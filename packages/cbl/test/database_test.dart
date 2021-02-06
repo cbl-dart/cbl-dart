@@ -520,8 +520,7 @@ void main() {
         WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
         GROUP BY dish._id
         ORDER BY max(meal.date)
-        '''
-            .replaceAll('\n', ' '),
+        ''',
       );
 
       print(await q.explain());

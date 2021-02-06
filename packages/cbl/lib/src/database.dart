@@ -138,6 +138,12 @@ class DatabaseConfiguration {
 /// - [Query.explain] for tuning performance with indexes.
 abstract class Index {
   /// A JSON array describing each column of the index.
+  ///
+  /// The language to describe an index in, is a subset of the
+  /// JSON query language [schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema).
+  ///
+  /// See:
+  /// - [JSON Query - Indexes](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema#9-indexes)
   String get keyExpressions;
 }
 
@@ -519,13 +525,15 @@ class Database {
 
   // === Queries ===============================================================
 
-  /// Creates a new query by compiling the [queryString] string.
+  /// Creates a new query by compiling the [queryString].
   ///
   /// This is fast, but not instantaneous. If you need to run the same query
   /// many times, keep the [Query] around instead of compiling it each time. If
   /// you need to run related queries with only some values different, create
   /// one query with placeholder parameter(s), and substitute the desired
   /// value(s) with [Query.setParameters] each time you run the query.
+  ///
+  /// {@macro cbl.Query.language}
   ///
   /// See:
   /// - [QueryLanguage] for the available query languages.
@@ -534,6 +542,10 @@ class Database {
     String queryString, {
     QueryLanguage language = QueryLanguage.N1QL,
   }) async {
+    if (language == QueryLanguage.N1QL) {
+      queryString = removeWhiteSpaceFromQuery(queryString);
+    }
+
     final address = await _worker
         .makeRequest<int>(CreateDatabaseQuery(_address, queryString, language));
     return createQuery(pointer: address.toPointer, worker: _worker);

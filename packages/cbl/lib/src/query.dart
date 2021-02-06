@@ -23,6 +23,10 @@ Query createQuery({
 }) =>
     Query._(pointer, worker, retain);
 
+String removeWhiteSpaceFromQuery(String query) => query
+    .replaceAll(RegExp(r'\s+'), ' ')
+    .trim();
+
 // endregion
 
 /// A callback to be invoked after a [Query]'s results have changed.
@@ -37,6 +41,7 @@ typedef QueryChangeListener = void Function(Query query, ResultSet resultSet);
 /// [N1QL](https://www.couchbase.com/products/n1ql) language from Couchbase
 /// Server, which you can think of as "SQL for JSON" or "SQL++".
 ///
+/// {@template cbl.Query.language}
 /// Queries may be given either in
 /// [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html),
 /// or in JSON using a
@@ -44,6 +49,7 @@ typedef QueryChangeListener = void Function(Query query, ResultSet resultSet);
 /// that resembles a parse tree of N1QL. The JSON syntax is harder for humans,
 /// but much more amenable to machine generation, if you need to create queries
 /// programmatically or translate them from some other form.
+/// {@endtemplate}
 ///
 /// ## Listening to a Query
 /// Adding a change listener to a query turns it into a "live query". When
@@ -75,12 +81,12 @@ class Query {
   /// final query = await db.query(
   ///   '''
   ///   SELECT p.name, r.rating
-  ///     FROM product p INNER JOIN reviews r ON (META(r).id  IN p.reviewList)
-  ///       WHERE META(p).id  = $PRODUCT_ID
+  ///     FROM product p INNER JOIN reviews r ON array_contains(p.reviewList, r.META.id)
+  ///         WHERE p.META.id  = $PRODUCT_ID
   ///   ''',
   /// );
   ///
-  /// await query.setParameters(MutableDict()..addAll({
+  /// await query.setParameters(MutableDict({
   ///   'PRODUCT_ID': 'product320',
   /// }))
   /// ```

@@ -9,4 +9,4 @@ export 'src/errors.dart'
         checkResultAndError,
         CheckResultAndErrorExt;
 export 'src/fleece.dart';
-export 'src/query.dart' hide createQuery;
+export 'src/query.dart' hide createQuery, removeWhiteSpaceFromQuery;
