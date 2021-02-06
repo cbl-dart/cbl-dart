@@ -5,7 +5,7 @@ import 'package:cbl/src/bindings/bindings.dart';
 import 'package:test/test.dart';
 
 final _buildDir = '../../build';
-final _cblLib = '$_buildDir/couchbase-lite-C/libCouchbaseLiteC';
+final _cblLib = '$_buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC';
 final _cblDartLib = '$_buildDir/cbl-dart/libCouchbaseLiteDart';
 
 /// The libraries config for tests.

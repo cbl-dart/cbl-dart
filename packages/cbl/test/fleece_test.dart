@@ -213,11 +213,8 @@ void main() {
     test('mutableCopy creates a copy of other array', () {
       final doc = Doc.fromJson('["a"]');
       final source = doc.root.asArray;
-      print(doc.root);
-      print(doc.root.doc);
-      print(source!.doc);
-      // final array = MutableArray.mutableCopy(source!);
-      // expect(array, equals(source));
+      final array = MutableArray.mutableCopy(source!);
+      expect(array, equals(source));
     });
 
     test('source returns source of array if it has one', () {
@@ -242,7 +239,7 @@ void main() {
 
     test('[]= throws ArgumentError if value is not compatible with Fleece', () {
       final array = MutableArray();
-      expect(() => array[0] = <void>[], throwsArgumentError);
+      expect(() => array[0] = Object(), throwsArgumentError);
     });
 
     test('[]= throws RangeError if index is out of range', () {
