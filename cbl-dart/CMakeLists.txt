@@ -9,8 +9,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 
-include(GenerateExportHeader)
-
 set(CBL_DART_INCLUDES
     src
     ${ROOT_DIR}/vendor/dart/include
@@ -34,10 +32,6 @@ add_library(CouchbaseLiteDart
 set_target_properties(CouchbaseLiteDart 
     PROPERTIES 
     CXX_VISIBILITY_PRESET hidden
-)
-
-generate_export_header(CouchbaseLiteDart
-    BASE_NAME CBLDart
 )
 
 target_include_directories(CouchbaseLiteDart

@@ -10,7 +10,7 @@
 /**
  * This is a compatibility layer to allow Dart code to use the Couchbase Lite C 
  * API. Some method signatures are incompatible with Dart's FFI capabilities.
- * 
+ *
  * This layer is also where memory management of objects from the Couchbase Lite
  * C API is integrated with the garbage collection of Dart objects.
  */
