@@ -52,4 +52,15 @@ function createXcframeworks() {
     done
 }
 
+function copyToCblFlutter() {
+    for framework in "${frameworks[@]}"
+    do 
+        srcPath="$xcframeworksDir/$framework.xcframework"
+        destPath="$projectDir/packages/cbl_flutter/Frameworks/$framework.xcframework"
+
+        rm -rf "$destPath"
+        cp -a "$srcPath" "$destPath"
+    done
+}
+
 "$@"

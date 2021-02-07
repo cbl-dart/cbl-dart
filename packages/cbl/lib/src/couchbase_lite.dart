@@ -6,7 +6,8 @@ import 'native_callbacks.dart';
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
 
-export 'bindings/bindings.dart' show LogLevel, LogDomain;
+export 'bindings/bindings.dart'
+    show LibraryConfiguration, Libraries, LogLevel, LogDomain;
 
 /// A callback which is called with log messages from the CouchbaseLite logging
 /// system.

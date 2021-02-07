@@ -11,6 +11,7 @@
 
 ### TODO
 
+- License
 - Couchbase
   - Blobs
   - Replication
@@ -40,3 +41,6 @@
 - Create flutter plugin cbl_flutter to distribute binaries
 - Setup CI
 - Docs
+  - How to redirect logs to flutter
+- cbl_flutter
+  - tests
