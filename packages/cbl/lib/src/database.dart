@@ -463,6 +463,12 @@ class Database {
   }
 
   /// Purges a document, given only its ID.
+  /// 
+  /// This removes all traces of the document from the database. Purges are not
+  /// replicated. If the document is changed on a server, it will be re-created
+  /// when pulled.
+  /// 
+  /// To delete a [Document], load it and call its [Document.delete] method.
   Future<bool> purgeDocumentById(String id) =>
       _worker.makeRequest(PurgeDatabaseDocumentById(_address, id));
 
