@@ -1,0 +1,39 @@
+name: tests-cbl-pkg
+on: [push]
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Get CMake and ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+
+      - name: Get flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+
+      - name: Get pub dependencies
+        run: dart pub get
+        working-directory: packages/cbl
+
+      - name: Build binaries
+        run: |
+          CC=clang-10 CXX=clang++-10 cmake \
+            -B build \
+            -g Ninja \
+            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
+            .
+          cmake --build build
+
+      - name: Run tests
+        run: dart test -r expanded
+        working-directory: packages/cbl
