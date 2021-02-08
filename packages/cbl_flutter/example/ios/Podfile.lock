@@ -1,25 +1,25 @@
 PODS:
-  - cbl_flutter (0.0.1):
+  - cbl_flutter_apple (0.0.1):
     - Flutter
   - Flutter (1.0.0)
   - path_provider (0.0.1):
     - Flutter
 
 DEPENDENCIES:
-  - cbl_flutter (from `.symlinks/plugins/cbl_flutter/ios`)
+  - cbl_flutter_apple (from `.symlinks/plugins/cbl_flutter_apple/ios`)
   - Flutter (from `Flutter`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
 
 EXTERNAL SOURCES:
-  cbl_flutter:
-    :path: ".symlinks/plugins/cbl_flutter/ios"
+  cbl_flutter_apple:
+    :path: ".symlinks/plugins/cbl_flutter_apple/ios"
   Flutter:
     :path: Flutter
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
-  cbl_flutter: 781dc8f6222b4e66862e52370a9c110c1aea7aee
+  cbl_flutter_apple: 3796d718164dc99d7ed45385b16a4f278a541c52
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
 

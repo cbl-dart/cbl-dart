@@ -8,6 +8,7 @@ developmentTeam=T8KNKMR8GY
 
 archivesDir="$projectDir/build/xcode/archives"
 xcframeworksDir="$projectDir/build/xcode/xcframeworks"
+cblFlutterFrameworksDir="$projectDir/packages/cbl_flutter_apple/Frameworks"
 
 scheme=CBL_Dart_All
 frameworks=(CBLDart CouchbaseLite)
@@ -53,13 +54,13 @@ function createXcframeworks() {
 }
 
 function copyToCblFlutter() {
+    rm -rf "$cblFlutterFrameworksDir"
+    mkdir -p "$cblFlutterFrameworksDir"
+
     for framework in "${frameworks[@]}"
     do 
         srcPath="$xcframeworksDir/$framework.xcframework"
-        destPath="$projectDir/packages/cbl_flutter/Frameworks/$framework.xcframework"
-
-        rm -rf "$destPath"
-        cp -a "$srcPath" "$destPath"
+        cp -a "$srcPath" "$cblFlutterFrameworksDir"
     done
 }
 

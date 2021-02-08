@@ -1,0 +1,26 @@
+framework module CouchbaseLite {
+    header "CouchbaseLite.h"
+    header "CBLBase.h"
+    header "CBL_Compat.h"
+    header "CBLBlob.h"
+    header "CBLDatabase.h"
+    header "CBLDocument.h"
+    header "CBLLog.h"
+    header "CBLQuery.h"
+    header "CBLReplicator.h"
+
+    module CBLCpp {
+        requires cplusplus
+        header "CouchbaseLite.hh"
+    }
+
+    module Fleece {
+        header "fleece/Base.h"
+        header "fleece/Fleece.h"
+        header "fleece/FLSlice.h"
+        header "fleece/Fleece+CoreFoundation.h"
+    }
+
+    link "couchbase_lite"
+}
+

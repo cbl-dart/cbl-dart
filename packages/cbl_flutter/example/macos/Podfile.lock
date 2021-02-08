@@ -1,25 +1,25 @@
 PODS:
-  - cbl_flutter (0.0.1):
+  - cbl_flutter_apple (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - path_provider_macos (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
-  - cbl_flutter (from `Flutter/ephemeral/.symlinks/plugins/cbl_flutter/macos`)
+  - cbl_flutter_apple (from `Flutter/ephemeral/.symlinks/plugins/cbl_flutter_apple/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
 
 EXTERNAL SOURCES:
-  cbl_flutter:
-    :path: Flutter/ephemeral/.symlinks/plugins/cbl_flutter/macos
+  cbl_flutter_apple:
+    :path: Flutter/ephemeral/.symlinks/plugins/cbl_flutter_apple/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   path_provider_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
 
 SPEC CHECKSUMS:
-  cbl_flutter: 1f4c659fc8797b76b6fafad913e2e48f932909cd
+  cbl_flutter_apple: 09918a23e0c1cb41657e83a3a9f7531aff2b6c55
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
   path_provider_macos: a0a3fd666cb7cd0448e936fb4abad4052961002b
 

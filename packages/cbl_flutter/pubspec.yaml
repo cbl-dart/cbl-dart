@@ -13,19 +13,14 @@ dependencies:
     sdk: flutter
   # cbl: ^0.0.1
   # cbl_flutter_android: ^0.0.1
+  # cbl_flutter_apple: ^0.0.1
 
   cbl:
     path: ../cbl
   cbl_flutter_android:
     path: ../cbl_flutter_android
+  cbl_flutter_apple:
+    path: ../cbl_flutter_apple
 
 dev_dependencies:
   pedantic: ^1.10.0-nullsafety.3
-
-flutter:
-  plugin:
-    platforms:
-      ios:
-        pluginClass: CblFlutterPlugin
-      macos:
-        pluginClass: CblFlutterPlugin

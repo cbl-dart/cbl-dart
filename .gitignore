@@ -97,6 +97,7 @@ lib/generated_plugin_registrant.dart
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Flutter/GeneratedPluginRegistrant.*
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
@@ -230,7 +231,8 @@ fabric.properties
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
