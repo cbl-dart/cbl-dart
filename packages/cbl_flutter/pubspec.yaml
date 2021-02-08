@@ -11,11 +11,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cbl: ^0.0.1
+  # cbl: ^0.0.1
+  # cbl_flutter_android: ^0.0.1
+
+  cbl:
+    path: ../cbl
+  cbl_flutter_android:
+    path: ../cbl_flutter_android
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   pedantic: ^1.10.0-nullsafety.3
 
 flutter:

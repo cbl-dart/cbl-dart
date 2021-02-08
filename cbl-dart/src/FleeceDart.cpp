@@ -8,7 +8,7 @@
 
 FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSlice slice)
 {
-    FLSliceResult result = {slice.buf, slice.size};
+    FLSliceResult result = {slice.buf, static_cast<size_t>(slice.size)};
     return result;
 }
 
