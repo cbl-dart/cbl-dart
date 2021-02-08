@@ -2,7 +2,10 @@ name: tests-cbl-pkg
 on: [push]
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-10.15]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -13,6 +16,8 @@ jobs:
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.os }}
 
       - name: Get flutter
         uses: subosito/flutter-action@v1
@@ -23,7 +28,8 @@ jobs:
         run: dart pub get
         working-directory: packages/cbl
 
-      - name: Build binaries
+      - name: Config CMake build on Linux
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           CC=clang-10 CXX=clang++-10 cmake \
             -B build \
@@ -32,7 +38,19 @@ jobs:
             -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -D CMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
             .
-          cmake --build build
+
+      - name: Config CMake build on macOS
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: |
+          cmake \
+            -B build \
+            -g Ninja \
+            -D CMAKE_C_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            .
+
+      - name: Build binaries with CMake
+        run: cmake --build build
 
       - name: Run tests
         run: dart test -r expanded
