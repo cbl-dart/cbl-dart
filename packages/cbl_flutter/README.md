@@ -1,7 +1,6 @@
 # cbl_flutter
 
-This package provides binaries required to use [`cbl`](https://github.com/cofu-app/cbl-dart)
-in Flutter apps.
+This package provides binaries required to use [`cbl`](../cbl) in Flutter apps.
 
 ## Usage
 

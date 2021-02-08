@@ -1,17 +1,10 @@
-# Couchbase Lite for Dart based on the C API
+# cbl-dart
 
-# Design
-
-- CBL Api is not thread safe
-- Expensive operations should be async, off of the isolate thread
-- C Api objects are ref counted and Dart objects should manage those ref counts
-- The C Api needs to be able to callback into Dart code, blocking and
-  non-blocking, with results
-- Callbacks should not have to be static
+This is a mono-repository for the CouchbaseLite Dart API package [cbl](./packages/cbl)
+and packages to distribute accompanying binaries.
 
 ### TODO
 
-- License
 - Couchbase
   - Blobs
   - Replication
@@ -38,9 +31,10 @@
   - FLMutableArray
   - .etc
 - Ergonomics: Review api for ease of use
-- Create flutter plugin cbl_flutter to distribute binaries
 - Setup CI
 - Docs
   - How to redirect logs to flutter
 - cbl_flutter
   - tests
+- apple
+  - rename CBLDart framework to CouchbaseLiteDart
