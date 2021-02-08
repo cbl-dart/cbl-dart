@@ -34,8 +34,6 @@ android {
         minSdkVersion 19
     }
 
-    ndkVersion '21.1.6352462'
-
     externalNativeBuild {
         ndkBuild {
             path "Android.mk"
