@@ -111,4 +111,12 @@ extern "C"
     CBLDART_EXPORT
     CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,
                                                          CallbackId listener);
+
+    // -- Blob
+
+    CBLDART_EXPORT
+    uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
+                                        void *buf,
+                                        uint64_t bufSize,
+                                        CBLError *outError);
 }

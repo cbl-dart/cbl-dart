@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:ffi';
 
+import 'package:collection/collection.dart';
 import 'package:ffi/ffi.dart';
 
 import 'bindings/bindings.dart';
@@ -8,6 +9,8 @@ import 'errors.dart';
 import 'ffi_utils.dart';
 
 export 'bindings/fleece.dart' show ValueType, CopyFlag;
+
+// === Doc =====================================================================
 
 /// An [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
@@ -48,6 +51,8 @@ class Doc {
           runtimeType == other.runtimeType &&
           _ref.address == other._ref.address;
 }
+
+// === Value ===================================================================
 
 /// The core Fleece data type is Value: a reference to a value in Fleece-encoded
 /// data. A Value can represent any JSON type (plus binary data).
@@ -243,6 +248,8 @@ class Value {
   }
 }
 
+// === Array ===================================================================
+
 /// A Fleece array.
 class Array extends Value with ListMixin<Value> {
   static late final _bindings = CBLBindings.instance.fleece.array;
@@ -427,6 +434,8 @@ class MutableArray extends Array {
     return pointer == nullptr ? null : MutableArray.fromPointer(pointer);
   }
 }
+
+// === Dict ====================================================================
 
 /// A Fleece dictionary.
 class Dict extends Value with MapMixin<String, Value> {
@@ -651,56 +660,87 @@ class MutableDict extends Dict {
       });
 }
 
-Object _immutableValueException() =>
-    UnsupportedError('You cannot mutate an immutable Value.');
+// === SlotSetter ==============================================================
 
-void _checkValueIsCompatibleWithFleece(Object? value) {
-  if (!(value == null ||
+abstract class SlotSetter {
+  static final _instances = <SlotSetter>[_DefaultSlotSetter()];
+
+  static void register(SlotSetter setter) {
+    if (!_instances.contains(setter)) {
+      _instances.add(setter);
+    }
+  }
+
+  static SlotSetter _findForValue(Object? value) {
+    final setter = _instances.firstWhereOrNull((it) => it.canSetValue(value));
+
+    if (setter == null) {
+      throw ArgumentError.value(
+        value,
+        'value',
+        'value is not compatible with Fleece',
+      );
+    }
+
+    return setter;
+  }
+
+  bool canSetValue(Object? value);
+
+  void setSlotValue(Pointer<FLSlot> slot, Object? value);
+}
+
+class _DefaultSlotSetter implements SlotSetter {
+  late final _slotBindings = CBLBindings.instance.fleece.slot;
+
+  @override
+  bool canSetValue(Object? value) =>
+      value == null ||
       value is bool ||
       value is int ||
       value is double ||
       value is String ||
       value is Iterable ||
       value is Map ||
-      value is Value)) {
-    throw ArgumentError.value(
-      value,
-      'value',
-      'value is not compatible with Fleece',
-    );
+      value is Value;
+
+  @override
+  void setSlotValue(Pointer<FLSlot> slot, Object? value) {
+    value = _recursivelyConvertCollectionsToFleece(value);
+
+    if (value == null) {
+      _slotBindings.setNull(slot);
+    } else if (value is bool) {
+      _slotBindings.setBool(slot, value.toInt);
+    } else if (value is int) {
+      _slotBindings.setInt(slot, value);
+    } else if (value is double) {
+      _slotBindings.setDouble(slot, value);
+    } else if (value is String) {
+      runArena(() {
+        _slotBindings.setString(slot, scoped(Utf8.toUtf8(value as String)));
+      });
+    } else if (value is Value) {
+      _slotBindings.setValue(slot, value.ref);
+    }
+  }
+
+  static Object? _recursivelyConvertCollectionsToFleece(Object? value) {
+    if (value is Map && value is! Dict) {
+      return MutableDict()..addAll(value.cast());
+    } else if (value is Iterable && value is! Array) {
+      return MutableArray()..addAll(value);
+    } else {
+      return value;
+    }
   }
 }
 
-Object? _recursivelyConvertCollectionsToFleece(Object? value) {
-  if (value is Map && value is! Dict) {
-    return MutableDict()..addAll(value.cast());
-  } else if (value is Iterable && value is! Array) {
-    return MutableArray()..addAll(value);
-  } else {
-    return value;
-  }
+void _setSlotValue(Pointer<FLSlot> slot, Object? value) {
+  SlotSetter._findForValue(value).setSlotValue(slot, value);
 }
 
-late final _slotBindings = CBLBindings.instance.fleece.slot;
+// === Misc ====================================================================
 
-void _setSlotValue(Pointer<Void> slot, Object? value) {
-  _checkValueIsCompatibleWithFleece(value);
-
-  value = _recursivelyConvertCollectionsToFleece(value);
-
-  if (value == null) {
-    _slotBindings.setNull(slot);
-  } else if (value is bool) {
-    _slotBindings.setBool(slot, value.toInt);
-  } else if (value is int) {
-    _slotBindings.setInt(slot, value);
-  } else if (value is double) {
-    _slotBindings.setDouble(slot, value);
-  } else if (value is String) {
-    runArena(() {
-      _slotBindings.setString(slot, scoped(Utf8.toUtf8(value as String)));
-    });
-  } else if (value is Value) {
-    _slotBindings.setValue(slot, value.ref);
-  }
-}
+Object _immutableValueException() =>
+    UnsupportedError('You cannot mutate an immutable Value.');

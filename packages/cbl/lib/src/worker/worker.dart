@@ -11,13 +11,10 @@ import 'handlers.dart';
 
 /// The Worker crashed because of an internal error.
 class WorkerCrashedError implements Exception {
-  WorkerCrashedError(this.message, this.stackTrace);
+  WorkerCrashedError(this.message);
 
   /// A description of the error.
   final String message;
-
-  /// A stack trace of the error.
-  final StackTrace stackTrace;
 
   @override
   String toString() => 'WorkerCrashedError(message: $message)';
@@ -97,10 +94,10 @@ class Worker {
             ready.complete();
           } else if (message is List) {
             final errorMessage = message.cast<String>();
-            error.completeError(WorkerCrashedError(
-              errorMessage[0],
+            error.completeError(
+              WorkerCrashedError(errorMessage[0]),
               StackTrace.fromString(errorMessage[1]),
-            ));
+            );
           } else if (message == 'exit') {
             exit.complete();
           } else {
@@ -131,13 +128,13 @@ class Worker {
         // If we made it to here the worker is able to start.
         // If it crashes during a request we restart it.
         // ignore: unawaited_futures
-        _error!.catchError((Object error) {
+        _error!.catchError((Object error, StackTrace stackTrace) {
           error = error as WorkerCrashedError;
 
           _log.severe(
             'Worker crashed. This is a bug. Restarting it...',
             error.message,
-            error.stackTrace,
+            stackTrace,
           );
           _reset();
           start().then((_) {
@@ -345,6 +342,7 @@ RequestRouter _configureRouter() {
 
   addDatabaseHandlersToRouter(router);
   addQueryHandlersToRouter(router);
+  addBlobHandlersToRouter(router);
 
   return router;
 }

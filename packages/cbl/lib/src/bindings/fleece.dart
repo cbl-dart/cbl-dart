@@ -8,7 +8,7 @@ import '../fleece.dart';
 import 'base.dart';
 import 'bindings.dart';
 
-// region Common
+// === Common ==================================================================
 
 /// Error codes returned from some API calls.
 enum FleeceErrorCode {
@@ -120,27 +120,38 @@ class SliceBindings {
   CBLDart_FLSliceResult_Release release;
 }
 
-typedef FLSlot_SetNull_C = Void Function(Pointer<Void> slot);
-typedef FLSlot_SetNull = void Function(Pointer<Void> slot);
+// TODO: Replace Void with FLSlot where appropriate
+class FLSlot extends Opaque {}
 
-typedef FLSlot_SetBool_C = Void Function(Pointer<Void> slot, Uint8 value);
-typedef FLSlot_SetBool = void Function(Pointer<Void> slot, int value);
+typedef FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
+typedef FLSlot_SetNull = void Function(Pointer<FLSlot> slot);
 
-typedef FLSlot_SetInt_C = Void Function(Pointer<Void> slot, Int64 value);
-typedef FLSlot_SetInt = void Function(Pointer<Void> slot, int value);
+typedef FLSlot_SetBool_C = Void Function(Pointer<FLSlot> slot, Uint8 value);
+typedef FLSlot_SetBool = void Function(Pointer<FLSlot> slot, int value);
 
-typedef FLSlot_SetDouble_C = Void Function(Pointer<Void> slot, Double value);
-typedef FLSlot_SetDouble = void Function(Pointer<Void> slot, double value);
+typedef FLSlot_SetInt_C = Void Function(Pointer<FLSlot> slot, Int64 value);
+typedef FLSlot_SetInt = void Function(Pointer<FLSlot> slot, int value);
+
+typedef FLSlot_SetDouble_C = Void Function(Pointer<FLSlot> slot, Double value);
+typedef FLSlot_SetDouble = void Function(Pointer<FLSlot> slot, double value);
 
 typedef CBLDart_FLSlot_SetString_C = Void Function(
-    Pointer<Void> slot, Pointer<Utf8> value);
+  Pointer<FLSlot> slot,
+  Pointer<Utf8> value,
+);
 typedef CBLDart_FLSlot_SetString = void Function(
-    Pointer<Void> slot, Pointer<Utf8> value);
+  Pointer<FLSlot> slot,
+  Pointer<Utf8> value,
+);
 
 typedef FLSlot_SetValue_C = Void Function(
-    Pointer<Void> slot, Pointer<Void> value);
+  Pointer<FLSlot> slot,
+  Pointer<Void> value,
+);
 typedef FLSlot_SetValue = void Function(
-    Pointer<Void> slot, Pointer<Void> value);
+  Pointer<FLSlot> slot,
+  Pointer<Void> value,
+);
 
 class SlotBindings {
   SlotBindings(Libraries libs)
@@ -173,9 +184,7 @@ class SlotBindings {
   final FLSlot_SetValue setValue;
 }
 
-// endregion
-
-// region Doc
+// === Doc =====================================================================
 
 typedef CBLDart_FLDoc_FromJSON = Pointer<Void> Function(
   Pointer<Utf8> json,
@@ -212,9 +221,10 @@ class DocBindings {
   final FLDoc_GetRoot getRoot;
 }
 
-// endregion
+// === Value ===================================================================
 
-// region Value
+// TODO: Replace Void with FLValue where appropriate
+class FLValue extends Opaque {}
 
 /// Types of Fleece values. Basically JSON, with the addition of Data
 /// (raw blob).
@@ -394,9 +404,7 @@ class ValueBindings {
   final CBLDart_FLValue_ToJSONX toJson;
 }
 
-// endregion
-
-// region Array
+// === Array ===================================================================
 
 typedef FLArray_Count_C = Uint32 Function(Pointer<Void> array);
 typedef FLArray_Count = int Function(Pointer<Void> array);
@@ -455,16 +463,16 @@ typedef FLMutableArray_GetSource = Pointer<Void> Function(Pointer<Void> array);
 typedef FLMutableArray_IsChanged_C = Uint8 Function(Pointer<Void> array);
 typedef FLMutableArray_IsChanged = int Function(Pointer<Void> array);
 
-typedef FLMutableArray_Set_C = Pointer<Void> Function(
+typedef FLMutableArray_Set_C = Pointer<FLSlot> Function(
   Pointer<Void> array,
   Uint32 index,
 );
-typedef FLMutableArray_Set = Pointer<Void> Function(
+typedef FLMutableArray_Set = Pointer<FLSlot> Function(
   Pointer<Void> array,
   int index,
 );
 
-typedef FLMutableArray_Append = Pointer<Void> Function(Pointer<Void> array);
+typedef FLMutableArray_Append = Pointer<FLSlot> Function(Pointer<Void> array);
 
 typedef FLMutableArray_Insert_C = Void Function(
   Pointer<Void> array,
@@ -574,9 +582,10 @@ class MutableArrayBindings {
   final FLMutableArray_GetMutableDict getMutableDict;
 }
 
-// endregion
+// === Dict ====================================================================
 
-// region Dict
+// TODO: Replace Void with FLDict where appropriate
+class FLDict extends Opaque {}
 
 typedef FLDict_Count_C = Uint32 Function(Pointer<Void> dict);
 typedef FLDict_Count = int Function(Pointer<Void> dict);
@@ -687,7 +696,7 @@ typedef FLMutableDict_GetSource = Pointer<Void> Function(Pointer<Void>);
 typedef FLMutableDict_IsChanged_C = Uint8 Function(Pointer<Void> dict);
 typedef FLMutableDict_IsChanged = int Function(Pointer<Void> dict);
 
-typedef CBLDart_FLMutableDict_Set = Pointer<Void> Function(
+typedef CBLDart_FLMutableDict_Set = Pointer<FLSlot> Function(
   Pointer<Void> dict,
   Pointer<Utf8> key,
 );
@@ -765,7 +774,7 @@ class MutableDictBindings {
   final CBLDart_FLMutableDict_GetMutableDict getMutableDict;
 }
 
-// endregion
+// === FleeceBindings ==========================================================
 
 class FleeceBindings {
   FleeceBindings(Libraries libs)

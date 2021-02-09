@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 
 import 'bindings/bindings.dart';
+import 'blob.dart';
 import 'document.dart';
 import 'ffi_utils.dart';
 import 'fleece.dart';
@@ -463,11 +464,11 @@ class Database {
   }
 
   /// Purges a document, given only its ID.
-  /// 
+  ///
   /// This removes all traces of the document from the database. Purges are not
   /// replicated. If the document is changed on a server, it will be re-created
   /// when pulled.
-  /// 
+  ///
   /// To delete a [Document], load it and call its [Document.delete] method.
   Future<bool> purgeDocumentById(String id) =>
       _worker.makeRequest(PurgeDatabaseDocumentById(_address, id));
@@ -582,4 +583,15 @@ class Database {
           MutableArray.fromPointer(address.toPointer, retain: false)
               .map((it) => it.asString)
               .toList());
+
+  // === Blobs =================================================================
+
+  /// The [BlobManager] associated with this Database.
+  ///
+  /// See:
+  /// - [Blob] for more about what a Blob is.
+  late BlobManager blobManager = createBlobManager(
+    db: _pointer.cast(),
+    worker: _worker,
+  );
 }

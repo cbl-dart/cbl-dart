@@ -402,3 +402,17 @@ CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,
 
     return listenerToken;
 }
+
+// -- Blob
+
+uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
+                                    void *buf,
+                                    uint64_t bufSize,
+                                    CBLError *outError)
+{
+    return CBLBlobReader_Read(
+        stream,
+        buf,
+        static_cast<size_t>(bufSize),
+        outError);
+}

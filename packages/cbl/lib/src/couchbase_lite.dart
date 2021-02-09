@@ -1,7 +1,9 @@
 import 'dart:ffi';
 
 import 'bindings/bindings.dart';
+import 'blob.dart';
 import 'database.dart';
+import 'fleece.dart';
 import 'native_callbacks.dart';
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
@@ -40,6 +42,8 @@ class CouchbaseLite {
   /// the entry point to the API.
   static Future<CouchbaseLite> init({required Libraries libraries}) async {
     CBLBindings.initInstance(libraries);
+
+    SlotSetter.register(blobSlotSetter);
 
     final workerManager = WorkerManager(libraries: libraries);
 

@@ -67,6 +67,9 @@ enum ConcurrencyControl {
 int concurrencyControlToC(ConcurrencyControl value) =>
     ConcurrencyControl.values.indexOf(value);
 
+// TODO: Replace Void with CBLDatabase where approriate
+class CBLDatabase extends Opaque {}
+
 typedef CBLDatabase_Exists_C = Uint8 Function(
   Pointer<Utf8> name,
   Pointer<Utf8> inDirectory,
