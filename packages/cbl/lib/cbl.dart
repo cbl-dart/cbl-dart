@@ -1,3 +1,4 @@
+export 'src/blob.dart' hide blobSlotSetter, createBlobManager;
 export 'src/couchbase_lite.dart';
 export 'src/database.dart' hide createDatabase;
 export 'src/document.dart'
@@ -8,5 +9,5 @@ export 'src/errors.dart'
         checkError,
         checkResultAndError,
         CheckResultAndErrorExt;
-export 'src/fleece.dart';
+export 'src/fleece.dart' hide SlotSetter;
 export 'src/query.dart' hide createQuery, removeWhiteSpaceFromQuery;

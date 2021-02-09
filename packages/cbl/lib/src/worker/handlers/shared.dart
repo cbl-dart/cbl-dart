@@ -1,9 +1,9 @@
 import 'dart:ffi';
 
 abstract class ObjectRequest {
-  ObjectRequest(this.address);
+  ObjectRequest(this._address);
 
-  final int address;
+  final int _address;
 
-  Pointer<Void> get pointer => Pointer.fromAddress(address);
+  Pointer<Void> get pointer => Pointer.fromAddress(_address);
 }

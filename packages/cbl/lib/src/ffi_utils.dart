@@ -40,14 +40,23 @@ T scoped<T extends Pointer>(T ptr) => Arena.current().scoped(ptr);
 /// Runs the [body] in an [Arena] freeing all memory which is [scoped] during
 /// execution of [body] at the end of the execution.
 R runArena<R>(R Function() body) {
-  var arena = Arena();
+  final arena = Arena();
+  Object? _result;
+
   try {
-    return runZoned(
+    final result = runZoned(
       () => body(),
       zoneValues: {#_currentArena: arena},
     );
+    _result = result;
+    return result;
   } finally {
-    arena.finalize();
+    final result = _result;
+    if (result is Future) {
+      result.whenComplete(arena.finalize);
+    } else {
+      arena.finalize();
+    }
   }
 }
 
@@ -61,16 +70,24 @@ extension BoolIntExt on bool {
   int get toInt => this ? 1 : 0;
 }
 
-extension NullableAddressPointerExt on int? {
-  Pointer<Void> get toPointer {
-    final self = this;
-    return self == null ? nullptr : Pointer.fromAddress(self);
-  }
+extension AddressPointerExt on int {
+  Pointer<Void> get toPointer => Pointer.fromAddress(this);
 }
 
-extension PointerAddressExt on Pointer {
+extension NullableAddressPointerExt on int? {
+  Pointer<Void> get toPointer => (this?.toPointer).orNullptr;
+}
+
+extension PointerExt<T extends NativeType> on Pointer<T> {
   /// If this is the [nullptr] return `null` else this pointer address.
   int? get addressOrNull => this == nullptr ? null : address;
+
+  /// `null` if this pointer is the [nullptr]. Otherwise this Pointer.
+  Pointer<T>? get asNullable => this == nullptr ? null : this;
+}
+
+extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
+  Pointer<T> get orNullptr => this == null ? nullptr : this!;
 }
 
 extension Utf8PointerStringExt on Pointer<Utf8> {

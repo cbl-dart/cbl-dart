@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'base.dart';
+import 'blob.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
@@ -10,6 +11,7 @@ import 'native_callbacks.dart';
 import 'query.dart';
 
 export 'base.dart';
+export 'blob.dart';
 export 'database.dart';
 export 'document.dart';
 export 'fleece.dart';
@@ -110,6 +112,7 @@ class CBLBindings {
         mutableDocument = MutableDocumentBindings(libs),
         query = QueryBindings(libs),
         resultSet = ResultSetBindings(libs),
+        blobs = BlobsBindings(libs),
         fleece = FleeceBindings(libs);
 
   final BaseBindings base;
@@ -120,5 +123,6 @@ class CBLBindings {
   final MutableDocumentBindings mutableDocument;
   final QueryBindings query;
   final ResultSetBindings resultSet;
+  final BlobsBindings blobs;
   final FleeceBindings fleece;
 }

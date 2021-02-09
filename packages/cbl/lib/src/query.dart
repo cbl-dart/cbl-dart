@@ -23,9 +23,8 @@ Query createQuery({
 }) =>
     Query._(pointer, worker, retain);
 
-String removeWhiteSpaceFromQuery(String query) => query
-    .replaceAll(RegExp(r'\s+'), ' ')
-    .trim();
+String removeWhiteSpaceFromQuery(String query) =>
+    query.replaceAll(RegExp(r'\s+'), ' ').trim();
 
 // endregion
 
