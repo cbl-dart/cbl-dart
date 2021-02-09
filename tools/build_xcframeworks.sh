@@ -4,7 +4,19 @@ set -e
 
 projectDir=$(cd "$(dirname ${BASH_SOURCE[0]})/.." && pwd)
 
-developmentTeam=T8KNKMR8GY
+developmentTeam="$1"
+
+if [ -z "$developmentTeam" ]; then
+    echo "You have to provide a development team id as the first argument."
+    exit 1
+fi
+
+cmd="$2"
+
+if [ -z "$cmd" ]; then
+    echo "You have to provide the command to run as the second argument."
+    exit 1
+fi
 
 archivesDir="$projectDir/build/xcode/archives"
 xcframeworksDir="$projectDir/build/xcode/xcframeworks"
@@ -15,10 +27,11 @@ frameworks=(CBLDart CouchbaseLite)
 platforms=(iOS "iOS Simulator" macOS)
 
 function buildArchives() {
-    for platform in "${platforms[@]}"
-    do
+    for platform in "${platforms[@]}"; do
         echo Building platform "$platform"
-        destination="generic/platform=$platform"
+
+        local destination="generic/platform=$platform"
+
         xcodebuild archive \
             -scheme "$scheme" \
             -destination "$destination" \
@@ -28,17 +41,16 @@ function buildArchives() {
             DEVELOPMENT_TEAM=$developmentTeam \
             CODE_SIGN_IDENTITY="Apple Development" \
             CODE_SIGN_STYLE=Automatic
-    done    
+    done
 }
 
 function createXcframeworks() {
-    for framework in "${frameworks[@]}"
-    do
+    for framework in "${frameworks[@]}"; do
         echo Creating xcframework "$framework"
 
-        frameworksArgs=()
-        for platform in "${platforms[@]}"
-        do
+        local frameworksArgs=()
+
+        for platform in "${platforms[@]}"; do
             frameworksArgs+=(
                 "-framework"
                 "$archivesDir/$scheme-$platform.xcarchive/Products/Library/Frameworks/$framework.framework"
@@ -57,11 +69,11 @@ function copyToCblFlutter() {
     rm -rf "$cblFlutterFrameworksDir"
     mkdir -p "$cblFlutterFrameworksDir"
 
-    for framework in "${frameworks[@]}"
-    do 
-        srcPath="$xcframeworksDir/$framework.xcframework"
+    for framework in "${frameworks[@]}"; do
+        local srcPath="$xcframeworksDir/$framework.xcframework"
+
         cp -a "$srcPath" "$cblFlutterFrameworksDir"
     done
 }
 
-"$@"
+"$cmd"

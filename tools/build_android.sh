@@ -2,44 +2,58 @@
 
 set -e
 
+sdk_home="$1"
+
+if [ -z "$sdk_home" ]; then
+    echo "You have to provide the path to the Android sdk as the first argument."
+    exit 1
+fi
+
+cmd="$2"
+
+if [ -z "$cmd" ]; then
+    echo "You have to provide the command to run as the second argument."
+    exit 1
+fi
+
 projectDir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 buildDir="$projectDir/build/android"
 libsDir="$buildDir/libs"
 cblFlutterLibsDir="$projectDir/packages/cbl_flutter_android/android/libs"
 
-SDK_HOME=/Users/gabriel/Library/Android/sdk
-NDK_VER="22.0.7026061"
-CMAKE_VER="3.10.2.4988404"
-CMAKE_PATH="${SDK_HOME}/cmake/${CMAKE_VER}/bin" 
+ndk_ver="22.0.7026061"
+cmake_ver="3.10.2.4988404"
+cmake_path="${sdk_home}/cmake/${cmake_ver}/bin"
 
 archs=(arm64-v8a armeabi-v7a x86 x86_64)
 
-function buildArch()  {
-    arch=$1
-    archDir="$buildDir/$arch"
+function buildArch() {
+    local arch=$1
+    local archDir="$buildDir/$arch"
+    
     mkdir -p "$archDir"
     cd "$archDir"
 
-    "${CMAKE_PATH}/cmake" \
+    "${cmake_path}/cmake" \
         -G Ninja \
-        -DCMAKE_TOOLCHAIN_FILE="${SDK_HOME}/ndk/${NDK_VER}/build/cmake/android.toolchain.cmake" \
-        -DCMAKE_MAKE_PROGRAM="${CMAKE_PATH}/ninja" \
+        -DCMAKE_TOOLCHAIN_FILE="${sdk_home}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_MAKE_PROGRAM="${cmake_path}/ninja" \
         -DANDROID_NATIVE_API_LEVEL=19 \
         -DANDROID_ABI="$arch" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         ../../..
 
-    "${CMAKE_PATH}/cmake" --build . --target CouchbaseLiteDart
+    "${cmake_path}/cmake" --build . --target CouchbaseLiteDart
 }
 
 function copyArchToLibs() {
-    arch=$1
-    buildArchDir="$buildDir/$arch"
-    libsArchDir="$libsDir/$arch"
+    local arch=$1
+    local buildArchDir="$buildDir/$arch"
+    local libsArchDir="$libsDir/$arch"
 
     rm -rf "$libsArchDir"
     mkdir -p "$libsArchDir"
-    
+
     cp "$buildArchDir/cbl-dart/libCouchbaseLiteDart.so" "$libsArchDir/libCouchbaseLiteDart.so"
     cp "$buildArchDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" "$libsArchDir/libCouchbaseLiteC.so"
 }
@@ -66,4 +80,4 @@ function clean() {
     rm -rf "$buildDir"
 }
 
-"$@"
+"$cmd"
