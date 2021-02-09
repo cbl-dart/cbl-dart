@@ -19,19 +19,7 @@ and packages to distribute accompanying binaries.
 - Remove Slice API wrappers once passing structs by value is possible in Dart FFI
 - Add dispose method to bindings classes so that allocated memory for global objects
   can be released.
-- Use Opaque for opaque structs
-  - CBLDatabase
-  - CBLQuery
-  - CBLResultSet
-  - FLDoc
-  - FLValue
-  - FLDict
-  - FLArray
-  - FLMutableDict
-  - FLMutableArray
-  - .etc
 - Ergonomics: Review api for ease of use
-- Setup CI
 - Docs
   - How to redirect logs to flutter
 - cbl_flutter
