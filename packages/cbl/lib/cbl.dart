@@ -11,3 +11,4 @@ export 'src/errors.dart'
         CheckResultAndErrorExt;
 export 'src/fleece.dart' hide SlotSetter;
 export 'src/query.dart' hide createQuery, removeWhiteSpaceFromQuery;
+export 'src/replicator.dart';

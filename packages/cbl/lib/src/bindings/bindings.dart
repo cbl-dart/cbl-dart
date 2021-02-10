@@ -18,6 +18,7 @@ export 'fleece.dart';
 export 'log.dart';
 export 'native_callbacks.dart';
 export 'query.dart';
+export 'replicator.dart';
 
 class LibraryConfiguration {
   LibraryConfiguration.dynamic(String name, {bool appendExtension = true})

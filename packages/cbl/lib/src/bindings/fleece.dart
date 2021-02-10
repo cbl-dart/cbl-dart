@@ -406,6 +406,9 @@ class ValueBindings {
 
 // === Array ===================================================================
 
+// TODO: Replace Void with FLArray where appropriate
+class FLArray extends Opaque {}
+
 typedef FLArray_Count_C = Uint32 Function(Pointer<Void> array);
 typedef FLArray_Count = int Function(Pointer<Void> array);
 

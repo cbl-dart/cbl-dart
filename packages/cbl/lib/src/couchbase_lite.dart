@@ -5,6 +5,7 @@ import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
+import 'replicator.dart';
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
 
@@ -117,6 +118,10 @@ class CouchbaseLite {
       pointer: Pointer.fromAddress(pointer),
       worker: worker,
     );
+  }
+
+  Future<Replicator> createReplicator(ReplicatorConfiguration config) async {
+    throw UnimplementedError();
   }
 
   static late final _logBindings = CBLBindings.instance.log;
