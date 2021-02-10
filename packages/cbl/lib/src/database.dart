@@ -20,10 +20,15 @@ export 'bindings/bindings.dart'
 // region Internal API
 
 Database createDatabase({
+  required String debugName,
   required Pointer<Void> pointer,
   required Worker worker,
 }) =>
-    Database._(pointer, worker);
+    Database._(debugName, pointer, worker);
+
+extension DatabasePointerExt on Database {
+  Pointer<CBLDatabase> get pointer => _pointer.cast();
+}
 
 // endregion
 
@@ -299,14 +304,17 @@ class Database {
   static late final _bindings = CBLBindings.instance.database;
   static late final _callbacks = NativeCallbacks.instance;
 
-  Database._(this._pointer, this._worker) {
+  Database._(this._debugName, this._pointer, this._worker) {
     _bindings.bindToDartObject(this, _pointer);
   }
 
   final Pointer<Void> _pointer;
+
   late final int _address = _pointer.address;
 
   final Worker _worker;
+
+  final String _debugName;
 
   // === Database ==============================================================
 
@@ -594,4 +602,17 @@ class Database {
     db: _pointer.cast(),
     worker: _worker,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Database &&
+          other.runtimeType == other.runtimeType &&
+          _pointer == other._pointer;
+
+  @override
+  int get hashCode => super.hashCode ^ _pointer.hashCode;
+
+  @override
+  String toString() => 'LocalDbEndpoint(name: $_debugName)';
 }

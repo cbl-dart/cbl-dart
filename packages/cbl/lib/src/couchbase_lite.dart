@@ -5,7 +5,7 @@ import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
-import 'replicator.dart';
+import 'replicator.dart' as repl;
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
 
@@ -115,14 +115,17 @@ class CouchbaseLite {
     final worker = await _workerManager.getWorker(id: 'Database#$databaseId');
     final pointer = await worker.makeRequest<int>(OpenDatabase(name, config));
     return createDatabase(
+      debugName: name,
       pointer: Pointer.fromAddress(pointer),
       worker: worker,
     );
   }
 
-  Future<Replicator> createReplicator(ReplicatorConfiguration config) async {
-    throw UnimplementedError();
-  }
+  /// Creates a replicator with the given configuration.
+  Future<repl.Replicator> createReplicator(
+    repl.ReplicatorConfiguration config,
+  ) async =>
+      repl.createReplicator(_worker, config);
 
   static late final _logBindings = CBLBindings.instance.log;
 

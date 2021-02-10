@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
@@ -103,6 +104,17 @@ extension StringFLSliceExt on String {
     slice.ref.buf = buf;
     slice.ref.size = units.length;
 
+    return slice;
+  }
+}
+
+extension TypedDataFLSliceExt on TypedData {
+  Pointer<FLSlice> toFLSliceScoped() {
+    final buf = scoped(malloc<Uint8>(lengthInBytes));
+    buf.asTypedList(lengthInBytes).setAll(0, buffer.asUint8List());
+    final slice = scoped(malloc<FLSlice>());
+    slice.ref.buf = buf;
+    slice.ref.size = lengthInBytes;
     return slice;
   }
 }

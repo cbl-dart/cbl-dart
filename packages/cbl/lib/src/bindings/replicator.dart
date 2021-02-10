@@ -1,8 +1,8 @@
 import 'dart:ffi';
 
+import '../document.dart';
 import '../ffi_utils.dart';
 import 'bindings.dart';
-import '../document.dart';
 
 // === ReplicatorConfiguration =================================================
 
@@ -116,7 +116,7 @@ class CBLDartReplicatorConfiguration extends Struct {
 
   external Pointer<FLArray> channels;
 
-  external Pointer<FLArray> documentIDS;
+  external Pointer<FLArray> documentIDs;
 
   @Int64()
   external int pushFilterId;
@@ -222,19 +222,19 @@ typedef CBLReplicator_Status = CBLReplicatorStatus Function(
   Pointer<CBLReplicator> replicator,
 );
 
-typedef CBLReplicator_PendingDocumentIDs = FLDict Function(
+typedef CBLReplicator_PendingDocumentIDs = Pointer<FLDict> Function(
   Pointer<CBLReplicator> replicator,
   Pointer<CBLError> error,
 );
 
-typedef CBLReplicator_IsDocumentPending_C = Uint8 Function(
+typedef CBLDart_CBLReplicator_IsDocumentPending_C = Uint8 Function(
   Pointer<CBLReplicator> replicator,
-  FLSlice docID,
+  Pointer<Utf8> docID,
   Pointer<CBLError> error,
 );
-typedef CBLReplicator_IsDocumentPending = int Function(
+typedef CBLDart_CBLReplicator_IsDocumentPending = int Function(
   Pointer<CBLReplicator> replicator,
-  FLSlice docID,
+  Pointer<Utf8> docID,
   Pointer<CBLError> error,
 );
 
@@ -252,11 +252,33 @@ class DocumentFlags extends Option {
   const DocumentFlags(String debugName, int bits) : super(debugName, bits);
 
   /// The document has been deleted.
-  static const deleted = DocumentFlags('deleted', 1);
+  static const deleted = DocumentFlags('deleted', 1 << 0);
 
   /// Lost access to the document on the server
-  static const removed = DocumentFlags('removed', 2);
+  static const removed = DocumentFlags('removed', 1 << 1);
+
+  static const values = {deleted, removed};
+
+  static Set<DocumentFlags> parseCFlags(int flag) => values.parseCFlags(flag);
 }
+
+class CBLDartReplicatedDocument extends Struct {
+  external Pointer<Utf8> ID;
+
+  @Uint32()
+  external int flags;
+
+  external CBLError error;
+}
+
+typedef CBLDart_CBLReplicator_AddDocumentListener_C = Void Function(
+  Pointer<CBLReplicator> replicator,
+  Int64 listenerId,
+);
+typedef CBLDart_CBLReplicator_AddDocumentListener = void Function(
+  Pointer<CBLReplicator> replicator,
+  int listenerId,
+);
 
 // === ReplicatorBindings ======================================================
 
@@ -268,7 +290,7 @@ class ReplicatorBindings {
             .lookupFunction<CBLEndpoint_NewWithURL, CBLEndpoint_NewWithURL>(
           'CBLEndpoint_NewWithURL',
         ),
-        endpointNewWithLocalDB = libs.cbl.lookupFunction<
+        endpointNewWithLocalDB = libs.cblEE?.lookupFunction<
             CBLEndpoint_NewWithLocalDB, CBLEndpoint_NewWithLocalDB>(
           'CBLEndpoint_NewWithLocalDB',
         ),
@@ -287,17 +309,70 @@ class ReplicatorBindings {
         authFree = libs.cbl.lookupFunction<CLBAuth_Free_C, CLBAuth_Free>(
           'CLBAuth_Free',
         ),
-        makeNew = libs.cbl.lookupFunction<CBLDart_CBLReplicator_New,
+        makeNew = libs.cblDart.lookupFunction<CBLDart_CBLReplicator_New,
             CBLDart_CBLReplicator_New>(
           'CBLDart_CBLReplicator_New',
+        ),
+        resetCheckpoint = libs.cbl.lookupFunction<
+            CBLReplicator_ResetCheckpoint_C, CBLReplicator_ResetCheckpoint>(
+          'CBLReplicator_ResetCheckpoint',
+        ),
+        start =
+            libs.cbl.lookupFunction<CBLReplicator_Start_C, CBLReplicator_Start>(
+          'CBLReplicator_Start',
+        ),
+        stop =
+            libs.cbl.lookupFunction<CBLReplicator_Stop_C, CBLReplicator_Stop>(
+          'CBLReplicator_Stop',
+        ),
+        setHostReachable = libs.cbl.lookupFunction<
+            CBLReplicator_SetHostReachable_C, CBLReplicator_SetHostReachable>(
+          'CBLReplicator_SetHostReachable',
+        ),
+        setSuspended = libs.cbl.lookupFunction<CBLReplicator_SetSuspended_C,
+            CBLReplicator_SetSuspended>(
+          'CBLReplicator_SetSuspended',
+        ),
+        status =
+            libs.cbl.lookupFunction<CBLReplicator_Status, CBLReplicator_Status>(
+          'CBLReplicator_Status',
+        ),
+        pendingDocumentIDs = libs.cbl.lookupFunction<
+            CBLReplicator_PendingDocumentIDs, CBLReplicator_PendingDocumentIDs>(
+          'CBLReplicator_PendingDocumentIDs',
+        ),
+        isDocumentPending = libs.cblDart.lookupFunction<
+            CBLDart_CBLReplicator_IsDocumentPending_C,
+            CBLDart_CBLReplicator_IsDocumentPending>(
+          'CBLDart_CBLReplicator_IsDocumentPending',
+        ),
+        addChangeListener = libs.cblDart.lookupFunction<
+            CBLDart_CBLReplicator_AddChangeListener_C,
+            CBLDart_CBLReplicator_AddChangeListener>(
+          'CBLDart_CBLReplicator_AddChangeListener',
+        ),
+        addDocumentListener = libs.cblDart.lookupFunction<
+            CBLDart_CBLReplicator_AddDocumentListener_C,
+            CBLDart_CBLReplicator_AddDocumentListener>(
+          'CBLDart_CBLReplicator_AddDocumentListener',
         );
 
   final String authDefaultCookieName;
   final CBLEndpoint_NewWithURL endpointNewWithUrl;
-  final CBLEndpoint_NewWithLocalDB endpointNewWithLocalDB;
+  final CBLEndpoint_NewWithLocalDB? endpointNewWithLocalDB;
   final CBLEndpoint_Free endpointFree;
   final CBLAuth_NewBasic authNewBasic;
   final CBLAuth_NewSession authNewSession;
   final CLBAuth_Free authFree;
   final CBLDart_CBLReplicator_New makeNew;
+  final CBLReplicator_ResetCheckpoint resetCheckpoint;
+  final CBLReplicator_Start start;
+  final CBLReplicator_Stop stop;
+  final CBLReplicator_SetHostReachable setHostReachable;
+  final CBLReplicator_SetSuspended setSuspended;
+  final CBLReplicator_Status status;
+  final CBLReplicator_PendingDocumentIDs pendingDocumentIDs;
+  final CBLDart_CBLReplicator_IsDocumentPending isDocumentPending;
+  final CBLDart_CBLReplicator_AddChangeListener addChangeListener;
+  final CBLDart_CBLReplicator_AddDocumentListener addDocumentListener;
 }

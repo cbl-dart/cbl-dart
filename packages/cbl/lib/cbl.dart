@@ -1,6 +1,6 @@
 export 'src/blob.dart' hide blobSlotSetter, createBlobManager;
 export 'src/couchbase_lite.dart';
-export 'src/database.dart' hide createDatabase;
+export 'src/database.dart' hide createDatabase, DatabasePointerExt;
 export 'src/document.dart'
     hide createDocument, createMutableDocument, InternalDocumentExt;
 export 'src/errors.dart'
@@ -11,4 +11,4 @@ export 'src/errors.dart'
         CheckResultAndErrorExt;
 export 'src/fleece.dart' hide SlotSetter;
 export 'src/query.dart' hide createQuery, removeWhiteSpaceFromQuery;
-export 'src/replicator.dart';
+export 'src/replicator.dart' hide createReplicator, CBLReplicatorStatusExt;

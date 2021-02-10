@@ -42,7 +42,7 @@ extension on DatabaseConfiguration {
       scoped(malloc<CBLDatabaseConfiguration>())
         ..ref.directory =
             directory == null ? nullptr : scoped(Utf8.toUtf8(directory!))
-        ..ref.flags = flags.toCFlag()
+        ..ref.flags = flags.toCFlags()
         ..ref.encryptionKey = encryptionKey?.toCBLEncryptionKey() ?? nullptr;
 }
 
@@ -50,7 +50,7 @@ extension on Pointer<CBLDatabaseConfiguration> {
   DatabaseConfiguration toDatabaseConfiguration() => DatabaseConfiguration(
         directory:
             ref.directory == nullptr ? null : Utf8.fromUtf8(ref.directory),
-        flags: DatabaseFlag.parseCFlag(ref.flags),
+        flags: DatabaseFlag.parseCFlags(ref.flags),
         encryptionKey: ref.encryptionKey == nullptr
             ? null
             : ref.encryptionKey.toEncryptionKey(),

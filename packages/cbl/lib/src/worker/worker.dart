@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 import '../bindings/bindings.dart';
 import '../errors.dart';
 import '../ffi_utils.dart';
+import 'handlers/replicator.dart';
 import 'handlers.dart';
 
 /// The Worker crashed because of an internal error.
@@ -343,6 +344,7 @@ RequestRouter _configureRouter() {
   addDatabaseHandlersToRouter(router);
   addQueryHandlersToRouter(router);
   addBlobHandlersToRouter(router);
+  addReplicatorHandlersToRouter(router);
 
   return router;
 }
