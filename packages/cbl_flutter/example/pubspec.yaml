@@ -21,5 +21,8 @@ dev_dependencies:
     sdk: flutter
   pedantic: ^1.10.0-nullsafety.3
 
+dependency_overrides:
+  characters: ^1.1.0
+
 flutter:
   uses-material-design: true
