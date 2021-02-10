@@ -1,8 +1,8 @@
-import 'dart:html';
 import 'dart:typed_data';
 
 import 'bindings/bindings.dart';
 import 'database.dart';
+import 'document.dart';
 import 'errors.dart';
 import 'fleece.dart';
 
@@ -14,7 +14,7 @@ export 'bindings/bindings.dart'
 /// The location of a database to replicate with.
 abstract class Endpoint {}
 
-/// An endpoint representing a server-based database at the given [Url].
+/// An endpoint representing a server-based database at the given [url].
 ///
 /// The Url's scheme must be `ws` or `wss`, it must of course have a valid
 /// hostname, and its path must be the name of the database on that server.
@@ -23,7 +23,7 @@ abstract class Endpoint {}
 class UrlEndpoint extends Endpoint {
   UrlEndpoint(this.url);
 
-  final Url url;
+  final Uri url;
 }
 
 /// An endpoint representing another local database. (Enterprise Edition only.)
