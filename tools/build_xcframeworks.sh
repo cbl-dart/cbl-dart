@@ -23,7 +23,7 @@ xcframeworksDir="$projectDir/build/xcode/xcframeworks"
 cblFlutterFrameworksDir="$projectDir/packages/cbl_flutter_apple/Frameworks"
 
 scheme=CBL_Dart_All
-frameworks=(CBLDart CouchbaseLite)
+frameworks=(CouchbaseLiteDart CouchbaseLite)
 platforms=(iOS "iOS Simulator" macOS)
 
 function buildArchives() {

@@ -6,6 +6,6 @@
 //
 
 PRODUCT_BUNDLE_IDENTIFIER = com.terwesten.gabriel.dart.cbl
-PRODUCT_NAME = CBLDart
+PRODUCT_NAME = CouchbaseLiteDart
 
 GCC_SYMBOLS_PRIVATE_EXTERN = YES

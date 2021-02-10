@@ -23,5 +23,3 @@ and packages to distribute accompanying binaries.
   - How to redirect logs to flutter
 - cbl_flutter
   - tests
-- apple
-  - rename CBLDart framework to CouchbaseLiteDart
