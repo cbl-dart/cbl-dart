@@ -34,6 +34,14 @@ function buildArch() {
     mkdir -p "$archDir"
     cd "$archDir"
 
+    local options=""
+
+    if command -v ccache > /dev/null 2>&1; then
+        echo "Using ccache to speed up build"
+        options="$options -DCMAKE_C_COMPILER_LAUNCHER=ccache"
+        options="$options -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+    fi
+
     "${cmake_path}/cmake" \
         -G Ninja \
         -DCMAKE_TOOLCHAIN_FILE="${sdk_home}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
@@ -41,6 +49,7 @@ function buildArch() {
         -DANDROID_NATIVE_API_LEVEL=19 \
         -DANDROID_ABI="$arch" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        $options \
         ../../..
 
     "${cmake_path}/cmake" --build . --target CouchbaseLiteDart

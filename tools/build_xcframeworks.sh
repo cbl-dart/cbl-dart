@@ -40,7 +40,9 @@ function buildArchives() {
             BUILD_FOR_DISTRIBUTION=YES \
             DEVELOPMENT_TEAM=$developmentTeam \
             CODE_SIGN_IDENTITY="Apple Development" \
-            CODE_SIGN_STYLE=Automatic
+            CODE_SIGN_STYLE=Automatic \
+            CC="$projectDir/tools/ccache-clang" \
+            CXX="$projectDir/tools/ccache-clang"
     done
 }
 
