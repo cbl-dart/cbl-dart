@@ -100,8 +100,11 @@ class WebSocketException extends BaseException {
   String toString() => 'WebSocketException(message: $message, code: $code)';
 }
 
-BaseException exceptionFromCBLError({String? queryString}) {
-  final error = globalError;
+BaseException exceptionFromCBLError({
+  Pointer<CBLError>? error,
+  String? queryString,
+}) {
+  error = error ?? globalError;
   assert(!error.isOk);
 
   // Caller must free memory of returned string.

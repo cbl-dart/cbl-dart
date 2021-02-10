@@ -23,7 +23,7 @@ class Option {
 }
 
 extension OptionIterable<T extends Option> on Iterable<T> {
-  int toCFlag() {
+  int toCFlags() {
     var result = 0;
     for (final option in this) {
       result |= option.bits;
@@ -31,7 +31,7 @@ extension OptionIterable<T extends Option> on Iterable<T> {
     return result;
   }
 
-  Set<T> parseCFlag(int flags) =>
+  Set<T> parseCFlags(int flags) =>
       where((option) => (flags & option.bits) == option.bits).toSet();
 }
 
@@ -121,6 +121,16 @@ class CBLError extends Struct {
 
   @Int32()
   external int internal_info;
+}
+
+extension CBLErrorCopyToPointerExt on CBLError {
+  Pointer<CBLError> copyToPointer() {
+    final result = malloc<CBLError>();
+    result.ref.domain = domain;
+    result.ref.code = code;
+    result.ref.internal_info = internal_info;
+    return result;
+  }
 }
 
 typedef CBLError_Message = Pointer<Utf8> Function(

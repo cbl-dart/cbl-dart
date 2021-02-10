@@ -9,6 +9,7 @@ import 'fleece.dart';
 import 'log.dart';
 import 'native_callbacks.dart';
 import 'query.dart';
+import 'replicator.dart';
 
 export 'base.dart';
 export 'blob.dart';
@@ -18,6 +19,7 @@ export 'fleece.dart';
 export 'log.dart';
 export 'native_callbacks.dart';
 export 'query.dart';
+export 'replicator.dart';
 
 class LibraryConfiguration {
   LibraryConfiguration.dynamic(String name, {bool appendExtension = true})
@@ -113,6 +115,7 @@ class CBLBindings {
         query = QueryBindings(libs),
         resultSet = ResultSetBindings(libs),
         blobs = BlobsBindings(libs),
+        replicator = ReplicatorBindings(libs),
         fleece = FleeceBindings(libs);
 
   final BaseBindings base;
@@ -124,5 +127,6 @@ class CBLBindings {
   final QueryBindings query;
   final ResultSetBindings resultSet;
   final BlobsBindings blobs;
+  final ReplicatorBindings replicator;
   final FleeceBindings fleece;
 }

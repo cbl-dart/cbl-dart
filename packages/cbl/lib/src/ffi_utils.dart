@@ -7,6 +7,8 @@ export 'package:ffi/ffi.dart';
 
 // Allocation ------------------------------------------------------------------
 
+typedef MemoryFinalizer = void Function();
+
 /// [Arena] manages allocated C memory.
 ///
 /// Arenas are zoned.
@@ -15,16 +17,26 @@ class Arena {
 
   final List<Pointer<Void>> _allocations = [];
 
+  final List<MemoryFinalizer> _finalizers = [];
+
   /// Bound the lifetime of [ptr] to this [Arena].
   T scoped<T extends Pointer>(T ptr) {
     _allocations.add(ptr.cast());
     return ptr;
   }
 
+  void registerFinalzier(MemoryFinalizer finalizer) {
+    _finalizers.add(finalizer);
+  }
+
   /// Frees all memory pointed to by [Pointer]s in this arena.
   void finalize() {
     for (final ptr in _allocations) {
       malloc.free(ptr);
+    }
+
+    for (final finalizer in _finalizers) {
+      finalizer();
     }
   }
 
@@ -36,6 +48,10 @@ class Arena {
 
 /// Bound the lifetime of [ptr] to the current [Arena].
 T scoped<T extends Pointer>(T ptr) => Arena.current().scoped(ptr);
+
+/// Registers [finalizer] to be called when the current [Arena] is finalized.
+void registerFinalzier(MemoryFinalizer finalizer) =>
+    Arena.current().registerFinalzier(finalizer);
 
 /// Runs the [body] in an [Arena] freeing all memory which is [scoped] during
 /// execution of [body] at the end of the execution.

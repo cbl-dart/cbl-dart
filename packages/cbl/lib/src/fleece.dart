@@ -346,7 +346,7 @@ class MutableArray extends Array {
     Set<CopyFlag> flags = const {},
   }) =>
       MutableArray.fromPointer(
-        _bindings.mutableCopy(source.ref, flags.toCFlag()),
+        _bindings.mutableCopy(source.ref, flags.toCFlags()),
         retain: false,
       );
 
@@ -595,7 +595,7 @@ class MutableDict extends Dict {
     Set<CopyFlag> flags = const {},
   }) =>
       MutableDict.fromPointer(
-        _bindings.mutableCopy(source.ref, flags.toCFlag()),
+        _bindings.mutableCopy(source.ref, flags.toCFlags()),
         retain: false,
       );
 

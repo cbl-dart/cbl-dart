@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 import '../bindings/bindings.dart';
 import '../errors.dart';
 import '../ffi_utils.dart';
+import 'handlers/replicator.dart';
 import 'handlers.dart';
 
 /// The Worker crashed because of an internal error.
@@ -271,6 +272,9 @@ class _ResponseEnvelope {
 class UnhandledWorkerRequest extends BaseException {
   UnhandledWorkerRequest([String message = 'Worker cannot handle this request'])
       : super(message);
+
+  @override
+  String toString() => 'UnhandledWorkerRequest(message: $message)';
 }
 
 /// A handler which responds to requests which have been sent to a [Worker].
@@ -343,6 +347,7 @@ RequestRouter _configureRouter() {
   addDatabaseHandlersToRouter(router);
   addQueryHandlersToRouter(router);
   addBlobHandlersToRouter(router);
+  addReplicatorHandlersToRouter(router);
 
   return router;
 }

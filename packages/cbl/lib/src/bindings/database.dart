@@ -42,7 +42,7 @@ class DatabaseFlag extends Option {
 
   static const values = {create, readOnly, noUpgrade};
 
-  static Set<DatabaseFlag> parseCFlag(int flags) => values.parseCFlag(flags);
+  static Set<DatabaseFlag> parseCFlags(int flags) => values.parseCFlags(flags);
 }
 
 class CBLDatabaseConfiguration extends Struct {
@@ -67,7 +67,7 @@ enum ConcurrencyControl {
 int concurrencyControlToC(ConcurrencyControl value) =>
     ConcurrencyControl.values.indexOf(value);
 
-// TODO: Replace Void with CBLDatabase where approriate
+// TODO: Replace Void with CBLDatabase where appropriate
 class CBLDatabase extends Opaque {}
 
 typedef CBLDatabase_Exists_C = Uint8 Function(
