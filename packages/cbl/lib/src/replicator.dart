@@ -17,11 +17,6 @@ import 'worker/worker.dart';
 export 'bindings/bindings.dart'
     show ReplicatorType, ProxyType, ReplicatorActivityLevel, DocumentFlags;
 
-// TODO: CBLDart_CBLReplicator_New
-// TODO: CBLDart_CBLReplicator_IsDocumentPending
-// TODO: CBLDart_CBLReplicator_AddChangeListener
-// TODO: CBLDart_CBLReplicator_AddDocumentListener
-
 // region Internal API
 
 Future<Replicator> createReplicator(
@@ -119,11 +114,11 @@ class BasicAuthenticator extends Authenticator {
 /// An authenticator using a Couchbase Sync Gateway login session identifier,
 /// and optionally a cookie name (pass `null` for the default.)
 class SessionAuthenticator extends Authenticator {
-  SessionAuthenticator({required this.sessionID, this.cookieName});
+  SessionAuthenticator({required this.sessionID, required this.cookieName});
 
   final String sessionID;
 
-  final String? cookieName;
+  final String cookieName;
 
   @override
   bool operator ==(Object other) =>
@@ -411,8 +406,7 @@ extension on ReplicatorConfiguration {
       } else if (authenticator is SessionAuthenticator) {
         cblAuthenticator = _bindings.authNewSession(
           authenticator.sessionID.asUtf8Scoped,
-          (authenticator.cookieName ?? _bindings.authDefaultCookieName)
-              .asUtf8Scoped,
+          authenticator.cookieName.asUtf8Scoped,
         );
       } else {
         throw UnimplementedError(
@@ -702,9 +696,8 @@ typedef ReplicatedDocumentListener = void Function(
 /// database and another database on a remote server (or on a peer device, or
 /// even another local database.)
 class Replicator {
-  Replicator._(this._pointer, this._worker, {bool retain = false}) {
-    CBLBindings.instance.base
-        .bindCBLRefCountedToDartObject(this, _pointer.cast(), retain.toInt);
+  Replicator._(this._pointer, this._worker) {
+    _bindings.bindToDartObject(this, _pointer.cast());
   }
 
   final Pointer<CBLReplicator> _pointer;
@@ -845,13 +838,14 @@ class Replicator {
       listener,
       (listener, arguments, result) {
         final isPush = arguments[0] as bool;
-        final documentAddresses = arguments[0] as List<int>;
-        final documents = documentAddresses
-            .map((it) => it.toPointer
-                .cast<CBLDartReplicatedDocument>()
-                .ref
-                .toReplicatedDocument())
-            .toList();
+        final numDocuments = arguments[1] as int;
+        final documentsAddress = arguments[2] as int;
+        final documentsPointer =
+            Pointer<CBLDartReplicatedDocument>.fromAddress(documentsAddress);
+        final documents = List.generate(
+          numDocuments,
+          (index) => documentsPointer.elementAt(index),
+        ).map((it) => it.ref.toReplicatedDocument()).toList();
 
         // At this point we have copied the documents and don't need to block
         // the replicator any more.

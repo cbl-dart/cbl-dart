@@ -6,8 +6,7 @@ and packages to distribute accompanying binaries.
 ### TODO
 
 - Couchbase
-  - Blobs
-  - Replication
+  - Replicator tests
   - QueryBuilder
 - Fleece
   - Data

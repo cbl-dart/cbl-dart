@@ -3,8 +3,6 @@ import '../../errors.dart';
 import '../../ffi_utils.dart';
 import '../../replicator.dart';
 import '../worker.dart';
-import 'database.dart';
-import 'query.dart';
 import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.replicator;
@@ -113,6 +111,6 @@ void addReplicatorHandlersToRouter(RequestRouter router) {
   router.addHandler(getReplicatorStatus);
   router.addHandler(getReplicatorPendingDocumentIDs);
   router.addHandler(getReplicatorIsDocumentPening);
-  router.addHandler(addQueryChangeListener);
-  router.addHandler(addDocumentChangeListener);
+  router.addHandler(addReplicatorChangeListener);
+  router.addHandler(addReplicatorDocumentListener);
 }

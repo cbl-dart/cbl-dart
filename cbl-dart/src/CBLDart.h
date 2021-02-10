@@ -119,4 +119,66 @@ extern "C"
                                         void *buf,
                                         uint64_t bufSize,
                                         CBLError *outError);
+
+    // -- Replicator
+
+    struct CBLDartReplicatorConfiguration
+    {
+        CBLDatabase *database;
+
+        CBLEndpoint *endpoint;
+
+        uint8_t replicatorType;
+
+        uint8_t continuous;
+
+        CBLAuthenticator *authenticator;
+
+        CBLProxySettings *proxy;
+
+        FLDict headers;
+
+        FLSlice *pinnedServerCertificate;
+
+        FLSlice *trustedRootCertificates;
+
+        FLArray channels;
+
+        FLArray documentIDs;
+
+        CallbackId pushFilterId;
+
+        CallbackId pullFilterId;
+
+        CallbackId conflictResolver;
+    };
+
+    CBLDART_EXPORT
+    CBLReplicator *CBLDart_CBLReplicator_New(CBLDartReplicatorConfiguration *config,
+                                             CBLError *error);
+
+    CBLDART_EXPORT
+    void CBLDart_BindReplicatorToDartObject(Dart_Handle handle,
+                                            CBLReplicator *replicator);
+
+    CBLDART_EXPORT
+    bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
+                                                 char *docId,
+                                                 CBLError *error);
+    CBLDART_EXPORT
+    void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
+                                                 CallbackId listenerId);
+
+    struct CBLDartReplicatedDocument
+    {
+        const char *ID;
+
+        uint32_t flags;
+
+        CBLError error;
+    };
+
+    CBLDART_EXPORT
+    void CBLDart_CBLReplicator_AddDocumentListener(CBLReplicator *replicator,
+                                                   CallbackId listenerId);
 }

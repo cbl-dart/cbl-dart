@@ -272,6 +272,9 @@ class _ResponseEnvelope {
 class UnhandledWorkerRequest extends BaseException {
   UnhandledWorkerRequest([String message = 'Worker cannot handle this request'])
       : super(message);
+
+  @override
+  String toString() => 'UnhandledWorkerRequest(message: $message)';
 }
 
 /// A handler which responds to requests which have been sent to a [Worker].

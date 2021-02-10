@@ -35,10 +35,10 @@ typedef CBLAuth_NewSession = Pointer<CBLAuthenticator> Function(
   Pointer<Utf8> cookieName,
 );
 
-typedef CLBAuth_Free_C = Void Function(
+typedef CBLAuth_Free_C = Void Function(
   Pointer<CBLAuthenticator> authenticator,
 );
-typedef CLBAuth_Free = void Function(
+typedef CBLAuth_Free = void Function(
   Pointer<CBLAuthenticator> authenticator,
 );
 
@@ -135,6 +135,15 @@ class CBLReplicator extends Opaque {}
 typedef CBLDart_CBLReplicator_New = Pointer<CBLReplicator> Function(
   Pointer<CBLDartReplicatorConfiguration> config,
   Pointer<CBLError> error,
+);
+
+typedef CBLDart_BindReplicatorToDartObject_C = Void Function(
+  Handle handle,
+  Pointer<CBLReplicator> replicator,
+);
+typedef CBLDart_BindReplicatorToDartObject = void Function(
+  Object handle,
+  Pointer<CBLReplicator> replicator,
 );
 
 typedef CBLReplicator_ResetCheckpoint_C = Void Function(
@@ -284,9 +293,7 @@ typedef CBLDart_CBLReplicator_AddDocumentListener = void Function(
 
 class ReplicatorBindings {
   ReplicatorBindings(Libraries libs)
-      : authDefaultCookieName =
-            libs.cbl.lookup<Utf8>('kCBLAuthDefaultCookieName').asString,
-        endpointNewWithUrl = libs.cbl
+      : endpointNewWithUrl = libs.cbl
             .lookupFunction<CBLEndpoint_NewWithURL, CBLEndpoint_NewWithURL>(
           'CBLEndpoint_NewWithURL',
         ),
@@ -306,12 +313,17 @@ class ReplicatorBindings {
             libs.cbl.lookupFunction<CBLAuth_NewSession, CBLAuth_NewSession>(
           'CBLAuth_NewSession',
         ),
-        authFree = libs.cbl.lookupFunction<CLBAuth_Free_C, CLBAuth_Free>(
-          'CLBAuth_Free',
+        authFree = libs.cbl.lookupFunction<CBLAuth_Free_C, CBLAuth_Free>(
+          'CBLAuth_Free',
         ),
         makeNew = libs.cblDart.lookupFunction<CBLDart_CBLReplicator_New,
             CBLDart_CBLReplicator_New>(
           'CBLDart_CBLReplicator_New',
+        ),
+        bindToDartObject = libs.cblDart.lookupFunction<
+            CBLDart_BindReplicatorToDartObject_C,
+            CBLDart_BindReplicatorToDartObject>(
+          'CBLDart_BindReplicatorToDartObject',
         ),
         resetCheckpoint = libs.cbl.lookupFunction<
             CBLReplicator_ResetCheckpoint_C, CBLReplicator_ResetCheckpoint>(
@@ -357,14 +369,14 @@ class ReplicatorBindings {
           'CBLDart_CBLReplicator_AddDocumentListener',
         );
 
-  final String authDefaultCookieName;
   final CBLEndpoint_NewWithURL endpointNewWithUrl;
   final CBLEndpoint_NewWithLocalDB? endpointNewWithLocalDB;
   final CBLEndpoint_Free endpointFree;
   final CBLAuth_NewBasic authNewBasic;
   final CBLAuth_NewSession authNewSession;
-  final CLBAuth_Free authFree;
+  final CBLAuth_Free authFree;
   final CBLDart_CBLReplicator_New makeNew;
+  final CBLDart_BindReplicatorToDartObject bindToDartObject;
   final CBLReplicator_ResetCheckpoint resetCheckpoint;
   final CBLReplicator_Start start;
   final CBLReplicator_Stop stop;

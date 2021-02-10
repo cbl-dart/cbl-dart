@@ -416,3 +416,282 @@ uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
         static_cast<size_t>(bufSize),
         outError);
 }
+
+// -- Replicator
+
+struct ReplicatorCallbackWrapperContext
+{
+    CallbackId pullFilterId;
+    CallbackId pushFilterId;
+    CallbackId conflictResolverId;
+};
+
+std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *> replicatorCallbackWrapperContexts;
+std::mutex replicatorCallbackWrapperContexts_mutex;
+
+bool CBLDart_ReplicatorFilterWrapper(CallbackId callbackId,
+                                     CBLDocument *document,
+                                     bool isDeleted)
+{
+    Dart_CObject documentAddress;
+    documentAddress.type = Dart_CObject_kInt64;
+    documentAddress.value.as_int64 = reinterpret_cast<int64_t>(document);
+
+    Dart_CObject isDeleted_;
+    isDeleted_.type = Dart_CObject_kBool;
+    isDeleted_.value.as_bool = isDeleted;
+
+    Dart_CObject *argsValues[] = {&documentAddress, &isDeleted_};
+
+    Dart_CObject args;
+    args.type = Dart_CObject_kArray;
+    args.value.as_array.length = 2;
+    args.value.as_array.values = argsValues;
+
+    bool descision;
+
+    auto resultHandler = [&descision](Dart_CObject *result) {
+        descision = result->value.as_bool;
+    };
+
+    CallbackCall(resultHandler).execute(callbackId, &args);
+
+    return descision;
+}
+
+bool CBLDart_ReplicatorPullFilterWrapper(void *context,
+                                         CBLDocument *document,
+                                         bool isDeleted)
+{
+    auto wrapperContext = reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
+    return CBLDart_ReplicatorFilterWrapper(wrapperContext->pullFilterId, document, isDeleted);
+}
+
+bool CBLDart_ReplicatorPushFilterWrapper(void *context,
+                                         CBLDocument *document,
+                                         bool isDeleted)
+{
+    auto wrapperContext = reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
+    return CBLDart_ReplicatorFilterWrapper(wrapperContext->pushFilterId, document, isDeleted);
+}
+
+const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(void *context,
+                                                             const char *documentID,
+                                                             const CBLDocument *localDocument,
+                                                             const CBLDocument *remoteDocument)
+{
+    auto wrapperContext = reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
+    auto callbackId = wrapperContext->conflictResolverId;
+
+    Dart_CObject documentID_;
+    documentID_.type = Dart_CObject_kString;
+    documentID_.value.as_string = const_cast<char *>(documentID);
+
+    Dart_CObject local;
+    if (localDocument == NULL)
+    {
+        local.type = Dart_CObject_kNull;
+    }
+    else
+    {
+        local.type = Dart_CObject_kInt64;
+        local.value.as_int64 = reinterpret_cast<int64_t>(localDocument);
+    }
+
+    Dart_CObject remote;
+    if (remoteDocument == NULL)
+    {
+        remote.type = Dart_CObject_kNull;
+    }
+    else
+    {
+        remote.type = Dart_CObject_kInt64;
+        remote.value.as_int64 = reinterpret_cast<int64_t>(remoteDocument);
+    }
+
+    Dart_CObject *argsValues[] = {&documentID_, &local, &remote};
+
+    Dart_CObject args;
+    args.type = Dart_CObject_kArray;
+    args.value.as_array.length = 3;
+    args.value.as_array.values = argsValues;
+
+    const CBLDocument *descision;
+
+    auto resultHandler = [&descision](Dart_CObject *result) {
+        descision = result->type == Dart_CObject_kNull
+                        ? NULL
+                        : reinterpret_cast<const CBLDocument *>(result->value.as_int64);
+    };
+
+    CallbackCall(resultHandler).execute(callbackId, &args);
+
+    return descision;
+}
+
+CBLReplicator *CBLDart_CBLReplicator_New(CBLDartReplicatorConfiguration *config,
+                                         CBLError *error)
+{
+    CBLReplicatorConfiguration _config;
+    _config.database = config->database;
+    _config.endpoint = config->endpoint;
+    _config.replicatorType = static_cast<CBLReplicatorType>(config->replicatorType);
+    _config.continuous = config->continuous;
+    _config.authenticator = config->authenticator;
+    _config.proxy = config->proxy;
+    _config.headers = config->headers;
+    _config.pinnedServerCertificate = config->pinnedServerCertificate == NULL
+                                          ? kFLSliceNull
+                                          : *config->pinnedServerCertificate;
+    _config.trustedRootCertificates = config->trustedRootCertificates == NULL
+                                          ? kFLSliceNull
+                                          : *config->trustedRootCertificates;
+    _config.channels = config->channels;
+    _config.documentIDs = config->documentIDs;
+    _config.pullFilter = config->pullFilterId == NULL_CALLBACK
+                             ? NULL
+                             : CBLDart_ReplicatorPullFilterWrapper;
+    _config.pushFilter = config->pushFilterId == NULL_CALLBACK
+                             ? NULL
+                             : CBLDart_ReplicatorPushFilterWrapper;
+    _config.conflictResolver = config->conflictResolver == NULL_CALLBACK
+                                   ? NULL
+                                   : CBLDart_ReplicatorConflictResolverWrapper;
+
+    auto context = new ReplicatorCallbackWrapperContext;
+    context->pullFilterId = config->pullFilterId;
+    context->pushFilterId = config->pushFilterId;
+    context->conflictResolverId = config->conflictResolver;
+    _config.context = context;
+
+    auto replicator = CBLReplicator_New(&_config, error);
+
+    // Associate callback context with this instance so we can it released
+    // when the replicator is released.
+    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
+    replicatorCallbackWrapperContexts[replicator] = context;
+
+    return replicator;
+}
+
+void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer)
+{
+    auto replicator = reinterpret_cast<CBLReplicator *>(peer);
+
+    CBLReplicator_Release(replicator);
+
+    // Clean up context for callback wrapper
+    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
+    auto callbackWrapperContext = replicatorCallbackWrapperContexts[replicator];
+    replicatorCallbackWrapperContexts.erase(replicator);
+    delete callbackWrapperContext;
+}
+
+void CBLDart_BindReplicatorToDartObject(Dart_Handle handle,
+                                        CBLReplicator *replicator)
+{
+    Dart_NewWeakPersistentHandle_DL(
+        handle,
+        reinterpret_cast<void *>(replicator),
+        0,
+        CBLDart_ReplicatorFinalizer);
+}
+
+bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
+                                             char *docId,
+                                             CBLError *error)
+{
+    return CBLReplicator_IsDocumentPending(replicator, FLStr(docId), error);
+}
+
+void CBLDart_Replicator_ChangeListenerWrapper(void *context,
+                                              CBLReplicator *replicator,
+                                              const CBLReplicatorStatus *status)
+{
+    auto callbackId = reinterpret_cast<CallbackId>(context);
+
+    Dart_CObject statusAddress;
+    statusAddress.type = Dart_CObject_kInt64;
+    statusAddress.value.as_int64 = reinterpret_cast<int64_t>(status);
+
+    Dart_CObject *argsValues[] = {&statusAddress};
+
+    Dart_CObject args;
+    args.type = Dart_CObject_kArray;
+    args.value.as_array.length = 1;
+    args.value.as_array.values = argsValues;
+
+    // Only required to make the call blocking.
+    auto resultHandler = [](Dart_CObject *result) {};
+
+    CallbackCall(resultHandler).execute(callbackId, &args);
+}
+
+void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
+                                             CallbackId listenerId)
+{
+    auto listenerToken = CBLReplicator_AddChangeListener(replicator,
+                                                         CBLDart_Replicator_ChangeListenerWrapper,
+                                                         (void *)listenerId);
+
+    CallbackIsolate::getForCallbackId(listenerId)
+        ->setCallbackFinalizer(listenerId, listenerToken, CBLDart_CBLListenerFinalizer);
+}
+
+void CBLDart_Replicator_DocumentListenerWrapper(void *context,
+                                                CBLReplicator *replicator,
+                                                bool isPush,
+                                                unsigned numDocuments,
+                                                const CBLReplicatedDocument *documents)
+{
+    auto callbackId = reinterpret_cast<CallbackId>(context);
+
+    Dart_CObject isPush_;
+    isPush_.type = Dart_CObject_kBool;
+    isPush_.value.as_bool = isPush;
+
+    auto dartDocuments = new CBLDartReplicatedDocument[numDocuments];
+
+    for (size_t i = 0; i < numDocuments; i++)
+    {
+        auto document = &documents[i];
+        auto dartDocument = &dartDocuments[i];
+
+        dartDocument->ID = document->ID;
+        dartDocument->flags = document->flags;
+        dartDocument->error = document->error;
+    }
+
+    Dart_CObject numDocuments_;
+    numDocuments_.type = Dart_CObject_kInt64;
+    numDocuments_.value.as_int64 = numDocuments;
+
+    Dart_CObject documents_;
+    documents_.type = Dart_CObject_kInt64;
+    documents_.value.as_int64 = reinterpret_cast<int64_t>(dartDocuments);
+
+    Dart_CObject *argsValues[] = {&isPush_, &numDocuments_, &documents_};
+
+    Dart_CObject args;
+    args.type = Dart_CObject_kArray;
+    args.value.as_array.length = 3;
+    args.value.as_array.values = argsValues;
+
+    // Only required to make the call blocking.
+    auto resultHandler = [](Dart_CObject *result) {};
+
+    CallbackCall(resultHandler).execute(callbackId, &args);
+
+    delete[] dartDocuments;
+}
+
+void CBLDart_CBLReplicator_AddDocumentListener(CBLReplicator *replicator,
+                                               CallbackId listenerId)
+{
+    auto listenerToken = CBLReplicator_AddDocumentListener(replicator,
+                                                           CBLDart_Replicator_DocumentListenerWrapper,
+                                                           (void *)listenerId);
+
+    CallbackIsolate::getForCallbackId(listenerId)
+        ->setCallbackFinalizer(listenerId, listenerToken, CBLDart_CBLListenerFinalizer);
+}
