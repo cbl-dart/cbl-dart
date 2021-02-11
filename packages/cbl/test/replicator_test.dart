@@ -14,8 +14,7 @@ void main() {
       config: DatabaseConfiguration(directory: testTmpDir),
     );
 
-    await cbl.createReplicator(ReplicatorConfiguration(
-      database: db,
+    await db.createReplicator(ReplicatorConfiguration(
       endpoint: UrlEndpoint(Uri.parse('ws://localhost:4984/db')),
       replicatorType: ReplicatorType.pushAndPull,
       continuous: true,

@@ -21,10 +21,11 @@ export 'bindings/bindings.dart'
 
 Future<Replicator> createReplicator(
   Worker worker,
+  Pointer<CBLDatabase> db,
   ReplicatorConfiguration config,
 ) =>
     runArena(() async {
-      final cblConfig = config.toCBLReplicatorConfigurationScoped();
+      final cblConfig = config.toCBLReplicatorConfigurationScoped(db);
 
       final address =
           await worker.makeRequest<int>(NewReplicator(cblConfig.address));
@@ -245,7 +246,6 @@ extension on ProxySettings {
 /// The configuration of a replicator.
 class ReplicatorConfiguration {
   ReplicatorConfiguration({
-    required this.database,
     required this.endpoint,
     required this.replicatorType,
     this.continuous = false,
@@ -260,9 +260,6 @@ class ReplicatorConfiguration {
     this.pullFilter,
     this.conflictResolver,
   });
-
-  /// The database to replicate
-  final Database database;
 
   /// The address of the other database to replicate with
   final Endpoint endpoint;
@@ -308,7 +305,6 @@ class ReplicatorConfiguration {
       identical(this, other) ||
       other is ReplicatorConfiguration &&
           other.runtimeType == other.runtimeType &&
-          database == other.database &&
           endpoint == other.endpoint &&
           replicatorType == other.replicatorType &&
           continuous == other.continuous &&
@@ -326,7 +322,6 @@ class ReplicatorConfiguration {
   @override
   int get hashCode =>
       super.hashCode ^
-      database.hashCode ^
       endpoint.hashCode ^
       replicatorType.hashCode ^
       continuous.hashCode ^
@@ -343,7 +338,6 @@ class ReplicatorConfiguration {
 
   @override
   String toString() => 'ReplicatorConfiguration('
-      'database: $database, '
       'endpoint: $endpoint, '
       'replicatorType: $replicatorType, '
       'continuous: $continuous, '
@@ -361,11 +355,13 @@ class ReplicatorConfiguration {
 }
 
 extension on ReplicatorConfiguration {
-  Pointer<CBLDartReplicatorConfiguration> toCBLReplicatorConfigurationScoped() {
+  Pointer<CBLDartReplicatorConfiguration> toCBLReplicatorConfigurationScoped(
+    Pointer<CBLDatabase> db,
+  ) {
     final config = scoped(malloc<CBLDartReplicatorConfiguration>());
 
     // database
-    config.ref.database = database.pointer;
+    config.ref.database = db;
 
     // endpoint
     Pointer<CBLEndpoint> cblEndpoint;

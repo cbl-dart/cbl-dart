@@ -10,6 +10,8 @@ import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
 import 'query.dart';
+import 'replicator.dart';
+import 'replicator.dart' as repl;
 import 'utils.dart';
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
@@ -602,6 +604,16 @@ class Database {
     db: _pointer.cast(),
     worker: _worker,
   );
+
+  // === Replicator ============================================================
+
+  /// Creates a [Replicator] for this database, with the given configuration.
+  Future<Replicator> createReplicator(
+    ReplicatorConfiguration config,
+  ) =>
+      repl.createReplicator(_worker, _pointer.cast(), config);
+
+  // === Object ================================================================
 
   @override
   bool operator ==(Object other) =>

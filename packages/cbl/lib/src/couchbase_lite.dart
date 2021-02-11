@@ -5,7 +5,6 @@ import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
-import 'replicator.dart' as repl;
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
 
@@ -120,12 +119,6 @@ class CouchbaseLite {
       worker: worker,
     );
   }
-
-  /// Creates a replicator with the given configuration.
-  Future<repl.Replicator> createReplicator(
-    repl.ReplicatorConfiguration config,
-  ) async =>
-      repl.createReplicator(_worker, config);
 
   static late final _logBindings = CBLBindings.instance.log;
 
