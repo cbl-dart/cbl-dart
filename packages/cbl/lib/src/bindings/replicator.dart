@@ -264,9 +264,9 @@ class DocumentFlags extends Option {
   static const deleted = DocumentFlags('deleted', 1 << 0);
 
   /// Lost access to the document on the server
-  static const removed = DocumentFlags('removed', 1 << 1);
+  static const accessRemoved = DocumentFlags('accessRemoved', 1 << 1);
 
-  static const values = {deleted, removed};
+  static const values = {deleted, accessRemoved};
 
   static Set<DocumentFlags> parseCFlags(int flag) => values.parseCFlags(flag);
 }
