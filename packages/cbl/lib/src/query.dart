@@ -5,7 +5,6 @@ import 'dart:ffi';
 import 'bindings/bindings.dart';
 import 'ffi_utils.dart';
 import 'fleece.dart';
-import 'native_callbacks.dart';
 import 'utils.dart';
 import 'worker/handlers.dart';
 import 'worker/worker.dart';
@@ -16,23 +15,27 @@ late final _baseBindings = CBLBindings.instance.base;
 
 // region Internal API
 
-Query createQuery({
-  required Pointer<Void> pointer,
+Future<Query> createQuery({
+  required Pointer<CBLDatabase> db,
   required Worker worker,
+  required String queryString,
+  required QueryLanguage language,
   bool retain = false,
-}) =>
-    Query._(pointer, worker, retain);
+}) async {
+  if (language == QueryLanguage.N1QL) {
+    queryString = _removeWhiteSpaceFromQuery(queryString);
+  }
 
-String removeWhiteSpaceFromQuery(String query) =>
+  final address = await worker
+      .makeRequest<int>(CreateDatabaseQuery(db.address, queryString, language));
+
+  return Query._(address.toPointer, worker, retain);
+}
+
+String _removeWhiteSpaceFromQuery(String query) =>
     query.replaceAll(RegExp(r'\s+'), ' ').trim();
 
 // endregion
-
-/// A callback to be invoked after a [Query]'s results have changed.
-///
-/// The callback is given the Query that triggered the listener and the updated
-/// [ResultSet].
-typedef QueryChangeListener = void Function(Query query, ResultSet resultSet);
 
 /// A [Query] represents a compiled database query.
 ///
@@ -131,42 +134,30 @@ class Query {
   Future<String> columnName(int index) =>
       _worker.makeRequest(GetQueryColumnName(_pointer.address, index));
 
-  /// Registers a change [listener] callback with this Query, turning it into a
-  /// "live query" until the listener is removed (via [removeChangeListener]).
+  /// Returns a [Stream] which emits a [ResultSet] when this query's results
+  /// change, turning it into a "live query" until the stream is canceled.
   ///
-  /// When the first change listener is added, the query will run (in the
-  /// background) and notify the listener(s) of the results when ready. After
-  /// that, it will run in the background after the database changes, and only
-  /// notify the listeners when the result set changes.
-  Future<void> addChangeListener(QueryChangeListener listener) async {
-    late int listenerTokenAddress;
+  /// When the first change stream is created, the query will run and notify the
+  /// subscriber of the results when ready. After that, it will run in the
+  /// background after the database changes, and only notify the subscriber when
+  /// the result set changes.
+  Stream<ResultSet> changes() => callbackStream<ResultSet, int>(
+        worker: _worker,
+        requestFactory: (callbackId) =>
+            AddQueryChangeListener(_pointer.address, callbackId),
+        eventCreator: (listenerTokenAddress, _) async {
+          // The native side sends no arguments. When the native side notfies
+          // the listener it has to copy the current query result set.
 
-    final listenerId =
-        NativeCallbacks.instance.registerCallback<QueryChangeListener>(
-      listener,
-      (listener, arguments, result) async {
-        // The native side sends no arguments. When the native side notfies the
-        // listener it has to copy the current query result set.
+          final resultSetAddress =
+              await _worker.makeRequest<int>(CopyCurrentQueryResultSet(
+            _pointer.address,
+            listenerTokenAddress,
+          ));
 
-        final resultSet = await _worker
-            .makeRequest<int>(CopyCurrentQueryResultSet(
-              _pointer.address,
-              listenerTokenAddress,
-            ))
-            .then((address) => ResultSet._(address.toPointer, false));
-
-        listener(this, resultSet);
-      },
-    );
-
-    listenerTokenAddress = await _worker
-        .makeRequest<int>(AddQueryChangeListener(_pointer.address, listenerId));
-  }
-
-  /// Stops the [changeListener] from being notified of changes.
-  Future<void> removeChangeListener(QueryChangeListener changeListener) async {
-    NativeCallbacks.instance.unregisterCallback(changeListener);
-  }
+          return ResultSet._(resultSetAddress.toPointer, false);
+        },
+      );
 }
 
 /// One of the results that [Query]s return in [ResultSet]s.

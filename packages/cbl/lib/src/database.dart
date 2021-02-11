@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -264,41 +265,9 @@ class FullTextIndex extends Index {
 /// See:
 /// - [Database.saveDocumentResolving] for saving a [Document] with a custom
 ///   conflict handler.
-typedef SaveConflictHandler = Future<bool> Function(
+typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
-);
-
-/// A document change listener lets you detect changes made to a specific
-/// document after they are persisted to the database.
-///
-/// If there are multiple [Database] instances on the same database file, each
-/// one's document listeners will be notified of changes made by other database
-/// instances.
-///
-/// The listener receives the [database] containing the document and the [id]
-/// of the document which changed.
-typedef DocumentChangeListener = void Function(
-  Database database,
-  String id,
-);
-
-/// A database change listener lets you detect changes made to all documents in
-/// a database. (If you only want to observe specific documents, use a
-/// [Database.addDocumentChangeListener] instead.)
-///
-/// If there are multiple [Database] instances on the same database file, each
-/// one's listeners will be notified of changes made by other database
-/// instances.
-///
-/// Changes made to the database file by other processes will __not__ be
-/// notified.
-///
-/// The listener receives the [database] containing the document and the [ids]
-/// of the documents which changed.
-typedef DatabaseChangeListener = void Function(
-  Database database,
-  List<String> ids,
 );
 
 /// A database is both a filesystem object and a container for documents.
@@ -497,48 +466,46 @@ class Database {
   Future<void> setDocumentExpiration(String id, DateTime? time) => _worker
       .makeRequest<void>(SetDatabaseDocumentExpiration(_address, id, time));
 
-  // === Listeners =============================================================
+  // === Changes ===============================================================
 
-  /// Registers a document change [listener]. It will be called after the
-  /// document with the given [id] has changed on disk.
-  Future<void> addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  ) {
-    final listenerId = _callbacks.registerCallback<DocumentChangeListener>(
-        listener, (listener, arguments, _) {
-      final docId = arguments[0] as String;
-      listener(this, docId);
-    });
+  /// Creates a stream that emits an event for each change made to a specific
+  /// document after the change has been persisted to the database.
+  ///
+  /// The stream is as single subscription stream and buffers events when
+  /// paused.
+  ///
+  /// If there are multiple [Database] instances on the same database file,
+  /// subscribers from one database will be notified of changes made by other
+  /// database instances.
+  ///
+  /// Changes made to the database file by other processes will __not__ be
+  /// notified.
+  Stream<void> changesOfDocument(String id) => callbackStream<void, void>(
+        worker: _worker,
+        requestFactory: (callbackId) =>
+            AddDocumentChangeListener(_address, id, callbackId),
+        eventCreator: (_, arguments) => null,
+      );
 
-    return _worker
-        .makeRequest(AddDocumentChangeListener(_address, id, listenerId));
-  }
-
-  /// Removes the document change [listener] so that it won't be called any
-  /// more.
-  Future<void> removeDocumentChangeListener(
-      DocumentChangeListener listener) async {
-    _callbacks.unregisterCallback(listener, runFinalizer: true);
-  }
-
-  /// Registers a database change [listener]. It will be called after one or
-  /// more documents are changed on disk.
-  Future<void> addChangeListener(DatabaseChangeListener listener) {
-    int? listenerId;
-    listenerId = _callbacks.registerCallback<DatabaseChangeListener>(listener,
-        (listener, arguments, _) {
-      listener(this, List.from(arguments));
-    });
-
-    return _worker.makeRequest(AddDatabaseChangeListener(_address, listenerId));
-  }
-
-  /// Removes the database change [listener] so that it won't be called any
-  /// more.
-  Future<void> removeChangeListener(DatabaseChangeListener listener) async {
-    _callbacks.unregisterCallback(listener, runFinalizer: true);
-  }
+  /// Creates a stream that emits a list of document ids each time documents
+  /// in this databse have changed.
+  ///
+  /// If you only want to observe specific documents, use a [changesOfDocument]
+  /// instead.
+  ///
+  /// If there are multiple [Database] instances on the same database file, each
+  /// one's listeners will be notified of changes made by other database
+  /// instances.
+  ///
+  /// Changes made to the database file by other processes will __not__ be
+  /// notified.
+  Stream<List<String>> changesOfAllDocuments() =>
+      callbackStream<List<String>, void>(
+        worker: _worker,
+        requestFactory: (callbackId) =>
+            AddDatabaseChangeListener(_address, callbackId),
+        eventCreator: (_, arguments) => List.from(arguments),
+      );
 
   // === Queries ===============================================================
 
@@ -558,15 +525,13 @@ class Database {
   Future<Query> query(
     String queryString, {
     QueryLanguage language = QueryLanguage.N1QL,
-  }) async {
-    if (language == QueryLanguage.N1QL) {
-      queryString = removeWhiteSpaceFromQuery(queryString);
-    }
-
-    final address = await _worker
-        .makeRequest<int>(CreateDatabaseQuery(_address, queryString, language));
-    return createQuery(pointer: address.toPointer, worker: _worker);
-  }
+  }) async =>
+      createQuery(
+        db: _pointer.cast(),
+        worker: _worker,
+        queryString: queryString,
+        language: language,
+      );
 
   // === Indexes ===============================================================
 

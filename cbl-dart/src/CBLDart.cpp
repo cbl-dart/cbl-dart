@@ -277,16 +277,9 @@ void CBLDart_DocumentChangeListenerWrapper(void *context,
 {
     auto callbackId = CallbackId(context);
 
-    Dart_CObject id;
-    id.type = Dart_CObject_kString;
-    id.value.as_string = const_cast<char *>(docID);
-
-    Dart_CObject *argsValues[] = {&id};
-
     Dart_CObject args;
     args.type = Dart_CObject_kArray;
-    args.value.as_array.length = 1;
-    args.value.as_array.values = argsValues;
+    args.value.as_array.length = 0;
 
     CallbackCall().execute(callbackId, &args);
 }
@@ -315,8 +308,8 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context,
 {
     auto callbackId = CallbackId(context);
 
-    auto ids = (Dart_CObject *)malloc(sizeof(Dart_CObject) * numDocs);
-    auto argsValues = (Dart_CObject **)malloc(sizeof(Dart_CObject *) * numDocs);
+    auto ids = new Dart_CObject[numDocs];
+    auto argsValues = new Dart_CObject *[numDocs];
 
     for (size_t i = 0; i < numDocs; i++)
     {
@@ -333,8 +326,8 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context,
 
     CallbackCall().execute(callbackId, &args);
 
-    free(ids);
-    free(argsValues);
+    delete[] ids;
+    delete[] argsValues;
 }
 
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,

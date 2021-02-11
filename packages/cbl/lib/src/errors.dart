@@ -12,6 +12,16 @@ abstract class BaseException implements Exception {
   BaseException(this.message);
 
   final String message;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BaseException &&
+          runtimeType == other.runtimeType &&
+          message == other.message;
+
+  @override
+  int get hashCode => super.hashCode ^ message.hashCode;
 }
 
 class CouchbaseLiteException extends BaseException {
@@ -32,6 +42,22 @@ class CouchbaseLiteException extends BaseException {
   final int? errorPosition;
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CouchbaseLiteException &&
+          runtimeType == other.runtimeType &&
+          code == other.code &&
+          queryString == other.queryString &&
+          errorPosition == other.errorPosition;
+
+  @override
+  int get hashCode =>
+      super.hashCode ^
+      code.hashCode ^
+      queryString.hashCode ^
+      errorPosition.hashCode;
+
+  @override
   String toString() => [
         'CouchbaseLiteException(message: $message, code: $code',
         if (queryString != null)
@@ -49,6 +75,16 @@ class PosixException extends BaseException {
   final int errno;
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PosixException &&
+          runtimeType == other.runtimeType &&
+          errno == other.errno;
+
+  @override
+  int get hashCode => super.hashCode ^ errno.hashCode;
+
+  @override
   String toString() => 'PosixException(message: $message, errno: $errno)';
 }
 
@@ -59,6 +95,16 @@ class SQLiteException extends BaseException {
   ) : super(message);
 
   final int code;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SQLiteException &&
+          runtimeType == other.runtimeType &&
+          code == other.code;
+
+  @override
+  int get hashCode => super.hashCode ^ code.hashCode;
 
   @override
   String toString() => 'SQLiteExceptions(message: $message, code: $code)';
@@ -73,6 +119,16 @@ class FleeceException extends BaseException {
   final FleeceErrorCode code;
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FleeceException &&
+          runtimeType == other.runtimeType &&
+          code == other.code;
+
+  @override
+  int get hashCode => super.hashCode ^ code.hashCode;
+
+  @override
   String toString() => 'FleeceException(message: $message, code: $code)';
 }
 
@@ -85,6 +141,16 @@ class NetworkException extends BaseException {
   final NetworkErrorCode code;
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NetworkException &&
+          runtimeType == other.runtimeType &&
+          code == other.code;
+
+  @override
+  int get hashCode => super.hashCode ^ code.hashCode;
+
+  @override
   String toString() => 'NetworkException(message: $message, code: $code)';
 }
 
@@ -95,6 +161,16 @@ class WebSocketException extends BaseException {
   ) : super(message);
 
   final int code;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WebSocketException &&
+          runtimeType == other.runtimeType &&
+          code == other.code;
+
+  @override
+  int get hashCode => super.hashCode ^ code.hashCode;
 
   @override
   String toString() => 'WebSocketException(message: $message, code: $code)';

@@ -246,20 +246,13 @@ void main() {
         () async {
       final doc = MutableDocument();
 
-      final listener = expectAsync2(
-        (database, id) {
-          expect(database, equals(db));
-          expect(id, equals(doc.id));
-        },
-        count: 1,
-        id: 'DocumentChangeListener',
-        reason: 'The Document was changed while listener is registered',
+      expect(
+        db.changesOfDocument(doc.id),
+        emitsInOrder(<dynamic>[null]),
       );
 
       await db.saveDocument(doc);
-      await db.addDocumentChangeListener(doc.id, listener);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
-      await db.removeDocumentChangeListener(listener);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
     });
 
@@ -267,19 +260,14 @@ void main() {
         () async {
       final doc = MutableDocument();
 
-      final listener = expectAsync2(
-        (database, ids) {
-          expect(database, equals(db));
-          expect(ids, equals([doc.id]));
-        },
-        count: 1,
-        id: 'DatabaseChangeListener',
-        reason: 'Some Document was changed while listener is registered',
+      expect(
+        db.changesOfAllDocuments(),
+        emitsInOrder(<dynamic>[
+          [doc.id]
+        ]),
       );
 
-      await db.addChangeListener(listener);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
-      await db.removeChangeListener(listener);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
     });
   });
@@ -406,31 +394,17 @@ void main() {
       final doc = MutableDocument()..properties.addAll({'b': 'c'});
       final result = MutableDict()..addAll({'a': doc.properties});
 
-      var callIndex = 0;
-
-      final QueryChangeListener listener = expectAsync2(
-        (query, resultSet) {
-          switch (callIndex++) {
-            // When listening for the first time the query is executed.
-            case 0:
-              expect(resultSet.asDicts.toList(), isEmpty);
-              break;
-            // This call is triggered by the doc save below.
-            case 1:
-              expect(resultSet.asDicts.toList(), equals([result]));
-              break;
-          }
-        },
-        count: 2,
+      expect(
+        q.changes().map((resultSet) => resultSet.asDicts.toList()),
+        emitsInOrder(<dynamic>[
+          isEmpty,
+          [result],
+        ]),
       );
 
-      addTearDown(() => q.removeChangeListener(listener));
-
-      await q.addChangeListener(listener);
-
-      // Wait a bit to ensure expected order. Query listeners run
-      // asynchronously and need some time to execute the query for the first
-      // time.
+      // Wait a bit to ensure expected order. Query change streams start the
+      // first query asynchronously and need some time to execute the query for
+      // the first time.
       await Future<void>.delayed(Duration(milliseconds: 50));
 
       await db.saveDocument(doc);
@@ -480,9 +454,12 @@ void main() {
 
       final doc = MutableDocument();
 
-      await dbA.addChangeListener(expectAsync2((database, ids) {
-        expect(ids, equals([doc.id]));
-      }));
+      expect(
+        dbA.changesOfAllDocuments(),
+        emitsInOrder(<dynamic>[
+          [doc.id]
+        ]),
+      );
 
       await dbB.saveDocument(doc);
     });

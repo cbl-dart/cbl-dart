@@ -10,5 +10,5 @@ export 'src/errors.dart'
         checkResultAndError,
         CheckResultAndErrorExt;
 export 'src/fleece.dart' hide SlotSetter;
-export 'src/query.dart' hide createQuery, removeWhiteSpaceFromQuery;
+export 'src/query.dart' hide createQuery;
 export 'src/replicator.dart' hide createReplicator, CBLReplicatorStatusExt;

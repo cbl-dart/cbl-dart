@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -146,7 +147,10 @@ class SessionAuthenticator extends Authenticator {
 /// The callback receives the [document] in question and whether it [isDeleted].
 ///
 /// Return `true` if the document should be replicated, `false` to skip it.
-typedef ReplicationFilter = bool Function(Document document, bool isDeleted);
+typedef ReplicationFilter = FutureOr<bool> Function(
+  Document document,
+  bool isDeleted,
+);
 
 /// Conflict-resolution callback for use in replications.
 ///
@@ -168,7 +172,7 @@ typedef ReplicationFilter = bool Function(Document document, bool isDeleted);
 /// pushing.) This can be the same as [local] or [remote], or you can create
 /// a mutable copy of either one and modify it appropriately.
 /// Alternatively return `null` if the resolution is to delete the document.
-typedef ConflictResolver = Document? Function(
+typedef ConflictResolver = FutureOr<Document?> Function(
   String documentId,
   Document? local,
   Document? remote,
@@ -471,7 +475,7 @@ extension on ReplicatorConfiguration {
     int registerReplicationFilter(ReplicationFilter filter) =>
         NativeCallbacks.instance.registerCallback<ReplicationFilter>(
           filter,
-          (filter, arguments, result) {
+          (filter, arguments, result) async {
             final docAddress = arguments[0] as int;
             final doc =
                 createDocument(pointer: docAddress.toPointer, retain: true);
@@ -479,7 +483,7 @@ extension on ReplicatorConfiguration {
 
             var decision = false;
             try {
-              decision = filter(doc, isDeleted);
+              decision = await filter(doc, isDeleted);
             } finally {
               result!(decision);
             }
@@ -505,7 +509,7 @@ extension on ReplicatorConfiguration {
     int registerConflictResolver(ConflictResolver filter) =>
         NativeCallbacks.instance.registerCallback<ConflictResolver>(
           filter,
-          (filter, arguments, result) {
+          (filter, arguments, result) async {
             final docId = arguments[0] as String;
             final localAddress = arguments[1] as int?;
             final local = localAddress?.let(
@@ -516,7 +520,7 @@ extension on ReplicatorConfiguration {
 
             var decision = local ?? remote;
             try {
-              decision = filter(docId, local, remote);
+              decision = await filter(docId, local, remote);
             } finally {
               result!(decision);
             }
@@ -618,14 +622,6 @@ extension CBLReplicatorStatusExt on CBLReplicatorStatus {
       });
 }
 
-/// A callback that notifies you when the [Replicator]'s status changes.
-///
-/// It should not take a long time to return, or it will slow down the
-/// replicator.
-///
-/// The callback receives the [Replicator]'s [status].
-typedef ReplicatorChangeListener = void Function(ReplicatorStatus status);
-
 /// Information about a [Document] that's been pushed or pulled.
 class ReplicatedDocument {
   ReplicatedDocument(this.id, this.flags, this.error);
@@ -675,18 +671,38 @@ extension on CBLDartReplicatedDocument {
       });
 }
 
-/// A callback that notifies you when [Document]s are replicated.
+/// An event that is emitted when [Document]s been replicated.
 ///
-/// It should not take a long time to return, or it will slow down the
-/// replicator.
-///
-/// [isPush] is `true` if the document(s) were pushed, `false` if pulled.
-///
-/// [documents] is a list with information about each document.
-typedef ReplicatedDocumentListener = void Function(
-  bool isPush,
-  List<ReplicatedDocument> documents,
-);
+/// See:
+/// - [DocumentsPushed] for the event emitted when documents have been pushed.
+/// - [DocumentsPulled] for the event emitted when documents have been pulled.
+abstract class DocumentsReplicated {
+  DocumentsReplicated(this.documents);
+
+  /// A list with information about each document.
+  final List<ReplicatedDocument> documents;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocumentsReplicated &&
+          runtimeType == other.runtimeType &&
+          const DeepCollectionEquality().equals(documents, other.documents);
+
+  @override
+  int get hashCode =>
+      super.hashCode ^ const DeepCollectionEquality().hash(documents);
+}
+
+/// An event that is emitted when [Document]s have been pushed.
+class DocumentsPushed extends DocumentsReplicated {
+  DocumentsPushed(List<ReplicatedDocument> documents) : super(documents);
+}
+
+/// An event that is emitted when [Document]s have been pulled.
+class DocumentsPulled extends DocumentsReplicated {
+  DocumentsPulled(List<ReplicatedDocument> documents) : super(documents);
+}
 
 /// A replicator is a background task that synchronizes changes between a local
 /// database and another database on a remote server (or on a peer device, or
@@ -720,9 +736,9 @@ class Replicator {
   ///
   /// Does nothing if it's not already started.
   ///
-  /// The replicator will call your [ReplicatorChangeListener] with an activity
-  /// level of [ReplicatorActivityLevel.stopped] after it stops. Until then,
-  /// consider it still active.
+  /// The [Stream] returned from [statusChanges] will emit a [ReplicatorStatus]
+  /// with an activity level of [ReplicatorActivityLevel.stopped] after it
+  /// stops. Until then, consider it still active.
   Future<void> stop() =>
       _worker.makeRequest<void>(StopReplicator(_pointer.address));
 
@@ -759,6 +775,26 @@ class Replicator {
   /// Returns this [Replicator]'s current status.
   Future<ReplicatorStatus> status() => _worker
       .makeRequest<ReplicatorStatus>(GetReplicatorStatus(_pointer.address));
+
+  /// Returns a stream that emits this replicators [ReplicatorStatus] when the
+  /// it changes.
+  Stream<ReplicatorStatus> statusChanges() =>
+      callbackStream<ReplicatorStatus, void>(
+        worker: _worker,
+        requestFactory: (callbackId) =>
+            AddReplicatorChangeListener(_pointer.address, callbackId),
+        // The native caller allocates some memory for the arguments and blocks
+        // until the Dart side copies them and finishes the call, so it can
+        // release free the memory.
+        finishBlockingCall: true,
+        eventCreator: (_, arguments) {
+          final statusAddress = arguments[0] as int;
+          return statusAddress.toPointer
+              .cast<CBLReplicatorStatus>()
+              .ref
+              .toReplicatorStatus();
+        },
+      );
 
   /// Indicates which documents have local changes that have not yet been pushed
   /// to the server by this replicator.
@@ -798,69 +834,32 @@ class Replicator {
         docID,
       ));
 
-  /// Adds a [listener] that will be called when this [Replicator]'s status
-  /// changes.
-  Future<void> addChangeListener(ReplicatorChangeListener listener) {
-    final listenerId =
-        NativeCallbacks.instance.registerCallback<ReplicatorChangeListener>(
-      listener,
-      (listener, arguments, result) {
-        final statusAddress = arguments[0] as int;
-        final status = statusAddress.toPointer
-            .cast<CBLReplicatorStatus>()
-            .ref
-            .toReplicatorStatus();
+  /// Returns a stream that emits [DocumentsReplicated]s when [Document]s
+  /// have been replicated.
+  Stream<DocumentsReplicated> documentReplications() => callbackStream(
+        worker: _worker,
+        requestFactory: (callbackId) =>
+            AddReplicatorDocumentListener(_pointer.address, callbackId),
+        // See `statusChanges` for an explanation of why this option is `true`.
+        finishBlockingCall: true,
+        eventCreator: (_, arguments) {
+          final isPush = arguments[0] as bool;
+          final numDocuments = arguments[1] as int;
+          final documentsAddress = arguments[2] as int;
 
-        // At this point we have copied the status and don't need to block
-        // the replicator any more.
-        result!(null);
+          final documentsPointer =
+              Pointer<CBLDartReplicatedDocument>.fromAddress(documentsAddress);
 
-        listener(status);
-      },
-    );
+          final documents = List.generate(
+            numDocuments,
+            (index) => documentsPointer.elementAt(index),
+          ).map((it) => it.ref.toReplicatedDocument()).toList();
 
-    return _worker
-        .makeRequest(AddReplicatorChangeListener(_pointer.address, listenerId));
-  }
-
-  /// Removes a change [listener] to stop it from being notified.
-  Future<void> removeChangeListener(ReplicatorChangeListener listener) async =>
-      NativeCallbacks.instance.unregisterCallback(listener);
-
-  /// Adds a [listener] that will be called when [Document]s are replicated.
-  Future<void> addDocumentListener(ReplicatedDocumentListener listener) {
-    final listenerId =
-        NativeCallbacks.instance.registerCallback<ReplicatedDocumentListener>(
-      listener,
-      (listener, arguments, result) {
-        final isPush = arguments[0] as bool;
-        final numDocuments = arguments[1] as int;
-        final documentsAddress = arguments[2] as int;
-        final documentsPointer =
-            Pointer<CBLDartReplicatedDocument>.fromAddress(documentsAddress);
-        final documents = List.generate(
-          numDocuments,
-          (index) => documentsPointer.elementAt(index),
-        ).map((it) => it.ref.toReplicatedDocument()).toList();
-
-        // At this point we have copied the documents and don't need to block
-        // the replicator any more.
-        result!(null);
-
-        listener(isPush, documents);
-      },
-    );
-
-    return _worker.makeRequest(AddReplicatorDocumentListener(
-      _pointer.address,
-      listenerId,
-    ));
-  }
-
-  /// Removes a document [listener] to stop it from being notified.
-  Future<void> removeDocumentListener(
-          ReplicatedDocumentListener listener) async =>
-      NativeCallbacks.instance.unregisterCallback(listener);
+          return isPush
+              ? DocumentsPushed(documents)
+              : DocumentsPulled(documents);
+        },
+      );
 
   @override
   bool operator ==(Object other) =>

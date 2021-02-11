@@ -42,13 +42,12 @@ class _MyAppState extends State<MyApp> {
       final query =
           await _db.query('SELECT post FROM post WHERE post.type = "post"');
 
-      await query.addChangeListener((query, resultSet) {
-        setState(() {
-          _posts = resultSet.asDicts
+      query
+          .changes()
+          .map((resultSet) => resultSet.asDicts
               .map((result) => result['post'].asDict!.toObject())
-              .toList();
-        });
-      });
+              .toList())
+          .listen((posts) => setState(() => _posts = posts));
     });
   }
 
