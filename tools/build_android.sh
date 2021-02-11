@@ -82,7 +82,7 @@ function copyAllArchsToLibs() {
 function copyLibsToCblFlutter() {
     rm -rf "$cblFlutterLibsDir"
     mkdir -p "$cblFlutterLibsDir"
-    cp -a "$libsDir/" "$cblFlutterLibsDir/"
+    cp -a "$libsDir/"* "$cblFlutterLibsDir/"
 }
 
 function clean() {
