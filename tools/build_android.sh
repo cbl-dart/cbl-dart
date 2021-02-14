@@ -63,11 +63,11 @@ function buildArch() {
 
     "${cmake_path}/cmake" \
         -G Ninja \
-        -D CMAKE_TOOLCHAIN_FILE="${sdkHome}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
-        -D CMAKE_MAKE_PROGRAM="${cmake_path}/ninja" \
-        -D ANDROID_NATIVE_API_LEVEL=19 \
-        -D ANDROID_ABI="$arch" \
-        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_TOOLCHAIN_FILE="${sdkHome}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_MAKE_PROGRAM="${cmake_path}/ninja" \
+        -DANDROID_NATIVE_API_LEVEL=19 \
+        -DANDROID_ABI="$arch" \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         $options \
         ../../..
 

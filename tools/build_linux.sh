@@ -18,10 +18,10 @@ function build() {
     cmake \
         -B "$buildDir" \
         -G Ninja \
-        -D CMAKE_C_COMPILER_LAUNCHER=ccache \
-        -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
-        -D CMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
-        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+        -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+        -DCMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         .
 
     cmake --build "$buildDir"
