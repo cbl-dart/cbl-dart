@@ -18,7 +18,7 @@ void main() {
   test('a custom log callback should receive log messages', () async {
     cbl.logCallback = expectAsync3(
       (domain, level, message) {
-        expect(domain, anyOf([LogDomain.all, LogDomain.database]));
+        expect(message, isNotEmpty);
       },
       // Must be called at least once.
       max: -1,
