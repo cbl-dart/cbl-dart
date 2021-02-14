@@ -1,0 +1,200 @@
+name: CI
+
+on: [push]
+
+jobs:
+  formatting-dart:
+    name: Formatting - Dart
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+
+      - name: Print Flutter version
+        run: flutter --version
+
+      - name: Check formatting
+        run: ./tools/packages.sh foreach dart format --set-exit-if-changed .
+
+  formatting-clang:
+    name: Formatting - Clang
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check formatting
+        uses: jidicula/clang-format-action@v3.1.0
+        with:
+          check-path: 'cbl-dart/src'
+
+  analyze-dart:
+    name: Analyze Dart code
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+
+      - name: Print Flutter version
+        run: flutter --version
+
+      - name: Install Dart dependencies
+        run: ./tools/packages.sh foreach flutter pub get
+
+      - name: Analyze code
+        run: ./tools/packages.sh foreach flutter analyze
+
+  build-binaries-linux:
+    name: Build - Binaries - Linux
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-linux
+
+      - name: Build
+        run: |
+          ./tools/build_linux.sh build
+          ./tools/build_linux.sh copyToLibs
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-linux
+          path: build/linux/libs/
+
+  build-binaries-android:
+    name: Build - Binaries - Android
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-android
+
+      - name: Build
+        run: |
+          ./tools/build_android.sh buildAllArchs
+          ./tools/build_android.sh copyAllArchsToLibs
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-android
+          path: build/android/libs/
+
+  build-binaries-apple:
+    name: Build - Binaries - Apple
+    runs-on: macos-10.15
+    environment: Apple
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-apple
+
+      # Need in build of Couchbase-Lite-C, which cannot be easily changed.
+      - name: Install doxygen
+        run: brew install doxygen
+
+      - name: Import signing certificate 
+        uses: apple-actions/import-codesign-certs@v1
+        with: 
+          p12-file-base64: ${{ secrets.APPLE_DEV_CERT }}
+          p12-password: ${{ secrets.APPLE_DEV_CERT_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_TMP_KEYCHAIN_PASSWORD }}
+
+      - name: Build
+        env:
+          DEVELOPMENT_TEAM: ${{ secrets.APPLE_DEVELOPMENT_TEAM }}
+        run: |
+          ./tools/build_apple.sh buildArchives
+          ./tools/build_apple.sh createXcframeworks
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-apple
+          path: build/xcode/xcframeworks/
+
+  test-standalone-dart-linux:
+    name: Test - Standalone Dart - Linux
+    runs-on: ubuntu-20.04
+    needs: build-binaries-linux
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-linux
+          path: libs
+
+      - name: Install Dart SDK
+        uses: dart-lang/setup-dart@v0.5
+        with:
+          sdk: beta
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Install Dart dependencies
+        working-directory: packages/cbl
+        run: dart pub get
+
+      - name: Run tests
+        working-directory: packages/cbl
+        env:
+          LD_LIBRARY_PATH: ../../libs
+        run: dart test -r expanded

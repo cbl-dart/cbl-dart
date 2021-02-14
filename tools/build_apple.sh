@@ -2,22 +2,27 @@
 
 set -e
 
-projectDir=$(cd "$(dirname ${BASH_SOURCE[0]})/.." && pwd)
+# === Environment ===
 
-developmentTeam="$1"
+developmentTeam="$DEVELOPMENT_TEAM"
 
 if [ -z "$developmentTeam" ]; then
-    echo "You have to provide a development team id as the first argument."
+    echo "You have to set the DEVELOPMENT_TEAM environment variable."
     exit 1
 fi
 
-cmd="$2"
+# === Parse args ===
+
+cmd="$1"
 
 if [ -z "$cmd" ]; then
-    echo "You have to provide the command to run as the second argument."
+    echo "You have to provide a command to run."
     exit 1
 fi
 
+# === Constans ===
+
+projectDir=$(cd "$(dirname ${BASH_SOURCE[0]})/.." && pwd)
 archivesDir="$projectDir/build/xcode/archives"
 xcframeworksDir="$projectDir/build/xcode/xcframeworks"
 cblFlutterFrameworksDir="$projectDir/packages/cbl_flutter_apple/Frameworks"
@@ -25,6 +30,8 @@ cblFlutterFrameworksDir="$projectDir/packages/cbl_flutter_apple/Frameworks"
 scheme=CBL_Dart_All
 frameworks=(CouchbaseLiteDart CouchbaseLite)
 platforms=(iOS "iOS Simulator" macOS)
+
+# === Commands ===
 
 function buildArchives() {
     for platform in "${platforms[@]}"; do
@@ -40,9 +47,10 @@ function buildArchives() {
             BUILD_FOR_DISTRIBUTION=YES \
             DEVELOPMENT_TEAM=$developmentTeam \
             CODE_SIGN_IDENTITY="Apple Development" \
-            CODE_SIGN_STYLE=Automatic \
-            CC="$projectDir/tools/ccache-clang" \
-            CXX="$projectDir/tools/ccache-clang"
+            CODE_SIGN_STYLE=Manual \
+            CMAKE_OPTS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" \
+            CC="/usr/local/opt/ccache/libexec/clang" \
+            CXX="/usr/local/opt/ccache/libexec/clang++"
     done
 }
 

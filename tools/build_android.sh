@@ -2,19 +2,36 @@
 
 set -e
 
-sdk_home="$1"
+# === Android SDK ===
 
-if [ -z "$sdk_home" ]; then
-    echo "You have to provide the path to the Android sdk as the first argument."
-    exit 1
+sdkHome="$ANDROID_HOME"
+
+# Look for Android SDK in default locations
+defaultSdkLocation=("$HOME/Android/Sdk" "$HOME/Library/Android/sdk")
+
+if [ -z "$sdkHome" ]; then
+    for location in "${defaultSdkLocation[@]}"; do
+        if [ -d "$location" ]; then
+            sdkHome="$location"
+            break
+        fi
+    done
+
+    if [ -z "$sdkHome" ]; then
+        echo "Could not find Android SDK."
+    fi
 fi
 
-cmd="$2"
+# === Parse args ===
+
+cmd="$1"
 
 if [ -z "$cmd" ]; then
     echo "You have to provide the command to run as the second argument."
     exit 1
 fi
+
+# === Constants ===
 
 projectDir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 buildDir="$projectDir/build/android"
@@ -23,20 +40,22 @@ cblFlutterLibsDir="$projectDir/packages/cbl_flutter_android/android/libs"
 
 ndk_ver="22.0.7026061"
 cmake_ver="3.10.2.4988404"
-cmake_path="${sdk_home}/cmake/${cmake_ver}/bin"
+cmake_path="${sdkHome}/cmake/${cmake_ver}/bin"
 
 archs=(arm64-v8a armeabi-v7a x86 x86_64)
+
+# === Commands ===
 
 function buildArch() {
     local arch=$1
     local archDir="$buildDir/$arch"
-    
+
     mkdir -p "$archDir"
     cd "$archDir"
 
     local options=""
 
-    if command -v ccache > /dev/null 2>&1; then
+    if command -v ccache >/dev/null 2>&1; then
         echo "Using ccache to speed up build"
         options="$options -DCMAKE_C_COMPILER_LAUNCHER=ccache"
         options="$options -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
@@ -44,11 +63,11 @@ function buildArch() {
 
     "${cmake_path}/cmake" \
         -G Ninja \
-        -DCMAKE_TOOLCHAIN_FILE="${sdk_home}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
-        -DCMAKE_MAKE_PROGRAM="${cmake_path}/ninja" \
-        -DANDROID_NATIVE_API_LEVEL=19 \
-        -DANDROID_ABI="$arch" \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -D CMAKE_TOOLCHAIN_FILE="${sdkHome}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
+        -D CMAKE_MAKE_PROGRAM="${cmake_path}/ninja" \
+        -D ANDROID_NATIVE_API_LEVEL=19 \
+        -D ANDROID_ABI="$arch" \
+        -D CMAKE_BUILD_TYPE=RelWithDebInfo \
         $options \
         ../../..
 

@@ -4,15 +4,33 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings/bindings.dart';
 import 'package:test/test.dart';
 
-final _buildDir = '../../build';
-final _cblLib = '$_buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC';
-final _cblDartLib = '$_buildDir/cbl-dart/libCouchbaseLiteDart';
+/// The [Libraries] to use when running tests during development.
+Libraries devLibraries() {
+  final buildDir = '../../build';
+  final cblLib = '$buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC';
+  final cblDartLib = '$buildDir/cbl-dart/libCouchbaseLiteDart';
+  return Libraries(
+    cbl: LibraryConfiguration.dynamic(cblLib),
+    cblDart: LibraryConfiguration.dynamic(cblDartLib),
+  );
+}
+
+/// The [Libraries] to use when running tests as part of CI.
+Libraries ciLibraries() {
+  final libsDIr = '../../libs';
+  final cblLib = '$libsDIr/libCouchbaseLiteC';
+  final cblDartLib = '$libsDIr/libCouchbaseLiteDart';
+  return Libraries(
+    cbl: LibraryConfiguration.dynamic(cblLib),
+    cblDart: LibraryConfiguration.dynamic(cblDartLib),
+  );
+}
+
+/// `true` if tests are running as part of CI.
+final isCi = Platform.environment.containsKey('CI');
 
 /// The libraries config for tests.
-final testLibraries = Libraries(
-  cbl: LibraryConfiguration.dynamic(_cblLib),
-  cblDart: LibraryConfiguration.dynamic(_cblDartLib),
-);
+late final testLibraries = isCi ? ciLibraries() : devLibraries();
 
 Future<CouchbaseLite>? _couchbaseLite;
 
@@ -21,9 +39,15 @@ Future<CouchbaseLite>? _couchbaseLite;
 /// Only on the first call [CouchbaseLite.init] is actually called. Subsequent
 /// calls continue right away and receive the cached [CouchbaseLite] object.
 Future<CouchbaseLite> initCouchbaseLiteForTests() =>
-    _couchbaseLite ??= CouchbaseLite.init(libraries: testLibraries).then(
-      (cbl) => cbl..logLevel = LogLevel.info,
-    );
+    _couchbaseLite ??= Future.sync(() async {
+      if (isCi) print('Running tests in CI');
+
+      final cbl = await CouchbaseLite.init(libraries: testLibraries);
+
+      cbl..logLevel = LogLevel.info;
+
+      return cbl;
+    });
 
 late final CouchbaseLite cbl;
 
