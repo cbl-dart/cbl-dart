@@ -52,7 +52,7 @@ class Document {
   final Worker? _worker;
 
   /// Returns the ID.
-  String get id => Utf8.fromUtf8(_bindings.id(_pointer));
+  String get id => _bindings.id(_pointer).toDartString();
 
   /// Returns the current sequence in the local database.
   ///
@@ -72,7 +72,7 @@ class Document {
 
   /// The properties as a JSON string.
   String get propertiesAsJson => runArena(
-      () => Utf8.fromUtf8(scoped(_bindings.propertiesAsJson(_pointer))));
+      () => scoped(_bindings.propertiesAsJson(_pointer)).toDartString());
 
   /// Deletes this document from the database.
   ///
@@ -140,7 +140,7 @@ class MutableDocument extends Document {
   /// It will not be added to a database until saved.
   factory MutableDocument([String? id]) {
     final pointer = runArena(() =>
-        _bindings.makeNew(id == null ? nullptr : scoped(Utf8.toUtf8(id))));
+        _bindings.makeNew(id == null ? nullptr : id.toNativeUtf8().asScoped));
     return createMutableDocument(pointer: pointer, isNew: true);
   }
 
@@ -177,7 +177,8 @@ class MutableDocument extends Document {
   set propertiesAsJson(String json) {
     runArena(() {
       _bindings
-          .setPropertiesAsJSON(_pointer, scoped(Utf8.toUtf8(json)), globalError)
+          .setPropertiesAsJSON(
+              _pointer, json.toNativeUtf8().asScoped, globalError)
           .checkResultAndError();
     });
   }

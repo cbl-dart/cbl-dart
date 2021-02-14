@@ -201,7 +201,8 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
 
     if (keyOrIndex is String) {
       pointer = runArena(() {
-        return _bindings.valueForKey(_pointer, keyOrIndex.asUtf8Scoped);
+        return _bindings.valueForKey(
+            _pointer, keyOrIndex.toNativeUtf8().asScoped);
       });
     } else if (keyOrIndex is int) {
       pointer = _bindings.valueAtIndex(_pointer, keyOrIndex);

@@ -70,11 +70,11 @@ class Blob {
 
   /// The cryptographic digest of this Blob's content (from its `digest`
   /// property).
-  String get digest => _blobBindings.digest(_pointer).asString;
+  String get digest => _blobBindings.digest(_pointer).toDartString();
 
   /// This Blob's MIME type, if its metadata has a `content_type` property.
   String? get contentType =>
-      _blobBindings.contentType(_pointer).asNullable?.asString;
+      _blobBindings.contentType(_pointer).asNullable?.toDartString();
 
   /// This Blob's metadata. This includes the `digest`, `length` and
   /// `content_type` properties, as well as any custom ones that may have been

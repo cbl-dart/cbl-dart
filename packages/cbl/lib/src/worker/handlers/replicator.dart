@@ -79,7 +79,7 @@ bool getReplicatorIsDocumentPening(GetReplicatorIsDocumentPening request) =>
     _bindings
         .isDocumentPending(
           request.pointer.cast(),
-          request.docId.asUtf8Scoped,
+          request.docId.toNativeUtf8().asScoped,
           globalError,
         )
         .toBool

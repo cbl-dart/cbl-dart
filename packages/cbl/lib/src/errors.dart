@@ -185,7 +185,7 @@ BaseException exceptionFromCBLError({
 
   // Caller must free memory of returned string.
   final messagePointer = CBLBindings.instance.base.Error_Message(error);
-  final message = Utf8.fromUtf8(messagePointer);
+  final message = messagePointer.toDartString();
   malloc.free(messagePointer);
 
   final code = error.ref.code;

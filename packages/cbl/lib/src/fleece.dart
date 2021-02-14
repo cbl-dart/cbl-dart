@@ -24,7 +24,8 @@ class Doc {
   factory Doc.fromJson(String json) => runArena(() {
         final error = malloc<Uint8>();
 
-        final docPointer = _bindings.fromJSON(scoped(Utf8.toUtf8(json)), error);
+        final docPointer =
+            _bindings.fromJSON(json.toNativeUtf8().asScoped, error);
         if (docPointer == nullptr) {
           throw FleeceException(
             'Could not create Doc from json.',
@@ -480,7 +481,7 @@ class Dict extends Value with MapMixin<String, Value> {
   @override
   Value operator [](Object? key) => runArena(() {
         assert(key is String, 'Dict key must be a non-null String');
-        final keyPointer = scoped(Utf8.toUtf8(key as String));
+        final keyPointer = (key as String).toNativeUtf8().asScoped;
         return Value.fromPointer(_bindings.get(ref, keyPointer));
       });
 
@@ -612,7 +613,7 @@ class MutableDict extends Dict {
 
   @override
   void operator []=(String key, Object? value) => runArena(() {
-        final slot = _bindings.set(ref, scoped(Utf8.toUtf8(key)));
+        final slot = _bindings.set(ref, key.toNativeUtf8().asScoped);
         _setSlotValue(slot, value);
       });
 
@@ -631,7 +632,7 @@ class MutableDict extends Dict {
         assert(key is String);
         final value = this[key];
 
-        _bindings.remove(ref, scoped(Utf8.toUtf8(key as String)));
+        _bindings.remove(ref, (key as String).toNativeUtf8().asScoped);
 
         return value;
       });
@@ -643,7 +644,8 @@ class MutableDict extends Dict {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(String key) => runArena(() {
-        final pointer = _bindings.getMutableDict(ref, scoped(Utf8.toUtf8(key)));
+        final pointer =
+            _bindings.getMutableDict(ref, key.toNativeUtf8().asScoped);
         return pointer == nullptr ? null : MutableDict.fromPointer(pointer);
       });
 
@@ -655,7 +657,7 @@ class MutableDict extends Dict {
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(String key) => runArena(() {
         final pointer =
-            _bindings.getMutableArray(ref, scoped(Utf8.toUtf8(key)));
+            _bindings.getMutableArray(ref, key.toNativeUtf8().asScoped);
         return pointer == nullptr ? null : MutableArray.fromPointer(pointer);
       });
 }
@@ -718,7 +720,8 @@ class _DefaultSlotSetter implements SlotSetter {
       _slotBindings.setDouble(slot, value);
     } else if (value is String) {
       runArena(() {
-        _slotBindings.setString(slot, scoped(Utf8.toUtf8(value as String)));
+        _slotBindings.setString(
+            slot, (value as String).toNativeUtf8().asScoped);
       });
     } else if (value is Value) {
       _slotBindings.setValue(slot, value.ref);

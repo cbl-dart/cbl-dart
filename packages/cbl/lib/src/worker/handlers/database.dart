@@ -41,7 +41,7 @@ extension on DatabaseConfiguration {
   Pointer<CBLDatabaseConfiguration> toCBLDatabaseConfiguration() =>
       scoped(malloc<CBLDatabaseConfiguration>())
         ..ref.directory =
-            directory == null ? nullptr : scoped(Utf8.toUtf8(directory!))
+            directory == null ? nullptr : directory!.toNativeUtf8().asScoped
         ..ref.flags = flags.toCFlags()
         ..ref.encryptionKey = encryptionKey?.toCBLEncryptionKey() ?? nullptr;
 }
@@ -49,7 +49,7 @@ extension on DatabaseConfiguration {
 extension on Pointer<CBLDatabaseConfiguration> {
   DatabaseConfiguration toDatabaseConfiguration() => DatabaseConfiguration(
         directory:
-            ref.directory == nullptr ? null : Utf8.fromUtf8(ref.directory),
+            ref.directory == nullptr ? null : ref.directory.toDartString(),
         flags: DatabaseFlag.parseCFlags(ref.flags),
         encryptionKey: ref.encryptionKey == nullptr
             ? null
@@ -66,10 +66,10 @@ class DatabaseExists {
 
 bool databaseExists(DatabaseExists request) => _bindings
     .databaseExists(
-      scoped(Utf8.toUtf8(request.name)),
+      request.name.toNativeUtf8().asScoped,
       request.directory == null
           ? nullptr
-          : scoped(Utf8.toUtf8(request.directory!)),
+          : request.directory!.toNativeUtf8().asScoped,
     )
     .toBool;
 
@@ -83,8 +83,8 @@ class CopyDatabase {
 
 void copyDatabase(CopyDatabase request) => _bindings
     .copyDatabase(
-      scoped(Utf8.toUtf8(request.fromPath)),
-      scoped(Utf8.toUtf8(request.toName)),
+      request.fromPath.toNativeUtf8().asScoped,
+      request.toName.toNativeUtf8().asScoped,
       request.config?.toCBLDatabaseConfiguration() ?? nullptr,
       globalError,
     )
@@ -99,10 +99,10 @@ class DeleteDatabaseFile {
 
 bool deleteDatabaseFile(DeleteDatabaseFile request) => _bindings
     .deleteDatabase(
-      scoped(Utf8.toUtf8(request.name)),
+      request.name.toNativeUtf8().asScoped,
       request.directory == null
           ? nullptr
-          : scoped(Utf8.toUtf8(request.directory!)),
+          : request.directory!.toNativeUtf8().asScoped,
       globalError,
     )
     .toBool
@@ -116,7 +116,7 @@ class OpenDatabase {
 
 int openDatabase(OpenDatabase request) => _bindings
     .open(
-      scoped(Utf8.toUtf8(request.name)),
+      request.name.toNativeUtf8().asScoped,
       request.config?.toCBLDatabaseConfiguration() ?? nullptr,
       globalError,
     )
@@ -128,14 +128,14 @@ class GetDatabaseName extends ObjectRequest {
 }
 
 String getDatabaseName(GetDatabaseName request) =>
-    _bindings.name(request.pointer).asString;
+    _bindings.name(request.pointer).toDartString();
 
 class GetDatabasePath extends ObjectRequest {
   GetDatabasePath(int address) : super(address);
 }
 
 String getDatabasePath(GetDatabasePath request) =>
-    _bindings.path(request.pointer).asString;
+    _bindings.path(request.pointer).toDartString();
 
 class GetDatabaseCount extends ObjectRequest {
   GetDatabaseCount(int address) : super(address);
@@ -219,7 +219,7 @@ class GetDatabaseDocument extends ObjectRequest {
 }
 
 int? getDatabaseDocument(GetDatabaseDocument request) => _bindings
-    .getDocument(request.pointer, scoped(Utf8.toUtf8(request.id)))
+    .getDocument(request.pointer, request.id.toNativeUtf8().asScoped)
     .addressOrNull;
 
 class GetDatabaseMutableDocument extends ObjectRequest {
@@ -228,7 +228,7 @@ class GetDatabaseMutableDocument extends ObjectRequest {
 }
 
 int? getDatabaseMutableDocument(GetDatabaseMutableDocument request) => _bindings
-    .getMutableDocument(request.pointer, scoped(Utf8.toUtf8(request.id)))
+    .getMutableDocument(request.pointer, request.id.toNativeUtf8().asScoped)
     .addressOrNull;
 
 class SaveDatabaseDocument extends ObjectRequest {
@@ -275,7 +275,7 @@ class PurgeDatabaseDocumentById extends ObjectRequest {
 bool purgeDatabaseDocumentById(PurgeDatabaseDocumentById request) => _bindings
     .purgeDocumentByID(
       request.pointer,
-      scoped(Utf8.toUtf8(request.id)),
+      request.id.toNativeUtf8().asScoped,
       globalError,
     )
     .toBool
@@ -289,7 +289,7 @@ class GetDatabaseDocumentExpiration extends ObjectRequest {
 DateTime? getDatabaseDocumentExpiration(GetDatabaseDocumentExpiration request) {
   final timestamp = _bindings.getDocumentExpiration(
     request.pointer,
-    scoped(Utf8.toUtf8(request.id)),
+    request.id.toNativeUtf8().asScoped,
     globalError,
   );
 
@@ -311,7 +311,7 @@ void setDatabaseDocumentExpiration(SetDatabaseDocumentExpiration request) =>
     _bindings
         .setDocumentExpiration(
           request.pointer,
-          scoped(Utf8.toUtf8(request.id)),
+          request.id.toNativeUtf8().asScoped,
           request.time == null ? 0 : request.time!.millisecondsSinceEpoch,
           globalError,
         )
@@ -351,7 +351,7 @@ class AddDocumentChangeListener extends ObjectRequest {
 void addDocumentChangeListener(AddDocumentChangeListener request) =>
     _bindings.addDocumentChangeListener(
       request.pointer,
-      scoped(Utf8.toUtf8(request.docId)),
+      request.docId.toNativeUtf8().asScoped,
       request.listenerId,
     );
 
@@ -383,11 +383,11 @@ extension on Pointer<CBLIndexSpec> {
     }
 
     ref.type = indexType.toInt;
-    ref.keyExpression = index.keyExpressions.asUtf8Scoped;
+    ref.keyExpression = index.keyExpressions.toNativeUtf8().asScoped;
 
     if (index is FullTextIndex) {
       ref.ignoreAccents = index.ignoreAccents.toInt;
-      ref.language = index.language?.asUtf8Scoped ?? nullptr;
+      ref.language = index.language?.toNativeUtf8().asScoped ?? nullptr;
     } else {
       ref.ignoreAccents = false.toInt;
       ref.language == nullptr;
@@ -398,7 +398,7 @@ extension on Pointer<CBLIndexSpec> {
 void createDatabaseIndex(CreateDatabaseIndex request) => _bindings
     .createIndex(
       request.pointer,
-      request.name.asUtf8Scoped,
+      request.name.toNativeUtf8().asScoped,
       scoped(malloc<CBLIndexSpec>())..initScoped(request.index),
       globalError,
     )
@@ -413,7 +413,7 @@ class DeleteDatabaseIndex extends ObjectRequest {
 void deleteDatabaseIndex(DeleteDatabaseIndex request) => _bindings
     .deleteIndex(
       request.pointer,
-      request.name.asUtf8Scoped,
+      request.name.toNativeUtf8().asScoped,
       globalError,
     )
     .toBool

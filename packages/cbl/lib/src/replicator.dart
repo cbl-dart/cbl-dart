@@ -238,10 +238,10 @@ extension on ProxySettings {
     final settings = scoped(malloc<CBLProxySettings>());
 
     settings.ref.type = type.toInt;
-    settings.ref.hostname = hostname.asUtf8Scoped;
+    settings.ref.hostname = hostname.toNativeUtf8().asScoped;
     settings.ref.port = port;
-    settings.ref.username = (username?.asUtf8Scoped).orNullptr;
-    settings.ref.password = password.asUtf8Scoped;
+    settings.ref.username = (username?.toNativeUtf8().asScoped).orNullptr;
+    settings.ref.password = password.toNativeUtf8().asScoped;
 
     return settings;
   }
@@ -371,8 +371,8 @@ extension on ReplicatorConfiguration {
     Pointer<CBLEndpoint> cblEndpoint;
     final endpoint = this.endpoint;
     if (endpoint is UrlEndpoint) {
-      cblEndpoint =
-          _bindings.endpointNewWithUrl(endpoint.url.toString().asUtf8Scoped);
+      cblEndpoint = _bindings
+          .endpointNewWithUrl(endpoint.url.toString().toNativeUtf8().asScoped);
     } else if (endpoint is LocalDbEndpoint) {
       assert(
         _bindings.endpointNewWithLocalDB != null,
@@ -400,13 +400,13 @@ extension on ReplicatorConfiguration {
 
       if (authenticator is BasicAuthenticator) {
         cblAuthenticator = _bindings.authNewBasic(
-          authenticator.username.toString().asUtf8Scoped,
-          authenticator.password.toString().asUtf8Scoped,
+          authenticator.username.toString().toNativeUtf8().asScoped,
+          authenticator.password.toString().toNativeUtf8().asScoped,
         );
       } else if (authenticator is SessionAuthenticator) {
         cblAuthenticator = _bindings.authNewSession(
-          authenticator.sessionID.asUtf8Scoped,
-          authenticator.cookieName.asUtf8Scoped,
+          authenticator.sessionID.toNativeUtf8().asScoped,
+          authenticator.cookieName.toNativeUtf8().asScoped,
         );
       } else {
         throw UnimplementedError(
@@ -664,7 +664,7 @@ extension on CBLDartReplicatedDocument {
         final error = scoped(this.error.copyToPointer());
 
         return ReplicatedDocument(
-          ID.asString,
+          ID.toDartString(),
           DocumentFlags.parseCFlags(flags),
           error.isOk ? null : exceptionFromCBLError(error: error),
         );

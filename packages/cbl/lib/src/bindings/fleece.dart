@@ -82,7 +82,7 @@ class FLSlice extends Struct {
 }
 
 extension FLSliceExt on FLSlice {
-  String toUtf8() => Utf8.fromUtf8(buf.cast(), length: size);
+  String toUtf8() => buf.cast<Utf8>().toDartString(length: size);
 }
 
 extension FLSlicePointerExt on Pointer<FLSlice> {

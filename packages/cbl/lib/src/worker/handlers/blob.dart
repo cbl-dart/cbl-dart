@@ -100,7 +100,7 @@ class CreateBlobWithWriteStream extends ObjectRequest {
 int createBlobWithWriteStream(CreateBlobWithWriteStream request) =>
     _writeStreamBindings
         .createBlobWithStream(
-          (request.contentType?.asUtf8Scoped).orNullptr,
+          (request.contentType?.toNativeUtf8().asScoped).orNullptr,
           request.pointer.cast(),
         )
         .address;

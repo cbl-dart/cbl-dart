@@ -20,7 +20,7 @@ int createDatabaseQuery(CreateDatabaseQuery request) => _bindings
     .makeNew(
       request.pointer,
       request.language.toInt,
-      request.queryString.asUtf8Scoped,
+      request.queryString.toNativeUtf8().asScoped,
       _bindings.globalErrorPosition,
       globalError,
     )

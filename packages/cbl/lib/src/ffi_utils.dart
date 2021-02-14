@@ -94,23 +94,18 @@ extension NullableAddressPointerExt on int? {
   Pointer<Void> get toPointer => (this?.toPointer).orNullptr;
 }
 
+final _scoped = scoped;
+
 extension PointerExt<T extends NativeType> on Pointer<T> {
   /// If this is the [nullptr] return `null` else this pointer address.
   int? get addressOrNull => this == nullptr ? null : address;
 
   /// `null` if this pointer is the [nullptr]. Otherwise this Pointer.
   Pointer<T>? get asNullable => this == nullptr ? null : this;
+
+  Pointer<T> get asScoped => _scoped(this);
 }
 
 extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
   Pointer<T> get orNullptr => this == null ? nullptr : this!;
-}
-
-extension Utf8PointerStringExt on Pointer<Utf8> {
-  String get asString => Utf8.fromUtf8(this);
-}
-
-extension StringUtf8PointerExt on String {
-  Pointer<Utf8> get asUtf8 => Utf8.toUtf8(this);
-  Pointer<Utf8> get asUtf8Scoped => scoped(Utf8.toUtf8(this));
 }
