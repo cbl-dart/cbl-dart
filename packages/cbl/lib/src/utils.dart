@@ -64,16 +64,22 @@ Stream<T> callbackStream<T, S>({
     final callbackId =
         callbacks.registerCallback<FutureOr<T> Function(S, List)>(
       eventCreator,
-      (callback, arguments, result) {
-        final event = Future.sync(() => callback(requestResult, arguments));
+      (eventCreator, arguments, result) async {
+        // Callbacks can come in before the registration request from the worker
+        // comes back. In this case `requestResult` has not be initialized yet.
+        // By waiting for `callbackAdded`, `requestResult` is guarantied to be
+        // set after this line.
+        await callbackAdded;
 
-        if (finishBlockingCall) {
-          event.whenComplete(() {
-            result!(null);
-          });
+        // We use `add` instead of `addStream` because the callback can fire
+        // before the Future from `addStream` returns. 
+        try {
+          controller.add(await eventCreator(requestResult, arguments));
+        } catch (error, stackTrace) {
+          controller.addError(error, stackTrace);
+        } finally {
+          if (finishBlockingCall) result!(null);
         }
-
-        controller.addStream(event.asStream());
       },
     );
 
