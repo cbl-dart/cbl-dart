@@ -255,10 +255,10 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
   auto argsValues = new Dart_CObject *[numDocs];
 
   for (size_t i = 0; i < numDocs; i++) {
-    auto id = ids[i];
-    id.type = Dart_CObject_kString;
-    id.value.as_string = const_cast<char *>(docID[i]);
-    argsValues[i] = &id;
+    auto id = &ids[i];
+    id->type = Dart_CObject_kString;
+    id->value.as_string = const_cast<char *>(docID[i]);
+    argsValues[i] = id;
   }
 
   Dart_CObject args;
