@@ -72,7 +72,7 @@ Stream<T> callbackStream<T, S>({
         await callbackAdded;
 
         // We use `add` instead of `addStream` because the callback can fire
-        // before the Future from `addStream` returns. 
+        // before the Future from `addStream` returns.
         try {
           controller.add(await eventCreator(requestResult, arguments));
         } catch (error, stackTrace) {
