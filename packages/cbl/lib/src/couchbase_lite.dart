@@ -61,9 +61,12 @@ class CouchbaseLite {
 
   /// Returns true if a database with the given [name] exists in the given
   /// [directory].
-  Future<bool> databaseExists(String name, {String? directory}) async {
-    return _worker.makeRequest(DatabaseExists(name, directory));
-  }
+  ///
+  /// [name] is the database name (without the ".cblite2" extension.).
+  ///
+  /// [directory] is the directory containing the database.
+  Future<bool> databaseExists(String name, {required String directory}) =>
+      _worker.makeRequest(DatabaseExists(name, directory));
 
   /// Copies a database file to a new location, and assigns it a new internal
   /// UUID to distinguish it from the original database when replicating.
@@ -79,9 +82,8 @@ class CouchbaseLite {
     required String fromPath,
     required String toName,
     DatabaseConfiguration? config,
-  }) async {
-    return _worker.makeRequest(CopyDatabase(fromPath, toName, config));
-  }
+  }) =>
+      _worker.makeRequest(CopyDatabase(fromPath, toName, config));
 
   /// Deletes a database file.
   ///
@@ -89,11 +91,9 @@ class CouchbaseLite {
   ///
   /// [name] is the database name (without the ".cblite2" extension.)
   ///
-  /// [directory] is the directory containing the database. If `null`, name must
-  /// be an absolute or relative path to the database.
-  Future<bool> deleteDatabase(String name, {String? directory}) async {
-    return _worker.makeRequest(DeleteDatabaseFile(name, directory));
-  }
+  /// [directory] is the directory containing the database.
+  Future<bool> deleteDatabase(String name, {required String directory}) =>
+      _worker.makeRequest(DeleteDatabaseFile(name, directory));
 
   /// Opens a database, or creates it if it doesn't exist yet, returning a new
   /// [Database] instance.

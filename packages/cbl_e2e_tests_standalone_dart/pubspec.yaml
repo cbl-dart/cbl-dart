@@ -1,0 +1,15 @@
+name: cbl_e2e_tests_standalone_dart
+publish_to: none
+
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+
+dependencies:
+  cbl_e2e_tests:
+    path: ../cbl_e2e_tests
+  path: ^1.8.0
+  
+
+dev_dependencies:
+  pedantic: ^1.10.0
+  test: ^1.16.0

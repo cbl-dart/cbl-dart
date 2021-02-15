@@ -17,7 +17,11 @@ dependencies:
   path_provider: ^2.0.0-nullsafety
 
 dev_dependencies:
+  cbl_e2e_tests:
+    path: ../../cbl_e2e_tests
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   pedantic: ^1.10.0-nullsafety.3
 

@@ -1,6 +1,8 @@
 name: CI
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
   formatting-dart:
@@ -22,7 +24,7 @@ jobs:
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v1
         with:
-          channel: beta
+          channel: dev
 
       - name: Print Flutter version
         run: flutter --version
@@ -61,7 +63,7 @@ jobs:
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v1
         with:
-          channel: beta
+          channel: dev
 
       - name: Print Flutter version
         run: flutter --version
@@ -92,12 +94,13 @@ jobs:
         run: |
           ./tools/build_linux.sh build
           ./tools/build_linux.sh copyToLibs
+          tar -czf binaries-linux.tar.gz -C build/linux/libs .
 
       - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
           name: binaries-linux
-          path: build/linux/libs/
+          path: binaries-linux.tar.gz
 
   build-binaries-android:
     name: Build - Binaries - Android
@@ -116,17 +119,21 @@ jobs:
         run: |
           ./tools/build_android.sh buildAllArchs
           ./tools/build_android.sh copyAllArchsToLibs
+          tar -czf binaries-android.tar.gz -C build/android/libs .
 
       - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
           name: binaries-android
-          path: build/android/libs/
+          path: binaries-android.tar.gz
 
   build-binaries-apple:
     name: Build - Binaries - Apple
     runs-on: macos-10.15
     environment: Apple
+    strategy:
+      matrix:
+        platform: [ios, ios_simulator, macos]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -135,15 +142,16 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: build-binaries-apple
+          key: build-binaries-apple-${{ matrix.platform }}
 
-      # Need in build of Couchbase-Lite-C, which cannot be easily changed.
-      - name: Install doxygen
-        run: brew install doxygen
+      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install doxygen bash
 
-      - name: Import signing certificate 
+      - name: Import signing certificate
         uses: apple-actions/import-codesign-certs@v1
-        with: 
+        with:
           p12-file-base64: ${{ secrets.APPLE_DEV_CERT }}
           p12-password: ${{ secrets.APPLE_DEV_CERT_PASSWORD }}
           keychain-password: ${{ secrets.APPLE_TMP_KEYCHAIN_PASSWORD }}
@@ -152,28 +160,66 @@ jobs:
         env:
           DEVELOPMENT_TEAM: ${{ secrets.APPLE_DEVELOPMENT_TEAM }}
         run: |
-          ./tools/build_apple.sh buildArchives
-          ./tools/build_apple.sh createXcframeworks
+          ./tools/build_apple.sh buildPlatform ${{ matrix.platform }}
+          tar -czf binaries-apple-${{ matrix.platform }}.tar.gz -C build/apple/archives .
 
       - name: Upload binaries
         uses: actions/upload-artifact@v2
         with:
-          name: binaries-apple
-          path: build/xcode/xcframeworks/
+          name: binaries-apple-${{ matrix.platform }}
+          path: binaries-apple-${{ matrix.platform }}.tar.gz
 
-  test-standalone-dart-linux:
-    name: Test - Standalone Dart - Linux
+  build-binaries-apple-xcframeworks:
+    name: Build - Binaries - Apple - xcframeworks
+    runs-on: macos-10.15
+    needs: build-binaries-apple
+    steps:
+      - uses: actions/checkout@v2
+
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install bash
+
+      - name: Download ios binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-ios
+
+      - name: Download ios_simulator binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-ios_simulator
+
+      - name: Download macos binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-macos
+
+      - name: Unpack archives
+        run: |
+          tar -xzf binaries-apple-ios.tar.gz
+          tar -xzf binaries-apple-ios_simulator.tar.gz
+          tar -xzf binaries-apple-macos.tar.gz
+
+      - name: Create xcframeworks
+        run: |
+          archivesDir="$PWD"
+          frameworksDir="$PWD/Frameworks"
+          ./tools/build_apple.sh createXcframeworks "$archivesDir" "$frameworksDir"
+          tar -czf binaries-apple-xcframeworks.tar.gz -C "$frameworksDir" .
+
+      - name: Upload xcframeworks
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-apple-xcframeworks
+          path: binaries-apple-xcframeworks.tar.gz
+
+  tests-cbl:
+    name: Tests - cbl
     runs-on: ubuntu-20.04
-    needs: build-binaries-linux
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Download binaries
-        uses: actions/download-artifact@v2
-        with:
-          name: binaries-linux
-          path: libs
 
       - name: Install Dart SDK
         uses: dart-lang/setup-dart@v0.5
@@ -195,6 +241,86 @@ jobs:
 
       - name: Run tests
         working-directory: packages/cbl
+        run: dart test -r expanded
+
+  tests-standalone-dart-linux:
+    name: Tests - Standalone Dart - Linux
+    runs-on: ubuntu-20.04
+    needs: build-binaries-linux
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-linux
+
+      - name: Extract binaries
+        run: |
+          mkdir libs
+          tar -xzf binaries-linux.tar.gz -C libs
+
+      - name: Install Dart SDK
+        uses: dart-lang/setup-dart@v0.5
+        with:
+          sdk: beta
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Install Dart dependencies
+        working-directory: packages/cbl_e2e_tests_standalone_dart
+        run: dart pub get
+
+      - name: Run tests
+        working-directory: packages/cbl_e2e_tests_standalone_dart
         env:
           LD_LIBRARY_PATH: ../../libs
+        run: dart test -r expanded
+
+  tests-standalone-dart-macos:
+    name: Tests - Standalone Dart - macOS
+    runs-on: macos-10.15
+    needs: build-binaries-apple
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-macos
+
+      - name: Extract frameworks from archive
+        run: |
+          tar -xzf binaries-apple-macos.tar.gz 
+          cp -a macos.xcarchive/Products/Library/Frameworks .
+
+      - name: Install Dart SDK
+        uses: dart-lang/setup-dart@v0.5
+        with:
+          sdk: beta
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Install Dart dependencies
+        working-directory: packages/cbl_e2e_tests_standalone_dart
+        run: dart pub get
+
+      - name: Run tests
+        working-directory: packages/cbl_e2e_tests_standalone_dart
         run: dart test -r expanded

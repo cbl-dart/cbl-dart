@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C005BBA825CF27DB0086E1B3"
-               BuildableName = "CBLDart.framework"
+               BuildableName = "CouchbaseLiteDart.framework"
                BlueprintName = "CBL_Dart"
                ReferencedContainer = "container:CBL_Dart.xcodeproj">
             </BuildableReference>
@@ -51,7 +51,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C005BBA825CF27DB0086E1B3"
-            BuildableName = "CBLDart.framework"
+            BuildableName = "CouchbaseLiteDart.framework"
             BlueprintName = "CBL_Dart"
             ReferencedContainer = "container:CBL_Dart.xcodeproj">
          </BuildableReference>
