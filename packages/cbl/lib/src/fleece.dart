@@ -72,10 +72,9 @@ class Value {
   /// Creates a [Value] based on a pointer to the the native value.
   ///
   /// {@template fleece.Value.fromPointer}
-  /// If a Value is backed by a [Doc], the native Doc will be kept in memory at
-  /// least as long as this Value has not been garbage collected. This can be
-  /// disabled by setting [bindToDoc] to `false`. A [Doc] will always keep
-  /// it's native value alive during it's lifetime.
+  /// Accessing immutable values is only allowed, while the enclosing container
+  /// ([Doc], [MutableArray], [MutableDict] and other objects, holding Fleece
+  /// data) has not been garbage collected.
   ///
   /// Per default a Value will __not__ update the ref count of the native value
   /// according to it's lifetime. When [bindToValue] is `true` the native
@@ -90,7 +89,6 @@ class Value {
     this.ref, {
     bool? bindToValue,
     bool? retain,
-    bool? bindToDoc,
   }) {
     assert(
       retain == null || bindToValue == true,
@@ -99,10 +97,6 @@ class Value {
 
     if (bindToValue ?? false) {
       _bindings.bindToDartObject(this, ref, (retain ?? true).toInt);
-    }
-
-    if (bindToDoc ?? true) {
-      _bindings.bindDocToDartObject(this, ref);
     }
   }
 
@@ -262,12 +256,10 @@ class Array extends Value with ListMixin<Value> {
     Pointer<Void> ref, {
     bool? bindToValue,
     bool? retain,
-    bool? bindToDoc,
   }) : super.fromPointer(
           ref,
           bindToValue: bindToValue,
           retain: retain,
-          bindToDoc: bindToDoc,
         );
 
   @override
@@ -319,7 +311,6 @@ class MutableArray extends Array {
           value,
           bindToValue: bindToValue,
           retain: retain,
-          bindToDoc: false,
         );
 
   /// Creates a new empty [MutableArray].
@@ -449,12 +440,10 @@ class Dict extends Value with MapMixin<String, Value> {
     Pointer<Void> value, {
     bool? bindToValue,
     bool? retain,
-    bool? bindToDoc,
   }) : super.fromPointer(
           value,
           bindToValue: bindToValue,
           retain: retain,
-          bindToDoc: bindToDoc,
         );
 
   /// Returns the number of items in a dictionary.
@@ -569,7 +558,6 @@ class MutableDict extends Dict {
           value,
           bindToValue: bindToValue,
           retain: retain,
-          bindToDoc: false,
         );
 
   /// Creates a new empty [MutableDict].

@@ -68,7 +68,7 @@ class Document {
   /// its contents must only be used while this Document has not been garbage
   /// collected. Keep a reference to a Document to ensure that it stays alive.
   Dict get properties =>
-      Dict.fromPointer(_bindings.properties(_pointer), bindToDoc: false);
+      Dict.fromPointer(_bindings.properties(_pointer));
 
   /// The properties as a JSON string.
   String get propertiesAsJson => runArena(

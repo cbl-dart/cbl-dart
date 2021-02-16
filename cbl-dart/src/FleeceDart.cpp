@@ -62,14 +62,6 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
                                   CBLDart_ReleaseDartObjectBoundFLValue);
 }
 
-void CBLDart_FLValue_BindDocToDartObject(Dart_Handle handle, FLValue value) {
-  auto doc = FLValue_FindDoc(value);
-  if (doc == NULL) return;
-
-  Dart_NewWeakPersistentHandle_DL(handle, doc, 0,
-                                  CBLDart_ReleaseDartObjectBoundFLDoc);
-}
-
 void CBLDart_FLValue_AsString(FLValue value, CBLDart_FLSlice *slice) {
   auto fl_slice = FLValue_AsString(value);
   slice->buf = fl_slice.buf;

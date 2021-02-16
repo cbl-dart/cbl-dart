@@ -816,7 +816,6 @@ class Replicator {
       .makeRequest<int>(GetReplicatorPendingDocumentIDs(_pointer.address))
       .then((address) => Dict.fromPointer(
             address.toPointer,
-            bindToDoc: false,
             bindToValue: true,
           ));
 

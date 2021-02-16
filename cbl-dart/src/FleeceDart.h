@@ -39,9 +39,6 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
                                       bool retain);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_BindDocToDartObject(Dart_Handle handle, FLValue value);
-
-CBLDART_EXPORT
 void CBLDart_FLValue_AsString(FLValue value, CBLDart_FLSlice *slice);
 
 CBLDART_EXPORT

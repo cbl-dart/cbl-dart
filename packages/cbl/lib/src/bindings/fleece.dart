@@ -286,15 +286,6 @@ typedef CBLDart_FLValue_BindToDartObject = void Function(
   int retain,
 );
 
-typedef CBLDart_FLValue_BindDocToDartObject_C = Void Function(
-  Handle dartDoc,
-  Pointer<Void> value,
-);
-typedef CBLDart_FLValue_BindDocToDartObject = void Function(
-  Object dartDoc,
-  Pointer<Void> value,
-);
-
 typedef FLValue_FindDoc = Pointer<Void> Function(Pointer<Void>);
 
 typedef FLValue_GetType_C = Int8 Function(Pointer<Void> value);
@@ -356,11 +347,6 @@ class ValueBindings {
             CBLDart_FLValue_BindToDartObject>(
           'CBLDart_FLValue_BindToDartObject',
         ),
-        bindDocToDartObject = libs.cblDart.lookupFunction<
-            CBLDart_FLValue_BindDocToDartObject_C,
-            CBLDart_FLValue_BindDocToDartObject>(
-          'CBLDart_FLValue_BindDocToDartObject',
-        ),
         findDoc = libs.cbl.lookupFunction<FLValue_FindDoc, FLValue_FindDoc>(
           'FLValue_FindDoc',
         ),
@@ -402,7 +388,6 @@ class ValueBindings {
         );
 
   final CBLDart_FLValue_BindToDartObject bindToDartObject;
-  final CBLDart_FLValue_BindDocToDartObject bindDocToDartObject;
   final FLValue_FindDoc findDoc;
   final FLValue_GetType getType;
   final FLValue_IsInteger isInteger;
