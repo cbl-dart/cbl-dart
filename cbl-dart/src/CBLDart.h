@@ -90,11 +90,11 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, const char *name,
 // -- Query
 
 CBLDART_EXPORT
-void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDart_FLSlice *result);
+void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDartSlice *result);
 
 CBLDART_EXPORT
 void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
-                                 CBLDart_FLSlice *result);
+                                 CBLDartSlice *result);
 
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,

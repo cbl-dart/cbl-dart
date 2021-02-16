@@ -143,7 +143,7 @@ class Value {
   /// Returns the exact contents of a string value, or null for all other types.
   String get asString {
     _bindings.asString(ref, globalSlice);
-    return globalSlice.ref.toUtf8();
+    return globalSlice.ref.toDartString();
   }
 
   /// If a Value represents an array, returns it as a [Array], else null.
@@ -157,7 +157,9 @@ class Value {
   /// and will return null.
   String? get scalarToString {
     _bindings.scalarToString(ref, globalSlice);
-    return globalSlice.ref.buf == nullptr ? null : globalSlice.ref.toUtf8();
+    return globalSlice.ref.buf == nullptr
+        ? null
+        : globalSlice.ref.toDartString();
   }
 
   /// Encodes a Fleece value as JSON (or a JSON fragment.) Any Data values will
@@ -167,7 +169,7 @@ class Value {
     bool canonical = true,
   }) {
     _bindings.toJson(ref, json5.toInt, canonical.toInt, globalSlice);
-    return globalSlice.toUtf8AndFree();
+    return globalSlice.toDartStringAndFree();
   }
 
   Object? toObject() {
@@ -519,27 +521,24 @@ class _DictKeyIterator extends Iterator<String> {
 
   @override
   bool moveNext() {
-    bool updateCurrent() {
-      final it = iterator!.ref;
-      final slice = it.keyString.ref;
+    // Create the iterator if it does not exist yet.
+    iterator ??= _bindings.begin(this, dict.ref.cast());
 
-      // Get value to check if iterator has entry available.
-      final value = _bindings.getValue(it.iterator);
-      if (value == nullptr) return false;
+    // The iterator has no more elements.
+    if (iterator!.ref.done.toBool) return false;
 
-      // Update current with keyString
-      _bindings.getKeyString(it.iterator, it.keyString);
-      current = slice.toUtf8();
-      return true;
-    }
+    // Advance to the next item.
+    _bindings.next(iterator!);
 
-    if (iterator == null) {
-      iterator = _bindings.begin(this, dict.ref);
-      return updateCurrent();
-    } else {
-      if (!_bindings.next(iterator!.ref.iterator).toBool) return false;
-      return updateCurrent();
-    }
+    final slice = iterator!.ref.keyString;
+
+    // If iterator has no elements at all, slice is the kNullSlice.
+    if (slice.buf == nullptr) return false;
+
+    // Update current with keyString.
+    current = slice.toDartString();
+
+    return true;
   }
 }
 

@@ -10,19 +10,21 @@ extern "C" {
 /**
  * See `FLSlice` in Dart code.
  */
-struct CBLDart_FLSlice {
+struct CBLDartSlice {
   const void *buf;
   uint64_t size;
 };
 
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSlice slice);
+#define kCBLDartNullSlice ((CBLDartSlice){NULL, 0})
 
-CBLDart_FLSlice CBLDart_FLSliceResultToDart(FLSliceResult slice);
+FLSliceResult CBLDart_FLSliceResultFromDart(CBLDartSlice slice);
 
-CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice);
+CBLDartSlice CBLDart_FLSliceResultToDart(FLSliceResult slice);
+
+CBLDartSlice CBLDart_FLSliceToDart(FLSlice slice);
 
 CBLDART_EXPORT
-void CBLDart_FLSliceResult_Release(CBLDart_FLSlice *slice);
+void CBLDart_FLSliceResult_Release(CBLDartSlice *slice);
 
 // Doc ---------------------------------------------------------------------
 
@@ -39,14 +41,14 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
                                       bool retain);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_AsString(FLValue value, CBLDart_FLSlice *slice);
+void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_ToString(FLValue value, CBLDart_FLSlice *slice);
+void CBLDart_FLValue_ToString(FLValue value, CBLDartSlice *slice);
 
 CBLDART_EXPORT
 void CBLDart_FLValue_ToJSONX(FLValue value, bool json5, bool canonicalForm,
-                             CBLDart_FLSlice *result);
+                             CBLDartSlice *result);
 
 // Dict --------------------------------------------------------------------
 
@@ -55,7 +57,8 @@ FLValue CBLDart_FLDict_Get(FLDict dict, char *keyString);
 
 typedef struct {
   FLDictIterator *iterator;
-  CBLDart_FLSlice *keyString;
+  CBLDartSlice keyString;
+  bool done;
 } CBLDart_DictIterator;
 
 CBLDART_EXPORT
@@ -63,8 +66,7 @@ CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle handle,
                                                    FLDict dict);
 
 CBLDART_EXPORT
-void CBLDart_FLDictIterator_GetKeyString(FLDictIterator *iterator,
-                                         CBLDart_FLSlice *keyString);
+void CBLDart_FLDictIterator_Next(CBLDart_DictIterator *iterator);
 
 CBLDART_EXPORT
 void CBLDart_FLMutableDict_Remove(FLMutableDict dict, char *key);

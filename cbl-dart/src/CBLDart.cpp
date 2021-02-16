@@ -288,12 +288,12 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, const char *name,
 
 // -- Query
 
-void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDart_FLSlice *result) {
+void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDartSlice *result) {
   *result = CBLDart_FLSliceResultToDart(CBLQuery_Explain(query));
 }
 
 void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
-                                 CBLDart_FLSlice *result) {
+                                 CBLDartSlice *result) {
   *result = CBLDart_FLSliceToDart(CBLQuery_ColumnName(query, columnIndex));
 }
 

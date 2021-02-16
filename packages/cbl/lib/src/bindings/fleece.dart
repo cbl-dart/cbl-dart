@@ -82,12 +82,12 @@ class FLSlice extends Struct {
 }
 
 extension FLSliceExt on FLSlice {
-  String toUtf8() => buf.cast<Utf8>().toDartString(length: size);
+  String toDartString() => buf.cast<Utf8>().toDartString(length: size);
 }
 
 extension FLSlicePointerExt on Pointer<FLSlice> {
-  String toUtf8AndFree() {
-    final string = ref.toUtf8();
+  String toDartStringAndFree() {
+    final string = ref.toDartString();
     CBLBindings.instance.fleece.slice.release(this);
     return string;
   }
@@ -621,33 +621,26 @@ class DictBindings {
 
 class DictIterator extends Struct {
   external Pointer<Void> get iterator;
-  external Pointer<FLSlice> get keyString;
+  external FLSlice get keyString;
+  @Uint8()
+  external int get done;
 }
 
 typedef CBLDart_FLDictIterator_Begin_C = Pointer<DictIterator> Function(
   Handle handle,
-  Pointer<Void> dict,
+  Pointer<FLDict> dict,
 );
 
 typedef CBLDart_FLDictIterator_Begin = Pointer<DictIterator> Function(
   Object handle,
-  Pointer<Void> dict,
+  Pointer<FLDict> dict,
 );
 
-typedef FLDictIterator_Next_C = Uint8 Function(Pointer<Void> iterator);
-typedef FLDictIterator_Next = int Function(Pointer<Void> iterator);
-
-typedef FLDictIterator_GetValue = Pointer<Void> Function(
-  Pointer<Void> iterator,
+typedef CBLDart_FLDictIterator_Next_C = Void Function(
+  Pointer<DictIterator> iterator,
 );
-
-typedef CBLDart_FLDictIterator_GetKeyString_C = Void Function(
-  Pointer<Void> iterator,
-  Pointer<FLSlice> keyString,
-);
-typedef CBLDart_FLDictIterator_GetKeyString = void Function(
-  Pointer<Void> iterator,
-  Pointer<FLSlice> keyString,
+typedef CBLDart_FLDictIterator_Next = void Function(
+  Pointer<DictIterator> iterator,
 );
 
 class DictIteratorBindings {
@@ -656,24 +649,13 @@ class DictIteratorBindings {
             CBLDart_FLDictIterator_Begin>(
           'CBLDart_FLDictIterator_Begin',
         ),
-        getValue = libs.cbl
-            .lookupFunction<FLDictIterator_GetValue, FLDictIterator_GetValue>(
-          'FLDictIterator_GetValue',
-        ),
-        getKeyString = libs.cblDart.lookupFunction<
-            CBLDart_FLDictIterator_GetKeyString_C,
-            CBLDart_FLDictIterator_GetKeyString>(
-          'CBLDart_FLDictIterator_GetKeyString',
-        ),
-        next =
-            libs.cbl.lookupFunction<FLDictIterator_Next_C, FLDictIterator_Next>(
-          'FLDictIterator_Next',
+        next = libs.cblDart.lookupFunction<CBLDart_FLDictIterator_Next_C,
+            CBLDart_FLDictIterator_Next>(
+          'CBLDart_FLDictIterator_Next',
         );
 
   final CBLDart_FLDictIterator_Begin begin;
-  final FLDictIterator_GetValue getValue;
-  final CBLDart_FLDictIterator_GetKeyString getKeyString;
-  final FLDictIterator_Next next;
+  final CBLDart_FLDictIterator_Next next;
 }
 
 // endregion

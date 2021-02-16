@@ -60,7 +60,7 @@ String explainQuery(ExplainQuery request) {
   _bindings.explain(request.pointer, globalSlice);
 
   // Caller is responsible for allocated memory of result.
-  return globalSlice.toUtf8AndFree();
+  return globalSlice.toDartStringAndFree();
 }
 
 class GetQueryColumnCount extends ObjectRequest {
@@ -77,7 +77,7 @@ class GetQueryColumnName extends ObjectRequest {
 
 String getQueryColumnName(GetQueryColumnName request) {
   _bindings.columnName(request.pointer, request.columnIndex, globalSlice);
-  return globalSlice.ref.toUtf8();
+  return globalSlice.ref.toDartString();
 }
 
 class AddQueryChangeListener extends ObjectRequest {
