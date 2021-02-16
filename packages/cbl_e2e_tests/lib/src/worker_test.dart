@@ -57,7 +57,7 @@ void main() {
             .makeRequest<void>('crash')
             .then((value) {}, onError: (dynamic _) {});
 
-        await Future<void>.delayed(Duration(milliseconds: 200));
+        await Future<void>.delayed(Duration(milliseconds: 500));
 
         expect(worker.running, isTrue);
 
