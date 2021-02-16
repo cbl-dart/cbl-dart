@@ -39,13 +39,5 @@ class FlutterCblE2eTestBindings extends CblE2eTestBindings {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
-    print('This is a setup hook for all tests');
-  });
-
-  tearDownAll(() {
-    print('This is a teardown hook for all tests');
-  });
-
   cblE2eTests(FlutterCblE2eTestBindings());
 }
