@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:cbl/src/bindings/bindings.dart';
 import 'package:cbl/src/native_callbacks.dart';
 
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
   late final bindings = CBLBindings.instance.nativeCallbacks;
   late final callbacks = NativeCallbacks.instance;
 

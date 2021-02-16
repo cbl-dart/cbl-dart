@@ -1,11 +1,9 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings/bindings.dart';
 
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
   group('Doc', () {
     group('fromJson', () {
       test('accept valid json', () {
@@ -553,6 +551,17 @@ void main() {
 
     print(doc.root.asDict!.toObject());
 
+    print(doc
+        .root
+        .asDict!['glossary']
+        .asDict!['GlossDiv']
+        .asDict!['GlossList']
+        .asDict!['GlossEntry']
+        .asDict!['GlossDef']
+        .asDict!['GlossSeeAlso']
+        .asArray![0]
+        .asString);
+
     print(MutableDict({
       'a': {
         'b': [
@@ -577,16 +586,5 @@ void main() {
         }
       }
     ]));
-
-    print(doc
-        .root
-        .asDict!['glossary']
-        .asDict!['GlossDiv']
-        .asDict!['GlossList']
-        .asDict!['GlossEntry']
-        .asDict!['GlossDef']
-        .asDict!['GlossSeeAlso']
-        .asArray![0]
-        .asString);
   });
 }

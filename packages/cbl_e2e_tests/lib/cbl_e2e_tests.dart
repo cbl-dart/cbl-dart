@@ -4,19 +4,22 @@ import 'src/fleece_test.dart' as fleece;
 import 'src/log_test.dart' as log;
 import 'src/native_callback_test.dart' as native_callback;
 import 'src/replicator_test.dart' as replicator;
-import 'src/test_bindings.dart';
 import 'src/worker_test.dart' as worker;
 
-export 'src/test_bindings.dart';
+export 'src/test_binding.dart';
 
-void cblE2eTests(CblE2eTestBindings binding) {
-  CblE2eTestBindings.register(binding);
+final tests = {
+  'blob': blob.main,
+  'database': database.main,
+  'fleece': fleece.main,
+  'log': log.main,
+  'native_callback': native_callback.main,
+  'replicator': replicator.main,
+  'worker': worker.main,
+};
 
-  blob.main();
-  database.main();
-  fleece.main();
-  log.main();
-  native_callback.main();
-  replicator.main();
-  worker.main();
+void cblE2eTests() {
+  for (final main in tests.values) {
+    main();
+  }
 }

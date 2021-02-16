@@ -4,17 +4,15 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/utils.dart';
 
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
   late Database db;
 
   setUpAll(() async {
     db = await cbl.openDatabase(
       testDbName('Blob-Common'),
-      config: DatabaseConfiguration(directory: testTmpDir),
+      config: DatabaseConfiguration(directory: tmpDir),
     );
   });
 

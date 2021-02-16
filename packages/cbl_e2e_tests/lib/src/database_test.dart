@@ -1,27 +1,25 @@
 import 'package:cbl/cbl.dart';
 
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
   group('databaseExists', () {
     test('works with inDirectory', () async {
       final dbName = testDbName('DatabaseExistsWithDir');
 
       expect(
-        await cbl.databaseExists(dbName, directory: testTmpDir),
+        await cbl.databaseExists(dbName, directory: tmpDir),
         isFalse,
       );
 
       final db = await cbl.openDatabase(
         dbName,
-        config: DatabaseConfiguration(directory: testTmpDir),
+        config: DatabaseConfiguration(directory: tmpDir),
       );
       await db.close();
 
       expect(
-        await cbl.databaseExists(dbName, directory: testTmpDir),
+        await cbl.databaseExists(dbName, directory: tmpDir),
         isTrue,
       );
     });
@@ -33,7 +31,7 @@ void main() {
         cbl.openDatabase(
           testDbName('OpenNonExistingDatabase'),
           config: DatabaseConfiguration(
-            directory: testTmpDir,
+            directory: tmpDir,
             flags: {},
           ),
         ),
@@ -52,7 +50,7 @@ void main() {
 
   setUpAll(() async {
     dbName = testDbName('Common');
-    dbConfig = DatabaseConfiguration(directory: testTmpDir);
+    dbConfig = DatabaseConfiguration(directory: tmpDir);
     db = await cbl.openDatabase(dbName, config: dbConfig);
   });
 
@@ -66,7 +64,7 @@ void main() {
     });
 
     test('path returns full path of Database', () {
-      expect(db.path, completion(equals('$testTmpDir/$dbName.cblite2/')));
+      expect(db.path, completion(equals('$tmpDir/$dbName.cblite2/')));
     });
 
     test('config returns config of Database', () {
@@ -279,7 +277,7 @@ void main() {
     setUp(() async {
       db = await cbl.openDatabase(
         testDbName('Index'),
-        config: DatabaseConfiguration(directory: testTmpDir),
+        config: DatabaseConfiguration(directory: tmpDir),
       );
     });
 
@@ -331,7 +329,7 @@ void main() {
     setUp(() async {
       db = await cbl.openDatabase(
         testDbName('Index'),
-        config: DatabaseConfiguration(directory: testTmpDir),
+        config: DatabaseConfiguration(directory: tmpDir),
       );
     });
 
@@ -429,13 +427,13 @@ void main() {
       final dbName = testDbName('OpenDbTwice');
       final dbA = await cbl.openDatabase(
         dbName,
-        config: DatabaseConfiguration(directory: testTmpDir),
+        config: DatabaseConfiguration(directory: tmpDir),
       );
       addTearDown(() => dbA.close());
 
       final dbB = await cbl.openDatabase(
         dbName,
-        config: DatabaseConfiguration(directory: testTmpDir),
+        config: DatabaseConfiguration(directory: tmpDir),
       );
       addTearDown(() => dbB.close());
 

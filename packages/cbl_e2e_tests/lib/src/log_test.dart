@@ -1,10 +1,8 @@
 import 'package:cbl/cbl.dart';
 
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
   test('get and set log level', () {
     final initialLogLevel = cbl.logLevel;
 
@@ -26,7 +24,7 @@ void main() {
 
     final db = await cbl.openDatabase(
       testDbName('LogCallback'),
-      config: DatabaseConfiguration(directory: testTmpDir),
+      config: DatabaseConfiguration(directory: tmpDir),
     );
 
     await db.close();

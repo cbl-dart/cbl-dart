@@ -2,15 +2,13 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
   test('create Replicator smoke test', () async {
     final db = await cbl.openDatabase(
       testDbName('CreateReplicatorSmoke'),
-      config: DatabaseConfiguration(directory: testTmpDir),
+      config: DatabaseConfiguration(directory: tmpDir),
     );
 
     await db.createReplicator(ReplicatorConfiguration(

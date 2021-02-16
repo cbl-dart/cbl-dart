@@ -1,13 +1,8 @@
 import 'package:cbl/src/worker/worker.dart';
 
-import 'test_bindings.dart';
-import 'test_utils.dart';
+import 'test_binding.dart';
 
 void main() {
-  testEnvironmentSetup();
-
-  late final libraries = CblE2eTestBindings.instance.libraries;
-
   group('Worker', () {
     group('makeRequest', () {
       test('should respond to ping request with pong', () async {
