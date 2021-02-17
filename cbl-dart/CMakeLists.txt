@@ -32,6 +32,8 @@ add_library(CouchbaseLiteDart
 set_target_properties(CouchbaseLiteDart 
     PROPERTIES 
     CXX_VISIBILITY_PRESET hidden
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH "\${ORIGIN}"
 )
 
 target_include_directories(CouchbaseLiteDart
