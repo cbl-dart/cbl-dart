@@ -324,3 +324,53 @@ jobs:
       - name: Run tests
         working-directory: packages/cbl_e2e_tests_standalone_dart
         run: dart test -r expanded
+
+  tests-flutter-macos:
+    name: Tests - Flutter - macOS
+    runs-on: macos-10.15
+    needs: build-binaries-apple-xcframeworks
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-xcframeworks
+
+      - name: Extract frameworks from archive
+        run: |
+          mkdir -p packages/cbl_flutter_apple/Frameworks
+          tar -xzf binaries-apple-xcframeworks.tar.gz -C packages/cbl_flutter_apple/Frameworks
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v1
+        with:
+          channel: dev
+
+      - name: Print Flutter version
+        run: flutter --version
+
+      - name: Enable Flutter on macOS 
+        run: flutter config --enable-macos-desktop
+
+      - name: Install Dart dependencies
+        working-directory: packages/cbl_flutter/example
+        run: flutter pub get
+
+      - name: Run tests
+        working-directory: packages/cbl_flutter/example
+        run: | 
+          flutter drive \
+            -d macos \
+            --driver test_driver/integration_test.dart \
+            --target integration_test/cbl_e2e_test.dart
