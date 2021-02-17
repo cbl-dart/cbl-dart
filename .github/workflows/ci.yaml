@@ -93,8 +93,8 @@ jobs:
       - name: Build
         run: |
           ./tools/build_linux.sh build
-          ./tools/build_linux.sh copyToLibs
-          tar -czf binaries-linux.tar.gz -C build/linux/libs .
+          ./tools/build_linux.sh copyToLib
+          tar -czf binaries-linux.tar.gz -C build/linux/lib .
 
       - name: Upload binaries
         uses: actions/upload-artifact@v2
@@ -118,8 +118,8 @@ jobs:
       - name: Build
         run: |
           ./tools/build_android.sh buildAllArchs
-          ./tools/build_android.sh copyAllArchsToLibs
-          tar -czf binaries-android.tar.gz -C build/android/libs .
+          ./tools/build_android.sh copyAllArchsToLib
+          tar -czf binaries-android.tar.gz -C build/android/lib .
 
       - name: Upload binaries
         uses: actions/upload-artifact@v2
@@ -257,9 +257,10 @@ jobs:
           name: binaries-linux
 
       - name: Extract binaries
+        working-directory: packages/cbl_e2e_tests_standalone_dart
         run: |
-          mkdir libs
-          tar -xzf binaries-linux.tar.gz -C libs
+          mkdir lib
+          tar -xzf ../../binaries-linux.tar.gz -C lib
 
       - name: Install Dart SDK
         uses: dart-lang/setup-dart@v0.5
@@ -282,7 +283,7 @@ jobs:
       - name: Run tests
         working-directory: packages/cbl_e2e_tests_standalone_dart
         env:
-          LD_LIBRARY_PATH: ../../libs
+          LD_LIBRARY_PATH: ./lib
         run: dart test -r expanded
 
   tests-standalone-dart-macos:
@@ -299,8 +300,9 @@ jobs:
           name: binaries-apple-macos
 
       - name: Extract frameworks from archive
+        working-directory: packages/cbl_e2e_tests_standalone_dart
         run: |
-          tar -xzf binaries-apple-macos.tar.gz 
+          tar -xzf ../../binaries-apple-macos.tar.gz 
           cp -a macos.xcarchive/Products/Library/Frameworks .
 
       - name: Install Dart SDK

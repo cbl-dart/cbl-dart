@@ -7,7 +7,8 @@ set -e
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 buildDir="$projectDir/build/linux"
-libsDir="$projectDir/build/linux/libs"
+libDir="$projectDir/build/linux/lib"
+standaloneTestsLibDir="$projectDir/packages/cbl_e2e_tests_standalone_dart/lib"
 
 # === Commands ===
 
@@ -27,10 +28,22 @@ function build() {
     cmake --build "$buildDir"
 }
 
-function copyToLibs() {
-    mkdir -p "$libsDir"
-    cp "$buildDir/cbl-dart/libCouchbaseLiteDart.so" "$libsDir"
-    cp "$buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" "$libsDir"
+function copyToLib() {
+    mkdir -p "$libDir"
+
+    cp \
+        "$buildDir/cbl-dart/libCouchbaseLiteDart.so" \
+        "$buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" \
+        "$libDir"
+}
+
+function copyToStandaloneTests() {
+    mkdir -p "$standaloneTestsLibDir"
+
+    cp \
+        "$buildDir/cbl-dart/libCouchbaseLiteDart.so" \
+        "$buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" \
+        "$standaloneTestsLibDir"
 }
 
 "$@"

@@ -35,8 +35,8 @@ fi
 
 projectDir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 buildDir="$projectDir/build/android"
-libsDir="$buildDir/libs"
-cblFlutterLibsDir="$projectDir/packages/cbl_flutter_android/android/libs"
+libDir="$buildDir/lib"
+cblFlutterLibDir="$projectDir/packages/cbl_flutter_android/android/lib"
 
 ndk_ver="22.0.7026061"
 cmake_ver="3.10.2.4988404"
@@ -74,16 +74,16 @@ function buildArch() {
     "${cmake_path}/cmake" --build . --target CouchbaseLiteDart
 }
 
-function copyArchToLibs() {
+function copyArchToLib() {
     local arch=$1
     local buildArchDir="$buildDir/$arch"
-    local libsArchDir="$libsDir/$arch"
+    local libArchDir="$libDir/$arch"
 
-    rm -rf "$libsArchDir"
-    mkdir -p "$libsArchDir"
+    rm -rf "$libArchDir"
+    mkdir -p "$libArchDir"
 
-    cp "$buildArchDir/cbl-dart/libCouchbaseLiteDart.so" "$libsArchDir/libCouchbaseLiteDart.so"
-    cp "$buildArchDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" "$libsArchDir/libCouchbaseLiteC.so"
+    cp "$buildArchDir/cbl-dart/libCouchbaseLiteDart.so" "$libArchDir/libCouchbaseLiteDart.so"
+    cp "$buildArchDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" "$libArchDir/libCouchbaseLiteC.so"
 }
 
 function buildAllArchs() {
@@ -92,16 +92,16 @@ function buildAllArchs() {
     done
 }
 
-function copyAllArchsToLibs() {
+function copyAllArchsToLib() {
     for arch in "${archs[@]}"; do
-        copyArchToLibs "$arch"
+        copyArchToLib "$arch"
     done
 }
 
-function copyLibsToCblFlutter() {
-    rm -rf "$cblFlutterLibsDir"
-    mkdir -p "$cblFlutterLibsDir"
-    cp -a "$libsDir/"* "$cblFlutterLibsDir/"
+function copyLibToCblFlutter() {
+    rm -rf "$cblFlutterLibDir"
+    mkdir -p "$cblFlutterLibDir"
+    cp -a "$libDir/"* "$cblFlutterLibDir/"
 }
 
 function clean() {

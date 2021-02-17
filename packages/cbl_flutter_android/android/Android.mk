@@ -4,13 +4,13 @@ LOCAL_PATH := $(call my-dir)
 # CouchbaseLiteC
 include $(CLEAR_VARS)
 LOCAL_MODULE := CouchbaseLiteC-prebuilt
-LOCAL_SRC_FILES := libs/$(TARGET_ARCH_ABI)/libCouchbaseLiteC.so
+LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libCouchbaseLiteC.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 # CouchbaseLiteDart
 include $(CLEAR_VARS)
 LOCAL_MODULE := CouchbaseLiteDart-prebuilt
-LOCAL_SRC_FILES := libs/$(TARGET_ARCH_ABI)/libCouchbaseLiteDart.so
+LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libCouchbaseLiteDart.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 # Empty shared library. The PREBUILT_SHARED_LIBRARY script does not cause

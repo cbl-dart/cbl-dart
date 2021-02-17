@@ -14,26 +14,9 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   String resolveTmpDir() => './test/.tmp';
 
   @override
-  Libraries get libraries => _isCi ? _ciLibraries() : _devLibraries();
-
-  /// `true` if tests are running as part of CI.
-  final _isCi = Platform.environment.containsKey('CI');
-
-  /// The [Libraries] to use when running tests during development.
-  Libraries _devLibraries() {
-    final buildDir = '../../build';
-    final cblLib = '$buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC';
-    final cblDartLib = '$buildDir/cbl-dart/libCouchbaseLiteDart';
-    return Libraries(
-      cbl: LibraryConfiguration.dynamic(cblLib),
-      cblDart: LibraryConfiguration.dynamic(cblDartLib),
-    );
-  }
-
-  /// The [Libraries] to use when running tests as part of CI.
-  Libraries _ciLibraries() {
-    final libsDIr = p.absolute('../../libs');
-    final frameworksDir = p.absolute('../../Frameworks');
+  late final libraries = (() {
+    final libDir = p.absolute('lib');
+    final frameworksDir = p.absolute('Frameworks');
 
     String findLibInFrameworks(String name) =>
         '$frameworksDir/$name.framework/Versions/A/$name';
@@ -42,8 +25,8 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
     late String cblDartLib;
 
     if (Platform.isLinux) {
-      cblLib = '$libsDIr/libCouchbaseLiteC';
-      cblDartLib = '$libsDIr/libCouchbaseLiteDart';
+      cblLib = '$libDir/libCouchbaseLiteC';
+      cblDartLib = '$libDir/libCouchbaseLiteDart';
 
       return Libraries(
         cbl: LibraryConfiguration.dynamic(cblLib),
@@ -66,5 +49,5 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
     } else {
       throw UnimplementedError();
     }
-  }
+  })();
 }
