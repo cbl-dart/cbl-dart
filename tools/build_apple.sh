@@ -37,6 +37,8 @@ function buildPlatform() {
 
     local destination="generic/platform=$platform"
 
+    export CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime,pch_defines,time_macros
+
     xcodebuild archive \
         -scheme "$scheme" \
         -destination "$destination" \
