@@ -51,7 +51,7 @@ abstract class CblE2eTestBinding {
   /// Temporary directory for tests.
   late final String tmpDir;
 
-  late final CouchbaseLite cbl;
+  CouchbaseLite? cbl;
 
   TestFn get testFn => t.test;
 
@@ -74,12 +74,15 @@ abstract class CblE2eTestBinding {
       await _initCouchbaseLite();
     });
 
-    tearDownAllFn(() => cbl.dispose());
+    tearDownAllFn(() => cbl?.dispose());
   }
 
   Future _cleanTestTmpDir() async {
-    await Process.run('rm', ['-rf', tmpDir]);
-    await Process.run('mkdir', ['-p', tmpDir]);
+    final tmpDir = Directory(this.tmpDir);
+    if (await tmpDir.exists()) {
+      await tmpDir.delete(recursive: true);
+    }
+    await tmpDir.create(recursive: true);
   }
 
   Future<void> _initCouchbaseLite() async {
@@ -89,7 +92,7 @@ abstract class CblE2eTestBinding {
 }
 
 /// Alias of [CblE2eTestBinding.cbl].
-late final cbl = CblE2eTestBinding.instance.cbl;
+late final cbl = CblE2eTestBinding.instance.cbl!;
 
 /// Alias of [CblE2eTestBinding.tmpDir].
 late final tmpDir = CblE2eTestBinding.instance.tmpDir;
