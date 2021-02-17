@@ -98,14 +98,10 @@ function copyAllArchsToLib() {
     done
 }
 
-function copyLibToCblFlutter() {
-    rm -rf "$cblFlutterLibDir"
-    mkdir -p "$cblFlutterLibDir"
-    cp -a "$libDir/"* "$cblFlutterLibDir/"
+function createLinksForDev() {
+    cd "$projectDir/packages/cbl_flutter_android/android"
+    rm -f lib
+    ln -s "../../../build/android/lib"
 }
 
-function clean() {
-    rm -rf "$buildDir"
-}
-
-"$cmd"
+"$@"

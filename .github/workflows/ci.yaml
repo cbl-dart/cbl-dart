@@ -173,6 +173,9 @@ jobs:
     name: Build - Binaries - Apple - xcframeworks
     runs-on: macos-10.15
     needs: build-binaries-apple
+    env:
+      ARCHIVES: build/apple/archives
+      XCFRAMEWORKS: build/apple/Xcframeworks
     steps:
       - uses: actions/checkout@v2
 
@@ -197,16 +200,16 @@ jobs:
 
       - name: Unpack archives
         run: |
-          tar -xzf binaries-apple-ios.tar.gz
-          tar -xzf binaries-apple-ios_simulator.tar.gz
-          tar -xzf binaries-apple-macos.tar.gz
+          mkdir -p "$ARCHIVES"
+          tar -xzf binaries-apple-ios.tar.gz -C "$ARCHIVES"
+          tar -xzf binaries-apple-ios_simulator.tar.gz -C "$ARCHIVES"
+          tar -xzf binaries-apple-macos.tar.gz -C "$ARCHIVES"
 
       - name: Create xcframeworks
         run: |
-          archivesDir="$PWD"
-          frameworksDir="$PWD/Frameworks"
-          ./tools/build_apple.sh createXcframeworks "$archivesDir" "$frameworksDir"
-          tar -czf binaries-apple-xcframeworks.tar.gz -C "$frameworksDir" .
+          mkdir -p "$XCFRAMEWORKS"
+          ./tools/build_apple.sh createXcframeworks
+          tar -czf binaries-apple-xcframeworks.tar.gz -C "$XCFRAMEWORKS" .
 
       - name: Upload xcframeworks
         uses: actions/upload-artifact@v2
@@ -347,9 +350,10 @@ jobs:
           name: binaries-apple-xcframeworks
 
       - name: Extract frameworks from archive
+        working-directory: packages/cbl_flutter_apple
         run: |
-          mkdir -p packages/cbl_flutter_apple/Frameworks
-          tar -xzf binaries-apple-xcframeworks.tar.gz -C packages/cbl_flutter_apple/Frameworks
+          mkdir -p Xcframeworks
+          tar -xzf ../../binaries-apple-xcframeworks.tar.gz -C Xcframeworks
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2
@@ -394,9 +398,10 @@ jobs:
           name: binaries-apple-xcframeworks
 
       - name: Extract frameworks from archive
+        working-directory: packages/cbl_flutter_apple
         run: |
-          mkdir -p packages/cbl_flutter_apple/Frameworks
-          tar -xzf binaries-apple-xcframeworks.tar.gz -C packages/cbl_flutter_apple/Frameworks
+          mkdir -p Xcframeworks
+          tar -xzf ../../binaries-apple-xcframeworks.tar.gz -C Xcframeworks
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2

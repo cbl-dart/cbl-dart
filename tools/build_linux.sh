@@ -8,7 +8,6 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 buildDir="$projectDir/build/linux"
 libDir="$projectDir/build/linux/lib"
-standaloneTestsLibDir="$projectDir/packages/cbl_e2e_tests_standalone_dart/lib"
 
 # === Commands ===
 
@@ -37,13 +36,10 @@ function copyToLib() {
         "$libDir"
 }
 
-function copyToStandaloneTests() {
-    mkdir -p "$standaloneTestsLibDir"
-
-    cp \
-        "$buildDir/cbl-dart/libCouchbaseLiteDart.so" \
-        "$buildDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" \
-        "$standaloneTestsLibDir"
+function createLinksForDev() {
+    cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
+    rm -f lib
+    ln -s "../../build/linux/lib"
 }
 
 "$@"
