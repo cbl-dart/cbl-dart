@@ -300,6 +300,18 @@ DerivedData/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,linux,intellij,flutter,dart,cmake,xcode
 
+# fastlane specific
+**/fastlane/report.xml
+
+# deliver temporary files
+**/fastlane/Preview.html
+
+# snapshot generated screenshots
+**/fastlane/screenshots
+
+# scan temporary files
+**/fastlane/test_output
+
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
 
 .tmp/
