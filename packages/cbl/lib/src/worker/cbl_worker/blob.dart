@@ -3,13 +3,12 @@ import 'dart:ffi';
 import '../../bindings/bindings.dart';
 import '../../errors.dart';
 import '../../ffi_utils.dart';
-import '../handlers.dart';
-import '../worker.dart';
+import '../request_router.dart';
 import 'shared.dart';
 
 late final _readStreamBindings = CBLBindings.instance.blobs.readStream;
 
-class OpenBlobReadStream extends ObjectRequest {
+class OpenBlobReadStream extends ObjectRequest<int> {
   OpenBlobReadStream(int address) : super(address);
 }
 
@@ -18,7 +17,7 @@ int openBlobReadStream(OpenBlobReadStream request) => _readStreamBindings
     .checkResultAndError()
     .address;
 
-class ReadFromBlobReadStream extends ObjectRequest {
+class ReadFromBlobReadStream extends ObjectRequest<int> {
   ReadFromBlobReadStream(int address, this._bufferAddress, this.bufferSize)
       : super(address);
 
@@ -44,7 +43,7 @@ int readFromBlobReadStream(ReadFromBlobReadStream request) {
   return bytesRead;
 }
 
-class CloseBlobReadStream extends ObjectRequest {
+class CloseBlobReadStream extends ObjectRequest<void> {
   CloseBlobReadStream(int address) : super(address);
 }
 
@@ -53,7 +52,7 @@ void closeBlobReadStream(CloseBlobReadStream request) =>
 
 late final _writeStreamBindings = CBLBindings.instance.blobs.writeStream;
 
-class OpenBlobWriteStream extends ObjectRequest {
+class OpenBlobWriteStream extends ObjectRequest<int> {
   OpenBlobWriteStream(int address) : super(address);
 }
 
@@ -62,7 +61,7 @@ int openBlobWriteStream(OpenBlobWriteStream request) => _writeStreamBindings
     .checkResultAndError()
     .address;
 
-class WriteToBlobWriteStream extends ObjectRequest {
+class WriteToBlobWriteStream extends ObjectRequest<void> {
   WriteToBlobWriteStream(int address, this._chunkAddress, this.chunkSize)
       : super(address);
 
@@ -84,14 +83,14 @@ void writeToBlobWriteStream(WriteToBlobWriteStream request) =>
         .toBool
         .checkResultAndError();
 
-class CloseBlobWriteStream extends ObjectRequest {
+class CloseBlobWriteStream extends ObjectRequest<void> {
   CloseBlobWriteStream(int address) : super(address);
 }
 
 void closeBlobWriteStream(CloseBlobWriteStream request) =>
     _writeStreamBindings.close(request.pointer.cast());
 
-class CreateBlobWithWriteStream extends ObjectRequest {
+class CreateBlobWithWriteStream extends ObjectRequest<int> {
   CreateBlobWithWriteStream(int address, this.contentType) : super(address);
 
   final String? contentType;

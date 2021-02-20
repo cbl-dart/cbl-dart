@@ -51,7 +51,7 @@ String redact(String string) {
 /// - [NativeCallbacks]
 Stream<T> callbackStream<T, S>({
   required Worker worker,
-  required Object Function(int callbackId) requestFactory,
+  required WorkerRequest<S> Function(int callbackId) requestFactory,
   required FutureOr<T> Function(S requestResult, List arguments) eventCreator,
   bool finishBlockingCall = false,
 }) {
@@ -83,8 +83,7 @@ Stream<T> callbackStream<T, S>({
       },
     );
 
-    callbackAdded =
-        worker.makeRequest<S>(requestFactory(callbackId)).then((result) {
+    callbackAdded = worker.execute(requestFactory(callbackId)).then((result) {
       requestResult = result;
       return true;
     }).catchError((Object error, StackTrace stackTrace) {

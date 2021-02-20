@@ -2,15 +2,58 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../bindings/bindings.dart';
-import '../errors.dart';
-import '../ffi_utils.dart';
-import 'handlers/replicator.dart';
-import 'handlers.dart';
+/// Base class for all worker requests.
+///
+/// [T] is the type of the response to the request.
+@immutable
+abstract class WorkerRequest<T extends Object?> {
+  const WorkerRequest();
+}
 
-/// The Worker crashed because of an internal error.
+/// The response to a [WorkerRequest].
+class WorkerResponse<T extends Object?> {
+  /// Creates a response for a request wich was successfully completed with
+  /// a [result].
+  WorkerResponse.success(
+    T result,
+  )   : error = null,
+        value = result;
+
+  /// Creates a response for a request wich failed with an [error].
+  WorkerResponse.error(Object error)
+      : error = error,
+        value = null;
+
+  final Object? error;
+
+  final T? value;
+}
+
+extension _WorkerResponseExt<T> on WorkerResponse<T> {
+  Future<T> toFuture() =>
+      error == null ? Future.value(value) : Future.error(error!);
+}
+
+/// A delegate wich implements the logic of a [Worker].
+///
+/// When creating a worker, you need to provide a delegate. This delegate is
+/// sent to an [Isolate] through a [SendPort] and must only contain values
+/// which can be sent over a `SendPort`. The worker isolate receives a copy of
+/// the original delegate and calls it's [initialize] method, before starting
+/// to accept requests.
+abstract class WorkerDelegate {
+  /// Initializes this delegate in the worker isolate, before the worker starts
+  /// to accept requests.
+  Future<void> initialize() async {}
+
+  /// Handles a [WorkerRequest] and returns a corresponding [WorkerResponse].
+  Future<WorkerResponse> handleRequest(WorkerRequest request);
+}
+
+/// The Worker crashed because of an unhandled exception.
 class WorkerCrashedError implements Exception {
   WorkerCrashedError(this.message);
 
@@ -21,18 +64,28 @@ class WorkerCrashedError implements Exception {
   String toString() => 'WorkerCrashedError(message: $message)';
 }
 
-/// A worker which executes requests on a separate worker Isolate.
+/// A worker executes [WorkerRequest]s in a separate [Isolate].
+///
+/// The logic of the worker is implemented by a [WorkerDelegate].
 class Worker {
-  Worker(this.id, Libraries libraries) : _libraries = libraries;
+  /// Creates a new worker.
+  factory Worker({
+    required String id,
+    required WorkerDelegate delegate,
+  }) =>
+      Worker._(id, delegate);
+
+  Worker._(this.id, this._delegate);
 
   /// The id of this worker.
   final String id;
 
-  final Libraries _libraries;
+  /// The delegate of this worker.
+  final WorkerDelegate _delegate;
 
   late final _log = Logger(_debugName);
 
-  late final _debugName = 'CouchbaseLiteWorker($id)';
+  late final _debugName = 'Worker($id)';
 
   /// Lock which serializes access to this worker.
   final _lock = Lock();
@@ -54,10 +107,10 @@ class Worker {
 
   /// Future which rejects with a [WorkerCrashedError] when the worker Isolate
   /// crashes.
-  Future<void>? _error;
+  Future<void>? _onCrashed;
 
   /// Future which resolves when the worker Isolate exits.
-  Future<void>? _exit;
+  Future<void>? _onExited;
 
   void _debugIsNotRunning() {
     assert(_running != true, 'Worker is already running');
@@ -79,28 +132,28 @@ class Worker {
         final sendPort = receivePort.sendPort;
 
         final responses = StreamController<_ResponseEnvelope>.broadcast();
-        final ready = Completer<void>();
-        final error = Completer<void>();
-        final exit = Completer<void>();
+        final onReady = Completer<void>();
+        final onCrashed = Completer<void>();
+        final onExited = Completer<void>();
 
         _responseStream = responses.stream;
-        _error = error.future;
-        _exit = exit.future;
+        _onCrashed = onCrashed.future;
+        _onExited = onExited.future;
 
         _receivePortSub = receivePort.listen((dynamic message) {
           if (message is _ResponseEnvelope) {
             responses.add(message);
           } else if (message is _WorkerReady) {
             _isolateSendPort = message.sendPort;
-            ready.complete();
+            onReady.complete();
           } else if (message is List) {
             final errorMessage = message.cast<String>();
-            error.completeError(
+            onCrashed.completeError(
               WorkerCrashedError(errorMessage[0]),
               StackTrace.fromString(errorMessage[1]),
             );
           } else if (message == 'exit') {
-            exit.complete();
+            onExited.complete();
           } else {
             throw StateError('Unexpected message from Worker: $message');
           }
@@ -109,7 +162,7 @@ class Worker {
         try {
           _isolate = await Isolate.spawn(
             _main,
-            _WorkerConfiguration(sendPort, _libraries),
+            _WorkerConfiguration(sendPort, _delegate),
             onError: sendPort,
             debugName: _debugName,
             errorsAreFatal: true,
@@ -120,7 +173,7 @@ class Worker {
 
           _isolate!.resume(_isolate!.pauseCapability!);
 
-          await ready.future;
+          await Future.any([onReady.future, _onCrashed!]);
         } catch (e) {
           _reset();
           rethrow;
@@ -129,12 +182,10 @@ class Worker {
         // If we made it to here the worker is able to start.
         // If it crashes during a request we restart it.
         // ignore: unawaited_futures
-        _error!.catchError((Object error, StackTrace stackTrace) {
-          error = error as WorkerCrashedError;
-
+        _onCrashed!.catchError((Object error, StackTrace stackTrace) {
           _log.severe(
             'Worker crashed. This is a bug. Restarting it...',
-            error.message,
+            error,
             stackTrace,
           );
           _reset();
@@ -152,7 +203,7 @@ class Worker {
 
         _isolate!.kill();
 
-        await _exit;
+        await _onExited;
 
         _reset();
       });
@@ -168,7 +219,8 @@ class Worker {
   ///
   /// If the Worker crashes while the request is pending the returned Future
   /// rejects with [WorkerCrashedError].
-  Future<T> makeRequest<T>(Object request) => _lock.synchronized(() async {
+  Future<R> execute<R>(WorkerRequest<R> request) =>
+      _lock.synchronized(() async {
         _debugIsRunning();
 
         final requestEnvelope = _RequestEnvelope(request);
@@ -176,16 +228,15 @@ class Worker {
         final response = _responseStream!
             .cast<_ResponseEnvelope>()
             .where((it) => it.requestId == requestEnvelope.id)
-            .asyncExpand<T>((it) => it.error != null
-                ? Stream.error(it.error!)
-                : Stream.value(it.result as T))
+            .map((it) => it.response)
+            .asyncExpand((it) => it.toFuture().asStream())
             .first;
 
         _isolateSendPort!.send(requestEnvelope);
 
-        await Future.any([response, _error!]);
+        await Future.any([response, _onCrashed!]);
 
-        return response;
+        return response.then((it) => it as R);
       });
 
   void _reset() {
@@ -196,24 +247,31 @@ class Worker {
     _isolateSendPort = null;
     _receivePortSub = null;
     _responseStream = null;
-    _error = null;
-    _exit = null;
+    _onCrashed = null;
+    _onExited = null;
   }
 
   @override
-  String toString() => 'CouchbaseLiteWorker($id, running: $running)';
+  String toString() => 'Worker($id, running: $running)';
 
-  static void _main(_WorkerConfiguration configuration) {
+  static void _main(_WorkerConfiguration configuration) async {
     final receivePort = ReceivePort();
     final sendPort = configuration.sendPort;
 
-    CBLBindings.initInstance(configuration.libraries);
+    final delegate = configuration.delegate;
 
-    final router = _configureRouter();
+    await delegate.initialize();
 
-    receivePort
-        .cast<_RequestEnvelope>()
-        .listen((request) => router._handleRequest(sendPort, request));
+    void handleRequest(_RequestEnvelope requestEnvelope) async {
+      final response = await delegate.handleRequest(requestEnvelope.request);
+      final responseEnvelope = _ResponseEnvelope(
+        requestId: requestEnvelope.id,
+        response: response,
+      );
+      sendPort.send(responseEnvelope);
+    }
+
+    receivePort.cast<_RequestEnvelope>().listen(handleRequest);
 
     // Sending ready message should be the last thing we do during
     // initialization.
@@ -222,10 +280,10 @@ class Worker {
 }
 
 class _WorkerConfiguration {
-  _WorkerConfiguration(this.sendPort, this.libraries);
+  _WorkerConfiguration(this.sendPort, this.delegate);
 
   final SendPort sendPort;
-  final Libraries libraries;
+  final WorkerDelegate delegate;
 }
 
 class _WorkerReady {
@@ -234,145 +292,20 @@ class _WorkerReady {
   final SendPort sendPort;
 }
 
-class _RequestEnvelope {
+class _RequestEnvelope<T> {
   _RequestEnvelope(this.request);
 
   static var _nextId = 0;
 
   final int id = _nextId++;
-  final Object request;
 
-  _ResponseEnvelope successAnswer(Object? result) =>
-      _ResponseEnvelope.success(requestId: id, result: result);
-
-  _ResponseEnvelope errorAnswer(Object error) =>
-      _ResponseEnvelope.error(requestId: id, error: error);
+  final WorkerRequest<T> request;
 }
 
 class _ResponseEnvelope {
-  _ResponseEnvelope.success({
-    required this.requestId,
-    required Object? result,
-  })   : error = null,
-        result = result;
-
-  _ResponseEnvelope.error({
-    required this.requestId,
-    required Object error,
-  })   : error = error,
-        result = null;
+  _ResponseEnvelope({required this.requestId, required this.response});
 
   final int requestId;
-  final Object? error;
-  final Object? result;
-}
 
-/// The error which is returned to the originator of a [Worker] request if it
-/// cannot be handled.
-class UnhandledWorkerRequest extends BaseException {
-  UnhandledWorkerRequest([String message = 'Worker cannot handle this request'])
-      : super(message);
-
-  @override
-  String toString() => 'UnhandledWorkerRequest(message: $message)';
-}
-
-/// A handler which responds to requests which have been sent to a [Worker].
-///
-/// The handler receives the [request] as it's argument and returns the
-/// response. Exceptions thrown by the handler that extend [BaseException] are
-/// signal an exceptional result and are forwarded to the caller. All other
-/// exceptions crash the Worker.
-///
-/// Every call of this handler will be wrapped in [runArena]. You can just use
-/// [scoped] in your implementation.
-typedef WorkerRequestHandler<T> = dynamic Function(T request);
-
-/// Router which handles requests to a [Worker] by dispatching them to
-/// a [WorkerRequestHandler].
-class RequestRouter {
-  final _requestHandlers = <Object, WorkerRequestHandler<dynamic>>{};
-
-  /// Adds [handler] to the set of registered handlers.
-  void addHandler<T>(WorkerRequestHandler<T> handler) {
-    assert(
-      !_requestHandlers.containsKey(handler.runtimeType),
-      'a handler for the same request type (${handler.runtimeType}) has '
-      'already been added',
-    );
-    _requestHandlers[T] = (dynamic request) => handler(request as T);
-  }
-
-  void _handleRequest(SendPort sendPort, _RequestEnvelope envelope) {
-    final request = envelope.request;
-    final handler = _requestHandlers[request.runtimeType];
-    if (handler != null) {
-      _invokeHandler(sendPort, handler, envelope);
-    } else {
-      sendPort.send((envelope.errorAnswer(UnhandledWorkerRequest())));
-    }
-  }
-
-  void _invokeHandler(
-    SendPort sendPort,
-    WorkerRequestHandler<Object> handler,
-    _RequestEnvelope envelope,
-  ) {
-    runArena(() {
-      try {
-        sendPort.send(envelope.successAnswer(handler(envelope.request)));
-      } on BaseException catch (e) {
-        sendPort.send(envelope.errorAnswer(e));
-      }
-    });
-  }
-}
-
-Object _internalRequestHandler(String method) {
-  switch (method) {
-    case 'ping':
-      return 'pong';
-    case 'crash':
-      throw 'This is a requested crash';
-    default:
-      throw UnhandledWorkerRequest();
-  }
-}
-
-RequestRouter _configureRouter() {
-  final router = RequestRouter();
-
-  router.addHandler(_internalRequestHandler);
-
-  addDatabaseHandlersToRouter(router);
-  addQueryHandlersToRouter(router);
-  addBlobHandlersToRouter(router);
-  addReplicatorHandlersToRouter(router);
-
-  return router;
-}
-
-/// A manager of [Worker]s.
-class WorkerManager {
-  WorkerManager({required Libraries libraries}) : libraries = libraries;
-
-  /// The dynamic libraries configuration for the [Worker]s.
-  final Libraries libraries;
-
-  final _lock = Lock();
-  final _workers = <String, Worker>{};
-
-  /// If it does not exist creates and returns the [Worker] with given [id].
-  Future<Worker> getWorker({required String id}) =>
-      _lock.synchronized(() async {
-        final worker = _workers.putIfAbsent(id, () => Worker(id, libraries));
-        if (!worker.running) await worker.start();
-        return worker;
-      });
-
-  /// Stops all the Workers.
-  Future<void> dispose() => _lock.synchronized(() async {
-        await Future.wait(_workers.values.map((worker) => worker.stop()));
-        _workers.clear();
-      });
+  final WorkerResponse response;
 }

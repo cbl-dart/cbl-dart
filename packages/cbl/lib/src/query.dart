@@ -6,8 +6,7 @@ import 'bindings/bindings.dart';
 import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'utils.dart';
-import 'worker/handlers.dart';
-import 'worker/worker.dart';
+import 'worker/cbl_worker.dart';
 
 export 'bindings/query.dart' show QueryLanguage;
 
@@ -27,7 +26,7 @@ Future<Query> createQuery({
   }
 
   final address = await worker
-      .makeRequest<int>(CreateDatabaseQuery(db.address, queryString, language));
+      .execute(CreateDatabaseQuery(db.address, queryString, language));
 
   return Query._(address.toPointer, worker, retain);
 }
@@ -92,8 +91,8 @@ class Query {
   ///   'PRODUCT_ID': 'product320',
   /// }))
   /// ```
-  Future<void> setParameters(Dict parameters) => _worker.makeRequest(
-      SetQueryParameters(_pointer.address, parameters.ref.address));
+  Future<void> setParameters(Dict parameters) => _worker
+      .execute(SetQueryParameters(_pointer.address, parameters.ref.address));
 
   /// Gets the values assigned to this query's parameters.
   ///
@@ -103,12 +102,12 @@ class Query {
   /// See:
   /// - [setParameters]
   Future<Dict?> getParameters() => _worker
-      .makeRequest<int?>(GetQueryParameters(_pointer.address))
+      .execute(GetQueryParameters(_pointer.address))
       .then((address) => address?.let((it) => Dict.fromPointer(it.toPointer)));
 
   /// Runs the query, returning the results.
   Future<ResultSet> execute() => _worker
-      .makeRequest<int>(ExecuteQuery(_pointer.address))
+      .execute(ExecuteQuery(_pointer.address))
       .then((address) => ResultSet._(address.toPointer, false));
 
   /// Returns information about the query, including the translated SQLite form,
@@ -116,12 +115,11 @@ class Query {
   /// the word `SCAN` in the strategy indicates a linear scan of the entire
   /// database, which should be avoided by adding an index. The strategy will
   /// also show which index(es), if any, are used.
-  Future<String> explain() =>
-      _worker.makeRequest(ExplainQuery(_pointer.address));
+  Future<String> explain() => _worker.execute(ExplainQuery(_pointer.address));
 
   /// Returns the number of columns in each result.
   Future<int> get columnCount =>
-      _worker.makeRequest(GetQueryColumnCount(_pointer.address));
+      _worker.execute(GetQueryColumnCount(_pointer.address));
 
   /// Returns the name of a column in the result.
   ///
@@ -132,7 +130,7 @@ class Query {
   /// custom name, use the `AS` syntax in the query. Every column is guaranteed
   /// to have a unique name.
   Future<String> columnName(int index) =>
-      _worker.makeRequest(GetQueryColumnName(_pointer.address, index));
+      _worker.execute(GetQueryColumnName(_pointer.address, index));
 
   /// Returns a [Stream] which emits a [ResultSet] when this query's results
   /// change, turning it into a "live query" until the stream is canceled.
@@ -150,7 +148,7 @@ class Query {
           // the listener it has to copy the current query result set.
 
           final resultSetAddress =
-              await _worker.makeRequest<int>(CopyCurrentQueryResultSet(
+              await _worker.execute(CopyCurrentQueryResultSet(
             _pointer.address,
             listenerTokenAddress,
           ));

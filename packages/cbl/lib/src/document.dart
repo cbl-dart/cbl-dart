@@ -7,8 +7,7 @@ import 'database.dart';
 import 'errors.dart';
 import 'ffi_utils.dart';
 import 'fleece.dart';
-import 'worker/handlers.dart';
-import 'worker/worker.dart';
+import 'worker/cbl_worker.dart';
 
 // region Internal API
 
@@ -67,8 +66,7 @@ class Document {
   /// This lifetime of the returned value is tied to this document. The dict and
   /// its contents must only be used while this Document has not been garbage
   /// collected. Keep a reference to a Document to ensure that it stays alive.
-  Dict get properties =>
-      Dict.fromPointer(_bindings.properties(_pointer));
+  Dict get properties => Dict.fromPointer(_bindings.properties(_pointer));
 
   /// The properties as a JSON string.
   String get propertiesAsJson => runArena(
@@ -81,7 +79,7 @@ class Document {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]) {
     _debugDocumentHasBeenSaved();
-    return _worker!.makeRequest(DeleteDocument(_pointer.address, concurrency));
+    return _worker!.execute(DeleteDocument(_pointer.address, concurrency));
   }
 
   /// Purges this document.
@@ -91,7 +89,7 @@ class Document {
   /// when pulled.
   Future<void> purge() {
     _debugDocumentHasBeenSaved();
-    return _worker!.makeRequest(PurgeDocument(_pointer.address));
+    return _worker!.execute(PurgeDocument(_pointer.address));
   }
 
   /// {@macro cbl.document.mutableCopy}

@@ -8,8 +8,7 @@ import 'document.dart';
 import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'utils.dart';
-import 'worker/handlers.dart';
-import 'worker/worker.dart';
+import 'worker/cbl_worker.dart';
 
 // region Internal API
 
@@ -158,7 +157,7 @@ class BlobWriteStream extends StreamConsumer<Uint8List> {
       .asyncMap((chunk) => runArena(() {
             final chunkPointer = scoped(malloc<Uint8>(chunk.length));
             chunkPointer.asTypedList(chunk.length).setAll(0, chunk);
-            return _worker.makeRequest<void>(WriteToBlobWriteStream(
+            return _worker.execute(WriteToBlobWriteStream(
               _pointer.address,
               chunkPointer.address,
               chunk.length,
@@ -169,7 +168,7 @@ class BlobWriteStream extends StreamConsumer<Uint8List> {
   /// Closes this stream, if you need to give up without creating a [Blob].
   @override
   Future<void> close() =>
-      _worker.makeRequest<void>(CloseBlobWriteStream(_pointer.address));
+      _worker.execute(CloseBlobWriteStream(_pointer.address));
 
   /// Creates a new [Blob] after its content has been written to this stream.
   ///
@@ -177,7 +176,7 @@ class BlobWriteStream extends StreamConsumer<Uint8List> {
   ///
   /// [contentType] is the MIME type of the data written to this stream.
   Future<Blob> createBlob({String? contentType}) async {
-    final address = await _worker.makeRequest<int>(CreateBlobWithWriteStream(
+    final address = await _worker.execute(CreateBlobWithWriteStream(
       _pointer.address,
       contentType,
     ));
@@ -208,7 +207,7 @@ class BlobManager {
   ///   the new Blob.
   Future<BlobWriteStream> openWriteStream() async {
     final address =
-        await _worker.makeRequest<int>(OpenBlobWriteStream(_pointer.address));
+        await _worker.execute(OpenBlobWriteStream(_pointer.address));
 
     return BlobWriteStream._(address.toPointer.cast(), _worker);
   }
@@ -241,18 +240,17 @@ class BlobManager {
     late Future setup = (() async {
       buffer = malloc(chunkSize);
 
-      streamPointer = (await _worker
-              .makeRequest<int>(OpenBlobReadStream(blob._pointer.address)))
-          .toPointer
-          .cast();
+      streamPointer =
+          (await _worker.execute(OpenBlobReadStream(blob._pointer.address)))
+              .toPointer
+              .cast();
     })();
 
     Future cleanUp() async {
       await setup.catchError((Object e) {});
 
       malloc.free(buffer!);
-      await _worker
-          .makeRequest<void>(CloseBlobReadStream(streamPointer!.address));
+      await _worker.execute(CloseBlobReadStream(streamPointer!.address));
     }
 
     void start() async {
@@ -262,8 +260,7 @@ class BlobManager {
         await setup;
 
         while (!isPaused) {
-          final bytesRead =
-              await _worker.makeRequest<int>(ReadFromBlobReadStream(
+          final bytesRead = await _worker.execute(ReadFromBlobReadStream(
             streamPointer!.address,
             buffer!.address,
             chunkSize,

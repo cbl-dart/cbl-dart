@@ -7,7 +7,7 @@ import '../../bindings/bindings.dart';
 import '../../database.dart';
 import '../../errors.dart';
 import '../../ffi_utils.dart';
-import '../handlers.dart';
+import '../request_router.dart';
 import '../worker.dart';
 import 'shared.dart';
 
@@ -57,7 +57,7 @@ extension on Pointer<CBLDatabaseConfiguration> {
       );
 }
 
-class DatabaseExists {
+class DatabaseExists extends WorkerRequest<bool> {
   DatabaseExists(this.name, this.directory);
 
   final String name;
@@ -73,7 +73,7 @@ bool databaseExists(DatabaseExists request) => _bindings
     )
     .toBool;
 
-class CopyDatabase {
+class CopyDatabase extends WorkerRequest<void> {
   CopyDatabase(this.fromPath, this.toName, this.config);
 
   final String fromPath;
@@ -91,7 +91,7 @@ void copyDatabase(CopyDatabase request) => _bindings
     .toBool
     .checkResultAndError();
 
-class DeleteDatabaseFile {
+class DeleteDatabaseFile extends WorkerRequest<bool> {
   DeleteDatabaseFile(this.name, this.directory);
   final String name;
   final String? directory;
@@ -108,7 +108,7 @@ bool deleteDatabaseFile(DeleteDatabaseFile request) => _bindings
     .toBool
     .checkResultAndError();
 
-class OpenDatabase {
+class OpenDatabase extends WorkerRequest<int> {
   OpenDatabase(this.name, this.config);
   final String name;
   final DatabaseConfiguration? config;
@@ -123,28 +123,28 @@ int openDatabase(OpenDatabase request) => _bindings
     .checkResultAndError()
     .address;
 
-class GetDatabaseName extends ObjectRequest {
+class GetDatabaseName extends ObjectRequest<String> {
   GetDatabaseName(int address) : super(address);
 }
 
 String getDatabaseName(GetDatabaseName request) =>
     _bindings.name(request.pointer).toDartString();
 
-class GetDatabasePath extends ObjectRequest {
+class GetDatabasePath extends ObjectRequest<String> {
   GetDatabasePath(int address) : super(address);
 }
 
 String getDatabasePath(GetDatabasePath request) =>
     _bindings.path(request.pointer).toDartString();
 
-class GetDatabaseCount extends ObjectRequest {
+class GetDatabaseCount extends ObjectRequest<int> {
   GetDatabaseCount(int address) : super(address);
 }
 
 int getDatabaseCount(GetDatabaseCount request) =>
     _bindings.count(request.pointer);
 
-class GetDatabaseConfiguration extends ObjectRequest {
+class GetDatabaseConfiguration extends ObjectRequest<DatabaseConfiguration> {
   GetDatabaseConfiguration(int address) : super(address);
 }
 
@@ -156,21 +156,21 @@ DatabaseConfiguration getDatabaseConfiguration(
   return config.toDatabaseConfiguration();
 }
 
-class CloseDatabase extends ObjectRequest {
+class CloseDatabase extends ObjectRequest<void> {
   CloseDatabase(int address) : super(address);
 }
 
 void closeDatabase(CloseDatabase request) =>
     _bindings.close(request.pointer, globalError).toBool.checkResultAndError();
 
-class DeleteDatabase extends ObjectRequest {
+class DeleteDatabase extends ObjectRequest<void> {
   DeleteDatabase(int address) : super(address);
 }
 
 void deleteDatabase(DeleteDatabase request) =>
     _bindings.delete(request.pointer, globalError).toBool.checkResultAndError();
 
-class CompactDatabase extends ObjectRequest {
+class CompactDatabase extends ObjectRequest<void> {
   CompactDatabase(int address) : super(address);
 }
 
@@ -179,7 +179,7 @@ void compactDatabase(CompactDatabase request) => _bindings
     .toBool
     .checkResultAndError();
 
-class BeginDatabaseBatch extends ObjectRequest {
+class BeginDatabaseBatch extends ObjectRequest<void> {
   BeginDatabaseBatch(int address) : super(address);
 }
 
@@ -188,7 +188,7 @@ void beginDatabaseBatch(BeginDatabaseBatch request) => _bindings
     .toBool
     .checkResultAndError();
 
-class EndDatabaseBatch extends ObjectRequest {
+class EndDatabaseBatch extends ObjectRequest<void> {
   EndDatabaseBatch(int address) : super(address);
 }
 
@@ -197,7 +197,7 @@ void endDatabaseBatch(EndDatabaseBatch request) => _bindings
     .toBool
     .checkResultAndError();
 
-class RekeyDatabase extends ObjectRequest {
+class RekeyDatabase extends ObjectRequest<void> {
   RekeyDatabase(int address, this.encryptionKey) : super(address);
   final EncryptionKey? encryptionKey;
 }
@@ -213,7 +213,7 @@ void rekeyDatabase(RekeyDatabase request) {
       .checkResultAndError();
 }
 
-class GetDatabaseDocument extends ObjectRequest {
+class GetDatabaseDocument extends ObjectRequest<int?> {
   GetDatabaseDocument(int address, this.id) : super(address);
   final String id;
 }
@@ -222,7 +222,7 @@ int? getDatabaseDocument(GetDatabaseDocument request) => _bindings
     .getDocument(request.pointer, request.id.toNativeUtf8().asScoped)
     .addressOrNull;
 
-class GetDatabaseMutableDocument extends ObjectRequest {
+class GetDatabaseMutableDocument extends ObjectRequest<int?> {
   GetDatabaseMutableDocument(int address, this.id) : super(address);
   final String id;
 }
@@ -231,7 +231,7 @@ int? getDatabaseMutableDocument(GetDatabaseMutableDocument request) => _bindings
     .getMutableDocument(request.pointer, request.id.toNativeUtf8().asScoped)
     .addressOrNull;
 
-class SaveDatabaseDocument extends ObjectRequest {
+class SaveDatabaseDocument extends ObjectRequest<int> {
   SaveDatabaseDocument(int address, this.docAdress, this.concurrency)
       : super(address);
   final int docAdress;
@@ -248,7 +248,7 @@ int saveDatabaseDocument(SaveDatabaseDocument request) => _bindings
     .checkResultAndError()
     .address;
 
-class SaveDatabaseDocumentResolving extends ObjectRequest {
+class SaveDatabaseDocumentResolving extends ObjectRequest<int> {
   SaveDatabaseDocumentResolving(
       int address, this.docAddress, this.conflictResolverId)
       : super(address);
@@ -267,7 +267,7 @@ int saveDatabaseDocumentResolving(SaveDatabaseDocumentResolving request) =>
         .checkResultAndError()
         .address;
 
-class PurgeDatabaseDocumentById extends ObjectRequest {
+class PurgeDatabaseDocumentById extends ObjectRequest<bool> {
   PurgeDatabaseDocumentById(int address, this.id) : super(address);
   final String id;
 }
@@ -281,7 +281,7 @@ bool purgeDatabaseDocumentById(PurgeDatabaseDocumentById request) => _bindings
     .toBool
     .checkResultAndError();
 
-class GetDatabaseDocumentExpiration extends ObjectRequest {
+class GetDatabaseDocumentExpiration extends ObjectRequest<DateTime?> {
   GetDatabaseDocumentExpiration(int address, this.id) : super(address);
   final String id;
 }
@@ -300,7 +300,7 @@ DateTime? getDatabaseDocumentExpiration(GetDatabaseDocumentExpiration request) {
   return timestamp == 0 ? null : DateTime.fromMillisecondsSinceEpoch(timestamp);
 }
 
-class SetDatabaseDocumentExpiration extends ObjectRequest {
+class SetDatabaseDocumentExpiration extends ObjectRequest<void> {
   SetDatabaseDocumentExpiration(int address, this.id, this.time)
       : super(address);
   final String id;
@@ -318,7 +318,7 @@ void setDatabaseDocumentExpiration(SetDatabaseDocumentExpiration request) =>
         .toBool
         .checkResultAndError();
 
-class DeleteDocument extends ObjectRequest {
+class DeleteDocument extends ObjectRequest<void> {
   DeleteDocument(int address, this.concurrency) : super(address);
   final ConcurrencyControl concurrency;
 }
@@ -332,7 +332,7 @@ void deleteDocument(DeleteDocument request) => _docBindings
     .toBool
     .checkResultAndError();
 
-class PurgeDocument extends ObjectRequest {
+class PurgeDocument extends ObjectRequest<void> {
   PurgeDocument(int address) : super(address);
 }
 
@@ -341,7 +341,7 @@ void purgeDocument(PurgeDocument request) => _docBindings
     .toBool
     .checkResultAndError();
 
-class AddDocumentChangeListener extends ObjectRequest {
+class AddDocumentChangeListener extends ObjectRequest<void> {
   AddDocumentChangeListener(int address, this.docId, this.listenerId)
       : super(address);
   final String docId;
@@ -357,7 +357,7 @@ void addDocumentChangeListener(AddDocumentChangeListener request) =>
 
 late final _docBindings = CBLBindings.instance.document;
 
-class AddDatabaseChangeListener extends ObjectRequest {
+class AddDatabaseChangeListener extends ObjectRequest<void> {
   AddDatabaseChangeListener(int address, this.listenerId) : super(address);
   final int listenerId;
 }
@@ -365,7 +365,7 @@ class AddDatabaseChangeListener extends ObjectRequest {
 void addDatabaseChangeListener(AddDatabaseChangeListener request) =>
     _bindings.addChangeListener(request.pointer, request.listenerId);
 
-class CreateDatabaseIndex extends ObjectRequest {
+class CreateDatabaseIndex extends ObjectRequest<void> {
   CreateDatabaseIndex(int address, this.name, this.index) : super(address);
   final String name;
   final Index index;
@@ -405,7 +405,7 @@ void createDatabaseIndex(CreateDatabaseIndex request) => _bindings
     .toBool
     .checkResultAndError();
 
-class DeleteDatabaseIndex extends ObjectRequest {
+class DeleteDatabaseIndex extends ObjectRequest<void> {
   DeleteDatabaseIndex(int address, this.name) : super(address);
   final String name;
 }
@@ -419,7 +419,7 @@ void deleteDatabaseIndex(DeleteDatabaseIndex request) => _bindings
     .toBool
     .checkResultAndError();
 
-class GetDatabaseIndexNames extends ObjectRequest {
+class GetDatabaseIndexNames extends ObjectRequest<int> {
   GetDatabaseIndexNames(int address) : super(address);
 }
 

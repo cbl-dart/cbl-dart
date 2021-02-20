@@ -1,6 +1,8 @@
 import 'dart:ffi';
 
-abstract class ObjectRequest {
+import '../worker.dart';
+
+abstract class ObjectRequest<T> extends WorkerRequest<T> {
   ObjectRequest(this._address);
 
   final int _address;
