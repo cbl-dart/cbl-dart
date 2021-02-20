@@ -5,8 +5,7 @@ import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
-import 'worker/handlers.dart';
-import 'worker/worker.dart';
+import 'worker/cbl_worker.dart';
 
 export 'bindings/bindings.dart'
     show LibraryConfiguration, Libraries, LogLevel, LogDomain;
@@ -45,7 +44,7 @@ class CouchbaseLite {
 
     SlotSetter.register(blobSlotSetter);
 
-    final workerManager = WorkerManager(libraries: libraries);
+    final workerManager = CblWorkerManager(libraries: libraries);
 
     return CouchbaseLite._(
       workerManager,
@@ -56,7 +55,7 @@ class CouchbaseLite {
   /// Private constructor to allow control over instance creation.
   CouchbaseLite._(this._workerManager, this._worker);
 
-  final WorkerManager _workerManager;
+  final CblWorkerManager _workerManager;
   final Worker _worker;
 
   /// Returns true if a database with the given [name] exists in the given
@@ -66,7 +65,7 @@ class CouchbaseLite {
   ///
   /// [directory] is the directory containing the database.
   Future<bool> databaseExists(String name, {required String directory}) =>
-      _worker.makeRequest(DatabaseExists(name, directory));
+      _worker.execute(DatabaseExists(name, directory));
 
   /// Copies a database file to a new location, and assigns it a new internal
   /// UUID to distinguish it from the original database when replicating.
@@ -83,7 +82,7 @@ class CouchbaseLite {
     required String toName,
     DatabaseConfiguration? config,
   }) =>
-      _worker.makeRequest(CopyDatabase(fromPath, toName, config));
+      _worker.execute(CopyDatabase(fromPath, toName, config));
 
   /// Deletes a database file.
   ///
@@ -93,7 +92,7 @@ class CouchbaseLite {
   ///
   /// [directory] is the directory containing the database.
   Future<bool> deleteDatabase(String name, {required String directory}) =>
-      _worker.makeRequest(DeleteDatabaseFile(name, directory));
+      _worker.execute(DeleteDatabaseFile(name, directory));
 
   /// Opens a database, or creates it if it doesn't exist yet, returning a new
   /// [Database] instance.
@@ -112,7 +111,7 @@ class CouchbaseLite {
   }) async {
     final databaseId = _nextDatabaseId++;
     final worker = await _workerManager.getWorker(id: 'Database#$databaseId');
-    final pointer = await worker.makeRequest<int>(OpenDatabase(name, config));
+    final pointer = await worker.execute(OpenDatabase(name, config));
     return createDatabase(
       debugName: name,
       pointer: Pointer.fromAddress(pointer),

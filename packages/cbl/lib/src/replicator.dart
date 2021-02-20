@@ -12,8 +12,7 @@ import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
 import 'utils.dart';
-import 'worker/handlers/replicator.dart';
-import 'worker/worker.dart';
+import 'worker/cbl_worker.dart';
 
 export 'bindings/bindings.dart'
     show ReplicatorType, ProxyType, ReplicatorActivityLevel, DocumentFlags;
@@ -28,8 +27,7 @@ Future<Replicator> createReplicator(
     runArena(() async {
       final cblConfig = config.toCBLReplicatorConfigurationScoped(db);
 
-      final address =
-          await worker.makeRequest<int>(NewReplicator(cblConfig.address));
+      final address = await worker.execute(NewReplicator(cblConfig.address));
 
       return Replicator._(address.toPointer.cast(), worker);
     });
@@ -724,13 +722,12 @@ class Replicator {
   /// missing documents if the client and server have gotten out of sync
   /// somehow.
   Future<void> resetCheckpoint() =>
-      _worker.makeRequest<void>(ResetReplicatorCheckpoint(_pointer.address));
+      _worker.execute(ResetReplicatorCheckpoint(_pointer.address));
 
   /// Starts this replicator, asynchronously.
   ///
   /// Does nothing if it's already started.
-  Future<void> start() =>
-      _worker.makeRequest<void>(StartReplicator(_pointer.address));
+  Future<void> start() => _worker.execute(StartReplicator(_pointer.address));
 
   /// Stops a running replicator, asynchronously.
   ///
@@ -739,8 +736,7 @@ class Replicator {
   /// The [Stream] returned from [statusChanges] will emit a [ReplicatorStatus]
   /// with an activity level of [ReplicatorActivityLevel.stopped] after it
   /// stops. Until then, consider it still active.
-  Future<void> stop() =>
-      _worker.makeRequest<void>(StopReplicator(_pointer.address));
+  Future<void> stop() => _worker.execute(StopReplicator(_pointer.address));
 
   /// Informs this replicator whether it's considered possible to reach the
   /// remote host with the current network configuration.
@@ -751,7 +747,7 @@ class Replicator {
   ///   automatic retries.
   /// * Setting it back to true will initiate an immediate retry.
   Future<void> setHostReachable(bool reachable) =>
-      _worker.makeRequest<void>(SetReplicatorHostReachable(
+      _worker.execute(SetReplicatorHostReachable(
         _pointer.address,
         reachable,
       ));
@@ -767,14 +763,14 @@ class Replicator {
   ///   reconnect, _if_ it was connected when suspended, and is still in Offline
   ///   state.
   Future<void> setSuspended(bool suspended) =>
-      _worker.makeRequest<void>(SetReplicatorSuspended(
+      _worker.execute(SetReplicatorSuspended(
         _pointer.address,
         suspended,
       ));
 
   /// Returns this [Replicator]'s current status.
-  Future<ReplicatorStatus> status() => _worker
-      .makeRequest<ReplicatorStatus>(GetReplicatorStatus(_pointer.address));
+  Future<ReplicatorStatus> status() =>
+      _worker.execute(GetReplicatorStatus(_pointer.address));
 
   /// Returns a stream that emits this replicators [ReplicatorStatus] when the
   /// it changes.
@@ -813,7 +809,7 @@ class Replicator {
   /// Documents that would never be pushed by this replicator, due to its
   /// configuration's `pushFilter` or `docIDs`, are ignored.
   Future<Dict> pendingDocumentIDs() => _worker
-      .makeRequest<int>(GetReplicatorPendingDocumentIDs(_pointer.address))
+      .execute(GetReplicatorPendingDocumentIDs(_pointer.address))
       .then((address) => Dict.fromPointer(
             address.toPointer,
             bindToValue: true,
@@ -828,7 +824,7 @@ class Replicator {
   ///
   /// A `false` result means the document is not pending.
   Future<bool> isDocumentPending(String docID) =>
-      _worker.makeRequest<bool>(GetReplicatorIsDocumentPening(
+      _worker.execute(GetReplicatorIsDocumentPening(
         _pointer.address,
         docID,
       ));

@@ -14,8 +14,7 @@ import 'query.dart';
 import 'replicator.dart';
 import 'replicator.dart' as repl;
 import 'utils.dart';
-import 'worker/handlers.dart';
-import 'worker/worker.dart';
+import 'worker/cbl_worker.dart';
 
 export 'bindings/bindings.dart'
     show EncryptionAlgorithm, DatabaseFlag, ConcurrencyControl;
@@ -290,31 +289,30 @@ class Database {
   // === Database ==============================================================
 
   /// The database's name.
-  Future<String> get name => _worker.makeRequest(GetDatabaseName(_address));
+  Future<String> get name => _worker.execute(GetDatabaseName(_address));
 
   /// The database's full filesystem path.
-  Future<String> get path => _worker.makeRequest(GetDatabasePath(_address));
+  Future<String> get path => _worker.execute(GetDatabasePath(_address));
 
   /// The number of documents in the database.
-  Future<int> get count => _worker.makeRequest(GetDatabaseCount(_address));
+  Future<int> get count => _worker.execute(GetDatabaseCount(_address));
 
   /// The database's configuration, as given when it was opened.
   ///
   /// The encryption key is not filled in, for security reasons.
   Future<DatabaseConfiguration> get config =>
-      _worker.makeRequest(GetDatabaseConfiguration(_address));
+      _worker.execute(GetDatabaseConfiguration(_address));
 
   /// Closes this database.
-  Future<void> close() => _worker.makeRequest<void>(CloseDatabase(_address));
+  Future<void> close() => _worker.execute(CloseDatabase(_address));
 
   /// Closes and deletes this database.
   ///
   /// If there are any other connections to the database, an error is thrown.
-  Future<void> delete() => _worker.makeRequest<void>(DeleteDatabase(_address));
+  Future<void> delete() => _worker.execute(DeleteDatabase(_address));
 
   /// Compacts the database file.
-  Future<void> compact() =>
-      _worker.makeRequest<void>(CompactDatabase(_address));
+  Future<void> compact() => _worker.execute(CompactDatabase(_address));
 
   /// Begins a batch operation, similar to a transaction.
   ///
@@ -324,14 +322,12 @@ class Database {
   /// Changes will not be visible to other CBLDatabase instances on the same
   /// database until the batch operation ends. Batch operations can nest.
   /// Changes are not committed until the outer batch ends.
-  Future<void> beginBatch() =>
-      _worker.makeRequest<void>(BeginDatabaseBatch(_address));
+  Future<void> beginBatch() => _worker.execute(BeginDatabaseBatch(_address));
 
   /// Ends a batch operation.
   ///
   /// This must be called after [beginBatch].
-  Future<void> endBatch() =>
-      _worker.makeRequest<void>(EndDatabaseBatch(_address));
+  Future<void> endBatch() => _worker.execute(EndDatabaseBatch(_address));
 
   /// Encrypts or decrypts a database, or changes its encryption key.
   ///
@@ -340,7 +336,7 @@ class Database {
   /// Otherwise the database will be encrypted with that key; if it was already
   /// encrypted, it will be re-encrypted with the new key.
   Future<void> rekey([EncryptionKey? encryptionKey]) =>
-      _worker.makeRequest<void>(RekeyDatabase(_address, encryptionKey));
+      _worker.execute(RekeyDatabase(_address, encryptionKey));
 
   // === Documents =============================================================
 
@@ -349,7 +345,7 @@ class Database {
   ///
   /// Returns `null` if no document with [id] exists.
   Future<Document?> getDocument(String id) => _worker
-      .makeRequest<int?>(GetDatabaseDocument(_address, id))
+      .execute(GetDatabaseDocument(_address, id))
       .then((address) => address?.toPointer
           .let((it) => createDocument(pointer: it, worker: _worker)));
 
@@ -358,7 +354,7 @@ class Database {
   ///
   /// This function is otherwise identical to [getDocument].
   Future<MutableDocument?> getMutableDocument(String id) => _worker
-      .makeRequest<int?>(GetDatabaseMutableDocument(_address, id))
+      .execute(GetDatabaseMutableDocument(_address, id))
       .then((address) => address?.toPointer
           .let((it) => createMutableDocument(pointer: it, worker: _worker)));
 
@@ -374,7 +370,7 @@ class Database {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
       _worker
-          .makeRequest<int>(
+          .execute(
               SaveDatabaseDocument(_address, doc.pointer.address, concurrency))
           .then((address) => address.toPointer
               .let((it) => createDocument(pointer: it, worker: _worker)));
@@ -432,7 +428,7 @@ class Database {
     );
 
     return _worker
-        .makeRequest<int>(SaveDatabaseDocumentResolving(
+        .execute(SaveDatabaseDocumentResolving(
           _address,
           doc.pointer.address,
           conflictHandlerId,
@@ -450,7 +446,7 @@ class Database {
   ///
   /// To delete a [Document], load it and call its [Document.delete] method.
   Future<bool> purgeDocumentById(String id) =>
-      _worker.makeRequest(PurgeDatabaseDocumentById(_address, id));
+      _worker.execute(PurgeDatabaseDocumentById(_address, id));
 
   /// Returns the time, if any, at which a given document will expire and be
   /// purged.
@@ -458,13 +454,13 @@ class Database {
   /// Documents don't normally expire; you have to call [setDocumentExpiration]
   /// to set a document's expiration time.
   Future<DateTime?> getDocumentExpiration(String id) =>
-      _worker.makeRequest(GetDatabaseDocumentExpiration(_address, id));
+      _worker.execute(GetDatabaseDocumentExpiration(_address, id));
 
   /// Sets or clears the expiration time of a document.
   ///
   /// When [time] is `null` the document will never expire.
-  Future<void> setDocumentExpiration(String id, DateTime? time) => _worker
-      .makeRequest<void>(SetDatabaseDocumentExpiration(_address, id, time));
+  Future<void> setDocumentExpiration(String id, DateTime? time) =>
+      _worker.execute(SetDatabaseDocumentExpiration(_address, id, time));
 
   // === Changes ===============================================================
 
@@ -545,16 +541,15 @@ class Database {
   /// If a non-identical index with that name already exists, it is deleted and
   /// re-created.
   Future<void> createIndex(String name, Index index) =>
-      _worker.makeRequest(CreateDatabaseIndex(_address, name, index));
+      _worker.execute(CreateDatabaseIndex(_address, name, index));
 
   /// Deletes an index given its name.
   Future<void> deleteIndex(String name) async =>
-      _worker.makeRequest(DeleteDatabaseIndex(_address, name));
+      _worker.execute(DeleteDatabaseIndex(_address, name));
 
   /// Returns the names of the indexes on this database, as an array of strings.
-  Future<List<String>> indexNames() async => _worker
-      .makeRequest<int>(GetDatabaseIndexNames(_address))
-      .then((address) =>
+  Future<List<String>> indexNames() async =>
+      _worker.execute(GetDatabaseIndexNames(_address)).then((address) =>
           MutableArray.fromPointer(address.toPointer, retain: false)
               .map((it) => it.asString)
               .toList());

@@ -4,12 +4,12 @@ import '../../bindings/bindings.dart';
 import '../../errors.dart';
 import '../../ffi_utils.dart';
 import '../../utils.dart';
-import '../worker.dart';
+import '../request_router.dart';
 import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.query;
 
-class CreateDatabaseQuery extends ObjectRequest {
+class CreateDatabaseQuery extends ObjectRequest<int> {
   CreateDatabaseQuery(int address, this.queryString, this.language)
       : super(address);
   final String queryString;
@@ -28,7 +28,7 @@ int createDatabaseQuery(CreateDatabaseQuery request) => _bindings
         ? throw exceptionFromCBLError(queryString: request.queryString)
         : it.address);
 
-class SetQueryParameters extends ObjectRequest {
+class SetQueryParameters extends ObjectRequest<void> {
   SetQueryParameters(int address, this.parametersAddress) : super(address);
   final int parametersAddress;
 }
@@ -36,25 +36,16 @@ class SetQueryParameters extends ObjectRequest {
 void setQueryParameters(SetQueryParameters request) => _bindings.setParameters(
     request.pointer, request.parametersAddress.toPointer);
 
-class GetQueryParameters extends ObjectRequest {
+class GetQueryParameters extends ObjectRequest<int?> {
   GetQueryParameters(int address) : super(address);
 }
 
 int? getQueryParameters(GetQueryParameters request) =>
     _bindings.parameters(request.pointer).addressOrNull;
 
-class ExplainQuery extends ObjectRequest {
+class ExplainQuery extends ObjectRequest<String> {
   ExplainQuery(int address) : super(address);
 }
-
-class ExecuteQuery extends ObjectRequest {
-  ExecuteQuery(int address) : super(address);
-}
-
-int executeQuery(ExecuteQuery request) => _bindings
-    .execute(request.pointer, globalError)
-    .checkResultAndError()
-    .address;
 
 String explainQuery(ExplainQuery request) {
   _bindings.explain(request.pointer, globalSlice);
@@ -63,14 +54,23 @@ String explainQuery(ExplainQuery request) {
   return globalSlice.toDartStringAndFree();
 }
 
-class GetQueryColumnCount extends ObjectRequest {
+class ExecuteQuery extends ObjectRequest<int> {
+  ExecuteQuery(int address) : super(address);
+}
+
+int executeQuery(ExecuteQuery request) => _bindings
+    .execute(request.pointer, globalError)
+    .checkResultAndError()
+    .address;
+
+class GetQueryColumnCount extends ObjectRequest<int> {
   GetQueryColumnCount(int address) : super(address);
 }
 
 int getQueryColumnCount(GetQueryColumnCount request) =>
     _bindings.columnCount(request.pointer);
 
-class GetQueryColumnName extends ObjectRequest {
+class GetQueryColumnName extends ObjectRequest<String> {
   GetQueryColumnName(int address, this.columnIndex) : super(address);
   final int columnIndex;
 }
@@ -80,7 +80,7 @@ String getQueryColumnName(GetQueryColumnName request) {
   return globalSlice.ref.toDartString();
 }
 
-class AddQueryChangeListener extends ObjectRequest {
+class AddQueryChangeListener extends ObjectRequest<int> {
   AddQueryChangeListener(int address, this.listenerId) : super(address);
   final int listenerId;
 }
@@ -88,7 +88,7 @@ class AddQueryChangeListener extends ObjectRequest {
 int addQueryChangeListener(AddQueryChangeListener request) =>
     _bindings.addChangeListener(request.pointer, request.listenerId).address;
 
-class CopyCurrentQueryResultSet extends ObjectRequest {
+class CopyCurrentQueryResultSet extends ObjectRequest<int> {
   CopyCurrentQueryResultSet(int address, this.listenerTokenAddress)
       : super(address);
   final int listenerTokenAddress;
