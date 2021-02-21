@@ -95,12 +95,6 @@ class RequestRouter {
   Future<WorkerResponse> handleRequest(WorkerRequest request) async {
     final handler = _requestHandlers[request.runtimeType];
     if (handler != null) {
-      final handlerType = _requestHandlers.entries
-          .singleWhere((it) => it.value == handler)
-          .key;
-
-      print('request: ${request.runtimeType}\nhandlerType: $handlerType');
-
       return _invokeHandler(handler, request);
     } else {
       return WorkerResponse.error(RequestHandlerNotFound(request));
