@@ -19,8 +19,8 @@ set(CBL_DART_INCLUDES
 
 set(CBL_DART_SOURCES 
     src/Callbacks.cpp
-    src/CBLDart.cpp
-    src/FleeceDart.cpp
+    src/CBL+Dart.cpp
+    src/Fleece+Dart.cpp
     ${ROOT_DIR}/vendor/dart/include/dart/dart_api_dl.c
 )
 

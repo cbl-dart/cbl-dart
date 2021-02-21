@@ -8,13 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		C0971C0925CF753F006EE2DC /* CouchbaseLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0971BEA25CF7525006EE2DC /* CouchbaseLite.framework */; };
-		C0D8CBEB25CF2AD7008B87C0 /* FleeceDart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE525CF2AD7008B87C0 /* FleeceDart.h */; };
-		C0D8CBEC25CF2AD7008B87C0 /* FleeceDart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE625CF2AD7008B87C0 /* FleeceDart.cpp */; };
+		C0D8CBEB25CF2AD7008B87C0 /* Fleece+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */; };
+		C0D8CBEC25CF2AD7008B87C0 /* Fleece+Dart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */; };
 		C0D8CBED25CF2AD7008B87C0 /* Callbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE725CF2AD7008B87C0 /* Callbacks.cpp */; };
-		C0D8CBEE25CF2AD7008B87C0 /* CBLDart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE825CF2AD7008B87C0 /* CBLDart.h */; };
+		C0D8CBEE25CF2AD7008B87C0 /* CBL+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE825CF2AD7008B87C0 /* CBL+Dart.h */; };
 		C0D8CBEF25CF2AD7008B87C0 /* Callbacks.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE925CF2AD7008B87C0 /* Callbacks.h */; };
 		C0D8CBF325CF2C63008B87C0 /* cbldart_export.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBF225CF2C63008B87C0 /* cbldart_export.h */; };
-		C0D8CC3225CF2ECC008B87C0 /* CBLDart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CC3125CF2ECC008B87C0 /* CBLDart.cpp */; };
+		C0D8CC3225CF2ECC008B87C0 /* CBL+Dart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */; };
 		C0D8CC6525CF325B008B87C0 /* dart_api_dl.c in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CC6425CF325B008B87C0 /* dart_api_dl.c */; };
 /* End PBXBuildFile section */
 
@@ -66,13 +66,13 @@
 		C0971C1225CF7AAE006EE2DC /* CBL_Dart_Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = CBL_Dart_Release.xcconfig; sourceTree = "<group>"; };
 		C0971C1325CF7ABA006EE2DC /* CBL_Dart_Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = CBL_Dart_Debug.xcconfig; sourceTree = "<group>"; };
 		C0D8CBCB25CF285A008B87C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = XCode/Info.plist; sourceTree = SOURCE_ROOT; };
-		C0D8CBE525CF2AD7008B87C0 /* FleeceDart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FleeceDart.h; sourceTree = "<group>"; };
-		C0D8CBE625CF2AD7008B87C0 /* FleeceDart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FleeceDart.cpp; sourceTree = "<group>"; };
+		C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Fleece+Dart.h"; sourceTree = "<group>"; };
+		C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Fleece+Dart.cpp"; sourceTree = "<group>"; };
 		C0D8CBE725CF2AD7008B87C0 /* Callbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Callbacks.cpp; sourceTree = "<group>"; };
-		C0D8CBE825CF2AD7008B87C0 /* CBLDart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CBLDart.h; sourceTree = "<group>"; };
+		C0D8CBE825CF2AD7008B87C0 /* CBL+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBL+Dart.h"; sourceTree = "<group>"; };
 		C0D8CBE925CF2AD7008B87C0 /* Callbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Callbacks.h; sourceTree = "<group>"; };
 		C0D8CBF225CF2C63008B87C0 /* cbldart_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cbldart_export.h; sourceTree = "<group>"; };
-		C0D8CC3125CF2ECC008B87C0 /* CBLDart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CBLDart.cpp; sourceTree = "<group>"; };
+		C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "CBL+Dart.cpp"; sourceTree = "<group>"; };
 		C0D8CC6425CF325B008B87C0 /* dart_api_dl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dart_api_dl.c; path = ../../../../vendor/dart/include/dart/dart_api_dl.c; sourceTree = "<group>"; };
 		C0D8CD5125CF711A008B87C0 /* CouchbaseLite.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CouchbaseLite.framework; path = build/CouchbaseLite.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -148,10 +148,10 @@
 				C0D8CBF225CF2C63008B87C0 /* cbldart_export.h */,
 				C0D8CBE725CF2AD7008B87C0 /* Callbacks.cpp */,
 				C0D8CBE925CF2AD7008B87C0 /* Callbacks.h */,
-				C0D8CBE825CF2AD7008B87C0 /* CBLDart.h */,
-				C0D8CC3125CF2ECC008B87C0 /* CBLDart.cpp */,
-				C0D8CBE525CF2AD7008B87C0 /* FleeceDart.h */,
-				C0D8CBE625CF2AD7008B87C0 /* FleeceDart.cpp */,
+				C0D8CBE825CF2AD7008B87C0 /* CBL+Dart.h */,
+				C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */,
+				C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */,
+				C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */,
 			);
 			name = src;
 			path = "cbl-dart/src";
@@ -206,8 +206,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0D8CBEF25CF2AD7008B87C0 /* Callbacks.h in Headers */,
-				C0D8CBEB25CF2AD7008B87C0 /* FleeceDart.h in Headers */,
-				C0D8CBEE25CF2AD7008B87C0 /* CBLDart.h in Headers */,
+				C0D8CBEB25CF2AD7008B87C0 /* Fleece+Dart.h in Headers */,
+				C0D8CBEE25CF2AD7008B87C0 /* CBL+Dart.h in Headers */,
 				C0D8CBF325CF2C63008B87C0 /* cbldart_export.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -325,8 +325,8 @@
 			files = (
 				C0D8CBED25CF2AD7008B87C0 /* Callbacks.cpp in Sources */,
 				C0D8CC6525CF325B008B87C0 /* dart_api_dl.c in Sources */,
-				C0D8CC3225CF2ECC008B87C0 /* CBLDart.cpp in Sources */,
-				C0D8CBEC25CF2AD7008B87C0 /* FleeceDart.cpp in Sources */,
+				C0D8CC3225CF2ECC008B87C0 /* CBL+Dart.cpp in Sources */,
+				C0D8CBEC25CF2AD7008B87C0 /* Fleece+Dart.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

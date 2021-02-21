@@ -1,10 +1,9 @@
-#include "CBLDart.h"
-
 #include <mutex>
 #include <shared_mutex>
 
+#include "CBL+Dart.h"
 #include "Callbacks.h"
-#include "FleeceDart.h"
+#include "Fleece+Dart.h"
 #include "cbl/CouchbaseLite.h"
 #include "dart/dart_api_dl.h"
 

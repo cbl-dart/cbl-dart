@@ -1,6 +1,6 @@
-#include "FleeceDart.h"
-
 #include <iostream>
+
+#include "Fleece+Dart.h"
 
 // Fleece ----------------------------------------------------------------------
 
