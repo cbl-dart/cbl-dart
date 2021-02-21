@@ -20,9 +20,11 @@ void CallbackIsolate::finalizer(void *dart_callback_data, void *peer) {
 
   // Clean up the callbacks which have not been unregistered before the Isolate
   // died.
-  const std::unique_lock lock(isolatesByCallback_mutex);
   for (const auto callbackId : self.callbackIds) {
-    isolatesByCallback.erase(callbackId);
+    {
+      const std::unique_lock lock(isolatesByCallback_mutex);
+      isolatesByCallback.erase(callbackId);
+    }
 
     // Run finalizer if it exists.
     self.removeFinalizer(callbackId, true);
@@ -34,8 +36,10 @@ void CallbackIsolate::finalizer(void *dart_callback_data, void *peer) {
 CallbackId CallbackIsolate::registerCallback() {
   auto callbackId = createCallbackId();
 
-  const std::unique_lock lock(isolatesByCallback_mutex);
-  isolatesByCallback[callbackId] = this;
+  {
+    const std::unique_lock lock(isolatesByCallback_mutex);
+    isolatesByCallback[callbackId] = this;
+  }
 
   callbackIds.push_back(callbackId);
 
@@ -46,8 +50,10 @@ void CallbackIsolate::unregisterCallback(CallbackId callbackId,
                                          bool runFinalizer) {
   assert(callbackId != ILLEGAL_PORT);
 
-  const std::unique_lock lock(isolatesByCallback_mutex);
-  isolatesByCallback.erase(callbackId);
+  {
+    const std::unique_lock lock(isolatesByCallback_mutex);
+    isolatesByCallback.erase(callbackId);
+  }
 
   auto position = std::find(callbackIds.begin(), callbackIds.end(), callbackId);
   callbackIds.erase(position);

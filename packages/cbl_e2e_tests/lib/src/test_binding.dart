@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
@@ -69,6 +70,24 @@ abstract class CblE2eTestBinding {
 
   void _setupTestLifecycleHooks() {
     setUpAllFn(() async {
+      Logger.root.onRecord.listen((record) {
+        final stringBuilder = StringBuffer();
+
+        stringBuilder.write(
+          '[${record.level.name}] ${record.loggerName} | ${record.message}',
+        );
+
+        if (record.error != null) {
+          stringBuilder.write('\nError: ${record.error}');
+        }
+
+        if (record.stackTrace != null) {
+          stringBuilder.write('\n${record.stackTrace}');
+        }
+
+        print(stringBuilder.toString());
+      });
+
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
       await _initCouchbaseLite();
@@ -87,7 +106,8 @@ abstract class CblE2eTestBinding {
 
   Future<void> _initCouchbaseLite() async {
     cbl = await CouchbaseLite.init(libraries: libraries)
-      ..logLevel = LogLevel.info;
+      ..logLevel = LogLevel.info
+      ..logCallback = loggerCallback();
   }
 }
 

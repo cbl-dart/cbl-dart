@@ -1,14 +1,54 @@
 import 'dart:ffi';
 
+import 'package:logging/logging.dart';
+
 import 'bindings/bindings.dart';
 import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
+import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
 export 'bindings/bindings.dart'
     show LibraryConfiguration, Libraries, LogLevel, LogDomain;
+
+/// Extension to map between CouchbaseLite's [LogLevel] and `loggin`s [Level].
+extension LogLevelExt on LogLevel {
+  /// Returns a [Level] from the `loggin` package which corresponds to this
+  /// CouchbaseLite log level.
+  Level toLogginLevel() {
+    switch (this) {
+      case LogLevel.verbose:
+        return Level.FINER;
+      case LogLevel.debug:
+        return Level.FINE;
+      case LogLevel.info:
+        return Level.INFO;
+      case LogLevel.warning:
+        return Level.WARNING;
+      case LogLevel.error:
+        return Level.SEVERE;
+      case LogLevel.none:
+        throw UnsupportedError('LogLevel.none has not mapping to Level');
+    }
+  }
+}
+
+/// Returns a [LogCallback] which logs messages to a [Logger].
+///
+/// If [logger] is not provided a new `Logger` with name 'CBL' will be created
+/// and used.
+LogCallback loggerCallback({Logger? logger}) {
+  logger ??= Logger('CBL');
+
+  return (domain, level, message) {
+    logger!.log(
+      level.toLogginLevel(),
+      '${describeEnum(domain)}: $message',
+    );
+  };
+}
 
 /// A callback which is called with log messages from the CouchbaseLite logging
 /// system.
@@ -159,7 +199,7 @@ class CouchbaseLite {
     if (callback != null) {
       newCallbackId = NativeCallbacks.instance.registerCallback<LogCallback>(
         callback,
-        (callback, arguments, result) {
+        (callback, arguments, _) {
           final domain = arguments[0] as int;
           final level = arguments[1] as int;
           final message = arguments[2] as String;
