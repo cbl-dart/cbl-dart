@@ -55,24 +55,29 @@ void registerFinalzier(MemoryFinalizer finalizer) =>
 
 /// Runs the [body] in an [Arena] freeing all memory which is [scoped] during
 /// execution of [body] at the end of the execution.
+///
+/// If the result is a [Future] the allocated memory is only freed after them
+/// `Future` completes.
 R runArena<R>(R Function() body) {
   final arena = Arena();
-  Object? _result;
 
   try {
-    final result = runZoned(
-      () => body(),
-      zoneValues: {#_currentArena: arena},
-    );
-    _result = result;
-    return result;
-  } finally {
-    final result = _result;
+    final result = runZoned(body,
+        zoneValues: {
+          #_currentArena: arena,
+        },
+        zoneSpecification: ZoneSpecification());
+
     if (result is Future) {
-      result.whenComplete(arena.finalize);
-    } else {
-      arena.finalize();
+      return result.whenComplete(arena.finalize) as R;
     }
+
+    return result;
+  } catch (_) {
+    // `finalize` cannot be run in a `finally` block since the result could be
+    // a `Future`. In that case, `finalize` should be called in `whenComplete`.
+    arena.finalize();
+    rethrow;
   }
 }
 
