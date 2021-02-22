@@ -7,7 +7,12 @@ scripts:
 
   analyze: melos exec -- dart analyze --fatal-infos
 
-  test:all: melos run test:cbl && melos run test:standalone_dart
+  test:all: melos run test:cbl_native && melos run test:cbl && melos run test:standalone_dart
+
+  test:cbl_native:
+    run: melos exec -- flutter test --no-pub -r expanded
+    select-package:
+      scope: 'cbl_native'
 
   test:cbl:
     run: melos exec -- flutter test --no-pub -r expanded
