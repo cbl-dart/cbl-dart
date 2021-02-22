@@ -33,7 +33,9 @@ fi
 
 # === Constants ===
 
-projectDir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+toolsDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+nativeDir="$(cd "$toolsDir/.." && pwd)"
+projectDir="$(cd "$nativeDir/.." && pwd)"
 buildDir="$projectDir/build/android"
 libDir="$buildDir/lib"
 cblFlutterLibDir="$projectDir/packages/cbl_flutter_android/android/lib"
@@ -69,7 +71,7 @@ function buildArch() {
         -DANDROID_ABI="$arch" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         $options \
-        ../../..
+        "$nativeDir"
 
     "${cmake_path}/cmake" --build . --target CouchbaseLiteDart
 }
@@ -101,7 +103,7 @@ function copyAllArchsToLib() {
 function createLinksForDev() {
     cd "$projectDir/packages/cbl_flutter_android/android"
     rm -f lib
-    ln -s "../../../build/android/lib"
+    ln -s "$libDir"
 }
 
 "$@"

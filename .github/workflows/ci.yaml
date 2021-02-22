@@ -42,7 +42,7 @@ jobs:
       - name: Check formatting
         uses: jidicula/clang-format-action@v3.1.0
         with:
-          check-path: 'cbl-dart/src'
+          check-path: 'native/cbl-dart/src'
 
   analyze-dart:
     name: Analyze Dart code
@@ -92,8 +92,8 @@ jobs:
 
       - name: Build
         run: |
-          ./tools/build_linux.sh build
-          ./tools/build_linux.sh copyToLib
+          ./native/tools/build_linux.sh build
+          ./native/tools/build_linux.sh copyToLib
           tar -czf binaries-linux.tar.gz -C build/linux/lib .
 
       - name: Upload binaries
@@ -117,8 +117,8 @@ jobs:
 
       - name: Build
         run: |
-          ./tools/build_android.sh buildAllArchs
-          ./tools/build_android.sh copyAllArchsToLib
+          ./native/tools/build_android.sh buildAllArchs
+          ./native/tools/build_android.sh copyAllArchsToLib
           tar -czf binaries-android.tar.gz -C build/android/lib .
 
       - name: Upload binaries
@@ -160,7 +160,7 @@ jobs:
         env:
           DEVELOPMENT_TEAM: ${{ secrets.APPLE_DEVELOPMENT_TEAM }}
         run: |
-          ./tools/build_apple.sh buildPlatform ${{ matrix.platform }}
+          ./native/tools/build_apple.sh buildPlatform ${{ matrix.platform }}
           tar -czf binaries-apple-${{ matrix.platform }}.tar.gz -C build/apple/archives .
 
       - name: Upload binaries
@@ -208,7 +208,7 @@ jobs:
       - name: Create xcframeworks
         run: |
           mkdir -p "$XCFRAMEWORKS"
-          ./tools/build_apple.sh createXcframeworks
+          ./native/tools/build_apple.sh createXcframeworks
           tar -czf binaries-apple-xcframeworks.tar.gz -C "$XCFRAMEWORKS" .
 
       - name: Upload xcframeworks

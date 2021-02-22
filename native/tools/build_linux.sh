@@ -4,8 +4,9 @@ set -e
 
 # === Constants ===
 
-scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-projectDir="$(cd "$scriptDir/.." && pwd)"
+toolsDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+nativeDir="$(cd "$toolsDir/.." && pwd)"
+projectDir="$(cd "$nativeDir/.." && pwd)"
 buildDir="$projectDir/build/linux"
 libDir="$projectDir/build/linux/lib"
 
@@ -22,7 +23,7 @@ function build() {
         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
         -DCMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-        .
+        "$nativeDir"
 
     cmake --build "$buildDir"
 }
@@ -39,7 +40,7 @@ function copyToLib() {
 function createLinksForDev() {
     cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
     rm -f lib
-    ln -s "../../build/linux/lib"
+    ln -s "$libDir"
 }
 
 "$@"

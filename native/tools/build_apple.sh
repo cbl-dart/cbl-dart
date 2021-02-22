@@ -14,7 +14,9 @@ fi
 # === Constans ===
 
 developmentTeam="$DEVELOPMENT_TEAM"
-projectDir=$(cd "$(dirname ${BASH_SOURCE[0]})/.." && pwd)
+toolsDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+nativeDir="$(cd "$toolsDir/.." && pwd)"
+projectDir="$(cd "$nativeDir/.." && pwd)"
 archivesDir="$projectDir/build/apple/archives"
 xcframeworksDir="$projectDir/build/apple/Xcframeworks"
 
@@ -29,6 +31,8 @@ function buildPlatform() {
         echo "You have to set the DEVELOPMENT_TEAM environment variable."
         exit 1
     fi
+
+    cd "$nativeDir"
 
     local platformId="$1"
     local platform="${platforms[$platformId]}"
@@ -95,11 +99,11 @@ function createXcframeworks() {
 function createLinksForDev() {
     cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
     rm -f Frameworks
-    ln -s "../../build/apple/archives/macos.xcarchive/Products/Library/Frameworks"
+    ln -s "$archivesDir/macos.xcarchive/Products/Library/Frameworks"
 
     cd "$projectDir/packages/cbl_flutter_apple"
     rm -f Xcframeworks
-    ln -s "../../build/apple/Xcframeworks"
+    ln -s "$xcframeworksDir"
 }
 
 "$@"
