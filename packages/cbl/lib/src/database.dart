@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import 'bindings/bindings.dart';
 import 'blob.dart';
 import 'document.dart';
-import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
 import 'query.dart';
@@ -16,7 +15,7 @@ import 'replicator.dart' as repl;
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'bindings/bindings.dart'
+export 'package:cbl_ffi/cbl_ffi.dart'
     show EncryptionAlgorithm, DatabaseFlag, ConcurrencyControl;
 
 // region Internal API
@@ -346,7 +345,8 @@ class Database {
   /// Returns `null` if no document with [id] exists.
   Future<Document?> getDocument(String id) => _worker
       .execute(GetDatabaseDocument(_address, id))
-      .then((address) => address?.toPointer
+      .then((address) => address
+          ?.toPointer()
           .let((it) => createDocument(pointer: it, worker: _worker)));
 
   /// Reads a document from the database, in mutable form that can be updated
@@ -355,7 +355,8 @@ class Database {
   /// This function is otherwise identical to [getDocument].
   Future<MutableDocument?> getMutableDocument(String id) => _worker
       .execute(GetDatabaseMutableDocument(_address, id))
-      .then((address) => address?.toPointer
+      .then((address) => address
+          ?.toPointer()
           .let((it) => createMutableDocument(pointer: it, worker: _worker)));
 
   /// Saves a (mutable) document to the database.
@@ -372,7 +373,8 @@ class Database {
       _worker
           .execute(
               SaveDatabaseDocument(_address, doc.pointer.address, concurrency))
-          .then((address) => address.toPointer
+          .then((address) => address
+              .toPointer()
               .let((it) => createDocument(pointer: it, worker: _worker)));
 
   /// This function is the same as [saveDocument], except that it allows for
@@ -398,8 +400,8 @@ class Database {
       conflictHandler,
       (handler, arguments, result) {
         // Build arguments
-        final documentBeingSavedPointer = (arguments[0] as int).toPointer;
-        final conflictingDocumentPointer = (arguments[1] as int?)?.toPointer;
+        final documentBeingSavedPointer = (arguments[0] as int).toPointer();
+        final conflictingDocumentPointer = (arguments[1] as int?)?.toPointer();
 
         final documentBeingSaved = createMutableDocument(
           pointer: documentBeingSavedPointer,
@@ -434,7 +436,7 @@ class Database {
           conflictHandlerId,
         ))
         .then((address) =>
-            createDocument(pointer: address.toPointer, worker: _worker))
+            createDocument(pointer: address.toPointer(), worker: _worker))
         .whenComplete(() => _callbacks.unregisterCallback(conflictHandler));
   }
 
@@ -550,7 +552,7 @@ class Database {
   /// Returns the names of the indexes on this database, as an array of strings.
   Future<List<String>> indexNames() async =>
       _worker.execute(GetDatabaseIndexNames(_address)).then((address) =>
-          MutableArray.fromPointer(address.toPointer, retain: false)
+          MutableArray.fromPointer(address.toPointer(), retain: false)
               .map((it) => it.asString)
               .toList());
 

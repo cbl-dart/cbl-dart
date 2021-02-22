@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'bindings.dart';
+import 'libraries.dart';
 
 /// Subsystems that log information.
 enum LogDomain {
@@ -12,11 +12,11 @@ enum LogDomain {
 }
 
 extension IntLogDomainExt on LogDomain {
-  int get toInt => LogDomain.values.indexOf(this);
+  int toInt() => LogDomain.values.indexOf(this);
 }
 
 extension LogDomainIntExt on int {
-  LogDomain get toLogDomain => LogDomain.values[this];
+  LogDomain toLogDomain() => LogDomain.values[this];
 }
 
 /// Levels of log messages. Higher values are more important/severe. Each level
@@ -42,11 +42,11 @@ enum LogLevel {
 }
 
 extension IntLogLevelExt on LogLevel {
-  int get toInt => LogLevel.values.indexOf(this);
+  int toInt() => LogLevel.values.indexOf(this);
 }
 
 extension LogLevelIntExt on int {
-  LogLevel get toLogLevel => LogLevel.values[this];
+  LogLevel toLogLevel() => LogLevel.values[this];
 }
 
 typedef CBLLog_ConsoleLevel_C = Uint8 Function();

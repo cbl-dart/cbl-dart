@@ -2,19 +2,18 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import 'bindings/bindings.dart';
 import 'database.dart';
 import 'document.dart';
 import 'errors.dart';
-import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'bindings/bindings.dart'
+export 'package:cbl_ffi/cbl_ffi.dart'
     show ReplicatorType, ProxyType, ReplicatorActivityLevel, DocumentFlags;
 
 // region Internal API
@@ -29,7 +28,7 @@ Future<Replicator> createReplicator(
 
       final address = await worker.execute(NewReplicator(cblConfig.address));
 
-      return Replicator._(address.toPointer.cast(), worker);
+      return Replicator._(address.toPointer().cast(), worker);
     });
 
 // endregion
@@ -235,11 +234,12 @@ extension on ProxySettings {
   Pointer<CBLProxySettings> toCBLProxySettingScoped() {
     final settings = scoped(malloc<CBLProxySettings>());
 
-    settings.ref.type = type.toInt;
-    settings.ref.hostname = hostname.toNativeUtf8().asScoped;
+    settings.ref.type = type.toInt();
+    settings.ref.hostname = hostname.toNativeUtf8().withScoped();
     settings.ref.port = port;
-    settings.ref.username = (username?.toNativeUtf8().asScoped).orNullptr;
-    settings.ref.password = password.toNativeUtf8().asScoped;
+    settings.ref.username =
+        (username?.toNativeUtf8().withScoped()).elseNullptr();
+    settings.ref.password = password.toNativeUtf8().withScoped();
 
     return settings;
   }
@@ -369,8 +369,8 @@ extension on ReplicatorConfiguration {
     Pointer<CBLEndpoint> cblEndpoint;
     final endpoint = this.endpoint;
     if (endpoint is UrlEndpoint) {
-      cblEndpoint = _bindings
-          .endpointNewWithUrl(endpoint.url.toString().toNativeUtf8().asScoped);
+      cblEndpoint = _bindings.endpointNewWithUrl(
+          endpoint.url.toString().toNativeUtf8().withScoped());
     } else if (endpoint is LocalDbEndpoint) {
       assert(
         _bindings.endpointNewWithLocalDB != null,
@@ -386,10 +386,10 @@ extension on ReplicatorConfiguration {
     config.ref.endpoint = cblEndpoint;
 
     // replicatorType
-    config.ref.replicatorType = replicatorType.toInt;
+    config.ref.replicatorType = replicatorType.toInt();
 
     // continuous
-    config.ref.continuous = continuous.toInt;
+    config.ref.continuous = continuous.toInt();
 
     // authenticator
     final authenticator = this.authenticator;
@@ -398,13 +398,13 @@ extension on ReplicatorConfiguration {
 
       if (authenticator is BasicAuthenticator) {
         cblAuthenticator = _bindings.authNewBasic(
-          authenticator.username.toString().toNativeUtf8().asScoped,
-          authenticator.password.toString().toNativeUtf8().asScoped,
+          authenticator.username.toString().toNativeUtf8().withScoped(),
+          authenticator.password.toString().toNativeUtf8().withScoped(),
         );
       } else if (authenticator is SessionAuthenticator) {
         cblAuthenticator = _bindings.authNewSession(
-          authenticator.sessionID.toNativeUtf8().asScoped,
-          authenticator.cookieName.toNativeUtf8().asScoped,
+          authenticator.sessionID.toNativeUtf8().withScoped(),
+          authenticator.cookieName.toNativeUtf8().withScoped(),
         );
       } else {
         throw UnimplementedError(
@@ -440,11 +440,11 @@ extension on ReplicatorConfiguration {
 
     // pinnedServerCertificate
     config.ref.pinnedServerCertificate =
-        (pinnedServerCertificate?.toFLSliceScoped()).orNullptr;
+        (pinnedServerCertificate?.toFLSliceScoped()).elseNullptr();
 
     // trustedRootCertificates
     config.ref.trustedRootCertificates =
-        (trustedRootCertificates?.toFLSliceScoped()).orNullptr;
+        (trustedRootCertificates?.toFLSliceScoped()).elseNullptr();
 
     // channels
     final channels = this.channels;
@@ -476,7 +476,7 @@ extension on ReplicatorConfiguration {
           (filter, arguments, result) async {
             final docAddress = arguments[0] as int;
             final doc =
-                createDocument(pointer: docAddress.toPointer, retain: true);
+                createDocument(pointer: docAddress.toPointer(), retain: true);
             final isDeleted = arguments[1] as bool;
 
             var decision = false;
@@ -511,10 +511,10 @@ extension on ReplicatorConfiguration {
             final docId = arguments[0] as String;
             final localAddress = arguments[1] as int?;
             final local = localAddress?.let(
-                (it) => createDocument(pointer: it.toPointer, retain: true));
+                (it) => createDocument(pointer: it.toPointer(), retain: true));
             final remoteAddress = arguments[2] as int?;
             final remote = remoteAddress?.let(
-                (it) => createDocument(pointer: it.toPointer, retain: true));
+                (it) => createDocument(pointer: it.toPointer(), retain: true));
 
             var decision = local ?? remote;
             try {
@@ -610,7 +610,7 @@ extension CBLReplicatorStatusExt on CBLReplicatorStatus {
   ReplicatorStatus toReplicatorStatus() => runArena(() {
         final error = scoped(this.error.copyToPointer());
         return ReplicatorStatus(
-          activity.toReplicatorActivityLevel,
+          activity.toReplicatorActivityLevel(),
           ReplicatorProgress(
             progress.fractionCompleted,
             progress.documentCount,
@@ -785,7 +785,8 @@ class Replicator {
         finishBlockingCall: true,
         eventCreator: (_, arguments) {
           final statusAddress = arguments[0] as int;
-          return statusAddress.toPointer
+          return statusAddress
+              .toPointer()
               .cast<CBLReplicatorStatus>()
               .ref
               .toReplicatorStatus();
@@ -811,7 +812,7 @@ class Replicator {
   Future<Dict> pendingDocumentIDs() => _worker
       .execute(GetReplicatorPendingDocumentIDs(_pointer.address))
       .then((address) => Dict.fromPointer(
-            address.toPointer,
+            address.toPointer(),
             bindToValue: true,
           ));
 

@@ -5,10 +5,11 @@ export 'src/document.dart'
     hide createDocument, createMutableDocument, InternalDocumentExt;
 export 'src/errors.dart'
     hide
+        globalError,
         exceptionFromCBLError,
         checkError,
         checkResultAndError,
         CheckResultAndErrorExt;
-export 'src/fleece.dart' hide SlotSetter;
+export 'src/fleece.dart' hide SlotSetter, globalSlice;
 export 'src/query.dart' hide createQuery;
 export 'src/replicator.dart' hide createReplicator, CBLReplicatorStatusExt;

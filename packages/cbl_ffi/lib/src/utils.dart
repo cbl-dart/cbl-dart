@@ -3,9 +3,7 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
-export 'package:ffi/ffi.dart';
-
-// Allocation ------------------------------------------------------------------
+// === Allocation ==============================================================
 
 typedef MemoryFinalizer = void Function();
 
@@ -81,36 +79,36 @@ R runArena<R>(R Function() body) {
   }
 }
 
-// Conversion ------------------------------------------------------------------
+// === Conversion ==============================================================
 
 extension IntBoolExt on int {
-  bool get toBool => this == 1;
+  bool toBool() => this == 1;
 }
 
 extension BoolIntExt on bool {
-  int get toInt => this ? 1 : 0;
+  int toInt() => this ? 1 : 0;
 }
 
 extension AddressPointerExt on int {
-  Pointer<Void> get toPointer => Pointer.fromAddress(this);
+  Pointer<Void> toPointer() => Pointer.fromAddress(this);
 }
 
 extension NullableAddressPointerExt on int? {
-  Pointer<Void> get toPointer => (this?.toPointer).orNullptr;
+  Pointer<Void> toPointer() => (this?.toPointer()).elseNullptr();
 }
 
 final _scoped = scoped;
 
 extension PointerExt<T extends NativeType> on Pointer<T> {
   /// If this is the [nullptr] return `null` else this pointer address.
-  int? get addressOrNull => this == nullptr ? null : address;
+  int? toAddressOrNull() => this == nullptr ? null : address;
 
   /// `null` if this pointer is the [nullptr]. Otherwise this Pointer.
-  Pointer<T>? get asNullable => this == nullptr ? null : this;
+  Pointer<T>? toNullable() => this == nullptr ? null : this;
 
-  Pointer<T> get asScoped => _scoped(this);
+  Pointer<T> withScoped() => _scoped(this);
 }
 
 extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
-  Pointer<T> get orNullptr => this == null ? nullptr : this!;
+  Pointer<T> elseNullptr() => this == null ? nullptr : this!;
 }

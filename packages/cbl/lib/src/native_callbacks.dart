@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:isolate';
 
-import 'bindings/bindings.dart';
-import 'ffi_utils.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import 'utils.dart';
 
 /// Function which is given to callbacks to respond to caller with a result.
@@ -93,7 +93,7 @@ class NativeCallbacks {
         .map((e) => e.key)
         .first;
 
-    _bindings.unregisterCallback(callbackId, runFinalizer.toInt);
+    _bindings.unregisterCallback(callbackId, runFinalizer.toInt());
 
     _callbacks.remove(callbackId);
     _callbackHandlers.remove(callbackId);

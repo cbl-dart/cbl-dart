@@ -1,5 +1,4 @@
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/bindings/bindings.dart';
 
 import 'test_binding.dart';
 

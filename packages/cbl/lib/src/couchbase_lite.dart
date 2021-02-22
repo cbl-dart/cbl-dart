@@ -1,8 +1,9 @@
 import 'dart:ffi';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:logging/logging.dart';
+import 'package:synchronized/synchronized.dart';
 
-import 'bindings/bindings.dart';
 import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
@@ -10,7 +11,7 @@ import 'native_callbacks.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'bindings/bindings.dart'
+export 'package:cbl_ffi/cbl_ffi.dart'
     show LibraryConfiguration, Libraries, LogLevel, LogDomain;
 
 /// Extension to map between CouchbaseLite's [LogLevel] and `loggin`s [Level].
@@ -71,6 +72,10 @@ typedef LogCallback = void Function(
 
 /// The initializer and entry point to the Couchbase Lite API.
 class CouchbaseLite {
+  static CouchbaseLite? _instance;
+
+  static final lock = Lock();
+
   /// Id of the [Worker] which is not bound to one specific object.
   static final _standaloneWorkerId = 'Standalone';
 
@@ -79,18 +84,21 @@ class CouchbaseLite {
 
   /// Initializes the Couchbase Lite API and returns [CouchbaseLite], which is
   /// the entry point to the API.
-  static Future<CouchbaseLite> init({required Libraries libraries}) async {
-    CBLBindings.initInstance(libraries);
+  static Future<CouchbaseLite> init({required Libraries libraries}) =>
+      lock.synchronized(() async {
+        if (_instance != null) return _instance!;
 
-    SlotSetter.register(blobSlotSetter);
+        CBLBindings.initInstance(libraries);
 
-    final workerManager = CblWorkerManager(libraries: libraries);
+        SlotSetter.register(blobSlotSetter);
 
-    return CouchbaseLite._(
-      workerManager,
-      await workerManager.getWorker(id: _standaloneWorkerId),
-    );
-  }
+        final workerManager = CblWorkerManager(libraries: libraries);
+
+        return _instance = CouchbaseLite._(
+          workerManager,
+          await workerManager.getWorker(id: _standaloneWorkerId),
+        );
+      });
 
   /// Private constructor to allow control over instance creation.
   CouchbaseLite._(this._workerManager, this._worker);
@@ -173,9 +181,9 @@ class CouchbaseLite {
   /// - [logCallback] to configure a custom log callback to handle log messages.
   /// - [restoreDefaultLogCallback] for more info about the default log
   ///   behavior.
-  LogLevel get logLevel => _logBindings.consoleLevel().toLogLevel;
+  LogLevel get logLevel => _logBindings.consoleLevel().toLogLevel();
 
-  set logLevel(LogLevel level) => _logBindings.setConsoleLevel(level.toInt);
+  set logLevel(LogLevel level) => _logBindings.setConsoleLevel(level.toInt());
 
   static LogCallback? _logCallback;
 
@@ -203,7 +211,7 @@ class CouchbaseLite {
           final domain = arguments[0] as int;
           final level = arguments[1] as int;
           final message = arguments[2] as String;
-          callback(domain.toLogDomain, level.toLogLevel, message);
+          callback(domain.toLogDomain(), level.toLogLevel(), message);
         },
       );
     }

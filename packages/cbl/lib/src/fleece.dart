@@ -1,14 +1,16 @@
 import 'dart:collection';
 import 'dart:ffi';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 import 'package:ffi/ffi.dart';
 
-import 'bindings/bindings.dart';
 import 'errors.dart';
-import 'ffi_utils.dart';
 
-export 'bindings/fleece.dart' show ValueType, CopyFlag;
+export 'package:cbl_ffi/cbl_ffi.dart' show ValueType, CopyFlag;
+
+// TODO: free allocated memory when Isolate goes away
+late final globalSlice = malloc<FLSlice>();
 
 // === Doc =====================================================================
 
@@ -25,11 +27,11 @@ class Doc {
         final error = malloc<Uint8>();
 
         final docPointer =
-            _bindings.fromJSON(json.toNativeUtf8().asScoped, error);
+            _bindings.fromJSON(json.toNativeUtf8().withScoped(), error);
         if (docPointer == nullptr) {
           throw FleeceException(
             'Could not create Doc from json.',
-            error.value.toFleeceErrorCode,
+            error.value.toFleeceErrorCode(),
           );
         }
 
@@ -96,7 +98,7 @@ class Value {
     );
 
     if (bindToValue ?? false) {
-      _bindings.bindToDartObject(this, ref, (retain ?? true).toInt);
+      _bindings.bindToDartObject(this, ref, (retain ?? true).toInt());
     }
   }
 
@@ -111,7 +113,7 @@ class Value {
   }
 
   /// Returns the data type of an arbitrary Value.
-  ValueType get type => _bindings.getType(ref).toFleeceValueType;
+  ValueType get type => _bindings.getType(ref).toFleeceValueType();
 
   /// Whether this value represents an `undefined` value.
   bool get isUndefined => type == ValueType.undefined;
@@ -120,15 +122,15 @@ class Value {
   bool get isNull => type == ValueType.Null;
 
   /// Returns true if the value is non-null and represents an integer.
-  bool get isInteger => _bindings.isInteger(ref).toBool;
+  bool get isInteger => _bindings.isInteger(ref).toBool();
 
   /// Returns true if the value is non-null and represents a 64-bit
   /// floating-point number.
-  bool get isDouble => _bindings.isDouble(ref).toBool;
+  bool get isDouble => _bindings.isDouble(ref).toBool();
 
   /// Returns a value coerced to boolean. This will be true unless the value is
   /// undefined, null, false, or zero.
-  bool get asBool => _bindings.asBool(ref).toBool;
+  bool get asBool => _bindings.asBool(ref).toBool();
 
   /// Returns a value coerced to an integer. True and false are returned as 1
   /// and 0, and floating-point numbers are rounded. All other types are
@@ -168,7 +170,7 @@ class Value {
     bool json5 = false,
     bool canonical = true,
   }) {
-    _bindings.toJson(ref, json5.toInt, canonical.toInt, globalSlice);
+    _bindings.toJson(ref, json5.toInt(), canonical.toInt(), globalSlice);
     return globalSlice.toDartStringAndFree();
   }
 
@@ -200,7 +202,7 @@ class Value {
       identical(this, other) ||
       other is Value &&
           runtimeType == other.runtimeType &&
-          _bindings.isEqual(ref, other.ref).toBool;
+          _bindings.isEqual(ref, other.ref).toBool();
 
   @override
   int get hashCode {
@@ -271,7 +273,7 @@ class Array extends Value with ListMixin<Value> {
   set length(int length) => throw _immutableValueException();
 
   @override
-  bool get isEmpty => _bindings.isEmpty(ref).toBool;
+  bool get isEmpty => _bindings.isEmpty(ref).toBool();
 
   @override
   Value get first => this[0];
@@ -353,7 +355,7 @@ class MutableArray extends Array {
 
   /// Returns true if the [Array] has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(ref).toBool;
+  bool get isChanged => _bindings.isChanged(ref).toBool();
 
   @override
   set length(int length) => _bindings.resize(ref, length);
@@ -455,7 +457,7 @@ class Dict extends Value with MapMixin<String, Value> {
   /// Returns true if a dictionary is empty. Depending on the dictionary's
   /// representation, this can be faster than `count == 0`.
   @override
-  bool get isEmpty => _bindings.isEmpty(ref).toBool;
+  bool get isEmpty => _bindings.isEmpty(ref).toBool();
 
   @override
   bool get isNotEmpty => !isEmpty;
@@ -472,7 +474,7 @@ class Dict extends Value with MapMixin<String, Value> {
   @override
   Value operator [](Object? key) => runArena(() {
         assert(key is String, 'Dict key must be a non-null String');
-        final keyPointer = (key as String).toNativeUtf8().asScoped;
+        final keyPointer = (key as String).toNativeUtf8().withScoped();
         return Value.fromPointer(_bindings.get(ref, keyPointer));
       });
 
@@ -525,7 +527,7 @@ class _DictKeyIterator extends Iterator<String> {
     iterator ??= _bindings.begin(this, dict.ref.cast());
 
     // The iterator has no more elements.
-    if (iterator!.ref.done.toBool) return false;
+    if (iterator!.ref.done.toBool()) return false;
 
     // Advance to the next item.
     _bindings.next(iterator!);
@@ -596,11 +598,11 @@ class MutableDict extends Dict {
 
   /// Returns true if the Dict has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(ref).toBool;
+  bool get isChanged => _bindings.isChanged(ref).toBool();
 
   @override
   void operator []=(String key, Object? value) => runArena(() {
-        final slot = _bindings.set(ref, key.toNativeUtf8().asScoped);
+        final slot = _bindings.set(ref, key.toNativeUtf8().withScoped());
         _setSlotValue(slot, value);
       });
 
@@ -619,7 +621,7 @@ class MutableDict extends Dict {
         assert(key is String);
         final value = this[key];
 
-        _bindings.remove(ref, (key as String).toNativeUtf8().asScoped);
+        _bindings.remove(ref, (key as String).toNativeUtf8().withScoped());
 
         return value;
       });
@@ -632,7 +634,7 @@ class MutableDict extends Dict {
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(String key) => runArena(() {
         final pointer =
-            _bindings.getMutableDict(ref, key.toNativeUtf8().asScoped);
+            _bindings.getMutableDict(ref, key.toNativeUtf8().withScoped());
         return pointer == nullptr ? null : MutableDict.fromPointer(pointer);
       });
 
@@ -644,7 +646,7 @@ class MutableDict extends Dict {
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(String key) => runArena(() {
         final pointer =
-            _bindings.getMutableArray(ref, key.toNativeUtf8().asScoped);
+            _bindings.getMutableArray(ref, key.toNativeUtf8().withScoped());
         return pointer == nullptr ? null : MutableArray.fromPointer(pointer);
       });
 }
@@ -700,7 +702,7 @@ class _DefaultSlotSetter implements SlotSetter {
     if (value == null) {
       _slotBindings.setNull(slot);
     } else if (value is bool) {
-      _slotBindings.setBool(slot, value.toInt);
+      _slotBindings.setBool(slot, value.toInt());
     } else if (value is int) {
       _slotBindings.setInt(slot, value);
     } else if (value is double) {
@@ -708,7 +710,7 @@ class _DefaultSlotSetter implements SlotSetter {
     } else if (value is String) {
       runArena(() {
         _slotBindings.setString(
-            slot, (value as String).toNativeUtf8().asScoped);
+            slot, (value as String).toNativeUtf8().withScoped());
       });
     } else if (value is Value) {
       _slotBindings.setValue(slot, value.ref);

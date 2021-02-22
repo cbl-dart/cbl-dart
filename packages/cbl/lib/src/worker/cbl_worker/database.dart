@@ -1,12 +1,11 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
-import '../../bindings/bindings.dart';
 import '../../database.dart';
 import '../../errors.dart';
-import '../../ffi_utils.dart';
 import '../request_router.dart';
 import '../worker.dart';
 import 'shared.dart';
@@ -41,7 +40,7 @@ extension on DatabaseConfiguration {
   Pointer<CBLDatabaseConfiguration> toCBLDatabaseConfiguration() =>
       scoped(malloc<CBLDatabaseConfiguration>())
         ..ref.directory =
-            directory == null ? nullptr : directory!.toNativeUtf8().asScoped
+            directory == null ? nullptr : directory!.toNativeUtf8().withScoped()
         ..ref.flags = flags.toCFlags()
         ..ref.encryptionKey = encryptionKey?.toCBLEncryptionKey() ?? nullptr;
 }
@@ -66,12 +65,12 @@ class DatabaseExists extends WorkerRequest<bool> {
 
 bool databaseExists(DatabaseExists request) => _bindings
     .databaseExists(
-      request.name.toNativeUtf8().asScoped,
+      request.name.toNativeUtf8().withScoped(),
       request.directory == null
           ? nullptr
-          : request.directory!.toNativeUtf8().asScoped,
+          : request.directory!.toNativeUtf8().withScoped(),
     )
-    .toBool;
+    .toBool();
 
 class CopyDatabase extends WorkerRequest<void> {
   CopyDatabase(this.fromPath, this.toName, this.config);
@@ -83,12 +82,12 @@ class CopyDatabase extends WorkerRequest<void> {
 
 void copyDatabase(CopyDatabase request) => _bindings
     .copyDatabase(
-      request.fromPath.toNativeUtf8().asScoped,
-      request.toName.toNativeUtf8().asScoped,
+      request.fromPath.toNativeUtf8().withScoped(),
+      request.toName.toNativeUtf8().withScoped(),
       request.config?.toCBLDatabaseConfiguration() ?? nullptr,
       globalError,
     )
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class DeleteDatabaseFile extends WorkerRequest<bool> {
@@ -99,13 +98,13 @@ class DeleteDatabaseFile extends WorkerRequest<bool> {
 
 bool deleteDatabaseFile(DeleteDatabaseFile request) => _bindings
     .deleteDatabase(
-      request.name.toNativeUtf8().asScoped,
+      request.name.toNativeUtf8().withScoped(),
       request.directory == null
           ? nullptr
-          : request.directory!.toNativeUtf8().asScoped,
+          : request.directory!.toNativeUtf8().withScoped(),
       globalError,
     )
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class OpenDatabase extends WorkerRequest<int> {
@@ -116,7 +115,7 @@ class OpenDatabase extends WorkerRequest<int> {
 
 int openDatabase(OpenDatabase request) => _bindings
     .open(
-      request.name.toNativeUtf8().asScoped,
+      request.name.toNativeUtf8().withScoped(),
       request.config?.toCBLDatabaseConfiguration() ?? nullptr,
       globalError,
     )
@@ -160,15 +159,19 @@ class CloseDatabase extends ObjectRequest<void> {
   CloseDatabase(int address) : super(address);
 }
 
-void closeDatabase(CloseDatabase request) =>
-    _bindings.close(request.pointer, globalError).toBool.checkResultAndError();
+void closeDatabase(CloseDatabase request) => _bindings
+    .close(request.pointer, globalError)
+    .toBool()
+    .checkResultAndError();
 
 class DeleteDatabase extends ObjectRequest<void> {
   DeleteDatabase(int address) : super(address);
 }
 
-void deleteDatabase(DeleteDatabase request) =>
-    _bindings.delete(request.pointer, globalError).toBool.checkResultAndError();
+void deleteDatabase(DeleteDatabase request) => _bindings
+    .delete(request.pointer, globalError)
+    .toBool()
+    .checkResultAndError();
 
 class CompactDatabase extends ObjectRequest<void> {
   CompactDatabase(int address) : super(address);
@@ -176,7 +179,7 @@ class CompactDatabase extends ObjectRequest<void> {
 
 void compactDatabase(CompactDatabase request) => _bindings
     .compact(request.pointer, globalError)
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class BeginDatabaseBatch extends ObjectRequest<void> {
@@ -185,7 +188,7 @@ class BeginDatabaseBatch extends ObjectRequest<void> {
 
 void beginDatabaseBatch(BeginDatabaseBatch request) => _bindings
     .beginBatch(request.pointer, globalError)
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class EndDatabaseBatch extends ObjectRequest<void> {
@@ -194,7 +197,7 @@ class EndDatabaseBatch extends ObjectRequest<void> {
 
 void endDatabaseBatch(EndDatabaseBatch request) => _bindings
     .endBatch(request.pointer, globalError)
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class RekeyDatabase extends ObjectRequest<void> {
@@ -209,7 +212,7 @@ void rekeyDatabase(RekeyDatabase request) {
 
   _bindings.rekey!
       .call(request.pointer, cblEncryptionKey, globalError)
-      .toBool
+      .toBool()
       .checkResultAndError();
 }
 
@@ -219,8 +222,8 @@ class GetDatabaseDocument extends ObjectRequest<int?> {
 }
 
 int? getDatabaseDocument(GetDatabaseDocument request) => _bindings
-    .getDocument(request.pointer, request.id.toNativeUtf8().asScoped)
-    .addressOrNull;
+    .getDocument(request.pointer, request.id.toNativeUtf8().withScoped())
+    .toAddressOrNull();
 
 class GetDatabaseMutableDocument extends ObjectRequest<int?> {
   GetDatabaseMutableDocument(int address, this.id) : super(address);
@@ -228,8 +231,8 @@ class GetDatabaseMutableDocument extends ObjectRequest<int?> {
 }
 
 int? getDatabaseMutableDocument(GetDatabaseMutableDocument request) => _bindings
-    .getMutableDocument(request.pointer, request.id.toNativeUtf8().asScoped)
-    .addressOrNull;
+    .getMutableDocument(request.pointer, request.id.toNativeUtf8().withScoped())
+    .toAddressOrNull();
 
 class SaveDatabaseDocument extends ObjectRequest<int> {
   SaveDatabaseDocument(int address, this.docAdress, this.concurrency)
@@ -241,7 +244,7 @@ class SaveDatabaseDocument extends ObjectRequest<int> {
 int saveDatabaseDocument(SaveDatabaseDocument request) => _bindings
     .saveDocument(
       request.pointer,
-      request.docAdress.toPointer,
+      request.docAdress.toPointer(),
       concurrencyControlToC(request.concurrency),
       globalError,
     )
@@ -260,7 +263,7 @@ int saveDatabaseDocumentResolving(SaveDatabaseDocumentResolving request) =>
     _bindings
         .saveDocumentResolving(
           request.pointer,
-          request.docAddress.toPointer,
+          request.docAddress.toPointer(),
           request.conflictResolverId,
           globalError,
         )
@@ -275,10 +278,10 @@ class PurgeDatabaseDocumentById extends ObjectRequest<bool> {
 bool purgeDatabaseDocumentById(PurgeDatabaseDocumentById request) => _bindings
     .purgeDocumentByID(
       request.pointer,
-      request.id.toNativeUtf8().asScoped,
+      request.id.toNativeUtf8().withScoped(),
       globalError,
     )
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class GetDatabaseDocumentExpiration extends ObjectRequest<DateTime?> {
@@ -289,7 +292,7 @@ class GetDatabaseDocumentExpiration extends ObjectRequest<DateTime?> {
 DateTime? getDatabaseDocumentExpiration(GetDatabaseDocumentExpiration request) {
   final timestamp = _bindings.getDocumentExpiration(
     request.pointer,
-    request.id.toNativeUtf8().asScoped,
+    request.id.toNativeUtf8().withScoped(),
     globalError,
   );
 
@@ -311,11 +314,11 @@ void setDatabaseDocumentExpiration(SetDatabaseDocumentExpiration request) =>
     _bindings
         .setDocumentExpiration(
           request.pointer,
-          request.id.toNativeUtf8().asScoped,
+          request.id.toNativeUtf8().withScoped(),
           request.time == null ? 0 : request.time!.millisecondsSinceEpoch,
           globalError,
         )
-        .toBool
+        .toBool()
         .checkResultAndError();
 
 class DeleteDocument extends ObjectRequest<void> {
@@ -329,7 +332,7 @@ void deleteDocument(DeleteDocument request) => _docBindings
       concurrencyControlToC(request.concurrency),
       globalError,
     )
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class PurgeDocument extends ObjectRequest<void> {
@@ -338,7 +341,7 @@ class PurgeDocument extends ObjectRequest<void> {
 
 void purgeDocument(PurgeDocument request) => _docBindings
     .purge(request.pointer, globalError)
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class AddDocumentChangeListener extends ObjectRequest<void> {
@@ -351,7 +354,7 @@ class AddDocumentChangeListener extends ObjectRequest<void> {
 void addDocumentChangeListener(AddDocumentChangeListener request) =>
     _bindings.addDocumentChangeListener(
       request.pointer,
-      request.docId.toNativeUtf8().asScoped,
+      request.docId.toNativeUtf8().withScoped(),
       request.listenerId,
     );
 
@@ -382,14 +385,14 @@ extension on Pointer<CBLIndexSpec> {
       throw UnimplementedError('Index is not implemented: $index');
     }
 
-    ref.type = indexType.toInt;
-    ref.keyExpression = index.keyExpressions.toNativeUtf8().asScoped;
+    ref.type = indexType.toInt();
+    ref.keyExpression = index.keyExpressions.toNativeUtf8().withScoped();
 
     if (index is FullTextIndex) {
-      ref.ignoreAccents = index.ignoreAccents.toInt;
-      ref.language = index.language?.toNativeUtf8().asScoped ?? nullptr;
+      ref.ignoreAccents = index.ignoreAccents.toInt();
+      ref.language = index.language?.toNativeUtf8().withScoped() ?? nullptr;
     } else {
-      ref.ignoreAccents = false.toInt;
+      ref.ignoreAccents = false.toInt();
       ref.language == nullptr;
     }
   }
@@ -398,11 +401,11 @@ extension on Pointer<CBLIndexSpec> {
 void createDatabaseIndex(CreateDatabaseIndex request) => _bindings
     .createIndex(
       request.pointer,
-      request.name.toNativeUtf8().asScoped,
+      request.name.toNativeUtf8().withScoped(),
       scoped(malloc<CBLIndexSpec>())..initScoped(request.index),
       globalError,
     )
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class DeleteDatabaseIndex extends ObjectRequest<void> {
@@ -413,10 +416,10 @@ class DeleteDatabaseIndex extends ObjectRequest<void> {
 void deleteDatabaseIndex(DeleteDatabaseIndex request) => _bindings
     .deleteIndex(
       request.pointer,
-      request.name.toNativeUtf8().asScoped,
+      request.name.toNativeUtf8().withScoped(),
       globalError,
     )
-    .toBool
+    .toBool()
     .checkResultAndError();
 
 class GetDatabaseIndexNames extends ObjectRequest<int> {

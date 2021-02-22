@@ -1,8 +1,8 @@
 import 'dart:ffi';
 
-import '../../bindings/bindings.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../../errors.dart';
-import '../../ffi_utils.dart';
 import '../request_router.dart';
 import 'shared.dart';
 
@@ -25,7 +25,7 @@ class ReadFromBlobReadStream extends ObjectRequest<int> {
 
   final int bufferSize;
 
-  Pointer<Uint8> get bufferPointer => _bufferAddress.toPointer.cast();
+  Pointer<Uint8> get bufferPointer => _bufferAddress.toPointer().cast();
 }
 
 int readFromBlobReadStream(ReadFromBlobReadStream request) {
@@ -80,7 +80,7 @@ void writeToBlobWriteStream(WriteToBlobWriteStream request) =>
           request.chunkSize,
           globalError,
         )
-        .toBool
+        .toBool()
         .checkResultAndError();
 
 class CloseBlobWriteStream extends ObjectRequest<void> {
@@ -99,7 +99,7 @@ class CreateBlobWithWriteStream extends ObjectRequest<int> {
 int createBlobWithWriteStream(CreateBlobWithWriteStream request) =>
     _writeStreamBindings
         .createBlobWithStream(
-          (request.contentType?.toNativeUtf8().asScoped).orNullptr,
+          (request.contentType?.toNativeUtf8().withScoped()).elseNullptr(),
           request.pointer.cast(),
         )
         .address;

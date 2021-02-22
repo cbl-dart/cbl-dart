@@ -12,7 +12,7 @@ extension ValueExt<T> on T {
 }
 
 /// Returns the name of a enum value.
-/// 
+///
 /// This is different from what the `toString` method of an enum value returns,
 /// in that it does not have the enum name as a prefix.
 String describeEnum(Object value) => value.toString().split('.')[1];

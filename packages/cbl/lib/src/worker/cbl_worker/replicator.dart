@@ -1,6 +1,6 @@
-import '../../bindings/bindings.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../../errors.dart';
-import '../../ffi_utils.dart';
 import '../../replicator.dart';
 import '../request_router.dart';
 import 'shared.dart';
@@ -42,8 +42,8 @@ class SetReplicatorHostReachable extends ObjectRequest<void> {
   final bool reachable;
 }
 
-void setReplicatorHostReachable(SetReplicatorHostReachable request) =>
-    _bindings.setHostReachable(request.pointer.cast(), request.reachable.toInt);
+void setReplicatorHostReachable(SetReplicatorHostReachable request) => _bindings
+    .setHostReachable(request.pointer.cast(), request.reachable.toInt());
 
 class SetReplicatorSuspended extends ObjectRequest<void> {
   SetReplicatorSuspended(int address, this.suspended) : super(address);
@@ -51,7 +51,7 @@ class SetReplicatorSuspended extends ObjectRequest<void> {
 }
 
 void setReplicatorSuspended(SetReplicatorSuspended request) =>
-    _bindings.setSuspended(request.pointer.cast(), request.suspended.toInt);
+    _bindings.setSuspended(request.pointer.cast(), request.suspended.toInt());
 
 class GetReplicatorStatus extends ObjectRequest<ReplicatorStatus> {
   GetReplicatorStatus(int address) : super(address);
@@ -79,10 +79,10 @@ bool getReplicatorIsDocumentPening(GetReplicatorIsDocumentPening request) =>
     _bindings
         .isDocumentPending(
           request.pointer.cast(),
-          request.docId.toNativeUtf8().asScoped,
+          request.docId.toNativeUtf8().withScoped(),
           globalError,
         )
-        .toBool
+        .toBool()
         .checkResultAndError();
 
 class AddReplicatorChangeListener extends ObjectRequest<void> {

@@ -2,14 +2,9 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
-import 'bindings.dart';
+import 'libraries.dart';
 
-typedef CBLDart_InitDartApiDL_C = Void Function(
-  Pointer<Void> data,
-);
-typedef CBLDart_InitDartApiDL = void Function(
-  Pointer<Void> data,
-);
+// === Option ==================================================================
 
 class Option {
   const Option(this.debugName, this.bits);
@@ -35,7 +30,16 @@ extension OptionIterable<T extends Option> on Iterable<T> {
       where((option) => (flags & option.bits) == option.bits).toSet();
 }
 
-// region Error
+// === Dart ====================================================================
+
+typedef CBLDart_InitDartApiDL_C = Void Function(
+  Pointer<Void> data,
+);
+typedef CBLDart_InitDartApiDL = void Function(
+  Pointer<Void> data,
+);
+
+// === CBLError ================================================================
 
 enum ErrorDomain {
   couchbaseLite,
@@ -137,16 +141,12 @@ typedef CBLError_Message = Pointer<Utf8> Function(
   Pointer<CBLError> error,
 );
 
-late final globalError = CBLBindings.instance.base.globalError;
-
 extension CBLErrorPointerExt on Pointer<CBLError> {
   /// Whether [CBLError.code] == 0.
   bool get isOk => ref.code == 0;
 }
 
-// endregion
-
-late final globalSlice = CBLBindings.instance.base.globalSlice;
+// === CBLRefCounted ===========================================================
 
 typedef CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
   Handle handle,
@@ -159,8 +159,12 @@ typedef CBLDart_BindCBLRefCountedToDartObject = void Function(
   int retain,
 );
 
+// === CBLListener =============================================================
+
 typedef CBLListener_Remove_C = Void Function(Pointer<Void> listenerToken);
 typedef CBLListener_Remove = void Function(Pointer<Void> listenerToken);
+
+// === BaseBindings ============================================================
 
 class BaseBindings {
   BaseBindings(Libraries libs)
@@ -168,8 +172,6 @@ class BaseBindings {
             .lookupFunction<CBLDart_InitDartApiDL_C, CBLDart_InitDartApiDL>(
           'CBLDart_InitDartApiDL',
         ),
-        globalError = malloc(),
-        globalSlice = malloc(),
         bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
             CBLDart_BindCBLRefCountedToDartObject_C,
             CBLDart_BindCBLRefCountedToDartObject>(
@@ -185,8 +187,6 @@ class BaseBindings {
         );
 
   final CBLDart_InitDartApiDL initDartApiDL;
-  final Pointer<CBLError> globalError;
-  final Pointer<FLSlice> globalSlice;
   final CBLDart_BindCBLRefCountedToDartObject bindCBLRefCountedToDartObject;
   final CBLError_Message Error_Message;
   final CBLListener_Remove Listener_Remove;

@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'bindings.dart';
+import 'libraries.dart';
 
 typedef CBLDart_NewCallbackIsolate_C = Pointer<Void> Function(
   Handle handle,

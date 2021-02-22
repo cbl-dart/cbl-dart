@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ffi';
 
-import 'bindings/bindings.dart';
-import 'ffi_utils.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import 'fleece.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'bindings/query.dart' show QueryLanguage;
+export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
 
 late final _baseBindings = CBLBindings.instance.base;
 
@@ -28,7 +28,7 @@ Future<Query> createQuery({
   final address = await worker
       .execute(CreateDatabaseQuery(db.address, queryString, language));
 
-  return Query._(address.toPointer, worker, retain);
+  return Query._(address.toPointer(), worker, retain);
 }
 
 String _removeWhiteSpaceFromQuery(String query) =>
@@ -62,7 +62,7 @@ String _removeWhiteSpaceFromQuery(String query) =>
 /// just the rows that changed.
 class Query {
   Query._(this._pointer, this._worker, bool retain) {
-    _baseBindings.bindCBLRefCountedToDartObject(this, _pointer, retain.toInt);
+    _baseBindings.bindCBLRefCountedToDartObject(this, _pointer, retain.toInt());
   }
 
   final Pointer<Void> _pointer;
@@ -101,14 +101,14 @@ class Query {
   ///
   /// See:
   /// - [setParameters]
-  Future<Dict?> getParameters() => _worker
-      .execute(GetQueryParameters(_pointer.address))
-      .then((address) => address?.let((it) => Dict.fromPointer(it.toPointer)));
+  Future<Dict?> getParameters() =>
+      _worker.execute(GetQueryParameters(_pointer.address)).then(
+          (address) => address?.let((it) => Dict.fromPointer(it.toPointer())));
 
   /// Runs the query, returning the results.
   Future<ResultSet> execute() => _worker
       .execute(ExecuteQuery(_pointer.address))
-      .then((address) => ResultSet._(address.toPointer, false));
+      .then((address) => ResultSet._(address.toPointer(), false));
 
   /// Returns information about the query, including the translated SQLite form,
   /// and the search strategy. You can use this to help optimize the query:
@@ -153,7 +153,7 @@ class Query {
             listenerTokenAddress,
           ));
 
-          return ResultSet._(resultSetAddress.toPointer, false);
+          return ResultSet._(resultSetAddress.toPointer(), false);
         },
       );
 }
@@ -191,7 +191,7 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
   Result get current => this;
 
   @override
-  bool moveNext() => _bindings.next(_pointer).toBool;
+  bool moveNext() => _bindings.next(_pointer).toBool();
 
   @override
   Value operator [](Object keyOrIndex) {
@@ -200,7 +200,7 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
     if (keyOrIndex is String) {
       pointer = runArena(() {
         return _bindings.valueForKey(
-            _pointer, keyOrIndex.toNativeUtf8().asScoped);
+            _pointer, keyOrIndex.toNativeUtf8().withScoped());
       });
     } else if (keyOrIndex is int) {
       pointer = _bindings.valueAtIndex(_pointer, keyOrIndex);
@@ -235,7 +235,7 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
 class ResultSet extends IterableBase<Result> {
   ResultSet._(this._pointer, bool retain) {
     CBLBindings.instance.base
-        .bindCBLRefCountedToDartObject(this, _pointer, retain.toInt);
+        .bindCBLRefCountedToDartObject(this, _pointer, retain.toInt());
   }
 
   final Pointer<Void> _pointer;

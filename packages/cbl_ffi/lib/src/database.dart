@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
-import 'bindings.dart';
+import 'libraries.dart';
 
 /// Encryption algorithms (available only in the Enterprise Edition).
 enum EncryptionAlgorithm {
@@ -294,7 +294,7 @@ enum IndexType {
 }
 
 extension IndexTypeIntExt on IndexType {
-  int get toInt => IndexType.values.indexOf(this);
+  int toInt() => IndexType.values.indexOf(this);
 }
 
 class CBLIndexSpec extends Struct {

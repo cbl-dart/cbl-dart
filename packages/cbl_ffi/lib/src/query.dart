@@ -2,16 +2,11 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
-import '../database.dart';
-import '../ffi_utils.dart';
-import '../query.dart';
-import 'bindings.dart';
+import 'base.dart';
+import 'fleece.dart';
+import 'libraries.dart';
 
-/// A [Query] language
-///
-/// See:
-/// - [Database.query] for how to create queries.
-/// - [Query] for how to use queries.
+/// A query language
 enum QueryLanguage {
   /// [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
   json,
@@ -21,11 +16,11 @@ enum QueryLanguage {
 }
 
 extension QueryLanguageIntExt on QueryLanguage {
-  int get toInt => QueryLanguage.values.indexOf(this);
+  int toInt() => QueryLanguage.values.indexOf(this);
 }
 
 extension IntQueryLanguageExt on int {
-  QueryLanguage get toQueryLanguage => QueryLanguage.values[this];
+  QueryLanguage toQueryLanguage() => QueryLanguage.values[this];
 }
 
 typedef CBLQuery_New_C = Pointer<Void> Function(

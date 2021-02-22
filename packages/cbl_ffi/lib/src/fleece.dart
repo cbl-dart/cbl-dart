@@ -4,10 +4,10 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import '../ffi_utils.dart';
-import '../fleece.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'libraries.dart';
+import 'utils.dart';
 
 // === Common ==================================================================
 
@@ -48,17 +48,13 @@ enum FleeceErrorCode {
 }
 
 extension FleeceErrorCodeIntExt on int {
-  FleeceErrorCode get toFleeceErrorCode {
+  FleeceErrorCode toFleeceErrorCode() {
     assert(this >= 0 && this <= 12);
     return FleeceErrorCode.values[this];
   }
 }
 
 /// Options for how values are copied.
-///
-/// See:
-/// - [MutableArray.mutableCopy] for copying arrays.
-/// - [MutableDict.mutableCopy] for copying dictionaries.
 class CopyFlag extends Option {
   const CopyFlag._(String name, int bits) : super(name, bits);
 
@@ -269,7 +265,7 @@ enum ValueType {
 }
 
 extension ValueTypeIntExt on int {
-  ValueType get toFleeceValueType {
+  ValueType toFleeceValueType() {
     assert(this >= -1 && this <= 6);
     return ValueType.values[this + 1];
   }
@@ -443,9 +439,7 @@ class ArrayBindings {
   final FLArray_Get get;
 }
 
-// endregion
-
-// region MutableArray
+// === MutabelArray ============================================================
 
 typedef FLArray_MutableCopy_C = Pointer<Void> Function(
   Pointer<Void> array,
@@ -658,9 +652,7 @@ class DictIteratorBindings {
   final CBLDart_FLDictIterator_Next next;
 }
 
-// endregion
-
-// region MutableDict
+// === MutableDict =============================================================
 
 typedef FLDict_MutableCopy_C = Pointer<Void> Function(
   Pointer<Void> source,

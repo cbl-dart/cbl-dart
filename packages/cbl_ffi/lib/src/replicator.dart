@@ -1,8 +1,11 @@
 import 'dart:ffi';
 
-import '../document.dart';
-import '../ffi_utils.dart';
-import 'bindings.dart';
+import 'package:ffi/ffi.dart';
+
+import 'base.dart';
+import 'database.dart';
+import 'fleece.dart';
+import 'libraries.dart';
 
 // === ReplicatorConfiguration =================================================
 
@@ -55,11 +58,11 @@ enum ReplicatorType {
 }
 
 extension ReplicatorTypeIntExtension on ReplicatorType {
-  int get toInt => ReplicatorType.values.indexOf(this);
+  int toInt() => ReplicatorType.values.indexOf(this);
 }
 
 extension IntReplicatorTypeExtension on int {
-  ReplicatorType get toReplicatorType => ReplicatorType.values[this];
+  ReplicatorType toReplicatorType() => ReplicatorType.values[this];
 }
 
 /// Types of proxy servers, for CBLProxySettings.
@@ -72,11 +75,11 @@ enum ProxyType {
 }
 
 extension ProxyTypeIntExtension on ProxyType {
-  int get toInt => ProxyType.values.indexOf(this);
+  int toInt() => ProxyType.values.indexOf(this);
 }
 
 extension IntProxyTypeExtension on int {
-  ProxyType get toProxyType => ProxyType.values[this];
+  ProxyType toProxyType() => ProxyType.values[this];
 }
 
 class CBLProxySettings extends Struct {
@@ -206,7 +209,7 @@ enum ReplicatorActivityLevel {
 }
 
 extension IntReplicatorActivityLevel on int {
-  ReplicatorActivityLevel get toReplicatorActivityLevel =>
+  ReplicatorActivityLevel toReplicatorActivityLevel() =>
       ReplicatorActivityLevel.values[this];
 }
 
@@ -256,7 +259,7 @@ typedef CBLDart_CBLReplicator_AddChangeListener = void Function(
   int listenerId,
 );
 
-/// Flags describing a replicated [Document].
+/// Flags describing a replicated document.
 class DocumentFlags extends Option {
   const DocumentFlags(String debugName, int bits) : super(debugName, bits);
 

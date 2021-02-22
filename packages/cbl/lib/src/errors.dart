@@ -1,11 +1,11 @@
 import 'dart:ffi';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
-import 'bindings/bindings.dart';
 import 'utils.dart';
 
-export 'bindings/bindings.dart'
+export 'package:cbl_ffi/cbl_ffi.dart'
     show CouchbaseLiteErrorCode, NetworkErrorCode, FleeceErrorCode;
 
 abstract class BaseException implements Exception {
@@ -176,6 +176,9 @@ class WebSocketException extends BaseException {
   String toString() => 'WebSocketException(message: $message, code: $code)';
 }
 
+// TODO: free allocated memory when Isolate goes away
+late final globalError = malloc<CBLError>();
+
 BaseException exceptionFromCBLError({
   Pointer<CBLError>? error,
   String? queryString,
@@ -211,7 +214,7 @@ BaseException exceptionFromCBLError({
     case ErrorDomain.sqLite:
       return SQLiteException(message, code);
     case ErrorDomain.fleece:
-      return FleeceException(message, code.toFleeceErrorCode);
+      return FleeceException(message, code.toFleeceErrorCode());
     case ErrorDomain.network:
       return NetworkException(message, networkErrorCodeFromCInt(code));
     case ErrorDomain.webSocket:

@@ -1,10 +1,9 @@
 import 'dart:async';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../bindings/bindings.dart';
 import '../errors.dart';
-import '../ffi_utils.dart';
 import 'cbl_worker/blob.dart';
 import 'cbl_worker/database.dart';
 import 'cbl_worker/query.dart';

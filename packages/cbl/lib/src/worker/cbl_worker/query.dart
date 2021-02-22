@@ -1,8 +1,9 @@
 import 'dart:ffi';
 
-import '../../bindings/bindings.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../../errors.dart';
-import '../../ffi_utils.dart';
+import '../../fleece.dart';
 import '../../utils.dart';
 import '../request_router.dart';
 import 'shared.dart';
@@ -19,8 +20,8 @@ class CreateDatabaseQuery extends ObjectRequest<int> {
 int createDatabaseQuery(CreateDatabaseQuery request) => _bindings
     .makeNew(
       request.pointer,
-      request.language.toInt,
-      request.queryString.toNativeUtf8().asScoped,
+      request.language.toInt(),
+      request.queryString.toNativeUtf8().withScoped(),
       _bindings.globalErrorPosition,
       globalError,
     )
@@ -34,14 +35,14 @@ class SetQueryParameters extends ObjectRequest<void> {
 }
 
 void setQueryParameters(SetQueryParameters request) => _bindings.setParameters(
-    request.pointer, request.parametersAddress.toPointer);
+    request.pointer, request.parametersAddress.toPointer());
 
 class GetQueryParameters extends ObjectRequest<int?> {
   GetQueryParameters(int address) : super(address);
 }
 
 int? getQueryParameters(GetQueryParameters request) =>
-    _bindings.parameters(request.pointer).addressOrNull;
+    _bindings.parameters(request.pointer).toAddressOrNull();
 
 class ExplainQuery extends ObjectRequest<String> {
   ExplainQuery(int address) : super(address);
@@ -97,7 +98,7 @@ class CopyCurrentQueryResultSet extends ObjectRequest<int> {
 int copyCurrentQueryResultSet(CopyCurrentQueryResultSet request) => _bindings
     .copyCurrentResults(
       request.pointer,
-      request.listenerTokenAddress.toPointer,
+      request.listenerTokenAddress.toPointer(),
       globalError,
     )
     .checkResultAndError()

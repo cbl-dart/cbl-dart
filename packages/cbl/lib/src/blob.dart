@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'bindings/bindings.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import 'database.dart';
 import 'document.dart';
-import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
@@ -58,7 +58,7 @@ class Blob {
     CBLBindings.instance.base.bindCBLRefCountedToDartObject(
       this,
       _pointer.cast(),
-      retain.toInt,
+      retain.toInt(),
     );
   }
 
@@ -73,7 +73,7 @@ class Blob {
 
   /// This Blob's MIME type, if its metadata has a `content_type` property.
   String? get contentType =>
-      _blobBindings.contentType(_pointer).asNullable?.toDartString();
+      _blobBindings.contentType(_pointer).toNullable()?.toDartString();
 
   /// This Blob's metadata. This includes the `digest`, `length` and
   /// `content_type` properties, as well as any custom ones that may have been
@@ -98,7 +98,7 @@ extension DictBlobExtension on Dict {
   /// Returns true if this Dict in a [Document] is a blob reference.
   ///
   /// If so, you can use [asBlob] to access it.
-  bool get isBlob => _blobBindings.isBlob(ref.cast()).toBool;
+  bool get isBlob => _blobBindings.isBlob(ref.cast()).toBool();
 
   /// Instantiates a [Blob] object corresponding to a Blob dictionary in a
   /// [Document].
@@ -106,7 +106,7 @@ extension DictBlobExtension on Dict {
   /// Returns `null` if this Dict is not a Blob.
   Blob? get asBlob => _blobBindings
       .get(ref.cast())
-      .asNullable
+      .toNullable()
       ?.let((it) => Blob._(it, retain: true));
 }
 
@@ -181,7 +181,7 @@ class BlobWriteStream extends StreamConsumer<Uint8List> {
       contentType,
     ));
 
-    return Blob._(address.toPointer.cast());
+    return Blob._(address.toPointer().cast());
   }
 }
 
@@ -209,7 +209,7 @@ class BlobManager {
     final address =
         await _worker.execute(OpenBlobWriteStream(_pointer.address));
 
-    return BlobWriteStream._(address.toPointer.cast(), _worker);
+    return BlobWriteStream._(address.toPointer().cast(), _worker);
   }
 
   /// Creates a new blob given its [content] as a single chunk of data.
@@ -242,7 +242,7 @@ class BlobManager {
 
       streamPointer =
           (await _worker.execute(OpenBlobReadStream(blob._pointer.address)))
-              .toPointer
+              .toPointer()
               .cast();
     })();
 

@@ -1,11 +1,10 @@
 import 'dart:ffi';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
-import 'bindings/bindings.dart';
 import 'database.dart';
 import 'errors.dart';
-import 'ffi_utils.dart';
 import 'fleece.dart';
 import 'worker/cbl_worker.dart';
 
@@ -42,8 +41,8 @@ class Document {
     this._worker,
     bool? retain,
   ) {
-    CBLBindings.instance.base
-        .bindCBLRefCountedToDartObject(this, _pointer, (retain ?? false).toInt);
+    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+        this, _pointer, (retain ?? false).toInt());
   }
 
   final Pointer<Void> _pointer;
@@ -137,8 +136,8 @@ class MutableDocument extends Document {
   ///
   /// It will not be added to a database until saved.
   factory MutableDocument([String? id]) {
-    final pointer = runArena(() =>
-        _bindings.makeNew(id == null ? nullptr : id.toNativeUtf8().asScoped));
+    final pointer = runArena(() => _bindings
+        .makeNew(id == null ? nullptr : id.toNativeUtf8().withScoped()));
     return createMutableDocument(pointer: pointer, isNew: true);
   }
 
@@ -176,7 +175,7 @@ class MutableDocument extends Document {
     runArena(() {
       _bindings
           .setPropertiesAsJSON(
-              _pointer, json.toNativeUtf8().asScoped, globalError)
+              _pointer, json.toNativeUtf8().withScoped(), globalError)
           .checkResultAndError();
     });
   }

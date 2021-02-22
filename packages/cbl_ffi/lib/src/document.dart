@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
-import 'bindings.dart';
+import 'libraries.dart';
 
 typedef CBLDocument_ID = Pointer<Utf8> Function(Pointer<Void> doc);
 

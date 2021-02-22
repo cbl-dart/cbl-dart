@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
-import 'bindings.dart';
+import 'libraries.dart';
 import 'database.dart';
 import 'fleece.dart';
 
