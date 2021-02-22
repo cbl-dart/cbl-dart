@@ -1,6 +1,6 @@
 name: cbl_flutter
 description: Binaries required to use cbl in Flutter apps.
-version: 0.0.1
+version: 0.1.0
 repository: https://github.com/cofu-app/cbl-dart
 issue_tracker: https://github.com/cofu-app/cbl-dart/issues
 publish_to: none
@@ -12,12 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # cbl: ^0.0.1
-  # cbl_flutter_android: ^0.0.1
-  # cbl_flutter_apple: ^0.0.1
-
-  cbl:
-    path: ../cbl
+  cbl_ffi:
+    path: ../cbl_ffi
   cbl_flutter_android:
     path: ../cbl_flutter_android
   cbl_flutter_apple:

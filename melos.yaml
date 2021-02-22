@@ -1,0 +1,20 @@
+name: cbl_dart
+packages:
+  - packages/**
+
+scripts:
+  formatting:check: melos exec -- dart format --set-exit-if-changed .
+
+  analyze: melos exec -- dart analyze --fatal-infos
+
+  test:all: melos run test:cbl && melos run test:standalone_dart
+
+  test:cbl:
+    run: melos exec -- flutter test --no-pub -r expanded
+    select-package:
+      scope: 'cbl'
+
+  test:standalone_dart:
+    run: melos exec -- flutter test --no-pub -r expanded
+    select-package:
+      scope: 'cbl_e2e_tests_standalone_dart'

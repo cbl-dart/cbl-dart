@@ -1,0 +1,13 @@
+name: Setup Dart environment
+inputs:
+  flutter-channel:
+    description: The Flutter channel to setup environment with.
+    default: dev
+  melos-version:
+    description: The version of Melos to setup environment with.
+    default: 0.4.5
+runs:
+  using: composite
+  steps:
+    - run: ${{ github.action_path }}/setup-dart-env.sh ${{ inputs.flutter-channel }} ${{ inputs.melos-version }}
+      shell: bash

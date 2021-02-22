@@ -21,16 +21,11 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Flutter SDK
-        uses: subosito/flutter-action@v1
-        with:
-          channel: dev
-
-      - name: Print Flutter version
-        run: flutter --version
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
       - name: Check formatting
-        run: ./tools/packages.sh foreach dart format --set-exit-if-changed .
+        run: melos run formatting:check
 
   formatting-clang:
     name: Formatting - Clang
@@ -60,19 +55,11 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Flutter SDK
-        uses: subosito/flutter-action@v1
-        with:
-          channel: dev
-
-      - name: Print Flutter version
-        run: flutter --version
-
-      - name: Install Dart dependencies
-        run: ./tools/packages.sh foreach flutter pub get
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
       - name: Analyze code
-        run: ./tools/packages.sh foreach flutter analyze
+        run: melos run analyze
 
   build-binaries-linux:
     name: Build - Binaries - Linux
@@ -224,11 +211,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Dart SDK
-        uses: dart-lang/setup-dart@v0.5
-        with:
-          sdk: beta
-
       - name: Cache Dart dependencies
         uses: actions/cache@v2
         with:
@@ -238,13 +220,11 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Dart dependencies
-        working-directory: packages/cbl
-        run: dart pub get
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
       - name: Run tests
-        working-directory: packages/cbl
-        run: dart test -r expanded
+        run: melos run test:cbl
 
   tests-standalone-dart-linux:
     name: Tests - Standalone Dart - Linux
@@ -265,11 +245,6 @@ jobs:
           mkdir lib
           tar -xzf ../../binaries-linux.tar.gz -C lib
 
-      - name: Install Dart SDK
-        uses: dart-lang/setup-dart@v0.5
-        with:
-          sdk: beta
-
       - name: Cache Dart dependencies
         uses: actions/cache@v2
         with:
@@ -279,13 +254,11 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Dart dependencies
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: dart pub get
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
       - name: Run tests
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: dart test -r expanded
+        run: melos run test:standalone_dart
 
   tests-standalone-dart-macos:
     name: Tests - Standalone Dart - macOS
@@ -306,11 +279,6 @@ jobs:
           tar -xzf ../../binaries-apple-macos.tar.gz 
           cp -a macos.xcarchive/Products/Library/Frameworks .
 
-      - name: Install Dart SDK
-        uses: dart-lang/setup-dart@v0.5
-        with:
-          sdk: beta
-
       - name: Cache Dart dependencies
         uses: actions/cache@v2
         with:
@@ -320,13 +288,11 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Dart dependencies
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: dart pub get
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
       - name: Run tests
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: dart test -r expanded
+        run: melos run test:standalone_dart
 
   tests-flutter-ios:
     name: Tests - Flutter - iOS
@@ -364,17 +330,8 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Flutter SDK
-        uses: subosito/flutter-action@v1
-        with:
-          channel: dev
-
-      - name: Print Flutter version
-        run: flutter --version
-
-      - name: Install Dart dependencies
-        working-directory: packages/cbl_flutter/example
-        run: flutter pub get
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
       - name: Build tests
         working-directory: packages/cbl_flutter/example
@@ -412,24 +369,15 @@ jobs:
             dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
             dart-pub-cache
 
-      - name: Install Flutter SDK
-        uses: subosito/flutter-action@v1
-        with:
-          channel: dev
+      - name: Setup Dart environment
+        uses: ./.github/actions/setup-dart-env
 
-      - name: Print Flutter version
-        run: flutter --version
-
-      - name: Enable Flutter on macOS 
+      - name: Enable Flutter on macOS
         run: flutter config --enable-macos-desktop
-
-      - name: Install Dart dependencies
-        working-directory: packages/cbl_flutter/example
-        run: flutter pub get
 
       - name: Run tests
         working-directory: packages/cbl_flutter/example
-        run: | 
+        run: |
           flutter drive \
             -d macos \
             --driver test_driver/integration_test.dart \

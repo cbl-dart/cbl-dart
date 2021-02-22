@@ -8,7 +8,6 @@ dependencies:
   cbl_e2e_tests:
     path: ../cbl_e2e_tests
   path: ^1.8.0
-  
 
 dev_dependencies:
   pedantic: ^1.10.0

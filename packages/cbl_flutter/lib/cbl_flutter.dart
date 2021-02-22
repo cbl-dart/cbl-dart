@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:cbl/cbl.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
 
 /// Locates and returns the [Libraries] shipped by this package (`cbl_flutter`),
 /// handling the differences between platforms.
