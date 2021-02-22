@@ -37,6 +37,7 @@ packages=(
     cbl
     cbl_e2e_tests
     cbl_e2e_tests_standalone_dart
+    cbl_ffi
     cbl_flutter
     cbl_flutter_android
     cbl_flutter_apple
