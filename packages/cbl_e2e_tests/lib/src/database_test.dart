@@ -1,6 +1,7 @@
 import 'package:cbl/cbl.dart';
 
 import 'test_binding.dart';
+import 'test_utils.dart';
 
 void main() {
   group('databaseExists', () {
@@ -236,6 +237,8 @@ void main() {
         emitsInOrder(<dynamic>[null]),
       );
 
+      await waitForChangeStream();
+
       await db.saveDocument(doc);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
@@ -251,6 +254,8 @@ void main() {
           [doc.id]
         ]),
       );
+
+      await waitForChangeStream();
 
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
       await db.saveDocument(doc, concurrency: ConcurrencyControl.lastWriteWins);
@@ -387,10 +392,7 @@ void main() {
         ]),
       );
 
-      // Wait a bit to ensure expected order. Query change streams start the
-      // first query asynchronously and need some time to execute the query for
-      // the first time.
-      await Future<void>.delayed(Duration(milliseconds: 50));
+      await waitForChangeStream();
 
       await db.saveDocument(doc);
     });
@@ -445,6 +447,8 @@ void main() {
           [doc.id]
         ]),
       );
+
+      await waitForChangeStream();
 
       await dbB.saveDocument(doc);
     });
