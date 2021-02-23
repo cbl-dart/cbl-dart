@@ -23,3 +23,8 @@ scripts:
     run: melos exec -- flutter test --no-pub -r expanded
     select-package:
       scope: 'cbl_e2e_tests_standalone_dart'
+
+  version:cbl_native:update_lib:
+    run: melos exec -- dart run tool/update_version.dart
+    select-package:
+      scope: 'cbl_native'
