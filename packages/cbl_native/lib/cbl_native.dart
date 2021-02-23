@@ -31,11 +31,8 @@ class GitHubRelease {
   /// The git tag which identifies this release.
   final String tag;
 
-  /// The url.
-  late final Uri url = repo.releasesUrl.resolve('$tag/');
-
   /// The url for downloads of assets.
-  late final Uri downloadUrl = url.resolve('download/');
+  late final Uri downloadUrl = repo.releasesUrl.resolve('download/$tag/');
 }
 
 /// Platform for wich binaries are available.

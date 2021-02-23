@@ -6,12 +6,12 @@ import 'package:test/test.dart';
 void main() {
   test('CblNativeBinary.url returns the correct download url', () {
     final binary = CblNativeBinaries(platform: Platform.linux);
+    final tag = '${binary.packageName}-v${binary.version}';
 
     expect(
       binary.url.toString(),
       'https://github.com/cofu-app/cbl-dart/releases'
-      '/${binary.packageName}-v${binary.version}'
-      '/download/${binary.packageName}-v${binary.version}-linux.tar.gz',
+      '/download/$tag/${binary.packageName}-v${binary.version}-linux.tar.gz',
     );
   });
 
@@ -25,7 +25,7 @@ void main() {
       url,
       matches(
         'https://github.com/cofu-app/cbl-dart/releases'
-        '/cbl_native-v(.+)/download/cbl_native-v(.+)-linux.tar.gz',
+        '/download/cbl_native-v(.+)/cbl_native-v(.+)-linux.tar.gz',
       ),
     );
   });
