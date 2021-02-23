@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
 
       _db = await cbl.openDatabase(
         'Example',
-        config: DatabaseConfiguration(directory: appDocsDir!.path),
+        config: DatabaseConfiguration(directory: appDocsDir.path),
       );
 
       final query =
