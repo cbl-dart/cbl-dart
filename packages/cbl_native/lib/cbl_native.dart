@@ -63,7 +63,7 @@ class CblNativeBinaries {
   final String packageName = 'cbl_native';
 
   /// The current version of `cbl_native`.
-  final String version = '1.0.0'; // cbl_native: version
+  final String version = '1.0.1'; // cbl_native: version
 
   /// The target platform of the binaries.
   final Platform platform;
