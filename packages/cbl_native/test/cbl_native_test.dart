@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:cbl_native/cbl_native.dart';
 import 'package:test/test.dart';
@@ -27,6 +28,28 @@ void main() {
         'https://github.com/cofu-app/cbl-dart/releases'
         '/download/cbl_native-v(.+)/cbl_native-v(.+)-linux.tar.gz',
       ),
+    );
+  });
+
+  test('binary_url script downloads and installs binaries', () async {
+    final tmpTestDir = 'test/.tmp';
+    final installDir =
+        '$tmpTestDir/${DateTime.now().millisecondsSinceEpoch}-linux/lib';
+
+    final result = await io.Process.run('dart', [
+      'run',
+      'cbl_native:binary_url',
+      'linux',
+      '--install',
+      installDir,
+    ]);
+
+    expect(result.exitCode, 0, reason: 'exit code');
+
+    expect(
+      Directory(installDir).list().toList(),
+      completion(isNotEmpty),
+      reason: 'installDir contents',
     );
   });
 }

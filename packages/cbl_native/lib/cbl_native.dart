@@ -1,3 +1,9 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:http/http.dart' as http;
+
 /// GitHub repository data.
 class GitHubRepo {
   GitHubRepo({
@@ -77,4 +83,117 @@ class CblNativeBinaries {
 
   /// The url to download the binaries.
   late final Uri url = release.downloadUrl.resolve(filename);
+
+  /// Downloads and installs the binaries into [installDir].
+  ///
+  /// If the [installDir] already exists the method returns without doing
+  /// anything. To removed it and installing the binaries, set [override] to
+  /// `true`.
+  Future<void> install({
+    required Directory installDir,
+    bool override = false,
+  }) async {
+    // Prepare install dir
+    if (await installDir.exists()) {
+      if (override) {
+        await installDir.delete(recursive: true);
+      } else {
+        return;
+      }
+    }
+    await installDir.create(recursive: true);
+
+    // Download archive
+    final archiveUri = await _downloadToTmpDir();
+
+    // Extract archive to installDir
+    final result = await Process.run(
+      'tar',
+      [
+        '-xzf',
+        archiveUri.path,
+        '-C',
+        installDir.path,
+      ],
+    );
+
+    if (result.exitCode != 0) {
+      print('Could not extract contents of archive at $archiveUri');
+      stdout.write(result.stdout);
+      stderr.write(result.stderr);
+      exit(result.exitCode);
+    }
+
+    // Clean up downloaded archive
+    await File.fromUri(archiveUri).delete();
+  }
+
+  Future<Uri> _downloadToTmpDir() async {
+    final timestamp = DateTime.now();
+    final downloadPath =
+        File('./${timestamp.millisecondsSinceEpoch}-$filename').absolute.uri;
+
+    await _retry<void>(
+      () async {
+        final response = await http.get(url);
+        if (response.statusCode != 200) {
+          throw HttpResponseException(response.statusCode, response.body);
+        }
+
+        await File.fromUri(downloadPath).writeAsBytes(response.bodyBytes);
+      },
+      retryIf: (e) =>
+          e is SocketException ||
+          (e is HttpResponseException &&
+              [500, 503, 504].contains(e.statusCode)),
+      onRetry: (error) {
+        print('Retrying download of $filename: $error');
+      },
+    );
+
+    return downloadPath;
+  }
+}
+
+class HttpResponseException implements Exception {
+  HttpResponseException(this.statusCode, this.body);
+
+  final int statusCode;
+
+  final String body;
+
+  @override
+  String toString() =>
+      'HttpResponseException(statusCode: $statusCode, body: $body)';
+}
+
+Future<T> _retry<T>(
+  FutureOr<T> Function() action, {
+  required FutureOr<bool> Function(Object error) retryIf,
+  required FutureOr<void> Function(Object error) onRetry,
+  int maxAttempts = 8,
+  double randomization = .25,
+  int baseDelay = 250,
+}) async {
+  final random = Random();
+  var attempts = 0;
+
+  while (true) {
+    attempts++;
+    try {
+      return await action();
+    } catch (error) {
+      if (attempts >= maxAttempts || !(await retryIf(error))) {
+        rethrow;
+      } else {
+        final randomizationFactor =
+            (random.nextDouble() * randomization * 2) - randomization;
+        final delay =
+            (baseDelay * pow(2, attempts - 1) * randomizationFactor).toInt();
+
+        await Future<void>.delayed(Duration(milliseconds: delay));
+        await onRetry(error);
+      }
+    }
+  }
 }
