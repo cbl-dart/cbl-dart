@@ -1,17 +1,28 @@
 import 'dart:ffi';
 import 'dart:io';
 
+/// Configuration of a [DynamicLibrary], which can be used to load the
+/// `DynamicLibrary` at a later time.
 class LibraryConfiguration {
+  /// Creates a configuration for a dynamic library opened with
+  /// [DynamicLibrary.open].
+  ///
+  /// If [appendExtension] is `true` (default), the file extension which is used
+  /// for dynamic libraries on the current platform is appended to [name].
   LibraryConfiguration.dynamic(String name, {bool appendExtension = true})
       : process = null,
         name = name,
         appendExtension = appendExtension;
 
+  /// Creates a configuration for a dynamic library opened with
+  /// [DynamicLibrary.process].
   LibraryConfiguration.process()
       : process = true,
         name = null,
         appendExtension = null;
 
+  /// Creates a configuration for a dynamic library opened with
+  /// [DynamicLibrary.executable].
   LibraryConfiguration.executable()
       : process = false,
         name = null,
@@ -41,8 +52,8 @@ class LibraryConfiguration {
   })();
 }
 
-/// The libraries to lookup symbols from in the bindings and metadata about
-/// those libraries.
+/// The [DynamicLibrary]s which provide the Couchbase Lite C API and the Dart
+/// support layer.
 class Libraries {
   Libraries({
     this.enterpriseEdition = false,
