@@ -161,7 +161,7 @@ class Value {
     _bindings.scalarToString(ref, globalSlice);
     return globalSlice.ref.buf == nullptr
         ? null
-        : globalSlice.ref.toDartString();
+        : globalSlice.toDartStringAndFree();
   }
 
   /// Encodes a Fleece value as JSON (or a JSON fragment.) Any Data values will
