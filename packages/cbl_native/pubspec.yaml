@@ -1,5 +1,5 @@
 name: cbl_native
-version: 1.0.1
+version: 1.0.2
 description: Binaries for CouchbaseLite + Dart.
 repository: https://github.com/cofu-app/cbl-dart
 issue_tracker: https://github.com/cofu-app/cbl-dart/issues
