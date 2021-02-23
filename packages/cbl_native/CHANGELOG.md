@@ -1,3 +1,7 @@
+## 1.1.0
+
+ - **FEAT**: support downloading and installing binaries.
+
 ## 1.0.2
 
  - **FIX**: fix urls to GitHub release assets.
