@@ -1,0 +1,184 @@
+name: cbl_native binaries release
+
+on:
+  push:
+    tags:
+      - 'cbl_native-v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-20.04
+    outputs:
+      upload-url: ${{ steps.create-release.outputs.upload_url }}
+      tag: ${{ steps.set-tag-output.outputs.tag }}
+    steps:
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Set tag output
+        id: set-tag-output
+        run: echo "::set-output name=tag::${GITHUB_REF/refs\/tags\//}"
+
+  binaries-linux:
+    needs: create-release
+    name: Linux
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-linux
+
+      - name: Build
+        run: |
+          ./native/tools/build_linux.sh build
+          ./native/tools/build_linux.sh copyToLib
+          tar -czf binaries-linux.tar.gz -C build/linux/lib .
+
+      - name: Upload binaries to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload-url }}
+          asset_path: ./binaries-linux.tar.gz
+          asset_name: ${{ needs.create-release.outputs.tag }}-linux.tar.gz
+          asset_content_type: application/gzip
+
+  binaries-android:
+    needs: create-release
+    name: Android
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-android
+
+      - name: Build
+        run: |
+          ./native/tools/build_android.sh buildAllArchs
+          ./native/tools/build_android.sh copyAllArchsToLib
+          tar -czf binaries-android.tar.gz -C build/android/lib .
+
+      - name: Upload binaries to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload-url }}
+          asset_path: ./binaries-android.tar.gz
+          asset_name: ${{ needs.create-release.outputs.tag }}-android.tar.gz
+          asset_content_type: application/gzip
+
+  binaries-apple:
+    name: Apple - Frameworks
+    runs-on: macos-10.15
+    environment: Apple
+    strategy:
+      matrix:
+        platform: [ios, ios_simulator, macos]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-apple-${{ matrix.platform }}
+
+      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install doxygen bash
+
+      - name: Import signing certificate
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DEV_CERT }}
+          p12-password: ${{ secrets.APPLE_DEV_CERT_PASSWORD }}
+          keychain-password: ${{ secrets.APPLE_TMP_KEYCHAIN_PASSWORD }}
+
+      - name: Build
+        env:
+          DEVELOPMENT_TEAM: ${{ secrets.APPLE_DEVELOPMENT_TEAM }}
+        run: |
+          ./native/tools/build_apple.sh buildPlatform ${{ matrix.platform }}
+          tar -czf binaries-apple-${{ matrix.platform }}.tar.gz -C build/apple/archives .
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-apple-${{ matrix.platform }}
+          path: binaries-apple-${{ matrix.platform }}.tar.gz
+
+  binaries-apple-xcframeworks:
+    name: Apple - Xcframeworks
+    runs-on: macos-10.15
+    needs: [create-release, binaries-apple]
+    env:
+      ARCHIVES: build/apple/archives
+      XCFRAMEWORKS: build/apple/Xcframeworks
+    steps:
+      - uses: actions/checkout@v2
+
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install bash
+
+      - name: Download ios binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-ios
+
+      - name: Download ios_simulator binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-ios_simulator
+
+      - name: Download macos binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries-apple-macos
+
+      - name: Unpack archives
+        run: |
+          mkdir -p "$ARCHIVES"
+          tar -xzf binaries-apple-ios.tar.gz -C "$ARCHIVES"
+          tar -xzf binaries-apple-ios_simulator.tar.gz -C "$ARCHIVES"
+          tar -xzf binaries-apple-macos.tar.gz -C "$ARCHIVES"
+
+      - name: Create xcframeworks
+        run: |
+          mkdir -p "$XCFRAMEWORKS"
+          ./native/tools/build_apple.sh createXcframeworks
+          tar -czf binaries-apple.tar.gz -C "$XCFRAMEWORKS" .
+
+      - name: Upload binaries to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload-url }}
+          asset_path: ./binaries-apple.tar.gz
+          asset_name: ${{ needs.create-release.outputs.tag }}-apple.tar.gz
+          asset_content_type: application/gzip
