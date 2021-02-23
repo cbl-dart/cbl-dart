@@ -58,18 +58,24 @@ final cblDartRepo = GitHubRepo(
   repo: 'cbl-dart',
 );
 
+/// The current version of `cbl_native`.
+const currentVersion = '1.1.0'; // cbl_native: version
+
 /// Binaries for `cbl_native` for one [Platform].
 class CblNativeBinaries {
-  CblNativeBinaries({required this.platform});
+  CblNativeBinaries({
+    required this.platform,
+    this.version = currentVersion,
+  });
 
   /// The name of the `cbl_native` package.
   final String packageName = 'cbl_native';
 
-  /// The current version of `cbl_native`.
-  final String version = '1.1.0'; // cbl_native: version
-
   /// The target platform of the binaries.
   final Platform platform;
+
+  /// The version of the binaries.
+  final String version;
 
   /// The release which contains the binaries
   late final release = GitHubRelease(

@@ -42,6 +42,8 @@ void main() {
       'linux',
       '--install',
       installDir,
+      '--version',
+      '1.1.0',
     ]);
 
     expect(result.exitCode, 0, reason: 'exit code');

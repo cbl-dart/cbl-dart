@@ -7,7 +7,10 @@ import 'package:collection/collection.dart';
 Future<void> main(List<String> args) async {
   final config = parseArgs(args);
 
-  final binary = CblNativeBinaries(platform: config.platform);
+  final binary = CblNativeBinaries(
+    platform: config.platform,
+    version: config.version,
+  );
 
   if (config.installDir == null) {
     print(binary.url);
@@ -37,29 +40,47 @@ Configuration parseArgs(List<String> args) {
     usageError('Please pass a valid platform: $platformNames');
   }
 
-  Directory? installDir;
-  if (args.contains('--install')) {
-    final installOptIndex = args.indexOf('--install');
-    final installDirInput = args.asMap()[installOptIndex + 1];
-    if (installDirInput == null || installDirInput.startsWith('-')) {
-      usageError('Please pass a installDir');
-    } else {
-      installDir = Directory(installDirInput).absolute;
+  String? parseOption(String name) {
+    final cmdLineName = '--$name';
+
+    if (args.contains(cmdLineName)) {
+      final optionIndex = args.indexOf(cmdLineName);
+      final optionValue = args.asMap()[optionIndex + 1];
+
+      if (optionValue == null || optionValue.startsWith('-')) {
+        usageError('Please pass a value for $cmdLineName');
+      }
+
+      args.removeRange(optionIndex, optionIndex + 2);
+
+      return optionValue;
+    }
+  }
+
+  bool parseFlag(String name) {
+    final cmdLineName = '--$name';
+    final isOnCmdLine = args.contains(cmdLineName);
+
+    if (isOnCmdLine) {
+      args.remove(cmdLineName);
     }
 
-    args.removeRange(installOptIndex, installOptIndex + 2);
+    return isOnCmdLine;
   }
 
-  var overrideInstallDir = false;
-  if (args.contains('--overrideInstallDir')) {
-    overrideInstallDir = true;
-    args.remove('--overrideInstallDir');
-  }
+  final installDirInput = parseOption('install');
+  final installDir =
+      installDirInput == null ? null : Directory(installDirInput).absolute;
+
+  final version = parseOption('version') ?? currentVersion;
+
+  final overrideInstallDir = parseFlag('overrideInstallDir');
 
   return Configuration(
     platform: platform,
     installDir: installDir,
     overrideInstallDir: overrideInstallDir,
+    version: version,
   );
 }
 
@@ -68,11 +89,13 @@ class Configuration {
     required this.platform,
     required this.installDir,
     required this.overrideInstallDir,
+    required this.version,
   });
 
   final Platform platform;
   final Directory? installDir;
   final bool overrideInstallDir;
+  final String version;
 }
 
 Never usageError(String message) {
@@ -95,5 +118,7 @@ Options:
                          instead of printing the url
 
   --overrideInstallDir   override the <installDir> if it already exists
+
+  --version <version>    use a specific version instead of the current one
 ''');
 }
