@@ -343,7 +343,7 @@ jobs:
           name: binaries-apple-xcframeworks
 
       - name: Extract frameworks from archive
-        working-directory: packages/cbl_flutter_apple
+        working-directory: packages/cbl_flutter
         run: |
           mkdir -p Xcframeworks
           tar -xzf ../../binaries-apple-xcframeworks.tar.gz -C Xcframeworks
@@ -382,7 +382,7 @@ jobs:
           name: binaries-apple-xcframeworks
 
       - name: Extract frameworks from archive
-        working-directory: packages/cbl_flutter_apple
+        working-directory: packages/cbl_flutter
         run: |
           mkdir -p Xcframeworks
           tar -xzf ../../binaries-apple-xcframeworks.tar.gz -C Xcframeworks

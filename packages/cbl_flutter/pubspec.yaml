@@ -14,10 +14,17 @@ dependencies:
     sdk: flutter
   cbl_ffi:
     path: ../cbl_ffi
-  cbl_flutter_android:
-    path: ../cbl_flutter_android
-  cbl_flutter_apple:
-    path: ../cbl_flutter_apple
 
 dev_dependencies:
   pedantic: ^1.10.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        pluginClass: CblFlutterPlugin
+        package: com.terwesten.gabriel.cbl_flutter
+      ios:
+        pluginClass: CblFlutterPlugin
+      macos:
+        pluginClass: CblFlutterPlugin

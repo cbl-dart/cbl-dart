@@ -101,7 +101,7 @@ function createLinksForDev() {
     rm -f Frameworks
     ln -s "$archivesDir/macos.xcarchive/Products/Library/Frameworks"
 
-    cd "$projectDir/packages/cbl_flutter_apple"
+    cd "$projectDir/packages/cbl_flutter"
     rm -f Xcframeworks
     ln -s "$xcframeworksDir"
 }

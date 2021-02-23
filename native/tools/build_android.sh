@@ -38,7 +38,7 @@ nativeDir="$(cd "$toolsDir/.." && pwd)"
 projectDir="$(cd "$nativeDir/.." && pwd)"
 buildDir="$projectDir/build/android"
 libDir="$buildDir/lib"
-cblFlutterLibDir="$projectDir/packages/cbl_flutter_android/android/lib"
+cblFlutterLibDir="$projectDir/packages/cbl_flutter/android/lib"
 
 ndk_ver="22.0.7026061"
 cmake_ver="3.10.2.4988404"
@@ -101,7 +101,7 @@ function copyAllArchsToLib() {
 }
 
 function createLinksForDev() {
-    cd "$projectDir/packages/cbl_flutter_android/android"
+    cd "$projectDir/packages/cbl_flutter/android"
     rm -f lib
     ln -s "$libDir"
 }
