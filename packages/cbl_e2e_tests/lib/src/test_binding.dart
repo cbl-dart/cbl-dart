@@ -35,7 +35,10 @@ abstract class CblE2eTestBinding {
   static void ensureInitialized(CblE2eTestBinding Function() createBinding) {
     if (_instance != null) return;
     _instance = createBinding();
-    _instance!._setupTestLifecycleHooks();
+
+    _instance!
+      .._setupLogging()
+      .._setupTestLifecycleHooks();
   }
 
   static CblE2eTestBinding? _instance;
@@ -68,8 +71,8 @@ abstract class CblE2eTestBinding {
 
   TestHook get addTearDownFn => t.addTearDown;
 
-  void _setupTestLifecycleHooks() {
-    setUpAllFn(() async {
+  void _setupLogging() {
+    Zone.root.run(() {
       Logger.root.onRecord.listen((record) {
         final stringBuilder = StringBuffer();
 
@@ -87,7 +90,11 @@ abstract class CblE2eTestBinding {
 
         print(stringBuilder.toString());
       });
+    });
+  }
 
+  void _setupTestLifecycleHooks() {
+    setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
       await _initCouchbaseLite();
