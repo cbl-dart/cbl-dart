@@ -67,9 +67,6 @@ void CBLDart_CBLDatabase_Config(CBLDatabase *db,
                                 CBLDatabaseConfiguration *config);
 
 CBLDART_EXPORT
-void CBLDart_Database_BindToDartObject(Dart_Handle handle, CBLDatabase *db);
-
-CBLDART_EXPORT
 const CBLDocument *CBLDart_CBLDatabase_SaveDocumentResolving(
     CBLDatabase *db, CBLDocument *doc, CallbackId conflictHandler,
     CBLError *error);
@@ -82,10 +79,6 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
                                            CallbackId listener);
-
-CBLDART_EXPORT
-bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, const char *name,
-                                     CBLIndexSpec *spec, CBLError *error);
 
 // -- Query
 

@@ -165,11 +165,6 @@ void CBLDart_CBLDatabase_Config(CBLDatabase *db,
   *config = CBLDatabase_Config(db);
 }
 
-void CBLDart_Database_BindToDartObject(Dart_Handle handle, CBLDatabase *db) {
-  Dart_NewWeakPersistentHandle_DL(handle, db, 0,
-                                  CBLDart_CBLRefCountedFinalizer);
-}
-
 bool CBLDart_SaveConflictHandlerWrapper(
     void *context, CBLDocument *documentBeingSaved,
     const CBLDocument *conflictingDocument) {
@@ -280,11 +275,6 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
       listener, listenerToken, CBLDart_CBLListenerFinalizer);
 }
 
-bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, const char *name,
-                                     CBLIndexSpec *spec, CBLError *error) {
-  return CBLDatabase_CreateIndex(db, name, *spec, error);
-}
-
 // -- Query
 
 void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDartSlice *result) {
@@ -297,7 +287,7 @@ void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
 }
 
 void CBLDart_QueryChangeListenerWrapper(void *context,
-                                        CBLQuery *query _cbl_nonnull) {
+                                        CBLQuery *query) {
   auto callbackId = CallbackId(context);
 
   Dart_CObject args;

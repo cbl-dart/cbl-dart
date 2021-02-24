@@ -63,9 +63,7 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
 }
 
 void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice) {
-  auto fl_slice = FLValue_AsString(value);
-  slice->buf = fl_slice.buf;
-  slice->size = fl_slice.size;
+  *slice = CBLDart_FLSliceToDart(FLValue_AsString(value));
 }
 
 void CBLDart_FLValue_ToString(FLValue value, CBLDartSlice *slice) {
