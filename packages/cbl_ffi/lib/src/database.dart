@@ -103,15 +103,6 @@ typedef CBL_DeleteDatabase = int Function(
   Pointer<CBLError> outError,
 );
 
-typedef CBLDart_Database_BindToDartObject_C = Void Function(
-  Handle dartDb,
-  Pointer<Void> db,
-);
-typedef CBLDart_Database_BindToDartObject = void Function(
-  Object dartDb,
-  Pointer<Void> db,
-);
-
 typedef CBLDatabase_Open = Pointer<Void> Function(
   Pointer<Utf8> name,
   Pointer<CBLDatabaseConfiguration> config,
@@ -309,16 +300,16 @@ class CBLIndexSpec extends Struct {
   external Pointer<Utf8> language;
 }
 
-typedef CBLDart_CBLDatabase_CreateIndex_C = Uint8 Function(
+typedef CBLDatabase_CreateIndex_C = Uint8 Function(
   Pointer<Void> db,
   Pointer<Utf8> name,
-  Pointer<CBLIndexSpec> indexSpec,
+  CBLIndexSpec indexSpec,
   Pointer<CBLError> error,
 );
-typedef CBLDart_CBLDatabase_CreateIndex = int Function(
+typedef CBLDatabase_CreateIndex = int Function(
   Pointer<Void> db,
   Pointer<Utf8> name,
-  Pointer<CBLIndexSpec> indexSpec,
+  CBLIndexSpec indexSpec,
   Pointer<CBLError> error,
 );
 
@@ -348,11 +339,6 @@ class DatabaseBindings {
         deleteDatabase =
             libs.cbl.lookupFunction<CBL_DeleteDatabase_C, CBL_DeleteDatabase>(
           'CBL_DeleteDatabase',
-        ),
-        bindToDartObject = libs.cblDart.lookupFunction<
-            CBLDart_Database_BindToDartObject_C,
-            CBLDart_Database_BindToDartObject>(
-          'CBLDart_Database_BindToDartObject',
         ),
         open = libs.cbl.lookupFunction<CBLDatabase_Open, CBLDatabase_Open>(
           'CBLDatabase_Open',
@@ -434,9 +420,9 @@ class DatabaseBindings {
             CBLDart_CBLDatabase_AddChangeListener>(
           'CBLDart_CBLDatabase_AddChangeListener',
         ),
-        createIndex = libs.cblDart.lookupFunction<
-            CBLDart_CBLDatabase_CreateIndex_C, CBLDart_CBLDatabase_CreateIndex>(
-          'CBLDart_CBLDatabase_CreateIndex',
+        createIndex = libs.cbl
+            .lookupFunction<CBLDatabase_CreateIndex_C, CBLDatabase_CreateIndex>(
+          'CBLDatabase_CreateIndex',
         ),
         deleteIndex = libs.cbl
             .lookupFunction<CBLDatabase_DeleteIndex_C, CBLDatabase_DeleteIndex>(
@@ -450,7 +436,6 @@ class DatabaseBindings {
   final CBLDatabase_Exists databaseExists;
   final CBL_CopyDatabase copyDatabase;
   final CBL_DeleteDatabase deleteDatabase;
-  final CBLDart_Database_BindToDartObject bindToDartObject;
   final CBLDatabase_Open open;
   final CBLDatabase_Close close;
   final CBLDatabase_Delete delete;
@@ -471,7 +456,7 @@ class DatabaseBindings {
   final CBLDatabase_SetDocumentExpiration setDocumentExpiration;
   final CBLDart_CBLDatabase_AddDocumentChangeListener addDocumentChangeListener;
   final CBLDart_CBLDatabase_AddChangeListener addChangeListener;
-  final CBLDart_CBLDatabase_CreateIndex createIndex;
+  final CBLDatabase_CreateIndex createIndex;
   final CBLDatabase_DeleteIndex deleteIndex;
   final CBLDatabase_IndexNames indexNames;
 }
