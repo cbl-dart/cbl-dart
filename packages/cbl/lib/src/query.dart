@@ -10,8 +10,6 @@ import 'worker/cbl_worker.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
 
-late final _baseBindings = CBLBindings.instance.base;
-
 // region Internal API
 
 Future<Query> createQuery({
@@ -62,7 +60,11 @@ String _removeWhiteSpaceFromQuery(String query) =>
 /// just the rows that changed.
 class Query {
   Query._(this._pointer, this._worker, bool retain) {
-    _baseBindings.bindCBLRefCountedToDartObject(this, _pointer, retain.toInt());
+    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+      this,
+      _pointer,
+      retain.toInt(),
+    );
   }
 
   final Pointer<Void> _pointer;
@@ -101,9 +103,9 @@ class Query {
   ///
   /// See:
   /// - [setParameters]
-  Future<Dict?> getParameters() =>
-      _worker.execute(GetQueryParameters(_pointer.address)).then(
-          (address) => address?.let((it) => Dict.fromPointer(it.toPointer())));
+  Future<Dict?> getParameters() => _worker
+      .execute(GetQueryParameters(_pointer.address))
+      .then((address) => Dict.fromPointer(address.toPointer()));
 
   /// Runs the query, returning the results.
   Future<ResultSet> execute() => _worker
