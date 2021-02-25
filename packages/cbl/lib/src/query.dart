@@ -118,7 +118,7 @@ class Query {
   Future<String> explain() => _worker.execute(ExplainQuery(_pointer.address));
 
   /// Returns the number of columns in each result.
-  Future<int> get columnCount =>
+  Future<int> columnCount() =>
       _worker.execute(GetQueryColumnCount(_pointer.address));
 
   /// Returns the name of a column in the result.
