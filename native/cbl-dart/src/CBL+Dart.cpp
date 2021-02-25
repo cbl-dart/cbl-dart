@@ -147,8 +147,8 @@ void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle handle,
                                            bool retain) {
   if (retain) CBL_Retain(refCounted);
 
-  Dart_NewWeakPersistentHandle_DL(handle, refCounted, 0,
-                                  CBLDart_CBLRefCountedFinalizer);
+  Dart_NewFinalizableHandle_DL(handle, refCounted, 0,
+                               CBLDart_CBLRefCountedFinalizer);
 }
 
 // -- Listener
@@ -286,8 +286,7 @@ void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
   *result = CBLDart_FLSliceToDart(CBLQuery_ColumnName(query, columnIndex));
 }
 
-void CBLDart_QueryChangeListenerWrapper(void *context,
-                                        CBLQuery *query) {
+void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query) {
   auto callbackId = CallbackId(context);
 
   Dart_CObject args;
@@ -480,8 +479,8 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
 
 void CBLDart_BindReplicatorToDartObject(Dart_Handle handle,
                                         CBLReplicator *replicator) {
-  Dart_NewWeakPersistentHandle_DL(handle, reinterpret_cast<void *>(replicator),
-                                  0, CBLDart_ReplicatorFinalizer);
+  Dart_NewFinalizableHandle_DL(handle, reinterpret_cast<void *>(replicator), 0,
+                               CBLDart_ReplicatorFinalizer);
 }
 
 bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,

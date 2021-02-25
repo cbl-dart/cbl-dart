@@ -9,7 +9,7 @@ CallbackIsolate *&CallbackIsolate::getForCallbackId(CallbackId callbackId) {
 
 CallbackIsolate::CallbackIsolate(Dart_Handle handle, Dart_Port sendPort)
     : sendPort_(sendPort) {
-  Dart_NewWeakPersistentHandle_DL(handle, this, 0, CallbackIsolate::finalizer);
+  Dart_NewFinalizableHandle_DL(handle, this, 0, CallbackIsolate::finalizer);
 };
 
 Dart_Port CallbackIsolate::sendPort() { return sendPort_; };

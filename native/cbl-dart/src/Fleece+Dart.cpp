@@ -37,8 +37,8 @@ void CBLDart_ReleaseDartObjectBoundFLDoc(void *dart_callback_data, void *peer) {
 }
 
 void CBLDart_FLDoc_BindToDartObject(Dart_Handle handle, FLDoc doc) {
-  Dart_NewWeakPersistentHandle_DL(handle, doc, 0,
-                                  CBLDart_ReleaseDartObjectBoundFLDoc);
+  Dart_NewFinalizableHandle_DL(handle, doc, 0,
+                               CBLDart_ReleaseDartObjectBoundFLDoc);
 }
 
 // -- Value
@@ -58,8 +58,8 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
 
   if (retain) FLValue_Retain(value);
 
-  Dart_NewWeakPersistentHandle_DL(handle, (void *)value, 0,
-                                  CBLDart_ReleaseDartObjectBoundFLValue);
+  Dart_NewFinalizableHandle_DL(handle, (void *)value, 0,
+                               CBLDart_ReleaseDartObjectBoundFLValue);
 }
 
 void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice) {
@@ -101,8 +101,8 @@ CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle handle,
 
   FLDictIterator_Begin(dict, iterator->iterator);
 
-  Dart_NewWeakPersistentHandle_DL(handle, iterator, sizeof(iterator),
-                                  CBLDart_FinalizeDartObjectBoundDictIterator);
+  Dart_NewFinalizableHandle_DL(handle, iterator, sizeof(iterator),
+                               CBLDart_FinalizeDartObjectBoundDictIterator);
 
   return iterator;
 }
