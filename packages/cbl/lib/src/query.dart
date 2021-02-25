@@ -5,6 +5,7 @@ import 'dart:ffi';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import 'fleece.dart';
+import 'native_object.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
@@ -13,20 +14,24 @@ export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
 // region Internal API
 
 Future<Query> createQuery({
-  required Pointer<CBLDatabase> db,
-  required Worker worker,
+  required WorkerObject<Void> db,
   required String queryString,
   required QueryLanguage language,
-  bool retain = false,
-}) async {
+}) {
   if (language == QueryLanguage.N1QL) {
     queryString = _removeWhiteSpaceFromQuery(queryString);
   }
 
-  final address = await worker
-      .execute(CreateDatabaseQuery(db.address, queryString, language));
-
-  return Query._(address.toPointer(), worker, retain);
+  return db
+      .execute((address) => CreateDatabaseQuery(
+            address,
+            queryString,
+            language,
+          ))
+      .then((address) => Query._fromPointer(
+            address.toPointer(),
+            db.worker,
+          ));
 }
 
 String _removeWhiteSpaceFromQuery(String query) =>
@@ -58,18 +63,14 @@ String _removeWhiteSpaceFromQuery(String query) =>
 ///
 /// The [ResultSet] passed to the listener is the _entire new result set_, not
 /// just the rows that changed.
-class Query {
-  Query._(this._pointer, this._worker, bool retain) {
-    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
-      this,
-      _pointer,
-      retain.toInt(),
-    );
-  }
-
-  final Pointer<Void> _pointer;
-
-  final Worker _worker;
+class Query extends NativeResource<WorkerObject<Void>> {
+  Query._fromPointer(Pointer<Void> pointer, Worker worker)
+      : super(CblRefCountedWorkerObject(
+          pointer,
+          worker,
+          release: true,
+          retain: false,
+        ));
 
   /// Assigns values to the query's parameters.
   ///
@@ -93,8 +94,11 @@ class Query {
   ///   'PRODUCT_ID': 'product320',
   /// }))
   /// ```
-  Future<void> setParameters(Dict parameters) => _worker
-      .execute(SetQueryParameters(_pointer.address, parameters.ref.address));
+  Future<void> setParameters(Dict parameters) =>
+      native.execute((address) => SetQueryParameters(
+            address,
+            parameters.native.pointer.address,
+          ));
 
   /// Gets the values assigned to this query's parameters.
   ///
@@ -103,25 +107,30 @@ class Query {
   ///
   /// See:
   /// - [setParameters]
-  Future<Dict?> getParameters() => _worker
-      .execute(GetQueryParameters(_pointer.address))
+  Future<Dict?> getParameters() => native
+      .execute((address) => GetQueryParameters(address))
       .then((address) => Dict.fromPointer(address.toPointer()));
 
   /// Runs the query, returning the results.
-  Future<ResultSet> execute() => _worker
-      .execute(ExecuteQuery(_pointer.address))
-      .then((address) => ResultSet._(address.toPointer(), false));
+  Future<ResultSet> execute() => native
+      .execute((address) => ExecuteQuery(address))
+      .then((address) => ResultSet._fromPointer(
+            address.toPointer(),
+            release: true,
+            retain: false,
+          ));
 
   /// Returns information about the query, including the translated SQLite form,
   /// and the search strategy. You can use this to help optimize the query:
   /// the word `SCAN` in the strategy indicates a linear scan of the entire
   /// database, which should be avoided by adding an index. The strategy will
   /// also show which index(es), if any, are used.
-  Future<String> explain() => _worker.execute(ExplainQuery(_pointer.address));
+  Future<String> explain() =>
+      native.execute((address) => ExplainQuery(address));
 
   /// Returns the number of columns in each result.
   Future<int> columnCount() =>
-      _worker.execute(GetQueryColumnCount(_pointer.address));
+      native.execute((address) => GetQueryColumnCount(address));
 
   /// Returns the name of a column in the result.
   ///
@@ -132,7 +141,7 @@ class Query {
   /// custom name, use the `AS` syntax in the query. Every column is guaranteed
   /// to have a unique name.
   Future<String> columnName(int index) =>
-      _worker.execute(GetQueryColumnName(_pointer.address, index));
+      native.execute((address) => GetQueryColumnName(address, index));
 
   /// Returns a [Stream] which emits a [ResultSet] when this query's results
   /// change, turning it into a "live query" until the stream is canceled.
@@ -142,20 +151,26 @@ class Query {
   /// background after the database changes, and only notify the subscriber when
   /// the result set changes.
   Stream<ResultSet> changes() => callbackStream<ResultSet, int>(
-        worker: _worker,
-        requestFactory: (callbackId) =>
-            AddQueryChangeListener(_pointer.address, callbackId),
-        eventCreator: (listenerTokenAddress, _) async {
+        worker: native.worker,
+        createWorkerRequest: (callbackId) => AddQueryChangeListener(
+          native.pointerUnsafe.address,
+          callbackId,
+        ),
+        createEvent: (listenerTokenAddress, _) async {
           // The native side sends no arguments. When the native side notfies
           // the listener it has to copy the current query result set.
 
           final resultSetAddress =
-              await _worker.execute(CopyCurrentQueryResultSet(
-            _pointer.address,
-            listenerTokenAddress,
-          ));
+              await native.execute((address) => CopyCurrentQueryResultSet(
+                    address,
+                    listenerTokenAddress,
+                  ));
 
-          return ResultSet._(resultSetAddress.toPointer(), false);
+          return ResultSet._fromPointer(
+            resultSetAddress.toPointer(),
+            release: true,
+            retain: false,
+          );
         },
       );
 }
@@ -182,20 +197,17 @@ abstract class Result {
   Dict get dict;
 }
 
-class _ResultSetIterator extends Iterator<Result> implements Result {
+class _ResultSetIterator extends NativeResource<NativeObject<Void>>
+    implements Iterator<Result>, Result {
   static late final _bindings = CBLBindings.instance.resultSet;
 
-  _ResultSetIterator(this._resultSet);
-
-  final ResultSet _resultSet;
-
-  Pointer<Void> get _pointer => _resultSet._pointer;
+  _ResultSetIterator(NativeObject<Void> native) : super(native);
 
   @override
   Result get current => this;
 
   @override
-  bool moveNext() => _bindings.next(_pointer).toBool();
+  bool moveNext() => _bindings.next(native.pointerUnsafe).toBool();
 
   @override
   Value operator [](Object keyOrIndex) {
@@ -203,11 +215,11 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
 
     if (keyOrIndex is String) {
       pointer = runArena(() => _bindings.valueForKey(
-            _pointer,
+            native.pointerUnsafe,
             keyOrIndex.toNativeUtf8().withScoped(),
           ));
     } else if (keyOrIndex is int) {
-      pointer = _bindings.valueAtIndex(_pointer, keyOrIndex);
+      pointer = _bindings.valueAtIndex(native.pointerUnsafe, keyOrIndex);
     } else {
       throw ArgumentError.value(keyOrIndex, 'keyOrIndex');
     }
@@ -216,16 +228,16 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
   }
 
   @override
-  Array get array => Array.fromPointer(
-        _bindings.rowArray(_pointer),
-        bindToValue: true,
+  Array get array => MutableArray.fromPointer(
+        _bindings.rowArray(native.pointerUnsafe),
+        release: true,
         retain: true,
       );
 
   @override
-  Dict get dict => Dict.fromPointer(
-        _bindings.rowDict(_pointer),
-        bindToValue: true,
+  Dict get dict => MutableDict.fromPointer(
+        _bindings.rowDict(native.pointerUnsafe),
+        release: true,
         retain: true,
       );
 }
@@ -236,13 +248,17 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
 ///
 /// See:
 /// - [Result] for how to consume a single Result.
-class ResultSet extends IterableBase<Result> {
-  ResultSet._(this._pointer, bool retain) {
-    CBLBindings.instance.base
-        .bindCBLRefCountedToDartObject(this, _pointer, retain.toInt());
-  }
-
-  final Pointer<Void> _pointer;
+class ResultSet extends NativeResource<NativeObject<Void>>
+    with IterableMixin<Result> {
+  ResultSet._fromPointer(
+    Pointer<Void> pointer, {
+    required bool release,
+    required bool retain,
+  }) : super(CblRefCountedObject(
+          pointer,
+          release: release,
+          retain: retain,
+        ));
 
   var _consumed = false;
 
@@ -254,7 +270,7 @@ class ResultSet extends IterableBase<Result> {
       );
     }
     _consumed = true;
-    return _ResultSetIterator(this);
+    return _ResultSetIterator(native);
   }
 
   /// All the results as [Array]s.

@@ -7,16 +7,14 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
+import 'native_object.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
 // region Internal API
 
-BlobManager createBlobManager({
-  required Pointer<CBLDatabase> db,
-  required Worker worker,
-}) =>
-    BlobManager._(db, worker);
+BlobManager createBlobManager({required WorkerObject<Void> db}) =>
+    BlobManager._(db);
 
 // endregion
 
@@ -53,33 +51,34 @@ late final _blobBindings = CBLBindings.instance.blobs.blob;
 /// See:
 /// - [BlobWriteStream] for writing a Blob in chunks.
 /// - [BlobManager] for the entry point to reading and writing Blob.
-class Blob {
-  Blob._(this._pointer, {bool retain = false}) {
-    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
-      this,
-      _pointer.cast(),
-      retain.toInt(),
-    );
-  }
-
-  final Pointer<CBLBlob> _pointer;
+class Blob extends NativeResource<NativeObject<CBLBlob>> {
+  Blob._fromPointer(
+    Pointer<CBLBlob> pointer, {
+    required bool retain,
+  }) : super(CblRefCountedObject(pointer, release: true, retain: retain));
 
   /// The length in bytes of this Blob's content (from its `length` property).
-  int get length => _blobBindings.length(_pointer);
+  int get length => _blobBindings.length(native.pointerUnsafe);
 
   /// The cryptographic digest of this Blob's content (from its `digest`
   /// property).
-  String get digest => _blobBindings.digest(_pointer).toDartString();
+  String get digest =>
+      _blobBindings.digest(native.pointerUnsafe).toDartString();
 
   /// This Blob's MIME type, if its metadata has a `content_type` property.
-  String? get contentType =>
-      _blobBindings.contentType(_pointer).toNullable()?.toDartString();
+  String? get contentType => _blobBindings
+      .contentType(native.pointerUnsafe)
+      .toNullable()
+      ?.toDartString();
 
   /// This Blob's metadata. This includes the `digest`, `length` and
   /// `content_type` properties, as well as any custom ones that may have been
   /// added.
-  MutableDict get properties =>
-      MutableDict.fromPointer(_blobBindings.properties(_pointer).cast());
+  MutableDict get properties => MutableDict.fromPointer(
+        _blobBindings.properties(native.pointerUnsafe).cast(),
+        release: true,
+        retain: true,
+      );
 }
 
 late final blobSlotSetter = _BlobSlotSetter();
@@ -90,7 +89,7 @@ class _BlobSlotSetter implements SlotSetter {
 
   @override
   void setSlotValue(Pointer<FLSlot> slot, Object? value) =>
-      _blobBindings.setBlob(slot, (value as Blob)._pointer);
+      _blobBindings.setBlob(slot, (value as Blob).native.pointerUnsafe);
 }
 
 /// Extension to get a [Blob] from a [Dict].
@@ -98,16 +97,16 @@ extension DictBlobExtension on Dict {
   /// Returns true if this Dict in a [Document] is a blob reference.
   ///
   /// If so, you can use [asBlob] to access it.
-  bool get isBlob => _blobBindings.isBlob(ref.cast()).toBool();
+  bool get isBlob => _blobBindings.isBlob(native.pointerUnsafe.cast()).toBool();
 
   /// Instantiates a [Blob] object corresponding to a Blob dictionary in a
   /// [Document].
   ///
   /// Returns `null` if this Dict is not a Blob.
   Blob? get asBlob => _blobBindings
-      .get(ref.cast())
+      .get(native.pointerUnsafe.cast())
       .toNullable()
-      ?.let((it) => Blob._(it, retain: true));
+      ?.let((it) => Blob._fromPointer(it, retain: true));
 }
 
 /// Extension to get a [Blob] from a [Value].
@@ -133,12 +132,11 @@ extension ValueBlobExtension on Value {
 /// Future from the last call has completed.
 ///
 /// If for some reason you need to abort, call [close].
-class BlobWriteStream extends StreamConsumer<Uint8List> {
-  BlobWriteStream._(this._pointer, this._worker);
-
-  final Pointer<CBLBlobWriteStream> _pointer;
-
-  final Worker _worker;
+class BlobWriteStream
+    extends NativeResource<SimpleWorkerObject<CBLBlobWriteStream>>
+    implements StreamConsumer<Uint8List> {
+  BlobWriteStream._(Pointer<CBLBlobWriteStream> pointer, Worker worker)
+      : super(SimpleWorkerObject(pointer, worker));
 
   /// Writes the chunks in [stream] to this stream.
   ///
@@ -156,33 +154,34 @@ class BlobWriteStream extends StreamConsumer<Uint8List> {
   Future<void> addStream(Stream<Uint8List> stream) => stream
       .asyncMap((chunk) => runArena(() {
             final chunkPointer = scoped(malloc<Uint8>(chunk.length));
+
             chunkPointer.asTypedList(chunk.length).setAll(0, chunk);
-            return _worker.execute(WriteToBlobWriteStream(
-              _pointer.address,
-              chunkPointer.address,
-              chunk.length,
-            ));
+
+            return native.execute((address) => WriteToBlobWriteStream(
+                  address,
+                  chunkPointer.address,
+                  chunk.length,
+                ));
           }))
       .drain();
 
   /// Closes this stream, if you need to give up without creating a [Blob].
   @override
   Future<void> close() =>
-      _worker.execute(CloseBlobWriteStream(_pointer.address));
+      native.execute((address) => CloseBlobWriteStream(address));
 
   /// Creates a new [Blob] after its content has been written to this stream.
   ///
   /// You should then add the Blob to a [MutableDocument] as a property.
   ///
   /// [contentType] is the MIME type of the data written to this stream.
-  Future<Blob> createBlob({String? contentType}) async {
-    final address = await _worker.execute(CreateBlobWithWriteStream(
-      _pointer.address,
-      contentType,
-    ));
-
-    return Blob._(address.toPointer().cast());
-  }
+  Future<Blob> createBlob({String? contentType}) => native
+      .execute((address) => CreateBlobWithWriteStream(
+            address,
+            contentType,
+          ))
+      .then((address) =>
+          Blob._fromPointer(address.toPointer().cast(), retain: false));
 }
 
 /// Manage reading and writing of [Blob]s.
@@ -190,12 +189,8 @@ class BlobWriteStream extends StreamConsumer<Uint8List> {
 /// See:
 /// - [Database.blobManager] to get the [BlobManager] instance associated with
 ///   a Database.
-class BlobManager {
-  BlobManager._(this._pointer, this._worker);
-
-  final Pointer<CBLDatabase> _pointer;
-
-  final Worker _worker;
+class BlobManager extends NativeResource<WorkerObject<Void>> {
+  BlobManager._(WorkerObject<Void> db) : super(db);
 
   /// Opens a [BlobWriteStream] for writing a new [Blob].
   ///
@@ -205,12 +200,12 @@ class BlobManager {
   /// See:
   /// - [BlobWriteStream] for how to add data to the stream and finally create
   ///   the new Blob.
-  Future<BlobWriteStream> openWriteStream() async {
-    final address =
-        await _worker.execute(OpenBlobWriteStream(_pointer.address));
-
-    return BlobWriteStream._(address.toPointer().cast(), _worker);
-  }
+  Future<BlobWriteStream> openWriteStream() => native
+      .execute((address) => OpenBlobWriteStream(address))
+      .then((address) => BlobWriteStream._(
+            address.toPointer().cast(),
+            native.worker,
+          ));
 
   /// Creates a new blob given its [content] as a single chunk of data.
   ///
@@ -240,17 +235,17 @@ class BlobManager {
     late Future setup = (() async {
       buffer = malloc(chunkSize);
 
-      streamPointer =
-          (await _worker.execute(OpenBlobReadStream(blob._pointer.address)))
-              .toPointer()
-              .cast();
+      streamPointer = await runNativeObjectScoped(() => native.worker
+          .execute(OpenBlobReadStream(blob.native.pointer.address))
+          .then((address) => address.toPointer().cast()));
     })();
 
     Future cleanUp() async {
       await setup.catchError((Object e) {});
 
       malloc.free(buffer!);
-      await _worker.execute(CloseBlobReadStream(streamPointer!.address));
+
+      await native.worker.execute(CloseBlobReadStream(streamPointer!.address));
     }
 
     void start() async {
@@ -260,7 +255,7 @@ class BlobManager {
         await setup;
 
         while (!isPaused) {
-          final bytesRead = await _worker.execute(ReadFromBlobReadStream(
+          final bytesRead = await native.worker.execute(ReadFromBlobReadStream(
             streamPointer!.address,
             buffer!.address,
             chunkSize,

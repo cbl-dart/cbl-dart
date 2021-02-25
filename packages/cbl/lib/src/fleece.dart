@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:ffi/ffi.dart';
 
 import 'errors.dart';
+import 'native_object.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart' show ValueType, CopyFlag;
 
@@ -16,7 +17,7 @@ late final globalSlice = malloc<FLSlice>();
 
 /// An [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
-class Doc {
+class Doc extends NativeResource<NativeObject<Void>> {
   static late final _bindings = CBLBindings.instance.fleece.doc;
 
   /// Creates an [Doc] from JSON-encoded data.
@@ -38,21 +39,17 @@ class Doc {
         return Doc._(docPointer);
       });
 
-  Doc._(this._ref) {
-    _bindings.bindToDartObject(this, _ref);
-  }
-
-  final Pointer<Void> _ref;
+  Doc._(Pointer<Void> pointer) : super(FleeceDocObject(pointer));
 
   /// Returns the root value in the [Doc], usually an [Dict].
-  Value get root => Value.fromPointer(_bindings.getRoot(_ref));
+  Value get root => Value.fromPointer(_bindings.getRoot(native.pointerUnsafe));
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Doc &&
           runtimeType == other.runtimeType &&
-          _ref.address == other._ref.address;
+          native == other.native;
 }
 
 // === Value ===================================================================
@@ -68,52 +65,29 @@ class Doc {
 ///   and Dict. To coerce an Value to a collection type, call [asArray] or
 ///   [asDict]. If the value is not of that type, null is returned. (Array and
 ///   Dict are documented fully in their own sections.)
-class Value {
+class Value extends NativeResource<NativeObject<Void>> {
   static late final _bindings = CBLBindings.instance.fleece.value;
+
+  /// Private constructor for subclasses.
+  Value._(NativeObject<Void> native) : super(native);
 
   /// Creates a [Value] based on a pointer to the the native value.
   ///
-  /// {@template fleece.Value.fromPointer}
   /// Accessing immutable values is only allowed, while the enclosing container
   /// ([Doc], [MutableArray], [MutableDict] and other objects, holding Fleece
   /// data) has not been garbage collected.
-  ///
-  /// Per default a Value will __not__ update the ref count of the native value
-  /// according to it's lifetime. When [bindToValue] is `true` the native
-  /// value's ref count will be increment during construction and decremented
-  /// during destruction. In case the native value has an initial ref count of
-  /// 1, [retain] can be set to `false` to ensure the ref count goes to 0 when
-  /// the Value is destroyed.
-  ///
-  /// Only mutable values can be ref counted.
-  /// {@endtemplate}
-  Value.fromPointer(
-    this.ref, {
-    bool? bindToValue,
-    bool? retain,
-  }) {
-    assert(
-      retain == null || bindToValue == true,
-      'retain can only be used when bindToValue is true',
-    );
-
-    if (bindToValue ?? false) {
-      _bindings.bindToDartObject(this, ref, (retain ?? true).toInt());
-    }
-  }
-
-  /// Pointer to the value in memory.
-  final Pointer<Void> ref;
+  Value.fromPointer(Pointer<Void> pointer) : super(NativeObject(pointer));
 
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
   Doc? get doc {
-    final pointer = _bindings.findDoc(ref);
+    final pointer = _bindings.findDoc(native.pointerUnsafe);
     return pointer == nullptr ? null : Doc._(pointer);
   }
 
   /// Returns the data type of an arbitrary Value.
-  ValueType get type => _bindings.getType(ref).toFleeceValueType();
+  ValueType get type =>
+      _bindings.getType(native.pointerUnsafe).toFleeceValueType();
 
   /// Whether this value represents an `undefined` value.
   bool get isUndefined => type == ValueType.undefined;
@@ -122,43 +96,45 @@ class Value {
   bool get isNull => type == ValueType.Null;
 
   /// Returns true if the value is non-null and represents an integer.
-  bool get isInteger => _bindings.isInteger(ref).toBool();
+  bool get isInteger => _bindings.isInteger(native.pointerUnsafe).toBool();
 
   /// Returns true if the value is non-null and represents a 64-bit
   /// floating-point number.
-  bool get isDouble => _bindings.isDouble(ref).toBool();
+  bool get isDouble => _bindings.isDouble(native.pointerUnsafe).toBool();
 
   /// Returns a value coerced to boolean. This will be true unless the value is
   /// undefined, null, false, or zero.
-  bool get asBool => _bindings.asBool(ref).toBool();
+  bool get asBool => _bindings.asBool(native.pointerUnsafe).toBool();
 
   /// Returns a value coerced to an integer. True and false are returned as 1
   /// and 0, and floating-point numbers are rounded. All other types are
   /// returned as 0.
-  int get asInt => _bindings.asInt(ref);
+  int get asInt => _bindings.asInt(native.pointerUnsafe);
 
   /// Returns a value coerced to a 64-bit floating point number. True and false
   /// are returned as 1.0 and 0.0, and integers are converted to float. All
   /// other types are returned as 0.0.
-  double get asDouble => _bindings.asDouble(ref);
+  double get asDouble => _bindings.asDouble(native.pointerUnsafe);
 
   /// Returns the exact contents of a string value, or null for all other types.
   String get asString {
-    _bindings.asString(ref, globalSlice);
+    _bindings.asString(native.pointerUnsafe, globalSlice);
     return globalSlice.ref.toDartString();
   }
 
   /// If a Value represents an array, returns it as a [Array], else null.
-  Array? get asArray => type == ValueType.array ? Array.fromPointer(ref) : null;
+  Array? get asArray =>
+      type == ValueType.array ? Array.fromPointer(native.pointerUnsafe) : null;
 
   /// If a Value represents a dictionary, returns it as a [Dict], else null.
-  Dict? get asDict => type == ValueType.dict ? Dict.fromPointer(ref) : null;
+  Dict? get asDict =>
+      type == ValueType.dict ? Dict.fromPointer(native.pointerUnsafe) : null;
 
   /// Returns a string representation of any scalar value. Data values are
   /// returned in raw form. Arrays and dictionaries don't have a representation
   /// and will return null.
   String? get scalarToString {
-    _bindings.scalarToString(ref, globalSlice);
+    _bindings.scalarToString(native.pointerUnsafe, globalSlice);
     return globalSlice.ref.buf == nullptr
         ? null
         : globalSlice.toDartStringAndFree();
@@ -170,7 +146,12 @@ class Value {
     bool json5 = false,
     bool canonical = true,
   }) {
-    _bindings.toJson(ref, json5.toInt(), canonical.toInt(), globalSlice);
+    _bindings.toJson(
+      native.pointerUnsafe,
+      json5.toInt(),
+      canonical.toInt(),
+      globalSlice,
+    );
     return globalSlice.toDartStringAndFree();
   }
 
@@ -202,7 +183,9 @@ class Value {
       identical(this, other) ||
       other is Value &&
           runtimeType == other.runtimeType &&
-          _bindings.isEqual(ref, other.ref).toBool();
+          _bindings
+              .isEqual(native.pointerUnsafe, other.native.pointerUnsafe)
+              .toBool();
 
   @override
   int get hashCode {
@@ -253,27 +236,20 @@ class Value {
 class Array extends Value with ListMixin<Value> {
   static late final _bindings = CBLBindings.instance.fleece.array;
 
+  /// Private constructor for subclasses.
+  Array._(NativeObject<Void> native) : super._(native);
+
   /// Creates an [Array] based on a pointer to the the native value.
-  ///
-  /// {@macro fleece.Value.fromPointer}
-  Array.fromPointer(
-    Pointer<Void> ref, {
-    bool? bindToValue,
-    bool? retain,
-  }) : super.fromPointer(
-          ref,
-          bindToValue: bindToValue,
-          retain: retain,
-        );
+  Array.fromPointer(Pointer<Void> pointer) : super.fromPointer(pointer);
 
   @override
-  int get length => _bindings.count(ref);
+  int get length => _bindings.count(native.pointerUnsafe);
 
   @override
   set length(int length) => throw _immutableValueException();
 
   @override
-  bool get isEmpty => _bindings.isEmpty(ref).toBool();
+  bool get isEmpty => _bindings.isEmpty(native.pointerUnsafe).toBool();
 
   @override
   Value get first => this[0];
@@ -283,15 +259,18 @@ class Array extends Value with ListMixin<Value> {
 
   /// If the array is mutable, returns it cast to [MutableArray], else null.
   MutableArray? get asMutable {
-    final pointer = _bindings.asMutable(ref);
-    return pointer == nullptr ? null : MutableArray.fromPointer(pointer);
+    final pointer = _bindings.asMutable(native.pointerUnsafe);
+    return pointer == nullptr
+        ? null
+        : MutableArray.fromPointer(pointer, release: true, retain: true);
   }
 
   @override
   List<Object?> toObject() => map((element) => element.toObject()).toList();
 
   @override
-  Value operator [](int index) => Value.fromPointer(_bindings.get(ref, index));
+  Value operator [](int index) =>
+      Value.fromPointer(_bindings.get(native.pointerUnsafe, index));
 
   @override
   void operator []=(int index, Object? value) =>
@@ -305,21 +284,23 @@ class MutableArray extends Array {
   static late final _bindings = CBLBindings.instance.fleece.mutableArray;
 
   /// Creates a [MutableArray] based on a pointer to the the native value.
-  ///
-  /// {@macro fleece.Value.fromPointer}
   MutableArray.fromPointer(
-    Pointer<Void> value, {
-    bool? bindToValue = true,
-    bool? retain,
-  }) : super.fromPointer(
-          value,
-          bindToValue: bindToValue,
+    Pointer<Void> pointer, {
+    required bool release,
+    required bool retain,
+  }) : super._(FleeceRefCountedObject(
+          pointer,
+          release: release,
           retain: retain,
-        );
+        ));
 
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
-    final result = MutableArray.fromPointer(_bindings.makeNew(), retain: false);
+    final result = MutableArray.fromPointer(
+      _bindings.makeNew(),
+      release: true,
+      retain: false,
+    );
 
     if (from != null) {
       result.addAll(from);
@@ -342,23 +323,24 @@ class MutableArray extends Array {
     Set<CopyFlag> flags = const {},
   }) =>
       MutableArray.fromPointer(
-        _bindings.mutableCopy(source.ref, flags.toCFlags()),
+        _bindings.mutableCopy(source.native.pointerUnsafe, flags.toCFlags()),
         retain: false,
+        release: true,
       );
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the original
   /// source Array.
   Array? get source {
-    final pointer = _bindings.getSource(ref);
+    final pointer = _bindings.getSource(native.pointerUnsafe);
     return pointer == nullptr ? null : Array.fromPointer(pointer);
   }
 
   /// Returns true if the [Array] has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(ref).toBool();
+  bool get isChanged => _bindings.isChanged(native.pointerUnsafe).toBool();
 
   @override
-  set length(int length) => _bindings.resize(ref, length);
+  set length(int length) => _bindings.resize(native.pointerUnsafe, length);
 
   @override
   set first(Object? value) {
@@ -373,13 +355,13 @@ class MutableArray extends Array {
   @override
   void operator []=(int index, Object? value) {
     RangeError.checkValidIndex(index, this);
-    final slot = _bindings.set(ref, index);
+    final slot = _bindings.set(native.pointerUnsafe, index);
     _setSlotValue(slot, value);
   }
 
   @override
   void add(Object? element) {
-    final slot = _bindings.append(ref);
+    final slot = _bindings.append(native.pointerUnsafe);
     _setSlotValue(slot, element);
   }
 
@@ -396,7 +378,7 @@ class MutableArray extends Array {
   @override
   void removeRange(int start, int end) {
     RangeError.checkValidRange(start, end, length);
-    _bindings.remove(ref, start, end - start);
+    _bindings.remove(native.pointerUnsafe, start, end - start);
   }
 
   /// Inserts a contiguous range of JSON `null` values into the array.
@@ -405,7 +387,7 @@ class MutableArray extends Array {
   /// [count] is the number of items to insert.
   void insertNulls(int start, int count) {
     RangeError.checkValidIndex(start, this, 'start');
-    _bindings.insert(ref, start, count);
+    _bindings.insert(native.pointerUnsafe, start, count);
   }
 
   /// Convenience function for getting an dict-valued property in mutable form.
@@ -415,8 +397,10 @@ class MutableArray extends Array {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(int index) {
-    final pointer = _bindings.getMutableDict(ref, index);
-    return pointer == nullptr ? null : MutableDict.fromPointer(pointer);
+    final pointer = _bindings.getMutableDict(native.pointerUnsafe, index);
+    return pointer == nullptr
+        ? null
+        : MutableDict.fromPointer(pointer, release: true, retain: true);
   }
 
   /// Convenience function for getting a array-valued property in mutable form.
@@ -426,8 +410,10 @@ class MutableArray extends Array {
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(int index) {
-    final pointer = _bindings.getMutableArray(ref, index);
-    return pointer == nullptr ? null : MutableArray.fromPointer(pointer);
+    final pointer = _bindings.getMutableArray(native.pointerUnsafe, index);
+    return pointer == nullptr
+        ? null
+        : MutableArray.fromPointer(pointer, retain: true, release: true);
   }
 }
 
@@ -437,35 +423,30 @@ class MutableArray extends Array {
 class Dict extends Value with MapMixin<String, Value> {
   static late final _bindings = CBLBindings.instance.fleece.dict;
 
+  /// Private constructor for subclasses.
+  Dict._(NativeObject<Void> native) : super._(native);
+
   /// Creates a [Dict] based on a pointer to the the native value.
-  ///
-  /// {@macro fleece.Value.fromPointer}
-  Dict.fromPointer(
-    Pointer<Void> value, {
-    bool? bindToValue,
-    bool? retain,
-  }) : super.fromPointer(
-          value,
-          bindToValue: bindToValue,
-          retain: retain,
-        );
+  Dict.fromPointer(Pointer<Void> pointer) : super.fromPointer(pointer);
 
   /// Returns the number of items in a dictionary.
   @override
-  int get length => _bindings.count(ref);
+  int get length => _bindings.count(native.pointerUnsafe);
 
   /// Returns true if a dictionary is empty. Depending on the dictionary's
   /// representation, this can be faster than `count == 0`.
   @override
-  bool get isEmpty => _bindings.isEmpty(ref).toBool();
+  bool get isEmpty => _bindings.isEmpty(native.pointerUnsafe).toBool();
 
   @override
   bool get isNotEmpty => !isEmpty;
 
   /// If the dictionary is mutable, returns it cast to [MutableDict], else null.
   MutableDict? get asMutable {
-    final pointer = _bindings.asMutable(ref);
-    return pointer == nullptr ? null : MutableDict.fromPointer(pointer);
+    final pointer = _bindings.asMutable(native.pointerUnsafe);
+    return pointer == nullptr
+        ? null
+        : MutableDict.fromPointer(pointer, release: true, retain: true);
   }
 
   @override
@@ -475,7 +456,8 @@ class Dict extends Value with MapMixin<String, Value> {
   Value operator [](Object? key) => runArena(() {
         assert(key is String, 'Dict key must be a non-null String');
         final keyPointer = (key as String).toNativeUtf8().withScoped();
-        return Value.fromPointer(_bindings.get(ref, keyPointer));
+        return Value.fromPointer(
+            _bindings.get(native.pointerUnsafe, keyPointer));
       });
 
   @override
@@ -524,7 +506,7 @@ class _DictKeyIterator extends Iterator<String> {
   @override
   bool moveNext() {
     // Create the iterator if it does not exist yet.
-    iterator ??= _bindings.begin(this, dict.ref.cast());
+    iterator ??= _bindings.begin(this, dict.native.pointerUnsafe.cast());
 
     // The iterator has no more elements.
     if (iterator!.ref.done.toBool()) return false;
@@ -549,21 +531,23 @@ class MutableDict extends Dict {
   static late final _bindings = CBLBindings.instance.fleece.mutableDict;
 
   /// Creates a [MutableDict] based on a pointer to the the native value.
-  ///
-  /// {@macro fleece.Value.fromPointer}
   MutableDict.fromPointer(
-    Pointer<Void> value, {
-    bool? bindToValue = true,
-    bool? retain,
-  }) : super.fromPointer(
-          value,
-          bindToValue: bindToValue,
+    Pointer<Void> pointer, {
+    required bool release,
+    required bool retain,
+  }) : super._(FleeceRefCountedObject(
+          pointer,
+          release: release,
           retain: retain,
-        );
+        ));
 
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {
-    final result = MutableDict.fromPointer(_bindings.makeNew(), retain: false);
+    final result = MutableDict.fromPointer(
+      _bindings.makeNew(),
+      release: true,
+      retain: false,
+    );
 
     if (from != null) {
       result.addAll(from);
@@ -585,24 +569,26 @@ class MutableDict extends Dict {
     Set<CopyFlag> flags = const {},
   }) =>
       MutableDict.fromPointer(
-        _bindings.mutableCopy(source.ref, flags.toCFlags()),
+        _bindings.mutableCopy(source.native.pointerUnsafe, flags.toCFlags()),
+        release: true,
         retain: false,
       );
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
   Dict? get source {
-    final pointer = _bindings.getSource(ref);
+    final pointer = _bindings.getSource(native.pointerUnsafe);
     return pointer == nullptr ? null : Dict.fromPointer(pointer);
   }
 
   /// Returns true if the Dict has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(ref).toBool();
+  bool get isChanged => _bindings.isChanged(native.pointerUnsafe).toBool();
 
   @override
   void operator []=(String key, Object? value) => runArena(() {
-        final slot = _bindings.set(ref, key.toNativeUtf8().withScoped());
+        final slot = _bindings.set(
+            native.pointerUnsafe, key.toNativeUtf8().withScoped());
         _setSlotValue(slot, value);
       });
 
@@ -614,14 +600,15 @@ class MutableDict extends Dict {
   }
 
   @override
-  void clear() => _bindings.removeAll(ref);
+  void clear() => _bindings.removeAll(native.pointerUnsafe);
 
   @override
   Value? remove(Object? key) => runArena(() {
         assert(key is String);
         final value = this[key];
 
-        _bindings.remove(ref, (key as String).toNativeUtf8().withScoped());
+        _bindings.remove(
+            native.pointerUnsafe, (key as String).toNativeUtf8().withScoped());
 
         return value;
       });
@@ -633,9 +620,11 @@ class MutableDict extends Dict {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(String key) => runArena(() {
-        final pointer =
-            _bindings.getMutableDict(ref, key.toNativeUtf8().withScoped());
-        return pointer == nullptr ? null : MutableDict.fromPointer(pointer);
+        final pointer = _bindings.getMutableDict(
+            native.pointerUnsafe, key.toNativeUtf8().withScoped());
+        return pointer == nullptr
+            ? null
+            : MutableDict.fromPointer(pointer, release: true, retain: true);
       });
 
   /// Convenience function for getting a array-valued property in mutable form.
@@ -645,9 +634,11 @@ class MutableDict extends Dict {
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(String key) => runArena(() {
-        final pointer =
-            _bindings.getMutableArray(ref, key.toNativeUtf8().withScoped());
-        return pointer == nullptr ? null : MutableArray.fromPointer(pointer);
+        final pointer = _bindings.getMutableArray(
+            native.pointerUnsafe, key.toNativeUtf8().withScoped());
+        return pointer == nullptr
+            ? null
+            : MutableArray.fromPointer(pointer, release: true, retain: true);
       });
 }
 
@@ -713,7 +704,7 @@ class _DefaultSlotSetter implements SlotSetter {
             slot, (value as String).toNativeUtf8().withScoped());
       });
     } else if (value is Value) {
-      _slotBindings.setValue(slot, value.ref);
+      _slotBindings.setValue(slot, value.native.pointerUnsafe);
     }
   }
 
