@@ -183,9 +183,11 @@ abstract class Result {
 class _ResultSetIterator extends Iterator<Result> implements Result {
   static late final _bindings = CBLBindings.instance.resultSet;
 
-  _ResultSetIterator(this._pointer);
+  _ResultSetIterator(this._resultSet);
 
-  final Pointer<Void> _pointer;
+  final ResultSet _resultSet;
+
+  Pointer<Void> get _pointer => _resultSet._pointer;
 
   @override
   Result get current => this;
@@ -198,10 +200,10 @@ class _ResultSetIterator extends Iterator<Result> implements Result {
     Pointer<Void> pointer;
 
     if (keyOrIndex is String) {
-      pointer = runArena(() {
-        return _bindings.valueForKey(
-            _pointer, keyOrIndex.toNativeUtf8().withScoped());
-      });
+      pointer = runArena(() => _bindings.valueForKey(
+            _pointer,
+            keyOrIndex.toNativeUtf8().withScoped(),
+          ));
     } else if (keyOrIndex is int) {
       pointer = _bindings.valueAtIndex(_pointer, keyOrIndex);
     } else {
@@ -250,7 +252,7 @@ class ResultSet extends IterableBase<Result> {
       );
     }
     _consumed = true;
-    return _ResultSetIterator(_pointer);
+    return _ResultSetIterator(this);
   }
 
   /// All the results as [Array]s.
