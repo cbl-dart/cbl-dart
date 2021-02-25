@@ -370,7 +370,7 @@ void main() {
 
     test('columCount returns correct count', () async {
       final q = await db.query('SELECT a');
-      expect(q.columnCount, completion(equals(1)));
+      expect(q.columnCount(), completion(equals(1)));
     });
 
     test('columnName returns correct name', () async {
