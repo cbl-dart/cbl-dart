@@ -270,11 +270,14 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 
 /// A database is both a filesystem object and a container for documents.
 class Database {
-  static late final _bindings = CBLBindings.instance.database;
   static late final _callbacks = NativeCallbacks.instance;
 
   Database._(this._debugName, this._pointer, this._worker) {
-    _bindings.bindToDartObject(this, _pointer);
+    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+      this,
+      _pointer,
+      false.toInt(),
+    );
   }
 
   final Pointer<Void> _pointer;

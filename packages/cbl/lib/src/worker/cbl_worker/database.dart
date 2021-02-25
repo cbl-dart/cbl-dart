@@ -402,7 +402,7 @@ void createDatabaseIndex(CreateDatabaseIndex request) => _bindings
     .createIndex(
       request.pointer,
       request.name.toNativeUtf8().withScoped(),
-      scoped(malloc<CBLIndexSpec>())..initScoped(request.index),
+      (scoped(malloc<CBLIndexSpec>())..initScoped(request.index)).ref,
       globalError,
     )
     .toBool()
