@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:synchronized/synchronized.dart';
 
 import '../errors.dart';
 import 'cbl_worker/blob.dart';
@@ -61,29 +60,19 @@ RequestRouter _createRouter() {
 WorkerRequestHandlerMiddleware _runInArenaMiddleware() =>
     (request, next) => runArena(() => next(request));
 
-/// A manager of [Worker]s which use a [CblWorkerDelegate].
-class CblWorkerManager {
-  CblWorkerManager({required Libraries libraries}) : libraries = libraries;
+/// A factory of [Worker]s which use a [CblWorkerDelegate].
+class CblWorkerFactory {
+  CblWorkerFactory({required Libraries libraries}) : libraries = libraries;
 
   /// The dynamic libraries configuration for the [Worker]s.
   final Libraries libraries;
 
-  final _lock = Lock();
-  final _workers = <String, Worker>{};
-
-  /// If it does not exist creates and returns the [Worker] with given [id].
-  Future<Worker> getWorker({required String id}) =>
-      _lock.synchronized(() async {
-        final worker = _workers.putIfAbsent(id, () => _createCblWorker(id));
-        if (!worker.running) await worker.start();
-        return worker;
-      });
-
-  /// Stops all the Workers.
-  Future<void> dispose() => _lock.synchronized(() async {
-        await Future.wait(_workers.values.map((worker) => worker.stop()));
-        _workers.clear();
-      });
+  /// Creates and starts a [Worker] with given [id].
+  Future<Worker> createWorker({required String id}) async {
+    final worker = _createCblWorker(id);
+    await worker.start();
+    return worker;
+  }
 
   Worker _createCblWorker(String id) =>
       Worker(id: id, delegate: CblWorkerDelegate(libraries));

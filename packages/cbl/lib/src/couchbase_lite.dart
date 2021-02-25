@@ -92,18 +92,18 @@ class CouchbaseLite {
 
         SlotSetter.register(blobSlotSetter);
 
-        final workerManager = CblWorkerManager(libraries: libraries);
+        final workerFactory = CblWorkerFactory(libraries: libraries);
 
         return _instance = CouchbaseLite._(
-          workerManager,
-          await workerManager.getWorker(id: _standaloneWorkerId),
+          workerFactory,
+          await workerFactory.createWorker(id: _standaloneWorkerId),
         );
       });
 
   /// Private constructor to allow control over instance creation.
-  CouchbaseLite._(this._workerManager, this._worker);
+  CouchbaseLite._(this._workerFactory, this._worker);
 
-  final CblWorkerManager _workerManager;
+  final CblWorkerFactory _workerFactory;
   final Worker _worker;
 
   /// Returns true if a database with the given [name] exists in the given
@@ -158,7 +158,8 @@ class CouchbaseLite {
     DatabaseConfiguration? config,
   }) async {
     final databaseId = _nextDatabaseId++;
-    final worker = await _workerManager.getWorker(id: 'Database#$databaseId');
+    final worker =
+        await _workerFactory.createWorker(id: 'Database#$databaseId');
     final pointer = await worker.execute(OpenDatabase(name, config));
     return createDatabase(
       debugName: name,
@@ -237,7 +238,7 @@ class CouchbaseLite {
   ///
   /// The Isolate will not exit until this method has been called.
   Future<void> dispose() async {
-    await _workerManager.dispose();
+    await _worker.stop();
     await NativeCallbacks.instance.dispose();
   }
 }

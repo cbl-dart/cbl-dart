@@ -306,12 +306,18 @@ class Database {
       _worker.execute(GetDatabaseConfiguration(_address));
 
   /// Closes this database.
-  Future<void> close() => _worker.execute(CloseDatabase(_address));
+  Future<void> close() async {
+    await _worker.execute(CloseDatabase(_address));
+    await _worker.stop();
+  }
 
   /// Closes and deletes this database.
   ///
   /// If there are any other connections to the database, an error is thrown.
-  Future<void> delete() => _worker.execute(DeleteDatabase(_address));
+  Future<void> delete() async {
+    await _worker.execute(DeleteDatabase(_address));
+    await _worker.stop();
+  }
 
   /// Compacts the database file.
   Future<void> compact() => _worker.execute(CompactDatabase(_address));
@@ -591,5 +597,5 @@ class Database {
   int get hashCode => super.hashCode ^ _pointer.hashCode;
 
   @override
-  String toString() => 'LocalDbEndpoint(name: $_debugName)';
+  String toString() => 'Database(name: $_debugName)';
 }
