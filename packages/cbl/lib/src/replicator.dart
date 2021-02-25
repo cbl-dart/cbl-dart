@@ -10,6 +10,7 @@ import 'document.dart';
 import 'errors.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
+import 'native_object.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
@@ -18,18 +19,18 @@ export 'package:cbl_ffi/cbl_ffi.dart'
 
 // region Internal API
 
-Future<Replicator> createReplicator(
-  Worker worker,
-  Pointer<CBLDatabase> db,
-  ReplicatorConfiguration config,
-) =>
-    runArena(() async {
-      final cblConfig = config.toCBLReplicatorConfigurationScoped(db);
+Future<Replicator> createReplicator({
+  required WorkerObject<Void> db,
+  required ReplicatorConfiguration config,
+}) =>
+    runNativeObjectScoped(() => runArena(() async {
+          final cblConfig = config.toCBLReplicatorConfigurationScoped(db);
 
-      final address = await worker.execute(NewReplicator(cblConfig.address));
+          final address =
+              await db.worker.execute(NewReplicator(cblConfig.address));
 
-      return Replicator._(address.toPointer().cast(), worker);
-    });
+          return Replicator._fromPointer(address.toPointer().cast(), db.worker);
+        }));
 
 // endregion
 
@@ -358,12 +359,12 @@ class ReplicatorConfiguration {
 
 extension on ReplicatorConfiguration {
   Pointer<CBLDartReplicatorConfiguration> toCBLReplicatorConfigurationScoped(
-    Pointer<CBLDatabase> db,
+    NativeObject<Void> db,
   ) {
     final config = scoped(malloc<CBLDartReplicatorConfiguration>());
 
     // database
-    config.ref.database = db;
+    config.ref.database = db.pointer.cast();
 
     // endpoint
     Pointer<CBLEndpoint> cblEndpoint;
@@ -376,8 +377,8 @@ extension on ReplicatorConfiguration {
         _bindings.endpointNewWithLocalDB != null,
         'LocalDbEndpoint is an Enterprise Edition feature',
       );
-      cblEndpoint =
-          _bindings.endpointNewWithLocalDB!(endpoint.database.pointer);
+      cblEndpoint = _bindings
+          .endpointNewWithLocalDB!(endpoint.database.native.pointer.cast());
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $endpoint');
     }
@@ -430,7 +431,7 @@ extension on ReplicatorConfiguration {
     final headers = this.headers;
     if (headers != null) {
       final dict = MutableDict(headers);
-      config.ref.headers = dict.ref.cast();
+      config.ref.headers = dict.native.pointer.cast();
       // We need to ensure dict is not garbage collected until the current
       // Arena is finalized.
       registerFinalzier(() => dict.type);
@@ -450,7 +451,7 @@ extension on ReplicatorConfiguration {
     final channels = this.channels;
     if (channels != null) {
       final array = MutableArray(channels);
-      config.ref.channels = array.ref.cast();
+      config.ref.channels = array.native.pointer.cast();
       // We need to ensure array is not garbage collected until the current
       // Arena is finalized.
       registerFinalzier(() => array.type);
@@ -462,7 +463,7 @@ extension on ReplicatorConfiguration {
     final documentIDs = this.documentIDs;
     if (documentIDs != null) {
       final array = MutableArray(documentIDs);
-      config.ref.documentIDs = array.ref.cast();
+      config.ref.documentIDs = array.native.pointer.cast();
       // We need to ensure array is not garbage collected until the current
       // Arena is finalized.
       registerFinalzier(() => array.type);
@@ -475,8 +476,11 @@ extension on ReplicatorConfiguration {
           filter,
           (filter, arguments, result) async {
             final docAddress = arguments[0] as int;
-            final doc =
-                createDocument(pointer: docAddress.toPointer(), retain: true);
+            final doc = createDocument(
+              pointer: docAddress.toPointer(),
+              retain: true,
+              worker: null,
+            );
             final isDeleted = arguments[1] as bool;
 
             var decision = false;
@@ -510,11 +514,19 @@ extension on ReplicatorConfiguration {
           (filter, arguments, result) async {
             final docId = arguments[0] as String;
             final localAddress = arguments[1] as int?;
-            final local = localAddress?.let(
-                (it) => createDocument(pointer: it.toPointer(), retain: true));
             final remoteAddress = arguments[2] as int?;
-            final remote = remoteAddress?.let(
-                (it) => createDocument(pointer: it.toPointer(), retain: true));
+
+            final local = localAddress?.let((it) => createDocument(
+                  pointer: it.toPointer(),
+                  retain: true,
+                  worker: null,
+                ));
+
+            final remote = remoteAddress?.let((it) => createDocument(
+                  pointer: it.toPointer(),
+                  retain: true,
+                  worker: null,
+                ));
 
             var decision = local ?? remote;
             try {
@@ -705,14 +717,9 @@ class DocumentsPulled extends DocumentsReplicated {
 /// A replicator is a background task that synchronizes changes between a local
 /// database and another database on a remote server (or on a peer device, or
 /// even another local database.)
-class Replicator {
-  Replicator._(this._pointer, this._worker) {
-    _bindings.bindToDartObject(this, _pointer.cast());
-  }
-
-  final Pointer<CBLReplicator> _pointer;
-
-  final Worker _worker;
+class Replicator extends NativeResource<WorkerObject<Void>> {
+  Replicator._fromPointer(Pointer<Void> pointer, Worker worker)
+      : super(CBLReplicatorObject(pointer, worker));
 
   /// Instructs this replicator to ignore existing checkpoints the next time it
   /// runs.
@@ -722,12 +729,12 @@ class Replicator {
   /// missing documents if the client and server have gotten out of sync
   /// somehow.
   Future<void> resetCheckpoint() =>
-      _worker.execute(ResetReplicatorCheckpoint(_pointer.address));
+      native.execute((address) => ResetReplicatorCheckpoint(address));
 
   /// Starts this replicator, asynchronously.
   ///
   /// Does nothing if it's already started.
-  Future<void> start() => _worker.execute(StartReplicator(_pointer.address));
+  Future<void> start() => native.execute((address) => StartReplicator(address));
 
   /// Stops a running replicator, asynchronously.
   ///
@@ -736,7 +743,7 @@ class Replicator {
   /// The [Stream] returned from [statusChanges] will emit a [ReplicatorStatus]
   /// with an activity level of [ReplicatorActivityLevel.stopped] after it
   /// stops. Until then, consider it still active.
-  Future<void> stop() => _worker.execute(StopReplicator(_pointer.address));
+  Future<void> stop() => native.execute((address) => StopReplicator(address));
 
   /// Informs this replicator whether it's considered possible to reach the
   /// remote host with the current network configuration.
@@ -746,11 +753,8 @@ class Replicator {
   /// * Setting it to false will cancel any pending retry and prevent future
   ///   automatic retries.
   /// * Setting it back to true will initiate an immediate retry.
-  Future<void> setHostReachable(bool reachable) =>
-      _worker.execute(SetReplicatorHostReachable(
-        _pointer.address,
-        reachable,
-      ));
+  Future<void> setHostReachable(bool reachable) => native
+      .execute((address) => SetReplicatorHostReachable(address, reachable));
 
   /// Puts this replicator in or out of "suspended" state.
   ///
@@ -763,27 +767,29 @@ class Replicator {
   ///   reconnect, _if_ it was connected when suspended, and is still in Offline
   ///   state.
   Future<void> setSuspended(bool suspended) =>
-      _worker.execute(SetReplicatorSuspended(
-        _pointer.address,
-        suspended,
-      ));
+      native.execute((address) => SetReplicatorSuspended(
+            address,
+            suspended,
+          ));
 
   /// Returns this [Replicator]'s current status.
   Future<ReplicatorStatus> status() =>
-      _worker.execute(GetReplicatorStatus(_pointer.address));
+      native.execute((address) => GetReplicatorStatus(address));
 
   /// Returns a stream that emits this replicators [ReplicatorStatus] when the
   /// it changes.
   Stream<ReplicatorStatus> statusChanges() =>
       callbackStream<ReplicatorStatus, void>(
-        worker: _worker,
-        requestFactory: (callbackId) =>
-            AddReplicatorChangeListener(_pointer.address, callbackId),
+        worker: native.worker,
+        createWorkerRequest: (callbackId) => AddReplicatorChangeListener(
+          native.pointerUnsafe.address,
+          callbackId,
+        ),
         // The native caller allocates some memory for the arguments and blocks
         // until the Dart side copies them and finishes the call, so it can
         // release free the memory.
         finishBlockingCall: true,
-        eventCreator: (_, arguments) {
+        createEvent: (_, arguments) {
           final statusAddress = arguments[0] as int;
           return statusAddress
               .toPointer()
@@ -809,11 +815,12 @@ class Replicator {
   ///
   /// Documents that would never be pushed by this replicator, due to its
   /// configuration's `pushFilter` or `docIDs`, are ignored.
-  Future<Dict> pendingDocumentIDs() => _worker
-      .execute(GetReplicatorPendingDocumentIDs(_pointer.address))
-      .then((address) => Dict.fromPointer(
+  Future<Dict> pendingDocumentIDs() => native
+      .execute((address) => GetReplicatorPendingDocumentIDs(address))
+      .then((address) => MutableDict.fromPointer(
             address.toPointer(),
-            bindToValue: true,
+            release: true,
+            retain: false,
           ));
 
   /// Indicates whether the document with the given ID has local changes that
@@ -824,21 +831,20 @@ class Replicator {
   /// documentation for details.
   ///
   /// A `false` result means the document is not pending.
-  Future<bool> isDocumentPending(String docID) =>
-      _worker.execute(GetReplicatorIsDocumentPening(
-        _pointer.address,
-        docID,
-      ));
+  Future<bool> isDocumentPending(String docID) => native
+      .execute((address) => GetReplicatorIsDocumentPening(address, docID));
 
   /// Returns a stream that emits [DocumentsReplicated]s when [Document]s
   /// have been replicated.
   Stream<DocumentsReplicated> documentReplications() => callbackStream(
-        worker: _worker,
-        requestFactory: (callbackId) =>
-            AddReplicatorDocumentListener(_pointer.address, callbackId),
+        worker: native.worker,
+        createWorkerRequest: (callbackId) => AddReplicatorDocumentListener(
+          native.pointerUnsafe.address,
+          callbackId,
+        ),
         // See `statusChanges` for an explanation of why this option is `true`.
         finishBlockingCall: true,
-        eventCreator: (_, arguments) {
+        createEvent: (_, arguments) {
           final isPush = arguments[0] as bool;
           final numDocuments = arguments[1] as int;
           final documentsAddress = arguments[2] as int;
@@ -862,10 +868,10 @@ class Replicator {
       identical(this, other) ||
       other is Replicator &&
           other.runtimeType == other.runtimeType &&
-          _pointer == other._pointer;
+          native == other.native;
 
   @override
-  int get hashCode => super.hashCode ^ _pointer.hashCode;
+  int get hashCode => super.hashCode ^ native.hashCode;
 
   @override
   String toString() => 'Replicator()';

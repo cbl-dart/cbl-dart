@@ -41,24 +41,25 @@ String redact(String string) {
 
 /// Utility to create a [Stream] from a native callback.
 ///
-/// Callbacks are registered through a request (created by [requestFactory]),
-/// which is executed on a [worker] to not block the calling Isolate.
+/// Callbacks are registered through a request (created by
+/// [createWorkerRequest]), which is executed on a [worker] to not block the
+/// calling Isolate.
 ///
-/// [eventCreator] receives the result of the callback registration request and
+/// [createEvent] receives the result of the callback registration request and
 /// the arguments from the native side an turns them into an event of type [T].
 ///
 /// The returned stream is single subscription.
 ///
 /// If [finishBlockingCall] is `true`, the native caller receives `null` as a
-/// result when [eventCreator] returns/completes. The native caller is also
-/// notified if [eventCreator] throws/rejects.
+/// result when [createEvent] returns/completes. The native caller is also
+/// notified if [createEvent] throws/rejects.
 ///
 /// See:
 /// - [NativeCallbacks]
 Stream<T> callbackStream<T, S>({
   required Worker worker,
-  required WorkerRequest<S> Function(int callbackId) requestFactory,
-  required FutureOr<T> Function(S requestResult, List arguments) eventCreator,
+  required WorkerRequest<S> Function(int callbackId) createWorkerRequest,
+  required FutureOr<T> Function(S requestResult, List arguments) createEvent,
   bool finishBlockingCall = false,
 }) {
   final callbacks = NativeCallbacks.instance;
@@ -69,8 +70,8 @@ Stream<T> callbackStream<T, S>({
   void onListen() {
     final callbackId =
         callbacks.registerCallback<FutureOr<T> Function(S, List)>(
-      eventCreator,
-      (eventCreator, arguments, result) async {
+      createEvent,
+      (createEvent, arguments, result) async {
         // Callbacks can come in before the registration request from the worker
         // comes back. In this case `requestResult` has not be initialized yet.
         // By waiting for `callbackAdded`, `requestResult` is guarantied to be
@@ -80,7 +81,7 @@ Stream<T> callbackStream<T, S>({
         // We use `add` instead of `addStream` because the callback can fire
         // before the Future from `addStream` returns.
         try {
-          controller.add(await eventCreator(requestResult, arguments));
+          controller.add(await createEvent(requestResult, arguments));
         } catch (error, stackTrace) {
           controller.addError(error, stackTrace);
         } finally {
@@ -89,7 +90,8 @@ Stream<T> callbackStream<T, S>({
       },
     );
 
-    callbackAdded = worker.execute(requestFactory(callbackId)).then((result) {
+    callbackAdded =
+        worker.execute(createWorkerRequest(callbackId)).then((result) {
       requestResult = result;
       return true;
     }).catchError((Object error, StackTrace stackTrace) {
@@ -101,7 +103,7 @@ Stream<T> callbackStream<T, S>({
 
   Future onCancel() async {
     if (await callbackAdded) {
-      callbacks.unregisterCallback(eventCreator, runFinalizer: true);
+      callbacks.unregisterCallback(createEvent, runFinalizer: true);
     }
   }
 
