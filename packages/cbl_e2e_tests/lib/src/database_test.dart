@@ -333,7 +333,7 @@ void main() {
 
     setUp(() async {
       db = await cbl.openDatabase(
-        testDbName('Index'),
+        testDbName('Query'),
         config: DatabaseConfiguration(directory: tmpDir),
       );
     });
