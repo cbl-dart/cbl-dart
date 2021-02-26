@@ -54,8 +54,10 @@ echo "::group::Install Melos"
 
 echo "::endgroup::"
 
-echo "::group::Bootstrap packages with Melos"
+if [ -z "$SKIP_MELOS_BOOTSTRAP" ]; then
+    echo "::group::Bootstrap packages with Melos"
 
-"$melos" bootstrap
+    "$melos" bootstrap
 
-echo "::endgroup::"
+    echo "::endgroup::"
+fi

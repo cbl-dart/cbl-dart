@@ -20,6 +20,7 @@ dev_dependencies:
 
 flutter:
   plugin:
+    implements: cbl_flutter
     platforms:
       android:
         pluginClass: CblFlutterPlugin
