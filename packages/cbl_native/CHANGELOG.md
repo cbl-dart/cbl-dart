@@ -1,3 +1,9 @@
+## 2.0.0
+
+ - **FEAT**: allow version to be explicitly specified
+ - ***BREAKING** **FEAT**: remove obsolete functions
+ - **FEAT**: use `FinalizableHandle`s
+
 ## 1.1.0
 
  - **FEAT**: support downloading and installing binaries.
