@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
 
     _openDatabase =
-        CouchbaseLite.init(libraries: flutterLibraries()).then((cbl) async {
+        CouchbaseLite.initialize(libraries: flutterLibraries()).then((cbl) async {
       cbl.logCallback = (domain, level, message) {
         print('CBL => $message');
       };

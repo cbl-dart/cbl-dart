@@ -8,6 +8,7 @@ import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_callbacks.dart';
+import 'replicator.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
@@ -72,9 +73,7 @@ typedef LogCallback = void Function(
 
 /// The initializer and entry point to the Couchbase Lite API.
 class CouchbaseLite {
-  static CouchbaseLite? _instance;
-
-  static final lock = Lock();
+  static final _lock = Lock();
 
   /// Id of the [Worker] which is not bound to one specific object.
   static final _standaloneWorkerId = 'Standalone';
@@ -82,10 +81,15 @@ class CouchbaseLite {
   /// Counter to generate unique ids for opened [Database]s.
   static int _nextDatabaseId = 0;
 
-  /// Initializes the Couchbase Lite API and returns [CouchbaseLite], which is
-  /// the entry point to the API.
-  static Future<CouchbaseLite> init({required Libraries libraries}) =>
-      lock.synchronized(() async {
+  /// The singleton instance of [CouchbaseLite].
+  ///
+  /// You have to [initialize] it before accessing this field.
+  static CouchbaseLite get instance => _instance!;
+  static CouchbaseLite? _instance;
+
+  /// Initializes [instance] and returns it.
+  static Future<CouchbaseLite> initialize({required Libraries libraries}) =>
+      _lock.synchronized(() async {
         if (_instance != null) return _instance!;
 
         CBLBindings.initInstance(libraries);
@@ -98,6 +102,22 @@ class CouchbaseLite {
           workerFactory,
           await workerFactory.createWorker(id: _standaloneWorkerId),
         );
+      });
+
+  /// Release resources occupied by [instance].
+  ///
+  /// You have to close all other resources such as [Database]s or [Replicator]s
+  /// before calling this method.
+  ///
+  /// The Isolate will not exit until this method has been called.
+  static Future<void> dispose() => _lock.synchronized(() async {
+        if (_instance == null) return;
+
+        await _instance!._worker.stop();
+
+        await NativeCallbacks.instance.dispose();
+
+        _instance = null;
       });
 
   /// Private constructor to allow control over instance creation.
@@ -232,13 +252,5 @@ class CouchbaseLite {
     }
 
     _logCallback = null;
-  }
-
-  /// Release resources occupied by CouchbaseLite.
-  ///
-  /// The Isolate will not exit until this method has been called.
-  Future<void> dispose() async {
-    await _worker.stop();
-    await NativeCallbacks.instance.dispose();
   }
 }
