@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cbl/cbl.dart';
 import 'package:logging/logging.dart';
@@ -128,8 +129,9 @@ late final libraries = CblE2eTestBinding.instance.libraries;
 
 /// Returns a unique name for a database every time it is called, which starts
 /// with [testName].
-String testDbName(String testName) =>
-    '$testName-${DateTime.now().millisecondsSinceEpoch}';
+String testDbName(String testName) => '$testName-'
+    '${DateTime.now().millisecondsSinceEpoch}-'
+    '${Random().nextInt(10000)}';
 
 @isTest
 void test(dynamic description, dynamic Function() body) =>
