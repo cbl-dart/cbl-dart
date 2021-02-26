@@ -2,9 +2,9 @@
 
 # Script which installs published binaries for a given platform.
 #
-# The first and only argument to the script must be the name of the platform 
+# The first and only argument to the script must be the name of the platform
 # (android | apple).
-# 
+#
 # When the environment variable CBL_FLUTTER_SKIP_INSTALL_BINARIES is set, the
 # installation will be skipped.
 
@@ -18,24 +18,45 @@ fi
 
 # Setup parameters
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-pkgDir="$dir/.."
+pkgDir="$(cd "$dir/.." && pwd)"
 platform="$1"
 
 installDir=
 case "$platform" in
-    android)
-        installDir="$pkgDir/android/lib"
+android)
+    installDir="$pkgDir/android/lib"
     ;;
-    apple)
-        installDir="$pkgDir/Xcframeworks"
+apple)
+    installDir="$pkgDir/Xcframeworks"
     ;;
-    *)
-        echo "cbl_flutter: Unknown platform $platform"
-        exit 1
+*)
+    echo "cbl_flutter: Unknown platform $platform"
+    exit 1
     ;;
 esac
 
 # Install binaries
-cd "$pkgDir"
+
+# Create temporary package to run `cbl_native:binary_url` from.
+# `pub` does not work from inside the package cache directory.
+tmpDir="/tmp/cbl_flutter_install_binaries-$(date +%s%N)"
+mkdir "$tmpDir"
+cd "$tmpDir"
+
+# The constraints in this pubspec file ensure that we use the version of cbl_native
+# which cbl_flutter depends on.
+cat >pubspec.yaml <<-EOF
+name: tmp
+environment:                                                            
+  sdk: '>=2.12.0-0 <3.0.0' 
+dependencies:
+    cbl_flutter:
+        path: "$pkgDir"
+    cbl_native: any
+EOF
+
 flutter pub get
 flutter pub run cbl_native:binary_url "$platform" --install "$installDir"
+
+# Clean up the tmporary package
+rm -rf "$tmpDir"
