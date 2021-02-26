@@ -2,5 +2,5 @@
 
 FFI bindings for the CouchbaseLite C API and the Dart support layer.
 
-This is an internal package for [`cbl`](https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl)
+> **Warning:** This is an internal package for [`cbl`](https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl)
 and it's API should not be considered public.
