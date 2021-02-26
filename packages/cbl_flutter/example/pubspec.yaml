@@ -9,8 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  cbl:
-    path: ../../cbl
+  cbl: ^0.1.0
   cbl_flutter:
     path: ../
   path_provider: ^2.0.0-nullsafety
