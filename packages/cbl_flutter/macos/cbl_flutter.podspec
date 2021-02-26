@@ -17,7 +17,10 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version       = '5.0'
 
-  s.prepare_command = "../tool/install_binaries.sh apple"
+  s.prepare_command = <<-EOF
+    ../tool/create_xcframeworks_links.sh
+    ../tool/install_binaries.sh apple
+  EOF
 
   s.vendored_frameworks = "Xcframeworks/CouchbaseLiteDart.xcframework", "Xcframeworks/CouchbaseLite.xcframework"
 end
