@@ -364,7 +364,7 @@ jobs:
 
       - name: Build tests
         working-directory: packages/cbl_flutter/example
-        run: flutter build ios --simulator integration_test/cbl_e2e_test.dart
+        run: flutter build ios --no-pub --simulator integration_test/cbl_e2e_test.dart
 
       - name: Run tests
         working-directory: packages/cbl_flutter/example/ios
@@ -410,6 +410,7 @@ jobs:
         working-directory: packages/cbl_flutter/example
         run: |
           flutter drive \
+            --no-pub \
             -d macos \
             --driver test_driver/integration_test.dart \
             --target integration_test/cbl_e2e_test.dart
