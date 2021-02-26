@@ -1,3 +1,7 @@
+## 0.1.0+2
+
+ - **FIX**: create Xcframeworks links in prepare command.
+
 ## 0.1.0+1
 
  - **FIX**: use temporary package to install binaries.
