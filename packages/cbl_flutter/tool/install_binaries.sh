@@ -13,7 +13,7 @@ set -e
 
 # Skip installation if environment variable is set
 if [ -n "$CBL_FLUTTER_SKIP_INSTALL_BINARIES" ]; then
-    echo "cbl_flutter: Skipping install of publihsed binaries"
+    echo "cbl_flutter: Skipping install of published binaries"
     exit 0
 fi
 
