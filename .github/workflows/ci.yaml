@@ -375,6 +375,9 @@ jobs:
     name: Tests - Flutter - macOS
     runs-on: macos-10.15
     needs: build-binaries-apple-xcframeworks
+    # Disabled because `flutter drive` ignores `--no-pub` which breaks melos setup
+    # Related issue https://github.com/flutter/flutter/issues/76446 
+    if: false
     env:
       CBL_FLUTTER_SKIP_INSTALL_BINARIES: true
     steps:
