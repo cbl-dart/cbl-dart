@@ -15,11 +15,11 @@ import 'worker/cbl_worker.dart';
 export 'package:cbl_ffi/cbl_ffi.dart'
     show LibraryConfiguration, Libraries, LogLevel, LogDomain;
 
-/// Extension to map between CouchbaseLite's [LogLevel] and `loggin`s [Level].
+/// Extension to map between CouchbaseLite's [LogLevel] and `logging`s [Level].
 extension LogLevelExt on LogLevel {
-  /// Returns a [Level] from the `loggin` package which corresponds to this
+  /// Returns a [Level] from the `logging` package which corresponds to this
   /// CouchbaseLite log level.
-  Level toLogginLevel() {
+  Level toLoggingLevel() {
     switch (this) {
       case LogLevel.verbose:
         return Level.FINER;
@@ -46,7 +46,7 @@ LogCallback loggerCallback({Logger? logger}) {
 
   return (domain, level, message) {
     logger!.log(
-      level.toLogginLevel(),
+      level.toLoggingLevel(),
       '${describeEnum(domain)}: $message',
     );
   };
