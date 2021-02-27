@@ -363,8 +363,9 @@ jobs:
         uses: ./.github/actions/setup-dart-env
 
       - name: Build tests
-        working-directory: packages/cbl_flutter/example
-        run: flutter build ios --no-pub --simulator integration_test/cbl_e2e_test.dart
+        run: |
+          melos run flutter:prepare
+          melos run build:cbl_flutter:test:ios
 
       - name: Run tests
         working-directory: packages/cbl_flutter/example/ios

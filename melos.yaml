@@ -1,11 +1,32 @@
 name: cbl_dart
+
 packages:
   - packages/**
 
 scripts:
+  flutter:prepare:
+    description: Runs `flutter pub get` followed by `melos bootstrap` in all flutter packages.
+    run: melos run flutter:pub_get --no-select && melos run flutter:bootstrap
+
+  flutter:pub_get:
+    run: melos exec -- flutter pub get
+    description: Runs `flutter pub get` in all flutter packages, to generate files
+      which `melos bootstrap` doesn't.
+    select-package:
+      flutter: true
+
+  flutter:bootstrap:
+    run: melos bootstrap --flutter
+
   formatting:check: melos exec -- dart format --set-exit-if-changed .
 
   analyze: melos exec -- dart analyze --fatal-infos
+
+  build:cbl_flutter:test:ios:
+    description: Builds the e2e tests for `cbl_flutter`.
+    run: melos exec -- flutter build ios --no-pub --simulator integration_test/cbl_e2e_test.dart
+    select-package:
+      scope: cbl_flutter_example
 
   test:all: melos run test:cbl_native && melos run test:cbl && melos run test:standalone_dart
 
@@ -25,6 +46,15 @@ scripts:
       scope: 'cbl_e2e_tests_standalone_dart'
 
   version:cbl_native:update_lib:
+    description: Updates the hard coded `currentVersion` in `cbl_native`. 
+      Must be run before publishing and after bumping the version of 
+      `cbl_native` in pubspec.yaml. 
     run: melos exec -- dart run tool/update_version.dart
     select-package:
       scope: 'cbl_native'
+
+  clean:packages: 
+    run: git clean -xdfq packages
+
+  clean:all:
+    run: git clean -xdfq .
