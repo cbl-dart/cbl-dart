@@ -1,9 +1,3 @@
-# - name: Install melos
-#   run: dart pub global activate melos "$MELOS_VERSION"
-
-# - name: Bootstrap packages with melos
-#   run: melos bootstrap
-
 set -e
 
 flutterChannel="$1"
