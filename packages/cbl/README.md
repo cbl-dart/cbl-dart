@@ -14,7 +14,7 @@
 
 This package only contains Dart code and requires binary libraries to be packaged
 with any app that wants to use it. For Flutter apps, you need to add `cbl_flutter` 
-as a dependency to include those library in the build. `cbl_flutter` currently 
+as a dependency to include those libraries in the build. `cbl_flutter` currently 
 supports iOS, macOS and Android.
 
 ```pubspec
