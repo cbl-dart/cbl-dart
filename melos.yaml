@@ -18,6 +18,10 @@ scripts:
   flutter:bootstrap:
     run: melos bootstrap --flutter
 
+  install:binaries:all:
+    description: Installs the latest published binaries into `cbl_flutter`.
+    run: melos exec --scope cbl_flutter -- ./tool/install_binaries.sh all
+
   formatting:check: melos exec -- dart format --set-exit-if-changed .
 
   analyze: melos exec -- dart analyze --fatal-infos
