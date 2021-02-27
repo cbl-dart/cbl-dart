@@ -1,5 +1,5 @@
 name: cbl_ffi
-version: 0.2.0
+version: 0.2.0+1
 description:
   FFI bindings for the CouchbaseLite C API and the Dart support layer.
 repository: https://github.com/cofu-app/cbl-dart
@@ -10,6 +10,6 @@ environment:
 
 dependencies:
   ffi: ^1.0.0
-  cbl_native: ^2.0.0
+  cbl_native: ^2.0.1
 dev_dependencies:
   pedantic: ^1.10.0

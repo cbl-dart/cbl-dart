@@ -1,3 +1,7 @@
+## 0.1.0+3
+
+ - **FIX**: fix typo.
+
 ## 0.1.0+2
 
  - **FIX**: create Xcframeworks links in prepare command.

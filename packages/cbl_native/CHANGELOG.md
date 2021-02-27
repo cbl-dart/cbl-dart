@@ -1,3 +1,7 @@
+## 2.0.1
+
+ - **DOCS**: add interal package warngin + mention cmd tool.
+
 ## 2.0.0
 
  - **FEAT**: allow version to be explicitly specified
