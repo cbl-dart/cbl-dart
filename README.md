@@ -20,7 +20,7 @@ All Dart code is organized in several [packages].
 
 ## Native libraries
 
-Two native libraries are required to enabled Couchbase Lite for Dart.
+Two native libraries are required to enable Couchbase Lite for Dart.
 
 | Library                | Description                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------- |
