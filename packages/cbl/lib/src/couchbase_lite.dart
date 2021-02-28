@@ -179,7 +179,7 @@ class CouchbaseLite {
   }) async {
     final databaseId = _nextDatabaseId++;
     final worker =
-        await _workerFactory.createWorker(id: 'Database#$databaseId');
+        await _workerFactory.createWorker(id: 'Database(#$databaseId|$name)');
     final pointer = await worker.execute(OpenDatabase(name, config));
     return createDatabase(
       debugName: name,
