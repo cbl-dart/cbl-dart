@@ -48,6 +48,7 @@ abstract class Endpoint {}
 class UrlEndpoint extends Endpoint {
   UrlEndpoint(this.url);
 
+  /// The url of the database to replicate with.
   final Uri url;
 
   @override
@@ -68,6 +69,7 @@ class UrlEndpoint extends Endpoint {
 class LocalDbEndpoint extends Endpoint {
   LocalDbEndpoint(this.database);
 
+  /// The local database to replicate with.
   final Database database;
 
   @override
@@ -91,8 +93,10 @@ abstract class Authenticator {}
 class BasicAuthenticator extends Authenticator {
   BasicAuthenticator({required this.username, required this.password});
 
+  /// The username to authenticate with.
   final String username;
 
+  /// The password to authenticate with.
   final String password;
 
   @override
@@ -116,8 +120,10 @@ class BasicAuthenticator extends Authenticator {
 class SessionAuthenticator extends Authenticator {
   SessionAuthenticator({required this.sessionID, this.cookieName});
 
+  /// The is of the authentication session.
   final String sessionID;
 
+  /// The name of the cookie to send the [sessionID] in.
   final String? cookieName;
 
   @override
