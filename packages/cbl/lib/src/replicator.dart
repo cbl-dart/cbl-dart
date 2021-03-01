@@ -642,7 +642,7 @@ class ReplicatedDocument {
   /// Indicates whether the document was deleted or removed
   final Set<DocumentFlags> flags;
 
-  /// If the code is nonzero, the document failed to replicate.
+  /// If not `null`, the document failed to replicate.
   final BaseException? error;
 
   @override
@@ -681,7 +681,7 @@ extension on CBLDartReplicatedDocument {
       });
 }
 
-/// An event that is emitted when [Document]s been replicated.
+/// An event that is emitted when [Document]s have been replicated.
 ///
 /// See:
 /// - [DocumentsPushed] for the event emitted when documents have been pushed.
