@@ -114,11 +114,11 @@ class BasicAuthenticator extends Authenticator {
 /// An authenticator using a Couchbase Sync Gateway login session identifier,
 /// and optionally a cookie name (pass `null` for the default.)
 class SessionAuthenticator extends Authenticator {
-  SessionAuthenticator({required this.sessionID, required this.cookieName});
+  SessionAuthenticator({required this.sessionID, this.cookieName});
 
   final String sessionID;
 
-  final String cookieName;
+  final String? cookieName;
 
   @override
   bool operator ==(Object other) =>
@@ -405,7 +405,7 @@ extension on ReplicatorConfiguration {
       } else if (authenticator is SessionAuthenticator) {
         cblAuthenticator = _bindings.authNewSession(
           authenticator.sessionID.toNativeUtf8().withScoped(),
-          authenticator.cookieName.toNativeUtf8().withScoped(),
+          (authenticator.cookieName?.toNativeUtf8().withScoped()).elseNullptr(),
         );
       } else {
         throw UnimplementedError(
