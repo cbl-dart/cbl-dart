@@ -1,3 +1,10 @@
+## 0.2.0
+
+> Note: This release has breaking changes.
+
+ - **CHORE**: publish packages.
+ - **BREAKING** **FEAT**: new Stream API for logging.
+
 ## 0.1.0+3
 
  - **FIX**: fix typo.
