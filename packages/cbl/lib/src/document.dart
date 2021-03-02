@@ -62,6 +62,13 @@ class Document extends NativeResource<NativeObject<Void>> {
   /// Returns the ID.
   String get id => _bindings.id(native.pointerUnsafe).toDartString();
 
+  /// The revision id, which is a short opaque string that's
+  /// guaranteed to be unique to every change made to the document.
+  ///
+  /// If the document doesn't exist yet, it is `null`.
+  String? get revisionId =>
+      _bindings.revisionId(native.pointerUnsafe).toNullable()?.toDartString();
+
   /// Returns the current sequence in the local database.
   ///
   /// This number increases every time the document is saved, and a more
@@ -113,15 +120,21 @@ class Document extends NativeResource<NativeObject<Void>> {
       other is Document &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          revisionId == other.revisionId &&
           sequence == other.sequence &&
           properties == other.properties;
 
   @override
-  int get hashCode => id.hashCode ^ sequence.hashCode ^ properties.hashCode;
+  int get hashCode =>
+      id.hashCode ^
+      revisionId.hashCode ^
+      sequence.hashCode ^
+      properties.hashCode;
 
   @override
   String toString() => 'Document('
       'id: $id, '
+      'revisionId: $revisionId, '
       'sequence: $sequence'
       ')';
 
@@ -216,6 +229,7 @@ class MutableDocument extends Document {
   @override
   String toString() => 'MutableDocument('
       'id: $id, '
+      'revisionId: $revisionId, '
       'sequence: $sequence'
       ')';
 }

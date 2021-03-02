@@ -263,6 +263,60 @@ void main() {
   });
 
   group('Document', () {
+    test("id returns the document's id", () {
+      final doc = MutableDocument('a');
+
+      expect(doc.id, 'a');
+    });
+
+    test('revisionId returns `null` when the document is new', () {
+      final doc = MutableDocument();
+
+      expect(doc.revisionId, isNull);
+    });
+
+    test('revisionId returns string when document has been saved', () async {
+      final doc = await db.saveDocument(MutableDocument());
+
+      expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
+    });
+
+    test('sequence returns the documents sequence', () async {
+      final doc = await db.saveDocument(MutableDocument());
+
+      expect(doc.sequence, isPositive);
+    });
+
+    test('properties returns the documents properties', () async {
+      final props = MutableDict({'a': 'b'});
+      final doc = MutableDocument()..properties = props;
+
+      expect(doc.properties, equals(props));
+    });
+
+    test('propertiesAsJson returns the documents properties as JSON', () async {
+      final doc = MutableDocument()..properties = MutableDict({'a': 'b'});
+
+      expect(doc.propertiesAsJson, equals('{"a":"b"}'));
+    });
+
+    test('mutableCopy returns a mutable copy of the document', () async {
+      final doc = await db.saveDocument(
+        MutableDocument()..properties = MutableDict({'a': 'b'}),
+      );
+
+      expect(
+        doc.mutableCopy(),
+        allOf(
+          isA<MutableDocument>().having(
+            (it) => it.properties,
+            'properties',
+            doc.properties,
+          ),
+        ),
+      );
+    });
+
     test('delete should remove document from the database', () async {
       final doc = await db.saveDocument(MutableDocument());
       await doc.delete();
@@ -273,6 +327,20 @@ void main() {
       final doc = await db.saveDocument(MutableDocument());
       await doc.purge();
       expect(db.getDocument(doc.id), completion(isNull));
+    });
+  });
+
+  group('MutableDocument', () {
+    test('supports specifying an id', () {
+      final doc = MutableDocument('id');
+
+      expect(doc.id, equals('id'));
+    });
+
+    test('supports generating an id', () {
+      final doc = MutableDocument();
+
+      expect(doc.id, isNotEmpty);
     });
   });
 
