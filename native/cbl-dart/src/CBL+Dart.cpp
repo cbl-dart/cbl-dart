@@ -106,11 +106,6 @@ void CBLDart_CBLLog_SetCallback(CallbackId callbackId) {
   const std::scoped_lock lock(logApiMutex);
   if (dartLogCallbackId == callbackId) return;
 
-  if (dartLogCallbackId != NULL_CALLBACK) {
-    CallbackIsolate::getForCallbackId(dartLogCallbackId)
-        ->removeCallbackFinalizer(dartLogCallbackId);
-  }
-
   if (callbackId != NULL_CALLBACK) {
     CallbackIsolate::getForCallbackId(callbackId)
         ->setCallbackFinalizer(callbackId, nullptr,

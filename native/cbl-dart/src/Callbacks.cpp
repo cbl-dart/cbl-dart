@@ -1,7 +1,7 @@
 #include "Callbacks.h"
 
 CallbackIsolate *&CallbackIsolate::getForCallbackId(CallbackId callbackId) {
-  assert(callbackId != ILLEGAL_PORT);
+  assert(callbackId != NULL_CALLBACK);
 
   const std::shared_lock lock(isolatesByCallback_mutex);
   return isolatesByCallback[callbackId];
