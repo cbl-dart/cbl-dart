@@ -32,6 +32,9 @@ typedef _CallbackHandler = void Function(
 class NativeCallbacks {
   static late final _bindings = CBLBindings.instance.nativeCallbacks;
 
+  /// The callback which signal the absence of a callback.
+  static final nullCallback = 0;
+
   static late final instance = NativeCallbacks._();
 
   NativeCallbacks._() {

@@ -5,14 +5,16 @@ import 'test_binding.dart';
 void main() {
   test('get and set log level', () {
     final initialLogLevel = cbl.logLevel;
+    addTearDown(() => cbl.logLevel = initialLogLevel);
 
     cbl.logLevel = LogLevel.verbose;
     expect(cbl.logLevel, equals(LogLevel.verbose));
-
-    cbl.logLevel = initialLogLevel;
   });
 
   test('a custom log callback should receive log messages', () async {
+    final initialLogCallback = cbl.logCallback;
+    addTearDown(() => cbl.logCallback = initialLogCallback);
+
     cbl.logCallback = expectAsync3(
       (domain, level, message) {
         expect(message, isNotEmpty);
@@ -28,11 +30,5 @@ void main() {
     );
 
     await db.close();
-
-    cbl.restoreDefaultLogCallback();
-  });
-
-  tearDownAll(() {
-    cbl.restoreDefaultLogCallback();
   });
 }

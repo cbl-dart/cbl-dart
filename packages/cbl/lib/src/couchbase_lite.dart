@@ -223,6 +223,7 @@ class CouchbaseLite {
     // Make sure the old callback is not being called while we make changes.
     restoreDefaultLogCallback();
 
+    _logCallback = callback;
     int? newCallbackId;
 
     if (callback != null) {
@@ -237,7 +238,7 @@ class CouchbaseLite {
       );
     }
 
-    _logBindings.setCallback(newCallbackId ?? 0);
+    _logBindings.setCallback(newCallbackId ?? NativeCallbacks.nullCallback);
   }
 
   /// Restores the log callback to the default callback which logs to the
