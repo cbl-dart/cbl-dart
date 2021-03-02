@@ -7,6 +7,8 @@ import 'libraries.dart';
 
 typedef CBLDocument_ID = Pointer<Utf8> Function(Pointer<Void> doc);
 
+typedef CBLDocument_RevisionID = Pointer<Utf8> Function(Pointer<Void> doc);
+
 typedef CBLDocument_Sequence_C = Uint64 Function(Pointer<Void> doc);
 typedef CBLDocument_Sequence = int Function(Pointer<Void> doc);
 
@@ -41,6 +43,10 @@ class DocumentBindings {
       : id = libs.cbl.lookupFunction<CBLDocument_ID, CBLDocument_ID>(
           'CBLDocument_ID',
         ),
+        revisionId = libs.cbl
+            .lookupFunction<CBLDocument_RevisionID, CBLDocument_RevisionID>(
+          'CBLDocument_RevisionID',
+        ),
         sequence = libs.cbl
             .lookupFunction<CBLDocument_Sequence_C, CBLDocument_Sequence>(
           'CBLDocument_Sequence',
@@ -62,6 +68,7 @@ class DocumentBindings {
         );
 
   final CBLDocument_ID id;
+  final CBLDocument_RevisionID revisionId;
   final CBLDocument_Sequence sequence;
   final CBLDocument_Properties properties;
   final CBLDocument_PropertiesAsJSON propertiesAsJson;
