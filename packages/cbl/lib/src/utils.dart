@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:characters/characters.dart';
+import 'package:synchronized/synchronized.dart';
 
 import 'native_callbacks.dart';
 import 'worker/worker.dart';
@@ -110,4 +111,35 @@ Stream<T> callbackStream<T, S>({
   controller = StreamController(onListen: onListen, onCancel: onCancel);
 
   return controller.stream;
+}
+
+StreamController<T> callbackBroadcastStreamController<T>({
+  required FutureOr<void> Function(int callbackId) startStream,
+  required FutureOr<void> Function() stopStream,
+  required T Function(List arguments) createEvent,
+}) {
+  late StreamController<T> controller;
+  final lock = Lock();
+
+  void onListen() => lock.synchronized(() async {
+        final callbackId = NativeCallbacks.instance
+            .registerCallback<T Function(List arguments)>(
+          createEvent,
+          (createEvent, arguments, _) => controller.add(createEvent(arguments)),
+        );
+
+        await startStream(callbackId);
+      });
+
+  Future<void> onCancel() => lock.synchronized(() async {
+        await stopStream();
+
+        NativeCallbacks.instance
+            .unregisterCallback(createEvent, runFinalizer: true);
+      });
+
+  controller =
+      StreamController.broadcast(onListen: onListen, onCancel: onCancel);
+
+  return controller;
 }

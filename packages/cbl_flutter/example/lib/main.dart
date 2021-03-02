@@ -25,11 +25,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    _openDatabase =
-        CouchbaseLite.initialize(libraries: flutterLibraries()).then((cbl) async {
-      cbl.logCallback = (domain, level, message) {
-        print('CBL => $message');
-      };
+    _openDatabase = CouchbaseLite.initialize(libraries: flutterLibraries())
+        .then((cbl) async {
+      cbl.logMessages().logToLogger();
       cbl.logLevel = LogLevel.verbose;
 
       final appDocsDir = await getApplicationDocumentsDirectory();

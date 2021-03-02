@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -14,6 +15,48 @@ import 'worker/cbl_worker.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart'
     show LibraryConfiguration, Libraries, LogLevel, LogDomain;
+
+/// A entry, which is emitted when CouchbaseLite logs a message.
+///
+/// See:
+/// - [CouchbaseLite.logMessages] for how to listen to log messages.
+class LogMessage {
+  LogMessage({
+    required this.level,
+    required this.domain,
+    required this.message,
+  });
+
+  /// The level at which this message is emitted, allowing you to filter them
+  /// based on urgency.
+  final LogLevel level;
+
+  /// The [domain] of the CouchbaseLite implementation this message comes from.
+  final LogDomain domain;
+
+  /// The logged message.
+  final String message;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LogMessage &&
+          runtimeType == other.runtimeType &&
+          level == other.level &&
+          domain == other.domain &&
+          message == other.message;
+
+  @override
+  int get hashCode =>
+      super.hashCode ^ level.hashCode ^ domain.hashCode ^ message.hashCode;
+
+  @override
+  String toString() => 'LogMessage('
+      'level: $level, '
+      'domain: $domain, '
+      'message: $message '
+      ')';
+}
 
 /// Extension to map between CouchbaseLite's [LogLevel] and `logging`s [Level].
 extension LogLevelExt on LogLevel {
@@ -37,39 +80,26 @@ extension LogLevelExt on LogLevel {
   }
 }
 
-/// Returns a [LogCallback] which logs messages to a [Logger].
-///
-/// If [logger] is not provided a new `Logger` with name 'CBL' will be created
-/// and used.
-LogCallback loggerCallback({Logger? logger}) {
-  logger ??= Logger('CBL');
-
-  return (domain, level, message) {
-    logger!.log(
-      level.toLoggingLevel(),
-      '${describeEnum(domain)}: $message',
-    );
-  };
+/// Extension for logging [LogMessage]s to [Logger]s.
+extension LogMessageLoggerExtension on Logger {
+  /// Logs [logMessage] to this logger.
+  void logLogMessage(LogMessage logMessage) => log(
+        logMessage.level.toLoggingLevel(),
+        '${describeEnum(logMessage.domain)}: ${logMessage.message}',
+      );
 }
 
-/// A callback which is called with log messages from the CouchbaseLite logging
-/// system.
-///
-/// The callback also receives a [domain] describing what part of the
-/// CouchbaseLite implementation the message comes from.
-///
-/// Each messages is associated with a [level], allowing you to filter them
-/// based on urgency.
-///
-/// See:
-/// - [CouchbaseLite.logLevel] for the current log level at which messages are
-///   emitted.
-/// - [CouchbaseLite.logCallback] to configure a custom log callback.
-typedef LogCallback = void Function(
-  LogDomain domain,
-  LogLevel level,
-  String message,
-);
+extension LogMessageStreamExtension on Stream<LogMessage> {
+  /// Adds a subscription to to this stream which logs the emitted [LogMessage]s
+  /// to [logger].
+  ///
+  /// If [logger] is not provided a new `Logger` with name 'CBL' will be created
+  /// and used.
+  StreamSubscription<LogMessage> logToLogger([Logger? logger]) {
+    logger ??= Logger('CBL');
+    return listen((logMessage) => logger!.logLogMessage(logMessage));
+  }
+}
 
 /// The initializer and entry point to the Couchbase Lite API.
 class CouchbaseLite {
@@ -192,66 +222,83 @@ class CouchbaseLite {
 
   /// The current LogLevel of all of CouchbaseLite.
   ///
-  /// Messages below this level will not be sent to the [logCallback] or the
+  /// Messages below this level will not be sent to the [logMessages] or the
   /// default log callback.
   ///
   /// It is not possible to configure logging individually for objects such as
   /// databases or replicators.
   ///
   /// See:
-  /// - [logCallback] to configure a custom log callback to handle log messages.
-  /// - [restoreDefaultLogCallback] for more info about the default log
-  ///   behavior.
+  /// - [logMessages] to handle log messages in Dart.
+  /// - [loggingIsDisabled] for completely disabling logging completely.
   LogLevel get logLevel => _logBindings.consoleLevel().toLogLevel();
 
   set logLevel(LogLevel level) => _logBindings.setConsoleLevel(level.toInt());
 
-  static LogCallback? _logCallback;
+  bool _loggingIsDisabled = false;
 
-  /// A callback which is invoked when CouchbaseLite has something to log.
+  /// Whether logging is completely disabled.
   ///
-  /// To disable all logging set this property to `null`.
+  /// [logMessages] cannot be listened to while logging is disabled and while
+  /// [logMessages] has listeners, logging cannot be disabled.
+  bool get loggingIsDisabled => _loggingIsDisabled;
+
+  set loggingIsDisabled(bool disabled) {
+    if (_loggingIsDisabled == disabled) return;
+
+    _loggingIsDisabled = disabled;
+
+    if (disabled) {
+      assert(
+        !_logMessages.hasListener,
+        'logging cannot be be disabled while `logMessage` stream has listeners',
+      );
+
+      _logBindings.setCallback(NativeCallbacks.nullCallback);
+    } else {
+      _logBindings.restoreOriginalCallback();
+    }
+  }
+
+  late final _logMessages =
+      callbackBroadcastStreamController<LogMessage>(
+    startStream: (callbackId) {
+      assert(
+        !_loggingIsDisabled,
+        '`logMessages` stream cannot be listened to while `loggingIsDisable` is `true`',
+      );
+
+      _logBindings.setCallback(callbackId);
+    },
+    stopStream: () {
+      _logBindings.restoreOriginalCallback();
+
+      // We wait here a few milliseconds to ensure that all messages which
+      // have been dispatched to the callback are received by it.
+      return Future<void>.delayed(Duration(milliseconds: 50));
+    },
+    createEvent: (arguments) {
+      final level = arguments[1] as int;
+      final domain = arguments[0] as int;
+      final message = arguments[2] as String;
+      return LogMessage(
+        level: level.toLogLevel(),
+        domain: domain.toLogDomain(),
+        message: message,
+      );
+    },
+  );
+
+  /// Broadcast stream which emits [LogMessage]s from the CouchbaseLite
+  /// implementation.
+  ///
+  /// If [loggingIsDisabled] is `false` and this stream has no listeners the
+  /// default consoler logger of the CouchbaseLite implementation will be used.
+  ///
+  /// Listening to this stream allows you to replace the default console logger
+  /// with your own logging implementation.
   ///
   /// See:
-  /// - [logLevel] to configure which messages this callback will receive.
-  /// - [LogCallback]
-  LogCallback? get logCallback => _logCallback;
-
-  set logCallback(LogCallback? callback) {
-    if (_logCallback == callback) return;
-
-    // Make sure the old callback is not being called while we make changes.
-    restoreDefaultLogCallback();
-
-    _logCallback = callback;
-    int? newCallbackId;
-
-    if (callback != null) {
-      newCallbackId = NativeCallbacks.instance.registerCallback<LogCallback>(
-        callback,
-        (callback, arguments, _) {
-          final domain = arguments[0] as int;
-          final level = arguments[1] as int;
-          final message = arguments[2] as String;
-          callback(domain.toLogDomain(), level.toLogLevel(), message);
-        },
-      );
-    }
-
-    _logBindings.setCallback(newCallbackId ?? NativeCallbacks.nullCallback);
-  }
-
-  /// Restores the log callback to the default callback which logs to the
-  /// console.
-  void restoreDefaultLogCallback() {
-    _logBindings.restoreOriginalCallback();
-
-    final oldCallback = _logCallback;
-
-    if (oldCallback != null) {
-      NativeCallbacks.instance.unregisterCallback(oldCallback);
-    }
-
-    _logCallback = null;
-  }
+  /// - [loggingIsDisabled] for how that property interacts with this stream.
+  Stream<LogMessage> logMessages() => _logMessages.stream;
 }

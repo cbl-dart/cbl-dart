@@ -70,6 +70,16 @@ abstract class CblE2eTestBinding {
 
   TestHook get addTearDownFn => t.addTearDown;
 
+  StreamSubscription<void>? _cblTestLogger;
+
+  Future<void> startTestLogger() async {
+    _cblTestLogger = cbl.logMessages().logToLogger();
+  }
+
+  Future<void> stopTestLogger() async {
+    await _cblTestLogger!.cancel();
+  }
+
   void _setupLogging() {
     Zone.root.run(() {
       Logger.root.onRecord.listen((record) {
@@ -96,10 +106,14 @@ abstract class CblE2eTestBinding {
     setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
-      await _initCouchbaseLite();
+      await CouchbaseLite.initialize(libraries: libraries);
+      await startTestLogger();
     });
 
-    tearDownAllFn(() => CouchbaseLite.dispose());
+    tearDownAllFn(() async {
+      await stopTestLogger();
+      await CouchbaseLite.dispose();
+    });
   }
 
   Future _cleanTestTmpDir() async {
@@ -109,13 +123,6 @@ abstract class CblE2eTestBinding {
     }
     await tmpDir.create(recursive: true);
   }
-
-  Future<void> _initCouchbaseLite() =>
-      CouchbaseLite.initialize(libraries: libraries).then(
-        (cbl) => cbl
-          ..logLevel = LogLevel.info
-          ..logCallback = loggerCallback(),
-      );
 }
 
 /// Alias of [CouchbaseLite.instance].
