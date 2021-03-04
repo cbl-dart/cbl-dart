@@ -37,8 +37,8 @@
 ## Installation
 
 This package only contains Dart code and requires binary libraries to be packaged
-with any app that wants to use it. For Flutter apps, you need to add 
-[`cbl_flutter`](https://pub.dev/packages/cbl_flutter) as a dependency to include 
+with any app that wants to use it. For Flutter apps, you need to add
+[`cbl_flutter`](https://pub.dev/packages/cbl_flutter) as a dependency to include
 those libraries in the build. `cbl_flutter` currently supports iOS, macOS and Android.
 
 ```pubspec
@@ -57,7 +57,7 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
 
 Future<void> initCbl() async {
-    await CouchbaseLite.init(libraries: flutterLibraries());
+  await CouchbaseLite.init(libraries: flutterLibraries());
 }
 ```
 
@@ -68,14 +68,20 @@ import 'package:cbl/cbl.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<void> openDatabase() async {
-    final documentsDir = await getApplicationDocumentsDirectory();
+  final documentsDir = await getApplicationDocumentsDirectory();
 
-    final db = await CouchbaseLite.instance.openDatabase(
-        'MyFirstDB',
-        config: DatabaseConfiguration(directory: documentsDir.path),
-    )
+  final db = await CouchbaseLite.instance.openDatabase(
+      'MyFirstDB',
+      config: DatabaseConfiguration(directory: documentsDir.path),
+  )
 
-    final doc = MutableDocument()..properties = {'message': 'Hello, World!'};
-    final savedDoc = await db.saveDocument(doc)
+  final doc = MutableDocument()
+    ..properties.addAll({
+      'type': 'message',
+      'body': 'Heyo',
+      'from': 'Alice',
+    });
+
+  final savedDoc = await db.saveDocument(doc)
 }
 ```
