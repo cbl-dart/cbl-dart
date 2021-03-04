@@ -1,3 +1,8 @@
+## 0.3.0+1
+
+ - **STYLE**: fix formatting.
+ - **DOCS**: add example.
+
 ## 0.3.0
 
 > Note: This release has breaking changes.
