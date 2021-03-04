@@ -260,8 +260,7 @@ class CouchbaseLite {
     }
   }
 
-  late final _logMessages =
-      callbackBroadcastStreamController<LogMessage>(
+  late final _logMessages = callbackBroadcastStreamController<LogMessage>(
     startStream: (callbackId) {
       assert(
         !_loggingIsDisabled,
