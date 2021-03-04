@@ -2,10 +2,10 @@ name: Setup Dart environment
 inputs:
   flutter-channel:
     description: The Flutter channel to setup environment with.
-    default: dev
+    default: stable
   melos-version:
     description: The version of Melos to setup environment with.
-    default: 0.4.5
+    default: 0.4.5+2
 runs:
   using: composite
   steps:
