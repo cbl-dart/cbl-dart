@@ -2,7 +2,7 @@ name: cbl_e2e_tests_standalone_dart
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0-0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   cbl_e2e_tests:
