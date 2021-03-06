@@ -1,7 +1,6 @@
 import 'package:cbl/cbl.dart';
 
 import 'test_binding.dart';
-import 'test_utils.dart';
 
 void main() {
   group('logging', () {
@@ -21,19 +20,17 @@ void main() {
       () async {
         expect(
           cbl.logMessages().map((it) => it.message),
-          emits(matches('litecore::SQLiteDataFile.+LogCallback.+\.cblite2')),
+          emitsThrough(
+            matches('litecore::SQLiteDataFile.+LogCallback.+\.cblite2'),
+          ),
         );
-
-        // Wait for `logMessages` to setup the stream. This happens
-        // asynchronously, potentially after `openDatabase` runs.
-        await delay(ms: 50);
 
         final db = await cbl.openDatabase(
           testDbName('LogCallback'),
           config: DatabaseConfiguration(directory: tmpDir),
         );
 
-        addTearDown(() => db.close());
+        addTearDown(db.close);
       },
     );
   });

@@ -9,7 +9,7 @@ import 'database.dart';
 import 'document.dart';
 import 'errors.dart';
 import 'fleece.dart';
-import 'native_callbacks.dart';
+import 'native_callback.dart';
 import 'native_object.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
@@ -24,12 +24,36 @@ Future<Replicator> createReplicator({
   required ReplicatorConfiguration config,
 }) =>
     runNativeObjectScoped(() => runArena(() async {
-          final cblConfig = config.toCBLReplicatorConfigurationScoped(db);
+          final pushFilterCallback =
+              config.pushFilter?.let(_wrapReplicationFilter);
+
+          final pullFilterCallback =
+              config.pushFilter?.let(_wrapReplicationFilter);
+
+          final conflictResolverCallback =
+              config.conflictResolver?.let(_wrapConflictResolver);
+
+          void disposeCallbacks() => ([
+                pushFilterCallback,
+                pullFilterCallback,
+                conflictResolverCallback
+              ].whereNotNull().forEach((it) => it.close()));
+
+          final cblConfig = config.toCBLReplicatorConfigurationScoped(
+            db,
+            pushFilterCallback?.native,
+            pullFilterCallback?.native,
+            conflictResolverCallback?.native,
+          );
 
           final address =
               await db.worker.execute(NewReplicator(cblConfig.address));
 
-          return Replicator._fromPointer(address.toPointer().cast(), db.worker);
+          return Replicator._fromPointer(
+            address.toPointer().cast(),
+            db.worker,
+            disposeCallbacks,
+          );
         }));
 
 // endregion
@@ -156,6 +180,24 @@ typedef ReplicationFilter = FutureOr<bool> Function(
   bool isDeleted,
 );
 
+NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
+    NativeCallback((arguments, result) async {
+      final docAddress = arguments[0] as int;
+      final doc = createDocument(
+        pointer: docAddress.toPointer(),
+        retain: true,
+        worker: null,
+      );
+      final isDeleted = arguments[1] as bool;
+
+      var decision = false;
+      try {
+        decision = await filter(doc, isDeleted);
+      } finally {
+        result!(decision);
+      }
+    });
+
 /// Conflict-resolution callback for use in replications.
 ///
 /// This callback will be invoked when the [Replicator] finds a newer
@@ -181,6 +223,32 @@ typedef ConflictResolver = FutureOr<Document?> Function(
   Document? local,
   Document? remote,
 );
+
+NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
+    NativeCallback((arguments, result) async {
+      final docId = arguments[0] as String;
+      final localAddress = arguments[1] as int?;
+      final remoteAddress = arguments[2] as int?;
+
+      final local = localAddress?.let((it) => createDocument(
+            pointer: it.toPointer(),
+            retain: true,
+            worker: null,
+          ));
+
+      final remote = remoteAddress?.let((it) => createDocument(
+            pointer: it.toPointer(),
+            retain: true,
+            worker: null,
+          ));
+
+      var decision = local ?? remote;
+      try {
+        decision = await filter(docId, local, remote);
+      } finally {
+        result!(decision);
+      }
+    });
 
 /// Proxy settings for the replicator.
 class ProxySettings {
@@ -366,6 +434,9 @@ class ReplicatorConfiguration {
 extension on ReplicatorConfiguration {
   Pointer<CBLDartReplicatorConfiguration> toCBLReplicatorConfigurationScoped(
     NativeObject<Void> db,
+    NativeObject<Callback>? pushFilterCallback,
+    NativeObject<Callback>? pullFilterCallback,
+    NativeObject<Callback>? conflictResolverCallback,
   ) {
     final config = scoped(malloc<CBLDartReplicatorConfiguration>());
 
@@ -477,79 +548,15 @@ extension on ReplicatorConfiguration {
       config.ref.documentIDs = nullptr;
     }
 
-    int registerReplicationFilter(ReplicationFilter filter) =>
-        NativeCallbacks.instance.registerCallback<ReplicationFilter>(
-          filter,
-          (filter, arguments, result) async {
-            final docAddress = arguments[0] as int;
-            final doc = createDocument(
-              pointer: docAddress.toPointer(),
-              retain: true,
-              worker: null,
-            );
-            final isDeleted = arguments[1] as bool;
-
-            var decision = false;
-            try {
-              decision = await filter(doc, isDeleted);
-            } finally {
-              result!(decision);
-            }
-          },
-        );
-
     // pushFilter
-    final pushFilter = this.pushFilter;
-    if (pushFilter != null) {
-      config.ref.pushFilterId = registerReplicationFilter(pushFilter);
-    } else {
-      config.ref.pushFilterId = 0;
-    }
+    config.ref.pushFilter = (pushFilterCallback?.pointerUnsafe).elseNullptr();
 
     // pullFilter
-    final pullFilter = this.pullFilter;
-    if (pullFilter != null) {
-      config.ref.pullFilterId = registerReplicationFilter(pullFilter);
-    } else {
-      config.ref.pullFilterId = 0;
-    }
-
-    int registerConflictResolver(ConflictResolver filter) =>
-        NativeCallbacks.instance.registerCallback<ConflictResolver>(
-          filter,
-          (filter, arguments, result) async {
-            final docId = arguments[0] as String;
-            final localAddress = arguments[1] as int?;
-            final remoteAddress = arguments[2] as int?;
-
-            final local = localAddress?.let((it) => createDocument(
-                  pointer: it.toPointer(),
-                  retain: true,
-                  worker: null,
-                ));
-
-            final remote = remoteAddress?.let((it) => createDocument(
-                  pointer: it.toPointer(),
-                  retain: true,
-                  worker: null,
-                ));
-
-            var decision = local ?? remote;
-            try {
-              decision = await filter(docId, local, remote);
-            } finally {
-              result!(decision);
-            }
-          },
-        );
+    config.ref.pullFilter = (pullFilterCallback?.pointerUnsafe).elseNullptr();
 
     // conflictResolver
-    final conflictResolver = this.conflictResolver;
-    if (conflictResolver != null) {
-      config.ref.conflictResolver = registerConflictResolver(conflictResolver);
-    } else {
-      config.ref.conflictResolver = 0;
-    }
+    config.ref.conflictResolver =
+        (conflictResolverCallback?.pointerUnsafe).elseNullptr();
 
     return config;
   }
@@ -724,8 +731,13 @@ class DocumentsPulled extends DocumentsReplicated {
 /// database and another database on a remote server (or on a peer device, or
 /// even another local database.)
 class Replicator extends NativeResource<WorkerObject<Void>> {
-  Replicator._fromPointer(Pointer<Void> pointer, Worker worker)
-      : super(CBLReplicatorObject(pointer, worker));
+  Replicator._fromPointer(
+    Pointer<Void> pointer,
+    Worker worker,
+    this._disposeCallbacks,
+  ) : super(CBLReplicatorObject(pointer, worker));
+
+  final void Function() _disposeCallbacks;
 
   /// Instructs this replicator to ignore existing checkpoints the next time it
   /// runs.
@@ -778,6 +790,20 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
             suspended,
           ));
 
+  /// Stops this replicator and frees resources.
+  ///
+  /// After calling this method, this replicator must not be used any more.
+  Future<void> close() async {
+    final isStopped =
+        Stream.fromIterable([status().asStream(), statusChanges()])
+            .asyncExpand((it) => it)
+            .firstWhere((it) => it.activity == ReplicatorActivityLevel.stopped);
+
+    await Future.wait([stop(), isStopped]);
+
+    _disposeCallbacks();
+  }
+
   /// Returns this [Replicator]'s current status.
   Future<ReplicatorStatus> status() =>
       native.execute((address) => GetReplicatorStatus(address));
@@ -787,9 +813,9 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   Stream<ReplicatorStatus> statusChanges() =>
       callbackStream<ReplicatorStatus, void>(
         worker: native.worker,
-        createWorkerRequest: (callbackId) => AddReplicatorChangeListener(
+        createWorkerRequest: (callback) => AddReplicatorChangeListener(
           native.pointerUnsafe.address,
-          callbackId,
+          callback.native.pointerUnsafe.address,
         ),
         // The native caller allocates some memory for the arguments and blocks
         // until the Dart side copies them and finishes the call, so it can
@@ -844,9 +870,9 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   /// have been replicated.
   Stream<DocumentsReplicated> documentReplications() => callbackStream(
         worker: native.worker,
-        createWorkerRequest: (callbackId) => AddReplicatorDocumentListener(
+        createWorkerRequest: (callback) => AddReplicatorDocumentListener(
           native.pointerUnsafe.address,
-          callbackId,
+          callback.native.pointerUnsafe.address,
         ),
         // See `statusChanges` for an explanation of why this option is `true`.
         finishBlockingCall: true,

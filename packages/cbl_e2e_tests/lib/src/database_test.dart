@@ -55,9 +55,7 @@ void main() {
     db = await cbl.openDatabase(dbName, config: dbConfig);
   });
 
-  tearDownAll(() async {
-    await db.close();
-  });
+  tearDownAll(() => db.close());
 
   group('Database', () {
     test('name returns name of Database', () {

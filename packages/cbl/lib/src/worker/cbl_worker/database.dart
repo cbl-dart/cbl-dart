@@ -253,10 +253,12 @@ int saveDatabaseDocument(SaveDatabaseDocument request) => _bindings
 
 class SaveDatabaseDocumentResolving extends ObjectRequest<int> {
   SaveDatabaseDocumentResolving(
-      int address, this.docAddress, this.conflictResolverId)
-      : super(address);
+    int address,
+    this.docAddress,
+    this.conflictResolverAddress,
+  ) : super(address);
   final int docAddress;
-  final int conflictResolverId;
+  final int conflictResolverAddress;
 }
 
 int saveDatabaseDocumentResolving(SaveDatabaseDocumentResolving request) =>
@@ -264,7 +266,7 @@ int saveDatabaseDocumentResolving(SaveDatabaseDocumentResolving request) =>
         .saveDocumentResolving(
           request.pointer,
           request.docAddress.toPointer(),
-          request.conflictResolverId,
+          request.conflictResolverAddress.toPointer(),
           globalError,
         )
         .checkResultAndError()
@@ -345,28 +347,31 @@ void purgeDocument(PurgeDocument request) => _docBindings
     .checkResultAndError();
 
 class AddDocumentChangeListener extends ObjectRequest<void> {
-  AddDocumentChangeListener(int address, this.docId, this.listenerId)
+  AddDocumentChangeListener(int address, this.docId, this.listenerAddress)
       : super(address);
   final String docId;
-  final int listenerId;
+  final int listenerAddress;
 }
 
 void addDocumentChangeListener(AddDocumentChangeListener request) =>
     _bindings.addDocumentChangeListener(
       request.pointer,
       request.docId.toNativeUtf8().withScoped(),
-      request.listenerId,
+      request.listenerAddress.toPointer(),
     );
 
 late final _docBindings = CBLBindings.instance.document;
 
 class AddDatabaseChangeListener extends ObjectRequest<void> {
-  AddDatabaseChangeListener(int address, this.listenerId) : super(address);
-  final int listenerId;
+  AddDatabaseChangeListener(int address, this.listenerAddress) : super(address);
+  final int listenerAddress;
 }
 
 void addDatabaseChangeListener(AddDatabaseChangeListener request) =>
-    _bindings.addChangeListener(request.pointer, request.listenerId);
+    _bindings.addChangeListener(
+      request.pointer,
+      request.listenerAddress.toPointer(),
+    );
 
 class CreateDatabaseIndex extends ObjectRequest<void> {
   CreateDatabaseIndex(int address, this.name, this.index) : super(address);
