@@ -11,7 +11,7 @@ environment:
 
 dependencies:
   cbl_ffi: ^0.2.1
-  cbl_native: ^2.0.1
+  cbl_native: ^3.0.0
   flutter:
     sdk: flutter
 

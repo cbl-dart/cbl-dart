@@ -1,3 +1,7 @@
+## 3.0.0
+
+ - **BREAKING** **FEAT**: rewrite callbacks
+
 ## 2.0.1
 
  - **DOCS**: add interal package warngin + mention cmd tool.
