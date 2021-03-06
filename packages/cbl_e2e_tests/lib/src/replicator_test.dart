@@ -11,7 +11,9 @@ void main() {
       config: DatabaseConfiguration(directory: tmpDir),
     );
 
-    await db.createReplicator(ReplicatorConfiguration(
+    addTearDown(db.close);
+
+    final replicator = await db.createReplicator(ReplicatorConfiguration(
       endpoint: UrlEndpoint(Uri.parse('ws://localhost:4984/db')),
       replicatorType: ReplicatorType.pushAndPull,
       continuous: true,
@@ -35,5 +37,7 @@ void main() {
       pushFilter: (document, isDeleted) => true,
       conflictResolver: (documentId, local, remote) => local,
     ));
+
+    addTearDown(replicator.close);
   });
 }

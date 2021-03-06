@@ -86,20 +86,28 @@ bool getReplicatorIsDocumentPening(GetReplicatorIsDocumentPening request) =>
         .checkResultAndError();
 
 class AddReplicatorChangeListener extends ObjectRequest<void> {
-  AddReplicatorChangeListener(int address, this.listenerId) : super(address);
-  final int listenerId;
+  AddReplicatorChangeListener(int address, this.listenerAddress)
+      : super(address);
+  final int listenerAddress;
 }
 
 void addReplicatorChangeListener(AddReplicatorChangeListener request) =>
-    _bindings.addChangeListener(request.pointer.cast(), request.listenerId);
+    _bindings.addChangeListener(
+      request.pointer.cast(),
+      request.listenerAddress.toPointer(),
+    );
 
 class AddReplicatorDocumentListener extends ObjectRequest<void> {
-  AddReplicatorDocumentListener(int address, this.listenerId) : super(address);
-  final int listenerId;
+  AddReplicatorDocumentListener(int address, this.listenerAddress)
+      : super(address);
+  final int listenerAddress;
 }
 
 void addReplicatorDocumentListener(AddReplicatorDocumentListener request) =>
-    _bindings.addDocumentListener(request.pointer.cast(), request.listenerId);
+    _bindings.addDocumentListener(
+      request.pointer.cast(),
+      request.listenerAddress.toPointer(),
+    );
 
 void addReplicatorHandlersToRouter(RequestRouter router) {
   router.addHandler(newReplicator);

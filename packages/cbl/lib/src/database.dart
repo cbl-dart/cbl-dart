@@ -8,7 +8,7 @@ import 'package:collection/collection.dart';
 import 'blob.dart';
 import 'document.dart';
 import 'fleece.dart';
-import 'native_callbacks.dart';
+import 'native_callback.dart';
 import 'native_object.dart';
 import 'query.dart';
 import 'replicator.dart';
@@ -267,8 +267,6 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 
 /// A database is both a filesystem object and a container for documents.
 class Database extends NativeResource<WorkerObject<Void>> {
-  static late final _callbacks = NativeCallbacks.instance;
-
   Database._fromPointer(this._debugName, Pointer<Void> pointer, Worker worker)
       : super(CblRefCountedWorkerObject(
           pointer,
@@ -412,57 +410,58 @@ class Database extends NativeResource<WorkerObject<Void>> {
     // database is used with conflict resolution.
     assert(!doc.isNew, 'new documents must be saved with `saveDocument`');
 
-    final conflictHandlerId = _callbacks.registerCallback<SaveConflictHandler>(
-      conflictHandler,
-      (handler, arguments, result) {
-        // Build arguments
-        final documentBeingSavedPointer = (arguments[0] as int).toPointer();
-        final conflictingDocumentPointer = (arguments[1] as int?)?.toPointer();
+    final callback = NativeCallback((arguments, result) {
+      // Build arguments
+      final documentBeingSavedPointer = (arguments[0] as int).toPointer<Void>();
+      final conflictingDocumentPointer =
+          (arguments[1] as int?)?.toPointer<Void>();
 
-        final documentBeingSaved = createMutableDocument(
-          pointer: documentBeingSavedPointer,
+      final documentBeingSaved = createMutableDocument(
+        pointer: documentBeingSavedPointer,
+        retain: true,
+        isNew: false,
+        worker: null,
+      );
+      final conflictingDocument = conflictingDocumentPointer?.let(
+        (pointer) => createDocument(
+          pointer: pointer,
           retain: true,
-          isNew: false,
           worker: null,
-        );
-        final conflictingDocument = conflictingDocumentPointer?.let(
-          (pointer) => createDocument(
-            pointer: pointer,
-            retain: true,
-            worker: null,
-          ),
-        );
+        ),
+      );
 
-        Future<void> invokeHandler() async {
-          // In case the handler throws an error we are canceling the save.
-          var decision = false;
+      Future<void> invokeHandler() async {
+        // In case the handler throws an error we are canceling the save.
+        var decision = false;
 
-          // We don't swallow exceptions because handlers should not throw and
-          // this way the they are visible to the developer as an unhandled
-          // exception.
-          try {
-            decision = await handler(documentBeingSaved, conflictingDocument);
-          } finally {
-            result!(decision);
-          }
+        // We don't swallow exceptions because handlers should not throw and
+        // this way the they are visible to the developer as an unhandled
+        // exception.
+        try {
+          decision = await conflictHandler(
+            documentBeingSaved,
+            conflictingDocument,
+          );
+        } finally {
+          result!(decision);
         }
+      }
 
-        invokeHandler();
-      },
-    );
+      invokeHandler();
+    });
 
     return native
         .execute((address) => SaveDatabaseDocumentResolving(
               address,
               doc.native.pointer.address,
-              conflictHandlerId,
+              callback.native.pointer.address,
             ))
         .then((address) => createDocument(
               pointer: address.toPointer(),
               worker: native.worker,
               retain: false,
             ))
-        .whenComplete(() => _callbacks.unregisterCallback(conflictHandler));
+        .whenComplete(callback.close);
   }
 
   /// Purges a document, given only its ID.
@@ -505,10 +504,10 @@ class Database extends NativeResource<WorkerObject<Void>> {
   /// notified.
   Stream<void> changesOfDocument(String id) => callbackStream<void, void>(
         worker: native.worker,
-        createWorkerRequest: (callbackId) => AddDocumentChangeListener(
+        createWorkerRequest: (callback) => AddDocumentChangeListener(
           native.pointerUnsafe.address,
           id,
-          callbackId,
+          callback.native.pointerUnsafe.address,
         ),
         createEvent: (_, arguments) => null,
       );
@@ -528,8 +527,10 @@ class Database extends NativeResource<WorkerObject<Void>> {
   Stream<List<String>> changesOfAllDocuments() =>
       callbackStream<List<String>, void>(
         worker: native.worker,
-        createWorkerRequest: (callbackId) =>
-            AddDatabaseChangeListener(native.pointerUnsafe.address, callbackId),
+        createWorkerRequest: (callback) => AddDatabaseChangeListener(
+          native.pointerUnsafe.address,
+          callback.native.pointerUnsafe.address,
+        ),
         createEvent: (_, arguments) => List.from(arguments),
       );
 

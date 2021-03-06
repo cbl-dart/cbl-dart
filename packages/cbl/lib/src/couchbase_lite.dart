@@ -8,7 +8,6 @@ import 'package:synchronized/synchronized.dart';
 import 'blob.dart';
 import 'database.dart';
 import 'fleece.dart';
-import 'native_callbacks.dart';
 import 'replicator.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
@@ -145,8 +144,6 @@ class CouchbaseLite {
 
         await _instance!._worker.stop();
 
-        await NativeCallbacks.instance.dispose();
-
         _instance = null;
       });
 
@@ -208,14 +205,22 @@ class CouchbaseLite {
     DatabaseConfiguration? config,
   }) async {
     final databaseId = _nextDatabaseId++;
+
     final worker =
         await _workerFactory.createWorker(id: 'Database(#$databaseId|$name)');
-    final pointer = await worker.execute(OpenDatabase(name, config));
-    return createDatabase(
-      debugName: name,
-      pointer: Pointer.fromAddress(pointer),
-      worker: worker,
-    );
+
+    try {
+      final pointer = await worker.execute(OpenDatabase(name, config));
+
+      return createDatabase(
+        debugName: name,
+        pointer: Pointer.fromAddress(pointer),
+        worker: worker,
+      );
+    } catch (error) {
+      await worker.stop();
+      rethrow;
+    }
   }
 
   static late final _logBindings = CBLBindings.instance.log;
@@ -250,35 +255,29 @@ class CouchbaseLite {
 
     if (disabled) {
       assert(
-        !_logMessages.hasListener,
+        !_logMessagesController.hasListener,
         'logging cannot be be disabled while `logMessage` stream has listeners',
       );
 
-      _logBindings.setCallback(NativeCallbacks.nullCallback);
+      _logBindings.setCallback(nullptr);
     } else {
       _logBindings.restoreOriginalCallback();
     }
   }
 
-  late final _logMessages = callbackBroadcastStreamController<LogMessage>(
-    startStream: (callbackId) {
+  late final _logMessagesController =
+      callbackBroadcastStreamController<LogMessage>(
+    startStream: (callback) {
       assert(
         !_loggingIsDisabled,
         '`logMessages` stream cannot be listened to while `loggingIsDisable` is `true`',
       );
 
-      _logBindings.setCallback(callbackId);
-    },
-    stopStream: () {
-      _logBindings.restoreOriginalCallback();
-
-      // We wait here a few milliseconds to ensure that all messages which
-      // have been dispatched to the callback are received by it.
-      return Future<void>.delayed(Duration(milliseconds: 50));
+      _logBindings.setCallback(callback.native.pointerUnsafe);
     },
     createEvent: (arguments) {
-      final level = arguments[1] as int;
       final domain = arguments[0] as int;
+      final level = arguments[1] as int;
       final message = arguments[2] as String;
       return LogMessage(
         level: level.toLogLevel(),
@@ -299,5 +298,5 @@ class CouchbaseLite {
   ///
   /// See:
   /// - [loggingIsDisabled] for how that property interacts with this stream.
-  Stream<LogMessage> logMessages() => _logMessages.stream;
+  Stream<LogMessage> logMessages() => _logMessagesController.stream;
 }

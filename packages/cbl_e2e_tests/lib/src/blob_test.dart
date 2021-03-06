@@ -16,6 +16,8 @@ void main() {
     );
   });
 
+  tearDownAll(() => db.close());
+
   group('Blob', () {
     test('length returns the content length', () async {
       final content = Uint8List(16);

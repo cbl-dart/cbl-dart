@@ -82,12 +82,16 @@ String getQueryColumnName(GetQueryColumnName request) {
 }
 
 class AddQueryChangeListener extends ObjectRequest<int> {
-  AddQueryChangeListener(int address, this.listenerId) : super(address);
-  final int listenerId;
+  AddQueryChangeListener(int address, this.listenerAddress) : super(address);
+  final int listenerAddress;
 }
 
-int addQueryChangeListener(AddQueryChangeListener request) =>
-    _bindings.addChangeListener(request.pointer, request.listenerId).address;
+int addQueryChangeListener(AddQueryChangeListener request) => _bindings
+    .addChangeListener(
+      request.pointer,
+      request.listenerAddress.toPointer(),
+    )
+    .address;
 
 class CopyCurrentQueryResultSet extends ObjectRequest<int> {
   CopyCurrentQueryResultSet(int address, this.listenerTokenAddress)

@@ -3,9 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:characters/characters.dart';
-import 'package:synchronized/synchronized.dart';
 
-import 'native_callbacks.dart';
+import 'native_callback.dart';
 import 'worker/worker.dart';
 
 extension ValueExt<T> on T {
@@ -56,43 +55,40 @@ String redact(String string) {
 /// notified if [createEvent] throws/rejects.
 ///
 /// See:
-/// - [NativeCallbacks]
+/// - [NativeCallback]
 Stream<T> callbackStream<T, S>({
   required Worker worker,
-  required WorkerRequest<S> Function(int callbackId) createWorkerRequest,
+  required WorkerRequest<S> Function(NativeCallback callback)
+      createWorkerRequest,
   required FutureOr<T> Function(S requestResult, List arguments) createEvent,
   bool finishBlockingCall = false,
 }) {
-  final callbacks = NativeCallbacks.instance;
+  late NativeCallback callback;
   late StreamController<T> controller;
   late Future<bool> callbackAdded;
   late S requestResult;
 
   void onListen() {
-    final callbackId =
-        callbacks.registerCallback<FutureOr<T> Function(S, List)>(
-      createEvent,
-      (createEvent, arguments, result) async {
-        // Callbacks can come in before the registration request from the worker
-        // comes back. In this case `requestResult` has not be initialized yet.
-        // By waiting for `callbackAdded`, `requestResult` is guarantied to be
-        // set after this line.
-        await callbackAdded;
+    callback = NativeCallback((arguments, result) async {
+      // Callbacks can come in before the registration request from the worker
+      // comes back. In this case `requestResult` has not be initialized yet.
+      // By waiting for `callbackAdded`, `requestResult` is guarantied to be
+      // set after this line.
+      await callbackAdded;
 
-        // We use `add` instead of `addStream` because the callback can fire
-        // before the Future from `addStream` returns.
-        try {
-          controller.add(await createEvent(requestResult, arguments));
-        } catch (error, stackTrace) {
-          controller.addError(error, stackTrace);
-        } finally {
-          if (finishBlockingCall) result!(null);
-        }
-      },
-    );
+      // We use `add` instead of `addStream` because the callback can fire
+      // before the Future from `addStream` returns.
+      try {
+        controller.add(await createEvent(requestResult, arguments));
+      } catch (error, stackTrace) {
+        controller.addError(error, stackTrace);
+      } finally {
+        if (finishBlockingCall) result!(null);
+      }
+    });
 
     callbackAdded =
-        worker.execute(createWorkerRequest(callbackId)).then((result) {
+        worker.execute(createWorkerRequest(callback)).then((result) {
       requestResult = result;
       return true;
     }).catchError((Object error, StackTrace stackTrace) {
@@ -104,7 +100,7 @@ Stream<T> callbackStream<T, S>({
 
   Future onCancel() async {
     if (await callbackAdded) {
-      callbacks.unregisterCallback(createEvent, runFinalizer: true);
+      callback.close();
     }
   }
 
@@ -114,29 +110,24 @@ Stream<T> callbackStream<T, S>({
 }
 
 StreamController<T> callbackBroadcastStreamController<T>({
-  required FutureOr<void> Function(int callbackId) startStream,
-  required FutureOr<void> Function() stopStream,
+  required void Function(NativeCallback callback) startStream,
   required T Function(List arguments) createEvent,
 }) {
+  late NativeCallback callback;
   late StreamController<T> controller;
-  final lock = Lock();
 
-  void onListen() => lock.synchronized(() async {
-        final callbackId = NativeCallbacks.instance
-            .registerCallback<T Function(List arguments)>(
-          createEvent,
-          (createEvent, arguments, _) => controller.add(createEvent(arguments)),
-        );
+  void onListen() {
+    callback = NativeCallback((arguments, _) {
+      final event = createEvent(arguments);
+      controller.add(event);
+    });
 
-        await startStream(callbackId);
-      });
+    startStream(callback);
+  }
 
-  Future<void> onCancel() => lock.synchronized(() async {
-        await stopStream();
-
-        NativeCallbacks.instance
-            .unregisterCallback(createEvent, runFinalizer: true);
-      });
+  void onCancel() {
+    callback.close();
+  }
 
   controller =
       StreamController.broadcast(onListen: onListen, onCancel: onCancel);

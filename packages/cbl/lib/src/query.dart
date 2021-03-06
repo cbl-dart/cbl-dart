@@ -152,9 +152,9 @@ class Query extends NativeResource<WorkerObject<Void>> {
   /// the result set changes.
   Stream<ResultSet> changes() => callbackStream<ResultSet, int>(
         worker: native.worker,
-        createWorkerRequest: (callbackId) => AddQueryChangeListener(
+        createWorkerRequest: (callback) => AddQueryChangeListener(
           native.pointerUnsafe.address,
-          callbackId,
+          callback.native.pointerUnsafe.address,
         ),
         createEvent: (listenerTokenAddress, _) async {
           // The native side sends no arguments. When the native side notfies
