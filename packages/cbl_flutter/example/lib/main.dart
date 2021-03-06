@@ -128,12 +128,12 @@ class _MyAppState extends State<MyApp> {
                       alignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          child: Text('Crate a Post'),
                           onPressed: _createPost,
+                          child: Text('Crate a Post'),
                         ),
                         ElevatedButton(
-                          child: Text('Clear Database'),
                           onPressed: _clearDatabase,
+                          child: Text('Clear Database'),
                         ),
                       ],
                     ),
