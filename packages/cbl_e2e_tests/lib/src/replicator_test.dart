@@ -6,7 +6,7 @@ import 'test_binding.dart';
 
 void main() {
   test('create Replicator smoke test', () async {
-    final db = await cbl.openDatabase(
+    final db = await Database.open(
       testDbName('CreateReplicatorSmoke'),
       config: DatabaseConfiguration(directory: tmpDir),
     );

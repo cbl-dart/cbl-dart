@@ -1,6 +1,7 @@
 export 'src/blob.dart' hide blobSlotSetter, createBlobManager;
-export 'src/couchbase_lite.dart';
-export 'src/database.dart' hide createDatabase;
+export 'src/couchbase_lite.dart'
+    hide debugCouchbaseLiteIsInitialized, workerFactory;
+export 'src/database.dart';
 export 'src/document.dart' hide createDocument, createMutableDocument;
 export 'src/errors.dart'
     hide

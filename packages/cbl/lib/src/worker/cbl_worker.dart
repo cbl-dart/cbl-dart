@@ -61,13 +61,13 @@ WorkerRequestHandlerMiddleware _runInArenaMiddleware() =>
     (request, next) => runArena(() => next(request));
 
 /// A factory of [Worker]s which use a [CblWorkerDelegate].
-class CblWorkerFactory {
+class CblWorkerFactory extends WorkerFactory {
   CblWorkerFactory({required Libraries libraries}) : libraries = libraries;
 
   /// The dynamic libraries configuration for the [Worker]s.
   final Libraries libraries;
 
-  /// Creates and starts a [Worker] with given [id].
+  @override
   Future<Worker> createWorker({required String id}) async {
     final worker = _createCblWorker(id);
     await worker.start();

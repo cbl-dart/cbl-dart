@@ -8,24 +8,24 @@ void main() {
     tearDownAll(() => CblE2eTestBinding.instance.startTestLogger());
 
     test('logLevel can be set', () {
-      final initialLogLevel = cbl.logLevel;
-      addTearDown(() => cbl.logLevel = initialLogLevel);
+      final initialLogLevel = CouchbaseLite.logLevel;
+      addTearDown(() => CouchbaseLite.logLevel = initialLogLevel);
 
-      cbl.logLevel = LogLevel.verbose;
-      expect(cbl.logLevel, equals(LogLevel.verbose));
+      CouchbaseLite.logLevel = LogLevel.verbose;
+      expect(CouchbaseLite.logLevel, equals(LogLevel.verbose));
     });
 
     test(
       'logMessages emits log messages from CouchbaseLite implementation',
       () async {
         expect(
-          cbl.logMessages().map((it) => it.message),
+          CouchbaseLite.logMessages().map((it) => it.message),
           emitsThrough(
             matches('litecore::SQLiteDataFile.+LogCallback.+\.cblite2'),
           ),
         );
 
-        final db = await cbl.openDatabase(
+        final db = await Database.open(
           testDbName('LogCallback'),
           config: DatabaseConfiguration(directory: tmpDir),
         );

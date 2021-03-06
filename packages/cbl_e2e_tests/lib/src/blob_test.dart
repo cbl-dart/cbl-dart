@@ -10,7 +10,7 @@ void main() {
   late Database db;
 
   setUpAll(() async {
-    db = await cbl.openDatabase(
+    db = await Database.open(
       testDbName('Blob-Common'),
       config: DatabaseConfiguration(directory: tmpDir),
     );
