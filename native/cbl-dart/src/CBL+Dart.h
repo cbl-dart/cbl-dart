@@ -24,18 +24,13 @@ void CBLDart_InitDartApiDL(void *data);
 // -- Callbacks
 
 CBLDART_EXPORT
-CallbackIsolate *CBLDart_NewCallbackIsolate(Dart_Handle handle,
-                                            Dart_Port sendPort);
+Callback *CBLDart_NewCallback(Dart_Handle handle, Dart_Port sendPort);
 
 CBLDART_EXPORT
-CallbackId CBLDart_CallbackIsolate_RegisterCallback(CallbackIsolate *isolate);
+void CBLDart_Callback_Close(Callback *callback);
 
 CBLDART_EXPORT
-void CBLDart_CallbackIsolate_UnregisterCallback(CallbackId callbackId,
-                                                bool runFinalizer);
-
-CBLDART_EXPORT
-void CBLDart_Callback_CallForTest(CallbackId callbackId, int64_t argument);
+void CBLDart_Callback_CallForTest(Callback *callback, int64_t argument);
 
 // Couchbase Lite ----------------------------------------------------------
 
@@ -45,7 +40,7 @@ CBLDART_EXPORT
 void CBLDart_CBLLog_RestoreOriginalCallback();
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_SetCallback(CallbackId callbackId);
+void CBLDart_CBLLog_SetCallback(Callback *callback);
 
 // -- RefCounted
 
@@ -68,17 +63,17 @@ void CBLDart_CBLDatabase_Config(CBLDatabase *db,
 
 CBLDART_EXPORT
 const CBLDocument *CBLDart_CBLDatabase_SaveDocumentResolving(
-    CBLDatabase *db, CBLDocument *doc, CallbackId conflictHandler,
+    CBLDatabase *db, CBLDocument *doc, Callback *conflictHandler,
     CBLError *error);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
                                                    const char *docID,
-                                                   CallbackId listener);
+                                                   Callback *listener);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           CallbackId listener);
+                                           Callback *listener);
 
 // -- Query
 
@@ -91,7 +86,7 @@ void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
 
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,
-                                                     CallbackId listener);
+                                                     Callback *listener);
 
 // -- Blob
 
@@ -124,11 +119,11 @@ struct CBLDartReplicatorConfiguration {
 
   FLArray documentIDs;
 
-  CallbackId pushFilterId;
+  Callback *pushFilter;
 
-  CallbackId pullFilterId;
+  Callback *pullFilter;
 
-  CallbackId conflictResolver;
+  Callback *conflictResolver;
 };
 
 CBLDART_EXPORT
@@ -144,7 +139,7 @@ bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
                                              char *docId, CBLError *error);
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
-                                             CallbackId listenerId);
+                                             Callback *listenerId);
 
 struct CBLDartReplicatedDocument {
   const char *ID;
@@ -156,5 +151,5 @@ struct CBLDartReplicatedDocument {
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentListener(CBLReplicator *replicator,
-                                               CallbackId listenerId);
+                                               Callback *listenerId);
 }
