@@ -1,3 +1,10 @@
+## 0.3.0
+
+> Note: This release has breaking changes.
+
+ - **CHORE**: cut release.
+ - **BREAKING** **FEAT**: rewrite native callback.
+
 ## 0.2.1
 
  - **FEAT**: add binding for `Document_RevisionID`.

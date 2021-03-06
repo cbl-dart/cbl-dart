@@ -1,3 +1,10 @@
+## 0.4.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: migrate to new native callback API.
+ - **BREAKING** **FEAT**: improve `CouchbaseLite` and `Database` APIs.
+
 ## 0.3.0+1
 
  - **STYLE**: fix formatting.
