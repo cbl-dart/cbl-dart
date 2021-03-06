@@ -5,6 +5,7 @@ import 'package:ffi/ffi.dart';
 import 'base.dart';
 import 'fleece.dart';
 import 'libraries.dart';
+import 'native_callback.dart';
 
 /// A query language
 enum QueryLanguage {
@@ -79,11 +80,11 @@ typedef CBLDart_CBLQuery_ColumnName = void Function(
 
 typedef CBLDart_CBLQuery_AddChangeListener_C = Pointer<Void> Function(
   Pointer<Void> query,
-  Int64 listener,
+  Pointer<Callback> listener,
 );
 typedef CBLDart_CBLQuery_AddChangeListener = Pointer<Void> Function(
   Pointer<Void> query,
-  int listener,
+  Pointer<Callback> listener,
 );
 typedef CBLQuery_CopyCurrentResults = Pointer<Void> Function(
   Pointer<Void> query,

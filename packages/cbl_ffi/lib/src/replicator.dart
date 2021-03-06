@@ -6,6 +6,7 @@ import 'base.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'libraries.dart';
+import 'native_callback.dart';
 
 // === ReplicatorConfiguration =================================================
 
@@ -121,14 +122,11 @@ class CBLDartReplicatorConfiguration extends Struct {
 
   external Pointer<FLArray> documentIDs;
 
-  @Int64()
-  external int pushFilterId;
+  external Pointer<Callback> pushFilter;
 
-  @Int64()
-  external int pullFilterId;
+  external Pointer<Callback> pullFilter;
 
-  @Int64()
-  external int conflictResolver;
+  external Pointer<Callback> conflictResolver;
 }
 
 // === Replicator ==============================================================
@@ -252,11 +250,11 @@ typedef CBLDart_CBLReplicator_IsDocumentPending = int Function(
 
 typedef CBLDart_CBLReplicator_AddChangeListener_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Int64 listenerId,
+  Pointer<Callback> listener,
 );
 typedef CBLDart_CBLReplicator_AddChangeListener = void Function(
   Pointer<CBLReplicator> replicator,
-  int listenerId,
+  Pointer<Callback> listener,
 );
 
 /// Flags describing a replicated document.
@@ -285,11 +283,11 @@ class CBLDartReplicatedDocument extends Struct {
 
 typedef CBLDart_CBLReplicator_AddDocumentListener_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Int64 listenerId,
+  Pointer<Callback> listener,
 );
 typedef CBLDart_CBLReplicator_AddDocumentListener = void Function(
   Pointer<CBLReplicator> replicator,
-  int listenerId,
+  Pointer<Callback> listener,
 );
 
 // === ReplicatorBindings ======================================================
