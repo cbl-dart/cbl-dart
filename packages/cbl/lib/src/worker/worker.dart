@@ -37,6 +37,33 @@ extension _WorkerResponseExt<T> on WorkerResponse<T> {
       error == null ? Future.value(value) : Future.error(error!);
 }
 
+/// The Worker crashed because of an unhandled exception.
+class WorkerCrashedError implements Exception {
+  WorkerCrashedError(this.message);
+
+  /// A description of the error.
+  final String message;
+
+  @override
+  String toString() => 'WorkerCrashedError(message: $message)';
+}
+
+/// Interface for executing [WorkerRequest]s.
+abstract class WorkerExecutor {
+  /// Executes [request] on a Worker, waits for a response and returns
+  /// that response.
+  ///
+  /// The Worker can also respond with an error if the request failed. In that
+  /// case the returned Future rejects with that error.
+  ///
+  /// If the Worker does not understand the request the returned Future rejects
+  /// with [UnsupportedError].
+  ///
+  /// If the Worker crashes while the request is pending the returned Future
+  /// rejects with [WorkerCrashedError].
+  Future<R> execute<R>(WorkerRequest<R> request);
+}
+
 /// A delegate wich implements the logic of a [Worker].
 ///
 /// When creating a worker, you need to provide a delegate. This delegate is
@@ -53,21 +80,10 @@ abstract class WorkerDelegate {
   Future<WorkerResponse> handleRequest(WorkerRequest request);
 }
 
-/// The Worker crashed because of an unhandled exception.
-class WorkerCrashedError implements Exception {
-  WorkerCrashedError(this.message);
-
-  /// A description of the error.
-  final String message;
-
-  @override
-  String toString() => 'WorkerCrashedError(message: $message)';
-}
-
 /// A worker executes [WorkerRequest]s in a separate [Isolate].
 ///
 /// The logic of the worker is implemented by a [WorkerDelegate].
-class Worker {
+class Worker extends WorkerExecutor {
   /// Creates a new worker.
   factory Worker({
     required String id,
@@ -208,17 +224,7 @@ class Worker {
         _reset();
       });
 
-  /// Sends [request] to the Worker Isolate, waits for a response and returns
-  /// that response.
-  ///
-  /// The Worker can also respond with an error if the request failed. In that
-  /// case the returned Future rejects with that error.
-  ///
-  /// If the Worker does not understand the request the returned Future rejects
-  /// with [UnsupportedError].
-  ///
-  /// If the Worker crashes while the request is pending the returned Future
-  /// rejects with [WorkerCrashedError].
+  @override
   Future<R> execute<R>(WorkerRequest<R> request) =>
       _lock.synchronized(() async {
         _debugIsRunning();
@@ -308,4 +314,75 @@ class _ResponseEnvelope {
   final int requestId;
 
   final WorkerResponse response;
+}
+
+/// Interface for creating [Worker]s.
+abstract class WorkerFactory {
+  /// Creates and starts a [Worker] with given [id].
+  Future<Worker> createWorker({required String id});
+}
+
+/// A [WorkerExecutor] which manages an inner [Worker], which is kept running
+/// wile there are pending requests.
+///
+/// When [execute] is called, the worker is created if necessary. While there
+/// are other requests pending the same worker is used to execute subsequent
+/// requests. After the last pending request completes the worker is destroyed.
+///
+/// Worker cleanup is scheduled in a microtask so that the worker is not
+/// destroyed between sequential requests.
+class TransientWorkerExecutor extends WorkerExecutor {
+  /// Creates a [WorkerExecutor] which manages an inner [Worker], which is kept
+  /// running wile there are pending requests.
+  TransientWorkerExecutor(this.debugName, this.workerFactory);
+
+  /// The name of this executor for debugging purposes.
+  final String debugName;
+
+  /// The worker factory used to create the inner worker.
+  final WorkerFactory workerFactory;
+
+  int _workerLeases = 0;
+
+  Worker? _worker;
+
+  final _lock = Lock();
+
+  @override
+  Future<R> execute<R>(WorkerRequest<R> request) async {
+    final worker = await _leaseWorker();
+
+    try {
+      return worker.execute(request);
+    } finally {
+      scheduleMicrotask(() => _returnWorker(worker));
+    }
+  }
+
+  Future<Worker> _leaseWorker() async {
+    _workerLeases++;
+    await _updateWorker();
+    return _worker!;
+  }
+
+  Future<void> _returnWorker(Worker worker) async {
+    _workerLeases--;
+    await _updateWorker();
+  }
+
+  Future<void> _updateWorker() => _lock.synchronized(() async {
+        if (_workerLeases > 0 && _worker == null) {
+          _worker = await workerFactory.createWorker(
+            id: 'TransientWorker($debugName)',
+          );
+        }
+
+        if (_workerLeases == 0 && _worker != null) {
+          await _worker!.stop();
+          _worker = null;
+        }
+      });
+
+  @override
+  String toString() => 'TransientWorkerExecutor($debugName)';
 }

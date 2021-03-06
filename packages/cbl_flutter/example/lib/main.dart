@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<void> _openDatabase;
+  late Future<void> _initFuture;
   late Database _db;
 
   var _posts = <Map<String, Object?>>[];
@@ -24,29 +24,30 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    CouchbaseLite.initialize(libraries: flutterLibraries());
+    CouchbaseLite.logMessages().logToLogger();
+    CouchbaseLite.logLevel = LogLevel.verbose;
 
-    _openDatabase = CouchbaseLite.initialize(libraries: flutterLibraries())
-        .then((cbl) async {
-      cbl.logMessages().logToLogger();
-      cbl.logLevel = LogLevel.verbose;
+    _initFuture = _init();
+  }
 
-      final appDocsDir = await getApplicationDocumentsDirectory();
+  Future<void> _init() async {
+    final appDocsDir = await getApplicationDocumentsDirectory();
 
-      _db = await cbl.openDatabase(
-        'Example',
-        config: DatabaseConfiguration(directory: appDocsDir.path),
-      );
+    _db = await Database.open(
+      'Example',
+      config: DatabaseConfiguration(directory: appDocsDir.path),
+    );
 
-      final query =
-          await _db.query('SELECT post FROM post WHERE post.type = "post"');
+    final query =
+        await _db.query('SELECT post FROM post WHERE post.type = "post"');
 
-      query
-          .changes()
-          .map((resultSet) => resultSet.asDicts
-              .map((result) => result['post'].asDict!.toObject())
-              .toList())
-          .listen((posts) => setState(() => _posts = posts));
-    });
+    query
+        .changes()
+        .map((resultSet) => resultSet.asDicts
+            .map((result) => result['post'].asDict!.toObject())
+            .toList())
+        .listen((posts) => setState(() => _posts = posts));
   }
 
   void _createPost() async {
@@ -88,7 +89,7 @@ class _MyAppState extends State<MyApp> {
         body: Padding(
           padding: EdgeInsets.all(16),
           child: FutureBuilder<void>(
-            future: _openDatabase,
+            future: _initFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active) {
                 return Center(
@@ -97,7 +98,7 @@ class _MyAppState extends State<MyApp> {
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 16),
-                      Text('Opening Database')
+                      Text('Initializing...')
                     ],
                   ),
                 );
@@ -108,7 +109,7 @@ class _MyAppState extends State<MyApp> {
                   child: IconAndMessage(
                     icon: Icons.close,
                     iconColor: Colors.red,
-                    text: 'Opening Database failed:\n'
+                    text: 'Initialization failed:\n'
                         '${snapshot.error}',
                   ),
                 );
@@ -121,7 +122,7 @@ class _MyAppState extends State<MyApp> {
                     IconAndMessage(
                       icon: Icons.check,
                       iconColor: Colors.green,
-                      text: 'Opened Database',
+                      text: 'Initialized',
                     ),
                     SizedBox(height: 32),
                     ButtonBar(

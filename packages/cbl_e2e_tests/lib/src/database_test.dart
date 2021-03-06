@@ -9,18 +9,18 @@ void main() {
       final dbName = testDbName('DatabaseExistsWithDir');
 
       expect(
-        await cbl.databaseExists(dbName, directory: tmpDir),
+        await Database.exists(dbName, directory: tmpDir),
         isFalse,
       );
 
-      final db = await cbl.openDatabase(
+      final db = await Database.open(
         dbName,
         config: DatabaseConfiguration(directory: tmpDir),
       );
       await db.close();
 
       expect(
-        await cbl.databaseExists(dbName, directory: tmpDir),
+        await Database.exists(dbName, directory: tmpDir),
         isTrue,
       );
     });
@@ -29,7 +29,7 @@ void main() {
   group('openDatabase', () {
     test('throws when database does not exist', () {
       expect(
-        cbl.openDatabase(
+        Database.open(
           testDbName('OpenNonExistingDatabase'),
           config: DatabaseConfiguration(
             directory: tmpDir,
@@ -52,7 +52,7 @@ void main() {
   setUpAll(() async {
     dbName = testDbName('Common');
     dbConfig = DatabaseConfiguration(directory: tmpDir);
-    db = await cbl.openDatabase(dbName, config: dbConfig);
+    db = await Database.open(dbName, config: dbConfig);
   });
 
   tearDownAll(() => db.close());
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('close does not throw', () async {
-      final db = await cbl.openDatabase(
+      final db = await Database.open(
         testDbName('CloseDatabase'),
         config: dbConfig,
       );
@@ -81,12 +81,12 @@ void main() {
 
     test('delete deletes the database file', () async {
       final name = testDbName('DeleteDatabase');
-      final db = await cbl.openDatabase(name, config: dbConfig);
+      final db = await Database.open(name, config: dbConfig);
 
       await db.delete();
 
       expect(
-        cbl.databaseExists(name, directory: dbConfig.directory!),
+        Database.exists(name, directory: dbConfig.directory!),
         completion(isFalse),
       );
     });
@@ -346,7 +346,7 @@ void main() {
     late Database db;
 
     setUp(() async {
-      db = await cbl.openDatabase(
+      db = await Database.open(
         testDbName('Index'),
         config: DatabaseConfiguration(directory: tmpDir),
       );
@@ -398,7 +398,7 @@ void main() {
     late Database db;
 
     setUp(() async {
-      db = await cbl.openDatabase(
+      db = await Database.open(
         testDbName('Query'),
         config: DatabaseConfiguration(directory: tmpDir),
       );
@@ -493,13 +493,13 @@ void main() {
   group('Scenarios', () {
     test('open the same database twice', () async {
       final dbName = testDbName('OpenDbTwice');
-      final dbA = await cbl.openDatabase(
+      final dbA = await Database.open(
         dbName,
         config: DatabaseConfiguration(directory: tmpDir),
       );
       addTearDown(() => dbA.close());
 
-      final dbB = await cbl.openDatabase(
+      final dbB = await Database.open(
         dbName,
         config: DatabaseConfiguration(directory: tmpDir),
       );

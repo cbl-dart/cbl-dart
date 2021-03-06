@@ -13,10 +13,10 @@ Libraries getLibraries() {
 
 Future<void> main() async {
   // The `cbl` package needs to be initialized before it can be used.
-  await CouchbaseLite.initialize(libraries: getLibraries());
+  CouchbaseLite.initialize(libraries: getLibraries());
 
   // Now open a database.
-  final db = await CouchbaseLite.instance.openDatabase(
+  final db = await Database.open(
     'DB',
     config: DatabaseConfiguration(directory: Directory.current.path),
   );
@@ -37,9 +37,4 @@ Future<void> main() async {
   print(savedDoc.properties);
 
   await db.close();
-
-  // If you are completely done using the `cbl` package and have closed all
-  // resources, you should clean up global resources, which the package creates
-  // during [CouchbaseLite.initialize].
-  await CouchbaseLite.dispose();
 }

@@ -73,7 +73,7 @@ abstract class CblE2eTestBinding {
   StreamSubscription<void>? _cblTestLogger;
 
   Future<void> startTestLogger() async {
-    _cblTestLogger = cbl.logMessages().logToLogger();
+    _cblTestLogger = CouchbaseLite.logMessages().logToLogger();
   }
 
   Future<void> stopTestLogger() async {
@@ -106,13 +106,12 @@ abstract class CblE2eTestBinding {
     setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
-      await CouchbaseLite.initialize(libraries: libraries);
+      CouchbaseLite.initialize(libraries: libraries);
       await startTestLogger();
     });
 
     tearDownAllFn(() async {
       await stopTestLogger();
-      await CouchbaseLite.dispose();
     });
   }
 
@@ -124,9 +123,6 @@ abstract class CblE2eTestBinding {
     await tmpDir.create(recursive: true);
   }
 }
-
-/// Alias of [CouchbaseLite.instance].
-late final cbl = CouchbaseLite.instance;
 
 /// Alias of [CblE2eTestBinding.tmpDir].
 late final tmpDir = CblE2eTestBinding.instance.tmpDir;

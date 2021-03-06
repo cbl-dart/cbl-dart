@@ -49,19 +49,19 @@ dependencies:
 
 ## Getting started
 
-`CouchbaseLite` is the entry point to the API and needs to be initialized with a
-configuration of how to load the binary libraries.
+`CouchbaseLite` needs to be initialized with a configuration of how to load 
+the binary libraries.
 
 ```dart
 import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
 
-Future<void> initCbl() async {
-  await CouchbaseLite.init(libraries: flutterLibraries());
+void initCbl() {
+  CouchbaseLite.initialize(libraries: flutterLibraries());
 }
 ```
 
-Now you can use `CouchbaseLite.instance` to open a database:
+Now you can use `Database.open` to open a database:
 
 ```dart
 import 'package:cbl/cbl.dart';
@@ -70,7 +70,7 @@ import 'package:path_provider/path_provider.dart';
 Future<void> openDatabase() async {
   final documentsDir = await getApplicationDocumentsDirectory();
 
-  final db = await CouchbaseLite.instance.openDatabase(
+  final db = await Database.open(
       'MyFirstDB',
       config: DatabaseConfiguration(directory: documentsDir.path),
   )

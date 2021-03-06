@@ -6,6 +6,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import 'blob.dart';
+import 'couchbase_lite.dart';
 import 'document.dart';
 import 'fleece.dart';
 import 'native_callback.dart';
@@ -18,17 +19,6 @@ import 'worker/cbl_worker.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart'
     show EncryptionAlgorithm, DatabaseFlag, ConcurrencyControl;
-
-// region Internal API
-
-Database createDatabase({
-  required String debugName,
-  required Pointer<Void> pointer,
-  required Worker worker,
-}) =>
-    Database._fromPointer(debugName, pointer, worker);
-
-// endregion
 
 /// Encryption key specified in a [DatabaseConfiguration].
 class EncryptionKey {
@@ -267,6 +257,77 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 
 /// A database is both a filesystem object and a container for documents.
 class Database extends NativeResource<WorkerObject<Void>> {
+  static late final _staticWorker =
+      TransientWorkerExecutor('Database.Static', workerFactory);
+
+  /// Returns true if a database with the given [name] exists in the given
+  /// [directory].
+  ///
+  /// [name] is the database name (without the ".cblite2" extension.).
+  ///
+  /// [directory] is the directory containing the database.
+  static Future<bool> exists(String name, {required String directory}) =>
+      _staticWorker.execute(DatabaseExists(name, directory));
+
+  /// Copies a database file to a new location, and assigns it a new internal
+  /// UUID to distinguish it from the original database when replicating.
+  ///
+  /// [fromPath] is the full filesystem path to the original database
+  /// (including extension).
+  ///
+  /// [toName] is the new database name (without the ".cblite2" extension.).
+  ///
+  /// [config] is the database configuration of the new database
+  /// (directory and encryption option.)
+  static Future<void> copy({
+    required String fromPath,
+    required String toName,
+    DatabaseConfiguration? config,
+  }) =>
+      _staticWorker.execute(CopyDatabase(fromPath, toName, config));
+
+  /// Deletes a database file.
+  ///
+  /// If the database file is open, an error is thrown.
+  ///
+  /// [name] is the database name (without the ".cblite2" extension.)
+  ///
+  /// [directory] is the directory containing the database.
+  static Future<bool> remove(String name, {required String directory}) =>
+      _staticWorker.execute(DeleteDatabaseFile(name, directory));
+
+  /// Counter to generate unique ids for opened [Database]s.
+  static int _nextDatabaseId = 0;
+
+  /// Opens a database, or creates it if it doesn't exist yet, returning a new
+  /// [Database] instance.
+  ///
+  /// It's OK to open the same database file multiple times. Each [Database]
+  /// instance is independent of the others (and must be separately closed and
+  /// released.)
+  ///
+  /// [name] is the database name (without the ".cblite2" extension.).
+  ///
+  /// [config] contains the database configuration (directory and encryption
+  /// option.)
+  static Future<Database> open(
+    String name, {
+    DatabaseConfiguration? config,
+  }) async {
+    final databaseId = _nextDatabaseId++;
+
+    final worker =
+        await workerFactory.createWorker(id: 'Database(#$databaseId|$name)');
+
+    try {
+      final pointer = await worker.execute(OpenDatabase(name, config));
+      return Database._fromPointer(name, pointer.toPointer(), worker);
+    } catch (error) {
+      await worker.stop();
+      rethrow;
+    }
+  }
+
   Database._fromPointer(this._debugName, Pointer<Void> pointer, Worker worker)
       : super(CblRefCountedWorkerObject(
           pointer,
