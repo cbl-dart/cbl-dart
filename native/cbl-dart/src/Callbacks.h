@@ -8,75 +8,54 @@
 
 #include "dart/dart_api_dl.h"
 
-typedef int64_t CallbackId;
+// === Callback ===============================================================
 
-#define NULL_CALLBACK (CallbackId(0))
+typedef void (*CallbackFinalizer)(void *context);
 
-/**
- * A callback which is invoked when an Isolate dies but the callback
- * registration still exists.
- *
- * This callback should ensure that the callback will not be invoked any more.
- *
- * The callback receives the context which was provided when it was registered.
- */
-typedef void (*CallbackFinalizer)(CallbackId CallbackId, void *context);
-
-class CallbackIsolate {
+class Callback {
  public:
-  static CallbackIsolate *&getForCallbackId(CallbackId callbackId);
+  Callback(Dart_Handle dartCallback, Dart_Port sendport);
 
-  CallbackIsolate(Dart_Handle handle, Dart_Port sendPort);
+  Dart_Port sendPort() const { return sendPort_; }
 
-  Dart_Port sendPort();
+  void setFinalizer(void *context, CallbackFinalizer finalizer);
 
-  // This method is called when the Isolate which this instance was created by
-  // dies.
-  static void finalizer(void *dart_callback_data, void *peer);
-
-  CallbackId registerCallback();
-
-  void unregisterCallback(CallbackId callbackId, bool runFinalizer);
-
-  void setCallbackFinalizer(CallbackId callbackId, void *context,
-                            CallbackFinalizer finalizer);
-
-  void removeCallbackFinalizer(CallbackId callbackId);
+  void close();
 
  private:
-  static std::atomic<CallbackId> nextCallbackId;
+  void static dartCallbackHandleFinalizer(void *dart_callback_data, void *peer);
 
-  static std::map<CallbackId, CallbackIsolate *> isolatesByCallback;
-  static std::shared_mutex isolatesByCallback_mutex;
+  ~Callback();
 
-  Dart_Port sendPort_;
-  std::vector<CallbackId> callbackIds;
+  Dart_Port sendPort_ = ILLEGAL_PORT;
+  void *finalizerContext_ = nullptr;
+  CallbackFinalizer finalizer_ = nullptr;
+  Dart_WeakPersistentHandle dartCallbackHandle_ = nullptr;
 
-  std::map<CallbackId, std::pair<CallbackFinalizer, void *> *>
-      callbackFinalizers;
-
-  CallbackId createCallbackId();
-
-  void removeFinalizer(CallbackId callbackId, bool runFinalizer);
+  void runFinalizer();
 };
+
+// === CallbackCall ===========================================================
 
 typedef void(CallbackResultHandler)(Dart_CObject *);
 
 class CallbackCall {
  public:
-  CallbackCall();
+  CallbackCall(const Callback &callback);
 
-  CallbackCall(const std::function<CallbackResultHandler> &resultHandler);
+  CallbackCall(const Callback &callback,
+               const std::function<CallbackResultHandler> &resultHandler);
 
   ~CallbackCall();
 
-  void execute(CallbackId callbackId, Dart_CObject *arguments);
+  void execute(Dart_CObject &arguments);
 
   static void messageHandler(Dart_Port dest_port_id, Dart_CObject *message);
 
  private:
-  const std::function<CallbackResultHandler> *resultHandler = nullptr;
-  Dart_Port receivePort = ILLEGAL_PORT;
-  std::condition_variable cv;
-  bool completed = false;
+  const Callback &callback_;
+  const std::function<CallbackResultHandler> *resultHandler_ = nullptr;
+  Dart_Port receivePort_ = ILLEGAL_PORT;
+  std::condition_variable cv_;
+  bool completed_ = false;
 };
