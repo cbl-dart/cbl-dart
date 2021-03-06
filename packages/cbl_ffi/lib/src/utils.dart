@@ -90,11 +90,12 @@ extension BoolIntExt on bool {
 }
 
 extension AddressPointerExt on int {
-  Pointer<Void> toPointer() => Pointer.fromAddress(this);
+  Pointer<T> toPointer<T extends NativeType>() => Pointer.fromAddress(this);
 }
 
 extension NullableAddressPointerExt on int? {
-  Pointer<Void> toPointer() => (this?.toPointer()).elseNullptr();
+  Pointer<T> toPointer<T extends NativeType>() =>
+      (this?.toPointer<T>()).elseNullptr();
 }
 
 final _scoped = scoped;

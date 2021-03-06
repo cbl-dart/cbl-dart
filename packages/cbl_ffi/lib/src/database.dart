@@ -4,6 +4,7 @@ import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'libraries.dart';
+import 'native_callback.dart';
 
 /// Encryption algorithms (available only in the Enterprise Edition).
 enum EncryptionAlgorithm {
@@ -214,13 +215,13 @@ typedef CBLDatabase_SaveDocument = Pointer<Void> Function(
 typedef CBLDart_CBLDatabase_SaveDocumentResolving_C = Pointer<Void> Function(
   Pointer<Void> db,
   Pointer<Void> doc,
-  Int64 conflictResolverId,
+  Pointer<Callback> conflictHandler,
   Pointer<CBLError> error,
 );
 typedef CBLDart_CBLDatabase_SaveDocumentResolving = Pointer<Void> Function(
   Pointer<Void> db,
   Pointer<Void> doc,
-  int conflictResolverId,
+  Pointer<Callback> conflictHandler,
   Pointer<CBLError> error,
 );
 
@@ -262,21 +263,21 @@ typedef CBLDatabase_SetDocumentExpiration = int Function(
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener_C = Void Function(
   Pointer<Void> db,
   Pointer<Utf8> docId,
-  Int64 listener,
+  Pointer<Callback> listener,
 );
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener = void Function(
   Pointer<Void> db,
   Pointer<Utf8> docId,
-  int listener,
+  Pointer<Callback> listener,
 );
 
 typedef CBLDart_CBLDatabase_AddChangeListener_C = Void Function(
   Pointer<Void> db,
-  Int64 listener,
+  Pointer<Callback> listener,
 );
 typedef CBLDart_CBLDatabase_AddChangeListener = void Function(
   Pointer<Void> db,
-  int listener,
+  Pointer<Callback> listener,
 );
 
 enum IndexType {

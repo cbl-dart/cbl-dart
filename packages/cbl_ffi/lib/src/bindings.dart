@@ -7,7 +7,7 @@ import 'document.dart';
 import 'fleece.dart';
 import 'libraries.dart';
 import 'log.dart';
-import 'native_callbacks.dart';
+import 'native_callback.dart';
 import 'query.dart';
 import 'replicator.dart';
 
@@ -30,7 +30,7 @@ class CBLBindings {
 
   CBLBindings(Libraries libs)
       : base = BaseBindings(libs),
-        nativeCallbacks = NativeCallbacksBindings(libs),
+        nativeCallback = NativeCallbackBindings(libs),
         log = LogBindings(libs),
         database = DatabaseBindings(libs),
         document = DocumentBindings(libs),
@@ -42,7 +42,7 @@ class CBLBindings {
         fleece = FleeceBindings(libs);
 
   final BaseBindings base;
-  final NativeCallbacksBindings nativeCallbacks;
+  final NativeCallbackBindings nativeCallback;
   final LogBindings log;
   final DatabaseBindings database;
   final DocumentBindings document;

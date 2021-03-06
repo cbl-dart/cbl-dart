@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'libraries.dart';
+import 'native_callback.dart';
 
 /// Subsystems that log information.
 enum LogDomain {
@@ -58,8 +59,12 @@ typedef CBLLog_SetConsoleLevel = void Function(int logLevel);
 typedef CBLDart_CBLLog_RestoreOriginalCallback_C = Void Function();
 typedef CBLDart_CBLLog_RestoreOriginalCallback = void Function();
 
-typedef CBLDart_CBLLog_SetCallback_C = Void Function(Int64 callbackId);
-typedef CBLDart_CBLLog_SetCallback = void Function(int callbackId);
+typedef CBLDart_CBLLog_SetCallback_C = Void Function(
+  Pointer<Callback> callback,
+);
+typedef CBLDart_CBLLog_SetCallback = void Function(
+  Pointer<Callback> callback,
+);
 
 class LogBindings {
   LogBindings(Libraries libs)
