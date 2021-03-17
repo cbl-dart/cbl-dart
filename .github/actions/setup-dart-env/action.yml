@@ -5,7 +5,7 @@ inputs:
     default: stable
   melos-version:
     description: The version of Melos to setup environment with.
-    default: 0.4.5
+    default: 0.4.7
 runs:
   using: composite
   steps:
