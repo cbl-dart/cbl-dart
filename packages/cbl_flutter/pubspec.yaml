@@ -1,5 +1,8 @@
 name: cbl_flutter
-description: Binaries required to use cbl in Flutter apps.
+description: >-
+  Binaries for use of Couchbase Lite with Flutter.
+  Couchbase Lite is A NoSQL database with change notification, 
+  full text search and replication.
 version: 0.3.0
 homepage: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter
 repository: https://github.com/cofu-app/cbl-dart
