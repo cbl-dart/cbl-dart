@@ -16,10 +16,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<void> _initFuture;
-  late Database _db;
+  Future<void> _initFuture;
+  Database _db;
 
-  var _posts = <Map<String, Object?>>[];
+  var _posts = <Map<String, Object>>[];
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
     query
         .changes()
         .map((resultSet) => resultSet.asDicts
-            .map((result) => result['post'].asDict!.toObject())
+            .map((result) => result['post'].asDict.toObject())
             .toList())
         .listen((posts) => setState(() => _posts = posts));
   }
@@ -163,10 +163,10 @@ class _MyAppState extends State<MyApp> {
 
 class IconAndMessage extends StatelessWidget {
   const IconAndMessage({
-    Key? key,
-    required this.icon,
-    required this.iconColor,
-    required this.text,
+    Key key,
+    @required this.icon,
+    @required this.iconColor,
+    @required this.text,
   }) : super(key: key);
 
   final IconData icon;
