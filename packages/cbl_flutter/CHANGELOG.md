@@ -1,3 +1,7 @@
+## 0.3.0+1
+
+ - **DOCS**: update docs.
+
 ## 0.3.0
 
 > Note: This release has breaking changes.
