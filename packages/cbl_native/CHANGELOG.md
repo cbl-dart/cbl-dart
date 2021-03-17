@@ -1,3 +1,7 @@
+## 3.0.1
+
+ - **FIX**: fix currentVersion.
+
 ## 3.0.0
 
  - **BREAKING** **FEAT**: rewrite callbacks
