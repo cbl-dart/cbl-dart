@@ -82,6 +82,7 @@ jobs:
 
       - name: Build
         run: |
+          apt-get install -y libc++-dev libc++abi-dev
           dpkg -S libc++.so
           dpkg -S libc++abi.so
           ./native/tools/build_linux.sh build
