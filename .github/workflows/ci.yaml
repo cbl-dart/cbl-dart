@@ -82,6 +82,8 @@ jobs:
 
       - name: Build
         run: |
+          dpkg -S libc++.so
+          dpkg -S libc++abi.so
           ./native/tools/build_linux.sh build
           ./native/tools/build_linux.sh copyToLib
           tar -czf binaries-linux.tar.gz -C build/linux/lib .
