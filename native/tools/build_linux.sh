@@ -13,15 +13,15 @@ libDir="$projectDir/build/linux/lib"
 # === Commands ===
 
 function build() {
-    export CC=clang-10
-    export CXX=clang++-10
+    export CC=clang-11
+    export CXX=clang++-11
 
     cmake \
         -B "$buildDir" \
         -G Ninja \
         -DCMAKE_C_COMPILER_LAUNCHER=ccache \
         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-        -DCMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
+        -DCMAKE_INCLUDE_PATH=/usr/lib/llvm-11 \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         "$nativeDir"
 
