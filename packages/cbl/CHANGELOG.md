@@ -1,3 +1,8 @@
+## 0.4.1
+
+ - **FEAT**: highlight error position in query parsing exception.
+ - **CHORE**: publish packages.
+
 ## 0.4.0
 
 > Note: This release has breaking changes.

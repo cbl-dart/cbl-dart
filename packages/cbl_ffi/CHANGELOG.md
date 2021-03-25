@@ -1,3 +1,7 @@
+## 0.3.0+2
+
+ - **FIX**: fix size of result of FLValue_AsInt_C.
+
 ## 0.3.0+1
 
  - Update a dependency to the latest release.
