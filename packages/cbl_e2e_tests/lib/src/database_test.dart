@@ -463,6 +463,21 @@ void main() {
       await db.saveDocument(doc);
     });
 
+    test('bad query: error position highlighting', () {
+      expect(
+        () => db.query('SELECT * WHERE META.foo = "bar"'),
+        throwsA(isA<CouchbaseLiteException>().having(
+          (it) => it.toString(),
+          'toString()',
+          '''
+CouchbaseLiteException(message: N1QL syntax error near character 21, code: CouchbaseLiteErrorCode.invalidQuery)
+SELECT * WHERE META.foo = "bar"
+                    ^
+''',
+        )),
+      );
+    });
+
     group('ResultSet', () {
       test('supports getting column by name', () async {
         final doc = MutableDocument('ResultSetColumnByName');
