@@ -77,9 +77,10 @@ void main() {
     });
 
     test('asInt returns value as int', () {
-      final doc = Doc.fromJson('{"a": 42}');
+      final number = 9223372036854775807;
+      final doc = Doc.fromJson('{"a": $number}');
       final value = doc.root.asDict!['a'];
-      expect(value.asInt, equals(42));
+      expect(value.asInt, equals(number));
     });
 
     test('asDouble returns value as double', () {
