@@ -296,7 +296,7 @@ typedef FLValue_IsDouble = int Function(Pointer<Void> value);
 typedef FLValue_AsBool_C = Uint8 Function(Pointer<Void> value);
 typedef FLValue_AsBool = int Function(Pointer<Void> value);
 
-typedef FLValue_AsInt_C = Int8 Function(Pointer<Void> value);
+typedef FLValue_AsInt_C = Int64 Function(Pointer<Void> value);
 typedef FLValue_AsInt = int Function(Pointer<Void> value);
 
 typedef FLValue_AsDouble_C = Double Function(Pointer<Void> value);
