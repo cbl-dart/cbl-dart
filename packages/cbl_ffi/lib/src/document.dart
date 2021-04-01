@@ -3,39 +3,46 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
+import 'fleece.dart';
 import 'libraries.dart';
 
-typedef CBLDocument_ID = Pointer<Utf8> Function(Pointer<Void> doc);
+class CBLDocument extends Opaque {}
 
-typedef CBLDocument_RevisionID = Pointer<Utf8> Function(Pointer<Void> doc);
+typedef CBLDocument_ID = Pointer<Utf8> Function(Pointer<CBLDocument> doc);
 
-typedef CBLDocument_Sequence_C = Uint64 Function(Pointer<Void> doc);
-typedef CBLDocument_Sequence = int Function(Pointer<Void> doc);
+typedef CBLDocument_RevisionID = Pointer<Utf8> Function(
+  Pointer<CBLDocument> doc,
+);
 
-typedef CBLDocument_Properties = Pointer<Void> Function(Pointer<Void> doc);
+typedef CBLDocument_Sequence_C = Uint64 Function(Pointer<CBLDocument> doc);
+typedef CBLDocument_Sequence = int Function(Pointer<CBLDocument> doc);
+
+typedef CBLDocument_Properties = Pointer<FLDict> Function(
+  Pointer<CBLDocument> doc,
+);
 
 typedef CBLDocument_Delete_C = Uint8 Function(
-  Pointer<Void> doc,
+  Pointer<CBLDocument> doc,
   Uint8 concurrency,
   Pointer<CBLError> error,
 );
 typedef CBLDocument_Delete = int Function(
-  Pointer<Void> doc,
+  Pointer<CBLDocument> doc,
   int concurrency,
   Pointer<CBLError> error,
 );
 
 typedef CBLDocument_Purge_C = Uint8 Function(
-  Pointer<Void> doc,
+  Pointer<CBLDocument> doc,
   Pointer<CBLError> error,
 );
 typedef CBLDocument_Purge = int Function(
-  Pointer<Void> doc,
+  Pointer<CBLDocument> doc,
   Pointer<CBLError> error,
 );
 
 typedef CBLDocument_PropertiesAsJSON = Pointer<Utf8> Function(
-  Pointer<Void> doc,
+  Pointer<CBLDocument> doc,
 );
 
 class DocumentBindings {
@@ -76,32 +83,36 @@ class DocumentBindings {
   final CBLDocument_Purge purge;
 }
 
-typedef CBLDocument_New = Pointer<Void> Function(Pointer<Utf8> id);
+class CBLMutableDocument extends Opaque {}
 
-typedef CBLDocument_MutableProperties = Pointer<Void> Function(
-  Pointer<Void> doc,
+typedef CBLDocument_New = Pointer<CBLMutableDocument> Function(
+  Pointer<Utf8> id,
 );
 
-typedef CBLDocument_MutableCopy = Pointer<Void> Function(
-  Pointer<Void> original,
+typedef CBLDocument_MutableCopy = Pointer<CBLMutableDocument> Function(
+  Pointer<CBLDocument> source,
+);
+
+typedef CBLDocument_MutableProperties = Pointer<FLMutableDict> Function(
+  Pointer<CBLMutableDocument> doc,
 );
 
 typedef CBLDocument_SetProperties_C = Void Function(
-  Pointer<Void> doc,
-  Pointer<Void> properties,
+  Pointer<CBLMutableDocument> doc,
+  Pointer<FLDict> properties,
 );
 typedef CBLDocument_SetProperties = void Function(
-  Pointer<Void> doc,
-  Pointer<Void> properties,
+  Pointer<CBLMutableDocument> doc,
+  Pointer<FLDict> properties,
 );
 
 typedef CBLDocument_SetPropertiesAsJSON_C = Uint8 Function(
-  Pointer<Void> doc,
+  Pointer<CBLMutableDocument> doc,
   Pointer<Utf8> json,
   Pointer<CBLError> error,
 );
 typedef CBLDocument_SetPropertiesAsJSON = int Function(
-  Pointer<Void> doc,
+  Pointer<CBLMutableDocument> doc,
   Pointer<Utf8> json,
   Pointer<CBLError> error,
 );

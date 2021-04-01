@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
+import 'database.dart';
 import 'fleece.dart';
 import 'libraries.dart';
 import 'native_callback.dart';
@@ -24,15 +25,17 @@ extension IntQueryLanguageExt on int {
   QueryLanguage toQueryLanguage() => QueryLanguage.values[this];
 }
 
-typedef CBLQuery_New_C = Pointer<Void> Function(
-  Pointer<Void> db,
+class CBLQuery extends Opaque {}
+
+typedef CBLQuery_New_C = Pointer<CBLQuery> Function(
+  Pointer<CBLDatabase> db,
   Uint32 language,
   Pointer<Utf8> queryString,
   Pointer<Int32> errorPos,
   Pointer<CBLError> error,
 );
-typedef CBLQuery_New = Pointer<Void> Function(
-  Pointer<Void> db,
+typedef CBLQuery_New = Pointer<CBLQuery> Function(
+  Pointer<CBLDatabase> db,
   int language,
   Pointer<Utf8> queryString,
   Pointer<Int32> errorPos,
@@ -40,55 +43,56 @@ typedef CBLQuery_New = Pointer<Void> Function(
 );
 
 typedef CBLQuery_SetParameters_C = Void Function(
-  Pointer<Void> query,
-  Pointer<Void> parameters,
+  Pointer<CBLQuery> query,
+  Pointer<FLDict> parameters,
 );
 typedef CBLQuery_SetParameters = void Function(
-  Pointer<Void> query,
-  Pointer<Void> parameters,
+  Pointer<CBLQuery> query,
+  Pointer<FLDict> parameters,
 );
 
-typedef CBLQuery_Parameters = Pointer<Void> Function(Pointer<Void> query);
+typedef CBLQuery_Parameters = Pointer<FLDict> Function(Pointer<CBLQuery> query);
 
-typedef CBLQuery_Execute = Pointer<Void> Function(
-  Pointer<Void> query,
+typedef CBLQuery_Execute = Pointer<CBLResultSet> Function(
+  Pointer<CBLQuery> query,
   Pointer<CBLError> error,
 );
 
 typedef CBLDart_CBLQuery_Explain_C = Void Function(
-  Pointer<Void> query,
+  Pointer<CBLQuery> query,
   Pointer<FLSlice> result,
 );
 typedef CBLDart_CBLQuery_Explain = void Function(
-  Pointer<Void> query,
+  Pointer<CBLQuery> query,
   Pointer<FLSlice> result,
 );
 
-typedef CBLQuery_ColumnCount_C = Uint32 Function(Pointer<Void> query);
-typedef CBLQuery_ColumnCount = int Function(Pointer<Void> query);
+typedef CBLQuery_ColumnCount_C = Uint32 Function(Pointer<CBLQuery> query);
+typedef CBLQuery_ColumnCount = int Function(Pointer<CBLQuery> query);
 
 typedef CBLDart_CBLQuery_ColumnName_C = Void Function(
-  Pointer<Void> query,
+  Pointer<CBLQuery> query,
   Uint32 columnIndex,
   Pointer<FLSlice> name,
 );
 typedef CBLDart_CBLQuery_ColumnName = void Function(
-  Pointer<Void> query,
+  Pointer<CBLQuery> query,
   int columnIndex,
   Pointer<FLSlice> name,
 );
 
-typedef CBLDart_CBLQuery_AddChangeListener_C = Pointer<Void> Function(
-  Pointer<Void> query,
+typedef CBLDart_CBLQuery_AddChangeListener_C = Pointer<CBLListenerToken>
+    Function(
+  Pointer<CBLQuery> query,
   Pointer<Callback> listener,
 );
-typedef CBLDart_CBLQuery_AddChangeListener = Pointer<Void> Function(
-  Pointer<Void> query,
+typedef CBLDart_CBLQuery_AddChangeListener = Pointer<CBLListenerToken> Function(
+  Pointer<CBLQuery> query,
   Pointer<Callback> listener,
 );
-typedef CBLQuery_CopyCurrentResults = Pointer<Void> Function(
-  Pointer<Void> query,
-  Pointer<Void> listenerToken,
+typedef CBLQuery_CopyCurrentResults = Pointer<CBLResultSet> Function(
+  Pointer<CBLQuery> query,
+  Pointer<CBLListenerToken> listenerToken,
   Pointer<CBLError> error,
 );
 
@@ -143,30 +147,35 @@ class QueryBindings {
   final CBLQuery_CopyCurrentResults copyCurrentResults;
 }
 
-typedef CBLResultSet_Next_C = Uint8 Function(Pointer<Void> query);
-typedef CBLResultSet_Next = int Function(Pointer<Void> query);
+class CBLResultSet extends Opaque {}
 
-typedef CBLResultSet_ValueAtIndex_C = Pointer<Void> Function(
-  Pointer<Void> resultSet,
+typedef CBLResultSet_Next_C = Uint8 Function(Pointer<CBLResultSet> resultSet);
+typedef CBLResultSet_Next = int Function(Pointer<CBLResultSet> resultSet);
+
+typedef CBLResultSet_ValueAtIndex_C = Pointer<FLValue> Function(
+  Pointer<CBLResultSet> resultSet,
   Uint32 index,
 );
-typedef CBLResultSet_ValueAtIndex = Pointer<Void> Function(
-  Pointer<Void> resultSet,
+typedef CBLResultSet_ValueAtIndex = Pointer<FLValue> Function(
+  Pointer<CBLResultSet> resultSet,
   int index,
 );
-typedef CBLResultSet_ValueForKey = Pointer<Void> Function(
-  Pointer<Void> resultSet,
+
+typedef CBLResultSet_ValueForKey = Pointer<FLValue> Function(
+  Pointer<CBLResultSet> resultSet,
   Pointer<Utf8> key,
 );
-typedef CBLResultSet_RowArray = Pointer<Void> Function(
-  Pointer<Void> resultSet,
+
+typedef CBLResultSet_RowArray = Pointer<FLArray> Function(
+  Pointer<CBLResultSet> resultSet,
 );
 
-typedef CBLResultSet_RowDict = Pointer<Void> Function(
-  Pointer<Void> resultSet,
+typedef CBLResultSet_RowDict = Pointer<FLDict> Function(
+  Pointer<CBLResultSet> resultSet,
 );
-typedef CBLResultSet_GetQuery = Pointer<Void> Function(
-  Pointer<Void> resultSet,
+
+typedef CBLResultSet_GetQuery = Pointer<CBLQuery> Function(
+  Pointer<CBLResultSet> resultSet,
 );
 
 class ResultSetBindings {

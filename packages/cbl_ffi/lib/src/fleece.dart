@@ -128,7 +128,6 @@ class SliceBindings {
   CBLDart_FLSliceResult_Release release;
 }
 
-// TODO: Replace Void with FLSlot where appropriate
 class FLSlot extends Opaque {}
 
 typedef FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
@@ -154,11 +153,11 @@ typedef CBLDart_FLSlot_SetString = void Function(
 
 typedef FLSlot_SetValue_C = Void Function(
   Pointer<FLSlot> slot,
-  Pointer<Void> value,
+  Pointer<FLValue> value,
 );
 typedef FLSlot_SetValue = void Function(
   Pointer<FLSlot> slot,
-  Pointer<Void> value,
+  Pointer<FLValue> value,
 );
 
 class SlotBindings {
@@ -194,21 +193,23 @@ class SlotBindings {
 
 // === Doc =====================================================================
 
-typedef CBLDart_FLDoc_FromJSON = Pointer<Void> Function(
+class FLDoc extends Opaque {}
+
+typedef CBLDart_FLDoc_FromJSON = Pointer<FLDoc> Function(
   Pointer<Utf8> json,
   Pointer<Uint8> error,
 );
 
 typedef CBLDart_FLDoc_BindToDartObject_C = Void Function(
   Handle dartDoc,
-  Pointer<Void> doc,
+  Pointer<FLDoc> doc,
 );
 typedef CBLDart_FLDoc_BindToDartObject = void Function(
   Object dartDoc,
-  Pointer<Void> doc,
+  Pointer<FLDoc> doc,
 );
 
-typedef FLDoc_GetRoot = Pointer<Void> Function(Pointer<Void> doc);
+typedef FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
 
 class DocBindings {
   DocBindings(Libraries libs)
@@ -231,7 +232,6 @@ class DocBindings {
 
 // === Value ===================================================================
 
-// TODO: Replace Void with FLValue where appropriate
 class FLValue extends Opaque {}
 
 /// Types of Fleece values. Basically JSON, with the addition of Data
@@ -273,64 +273,70 @@ extension ValueTypeIntExt on int {
 
 typedef CBLDart_FLValue_BindToDartObject_C = Void Function(
   Handle dartDoc,
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   Uint8 retain,
 );
 typedef CBLDart_FLValue_BindToDartObject = void Function(
   Object dartDoc,
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   int retain,
 );
 
-typedef FLValue_FindDoc = Pointer<Void> Function(Pointer<Void>);
+typedef FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
 
-typedef FLValue_GetType_C = Int8 Function(Pointer<Void> value);
-typedef FLValue_GetType = int Function(Pointer<Void> value);
+typedef FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
+typedef FLValue_GetType = int Function(Pointer<FLValue> value);
 
-typedef FLValue_IsInteger_C = Uint8 Function(Pointer<Void> value);
-typedef FLValue_IsInteger = int Function(Pointer<Void> value);
+typedef FLValue_IsInteger_C = Uint8 Function(Pointer<FLValue> value);
+typedef FLValue_IsInteger = int Function(Pointer<FLValue> value);
 
-typedef FLValue_IsDouble_C = Uint8 Function(Pointer<Void> value);
-typedef FLValue_IsDouble = int Function(Pointer<Void> value);
+typedef FLValue_IsDouble_C = Uint8 Function(Pointer<FLValue> value);
+typedef FLValue_IsDouble = int Function(Pointer<FLValue> value);
 
-typedef FLValue_AsBool_C = Uint8 Function(Pointer<Void> value);
-typedef FLValue_AsBool = int Function(Pointer<Void> value);
+typedef FLValue_AsBool_C = Uint8 Function(Pointer<FLValue> value);
+typedef FLValue_AsBool = int Function(Pointer<FLValue> value);
 
-typedef FLValue_AsInt_C = Int64 Function(Pointer<Void> value);
-typedef FLValue_AsInt = int Function(Pointer<Void> value);
+typedef FLValue_AsInt_C = Int64 Function(Pointer<FLValue> value);
+typedef FLValue_AsInt = int Function(Pointer<FLValue> value);
 
-typedef FLValue_AsDouble_C = Double Function(Pointer<Void> value);
-typedef FLValue_AsDouble = double Function(Pointer<Void> value);
+typedef FLValue_AsDouble_C = Double Function(Pointer<FLValue> value);
+typedef FLValue_AsDouble = double Function(Pointer<FLValue> value);
 
 typedef FLValue_AsString_C = Void Function(
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   Pointer<FLSlice> slice,
 );
 typedef FLValue_AsString = void Function(
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   Pointer<FLSlice> slice,
 );
 
 typedef CBLDart_FLValue_ToString_C = Void Function(
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   Pointer<FLSlice> slice,
 );
 typedef CBLDart_FLValue_ToString = void Function(
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   Pointer<FLSlice> slice,
 );
 
-typedef FLValue_IsEqual_C = Uint8 Function(Pointer<Void> v1, Pointer<Void> v2);
-typedef FLValue_IsEqual = int Function(Pointer<Void> v1, Pointer<Void> v2);
+typedef FLValue_IsEqual_C = Uint8 Function(
+  Pointer<FLValue> v1,
+  Pointer<FLValue> v2,
+);
+typedef FLValue_IsEqual = int Function(
+  Pointer<FLValue> v1,
+  Pointer<FLValue> v2,
+);
 
 typedef CBLDart_FLValue_ToJSONX_C = Void Function(
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   Uint8 json5,
   Uint8 canonicalForm,
   Pointer<FLSlice> result,
 );
 typedef CBLDart_FLValue_ToJSONX = void Function(
-  Pointer<Void> value,
+  Pointer<FLValue> value,
   int json5,
   int canonicalForm,
   Pointer<FLSlice> result,
@@ -399,21 +405,24 @@ class ValueBindings {
 
 // === Array ===================================================================
 
-// TODO: Replace Void with FLArray where appropriate
 class FLArray extends Opaque {}
 
-typedef FLArray_Count_C = Uint32 Function(Pointer<Void> array);
-typedef FLArray_Count = int Function(Pointer<Void> array);
+typedef FLArray_Count_C = Uint32 Function(Pointer<FLArray> array);
+typedef FLArray_Count = int Function(Pointer<FLArray> array);
 
-typedef FLArray_IsEmpty_C = Uint8 Function(Pointer<Void> array);
-typedef FLArray_IsEmpty = int Function(Pointer<Void> array);
+typedef FLArray_IsEmpty_C = Uint8 Function(Pointer<FLArray> array);
+typedef FLArray_IsEmpty = int Function(Pointer<FLArray> array);
 
-typedef FLArray_AsMutable = Pointer<Void> Function(Pointer<Void> array);
+typedef FLArray_AsMutable = Pointer<FLMutableArray> Function(
+  Pointer<FLArray> array,
+);
 
-typedef FLArray_Get_C = Pointer<Void> Function(
-    Pointer<Void> array, Uint32 index);
-typedef FLArray_Get = Pointer<Void> Function(
-  Pointer<Void> array,
+typedef FLArray_Get_C = Pointer<FLValue> Function(
+  Pointer<FLArray> array,
+  Uint32 index,
+);
+typedef FLArray_Get = Pointer<FLValue> Function(
+  Pointer<FLArray> array,
   int index,
 );
 
@@ -441,79 +450,89 @@ class ArrayBindings {
 
 // === MutabelArray ============================================================
 
-typedef FLArray_MutableCopy_C = Pointer<Void> Function(
-  Pointer<Void> array,
+class FLMutableArray extends Opaque {}
+
+typedef FLArray_MutableCopy_C = Pointer<FLMutableArray> Function(
+  Pointer<FLArray> array,
   Uint32 flags,
 );
-typedef FLArray_MutableCopy = Pointer<Void> Function(
-  Pointer<Void> array,
+typedef FLArray_MutableCopy = Pointer<FLMutableArray> Function(
+  Pointer<FLArray> array,
   int flags,
 );
 
-typedef FLMutableArray_New = Pointer<Void> Function();
+typedef FLMutableArray_New = Pointer<FLMutableArray> Function();
 
-typedef FLMutableArray_GetSource = Pointer<Void> Function(Pointer<Void> array);
+typedef FLMutableArray_GetSource = Pointer<FLArray> Function(
+  Pointer<FLMutableArray> array,
+);
 
-typedef FLMutableArray_IsChanged_C = Uint8 Function(Pointer<Void> array);
-typedef FLMutableArray_IsChanged = int Function(Pointer<Void> array);
+typedef FLMutableArray_IsChanged_C = Uint8 Function(
+  Pointer<FLMutableArray> array,
+);
+typedef FLMutableArray_IsChanged = int Function(
+  Pointer<FLMutableArray> array,
+);
 
 typedef FLMutableArray_Set_C = Pointer<FLSlot> Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   Uint32 index,
 );
 typedef FLMutableArray_Set = Pointer<FLSlot> Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   int index,
 );
 
-typedef FLMutableArray_Append = Pointer<FLSlot> Function(Pointer<Void> array);
+typedef FLMutableArray_Append = Pointer<FLSlot> Function(
+  Pointer<FLMutableArray> array,
+);
 
 typedef FLMutableArray_Insert_C = Void Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   Uint32 firstIndex,
   Uint32 count,
 );
 typedef FLMutableArray_Insert = void Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   int firstIndex,
   int count,
 );
 
 typedef FLMutableArray_Remove_C = Void Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   Uint32 firstIndex,
   Uint32 count,
 );
 typedef FLMutableArray_Remove = void Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   int firstIndex,
   int count,
 );
 
 typedef FLMutableArray_Resize_C = Void Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   Uint32 size,
 );
 typedef FLMutableArray_Resize = void Function(
-  Pointer<Void> array,
+  Pointer<FLMutableArray> array,
   int size,
 );
 
-typedef FLMutableArray_GetMutableArray_C = Pointer<Void> Function(
-  Pointer<Void> array,
+typedef FLMutableArray_GetMutableArray_C = Pointer<FLMutableArray> Function(
+  Pointer<FLMutableArray> array,
   Uint32 index,
 );
-typedef FLMutableArray_GetMutableArray = Pointer<Void> Function(
-  Pointer<Void> array,
+typedef FLMutableArray_GetMutableArray = Pointer<FLMutableArray> Function(
+  Pointer<FLMutableArray> array,
   int index,
 );
 
-typedef FLMutableArray_GetMutableDict_C = Pointer<Void> Function(
-  Pointer<Void> array,
+typedef FLMutableArray_GetMutableDict_C = Pointer<FLMutableDict> Function(
+  Pointer<FLMutableArray> array,
   Uint32 index,
 );
-typedef FLMutableArray_GetMutableDict = Pointer<Void> Function(
-  Pointer<Void> array,
+typedef FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
+  Pointer<FLMutableArray> array,
   int index,
 );
 
@@ -578,19 +597,20 @@ class MutableArrayBindings {
 
 // === Dict ====================================================================
 
-// TODO: Replace Void with FLDict where appropriate
 class FLDict extends Opaque {}
 
-typedef FLDict_Count_C = Uint32 Function(Pointer<Void> dict);
-typedef FLDict_Count = int Function(Pointer<Void> dict);
+typedef FLDict_Count_C = Uint32 Function(Pointer<FLDict> dict);
+typedef FLDict_Count = int Function(Pointer<FLDict> dict);
 
-typedef FLDict_IsEmpty_C = Uint8 Function(Pointer<Void> dict);
-typedef FLDict_IsEmpty = int Function(Pointer<Void> dict);
+typedef FLDict_IsEmpty_C = Uint8 Function(Pointer<FLDict> dict);
+typedef FLDict_IsEmpty = int Function(Pointer<FLDict> dict);
 
-typedef FLDict_AsMutable = Pointer<Void> Function(Pointer<Void>);
+typedef FLDict_AsMutable = Pointer<FLMutableDict> Function(
+  Pointer<FLDict> dict,
+);
 
-typedef FLDict_Get = Pointer<Void> Function(
-  Pointer<Void> dict,
+typedef FLDict_Get = Pointer<FLValue> Function(
+  Pointer<FLDict> dict,
   Pointer<Utf8> key,
 );
 
@@ -654,46 +674,51 @@ class DictIteratorBindings {
 
 // === MutableDict =============================================================
 
-typedef FLDict_MutableCopy_C = Pointer<Void> Function(
-  Pointer<Void> source,
+class FLMutableDict extends Opaque {}
+
+typedef FLDict_MutableCopy_C = Pointer<FLMutableDict> Function(
+  Pointer<FLDict> source,
   Uint32 flags,
 );
-typedef FLDict_MutableCopy = Pointer<Void> Function(
-  Pointer<Void> source,
+typedef FLDict_MutableCopy = Pointer<FLMutableDict> Function(
+  Pointer<FLDict> source,
   int flags,
 );
 
-typedef FLMutableDict_New = Pointer<Void> Function();
+typedef FLMutableDict_New = Pointer<FLMutableDict> Function();
 
-typedef FLMutableDict_GetSource = Pointer<Void> Function(Pointer<Void>);
+typedef FLMutableDict_GetSource = Pointer<FLDict> Function(
+  Pointer<FLMutableDict> dict,
+);
 
-typedef FLMutableDict_IsChanged_C = Uint8 Function(Pointer<Void> dict);
-typedef FLMutableDict_IsChanged = int Function(Pointer<Void> dict);
+typedef FLMutableDict_IsChanged_C = Uint8 Function(Pointer<FLMutableDict> dict);
+typedef FLMutableDict_IsChanged = int Function(Pointer<FLMutableDict> dict);
 
 typedef CBLDart_FLMutableDict_Set = Pointer<FLSlot> Function(
-  Pointer<Void> dict,
+  Pointer<FLMutableDict> dict,
   Pointer<Utf8> key,
 );
 
 typedef CBLDart_FLMutableDict_Remove_C = Void Function(
-  Pointer<Void> dict,
+  Pointer<FLMutableDict> dict,
   Pointer<Utf8> key,
 );
 typedef CBLDart_FLMutableDict_Remove = void Function(
-  Pointer<Void> dict,
+  Pointer<FLMutableDict> dict,
   Pointer<Utf8> key,
 );
 
-typedef FLMutableDict_RemoveAll_C = Void Function(Pointer<Void> dict);
-typedef FLMutableDict_RemoveAll = void Function(Pointer<Void> dict);
+typedef FLMutableDict_RemoveAll_C = Void Function(Pointer<FLMutableDict> dict);
+typedef FLMutableDict_RemoveAll = void Function(Pointer<FLMutableDict> dict);
 
-typedef CBLDart_FLMutableDict_GetMutableArray = Pointer<Void> Function(
-  Pointer<Void> dict,
+typedef CBLDart_FLMutableDict_GetMutableArray = Pointer<FLMutableArray>
+    Function(
+  Pointer<FLMutableDict> dict,
   Pointer<Utf8> key,
 );
 
-typedef CBLDart_FLMutableDict_GetMutableDict = Pointer<Void> Function(
-  Pointer<Void> dict,
+typedef CBLDart_FLMutableDict_GetMutableDict = Pointer<FLMutableDict> Function(
+  Pointer<FLMutableDict> dict,
   Pointer<Utf8> key,
 );
 
