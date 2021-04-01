@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../errors.dart';
@@ -7,105 +9,113 @@ import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.replicator;
 
-class NewReplicator extends ObjectRequest<int> {
-  NewReplicator(int address) : super(address);
+class NewReplicator extends ObjectRequest<CBLDartReplicatorConfiguration, int> {
+  NewReplicator(Pointer<CBLDartReplicatorConfiguration> config) : super(config);
 }
 
 int newReplicator(NewReplicator request) => _bindings
-    .makeNew(request.pointer.cast(), globalError)
+    .makeNew(request.object, globalError)
     .checkResultAndError()
     .address;
 
-class ResetReplicatorCheckpoint extends ObjectRequest<void> {
-  ResetReplicatorCheckpoint(int address) : super(address);
+class ResetReplicatorCheckpoint extends ObjectRequest<CBLReplicator, void> {
+  ResetReplicatorCheckpoint(Pointer<CBLReplicator> replicator)
+      : super(replicator);
 }
 
 void resetReplicatorCheckpoint(ResetReplicatorCheckpoint request) =>
-    _bindings.resetCheckpoint(request.pointer.cast());
+    _bindings.resetCheckpoint(request.object);
 
-class StartReplicator extends ObjectRequest<void> {
-  StartReplicator(int address) : super(address);
+class StartReplicator extends ObjectRequest<CBLReplicator, void> {
+  StartReplicator(Pointer<CBLReplicator> replicator) : super(replicator);
 }
 
 void startReplicator(StartReplicator request) =>
-    _bindings.start(request.pointer.cast());
+    _bindings.start(request.object);
 
-class StopReplicator extends ObjectRequest<void> {
-  StopReplicator(int address) : super(address);
+class StopReplicator extends ObjectRequest<CBLReplicator, void> {
+  StopReplicator(Pointer<CBLReplicator> replicator) : super(replicator);
 }
 
-void stopReplicator(StopReplicator request) =>
-    _bindings.stop(request.pointer.cast());
+void stopReplicator(StopReplicator request) => _bindings.stop(request.object);
 
-class SetReplicatorHostReachable extends ObjectRequest<void> {
-  SetReplicatorHostReachable(int address, this.reachable) : super(address);
+class SetReplicatorHostReachable extends ObjectRequest<CBLReplicator, void> {
+  SetReplicatorHostReachable(Pointer<CBLReplicator> replicator, this.reachable)
+      : super(replicator);
   final bool reachable;
 }
 
-void setReplicatorHostReachable(SetReplicatorHostReachable request) => _bindings
-    .setHostReachable(request.pointer.cast(), request.reachable.toInt());
+void setReplicatorHostReachable(SetReplicatorHostReachable request) =>
+    _bindings.setHostReachable(request.object, request.reachable.toInt());
 
-class SetReplicatorSuspended extends ObjectRequest<void> {
-  SetReplicatorSuspended(int address, this.suspended) : super(address);
+class SetReplicatorSuspended extends ObjectRequest<CBLReplicator, void> {
+  SetReplicatorSuspended(Pointer<CBLReplicator> replicator, this.suspended)
+      : super(replicator);
   final bool suspended;
 }
 
 void setReplicatorSuspended(SetReplicatorSuspended request) =>
-    _bindings.setSuspended(request.pointer.cast(), request.suspended.toInt());
+    _bindings.setSuspended(request.object, request.suspended.toInt());
 
-class GetReplicatorStatus extends ObjectRequest<ReplicatorStatus> {
-  GetReplicatorStatus(int address) : super(address);
+class GetReplicatorStatus
+    extends ObjectRequest<CBLReplicator, ReplicatorStatus> {
+  GetReplicatorStatus(Pointer<CBLReplicator> replicator) : super(replicator);
 }
 
 ReplicatorStatus getReplicatorStatus(GetReplicatorStatus request) =>
-    _bindings.status(request.pointer.cast()).toReplicatorStatus();
+    _bindings.status(request.object).toReplicatorStatus();
 
-class GetReplicatorPendingDocumentIDs extends ObjectRequest<int> {
-  GetReplicatorPendingDocumentIDs(int address) : super(address);
+class GetReplicatorPendingDocumentIDs
+    extends ObjectRequest<CBLReplicator, int> {
+  GetReplicatorPendingDocumentIDs(Pointer<CBLReplicator> replicator)
+      : super(replicator);
 }
 
 int getReplicatorPendingDocumentIDs(GetReplicatorPendingDocumentIDs request) =>
     _bindings
-        .pendingDocumentIDs(request.pointer.cast(), globalError)
+        .pendingDocumentIDs(request.object, globalError)
         .checkResultAndError()
         .address;
 
-class GetReplicatorIsDocumentPening extends ObjectRequest<bool> {
-  GetReplicatorIsDocumentPening(int address, this.docId) : super(address);
+class GetReplicatorIsDocumentPening extends ObjectRequest<CBLReplicator, bool> {
+  GetReplicatorIsDocumentPening(Pointer<CBLReplicator> replicator, this.docId)
+      : super(replicator);
   final String docId;
 }
 
 bool getReplicatorIsDocumentPening(GetReplicatorIsDocumentPening request) =>
     _bindings
         .isDocumentPending(
-          request.pointer.cast(),
+          request.object,
           request.docId.toNativeUtf8().withScoped(),
           globalError,
         )
         .toBool()
         .checkResultAndError();
 
-class AddReplicatorChangeListener extends ObjectRequest<void> {
-  AddReplicatorChangeListener(int address, this.listenerAddress)
-      : super(address);
+class AddReplicatorChangeListener extends ObjectRequest<CBLReplicator, void> {
+  AddReplicatorChangeListener(
+      Pointer<CBLReplicator> replicator, this.listenerAddress)
+      : super(replicator);
   final int listenerAddress;
 }
 
 void addReplicatorChangeListener(AddReplicatorChangeListener request) =>
     _bindings.addChangeListener(
-      request.pointer.cast(),
+      request.object,
       request.listenerAddress.toPointer(),
     );
 
-class AddReplicatorDocumentListener extends ObjectRequest<void> {
-  AddReplicatorDocumentListener(int address, this.listenerAddress)
-      : super(address);
+class AddReplicatorDocumentListener extends ObjectRequest<CBLReplicator, void> {
+  AddReplicatorDocumentListener(
+      Pointer<CBLReplicator> replicator, this.listenerAddress)
+      : super(replicator);
   final int listenerAddress;
 }
 
 void addReplicatorDocumentListener(AddReplicatorDocumentListener request) =>
     _bindings.addDocumentListener(
-      request.pointer.cast(),
+      request.object,
       request.listenerAddress.toPointer(),
     );
 

@@ -20,7 +20,7 @@ export 'package:cbl_ffi/cbl_ffi.dart'
 // region Internal API
 
 Future<Replicator> createReplicator({
-  required WorkerObject<Void> db,
+  required WorkerObject<CBLDatabase> db,
   required ReplicatorConfiguration config,
 }) =>
     runNativeObjectScoped(() => runArena(() async {
@@ -46,8 +46,7 @@ Future<Replicator> createReplicator({
             conflictResolverCallback?.native,
           );
 
-          final address =
-              await db.worker.execute(NewReplicator(cblConfig.address));
+          final address = await db.worker.execute(NewReplicator(cblConfig));
 
           return Replicator._fromPointer(
             address.toPointer().cast(),
@@ -433,7 +432,7 @@ class ReplicatorConfiguration {
 
 extension on ReplicatorConfiguration {
   Pointer<CBLDartReplicatorConfiguration> toCBLReplicatorConfigurationScoped(
-    NativeObject<Void> db,
+    NativeObject<CBLDatabase> db,
     NativeObject<Callback>? pushFilterCallback,
     NativeObject<Callback>? pullFilterCallback,
     NativeObject<Callback>? conflictResolverCallback,
@@ -730,9 +729,9 @@ class DocumentsPulled extends DocumentsReplicated {
 /// A replicator is a background task that synchronizes changes between a local
 /// database and another database on a remote server (or on a peer device, or
 /// even another local database.)
-class Replicator extends NativeResource<WorkerObject<Void>> {
+class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   Replicator._fromPointer(
-    Pointer<Void> pointer,
+    Pointer<CBLReplicator> pointer,
     Worker worker,
     this._disposeCallbacks,
   ) : super(CBLReplicatorObject(pointer, worker));
@@ -747,12 +746,12 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   /// missing documents if the client and server have gotten out of sync
   /// somehow.
   Future<void> resetCheckpoint() =>
-      native.execute((address) => ResetReplicatorCheckpoint(address));
+      native.execute((pointer) => ResetReplicatorCheckpoint(pointer));
 
   /// Starts this replicator, asynchronously.
   ///
   /// Does nothing if it's already started.
-  Future<void> start() => native.execute((address) => StartReplicator(address));
+  Future<void> start() => native.execute((pointer) => StartReplicator(pointer));
 
   /// Stops a running replicator, asynchronously.
   ///
@@ -761,7 +760,7 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   /// The [Stream] returned from [statusChanges] will emit a [ReplicatorStatus]
   /// with an activity level of [ReplicatorActivityLevel.stopped] after it
   /// stops. Until then, consider it still active.
-  Future<void> stop() => native.execute((address) => StopReplicator(address));
+  Future<void> stop() => native.execute((pointer) => StopReplicator(pointer));
 
   /// Informs this replicator whether it's considered possible to reach the
   /// remote host with the current network configuration.
@@ -772,7 +771,7 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   ///   automatic retries.
   /// * Setting it back to true will initiate an immediate retry.
   Future<void> setHostReachable(bool reachable) => native
-      .execute((address) => SetReplicatorHostReachable(address, reachable));
+      .execute((pointer) => SetReplicatorHostReachable(pointer, reachable));
 
   /// Puts this replicator in or out of "suspended" state.
   ///
@@ -785,8 +784,8 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   ///   reconnect, _if_ it was connected when suspended, and is still in Offline
   ///   state.
   Future<void> setSuspended(bool suspended) =>
-      native.execute((address) => SetReplicatorSuspended(
-            address,
+      native.execute((pointer) => SetReplicatorSuspended(
+            pointer,
             suspended,
           ));
 
@@ -806,7 +805,7 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
 
   /// Returns this [Replicator]'s current status.
   Future<ReplicatorStatus> status() =>
-      native.execute((address) => GetReplicatorStatus(address));
+      native.execute((pointer) => GetReplicatorStatus(pointer));
 
   /// Returns a stream that emits this replicators [ReplicatorStatus] when the
   /// it changes.
@@ -814,7 +813,7 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
       callbackStream<ReplicatorStatus, void>(
         worker: native.worker,
         createWorkerRequest: (callback) => AddReplicatorChangeListener(
-          native.pointerUnsafe.address,
+          native.pointerUnsafe,
           callback.native.pointerUnsafe.address,
         ),
         // The native caller allocates some memory for the arguments and blocks
@@ -848,7 +847,7 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   /// Documents that would never be pushed by this replicator, due to its
   /// configuration's `pushFilter` or `docIDs`, are ignored.
   Future<Dict> pendingDocumentIDs() => native
-      .execute((address) => GetReplicatorPendingDocumentIDs(address))
+      .execute((pointer) => GetReplicatorPendingDocumentIDs(pointer))
       .then((address) => MutableDict.fromPointer(
             address.toPointer(),
             release: true,
@@ -864,14 +863,14 @@ class Replicator extends NativeResource<WorkerObject<Void>> {
   ///
   /// A `false` result means the document is not pending.
   Future<bool> isDocumentPending(String docID) => native
-      .execute((address) => GetReplicatorIsDocumentPening(address, docID));
+      .execute((pointer) => GetReplicatorIsDocumentPening(pointer, docID));
 
   /// Returns a stream that emits [DocumentsReplicated]s when [Document]s
   /// have been replicated.
   Stream<DocumentsReplicated> documentReplications() => callbackStream(
         worker: native.worker,
         createWorkerRequest: (callback) => AddReplicatorDocumentListener(
-          native.pointerUnsafe.address,
+          native.pointerUnsafe,
           callback.native.pointerUnsafe.address,
         ),
         // See `statusChanges` for an explanation of why this option is `true`.

@@ -13,7 +13,7 @@ import 'worker/cbl_worker.dart';
 
 // region Internal API
 
-BlobManager createBlobManager({required WorkerObject<Void> db}) =>
+BlobManager createBlobManager({required WorkerObject<CBLDatabase> db}) =>
     BlobManager._(db);
 
 // endregion
@@ -157,8 +157,8 @@ class BlobWriteStream
 
             chunkPointer.asTypedList(chunk.length).setAll(0, chunk);
 
-            return native.execute((address) => WriteToBlobWriteStream(
-                  address,
+            return native.execute((pointer) => WriteToBlobWriteStream(
+                  pointer,
                   chunkPointer.address,
                   chunk.length,
                 ));
@@ -168,7 +168,7 @@ class BlobWriteStream
   /// Closes this stream, if you need to give up without creating a [Blob].
   @override
   Future<void> close() =>
-      native.execute((address) => CloseBlobWriteStream(address));
+      native.execute((pointer) => CloseBlobWriteStream(pointer));
 
   /// Creates a new [Blob] after its content has been written to this stream.
   ///
@@ -176,8 +176,8 @@ class BlobWriteStream
   ///
   /// [contentType] is the MIME type of the data written to this stream.
   Future<Blob> createBlob({String? contentType}) => native
-      .execute((address) => CreateBlobWithWriteStream(
-            address,
+      .execute((pointer) => CreateBlobWithWriteStream(
+            pointer,
             contentType,
           ))
       .then((address) =>
@@ -189,8 +189,8 @@ class BlobWriteStream
 /// See:
 /// - [Database.blobManager] to get the [BlobManager] instance associated with
 ///   a Database.
-class BlobManager extends NativeResource<WorkerObject<Void>> {
-  BlobManager._(WorkerObject<Void> db) : super(db);
+class BlobManager extends NativeResource<WorkerObject<CBLDatabase>> {
+  BlobManager._(WorkerObject<CBLDatabase> db) : super(db);
 
   /// Opens a [BlobWriteStream] for writing a new [Blob].
   ///
@@ -201,7 +201,7 @@ class BlobManager extends NativeResource<WorkerObject<Void>> {
   /// - [BlobWriteStream] for how to add data to the stream and finally create
   ///   the new Blob.
   Future<BlobWriteStream> openWriteStream() => native
-      .execute((address) => OpenBlobWriteStream(address))
+      .execute((pointer) => OpenBlobWriteStream(pointer))
       .then((address) => BlobWriteStream._(
             address.toPointer().cast(),
             native.worker,
@@ -236,7 +236,7 @@ class BlobManager extends NativeResource<WorkerObject<Void>> {
       buffer = malloc(chunkSize);
 
       streamPointer = await runNativeObjectScoped(() => native.worker
-          .execute(OpenBlobReadStream(blob.native.pointer.address))
+          .execute(OpenBlobReadStream(blob.native.pointer))
           .then((address) => address.toPointer().cast()));
     })();
 
@@ -245,7 +245,7 @@ class BlobManager extends NativeResource<WorkerObject<Void>> {
 
       malloc.free(buffer!);
 
-      await native.worker.execute(CloseBlobReadStream(streamPointer!.address));
+      await native.worker.execute(CloseBlobReadStream(streamPointer!));
     }
 
     void start() async {
@@ -256,7 +256,7 @@ class BlobManager extends NativeResource<WorkerObject<Void>> {
 
         while (!isPaused) {
           final bytesRead = await native.worker.execute(ReadFromBlobReadStream(
-            streamPointer!.address,
+            streamPointer!,
             buffer!.address,
             chunkSize,
           ));

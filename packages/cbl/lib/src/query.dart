@@ -14,7 +14,7 @@ export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
 // region Internal API
 
 Future<Query> createQuery({
-  required WorkerObject<Void> db,
+  required WorkerObject<CBLDatabase> db,
   required String queryString,
   required QueryLanguage language,
 }) {
@@ -23,8 +23,8 @@ Future<Query> createQuery({
   }
 
   return db
-      .execute((address) => CreateDatabaseQuery(
-            address,
+      .execute((pointer) => CreateDatabaseQuery(
+            pointer,
             queryString,
             language,
           ))
@@ -63,8 +63,8 @@ String _removeWhiteSpaceFromQuery(String query) =>
 ///
 /// The [ResultSet] passed to the listener is the _entire new result set_, not
 /// just the rows that changed.
-class Query extends NativeResource<WorkerObject<Void>> {
-  Query._fromPointer(Pointer<Void> pointer, Worker worker)
+class Query extends NativeResource<WorkerObject<CBLQuery>> {
+  Query._fromPointer(Pointer<CBLQuery> pointer, Worker worker)
       : super(CblRefCountedWorkerObject(
           pointer,
           worker,
@@ -95,8 +95,8 @@ class Query extends NativeResource<WorkerObject<Void>> {
   /// }))
   /// ```
   Future<void> setParameters(Dict parameters) =>
-      native.execute((address) => SetQueryParameters(
-            address,
+      native.execute((pointer) => SetQueryParameters(
+            pointer,
             parameters.native.pointer.address,
           ));
 
@@ -108,12 +108,12 @@ class Query extends NativeResource<WorkerObject<Void>> {
   /// See:
   /// - [setParameters]
   Future<Dict?> getParameters() => native
-      .execute((address) => GetQueryParameters(address))
+      .execute((pointer) => GetQueryParameters(pointer))
       .then((address) => Dict.fromPointer(address.toPointer()));
 
   /// Runs the query, returning the results.
   Future<ResultSet> execute() => native
-      .execute((address) => ExecuteQuery(address))
+      .execute((pointer) => ExecuteQuery(pointer))
       .then((address) => ResultSet._fromPointer(
             address.toPointer(),
             release: true,
@@ -126,11 +126,11 @@ class Query extends NativeResource<WorkerObject<Void>> {
   /// database, which should be avoided by adding an index. The strategy will
   /// also show which index(es), if any, are used.
   Future<String> explain() =>
-      native.execute((address) => ExplainQuery(address));
+      native.execute((pointer) => ExplainQuery(pointer));
 
   /// Returns the number of columns in each result.
   Future<int> columnCount() =>
-      native.execute((address) => GetQueryColumnCount(address));
+      native.execute((pointer) => GetQueryColumnCount(pointer));
 
   /// Returns the name of a column in the result.
   ///
@@ -141,7 +141,7 @@ class Query extends NativeResource<WorkerObject<Void>> {
   /// custom name, use the `AS` syntax in the query. Every column is guaranteed
   /// to have a unique name.
   Future<String> columnName(int index) =>
-      native.execute((address) => GetQueryColumnName(address, index));
+      native.execute((pointer) => GetQueryColumnName(pointer, index));
 
   /// Returns a [Stream] which emits a [ResultSet] when this query's results
   /// change, turning it into a "live query" until the stream is canceled.
@@ -153,7 +153,7 @@ class Query extends NativeResource<WorkerObject<Void>> {
   Stream<ResultSet> changes() => callbackStream<ResultSet, int>(
         worker: native.worker,
         createWorkerRequest: (callback) => AddQueryChangeListener(
-          native.pointerUnsafe.address,
+          native.pointerUnsafe,
           callback.native.pointerUnsafe.address,
         ),
         createEvent: (listenerTokenAddress, _) async {
@@ -161,8 +161,8 @@ class Query extends NativeResource<WorkerObject<Void>> {
           // the listener it has to copy the current query result set.
 
           final resultSetAddress =
-              await native.execute((address) => CopyCurrentQueryResultSet(
-                    address,
+              await native.execute((pointer) => CopyCurrentQueryResultSet(
+                    pointer,
                     listenerTokenAddress,
                   ));
 
@@ -197,11 +197,11 @@ abstract class Result {
   Dict get dict;
 }
 
-class _ResultSetIterator extends NativeResource<NativeObject<Void>>
+class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
     implements Iterator<Result>, Result {
   static late final _bindings = CBLBindings.instance.resultSet;
 
-  _ResultSetIterator(NativeObject<Void> native) : super(native);
+  _ResultSetIterator(NativeObject<CBLResultSet> native) : super(native);
 
   @override
   Result get current => this;
@@ -211,7 +211,7 @@ class _ResultSetIterator extends NativeResource<NativeObject<Void>>
 
   @override
   Value operator [](Object keyOrIndex) {
-    Pointer<Void> pointer;
+    Pointer<FLValue> pointer;
 
     if (keyOrIndex is String) {
       pointer = runArena(() => _bindings.valueForKey(
@@ -229,14 +229,14 @@ class _ResultSetIterator extends NativeResource<NativeObject<Void>>
 
   @override
   Array get array => MutableArray.fromPointer(
-        _bindings.rowArray(native.pointerUnsafe),
+        _bindings.rowArray(native.pointerUnsafe).cast(),
         release: true,
         retain: true,
       );
 
   @override
   Dict get dict => MutableDict.fromPointer(
-        _bindings.rowDict(native.pointerUnsafe),
+        _bindings.rowDict(native.pointerUnsafe).cast(),
         release: true,
         retain: true,
       );
@@ -248,10 +248,10 @@ class _ResultSetIterator extends NativeResource<NativeObject<Void>>
 ///
 /// See:
 /// - [Result] for how to consume a single Result.
-class ResultSet extends NativeResource<NativeObject<Void>>
+class ResultSet extends NativeResource<NativeObject<CBLResultSet>>
     with IterableMixin<Result> {
   ResultSet._fromPointer(
-    Pointer<Void> pointer, {
+    Pointer<CBLResultSet> pointer, {
     required bool release,
     required bool retain,
   }) : super(CblRefCountedObject(
