@@ -12,7 +12,7 @@ import 'worker/cbl_worker.dart';
 // region Internal API
 
 Document createDocument({
-  required Pointer<Void> pointer,
+  required Pointer<CBLDocument> pointer,
   required Worker? worker,
   required bool retain,
 }) =>
@@ -23,7 +23,7 @@ Document createDocument({
     );
 
 MutableDocument createMutableDocument({
-  required Pointer<Void> pointer,
+  required Pointer<CBLMutableDocument> pointer,
   required Worker? worker,
   required bool retain,
   required bool isNew,
@@ -39,11 +39,11 @@ MutableDocument createMutableDocument({
 
 /// A [Document] is essentially a JSON object with an [id] string that is unique
 /// in its database.
-class Document extends NativeResource<NativeObject<Void>> {
+class Document extends NativeResource<NativeObject<CBLDocument>> {
   static late final _bindings = CBLBindings.instance.document;
 
   Document._fromPointer(
-    Pointer<Void> pointer, {
+    Pointer<CBLDocument> pointer, {
     Worker? worker,
     required bool retain,
   }) : super(worker == null
@@ -96,8 +96,8 @@ class Document extends NativeResource<NativeObject<Void>> {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]) {
     _debugDocumentHasWorker();
-    return (native as WorkerObject)
-        .execute((address) => DeleteDocument(address, concurrency));
+    return (native as WorkerObject<CBLDocument>)
+        .execute((pointer) => DeleteDocument(pointer, concurrency));
   }
 
   /// Purges this document.
@@ -107,8 +107,8 @@ class Document extends NativeResource<NativeObject<Void>> {
   /// when pulled.
   Future<void> purge() {
     _debugDocumentHasWorker();
-    return (native as WorkerObject)
-        .execute((address) => PurgeDocument(address));
+    return (native as WorkerObject<CBLDocument>)
+        .execute((pointer) => PurgeDocument(pointer));
   }
 
   /// {@macro cbl.document.mutableCopy}
@@ -152,12 +152,12 @@ class MutableDocument extends Document {
   static late final _bindings = CBLBindings.instance.mutableDocument;
 
   MutableDocument._fromPointer(
-    Pointer<Void> pointer, {
+    Pointer<CBLMutableDocument> pointer, {
     Worker? worker,
     required bool retain,
     required this.isNew,
   }) : super._fromPointer(
-          pointer,
+          pointer.cast(),
           worker: worker,
           retain: retain,
         );
@@ -192,6 +192,9 @@ class MutableDocument extends Document {
         isNew: false,
       );
 
+  late final Pointer<CBLMutableDocument> _mutablePointer =
+      native.pointerUnsafe.cast();
+
   /// A new document has not been saved to the [Database] while an old document
   /// has been pulled ouf the Database.
   final bool isNew;
@@ -202,15 +205,15 @@ class MutableDocument extends Document {
   /// lifetime is not tied to this document.
   @override
   MutableDict get properties => MutableDict.fromPointer(
-        _bindings.mutableProperties(native.pointerUnsafe),
+        _bindings.mutableProperties(_mutablePointer),
         release: true,
         retain: true,
       );
 
   set properties(MutableDict properties) {
     _bindings.setProperties(
-      native.pointerUnsafe,
-      properties.native.pointerUnsafe,
+      _mutablePointer,
+      properties.native.pointerUnsafe.cast(),
     );
   }
 
@@ -218,7 +221,7 @@ class MutableDocument extends Document {
     runArena(() {
       _bindings
           .setPropertiesAsJSON(
-            native.pointerUnsafe,
+            _mutablePointer,
             json.toNativeUtf8().withScoped(),
             globalError,
           )

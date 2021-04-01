@@ -93,10 +93,10 @@ mixin WorkerObject<T extends NativeType> on NativeObject<T> {
   /// [createRequest] is passed the address of this object as an `int` and
   /// has to return the [WorkerRequest] to be executed.
   Future<R> execute<R>(
-    FutureOr<WorkerRequest<R>> Function(int address) createRequest,
+    FutureOr<WorkerRequest<R>> Function(Pointer<T> pointer) createRequest,
   ) =>
       runNativeObjectScoped(() async {
-        return worker.execute(await createRequest(pointer.address));
+        return worker.execute(await createRequest(pointer));
       });
 }
 
@@ -151,9 +151,11 @@ class CblRefCountedWorkerObject<T extends NativeType>
 }
 
 /// Represents a reference to a CBLReplicator.
-class CBLReplicatorObject extends NativeObject<Void> with WorkerObject {
+class CBLReplicatorObject extends NativeObject<CBLReplicator>
+    with WorkerObject {
   /// Creates a reference to a CBLReplicator.
-  CBLReplicatorObject(Pointer<Void> pointer, this.worker) : super(pointer) {
+  CBLReplicatorObject(Pointer<CBLReplicator> pointer, this.worker)
+      : super(pointer) {
     CBLBindings.instance.replicator.bindToDartObject(
       this,
       pointer.cast(),
@@ -165,13 +167,10 @@ class CBLReplicatorObject extends NativeObject<Void> with WorkerObject {
 }
 
 /// Represents a reference to a Fleece document.
-class FleeceDocObject extends NativeObject<Void> {
+class FleeceDocObject extends NativeObject<FLDoc> {
   /// Creates a reference to a Fleece document.
-  FleeceDocObject(Pointer<Void> pointer) : super(pointer) {
-    CBLBindings.instance.fleece.doc.bindToDartObject(
-      this,
-      pointer.cast(),
-    );
+  FleeceDocObject(Pointer<FLDoc> pointer) : super(pointer) {
+    CBLBindings.instance.fleece.doc.bindToDartObject(this, pointer);
   }
 }
 

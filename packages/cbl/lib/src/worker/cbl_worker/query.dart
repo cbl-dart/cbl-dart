@@ -10,16 +10,16 @@ import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.query;
 
-class CreateDatabaseQuery extends ObjectRequest<int> {
-  CreateDatabaseQuery(int address, this.queryString, this.language)
-      : super(address);
+class CreateDatabaseQuery extends ObjectRequest<CBLDatabase, int> {
+  CreateDatabaseQuery(Pointer<CBLDatabase> db, this.queryString, this.language)
+      : super(db);
   final String queryString;
   final QueryLanguage language;
 }
 
 int createDatabaseQuery(CreateDatabaseQuery request) => _bindings
     .makeNew(
-      request.pointer,
+      request.object,
       request.language.toInt(),
       request.queryString.toNativeUtf8().withScoped(),
       _bindings.globalErrorPosition,
@@ -29,79 +29,83 @@ int createDatabaseQuery(CreateDatabaseQuery request) => _bindings
         ? throw exceptionFromCBLError(queryString: request.queryString)
         : it.address);
 
-class SetQueryParameters extends ObjectRequest<void> {
-  SetQueryParameters(int address, this.parametersAddress) : super(address);
+class SetQueryParameters extends ObjectRequest<CBLQuery, void> {
+  SetQueryParameters(Pointer<CBLQuery> query, this.parametersAddress)
+      : super(query);
   final int parametersAddress;
 }
 
 void setQueryParameters(SetQueryParameters request) => _bindings.setParameters(
-    request.pointer, request.parametersAddress.toPointer());
+      request.object,
+      request.parametersAddress.toPointer(),
+    );
 
-class GetQueryParameters extends ObjectRequest<int?> {
-  GetQueryParameters(int address) : super(address);
+class GetQueryParameters extends ObjectRequest<CBLQuery, int?> {
+  GetQueryParameters(Pointer<CBLQuery> query) : super(query);
 }
 
 int? getQueryParameters(GetQueryParameters request) =>
-    _bindings.parameters(request.pointer).toAddressOrNull();
+    _bindings.parameters(request.object).toAddressOrNull();
 
-class ExplainQuery extends ObjectRequest<String> {
-  ExplainQuery(int address) : super(address);
+class ExplainQuery extends ObjectRequest<CBLQuery, String> {
+  ExplainQuery(Pointer<CBLQuery> query) : super(query);
 }
 
 String explainQuery(ExplainQuery request) {
-  _bindings.explain(request.pointer, globalSlice);
+  _bindings.explain(request.object, globalSlice);
 
   // Caller is responsible for allocated memory of result.
   return globalSlice.toDartStringAndFree();
 }
 
-class ExecuteQuery extends ObjectRequest<int> {
-  ExecuteQuery(int address) : super(address);
+class ExecuteQuery extends ObjectRequest<CBLQuery, int> {
+  ExecuteQuery(Pointer<CBLQuery> query) : super(query);
 }
 
 int executeQuery(ExecuteQuery request) => _bindings
-    .execute(request.pointer, globalError)
+    .execute(request.object, globalError)
     .checkResultAndError()
     .address;
 
-class GetQueryColumnCount extends ObjectRequest<int> {
-  GetQueryColumnCount(int address) : super(address);
+class GetQueryColumnCount extends ObjectRequest<CBLQuery, int> {
+  GetQueryColumnCount(Pointer<CBLQuery> query) : super(query);
 }
 
 int getQueryColumnCount(GetQueryColumnCount request) =>
-    _bindings.columnCount(request.pointer);
+    _bindings.columnCount(request.object);
 
-class GetQueryColumnName extends ObjectRequest<String> {
-  GetQueryColumnName(int address, this.columnIndex) : super(address);
+class GetQueryColumnName extends ObjectRequest<CBLQuery, String> {
+  GetQueryColumnName(Pointer<CBLQuery> query, this.columnIndex) : super(query);
   final int columnIndex;
 }
 
 String getQueryColumnName(GetQueryColumnName request) {
-  _bindings.columnName(request.pointer, request.columnIndex, globalSlice);
+  _bindings.columnName(request.object, request.columnIndex, globalSlice);
   return globalSlice.ref.toDartString();
 }
 
-class AddQueryChangeListener extends ObjectRequest<int> {
-  AddQueryChangeListener(int address, this.listenerAddress) : super(address);
+class AddQueryChangeListener extends ObjectRequest<CBLQuery, int> {
+  AddQueryChangeListener(Pointer<CBLQuery> query, this.listenerAddress)
+      : super(query);
   final int listenerAddress;
 }
 
 int addQueryChangeListener(AddQueryChangeListener request) => _bindings
     .addChangeListener(
-      request.pointer,
+      request.object,
       request.listenerAddress.toPointer(),
     )
     .address;
 
-class CopyCurrentQueryResultSet extends ObjectRequest<int> {
-  CopyCurrentQueryResultSet(int address, this.listenerTokenAddress)
-      : super(address);
+class CopyCurrentQueryResultSet extends ObjectRequest<CBLQuery, int> {
+  CopyCurrentQueryResultSet(Pointer<CBLQuery> query, this.listenerTokenAddress)
+      : super(query);
   final int listenerTokenAddress;
 }
 
 int copyCurrentQueryResultSet(CopyCurrentQueryResultSet request) => _bindings
     .copyCurrentResults(
-      request.pointer,
+      request.object,
       request.listenerTokenAddress.toPointer(),
       globalError,
     )

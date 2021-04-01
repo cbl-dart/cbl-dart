@@ -256,7 +256,7 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 );
 
 /// A database is both a filesystem object and a container for documents.
-class Database extends NativeResource<WorkerObject<Void>> {
+class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   static late final _staticWorker =
       TransientWorkerExecutor('Database.Static', workerFactory);
 
@@ -328,8 +328,11 @@ class Database extends NativeResource<WorkerObject<Void>> {
     }
   }
 
-  Database._fromPointer(this._debugName, Pointer<Void> pointer, Worker worker)
-      : super(CblRefCountedWorkerObject(
+  Database._fromPointer(
+    this._debugName,
+    Pointer<CBLDatabase> pointer,
+    Worker worker,
+  ) : super(CblRefCountedWorkerObject(
           pointer,
           worker,
           release: true,
@@ -342,25 +345,25 @@ class Database extends NativeResource<WorkerObject<Void>> {
 
   /// The database's name.
   Future<String> get name =>
-      native.execute((address) => GetDatabaseName(address));
+      native.execute((pointer) => GetDatabaseName(pointer));
 
   /// The database's full filesystem path.
   Future<String> get path =>
-      native.execute((address) => GetDatabasePath(address));
+      native.execute((pointer) => GetDatabasePath(pointer));
 
   /// The number of documents in the database.
   Future<int> get count =>
-      native.execute((address) => GetDatabaseCount(address));
+      native.execute((pointer) => GetDatabaseCount(pointer));
 
   /// The database's configuration, as given when it was opened.
   ///
   /// The encryption key is not filled in, for security reasons.
   Future<DatabaseConfiguration> get config =>
-      native.execute((address) => GetDatabaseConfiguration(address));
+      native.execute((pointer) => GetDatabaseConfiguration(pointer));
 
   /// Closes this database.
   Future<void> close() async {
-    await native.execute((address) => CloseDatabase(address));
+    await native.execute((pointer) => CloseDatabase(pointer));
     await native.worker.stop();
   }
 
@@ -368,13 +371,13 @@ class Database extends NativeResource<WorkerObject<Void>> {
   ///
   /// If there are any other connections to the database, an error is thrown.
   Future<void> delete() async {
-    await native.execute((address) => DeleteDatabase(address));
+    await native.execute((pointer) => DeleteDatabase(pointer));
     await native.worker.stop();
   }
 
   /// Compacts the database file.
   Future<void> compact() =>
-      native.execute((address) => CompactDatabase(address));
+      native.execute((pointer) => CompactDatabase(pointer));
 
   /// Begins a batch operation, similar to a transaction.
   ///
@@ -385,13 +388,13 @@ class Database extends NativeResource<WorkerObject<Void>> {
   /// database until the batch operation ends. Batch operations can nest.
   /// Changes are not committed until the outer batch ends.
   Future<void> beginBatch() =>
-      native.execute((address) => BeginDatabaseBatch(address));
+      native.execute((pointer) => BeginDatabaseBatch(pointer));
 
   /// Ends a batch operation.
   ///
   /// This must be called after [beginBatch].
   Future<void> endBatch() =>
-      native.execute((address) => EndDatabaseBatch(address));
+      native.execute((pointer) => EndDatabaseBatch(pointer));
 
   /// Encrypts or decrypts a database, or changes its encryption key.
   ///
@@ -400,7 +403,7 @@ class Database extends NativeResource<WorkerObject<Void>> {
   /// Otherwise the database will be encrypted with that key; if it was already
   /// encrypted, it will be re-encrypted with the new key.
   Future<void> rekey([EncryptionKey? encryptionKey]) =>
-      native.execute((address) => RekeyDatabase(address, encryptionKey));
+      native.execute((pointer) => RekeyDatabase(pointer, encryptionKey));
 
   // === Documents =============================================================
 
@@ -409,7 +412,7 @@ class Database extends NativeResource<WorkerObject<Void>> {
   ///
   /// Returns `null` if no document with [id] exists.
   Future<Document?> getDocument(String id) => native
-      .execute((address) => GetDatabaseDocument(address, id))
+      .execute((pointer) => GetDatabaseDocument(pointer, id))
       .then((address) => address?.let((it) => createDocument(
             pointer: it.toPointer(),
             worker: native.worker,
@@ -421,7 +424,7 @@ class Database extends NativeResource<WorkerObject<Void>> {
   ///
   /// This function is otherwise identical to [getDocument].
   Future<MutableDocument?> getMutableDocument(String id) => native
-      .execute((address) => GetDatabaseMutableDocument(address, id))
+      .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
       .then((address) => address?.let((it) => createMutableDocument(
             pointer: it.toPointer(),
             worker: native.worker,
@@ -441,9 +444,9 @@ class Database extends NativeResource<WorkerObject<Void>> {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
       native
-          .execute((address) => SaveDatabaseDocument(
-                address,
-                doc.native.pointer.address,
+          .execute((pointer) => SaveDatabaseDocument(
+                pointer,
+                doc.native.pointer.cast(),
                 concurrency,
               ))
           .then((address) => createDocument(
@@ -473,9 +476,10 @@ class Database extends NativeResource<WorkerObject<Void>> {
 
     final callback = NativeCallback((arguments, result) {
       // Build arguments
-      final documentBeingSavedPointer = (arguments[0] as int).toPointer<Void>();
+      final documentBeingSavedPointer =
+          (arguments[0] as int).toPointer<CBLMutableDocument>();
       final conflictingDocumentPointer =
-          (arguments[1] as int?)?.toPointer<Void>();
+          (arguments[1] as int?)?.toPointer<CBLDocument>();
 
       final documentBeingSaved = createMutableDocument(
         pointer: documentBeingSavedPointer,
@@ -512,9 +516,9 @@ class Database extends NativeResource<WorkerObject<Void>> {
     });
 
     return native
-        .execute((address) => SaveDatabaseDocumentResolving(
-              address,
-              doc.native.pointer.address,
+        .execute((pointer) => SaveDatabaseDocumentResolving(
+              pointer,
+              doc.native.pointer.cast(),
               callback.native.pointer.address,
             ))
         .then((address) => createDocument(
@@ -533,7 +537,7 @@ class Database extends NativeResource<WorkerObject<Void>> {
   ///
   /// To delete a [Document], load it and call its [Document.delete] method.
   Future<bool> purgeDocumentById(String id) =>
-      native.execute((address) => PurgeDatabaseDocumentById(address, id));
+      native.execute((pointer) => PurgeDatabaseDocumentById(pointer, id));
 
   /// Returns the time, if any, at which a given document will expire and be
   /// purged.
@@ -541,13 +545,13 @@ class Database extends NativeResource<WorkerObject<Void>> {
   /// Documents don't normally expire; you have to call [setDocumentExpiration]
   /// to set a document's expiration time.
   Future<DateTime?> getDocumentExpiration(String id) =>
-      native.execute((address) => GetDatabaseDocumentExpiration(address, id));
+      native.execute((pointer) => GetDatabaseDocumentExpiration(pointer, id));
 
   /// Sets or clears the expiration time of a document.
   ///
   /// When [time] is `null` the document will never expire.
   Future<void> setDocumentExpiration(String id, DateTime? time) => native
-      .execute((address) => SetDatabaseDocumentExpiration(address, id, time));
+      .execute((pointer) => SetDatabaseDocumentExpiration(pointer, id, time));
 
   // === Changes ===============================================================
 
@@ -566,7 +570,7 @@ class Database extends NativeResource<WorkerObject<Void>> {
   Stream<void> changesOfDocument(String id) => callbackStream<void, void>(
         worker: native.worker,
         createWorkerRequest: (callback) => AddDocumentChangeListener(
-          native.pointerUnsafe.address,
+          native.pointerUnsafe.cast(),
           id,
           callback.native.pointerUnsafe.address,
         ),
@@ -589,7 +593,7 @@ class Database extends NativeResource<WorkerObject<Void>> {
       callbackStream<List<String>, void>(
         worker: native.worker,
         createWorkerRequest: (callback) => AddDatabaseChangeListener(
-          native.pointerUnsafe.address,
+          native.pointerUnsafe.cast(),
           callback.native.pointerUnsafe.address,
         ),
         createEvent: (_, arguments) => List.from(arguments),
@@ -632,15 +636,15 @@ class Database extends NativeResource<WorkerObject<Void>> {
   /// If a non-identical index with that name already exists, it is deleted and
   /// re-created.
   Future<void> createIndex(String name, Index index) =>
-      native.execute((address) => CreateDatabaseIndex(address, name, index));
+      native.execute((pointer) => CreateDatabaseIndex(pointer, name, index));
 
   /// Deletes an index given its name.
   Future<void> deleteIndex(String name) async =>
-      native.execute((address) => DeleteDatabaseIndex(address, name));
+      native.execute((pointer) => DeleteDatabaseIndex(pointer, name));
 
   /// Returns the names of the indexes on this database, as an array of strings.
   Future<List<String>> indexNames() async => native
-      .execute((address) => GetDatabaseIndexNames(address))
+      .execute((pointer) => GetDatabaseIndexNames(pointer))
       .then((address) => MutableArray.fromPointer(
             address.toPointer(),
             release: true,
