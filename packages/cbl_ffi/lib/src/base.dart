@@ -148,21 +148,29 @@ extension CBLErrorPointerExt on Pointer<CBLError> {
 
 // === CBLRefCounted ===========================================================
 
+class CBLRefCounted extends Opaque {}
+
 typedef CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
   Handle handle,
-  Pointer<Void> refCounted,
+  Pointer<CBLRefCounted> refCounted,
   Uint8 retain,
 );
 typedef CBLDart_BindCBLRefCountedToDartObject = void Function(
   Object handle,
-  Pointer<Void> refCounted,
+  Pointer<CBLRefCounted> refCounted,
   int retain,
 );
 
 // === CBLListener =============================================================
 
-typedef CBLListener_Remove_C = Void Function(Pointer<Void> listenerToken);
-typedef CBLListener_Remove = void Function(Pointer<Void> listenerToken);
+class CBLListenerToken extends Opaque {}
+
+typedef CBLListener_Remove_C = Void Function(
+  Pointer<CBLListenerToken> listenerToken,
+);
+typedef CBLListener_Remove = void Function(
+  Pointer<CBLListenerToken> listenerToken,
+);
 
 // === BaseBindings ============================================================
 

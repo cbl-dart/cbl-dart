@@ -3,6 +3,8 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
+import 'document.dart';
+import 'fleece.dart';
 import 'libraries.dart';
 import 'native_callback.dart';
 
@@ -68,7 +70,6 @@ enum ConcurrencyControl {
 int concurrencyControlToC(ConcurrencyControl value) =>
     ConcurrencyControl.values.indexOf(value);
 
-// TODO: Replace Void with CBLDatabase where appropriate
 class CBLDatabase extends Opaque {}
 
 typedef CBLDatabase_Exists_C = Uint8 Function(
@@ -104,179 +105,181 @@ typedef CBL_DeleteDatabase = int Function(
   Pointer<CBLError> outError,
 );
 
-typedef CBLDatabase_Open = Pointer<Void> Function(
+typedef CBLDatabase_Open = Pointer<CBLDatabase> Function(
   Pointer<Utf8> name,
   Pointer<CBLDatabaseConfiguration> config,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_Close_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_Close = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_Delete_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_Delete = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_Compact_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_Compact = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_BeginBatch_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_BeginBatch = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_EndBatch_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_EndBatch = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_Rekey_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLEncryptionKey> encryptionKey,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_Rekey = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLEncryptionKey> encryptionKey,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_Name = Pointer<Utf8> Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
 );
 
 typedef CBLDatabase_Path = Pointer<Utf8> Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
 );
 
 typedef CBLDatabase_Count_C = Uint64 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
 );
 typedef CBLDatabase_Count = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
 );
 
 typedef CBLDatabase_Config_C = Void Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLDatabaseConfiguration> config,
 );
 typedef CBLDatabase_Config = void Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<CBLDatabaseConfiguration> config,
 );
 
-typedef CBLDatabase_GetDocument = Pointer<Void> Function(
-  Pointer<Void> db,
+typedef CBLDatabase_GetDocument = Pointer<CBLDocument> Function(
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
 );
 
-typedef CBLDatabase_GetMutableDocument = Pointer<Void> Function(
-  Pointer<Void> db,
+typedef CBLDatabase_GetMutableDocument = Pointer<CBLMutableDocument> Function(
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
 );
 
-typedef CBLDatabase_SaveDocument_C = Pointer<Void> Function(
-  Pointer<Void> db,
-  Pointer<Void> doc,
+typedef CBLDatabase_SaveDocument_C = Pointer<CBLDocument> Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLMutableDocument> doc,
   Uint8 concurrency,
   Pointer<CBLError> error,
 );
-typedef CBLDatabase_SaveDocument = Pointer<Void> Function(
-  Pointer<Void> db,
-  Pointer<Void> doc,
+typedef CBLDatabase_SaveDocument = Pointer<CBLDocument> Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLMutableDocument> doc,
   int concurrency,
   Pointer<CBLError> error,
 );
-typedef CBLDart_CBLDatabase_SaveDocumentResolving_C = Pointer<Void> Function(
-  Pointer<Void> db,
-  Pointer<Void> doc,
+typedef CBLDart_CBLDatabase_SaveDocumentResolving_C = Pointer<CBLDocument>
+    Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLMutableDocument> doc,
   Pointer<Callback> conflictHandler,
   Pointer<CBLError> error,
 );
-typedef CBLDart_CBLDatabase_SaveDocumentResolving = Pointer<Void> Function(
-  Pointer<Void> db,
-  Pointer<Void> doc,
+typedef CBLDart_CBLDatabase_SaveDocumentResolving = Pointer<CBLDocument>
+    Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLMutableDocument> doc,
   Pointer<Callback> conflictHandler,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_PurgeDocumentByID = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_GetDocumentExpiration_C = Int64 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_GetDocumentExpiration = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Int64 expiration,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_SetDocumentExpiration = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   int expiration,
   Pointer<CBLError> error,
 );
 
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener_C = Void Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Pointer<Callback> listener,
 );
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener = void Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Pointer<Callback> listener,
 );
 
 typedef CBLDart_CBLDatabase_AddChangeListener_C = Void Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Callback> listener,
 );
 typedef CBLDart_CBLDatabase_AddChangeListener = void Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Callback> listener,
 );
 
@@ -302,30 +305,32 @@ class CBLIndexSpec extends Struct {
 }
 
 typedef CBLDatabase_CreateIndex_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
   CBLIndexSpec indexSpec,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_CreateIndex = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
   CBLIndexSpec indexSpec,
   Pointer<CBLError> error,
 );
 
 typedef CBLDatabase_DeleteIndex_C = Uint8 Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
   Pointer<CBLError> error,
 );
 typedef CBLDatabase_DeleteIndex = int Function(
-  Pointer<Void> db,
+  Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
   Pointer<CBLError> error,
 );
 
-typedef CBLDatabase_IndexNames = Pointer<Void> Function(Pointer<Void> db);
+typedef CBLDatabase_IndexNames = Pointer<FLArray> Function(
+  Pointer<CBLDatabase> db,
+);
 
 class DatabaseBindings {
   DatabaseBindings(Libraries libs)
