@@ -1,3 +1,9 @@
+## 0.4.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: replace `Void` with opaque structs.
+
 ## 0.3.0+2
 
  - **FIX**: fix size of result of FLValue_AsInt_C.

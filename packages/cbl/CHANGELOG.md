@@ -1,3 +1,8 @@
+## 0.4.1+1
+
+ - **REFACTOR**: replace `Void` with opaque structs.
+ - **FIX**: fix `Replicator` conflict resolver callback.
+
 ## 0.4.1
 
  - **FEAT**: highlight error position in query parsing exception.
