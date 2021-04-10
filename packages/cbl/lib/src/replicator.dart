@@ -55,6 +55,20 @@ Future<Replicator> createReplicator({
           );
         }));
 
+extension CBLReplicatorStatusExt on CBLReplicatorStatus {
+  ReplicatorStatus toReplicatorStatus() => runArena(() {
+        final error = scoped(this.error.copyToPointer());
+        return ReplicatorStatus(
+          activity.toReplicatorActivityLevel(),
+          ReplicatorProgress(
+            progress.fractionCompleted,
+            progress.documentCount,
+          ),
+          error.isOk ? null : exceptionFromCBLError(error: error),
+        );
+      });
+}
+
 // endregion
 
 late final _bindings = CBLBindings.instance.replicator;
@@ -245,7 +259,7 @@ NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
       try {
         decision = await filter(docId, local, remote);
       } finally {
-        result!(decision);
+        result!(decision?.native.pointerUnsafe.address);
       }
     });
 
@@ -440,7 +454,7 @@ extension on ReplicatorConfiguration {
     final config = scoped(malloc<CBLDartReplicatorConfiguration>());
 
     // database
-    config.ref.database = db.pointer.cast();
+    config.ref.database = db.pointer;
 
     // endpoint
     Pointer<CBLEndpoint> cblEndpoint;
@@ -453,8 +467,8 @@ extension on ReplicatorConfiguration {
         _bindings.endpointNewWithLocalDB != null,
         'LocalDbEndpoint is an Enterprise Edition feature',
       );
-      cblEndpoint = _bindings
-          .endpointNewWithLocalDB!(endpoint.database.native.pointer.cast());
+      cblEndpoint =
+          _bindings.endpointNewWithLocalDB!(endpoint.database.native.pointer);
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $endpoint');
     }
@@ -496,24 +510,12 @@ extension on ReplicatorConfiguration {
     }
 
     // proxy
-    final proxy = this.proxy;
-    if (proxy != null) {
-      config.ref.proxy = proxy.toCBLProxySettingScoped();
-    } else {
-      config.ref.proxy = nullptr;
-    }
+    config.ref.proxy =
+        (this.proxy?.let((it) => it.toCBLProxySettingScoped())).elseNullptr();
 
     // headers
-    final headers = this.headers;
-    if (headers != null) {
-      final dict = MutableDict(headers);
-      config.ref.headers = dict.native.pointer.cast();
-      // We need to ensure dict is not garbage collected until the current
-      // Arena is finalized.
-      registerFinalzier(() => dict.type);
-    } else {
-      config.ref.headers = nullptr;
-    }
+    config.ref.headers =
+        headers != null ? MutableDict(headers).native.pointer.cast() : nullptr;
 
     // pinnedServerCertificate
     config.ref.pinnedServerCertificate =
@@ -524,38 +526,24 @@ extension on ReplicatorConfiguration {
         (trustedRootCertificates?.toFLSliceScoped()).elseNullptr();
 
     // channels
-    final channels = this.channels;
-    if (channels != null) {
-      final array = MutableArray(channels);
-      config.ref.channels = array.native.pointer.cast();
-      // We need to ensure array is not garbage collected until the current
-      // Arena is finalized.
-      registerFinalzier(() => array.type);
-    } else {
-      config.ref.channels = nullptr;
-    }
+    config.ref.channels = channels != null
+        ? MutableArray(channels).native.pointer.cast()
+        : nullptr;
 
     // documentIDs
-    final documentIDs = this.documentIDs;
-    if (documentIDs != null) {
-      final array = MutableArray(documentIDs);
-      config.ref.documentIDs = array.native.pointer.cast();
-      // We need to ensure array is not garbage collected until the current
-      // Arena is finalized.
-      registerFinalzier(() => array.type);
-    } else {
-      config.ref.documentIDs = nullptr;
-    }
+    config.ref.documentIDs = channels != null
+        ? MutableArray(documentIDs).native.pointer.cast()
+        : nullptr;
 
     // pushFilter
-    config.ref.pushFilter = (pushFilterCallback?.pointerUnsafe).elseNullptr();
+    config.ref.pushFilter = (pushFilterCallback?.pointer).elseNullptr();
 
     // pullFilter
-    config.ref.pullFilter = (pullFilterCallback?.pointerUnsafe).elseNullptr();
+    config.ref.pullFilter = (pullFilterCallback?.pointer).elseNullptr();
 
     // conflictResolver
     config.ref.conflictResolver =
-        (conflictResolverCallback?.pointerUnsafe).elseNullptr();
+        (conflictResolverCallback?.pointer).elseNullptr();
 
     return config;
   }
@@ -628,20 +616,6 @@ class ReplicatorStatus {
       'progress: $progress, '
       'error: $error'
       ')';
-}
-
-extension CBLReplicatorStatusExt on CBLReplicatorStatus {
-  ReplicatorStatus toReplicatorStatus() => runArena(() {
-        final error = scoped(this.error.copyToPointer());
-        return ReplicatorStatus(
-          activity.toReplicatorActivityLevel(),
-          ReplicatorProgress(
-            progress.fractionCompleted,
-            progress.documentCount,
-          ),
-          error.isOk ? null : exceptionFromCBLError(error: error),
-        );
-      });
 }
 
 /// Information about a [Document] that's been pushed or pulled.
@@ -818,7 +792,7 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
         ),
         // The native caller allocates some memory for the arguments and blocks
         // until the Dart side copies them and finishes the call, so it can
-        // release free the memory.
+        // free the memory.
         finishBlockingCall: true,
         createEvent: (_, arguments) {
           final statusAddress = arguments[0] as int;
