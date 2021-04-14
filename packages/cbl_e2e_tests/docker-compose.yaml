@@ -1,0 +1,14 @@
+version: '3.1'
+services:
+  couchbase:
+    image: couchbase:community-6.6.0
+    ports:
+      - 8091:8091
+  sync-gateway:
+    image: couchbase/sync-gateway:2.8.2-community
+    command: ['/etc/sync-gateway-config.json']
+    ports:
+      - 4984:4984
+    volumes:
+      - ./sync-gateway-config.json:/etc/sync-gateway-config.json:ro
+    restart: on-failure

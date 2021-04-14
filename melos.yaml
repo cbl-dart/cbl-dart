@@ -10,7 +10,8 @@ scripts:
 
   flutter:pub_get:
     run: melos exec -- flutter pub get
-    description: Runs `flutter pub get` in all flutter packages, to generate files
+    description:
+      Runs `flutter pub get` in all flutter packages, to generate files
       which `melos bootstrap` doesn't.
     select-package:
       flutter: true
@@ -32,6 +33,21 @@ scripts:
     select-package:
       scope: cbl_flutter_example
 
+  test:setupCouchbaseClusterDocker:
+    run: melos exec -- "./couchbase-cluster.sh setupDocker"
+    select-package:
+      scope: cbl_e2e_tests
+
+  test:teardownCouchbaseClusterDocker:
+    run: melos exec -- "./couchbase-cluster.sh teardownDocker"
+    select-package:
+      scope: cbl_e2e_tests
+
+  test:setupCouchbaseClusterMacOS:
+    run: melos exec -- "./couchbase-cluster.sh setupMacOS"
+    select-package:
+      scope: cbl_e2e_tests
+
   test:all: melos run test:cbl_native && melos run test:cbl && melos run test:standalone_dart
 
   test:cbl_native:
@@ -50,14 +66,14 @@ scripts:
       scope: 'cbl_e2e_tests_standalone_dart'
 
   version:cbl_native:update_lib:
-    description: Updates the hard coded `currentVersion` in `cbl_native`. 
-      Must be run before publishing and after bumping the version of 
-      `cbl_native` in pubspec.yaml. 
+    description: Updates the hard coded `currentVersion` in `cbl_native`.
+      Must be run before publishing and after bumping the version of
+      `cbl_native` in pubspec.yaml.
     run: melos exec -- dart run tool/update_version.dart
     select-package:
       scope: 'cbl_native'
 
-  clean:packages: 
+  clean:packages:
     run: git clean -xdfq packages
 
   clean:all:

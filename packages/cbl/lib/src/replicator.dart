@@ -774,12 +774,13 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   ///
   /// After calling this method, this replicator must not be used any more.
   Future<void> close() async {
-    final isStopped =
-        Stream.fromIterable([status().asStream(), statusChanges()])
-            .asyncExpand((it) => it)
-            .firstWhere((it) => it.activity == ReplicatorActivityLevel.stopped);
-
-    await Future.wait([stop(), isStopped]);
+    if ((await status()).activity != ReplicatorActivityLevel.stopped) {
+      final stopped = statusChanges().firstWhere((status) {
+        return status.activity == ReplicatorActivityLevel.stopped;
+      });
+      await stop();
+      await stopped;
+    }
 
     _disposeCallbacks();
   }
@@ -821,12 +822,12 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   /// are the IDs and values are `true`.
   ///
   /// If there are no pending documents, the dictionary is empty.
-  /// On error, `null` is returned.
   ///
   /// This function can be called on a stopped or un-started replicator.
   ///
   /// Documents that would never be pushed by this replicator, due to its
-  /// configuration's `pushFilter` or `docIDs`, are ignored.
+  /// configuration's [ReplicatorConfiguration.pushFilter] or
+  /// [ReplicatorConfiguration.documentIDs], are ignored.
   Future<Dict> pendingDocumentIDs() => native
       .execute((pointer) => GetReplicatorPendingDocumentIDs(pointer))
       .then((address) => MutableDict.fromPointer(
