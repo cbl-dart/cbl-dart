@@ -6,30 +6,32 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'test_binding.dart';
 
 void main() {
-  late final bindings = CBLBindings.instance.nativeCallback;
+  group('NativeCallback', () {
+    late final bindings = CBLBindings.instance.nativeCallback;
 
-  test('callbacks are invoked in the Zone where the callback was registered',
-      () async {
-    final zoneValues = {#test: 'nativeCallback'};
-    final argument = 42;
+    test('callbacks are invoked in the Zone where the callback was registered',
+        () async {
+      final zoneValues = {#test: 'nativeCallback'};
+      final argument = 42;
 
-    final callback = runZoned(
-      () => NativeCallback(expectAsync2(
-        (arguments, result) {
-          // Test caller is not requesting a result.
-          expect(result, isNull);
+      final callback = runZoned(
+        () => NativeCallback(expectAsync2(
+          (arguments, result) {
+            // Test caller is not requesting a result.
+            expect(result, isNull);
 
-          expect(arguments, equals([argument]));
+            expect(arguments, equals([argument]));
 
-          expect(Zone.current[#test], 'nativeCallback');
-        },
-        count: 1,
-      )),
-      zoneValues: zoneValues,
-    );
+            expect(Zone.current[#test], 'nativeCallback');
+          },
+          count: 1,
+        )),
+        zoneValues: zoneValues,
+      );
 
-    addTearDown(callback.close);
+      addTearDown(callback.close);
 
-    bindings.callForTest(callback.native.pointerUnsafe, argument);
+      bindings.callForTest(callback.native.pointerUnsafe, argument);
+    });
   });
 }
