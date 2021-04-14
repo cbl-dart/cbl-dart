@@ -578,7 +578,7 @@ class ReplicatorProgress {
       super.hashCode ^ fractionComplete.hashCode ^ documentCount.hashCode;
 
   @override
-  String toString() => 'ReplicatorConfiguration('
+  String toString() => 'ReplicatorProgress('
       'fractionComplete: $fractionComplete, '
       'documentCount: $documentCount'
       ')';
@@ -667,13 +667,21 @@ extension on CBLDartReplicatedDocument {
       });
 }
 
+/// The direction in which documents may be replicated.
+enum ReplicationDirection {
+  /// Documents are push from a local to a remote database.
+  push,
+
+  /// Documents are pulled from a remote to a local database.
+  pull,
+}
+
 /// An event that is emitted when [Document]s have been replicated.
-///
-/// See:
-/// - [DocumentsPushed] for the event emitted when documents have been pushed.
-/// - [DocumentsPulled] for the event emitted when documents have been pulled.
-abstract class DocumentsReplicated {
-  DocumentsReplicated(this.documents);
+class DocumentsReplicated {
+  DocumentsReplicated(this.direction, this.documents);
+
+  /// The direction in which [documents] have been replicated.
+  final ReplicationDirection direction;
 
   /// A list with information about each document.
   final List<ReplicatedDocument> documents;
@@ -683,21 +691,20 @@ abstract class DocumentsReplicated {
       identical(this, other) ||
       other is DocumentsReplicated &&
           runtimeType == other.runtimeType &&
+          direction == other.direction &&
           const DeepCollectionEquality().equals(documents, other.documents);
 
   @override
   int get hashCode =>
-      super.hashCode ^ const DeepCollectionEquality().hash(documents);
-}
+      super.hashCode ^
+      direction.hashCode ^
+      const DeepCollectionEquality().hash(documents);
 
-/// An event that is emitted when [Document]s have been pushed.
-class DocumentsPushed extends DocumentsReplicated {
-  DocumentsPushed(List<ReplicatedDocument> documents) : super(documents);
-}
-
-/// An event that is emitted when [Document]s have been pulled.
-class DocumentsPulled extends DocumentsReplicated {
-  DocumentsPulled(List<ReplicatedDocument> documents) : super(documents);
+  @override
+  String toString() => 'DocumentsReplicated('
+      'direction: $direction, '
+      'documents: $documents'
+      ')';
 }
 
 /// A replicator is a background task that synchronizes changes between a local
@@ -854,6 +861,9 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
           final numDocuments = arguments[1] as int;
           final documentsAddress = arguments[2] as int;
 
+          final direction =
+              isPush ? ReplicationDirection.push : ReplicationDirection.pull;
+
           final documentsPointer =
               Pointer<CBLDartReplicatedDocument>.fromAddress(documentsAddress);
 
@@ -862,9 +872,7 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
             (index) => documentsPointer.elementAt(index),
           ).map((it) => it.ref.toReplicatedDocument()).toList();
 
-          return isPush
-              ? DocumentsPushed(documents)
-              : DocumentsPulled(documents);
+          return DocumentsReplicated(direction, documents);
         },
       );
 
