@@ -27,20 +27,32 @@ Future<Database> openTestDb(
 }
 
 extension DatabaseUtilsExtension on Database {
+  /// Returns a stream wich emits the ids of all the documents in this database.
+  Stream<String> getAllIds() async* {
+    final resultSet =
+        await query('SELECT META.id AS id').then((query) => query.execute());
+
+    for (final result in resultSet.asDicts) {
+      yield result['id'].asString;
+    }
+  }
+
+  /// Returns a stream which emits the ids of all the documents in the
+  /// database when they change.
+  Stream<List<String>> watchAllIds() => query('SELECT META.id AS id')
+      .asStream()
+      .asyncExpand((q) => q.changes())
+      .map((resultSet) => resultSet.map((rs) => rs['id'].asString).toList());
+
   /// Deletes all documents in this database and returns whether any documents
   /// where deleted.
   Future<bool> deleteAllDocuments() async {
-    final resultSet =
-        await query('SELECT META.id AS id').then((query) => query.execute());
-    final docIds =
-        resultSet.asDicts.map((result) => result['id'].asString).toList();
-
-    final deleteAllDocuments = docIds.map((id) async {
-      final document = await getDocument(id);
-      return document!.delete();
-    });
-    await Future.wait(deleteAllDocuments);
-
-    return docIds.isNotEmpty;
+    var deletedAnyDocument = false;
+    await for (final id in getAllIds()) {
+      final doc = await getDocument(id);
+      await doc?.delete();
+      deletedAnyDocument = doc != null;
+    }
+    return deletedAnyDocument;
   }
 }

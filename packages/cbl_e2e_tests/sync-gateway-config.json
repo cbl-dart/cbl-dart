@@ -1,0 +1,27 @@
+{
+  "logging": {
+    "console": {
+      "enabled": true,
+      "log_level": "info",
+      "log_keys": ["*"],
+      "color_enabled": true
+    }
+  },
+  "databases": {
+    "db": {
+      "server": "http://couchbase:8091",
+      "username": "sync-gateway",
+      "password": "password",
+      "bucket": "default",
+      "import_docs": true,
+      "enable_shared_bucket_access": true,
+      "num_index_replicas": 0,
+      "users": {
+        "GUEST": {
+          "disabled": false,
+          "admin_channels": ["*"]
+        }
+      }
+    }
+  }
+}
