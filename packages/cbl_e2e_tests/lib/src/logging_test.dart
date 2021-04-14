@@ -1,9 +1,10 @@
 import 'package:cbl/cbl.dart';
 
 import 'test_binding.dart';
+import 'utils/database_utils.dart';
 
 void main() {
-  group('logging', () {
+  group('Logging', () {
     setUpAll(() => CblE2eTestBinding.instance.stopTestLogger());
     tearDownAll(() => CblE2eTestBinding.instance.startTestLogger());
 
@@ -25,12 +26,7 @@ void main() {
           ),
         );
 
-        final db = await Database.open(
-          testDbName('LogCallback'),
-          config: DatabaseConfiguration(directory: tmpDir),
-        );
-
-        addTearDown(db.close);
+        await openTestDb('LogCallback');
       },
     );
   });
