@@ -28,7 +28,7 @@ Future<Replicator> createReplicator({
               config.pushFilter?.let(_wrapReplicationFilter);
 
           final pullFilterCallback =
-              config.pushFilter?.let(_wrapReplicationFilter);
+              config.pullFilter?.let(_wrapReplicationFilter);
 
           final conflictResolverCallback =
               config.conflictResolver?.let(_wrapConflictResolver);
@@ -175,8 +175,10 @@ class SessionAuthenticator extends Authenticator {
   int get hashCode => super.hashCode ^ sessionID.hashCode ^ cookieName.hashCode;
 
   @override
-  String toString() => 'SessionAuthenticator(sessionID: ${redact(sessionID)}, '
-      'cookieName: $cookieName)';
+  String toString() => 'SessionAuthenticator('
+      'sessionID: ${redact(sessionID)}, '
+      'cookieName: $cookieName'
+      ')';
 }
 
 /// A callback that can decide whether a particular document should be pushed or
@@ -282,7 +284,7 @@ class ProxySettings {
   /// Proxy server port
   final int port;
 
-  /// Username for proxy auth (optional)
+  /// Username for proxy auth
   final String? username;
 
   /// Password for proxy auth
@@ -337,8 +339,8 @@ extension on ProxySettings {
 class ReplicatorConfiguration {
   ReplicatorConfiguration({
     required this.endpoint,
-    required this.replicatorType,
-    this.continuous = false,
+    this.replicatorType,
+    this.continuous,
     this.authenticator,
     this.proxy,
     this.headers,
@@ -354,11 +356,15 @@ class ReplicatorConfiguration {
   /// The address of the other database to replicate with
   final Endpoint endpoint;
 
-  /// Push, pull or both
-  final ReplicatorType replicatorType;
+  /// The type of the replicator
+  ///
+  /// The default is [ReplicatorType.pushAndPull].
+  final ReplicatorType? replicatorType;
 
-  /// Continuous replication?
-  final bool continuous;
+  /// Whether the replicator should work continuously
+  ///
+  /// The default is `false`.
+  final bool? continuous;
 
   /// Authentication credentials, if needed
   final Authenticator? authenticator;
@@ -422,7 +428,7 @@ class ReplicatorConfiguration {
       trustedRootCertificates.hashCode ^
       channels.hashCode ^
       documentIDs.hashCode ^
-      pullFilter.hashCode ^
+      pushFilter.hashCode ^
       pullFilter.hashCode ^
       conflictResolver.hashCode;
 
@@ -438,7 +444,7 @@ class ReplicatorConfiguration {
       'trustedRootCertificate: $trustedRootCertificates, '
       'channels: $channels, '
       'documentIDs: $documentIDs, '
-      'pushFilter: $pullFilter, '
+      'pushFilter: $pushFilter, '
       'pullFilter: $pullFilter, '
       'conflictResolver: $conflictResolver'
       ')';
@@ -477,10 +483,11 @@ extension on ReplicatorConfiguration {
     config.ref.endpoint = cblEndpoint;
 
     // replicatorType
-    config.ref.replicatorType = replicatorType.toInt();
+    config.ref.replicatorType =
+        (replicatorType ?? ReplicatorType.pushAndPull).toInt();
 
     // continuous
-    config.ref.continuous = continuous.toInt();
+    config.ref.continuous = (continuous ?? false).toInt();
 
     // authenticator
     final authenticator = this.authenticator;
@@ -531,7 +538,7 @@ extension on ReplicatorConfiguration {
         : nullptr;
 
     // documentIDs
-    config.ref.documentIDs = channels != null
+    config.ref.documentIDs = documentIDs != null
         ? MutableArray(documentIDs).native.pointer.cast()
         : nullptr;
 
