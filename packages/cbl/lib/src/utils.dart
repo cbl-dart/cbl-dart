@@ -42,11 +42,11 @@ String redact(String string) {
 /// Utility to create a [Stream] from a native callback.
 ///
 /// Callbacks are registered through a request (created by
-/// [createWorkerRequest]), which is executed on a [worker] to not block the
-/// calling Isolate.
+/// [createRegisterCallbackRequest]), which is executed on a [worker] to not
+/// block the calling Isolate.
 ///
 /// [createEvent] receives the result of the callback registration request and
-/// the arguments from the native side an turns them into an event of type [T].
+/// the arguments from the native side and turns them into an event of type [T].
 ///
 /// The returned stream is single subscription.
 ///
@@ -59,37 +59,41 @@ String redact(String string) {
 Stream<T> callbackStream<T, S>({
   required Worker worker,
   required WorkerRequest<S> Function(NativeCallback callback)
-      createWorkerRequest,
-  required FutureOr<T> Function(S requestResult, List arguments) createEvent,
+      createRegisterCallbackRequest,
+  required FutureOr<T> Function(S registrationResult, List arguments)
+      createEvent,
   bool finishBlockingCall = false,
 }) {
   late NativeCallback callback;
   late StreamController<T> controller;
-  late Future<bool> callbackAdded;
-  late S requestResult;
+  late Future<bool> callbackRegistered;
+  late S registrationResult;
+  var canceled = false;
 
   void onListen() {
     callback = NativeCallback((arguments, result) async {
-      // Callbacks can come in before the registration request from the worker
-      // comes back. In this case `requestResult` has not be initialized yet.
-      // By waiting for `callbackAdded`, `requestResult` is guarantied to be
-      // set after this line.
-      await callbackAdded;
-
-      // We use `add` instead of `addStream` because the callback can fire
-      // before the Future from `addStream` returns.
       try {
-        controller.add(await createEvent(requestResult, arguments));
+        // Callbacks can come in before the registration request from the worker
+        // comes back. In this case `registrationResult` has not be initialized
+        // yet. By waiting for `callbackRegistered`, `registrationResult` is
+        // guarantied to be set after this line.
+        await callbackRegistered;
+
+        if (canceled) return;
+        final event = await createEvent(registrationResult, arguments);
+        if (canceled) return;
+        controller.add(event);
       } catch (error, stackTrace) {
+        if (canceled) return;
         controller.addError(error, stackTrace);
       } finally {
         if (finishBlockingCall) result!(null);
       }
     });
 
-    callbackAdded =
-        worker.execute(createWorkerRequest(callback)).then((result) {
-      requestResult = result;
+    callbackRegistered =
+        worker.execute(createRegisterCallbackRequest(callback)).then((result) {
+      registrationResult = result;
       return true;
     }).catchError((Object error, StackTrace stackTrace) {
       controller.addError(error, stackTrace);
@@ -99,7 +103,8 @@ Stream<T> callbackStream<T, S>({
   }
 
   Future onCancel() async {
-    if (await callbackAdded) {
+    canceled = true;
+    if (await callbackRegistered) {
       callback.close();
     }
   }
@@ -115,22 +120,29 @@ StreamController<T> callbackBroadcastStreamController<T>({
 }) {
   late NativeCallback callback;
   late StreamController<T> controller;
+  var canceled = false;
 
   void onListen() {
+    canceled = false;
+
     callback = NativeCallback((arguments, _) {
-      final event = createEvent(arguments);
-      controller.add(event);
+      if (canceled) return;
+      try {
+        final event = createEvent(arguments);
+        controller.add(event);
+      } catch (error, stacktrace) {
+        controller.addError(error, stacktrace);
+      }
     });
 
     startStream(callback);
   }
 
   void onCancel() {
+    canceled = true;
     callback.close();
   }
 
-  controller =
+  return controller =
       StreamController.broadcast(onListen: onListen, onCancel: onCancel);
-
-  return controller;
 }

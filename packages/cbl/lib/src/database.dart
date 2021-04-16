@@ -569,7 +569,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   /// notified.
   Stream<void> changesOfDocument(String id) => callbackStream<void, void>(
         worker: native.worker,
-        createWorkerRequest: (callback) => AddDocumentChangeListener(
+        createRegisterCallbackRequest: (callback) => AddDocumentChangeListener(
           native.pointerUnsafe.cast(),
           id,
           callback.native.pointerUnsafe.address,
@@ -592,7 +592,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   Stream<List<String>> changesOfAllDocuments() =>
       callbackStream<List<String>, void>(
         worker: native.worker,
-        createWorkerRequest: (callback) => AddDatabaseChangeListener(
+        createRegisterCallbackRequest: (callback) => AddDatabaseChangeListener(
           native.pointerUnsafe.cast(),
           callback.native.pointerUnsafe.address,
         ),
