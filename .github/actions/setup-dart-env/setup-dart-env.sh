@@ -4,6 +4,7 @@ flutterChannel="$1"
 melosVersion="$2"
 flutterDir="$HOME/opt/flutter"
 flutterBinDir="$flutterDir/bin"
+dartBinDir="$flutterDir/bin/cache/dart-sdk/bin"
 flutter="$flutterBinDir/flutter"
 pubBinDir="$HOME/.pub-cache/bin"
 melos="$pubBinDir/melos"
@@ -20,14 +21,17 @@ if [[ -z "$melosVersion" ]]; then
     exit 1
 fi
 
-# Add Flutter bin to path
+# Add Flutter binaries to path
 echo "$flutterBinDir" >>$GITHUB_PATH
 
-# Add pub bins to path
+# Add Dart binaries to path
+echo "$dartBinDir" >>$GITHUB_PATH
+
+# Add global pub binaries to path
 echo "$pubBinDir" >>$GITHUB_PATH
 
-# Make bin dir availabe to comands in this script
-export PATH="$flutterBinDir:$pubBinDir:$PATH"
+# Make binaries availabe to comands in this script
+export PATH="$pubBinDir:$dartBinDir:$flutterBinDir:$PATH"
 
 echo "::group::Clone Flutter repo"
 
