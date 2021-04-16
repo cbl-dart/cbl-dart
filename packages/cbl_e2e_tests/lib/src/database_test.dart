@@ -351,7 +351,7 @@ void main() {
       test('createIndex should work with ValueIndex', () async {
         await db.createIndex('a', ValueIndex('[[".a"]]'));
 
-        final q = await db.query('SELECT * WHERE a = "a"');
+        final q = await db.query(N1QLQuery('SELECT * WHERE a = "a"'));
 
         final explain = await q.explain();
 
@@ -361,7 +361,7 @@ void main() {
       test('createIndex should work with FullTextIndex', () async {
         await db.createIndex('a', FullTextIndex('[[".a"]]'));
 
-        final q = await db.query('SELECT * WHERE "a" MATCH "query"');
+        final q = await db.query(N1QLQuery('SELECT * WHERE "a" MATCH "query"'));
 
         final explain = await q.explain();
 
@@ -396,7 +396,7 @@ void main() {
       });
 
       test('(set/get)Parameters sets and gets the query parameters', () async {
-        final q = await db.query('SELECT doc');
+        final q = await db.query(N1QLQuery('SELECT doc'));
 
         final parameters = MutableDict()..addAll({'a': true});
 
@@ -406,12 +406,12 @@ void main() {
       });
 
       test('execute does not throw', () async {
-        final q = await db.query('SELECT doc');
+        final q = await db.query(N1QLQuery('SELECT doc'));
         expect(q.execute(), completion(isEmpty));
       });
 
       test('explain returns the query plan explanation', () async {
-        final q = await db.query('SELECT doc');
+        final q = await db.query(N1QLQuery('SELECT doc'));
         final queryPlan = await q.explain();
 
         expect(
@@ -424,17 +424,17 @@ void main() {
       });
 
       test('columCount returns correct count', () async {
-        final q = await db.query('SELECT a');
+        final q = await db.query(N1QLQuery('SELECT a'));
         expect(q.columnCount(), completion(equals(1)));
       });
 
       test('columnName returns correct name', () async {
-        final q = await db.query('SELECT a');
+        final q = await db.query(N1QLQuery('SELECT a'));
         expect(q.columnName(0), completion(equals('a')));
       });
 
       test('listener is notified of changes', () async {
-        final q = await db.query('SELECT a FROM a WHERE a.b = "c"');
+        final q = await db.query(N1QLQuery('SELECT a FROM a WHERE a.b = "c"'));
 
         final doc = MutableDocument()..properties.addAll({'b': 'c'});
         final result = MutableDict()..addAll({'a': doc.properties});
@@ -457,7 +457,7 @@ void main() {
 
       test('bad query: error position highlighting', () {
         expect(
-          () => db.query('SELECT * WHERE META.foo = "bar"'),
+          () => db.query(N1QLQuery('SELECT * WHERE META.foo = "bar"')),
           throwsA(isA<CouchbaseLiteException>().having(
             (it) => it.toString(),
             'toString()',
@@ -475,7 +475,8 @@ SELECT * WHERE META.foo = "bar"
           final doc = MutableDocument('ResultSetColumnByName');
           await db.saveDocument(doc);
 
-          final q = await db.query(r'SELECT META.id AS id WHERE META.id = $ID');
+          final q = await db
+              .query(N1QLQuery(r'SELECT META.id AS id WHERE META.id = $ID'));
           await q.setParameters(MutableDict()..addAll({'ID': doc.id}));
 
           final resultSet = await q.execute();
@@ -487,7 +488,8 @@ SELECT * WHERE META.foo = "bar"
           final doc = MutableDocument('ResultSetColumnIndex');
           await db.saveDocument(doc);
 
-          final q = await db.query(r'SELECT META.id WHERE META.id = $ID');
+          final q =
+              await db.query(N1QLQuery(r'SELECT META.id WHERE META.id = $ID'));
           await q.setParameters(MutableDict()..addAll({'ID': doc.id}));
 
           final resultSet = await q.execute();
@@ -541,15 +543,15 @@ SELECT * WHERE META.foo = "bar"
             'date': '2021-01-15',
           }));
 
-        final q = await db.query(
+        final q = await db.query(N1QLQuery(
           r'''
-        SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal FROM dish
-        JOIN meal ON array_contains(meal.dishes, dish._id)
-        WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
-        GROUP BY dish._id
-        ORDER BY max(meal.date)
-        ''',
-        );
+          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal FROM dish
+          JOIN meal ON array_contains(meal.dishes, dish._id)
+          WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
+          GROUP BY dish._id
+          ORDER BY max(meal.date)
+          ''',
+        ));
 
         print(await q.explain());
 

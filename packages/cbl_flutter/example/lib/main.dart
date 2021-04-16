@@ -39,8 +39,8 @@ class _MyAppState extends State<MyApp> {
       config: DatabaseConfiguration(directory: appDocsDir.path),
     );
 
-    final query =
-        await _db.query('SELECT post FROM post WHERE post.type = "post"');
+    final query = await _db
+        .query(N1QLQuery('SELECT post FROM post WHERE post.type = "post"'));
 
     query
         .changes()
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
 
   void _clearDatabase() async {
     final ids = await _db
-        .query('SELECT META.id')
+        .query(N1QLQuery('SELECT META.id'))
         .then((q) => q.execute())
         .then((rs) => rs.map((r) => r[0].asString).toList());
 

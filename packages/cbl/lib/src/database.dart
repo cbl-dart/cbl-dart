@@ -601,7 +601,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
 
   // === Queries ===============================================================
 
-  /// Creates a new query by compiling the [queryString].
+  /// Creates a new query by compiling the [queryDefinition].
   ///
   /// This is fast, but not instantaneous. If you need to run the same query
   /// many times, keep the [Query] around instead of compiling it each time. If
@@ -609,19 +609,11 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   /// one query with placeholder parameter(s), and substitute the desired
   /// value(s) with [Query.setParameters] each time you run the query.
   ///
-  /// {@macro cbl.Query.language}
-  ///
   /// See:
-  /// - [QueryLanguage] for the available query languages.
   /// - [Query] for how to write and use queries.
-  Future<Query> query(
-    String queryString, {
-    QueryLanguage language = QueryLanguage.N1QL,
-  }) async =>
-      createQuery(
+  Future<Query> query(QueryDefinition queryDefinition) async => createQuery(
         db: native,
-        queryString: queryString,
-        language: language,
+        queryDefinition: queryDefinition,
       );
 
   // === Indexes ===============================================================
