@@ -29,8 +29,8 @@ Future<Database> openTestDb(
 extension DatabaseUtilsExtension on Database {
   /// Returns a stream wich emits the ids of all the documents in this database.
   Stream<String> getAllIds() async* {
-    final resultSet =
-        await query('SELECT META.id AS id').then((query) => query.execute());
+    final resultSet = await query(N1QLQuery('SELECT META.id AS id'))
+        .then((query) => query.execute());
 
     for (final result in resultSet.asDicts) {
       yield result['id'].asString;
@@ -39,7 +39,7 @@ extension DatabaseUtilsExtension on Database {
 
   /// Returns a stream which emits the ids of all the documents in the
   /// database when they change.
-  Stream<List<String>> watchAllIds() => query('SELECT META.id AS id')
+  Stream<List<String>> watchAllIds() => query(N1QLQuery('SELECT META.id AS id'))
       .asStream()
       .asyncExpand((q) => q.changes())
       .map((resultSet) => resultSet.map((rs) => rs['id'].asString).toList());

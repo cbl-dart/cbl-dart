@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:meta/meta.dart';
 
+import 'database.dart';
 import 'fleece.dart';
 import 'native_object.dart';
 import 'utils.dart';
@@ -15,18 +18,13 @@ export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
 
 Future<Query> createQuery({
   required WorkerObject<CBLDatabase> db,
-  required String queryString,
-  required QueryLanguage language,
+  required QueryDefinition queryDefinition,
 }) {
-  if (language == QueryLanguage.N1QL) {
-    queryString = _removeWhiteSpaceFromQuery(queryString);
-  }
-
   return db
       .execute((pointer) => CreateDatabaseQuery(
             pointer,
-            queryString,
-            language,
+            queryDefinition.queryString,
+            queryDefinition.language,
           ))
       .then((address) => Query._fromPointer(
             address.toPointer(),
@@ -34,18 +32,83 @@ Future<Query> createQuery({
           ));
 }
 
-String _removeWhiteSpaceFromQuery(String query) =>
-    query.replaceAll(RegExp(r'\s+'), ' ').trim();
-
 // endregion
+
+/// A definition for a database query which can be compiled into a [Query].
+///
+/// {@macro cbl.Query.language}
+///
+/// Use [N1QLQuery] and [JSONQuery] to create query definitions in the
+/// corresponding language.
+///
+/// See:
+/// - [Database.query] for creating [Query]s.
+@immutable
+abstract class QueryDefinition {
+  /// The query language this query is defined in.
+  QueryLanguage get language;
+
+  /// The query string which defines this query.
+  String get queryString;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is QueryDefinition &&
+          runtimeType == other.runtimeType &&
+          language == other.language &&
+          queryString == other.queryString;
+
+  @override
+  int get hashCode => super.hashCode ^ language.hashCode ^ queryString.hashCode;
+}
+
+/// A [QueryDefinition] written in N1QL.
+class N1QLQuery extends QueryDefinition {
+  static String _removeWhiteSpaceFromQueryDefinition(String query) =>
+      query.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  /// Creates a [QueryDefinition] written in N1QL.
+  N1QLQuery(String queryDefinition)
+      : queryString = _removeWhiteSpaceFromQueryDefinition(queryDefinition);
+
+  @override
+  QueryLanguage get language => QueryLanguage.N1QL;
+
+  @override
+  final String queryString;
+
+  @override
+  String toString() => 'N1QLQuery($queryString)';
+}
+
+/// A [QueryDefinition] in the JSON syntax.
+class JSONQuery extends QueryDefinition {
+  /// Creates a [QueryDefinition] in the JSON syntax from JSON
+  /// represented as primitive Dart values.
+  JSONQuery(List<dynamic> queryDefinition)
+      : queryString = jsonEncode(queryDefinition);
+
+  /// Creates a [QueryDefinition] in the JSON syntax from a JSON string.
+  JSONQuery.fromString(this.queryString);
+
+  @override
+  QueryLanguage get language => QueryLanguage.json;
+
+  @override
+  final String queryString;
+
+  @override
+  String toString() => 'JSONQuery($queryString)';
+}
 
 /// A [Query] represents a compiled database query.
 ///
+/// {@template cbl.Query.language}
 /// The query language is a large subset of the
 /// [N1QL](https://www.couchbase.com/products/n1ql) language from Couchbase
 /// Server, which you can think of as "SQL for JSON" or "SQL++".
 ///
-/// {@template cbl.Query.language}
 /// Queries may be given either in
 /// [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html),
 /// or in JSON using a
@@ -63,6 +126,10 @@ String _removeWhiteSpaceFromQuery(String query) =>
 ///
 /// The [ResultSet] passed to the listener is the _entire new result set_, not
 /// just the rows that changed.
+///
+/// See:
+/// - [QueryDefinition] for the object which represents an uncompiled database
+///   query.
 class Query extends NativeResource<WorkerObject<CBLQuery>> {
   Query._fromPointer(Pointer<CBLQuery> pointer, Worker worker)
       : super(CblRefCountedWorkerObject(
@@ -82,13 +149,13 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
   /// key `PARAM` that maps to the value of the parameter.
   ///
   /// ```dart
-  /// final query = await db.query(
+  /// final query = await db.query(N1QLQuery(
   ///   '''
   ///   SELECT p.name, r.rating
   ///     FROM product p INNER JOIN reviews r ON array_contains(p.reviewList, r.META.id)
-  ///         WHERE p.META.id  = $PRODUCT_ID
+  ///       WHERE p.META.id = $PRODUCT_ID
   ///   ''',
-  /// );
+  /// ));
   ///
   /// await query.setParameters(MutableDict({
   ///   'PRODUCT_ID': 'product320',
