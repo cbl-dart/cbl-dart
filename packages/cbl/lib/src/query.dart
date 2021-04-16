@@ -152,7 +152,7 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
   /// the result set changes.
   Stream<ResultSet> changes() => callbackStream<ResultSet, int>(
         worker: native.worker,
-        createWorkerRequest: (callback) => AddQueryChangeListener(
+        createRegisterCallbackRequest: (callback) => AddQueryChangeListener(
           native.pointerUnsafe,
           callback.native.pointerUnsafe.address,
         ),

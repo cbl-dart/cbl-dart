@@ -801,7 +801,8 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   Stream<ReplicatorStatus> statusChanges() =>
       callbackStream<ReplicatorStatus, void>(
         worker: native.worker,
-        createWorkerRequest: (callback) => AddReplicatorChangeListener(
+        createRegisterCallbackRequest: (callback) =>
+            AddReplicatorChangeListener(
           native.pointerUnsafe,
           callback.native.pointerUnsafe.address,
         ),
@@ -858,7 +859,8 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   /// have been replicated.
   Stream<DocumentsReplicated> documentReplications() => callbackStream(
         worker: native.worker,
-        createWorkerRequest: (callback) => AddReplicatorDocumentListener(
+        createRegisterCallbackRequest: (callback) =>
+            AddReplicatorDocumentListener(
           native.pointerUnsafe,
           callback.native.pointerUnsafe.address,
         ),
