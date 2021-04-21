@@ -21,7 +21,7 @@ abstract class BaseException implements Exception {
           message == other.message;
 
   @override
-  int get hashCode => super.hashCode ^ message.hashCode;
+  int get hashCode => message.hashCode;
 }
 
 class CouchbaseLiteException extends BaseException {

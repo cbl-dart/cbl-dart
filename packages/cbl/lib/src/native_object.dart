@@ -69,7 +69,7 @@ class NativeObject<T extends NativeType> {
           _pointer.address == other._pointer.address;
 
   @override
-  int get hashCode => super.hashCode ^ _pointer.address.hashCode;
+  int get hashCode => _pointer.address.hashCode;
 }
 
 /// A resource which is based on a [NativeObject].
@@ -79,6 +79,16 @@ abstract class NativeResource<T extends NativeObject> {
   /// The native object underlying this resource.
   @internal
   final T native;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NativeResource &&
+          other.runtimeType == other.runtimeType &&
+          native == other.native;
+
+  @override
+  int get hashCode => native.hashCode;
 }
 
 /// A native object, whose operations are executed in a [Worker].

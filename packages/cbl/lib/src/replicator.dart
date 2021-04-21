@@ -96,7 +96,7 @@ class UrlEndpoint extends Endpoint {
           url == other.url;
 
   @override
-  int get hashCode => super.hashCode ^ url.hashCode;
+  int get hashCode => url.hashCode;
 
   @override
   String toString() => 'UrlEndpoint(url: $url)';
@@ -117,7 +117,7 @@ class LocalDbEndpoint extends Endpoint {
           database == other.database;
 
   @override
-  int get hashCode => super.hashCode ^ database.hashCode;
+  int get hashCode => database.hashCode;
 
   @override
   String toString() => 'LocalDbEndpoint(database: $database)';
@@ -303,7 +303,6 @@ class ProxySettings {
 
   @override
   int get hashCode =>
-      super.hashCode ^
       type.hashCode ^
       hostname.hashCode ^
       port.hashCode ^
@@ -417,7 +416,6 @@ class ReplicatorConfiguration {
 
   @override
   int get hashCode =>
-      super.hashCode ^
       endpoint.hashCode ^
       replicatorType.hashCode ^
       continuous.hashCode ^
@@ -581,8 +579,7 @@ class ReplicatorProgress {
           documentCount == other.documentCount;
 
   @override
-  int get hashCode =>
-      super.hashCode ^ fractionComplete.hashCode ^ documentCount.hashCode;
+  int get hashCode => fractionComplete.hashCode ^ documentCount.hashCode;
 
   @override
   String toString() => 'ReplicatorProgress('
@@ -614,8 +611,7 @@ class ReplicatorStatus {
           error == other.error;
 
   @override
-  int get hashCode =>
-      super.hashCode ^ activity.hashCode ^ progress.hashCode ^ error.hashCode;
+  int get hashCode => activity.hashCode ^ progress.hashCode ^ error.hashCode;
 
   @override
   String toString() => 'ReplicatorStatus('
@@ -649,7 +645,6 @@ class ReplicatedDocument {
 
   @override
   int get hashCode =>
-      super.hashCode ^
       id.hashCode ^
       const DeepCollectionEquality().hash(flags) ^
       error.hashCode;
@@ -703,7 +698,6 @@ class DocumentsReplicated {
 
   @override
   int get hashCode =>
-      super.hashCode ^
       direction.hashCode ^
       const DeepCollectionEquality().hash(documents);
 
@@ -885,16 +879,6 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
           return DocumentsReplicated(direction, documents);
         },
       );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Replicator &&
-          other.runtimeType == other.runtimeType &&
-          native == other.native;
-
-  @override
-  int get hashCode => super.hashCode ^ native.hashCode;
 
   @override
   String toString() => 'Replicator()';

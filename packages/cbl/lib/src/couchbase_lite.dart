@@ -43,8 +43,7 @@ class LogMessage {
           message == other.message;
 
   @override
-  int get hashCode =>
-      super.hashCode ^ level.hashCode ^ domain.hashCode ^ message.hashCode;
+  int get hashCode => level.hashCode ^ domain.hashCode ^ message.hashCode;
 
   @override
   String toString() => 'LogMessage('

@@ -43,13 +43,6 @@ class Doc extends NativeResource<NativeObject<FLDoc>> {
 
   /// Returns the root value in the [Doc], usually an [Dict].
   Value get root => Value.fromPointer(_bindings.getRoot(native.pointerUnsafe));
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Doc &&
-          runtimeType == other.runtimeType &&
-          native == other.native;
 }
 
 // === Value ===================================================================
@@ -194,20 +187,20 @@ class Value extends NativeResource<NativeObject<FLValue>> {
     switch (type) {
       case ValueType.undefined:
       case ValueType.Null:
-        return super.hashCode;
+        return 0;
       case ValueType.boolean:
-        return super.hashCode ^ asBool.hashCode;
+        return  asBool.hashCode;
       case ValueType.number:
-        return super.hashCode ^ asInt.hashCode;
+        return asInt.hashCode;
       case ValueType.string:
-        return super.hashCode ^ asString.hashCode;
+        return  asString.hashCode;
       case ValueType.data:
         // TODO: update when ValueType.data is implemented
-        return super.hashCode;
+        return 0;
       case ValueType.array:
-        return super.hashCode ^ asArray.hashCode;
+        return asArray.hashCode;
       case ValueType.dict:
-        return super.hashCode ^ asDict.hashCode;
+        return asDict.hashCode;
     }
   }
 

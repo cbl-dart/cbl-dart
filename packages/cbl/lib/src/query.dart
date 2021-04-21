@@ -60,7 +60,7 @@ abstract class QueryDefinition {
           queryString == other.queryString;
 
   @override
-  int get hashCode => super.hashCode ^ language.hashCode ^ queryString.hashCode;
+  int get hashCode => language.hashCode ^ queryString.hashCode;
 }
 
 /// A [QueryDefinition] written in N1QL.
