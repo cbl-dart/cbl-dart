@@ -5,19 +5,15 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl/src/utils.dart';
 
 import 'test_binding.dart';
+import 'utils/database_utils.dart';
 
 void main() {
   group('Blob', () {
     late Database db;
 
     setUpAll(() async {
-      db = await Database.open(
-        testDbName('Blob-Common'),
-        config: DatabaseConfiguration(directory: tmpDir),
-      );
+      db = await openTestDb('Blob-Common');
     });
-
-    tearDownAll(() => db.close());
 
     group('Blob', () {
       test('length returns the content length', () async {

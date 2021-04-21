@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 
 import 'blob.dart';
 import 'fleece.dart';
+import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 

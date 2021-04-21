@@ -8,6 +8,7 @@ import 'errors.dart';
 import 'fleece.dart';
 import 'native_object.dart';
 import 'worker/cbl_worker.dart';
+import 'resource.dart';
 
 // region Internal API
 

@@ -16,22 +16,17 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     ReplicationFilter? pushFilter,
     ReplicationFilter? pullFilter,
     ConflictResolver? conflictResolver,
-  }) async {
-    final replicator = await createReplicator(ReplicatorConfiguration(
-      endpoint: UrlEndpoint(testSyncGatewayUrl),
-      replicatorType: replicatorType,
-      continuous: continuous,
-      channels: channels,
-      documentIDs: documentIDs,
-      pushFilter: pushFilter,
-      pullFilter: pullFilter,
-      conflictResolver: conflictResolver,
-    ));
-
-    addTearDown(replicator.close);
-
-    return replicator;
-  }
+  }) =>
+      createReplicator(ReplicatorConfiguration(
+        endpoint: UrlEndpoint(testSyncGatewayUrl),
+        replicatorType: replicatorType,
+        continuous: continuous,
+        channels: channels,
+        documentIDs: documentIDs,
+        pushFilter: pushFilter,
+        pullFilter: pullFilter,
+        conflictResolver: conflictResolver,
+      ));
 }
 
 extension ReplicatorUtilsExtension on Replicator {

@@ -25,16 +25,16 @@ late final _bindings = CBLBindings.instance.nativeCallback;
 /// A callback which can be called from the native side.
 ///
 /// [NativeCallback]s have to be [close]d to free allocated resources on the
-/// native side and close it's [ReceivePort]. The isolate will not exist, as
+/// native side and close its [ReceivePort]. The isolate will not exist, as
 /// long as there is an open [ReceivePort].
-class NativeCallback implements NativeResource<NativeObject<Callback>> {
+class NativeCallback {
   /// Creates a callback which can be called from the native side.
   ///
   /// [handler] is the function which responds to calls from the native side.
   NativeCallback(this.handler) {
     _receivePort = ReceivePort();
 
-    _native = NativeObject(_bindings.makeNew(
+    native = NativeObject(_bindings.makeNew(
       this,
       _receivePort.sendPort.nativePort,
     ));
@@ -47,10 +47,7 @@ class NativeCallback implements NativeResource<NativeObject<Callback>> {
 
   late final ReceivePort _receivePort;
 
-  late final NativeObject<Callback> _native;
-
-  @override
-  NativeObject<Callback> get native => _native;
+  late final NativeObject<Callback> native;
 
   /// Close this callback to free resources on the native side and the
   /// Dart side.

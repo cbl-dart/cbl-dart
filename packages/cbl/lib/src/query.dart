@@ -9,30 +9,11 @@ import 'package:meta/meta.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'native_object.dart';
-import 'utils.dart';
+import 'resource.dart';
+import 'streams.dart';
 import 'worker/cbl_worker.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
-
-// region Internal API
-
-Future<Query> createQuery({
-  required WorkerObject<CBLDatabase> db,
-  required QueryDefinition queryDefinition,
-}) {
-  return db
-      .execute((pointer) => CreateDatabaseQuery(
-            pointer,
-            queryDefinition.queryString,
-            queryDefinition.language,
-          ))
-      .then((address) => Query._fromPointer(
-            address.toPointer(),
-            db.worker,
-          ));
-}
-
-// endregion
 
 /// A definition for a database query which can be compiled into a [Query].
 ///
@@ -130,14 +111,9 @@ class JSONQuery extends QueryDefinition {
 /// See:
 /// - [QueryDefinition] for the object which represents an uncompiled database
 ///   query.
-class Query extends NativeResource<WorkerObject<CBLQuery>> {
-  Query._fromPointer(Pointer<CBLQuery> pointer, Worker worker)
-      : super(CblRefCountedWorkerObject(
-          pointer,
-          worker,
-          release: true,
-          retain: false,
-        ));
+abstract class Query implements Resource {
+  /// The database this query is operating on.
+  Database get database;
 
   /// Assigns values to the query's parameters.
   ///
@@ -161,11 +137,7 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
   ///   'PRODUCT_ID': 'product320',
   /// }))
   /// ```
-  Future<void> setParameters(Dict parameters) =>
-      native.execute((pointer) => SetQueryParameters(
-            pointer,
-            parameters.native.pointer.address,
-          ));
+  Future<void> setParameters(Dict parameters);
 
   /// Gets the values assigned to this query's parameters.
   ///
@@ -174,30 +146,20 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
   ///
   /// See:
   /// - [setParameters]
-  Future<Dict?> getParameters() => native
-      .execute((pointer) => GetQueryParameters(pointer))
-      .then((address) => Dict.fromPointer(address.toPointer()));
+  Future<Dict?> getParameters();
 
   /// Runs the query, returning the results.
-  Future<ResultSet> execute() => native
-      .execute((pointer) => ExecuteQuery(pointer))
-      .then((address) => ResultSet._fromPointer(
-            address.toPointer(),
-            release: true,
-            retain: false,
-          ));
+  Future<ResultSet> execute();
 
   /// Returns information about the query, including the translated SQLite form,
   /// and the search strategy. You can use this to help optimize the query:
   /// the word `SCAN` in the strategy indicates a linear scan of the entire
   /// database, which should be avoided by adding an index. The strategy will
   /// also show which index(es), if any, are used.
-  Future<String> explain() =>
-      native.execute((pointer) => ExplainQuery(pointer));
+  Future<String> explain();
 
   /// Returns the number of columns in each result.
-  Future<int> columnCount() =>
-      native.execute((pointer) => GetQueryColumnCount(pointer));
+  Future<int> columnCount();
 
   /// Returns the name of a column in the result.
   ///
@@ -207,8 +169,7 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
   /// will have an automatically-generated name like `$1`. To give a column a
   /// custom name, use the `AS` syntax in the query. Every column is guaranteed
   /// to have a unique name.
-  Future<String> columnName(int index) =>
-      native.execute((pointer) => GetQueryColumnName(pointer, index));
+  Future<String> columnName(int index);
 
   /// Returns a [Stream] which emits a [ResultSet] when this query's results
   /// change, turning it into a "live query" until the stream is canceled.
@@ -217,29 +178,86 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
   /// subscriber of the results when ready. After that, it will run in the
   /// background after the database changes, and only notify the subscriber when
   /// the result set changes.
-  Stream<ResultSet> changes() => callbackStream<ResultSet, int>(
-        worker: native.worker,
-        createRegisterCallbackRequest: (callback) => AddQueryChangeListener(
-          native.pointerUnsafe,
-          callback.native.pointerUnsafe.address,
-        ),
-        createEvent: (listenerTokenAddress, _) async {
-          // The native side sends no arguments. When the native side notfies
-          // the listener it has to copy the current query result set.
+  Stream<ResultSet> changes();
+}
 
-          final resultSetAddress =
-              await native.execute((pointer) => CopyCurrentQueryResultSet(
-                    pointer,
-                    listenerTokenAddress,
-                  ));
+class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
+    with DelegatingResourceMixin
+    implements Query {
+  QueryImpl({
+    required this.database,
+    required Pointer<CBLQuery> pointer,
+  }) : super(CblRefCountedWorkerObject(
+          pointer,
+          database.native.worker,
+          release: true,
+          retain: false,
+        )) {
+    database.registerChildResource(this);
+  }
 
-          return ResultSet._fromPointer(
-            resultSetAddress.toPointer(),
+  @override
+  final DatabaseImpl database;
+
+  @override
+  Future<void> setParameters(Dict parameters) =>
+      use(() => native.execute((pointer) => SetQueryParameters(
+            pointer,
+            parameters.native.pointer.address,
+          )));
+
+  @override
+  Future<Dict?> getParameters() => use(() => native
+      .execute((pointer) => GetQueryParameters(pointer))
+      .then((address) => Dict.fromPointer(address.toPointer())));
+
+  @override
+  Future<ResultSet> execute() => use(() => native
+      .execute((pointer) => ExecuteQuery(pointer))
+      .then((address) => ResultSet._(
+            address.toPointer(),
             release: true,
             retain: false,
-          );
-        },
-      );
+          )));
+
+  @override
+  Future<String> explain() =>
+      use(() => native.execute((pointer) => ExplainQuery(pointer)));
+
+  @override
+  Future<int> columnCount() =>
+      use(() => native.execute((pointer) => GetQueryColumnCount(pointer)));
+
+  @override
+  Future<String> columnName(int index) => use(
+      () => native.execute((pointer) => GetQueryColumnName(pointer, index)));
+
+  @override
+  Stream<ResultSet> changes() =>
+      useSync(() => CallbackStreamController<ResultSet, int>(
+            parent: this,
+            worker: native.worker,
+            createRegisterCallbackRequest: (callback) => AddQueryChangeListener(
+              native.pointerUnsafe,
+              callback.native.pointerUnsafe.address,
+            ),
+            createEvent: (listenerTokenAddress, _) async {
+              // The native side sends no arguments. When the native side notfies
+              // the listener it has to copy the current query result set.
+
+              final resultSetAddress =
+                  await native.execute((pointer) => CopyCurrentQueryResultSet(
+                        pointer,
+                        listenerTokenAddress,
+                      ));
+
+              return ResultSet._(
+                resultSetAddress.toPointer(),
+                release: true,
+                retain: false,
+              );
+            },
+          ).stream);
 }
 
 /// One of the results that [Query]s return in [ResultSet]s.
@@ -248,7 +266,7 @@ class Query extends NativeResource<WorkerObject<CBLQuery>> {
 /// data pull it out of the Result before moving on to the next Result.
 abstract class Result {
   /// Returns the value of a column of the current result, given its
-  /// (zero-based) numeric index as an `int` or it's name as a [String].
+  /// (zero-based) numeric index as an `int` or its name as a [String].
   ///
   /// This may return `null`, indicating `MISSING`, if the value doesn't exist,
   /// e.g. if the column is a property that doesn't exist in the document.
@@ -317,7 +335,7 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
 /// - [Result] for how to consume a single Result.
 class ResultSet extends NativeResource<NativeObject<CBLResultSet>>
     with IterableMixin<Result> {
-  ResultSet._fromPointer(
+  ResultSet._(
     Pointer<CBLResultSet> pointer, {
     required bool release,
     required bool retain,

@@ -8,15 +8,10 @@ import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
 import 'native_object.dart';
+import 'resource.dart';
+import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
-
-// region Internal API
-
-BlobManager createBlobManager({required WorkerObject<CBLDatabase> db}) =>
-    BlobManager._(db);
-
-// endregion
 
 late final _blobBindings = CBLBindings.instance.blobs.blob;
 
@@ -52,7 +47,7 @@ late final _blobBindings = CBLBindings.instance.blobs.blob;
 /// - [BlobWriteStream] for writing a Blob in chunks.
 /// - [BlobManager] for the entry point to reading and writing Blob.
 class Blob extends NativeResource<NativeObject<CBLBlob>> {
-  Blob._fromPointer(
+  Blob._(
     Pointer<CBLBlob> pointer, {
     required bool retain,
   }) : super(CblRefCountedObject(pointer, release: true, retain: retain));
@@ -106,7 +101,7 @@ extension DictBlobExtension on Dict {
   Blob? get asBlob => _blobBindings
       .get(native.pointerUnsafe.cast())
       .toNullable()
-      ?.let((it) => Blob._fromPointer(it, retain: true));
+      ?.let((it) => Blob._(it, retain: true));
 }
 
 /// Extension to get a [Blob] from a [Value].
@@ -132,12 +127,8 @@ extension ValueBlobExtension on Value {
 /// Future from the last call has completed.
 ///
 /// If for some reason you need to abort, call [close].
-class BlobWriteStream
-    extends NativeResource<SimpleWorkerObject<CBLBlobWriteStream>>
-    implements StreamConsumer<Uint8List> {
-  BlobWriteStream._(Pointer<CBLBlobWriteStream> pointer, Worker worker)
-      : super(SimpleWorkerObject(pointer, worker));
-
+abstract class BlobWriteStream
+    implements StreamConsumer<Uint8List>, ClosableResource {
   /// Writes the chunks in [stream] to this stream.
   ///
   /// You must not call this method again until the returned [Future] completes.
@@ -151,7 +142,33 @@ class BlobWriteStream
   /// Even if the returned Future rejects, you have to call [close] if you are
   /// not going to finish the stream with a call to [createBlob].
   @override
-  Future<void> addStream(Stream<Uint8List> stream) => stream
+  Future<void> addStream(Stream<Uint8List> stream);
+
+  /// Closes this stream, if you need to give up without creating a [Blob].
+  @override
+  Future<void> close();
+
+  /// Creates a new [Blob] after its content has been written to this stream.
+  ///
+  /// You should then add the Blob to a [MutableDocument] as a property.
+  ///
+  /// [contentType] is the MIME type of the data written to this stream.
+  Future<Blob> createBlob({String? contentType});
+}
+
+class _BlobWriteStream
+    extends NativeResource<SimpleWorkerObject<CBLBlobWriteStream>>
+    with ClosableResourceMixin
+    implements BlobWriteStream {
+  _BlobWriteStream(
+    BlobManagerImpl blobManager,
+    Pointer<CBLBlobWriteStream> pointer,
+  ) : super(SimpleWorkerObject(pointer, blobManager.native.worker)) {
+    blobManager.registerChildResource(this);
+  }
+
+  @override
+  Future<void> addStream(Stream<Uint8List> stream) => use(() => stream
       .asyncMap((chunk) => runArena(() {
             final chunkPointer = scoped(malloc<Uint8>(chunk.length));
 
@@ -163,25 +180,107 @@ class BlobWriteStream
                   chunk.length,
                 ));
           }))
-      .drain();
+      .drain());
 
-  /// Closes this stream, if you need to give up without creating a [Blob].
   @override
-  Future<void> close() =>
-      native.execute((pointer) => CloseBlobWriteStream(pointer));
+  Future<Blob> createBlob({String? contentType}) => closeAndUse(
+        () async {
+          final address =
+              await native.execute((pointer) => CreateBlobWithWriteStream(
+                    pointer,
+                    contentType,
+                  ));
 
-  /// Creates a new [Blob] after its content has been written to this stream.
-  ///
-  /// You should then add the Blob to a [MutableDocument] as a property.
-  ///
-  /// [contentType] is the MIME type of the data written to this stream.
-  Future<Blob> createBlob({String? contentType}) => native
-      .execute((pointer) => CreateBlobWithWriteStream(
-            pointer,
-            contentType,
-          ))
-      .then((address) =>
-          Blob._fromPointer(address.toPointer().cast(), retain: false));
+          return Blob._(
+            address.toPointer().cast(),
+            retain: false,
+          );
+        },
+        doPerformClose: false,
+      );
+
+  @override
+  Future<void> performClose() =>
+      native.execute((pointer) => CloseBlobWriteStream(pointer));
+}
+
+class _BlobReadStreamController
+    extends ClosableResourceStreamController<Uint8List> {
+  _BlobReadStreamController({
+    required AbstractResource parent,
+    required this.worker,
+    required this.blob,
+    required this.chunkSize,
+  }) : super(parent: parent);
+
+  final Worker worker;
+  final Blob blob;
+  final int chunkSize;
+
+  Future<void>? _setupDone;
+  late Pointer<Uint8> _buffer;
+  late Pointer<CBLBlobReadStream> _streamPointer;
+  var _isPaused = false;
+
+  @override
+  Future<void> onListen() => _start();
+
+  @override
+  void onPause() => _pause();
+
+  @override
+  void onResume() => _start();
+
+  @override
+  Future<void> onCancel() async {
+    _pause();
+    await _cleanUp();
+  }
+
+  Future<void> _setup() async {
+    _buffer = malloc(chunkSize);
+
+    _streamPointer = await runNativeObjectScoped(() => worker
+        .execute(OpenBlobReadStream(blob.native.pointer))
+        .then((address) => address.toPointer().cast()));
+  }
+
+  Future<void> _cleanUp() async {
+    await _setupDone;
+
+    malloc.free(_buffer);
+
+    await worker.execute(CloseBlobReadStream(_streamPointer));
+  }
+
+  Future<void> _start() async {
+    try {
+      _isPaused = false;
+
+      await (_setupDone ??= _setup());
+
+      while (!_isPaused) {
+        final bytesRead = await worker.execute(ReadFromBlobReadStream(
+          _streamPointer,
+          _buffer.address,
+          chunkSize,
+        ));
+
+        // The read stream is done (EOF).
+        if (bytesRead == 0) {
+          await controller.close();
+          break;
+        }
+
+        controller.add(Uint8List.fromList(_buffer.asTypedList(bytesRead)));
+      }
+    } catch (error, stackTrace) {
+      controller.addError(error, stackTrace);
+      await controller.close();
+    }
+  }
+
+  void _pause() => _isPaused = true;
 }
 
 /// Manage reading and writing of [Blob]s.
@@ -189,9 +288,7 @@ class BlobWriteStream
 /// See:
 /// - [Database.blobManager] to get the [BlobManager] instance associated with
 ///   a Database.
-class BlobManager extends NativeResource<WorkerObject<CBLDatabase>> {
-  BlobManager._(WorkerObject<CBLDatabase> db) : super(db);
-
+abstract class BlobManager {
   /// Opens a [BlobWriteStream] for writing a new [Blob].
   ///
   /// You have to either use the returned stream to [BlobWriteStream.createBlob]
@@ -200,24 +297,12 @@ class BlobManager extends NativeResource<WorkerObject<CBLDatabase>> {
   /// See:
   /// - [BlobWriteStream] for how to add data to the stream and finally create
   ///   the new Blob.
-  Future<BlobWriteStream> openWriteStream() => native
-      .execute((pointer) => OpenBlobWriteStream(pointer))
-      .then((address) => BlobWriteStream._(
-            address.toPointer().cast(),
-            native.worker,
-          ));
+  Future<BlobWriteStream> openWriteStream();
 
   /// Creates a new blob given its [content] as a single chunk of data.
   ///
   /// [contentType] is the MIME type of the data in [content].
-  Future<Blob> createBlob(
-    Uint8List content, {
-    String? contentType,
-  }) async {
-    final writeStream = await openWriteStream();
-    await writeStream.addStream(Stream.value(content));
-    return writeStream.createBlob(contentType: contentType);
-  }
+  Future<Blob> createBlob(Uint8List content, {String? contentType});
 
   /// Returns a stream for reading a [Blob]'s content in chunks.
   ///
@@ -226,73 +311,44 @@ class BlobManager extends NativeResource<WorkerObject<CBLDatabase>> {
   ///
   /// The returned Stream only starts reading after a subscription has been
   /// created and can only be listened to once.
-  Stream<Uint8List> readStream(Blob blob, {int chunkSize = 4096}) {
-    late StreamController<Uint8List> controller;
-    Pointer<Uint8>? buffer;
-    Pointer<CBLBlobReadStream>? streamPointer;
-    var isPaused = false;
-
-    late Future setup = (() async {
-      buffer = malloc(chunkSize);
-
-      streamPointer = await runNativeObjectScoped(() => native.worker
-          .execute(OpenBlobReadStream(blob.native.pointer))
-          .then((address) => address.toPointer().cast()));
-    })();
-
-    Future cleanUp() async {
-      await setup.catchError((Object e) {});
-
-      malloc.free(buffer!);
-
-      await native.worker.execute(CloseBlobReadStream(streamPointer!));
-    }
-
-    void start() async {
-      try {
-        isPaused = false;
-
-        await setup;
-
-        while (!isPaused) {
-          final bytesRead = await native.worker.execute(ReadFromBlobReadStream(
-            streamPointer!,
-            buffer!.address,
-            chunkSize,
-          ));
-
-          // The read stream is done (EOF).
-          if (bytesRead == 0) {
-            await controller.close();
-            break;
-          }
-
-          controller.add(Uint8List.fromList(buffer!.asTypedList(bytesRead)));
-        }
-      } catch (error, stackTrace) {
-        controller.addError(error, stackTrace);
-        await controller.close();
-      }
-    }
-
-    void pause() {
-      isPaused = true;
-    }
-
-    controller = StreamController(
-      onListen: start,
-      onPause: pause,
-      onResume: start,
-      onCancel: () async {
-        pause();
-        await cleanUp();
-      },
-    );
-
-    return controller.stream;
-  }
+  Stream<Uint8List> readStream(Blob blob, {int chunkSize = 4096});
 
   /// Reads the [Blob]'s contents into memory and returns them.
+  Future<Uint8List> blobContent(Blob blob);
+}
+
+class BlobManagerImpl extends NativeResource<WorkerObject<CBLDatabase>>
+    with DelegatingResourceMixin
+    implements BlobManager {
+  BlobManagerImpl(this.database) : super(database.native) {
+    database.registerChildResource(this);
+  }
+
+  final DatabaseImpl database;
+
+  @override
+  Future<BlobWriteStream> openWriteStream() => use(() => native
+      .execute((pointer) => OpenBlobWriteStream(pointer))
+      .then((address) => _BlobWriteStream(this, address.toPointer().cast())));
+
+  @override
+  Future<Blob> createBlob(Uint8List content, {String? contentType}) =>
+      use(() async {
+        final writeStream = await openWriteStream();
+        await writeStream.addStream(Stream.value(content));
+        return writeStream.createBlob(contentType: contentType);
+      });
+
+  @override
+  Stream<Uint8List> readStream(Blob blob, {int chunkSize = 4096}) =>
+      useSync(() => _BlobReadStreamController(
+            parent: this,
+            worker: native.worker,
+            blob: blob,
+            chunkSize: chunkSize,
+          ).stream);
+
+  @override
   Future<Uint8List> blobContent(Blob blob) =>
-      readStream(blob).toList().then(jointUint8Lists);
+      use(() => readStream(blob).toList().then(jointUint8Lists));
 }

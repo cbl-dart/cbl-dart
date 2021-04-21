@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:meta/meta.dart';
 
 import 'worker/worker.dart';
 
@@ -70,25 +69,6 @@ class NativeObject<T extends NativeType> {
 
   @override
   int get hashCode => _pointer.address.hashCode;
-}
-
-/// A resource which is based on a [NativeObject].
-abstract class NativeResource<T extends NativeObject> {
-  NativeResource(this.native);
-
-  /// The native object underlying this resource.
-  @internal
-  final T native;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is NativeResource &&
-          other.runtimeType == other.runtimeType &&
-          native == other.native;
-
-  @override
-  int get hashCode => native.hashCode;
 }
 
 /// A native object, whose operations are executed in a [Worker].

@@ -3,11 +3,11 @@
 Binaries for Couchbase Lite + Dart.
 
 > **Warning:** This is an internal package for [`cbl`](https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl)
-and it's API should not be considered public.
+and its API should not be considered public.
 
 ## Binaries versioning
 
-This package does not contain the actual binaries. It's primary purpose is
+This package does not contain the actual binaries. Its primary purpose is
 to declare dependencies on a version of the binaries. The binaries for a specific released are
 attached to a corresponding GitHub release, with a tag such as `cbl_native-v0.1.0`.
 
