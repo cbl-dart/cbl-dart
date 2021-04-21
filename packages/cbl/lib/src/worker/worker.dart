@@ -69,7 +69,7 @@ abstract class WorkerExecutor {
 /// When creating a worker, you need to provide a delegate. This delegate is
 /// sent to an [Isolate] through a [SendPort] and must only contain values
 /// which can be sent over a `SendPort`. The worker isolate receives a copy of
-/// the original delegate and calls it's [initialize] method, before starting
+/// the original delegate and calls its [initialize] method, before starting
 /// to accept requests.
 abstract class WorkerDelegate {
   /// Initializes this delegate in the worker isolate, before the worker starts
@@ -136,7 +136,7 @@ class Worker extends WorkerExecutor {
     assert(_running == true, 'Worker is not running');
   }
 
-  /// Starts this Worker by spawning it's Isolate and waiting for it to become
+  /// Starts this Worker by spawning its Isolate and waiting for it to become
   /// ready.
   ///
   /// If the Worker is not able to start the returned Future rejects with
@@ -213,7 +213,7 @@ class Worker extends WorkerExecutor {
         _running = true;
       });
 
-  /// Stops this Worker by killing it's Isolate and waiting for it to exit.
+  /// Stops this Worker by killing its Isolate and waiting for it to exit.
   Future<void> stop() => _lock.synchronized(() async {
         _debugIsRunning();
 

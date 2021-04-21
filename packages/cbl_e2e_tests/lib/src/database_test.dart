@@ -457,7 +457,7 @@ void main() {
 
       test('bad query: error position highlighting', () {
         expect(
-          () => db.query(N1QLQuery('SELECT * WHERE META.foo = "bar"')),
+          db.query(N1QLQuery('SELECT * WHERE META.foo = "bar"')),
           throwsA(isA<CouchbaseLiteException>().having(
             (it) => it.toString(),
             'toString()',

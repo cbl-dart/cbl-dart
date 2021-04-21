@@ -7,6 +7,7 @@ import 'package:ffi/ffi.dart';
 
 import 'errors.dart';
 import 'native_object.dart';
+import 'resource.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart' show ValueType, CopyFlag;
 
@@ -189,11 +190,11 @@ class Value extends NativeResource<NativeObject<FLValue>> {
       case ValueType.Null:
         return 0;
       case ValueType.boolean:
-        return  asBool.hashCode;
+        return asBool.hashCode;
       case ValueType.number:
         return asInt.hashCode;
       case ValueType.string:
-        return  asString.hashCode;
+        return asString.hashCode;
       case ValueType.data:
         // TODO: update when ValueType.data is implemented
         return 0;

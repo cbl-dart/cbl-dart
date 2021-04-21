@@ -17,7 +17,7 @@ class RequestHandlerNotFound implements Exception {
 
 /// A handler which responds to requests which have been sent to a [Worker].
 ///
-/// The handler receives the [request] as it's argument and returns the
+/// The handler receives the [request] as its argument and returns the
 /// response.
 typedef WorkerRequestHandler<T extends WorkerRequest<R>, R> = FutureOr<R>
     Function(T request);

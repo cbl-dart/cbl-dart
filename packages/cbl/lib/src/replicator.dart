@@ -11,6 +11,8 @@ import 'errors.dart';
 import 'fleece.dart';
 import 'native_callback.dart';
 import 'native_object.dart';
+import 'resource.dart';
+import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
@@ -20,7 +22,7 @@ export 'package:cbl_ffi/cbl_ffi.dart'
 // region Internal API
 
 Future<Replicator> createReplicator({
-  required WorkerObject<CBLDatabase> db,
+  required DatabaseImpl db,
   required ReplicatorConfiguration config,
 }) =>
     runNativeObjectScoped(() => runArena(() async {
@@ -40,18 +42,19 @@ Future<Replicator> createReplicator({
               ].whereNotNull().forEach((it) => it.close()));
 
           final cblConfig = config.toCBLReplicatorConfigurationScoped(
-            db,
+            db.native,
             pushFilterCallback?.native,
             pullFilterCallback?.native,
             conflictResolverCallback?.native,
           );
 
-          final address = await db.worker.execute(NewReplicator(cblConfig));
+          final address =
+              await db.native.worker.execute(NewReplicator(cblConfig));
 
-          return Replicator._fromPointer(
-            address.toPointer().cast(),
-            db.worker,
-            disposeCallbacks,
+          return ReplicatorImpl(
+            database: db,
+            pointer: address.toPointer().cast(),
+            disposeCallbacks: disposeCallbacks,
           );
         }));
 
@@ -471,8 +474,9 @@ extension on ReplicatorConfiguration {
         _bindings.endpointNewWithLocalDB != null,
         'LocalDbEndpoint is an Enterprise Edition feature',
       );
-      cblEndpoint =
-          _bindings.endpointNewWithLocalDB!(endpoint.database.native.pointer);
+      cblEndpoint = _bindings.endpointNewWithLocalDB!(
+        (endpoint.database as DatabaseImpl).native.pointer,
+      );
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $endpoint');
     }
@@ -645,9 +649,7 @@ class ReplicatedDocument {
 
   @override
   int get hashCode =>
-      id.hashCode ^
-      const DeepCollectionEquality().hash(flags) ^
-      error.hashCode;
+      id.hashCode ^ const DeepCollectionEquality().hash(flags) ^ error.hashCode;
 
   @override
   String toString() => 'ReplicatedDocument('
@@ -698,8 +700,7 @@ class DocumentsReplicated {
 
   @override
   int get hashCode =>
-      direction.hashCode ^
-      const DeepCollectionEquality().hash(documents);
+      direction.hashCode ^ const DeepCollectionEquality().hash(documents);
 
   @override
   String toString() => 'DocumentsReplicated('
@@ -711,14 +712,13 @@ class DocumentsReplicated {
 /// A replicator is a background task that synchronizes changes between a local
 /// database and another database on a remote server (or on a peer device, or
 /// even another local database.)
-class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
-  Replicator._fromPointer(
-    Pointer<CBLReplicator> pointer,
-    Worker worker,
-    this._disposeCallbacks,
-  ) : super(CBLReplicatorObject(pointer, worker));
+abstract class Replicator extends NativeResource<WorkerObject<CBLReplicator>>
+    implements ClosableResource {
+  Replicator._(WorkerObject<CBLReplicator> native) : super(native);
 
-  final void Function() _disposeCallbacks;
+  /// The database this replicator is pulling changes into and pushing changes
+  /// out of.
+  Database get database;
 
   /// Instructs this replicator to ignore existing checkpoints the next time it
   /// runs.
@@ -727,13 +727,12 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   /// database, which takes a lot longer, but it can resolve problems with
   /// missing documents if the client and server have gotten out of sync
   /// somehow.
-  Future<void> resetCheckpoint() =>
-      native.execute((pointer) => ResetReplicatorCheckpoint(pointer));
+  Future<void> resetCheckpoint();
 
   /// Starts this replicator, asynchronously.
   ///
   /// Does nothing if it's already started.
-  Future<void> start() => native.execute((pointer) => StartReplicator(pointer));
+  Future<void> start();
 
   /// Stops a running replicator, asynchronously.
   ///
@@ -742,7 +741,7 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   /// The [Stream] returned from [statusChanges] will emit a [ReplicatorStatus]
   /// with an activity level of [ReplicatorActivityLevel.stopped] after it
   /// stops. Until then, consider it still active.
-  Future<void> stop() => native.execute((pointer) => StopReplicator(pointer));
+  Future<void> stop();
 
   /// Informs this replicator whether it's considered possible to reach the
   /// remote host with the current network configuration.
@@ -752,8 +751,7 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   /// * Setting it to false will cancel any pending retry and prevent future
   ///   automatic retries.
   /// * Setting it back to true will initiate an immediate retry.
-  Future<void> setHostReachable(bool reachable) => native
-      .execute((pointer) => SetReplicatorHostReachable(pointer, reachable));
+  Future<void> setHostReachable(bool reachable);
 
   /// Puts this replicator in or out of "suspended" state.
   ///
@@ -765,35 +763,99 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
   /// * Setting [suspended] ot `false` causes the replicator to attempt to
   ///   reconnect, _if_ it was connected when suspended, and is still in Offline
   ///   state.
-  Future<void> setSuspended(bool suspended) =>
-      native.execute((pointer) => SetReplicatorSuspended(
-            pointer,
-            suspended,
-          ));
-
-  /// Stops this replicator and frees resources.
-  ///
-  /// After calling this method, this replicator must not be used any more.
-  Future<void> close() async {
-    if ((await status()).activity != ReplicatorActivityLevel.stopped) {
-      final stopped = statusChanges().firstWhere((status) {
-        return status.activity == ReplicatorActivityLevel.stopped;
-      });
-      await stop();
-      await stopped;
-    }
-
-    _disposeCallbacks();
-  }
+  Future<void> setSuspended(bool suspended);
 
   /// Returns this [Replicator]'s current status.
-  Future<ReplicatorStatus> status() =>
-      native.execute((pointer) => GetReplicatorStatus(pointer));
+  Future<ReplicatorStatus> status();
 
   /// Returns a stream that emits this replicators [ReplicatorStatus] when the
   /// it changes.
-  Stream<ReplicatorStatus> statusChanges() =>
-      callbackStream<ReplicatorStatus, void>(
+  Stream<ReplicatorStatus> statusChanges();
+
+  /// Indicates which documents have local changes that have not yet been pushed
+  /// to the server by this replicator.
+  ///
+  /// This is of course a snapshot, that will go out of date as the replicator
+  /// makes progress and/or documents are saved locally.
+  ///
+  /// The result is, effectively, a set of document IDs: a dictionary whose keys
+  /// are the IDs and values are `true`.
+  ///
+  /// If there are no pending documents, the dictionary is empty.
+  ///
+  /// This function can be called on a stopped or un-started replicator.
+  ///
+  /// Documents that would never be pushed by this replicator, due to its
+  /// configuration's [ReplicatorConfiguration.pushFilter] or
+  /// [ReplicatorConfiguration.documentIDs], are ignored.
+  Future<Dict> pendingDocumentIDs();
+
+  /// Indicates whether the document with the given ID has local changes that
+  /// have not yet been pushed to the server by this replicator.
+  ///
+  /// This is equivalent to, but faster than, calling [pendingDocumentIDs] and
+  /// checking whether the result contains [docID]. See that function's
+  /// documentation for details.
+  ///
+  /// A `false` result means the document is not pending.
+  Future<bool> isDocumentPending(String docID);
+
+  /// Returns a stream that emits [DocumentsReplicated]s when [Document]s
+  /// have been replicated.
+  Stream<DocumentsReplicated> documentReplications();
+}
+
+class ReplicatorImpl extends Replicator with ClosableResourceMixin {
+  ReplicatorImpl({
+    required this.database,
+    required Pointer<CBLReplicator> pointer,
+    required void Function() disposeCallbacks,
+  })   : _disposeCallbacks = disposeCallbacks,
+        super._(CBLReplicatorObject(pointer, database.native.worker)) {
+    database.registerChildResource(this);
+  }
+
+  final void Function() _disposeCallbacks;
+
+  @override
+  final DatabaseImpl database;
+
+  @override
+  Future<void> resetCheckpoint() => use(
+      () => native.execute((pointer) => ResetReplicatorCheckpoint(pointer)));
+
+  @override
+  Future<void> start() =>
+      use(() => native.execute((pointer) => StartReplicator(pointer)));
+
+  @override
+  Future<void> stop() => use(_stop);
+
+  Future<void> _stop() => native.execute((pointer) => StopReplicator(pointer));
+
+  @override
+  Future<void> setHostReachable(bool reachable) => use(() => native
+      .execute((pointer) => SetReplicatorHostReachable(pointer, reachable)));
+
+  @override
+  Future<void> setSuspended(bool suspended) =>
+      use(() => native.execute((pointer) => SetReplicatorSuspended(
+            pointer,
+            suspended,
+          )));
+
+  @override
+  Future<ReplicatorStatus> status() => use(_status);
+
+  Future<ReplicatorStatus> _status() =>
+      native.execute((pointer) => GetReplicatorStatus(pointer));
+
+  @override
+  Stream<ReplicatorStatus> statusChanges() => useSync(_statusChanges);
+
+  Stream<ReplicatorStatus> _statusChanges() =>
+      CallbackStreamController<ReplicatorStatus, void>(
+        parent: this,
         worker: native.worker,
         createRegisterCallbackRequest: (callback) =>
             AddReplicatorChangeListener(
@@ -812,46 +874,25 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
               .ref
               .toReplicatorStatus();
         },
-      );
+      ).stream;
 
-  /// Indicates which documents have local changes that have not yet been pushed
-  /// to the server by this replicator.
-  ///
-  /// This is of course a snapshot, that will go out of date as the replicator
-  /// makes progress and/or documents are saved locally.
-  ///
-  /// The result is, effectively, a set of document IDs: a dictionary whose keys
-  /// are the IDs and values are `true`.
-  ///
-  /// If there are no pending documents, the dictionary is empty.
-  ///
-  /// This function can be called on a stopped or un-started replicator.
-  ///
-  /// Documents that would never be pushed by this replicator, due to its
-  /// configuration's [ReplicatorConfiguration.pushFilter] or
-  /// [ReplicatorConfiguration.documentIDs], are ignored.
-  Future<Dict> pendingDocumentIDs() => native
+  @override
+  Future<Dict> pendingDocumentIDs() => use(() => native
       .execute((pointer) => GetReplicatorPendingDocumentIDs(pointer))
       .then((address) => MutableDict.fromPointer(
             address.toPointer(),
             release: true,
             retain: false,
-          ));
+          )));
 
-  /// Indicates whether the document with the given ID has local changes that
-  /// have not yet been pushed to the server by this replicator.
-  ///
-  /// This is equivalent to, but faster than, calling [pendingDocumentIDs] and
-  /// checking whether the result contains [docID]. See that function's
-  /// documentation for details.
-  ///
-  /// A `false` result means the document is not pending.
-  Future<bool> isDocumentPending(String docID) => native
-      .execute((pointer) => GetReplicatorIsDocumentPening(pointer, docID));
+  @override
+  Future<bool> isDocumentPending(String docID) => use(() => native
+      .execute((pointer) => GetReplicatorIsDocumentPening(pointer, docID)));
 
-  /// Returns a stream that emits [DocumentsReplicated]s when [Document]s
-  /// have been replicated.
-  Stream<DocumentsReplicated> documentReplications() => callbackStream(
+  @override
+  Stream<DocumentsReplicated> documentReplications() => useSync(() =>
+      CallbackStreamController(
+        parent: this,
         worker: native.worker,
         createRegisterCallbackRequest: (callback) =>
             AddReplicatorDocumentListener(
@@ -878,7 +919,25 @@ class Replicator extends NativeResource<WorkerObject<CBLReplicator>> {
 
           return DocumentsReplicated(direction, documents);
         },
-      );
+      ).stream);
+
+  @override
+  Future<void> performClose() async {
+    await _stop();
+
+    final statusStream = changeStreamWithInitialValue(
+      createInitialValue: _status,
+      createChangeStream: _statusChanges,
+    );
+
+    await for (final status in statusStream) {
+      if (status.activity == ReplicatorActivityLevel.stopped) {
+        break;
+      }
+    }
+
+    _disposeCallbacks();
+  }
 
   @override
   String toString() => 'Replicator()';

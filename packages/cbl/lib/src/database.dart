@@ -14,6 +14,8 @@ import 'native_object.dart';
 import 'query.dart';
 import 'replicator.dart';
 import 'replicator.dart' as repl;
+import 'resource.dart';
+import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
@@ -216,9 +218,7 @@ class FullTextIndex extends Index {
 
   @override
   int get hashCode =>
-      keyExpressions.hashCode ^
-      ignoreAccents.hashCode ^
-      language.hashCode;
+      keyExpressions.hashCode ^ ignoreAccents.hashCode ^ language.hashCode;
 
   @override
   String toString() => 'FullTextIndex($keyExpressions, '
@@ -255,7 +255,7 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 );
 
 /// A database is both a filesystem object and a container for documents.
-class Database extends NativeResource<WorkerObject<CBLDatabase>> {
+abstract class Database with ClosableResource {
   static late final _staticWorker =
       TransientWorkerExecutor('Database.Static', workerFactory);
 
@@ -320,63 +320,36 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
 
     try {
       final pointer = await worker.execute(OpenDatabase(name, config));
-      return Database._fromPointer(name, pointer.toPointer(), worker);
+      return DatabaseImpl(name, pointer.toPointer(), worker);
     } catch (error) {
       await worker.stop();
       rethrow;
     }
   }
 
-  Database._fromPointer(
-    this._debugName,
-    Pointer<CBLDatabase> pointer,
-    Worker worker,
-  ) : super(CblRefCountedWorkerObject(
-          pointer,
-          worker,
-          release: true,
-          retain: false,
-        ));
-
-  final String _debugName;
-
   // === Database ==============================================================
 
   /// The database's name.
-  Future<String> get name =>
-      native.execute((pointer) => GetDatabaseName(pointer));
+  Future<String> get name;
 
   /// The database's full filesystem path.
-  Future<String> get path =>
-      native.execute((pointer) => GetDatabasePath(pointer));
+  Future<String> get path;
 
   /// The number of documents in the database.
-  Future<int> get count =>
-      native.execute((pointer) => GetDatabaseCount(pointer));
+  Future<int> get count;
 
   /// The database's configuration, as given when it was opened.
   ///
   /// The encryption key is not filled in, for security reasons.
-  Future<DatabaseConfiguration> get config =>
-      native.execute((pointer) => GetDatabaseConfiguration(pointer));
-
-  /// Closes this database.
-  Future<void> close() async {
-    await native.execute((pointer) => CloseDatabase(pointer));
-    await native.worker.stop();
-  }
+  Future<DatabaseConfiguration> get config;
 
   /// Closes and deletes this database.
   ///
   /// If there are any other connections to the database, an error is thrown.
-  Future<void> delete() async {
-    await native.execute((pointer) => DeleteDatabase(pointer));
-    await native.worker.stop();
-  }
+  Future<void> delete();
 
   /// Compacts the database file.
-  Future<void> compact() =>
-      native.execute((pointer) => CompactDatabase(pointer));
+  Future<void> compact();
 
   /// Begins a batch operation, similar to a transaction.
   ///
@@ -386,14 +359,12 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   /// Changes will not be visible to other CBLDatabase instances on the same
   /// database until the batch operation ends. Batch operations can nest.
   /// Changes are not committed until the outer batch ends.
-  Future<void> beginBatch() =>
-      native.execute((pointer) => BeginDatabaseBatch(pointer));
+  Future<void> beginBatch();
 
   /// Ends a batch operation.
   ///
   /// This must be called after [beginBatch].
-  Future<void> endBatch() =>
-      native.execute((pointer) => EndDatabaseBatch(pointer));
+  Future<void> endBatch();
 
   /// Encrypts or decrypts a database, or changes its encryption key.
   ///
@@ -401,8 +372,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   /// [EncryptionAlgorithm.none], the database will be decrypted.
   /// Otherwise the database will be encrypted with that key; if it was already
   /// encrypted, it will be re-encrypted with the new key.
-  Future<void> rekey([EncryptionKey? encryptionKey]) =>
-      native.execute((pointer) => RekeyDatabase(pointer, encryptionKey));
+  Future<void> rekey([EncryptionKey? encryptionKey]);
 
   // === Documents =============================================================
 
@@ -410,26 +380,13 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   /// object.
   ///
   /// Returns `null` if no document with [id] exists.
-  Future<Document?> getDocument(String id) => native
-      .execute((pointer) => GetDatabaseDocument(pointer, id))
-      .then((address) => address?.let((it) => createDocument(
-            pointer: it.toPointer(),
-            worker: native.worker,
-            retain: false,
-          )));
+  Future<Document?> getDocument(String id);
 
   /// Reads a document from the database, in mutable form that can be updated
   /// and saved.
   ///
   /// This function is otherwise identical to [getDocument].
-  Future<MutableDocument?> getMutableDocument(String id) => native
-      .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
-      .then((address) => address?.let((it) => createMutableDocument(
-            pointer: it.toPointer(),
-            worker: native.worker,
-            retain: false,
-            isNew: false,
-          )));
+  Future<MutableDocument?> getMutableDocument(String id);
 
   /// Saves a (mutable) document to the database.
   ///
@@ -441,18 +398,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   Future<Document> saveDocument(
     MutableDocument doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
-  }) =>
-      native
-          .execute((pointer) => SaveDatabaseDocument(
-                pointer,
-                doc.native.pointer.cast(),
-                concurrency,
-              ))
-          .then((address) => createDocument(
-                pointer: address.toPointer(),
-                worker: native.worker,
-                retain: false,
-              ));
+  });
 
   /// This function is the same as [saveDocument], except that it allows for
   /// custom conflict handling in the event that the document has been updated
@@ -468,65 +414,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   Future<Document> saveDocumentResolving(
     MutableDocument doc,
     SaveConflictHandler conflictHandler,
-  ) async {
-    // Couchbase crashes when a document that has not been pulled out of the
-    // database is used with conflict resolution.
-    assert(!doc.isNew, 'new documents must be saved with `saveDocument`');
-
-    final callback = NativeCallback((arguments, result) {
-      // Build arguments
-      final documentBeingSavedPointer =
-          (arguments[0] as int).toPointer<CBLMutableDocument>();
-      final conflictingDocumentPointer =
-          (arguments[1] as int?)?.toPointer<CBLDocument>();
-
-      final documentBeingSaved = createMutableDocument(
-        pointer: documentBeingSavedPointer,
-        retain: true,
-        isNew: false,
-        worker: null,
-      );
-      final conflictingDocument = conflictingDocumentPointer?.let(
-        (pointer) => createDocument(
-          pointer: pointer,
-          retain: true,
-          worker: null,
-        ),
-      );
-
-      Future<void> invokeHandler() async {
-        // In case the handler throws an error we are canceling the save.
-        var decision = false;
-
-        // We don't swallow exceptions because handlers should not throw and
-        // this way the they are visible to the developer as an unhandled
-        // exception.
-        try {
-          decision = await conflictHandler(
-            documentBeingSaved,
-            conflictingDocument,
-          );
-        } finally {
-          result!(decision);
-        }
-      }
-
-      invokeHandler();
-    });
-
-    return native
-        .execute((pointer) => SaveDatabaseDocumentResolving(
-              pointer,
-              doc.native.pointer.cast(),
-              callback.native.pointer.address,
-            ))
-        .then((address) => createDocument(
-              pointer: address.toPointer(),
-              worker: native.worker,
-              retain: false,
-            ))
-        .whenComplete(callback.close);
-  }
+  );
 
   /// Purges a document, given only its ID.
   ///
@@ -535,22 +423,19 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   /// when pulled.
   ///
   /// To delete a [Document], load it and call its [Document.delete] method.
-  Future<bool> purgeDocumentById(String id) =>
-      native.execute((pointer) => PurgeDatabaseDocumentById(pointer, id));
+  Future<bool> purgeDocumentById(String id);
 
   /// Returns the time, if any, at which a given document will expire and be
   /// purged.
   ///
   /// Documents don't normally expire; you have to call [setDocumentExpiration]
   /// to set a document's expiration time.
-  Future<DateTime?> getDocumentExpiration(String id) =>
-      native.execute((pointer) => GetDatabaseDocumentExpiration(pointer, id));
+  Future<DateTime?> getDocumentExpiration(String id);
 
   /// Sets or clears the expiration time of a document.
   ///
   /// When [time] is `null` the document will never expire.
-  Future<void> setDocumentExpiration(String id, DateTime? time) => native
-      .execute((pointer) => SetDatabaseDocumentExpiration(pointer, id, time));
+  Future<void> setDocumentExpiration(String id, DateTime? time);
 
   // === Changes ===============================================================
 
@@ -566,15 +451,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   ///
   /// Changes made to the database file by other processes will __not__ be
   /// notified.
-  Stream<void> changesOfDocument(String id) => callbackStream<void, void>(
-        worker: native.worker,
-        createRegisterCallbackRequest: (callback) => AddDocumentChangeListener(
-          native.pointerUnsafe.cast(),
-          id,
-          callback.native.pointerUnsafe.address,
-        ),
-        createEvent: (_, arguments) => null,
-      );
+  Stream<void> changesOfDocument(String id);
 
   /// Creates a stream that emits a list of document ids each time documents
   /// in this databse have changed.
@@ -588,15 +465,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   ///
   /// Changes made to the database file by other processes will __not__ be
   /// notified.
-  Stream<List<String>> changesOfAllDocuments() =>
-      callbackStream<List<String>, void>(
-        worker: native.worker,
-        createRegisterCallbackRequest: (callback) => AddDatabaseChangeListener(
-          native.pointerUnsafe.cast(),
-          callback.native.pointerUnsafe.address,
-        ),
-        createEvent: (_, arguments) => List.from(arguments),
-      );
+  Stream<List<String>> changesOfAllDocuments();
 
   // === Queries ===============================================================
 
@@ -610,10 +479,7 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   ///
   /// See:
   /// - [Query] for how to write and use queries.
-  Future<Query> query(QueryDefinition queryDefinition) async => createQuery(
-        db: native,
-        queryDefinition: queryDefinition,
-      );
+  Future<Query> query(QueryDefinition queryDefinition);
 
   // === Indexes ===============================================================
 
@@ -626,21 +492,13 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   ///
   /// If a non-identical index with that name already exists, it is deleted and
   /// re-created.
-  Future<void> createIndex(String name, Index index) =>
-      native.execute((pointer) => CreateDatabaseIndex(pointer, name, index));
+  Future<void> createIndex(String name, Index index);
 
   /// Deletes an index given its name.
-  Future<void> deleteIndex(String name) async =>
-      native.execute((pointer) => DeleteDatabaseIndex(pointer, name));
+  Future<void> deleteIndex(String name);
 
   /// Returns the names of the indexes on this database, as an array of strings.
-  Future<List<String>> indexNames() async => native
-      .execute((pointer) => GetDatabaseIndexNames(pointer))
-      .then((address) => MutableArray.fromPointer(
-            address.toPointer(),
-            release: true,
-            retain: false,
-          ).map((it) => it.asString).toList());
+  Future<List<String>> indexNames();
 
   // === Blobs =================================================================
 
@@ -648,15 +506,267 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
   ///
   /// See:
   /// - [Blob] for more about what a Blob is.
-  late BlobManager blobManager = createBlobManager(db: native);
+  BlobManager get blobManager;
 
   // === Replicator ============================================================
 
   /// Creates a [Replicator] for this database, with the given configuration.
-  Future<Replicator> createReplicator(
-    ReplicatorConfiguration config,
+  Future<Replicator> createReplicator(ReplicatorConfiguration config);
+}
+
+class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
+    with ClosableResourceMixin
+    implements Database {
+  DatabaseImpl(
+    this._debugName,
+    Pointer<CBLDatabase> pointer,
+    Worker worker,
+  ) : super(CblRefCountedWorkerObject(
+          pointer,
+          worker,
+          release: true,
+          retain: false,
+        ));
+
+  final String _debugName;
+
+  // === Database ==============================================================
+
+  @override
+  Future<String> get name =>
+      use(() => native.execute((pointer) => GetDatabaseName(pointer)));
+
+  @override
+  Future<String> get path =>
+      use(() => native.execute((pointer) => GetDatabasePath(pointer)));
+
+  @override
+  Future<int> get count =>
+      use(() => native.execute((pointer) => GetDatabaseCount(pointer)));
+
+  @override
+  Future<DatabaseConfiguration> get config =>
+      use(() => native.execute((pointer) => GetDatabaseConfiguration(pointer)));
+
+  @override
+  Future<void> delete() async {
+    _createCloseRequest = (pointer) => DeleteDatabase(pointer);
+    await close();
+  }
+
+  @override
+  Future<void> compact() =>
+      use(() => native.execute((pointer) => CompactDatabase(pointer)));
+
+  @override
+  Future<void> beginBatch() =>
+      use(() => native.execute((pointer) => BeginDatabaseBatch(pointer)));
+
+  @override
+  Future<void> endBatch() =>
+      use(() => native.execute((pointer) => EndDatabaseBatch(pointer)));
+
+  @override
+  Future<void> rekey([EncryptionKey? encryptionKey]) => use(
+      () => native.execute((pointer) => RekeyDatabase(pointer, encryptionKey)));
+
+  WorkerRequest Function(Pointer<CBLDatabase>) _createCloseRequest =
+      (pointer) => CloseDatabase(pointer);
+
+  @override
+  Future<void> performClose() async {
+    await native.execute(_createCloseRequest);
+    await native.worker.stop();
+  }
+
+  // === Documents =============================================================
+
+  @override
+  Future<Document?> getDocument(String id) => use(() => native
+      .execute((pointer) => GetDatabaseDocument(pointer, id))
+      .then((address) => address?.let((it) => createDocument(
+            pointer: it.toPointer(),
+            worker: native.worker,
+            retain: false,
+          ))));
+
+  @override
+  Future<MutableDocument?> getMutableDocument(String id) => use(() => native
+      .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
+      .then((address) => address?.let((it) => createMutableDocument(
+            pointer: it.toPointer(),
+            worker: native.worker,
+            retain: false,
+            isNew: false,
+          ))));
+
+  @override
+  Future<Document> saveDocument(
+    MutableDocument doc, {
+    ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
+  }) =>
+      use(() => native
+          .execute((pointer) => SaveDatabaseDocument(
+                pointer,
+                doc.native.pointer.cast(),
+                concurrency,
+              ))
+          .then((address) => createDocument(
+                pointer: address.toPointer(),
+                worker: native.worker,
+                retain: false,
+              )));
+
+  @override
+  Future<Document> saveDocumentResolving(
+    MutableDocument doc,
+    SaveConflictHandler conflictHandler,
   ) =>
-      repl.createReplicator(db: native, config: config);
+      use(() async {
+        // Couchbase crashes when a document that has not been pulled out of the
+        // database is used with conflict resolution.
+        assert(!doc.isNew, 'new documents must be saved with `saveDocument`');
+
+        final callback = NativeCallback((arguments, result) {
+          // Build arguments
+          final documentBeingSavedPointer =
+              (arguments[0] as int).toPointer<CBLMutableDocument>();
+          final conflictingDocumentPointer =
+              (arguments[1] as int?)?.toPointer<CBLDocument>();
+
+          final documentBeingSaved = createMutableDocument(
+            pointer: documentBeingSavedPointer,
+            retain: true,
+            isNew: false,
+            worker: null,
+          );
+          final conflictingDocument = conflictingDocumentPointer?.let(
+            (pointer) => createDocument(
+              pointer: pointer,
+              retain: true,
+              worker: null,
+            ),
+          );
+
+          Future<void> invokeHandler() async {
+            // In case the handler throws an error we are canceling the save.
+            var decision = false;
+
+            // We don't swallow exceptions because handlers should not throw and
+            // this way the they are visible to the developer as an unhandled
+            // exception.
+            try {
+              decision = await conflictHandler(
+                documentBeingSaved,
+                conflictingDocument,
+              );
+            } finally {
+              result!(decision);
+            }
+          }
+
+          invokeHandler();
+        });
+
+        return native
+            .execute((pointer) => SaveDatabaseDocumentResolving(
+                  pointer,
+                  doc.native.pointer.cast(),
+                  callback.native.pointer.address,
+                ))
+            .then((address) => createDocument(
+                  pointer: address.toPointer(),
+                  worker: native.worker,
+                  retain: false,
+                ))
+            .whenComplete(callback.close);
+      });
+
+  @override
+  Future<bool> purgeDocumentById(String id) => use(() =>
+      native.execute((pointer) => PurgeDatabaseDocumentById(pointer, id)));
+
+  @override
+  Future<DateTime?> getDocumentExpiration(String id) => use(() =>
+      native.execute((pointer) => GetDatabaseDocumentExpiration(pointer, id)));
+
+  @override
+  Future<void> setDocumentExpiration(String id, DateTime? time) =>
+      use(() => native.execute(
+          (pointer) => SetDatabaseDocumentExpiration(pointer, id, time)));
+
+  // === Changes ===============================================================
+
+  @override
+  Stream<void> changesOfDocument(String id) =>
+      useSync(() => CallbackStreamController<void, void>(
+            parent: this,
+            worker: native.worker,
+            createRegisterCallbackRequest: (callback) =>
+                AddDocumentChangeListener(
+              native.pointerUnsafe.cast(),
+              id,
+              callback.native.pointerUnsafe.address,
+            ),
+            createEvent: (_, arguments) => null,
+          ).stream);
+
+  @override
+  Stream<List<String>> changesOfAllDocuments() =>
+      useSync(() => CallbackStreamController<List<String>, void>(
+            parent: this,
+            worker: native.worker,
+            createRegisterCallbackRequest: (callback) =>
+                AddDatabaseChangeListener(
+              native.pointerUnsafe.cast(),
+              callback.native.pointerUnsafe.address,
+            ),
+            createEvent: (_, arguments) => List.from(arguments),
+          ).stream);
+
+  // === Queries ===============================================================
+
+  @override
+  Future<Query> query(QueryDefinition queryDefinition) async => use(() => native
+      .execute((pointer) => CreateDatabaseQuery(
+            pointer,
+            queryDefinition.queryString,
+            queryDefinition.language,
+          ))
+      .then((value) => QueryImpl(
+            database: this,
+            pointer: value.toPointer(),
+          )));
+
+  // === Indexes ===============================================================
+
+  @override
+  Future<void> createIndex(String name, Index index) => use(() =>
+      native.execute((pointer) => CreateDatabaseIndex(pointer, name, index)));
+
+  @override
+  Future<void> deleteIndex(String name) async => use(
+      () => native.execute((pointer) => DeleteDatabaseIndex(pointer, name)));
+
+  @override
+  Future<List<String>> indexNames() async => use(() => native
+      .execute((pointer) => GetDatabaseIndexNames(pointer))
+      .then((address) => MutableArray.fromPointer(
+            address.toPointer(),
+            release: true,
+            retain: false,
+          ).map((it) => it.asString).toList()));
+
+  // === Blobs =================================================================
+
+  @override
+  late BlobManager blobManager = useSync(() => BlobManagerImpl(this));
+
+  // === Replicator ============================================================
+
+  @override
+  Future<Replicator> createReplicator(ReplicatorConfiguration config) =>
+      use(() => repl.createReplicator(db: this, config: config));
 
   // === Object ================================================================
 
