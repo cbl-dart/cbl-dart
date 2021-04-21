@@ -161,7 +161,7 @@ class ValueIndex extends Index {
           keyExpressions == other.keyExpressions;
 
   @override
-  int get hashCode => super.hashCode ^ keyExpressions.hashCode;
+  int get hashCode => keyExpressions.hashCode;
 
   @override
   String toString() => 'ValueIndex($keyExpressions)';
@@ -216,7 +216,6 @@ class FullTextIndex extends Index {
 
   @override
   int get hashCode =>
-      super.hashCode ^
       keyExpressions.hashCode ^
       ignoreAccents.hashCode ^
       language.hashCode;
@@ -660,16 +659,6 @@ class Database extends NativeResource<WorkerObject<CBLDatabase>> {
       repl.createReplicator(db: native, config: config);
 
   // === Object ================================================================
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Database &&
-          other.runtimeType == other.runtimeType &&
-          native == other.native;
-
-  @override
-  int get hashCode => super.hashCode ^ native.hashCode;
 
   @override
   String toString() => 'Database(name: $_debugName)';
