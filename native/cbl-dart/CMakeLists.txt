@@ -21,6 +21,7 @@ set(CBL_DART_SOURCES
     src/Callbacks.cpp
     src/CBL+Dart.cpp
     src/Fleece+Dart.cpp
+    src/Utils.cpp
     ${ROOT_DIR}/vendor/dart/include/dart/dart_api_dl.c
 )
 
