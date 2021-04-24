@@ -96,10 +96,14 @@ void CallbackCall::execute(Dart_CObject &arguments) {
 
 void CallbackCall::messageHandler(Dart_Port dest_port_id,
                                   Dart_CObject *message) {
-  auto callPointer = message->value.as_array.values[0]->value.as_int64;
-  CallbackCall &call = *reinterpret_cast<CallbackCall *>(callPointer);
+  assert(message->type == Dart_CObject_kArray);
+  assert(message->value.as_array.length == 2);
 
+  auto callPointer = message->value.as_array.values[0];
   auto result = message->value.as_array.values[1];
+
+  CallbackCall &call = *reinterpret_cast<CallbackCall *>(
+      CBLDart_CObject_getIntValueAsInt64(callPointer));
 
   assert(call.resultHandler_ != nullptr);
 

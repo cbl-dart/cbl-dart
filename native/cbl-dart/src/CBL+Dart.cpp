@@ -4,6 +4,7 @@
 #include "CBL+Dart.h"
 #include "Callbacks.h"
 #include "Fleece+Dart.h"
+#include "Utils.hh"
 #include "cbl/CouchbaseLite.h"
 #include "dart/dart_api_dl.h"
 
@@ -382,10 +383,10 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   const CBLDocument *descision;
 
   auto resultHandler = [&descision](Dart_CObject *result) {
-    descision =
-        result->type == Dart_CObject_kNull
-            ? NULL
-            : reinterpret_cast<const CBLDocument *>(result->value.as_int64);
+    descision = result->type == Dart_CObject_kNull
+                    ? NULL
+                    : reinterpret_cast<const CBLDocument *>(
+                          CBLDart_CObject_getIntValueAsInt64(result));
   };
 
   CallbackCall(*callback, resultHandler).execute(args);
