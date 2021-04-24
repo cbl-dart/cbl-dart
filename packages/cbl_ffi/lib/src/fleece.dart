@@ -197,7 +197,7 @@ class FLDoc extends Opaque {}
 
 typedef CBLDart_FLDoc_FromJSON = Pointer<FLDoc> Function(
   Pointer<Utf8> json,
-  Pointer<Uint8> error,
+  Pointer<Uint32> error,
 );
 
 typedef CBLDart_FLDoc_BindToDartObject_C = Void Function(
