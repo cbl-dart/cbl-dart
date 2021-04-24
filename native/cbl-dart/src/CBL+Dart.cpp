@@ -13,7 +13,7 @@ std::mutex initDartApiDLMutex;
 bool initDartApiDLDone = false;
 
 void CBLDart_InitDartApiDL(void *data) {
-  const std::scoped_lock lock(initDartApiDLMutex);
+  const std::scoped_lock<std::mutex> lock(initDartApiDLMutex);
   if (!initDartApiDLDone) {
     Dart_InitializeApiDL(data);
     initDartApiDLDone = true;
@@ -55,7 +55,7 @@ Callback *dartLogCallback = nullptr;
 
 void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
                                 const char *message) {
-  const std::shared_lock lock(loggingMutex);
+  const std::shared_lock<std::shared_mutex> lock(loggingMutex);
 
   Dart_CObject domain_;
   domain_.type = Dart_CObject_kInt32;
@@ -84,13 +84,13 @@ void CBLDart_LogCallbackFinalizer(void *context) {
 }
 
 void CBLDart_CBLLog_RestoreOriginalCallback() {
-  const std::unique_lock lock(loggingMutex);
+  const std::unique_lock<std::shared_mutex> lock(loggingMutex);
   dartLogCallback = nullptr;
   CBLLog_SetCallback(originalLogCallback);
 }
 
 void CBLDart_CBLLog_SetCallback(Callback *callback) {
-  const std::unique_lock lock(loggingMutex);
+  const std::unique_lock<std::shared_mutex> lock(loggingMutex);
 
   dartLogCallback = callback;
 
@@ -432,7 +432,7 @@ CBLReplicator *CBLDart_CBLReplicator_New(CBLDartReplicatorConfiguration *config,
 
   // Associate callback context with this instance so we can it released
   // when the replicator is released.
-  std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
+  std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
   replicatorCallbackWrapperContexts[replicator] = context;
 
   return replicator;
@@ -444,7 +444,7 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   CBLReplicator_Release(replicator);
 
   // Clean up context for callback wrapper
-  std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
+  std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
   auto callbackWrapperContext = replicatorCallbackWrapperContexts[replicator];
   replicatorCallbackWrapperContexts.erase(replicator);
   delete callbackWrapperContext;
