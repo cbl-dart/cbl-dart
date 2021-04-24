@@ -1,5 +1,7 @@
 #include "Callbacks.h"
 
+#include "Utils.hh"
+
 // === Callback ===============================================================
 
 Callback::Callback(Dart_Handle dartCallback, Dart_Port sendport)
@@ -65,7 +67,7 @@ void CallbackCall::execute(Dart_CObject &arguments) {
   }
 
   // Pointer to this call, which is sent back by the Dart side in the result
-  // message. This is how we get a reference to this call in the message
+  // response. This is how we get a reference to this call in the response
   // handler. Only necessary if the caller is interested in the result.
   Dart_CObject callPointer;
   if (resultHandler_ == nullptr) {
@@ -75,40 +77,61 @@ void CallbackCall::execute(Dart_CObject &arguments) {
     callPointer.value.as_int64 = reinterpret_cast<int64_t>(this);
   }
 
-  // The message is sent as an array.
-  Dart_CObject *messageValues[] = {&responsePort, &callPointer, &arguments};
+  // The request is sent as an array.
+  Dart_CObject *requestValues[] = {&responsePort, &callPointer, &arguments};
 
-  Dart_CObject message;
-  message.type = Dart_CObject_kArray;
-  message.value.as_array.length = 3;
-  message.value.as_array.values = messageValues;
+  Dart_CObject request;
+  request.type = Dart_CObject_kArray;
+  request.value.as_array.length = 3;
+  request.value.as_array.values = requestValues;
 
-  Dart_PostCObject_DL(callback_.sendPort(), &message);
-
-  // Now wait for the response if the caller is interested.
-  if (resultHandler_ != nullptr) {
-    std::mutex mutex;
-    std::unique_lock lock(mutex);
-
-    while (!completed_) cv_.wait(lock);
+  if (resultHandler_ == nullptr) {
+    sendCallbackRequest(&request);
+  } else {
+    sendCallbackRequestAndWaitForResult(&request);
   }
 }
 
-void CallbackCall::messageHandler(Dart_Port dest_port_id,
-                                  Dart_CObject *message) {
-  assert(message->type == Dart_CObject_kArray);
-  assert(message->value.as_array.length == 2);
+void CallbackCall::sendCallbackRequest(Dart_CObject *request) {
+  Dart_PostCObject_DL(callback_.sendPort(), request);
+}
 
-  auto callPointer = message->value.as_array.values[0];
-  auto result = message->value.as_array.values[1];
+void CallbackCall::sendCallbackRequestAndWaitForResult(Dart_CObject *request) {
+  std::mutex mutex;
+  std::unique_lock<std::mutex> lock(mutex);
+  std::condition_variable cv;
+  resultMutex_ = &mutex;
+  resultCv_ = &cv;
+
+  sendCallbackRequest(request);
+
+  cv.wait(lock, [this] { return resultReceived_; });
+
+  resultMutex_ = nullptr;
+  resultCv_ = nullptr;
+}
+
+void CallbackCall::completeWithResult(Dart_CObject *result) {
+  assert(resultHandler_ != nullptr);
+  (*resultHandler_)(result);
+
+  {
+    std::scoped_lock<std::mutex> lock(*resultMutex_);
+    resultReceived_ = true;
+  }
+  resultCv_->notify_one();
+}
+
+void CallbackCall::messageHandler(Dart_Port dest_port_id,
+                                  Dart_CObject *response) {
+  assert(response->type == Dart_CObject_kArray);
+  assert(response->value.as_array.length == 2);
+
+  auto callPointer = response->value.as_array.values[0];
+  auto result = response->value.as_array.values[1];
 
   CallbackCall &call = *reinterpret_cast<CallbackCall *>(
       CBLDart_CObject_getIntValueAsInt64(callPointer));
 
-  assert(call.resultHandler_ != nullptr);
-
-  (*call.resultHandler_)(result);
-
-  call.completed_ = true;
-  call.cv_.notify_all();
+  call.completeWithResult(result);
 }
