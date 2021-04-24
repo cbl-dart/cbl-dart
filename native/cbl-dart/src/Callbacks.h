@@ -1,10 +1,8 @@
 #pragma once
 
+#include <condition_variable>
 #include <functional>
-#include <map>
 #include <mutex>
-#include <shared_mutex>
-#include <vector>
 
 #include "dart/dart_api_dl.h"
 
@@ -56,6 +54,11 @@ class CallbackCall {
   const Callback &callback_;
   const std::function<CallbackResultHandler> *resultHandler_ = nullptr;
   Dart_Port receivePort_ = ILLEGAL_PORT;
-  std::condition_variable cv_;
-  bool completed_ = false;
+  std::mutex *resultMutex_ = nullptr;
+  bool resultReceived_ = false;
+  std::condition_variable *resultCv_ = nullptr;
+
+  void sendCallbackRequest(Dart_CObject *request);
+  void sendCallbackRequestAndWaitForResult(Dart_CObject *request);
+  void completeWithResult(Dart_CObject *result);
 };
