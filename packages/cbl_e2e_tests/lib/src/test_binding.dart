@@ -85,9 +85,11 @@ abstract class CblE2eTestBinding {
       Logger.root.onRecord.listen((record) {
         final stringBuilder = StringBuffer();
 
-        stringBuilder.write(
-          '[${record.level.name}] ${record.loggerName} | ${record.message}',
-        );
+        stringBuilder.write('[${record.level.name}]'.padRight(9));
+        stringBuilder.write(' | ');
+        stringBuilder.write(record.loggerName.padRight(10).substring(0, 10));
+        stringBuilder.write(' | ');
+        stringBuilder.write(record.message);
 
         if (record.error != null) {
           stringBuilder.write('\nError: ${record.error}');
