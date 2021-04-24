@@ -26,7 +26,7 @@ class Doc extends NativeResource<NativeObject<FLDoc>> {
   /// The data is first encoded into Fleece, and the Fleece data is kept by the
   /// doc.
   factory Doc.fromJson(String json) => runArena(() {
-        final error = malloc<Uint8>();
+        final error = malloc<Uint32>();
 
         final docPointer =
             _bindings.fromJSON(json.toNativeUtf8().withScoped(), error);
