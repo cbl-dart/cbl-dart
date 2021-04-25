@@ -291,7 +291,27 @@ jobs:
         run: melos run test:setupCouchbaseClusterDocker
 
       - name: Run tests
-        run: melos run test:standalone_dart
+        run: |
+          ulimit -c unlimited
+          sudo sysctl -w kernel.core_pattern=core
+          melos run test:standalone_dart
+
+      - name: Print debug info
+        if: failure()
+        working-directory: packages/cbl_e2e_tests_standalone_dart
+        run: |          
+          if [ ! -f ./core ]; then
+            echo "Did not find core dump"
+            exit 0
+          fi
+
+          echo "::group::Instal gdb"
+          sudo apt-get install gdb
+          echo "::endgroup::"
+
+          echo "::group::Print back trace"
+          gdb -batch -ex 'thread apply all bt' /home/runner/opt/flutter/bin/cache/artifacts/engine/linux-x64/flutter_tester core
+          echo "::endgroup::"
 
   tests-standalone-dart-macos:
     name: Tests - Standalone Dart - macOS
