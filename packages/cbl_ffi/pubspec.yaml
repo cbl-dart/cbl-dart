@@ -12,4 +12,4 @@ dependencies:
   cbl_native: ^4.0.0
 
 dev_dependencies:
-  pedantic: ^1.10.0
+  pedantic: ^1.11.0
