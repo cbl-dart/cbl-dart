@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'blob.dart';
 import 'couchbase_lite.dart';
 import 'document.dart';
+import 'errors.dart';
 import 'fleece.dart';
 import 'native_callback.dart';
 import 'native_object.dart';
@@ -20,7 +21,7 @@ import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
 export 'package:cbl_ffi/cbl_ffi.dart'
-    show EncryptionAlgorithm, DatabaseFlag, ConcurrencyControl;
+    show EncryptionAlgorithm, DatabaseFlag, ConcurrencyControl, MaintenanceType;
 
 /// Encryption key specified in a [DatabaseConfiguration].
 class EncryptionKey {
@@ -348,8 +349,15 @@ abstract class Database with ClosableResource {
   /// If there are any other connections to the database, an error is thrown.
   Future<void> delete();
 
-  /// Compacts the database file.
-  Future<void> compact();
+  /// Performs database maintenance.
+  ///
+  /// When [MaintenanceType.integrityCheck] is performed and the check fails,
+  /// a [CouchbaseLiteException] with [CouchbaseLiteErrorCode.corruptData] is
+  /// thrown.
+  ///
+  /// See:
+  /// - [MaintenanceType] for the types of maintenance the database can perform.
+  Future<void> performMaintenance(MaintenanceType type);
 
   /// Begins a batch operation, similar to a transaction.
   ///
@@ -555,8 +563,8 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   }
 
   @override
-  Future<void> compact() =>
-      use(() => native.execute((pointer) => CompactDatabase(pointer)));
+  Future<void> performMaintenance(MaintenanceType type) => use(() =>
+      native.execute((pointer) => PerformDatabaseMaintenance(pointer, type)));
 
   @override
   Future<void> beginBatch() =>

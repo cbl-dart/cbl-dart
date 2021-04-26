@@ -92,8 +92,20 @@ void main() {
         );
       });
 
-      test('compact does not throw', () async {
-        await db.compact();
+      test('performMaintenance: compact', () async {
+        await db.performMaintenance(MaintenanceType.compact);
+      });
+
+      test('performMaintenance: reindex', () async {
+        final db = await openTestDb('PerformMaintenance|Reindex');
+        await db.createIndex('a', ValueIndex('[".type"]'));
+        final doc = MutableDocument()..properties.addAll({'type': 'A'});
+        await db.saveDocument(doc);
+        await db.performMaintenance(MaintenanceType.reindex);
+      });
+
+      test('performMaintenance: integrityCheck', () async {
+        await db.performMaintenance(MaintenanceType.integrityCheck);
       });
 
       test('batch operations do not throw', () async {
