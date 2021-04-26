@@ -172,12 +172,15 @@ void deleteDatabase(DeleteDatabase request) => _bindings
     .toBool()
     .checkResultAndError();
 
-class CompactDatabase extends ObjectRequest<CBLDatabase, void> {
-  CompactDatabase(Pointer<CBLDatabase> db) : super(db);
+class PerformDatabaseMaintenance
+    extends ObjectRequest<CBLDatabase, CouchbaseLiteException?> {
+  PerformDatabaseMaintenance(Pointer<CBLDatabase> db, this.type) : super(db);
+
+  final MaintenanceType type;
 }
 
-void compactDatabase(CompactDatabase request) => _bindings
-    .compact(request.object, globalError)
+void performDatabaseMaintenance(PerformDatabaseMaintenance request) => _bindings
+    .performMaintenance(request.object, request.type.toInt(), globalError)
     .toBool()
     .checkResultAndError();
 
@@ -453,7 +456,7 @@ void addDatabaseHandlersToRouter(RequestRouter router) {
   router.addHandler(getDatabaseConfiguration);
   router.addHandler(closeDatabase);
   router.addHandler(deleteDatabase);
-  router.addHandler(compactDatabase);
+  router.addHandler(performDatabaseMaintenance);
   router.addHandler(beginDatabaseBatch);
   router.addHandler(endDatabaseBatch);
   router.addHandler(rekeyDatabase);
