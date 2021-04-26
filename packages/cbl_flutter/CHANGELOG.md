@@ -1,3 +1,7 @@
+## 0.3.1+1
+
+ - **DOCS**: fix badges.
+
 ## 0.3.1
 
  - **FEAT**: Update dependencies.
