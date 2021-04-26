@@ -37,10 +37,11 @@ class Doc extends NativeResource<NativeObject<FLDoc>> {
           );
         }
 
-        return Doc._(docPointer);
+        return Doc.fromPointer(docPointer);
       });
 
-  Doc._(Pointer<FLDoc> pointer) : super(FleeceDocObject(pointer));
+  /// Creates an [Doc] based on a [pointer] to the the native value.
+  Doc.fromPointer(Pointer<FLDoc> pointer) : super(FleeceDocObject(pointer));
 
   /// Returns the root value in the [Doc], usually an [Dict].
   Value get root => Value.fromPointer(_bindings.getRoot(native.pointerUnsafe));
@@ -62,21 +63,26 @@ class Doc extends NativeResource<NativeObject<FLDoc>> {
 class Value extends NativeResource<NativeObject<FLValue>> {
   static late final _bindings = CBLBindings.instance.fleece.value;
 
-  /// Private constructor for subclasses.
-  Value._(NativeObject<FLValue> native) : super(native);
-
-  /// Creates a [Value] based on a pointer to the the native value.
+  /// Creates a [Value] based on a [pointer] to the the native value.
   ///
   /// Accessing immutable values is only allowed, while the enclosing container
   /// ([Doc], [MutableArray], [MutableDict] and other objects, holding Fleece
   /// data) has not been garbage collected.
-  Value.fromPointer(Pointer<FLValue> pointer) : super(NativeObject(pointer));
+  Value.fromPointer(
+    Pointer<FLValue> pointer, {
+    bool release = false,
+    bool retain = false,
+  }) : super(FleeceRefCountedObject(
+          pointer.cast(),
+          release: release,
+          retain: retain,
+        ));
 
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
   Doc? get doc {
     final pointer = _bindings.findDoc(native.pointerUnsafe);
-    return pointer == nullptr ? null : Doc._(pointer);
+    return pointer == nullptr ? null : Doc.fromPointer(pointer);
   }
 
   /// Returns the data type of an arbitrary Value.
@@ -232,12 +238,12 @@ class Value extends NativeResource<NativeObject<FLValue>> {
 class Array extends Value with ListMixin<Value> {
   static late final _bindings = CBLBindings.instance.fleece.array;
 
-  /// Private constructor for subclasses.
-  Array._(NativeObject<FLValue> native) : super._(native);
-
-  /// Creates an [Array] based on a pointer to the the native value.
-  Array.fromPointer(Pointer<FLArray> pointer)
-      : super.fromPointer(pointer.cast());
+  /// Creates an [Array] based on a [pointer] to the the native value.
+  Array.fromPointer(
+    Pointer<FLArray> pointer, {
+    bool release = false,
+    bool retain = false,
+  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
 
   late final Pointer<FLArray> _arrayPointer = native.pointerUnsafe.cast();
 
@@ -282,16 +288,12 @@ class Array extends Value with ListMixin<Value> {
 class MutableArray extends Array {
   static late final _bindings = CBLBindings.instance.fleece.mutableArray;
 
-  /// Creates a [MutableArray] based on a pointer to the the native value.
+  /// Creates a [MutableArray] based on a [pointer] to the the native value.
   MutableArray.fromPointer(
     Pointer<FLMutableArray> pointer, {
     required bool release,
     required bool retain,
-  }) : super._(FleeceRefCountedObject(
-          pointer.cast(),
-          release: release,
-          retain: retain,
-        ));
+  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
 
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
@@ -428,11 +430,12 @@ class MutableArray extends Array {
 class Dict extends Value with MapMixin<String, Value> {
   static late final _bindings = CBLBindings.instance.fleece.dict;
 
-  /// Private constructor for subclasses.
-  Dict._(NativeObject<FLValue> native) : super._(native);
-
-  /// Creates a [Dict] based on a pointer to the the native value.
-  Dict.fromPointer(Pointer<FLDict> pointer) : super.fromPointer(pointer.cast());
+  /// Creates a [Dict] based on a [pointer] to the the native value.
+  Dict.fromPointer(
+    Pointer<FLDict> pointer, {
+    bool release = false,
+    bool retain = false,
+  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
 
   late final Pointer<FLDict> _dictPointer = native.pointerUnsafe.cast();
 
@@ -536,16 +539,12 @@ class _DictKeyIterator extends Iterator<String> {
 class MutableDict extends Dict {
   static late final _bindings = CBLBindings.instance.fleece.mutableDict;
 
-  /// Creates a [MutableDict] based on a pointer to the the native value.
+  /// Creates a [MutableDict] based on a [pointer] to the the native value.
   MutableDict.fromPointer(
     Pointer<FLMutableDict> pointer, {
     required bool release,
     required bool retain,
-  }) : super._(FleeceRefCountedObject(
-          pointer.cast(),
-          release: release,
-          retain: retain,
-        ));
+  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
 
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {

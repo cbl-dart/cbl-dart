@@ -7,8 +7,8 @@ import 'database.dart';
 import 'errors.dart';
 import 'fleece.dart';
 import 'native_object.dart';
-import 'worker/cbl_worker.dart';
 import 'resource.dart';
+import 'worker/cbl_worker.dart';
 
 // region Internal API
 
@@ -79,12 +79,11 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
   int get sequence => _bindings.sequence(native.pointerUnsafe);
 
   /// The properties as a dictionary.
-  ///
-  /// This lifetime of the returned value is tied to this document. The dict and
-  /// its contents must only be used while this Document has not been garbage
-  /// collected. Keep a reference to a Document to ensure that it stays alive.
-  Dict get properties =>
-      Dict.fromPointer(_bindings.properties(native.pointerUnsafe));
+  Dict get properties => Dict.fromPointer(
+        _bindings.properties(native.pointerUnsafe),
+        retain: true,
+        release: true,
+      );
 
   /// The properties as a JSON string.
   String get propertiesAsJson => runArena(() =>
@@ -201,9 +200,6 @@ class MutableDocument extends Document {
   final bool isNew;
 
   /// The properties as a mutable dictionary.
-  ///
-  /// Other than the [Dict] returned by [Document.properties], this value's
-  /// lifetime is not tied to this document.
   @override
   MutableDict get properties => MutableDict.fromPointer(
         _bindings.mutableProperties(_mutablePointer),
