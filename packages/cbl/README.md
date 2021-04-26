@@ -6,8 +6,6 @@
 
 > **Warning:** This project has not yet reached a stable production release.
 
-> **Warning:** This is not an official Couchbase product.
-
 ## Features - Couchbase Lite
 
 - Schemaless JSON documents
@@ -34,6 +32,14 @@
 - Support for standalone Dart (for example a CLI)
 - Well documented
 
+## Supported Platforms
+
+| Platform | Minimum version |
+| -------: | --------------- |
+|      iOS | 11              |
+|    macOS | 10.13           |
+|  Android | 19              |
+
 ## Installation
 
 This package only contains Dart code and requires binary libraries to be packaged
@@ -49,8 +55,11 @@ dependencies:
 
 ## Getting started
 
-`CouchbaseLite` needs to be initialized with a configuration of how to load 
-the binary libraries.
+Make sure you have set the required minimum target version in the build systems of the
+platforms you support.
+
+Before you access any part of the library, `CouchbaseLite` needs to be initialized with a
+configuration of how to load the binary libraries.
 
 ```dart
 import 'package:cbl/cbl.dart';
@@ -85,3 +94,7 @@ Future<void> openDatabase() async {
   final savedDoc = await db.saveDocument(doc)
 }
 ```
+
+# Disclaimer
+
+> **Warning:** This is not an official Couchbase product.
