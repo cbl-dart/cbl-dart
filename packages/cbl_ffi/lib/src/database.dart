@@ -17,11 +17,14 @@ enum EncryptionAlgorithm {
   aes256,
 }
 
-int encryptionAlgorithmToC(EncryptionAlgorithm value) =>
-    EncryptionAlgorithm.values.indexOf(value);
+extension EncryptionAlgorithmIntExt on EncryptionAlgorithm {
+  int toInt() => EncryptionAlgorithm.values.indexOf(this);
+}
 
-EncryptionAlgorithm encryptionAlgorithmFromC(int value) =>
-    EncryptionAlgorithm.values[value];
+extension IntEncryptionAlgorithmExt on int {
+  EncryptionAlgorithm toEncryptionAlgorithm() =>
+      EncryptionAlgorithm.values[this];
+}
 
 class CBLEncryptionKey extends Struct {
   @Uint32()
@@ -67,8 +70,9 @@ enum ConcurrencyControl {
   failOnConflict,
 }
 
-int concurrencyControlToC(ConcurrencyControl value) =>
-    ConcurrencyControl.values.indexOf(value);
+extension ConcurrencyControlIntExt on ConcurrencyControl {
+  int toInt() => ConcurrencyControl.values.indexOf(this);
+}
 
 class CBLDatabase extends Opaque {}
 
