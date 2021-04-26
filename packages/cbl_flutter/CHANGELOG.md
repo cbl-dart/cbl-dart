@@ -1,3 +1,8 @@
+## 0.3.1
+
+ - **FEAT**: Update dependencies.
+ - **DOCS**: mention minimum platform targets.
+
 ## 0.3.0+5
 
  - Update a dependency to the latest release.

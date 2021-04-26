@@ -1,3 +1,9 @@
+## 0.5.1
+
+ - **FEAT**: retain `Document.properties`.
+ - **FEAT**: Update dependencies.
+ - **DOCS**: mention minimum platform targets.
+
 ## 0.5.0
 
 > Note: This release has breaking changes.

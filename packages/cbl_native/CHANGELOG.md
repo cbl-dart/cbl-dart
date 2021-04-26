@@ -1,3 +1,7 @@
+## 4.1.0
+
+ - **FEAT**: Update dependencies.
+
 ## 4.0.0
 
 > Note: This release has breaking changes.
