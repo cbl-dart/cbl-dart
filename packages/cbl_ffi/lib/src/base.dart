@@ -50,9 +50,11 @@ enum ErrorDomain {
   webSocket,
 }
 
-ErrorDomain errorDomainFromCInt(int domain) {
-  assert(domain >= 1 || domain <= 6);
-  return ErrorDomain.values[domain - 1];
+extension IntErrorDomainExt on int {
+  ErrorDomain toErrorDomain() {
+    assert(this >= 1 || this <= 6);
+    return ErrorDomain.values[this - 1];
+  }
 }
 
 enum CouchbaseLiteErrorCode {
@@ -88,9 +90,11 @@ enum CouchbaseLiteErrorCode {
   cantUpgradeDatabase,
 }
 
-CouchbaseLiteErrorCode couchbaseLiteErrorCodeFromCInt(int domain) {
-  assert(domain >= 1 || domain <= 30);
-  return CouchbaseLiteErrorCode.values[domain - 1];
+extension IntCouchbaseLiteErrorCodeExt on int {
+  CouchbaseLiteErrorCode toCouchbaseLiteErrorCode() {
+    assert(this >= 1 || this <= 30);
+    return CouchbaseLiteErrorCode.values[this - 1];
+  }
 }
 
 enum NetworkErrorCode {
@@ -111,9 +115,11 @@ enum NetworkErrorCode {
   tlsCertNameMismatch,
 }
 
-NetworkErrorCode networkErrorCodeFromCInt(int domain) {
-  assert(domain >= 1 || domain <= 15);
-  return NetworkErrorCode.values[domain - 1];
+extension IntNetworkErrorCodeExt on int {
+  NetworkErrorCode toNetworkErrorCode() {
+    assert(this >= 1 || this <= 15);
+    return NetworkErrorCode.values[this - 1];
+  }
 }
 
 class CBLError extends Struct {
