@@ -22,14 +22,14 @@ extension on EncryptionKey {
         .replaceRange(0, _keyByteLength, bytes);
 
     return scoped(malloc<CBLEncryptionKey>())
-      ..ref.algorithm = encryptionAlgorithmToC(algorithm)
+      ..ref.algorithm = algorithm.toInt()
       ..ref.bytes = bytesPointer;
   }
 }
 
 extension on Pointer<CBLEncryptionKey> {
   EncryptionKey toEncryptionKey() => EncryptionKey(
-        algorithm: encryptionAlgorithmFromC(ref.algorithm),
+        algorithm: ref.algorithm.toEncryptionAlgorithm(),
         bytes: Uint8List.fromList(
           ref.bytes.asTypedList(EncryptionKey.keyByteLength),
         ),
@@ -248,7 +248,7 @@ int saveDatabaseDocument(SaveDatabaseDocument request) => _bindings
     .saveDocument(
       request.object,
       request.argument,
-      concurrencyControlToC(request.concurrency),
+      request.concurrency.toInt(),
       globalError,
     )
     .checkResultAndError()
@@ -336,7 +336,7 @@ class DeleteDocument extends ObjectRequest<CBLDocument, void> {
 void deleteDocument(DeleteDocument request) => _docBindings
     .delete(
       request.object,
-      concurrencyControlToC(request.concurrency),
+      request.concurrency.toInt(),
       globalError,
     )
     .toBool()

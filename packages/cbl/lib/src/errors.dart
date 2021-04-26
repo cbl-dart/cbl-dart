@@ -257,9 +257,9 @@ BaseException exceptionFromCBLError({
 
   final code = error.ref.code;
 
-  switch (errorDomainFromCInt(error.ref.domain)) {
+  switch (error.ref.domain.toErrorDomain()) {
     case ErrorDomain.couchbaseLite:
-      final cblCode = couchbaseLiteErrorCodeFromCInt(code);
+      final cblCode = code.toCouchbaseLiteErrorCode();
 
       int? errorPosition;
       if (queryString != null) {
@@ -280,7 +280,7 @@ BaseException exceptionFromCBLError({
     case ErrorDomain.fleece:
       return FleeceException(message, code.toFleeceErrorCode());
     case ErrorDomain.network:
-      return NetworkException(message, networkErrorCodeFromCInt(code));
+      return NetworkException(message, code.toNetworkErrorCode());
     case ErrorDomain.webSocket:
       return WebSocketException(message, code);
   }
