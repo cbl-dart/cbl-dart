@@ -1,3 +1,18 @@
+## 0.5.0
+
+> Note: This release has breaking changes.
+
+ - **TEST**: add tests for `Replicator`.
+ - **REFACTOR**: use extensions for enum conversion.
+ - **FIX**: use correct size for `FleeceErrorCode`.
+ - **FIX**: fix `hashCode`s of multiple classes.
+ - **FIX**: properly handle cancelation of `NativeCallback` streams.
+ - **FIX**: fix `Replicator` config options `pullFilter` and `documentIDs`.
+ - **FEAT**: add `Resource` abstraction.
+ - **BREAKING** **FEAT**: add `Database.performMaintenance`.
+ - **BREAKING** **FEAT**: represent uncompiled queries as `QueryDefinition`.
+ - **BREAKING** **FEAT**: `Replicator` API change.
+
 ## 0.4.1+1
 
  - **REFACTOR**: replace `Void` with opaque structs.

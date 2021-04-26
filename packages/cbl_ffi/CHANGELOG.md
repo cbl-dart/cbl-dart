@@ -1,3 +1,11 @@
+## 0.5.0
+
+> Note: This release has breaking changes.
+
+ - **FIX**: use correct size for `FleeceErrorCode`.
+ - **BREAKING** **FEAT**: add `DatabaseBindings.performMaintenance`.
+ - **BREAKING** **FEAT**: use extensions for enum conversion.
+
 ## 0.4.0
 
 > Note: This release has breaking changes.

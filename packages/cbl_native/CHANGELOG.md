@@ -1,3 +1,9 @@
+## 4.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: upgrade dependency on couchbase-lite-C.
+
 ## 3.0.1
 
  - **FIX**: fix currentVersion.
