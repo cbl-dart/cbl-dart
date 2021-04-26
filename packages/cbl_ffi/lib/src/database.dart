@@ -133,12 +133,30 @@ typedef CBLDatabase_Delete = int Function(
   Pointer<CBLError> error,
 );
 
-typedef CBLDatabase_Compact_C = Uint8 Function(
+/// The type of maintenance a database can perform.
+enum MaintenanceType {
+  /// Compact the database file and delete unused attachments.
+  compact,
+
+  /// Rebuild the database's indexes.
+  reindex,
+
+  /// Check for database corruption.
+  integrityCheck,
+}
+
+extension MaintenanceTypeIntExt on MaintenanceType {
+  int toInt() => MaintenanceType.values.indexOf(this);
+}
+
+typedef CBLDatabase_PerformMaintenance_C = Uint8 Function(
   Pointer<CBLDatabase> db,
+  Uint32 type,
   Pointer<CBLError> error,
 );
-typedef CBLDatabase_Compact = int Function(
+typedef CBLDatabase_PerformMaintenance = int Function(
   Pointer<CBLDatabase> db,
+  int type,
   Pointer<CBLError> error,
 );
 
@@ -360,9 +378,9 @@ class DatabaseBindings {
             libs.cbl.lookupFunction<CBLDatabase_Delete_C, CBLDatabase_Delete>(
           'CBLDatabase_Delete',
         ),
-        compact =
-            libs.cbl.lookupFunction<CBLDatabase_Compact_C, CBLDatabase_Compact>(
-          'CBLDatabase_Compact',
+        performMaintenance = libs.cbl.lookupFunction<
+            CBLDatabase_PerformMaintenance_C, CBLDatabase_PerformMaintenance>(
+          'CBLDatabase_PerformMaintenance',
         ),
         beginBatch = libs.cbl
             .lookupFunction<CBLDatabase_BeginBatch_C, CBLDatabase_BeginBatch>(
@@ -449,7 +467,7 @@ class DatabaseBindings {
   final CBLDatabase_Open open;
   final CBLDatabase_Close close;
   final CBLDatabase_Delete delete;
-  final CBLDatabase_Compact compact;
+  final CBLDatabase_PerformMaintenance performMaintenance;
   final CBLDatabase_BeginBatch beginBatch;
   final CBLDatabase_EndBatch endBatch;
   final CBLDatabase_Rekey? rekey;
