@@ -78,45 +78,69 @@ class FLSlice extends Struct {
 }
 
 extension FLSliceExt on FLSlice {
-  String toDartString() => buf.cast<Utf8>().toDartString(length: size);
-}
-
-extension FLSlicePointerExt on Pointer<FLSlice> {
-  String toDartStringAndFree() {
-    final string = ref.toDartString();
-    CBLBindings.instance.fleece.slice.release(this);
-    return string;
-  }
+  bool get isNull => buf == nullptr;
+  String? toDartString() =>
+      isNull ? null : buf.cast<Utf8>().toDartString(length: size);
+  Uint8List? toUint8List() => isNull ? null : buf.asTypedList(size);
 }
 
 extension StringFLSliceExt on String {
-  Pointer<FLSlice> get asSliceScoped {
+  Pointer<FLSlice> toSliceScoped() {
     final slice = scoped(malloc<FLSlice>());
     final units = utf8.encode(this);
     final buf = scoped(malloc<Uint8>(units.length));
 
-    buf.asTypedList(length).setAll(0, units);
+    buf.asTypedList(units.length).setAll(0, units);
 
-    slice.ref.buf = buf;
-    slice.ref.size = units.length;
+    slice.ref
+      ..buf = buf
+      ..size = units.length;
 
     return slice;
   }
 }
 
 extension TypedDataFLSliceExt on TypedData {
-  Pointer<FLSlice> toFLSliceScoped() {
-    final buf = scoped(malloc<Uint8>(lengthInBytes));
-    buf.asTypedList(lengthInBytes).setAll(0, buffer.asUint8List());
+  Pointer<FLSlice> toSliceScoped() {
     final slice = scoped(malloc<FLSlice>());
-    slice.ref.buf = buf;
-    slice.ref.size = lengthInBytes;
+    final buf = scoped(malloc<Uint8>(lengthInBytes));
+
+    buf.asTypedList(lengthInBytes).setAll(0, buffer.asUint8List());
+
+    slice.ref
+      ..buf = buf
+      ..size = lengthInBytes;
+
     return slice;
   }
 }
 
-typedef CBLDart_FLSliceResult_Release_C = Void Function(Pointer<FLSlice>);
-typedef CBLDart_FLSliceResult_Release = void Function(Pointer<FLSlice>);
+class FLResultSlice extends Struct {
+  external Pointer<Uint8> buf;
+
+  // TODO: use correct type
+  // See FLSlice.size
+  @Uint64()
+  external int size;
+}
+
+extension FLResultSliceExt on FLResultSlice {
+  bool get isNull => buf == nullptr;
+  String? toDartString() =>
+      isNull ? null : buf.cast<Utf8>().toDartString(length: size);
+  Uint8List? toUint8List() => isNull ? null : buf.asTypedList(size);
+}
+
+extension FLResultSlicePointerExt on Pointer<FLResultSlice> {
+  String? toDartStringAndRelease() {
+    final string = ref.toDartString();
+    CBLBindings.instance.fleece.slice.release(this);
+    return string;
+  }
+}
+
+typedef CBLDart_FLSliceResult_Release_C = Void Function(Pointer<FLResultSlice>);
+typedef CBLDart_FLSliceResult_Release = void Function(Pointer<FLResultSlice>);
 
 class SliceBindings {
   SliceBindings(Libraries libs)
@@ -313,11 +337,11 @@ typedef FLValue_AsString = void Function(
 
 typedef CBLDart_FLValue_ToString_C = Void Function(
   Pointer<FLValue> value,
-  Pointer<FLSlice> slice,
+  Pointer<FLResultSlice> slice,
 );
 typedef CBLDart_FLValue_ToString = void Function(
   Pointer<FLValue> value,
-  Pointer<FLSlice> slice,
+  Pointer<FLResultSlice> slice,
 );
 
 typedef FLValue_IsEqual_C = Uint8 Function(
@@ -333,13 +357,13 @@ typedef CBLDart_FLValue_ToJSONX_C = Void Function(
   Pointer<FLValue> value,
   Uint8 json5,
   Uint8 canonicalForm,
-  Pointer<FLSlice> result,
+  Pointer<FLResultSlice> result,
 );
 typedef CBLDart_FLValue_ToJSONX = void Function(
   Pointer<FLValue> value,
   int json5,
   int canonicalForm,
-  Pointer<FLSlice> result,
+  Pointer<FLResultSlice> result,
 );
 
 class ValueBindings {

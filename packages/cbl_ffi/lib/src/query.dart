@@ -60,11 +60,11 @@ typedef CBLQuery_Execute = Pointer<CBLResultSet> Function(
 
 typedef CBLDart_CBLQuery_Explain_C = Void Function(
   Pointer<CBLQuery> query,
-  Pointer<FLSlice> result,
+  Pointer<FLResultSlice> result,
 );
 typedef CBLDart_CBLQuery_Explain = void Function(
   Pointer<CBLQuery> query,
-  Pointer<FLSlice> result,
+  Pointer<FLResultSlice> result,
 );
 
 typedef CBLQuery_ColumnCount_C = Uint32 Function(Pointer<CBLQuery> query);
