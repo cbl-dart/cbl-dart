@@ -528,11 +528,11 @@ extension on ReplicatorConfiguration {
 
     // pinnedServerCertificate
     config.ref.pinnedServerCertificate =
-        (pinnedServerCertificate?.toFLSliceScoped()).elseNullptr();
+        (pinnedServerCertificate?.toSliceScoped()).elseNullptr();
 
     // trustedRootCertificates
     config.ref.trustedRootCertificates =
-        (trustedRootCertificates?.toFLSliceScoped()).elseNullptr();
+        (trustedRootCertificates?.toSliceScoped()).elseNullptr();
 
     // channels
     config.ref.channels = channels != null
