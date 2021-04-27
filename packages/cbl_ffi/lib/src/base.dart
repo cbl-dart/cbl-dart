@@ -61,7 +61,7 @@ enum CouchbaseLiteErrorCode {
   assertionFailed,
   unimplemented,
   unsupportedEncryption,
-  badRevisionID,
+  badRevisionId,
   corruptRevisionData,
   notOpen,
   notFound,
@@ -86,7 +86,7 @@ enum CouchbaseLiteErrorCode {
   remoteError,
   databaseTooOld,
   databaseTooNew,
-  badDocID,
+  badDocId,
   cantUpgradeDatabase,
 }
 
