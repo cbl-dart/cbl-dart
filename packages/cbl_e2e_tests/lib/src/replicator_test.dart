@@ -35,7 +35,7 @@ void main() {
         pinnedServerCertificate: Uint8List(0),
         trustedRootCertificates: Uint8List(0),
         channels: ['channel'],
-        documentIDs: ['id'],
+        documentIds: ['id'],
         pullFilter: (document, isDeleted) => true,
         pushFilter: (document, isDeleted) => true,
         conflictResolver: (documentId, local, remote) => local,
@@ -77,21 +77,21 @@ void main() {
       );
     });
 
-    test('use documentIDs to filter replicated documents', () async {
+    test('use documentIds to filter replicated documents', () async {
       // Insert doc A and B into db A
-      // Sync db A with server with documentIDs == [docA.id]
+      // Sync db A with server with documentIds == [docA.id]
       // Sync db B with server
       // => db B only contains doc A
 
-      final dbA = await openTestDb('ReplicationWithDocumentIDs-DB-A');
-      final dbB = await openTestDb('ReplicationWithDocumentIDs-DB-B');
+      final dbA = await openTestDb('ReplicationWithDocumentIds-DB-A');
+      final dbB = await openTestDb('ReplicationWithDocumentIds-DB-B');
 
       final docA = await dbA.saveDocument(MutableDocument());
       await dbA.saveDocument(MutableDocument());
 
       final replicatorA = await dbA.createTestReplicator(
         replicatorType: ReplicatorType.push,
-        documentIDs: [docA.id],
+        documentIds: [docA.id],
       );
       await replicatorA.startAndWaitUntilStopped();
 
@@ -272,13 +272,13 @@ void main() {
       await replicator.start();
     });
 
-    test('pendingDocumentIDs returns IDs of documents waiting to be pushed',
+    test('pendingDocumentIds returns ids of documents waiting to be pushed',
         () async {
-      final db = await openTestDb('PendingDocumentIDs');
+      final db = await openTestDb('PendingDocumentIds');
       final replicator = await db.createTestReplicator();
       final doc = await db.saveDocument(MutableDocument());
-      final pendingDocumentIDs = await replicator.pendingDocumentIDs();
-      expect(pendingDocumentIDs.toObject(), {doc.id: true});
+      final pendingDocumentIds = await replicator.pendingDocumentIds();
+      expect(pendingDocumentIds.toObject(), {doc.id: true});
     });
 
     test('isDocumentPending returns whether a document is waiting to be pushed',

@@ -65,13 +65,13 @@ class GetReplicatorStatus
 ReplicatorStatus getReplicatorStatus(GetReplicatorStatus request) =>
     _bindings.status(request.object).toReplicatorStatus();
 
-class GetReplicatorPendingDocumentIDs
+class GetReplicatorPendingDocumentIds
     extends ObjectRequest<CBLReplicator, int> {
-  GetReplicatorPendingDocumentIDs(Pointer<CBLReplicator> replicator)
+  GetReplicatorPendingDocumentIds(Pointer<CBLReplicator> replicator)
       : super(replicator);
 }
 
-int getReplicatorPendingDocumentIDs(GetReplicatorPendingDocumentIDs request) =>
+int getReplicatorPendingDocumentIds(GetReplicatorPendingDocumentIds request) =>
     _bindings
         .pendingDocumentIDs(request.object, globalError)
         .checkResultAndError()
@@ -127,7 +127,7 @@ void addReplicatorHandlersToRouter(RequestRouter router) {
   router.addHandler(setReplicatorHostReachable);
   router.addHandler(setReplicatorSuspended);
   router.addHandler(getReplicatorStatus);
-  router.addHandler(getReplicatorPendingDocumentIDs);
+  router.addHandler(getReplicatorPendingDocumentIds);
   router.addHandler(getReplicatorIsDocumentPening);
   router.addHandler(addReplicatorChangeListener);
   router.addHandler(addReplicatorDocumentListener);

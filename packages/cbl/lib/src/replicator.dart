@@ -158,12 +158,12 @@ class BasicAuthenticator extends Authenticator {
 /// An authenticator using a Couchbase Sync Gateway login session identifier,
 /// and optionally a cookie name (pass `null` for the default.)
 class SessionAuthenticator extends Authenticator {
-  SessionAuthenticator({required this.sessionID, this.cookieName});
+  SessionAuthenticator({required this.sessionId, this.cookieName});
 
-  /// The is of the authentication session.
-  final String sessionID;
+  /// The id of the authentication session.
+  final String sessionId;
 
-  /// The name of the cookie to send the [sessionID] in.
+  /// The name of the cookie to send the [sessionId] in.
   final String? cookieName;
 
   @override
@@ -171,15 +171,15 @@ class SessionAuthenticator extends Authenticator {
       identical(this, other) ||
       other is SessionAuthenticator &&
           other.runtimeType == other.runtimeType &&
-          sessionID == other.sessionID &&
+          sessionId == other.sessionId &&
           cookieName == other.cookieName;
 
   @override
-  int get hashCode => super.hashCode ^ sessionID.hashCode ^ cookieName.hashCode;
+  int get hashCode => super.hashCode ^ sessionId.hashCode ^ cookieName.hashCode;
 
   @override
   String toString() => 'SessionAuthenticator('
-      'sessionID: ${redact(sessionID)}, '
+      'sessionId: ${redact(sessionId)}, '
       'cookieName: $cookieName'
       ')';
 }
@@ -349,7 +349,7 @@ class ReplicatorConfiguration {
     this.pinnedServerCertificate,
     this.trustedRootCertificates,
     this.channels,
-    this.documentIDs,
+    this.documentIds,
     this.pushFilter,
     this.pullFilter,
     this.conflictResolver,
@@ -386,8 +386,8 @@ class ReplicatorConfiguration {
   /// Optional set of channels to pull from
   final List<String>? channels;
 
-  /// Optional set of document IDs to replicate
-  final List<String>? documentIDs;
+  /// Optional set of document ids to replicate
+  final List<String>? documentIds;
 
   /// Optional callback to filter which docs are pushed
   final ReplicationFilter? pushFilter;
@@ -412,7 +412,7 @@ class ReplicatorConfiguration {
           pinnedServerCertificate == other.pinnedServerCertificate &&
           trustedRootCertificates == other.trustedRootCertificates &&
           channels == other.channels &&
-          documentIDs == other.documentIDs &&
+          documentIds == other.documentIds &&
           pushFilter == other.pushFilter &&
           pullFilter == other.pullFilter &&
           conflictResolver == other.conflictResolver;
@@ -428,7 +428,7 @@ class ReplicatorConfiguration {
       pinnedServerCertificate.hashCode ^
       trustedRootCertificates.hashCode ^
       channels.hashCode ^
-      documentIDs.hashCode ^
+      documentIds.hashCode ^
       pushFilter.hashCode ^
       pullFilter.hashCode ^
       conflictResolver.hashCode;
@@ -444,7 +444,7 @@ class ReplicatorConfiguration {
       'pinnedServerCertificate: $pinnedServerCertificate, '
       'trustedRootCertificate: $trustedRootCertificates, '
       'channels: $channels, '
-      'documentIDs: $documentIDs, '
+      'documentIds: $documentIds, '
       'pushFilter: $pushFilter, '
       'pullFilter: $pullFilter, '
       'conflictResolver: $conflictResolver'
@@ -503,7 +503,7 @@ extension on ReplicatorConfiguration {
         );
       } else if (authenticator is SessionAuthenticator) {
         cblAuthenticator = _bindings.authNewSession(
-          authenticator.sessionID.toNativeUtf8().withScoped(),
+          authenticator.sessionId.toNativeUtf8().withScoped(),
           (authenticator.cookieName?.toNativeUtf8().withScoped()).elseNullptr(),
         );
       } else {
@@ -539,9 +539,9 @@ extension on ReplicatorConfiguration {
         ? MutableArray(channels).native.pointer.cast()
         : nullptr;
 
-    // documentIDs
-    config.ref.documentIDs = documentIDs != null
-        ? MutableArray(documentIDs).native.pointer.cast()
+    // documentIds
+    config.ref.documentIDs = documentIds != null
+        ? MutableArray(documentIds).native.pointer.cast()
         : nullptr;
 
     // pushFilter
@@ -629,7 +629,7 @@ class ReplicatorStatus {
 class ReplicatedDocument {
   ReplicatedDocument(this.id, this.flags, this.error);
 
-  /// The document ID
+  /// The document's [id].
   final String id;
 
   /// Indicates whether the document was deleted or removed
@@ -778,8 +778,8 @@ abstract class Replicator extends NativeResource<WorkerObject<CBLReplicator>>
   /// This is of course a snapshot, that will go out of date as the replicator
   /// makes progress and/or documents are saved locally.
   ///
-  /// The result is, effectively, a set of document IDs: a dictionary whose keys
-  /// are the IDs and values are `true`.
+  /// The result is, effectively, a set of document ids: a dictionary whose keys
+  /// are the ids and values are `true`.
   ///
   /// If there are no pending documents, the dictionary is empty.
   ///
@@ -787,18 +787,18 @@ abstract class Replicator extends NativeResource<WorkerObject<CBLReplicator>>
   ///
   /// Documents that would never be pushed by this replicator, due to its
   /// configuration's [ReplicatorConfiguration.pushFilter] or
-  /// [ReplicatorConfiguration.documentIDs], are ignored.
-  Future<Dict> pendingDocumentIDs();
+  /// [ReplicatorConfiguration.documentIds], are ignored.
+  Future<Dict> pendingDocumentIds();
 
-  /// Indicates whether the document with the given ID has local changes that
+  /// Indicates whether the document with the given id has local changes that
   /// have not yet been pushed to the server by this replicator.
   ///
-  /// This is equivalent to, but faster than, calling [pendingDocumentIDs] and
-  /// checking whether the result contains [docID]. See that function's
+  /// This is equivalent to, but faster than, calling [pendingDocumentIds] and
+  /// checking whether the result contains [id]. See that function's
   /// documentation for details.
   ///
   /// A `false` result means the document is not pending.
-  Future<bool> isDocumentPending(String docID);
+  Future<bool> isDocumentPending(String id);
 
   /// Returns a stream that emits [DocumentsReplicated]s when [Document]s
   /// have been replicated.
@@ -877,8 +877,8 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
       ).stream;
 
   @override
-  Future<Dict> pendingDocumentIDs() => use(() => native
-      .execute((pointer) => GetReplicatorPendingDocumentIDs(pointer))
+  Future<Dict> pendingDocumentIds() => use(() => native
+      .execute((pointer) => GetReplicatorPendingDocumentIds(pointer))
       .then((address) => MutableDict.fromPointer(
             address.toPointer(),
             release: true,
@@ -886,8 +886,8 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
           )));
 
   @override
-  Future<bool> isDocumentPending(String docID) => use(() => native
-      .execute((pointer) => GetReplicatorIsDocumentPening(pointer, docID)));
+  Future<bool> isDocumentPending(String id) => use(() =>
+      native.execute((pointer) => GetReplicatorIsDocumentPening(pointer, id)));
 
   @override
   Stream<DocumentsReplicated> documentReplications() => useSync(() =>

@@ -424,7 +424,7 @@ abstract class Database with ClosableResource {
     SaveConflictHandler conflictHandler,
   );
 
-  /// Purges a document, given only its ID.
+  /// Purges a document, given only its [id].
   ///
   /// This removes all traces of the document from the database. Purges are not
   /// replicated. If the document is changed on a server, it will be re-created

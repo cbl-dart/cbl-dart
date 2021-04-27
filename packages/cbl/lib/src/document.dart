@@ -60,7 +60,7 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
                 retain: retain,
               ));
 
-  /// Returns the ID.
+  /// Returns this documents id.
   String get id => _bindings.id(native.pointerUnsafe).toDartString();
 
   /// The revision id, which is a short opaque string that's
