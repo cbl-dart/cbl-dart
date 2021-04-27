@@ -44,6 +44,9 @@ CBLDART_EXPORT
 void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice);
 
 CBLDART_EXPORT
+void CBLDart_FLValue_AsData(FLValue value, CBLDartSlice *slice);
+
+CBLDART_EXPORT
 void CBLDart_FLValue_ToString(FLValue value, CBLDartSlice *slice);
 
 CBLDART_EXPORT
