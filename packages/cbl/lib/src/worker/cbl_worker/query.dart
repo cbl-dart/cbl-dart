@@ -52,10 +52,8 @@ class ExplainQuery extends ObjectRequest<CBLQuery, String> {
 }
 
 String explainQuery(ExplainQuery request) {
-  _bindings.explain(request.object, globalSlice);
-
-  // Caller is responsible for allocated memory of result.
-  return globalSlice.toDartStringAndFree();
+  _bindings.explain(request.object, globalResultSlice);
+  return globalResultSlice.toDartStringAndRelease()!;
 }
 
 class ExecuteQuery extends ObjectRequest<CBLQuery, int> {

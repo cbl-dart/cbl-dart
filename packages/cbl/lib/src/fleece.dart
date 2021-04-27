@@ -136,10 +136,8 @@ class Value extends NativeResource<NativeObject<FLValue>> {
   /// returned in raw form. Arrays and dictionaries don't have a representation
   /// and will return null.
   String? get scalarToString {
-    _bindings.scalarToString(native.pointerUnsafe, globalSlice);
-    return globalSlice.ref.buf == nullptr
-        ? null
-        : globalSlice.toDartStringAndFree();
+    _bindings.scalarToString(native.pointerUnsafe, globalResultSlice);
+    return globalResultSlice.toDartStringAndRelease();
   }
 
   /// Encodes a Fleece value as JSON (or a JSON fragment.) Any Data values will
@@ -152,9 +150,9 @@ class Value extends NativeResource<NativeObject<FLValue>> {
       native.pointerUnsafe,
       json5.toInt(),
       canonical.toInt(),
-      globalSlice,
+      globalResultSlice,
     );
-    return globalSlice.toDartStringAndFree();
+    return globalResultSlice.toDartStringAndRelease()!;
   }
 
   Object? toObject() {
@@ -526,10 +524,10 @@ class _DictKeyIterator extends Iterator<String> {
     final slice = iterator!.ref.keyString;
 
     // If iterator has no elements at all, slice is the kNullSlice.
-    if (slice.buf == nullptr) return false;
+    if (slice.isNull) return false;
 
     // Update current with keyString.
-    current = slice.toDartString();
+    current = slice.toDartString()!;
 
     return true;
   }
