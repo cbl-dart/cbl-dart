@@ -1,6 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:cbl/cbl.dart';
 
 import 'test_binding.dart';
+
+/// A test value which can be used to test [Value]s with [ValueType.data].
+final testDataUint8List = Uint8List.fromList([1, 2, 3]);
 
 void main() {
   group('Fleece', () {
@@ -94,6 +99,12 @@ void main() {
         final doc = Doc.fromJson('{"a": "b"}');
         final value = doc.root.asDict!['a'];
         expect(value.asString, equals('b'));
+      });
+
+      test('asData returns value as Uint8List', () {
+        final dict = MutableDict();
+        dict['a'] = testDataUint8List;
+        expect(dict['a'].asData, equals(testDataUint8List));
       });
 
       test('scalarToString returns scalar value as string', () {
@@ -374,66 +385,6 @@ void main() {
       });
     });
 
-    group('plain object conversion', () {
-      test('throws when a incompatible type is added to collection', () {
-        expect(() => MutableArray([Object()]), throwsArgumentError);
-
-        expect(() => MutableDict({'a': Object()}), throwsArgumentError);
-      });
-
-      test('throws UnsupportedError if value is undefined', () {
-        expect(() => MutableArray([]).first.toObject(), throwsUnsupportedError);
-      });
-
-      test('converts null value to null', () {
-        expect(MutableArray([null]).first.toObject(), isNull);
-      });
-
-      test('converts bool value to bool', () {
-        expect(MutableArray([true]).first.toObject(), isTrue);
-      });
-
-      test('converts integer value to int', () {
-        expect(MutableArray([1]).first.toObject(), 1);
-      });
-
-      test('converts double value to double', () {
-        expect(MutableArray([.5]).first.toObject(), .5);
-      });
-
-      test('converts string value to String', () {
-        expect(MutableArray(['a']).first.toObject(), 'a');
-      });
-
-      test('converts Array to List', () {
-        final array = MutableArray([
-          MutableDict({'a': 'b'}),
-          'c'
-        ]);
-
-        final result = [
-          {'a': 'b'},
-          'c'
-        ];
-
-        expect(array.toObject(), result);
-      });
-
-      test('converts Dict to Map', () {
-        final array = MutableDict({
-          'a': 'b',
-          'c': MutableArray(['d'])
-        });
-
-        final result = {
-          'a': 'b',
-          'c': ['d']
-        };
-
-        expect(array.toObject(), result);
-      });
-    });
-
     group('MutableDict', () {
       test('create mutable copy', () {
         final doc = Doc.fromJson('{"a": "b"}');
@@ -526,6 +477,92 @@ void main() {
         expect(dict.mutableArray('a'), isNotNull);
       });
     });
+
+    group('conversion when setting values in containers', () {
+      test('should set TypedData as ValueType.data', () {
+        expect(MutableArray([ByteData(0)]).first.type, ValueType.data);
+        expect(MutableArray([Float32List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Float32x4List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Float64List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Float64x2List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Int8List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Int16List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Int32List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Int32x4List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Int64List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Uint8ClampedList(0)]).first.type, ValueType.data);
+        expect(MutableArray([Uint8List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Uint16List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Uint32List(0)]).first.type, ValueType.data);
+        expect(MutableArray([Uint64List(0)]).first.type, ValueType.data);
+      });
+    });
+
+    group('plain object conversion', () {
+      test('throws when a incompatible type is added to collection', () {
+        expect(() => MutableArray([Object()]), throwsArgumentError);
+
+        expect(() => MutableDict({'a': Object()}), throwsArgumentError);
+      });
+
+      test('throws UnsupportedError if value is undefined', () {
+        expect(() => MutableArray([]).first.toObject(), throwsUnsupportedError);
+      });
+
+      test('converts null value to null', () {
+        expect(MutableArray([null]).first.toObject(), isNull);
+      });
+
+      test('converts bool value to bool', () {
+        expect(MutableArray([true]).first.toObject(), isTrue);
+      });
+
+      test('converts integer value to int', () {
+        expect(MutableArray([1]).first.toObject(), 1);
+      });
+
+      test('converts double value to double', () {
+        expect(MutableArray([.5]).first.toObject(), .5);
+      });
+
+      test('converts string value to String', () {
+        expect(MutableArray(['a']).first.toObject(), 'a');
+      });
+
+      test('converts data value to Uint8List', () {
+        expect(MutableArray([testDataUint8List]).first.toObject(),
+            testDataUint8List);
+      });
+
+      test('converts Array to List', () {
+        final array = MutableArray([
+          MutableDict({'a': 'b'}),
+          'c'
+        ]);
+
+        final result = [
+          {'a': 'b'},
+          'c'
+        ];
+
+        expect(array.toObject(), result);
+      });
+
+      test('converts Dict to Map', () {
+        final array = MutableDict({
+          'a': 'b',
+          'c': MutableArray(['d'])
+        });
+
+        final result = {
+          'a': 'b',
+          'c': ['d']
+        };
+
+        expect(array.toObject(), result);
+      });
+    });
+
     test('usage example', () {
       final doc = Doc.fromJson('''
       {

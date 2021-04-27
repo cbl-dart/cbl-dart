@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
@@ -13,6 +14,7 @@ export 'package:cbl_ffi/cbl_ffi.dart' show ValueType, CopyFlag;
 
 // TODO: free allocated memory when Isolate goes away
 late final globalSlice = malloc<FLSlice>();
+late final globalResultSlice = globalSlice.cast<FLResultSlice>();
 
 // === Doc =====================================================================
 
@@ -122,6 +124,12 @@ class Value extends NativeResource<NativeObject<FLValue>> {
     return globalSlice.ref.toDartString();
   }
 
+  /// Returns the exact contents of a data value, or null for all other types.
+  Uint8List? get asData {
+    _bindings.asData(native.pointerUnsafe, globalSlice);
+    return globalSlice.ref.toUint8List();
+  }
+
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray => type == ValueType.array
       ? Array.fromPointer(native.pointerUnsafe.cast())
@@ -174,7 +182,7 @@ class Value extends NativeResource<NativeObject<FLValue>> {
       case ValueType.dict:
         return asDict!.toObject();
       case ValueType.data:
-        throw UnimplementedError('TODO: Fleece data');
+        return asData;
     }
   }
 
@@ -200,8 +208,7 @@ class Value extends NativeResource<NativeObject<FLValue>> {
       case ValueType.string:
         return asString.hashCode;
       case ValueType.data:
-        // TODO: update when ValueType.data is implemented
-        return 0;
+        return asData.hashCode;
       case ValueType.array:
         return asArray.hashCode;
       case ValueType.dict:
@@ -699,6 +706,7 @@ class _DefaultSlotSetter implements SlotSetter {
       value is int ||
       value is double ||
       value is String ||
+      value is TypedData ||
       value is Iterable ||
       value is Map ||
       value is Value;
@@ -717,8 +725,13 @@ class _DefaultSlotSetter implements SlotSetter {
       _slotBindings.setDouble(slot, value);
     } else if (value is String) {
       runArena(() {
-        _slotBindings.setString(
-            slot, (value as String).toNativeUtf8().withScoped());
+        final cString = (value as String).toNativeUtf8().withScoped();
+        _slotBindings.setString(slot, cString);
+      });
+    } else if (value is TypedData) {
+      runArena(() {
+        final slice = (value as TypedData).toSliceScoped();
+        _slotBindings.setData(slot, slice.ref);
       });
     } else if (value is Value) {
       _slotBindings.setValue(slot, value.native.pointerUnsafe);
@@ -726,11 +739,16 @@ class _DefaultSlotSetter implements SlotSetter {
   }
 
   static Object? _recursivelyConvertCollectionsToFleece(Object? value) {
-    if (value is Map && value is! Dict) {
+    // These collection types can be set directly though the `set...` methods of
+    // FLSLot.
+    if (value is Value || value is TypedData) return value;
+
+    if (value is Map) {
       return MutableDict()..addAll(value.cast());
-    } else if (value is Iterable && value is! Array) {
+    } else if (value is Iterable) {
       return MutableArray()..addAll(value);
     } else {
+      // value is a primitive.
       return value;
     }
   }
