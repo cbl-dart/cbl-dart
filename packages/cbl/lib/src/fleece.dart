@@ -117,7 +117,7 @@ class Value extends NativeResource<NativeObject<FLValue>> {
   double get asDouble => _bindings.asDouble(native.pointerUnsafe);
 
   /// Returns the exact contents of a string value, or null for all other types.
-  String get asString {
+  String? get asString {
     _bindings.asString(native.pointerUnsafe, globalSlice);
     return globalSlice.ref.toDartString();
   }

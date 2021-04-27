@@ -169,7 +169,7 @@ abstract class Query implements Resource {
   /// will have an automatically-generated name like `$1`. To give a column a
   /// custom name, use the `AS` syntax in the query. Every column is guaranteed
   /// to have a unique name.
-  Future<String> columnName(int index);
+  Future<String?> columnName(int index);
 
   /// Returns a [Stream] which emits a [ResultSet] when this query's results
   /// change, turning it into a "live query" until the stream is canceled.
@@ -229,7 +229,7 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
       use(() => native.execute((pointer) => GetQueryColumnCount(pointer)));
 
   @override
-  Future<String> columnName(int index) => use(
+  Future<String?> columnName(int index) => use(
       () => native.execute((pointer) => GetQueryColumnName(pointer, index)));
 
   @override

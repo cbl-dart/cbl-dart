@@ -74,12 +74,12 @@ class GetQueryColumnCount extends ObjectRequest<CBLQuery, int> {
 int getQueryColumnCount(GetQueryColumnCount request) =>
     _bindings.columnCount(request.object);
 
-class GetQueryColumnName extends ObjectRequest<CBLQuery, String> {
+class GetQueryColumnName extends ObjectRequest<CBLQuery, String?> {
   GetQueryColumnName(Pointer<CBLQuery> query, this.columnIndex) : super(query);
   final int columnIndex;
 }
 
-String getQueryColumnName(GetQueryColumnName request) {
+String? getQueryColumnName(GetQueryColumnName request) {
   _bindings.columnName(request.object, request.columnIndex, globalSlice);
   return globalSlice.ref.toDartString();
 }
