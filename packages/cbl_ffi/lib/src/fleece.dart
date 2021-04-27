@@ -175,6 +175,15 @@ typedef CBLDart_FLSlot_SetString = void Function(
   Pointer<Utf8> value,
 );
 
+typedef FLSlot_SetData_C = Void Function(
+  Pointer<FLSlot> slot,
+  FLSlice value,
+);
+typedef FLSlot_SetData = void Function(
+  Pointer<FLSlot> slot,
+  FLSlice value,
+);
+
 typedef FLSlot_SetValue_C = Void Function(
   Pointer<FLSlot> slot,
   Pointer<FLValue> value,
@@ -203,6 +212,9 @@ class SlotBindings {
             CBLDart_FLSlot_SetString>(
           'CBLDart_FLSlot_SetString',
         ),
+        setData = libs.cblDart.lookupFunction<FLSlot_SetData_C, FLSlot_SetData>(
+          'FLSlot_SetData',
+        ),
         setValue = libs.cbl.lookupFunction<FLSlot_SetValue_C, FLSlot_SetValue>(
           'FLSlot_SetValue',
         );
@@ -212,6 +224,7 @@ class SlotBindings {
   final FLSlot_SetInt setInt;
   final FLSlot_SetDouble setDouble;
   final CBLDart_FLSlot_SetString setString;
+  final FLSlot_SetData setData;
   final FLSlot_SetValue setValue;
 }
 
@@ -326,11 +339,20 @@ typedef FLValue_AsInt = int Function(Pointer<FLValue> value);
 typedef FLValue_AsDouble_C = Double Function(Pointer<FLValue> value);
 typedef FLValue_AsDouble = double Function(Pointer<FLValue> value);
 
-typedef FLValue_AsString_C = Void Function(
+typedef CBLDart_FLValue_AsString_C = Void Function(
   Pointer<FLValue> value,
   Pointer<FLSlice> slice,
 );
-typedef FLValue_AsString = void Function(
+typedef CBLDart_FLValue_AsString = void Function(
+  Pointer<FLValue> value,
+  Pointer<FLSlice> slice,
+);
+
+typedef CBLDart_FLValue_AsData_C = Void Function(
+  Pointer<FLValue> value,
+  Pointer<FLSlice> slice,
+);
+typedef CBLDart_FLValue_AsData = void Function(
   Pointer<FLValue> value,
   Pointer<FLSlice> slice,
 );
@@ -397,9 +419,13 @@ class ValueBindings {
             libs.cbl.lookupFunction<FLValue_AsDouble_C, FLValue_AsDouble>(
           'FLValue_AsDouble',
         ),
-        asString =
-            libs.cblDart.lookupFunction<FLValue_AsString_C, FLValue_AsString>(
+        asString = libs.cblDart.lookupFunction<CBLDart_FLValue_AsString_C,
+            CBLDart_FLValue_AsString>(
           'CBLDart_FLValue_AsString',
+        ),
+        asData = libs.cblDart
+            .lookupFunction<CBLDart_FLValue_AsData_C, CBLDart_FLValue_AsData>(
+          'CBLDart_FLValue_AsData',
         ),
         scalarToString = libs.cblDart.lookupFunction<CBLDart_FLValue_ToString_C,
             CBLDart_FLValue_ToString>(
@@ -421,7 +447,8 @@ class ValueBindings {
   final FLValue_AsBool asBool;
   final FLValue_AsInt asInt;
   final FLValue_AsDouble asDouble;
-  final FLValue_AsString asString;
+  final CBLDart_FLValue_AsString asString;
+  final CBLDart_FLValue_AsData asData;
   final CBLDart_FLValue_ToString scalarToString;
   final FLValue_IsEqual isEqual;
   final CBLDart_FLValue_ToJSONX toJson;
