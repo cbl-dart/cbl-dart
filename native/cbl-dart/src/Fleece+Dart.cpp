@@ -66,6 +66,10 @@ void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice) {
   *slice = CBLDart_FLSliceToDart(FLValue_AsString(value));
 }
 
+void CBLDart_FLValue_AsData(FLValue value, CBLDartSlice *slice) {
+  *slice = CBLDart_FLSliceToDart(FLValue_AsData(value));
+}
+
 void CBLDart_FLValue_ToString(FLValue value, CBLDartSlice *slice) {
   *slice = CBLDart_FLSliceResultToDart(FLValue_ToString(value));
 }
