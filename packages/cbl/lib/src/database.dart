@@ -763,7 +763,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             address.toPointer(),
             release: true,
             retain: false,
-          ).map((it) => it.asString).toList()));
+          ).map((it) => it.asString!).toList()));
 
   // === Blobs =================================================================
 

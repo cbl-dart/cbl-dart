@@ -33,7 +33,7 @@ extension DatabaseUtilsExtension on Database {
         .then((query) => query.execute());
 
     for (final result in resultSet.asDicts) {
-      yield result['id'].asString;
+      yield result['id'].asString!;
     }
   }
 
@@ -42,7 +42,7 @@ extension DatabaseUtilsExtension on Database {
   Stream<List<String>> watchAllIds() => query(N1QLQuery('SELECT META.id AS id'))
       .asStream()
       .asyncExpand((q) => q.changes())
-      .map((resultSet) => resultSet.map((rs) => rs['id'].asString).toList());
+      .map((resultSet) => resultSet.map((rs) => rs['id'].asString!).toList());
 
   /// Deletes all documents in this database and returns whether any documents
   /// where deleted.
