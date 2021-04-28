@@ -48,7 +48,7 @@ function buildPlatform() {
         -destination "$destination" \
         -archivePath "$archivesDir/$platformId" \
         SKIP_INSTALL=NO \
-        BUILD_FOR_DISTRIBUTION=YES \
+        BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         DEVELOPMENT_TEAM=$developmentTeam \
         CODE_SIGN_IDENTITY="Apple Development" \
         CODE_SIGN_STYLE=Manual \
