@@ -299,7 +299,7 @@ jobs:
       - name: Print debug info
         if: failure()
         working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: |          
+        run: |
           if [ ! -f ./core ]; then
             echo "Did not find core dump"
             exit 0
@@ -401,7 +401,12 @@ jobs:
 
       - name: Run tests
         working-directory: packages/cbl_flutter/example/ios
-        run: fastlane test
+        run: |
+          xcodebuild \
+            -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -destination 'platform=iOS Simulator,name=iPhone 12,OS=14.4' \
+            test
 
   tests-flutter-macos:
     name: Tests - Flutter - macOS
