@@ -526,6 +526,20 @@ SELECT * WHERE META.foo = "bar"
           ]),
         );
 
+        // Streams such as `changesOfAllDocuments` are doing async work
+        // when being listened to. That means we cannot assume the stream
+        // is fully setup and will see changes at this point. In the context
+        // of a single database this usually does not matter because all
+        // resources related to that database share a single worker. A worker
+        // behaves like a queue, so once a stream has been listened to, its
+        // request to the worker will be handled before all other requests which
+        // could affect it. In this case there are two database and two workers
+        // handling requests in parallel. To prevent the doc from being saved
+        // before the stream is ready, we wait a few milliseconds.
+        // TODO: when streams expose a method to wait until they are fully
+        // ready use that instead of this workaround
+        await Future<void>.delayed(Duration(milliseconds: 50));
+
         await dbB.saveDocument(doc);
       });
 
