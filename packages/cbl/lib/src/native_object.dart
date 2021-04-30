@@ -178,7 +178,10 @@ class FleeceRefCountedObject<T extends NativeType> extends NativeObject<T> {
     required bool release,
     required bool retain,
   }) : super(pointer) {
-    assert(!retain || release, 'only a retained object can be released');
+    assert(
+      !(retain && !release),
+      'only an object which will be released can be retained',
+    );
 
     if (release) {
       CBLBindings.instance.fleece.value.bindToDartObject(
