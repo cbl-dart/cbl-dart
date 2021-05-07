@@ -1,117 +1,121 @@
 import 'dart:ffi';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../errors.dart';
 import '../request_router.dart';
+import '../worker.dart';
 import 'shared.dart';
 
 late final _readStreamBindings = CBLBindings.instance.blobs.readStream;
 
-class OpenBlobReadStream extends ObjectRequest<CBLBlob, int> {
-  OpenBlobReadStream(Pointer<CBLBlob> blob) : super(blob);
+class OpenBlobReadStream
+    extends WorkerRequest<TransferablePointer<CBLBlobReadStream>> {
+  OpenBlobReadStream(Pointer<CBLBlob> blob)
+      : blob = blob.toTransferablePointer();
+
+  final TransferablePointer<CBLBlob> blob;
 }
 
-int openBlobReadStream(OpenBlobReadStream request) => _readStreamBindings
-    .openContentStream(request.object, globalError)
-    .checkResultAndError()
-    .address;
+TransferablePointer<CBLBlobReadStream> openBlobReadStream(
+        OpenBlobReadStream request) =>
+    _readStreamBindings
+        .openContentStream(request.blob.pointer)
+        .toTransferablePointer();
 
-class ReadFromBlobReadStream extends ObjectRequest<CBLBlobReadStream, int> {
+class ReadFromBlobReadStream extends WorkerRequest<int> {
   ReadFromBlobReadStream(
     Pointer<CBLBlobReadStream> stream,
-    this._bufferAddress,
+    Pointer<Uint8> buffer,
     this.bufferSize,
-  ) : super(stream);
+  )   : stream = stream.toTransferablePointer(),
+        buffer = buffer.toTransferablePointer();
 
-  final int _bufferAddress;
+  final TransferablePointer<CBLBlobReadStream> stream;
+
+  final TransferablePointer<Uint8> buffer;
 
   final int bufferSize;
-
-  Pointer<Uint8> get bufferPointer => _bufferAddress.toPointer().cast();
 }
 
-int readFromBlobReadStream(ReadFromBlobReadStream request) {
-  final bytesRead = _readStreamBindings.read(
-    request.object,
-    request.bufferPointer,
-    request.bufferSize,
-    globalError,
-  );
+int readFromBlobReadStream(ReadFromBlobReadStream request) =>
+    _readStreamBindings.read(
+      request.stream.pointer,
+      request.buffer.pointer,
+      request.bufferSize,
+    );
 
-  if (bytesRead == -1) {
-    checkError();
-  }
+class CloseBlobReadStream extends WorkerRequest<void> {
+  CloseBlobReadStream(Pointer<CBLBlobReadStream> stream)
+      : stream = stream.toTransferablePointer();
 
-  return bytesRead;
-}
-
-class CloseBlobReadStream extends ObjectRequest<CBLBlobReadStream, void> {
-  CloseBlobReadStream(Pointer<CBLBlobReadStream> stream) : super(stream);
+  final TransferablePointer<CBLBlobReadStream> stream;
 }
 
 void closeBlobReadStream(CloseBlobReadStream request) =>
-    _readStreamBindings.close(request.object);
+    _readStreamBindings.close(request.stream.pointer);
 
 late final _writeStreamBindings = CBLBindings.instance.blobs.writeStream;
 
-class OpenBlobWriteStream extends ObjectRequest<CBLDatabase, int> {
-  OpenBlobWriteStream(Pointer<CBLDatabase> db) : super(db);
+class OpenBlobWriteStream
+    extends WorkerRequest<TransferablePointer<CBLBlobWriteStream>> {
+  OpenBlobWriteStream(Pointer<CBLDatabase> db)
+      : db = db.toTransferablePointer();
+
+  final TransferablePointer<CBLDatabase> db;
 }
 
-int openBlobWriteStream(OpenBlobWriteStream request) => _writeStreamBindings
-    .makeNew(request.object, globalError)
-    .checkResultAndError()
-    .address;
+TransferablePointer<CBLBlobWriteStream> openBlobWriteStream(
+        OpenBlobWriteStream request) =>
+    _writeStreamBindings.create(request.db.pointer).toTransferablePointer();
 
-class WriteToBlobWriteStream extends ObjectRequest<CBLBlobWriteStream, void> {
+class WriteToBlobWriteStream extends WorkerRequest<void> {
   WriteToBlobWriteStream(
     Pointer<CBLBlobWriteStream> stream,
-    this._chunkAddress,
-    this.chunkSize,
-  ) : super(stream);
+    Uint8List chunk,
+  )   : stream = stream.toTransferablePointer(),
+        chunk = TransferableTypedData.fromList([chunk]);
 
-  final int _chunkAddress;
+  final TransferablePointer<CBLBlobWriteStream> stream;
 
-  final int chunkSize;
-
-  Pointer<Uint8> get chunkPointer => Pointer.fromAddress(_chunkAddress);
+  final TransferableTypedData chunk;
 }
 
 void writeToBlobWriteStream(WriteToBlobWriteStream request) =>
-    _writeStreamBindings
-        .write(
-          request.object,
-          request.chunkPointer,
-          request.chunkSize,
-          globalError,
-        )
-        .toBool()
-        .checkResultAndError();
+    _writeStreamBindings.write(
+      request.stream.pointer,
+      request.chunk.materialize().asUint8List(),
+    );
 
-class CloseBlobWriteStream extends ObjectRequest<CBLBlobWriteStream, void> {
-  CloseBlobWriteStream(Pointer<CBLBlobWriteStream> stream) : super(stream);
+class CloseBlobWriteStream extends WorkerRequest<void> {
+  CloseBlobWriteStream(Pointer<CBLBlobWriteStream> stream)
+      : stream = stream.toTransferablePointer();
+
+  final TransferablePointer<CBLBlobWriteStream> stream;
 }
 
 void closeBlobWriteStream(CloseBlobWriteStream request) =>
-    _writeStreamBindings.close(request.object);
+    _writeStreamBindings.close(request.stream.pointer);
 
-class CreateBlobWithWriteStream extends ObjectRequest<CBLBlobWriteStream, int> {
+class CreateBlobWithWriteStream
+    extends WorkerRequest<TransferablePointer<CBLBlob>> {
   CreateBlobWithWriteStream(
     Pointer<CBLBlobWriteStream> stream,
     this.contentType,
-  ) : super(stream);
+  ) : stream = stream.toTransferablePointer();
+
+  final TransferablePointer<CBLBlobWriteStream> stream;
 
   final String? contentType;
 }
 
-int createBlobWithWriteStream(CreateBlobWithWriteStream request) =>
+TransferablePointer<CBLBlob> createBlobWithWriteStream(
+  CreateBlobWithWriteStream request,
+) =>
     _writeStreamBindings
-        .createBlobWithStream(
-          (request.contentType?.toNativeUtf8().withScoped()).elseNullptr(),
-          request.object,
-        )
-        .address;
+        .createBlobWithStream(request.contentType, request.stream.pointer)
+        .toTransferablePointer();
 
 void addBlobHandlersToRouter(RequestRouter router) {
   router.addHandler(openBlobReadStream);

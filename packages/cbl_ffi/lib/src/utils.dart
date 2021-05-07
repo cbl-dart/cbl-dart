@@ -3,6 +3,12 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
+// === Lang ====================================================================
+
+extension AnyExt<T> on T {
+  R let<R>(R Function(T it) f) => f(this);
+}
+
 // === Allocation ==============================================================
 
 typedef MemoryFinalizer = void Function();
@@ -60,16 +66,13 @@ R runArena<R>(R Function() body) {
   final arena = Arena();
 
   try {
-    final result = runZoned(body,
-        zoneValues: {
-          #_currentArena: arena,
-        },
-        zoneSpecification: ZoneSpecification());
+    final result = runZoned(body, zoneValues: {#_currentArena: arena});
 
     if (result is Future) {
       return result.whenComplete(arena.finalize) as R;
     }
 
+    arena.finalize();
     return result;
   } catch (_) {
     // `finalize` cannot be run in a `finally` block since the result could be

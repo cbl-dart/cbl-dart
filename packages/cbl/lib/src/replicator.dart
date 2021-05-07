@@ -16,60 +16,75 @@ import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'package:cbl_ffi/cbl_ffi.dart'
-    show ReplicatorType, ProxyType, ReplicatorActivityLevel, DocumentFlags;
-
 // region Internal API
 
 Future<Replicator> createReplicator({
   required DatabaseImpl db,
   required ReplicatorConfiguration config,
-}) =>
-    runNativeObjectScoped(() => runArena(() async {
-          final pushFilterCallback =
-              config.pushFilter?.let(_wrapReplicationFilter);
+}) {
+  return runNativeObjectScoped(() async {
+    final pushFilterCallback = config.pushFilter?.let(_wrapReplicationFilter);
+    final pullFilterCallback = config.pullFilter?.let(_wrapReplicationFilter);
+    final conflictResolverCallback =
+        config.conflictResolver?.let(_wrapConflictResolver);
 
-          final pullFilterCallback =
-              config.pullFilter?.let(_wrapReplicationFilter);
+    void disposeCallbacks() => ([
+          pushFilterCallback,
+          pullFilterCallback,
+          conflictResolverCallback
+        ].whereNotNull().forEach((it) => it.close()));
 
-          final conflictResolverCallback =
-              config.conflictResolver?.let(_wrapConflictResolver);
+    final endpoint = config.createEndpoint();
+    final authenticator = config.createAuthenticator();
 
-          void disposeCallbacks() => ([
-                pushFilterCallback,
-                pullFilterCallback,
-                conflictResolverCallback
-              ].whereNotNull().forEach((it) => it.close()));
+    try {
+      final result = await db.native.worker.execute(NewReplicator(
+        db.native.pointer,
+        endpoint,
+        config.replicatorType ?? ReplicatorType.pushAndPull,
+        config.continuous ?? false,
+        authenticator,
+        config.proxy?.type,
+        config.proxy?.hostname,
+        config.proxy?.port,
+        config.proxy?.username,
+        config.proxy?.password,
+        config.headers?.let((it) => MutableDict(it).native.pointer.cast()),
+        config.pinnedServerCertificate,
+        config.trustedRootCertificates,
+        config.channels?.let((it) => MutableArray(it).native.pointer.cast()),
+        config.documentIds?.let((it) => MutableArray(it).native.pointer.cast()),
+        pushFilterCallback?.native.pointer,
+        pullFilterCallback?.native.pointer,
+        conflictResolverCallback?.native.pointer,
+      ));
 
-          final cblConfig = config.toCBLReplicatorConfigurationScoped(
-            db.native,
-            pushFilterCallback?.native,
-            pullFilterCallback?.native,
-            conflictResolverCallback?.native,
-          );
-
-          final address =
-              await db.native.worker.execute(NewReplicator(cblConfig));
-
-          return ReplicatorImpl(
-            database: db,
-            pointer: address.toPointer().cast(),
-            disposeCallbacks: disposeCallbacks,
-          );
-        }));
+      return ReplicatorImpl(
+        database: db,
+        pointer: result.pointer,
+        disposeCallbacks: disposeCallbacks,
+      );
+    } catch (e) {
+      disposeCallbacks();
+      rethrow;
+    } finally {
+      _bindings.freeEndpoint(endpoint);
+      if (authenticator != null) {
+        _bindings.freeAuthenticator(authenticator);
+      }
+    }
+  });
+}
 
 extension CBLReplicatorStatusExt on CBLReplicatorStatus {
-  ReplicatorStatus toReplicatorStatus() => runArena(() {
-        final error = scoped(this.error.copyToPointer());
-        return ReplicatorStatus(
-          activity.toReplicatorActivityLevel(),
-          ReplicatorProgress(
-            progress.fractionCompleted,
-            progress.documentCount,
-          ),
-          error.isOk ? null : exceptionFromCBLError(error: error),
-        );
-      });
+  ReplicatorStatus toReplicatorStatus() => ReplicatorStatus(
+        activity.toReplicatorActivityLevel(),
+        ReplicatorProgress(
+          progress.fractionCompleted,
+          progress.documentCount,
+        ),
+        exception?.translate(),
+      );
 }
 
 // endregion
@@ -200,17 +215,16 @@ typedef ReplicationFilter = FutureOr<bool> Function(
 
 NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
     NativeCallback((arguments, result) async {
-      final docAddress = arguments[0] as int;
+      final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
       final doc = createDocument(
-        pointer: docAddress.toPointer(),
+        pointer: message.document,
         retain: true,
         worker: null,
       );
-      final isDeleted = arguments[1] as bool;
 
       var decision = false;
       try {
-        decision = await filter(doc, isDeleted);
+        decision = await filter(doc, message.isDeleted);
       } finally {
         result!(decision);
       }
@@ -244,29 +258,37 @@ typedef ConflictResolver = FutureOr<Document?> Function(
 
 NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
     NativeCallback((arguments, result) async {
-      final docId = arguments[0] as String;
-      final localAddress = arguments[1] as int?;
-      final remoteAddress = arguments[2] as int?;
+      final message =
+          ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-      final local = localAddress?.let((it) => createDocument(
-            pointer: it.toPointer(),
+      final local = message.localDocument?.let((it) => createDocument(
+            pointer: it,
             retain: true,
             worker: null,
           ));
 
-      final remote = remoteAddress?.let((it) => createDocument(
-            pointer: it.toPointer(),
+      final remote = message.remoteDocument?.let((it) => createDocument(
+            pointer: it,
             retain: true,
             worker: null,
           ));
 
       var decision = local ?? remote;
       try {
-        decision = await filter(docId, local, remote);
+        decision = await filter(message.documentId, local, remote);
       } finally {
         result!(decision?.native.pointerUnsafe.address);
       }
     });
+
+/// Types of proxy servers, for CBLProxySettings.
+enum ProxyType {
+  /// HTTP proxy; must support 'CONNECT' method
+  http,
+
+  /// HTTPS proxy; must support 'CONNECT' method
+  https,
+}
 
 /// Proxy settings for the replicator.
 class ProxySettings {
@@ -322,19 +344,16 @@ class ProxySettings {
       ')';
 }
 
-extension on ProxySettings {
-  Pointer<CBLProxySettings> toCBLProxySettingScoped() {
-    final settings = scoped(malloc<CBLProxySettings>());
+/// Direction of replication: push, pull, or both.
+enum ReplicatorType {
+  /// Bidirectional; both push and pull
+  pushAndPull,
 
-    settings.ref.type = type.toInt();
-    settings.ref.hostname = hostname.toNativeUtf8().withScoped();
-    settings.ref.port = port;
-    settings.ref.username =
-        (username?.toNativeUtf8().withScoped()).elseNullptr();
-    settings.ref.password = password.toNativeUtf8().withScoped();
+  /// Pushing changes to the target
+  push,
 
-    return settings;
-  }
+  /// Pulling changes from the target
+  pull,
 }
 
 /// The configuration of a replicator.
@@ -452,109 +471,38 @@ class ReplicatorConfiguration {
 }
 
 extension on ReplicatorConfiguration {
-  Pointer<CBLDartReplicatorConfiguration> toCBLReplicatorConfigurationScoped(
-    NativeObject<CBLDatabase> db,
-    NativeObject<Callback>? pushFilterCallback,
-    NativeObject<Callback>? pullFilterCallback,
-    NativeObject<Callback>? conflictResolverCallback,
-  ) {
-    final config = scoped(malloc<CBLDartReplicatorConfiguration>());
-
-    // database
-    config.ref.database = db.pointer;
-
-    // endpoint
-    Pointer<CBLEndpoint> cblEndpoint;
+  Pointer<CBLEndpoint> createEndpoint() {
     final endpoint = this.endpoint;
     if (endpoint is UrlEndpoint) {
-      cblEndpoint = _bindings.endpointNewWithUrl(
-          endpoint.url.toString().toNativeUtf8().withScoped());
+      return _bindings.createEndpointWithUrl(endpoint.url.toString());
     } else if (endpoint is LocalDbEndpoint) {
-      assert(
-        _bindings.endpointNewWithLocalDB != null,
-        'LocalDbEndpoint is an Enterprise Edition feature',
-      );
-      cblEndpoint = _bindings.endpointNewWithLocalDB!(
+      return _bindings.createEndpointWithLocalDB(
         (endpoint.database as DatabaseImpl).native.pointer,
       );
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $endpoint');
     }
+  }
 
-    registerFinalzier(() => _bindings.endpointFree(cblEndpoint));
-    config.ref.endpoint = cblEndpoint;
-
-    // replicatorType
-    config.ref.replicatorType =
-        (replicatorType ?? ReplicatorType.pushAndPull).toInt();
-
-    // continuous
-    config.ref.continuous = (continuous ?? false).toInt();
-
-    // authenticator
+  Pointer<CBLAuthenticator>? createAuthenticator() {
     final authenticator = this.authenticator;
-    if (authenticator != null) {
-      Pointer<CBLAuthenticator> cblAuthenticator;
+    if (authenticator == null) return null;
 
-      if (authenticator is BasicAuthenticator) {
-        cblAuthenticator = _bindings.authNewBasic(
-          authenticator.username.toString().toNativeUtf8().withScoped(),
-          authenticator.password.toString().toNativeUtf8().withScoped(),
-        );
-      } else if (authenticator is SessionAuthenticator) {
-        cblAuthenticator = _bindings.authNewSession(
-          authenticator.sessionId.toNativeUtf8().withScoped(),
-          (authenticator.cookieName?.toNativeUtf8().withScoped()).elseNullptr(),
-        );
-      } else {
-        throw UnimplementedError(
-          'Authenticator type is not implemented: $authenticator',
-        );
-      }
-
-      registerFinalzier(() => _bindings.authFree(cblAuthenticator));
-      config.ref.authenticator = cblAuthenticator;
+    if (authenticator is BasicAuthenticator) {
+      return _bindings.createBasicAuthenticator(
+        authenticator.username,
+        authenticator.password,
+      );
+    } else if (authenticator is SessionAuthenticator) {
+      return _bindings.createSessionAuthenticator(
+        authenticator.sessionId,
+        authenticator.cookieName,
+      );
     } else {
-      config.ref.authenticator = nullptr;
+      throw UnimplementedError(
+        'Authenticator type is not implemented: $authenticator',
+      );
     }
-
-    // proxy
-    config.ref.proxy =
-        (this.proxy?.let((it) => it.toCBLProxySettingScoped())).elseNullptr();
-
-    // headers
-    config.ref.headers =
-        headers != null ? MutableDict(headers).native.pointer.cast() : nullptr;
-
-    // pinnedServerCertificate
-    config.ref.pinnedServerCertificate =
-        (pinnedServerCertificate?.toSliceScoped()).elseNullptr();
-
-    // trustedRootCertificates
-    config.ref.trustedRootCertificates =
-        (trustedRootCertificates?.toSliceScoped()).elseNullptr();
-
-    // channels
-    config.ref.channels = channels != null
-        ? MutableArray(channels).native.pointer.cast()
-        : nullptr;
-
-    // documentIds
-    config.ref.documentIDs = documentIds != null
-        ? MutableArray(documentIds).native.pointer.cast()
-        : nullptr;
-
-    // pushFilter
-    config.ref.pushFilter = (pushFilterCallback?.pointer).elseNullptr();
-
-    // pullFilter
-    config.ref.pullFilter = (pullFilterCallback?.pointer).elseNullptr();
-
-    // conflictResolver
-    config.ref.conflictResolver =
-        (conflictResolverCallback?.pointer).elseNullptr();
-
-    return config;
   }
 }
 
@@ -590,6 +538,29 @@ class ReplicatorProgress {
       'fractionComplete: $fractionComplete, '
       'documentCount: $documentCount'
       ')';
+}
+
+/// The possible states a replicator can be in during its lifecycle.
+enum ReplicatorActivityLevel {
+  /// The replicator is unstarted, finished, or hit a fatal error.
+  stopped,
+
+  /// The replicator is offline, as the remote host is unreachable.
+  offline,
+
+  /// The replicator is connecting to the remote host.
+  connecting,
+
+  /// The replicator is inactive, waiting for changes to sync.
+  idle,
+
+  /// The replicator is actively transferring data.
+  busy,
+}
+
+extension on CBLReplicatorActivityLevel {
+  ReplicatorActivityLevel toReplicatorActivityLevel() =>
+      ReplicatorActivityLevel.values[index];
 }
 
 /// A [Replicator]'s current status
@@ -860,27 +831,24 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
         createRegisterCallbackRequest: (callback) =>
             AddReplicatorChangeListener(
           native.pointerUnsafe,
-          callback.native.pointerUnsafe.address,
+          callback.native.pointerUnsafe,
         ),
         // The native caller allocates some memory for the arguments and blocks
         // until the Dart side copies them and finishes the call, so it can
         // free the memory.
         finishBlockingCall: true,
         createEvent: (_, arguments) {
-          final statusAddress = arguments[0] as int;
-          return statusAddress
-              .toPointer()
-              .cast<CBLReplicatorStatus>()
-              .ref
-              .toReplicatorStatus();
+          final message =
+              ReplicatorStatusCallbackMessage.fromArguments(arguments);
+          return message.status.ref.toReplicatorStatus();
         },
       ).stream;
 
   @override
   Future<Dict> pendingDocumentIds() => use(() => native
       .execute((pointer) => GetReplicatorPendingDocumentIds(pointer))
-      .then((address) => MutableDict.fromPointer(
-            address.toPointer(),
+      .then((result) => Dict.fromPointer(
+            result.pointer,
             release: true,
             retain: false,
           )));
@@ -890,36 +858,33 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
       native.execute((pointer) => GetReplicatorIsDocumentPening(pointer, id)));
 
   @override
-  Stream<DocumentsReplicated> documentReplications() => useSync(() =>
-      CallbackStreamController(
-        parent: this,
-        worker: native.worker,
-        createRegisterCallbackRequest: (callback) =>
-            AddReplicatorDocumentListener(
-          native.pointerUnsafe,
-          callback.native.pointerUnsafe.address,
-        ),
-        // See `statusChanges` for an explanation of why this option is `true`.
-        finishBlockingCall: true,
-        createEvent: (_, arguments) {
-          final isPush = arguments[0] as bool;
-          final numDocuments = arguments[1] as int;
-          final documentsAddress = arguments[2] as int;
+  Stream<DocumentsReplicated> documentReplications() =>
+      useSync(() => CallbackStreamController(
+            parent: this,
+            worker: native.worker,
+            createRegisterCallbackRequest: (callback) =>
+                AddReplicatorDocumentListener(
+              native.pointerUnsafe,
+              callback.native.pointerUnsafe,
+            ),
+            // See `statusChanges` for an explanation of why this option is `true`.
+            finishBlockingCall: true,
+            createEvent: (_, arguments) {
+              final message =
+                  DocumentReplicationsCallbackMessage.fromArguments(arguments);
 
-          final direction =
-              isPush ? ReplicationDirection.push : ReplicationDirection.pull;
+              final direction = message.isPush
+                  ? ReplicationDirection.push
+                  : ReplicationDirection.pull;
 
-          final documentsPointer =
-              Pointer<CBLDartReplicatedDocument>.fromAddress(documentsAddress);
+              final documents = List.generate(
+                message.documentCount,
+                (index) => message.documents.elementAt(index),
+              ).map((it) => it.ref.toReplicatedDocument()).toList();
 
-          final documents = List.generate(
-            numDocuments,
-            (index) => documentsPointer.elementAt(index),
-          ).map((it) => it.ref.toReplicatedDocument()).toList();
-
-          return DocumentsReplicated(direction, documents);
-        },
-      ).stream);
+              return DocumentsReplicated(direction, documents);
+            },
+          ).stream);
 
   @override
   Future<void> performClose() async {

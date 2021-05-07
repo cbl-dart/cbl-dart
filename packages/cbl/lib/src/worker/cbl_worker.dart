@@ -33,6 +33,11 @@ class CblWorkerDelegate extends WorkerDelegate {
   }
 
   @override
+  Future<void> shutdown() async {
+    CBLBindings.instance.dispose();
+  }
+
+  @override
   Future<WorkerResponse> handleRequest(WorkerRequest request) =>
       _router.handleRequest(request);
 }
@@ -40,12 +45,9 @@ class CblWorkerDelegate extends WorkerDelegate {
 RequestRouter _createRouter() {
   final _router = RequestRouter();
 
-  // Run every handler in a memory management [Arena].
-  _router.addMiddleware(_runInArenaMiddleware());
-
-  // Only [BaseException]s are expected to be throw from handlers. Other
+  // Only [CBLErrorException]s are expected to be throw from handlers. Other
   // exceptions should crash the [Worker].
-  _router.setErrorHandler(rootedErrorHandler<BaseException>());
+  _router.setErrorHandler(CBLErrorExceptionHandler());
 
   addDatabaseHandlersToRouter(_router);
   addQueryHandlersToRouter(_router);
@@ -55,10 +57,13 @@ RequestRouter _createRouter() {
   return _router;
 }
 
-/// Returns a [WorkerRequestHandlerMiddleware] wich runs the next handler in a
-/// memory management [Arena].
-WorkerRequestHandlerMiddleware _runInArenaMiddleware() =>
-    (request, next) => runArena(() => next(request));
+/// Error handler which handles [CBLErrorException] by translating them to a
+/// [BaseException].
+ErrorHandler CBLErrorExceptionHandler() => (error, _) {
+      if (error is CBLErrorException) {
+        return WorkerResponse.error(translateCBLErrorException(error));
+      }
+    };
 
 /// A factory of [Worker]s which use a [CblWorkerDelegate].
 class CblWorkerFactory extends WorkerFactory {

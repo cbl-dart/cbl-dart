@@ -1,122 +1,220 @@
 import 'dart:ffi';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../errors.dart';
 import '../../replicator.dart';
+import '../../utils.dart';
 import '../request_router.dart';
+import '../worker.dart';
 import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.replicator;
 
-class NewReplicator extends ObjectRequest<CBLDartReplicatorConfiguration, int> {
-  NewReplicator(Pointer<CBLDartReplicatorConfiguration> config) : super(config);
+extension on ReplicatorType {
+  CBLReplicatorType toCBLReplicatorType() => CBLReplicatorType.values[index];
 }
 
-int newReplicator(NewReplicator request) => _bindings
-    .makeNew(request.object, globalError)
-    .checkResultAndError()
-    .address;
+extension on ProxyType {
+  CBLProxyType toCBLProxyType() => CBLProxyType.values[index];
+}
 
-class ResetReplicatorCheckpoint extends ObjectRequest<CBLReplicator, void> {
+class NewReplicator extends WorkerRequest<TransferablePointer<CBLReplicator>> {
+  NewReplicator(
+    Pointer<CBLDatabase> database,
+    Pointer<CBLEndpoint> endpoint,
+    this.replicatorType,
+    this.continuous,
+    Pointer<CBLAuthenticator>? authenticator,
+    this.proxyType,
+    this.proxyHostname,
+    this.proxyPort,
+    this.proxyUsername,
+    this.proxyPassword,
+    Pointer<FLDict>? headers,
+    Uint8List? pinnedServerCertificate,
+    Uint8List? trustedRootCertificates,
+    Pointer<FLArray>? channels,
+    Pointer<FLArray>? documentIDs,
+    Pointer<Callback>? pushFilter,
+    Pointer<Callback>? pullFilter,
+    Pointer<Callback>? conflictResolver,
+  )   : database = database.toTransferablePointer(),
+        endpoint = endpoint.toTransferablePointer(),
+        authenticator = authenticator?.toTransferablePointer(),
+        headers = headers?.toTransferablePointer(),
+        pinnedServerCertificate = pinnedServerCertificate
+            ?.let((it) => TransferableTypedData.fromList([it])),
+        trustedRootCertificates = trustedRootCertificates
+            ?.let((it) => TransferableTypedData.fromList([it])),
+        channels = channels?.toTransferablePointer(),
+        documentIDs = documentIDs?.toTransferablePointer(),
+        pushFilter = pushFilter?.toTransferablePointer(),
+        pullFilter = pullFilter?.toTransferablePointer(),
+        conflictResolver = conflictResolver?.toTransferablePointer();
+
+  final TransferablePointer<CBLDatabase> database;
+  final TransferablePointer<CBLEndpoint> endpoint;
+  final ReplicatorType replicatorType;
+  final bool continuous;
+  final TransferablePointer<CBLAuthenticator>? authenticator;
+  final ProxyType? proxyType;
+  final String? proxyHostname;
+  final int? proxyPort;
+  final String? proxyUsername;
+  final String? proxyPassword;
+  final TransferablePointer<FLDict>? headers;
+  final TransferableTypedData? pinnedServerCertificate;
+  final TransferableTypedData? trustedRootCertificates;
+  final TransferablePointer<FLArray>? channels;
+  final TransferablePointer<FLArray>? documentIDs;
+  final TransferablePointer<Callback>? pushFilter;
+  final TransferablePointer<Callback>? pullFilter;
+  final TransferablePointer<Callback>? conflictResolver;
+}
+
+TransferablePointer<CBLReplicator> newReplicator(NewReplicator request) =>
+    _bindings
+        .createReplicator(
+          request.database.pointer,
+          request.endpoint.pointer,
+          request.replicatorType.toCBLReplicatorType(),
+          request.continuous,
+          request.authenticator?.pointer,
+          request.proxyType?.toCBLProxyType(),
+          request.proxyHostname,
+          request.proxyPort,
+          request.proxyUsername,
+          request.proxyPassword,
+          request.headers?.pointer,
+          request.pinnedServerCertificate?.materialize().asUint8List(),
+          request.trustedRootCertificates?.materialize().asUint8List(),
+          request.channels?.pointer,
+          request.documentIDs?.pointer,
+          request.pushFilter?.pointer,
+          request.pullFilter?.pointer,
+          request.conflictResolver?.pointer,
+        )
+        .toTransferablePointer();
+
+class ResetReplicatorCheckpoint extends WorkerRequest<void> {
   ResetReplicatorCheckpoint(Pointer<CBLReplicator> replicator)
-      : super(replicator);
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
 }
 
 void resetReplicatorCheckpoint(ResetReplicatorCheckpoint request) =>
-    _bindings.resetCheckpoint(request.object);
+    _bindings.resetCheckpoint(request.replicator.pointer);
 
-class StartReplicator extends ObjectRequest<CBLReplicator, void> {
-  StartReplicator(Pointer<CBLReplicator> replicator) : super(replicator);
+class StartReplicator extends WorkerRequest<void> {
+  StartReplicator(Pointer<CBLReplicator> replicator)
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
 }
 
 void startReplicator(StartReplicator request) =>
-    _bindings.start(request.object);
+    _bindings.start(request.replicator.pointer);
 
-class StopReplicator extends ObjectRequest<CBLReplicator, void> {
-  StopReplicator(Pointer<CBLReplicator> replicator) : super(replicator);
+class StopReplicator extends WorkerRequest<void> {
+  StopReplicator(Pointer<CBLReplicator> replicator)
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
 }
 
-void stopReplicator(StopReplicator request) => _bindings.stop(request.object);
+void stopReplicator(StopReplicator request) =>
+    _bindings.stop(request.replicator.pointer);
 
-class SetReplicatorHostReachable extends ObjectRequest<CBLReplicator, void> {
+class SetReplicatorHostReachable extends WorkerRequest<void> {
   SetReplicatorHostReachable(Pointer<CBLReplicator> replicator, this.reachable)
-      : super(replicator);
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
   final bool reachable;
 }
 
 void setReplicatorHostReachable(SetReplicatorHostReachable request) =>
-    _bindings.setHostReachable(request.object, request.reachable.toInt());
+    _bindings.setHostReachable(request.replicator.pointer, request.reachable);
 
-class SetReplicatorSuspended extends ObjectRequest<CBLReplicator, void> {
+class SetReplicatorSuspended extends WorkerRequest<void> {
   SetReplicatorSuspended(Pointer<CBLReplicator> replicator, this.suspended)
-      : super(replicator);
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
   final bool suspended;
 }
 
 void setReplicatorSuspended(SetReplicatorSuspended request) =>
-    _bindings.setSuspended(request.object, request.suspended.toInt());
+    _bindings.setSuspended(request.replicator.pointer, request.suspended);
 
-class GetReplicatorStatus
-    extends ObjectRequest<CBLReplicator, ReplicatorStatus> {
-  GetReplicatorStatus(Pointer<CBLReplicator> replicator) : super(replicator);
+class GetReplicatorStatus extends WorkerRequest<ReplicatorStatus> {
+  GetReplicatorStatus(Pointer<CBLReplicator> replicator)
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
 }
 
 ReplicatorStatus getReplicatorStatus(GetReplicatorStatus request) =>
-    _bindings.status(request.object).toReplicatorStatus();
+    _bindings.status(request.replicator.pointer).toReplicatorStatus();
 
 class GetReplicatorPendingDocumentIds
-    extends ObjectRequest<CBLReplicator, int> {
+    extends WorkerRequest<TransferablePointer<FLDict>> {
   GetReplicatorPendingDocumentIds(Pointer<CBLReplicator> replicator)
-      : super(replicator);
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
 }
 
-int getReplicatorPendingDocumentIds(GetReplicatorPendingDocumentIds request) =>
+TransferablePointer<FLDict> getReplicatorPendingDocumentIds(
+        GetReplicatorPendingDocumentIds request) =>
     _bindings
-        .pendingDocumentIDs(request.object, globalError)
-        .checkResultAndError()
-        .address;
+        .pendingDocumentIDs(request.replicator.pointer)
+        .toTransferablePointer();
 
-class GetReplicatorIsDocumentPening extends ObjectRequest<CBLReplicator, bool> {
+class GetReplicatorIsDocumentPening extends WorkerRequest<bool> {
   GetReplicatorIsDocumentPening(Pointer<CBLReplicator> replicator, this.docId)
-      : super(replicator);
+      : replicator = replicator.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
   final String docId;
 }
 
 bool getReplicatorIsDocumentPening(GetReplicatorIsDocumentPening request) =>
-    _bindings
-        .isDocumentPending(
-          request.object,
-          request.docId.toNativeUtf8().withScoped(),
-          globalError,
-        )
-        .toBool()
-        .checkResultAndError();
+    _bindings.isDocumentPending(request.replicator.pointer, request.docId);
 
-class AddReplicatorChangeListener extends ObjectRequest<CBLReplicator, void> {
+class AddReplicatorChangeListener extends WorkerRequest<void> {
   AddReplicatorChangeListener(
-      Pointer<CBLReplicator> replicator, this.listenerAddress)
-      : super(replicator);
-  final int listenerAddress;
+      Pointer<CBLReplicator> replicator, Pointer<Callback> listener)
+      : replicator = replicator.toTransferablePointer(),
+        listener = listener.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
+  final TransferablePointer<Callback> listener;
 }
 
 void addReplicatorChangeListener(AddReplicatorChangeListener request) =>
     _bindings.addChangeListener(
-      request.object,
-      request.listenerAddress.toPointer(),
+      request.replicator.pointer,
+      request.listener.pointer,
     );
 
-class AddReplicatorDocumentListener extends ObjectRequest<CBLReplicator, void> {
+class AddReplicatorDocumentListener extends WorkerRequest<void> {
   AddReplicatorDocumentListener(
-      Pointer<CBLReplicator> replicator, this.listenerAddress)
-      : super(replicator);
-  final int listenerAddress;
+      Pointer<CBLReplicator> replicator, Pointer<Callback> listener)
+      : replicator = replicator.toTransferablePointer(),
+        listener = listener.toTransferablePointer();
+
+  final TransferablePointer<CBLReplicator> replicator;
+  final TransferablePointer<Callback> listener;
 }
 
 void addReplicatorDocumentListener(AddReplicatorDocumentListener request) =>
     _bindings.addDocumentListener(
-      request.object,
-      request.listenerAddress.toPointer(),
+      request.replicator.pointer,
+      request.listener.pointer,
     );
 
 void addReplicatorHandlersToRouter(RequestRouter router) {

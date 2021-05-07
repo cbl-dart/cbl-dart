@@ -57,14 +57,10 @@ class Blob extends NativeResource<NativeObject<CBLBlob>> {
 
   /// The cryptographic digest of this Blob's content (from its `digest`
   /// property).
-  String get digest =>
-      _blobBindings.digest(native.pointerUnsafe).toDartString();
+  String get digest => _blobBindings.digest(native.pointerUnsafe);
 
   /// This Blob's MIME type, if its metadata has a `content_type` property.
-  String? get contentType => _blobBindings
-      .contentType(native.pointerUnsafe)
-      .toNullable()
-      ?.toDartString();
+  String? get contentType => _blobBindings.contentType(native.pointerUnsafe);
 
   /// This Blob's metadata. This includes the `digest`, `length` and
   /// `content_type` properties, as well as any custom ones that may have been
@@ -92,15 +88,14 @@ extension DictBlobExtension on Dict {
   /// Returns true if this Dict in a [Document] is a blob reference.
   ///
   /// If so, you can use [asBlob] to access it.
-  bool get isBlob => _blobBindings.isBlob(native.pointerUnsafe.cast()).toBool();
+  bool get isBlob => _blobBindings.isBlob(native.pointerUnsafe.cast());
 
   /// Instantiates a [Blob] object corresponding to a Blob dictionary in a
   /// [Document].
   ///
   /// Returns `null` if this Dict is not a Blob.
   Blob? get asBlob => _blobBindings
-      .get(native.pointerUnsafe.cast())
-      .toNullable()
+      .getBlob(native.pointerUnsafe.cast())
       ?.let((it) => Blob._(it, retain: true));
 }
 
@@ -169,32 +164,20 @@ class _BlobWriteStream
 
   @override
   Future<void> addStream(Stream<Uint8List> stream) => use(() => stream
-      .asyncMap((chunk) => runArena(() {
-            final chunkPointer = scoped(malloc<Uint8>(chunk.length));
-
-            chunkPointer.asTypedList(chunk.length).setAll(0, chunk);
-
-            return native.execute((pointer) => WriteToBlobWriteStream(
-                  pointer,
-                  chunkPointer.address,
-                  chunk.length,
-                ));
-          }))
+      .asyncMap((chunk) =>
+          native.execute((pointer) => WriteToBlobWriteStream(pointer, chunk)))
       .drain());
 
   @override
   Future<Blob> createBlob({String? contentType}) => closeAndUse(
         () async {
-          final address =
+          final result =
               await native.execute((pointer) => CreateBlobWithWriteStream(
                     pointer,
                     contentType,
                   ));
 
-          return Blob._(
-            address.toPointer().cast(),
-            retain: false,
-          );
+          return Blob._(result.pointer, retain: false);
         },
         doPerformClose: false,
       );
@@ -242,7 +225,7 @@ class _BlobReadStreamController
 
     _streamPointer = await runNativeObjectScoped(() => worker
         .execute(OpenBlobReadStream(blob.native.pointer))
-        .then((address) => address.toPointer().cast()));
+        .then((result) => result.pointer));
   }
 
   Future<void> _cleanUp() async {
@@ -262,7 +245,7 @@ class _BlobReadStreamController
       while (!_isPaused) {
         final bytesRead = await worker.execute(ReadFromBlobReadStream(
           _streamPointer,
-          _buffer.address,
+          _buffer,
           chunkSize,
         ));
 
@@ -329,7 +312,7 @@ class BlobManagerImpl extends NativeResource<WorkerObject<CBLDatabase>>
   @override
   Future<BlobWriteStream> openWriteStream() => use(() => native
       .execute((pointer) => OpenBlobWriteStream(pointer))
-      .then((address) => _BlobWriteStream(this, address.toPointer().cast())));
+      .then((result) => _BlobWriteStream(this, result.pointer)));
 
   @override
   Future<Blob> createBlob(Uint8List content, {String? contentType}) =>

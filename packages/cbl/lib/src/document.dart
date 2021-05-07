@@ -1,10 +1,8 @@
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:ffi/ffi.dart';
 
 import 'database.dart';
-import 'errors.dart';
 import 'fleece.dart';
 import 'native_object.dart';
 import 'resource.dart';
@@ -61,14 +59,13 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
               ));
 
   /// Returns this documents id.
-  String get id => _bindings.id(native.pointerUnsafe).toDartString();
+  String get id => _bindings.id(native.pointerUnsafe);
 
   /// The revision id, which is a short opaque string that's
   /// guaranteed to be unique to every change made to the document.
   ///
   /// If the document doesn't exist yet, it is `null`.
-  String? get revisionId =>
-      _bindings.revisionId(native.pointerUnsafe).toNullable()?.toDartString();
+  String? get revisionId => _bindings.revisionId(native.pointerUnsafe);
 
   /// Returns the current sequence in the local database.
   ///
@@ -86,8 +83,8 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
       );
 
   /// The properties as a JSON string.
-  String get propertiesAsJson => runArena(() =>
-      scoped(_bindings.propertiesAsJson(native.pointerUnsafe)).toDartString());
+  String get propertiesAsJson =>
+      _bindings.propertiesAsJson(native.pointerUnsafe);
 
   /// Deletes this document from the database.
   ///
@@ -165,16 +162,12 @@ class MutableDocument extends Document {
   /// Creates a new, empty document in memory.
   ///
   /// It will not be added to a database until saved.
-  factory MutableDocument([String? id]) {
-    final pointer = runArena(() => _bindings
-        .makeNew(id == null ? nullptr : id.toNativeUtf8().withScoped()));
-    return createMutableDocument(
-      pointer: pointer,
-      worker: null,
-      retain: false,
-      isNew: true,
-    );
-  }
+  factory MutableDocument([String? id]) => createMutableDocument(
+        pointer: _bindings.create(id),
+        worker: null,
+        retain: false,
+        isNew: true,
+      );
 
   /// {@template cbl.document.mutableCopy}
   /// Creates a new [MutableDocument] instance that refers to the same document
@@ -215,15 +208,7 @@ class MutableDocument extends Document {
   }
 
   set propertiesAsJson(String json) {
-    runArena(() {
-      _bindings
-          .setPropertiesAsJSON(
-            _mutablePointer,
-            json.toNativeUtf8().withScoped(),
-            globalError,
-          )
-          .checkResultAndError();
-    });
+    _bindings.setPropertiesAsJSON(_mutablePointer, json);
   }
 
   @override

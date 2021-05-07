@@ -1,12 +1,104 @@
-import 'dart:ffi';
-
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:ffi/ffi.dart';
 
-import 'utils.dart';
+enum CouchbaseLiteErrorCode {
+  assertionFailed,
+  unimplemented,
+  unsupportedEncryption,
+  badRevisionId,
+  corruptRevisionData,
+  notOpen,
+  notFound,
+  conflict,
+  invalidParameter,
+  unexpectedError,
+  cantOpenFile,
+  iOError,
+  memoryError,
+  notWriteable,
+  corruptData,
+  busy,
+  notInTransaction,
+  transactionNotClosed,
+  unsupported,
+  notADatabaseFile,
+  wrongFormat,
+  crypto,
+  invalidQuery,
+  missingIndex,
+  invalidQueryParam,
+  remoteError,
+  databaseTooOld,
+  databaseTooNew,
+  badDocId,
+  cantUpgradeDatabase,
+}
 
-export 'package:cbl_ffi/cbl_ffi.dart'
-    show CouchbaseLiteErrorCode, NetworkErrorCode, FleeceErrorCode;
+extension on CBLErrorCode {
+  CouchbaseLiteErrorCode toCouchbaseLiteErrorCode() =>
+      CouchbaseLiteErrorCode.values[index];
+}
+
+enum NetworkErrorCode {
+  dnsFailure,
+  unknownHost,
+  timeout,
+  invalidURL,
+  tooManyRedirects,
+  tlsHandshakeFailed,
+  tlsCertExpired,
+  tlsCertUntrusted,
+  tlsClientCertRequired,
+  tlsClientCertRejected,
+  tlsCertUnknownRoot,
+  invalidRedirect,
+  unknown,
+  tlsCertRevoked,
+  tlsCertNameMismatch,
+}
+
+extension on CBLNetworkErrorCode {
+  NetworkErrorCode toNetworkErrorCode() => NetworkErrorCode.values[index];
+}
+
+/// Error codes returned from some API calls.
+enum FleeceErrorCode {
+  noError,
+
+  /// Out of memory, or allocation failed.
+  memoryError,
+
+  /// Array index or iterator out of range.
+  outOfRange,
+
+  /// Bad input data (NaN, non-string key, etc.).
+  invalidData,
+
+  /// Structural error encoding (missing value, too many ends, etc.).
+  encodeError,
+
+  /// Error parsing JSON.
+  jsonError,
+
+  /// Unparseable data in a Value (corrupt? Or from some distant future?).
+  unknownValue,
+
+  /// Something that shouldn't happen.
+  internalError,
+
+  /// Key not found.
+  notFound,
+
+  /// Misuse of shared keys (not in transaction, etc.)
+  sharedKeysStateError,
+  posixError,
+
+  /// Operation is unsupported
+  unsupported,
+}
+
+extension on FLErrorCode {
+  FleeceErrorCode toFleeceErrorCode() => FleeceErrorCode.values[index];
+}
 
 abstract class BaseException implements Exception {
   BaseException(this.message);
@@ -240,82 +332,34 @@ class WebSocketException extends BaseException {
   String toString() => 'WebSocketException(message: $message, code: $code)';
 }
 
-// TODO: free allocated memory when Isolate goes away
-late final globalError = malloc<CBLError>();
-
-BaseException exceptionFromCBLError({
-  Pointer<CBLError>? error,
-  String? queryString,
-}) {
-  error = error ?? globalError;
-  assert(!error.isOk);
-
-  // Caller must free memory of returned string.
-  final messagePointer = CBLBindings.instance.base.Error_Message(error);
-  final message = messagePointer.toDartString();
-  malloc.free(messagePointer);
-
-  final code = error.ref.code;
-
-  switch (error.ref.domain.toErrorDomain()) {
-    case ErrorDomain.couchbaseLite:
-      final cblCode = code.toCouchbaseLiteErrorCode();
-
-      int? errorPosition;
-      if (queryString != null) {
-        errorPosition = CBLBindings.instance.query.globalErrorPosition.value
-            .let((it) => it == -1 ? null : it);
-      }
-
+BaseException translateCBLErrorException(CBLErrorException exception) {
+  switch (exception.domain) {
+    case CBLErrorDomain.couchbaseLite:
       return CouchbaseLiteException(
-        message,
-        cblCode,
-        errorPosition: errorPosition,
-        queryString: queryString,
+        exception.message,
+        (exception.code as CBLErrorCode).toCouchbaseLiteErrorCode(),
+        errorPosition: exception.errorPosition,
+        queryString: exception.errorSource,
       );
-    case ErrorDomain.posix:
-      return PosixException(message, code);
-    case ErrorDomain.sqLite:
-      return SQLiteException(message, code);
-    case ErrorDomain.fleece:
-      return FleeceException(message, code.toFleeceErrorCode());
-    case ErrorDomain.network:
-      return NetworkException(message, code.toNetworkErrorCode());
-    case ErrorDomain.webSocket:
-      return WebSocketException(message, code);
+    case CBLErrorDomain.posix:
+      return PosixException(exception.message, exception.code as int);
+    case CBLErrorDomain.sqLite:
+      return SQLiteException(exception.message, exception.code as int);
+    case CBLErrorDomain.fleece:
+      return FleeceException(
+        exception.message,
+        (exception.code as FLErrorCode).toFleeceErrorCode(),
+      );
+    case CBLErrorDomain.network:
+      return NetworkException(
+        exception.message,
+        (exception.code as CBLNetworkErrorCode).toNetworkErrorCode(),
+      );
+    case CBLErrorDomain.webSocket:
+      return WebSocketException(exception.message, exception.code as int);
   }
 }
 
-/// Throws an exception, built from [globalError] if it contains an error.
-///
-/// See:
-/// - [CBLErrorPointerExt].isOk
-void checkError() {
-  if (globalError.isOk) return;
-
-  throw exceptionFromCBLError();
-}
-
-/// Throws an exception, built from [globalError] if it contains an error and
-/// [result] is `false` or [nullptr]. Otherwise [result] is returned.
-///
-/// [result] must be a [Pointer] or a [bool].
-T checkResultAndError<T>(T result) {
-  assert(result is Pointer || result is bool);
-
-  if (result == false || result == nullptr) {
-    checkError();
-  }
-
-  return result;
-}
-
-final _checkResultAndError = checkResultAndError;
-
-extension CheckResultAndErrorExt<T> on T {
-  /// Throws an exception, built from [globalError] if it contains an error and
-  /// this is `false` or [nullptr]. Otherwise this is returned.
-  ///
-  /// This must be a [Pointer] or a [bool].
-  T checkResultAndError() => _checkResultAndError(this);
+extension CBLErrorExceptionExt on CBLErrorException {
+  BaseException translate() => translateCBLErrorException(this);
 }

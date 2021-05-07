@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:isolate';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -34,9 +33,9 @@ class NativeCallback {
   NativeCallback(this.handler) {
     _receivePort = ReceivePort();
 
-    native = NativeObject(_bindings.makeNew(
+    native = NativeObject(_bindings.create(
       this,
-      _receivePort.sendPort.nativePort,
+      _receivePort.sendPort,
     ));
 
     _receivePort.cast<List>().listen(_messageHandler);

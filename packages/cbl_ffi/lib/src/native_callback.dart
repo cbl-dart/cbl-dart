@@ -1,6 +1,7 @@
 import 'dart:ffi';
+import 'dart:isolate';
 
-import 'libraries.dart';
+import 'bindings.dart';
 
 class Callback extends Opaque {}
 
@@ -25,22 +26,35 @@ typedef CBLDart_Callback_CallForTest = void Function(
   int result,
 );
 
-class NativeCallbackBindings {
-  NativeCallbackBindings(Libraries libs)
-      : makeNew = libs.cblDart
-            .lookupFunction<CBLDart_NewCallback_C, CBLDart_NewCallback>(
-          'CBLDart_NewCallback',
-        ),
-        close = libs.cblDart
-            .lookupFunction<CBLDart_Callback_Close_C, CBLDart_Callback_Close>(
-          'CBLDart_Callback_Close',
-        ),
-        callForTest = libs.cblDart.lookupFunction<
-            CBLDart_Callback_CallForTest_C, CBLDart_Callback_CallForTest>(
-          'CBLDart_Callback_CallForTest',
-        );
+class NativeCallbackBindings extends Bindings {
+  NativeCallbackBindings(Bindings parent) : super(parent) {
+    _newCallback =
+        libs.cblDart.lookupFunction<CBLDart_NewCallback_C, CBLDart_NewCallback>(
+      'CBLDart_NewCallback',
+    );
+    _close = libs.cblDart
+        .lookupFunction<CBLDart_Callback_Close_C, CBLDart_Callback_Close>(
+      'CBLDart_Callback_Close',
+    );
+    _callForTest = libs.cblDart.lookupFunction<CBLDart_Callback_CallForTest_C,
+        CBLDart_Callback_CallForTest>(
+      'CBLDart_Callback_CallForTest',
+    );
+  }
 
-  final CBLDart_NewCallback makeNew;
-  final CBLDart_Callback_Close close;
-  final CBLDart_Callback_CallForTest callForTest;
+  late final CBLDart_NewCallback _newCallback;
+  late final CBLDart_Callback_Close _close;
+  late final CBLDart_Callback_CallForTest _callForTest;
+
+  Pointer<Callback> create(Object dartCallback, SendPort sendPort) {
+    return _newCallback(dartCallback, sendPort.nativePort);
+  }
+
+  void close(Pointer<Callback> callback) {
+    _close(callback);
+  }
+
+  void callForTest(Pointer<Callback> callback, int result) {
+    _callForTest(callback, result);
+  }
 }
