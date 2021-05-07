@@ -596,6 +596,20 @@ class ReplicatorStatus {
       ')';
 }
 
+/// Flags describing a replicated document.
+enum ReplicatedDocumentFlag {
+  /// The document has been deleted.
+  deleted,
+
+  /// Lost access to the document on the server
+  accessRemoved,
+}
+
+extension on CBLReplicatedDocumentFlag {
+  ReplicatedDocumentFlag toReplicatedDocumentFlag() => ReplicatedDocumentFlag
+      .values[CBLReplicatedDocumentFlag.values.indexOf(this)];
+}
+
 /// Information about a [Document] that's been pushed or pulled.
 class ReplicatedDocument {
   ReplicatedDocument(this.id, this.flags, this.error);
@@ -604,7 +618,7 @@ class ReplicatedDocument {
   final String id;
 
   /// Indicates whether the document was deleted or removed
-  final Set<DocumentFlags> flags;
+  final Set<ReplicatedDocumentFlag> flags;
 
   /// If not `null`, the document failed to replicate.
   final BaseException? error;
@@ -631,15 +645,11 @@ class ReplicatedDocument {
 }
 
 extension on CBLDartReplicatedDocument {
-  ReplicatedDocument toReplicatedDocument() => runArena(() {
-        final error = scoped(this.error.copyToPointer());
-
-        return ReplicatedDocument(
-          ID.toDartString(),
-          DocumentFlags.parseCFlags(flags),
-          error.isOk ? null : exceptionFromCBLError(error: error),
-        );
-      });
+  ReplicatedDocument toReplicatedDocument() => ReplicatedDocument(
+        ID.toDartString(),
+        flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
+        exception?.translate(),
+      );
 }
 
 /// The direction in which documents may be replicated.
