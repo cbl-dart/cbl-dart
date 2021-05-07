@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:cbl_ffi/cbl_ffi.dart' hide Libraries, LibraryConfiguration;
+import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 import 'package:logging/logging.dart';
 
 import 'blob.dart';
@@ -10,8 +11,109 @@ import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'package:cbl_ffi/cbl_ffi.dart'
-    show LibraryConfiguration, Libraries, LogLevel, LogDomain;
+/// Configuration of a [DynamicLibrary], which can be used to load the
+/// `DynamicLibrary` at a later time.
+class LibraryConfiguration {
+  /// Creates a configuration for a dynamic library opened with
+  /// [DynamicLibrary.open].
+  ///
+  /// If [appendExtension] is `true` (default), the file extension which is used
+  /// for dynamic libraries on the current platform is appended to [name].
+  LibraryConfiguration.dynamic(String name, {bool appendExtension = true})
+      : process = null,
+        name = name,
+        appendExtension = appendExtension;
+
+  /// Creates a configuration for a dynamic library opened with
+  /// [DynamicLibrary.process].
+  LibraryConfiguration.process()
+      : process = true,
+        name = null,
+        appendExtension = null;
+
+  /// Creates a configuration for a dynamic library opened with
+  /// [DynamicLibrary.executable].
+  LibraryConfiguration.executable()
+      : process = false,
+        name = null,
+        appendExtension = null;
+
+  final bool? process;
+  final String? name;
+  final bool? appendExtension;
+
+  ffi.LibraryConfiguration _toFfi() => ffi.LibraryConfiguration(
+        process: process,
+        name: name,
+        appendExtension: appendExtension,
+      );
+}
+
+/// The [DynamicLibrary]s which provide the Couchbase Lite C API and the Dart
+/// support layer.
+class Libraries {
+  Libraries({
+    this.enterpriseEdition = false,
+    required LibraryConfiguration cbl,
+    required LibraryConfiguration cblDart,
+  })   : cbl = cbl,
+        cblDart = cblDart;
+
+  final LibraryConfiguration cbl;
+  final LibraryConfiguration cblDart;
+
+  /// Whether the provided Couchbase Lite C library is the enterprise edition.
+  final bool enterpriseEdition;
+
+  ffi.Libraries _toFfi() => ffi.Libraries(
+        enterpriseEdition: enterpriseEdition,
+        cbl: cbl._toFfi(),
+        cblDart: cblDart._toFfi(),
+      );
+}
+
+/// Subsystems that log information.
+enum LogDomain {
+  all,
+  database,
+  query,
+  replicator,
+  network,
+}
+
+extension on CBLLogDomain {
+  LogDomain toLogDomain() => LogDomain.values[index];
+}
+
+/// Levels of log messages. Higher values are more important/severe. Each level
+/// includes the lower ones.
+enum LogLevel {
+  /// Extremely detailed messages, only written by debug builds of CBL.
+  debug,
+
+  /// Detailed messages about normally-unimportant stuff.
+  verbose,
+
+  /// Messages about ordinary behavior.
+  info,
+
+  /// Messages warning about unlikely and possibly bad stuff.
+  warning,
+
+  /// Messages about errors
+  error,
+
+  /// Disables logging entirely.
+  none
+}
+
+extension on CBLLogLevel {
+  LogLevel toLogLevel() => LogLevel.values[index];
+}
+
+extension on LogLevel {
+  CBLLogLevel toCBLLogLevel() => CBLLogLevel.values[index];
+}
 
 /// A entry, which is emitted when CouchbaseLite logs a message.
 ///
@@ -117,17 +219,19 @@ WorkerFactory get workerFactory {
 class CouchbaseLite {
   /// Initializes the `cbl` package.
   static void initialize({required Libraries libraries}) {
-    CBLBindings.initInstance(libraries);
+    final ffiLibraries = libraries._toFfi();
+
+    CBLBindings.initInstance(ffiLibraries);
 
     SlotSetter.register(blobSlotSetter);
 
-    _workerFactory = CblWorkerFactory(libraries: libraries);
+    _workerFactory = CblWorkerFactory(libraries: ffiLibraries);
   }
 
   /// Private constructor to allow control over instance creation.
   CouchbaseLite._();
 
-  static late final _logBindings = CBLBindings.instance.log;
+  static late final _logBindings = CBLBindings.instance.logging;
 
   /// The current LogLevel of all of CouchbaseLite.
   ///
@@ -143,7 +247,7 @@ class CouchbaseLite {
   static LogLevel get logLevel => _logBindings.consoleLevel().toLogLevel();
 
   static set logLevel(LogLevel level) =>
-      _logBindings.setConsoleLevel(level.toInt());
+      _logBindings.setConsoleLevel(level.toCBLLogLevel());
 
   static bool _loggingIsDisabled = false;
 
@@ -182,13 +286,11 @@ class CouchbaseLite {
       _logBindings.setCallback(callback.native.pointerUnsafe);
     },
     createEvent: (arguments) {
-      final domain = arguments[0] as int;
-      final level = arguments[1] as int;
-      final message = arguments[2] as String;
+      final message = LogCallbackMessage.fromArguments(arguments);
       return LogMessage(
-        level: level.toLogLevel(),
-        domain: domain.toLogDomain(),
-        message: message,
+        level: message.level.toLogLevel(),
+        domain: message.domain.toLogDomain(),
+        message: message.message,
       );
     },
   );

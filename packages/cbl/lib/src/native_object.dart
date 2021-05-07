@@ -120,7 +120,7 @@ class CblRefCountedObject<T extends NativeType> extends NativeObject<T> {
       CBLBindings.instance.base.bindCBLRefCountedToDartObject(
         this,
         pointer.cast(),
-        retain.toInt(),
+        retain,
       );
     }
   }
@@ -146,10 +146,7 @@ class CBLReplicatorObject extends NativeObject<CBLReplicator>
   /// Creates a reference to a CBLReplicator.
   CBLReplicatorObject(Pointer<CBLReplicator> pointer, this.worker)
       : super(pointer) {
-    CBLBindings.instance.replicator.bindToDartObject(
-      this,
-      pointer.cast(),
-    );
+    CBLBindings.instance.replicator.bindReplicatorToDartObject(this, pointer);
   }
 
   @override
@@ -187,7 +184,7 @@ class FleeceRefCountedObject<T extends NativeType> extends NativeObject<T> {
       CBLBindings.instance.fleece.value.bindToDartObject(
         this,
         pointer.cast(),
-        retain.toInt(),
+        retain,
       );
     }
   }

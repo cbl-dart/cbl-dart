@@ -1,12 +1,15 @@
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
+import 'bindings.dart';
 import 'database.dart';
+import 'document.dart';
 import 'fleece.dart';
-import 'libraries.dart';
 import 'native_callback.dart';
+import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
 
@@ -46,46 +49,36 @@ typedef CBLAuth_Free = void Function(
   Pointer<CBLAuthenticator> authenticator,
 );
 
-/// Direction of replication: push, pull, or both.
-enum ReplicatorType {
-  /// Bidirectional; both push and pull
+enum CBLReplicatorType {
   pushAndPull,
-
-  /// Pushing changes to the target
   push,
-
-  /// Pulling changes from the target
   pull,
 }
 
-extension ReplicatorTypeIntExtension on ReplicatorType {
-  int toInt() => ReplicatorType.values.indexOf(this);
+extension on CBLReplicatorType {
+  int toInt() => CBLReplicatorType.values.indexOf(this);
 }
 
-extension IntReplicatorTypeExtension on int {
-  ReplicatorType toReplicatorType() => ReplicatorType.values[this];
+extension on int {
+  CBLReplicatorType toReplicatorType() => CBLReplicatorType.values[this];
 }
 
-/// Types of proxy servers, for CBLProxySettings.
-enum ProxyType {
-  /// HTTP proxy; must support 'CONNECT' method
+enum CBLProxyType {
   http,
-
-  /// HTTPS proxy; must support 'CONNECT' method
   https,
 }
 
-extension ProxyTypeIntExtension on ProxyType {
-  int toInt() => ProxyType.values.indexOf(this);
+extension on CBLProxyType {
+  int toInt() => CBLProxyType.values.indexOf(this);
 }
 
-extension IntProxyTypeExtension on int {
-  ProxyType toProxyType() => ProxyType.values[this];
+extension on int {
+  CBLProxyType toProxyType() => CBLProxyType.values[this];
 }
 
 class CBLProxySettings extends Struct {
   @Uint8()
-  external int type;
+  external int _type;
 
   external Pointer<Utf8> hostname;
 
@@ -97,16 +90,21 @@ class CBLProxySettings extends Struct {
   external Pointer<Utf8> password;
 }
 
+extension CBLProxySettingsExt on CBLProxySettings {
+  CBLProxyType get type => _type.toProxyType();
+  set type(CBLProxyType value) => _type = value.toInt();
+}
+
 class CBLDartReplicatorConfiguration extends Struct {
   external Pointer<CBLDatabase> database;
 
   external Pointer<CBLEndpoint> endpoint;
 
   @Uint8()
-  external int replicatorType;
+  external int _replicatorType;
 
   @Uint8()
-  external int continuous;
+  external int _continuous;
 
   external Pointer<CBLAuthenticator> authenticator;
 
@@ -129,6 +127,47 @@ class CBLDartReplicatorConfiguration extends Struct {
   external Pointer<Callback> conflictResolver;
 }
 
+extension CBLDartReplicatorConfigurationExt on CBLDartReplicatorConfiguration {
+  CBLReplicatorType get replicatorType => _replicatorType.toReplicatorType();
+  set replicatorType(CBLReplicatorType value) =>
+      _replicatorType = value.toInt();
+  bool get continuous => _continuous.toBool();
+  set continuous(bool value) => _continuous = value.toInt();
+}
+
+class ReplicationFilterCallbackMessage {
+  ReplicationFilterCallbackMessage(this.document, this.isDeleted);
+
+  ReplicationFilterCallbackMessage.fromArguments(List<dynamic> arguments)
+      : this(
+          (arguments[0] as int).toPointer(),
+          arguments[1] as bool,
+        );
+
+  final Pointer<CBLDocument> document;
+  final bool isDeleted;
+}
+
+class ReplicationConflictResolverCallbackMessage {
+  ReplicationConflictResolverCallbackMessage(
+    this.documentId,
+    this.localDocument,
+    this.remoteDocument,
+  );
+
+  ReplicationConflictResolverCallbackMessage.fromArguments(
+    List<dynamic> arguments,
+  ) : this(
+          arguments[0] as String,
+          (arguments[1] as int?)?.toPointer(),
+          (arguments[2] as int?)?.toPointer(),
+        );
+
+  final String documentId;
+  final Pointer<CBLDocument>? localDocument;
+  final Pointer<CBLDocument>? remoteDocument;
+}
+
 // === Replicator ==============================================================
 
 class CBLReplicator extends Opaque {}
@@ -139,11 +178,11 @@ typedef CBLDart_CBLReplicator_New = Pointer<CBLReplicator> Function(
 );
 
 typedef CBLDart_BindReplicatorToDartObject_C = Void Function(
-  Handle handle,
+  Handle object,
   Pointer<CBLReplicator> replicator,
 );
 typedef CBLDart_BindReplicatorToDartObject = void Function(
-  Object handle,
+  Object object,
   Pointer<CBLReplicator> replicator,
 );
 
@@ -188,27 +227,17 @@ typedef CBLReplicator_SetSuspended = void Function(
 
 // === Status and Progress =====================================================
 
-/// The possible states a replicator can be in during its lifecycle.
-enum ReplicatorActivityLevel {
-  /// The replicator is unstarted, finished, or hit a fatal error.
+enum CBLReplicatorActivityLevel {
   stopped,
-
-  /// The replicator is offline, as the remote host is unreachable.
   offline,
-
-  /// The replicator is connecting to the remote host.
   connecting,
-
-  /// The replicator is inactive, waiting for changes to sync.
   idle,
-
-  /// The replicator is actively transferring data.
   busy,
 }
 
-extension IntReplicatorActivityLevel on int {
-  ReplicatorActivityLevel toReplicatorActivityLevel() =>
-      ReplicatorActivityLevel.values[this];
+extension on int {
+  CBLReplicatorActivityLevel toReplicatorActivityLevel() =>
+      CBLReplicatorActivityLevel.values[this];
 }
 
 class CBLReplicatorProgress extends Struct {
@@ -221,11 +250,23 @@ class CBLReplicatorProgress extends Struct {
 
 class CBLReplicatorStatus extends Struct {
   @Uint8()
-  external int activity;
+  external int _activity;
 
   external CBLReplicatorProgress progress;
 
-  external CBLError error;
+  external CBLError _error;
+}
+
+extension CBLReplicatorStatusExt on CBLReplicatorStatus {
+  CBLReplicatorActivityLevel get activity =>
+      _activity.toReplicatorActivityLevel();
+
+  CBLErrorException? get exception {
+    if (!_error.isOk) {
+      _error.copyToGlobal();
+      return CBLErrorException.fromCBLError(globalCBLError);
+    }
+  }
 }
 
 typedef CBLReplicator_Status = CBLReplicatorStatus Function(
@@ -258,27 +299,39 @@ typedef CBLDart_CBLReplicator_AddChangeListener = void Function(
 );
 
 /// Flags describing a replicated document.
-class DocumentFlags extends Option {
-  const DocumentFlags(String debugName, int bits) : super(debugName, bits);
+class CBLReplicatedDocumentFlag extends Option {
+  const CBLReplicatedDocumentFlag(String debugName, int bits)
+      : super(debugName, bits);
 
-  /// The document has been deleted.
-  static const deleted = DocumentFlags('deleted', 1 << 0);
+  static const deleted = CBLReplicatedDocumentFlag('deleted', 1 << 0);
+  static const accessRemoved =
+      CBLReplicatedDocumentFlag('accessRemoved', 1 << 1);
 
-  /// Lost access to the document on the server
-  static const accessRemoved = DocumentFlags('accessRemoved', 1 << 1);
+  static const values = [deleted, accessRemoved];
 
-  static const values = {deleted, accessRemoved};
-
-  static Set<DocumentFlags> parseCFlags(int flag) => values.parseCFlags(flag);
+  static Set<CBLReplicatedDocumentFlag> _parseCFlags(int flag) =>
+      values.parseCFlags(flag);
 }
 
 class CBLDartReplicatedDocument extends Struct {
   external Pointer<Utf8> ID;
 
   @Uint32()
-  external int flags;
+  external int _flags;
 
-  external CBLError error;
+  external CBLError _error;
+}
+
+extension CBLDartReplicatedDocumentExt on CBLDartReplicatedDocument {
+  Set<CBLReplicatedDocumentFlag> get flags =>
+      CBLReplicatedDocumentFlag._parseCFlags(_flags);
+
+  CBLErrorException? get exception {
+    if (!_error.isOk) {
+      _error.copyToGlobal();
+      return CBLErrorException.fromCBLError(globalCBLError);
+    }
+  }
 }
 
 typedef CBLDart_CBLReplicator_AddDocumentListener_C = Void Function(
@@ -290,102 +343,347 @@ typedef CBLDart_CBLReplicator_AddDocumentListener = void Function(
   Pointer<Callback> listener,
 );
 
-// === ReplicatorBindings ======================================================
+class ReplicatorStatusCallbackMessage {
+  ReplicatorStatusCallbackMessage(this.status);
 
-class ReplicatorBindings {
-  ReplicatorBindings(Libraries libs)
-      : endpointNewWithUrl = libs.cbl
-            .lookupFunction<CBLEndpoint_NewWithURL, CBLEndpoint_NewWithURL>(
-          'CBLEndpoint_NewWithURL',
-        ),
-        endpointNewWithLocalDB = libs.cblEE?.lookupFunction<
-            CBLEndpoint_NewWithLocalDB, CBLEndpoint_NewWithLocalDB>(
-          'CBLEndpoint_NewWithLocalDB',
-        ),
-        endpointFree =
-            libs.cbl.lookupFunction<CBLEndpoint_Free_C, CBLEndpoint_Free>(
-          'CBLEndpoint_Free',
-        ),
-        authNewBasic =
-            libs.cbl.lookupFunction<CBLAuth_NewBasic, CBLAuth_NewBasic>(
-          'CBLAuth_NewBasic',
-        ),
-        authNewSession =
-            libs.cbl.lookupFunction<CBLAuth_NewSession, CBLAuth_NewSession>(
-          'CBLAuth_NewSession',
-        ),
-        authFree = libs.cbl.lookupFunction<CBLAuth_Free_C, CBLAuth_Free>(
-          'CBLAuth_Free',
-        ),
-        makeNew = libs.cblDart.lookupFunction<CBLDart_CBLReplicator_New,
-            CBLDart_CBLReplicator_New>(
-          'CBLDart_CBLReplicator_New',
-        ),
-        bindToDartObject = libs.cblDart.lookupFunction<
-            CBLDart_BindReplicatorToDartObject_C,
-            CBLDart_BindReplicatorToDartObject>(
-          'CBLDart_BindReplicatorToDartObject',
-        ),
-        resetCheckpoint = libs.cbl.lookupFunction<
-            CBLReplicator_ResetCheckpoint_C, CBLReplicator_ResetCheckpoint>(
-          'CBLReplicator_ResetCheckpoint',
-        ),
-        start =
-            libs.cbl.lookupFunction<CBLReplicator_Start_C, CBLReplicator_Start>(
-          'CBLReplicator_Start',
-        ),
-        stop =
-            libs.cbl.lookupFunction<CBLReplicator_Stop_C, CBLReplicator_Stop>(
-          'CBLReplicator_Stop',
-        ),
-        setHostReachable = libs.cbl.lookupFunction<
-            CBLReplicator_SetHostReachable_C, CBLReplicator_SetHostReachable>(
-          'CBLReplicator_SetHostReachable',
-        ),
-        setSuspended = libs.cbl.lookupFunction<CBLReplicator_SetSuspended_C,
-            CBLReplicator_SetSuspended>(
-          'CBLReplicator_SetSuspended',
-        ),
-        status =
-            libs.cbl.lookupFunction<CBLReplicator_Status, CBLReplicator_Status>(
-          'CBLReplicator_Status',
-        ),
-        pendingDocumentIDs = libs.cbl.lookupFunction<
-            CBLReplicator_PendingDocumentIDs, CBLReplicator_PendingDocumentIDs>(
-          'CBLReplicator_PendingDocumentIDs',
-        ),
-        isDocumentPending = libs.cblDart.lookupFunction<
-            CBLDart_CBLReplicator_IsDocumentPending_C,
-            CBLDart_CBLReplicator_IsDocumentPending>(
-          'CBLDart_CBLReplicator_IsDocumentPending',
-        ),
-        addChangeListener = libs.cblDart.lookupFunction<
-            CBLDart_CBLReplicator_AddChangeListener_C,
-            CBLDart_CBLReplicator_AddChangeListener>(
-          'CBLDart_CBLReplicator_AddChangeListener',
-        ),
-        addDocumentListener = libs.cblDart.lookupFunction<
-            CBLDart_CBLReplicator_AddDocumentListener_C,
-            CBLDart_CBLReplicator_AddDocumentListener>(
-          'CBLDart_CBLReplicator_AddDocumentListener',
+  ReplicatorStatusCallbackMessage.fromArguments(List<dynamic> arguments)
+      : this((arguments[0] as int).toPointer());
+
+  final Pointer<CBLReplicatorStatus> status;
+}
+
+class DocumentReplicationsCallbackMessage {
+  DocumentReplicationsCallbackMessage(
+    this.isPush,
+    this.documentCount,
+    this.documents,
+  );
+
+  DocumentReplicationsCallbackMessage.fromArguments(List<dynamic> arguments)
+      : this(
+          arguments[0] as bool,
+          arguments[1] as int,
+          (arguments[2] as int).toPointer(),
         );
 
-  final CBLEndpoint_NewWithURL endpointNewWithUrl;
-  final CBLEndpoint_NewWithLocalDB? endpointNewWithLocalDB;
-  final CBLEndpoint_Free endpointFree;
-  final CBLAuth_NewBasic authNewBasic;
-  final CBLAuth_NewSession authNewSession;
-  final CBLAuth_Free authFree;
-  final CBLDart_CBLReplicator_New makeNew;
-  final CBLDart_BindReplicatorToDartObject bindToDartObject;
-  final CBLReplicator_ResetCheckpoint resetCheckpoint;
-  final CBLReplicator_Start start;
-  final CBLReplicator_Stop stop;
-  final CBLReplicator_SetHostReachable setHostReachable;
-  final CBLReplicator_SetSuspended setSuspended;
-  final CBLReplicator_Status status;
-  final CBLReplicator_PendingDocumentIDs pendingDocumentIDs;
-  final CBLDart_CBLReplicator_IsDocumentPending isDocumentPending;
-  final CBLDart_CBLReplicator_AddChangeListener addChangeListener;
-  final CBLDart_CBLReplicator_AddDocumentListener addDocumentListener;
+  final bool isPush;
+  final int documentCount;
+  final Pointer<CBLDartReplicatedDocument> documents;
+}
+
+// === ReplicatorBindings ======================================================
+
+class ReplicatorBindings extends Bindings {
+  ReplicatorBindings(Bindings parent) : super(parent) {
+    _endpointNewWithUrl =
+        libs.cbl.lookupFunction<CBLEndpoint_NewWithURL, CBLEndpoint_NewWithURL>(
+      'CBLEndpoint_NewWithURL',
+    );
+    _endpointNewWithLocalDB = libs.cblEE?.lookupFunction<
+        CBLEndpoint_NewWithLocalDB, CBLEndpoint_NewWithLocalDB>(
+      'CBLEndpoint_NewWithLocalDB',
+    );
+    _endpointFree =
+        libs.cbl.lookupFunction<CBLEndpoint_Free_C, CBLEndpoint_Free>(
+      'CBLEndpoint_Free',
+    );
+    _authNewBasic = libs.cbl.lookupFunction<CBLAuth_NewBasic, CBLAuth_NewBasic>(
+      'CBLAuth_NewBasic',
+    );
+    _authNewSession =
+        libs.cbl.lookupFunction<CBLAuth_NewSession, CBLAuth_NewSession>(
+      'CBLAuth_NewSession',
+    );
+    _authFree = libs.cbl.lookupFunction<CBLAuth_Free_C, CBLAuth_Free>(
+      'CBLAuth_Free',
+    );
+    _new = libs.cblDart
+        .lookupFunction<CBLDart_CBLReplicator_New, CBLDart_CBLReplicator_New>(
+      'CBLDart_CBLReplicator_New',
+    );
+    _bindToDartObject = libs.cblDart.lookupFunction<
+        CBLDart_BindReplicatorToDartObject_C,
+        CBLDart_BindReplicatorToDartObject>(
+      'CBLDart_BindReplicatorToDartObject',
+    );
+    _resetCheckpoint = libs.cbl.lookupFunction<CBLReplicator_ResetCheckpoint_C,
+        CBLReplicator_ResetCheckpoint>(
+      'CBLReplicator_ResetCheckpoint',
+    );
+    _start =
+        libs.cbl.lookupFunction<CBLReplicator_Start_C, CBLReplicator_Start>(
+      'CBLReplicator_Start',
+    );
+    _stop = libs.cbl.lookupFunction<CBLReplicator_Stop_C, CBLReplicator_Stop>(
+      'CBLReplicator_Stop',
+    );
+    _setHostReachable = libs.cbl.lookupFunction<
+        CBLReplicator_SetHostReachable_C, CBLReplicator_SetHostReachable>(
+      'CBLReplicator_SetHostReachable',
+    );
+    _setSuspended = libs.cbl.lookupFunction<CBLReplicator_SetSuspended_C,
+        CBLReplicator_SetSuspended>(
+      'CBLReplicator_SetSuspended',
+    );
+    _status =
+        libs.cbl.lookupFunction<CBLReplicator_Status, CBLReplicator_Status>(
+      'CBLReplicator_Status',
+    );
+    _pendingDocumentIDs = libs.cbl.lookupFunction<
+        CBLReplicator_PendingDocumentIDs, CBLReplicator_PendingDocumentIDs>(
+      'CBLReplicator_PendingDocumentIDs',
+    );
+    _isDocumentPending = libs.cblDart.lookupFunction<
+        CBLDart_CBLReplicator_IsDocumentPending_C,
+        CBLDart_CBLReplicator_IsDocumentPending>(
+      'CBLDart_CBLReplicator_IsDocumentPending',
+    );
+    _addChangeListener = libs.cblDart.lookupFunction<
+        CBLDart_CBLReplicator_AddChangeListener_C,
+        CBLDart_CBLReplicator_AddChangeListener>(
+      'CBLDart_CBLReplicator_AddChangeListener',
+    );
+    _addDocumentListener = libs.cblDart.lookupFunction<
+        CBLDart_CBLReplicator_AddDocumentListener_C,
+        CBLDart_CBLReplicator_AddDocumentListener>(
+      'CBLDart_CBLReplicator_AddDocumentListener',
+    );
+  }
+
+  late final CBLEndpoint_NewWithURL _endpointNewWithUrl;
+  late final CBLEndpoint_NewWithLocalDB? _endpointNewWithLocalDB;
+  late final CBLEndpoint_Free _endpointFree;
+  late final CBLAuth_NewBasic _authNewBasic;
+  late final CBLAuth_NewSession _authNewSession;
+  late final CBLAuth_Free _authFree;
+  late final CBLDart_CBLReplicator_New _new;
+  late final CBLDart_BindReplicatorToDartObject _bindToDartObject;
+  late final CBLReplicator_ResetCheckpoint _resetCheckpoint;
+  late final CBLReplicator_Start _start;
+  late final CBLReplicator_Stop _stop;
+  late final CBLReplicator_SetHostReachable _setHostReachable;
+  late final CBLReplicator_SetSuspended _setSuspended;
+  late final CBLReplicator_Status _status;
+  late final CBLReplicator_PendingDocumentIDs _pendingDocumentIDs;
+  late final CBLDart_CBLReplicator_IsDocumentPending _isDocumentPending;
+  late final CBLDart_CBLReplicator_AddChangeListener _addChangeListener;
+  late final CBLDart_CBLReplicator_AddDocumentListener _addDocumentListener;
+
+  Pointer<CBLEndpoint> createEndpointWithUrl(String url) {
+    return stringTable
+        .autoFree(() => _endpointNewWithUrl(stringTable.cString(url)));
+  }
+
+  Pointer<CBLEndpoint> createEndpointWithLocalDB(
+    Pointer<CBLDatabase> database,
+  ) {
+    return _endpointNewWithLocalDB!(database);
+  }
+
+  void freeEndpoint(Pointer<CBLEndpoint> endpoint) {
+    _endpointFree(endpoint);
+  }
+
+  Pointer<CBLAuthenticator> createBasicAuthenticator(
+    String username,
+    String password,
+  ) {
+    return stringTable.autoFree(() => _authNewBasic(
+          stringTable.cString(username),
+          stringTable.cString(password),
+        ));
+  }
+
+  Pointer<CBLAuthenticator> createSessionAuthenticator(
+    String sessionID,
+    String? cookieName,
+  ) {
+    return stringTable.autoFree(() => _authNewSession(
+          stringTable.cString(sessionID),
+          cookieName == null ? nullptr : stringTable.cString(cookieName),
+        ));
+  }
+
+  void freeAuthenticator(Pointer<CBLAuthenticator> authenticator) {
+    _authFree(authenticator);
+  }
+
+  Pointer<CBLReplicator> createReplicator(
+    Pointer<CBLDatabase> database,
+    Pointer<CBLEndpoint> endpoint,
+    CBLReplicatorType replicatorType,
+    bool continuous,
+    Pointer<CBLAuthenticator>? authenticator,
+    CBLProxyType? proxyType,
+    String? proxyHostname,
+    int? proxyPort,
+    String? proxyUsername,
+    String? proxyPassword,
+    Pointer<FLDict>? headers,
+    Uint8List? pinnedServerCertificate,
+    Uint8List? trustedRootCertificates,
+    Pointer<FLArray>? channels,
+    Pointer<FLArray>? documentIDs,
+    Pointer<Callback>? pushFilter,
+    Pointer<Callback>? pullFilter,
+    Pointer<Callback>? conflictResolver,
+  ) {
+    return runArena(() {
+      return _new(
+        _createConfig(
+          database,
+          endpoint,
+          replicatorType,
+          continuous,
+          authenticator,
+          proxyType,
+          proxyHostname,
+          proxyPort,
+          proxyUsername,
+          proxyPassword,
+          headers,
+          pinnedServerCertificate,
+          trustedRootCertificates,
+          channels,
+          documentIDs,
+          pushFilter,
+          pullFilter,
+          conflictResolver,
+        ),
+        globalCBLError,
+      ).checkCBLError();
+    });
+  }
+
+  void bindReplicatorToDartObject(
+    Object object,
+    Pointer<CBLReplicator> replicator,
+  ) {
+    _bindToDartObject(object, replicator);
+  }
+
+  void resetCheckpoint(Pointer<CBLReplicator> replicator) {
+    _resetCheckpoint(replicator);
+  }
+
+  void start(Pointer<CBLReplicator> replicator) {
+    _start(replicator);
+  }
+
+  void stop(Pointer<CBLReplicator> replicator) {
+    _stop(replicator);
+  }
+
+  void setHostReachable(Pointer<CBLReplicator> replicator, bool reachable) {
+    _setHostReachable(replicator, reachable.toInt());
+  }
+
+  void setSuspended(Pointer<CBLReplicator> replicator, bool reachable) {
+    _setSuspended(replicator, reachable.toInt());
+  }
+
+  CBLReplicatorStatus status(Pointer<CBLReplicator> replicator) {
+    return _status(replicator);
+  }
+
+  Pointer<FLDict> pendingDocumentIDs(Pointer<CBLReplicator> replicator) {
+    return _pendingDocumentIDs(replicator, globalCBLError).checkCBLError();
+  }
+
+  bool isDocumentPending(
+    Pointer<CBLReplicator> replicator,
+    String docID,
+  ) {
+    return stringTable.autoFree(() {
+      return _isDocumentPending(
+        replicator,
+        stringTable.cString(docID),
+        globalCBLError,
+      ).checkCBLError().toBool();
+    });
+  }
+
+  void addChangeListener(
+    Pointer<CBLReplicator> replicator,
+    Pointer<Callback> listener,
+  ) {
+    _addChangeListener(replicator, listener);
+  }
+
+  void addDocumentListener(
+    Pointer<CBLReplicator> replicator,
+    Pointer<Callback> listener,
+  ) {
+    _addDocumentListener(replicator, listener);
+  }
+
+  Pointer<CBLDartReplicatorConfiguration> _createConfig(
+    Pointer<CBLDatabase> database,
+    Pointer<CBLEndpoint> endpoint,
+    CBLReplicatorType replicatorType,
+    bool continuous,
+    Pointer<CBLAuthenticator>? authenticator,
+    CBLProxyType? proxyType,
+    String? proxyHostname,
+    int? proxyPort,
+    String? proxyUsername,
+    String? proxyPassword,
+    Pointer<FLDict>? headers,
+    Uint8List? pinnedServerCertificate,
+    Uint8List? trustedRootCertificates,
+    Pointer<FLArray>? channels,
+    Pointer<FLArray>? documentIDs,
+    Pointer<Callback>? pushFilter,
+    Pointer<Callback>? pullFilter,
+    Pointer<Callback>? conflictResolver,
+  ) {
+    final result = malloc<CBLDartReplicatorConfiguration>().withScoped();
+
+    result.ref
+      ..database = database
+      ..endpoint = endpoint
+      ..replicatorType = replicatorType
+      ..continuous = continuous
+      ..authenticator = authenticator ?? nullptr
+      ..proxy = _createProxySettings(
+        proxyType,
+        proxyHostname,
+        proxyPort,
+        proxyUsername,
+        proxyPassword,
+      )
+      ..headers = headers ?? nullptr
+      ..pinnedServerCertificate =
+          pinnedServerCertificate?.copyToGlobalSliceScoped() ?? nullptr
+      ..trustedRootCertificates =
+          trustedRootCertificates?.copyToGlobalSliceScoped() ?? nullptr
+      ..channels = channels ?? nullptr
+      ..documentIDs = documentIDs ?? nullptr
+      ..pushFilter = pushFilter ?? nullptr
+      ..pullFilter = pullFilter ?? nullptr
+      ..conflictResolver = conflictResolver ?? nullptr;
+
+    return result;
+  }
+
+  Pointer<CBLProxySettings> _createProxySettings(
+    CBLProxyType? type,
+    String? hostname,
+    int? port,
+    String? username,
+    String? password,
+  ) {
+    if (type == null) return nullptr;
+
+    final result = malloc<CBLProxySettings>().withScoped();
+
+    result.ref
+      ..type = type
+      ..hostname = stringTable.cString(hostname!, arena: true)
+      ..port = port!
+      ..username = stringTable.cString(username, arena: true)
+      ..password = stringTable.cString(password, arena: true, cache: false);
+
+    return result;
+  }
 }

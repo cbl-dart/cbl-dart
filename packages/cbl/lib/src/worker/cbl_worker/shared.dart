@@ -1,22 +1,32 @@
 import 'dart:ffi';
+import 'dart:isolate';
 
-import '../worker.dart';
+/// A wrapper for a [Pointer] to send it through a [SendPort].
+///
+/// A [TransferablePointer] cannot represent a [nullptr].
+/// Instead use `null` to represent the absence of a value..
+class TransferablePointer<T extends NativeType> {
+  /// Creates a wrapper for [pointer] to send it through a [SendPort].
+  TransferablePointer(Pointer<T> pointer)
+      : assert(pointer != nullptr),
+        address = pointer.address;
 
-abstract class ObjectRequest<O extends NativeType, T> extends WorkerRequest<T> {
-  ObjectRequest(Pointer<O> object) : _objectAddress = object.address;
+  /// The pointer's raw address.
+  final int address;
 
-  final int _objectAddress;
-
-  Pointer<O> get object => Pointer.fromAddress(_objectAddress).cast();
+  /// The pointer which is wrapped by this [TransferablePointer].
+  Pointer<T> get pointer => Pointer.fromAddress(address);
 }
 
-abstract class ObjectWithArgRequest<O extends NativeType, A extends NativeType,
-    T> extends ObjectRequest<O, T> {
-  ObjectWithArgRequest(Pointer<O> object, Pointer<A> argument)
-      : _argAddress = argument.address,
-        super(object);
+extension TransferablePointerExt<T extends NativeType> on Pointer<T> {
+  /// Creates a [TransferablePointer] from this pointer.
+  ///
+  /// This pointer must not be the [nullptr].
+  TransferablePointer<T> toTransferablePointer() =>
+      toTransferablePointerOrNull()!;
 
-  final int _argAddress;
-
-  Pointer<A> get argument => Pointer.fromAddress(_argAddress).cast();
+  /// Creates a [TransferablePointer] from this pointer, or returns `null`
+  /// when this is the [nullptr].
+  TransferablePointer<T>? toTransferablePointerOrNull() =>
+      this == nullptr ? null : TransferablePointer(this);
 }

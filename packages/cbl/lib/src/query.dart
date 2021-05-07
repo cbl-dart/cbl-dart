@@ -11,9 +11,18 @@ import 'fleece.dart';
 import 'native_object.dart';
 import 'resource.dart';
 import 'streams.dart';
+import 'utils.dart';
 import 'worker/cbl_worker.dart';
+import 'worker/cbl_worker/shared.dart';
 
-export 'package:cbl_ffi/cbl_ffi.dart' show QueryLanguage;
+/// A query language
+enum QueryLanguage {
+  /// [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
+  json,
+
+  /// [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
+  N1QL
+}
 
 /// A definition for a database query which can be compiled into a [Query].
 ///
@@ -203,19 +212,19 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
   Future<void> setParameters(Dict parameters) =>
       use(() => native.execute((pointer) => SetQueryParameters(
             pointer,
-            parameters.native.pointer.address,
+            parameters.native.pointer.cast(),
           )));
 
   @override
   Future<Dict?> getParameters() => use(() => native
       .execute((pointer) => GetQueryParameters(pointer))
-      .then((address) => Dict.fromPointer(address.toPointer())));
+      .then((result) => result?.pointer.let((it) => Dict.fromPointer(it))));
 
   @override
   Future<ResultSet> execute() => use(() => native
       .execute((pointer) => ExecuteQuery(pointer))
-      .then((address) => ResultSet._(
-            address.toPointer(),
+      .then((result) => ResultSet._(
+            result.pointer,
             release: true,
             retain: false,
           )));
@@ -233,31 +242,31 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
       () => native.execute((pointer) => GetQueryColumnName(pointer, index)));
 
   @override
-  Stream<ResultSet> changes() =>
-      useSync(() => CallbackStreamController<ResultSet, int>(
-            parent: this,
-            worker: native.worker,
-            createRegisterCallbackRequest: (callback) => AddQueryChangeListener(
-              native.pointerUnsafe,
-              callback.native.pointerUnsafe.address,
-            ),
-            createEvent: (listenerTokenAddress, _) async {
-              // The native side sends no arguments. When the native side notfies
-              // the listener it has to copy the current query result set.
+  Stream<ResultSet> changes() => useSync(() => CallbackStreamController<
+          ResultSet, TransferablePointer<CBLListenerToken>>(
+        parent: this,
+        worker: native.worker,
+        createRegisterCallbackRequest: (callback) => AddQueryChangeListener(
+          native.pointerUnsafe,
+          callback.native.pointerUnsafe,
+        ),
+        createEvent: (listenerToken, _) async {
+          // The native side sends no arguments. When the native side notfies
+          // the listener it has to copy the current query result set.
 
-              final resultSetAddress =
-                  await native.execute((pointer) => CopyCurrentQueryResultSet(
-                        pointer,
-                        listenerTokenAddress,
-                      ));
+          final result =
+              await native.execute((pointer) => CopyCurrentQueryResultSet(
+                    pointer,
+                    listenerToken.pointer,
+                  ));
 
-              return ResultSet._(
-                resultSetAddress.toPointer(),
-                release: true,
-                retain: false,
-              );
-            },
-          ).stream);
+          return ResultSet._(
+            result.pointer,
+            release: true,
+            retain: false,
+          );
+        },
+      ).stream);
 }
 
 /// One of the results that [Query]s return in [ResultSet]s.
@@ -292,17 +301,14 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
   Result get current => this;
 
   @override
-  bool moveNext() => _bindings.next(native.pointerUnsafe).toBool();
+  bool moveNext() => _bindings.next(native.pointerUnsafe);
 
   @override
   Value operator [](Object keyOrIndex) {
     Pointer<FLValue> pointer;
 
     if (keyOrIndex is String) {
-      pointer = runArena(() => _bindings.valueForKey(
-            native.pointerUnsafe,
-            keyOrIndex.toNativeUtf8().withScoped(),
-          ));
+      pointer = _bindings.valueForKey(native.pointerUnsafe, keyOrIndex);
     } else if (keyOrIndex is int) {
       pointer = _bindings.valueAtIndex(native.pointerUnsafe, keyOrIndex);
     } else {

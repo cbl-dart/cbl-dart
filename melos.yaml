@@ -48,17 +48,22 @@ scripts:
     select-package:
       scope: cbl_e2e_tests
 
-  test:all: melos run test:cbl_native && melos run test:cbl && melos run test:standalone_dart
-
-  test:cbl_native:
-    run: melos exec -- flutter test --no-pub -r expanded
-    select-package:
-      scope: 'cbl_native'
+  test:all: 'melos run test:cbl && melos run test:cbl_ffi && melos run test:cbl_native &&  melos run test:standalone_dart'
 
   test:cbl:
     run: melos exec -- flutter test --no-pub -r expanded
     select-package:
       scope: 'cbl'
+
+  test:cbl_ffi:
+    run: melos exec -- flutter test --no-pub -r expanded
+    select-package:
+      scope: 'cbl_ffi'
+
+  test:cbl_native:
+    run: melos exec -- flutter test --no-pub -r expanded
+    select-package:
+      scope: 'cbl_native'
 
   test:standalone_dart:
     run: melos exec -- flutter test --no-pub -r expanded

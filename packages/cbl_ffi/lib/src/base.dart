@@ -2,7 +2,11 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
-import 'libraries.dart';
+import 'bindings.dart';
+import 'fleece.dart';
+import 'utils.dart';
+
+late final _baseBinds = CBLBindings.instance.base;
 
 // === Option ==================================================================
 
@@ -41,7 +45,7 @@ typedef CBLDart_InitDartApiDL = void Function(
 
 // === CBLError ================================================================
 
-enum ErrorDomain {
+enum CBLErrorDomain {
   couchbaseLite,
   posix,
   sqLite,
@@ -50,14 +54,14 @@ enum ErrorDomain {
   webSocket,
 }
 
-extension IntErrorDomainExt on int {
-  ErrorDomain toErrorDomain() {
+extension on int {
+  CBLErrorDomain toErrorDomain() {
     assert(this >= 1 || this <= 6);
-    return ErrorDomain.values[this - 1];
+    return CBLErrorDomain.values[this - 1];
   }
 }
 
-enum CouchbaseLiteErrorCode {
+enum CBLErrorCode {
   assertionFailed,
   unimplemented,
   unsupportedEncryption,
@@ -90,14 +94,14 @@ enum CouchbaseLiteErrorCode {
   cantUpgradeDatabase,
 }
 
-extension IntCouchbaseLiteErrorCodeExt on int {
-  CouchbaseLiteErrorCode toCouchbaseLiteErrorCode() {
+extension on int {
+  CBLErrorCode toCouchbaseLiteErrorCode() {
     assert(this >= 1 || this <= 30);
-    return CouchbaseLiteErrorCode.values[this - 1];
+    return CBLErrorCode.values[this - 1];
   }
 }
 
-enum NetworkErrorCode {
+enum CBLNetworkErrorCode {
   dnsFailure,
   unknownHost,
   timeout,
@@ -115,41 +119,107 @@ enum NetworkErrorCode {
   tlsCertNameMismatch,
 }
 
-extension IntNetworkErrorCodeExt on int {
-  NetworkErrorCode toNetworkErrorCode() {
+extension on int {
+  CBLNetworkErrorCode toNetworkErrorCode() {
     assert(this >= 1 || this <= 15);
-    return NetworkErrorCode.values[this - 1];
+    return CBLNetworkErrorCode.values[this - 1];
   }
 }
+
+late final globalCBLError = _baseBinds._globalCBLError;
+late final globalErrorPosition = _baseBinds._globalErrorPosition;
 
 class CBLError extends Struct {
   @Uint32()
-  external int domain;
+  external int _domain;
 
   @Int32()
-  external int code;
+  external int _code;
 
   @Int32()
-  external int internal_info;
-}
-
-extension CBLErrorCopyToPointerExt on CBLError {
-  Pointer<CBLError> copyToPointer() {
-    final result = malloc<CBLError>();
-    result.ref.domain = domain;
-    result.ref.code = code;
-    result.ref.internal_info = internal_info;
-    return result;
-  }
+  // ignore: unused_field
+  external int _internal_info;
 }
 
 typedef CBLError_Message = Pointer<Utf8> Function(
   Pointer<CBLError> error,
 );
 
-extension CBLErrorPointerExt on Pointer<CBLError> {
-  /// Whether [CBLError.code] == 0.
-  bool get isOk => ref.code == 0;
+extension CBLErrorExt on CBLError {
+  CBLErrorDomain get domain => _domain.toErrorDomain();
+
+  Object get code {
+    switch (domain) {
+      case CBLErrorDomain.couchbaseLite:
+        return _code.toCouchbaseLiteErrorCode();
+      case CBLErrorDomain.posix:
+        return _code;
+      case CBLErrorDomain.sqLite:
+        return _code;
+      case CBLErrorDomain.fleece:
+        return _code.toFleeceErrorCode();
+      case CBLErrorDomain.network:
+        return _code.toNetworkErrorCode();
+      case CBLErrorDomain.webSocket:
+        return _code;
+      default:
+        throw UnimplementedError();
+    }
+  }
+
+  /// `true` if there is no error stored in this [CBLError].
+  bool get isOk => _code == 0;
+
+  void copyToGlobal() {
+    globalCBLError.ref._domain = _domain;
+    globalCBLError.ref._code = _code;
+    globalCBLError.ref._internal_info = _internal_info;
+  }
+}
+
+class CBLErrorException implements Exception {
+  CBLErrorException(
+    this.domain,
+    this.code,
+    this.message, {
+    this.errorPosition,
+    this.errorSource,
+  });
+  CBLErrorException.fromCBLError(Pointer<CBLError> error,
+      {String? errorSource, int? errorPosition})
+      : this(
+          error.ref.domain,
+          error.ref.code,
+          _baseBinds.CBLErrorMessage(globalCBLError)!,
+          errorSource: errorSource,
+          errorPosition: errorPosition,
+        );
+
+  final CBLErrorDomain domain;
+  final Object? code;
+  final String message;
+  final int? errorPosition;
+  final String? errorSource;
+}
+
+void _checkCBLError({String? errorSource}) {
+  if (!globalCBLError.ref.isOk) {
+    throw CBLErrorException.fromCBLError(
+      globalCBLError,
+      errorSource: errorSource,
+      errorPosition:
+          globalErrorPosition.value == -1 ? null : globalErrorPosition.value,
+    );
+  }
+}
+
+extension CheckCBLErrorExt<T> on T {
+  T checkCBLError({String? errorSource}) {
+    if (this == nullptr || this == false || this == -1) {
+      _checkCBLError(errorSource: errorSource);
+    }
+    return this;
+  }
 }
 
 // === CBLRefCounted ===========================================================
@@ -157,12 +227,12 @@ extension CBLErrorPointerExt on Pointer<CBLError> {
 class CBLRefCounted extends Opaque {}
 
 typedef CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
-  Handle handle,
+  Handle object,
   Pointer<CBLRefCounted> refCounted,
   Uint8 retain,
 );
 typedef CBLDart_BindCBLRefCountedToDartObject = void Function(
-  Object handle,
+  Object object,
   Pointer<CBLRefCounted> refCounted,
   int retain,
 );
@@ -180,28 +250,62 @@ typedef CBLListener_Remove = void Function(
 
 // === BaseBindings ============================================================
 
-class BaseBindings {
-  BaseBindings(Libraries libs)
-      : initDartApiDL = libs.cblDart
-            .lookupFunction<CBLDart_InitDartApiDL_C, CBLDart_InitDartApiDL>(
-          'CBLDart_InitDartApiDL',
-        ),
-        bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
-            CBLDart_BindCBLRefCountedToDartObject_C,
-            CBLDart_BindCBLRefCountedToDartObject>(
-          'CBLDart_BindCBLRefCountedToDartObject',
-        ),
-        Error_Message =
-            libs.cbl.lookupFunction<CBLError_Message, CBLError_Message>(
-          'CBLError_Message',
-        ),
-        Listener_Remove =
-            libs.cbl.lookupFunction<CBLListener_Remove_C, CBLListener_Remove>(
-          'CBLListener_Remove',
-        );
+class BaseBindings extends Bindings {
+  BaseBindings(Bindings parent) : super(parent) {
+    _initDartApiDL = libs.cblDart
+        .lookupFunction<CBLDart_InitDartApiDL_C, CBLDart_InitDartApiDL>(
+      'CBLDart_InitDartApiDL',
+    );
+    _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
+        CBLDart_BindCBLRefCountedToDartObject_C,
+        CBLDart_BindCBLRefCountedToDartObject>(
+      'CBLDart_BindCBLRefCountedToDartObject',
+    );
+    _Error_Message =
+        libs.cbl.lookupFunction<CBLError_Message, CBLError_Message>(
+      'CBLError_Message',
+    );
+    _Listener_Remove =
+        libs.cbl.lookupFunction<CBLListener_Remove_C, CBLListener_Remove>(
+      'CBLListener_Remove',
+    );
+  }
 
-  final CBLDart_InitDartApiDL initDartApiDL;
-  final CBLDart_BindCBLRefCountedToDartObject bindCBLRefCountedToDartObject;
-  final CBLError_Message Error_Message;
-  final CBLListener_Remove Listener_Remove;
+  late final Pointer<CBLError> _globalCBLError = malloc();
+  late final Pointer<Int32> _globalErrorPosition = malloc();
+
+  late final CBLDart_InitDartApiDL _initDartApiDL;
+  late final CBLDart_BindCBLRefCountedToDartObject
+      _bindCBLRefCountedToDartObject;
+  late final CBLError_Message _Error_Message;
+  late final CBLListener_Remove _Listener_Remove;
+
+  void initDartApiDL() {
+    _initDartApiDL(NativeApi.initializeApiDLData);
+  }
+
+  void bindCBLRefCountedToDartObject(
+    Object handle,
+    Pointer<CBLRefCounted> refCounted,
+    bool retain,
+  ) {
+    _bindCBLRefCountedToDartObject(handle, refCounted, retain.toInt());
+  }
+
+  String? CBLErrorMessage(Pointer<CBLError> error) {
+    return runArena(() {
+      return _Error_Message(error).toNullable()?.withScoped().toDartString();
+    });
+  }
+
+  void removeListener(Pointer<CBLListenerToken> token) {
+    _Listener_Remove(token);
+  }
+
+  @override
+  void dispose() {
+    malloc.free(_globalCBLError);
+    malloc.free(_globalErrorPosition);
+    super.dispose();
+  }
 }

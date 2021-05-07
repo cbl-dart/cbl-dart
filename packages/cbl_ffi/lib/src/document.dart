@@ -3,8 +3,10 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
+import 'bindings.dart';
+import 'database.dart';
 import 'fleece.dart';
-import 'libraries.dart';
+import 'utils.dart';
 
 class CBLDocument extends Opaque {}
 
@@ -45,42 +47,76 @@ typedef CBLDocument_PropertiesAsJSON = Pointer<Utf8> Function(
   Pointer<CBLDocument> doc,
 );
 
-class DocumentBindings {
-  DocumentBindings(Libraries libs)
-      : id = libs.cbl.lookupFunction<CBLDocument_ID, CBLDocument_ID>(
-          'CBLDocument_ID',
-        ),
-        revisionId = libs.cbl
-            .lookupFunction<CBLDocument_RevisionID, CBLDocument_RevisionID>(
-          'CBLDocument_RevisionID',
-        ),
-        sequence = libs.cbl
-            .lookupFunction<CBLDocument_Sequence_C, CBLDocument_Sequence>(
-          'CBLDocument_Sequence',
-        ),
-        properties = libs.cbl
-            .lookupFunction<CBLDocument_Properties, CBLDocument_Properties>(
-          'CBLDocument_Properties',
-        ),
-        propertiesAsJson = libs.cbl.lookupFunction<CBLDocument_PropertiesAsJSON,
-            CBLDocument_PropertiesAsJSON>(
-          'CBLDocument_PropertiesAsJSON',
-        ),
-        delete =
-            libs.cbl.lookupFunction<CBLDocument_Delete_C, CBLDocument_Delete>(
-          'CBLDocument_Delete',
-        ),
-        purge = libs.cbl.lookupFunction<CBLDocument_Purge_C, CBLDocument_Purge>(
-          'CBLDocument_Purge',
-        );
+class DocumentBindings extends Bindings {
+  DocumentBindings(Bindings parent) : super(parent) {
+    _id = libs.cbl.lookupFunction<CBLDocument_ID, CBLDocument_ID>(
+      'CBLDocument_ID',
+    );
+    _revisionId =
+        libs.cbl.lookupFunction<CBLDocument_RevisionID, CBLDocument_RevisionID>(
+      'CBLDocument_RevisionID',
+    );
+    _sequence =
+        libs.cbl.lookupFunction<CBLDocument_Sequence_C, CBLDocument_Sequence>(
+      'CBLDocument_Sequence',
+    );
+    _properties =
+        libs.cbl.lookupFunction<CBLDocument_Properties, CBLDocument_Properties>(
+      'CBLDocument_Properties',
+    );
+    _propertiesAsJson = libs.cbl.lookupFunction<CBLDocument_PropertiesAsJSON,
+        CBLDocument_PropertiesAsJSON>(
+      'CBLDocument_PropertiesAsJSON',
+    );
+    _delete = libs.cbl.lookupFunction<CBLDocument_Delete_C, CBLDocument_Delete>(
+      'CBLDocument_Delete',
+    );
+    _purge = libs.cbl.lookupFunction<CBLDocument_Purge_C, CBLDocument_Purge>(
+      'CBLDocument_Purge',
+    );
+  }
 
-  final CBLDocument_ID id;
-  final CBLDocument_RevisionID revisionId;
-  final CBLDocument_Sequence sequence;
-  final CBLDocument_Properties properties;
-  final CBLDocument_PropertiesAsJSON propertiesAsJson;
-  final CBLDocument_Delete delete;
-  final CBLDocument_Purge purge;
+  late final CBLDocument_ID _id;
+  late final CBLDocument_RevisionID _revisionId;
+  late final CBLDocument_Sequence _sequence;
+  late final CBLDocument_Properties _properties;
+  late final CBLDocument_PropertiesAsJSON _propertiesAsJson;
+  late final CBLDocument_Delete _delete;
+  late final CBLDocument_Purge _purge;
+
+  String id(Pointer<CBLDocument> doc) {
+    return _id(doc).toDartString();
+  }
+
+  String? revisionId(Pointer<CBLDocument> doc) {
+    return _revisionId(doc).toNullable()?.toDartString();
+  }
+
+  int sequence(Pointer<CBLDocument> doc) {
+    return _sequence(doc);
+  }
+
+  Pointer<FLDict> properties(Pointer<CBLDocument> doc) {
+    return _properties(doc);
+  }
+
+  String propertiesAsJson(Pointer<CBLDocument> doc) {
+    final cString = _propertiesAsJson(doc);
+    final string = cString.toDartString();
+    malloc.free(cString);
+    return string;
+  }
+
+  void delete(
+    Pointer<CBLDocument> doc,
+    CBLConcurrencyControl concurrencyControl,
+  ) {
+    _delete(doc, concurrencyControl.toInt(), globalCBLError).checkCBLError();
+  }
+
+  void purge(Pointer<CBLDocument> doc) {
+    _purge(doc, globalCBLError).checkCBLError();
+  }
 }
 
 class CBLMutableDocument extends Opaque {}
@@ -117,31 +153,65 @@ typedef CBLDocument_SetPropertiesAsJSON = int Function(
   Pointer<CBLError> error,
 );
 
-class MutableDocumentBindings {
-  MutableDocumentBindings(Libraries libs)
-      : makeNew = libs.cbl.lookupFunction<CBLDocument_New, CBLDocument_New>(
-          'CBLDocument_New',
-        ),
-        mutableCopy = libs.cbl
-            .lookupFunction<CBLDocument_MutableCopy, CBLDocument_MutableCopy>(
-          'CBLDocument_MutableCopy',
-        ),
-        mutableProperties = libs.cbl.lookupFunction<
-            CBLDocument_MutableProperties, CBLDocument_MutableProperties>(
-          'CBLDocument_MutableProperties',
-        ),
-        setProperties = libs.cbl.lookupFunction<CBLDocument_SetProperties_C,
-            CBLDocument_SetProperties>(
-          'CBLDocument_SetProperties',
-        ),
-        setPropertiesAsJSON = libs.cbl.lookupFunction<
-            CBLDocument_SetPropertiesAsJSON_C, CBLDocument_SetPropertiesAsJSON>(
-          'CBLDocument_SetPropertiesAsJSON',
-        );
+class MutableDocumentBindings extends Bindings {
+  MutableDocumentBindings(Bindings parent) : super(parent) {
+    _new = libs.cbl.lookupFunction<CBLDocument_New, CBLDocument_New>(
+      'CBLDocument_New',
+    );
+    _mutableCopy = libs.cbl
+        .lookupFunction<CBLDocument_MutableCopy, CBLDocument_MutableCopy>(
+      'CBLDocument_MutableCopy',
+    );
+    _mutableProperties = libs.cbl.lookupFunction<CBLDocument_MutableProperties,
+        CBLDocument_MutableProperties>(
+      'CBLDocument_MutableProperties',
+    );
+    _setProperties = libs.cbl
+        .lookupFunction<CBLDocument_SetProperties_C, CBLDocument_SetProperties>(
+      'CBLDocument_SetProperties',
+    );
+    _setPropertiesAsJSON = libs.cbl.lookupFunction<
+        CBLDocument_SetPropertiesAsJSON_C, CBLDocument_SetPropertiesAsJSON>(
+      'CBLDocument_SetPropertiesAsJSON',
+    );
+  }
 
-  final CBLDocument_New makeNew;
-  final CBLDocument_MutableCopy mutableCopy;
-  final CBLDocument_MutableProperties mutableProperties;
-  final CBLDocument_SetProperties setProperties;
-  final CBLDocument_SetPropertiesAsJSON setPropertiesAsJSON;
+  late final CBLDocument_New _new;
+  late final CBLDocument_MutableCopy _mutableCopy;
+  late final CBLDocument_MutableProperties _mutableProperties;
+  late final CBLDocument_SetProperties _setProperties;
+  late final CBLDocument_SetPropertiesAsJSON _setPropertiesAsJSON;
+
+  Pointer<CBLMutableDocument> create(String? id) {
+    return stringTable
+        .autoFree(() => _new(id == null ? nullptr : stringTable.cString(id)));
+  }
+
+  Pointer<CBLMutableDocument> mutableCopy(Pointer<CBLDocument> source) {
+    return _mutableCopy(source);
+  }
+
+  Pointer<FLMutableDict> mutableProperties(Pointer<CBLMutableDocument> doc) {
+    return _mutableProperties(doc);
+  }
+
+  void setProperties(
+    Pointer<CBLMutableDocument> doc,
+    Pointer<FLDict> properties,
+  ) {
+    return _setProperties(doc, properties);
+  }
+
+  void setPropertiesAsJSON(
+    Pointer<CBLMutableDocument> doc,
+    String properties,
+  ) {
+    stringTable.autoFree(() {
+      _setPropertiesAsJSON(
+        doc,
+        stringTable.cString(properties),
+        globalCBLError,
+      ).checkCBLError();
+    });
+  }
 }

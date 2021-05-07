@@ -76,6 +76,9 @@ abstract class WorkerDelegate {
   /// to accept requests.
   Future<void> initialize() async {}
 
+  // Called when the worker crashes or is stopped.
+  Future<void> shutdown() async {}
+
   /// Handles a [WorkerRequest] and returns a corresponding [WorkerResponse].
   Future<WorkerResponse> handleRequest(WorkerRequest request);
 }
@@ -217,7 +220,7 @@ class Worker extends WorkerExecutor {
   Future<void> stop() => _lock.synchronized(() async {
         _debugIsRunning();
 
-        _isolate!.kill();
+        _isolateSendPort!.send(_ShutdownWorker());
 
         await _onExited;
 
@@ -262,11 +265,25 @@ class Worker extends WorkerExecutor {
 
   static void _main(_WorkerConfiguration configuration) async {
     final receivePort = ReceivePort();
+    late StreamSubscription receivePortSub;
+
     final sendPort = configuration.sendPort;
 
     final delegate = configuration.delegate;
 
     await delegate.initialize();
+
+    Future<void> shutdown() async {
+      await receivePortSub.cancel();
+      try {
+        await delegate.shutdown();
+      } catch (error, stackTrace) {
+        print(
+          'Warning: WorkerDelegate.shutdown threw an error: $error\n'
+          '$stackTrace',
+        );
+      }
+    }
 
     void handleRequest(_RequestEnvelope requestEnvelope) async {
       final response = await delegate.handleRequest(requestEnvelope.request);
@@ -277,7 +294,23 @@ class Worker extends WorkerExecutor {
       sendPort.send(responseEnvelope);
     }
 
-    receivePort.cast<_RequestEnvelope>().listen(handleRequest);
+    void messageHandler(dynamic event) {
+      if (event is _RequestEnvelope) {
+        handleRequest(event);
+      } else if (event is _ShutdownWorker) {
+        shutdown();
+      }
+    }
+
+    runZoned(
+      () => receivePortSub = receivePort.listen(messageHandler),
+      zoneSpecification: ZoneSpecification(
+        handleUncaughtError: (self, parent, zone, error, stackTrace) {
+          shutdown()
+              .then((_) => parent.handleUncaughtError(zone, error, stackTrace));
+        },
+      ),
+    );
 
     // Sending ready message should be the last thing we do during
     // initialization.
@@ -297,6 +330,8 @@ class _WorkerReady {
 
   final SendPort sendPort;
 }
+
+class _ShutdownWorker {}
 
 class _RequestEnvelope<T> {
   _RequestEnvelope(this.request);

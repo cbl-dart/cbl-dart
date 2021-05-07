@@ -20,19 +20,23 @@ import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-export 'package:cbl_ffi/cbl_ffi.dart'
-    show EncryptionAlgorithm, DatabaseFlag, ConcurrencyControl, MaintenanceType;
+/// Encryption algorithms (available only in the Enterprise Edition).
+enum EncryptionAlgorithm {
+  /// No encryption (default).
+  none,
+
+  /// AES with 256-bit key.
+  aes256,
+}
 
 /// Encryption key specified in a [DatabaseConfiguration].
 class EncryptionKey {
-  static const keyByteLength = 32;
-
   /// Creates an [EncryptionKey].
   EncryptionKey({
     this.algorithm = EncryptionAlgorithm.none,
     Uint8List? bytes,
-  })  : bytes = bytes ?? Uint8List(keyByteLength),
-        assert(bytes == null || bytes.lengthInBytes == keyByteLength);
+  })  : bytes = bytes ?? Uint8List(encryptionKeyByteLength),
+        assert(bytes == null || bytes.lengthInBytes == encryptionKeyByteLength);
 
   /// The encryption algorithm to use.
   final EncryptionAlgorithm algorithm;
@@ -64,6 +68,18 @@ class EncryptionKey {
   String toString() => 'EncryptionKey(algorithm: $algorithm, bytes: REDACTED)';
 }
 
+/// Flags for how to open a database.
+enum DatabaseFlag {
+  /// Create the file if it doesn't exist.
+  create,
+
+  /// Open file read-only.
+  readOnly,
+
+  /// Disable upgrading an older-version database.
+  noUpgrade,
+}
+
 /// Database configuration options.
 class DatabaseConfiguration {
   /// Creates a [DatabaseConfiguration].
@@ -93,6 +109,12 @@ class DatabaseConfiguration {
         encryptionKey: encryptionKey ?? this.encryptionKey,
       );
 
+  DatabaseConfiguration _withoutKeyMaterial() => copyWith(
+        encryptionKey: encryptionKey?.copyWith(
+          bytes: Uint8List(encryptionKeyByteLength),
+        ),
+      );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -112,6 +134,28 @@ class DatabaseConfiguration {
       'flags: $flags, '
       'encryptionKey: $encryptionKey'
       ')';
+}
+
+/// Conflict-handling options when saving or deleting a document.
+enum ConcurrencyControl {
+  /// The current save/delete will overwrite a conflicting revision if there is
+  /// a conflict.
+  lastWriteWins,
+
+  /// The current save/delete will fail if there is a conflict.
+  failOnConflict,
+}
+
+/// The type of maintenance a database can perform.
+enum MaintenanceType {
+  /// Compact the database file and delete unused attachments.
+  compact,
+
+  /// Rebuild the database's indexes.
+  reindex,
+
+  /// Check for database corruption.
+  integrityCheck,
 }
 
 /// Indexes are used to speed up queries by allowing fast -- O(log n) -- lookup
@@ -284,7 +328,14 @@ abstract class Database with ClosableResource {
     required String toName,
     DatabaseConfiguration? config,
   }) =>
-      _staticWorker.execute(CopyDatabase(fromPath, toName, config));
+      _staticWorker.execute(CopyDatabase(
+        fromPath,
+        toName,
+        config?.directory,
+        config?.flags,
+        config?.encryptionKey?.algorithm,
+        config?.encryptionKey?.bytes,
+      ));
 
   /// Deletes a database file.
   ///
@@ -320,8 +371,14 @@ abstract class Database with ClosableResource {
         await workerFactory.createWorker(id: 'Database(#$databaseId|$name)');
 
     try {
-      final pointer = await worker.execute(OpenDatabase(name, config));
-      return DatabaseImpl(name, pointer.toPointer(), worker);
+      final result = await worker.execute(OpenDatabase(
+        name,
+        config?.directory,
+        config?.flags,
+        config?.encryptionKey?.algorithm,
+        config?.encryptionKey?.bytes,
+      ));
+      return DatabaseImpl(name, config, result.pointer, worker);
     } catch (error) {
       await worker.stop();
       rethrow;
@@ -527,9 +584,11 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
     implements Database {
   DatabaseImpl(
     this._debugName,
+    DatabaseConfiguration? config,
     Pointer<CBLDatabase> pointer,
     Worker worker,
-  ) : super(CblRefCountedWorkerObject(
+  )   : _config = config?._withoutKeyMaterial(),
+        super(CblRefCountedWorkerObject(
           pointer,
           worker,
           release: true,
@@ -537,6 +596,8 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
         ));
 
   final String _debugName;
+
+  final DatabaseConfiguration? _config;
 
   // === Database ==============================================================
 
@@ -553,8 +614,9 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
       use(() => native.execute((pointer) => GetDatabaseCount(pointer)));
 
   @override
-  Future<DatabaseConfiguration> get config =>
-      use(() => native.execute((pointer) => GetDatabaseConfiguration(pointer)));
+  Future<DatabaseConfiguration> get config async =>
+      _config ??
+      (throw StateError('Database was created without configuration.'));
 
   @override
   Future<void> delete() async {
@@ -575,8 +637,12 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
       use(() => native.execute((pointer) => EndDatabaseBatch(pointer)));
 
   @override
-  Future<void> rekey([EncryptionKey? encryptionKey]) => use(
-      () => native.execute((pointer) => RekeyDatabase(pointer, encryptionKey)));
+  Future<void> rekey([EncryptionKey? encryptionKey]) =>
+      use(() => native.execute((pointer) => RekeyDatabase(
+            pointer,
+            encryptionKey?.algorithm,
+            encryptionKey?.bytes,
+          )));
 
   WorkerRequest Function(Pointer<CBLDatabase>) _createCloseRequest =
       (pointer) => CloseDatabase(pointer);
@@ -593,7 +659,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   Future<Document?> getDocument(String id) => use(() => native
       .execute((pointer) => GetDatabaseDocument(pointer, id))
       .then((address) => address?.let((it) => createDocument(
-            pointer: it.toPointer(),
+            pointer: it.pointer,
             worker: native.worker,
             retain: false,
           ))));
@@ -602,7 +668,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   Future<MutableDocument?> getMutableDocument(String id) => use(() => native
       .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
       .then((address) => address?.let((it) => createMutableDocument(
-            pointer: it.toPointer(),
+            pointer: it.pointer,
             worker: native.worker,
             retain: false,
             isNew: false,
@@ -620,7 +686,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                 concurrency,
               ))
           .then((address) => createDocument(
-                pointer: address.toPointer(),
+                pointer: address.pointer,
                 worker: native.worker,
                 retain: false,
               )));
@@ -636,19 +702,16 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
         assert(!doc.isNew, 'new documents must be saved with `saveDocument`');
 
         final callback = NativeCallback((arguments, result) {
-          // Build arguments
-          final documentBeingSavedPointer =
-              (arguments[0] as int).toPointer<CBLMutableDocument>();
-          final conflictingDocumentPointer =
-              (arguments[1] as int?)?.toPointer<CBLDocument>();
+          final message =
+              SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
 
           final documentBeingSaved = createMutableDocument(
-            pointer: documentBeingSavedPointer,
+            pointer: message.documentBeingSaved,
             retain: true,
             isNew: false,
             worker: null,
           );
-          final conflictingDocument = conflictingDocumentPointer?.let(
+          final conflictingDocument = message.conflictingDocument?.let(
             (pointer) => createDocument(
               pointer: pointer,
               retain: true,
@@ -680,10 +743,10 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             .execute((pointer) => SaveDatabaseDocumentResolving(
                   pointer,
                   doc.native.pointer.cast(),
-                  callback.native.pointer.address,
+                  callback.native.pointer,
                 ))
             .then((address) => createDocument(
-                  pointer: address.toPointer(),
+                  pointer: address.pointer,
                   worker: native.worker,
                   retain: false,
                 ))
@@ -714,7 +777,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                 AddDocumentChangeListener(
               native.pointerUnsafe.cast(),
               id,
-              callback.native.pointerUnsafe.address,
+              callback.native.pointerUnsafe,
             ),
             createEvent: (_, arguments) => null,
           ).stream);
@@ -727,7 +790,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             createRegisterCallbackRequest: (callback) =>
                 AddDatabaseChangeListener(
               native.pointerUnsafe.cast(),
-              callback.native.pointerUnsafe.address,
+              callback.native.pointerUnsafe,
             ),
             createEvent: (_, arguments) => List.from(arguments),
           ).stream);
@@ -741,9 +804,9 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             queryDefinition.queryString,
             queryDefinition.language,
           ))
-      .then((value) => QueryImpl(
+      .then((result) => QueryImpl(
             database: this,
-            pointer: value.toPointer(),
+            pointer: result.pointer,
           )));
 
   // === Indexes ===============================================================
@@ -759,8 +822,8 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   @override
   Future<List<String>> indexNames() async => use(() => native
       .execute((pointer) => GetDatabaseIndexNames(pointer))
-      .then((address) => MutableArray.fromPointer(
-            address.toPointer(),
+      .then((result) => Array.fromPointer(
+            result.pointer,
             release: true,
             retain: false,
           ).map((it) => it.asString!).toList()));
