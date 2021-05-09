@@ -1075,19 +1075,7 @@ class FleeceBindings extends Bindings {
   late final DictBindings dict;
   late final DictIteratorBindings dictIterator;
   late final MutableDictBindings mutableDict;
-
-  @override
-  List<Bindings> get children => [
-        slice,
-        slot,
-        doc,
-        value,
-        array,
-        mutableArray,
-        dict,
-        dictIterator,
-        mutableDict
-      ];
+  
 
   @override
   void dispose() {
