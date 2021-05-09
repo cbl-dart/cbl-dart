@@ -14,8 +14,51 @@ CBLDart_FLSlice CBLDart_FLSliceResultToDart(FLSliceResult slice) {
   return {slice.buf, slice.size};
 }
 
+FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice) {
+  return {slice.buf, static_cast<size_t>(slice.size)};
+}
+
 CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice) {
   return {slice.buf, slice.size};
+}
+
+uint8_t CBLDart_FLSlice_Equal(CBLDart_FLSlice a, CBLDart_FLSlice b) {
+  return FLSlice_Equal(CBLDart_FLSliceFromDart(a), CBLDart_FLSliceFromDart(b));
+}
+
+int64_t CBLDart_FLSlice_Compare(CBLDart_FLSlice a, CBLDart_FLSlice b) {
+  return FLSlice_Compare(CBLDart_FLSliceFromDart(a),
+                         CBLDart_FLSliceFromDart(b));
+}
+
+CBLDart_FLSlice CBLDart_FLSliceResult_New(uint64_t size) {
+  return CBLDart_FLSliceResultToDart(FLSliceResult_New(size));
+}
+
+CBLDart_FLSlice CBLDart_FLSlice_Copy(CBLDart_FLSlice slice) {
+  return CBLDart_FLSliceResultToDart(
+      FLSlice_Copy(CBLDart_FLSliceFromDart(slice)));
+}
+
+void CBLDart_ReleaseDartObjectBoundFLSliceResult(void *dart_callback_data,
+                                                 void *peer) {
+  auto slice = reinterpret_cast<FLSliceResult *>(peer);
+  FLSliceResult_Release(*slice);
+  delete slice;
+}
+
+void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
+                                            CBLDart_FLSlice slice,
+                                            uint8_t retain) {
+  auto _slice = new FLSliceResult;
+  *_slice = CBLDart_FLSliceResultFromDart(slice);
+
+  if (retain) {
+    FLSliceResult_Retain(*_slice);
+  }
+
+  Dart_NewFinalizableHandle_DL(object, _slice, 0,
+                               CBLDart_ReleaseDartObjectBoundFLSliceResult);
 }
 
 void CBLDart_FLSliceResult_Release(CBLDart_FLSlice *slice) {
