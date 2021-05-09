@@ -304,7 +304,4 @@ class BlobsBindings extends Bindings {
   late final BlobBindings blob;
   late final BlobReadStreamBindings readStream;
   late final BlobWriteStreamBindings writeStream;
-
-  @override
-  List<Bindings> get children => [blob, readStream, writeStream];
 }

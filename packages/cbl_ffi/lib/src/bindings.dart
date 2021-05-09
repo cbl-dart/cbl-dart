@@ -15,7 +15,9 @@ import 'string_table.dart';
 abstract class Bindings {
   Bindings(Bindings parent)
       : libs = parent.libs,
-        stringTable = parent.stringTable;
+        stringTable = parent.stringTable {
+    parent._children.add(this);
+  }
 
   Bindings.root(Libraries libs, StringTable stringTable)
       : libs = libs,
@@ -25,7 +27,7 @@ abstract class Bindings {
 
   final StringTable stringTable;
 
-  List<Bindings> get children => [];
+  List<Bindings> get _children => [];
 
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
@@ -36,7 +38,7 @@ abstract class Bindings {
 
     _isDisposed = true;
 
-    children.forEach((element) {
+    _children.forEach((element) {
       element.dispose();
     });
   }
@@ -91,21 +93,6 @@ class CBLBindings extends Bindings {
   late final BlobsBindings blobs;
   late final ReplicatorBindings replicator;
   late final FleeceBindings fleece;
-
-  @override
-  List<Bindings> get children => [
-        base,
-        nativeCallback,
-        logging,
-        database,
-        document,
-        mutableDocument,
-        query,
-        resultSet,
-        blobs,
-        replicator,
-        fleece
-      ];
 
   @override
   void dispose() {
