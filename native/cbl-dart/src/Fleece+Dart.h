@@ -10,21 +10,21 @@ extern "C" {
 /**
  * See `FLSlice` in Dart code.
  */
-struct CBLDartSlice {
+struct CBLDart_FLSlice {
   const void *buf;
   uint64_t size;
 };
 
-#define kCBLDartNullSlice ((CBLDartSlice){NULL, 0})
+#define kCBLDartNullSlice ((CBLDart_FLSlice){NULL, 0})
 
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDartSlice slice);
+FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSlice slice);
 
-CBLDartSlice CBLDart_FLSliceResultToDart(FLSliceResult slice);
+CBLDart_FLSlice CBLDart_FLSliceResultToDart(FLSliceResult slice);
 
-CBLDartSlice CBLDart_FLSliceToDart(FLSlice slice);
+CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice);
 
 CBLDART_EXPORT
-void CBLDart_FLSliceResult_Release(CBLDartSlice *slice);
+void CBLDart_FLSliceResult_Release(CBLDart_FLSlice *slice);
 
 // Doc ---------------------------------------------------------------------
 
@@ -41,17 +41,17 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
                                       bool retain);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice);
+void CBLDart_FLValue_AsString(FLValue value, CBLDart_FLSlice *slice);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_AsData(FLValue value, CBLDartSlice *slice);
+void CBLDart_FLValue_AsData(FLValue value, CBLDart_FLSlice *slice);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_ToString(FLValue value, CBLDartSlice *slice);
+void CBLDart_FLValue_ToString(FLValue value, CBLDart_FLSlice *slice);
 
 CBLDART_EXPORT
 void CBLDart_FLValue_ToJSONX(FLValue value, bool json5, bool canonicalForm,
-                             CBLDartSlice *result);
+                             CBLDart_FLSlice *result);
 
 // Dict --------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ FLValue CBLDart_FLDict_Get(FLDict dict, char *keyString);
 
 typedef struct {
   FLDictIterator *iterator;
-  CBLDartSlice keyString;
+  CBLDart_FLSlice keyString;
   bool done;
 } CBLDart_DictIterator;
 

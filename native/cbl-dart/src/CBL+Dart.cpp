@@ -24,7 +24,7 @@ void CBLDart_InitDartApiDL(void *data) {
 
 // -- Callbacks
 
-Callback *CBLDart_NewCallback(Dart_Handle handle, Dart_Port sendPort) {
+Callback *CBLDart_Callback_New(Dart_Handle handle, Dart_Port sendPort) {
   return new Callback(handle, sendPort);
 }
 
@@ -253,12 +253,12 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
 
 // -- Query
 
-void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDartSlice *result) {
+void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDart_FLSlice *result) {
   *result = CBLDart_FLSliceResultToDart(CBLQuery_Explain(query));
 }
 
 void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
-                                 CBLDartSlice *result) {
+                                 CBLDart_FLSlice *result) {
   *result = CBLDart_FLSliceToDart(CBLQuery_ColumnName(query, columnIndex));
 }
 
@@ -395,8 +395,8 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   return descision;
 }
 
-CBLReplicator *CBLDart_CBLReplicator_New(CBLDartReplicatorConfiguration *config,
-                                         CBLError *error) {
+CBLReplicator *CBLDart_CBLReplicator_New(
+    CBLDart_ReplicatorConfiguration *config, CBLError *error) {
   CBLReplicatorConfiguration _config;
   _config.database = config->database;
   _config.endpoint = config->endpoint;
@@ -502,7 +502,7 @@ void CBLDart_Replicator_DocumentListenerWrapper(
   isPush_.type = Dart_CObject_kBool;
   isPush_.value.as_bool = isPush;
 
-  auto dartDocuments = new CBLDartReplicatedDocument[numDocuments];
+  auto dartDocuments = new CBLDart_ReplicatedDocument[numDocuments];
 
   for (size_t i = 0; i < numDocuments; i++) {
     auto document = &documents[i];
