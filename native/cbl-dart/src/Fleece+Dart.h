@@ -21,7 +21,26 @@ FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSlice slice);
 
 CBLDart_FLSlice CBLDart_FLSliceResultToDart(FLSliceResult slice);
 
+FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice);
+
 CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLSlice_Equal(CBLDart_FLSlice a, CBLDart_FLSlice b);
+
+CBLDART_EXPORT
+int64_t CBLDart_FLSlice_Compare(CBLDart_FLSlice a, CBLDart_FLSlice b);
+
+CBLDART_EXPORT
+CBLDart_FLSlice CBLDart_FLSliceResult_New(uint64_t size);
+
+CBLDART_EXPORT
+CBLDart_FLSlice CBLDart_FLSlice_Copy(CBLDart_FLSlice slice);
+
+CBLDART_EXPORT
+void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
+                                            CBLDart_FLSlice slice,
+                                            uint8_t retain);
 
 CBLDART_EXPORT
 void CBLDart_FLSliceResult_Release(CBLDart_FLSlice *slice);
