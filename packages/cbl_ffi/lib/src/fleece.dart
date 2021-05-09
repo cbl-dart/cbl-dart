@@ -121,11 +121,55 @@ extension FLResultSlicePointerExt on Pointer<FLSliceResult> {
   }
 }
 
+typedef CBLDart_FLSlice_Equal_C = Uint8 Function(FLSlice a, FLSlice b);
+typedef CBLDart_FLSlice_Equal = int Function(FLSlice a, FLSlice b);
+
+typedef CBLDart_FLSlice_Compare_C = Int64 Function(FLSlice a, FLSlice b);
+typedef CBLDart_FLSlice_Compare = int Function(FLSlice a, FLSlice b);
+
+typedef CBLDart_FLSliceResult_New_C = FLSliceResult Function(Uint64 size);
+typedef CBLDart_FLSliceResult_New = FLSliceResult Function(int size);
+
+typedef CBLDart_FLSlice_Copy_C = FLSliceResult Function(FLSlice slice);
+typedef CBLDart_FLSlice_Copy = FLSliceResult Function(FLSlice slice);
+
+typedef CBLDart_FLSliceResult_BindToDartObject_C = Void Function(
+  Handle object,
+  FLSliceResult slice,
+  Uint8 retain,
+);
+typedef CBLDart_FLSliceResult_BindToDartObject = void Function(
+  Object object,
+  FLSliceResult slice,
+  int retain,
+);
+
 typedef CBLDart_FLSliceResult_Release_C = Void Function(Pointer<FLSliceResult>);
 typedef CBLDart_FLSliceResult_Release = void Function(Pointer<FLSliceResult>);
 
 class SliceBindings extends Bindings {
   SliceBindings(Bindings parent) : super(parent) {
+    _equal = libs.cblDart
+        .lookupFunction<CBLDart_FLSlice_Equal_C, CBLDart_FLSlice_Equal>(
+      'CBLDart_FLSlice_Equal',
+    );
+    _compare = libs.cblDart
+        .lookupFunction<CBLDart_FLSlice_Compare_C, CBLDart_FLSlice_Compare>(
+      'CBLDart_FLSlice_Compare',
+    );
+    _new = libs.cblDart
+        .lookupFunction<CBLDart_FLSliceResult_New_C, CBLDart_FLSliceResult_New>(
+      'CBLDart_FLSliceResult_New',
+    );
+    _copy = libs.cblDart
+        .lookupFunction<CBLDart_FLSlice_Copy_C, CBLDart_FLSlice_Copy>(
+      'CBLDart_FLSlice_Copy',
+    );
+    _bindToDartObject = libs.cblDart.lookupFunction<
+        CBLDart_FLSliceResult_BindToDartObject_C,
+        CBLDart_FLSliceResult_BindToDartObject>(
+      'CBLDart_FLSliceResult_BindToDartObject',
+    );
     _release = libs.cblDart.lookupFunction<CBLDart_FLSliceResult_Release_C,
         CBLDart_FLSliceResult_Release>(
       'CBLDart_FLSliceResult_Release',
@@ -135,7 +179,37 @@ class SliceBindings extends Bindings {
   late final Pointer<FLSlice> globalSlice = malloc();
   late final Pointer<FLSliceResult> globalSliceResult = globalSlice.cast();
 
-  late final CBLDart_FLSliceResult_Release release;
+  late final CBLDart_FLSlice_Equal _equal;
+  late final CBLDart_FLSlice_Compare _compare;
+
+  late final CBLDart_FLSliceResult_New _new;
+  late final CBLDart_FLSlice_Copy _copy;
+  late final CBLDart_FLSliceResult_BindToDartObject _bindToDartObject;
+  late final CBLDart_FLSliceResult_Release _release;
+
+  bool equal(FLSlice a, FLSlice b) {
+    return _equal(a, b).toBool();
+  }
+
+  int compare(FLSlice a, FLSlice b) {
+    return _compare(a, b);
+  }
+
+  FLSliceResult create(int size) {
+    return _new(size);
+  }
+
+  FLSliceResult copy(FLSlice slice) {
+    return _copy(slice);
+  }
+
+  void bindToDartObject(Object object, FLSliceResult sliceResult, bool retain) {
+    _bindToDartObject(object, sliceResult, retain.toInt());
+  }
+
+  void release(Pointer<FLSliceResult> sliceResult) {
+    _release(sliceResult);
+  }
 
   @override
   void dispose() {
