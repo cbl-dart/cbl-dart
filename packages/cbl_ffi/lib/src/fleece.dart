@@ -82,7 +82,7 @@ extension FLSliceExt on FLSlice {
   Uint8List? asUint8List() => isNull ? null : buf.asTypedList(size);
 }
 
-late final globalSlice = CBLBindings.instance.fleece.slice.globalSlice;
+late final globalFLSlice = CBLBindings.instance.fleece.slice.globalSlice;
 
 extension TypedDataFLSliceExt on TypedData {
   Pointer<FLSlice> copyToGlobalSliceInArena() {
@@ -90,15 +90,15 @@ extension TypedDataFLSliceExt on TypedData {
 
     buf.asTypedList(lengthInBytes).setAll(0, buffer.asUint8List());
 
-    globalSlice.ref
+    globalFLSlice.ref
       ..buf = buf
       ..size = lengthInBytes;
 
-    return globalSlice;
+    return globalFLSlice;
   }
 }
 
-class FLResultSlice extends Struct {
+class FLSliceResult extends Struct {
   external Pointer<Uint8> buf;
 
   // TODO: use correct type
@@ -107,10 +107,10 @@ class FLResultSlice extends Struct {
   external int size;
 }
 
-late final globalSliceResult =
+late final globalFLSliceResult =
     CBLBindings.instance.fleece.slice.globalSliceResult;
 
-extension FLResultSlicePointerExt on Pointer<FLResultSlice> {
+extension FLResultSlicePointerExt on Pointer<FLSliceResult> {
   Pointer<FLSlice> asSlice() => cast();
 
   String? toDartStringAndRelease() {
@@ -120,19 +120,19 @@ extension FLResultSlicePointerExt on Pointer<FLResultSlice> {
   }
 }
 
-typedef CBLDart_FLSliceResult_Release_C = Void Function(Pointer<FLResultSlice>);
-typedef CBLDart_FLSliceResult_Release = void Function(Pointer<FLResultSlice>);
+typedef CBLDart_FLSliceResult_Release_C = Void Function(Pointer<FLSliceResult>);
+typedef CBLDart_FLSliceResult_Release = void Function(Pointer<FLSliceResult>);
 
 class SliceBindings extends Bindings {
   SliceBindings(Bindings parent) : super(parent) {
-    release = libs.cblDart.lookupFunction<CBLDart_FLSliceResult_Release_C,
+    _release = libs.cblDart.lookupFunction<CBLDart_FLSliceResult_Release_C,
         CBLDart_FLSliceResult_Release>(
       'CBLDart_FLSliceResult_Release',
     );
   }
 
   late final Pointer<FLSlice> globalSlice = malloc();
-  late final Pointer<FLResultSlice> globalSliceResult = globalSlice.cast();
+  late final Pointer<FLSliceResult> globalSliceResult = globalSlice.cast();
 
   late final CBLDart_FLSliceResult_Release release;
 
@@ -320,7 +320,7 @@ enum FLValueType {
 }
 
 extension on int {
-  FLValueType toFleeceValueType() {
+  FLValueType toFLValueType() {
     assert(this >= -1 && this <= 6);
     return FLValueType.values[this + 1];
   }
@@ -377,11 +377,11 @@ typedef CBLDart_FLValue_AsData = void Function(
 
 typedef CBLDart_FLValue_ToString_C = Void Function(
   Pointer<FLValue> value,
-  Pointer<FLResultSlice> slice,
+  Pointer<FLSliceResult> slice,
 );
 typedef CBLDart_FLValue_ToString = void Function(
   Pointer<FLValue> value,
-  Pointer<FLResultSlice> slice,
+  Pointer<FLSliceResult> slice,
 );
 
 typedef FLValue_IsEqual_C = Uint8 Function(
@@ -397,13 +397,13 @@ typedef CBLDart_FLValue_ToJSONX_C = Void Function(
   Pointer<FLValue> value,
   Uint8 json5,
   Uint8 canonicalForm,
-  Pointer<FLResultSlice> result,
+  Pointer<FLSliceResult> result,
 );
 typedef CBLDart_FLValue_ToJSONX = void Function(
   Pointer<FLValue> value,
   int json5,
   int canonicalForm,
-  Pointer<FLResultSlice> result,
+  Pointer<FLSliceResult> result,
 );
 
 class ValueBindings extends Bindings {
@@ -478,7 +478,7 @@ class ValueBindings extends Bindings {
   }
 
   FLValueType getType(Pointer<FLValue> value) {
-    return _getType(value).toFleeceValueType();
+    return _getType(value).toFLValueType();
   }
 
   bool isInteger(Pointer<FLValue> value) {
@@ -502,18 +502,18 @@ class ValueBindings extends Bindings {
   }
 
   String? asString(Pointer<FLValue> value) {
-    _asString(value, globalSlice);
-    return globalSlice.ref.toDartString();
+    _asString(value, globalFLSlice);
+    return globalFLSlice.ref.toDartString();
   }
 
   Uint8List? asData(Pointer<FLValue> value) {
-    _asData(value, globalSlice);
-    return globalSlice.ref.asUint8List();
+    _asData(value, globalFLSlice);
+    return globalFLSlice.ref.asUint8List();
   }
 
   String? scalarToString(Pointer<FLValue> value) {
-    _scalarToString(value, globalSliceResult);
-    return globalSliceResult.toDartStringAndRelease();
+    _scalarToString(value, globalFLSliceResult);
+    return globalFLSliceResult.toDartStringAndRelease();
   }
 
   bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) {
@@ -525,8 +525,8 @@ class ValueBindings extends Bindings {
     bool json5,
     bool canonicalForm,
   ) {
-    _toJson(value, json5.toInt(), canonicalForm.toInt(), globalSliceResult);
-    return globalSliceResult.toDartStringAndRelease()!;
+    _toJson(value, json5.toInt(), canonicalForm.toInt(), globalFLSliceResult);
+    return globalFLSliceResult.toDartStringAndRelease()!;
   }
 }
 

@@ -5,11 +5,11 @@ import 'bindings.dart';
 
 class Callback extends Opaque {}
 
-typedef CBLDart_NewCallback_C = Pointer<Callback> Function(
+typedef CBLDart_Callback_New_C = Pointer<Callback> Function(
   Handle dartCallback,
   Int64 sendPort,
 );
-typedef CBLDart_NewCallback = Pointer<Callback> Function(
+typedef CBLDart_Callback_New = Pointer<Callback> Function(
   Object dartCallback,
   int sendPort,
 );
@@ -28,9 +28,9 @@ typedef CBLDart_Callback_CallForTest = void Function(
 
 class NativeCallbackBindings extends Bindings {
   NativeCallbackBindings(Bindings parent) : super(parent) {
-    _newCallback =
-        libs.cblDart.lookupFunction<CBLDart_NewCallback_C, CBLDart_NewCallback>(
-      'CBLDart_NewCallback',
+    _new = libs.cblDart
+        .lookupFunction<CBLDart_Callback_New_C, CBLDart_Callback_New>(
+      'CBLDart_Callback_New',
     );
     _close = libs.cblDart
         .lookupFunction<CBLDart_Callback_Close_C, CBLDart_Callback_Close>(
@@ -42,12 +42,12 @@ class NativeCallbackBindings extends Bindings {
     );
   }
 
-  late final CBLDart_NewCallback _newCallback;
+  late final CBLDart_Callback_New _new;
   late final CBLDart_Callback_Close _close;
   late final CBLDart_Callback_CallForTest _callForTest;
 
   Pointer<Callback> create(Object dartCallback, SendPort sendPort) {
-    return _newCallback(dartCallback, sendPort.nativePort);
+    return _new(dartCallback, sendPort.nativePort);
   }
 
   void close(Pointer<Callback> callback) {
