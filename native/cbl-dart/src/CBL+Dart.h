@@ -24,7 +24,7 @@ void CBLDart_InitDartApiDL(void *data);
 // -- Callbacks
 
 CBLDART_EXPORT
-Callback *CBLDart_NewCallback(Dart_Handle handle, Dart_Port sendPort);
+Callback *CBLDart_Callback_New(Dart_Handle handle, Dart_Port sendPort);
 
 CBLDART_EXPORT
 void CBLDart_Callback_Close(Callback *callback);
@@ -78,11 +78,11 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
 // -- Query
 
 CBLDART_EXPORT
-void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDartSlice *result);
+void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDart_FLSlice *result);
 
 CBLDART_EXPORT
 void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
-                                 CBLDartSlice *result);
+                                 CBLDart_FLSlice *result);
 
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,
@@ -96,7 +96,7 @@ uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream, void *buf,
 
 // -- Replicator
 
-struct CBLDartReplicatorConfiguration {
+struct CBLDart_ReplicatorConfiguration {
   CBLDatabase *database;
 
   CBLEndpoint *endpoint;
@@ -127,8 +127,8 @@ struct CBLDartReplicatorConfiguration {
 };
 
 CBLDART_EXPORT
-CBLReplicator *CBLDart_CBLReplicator_New(CBLDartReplicatorConfiguration *config,
-                                         CBLError *error);
+CBLReplicator *CBLDart_CBLReplicator_New(
+    CBLDart_ReplicatorConfiguration *config, CBLError *error);
 
 CBLDART_EXPORT
 void CBLDart_BindReplicatorToDartObject(Dart_Handle handle,
@@ -141,7 +141,7 @@ CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
                                              Callback *listenerId);
 
-struct CBLDartReplicatedDocument {
+struct CBLDart_ReplicatedDocument {
   const char *ID;
 
   uint32_t flags;

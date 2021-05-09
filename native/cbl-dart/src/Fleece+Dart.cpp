@@ -6,22 +6,19 @@
 
 // -- Slice
 
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDartSlice slice) {
-  FLSliceResult result = {slice.buf, static_cast<size_t>(slice.size)};
-  return result;
+FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSlice slice) {
+  return {slice.buf, static_cast<size_t>(slice.size)};
 }
 
-CBLDartSlice CBLDart_FLSliceResultToDart(FLSliceResult slice) {
-  CBLDartSlice result = {slice.buf, slice.size};
-  return result;
+CBLDart_FLSlice CBLDart_FLSliceResultToDart(FLSliceResult slice) {
+  return {slice.buf, slice.size};
 }
 
-CBLDartSlice CBLDart_FLSliceToDart(FLSlice slice) {
-  CBLDartSlice result = {slice.buf, slice.size};
-  return result;
+CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice) {
+  return {slice.buf, slice.size};
 }
 
-void CBLDart_FLSliceResult_Release(CBLDartSlice *slice) {
+void CBLDart_FLSliceResult_Release(CBLDart_FLSlice *slice) {
   FLSliceResult_Release(CBLDart_FLSliceResultFromDart(*slice));
 }
 
@@ -62,20 +59,20 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
                                CBLDart_ReleaseDartObjectBoundFLValue);
 }
 
-void CBLDart_FLValue_AsString(FLValue value, CBLDartSlice *slice) {
+void CBLDart_FLValue_AsString(FLValue value, CBLDart_FLSlice *slice) {
   *slice = CBLDart_FLSliceToDart(FLValue_AsString(value));
 }
 
-void CBLDart_FLValue_AsData(FLValue value, CBLDartSlice *slice) {
+void CBLDart_FLValue_AsData(FLValue value, CBLDart_FLSlice *slice) {
   *slice = CBLDart_FLSliceToDart(FLValue_AsData(value));
 }
 
-void CBLDart_FLValue_ToString(FLValue value, CBLDartSlice *slice) {
+void CBLDart_FLValue_ToString(FLValue value, CBLDart_FLSlice *slice) {
   *slice = CBLDart_FLSliceResultToDart(FLValue_ToString(value));
 }
 
 void CBLDart_FLValue_ToJSONX(FLValue value, bool json5, bool canonicalForm,
-                             CBLDartSlice *result) {
+                             CBLDart_FLSlice *result) {
   auto json = FLValue_ToJSONX(value, json5, canonicalForm);
   *result = CBLDart_FLSliceResultToDart(json);
 }
