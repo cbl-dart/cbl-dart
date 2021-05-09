@@ -79,7 +79,8 @@ extension FLSliceExt on FLSlice {
   bool get isNull => buf == nullptr;
   String? toDartString() =>
       isNull ? null : buf.cast<Utf8>().toDartString(length: size);
-  Uint8List? asUint8List() => isNull ? null : buf.asTypedList(size);
+  Uint8List? toUint8List() =>
+      isNull ? null : Uint8List.fromList(buf.asTypedList(size));
 }
 
 late final globalFLSlice = CBLBindings.instance.fleece.slice.globalSlice;
@@ -508,7 +509,7 @@ class ValueBindings extends Bindings {
 
   Uint8List? asData(Pointer<FLValue> value) {
     _asData(value, globalFLSlice);
-    return globalFLSlice.ref.asUint8List();
+    return globalFLSlice.ref.toUint8List();
   }
 
   String? scalarToString(Pointer<FLValue> value) {
