@@ -185,9 +185,12 @@ class CBLErrorException implements Exception {
     this.errorPosition,
     this.errorSource,
   });
-  CBLErrorException.fromCBLError(Pointer<CBLError> error,
-      {String? errorSource, int? errorPosition})
-      : this(
+
+  CBLErrorException.fromCBLError(
+    Pointer<CBLError> error, {
+    String? errorSource,
+    int? errorPosition,
+  }) : this(
           error.ref.domain,
           error.ref.code,
           _baseBinds.CBLErrorMessage(globalCBLError)!,
@@ -195,11 +198,20 @@ class CBLErrorException implements Exception {
           errorPosition: errorPosition,
         );
 
+  final String message;
   final CBLErrorDomain domain;
   final Object? code;
-  final String message;
-  final int? errorPosition;
   final String? errorSource;
+  final int? errorPosition;
+
+  @override
+  String toString() => 'CBLErrorException('
+      'domain: $domain, '
+      'code: $code, '
+      'message: $message, '
+      'errorSource: $errorSource, '
+      'errorPosition: $errorPosition'
+      ')';
 }
 
 void _checkCBLError({String? errorSource}) {
