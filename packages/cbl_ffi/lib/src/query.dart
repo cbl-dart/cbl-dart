@@ -53,11 +53,11 @@ typedef CBLQuery_Execute = Pointer<CBLResultSet> Function(
 
 typedef CBLDart_CBLQuery_Explain_C = Void Function(
   Pointer<CBLQuery> query,
-  Pointer<FLResultSlice> result,
+  Pointer<FLSliceResult> result,
 );
 typedef CBLDart_CBLQuery_Explain = void Function(
   Pointer<CBLQuery> query,
-  Pointer<FLResultSlice> result,
+  Pointer<FLSliceResult> result,
 );
 
 typedef CBLQuery_ColumnCount_C = Uint32 Function(Pointer<CBLQuery> query);
@@ -167,8 +167,8 @@ class QueryBindings extends Bindings {
   }
 
   String explain(Pointer<CBLQuery> query) {
-    _explain(query, globalSliceResult);
-    return globalSliceResult.toDartStringAndRelease()!;
+    _explain(query, globalFLSliceResult);
+    return globalFLSliceResult.toDartStringAndRelease()!;
   }
 
   int columnCount(Pointer<CBLQuery> query) {
@@ -176,8 +176,8 @@ class QueryBindings extends Bindings {
   }
 
   String columnName(Pointer<CBLQuery> query, int column) {
-    _columnName(query, column, globalSlice);
-    return globalSlice.ref.toDartString()!;
+    _columnName(query, column, globalFLSlice);
+    return globalFLSlice.ref.toDartString()!;
   }
 
   Pointer<CBLListenerToken> addChangeListener(
