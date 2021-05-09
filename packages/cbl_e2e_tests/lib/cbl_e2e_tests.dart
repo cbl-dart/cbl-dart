@@ -1,5 +1,6 @@
 import 'src/blob_test.dart' as blob;
 import 'src/database_test.dart' as database;
+import 'src/fleece_slice_test.dart' as fleece_slice;
 import 'src/fleece_test.dart' as fleece;
 import 'src/logging_test.dart' as logging;
 import 'src/native_callback_test.dart' as native_callback;
@@ -14,6 +15,7 @@ final tests = {
   'logging': logging.main,
   'native_callback': native_callback.main,
   'replicator': replicator.main,
+  'fleece_slice': fleece_slice.main,
 };
 
 void cblE2eTests() {
