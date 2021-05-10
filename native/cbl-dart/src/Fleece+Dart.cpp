@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "Fleece+Dart.h"
 
 // Fleece ----------------------------------------------------------------------
@@ -183,4 +181,170 @@ FLMutableArray CBLDart_FLMutableDict_GetMutableArray(FLMutableDict dict,
 FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
                                                    char *key) {
   return FLMutableDict_GetMutableDict(dict, FLStr(key));
+}
+
+// Decoder --------------------------------------------------------------------
+
+CBLDart_FLSlice CBLDart_FLData_Dump(CBLDart_FLSlice data) {
+  return CBLDart_FLSliceResultToDart(
+      FLData_Dump(CBLDart_FLSliceFromDart(data)));
+}
+
+uint8_t CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
+                                 CBLDart_LoadedFLValue *out) {
+  auto value = FLValue_FromData(CBLDart_FLSliceFromDart(data), trust);
+  if (!value) {
+    return false;
+  }
+
+  CBLDart_GetLoadedFLValue(value, out);
+
+  return true;
+}
+
+void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
+  auto type = FLValue_GetType(value);
+  out->type = type;
+
+  switch (type) {
+    case kFLUndefined:
+    case kFLNull:
+      break;
+    case kFLBoolean: {
+      out->asBool = FLValue_AsBool(value);
+      break;
+    }
+    case kFLNumber: {
+      auto isInteger = FLValue_IsInteger(value);
+      out->isInteger = isInteger;
+      if (isInteger) {
+        out->asInt = FLValue_AsInt(value);
+      } else {
+        out->asDouble = FLValue_AsDouble(value);
+      }
+      break;
+    }
+    case kFLString: {
+      out->asSlice = CBLDart_FLSliceToDart(FLValue_AsString(value));
+      out->asValue = value;
+      break;
+    }
+    case kFLData: {
+      out->asSlice = CBLDart_FLSliceToDart(FLValue_AsData(value));
+      out->asValue = value;
+      break;
+    }
+    case kFLArray: {
+      out->collectionSize = FLArray_Count((FLArray)value);
+      out->asValue = value;
+      break;
+    }
+    case kFLDict: {
+      out->collectionSize = FLDict_Count((FLDict)value);
+      out->asValue = value;
+      break;
+    }
+  }
+}
+
+void CBLDart_FLArray_GetLoadedFLValue(FLArray array, uint32_t index,
+                                      CBLDart_LoadedFLValue *out) {
+  auto value = FLArray_Get(array, index);
+  CBLDart_GetLoadedFLValue(value, out);
+}
+
+void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
+                                     CBLDart_LoadedFLValue *out) {
+  CBLDart_GetLoadedFLValue(FLDict_Get(dict, key), out);
+}
+
+void CBLDart_FinalizeDartObjectBoundDictIterator2(void *dart_callback_data,
+                                                  void *peer) {
+  auto iterator = reinterpret_cast<CBLDart_FLDictIterator2 *>(peer);
+
+  if (!iterator->isDone) FLDictIterator_End(iterator->_iterator);
+
+  delete iterator->_iterator;
+  delete iterator;
+}
+
+CBLDart_FLDictIterator2 *CBLDart_FLDictIterator2_Begin(
+    Dart_Handle object, FLDict dict, CBLDart_FLSlice *keyOut,
+    CBLDart_LoadedFLValue *valueOut) {
+  auto iterator = new CBLDart_FLDictIterator2;
+  iterator->_iterator = new FLDictIterator;
+  iterator->isDone = false;
+  iterator->keyOut = keyOut;
+  iterator->valueOut = valueOut;
+
+  FLDictIterator_Begin(dict, iterator->_iterator);
+
+  Dart_NewFinalizableHandle_DL(object, iterator, sizeof(iterator),
+                               CBLDart_FinalizeDartObjectBoundDictIterator2);
+
+  return iterator;
+}
+
+void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator) {
+  auto value = FLDictIterator_GetValue(iterator->_iterator);
+  iterator->isDone = value == nullptr;
+  if (!iterator->isDone) {
+    if (iterator->keyOut) {
+      auto key = FLDictIterator_GetKeyString(iterator->_iterator);
+      *iterator->keyOut = CBLDart_FLSliceToDart(key);
+    }
+
+    if (iterator->valueOut) CBLDart_GetLoadedFLValue(value, iterator->valueOut);
+
+    FLDictIterator_Next(iterator->_iterator);
+  }
+}
+
+// Encoder --------------------------------------------------------------------
+
+void CBLDart_ReleaseDartObjectBoundFLEncoder(void *dart_callback_data,
+                                             void *peer) {
+  auto encoder = reinterpret_cast<FLEncoder>(peer);
+  FLEncoder_Free(encoder);
+}
+
+FLEncoder CBLDart_FLEncoder_New(Dart_Handle object, uint8_t format,
+                                uint64_t reserveSize, uint8_t uniqueStrings) {
+  auto encoder = FLEncoder_NewWithOptions(static_cast<FLEncoderFormat>(format),
+                                          reserveSize, uniqueStrings);
+
+  Dart_NewFinalizableHandle_DL(object, encoder, 0,
+                               CBLDart_ReleaseDartObjectBoundFLEncoder);
+
+  return encoder;
+}
+
+uint8_t CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
+                                          uint32_t index) {
+  return FLEncoder_WriteValue(encoder, FLArray_Get(array, index));
+}
+
+uint8_t CBLDart_FLEncoder_WriteString(FLEncoder encoder,
+                                      CBLDart_FLSlice value) {
+  return FLEncoder_WriteString(encoder, CBLDart_FLSliceFromDart(value));
+}
+
+uint8_t CBLDart_FLEncoder_WriteData(FLEncoder encoder, CBLDart_FLSlice value) {
+  return FLEncoder_WriteData(encoder, CBLDart_FLSliceFromDart(value));
+}
+
+uint8_t CBLDart_FLEncoder_WriteJSON(FLEncoder encoder, CBLDart_FLSlice value) {
+  return FLEncoder_ConvertJSON(encoder, CBLDart_FLSliceFromDart(value));
+}
+
+uint8_t CBLDart_FLEncoder_BeginArray(FLEncoder encoder, uint64_t reserveCount) {
+  return FLEncoder_BeginArray(encoder, reserveCount);
+}
+
+uint8_t CBLDart_FLEncoder_BeginDict(FLEncoder encoder, uint64_t reserveCount) {
+  return FLEncoder_BeginDict(encoder, reserveCount);
+}
+
+uint8_t CBLDart_FLEncoder_WriteKey(FLEncoder encoder, CBLDart_FLSlice key) {
+  return FLEncoder_WriteKey(encoder, CBLDart_FLSliceFromDart(key));
 }

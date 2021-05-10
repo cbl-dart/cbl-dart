@@ -106,4 +106,78 @@ FLMutableArray CBLDart_FLMutableDict_GetMutableArray(FLMutableDict dict,
 CBLDART_EXPORT
 FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
                                                    char *key);
+
+// Decoder --------------------------------------------------------------------
+
+struct CBLDart_LoadedFLValue {
+  int8_t type;
+  uint8_t isInteger;
+  uint32_t collectionSize;
+  uint8_t asBool;
+  int64_t asInt;
+  double asDouble;
+  CBLDart_FLSlice asSlice;
+  FLValue asValue;
+};
+
+CBLDART_EXPORT
+CBLDart_FLSlice CBLDart_FLData_Dump(CBLDart_FLSlice data);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
+                                 CBLDart_LoadedFLValue *out);
+
+CBLDART_EXPORT
+void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out);
+
+CBLDART_EXPORT
+void CBLDart_FLArray_GetLoadedFLValue(FLArray array, uint32_t index,
+                                      CBLDart_LoadedFLValue *out);
+
+CBLDART_EXPORT
+void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
+                                     CBLDart_LoadedFLValue *out);
+
+struct CBLDart_FLDictIterator2 {
+  bool isDone;
+  CBLDart_FLSlice *keyOut;
+  CBLDart_LoadedFLValue *valueOut;
+  FLDictIterator *_iterator;
+};
+
+CBLDART_EXPORT
+CBLDart_FLDictIterator2 *CBLDart_FLDictIterator2_Begin(
+    Dart_Handle object, FLDict dict, CBLDart_FLSlice *keyOut,
+    CBLDart_LoadedFLValue *valueOut);
+
+CBLDART_EXPORT
+void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator);
+
+// Encoder --------------------------------------------------------------------
+
+CBLDART_EXPORT
+FLEncoder CBLDart_FLEncoder_New(Dart_Handle object, uint8_t format,
+                                uint64_t reserveSize, uint8_t uniqueStrings);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
+                                          uint32_t index);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_WriteString(FLEncoder encoder, CBLDart_FLSlice value);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_WriteData(FLEncoder encoder, CBLDart_FLSlice value);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_WriteJSON(FLEncoder encoder, CBLDart_FLSlice value);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_BeginArray(FLEncoder encoder, uint64_t reserveCount);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_BeginDict(FLEncoder encoder, uint64_t reserveCount);
+
+CBLDART_EXPORT
+uint8_t CBLDart_FLEncoder_WriteKey(FLEncoder encoder, CBLDart_FLSlice key);
 }
