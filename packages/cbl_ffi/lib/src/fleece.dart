@@ -1642,7 +1642,7 @@ class FleeceEncoderBindings extends Bindings {
     if (value == nullptr) {
       throw ArgumentError.value(value, 'value', 'must not be `nullptr`');
     }
-    
+
     _checkError(encoder, _writeValue(encoder, value));
   }
 
@@ -1672,10 +1672,10 @@ class FleeceEncoderBindings extends Bindings {
   }
 
   void writeData(Pointer<FLEncoder> encoder, TypedData value) {
-    runArena(() {
+    withZoneArena(() {
       _checkError(
         encoder,
-        _writeData(encoder, value.copyToGlobalSliceScoped().ref),
+        _writeData(encoder, value.copyToGlobalSliceInArena().ref),
       );
     });
   }
