@@ -54,7 +54,8 @@ void _checkFleeceError() {
 
 extension _FleeceErrorExt<T> on T {
   T checkFleeceError() {
-    if (this == nullptr) {
+    final self = this;
+    if (this == nullptr || self is FLSliceResult && self.buf == nullptr) {
       _checkFleeceError();
     }
     return this;
@@ -1125,6 +1126,629 @@ class MutableDictBindings extends Bindings {
   }
 }
 
+// === Decoder =================================================================
+
+enum FLTrust {
+  untrusted,
+  trusted,
+}
+
+extension on FLTrust {
+  int toInt() => index;
+}
+
+class CBLDart_LoadedFLValue extends Struct {
+  @Int8()
+  external int _type;
+  @Uint8()
+  external int _isInteger;
+  @Uint32()
+  external int collectionSize;
+  @Uint8()
+  external int _asBool;
+  @Int64()
+  external int asInt;
+  @Double()
+  external double asDouble;
+  external FLSlice asSlice;
+  external Pointer<FLValue> asValue;
+}
+
+// ignore: camel_case_extensions
+extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
+  FLValueType get type => _type.toFLValueType();
+  bool get isInteger => _isInteger.toBool();
+  bool get asBool => _asBool.toBool();
+}
+
+late final Pointer<CBLDart_LoadedFLValue> globalLoadedFLValue =
+    CBLBindings.instance.fleece.decoder._globalLoadedFLValue;
+
+typedef CBLDart_FLData_Dump_C = FLSliceResult Function(FLSlice slice);
+typedef CBLDart_FLData_Dump = FLSliceResult Function(FLSlice slice);
+
+typedef CBLDart_FLData_ConvertJSON_C = FLSliceResult Function(
+  FLSlice json,
+  Pointer<Uint32> errorOut,
+);
+typedef CBLDart_FLData_ConvertJSON = FLSliceResult Function(
+  FLSlice json,
+  Pointer<Uint32> errorOut,
+);
+
+typedef CBLDart_FLValue_FromData_C = Uint8 Function(
+  FLSlice data,
+  Uint8 trust,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+typedef CBLDart_FLValue_FromData = int Function(
+  FLSlice data,
+  int trust,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+
+typedef CBLDart_GetLoadedFLValue_C = Void Function(
+  Pointer<FLValue> value,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+typedef CBLDart_GetLoadedFLValue = void Function(
+  Pointer<FLValue> value,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+
+typedef CBLDart_FLArray_GetLoadedFLValue_C = Void Function(
+  Pointer<FLArray> array,
+  Uint32 index,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+typedef CBLDart_FLArray_GetLoadedFLValue = void Function(
+  Pointer<FLArray> array,
+  int index,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+
+typedef CBLDart_FLDict_GetLoadedFLValue_C = Void Function(
+  Pointer<FLDict> dict,
+  FLSlice key,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+typedef CBLDart_FLDict_GetLoadedFLValue = void Function(
+  Pointer<FLDict> dict,
+  FLSlice key,
+  Pointer<CBLDart_LoadedFLValue> out,
+);
+
+class CBLDart_FLDictIterator2 extends Struct {
+  @Uint8()
+  external int _isDone;
+  // ignore: unused_field
+  external Pointer<FLSlice> _keyOut;
+  // ignore: unused_field
+  external Pointer<CBLDart_LoadedFLValue> _valueOut;
+  // ignore: unused_field
+  external Pointer<Void> _iterator;
+}
+
+// ignore: camel_case_extensions
+extension CBLDart_FLDictIterator2Ext on CBLDart_FLDictIterator2 {
+  bool get isDone => _isDone.toBool();
+}
+
+typedef CBLDart_FLDictIterator2_Begin_C = Pointer<CBLDart_FLDictIterator2>
+    Function(
+  Handle object,
+  Pointer<FLDict> dict,
+  Pointer<FLSlice> keyOut,
+  Pointer<CBLDart_LoadedFLValue> valueOut,
+);
+typedef CBLDart_FLDictIterator2_Begin = Pointer<CBLDart_FLDictIterator2>
+    Function(
+  Object object,
+  Pointer<FLDict> dict,
+  Pointer<FLSlice> keyOut,
+  Pointer<CBLDart_LoadedFLValue> valueOut,
+);
+
+typedef CBLDart_FLDictIterator2_Next_C = Void Function(
+  Pointer<CBLDart_FLDictIterator2> iterator,
+);
+typedef CBLDart_FLDictIterator2_Next = void Function(
+  Pointer<CBLDart_FLDictIterator2> iterator,
+);
+
+class FleeceDecoderBindings extends Bindings {
+  FleeceDecoderBindings(Bindings parent) : super(parent) {
+    _dumpData =
+        libs.cblDart.lookupFunction<CBLDart_FLData_Dump_C, CBLDart_FLData_Dump>(
+      'CBLDart_FLData_Dump',
+    );
+    _getLoadedFLValueFromData = libs.cblDart
+        .lookupFunction<CBLDart_FLValue_FromData_C, CBLDart_FLValue_FromData>(
+      'CBLDart_FLValue_FromData',
+    );
+    _getLoadedFLValue = libs.cblDart
+        .lookupFunction<CBLDart_GetLoadedFLValue_C, CBLDart_GetLoadedFLValue>(
+      'CBLDart_GetLoadedFLValue',
+    );
+    _getLoadedFLValueFromArray = libs.cblDart.lookupFunction<
+        CBLDart_FLArray_GetLoadedFLValue_C, CBLDart_FLArray_GetLoadedFLValue>(
+      'CBLDart_FLArray_GetLoadedFLValue',
+    );
+    _getLoadedFLValueFromDict = libs.cblDart.lookupFunction<
+        CBLDart_FLDict_GetLoadedFLValue_C, CBLDart_FLDict_GetLoadedFLValue>(
+      'CBLDart_FLDict_GetLoadedFLValue',
+    );
+    _dictIteratorBegin = libs.cblDart.lookupFunction<
+        CBLDart_FLDictIterator2_Begin_C, CBLDart_FLDictIterator2_Begin>(
+      'CBLDart_FLDictIterator2_Begin',
+    );
+    _dictIteratorNext = libs.cblDart.lookupFunction<
+        CBLDart_FLDictIterator2_Next_C, CBLDart_FLDictIterator2_Next>(
+      'CBLDart_FLDictIterator2_Next',
+    );
+  }
+
+  final Pointer<CBLDart_LoadedFLValue> _globalLoadedFLValue = malloc();
+
+  late final CBLDart_FLData_Dump _dumpData;
+  late final CBLDart_FLValue_FromData _getLoadedFLValueFromData;
+  late final CBLDart_GetLoadedFLValue _getLoadedFLValue;
+  late final CBLDart_FLArray_GetLoadedFLValue _getLoadedFLValueFromArray;
+  late final CBLDart_FLDict_GetLoadedFLValue _getLoadedFLValueFromDict;
+  late final CBLDart_FLDictIterator2_Begin _dictIteratorBegin;
+  late final CBLDart_FLDictIterator2_Next _dictIteratorNext;
+
+  FLSliceResult dumpData(FLSlice data) {
+    return _dumpData(data);
+  }
+
+  bool getLoadedFLValueFromData(FLSlice data, FLTrust trust) {
+    return _getLoadedFLValueFromData(
+      data,
+      trust.toInt(),
+      _globalLoadedFLValue,
+    ).toBool();
+  }
+
+  void getLoadedValue(Pointer<FLValue> value) {
+    _getLoadedFLValue(value, _globalLoadedFLValue);
+  }
+
+  void getLoadedValueFromArray(
+    Pointer<FLArray> array,
+    int index,
+  ) {
+    _getLoadedFLValueFromArray(array, index, _globalLoadedFLValue);
+  }
+
+  void getLoadedValueFromDict(
+    Pointer<FLDict> array,
+    String key,
+  ) {
+    stringTable.autoFree(() {
+      _getLoadedFLValueFromDict(
+        array,
+        stringTable.flString(key).ref,
+        _globalLoadedFLValue,
+      );
+    });
+  }
+
+  Pointer<CBLDart_FLDictIterator2> dictIteratorBegin(
+    Object object,
+    Pointer<FLDict> dict,
+    Pointer<FLSlice> keyOut,
+    Pointer<CBLDart_LoadedFLValue> valueOut,
+  ) {
+    return _dictIteratorBegin(object, dict, keyOut, valueOut);
+  }
+
+  void dictIteratorNext(Pointer<CBLDart_FLDictIterator2> iterator) {
+    _dictIteratorNext(iterator);
+  }
+
+  @override
+  void dispose() {
+    malloc.free(_globalLoadedFLValue);
+    super.dispose();
+  }
+}
+
+// === Encoder =================================================================
+
+/// Output formats a Fleece encoder can generate.
+enum FLEncoderFormat {
+  /// Fleece encoding
+  fleece,
+
+  /// JSON encoding
+  json,
+
+  /// [JSON5](http://json5.org); an extension of JSON with a more readable
+  /// syntax.
+  json5,
+}
+
+extension on FLEncoderFormat {
+  int toInt() => index;
+}
+
+class FLEncoder extends Opaque {}
+
+typedef CBLDart_FLEncoder_New_C = Pointer<FLEncoder> Function(
+  Handle object,
+  Uint8 format,
+  Uint64 reserveSize,
+  Uint8 uniqueStrings,
+);
+typedef CBLDart_FLEncoder_New = Pointer<FLEncoder> Function(
+  Object object,
+  int format,
+  int reserveSize,
+  int uniqueStrings,
+);
+
+typedef FLEncoder_Reset_C = Void Function(Pointer<FLEncoder> encoder);
+typedef FLEncoder_Reset = void Function(Pointer<FLEncoder> encoder);
+
+typedef CBLDart_FLEncoder_WriteArrayValue_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLArray> array,
+  Uint32 index,
+);
+typedef CBLDart_FLEncoder_WriteArrayValue = int Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLArray> array,
+  int index,
+);
+
+typedef FLEncoder_WriteValue_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLValue> value,
+);
+typedef FLEncoder_WriteValue = int Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLValue> value,
+);
+
+typedef FLEncoder_WriteNull_C = Uint8 Function(Pointer<FLEncoder> encoder);
+typedef FLEncoder_WriteNull = int Function(Pointer<FLEncoder> encoder);
+
+typedef FLEncoder_WriteBool_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Uint8 value,
+);
+typedef FLEncoder_WriteBool = int Function(
+  Pointer<FLEncoder> encoder,
+  int value,
+);
+
+typedef FLEncoder_WriteInt_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Int64 value,
+);
+typedef FLEncoder_WriteInt = int Function(
+  Pointer<FLEncoder> encoder,
+  int value,
+);
+
+typedef FLEncoder_WriteDouble_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Double value,
+);
+typedef FLEncoder_WriteDouble = int Function(
+  Pointer<FLEncoder> encoder,
+  double value,
+);
+
+typedef CBLDart_FLEncoder_WriteString_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice value,
+);
+typedef CBLDart_FLEncoder_WriteString = int Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice value,
+);
+
+typedef CBLDart_FLEncoder_WriteData_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice value,
+);
+typedef CBLDart_FLEncoder_WriteData = int Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice value,
+);
+
+typedef CBLDart_FLEncoder_WriteJSON_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice value,
+);
+typedef CBLDart_FLEncoder_WriteJSON = int Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice value,
+);
+
+typedef CBLDart_FLEncoder_BeginArray_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Uint64 reserveCount,
+);
+typedef CBLDart_FLEncoder_BeginArray = int Function(
+  Pointer<FLEncoder> encoder,
+  int reserveCount,
+);
+
+typedef FLEncoder_EndArray_C = Uint8 Function(Pointer<FLEncoder> encoder);
+typedef FLEncoder_EndArray = int Function(Pointer<FLEncoder> encoder);
+
+typedef CBLDart_FLEncoder_BeginDict_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  Uint64 reserveCount,
+);
+typedef CBLDart_FLEncoder_BeginDict = int Function(
+  Pointer<FLEncoder> encoder,
+  int reserveCount,
+);
+
+typedef CBLDart_FLEncoder_WriteKey_C = Uint8 Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice key,
+);
+typedef CBLDart_FLEncoder_WriteKey = int Function(
+  Pointer<FLEncoder> encoder,
+  FLSlice key,
+);
+
+typedef FLEncoder_EndDict_C = Uint8 Function(Pointer<FLEncoder> encoder);
+typedef FLEncoder_EndDict = int Function(Pointer<FLEncoder> encoder);
+
+typedef FLEncoder_Finish_C = FLSliceResult Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<Uint32> error,
+);
+typedef FLEncoder_Finish = FLSliceResult Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<Uint32> error,
+);
+
+typedef FLEncoder_GetError_C = Uint32 Function(Pointer<FLEncoder> encoder);
+typedef FLEncoder_GetError = int Function(Pointer<FLEncoder> encoder);
+
+typedef FLEncoder_GetErrorMessage_C = Pointer<Utf8> Function(
+  Pointer<FLEncoder> encoder,
+);
+typedef FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
+  Pointer<FLEncoder> encoder,
+);
+
+class FleeceEncoderBindings extends Bindings {
+  FleeceEncoderBindings(Bindings parent) : super(parent) {
+    _new = libs.cblDart
+        .lookupFunction<CBLDart_FLEncoder_New_C, CBLDart_FLEncoder_New>(
+      'CBLDart_FLEncoder_New',
+    );
+    _reset = libs.cbl.lookupFunction<FLEncoder_Reset_C, FLEncoder_Reset>(
+      'FLEncoder_Reset',
+    );
+    _writeArrayValue = libs.cblDart.lookupFunction<
+        CBLDart_FLEncoder_WriteArrayValue_C, CBLDart_FLEncoder_WriteArrayValue>(
+      'CBLDart_FLEncoder_WriteArrayValue',
+    );
+    _writeValue =
+        libs.cbl.lookupFunction<FLEncoder_WriteValue_C, FLEncoder_WriteValue>(
+      'FLEncoder_WriteValue',
+    );
+    _writeNull =
+        libs.cbl.lookupFunction<FLEncoder_WriteNull_C, FLEncoder_WriteNull>(
+      'FLEncoder_WriteNull',
+    );
+    _writeBool =
+        libs.cbl.lookupFunction<FLEncoder_WriteBool_C, FLEncoder_WriteBool>(
+      'FLEncoder_WriteBool',
+    );
+    _writeInt =
+        libs.cbl.lookupFunction<FLEncoder_WriteInt_C, FLEncoder_WriteInt>(
+      'FLEncoder_WriteInt',
+    );
+    _writeDouble =
+        libs.cbl.lookupFunction<FLEncoder_WriteDouble_C, FLEncoder_WriteDouble>(
+      'FLEncoder_WriteDouble',
+    );
+    _writeString = libs.cblDart.lookupFunction<CBLDart_FLEncoder_WriteString_C,
+        CBLDart_FLEncoder_WriteString>(
+      'CBLDart_FLEncoder_WriteString',
+    );
+    _writeData = libs.cblDart.lookupFunction<CBLDart_FLEncoder_WriteData_C,
+        CBLDart_FLEncoder_WriteData>(
+      'CBLDart_FLEncoder_WriteData',
+    );
+    _writeJSON = libs.cblDart.lookupFunction<CBLDart_FLEncoder_WriteJSON_C,
+        CBLDart_FLEncoder_WriteJSON>(
+      'CBLDart_FLEncoder_WriteJSON',
+    );
+    _beginArray = libs.cblDart.lookupFunction<CBLDart_FLEncoder_BeginArray_C,
+        CBLDart_FLEncoder_BeginArray>(
+      'CBLDart_FLEncoder_BeginArray',
+    );
+    _endArray =
+        libs.cbl.lookupFunction<FLEncoder_EndArray_C, FLEncoder_EndArray>(
+      'FLEncoder_EndArray',
+    );
+    _beginDict = libs.cblDart.lookupFunction<CBLDart_FLEncoder_BeginDict_C,
+        CBLDart_FLEncoder_BeginDict>(
+      'CBLDart_FLEncoder_BeginDict',
+    );
+    _writeKey = libs.cblDart.lookupFunction<CBLDart_FLEncoder_WriteKey_C,
+        CBLDart_FLEncoder_WriteKey>(
+      'CBLDart_FLEncoder_WriteKey',
+    );
+    _endDict = libs.cbl.lookupFunction<FLEncoder_EndDict_C, FLEncoder_EndDict>(
+      'FLEncoder_EndDict',
+    );
+    _finish = libs.cbl.lookupFunction<FLEncoder_Finish_C, FLEncoder_Finish>(
+      'FLEncoder_Finish',
+    );
+    __getError =
+        libs.cbl.lookupFunction<FLEncoder_GetError_C, FLEncoder_GetError>(
+      'FLEncoder_GetError',
+    );
+    __getErrorMessage = libs.cblDart
+        .lookupFunction<FLEncoder_GetErrorMessage_C, FLEncoder_GetErrorMessage>(
+      'FLEncoder_GetErrorMessage',
+    );
+  }
+
+  late final CBLDart_FLEncoder_New _new;
+  late final FLEncoder_Reset _reset;
+  late final CBLDart_FLEncoder_WriteArrayValue _writeArrayValue;
+  late final FLEncoder_WriteValue _writeValue;
+  late final FLEncoder_WriteNull _writeNull;
+  late final FLEncoder_WriteBool _writeBool;
+  late final FLEncoder_WriteInt _writeInt;
+  late final FLEncoder_WriteDouble _writeDouble;
+  late final CBLDart_FLEncoder_WriteString _writeString;
+  late final CBLDart_FLEncoder_WriteData _writeData;
+  late final CBLDart_FLEncoder_WriteJSON _writeJSON;
+  late final CBLDart_FLEncoder_BeginArray _beginArray;
+  late final FLEncoder_EndArray _endArray;
+  late final CBLDart_FLEncoder_BeginDict _beginDict;
+  late final CBLDart_FLEncoder_WriteKey _writeKey;
+  late final FLEncoder_EndDict _endDict;
+  late final FLEncoder_Finish _finish;
+  late final FLEncoder_GetError __getError;
+  late final FLEncoder_GetErrorMessage __getErrorMessage;
+
+  Pointer<FLEncoder> create(
+    Object object,
+    FLEncoderFormat format,
+    int reserveSize,
+    bool uniqueStrings,
+  ) {
+    return _new(object, format.toInt(), reserveSize, uniqueStrings.toInt());
+  }
+
+  void reset(Pointer<FLEncoder> encoder) {
+    _reset(encoder);
+  }
+
+  void writeArrayValue(
+    Pointer<FLEncoder> encoder,
+    Pointer<FLArray> array,
+    int index,
+  ) {
+    _checkError(encoder, _writeArrayValue(encoder, array, index));
+  }
+
+  void writeValue(Pointer<FLEncoder> encoder, Pointer<FLValue> value) {
+    if (value == nullptr) {
+      throw ArgumentError.value(value, 'value', 'must not be `nullptr`');
+    }
+    
+    _checkError(encoder, _writeValue(encoder, value));
+  }
+
+  void writeNull(Pointer<FLEncoder> encoder) {
+    _checkError(encoder, _writeNull(encoder));
+  }
+
+  void writeBool(Pointer<FLEncoder> encoder, bool value) {
+    _checkError(encoder, _writeBool(encoder, value.toInt()));
+  }
+
+  void writeInt(Pointer<FLEncoder> encoder, int value) {
+    _checkError(encoder, _writeInt(encoder, value));
+  }
+
+  void writeDouble(Pointer<FLEncoder> encoder, double value) {
+    _checkError(encoder, _writeDouble(encoder, value));
+  }
+
+  void writeString(Pointer<FLEncoder> encoder, String value) {
+    stringTable.autoFree(() {
+      _checkError(
+        encoder,
+        _writeString(encoder, stringTable.flString(value).ref),
+      );
+    });
+  }
+
+  void writeData(Pointer<FLEncoder> encoder, TypedData value) {
+    runArena(() {
+      _checkError(
+        encoder,
+        _writeData(encoder, value.copyToGlobalSliceScoped().ref),
+      );
+    });
+  }
+
+  void writeJSON(Pointer<FLEncoder> encoder, String value) {
+    stringTable.autoFree(() {
+      _checkError(
+        encoder,
+        _writeJSON(encoder, stringTable.flString(value).ref),
+      );
+    });
+  }
+
+  void beginArray(Pointer<FLEncoder> encoder, int reserveCount) {
+    _checkError(encoder, _beginArray(encoder, reserveCount));
+  }
+
+  void endArray(Pointer<FLEncoder> encoder) {
+    _checkError(encoder, _endArray(encoder));
+  }
+
+  void beginDict(Pointer<FLEncoder> encoder, int reserveCount) {
+    _checkError(encoder, _beginDict(encoder, reserveCount));
+  }
+
+  void writeKey(Pointer<FLEncoder> encoder, String value) {
+    stringTable.autoFree(() {
+      _checkError(
+        encoder,
+        _writeKey(encoder, stringTable.flString(value).ref),
+      );
+    });
+  }
+
+  void endDict(Pointer<FLEncoder> encoder) {
+    _checkError(encoder, _endDict(encoder));
+  }
+
+  FLSliceResult finish(Pointer<FLEncoder> encoder) {
+    return _checkError(encoder, _finish(encoder, _globalFleeceErrorCode));
+  }
+
+  FLErrorCode _getError(Pointer<FLEncoder> encoder) =>
+      __getError(encoder).toFleeceErrorCode();
+
+  String _getErrorMessage(Pointer<FLEncoder> encoder) {
+    final pointer = __getErrorMessage(encoder);
+    final result = pointer.toDartString();
+    malloc.free(pointer);
+    return result;
+  }
+
+  T _checkError<T>(Pointer<FLEncoder> encoder, T result) {
+    final mayHaveError = (result is int && !result.toBool()) ||
+        (result is FLSliceResult && result.buf == nullptr);
+
+    if (mayHaveError) {
+      final errorCode = _getError(encoder);
+      if (errorCode == FLErrorCode.noError) {
+        return result;
+      }
+
+      throw CBLErrorException(
+        CBLErrorDomain.fleece,
+        errorCode,
+        _getErrorMessage(encoder),
+      );
+    }
+
+    return result;
+  }
+}
+
 // === FleeceBindings ==========================================================
 
 class FleeceBindings extends Bindings {
@@ -1138,6 +1762,8 @@ class FleeceBindings extends Bindings {
     dict = DictBindings(this);
     dictIterator = DictIteratorBindings(this);
     mutableDict = MutableDictBindings(this);
+    decoder = FleeceDecoderBindings(this);
+    encoder = FleeceEncoderBindings(this);
   }
 
   late final Pointer<Uint32> _globalFleeceErrorCode = malloc();
@@ -1150,7 +1776,8 @@ class FleeceBindings extends Bindings {
   late final DictBindings dict;
   late final DictIteratorBindings dictIterator;
   late final MutableDictBindings mutableDict;
-  
+  late final FleeceDecoderBindings decoder;
+  late final FleeceEncoderBindings encoder;
 
   @override
   void dispose() {
