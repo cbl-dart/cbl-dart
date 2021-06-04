@@ -1,5 +1,3 @@
-export 'package:ffi/ffi.dart';
-
 export 'src/base.dart' hide OptionIterable;
 export 'src/bindings.dart';
 export 'src/blob.dart';

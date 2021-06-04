@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/src/string_table.dart';
-import 'package:cbl_ffi/src/utils.dart';
+import 'package:ffi/ffi.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -98,14 +98,15 @@ void main() {
       expect(encodedString.refs, 1);
     });
 
-    test('should free strings allocated in runArena', () {
+    test('should free strings allocated in withZoneArena', () {
       final table = testStringTable(maxCacheSize: 0);
       var string = '';
 
       final encodedString = table.encodedString(string);
       addTearDown(() => table.free(string));
 
-      runArena(() => expect(table.encodedString(string, arena: true).refs, 2));
+      withZoneArena(
+          () => expect(table.encodedString(string, arena: true).refs, 2));
 
       expect(encodedString.refs, 1);
     });

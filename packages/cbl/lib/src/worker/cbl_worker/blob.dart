@@ -12,39 +12,29 @@ late final _readStreamBindings = CBLBindings.instance.blobs.readStream;
 
 class OpenBlobReadStream
     extends WorkerRequest<TransferablePointer<CBLBlobReadStream>> {
-  OpenBlobReadStream(Pointer<CBLBlob> blob)
+  OpenBlobReadStream(Pointer<CBLBlob> blob, this.bufferSize)
       : blob = blob.toTransferablePointer();
 
   final TransferablePointer<CBLBlob> blob;
+
+  final int bufferSize;
 }
 
 TransferablePointer<CBLBlobReadStream> openBlobReadStream(
         OpenBlobReadStream request) =>
     _readStreamBindings
-        .openContentStream(request.blob.pointer)
+        .openContentStream(request.blob.pointer, request.bufferSize)
         .toTransferablePointer();
 
-class ReadFromBlobReadStream extends WorkerRequest<int> {
-  ReadFromBlobReadStream(
-    Pointer<CBLBlobReadStream> stream,
-    Pointer<Uint8> buffer,
-    this.bufferSize,
-  )   : stream = stream.toTransferablePointer(),
-        buffer = buffer.toTransferablePointer();
+class ReadFromBlobReadStream extends WorkerRequest<BlobStreamBuffer?> {
+  ReadFromBlobReadStream(Pointer<CBLBlobReadStream> stream)
+      : stream = stream.toTransferablePointer();
 
   final TransferablePointer<CBLBlobReadStream> stream;
-
-  final TransferablePointer<Uint8> buffer;
-
-  final int bufferSize;
 }
 
-int readFromBlobReadStream(ReadFromBlobReadStream request) =>
-    _readStreamBindings.read(
-      request.stream.pointer,
-      request.buffer.pointer,
-      request.bufferSize,
-    );
+BlobStreamBuffer? readFromBlobReadStream(ReadFromBlobReadStream request) =>
+    _readStreamBindings.read(request.stream.pointer);
 
 class CloseBlobReadStream extends WorkerRequest<void> {
   CloseBlobReadStream(Pointer<CBLBlobReadStream> stream)

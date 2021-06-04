@@ -517,7 +517,7 @@ class DatabaseBindings extends Bindings {
     CBLEncryptionAlgorithm? encryptionAlgorithm,
     Uint8List? encryptionKeyBytes,
   ) {
-    return runArena(() {
+    return withZoneArena(() {
       return stringTable.autoFree(() {
         return _copyDatabase(
           stringTable.cString(fromPath),
@@ -560,7 +560,7 @@ class DatabaseBindings extends Bindings {
     CBLEncryptionAlgorithm? encryptionAlgorithm,
     Uint8List? encryptionKeyBytes,
   ) {
-    return runArena(() {
+    return withZoneArena(() {
       return stringTable.autoFree(() {
         return _open(
           stringTable.cString(name),
@@ -601,7 +601,7 @@ class DatabaseBindings extends Bindings {
     final CBLEncryptionAlgorithm? encryptionAlgorithm,
     final Uint8List? encryptionKeyBytes,
   ) {
-    runArena(() {
+    withZoneArena(() {
       _rekey!
           .call(
             db,
@@ -729,7 +729,7 @@ class DatabaseBindings extends Bindings {
     bool? ignoreAccents,
     String? language,
   ) {
-    runArena(() {
+    withZoneArena(() {
       stringTable.autoFree(() {
         _createIndex(
           db,
@@ -758,7 +758,7 @@ class DatabaseBindings extends Bindings {
     CBLEncryptionAlgorithm? encryptionAlgorithm,
     Uint8List? encryptionKey,
   ) {
-    final result = malloc<CBLDatabaseConfiguration>().withScoped();
+    final result = zoneArena<CBLDatabaseConfiguration>();
 
     result.ref
       ..directory = stringTable.cString(directory, arena: true)
@@ -777,9 +777,9 @@ class DatabaseBindings extends Bindings {
 
     if (encryptionAlgorithm == null) return nullptr;
 
-    final result = malloc<CBLEncryptionKey>().withScoped();
+    final result = zoneArena<CBLEncryptionKey>();
 
-    final keyBytes = malloc<Uint8>(encryptionKeyByteLength).withScoped()
+    final keyBytes = zoneArena<Uint8>(encryptionKeyByteLength)
       ..asTypedList(encryptionKeyByteLength).setAll(0, bytes!);
 
     result.ref
@@ -795,7 +795,7 @@ class DatabaseBindings extends Bindings {
     bool? ignoreAccents,
     String? language,
   ) {
-    final result = malloc<CBLIndexSpec>().withScoped();
+    final result = zoneArena<CBLIndexSpec>();
 
     result.ref
       ..type = type

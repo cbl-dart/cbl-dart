@@ -292,11 +292,8 @@ class BaseBindings extends Bindings {
     _bindCBLRefCountedToDartObject(handle, refCounted, retain.toInt());
   }
 
-  String? CBLErrorMessage(Pointer<CBLError> error) {
-    return runArena(() {
-      return _Error_Message(error).toNullable()?.withScoped().toDartString();
-    });
-  }
+  String? CBLErrorMessage(Pointer<CBLError> error) =>
+      _Error_Message(error).toNullable()?.toDartStringAndFree();
 
   void removeListener(Pointer<CBLListenerToken> token) {
     _Listener_Remove(token);

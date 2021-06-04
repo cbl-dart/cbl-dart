@@ -85,8 +85,8 @@ extension FLSliceExt on FLSlice {
 late final globalSlice = CBLBindings.instance.fleece.slice.globalSlice;
 
 extension TypedDataFLSliceExt on TypedData {
-  Pointer<FLSlice> copyToGlobalSliceScoped() {
-    final buf = scoped(malloc<Uint8>(lengthInBytes));
+  Pointer<FLSlice> copyToGlobalSliceInArena() {
+    final buf = zoneArena.allocate<Uint8>(lengthInBytes);
 
     buf.asTypedList(lengthInBytes).setAll(0, buffer.asUint8List());
 
@@ -241,7 +241,7 @@ class SlotBindings extends Bindings {
   }
 
   void setData(Pointer<FLSlot> slot, TypedData value) {
-    runArena(() => _setData(slot, value.copyToGlobalSliceScoped().ref));
+    withZoneArena(() => _setData(slot, value.copyToGlobalSliceInArena().ref));
   }
 
   void setValue(Pointer<FLSlot> slot, Pointer<FLValue> value) {

@@ -201,7 +201,6 @@ class _BlobReadStreamController
   final int chunkSize;
 
   Future<void>? _setupDone;
-  late Pointer<Uint8> _buffer;
   late Pointer<CBLBlobReadStream> _streamPointer;
   var _isPaused = false;
 
@@ -221,17 +220,13 @@ class _BlobReadStreamController
   }
 
   Future<void> _setup() async {
-    _buffer = malloc(chunkSize);
-
     _streamPointer = await runNativeObjectScoped(() => worker
-        .execute(OpenBlobReadStream(blob.native.pointer))
+        .execute(OpenBlobReadStream(blob.native.pointer, chunkSize))
         .then((result) => result.pointer));
   }
 
   Future<void> _cleanUp() async {
     await _setupDone;
-
-    malloc.free(_buffer);
 
     await worker.execute(CloseBlobReadStream(_streamPointer));
   }
@@ -243,19 +238,16 @@ class _BlobReadStreamController
       await (_setupDone ??= _setup());
 
       while (!_isPaused) {
-        final bytesRead = await worker.execute(ReadFromBlobReadStream(
-          _streamPointer,
-          _buffer,
-          chunkSize,
-        ));
+        final buffer =
+            await worker.execute(ReadFromBlobReadStream(_streamPointer));
 
         // The read stream is done (EOF).
-        if (bytesRead == 0) {
+        if (buffer == null) {
           await controller.close();
           break;
         }
 
-        controller.add(Uint8List.fromList(_buffer.asTypedList(bytesRead)));
+        controller.add(Uint8List.fromList(buffer.bytes));
       }
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);

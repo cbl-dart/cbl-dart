@@ -131,6 +131,25 @@ typedef CBLBlobReader_Close = void Function(
   Pointer<CBLBlobReadStream> stream,
 );
 
+class BlobStreamBuffer {
+  BlobStreamBuffer._(int size)
+      : _size = size,
+        _bufferAddress = malloc<Uint8>(size).address;
+
+  final int _bufferAddress;
+  final int _size;
+  int? _length;
+
+  Pointer<Uint8> get _pointer => _bufferAddress.toPointer();
+
+  Uint8List get bytes {
+    assert(_length != null, 'no data has been read into buffer');
+    return _pointer.asTypedList(_length!);
+  }
+
+  void _dispose() => malloc.free(_pointer);
+}
+
 class BlobReadStreamBindings extends Bindings {
   BlobReadStreamBindings(Bindings parent) : super(parent) {
     _openContentStream = libs.cbl
@@ -151,15 +170,33 @@ class BlobReadStreamBindings extends Bindings {
   late final CBLDart_CBLBlobReader_Read _read;
   late final CBLBlobReader_Close _close;
 
-  Pointer<CBLBlobReadStream> openContentStream(Pointer<CBLBlob> blob) {
-    return _openContentStream(blob, globalCBLError).checkCBLError();
+  final _readStreamBuffers = <int, BlobStreamBuffer>{};
+
+  Pointer<CBLBlobReadStream> openContentStream(
+    Pointer<CBLBlob> blob,
+    int bufferSize,
+  ) {
+    final stream = _openContentStream(blob, globalCBLError).checkCBLError();
+    _readStreamBuffers[stream.address] = BlobStreamBuffer._(bufferSize);
+    return stream;
   }
 
-  int read(Pointer<CBLBlobReadStream> stream, Pointer<Uint8> buf, int bufSize) {
-    return _read(stream, buf, bufSize, globalCBLError).checkCBLError();
+  BlobStreamBuffer? read(Pointer<CBLBlobReadStream> stream) {
+    final buffer = _readStreamBuffers[stream.address]!;
+
+    buffer._length = _read(
+      stream,
+      buffer._pointer,
+      buffer._size,
+      globalCBLError,
+    ).checkCBLError();
+
+    // If 0 bytes were read there are no more byte to read.
+    return buffer._length == 0 ? null : buffer;
   }
 
   void close(Pointer<CBLBlobReadStream> stream) {
+    _readStreamBuffers.remove(stream.address)!._dispose();
     _close(stream);
   }
 }
