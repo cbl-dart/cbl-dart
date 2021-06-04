@@ -56,7 +56,7 @@ class Libraries {
     this.enterpriseEdition = false,
     required LibraryConfiguration cbl,
     required LibraryConfiguration cblDart,
-  })   : cbl = cbl,
+  })  : cbl = cbl,
         cblDart = cblDart;
 
   final LibraryConfiguration cbl;
