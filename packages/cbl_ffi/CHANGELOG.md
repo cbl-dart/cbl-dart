@@ -1,3 +1,14 @@
+## 0.6.0
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: migrate to `Arena` from `ffi` package (#60).
+ - **FEAT**: add APIs for Fleece data `Value`s.
+ - **CHORE**: cut release.
+ - **BREAKING** **REFACTOR**: convert between native and Dart types in `cbl_ffi`.
+ - **BREAKING** **FEAT**: consistently use `id` instead of `ID`.
+ - **BREAKING** **FEAT**: add `FLResultSlice`.
+
 ## 0.5.1
 
  - **FEAT**: Update dependencies.

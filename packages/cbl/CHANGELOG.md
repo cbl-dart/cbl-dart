@@ -1,3 +1,16 @@
+## 0.6.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: use `FLResultSlice`.
+ - **FIX**: fix assert in `FleeceRefCountedObject`.
+ - **FEAT**: migrate to `Arena` from `ffi` package (#60).
+ - **FEAT**: add support for Fleece data `Value`s.
+ - **BREAKING** **REFACTOR**: convert between native and Dart types in `cbl_ffi`.
+ - **BREAKING** **FEAT**: rename `DocumentFalgs` to `ReplicatedDocumentFlag`.
+ - **BREAKING** **FEAT**: consistently use `id` instead of `ID`.
+ - **BREAKING** **FEAT**: make `Value.asString` and `Query.columnName` nullable.
+
 ## 0.5.1
 
  - **FEAT**: retain `Document.properties`.

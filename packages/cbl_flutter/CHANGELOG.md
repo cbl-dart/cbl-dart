@@ -1,3 +1,12 @@
+## 0.4.0
+
+> Note: This release has breaking changes.
+
+ - **TEST**: follow guide in setup of integration_test.
+ - **CI**: run iOS tests directly with xcodebuild.
+ - **CHORE**: bump dependency on `cbl_native`.
+ - **BREAKING** **REFACTOR**: convert between native and Dart types in `cbl_ffi`.
+
 ## 0.3.1+1
 
  - **DOCS**: fix badges.
