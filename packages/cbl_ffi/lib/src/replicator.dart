@@ -314,7 +314,7 @@ class CBLReplicatedDocumentFlag extends Option {
 }
 
 class CBLDartReplicatedDocument extends Struct {
-  external Pointer<Utf8> ID;
+  external Pointer<Utf8> _ID;
 
   @Uint32()
   external int _flags;
@@ -323,6 +323,8 @@ class CBLDartReplicatedDocument extends Struct {
 }
 
 extension CBLDartReplicatedDocumentExt on CBLDartReplicatedDocument {
+  String get ID => _ID.toDartString();
+
   Set<CBLReplicatedDocumentFlag> get flags =>
       CBLReplicatedDocumentFlag._parseCFlags(_flags);
 
@@ -528,7 +530,7 @@ class ReplicatorBindings extends Bindings {
     Pointer<Callback>? pullFilter,
     Pointer<Callback>? conflictResolver,
   ) {
-    return runArena(() {
+    return withZoneArena(() {
       return _new(
         _createConfig(
           database,
@@ -637,7 +639,7 @@ class ReplicatorBindings extends Bindings {
     Pointer<Callback>? pullFilter,
     Pointer<Callback>? conflictResolver,
   ) {
-    final result = malloc<CBLDartReplicatorConfiguration>().withScoped();
+    final result = zoneArena<CBLDartReplicatorConfiguration>();
 
     result.ref
       ..database = database
@@ -654,9 +656,9 @@ class ReplicatorBindings extends Bindings {
       )
       ..headers = headers ?? nullptr
       ..pinnedServerCertificate =
-          pinnedServerCertificate?.copyToGlobalSliceScoped() ?? nullptr
+          pinnedServerCertificate?.copyToGlobalSliceInArena() ?? nullptr
       ..trustedRootCertificates =
-          trustedRootCertificates?.copyToGlobalSliceScoped() ?? nullptr
+          trustedRootCertificates?.copyToGlobalSliceInArena() ?? nullptr
       ..channels = channels ?? nullptr
       ..documentIDs = documentIDs ?? nullptr
       ..pushFilter = pushFilter ?? nullptr
@@ -675,7 +677,7 @@ class ReplicatorBindings extends Bindings {
   ) {
     if (type == null) return nullptr;
 
-    final result = malloc<CBLProxySettings>().withScoped();
+    final result = zoneArena<CBLProxySettings>();
 
     result.ref
       ..type = type

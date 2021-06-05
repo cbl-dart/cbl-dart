@@ -5,7 +5,6 @@ import 'package:ffi/ffi.dart';
 import 'package:meta/meta.dart';
 
 import 'fleece.dart';
-import 'utils.dart';
 
 class StringTable {
   StringTable({
@@ -78,7 +77,7 @@ class StringTable {
     if (!arena) {
       _autoFree?.add(string);
     } else {
-      registerFinalzier(() => free(string));
+      zoneArena.onReleaseAll(() => free(string));
     }
 
     return result;

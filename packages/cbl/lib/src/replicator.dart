@@ -646,7 +646,7 @@ class ReplicatedDocument {
 
 extension on CBLDartReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocument(
-        ID.toDartString(),
+        ID,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
         exception?.translate(),
       );
@@ -791,7 +791,7 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
     required this.database,
     required Pointer<CBLReplicator> pointer,
     required void Function() disposeCallbacks,
-  })   : _disposeCallbacks = disposeCallbacks,
+  })  : _disposeCallbacks = disposeCallbacks,
         super._(CBLReplicatorObject(pointer, database.native.worker)) {
     database.registerChildResource(this);
   }
