@@ -1,3 +1,8 @@
+## 4.2.0
+
+ - **FEAT**: add `CBLDart_FLValue_AsData`
+ - **FIX**: fix build setting name `BUILD_LIBRARY_FOR_DISTRIBUTION`
+
 ## 4.1.0
 
  - **FEAT**: Update dependencies.

@@ -59,7 +59,7 @@ final cblDartRepo = GitHubRepo(
 );
 
 /// The current version of `cbl_native`.
-const currentVersion = '4.1.0'; // cbl_native: version
+const currentVersion = '4.2.0'; // cbl_native: version
 
 /// Binaries for `cbl_native` for one [Platform].
 class CblNativeBinaries {
