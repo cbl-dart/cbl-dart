@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 group 'com.terwesten.gabriel.cbl_flutter'
 version '1.0-SNAPSHOT'
 
@@ -47,7 +49,12 @@ dependencies {
 
 task installBinaries(type: Exec) {
     workingDir file("$projectDir/..")
-    commandLine './tool/install_binaries.sh', 'android'
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'cmd', '/c', 'C:/Program Files/Git/bin/bash', './tool/install_binaries.sh', 'android'
+    } else {
+        commandLine './tool/install_binaries.sh', 'android'
+    }
 }
 
 tasks.preBuild.dependsOn(installBinaries)
