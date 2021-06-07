@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 
 /// GitHub repository data.
 class GitHubRepo {
@@ -117,9 +118,9 @@ class CblNativeBinaries {
       'tar',
       [
         '-xzf',
-        archiveUri.path,
+        fromUri(archiveUri),
         '-C',
-        installDir.path,
+        fromUri(installDir.uri),
       ],
     );
 
