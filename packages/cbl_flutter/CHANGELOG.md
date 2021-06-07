@@ -1,3 +1,8 @@
+## 0.4.0+1
+
+ - **FIX**: installing binaires on windows.
+ - **CHORE**: publish packages.
+
 ## 0.4.0
 
 > Note: This release has breaking changes.
