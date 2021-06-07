@@ -1,3 +1,7 @@
+## 4.2.1
+
+ - **FIX**: format paths for current system.
+
 ## 4.2.0
 
  - **FEAT**: add `CBLDart_FLValue_AsData`

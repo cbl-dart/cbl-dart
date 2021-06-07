@@ -14,7 +14,7 @@ environment:
 
 dependencies:
   cbl: ^0.6.0
-  cbl_native: ^4.2.0
+  cbl_native: ^4.2.1
   flutter:
     sdk: flutter
 
