@@ -11,18 +11,33 @@
 
 set -e
 
-# Skip installation if environment variable is set
+# Skip installation if environment variable is set.
 if [ -n "$CBL_FLUTTER_SKIP_INSTALL_BINARIES" ]; then
     echo "cbl_flutter: Skipping install of published binaries"
     exit 0
 fi
 
-# Setup parameters
+# The directory of this script.
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# The directory of the 'cbl_flutter' package. 
 pkgDir="$(cd "$dir/.." && pwd)"
+
+# The directory of the 'cbl_flutter' package formatted properly for the 
+# current system.
+pkgDirSys=
+case $(uname -s) in
+    CYGWIN*)    pkgDirSys=$(cygpath -m "$pkgDir");;
+    MINGW*)     pkgDirSys=$(cygpath -m "$pkgDir");;
+    *)          pkgDirSys=pkgDir
+esac
+
+# The names of all platforms for which binaries are available.
 allPlatforms=(android apple)
 
 platformArg="$1"
+
+# The names of the platforms for which to install binaries.
 platforms=
 if [ "$platformArg" = "all" ]; then
     platforms=("${allPlatforms[@]}")
@@ -59,10 +74,10 @@ function installBinariesForPlatform() {
     cat >pubspec.yaml <<-EOF
 name: tmp
 environment:                                                            
-  sdk: '>=2.12.0-0 <3.0.0' 
+  sdk: '>=2.12.0 <3.0.0' 
 dependencies:
     cbl_flutter:
-        path: "$pkgDir"
+        path: "$pkgDirSys"
     cbl_native: any
 EOF
 
