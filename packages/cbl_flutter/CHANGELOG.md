@@ -1,3 +1,7 @@
+## 0.4.0+2
+
+ - **FIX**: fix variable reference in `install_binaries.sh`.
+
 ## 0.4.0+1
 
  - **FIX**: installing binaires on windows.
