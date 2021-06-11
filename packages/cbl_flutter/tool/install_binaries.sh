@@ -29,7 +29,7 @@ pkgDirSys=
 case $(uname -s) in
     CYGWIN*)    pkgDirSys=$(cygpath -m "$pkgDir");;
     MINGW*)     pkgDirSys=$(cygpath -m "$pkgDir");;
-    *)          pkgDirSys=pkgDir
+    *)          pkgDirSys=$pkgDir
 esac
 
 # The names of all platforms for which binaries are available.
