@@ -1,11 +1,3 @@
-import 'package:cbl_e2e_tests/cbl_e2e_tests.dart';
-import 'package:integration_test/integration_test.dart';
+import 'cbl_e2e_tests/all_tests.dart' as all_tests;
 
-import 'test_binding.dart';
-
-void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  FlutterCblE2eTestBinding.ensureInitialized();
-
-  cblE2eTests();
-}
+void main() => all_tests.main();

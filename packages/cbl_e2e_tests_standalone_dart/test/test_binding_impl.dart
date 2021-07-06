@@ -1,8 +1,13 @@
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl_e2e_tests/cbl_e2e_tests.dart';
 import 'package:path/path.dart' as p;
+
+import 'cbl_e2e_tests/test_binding.dart';
+
+void setupTestBinding() {
+  StandaloneDartCblE2eTestBinding.ensureInitialized();
+}
 
 class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   static void ensureInitialized() {

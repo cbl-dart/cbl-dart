@@ -2,12 +2,15 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 
 /// A test value which can be used to test [Value]s with [ValueType.data].
 final testDataUint8List = Uint8List.fromList([1, 2, 3]);
 
 void main() {
+  setupTestBinding();
+
   group('Fleece', () {
     group('Doc', () {
       group('fromJson', () {

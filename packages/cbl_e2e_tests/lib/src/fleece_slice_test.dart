@@ -3,9 +3,12 @@ import 'dart:ffi';
 import 'package:cbl/src/fleece/slice.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 
 void main() {
+  setupTestBinding();
+
   group('Fleece Slice', () {
     test('create Slice from other Slice', () {
       final source = SliceResult.fromString('source');

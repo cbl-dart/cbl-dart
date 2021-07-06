@@ -1,0 +1,47 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "cbl",
+      "cwd": "packages/cbl",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "cbl_e2e_tests_standalone_dart",
+      "cwd": "packages/cbl_e2e_tests_standalone_dart",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "cbl_ffi",
+      "cwd": "packages/cbl_ffi",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "cbl_flutter",
+      "cwd": "packages/cbl_flutter",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--no-pub"]
+    },
+    {
+      "name": "cbl_flutter (profile mode)",
+      "cwd": "packages/cbl_flutter",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "toolArgs": ["--no-pub"]
+    },
+    {
+      "name": "cbl_native",
+      "cwd": "packages/cbl_native",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}

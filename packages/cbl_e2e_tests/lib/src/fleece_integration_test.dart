@@ -1,10 +1,13 @@
 import 'package:cbl/src/fleece/fleece.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/fleece_coding.dart';
 
 void main() {
+  setupTestBinding();
+
   group('Fleece Integration', () {
     setUpAll(() => MDelegate.instance = SimpleMDelegate());
 

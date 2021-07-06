@@ -8,7 +8,11 @@ import 'utils/database_utils.dart';
 import 'utils/replicator_utils.dart';
 import 'utils/test_document.dart';
 
+import '../test_binding_impl.dart';
+
 void main() {
+  setupTestBinding();
+
   group('Replicator', () {
     setupTestDocument();
     setUp(clearTestServerDb);
