@@ -32,23 +32,29 @@ function clean() {
 }
 
 function build() {
-    local platformIds="${1:-!platforms[@]}"
+    local platformIds="${1:-${!platforms[@]}}"
     local configuration="${2:-Release}"
 
     for platformId in "$platformIds"; do
         buildPlatform "$platformId" "$configuration"
     done
 
-    createXcframeworks "$platformIds"
+    createXcframeworks "$platformIds" "$configuration"
 
     _createLinksForDev
 }
 
+function foo() {
+    local platformIds="${1:-${!platforms[@]}}"
+    echo "$platformIds"
+}
+
 function createXcframeworks() {
-    local platformIds="${1:-!platforms[@]}"
+    local platformIds="${1:-${!platforms[@]}}"
+    local configuration="$2"
 
     for framework in "${frameworks[@]}"; do
-        createXcframework "$framework" "$platformIds"
+        createXcframework "$framework" "$platformIds" "$configuration"
     done
 }
 
@@ -98,6 +104,7 @@ function buildPlatform() {
 function createXcframework() {
     local framework="$1"
     local platformIds="$2"
+    local configuration="${3:-Release}"
 
     echo Creating xcframework "$framework"
 
@@ -113,9 +120,14 @@ function createXcframework() {
         frameworksArgs+=(
             "-framework"
             "$archive/Products/Library/Frameworks/$framework.framework"
-            "-debug-symbols"
-            "$archive/dSYMs/$framework.framework.dSYM"
         )
+
+        if [[ "$configuration" == "Release" ]]; then
+            frameworksArgs+=(
+                "-debug-symbols"
+                "$archive/dSYMs/$framework.framework.dSYM"
+            )
+        fi
     done
 
     xcodebuild -create-xcframework \

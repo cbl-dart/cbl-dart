@@ -51,7 +51,6 @@ jobs:
       - name: Build
         run: |
           ./native/tools/build_linux.sh build
-          ./native/tools/build_linux.sh copyToLib
           tar -czf binaries-linux.tar.gz -C build/linux/lib .
 
       - name: Upload binaries to release
@@ -80,8 +79,7 @@ jobs:
 
       - name: Build
         run: |
-          ./native/tools/build_android.sh buildAllArchs
-          ./native/tools/build_android.sh copyAllArchsToLib
+          ./native/tools/build_android.sh build
           tar -czf binaries-android.tar.gz -C build/android/lib .
 
       - name: Upload binaries to release
