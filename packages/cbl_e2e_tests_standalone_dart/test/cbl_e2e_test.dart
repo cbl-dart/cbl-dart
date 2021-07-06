@@ -1,9 +1,3 @@
-import 'package:cbl_e2e_tests/cbl_e2e_tests.dart';
+import 'cbl_e2e_tests/all_tests.dart' as all_tests;
 
-import 'test_binding.dart';
-
-void main() {
-  StandaloneDartCblE2eTestBinding.ensureInitialized();
-
-  cblE2eTests();
-}
+void main() => all_tests.main();

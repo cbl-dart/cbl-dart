@@ -1,9 +1,12 @@
 import 'package:cbl/cbl.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/database_utils.dart';
 
 void main() {
+  setupTestBinding();
+
   group('Logging', () {
     setUpAll(() => CblE2eTestBinding.instance.stopTestLogger());
     tearDownAll(() => CblE2eTestBinding.instance.startTestLogger());

@@ -4,10 +4,13 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/utils.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/database_utils.dart';
 
 void main() {
+  setupTestBinding();
+
   group('Blob', () {
     late Database db;
 
