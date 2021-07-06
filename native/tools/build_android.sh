@@ -48,9 +48,42 @@ archs=(arm64-v8a armeabi-v7a x86 x86_64)
 
 # === Commands ===
 
-function buildArch() {
+function clean() {
+    rm -rf "$buildDir"
+}
+
+function build() {
+    local buildMode="${1:-RelWithDebInfo}"
+    _configureAllArchs "$buildMode"
+    _buildAllArchs
+    _createLinksForDev
+}
+
+function _configureAllArchs() {
+    local buildType="$1"
+    local override="$2"
+
+    for arch in "${archs[@]}"; do
+        _configureArch "$arch" "$buildType" "$override"
+    done
+}
+
+function _buildAllArchs() {
+    for arch in "${archs[@]}"; do
+        _buildArch "$arch"
+    done
+}
+
+function _configureArch() {
     local arch=$1
+    local buildType="$2"
     local archDir="$buildDir/$arch"
+
+    # If build dir has already been configured, skip configuring it again.
+    if [ -d "$archDir" ]; then
+        echo "Skiping configuring build dir for $arch"
+        return 0
+    fi
 
     mkdir -p "$archDir"
     cd "$archDir"
@@ -72,11 +105,20 @@ function buildArch() {
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         $options \
         "$nativeDir"
-
-    "${cmake_path}/cmake" --build . --target CouchbaseLiteDart
 }
 
-function copyArchToLib() {
+function _buildArch() {
+    local arch=$1
+    local archDir="$buildDir/$arch"
+
+    cd "$archDir"
+
+    "${cmake_path}/cmake" --build . --target CouchbaseLiteDart
+
+    _copyArchToLib $arch
+}
+
+function _copyArchToLib() {
     local arch=$1
     local buildArchDir="$buildDir/$arch"
     local libArchDir="$libDir/$arch"
@@ -88,19 +130,7 @@ function copyArchToLib() {
     cp "$buildArchDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" "$libArchDir/libCouchbaseLiteC.so"
 }
 
-function buildAllArchs() {
-    for arch in "${archs[@]}"; do
-        buildArch "$arch"
-    done
-}
-
-function copyAllArchsToLib() {
-    for arch in "${archs[@]}"; do
-        copyArchToLib "$arch"
-    done
-}
-
-function createLinksForDev() {
+function _createLinksForDev() {
     cd "$projectDir/packages/cbl_flutter/android"
     rm -f lib
     ln -s "$libDir"

@@ -12,23 +12,44 @@ libDir="$projectDir/build/linux/lib"
 
 # === Commands ===
 
-function build() {
-    export CC=clang-10
-    export CXX=clang++-10
+function clean() {
+    rm -rf "$buildDir"
+}
 
-    cmake \
+function build() {
+    local buildMode="${1:-RelWithDebInfo}"
+    _configure "$buildMode"
+    _build
+    _createLinksForDev
+}
+
+function _configure() {
+    local buildType="$1"
+
+    # If build dir has already been configured, skip configuring it again.
+    if [ -d "$buildDir" ]; then
+        echo "Skiping configuring build dir"
+        return 0
+    fi
+
+    CC=clang-10 \
+        CXX=clang++-10 \
+        cmake \
         -B "$buildDir" \
         -G Ninja \
         -DCMAKE_C_COMPILER_LAUNCHER=ccache \
         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
         -DCMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_BUILD_TYPE="$buildType" \
         "$nativeDir"
-
-    cmake --build "$buildDir"
 }
 
-function copyToLib() {
+function _build() {
+    cmake --build "$buildDir"
+    _copyToLib
+}
+
+function _copyToLib() {
     mkdir -p "$libDir"
 
     cp \
@@ -37,7 +58,7 @@ function copyToLib() {
         "$libDir"
 }
 
-function createLinksForDev() {
+function _createLinksForDev() {
     cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
     rm -f lib
     ln -s "$libDir"
