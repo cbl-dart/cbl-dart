@@ -17,4 +17,4 @@ dependency_overrides:
   cbl:
     path: ../cbl
   cbl_ffi:
-    path: ../cbl
+    path: ../cbl_ffi
