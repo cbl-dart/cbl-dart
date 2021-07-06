@@ -17,14 +17,56 @@ developmentTeam="$DEVELOPMENT_TEAM"
 toolsDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 nativeDir="$(cd "$toolsDir/.." && pwd)"
 projectDir="$(cd "$nativeDir/.." && pwd)"
-archivesDir="$projectDir/build/apple/archives"
-xcframeworksDir="$projectDir/build/apple/Xcframeworks"
+buildDir="$projectDir/build/apple"
+archivesDir="$buildDir/archives"
+xcframeworksDir="$buildDir/Xcframeworks"
 
 scheme=CBL_Dart_All
 frameworks=(CouchbaseLiteDart CouchbaseLite)
 declare -A platforms=([ios]=iOS [ios_simulator]="iOS Simulator" [macos]=macOS)
 
 # === Commands ===
+
+function clean() {
+    rm -rf "$buildDir"
+}
+
+function build() {
+    local platformIds="${1:-${!platforms[@]}}"
+    local configuration="${2:-Release}"
+
+    for platformId in $platformIds; do
+        buildPlatform "$platformId" "$configuration"
+    done
+
+    createXcframeworks "$platformIds" "$configuration"
+
+    _createLinksForDev
+}
+
+function foo() {
+    local platformIds="${1:-${!platforms[@]}}"
+    echo "$platformIds"
+}
+
+function createXcframeworks() {
+    local platformIds="${1:-${!platforms[@]}}"
+    local configuration="$2"
+
+    for framework in "${frameworks[@]}"; do
+        createXcframework "$framework" "$platformIds" "$configuration"
+    done
+}
+
+function _createLinksForDev() {
+    cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
+    rm -f Frameworks
+    ln -s "$archivesDir/macos.xcarchive/Products/Library/Frameworks"
+
+    cd "$projectDir/packages/cbl_flutter"
+    rm -f Xcframeworks
+    ln -s "$xcframeworksDir"
+}
 
 function buildPlatform() {
     if [ -z "$developmentTeam" ]; then
@@ -35,6 +77,7 @@ function buildPlatform() {
     cd "$nativeDir"
 
     local platformId="$1"
+    local configuration="${2:-Release}"
     local platform="${platforms[$platformId]}"
 
     echo Building platform "$platform"
@@ -46,6 +89,7 @@ function buildPlatform() {
     xcodebuild archive \
         -scheme "$scheme" \
         -destination "$destination" \
+        -configuration "$configuration" \
         -archivePath "$archivesDir/$platformId" \
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
@@ -59,12 +103,15 @@ function buildPlatform() {
 
 function createXcframework() {
     local framework="$1"
+    local platformIds="$2"
+    local configuration="${3:-Release}"
+    local output="$xcframeworksDir/$framework.xcframework"
 
     echo Creating xcframework "$framework"
 
     local frameworksArgs=()
 
-    for platformId in "${!platforms[@]}"; do
+    for platformId in $platformIds; do
         local archive="$archivesDir/$platformId.xcarchive"
 
         if [ ! -e "$archive" ]; then
@@ -74,36 +121,21 @@ function createXcframework() {
         frameworksArgs+=(
             "-framework"
             "$archive/Products/Library/Frameworks/$framework.framework"
-            "-debug-symbols"
-            "$archive/dSYMs/$framework.framework.dSYM"
         )
+
+        if [[ "$configuration" == "Release" ]]; then
+            frameworksArgs+=(
+                "-debug-symbols"
+                "$archive/dSYMs/$framework.framework.dSYM"
+            )
+        fi
     done
+
+    rm -rf "$output"
 
     xcodebuild -create-xcframework \
         "${frameworksArgs[@]}" \
         -output "$xcframeworksDir/$framework.xcframework"
-}
-
-function buildAllPlatforms() {
-    for platformId in "${!platforms[@]}"; do
-        buildPlatform "$platformId"
-    done
-}
-
-function createXcframeworks() {
-    for framework in "${frameworks[@]}"; do
-        createXcframework "$framework"
-    done
-}
-
-function createLinksForDev() {
-    cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
-    rm -f Frameworks
-    ln -s "$archivesDir/macos.xcarchive/Products/Library/Frameworks"
-
-    cd "$projectDir/packages/cbl_flutter"
-    rm -f Xcframeworks
-    ln -s "$xcframeworksDir"
 }
 
 "$@"
