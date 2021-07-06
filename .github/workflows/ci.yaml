@@ -469,4 +469,4 @@ jobs:
         run: melos run test:setupCouchbaseClusterMacOS
 
       - name: Run tests
-        run: melos runs test:flutter:macos
+        run: melos run test:flutter:macos
