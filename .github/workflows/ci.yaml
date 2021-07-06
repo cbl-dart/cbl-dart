@@ -409,6 +409,8 @@ jobs:
             dart-pub-cache
 
       - name: Setup Dart environment
+        env:
+          SKIP_MELOS_BOOTSTRAP: true
         uses: ./.github/actions/setup-dart-env
 
       - name: Build tests
@@ -460,10 +462,15 @@ jobs:
             dart-pub-cache
 
       - name: Setup Dart environment
+        env:
+          SKIP_MELOS_BOOTSTRAP: true
         uses: ./.github/actions/setup-dart-env
 
       - name: Enable Flutter on macOS
         run: flutter config --enable-macos-desktop
+
+      - name: Prepare flutter projects
+        run: melos run flutter:prepare
 
       - name: Start test Couchbase cluster
         run: melos run test:setupCouchbaseClusterMacOS
