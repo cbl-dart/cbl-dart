@@ -35,7 +35,7 @@ function build() {
     local platformIds="${1:-${!platforms[@]}}"
     local configuration="${2:-Release}"
 
-    for platformId in "$platformIds"; do
+    for platformId in $platformIds; do
         buildPlatform "$platformId" "$configuration"
     done
 
@@ -105,12 +105,13 @@ function createXcframework() {
     local framework="$1"
     local platformIds="$2"
     local configuration="${3:-Release}"
+    local output="$xcframeworksDir/$framework.xcframework"
 
     echo Creating xcframework "$framework"
 
     local frameworksArgs=()
 
-    for platformId in "$platformIds"; do
+    for platformId in $platformIds; do
         local archive="$archivesDir/$platformId.xcarchive"
 
         if [ ! -e "$archive" ]; then
@@ -129,6 +130,8 @@ function createXcframework() {
             )
         fi
     done
+
+    rm -rf "$output"
 
     xcodebuild -create-xcframework \
         "${frameworksArgs[@]}" \
