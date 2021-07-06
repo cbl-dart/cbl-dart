@@ -48,7 +48,11 @@ scripts:
     select-package:
       scope: cbl_e2e_tests
 
-  test:all: 'melos run test:cbl && melos run test:cbl_ffi && melos run test:cbl_native &&  melos run test:standalone_dart'
+  test:all: melos run test:cbl &&
+    melos run test:cbl_ffi &&
+    melos run test:cbl_native &&
+    melos run test:standalone_dart &&
+    melos run test:flutter:macos
 
   test:cbl:
     run: melos exec -- flutter test --no-pub -r expanded
@@ -69,6 +73,15 @@ scripts:
     run: melos exec -- flutter test --no-pub -r expanded
     select-package:
       scope: 'cbl_e2e_tests_standalone_dart'
+
+  test:flutter:macos:
+    run: melos exec --
+      flutter test
+      --no-pub
+      -d macos
+      integration_test/cbl_e2e_test.dart
+    select-package:
+      scope: 'cbl_flutter_example'
 
   version:cbl_native:update_lib:
     description: Updates the hard coded `currentVersion` in `cbl_native`.

@@ -409,6 +409,8 @@ jobs:
             dart-pub-cache
 
       - name: Setup Dart environment
+        env:
+          SKIP_MELOS_BOOTSTRAP: true
         uses: ./.github/actions/setup-dart-env
 
       - name: Build tests
@@ -460,22 +462,18 @@ jobs:
             dart-pub-cache
 
       - name: Setup Dart environment
+        env:
+          SKIP_MELOS_BOOTSTRAP: true
         uses: ./.github/actions/setup-dart-env
 
       - name: Enable Flutter on macOS
         run: flutter config --enable-macos-desktop
 
+      - name: Prepare flutter projects
+        run: melos run flutter:prepare
+
       - name: Start test Couchbase cluster
         run: melos run test:setupCouchbaseClusterMacOS
 
       - name: Run tests
-        # Disabled because `flutter drive` ignores `--no-pub` which breaks melos setup
-        # Related issue https://github.com/flutter/flutter/issues/76446
-        if: 'false'
-        working-directory: packages/cbl_flutter/example
-        run: |
-          flutter drive \
-            --no-pub \
-            -d macos \
-            --driver test_driver/integration_test.dart \
-            --target integration_test/cbl_e2e_test.dart
+        run: melos run test:flutter:macos
