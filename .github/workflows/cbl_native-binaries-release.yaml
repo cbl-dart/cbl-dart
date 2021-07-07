@@ -95,7 +95,6 @@ jobs:
   binaries-apple:
     name: Apple - Frameworks
     runs-on: macos-10.15
-    environment: Apple
     strategy:
       matrix:
         platform: [ios, ios_simulator, macos]

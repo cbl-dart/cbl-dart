@@ -124,7 +124,6 @@ jobs:
   build-binaries-apple:
     name: Build - Binaries - Apple
     runs-on: macos-10.15
-    environment: Apple
     strategy:
       matrix:
         platform: [ios, ios_simulator, macos]
