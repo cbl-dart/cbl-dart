@@ -1,6 +1,6 @@
 set -e
 
-flutterChannel="$1"
+flutterVersion="$1"
 melosVersion="$2"
 flutterDir="$HOME/opt/flutter"
 flutterBinDir="$flutterDir/bin"
@@ -8,13 +8,6 @@ dartBinDir="$flutterDir/bin/cache/dart-sdk/bin"
 flutter="$flutterBinDir/flutter"
 pubBinDir="$HOME/.pub-cache/bin"
 melos="$pubBinDir/melos"
-channels=(stable beta dev master)
-
-# Validate channel
-if [[ ! " ${channels[@]} " =~ " ${flutterChannel} " ]]; then
-    echo "::error::Flutter channel '${flutterChannel}' does not exist."
-    exit 1
-fi
 
 if [[ -z "$melosVersion" ]]; then
     echo "::error::Melos version must not be empty."
@@ -35,7 +28,7 @@ export PATH="$pubBinDir:$dartBinDir:$flutterBinDir:$PATH"
 
 echo "::group::Clone Flutter repo"
 
-git clone https://github.com/flutter/flutter.git -b "$flutterChannel" --depth 1 "$flutterDir"
+git clone https://github.com/flutter/flutter.git -b "$flutterVersion" --depth 1 "$flutterDir"
 
 echo "::endgroup::"
 
