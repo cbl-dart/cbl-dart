@@ -170,7 +170,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: build-binaries-linux
+          key: tests-standalone-dart-linux
 
       # CMake script is not able to find libc++abi on the ubuntu-20.04 image.
       # Might have something to do with that the image has libc++[abi]-11-dev installed.
@@ -230,7 +230,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: build-binaries-apple-${{ matrix.platform }}
+          key: tests-standalone-dart-macos
 
       # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
       # bash >=4 is needed in build_apple.sh.
@@ -272,7 +272,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: build-binaries-apple-${{ matrix.platform }}
+          key: tests-flutter-ios
 
       # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
       # bash >=4 is needed in build_apple.sh.
@@ -326,7 +326,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: build-binaries-apple-${{ matrix.platform }}
+          key: tests-flutter-macos
 
       # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
       # bash >=4 is needed in build_apple.sh.
