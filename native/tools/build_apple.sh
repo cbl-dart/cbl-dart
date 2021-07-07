@@ -85,7 +85,10 @@ function buildPlatform() {
         CODE_SIGNING_ALLOWED="NO" \
         CMAKE_OPTS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" \
         CC="/usr/local/opt/ccache/libexec/clang" \
-        CXX="/usr/local/opt/ccache/libexec/clang++"
+        CXX="/usr/local/opt/ccache/libexec/clang++" |
+        xcpretty
+
+    return ${PIPESTATUS[0]}
 }
 
 function createXcframework() {
@@ -122,7 +125,10 @@ function createXcframework() {
 
     xcodebuild -create-xcframework \
         "${frameworksArgs[@]}" \
-        -output "$xcframeworksDir/$framework.xcframework"
+        -output "$xcframeworksDir/$framework.xcframework" |
+        xcpretty
+
+    return ${PIPESTATUS[0]}
 }
 
 "$@"
