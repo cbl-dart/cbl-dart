@@ -2,9 +2,7 @@
 [![License](https://badgen.net/pub/license/cbl)](https://github.com/cofu-app/cbl-dart/blob/main/packages/cbl/LICENSE)
 [![CI](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml)
 
-# cbl
-
-> **Warning:** This project has not yet reached a stable production release.
+> :warning: This project has not yet reached a stable production release.
 
 ## Features - Couchbase Lite
 
@@ -42,10 +40,11 @@
 
 ## Installation
 
-This package only contains Dart code and requires binary libraries to be packaged
-with any app that wants to use it. For Flutter apps, you need to add
+This package only contains Dart code and requires binary libraries to be
+packaged with any app that wants to use it. For Flutter apps, you need to add
 [`cbl_flutter`](https://pub.dev/packages/cbl_flutter) as a dependency to include
-those libraries in the build. `cbl_flutter` currently supports iOS, macOS and Android.
+those libraries in the build. `cbl_flutter` currently supports iOS, macOS and
+Android.
 
 ```pubspec
 dependencies:
@@ -55,11 +54,11 @@ dependencies:
 
 ## Getting started
 
-Make sure you have set the required minimum target version in the build systems of the
-platforms you support.
+Make sure you have set the required minimum target version in the build systems
+of the platforms you support.
 
-Before you access any part of the library, `CouchbaseLite` needs to be initialized with a
-configuration of how to load the binary libraries.
+Before you access any part of the library, `CouchbaseLite` needs to be
+initialized with a configuration of how to load the binary libraries.
 
 ```dart
 import 'package:cbl/cbl.dart';
@@ -95,6 +94,17 @@ Future<void> openDatabase() async {
 }
 ```
 
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to
+discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+Read the [contributor guide] to get started developing.
+
 # Disclaimer
 
 > **Warning:** This is not an official Couchbase product.
+
+[contributor guide]: ../../docs/CONTRIBUTOR_GUIDE.md

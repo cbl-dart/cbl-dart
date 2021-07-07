@@ -4,7 +4,8 @@
 
 # cbl_flutter
 
-This package provides binaries required to use [`cbl`](https://pub.dev/packages/cbl) in Flutter apps.
+This package provides binaries required to use
+[`cbl`](https://pub.dev/packages/cbl) in Flutter apps.
 
 ## Supported Platforms
 
@@ -16,12 +17,12 @@ This package provides binaries required to use [`cbl`](https://pub.dev/packages/
 
 ## Usage
 
-Make sure you have set the required minimum target version in the build systems of the
-platforms you support.
+Make sure you have set the required minimum target version in the build systems
+of the platforms you support.
 
-Before you access any part of the library, `CouchbaseLite` needs to be initialized before
-it can be used. For Flutter apps you provide the `initialize` function with the dynamic
-libraries returned from `flutterLibraries`:
+Before you access any part of the library, `CouchbaseLite` needs to be
+initialized before it can be used. For Flutter apps you provide the `initialize`
+function with the dynamic libraries returned from `flutterLibraries`:
 
 ```dart
 import 'package:cbl/cbl.dart';

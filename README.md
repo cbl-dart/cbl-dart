@@ -3,7 +3,8 @@
 
 # cbl-dart
 
-This is the mono-repository for the `cbl-dart` project, wich implements Couchbase Lite for Dart.
+This is the mono-repository for the `cbl-dart` project, wich implements
+Couchbase Lite for Dart.
 
 ## Dart packages
 
@@ -27,13 +28,27 @@ Two native libraries are required to enable Couchbase Lite for Dart.
 | libCouchbaseLiteC      | Couchbase Lite implementation behind a C API (vendored from [couchbase-lite-C]) |
 | [libCouchbaseLiteDart] | Compatibility layer to allow Dart code to use the Couchbase Lite C API          |
 
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to
+discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+Read the [contributor guide] to get started developing.
+
 [packages]: https://github.com/cofu-app/cbl-dart/tree/main/packages
 [cbl]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl
-[cbl_e2e_tests]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests
-[cbl_e2e_tests_standalone_dart]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests_standalone_dart
+[cbl_e2e_tests]:
+  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests
+[cbl_e2e_tests_standalone_dart]:
+  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests_standalone_dart
 [cbl_ffi]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_ffi
-[cbl_flutter]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter
+[cbl_flutter]:
+  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter
 [cbl_native]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_native
 [native]: https://github.com/cofu-app/cbl-dart/tree/main/native
-[libcouchbaselitedart]: https://github.com/cofu-app/cbl-dart/tree/main/native/cbl-dart
+[libcouchbaselitedart]:
+  https://github.com/cofu-app/cbl-dart/tree/main/native/cbl-dart
 [couchbase-lite-c]: https://github.com/couchbaselabs/couchbase-lite-C
+[contributor guide]: ./docs/CONTRIBUTOR_GUIDE.md
