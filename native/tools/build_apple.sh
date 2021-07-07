@@ -11,9 +11,8 @@ if [ -z "$cmd" ]; then
     exit 1
 fi
 
-# === Constans ===
+# === Constants ===
 
-developmentTeam="$DEVELOPMENT_TEAM"
 toolsDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 nativeDir="$(cd "$toolsDir/.." && pwd)"
 projectDir="$(cd "$nativeDir/.." && pwd)"
@@ -44,11 +43,6 @@ function build() {
     _createLinksForDev
 }
 
-function foo() {
-    local platformIds="${1:-${!platforms[@]}}"
-    echo "$platformIds"
-}
-
 function createXcframeworks() {
     local platformIds="${1:-${!platforms[@]}}"
     local configuration="$2"
@@ -69,11 +63,6 @@ function _createLinksForDev() {
 }
 
 function buildPlatform() {
-    if [ -z "$developmentTeam" ]; then
-        echo "You have to set the DEVELOPMENT_TEAM environment variable."
-        exit 1
-    fi
-
     cd "$nativeDir"
 
     local platformId="$1"
@@ -93,9 +82,7 @@ function buildPlatform() {
         -archivePath "$archivesDir/$platformId" \
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
-        DEVELOPMENT_TEAM=$developmentTeam \
-        CODE_SIGN_IDENTITY="Apple Development" \
-        CODE_SIGN_STYLE=Manual \
+        CODE_SIGNING_ALLOWED="NO" \
         CMAKE_OPTS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" \
         CC="/usr/local/opt/ccache/libexec/clang" \
         CXX="/usr/local/opt/ccache/libexec/clang++"

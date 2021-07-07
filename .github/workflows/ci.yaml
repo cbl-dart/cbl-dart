@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
-
   pull_request:
+    branches:
+      - main
 
 jobs:
   formatting-dart:
@@ -123,7 +124,6 @@ jobs:
   build-binaries-apple:
     name: Build - Binaries - Apple
     runs-on: macos-10.15
-    environment: Apple
     strategy:
       matrix:
         platform: [ios, ios_simulator, macos]
@@ -142,16 +142,7 @@ jobs:
       - name: Install dependencies with brew
         run: brew install doxygen bash
 
-      - name: Import signing certificate
-        uses: apple-actions/import-codesign-certs@v1
-        with:
-          p12-file-base64: ${{ secrets.APPLE_DEV_CERT }}
-          p12-password: ${{ secrets.APPLE_DEV_CERT_PASSWORD }}
-          keychain-password: ${{ secrets.APPLE_TMP_KEYCHAIN_PASSWORD }}
-
       - name: Build
-        env:
-          DEVELOPMENT_TEAM: ${{ secrets.APPLE_DEVELOPMENT_TEAM }}
         run: |
           ./native/tools/build_apple.sh buildPlatform ${{ matrix.platform }}
           tar -czf binaries-apple-${{ matrix.platform }}.tar.gz -C build/apple/archives .
@@ -381,13 +372,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Import signing certificate
-        uses: apple-actions/import-codesign-certs@v1
-        with:
-          p12-file-base64: ${{ secrets.APPLE_DEV_CERT }}
-          p12-password: ${{ secrets.APPLE_DEV_CERT_PASSWORD }}
-          keychain-password: ${{ secrets.APPLE_TMP_KEYCHAIN_PASSWORD }}
-
       - name: Download binaries
         uses: actions/download-artifact@v2
         with:
@@ -413,22 +397,21 @@ jobs:
           SKIP_MELOS_BOOTSTRAP: true
         uses: ./.github/actions/setup-dart-env
 
-      - name: Build tests
-        run: |
-          melos run flutter:prepare
-          melos run build:cbl_flutter:test:ios
+      - name: Prepare flutter projects
+        run: melos run flutter:prepare
 
       - name: Start test Couchbase cluster
         run: melos run test:setupCouchbaseClusterMacOS
 
+      - name: Start simulator
+        uses: futureware-tech/simulator-action@v1
+        with:
+          model: 'iPhone 12'
+          erase_before_boot: false
+          shutdown_after_job: false
+
       - name: Run tests
-        working-directory: packages/cbl_flutter/example/ios
-        run: |
-          xcodebuild \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -destination 'platform=iOS Simulator,name=iPhone 12,OS=14.4' \
-            test
+        run: melos run test:flutter:ios
 
   tests-flutter-macos:
     name: Tests - Flutter - macOS
