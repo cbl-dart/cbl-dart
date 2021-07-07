@@ -65,38 +65,6 @@ jobs:
       - name: Analyze code
         run: melos run analyze
 
-  build-binaries-linux:
-    name: Build - Binaries - Linux
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: build-binaries-linux
-
-      # CMake script is not able to find libc++abi on the ubuntu-20.04 image.
-      # Might have something to do with that the image has libc++[abi]-11-dev installed.
-      - name: Install libc++ and libc++abi
-        run: sudo apt-get install -y libc++-dev libc++abi-dev
-
-      - name: Build
-        run: |
-          ./native/tools/build_linux.sh build
-          tar -czf binaries-linux.tar.gz -C build/linux/lib .
-
-      - name: Upload binaries
-        uses: actions/upload-artifact@v2
-        with:
-          name: binaries-linux
-          path: binaries-linux.tar.gz
-
   build-binaries-android:
     name: Build - Binaries - Android
     runs-on: ubuntu-20.04
@@ -120,86 +88,6 @@ jobs:
         with:
           name: binaries-android
           path: binaries-android.tar.gz
-
-  build-binaries-apple:
-    name: Build - Binaries - Apple
-    runs-on: macos-10.15
-    strategy:
-      matrix:
-        platform: [ios, ios_simulator, macos]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: build-binaries-apple-${{ matrix.platform }}
-
-      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
-      # bash >=4 is needed in build_apple.sh.
-      - name: Install dependencies with brew
-        run: brew install doxygen bash
-
-      - name: Build
-        run: |
-          ./native/tools/build_apple.sh buildPlatform ${{ matrix.platform }}
-          tar -czf binaries-apple-${{ matrix.platform }}.tar.gz -C build/apple/archives .
-
-      - name: Upload binaries
-        uses: actions/upload-artifact@v2
-        with:
-          name: binaries-apple-${{ matrix.platform }}
-          path: binaries-apple-${{ matrix.platform }}.tar.gz
-
-  build-binaries-apple-xcframeworks:
-    name: Build - Binaries - Apple - xcframeworks
-    runs-on: macos-10.15
-    needs: build-binaries-apple
-    env:
-      ARCHIVES: build/apple/archives
-      XCFRAMEWORKS: build/apple/Xcframeworks
-    steps:
-      - uses: actions/checkout@v2
-
-      # bash >=4 is needed in build_apple.sh.
-      - name: Install dependencies with brew
-        run: brew install bash
-
-      - name: Download ios binaries
-        uses: actions/download-artifact@v2
-        with:
-          name: binaries-apple-ios
-
-      - name: Download ios_simulator binaries
-        uses: actions/download-artifact@v2
-        with:
-          name: binaries-apple-ios_simulator
-
-      - name: Download macos binaries
-        uses: actions/download-artifact@v2
-        with:
-          name: binaries-apple-macos
-
-      - name: Unpack archives
-        run: |
-          mkdir -p "$ARCHIVES"
-          tar -xzf binaries-apple-ios.tar.gz -C "$ARCHIVES"
-          tar -xzf binaries-apple-ios_simulator.tar.gz -C "$ARCHIVES"
-          tar -xzf binaries-apple-macos.tar.gz -C "$ARCHIVES"
-
-      - name: Create xcframeworks
-        run: |
-          mkdir -p "$XCFRAMEWORKS"
-          ./native/tools/build_apple.sh createXcframeworks
-          tar -czf binaries-apple-xcframeworks.tar.gz -C "$XCFRAMEWORKS" .
-
-      - name: Upload xcframeworks
-        uses: actions/upload-artifact@v2
-        with:
-          name: binaries-apple-xcframeworks
-          path: binaries-apple-xcframeworks.tar.gz
 
   tests-cbl:
     name: Tests - cbl
@@ -270,21 +158,27 @@ jobs:
   tests-standalone-dart-linux:
     name: Tests - Standalone Dart - Linux
     runs-on: ubuntu-20.04
-    needs: build-binaries-linux
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Download binaries
-        uses: actions/download-artifact@v2
         with:
-          name: binaries-linux
+          submodules: 'recursive'
 
-      - name: Extract binaries
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: |
-          mkdir lib
-          tar -xzf ../../binaries-linux.tar.gz -C lib
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-linux
+
+      # CMake script is not able to find libc++abi on the ubuntu-20.04 image.
+      # Might have something to do with that the image has libc++[abi]-11-dev installed.
+      - name: Install libc++ and libc++abi
+        run: sudo apt-get install -y libc++-dev libc++abi-dev
+
+      - name: Build native binaries
+        run: ./native/tools/build_linux.sh build Debug
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2
@@ -327,21 +221,24 @@ jobs:
   tests-standalone-dart-macos:
     name: Tests - Standalone Dart - macOS
     runs-on: macos-10.15
-    needs: build-binaries-apple
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Download binaries
-        uses: actions/download-artifact@v2
         with:
-          name: binaries-apple-macos
+          submodules: recursive
 
-      - name: Extract frameworks from archive
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: |
-          tar -xzf ../../binaries-apple-macos.tar.gz 
-          cp -a macos.xcarchive/Products/Library/Frameworks .
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-apple-${{ matrix.platform }}
+
+      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install doxygen bash
+
+      - name: Build native binaries
+        run: ./native/tools/build_apple.sh build macos Debug
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2
@@ -364,24 +261,26 @@ jobs:
   tests-flutter-ios:
     name: Tests - Flutter - iOS
     runs-on: macos-10.15
-    needs: build-binaries-apple-xcframeworks
-    environment: Apple
     env:
       CBL_FLUTTER_SKIP_INSTALL_BINARIES: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Download binaries
-        uses: actions/download-artifact@v2
         with:
-          name: binaries-apple-xcframeworks
+          submodules: recursive
 
-      - name: Extract frameworks from archive
-        working-directory: packages/cbl_flutter
-        run: |
-          mkdir -p Xcframeworks
-          tar -xzf ../../binaries-apple-xcframeworks.tar.gz -C Xcframeworks
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-apple-${{ matrix.platform }}
+
+      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install doxygen bash
+
+      - name: Build native binaries
+        run: ./native/tools/build_apple.sh build ios_simulator Debug
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2
@@ -416,24 +315,26 @@ jobs:
   tests-flutter-macos:
     name: Tests - Flutter - macOS
     runs-on: macos-10.15
-    needs: build-binaries-apple-xcframeworks
-
     env:
       CBL_FLUTTER_SKIP_INSTALL_BINARIES: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Download binaries
-        uses: actions/download-artifact@v2
         with:
-          name: binaries-apple-xcframeworks
+          submodules: recursive
 
-      - name: Extract frameworks from archive
-        working-directory: packages/cbl_flutter
-        run: |
-          mkdir -p Xcframeworks
-          tar -xzf ../../binaries-apple-xcframeworks.tar.gz -C Xcframeworks
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: build-binaries-apple-${{ matrix.platform }}
+
+      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
+      # bash >=4 is needed in build_apple.sh.
+      - name: Install dependencies with brew
+        run: brew install doxygen bash
+
+      - name: Build native binaries
+        run: ./native/tools/build_apple.sh build macos Debug
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2
