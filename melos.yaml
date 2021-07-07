@@ -78,7 +78,7 @@ scripts:
     run: melos exec --
       flutter test
       --no-pub
-      -d macos
+      -d macOS
       integration_test/cbl_e2e_test.dart
     select-package:
       scope: 'cbl_flutter_example'
@@ -87,7 +87,7 @@ scripts:
     run: melos exec --
       flutter test
       --no-pub
-      -d ios
+      -d iPhone
       integration_test/cbl_e2e_test.dart
     select-package:
       scope: 'cbl_flutter_example'
