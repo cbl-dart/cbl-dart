@@ -81,13 +81,13 @@ typedef CBL_CopyDatabase_C = Uint8 Function(
   Pointer<Utf8> fromPath,
   Pointer<Utf8> toPath,
   Pointer<CBLDatabaseConfiguration> config,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBL_CopyDatabase = int Function(
   Pointer<Utf8> fromPath,
   Pointer<Utf8> toPath,
   Pointer<CBLDatabaseConfiguration> config,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBL_DeleteDatabase_C = Uint8 Function(
@@ -113,25 +113,25 @@ typedef CBLDatabase_Exists = int Function(
 typedef CBLDatabase_Open = Pointer<CBLDatabase> Function(
   Pointer<Utf8> name,
   Pointer<CBLDatabaseConfiguration> config,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_Close_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_Close = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_Delete_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_Delete = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 enum CBLMaintenanceType {
@@ -147,41 +147,41 @@ extension CBLMaintenanceTypeIntExt on CBLMaintenanceType {
 typedef CBLDatabase_PerformMaintenance_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Uint32 type,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_PerformMaintenance = int Function(
   Pointer<CBLDatabase> db,
   int type,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_BeginBatch_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_BeginBatch = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_EndBatch_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_EndBatch = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_Rekey_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLEncryptionKey> encryptionKey,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_Rekey = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLEncryptionKey> encryptionKey,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_Name = Pointer<Utf8> Function(
@@ -222,13 +222,13 @@ typedef CBLDatabase_SaveDocument_C = Pointer<CBLDocument> Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Uint8 concurrency,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_SaveDocument = Pointer<CBLDocument> Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   int concurrency,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 class SaveDocumentResolvingCallbackMessage {
@@ -252,49 +252,49 @@ typedef CBLDart_CBLDatabase_SaveDocumentResolving_C = Pointer<CBLDocument>
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Pointer<Callback> conflictHandler,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDart_CBLDatabase_SaveDocumentResolving = Pointer<CBLDocument>
     Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Pointer<Callback> conflictHandler,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_PurgeDocumentByID = int Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_GetDocumentExpiration_C = Int64 Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_GetDocumentExpiration = int Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   Int64 expiration,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_SetDocumentExpiration = int Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> docId,
   int expiration,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener_C = Void Function(
@@ -353,24 +353,24 @@ typedef CBLDatabase_CreateIndex_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
   CBLIndexSpec indexSpec,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_CreateIndex = int Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
   CBLIndexSpec indexSpec,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_DeleteIndex_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDatabase_DeleteIndex = int Function(
   Pointer<CBLDatabase> db,
   Pointer<Utf8> name,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDatabase_IndexNames = Pointer<FLArray> Function(

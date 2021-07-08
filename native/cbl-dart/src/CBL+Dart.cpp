@@ -24,8 +24,8 @@ void CBLDart_InitDartApiDL(void *data) {
 
 // -- Callbacks
 
-Callback *CBLDart_Callback_New(Dart_Handle handle, Dart_Port sendPort) {
-  return new Callback(handle, sendPort);
+Callback *CBLDart_Callback_New(Dart_Handle object, Dart_Port sendPort) {
+  return new Callback(object, sendPort);
 }
 
 void CBLDart_Callback_Close(Callback *callback) { callback->close(); }
@@ -120,12 +120,12 @@ void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
  * If \p retain is true the ref counted object will be retained. Otherwise
  * it will only be released once the Dart object is garbage collected.
  */
-void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle handle,
+void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
                                            CBLRefCounted *refCounted,
-                                           bool retain) {
+                                           uint8_t retain) {
   if (retain) CBL_Retain(refCounted);
 
-  Dart_NewFinalizableHandle_DL(handle, refCounted, 0,
+  Dart_NewFinalizableHandle_DL(object, refCounted, 0,
                                CBLDart_CBLRefCountedFinalizer);
 }
 
@@ -191,10 +191,10 @@ bool CBLDart_SaveConflictHandlerWrapper(
 
 const CBLDocument *CBLDart_CBLDatabase_SaveDocumentResolving(
     CBLDatabase *db, CBLDocument *doc, Callback *conflictHandler,
-    CBLError *error) {
+    CBLError *errorOut) {
   return CBLDatabase_SaveDocumentResolving(db, doc,
                                            CBLDart_SaveConflictHandlerWrapper,
-                                           (void *)conflictHandler, error);
+                                           (void *)conflictHandler, errorOut);
 }
 
 void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
@@ -396,7 +396,7 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
 }
 
 CBLReplicator *CBLDart_CBLReplicator_New(
-    CBLDart_ReplicatorConfiguration *config, CBLError *error) {
+    CBLDart_ReplicatorConfiguration *config, CBLError *errorOut) {
   CBLReplicatorConfiguration _config;
   _config.database = config->database;
   _config.endpoint = config->endpoint;
@@ -430,7 +430,7 @@ CBLReplicator *CBLDart_CBLReplicator_New(
   context->conflictResolver = config->conflictResolver;
   _config.context = context;
 
-  auto replicator = CBLReplicator_New(&_config, error);
+  auto replicator = CBLReplicator_New(&_config, errorOut);
 
   // Associate callback context with this instance so we can it released
   // when the replicator is released.
@@ -452,15 +452,16 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   delete callbackWrapperContext;
 }
 
-void CBLDart_BindReplicatorToDartObject(Dart_Handle handle,
+void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
                                         CBLReplicator *replicator) {
-  Dart_NewFinalizableHandle_DL(handle, reinterpret_cast<void *>(replicator), 0,
+  Dart_NewFinalizableHandle_DL(object, reinterpret_cast<void *>(replicator), 0,
                                CBLDart_ReplicatorFinalizer);
 }
 
-bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
-                                             char *docId, CBLError *error) {
-  return CBLReplicator_IsDocumentPending(replicator, FLStr(docId), error);
+uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
+                                                char *docId,
+                                                CBLError *errorOut) {
+  return CBLReplicator_IsDocumentPending(replicator, FLStr(docId), errorOut);
 }
 
 void CBLDart_Replicator_ChangeListenerWrapper(

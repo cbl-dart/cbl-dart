@@ -26,21 +26,21 @@ typedef CBLDocument_Properties = Pointer<FLDict> Function(
 typedef CBLDocument_Delete_C = Uint8 Function(
   Pointer<CBLDocument> doc,
   Uint8 concurrency,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDocument_Delete = int Function(
   Pointer<CBLDocument> doc,
   int concurrency,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDocument_Purge_C = Uint8 Function(
   Pointer<CBLDocument> doc,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDocument_Purge = int Function(
   Pointer<CBLDocument> doc,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDocument_PropertiesAsJSON = Pointer<Utf8> Function(
@@ -145,12 +145,12 @@ typedef CBLDocument_SetProperties = void Function(
 typedef CBLDocument_SetPropertiesAsJSON_C = Uint8 Function(
   Pointer<CBLMutableDocument> doc,
   Pointer<Utf8> json,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDocument_SetPropertiesAsJSON = int Function(
   Pointer<CBLMutableDocument> doc,
   Pointer<Utf8> json,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 class MutableDocumentBindings extends Bindings {

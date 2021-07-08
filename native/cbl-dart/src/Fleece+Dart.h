@@ -51,13 +51,13 @@ CBLDART_EXPORT
 FLDoc CBLDart_FLDoc_FromJSON(char *json, FLError *error);
 
 CBLDART_EXPORT
-void CBLDart_FLDoc_BindToDartObject(Dart_Handle handle, FLDoc doc);
+void CBLDart_FLDoc_BindToDartObject(Dart_Handle object, FLDoc doc);
 
 // Value -------------------------------------------------------------------
 
 CBLDART_EXPORT
-void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
-                                      bool retain);
+void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
+                                      uint8_t retain);
 
 CBLDART_EXPORT
 void CBLDart_FLValue_AsString(FLValue value, CBLDart_FLSlice *slice);
@@ -69,8 +69,8 @@ CBLDART_EXPORT
 void CBLDart_FLValue_ToString(FLValue value, CBLDart_FLSlice *slice);
 
 CBLDART_EXPORT
-void CBLDart_FLValue_ToJSONX(FLValue value, bool json5, bool canonicalForm,
-                             CBLDart_FLSlice *result);
+CBLDart_FLStringResult CBLDart_FLValue_ToJSONX(FLValue value, uint8_t json5,
+                                               uint8_t canonicalForm);
 
 // Dict --------------------------------------------------------------------
 
@@ -80,11 +80,11 @@ FLValue CBLDart_FLDict_Get(FLDict dict, char *keyString);
 typedef struct {
   FLDictIterator *iterator;
   CBLDart_FLSlice keyString;
-  bool done;
+  uint8_t done;
 } CBLDart_DictIterator;
 
 CBLDART_EXPORT
-CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle handle,
+CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle object,
                                                    FLDict dict);
 
 CBLDART_EXPORT
@@ -139,8 +139,7 @@ void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
                                      CBLDart_LoadedFLValue *out);
 
 struct CBLDart_FLDictIterator2 {
-  bool isDone;
-  CBLDart_FLSlice *keyOut;
+  uint8_t isDone;
   CBLDart_LoadedFLValue *valueOut;
   FLDictIterator *_iterator;
 };

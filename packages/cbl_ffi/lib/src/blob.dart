@@ -108,20 +108,20 @@ class CBLBlobReadStream extends Opaque {}
 
 typedef CBLBlob_OpenContentStream = Pointer<CBLBlobReadStream> Function(
   Pointer<CBLBlob> blob,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_CBLBlobReader_Read_C = Uint64 Function(
   Pointer<CBLBlobReadStream> stream,
   Pointer<Uint8> buf,
   Uint64 bufSize,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDart_CBLBlobReader_Read = int Function(
   Pointer<CBLBlobReadStream> stream,
   Pointer<Uint8> buf,
   int bufSize,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLBlobReader_Close_C = Void Function(
@@ -207,7 +207,7 @@ class CBLBlobWriteStream extends Opaque {}
 
 typedef CBLBlobWriter_New = Pointer<CBLBlobWriteStream> Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLBlobWriter_Close_C = Void Function(
@@ -221,13 +221,13 @@ typedef CBLBlobWriter_Write_C = Uint8 Function(
   Pointer<CBLBlobWriteStream> stream,
   Pointer<Uint8> buf,
   Uint64 bufSize,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLBlobWriter_Write = int Function(
   Pointer<CBLBlobWriteStream> stream,
   Pointer<Uint8> buf,
   int bufSize,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLBlob_CreateWithStream = Pointer<CBLBlob> Function(

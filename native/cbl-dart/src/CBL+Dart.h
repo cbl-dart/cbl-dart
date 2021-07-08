@@ -24,7 +24,7 @@ void CBLDart_InitDartApiDL(void *data);
 // -- Callbacks
 
 CBLDART_EXPORT
-Callback *CBLDart_Callback_New(Dart_Handle handle, Dart_Port sendPort);
+Callback *CBLDart_Callback_New(Dart_Handle object, Dart_Port sendPort);
 
 CBLDART_EXPORT
 void CBLDart_Callback_Close(Callback *callback);
@@ -51,9 +51,9 @@ void CBLDart_CBLLog_SetCallback(Callback *callback);
  * it will only be released once the Dart object is garbage collected.
  */
 CBLDART_EXPORT
-void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle handle,
+void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
                                            CBLRefCounted *refCounted,
-                                           bool retain);
+                                           uint8_t retain);
 
 // -- Database
 
@@ -64,7 +64,7 @@ void CBLDart_CBLDatabase_Config(CBLDatabase *db,
 CBLDART_EXPORT
 const CBLDocument *CBLDart_CBLDatabase_SaveDocumentResolving(
     CBLDatabase *db, CBLDocument *doc, Callback *conflictHandler,
-    CBLError *error);
+    CBLError *errorOut);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
@@ -128,15 +128,16 @@ struct CBLDart_ReplicatorConfiguration {
 
 CBLDART_EXPORT
 CBLReplicator *CBLDart_CBLReplicator_New(
-    CBLDart_ReplicatorConfiguration *config, CBLError *error);
+    CBLDart_ReplicatorConfiguration *config, CBLError *errorOut);
 
 CBLDART_EXPORT
-void CBLDart_BindReplicatorToDartObject(Dart_Handle handle,
+void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
                                         CBLReplicator *replicator);
 
 CBLDART_EXPORT
-bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
-                                             char *docId, CBLError *error);
+uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
+                                                char *docId,
+                                                CBLError *errorOut);
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
                                              Callback *listenerId);

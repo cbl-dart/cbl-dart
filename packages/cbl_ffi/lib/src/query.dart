@@ -25,14 +25,14 @@ typedef CBLQuery_New_C = Pointer<CBLQuery> Function(
   Uint32 language,
   Pointer<Utf8> queryString,
   Pointer<Int32> errorPos,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLQuery_New = Pointer<CBLQuery> Function(
   Pointer<CBLDatabase> db,
   int language,
   Pointer<Utf8> queryString,
   Pointer<Int32> errorPos,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLQuery_SetParameters_C = Void Function(
@@ -48,7 +48,7 @@ typedef CBLQuery_Parameters = Pointer<FLDict> Function(Pointer<CBLQuery> query);
 
 typedef CBLQuery_Execute = Pointer<CBLResultSet> Function(
   Pointer<CBLQuery> query,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_CBLQuery_Explain_C = Void Function(
@@ -86,7 +86,7 @@ typedef CBLDart_CBLQuery_AddChangeListener = Pointer<CBLListenerToken> Function(
 typedef CBLQuery_CopyCurrentResults = Pointer<CBLResultSet> Function(
   Pointer<CBLQuery> query,
   Pointer<CBLListenerToken> listenerToken,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 class QueryBindings extends Bindings {

@@ -174,7 +174,7 @@ class CBLReplicator extends Opaque {}
 
 typedef CBLDart_CBLReplicator_New = Pointer<CBLReplicator> Function(
   Pointer<CBLDartReplicatorConfiguration> config,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_BindReplicatorToDartObject_C = Void Function(
@@ -275,18 +275,18 @@ typedef CBLReplicator_Status = CBLReplicatorStatus Function(
 
 typedef CBLReplicator_PendingDocumentIDs = Pointer<FLDict> Function(
   Pointer<CBLReplicator> replicator,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_CBLReplicator_IsDocumentPending_C = Uint8 Function(
   Pointer<CBLReplicator> replicator,
   Pointer<Utf8> docID,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 typedef CBLDart_CBLReplicator_IsDocumentPending = int Function(
   Pointer<CBLReplicator> replicator,
   Pointer<Utf8> docID,
-  Pointer<CBLError> error,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_CBLReplicator_AddChangeListener_C = Void Function(

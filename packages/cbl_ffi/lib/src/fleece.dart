@@ -335,7 +335,7 @@ typedef CBLDart_FLDoc_FromJSON = Pointer<FLDoc> Function(
 );
 
 typedef CBLDart_FLDoc_BindToDartObject_C = Void Function(
-  Handle handle,
+  Handle object,
   Pointer<FLDoc> doc,
 );
 typedef CBLDart_FLDoc_BindToDartObject = void Function(
@@ -403,7 +403,7 @@ extension on int {
 }
 
 typedef CBLDart_FLValue_BindToDartObject_C = Void Function(
-  Handle handle,
+  Handle object,
   Pointer<FLValue> value,
   Uint8 retain,
 );
@@ -1503,11 +1503,11 @@ typedef FLEncoder_EndDict = int Function(Pointer<FLEncoder> encoder);
 
 typedef FLEncoder_Finish_C = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
-  Pointer<Uint32> error,
+  Pointer<Uint32> errorOut,
 );
 typedef FLEncoder_Finish = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
-  Pointer<Uint32> error,
+  Pointer<Uint32> errorOut,
 );
 
 typedef FLEncoder_GetError_C = Uint32 Function(Pointer<FLEncoder> encoder);

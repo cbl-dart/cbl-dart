@@ -74,8 +74,8 @@ void CBLDart_ReleaseDartObjectBoundFLDoc(void *dart_callback_data, void *peer) {
   FLDoc_Release(doc);
 }
 
-void CBLDart_FLDoc_BindToDartObject(Dart_Handle handle, FLDoc doc) {
-  Dart_NewFinalizableHandle_DL(handle, doc, 0,
+void CBLDart_FLDoc_BindToDartObject(Dart_Handle object, FLDoc doc) {
+  Dart_NewFinalizableHandle_DL(object, doc, 0,
                                CBLDart_ReleaseDartObjectBoundFLDoc);
 }
 
@@ -87,8 +87,8 @@ void CBLDart_ReleaseDartObjectBoundFLValue(void *dart_callback_data,
   FLValue_Release(value);
 }
 
-void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
-                                      bool retain) {
+void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
+                                      uint8_t retain) {
   // There is nothing to be done for `null` und `undefined`.
   if (value == NULL ||  // The null pointer represents `undefined` values.
       value == kFLNullValue)
@@ -96,7 +96,7 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle handle, FLValue value,
 
   if (retain) FLValue_Retain(value);
 
-  Dart_NewFinalizableHandle_DL(handle, (void *)value, 0,
+  Dart_NewFinalizableHandle_DL(object, (void *)value, 0,
                                CBLDart_ReleaseDartObjectBoundFLValue);
 }
 
@@ -134,7 +134,7 @@ void CBLDart_FinalizeDartObjectBoundDictIterator(void *dart_callback_data,
   delete iterator;
 }
 
-CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle handle,
+CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle object,
                                                    FLDict dict) {
   auto iterator = new CBLDart_DictIterator;
   iterator->iterator = new FLDictIterator;
@@ -143,7 +143,7 @@ CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle handle,
 
   FLDictIterator_Begin(dict, iterator->iterator);
 
-  Dart_NewFinalizableHandle_DL(handle, iterator, sizeof(iterator),
+  Dart_NewFinalizableHandle_DL(object, iterator, sizeof(iterator),
                                CBLDart_FinalizeDartObjectBoundDictIterator);
 
   return iterator;
