@@ -3,7 +3,7 @@
 
 #ifdef __APPLE__
 #include <CouchbaseLite/CouchbaseLite.h>
-#elif
+#else
 #include "cbl/CouchbaseLite.h"
 #endif
 

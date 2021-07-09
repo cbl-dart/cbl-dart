@@ -2,7 +2,7 @@
 
 #ifdef __APPLE__
 #include <CouchbaseLite/Fleece.h>
-#elif
+#else
 #include "fleece/Fleece.h"
 #endif
 
