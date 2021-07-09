@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C0971C0925CF753F006EE2DC /* CouchbaseLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0971BEA25CF7525006EE2DC /* CouchbaseLite.framework */; };
+		C051862E2698547B00D6A421 /* CouchbaseLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0971BEA25CF7525006EE2DC /* CouchbaseLite.framework */; };
 		C09E6C23263456C700127155 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C09E6C1A263456C700127155 /* Utils.cpp */; };
 		C09E6C24263456C700127155 /* Utils.hh in Headers */ = {isa = PBXBuildFile; fileRef = C09E6C22263456C700127155 /* Utils.hh */; };
 		C0D8CBEB25CF2AD7008B87C0 /* Fleece+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */; };
@@ -86,7 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0971C0925CF753F006EE2DC /* CouchbaseLite.framework in Frameworks */,
+				C051862E2698547B00D6A421 /* CouchbaseLite.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -380,11 +380,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				HEADER_SEARCH_PATHS = (
-					$PROJECT_DIR/vendor/dart/include,
-					"$PROJECT_DIR/vendor/couchbase-lite-C/include",
-					"$PROJECT_DIR/vendor/couchbase-lite-C/vendor/couchbase-lite-core/vendor/fleece/API",
-				);
+				HEADER_SEARCH_PATHS = $PROJECT_DIR/vendor/dart/include;
 				INFOPLIST_FILE = XCode/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -407,11 +403,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				HEADER_SEARCH_PATHS = (
-					$PROJECT_DIR/vendor/dart/include,
-					"$PROJECT_DIR/vendor/couchbase-lite-C/include",
-					"$PROJECT_DIR/vendor/couchbase-lite-C/vendor/couchbase-lite-core/vendor/fleece/API",
-				);
+				HEADER_SEARCH_PATHS = $PROJECT_DIR/vendor/dart/include;
 				INFOPLIST_FILE = XCode/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (

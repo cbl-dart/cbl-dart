@@ -1,8 +1,13 @@
 #pragma once
 
+#if __APPLE__
+#include <CouchbaseLite/Fleece.h>
+#elif
+#include "fleece/Fleece.h"
+#endif
+
 #include "cbldart_export.h"
 #include "dart/dart_api_dl.h"
-#include "fleece/Fleece.h"
 
 extern "C" {
 // Slice -------------------------------------------------------------------
