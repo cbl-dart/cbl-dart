@@ -8,9 +8,9 @@
 #endif
 
 #include "Callbacks.h"
+#include "Fleece+Dart.h"
 #include "cbldart_export.h"
 #include "dart/dart_api_dl.h"
-#include "Fleece+Dart.h"
 
 /**
  * This is a compatibility layer to allow Dart code to use the Couchbase Lite C

@@ -2,11 +2,11 @@
 #include <mutex>
 #include <shared_mutex>
 
-#include "Callbacks.h"
 #include "CBL+Dart.h"
-#include "dart/dart_api_dl.h"
+#include "Callbacks.h"
 #include "Fleece+Dart.h"
 #include "Utils.hh"
+#include "dart/dart_api_dl.h"
 
 // Dart ------------------------------------------------------------------------
 
