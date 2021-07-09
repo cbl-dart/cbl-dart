@@ -3,12 +3,11 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/database_utils.dart';
 import 'utils/replicator_utils.dart';
 import 'utils/test_document.dart';
-
-import '../test_binding_impl.dart';
 
 void main() {
   setupTestBinding();
@@ -226,13 +225,6 @@ void main() {
       await replicatorA.startAndWaitUntilStopped();
 
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
-    });
-
-    test('resetCheckpoint smoke test', () async {
-      final db = await openTestDb('ResetCheckpointSmoke');
-      final replicator = await db.createTestReplicator();
-      await replicator.resetCheckpoint();
-      await replicator.startAndWaitUntilStopped();
     });
 
     test('setHostReachable smoke test', () async {

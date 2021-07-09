@@ -130,18 +130,18 @@ late final globalCBLError = _baseBinds._globalCBLError;
 late final globalErrorPosition = _baseBinds._globalErrorPosition;
 
 class CBLError extends Struct {
-  @Uint32()
+  @Uint8()
   external int _domain;
 
   @Int32()
   external int _code;
 
-  @Int32()
+  @Uint32()
   // ignore: unused_field
   external int _internal_info;
 }
 
-typedef CBLError_Message = Pointer<Utf8> Function(
+typedef CBLDart_CBLError_Message = FLStringResult Function(
   Pointer<CBLError> error,
 );
 
@@ -273,9 +273,9 @@ class BaseBindings extends Bindings {
         CBLDart_BindCBLRefCountedToDartObject>(
       'CBLDart_BindCBLRefCountedToDartObject',
     );
-    _Error_Message =
-        libs.cbl.lookupFunction<CBLError_Message, CBLError_Message>(
-      'CBLError_Message',
+    _Error_Message = libs.cblDart
+        .lookupFunction<CBLDart_CBLError_Message, CBLDart_CBLError_Message>(
+      'CBLDart_CBLError_Message',
     );
     _Listener_Remove =
         libs.cbl.lookupFunction<CBLListener_Remove_C, CBLListener_Remove>(
@@ -289,7 +289,7 @@ class BaseBindings extends Bindings {
   late final CBLDart_InitDartApiDL _initDartApiDL;
   late final CBLDart_BindCBLRefCountedToDartObject
       _bindCBLRefCountedToDartObject;
-  late final CBLError_Message _Error_Message;
+  late final CBLDart_CBLError_Message _Error_Message;
   late final CBLListener_Remove _Listener_Remove;
 
   void initDartApiDL() {
@@ -305,7 +305,7 @@ class BaseBindings extends Bindings {
   }
 
   String? CBLErrorMessage(Pointer<CBLError> error) =>
-      _Error_Message(error).toNullable()?.toDartStringAndFree();
+      _Error_Message(error).toDartStringAndRelease();
 
   void removeListener(Pointer<CBLListenerToken> token) {
     _Listener_Remove(token);

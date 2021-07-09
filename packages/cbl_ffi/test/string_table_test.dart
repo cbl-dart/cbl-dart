@@ -36,21 +36,12 @@ void main() {
       expect(string.isFreed, isTrue);
     });
 
-    test('should encode string as utf8 and null terminated it', () {
+    test('should store string in FLSlice', () {
       final string = testEncodedString('a❤');
 
+      expect(string.flString.ref.size, 4);
       expect(
-        string.asNullTerminated.cast<Uint8>().asTypedList(5),
-        Uint8List.fromList([0x61, 0xE2, 0x9D, 0xA4, 0]),
-      );
-    });
-
-    test('should store string in slice', () {
-      final string = testEncodedString('a❤');
-
-      expect(string.asSlice.ref.size, 4);
-      expect(
-        string.asSlice.ref.buf.cast<Uint8>().asTypedList(4),
+        string.flString.ref.buf.cast<Uint8>().asTypedList(4),
         Uint8List.fromList([0x61, 0xE2, 0x9D, 0xA4]),
       );
     });
@@ -245,7 +236,7 @@ void main() {
 String stringWithEncodedSizeOf(int encodeSize, [String? prefix]) {
   prefix ??= '';
   final remaining =
-      encodeSize - EncodedString.sliceSizeAligned - 1 - prefix.length;
+      encodeSize - EncodedString.flStringSizeAligned - prefix.length;
   assert(remaining >= 0);
   return prefix + List.filled(remaining, '.').join();
 }

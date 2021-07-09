@@ -29,7 +29,7 @@ class SharedStrings {
     return _addressToDartString[slice.buf.address] ??= slice.toDartString();
   }
 
-  String? flSliceToDartString(FLSlice slice) {
+  String? flStringToDartString(FLString slice) {
     if (slice.size < minSharedStringSize || slice.size > maxSharedStringSize) {
       return slice.toDartString();
     }
@@ -152,10 +152,13 @@ extension on CBLDart_LoadedFLValue {
         return SimpleFLValue(isInteger ? asInt : asDouble);
       case FLValueType.string:
       case FLValueType.data:
+        final isString = type == FLValueType.string;
         return SliceFLValue(
-          slice: Slice.fromFLSlice(asSlice)!,
+          slice: isString
+              ? Slice.fromFLString(asString)!
+              : Slice.fromFLSlice(asData)!,
           value: asValue,
-          isString: type == FLValueType.string,
+          isString: isString,
         );
       case FLValueType.array:
       case FLValueType.dict:
@@ -194,10 +197,7 @@ class FleeceDecoder {
   /// Returns a string which shows how values are encoded in the Fleece [data].
   ///
   /// This method exists for debugging and learning purposes.
-  String dumpData(Slice data) {
-    final flSlice = _decoderBinds.dumpData(data.makeGlobal().ref);
-    return SliceResult.fromFLSliceResult(flSlice)!.toDartString();
-  }
+  String dumpData(Slice data) => _decoderBinds.dumpData(data.makeGlobal().ref);
 
   // === LoadedFLValue ==========================================================
 
@@ -274,11 +274,11 @@ class FleeceDecoder {
         final result = <String, dynamic>{};
         final iterator = DictIterator(
           value.value.cast(),
-          keyOut: globalFLSlice,
+          keyOut: globalFLString,
           valueOut: globalLoadedFLValue,
         );
         while (iterator.moveNext()) {
-          final key = sharedStrings.flSliceToDartString(globalFLSlice.ref)!;
+          final key = sharedStrings.flStringToDartString(globalFLString.ref)!;
           result[key] = _globalLoadedValueToDartObject();
         }
         return result;
@@ -296,17 +296,17 @@ class FleeceDecoder {
   ) =>
       DictIterable(
         dict,
-        keyOut: globalFLSlice,
+        keyOut: globalFLString,
         valueOut: globalLoadedFLValue,
       ).map((_) => MapEntry(
-            sharedStrings.flSliceToDartString(globalFLSlice.ref)!,
+            sharedStrings.flStringToDartString(globalFLString.ref)!,
             _globalLoadedValueObject()!,
           ));
 
   /// Returns an [Iterable] which iterates over the keys of [dict].
   Iterable<String> dictKeyIterable(Pointer<FLDict> dict) =>
-      DictIterable(dict, keyOut: globalFLSlice)
-          .map((it) => sharedStrings.flSliceToDartString(globalFLSlice.ref)!);
+      DictIterable(dict, keyOut: globalFLString)
+          .map((it) => sharedStrings.flStringToDartString(globalFLString.ref)!);
 
   // === Impl ==================================================================
 
@@ -324,9 +324,9 @@ class FleeceDecoder {
       case FLValueType.number:
         return value.isInteger ? value.asInt : value.asDouble;
       case FLValueType.string:
-        return sharedStrings.flSliceToDartString(value.asSlice);
+        return sharedStrings.flStringToDartString(value.asString);
       case FLValueType.data:
-        return value.asSlice.toUint8List();
+        return value.asData.toUint8List();
       case FLValueType.array:
         final array = value.asValue.cast<FLArray>();
         return List<dynamic>.generate(value.collectionSize, (index) {
@@ -337,11 +337,11 @@ class FleeceDecoder {
         final result = <String, dynamic>{};
         final iterator = DictIterator(
           value.asValue.cast(),
-          keyOut: globalFLSlice,
+          keyOut: globalFLString,
           valueOut: globalLoadedFLValue,
         );
         while (iterator.moveNext()) {
-          final key = sharedStrings.flSliceToDartString(globalFLSlice.ref)!;
+          final key = sharedStrings.flStringToDartString(globalFLString.ref)!;
           result[key] = _globalLoadedValueToDartObject();
         }
         return result;
@@ -362,7 +362,7 @@ class DictIterable with IterableMixin<void> {
   DictIterable(this.dict, {this.keyOut, this.valueOut});
 
   final Pointer<FLDict> dict;
-  final Pointer<FLSlice>? keyOut;
+  final Pointer<FLString>? keyOut;
   final Pointer<CBLDart_LoadedFLValue>? valueOut;
 
   @override
@@ -382,7 +382,7 @@ class DictIterator implements Iterator<void> {
   /// loaded if a destination has been provided.
   DictIterator(
     Pointer<FLDict> dict, {
-    Pointer<FLSlice>? keyOut,
+    Pointer<FLString>? keyOut,
     Pointer<CBLDart_LoadedFLValue>? valueOut,
   }) {
     _iterator = _decoderBinds.dictIteratorBegin(

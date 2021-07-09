@@ -34,24 +34,14 @@ class StringTable {
 
   // Allocation
 
-  // TODO: Avoid passing C strings to native methods where possible, to avoid
-  // iterating over string to find length. Instead use FLStrings which include
-  // the string length.
-  Pointer<Utf8> cString(
+  Pointer<FLString> flString(
     String? string, {
     bool cache = true,
     bool arena = false,
   }) =>
       string == null
-          ? nullptr
-          : encodedString(string, cache: cache, arena: arena).asNullTerminated;
-
-  Pointer<FLSlice> flString(
-    String string, {
-    bool cache = true,
-    bool arena = false,
-  }) =>
-      encodedString(string, cache: cache, arena: arena).asSlice;
+          ? nullFLString
+          : encodedString(string, cache: cache, arena: arena).flString;
 
   EncodedString encodedString(
     String string, {
@@ -178,31 +168,25 @@ class StringTable {
 }
 
 class EncodedString {
-  static final sliceSize = sizeOf<FLSlice>();
-  static final sliceSizeAligned = sliceSize + (sliceSize % 8);
+  static final flStringSize = sizeOf<FLString>();
+  static final flStringSizeAligned = flStringSize + (flStringSize % 8);
 
   EncodedString(String string) : string = string {
     final encoded = utf8.encode(string);
+    final bufLength = encoded.length;
+    sizeEncoded = flStringSizeAligned + bufLength;
 
-    // The length of the encoded string plus the null terminator.
-    final bufLength = encoded.length + 1;
-    sizeEncoded = sliceSizeAligned + bufLength;
-
-    // Pointer to all the memory allocated for this string.
     _memory = malloc(sizeEncoded);
+    flString = _memory.cast();
 
-    // Pointer to the encoded string.
-    final buf = _memory.elementAt(sliceSizeAligned);
+    // Pointer to address after FLString in _memory.
+    final buf = _memory.elementAt(flStringSizeAligned);
 
-    // Write null terminated string to memory.
-    final bufList = buf.asTypedList(bufLength);
-    bufList.setAll(0, encoded);
-    bufList[encoded.length] = 0x0;
+    buf.asTypedList(bufLength).setAll(0, encoded);
 
-    // Init slice.
-    asSlice.ref
-      ..size = encoded.length
-      ..buf = buf;
+    flString.ref
+      ..buf = buf
+      ..size = encoded.length;
   }
 
   var _refs = 1;
@@ -217,10 +201,7 @@ class EncodedString {
 
   late final Pointer<Uint8> _memory;
 
-  late final Pointer<FLSlice> asSlice = _memory.cast();
-
-  late final Pointer<Utf8> asNullTerminated =
-      _memory.elementAt(sliceSizeAligned).cast();
+  late final Pointer<FLString> flString;
 
   @visibleForTesting
   EncodedString retain() {

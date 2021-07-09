@@ -83,30 +83,7 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
       );
 
   /// The properties as a JSON string.
-  String get propertiesAsJson =>
-      _bindings.propertiesAsJson(native.pointerUnsafe);
-
-  /// Deletes this document from the database.
-  ///
-  /// Deletions are replicated.
-  Future<void> delete([
-    ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
-  ]) {
-    _debugDocumentHasWorker();
-    return (native as WorkerObject<CBLDocument>)
-        .execute((pointer) => DeleteDocument(pointer, concurrency));
-  }
-
-  /// Purges this document.
-  ///
-  /// This removes all traces of the document from the database. Purges are not
-  /// replicated. If the document is changed on a server, it will be re-created
-  /// when pulled.
-  Future<void> purge() {
-    _debugDocumentHasWorker();
-    return (native as WorkerObject<CBLDocument>)
-        .execute((pointer) => PurgeDocument(pointer));
-  }
+  String get propertiesAsJson => _bindings.createJSON(native.pointerUnsafe);
 
   /// {@macro cbl.document.mutableCopy}
   MutableDocument mutableCopy() => MutableDocument.mutableCopy(this);
@@ -134,10 +111,6 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
       'revisionId: $revisionId, '
       'sequence: $sequence'
       ')';
-
-  void _debugDocumentHasWorker() {
-    assert(native is WorkerObject, 'Document has no Worker');
-  }
 }
 
 /// A [Document] whose [properties] can be changed.
@@ -163,7 +136,7 @@ class MutableDocument extends Document {
   ///
   /// It will not be added to a database until saved.
   factory MutableDocument([String? id]) => createMutableDocument(
-        pointer: _bindings.create(id),
+        pointer: _bindings.createWithID(id),
         worker: null,
         retain: false,
         isNew: true,
@@ -208,7 +181,7 @@ class MutableDocument extends Document {
   }
 
   set propertiesAsJson(String json) {
-    _bindings.setPropertiesAsJSON(_mutablePointer, json);
+    _bindings.setJSON(_mutablePointer, json);
   }
 
   @override

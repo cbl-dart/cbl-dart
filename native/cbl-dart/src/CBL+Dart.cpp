@@ -47,6 +47,34 @@ void CBLDart_Callback_CallForTest(Callback *callback, int64_t argument) {
 
 // Couchbase Lite --------------------------------------------------------------
 
+// -- Base
+
+CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error) {
+  return CBLDart_FLStringResultToDart(CBLError_Message(error));
+}
+
+/**
+ * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
+ */
+void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
+  auto refCounted = reinterpret_cast<CBLRefCounted *>(peer);
+  CBL_Release(refCounted);
+}
+
+void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
+                                           CBLRefCounted *refCounted,
+                                           uint8_t retain) {
+  if (retain) CBL_Retain(refCounted);
+
+  Dart_NewFinalizableHandle_DL(object, refCounted, 0,
+                               CBLDart_CBLRefCountedFinalizer);
+}
+
+void CBLDart_CBLListenerFinalizer(void *context) {
+  auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
+  CBLListener_Remove(listenerToken);
+}
+
 // -- Log
 
 std::shared_mutex loggingMutex;
@@ -56,7 +84,7 @@ auto originalLogCallback = CBLLog_Callback();
 Callback *dartLogCallback = nullptr;
 
 void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
-                                const char *message) {
+                                FLString message) {
   const std::shared_lock<std::shared_mutex> lock(loggingMutex);
 
   Dart_CObject domain_;
@@ -68,8 +96,8 @@ void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
   level_.value.as_int32 = int32_t(level);
 
   Dart_CObject message_;
-  message_.type = Dart_CObject_kString;
-  message_.value.as_string = const_cast<char *>(message);
+  message_.type = Dart_CObject_kInt64;
+  message_.value.as_int64 = reinterpret_cast<int64_t>(&message);
 
   Dart_CObject *argsValues[] = {&domain_, &level_, &message_};
 
@@ -104,43 +132,103 @@ void CBLDart_CBLLog_SetCallback(Callback *callback) {
   }
 }
 
-// -- RefCounted
+// -- Document
 
-/**
- * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
- */
-void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
-  auto refCounted = reinterpret_cast<CBLRefCounted *>(peer);
-  CBL_Release(refCounted);
+CBLDart_FLString CBLDart_CBLDocument_ID(CBLDocument *doc) {
+  return CBLDart_FLStringToDart(CBLDocument_ID(doc));
 }
 
-/**
- * Binds a CBLRefCounted to a Dart objects lifetime.
- *
- * If \p retain is true the ref counted object will be retained. Otherwise
- * it will only be released once the Dart object is garbage collected.
- */
-void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
-                                           CBLRefCounted *refCounted,
-                                           uint8_t retain) {
-  if (retain) CBL_Retain(refCounted);
-
-  Dart_NewFinalizableHandle_DL(object, refCounted, 0,
-                               CBLDart_CBLRefCountedFinalizer);
+CBLDart_FLString CBLDart_CBLDocument_RevisionID(CBLDocument *doc) {
+  return CBLDart_FLStringToDart(CBLDocument_RevisionID(doc));
 }
 
-// -- Listener
+CBLDart_FLStringResult CBLDart_CBLDocument_CreateJSON(CBLDocument *doc) {
+  return CBLDart_FLStringResultToDart(CBLDocument_CreateJSON(doc));
+}
 
-void CBLDart_CBLListenerFinalizer(void *context) {
-  auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
-  CBLListener_Remove(listenerToken);
+CBLDocument *CBLDart_CBLDocument_CreateWithID(CBLDart_FLString docID) {
+  return CBLDocument_CreateWithID(CBLDart_FLStringFromDart(docID));
+}
+
+int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
+                                   CBLError *errorOut) {
+  return CBLDocument_SetJSON(doc, CBLDart_FLStringFromDart(json), errorOut);
 }
 
 // -- Database
 
-void CBLDart_CBLDatabase_Config(CBLDatabase *db,
-                                CBLDatabaseConfiguration *config) {
-  *config = CBLDatabase_Config(db);
+CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
+  auto config = CBLDatabaseConfiguration_Default();
+  CBLDart_CBLDatabaseConfiguration result;
+  result.directory = CBLDart_FLStringToDart(config.directory);
+  return result;
+}
+
+uint8_t CBLDart_CBL_DatabaseExists(CBLDart_FLString name,
+                                   CBLDart_FLString inDirectory) {
+  return CBL_DatabaseExists(CBLDart_FLStringFromDart(name),
+                            CBLDart_FLStringFromDart(inDirectory));
+}
+
+uint8_t CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
+                                 CBLDart_FLString toName,
+                                 CBLDart_CBLDatabaseConfiguration *config,
+                                 CBLError *errorOut) {
+  CBLDatabaseConfiguration _config;
+  _config.directory = CBLDart_FLStringFromDart(config->directory);
+  return CBL_CopyDatabase(CBLDart_FLStringFromDart(fromPath),
+                          CBLDart_FLStringFromDart(toName), &_config, errorOut);
+}
+
+uint8_t CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
+                                   CBLDart_FLString inDirectory,
+                                   CBLError *errorOut) {
+  return CBL_DeleteDatabase(CBLDart_FLStringFromDart(name),
+                            CBLDart_FLStringFromDart(inDirectory), errorOut);
+}
+
+CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
+                                      CBLDart_CBLDatabaseConfiguration *config,
+                                      CBLError *errorOut) {
+  CBLDatabaseConfiguration _config;
+  _config.directory = CBLDart_FLStringFromDart(config->directory);
+  return CBLDatabase_Open(CBLDart_FLStringFromDart(name), &_config, errorOut);
+}
+
+CBLDart_FLString CBLDart_CBLDatabase_Name(CBLDatabase *db) {
+  return CBLDart_FLStringToDart(CBLDatabase_Name(db));
+}
+
+CBLDart_FLStringResult CBLDart_CBLDatabase_Path(CBLDatabase *db) {
+  return CBLDart_FLStringResultToDart(CBLDatabase_Path(db));
+}
+
+CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabase_Config(CBLDatabase *db) {
+  auto config = CBLDatabase_Config(db);
+  return {
+      .directory = CBLDart_FLStringToDart(config.directory),
+  };
+}
+
+const CBLDocument *CBLDart_CBLDatabase_GetDocument(CBLDatabase *database,
+                                                   CBLDart_FLString docID,
+                                                   CBLError *errorOut) {
+  return CBLDatabase_GetDocument(database, CBLDart_FLStringFromDart(docID),
+                                 errorOut);
+}
+
+CBLDocument *CBLDart_CBLDatabase_GetMutableDocument(CBLDatabase *database,
+                                                    CBLDart_FLString docID,
+                                                    CBLError *errorOut) {
+  return CBLDatabase_GetMutableDocument(
+      database, CBLDart_FLStringFromDart(docID), errorOut);
+}
+
+uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
+    CBLDatabase *db, CBLDocument *doc, CBLConcurrencyControl concurrency,
+    CBLError *errorOut) {
+  return CBLDatabase_SaveDocumentWithConcurrencyControl(db, doc, concurrency,
+                                                        errorOut);
 }
 
 bool CBLDart_SaveConflictHandlerWrapper(
@@ -189,16 +277,39 @@ bool CBLDart_SaveConflictHandlerWrapper(
   return decision;
 }
 
-const CBLDocument *CBLDart_CBLDatabase_SaveDocumentResolving(
+uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandler(
     CBLDatabase *db, CBLDocument *doc, Callback *conflictHandler,
     CBLError *errorOut) {
-  return CBLDatabase_SaveDocumentResolving(db, doc,
-                                           CBLDart_SaveConflictHandlerWrapper,
-                                           (void *)conflictHandler, errorOut);
+  return CBLDatabase_SaveDocumentWithConflictHandler(
+      db, doc, CBLDart_SaveConflictHandlerWrapper, (void *)conflictHandler,
+      errorOut);
+}
+
+CBLDART_EXPORT
+uint8_t CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
+                                              CBLDart_FLString docID,
+                                              CBLError *errorOut) {
+  return CBLDatabase_PurgeDocumentByID(
+      database, CBLDart_FLStringFromDart(docID), errorOut);
+}
+
+CBLTimestamp CBLDart_CBLDatabase_GetDocumentExpiration(CBLDatabase *db,
+                                                       CBLDart_FLSlice docID,
+                                                       CBLError *errorOut) {
+  return CBLDatabase_GetDocumentExpiration(db, CBLDart_FLStringFromDart(docID),
+                                           errorOut);
+}
+
+uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
+                                                  CBLDart_FLSlice docID,
+                                                  CBLTimestamp expiration,
+                                                  CBLError *errorOut) {
+  return CBLDatabase_SetDocumentExpiration(db, CBLDart_FLStringFromDart(docID),
+                                           expiration, errorOut);
 }
 
 void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
-                                           const char *docID) {
+                                           FLString docID) {
   const Callback &callback = *reinterpret_cast<Callback *>(context);
 
   Dart_CObject args;
@@ -209,17 +320,17 @@ void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
 }
 
 void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
-                                                   const char *docID,
+                                                   const CBLDart_FLString docID,
                                                    Callback *listener) {
   auto listenerToken = CBLDatabase_AddDocumentChangeListener(
-      db, docID, CBLDart_DocumentChangeListenerWrapper, (void *)listener);
+      db, CBLDart_FLStringFromDart(docID),
+      CBLDart_DocumentChangeListenerWrapper, (void *)listener);
 
   listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
 }
 
 void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
-                                           unsigned numDocs,
-                                           const char **docID) {
+                                           unsigned numDocs, FLString *docID) {
   const Callback &callback = *reinterpret_cast<Callback *>(context);
 
   auto ids = new Dart_CObject[numDocs];
@@ -227,8 +338,8 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
 
   for (size_t i = 0; i < numDocs; i++) {
     auto id = &ids[i];
-    id->type = Dart_CObject_kString;
-    id->value.as_string = const_cast<char *>(docID[i]);
+    id->type = Dart_CObject_kInt64;
+    id->value.as_int64 = reinterpret_cast<int64_t>(&docID[i]);
     argsValues[i] = id;
   }
 
@@ -251,18 +362,64 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
   listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
 }
 
+uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
+                                        CBLDart_CBLIndexSpec indexSpec,
+                                        CBLError *errorOut) {
+  switch (indexSpec.type) {
+    case kCBLDart_IndexTypeValue: {
+      CBLValueIndexConfiguration config = {
+          .expressionLanguage = indexSpec.expressionLanguage,
+          .expressions = CBLDart_FLStringFromDart(indexSpec.expressions),
+      };
+      return CBLDatabase_CreateValueIndex(db, CBLDart_FLStringFromDart(name),
+                                          config, errorOut);
+    }
+    case kCBLDart_IndexTypeFullText: {
+    }
+      CBLFullTextIndexConfiguration config = {
+          .expressionLanguage = indexSpec.expressionLanguage,
+          .expressions = CBLDart_FLStringFromDart(indexSpec.expressions),
+          .ignoreAccents = static_cast<bool>(indexSpec.ignoreAccents),
+          .language = CBLDart_FLSliceFromDart(indexSpec.language),
+      };
+      return CBLDatabase_CreateFullTextIndex(db, CBLDart_FLStringFromDart(name),
+                                             config, errorOut);
+  }
+}
+
+uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
+                                        CBLError *errorOut) {
+  return CBLDatabase_DeleteIndex(db, CBLDart_FLStringFromDart(name), errorOut);
+}
+
 // -- Query
 
-void CBLDart_CBLQuery_Explain(const CBLQuery *query, CBLDart_FLSlice *result) {
-  *result = CBLDart_FLSliceResultToDart(CBLQuery_Explain(query));
+CBLQuery *CBLDart_CBLDatabase_CreateQuery(CBLDatabase *db,
+                                          CBLQueryLanguage language,
+                                          CBLDart_FLString queryString,
+                                          int *errorPosOut,
+                                          CBLError *errorOut) {
+  return CBLDatabase_CreateQuery(db, language,
+                                 CBLDart_FLStringFromDart(queryString),
+                                 errorPosOut, errorOut);
 }
 
-void CBLDart_CBLQuery_ColumnName(const CBLQuery *query, unsigned columnIndex,
-                                 CBLDart_FLSlice *result) {
-  *result = CBLDart_FLSliceToDart(CBLQuery_ColumnName(query, columnIndex));
+CBLDart_FLStringResult CBLDart_CBLQuery_Explain(const CBLQuery *query) {
+  return CBLDart_FLStringResultToDart(CBLQuery_Explain(query));
 }
 
-void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query) {
+CBLDart_FLString CBLDart_CBLQuery_ColumnName(const CBLQuery *query,
+                                             unsigned columnIndex) {
+  return CBLDart_FLStringToDart(CBLQuery_ColumnName(query, columnIndex));
+}
+
+FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
+                                         CBLDart_FLString key) {
+  return CBLResultSet_ValueForKey(rs, CBLDart_FLStringFromDart(key));
+}
+
+void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
+                                        CBLListenerToken *token) {
   const Callback &callback = *reinterpret_cast<Callback *>(context);
 
   Dart_CObject args;
@@ -291,7 +448,29 @@ uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream, void *buf,
                             outError);
 }
 
+CBLBlob *CBLDart_CBLBlob_CreateWithStream(CBLDart_FLString contentType,
+                                          CBLBlobWriteStream *writer) {
+  return CBLBlob_CreateWithStream(CBLDart_FLStringFromDart(contentType),
+                                  writer);
+}
+
 // -- Replicator
+
+CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url) {
+  return CBLEndpoint_CreateWithURL(CBLDart_FLStringFromDart(url));
+}
+
+CBLAuthenticator *CBLDart_CBLAuth_CreatePassword(CBLDart_FLString username,
+                                                 CBLDart_FLString password) {
+  return CBLAuth_CreatePassword(CBLDart_FLStringFromDart(username),
+                                CBLDart_FLStringFromDart(password));
+}
+
+CBLAuthenticator *CBLDart_CBLAuth_CreateSession(CBLDart_FLString sessionID,
+                                                CBLDart_FLString cookieName) {
+  return CBLAuth_CreateSession(CBLDart_FLStringFromDart(sessionID),
+                               CBLDart_FLStringFromDart(cookieName));
+}
 
 struct ReplicatorCallbackWrapperContext {
   Callback *pullFilter;
@@ -304,14 +483,14 @@ std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *>
 std::mutex replicatorCallbackWrapperContexts_mutex;
 
 bool CBLDart_ReplicatorFilterWrapper(Callback *callback, CBLDocument *document,
-                                     bool isDeleted) {
+                                     CBLDocumentFlags flags) {
   Dart_CObject documentAddress;
   documentAddress.type = Dart_CObject_kInt64;
   documentAddress.value.as_int64 = reinterpret_cast<int64_t>(document);
 
   Dart_CObject isDeleted_;
-  isDeleted_.type = Dart_CObject_kBool;
-  isDeleted_.value.as_bool = isDeleted;
+  isDeleted_.type = Dart_CObject_kInt32;
+  isDeleted_.value.as_int32 = flags;
 
   Dart_CObject *argsValues[] = {&documentAddress, &isDeleted_};
 
@@ -332,31 +511,31 @@ bool CBLDart_ReplicatorFilterWrapper(Callback *callback, CBLDocument *document,
 }
 
 bool CBLDart_ReplicatorPullFilterWrapper(void *context, CBLDocument *document,
-                                         bool isDeleted) {
+                                         CBLDocumentFlags flags) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
   return CBLDart_ReplicatorFilterWrapper(wrapperContext->pullFilter, document,
-                                         isDeleted);
+                                         flags);
 }
 
 bool CBLDart_ReplicatorPushFilterWrapper(void *context, CBLDocument *document,
-                                         bool isDeleted) {
+                                         CBLDocumentFlags flags) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
   return CBLDart_ReplicatorFilterWrapper(wrapperContext->pushFilter, document,
-                                         isDeleted);
+                                         flags);
 }
 
 const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
-    void *context, const char *documentID, const CBLDocument *localDocument,
+    void *context, FLString documentID, const CBLDocument *localDocument,
     const CBLDocument *remoteDocument) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
   auto callback = wrapperContext->conflictResolver;
 
   Dart_CObject documentID_;
-  documentID_.type = Dart_CObject_kString;
-  documentID_.value.as_string = const_cast<char *>(documentID);
+  documentID_.type = Dart_CObject_kInt64;
+  documentID_.value.as_int64 = reinterpret_cast<int64_t>(&documentID);
 
   Dart_CObject local;
   if (localDocument == NULL) {
@@ -395,7 +574,7 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   return descision;
 }
 
-CBLReplicator *CBLDart_CBLReplicator_New(
+CBLReplicator *CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration *config, CBLError *errorOut) {
   CBLReplicatorConfiguration _config;
   _config.database = config->database;
@@ -403,8 +582,24 @@ CBLReplicator *CBLDart_CBLReplicator_New(
   _config.replicatorType =
       static_cast<CBLReplicatorType>(config->replicatorType);
   _config.continuous = config->continuous;
+  _config.disableAutoPurge = config->disableAutoPurge;
+  _config.maxAttempts = config->maxAttempts;
+  _config.maxAttemptWaitTime = config->maxAttemptWaitTime;
+  _config.heartbeat = config->heartbeat;
   _config.authenticator = config->authenticator;
-  _config.proxy = config->proxy;
+
+  if (config->proxy) {
+    CBLProxySettings proxy;
+    proxy.type = config->proxy->type;
+    proxy.hostname = CBLDart_FLStringFromDart(config->proxy->hostname);
+    proxy.port = config->proxy->port;
+    proxy.username = CBLDart_FLStringFromDart(config->proxy->username);
+    proxy.password = CBLDart_FLStringFromDart(config->proxy->password);
+    _config.proxy = &proxy;
+  } else {
+    _config.proxy = nullptr;
+  }
+
   _config.headers = config->headers;
   _config.pinnedServerCertificate = config->pinnedServerCertificate == NULL
                                         ? kFLSliceNull
@@ -430,7 +625,7 @@ CBLReplicator *CBLDart_CBLReplicator_New(
   context->conflictResolver = config->conflictResolver;
   _config.context = context;
 
-  auto replicator = CBLReplicator_New(&_config, errorOut);
+  auto replicator = CBLReplicator_Create(&_config, errorOut);
 
   // Associate callback context with this instance so we can it released
   // when the replicator is released.
@@ -459,9 +654,10 @@ void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
 }
 
 uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
-                                                char *docId,
+                                                CBLDart_FLString docId,
                                                 CBLError *errorOut) {
-  return CBLReplicator_IsDocumentPending(replicator, FLStr(docId), errorOut);
+  return CBLReplicator_IsDocumentPending(
+      replicator, CBLDart_FLStringFromDart(docId), errorOut);
 }
 
 void CBLDart_Replicator_ChangeListenerWrapper(
@@ -494,7 +690,7 @@ void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
   listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
 }
 
-void CBLDart_Replicator_DocumentListenerWrapper(
+void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     void *context, CBLReplicator *replicator, bool isPush,
     unsigned numDocuments, const CBLReplicatedDocument *documents) {
   auto callback = reinterpret_cast<Callback *>(context);
@@ -509,7 +705,7 @@ void CBLDart_Replicator_DocumentListenerWrapper(
     auto document = &documents[i];
     auto dartDocument = &dartDocuments[i];
 
-    dartDocument->ID = document->ID;
+    dartDocument->ID = CBLDart_FLStringToDart(document->ID);
     dartDocument->flags = document->flags;
     dartDocument->error = document->error;
   }
@@ -537,10 +733,11 @@ void CBLDart_Replicator_DocumentListenerWrapper(
   delete[] dartDocuments;
 }
 
-void CBLDart_CBLReplicator_AddDocumentListener(CBLReplicator *replicator,
-                                               Callback *listener) {
-  auto listenerToken = CBLReplicator_AddDocumentListener(
-      replicator, CBLDart_Replicator_DocumentListenerWrapper, (void *)listener);
+void CBLDart_CBLReplicator_AddDocumentReplicationListener(
+    CBLReplicator *replicator, Callback *listener) {
+  auto listenerToken = CBLReplicator_AddDocumentReplicationListener(
+      replicator, CBLDart_Replicator_DocumentReplicationListenerWrapper,
+      (void *)listener);
 
   listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
 }

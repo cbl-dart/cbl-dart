@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:collection/collection.dart';
 
 import 'blob.dart';
 import 'couchbase_lite.dart';
@@ -20,99 +18,21 @@ import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
 
-/// Encryption algorithms (available only in the Enterprise Edition).
-enum EncryptionAlgorithm {
-  /// No encryption (default).
-  none,
-
-  /// AES with 256-bit key.
-  aes256,
-}
-
-/// Encryption key specified in a [DatabaseConfiguration].
-class EncryptionKey {
-  /// Creates an [EncryptionKey].
-  EncryptionKey({
-    this.algorithm = EncryptionAlgorithm.none,
-    Uint8List? bytes,
-  })  : bytes = bytes ?? Uint8List(encryptionKeyByteLength),
-        assert(bytes == null || bytes.lengthInBytes == encryptionKeyByteLength);
-
-  /// The encryption algorithm to use.
-  final EncryptionAlgorithm algorithm;
-
-  /// The raw key data.
-  final Uint8List bytes;
-
-  EncryptionKey copyWith({
-    EncryptionAlgorithm? algorithm,
-    Uint8List? bytes,
-  }) =>
-      EncryptionKey(
-        algorithm: algorithm ?? this.algorithm,
-        bytes: bytes ?? this.bytes,
-      );
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is EncryptionKey &&
-          runtimeType == other.runtimeType &&
-          algorithm == other.algorithm &&
-          bytes == other.bytes;
-
-  @override
-  int get hashCode => algorithm.hashCode ^ bytes.hashCode;
-
-  @override
-  String toString() => 'EncryptionKey(algorithm: $algorithm, bytes: REDACTED)';
-}
-
-/// Flags for how to open a database.
-enum DatabaseFlag {
-  /// Create the file if it doesn't exist.
-  create,
-
-  /// Open file read-only.
-  readOnly,
-
-  /// Disable upgrading an older-version database.
-  noUpgrade,
-}
-
 /// Database configuration options.
 class DatabaseConfiguration {
   /// Creates a [DatabaseConfiguration].
   DatabaseConfiguration({
     this.directory,
-    this.flags = const {DatabaseFlag.create},
-    this.encryptionKey,
   });
 
   /// The parent directory of the database.
   final String? directory;
 
-  /// Options for opening the database.
-  final Set<DatabaseFlag> flags;
-
-  /// The database's encryption key (if any).
-  final EncryptionKey? encryptionKey;
-
   DatabaseConfiguration copyWith({
     String? directory,
-    Set<DatabaseFlag>? flags,
-    EncryptionKey? encryptionKey,
   }) =>
       DatabaseConfiguration(
         directory: directory ?? this.directory,
-        flags: flags ?? this.flags,
-        encryptionKey: encryptionKey ?? this.encryptionKey,
-      );
-
-  DatabaseConfiguration _withoutKeyMaterial() => copyWith(
-        encryptionKey: encryptionKey?.copyWith(
-          bytes: Uint8List(encryptionKeyByteLength),
-        ),
       );
 
   @override
@@ -120,19 +40,14 @@ class DatabaseConfiguration {
       identical(this, other) ||
       other is DatabaseConfiguration &&
           runtimeType == other.runtimeType &&
-          directory == other.directory &&
-          const SetEquality<DatabaseFlag>().equals(flags, other.flags) &&
-          encryptionKey == other.encryptionKey;
+          directory == other.directory;
 
   @override
-  int get hashCode =>
-      directory.hashCode ^ flags.hashCode ^ encryptionKey.hashCode;
+  int get hashCode => directory.hashCode;
 
   @override
   String toString() => 'DatabaseConfiguration('
-      'directory: $directory, '
-      'flags: $flags, '
-      'encryptionKey: $encryptionKey'
+      'directory: $directory'
       ')';
 }
 
@@ -185,7 +100,7 @@ abstract class Index {
   ///
   /// See:
   /// - [JSON Query - Indexes](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema#9-indexes)
-  String get keyExpressions;
+  String get expressions;
 }
 
 /// Value indexes speed up queries by making it possible to look up property
@@ -195,23 +110,23 @@ abstract class Index {
 /// supported; the first is the primary key, second is secondary. Expressions
 /// must evaluate to scalar types (boolean, number, string).
 class ValueIndex extends Index {
-  ValueIndex(this.keyExpressions);
+  ValueIndex(this.expressions);
 
   @override
-  final String keyExpressions;
+  final String expressions;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ValueIndex &&
           runtimeType == other.runtimeType &&
-          keyExpressions == other.keyExpressions;
+          expressions == other.expressions;
 
   @override
-  int get hashCode => keyExpressions.hashCode;
+  int get hashCode => expressions.hashCode;
 
   @override
-  String toString() => 'ValueIndex($keyExpressions)';
+  String toString() => 'ValueIndex($expressions)';
 }
 
 /// Full-Text Search (FTS) indexes enable fast search of natural-language words
@@ -223,13 +138,13 @@ class ValueIndex extends Index {
 /// allowed, and it must evaluate to a string.
 class FullTextIndex extends Index {
   FullTextIndex(
-    this.keyExpressions, {
+    this.expressions, {
     this.ignoreAccents = false,
     this.language,
   });
 
   @override
-  final String keyExpressions;
+  final String expressions;
 
   /// Should diacritical marks (accents) be ignored?
   /// Defaults to `false`. Generally this should be left `false` for non-English
@@ -257,16 +172,16 @@ class FullTextIndex extends Index {
       identical(this, other) ||
       other is FullTextIndex &&
           runtimeType == other.runtimeType &&
-          keyExpressions == other.keyExpressions &&
+          expressions == other.expressions &&
           ignoreAccents == other.ignoreAccents &&
           language == other.language;
 
   @override
   int get hashCode =>
-      keyExpressions.hashCode ^ ignoreAccents.hashCode ^ language.hashCode;
+      expressions.hashCode ^ ignoreAccents.hashCode ^ language.hashCode;
 
   @override
-  String toString() => 'FullTextIndex($keyExpressions, '
+  String toString() => 'FullTextIndex($expressions, '
       'ignoreAccents: $ignoreAccents, '
       'language: $language)';
 }
@@ -332,9 +247,6 @@ abstract class Database with ClosableResource {
         fromPath,
         toName,
         config?.directory,
-        config?.flags,
-        config?.encryptionKey?.algorithm,
-        config?.encryptionKey?.bytes,
       ));
 
   /// Deletes a database file.
@@ -374,9 +286,6 @@ abstract class Database with ClosableResource {
       final result = await worker.execute(OpenDatabase(
         name,
         config?.directory,
-        config?.flags,
-        config?.encryptionKey?.algorithm,
-        config?.encryptionKey?.bytes,
       ));
       return DatabaseImpl(name, config, result.pointer, worker);
     } catch (error) {
@@ -431,14 +340,6 @@ abstract class Database with ClosableResource {
   /// This must be called after [beginBatch].
   Future<void> endBatch();
 
-  /// Encrypts or decrypts a database, or changes its encryption key.
-  ///
-  /// If [encryptionKey] is `null`, or its [EncryptionKey.algorithm] is
-  /// [EncryptionAlgorithm.none], the database will be decrypted.
-  /// Otherwise the database will be encrypted with that key; if it was already
-  /// encrypted, it will be re-encrypted with the new key.
-  Future<void> rekey([EncryptionKey? encryptionKey]);
-
   // === Documents =============================================================
 
   /// Reads a document from the database, creating a new (immutable) [Document]
@@ -481,13 +382,21 @@ abstract class Database with ClosableResource {
     SaveConflictHandler conflictHandler,
   );
 
+  /// Deletes this document from the database.
+  ///
+  /// Deletions are replicated.
+  Future<void> deleteDocument(
+    Document doc, [
+    ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
+  ]);
+
   /// Purges a document, given only its [id].
   ///
   /// This removes all traces of the document from the database. Purges are not
   /// replicated. If the document is changed on a server, it will be re-created
   /// when pulled.
   ///
-  /// To delete a [Document], load it and call its [Document.delete] method.
+  /// To delete a [Document], use [deleteDocument] method.
   Future<bool> purgeDocumentById(String id);
 
   /// Returns the time, if any, at which a given document will expire and be
@@ -587,7 +496,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
     DatabaseConfiguration? config,
     Pointer<CBLDatabase> pointer,
     Worker worker,
-  )   : _config = config?._withoutKeyMaterial(),
+  )   : _config = config,
         super(CblRefCountedWorkerObject(
           pointer,
           worker,
@@ -630,19 +539,11 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
 
   @override
   Future<void> beginBatch() =>
-      use(() => native.execute((pointer) => BeginDatabaseBatch(pointer)));
+      use(() => native.execute((pointer) => BeginDatabaseTransaction(pointer)));
 
   @override
-  Future<void> endBatch() =>
-      use(() => native.execute((pointer) => EndDatabaseBatch(pointer)));
-
-  @override
-  Future<void> rekey([EncryptionKey? encryptionKey]) =>
-      use(() => native.execute((pointer) => RekeyDatabase(
-            pointer,
-            encryptionKey?.algorithm,
-            encryptionKey?.bytes,
-          )));
+  Future<void> endBatch() => use(
+      () => native.execute((pointer) => EndDatabaseTransaction(pointer, true)));
 
   WorkerRequest Function(Pointer<CBLDatabase>) _createCloseRequest =
       (pointer) => CloseDatabase(pointer);
@@ -680,16 +581,12 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
       use(() => native
-          .execute((pointer) => SaveDatabaseDocument(
+          .execute((pointer) => SaveDatabaseDocumentWithConcurrencyControl(
                 pointer,
                 doc.native.pointer.cast(),
                 concurrency,
               ))
-          .then((address) => createDocument(
-                pointer: address.pointer,
-                worker: native.worker,
-                retain: false,
-              )));
+          .then((_) => doc));
 
   @override
   Future<Document> saveDocumentResolving(
@@ -739,19 +636,28 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
           invokeHandler();
         });
 
-        return native
-            .execute((pointer) => SaveDatabaseDocumentResolving(
+        await native
+            .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
                   pointer,
                   doc.native.pointer.cast(),
                   callback.native.pointer,
                 ))
-            .then((address) => createDocument(
-                  pointer: address.pointer,
-                  worker: native.worker,
-                  retain: false,
-                ))
             .whenComplete(callback.close);
+
+        return doc;
       });
+
+  @override
+  Future<void> deleteDocument(
+    Document doc, [
+    ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
+  ]) =>
+      use(() =>
+          native.execute((pointer) => DeleteDocumentWithConcurrencyControl(
+                pointer,
+                doc.native.pointer,
+                concurrency,
+              )));
 
   @override
   Future<bool> purgeDocumentById(String id) => use(() =>
@@ -792,7 +698,9 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
               native.pointerUnsafe.cast(),
               callback.native.pointerUnsafe,
             ),
-            createEvent: (_, arguments) => List.from(arguments),
+            createEvent: (_, arguments) =>
+                DatabaseChangeCallbackMessage.fromArguments(arguments)
+                    .documentIds,
           ).stream);
 
   // === Queries ===============================================================

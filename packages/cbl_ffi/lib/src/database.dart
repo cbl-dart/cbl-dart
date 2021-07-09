@@ -1,5 +1,4 @@
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
@@ -8,62 +7,11 @@ import 'bindings.dart';
 import 'document.dart';
 import 'fleece.dart';
 import 'native_callback.dart';
+import 'query.dart';
 import 'utils.dart';
 
-const encryptionKeyByteLength = 32;
-
-enum CBLEncryptionAlgorithm {
-  none,
-  aes256,
-}
-
-extension on CBLEncryptionAlgorithm {
-  int toInt() => CBLEncryptionAlgorithm.values.indexOf(this);
-}
-
-extension on int {
-  CBLEncryptionAlgorithm toEncryptionAlgorithm() =>
-      CBLEncryptionAlgorithm.values[this];
-}
-
-class CBLEncryptionKey extends Struct {
-  @Uint32()
-  external int _algorithm;
-
-  external Pointer<Uint8> bytes;
-}
-
-extension CBLEncryptionKeyExt on CBLEncryptionKey {
-  CBLEncryptionAlgorithm get algorithm => _algorithm.toEncryptionAlgorithm();
-
-  set algorithm(CBLEncryptionAlgorithm value) => _algorithm = value.toInt();
-}
-
-class CBLDatabaseFlag extends Option {
-  const CBLDatabaseFlag._(String name, int bits) : super(name, bits);
-
-  static const create = CBLDatabaseFlag._('create', 1);
-  static const readOnly = CBLDatabaseFlag._('readOnly', 2);
-  static const noUpgrade = CBLDatabaseFlag._('noUpgrade', 4);
-
-  static const values = [create, readOnly, noUpgrade];
-
-  static Set<CBLDatabaseFlag> _parseCFlags(int flags) =>
-      values.parseCFlags(flags);
-}
-
-class CBLDatabaseConfiguration extends Struct {
-  external Pointer<Utf8> directory;
-
-  @Uint32()
-  external int _flags;
-
-  external Pointer<CBLEncryptionKey> encryptionKey;
-}
-
-extension CBLDatabaseConfigurationExt on CBLDatabaseConfiguration {
-  Set<CBLDatabaseFlag> get flags => CBLDatabaseFlag._parseCFlags(_flags);
-  set flags(Set<CBLDatabaseFlag> value) => _flags = value.toCFlags();
+class CBLDart_CBLDatabaseConfiguration extends Struct {
+  external FLString directory;
 }
 
 enum CBLConcurrencyControl {
@@ -77,42 +25,45 @@ extension CBLConcurrencyControlExt on CBLConcurrencyControl {
 
 class CBLDatabase extends Opaque {}
 
-typedef CBL_CopyDatabase_C = Uint8 Function(
-  Pointer<Utf8> fromPath,
-  Pointer<Utf8> toPath,
-  Pointer<CBLDatabaseConfiguration> config,
+typedef CBLDart_CBLDatabaseConfiguration_Default
+    = CBLDart_CBLDatabaseConfiguration Function();
+
+typedef CBLDart_CBL_CopyDatabase_C = Uint8 Function(
+  FLString fromPath,
+  FLString toPath,
+  Pointer<CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
-typedef CBL_CopyDatabase = int Function(
-  Pointer<Utf8> fromPath,
-  Pointer<Utf8> toPath,
-  Pointer<CBLDatabaseConfiguration> config,
+typedef CBLDart_CBL_CopyDatabase = int Function(
+  FLString fromPath,
+  FLString toPath,
+  Pointer<CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBL_DeleteDatabase_C = Uint8 Function(
-  Pointer<Utf8> name,
-  Pointer<Utf8> inDirectory,
+typedef CBLDart_CBL_DeleteDatabase_C = Uint8 Function(
+  FLString name,
+  FLString inDirectory,
   Pointer<CBLError> outError,
 );
-typedef CBL_DeleteDatabase = int Function(
-  Pointer<Utf8> name,
-  Pointer<Utf8> inDirectory,
+typedef CBLDart_CBL_DeleteDatabase = int Function(
+  FLString name,
+  FLString inDirectory,
   Pointer<CBLError> outError,
 );
 
-typedef CBLDatabase_Exists_C = Uint8 Function(
-  Pointer<Utf8> name,
-  Pointer<Utf8> inDirectory,
+typedef CBLDart_CBLDatabase_Exists_C = Uint8 Function(
+  FLString name,
+  FLString inDirectory,
 );
-typedef CBLDatabase_Exists = int Function(
-  Pointer<Utf8> name,
-  Pointer<Utf8> inDirectory,
+typedef CBLDart_CBLDatabase_Exists = int Function(
+  FLString name,
+  FLString inDirectory,
 );
 
-typedef CBLDatabase_Open = Pointer<CBLDatabase> Function(
-  Pointer<Utf8> name,
-  Pointer<CBLDatabaseConfiguration> config,
+typedef CBLDart_CBLDatabase_Open = Pointer<CBLDatabase> Function(
+  FLString name,
+  Pointer<CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
@@ -155,40 +106,29 @@ typedef CBLDatabase_PerformMaintenance = int Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_BeginBatch_C = Uint8 Function(
+typedef CBLDatabase_BeginTransaction_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_BeginBatch = int Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLError> errorOut,
-);
-
-typedef CBLDatabase_EndBatch_C = Uint8 Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLError> errorOut,
-);
-typedef CBLDatabase_EndBatch = int Function(
+typedef CBLDatabase_BeginTransaction = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_Rekey_C = Uint8 Function(
+typedef CBLDatabase_EndTransaction_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLEncryptionKey> encryptionKey,
+  Uint8 commit,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_Rekey = int Function(
+typedef CBLDatabase_EndTransaction = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<CBLEncryptionKey> encryptionKey,
+  int commit,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_Name = Pointer<Utf8> Function(
-  Pointer<CBLDatabase> db,
-);
+typedef CBLDart_CBLDatabase_Name = FLString Function(Pointer<CBLDatabase> db);
 
-typedef CBLDatabase_Path = Pointer<Utf8> Function(
+typedef CBLDart_CBLDatabase_Path = FLStringResult Function(
   Pointer<CBLDatabase> db,
 );
 
@@ -199,32 +139,31 @@ typedef CBLDatabase_Count = int Function(
   Pointer<CBLDatabase> db,
 );
 
-typedef CBLDatabase_Config_C = Void Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLDatabaseConfiguration> config,
-);
-typedef CBLDatabase_Config = void Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLDatabaseConfiguration> config,
+typedef CBLDart_CBLDatabase_Config = CBLDart_CBLDatabaseConfiguration Function(
+  Pointer<CBLDatabase> dbm,
 );
 
-typedef CBLDatabase_GetDocument = Pointer<CBLDocument> Function(
+typedef CBLDart_CBLDatabase_GetDocument = Pointer<CBLDocument> Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  FLString docId,
+  Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_GetMutableDocument = Pointer<CBLMutableDocument> Function(
+typedef CBLDart_CBLDatabase_GetMutableDocument = Pointer<CBLMutableDocument>
+    Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  FLString docId,
+  Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_SaveDocument_C = Pointer<CBLDocument> Function(
+typedef CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C = Uint8
+    Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Uint8 concurrency,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_SaveDocument = Pointer<CBLDocument> Function(
+typedef CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   int concurrency,
@@ -247,64 +186,75 @@ class SaveDocumentResolvingCallbackMessage {
   final Pointer<CBLDocument>? conflictingDocument;
 }
 
-typedef CBLDart_CBLDatabase_SaveDocumentResolving_C = Pointer<CBLDocument>
-    Function(
+typedef CBLDart_CBLDatabase_SaveDocumentWithConflictHandler_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Pointer<Callback> conflictHandler,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_SaveDocumentResolving = Pointer<CBLDocument>
-    Function(
+typedef CBLDart_CBLDatabase_SaveDocumentWithConflictHandler = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Pointer<Callback> conflictHandler,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
+typedef CBLDatabase_DeleteDocumentWithConcurrencyControl_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  Pointer<CBLDocument> document,
+  Uint8 concurrency,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_PurgeDocumentByID = int Function(
+typedef CBLDatabase_DeleteDocumentWithConcurrencyControl = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
-  Pointer<CBLError> errorOut,
-);
-
-typedef CBLDatabase_GetDocumentExpiration_C = Int64 Function(
-  Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
-  Pointer<CBLError> errorOut,
-);
-typedef CBLDatabase_GetDocumentExpiration = int Function(
-  Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  Pointer<CBLDocument> document,
+  int concurrency,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
+typedef CBLDart_CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  FLString docId,
+  Pointer<CBLError> errorOut,
+);
+typedef CBLDart_CBLDatabase_PurgeDocumentByID = int Function(
+  Pointer<CBLDatabase> db,
+  FLString docId,
+  Pointer<CBLError> errorOut,
+);
+
+typedef CBLDart_CBLDatabase_GetDocumentExpiration_C = Int64 Function(
+  Pointer<CBLDatabase> db,
+  FLString docId,
+  Pointer<CBLError> errorOut,
+);
+typedef CBLDart_CBLDatabase_GetDocumentExpiration = int Function(
+  Pointer<CBLDatabase> db,
+  FLString docId,
+  Pointer<CBLError> errorOut,
+);
+
+typedef CBLDart_CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
+  Pointer<CBLDatabase> db,
+  FLString docId,
   Int64 expiration,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_SetDocumentExpiration = int Function(
+typedef CBLDart_CBLDatabase_SetDocumentExpiration = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  FLString docId,
   int expiration,
   Pointer<CBLError> errorOut,
 );
 
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener_C = Void Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  FLString docId,
   Pointer<Callback> listener,
 );
 typedef CBLDart_CBLDatabase_AddDocumentChangeListener = void Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> docId,
+  FLString docId,
   Pointer<Callback> listener,
 );
 
@@ -317,82 +267,103 @@ typedef CBLDart_CBLDatabase_AddChangeListener = void Function(
   Pointer<Callback> listener,
 );
 
-enum CBLIndexType {
+class DatabaseChangeCallbackMessage {
+  DatabaseChangeCallbackMessage(this.documentIds);
+
+  DatabaseChangeCallbackMessage.fromArguments(List<dynamic> message)
+      : this(message
+            .cast<int>()
+            .map((address) =>
+                Pointer<FLString>.fromAddress(address).ref.toDartString()!)
+            .toList());
+
+  final List<String> documentIds;
+}
+
+enum CBLdart_IndexType {
   value,
   fullText,
 }
 
-extension on CBLIndexType {
-  int toInt() => CBLIndexType.values.indexOf(this);
+extension on CBLdart_IndexType {
+  int toInt() => CBLdart_IndexType.values.indexOf(this);
 }
 
 extension on int {
-  CBLIndexType toIndexType() => CBLIndexType.values[this];
+  CBLdart_IndexType toIndexType() => CBLdart_IndexType.values[this];
 }
 
-class CBLIndexSpec extends Struct {
-  @Uint32()
+class CBLDart_CBLIndexSpec extends Struct {
+  @Uint8()
   external int _type;
 
-  external Pointer<Utf8> keyExpression;
+  @Uint32()
+  // ignore: unused_field
+  external int _expressionLanguage;
+
+  external FLString expressions;
 
   @Uint8()
+  // ignore: unused_field
   external int _ignoreAccents;
 
-  external Pointer<Utf8> language;
+  external FLString language;
 }
 
-extension CBLIndexSpecExt on CBLIndexSpec {
-  CBLIndexType get type => _type.toIndexType();
-  set type(CBLIndexType value) => _type = value.toInt();
-  bool get ignoreAccents => _ignoreAccents.toBool();
+// ignore: camel_case_extensions
+extension CBLDart_CBLIndexSpecExt on CBLDart_CBLIndexSpec {
+  CBLdart_IndexType get type => _type.toIndexType();
+  set type(CBLdart_IndexType value) => _type = value.toInt();
+  set expressionLanguage(CBLQueryLanguage value) =>
+      _expressionLanguage = value.toInt();
   set ignoreAccents(bool value) => _ignoreAccents = value.toInt();
 }
 
-typedef CBLDatabase_CreateIndex_C = Uint8 Function(
+typedef CBLDart_CBLDatabase_CreateIndex_C = Uint8 Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> name,
-  CBLIndexSpec indexSpec,
+  FLString name,
+  CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_CreateIndex = int Function(
+typedef CBLDart_CBLDatabase_CreateIndex = int Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> name,
-  CBLIndexSpec indexSpec,
-  Pointer<CBLError> errorOut,
-);
-
-typedef CBLDatabase_DeleteIndex_C = Uint8 Function(
-  Pointer<CBLDatabase> db,
-  Pointer<Utf8> name,
-  Pointer<CBLError> errorOut,
-);
-typedef CBLDatabase_DeleteIndex = int Function(
-  Pointer<CBLDatabase> db,
-  Pointer<Utf8> name,
+  FLString name,
+  CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_IndexNames = Pointer<FLArray> Function(
+typedef CBLDart_CBLDatabase_DeleteIndex_C = Uint8 Function(
+  Pointer<CBLDatabase> db,
+  FLString name,
+  Pointer<CBLError> errorOut,
+);
+typedef CBLDart_CBLDatabase_DeleteIndex = int Function(
+  Pointer<CBLDatabase> db,
+  FLString name,
+  Pointer<CBLError> errorOut,
+);
+
+typedef CBLDatabase_GetIndexNames = Pointer<FLArray> Function(
   Pointer<CBLDatabase> db,
 );
 
 class DatabaseBindings extends Bindings {
   DatabaseBindings(Bindings parent) : super(parent) {
-    _copyDatabase =
-        libs.cbl.lookupFunction<CBL_CopyDatabase_C, CBL_CopyDatabase>(
-      'CBL_CopyDatabase',
+    _copyDatabase = libs.cblDart
+        .lookupFunction<CBLDart_CBL_CopyDatabase_C, CBLDart_CBL_CopyDatabase>(
+      'CBLDart_CBL_CopyDatabase',
     );
-    _deleteDatabase =
-        libs.cbl.lookupFunction<CBL_DeleteDatabase_C, CBL_DeleteDatabase>(
-      'CBL_DeleteDatabase',
+    _deleteDatabase = libs.cblDart.lookupFunction<CBLDart_CBL_DeleteDatabase_C,
+        CBLDart_CBL_DeleteDatabase>(
+      'CBLDart_CBL_DeleteDatabase',
     );
-    _databaseExists =
-        libs.cbl.lookupFunction<CBLDatabase_Exists_C, CBLDatabase_Exists>(
-      'CBL_DatabaseExists',
+    _databaseExists = libs.cblDart.lookupFunction<CBLDart_CBLDatabase_Exists_C,
+        CBLDart_CBLDatabase_Exists>(
+      'CBLDart_CBL_DatabaseExists',
     );
-    _open = libs.cbl.lookupFunction<CBLDatabase_Open, CBLDatabase_Open>(
-      'CBLDatabase_Open',
+    _open = libs.cblDart
+        .lookupFunction<CBLDart_CBLDatabase_Open, CBLDart_CBLDatabase_Open>(
+      'CBLDart_CBLDatabase_Open',
     );
     _close = libs.cbl.lookupFunction<CBLDatabase_Close_C, CBLDatabase_Close>(
       'CBLDatabase_Close',
@@ -404,58 +375,67 @@ class DatabaseBindings extends Bindings {
         CBLDatabase_PerformMaintenance_C, CBLDatabase_PerformMaintenance>(
       'CBLDatabase_PerformMaintenance',
     );
-    _beginBatch = libs.cbl
-        .lookupFunction<CBLDatabase_BeginBatch_C, CBLDatabase_BeginBatch>(
-      'CBLDatabase_BeginBatch',
+    _beginTransaction = libs.cbl.lookupFunction<CBLDatabase_BeginTransaction_C,
+        CBLDatabase_BeginTransaction>(
+      'CBLDatabase_BeginTransaction',
     );
-    _endBatch =
-        libs.cbl.lookupFunction<CBLDatabase_EndBatch_C, CBLDatabase_EndBatch>(
-      'CBLDatabase_EndBatch',
+    _endTransaction = libs.cbl.lookupFunction<CBLDatabase_EndTransaction_C,
+        CBLDatabase_EndTransaction>(
+      'CBLDatabase_EndTransaction',
     );
-    _rekey = libs.cblEE?.lookupFunction<CBLDatabase_Rekey_C, CBLDatabase_Rekey>(
-      'CBLDatabase_Rekey',
+    _name = libs.cblDart
+        .lookupFunction<CBLDart_CBLDatabase_Name, CBLDart_CBLDatabase_Name>(
+      'CBLDart_CBLDatabase_Name',
     );
-    _name = libs.cbl.lookupFunction<CBLDatabase_Name, CBLDatabase_Name>(
-      'CBLDatabase_Name',
-    );
-    _path = libs.cbl.lookupFunction<CBLDatabase_Path, CBLDatabase_Path>(
-      'CBLDatabase_Path',
+    _path = libs.cblDart
+        .lookupFunction<CBLDart_CBLDatabase_Path, CBLDart_CBLDatabase_Path>(
+      'CBLDart_CBLDatabase_Path',
     );
     _count = libs.cbl.lookupFunction<CBLDatabase_Count_C, CBLDatabase_Count>(
       'CBLDatabase_Count',
     );
-    _config =
-        libs.cblDart.lookupFunction<CBLDatabase_Config_C, CBLDatabase_Config>(
+    _config = libs.cblDart
+        .lookupFunction<CBLDart_CBLDatabase_Config, CBLDart_CBLDatabase_Config>(
       'CBLDart_CBLDatabase_Config',
     );
-    _getDocument = libs.cbl
-        .lookupFunction<CBLDatabase_GetDocument, CBLDatabase_GetDocument>(
-      'CBLDatabase_GetDocument',
+    _getDocument = libs.cblDart.lookupFunction<CBLDart_CBLDatabase_GetDocument,
+        CBLDart_CBLDatabase_GetDocument>(
+      'CBLDart_CBLDatabase_GetDocument',
     );
-    _getMutableDocument = libs.cbl.lookupFunction<
-        CBLDatabase_GetMutableDocument, CBLDatabase_GetMutableDocument>(
-      'CBLDatabase_GetMutableDocument',
+    _getMutableDocument = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_GetMutableDocument,
+        CBLDart_CBLDatabase_GetMutableDocument>(
+      'CBLDart_CBLDatabase_GetMutableDocument',
     );
-    _saveDocument = libs.cbl
-        .lookupFunction<CBLDatabase_SaveDocument_C, CBLDatabase_SaveDocument>(
-      'CBLDatabase_SaveDocument',
+    _saveDocumentWithConcurrencyControl = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C,
+        CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl>(
+      'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
     );
-    _saveDocumentResolving = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_SaveDocumentResolving_C,
-        CBLDart_CBLDatabase_SaveDocumentResolving>(
-      'CBLDart_CBLDatabase_SaveDocumentResolving',
+    _saveDocumentWithConflictHandler = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_SaveDocumentWithConflictHandler_C,
+        CBLDart_CBLDatabase_SaveDocumentWithConflictHandler>(
+      'CBLDart_CBLDatabase_SaveDocumentWithConflictHandler',
     );
-    _purgeDocumentByID = libs.cbl.lookupFunction<
-        CBLDatabase_PurgeDocumentByID_C, CBLDatabase_PurgeDocumentByID>(
-      'CBLDatabase_PurgeDocumentByID',
+    _deleteDocumentWithConcurrencyControl = libs.cbl.lookupFunction<
+        CBLDatabase_DeleteDocumentWithConcurrencyControl_C,
+        CBLDatabase_DeleteDocumentWithConcurrencyControl>(
+      'CBLDatabase_DeleteDocumentWithConcurrencyControl',
     );
-    _getDocumentExpiration = libs.cbl.lookupFunction<
-        CBLDatabase_GetDocumentExpiration_C, CBLDatabase_GetDocumentExpiration>(
-      'CBLDatabase_GetDocumentExpiration',
+    _purgeDocumentByID = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_PurgeDocumentByID_C,
+        CBLDart_CBLDatabase_PurgeDocumentByID>(
+      'CBLDart_CBLDatabase_PurgeDocumentByID',
     );
-    _setDocumentExpiration = libs.cbl.lookupFunction<
-        CBLDatabase_SetDocumentExpiration_C, CBLDatabase_SetDocumentExpiration>(
-      'CBLDatabase_SetDocumentExpiration',
+    _getDocumentExpiration = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_GetDocumentExpiration_C,
+        CBLDart_CBLDatabase_GetDocumentExpiration>(
+      'CBLDart_CBLDatabase_GetDocumentExpiration',
+    );
+    _setDocumentExpiration = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_SetDocumentExpiration_C,
+        CBLDart_CBLDatabase_SetDocumentExpiration>(
+      'CBLDart_CBLDatabase_SetDocumentExpiration',
     );
     _addDocumentChangeListener = libs.cblDart.lookupFunction<
         CBLDart_CBLDatabase_AddDocumentChangeListener_C,
@@ -467,66 +447,63 @@ class DatabaseBindings extends Bindings {
         CBLDart_CBLDatabase_AddChangeListener>(
       'CBLDart_CBLDatabase_AddChangeListener',
     );
-    _createIndex = libs.cbl
-        .lookupFunction<CBLDatabase_CreateIndex_C, CBLDatabase_CreateIndex>(
-      'CBLDatabase_CreateIndex',
+    _createIndex = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_CreateIndex_C, CBLDart_CBLDatabase_CreateIndex>(
+      'CBLDart_CBLDatabase_CreateIndex',
     );
-    _deleteIndex = libs.cbl
-        .lookupFunction<CBLDatabase_DeleteIndex_C, CBLDatabase_DeleteIndex>(
-      'CBLDatabase_DeleteIndex',
+    _deleteIndex = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabase_DeleteIndex_C, CBLDart_CBLDatabase_DeleteIndex>(
+      'CBLDart_CBLDatabase_DeleteIndex',
     );
-    _indexNames =
-        libs.cbl.lookupFunction<CBLDatabase_IndexNames, CBLDatabase_IndexNames>(
-      'CBLDatabase_IndexNames',
+    _indexNames = libs.cbl
+        .lookupFunction<CBLDatabase_GetIndexNames, CBLDatabase_GetIndexNames>(
+      'CBLDatabase_GetIndexNames',
     );
   }
 
-  late final CBL_CopyDatabase _copyDatabase;
-  late final CBL_DeleteDatabase _deleteDatabase;
-  late final CBLDatabase_Exists _databaseExists;
-  late final CBLDatabase_Open _open;
+  late final CBLDart_CBL_CopyDatabase _copyDatabase;
+  late final CBLDart_CBL_DeleteDatabase _deleteDatabase;
+  late final CBLDart_CBLDatabase_Exists _databaseExists;
+  late final CBLDart_CBLDatabase_Open _open;
   late final CBLDatabase_Close _close;
   late final CBLDatabase_Delete _delete;
   late final CBLDatabase_PerformMaintenance _performMaintenance;
-  late final CBLDatabase_BeginBatch _beginBatch;
-  late final CBLDatabase_EndBatch _endBatch;
-  late final CBLDatabase_Rekey? _rekey;
-  late final CBLDatabase_Name _name;
-  late final CBLDatabase_Name _path;
+  late final CBLDatabase_BeginTransaction _beginTransaction;
+  late final CBLDatabase_EndTransaction _endTransaction;
+  late final CBLDart_CBLDatabase_Name _name;
+  late final CBLDart_CBLDatabase_Path _path;
   late final CBLDatabase_Count _count;
-  late final CBLDatabase_Config _config;
-  late final CBLDatabase_GetDocument _getDocument;
-  late final CBLDatabase_GetMutableDocument _getMutableDocument;
-  late final CBLDatabase_SaveDocument _saveDocument;
-  late final CBLDart_CBLDatabase_SaveDocumentResolving _saveDocumentResolving;
-  late final CBLDatabase_PurgeDocumentByID _purgeDocumentByID;
-  late final CBLDatabase_GetDocumentExpiration _getDocumentExpiration;
-  late final CBLDatabase_SetDocumentExpiration _setDocumentExpiration;
+  late final CBLDart_CBLDatabase_Config _config;
+  late final CBLDart_CBLDatabase_GetDocument _getDocument;
+  late final CBLDart_CBLDatabase_GetMutableDocument _getMutableDocument;
+  late final CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl
+      _saveDocumentWithConcurrencyControl;
+  late final CBLDart_CBLDatabase_SaveDocumentWithConflictHandler
+      _saveDocumentWithConflictHandler;
+  late final CBLDatabase_DeleteDocumentWithConcurrencyControl
+      _deleteDocumentWithConcurrencyControl;
+  late final CBLDart_CBLDatabase_PurgeDocumentByID _purgeDocumentByID;
+  late final CBLDart_CBLDatabase_GetDocumentExpiration _getDocumentExpiration;
+  late final CBLDart_CBLDatabase_SetDocumentExpiration _setDocumentExpiration;
   late final CBLDart_CBLDatabase_AddDocumentChangeListener
       _addDocumentChangeListener;
   late final CBLDart_CBLDatabase_AddChangeListener _addChangeListener;
-  late final CBLDatabase_CreateIndex _createIndex;
-  late final CBLDatabase_DeleteIndex _deleteIndex;
-  late final CBLDatabase_IndexNames _indexNames;
+  late final CBLDart_CBLDatabase_CreateIndex _createIndex;
+  late final CBLDart_CBLDatabase_DeleteIndex _deleteIndex;
+  late final CBLDatabase_GetIndexNames _indexNames;
 
   bool copyDatabase(
     String fromPath,
     String toPath,
     String? directory,
-    Set<CBLDatabaseFlag>? flags,
-    CBLEncryptionAlgorithm? encryptionAlgorithm,
-    Uint8List? encryptionKeyBytes,
   ) {
     return withZoneArena(() {
       return stringTable.autoFree(() {
         return _copyDatabase(
-          stringTable.cString(fromPath),
-          stringTable.cString(toPath),
+          stringTable.flString(fromPath).ref,
+          stringTable.flString(toPath).ref,
           _createConfig(
             directory,
-            flags,
-            encryptionAlgorithm,
-            encryptionKeyBytes,
           ),
           globalCBLError,
         ).checkCBLError().toBool();
@@ -537,8 +514,8 @@ class DatabaseBindings extends Bindings {
   bool deleteDatabase(String name, String? inDirectory) {
     return stringTable.autoFree(() {
       return _deleteDatabase(
-        stringTable.cString(name),
-        inDirectory == null ? nullptr : stringTable.cString(inDirectory),
+        stringTable.flString(name).ref,
+        stringTable.flString(inDirectory).ref,
         globalCBLError,
       ).checkCBLError().toBool();
     });
@@ -547,8 +524,8 @@ class DatabaseBindings extends Bindings {
   bool databaseExists(String name, String? inDirectory) {
     return stringTable.autoFree(() {
       return _databaseExists(
-        stringTable.cString(name),
-        inDirectory == null ? nullptr : stringTable.cString(inDirectory),
+        stringTable.flString(name).ref,
+        stringTable.flString(inDirectory).ref,
       ).toBool();
     });
   }
@@ -556,19 +533,13 @@ class DatabaseBindings extends Bindings {
   Pointer<CBLDatabase> open(
     String name,
     String? directory,
-    Set<CBLDatabaseFlag>? flags,
-    CBLEncryptionAlgorithm? encryptionAlgorithm,
-    Uint8List? encryptionKeyBytes,
   ) {
     return withZoneArena(() {
       return stringTable.autoFree(() {
         return _open(
-          stringTable.cString(name),
+          stringTable.flString(name).ref,
           _createConfig(
             directory,
-            flags,
-            encryptionAlgorithm,
-            encryptionKeyBytes,
           ),
           globalCBLError,
         ).checkCBLError();
@@ -588,47 +559,28 @@ class DatabaseBindings extends Bindings {
     _performMaintenance(db, type.toInt(), globalCBLError).checkCBLError();
   }
 
-  void beginBatch(Pointer<CBLDatabase> db) {
-    _beginBatch(db, globalCBLError).checkCBLError();
+  void beginTransaction(Pointer<CBLDatabase> db) {
+    _beginTransaction(db, globalCBLError).checkCBLError();
   }
 
-  void endBatch(Pointer<CBLDatabase> db) {
-    _endBatch(db, globalCBLError).checkCBLError();
-  }
-
-  void rekey(
-    Pointer<CBLDatabase> db,
-    final CBLEncryptionAlgorithm? encryptionAlgorithm,
-    final Uint8List? encryptionKeyBytes,
-  ) {
-    withZoneArena(() {
-      _rekey!
-          .call(
-            db,
-            _createEncryptionKey(encryptionAlgorithm, encryptionKeyBytes),
-            globalCBLError,
-          )
-          .checkCBLError();
-    });
+  void endTransaction(Pointer<CBLDatabase> db, bool commit) {
+    _endTransaction(db, commit.toInt(), globalCBLError).checkCBLError();
   }
 
   String name(Pointer<CBLDatabase> db) {
-    return _name(db).toDartString();
+    return _name(db).toDartString()!;
   }
 
   String path(Pointer<CBLDatabase> db) {
-    return _path(db).toDartString();
+    return _path(db).toDartStringAndRelease()!;
   }
 
   int count(Pointer<CBLDatabase> db) {
     return _count(db);
   }
 
-  void config(
-    Pointer<CBLDatabase> db,
-    Pointer<CBLDatabaseConfiguration> config,
-  ) {
-    _config(db, config);
+  CBLDart_CBLDatabaseConfiguration config(Pointer<CBLDatabase> db) {
+    return _config(db);
   }
 
   Pointer<CBLDocument> getDocument(
@@ -636,7 +588,8 @@ class DatabaseBindings extends Bindings {
     String docId,
   ) {
     return stringTable.autoFree(() {
-      return _getDocument(db, stringTable.cString(docId));
+      return _getDocument(db, stringTable.flString(docId).ref, globalCBLError)
+          .checkCBLError();
     });
   }
 
@@ -645,33 +598,60 @@ class DatabaseBindings extends Bindings {
     String docId,
   ) {
     return stringTable.autoFree(() {
-      return _getMutableDocument(db, stringTable.cString(docId));
+      return _getMutableDocument(
+        db,
+        stringTable.flString(docId).ref,
+        globalCBLError,
+      ).checkCBLError();
     });
   }
 
-  Pointer<CBLDocument> saveDocument(
+  void saveDocumentWithConcurrencyControl(
     Pointer<CBLDatabase> db,
     Pointer<CBLMutableDocument> doc,
     CBLConcurrencyControl concurrencyControl,
   ) {
-    return _saveDocument(db, doc, concurrencyControl.toInt(), globalCBLError)
-        .checkCBLError();
+    _saveDocumentWithConcurrencyControl(
+      db,
+      doc,
+      concurrencyControl.toInt(),
+      globalCBLError,
+    ).checkCBLError();
   }
 
-  Pointer<CBLDocument> saveDocumentResolving(
+  void saveDocumentWithConflictHandler(
     Pointer<CBLDatabase> db,
     Pointer<CBLMutableDocument> doc,
     Pointer<Callback> conflictHandler,
   ) {
-    return _saveDocumentResolving(db, doc, conflictHandler, globalCBLError)
-        .checkCBLError();
+    _saveDocumentWithConflictHandler(
+      db,
+      doc,
+      conflictHandler,
+      globalCBLError,
+    ).checkCBLError();
+  }
+
+  bool deleteDocumentWithConcurrencyControl(
+    Pointer<CBLDatabase> db,
+    Pointer<CBLDocument> document,
+    CBLConcurrencyControl concurrency,
+  ) {
+    return _deleteDocumentWithConcurrencyControl(
+      db,
+      document,
+      concurrency.toInt(),
+      globalCBLError,
+    ).checkCBLError().toBool();
   }
 
   bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) {
     return stringTable.autoFree(() {
-      return _purgeDocumentByID(db, stringTable.cString(docId), globalCBLError)
-          .checkCBLError()
-          .toBool();
+      return _purgeDocumentByID(
+        db,
+        stringTable.flString(docId).ref,
+        globalCBLError,
+      ).checkCBLError().toBool();
     });
   }
 
@@ -679,7 +659,7 @@ class DatabaseBindings extends Bindings {
     return stringTable.autoFree(() {
       final expiration = _getDocumentExpiration(
         db,
-        stringTable.cString(docId),
+        stringTable.flString(docId).ref,
         globalCBLError,
       ).checkCBLError();
 
@@ -697,7 +677,7 @@ class DatabaseBindings extends Bindings {
     return stringTable.autoFree(() {
       _setDocumentExpiration(
         db,
-        stringTable.cString(docId),
+        stringTable.flString(docId).ref,
         expiration?.millisecondsSinceEpoch ?? 0,
         globalCBLError,
       ).checkCBLError();
@@ -710,7 +690,7 @@ class DatabaseBindings extends Bindings {
     Pointer<Callback> listener,
   ) {
     stringTable.autoFree(() {
-      _addDocumentChangeListener(db, stringTable.cString(docId), listener);
+      _addDocumentChangeListener(db, stringTable.flString(docId).ref, listener);
     });
   }
 
@@ -724,8 +704,9 @@ class DatabaseBindings extends Bindings {
   void createIndex(
     Pointer<CBLDatabase> db,
     String name,
-    CBLIndexType type,
-    String keyExpressions,
+    CBLdart_IndexType type,
+    CBLQueryLanguage expressionLanguage,
+    String expressions,
     bool? ignoreAccents,
     String? language,
   ) {
@@ -733,8 +714,14 @@ class DatabaseBindings extends Bindings {
       stringTable.autoFree(() {
         _createIndex(
           db,
-          stringTable.cString(name),
-          _createIndexSpec(type, keyExpressions, ignoreAccents, language).ref,
+          stringTable.flString(name).ref,
+          _createIndexSpec(
+            type,
+            expressionLanguage,
+            expressions,
+            ignoreAccents,
+            language,
+          ).ref,
           globalCBLError,
         ).checkCBLError();
       });
@@ -743,8 +730,11 @@ class DatabaseBindings extends Bindings {
 
   void deleteIndex(Pointer<CBLDatabase> db, String name) {
     stringTable.autoFree(() {
-      _deleteIndex(db, stringTable.cString(name), globalCBLError)
-          .checkCBLError();
+      _deleteIndex(
+        db,
+        stringTable.flString(name).ref,
+        globalCBLError,
+      ).checkCBLError();
     });
   }
 
@@ -752,56 +742,33 @@ class DatabaseBindings extends Bindings {
     return _indexNames(db);
   }
 
-  Pointer<CBLDatabaseConfiguration> _createConfig(
+  Pointer<CBLDart_CBLDatabaseConfiguration> _createConfig(
     String? directory,
-    Set<CBLDatabaseFlag>? flags,
-    CBLEncryptionAlgorithm? encryptionAlgorithm,
-    Uint8List? encryptionKey,
   ) {
-    final result = zoneArena<CBLDatabaseConfiguration>();
+    final result = zoneArena<CBLDart_CBLDatabaseConfiguration>();
 
-    result.ref
-      ..directory = stringTable.cString(directory, arena: true)
-      .._flags = (flags ?? {}).toCFlags()
-      ..encryptionKey =
-          _createEncryptionKey(encryptionAlgorithm, encryptionKey);
+    if (directory != null) {
+      result.ref.directory = stringTable.flString(directory, arena: true).ref;
+    }
 
     return result;
   }
 
-  Pointer<CBLEncryptionKey> _createEncryptionKey(
-    CBLEncryptionAlgorithm? encryptionAlgorithm,
-    Uint8List? bytes,
-  ) {
-    assert(encryptionAlgorithm == null || bytes != null);
-
-    if (encryptionAlgorithm == null) return nullptr;
-
-    final result = zoneArena<CBLEncryptionKey>();
-
-    final keyBytes = zoneArena<Uint8>(encryptionKeyByteLength)
-      ..asTypedList(encryptionKeyByteLength).setAll(0, bytes!);
-
-    result.ref
-      ..algorithm = encryptionAlgorithm
-      ..bytes = keyBytes;
-
-    return result;
-  }
-
-  Pointer<CBLIndexSpec> _createIndexSpec(
-    CBLIndexType type,
-    String keyExpressions,
+  Pointer<CBLDart_CBLIndexSpec> _createIndexSpec(
+    CBLdart_IndexType type,
+    CBLQueryLanguage expressionLanguage,
+    String expressions,
     bool? ignoreAccents,
     String? language,
   ) {
-    final result = zoneArena<CBLIndexSpec>();
+    final result = zoneArena<CBLDart_CBLIndexSpec>();
 
     result.ref
       ..type = type
-      ..keyExpression = stringTable.cString(keyExpressions, arena: true)
+      ..expressionLanguage = expressionLanguage
+      ..expressions = stringTable.flString(expressions, arena: true).ref
       ..ignoreAccents = ignoreAccents ?? false
-      ..language = stringTable.cString(language, arena: true);
+      ..language = stringTable.flString(language, arena: true).ref;
 
     return result;
   }

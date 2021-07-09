@@ -320,14 +320,14 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
 
   @override
   Array get array => MutableArray.fromPointer(
-        _bindings.rowArray(native.pointerUnsafe).cast(),
+        _bindings.resultArray(native.pointerUnsafe).cast(),
         release: true,
         retain: true,
       );
 
   @override
   Dict get dict => MutableDict.fromPointer(
-        _bindings.rowDict(native.pointerUnsafe).cast(),
+        _bindings.resultDict(native.pointerUnsafe).cast(),
         release: true,
         retain: true,
       );

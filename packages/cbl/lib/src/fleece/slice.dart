@@ -28,6 +28,12 @@ class Slice {
   static Slice? fromFLSlice(FLSlice slice) =>
       slice.buf == nullptr ? null : Slice._(slice.buf, slice.size);
 
+  /// Creates a [Slice] which points to the same data as [string].
+  ///
+  /// Returns `null` if the [FLSlice] is the _null slice_.
+  static Slice? fromFLString(FLString string) =>
+      string.buf == nullptr ? null : Slice._(string.buf, string.size);
+
   /// The pointer to start of this slice in native memory.
   final Pointer<Uint8> buf;
 

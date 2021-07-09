@@ -50,7 +50,9 @@ extension DatabaseUtilsExtension on Database {
     var deletedAnyDocument = false;
     await for (final id in getAllIds()) {
       final doc = await getDocument(id);
-      await doc?.delete();
+      if (doc != null) {
+        await deleteDocument(doc);
+      }
       deletedAnyDocument = doc != null;
     }
     return deletedAnyDocument;

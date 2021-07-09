@@ -43,6 +43,10 @@ Future<Replicator> createReplicator({
         endpoint,
         config.replicatorType ?? ReplicatorType.pushAndPull,
         config.continuous ?? false,
+        null,
+        null,
+        null,
+        null,
         authenticator,
         config.proxy?.type,
         config.proxy?.hostname,
@@ -80,7 +84,7 @@ extension CBLReplicatorStatusExt on CBLReplicatorStatus {
   ReplicatorStatus toReplicatorStatus() => ReplicatorStatus(
         activity.toReplicatorActivityLevel(),
         ReplicatorProgress(
-          progress.fractionCompleted,
+          progress.complete,
           progress.documentCount,
         ),
         exception?.translate(),
@@ -118,27 +122,6 @@ class UrlEndpoint extends Endpoint {
 
   @override
   String toString() => 'UrlEndpoint(url: $url)';
-}
-
-/// An endpoint representing another local database. (Enterprise Edition only.)
-class LocalDbEndpoint extends Endpoint {
-  LocalDbEndpoint(this.database);
-
-  /// The local database to replicate with.
-  final Database database;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is LocalDbEndpoint &&
-          other.runtimeType == other.runtimeType &&
-          database == other.database;
-
-  @override
-  int get hashCode => database.hashCode;
-
-  @override
-  String toString() => 'LocalDbEndpoint(database: $database)';
 }
 
 /// The authentication credentials for a remote server.
@@ -224,7 +207,10 @@ NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
 
       var decision = false;
       try {
-        decision = await filter(doc, message.isDeleted);
+        decision = await filter(
+          doc,
+          message.flags.contains(CBLReplicatedDocumentFlag.deleted),
+        );
       } finally {
         result!(decision);
       }
@@ -475,10 +461,6 @@ extension on ReplicatorConfiguration {
     final endpoint = this.endpoint;
     if (endpoint is UrlEndpoint) {
       return _bindings.createEndpointWithUrl(endpoint.url.toString());
-    } else if (endpoint is LocalDbEndpoint) {
-      return _bindings.createEndpointWithLocalDB(
-        (endpoint.database as DatabaseImpl).native.pointer,
-      );
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $endpoint');
     }
@@ -489,7 +471,7 @@ extension on ReplicatorConfiguration {
     if (authenticator == null) return null;
 
     if (authenticator is BasicAuthenticator) {
-      return _bindings.createBasicAuthenticator(
+      return _bindings.createPasswordAuthenticator(
         authenticator.username,
         authenticator.password,
       );
@@ -644,7 +626,7 @@ class ReplicatedDocument {
       ')';
 }
 
-extension on CBLDartReplicatedDocument {
+extension on CBLDart_ReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocument(
         ID,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
@@ -700,15 +682,6 @@ abstract class Replicator extends NativeResource<WorkerObject<CBLReplicator>>
   /// The database this replicator is pulling changes into and pushing changes
   /// out of.
   Database get database;
-
-  /// Instructs this replicator to ignore existing checkpoints the next time it
-  /// runs.
-  ///
-  /// This will cause it to scan through all the [Document]s on the remote
-  /// database, which takes a lot longer, but it can resolve problems with
-  /// missing documents if the client and server have gotten out of sync
-  /// somehow.
-  Future<void> resetCheckpoint();
 
   /// Starts this replicator, asynchronously.
   ///
@@ -802,12 +775,8 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
   final DatabaseImpl database;
 
   @override
-  Future<void> resetCheckpoint() => use(
-      () => native.execute((pointer) => ResetReplicatorCheckpoint(pointer)));
-
-  @override
   Future<void> start() =>
-      use(() => native.execute((pointer) => StartReplicator(pointer)));
+      use(() => native.execute((pointer) => StartReplicator(pointer, false)));
 
   @override
   Future<void> stop() => use(_stop);

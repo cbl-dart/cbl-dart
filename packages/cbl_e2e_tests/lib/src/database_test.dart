@@ -38,7 +38,6 @@ void main() {
             testDbName('OpenNonExistingDatabase'),
             config: DatabaseConfiguration(
               directory: tmpDir,
-              flags: {},
             ),
           ),
           throwsA(isA<CouchbaseLiteException>().having(
@@ -189,7 +188,13 @@ void main() {
         );
       });
 
-      test('purgeDocument purges a document by id', () async {
+      test('deleteDocument should remove document from the database', () async {
+        final doc = await db.saveDocument(MutableDocument());
+        await db.deleteDocument(doc);
+        expect(db.getDocument(doc.id), completion(isNull));
+      });
+
+      test('purgeDocumentById purges a document by id', () async {
         final doc = await db.saveDocument(MutableDocument());
 
         await db.purgeDocumentById(doc.id);
@@ -327,18 +332,6 @@ void main() {
             ),
           ),
         );
-      });
-
-      test('delete should remove document from the database', () async {
-        final doc = await db.saveDocument(MutableDocument());
-        await doc.delete();
-        expect(db.getDocument(doc.id), completion(isNull));
-      });
-
-      test('purge should remove document from the database', () async {
-        final doc = await db.saveDocument(MutableDocument());
-        await doc.purge();
-        expect(db.getDocument(doc.id), completion(isNull));
       });
     });
 

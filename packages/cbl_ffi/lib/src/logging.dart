@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import '../cbl_ffi.dart';
 import 'bindings.dart';
 import 'native_callback.dart';
 
@@ -48,7 +49,9 @@ class LogCallbackMessage {
       : this(
           (arguments[0] as int).toLogDomain(),
           (arguments[1] as int).toLogLevel(),
-          arguments[2] as String,
+          Pointer<FLString>.fromAddress(arguments[2] as int)
+              .ref
+              .toDartString()!,
         );
 
   final CBLLogDomain domain;
