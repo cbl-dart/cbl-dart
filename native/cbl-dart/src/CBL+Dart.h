@@ -1,7 +1,7 @@
 
 #pragma once
 
-#if __APPLE__
+#ifdef __APPLE__
 #include <CouchbaseLite/CouchbaseLite.h>
 #elif
 #include "cbl/CouchbaseLite.h"

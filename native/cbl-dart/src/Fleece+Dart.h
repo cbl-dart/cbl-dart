@@ -1,6 +1,6 @@
 #pragma once
 
-#if __APPLE__
+#ifdef __APPLE__
 #include <CouchbaseLite/Fleece.h>
 #elif
 #include "fleece/Fleece.h"
