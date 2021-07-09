@@ -561,7 +561,6 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
       .execute((pointer) => GetDatabaseDocument(pointer, id))
       .then((address) => address?.let((it) => createDocument(
             pointer: it.pointer,
-            worker: native.worker,
             retain: false,
           ))));
 
@@ -570,7 +569,6 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
       .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
       .then((address) => address?.let((it) => createMutableDocument(
             pointer: it.pointer,
-            worker: native.worker,
             retain: false,
             isNew: false,
           ))));
@@ -606,13 +604,11 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             pointer: message.documentBeingSaved,
             retain: true,
             isNew: false,
-            worker: null,
           );
           final conflictingDocument = message.conflictingDocument?.let(
             (pointer) => createDocument(
               pointer: pointer,
               retain: true,
-              worker: null,
             ),
           );
 

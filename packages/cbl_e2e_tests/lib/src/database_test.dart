@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/database_utils.dart';
+import 'utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -32,20 +33,15 @@ void main() {
     });
 
     group('open', () {
-      test('throws when database does not exist', () {
-        expect(
-          Database.open(
-            testDbName('OpenNonExistingDatabase'),
-            config: DatabaseConfiguration(
-              directory: tmpDir,
-            ),
+      test('creates database if it does not exist', () async {
+        final db = await Database.open(
+          testDbName('OpenNonExistingDatabase'),
+          config: DatabaseConfiguration(
+            directory: tmpDir,
           ),
-          throwsA(isA<CouchbaseLiteException>().having(
-            (e) => e.code,
-            'code',
-            equals(CouchbaseLiteErrorCode.notFound),
-          )),
         );
+
+        expect(db.path, completion(isDirectory));
       });
     });
 
@@ -123,7 +119,8 @@ void main() {
 
       test('getDocument returns the document when it exist', () async {
         final doc = await db.saveDocument(MutableDocument());
-        expect(db.getDocument(doc.id), completion(equals(doc)));
+        final loadedDoc = await db.getDocument(doc.id);
+        expect(loadedDoc, doc);
       });
 
       test('getMutableDocument returns null when the document does not exist',
@@ -150,35 +147,34 @@ void main() {
       });
 
       test('saveDocumentResolving invokes the callback on conflict', () async {
-        final docToSave = await db.saveDocument(MutableDocument());
-        final conflictDoc = await db
-            .saveDocument(docToSave.mutableCopy()..properties['a'] = 'b');
+        final versionA = await db.saveDocument(MutableDocument());
+        final versionB = await db
+            .saveDocument(versionA.mutableCopy()..properties['a'] = 'b');
 
         await db.saveDocumentResolving(
-          docToSave.mutableCopy(),
-          expectAsync2(
-            (documentBeingSaved, conflictingDocument) async {
-              expect(documentBeingSaved.sequence, equals(docToSave.sequence));
-              expect(
-                  conflictingDocument?.sequence, equals(conflictDoc.sequence));
-
-              return true;
-            },
-            count: 1,
-            id: 'ConflictResolver',
-          ),
+          versionA.mutableCopy(),
+          expectAsync2((documentBeingSaved, conflictingDocument) async {
+            expect(documentBeingSaved, equals(versionA));
+            expect(conflictingDocument, equals(versionB));
+            return true;
+          }),
         );
       });
 
       test('saveDocumentResolving cancels save if handler returns false',
           () async {
-        final docToSave = await db.saveDocument(MutableDocument());
-        await db.saveDocument(docToSave.mutableCopy()..properties['a'] = 'b');
+        final versionA = await db.saveDocument(MutableDocument());
+        final versionB = await db
+            .saveDocument(versionA.mutableCopy()..properties['a'] = 'b');
 
         expect(
           db.saveDocumentResolving(
-            docToSave.mutableCopy(),
-            (documentBeingSaved, conflictingDocument) async => false,
+            versionA.mutableCopy(),
+            expectAsync2((documentBeingSaved, conflictingDocument) async {
+              expect(documentBeingSaved, equals(versionA));
+              expect(conflictingDocument, equals(versionB));
+              return false;
+            }),
           ),
           throwsA(isA<CouchbaseLiteException>().having(
             (it) => it.code,
@@ -294,7 +290,7 @@ void main() {
       test('revisionId returns string when document has been saved', () async {
         final doc = await db.saveDocument(MutableDocument());
 
-        expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
+        expect(doc.revisionId, '1@*');
       });
 
       test('sequence returns the documents sequence', () async {
@@ -369,11 +365,13 @@ void main() {
       test('createIndex should work with FullTextIndex', () async {
         await db.createIndex('a', FullTextIndex('[[".a"]]'));
 
-        final q = await db.query(N1QLQuery('SELECT * WHERE "a" MATCH "query"'));
+        final q = await db.query(N1QLQuery(
+          "SELECT * WHERE MATCH('a', 'query')",
+        ));
 
         final explain = await q.explain();
 
-        expect(explain, contains('["MATCH","a","query"]'));
+        expect(explain, contains('["MATCH()","a","query"]'));
       });
 
       test('deleteIndex should delete the given index', () async {
@@ -442,7 +440,9 @@ void main() {
       });
 
       test('listener is notified of changes', () async {
-        final q = await db.query(N1QLQuery('SELECT a FROM a WHERE a.b = "c"'));
+        final q = await db.query(N1QLQuery(
+          'SELECT a FROM _default AS a WHERE a.b = "c"',
+        ));
 
         final doc = MutableDocument()..properties.addAll({'b': 'c'});
         final result = MutableDict()..addAll({'a': doc.properties});
@@ -465,44 +465,46 @@ void main() {
 
       test('bad query: error position highlighting', () {
         expect(
-          db.query(N1QLQuery('SELECT * WHERE META.foo = "bar"')),
+          db.query(N1QLQuery('SELECT foo()')),
           throwsA(isA<CouchbaseLiteException>().having(
             (it) => it.toString(),
             'toString()',
             '''
-CouchbaseLiteException(message: N1QL syntax error near character 21, code: CouchbaseLiteErrorCode.invalidQuery)
-SELECT * WHERE META.foo = "bar"
-                    ^
+CouchbaseLiteException(message: query syntax error, code: CouchbaseLiteErrorCode.invalidQuery)
+SELECT foo()
+          ^
 ''',
           )),
         );
       });
 
       group('ResultSet', () {
+        // TODO: fix bug which prevents id from being used an alias
+        // The test uses id_ as a workaround.
         test('supports getting column by name', () async {
           final doc = MutableDocument('ResultSetColumnByName');
           await db.saveDocument(doc);
 
-          final q = await db
-              .query(N1QLQuery(r'SELECT META.id AS id WHERE META.id = $ID'));
+          final q = await db.query(
+              N1QLQuery(r'SELECT META().id AS id_ WHERE META().id = $ID'));
           await q.setParameters(MutableDict()..addAll({'ID': doc.id}));
 
           final resultSet = await q.execute();
           final iterator = resultSet.iterator..moveNext();
-          expect(iterator['id'].asString, doc.id);
+          expect(iterator.current['id_'].asString, doc.id);
         });
 
         test('supports getting column by index', () async {
           final doc = MutableDocument('ResultSetColumnIndex');
           await db.saveDocument(doc);
 
-          final q =
-              await db.query(N1QLQuery(r'SELECT META.id WHERE META.id = $ID'));
+          final q = await db
+              .query(N1QLQuery(r'SELECT META().id WHERE META().id = $ID'));
           await q.setParameters(MutableDict()..addAll({'ID': doc.id}));
 
           final resultSet = await q.execute();
           final iterator = resultSet.iterator..moveNext();
-          expect(iterator[0].asString, doc.id);
+          expect(iterator.current[0].asString, doc.id);
         });
       });
     });
@@ -541,7 +543,7 @@ SELECT * WHERE META.foo = "bar"
 
       test('N1QL meal planner example', () async {
         await db.createIndex('date', ValueIndex('[".type"]'));
-        await db.createIndex('group', ValueIndex('[".group"]'));
+        await db.createIndex('group_index', ValueIndex('[".group"]'));
 
         final dish = await db.saveDocument(MutableDocument()
           ..properties.addAll({
@@ -567,8 +569,9 @@ SELECT * WHERE META.foo = "bar"
 
         final q = await db.query(N1QLQuery(
           r'''
-          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal FROM dish
-          JOIN meal ON array_contains(meal.dishes, dish._id)
+          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
+          FROM _default AS dish
+          JOIN _default AS meal ON array_contains(meal.dishes, dish._id)
           WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
           GROUP BY dish._id
           ORDER BY max(meal.date)

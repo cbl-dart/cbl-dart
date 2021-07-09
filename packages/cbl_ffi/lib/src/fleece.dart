@@ -618,7 +618,7 @@ class ValueBindings extends Bindings {
   }
 
   String? scalarToString(Pointer<FLValue> value) {
-    _scalarToString(value).toDartStringAndRelease();
+    return _scalarToString(value).toDartStringAndRelease();
   }
 
   bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) {

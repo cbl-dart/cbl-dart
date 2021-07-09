@@ -195,7 +195,10 @@ class CBLErrorException implements Exception {
           error.ref.code,
           _baseBinds.CBLErrorMessage(globalCBLError)!,
           errorSource: errorSource,
-          errorPosition: errorPosition,
+          errorPosition:
+              error.ref.code == CBLErrorCode.invalidQuery && errorPosition != -1
+                  ? errorPosition
+                  : null,
         );
 
   final String message;
@@ -219,15 +222,14 @@ void _checkCBLError({String? errorSource}) {
     throw CBLErrorException.fromCBLError(
       globalCBLError,
       errorSource: errorSource,
-      errorPosition:
-          globalErrorPosition.value == -1 ? null : globalErrorPosition.value,
+      errorPosition: globalErrorPosition.value,
     );
   }
 }
 
 extension CheckCBLErrorExt<T> on T {
   T checkCBLError({String? errorSource}) {
-    if (this == nullptr || this == false || this == -1) {
+    if (this == nullptr || this == false || this == 0 || this == -1) {
       _checkCBLError(errorSource: errorSource);
     }
     return this;

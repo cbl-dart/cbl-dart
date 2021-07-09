@@ -202,7 +202,6 @@ NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
       final doc = createDocument(
         pointer: message.document,
         retain: true,
-        worker: null,
       );
 
       var decision = false;
@@ -250,13 +249,11 @@ NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
       final local = message.localDocument?.let((it) => createDocument(
             pointer: it,
             retain: true,
-            worker: null,
           ));
 
       final remote = message.remoteDocument?.let((it) => createDocument(
             pointer: it,
             retain: true,
-            worker: null,
           ));
 
       var decision = local ?? remote;

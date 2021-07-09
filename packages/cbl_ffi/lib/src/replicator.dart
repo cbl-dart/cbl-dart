@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -148,9 +149,7 @@ class ReplicationConflictResolverCallbackMessage {
   ReplicationConflictResolverCallbackMessage.fromArguments(
     List<dynamic> arguments,
   ) : this(
-          Pointer<FLString>.fromAddress(arguments[0] as int)
-              .ref
-              .toDartString()!,
+          utf8.decode(arguments[0] as Uint8List),
           (arguments[1] as int?)?.toPointer(),
           (arguments[2] as int?)?.toPointer(),
         );

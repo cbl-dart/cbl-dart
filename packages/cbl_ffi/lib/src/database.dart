@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
@@ -271,11 +273,7 @@ class DatabaseChangeCallbackMessage {
   DatabaseChangeCallbackMessage(this.documentIds);
 
   DatabaseChangeCallbackMessage.fromArguments(List<dynamic> message)
-      : this(message
-            .cast<int>()
-            .map((address) =>
-                Pointer<FLString>.fromAddress(address).ref.toDartString()!)
-            .toList());
+      : this(message.cast<Uint8List>().map(utf8.decode).toList());
 
   final List<String> documentIds;
 }

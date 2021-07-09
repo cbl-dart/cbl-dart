@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import '../cbl_ffi.dart';
 import 'bindings.dart';
@@ -49,9 +51,7 @@ class LogCallbackMessage {
       : this(
           (arguments[0] as int).toLogDomain(),
           (arguments[1] as int).toLogLevel(),
-          Pointer<FLString>.fromAddress(arguments[2] as int)
-              .ref
-              .toDartString()!,
+          utf8.decode(arguments[2] as Uint8List),
         );
 
   final CBLLogDomain domain;

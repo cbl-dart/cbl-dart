@@ -6,30 +6,25 @@ import 'database.dart';
 import 'fleece.dart';
 import 'native_object.dart';
 import 'resource.dart';
-import 'worker/cbl_worker.dart';
 
 // region Internal API
 
 Document createDocument({
   required Pointer<CBLDocument> pointer,
-  required Worker? worker,
   required bool retain,
 }) =>
     Document._fromPointer(
       pointer,
-      worker: worker,
       retain: retain,
     );
 
 MutableDocument createMutableDocument({
   required Pointer<CBLMutableDocument> pointer,
-  required Worker? worker,
   required bool retain,
   required bool isNew,
 }) =>
     MutableDocument._fromPointer(
       pointer,
-      worker: worker,
       retain: retain,
       isNew: isNew,
     );
@@ -43,20 +38,12 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
 
   Document._fromPointer(
     Pointer<CBLDocument> pointer, {
-    Worker? worker,
     required bool retain,
-  }) : super(worker == null
-            ? CblRefCountedObject(
-                pointer,
-                release: true,
-                retain: retain,
-              )
-            : CblRefCountedWorkerObject(
-                pointer,
-                worker,
-                release: true,
-                retain: retain,
-              ));
+  }) : super(CblRefCountedObject(
+          pointer,
+          release: true,
+          retain: retain,
+        ));
 
   /// Returns this documents id.
   String get id => _bindings.id(native.pointerUnsafe);
@@ -92,7 +79,6 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Document &&
-          runtimeType == other.runtimeType &&
           id == other.id &&
           revisionId == other.revisionId &&
           sequence == other.sequence &&
@@ -123,12 +109,10 @@ class MutableDocument extends Document {
 
   MutableDocument._fromPointer(
     Pointer<CBLMutableDocument> pointer, {
-    Worker? worker,
     required bool retain,
     required this.isNew,
   }) : super._fromPointer(
           pointer.cast(),
-          worker: worker,
           retain: retain,
         );
 
@@ -137,7 +121,6 @@ class MutableDocument extends Document {
   /// It will not be added to a database until saved.
   factory MutableDocument([String? id]) => createMutableDocument(
         pointer: _bindings.createWithID(id),
-        worker: null,
         retain: false,
         isNew: true,
       );
@@ -153,7 +136,6 @@ class MutableDocument extends Document {
   factory MutableDocument.mutableCopy(Document original) =>
       createMutableDocument(
         pointer: _bindings.mutableCopy(original.native.pointerUnsafe),
-        worker: (original.native as WorkerObject).worker,
         retain: false,
         isNew: false,
       );
