@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Copied from setup-dart Github Action (https://github.com/dart-lang/setup-dart)
 
 # Copyright (c) 2020, the Dart project authors.

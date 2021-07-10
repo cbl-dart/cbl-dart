@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dartVersion="$1"
 flutterVersion="$2"
@@ -8,18 +10,18 @@ os="$4"
 
 echo ::group::Setup Dart
 
-"$scripDir/setup-dart.sh" "$dartVersion" "$os" "x64"
+"$scriptDir/setup-dart.sh" "$dartVersion" "$os" "x64"
 
 echo ::endgroup::
 
 echo ::group::Setup Flutter
 
-"$scripDir/setup-flutter.sh" "$flutterVersion"
+"$scriptDir/setup-flutter.sh" "$flutterVersion"
 
 echo ::endgroup::
 
 echo ::group::Setup Melos
 
-"$scripDir/setup-melos.sh" "$melosVersion"
+"$scriptDir/setup-melos.sh" "$melosVersion"
 
 echo ::endgroup::

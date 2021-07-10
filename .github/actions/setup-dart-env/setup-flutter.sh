@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 flutterVersion="$1"
 
 flutterDir="$RUNNER_TOOL_CACHE/flutter"
@@ -22,9 +24,8 @@ export PATH="$pubBinDir:$flutterBinDir:$PATH"
 
 echo "Warming up Flutter CLI..."
 # Run tool once so that the next command does not show verbose install info.
-flutter > /dev/null
+flutter >/dev/null
 
 echo "Succefully installed Flutter SDK:"
 # Print Flutter version
 flutter --version
-

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 melosVersion="$1"
 
 echo "Installing Melos $melosVersion"
