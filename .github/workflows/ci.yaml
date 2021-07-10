@@ -172,11 +172,6 @@ jobs:
         with:
           key: tests-standalone-dart-linux
 
-      # CMake script is not able to find libc++abi on the ubuntu-20.04 image.
-      # Might have something to do with that the image has libc++[abi]-11-dev installed.
-      - name: Install libc++ and libc++abi
-        run: sudo apt-get install -y libc++-dev libc++abi-dev
-
       - name: Build native binaries
         run: ./native/tools/build_linux.sh build Debug
 
@@ -215,7 +210,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::Print back trace"
-          gdb -batch -ex 'thread apply all bt' /home/runner/opt/flutter/bin/cache/artifacts/engine/linux-x64/flutter_tester core
+          gdb -batch -ex 'thread apply all bt' "$(which dart)" core
           echo "::endgroup::"
 
   tests-standalone-dart-macos:
