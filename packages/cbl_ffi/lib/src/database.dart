@@ -655,15 +655,17 @@ class DatabaseBindings extends Bindings {
 
   DateTime? getDocumentExpiration(Pointer<CBLDatabase> db, String docId) {
     return stringTable.autoFree(() {
-      final expiration = _getDocumentExpiration(
+      final result = _getDocumentExpiration(
         db,
         stringTable.flString(docId).ref,
         globalCBLError,
-      ).checkCBLError();
+      );
 
-      return expiration == 0
-          ? null
-          : DateTime.fromMillisecondsSinceEpoch(expiration);
+      if (result == -1) {
+        checkCBLError();
+      }
+
+      return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
     });
   }
 

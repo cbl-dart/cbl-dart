@@ -41,7 +41,7 @@ class BlobBindings extends Bindings {
     _isBlob = libs.cbl.lookupFunction<FLDict_IsBlob_C, FLDict_IsBlob>(
       'FLDict_IsBlob',
     );
-    _get = libs.cbl.lookupFunction<FLDict_GetBlob, FLDict_GetBlob>(
+    _getBlob = libs.cbl.lookupFunction<FLDict_GetBlob, FLDict_GetBlob>(
       'FLDict_GetBlob',
     );
     _length = libs.cbl.lookupFunction<CBLBlob_Length_C, CBLBlob_Length>(
@@ -64,19 +64,23 @@ class BlobBindings extends Bindings {
   }
 
   late final FLDict_IsBlob _isBlob;
-  late final FLDict_GetBlob _get;
+  late final FLDict_GetBlob _getBlob;
+  late final FLSlot_SetBlob _setBlob;
   late final CBLBlob_Length _length;
   late final CBLBlob_Digest _digest;
   late final CBLBlob_ContentType _contentType;
   late final CBLBlob_Properties _properties;
-  late final FLSlot_SetBlob _setBlob;
 
   bool isBlob(Pointer<FLDict> dict) {
     return _isBlob(dict).toBool();
   }
 
   Pointer<CBLBlob>? getBlob(Pointer<FLDict> dict) {
-    return _get(dict).toNullable();
+    return _getBlob(dict).toNullable();
+  }
+
+  void setBlob(Pointer<FLSlot> slot, Pointer<CBLBlob> blob) {
+    _setBlob(slot, blob);
   }
 
   int length(Pointer<CBLBlob> blob) {
@@ -93,10 +97,6 @@ class BlobBindings extends Bindings {
 
   Pointer<FLDict> properties(Pointer<CBLBlob> blob) {
     return _properties(blob);
-  }
-
-  void setBlob(Pointer<FLSlot> slot, Pointer<CBLBlob> blob) {
-    _setBlob(slot, blob);
   }
 }
 
@@ -182,12 +182,19 @@ class BlobReadStreamBindings extends Bindings {
   BlobStreamBuffer? read(Pointer<CBLBlobReadStream> stream) {
     final buffer = _readStreamBuffers[stream.address]!;
 
-    buffer._length = _read(
+    final result = _read(
       stream,
       buffer._pointer,
       buffer._size,
       globalCBLError,
-    ).checkCBLError();
+    );
+
+    //  A result of -1 signals an error.
+    if (result == -1) {
+      checkCBLError();
+    } else {
+      buffer._length = result;
+    }
 
     // If 0 bytes were read there are no more byte to read.
     return buffer._length == 0 ? null : buffer;

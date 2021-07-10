@@ -601,10 +601,14 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
 
-  // Associate callback context with this instance so we can it released
-  // when the replicator is released.
-  std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
-  replicatorCallbackWrapperContexts[replicator] = context;
+  if (replicator) {
+    // Associate callback context with this instance so we can it released
+    // when the replicator is released.
+    std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
+    replicatorCallbackWrapperContexts[replicator] = context;
+  } else {
+    delete context;
+  }
 
   return replicator;
 }

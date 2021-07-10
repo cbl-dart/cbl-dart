@@ -70,7 +70,7 @@ scripts:
       scope: 'cbl_native'
 
   test:standalone_dart:
-    run: melos exec -- flutter test --no-pub -r expanded
+    run: melos exec -- dart test -r expanded -j 1
     select-package:
       scope: 'cbl_e2e_tests_standalone_dart'
 

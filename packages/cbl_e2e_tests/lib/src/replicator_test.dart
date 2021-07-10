@@ -44,6 +44,8 @@ void main() {
         conflictResolver: (documentId, local, remote) => local,
       ));
 
+      await replicator.start();
+
       await replicator.close();
     });
 

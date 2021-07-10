@@ -290,7 +290,7 @@ void main() {
       test('revisionId returns string when document has been saved', () async {
         final doc = await db.saveDocument(MutableDocument());
 
-        expect(doc.revisionId, '1@*');
+        expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
       });
 
       test('sequence returns the documents sequence', () async {

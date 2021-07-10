@@ -40,8 +40,8 @@ buildDir="$projectDir/build/android"
 libDir="$buildDir/lib"
 cblFlutterLibDir="$projectDir/packages/cbl_flutter/android/lib"
 
-ndk_ver="22.1.7171670"
-cmake_ver="3.10.2.4988404"
+ndk_ver="21.4.7075529"
+cmake_ver="3.18.1"
 cmake_path="${sdkHome}/cmake/${cmake_ver}/bin"
 
 archs=(arm64-v8a armeabi-v7a x86 x86_64)

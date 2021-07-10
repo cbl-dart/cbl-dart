@@ -584,7 +584,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                 doc.native.pointer.cast(),
                 concurrency,
               ))
-          .then((_) => doc));
+          .then((_) => getDocument(doc.id).then((it) => it!)));
 
   @override
   Future<Document> saveDocumentResolving(
@@ -640,7 +640,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                 ))
             .whenComplete(callback.close);
 
-        return doc;
+        return getDocument(doc.id).then((it) => it!);
       });
 
   @override

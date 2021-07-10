@@ -217,7 +217,7 @@ class CBLErrorException implements Exception {
       ')';
 }
 
-void _checkCBLError({String? errorSource}) {
+void checkCBLError({String? errorSource}) {
   if (!globalCBLError.ref.isOk) {
     throw CBLErrorException.fromCBLError(
       globalCBLError,
@@ -227,9 +227,21 @@ void _checkCBLError({String? errorSource}) {
   }
 }
 
-extension CheckCBLErrorExt<T> on T {
+final _checkCBLError = checkCBLError;
+
+extension CheckCBLErrorPointerExt<T extends Pointer> on T {
   T checkCBLError({String? errorSource}) {
-    if (this == nullptr || this == false || this == 0 || this == -1) {
+    if (this == nullptr) {
+      _checkCBLError(errorSource: errorSource);
+    }
+    return this;
+  }
+}
+
+extension CheckCBLErrorIntExt on int {
+  int checkCBLError({String? errorSource}) {
+    assert(this == 0 || this == 1);
+    if (this == 0) {
       _checkCBLError(errorSource: errorSource);
     }
     return this;
