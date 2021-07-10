@@ -1,6 +1,6 @@
 #!/bin/bash
 
-scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}") && pwd")"
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dartVersion="$1"
 flutterVersion="$2"
 melosVersion="$3"
