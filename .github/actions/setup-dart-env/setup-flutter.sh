@@ -11,7 +11,7 @@ pubBinDir="$HOME/.pub-cache/bin"
 echo "Installing Flutter SDK version $flutterVersion"
 
 echo "Cloning Flutter repository..."
-git clone https://github.com/flutter/flutter.git -b "$flutterVersion" --depth 1 "$flutterDir"
+git clone https://github.com/flutter/flutter.git -b "$flutterVersion" --depth 1 "$flutterDir" >/dev/null
 
 # Add Flutter binaries to path
 echo "$flutterBinDir" >>$GITHUB_PATH
@@ -21,6 +21,7 @@ echo "$pubBinDir" >>$GITHUB_PATH
 
 # Make binaries availabe to comands in this action
 export PATH="$pubBinDir:$flutterBinDir:$PATH"
+echo "export PATH=\"$pubBinDir:$flutterBinDir:\$PATH\"" >>"HOME/.profile"
 
 echo "Warming up Flutter CLI..."
 # Run tool once so that the next command does not show verbose install info.
