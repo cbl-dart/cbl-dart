@@ -21,7 +21,8 @@ echo "$pubBinDir" >>$GITHUB_PATH
 
 # Make binaries availabe to comands in this action
 export PATH="$pubBinDir:$flutterBinDir:$PATH"
-echo "export PATH=\"$pubBinDir:$flutterBinDir:\$PATH\"" >>"HOME/.profile"
+echo "export PATH=\"$pubBinDir:$flutterBinDir:\$PATH\"" >"update_flutter_path.sh"
+chmod 755 update_flutter_path.sh
 
 echo "Warming up Flutter CLI..."
 # Run tool once so that the next command does not show verbose install info.

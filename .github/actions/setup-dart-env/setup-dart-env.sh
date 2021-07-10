@@ -17,6 +17,7 @@ echo ::endgroup::
 echo ::group::Setup Flutter
 
 "$scriptDir/setup-flutter.sh" "$flutterVersion"
+source update_flutter_path.sh
 
 echo ::endgroup::
 
