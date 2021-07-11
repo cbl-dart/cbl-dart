@@ -233,7 +233,9 @@ void main() {
       final db = await openTestDb('SetHostReachableSmoke');
       final replicator = await db.createTestReplicator(continuous: true);
       await replicator.start();
+      await replicatorStartDelay();
       await replicator.setHostReachable(false);
+      await replicatorStartDelay();
       await replicator.setHostReachable(true);
     });
 
@@ -241,7 +243,9 @@ void main() {
       final db = await openTestDb('SetSuspendedSmoke');
       final replicator = await db.createTestReplicator(continuous: true);
       await replicator.start();
+      await replicatorStartDelay();
       await replicator.setSuspended(true);
+      await replicatorStartDelay();
       await replicator.setSuspended(false);
     });
 
@@ -268,6 +272,7 @@ void main() {
       );
 
       await replicator.start();
+      await replicatorStartDelay();
     });
 
     test('pendingDocumentIds returns ids of documents waiting to be pushed',

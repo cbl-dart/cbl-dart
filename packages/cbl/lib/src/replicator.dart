@@ -202,6 +202,7 @@ NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
       final doc = createDocument(
         pointer: message.document,
         retain: true,
+        debugCreator: 'ReplicationFilter()',
       );
 
       var decision = false;
@@ -226,10 +227,10 @@ NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
 /// needs to prompt for user input, that's OK.
 ///
 /// The callback receives the [documentId] of the conflicted document,
-/// the [local] current revision of the document in the, or `null` if the
-/// local document has been deleted and the the remove revision of the document
-/// found on the server or `null` if the document has been deleted on the
-/// server.
+/// the [local] revision of the document in the database, or `null` if the
+/// local document has been deleted and the the [remote] revision of the
+/// document found on the server or `null` if the document has been deleted
+/// on the server.
 ///
 /// Return the resolved document to save locally (and push, if the replicator is
 /// pushing.) This can be the same as [local] or [remote], or you can create
@@ -249,18 +250,44 @@ NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
       final local = message.localDocument?.let((it) => createDocument(
             pointer: it,
             retain: true,
+            debugCreator: 'ConflictResolver(local)',
           ));
 
       final remote = message.remoteDocument?.let((it) => createDocument(
             pointer: it,
             retain: true,
+            debugCreator: 'ConflictResolver(remote)',
           ));
 
-      var decision = local ?? remote;
+      var resolved = remote;
+      // TODO: throw on the native side when resolver throws
+      // Also review whether other callbacks can be aborted.
       try {
-        decision = await filter(message.documentId, local, remote);
+        resolved = await filter(message.documentId, local, remote);
       } finally {
-        result!(decision?.native.pointerUnsafe.address);
+        final resolvedPointer = resolved?.native.pointerUnsafe;
+
+        // If the resolver returned a document other than `local` or `remote`,
+        // the ref count of `resolved` needs to be incremented because the
+        // native conflict resolver callback is expected to returned a document
+        // with a ref count of +1, which the caller balances with a release.
+        // This must happen on the Dart side, because `resolved` can be garbage
+        // collected before `resolvedAddress` makes it back to the native side.
+        // if (resolvedPointer != null &&
+        //     resolved != local &&
+        //     resolved != remote) {
+        //   CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+        // }
+
+        // Workaround for a bug in CBL C SDK, which frees all resolved
+        // documents, not just merged ones. When this bug is fixed the above
+        // commented out code block should replace this one.
+        // https://github.com/couchbase/couchbase-lite-C/issues/148
+        if (resolvedPointer != null) {
+          CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+        }
+
+        result!(resolvedPointer?.address);
       }
     });
 

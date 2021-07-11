@@ -53,7 +53,15 @@ CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error);
 CBLDART_EXPORT
 void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
                                            CBLRefCounted *refCounted,
-                                           uint8_t retain);
+                                           uint8_t retain, char *debugName);
+
+/**
+ * Sets whether information to debug CBLRefCounted is printed.
+ *
+ * This features is only functional in debug builds.
+ */
+CBLDART_EXPORT
+void CBLDart_SetDebugRefCounted(uint8_t enabled);
 
 // -- Log
 

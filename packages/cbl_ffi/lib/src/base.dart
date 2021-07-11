@@ -256,11 +256,20 @@ typedef CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
   Handle object,
   Pointer<CBLRefCounted> refCounted,
   Uint8 retain,
+  Pointer<Utf8> debugName,
 );
 typedef CBLDart_BindCBLRefCountedToDartObject = void Function(
   Object object,
   Pointer<CBLRefCounted> refCounted,
   int retain,
+  Pointer<Utf8> debugName,
+);
+
+typedef CBLDart_SetDebugRefCounted_C = Void Function(Uint8 enabled);
+typedef CBLDart_SetDebugRefCounted = void Function(int enabled);
+
+typedef CBL_Retain = Pointer<CBLRefCounted> Function(
+  Pointer<CBLRefCounted> refCounted,
 );
 
 // === CBLListener =============================================================
@@ -287,6 +296,13 @@ class BaseBindings extends Bindings {
         CBLDart_BindCBLRefCountedToDartObject>(
       'CBLDart_BindCBLRefCountedToDartObject',
     );
+    _setDebugRefCounted = libs.cblDart.lookupFunction<
+        CBLDart_SetDebugRefCounted_C, CBLDart_SetDebugRefCounted>(
+      'CBLDart_SetDebugRefCounted',
+    );
+    _retainRefCounted = libs.cblDart.lookupFunction<CBL_Retain, CBL_Retain>(
+      'CBL_Retain',
+    );
     _Error_Message = libs.cblDart
         .lookupFunction<CBLDart_CBLError_Message, CBLDart_CBLError_Message>(
       'CBLDart_CBLError_Message',
@@ -303,6 +319,8 @@ class BaseBindings extends Bindings {
   late final CBLDart_InitDartApiDL _initDartApiDL;
   late final CBLDart_BindCBLRefCountedToDartObject
       _bindCBLRefCountedToDartObject;
+  late final CBLDart_SetDebugRefCounted _setDebugRefCounted;
+  late final CBL_Retain _retainRefCounted;
   late final CBLDart_CBLError_Message _Error_Message;
   late final CBLListener_Remove _Listener_Remove;
 
@@ -314,8 +332,20 @@ class BaseBindings extends Bindings {
     Object handle,
     Pointer<CBLRefCounted> refCounted,
     bool retain,
+    String? debugName,
   ) {
-    _bindCBLRefCountedToDartObject(handle, refCounted, retain.toInt());
+    _bindCBLRefCountedToDartObject(
+      handle,
+      refCounted,
+      retain.toInt(),
+      debugName?.toNativeUtf8() ?? nullptr,
+    );
+  }
+
+  set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled.toInt());
+
+  void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
+    _retainRefCounted(refCounted);
   }
 
   String? CBLErrorMessage(Pointer<CBLError> error) =>

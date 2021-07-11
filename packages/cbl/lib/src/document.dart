@@ -12,21 +12,25 @@ import 'resource.dart';
 Document createDocument({
   required Pointer<CBLDocument> pointer,
   required bool retain,
+  required String? debugCreator,
 }) =>
     Document._fromPointer(
       pointer,
       retain: retain,
+      debugName: 'Document(creator: $debugCreator)',
     );
 
 MutableDocument createMutableDocument({
   required Pointer<CBLMutableDocument> pointer,
   required bool retain,
   required bool isNew,
+  required String? debugCreator,
 }) =>
     MutableDocument._fromPointer(
       pointer,
       retain: retain,
       isNew: isNew,
+      debugName: 'MutableDocument(creator: $debugCreator)',
     );
 
 // endregion
@@ -39,10 +43,12 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
   Document._fromPointer(
     Pointer<CBLDocument> pointer, {
     required bool retain,
+    required String? debugName,
   }) : super(CblRefCountedObject(
           pointer,
           release: true,
           retain: retain,
+          debugName: debugName,
         ));
 
   /// Returns this documents id.
@@ -111,9 +117,11 @@ class MutableDocument extends Document {
     Pointer<CBLMutableDocument> pointer, {
     required bool retain,
     required this.isNew,
+    required String? debugName,
   }) : super._fromPointer(
           pointer.cast(),
           retain: retain,
+          debugName: debugName,
         );
 
   /// Creates a new, empty document in memory.
@@ -123,6 +131,7 @@ class MutableDocument extends Document {
         pointer: _bindings.createWithID(id),
         retain: false,
         isNew: true,
+        debugCreator: '()',
       );
 
   /// {@template cbl.document.mutableCopy}
@@ -138,6 +147,7 @@ class MutableDocument extends Document {
         pointer: _bindings.mutableCopy(original.native.pointerUnsafe),
         retain: false,
         isNew: false,
+        debugCreator: 'mutableCopy()',
       );
 
   late final Pointer<CBLMutableDocument> _mutablePointer =

@@ -502,6 +502,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
           worker,
           release: true,
           retain: false,
+          debugName: 'Database($_debugName)',
         ));
 
   final String _debugName;
@@ -562,6 +563,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
       .then((address) => address?.let((it) => createDocument(
             pointer: it.pointer,
             retain: false,
+            debugCreator: 'Database.getDocument()',
           ))));
 
   @override
@@ -571,6 +573,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             pointer: it.pointer,
             retain: false,
             isNew: false,
+            debugCreator: 'Database.getMutableDocument()',
           ))));
 
   @override
@@ -604,11 +607,13 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             pointer: message.documentBeingSaved,
             retain: true,
             isNew: false,
+            debugCreator: 'SaveConflictHandler(documentBeingSaved)',
           );
           final conflictingDocument = message.conflictingDocument?.let(
             (pointer) => createDocument(
               pointer: pointer,
               retain: true,
+              debugCreator: 'SaveConflictHandler(conflictingDocument)',
             ),
           );
 
@@ -711,6 +716,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
       .then((result) => QueryImpl(
             database: this,
             pointer: result.pointer,
+            debugCreator: 'Database.query()',
           )));
 
   // === Indexes ===============================================================

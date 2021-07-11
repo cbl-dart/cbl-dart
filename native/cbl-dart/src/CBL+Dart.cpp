@@ -52,21 +52,61 @@ CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error) {
   return CBLDart_FLStringResultToDart(CBLError_Message(error));
 }
 
+#ifdef DEBUG
+bool cblRefCountedDebugEnabled = false;
+std::map<CBLRefCounted *, char *> cblRefCountedDebugNames;
+std::mutex cblRefCountedDebugMutex;
+#endif
+
 /**
  * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
  */
 void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
   auto refCounted = reinterpret_cast<CBLRefCounted *>(peer);
+
+#ifdef DEBUG
+  {
+    std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+    if (cblRefCountedDebugEnabled) {
+      auto nh = cblRefCountedDebugNames.extract(refCounted);
+      if (!nh.empty()) {
+        auto debugName = nh.mapped();
+        printf("CBLRefCountedFinalizer: %p %s\n", refCounted, debugName);
+        free(debugName);
+      }
+    }
+  }
+#endif
+
   CBL_Release(refCounted);
 }
 
 void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
                                            CBLRefCounted *refCounted,
-                                           uint8_t retain) {
+                                           uint8_t retain, char *debugName) {
+#ifdef DEBUG
+  if (debugName) {
+    std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+    if (cblRefCountedDebugEnabled) {
+      cblRefCountedDebugNames[refCounted] = debugName;
+    }
+  }
+#endif
+
   if (retain) CBL_Retain(refCounted);
 
   Dart_NewFinalizableHandle_DL(object, refCounted, 0,
                                CBLDart_CBLRefCountedFinalizer);
+}
+
+void CBLDart_SetDebugRefCounted(uint8_t enabled) {
+#ifdef DEBUG
+  std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+  cblRefCountedDebugEnabled = enabled;
+  if (!enabled) {
+    cblRefCountedDebugNames.clear();
+  }
+#endif
 }
 
 void CBLDart_CBLListenerFinalizer(void *context) {

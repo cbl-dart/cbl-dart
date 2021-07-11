@@ -197,11 +197,13 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
   QueryImpl({
     required this.database,
     required Pointer<CBLQuery> pointer,
+    required String? debugCreator,
   }) : super(CblRefCountedWorkerObject(
           pointer,
           database.native.worker,
           release: true,
           retain: false,
+          debugName: 'Query(creator: $debugCreator)',
         )) {
     database.registerChildResource(this);
   }
@@ -228,6 +230,7 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
             result.pointer,
             release: true,
             retain: false,
+            debugCreator: 'Query.execute()',
           )));
 
   @override
@@ -265,6 +268,7 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
             result.pointer,
             release: true,
             retain: false,
+            debugCreator: 'Query.changes()',
           );
         },
       ).stream);
@@ -373,10 +377,12 @@ class ResultSet extends NativeResource<NativeObject<CBLResultSet>>
     Pointer<CBLResultSet> pointer, {
     required bool release,
     required bool retain,
+    required String? debugCreator,
   }) : super(CblRefCountedObject(
           pointer,
           release: release,
           retain: retain,
+          debugName: 'ResultSet(creator: $debugCreator)',
         ));
 
   var _consumed = false;

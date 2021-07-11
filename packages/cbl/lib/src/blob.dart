@@ -50,7 +50,13 @@ class Blob extends NativeResource<NativeObject<CBLBlob>> {
   Blob._(
     Pointer<CBLBlob> pointer, {
     required bool retain,
-  }) : super(CblRefCountedObject(pointer, release: true, retain: retain));
+    required String? debugCreator,
+  }) : super(CblRefCountedObject(
+          pointer,
+          release: true,
+          retain: retain,
+          debugName: 'Blob(creator: $debugCreator)',
+        ));
 
   /// The length in bytes of this Blob's content (from its `length` property).
   int get length => _blobBindings.length(native.pointerUnsafe);
@@ -94,9 +100,12 @@ extension DictBlobExtension on Dict {
   /// [Document].
   ///
   /// Returns `null` if this Dict is not a Blob.
-  Blob? get asBlob => _blobBindings
-      .getBlob(native.pointerUnsafe.cast())
-      ?.let((it) => Blob._(it, retain: true));
+  Blob? get asBlob =>
+      _blobBindings.getBlob(native.pointerUnsafe.cast())?.let((it) => Blob._(
+            it,
+            retain: true,
+            debugCreator: 'Dict.asBlob',
+          ));
 }
 
 /// Extension to get a [Blob] from a [Value].
@@ -177,7 +186,11 @@ class _BlobWriteStream
                     contentType,
                   ));
 
-          return Blob._(result.pointer, retain: false);
+          return Blob._(
+            result.pointer,
+            retain: false,
+            debugCreator: 'BlobWriteStream.createBlob()',
+          );
         },
         doPerformClose: false,
       );
