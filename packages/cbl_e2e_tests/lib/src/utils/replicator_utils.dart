@@ -78,4 +78,4 @@ Future<void> clearTestServerDb() async {
 /// TODO: Remove replicatorStartDelay when PR to fix this issue is in
 /// https://github.com/couchbase/couchbase-lite-core/pull/1167
 Future<void> replicatorStartDelay() =>
-    Future.delayed(Duration(milliseconds: 250));
+    Future.delayed(Duration(milliseconds: 500));
