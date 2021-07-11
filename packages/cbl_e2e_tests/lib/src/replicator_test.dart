@@ -22,7 +22,7 @@ void main() {
       final replicator = await db.createReplicator(ReplicatorConfiguration(
         endpoint: UrlEndpoint(testSyncGatewayUrl),
         replicatorType: ReplicatorType.pushAndPull,
-        continuous: true,
+        continuous: false,
         authenticator: BasicAuthenticator(
           username: 'user',
           password: 'password',
@@ -44,9 +44,15 @@ void main() {
         conflictResolver: (documentId, local, remote) => local,
       ));
 
-      await replicator.start();
-
-      await replicator.close();
+      // Throws exception because we don't provide valid certificates.
+      await expectLater(
+        replicator.startAndWaitUntilStopped(),
+        throwsA(isA<CouchbaseLiteException>().having(
+          (it) => it.code,
+          'code',
+          CouchbaseLiteErrorCode.remoteError,
+        )),
+      );
     });
 
     test('continuous replication', () async {
@@ -231,21 +237,15 @@ void main() {
 
     test('setHostReachable smoke test', () async {
       final db = await openTestDb('SetHostReachableSmoke');
-      final replicator = await db.createTestReplicator(continuous: true);
-      await replicator.start();
-      await replicatorStartDelay();
+      final replicator = await db.createTestReplicator();
       await replicator.setHostReachable(false);
-      await replicatorStartDelay();
       await replicator.setHostReachable(true);
     });
 
     test('setSuspended smoke test', () async {
       final db = await openTestDb('SetSuspendedSmoke');
-      final replicator = await db.createTestReplicator(continuous: true);
-      await replicator.start();
-      await replicatorStartDelay();
+      final replicator = await db.createTestReplicator();
       await replicator.setSuspended(true);
-      await replicatorStartDelay();
       await replicator.setSuspended(false);
     });
 
@@ -272,7 +272,6 @@ void main() {
       );
 
       await replicator.start();
-      await replicatorStartDelay();
     });
 
     test('pendingDocumentIds returns ids of documents waiting to be pushed',
