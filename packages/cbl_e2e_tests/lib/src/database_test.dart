@@ -481,6 +481,7 @@ SELECT foo()
       group('ResultSet', () {
         // TODO: fix bug which prevents id from being used an alias
         // The test uses id_ as a workaround.
+        // https://github.com/couchbase/couchbase-lite-C/issues/149
         test('supports getting column by name', () async {
           final doc = MutableDocument('ResultSetColumnByName');
           await db.saveDocument(doc);
