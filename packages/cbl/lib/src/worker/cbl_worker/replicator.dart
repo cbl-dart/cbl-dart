@@ -26,6 +26,10 @@ class NewReplicator extends WorkerRequest<TransferablePointer<CBLReplicator>> {
     Pointer<CBLEndpoint> endpoint,
     this.replicatorType,
     this.continuous,
+    this.disableAutoPurge,
+    this.maxAttempts,
+    this.maxAttemptWaitTime,
+    this.heartbeat,
     Pointer<CBLAuthenticator>? authenticator,
     this.proxyType,
     this.proxyHostname,
@@ -58,6 +62,10 @@ class NewReplicator extends WorkerRequest<TransferablePointer<CBLReplicator>> {
   final TransferablePointer<CBLEndpoint> endpoint;
   final ReplicatorType replicatorType;
   final bool continuous;
+  final bool? disableAutoPurge;
+  final int? maxAttempts;
+  final int? maxAttemptWaitTime;
+  final int? heartbeat;
   final TransferablePointer<CBLAuthenticator>? authenticator;
   final ProxyType? proxyType;
   final String? proxyHostname;
@@ -81,6 +89,10 @@ TransferablePointer<CBLReplicator> newReplicator(NewReplicator request) =>
           request.endpoint.pointer,
           request.replicatorType.toCBLReplicatorType(),
           request.continuous,
+          request.disableAutoPurge,
+          request.maxAttempts,
+          request.maxAttemptWaitTime,
+          request.heartbeat,
           request.authenticator?.pointer,
           request.proxyType?.toCBLProxyType(),
           request.proxyHostname,
@@ -98,25 +110,16 @@ TransferablePointer<CBLReplicator> newReplicator(NewReplicator request) =>
         )
         .toTransferablePointer();
 
-class ResetReplicatorCheckpoint extends WorkerRequest<void> {
-  ResetReplicatorCheckpoint(Pointer<CBLReplicator> replicator)
-      : replicator = replicator.toTransferablePointer();
-
-  final TransferablePointer<CBLReplicator> replicator;
-}
-
-void resetReplicatorCheckpoint(ResetReplicatorCheckpoint request) =>
-    _bindings.resetCheckpoint(request.replicator.pointer);
-
 class StartReplicator extends WorkerRequest<void> {
-  StartReplicator(Pointer<CBLReplicator> replicator)
+  StartReplicator(Pointer<CBLReplicator> replicator, this.resetCheckpoint)
       : replicator = replicator.toTransferablePointer();
 
   final TransferablePointer<CBLReplicator> replicator;
+  final bool resetCheckpoint;
 }
 
 void startReplicator(StartReplicator request) =>
-    _bindings.start(request.replicator.pointer);
+    _bindings.start(request.replicator.pointer, request.resetCheckpoint);
 
 class StopReplicator extends WorkerRequest<void> {
   StopReplicator(Pointer<CBLReplicator> replicator)
@@ -212,14 +215,13 @@ class AddReplicatorDocumentListener extends WorkerRequest<void> {
 }
 
 void addReplicatorDocumentListener(AddReplicatorDocumentListener request) =>
-    _bindings.addDocumentListener(
+    _bindings.addDocumentReplicationListener(
       request.replicator.pointer,
       request.listener.pointer,
     );
 
 void addReplicatorHandlersToRouter(RequestRouter router) {
   router.addHandler(newReplicator);
-  router.addHandler(resetReplicatorCheckpoint);
   router.addHandler(startReplicator);
   router.addHandler(stopReplicator);
   router.addHandler(setReplicatorHostReachable);

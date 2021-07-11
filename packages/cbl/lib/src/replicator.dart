@@ -43,6 +43,10 @@ Future<Replicator> createReplicator({
         endpoint,
         config.replicatorType ?? ReplicatorType.pushAndPull,
         config.continuous ?? false,
+        null,
+        null,
+        null,
+        null,
         authenticator,
         config.proxy?.type,
         config.proxy?.hostname,
@@ -80,7 +84,7 @@ extension CBLReplicatorStatusExt on CBLReplicatorStatus {
   ReplicatorStatus toReplicatorStatus() => ReplicatorStatus(
         activity.toReplicatorActivityLevel(),
         ReplicatorProgress(
-          progress.fractionCompleted,
+          progress.complete,
           progress.documentCount,
         ),
         exception?.translate(),
@@ -118,27 +122,6 @@ class UrlEndpoint extends Endpoint {
 
   @override
   String toString() => 'UrlEndpoint(url: $url)';
-}
-
-/// An endpoint representing another local database. (Enterprise Edition only.)
-class LocalDbEndpoint extends Endpoint {
-  LocalDbEndpoint(this.database);
-
-  /// The local database to replicate with.
-  final Database database;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is LocalDbEndpoint &&
-          other.runtimeType == other.runtimeType &&
-          database == other.database;
-
-  @override
-  int get hashCode => database.hashCode;
-
-  @override
-  String toString() => 'LocalDbEndpoint(database: $database)';
 }
 
 /// The authentication credentials for a remote server.
@@ -219,12 +202,15 @@ NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
       final doc = createDocument(
         pointer: message.document,
         retain: true,
-        worker: null,
+        debugCreator: 'ReplicationFilter()',
       );
 
       var decision = false;
       try {
-        decision = await filter(doc, message.isDeleted);
+        decision = await filter(
+          doc,
+          message.flags.contains(CBLReplicatedDocumentFlag.deleted),
+        );
       } finally {
         result!(decision);
       }
@@ -241,10 +227,10 @@ NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
 /// needs to prompt for user input, that's OK.
 ///
 /// The callback receives the [documentId] of the conflicted document,
-/// the [local] current revision of the document in the, or `null` if the
-/// local document has been deleted and the the remove revision of the document
-/// found on the server or `null` if the document has been deleted on the
-/// server.
+/// the [local] revision of the document in the database, or `null` if the
+/// local document has been deleted and the the [remote] revision of the
+/// document found on the server or `null` if the document has been deleted
+/// on the server.
 ///
 /// Return the resolved document to save locally (and push, if the replicator is
 /// pushing.) This can be the same as [local] or [remote], or you can create
@@ -264,20 +250,44 @@ NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
       final local = message.localDocument?.let((it) => createDocument(
             pointer: it,
             retain: true,
-            worker: null,
+            debugCreator: 'ConflictResolver(local)',
           ));
 
       final remote = message.remoteDocument?.let((it) => createDocument(
             pointer: it,
             retain: true,
-            worker: null,
+            debugCreator: 'ConflictResolver(remote)',
           ));
 
-      var decision = local ?? remote;
+      var resolved = remote;
+      // TODO: throw on the native side when resolver throws
+      // Also review whether other callbacks can be aborted.
       try {
-        decision = await filter(message.documentId, local, remote);
+        resolved = await filter(message.documentId, local, remote);
       } finally {
-        result!(decision?.native.pointerUnsafe.address);
+        final resolvedPointer = resolved?.native.pointerUnsafe;
+
+        // If the resolver returned a document other than `local` or `remote`,
+        // the ref count of `resolved` needs to be incremented because the
+        // native conflict resolver callback is expected to returned a document
+        // with a ref count of +1, which the caller balances with a release.
+        // This must happen on the Dart side, because `resolved` can be garbage
+        // collected before `resolvedAddress` makes it back to the native side.
+        // if (resolvedPointer != null &&
+        //     resolved != local &&
+        //     resolved != remote) {
+        //   CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+        // }
+
+        // Workaround for a bug in CBL C SDK, which frees all resolved
+        // documents, not just merged ones. When this bug is fixed the above
+        // commented out code block should replace this one.
+        // https://github.com/couchbase/couchbase-lite-C/issues/148
+        if (resolvedPointer != null) {
+          CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+        }
+
+        result!(resolvedPointer?.address);
       }
     });
 
@@ -475,10 +485,6 @@ extension on ReplicatorConfiguration {
     final endpoint = this.endpoint;
     if (endpoint is UrlEndpoint) {
       return _bindings.createEndpointWithUrl(endpoint.url.toString());
-    } else if (endpoint is LocalDbEndpoint) {
-      return _bindings.createEndpointWithLocalDB(
-        (endpoint.database as DatabaseImpl).native.pointer,
-      );
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $endpoint');
     }
@@ -489,7 +495,7 @@ extension on ReplicatorConfiguration {
     if (authenticator == null) return null;
 
     if (authenticator is BasicAuthenticator) {
-      return _bindings.createBasicAuthenticator(
+      return _bindings.createPasswordAuthenticator(
         authenticator.username,
         authenticator.password,
       );
@@ -644,7 +650,7 @@ class ReplicatedDocument {
       ')';
 }
 
-extension on CBLDartReplicatedDocument {
+extension on CBLDart_ReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocument(
         ID,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
@@ -700,15 +706,6 @@ abstract class Replicator extends NativeResource<WorkerObject<CBLReplicator>>
   /// The database this replicator is pulling changes into and pushing changes
   /// out of.
   Database get database;
-
-  /// Instructs this replicator to ignore existing checkpoints the next time it
-  /// runs.
-  ///
-  /// This will cause it to scan through all the [Document]s on the remote
-  /// database, which takes a lot longer, but it can resolve problems with
-  /// missing documents if the client and server have gotten out of sync
-  /// somehow.
-  Future<void> resetCheckpoint();
 
   /// Starts this replicator, asynchronously.
   ///
@@ -802,12 +799,8 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
   final DatabaseImpl database;
 
   @override
-  Future<void> resetCheckpoint() => use(
-      () => native.execute((pointer) => ResetReplicatorCheckpoint(pointer)));
-
-  @override
   Future<void> start() =>
-      use(() => native.execute((pointer) => StartReplicator(pointer)));
+      use(() => native.execute((pointer) => StartReplicator(pointer, false)));
 
   @override
   Future<void> stop() => use(_stop);

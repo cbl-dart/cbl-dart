@@ -208,7 +208,6 @@ class Value extends NativeResource<NativeObject<FLValue>> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Value &&
-          runtimeType == other.runtimeType &&
           _bindings.isEqual(native.pointerUnsafe, other.native.pointerUnsafe);
 
   @override
@@ -242,7 +241,7 @@ class Value extends NativeResource<NativeObject<FLValue>> {
       case ValueType.number:
         return scalarToString!;
       case ValueType.string:
-        return '"${scalarToString!}"';
+        return '"${asString!}"';
       case ValueType.array:
         return asArray.toString();
       case ValueType.dict:

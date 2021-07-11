@@ -1,9 +1,17 @@
 name: Setup Dart environment
 description: Installs Flutter and Melos and bootstrap packages.
+branding:
+  icon: box
+  color: blue
 inputs:
+  dart-version:
+    required: false
+    description: The version of the Dart SDK to setup environment with.
+    default: 2.13.4
   flutter-version:
     required: false
-    description: The Flutter version/channel to setup environment with.
+    description:
+      The version/channel of the Flutter SDK to setup environment with.
     default: 2.2.3
   melos-version:
     required: false
@@ -12,5 +20,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: ${{ github.action_path }}/setup-dart-env.sh ${{ inputs.flutter-version }} ${{ inputs.melos-version }}
+    - run:
+        ${{ github.action_path }}/setup-dart-env.sh
+        ${{ inputs.dart-version }}
+        ${{ inputs.flutter-version }}
+        ${{ inputs.melos-version }}
+        ${{ runner.os }}
       shell: bash

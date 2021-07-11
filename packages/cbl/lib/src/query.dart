@@ -137,8 +137,9 @@ abstract class Query implements Resource {
   /// final query = await db.query(N1QLQuery(
   ///   '''
   ///   SELECT p.name, r.rating
-  ///     FROM product p INNER JOIN reviews r ON array_contains(p.reviewList, r.META.id)
-  ///       WHERE p.META.id = $PRODUCT_ID
+  ///     FROM _default AS p
+  ///     INNER JOIN _default AS r ON array_contains(p.reviewList, META(r).id)
+  ///       WHERE META(p).id = $PRODUCT_ID
   ///   ''',
   /// ));
   ///
@@ -196,11 +197,13 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
   QueryImpl({
     required this.database,
     required Pointer<CBLQuery> pointer,
+    required String? debugCreator,
   }) : super(CblRefCountedWorkerObject(
           pointer,
           database.native.worker,
           release: true,
           retain: false,
+          debugName: 'Query(creator: $debugCreator)',
         )) {
     database.registerChildResource(this);
   }
@@ -227,6 +230,7 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
             result.pointer,
             release: true,
             retain: false,
+            debugCreator: 'Query.execute()',
           )));
 
   @override
@@ -264,6 +268,7 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
             result.pointer,
             release: true,
             retain: false,
+            debugCreator: 'Query.changes()',
           );
         },
       ).stream);
@@ -297,14 +302,26 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
 
   _ResultSetIterator(NativeObject<CBLResultSet> native) : super(native);
 
+  var _hasMore = true;
+  var _hasCurrent = false;
+
   @override
   Result get current => this;
 
   @override
-  bool moveNext() => _bindings.next(native.pointerUnsafe);
+  bool moveNext() {
+    if (_hasMore) {
+      _hasCurrent = _bindings.next(native.pointerUnsafe);
+      if (!_hasCurrent) {
+        _hasMore = false;
+      }
+    }
+    return _hasMore;
+  }
 
   @override
   Value operator [](Object keyOrIndex) {
+    _checkHasCurrent();
     Pointer<FLValue> pointer;
 
     if (keyOrIndex is String) {
@@ -319,18 +336,33 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
   }
 
   @override
-  Array get array => MutableArray.fromPointer(
-        _bindings.rowArray(native.pointerUnsafe).cast(),
-        release: true,
-        retain: true,
-      );
+  Array get array {
+    _checkHasCurrent();
+    return MutableArray.fromPointer(
+      _bindings.resultArray(native.pointerUnsafe).cast(),
+      release: true,
+      retain: true,
+    );
+  }
 
   @override
-  Dict get dict => MutableDict.fromPointer(
-        _bindings.rowDict(native.pointerUnsafe).cast(),
-        release: true,
-        retain: true,
+  Dict get dict {
+    _checkHasCurrent();
+    return MutableDict.fromPointer(
+      _bindings.resultDict(native.pointerUnsafe).cast(),
+      release: true,
+      retain: true,
+    );
+  }
+
+  void _checkHasCurrent() {
+    if (!_hasCurrent) {
+      throw StateError(
+        'ResultSet iterator is empty or its moveNext method has not been '
+        'called.',
       );
+    }
+  }
 }
 
 /// A [ResultSet] is an iterable of the [Result]s returned by a query.
@@ -345,16 +377,18 @@ class ResultSet extends NativeResource<NativeObject<CBLResultSet>>
     Pointer<CBLResultSet> pointer, {
     required bool release,
     required bool retain,
+    required String? debugCreator,
   }) : super(CblRefCountedObject(
           pointer,
           release: release,
           retain: retain,
+          debugName: 'ResultSet(creator: $debugCreator)',
         ));
 
   var _consumed = false;
 
   @override
-  _ResultSetIterator get iterator {
+  Iterator<Result> get iterator {
     if (_consumed) {
       throw StateError(
         'ResultSet can only be consumed once and already has been.',

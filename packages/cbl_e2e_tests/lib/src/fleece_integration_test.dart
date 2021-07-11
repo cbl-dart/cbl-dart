@@ -4,6 +4,7 @@ import 'package:cbl/src/fleece/integration/integration.dart';
 import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/fleece_coding.dart';
+import 'utils/matchers.dart';
 
 void main() {
   setupTestBinding();

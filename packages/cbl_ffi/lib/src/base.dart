@@ -130,18 +130,18 @@ late final globalCBLError = _baseBinds._globalCBLError;
 late final globalErrorPosition = _baseBinds._globalErrorPosition;
 
 class CBLError extends Struct {
-  @Uint32()
+  @Uint8()
   external int _domain;
 
   @Int32()
   external int _code;
 
-  @Int32()
+  @Uint32()
   // ignore: unused_field
   external int _internal_info;
 }
 
-typedef CBLError_Message = Pointer<Utf8> Function(
+typedef CBLDart_CBLError_Message = FLStringResult Function(
   Pointer<CBLError> error,
 );
 
@@ -195,7 +195,10 @@ class CBLErrorException implements Exception {
           error.ref.code,
           _baseBinds.CBLErrorMessage(globalCBLError)!,
           errorSource: errorSource,
-          errorPosition: errorPosition,
+          errorPosition:
+              error.ref.code == CBLErrorCode.invalidQuery && errorPosition != -1
+                  ? errorPosition
+                  : null,
         );
 
   final String message;
@@ -214,20 +217,31 @@ class CBLErrorException implements Exception {
       ')';
 }
 
-void _checkCBLError({String? errorSource}) {
+void checkCBLError({String? errorSource}) {
   if (!globalCBLError.ref.isOk) {
     throw CBLErrorException.fromCBLError(
       globalCBLError,
       errorSource: errorSource,
-      errorPosition:
-          globalErrorPosition.value == -1 ? null : globalErrorPosition.value,
+      errorPosition: globalErrorPosition.value,
     );
   }
 }
 
-extension CheckCBLErrorExt<T> on T {
+final _checkCBLError = checkCBLError;
+
+extension CheckCBLErrorPointerExt<T extends Pointer> on T {
   T checkCBLError({String? errorSource}) {
-    if (this == nullptr || this == false || this == -1) {
+    if (this == nullptr) {
+      _checkCBLError(errorSource: errorSource);
+    }
+    return this;
+  }
+}
+
+extension CheckCBLErrorIntExt on int {
+  int checkCBLError({String? errorSource}) {
+    assert(this == 0 || this == 1);
+    if (this == 0) {
       _checkCBLError(errorSource: errorSource);
     }
     return this;
@@ -242,11 +256,20 @@ typedef CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
   Handle object,
   Pointer<CBLRefCounted> refCounted,
   Uint8 retain,
+  Pointer<Utf8> debugName,
 );
 typedef CBLDart_BindCBLRefCountedToDartObject = void Function(
   Object object,
   Pointer<CBLRefCounted> refCounted,
   int retain,
+  Pointer<Utf8> debugName,
+);
+
+typedef CBLDart_SetDebugRefCounted_C = Void Function(Uint8 enabled);
+typedef CBLDart_SetDebugRefCounted = void Function(int enabled);
+
+typedef CBL_Retain = Pointer<CBLRefCounted> Function(
+  Pointer<CBLRefCounted> refCounted,
 );
 
 // === CBLListener =============================================================
@@ -273,9 +296,16 @@ class BaseBindings extends Bindings {
         CBLDart_BindCBLRefCountedToDartObject>(
       'CBLDart_BindCBLRefCountedToDartObject',
     );
-    _Error_Message =
-        libs.cbl.lookupFunction<CBLError_Message, CBLError_Message>(
-      'CBLError_Message',
+    _setDebugRefCounted = libs.cblDart.lookupFunction<
+        CBLDart_SetDebugRefCounted_C, CBLDart_SetDebugRefCounted>(
+      'CBLDart_SetDebugRefCounted',
+    );
+    _retainRefCounted = libs.cblDart.lookupFunction<CBL_Retain, CBL_Retain>(
+      'CBL_Retain',
+    );
+    _Error_Message = libs.cblDart
+        .lookupFunction<CBLDart_CBLError_Message, CBLDart_CBLError_Message>(
+      'CBLDart_CBLError_Message',
     );
     _Listener_Remove =
         libs.cbl.lookupFunction<CBLListener_Remove_C, CBLListener_Remove>(
@@ -289,7 +319,9 @@ class BaseBindings extends Bindings {
   late final CBLDart_InitDartApiDL _initDartApiDL;
   late final CBLDart_BindCBLRefCountedToDartObject
       _bindCBLRefCountedToDartObject;
-  late final CBLError_Message _Error_Message;
+  late final CBLDart_SetDebugRefCounted _setDebugRefCounted;
+  late final CBL_Retain _retainRefCounted;
+  late final CBLDart_CBLError_Message _Error_Message;
   late final CBLListener_Remove _Listener_Remove;
 
   void initDartApiDL() {
@@ -300,12 +332,24 @@ class BaseBindings extends Bindings {
     Object handle,
     Pointer<CBLRefCounted> refCounted,
     bool retain,
+    String? debugName,
   ) {
-    _bindCBLRefCountedToDartObject(handle, refCounted, retain.toInt());
+    _bindCBLRefCountedToDartObject(
+      handle,
+      refCounted,
+      retain.toInt(),
+      debugName?.toNativeUtf8() ?? nullptr,
+    );
+  }
+
+  set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled.toInt());
+
+  void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
+    _retainRefCounted(refCounted);
   }
 
   String? CBLErrorMessage(Pointer<CBLError> error) =>
-      _Error_Message(error).toNullable()?.toDartStringAndFree();
+      _Error_Message(error).toDartStringAndRelease();
 
   void removeListener(Pointer<CBLListenerToken> token) {
     _Listener_Remove(token);

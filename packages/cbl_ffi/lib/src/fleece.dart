@@ -71,20 +71,74 @@ class FLSlice extends Struct {
   // This is actually a size_t, but Dart FFI does not support it yet.
   // See https://github.com/dart-lang/sdk/issues/36140.
   // We work around this by translating between an actual FLSlice(Result)
-  // and this fixed size struct.
+  // and this fixed size struct. Also applies to FLSliceResult, FLString and
+  // FLStringResult.
   @Uint64()
   external int size;
 }
 
 extension FLSliceExt on FLSlice {
   bool get isNull => buf == nullptr;
-  String? toDartString() =>
-      isNull ? null : buf.cast<Utf8>().toDartString(length: size);
   Uint8List? toUint8List() =>
       isNull ? null : Uint8List.fromList(buf.asTypedList(size));
 }
 
+class FLSliceResult extends Struct {
+  external Pointer<Uint8> buf;
+
+  @Uint64()
+  external int size;
+}
+
+extension FLResultSliceExt on FLSliceResult {
+  bool get isNull => buf == nullptr;
+  Uint8List? toUint8List() =>
+      isNull ? null : Uint8List.fromList(buf.asTypedList(size));
+}
+
+class FLString extends Struct {
+  external Pointer<Uint8> buf;
+
+  @Uint64()
+  external int size;
+}
+
+extension FLStringExt on FLString {
+  bool get isNull => buf == nullptr;
+  String? toDartString() =>
+      isNull ? null : buf.cast<Utf8>().toDartString(length: size);
+}
+
+class FLStringResult extends Struct {
+  external Pointer<Uint8> buf;
+
+  @Uint64()
+  external int size;
+}
+
+extension FLStringResultExt on FLStringResult {
+  bool get isNull => buf == nullptr;
+  String? toDartStringAndRelease() {
+    if (isNull) {
+      return null;
+    }
+
+    final result = buf.cast<Utf8>().toDartString(length: size);
+
+    CBLBindings.instance.fleece.slice.releaseStringResult(this);
+
+    return result;
+  }
+}
+
+late final nullFLSlice = CBLBindings.instance.fleece.slice.nullSlice;
+late final nullFLString =
+    CBLBindings.instance.fleece.slice.nullSlice.cast<FLString>();
 late final globalFLSlice = CBLBindings.instance.fleece.slice.globalSlice;
+late final globalFLSliceResult =
+    CBLBindings.instance.fleece.slice.globalSliceResult;
+late final globalFLString =
+    CBLBindings.instance.fleece.slice.globalSlice.cast<FLString>();
 
 extension TypedDataFLSliceExt on TypedData {
   Pointer<FLSlice> copyToGlobalSliceInArena() {
@@ -97,28 +151,6 @@ extension TypedDataFLSliceExt on TypedData {
       ..size = lengthInBytes;
 
     return globalFLSlice;
-  }
-}
-
-class FLSliceResult extends Struct {
-  external Pointer<Uint8> buf;
-
-  // TODO: use correct type
-  // See FLSlice.size
-  @Uint64()
-  external int size;
-}
-
-late final globalFLSliceResult =
-    CBLBindings.instance.fleece.slice.globalSliceResult;
-
-extension FLResultSlicePointerExt on Pointer<FLSliceResult> {
-  Pointer<FLSlice> asSlice() => cast();
-
-  String? toDartStringAndRelease() {
-    final string = asSlice().ref.toDartString();
-    CBLBindings.instance.fleece.slice.release(this);
-    return string;
   }
 }
 
@@ -145,8 +177,10 @@ typedef CBLDart_FLSliceResult_BindToDartObject = void Function(
   int retain,
 );
 
-typedef CBLDart_FLSliceResult_Release_C = Void Function(Pointer<FLSliceResult>);
-typedef CBLDart_FLSliceResult_Release = void Function(Pointer<FLSliceResult>);
+typedef CBLDart_FLSliceResult_Release_C = Void Function(FLSliceResult);
+typedef CBLDart_FLSliceResult_Release = void Function(FLSliceResult);
+typedef CBLDart_FLStringResult_Release_C = Void Function(FLStringResult);
+typedef CBLDart_FLStringResult_Release = void Function(FLStringResult);
 
 class SliceBindings extends Bindings {
   SliceBindings(Bindings parent) : super(parent) {
@@ -171,12 +205,19 @@ class SliceBindings extends Bindings {
         CBLDart_FLSliceResult_BindToDartObject>(
       'CBLDart_FLSliceResult_BindToDartObject',
     );
-    _release = libs.cblDart.lookupFunction<CBLDart_FLSliceResult_Release_C,
-        CBLDart_FLSliceResult_Release>(
+    _releaseSliceResult = libs.cblDart.lookupFunction<
+        CBLDart_FLSliceResult_Release_C, CBLDart_FLSliceResult_Release>(
+      'CBLDart_FLSliceResult_Release',
+    );
+    _releaseStringResult = libs.cblDart.lookupFunction<
+        CBLDart_FLStringResult_Release_C, CBLDart_FLStringResult_Release>(
       'CBLDart_FLSliceResult_Release',
     );
   }
 
+  late final Pointer<FLSlice> nullSlice = malloc()
+    ..ref.buf = nullptr
+    ..ref.size = 0;
   late final Pointer<FLSlice> globalSlice = malloc();
   late final Pointer<FLSliceResult> globalSliceResult = globalSlice.cast();
 
@@ -186,7 +227,8 @@ class SliceBindings extends Bindings {
   late final CBLDart_FLSliceResult_New _new;
   late final CBLDart_FLSlice_Copy _copy;
   late final CBLDart_FLSliceResult_BindToDartObject _bindToDartObject;
-  late final CBLDart_FLSliceResult_Release _release;
+  late final CBLDart_FLSliceResult_Release _releaseSliceResult;
+  late final CBLDart_FLStringResult_Release _releaseStringResult;
 
   bool equal(FLSlice a, FLSlice b) {
     return _equal(a, b).toBool();
@@ -208,12 +250,17 @@ class SliceBindings extends Bindings {
     _bindToDartObject(object, sliceResult, retain.toInt());
   }
 
-  void release(Pointer<FLSliceResult> sliceResult) {
-    _release(sliceResult);
+  void releaseSliceResult(FLSliceResult result) {
+    _releaseSliceResult(result);
+  }
+
+  void releaseStringResult(FLStringResult result) {
+    _releaseStringResult(result);
   }
 
   @override
   void dispose() {
+    malloc.free(nullSlice);
     malloc.free(globalSlice);
     super.dispose();
   }
@@ -237,11 +284,11 @@ typedef FLSlot_SetDouble = void Function(Pointer<FLSlot> slot, double value);
 
 typedef CBLDart_FLSlot_SetString_C = Void Function(
   Pointer<FLSlot> slot,
-  Pointer<Utf8> value,
+  FLString value,
 );
 typedef CBLDart_FLSlot_SetString = void Function(
   Pointer<FLSlot> slot,
-  Pointer<Utf8> value,
+  FLString value,
 );
 
 typedef FLSlot_SetData_C = Void Function(
@@ -313,7 +360,8 @@ class SlotBindings extends Bindings {
   }
 
   void setString(Pointer<FLSlot> slot, String value) {
-    stringTable.autoFree(() => _setString(slot, stringTable.cString(value)));
+    stringTable
+        .autoFree(() => _setString(slot, stringTable.flString(value).ref));
   }
 
   void setData(Pointer<FLSlot> slot, TypedData value) {
@@ -330,12 +378,12 @@ class SlotBindings extends Bindings {
 class FLDoc extends Opaque {}
 
 typedef CBLDart_FLDoc_FromJSON = Pointer<FLDoc> Function(
-  Pointer<Utf8> json,
-  Pointer<Uint32> error,
+  FLString json,
+  Pointer<Uint32> errorOut,
 );
 
 typedef CBLDart_FLDoc_BindToDartObject_C = Void Function(
-  Handle handle,
+  Handle object,
   Pointer<FLDoc> doc,
 );
 typedef CBLDart_FLDoc_BindToDartObject = void Function(
@@ -366,7 +414,7 @@ class DocBindings extends Bindings {
 
   Pointer<FLDoc> fromJson(String json) {
     return stringTable.autoFree(() {
-      return _fromJSON(stringTable.cString(json), _globalFleeceErrorCode)
+      return _fromJSON(stringTable.flString(json).ref, _globalFleeceErrorCode)
           .checkFleeceError();
     });
   }
@@ -403,7 +451,7 @@ extension on int {
 }
 
 typedef CBLDart_FLValue_BindToDartObject_C = Void Function(
-  Handle handle,
+  Handle object,
   Pointer<FLValue> value,
   Uint8 retain,
 );
@@ -433,31 +481,17 @@ typedef FLValue_AsInt = int Function(Pointer<FLValue> value);
 typedef FLValue_AsDouble_C = Double Function(Pointer<FLValue> value);
 typedef FLValue_AsDouble = double Function(Pointer<FLValue> value);
 
-typedef CBLDart_FLValue_AsString_C = Void Function(
-  Pointer<FLValue> value,
-  Pointer<FLSlice> slice,
-);
-typedef CBLDart_FLValue_AsString = void Function(
-  Pointer<FLValue> value,
-  Pointer<FLSlice> slice,
-);
+typedef CBLDart_FLValue_AsString_C = FLString Function(Pointer<FLValue> value);
+typedef CBLDart_FLValue_AsString = FLString Function(Pointer<FLValue> value);
 
-typedef CBLDart_FLValue_AsData_C = Void Function(
-  Pointer<FLValue> value,
-  Pointer<FLSlice> slice,
-);
-typedef CBLDart_FLValue_AsData = void Function(
-  Pointer<FLValue> value,
-  Pointer<FLSlice> slice,
-);
+typedef CBLDart_FLValue_AsData_C = FLSlice Function(Pointer<FLValue> value);
+typedef CBLDart_FLValue_AsData = FLSlice Function(Pointer<FLValue> value);
 
-typedef CBLDart_FLValue_ToString_C = Void Function(
+typedef CBLDart_FLValue_ToString_C = FLStringResult Function(
   Pointer<FLValue> value,
-  Pointer<FLSliceResult> slice,
 );
-typedef CBLDart_FLValue_ToString = void Function(
+typedef CBLDart_FLValue_ToString = FLStringResult Function(
   Pointer<FLValue> value,
-  Pointer<FLSliceResult> slice,
 );
 
 typedef FLValue_IsEqual_C = Uint8 Function(
@@ -469,17 +503,15 @@ typedef FLValue_IsEqual = int Function(
   Pointer<FLValue> v2,
 );
 
-typedef CBLDart_FLValue_ToJSONX_C = Void Function(
+typedef CBLDart_FLValue_ToJSONX_C = FLStringResult Function(
   Pointer<FLValue> value,
   Uint8 json5,
   Uint8 canonicalForm,
-  Pointer<FLSliceResult> result,
 );
-typedef CBLDart_FLValue_ToJSONX = void Function(
+typedef CBLDart_FLValue_ToJSONX = FLStringResult Function(
   Pointer<FLValue> value,
   int json5,
   int canonicalForm,
-  Pointer<FLSliceResult> result,
 );
 
 class ValueBindings extends Bindings {
@@ -578,18 +610,15 @@ class ValueBindings extends Bindings {
   }
 
   String? asString(Pointer<FLValue> value) {
-    _asString(value, globalFLSlice);
-    return globalFLSlice.ref.toDartString();
+    return _asString(value).toDartString();
   }
 
   Uint8List? asData(Pointer<FLValue> value) {
-    _asData(value, globalFLSlice);
-    return globalFLSlice.ref.toUint8List();
+    return _asData(value).toUint8List();
   }
 
   String? scalarToString(Pointer<FLValue> value) {
-    _scalarToString(value, globalFLSliceResult);
-    return globalFLSliceResult.toDartStringAndRelease();
+    return _scalarToString(value).toDartStringAndRelease();
   }
 
   bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) {
@@ -601,8 +630,8 @@ class ValueBindings extends Bindings {
     bool json5,
     bool canonicalForm,
   ) {
-    _toJson(value, json5.toInt(), canonicalForm.toInt(), globalFLSliceResult);
-    return globalFLSliceResult.toDartStringAndRelease()!;
+    return _toJson(value, json5.toInt(), canonicalForm.toInt())
+        .toDartStringAndRelease()!;
   }
 }
 
@@ -883,7 +912,7 @@ typedef FLDict_AsMutable = Pointer<FLMutableDict> Function(
 
 typedef FLDict_Get = Pointer<FLValue> Function(
   Pointer<FLDict> dict,
-  Pointer<Utf8> key,
+  FLString key,
 );
 
 class DictBindings extends Bindings {
@@ -906,7 +935,8 @@ class DictBindings extends Bindings {
   late final FLDict_AsMutable _asMutable;
 
   Pointer<FLValue> get(Pointer<FLDict> dict, String key) {
-    return stringTable.autoFree(() => _get(dict, stringTable.cString(key)));
+    return stringTable
+        .autoFree(() => _get(dict, stringTable.flString(key).ref));
   }
 
   int count(Pointer<FLDict> dict) {
@@ -925,7 +955,7 @@ class DictBindings extends Bindings {
 class DictIterator extends Struct {
   // ignore: unused_element
   external Pointer<Void> get _iterator;
-  external FLSlice get _keyString;
+  external FLString get _keyString;
   @Uint8()
   external int get _done;
 }
@@ -999,16 +1029,16 @@ typedef FLMutableDict_IsChanged = int Function(Pointer<FLMutableDict> dict);
 
 typedef CBLDart_FLMutableDict_Set = Pointer<FLSlot> Function(
   Pointer<FLMutableDict> dict,
-  Pointer<Utf8> key,
+  FLString key,
 );
 
 typedef CBLDart_FLMutableDict_Remove_C = Void Function(
   Pointer<FLMutableDict> dict,
-  Pointer<Utf8> key,
+  FLString key,
 );
 typedef CBLDart_FLMutableDict_Remove = void Function(
   Pointer<FLMutableDict> dict,
-  Pointer<Utf8> key,
+  FLString key,
 );
 
 typedef FLMutableDict_RemoveAll_C = Void Function(Pointer<FLMutableDict> dict);
@@ -1017,12 +1047,12 @@ typedef FLMutableDict_RemoveAll = void Function(Pointer<FLMutableDict> dict);
 typedef CBLDart_FLMutableDict_GetMutableArray = Pointer<FLMutableArray>
     Function(
   Pointer<FLMutableDict> dict,
-  Pointer<Utf8> key,
+  FLString key,
 );
 
 typedef CBLDart_FLMutableDict_GetMutableDict = Pointer<FLMutableDict> Function(
   Pointer<FLMutableDict> dict,
-  Pointer<Utf8> key,
+  FLString key,
 );
 
 class MutableDictBindings extends Bindings {
@@ -1096,11 +1126,12 @@ class MutableDictBindings extends Bindings {
   }
 
   Pointer<FLSlot> set(Pointer<FLMutableDict> dict, String key) {
-    return stringTable.autoFree(() => _set(dict, stringTable.cString(key)));
+    return stringTable
+        .autoFree(() => _set(dict, stringTable.flString(key).ref));
   }
 
   void remove(Pointer<FLMutableDict> dict, String key) {
-    stringTable.autoFree(() => _remove(dict, stringTable.cString(key)));
+    stringTable.autoFree(() => _remove(dict, stringTable.flString(key).ref));
   }
 
   void removeAll(Pointer<FLMutableDict> dict) {
@@ -1112,7 +1143,8 @@ class MutableDictBindings extends Bindings {
     String key,
   ) {
     return stringTable.autoFree(() {
-      return _getMutableArray(array, stringTable.cString(key)).toNullable();
+      return _getMutableArray(array, stringTable.flString(key).ref)
+          .toNullable();
     });
   }
 
@@ -1121,7 +1153,7 @@ class MutableDictBindings extends Bindings {
     String key,
   ) {
     return stringTable.autoFree(() {
-      return _getMutableDict(array, stringTable.cString(key)).toNullable();
+      return _getMutableDict(array, stringTable.flString(key).ref).toNullable();
     });
   }
 }
@@ -1150,7 +1182,8 @@ class CBLDart_LoadedFLValue extends Struct {
   external int asInt;
   @Double()
   external double asDouble;
-  external FLSlice asSlice;
+  external FLString asString;
+  external FLSlice asData;
   external Pointer<FLValue> asValue;
 }
 
@@ -1164,8 +1197,8 @@ extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
 late final Pointer<CBLDart_LoadedFLValue> globalLoadedFLValue =
     CBLBindings.instance.fleece.decoder._globalLoadedFLValue;
 
-typedef CBLDart_FLData_Dump_C = FLSliceResult Function(FLSlice slice);
-typedef CBLDart_FLData_Dump = FLSliceResult Function(FLSlice slice);
+typedef CBLDart_FLData_Dump_C = FLStringResult Function(FLSlice slice);
+typedef CBLDart_FLData_Dump = FLStringResult Function(FLSlice slice);
 
 typedef CBLDart_FLData_ConvertJSON_C = FLSliceResult Function(
   FLSlice json,
@@ -1209,12 +1242,12 @@ typedef CBLDart_FLArray_GetLoadedFLValue = void Function(
 
 typedef CBLDart_FLDict_GetLoadedFLValue_C = Void Function(
   Pointer<FLDict> dict,
-  FLSlice key,
+  FLString key,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 typedef CBLDart_FLDict_GetLoadedFLValue = void Function(
   Pointer<FLDict> dict,
-  FLSlice key,
+  FLString key,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
@@ -1222,7 +1255,7 @@ class CBLDart_FLDictIterator2 extends Struct {
   @Uint8()
   external int _isDone;
   // ignore: unused_field
-  external Pointer<FLSlice> _keyOut;
+  external Pointer<FLString> _keyOut;
   // ignore: unused_field
   external Pointer<CBLDart_LoadedFLValue> _valueOut;
   // ignore: unused_field
@@ -1238,14 +1271,14 @@ typedef CBLDart_FLDictIterator2_Begin_C = Pointer<CBLDart_FLDictIterator2>
     Function(
   Handle object,
   Pointer<FLDict> dict,
-  Pointer<FLSlice> keyOut,
+  Pointer<FLString> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
 );
 typedef CBLDart_FLDictIterator2_Begin = Pointer<CBLDart_FLDictIterator2>
     Function(
   Object object,
   Pointer<FLDict> dict,
-  Pointer<FLSlice> keyOut,
+  Pointer<FLString> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
 );
 
@@ -1298,8 +1331,8 @@ class FleeceDecoderBindings extends Bindings {
   late final CBLDart_FLDictIterator2_Begin _dictIteratorBegin;
   late final CBLDart_FLDictIterator2_Next _dictIteratorNext;
 
-  FLSliceResult dumpData(FLSlice data) {
-    return _dumpData(data);
+  String dumpData(FLSlice data) {
+    return _dumpData(data).toDartStringAndRelease()!;
   }
 
   bool getLoadedFLValueFromData(FLSlice data, FLTrust trust) {
@@ -1337,7 +1370,7 @@ class FleeceDecoderBindings extends Bindings {
   Pointer<CBLDart_FLDictIterator2> dictIteratorBegin(
     Object object,
     Pointer<FLDict> dict,
-    Pointer<FLSlice> keyOut,
+    Pointer<FLString> keyOut,
     Pointer<CBLDart_LoadedFLValue> valueOut,
   ) {
     return _dictIteratorBegin(object, dict, keyOut, valueOut);
@@ -1443,11 +1476,11 @@ typedef FLEncoder_WriteDouble = int Function(
 
 typedef CBLDart_FLEncoder_WriteString_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
-  FLSlice value,
+  FLString value,
 );
 typedef CBLDart_FLEncoder_WriteString = int Function(
   Pointer<FLEncoder> encoder,
-  FLSlice value,
+  FLString value,
 );
 
 typedef CBLDart_FLEncoder_WriteData_C = Uint8 Function(
@@ -1461,11 +1494,11 @@ typedef CBLDart_FLEncoder_WriteData = int Function(
 
 typedef CBLDart_FLEncoder_WriteJSON_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
-  FLSlice value,
+  FLString value,
 );
 typedef CBLDart_FLEncoder_WriteJSON = int Function(
   Pointer<FLEncoder> encoder,
-  FLSlice value,
+  FLString value,
 );
 
 typedef CBLDart_FLEncoder_BeginArray_C = Uint8 Function(
@@ -1491,11 +1524,11 @@ typedef CBLDart_FLEncoder_BeginDict = int Function(
 
 typedef CBLDart_FLEncoder_WriteKey_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
-  FLSlice key,
+  FLString key,
 );
 typedef CBLDart_FLEncoder_WriteKey = int Function(
   Pointer<FLEncoder> encoder,
-  FLSlice key,
+  FLString key,
 );
 
 typedef FLEncoder_EndDict_C = Uint8 Function(Pointer<FLEncoder> encoder);
@@ -1503,11 +1536,11 @@ typedef FLEncoder_EndDict = int Function(Pointer<FLEncoder> encoder);
 
 typedef FLEncoder_Finish_C = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
-  Pointer<Uint32> error,
+  Pointer<Uint32> errorOut,
 );
 typedef FLEncoder_Finish = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
-  Pointer<Uint32> error,
+  Pointer<Uint32> errorOut,
 );
 
 typedef FLEncoder_GetError_C = Uint32 Function(Pointer<FLEncoder> encoder);

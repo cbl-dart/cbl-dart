@@ -141,6 +141,17 @@ void main() {
         expect(value.toJson(), equals(json));
       });
 
+      test('== works for null values', () {
+        final doc = Doc.fromJson('[null, null, 1]');
+        final array = doc.root.asArray!;
+        expect(array[0], array[1]);
+        expect(array[0], isNot(array[2]));
+
+        final mutArray = MutableArray([null, null, 1]);
+        expect(mutArray[0], mutArray[1]);
+        expect(mutArray[0], isNot(mutArray[2]));
+      });
+
       test('toString returns debug description', () {
         final doc = Doc.fromJson(r'''
       {
@@ -288,14 +299,20 @@ void main() {
         final array = MutableArray();
         array.addAll([1, 2]);
         array.insertNulls(1, 2);
-        expect(array, equals(MutableArray()..addAll([1, null, null, 2])));
+        final expected = MutableArray([1, null, null, 2]);
+        expect(array[0], expected[0]);
+        expect(array[1].type, expected[1].type);
+        expect(array[2].type, expected[2].type);
+        expect(array[3], expected[3]);
       });
 
       test('setting length resizes the array', () {
         final array = MutableArray();
         expect(array, isEmpty);
         array.length = 3;
-        expect(array, equals(MutableArray()..addAll([null, null, null])));
+        expect(array[0].type, ValueType.Null);
+        expect(array[1].type, ValueType.Null);
+        expect(array[2].type, ValueType.Null);
       });
 
       test('mutableDict returns null when value at index is not an dict', () {
@@ -632,3 +649,6 @@ void main() {
     });
   });
 }
+
+@pragma('vm:never-inline')
+void keepAlive(Object? object) {}

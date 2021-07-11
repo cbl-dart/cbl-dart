@@ -1,4 +1,4 @@
 [submodule "native/vendor/couchbase-lite-C"]
 	path = native/vendor/couchbase-lite-C
-	url = https://github.com/cofu-app/couchbase-lite-C.git
-	branch = cbl-dart
+	url = https://github.com/couchbase/couchbase-lite-C.git
+	branch = master

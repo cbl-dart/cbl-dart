@@ -1,6 +1,4 @@
 import 'dart:ffi';
-import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -11,15 +9,6 @@ import '../worker.dart';
 import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.database;
-
-extension on EncryptionAlgorithm {
-  CBLEncryptionAlgorithm toCBLEncryptionAlgorithm() =>
-      CBLEncryptionAlgorithm.values[index];
-}
-
-extension on DatabaseFlag {
-  CBLDatabaseFlag toCBLDatabaseFlag() => CBLDatabaseFlag.values[index];
-}
 
 extension on ConcurrencyControl {
   CBLConcurrencyControl toCBLConcurrencyControl() =>
@@ -45,28 +34,17 @@ class CopyDatabase extends WorkerRequest<void> {
     this.fromPath,
     this.toName,
     this.directory,
-    this.flags,
-    this.encryptionAlgorithm,
-    Uint8List? encryptionKey,
-  ) : encryptionKey = encryptionKey == null
-            ? null
-            : TransferableTypedData.fromList([encryptionKey]);
+  );
 
   final String fromPath;
   final String toName;
   final String? directory;
-  final Set<DatabaseFlag>? flags;
-  final EncryptionAlgorithm? encryptionAlgorithm;
-  final TransferableTypedData? encryptionKey;
 }
 
 void copyDatabase(CopyDatabase request) => _bindings.copyDatabase(
       request.fromPath,
       request.toName,
       request.directory,
-      request.flags?.map((flag) => flag.toCBLDatabaseFlag()).toSet(),
-      request.encryptionAlgorithm?.toCBLEncryptionAlgorithm(),
-      request.encryptionKey?.materialize().asUint8List(),
     );
 
 class DeleteDatabaseFile extends WorkerRequest<bool> {
@@ -82,27 +60,16 @@ class OpenDatabase extends WorkerRequest<TransferablePointer<CBLDatabase>> {
   OpenDatabase(
     this.name,
     this.directory,
-    this.flags,
-    this.encryptionAlgorithm,
-    Uint8List? encryptionKey,
-  ) : encryptionKey = encryptionKey == null
-            ? null
-            : TransferableTypedData.fromList([encryptionKey]);
+  );
 
   final String name;
   final String? directory;
-  final Set<DatabaseFlag>? flags;
-  final EncryptionAlgorithm? encryptionAlgorithm;
-  final TransferableTypedData? encryptionKey;
 }
 
 TransferablePointer<CBLDatabase> openDatabase(OpenDatabase request) => _bindings
     .open(
       request.name,
       request.directory,
-      request.flags?.map((flag) => flag.toCBLDatabaseFlag()).toSet(),
-      request.encryptionAlgorithm?.toCBLEncryptionAlgorithm(),
-      request.encryptionKey?.materialize().asUint8List(),
     )
     .toTransferablePointer();
 
@@ -164,44 +131,26 @@ void performDatabaseMaintenance(PerformDatabaseMaintenance request) =>
     _bindings.performMaintenance(
         request.db.pointer, request.type.toCBLMaintenanceType());
 
-class BeginDatabaseBatch extends WorkerRequest<void> {
-  BeginDatabaseBatch(Pointer<CBLDatabase> db) : db = db.toTransferablePointer();
+class BeginDatabaseTransaction extends WorkerRequest<void> {
+  BeginDatabaseTransaction(Pointer<CBLDatabase> db)
+      : db = db.toTransferablePointer();
 
   final TransferablePointer<CBLDatabase> db;
 }
 
-void beginDatabaseBatch(BeginDatabaseBatch request) =>
-    _bindings.beginBatch(request.db.pointer);
+void beginDatabaseTransaction(BeginDatabaseTransaction request) =>
+    _bindings.beginTransaction(request.db.pointer);
 
-class EndDatabaseBatch extends WorkerRequest<void> {
-  EndDatabaseBatch(Pointer<CBLDatabase> db) : db = db.toTransferablePointer();
-
-  final TransferablePointer<CBLDatabase> db;
-}
-
-void endDatabaseBatch(EndDatabaseBatch request) =>
-    _bindings.endBatch(request.db.pointer);
-
-class RekeyDatabase extends WorkerRequest<void> {
-  RekeyDatabase(Pointer<CBLDatabase> db, this.encryptionAlgorithm,
-      Uint8List? encryptionKey)
-      : db = db.toTransferablePointer(),
-        encryptionKey = encryptionKey == null
-            ? null
-            : TransferableTypedData.fromList([encryptionKey]);
+class EndDatabaseTransaction extends WorkerRequest<void> {
+  EndDatabaseTransaction(Pointer<CBLDatabase> db, this.commit)
+      : db = db.toTransferablePointer();
 
   final TransferablePointer<CBLDatabase> db;
-  final EncryptionAlgorithm? encryptionAlgorithm;
-  final TransferableTypedData? encryptionKey;
+  final bool commit;
 }
 
-void rekeyDatabase(RekeyDatabase request) {
-  _bindings.rekey(
-    request.db.pointer,
-    request.encryptionAlgorithm?.toCBLEncryptionAlgorithm(),
-    request.encryptionKey?.materialize().asUint8List(),
-  );
-}
+void endDatabaseTransaction(EndDatabaseTransaction request) =>
+    _bindings.endTransaction(request.db.pointer, request.commit);
 
 class GetDatabaseDocument
     extends WorkerRequest<TransferablePointer<CBLDocument>?> {
@@ -233,9 +182,8 @@ TransferablePointer<CBLMutableDocument>? getDatabaseMutableDocument(
         .getMutableDocument(request.db.pointer, request.id)
         .toTransferablePointerOrNull();
 
-class SaveDatabaseDocument
-    extends WorkerRequest<TransferablePointer<CBLDocument>> {
-  SaveDatabaseDocument(
+class SaveDatabaseDocumentWithConcurrencyControl extends WorkerRequest<void> {
+  SaveDatabaseDocumentWithConcurrencyControl(
     Pointer<CBLDatabase> db,
     Pointer<CBLMutableDocument> doc,
     this.concurrency,
@@ -247,19 +195,17 @@ class SaveDatabaseDocument
   final ConcurrencyControl concurrency;
 }
 
-TransferablePointer<CBLDocument> saveDatabaseDocument(
-        SaveDatabaseDocument request) =>
-    _bindings
-        .saveDocument(
-          request.db.pointer,
-          request.doc.pointer,
-          request.concurrency.toCBLConcurrencyControl(),
-        )
-        .toTransferablePointer();
+void saveDatabaseDocumentWithConcurrencyControl(
+  SaveDatabaseDocumentWithConcurrencyControl request,
+) =>
+    _bindings.saveDocumentWithConcurrencyControl(
+      request.db.pointer,
+      request.doc.pointer,
+      request.concurrency.toCBLConcurrencyControl(),
+    );
 
-class SaveDatabaseDocumentResolving
-    extends WorkerRequest<TransferablePointer<CBLDocument>> {
-  SaveDatabaseDocumentResolving(
+class SaveDatabaseDocumentWithConflictHandler extends WorkerRequest<void> {
+  SaveDatabaseDocumentWithConflictHandler(
     Pointer<CBLDatabase> db,
     Pointer<CBLMutableDocument> doc,
     Pointer<Callback> conflictResolver,
@@ -272,15 +218,14 @@ class SaveDatabaseDocumentResolving
   final TransferablePointer<Callback> conflictResolver;
 }
 
-TransferablePointer<CBLDocument> saveDatabaseDocumentResolving(
-        SaveDatabaseDocumentResolving request) =>
-    _bindings
-        .saveDocumentResolving(
-          request.db.pointer,
-          request.doc.pointer,
-          request.conflictResolver.pointer,
-        )
-        .toTransferablePointer();
+void saveDatabaseDocumentResolvingWithConflictHandler(
+  SaveDatabaseDocumentWithConflictHandler request,
+) =>
+    _bindings.saveDocumentWithConflictHandler(
+      request.db.pointer,
+      request.doc.pointer,
+      request.conflictResolver.pointer,
+    );
 
 class PurgeDatabaseDocumentById extends WorkerRequest<bool> {
   PurgeDatabaseDocumentById(Pointer<CBLDatabase> db, this.id)
@@ -319,27 +264,36 @@ void setDatabaseDocumentExpiration(SetDatabaseDocumentExpiration request) =>
     _bindings.setDocumentExpiration(
         request.db.pointer, request.id, request.time);
 
-class DeleteDocument extends WorkerRequest<void> {
-  DeleteDocument(Pointer<CBLDocument> doc, this.concurrency)
-      : doc = doc.toTransferablePointer();
+class DeleteDocumentWithConcurrencyControl extends WorkerRequest<bool> {
+  DeleteDocumentWithConcurrencyControl(
+      Pointer<CBLDatabase> db, Pointer<CBLDocument> doc, this.concurrency)
+      : db = db.toTransferablePointer(),
+        doc = doc.toTransferablePointer();
 
+  final TransferablePointer<CBLDatabase> db;
   final TransferablePointer<CBLDocument> doc;
   final ConcurrencyControl concurrency;
 }
 
-void deleteDocument(DeleteDocument request) => _docBindings.delete(
+bool deleteDocumentWithConcurrencyControl(
+  DeleteDocumentWithConcurrencyControl request,
+) =>
+    _bindings.deleteDocumentWithConcurrencyControl(
+      request.db.pointer,
       request.doc.pointer,
       request.concurrency.toCBLConcurrencyControl(),
     );
 
-class PurgeDocument extends WorkerRequest<void> {
-  PurgeDocument(Pointer<CBLDocument> doc) : doc = doc.toTransferablePointer();
+class PurgeDocumentByID extends WorkerRequest<bool> {
+  PurgeDocumentByID(Pointer<CBLDatabase> db, this.docID)
+      : db = db.toTransferablePointer();
 
-  final TransferablePointer<CBLDocument> doc;
+  final TransferablePointer<CBLDatabase> db;
+  final String docID;
 }
 
-void purgeDocument(PurgeDocument request) =>
-    _docBindings.purge(request.doc.pointer);
+void purgeDocumentByID(PurgeDocumentByID request) =>
+    _bindings.purgeDocumentByID(request.db.pointer, request.docID);
 
 class AddDocumentChangeListener extends WorkerRequest<void> {
   AddDocumentChangeListener(
@@ -358,8 +312,6 @@ void addDocumentChangeListener(AddDocumentChangeListener request) =>
       request.docId,
       request.listener.pointer,
     );
-
-late final _docBindings = CBLBindings.instance.document;
 
 class AddDatabaseChangeListener extends WorkerRequest<void> {
   AddDatabaseChangeListener(Pointer<CBLDatabase> db, Pointer<Callback> listener)
@@ -384,14 +336,14 @@ class CreateDatabaseIndex extends WorkerRequest<void> {
 
 void createDatabaseIndex(CreateDatabaseIndex request) {
   final index = request.index;
-  CBLIndexType type;
+  CBLdart_IndexType type;
   bool? ignoreAccents;
   String? language;
 
   if (index is ValueIndex) {
-    type = CBLIndexType.value;
+    type = CBLdart_IndexType.value;
   } else if (index is FullTextIndex) {
-    type = CBLIndexType.fullText;
+    type = CBLdart_IndexType.fullText;
     ignoreAccents = index.ignoreAccents;
     language = index.language;
   } else {
@@ -402,7 +354,8 @@ void createDatabaseIndex(CreateDatabaseIndex request) {
     request.db.pointer,
     request.name,
     type,
-    index.keyExpressions,
+    CBLQueryLanguage.json,
+    index.expressions,
     ignoreAccents,
     language,
   );
@@ -428,7 +381,8 @@ class GetDatabaseIndexNames
 }
 
 TransferablePointer<FLArray> getDatabaseIndexNames(
-        GetDatabaseIndexNames request) =>
+  GetDatabaseIndexNames request,
+) =>
     _bindings.indexNames(request.db.pointer).toTransferablePointer();
 
 void addDatabaseHandlersToRouter(RequestRouter router) {
@@ -442,18 +396,17 @@ void addDatabaseHandlersToRouter(RequestRouter router) {
   router.addHandler(closeDatabase);
   router.addHandler(deleteDatabase);
   router.addHandler(performDatabaseMaintenance);
-  router.addHandler(beginDatabaseBatch);
-  router.addHandler(endDatabaseBatch);
-  router.addHandler(rekeyDatabase);
+  router.addHandler(beginDatabaseTransaction);
+  router.addHandler(endDatabaseTransaction);
   router.addHandler(getDatabaseDocument);
   router.addHandler(getDatabaseMutableDocument);
-  router.addHandler(saveDatabaseDocument);
-  router.addHandler(saveDatabaseDocumentResolving);
+  router.addHandler(saveDatabaseDocumentWithConcurrencyControl);
+  router.addHandler(saveDatabaseDocumentResolvingWithConflictHandler);
   router.addHandler(purgeDatabaseDocumentById);
   router.addHandler(getDatabaseDocumentExpiration);
   router.addHandler(setDatabaseDocumentExpiration);
-  router.addHandler(deleteDocument);
-  router.addHandler(purgeDocument);
+  router.addHandler(deleteDocumentWithConcurrencyControl);
+  router.addHandler(purgeDocumentByID);
   router.addHandler(addDocumentChangeListener);
   router.addHandler(addDatabaseChangeListener);
   router.addHandler(createDatabaseIndex);

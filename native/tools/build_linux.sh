@@ -32,14 +32,12 @@ function _configure() {
         return 0
     fi
 
-    CC=clang-10 \
-        CXX=clang++-10 \
-        cmake \
+    cmake \
         -B "$buildDir" \
         -G Ninja \
+        -DCMAKE_INSTALL_PREFIX="$buildDir/install" \
         -DCMAKE_C_COMPILER_LAUNCHER=ccache \
         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-        -DCMAKE_INCLUDE_PATH=/usr/lib/llvm-10 \
         -DCMAKE_BUILD_TYPE="$buildType" \
         "$nativeDir"
 }

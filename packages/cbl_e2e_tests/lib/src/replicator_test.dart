@@ -3,12 +3,11 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../test_binding_impl.dart';
 import 'test_binding.dart';
 import 'utils/database_utils.dart';
 import 'utils/replicator_utils.dart';
 import 'utils/test_document.dart';
-
-import '../test_binding_impl.dart';
 
 void main() {
   setupTestBinding();
@@ -23,7 +22,7 @@ void main() {
       final replicator = await db.createReplicator(ReplicatorConfiguration(
         endpoint: UrlEndpoint(testSyncGatewayUrl),
         replicatorType: ReplicatorType.pushAndPull,
-        continuous: true,
+        continuous: false,
         authenticator: BasicAuthenticator(
           username: 'user',
           password: 'password',
@@ -45,7 +44,15 @@ void main() {
         conflictResolver: (documentId, local, remote) => local,
       ));
 
-      await replicator.close();
+      // Throws exception because we don't provide valid certificates.
+      await expectLater(
+        replicator.startAndWaitUntilStopped(),
+        throwsA(isA<CouchbaseLiteException>().having(
+          (it) => it.code,
+          'code',
+          CouchbaseLiteErrorCode.remoteError,
+        )),
+      );
     });
 
     test('continuous replication', () async {
@@ -228,25 +235,16 @@ void main() {
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
     });
 
-    test('resetCheckpoint smoke test', () async {
-      final db = await openTestDb('ResetCheckpointSmoke');
-      final replicator = await db.createTestReplicator();
-      await replicator.resetCheckpoint();
-      await replicator.startAndWaitUntilStopped();
-    });
-
     test('setHostReachable smoke test', () async {
       final db = await openTestDb('SetHostReachableSmoke');
-      final replicator = await db.createTestReplicator(continuous: true);
-      await replicator.start();
+      final replicator = await db.createTestReplicator();
       await replicator.setHostReachable(false);
       await replicator.setHostReachable(true);
     });
 
     test('setSuspended smoke test', () async {
       final db = await openTestDb('SetSuspendedSmoke');
-      final replicator = await db.createTestReplicator(continuous: true);
-      await replicator.start();
+      final replicator = await db.createTestReplicator();
       await replicator.setSuspended(true);
       await replicator.setSuspended(false);
     });

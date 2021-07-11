@@ -62,19 +62,12 @@ void main() {
         blob.properties['myData'] = myData;
 
         expect(
-          {
-            '@type': blob.properties['@type'].asString,
-            'length': blob.properties['length'].asInt,
-            // TODO: Bug in Blob metadata `content_type` and `digest`
-            // values have bit1 set to 1 which means they are mutable, but only
-            // collection values can be mutable.
-            // 'content_type': blob.properties['content_type'].asString,
-            // 'digest': blob.properties['digest'].asString,
-            'myData': blob.properties['myData'].toObject(),
-          },
+          blob.properties.toObject(),
           {
             '@type': 'blob',
-            'length': content.length,
+            'content_type': blob.contentType,
+            'digest': blob.digest,
+            'length': blob.length,
             'myData': myData,
           },
         );

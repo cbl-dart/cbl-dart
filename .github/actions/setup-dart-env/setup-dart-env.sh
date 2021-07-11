@@ -1,54 +1,28 @@
+#!/bin/bash
+
 set -e
 
-flutterVersion="$1"
-melosVersion="$2"
-flutterDir="$HOME/opt/flutter"
-flutterBinDir="$flutterDir/bin"
-dartBinDir="$flutterDir/bin/cache/dart-sdk/bin"
-flutter="$flutterBinDir/flutter"
-pubBinDir="$HOME/.pub-cache/bin"
-melos="$pubBinDir/melos"
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+dartVersion="$1"
+flutterVersion="$2"
+melosVersion="$3"
+os="$4"
 
-if [[ -z "$melosVersion" ]]; then
-    echo "::error::Melos version must not be empty."
-    exit 1
-fi
+echo ::group::Setup Flutter
 
-# Add Flutter binaries to path
-echo "$flutterBinDir" >>$GITHUB_PATH
+"$scriptDir/setup-flutter.sh" "$flutterVersion"
+source update_flutter_path.sh
 
-# Add Dart binaries to path
-echo "$dartBinDir" >>$GITHUB_PATH
+echo ::endgroup::
 
-# Add global pub binaries to path
-echo "$pubBinDir" >>$GITHUB_PATH
+echo ::group::Setup Melos
 
-# Make binaries availabe to comands in this script
-export PATH="$pubBinDir:$dartBinDir:$flutterBinDir:$PATH"
+"$scriptDir/setup-melos.sh" "$melosVersion"
 
-echo "::group::Clone Flutter repo"
+echo ::endgroup::
 
-git clone https://github.com/flutter/flutter.git -b "$flutterVersion" --depth 1 "$flutterDir"
+echo ::group::Setup Dart
 
-echo "::endgroup::"
+"$scriptDir/setup-dart.sh" "$dartVersion" "$os" "x64"
 
-echo "::group::Flutter version"
-
-# Print Flutter version
-"$flutter" --version
-
-echo "::endgroup::"
-
-echo "::group::Install Melos"
-
-"$flutter" pub global activate melos "$melosVersion"
-
-echo "::endgroup::"
-
-if [ -z "$SKIP_MELOS_BOOTSTRAP" ]; then
-    echo "::group::Bootstrap packages with Melos"
-
-    "$melos" bootstrap
-
-    echo "::endgroup::"
-fi
+echo ::endgroup::

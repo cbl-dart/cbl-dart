@@ -113,6 +113,7 @@ class CblRefCountedObject<T extends NativeType> extends NativeObject<T> {
     Pointer<T> pointer, {
     required bool release,
     required bool retain,
+    required String? debugName,
   }) : super(pointer) {
     assert(!retain || release, 'only a retained object can be released');
 
@@ -121,6 +122,7 @@ class CblRefCountedObject<T extends NativeType> extends NativeObject<T> {
         this,
         pointer.cast(),
         retain,
+        debugName,
       );
     }
   }
@@ -134,7 +136,13 @@ class CblRefCountedWorkerObject<T extends NativeType>
     this.worker, {
     required bool release,
     required bool retain,
-  }) : super(pointer, release: release, retain: retain);
+    required String? debugName,
+  }) : super(
+          pointer,
+          release: release,
+          retain: retain,
+          debugName: debugName,
+        );
 
   @override
   final Worker worker;

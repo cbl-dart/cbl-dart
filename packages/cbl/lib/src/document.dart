@@ -6,32 +6,31 @@ import 'database.dart';
 import 'fleece.dart';
 import 'native_object.dart';
 import 'resource.dart';
-import 'worker/cbl_worker.dart';
 
 // region Internal API
 
 Document createDocument({
   required Pointer<CBLDocument> pointer,
-  required Worker? worker,
   required bool retain,
+  required String? debugCreator,
 }) =>
     Document._fromPointer(
       pointer,
-      worker: worker,
       retain: retain,
+      debugName: 'Document(creator: $debugCreator)',
     );
 
 MutableDocument createMutableDocument({
   required Pointer<CBLMutableDocument> pointer,
-  required Worker? worker,
   required bool retain,
   required bool isNew,
+  required String? debugCreator,
 }) =>
     MutableDocument._fromPointer(
       pointer,
-      worker: worker,
       retain: retain,
       isNew: isNew,
+      debugName: 'MutableDocument(creator: $debugCreator)',
     );
 
 // endregion
@@ -43,20 +42,14 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
 
   Document._fromPointer(
     Pointer<CBLDocument> pointer, {
-    Worker? worker,
     required bool retain,
-  }) : super(worker == null
-            ? CblRefCountedObject(
-                pointer,
-                release: true,
-                retain: retain,
-              )
-            : CblRefCountedWorkerObject(
-                pointer,
-                worker,
-                release: true,
-                retain: retain,
-              ));
+    required String? debugName,
+  }) : super(CblRefCountedObject(
+          pointer,
+          release: true,
+          retain: retain,
+          debugName: debugName,
+        ));
 
   /// Returns this documents id.
   String get id => _bindings.id(native.pointerUnsafe);
@@ -83,30 +76,7 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
       );
 
   /// The properties as a JSON string.
-  String get propertiesAsJson =>
-      _bindings.propertiesAsJson(native.pointerUnsafe);
-
-  /// Deletes this document from the database.
-  ///
-  /// Deletions are replicated.
-  Future<void> delete([
-    ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
-  ]) {
-    _debugDocumentHasWorker();
-    return (native as WorkerObject<CBLDocument>)
-        .execute((pointer) => DeleteDocument(pointer, concurrency));
-  }
-
-  /// Purges this document.
-  ///
-  /// This removes all traces of the document from the database. Purges are not
-  /// replicated. If the document is changed on a server, it will be re-created
-  /// when pulled.
-  Future<void> purge() {
-    _debugDocumentHasWorker();
-    return (native as WorkerObject<CBLDocument>)
-        .execute((pointer) => PurgeDocument(pointer));
-  }
+  String get propertiesAsJson => _bindings.createJSON(native.pointerUnsafe);
 
   /// {@macro cbl.document.mutableCopy}
   MutableDocument mutableCopy() => MutableDocument.mutableCopy(this);
@@ -115,7 +85,6 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Document &&
-          runtimeType == other.runtimeType &&
           id == other.id &&
           revisionId == other.revisionId &&
           sequence == other.sequence &&
@@ -134,10 +103,6 @@ class Document extends NativeResource<NativeObject<CBLDocument>> {
       'revisionId: $revisionId, '
       'sequence: $sequence'
       ')';
-
-  void _debugDocumentHasWorker() {
-    assert(native is WorkerObject, 'Document has no Worker');
-  }
 }
 
 /// A [Document] whose [properties] can be changed.
@@ -150,23 +115,23 @@ class MutableDocument extends Document {
 
   MutableDocument._fromPointer(
     Pointer<CBLMutableDocument> pointer, {
-    Worker? worker,
     required bool retain,
     required this.isNew,
+    required String? debugName,
   }) : super._fromPointer(
           pointer.cast(),
-          worker: worker,
           retain: retain,
+          debugName: debugName,
         );
 
   /// Creates a new, empty document in memory.
   ///
   /// It will not be added to a database until saved.
   factory MutableDocument([String? id]) => createMutableDocument(
-        pointer: _bindings.create(id),
-        worker: null,
+        pointer: _bindings.createWithID(id),
         retain: false,
         isNew: true,
+        debugCreator: '()',
       );
 
   /// {@template cbl.document.mutableCopy}
@@ -180,9 +145,9 @@ class MutableDocument extends Document {
   factory MutableDocument.mutableCopy(Document original) =>
       createMutableDocument(
         pointer: _bindings.mutableCopy(original.native.pointerUnsafe),
-        worker: (original.native as WorkerObject).worker,
         retain: false,
         isNew: false,
+        debugCreator: 'mutableCopy()',
       );
 
   late final Pointer<CBLMutableDocument> _mutablePointer =
@@ -208,7 +173,7 @@ class MutableDocument extends Document {
   }
 
   set propertiesAsJson(String json) {
-    _bindings.setPropertiesAsJSON(_mutablePointer, json);
+    _bindings.setJSON(_mutablePointer, json);
   }
 
   @override

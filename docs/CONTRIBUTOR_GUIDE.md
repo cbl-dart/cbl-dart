@@ -36,7 +36,7 @@ so that tests and examples use them.
 - CMake 3.9+
 - ninja-build
 - ccache
-- Clang 10
+- GCC/Clang
 - ICU libraries
 
 ```shell
@@ -53,7 +53,7 @@ Build the native binaries with build type `Debug`:
 
 **Dependencies**:
 
-- Android SDK with NDK `22.1.7171670` and CMake `3.10.2.4988404`
+- Android SDK with NDK `21.4.7075529` and CMake `3.18.1`
 - ccache (optional)
 
 Build the native binaries with build type `Debug`:
