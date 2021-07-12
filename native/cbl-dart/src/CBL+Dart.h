@@ -275,7 +275,8 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
 
 CBLDART_EXPORT
 void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
-                                        CBLReplicator *replicator);
+                                        CBLReplicator *replicator,
+                                        char *debugName);
 
 CBLDART_EXPORT
 uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,

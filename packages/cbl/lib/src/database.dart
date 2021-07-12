@@ -747,7 +747,11 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
 
   @override
   Future<Replicator> createReplicator(ReplicatorConfiguration config) =>
-      use(() => repl.createReplicator(db: this, config: config));
+      use(() => repl.createReplicator(
+            db: this,
+            config: config,
+            debugCreator: 'Database.createReplicator()',
+          ));
 
   // === Object ================================================================
 
