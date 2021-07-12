@@ -21,6 +21,7 @@ import 'worker/cbl_worker.dart';
 Future<Replicator> createReplicator({
   required DatabaseImpl db,
   required ReplicatorConfiguration config,
+  required String? debugCreator,
 }) {
   return runNativeObjectScoped(() async {
     final pushFilterCallback = config.pushFilter?.let(_wrapReplicationFilter);
@@ -67,6 +68,7 @@ Future<Replicator> createReplicator({
         database: db,
         pointer: result.pointer,
         disposeCallbacks: disposeCallbacks,
+        debugCreator: debugCreator,
       );
     } catch (e) {
       disposeCallbacks();
@@ -788,8 +790,13 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
     required this.database,
     required Pointer<CBLReplicator> pointer,
     required void Function() disposeCallbacks,
+    required String? debugCreator,
   })  : _disposeCallbacks = disposeCallbacks,
-        super._(CBLReplicatorObject(pointer, database.native.worker)) {
+        super._(CBLReplicatorObject(
+          pointer,
+          worker: database.native.worker,
+          debugName: 'Replicator(creator: $debugCreator)',
+        )) {
     database.registerChildResource(this);
   }
 

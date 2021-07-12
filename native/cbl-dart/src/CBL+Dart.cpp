@@ -58,32 +58,30 @@ std::map<CBLRefCounted *, char *> cblRefCountedDebugNames;
 std::mutex cblRefCountedDebugMutex;
 #endif
 
-/**
- * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
- */
-void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
-  auto refCounted = reinterpret_cast<CBLRefCounted *>(peer);
-
+inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
 #ifdef DEBUG
+  char *debugName = nullptr;
   {
     std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
     if (cblRefCountedDebugEnabled) {
       auto nh = cblRefCountedDebugNames.extract(refCounted);
       if (!nh.empty()) {
-        auto debugName = nh.mapped();
-        printf("CBLRefCountedFinalizer: %p %s\n", refCounted, debugName);
-        free(debugName);
+        debugName = nh.mapped();
       }
     }
+  }
+  if (debugName) {
+    printf("CBLRefCountedFinalizer: %p %s\n", refCounted, debugName);
+    free(debugName);
   }
 #endif
 
   CBL_Release(refCounted);
 }
 
-void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
-                                           CBLRefCounted *refCounted,
-                                           uint8_t retain, char *debugName) {
+inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
+    Dart_Handle object, CBLRefCounted *refCounted, uint8_t retain,
+    char *debugName, Dart_HandleFinalizer handleFinalizer) {
 #ifdef DEBUG
   if (debugName) {
     std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
@@ -95,8 +93,21 @@ void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
 
   if (retain) CBL_Retain(refCounted);
 
-  Dart_NewFinalizableHandle_DL(object, refCounted, 0,
-                               CBLDart_CBLRefCountedFinalizer);
+  Dart_NewFinalizableHandle_DL(object, refCounted, 0, handleFinalizer);
+}
+
+/**
+ * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
+ */
+void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
+  CBLDart_CBLRefCountedFinalizer_Impl(reinterpret_cast<CBLRefCounted *>(peer));
+}
+
+void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
+                                           CBLRefCounted *refCounted,
+                                           uint8_t retain, char *debugName) {
+  CBLDart_BindCBLRefCountedToDartObject_Impl(
+      object, refCounted, retain, debugName, CBLDart_CBLRefCountedFinalizer);
 }
 
 void CBLDart_SetDebugRefCounted(uint8_t enabled) {
@@ -656,19 +667,25 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
 void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   auto replicator = reinterpret_cast<CBLReplicator *>(peer);
 
-  CBLReplicator_Release(replicator);
-
   // Clean up context for callback wrapper
-  std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
-  auto callbackWrapperContext = replicatorCallbackWrapperContexts[replicator];
-  replicatorCallbackWrapperContexts.erase(replicator);
+  ReplicatorCallbackWrapperContext *callbackWrapperContext;
+  {
+    std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
+    auto nh = replicatorCallbackWrapperContexts.extract(replicator);
+    callbackWrapperContext = nh.mapped();
+  }
   delete callbackWrapperContext;
+
+  CBLDart_CBLRefCountedFinalizer_Impl(
+      reinterpret_cast<CBLRefCounted *>(replicator));
 }
 
 void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
-                                        CBLReplicator *replicator) {
-  Dart_NewFinalizableHandle_DL(object, reinterpret_cast<void *>(replicator), 0,
-                               CBLDart_ReplicatorFinalizer);
+                                        CBLReplicator *replicator,
+                                        char *debugName) {
+  CBLDart_BindCBLRefCountedToDartObject_Impl(
+      object, reinterpret_cast<CBLRefCounted *>(replicator), false, debugName,
+      CBLDart_ReplicatorFinalizer);
 }
 
 uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,

@@ -152,9 +152,13 @@ class CblRefCountedWorkerObject<T extends NativeType>
 class CBLReplicatorObject extends NativeObject<CBLReplicator>
     with WorkerObject {
   /// Creates a reference to a CBLReplicator.
-  CBLReplicatorObject(Pointer<CBLReplicator> pointer, this.worker)
-      : super(pointer) {
-    CBLBindings.instance.replicator.bindReplicatorToDartObject(this, pointer);
+  CBLReplicatorObject(
+    Pointer<CBLReplicator> pointer, {
+    required this.worker,
+    required String? debugName,
+  }) : super(pointer) {
+    CBLBindings.instance.replicator
+        .bindReplicatorToDartObject(this, pointer, debugName);
   }
 
   @override

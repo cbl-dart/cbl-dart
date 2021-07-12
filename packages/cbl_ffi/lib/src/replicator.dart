@@ -20,10 +20,6 @@ typedef CBLDart_CBLEndpoint_CreateWithURL = Pointer<CBLEndpoint> Function(
   FLString url,
 );
 
-typedef CBLEndpoint_NewWithLocalDB = Pointer<CBLEndpoint> Function(
-  Pointer<CBLDatabase> database,
-);
-
 typedef CBLEndpoint_Free_C = Void Function(
   Pointer<CBLEndpoint> endpoint,
 );
@@ -171,10 +167,12 @@ typedef CBLDart_CBLReplicator_Create = Pointer<CBLReplicator> Function(
 typedef CBLDart_BindReplicatorToDartObject_C = Void Function(
   Handle object,
   Pointer<CBLReplicator> replicator,
+  Pointer<Utf8> debugName,
 );
 typedef CBLDart_BindReplicatorToDartObject = void Function(
   Object object,
   Pointer<CBLReplicator> replicator,
+  Pointer<Utf8> debugName,
 );
 
 typedef CBLReplicator_ResetCheckpoint_C = Void Function(
@@ -547,8 +545,13 @@ class ReplicatorBindings extends Bindings {
   void bindReplicatorToDartObject(
     Object object,
     Pointer<CBLReplicator> replicator,
+    String? debugName,
   ) {
-    _bindToDartObject(object, replicator);
+    _bindToDartObject(
+      object,
+      replicator,
+      debugName?.toNativeUtf8() ?? nullptr,
+    );
   }
 
   void start(Pointer<CBLReplicator> replicator, bool resetCheckpoint) {
