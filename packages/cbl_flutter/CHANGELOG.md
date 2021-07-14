@@ -1,3 +1,7 @@
+## 0.4.0+3
+
+ - Update a dependency to the latest release.
+
 ## 0.4.0+2
 
  - **FIX**: fix variable reference in `install_binaries.sh`.

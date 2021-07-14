@@ -1,3 +1,7 @@
+## 4.2.2
+
+ - **FIX**: build all apple Frameworks with `CFBundleVersion`.
+
 ## 4.2.1
 
  - **FIX**: format paths for current system.
