@@ -80,6 +80,7 @@ function buildPlatform() {
         -destination "$destination" \
         -configuration "$configuration" \
         -archivePath "$archivesDir/$platformId" \
+        CURRENT_PROJECT_VERSION=1 \
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         CODE_SIGNING_ALLOWED="NO" \
