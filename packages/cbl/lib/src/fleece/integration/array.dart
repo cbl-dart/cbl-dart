@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -16,7 +17,7 @@ class MArray extends MCollection {
 
   MArray.asCopy(MArray original, {bool? isMutable})
       : _array = original._array,
-        _values = List.of(original._values),
+        _values = original._values.map((value) => value?.clone()).toList(),
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
 
   MArray.asChild(MValue slot, MCollection parent, {bool? isMutable})
@@ -116,21 +117,23 @@ class MArray extends MCollection {
   }
 
   @override
-  void encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder) {
     if (!isMutated) {
       encoder.writeValue(_array!.cast());
     } else {
-      encoder.beginArray(length);
-      var index = 0;
-      for (final value in _values) {
-        if (value == null) {
-          encoder.writeArrayValue(_array!, index);
-        } else {
-          value.encodeTo(encoder);
+      return iterateMaybeAsync(() sync* {
+        encoder.beginArray(length);
+        var index = 0;
+        for (final value in _values) {
+          if (value == null) {
+            encoder.writeArrayValue(_array!, index);
+          } else {
+            yield value.encodeTo(encoder);
+          }
+          ++index;
         }
-        ++index;
-      }
-      encoder.endArray();
+        encoder.endArray();
+      }());
     }
   }
 

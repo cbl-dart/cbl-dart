@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -31,10 +32,10 @@ Uint8List jointUint8Lists(List<Uint8List> lists) {
 }
 
 String redact(String string) {
+  const unredactedChars = 3;
   final chars = string.characters;
-  final unredactedChars = 3;
   final redactedChars =
-      max(chars.length - 3, min(unredactedChars, chars.length));
+      max(chars.length - unredactedChars, min(unredactedChars, chars.length));
   final unredactedCharsStr = chars.getRange(redactedChars);
   return ('*' * redactedChars) + unredactedCharsStr.string;
 }
@@ -73,4 +74,18 @@ class Once<T> {
   }
 
   String get _debugName => debugName ?? runtimeType.toString();
+}
+
+FutureOr<void> iterateMaybeAsync(Iterable<FutureOr<void>> iterable) {
+  final iterator = iterable.iterator;
+  while (iterator.moveNext()) {
+    final result = iterator.current;
+    if (result is Future) {
+      return result.then((void _) async {
+        while (iterator.moveNext()) {
+          await iterator.current;
+        }
+      });
+    }
+  }
 }

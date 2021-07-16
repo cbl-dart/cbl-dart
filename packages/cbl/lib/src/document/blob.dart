@@ -93,7 +93,7 @@ abstract class Blob {
   }
 }
 
-class BlobImpl implements Blob, FleeceEncodable {
+class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl({
     required Pointer<CBLBlob> blob,
     required bool retain,
@@ -104,6 +104,9 @@ class BlobImpl implements Blob, FleeceEncodable {
           retain: retain,
           debugName: 'Blob(creator: $debugCreator)',
         );
+
+  factory BlobImpl.fromProperties(Map<String, dynamic> properties) =>
+      throw UnimplementedError();
 
   final CblRefCountedObject<CBLBlob> _blob;
 
@@ -147,6 +150,18 @@ class BlobImpl implements Blob, FleeceEncodable {
 
   @override
   int get hashCode => const DeepCollectionEquality().hash(properties);
+
+  @override
+  Object? toCblObject() {
+    // TODO: implement toCblObject
+    throw UnimplementedError();
+  }
+
+  @override
+  Object? toPlainObject() {
+    // TODO: implement toPlainObject
+    throw UnimplementedError();
+  }
 }
 
 Future<Uint8List> _dataStreamToFuture(Stream<Uint8List> stream) async {

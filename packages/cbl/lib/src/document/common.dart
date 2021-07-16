@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -11,12 +12,76 @@ import 'dictionary.dart';
 
 late final _blobBindings = CBLBindings.instance.blobs.blob;
 
-abstract class MCollectionWrapper {
-  MCollection get mCollection;
+abstract class CblConversions {
+  Object? toPlainObject();
+  Object? toCblObject();
+
+  static Object? convertToPlainObject(Object? object) {
+    if (object is CblConversions) {
+      return object.toPlainObject();
+    }
+    return const _DefaultCblConversions().toPlainObject(object);
+  }
+
+  static Object? convertToCblObject(Object? object) {
+    if (object is CblConversions) {
+      return object.toCblObject();
+    }
+    return const _DefaultCblConversions().toCblObject(object);
+  }
+}
+
+class _DefaultCblConversions implements CblConversions {
+  const _DefaultCblConversions();
+
+  @override
+  Object? toCblObject([Object? object]) {
+    // The order in which `object` is checked for the different types attempts
+    // to anticipate which types of objects are used most often, to minimize
+    // the number of executed checks.
+    if (object is String || object is num || object is bool || object == null) {
+      return object;
+    }
+
+    if (object is Map<String, dynamic>) {
+      if (Blob.isBlob(object)) {
+        return BlobImpl.fromProperties(object);
+      }
+      return MutableDictionary(object);
+    }
+
+    if (object is Iterable<Object?>) {
+      return MutableArray(object);
+    }
+
+    if (object is DateTime) {
+      return object.toIso8601String();
+    }
+
+    if (object is TypedData) {
+      return Blob.fromData(
+        'application/octet-stream',
+        object.buffer.asUint8List(),
+      );
+    }
+
+    throw ArgumentError.value(
+      object,
+      'object',
+      'cannot be stored in a Couchbase Lite Document',
+    );
+  }
+
+  @override
+  Object? toPlainObject([Object? object]) => object;
 }
 
 abstract class FleeceEncodable {
-  void encodeTo(FleeceEncoder encoder);
+  FutureOr<void> encodeTo(FleeceEncoder encoder);
+}
+
+abstract class MCollectionWrapper {
+  MCollection get mCollection;
 }
 
 class CblMDelegate extends MDelegate {
@@ -28,7 +93,7 @@ class CblMDelegate extends MDelegate {
   }
 
   @override
-  void encodeNative(FleeceEncoder encoder, Object? native) {
+  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native) {
     if (native == null ||
         native is String ||
         native is num ||
@@ -38,7 +103,7 @@ class CblMDelegate extends MDelegate {
     } else if (native is DateTime) {
       encoder.writeString(native.toIso8601String());
     } else if (native is FleeceEncodable) {
-      native.encodeTo(encoder);
+      return native.encodeTo(encoder);
     } else {
       throw ArgumentError.value(
         native,
@@ -101,70 +166,16 @@ bool valueWouldChange(
   MValue? oldValue,
   MCollection container,
 ) {
+  // Collection values are assumed to result in a change to skip expensive
+  // comparisons of large instances.
   if (oldValue?.value is CollectionFLValue) {
     return false;
   }
-
   if (newValue is Array || newValue is Dictionary) {
     return true;
   }
 
   return newValue != oldValue?.asNative(container);
-}
-
-Object? toPrimitiveObject(Object? object) {
-  if (object is Array) {
-    return object.map(toPrimitiveObject).toList();
-  }
-  if (object is Dictionary) {
-    return Map.fromEntries(object.map((key) => MapEntry(
-          key,
-          toPrimitiveObject(object.value(key)),
-        )));
-  }
-  return object;
-}
-
-Object? toCblObject(Object? object) {
-  if (object == null || object is num || object is bool || object is String) {
-    return object;
-  }
-  if (object is DateTime) {
-    return object.toIso8601String();
-  }
-  if (object is TypedData) {
-    return Blob.fromData(
-      'application/octet-stream',
-      object.buffer.asUint8List(),
-    );
-  }
-  if (object is Blob) {
-    return object;
-  }
-  if (object is MutableArray) {
-    return object;
-  }
-  if (object is Array) {
-    return object.toMutable();
-  }
-  if (object is MutableDictionary) {
-    return object;
-  }
-  if (object is Dictionary) {
-    return object.toMutable();
-  }
-  if (object is Iterable<Object?>) {
-    return MutableArray(object);
-  }
-  if (object is Map<String, dynamic>) {
-    if (Blob.isBlob(object)) {
-      // TODO
-      throw UnimplementedError();
-    }
-    return MutableDictionary(object);
-  }
-
-  throw ArgumentError.value(object, 'value', 'cannot be stored in a Documents');
 }
 
 T? coerceObject<T>(Object? object) {

@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:meta/meta.dart';
 
-import '../fleece/containers.dart' as fl;
+import '../database.dart';
+import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../native_object.dart';
 import '../resource.dart';
@@ -19,7 +20,6 @@ late final _mutableDocumentBindings = CBLBindings.instance.mutableDocument;
 /// A Couchbase Lite document.
 ///
 /// The [Document] is immutable.
-@immutable
 abstract class Document implements DictionaryInterface, Iterable<String> {
   /// The document’s id.
   String get id;
@@ -75,8 +75,15 @@ class DocumentMContext extends MContext {
   final DocumentImpl document;
 }
 
+class DocumentEncoderContext {
+  DocumentEncoderContext(this.document);
+
+  final DocumentImpl document;
+}
+
 class DocumentImpl with IterableMixin<String> implements Document {
   DocumentImpl({
+    required DatabaseImpl database,
     required Pointer<CBLDocument> doc,
     required bool retain,
     required String debugCreator,
@@ -87,15 +94,35 @@ class DocumentImpl with IterableMixin<String> implements Document {
         );
 
   DocumentImpl._({
+    DatabaseImpl? database,
     required Pointer<CBLDocument> doc,
     required bool retain,
     required String debugName,
-  }) : doc = CblRefCountedObject(
+  })  : _database = database,
+        doc = CblRefCountedObject(
           doc,
           release: true,
           retain: retain,
           debugName: debugName,
         );
+
+  /// The database to which this document belongs.
+  ///
+  /// Is `null` if the document has not been saved yet.
+  DatabaseImpl? get database => _database;
+  DatabaseImpl? _database;
+
+  set database(DatabaseImpl? database) {
+    if (_database != database) {
+      if (_database != null) {
+        throw StateError(
+          'The document cannot be saved in $database because it already '
+          'belongs to a $_database: $this',
+        );
+      }
+      _database = database;
+    }
+  }
 
   final NativeObject<CBLDocument> doc;
 
@@ -197,10 +224,12 @@ class DocumentImpl with IterableMixin<String> implements Document {
 
 class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   MutableDocumentImpl({
+    DatabaseImpl? database,
     required Pointer<CBLMutableDocument> doc,
     required bool retain,
     required String debugCreator,
   }) : super._(
+          database: database,
           doc: doc.cast(),
           retain: retain,
           debugName: 'MutableDocument(creator: $debugCreator)',
@@ -296,8 +325,12 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
 
   /// Encodes `_properties` and sets the result as the new properties of the
   /// native `Document`.
-  void flushProperties() {
-    final data = _root.encode();
+  Future<void> flushProperties() async {
+    assert(database != null);
+    final encoder = fl.FleeceEncoder();
+    encoder.extraInfo = DocumentEncoderContext(this);
+    await _root.encodeTo(encoder);
+    final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
     final dict = doc.root.asDict!;
     final mutableDict = fl.MutableDict.mutableCopy(dict);

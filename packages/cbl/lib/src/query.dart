@@ -121,7 +121,7 @@ class Parameters {
   void setValue(Object? value, {required String name}) {
     _checkReadonly();
     _data ??= {};
-    _data![name] = toCblObject(value);
+    _data![name] = CblConversions.convertToCblObject(value);
   }
 
   /// Set a [String] to the query parameter referenced by the given

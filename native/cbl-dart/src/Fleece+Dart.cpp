@@ -85,7 +85,7 @@ FLDoc CBLDart_FLDoc_FromResultData(CBLDart_FLSliceResult data, uint8_t trust,
                                    FLSharedKeys sharedKeys,
                                    CBLDart_FLSlice externalData) {
   return FLDoc_FromResultData(CBLDart_FLSliceResultFromDart(data),
-                              (FLTrust)trust, sharedKeys,
+                              static_cast<FLTrust>(trust), sharedKeys,
                               CBLDart_FLSliceFromDart(externalData));
 }
 

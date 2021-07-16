@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
@@ -87,7 +86,6 @@ abstract class DictionaryInterface implements DictionaryFragment {
 }
 
 /// Provides readonly access to dictionary data.
-@immutable
 abstract class Dictionary implements DictionaryInterface, Iterable<String> {
   /// Returns a mutable copy of this dictionary.
   MutableDictionary toMutable();
@@ -166,7 +164,7 @@ abstract class MutableDictionary
 
 class DictionaryImpl
     with IterableMixin<String>
-    implements Dictionary, MCollectionWrapper, FleeceEncodable {
+    implements Dictionary, MCollectionWrapper, FleeceEncodable, CblConversions {
   DictionaryImpl(this._dict);
 
   final MDict _dict;
@@ -216,7 +214,10 @@ class DictionaryImpl
 
   @override
   Map<String, dynamic> toMap() =>
-      toPrimitiveObject(this) as Map<String, dynamic>;
+      Map<String, dynamic>.fromEntries(map((key) => MapEntry<String, dynamic>(
+            key,
+            CblConversions.convertToPlainObject(value(key)),
+          )));
 
   @override
   Fragment operator [](String key) =>
@@ -231,6 +232,12 @@ class DictionaryImpl
 
   @override
   void encodeTo(FleeceEncoder encoder) => _dict.encodeTo(encoder);
+
+  @override
+  Object? toCblObject() => toMutable();
+
+  @override
+  Object? toPlainObject() => toMap();
 
   @override
   Iterator<String> get iterator =>
@@ -261,7 +268,7 @@ class MutableDictionaryImpl extends DictionaryImpl
 
   @override
   void setValue(Object? value, {required String key}) {
-    value = toCblObject(value);
+    value = CblConversions.convertToCblObject(value);
     if (valueWouldChange(value, _dict.get(key), _dict)) {
       _dict.set(key, value);
     }
@@ -308,7 +315,7 @@ class MutableDictionaryImpl extends DictionaryImpl
   void setData(Map<String, Object?> data) {
     _dict.clear();
     data.entries.forEach((entry) {
-      _dict.set(entry.key, toCblObject(entry.value));
+      _dict.set(entry.key, CblConversions.convertToCblObject(entry.value));
     });
   }
 
@@ -336,4 +343,9 @@ class MutableDictionaryImpl extends DictionaryImpl
 
   @override
   MutableDictionary toMutable() => this;
+
+  // === CblConversions ========================================================
+
+  @override
+  Object? toCblObject() => this;
 }

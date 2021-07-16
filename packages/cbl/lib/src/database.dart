@@ -552,6 +552,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   Future<Document?> getDocument(String id) => use(() => native
       .execute((pointer) => GetDatabaseDocument(pointer, id))
       .then((address) => address?.let((it) => DocumentImpl(
+            database: this,
             doc: it.pointer,
             retain: false,
             debugCreator: 'Database.getDocument()',
@@ -571,16 +572,19 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
     MutableDocument doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
-      use(() => native
-          .execute((pointer) => SaveDatabaseDocumentWithConcurrencyControl(
-                pointer,
-                ((doc as MutableDocumentImpl)..flushProperties())
-                    .doc
-                    .pointer
-                    .cast(),
-                concurrency,
-              ))
-          .then((_) => getDocument(doc.id).then((it) => it!)));
+      use(() async {
+        final docImpl = doc as MutableDocumentImpl;
+        docImpl.database = this;
+        await docImpl.flushProperties();
+
+        return native
+            .execute((pointer) => SaveDatabaseDocumentWithConcurrencyControl(
+                  pointer,
+                  docImpl.doc.pointer.cast(),
+                  concurrency,
+                ))
+            .then((_) => getDocument(doc.id).then((it) => it!));
+      });
 
   @override
   Future<Document> saveDocumentResolving(
@@ -588,17 +592,17 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
     SaveConflictHandler conflictHandler,
   ) =>
       use(() async {
+        final documentBeingSaved = doc as MutableDocumentImpl;
+        documentBeingSaved.database = this;
+        await documentBeingSaved.flushProperties();
+
         final callback = NativeCallback((arguments, result) {
           final message =
               SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
 
-          final documentBeingSaved = MutableDocumentImpl(
-            doc: message.documentBeingSaved,
-            retain: true,
-            debugCreator: 'SaveConflictHandler(documentBeingSaved)',
-          );
           final conflictingDocument = message.conflictingDocument?.let(
             (pointer) => DocumentImpl(
+              database: this,
               doc: pointer,
               retain: true,
               debugCreator: 'SaveConflictHandler(conflictingDocument)',
@@ -617,7 +621,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                 documentBeingSaved,
                 conflictingDocument,
               );
-              documentBeingSaved.flushProperties();
+              await documentBeingSaved.flushProperties();
             } finally {
               result!(decision);
             }
@@ -629,10 +633,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
         await native
             .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
                   pointer,
-                  ((doc as MutableDocumentImpl)..flushProperties())
-                      .doc
-                      .pointer
-                      .cast(),
+                  documentBeingSaved.doc.pointer.cast(),
                   callback.native.pointer,
                 ))
             .whenComplete(callback.close);

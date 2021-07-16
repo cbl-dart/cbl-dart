@@ -6,9 +6,10 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import '../errors.dart';
-import 'slice.dart';
 import '../native_object.dart';
 import '../resource.dart';
+import 'encoder.dart';
+import 'slice.dart';
 
 /// Options for how values are copied.
 enum CopyFlag {
@@ -34,6 +35,7 @@ extension on Iterable<CopyFlag> {
 class Doc extends NativeResource<NativeObject<FLDoc>> {
   static late final _bindings = CBLBindings.instance.fleece.doc;
 
+  /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
   factory Doc.fromResultData(SliceResult data, FLTrust trust) {
     final doc = _bindings.fromResultData(
       data.makeGlobal().cast<FLSliceResult>().ref,
@@ -48,7 +50,7 @@ class Doc extends NativeResource<NativeObject<FLDoc>> {
     return Doc.fromPointer(doc);
   }
 
-  /// Creates an [Doc] from JSON-encoded data.
+  /// Creates a [Doc] from JSON-encoded data.
   ///
   /// The data is first encoded into Fleece, and the Fleece data is kept by the
   /// doc.

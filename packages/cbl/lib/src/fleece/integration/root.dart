@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -46,13 +47,15 @@ class MRoot extends MCollection {
   Iterable<MValue> get values => [_slot];
 
   @override
-  void encodeTo(FleeceEncoder encoder) => _slot.encodeTo(encoder);
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder) =>
+      _slot.encodeTo(encoder);
 
   Object? get asNative => _slot.asNative(this);
 
   SliceResult encode() {
     var encoder = FleeceEncoder();
-    encodeTo(encoder);
+    final result = encodeTo(encoder);
+    assert(result is! Future);
     return encoder.finish();
   }
 }

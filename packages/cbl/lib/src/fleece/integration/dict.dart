@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -17,7 +18,8 @@ class MDict extends MCollection {
 
   MDict.asCopy(MDict original, {bool? isMutable})
       : _dict = original._dict,
-        _values = Map.of(original._values),
+        _values = Map.fromEntries(original._values.entries
+            .map((entry) => MapEntry(entry.key, entry.value.clone()))),
         _length = original._length,
         _valuesHasAllKeys = original._valuesHasAllKeys,
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
@@ -94,20 +96,22 @@ class MDict extends MCollection {
   }
 
   @override
-  void encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder) async {
     if (!isMutated) {
       encoder.writeValue(_dict!.cast());
     } else {
-      encoder.beginDict(length);
-      for (final entry in iterable) {
-        encoder.writeKey(entry.key);
-        if (entry.value.hasValue) {
-          encoder.writeLoadedValue(entry.value.value!);
-        } else {
-          entry.value.encodeTo(encoder);
+      return iterateMaybeAsync(() sync* {
+        encoder.beginDict(length);
+        for (final entry in iterable) {
+          encoder.writeKey(entry.key);
+          if (entry.value.hasValue) {
+            encoder.writeLoadedValue(entry.value.value!);
+          } else {
+            yield entry.value.encodeTo(encoder);
+          }
         }
-      }
-      encoder.endDict();
+        encoder.endDict();
+      }());
     }
   }
 

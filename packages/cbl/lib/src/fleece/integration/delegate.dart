@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import '../decoder.dart';
@@ -14,7 +15,7 @@ abstract class MDelegate {
 
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt);
 
-  void encodeNative(FleeceEncoder encoder, Object? native);
+  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native);
 }
 
 class SimpleMDelegate extends MDelegate {
@@ -24,7 +25,7 @@ class SimpleMDelegate extends MDelegate {
   }
 
   @override
-  void encodeNative(FleeceEncoder encoder, Object? native) {
+  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native) {
     if (native == null ||
         native is String ||
         native is num ||
@@ -32,7 +33,7 @@ class SimpleMDelegate extends MDelegate {
         native is TypedData) {
       encoder.writeDartObject(native);
     } else if (native is MCollection) {
-      native.encodeTo(encoder);
+      return native.encodeTo(encoder);
     } else {
       throw ArgumentError.value(
         native,

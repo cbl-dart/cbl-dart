@@ -5,7 +5,12 @@ export 'src/document/array.dart' hide ArrayImpl, MutableArrayImpl;
 export 'src/document/blob.dart' hide BlobImpl;
 export 'src/document/dictionary.dart'
     hide DictionaryImpl, MutableDictionaryImpl;
-export 'src/document/document.dart' hide DocumentImpl, MutableDocumentImpl;
+export 'src/document/document.dart'
+    hide
+        DocumentImpl,
+        MutableDocumentImpl,
+        DocumentMContext,
+        DocumentEncoderContext;
 export 'src/document/fragment.dart'
     hide FragmentImpl, MutableFragmentImpl, DocumentFragmentImpl;
 export 'src/errors.dart' hide translateCBLErrorException, CBLErrorExceptionExt;

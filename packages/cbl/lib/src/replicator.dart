@@ -24,10 +24,12 @@ Future<Replicator> createReplicator({
   required String? debugCreator,
 }) {
   return runKeepAlive(() async {
-    final pushFilterCallback = config.pushFilter?.let(_wrapReplicationFilter);
-    final pullFilterCallback = config.pullFilter?.let(_wrapReplicationFilter);
+    final pushFilterCallback =
+        config.pushFilter?.let((it) => _wrapReplicationFilter(db, it));
+    final pullFilterCallback =
+        config.pullFilter?.let((it) => _wrapReplicationFilter(db, it));
     final conflictResolverCallback =
-        config.conflictResolver?.let(_wrapConflictResolver);
+        config.conflictResolver?.let((it) => _wrapConflictResolver(db, it));
 
     void disposeCallbacks() => ([
           pushFilterCallback,
@@ -199,10 +201,14 @@ typedef ReplicationFilter = FutureOr<bool> Function(
   bool isDeleted,
 );
 
-NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
+NativeCallback _wrapReplicationFilter(
+  DatabaseImpl database,
+  ReplicationFilter filter,
+) =>
     NativeCallback((arguments, result) async {
       final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
       final doc = DocumentImpl(
+        database: database,
         doc: message.document,
         retain: true,
         debugCreator: 'ReplicationFilter()',
@@ -245,18 +251,23 @@ typedef ConflictResolver = FutureOr<Document?> Function(
   Document? remote,
 );
 
-NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
+NativeCallback _wrapConflictResolver(
+  DatabaseImpl database,
+  ConflictResolver filter,
+) =>
     NativeCallback((arguments, result) async {
       final message =
           ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
       final local = message.localDocument?.let((it) => DocumentImpl(
+            database: database,
             doc: it,
             retain: true,
             debugCreator: 'ConflictResolver(local)',
           ));
 
       final remote = message.remoteDocument?.let((it) => DocumentImpl(
+            database: database,
             doc: it,
             retain: true,
             debugCreator: 'ConflictResolver(remote)',
@@ -272,7 +283,8 @@ NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
           remote,
         ) as DocumentImpl?;
         if (resolved is MutableDocumentImpl) {
-          resolved.flushProperties();
+          resolved.database = database;
+          await resolved.flushProperties();
         }
       } finally {
         final resolvedPointer = resolved?.doc.pointerUnsafe;

@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 
 import '../fleece/fleece.dart';
 import '../fleece/integration/integration.dart';
@@ -95,7 +95,6 @@ abstract class ArrayInterface implements ArrayFragment {
 }
 
 /// Provides readonly access to array data.
-@immutable
 abstract class Array implements ArrayInterface, Iterable<Object?> {
   /// Returns a mutable copy of this array.
   MutableArray toMutable();
@@ -298,7 +297,7 @@ abstract class MutableArray implements Array, MutableArrayInterface {
 
 class ArrayImpl
     with IterableMixin<Object?>
-    implements Array, MCollectionWrapper, FleeceEncodable {
+    implements Array, MCollectionWrapper, FleeceEncodable, CblConversions {
   ArrayImpl(this._array);
 
   final MArray _array;
@@ -351,7 +350,7 @@ class ArrayImpl
 
   @override
   List<Object?> toList({bool growable = true}) =>
-      toPrimitiveObject(this) as List<Object?>;
+      map(CblConversions.convertToPlainObject).toList();
 
   @override
   Fragment operator [](int index) => FragmentImpl.fromArray(this, index: index);
@@ -364,7 +363,13 @@ class ArrayImpl
   MCollection get mCollection => _array;
 
   @override
-  void encodeTo(FleeceEncoder encoder) => _array.encodeTo(encoder);
+  FutureOr<void> encodeTo(FleeceEncoder encoder) => _array.encodeTo(encoder);
+
+  @override
+  Object? toCblObject() => toMutable();
+
+  @override
+  Object? toPlainObject() => toList();
 
   @override
   Iterator<Object?> get iterator => Iterable.generate(length, value).iterator;
@@ -390,7 +395,7 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
 
   @override
   void setValue(Object? value, {required int at}) {
-    value = toCblObject(value);
+    value = CblConversions.convertToCblObject(value);
     if (valueWouldChange(value, _array.get(at), _array)) {
       if (!_array.set(at, value)) {
         throw RangeError.index(at, this, 'at');
@@ -429,7 +434,8 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
   // === Append ================================================================
 
   @override
-  void addValue(Object? value) => _array.append(toCblObject(value));
+  void addValue(Object? value) =>
+      _array.append(CblConversions.convertToCblObject(value));
 
   @override
   void addString(String? value) => addValue(value);
@@ -462,7 +468,7 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
 
   @override
   void insertValue(Object? value, {required int at}) {
-    if (!_array.insert(at, toCblObject(value))) {
+    if (!_array.insert(at, CblConversions.convertToCblObject(value))) {
       throw RangeError.index(at, this, 'at');
     }
   }
@@ -507,7 +513,7 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
   @override
   void setData(Iterable<Object?> data) {
     _array.clear();
-    data.map(toCblObject).forEach(_array.append);
+    data.map(CblConversions.convertToCblObject).forEach(_array.append);
   }
 
   // === Remove ================================================================
@@ -538,4 +544,9 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
 
   @override
   MutableArray toMutable() => this;
+
+  // === CblConversions ========================================================
+
+  @override
+  Object? toCblObject() => this;
 }
