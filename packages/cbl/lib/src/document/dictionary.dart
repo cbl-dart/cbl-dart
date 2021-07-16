@@ -250,6 +250,9 @@ class DictionaryImpl
   int get hashCode =>
       const IterableEquality<String>().hash(this) ^
       const IterableEquality<Object?>().hash(_values);
+
+  @override
+  String toString() => toMap().toString();
 }
 
 class MutableDictionaryImpl extends DictionaryImpl

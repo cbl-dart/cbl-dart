@@ -378,6 +378,9 @@ class ArrayImpl
 
   @override
   int get hashCode => const IterableEquality<Object?>().hash(this);
+
+  @override
+  String toString() => toList().toString();
 }
 
 class MutableArrayImpl extends ArrayImpl implements MutableArray {
