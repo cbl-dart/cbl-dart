@@ -144,7 +144,9 @@ extension TypedDataFLSliceExt on TypedData {
   Pointer<FLSlice> copyToGlobalSliceInArena() {
     final buf = zoneArena.allocate<Uint8>(lengthInBytes);
 
-    buf.asTypedList(lengthInBytes).setAll(0, buffer.asUint8List());
+    buf
+        .asTypedList(lengthInBytes)
+        .setAll(0, buffer.asUint8List(0, lengthInBytes));
 
     globalFLSlice.ref
       ..buf = buf

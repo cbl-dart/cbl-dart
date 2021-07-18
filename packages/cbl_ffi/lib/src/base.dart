@@ -238,6 +238,15 @@ extension CheckCBLErrorPointerExt<T extends Pointer> on T {
   }
 }
 
+extension CheckCBLErrorFLSliceResultExt on FLSliceResult {
+  FLSliceResult checkCBLError({String? errorSource}) {
+    if (buf == nullptr) {
+      _checkCBLError(errorSource: errorSource);
+    }
+    return this;
+  }
+}
+
 extension CheckCBLErrorIntExt on int {
   int checkCBLError({String? errorSource}) {
     assert(this == 0 || this == 1);

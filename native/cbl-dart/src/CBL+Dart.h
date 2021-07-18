@@ -61,6 +61,10 @@ void CBLDart_SetDebugRefCounted(uint8_t enabled);
 // -- Log
 
 CBLDART_EXPORT
+void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
+                            CBLDart_FLString message);
+
+CBLDART_EXPORT
 void CBLDart_CBLLog_RestoreOriginalCallback();
 
 CBLDART_EXPORT
@@ -221,12 +225,19 @@ CBLDART_EXPORT
 CBLDart_FLString CBLDart_CBLBlob_ContentType(CBLBlob *blob);
 
 CBLDART_EXPORT
+CBLDart_FLSliceResult CBLDart_CBLBlob_Content(const CBLBlob *blob,
+                                              CBLError *errorOut);
+
+CBLDART_EXPORT
 uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream, void *buf,
                                     uint64_t bufSize, CBLError *outError);
 
 CBLDART_EXPORT
-CBLBlob *CBLDart_CBLBlob_CreateWithStream(CBLDart_FLString contentType,
-                                          CBLBlobWriteStream *writer);
+CBLBlob *CBLDart_CBLBlob_CreateWithData(CBLDart_FLString contentType,
+                                        CBLDart_FLSlice contents);
+
+CBLDART_EXPORT CBLBlob *CBLDart_CBLBlob_CreateWithStream(
+    CBLDart_FLString contentType, CBLBlobWriteStream *writer);
 
 // -- Replicator
 

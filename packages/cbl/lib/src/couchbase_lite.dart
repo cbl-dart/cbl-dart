@@ -5,7 +5,9 @@ import 'package:cbl_ffi/cbl_ffi.dart' hide Libraries, LibraryConfiguration;
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 import 'package:logging/logging.dart';
 
+import 'document/blob.dart';
 import 'document/common.dart';
+import 'fleece/fleece.dart';
 import 'fleece/integration/integration.dart';
 import 'streams.dart';
 import 'utils.dart';
@@ -83,6 +85,10 @@ enum LogDomain {
 
 extension on CBLLogDomain {
   LogDomain toLogDomain() => LogDomain.values[index];
+}
+
+extension on LogDomain {
+  CBLLogDomain toCBLLogDomain() => CBLLogDomain.values[index];
 }
 
 /// Levels of log messages. Higher values are more important/severe. Each level
@@ -199,6 +205,15 @@ extension LogMessageStreamExtension on Stream<LogMessage> {
   }
 }
 
+/// Log a [message] through the Couchbase Lite logging system.
+void logMessage(LogDomain domain, LogLevel level, String message) {
+  CBLBindings.instance.logging.logMessage(
+    domain.toCBLLogDomain(),
+    level.toCBLLogLevel(),
+    message,
+  );
+}
+
 void debugCouchbaseLiteIsInitialized() {
   CouchbaseLite._initialization.debugCheckHasExecuted();
 }
@@ -227,6 +242,7 @@ class CouchbaseLite {
         CBLBindings.initInstance(ffiLibraries);
         _workerFactory = CblWorkerFactory(libraries: ffiLibraries);
         MDelegate.instance = CblMDelegate();
+        SlotSetter.register(BlobImplSetter());
       });
 
   /// Private constructor to allow control over instance creation.

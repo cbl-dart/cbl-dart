@@ -3,12 +3,14 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
+import 'document.dart';
 
 late final _blobBindings = CBLBindings.instance.blobs.blob;
 
@@ -135,7 +137,13 @@ class CblMDelegate extends MDelegate {
       } else {
         final blob = _blobBindings.getBlob(flValue.value.cast());
         if (blob != null) {
+          final context = parent.context;
+          DatabaseImpl? database;
+          if (context is DocumentMContext) {
+            database = context.document.database;
+          }
           return BlobImpl(
+            database: database,
             blob: blob,
             // `getBlob` returns an existing instance retained by the containing
             // document.

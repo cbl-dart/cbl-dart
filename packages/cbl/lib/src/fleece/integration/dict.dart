@@ -119,8 +119,13 @@ class MDict extends MCollection {
   Iterable<MValue> get values => _values.values;
 
   Iterable<MapEntry<String, MValue>> get iterable sync* {
-    // Iterate over entries in _value.
-    yield* _values.entries;
+    // Iterate over entries in _values.
+    for (var entry in _values.entries) {
+      // Empty MValues represent that the entry was removed.
+      if (entry.value.isNotEmpty) {
+        yield entry;
+      }
+    }
 
     // _values shadows all keys in _dict so there is no use in iterating _dict.
     if (_valuesHasAllKeys) return;

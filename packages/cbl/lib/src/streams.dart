@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -222,4 +223,12 @@ Stream<T> changeStreamWithInitialValue<T>({
   );
 
   return controller.stream;
+}
+
+Future<Uint8List> byteStreamToFuture(Stream<Uint8List> stream) async {
+  final builder = BytesBuilder(copy: false);
+  await for (final chunk in stream) {
+    builder.add(chunk);
+  }
+  return builder.toBytes();
 }

@@ -363,3 +363,11 @@ BaseException translateCBLErrorException(CBLErrorException exception) {
 extension CBLErrorExceptionExt on CBLErrorException {
   BaseException translate() => translateCBLErrorException(this);
 }
+
+T withCBLErrorExceptionTranslation<T>(T Function() fn) {
+  try {
+    return fn();
+  } on CBLErrorException catch (e) {
+    throw translateCBLErrorException(e);
+  }
+}
