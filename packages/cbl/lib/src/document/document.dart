@@ -120,7 +120,7 @@ class DocumentImpl with IterableMixin<String> implements Document {
       if (_database != null) {
         throw StateError(
           'The document cannot be saved in $database because it already '
-          'belongs to a $_database: $this',
+          'belongs to $_database: $this',
         );
       }
       _database = database;
@@ -199,29 +199,31 @@ class DocumentImpl with IterableMixin<String> implements Document {
   @override
   Iterator<String> get iterator => _properties.iterator;
 
+  // `sequence` is not included in `==`, `hashCode` and `toString` since it
+  // is unrelated to the content of the document. Two documents from different
+  // databases could have the same content but different `sequence`s.
+  //
+  // For an immutable document `id` and `revisionId` should approximate identity
+  // very closely (absent collisions in the `revisionId`). But for mutable
+  // documents the `_properties` need to be taken into account.
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is DocumentImpl &&
           id == other.id &&
           revisionId == other.revisionId &&
-          sequence == other.sequence &&
           _properties == other._properties;
 
   @override
-  int get hashCode =>
-      id.hashCode ^
-      revisionId.hashCode ^
-      sequence.hashCode ^
-      _properties.hashCode;
+  int get hashCode => id.hashCode ^ revisionId.hashCode ^ _properties.hashCode;
 
   final _typeName = 'Document';
 
   @override
   String toString() => '$_typeName('
       'id: $id, '
-      'revisionId: $revisionId, '
-      'sequence: $sequence'
+      'revisionId: $revisionId'
       ')';
 }
 

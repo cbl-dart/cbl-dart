@@ -96,7 +96,7 @@ class MDict extends MCollection {
   }
 
   @override
-  FutureOr<void> performEncodeTo(FleeceEncoder encoder) async {
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder) {
     if (!isMutated) {
       encoder.writeValue(_dict!.cast());
     } else {

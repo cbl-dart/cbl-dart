@@ -16,8 +16,7 @@ void main() {
         mutableDoc.toString(),
         'MutableDocument('
         'id: ${mutableDoc.id}, '
-        'revisionId: ${mutableDoc.revisionId}, '
-        'sequence: ${mutableDoc.sequence}'
+        'revisionId: ${mutableDoc.revisionId}'
         ')',
       );
 
@@ -26,8 +25,7 @@ void main() {
         doc.toString(),
         'Document('
         'id: ${doc.id}, '
-        'revisionId: ${doc.revisionId}, '
-        'sequence: ${doc.sequence}'
+        'revisionId: ${doc.revisionId}'
         ')',
       );
     });

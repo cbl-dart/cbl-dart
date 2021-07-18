@@ -55,12 +55,28 @@ abstract class MCollection {
   bool _isEncoding = false;
 
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
+    if (isEncoding) {
+      // Some ancestor is the encoding root so we don't need to do the
+      // bookkeeping again.
+      return performEncodeTo(encoder);
+    }
+
+    // This object is the encoding root and needs to keep track of whether
+    // encoding is ongoing.
+
     _isEncoding = true;
 
-    final result = performEncodeTo(encoder);
+    try {
+      final result = performEncodeTo(encoder);
 
-    if (result is Future) {
-      return result.whenComplete(() => _isEncoding = false);
+      if (result is Future) {
+        return result.whenComplete(() => _isEncoding = false);
+      } else {
+        _isEncoding = false;
+      }
+    } catch (e) {
+      _isEncoding = false;
+      rethrow;
     }
   }
 
