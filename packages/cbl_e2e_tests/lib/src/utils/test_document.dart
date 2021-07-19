@@ -19,7 +19,7 @@ void setupTestDocument() {
 /// [testDocumentId] which has [value] in its properties.
 Matcher isTestDocument(String value) => isA<Document>()
     .having((it) => it.id, 'id', testDocumentId)
-    .having((it) => it.properties.toObject(), 'properties', {'value': value});
+    .having((it) => it.toPlainMap(), 'toMap()', {'value': value});
 
 extension TestDocumentDatabaseExtension on Database {
   /// Writes [value] in the properties of the test document. If its does not
@@ -27,14 +27,10 @@ extension TestDocumentDatabaseExtension on Database {
   Future<Document> writeTestDocument(String value) async {
     final doc =
         await getTestDocumentOrNull().then((it) => it ?? MutableDocument());
-
-    doc.properties = MutableDict({'value': value});
-
-    final savedDoc = await saveDocument(doc);
-
-    testDocumentId ??= savedDoc.id;
-
-    return savedDoc;
+    testDocumentId ??= doc.id;
+    doc.setValue(value, key: 'value');
+    await saveDocument(doc);
+    return doc;
   }
 
   /// Gets the test document or `null` if does not exist.

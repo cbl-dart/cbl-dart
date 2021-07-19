@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:ffi';
 
@@ -133,7 +134,7 @@ class StringTable {
   // Impl
 
   final _map = <String, EncodedString>{};
-  final _lruList = <EncodedString>[];
+  final _lruList = Queue<EncodedString>();
 
   void _recordUse(EncodedString string) {
     // Caching is disabled.
@@ -151,7 +152,7 @@ class StringTable {
     if (!_lruList.remove(string)) {
       string.retain();
     }
-    _lruList.insert(0, string);
+    _lruList.addFirst(string);
 
     // Remove the least recently used string if the cache is full.
     if (_lruList.length > maxCacheSize) {

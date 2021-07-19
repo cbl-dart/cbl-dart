@@ -97,7 +97,7 @@ void main() {
       test('performMaintenance: reindex', () async {
         final db = await openTestDb('PerformMaintenance|Reindex');
         await db.createIndex('a', ValueIndex('[".type"]'));
-        final doc = MutableDocument()..properties.addAll({'type': 'A'});
+        final doc = MutableDocument({'type': 'A'});
         await db.saveDocument(doc);
         await db.performMaintenance(MaintenanceType.reindex);
       });
@@ -118,7 +118,9 @@ void main() {
       });
 
       test('getDocument returns the document when it exist', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+
         final loadedDoc = await db.getDocument(doc.id);
         expect(loadedDoc, doc);
       });
@@ -129,30 +131,30 @@ void main() {
       });
 
       test('getMutableDocument returns the document when it exist', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
         final result = await db.getMutableDocument(doc.id);
         expect(result!.id, equals(doc.id));
       });
 
       test('saveDocument saves the document', () async {
-        final doc = MutableDocument()
-          ..properties.addAll({
-            'a': 'b',
-            'c': 4,
-          });
+        final doc = MutableDocument({'a': 'b', 'c': 4});
 
-        final savedDoc = await db.saveDocument(doc);
+        await db.saveDocument(doc);
+        final loadedDoc = await db.getDocument(doc.id);
 
-        expect(savedDoc.properties, equals(doc.properties));
+        expect(loadedDoc!.toPlainMap(), equals(doc.toPlainMap()));
       });
 
       test('saveDocumentResolving invokes the callback on conflict', () async {
-        final versionA = await db.saveDocument(MutableDocument());
-        final versionB = await db
-            .saveDocument(versionA.mutableCopy()..properties['a'] = 'b');
+        final versionA = MutableDocument();
+        await db.saveDocument(versionA);
+        final versionB = (await db.getMutableDocument(versionA.id))!
+          ..setValue('b', key: 'a');
+        await db.saveDocument(versionB);
 
         await db.saveDocumentResolving(
-          versionA.mutableCopy(),
+          versionA.toMutable(),
           expectAsync2((documentBeingSaved, conflictingDocument) async {
             expect(documentBeingSaved, equals(versionA));
             expect(conflictingDocument, equals(versionB));
@@ -163,13 +165,15 @@ void main() {
 
       test('saveDocumentResolving cancels save if handler returns false',
           () async {
-        final versionA = await db.saveDocument(MutableDocument());
-        final versionB = await db
-            .saveDocument(versionA.mutableCopy()..properties['a'] = 'b');
+        final versionA = MutableDocument();
+        await db.saveDocument(versionA);
+        final versionB = (await db.getMutableDocument(versionA.id))!
+          ..setValue('b', key: 'a');
+        await db.saveDocument(versionB);
 
         expect(
           db.saveDocumentResolving(
-            versionA.mutableCopy(),
+            versionA.toMutable(),
             expectAsync2((documentBeingSaved, conflictingDocument) async {
               expect(documentBeingSaved, equals(versionA));
               expect(conflictingDocument, equals(versionB));
@@ -185,13 +189,15 @@ void main() {
       });
 
       test('deleteDocument should remove document from the database', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
         await db.deleteDocument(doc);
         expect(db.getDocument(doc.id), completion(isNull));
       });
 
       test('purgeDocumentById purges a document by id', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.purgeDocumentById(doc.id);
 
@@ -201,7 +207,8 @@ void main() {
       test(
           'getDocumentExpiration returns null if the document has no expiration',
           () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         expect(db.getDocumentExpiration(doc.id), completion(isNull));
       });
@@ -210,7 +217,8 @@ void main() {
           'getDocumentExpiration returns the time of expiration if the document has one',
           () async {
         final expiration = DateTime.now().add(Duration(days: 1));
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.setDocumentExpiration(doc.id, expiration);
 
@@ -224,7 +232,8 @@ void main() {
 
       test('setDocumentExpiration sets a new time of expiration', () async {
         final expiration = DateTime.now().add(Duration(days: 1));
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.setDocumentExpiration(doc.id, expiration);
 
@@ -239,7 +248,8 @@ void main() {
       test('setDocumentExpiration sets the time of expiration to null',
           () async {
         final expiration = DateTime.now().add(Duration(days: 1));
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.setDocumentExpiration(doc.id, expiration);
         await db.setDocumentExpiration(doc.id, null);
@@ -276,7 +286,7 @@ void main() {
 
     group('Document', () {
       test("id returns the document's id", () {
-        final doc = MutableDocument('a');
+        final doc = MutableDocument.withId('a');
 
         expect(doc.id, 'a');
       });
@@ -288,44 +298,36 @@ void main() {
       });
 
       test('revisionId returns string when document has been saved', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
       });
 
       test('sequence returns the documents sequence', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         expect(doc.sequence, isPositive);
       });
 
-      test('properties returns the documents properties', () async {
-        final props = MutableDict({'a': 'b'});
-        final doc = MutableDocument()..properties = props;
+      test('toMap returns the documents properties', () async {
+        final props = {'a': 'b'};
+        final doc = MutableDocument(props);
 
-        expect(doc.properties, equals(props));
+        expect(doc.toPlainMap(), equals(props));
       });
 
-      test('propertiesAsJson returns the documents properties as JSON',
-          () async {
-        final doc = MutableDocument()..properties = MutableDict({'a': 'b'});
-
-        expect(doc.propertiesAsJson, equals('{"a":"b"}'));
-      });
-
-      test('mutableCopy returns a mutable copy of the document', () async {
-        final doc = await db.saveDocument(
-          MutableDocument()..properties = MutableDict({'a': 'b'}),
-        );
+      test('toMutable() returns a mutable copy of the document', () async {
+        final doc = MutableDocument({'a': 'b'});
+        await db.saveDocument(doc);
 
         expect(
-          doc.mutableCopy(),
-          allOf(
-            isA<MutableDocument>().having(
-              (it) => it.properties,
-              'properties',
-              doc.properties,
-            ),
+          doc.toMutable(),
+          isA<MutableDocument>().having(
+            (it) => it.toPlainMap(),
+            'toMap()',
+            doc.toPlainMap(),
           ),
         );
       });
@@ -333,7 +335,7 @@ void main() {
 
     group('MutableDocument', () {
       test('supports specifying an id', () {
-        final doc = MutableDocument('id');
+        final doc = MutableDocument.withId('id');
 
         expect(doc.id, equals('id'));
       });
@@ -401,14 +403,28 @@ void main() {
         db = await openTestDb('Query');
       });
 
-      test('(set/get)Parameters sets and gets the query parameters', () async {
-        final q = await db.query(N1QLQuery('SELECT doc'));
+      test('execute query with parameters', () async {
+        final q =
+            await db.query(N1QLQuery(r'SELECT doc WHERE META().id = $ID'));
+        await db.saveDocument(MutableDocument.withId('A'));
 
-        final parameters = MutableDict()..addAll({'a': true});
+        q.parameters.setValue('A', name: 'ID');
+        expect((await q.execute()), isNotEmpty);
 
-        await q.setParameters(parameters);
+        q.parameters.setValue('B', name: 'ID');
+        expect((await q.execute()), isEmpty);
+      });
 
-        expect(q.getParameters(), completion(equals(parameters)));
+      test('listen to query with parameters', () async {
+        final q =
+            await db.query(N1QLQuery(r'SELECT doc WHERE META().id = $ID'));
+        await db.saveDocument(MutableDocument.withId('A'));
+
+        q.parameters.setValue('A', name: 'ID');
+        expect((await q.changes().first), isNotEmpty);
+
+        q.parameters.setValue('B', name: 'ID');
+        expect((await q.changes().first), isEmpty);
       });
 
       test('execute does not throw', () async {
@@ -444,11 +460,13 @@ void main() {
           'SELECT a FROM _default AS a WHERE a.b = "c"',
         ));
 
-        final doc = MutableDocument()..properties.addAll({'b': 'c'});
-        final result = MutableDict()..addAll({'a': doc.properties});
+        final doc = MutableDocument({'b': 'c'});
+        final result = {'a': doc.toPlainMap()};
         final stream = q
             .changes()
-            .map((resultSet) => resultSet.asDicts.toList())
+            .map((resultSet) => resultSet.asDictionaries
+                .map((dict) => dict.toPlainMap())
+                .toList())
             .shareReplay();
 
         // ignore: unawaited_futures
@@ -483,29 +501,29 @@ SELECT foo()
         // The test uses id_ as a workaround.
         // https://github.com/couchbase/couchbase-lite-C/issues/149
         test('supports getting column by name', () async {
-          final doc = MutableDocument('ResultSetColumnByName');
+          final doc = MutableDocument.withId('ResultSetColumnByName');
           await db.saveDocument(doc);
 
           final q = await db.query(
               N1QLQuery(r'SELECT META().id AS id_ WHERE META().id = $ID'));
-          await q.setParameters(MutableDict()..addAll({'ID': doc.id}));
+          q.parameters.setString(doc.id, name: 'ID');
 
           final resultSet = await q.execute();
           final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current['id_'].asString, doc.id);
+          expect(iterator.current['id_'] as String, doc.id);
         });
 
         test('supports getting column by index', () async {
-          final doc = MutableDocument('ResultSetColumnIndex');
+          final doc = MutableDocument.withId('ResultSetColumnIndex');
           await db.saveDocument(doc);
 
           final q = await db
               .query(N1QLQuery(r'SELECT META().id WHERE META().id = $ID'));
-          await q.setParameters(MutableDict()..addAll({'ID': doc.id}));
+          q.parameters.setString(doc.id, name: 'ID');
 
           final resultSet = await q.execute();
           final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current[0].asString, doc.id);
+          expect(iterator.current[0] as String, doc.id);
         });
       });
     });
@@ -546,27 +564,25 @@ SELECT foo()
         await db.createIndex('date', ValueIndex('[".type"]'));
         await db.createIndex('group_index', ValueIndex('[".group"]'));
 
-        final dish = await db.saveDocument(MutableDocument()
-          ..properties.addAll({
-            'type': 'dish',
-            'title': 'Lasagna',
-          }));
+        final dish = MutableDocument({
+          'type': 'dish',
+          'title': 'Lasagna',
+        });
+        await db.saveDocument(dish);
 
-        await db.saveDocument(MutableDocument()
-          ..properties.addAll({
-            'type': 'meal',
-            'dishes': MutableArray()..add(dish.id),
-            'group': 'fam',
-            'date': '2020-06-30',
-          }));
+        await db.saveDocument(MutableDocument({
+          'type': 'meal',
+          'dishes': [dish.id],
+          'group': 'fam',
+          'date': '2020-06-30',
+        }));
 
-        await db.saveDocument(MutableDocument()
-          ..properties.addAll({
-            'type': 'meal',
-            'dishes': MutableArray()..add(dish.id),
-            'group': 'fam',
-            'date': '2021-01-15',
-          }));
+        await db.saveDocument(MutableDocument({
+          'type': 'meal',
+          'dishes': [dish.id],
+          'group': 'fam',
+          'date': '2021-01-15',
+        }));
 
         final q = await db.query(N1QLQuery(
           r'''
@@ -583,7 +599,7 @@ SELECT foo()
 
         var resultSet = await q.execute();
 
-        for (final result in resultSet.asDicts) {
+        for (final result in resultSet.asDictionaries) {
           print(result);
         }
       });

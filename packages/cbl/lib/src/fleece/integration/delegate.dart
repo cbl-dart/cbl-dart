@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import '../decoder.dart';
@@ -8,13 +9,13 @@ import 'dict.dart';
 import 'value.dart';
 
 abstract class MDelegate {
-  static late MDelegate instance;
+  static MDelegate? instance;
 
   MCollection? collectionFromNative(Object? native);
 
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt);
 
-  void encodeNative(FleeceEncoder encoder, Object? native);
+  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native);
 }
 
 class SimpleMDelegate extends MDelegate {
@@ -24,7 +25,7 @@ class SimpleMDelegate extends MDelegate {
   }
 
   @override
-  void encodeNative(FleeceEncoder encoder, Object? native) {
+  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native) {
     if (native == null ||
         native is String ||
         native is num ||
@@ -32,7 +33,7 @@ class SimpleMDelegate extends MDelegate {
         native is TypedData) {
       encoder.writeDartObject(native);
     } else if (native is MCollection) {
-      native.encodeTo(encoder);
+      return native.encodeTo(encoder);
     } else {
       throw ArgumentError.value(
         native,
@@ -55,8 +56,8 @@ class SimpleMDelegate extends MDelegate {
     } else if (flValue is CollectionFLValue) {
       cacheIt();
       return flValue.isArray
-          ? MArray.fromMValue(value, parent)
-          : MDict.fromMValue(value, parent);
+          ? MArray.asChild(value, parent)
+          : MDict.asChild(value, parent);
     }
   }
 }

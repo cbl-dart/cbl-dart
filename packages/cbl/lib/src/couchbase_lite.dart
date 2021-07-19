@@ -5,8 +5,10 @@ import 'package:cbl_ffi/cbl_ffi.dart' hide Libraries, LibraryConfiguration;
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 import 'package:logging/logging.dart';
 
-import 'blob.dart';
-import 'fleece.dart';
+import 'document/blob.dart';
+import 'document/common.dart';
+import 'fleece/fleece.dart';
+import 'fleece/integration/integration.dart';
 import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
@@ -83,6 +85,10 @@ enum LogDomain {
 
 extension on CBLLogDomain {
   LogDomain toLogDomain() => LogDomain.values[index];
+}
+
+extension on LogDomain {
+  CBLLogDomain toCBLLogDomain() => CBLLogDomain.values[index];
 }
 
 /// Levels of log messages. Higher values are more important/severe. Each level
@@ -199,10 +205,17 @@ extension LogMessageStreamExtension on Stream<LogMessage> {
   }
 }
 
-bool _isInitialized = false;
+/// Log a [message] through the Couchbase Lite logging system.
+void logMessage(LogDomain domain, LogLevel level, String message) {
+  CBLBindings.instance.logging.logMessage(
+    domain.toCBLLogDomain(),
+    level.toCBLLogLevel(),
+    message,
+  );
+}
 
 void debugCouchbaseLiteIsInitialized() {
-  assert(!_isInitialized, 'CouchbaseLite.initialize has not been called.');
+  CouchbaseLite._initialization.debugCheckHasExecuted();
 }
 
 late WorkerFactory _workerFactory;
@@ -217,16 +230,20 @@ WorkerFactory get workerFactory {
 /// Initializes global resources and configures global settings, such as
 /// logging.
 class CouchbaseLite {
+  static final _initialization = Once<void>(
+    rejectMultipleExecutions: true,
+    debugName: 'CouchbaseLite.initialize()',
+  );
+
   /// Initializes the `cbl` package.
-  static void initialize({required Libraries libraries}) {
-    final ffiLibraries = libraries._toFfi();
-
-    CBLBindings.initInstance(ffiLibraries);
-
-    SlotSetter.register(blobSlotSetter);
-
-    _workerFactory = CblWorkerFactory(libraries: ffiLibraries);
-  }
+  static void initialize({required Libraries libraries}) =>
+      _initialization.execute(() {
+        final ffiLibraries = libraries._toFfi();
+        CBLBindings.initInstance(ffiLibraries);
+        _workerFactory = CblWorkerFactory(libraries: ffiLibraries);
+        MDelegate.instance = CblMDelegate();
+        SlotSetter.register(BlobImplSetter());
+      });
 
   /// Private constructor to allow control over instance creation.
   CouchbaseLite._();

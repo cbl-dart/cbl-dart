@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -11,18 +12,31 @@ import 'value.dart';
 class MDict extends MCollection {
   MDict()
       : _dict = null,
+        _values = {},
         _length = 0,
-        _valuesHasAllKeys = true,
-        super(null, isMutable: true);
+        _valuesHasAllKeys = true;
 
-  MDict.fromMValue(MValue slot, MCollection parent)
+  MDict.asCopy(MDict original, {bool? isMutable})
+      : _dict = original._dict,
+        _values = Map.fromEntries(original._values.entries
+            .map((entry) => MapEntry(entry.key, entry.value.clone()))),
+        _length = original._length,
+        _valuesHasAllKeys = original._valuesHasAllKeys,
+        super.asCopy(original, isMutable: isMutable ?? original.isMutable);
+
+  MDict.asChild(MValue slot, MCollection parent, {bool? isMutable})
       : _dict = (slot.value as CollectionFLValue).value.cast(),
+        _values = {},
         _length = (slot.value as CollectionFLValue).length,
         _valuesHasAllKeys = false,
-        super.withParent(slot, parent, isMutable: parent.hasMutableChildren);
+        super.asChild(
+          slot,
+          parent,
+          isMutable: isMutable ?? parent.hasMutableChildren,
+        );
 
   final Pointer<FLDict>? _dict;
-  final Map<String, MValue> _values = {};
+  final Map<String, MValue> _values;
   int _length;
 
   /// Whether [_values] contains all the keys of [_dict].
@@ -82,20 +96,22 @@ class MDict extends MCollection {
   }
 
   @override
-  void encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder) {
     if (!isMutated) {
       encoder.writeValue(_dict!.cast());
     } else {
-      encoder.beginDict(length);
-      for (final entry in iterable) {
-        encoder.writeKey(entry.key);
-        if (entry.value.hasValue) {
-          encoder.writeLoadedValue(entry.value.value!);
-        } else {
-          entry.value.encodeTo(encoder);
+      return iterateMaybeAsync(() sync* {
+        encoder.beginDict(length);
+        for (final entry in iterable) {
+          encoder.writeKey(entry.key);
+          if (entry.value.hasValue) {
+            encoder.writeLoadedValue(entry.value.value!);
+          } else {
+            yield entry.value.encodeTo(encoder);
+          }
         }
-      }
-      encoder.endDict();
+        encoder.endDict();
+      }());
     }
   }
 
@@ -103,8 +119,13 @@ class MDict extends MCollection {
   Iterable<MValue> get values => _values.values;
 
   Iterable<MapEntry<String, MValue>> get iterable sync* {
-    // Iterate over entries in _value.
-    yield* _values.entries;
+    // Iterate over entries in _values.
+    for (var entry in _values.entries) {
+      // Empty MValues represent that the entry was removed.
+      if (entry.value.isNotEmpty) {
+        yield entry;
+      }
+    }
 
     // _values shadows all keys in _dict so there is no use in iterating _dict.
     if (_valuesHasAllKeys) return;

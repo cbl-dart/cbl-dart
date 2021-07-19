@@ -6,9 +6,9 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import 'database.dart';
-import 'document.dart';
+import 'document/document.dart';
 import 'errors.dart';
-import 'fleece.dart';
+import 'fleece/fleece.dart' as fl;
 import 'native_callback.dart';
 import 'native_object.dart';
 import 'resource.dart';
@@ -23,11 +23,13 @@ Future<Replicator> createReplicator({
   required ReplicatorConfiguration config,
   required String? debugCreator,
 }) {
-  return runNativeObjectScoped(() async {
-    final pushFilterCallback = config.pushFilter?.let(_wrapReplicationFilter);
-    final pullFilterCallback = config.pullFilter?.let(_wrapReplicationFilter);
+  return runKeepAlive(() async {
+    final pushFilterCallback =
+        config.pushFilter?.let((it) => _wrapReplicationFilter(db, it));
+    final pullFilterCallback =
+        config.pullFilter?.let((it) => _wrapReplicationFilter(db, it));
     final conflictResolverCallback =
-        config.conflictResolver?.let(_wrapConflictResolver);
+        config.conflictResolver?.let((it) => _wrapConflictResolver(db, it));
 
     void disposeCallbacks() => ([
           pushFilterCallback,
@@ -54,11 +56,12 @@ Future<Replicator> createReplicator({
         config.proxy?.port,
         config.proxy?.username,
         config.proxy?.password,
-        config.headers?.let((it) => MutableDict(it).native.pointer.cast()),
+        config.headers?.let((it) => fl.MutableDict(it).native.pointer.cast()),
         config.pinnedServerCertificate,
         config.trustedRootCertificates,
-        config.channels?.let((it) => MutableArray(it).native.pointer.cast()),
-        config.documentIds?.let((it) => MutableArray(it).native.pointer.cast()),
+        config.channels?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+        config.documentIds
+            ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
         pushFilterCallback?.native.pointer,
         pullFilterCallback?.native.pointer,
         conflictResolverCallback?.native.pointer,
@@ -198,11 +201,15 @@ typedef ReplicationFilter = FutureOr<bool> Function(
   bool isDeleted,
 );
 
-NativeCallback _wrapReplicationFilter(ReplicationFilter filter) =>
+NativeCallback _wrapReplicationFilter(
+  DatabaseImpl database,
+  ReplicationFilter filter,
+) =>
     NativeCallback((arguments, result) async {
       final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
-      final doc = createDocument(
-        pointer: message.document,
+      final doc = DocumentImpl(
+        database: database,
+        doc: message.document,
         retain: true,
         debugCreator: 'ReplicationFilter()',
       );
@@ -244,19 +251,24 @@ typedef ConflictResolver = FutureOr<Document?> Function(
   Document? remote,
 );
 
-NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
+NativeCallback _wrapConflictResolver(
+  DatabaseImpl database,
+  ConflictResolver filter,
+) =>
     NativeCallback((arguments, result) async {
       final message =
           ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-      final local = message.localDocument?.let((it) => createDocument(
-            pointer: it,
+      final local = message.localDocument?.let((it) => DocumentImpl(
+            database: database,
+            doc: it,
             retain: true,
             debugCreator: 'ConflictResolver(local)',
           ));
 
-      final remote = message.remoteDocument?.let((it) => createDocument(
-            pointer: it,
+      final remote = message.remoteDocument?.let((it) => DocumentImpl(
+            database: database,
+            doc: it,
             retain: true,
             debugCreator: 'ConflictResolver(remote)',
           ));
@@ -265,9 +277,17 @@ NativeCallback _wrapConflictResolver(ConflictResolver filter) =>
       // TODO: throw on the native side when resolver throws
       // Also review whether other callbacks can be aborted.
       try {
-        resolved = await filter(message.documentId, local, remote);
+        resolved = await filter(
+          message.documentId,
+          local,
+          remote,
+        ) as DocumentImpl?;
+        if (resolved is MutableDocumentImpl) {
+          resolved.database = database;
+          await resolved.flushProperties();
+        }
       } finally {
-        final resolvedPointer = resolved?.native.pointerUnsafe;
+        final resolvedPointer = resolved?.doc.pointerUnsafe;
 
         // If the resolver returned a document other than `local` or `remote`,
         // the ref count of `resolved` needs to be incremented because the
@@ -768,7 +788,7 @@ abstract class Replicator extends NativeResource<WorkerObject<CBLReplicator>>
   /// Documents that would never be pushed by this replicator, due to its
   /// configuration's [ReplicatorConfiguration.pushFilter] or
   /// [ReplicatorConfiguration.documentIds], are ignored.
-  Future<Dict> pendingDocumentIds();
+  Future<Map<String, bool>> pendingDocumentIds();
 
   /// Indicates whether the document with the given id has local changes that
   /// have not yet been pushed to the server by this replicator.
@@ -855,13 +875,13 @@ class ReplicatorImpl extends Replicator with ClosableResourceMixin {
       ).stream;
 
   @override
-  Future<Dict> pendingDocumentIds() => use(() => native
+  Future<Map<String, bool>> pendingDocumentIds() => use(() => native
       .execute((pointer) => GetReplicatorPendingDocumentIds(pointer))
-      .then((result) => Dict.fromPointer(
+      .then((result) => fl.Dict.fromPointer(
             result.pointer,
             release: true,
             retain: false,
-          )));
+          ).toObject().cast()));
 
   @override
   Future<bool> isDocumentPending(String id) => use(() =>

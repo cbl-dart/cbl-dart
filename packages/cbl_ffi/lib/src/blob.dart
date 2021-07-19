@@ -13,6 +13,11 @@ import 'utils.dart';
 
 class CBLBlob extends Opaque {}
 
+typedef CBLDart_CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
+  FLString contentType,
+  FLSlice contents,
+);
+
 typedef FLDict_IsBlob_C = Int8 Function(Pointer<FLDict> dict);
 typedef FLDict_IsBlob = int Function(Pointer<FLDict> dict);
 
@@ -24,6 +29,11 @@ typedef CBLBlob_Length = int Function(Pointer<CBLBlob> blob);
 typedef CBLDart_CBLBlob_Digest = FLString Function(Pointer<CBLBlob> blob);
 
 typedef CBLDart_CBLBlob_ContentType = FLString Function(Pointer<CBLBlob> blob);
+
+typedef CBLDart_CBLBlob_Content = FLSliceResult Function(
+  Pointer<CBLBlob> blob,
+  Pointer<CBLError> errorOut,
+);
 
 typedef CBLBlob_Properties = Pointer<FLDict> Function(Pointer<CBLBlob> blob);
 
@@ -38,6 +48,10 @@ typedef FLSlot_SetBlob = void Function(
 
 class BlobBindings extends Bindings {
   BlobBindings(Bindings parent) : super(parent) {
+    _createWithData = libs.cblDart.lookupFunction<
+        CBLDart_CBLBlob_CreateWithData, CBLDart_CBLBlob_CreateWithData>(
+      'CBLDart_CBLBlob_CreateWithData',
+    );
     _isBlob = libs.cbl.lookupFunction<FLDict_IsBlob_C, FLDict_IsBlob>(
       'FLDict_IsBlob',
     );
@@ -55,6 +69,10 @@ class BlobBindings extends Bindings {
         CBLDart_CBLBlob_ContentType>(
       'CBLDart_CBLBlob_ContentType',
     );
+    _content = libs.cblDart
+        .lookupFunction<CBLDart_CBLBlob_Content, CBLDart_CBLBlob_Content>(
+      'CBLDart_CBLBlob_Content',
+    );
     _properties =
         libs.cbl.lookupFunction<CBLBlob_Properties, CBLBlob_Properties>(
       'CBLBlob_Properties',
@@ -64,13 +82,22 @@ class BlobBindings extends Bindings {
     );
   }
 
+  late final CBLDart_CBLBlob_CreateWithData _createWithData;
   late final FLDict_IsBlob _isBlob;
   late final FLDict_GetBlob _getBlob;
   late final FLSlot_SetBlob _setBlob;
   late final CBLBlob_Length _length;
   late final CBLDart_CBLBlob_Digest _digest;
+  late final CBLDart_CBLBlob_Content _content;
   late final CBLDart_CBLBlob_ContentType _contentType;
   late final CBLBlob_Properties _properties;
+
+  Pointer<CBLBlob> createWithData(String? contentType, TypedData content) {
+    return withZoneArena(() => _createWithData(
+          stringTable.flString(contentType, arena: true).ref,
+          content.copyToGlobalSliceInArena().ref,
+        ));
+  }
 
   bool isBlob(Pointer<FLDict> dict) {
     return _isBlob(dict).toBool();
@@ -90,6 +117,10 @@ class BlobBindings extends Bindings {
 
   String digest(Pointer<CBLBlob> blob) {
     return _digest(blob).toDartString()!;
+  }
+
+  FLSliceResult content(Pointer<CBLBlob> blob) {
+    return _content(blob, globalCBLError).checkCBLError();
   }
 
   String? contentType(Pointer<CBLBlob> blob) {

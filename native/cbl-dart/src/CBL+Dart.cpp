@@ -133,6 +133,11 @@ auto originalLogCallback = CBLLog_Callback();
 
 Callback *dartLogCallback = nullptr;
 
+void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
+                            CBLDart_FLString message) {
+  CBL_LogMessage(domain, level, CBLDart_FLStringFromDart(message));
+}
+
 void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
                                 FLString message) {
   const std::shared_lock<std::shared_mutex> lock(loggingMutex);
@@ -487,10 +492,21 @@ CBLDart_FLString CBLDart_CBLBlob_ContentType(CBLBlob *blob) {
   return CBLDart_FLStringToDart(CBLBlob_ContentType(blob));
 }
 
+CBLDart_FLSliceResult CBLDart_CBLBlob_Content(const CBLBlob *blob,
+                                              CBLError *errorOut) {
+  return CBLDart_FLSliceResultToDart(CBLBlob_Content(blob, errorOut));
+}
+
 uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream, void *buf,
                                     uint64_t bufSize, CBLError *outError) {
   return CBLBlobReader_Read(stream, buf, static_cast<size_t>(bufSize),
                             outError);
+}
+
+CBLBlob *CBLDart_CBLBlob_CreateWithData(CBLDart_FLString contentType,
+                                        CBLDart_FLSlice contents) {
+  return CBLBlob_CreateWithData(CBLDart_FLStringFromDart(contentType),
+                                CBLDart_FLSliceFromDart(contents));
 }
 
 CBLBlob *CBLDart_CBLBlob_CreateWithStream(CBLDart_FLString contentType,

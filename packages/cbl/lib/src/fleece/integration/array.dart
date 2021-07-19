@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -12,17 +13,25 @@ import 'value.dart';
 class MArray extends MCollection {
   MArray()
       : _array = null,
-        _values = [],
-        super(null, isMutable: true);
+        _values = [];
 
-  MArray.fromMValue(MValue slot, MCollection parent)
+  MArray.asCopy(MArray original, {bool? isMutable})
+      : _array = original._array,
+        _values = original._values.map((value) => value?.clone()).toList(),
+        super.asCopy(original, isMutable: isMutable ?? original.isMutable);
+
+  MArray.asChild(MValue slot, MCollection parent, {bool? isMutable})
       : _array = (slot.value as CollectionFLValue).value.cast(),
         _values = List<MValue?>.filled(
           (slot.value as CollectionFLValue).length,
           null,
           growable: true,
         ),
-        super.withParent(slot, parent, isMutable: parent.hasMutableChildren);
+        super.asChild(
+          slot,
+          parent,
+          isMutable: isMutable ?? parent.hasMutableChildren,
+        );
 
   final Pointer<FLArray>? _array;
   final List<MValue?> _values;
@@ -108,21 +117,23 @@ class MArray extends MCollection {
   }
 
   @override
-  void encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder) {
     if (!isMutated) {
       encoder.writeValue(_array!.cast());
     } else {
-      encoder.beginArray(length);
-      var index = 0;
-      for (final value in _values) {
-        if (value == null) {
-          encoder.writeArrayValue(_array!, index);
-        } else {
-          value.encodeTo(encoder);
+      return iterateMaybeAsync(() sync* {
+        encoder.beginArray(length);
+        var index = 0;
+        for (final value in _values) {
+          if (value == null) {
+            encoder.writeArrayValue(_array!, index);
+          } else {
+            yield value.encodeTo(encoder);
+          }
+          ++index;
         }
-        ++index;
-      }
-      encoder.endArray();
+        encoder.endArray();
+      }());
     }
   }
 

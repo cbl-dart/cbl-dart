@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import '../decoder.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'delegate.dart';
 
-MDelegate get _delegate => MDelegate.instance;
+MDelegate get _delegate => MDelegate.instance!;
 
 class MValue {
   MValue.empty() : this(null, null, hasNative: false);
@@ -66,16 +68,18 @@ class MValue {
 
   void removeFromParent() => _updateNativeParent(null, null);
 
-  void encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> encodeTo(FleeceEncoder encoder) {
     assert(!isEmpty);
 
     final value = _value;
     if (value != null) {
       encoder.writeLoadedValue(value);
     } else {
-      _delegate.encodeNative(encoder, _native);
+      return _delegate.encodeNative(encoder, _native);
     }
   }
+
+  MValue clone() => MValue(_value, _native, hasNative: _hasNative);
 
   void _setNative(
     Object? native, {

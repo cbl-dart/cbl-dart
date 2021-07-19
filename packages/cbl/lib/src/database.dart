@@ -3,11 +3,10 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import 'blob.dart';
 import 'couchbase_lite.dart';
-import 'document.dart';
+import 'document/document.dart';
 import 'errors.dart';
-import 'fleece.dart';
+import 'fleece/fleece.dart' as fl;
 import 'native_callback.dart';
 import 'native_object.dart';
 import 'query.dart';
@@ -361,7 +360,7 @@ abstract class Database with ClosableResource {
   /// conflicting revision should be overwritten with the revision being saved.
   /// If you need finer-grained control, call [saveDocumentResolving]
   /// instead.
-  Future<Document> saveDocument(
+  Future<void> saveDocument(
     MutableDocument doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   });
@@ -377,7 +376,7 @@ abstract class Database with ClosableResource {
   ///
   /// See:
   /// - [SaveConflictHandler] for implementing the conflict handler.
-  Future<Document> saveDocumentResolving(
+  Future<void> saveDocumentResolving(
     MutableDocument doc,
     SaveConflictHandler conflictHandler,
   );
@@ -449,7 +448,7 @@ abstract class Database with ClosableResource {
   /// many times, keep the [Query] around instead of compiling it each time. If
   /// you need to run related queries with only some values different, create
   /// one query with placeholder parameter(s), and substitute the desired
-  /// value(s) with [Query.setParameters] each time you run the query.
+  /// value(s) with [Query.parameters] each time you run the query.
   ///
   /// See:
   /// - [Query] for how to write and use queries.
@@ -473,14 +472,6 @@ abstract class Database with ClosableResource {
 
   /// Returns the names of the indexes on this database, as an array of strings.
   Future<List<String>> indexNames();
-
-  // === Blobs =================================================================
-
-  /// The [BlobManager] associated with this Database.
-  ///
-  /// See:
-  /// - [Blob] for more about what a Blob is.
-  BlobManager get blobManager;
 
   // === Replicator ============================================================
 
@@ -560,8 +551,9 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   @override
   Future<Document?> getDocument(String id) => use(() => native
       .execute((pointer) => GetDatabaseDocument(pointer, id))
-      .then((address) => address?.let((it) => createDocument(
-            pointer: it.pointer,
+      .then((address) => address?.let((it) => DocumentImpl(
+            database: this,
+            doc: it.pointer,
             retain: false,
             debugCreator: 'Database.getDocument()',
           ))));
@@ -569,96 +561,100 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   @override
   Future<MutableDocument?> getMutableDocument(String id) => use(() => native
       .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
-      .then((address) => address?.let((it) => createMutableDocument(
-            pointer: it.pointer,
+      .then((address) => address?.let((it) => MutableDocumentImpl(
+            doc: it.pointer,
             retain: false,
-            isNew: false,
             debugCreator: 'Database.getMutableDocument()',
           ))));
 
   @override
-  Future<Document> saveDocument(
-    MutableDocument doc, {
+  Future<void> saveDocument(
+    covariant MutableDocumentImpl doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
-      use(() => native
-          .execute((pointer) => SaveDatabaseDocumentWithConcurrencyControl(
-                pointer,
-                doc.native.pointer.cast(),
-                concurrency,
-              ))
-          .then((_) => getDocument(doc.id).then((it) => it!)));
+      use(() => doc.useLocked(() async {
+            doc.database = this;
+            await doc.flushProperties();
+
+            return native.execute(
+                (pointer) => SaveDatabaseDocumentWithConcurrencyControl(
+                      pointer,
+                      doc.doc.pointer.cast(),
+                      concurrency,
+                    ));
+          }));
 
   @override
-  Future<Document> saveDocumentResolving(
-    MutableDocument doc,
+  Future<void> saveDocumentResolving(
+    covariant MutableDocumentImpl doc,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() async {
-        // Couchbase crashes when a document that has not been pulled out of the
-        // database is used with conflict resolution.
-        assert(!doc.isNew, 'new documents must be saved with `saveDocument`');
+      use(() => doc.useLocked(() async {
+            doc.database = this;
+            await doc.flushProperties();
 
-        final callback = NativeCallback((arguments, result) {
-          final message =
-              SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
+            final callback = NativeCallback((arguments, result) {
+              final message =
+                  SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
 
-          final documentBeingSaved = createMutableDocument(
-            pointer: message.documentBeingSaved,
-            retain: true,
-            isNew: false,
-            debugCreator: 'SaveConflictHandler(documentBeingSaved)',
-          );
-          final conflictingDocument = message.conflictingDocument?.let(
-            (pointer) => createDocument(
-              pointer: pointer,
-              retain: true,
-              debugCreator: 'SaveConflictHandler(conflictingDocument)',
-            ),
-          );
-
-          Future<void> invokeHandler() async {
-            // In case the handler throws an error we are canceling the save.
-            var decision = false;
-
-            // We don't swallow exceptions because handlers should not throw and
-            // this way the they are visible to the developer as an unhandled
-            // exception.
-            try {
-              decision = await conflictHandler(
-                documentBeingSaved,
-                conflictingDocument,
+              final conflictingDocument = message.conflictingDocument?.let(
+                (pointer) => DocumentImpl(
+                  database: this,
+                  doc: pointer,
+                  retain: true,
+                  debugCreator: 'SaveConflictHandler(conflictingDocument)',
+                ),
               );
-            } finally {
-              result!(decision);
-            }
-          }
 
-          invokeHandler();
-        });
+              Future<void> invokeHandler() async {
+                // In case the handler throws an error we are canceling the
+                // save.
+                var decision = false;
 
-        await native
-            .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
-                  pointer,
-                  doc.native.pointer.cast(),
-                  callback.native.pointer,
-                ))
-            .whenComplete(callback.close);
+                // We don't swallow exceptions because handlers should not throw
+                // and this way the they are visible to the developer as an
+                // unhandled exception.
+                try {
+                  decision = await conflictHandler(
+                    doc,
+                    conflictingDocument,
+                  );
+                  await doc.flushProperties();
+                } finally {
+                  result!(decision);
+                }
+              }
 
-        return getDocument(doc.id).then((it) => it!);
-      });
+              invokeHandler();
+            });
+
+            doc.saveSequence();
+
+            await native
+                .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
+                      pointer,
+                      doc.doc.pointer.cast(),
+                      callback.native.pointer,
+                    ))
+                .whenComplete(() {
+              doc.restoreSequence();
+              callback.close();
+            });
+          }));
 
   @override
   Future<void> deleteDocument(
-    Document doc, [
+    covariant DocumentImpl doc, [
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]) =>
-      use(() =>
-          native.execute((pointer) => DeleteDocumentWithConcurrencyControl(
-                pointer,
-                doc.native.pointer,
-                concurrency,
-              )));
+      use(() => doc.useLocked(() async {
+            await native
+                .execute((pointer) => DeleteDocumentWithConcurrencyControl(
+                      pointer,
+                      doc.doc.pointer,
+                      concurrency,
+                    ));
+          }));
 
   @override
   Future<bool> purgeDocumentById(String id) => use(() =>
@@ -732,16 +728,11 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   @override
   Future<List<String>> indexNames() async => use(() => native
       .execute((pointer) => GetDatabaseIndexNames(pointer))
-      .then((result) => Array.fromPointer(
+      .then((result) => fl.Array.fromPointer(
             result.pointer,
             release: true,
             retain: false,
           ).map((it) => it.asString!).toList()));
-
-  // === Blobs =================================================================
-
-  @override
-  late BlobManager blobManager = useSync(() => BlobManagerImpl(this));
 
   // === Replicator ============================================================
 

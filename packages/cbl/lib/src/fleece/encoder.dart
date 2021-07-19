@@ -48,6 +48,13 @@ class FleeceEncoder {
   /// The default is `true`.
   final bool uniqueStrings;
 
+  /// Arbitrary information which needs to be available to code that is using
+  /// this encoder.
+  ///
+  /// This is useful, for example, if an encoder is passed through an object
+  /// hierarchies to let objects encode them self.
+  Object? extraInfo;
+
   /// Converts the [json] string to [format] and returns the result.
   SliceResult convertJson(String json) {
     reset();

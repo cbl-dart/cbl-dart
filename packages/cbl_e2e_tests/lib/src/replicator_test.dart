@@ -72,7 +72,8 @@ void main() {
       await replicatorB.start();
 
       final timestamp = DateTime.now().microsecondsSinceEpoch;
-      final doc = MutableDocument('continuouslyReplicatedDoc-$timestamp');
+      final doc =
+          MutableDocument.withId('continuouslyReplicatedDoc-$timestamp');
 
       final stream = dbB.watchAllIds().shareReplay();
 
@@ -97,7 +98,8 @@ void main() {
       final dbA = await openTestDb('ReplicationWithDocumentIds-DB-A');
       final dbB = await openTestDb('ReplicationWithDocumentIds-DB-B');
 
-      final docA = await dbA.saveDocument(MutableDocument());
+      final docA = MutableDocument();
+      await dbA.saveDocument(docA);
       await dbA.saveDocument(MutableDocument());
 
       final replicatorA = await dbA.createTestReplicator(
@@ -124,8 +126,8 @@ void main() {
       final dbA = await openTestDb('ReplicationWithChannels-DB-A');
       final dbB = await openTestDb('ReplicationWithChannels-DB-B');
 
-      final docA = await dbA.saveDocument(
-          MutableDocument()..properties.addAll({'channels': 'A'}));
+      final docA = MutableDocument({'channels': 'A'});
+      await dbA.saveDocument(docA);
       await dbA.saveDocument(MutableDocument());
 
       final replicatorA = await dbA.createTestReplicator(
@@ -147,8 +149,10 @@ void main() {
       final dbA = await openTestDb('ReplicationWithPushFilter-DB-A');
       final dbB = await openTestDb('ReplicationWithPushFilter-DB-B');
 
-      final docA = await dbA.saveDocument(MutableDocument());
-      final docB = await dbA.saveDocument(MutableDocument());
+      final docA = MutableDocument();
+      await dbA.saveDocument(docA);
+      final docB = MutableDocument();
+      await dbA.saveDocument(docB);
 
       final replicatorA = await dbA.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -176,8 +180,10 @@ void main() {
       final dbA = await openTestDb('ReplicationWithPullFilter-DB-A');
       final dbB = await openTestDb('ReplicationWithPullFilter-DB-B');
 
-      final docA = await dbA.saveDocument(MutableDocument());
-      final docB = await dbA.saveDocument(MutableDocument());
+      final docA = MutableDocument();
+      await dbA.saveDocument(docA);
+      final docB = MutableDocument();
+      await dbA.saveDocument(docB);
 
       final replicatorA = await dbA.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -278,16 +284,18 @@ void main() {
         () async {
       final db = await openTestDb('PendingDocumentIds');
       final replicator = await db.createTestReplicator();
-      final doc = await db.saveDocument(MutableDocument());
+      final doc = MutableDocument();
+      await db.saveDocument(doc);
       final pendingDocumentIds = await replicator.pendingDocumentIds();
-      expect(pendingDocumentIds.toObject(), {doc.id: true});
+      expect(pendingDocumentIds, {doc.id: true});
     });
 
     test('isDocumentPending returns whether a document is waiting to be pushed',
         () async {
       final db = await openTestDb('IsDocumentPending');
       final replicator = await db.createTestReplicator();
-      final doc = await db.saveDocument(MutableDocument());
+      final doc = MutableDocument();
+      await db.saveDocument(doc);
       expect(await replicator.isDocumentPending(doc.id), isTrue);
     });
 
@@ -298,7 +306,8 @@ void main() {
       final replicator = await db.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
-      final doc = await db.saveDocument(MutableDocument());
+      final doc = MutableDocument();
+      await db.saveDocument(doc);
 
       expect(
         replicator.documentReplications(),

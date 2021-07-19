@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../encoder.dart';
@@ -5,20 +7,28 @@ import 'context.dart';
 import 'value.dart';
 
 abstract class MCollection {
-  MCollection(
-    MContext? context, {
-    required bool isMutable,
+  MCollection({
+    MContext? context,
+    bool isMutable = true,
   })  : _context = context,
         _isMutable = isMutable,
-        _hasMutableChildren = isMutable,
+        hasMutableChildren = isMutable,
         _isMutated = true;
 
-  MCollection.withParent(
+  MCollection.asCopy(
+    MCollection original, {
+    required bool isMutable,
+  })  : _context = original.context,
+        _isMutable = isMutable,
+        hasMutableChildren = isMutable,
+        _isMutated = true;
+
+  MCollection.asChild(
     MValue slot,
     MCollection parent, {
     required bool isMutable,
   })  : _isMutable = isMutable,
-        _hasMutableChildren = isMutable,
+        hasMutableChildren = isMutable,
         _isMutated = slot.isMutated {
     updateParent(slot, parent);
   }
@@ -36,23 +46,46 @@ abstract class MCollection {
   bool get isMutable => _isMutable;
   final bool _isMutable;
 
-  bool _hasMutableChildren;
-
-  bool get hasMutableChildren => _hasMutableChildren;
-
-  set hasMutableChildren(bool hasMutableChildren) {
-    assert(isMutable);
-    _hasMutableChildren = hasMutableChildren;
-  }
+  final bool hasMutableChildren;
 
   bool get isMutated => _isMutated;
   bool _isMutated;
 
-  void encodeTo(FleeceEncoder encoder);
+  bool get isEncoding => _isEncoding || (_parent?.isEncoding ?? false);
+  bool _isEncoding = false;
+
+  FutureOr<void> encodeTo(FleeceEncoder encoder) {
+    if (isEncoding) {
+      // Some ancestor is the encoding root so we don't need to do the
+      // bookkeeping again.
+      return performEncodeTo(encoder);
+    }
+
+    // This object is the encoding root and needs to keep track of whether
+    // encoding is ongoing.
+
+    _isEncoding = true;
+
+    try {
+      final result = performEncodeTo(encoder);
+
+      if (result is Future) {
+        return result.whenComplete(() => _isEncoding = false);
+      } else {
+        _isEncoding = false;
+      }
+    } catch (e) {
+      _isEncoding = false;
+      rethrow;
+    }
+  }
+
+  FutureOr<void> performEncodeTo(FleeceEncoder encoder);
 
   @protected
   void mutate() {
-    assert(isMutable);
+    // TODO: should this always throw, not just in debug mode?
+    assert(isMutable && !isEncoding);
 
     if (!_isMutated) {
       _isMutated = true;
