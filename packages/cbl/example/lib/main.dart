@@ -30,10 +30,10 @@ Future<void> main() async {
   });
 
   // Saving a document will return an immutable [Document].
-  final savedDoc = await db.saveDocument(doc);
+  await db.saveDocument(doc);
 
-  print(savedDoc);
-  print(savedDoc.toMap());
+  print(doc);
+  print(doc.toPlainMap());
 
   await db.close();
 }

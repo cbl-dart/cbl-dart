@@ -118,7 +118,9 @@ void main() {
       });
 
       test('getDocument returns the document when it exist', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+
         final loadedDoc = await db.getDocument(doc.id);
         expect(loadedDoc, doc);
       });
@@ -129,7 +131,8 @@ void main() {
       });
 
       test('getMutableDocument returns the document when it exist', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
         final result = await db.getMutableDocument(doc.id);
         expect(result!.id, equals(doc.id));
       });
@@ -137,15 +140,18 @@ void main() {
       test('saveDocument saves the document', () async {
         final doc = MutableDocument({'a': 'b', 'c': 4});
 
-        final savedDoc = await db.saveDocument(doc);
+        await db.saveDocument(doc);
+        final loadedDoc = await db.getDocument(doc.id);
 
-        expect(savedDoc.toMap(), equals(doc.toMap()));
+        expect(loadedDoc!.toPlainMap(), equals(doc.toPlainMap()));
       });
 
       test('saveDocumentResolving invokes the callback on conflict', () async {
-        final versionA = await db.saveDocument(MutableDocument());
-        final versionB = await db
-            .saveDocument(versionA.toMutable()..setValue('b', key: 'a'));
+        final versionA = MutableDocument();
+        await db.saveDocument(versionA);
+        final versionB = (await db.getMutableDocument(versionA.id))!
+          ..setValue('b', key: 'a');
+        await db.saveDocument(versionB);
 
         await db.saveDocumentResolving(
           versionA.toMutable(),
@@ -159,9 +165,11 @@ void main() {
 
       test('saveDocumentResolving cancels save if handler returns false',
           () async {
-        final versionA = await db.saveDocument(MutableDocument());
-        final versionB = await db
-            .saveDocument(versionA.toMutable()..setValue('b', key: 'a'));
+        final versionA = MutableDocument();
+        await db.saveDocument(versionA);
+        final versionB = (await db.getMutableDocument(versionA.id))!
+          ..setValue('b', key: 'a');
+        await db.saveDocument(versionB);
 
         expect(
           db.saveDocumentResolving(
@@ -181,13 +189,15 @@ void main() {
       });
 
       test('deleteDocument should remove document from the database', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
         await db.deleteDocument(doc);
         expect(db.getDocument(doc.id), completion(isNull));
       });
 
       test('purgeDocumentById purges a document by id', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.purgeDocumentById(doc.id);
 
@@ -197,7 +207,8 @@ void main() {
       test(
           'getDocumentExpiration returns null if the document has no expiration',
           () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         expect(db.getDocumentExpiration(doc.id), completion(isNull));
       });
@@ -206,7 +217,8 @@ void main() {
           'getDocumentExpiration returns the time of expiration if the document has one',
           () async {
         final expiration = DateTime.now().add(Duration(days: 1));
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.setDocumentExpiration(doc.id, expiration);
 
@@ -220,7 +232,8 @@ void main() {
 
       test('setDocumentExpiration sets a new time of expiration', () async {
         final expiration = DateTime.now().add(Duration(days: 1));
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.setDocumentExpiration(doc.id, expiration);
 
@@ -235,7 +248,8 @@ void main() {
       test('setDocumentExpiration sets the time of expiration to null',
           () async {
         final expiration = DateTime.now().add(Duration(days: 1));
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         await db.setDocumentExpiration(doc.id, expiration);
         await db.setDocumentExpiration(doc.id, null);
@@ -284,13 +298,15 @@ void main() {
       });
 
       test('revisionId returns string when document has been saved', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
       });
 
       test('sequence returns the documents sequence', () async {
-        final doc = await db.saveDocument(MutableDocument());
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
 
         expect(doc.sequence, isPositive);
       });
@@ -299,18 +315,19 @@ void main() {
         final props = {'a': 'b'};
         final doc = MutableDocument(props);
 
-        expect(doc.toMap(), equals(props));
+        expect(doc.toPlainMap(), equals(props));
       });
 
       test('toMutable() returns a mutable copy of the document', () async {
-        final doc = await db.saveDocument(MutableDocument({'a': 'b'}));
+        final doc = MutableDocument({'a': 'b'});
+        await db.saveDocument(doc);
 
         expect(
           doc.toMutable(),
           isA<MutableDocument>().having(
-            (it) => it.toMap(),
+            (it) => it.toPlainMap(),
             'toMap()',
-            doc.toMap(),
+            doc.toPlainMap(),
           ),
         );
       });
@@ -444,11 +461,12 @@ void main() {
         ));
 
         final doc = MutableDocument({'b': 'c'});
-        final result = {'a': doc.toMap()};
+        final result = {'a': doc.toPlainMap()};
         final stream = q
             .changes()
-            .map((resultSet) =>
-                resultSet.asDictionaries.map((dict) => dict.toMap()).toList())
+            .map((resultSet) => resultSet.asDictionaries
+                .map((dict) => dict.toPlainMap())
+                .toList())
             .shareReplay();
 
         // ignore: unawaited_futures
@@ -546,10 +564,11 @@ SELECT foo()
         await db.createIndex('date', ValueIndex('[".type"]'));
         await db.createIndex('group_index', ValueIndex('[".group"]'));
 
-        final dish = await db.saveDocument(MutableDocument({
+        final dish = MutableDocument({
           'type': 'dish',
           'title': 'Lasagna',
-        }));
+        });
+        await db.saveDocument(dish);
 
         await db.saveDocument(MutableDocument({
           'type': 'meal',

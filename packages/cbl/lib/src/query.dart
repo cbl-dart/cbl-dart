@@ -179,7 +179,7 @@ class Parameters {
   ///
   /// {@macro cbl.Parameters.parameterDefinition}
   void setDictionary(Dictionary? value, {required String name}) =>
-      setValue(value?.toMap(), name: name);
+      setValue(value?.toPlainMap(), name: name);
 
   void _checkReadonly() {
     if (_readonly) {
@@ -307,10 +307,16 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
   set parameters(Parameters value) => useSync(() => _parameters = value);
 
   void _flushParameters() {
-    final dict = fl.MutableDict(parameters._data);
+    final dict = MutableDictionary(parameters._data) as MutableDictionaryImpl;
+    final encoder = fl.FleeceEncoder();
+    final result = dict.encodeTo(encoder);
+    assert(result is! Future);
+    final data = encoder.finish();
+    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
+    final flDict = doc.root.asDict!;
     runKeepAlive(() => _bindings.setParameters(
           native.pointer,
-          dict.native.pointer.cast(),
+          flDict.native.pointer.cast(),
         ));
   }
 

@@ -7,6 +7,7 @@ import '../database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
+import '../fleece/fleece.dart' as fl;
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
@@ -135,23 +136,27 @@ class CblMDelegate extends MDelegate {
           return ArrayImpl(array);
         }
       } else {
-        final blob = _blobBindings.getBlob(flValue.value.cast());
-        if (blob != null) {
-          final context = parent.context;
-          DatabaseImpl? database;
-          if (context is DocumentMContext) {
-            database = context.document.database;
+        if (_blobBindings.isBlob(flValue.value.cast())) {
+          final blob = _blobBindings.getBlob(flValue.value.cast());
+          if (blob != null) {
+            final context = parent.context;
+            DatabaseImpl? database;
+            if (context is DocumentMContext) {
+              database = context.document.database;
+            }
+            return BlobImpl(
+              database: database,
+              blob: blob,
+              // `getBlob` returns an existing instance retained by the
+              // containing document.
+              retain: true,
+              debugCreator: 'CblMDelegate.toNative()',
+            );
+          } else {
+            final dict = fl.Dict.fromPointer(flValue.value.cast());
+            return BlobImpl.fromProperties(dict.toObject());
           }
-          return BlobImpl(
-            database: database,
-            blob: blob,
-            // `getBlob` returns an existing instance retained by the containing
-            // document.
-            retain: true,
-            debugCreator: 'CblMDelegate.toNative()',
-          );
         }
-
         final dictionary = MDict.asChild(value, parent);
         if (parent.hasMutableChildren) {
           return MutableDictionaryImpl(dictionary);
@@ -174,18 +179,24 @@ bool valueWouldChange(
   MValue? oldValue,
   MCollection container,
 ) {
+  // If `oldValue` is null it was undefined.
+  if (oldValue == null) {
+    return true;
+  }
+
   // Collection values are assumed to result in a change to skip expensive
   // comparisons of large instances.
-  if (oldValue?.value is CollectionFLValue) {
+  if (oldValue.value is CollectionFLValue) {
     return false;
   }
   if (newValue is Array || newValue is Dictionary) {
     return true;
   }
 
-  return newValue != oldValue?.asNative(container);
+  return newValue != oldValue.asNative(container);
 }
 
+@pragma('vm:prefer-inline')
 T? coerceObject<T>(Object? object) {
   if (object is T) {
     return object;

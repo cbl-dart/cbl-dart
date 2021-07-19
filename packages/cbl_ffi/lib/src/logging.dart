@@ -39,9 +39,6 @@ extension on int {
   CBLLogLevel toLogLevel() => CBLLogLevel.values[this];
 }
 
-// void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
-//                             CBLDart_FLString message);
-
 typedef CBLDart_CBL_LogMessage_C = Void Function(
   Uint8 domain,
   Uint8 level,

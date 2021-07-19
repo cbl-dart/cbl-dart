@@ -5,6 +5,9 @@ import 'document.dart';
 
 /// Readonly access to the data value wrapped by a [Fragment] object.
 abstract class FragmentInterface {
+  /// The value of this fragment as a value of type [T].
+  T? valueAs<T extends Object>();
+
   /// The value of this fragment.
   Object? get value;
 
@@ -127,105 +130,131 @@ class FragmentImpl implements Fragment {
 
   static final Fragment _emptyInstance = FragmentImpl._empty();
 
-  dynamic _parent;
+  Object? _parent;
   int _index = 0;
   String? _key;
 
   @override
+  T? valueAs<T extends Object>() {
+    if (_key != null) {
+      return (_parent as Dictionary?)?.value(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.value(_index);
+    }
+  }
+
+  @override
   Object? get value {
     if (_key != null) {
-      return (_parent as Dictionary).value(_key!);
-    } else {
-      return (_parent as Array).value(_index);
+      return (_parent as Dictionary?)?.value(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.value(_index);
     }
   }
 
   @override
   String? get string {
     if (_key != null) {
-      return (_parent as Dictionary).string(_key!);
-    } else {
-      return (_parent as Array).string(_index);
+      return (_parent as Dictionary?)?.string(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.string(_index);
     }
   }
 
   @override
   int get integer {
+    int? result;
     if (_key != null) {
-      return (_parent as Dictionary).integer(_key!);
-    } else {
-      return (_parent as Array).integer(_index);
+      result = (_parent as Dictionary?)?.integer(_key!);
+    } else if (_isValidIndex()) {
+      result = (_parent as Array?)?.integer(_index);
     }
+    return result ?? 0;
   }
 
   @override
   double get float {
+    double? result;
     if (_key != null) {
-      return (_parent as Dictionary).float(_key!);
-    } else {
-      return (_parent as Array).float(_index);
+      result = (_parent as Dictionary?)?.float(_key!);
+    } else if (_isValidIndex()) {
+      result = (_parent as Array?)?.float(_index);
     }
+    return result ?? 0;
   }
 
   @override
   num? get number {
     if (_key != null) {
-      return (_parent as Dictionary).number(_key!);
-    } else {
-      return (_parent as Array).number(_index);
+      return (_parent as Dictionary?)?.number(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.number(_index);
     }
   }
 
   @override
   bool get boolean {
+    bool? result;
     if (_key != null) {
-      return (_parent as Dictionary).boolean(_key!);
-    } else {
-      return (_parent as Array).boolean(_index);
+      result = (_parent as Dictionary?)?.boolean(_key!);
+    } else if (_isValidIndex()) {
+      result = (_parent as Array?)?.boolean(_index);
     }
+    return result ?? false;
   }
 
   @override
   DateTime? get date {
     if (_key != null) {
-      return (_parent as Dictionary).date(_key!);
-    } else {
-      return (_parent as Array).date(_index);
+      return (_parent as Dictionary?)?.date(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.date(_index);
     }
   }
 
   @override
   Blob? get blob {
     if (_key != null) {
-      return (_parent as Dictionary).blob(_key!);
-    } else {
-      return (_parent as Array).blob(_index);
+      return (_parent as Dictionary?)?.blob(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.blob(_index);
     }
   }
 
   @override
   Array? get array {
     if (_key != null) {
-      return (_parent as Dictionary).array(_key!);
-    } else {
-      return (_parent as Array).array(_index);
+      return (_parent as Dictionary?)?.array(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.array(_index);
     }
   }
 
   @override
   Dictionary? get dictionary {
     if (_key != null) {
-      return (_parent as Dictionary).dictionary(_key!);
-    } else {
-      return (_parent as Array).dictionary(_index);
+      return (_parent as Dictionary?)?.dictionary(_key!);
+    } else if (_isValidIndex()) {
+      return (_parent as Array?)?.dictionary(_index);
     }
   }
 
   @override
-  bool get exists => value != null;
+  bool get exists {
+    final parent = _parent;
+    if (parent == null) {
+      return false;
+    }
+
+    if (_key != null) {
+      return (_parent as Dictionary).contains(_key);
+    } else {
+      return (_parent as Array).length > _index;
+    }
+  }
 
   @override
-  Fragment operator [](final Object indexOrKey) =>
+  Fragment operator [](Object indexOrKey) =>
       _updateSubscript(indexOrKey) ? this : _emptyInstance;
 
   bool _updateSubscript(Object indexOrKey) {
@@ -240,7 +269,7 @@ class FragmentImpl implements Fragment {
     final value = this.value;
 
     if (value is Array && indexOrKey is int) {
-      if (value.length >= indexOrKey) {
+      if (indexOrKey >= value.length) {
         return false;
       }
       _parent = value;
@@ -256,6 +285,15 @@ class FragmentImpl implements Fragment {
     }
 
     return false;
+  }
+
+  bool _isValidIndex() {
+    assert(_key == null);
+    final parent = _parent as Array?;
+    if (parent == null) {
+      return true;
+    }
+    return parent.length > _index;
   }
 }
 
@@ -274,6 +312,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set value(Object? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setValue(value, key: _key!);
     } else {
@@ -283,6 +323,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set string(String? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setString(value, key: _key!);
     } else {
@@ -292,6 +334,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set integer(int value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setInteger(value, key: _key!);
     } else {
@@ -301,6 +345,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set float(double value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setFloat(value, key: _key!);
     } else {
@@ -310,6 +356,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set number(num? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setNumber(value, key: _key!);
     } else {
@@ -319,6 +367,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set boolean(bool value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setBoolean(value, key: _key!);
     } else {
@@ -328,6 +378,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set date(DateTime? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setDate(value, key: _key!);
     } else {
@@ -337,6 +389,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set blob(Blob? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setBlob(value, key: _key!);
     } else {
@@ -346,6 +400,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set array(Array? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setArray(value, key: _key!);
     } else {
@@ -355,6 +411,8 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
 
   @override
   set dictionary(Dictionary? value) {
+    _checkHasParent();
+
     if (_key != null) {
       (_parent as MutableDictionary).setDictionary(value, key: _key!);
     } else {
@@ -365,6 +423,15 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
   @override
   MutableFragment operator [](final Object indexOrKey) =>
       _updateSubscript(indexOrKey) ? this : _emptyInstance;
+
+  void _checkHasParent() {
+    if (_parent == null) {
+      throw StateError(
+        'The value of a Fragment cannot be set if it references a path outside '
+        'an existing collection.',
+      );
+    }
+  }
 }
 
 class DocumentFragmentImpl implements DocumentFragment {

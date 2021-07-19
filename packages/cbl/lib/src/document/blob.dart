@@ -271,7 +271,12 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   @override
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
     if (encoder is DocumentFleeceEncoder) {
-      encoder.writeBlob(this);
+      if (_digest != null && _blob == null) {
+        // Blob was created from properties.
+        encoder.writeDartObject(_blobProperties);
+      } else {
+        encoder.writeBlob(this);
+      }
 
       final database = encoder.extraInfo.document.database;
       if (database != null) {

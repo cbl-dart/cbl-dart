@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../database.dart';
 import '../fleece/fleece.dart' as fl;
@@ -109,6 +110,11 @@ class DocumentImpl with IterableMixin<String> implements Document {
           debugName: debugName,
         );
 
+  /// Lock which is used to serialize async operations on this document.
+  final _lock = Lock();
+
+  Future<T> useLocked<T>(T Function() fn) => _lock.synchronized(fn);
+
   /// The database to which this document belongs.
   ///
   /// Is `null` if the document has not been saved yet.
@@ -153,7 +159,7 @@ class DocumentImpl with IterableMixin<String> implements Document {
   List<String> get keys => _properties.keys;
 
   @override
-  Object? value(String key) => _properties.value(key);
+  T? value<T extends Object>(String key) => _properties.value(key);
 
   @override
   String? string(String key) => _properties.string(key);
@@ -186,7 +192,7 @@ class DocumentImpl with IterableMixin<String> implements Document {
   Fragment operator [](String key) => _properties[key];
 
   @override
-  Map<String, dynamic> toMap() => _properties.toMap();
+  Map<String, dynamic> toPlainMap() => _properties.toPlainMap();
 
   @override
   MutableDocument toMutable() => MutableDocumentImpl(
@@ -270,17 +276,30 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   late final MutableDictionary _properties =
       _root.asNative as MutableDictionary;
 
-  @override
-  MutableArray? array(String key) => _properties.array(key);
+  /// Encodes `_properties` and sets the result as the new properties of the
+  /// native `Document`.
+  Future<void> flushProperties() async {
+    assert(database != null);
+    final encoder = DocumentFleeceEncoder(document: this);
+    await _root.encodeTo(encoder);
+    final properties = encoder.finishProperties();
+    runKeepAlive(() => _mutableDocumentBindings.setProperties(
+          doc.pointer.cast(),
+          properties.native.pointer.cast(),
+        ));
+  }
 
   @override
-  MutableDictionary? dictionary(String key) => _properties.dictionary(key);
+  int get sequence => _sequenceOverride ?? super.sequence;
+  int? _sequenceOverride;
 
-  @override
-  MutableFragment operator [](String key) => _properties[key];
-
-  @override
-  MutableDocument toMutable() => this;
+  // While a document is being saved and the [SaveConflictHandler] is running,
+  // the sequence cannot be read from the native document because of a lock.
+  // To allow the sequence to be read in the handler, code which invokes the
+  // handler needs to call [saveSequence] before calling the handler and
+  // [restoreSequence] after the handler is done.
+  void saveSequence() => _sequenceOverride = sequence;
+  void restoreSequence() => _sequenceOverride = null;
 
   @override
   void setValue(Object? value, {required String key}) =>
@@ -328,29 +347,54 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   @override
   void removeValue(String key) => _properties.removeValue(key);
 
-  /// Encodes `_properties` and sets the result as the new properties of the
-  /// native `Document`.
-  Future<void> flushProperties() async {
-    assert(database != null);
-    final encoder = DocumentFleeceEncoder(document: this);
-    await _root.encodeTo(encoder);
-    final properties = encoder.finishProperties();
-    runKeepAlive(() => _mutableDocumentBindings.setProperties(
-          doc.pointer.cast(),
-          properties.native.pointer.cast(),
-        ));
-  }
+  @override
+  MutableArray? array(String key) => _properties.array(key);
+
+  @override
+  MutableDictionary? dictionary(String key) => _properties.dictionary(key);
+
+  @override
+  MutableFragment operator [](String key) => _properties[key];
+
+  @override
+  MutableDocument toMutable() => this;
 
   @override
   final _typeName = 'MutableDocument';
 }
 
+/// [fl.FleeceEncoder] which is aware of blobs and is able to insert [CBLBlob]s
+/// into the Fleece data.
 class DocumentFleeceEncoder extends fl.FleeceEncoder {
   DocumentFleeceEncoder({required DocumentImpl document})
       : extraInfo = DocumentEncoderContext(document);
 
+  // === API ===================================================================
+
   @override
   final DocumentEncoderContext extraInfo;
+
+  /// Writes the [BlobImpl] [value] to this encoder.
+  void writeBlob(BlobImpl value) {
+    _blobs[[..._parentCollectionSegments, _currentCollectionSegment!]] = value;
+    _writeValue();
+    writeNull();
+  }
+
+  /// Finishes encoding and returns the encoded document properties.
+  fl.MutableDict finishProperties() {
+    final data = finish();
+    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
+    final properties = fl.MutableDict.mutableCopy(doc.root.asDict!);
+
+    if (_blobs.isNotEmpty) {
+      _insertBlobs(properties);
+    }
+
+    return properties;
+  }
+
+  // === Impl ==================================================================
 
   final Map<List<Object>, BlobImpl> _blobs = {};
 
@@ -379,12 +423,6 @@ class DocumentFleeceEncoder extends fl.FleeceEncoder {
     } else if (collectionSegment is String) {
       _currentCollectionSegment = null;
     }
-  }
-
-  void writeBlob(BlobImpl blob) {
-    _blobs[[..._parentCollectionSegments, _currentCollectionSegment!]] = blob;
-    _writeValue();
-    writeNull();
   }
 
   @override
@@ -478,18 +516,6 @@ class DocumentFleeceEncoder extends fl.FleeceEncoder {
     _parentCollectionSegments.clear();
     _currentCollectionSegment = null;
     super.reset();
-  }
-
-  fl.MutableDict finishProperties() {
-    final data = finish();
-    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
-    final properties = fl.MutableDict.mutableCopy(doc.root.asDict!);
-
-    if (_blobs.isNotEmpty) {
-      _insertBlobs(properties);
-    }
-
-    return properties;
   }
 
   void _insertBlobs(fl.MutableDict properties) {

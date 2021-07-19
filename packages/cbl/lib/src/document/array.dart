@@ -20,7 +20,7 @@ abstract class ArrayInterface implements ArrayFragment {
   /// Returns `null` if the element is `null`.
   ///
   /// Throws a [RangeError] if the [index] is ouf of range.
-  Object? value(int index);
+  T? value<T extends Object>(int index);
 
   /// Returns the element at the given [index] as a [String].
   ///
@@ -91,7 +91,7 @@ abstract class ArrayInterface implements ArrayFragment {
   ///  - [Dictionary]s are converted to a map of type `Map<String, dynamic>`
   ///    where each value has been recursively converted.
   /// {@endtemplate}
-  List<Object?> toList();
+  List<Object?> toPlainList();
 }
 
 /// Provides readonly access to array data.
@@ -313,13 +313,15 @@ class ArrayImpl
     return value;
   }
 
+  @pragma('vm:prefer-inline')
   T? _getAs<T>(int index) => coerceObject(_get(index).asNative(_array));
 
+  @pragma('vm:prefer-inline')
   T _getAsWithDefault<T>(int index, T defaultValue) =>
       _getAs(index) ?? defaultValue;
 
   @override
-  Object? value(int index) => _getAs(index);
+  T? value<T extends Object>(int index) => _getAs(index);
 
   @override
   String? string(int index) => _getAs(index);
@@ -349,7 +351,7 @@ class ArrayImpl
   Dictionary? dictionary(int index) => _getAs(index);
 
   @override
-  List<Object?> toList({bool growable = true}) =>
+  List<Object?> toPlainList({bool growable = true}) =>
       map(CblConversions.convertToPlainObject).toList();
 
   @override
@@ -369,7 +371,7 @@ class ArrayImpl
   Object? toCblObject() => toMutable();
 
   @override
-  Object? toPlainObject() => toList();
+  Object? toPlainObject() => toPlainList();
 
   @override
   Iterator<Object?> get iterator => Iterable.generate(length, value).iterator;
@@ -385,7 +387,7 @@ class ArrayImpl
   int get hashCode => const IterableEquality<Object?>().hash(this);
 
   @override
-  String toString() => toList().toString();
+  String toString() => toPlainList().toString();
 }
 
 class MutableArrayImpl extends ArrayImpl implements MutableArray {

@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
     query
         .changes()
         .map((resultSet) => resultSet.asDictionaries
-            .map((result) => result['post'].dictionary!.toMap())
+            .map((result) => result['post'].dictionary!.toPlainMap())
             .toList())
         .listen((posts) => setState(() => _posts = posts));
   }

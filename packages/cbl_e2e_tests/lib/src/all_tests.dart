@@ -3,6 +3,7 @@ import 'document/array_test.dart' as document_array_test;
 import 'document/blob_test.dart' as document_blob_test;
 import 'document/dictionary_test.dart' as document_dictionary_test;
 import 'document/document_test.dart' as document_document_test;
+import 'document/fragment_test.dart' as document_fragment_test;
 import 'fleece/coding_test.dart' as fleece_coding;
 import 'fleece/containers_test.dart' as fleece_containers;
 import 'fleece/integration_test.dart' as fleece_integration;
@@ -17,6 +18,7 @@ final tests = {
   'document_blob': document_blob_test.main,
   'document_dictionary': document_dictionary_test.main,
   'document_document': document_document_test.main,
+  'document_fragment': document_fragment_test.main,
   'fleece_coding': fleece_coding.main,
   'fleece_integration': fleece_integration.main,
   'fleece_slice': fleece_slice.main,

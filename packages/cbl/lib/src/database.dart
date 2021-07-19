@@ -360,7 +360,7 @@ abstract class Database with ClosableResource {
   /// conflicting revision should be overwritten with the revision being saved.
   /// If you need finer-grained control, call [saveDocumentResolving]
   /// instead.
-  Future<Document> saveDocument(
+  Future<void> saveDocument(
     MutableDocument doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   });
@@ -376,7 +376,7 @@ abstract class Database with ClosableResource {
   ///
   /// See:
   /// - [SaveConflictHandler] for implementing the conflict handler.
-  Future<Document> saveDocumentResolving(
+  Future<void> saveDocumentResolving(
     MutableDocument doc,
     SaveConflictHandler conflictHandler,
   );
@@ -568,90 +568,93 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
           ))));
 
   @override
-  Future<Document> saveDocument(
-    MutableDocument doc, {
+  Future<void> saveDocument(
+    covariant MutableDocumentImpl doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
-      use(() async {
-        final docImpl = doc as MutableDocumentImpl;
-        docImpl.database = this;
-        await docImpl.flushProperties();
+      use(() => doc.useLocked(() async {
+            doc.database = this;
+            await doc.flushProperties();
 
-        return native
-            .execute((pointer) => SaveDatabaseDocumentWithConcurrencyControl(
-                  pointer,
-                  docImpl.doc.pointer.cast(),
-                  concurrency,
-                ))
-            .then((_) => getDocument(doc.id).then((it) => it!));
-      });
+            return native.execute(
+                (pointer) => SaveDatabaseDocumentWithConcurrencyControl(
+                      pointer,
+                      doc.doc.pointer.cast(),
+                      concurrency,
+                    ));
+          }));
 
   @override
-  Future<Document> saveDocumentResolving(
-    MutableDocument doc,
+  Future<void> saveDocumentResolving(
+    covariant MutableDocumentImpl doc,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() async {
-        final documentBeingSaved = doc as MutableDocumentImpl;
-        documentBeingSaved.database = this;
-        await documentBeingSaved.flushProperties();
+      use(() => doc.useLocked(() async {
+            doc.database = this;
+            await doc.flushProperties();
 
-        final callback = NativeCallback((arguments, result) {
-          final message =
-              SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
+            final callback = NativeCallback((arguments, result) {
+              final message =
+                  SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
 
-          final conflictingDocument = message.conflictingDocument?.let(
-            (pointer) => DocumentImpl(
-              database: this,
-              doc: pointer,
-              retain: true,
-              debugCreator: 'SaveConflictHandler(conflictingDocument)',
-            ),
-          );
-
-          Future<void> invokeHandler() async {
-            // In case the handler throws an error we are canceling the save.
-            var decision = false;
-
-            // We don't swallow exceptions because handlers should not throw and
-            // this way the they are visible to the developer as an unhandled
-            // exception.
-            try {
-              decision = await conflictHandler(
-                documentBeingSaved,
-                conflictingDocument,
+              final conflictingDocument = message.conflictingDocument?.let(
+                (pointer) => DocumentImpl(
+                  database: this,
+                  doc: pointer,
+                  retain: true,
+                  debugCreator: 'SaveConflictHandler(conflictingDocument)',
+                ),
               );
-              await documentBeingSaved.flushProperties();
-            } finally {
-              result!(decision);
-            }
-          }
 
-          invokeHandler();
-        });
+              Future<void> invokeHandler() async {
+                // In case the handler throws an error we are canceling the
+                // save.
+                var decision = false;
 
-        await native
-            .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
-                  pointer,
-                  documentBeingSaved.doc.pointer.cast(),
-                  callback.native.pointer,
-                ))
-            .whenComplete(callback.close);
+                // We don't swallow exceptions because handlers should not throw
+                // and this way the they are visible to the developer as an
+                // unhandled exception.
+                try {
+                  decision = await conflictHandler(
+                    doc,
+                    conflictingDocument,
+                  );
+                  await doc.flushProperties();
+                } finally {
+                  result!(decision);
+                }
+              }
 
-        return getDocument(doc.id).then((it) => it!);
-      });
+              invokeHandler();
+            });
+
+            doc.saveSequence();
+
+            await native
+                .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
+                      pointer,
+                      doc.doc.pointer.cast(),
+                      callback.native.pointer,
+                    ))
+                .whenComplete(() {
+              doc.restoreSequence();
+              callback.close();
+            });
+          }));
 
   @override
   Future<void> deleteDocument(
-    Document doc, [
+    covariant DocumentImpl doc, [
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]) =>
-      use(() =>
-          native.execute((pointer) => DeleteDocumentWithConcurrencyControl(
-                pointer,
-                (doc as DocumentImpl).doc.pointer,
-                concurrency,
-              )));
+      use(() => doc.useLocked(() async {
+            await native
+                .execute((pointer) => DeleteDocumentWithConcurrencyControl(
+                      pointer,
+                      doc.doc.pointer,
+                      concurrency,
+                    ));
+          }));
 
   @override
   Future<bool> purgeDocumentById(String id) => use(() =>

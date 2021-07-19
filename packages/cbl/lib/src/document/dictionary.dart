@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
@@ -21,7 +22,7 @@ abstract class DictionaryInterface implements DictionaryFragment {
   ///
   /// Returns `null` if the element is `null` or the there is no entry with the
   /// given [key].
-  Object? value(String key);
+  T? value<T extends Object>(String key);
 
   /// Returns the value for the given [key] as a [String].
   ///
@@ -82,7 +83,7 @@ abstract class DictionaryInterface implements DictionaryFragment {
   /// objects and returns it.
   ///
   /// {@macro cbl.ArrayInterface.toPrimitiveObjectConversion}
-  Map<String, dynamic> toMap();
+  Map<String, dynamic> toPlainMap();
 }
 
 /// Provides readonly access to dictionary data.
@@ -177,13 +178,15 @@ class DictionaryImpl
 
   Iterable<Object?> get _values => map(value);
 
+  @pragma('vm:prefer-inline')
   T? _getAs<T>(String key) => coerceObject(_dict.get(key)?.asNative(_dict));
 
+  @pragma('vm:prefer-inline')
   T _getAsWithDefault<T>(String key, T defaultValue) =>
       _getAs(key) ?? defaultValue;
 
   @override
-  Object? value(String key) => _getAs(key);
+  T? value<T extends Object>(String key) => _getAs(key);
 
   @override
   String? string(String key) => _getAs(key);
@@ -213,7 +216,7 @@ class DictionaryImpl
   Dictionary? dictionary(String key) => _getAs(key);
 
   @override
-  Map<String, dynamic> toMap() =>
+  Map<String, dynamic> toPlainMap() =>
       Map<String, dynamic>.fromEntries(map((key) => MapEntry<String, dynamic>(
             key,
             CblConversions.convertToPlainObject(value(key)),
@@ -231,13 +234,13 @@ class DictionaryImpl
   MCollection get mCollection => _dict;
 
   @override
-  void encodeTo(FleeceEncoder encoder) => _dict.encodeTo(encoder);
+  FutureOr<void> encodeTo(FleeceEncoder encoder) => _dict.encodeTo(encoder);
 
   @override
   Object? toCblObject() => toMutable();
 
   @override
-  Object? toPlainObject() => toMap();
+  Object? toPlainObject() => toPlainMap();
 
   @override
   Iterator<String> get iterator =>
@@ -259,7 +262,7 @@ class DictionaryImpl
       const IterableEquality<Object?>().hash(_values);
 
   @override
-  String toString() => toMap().toString();
+  String toString() => toPlainMap().toString();
 }
 
 class MutableDictionaryImpl extends DictionaryImpl

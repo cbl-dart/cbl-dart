@@ -35,14 +35,10 @@ Uint8List randomBytes(int size) {
   return data.buffer.asUint8List(0, size);
 }
 
-enum WriteBlob { data, stream, file }
-
+enum WriteBlob { data, stream, file, properties }
 enum ReadTime { beforeSave, afterSave }
-
 enum ReadMode { future, stream }
-
 enum ReadBlob { sourceBlob, loadedBlob }
-
 enum BlobSize { small, large }
 
 void main() {
@@ -81,6 +77,25 @@ void main() {
           'digest': null,
         });
       });
+
+      test('throws error when saving blob with failed stream again', () async {
+        final blob = Blob.fromStream(contentType, Stream.error('Whoops'));
+        final doc = MutableDocument({'blob': blob});
+        await expectLater(db.saveDocument(doc), throwsA('Whoops'));
+        await expectLater(
+          db.saveDocument(doc),
+          throwsA(
+            isA<StateError>().having(
+              (it) => it.message,
+              'message',
+              contains(
+                'A document contains a blob which previously was unable to '
+                'read the stream it was created from.',
+              ),
+            ),
+          ),
+        );
+      });
     });
 
     group('from file', () {
@@ -101,31 +116,44 @@ void main() {
       });
     });
 
-    // Blob from properties
-    // is initialized with all properties
-    // throws when reading content before saving
-    // read content after saving
-    // throws when reading content stream before saving
-    // read content stream after saving
-    // throws error when blob cannot be found
+    group('from properties', () {
+      test('is initialized with all properties', () {
+        final blob = BlobImpl.fromProperties(<String, dynamic>{
+          '@type': 'blob',
+          'digest': 'digest',
+          'length': 0,
+          'content_type': contentType,
+        });
 
-    test('throws error when saving blob with failed stream again', () async {
-      final blob = Blob.fromStream(contentType, Stream.error('Whoops'));
-      final doc = MutableDocument({'blob': blob});
-      await expectLater(db.saveDocument(doc), throwsA('Whoops'));
-      await expectLater(
-        db.saveDocument(doc),
-        throwsA(
-          isA<StateError>().having(
+        expect(blob.digest, 'digest');
+        expect(blob.length, 0);
+        expect(blob.contentType, contentType);
+      });
+
+      test('throws when reading content before saving', () {
+        final blob = BlobImpl.fromProperties(<String, dynamic>{
+          '@type': 'blob',
+          'digest': 'digest',
+          'length': 0,
+          'content_type': contentType,
+        });
+        expect(
+          blob.content(),
+          throwsA(isStateError.having(
             (it) => it.message,
             'message',
-            contains(
-              'A document contains a blob which previously was unable to read '
-              'the stream it was created from.',
-            ),
-          ),
-        ),
-      );
+            contains('Blob has no data available.'),
+          )),
+        );
+        expect(
+          blob.contentStream().first,
+          throwsA(isStateError.having(
+            (it) => it.message,
+            'message',
+            contains('Blob has no data available.'),
+          )),
+        );
+      });
     });
 
     test('throws error when saving blob from different database', () async {
@@ -155,7 +183,9 @@ void main() {
           () async {
             final content = randomTestContent(large: size == BlobSize.large);
 
-            Blob _writeBlob;
+            Blob? _writeBlob;
+            final doc = MutableDocument();
+
             switch (writeBlob) {
               case WriteBlob.data:
                 _writeBlob = Blob.fromData(contentType, content);
@@ -169,15 +199,27 @@ void main() {
                 await file.writeAsBytes(content);
                 _writeBlob = Blob.fromFileUrl(contentType, file.uri);
                 break;
+              case WriteBlob.properties:
+                final blob = Blob.fromData(contentType, content);
+                await db.saveDocument(MutableDocument({'blob': blob}));
+                doc['blob'].value = <String, Object?>{
+                  '@type': 'blob',
+                  'digest': blob.digest,
+                  'length': blob.length,
+                  'content_type': blob.contentType,
+                };
+                break;
             }
 
-            final doc = MutableDocument({'blob': _writeBlob});
+            if (_writeBlob != null) {
+              doc['blob'].value = _writeBlob;
+            }
 
             Future<void> read() async {
               Blob _readBlob;
               switch (readBlob) {
                 case ReadBlob.sourceBlob:
-                  _readBlob = _writeBlob;
+                  _readBlob = _writeBlob!;
                   break;
                 case ReadBlob.loadedBlob:
                   final loadedDoc = (await db.getDocument(doc.id))!;
@@ -216,9 +258,15 @@ void main() {
           for (final readMode in ReadMode.values) {
             for (final readBlob in ReadBlob.values) {
               for (final size in BlobSize.values) {
-                if (!(readTime == ReadTime.beforeSave &&
-                    readBlob == ReadBlob.loadedBlob)) {
-                  blobReadTest(writeBlob, readTime, readMode, readBlob, size);
+                // Condition for [ReadBlob.loadedBlob].
+                if (readBlob != ReadBlob.loadedBlob ||
+                    readTime == ReadTime.afterSave) {
+                  // Conditions for [WriteBlob.properties].
+                  if (writeBlob != WriteBlob.properties ||
+                      (readTime == ReadTime.afterSave &&
+                          readBlob == ReadBlob.loadedBlob)) {
+                    blobReadTest(writeBlob, readTime, readMode, readBlob, size);
+                  }
                 }
               }
             }
