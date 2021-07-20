@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cbl/cbl.dart';
 
 import '../test_binding.dart';
@@ -15,21 +17,40 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     List<String>? documentIds,
     ReplicationFilter? pushFilter,
     ReplicationFilter? pullFilter,
-    ConflictResolver? conflictResolver,
-  }) =>
-      createReplicator(ReplicatorConfiguration(
-        endpoint: UrlEndpoint(testSyncGatewayUrl),
-        replicatorType: replicatorType,
-        continuous: continuous,
+    ConflictResolverFunction? conflictResolver,
+  }) async =>
+      Replicator(ReplicatorConfiguration(
+        database: this,
+        target: UrlEndpoint(testSyncGatewayUrl),
+        replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
+        continuous: continuous ?? false,
         channels: channels,
         documentIds: documentIds,
         pushFilter: pushFilter,
         pullFilter: pullFilter,
-        conflictResolver: conflictResolver,
+        conflictResolver: conflictResolver != null
+            ? ConflictResolver.from(conflictResolver)
+            : null,
       ));
 }
 
 extension ReplicatorUtilsExtension on Replicator {
+  Future<T> waitForActivityLevel<T>(
+    ReplicatorActivityLevel level,
+    FutureOr<T> Function() fn,
+  ) async {
+    final statusReached = changes().firstWhere((change) {
+      var error = change.status.error;
+      if (error != null) {
+        throw error;
+      }
+      return change.status.activity == level;
+    });
+    final result = await fn();
+    await statusReached;
+    return result;
+  }
+
   /// Starts this replicator and waits until it stops. If it stops with an
   /// error, that error is thrown.
   Future<void> startAndWaitUntilStopped() async {
@@ -38,19 +59,7 @@ extension ReplicatorUtilsExtension on Replicator {
       throw StateError('Expected replicator to be stopped');
     }
 
-    final stopped = statusChanges().firstWhere((status) {
-      return status.error != null ||
-          status.activity == ReplicatorActivityLevel.stopped;
-    });
-
-    await start();
-
-    lastStatus = await stopped;
-
-    final error = lastStatus.error;
-    if (error != null) {
-      throw error;
-    }
+    await waitForActivityLevel(ReplicatorActivityLevel.stopped, start);
   }
 }
 

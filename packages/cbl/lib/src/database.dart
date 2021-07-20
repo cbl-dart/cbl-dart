@@ -10,8 +10,6 @@ import 'fleece/fleece.dart' as fl;
 import 'native_callback.dart';
 import 'native_object.dart';
 import 'query.dart';
-import 'replicator.dart';
-import 'replicator.dart' as repl;
 import 'resource.dart';
 import 'streams.dart';
 import 'utils.dart';
@@ -472,11 +470,6 @@ abstract class Database with ClosableResource {
 
   /// Returns the names of the indexes on this database, as an array of strings.
   Future<List<String>> indexNames();
-
-  // === Replicator ============================================================
-
-  /// Creates a [Replicator] for this database, with the given configuration.
-  Future<Replicator> createReplicator(ReplicatorConfiguration config);
 }
 
 class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
@@ -733,16 +726,6 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             release: true,
             retain: false,
           ).map((it) => it.asString!).toList()));
-
-  // === Replicator ============================================================
-
-  @override
-  Future<Replicator> createReplicator(ReplicatorConfiguration config) =>
-      use(() => repl.createReplicator(
-            db: this,
-            config: config,
-            debugCreator: 'Database.createReplicator()',
-          ));
 
   // === Object ================================================================
 

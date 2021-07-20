@@ -29,16 +29,16 @@ abstract class ReplicatedDocument {
 }
 
 class DocumentReplicationImpl implements DocumentReplication {
-  DocumentReplicationImpl(this.documents, this.isPush, this.replicator);
+  DocumentReplicationImpl(this.replicator, this.isPush, this.documents);
 
   @override
-  final List<ReplicatedDocument> documents;
+  final Replicator replicator;
 
   @override
   final bool isPush;
 
   @override
-  final Replicator replicator;
+  final List<ReplicatedDocument> documents;
 
   @override
   String toString() => [

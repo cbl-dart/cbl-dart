@@ -1,114 +1,13 @@
 import 'dart:ffi';
-import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../replicator.dart';
-import '../../utils.dart';
+import '../../replication/replicator.dart';
 import '../request_router.dart';
 import '../worker.dart';
 import 'shared.dart';
 
 late final _bindings = CBLBindings.instance.replicator;
-
-extension on ReplicatorType {
-  CBLReplicatorType toCBLReplicatorType() => CBLReplicatorType.values[index];
-}
-
-extension on ProxyType {
-  CBLProxyType toCBLProxyType() => CBLProxyType.values[index];
-}
-
-class NewReplicator extends WorkerRequest<TransferablePointer<CBLReplicator>> {
-  NewReplicator(
-    Pointer<CBLDatabase> database,
-    Pointer<CBLEndpoint> endpoint,
-    this.replicatorType,
-    this.continuous,
-    this.disableAutoPurge,
-    this.maxAttempts,
-    this.maxAttemptWaitTime,
-    this.heartbeat,
-    Pointer<CBLAuthenticator>? authenticator,
-    this.proxyType,
-    this.proxyHostname,
-    this.proxyPort,
-    this.proxyUsername,
-    this.proxyPassword,
-    Pointer<FLDict>? headers,
-    Uint8List? pinnedServerCertificate,
-    Uint8List? trustedRootCertificates,
-    Pointer<FLArray>? channels,
-    Pointer<FLArray>? documentIDs,
-    Pointer<Callback>? pushFilter,
-    Pointer<Callback>? pullFilter,
-    Pointer<Callback>? conflictResolver,
-  )   : database = database.toTransferablePointer(),
-        endpoint = endpoint.toTransferablePointer(),
-        authenticator = authenticator?.toTransferablePointer(),
-        headers = headers?.toTransferablePointer(),
-        pinnedServerCertificate = pinnedServerCertificate
-            ?.let((it) => TransferableTypedData.fromList([it])),
-        trustedRootCertificates = trustedRootCertificates
-            ?.let((it) => TransferableTypedData.fromList([it])),
-        channels = channels?.toTransferablePointer(),
-        documentIDs = documentIDs?.toTransferablePointer(),
-        pushFilter = pushFilter?.toTransferablePointer(),
-        pullFilter = pullFilter?.toTransferablePointer(),
-        conflictResolver = conflictResolver?.toTransferablePointer();
-
-  final TransferablePointer<CBLDatabase> database;
-  final TransferablePointer<CBLEndpoint> endpoint;
-  final ReplicatorType replicatorType;
-  final bool continuous;
-  final bool? disableAutoPurge;
-  final int? maxAttempts;
-  final int? maxAttemptWaitTime;
-  final int? heartbeat;
-  final TransferablePointer<CBLAuthenticator>? authenticator;
-  final ProxyType? proxyType;
-  final String? proxyHostname;
-  final int? proxyPort;
-  final String? proxyUsername;
-  final String? proxyPassword;
-  final TransferablePointer<FLDict>? headers;
-  final TransferableTypedData? pinnedServerCertificate;
-  final TransferableTypedData? trustedRootCertificates;
-  final TransferablePointer<FLArray>? channels;
-  final TransferablePointer<FLArray>? documentIDs;
-  final TransferablePointer<Callback>? pushFilter;
-  final TransferablePointer<Callback>? pullFilter;
-  final TransferablePointer<Callback>? conflictResolver;
-}
-
-TransferablePointer<CBLReplicator> newReplicator(NewReplicator request) =>
-    _bindings
-        .createReplicator(
-          request.database.pointer,
-          request.endpoint.pointer,
-          request.replicatorType.toCBLReplicatorType(),
-          request.continuous,
-          request.disableAutoPurge,
-          request.maxAttempts,
-          request.maxAttemptWaitTime,
-          request.heartbeat,
-          request.authenticator?.pointer,
-          request.proxyType?.toCBLProxyType(),
-          request.proxyHostname,
-          request.proxyPort,
-          request.proxyUsername,
-          request.proxyPassword,
-          request.headers?.pointer,
-          request.pinnedServerCertificate?.materialize().asUint8List(),
-          request.trustedRootCertificates?.materialize().asUint8List(),
-          request.channels?.pointer,
-          request.documentIDs?.pointer,
-          request.pushFilter?.pointer,
-          request.pullFilter?.pointer,
-          request.conflictResolver?.pointer,
-        )
-        .toTransferablePointer();
 
 class StartReplicator extends WorkerRequest<void> {
   StartReplicator(Pointer<CBLReplicator> replicator, this.resetCheckpoint)
@@ -221,7 +120,6 @@ void addReplicatorDocumentListener(AddReplicatorDocumentListener request) =>
     );
 
 void addReplicatorHandlersToRouter(RequestRouter router) {
-  router.addHandler(newReplicator);
   router.addHandler(startReplicator);
   router.addHandler(stopReplicator);
   router.addHandler(setReplicatorHostReachable);

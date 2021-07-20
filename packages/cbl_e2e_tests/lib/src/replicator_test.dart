@@ -19,8 +19,9 @@ void main() {
     test('create Replicator smoke test', () async {
       final db = await openTestDb('CreateReplicatorSmoke');
 
-      final replicator = await db.createReplicator(ReplicatorConfiguration(
-        endpoint: UrlEndpoint(testSyncGatewayUrl),
+      final repl = Replicator(ReplicatorConfiguration(
+        database: db,
+        target: UrlEndpoint(testSyncGatewayUrl),
         replicatorType: ReplicatorType.pushAndPull,
         continuous: false,
         authenticator: BasicAuthenticator(
@@ -28,31 +29,16 @@ void main() {
           password: 'password',
         ),
         headers: {'Client': 'test'},
-        proxy: ProxySettings(
-          type: ProxyType.http,
-          hostname: 'host',
-          port: 4444,
-          username: 'user',
-          password: 'password',
-        ),
         pinnedServerCertificate: Uint8List(0),
-        trustedRootCertificates: Uint8List(0),
         channels: ['channel'],
         documentIds: ['id'],
         pullFilter: (document, isDeleted) => true,
         pushFilter: (document, isDeleted) => true,
-        conflictResolver: (documentId, local, remote) => local,
+        conflictResolver:
+            ConflictResolver.from((conflict) => conflict.localDocument),
       ));
 
-      // Throws exception because we don't provide valid certificates.
-      await expectLater(
-        replicator.startAndWaitUntilStopped(),
-        throwsA(isA<CouchbaseLiteException>().having(
-          (it) => it.code,
-          'code',
-          CouchbaseLiteErrorCode.remoteError,
-        )),
-      );
+      await repl.start();
     });
 
     test('continuous replication', () async {
@@ -157,8 +143,8 @@ void main() {
       final replicatorA = await dbA.createTestReplicator(
         replicatorType: ReplicatorType.push,
         pushFilter: expectAsync2(
-          (document, isDeleted) {
-            expect(isDeleted, isFalse);
+          (document, flags) {
+            expect(flags, isEmpty);
             expect(document.id, anyOf(docA.id, docB.id));
             return docA.id == document.id;
           },
@@ -193,8 +179,8 @@ void main() {
       final replicatorB = await dbB.createTestReplicator(
         replicatorType: ReplicatorType.pull,
         pullFilter: expectAsync2(
-          (document, isDeleted) {
-            expect(isDeleted, isFalse);
+          (document, flags) {
+            expect(flags, isEmpty);
             expect(document.id, anyOf(docA.id, docB.id));
             return docA.id == document.id;
           },
@@ -219,11 +205,11 @@ void main() {
 
       final dbA = await openTestDb('ConflictResolver-DB-A');
       final replicatorA = await dbA.createTestReplicator(
-        conflictResolver: expectAsync3((documentId, local, remote) {
-          expect(documentId, testDocumentId);
-          expect(local, isTestDocument('DB-A-2'));
-          expect(remote, isTestDocument('DB-B-1'));
-          return remote;
+        conflictResolver: expectAsync1((conflict) {
+          expect(conflict.documentId, testDocumentId);
+          expect(conflict.localDocument, isTestDocument('DB-A-2'));
+          expect(conflict.remoteDocument, isTestDocument('DB-B-1'));
+          return conflict.remoteDocument;
         }),
       );
 
@@ -241,28 +227,14 @@ void main() {
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
     });
 
-    test('setHostReachable smoke test', () async {
-      final db = await openTestDb('SetHostReachableSmoke');
-      final replicator = await db.createTestReplicator();
-      await replicator.setHostReachable(false);
-      await replicator.setHostReachable(true);
-    });
-
-    test('setSuspended smoke test', () async {
-      final db = await openTestDb('SetSuspendedSmoke');
-      final replicator = await db.createTestReplicator();
-      await replicator.setSuspended(true);
-      await replicator.setSuspended(false);
-    });
-
     test('status returns the current status of the replicator', () async {
       final db = await openTestDb('GetReplicatorStatus');
       final replicator = await db.createTestReplicator();
       final status = await replicator.status();
       expect(status.activity, ReplicatorActivityLevel.stopped);
       expect(status.error, isNull);
-      expect(status.progress.documentCount, 0);
-      expect(status.progress.fractionComplete, 0.0);
+      expect(status.progress.progress, 0);
+      expect(status.progress.completed, 0);
     });
 
     test('statusChanges emits when the replicators status changes', () async {
@@ -270,7 +242,7 @@ void main() {
       final replicator = await db.createTestReplicator();
 
       expect(
-        replicator.statusChanges().map((it) => it.activity),
+        replicator.changes().map((it) => it.status.activity),
         emitsInOrder(<ReplicatorActivityLevel>[
           ReplicatorActivityLevel.busy,
           ReplicatorActivityLevel.stopped,
@@ -287,7 +259,7 @@ void main() {
       final doc = MutableDocument();
       await db.saveDocument(doc);
       final pendingDocumentIds = await replicator.pendingDocumentIds();
-      expect(pendingDocumentIds, {doc.id: true});
+      expect(pendingDocumentIds, [doc.id]);
     });
 
     test('isDocumentPending returns whether a document is waiting to be pushed',
@@ -311,12 +283,14 @@ void main() {
 
       expect(
         replicator.documentReplications(),
-        emits(DocumentsReplicated(
-          ReplicationDirection.push,
-          [
-            ReplicatedDocument(doc.id, {}, null),
-          ],
-        )),
+        emits(isA<DocumentReplication>()
+            .having((it) => it.isPush, 'isPush', isTrue)
+            .having((it) => it.documents, 'documents', [
+          isA<ReplicatedDocument>()
+              .having((it) => it.id, 'id', doc.id)
+              .having((it) => it.flags, 'flags', isEmpty)
+              .having((it) => it.error, 'error', isNull)
+        ])),
       );
 
       await replicator.start();
@@ -326,28 +300,12 @@ void main() {
   test('start stop', () async {
     final db = await openTestDb('Replicator-Start-Stop');
     final repl = await db.createTestReplicator(continuous: true);
-    repl.statusChanges().listen(
+    repl.changes().listen(
           print,
           onDone: () => print('statusChanges => DONE'),
         );
 
-    Future<T> waitForActivityLevel<T>(
-      ReplicatorActivityLevel level,
-      Future<T> Function() fn,
-    ) async {
-      final statusReached = repl.statusChanges().firstWhere((status) {
-        var error = status.error;
-        if (error != null) {
-          throw error;
-        }
-        return status.activity == level;
-      });
-      final result = await fn();
-      await statusReached;
-      return result;
-    }
-
-    await waitForActivityLevel(ReplicatorActivityLevel.idle, repl.start);
-    await waitForActivityLevel(ReplicatorActivityLevel.stopped, repl.stop);
+    await repl.waitForActivityLevel(ReplicatorActivityLevel.idle, repl.start);
+    await repl.waitForActivityLevel(ReplicatorActivityLevel.stopped, repl.stop);
   });
 }

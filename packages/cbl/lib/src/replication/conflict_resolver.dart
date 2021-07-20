@@ -5,9 +5,21 @@ import 'configuration.dart';
 import 'conflict.dart';
 import 'replicator.dart';
 
+/// Functional version of [ConflictResolver].
+typedef ConflictResolverFunction = FutureOr<Document?> Function(
+  Conflict conflict,
+);
+
 /// An object which is able to resolve a [Conflict] between the local and remote
 /// versions of a replicated [Document].
 abstract class ConflictResolver {
+  /// Creates a [ConflictResolver] from a function which is called to resolve
+  /// the conflict.
+  factory ConflictResolver.from(
+    ConflictResolverFunction resolve,
+  ) =>
+      _FunctionConflictResolver(resolve);
+
   /// Resolves the [conflict] between the local and the remote version of
   /// a [Document].
   ///
@@ -31,4 +43,13 @@ abstract class ConflictResolver {
   /// and modify it appropriately. Alternatively return `null` if the resolution
   /// is to delete the document.
   FutureOr<Document?> resolve(Conflict conflict);
+}
+
+class _FunctionConflictResolver implements ConflictResolver {
+  _FunctionConflictResolver(this._resolve);
+
+  final ConflictResolverFunction _resolve;
+
+  @override
+  FutureOr<Document?> resolve(Conflict conflict) => _resolve(conflict);
 }
