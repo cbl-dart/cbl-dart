@@ -322,4 +322,32 @@ void main() {
       await replicator.start();
     });
   });
+
+  test('start stop', () async {
+    final db = await openTestDb('Replicator-Start-Stop');
+    final repl = await db.createTestReplicator(continuous: true);
+    repl.statusChanges().listen(
+          print,
+          onDone: () => print('statusChanges => DONE'),
+        );
+
+    Future<T> waitForActivityLevel<T>(
+      ReplicatorActivityLevel level,
+      Future<T> Function() fn,
+    ) async {
+      final statusReached = repl.statusChanges().firstWhere((status) {
+        var error = status.error;
+        if (error != null) {
+          throw error;
+        }
+        return status.activity == level;
+      });
+      final result = await fn();
+      await statusReached;
+      return result;
+    }
+
+    await waitForActivityLevel(ReplicatorActivityLevel.idle, repl.start);
+    await waitForActivityLevel(ReplicatorActivityLevel.stopped, repl.stop);
+  });
 }
