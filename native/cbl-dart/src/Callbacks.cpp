@@ -196,26 +196,22 @@ void CallbackCall::messageHandler(Dart_Port dest_port_id,
 }
 
 void CallbackCall::sendRequestAndWaitForReturn(Dart_CObject &request) {
-  std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
-  std::condition_variable cv;
+  std::unique_lock<std::mutex> lock(mutex_);
 
-  {
-    std::scoped_lock lock(mutex_);
-    if (completed_) {
-      // If the call has been completed early because the callback has been
-      // closed don't send the request.
-      assert(!expectsResult());
-      return;
-    }
-    completedCv_ = &cv;
+  if (completed_) {
+    // If the call has been completed early because the callback has been
+    // closed don't send the request.
+    assert(!expectsResult());
+    return;
   }
+
+  std::condition_variable cv;
+  completedCv_ = &cv;
 
   callback_.sendRequest(request);
 
   cv.wait(lock, [this] { return completed_; });
 
-  // At this point lock is locked so we can safely update
-  // the state of the call.
   completedCv_ = nullptr;
 }
 
