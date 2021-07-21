@@ -2,9 +2,9 @@ import 'dart:ffi';
 
 import 'package:cbl/src/fleece/slice.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
-import '../test_binding.dart';
 
 void main() {
   setupTestBinding();

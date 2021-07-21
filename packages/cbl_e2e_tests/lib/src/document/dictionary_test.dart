@@ -4,9 +4,9 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/dictionary.dart';
 import 'package:cbl/src/fleece/fleece.dart' as fl;
 import 'package:cbl/src/fleece/integration/integration.dart';
+import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
-import '../test_binding.dart';
 
 void main() {
   setupTestBinding();
