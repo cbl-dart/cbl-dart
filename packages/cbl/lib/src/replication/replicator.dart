@@ -244,7 +244,9 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   Future<ReplicatorStatus> status() => use(_status);
 
   Future<ReplicatorStatus> _status() => runKeepAlive(() {
-        return _worker.execute(GetReplicatorStatus(_replicator.pointer));
+        return _worker
+            .execute(GetReplicatorStatus(_replicator.pointer))
+            .then((status) => status.toReplicatorStatus());
       });
 
   @override
@@ -276,7 +278,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
             ReplicatorStatusCallbackMessage.fromArguments(arguments);
         return ReplicatorChangeImpl(
           this,
-          message.status.ref.toReplicatorStatus(),
+          message.status.toReplicatorStatus(),
         );
       },
     ).stream;
@@ -387,14 +389,14 @@ extension on CBLReplicatedDocumentFlag {
       DocumentFlag.values[CBLReplicatedDocumentFlag.values.indexOf(this)];
 }
 
-extension CBLReplicatorStatusExt on CBLReplicatorStatus {
+extension on CBLReplicatorStatus {
   ReplicatorStatus toReplicatorStatus() => ReplicatorStatus._(
         activity.toReplicatorActivityLevel(),
         ReplicatorProgress._(
-          progress.documentCount,
-          progress.complete,
+          progressDocumentCount,
+          progressComplete,
         ),
-        exception?.translate(),
+        error?.translate(),
       );
 }
 
@@ -442,80 +444,73 @@ NativeCallback _wrapReplicationFilter(
   DatabaseImpl database,
   ReplicationFilter filter,
 ) =>
-    NativeCallback(
-      (arguments) async {
-        final message =
-            ReplicationFilterCallbackMessage.fromArguments(arguments);
-        final doc = DocumentImpl(
-          database: database,
-          doc: message.document,
-          retain: true,
-          debugCreator: 'ReplicationFilter()',
-        );
+    NativeCallback((arguments) async {
+      final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
+      final doc = DocumentImpl(
+        database: database,
+        doc: message.document,
+        retain: true,
+        debugCreator: 'ReplicationFilter()',
+      );
 
-        return filter(
-          doc,
-          message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-        );
-      },
-      // Reject document if filter throws.
-      errorResult: false,
-    );
+      return filter(
+        doc,
+        message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
+      );
+    }, errorResult: false)
+      ..errors.listen(null);
 
 NativeCallback _wrapConflictResolver(
   DatabaseImpl database,
   ConflictResolver resolver,
 ) =>
-    NativeCallback(
-      (arguments) async {
-        final message =
-            ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
+    NativeCallback((arguments) async {
+      final message =
+          ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-        final local = message.localDocument?.let((it) => DocumentImpl(
-              database: database,
-              doc: it,
-              retain: true,
-              debugCreator: 'ConflictResolver(local)',
-            ));
+      final local = message.localDocument?.let((it) => DocumentImpl(
+            database: database,
+            doc: it,
+            retain: true,
+            debugCreator: 'ConflictResolver(local)',
+          ));
 
-        final remote = message.remoteDocument?.let((it) => DocumentImpl(
-              database: database,
-              doc: it,
-              retain: true,
-              debugCreator: 'ConflictResolver(remote)',
-            ));
+      final remote = message.remoteDocument?.let((it) => DocumentImpl(
+            database: database,
+            doc: it,
+            retain: true,
+            debugCreator: 'ConflictResolver(remote)',
+          ));
 
-        final conflict = ConflictImpl(message.documentId, local, remote);
-        final resolved = await resolver.resolve(conflict) as DocumentImpl?;
-        if (resolved is MutableDocumentImpl) {
-          resolved.database = database;
-          await resolved.flushProperties();
-        }
+      final conflict = ConflictImpl(message.documentId, local, remote);
+      final resolved = await resolver.resolve(conflict) as DocumentImpl?;
+      if (resolved is MutableDocumentImpl) {
+        resolved.database = database;
+        await resolved.flushProperties();
+      }
 
-        final resolvedPointer = resolved?.doc.pointerUnsafe;
+      final resolvedPointer = resolved?.doc.pointerUnsafe;
 
-        // If the resolver returned a document other than `local` or `remote`,
-        // the ref count of `resolved` needs to be incremented because the
-        // native conflict resolver callback is expected to returned a document
-        // with a ref count of +1, which the caller balances with a release.
-        // This must happen on the Dart side, because `resolved` can be garbage
-        // collected before `resolvedAddress` makes it back to the native side.
-        // if (resolvedPointer != null &&
-        //     resolved != local &&
-        //     resolved != remote) {
-        //   CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
-        // }
+      // If the resolver returned a document other than `local` or `remote`,
+      // the ref count of `resolved` needs to be incremented because the
+      // native conflict resolver callback is expected to returned a document
+      // with a ref count of +1, which the caller balances with a release.
+      // This must happen on the Dart side, because `resolved` can be garbage
+      // collected before `resolvedAddress` makes it back to the native side.
+      // if (resolvedPointer != null &&
+      //     resolved != local &&
+      //     resolved != remote) {
+      //   CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+      // }
 
-        // Workaround for a bug in CBL C SDK, which frees all resolved
-        // documents, not just merged ones. When this bug is fixed the above
-        // commented out code block should replace this one.
-        // https://github.com/couchbase/couchbase-lite-C/issues/148
-        if (resolvedPointer != null) {
-          CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
-        }
+      // Workaround for a bug in CBL C SDK, which frees all resolved
+      // documents, not just merged ones. When this bug is fixed the above
+      // commented out code block should replace this one.
+      // https://github.com/couchbase/couchbase-lite-C/issues/148
+      if (resolvedPointer != null) {
+        CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+      }
 
-        return resolvedPointer?.address;
-      },
-      // `false` signals to the native side that an exception has occurred.
-      errorResult: false,
-    );
+      return resolvedPointer?.address;
+    })
+      ..errors.listen(null);

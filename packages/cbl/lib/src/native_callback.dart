@@ -21,7 +21,10 @@ class NativeCallback {
   /// Creates a callback which can be called from the native side.
   ///
   /// [handler] is the function which responds to calls from the native side.
-  NativeCallback(this.handler, {this.errorResult}) {
+  NativeCallback(
+    this.handler, {
+    this.errorResult = failureResult,
+  }) {
     _receivePort = ReceivePort();
 
     native = NativeObject(_bindings.create(
@@ -32,16 +35,29 @@ class NativeCallback {
     _receivePort.cast<List>().listen(_messageHandler);
   }
 
+  /// A special result which signals the native side to throw a C++
+  /// `std::runtime_exception`.
+  static const failureResult = '__NATIVE_CALLBACK_FAILED__';
+
   /// The handler which responds to calls to this callback.
   final CallbackHandler handler;
 
-  /// Value which is send to the call on the native side if [handler] throws an
-  /// exception.
+  /// The result to send to the native side when [handler] throws an exception.
+  ///
+  /// The default is to send [failureResult], which is a special value which
+  /// signals the native side to throw a C++ `std::runtime_exception`.
   final Object? errorResult;
+
+  /// A [Stream] of the errors thrown by [handler].
+  ///
+  /// The stream supports a single subscriber.
+  Stream<void> get errors => _errorStreamController.stream;
 
   late final ReceivePort _receivePort;
 
   late final NativeObject<Callback> native;
+
+  late final _errorStreamController = StreamController<Object?>();
 
   var _closed = false;
 
@@ -53,6 +69,7 @@ class NativeCallback {
     _closed = true;
     native.keepAlive(_bindings.close);
     _receivePort.close();
+    _errorStreamController.close();
   }
 
   void _messageHandler(List message) {
@@ -68,7 +85,6 @@ class NativeCallback {
       'caller of callback must send a sendPort and callAddress to receive a '
       'result',
     );
-    ;
 
     Future(() => handler(args)).then(
       (result) {
@@ -81,7 +97,7 @@ class NativeCallback {
         if (!_closed && sendPort != null) {
           sendPort.send([callAddress, errorResult]);
         }
-        Zone.current.handleUncaughtError(error, stackTrace);
+        _errorStreamController.addError(error, stackTrace);
       },
     );
   }

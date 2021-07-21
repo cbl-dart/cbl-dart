@@ -38,6 +38,7 @@ extension ReplicatorUtilsDatabaseExtension on Database {
             hasActivityLevel(ReplicatorActivityLevel.busy),
           )),
           replicator.stop,
+          validStatusMatcher: anything,
         ));
 
     return replicator;
@@ -46,8 +47,15 @@ extension ReplicatorUtilsDatabaseExtension on Database {
 
 final isReplicatorStatus = isA<ReplicatorStatus>();
 
-final isErrorReplicatorStatus =
-    isReplicatorStatus.having((it) => it.error, 'error', isNotNull);
+extension ReplicatorStatusMatcherExtension on TypeMatcher<ReplicatorStatus> {
+  Matcher havingActivity(Object? activity) =>
+      having((it) => it.activity, 'activity', activity);
+
+  Matcher havingError(Object? error) =>
+      having((it) => it.error, 'error', error);
+}
+
+final isErrorReplicatorStatus = isReplicatorStatus.havingError(isNotNull);
 
 Matcher hasActivityLevel(
   ReplicatorActivityLevel activityLevel,
@@ -154,6 +162,7 @@ extension ReplicatorUtilsExtension on Replicator {
       hasActivityLevel(ReplicatorActivityLevel.stopped),
       start,
       matchInitialStatus: true,
+      validStatusMatcher: anything,
     );
   }
 }

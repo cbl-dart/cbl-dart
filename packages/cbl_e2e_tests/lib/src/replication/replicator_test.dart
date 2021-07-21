@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
@@ -164,13 +165,43 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
-    test('pushFilter throws exception', () {
-      fail('TODO');
+    test('pushFilter exception handling', () async {
+      Object? uncaughtError;
+      await runZonedGuarded(() async {
+        final pushDb =
+            await openTestDb('PushFilterExceptionHandling-Throws-Push');
+        final pullDb =
+            await openTestDb('PushFilterExceptionHandling-Throws-Pull');
+
+        final doc = MutableDocument();
+        await pushDb.saveDocument(doc);
+
+        final pusher = pushDb.createTestReplicator(
+          replicatorType: ReplicatorType.push,
+          pushFilter: (document, flags) {
+            throw 'Push failed';
+          },
+        );
+
+        await pusher.replicateOneShot();
+
+        final puller = pullDb.createTestReplicator(
+          replicatorType: ReplicatorType.pull,
+        );
+
+        await puller.replicateOneShot();
+
+        // Documents where filter throws are not pushed.
+        expect(await pullDb.getDocument(doc.id), isNull);
+      }, (error, _) {
+        uncaughtError = error;
+      });
+      expect(uncaughtError, 'Push failed');
     });
 
     test('use pullFilter to filter pulled documents', () async {
-      final pushDb = await openTestDb('ReplicationWithPullFilter-Push');
-      final pullDb = await openTestDb('ReplicationWithPullFilter-Pull');
+      final pushDb = await openTestDb('PullFilterExceptionHandling-Push');
+      final pullDb = await openTestDb('PullFilterExceptionHandling-Pull');
 
       final docA = MutableDocument();
       await pushDb.saveDocument(docA);
@@ -200,8 +231,38 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
-    test('pullFilter throws exception', () {
-      fail('TODO');
+    test('pullFilter exception handling', () async {
+      Object? uncaughtError;
+      await runZonedGuarded(() async {
+        final pushDb =
+            await openTestDb('ReplicationWithPullFilter-Throws-Push');
+        final pullDb =
+            await openTestDb('ReplicationWithPullFilter-Throws-Pull');
+
+        final doc = MutableDocument();
+        await pushDb.saveDocument(doc);
+
+        final pusher = pushDb.createTestReplicator(
+          replicatorType: ReplicatorType.push,
+        );
+
+        await pusher.replicateOneShot();
+
+        final puller = pullDb.createTestReplicator(
+          replicatorType: ReplicatorType.pull,
+          pullFilter: (document, flags) {
+            throw 'Pull failed';
+          },
+        );
+
+        await puller.replicateOneShot();
+
+        // Documents where filter throws are not pulled.
+        expect(await pullDb.getDocument(doc.id), isNull);
+      }, (error, _) {
+        uncaughtError = error;
+      });
+      expect(uncaughtError, 'Pull failed');
     });
 
     test('conflict resolver should work correctly', () async {
@@ -238,8 +299,30 @@ void main() {
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
     });
 
-    test('conflict resolver throws exception', () {
-      fail('TODO');
+    test('conflict resolver exception handling', () async {
+      Object? uncaughtError;
+      await runZonedGuarded(() async {
+        final dbA = await openTestDb('ConflictResolver-Exception-Handling-A');
+        final replicatorA = dbA.createTestReplicator(
+          conflictResolver: expectAsync1((conflict) {
+            throw 'Conflict resolver failed';
+          }),
+        );
+
+        final dbB = await openTestDb('ConflictResolver-Exception-Handling-B');
+        final replicatorB = dbB.createTestReplicator();
+
+        await dbA.writeTestDocument('DB-A-1');
+        await replicatorA.replicateOneShot();
+        await replicatorB.replicateOneShot();
+        await dbA.writeTestDocument('DB-A-2');
+        await dbB.writeTestDocument('DB-B-1');
+        await replicatorB.replicateOneShot();
+        await replicatorA.replicateOneShot();
+      }, (error, _) {
+        uncaughtError = error;
+      });
+      expect(uncaughtError, 'Conflict resolver failed');
     });
 
     test('status returns the current status of the replicator', () async {

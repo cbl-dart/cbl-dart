@@ -135,7 +135,8 @@ Callback *dartLogCallback = nullptr;
 
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message) {
-  CBL_LogMessage(domain, level, CBLDart_FLStringFromDart(message));
+  CBL_Log(domain, level, "%.*s", (int)message.size,
+          reinterpret_cast<const char *>(message.buf));
 }
 
 void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,

@@ -2,7 +2,6 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../replication/replicator.dart';
 import '../request_router.dart';
 import '../worker.dart';
 import 'shared.dart';
@@ -52,15 +51,15 @@ class SetReplicatorSuspended extends WorkerRequest<void> {
 void setReplicatorSuspended(SetReplicatorSuspended request) =>
     _bindings.setSuspended(request.replicator.pointer, request.suspended);
 
-class GetReplicatorStatus extends WorkerRequest<ReplicatorStatus> {
+class GetReplicatorStatus extends WorkerRequest<CBLReplicatorStatus> {
   GetReplicatorStatus(Pointer<CBLReplicator> replicator)
       : replicator = replicator.toTransferablePointer();
 
   final TransferablePointer<CBLReplicator> replicator;
 }
 
-ReplicatorStatus getReplicatorStatus(GetReplicatorStatus request) =>
-    _bindings.status(request.replicator.pointer).toReplicatorStatus();
+CBLReplicatorStatus getReplicatorStatus(GetReplicatorStatus request) =>
+    _bindings.status(request.replicator.pointer);
 
 class GetReplicatorPendingDocumentIds
     extends WorkerRequest<TransferablePointer<FLDict>> {

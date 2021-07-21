@@ -22,16 +22,16 @@ class CallbackRegistry {
 
   bool callbackExists(const Callback &callback) const;
 
-  void addWaitingCall(CallbackCall &call);
+  void addBlockingCall(CallbackCall &call);
 
-  bool takeWaitingCall(CallbackCall &call);
+  bool takeBlockingCall(CallbackCall &call);
 
  private:
   CallbackRegistry();
 
   mutable std::mutex mutex_;
   std::vector<const Callback *> callbacks_;
-  std::vector<CallbackCall *> waitingCalls_;
+  std::vector<CallbackCall *> blockingCalls_;
 };
 
 // === Callback ===============================================================
@@ -54,7 +54,7 @@ class Callback {
 
   void registerCall(CallbackCall &call);
   void unregisterCall(CallbackCall &call);
-  void sendRequest(Dart_CObject &request);
+  void sendRequest(Dart_CObject *request);
 
   std::mutex mutex_;
   bool closed_ = false;
@@ -71,7 +71,7 @@ typedef void(CallbackResultHandler)(Dart_CObject *);
 
 class CallbackCall {
  public:
-  CallbackCall(Callback &callback, bool waitForReturn = false);
+  CallbackCall(Callback &callback, bool isBlocking = false);
 
   CallbackCall(Callback &callback,
                const std::function<CallbackResultHandler> &resultHandler)
@@ -81,22 +81,33 @@ class CallbackCall {
 
   ~CallbackCall();
 
-  bool waitsForReturn() { return receivePort_ != ILLEGAL_PORT; }
-  bool expectsResult() { return resultHandler_ != nullptr; }
+  bool isBlocking() { return receivePort_ != ILLEGAL_PORT; }
+  bool hasResultHandler() { return resultHandler_ != nullptr; }
+  bool isExecuted() {
+    std::scoped_lock lock(mutex_);
+    return isExecuted_;
+  }
+  bool isCompleted() {
+    std::scoped_lock lock(mutex_);
+    return isCompleted_;
+  }
+
   void execute(Dart_CObject &arguments);
+  void complete(Dart_CObject *result);
+  void close();
 
  private:
-  friend class Callback;
-
   static void messageHandler(Dart_Port dest_port_id, Dart_CObject *message);
 
-  void sendRequestAndWaitForReturn(Dart_CObject &request);
-  void complete(Dart_CObject *result = nullptr);
+  void waitForCompletion();
+  bool isFailureResult(Dart_CObject* result);
 
   std::mutex mutex_;
   Callback &callback_;
   const std::function<CallbackResultHandler> *resultHandler_ = nullptr;
   Dart_Port receivePort_ = ILLEGAL_PORT;
-  bool completed_ = false;
-  std::condition_variable *completedCv_ = nullptr;
+  bool isExecuted_ = false;
+  bool isCompleted_ = false;
+  bool didFail_ = false;
+  std::condition_variable completedCv_;
 };
