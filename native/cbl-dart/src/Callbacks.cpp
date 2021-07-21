@@ -23,7 +23,7 @@ bool CallbackRegistry::callbackExists(const Callback &callback) const {
          callbacks_.end();
 }
 
-  void CallbackRegistry::addBlockingCall(CallbackCall &call) {
+void CallbackRegistry::addBlockingCall(CallbackCall &call) {
   assert(call.isBlocking());
   std::scoped_lock lock(mutex_);
   blockingCalls_.push_back(&call);

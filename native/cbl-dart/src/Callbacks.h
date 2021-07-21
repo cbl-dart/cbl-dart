@@ -100,7 +100,7 @@ class CallbackCall {
   static void messageHandler(Dart_Port dest_port_id, Dart_CObject *message);
 
   void waitForCompletion();
-  bool isFailureResult(Dart_CObject* result);
+  bool isFailureResult(Dart_CObject *result);
 
   std::mutex mutex_;
   Callback &callback_;
