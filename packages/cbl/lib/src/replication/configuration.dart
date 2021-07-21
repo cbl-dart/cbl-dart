@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../database.dart';
 import '../document/document.dart';
+import '../utils.dart';
 import 'authenticator.dart';
 import 'conflict_resolver.dart';
 import 'endpoint.dart';
@@ -219,25 +220,41 @@ class ReplicatorConfiguration {
   }
 
   @override
-  String toString() => [
-        'ReplicatorConfiguration(',
-        [
-          'database: $database',
-          'target: $target',
-          'replicatorType: $replicatorType',
-          'continuous: $continuous',
-          if (authenticator != null) 'authenticator: $authenticator',
-          if (pinnedServerCertificate != null) 'PINNED-SERVER-CERTIFICATE',
-          if (headers != null) 'headers: $headers',
-          if (channels != null) 'channels: $channels',
-          if (documentIds != null) 'documentIds: $documentIds',
-          if (pushFilter != null) 'PUSH-FILTER',
-          if (pushFilter != null) 'PULL-FILTER',
-          if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
-          'heartbeat: $_heartbeat',
-          'maxRetries: $_maxRetries',
-          'maxRetryWaitTime: $_maxRetryWaitTime',
-        ].join(', '),
-        ')'
-      ].join('');
+  String toString() {
+    final headers = this.headers?.let(_redactHeaders);
+
+    return [
+      'ReplicatorConfiguration(',
+      [
+        'database: $database',
+        'target: $target',
+        'replicatorType: ${describeEnum(replicatorType)}',
+        if (continuous) 'CONTINUOUS',
+        if (authenticator != null) 'authenticator: $authenticator',
+        if (pinnedServerCertificate != null) 'PINNED-SERVER-CERTIFICATE',
+        if (headers != null) 'headers: $headers',
+        if (channels != null) 'channels: $channels',
+        if (documentIds != null) 'documentIds: $documentIds',
+        if (pushFilter != null) 'PUSH-FILTER',
+        if (pushFilter != null) 'PULL-FILTER',
+        if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
+        'heartbeat: ${_heartbeat.inSeconds}',
+        'maxRetries: $maxRetries',
+        'maxRetryWaitTime: ${_maxRetryWaitTime.inSeconds}',
+      ].join(', '),
+      ')'
+    ].join('');
+  }
+}
+
+Map<String, String> _redactHeaders(Map<String, String> headers) {
+  final redactedHeaders = ['authentication'];
+
+  return Map.fromEntries(
+    headers.entries.map(
+      (e) => redactedHeaders.contains(e.key.toLowerCase())
+          ? MapEntry(e.key, 'REDACTED')
+          : MapEntry(e.key, e.value),
+    ),
+  );
 }

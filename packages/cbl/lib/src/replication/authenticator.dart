@@ -26,13 +26,18 @@ class BasicAuthenticator extends Authenticator {
 class SessionAuthenticator extends Authenticator {
   /// Creates an authenticator using a Couchbase Sync Gateway login session
   /// identifier, and optionally a cookie name (pass `null` for the default.)
-  SessionAuthenticator({required this.sessionId, this.cookieName});
+  SessionAuthenticator({
+    required this.sessionId,
+    String? cookieName,
+  }) : cookieName = cookieName ?? _defaultCookieName;
+
+  static const _defaultCookieName = 'SyncGatewaySession';
 
   /// The id of the session created by Sync Gateway.
   final String sessionId;
 
   /// The name of the session cookie to send the [sessionId] in.
-  final String? cookieName;
+  final String cookieName;
 
   @override
   String toString() => 'SessionAuthenticator('

@@ -53,7 +53,7 @@ class DocumentReplicationImpl implements DocumentReplication {
 }
 
 class ReplicatedDocumentImpl implements ReplicatedDocument {
-  ReplicatedDocumentImpl(this.id, this.flags, this.error);
+  ReplicatedDocumentImpl(this.id, [this.flags = const {}, this.error]);
 
   @override
   final String id;

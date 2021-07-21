@@ -41,6 +41,19 @@ void main() {
       await repl.start();
     });
 
+    test('config returns copy', () async {
+      final db = await openTestDb(null);
+      final config = ReplicatorConfiguration(
+        database: db,
+        target: UrlEndpoint(testSyncGatewayUrl),
+      );
+      final repl = Replicator(config);
+      final configA = repl.config;
+      final configB = repl.config;
+      expect(configA, isNot(same(config)));
+      expect(configA, isNot(same(configB)));
+    });
+
     test('continuous replication', () async {
       final pushDb = await openTestDb('ContinuousReplication-Push');
       final pullDb = await openTestDb('ContinuousReplication-Pull');
@@ -265,7 +278,7 @@ void main() {
       expect(uncaughtError, 'Pull failed');
     });
 
-    test('conflict resolver should work correctly', () async {
+    test('custom conflict resolver', () async {
       // Create document in db A
       // Sync db A with server
       // Sync db B with server

@@ -133,9 +133,11 @@ late final libraries = CblE2eTestBinding.instance.libraries;
 
 /// Returns a unique name for a database every time it is called, which starts
 /// with [testName].
-String testDbName(String testName) => '$testName-'
-    '${DateTime.now().millisecondsSinceEpoch}-'
-    '${Random().nextInt(10000)}';
+String testDbName(String? testName) => [
+      if (testName != null) testName,
+      '${DateTime.now().millisecondsSinceEpoch}',
+      '${Random().nextInt(10000)}'
+    ].join('-');
 
 @isTest
 void test(dynamic description, dynamic Function() body) =>
