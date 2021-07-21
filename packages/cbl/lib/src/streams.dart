@@ -62,24 +62,17 @@ class CallbackStreamController<T, S>
   /// the arguments from the native side and turns them into an event of type [T].
   ///
   /// The returned stream is single subscription.
-  ///
-  /// If [finishBlockingCall] is `true`, the native caller receives `null` as a
-  /// result when [createEvent] returns/completes. The native caller is also
-  /// notified if [createEvent] throws/rejects.
-  ///
   CallbackStreamController({
     required AbstractResource parent,
     required this.worker,
     required this.createRegisterCallbackRequest,
     required this.createEvent,
-    this.finishBlockingCall = false,
   }) : super(parent: parent);
 
   final Worker worker;
   final WorkerRequest<S> Function(NativeCallback callback)
       createRegisterCallbackRequest;
   final FutureOr<T> Function(S registrationResult, List arguments) createEvent;
-  final bool finishBlockingCall;
 
   late NativeCallback _callback;
   late Future<bool> _callbackRegistered;
@@ -91,7 +84,7 @@ class CallbackStreamController<T, S>
     final callbackRegistered = Completer<bool>();
     _callbackRegistered = callbackRegistered.future;
 
-    _callback = NativeCallback((arguments, result) async {
+    _callback = NativeCallback((arguments) async {
       try {
         // Callbacks can come in before the registration request from the
         // worker comes back. In this case `registrationResult` has not be
@@ -106,8 +99,6 @@ class CallbackStreamController<T, S>
       } catch (error, stackTrace) {
         if (_canceled) return;
         controller.addError(error, stackTrace);
-      } finally {
-        if (finishBlockingCall) result!(null);
       }
     });
 
@@ -142,7 +133,7 @@ StreamController<T> callbackBroadcastStreamController<T>({
   void onListen() {
     canceled = false;
 
-    callback = NativeCallback((arguments, _) {
+    callback = NativeCallback((arguments) {
       if (canceled) return;
       try {
         final event = createEvent(arguments);

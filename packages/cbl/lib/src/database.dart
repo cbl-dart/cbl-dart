@@ -10,8 +10,6 @@ import 'fleece/fleece.dart' as fl;
 import 'native_callback.dart';
 import 'native_object.dart';
 import 'query.dart';
-import 'replicator.dart';
-import 'replicator.dart' as repl;
 import 'resource.dart';
 import 'streams.dart';
 import 'utils.dart';
@@ -472,11 +470,6 @@ abstract class Database with ClosableResource {
 
   /// Returns the names of the indexes on this database, as an array of strings.
   Future<List<String>> indexNames();
-
-  // === Replicator ============================================================
-
-  /// Creates a [Replicator] for this database, with the given configuration.
-  Future<Replicator> createReplicator(ReplicatorConfiguration config);
 }
 
 class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
@@ -593,40 +586,32 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             doc.database = this;
             await doc.flushProperties();
 
-            final callback = NativeCallback((arguments, result) {
-              final message =
-                  SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
+            final callback = NativeCallback(
+              (arguments) async {
+                final message =
+                    SaveDocumentResolvingCallbackMessage.fromArguments(
+                        arguments);
 
-              final conflictingDocument = message.conflictingDocument?.let(
-                (pointer) => DocumentImpl(
-                  database: this,
-                  doc: pointer,
-                  retain: true,
-                  debugCreator: 'SaveConflictHandler(conflictingDocument)',
-                ),
-              );
+                final conflictingDocument = message.conflictingDocument?.let(
+                  (pointer) => DocumentImpl(
+                    database: this,
+                    doc: pointer,
+                    retain: true,
+                    debugCreator: 'SaveConflictHandler(conflictingDocument)',
+                  ),
+                );
 
-              Future<void> invokeHandler() async {
-                // In case the handler throws an error we are canceling the
-                // save.
-                var decision = false;
+                final decision = await conflictHandler(
+                  doc,
+                  conflictingDocument,
+                );
+                await doc.flushProperties();
 
-                // We don't swallow exceptions because handlers should not throw
-                // and this way the they are visible to the developer as an
-                // unhandled exception.
-                try {
-                  decision = await conflictHandler(
-                    doc,
-                    conflictingDocument,
-                  );
-                  await doc.flushProperties();
-                } finally {
-                  result!(decision);
-                }
-              }
-
-              invokeHandler();
-            });
+                return decision;
+              },
+              // In case the handler throws an error we are canceling the save.
+              errorResult: false,
+            );
 
             doc.saveSequence();
 
@@ -734,18 +719,8 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             retain: false,
           ).map((it) => it.asString!).toList()));
 
-  // === Replicator ============================================================
-
-  @override
-  Future<Replicator> createReplicator(ReplicatorConfiguration config) =>
-      use(() => repl.createReplicator(
-            db: this,
-            config: config,
-            debugCreator: 'Database.createReplicator()',
-          ));
-
   // === Object ================================================================
 
   @override
-  String toString() => 'Database(name: $_debugName)';
+  String toString() => 'Database($_debugName)';
 }

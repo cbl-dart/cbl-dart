@@ -10,26 +10,40 @@ import 'fleece/integration_test.dart' as fleece_integration;
 import 'fleece/slice_test.dart' as fleece_slice;
 import 'logging_test.dart' as logging;
 import 'native_callback_test.dart' as native_callback;
-import 'replicator_test.dart' as replicator;
+import 'replication/authenticator_test.dart' as replication_authenticator;
+import 'replication/configuration_test.dart' as replication_configuration;
+import 'replication/conflict_test.dart' as replication_conflict;
+import 'replication/document_replication_test.dart'
+    as replication_document_replication;
+import 'replication/endpoint_test.dart' as replication_endpoint;
+import 'replication/replicator_change_test.dart'
+    as replication_replicator_change;
+import 'replication/replicator_test.dart' as replication_replicator;
 
-final tests = {
-  'database': database.main,
-  'document_array': document_array_test.main,
-  'document_blob': document_blob_test.main,
-  'document_dictionary': document_dictionary_test.main,
-  'document_document': document_document_test.main,
-  'document_fragment': document_fragment_test.main,
-  'fleece_coding': fleece_coding.main,
-  'fleece_integration': fleece_integration.main,
-  'fleece_slice': fleece_slice.main,
-  'fleece_containers': fleece_containers.main,
-  'logging': logging.main,
-  'native_callback': native_callback.main,
-  'replicator': replicator.main,
-};
+final tests = [
+  database.main,
+  document_array_test.main,
+  document_blob_test.main,
+  document_dictionary_test.main,
+  document_document_test.main,
+  document_fragment_test.main,
+  fleece_coding.main,
+  fleece_containers.main,
+  fleece_integration.main,
+  fleece_slice.main,
+  logging.main,
+  native_callback.main,
+  replication_authenticator.main,
+  replication_configuration.main,
+  replication_conflict.main,
+  replication_document_replication.main,
+  replication_endpoint.main,
+  replication_replicator_change.main,
+  replication_replicator.main,
+];
 
 void main() {
-  for (final main in tests.values) {
+  for (final main in tests) {
     main();
   }
 }

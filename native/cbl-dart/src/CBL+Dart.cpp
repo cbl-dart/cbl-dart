@@ -14,7 +14,7 @@ std::mutex initDartApiDLMutex;
 bool initDartApiDLDone = false;
 
 void CBLDart_InitDartApiDL(void *data) {
-  const std::scoped_lock<std::mutex> lock(initDartApiDLMutex);
+  const std::scoped_lock lock(initDartApiDLMutex);
   if (!initDartApiDLDone) {
     Dart_InitializeApiDL(data);
     initDartApiDLDone = true;
@@ -62,7 +62,7 @@ inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
 #ifdef DEBUG
   char *debugName = nullptr;
   {
-    std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+    std::scoped_lock lock(cblRefCountedDebugMutex);
     if (cblRefCountedDebugEnabled) {
       auto nh = cblRefCountedDebugNames.extract(refCounted);
       if (!nh.empty()) {
@@ -84,7 +84,7 @@ inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
     char *debugName, Dart_HandleFinalizer handleFinalizer) {
 #ifdef DEBUG
   if (debugName) {
-    std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+    std::scoped_lock lock(cblRefCountedDebugMutex);
     if (cblRefCountedDebugEnabled) {
       cblRefCountedDebugNames[refCounted] = debugName;
     }
@@ -112,7 +112,7 @@ void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
 
 void CBLDart_SetDebugRefCounted(uint8_t enabled) {
 #ifdef DEBUG
-  std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+  std::scoped_lock lock(cblRefCountedDebugMutex);
   cblRefCountedDebugEnabled = enabled;
   if (!enabled) {
     cblRefCountedDebugNames.clear();
@@ -135,7 +135,8 @@ Callback *dartLogCallback = nullptr;
 
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message) {
-  CBL_LogMessage(domain, level, CBLDart_FLStringFromDart(message));
+  CBL_Log(domain, level, "%.*s", (int)message.size,
+          reinterpret_cast<const char *>(message.buf));
 }
 
 void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
@@ -288,7 +289,7 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
 bool CBLDart_SaveConflictHandlerWrapper(
     void *context, CBLDocument *documentBeingSaved,
     const CBLDocument *conflictingDocument) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   // documentBeingSaved cannot be accessed from the Dart Isolate main thread
   // because this thread has a lock on it. So we make a copy give that to the
@@ -356,7 +357,7 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
 
 void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            FLString docID) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
@@ -376,7 +377,7 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
 
 void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            unsigned numDocs, FLString *docIDs) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   auto docIDs_ = new Dart_CObject[numDocs];
   auto argsValues = new Dart_CObject *[numDocs];
@@ -429,6 +430,9 @@ uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
       return CBLDatabase_CreateFullTextIndex(db, CBLDart_FLStringFromDart(name),
                                              config, errorOut);
   }
+
+  // Is never reached, but stops the compiler warnings.
+  return 0;
 }
 
 uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
@@ -464,7 +468,7 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
 
 void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
                                         CBLListenerToken *token) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
@@ -610,15 +614,37 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   args.value.as_array.values = argsValues;
 
   const CBLDocument *descision;
+  auto resolverThrewException = false;
 
-  auto resultHandler = [&descision](Dart_CObject *result) {
-    descision = result->type == Dart_CObject_kNull
-                    ? NULL
-                    : reinterpret_cast<const CBLDocument *>(
-                          CBLDart_CObject_getIntValueAsInt64(result));
+  auto resultHandler = [&descision,
+                        &resolverThrewException](Dart_CObject *result) {
+    switch (result->type) {
+      case Dart_CObject_kNull:
+        descision = nullptr;
+        break;
+      case Dart_CObject_kInt64:
+        descision = reinterpret_cast<const CBLDocument *>(
+            CBLDart_CObject_getIntValueAsInt64(result));
+        break;
+
+      case Dart_CObject_kBool:
+        // `false` means the resolver threw an exception.
+        if (!result->value.as_bool) {
+          resolverThrewException = true;
+          break;
+        }
+      default:
+        throw std::logic_error(
+            "Unexpected result from replicator conflict resolver.");
+        break;
+    }
   };
 
   CallbackCall(*callback, resultHandler).execute(args);
+
+  if (resolverThrewException) {
+    throw std::runtime_error("Replicator conflict resolver threw an exception");
+  }
 
   return descision;
 }
@@ -679,7 +705,7 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   if (replicator) {
     // Associate callback context with this instance so we can it released
     // when the replicator is released.
-    std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
+    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
     replicatorCallbackWrapperContexts[replicator] = context;
   } else {
     delete context;
@@ -694,7 +720,7 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   // Clean up context for callback wrapper
   ReplicatorCallbackWrapperContext *callbackWrapperContext;
   {
-    std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
+    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
     auto nh = replicatorCallbackWrapperContexts.extract(replicator);
     callbackWrapperContext = nh.mapped();
   }
@@ -734,10 +760,7 @@ void CBLDart_Replicator_ChangeListenerWrapper(
   args.value.as_array.length = 1;
   args.value.as_array.values = argsValues;
 
-  // Only required to make the call blocking.
-  auto resultHandler = [](Dart_CObject *result) {};
-
-  CallbackCall(*callback, resultHandler).execute(args);
+  CallbackCall(*callback, true).execute(args);
 }
 
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
@@ -782,10 +805,7 @@ void CBLDart_Replicator_DocumentReplicationListenerWrapper(
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  // Only required to make the call blocking.
-  auto resultHandler = [](Dart_CObject *result) {};
-
-  CallbackCall(*callback, resultHandler).execute(args);
+  CallbackCall(*callback, true).execute(args);
 
   delete[] documents_;
 }

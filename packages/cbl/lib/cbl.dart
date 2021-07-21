@@ -15,6 +15,13 @@ export 'src/document/fragment.dart'
     hide FragmentImpl, MutableFragmentImpl, DocumentFragmentImpl;
 export 'src/errors.dart' hide translateCBLErrorException, CBLErrorExceptionExt;
 export 'src/query.dart' hide QueryImpl;
-export 'src/replicator.dart'
-    hide ReplicatorImpl, createReplicator, CBLReplicatorStatusExt;
+export 'src/replication/authenticator.dart';
+export 'src/replication/configuration.dart';
+export 'src/replication/conflict.dart' hide ConflictImpl;
+export 'src/replication/conflict_resolver.dart';
+export 'src/replication/document_replication.dart'
+    hide DocumentReplicationImpl, ReplicatedDocumentImpl;
+export 'src/replication/endpoint.dart';
+export 'src/replication/replicator.dart' hide ReplicatorImpl;
+export 'src/replication/replicator_change.dart' hide ReplicatorChangeImpl;
 export 'src/resource.dart' show Resource, ClosableResource;

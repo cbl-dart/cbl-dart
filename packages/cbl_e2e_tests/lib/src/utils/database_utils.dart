@@ -10,12 +10,12 @@ import '../test_binding.dart';
 ///
 /// The database will be created in the [tmpDir].
 Future<Database> openTestDb(
-  String dbName, {
+  String? dbName, {
   bool useNameDirectly = false,
   bool autoClose = true,
 }) async {
   final db = await Database.open(
-    useNameDirectly ? dbName : testDbName(dbName),
+    useNameDirectly ? dbName! : testDbName(dbName),
     config: DatabaseConfiguration(
       directory: tmpDir,
     ),

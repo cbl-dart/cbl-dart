@@ -231,7 +231,7 @@ extension on int {
       CBLReplicatorActivityLevel.values[this];
 }
 
-class CBLReplicatorProgress extends Struct {
+class _CBLReplicatorProgress extends Struct {
   @Float()
   external double complete;
 
@@ -239,28 +239,46 @@ class CBLReplicatorProgress extends Struct {
   external int documentCount;
 }
 
-class CBLReplicatorStatus extends Struct {
+class _CBLReplicatorStatus extends Struct {
   @Uint8()
   external int _activity;
 
-  external CBLReplicatorProgress progress;
+  external _CBLReplicatorProgress progress;
 
   external CBLError _error;
 }
 
-extension CBLReplicatorStatusExt on CBLReplicatorStatus {
-  CBLReplicatorActivityLevel get activity =>
-      _activity.toReplicatorActivityLevel();
+class CBLReplicatorStatus {
+  CBLReplicatorStatus(
+    this.activity,
+    this.progressComplete,
+    this.progressDocumentCount,
+    this.error,
+  );
 
+  final CBLReplicatorActivityLevel activity;
+  final double progressComplete;
+  final int progressDocumentCount;
+  final CBLErrorException? error;
+}
+
+extension on _CBLReplicatorStatus {
   CBLErrorException? get exception {
     if (!_error.isOk) {
       _error.copyToGlobal();
       return CBLErrorException.fromCBLError(globalCBLError);
     }
   }
+
+  CBLReplicatorStatus toCBLReplicatorStatus() => CBLReplicatorStatus(
+        _activity.toReplicatorActivityLevel(),
+        progress.complete,
+        progress.documentCount,
+        exception,
+      );
 }
 
-typedef CBLReplicator_Status = CBLReplicatorStatus Function(
+typedef CBLReplicator_Status = _CBLReplicatorStatus Function(
   Pointer<CBLReplicator> replicator,
 );
 
@@ -340,9 +358,12 @@ class ReplicatorStatusCallbackMessage {
   ReplicatorStatusCallbackMessage(this.status);
 
   ReplicatorStatusCallbackMessage.fromArguments(List<dynamic> arguments)
-      : this((arguments[0] as int).toPointer());
+      : this((arguments[0] as int)
+            .toPointer<_CBLReplicatorStatus>()
+            .ref
+            .toCBLReplicatorStatus());
 
-  final Pointer<CBLReplicatorStatus> status;
+  final CBLReplicatorStatus status;
 }
 
 class DocumentReplicationsCallbackMessage {
@@ -571,7 +592,7 @@ class ReplicatorBindings extends Bindings {
   }
 
   CBLReplicatorStatus status(Pointer<CBLReplicator> replicator) {
-    return _status(replicator);
+    return _status(replicator).toCBLReplicatorStatus();
   }
 
   Pointer<FLDict> pendingDocumentIDs(Pointer<CBLReplicator> replicator) {

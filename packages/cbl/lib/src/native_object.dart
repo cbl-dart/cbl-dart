@@ -199,20 +199,15 @@ class CblRefCountedWorkerObject<T extends NativeType>
 }
 
 /// Represents a reference to a CBLReplicator.
-class CBLReplicatorObject extends NativeObject<CBLReplicator>
-    with WorkerObject {
+class CBLReplicatorObject extends NativeObject<CBLReplicator> {
   /// Creates a reference to a CBLReplicator.
   CBLReplicatorObject(
     Pointer<CBLReplicator> pointer, {
-    required this.worker,
     required String? debugName,
   }) : super(pointer) {
     CBLBindings.instance.replicator
         .bindReplicatorToDartObject(this, pointer, debugName);
   }
-
-  @override
-  final Worker worker;
 }
 
 /// Represents a reference to a Fleece document.
