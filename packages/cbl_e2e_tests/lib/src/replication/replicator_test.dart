@@ -354,11 +354,7 @@ void main() {
 
       expect(
         replicator.changes().map((it) => it.status.activity),
-        emitsInOrder(<ReplicatorActivityLevel>[
-          ReplicatorActivityLevel.busy,
-          ReplicatorActivityLevel.busy,
-          ReplicatorActivityLevel.stopped,
-        ]),
+        emitsThrough(ReplicatorActivityLevel.stopped),
       );
 
       await replicator.start();
