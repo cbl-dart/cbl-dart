@@ -250,8 +250,14 @@ void CallbackCall::close() {
 
   // Call is waiting for completion.
   if (!isCompleted_) {
-    auto callExists = CallbackRegistry::instance.takeBlockingCall(*this);
-    assert(callExists);
+    auto completCall = CallbackRegistry::instance.takeBlockingCall(*this);
+    if (!completCall) {
+      // If at this point we are not able to take the blocking call,
+      // `complete` already did and is just wainting for us to release
+      // the lock on this call.
+      return;
+    }
+
     assert(!hasResultHandler());
 
     isCompleted_ = true;
