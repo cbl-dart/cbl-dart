@@ -14,7 +14,7 @@ std::mutex initDartApiDLMutex;
 bool initDartApiDLDone = false;
 
 void CBLDart_InitDartApiDL(void *data) {
-  const std::scoped_lock<std::mutex> lock(initDartApiDLMutex);
+  const std::scoped_lock lock(initDartApiDLMutex);
   if (!initDartApiDLDone) {
     Dart_InitializeApiDL(data);
     initDartApiDLDone = true;
@@ -62,7 +62,7 @@ inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
 #ifdef DEBUG
   char *debugName = nullptr;
   {
-    std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+    std::scoped_lock lock(cblRefCountedDebugMutex);
     if (cblRefCountedDebugEnabled) {
       auto nh = cblRefCountedDebugNames.extract(refCounted);
       if (!nh.empty()) {
@@ -84,7 +84,7 @@ inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
     char *debugName, Dart_HandleFinalizer handleFinalizer) {
 #ifdef DEBUG
   if (debugName) {
-    std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+    std::scoped_lock lock(cblRefCountedDebugMutex);
     if (cblRefCountedDebugEnabled) {
       cblRefCountedDebugNames[refCounted] = debugName;
     }
@@ -112,7 +112,7 @@ void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
 
 void CBLDart_SetDebugRefCounted(uint8_t enabled) {
 #ifdef DEBUG
-  std::scoped_lock<std::mutex> lock(cblRefCountedDebugMutex);
+  std::scoped_lock lock(cblRefCountedDebugMutex);
   cblRefCountedDebugEnabled = enabled;
   if (!enabled) {
     cblRefCountedDebugNames.clear();
@@ -704,7 +704,7 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   if (replicator) {
     // Associate callback context with this instance so we can it released
     // when the replicator is released.
-    std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
+    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
     replicatorCallbackWrapperContexts[replicator] = context;
   } else {
     delete context;
@@ -719,7 +719,7 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   // Clean up context for callback wrapper
   ReplicatorCallbackWrapperContext *callbackWrapperContext;
   {
-    std::scoped_lock<std::mutex> lock(replicatorCallbackWrapperContexts_mutex);
+    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
     auto nh = replicatorCallbackWrapperContexts.extract(replicator);
     callbackWrapperContext = nh.mapped();
   }

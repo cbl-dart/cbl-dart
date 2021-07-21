@@ -23,6 +23,22 @@ bool CallbackRegistry::callbackExists(const Callback &callback) const {
          callbacks_.end();
 }
 
+void CallbackRegistry::addWaitingCall(CallbackCall &call) {
+  std::scoped_lock lock(mutex_);
+  waitingCalls_.push_back(&call);
+}
+
+bool CallbackRegistry::takeWaitingCall(CallbackCall &call) {
+  std::scoped_lock lock(mutex_);
+  auto position = std::find(waitingCalls_.begin(), waitingCalls_.end(), &call);
+  if (position != waitingCalls_.end()) {
+    waitingCalls_.erase(position);
+    return true;
+  } else {
+    return false;
+  }
+}
+
 CallbackRegistry::CallbackRegistry() {}
 
 // === Callback ===============================================================
@@ -196,7 +212,7 @@ void CallbackCall::messageHandler(Dart_Port dest_port_id,
 }
 
 void CallbackCall::sendRequestAndWaitForReturn(Dart_CObject &request) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::unique_lock lock(mutex_);
 
   if (completed_) {
     // If the call has been completed early because the callback has been
@@ -208,6 +224,8 @@ void CallbackCall::sendRequestAndWaitForReturn(Dart_CObject &request) {
   std::condition_variable cv;
   completedCv_ = &cv;
 
+  CallbackRegistry::instance.addWaitingCall(*this);
+
   callback_.sendRequest(request);
 
   cv.wait(lock, [this] { return completed_; });
@@ -216,6 +234,11 @@ void CallbackCall::sendRequestAndWaitForReturn(Dart_CObject &request) {
 }
 
 void CallbackCall::complete(Dart_CObject *result) {
+  if (!CallbackRegistry::instance.takeWaitingCall(*this)) {
+    // Prevent completing a call multiple times.
+    return;
+  }
+
   std::scoped_lock lock(mutex_);
 
   assert(result || !expectsResult());

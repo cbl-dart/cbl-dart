@@ -22,11 +22,16 @@ class CallbackRegistry {
 
   bool callbackExists(const Callback &callback) const;
 
+  void addWaitingCall(CallbackCall &call);
+
+  bool takeWaitingCall(CallbackCall &call);
+
  private:
   CallbackRegistry();
 
   mutable std::mutex mutex_;
   std::vector<const Callback *> callbacks_;
+  std::vector<CallbackCall *> waitingCalls_;
 };
 
 // === Callback ===============================================================
