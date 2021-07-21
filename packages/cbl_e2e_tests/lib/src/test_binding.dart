@@ -4,26 +4,7 @@ import 'dart:math';
 
 import 'package:cbl/cbl.dart';
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
-import 'package:test/test.dart' as t;
-
-export 'package:test/test.dart'
-    hide
-        test,
-        group,
-        setUpAll,
-        setUp,
-        tearDownAll,
-        tearDown,
-        addTearDown,
-        registerException,
-        printOnFailure,
-        markTestSkipped;
-
-/// Signature of the function to return from [CblE2eTestBinding.testFn].
-typedef TestFn = void Function(dynamic description, dynamic Function() body);
-
-typedef TestHook = void Function(dynamic Function() body);
+import 'package:test/test.dart';
 
 /// The properties which end are the functions used to declare tests, groups
 /// and lifecycle hooks. Per default these properties return the corresponding
@@ -55,20 +36,6 @@ abstract class CblE2eTestBinding {
 
   /// Temporary directory for tests.
   late final String tmpDir;
-
-  TestFn get testFn => t.test;
-
-  TestFn get groupFn => t.group;
-
-  TestHook get setUpAllFn => t.setUpAll;
-
-  TestHook get setUpFn => t.setUp;
-
-  TestHook get tearDownAllFn => t.tearDownAll;
-
-  TestHook get tearDownFn => t.tearDown;
-
-  TestHook get addTearDownFn => t.addTearDown;
 
   StreamSubscription<void>? _cblTestLogger;
 
@@ -105,14 +72,14 @@ abstract class CblE2eTestBinding {
   }
 
   void _setupTestLifecycleHooks() {
-    setUpAllFn(() async {
+    setUpAll(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
       CouchbaseLite.initialize(libraries: libraries);
       await startTestLogger();
     });
 
-    tearDownAllFn(() async {
+    tearDownAll(() async {
       await stopTestLogger();
     });
   }
@@ -138,25 +105,3 @@ String testDbName(String? testName) => [
       '${DateTime.now().millisecondsSinceEpoch}',
       '${Random().nextInt(10000)}'
     ].join('-');
-
-@isTest
-void test(dynamic description, dynamic Function() body) =>
-    CblE2eTestBinding.instance.testFn(description, body);
-
-@isTestGroup
-void group(dynamic description, dynamic Function() body) =>
-    CblE2eTestBinding.instance.groupFn(description, body);
-
-void setUpAll(dynamic Function() body) =>
-    CblE2eTestBinding.instance.setUpAllFn(body);
-
-void setUp(dynamic Function() body) => CblE2eTestBinding.instance.setUpFn(body);
-
-void tearDownAll(dynamic Function() body) =>
-    CblE2eTestBinding.instance.tearDownAllFn(body);
-
-void tearDown(dynamic Function() body) =>
-    CblE2eTestBinding.instance.tearDownFn(body);
-
-void addTearDown(dynamic Function() body) =>
-    CblE2eTestBinding.instance.addTearDownFn(body);

@@ -8,6 +8,7 @@ import 'package:cbl/src/document/blob.dart';
 import 'package:cbl/src/streams.dart';
 import 'package:cbl/src/utils.dart';
 import 'package:collection/collection.dart';
+import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
