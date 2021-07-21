@@ -18,11 +18,8 @@ void main() {
       final argument = 42;
 
       final callback = runZoned(
-        () => NativeCallback(expectAsync2(
-          (arguments, result) {
-            // Test caller is not requesting a result.
-            expect(result, isNull);
-
+        () => NativeCallback(expectAsync1(
+          (arguments) {
             expect(arguments, equals([argument]));
 
             expect(Zone.current[#test], 'nativeCallback');

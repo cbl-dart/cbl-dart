@@ -22,6 +22,7 @@ export 'src/replication/conflict_resolver.dart';
 export 'src/replication/document_replication.dart'
     hide DocumentReplicationImpl, ReplicatedDocumentImpl;
 export 'src/replication/endpoint.dart';
-export 'src/replication/replicator.dart' hide ReplicatorImpl;
+export 'src/replication/replicator.dart'
+    hide ReplicatorImpl, CBLReplicatorStatusExt;
 export 'src/replication/replicator_change.dart' hide ReplicatorChangeImpl;
 export 'src/resource.dart' show Resource, ClosableResource;

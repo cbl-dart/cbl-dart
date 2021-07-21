@@ -82,7 +82,7 @@ class ReplicatorStatus {
         'ReplicatorStatus(',
         [
           describeEnum(activity),
-          if (progress.progress != 0) 'progress: $progress',
+          if (progress.completed != 0) 'progress: $progress',
           if (error != null) 'error: $error',
         ].join(', '),
         ')',
@@ -129,7 +129,7 @@ abstract class Replicator implements ClosableResource {
 
   /// Returns a [Stream] which emits a [ReplicatorChange] event when this
   /// replicators [status] changes.
-  Stream<ReplicatorChange> changes();
+  Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false});
 
   /// Returns a [Stream] wich emits a [DocumentReplication] event when a set
   /// of [Document]s have been replicated.
@@ -259,30 +259,37 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
       });
 
   @override
-  Stream<ReplicatorChange> changes() => useSync(_changes);
+  Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false}) =>
+      useSync(() => _changes(startWithCurrentStatus: startWithCurrentStatus));
 
-  Stream<ReplicatorChange> _changes() =>
-      CallbackStreamController<ReplicatorChange, void>(
-        parent: this,
-        worker: _database.native.worker,
-        createRegisterCallbackRequest: (callback) =>
-            AddReplicatorChangeListener(
-          _replicator.pointerUnsafe,
-          callback.native.pointerUnsafe,
-        ),
-        // The native caller allocates some memory for the arguments and blocks
-        // until the Dart side copies them and finishes the call, so it can
-        // free the memory.
-        finishBlockingCall: true,
-        createEvent: (_, arguments) {
-          final message =
-              ReplicatorStatusCallbackMessage.fromArguments(arguments);
-          return ReplicatorChangeImpl(
-            this,
-            message.status.ref.toReplicatorStatus(),
-          );
-        },
-      ).stream;
+  Stream<ReplicatorChange> _changes({bool startWithCurrentStatus = false}) {
+    final changes = CallbackStreamController<ReplicatorChange, void>(
+      parent: this,
+      worker: _database.native.worker,
+      createRegisterCallbackRequest: (callback) => AddReplicatorChangeListener(
+        _replicator.pointerUnsafe,
+        callback.native.pointerUnsafe,
+      ),
+      createEvent: (_, arguments) {
+        final message =
+            ReplicatorStatusCallbackMessage.fromArguments(arguments);
+        return ReplicatorChangeImpl(
+          this,
+          message.status.ref.toReplicatorStatus(),
+        );
+      },
+    ).stream;
+
+    if (startWithCurrentStatus) {
+      return changeStreamWithInitialValue(
+        createInitialValue: () async =>
+            ReplicatorChangeImpl(this, await _status()),
+        createChangeStream: () => changes,
+      );
+    } else {
+      return changes;
+    }
+  }
 
   @override
   Stream<DocumentReplication> documentReplications() =>
@@ -294,9 +301,6 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
               _replicator.pointerUnsafe,
               callback.native.pointerUnsafe,
             ),
-            // See `statusChanges` for an explanation of why this option is
-            // `true`.
-            finishBlockingCall: true,
             createEvent: (_, arguments) {
               final message =
                   DocumentReplicationsCallbackMessage.fromArguments(arguments);
@@ -334,10 +338,8 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   @override
   Future<void> performClose() async {
     try {
-      final status = changeStreamWithInitialValue(
-        createInitialValue: _status,
-        createChangeStream: () => _changes().map((event) => event.status),
-      );
+      final status =
+          _changes(startWithCurrentStatus: true).map((change) => change.status);
 
       var stopping = false;
 
@@ -439,7 +441,7 @@ NativeCallback _wrapReplicationFilter(
   DatabaseImpl database,
   ReplicationFilter filter,
 ) =>
-    NativeCallback((arguments, result) async {
+    NativeCallback((arguments) async {
       final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
       final doc = DocumentImpl(
         database: database,
@@ -455,7 +457,7 @@ NativeCallback _wrapReplicationFilter(
           message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
         );
       } finally {
-        result!(decision);
+        return decision;
       }
     });
 
@@ -463,7 +465,7 @@ NativeCallback _wrapConflictResolver(
   DatabaseImpl database,
   ConflictResolver resolver,
 ) =>
-    NativeCallback((arguments, result) async {
+    NativeCallback((arguments) async {
       final message =
           ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
@@ -514,6 +516,6 @@ NativeCallback _wrapConflictResolver(
           CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
         }
 
-        result!(resolvedPointer?.address);
+        return resolvedPointer?.address;
       }
     });

@@ -288,7 +288,7 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
 bool CBLDart_SaveConflictHandlerWrapper(
     void *context, CBLDocument *documentBeingSaved,
     const CBLDocument *conflictingDocument) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   // documentBeingSaved cannot be accessed from the Dart Isolate main thread
   // because this thread has a lock on it. So we make a copy give that to the
@@ -356,7 +356,7 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
 
 void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            FLString docID) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
@@ -376,7 +376,7 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
 
 void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            unsigned numDocs, FLString *docIDs) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   auto docIDs_ = new Dart_CObject[numDocs];
   auto argsValues = new Dart_CObject *[numDocs];
@@ -429,6 +429,9 @@ uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
       return CBLDatabase_CreateFullTextIndex(db, CBLDart_FLStringFromDart(name),
                                              config, errorOut);
   }
+
+  // Is never reached, but stops the compiler warnings.
+  return 0;
 }
 
 uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
@@ -464,7 +467,7 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
 
 void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
                                         CBLListenerToken *token) {
-  const Callback &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<Callback *>(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
@@ -734,10 +737,7 @@ void CBLDart_Replicator_ChangeListenerWrapper(
   args.value.as_array.length = 1;
   args.value.as_array.values = argsValues;
 
-  // Only required to make the call blocking.
-  auto resultHandler = [](Dart_CObject *result) {};
-
-  CallbackCall(*callback, resultHandler).execute(args);
+  CallbackCall(*callback, true).execute(args);
 }
 
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
@@ -782,10 +782,7 @@ void CBLDart_Replicator_DocumentReplicationListenerWrapper(
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  // Only required to make the call blocking.
-  auto resultHandler = [](Dart_CObject *result) {};
-
-  CallbackCall(*callback, resultHandler).execute(args);
+  CallbackCall(*callback, true).execute(args);
 
   delete[] documents_;
 }

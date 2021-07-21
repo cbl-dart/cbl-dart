@@ -586,7 +586,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             doc.database = this;
             await doc.flushProperties();
 
-            final callback = NativeCallback((arguments, result) {
+            final callback = NativeCallback((arguments) {
               final message =
                   SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
 
@@ -599,7 +599,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                 ),
               );
 
-              Future<void> invokeHandler() async {
+              Future<bool> invokeHandler() async {
                 // In case the handler throws an error we are canceling the
                 // save.
                 var decision = false;
@@ -614,11 +614,11 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
                   );
                   await doc.flushProperties();
                 } finally {
-                  result!(decision);
+                  return decision;
                 }
               }
 
-              invokeHandler();
+              return invokeHandler();
             });
 
             doc.saveSequence();

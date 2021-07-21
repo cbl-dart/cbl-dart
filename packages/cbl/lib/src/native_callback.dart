@@ -1,23 +1,14 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import 'native_object.dart';
-import 'utils.dart';
-
-/// Function which is given to callbacks to respond to caller with a result.
-typedef CallbackResultHandler = void Function(dynamic response);
 
 /// Handler which is invoked to respond to a [NativeCallback].
 ///
 /// The handler receives a list of [arguments] from native side.
-///
-/// If the natives side expects a response [result] is not `null`, and must
-/// be called to unblock the native side.
-typedef CallbackHandler = void Function(
-  List arguments,
-  CallbackResultHandler? result,
-);
+typedef CallbackHandler = FutureOr<Object?> Function(List arguments);
 
 late final _bindings = CBLBindings.instance.nativeCallback;
 
@@ -48,11 +39,14 @@ class NativeCallback {
 
   late final NativeObject<Callback> native;
 
+  var _closed = false;
+
   /// Close this callback to free resources on the native side and the
   /// Dart side.
   ///
   /// After calling this method the callback must not be used any more.
   void close() {
+    _closed = true;
     _bindings.close(native.pointerUnsafe);
     _receivePort.close();
   }
@@ -64,22 +58,19 @@ class NativeCallback {
     final callAddress = message[1] as int?;
     final args = message[2] as List;
 
-    CallbackResultHandler createResultHandler(
-      SendPort sendPort,
-      int callAddress,
-    ) =>
-        (dynamic result) => sendPort.send(<dynamic>[callAddress, result]);
-
     assert(
       (sendPort != null && callAddress != null) ||
           (sendPort == null && callAddress == null),
       'caller of callback must send a sendPort and callAddress to receive a '
       'result',
     );
+    ;
 
-    final resultHandler =
-        sendPort?.let((it) => createResultHandler(it, callAddress!));
-
-    handler.call(args, resultHandler);
+    Future.value(handler(args)).then((result) {
+      assert(result == null || sendPort != null);
+      if (!_closed && sendPort != null) {
+        sendPort.send([callAddress, result]);
+      }
+    });
   }
 }

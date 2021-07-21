@@ -14,7 +14,6 @@ void main() {
 
   group('Replicator', () {
     setupTestDocument();
-    setUp(clearTestServerDb);
 
     test('create Replicator smoke test', () async {
       final db = await openTestDb('CreateReplicatorSmoke');
@@ -42,105 +41,107 @@ void main() {
     });
 
     test('continuous replication', () async {
-      final dbA = await openTestDb('ContinuousReplication-DB-A');
-      final dbB = await openTestDb('ContinuousReplication-DB-B');
+      final pushDb = await openTestDb('ContinuousReplication-Push');
+      final pullDb = await openTestDb('ContinuousReplication-Pull');
 
-      final replicatorA = await dbA.createTestReplicator(
+      final pusher = pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
         continuous: true,
       );
-      await replicatorA.start();
+      await pusher.start();
 
-      final replicatorB = await dbB.createTestReplicator(
+      final puller = pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
         continuous: true,
       );
-      await replicatorB.start();
+      await puller.start();
 
       final timestamp = DateTime.now().microsecondsSinceEpoch;
       final doc =
           MutableDocument.withId('continuouslyReplicatedDoc-$timestamp');
 
-      final stream = dbB.watchAllIds().shareReplay();
+      final stream = pullDb.watchAllIds().shareReplay();
 
       // ignore: unawaited_futures
-      stream.first.then((_) => dbA.saveDocument(doc));
+      stream.first.then((_) => pushDb.saveDocument(doc));
 
       expect(
         stream,
         emitsInOrder(<dynamic>[
-          isEmpty,
-          [doc.id],
+          isNot(contains(doc.id)),
+          contains(doc.id),
         ]),
       );
     });
 
     test('use documentIds to filter replicated documents', () async {
-      // Insert doc A and B into db A
-      // Sync db A with server with documentIds == [docA.id]
-      // Sync db B with server
-      // => db B only contains doc A
+      // Insert doc A and B into push db
+      // Sync push db  with server with documentIds == [docA.id]
+      // Sync pull db  with server
+      // => pull db contains doc A
 
-      final dbA = await openTestDb('ReplicationWithDocumentIds-DB-A');
-      final dbB = await openTestDb('ReplicationWithDocumentIds-DB-B');
+      final pushDb = await openTestDb('ReplicationWithDocumentIds-Push');
+      final pullDb = await openTestDb('ReplicationWithDocumentIds-Pull');
 
       final docA = MutableDocument();
-      await dbA.saveDocument(docA);
-      await dbA.saveDocument(MutableDocument());
+      await pushDb.saveDocument(docA);
+      final docB = MutableDocument();
+      await pushDb.saveDocument(docB);
 
-      final replicatorA = await dbA.createTestReplicator(
+      final pusher = pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
         documentIds: [docA.id],
       );
-      await replicatorA.startAndWaitUntilStopped();
+      await pusher.replicateOneShot();
 
-      final replicatorB = await dbB.createTestReplicator(
+      final puller = pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
       );
-      await replicatorB.startAndWaitUntilStopped();
+      await puller.replicateOneShot();
 
-      final idsInDbB = await dbB.getAllIds().toList();
-      expect(idsInDbB, [docA.id]);
+      final idsInPullDb = await pullDb.getAllIds().toList();
+      expect(idsInPullDb, contains(docA.id));
     });
 
     test('use channels to filter pulled documents', () async {
-      // Insert doc A and B into db A, where doc A is in channel A
-      // Sync db A with server
-      // Sync db B with server with channels == ['A']
-      // => db B only contains doc A
+      // Insert doc A and B into push db, where doc A is in channel A
+      // Sync push db with server
+      // Sync pull db with server with channels == ['A']
+      // => pull db contains doc A
 
-      final dbA = await openTestDb('ReplicationWithChannels-DB-A');
-      final dbB = await openTestDb('ReplicationWithChannels-DB-B');
+      final pushDb = await openTestDb('ReplicationWithChannels-Push');
+      final pullDb = await openTestDb('ReplicationWithChannels-Push');
 
       final docA = MutableDocument({'channels': 'A'});
-      await dbA.saveDocument(docA);
-      await dbA.saveDocument(MutableDocument());
+      await pushDb.saveDocument(docA);
+      final docB = MutableDocument();
+      await pushDb.saveDocument(docB);
 
-      final replicatorA = await dbA.createTestReplicator(
+      final pusher = pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
-      await replicatorA.startAndWaitUntilStopped();
+      await pusher.replicateOneShot();
 
-      final replicatorB = await dbB.createTestReplicator(
+      final puller = pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
         channels: ['A'],
       );
-      await replicatorB.startAndWaitUntilStopped();
+      await puller.replicateOneShot();
 
-      final idsInDbB = await dbB.getAllIds().toList();
-      expect(idsInDbB, [docA.id]);
+      final idsInPullDb = await pullDb.getAllIds().toList();
+      expect(idsInPullDb, contains(docA.id));
     });
 
     test('use pushFilter to filter pushed documents', () async {
-      final dbA = await openTestDb('ReplicationWithPushFilter-DB-A');
-      final dbB = await openTestDb('ReplicationWithPushFilter-DB-B');
+      final pushDb = await openTestDb('ReplicationWithPushFilter-Push');
+      final pullDb = await openTestDb('ReplicationWithPushFilter-Pull');
 
       final docA = MutableDocument();
-      await dbA.saveDocument(docA);
+      await pushDb.saveDocument(docA);
       final docB = MutableDocument();
-      await dbA.saveDocument(docB);
+      await pushDb.saveDocument(docB);
 
-      final replicatorA = await dbA.createTestReplicator(
+      final pusher = pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
         pushFilter: expectAsync2(
           (document, flags) {
@@ -151,46 +152,48 @@ void main() {
           count: 2,
         ),
       );
-      await replicatorA.startAndWaitUntilStopped();
+      await pusher.replicateOneShot();
 
-      final replicatorB = await dbB.createTestReplicator(
+      final puller = pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
       );
-      await replicatorB.startAndWaitUntilStopped();
+      await puller.replicateOneShot();
 
-      final idsInDbB = await dbB.getAllIds().toList();
-      expect(idsInDbB, [docA.id]);
+      final idsInPullDb = await pullDb.getAllIds().toList();
+      expect(idsInPullDb, contains(docA.id));
+      expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
     test('use pullFilter to filter pulled documents', () async {
-      final dbA = await openTestDb('ReplicationWithPullFilter-DB-A');
-      final dbB = await openTestDb('ReplicationWithPullFilter-DB-B');
+      final pushDb = await openTestDb('ReplicationWithPullFilter-Push');
+      final pullDb = await openTestDb('ReplicationWithPullFilter-Pull');
 
       final docA = MutableDocument();
-      await dbA.saveDocument(docA);
+      await pushDb.saveDocument(docA);
       final docB = MutableDocument();
-      await dbA.saveDocument(docB);
+      await pushDb.saveDocument(docB);
 
-      final replicatorA = await dbA.createTestReplicator(
+      final pusher = pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
-      await replicatorA.startAndWaitUntilStopped();
+      await pusher.replicateOneShot();
 
-      final replicatorB = await dbB.createTestReplicator(
+      final puller = pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
         pullFilter: expectAsync2(
           (document, flags) {
             expect(flags, isEmpty);
-            expect(document.id, anyOf(docA.id, docB.id));
             return docA.id == document.id;
           },
           count: 2,
+          max: -1,
         ),
       );
-      await replicatorB.startAndWaitUntilStopped();
+      await puller.replicateOneShot();
 
-      final idsInDbB = await dbB.getAllIds().toList();
-      expect(idsInDbB, [docA.id]);
+      final idsInPullDb = await pullDb.getAllIds().toList();
+      expect(idsInPullDb, contains(docA.id));
+      expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
     test('conflict resolver should work correctly', () async {
@@ -204,7 +207,7 @@ void main() {
       // => Conflict in db A
 
       final dbA = await openTestDb('ConflictResolver-DB-A');
-      final replicatorA = await dbA.createTestReplicator(
+      final replicatorA = dbA.createTestReplicator(
         conflictResolver: expectAsync1((conflict) {
           expect(conflict.documentId, testDocumentId);
           expect(conflict.localDocument, isTestDocument('DB-A-2'));
@@ -214,22 +217,22 @@ void main() {
       );
 
       final dbB = await openTestDb('ConflictResolver-DB-B');
-      final replicatorB = await dbB.createTestReplicator();
+      final replicatorB = dbB.createTestReplicator();
 
       await dbA.writeTestDocument('DB-A-1');
-      await replicatorA.startAndWaitUntilStopped();
-      await replicatorB.startAndWaitUntilStopped();
+      await replicatorA.replicateOneShot();
+      await replicatorB.replicateOneShot();
       await dbA.writeTestDocument('DB-A-2');
       await dbB.writeTestDocument('DB-B-1');
-      await replicatorB.startAndWaitUntilStopped();
-      await replicatorA.startAndWaitUntilStopped();
+      await replicatorB.replicateOneShot();
+      await replicatorA.replicateOneShot();
 
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
     });
 
     test('status returns the current status of the replicator', () async {
       final db = await openTestDb('GetReplicatorStatus');
-      final replicator = await db.createTestReplicator();
+      final replicator = db.createTestReplicator();
       final status = await replicator.status();
       expect(status.activity, ReplicatorActivityLevel.stopped);
       expect(status.error, isNull);
@@ -239,11 +242,12 @@ void main() {
 
     test('statusChanges emits when the replicators status changes', () async {
       final db = await openTestDb('ReplicatorStatusChanges');
-      final replicator = await db.createTestReplicator();
+      final replicator = db.createTestReplicator();
 
       expect(
         replicator.changes().map((it) => it.status.activity),
         emitsInOrder(<ReplicatorActivityLevel>[
+          ReplicatorActivityLevel.busy,
           ReplicatorActivityLevel.busy,
           ReplicatorActivityLevel.stopped,
         ]),
@@ -255,7 +259,7 @@ void main() {
     test('pendingDocumentIds returns ids of documents waiting to be pushed',
         () async {
       final db = await openTestDb('PendingDocumentIds');
-      final replicator = await db.createTestReplicator();
+      final replicator = db.createTestReplicator();
       final doc = MutableDocument();
       await db.saveDocument(doc);
       final pendingDocumentIds = await replicator.pendingDocumentIds();
@@ -265,7 +269,7 @@ void main() {
     test('isDocumentPending returns whether a document is waiting to be pushed',
         () async {
       final db = await openTestDb('IsDocumentPending');
-      final replicator = await db.createTestReplicator();
+      final replicator = db.createTestReplicator();
       final doc = MutableDocument();
       await db.saveDocument(doc);
       expect(await replicator.isDocumentPending(doc.id), isTrue);
@@ -275,7 +279,7 @@ void main() {
         'documentReplications emits events when documents have been replicated',
         () async {
       final db = await openTestDb('DocumentReplications');
-      final replicator = await db.createTestReplicator(
+      final replicator = db.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
       final doc = MutableDocument();
@@ -295,17 +299,19 @@ void main() {
 
       await replicator.start();
     });
-  });
 
-  test('start stop', () async {
-    final db = await openTestDb('Replicator-Start-Stop');
-    final repl = await db.createTestReplicator(continuous: true);
-    repl.changes().listen(
-          print,
-          onDone: () => print('statusChanges => DONE'),
-        );
+    test('start and stop', () async {
+      final db = await openTestDb('Replicator-Start-Stop');
+      final repl = db.createTestReplicator(continuous: true);
 
-    await repl.waitForActivityLevel(ReplicatorActivityLevel.idle, repl.start);
-    await repl.waitForActivityLevel(ReplicatorActivityLevel.stopped, repl.stop);
+      await repl.driveToStatus(
+        hasActivityLevel(ReplicatorActivityLevel.idle),
+        repl.start,
+      );
+      await repl.driveToStatus(
+        hasActivityLevel(ReplicatorActivityLevel.stopped),
+        repl.stop,
+      );
+    });
   });
 }
