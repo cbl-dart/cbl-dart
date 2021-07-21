@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -441,59 +442,56 @@ NativeCallback _wrapReplicationFilter(
   DatabaseImpl database,
   ReplicationFilter filter,
 ) =>
-    NativeCallback((arguments) async {
-      final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
-      final doc = DocumentImpl(
-        database: database,
-        doc: message.document,
-        retain: true,
-        debugCreator: 'ReplicationFilter()',
-      );
+    NativeCallback(
+      (arguments) async {
+        final message =
+            ReplicationFilterCallbackMessage.fromArguments(arguments);
+        final doc = DocumentImpl(
+          database: database,
+          doc: message.document,
+          retain: true,
+          debugCreator: 'ReplicationFilter()',
+        );
 
-      var decision = false;
-      try {
-        decision = await filter(
+        return filter(
           doc,
           message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
         );
-      } finally {
-        return decision;
-      }
-    });
+      },
+      // Reject document if filter throws.
+      errorResult: false,
+    );
 
 NativeCallback _wrapConflictResolver(
   DatabaseImpl database,
   ConflictResolver resolver,
 ) =>
-    NativeCallback((arguments) async {
-      final message =
-          ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
+    NativeCallback(
+      (arguments) async {
+        final message =
+            ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-      final local = message.localDocument?.let((it) => DocumentImpl(
-            database: database,
-            doc: it,
-            retain: true,
-            debugCreator: 'ConflictResolver(local)',
-          ));
+        final local = message.localDocument?.let((it) => DocumentImpl(
+              database: database,
+              doc: it,
+              retain: true,
+              debugCreator: 'ConflictResolver(local)',
+            ));
 
-      final remote = message.remoteDocument?.let((it) => DocumentImpl(
-            database: database,
-            doc: it,
-            retain: true,
-            debugCreator: 'ConflictResolver(remote)',
-          ));
+        final remote = message.remoteDocument?.let((it) => DocumentImpl(
+              database: database,
+              doc: it,
+              retain: true,
+              debugCreator: 'ConflictResolver(remote)',
+            ));
 
-      var resolved = remote;
-      // TODO: throw on the native side when resolver throws
-      // Also review whether other callbacks can be aborted.
-      try {
         final conflict = ConflictImpl(message.documentId, local, remote);
-        resolved = await resolver.resolve(conflict) as DocumentImpl?;
+        final resolved = await resolver.resolve(conflict) as DocumentImpl?;
         if (resolved is MutableDocumentImpl) {
           resolved.database = database;
           await resolved.flushProperties();
         }
-      } finally {
+
         final resolvedPointer = resolved?.doc.pointerUnsafe;
 
         // If the resolver returned a document other than `local` or `remote`,
@@ -517,5 +515,7 @@ NativeCallback _wrapConflictResolver(
         }
 
         return resolvedPointer?.address;
-      }
-    });
+      },
+      // `false` signals to the native side that an exception has occurred.
+      errorResult: false,
+    );

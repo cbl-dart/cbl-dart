@@ -613,15 +613,37 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   args.value.as_array.values = argsValues;
 
   const CBLDocument *descision;
+  auto resolverThrewException = false;
 
-  auto resultHandler = [&descision](Dart_CObject *result) {
-    descision = result->type == Dart_CObject_kNull
-                    ? NULL
-                    : reinterpret_cast<const CBLDocument *>(
-                          CBLDart_CObject_getIntValueAsInt64(result));
+  auto resultHandler = [&descision,
+                        &resolverThrewException](Dart_CObject *result) {
+    switch (result->type) {
+      case Dart_CObject_kNull:
+        descision = nullptr;
+        break;
+      case Dart_CObject_kInt64:
+        descision = reinterpret_cast<const CBLDocument *>(
+            CBLDart_CObject_getIntValueAsInt64(result));
+        break;
+
+      case Dart_CObject_kBool:
+        // `false` means the resolver threw an exception.
+        if (!result->value.as_bool) {
+          resolverThrewException = true;
+          break;
+        }
+      default:
+        throw std::logic_error(
+            "Unexpected result from replicator conflict resolver.");
+        break;
+    }
   };
 
   CallbackCall(*callback, resultHandler).execute(args);
+
+  if (resolverThrewException) {
+    throw std::runtime_error("Replicator conflict resolver threw an exception");
+  }
 
   return descision;
 }

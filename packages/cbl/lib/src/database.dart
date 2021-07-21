@@ -586,40 +586,32 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             doc.database = this;
             await doc.flushProperties();
 
-            final callback = NativeCallback((arguments) {
-              final message =
-                  SaveDocumentResolvingCallbackMessage.fromArguments(arguments);
+            final callback = NativeCallback(
+              (arguments) async {
+                final message =
+                    SaveDocumentResolvingCallbackMessage.fromArguments(
+                        arguments);
 
-              final conflictingDocument = message.conflictingDocument?.let(
-                (pointer) => DocumentImpl(
-                  database: this,
-                  doc: pointer,
-                  retain: true,
-                  debugCreator: 'SaveConflictHandler(conflictingDocument)',
-                ),
-              );
+                final conflictingDocument = message.conflictingDocument?.let(
+                  (pointer) => DocumentImpl(
+                    database: this,
+                    doc: pointer,
+                    retain: true,
+                    debugCreator: 'SaveConflictHandler(conflictingDocument)',
+                  ),
+                );
 
-              Future<bool> invokeHandler() async {
-                // In case the handler throws an error we are canceling the
-                // save.
-                var decision = false;
+                final decision = await conflictHandler(
+                  doc,
+                  conflictingDocument,
+                );
+                await doc.flushProperties();
 
-                // We don't swallow exceptions because handlers should not throw
-                // and this way the they are visible to the developer as an
-                // unhandled exception.
-                try {
-                  decision = await conflictHandler(
-                    doc,
-                    conflictingDocument,
-                  );
-                  await doc.flushProperties();
-                } finally {
-                  return decision;
-                }
-              }
-
-              return invokeHandler();
-            });
+                return decision;
+              },
+              // In case the handler throws an error we are canceling the save.
+              errorResult: false,
+            );
 
             doc.saveSequence();
 
@@ -730,5 +722,5 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   // === Object ================================================================
 
   @override
-  String toString() => 'Database(name: $_debugName)';
+  String toString() => 'Database($_debugName)';
 }

@@ -196,7 +196,7 @@ void CallbackCall::messageHandler(Dart_Port dest_port_id,
 }
 
 void CallbackCall::sendRequestAndWaitForReturn(Dart_CObject &request) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
   std::condition_variable cv;
 
   {

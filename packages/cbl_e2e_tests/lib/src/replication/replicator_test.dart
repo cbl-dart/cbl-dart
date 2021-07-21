@@ -3,11 +3,11 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../test_binding_impl.dart';
-import 'test_binding.dart';
-import 'utils/database_utils.dart';
-import 'utils/replicator_utils.dart';
-import 'utils/test_document.dart';
+import '../../test_binding_impl.dart';
+import '../test_binding.dart';
+import '../utils/database_utils.dart';
+import '../utils/replicator_utils.dart';
+import '../utils/test_document.dart';
 
 void main() {
   setupTestBinding();
@@ -164,6 +164,10 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
+    test('pushFilter throws exception', () {
+      fail('TODO');
+    });
+
     test('use pullFilter to filter pulled documents', () async {
       final pushDb = await openTestDb('ReplicationWithPullFilter-Push');
       final pullDb = await openTestDb('ReplicationWithPullFilter-Pull');
@@ -194,6 +198,10 @@ void main() {
       final idsInPullDb = await pullDb.getAllIds().toList();
       expect(idsInPullDb, contains(docA.id));
       expect(idsInPullDb, isNot(contains(docB.id)));
+    });
+
+    test('pullFilter throws exception', () {
+      fail('TODO');
     });
 
     test('conflict resolver should work correctly', () async {
@@ -228,6 +236,10 @@ void main() {
       await replicatorA.replicateOneShot();
 
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
+    });
+
+    test('conflict resolver throws exception', () {
+      fail('TODO');
     });
 
     test('status returns the current status of the replicator', () async {

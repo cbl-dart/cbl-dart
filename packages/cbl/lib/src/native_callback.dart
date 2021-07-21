@@ -21,7 +21,7 @@ class NativeCallback {
   /// Creates a callback which can be called from the native side.
   ///
   /// [handler] is the function which responds to calls from the native side.
-  NativeCallback(this.handler) {
+  NativeCallback(this.handler, {this.errorResult}) {
     _receivePort = ReceivePort();
 
     native = NativeObject(_bindings.create(
@@ -35,6 +35,10 @@ class NativeCallback {
   /// The handler which responds to calls to this callback.
   final CallbackHandler handler;
 
+  /// Value which is send to the call on the native side if [handler] throws an
+  /// exception.
+  final Object? errorResult;
+
   late final ReceivePort _receivePort;
 
   late final NativeObject<Callback> native;
@@ -47,7 +51,7 @@ class NativeCallback {
   /// After calling this method the callback must not be used any more.
   void close() {
     _closed = true;
-    _bindings.close(native.pointerUnsafe);
+    native.keepAlive(_bindings.close);
     _receivePort.close();
   }
 
@@ -66,11 +70,19 @@ class NativeCallback {
     );
     ;
 
-    Future.value(handler(args)).then((result) {
-      assert(result == null || sendPort != null);
-      if (!_closed && sendPort != null) {
-        sendPort.send([callAddress, result]);
-      }
-    });
+    Future(() => handler(args)).then(
+      (result) {
+        assert(result == null || sendPort != null);
+        if (!_closed && sendPort != null) {
+          sendPort.send([callAddress, result]);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (!_closed && sendPort != null) {
+          sendPort.send([callAddress, errorResult]);
+        }
+        Zone.current.handleUncaughtError(error, stackTrace);
+      },
+    );
   }
 }

@@ -10,22 +10,22 @@ import 'fleece/integration_test.dart' as fleece_integration;
 import 'fleece/slice_test.dart' as fleece_slice;
 import 'logging_test.dart' as logging;
 import 'native_callback_test.dart' as native_callback;
-import 'replicator_test.dart' as replicator;
+import 'replication/replicator_test.dart' as replication_replicator;
 
 final tests = {
   'database': database.main,
-  'document_array': document_array_test.main,
-  'document_blob': document_blob_test.main,
-  'document_dictionary': document_dictionary_test.main,
-  'document_document': document_document_test.main,
-  'document_fragment': document_fragment_test.main,
-  'fleece_coding': fleece_coding.main,
-  'fleece_integration': fleece_integration.main,
-  'fleece_slice': fleece_slice.main,
-  'fleece_containers': fleece_containers.main,
+  'document/array': document_array_test.main,
+  'document/blob': document_blob_test.main,
+  'document/dictionary': document_dictionary_test.main,
+  'document/document': document_document_test.main,
+  'document/fragment': document_fragment_test.main,
+  'fleece/coding': fleece_coding.main,
+  'fleece/integration': fleece_integration.main,
+  'fleece/slice': fleece_slice.main,
+  'fleece/containers': fleece_containers.main,
   'logging': logging.main,
   'native_callback': native_callback.main,
-  'replicator': replicator.main,
+  'replication/replicator': replication_replicator.main,
 };
 
 void main() {
