@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl/src/native_callback.dart';
+import 'package:cbl/src/native_object.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:test/test.dart';
 
@@ -31,7 +32,8 @@ void main() {
 
       addTearDown(callback.close);
 
-      bindings.callForTest(callback.native.pointerUnsafe, argument);
+      callback.native
+          .keepAlive((pointer) => bindings.callForTest(pointer, argument));
     });
   });
 }

@@ -353,8 +353,8 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
         createRegisterCallbackRequest: (callback) {
           _flushParameters();
           return AddQueryChangeListener(
-            native.pointerUnsafe,
-            callback.native.pointerUnsafe,
+            native.pointer,
+            callback.native.pointer,
           );
         },
         createEvent: (listenerToken, _) async {
@@ -414,7 +414,7 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
   @override
   bool moveNext() {
     if (_hasMore) {
-      _hasCurrent = _bindings.next(native.pointerUnsafe);
+      _hasCurrent = native.keepAlive(_bindings.next);
       if (!_hasCurrent) {
         _hasMore = false;
       }
@@ -428,9 +428,11 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
     Pointer<FLValue> pointer;
 
     if (keyOrIndex is String) {
-      pointer = _bindings.valueForKey(native.pointerUnsafe, keyOrIndex);
+      pointer = native
+          .keepAlive((pointer) => _bindings.valueForKey(pointer, keyOrIndex));
     } else if (keyOrIndex is int) {
-      pointer = _bindings.valueAtIndex(native.pointerUnsafe, keyOrIndex);
+      pointer = native
+          .keepAlive((pointer) => _bindings.valueAtIndex(pointer, keyOrIndex));
     } else {
       throw ArgumentError.value(keyOrIndex, 'keyOrIndex');
     }
@@ -446,7 +448,7 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
   Array get array {
     _checkHasCurrent();
     return MRoot.fromValue(
-      _bindings.resultArray(native.pointerUnsafe).cast(),
+      native.keepAlive(_bindings.resultArray).cast(),
       context: MContext(),
       isMutable: false,
     ).asNative as Array;
@@ -456,7 +458,7 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
   Dictionary get dictionary {
     _checkHasCurrent();
     return MRoot.fromValue(
-      _bindings.resultDict(native.pointerUnsafe).cast(),
+      native.keepAlive(_bindings.resultDict).cast(),
       context: MContext(),
       isMutable: false,
     ).asNative as Dictionary;

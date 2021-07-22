@@ -663,9 +663,9 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             worker: native.worker,
             createRegisterCallbackRequest: (callback) =>
                 AddDocumentChangeListener(
-              native.pointerUnsafe.cast(),
+              native.pointer,
               id,
-              callback.native.pointerUnsafe,
+              callback.native.pointer,
             ),
             createEvent: (_, arguments) => null,
           ).stream);
@@ -677,8 +677,8 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
             worker: native.worker,
             createRegisterCallbackRequest: (callback) =>
                 AddDatabaseChangeListener(
-              native.pointerUnsafe.cast(),
-              callback.native.pointerUnsafe,
+              native.pointer,
+              callback.native.pointer,
             ),
             createEvent: (_, arguments) =>
                 DatabaseChangeCallbackMessage.fromArguments(arguments)

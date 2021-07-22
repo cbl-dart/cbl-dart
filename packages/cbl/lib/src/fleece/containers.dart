@@ -66,7 +66,7 @@ class Doc extends NativeResource<NativeObject<FLDoc>> {
   Doc.fromPointer(Pointer<FLDoc> pointer) : super(FleeceDocObject(pointer));
 
   /// Returns the root value in the [Doc], usually an [Dict].
-  Value get root => Value.fromPointer(_bindings.getRoot(native.pointerUnsafe));
+  Value get root => Value.fromPointer(native.keepAlive(_bindings.getRoot));
 }
 
 // === Value ===================================================================
@@ -135,12 +135,12 @@ class Value extends NativeResource<NativeObject<FLValue>> {
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
   Doc? get doc {
-    final pointer = _bindings.findDoc(native.pointerUnsafe);
+    final pointer = native.keepAlive(_bindings.findDoc);
     return pointer == nullptr ? null : Doc.fromPointer(pointer);
   }
 
   /// Returns the data type of an arbitrary Value.
-  ValueType get type => _bindings.getType(native.pointerUnsafe).toValueType();
+  ValueType get type => native.keepAlive(_bindings.getType).toValueType();
 
   /// Whether this value represents an `undefined` value.
   bool get isUndefined => type == ValueType.undefined;
@@ -149,46 +149,46 @@ class Value extends NativeResource<NativeObject<FLValue>> {
   bool get isNull => type == ValueType.Null;
 
   /// Returns true if the value is non-null and represents an integer.
-  bool get isInteger => _bindings.isInteger(native.pointerUnsafe);
+  bool get isInteger => native.keepAlive(_bindings.isInteger);
 
   /// Returns true if the value is non-null and represents a 64-bit
   /// floating-point number.
-  bool get isDouble => _bindings.isDouble(native.pointerUnsafe);
+  bool get isDouble => native.keepAlive(_bindings.isDouble);
 
   /// Returns a value coerced to boolean. This will be true unless the value is
   /// undefined, null, false, or zero.
-  bool get asBool => _bindings.asBool(native.pointerUnsafe);
+  bool get asBool => native.keepAlive(_bindings.asBool);
 
   /// Returns a value coerced to an integer. True and false are returned as 1
   /// and 0, and floating-point numbers are rounded. All other types are
   /// returned as 0.
-  int get asInt => _bindings.asInt(native.pointerUnsafe);
+  int get asInt => native.keepAlive(_bindings.asInt);
 
   /// Returns a value coerced to a 64-bit floating point number. True and false
   /// are returned as 1.0 and 0.0, and integers are converted to float. All
   /// other types are returned as 0.0.
-  double get asDouble => _bindings.asDouble(native.pointerUnsafe);
+  double get asDouble => native.keepAlive(_bindings.asDouble);
 
   /// Returns the exact contents of a string value, or null for all other types.
-  String? get asString => _bindings.asString(native.pointerUnsafe);
+  String? get asString => native.keepAlive(_bindings.asString);
 
   /// Returns the exact contents of a data value, or null for all other types.
-  Uint8List? get asData => _bindings.asData(native.pointerUnsafe);
+  Uint8List? get asData => native.keepAlive(_bindings.asData);
 
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray => type == ValueType.array
-      ? Array.fromPointer(native.pointerUnsafe.cast())
+      ? native.keepAlive((pointer) => Array.fromPointer(pointer.cast()))
       : null;
 
   /// If a Value represents a dictionary, returns it as a [Dict], else null.
   Dict? get asDict => type == ValueType.dict
-      ? Dict.fromPointer(native.pointerUnsafe.cast())
+      ? native.keepAlive((pointer) => Dict.fromPointer(pointer.cast()))
       : null;
 
   /// Returns a string representation of any scalar value. Data values are
   /// returned in raw form. Arrays and dictionaries don't have a representation
   /// and will return null.
-  String? get scalarToString => _bindings.scalarToString(native.pointerUnsafe);
+  String? get scalarToString => native.keepAlive(_bindings.scalarToString);
 
   /// Encodes a Fleece value as JSON (or a JSON fragment.) Any Data values will
   /// become base64-encoded JSON strings.
@@ -196,7 +196,8 @@ class Value extends NativeResource<NativeObject<FLValue>> {
     bool json5 = false,
     bool canonical = true,
   }) =>
-      _bindings.toJSONX(native.pointerUnsafe, json5, canonical);
+      native
+          .keepAlive((pointer) => _bindings.toJSONX(pointer, json5, canonical));
 
   Object? toObject() {
     switch (type) {
@@ -225,7 +226,8 @@ class Value extends NativeResource<NativeObject<FLValue>> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Value &&
-          _bindings.isEqual(native.pointerUnsafe, other.native.pointerUnsafe);
+          native.keepAlive((pointer) => other.native.keepAlive(
+              (otherPointer) => _bindings.isEqual(pointer, otherPointer)));
 
   @override
   int get hashCode {
@@ -282,16 +284,16 @@ class Array extends Value with ListMixin<Value> {
     bool retain = false,
   }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
 
-  late final Pointer<FLArray> _arrayPointer = native.pointerUnsafe.cast();
-
   @override
-  int get length => _bindings.count(_arrayPointer);
+  int get length =>
+      native.keepAlive((pointer) => _bindings.count(pointer.cast()));
 
   @override
   set length(int length) => throw _immutableValueException();
 
   @override
-  bool get isEmpty => _bindings.isEmpty(_arrayPointer);
+  bool get isEmpty =>
+      native.keepAlive((pointer) => _bindings.isEmpty(pointer.cast()));
 
   @override
   Value get first => this[0];
@@ -301,7 +303,8 @@ class Array extends Value with ListMixin<Value> {
 
   /// If the array is mutable, returns it cast to [MutableArray], else null.
   MutableArray? get asMutable {
-    final pointer = _bindings.asMutable(_arrayPointer);
+    final pointer =
+        native.keepAlive((pointer) => _bindings.asMutable(pointer.cast()));
     return pointer == null
         ? null
         : MutableArray.fromPointer(pointer, release: true, retain: true);
@@ -311,8 +314,8 @@ class Array extends Value with ListMixin<Value> {
   List<Object?> toObject() => map((element) => element.toObject()).toList();
 
   @override
-  Value operator [](int index) =>
-      Value.fromPointer(_bindings.get(_arrayPointer, index));
+  Value operator [](int index) => Value.fromPointer(
+      native.keepAlive((pointer) => _bindings.get(pointer.cast(), index)));
 
   @override
   void operator []=(int index, Object? value) =>
@@ -361,30 +364,30 @@ class MutableArray extends Array {
     Set<CopyFlag> flags = const {},
   }) =>
       MutableArray.fromPointer(
-        _bindings.mutableCopy(
-          source.native.pointerUnsafe.cast(),
-          flags.toFLCopyFlags(),
-        ),
+        source.native.keepAlive((pointer) => _bindings.mutableCopy(
+              pointer.cast(),
+              flags.toFLCopyFlags(),
+            )),
         retain: false,
         release: true,
       );
 
-  late final Pointer<FLMutableArray> _mutableArrayPointer =
-      native.pointerUnsafe.cast();
-
   /// If the Array was created by [MutableArray.mutableCopy], returns the original
   /// source Array.
   Array? get source {
-    final pointer = _bindings.getSource(_mutableArrayPointer);
+    final pointer =
+        native.keepAlive((pointer) => _bindings.getSource(pointer.cast()));
     return pointer == nullptr ? null : Array.fromPointer(pointer);
   }
 
   /// Returns true if the [Array] has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(_mutableArrayPointer);
+  bool get isChanged =>
+      native.keepAlive((pointer) => _bindings.isChanged(pointer.cast()));
 
   @override
-  set length(int length) => _bindings.resize(_mutableArrayPointer, length);
+  set length(int length) =>
+      native.keepAlive((pointer) => _bindings.resize(pointer.cast(), length));
 
   @override
   set first(Object? value) {
@@ -399,13 +402,15 @@ class MutableArray extends Array {
   @override
   void operator []=(int index, Object? value) {
     RangeError.checkValidIndex(index, this);
-    final slot = _bindings.set(_mutableArrayPointer, index);
+    final slot =
+        native.keepAlive((pointer) => _bindings.set(pointer.cast(), index));
     _setSlotValue(slot, value);
   }
 
   @override
   void add(Object? element) {
-    final slot = _bindings.append(_mutableArrayPointer);
+    final slot =
+        native.keepAlive((pointer) => _bindings.append(pointer.cast()));
     _setSlotValue(slot, element);
   }
 
@@ -422,7 +427,8 @@ class MutableArray extends Array {
   @override
   void removeRange(int start, int end) {
     RangeError.checkValidRange(start, end, length);
-    _bindings.remove(_mutableArrayPointer, start, end - start);
+    native.keepAlive(
+        (pointer) => _bindings.remove(pointer.cast(), start, end - start));
   }
 
   /// Inserts a contiguous range of JSON `null` values into the array.
@@ -431,7 +437,8 @@ class MutableArray extends Array {
   /// [count] is the number of items to insert.
   void insertNulls(int start, int count) {
     RangeError.checkValidIndex(start, this, 'start');
-    _bindings.insert(_mutableArrayPointer, start, count);
+    native
+        .keepAlive((pointer) => _bindings.insert(pointer.cast(), start, count));
   }
 
   /// Convenience function for getting an dict-valued property in mutable form.
@@ -441,7 +448,8 @@ class MutableArray extends Array {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(int index) {
-    final pointer = _bindings.getMutableDict(_mutableArrayPointer, index);
+    final pointer = native.keepAlive(
+        (pointer) => _bindings.getMutableDict(pointer.cast(), index));
     return pointer == null
         ? null
         : MutableDict.fromPointer(pointer, release: true, retain: true);
@@ -454,7 +462,8 @@ class MutableArray extends Array {
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(int index) {
-    final pointer = _bindings.getMutableArray(_mutableArrayPointer, index);
+    final pointer = native.keepAlive(
+        (pointer) => _bindings.getMutableArray(pointer.cast(), index));
     return pointer == null
         ? null
         : MutableArray.fromPointer(pointer, retain: true, release: true);
@@ -474,23 +483,24 @@ class Dict extends Value with MapMixin<String, Value> {
     bool retain = false,
   }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
 
-  late final Pointer<FLDict> _dictPointer = native.pointerUnsafe.cast();
-
   /// Returns the number of items in a dictionary.
   @override
-  int get length => _bindings.count(_dictPointer);
+  int get length =>
+      native.keepAlive((pointer) => _bindings.count(pointer.cast()));
 
   /// Returns true if a dictionary is empty. Depending on the dictionary's
   /// representation, this can be faster than `count == 0`.
   @override
-  bool get isEmpty => _bindings.isEmpty(_dictPointer);
+  bool get isEmpty =>
+      native.keepAlive((pointer) => _bindings.isEmpty(pointer.cast()));
 
   @override
   bool get isNotEmpty => !isEmpty;
 
   /// If the dictionary is mutable, returns it cast to [MutableDict], else null.
   MutableDict? get asMutable {
-    final pointer = _bindings.asMutable(_dictPointer);
+    final pointer =
+        native.keepAlive((pointer) => _bindings.asMutable(pointer.cast()));
     return pointer == null
         ? null
         : MutableDict.fromPointer(pointer, release: true, retain: true);
@@ -502,7 +512,8 @@ class Dict extends Value with MapMixin<String, Value> {
   @override
   Value operator [](Object? key) {
     assert(key is String, 'Dict key must be a non-null String');
-    return Value.fromPointer(_bindings.get(_dictPointer, key as String));
+    return Value.fromPointer(native
+        .keepAlive((pointer) => _bindings.get(pointer.cast(), key as String)));
   }
 
   @override
@@ -551,7 +562,8 @@ class _DictKeyIterator extends Iterator<String> {
   @override
   bool moveNext() {
     // Create the iterator if it does not exist yet.
-    iterator ??= _bindings.begin(this, dict.native.pointerUnsafe.cast());
+    iterator ??= dict.native
+        .keepAlive((pointer) => _bindings.begin(this, pointer.cast()));
 
     // The iterator has no more elements.
     if (iterator!.ref.done) return false;
@@ -610,31 +622,32 @@ class MutableDict extends Dict {
     Set<CopyFlag> flags = const {},
   }) =>
       MutableDict.fromPointer(
-        _bindings.mutableCopy(
-          source.native.pointerUnsafe.cast(),
-          flags.toFLCopyFlags(),
-        ),
+        source.native.keepAlive((pointer) => _bindings.mutableCopy(
+              pointer.cast(),
+              flags.toFLCopyFlags(),
+            )),
         release: true,
         retain: false,
       );
 
-  late final Pointer<FLMutableDict> _mutableDictPointer =
-      native.pointerUnsafe.cast();
-
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
   Dict? get source {
-    final pointer = _bindings.getSource(_mutableDictPointer);
+    final pointer =
+        native.keepAlive((pointer) => _bindings.getSource(pointer.cast()));
     return pointer == nullptr ? null : Dict.fromPointer(pointer);
   }
 
   /// Returns true if the Dict has been changed from the source it was copied
   /// from.
-  bool get isChanged => _bindings.isChanged(_mutableDictPointer);
+  bool get isChanged =>
+      native.keepAlive((pointer) => _bindings.isChanged(pointer.cast()));
 
   @override
-  void operator []=(String key, Object? value) =>
-      _setSlotValue(_bindings.set(_mutableDictPointer, key), value);
+  void operator []=(String key, Object? value) => _setSlotValue(
+        native.keepAlive((pointer) => _bindings.set(pointer.cast(), key)),
+        value,
+      );
 
   @override
   void addAll(Map<String, Object?> other) {
@@ -644,14 +657,16 @@ class MutableDict extends Dict {
   }
 
   @override
-  void clear() => _bindings.removeAll(_mutableDictPointer);
+  void clear() =>
+      native.keepAlive((pointer) => _bindings.removeAll(pointer.cast()));
 
   @override
   Value? remove(Object? key) {
     assert(key is String);
     final value = this[key];
 
-    _bindings.remove(_mutableDictPointer, key as String);
+    native.keepAlive(
+        (pointer) => _bindings.remove(pointer.cast(), key as String));
 
     return value;
   }
@@ -663,7 +678,8 @@ class MutableDict extends Dict {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(String key) {
-    final pointer = _bindings.getMutableDict(_mutableDictPointer, key);
+    final pointer = native
+        .keepAlive((pointer) => _bindings.getMutableDict(pointer.cast(), key));
     return pointer == null
         ? null
         : MutableDict.fromPointer(pointer, release: true, retain: true);
@@ -676,7 +692,8 @@ class MutableDict extends Dict {
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(String key) {
-    final pointer = _bindings.getMutableArray(_mutableDictPointer, key);
+    final pointer = native
+        .keepAlive((pointer) => _bindings.getMutableArray(pointer.cast(), key));
     return pointer == null
         ? null
         : MutableArray.fromPointer(pointer, release: true, retain: true);
@@ -745,7 +762,8 @@ class _DefaultSlotSetter implements SlotSetter {
     } else if (value is TypedData) {
       _slotBindings.setData(slot, value);
     } else if (value is Value) {
-      _slotBindings.setValue(slot, value.native.pointerUnsafe);
+      value.native
+          .keepAlive((pointer) => _slotBindings.setValue(slot, pointer));
     }
   }
 
