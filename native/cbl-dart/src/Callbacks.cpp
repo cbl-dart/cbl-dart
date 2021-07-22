@@ -1,6 +1,10 @@
 #include "Callbacks.h"
 
+#include <sstream>
+
 #include "Utils.hh"
+
+namespace CBLDart {
 
 // === CallbackRegistry =======================================================
 
@@ -45,15 +49,18 @@ CallbackRegistry::CallbackRegistry() {}
 
 // === Callback ===============================================================
 
-Callback::Callback(Dart_Handle dartCallback, Dart_Port sendport)
-    : sendPort_(sendport) {
+Callback::Callback(uint32_t id, Dart_Handle dartCallback, Dart_Port sendport,
+                   bool debug)
+    : id_(id), debug_(debug), sendPort_(sendport) {
   dartCallbackHandle_ = Dart_NewWeakPersistentHandle_DL(
       dartCallback, this, 0, Callback::dartCallbackHandleFinalizer);
+  assert(dartCallbackHandle_ != nullptr);
 
   CallbackRegistry::instance.registerCallback(*this);
 }
 
 void Callback::setFinalizer(void *context, CallbackFinalizer finalizer) {
+  debugLog("setFinalizer");
   std::scoped_lock lock(mutex_);
   assert(!closed_);
   finalizerContext_ = context;
@@ -94,11 +101,14 @@ void Callback::close() {
 void Callback::dartCallbackHandleFinalizer(void *dart_callback_data,
                                            void *peer) {
   auto callback = reinterpret_cast<Callback *>(peer);
+  callback->debugLog("closing from Dart finalizer");
   callback->dartCallbackHandle_ = nullptr;
   callback->close();
 }
 
 Callback::~Callback() {
+  debugLog("deleting");
+
   assert(activeCalls_.empty());
 
   CallbackRegistry::instance.unregisterCallback(*this);
@@ -136,14 +146,25 @@ void Callback::unregisterCall(CallbackCall &call) {
   }
 }
 
-void Callback::sendRequest(Dart_CObject *request) {
+bool Callback::sendRequest(Dart_CObject *request) {
   {
     std::scoped_lock lock(mutex_);
     if (closed_) {
-      return;
+      return false;
     }
   }
-  Dart_PostCObject_DL(sendPort_, request);
+
+  auto didSendRequest = Dart_PostCObject_DL(sendPort_, request);
+  assert(didSendRequest);
+  return true;
+}
+
+inline void Callback::debugLog(const char *message) {
+#ifdef DEBUG
+  if (debug_) {
+    printf("NativeCallback #%d -> %s\n", id_, message);
+  }
+#endif
 }
 
 // === CallbackCall ===========================================================
@@ -157,6 +178,7 @@ CallbackCall::CallbackCall(Callback &callback, bool isBlocking)
   if (isBlocking) {
     receivePort_ = Dart_NewNativePort_DL("CallbackCall",
                                          &CallbackCall::messageHandler, false);
+    assert(receivePort_ != ILLEGAL_PORT);
   }
 };
 
@@ -164,7 +186,8 @@ CallbackCall::~CallbackCall() {
   callback_.unregisterCall(*this);
 
   if (isBlocking()) {
-    Dart_CloseNativePort_DL(receivePort_);
+    auto didCloseReceivePort = Dart_CloseNativePort_DL(receivePort_);
+    assert(didCloseReceivePort);
   }
 }
 
@@ -177,6 +200,7 @@ void CallbackCall::execute(Dart_CObject &arguments) {
   if (isCompleted_) {
     // Call was completed early by `close`.
     assert(!hasResultHandler());
+    debugLog("not sending request because call is already closed");
     return;
   }
 
@@ -206,14 +230,36 @@ void CallbackCall::execute(Dart_CObject &arguments) {
   request.value.as_array.length = 3;
   request.value.as_array.values = requestValues;
 
-  callback_.sendRequest(&request);
-
   if (isBlocking()) {
     CallbackRegistry::instance.addBlockingCall(*this);
+  }
+
+  auto didSendRequest = callback_.sendRequest(&request);
+  if (!didSendRequest) {
+    // The request could not be sent because the callback has already been
+    // closed.
+    debugLog("did not send request because callback is already closed");
+    assert(!hasResultHandler());
+
+    if (isBlocking()) {
+      // If the request could not be sent, `complete` will never take this call.
+      CallbackRegistry::instance.takeBlockingCall(*this);
+    }
+
+    isCompleted_ = true;
+    return;
+  }
+
+  debugLog("did send request");
+
+  if (isBlocking()) {
+    debugLog("waiting for completion");
     waitForCompletion();
   } else {
     isCompleted_ = true;
   }
+
+  debugLog("finished");
 }
 
 void CallbackCall::complete(Dart_CObject *result) {
@@ -225,6 +271,8 @@ void CallbackCall::complete(Dart_CObject *result) {
   }
 
   std::scoped_lock lock(mutex_);
+
+  debugLog("completing with result");
 
   assert(isBlocking());
 
@@ -243,6 +291,8 @@ void CallbackCall::close() {
 
   // Call has not been executed.
   if (!isExecuted_) {
+    debugLog("closing call which has not been executed");
+
     // Mark call as completed and bail out early in `execute`.
     isCompleted_ = true;
     return;
@@ -250,15 +300,18 @@ void CallbackCall::close() {
 
   // Call is waiting for completion.
   if (!isCompleted_) {
-    auto completCall = CallbackRegistry::instance.takeBlockingCall(*this);
-    if (!completCall) {
+    auto didTakeCall = CallbackRegistry::instance.takeBlockingCall(*this);
+    if (!didTakeCall) {
       // If at this point we are not able to take the blocking call,
       // `complete` already did and is just wainting for us to release
       // the lock on this call.
+      debugLog("not completing call which will be completed with result");
       return;
     }
 
     assert(!hasResultHandler());
+
+    debugLog("completing to close call");
 
     isCompleted_ = true;
     completedCv_.notify_one();
@@ -266,6 +319,7 @@ void CallbackCall::close() {
   }
 
   // Call has already completed.
+  debugLog("did nothing to close call which has already been completed");
 }
 
 void CallbackCall::messageHandler(Dart_Port dest_port_id,
@@ -289,6 +343,7 @@ void CallbackCall::waitForCompletion() {
   completedCv_.wait(lock, [this] { return isCompleted_; });
 
   if (didFail_) {
+    debugLog("failed");
     throw std::runtime_error(failureResult);
   }
 }
@@ -297,3 +352,18 @@ bool CallbackCall::isFailureResult(Dart_CObject *result) {
   return result->type == Dart_CObject_kString &&
          failureResult == result->value.as_string;
 }
+
+inline void CallbackCall::debugLog(const char *message) {
+#ifdef DEBUG
+  if (!callback_.debug_) {
+    return;
+  }
+
+  std::ostringstream stream;
+  stream << "Call " << this << " -> " << message;
+  auto str = stream.str();
+  callback_.debugLog(str.c_str());
+#endif
+}
+
+}  // namespace CBLDart

@@ -24,13 +24,15 @@ void CBLDart_InitDartApiDL(void *data);
 // -- Callbacks
 
 CBLDART_EXPORT
-Callback *CBLDart_Callback_New(Dart_Handle object, Dart_Port sendPort);
+CBLDart::Callback *CBLDart_Callback_New(uint32_t id, Dart_Handle object,
+                                        Dart_Port sendPort, uint8_t debug);
 
 CBLDART_EXPORT
-void CBLDart_Callback_Close(Callback *callback);
+void CBLDart_Callback_Close(CBLDart::Callback *callback);
 
 CBLDART_EXPORT
-void CBLDart_Callback_CallForTest(Callback *callback, int64_t argument);
+void CBLDart_Callback_CallForTest(CBLDart::Callback *callback,
+                                  int64_t argument);
 
 // Couchbase Lite ----------------------------------------------------------
 
@@ -68,7 +70,7 @@ CBLDART_EXPORT
 void CBLDart_CBLLog_RestoreOriginalCallback();
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_SetCallback(Callback *callback);
+void CBLDart_CBLLog_SetCallback(CBLDart::Callback *callback);
 
 // -- Document
 
@@ -143,7 +145,7 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
 
 CBLDART_EXPORT
 uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandler(
-    CBLDatabase *db, CBLDocument *doc, Callback *conflictHandler,
+    CBLDatabase *db, CBLDocument *doc, CBLDart::Callback *conflictHandler,
     CBLError *errorOut);
 
 CBLDART_EXPORT
@@ -165,11 +167,11 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
                                                    const CBLDart_FLString docID,
-                                                   Callback *listener);
+                                                   CBLDart::Callback *listener);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           Callback *listener);
+                                           CBLDart::Callback *listener);
 
 typedef enum : uint8_t {
   kCBLDart_IndexTypeValue,
@@ -213,8 +215,8 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
                                          CBLDart_FLString key);
 
 CBLDART_EXPORT
-CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,
-                                                     Callback *listener);
+CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
+    CBLQuery *query, CBLDart::Callback *listener);
 
 // -- Blob
 
@@ -276,9 +278,9 @@ struct CBLDart_ReplicatorConfiguration {
   FLSlice *trustedRootCertificates;
   FLArray channels;
   FLArray documentIDs;
-  Callback *pushFilter;
-  Callback *pullFilter;
-  Callback *conflictResolver;
+  CBLDart::Callback *pushFilter;
+  CBLDart::Callback *pullFilter;
+  CBLDart::Callback *conflictResolver;
 };
 
 CBLDART_EXPORT
@@ -296,7 +298,7 @@ uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
                                                 CBLError *errorOut);
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
-                                             Callback *listenerId);
+                                             CBLDart::Callback *listenerId);
 
 struct CBLDart_ReplicatedDocument {
   CBLDart_FLString ID;
@@ -308,5 +310,5 @@ struct CBLDart_ReplicatedDocument {
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, Callback *listenerId);
+    CBLReplicator *replicator, CBLDart::Callback *listenerId);
 }

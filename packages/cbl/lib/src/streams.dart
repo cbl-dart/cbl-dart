@@ -101,7 +101,7 @@ class CallbackStreamController<T, S>
         if (_canceled) return;
         controller.addError(error, stackTrace);
       }
-    });
+    }, debugName: 'Stream<$T>');
 
     try {
       _registrationResult = await runKeepAlive(() {
@@ -143,7 +143,7 @@ StreamController<T> callbackBroadcastStreamController<T>({
       } catch (error, stacktrace) {
         controller.addError(error, stacktrace);
       }
-    });
+    }, debugName: 'Stream<$T>.broadcast');
 
     startStream(callback);
   }

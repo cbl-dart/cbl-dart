@@ -7,6 +7,8 @@
 
 #include "dart/dart_api_dl.h"
 
+namespace CBLDart {
+
 class Callback;
 class CallbackCall;
 
@@ -40,7 +42,10 @@ typedef void (*CallbackFinalizer)(void *context);
 
 class Callback {
  public:
-  Callback(Dart_Handle dartCallback, Dart_Port sendport);
+  Callback(uint32_t id, Dart_Handle dartCallback, Dart_Port sendport,
+           bool debug);
+
+  uint32_t id() { return id_; };
 
   void setFinalizer(void *context, CallbackFinalizer finalizer);
   void close();
@@ -54,8 +59,11 @@ class Callback {
 
   void registerCall(CallbackCall &call);
   void unregisterCall(CallbackCall &call);
-  void sendRequest(Dart_CObject *request);
+  bool sendRequest(Dart_CObject *request);
+  inline void debugLog(const char *message);
 
+  uint32_t id_;
+  bool debug_;
   std::mutex mutex_;
   bool closed_ = false;
   Dart_Port sendPort_ = ILLEGAL_PORT;
@@ -101,6 +109,7 @@ class CallbackCall {
 
   void waitForCompletion();
   bool isFailureResult(Dart_CObject *result);
+  inline void debugLog(const char *message);
 
   std::mutex mutex_;
   Callback &callback_;
@@ -111,3 +120,5 @@ class CallbackCall {
   bool didFail_ = false;
   std::condition_variable completedCv_;
 };
+
+}  // namespace CBLDart

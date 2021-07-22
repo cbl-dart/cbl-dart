@@ -611,6 +611,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
               },
               // In case the handler throws an error we are canceling the save.
               errorResult: false,
+              debugName: 'SaveConflictHandler',
             );
 
             doc.saveSequence();

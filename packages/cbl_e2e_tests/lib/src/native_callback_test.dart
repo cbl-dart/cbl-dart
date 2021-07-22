@@ -19,14 +19,18 @@ void main() {
       final argument = 42;
 
       final callback = runZoned(
-        () => NativeCallback(expectAsync1(
-          (arguments) {
-            expect(arguments, equals([argument]));
+        () => NativeCallback(
+          expectAsync1(
+            (arguments) {
+              expect(arguments, equals([argument]));
 
-            expect(Zone.current[#test], 'nativeCallback');
-          },
-          count: 1,
-        )),
+              expect(Zone.current[#test], 'nativeCallback');
+            },
+            count: 1,
+          ),
+          debugName: 'Test',
+          debug: true,
+        ),
         zoneValues: zoneValues,
       );
 
