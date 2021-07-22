@@ -35,7 +35,7 @@ discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
-Read the [contributor guide] to get started developing.
+Read [CONTRIBUTING] to get started developing.
 
 [packages]: https://github.com/cofu-app/cbl-dart/tree/main/packages
 [cbl]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl
@@ -51,4 +51,4 @@ Read the [contributor guide] to get started developing.
 [libcouchbaselitedart]:
   https://github.com/cofu-app/cbl-dart/tree/main/native/cbl-dart
 [couchbase-lite-c]: https://github.com/couchbaselabs/couchbase-lite-C
-[contributor guide]: ./docs/CONTRIBUTOR_GUIDE.md
+[contributing]: ./CONTRIBUTING.md

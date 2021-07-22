@@ -100,10 +100,10 @@ discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
-Read the [contributor guide] to get started developing.
+Read [CONTRIBUTING] to get started developing.
 
 # Disclaimer
 
 > **Warning:** This is not an official Couchbase product.
 
-[contributor guide]: ../../docs/CONTRIBUTOR_GUIDE.md
+[CONTRIBUTING]: ../../CONTRIBUTING.md

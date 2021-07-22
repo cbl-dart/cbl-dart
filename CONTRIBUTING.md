@@ -1,4 +1,11 @@
-# Contributor guide
+# Contributing
+
+Please submit contributions as PRs against the `main` branch. PRs must pass all
+checks to merge.
+
+Format your commit messages as [conventional commits]. If the changes of a PR
+are limited to a single package use it as the commit message's scope, e.g.
+`feat(cbl): ...`.
 
 # Development environment
 
@@ -104,15 +111,6 @@ tests are not configured as Flutter unit tests, but instead as Flutter
 integration tests. Integration tests can can be launched through the IDE or
 through `flutter test` with a specific test file in `integration_test`. By using
 `integration_test/cbl_e2e_test.dart` as the test file all tests are executed.
-
-## Contributing
-
-Please submit contributions as PRs against the `main` branch. PRs must pass all
-checks to merge.
-
-Format your commit messages as [conventional commits]. If the changes of a PR
-are limited to a single package use it as the commit message's scope, e.g.
-`feat(cbl): ...`.
 
 [install flutter]: https://flutter.dev/docs/get-started/install
 [packages]: ../packages
