@@ -1,8 +1,8 @@
 import 'package:cbl/src/fleece/fleece.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
-import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
+import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 import '../utils/matchers.dart';
 

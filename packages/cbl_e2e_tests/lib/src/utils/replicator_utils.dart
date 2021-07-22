@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
-import 'package:test/test.dart';
+
+import '../test_binding.dart';
 
 final testSyncGatewayUrl = Uri.parse('ws://localhost:4984/db');
 

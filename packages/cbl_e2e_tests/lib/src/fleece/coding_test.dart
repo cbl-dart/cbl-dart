@@ -5,10 +5,10 @@ import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/slice.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
 import '../fixtures/large_json_doc.dart';
+import '../test_binding.dart';
 import '../utils/benchmark.dart';
 
 void main() {

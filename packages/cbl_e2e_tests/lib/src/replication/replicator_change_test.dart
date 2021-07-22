@@ -1,9 +1,9 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/replication/replicator.dart';
 import 'package:cbl/src/replication/replicator_change.dart';
-import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
+import '../test_binding.dart';
 
 void main() {
   setupTestBinding();

@@ -1,8 +1,8 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/replication/conflict.dart';
-import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
+import '../test_binding.dart';
 
 void main() {
   setupTestBinding();

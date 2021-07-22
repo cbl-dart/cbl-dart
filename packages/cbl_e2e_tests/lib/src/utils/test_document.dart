@@ -2,7 +2,8 @@
 library test_document;
 
 import 'package:cbl/cbl.dart';
-import 'package:test/test.dart';
+
+import '../test_binding.dart';
 
 /// The id of the test document if it has been written to at least once.
 String? testDocumentId;

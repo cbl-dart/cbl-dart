@@ -1,4 +1,5 @@
 import 'package:cbl_flutter/cbl_flutter.dart';
+import 'package:flutter_test/flutter_test.dart' as ft;
 import 'package:integration_test/integration_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -21,4 +22,27 @@ class FlutterCblE2eTestBinding extends CblE2eTestBinding {
   @override
   Future<String> resolveTmpDir() =>
       getTemporaryDirectory().then((dir) => path.join(dir.path, 'cbl_flutter'));
+
+  @override
+  final testFn = (dynamic description, body) =>
+      ft.testWidgets(description as String, (tester) async => await body());
+
+  @override
+  final groupFn =
+      (dynamic description, body) => ft.group(description as Object, body);
+
+  @override
+  final setUpAllFn = ft.setUpAll;
+
+  @override
+  final setUpFn = ft.setUp;
+
+  @override
+  final tearDownAllFn = ft.tearDownAll;
+
+  @override
+  final tearDownFn = ft.tearDown;
+
+  @override
+  final addTearDownFn = ft.addTearDown;
 }

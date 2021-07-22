@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:test/test.dart';
 
 import '../../test_binding_impl.dart';
+import '../test_binding.dart';
 import '../utils/database_utils.dart';
 import '../utils/replicator_utils.dart';
 import '../utils/test_document.dart';
