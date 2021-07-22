@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:cbl/src/native_object.dart';
 import 'package:meta/meta.dart';
 
 import 'native_callback.dart';
+import 'native_object.dart';
 import 'resource.dart';
 import 'worker/worker.dart';
 

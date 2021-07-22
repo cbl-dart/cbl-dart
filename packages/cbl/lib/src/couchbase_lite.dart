@@ -219,7 +219,7 @@ void debugCouchbaseLiteIsInitialized() {
   CouchbaseLite._initialization.debugCheckHasExecuted();
 }
 
-/// Setting this flag to `true` enables printing of debug information for 
+/// Setting this flag to `true` enables printing of debug information for
 /// [CblRefCountedObject] in debug builds.
 bool get debugRefCounted => _debugRefCountedObject;
 bool _debugRefCountedObject = false;
