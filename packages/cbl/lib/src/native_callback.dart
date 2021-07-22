@@ -12,6 +12,13 @@ typedef CallbackHandler = FutureOr<Object?> Function(List arguments);
 
 late final _bindings = CBLBindings.instance.nativeCallback;
 
+var _nextId = 0;
+int _generateId() {
+  final id = _nextId;
+  _nextId += 1;
+  return id;
+}
+
 /// A callback which can be called from the native side.
 ///
 /// [NativeCallback]s have to be [close]d to free allocated resources on the
@@ -24,20 +31,28 @@ class NativeCallback {
   NativeCallback(
     this.handler, {
     this.errorResult = failureResult,
+    required this.debugName,
+    this.debug = false,
   }) {
     _receivePort = ReceivePort();
 
     native = NativeObject(_bindings.create(
+      _id,
       this,
       _receivePort.sendPort,
+      debug,
     ));
 
-    _receivePort.cast<List>().listen(_messageHandler);
+    _receivePort.cast<List<Object?>>().listen(_messageHandler);
+
+    _debugLog('created ($debugName)');
   }
 
   /// A special result which signals the native side to throw a C++
   /// `std::runtime_exception`.
   static const failureResult = '__NATIVE_CALLBACK_FAILED__';
+
+  final _id = _generateId();
 
   /// The handler which responds to calls to this callback.
   final CallbackHandler handler;
@@ -47,6 +62,14 @@ class NativeCallback {
   /// The default is to send [failureResult], which is a special value which
   /// signals the native side to throw a C++ `std::runtime_exception`.
   final Object? errorResult;
+
+  /// A debug description of this callback.
+  final String debugName;
+
+  /// Whether to print debug information for this callback.
+  ///
+  /// This feature is only functional in debug mode.
+  final bool debug;
 
   /// A [Stream] of the errors thrown by [handler].
   ///
@@ -66,39 +89,82 @@ class NativeCallback {
   ///
   /// After calling this method the callback must not be used any more.
   void close() {
+    _debugLog('closing');
     _closed = true;
     native.keepAlive(_bindings.close);
     _receivePort.close();
     _errorStreamController.close();
   }
 
-  void _messageHandler(List message) {
+  void _messageHandler(List<Object?> message) {
     assert(message is List, 'callback call message must be a list');
 
     final sendPort = message[0] as SendPort?;
     final callAddress = message[1] as int?;
-    final args = message[2] as List;
+    final args = message[2] as List<Object?>;
+
+    String debugFormatArgs() => args.map((arg) {
+          if (arg is! Iterable<Object?>) {
+            return arg;
+          }
+
+          final list = arg.toList();
+          if (list.length > 3) {
+            return [...list.take(3), '...'];
+          }
+          return list;
+        }).join(', ');
+
+    _debugLog('received call: ${debugFormatArgs()}');
+
+    final isBlocking = sendPort != null;
 
     assert(
       (sendPort != null && callAddress != null) ||
           (sendPort == null && callAddress == null),
-      'caller of callback must send a sendPort and callAddress to receive a '
-      'result',
+      'CBLDart::CallbackCall must send both a sendPort and '
+      'a callAddress or none',
     );
+
+    void sendResult(Object? result) {
+      if (!isBlocking) {
+        _debugLog('not sending result because call is not blocking');
+        return;
+      }
+
+      if (_closed) {
+        _debugLog('not sending result because call is not closed');
+        return;
+      }
+
+      if (debug) {
+        _debugLog('sending result: $result');
+      }
+
+      sendPort!.send([callAddress, result]);
+    }
 
     Future(() => handler(args)).then(
       (result) {
         assert(result == null || sendPort != null);
-        if (!_closed && sendPort != null) {
-          sendPort.send([callAddress, result]);
-        }
+        sendResult(result);
       },
       onError: (Object error, StackTrace stackTrace) {
-        if (!_closed && sendPort != null) {
-          sendPort.send([callAddress, errorResult]);
-        }
+        sendResult(errorResult);
         _errorStreamController.addError(error, stackTrace);
       },
     );
+  }
+
+  @pragma('vm:prefer-inline')
+  // When inlined in release mode, it is as if this function did not exist at
+  // the call site.
+  void _debugLog(String message) {
+    assert(() {
+      if (debug) {
+        print('NativeCallback #$_id -> $message');
+      }
+      return true;
+    }());
   }
 }

@@ -2,16 +2,21 @@ import 'dart:ffi';
 import 'dart:isolate';
 
 import 'bindings.dart';
+import 'utils.dart';
 
 class Callback extends Opaque {}
 
 typedef CBLDart_Callback_New_C = Pointer<Callback> Function(
+  Uint32 id,
   Handle dartCallback,
   Int64 sendPort,
+  Uint8 debug,
 );
 typedef CBLDart_Callback_New = Pointer<Callback> Function(
+  int id,
   Object dartCallback,
   int sendPort,
+  int debug,
 );
 
 typedef CBLDart_Callback_Close_C = Void Function(Pointer<Callback> callback);
@@ -46,8 +51,13 @@ class NativeCallbackBindings extends Bindings {
   late final CBLDart_Callback_Close _close;
   late final CBLDart_Callback_CallForTest _callForTest;
 
-  Pointer<Callback> create(Object dartCallback, SendPort sendPort) {
-    return _new(dartCallback, sendPort.nativePort);
+  Pointer<Callback> create(
+    int id,
+    Object dartCallback,
+    SendPort sendPort,
+    bool debug,
+  ) {
+    return _new(id, dartCallback, sendPort.nativePort, debug.toInt());
   }
 
   void close(Pointer<Callback> callback) {

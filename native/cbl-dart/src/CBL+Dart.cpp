@@ -23,13 +23,15 @@ void CBLDart_InitDartApiDL(void *data) {
 
 // -- Callbacks
 
-Callback *CBLDart_Callback_New(Dart_Handle object, Dart_Port sendPort) {
-  return new Callback(object, sendPort);
+CBLDart::Callback *CBLDart_Callback_New(uint32_t id, Dart_Handle object,
+                                        Dart_Port sendPort, uint8_t debug) {
+  return new CBLDart::Callback(id, object, sendPort, debug);
 }
 
-void CBLDart_Callback_Close(Callback *callback) { callback->close(); }
+void CBLDart_Callback_Close(CBLDart::Callback *callback) { callback->close(); }
 
-void CBLDart_Callback_CallForTest(Callback *callback, int64_t argument) {
+void CBLDart_Callback_CallForTest(CBLDart::Callback *callback,
+                                  int64_t argument) {
   Dart_CObject argument__;
   argument__.type = Dart_CObject_kInt64;
   argument__.value.as_int64 = argument;
@@ -41,7 +43,7 @@ void CBLDart_Callback_CallForTest(Callback *callback, int64_t argument) {
   args.value.as_array.length = 1;
   args.value.as_array.values = argsValues;
 
-  CallbackCall(*callback).execute(args);
+  CBLDart::CallbackCall(*callback).execute(args);
 }
 
 // Couchbase Lite --------------------------------------------------------------
@@ -131,7 +133,7 @@ std::shared_mutex loggingMutex;
 
 auto originalLogCallback = CBLLog_Callback();
 
-Callback *dartLogCallback = nullptr;
+CBLDart::Callback *dartLogCallback = nullptr;
 
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message) {
@@ -161,7 +163,7 @@ void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  CallbackCall(*dartLogCallback).execute(args);
+  CBLDart::CallbackCall(*dartLogCallback).execute(args);
 }
 
 void CBLDart_LogCallbackFinalizer(void *context) {
@@ -174,7 +176,7 @@ void CBLDart_CBLLog_RestoreOriginalCallback() {
   CBLLog_SetCallback(originalLogCallback);
 }
 
-void CBLDart_CBLLog_SetCallback(Callback *callback) {
+void CBLDart_CBLLog_SetCallback(CBLDart::Callback *callback) {
   const std::unique_lock<std::shared_mutex> lock(loggingMutex);
 
   dartLogCallback = callback;
@@ -289,7 +291,7 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
 bool CBLDart_SaveConflictHandlerWrapper(
     void *context, CBLDocument *documentBeingSaved,
     const CBLDocument *conflictingDocument) {
-  auto &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<CBLDart::Callback *>(context);
 
   // documentBeingSaved cannot be accessed from the Dart Isolate main thread
   // because this thread has a lock on it. So we make a copy give that to the
@@ -315,7 +317,7 @@ bool CBLDart_SaveConflictHandlerWrapper(
     decision = result->value.as_bool;
   };
 
-  CallbackCall(callback, resultHandler).execute(args);
+  CBLDart::CallbackCall(callback, resultHandler).execute(args);
 
   auto newProperties = CBLDocument_MutableProperties(documentBeingSavedCopy);
   CBLDocument_SetProperties(documentBeingSaved, newProperties);
@@ -325,7 +327,7 @@ bool CBLDart_SaveConflictHandlerWrapper(
 }
 
 uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandler(
-    CBLDatabase *db, CBLDocument *doc, Callback *conflictHandler,
+    CBLDatabase *db, CBLDocument *doc, CBLDart::Callback *conflictHandler,
     CBLError *errorOut) {
   return CBLDatabase_SaveDocumentWithConflictHandler(
       db, doc, CBLDart_SaveConflictHandlerWrapper, (void *)conflictHandler,
@@ -357,17 +359,17 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
 
 void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            FLString docID) {
-  auto &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<CBLDart::Callback *>(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
 
-  CallbackCall(callback).execute(args);
+  CBLDart::CallbackCall(callback).execute(args);
 }
 
-void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
-                                                   const CBLDart_FLString docID,
-                                                   Callback *listener) {
+void CBLDart_CBLDatabase_AddDocumentChangeListener(
+    const CBLDatabase *db, const CBLDart_FLString docID,
+    CBLDart::Callback *listener) {
   auto listenerToken = CBLDatabase_AddDocumentChangeListener(
       db, CBLDart_FLStringFromDart(docID),
       CBLDart_DocumentChangeListenerWrapper, (void *)listener);
@@ -377,7 +379,7 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
 
 void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            unsigned numDocs, FLString *docIDs) {
-  auto &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<CBLDart::Callback *>(context);
 
   auto docIDs_ = new Dart_CObject[numDocs];
   auto argsValues = new Dart_CObject *[numDocs];
@@ -393,14 +395,14 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
   args.value.as_array.length = numDocs;
   args.value.as_array.values = argsValues;
 
-  CallbackCall(callback).execute(args);
+  CBLDart::CallbackCall(callback).execute(args);
 
   delete[] docIDs_;
   delete[] argsValues;
 }
 
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           Callback *listener) {
+                                           CBLDart::Callback *listener) {
   auto listenerToken = CBLDatabase_AddChangeListener(
       db, CBLDart_DatabaseChangeListenerWrapper, (void *)listener);
 
@@ -468,16 +470,16 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
 
 void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
                                         CBLListenerToken *token) {
-  auto &callback = *reinterpret_cast<Callback *>(context);
+  auto &callback = *reinterpret_cast<CBLDart::Callback *>(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
 
-  CallbackCall(callback).execute(args);
+  CBLDart::CallbackCall(callback).execute(args);
 }
 
-CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(CBLQuery *query,
-                                                     Callback *listener) {
+CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
+    CBLQuery *query, CBLDart::Callback *listener) {
   auto listenerToken = CBLQuery_AddChangeListener(
       query, CBLDart_QueryChangeListenerWrapper, (void *)listener);
 
@@ -538,16 +540,17 @@ CBLAuthenticator *CBLDart_CBLAuth_CreateSession(CBLDart_FLString sessionID,
 }
 
 struct ReplicatorCallbackWrapperContext {
-  Callback *pullFilter;
-  Callback *pushFilter;
-  Callback *conflictResolver;
+  CBLDart::Callback *pullFilter;
+  CBLDart::Callback *pushFilter;
+  CBLDart::Callback *conflictResolver;
 };
 
 std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *>
     replicatorCallbackWrapperContexts;
 std::mutex replicatorCallbackWrapperContexts_mutex;
 
-bool CBLDart_ReplicatorFilterWrapper(Callback *callback, CBLDocument *document,
+bool CBLDart_ReplicatorFilterWrapper(CBLDart::Callback *callback,
+                                     CBLDocument *document,
                                      CBLDocumentFlags flags) {
   Dart_CObject document_;
   CBLDart_CObject_SetPointer(&document_, document);
@@ -569,7 +572,7 @@ bool CBLDart_ReplicatorFilterWrapper(Callback *callback, CBLDocument *document,
     descision = result->value.as_bool;
   };
 
-  CallbackCall(*callback, resultHandler).execute(args);
+  CBLDart::CallbackCall(*callback, resultHandler).execute(args);
 
   return descision;
 }
@@ -640,7 +643,7 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
     }
   };
 
-  CallbackCall(*callback, resultHandler).execute(args);
+  CBLDart::CallbackCall(*callback, resultHandler).execute(args);
 
   if (resolverThrewException) {
     throw std::runtime_error("Replicator conflict resolver threw an exception");
@@ -748,7 +751,7 @@ uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
 void CBLDart_Replicator_ChangeListenerWrapper(
     void *context, CBLReplicator *replicator,
     const CBLReplicatorStatus *status) {
-  auto callback = reinterpret_cast<Callback *>(context);
+  auto callback = reinterpret_cast<CBLDart::Callback *>(context);
 
   Dart_CObject status_;
   CBLDart_CObject_SetPointer(&status_, status);
@@ -760,11 +763,11 @@ void CBLDart_Replicator_ChangeListenerWrapper(
   args.value.as_array.length = 1;
   args.value.as_array.values = argsValues;
 
-  CallbackCall(*callback, true).execute(args);
+  CBLDart::CallbackCall(*callback, true).execute(args);
 }
 
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
-                                             Callback *listener) {
+                                             CBLDart::Callback *listener) {
   auto listenerToken = CBLReplicator_AddChangeListener(
       replicator, CBLDart_Replicator_ChangeListenerWrapper, (void *)listener);
 
@@ -774,7 +777,7 @@ void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
 void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     void *context, CBLReplicator *replicator, bool isPush,
     unsigned numDocuments, const CBLReplicatedDocument *documents) {
-  auto callback = reinterpret_cast<Callback *>(context);
+  auto callback = reinterpret_cast<CBLDart::Callback *>(context);
 
   Dart_CObject isPush_;
   isPush_.type = Dart_CObject_kBool;
@@ -805,13 +808,13 @@ void CBLDart_Replicator_DocumentReplicationListenerWrapper(
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  CallbackCall(*callback, true).execute(args);
+  CBLDart::CallbackCall(*callback, true).execute(args);
 
   delete[] documents_;
 }
 
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, Callback *listener) {
+    CBLReplicator *replicator, CBLDart::Callback *listener) {
   auto listenerToken = CBLReplicator_AddDocumentReplicationListener(
       replicator, CBLDart_Replicator_DocumentReplicationListenerWrapper,
       (void *)listener);

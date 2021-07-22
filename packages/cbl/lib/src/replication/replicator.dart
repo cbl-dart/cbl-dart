@@ -457,7 +457,7 @@ NativeCallback _wrapReplicationFilter(
         doc,
         message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
       );
-    }, errorResult: false)
+    }, errorResult: false, debugName: 'ReplicationFilter')
       ..errors.listen(null);
 
 NativeCallback _wrapConflictResolver(
@@ -512,5 +512,5 @@ NativeCallback _wrapConflictResolver(
       }
 
       return resolvedPointer?.address;
-    })
+    }, debugName: 'ConflictResolver')
       ..errors.listen(null);

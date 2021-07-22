@@ -113,11 +113,6 @@ void CBLDart_ReleaseDartObjectBoundFLValue(void *dart_callback_data,
 
 void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
                                       uint8_t retain) {
-  // There is nothing to be done for `null` und `undefined`.
-  if (value == NULL ||  // The null pointer represents `undefined` values.
-      value == kFLNullValue)
-    return;
-
   if (retain) FLValue_Retain(value);
 
   Dart_NewFinalizableHandle_DL(object, (void *)value, 0,
