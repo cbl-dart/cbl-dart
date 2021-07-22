@@ -270,8 +270,8 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
       parent: this,
       worker: _database.native.worker,
       createRegisterCallbackRequest: (callback) => AddReplicatorChangeListener(
-        _replicator.pointerUnsafe,
-        callback.native.pointerUnsafe,
+        _replicator.pointer,
+        callback.native.pointer,
       ),
       createEvent: (_, arguments) {
         final message =
@@ -301,8 +301,8 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
             worker: _database.native.worker,
             createRegisterCallbackRequest: (callback) =>
                 AddReplicatorDocumentListener(
-              _replicator.pointerUnsafe,
-              callback.native.pointerUnsafe,
+              _replicator.pointer,
+              callback.native.pointer,
             ),
             createEvent: (_, arguments) {
               final message =

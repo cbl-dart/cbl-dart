@@ -9,6 +9,7 @@ import 'document/blob.dart';
 import 'document/common.dart';
 import 'fleece/fleece.dart';
 import 'fleece/integration/integration.dart';
+import 'native_object.dart';
 import 'streams.dart';
 import 'utils.dart';
 import 'worker/cbl_worker.dart';
@@ -218,6 +219,18 @@ void debugCouchbaseLiteIsInitialized() {
   CouchbaseLite._initialization.debugCheckHasExecuted();
 }
 
+/// Setting this flag to `true` enables printing of debug information for 
+/// [CblRefCountedObject] in debug builds.
+bool get debugRefCounted => _debugRefCountedObject;
+bool _debugRefCountedObject = false;
+
+set debugRefCounted(bool value) {
+  if (_debugRefCountedObject != value) {
+    _debugRefCountedObject = value;
+    CBLBindings.instance.base.debugRefCounted = value;
+  }
+}
+
 late WorkerFactory _workerFactory;
 
 /// The global worker factory used by all resources which need to create
@@ -300,7 +313,7 @@ class CouchbaseLite {
         'is `true`',
       );
 
-      _logBindings.setCallback(callback.native.pointerUnsafe);
+      callback.native.keepAlive(_logBindings.setCallback);
     },
     createEvent: (arguments) {
       final message = LogCallbackMessage.fromArguments(arguments);

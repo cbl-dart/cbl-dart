@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:cbl/src/native_object.dart';
 import 'package:meta/meta.dart';
 
 import 'native_callback.dart';
@@ -103,8 +104,9 @@ class CallbackStreamController<T, S>
     });
 
     try {
-      _registrationResult =
-          await worker.execute(createRegisterCallbackRequest(_callback));
+      _registrationResult = await runKeepAlive(() {
+        return worker.execute(createRegisterCallbackRequest(_callback));
+      });
       callbackRegistered.complete(true);
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);
