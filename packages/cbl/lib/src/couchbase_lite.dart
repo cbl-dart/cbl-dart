@@ -302,7 +302,7 @@ class CouchbaseLite {
         'is `true`',
       );
 
-      callback.native.keepAlive(_logBindings.setCallback);
+      callback.native.call(_logBindings.setCallback);
     },
     createEvent: (arguments) {
       final message = LogCallbackMessage.fromArguments(arguments);

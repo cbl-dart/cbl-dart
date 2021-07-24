@@ -94,7 +94,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
   void close() {
     _debugLog('closing');
     _closed = true;
-    native.keepAlive(_bindings.close);
+    native.call(_bindings.close);
     _receivePort.close();
     _errorStreamController.close();
   }

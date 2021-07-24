@@ -1,9 +1,5 @@
 export 'src/couchbase_lite.dart'
-    hide
-        debugCouchbaseLiteIsInitialized,
-        workerFactory,
-        logMessage,
-        debugRefCounted;
+    hide debugCouchbaseLiteIsInitialized, logMessage, debugRefCounted;
 export 'src/database.dart' hide DatabaseImpl;
 export 'src/document/array.dart' hide ArrayImpl, MutableArrayImpl;
 export 'src/document/blob.dart' hide BlobImpl, BlobImplSetter;

@@ -3,13 +3,13 @@ import 'dart:collection';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:cbl/src/support/resource.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/native_object.dart';
+import '../support/resource.dart';
 import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
@@ -132,7 +132,7 @@ class DocumentImpl
   @override
   final NativeObject<CBLDocument> native;
 
-  late final _root = native.keepAlive((pointer) => MRoot.fromValue(
+  late final _root = native.call((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
         isMutable: false,
@@ -141,13 +141,13 @@ class DocumentImpl
   late final Dictionary _properties = _root.asNative as Dictionary;
 
   @override
-  String get id => native.keepAlive(_documentBindings.id);
+  String get id => native.call(_documentBindings.id);
 
   @override
-  String? get revisionId => native.keepAlive(_documentBindings.revisionId);
+  String? get revisionId => native.call(_documentBindings.revisionId);
 
   @override
-  int get sequence => native.keepAlive(_documentBindings.sequence);
+  int get sequence => native.call(_documentBindings.sequence);
 
   @override
   int get length => _properties.length;
@@ -193,7 +193,7 @@ class DocumentImpl
 
   @override
   MutableDocument toMutable() => MutableDocumentImpl(
-        doc: native.keepAlive(_mutableDocumentBindings.mutableCopy),
+        doc: native.call(_mutableDocumentBindings.mutableCopy),
         // `mutableCopy` returns a new instance with +1 ref count.
         retain: false,
         debugCreator: 'Document.toMutable()',
@@ -263,7 +263,7 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   }
 
   @override
-  late final _root = native.keepAlive((pointer) => MRoot.fromValue(
+  late final _root = native.call((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
         isMutable: true,
@@ -281,7 +281,7 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
     final encodeToFuture = _root.encodeTo(encoder);
     assert(encodeToFuture is! Future);
     final properties = encoder.finishProperties();
-    runKeepAlive(() => _mutableDocumentBindings.setProperties(
+    runNativeCalls(() => _mutableDocumentBindings.setProperties(
           native.pointer.cast(),
           properties.native.pointer.cast(),
         ));

@@ -155,7 +155,7 @@ void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
   level_.value.as_int32 = int32_t(level);
 
   Dart_CObject message_;
-  CBLDart_CObject_SetFLString(&message_, &message);
+  CBLDart_CObject_SetFLString(&message_, message);
 
   Dart_CObject *argsValues[] = {&domain_, &level_, &message_};
 
@@ -382,12 +382,12 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
                                            unsigned numDocs, FLString *docIDs) {
   auto &callback = *reinterpret_cast<CBLDart::AsyncCallback *>(context);
 
-  auto docIDs_ = new Dart_CObject[numDocs];
-  auto argsValues = new Dart_CObject *[numDocs];
+  Dart_CObject docIDs_[numDocs];
+  Dart_CObject *argsValues[numDocs];
 
   for (size_t i = 0; i < numDocs; i++) {
     auto docID_ = &docIDs_[i];
-    CBLDart_CObject_SetFLString(docID_, &docIDs[i]);
+    CBLDart_CObject_SetFLString(docID_, docIDs[i]);
     argsValues[i] = docID_;
   }
 
@@ -397,9 +397,6 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
   args.value.as_array.values = argsValues;
 
   CBLDart::AsyncCallbackCall(callback).execute(args);
-
-  delete[] docIDs_;
-  delete[] argsValues;
 }
 
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
@@ -602,7 +599,7 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   auto callback = wrapperContext->conflictResolver;
 
   Dart_CObject documentID_;
-  CBLDart_CObject_SetFLString(&documentID_, &documentID);
+  CBLDart_CObject_SetFLString(&documentID_, documentID);
 
   Dart_CObject local;
   CBLDart_CObject_SetPointer(&local, localDocument);
@@ -749,22 +746,83 @@ uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
       replicator, CBLDart_FLStringFromDart(docId), errorOut);
 }
 
+class CObject_ReplicatorStatus {
+ public:
+  void init(const CBLReplicatorStatus *status) {
+    assert(!errorMessageStr.buf);
+
+    auto hasError = status->error.code != 0;
+
+    // Init strings.
+    if (hasError) {
+      errorMessageStr = CBLError_Message(&status->error);
+    }
+
+    // Build CObject.
+    object.type = Dart_CObject_kArray;
+    object.value.as_array.length = hasError ? 6 : 3;
+    object.value.as_array.values = objectValues;
+
+    objectValues[0] = &activity;
+    activity.type = Dart_CObject_kInt32;
+    activity.value.as_int32 = status->activity;
+
+    objectValues[1] = &progressComplete;
+    progressComplete.type = Dart_CObject_kDouble;
+    progressComplete.value.as_double = status->progress.complete;
+
+    objectValues[2] = &progressDocumentCount;
+    progressDocumentCount.type = Dart_CObject_kInt64;
+    progressDocumentCount.value.as_int64 = status->progress.documentCount;
+
+    if (hasError) {
+      objectValues[3] = &errorDomain;
+      errorDomain.type = Dart_CObject_kInt32;
+      errorDomain.value.as_int32 = status->error.domain;
+
+      objectValues[4] = &errorCode;
+      errorCode.type = Dart_CObject_kInt32;
+      errorCode.value.as_int32 = status->error.code;
+
+      objectValues[5] = &errorMessage;
+      CBLDart_CObject_SetFLString(&errorMessage,
+                                  static_cast<FLString>(errorMessageStr));
+    }
+  }
+
+  ~CObject_ReplicatorStatus() { FLSliceResult_Release(errorMessageStr); }
+
+  Dart_CObject *cObject() { return &object; }
+
+ private:
+  Dart_CObject object;
+  Dart_CObject *objectValues[6];
+  Dart_CObject activity;
+  Dart_CObject progressComplete;
+  Dart_CObject progressDocumentCount;
+  Dart_CObject errorDomain;
+  Dart_CObject errorCode;
+  Dart_CObject errorMessage;
+
+  FLSliceResult errorMessageStr = {nullptr, 0};
+};
+
 void CBLDart_Replicator_ChangeListenerWrapper(
     void *context, CBLReplicator *replicator,
     const CBLReplicatorStatus *status) {
   auto callback = reinterpret_cast<CBLDart::AsyncCallback *>(context);
 
-  Dart_CObject status_;
-  CBLDart_CObject_SetPointer(&status_, status);
+  CObject_ReplicatorStatus cObjectStatus;
+  cObjectStatus.init(status);
 
-  Dart_CObject *argsValues[] = {&status_};
+  Dart_CObject *argsValues[] = {cObjectStatus.cObject()};
 
   Dart_CObject args;
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = 1;
   args.value.as_array.values = argsValues;
 
-  CBLDart::AsyncCallbackCall(*callback, true).execute(args);
+  CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
@@ -775,6 +833,60 @@ void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
   listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
 }
 
+class CObject_ReplicatedDocument {
+ public:
+  void init(const CBLReplicatedDocument *document) {
+    assert(!errorMessageStr);
+
+    auto hasError = document->error.code != 0;
+
+    if (hasError) {
+      errorMessageStr = CBLError_Message(&document->error);
+    }
+
+    // Build CObject.
+    object.type = Dart_CObject_kArray;
+    object.value.as_array.length = hasError ? 5 : 2;
+    object.value.as_array.values = objectValues;
+
+    objectValues[0] = &id;
+    CBLDart_CObject_SetFLString(&id, document->ID);
+
+    objectValues[1] = &flags;
+    flags.type = Dart_CObject_kInt32;
+    flags.value.as_int32 = document->flags;
+
+    if (hasError) {
+      objectValues[2] = &errorDomain;
+      errorDomain.type = Dart_CObject_kInt32;
+      errorDomain.value.as_int32 = document->error.domain;
+
+      objectValues[3] = &errorCode;
+      errorCode.type = Dart_CObject_kInt32;
+      errorCode.value.as_int32 = document->error.code;
+
+      objectValues[4] = &errorMessage;
+      CBLDart_CObject_SetFLString(&errorMessage,
+                                  static_cast<FLString>(errorMessageStr));
+    }
+  }
+
+  ~CObject_ReplicatedDocument() { FLSliceResult_Release(errorMessageStr); }
+
+  Dart_CObject *cObject() { return &object; }
+
+ private:
+  Dart_CObject object;
+  Dart_CObject *objectValues[5];
+  Dart_CObject id;
+  Dart_CObject flags;
+  Dart_CObject errorDomain;
+  Dart_CObject errorCode;
+  Dart_CObject errorMessage;
+
+  FLSliceResult errorMessageStr = {nullptr, 0};
+};
+
 void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     void *context, CBLReplicator *replicator, bool isPush,
     unsigned numDocuments, const CBLReplicatedDocument *documents) {
@@ -784,34 +896,28 @@ void CBLDart_Replicator_DocumentReplicationListenerWrapper(
   isPush_.type = Dart_CObject_kBool;
   isPush_.value.as_bool = isPush;
 
-  auto documents_ = new CBLDart_ReplicatedDocument[numDocuments];
+  CObject_ReplicatedDocument cObjectDocuments[numDocuments];
+  Dart_CObject *cObjectDocumentArrayValues[numDocuments];
 
   for (size_t i = 0; i < numDocuments; i++) {
-    auto document = &documents[i];
-    auto document_ = &documents_[i];
-
-    document_->ID = CBLDart_FLStringToDart(document->ID);
-    document_->flags = document->flags;
-    document_->error = document->error;
+    auto cObjectDocument = &cObjectDocuments[i];
+    cObjectDocument->init(&documents[i]);
+    cObjectDocumentArrayValues[i] = cObjectDocument->cObject();
   }
 
-  Dart_CObject numDocuments_;
-  numDocuments_.type = Dart_CObject_kInt64;
-  numDocuments_.value.as_int64 = numDocuments;
+  Dart_CObject cObjectDocumentsArray;
+  cObjectDocumentsArray.type = Dart_CObject_kArray;
+  cObjectDocumentsArray.value.as_array.length = numDocuments;
+  cObjectDocumentsArray.value.as_array.values = cObjectDocumentArrayValues;
 
-  Dart_CObject documentsPointer_;
-  CBLDart_CObject_SetPointer(&documentsPointer_, documents_);
-
-  Dart_CObject *argsValues[] = {&isPush_, &numDocuments_, &documentsPointer_};
+  Dart_CObject *argsValues[] = {&isPush_, &cObjectDocumentsArray};
 
   Dart_CObject args;
   args.type = Dart_CObject_kArray;
-  args.value.as_array.length = 3;
+  args.value.as_array.length = 2;
   args.value.as_array.values = argsValues;
 
-  CBLDart::AsyncCallbackCall(*callback, true).execute(args);
-
-  delete[] documents_;
+  CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(

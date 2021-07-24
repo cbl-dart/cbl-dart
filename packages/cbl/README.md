@@ -23,8 +23,6 @@
 ## Features - Dart API
 
 - Calls Couchbase Lite C API through FFI
-- Expensive operations run in separate isolate
-  - No blocking of calling isolate
 - Streams for event based APIs
 - Support for Flutter apps
 - Support for standalone Dart (for example a CLI)
@@ -78,7 +76,7 @@ import 'package:path_provider/path_provider.dart';
 Future<void> openDatabase() async {
   final documentsDir = await getApplicationDocumentsDirectory();
 
-  final db = await Database.open(
+  final db = Database.open(
       'MyFirstDB',
       config: DatabaseConfiguration(directory: documentsDir.path),
   );
@@ -89,7 +87,9 @@ Future<void> openDatabase() async {
     'from': 'Alice',
   });
 
-  await db.saveDocument(doc);
+  db.saveDocument(doc);
+
+  await db.close();
 }
 ```
 
@@ -106,4 +106,4 @@ Read [CONTRIBUTING] to get started developing.
 
 > **Warning:** This is not an official Couchbase product.
 
-[CONTRIBUTING]: ../../CONTRIBUTING.md
+[contributing]: ../../CONTRIBUTING.md

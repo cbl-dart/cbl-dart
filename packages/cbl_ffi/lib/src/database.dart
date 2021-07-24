@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
+import '../cbl_ffi.dart';
+import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'document.dart';
 import 'fleece.dart';
-import 'async_callback.dart';
 import 'query.dart';
 import 'utils.dart';
 

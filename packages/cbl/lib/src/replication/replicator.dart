@@ -107,7 +107,7 @@ abstract class Replicator implements ClosableResource {
   ReplicatorConfiguration get config;
 
   /// Returns this replicator's status.
-  ReplicatorStatus status();
+  ReplicatorStatus get status;
 
   /// Starts this replicator with an option to [reset] the local checkpoint of
   /// the replicator.
@@ -129,7 +129,7 @@ abstract class Replicator implements ClosableResource {
 
   /// Returns a [Stream] which emits a [ReplicatorChange] event when this
   /// replicators [status] changes.
-  Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false});
+  Stream<ReplicatorChange> changes();
 
   /// Returns a [Stream] wich emits a [DocumentReplication] event when a set
   /// of [Document]s have been replicated.
@@ -145,7 +145,7 @@ abstract class Replicator implements ClosableResource {
   ///
   /// This API is a snapshot and results may change between the time the call
   /// was mad and the time the call returns.
-  Set<String> pendingDocumentIds();
+  Set<String> get pendingDocumentIds;
 
   /// Returns whether the [Document] with the given [documentId] has revisions
   /// pending push.
@@ -160,10 +160,11 @@ late final _bindings = CBLBindings.instance.replicator;
 class ReplicatorImpl
     with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
     implements Replicator {
-  ReplicatorImpl(this._config, {required String debugCreator}) {
+  ReplicatorImpl(ReplicatorConfiguration config, {required String debugCreator})
+      : _config = ReplicatorConfiguration.from(config) {
     final database = _database = (_config.database as DatabaseImpl);
 
-    runKeepAlive(() {
+    runNativeCalls(() {
       final pushFilterCallback =
           config.pushFilter?.let((it) => _wrapReplicationFilter(database, it));
       final pullFilterCallback =
@@ -181,34 +182,32 @@ class ReplicatorImpl
       final authenticator = config.createAuthenticator();
 
       try {
-        final replicator =
-            withCBLErrorExceptionTranslation(() => _bindings.createReplicator(
-                  database.native.pointer,
-                  endpoint,
-                  config.replicatorType.toCBLReplicatorType(),
-                  config.continuous,
-                  null,
-                  config.maxRetries + 1,
-                  config.maxRetryWaitTime.inSeconds,
-                  config.heartbeat.inSeconds,
-                  authenticator,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  config.headers
-                      ?.let((it) => fl.MutableDict(it).native.pointer.cast()),
-                  config.pinnedServerCertificate,
-                  null,
-                  config.channels
-                      ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-                  config.documentIds
-                      ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-                  pushFilterCallback?.native.pointer,
-                  pullFilterCallback?.native.pointer,
-                  conflictResolverCallback?.native.pointer,
-                ));
+        final replicator = _bindings.createReplicator(
+          database.native.pointer,
+          endpoint,
+          config.replicatorType.toCBLReplicatorType(),
+          config.continuous,
+          null,
+          config.maxRetries + 1,
+          config.maxRetryWaitTime.inSeconds,
+          config.heartbeat.inSeconds,
+          authenticator,
+          null,
+          null,
+          null,
+          null,
+          null,
+          config.headers?.let((it) => fl.MutableDict(it).native.pointer.cast()),
+          config.pinnedServerCertificate,
+          null,
+          config.channels
+              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+          config.documentIds
+              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+          pushFilterCallback?.native.pointer,
+          pullFilterCallback?.native.pointer,
+          conflictResolverCallback?.native.pointer,
+        );
 
         native = CBLReplicatorObject(
           replicator,
@@ -241,50 +240,39 @@ class ReplicatorImpl
   ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
 
   @override
-  ReplicatorStatus status() => useSync(_status);
+  ReplicatorStatus get status => useSync(() => _status);
 
-  ReplicatorStatus _status() =>
-      native.keepAlive(_bindings.status).toReplicatorStatus();
+  ReplicatorStatus get _status =>
+      native.call(_bindings.status).toReplicatorStatus();
 
   @override
-  void start({bool reset = false}) => useSync(
-      () => native.keepAlive((pointer) => _bindings.start(pointer, reset)));
+  void start({bool reset = false}) =>
+      useSync(() => native.call((pointer) => _bindings.start(pointer, reset)));
 
   @override
   void stop() => useSync(_stop);
 
-  void _stop() => native.keepAlive(_bindings.stop);
+  void _stop() => native.call(_bindings.stop);
 
   @override
-  Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false}) =>
-      useSync(() => _changes(startWithCurrentStatus: startWithCurrentStatus));
+  Stream<ReplicatorChange> changes() => useSync(_changes);
 
-  Stream<ReplicatorChange> _changes({bool startWithCurrentStatus = false}) {
-    final changes = CallbackStreamController<ReplicatorChange, void>(
-      parent: this,
-      startStream: (callback) => _bindings.addChangeListener(
-        native.pointer,
-        callback.native.pointer,
-      ),
-      createEvent: (_, arguments) {
-        final message =
-            ReplicatorStatusCallbackMessage.fromArguments(arguments);
-        return ReplicatorChangeImpl(
-          this,
-          message.status.toReplicatorStatus(),
-        );
-      },
-    ).stream;
-
-    if (startWithCurrentStatus) {
-      return changeStreamWithInitialValue(
-        createInitialValue: () => ReplicatorChangeImpl(this, _status()),
-        createChangeStream: () => changes,
-      );
-    } else {
-      return changes;
-    }
-  }
+  Stream<ReplicatorChange> _changes() =>
+      CallbackStreamController<ReplicatorChange, void>(
+        parent: this,
+        startStream: (callback) => _bindings.addChangeListener(
+          native.pointer,
+          callback.native.pointer,
+        ),
+        createEvent: (_, arguments) {
+          final message =
+              ReplicatorStatusCallbackMessage.fromArguments(arguments);
+          return ReplicatorChangeImpl(
+            this,
+            message.status.toReplicatorStatus(),
+          );
+        },
+      ).stream;
 
   @override
   Stream<DocumentReplication> documentReplications() =>
@@ -298,19 +286,18 @@ class ReplicatorImpl
               final message =
                   DocumentReplicationsCallbackMessage.fromArguments(arguments);
 
-              final documents = List.generate(
-                message.documentCount,
-                (index) => message.documents.elementAt(index),
-              ).map((it) => it.ref.toReplicatedDocument()).toList();
+              final documents = message.documents
+                  .map((it) => it.toReplicatedDocument())
+                  .toList();
 
               return DocumentReplicationImpl(this, message.isPush, documents);
             },
           ).stream);
 
   @override
-  Set<String> pendingDocumentIds() => useSync(() {
+  Set<String> get pendingDocumentIds => useSync(() {
         final dict = fl.Dict.fromPointer(
-          native.keepAlive(_bindings.pendingDocumentIDs),
+          native.call(_bindings.pendingDocumentIDs),
           retain: false,
         );
         return dict.keys.toSet();
@@ -318,27 +305,21 @@ class ReplicatorImpl
 
   @override
   bool isDocumentPending(String documentId) =>
-      useSync(() => native.keepAlive((pointer) {
+      useSync(() => native.call((pointer) {
             return _bindings.isDocumentPending(pointer, documentId);
           }));
 
   @override
   Future<void> performClose() async {
     try {
-      final status =
-          _changes(startWithCurrentStatus: true).map((change) => change.status);
-
       var stopping = false;
-
-      await status.asyncMap((status) async {
-        if (status.activity != ReplicatorActivityLevel.stopped && !stopping) {
-          stopping = true;
+      while (_status.activity != ReplicatorActivityLevel.stopped) {
+        if (!stopping) {
           _stop();
+          stopping = true;
         }
-        return status;
-      }).firstWhere((status) {
-        return status.activity == ReplicatorActivityLevel.stopped;
-      });
+        await Future<void>.delayed(Duration(milliseconds: 100));
+      }
     } finally {
       _disposeCallbacks();
     }
@@ -384,11 +365,11 @@ extension on CBLReplicatorStatus {
       );
 }
 
-extension on CBLDart_ReplicatedDocument {
+extension on CBLReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocumentImpl(
-        ID,
+        id,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-        exception?.translate(),
+        error?.translate(),
       );
 }
 

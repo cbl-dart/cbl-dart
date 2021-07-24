@@ -15,33 +15,33 @@ void main() {
         final dbName = testDbName('DatabaseExistsWithDir');
 
         expect(
-          await Database.exists(dbName, directory: tmpDir),
+          Database.exists(dbName, directory: tmpDir),
           isFalse,
         );
 
-        final db = await Database.open(
+        final db = Database.open(
           dbName,
           config: DatabaseConfiguration(directory: tmpDir),
         );
         await db.close();
 
         expect(
-          await Database.exists(dbName, directory: tmpDir),
+          Database.exists(dbName, directory: tmpDir),
           isTrue,
         );
       });
     });
 
     group('open', () {
-      test('creates database if it does not exist', () async {
-        final db = await Database.open(
+      test('creates database if it does not exist', () {
+        final db = Database.open(
           testDbName('OpenNonExistingDatabase'),
           config: DatabaseConfiguration(
             directory: tmpDir,
           ),
         );
 
-        expect(db.path, completion(isDirectory));
+        expect(db.path, isDirectory);
       });
     });
 
@@ -49,28 +49,28 @@ void main() {
     late DatabaseConfiguration dbConfig;
     late Database db;
 
-    setUpAll(() async {
+    setUpAll(() {
       dbName = testDbName('Common');
       dbConfig = DatabaseConfiguration(directory: tmpDir);
-      db = await Database.open(dbName, config: dbConfig);
+      db = Database.open(dbName, config: dbConfig);
       addTearDown(db.close);
     });
 
     group('Database', () {
       test('name returns name of Database', () {
-        expect(db.name, completion(equals(dbName)));
+        expect(db.name, dbName);
       });
 
       test('path returns full path of Database', () {
-        expect(db.path, completion(equals('$tmpDir/$dbName.cblite2/')));
+        expect(db.path, '$tmpDir/$dbName.cblite2/');
       });
 
       test('config returns config of Database', () {
-        expect(db.config, completion(equals(dbConfig)));
+        expect(db.config, dbConfig);
       });
 
       test('close does not throw', () async {
-        final db = await Database.open(
+        final db = Database.open(
           testDbName('CloseDatabase'),
           config: dbConfig,
         );
@@ -80,185 +80,181 @@ void main() {
 
       test('delete deletes the database file', () async {
         final name = testDbName('DeleteDatabase');
-        final db = await Database.open(name, config: dbConfig);
+        final db = Database.open(name, config: dbConfig);
 
         await db.delete();
 
         expect(
           Database.exists(name, directory: dbConfig.directory!),
-          completion(isFalse),
+          isFalse,
         );
       });
 
-      test('performMaintenance: compact', () async {
-        await db.performMaintenance(MaintenanceType.compact);
+      test('performMaintenance: compact', () {
+        db.performMaintenance(MaintenanceType.compact);
       });
 
-      test('performMaintenance: reindex', () async {
-        final db = await openTestDb('PerformMaintenance|Reindex');
-        await db.createIndex('a', ValueIndex('[".type"]'));
+      test('performMaintenance: reindex', () {
+        final db = openTestDb('PerformMaintenance|Reindex');
+        db.createIndex('a', ValueIndex('[".type"]'));
         final doc = MutableDocument({'type': 'A'});
-        await db.saveDocument(doc);
-        await db.performMaintenance(MaintenanceType.reindex);
+        db.saveDocument(doc);
+        db.performMaintenance(MaintenanceType.reindex);
       });
 
-      test('performMaintenance: integrityCheck', () async {
-        await db.performMaintenance(MaintenanceType.integrityCheck);
+      test('performMaintenance: integrityCheck', () {
+        db.performMaintenance(MaintenanceType.integrityCheck);
       });
 
-      test('batch operations do not throw', () async {
-        await db.beginBatch();
-        await db.saveDocument(MutableDocument());
-        await db.endBatch();
+      test('batch operations do not throw', () {
+        db.beginBatch();
+        db.saveDocument(MutableDocument());
+        db.endBatch();
       });
 
-      test('getDocument returns null when the document does not exist',
-          () async {
-        expect(db.getDocument('x'), completion(isNull));
+      test('getDocument returns null when the document does not exist', () {
+        expect(db.getDocument('x'), isNull);
       });
 
-      test('getDocument returns the document when it exist', () async {
+      test('getDocument returns the document when it exist', () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
-        final loadedDoc = await db.getDocument(doc.id);
+        final loadedDoc = db.getDocument(doc.id);
         expect(loadedDoc, doc);
       });
 
       test('getMutableDocument returns null when the document does not exist',
-          () async {
-        expect(db.getMutableDocument('x'), completion(isNull));
+          () {
+        expect(db.getMutableDocument('x'), isNull);
       });
 
-      test('getMutableDocument returns the document when it exist', () async {
+      test('getMutableDocument returns the document when it exist', () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
-        final result = await db.getMutableDocument(doc.id);
-        expect(result!.id, equals(doc.id));
+        db.saveDocument(doc);
+        final result = db.getMutableDocument(doc.id);
+        expect(result!.id, doc.id);
       });
 
-      test('saveDocument saves the document', () async {
+      test('saveDocument saves the document', () {
         final doc = MutableDocument({'a': 'b', 'c': 4});
 
-        await db.saveDocument(doc);
-        final loadedDoc = await db.getDocument(doc.id);
+        db.saveDocument(doc);
+        final loadedDoc = db.getDocument(doc.id);
 
-        expect(loadedDoc!.toPlainMap(), equals(doc.toPlainMap()));
+        expect(loadedDoc!.toPlainMap(), doc.toPlainMap());
       });
 
-      test('saveDocumentResolving invokes the callback on conflict', () async {
+      test('saveDocumentResolving invokes the callback on conflict', () {
         final versionA = MutableDocument();
-        await db.saveDocument(versionA);
-        final versionB = (await db.getMutableDocument(versionA.id))!
+        db.saveDocument(versionA);
+        final versionB = (db.getMutableDocument(versionA.id))!
           ..setValue('b', key: 'a');
-        await db.saveDocument(versionB);
+        db.saveDocument(versionB);
 
-        await db.saveDocumentResolving(
+        db.saveDocumentResolving(
           versionA.toMutable(),
-          expectAsync2((documentBeingSaved, conflictingDocument) async {
-            expect(documentBeingSaved, equals(versionA));
-            expect(conflictingDocument, equals(versionB));
+          expectAsync2((documentBeingSaved, conflictingDocument) {
+            expect(documentBeingSaved, versionA);
+            expect(conflictingDocument, versionB);
             return true;
           }),
         );
       });
 
-      test('saveDocumentResolving cancels save if handler returns false',
-          () async {
+      test('saveDocumentResolving cancels save if handler returns false', () {
         final versionA = MutableDocument();
-        await db.saveDocument(versionA);
-        final versionB = (await db.getMutableDocument(versionA.id))!
+        db.saveDocument(versionA);
+        final versionB = (db.getMutableDocument(versionA.id))!
           ..setValue('b', key: 'a');
-        await db.saveDocument(versionB);
+        db.saveDocument(versionB);
 
         expect(
-          db.saveDocumentResolving(
+          () => db.saveDocumentResolving(
             versionA.toMutable(),
-            expectAsync2((documentBeingSaved, conflictingDocument) async {
-              expect(documentBeingSaved, equals(versionA));
-              expect(conflictingDocument, equals(versionB));
+            expectAsync2((documentBeingSaved, conflictingDocument) {
+              expect(documentBeingSaved, versionA);
+              expect(conflictingDocument, versionB);
               return false;
             }),
           ),
           throwsA(isA<CouchbaseLiteException>().having(
             (it) => it.code,
             'code',
-            equals(CouchbaseLiteErrorCode.conflict),
+            CouchbaseLiteErrorCode.conflict,
           )),
         );
       });
 
-      test('deleteDocument should remove document from the database', () async {
+      test('deleteDocument should remove document from the database', () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
-        await db.deleteDocument(doc);
-        expect(db.getDocument(doc.id), completion(isNull));
+        db.saveDocument(doc);
+        db.deleteDocument(doc);
+        expect(db.getDocument(doc.id), isNull);
       });
 
-      test('purgeDocumentById purges a document by id', () async {
+      test('purgeDocumentById purges a document by id', () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
-        await db.purgeDocumentById(doc.id);
+        db.purgeDocumentById(doc.id);
 
-        expect(db.getDocument(doc.id), completion(isNull));
+        expect(db.getDocument(doc.id), isNull);
       });
 
       test(
           'getDocumentExpiration returns null if the document has no expiration',
-          () async {
+          () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
-        expect(db.getDocumentExpiration(doc.id), completion(isNull));
+        expect(db.getDocumentExpiration(doc.id), isNull);
       });
 
       test(
           'getDocumentExpiration returns the time of expiration if the document has one',
-          () async {
+          () {
         final expiration = DateTime.now().add(Duration(days: 1));
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
-        await db.setDocumentExpiration(doc.id, expiration);
+        db.setDocumentExpiration(doc.id, expiration);
 
-        final storedExpiration = await db.getDocumentExpiration(doc.id);
+        final storedExpiration = db.getDocumentExpiration(doc.id);
 
         expect(
           storedExpiration!.millisecondsSinceEpoch,
-          equals(expiration.millisecondsSinceEpoch),
+          expiration.millisecondsSinceEpoch,
         );
       });
 
-      test('setDocumentExpiration sets a new time of expiration', () async {
+      test('setDocumentExpiration sets a new time of expiration', () {
         final expiration = DateTime.now().add(Duration(days: 1));
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
-        await db.setDocumentExpiration(doc.id, expiration);
+        db.setDocumentExpiration(doc.id, expiration);
 
-        final storedExpiration = await db.getDocumentExpiration(doc.id);
+        final storedExpiration = db.getDocumentExpiration(doc.id);
 
         expect(
           storedExpiration!.millisecondsSinceEpoch,
-          equals(expiration.millisecondsSinceEpoch),
+          expiration.millisecondsSinceEpoch,
         );
       });
 
-      test('setDocumentExpiration sets the time of expiration to null',
-          () async {
+      test('setDocumentExpiration sets the time of expiration to null', () {
         final expiration = DateTime.now().add(Duration(days: 1));
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
-        await db.setDocumentExpiration(doc.id, expiration);
-        await db.setDocumentExpiration(doc.id, null);
+        db.setDocumentExpiration(doc.id, expiration);
+        db.setDocumentExpiration(doc.id, null);
 
-        expect(db.getDocumentExpiration(doc.id), completion(isNull));
+        expect(db.getDocumentExpiration(doc.id), isNull);
       });
 
-      test('document change listener is called when the document changes',
-          () async {
+      test('document change listener is called when the document changes', () {
         final doc = MutableDocument();
 
         expect(
@@ -266,11 +262,10 @@ void main() {
           emitsInOrder(<dynamic>[null]),
         );
 
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
       });
 
-      test('database change listener is called when a document changes',
-          () async {
+      test('database change listener is called when a document changes', () {
         final doc = MutableDocument();
 
         expect(
@@ -280,7 +275,7 @@ void main() {
           ]),
         );
 
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
       });
     });
 
@@ -297,30 +292,30 @@ void main() {
         expect(doc.revisionId, isNull);
       });
 
-      test('revisionId returns string when document has been saved', () async {
+      test('revisionId returns string when document has been saved', () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
         expect(doc.revisionId, '1-581ad726ee407c8376fc94aad966051d013893c4');
       });
 
-      test('sequence returns the documents sequence', () async {
+      test('sequence returns the documents sequence', () {
         final doc = MutableDocument();
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
         expect(doc.sequence, isPositive);
       });
 
-      test('toMap returns the documents properties', () async {
+      test('toMap returns the documents properties', () {
         final props = {'a': 'b'};
         final doc = MutableDocument(props);
 
-        expect(doc.toPlainMap(), equals(props));
+        expect(doc.toPlainMap(), props);
       });
 
-      test('toMutable() returns a mutable copy of the document', () async {
+      test('toMutable() returns a mutable copy of the document', () {
         final doc = MutableDocument({'a': 'b'});
-        await db.saveDocument(doc);
+        db.saveDocument(doc);
 
         expect(
           doc.toMutable(),
@@ -337,7 +332,7 @@ void main() {
       test('supports specifying an id', () {
         final doc = MutableDocument.withId('id');
 
-        expect(doc.id, equals('id'));
+        expect(doc.id, 'id');
       });
 
       test('supports generating an id', () {
@@ -350,75 +345,72 @@ void main() {
     group('Index', () {
       late Database db;
 
-      setUp(() async {
-        db = await openTestDb('Index');
+      setUp(() {
+        db = openTestDb('Index');
       });
 
-      test('createIndex should work with ValueIndex', () async {
-        await db.createIndex('a', ValueIndex('[[".a"]]'));
+      test('createIndex should work with ValueIndex', () {
+        db.createIndex('a', ValueIndex('[[".a"]]'));
 
-        final q = await db.query(N1QLQuery('SELECT * WHERE a = "a"'));
+        final q = db.query(N1QLQuery('SELECT * WHERE a = "a"'));
 
-        final explain = await q.explain();
+        final explain = q.explain();
 
         expect(explain, contains('USING INDEX a'));
       });
 
-      test('createIndex should work with FullTextIndex', () async {
-        await db.createIndex('a', FullTextIndex('[[".a"]]'));
+      test('createIndex should work with FullTextIndex', () {
+        db.createIndex('a', FullTextIndex('[[".a"]]'));
 
-        final q = await db.query(N1QLQuery(
+        final q = db.query(N1QLQuery(
           "SELECT * WHERE MATCH('a', 'query')",
         ));
 
-        final explain = await q.explain();
+        final explain = q.explain();
 
         expect(explain, contains('["MATCH()","a","query"]'));
       });
 
-      test('deleteIndex should delete the given index', () async {
-        await db.createIndex('a', ValueIndex('[[".a"]]'));
+      test('deleteIndex should delete the given index', () {
+        db.createIndex('a', ValueIndex('[[".a"]]'));
 
-        expect(await db.indexNames(), equals(['a']));
+        expect(db.indexNames(), ['a']);
 
-        await db.deleteIndex('a');
+        db.deleteIndex('a');
 
-        expect(await db.indexNames(), isEmpty);
+        expect(db.indexNames(), isEmpty);
       });
 
-      test('indexNames should return the names of all existing indexes',
-          () async {
-        expect(await db.indexNames(), isEmpty);
+      test('indexNames should return the names of all existing indexes', () {
+        expect(db.indexNames(), isEmpty);
 
-        await db.createIndex('a', ValueIndex('[[".a"]]'));
+        db.createIndex('a', ValueIndex('[[".a"]]'));
 
-        expect(db.indexNames(), completion(equals(['a'])));
+        expect(db.indexNames(), ['a']);
       });
     });
 
     group('Query', () {
       late Database db;
 
-      setUp(() async {
-        db = await openTestDb('Query');
+      setUp(() {
+        db = openTestDb('Query');
       });
 
-      test('execute query with parameters', () async {
-        final q =
-            await db.query(N1QLQuery(r'SELECT doc WHERE META().id = $ID'));
-        await db.saveDocument(MutableDocument.withId('A'));
+      test('execute query with parameters', () {
+        final q = db.query(N1QLQuery(r'SELECT doc WHERE META().id = $ID'));
+        db.saveDocument(MutableDocument.withId('A'));
 
         q.parameters.setValue('A', name: 'ID');
-        expect((await q.execute()), isNotEmpty);
+        expect((q.execute()), isNotEmpty);
 
         q.parameters.setValue('B', name: 'ID');
-        expect((await q.execute()), isEmpty);
+        expect((q.execute()), isEmpty);
       });
 
       test('listen to query with parameters', () async {
-        final q =
-            await db.query(N1QLQuery(r'SELECT doc WHERE META().id = $ID'));
-        await db.saveDocument(MutableDocument.withId('A'));
+        final q = db.query(N1QLQuery(r'SELECT doc WHERE META().id = $ID'));
+        db.saveDocument(MutableDocument.withId('A'));
 
         q.parameters.setValue('A', name: 'ID');
         expect((await q.changes().first), isNotEmpty);
@@ -428,13 +420,13 @@ void main() {
       });
 
       test('execute does not throw', () async {
-        final q = await db.query(N1QLQuery('SELECT doc'));
-        expect(q.execute(), completion(isEmpty));
+        final q = db.query(N1QLQuery('SELECT doc'));
+        expect(q.execute(), isEmpty);
       });
 
-      test('explain returns the query plan explanation', () async {
-        final q = await db.query(N1QLQuery('SELECT doc'));
-        final queryPlan = await q.explain();
+      test('explain returns the query plan explanation', () {
+        final q = db.query(N1QLQuery('SELECT doc'));
+        final queryPlan = q.explain();
 
         expect(
           queryPlan,
@@ -445,18 +437,18 @@ void main() {
         );
       });
 
-      test('columCount returns correct count', () async {
-        final q = await db.query(N1QLQuery('SELECT a'));
-        expect(q.columnCount(), completion(equals(1)));
+      test('columCount returns correct count', () {
+        final q = db.query(N1QLQuery('SELECT a'));
+        expect(q.columnCount(), 1);
       });
 
-      test('columnName returns correct name', () async {
-        final q = await db.query(N1QLQuery('SELECT a'));
-        expect(q.columnName(0), completion(equals('a')));
+      test('columnName returns correct name', () {
+        final q = db.query(N1QLQuery('SELECT a'));
+        expect(q.columnName(0), 'a');
       });
 
-      test('listener is notified of changes', () async {
-        final q = await db.query(N1QLQuery(
+      test('listener is notified of changes', () {
+        final q = db.query(N1QLQuery(
           'SELECT a FROM _default AS a WHERE a.b = "c"',
         ));
 
@@ -483,7 +475,7 @@ void main() {
 
       test('bad query: error position highlighting', () {
         expect(
-          db.query(N1QLQuery('SELECT foo()')),
+          () => db.query(N1QLQuery('SELECT foo()')),
           throwsA(isA<CouchbaseLiteException>().having(
             (it) => it.toString(),
             'toString()',
@@ -502,26 +494,26 @@ SELECT foo()
         // https://github.com/couchbase/couchbase-lite-C/issues/149
         test('supports getting column by name', () async {
           final doc = MutableDocument.withId('ResultSetColumnByName');
-          await db.saveDocument(doc);
+          db.saveDocument(doc);
 
-          final q = await db.query(
+          final q = db.query(
               N1QLQuery(r'SELECT META().id AS id_ WHERE META().id = $ID'));
           q.parameters.setString(doc.id, name: 'ID');
 
-          final resultSet = await q.execute();
+          final resultSet = q.execute();
           final iterator = resultSet.iterator..moveNext();
           expect(iterator.current['id_'] as String, doc.id);
         });
 
         test('supports getting column by index', () async {
           final doc = MutableDocument.withId('ResultSetColumnIndex');
-          await db.saveDocument(doc);
+          db.saveDocument(doc);
 
-          final q = await db
-              .query(N1QLQuery(r'SELECT META().id WHERE META().id = $ID'));
+          final q =
+              db.query(N1QLQuery(r'SELECT META().id WHERE META().id = $ID'));
           q.parameters.setString(doc.id, name: 'ID');
 
-          final resultSet = await q.execute();
+          final resultSet = q.execute();
           final iterator = resultSet.iterator..moveNext();
           expect(iterator.current[0] as String, doc.id);
         });
@@ -532,8 +524,8 @@ SELECT foo()
       test('open the same database twice and receive change notifications',
           () async {
         final dbName = testDbName('OpenDbTwice');
-        final dbA = await openTestDb(dbName, useNameDirectly: true);
-        final dbB = await openTestDb(dbName, useNameDirectly: true);
+        final dbA = openTestDb(dbName, useNameDirectly: true);
+        final dbB = openTestDb(dbName, useNameDirectly: true);
         final doc = MutableDocument();
 
         expect(
@@ -557,34 +549,34 @@ SELECT foo()
         // ready use that instead of this workaround
         await Future<void>.delayed(Duration(milliseconds: 50));
 
-        await dbB.saveDocument(doc);
+        dbB.saveDocument(doc);
       });
 
-      test('N1QL meal planner example', () async {
-        await db.createIndex('date', ValueIndex('[".type"]'));
-        await db.createIndex('group_index', ValueIndex('[".group"]'));
+      test('N1QL meal planner example', () {
+        db.createIndex('date', ValueIndex('[".type"]'));
+        db.createIndex('group_index', ValueIndex('[".group"]'));
 
         final dish = MutableDocument({
           'type': 'dish',
           'title': 'Lasagna',
         });
-        await db.saveDocument(dish);
+        db.saveDocument(dish);
 
-        await db.saveDocument(MutableDocument({
+        db.saveDocument(MutableDocument({
           'type': 'meal',
           'dishes': [dish.id],
           'group': 'fam',
           'date': '2020-06-30',
         }));
 
-        await db.saveDocument(MutableDocument({
+        db.saveDocument(MutableDocument({
           'type': 'meal',
           'dishes': [dish.id],
           'group': 'fam',
           'date': '2021-01-15',
         }));
 
-        final q = await db.query(N1QLQuery(
+        final q = db.query(N1QLQuery(
           r'''
           SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
           FROM _default AS dish
@@ -595,9 +587,9 @@ SELECT foo()
           ''',
         ));
 
-        print(await q.explain());
+        print(q.explain());
 
-        var resultSet = await q.execute();
+        var resultSet = q.execute();
 
         for (final result in resultSet.asDictionaries) {
           print(result);

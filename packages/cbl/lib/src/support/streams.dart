@@ -99,7 +99,7 @@ class CallbackStreamController<T, S>
     }, debugName: 'Stream<$T>');
 
     try {
-      _registrationResult = runKeepAlive(() => startStream(_callback));
+      _registrationResult = runNativeCalls(() => startStream(_callback));
       callbackRegistered.complete(true);
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);

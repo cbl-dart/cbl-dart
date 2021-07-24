@@ -6,8 +6,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
-import '../fleece/integration/integration.dart';
 import '../fleece/fleece.dart' as fl;
+import '../fleece/integration/integration.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
@@ -153,7 +153,13 @@ class CblMDelegate extends MDelegate {
               debugCreator: 'CblMDelegate.toNative()',
             );
           } else {
-            final dict = fl.Dict.fromPointer(flValue.value.cast());
+            final dict = fl.Dict.fromPointer(
+              flValue.value.cast(),
+              // This value is alive as long as the MRoot is alive and the
+              // MRoot does not necessarily read form a Doc.
+              retain: false,
+              release: false,
+            );
             return BlobImpl.fromProperties(dict.toObject());
           }
         }

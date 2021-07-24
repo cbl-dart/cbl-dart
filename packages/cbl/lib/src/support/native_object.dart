@@ -3,6 +3,8 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../errors.dart';
+
 /// Keeps a [NativeObject] alive while the [Function] [fn] is running.
 ///
 /// If [fn] returns a [Future] [object] is kept alive until the future
@@ -38,14 +40,6 @@ T keepAlive<P extends NativeType, T>(
 
 final _keepAlive = keepAlive;
 
-extension KeepAliveExtension<P extends NativeType> on NativeObject<P> {
-  /// Keeps this [NativeObject] alive while the [Function] [fn] is running.
-  ///
-  /// If [fn] returns a [Future] this object is kept alive until the future
-  /// completes.
-  R keepAlive<R>(R Function(Pointer<P> pointer) fn) => _keepAlive(this, fn);
-}
-
 @pragma('vm:never-inline')
 void _keepAliveUntil(Object? object) {}
 
@@ -69,6 +63,18 @@ T runKeepAlive<T>(T Function() body) => runZoned(
 Set<NativeObject>? get _aliveNativeObjects =>
     Zone.current[#_aliveNativeObjects] as Set<NativeObject>?;
 
+T runNativeCalls<T>(T Function() body) =>
+    runWithErrorTranslation(() => runKeepAlive(body));
+
+extension NativeObjectCallExtension<P extends NativeType> on NativeObject<P> {
+  /// Keeps this [NativeObject] alive while the [Function] [fn] is running.
+  ///
+  /// If [fn] returns a [Future] this object is kept alive until the future
+  /// completes.
+  R call<R>(R Function(Pointer<P> pointer) fn) =>
+      runWithErrorTranslation(() => _keepAlive(this, fn));
+}
+
 /// Represents an object on the native side.
 ///
 /// The lifetime of the native object is determined by the lifetime of this
@@ -83,7 +89,7 @@ class NativeObject<T extends NativeType> {
   /// The pointer to the native object.
   ///
   /// Code which access this property must be run in a
-  /// [runKeepAlive].
+  /// [runNativeCalls].
   Pointer<T> get pointer {
     final aliveNativeObjects = _aliveNativeObjects;
 
@@ -105,7 +111,7 @@ class NativeObject<T extends NativeType> {
   /// object has not been garbage collected.
   ///
   /// See:
-  /// - [runKeepAlive] for what a native object keep alive is.
+  /// - [runNativeCalls] for what a native object keep alive is.
   Pointer<T> get pointerUnsafe => _pointer;
 
   @override

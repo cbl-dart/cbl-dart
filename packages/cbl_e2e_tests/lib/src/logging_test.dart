@@ -29,7 +29,7 @@ void main() {
           ),
         );
 
-        await openTestDb('LogCallback');
+        openTestDb('LogCallback');
       },
     );
   });

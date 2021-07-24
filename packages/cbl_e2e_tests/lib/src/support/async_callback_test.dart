@@ -37,7 +37,7 @@ void main() {
       addTearDown(callback.close);
 
       callback.native
-          .keepAlive((pointer) => bindings.callForTest(pointer, argument));
+          .call((pointer) => bindings.callForTest(pointer, argument));
     });
   });
 }

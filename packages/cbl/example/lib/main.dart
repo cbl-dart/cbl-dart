@@ -16,7 +16,7 @@ Future<void> main() async {
   CouchbaseLite.initialize(libraries: getLibraries());
 
   // Now open a database.
-  final db = await Database.open(
+  final db = Database.open(
     'DB',
     config: DatabaseConfiguration(directory: Directory.current.path),
   );
@@ -30,7 +30,7 @@ Future<void> main() async {
   });
 
   // Saving a document will return an immutable [Document].
-  await db.saveDocument(doc);
+  db.saveDocument(doc);
 
   print(doc);
   print(doc.toPlainMap());

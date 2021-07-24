@@ -396,7 +396,7 @@ abstract class Database with ClosableResource {
   ///
   /// Changes made to the database file by other processes will __not__ be
   /// notified.
-  void changesOfDocument(String id);
+  Stream<void> changesOfDocument(String id);
 
   /// Creates a stream that emits a list of document ids each time documents
   /// in this databse have changed.
@@ -470,13 +470,13 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
   // === Database ==============================================================
 
   @override
-  String get name => useSync(() => native.keepAlive(_bindings.name));
+  String get name => useSync(() => native.call(_bindings.name));
 
   @override
-  String get path => useSync(() => native.keepAlive(_bindings.path));
+  String get path => useSync(() => native.call(_bindings.path));
 
   @override
-  int get count => useSync(() => native.keepAlive(_bindings.count));
+  int get count => useSync(() => native.call(_bindings.count));
 
   @override
   DatabaseConfiguration get config =>
@@ -491,23 +491,22 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
 
   @override
   void performMaintenance(MaintenanceType type) =>
-      useSync(() => native.keepAlive((pointer) => _bindings.performMaintenance(
+      useSync(() => native.call((pointer) => _bindings.performMaintenance(
             pointer,
             type.toCBLMaintenanceType(),
           )));
 
   @override
-  void beginBatch() =>
-      useSync(() => native.keepAlive(_bindings.beginTransaction));
+  void beginBatch() => useSync(() => native.call(_bindings.beginTransaction));
 
   @override
-  void endBatch() => useSync(() =>
-      native.keepAlive((pointer) => _bindings.endTransaction(pointer, true)));
+  void endBatch() => useSync(
+      () => native.call((pointer) => _bindings.endTransaction(pointer, true)));
 
   @override
   Future<void> performClose() async {
     if (_deleteWhenClosing) {
-      native.keepAlive(_bindings.delete);
+      native.call(_bindings.delete);
     }
   }
 
@@ -515,7 +514,7 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
 
   @override
   Document? getDocument(String id) => useSync(() => native
-      .keepAlive((pointer) => _bindings.getDocument(pointer, id))
+      .call((pointer) => _bindings.getDocument(pointer, id))
       ?.let((pointer) => DocumentImpl(
             database: this,
             doc: pointer,
@@ -525,7 +524,7 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
 
   @override
   MutableDocument? getMutableDocument(String id) => useSync(() => native
-      .keepAlive((pointer) => _bindings.getMutableDocument(pointer, id))
+      .call((pointer) => _bindings.getMutableDocument(pointer, id))
       ?.let((pointer) => MutableDocumentImpl(
             database: this,
             doc: pointer,
@@ -541,9 +540,9 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
       useSync(() {
         doc.database = this;
         doc.flushProperties();
-        native.keepAlive((pointer) {
+        runNativeCalls(() {
           _bindings.saveDocumentWithConcurrencyControl(
-            pointer,
+            native.pointer,
             doc.native.pointer.cast(),
             concurrency.toCBLConcurrencyControl(),
           );
@@ -579,7 +578,7 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
           return decision;
         }
 
-        runKeepAlive(() => _bindings.saveDocumentWithConflictHandler(
+        runNativeCalls(() => _bindings.saveDocumentWithConflictHandler(
               native.pointer,
               doc.native.pointer.cast(),
               _conflictHandler,
@@ -591,26 +590,25 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
     covariant DocumentImpl doc, [
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]) =>
-      useSync(() => native.keepAlive((pointer) {
+      useSync(() => runNativeCalls(() {
             _bindings.deleteDocumentWithConcurrencyControl(
-              pointer,
+              native.pointer,
               doc.native.pointer,
               concurrency.toCBLConcurrencyControl(),
             );
           }));
 
   @override
-  bool purgeDocumentById(String id) => useSync(() =>
-      native.keepAlive((pointer) => _bindings.purgeDocumentByID(pointer, id)));
+  bool purgeDocumentById(String id) => useSync(
+      () => native.call((pointer) => _bindings.purgeDocumentByID(pointer, id)));
 
   @override
-  DateTime? getDocumentExpiration(String id) => useSync(() => native
-      .keepAlive((pointer) => _bindings.getDocumentExpiration(pointer, id)));
+  DateTime? getDocumentExpiration(String id) => useSync(() =>
+      native.call((pointer) => _bindings.getDocumentExpiration(pointer, id)));
 
   @override
-  void setDocumentExpiration(String id, DateTime? time) =>
-      useSync(() => native.keepAlive(
-          (pointer) => _bindings.setDocumentExpiration(pointer, id, time)));
+  void setDocumentExpiration(String id, DateTime? time) => useSync(() => native
+      .call((pointer) => _bindings.setDocumentExpiration(pointer, id, time)));
 
   // === Changes ===============================================================
 
@@ -653,7 +651,7 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
 
   @override
   void createIndex(String name, Index index) =>
-      useSync(() => native.keepAlive((pointer) {
+      useSync(() => native.call((pointer) {
             if (index is ValueIndex) {
               _bindings.createIndex(
                 pointer,
@@ -682,13 +680,13 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
           }));
 
   @override
-  void deleteIndex(String name) => useSync(() =>
-      native.keepAlive((pointer) => _bindings.deleteIndex(pointer, name)));
+  void deleteIndex(String name) => useSync(
+      () => native.call((pointer) => _bindings.deleteIndex(pointer, name)));
 
   @override
   List<String> indexNames() => useSync(() {
         return fl.Array.fromPointer(
-          native.keepAlive(_bindings.indexNames),
+          native.call(_bindings.indexNames),
           retain: false,
         ).map((it) => it.asString!).toList();
       });

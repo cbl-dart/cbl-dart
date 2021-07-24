@@ -163,7 +163,7 @@ bool AsyncCallback::sendRequest(Dart_CObject *request) {
 inline void AsyncCallback::debugLog(const char *message) {
 #ifdef DEBUG
   if (debug_) {
-    printf("NativeCallback #%d -> %s\n", id_, message);
+    printf("AsyncCallback #%d -> %s\n", id_, message);
   }
 #endif
 }

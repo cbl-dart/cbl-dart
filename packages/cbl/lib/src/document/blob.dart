@@ -2,17 +2,16 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:cbl/src/support/resource.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import '../couchbase_lite.dart';
 import '../database.dart';
-import '../errors.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/native_object.dart';
+import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'common.dart';
@@ -97,7 +96,7 @@ class BlobImplSetter extends fl.SlotSetter {
 
   @override
   void setSlotValue(Pointer<FLSlot> slot, covariant BlobImpl value) =>
-      value.native.keepAlive((pointer) => _blobBindings.setBlob(slot, pointer));
+      value.native.call((pointer) => _blobBindings.setBlob(slot, pointer));
 }
 
 late final _bindings = CBLBindings.instance.blobs;
@@ -118,9 +117,9 @@ class BlobImpl
           retain: retain,
           debugName: 'Blob(creator: $debugCreator)',
         ) {
-    _contentType = native.keepAlive(_blobBindings.contentType);
-    _length = native.keepAlive(_blobBindings.length);
-    _digest = native.keepAlive(_blobBindings.digest);
+    _contentType = native.call(_blobBindings.contentType);
+    _length = native.call(_blobBindings.length);
+    _digest = native.call(_blobBindings.digest);
   }
 
   BlobImpl.fromData(String contentType, Uint8List data)
@@ -132,10 +131,10 @@ class BlobImpl
         ),
         _contentType = contentType,
         _length = data.length {
-    _digest = native.keepAlive(_blobBindings.digest);
+    _digest = native.call(_blobBindings.digest);
   }
 
-  BlobImpl.fromProperties(Map<String, dynamic> properties)
+  BlobImpl.fromProperties(Map<String, Object?> properties)
       : assert(properties[_typeProperty] == _blobType),
         _contentType = properties[_blobContentTypeProperty] as String?,
         _length = properties[_blobLengthProperty] as int,
@@ -176,11 +175,9 @@ class BlobImpl
     if (content == null) {
       final blob = _blob;
       if (blob != null) {
-        final slice = withCBLErrorExceptionTranslation(() {
-          return blob
-              .keepAlive(_blobBindings.content)
-              .let(SliceResult.fromFLSliceResult)!;
-        });
+        final slice = blob
+            .call(_blobBindings.content)
+            .let(SliceResult.fromFLSliceResult)!;
         content = slice.asBytes();
         if (content.length <= _maxCachedContentLength) {
           _content = content;
@@ -346,7 +343,7 @@ class _BlobReadStreamController
       return;
     }
     _streamIsOpen = true;
-    _streamPointer = _blob.native.keepAlive((pointer) =>
+    _streamPointer = _blob.native.call((pointer) =>
         _bindings.readStream.openContentStream(pointer, _readStreamChunkSize));
   }
 

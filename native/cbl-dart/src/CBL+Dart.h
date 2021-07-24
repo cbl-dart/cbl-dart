@@ -302,14 +302,6 @@ CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(
     CBLReplicator *replicator, CBLDart::AsyncCallback *listenerId);
 
-struct CBLDart_ReplicatedDocument {
-  CBLDart_FLString ID;
-
-  uint32_t flags;
-
-  CBLError error;
-};
-
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
     CBLReplicator *replicator, CBLDart::AsyncCallback *listenerId);

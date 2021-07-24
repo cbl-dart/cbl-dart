@@ -286,7 +286,7 @@ class QueryImpl extends NativeResource<CBLQuery>
     required String query,
     required String? debugCreator,
   }) : super(CblRefCountedObject(
-          database.native.keepAlive((pointer) => _bindings.create(
+          database.native.call((pointer) => _bindings.create(
                 pointer,
                 language.toCBLQueryLanguage(),
                 query,
@@ -316,7 +316,7 @@ class QueryImpl extends NativeResource<CBLQuery>
     final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
     final flDict = doc.root.asDict!;
-    runKeepAlive(() => _bindings.setParameters(
+    runNativeCalls(() => _bindings.setParameters(
           native.pointer,
           flDict.native.pointer.cast(),
         ));
@@ -326,7 +326,7 @@ class QueryImpl extends NativeResource<CBLQuery>
   ResultSet execute() => useSync(() {
         _flushParameters();
         return ResultSet._(
-          native.keepAlive(_bindings.execute),
+          native.call(_bindings.execute),
           release: true,
           retain: false,
           debugCreator: 'Query.execute()',
@@ -334,13 +334,13 @@ class QueryImpl extends NativeResource<CBLQuery>
       });
 
   @override
-  String explain() => useSync(() => native.keepAlive(_bindings.explain));
+  String explain() => useSync(() => native.call(_bindings.explain));
 
   @override
-  int columnCount() => useSync(() => native.keepAlive(_bindings.columnCount));
+  int columnCount() => useSync(() => native.call(_bindings.columnCount));
 
   @override
-  String? columnName(int index) => useSync(() => native.keepAlive((pointer) {
+  String? columnName(int index) => useSync(() => native.call((pointer) {
         return _bindings.columnName(pointer, index);
       }));
 
@@ -357,7 +357,7 @@ class QueryImpl extends NativeResource<CBLQuery>
             },
             createEvent: (listenerToken, _) {
               return ResultSet._(
-                native.keepAlive((pointer) {
+                native.call((pointer) {
                   // The native side sends no arguments. When the native side
                   // notfies the listener it has to copy the current query result
                   // set.
@@ -411,7 +411,7 @@ class _ResultSetIterator extends NativeResource<CBLResultSet>
   @override
   bool moveNext() {
     if (_hasMore) {
-      _hasCurrent = native.keepAlive(_bindings.next);
+      _hasCurrent = native.call(_bindings.next);
       if (!_hasCurrent) {
         _hasMore = false;
       }
@@ -425,11 +425,11 @@ class _ResultSetIterator extends NativeResource<CBLResultSet>
     Pointer<FLValue> pointer;
 
     if (keyOrIndex is String) {
-      pointer = native
-          .keepAlive((pointer) => _bindings.valueForKey(pointer, keyOrIndex));
+      pointer =
+          native.call((pointer) => _bindings.valueForKey(pointer, keyOrIndex));
     } else if (keyOrIndex is int) {
-      pointer = native
-          .keepAlive((pointer) => _bindings.valueAtIndex(pointer, keyOrIndex));
+      pointer =
+          native.call((pointer) => _bindings.valueAtIndex(pointer, keyOrIndex));
     } else {
       throw ArgumentError.value(keyOrIndex, 'keyOrIndex');
     }
@@ -445,7 +445,7 @@ class _ResultSetIterator extends NativeResource<CBLResultSet>
   Array get array {
     _checkHasCurrent();
     return MRoot.fromValue(
-      native.keepAlive(_bindings.resultArray).cast(),
+      native.call(_bindings.resultArray).cast(),
       context: MContext(),
       isMutable: false,
     ).asNative as Array;
@@ -455,7 +455,7 @@ class _ResultSetIterator extends NativeResource<CBLResultSet>
   Dictionary get dictionary {
     _checkHasCurrent();
     return MRoot.fromValue(
-      native.keepAlive(_bindings.resultDict).cast(),
+      native.call(_bindings.resultDict).cast(),
       context: MContext(),
       isMutable: false,
     ).asNative as Dictionary;

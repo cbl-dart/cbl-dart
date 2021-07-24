@@ -4,12 +4,12 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
+import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
-import 'async_callback.dart';
 import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
@@ -358,31 +358,74 @@ class ReplicatorStatusCallbackMessage {
   ReplicatorStatusCallbackMessage(this.status);
 
   ReplicatorStatusCallbackMessage.fromArguments(List<dynamic> arguments)
-      : this((arguments[0] as int)
-            .toPointer<_CBLReplicatorStatus>()
-            .ref
-            .toCBLReplicatorStatus());
+      : this(parseArguments(arguments[0] as List<dynamic>));
+
+  static CBLReplicatorStatus parseArguments(List<dynamic> status) {
+    CBLErrorException? error;
+    if (status.length > 3) {
+      error = CBLErrorException(
+        (status[3] as int).toErrorDomain(),
+        (status[4] as int),
+        utf8.decode(status[5] as Uint8List),
+      );
+    }
+
+    return CBLReplicatorStatus(
+      (status[0] as int).toReplicatorActivityLevel(),
+      status[1] as double,
+      status[2] as int,
+      error,
+    );
+  }
 
   final CBLReplicatorStatus status;
+}
+
+class CBLReplicatedDocument {
+  CBLReplicatedDocument(
+    this.id,
+    this.flags,
+    this.error,
+  );
+
+  final String id;
+  final Set<CBLReplicatedDocumentFlag> flags;
+  final CBLErrorException? error;
 }
 
 class DocumentReplicationsCallbackMessage {
   DocumentReplicationsCallbackMessage(
     this.isPush,
-    this.documentCount,
     this.documents,
   );
 
   DocumentReplicationsCallbackMessage.fromArguments(List<dynamic> arguments)
       : this(
           arguments[0] as bool,
-          arguments[1] as int,
-          (arguments[2] as int).toPointer(),
+          parseDocuments(arguments[1] as List<dynamic>),
         );
 
+  static List<CBLReplicatedDocument> parseDocuments(List<dynamic> documents) {
+    return documents.cast<List<dynamic>>().map((document) {
+      CBLErrorException? error;
+      if (document.length > 2) {
+        error = CBLErrorException(
+          (document[2] as int).toErrorDomain(),
+          (document[3] as int),
+          utf8.decode(document[4] as Uint8List),
+        );
+      }
+
+      return CBLReplicatedDocument(
+        utf8.decode(document[0] as Uint8List),
+        CBLReplicatedDocumentFlag._parseCFlags(document[1] as int),
+        error,
+      );
+    }).toList();
+  }
+
   final bool isPush;
-  final int documentCount;
-  final Pointer<CBLDart_ReplicatedDocument> documents;
+  final List<CBLReplicatedDocument> documents;
 }
 
 // === ReplicatorBindings ======================================================

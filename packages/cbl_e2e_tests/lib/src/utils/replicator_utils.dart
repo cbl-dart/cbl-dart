@@ -6,6 +6,14 @@ import '../test_binding.dart';
 
 final testSyncGatewayUrl = Uri.parse('ws://localhost:4984/db');
 
+/// Delay to wait before stopping a [Replicator] to prevent it from crashing.
+///
+/// If a [Replicator] is stopped shortly after starting it is possible that
+/// it makes a connection to the server after it was stopped, causing a crash.
+/// This is a bug in Couchbase Lite.
+Future<void> preReplicatorStopDelay() =>
+    Future<void>.delayed(Duration(milliseconds: 500));
+
 extension ReplicatorUtilsDatabaseExtension on Database {
   /// Creates a replicator which is configured with the test sync gateway
   /// endpoint.
@@ -32,14 +40,9 @@ extension ReplicatorUtilsDatabaseExtension on Database {
           : null,
     ));
 
-    addTearDown(() => replicator.whenStatusDo(
-          isNot(anyOf(
-            hasActivityLevel(ReplicatorActivityLevel.connecting),
-            hasActivityLevel(ReplicatorActivityLevel.busy),
-          )),
-          replicator.stop,
-          validStatusMatcher: anything,
-        ));
+    /// Ensures that when the replicator is closed as part of closing the
+    /// database it wont be stopped to quickly.
+    addTearDown(preReplicatorStopDelay);
 
     return replicator;
   }
@@ -63,6 +66,11 @@ Matcher hasActivityLevel(
     isReplicatorStatus.having((it) => it.activity, 'activity', activityLevel);
 
 extension ReplicatorUtilsExtension on Replicator {
+  Stream<ReplicatorStatus> statusStartingWithCurrent() async* {
+    yield status;
+    yield* changes().map((change) => change.status);
+  }
+
   /// Calls [fn] and waits until the replicator's status matches
   /// [statusMatcher].
   ///
@@ -80,9 +88,7 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var isInitialStatus = true;
 
-    await changes(startWithCurrentStatus: true)
-        .map((change) => change.status)
-        .asyncMap((status) async {
+    await statusStartingWithCurrent().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
       if (isInitialStatus) {
@@ -115,9 +121,7 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var calledDriveFn = false;
 
-    await changes(startWithCurrentStatus: true)
-        .map((change) => change.status)
-        .asyncMap((status) async {
+    await statusStartingWithCurrent().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
       var isMatch = _matches(status, statusMatcher);
@@ -141,9 +145,7 @@ extension ReplicatorUtilsExtension on Replicator {
   }) async {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
 
-    await changes(startWithCurrentStatus: true)
-        .map((change) => change.status)
-        .asyncMap((status) async {
+    await statusStartingWithCurrent().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
       var isMatch = _matches(status, statusMatcher);

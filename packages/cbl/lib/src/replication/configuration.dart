@@ -91,7 +91,7 @@ class ReplicatorConfiguration {
         _maxRetries = config.maxRetries,
         _maxRetryWaitTime = config.maxRetryWaitTime;
 
-  static const _defaultContinuousMaxRetries = 1 << 64;
+  static const _defaultContinuousMaxRetries = 0xFFFFFFFF - 1;
   static const _defaultSingleShotMaxRetries = 9;
 
   /// The local [Database] to replicate with the replication [target].
