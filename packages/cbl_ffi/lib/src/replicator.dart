@@ -9,7 +9,7 @@ import 'bindings.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
-import 'native_callback.dart';
+import 'async_callback.dart';
 import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
@@ -110,9 +110,9 @@ class CBLDartReplicatorConfiguration extends Struct {
   external Pointer<FLSlice> trustedRootCertificates;
   external Pointer<FLArray> channels;
   external Pointer<FLArray> documentIDs;
-  external Pointer<Callback> pushFilter;
-  external Pointer<Callback> pullFilter;
-  external Pointer<Callback> conflictResolver;
+  external Pointer<CBLDartAsyncCallback> pushFilter;
+  external Pointer<CBLDartAsyncCallback> pullFilter;
+  external Pointer<CBLDartAsyncCallback> conflictResolver;
 }
 
 extension CBLDartReplicatorConfigurationExt on CBLDartReplicatorConfiguration {
@@ -300,11 +300,11 @@ typedef CBLDart_CBLReplicator_IsDocumentPending = int Function(
 
 typedef CBLDart_CBLReplicator_AddChangeListener_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Pointer<Callback> listener,
+  Pointer<CBLDartAsyncCallback> listener,
 );
 typedef CBLDart_CBLReplicator_AddChangeListener = void Function(
   Pointer<CBLReplicator> replicator,
-  Pointer<Callback> listener,
+  Pointer<CBLDartAsyncCallback> listener,
 );
 
 /// Flags describing a replicated document.
@@ -347,11 +347,11 @@ extension CBLDartReplicatedDocumentExt on CBLDart_ReplicatedDocument {
 
 typedef CBLDart_CBLReplicator_AddDocumentReplicationListener_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Pointer<Callback> listener,
+  Pointer<CBLDartAsyncCallback> listener,
 );
 typedef CBLDart_CBLReplicator_AddDocumentReplicationListener = void Function(
   Pointer<CBLReplicator> replicator,
-  Pointer<Callback> listener,
+  Pointer<CBLDartAsyncCallback> listener,
 );
 
 class ReplicatorStatusCallbackMessage {
@@ -528,9 +528,9 @@ class ReplicatorBindings extends Bindings {
     Uint8List? trustedRootCertificates,
     Pointer<FLArray>? channels,
     Pointer<FLArray>? documentIDs,
-    Pointer<Callback>? pushFilter,
-    Pointer<Callback>? pullFilter,
-    Pointer<Callback>? conflictResolver,
+    Pointer<CBLDartAsyncCallback>? pushFilter,
+    Pointer<CBLDartAsyncCallback>? pullFilter,
+    Pointer<CBLDartAsyncCallback>? conflictResolver,
   ) {
     return withZoneArena(() {
       return _create(
@@ -614,14 +614,14 @@ class ReplicatorBindings extends Bindings {
 
   void addChangeListener(
     Pointer<CBLReplicator> replicator,
-    Pointer<Callback> listener,
+    Pointer<CBLDartAsyncCallback> listener,
   ) {
     _addChangeListener(replicator, listener);
   }
 
   void addDocumentReplicationListener(
     Pointer<CBLReplicator> replicator,
-    Pointer<Callback> listener,
+    Pointer<CBLDartAsyncCallback> listener,
   ) {
     _addDocumentReplicationListener(replicator, listener);
   }
@@ -646,9 +646,9 @@ class ReplicatorBindings extends Bindings {
     Uint8List? trustedRootCertificates,
     Pointer<FLArray>? channels,
     Pointer<FLArray>? documentIDs,
-    Pointer<Callback>? pushFilter,
-    Pointer<Callback>? pullFilter,
-    Pointer<Callback>? conflictResolver,
+    Pointer<CBLDartAsyncCallback>? pushFilter,
+    Pointer<CBLDartAsyncCallback>? pullFilter,
+    Pointer<CBLDartAsyncCallback>? conflictResolver,
   ) {
     final result = zoneArena<CBLDartReplicatorConfiguration>();
 

@@ -3,14 +3,13 @@ import 'dart:collection';
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:cbl/src/support/resource.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:synchronized/synchronized.dart';
 
 import '../database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/native_object.dart';
-import '../support/resource.dart';
 import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
@@ -84,7 +83,9 @@ class DocumentEncoderContext {
   final DocumentImpl document;
 }
 
-class DocumentImpl with IterableMixin<String> implements Document {
+class DocumentImpl
+    with IterableMixin<String>, NativeResourceMixin<CBLDocument>
+    implements Document {
   DocumentImpl({
     required DatabaseImpl database,
     required Pointer<CBLDocument> doc,
@@ -103,7 +104,7 @@ class DocumentImpl with IterableMixin<String> implements Document {
     required bool retain,
     required String debugName,
   })  : _database = database,
-        doc = CblRefCountedObject(
+        native = CblRefCountedObject(
           doc,
           release: true,
           retain: retain,
@@ -128,9 +129,10 @@ class DocumentImpl with IterableMixin<String> implements Document {
     }
   }
 
-  final NativeObject<CBLDocument> doc;
+  @override
+  final NativeObject<CBLDocument> native;
 
-  late final _root = doc.keepAlive((pointer) => MRoot.fromValue(
+  late final _root = native.keepAlive((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
         isMutable: false,
@@ -139,13 +141,13 @@ class DocumentImpl with IterableMixin<String> implements Document {
   late final Dictionary _properties = _root.asNative as Dictionary;
 
   @override
-  String get id => doc.keepAlive(_documentBindings.id);
+  String get id => native.keepAlive(_documentBindings.id);
 
   @override
-  String? get revisionId => doc.keepAlive(_documentBindings.revisionId);
+  String? get revisionId => native.keepAlive(_documentBindings.revisionId);
 
   @override
-  int get sequence => doc.keepAlive(_documentBindings.sequence);
+  int get sequence => native.keepAlive(_documentBindings.sequence);
 
   @override
   int get length => _properties.length;
@@ -191,7 +193,7 @@ class DocumentImpl with IterableMixin<String> implements Document {
 
   @override
   MutableDocument toMutable() => MutableDocumentImpl(
-        doc: doc.keepAlive(_mutableDocumentBindings.mutableCopy),
+        doc: native.keepAlive(_mutableDocumentBindings.mutableCopy),
         // `mutableCopy` returns a new instance with +1 ref count.
         retain: false,
         debugCreator: 'Document.toMutable()',
@@ -261,7 +263,7 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   }
 
   @override
-  late final _root = doc.keepAlive((pointer) => MRoot.fromValue(
+  late final _root = native.keepAlive((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
         isMutable: true,
@@ -273,13 +275,14 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
 
   /// Encodes `_properties` and sets the result as the new properties of the
   /// native `Document`.
-  Future<void> flushProperties() async {
+  void flushProperties() {
     assert(database != null);
     final encoder = DocumentFleeceEncoder(document: this);
-    await _root.encodeTo(encoder);
+    final encodeToFuture = _root.encodeTo(encoder);
+    assert(encodeToFuture is! Future);
     final properties = encoder.finishProperties();
     runKeepAlive(() => _mutableDocumentBindings.setProperties(
-          doc.pointer.cast(),
+          native.pointer.cast(),
           properties.native.pointer.cast(),
         ));
   }

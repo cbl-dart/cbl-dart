@@ -9,41 +9,41 @@
 
 namespace CBLDart {
 
-class Callback;
-class CallbackCall;
+class AsyncCallback;
+class AsyncCallbackCall;
 
-// === CallbackRegistry =======================================================
+// === AsyncCallbackRegistry ==================================================
 
-class CallbackRegistry {
+class AsyncCallbackRegistry {
  public:
-  static CallbackRegistry instance;
+  static AsyncCallbackRegistry instance;
 
-  void registerCallback(const Callback &callback);
+  void registerCallback(const AsyncCallback &callback);
 
-  void unregisterCallback(const Callback &callback);
+  void unregisterCallback(const AsyncCallback &callback);
 
-  bool callbackExists(const Callback &callback) const;
+  bool callbackExists(const AsyncCallback &callback) const;
 
-  void addBlockingCall(CallbackCall &call);
+  void addBlockingCall(AsyncCallbackCall &call);
 
-  bool takeBlockingCall(CallbackCall &call);
+  bool takeBlockingCall(AsyncCallbackCall &call);
 
  private:
-  CallbackRegistry();
+  AsyncCallbackRegistry();
 
   mutable std::mutex mutex_;
-  std::vector<const Callback *> callbacks_;
-  std::vector<CallbackCall *> blockingCalls_;
+  std::vector<const AsyncCallback *> callbacks_;
+  std::vector<AsyncCallbackCall *> blockingCalls_;
 };
 
-// === Callback ===============================================================
+// === AsyncCallback ==========================================================
 
 typedef void (*CallbackFinalizer)(void *context);
 
-class Callback {
+class AsyncCallback {
  public:
-  Callback(uint32_t id, Dart_Handle dartCallback, Dart_Port sendport,
-           bool debug);
+  AsyncCallback(uint32_t id, Dart_Handle dartCallback, Dart_Port sendport,
+                bool debug);
 
   uint32_t id() { return id_; };
 
@@ -51,14 +51,14 @@ class Callback {
   void close();
 
  private:
-  friend class CallbackCall;
+  friend class AsyncCallbackCall;
 
   void static dartCallbackHandleFinalizer(void *dart_callback_data, void *peer);
 
-  ~Callback();
+  ~AsyncCallback();
 
-  void registerCall(CallbackCall &call);
-  void unregisterCall(CallbackCall &call);
+  void registerCall(AsyncCallbackCall &call);
+  void unregisterCall(AsyncCallbackCall &call);
   bool sendRequest(Dart_CObject *request);
   inline void debugLog(const char *message);
 
@@ -70,24 +70,24 @@ class Callback {
   void *finalizerContext_ = nullptr;
   CallbackFinalizer finalizer_ = nullptr;
   Dart_WeakPersistentHandle dartCallbackHandle_ = nullptr;
-  std::vector<CallbackCall *> activeCalls_;
+  std::vector<AsyncCallbackCall *> activeCalls_;
 };
 
-// === CallbackCall ===========================================================
+// === AsyncCallbackCall ======================================================
 
 typedef void(CallbackResultHandler)(Dart_CObject *);
 
-class CallbackCall {
+class AsyncCallbackCall {
  public:
-  CallbackCall(Callback &callback, bool isBlocking = false);
+  AsyncCallbackCall(AsyncCallback &callback, bool isBlocking = false);
 
-  CallbackCall(Callback &callback,
-               const std::function<CallbackResultHandler> &resultHandler)
-      : CallbackCall(callback, true) {
+  AsyncCallbackCall(AsyncCallback &callback,
+                    const std::function<CallbackResultHandler> &resultHandler)
+      : AsyncCallbackCall(callback, true) {
     resultHandler_ = &resultHandler;
   };
 
-  ~CallbackCall();
+  ~AsyncCallbackCall();
 
   bool isBlocking() { return receivePort_ != ILLEGAL_PORT; }
   bool hasResultHandler() { return resultHandler_ != nullptr; }
@@ -112,7 +112,7 @@ class CallbackCall {
   inline void debugLog(const char *message);
 
   std::mutex mutex_;
-  Callback &callback_;
+  AsyncCallback &callback_;
   const std::function<CallbackResultHandler> *resultHandler_ = nullptr;
   Dart_Port receivePort_ = ILLEGAL_PORT;
   bool isExecuted_ = false;

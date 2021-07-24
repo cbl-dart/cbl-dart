@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "Callbacks.h"
+#include "AsyncCallback.h"
 #include "Fleece+Dart.h"
 #include "cbl/CouchbaseLite.h"
 #include "cbldart_export.h"
@@ -24,15 +24,17 @@ void CBLDart_InitDartApiDL(void *data);
 // -- Callbacks
 
 CBLDART_EXPORT
-CBLDart::Callback *CBLDart_Callback_New(uint32_t id, Dart_Handle object,
-                                        Dart_Port sendPort, uint8_t debug);
+CBLDart::AsyncCallback *CBLDart_AsyncCallback_New(uint32_t id,
+                                                  Dart_Handle object,
+                                                  Dart_Port sendPort,
+                                                  uint8_t debug);
 
 CBLDART_EXPORT
-void CBLDart_Callback_Close(CBLDart::Callback *callback);
+void CBLDart_AsyncCallback_Close(CBLDart::AsyncCallback *callback);
 
 CBLDART_EXPORT
-void CBLDart_Callback_CallForTest(CBLDart::Callback *callback,
-                                  int64_t argument);
+void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
+                                       int64_t argument);
 
 // Couchbase Lite ----------------------------------------------------------
 
@@ -70,7 +72,7 @@ CBLDART_EXPORT
 void CBLDart_CBLLog_RestoreOriginalCallback();
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_SetCallback(CBLDart::Callback *callback);
+void CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback);
 
 // -- Document
 
@@ -144,8 +146,8 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
     CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandler(
-    CBLDatabase *db, CBLDocument *doc, CBLDart::Callback *conflictHandler,
+uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync(
+    CBLDatabase *db, CBLDocument *doc, CBLDart::AsyncCallback *conflictHandler,
     CBLError *errorOut);
 
 CBLDART_EXPORT
@@ -165,13 +167,13 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
                                                   CBLError *errorOut);
 
 CBLDART_EXPORT
-void CBLDart_CBLDatabase_AddDocumentChangeListener(const CBLDatabase *db,
-                                                   const CBLDart_FLString docID,
-                                                   CBLDart::Callback *listener);
+void CBLDart_CBLDatabase_AddDocumentChangeListener(
+    const CBLDatabase *db, const CBLDart_FLString docID,
+    CBLDart::AsyncCallback *listener);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           CBLDart::Callback *listener);
+                                           CBLDart::AsyncCallback *listener);
 
 typedef enum : uint8_t {
   kCBLDart_IndexTypeValue,
@@ -216,7 +218,7 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
 
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
-    CBLQuery *query, CBLDart::Callback *listener);
+    CBLQuery *query, CBLDart::AsyncCallback *listener);
 
 // -- Blob
 
@@ -278,9 +280,9 @@ struct CBLDart_ReplicatorConfiguration {
   FLSlice *trustedRootCertificates;
   FLArray channels;
   FLArray documentIDs;
-  CBLDart::Callback *pushFilter;
-  CBLDart::Callback *pullFilter;
-  CBLDart::Callback *conflictResolver;
+  CBLDart::AsyncCallback *pushFilter;
+  CBLDart::AsyncCallback *pullFilter;
+  CBLDart::AsyncCallback *conflictResolver;
 };
 
 CBLDART_EXPORT
@@ -297,8 +299,8 @@ uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
                                                 CBLDart_FLString docId,
                                                 CBLError *errorOut);
 CBLDART_EXPORT
-void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
-                                             CBLDart::Callback *listenerId);
+void CBLDart_CBLReplicator_AddChangeListener(
+    CBLReplicator *replicator, CBLDart::AsyncCallback *listenerId);
 
 struct CBLDart_ReplicatedDocument {
   CBLDart_FLString ID;
@@ -310,5 +312,5 @@ struct CBLDart_ReplicatedDocument {
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, CBLDart::Callback *listenerId);
+    CBLReplicator *replicator, CBLDart::AsyncCallback *listenerId);
 }

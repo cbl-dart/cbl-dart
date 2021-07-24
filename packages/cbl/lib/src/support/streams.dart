@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'native_callback.dart';
+import 'async_callback.dart';
 import 'native_object.dart';
 import 'resource.dart';
 
@@ -48,11 +48,11 @@ abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
   Future<void> performClose() => controller.close();
 }
 
-/// A [Stream] controller to create a [Stream] from a [NativeCallback].
+/// A [Stream] controller to create a [Stream] from a [AsyncCallback].
 class CallbackStreamController<T, S>
     extends ClosableResourceStreamController<T> {
   /// Creates a [Stream] controller to create a [Stream] from a
-  /// [NativeCallback].
+  /// [AsyncCallback].
   ///
   /// Callbacks need to be registered with native code in [startStream].
   ///
@@ -67,10 +67,10 @@ class CallbackStreamController<T, S>
     required this.createEvent,
   }) : super(parent: parent);
 
-  final S Function(NativeCallback callback) startStream;
+  final S Function(AsyncCallback callback) startStream;
   final FutureOr<T> Function(S registrationResult, List arguments) createEvent;
 
-  late NativeCallback _callback;
+  late AsyncCallback _callback;
   late Future<bool> _callbackRegistered;
   late S _registrationResult;
   var _canceled = false;
@@ -80,7 +80,7 @@ class CallbackStreamController<T, S>
     final callbackRegistered = Completer<bool>();
     _callbackRegistered = callbackRegistered.future;
 
-    _callback = NativeCallback((arguments) async {
+    _callback = AsyncCallback((arguments) async {
       try {
         // Callbacks can come in before the registration request from the
         // worker comes back. In this case `registrationResult` has not be
@@ -118,17 +118,17 @@ class CallbackStreamController<T, S>
 }
 
 StreamController<T> callbackBroadcastStreamController<T>({
-  required void Function(NativeCallback callback) startStream,
+  required void Function(AsyncCallback callback) startStream,
   required T Function(List arguments) createEvent,
 }) {
-  late NativeCallback callback;
+  late AsyncCallback callback;
   late StreamController<T> controller;
   var canceled = false;
 
   void onListen() {
     canceled = false;
 
-    callback = NativeCallback((arguments) {
+    callback = AsyncCallback((arguments) {
       if (canceled) return;
       try {
         final event = createEvent(arguments);

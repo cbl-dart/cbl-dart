@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import '../cbl_ffi.dart';
 import 'bindings.dart';
-import 'native_callback.dart';
+import 'async_callback.dart';
 
 enum CBLLogDomain {
   all,
@@ -75,10 +75,10 @@ class LogCallbackMessage {
 }
 
 typedef CBLDart_CBLLog_SetCallback_C = Void Function(
-  Pointer<Callback> callback,
+  Pointer<CBLDartAsyncCallback> callback,
 );
 typedef CBLDart_CBLLog_SetCallback = void Function(
-  Pointer<Callback> callback,
+  Pointer<CBLDartAsyncCallback> callback,
 );
 
 class LoggingBindings extends Bindings {
@@ -138,7 +138,7 @@ class LoggingBindings extends Bindings {
     _restoreOriginalCallback();
   }
 
-  void setCallback(Pointer<Callback> callback) {
+  void setCallback(Pointer<CBLDartAsyncCallback> callback) {
     _setCallback(callback);
   }
 }

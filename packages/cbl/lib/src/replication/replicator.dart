@@ -8,7 +8,7 @@ import '../database.dart';
 import '../document/document.dart';
 import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
-import '../support/native_callback.dart';
+import '../support/async_callback.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -157,7 +157,9 @@ abstract class Replicator implements ClosableResource {
 
 late final _bindings = CBLBindings.instance.replicator;
 
-class ReplicatorImpl with ClosableResourceMixin implements Replicator {
+class ReplicatorImpl
+    with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
+    implements Replicator {
   ReplicatorImpl(this._config, {required String debugCreator}) {
     final database = _database = (_config.database as DatabaseImpl);
 
@@ -208,7 +210,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
                   conflictResolverCallback?.native.pointer,
                 ));
 
-        _replicator = CBLReplicatorObject(
+        native = CBLReplicatorObject(
           replicator,
           debugName: 'Replicator(creator: $debugCreator)',
         );
@@ -230,9 +232,10 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
 
   late final DatabaseImpl _database;
 
-  late final NativeObject<CBLReplicator> _replicator;
+  @override
+  late final NativeObject<CBLReplicator> native;
 
-  late final List<NativeCallback> _callbacks;
+  late final List<AsyncCallback> _callbacks;
 
   @override
   ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
@@ -241,16 +244,16 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   ReplicatorStatus status() => useSync(_status);
 
   ReplicatorStatus _status() =>
-      _replicator.keepAlive(_bindings.status).toReplicatorStatus();
+      native.keepAlive(_bindings.status).toReplicatorStatus();
 
   @override
-  void start({bool reset = false}) => useSync(() =>
-      _replicator.keepAlive((pointer) => _bindings.start(pointer, reset)));
+  void start({bool reset = false}) => useSync(
+      () => native.keepAlive((pointer) => _bindings.start(pointer, reset)));
 
   @override
   void stop() => useSync(_stop);
 
-  void _stop() => _replicator.keepAlive(_bindings.stop);
+  void _stop() => native.keepAlive(_bindings.stop);
 
   @override
   Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false}) =>
@@ -260,7 +263,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
     final changes = CallbackStreamController<ReplicatorChange, void>(
       parent: this,
       startStream: (callback) => _bindings.addChangeListener(
-        _replicator.pointer,
+        native.pointer,
         callback.native.pointer,
       ),
       createEvent: (_, arguments) {
@@ -288,7 +291,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
       useSync(() => CallbackStreamController(
             parent: this,
             startStream: (callback) => _bindings.addDocumentReplicationListener(
-              _replicator.pointer,
+              native.pointer,
               callback.native.pointer,
             ),
             createEvent: (_, arguments) {
@@ -307,16 +310,15 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   @override
   Set<String> pendingDocumentIds() => useSync(() {
         final dict = fl.Dict.fromPointer(
-          _replicator.keepAlive(_bindings.pendingDocumentIDs),
+          native.keepAlive(_bindings.pendingDocumentIDs),
           retain: false,
-          release: true,
         );
         return dict.keys.toSet();
       });
 
   @override
   bool isDocumentPending(String documentId) =>
-      useSync(() => _replicator.keepAlive((pointer) {
+      useSync(() => native.keepAlive((pointer) {
             return _bindings.isDocumentPending(pointer, documentId);
           }));
 
@@ -422,11 +424,11 @@ extension on ReplicatorConfiguration {
   }
 }
 
-NativeCallback _wrapReplicationFilter(
+AsyncCallback _wrapReplicationFilter(
   DatabaseImpl database,
   ReplicationFilter filter,
 ) =>
-    NativeCallback((arguments) async {
+    AsyncCallback((arguments) async {
       final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
       final doc = DocumentImpl(
         database: database,
@@ -442,11 +444,11 @@ NativeCallback _wrapReplicationFilter(
     }, errorResult: false, debugName: 'ReplicationFilter')
       ..errors.listen(null);
 
-NativeCallback _wrapConflictResolver(
+AsyncCallback _wrapConflictResolver(
   DatabaseImpl database,
   ConflictResolver resolver,
 ) =>
-    NativeCallback((arguments) async {
+    AsyncCallback((arguments) async {
       final message =
           ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
@@ -468,10 +470,10 @@ NativeCallback _wrapConflictResolver(
       final resolved = await resolver.resolve(conflict) as DocumentImpl?;
       if (resolved is MutableDocumentImpl) {
         resolved.database = database;
-        await resolved.flushProperties();
+        resolved.flushProperties();
       }
 
-      final resolvedPointer = resolved?.doc.pointerUnsafe;
+      final resolvedPointer = resolved?.native.pointerUnsafe;
 
       // If the resolver returned a document other than `local` or `remote`,
       // the ref count of `resolved` needs to be incremented because the

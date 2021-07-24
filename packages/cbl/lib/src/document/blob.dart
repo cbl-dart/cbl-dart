@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cbl/src/support/resource.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
-import 'package:synchronized/synchronized.dart';
 
 import '../couchbase_lite.dart';
 import '../database.dart';
@@ -14,14 +13,12 @@ import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/native_object.dart';
-import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'common.dart';
 import 'document.dart';
 
 late final _blobBindings = CBLBindings.instance.blobs.blob;
-late final _blobWriteStreamBindings = CBLBindings.instance.blobs.writeStream;
 
 /// Max size of data that will be cached in memory with the [Blob].
 const _maxCachedContentLength = 8 * 1024;
@@ -50,22 +47,6 @@ abstract class Blob {
   /// Creates a [Blob] with the given in-memory data.
   factory Blob.fromData(String contentType, Uint8List data) =>
       BlobImpl.fromData(contentType, data);
-
-  /// Creates a [Blob] with the given stream of data.
-  factory Blob.fromStream(String contentType, Stream<Uint8List> stream) =>
-      BlobImpl.fromStream(contentType, stream);
-
-  /// Creates a [Blob] with the contents of a file.
-  factory Blob.fromFileUrl(String contentType, Uri url) {
-    if (!FileSystemEntity.isFileSync(url.toFilePath())) {
-      throw ArgumentError.value(url, 'url', 'is not a path to a file');
-    }
-
-    return BlobImpl.fromStream(
-      contentType,
-      File.fromUri(url).openRead().cast(),
-    );
-  }
 
   /// Gets the contents of this [Blob] as a block of memory.
   ///
@@ -116,12 +97,14 @@ class BlobImplSetter extends fl.SlotSetter {
 
   @override
   void setSlotValue(Pointer<FLSlot> slot, covariant BlobImpl value) =>
-      value._blob!.keepAlive((pointer) => _blobBindings.setBlob(slot, pointer));
+      value.native.keepAlive((pointer) => _blobBindings.setBlob(slot, pointer));
 }
 
 late final _bindings = CBLBindings.instance.blobs;
 
-class BlobImpl implements Blob, FleeceEncodable, CblConversions {
+class BlobImpl
+    with NativeResourceMixin<CBLBlob>
+    implements Blob, FleeceEncodable, CblConversions {
   BlobImpl({
     required DatabaseImpl? database,
     required Pointer<CBLBlob> blob,
@@ -135,9 +118,9 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
           retain: retain,
           debugName: 'Blob(creator: $debugCreator)',
         ) {
-    _contentType = _blob!.keepAlive(_blobBindings.contentType);
-    _length = _blob!.keepAlive(_blobBindings.length);
-    _digest = _blob!.keepAlive(_blobBindings.digest);
+    _contentType = native.keepAlive(_blobBindings.contentType);
+    _length = native.keepAlive(_blobBindings.length);
+    _digest = native.keepAlive(_blobBindings.digest);
   }
 
   BlobImpl.fromData(String contentType, Uint8List data)
@@ -149,12 +132,8 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
         ),
         _contentType = contentType,
         _length = data.length {
-    _digest = _blob!.keepAlive(_blobBindings.digest);
+    _digest = native.keepAlive(_blobBindings.digest);
   }
-
-  BlobImpl.fromStream(String contentType, Stream<Uint8List> stream)
-      : _initialContentStream = stream,
-        _contentType = contentType;
 
   BlobImpl.fromProperties(Map<String, dynamic> properties)
       : assert(properties[_typeProperty] == _blobType),
@@ -162,37 +141,33 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
         _length = properties[_blobLengthProperty] as int,
         _digest = properties[_blobDigestProperty] as String;
 
-  final _lock = Lock();
   DatabaseImpl? _database;
   CblRefCountedObject<CBLBlob>? _blob;
+  @override
+  CblRefCountedObject<CBLBlob> get native => _blob!;
   Uint8List? _content;
-  Stream<Uint8List>? _initialContentStream;
   String? _contentType;
   int? _length;
   String? _digest;
 
   @override
-  Future<Uint8List> content() async =>
-      _loadSavedContent()?.let(byteStreamToFuture) ?? _loadUnsavedContent();
+  Future<Uint8List> content() async => byteStreamToFuture(contentStream());
 
   @override
   Stream<Uint8List> contentStream() =>
-      _loadSavedContent() ?? _loadUnsavedContent().asStream();
+      _loadSavedContentAsync() ??
+      Future(() {
+        final content = _loadContentSync();
+        if (content == null) {
+          _throwNoDataError();
+        }
+        return content;
+      }).asStream();
 
-  Stream<Uint8List>? _loadSavedContent() {
+  Stream<Uint8List>? _loadSavedContentAsync() {
     if (_blob != null && _database != null) {
       return _BlobReadStreamController(this).stream;
     }
-  }
-
-  Future<Uint8List> _loadUnsavedContent() async {
-    final content = await _loadContentFromInitialSteam() ?? _loadContentSync();
-
-    if (content == null) {
-      _throwNoDataError();
-    }
-
-    return content;
   }
 
   Uint8List? _loadContentSync() {
@@ -216,23 +191,6 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
     return content;
   }
-
-  Future<Uint8List?> _loadContentFromInitialSteam() =>
-      // The lock ensures that the `_initialContentStream` is only consumed
-      // once.
-      _lock.synchronized(() async {
-        final initialContentStream = _initialContentStream;
-        if (initialContentStream != null) {
-          try {
-            final content = await byteStreamToFuture(initialContentStream);
-            _content = content;
-            _length = content.length;
-            return content;
-          } finally {
-            _initialContentStream = null;
-          }
-        }
-      });
 
   Never _throwNoDataError() {
     if (_digest != null) {
@@ -284,7 +242,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
         _database = database;
 
         if (_digest == null) {
-          return _installInDatabase(database);
+          return _throwNoDataError();
         }
       }
     } else {
@@ -292,43 +250,11 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     }
   }
 
-  Future<void> _installInDatabase(DatabaseImpl database) async {
-    final writeStream = _BlobWriteStream(database);
-    await _lock.synchronized(() async {
-      _checkBlobCanLoadData();
-      final contentStream = _initialContentStream ?? Stream.value(_content!);
-      try {
-        await writeStream.addStream(contentStream);
-      } finally {
-        _initialContentStream = null;
-      }
-    });
-    final blob = await writeStream.createBlob(contentType: _contentType);
-    _blob = CblRefCountedObject(
-      blob,
-      release: true,
-      retain: false,
-      debugName: 'Blob(creator: BlobImpl._installStreamInDatabase())',
-    );
-    _length = _blob!.keepAlive(_blobBindings.length);
-    _digest = _blob!.keepAlive(_blobBindings.digest);
-  }
-
   void _checkBlobIsFromSameDatabase(DatabaseImpl database) {
     if (_database != null && _database != database) {
       throw StateError(
         'A document contains a blob that was saved to a different database. '
         'The save operation cannot complete.',
-      );
-    }
-  }
-
-  void _checkBlobCanLoadData() {
-    if (_content == null && _initialContentStream == null) {
-      throw StateError(
-        'A document contains a blob which previously was unable to read the '
-        'stream it was created from. Streams are only attempted to be read '
-        'once. The save operation cannot complete.',
       );
     }
   }
@@ -390,35 +316,6 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   }
 }
 
-class _BlobWriteStream extends NativeResource<NativeObject<CBLBlobWriteStream>>
-    with ClosableResourceMixin
-    implements StreamConsumer<Uint8List> {
-  _BlobWriteStream(DatabaseImpl database)
-      : super(NativeObject(
-          withCBLErrorExceptionTranslation(() {
-            return database.native.keepAlive(_blobWriteStreamBindings.create);
-          }),
-        )) {
-    database.registerChildResource(this);
-  }
-
-  @override
-  Future<void> addStream(Stream<Uint8List> stream) => use(() => stream
-      .asyncMap((chunk) => native
-          .keepAlive((pointer) => _bindings.writeStream.write(pointer, chunk)))
-      .drain());
-
-  Future<Pointer<CBLBlob>> createBlob({String? contentType}) => closeAndUse(
-        () => native.keepAlive((pointer) =>
-            _bindings.writeStream.createBlobWithStream(contentType, pointer)),
-        doPerformClose: false,
-      );
-
-  @override
-  Future<void> performClose() async =>
-      native.keepAlive(_bindings.writeStream.close);
-}
-
 class _BlobReadStreamController
     extends ClosableResourceStreamController<Uint8List> {
   _BlobReadStreamController(this._blob) : super(parent: _blob._database!);
@@ -449,7 +346,7 @@ class _BlobReadStreamController
       return;
     }
     _streamIsOpen = true;
-    _streamPointer = _blob._blob!.keepAlive((pointer) =>
+    _streamPointer = _blob.native.keepAlive((pointer) =>
         _bindings.readStream.openContentStream(pointer, _readStreamChunkSize));
   }
 

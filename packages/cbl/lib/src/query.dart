@@ -275,7 +275,7 @@ abstract class Query implements Resource {
   Stream<ResultSet> changes();
 }
 
-class QueryImpl extends NativeResource<NativeObject<CBLQuery>>
+class QueryImpl extends NativeResource<CBLQuery>
     with DelegatingResourceMixin
     implements Query {
   static late final _bindings = CBLBindings.instance.query;
@@ -396,7 +396,7 @@ abstract class Result {
   Dictionary get dictionary;
 }
 
-class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
+class _ResultSetIterator extends NativeResource<CBLResultSet>
     implements Iterator<Result>, Result {
   static late final _bindings = CBLBindings.instance.resultSet;
 
@@ -477,7 +477,7 @@ class _ResultSetIterator extends NativeResource<NativeObject<CBLResultSet>>
 ///
 /// See:
 /// - [Result] for how to consume a single Result.
-class ResultSet extends NativeResource<NativeObject<CBLResultSet>>
+class ResultSet extends NativeResource<CBLResultSet>
     with IterableMixin<Result> {
   ResultSet._(
     Pointer<CBLResultSet> pointer, {

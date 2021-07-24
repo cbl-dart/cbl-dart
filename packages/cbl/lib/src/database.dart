@@ -6,8 +6,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'document/document.dart';
 import 'errors.dart';
 import 'fleece/fleece.dart' as fl;
-import 'support/native_object.dart';
 import 'query.dart';
+import 'support/native_object.dart';
 import 'support/resource.dart';
 import 'support/streams.dart';
 import 'support/utils.dart';
@@ -332,7 +332,7 @@ abstract class Database with ClosableResource {
   /// conflicting revision should be overwritten with the revision being saved.
   /// If you need finer-grained control, call [saveDocumentResolving]
   /// instead.
-  Future<void> saveDocument(
+  void saveDocument(
     MutableDocument doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   });
@@ -348,7 +348,7 @@ abstract class Database with ClosableResource {
   ///
   /// See:
   /// - [SaveConflictHandler] for implementing the conflict handler.
-  Future<void> saveDocumentResolving(
+  void saveDocumentResolving(
     MutableDocument doc,
     SaveConflictHandler conflictHandler,
   );
@@ -446,7 +446,7 @@ abstract class Database with ClosableResource {
   List<String> indexNames();
 }
 
-class DatabaseImpl extends NativeResource<NativeObject<CBLDatabase>>
+class DatabaseImpl extends NativeResource<CBLDatabase>
     with ClosableResourceMixin
     implements Database {
   DatabaseImpl(
@@ -534,30 +534,30 @@ class DatabaseImpl extends NativeResource<NativeObject<CBLDatabase>>
           )));
 
   @override
-  Future<void> saveDocument(
+  void saveDocument(
     covariant MutableDocumentImpl doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
-      use(() async {
+      useSync(() {
         doc.database = this;
-        await doc.flushProperties();
+        doc.flushProperties();
         native.keepAlive((pointer) {
           _bindings.saveDocumentWithConcurrencyControl(
             pointer,
-            doc.doc.pointer.cast(),
+            doc.native.pointer.cast(),
             concurrency.toCBLConcurrencyControl(),
           );
         });
       });
 
   @override
-  Future<void> saveDocumentResolving(
+  void saveDocumentResolving(
     covariant MutableDocumentImpl doc,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() async {
+      useSync(() {
         doc.database = this;
-        await doc.flushProperties();
+        doc.flushProperties();
 
         bool _conflictHandler(
           Pointer<CBLMutableDocument> _,
@@ -579,9 +579,9 @@ class DatabaseImpl extends NativeResource<NativeObject<CBLDatabase>>
           return decision;
         }
 
-        runKeepAlive(() => _bindings.saveDocumentWithConflictHandlerSync(
+        runKeepAlive(() => _bindings.saveDocumentWithConflictHandler(
               native.pointer,
-              doc.doc.pointer.cast(),
+              doc.native.pointer.cast(),
               _conflictHandler,
             ));
       });
@@ -594,7 +594,7 @@ class DatabaseImpl extends NativeResource<NativeObject<CBLDatabase>>
       useSync(() => native.keepAlive((pointer) {
             _bindings.deleteDocumentWithConcurrencyControl(
               pointer,
-              doc.doc.pointer,
+              doc.native.pointer,
               concurrency.toCBLConcurrencyControl(),
             );
           }));
@@ -689,7 +689,6 @@ class DatabaseImpl extends NativeResource<NativeObject<CBLDatabase>>
   List<String> indexNames() => useSync(() {
         return fl.Array.fromPointer(
           native.keepAlive(_bindings.indexNames),
-          release: true,
           retain: false,
         ).map((it) => it.asString!).toList();
       });

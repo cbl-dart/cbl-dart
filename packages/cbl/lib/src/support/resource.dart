@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:meta/meta.dart';
 
@@ -193,23 +194,34 @@ mixin DelegatingResourceMixin implements AbstractResource {
 }
 
 /// A resource which is based on a [NativeObject].
-abstract class NativeResource<T extends NativeObject> {
-  NativeResource(this._native);
+abstract class NativeResource<T extends NativeType> {
+  NativeResource(this.native);
 
   /// The native object underlying this resource.
-  final T _native;
+  final NativeObject<T> native;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is NativeResource &&
           other.runtimeType == other.runtimeType &&
-          _native == other._native;
+          native == other.native;
 
   @override
-  int get hashCode => _native.hashCode;
+  int get hashCode => native.hashCode;
 }
 
-extension NativeResourceExtension<T extends NativeObject> on NativeResource<T> {
-  T get native => _native;
+mixin NativeResourceMixin<T extends NativeType> implements NativeResource<T> {
+  @override
+  NativeObject<T> get native;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NativeResource &&
+          other.runtimeType == other.runtimeType &&
+          native == other.native;
+
+  @override
+  int get hashCode => native.hashCode;
 }

@@ -4,7 +4,7 @@ import 'base.dart';
 import 'bindings.dart';
 import 'database.dart';
 import 'fleece.dart';
-import 'native_callback.dart';
+import 'async_callback.dart';
 import 'utils.dart';
 
 enum CBLQueryLanguage {
@@ -71,11 +71,11 @@ typedef CBLDart_CBLQuery_ColumnName = FLString Function(
 typedef CBLDart_CBLQuery_AddChangeListener_C = Pointer<CBLListenerToken>
     Function(
   Pointer<CBLQuery> query,
-  Pointer<Callback> listener,
+  Pointer<CBLDartAsyncCallback> listener,
 );
 typedef CBLDart_CBLQuery_AddChangeListener = Pointer<CBLListenerToken> Function(
   Pointer<CBLQuery> query,
-  Pointer<Callback> listener,
+  Pointer<CBLDartAsyncCallback> listener,
 );
 typedef CBLQuery_CopyCurrentResults = Pointer<CBLResultSet> Function(
   Pointer<CBLQuery> query,
@@ -175,7 +175,7 @@ class QueryBindings extends Bindings {
 
   Pointer<CBLListenerToken> addChangeListener(
     Pointer<CBLQuery> query,
-    Pointer<Callback> listener,
+    Pointer<CBLDartAsyncCallback> listener,
   ) {
     return _addChangeListener(query, listener);
   }

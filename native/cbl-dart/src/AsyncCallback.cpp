@@ -1,4 +1,4 @@
-#include "Callbacks.h"
+#include "AsyncCallback.h"
 
 #include <sstream>
 
@@ -6,34 +6,35 @@
 
 namespace CBLDart {
 
-// === CallbackRegistry =======================================================
+// === AsyncCallbackRegistry ==================================================
 
-CallbackRegistry CallbackRegistry::instance;
+AsyncCallbackRegistry AsyncCallbackRegistry::instance;
 
-void CallbackRegistry::registerCallback(const Callback &callback) {
+void AsyncCallbackRegistry::registerCallback(const AsyncCallback &callback) {
   std::scoped_lock lock(mutex_);
   callbacks_.push_back(&callback);
 }
 
-void CallbackRegistry::unregisterCallback(const Callback &callback) {
+void AsyncCallbackRegistry::unregisterCallback(const AsyncCallback &callback) {
   std::scoped_lock lock(mutex_);
   callbacks_.erase(std::remove(callbacks_.begin(), callbacks_.end(), &callback),
                    callbacks_.end());
 }
 
-bool CallbackRegistry::callbackExists(const Callback &callback) const {
+bool AsyncCallbackRegistry::callbackExists(
+    const AsyncCallback &callback) const {
   std::scoped_lock lock(mutex_);
   return std::find(callbacks_.begin(), callbacks_.end(), &callback) !=
          callbacks_.end();
 }
 
-void CallbackRegistry::addBlockingCall(CallbackCall &call) {
+void AsyncCallbackRegistry::addBlockingCall(AsyncCallbackCall &call) {
   assert(call.isBlocking());
   std::scoped_lock lock(mutex_);
   blockingCalls_.push_back(&call);
 }
 
-bool CallbackRegistry::takeBlockingCall(CallbackCall &call) {
+bool AsyncCallbackRegistry::takeBlockingCall(AsyncCallbackCall &call) {
   std::scoped_lock lock(mutex_);
   auto position =
       std::find(blockingCalls_.begin(), blockingCalls_.end(), &call);
@@ -45,21 +46,21 @@ bool CallbackRegistry::takeBlockingCall(CallbackCall &call) {
   }
 }
 
-CallbackRegistry::CallbackRegistry() {}
+AsyncCallbackRegistry::AsyncCallbackRegistry() {}
 
-// === Callback ===============================================================
+// === AsyncCallback ==========================================================
 
-Callback::Callback(uint32_t id, Dart_Handle dartCallback, Dart_Port sendport,
-                   bool debug)
+AsyncCallback::AsyncCallback(uint32_t id, Dart_Handle dartCallback,
+                             Dart_Port sendport, bool debug)
     : id_(id), debug_(debug), sendPort_(sendport) {
   dartCallbackHandle_ = Dart_NewWeakPersistentHandle_DL(
-      dartCallback, this, 0, Callback::dartCallbackHandleFinalizer);
+      dartCallback, this, 0, AsyncCallback::dartCallbackHandleFinalizer);
   assert(dartCallbackHandle_ != nullptr);
 
-  CallbackRegistry::instance.registerCallback(*this);
+  AsyncCallbackRegistry::instance.registerCallback(*this);
 }
 
-void Callback::setFinalizer(void *context, CallbackFinalizer finalizer) {
+void AsyncCallback::setFinalizer(void *context, CallbackFinalizer finalizer) {
   debugLog("setFinalizer");
   std::scoped_lock lock(mutex_);
   assert(!closed_);
@@ -67,7 +68,7 @@ void Callback::setFinalizer(void *context, CallbackFinalizer finalizer) {
   finalizer_ = finalizer;
 }
 
-void Callback::close() {
+void AsyncCallback::close() {
   {
     std::scoped_lock lock(mutex_);
     assert(!closed_);
@@ -98,35 +99,35 @@ void Callback::close() {
   delete this;
 }
 
-void Callback::dartCallbackHandleFinalizer(void *dart_callback_data,
-                                           void *peer) {
-  auto callback = reinterpret_cast<Callback *>(peer);
+void AsyncCallback::dartCallbackHandleFinalizer(void *dart_callback_data,
+                                                void *peer) {
+  auto callback = reinterpret_cast<AsyncCallback *>(peer);
   callback->debugLog("closing from Dart finalizer");
   callback->dartCallbackHandle_ = nullptr;
   callback->close();
 }
 
-Callback::~Callback() {
+AsyncCallback::~AsyncCallback() {
   debugLog("deleting");
 
   assert(activeCalls_.empty());
 
-  CallbackRegistry::instance.unregisterCallback(*this);
+  AsyncCallbackRegistry::instance.unregisterCallback(*this);
 
   if (finalizer_) {
     finalizer_(finalizerContext_);
   }
 }
 
-void Callback::registerCall(CallbackCall &call) {
-  assert(CallbackRegistry::instance.callbackExists(*this));
+void AsyncCallback::registerCall(AsyncCallbackCall &call) {
+  assert(AsyncCallbackRegistry::instance.callbackExists(*this));
 
   std::scoped_lock lock(mutex_);
   assert(!closed_);
   activeCalls_.push_back(&call);
 }
 
-void Callback::unregisterCall(CallbackCall &call) {
+void AsyncCallback::unregisterCall(AsyncCallbackCall &call) {
   auto shouldDelete = false;
   {
     std::scoped_lock lock(mutex_);
@@ -146,7 +147,7 @@ void Callback::unregisterCall(CallbackCall &call) {
   }
 }
 
-bool Callback::sendRequest(Dart_CObject *request) {
+bool AsyncCallback::sendRequest(Dart_CObject *request) {
   {
     std::scoped_lock lock(mutex_);
     if (closed_) {
@@ -159,7 +160,7 @@ bool Callback::sendRequest(Dart_CObject *request) {
   return true;
 }
 
-inline void Callback::debugLog(const char *message) {
+inline void AsyncCallback::debugLog(const char *message) {
 #ifdef DEBUG
   if (debug_) {
     printf("NativeCallback #%d -> %s\n", id_, message);
@@ -167,22 +168,22 @@ inline void Callback::debugLog(const char *message) {
 #endif
 }
 
-// === CallbackCall ===========================================================
+// === AsyncCallbackCall ======================================================
 
-static std::string failureResult = "__NATIVE_CALLBACK_FAILED__";
+static std::string failureResult = "__ASYNC_CALLBACK_FAILED__";
 
-CallbackCall::CallbackCall(Callback &callback, bool isBlocking)
+AsyncCallbackCall::AsyncCallbackCall(AsyncCallback &callback, bool isBlocking)
     : callback_(callback) {
   callback_.registerCall(*this);
 
   if (isBlocking) {
-    receivePort_ = Dart_NewNativePort_DL("CallbackCall",
-                                         &CallbackCall::messageHandler, false);
+    receivePort_ = Dart_NewNativePort_DL(
+        "AsyncCallbackCall", &AsyncCallbackCall::messageHandler, false);
     assert(receivePort_ != ILLEGAL_PORT);
   }
 };
 
-CallbackCall::~CallbackCall() {
+AsyncCallbackCall::~AsyncCallbackCall() {
   callback_.unregisterCall(*this);
 
   if (isBlocking()) {
@@ -191,7 +192,7 @@ CallbackCall::~CallbackCall() {
   }
 }
 
-void CallbackCall::execute(Dart_CObject &arguments) {
+void AsyncCallbackCall::execute(Dart_CObject &arguments) {
   std::scoped_lock lock(mutex_);
 
   assert(!isExecuted_);
@@ -231,7 +232,7 @@ void CallbackCall::execute(Dart_CObject &arguments) {
   request.value.as_array.values = requestValues;
 
   if (isBlocking()) {
-    CallbackRegistry::instance.addBlockingCall(*this);
+    AsyncCallbackRegistry::instance.addBlockingCall(*this);
   }
 
   auto didSendRequest = callback_.sendRequest(&request);
@@ -243,7 +244,7 @@ void CallbackCall::execute(Dart_CObject &arguments) {
 
     if (isBlocking()) {
       // If the request could not be sent, `complete` will never take this call.
-      CallbackRegistry::instance.takeBlockingCall(*this);
+      AsyncCallbackRegistry::instance.takeBlockingCall(*this);
     }
 
     isCompleted_ = true;
@@ -262,10 +263,10 @@ void CallbackCall::execute(Dart_CObject &arguments) {
   debugLog("finished");
 }
 
-void CallbackCall::complete(Dart_CObject *result) {
+void AsyncCallbackCall::complete(Dart_CObject *result) {
   assert(result);
 
-  if (!CallbackRegistry::instance.takeBlockingCall(*this)) {
+  if (!AsyncCallbackRegistry::instance.takeBlockingCall(*this)) {
     // Prevent completing calls which have been completed by `close`.
     return;
   }
@@ -286,7 +287,7 @@ void CallbackCall::complete(Dart_CObject *result) {
   completedCv_.notify_one();
 }
 
-void CallbackCall::close() {
+void AsyncCallbackCall::close() {
   std::scoped_lock lock(mutex_);
 
   // Call has not been executed.
@@ -300,7 +301,7 @@ void CallbackCall::close() {
 
   // Call is waiting for completion.
   if (!isCompleted_) {
-    auto didTakeCall = CallbackRegistry::instance.takeBlockingCall(*this);
+    auto didTakeCall = AsyncCallbackRegistry::instance.takeBlockingCall(*this);
     if (!didTakeCall) {
       // If at this point we are not able to take the blocking call,
       // `complete` already did and is just wainting for us to release
@@ -322,21 +323,21 @@ void CallbackCall::close() {
   debugLog("did nothing to close call which has already been completed");
 }
 
-void CallbackCall::messageHandler(Dart_Port dest_port_id,
-                                  Dart_CObject *response) {
+void AsyncCallbackCall::messageHandler(Dart_Port dest_port_id,
+                                       Dart_CObject *response) {
   assert(response->type == Dart_CObject_kArray);
   assert(response->value.as_array.length == 2);
 
   auto callPointer = response->value.as_array.values[0];
   auto result = response->value.as_array.values[1];
 
-  CallbackCall &call = *reinterpret_cast<CallbackCall *>(
+  AsyncCallbackCall &call = *reinterpret_cast<AsyncCallbackCall *>(
       CBLDart_CObject_getIntValueAsInt64(callPointer));
 
   call.complete(result);
 }
 
-void CallbackCall::waitForCompletion() {
+void AsyncCallbackCall::waitForCompletion() {
   // The mutex has already been locked when this method is called.
   std::unique_lock lock(mutex_, std::adopt_lock);
 
@@ -348,12 +349,12 @@ void CallbackCall::waitForCompletion() {
   }
 }
 
-bool CallbackCall::isFailureResult(Dart_CObject *result) {
+bool AsyncCallbackCall::isFailureResult(Dart_CObject *result) {
   return result->type == Dart_CObject_kString &&
          failureResult == result->value.as_string;
 }
 
-inline void CallbackCall::debugLog(const char *message) {
+inline void AsyncCallbackCall::debugLog(const char *message) {
 #ifdef DEBUG
   if (!callback_.debug_) {
     return;

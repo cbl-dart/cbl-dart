@@ -21,7 +21,7 @@ set(CBL_DART_INCLUDES
 )
 
 set(CBL_DART_SOURCES 
-    src/Callbacks.cpp
+    src/AsyncCallback.cpp
     src/CBL+Dart.cpp
     src/Fleece+Dart.cpp
     src/Utils.cpp
