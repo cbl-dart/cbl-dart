@@ -1,4 +1,4 @@
-import 'package:cbl/src/utils.dart';
+import 'package:cbl/src/support/utils.dart';
 import 'package:test/test.dart';
 
 void main() {

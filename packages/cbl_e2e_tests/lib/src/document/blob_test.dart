@@ -5,8 +5,8 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/blob.dart';
-import 'package:cbl/src/streams.dart';
-import 'package:cbl/src/utils.dart';
+import 'package:cbl/src/support/streams.dart';
+import 'package:cbl/src/support/utils.dart';
 import 'package:collection/collection.dart';
 
 import '../../test_binding_impl.dart';

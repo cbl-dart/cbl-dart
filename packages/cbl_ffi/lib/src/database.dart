@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
@@ -170,6 +171,19 @@ typedef CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = int Function(
   Pointer<CBLMutableDocument> doc,
   int concurrency,
   Pointer<CBLError> errorOut,
+);
+
+typedef SaveConflictHandler_C = Uint8 Function(
+  Pointer<CBLMutableDocument> documentBeingSave,
+  Pointer<CBLDocument> conflictingDocument,
+);
+typedef SaveConflictHandler = int Function(
+  Pointer<CBLMutableDocument> documentBeingSave,
+  Pointer<CBLDocument> conflictingDocument,
+);
+typedef CBLSaveConflictHandler = bool Function(
+  Pointer<CBLMutableDocument> documentBeingSave,
+  Pointer<CBLDocument>? conflictingDocument,
 );
 
 class SaveDocumentResolvingCallbackMessage {
@@ -410,6 +424,8 @@ class DatabaseBindings extends Bindings {
         CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl>(
       'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
     );
+    _saveConflictHandler = Pointer.fromFunction<SaveConflictHandler_C>(
+        _callSaveConflictHandler, 0);
     _saveDocumentWithConflictHandler = libs.cblDart.lookupFunction<
         CBLDart_CBLDatabase_SaveDocumentWithConflictHandler_C,
         CBLDart_CBLDatabase_SaveDocumentWithConflictHandler>(
@@ -459,6 +475,19 @@ class DatabaseBindings extends Bindings {
     );
   }
 
+  static SaveConflictHandler? _currentSaveConflictHandler;
+
+  static int _callSaveConflictHandler(
+    Pointer<CBLMutableDocument> documentBeingSaved,
+    Pointer<CBLDocument> conflictingDocument,
+  ) {
+    assert(_currentSaveConflictHandler != null);
+    return _currentSaveConflictHandler!(
+      documentBeingSaved,
+      conflictingDocument,
+    );
+  }
+
   late final CBLDart_CBL_CopyDatabase _copyDatabase;
   late final CBLDart_CBL_DeleteDatabase _deleteDatabase;
   late final CBLDart_CBLDatabase_Exists _databaseExists;
@@ -476,6 +505,8 @@ class DatabaseBindings extends Bindings {
   late final CBLDart_CBLDatabase_GetMutableDocument _getMutableDocument;
   late final CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl
       _saveDocumentWithConcurrencyControl;
+  late final Pointer<NativeFunction<SaveConflictHandler_C>>
+      _saveConflictHandler;
   late final CBLDart_CBLDatabase_SaveDocumentWithConflictHandler
       _saveDocumentWithConflictHandler;
   late final CBLDatabase_DeleteDocumentWithConcurrencyControl
@@ -581,17 +612,18 @@ class DatabaseBindings extends Bindings {
     return _config(db);
   }
 
-  Pointer<CBLDocument> getDocument(
+  Pointer<CBLDocument>? getDocument(
     Pointer<CBLDatabase> db,
     String docId,
   ) {
     return stringTable.autoFree(() {
       return _getDocument(db, stringTable.flString(docId).ref, globalCBLError)
-          .checkCBLError();
+          .checkCBLError()
+          .toNullable();
     });
   }
 
-  Pointer<CBLMutableDocument> getMutableDocument(
+  Pointer<CBLMutableDocument>? getMutableDocument(
     Pointer<CBLDatabase> db,
     String docId,
   ) {
@@ -600,7 +632,7 @@ class DatabaseBindings extends Bindings {
         db,
         stringTable.flString(docId).ref,
         globalCBLError,
-      ).checkCBLError();
+      ).checkCBLError().toNullable();
     });
   }
 
@@ -628,6 +660,26 @@ class DatabaseBindings extends Bindings {
       conflictHandler,
       globalCBLError,
     ).checkCBLError();
+  }
+
+  void saveDocumentWithConflictHandlerSync(
+    Pointer<CBLDatabase> db,
+    Pointer<CBLMutableDocument> doc,
+    CBLSaveConflictHandler conflictHandler,
+  ) {
+    _currentSaveConflictHandler = (documentBeingSaved, conflictingDocument) =>
+        conflictHandler(documentBeingSaved, conflictingDocument.toNullable())
+            .toInt();
+    try {
+      _saveDocumentWithConflictHandlerSync(
+        db,
+        doc,
+        _saveConflictHandler,
+        globalCBLError,
+      ).checkCBLError();
+    } finally {
+      _currentSaveConflictHandler = null;
+    }
   }
 
   bool deleteDocumentWithConcurrencyControl(

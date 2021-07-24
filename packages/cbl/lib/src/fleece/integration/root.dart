@@ -3,7 +3,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../native_object.dart';
+import '../../support/native_object.dart';
 import '../encoder.dart';
 import '../slice.dart';
 import 'collection.dart';

@@ -28,4 +28,4 @@ export 'src/replication/document_replication.dart'
 export 'src/replication/endpoint.dart';
 export 'src/replication/replicator.dart' hide ReplicatorImpl;
 export 'src/replication/replicator_change.dart' hide ReplicatorChangeImpl;
-export 'src/resource.dart' show Resource, ClosableResource;
+export 'src/support/resource.dart' show Resource, ClosableResource;

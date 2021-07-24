@@ -4,7 +4,7 @@ import 'dart:ffi';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import '../../utils.dart';
+import '../../support/utils.dart';
 import '../decoder.dart';
 import '../encoder.dart';
 import 'collection.dart';

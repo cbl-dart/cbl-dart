@@ -13,12 +13,10 @@ import 'document/common.dart';
 import 'document/dictionary.dart';
 import 'fleece/fleece.dart' as fl;
 import 'fleece/integration/integration.dart';
-import 'native_object.dart';
-import 'resource.dart';
-import 'streams.dart';
-import 'utils.dart';
-import 'worker/cbl_worker.dart';
-import 'worker/cbl_worker/shared.dart';
+import 'support/native_object.dart';
+import 'support/resource.dart';
+import 'support/streams.dart';
+import 'support/utils.dart';
 
 /// A query language
 enum QueryLanguage {
@@ -245,17 +243,17 @@ abstract class Query implements Resource {
   set parameters(Parameters value);
 
   /// Runs the query, returning the results.
-  Future<ResultSet> execute();
+  ResultSet execute();
 
   /// Returns information about the query, including the translated SQLite form,
   /// and the search strategy. You can use this to help optimize the query:
   /// the word `SCAN` in the strategy indicates a linear scan of the entire
   /// database, which should be avoided by adding an index. The strategy will
   /// also show which index(es), if any, are used.
-  Future<String> explain();
+  String explain();
 
   /// Returns the number of columns in each result.
-  Future<int> columnCount();
+  int columnCount();
 
   /// Returns the name of a column in the result.
   ///
@@ -265,7 +263,7 @@ abstract class Query implements Resource {
   /// will have an automatically-generated name like `$1`. To give a column a
   /// custom name, use the `AS` syntax in the query. Every column is guaranteed
   /// to have a unique name.
-  Future<String?> columnName(int index);
+  String? columnName(int index);
 
   /// Returns a [Stream] which emits a [ResultSet] when this query's results
   /// change, turning it into a "live query" until the stream is canceled.
@@ -277,18 +275,22 @@ abstract class Query implements Resource {
   Stream<ResultSet> changes();
 }
 
-class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
+class QueryImpl extends NativeResource<NativeObject<CBLQuery>>
     with DelegatingResourceMixin
     implements Query {
   static late final _bindings = CBLBindings.instance.query;
 
   QueryImpl({
     required this.database,
-    required Pointer<CBLQuery> pointer,
+    required QueryLanguage language,
+    required String query,
     required String? debugCreator,
-  }) : super(CblRefCountedWorkerObject(
-          pointer,
-          database.native.worker,
+  }) : super(CblRefCountedObject(
+          database.native.keepAlive((pointer) => _bindings.create(
+                pointer,
+                language.toCBLQueryLanguage(),
+                query,
+              )),
           release: true,
           retain: false,
           debugName: 'Query(creator: $debugCreator)',
@@ -321,60 +323,55 @@ class QueryImpl extends NativeResource<WorkerObject<CBLQuery>>
   }
 
   @override
-  Future<ResultSet> execute() => use(() {
+  ResultSet execute() => useSync(() {
         _flushParameters();
-        return native
-            .execute((pointer) => ExecuteQuery(pointer))
-            .then((result) => ResultSet._(
-                  result.pointer,
-                  release: true,
-                  retain: false,
-                  debugCreator: 'Query.execute()',
-                ));
+        return ResultSet._(
+          native.keepAlive(_bindings.execute),
+          release: true,
+          retain: false,
+          debugCreator: 'Query.execute()',
+        );
       });
 
   @override
-  Future<String> explain() =>
-      use(() => native.execute((pointer) => ExplainQuery(pointer)));
+  String explain() => useSync(() => native.keepAlive(_bindings.explain));
 
   @override
-  Future<int> columnCount() =>
-      use(() => native.execute((pointer) => GetQueryColumnCount(pointer)));
+  int columnCount() => useSync(() => native.keepAlive(_bindings.columnCount));
 
   @override
-  Future<String?> columnName(int index) => use(
-      () => native.execute((pointer) => GetQueryColumnName(pointer, index)));
+  String? columnName(int index) => useSync(() => native.keepAlive((pointer) {
+        return _bindings.columnName(pointer, index);
+      }));
 
   @override
-  Stream<ResultSet> changes() => useSync(() => CallbackStreamController<
-          ResultSet, TransferablePointer<CBLListenerToken>>(
-        parent: this,
-        worker: native.worker,
-        createRegisterCallbackRequest: (callback) {
-          _flushParameters();
-          return AddQueryChangeListener(
-            native.pointer,
-            callback.native.pointer,
-          );
-        },
-        createEvent: (listenerToken, _) async {
-          // The native side sends no arguments. When the native side notfies
-          // the listener it has to copy the current query result set.
-
-          final result =
-              await native.execute((pointer) => CopyCurrentQueryResultSet(
+  Stream<ResultSet> changes() => useSync(
+      () => CallbackStreamController<ResultSet, Pointer<CBLListenerToken>>(
+            parent: this,
+            startStream: (callback) {
+              _flushParameters();
+              return _bindings.addChangeListener(
+                native.pointer,
+                callback.native.pointer,
+              );
+            },
+            createEvent: (listenerToken, _) {
+              return ResultSet._(
+                native.keepAlive((pointer) {
+                  // The native side sends no arguments. When the native side
+                  // notfies the listener it has to copy the current query result
+                  // set.
+                  return _bindings.copyCurrentResults(
                     pointer,
-                    listenerToken.pointer,
-                  ));
-
-          return ResultSet._(
-            result.pointer,
-            release: true,
-            retain: false,
-            debugCreator: 'Query.changes()',
-          );
-        },
-      ).stream);
+                    listenerToken,
+                  );
+                }),
+                release: true,
+                retain: false,
+                debugCreator: 'Query.changes()',
+              );
+            },
+          ).stream);
 }
 
 /// One of the results that [Query]s return in [ResultSet]s.
@@ -512,4 +509,8 @@ class ResultSet extends NativeResource<NativeObject<CBLResultSet>>
 
   /// All the results as [Dictionary]s.
   Iterable<Dictionary> get asDictionaries => map((result) => result.dictionary);
+}
+
+extension on QueryLanguage {
+  CBLQueryLanguage toCBLQueryLanguage() => CBLQueryLanguage.values[index];
 }

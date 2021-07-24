@@ -8,12 +8,11 @@ import '../database.dart';
 import '../document/document.dart';
 import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
-import '../native_callback.dart';
-import '../native_object.dart';
-import '../resource.dart';
-import '../streams.dart';
-import '../utils.dart';
-import '../worker/cbl_worker.dart';
+import '../support/native_callback.dart';
+import '../support/native_object.dart';
+import '../support/resource.dart';
+import '../support/streams.dart';
+import '../support/utils.dart';
 import 'authenticator.dart';
 import 'configuration.dart';
 import 'conflict.dart';
@@ -108,7 +107,7 @@ abstract class Replicator implements ClosableResource {
   ReplicatorConfiguration get config;
 
   /// Returns this replicator's status.
-  Future<ReplicatorStatus> status();
+  ReplicatorStatus status();
 
   /// Starts this replicator with an option to [reset] the local checkpoint of
   /// the replicator.
@@ -118,7 +117,7 @@ abstract class Replicator implements ClosableResource {
   ///
   /// The method returns immediately; the replicator runs asynchronously and
   /// will report its progress through the [changes] stream.
-  Future<void> start({bool reset = false});
+  void start({bool reset = false});
 
   /// Stops this replicator, if running.
   ///
@@ -126,7 +125,7 @@ abstract class Replicator implements ClosableResource {
   /// replicator will change the [ReplicatorActivityLevel] of its [status] to
   /// [ReplicatorActivityLevel.stopped]. and the [changes] stream will
   /// be notified accordingly.
-  Future<void> stop();
+  void stop();
 
   /// Returns a [Stream] which emits a [ReplicatorChange] event when this
   /// replicators [status] changes.
@@ -146,14 +145,14 @@ abstract class Replicator implements ClosableResource {
   ///
   /// This API is a snapshot and results may change between the time the call
   /// was mad and the time the call returns.
-  Future<Set<String>> pendingDocumentIds();
+  Set<String> pendingDocumentIds();
 
   /// Returns whether the [Document] with the given [documentId] has revisions
   /// pending push.
   ///
   /// This API is a snapshot and the result may change between the time the call
   /// was made and the time the call returns.
-  Future<bool> isDocumentPending(String documentId);
+  bool isDocumentPending(String documentId);
 }
 
 late final _bindings = CBLBindings.instance.replicator;
@@ -231,8 +230,6 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
 
   late final DatabaseImpl _database;
 
-  Worker get _worker => _database.native.worker;
-
   late final NativeObject<CBLReplicator> _replicator;
 
   late final List<NativeCallback> _callbacks;
@@ -241,25 +238,19 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
 
   @override
-  Future<ReplicatorStatus> status() => use(_status);
+  ReplicatorStatus status() => useSync(_status);
 
-  Future<ReplicatorStatus> _status() => runKeepAlive(() {
-        return _worker
-            .execute(GetReplicatorStatus(_replicator.pointer))
-            .then((status) => status.toReplicatorStatus());
-      });
+  ReplicatorStatus _status() =>
+      _replicator.keepAlive(_bindings.status).toReplicatorStatus();
 
   @override
-  Future<void> start({bool reset = false}) => use(() => runKeepAlive(() {
-        return _worker.execute(StartReplicator(_replicator.pointer, reset));
-      }));
+  void start({bool reset = false}) => useSync(() =>
+      _replicator.keepAlive((pointer) => _bindings.start(pointer, reset)));
 
   @override
-  Future<void> stop() => use(_stop);
+  void stop() => useSync(_stop);
 
-  Future<void> _stop() => runKeepAlive(() {
-        return _worker.execute(StopReplicator(_replicator.pointer));
-      });
+  void _stop() => _replicator.keepAlive(_bindings.stop);
 
   @override
   Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false}) =>
@@ -268,8 +259,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   Stream<ReplicatorChange> _changes({bool startWithCurrentStatus = false}) {
     final changes = CallbackStreamController<ReplicatorChange, void>(
       parent: this,
-      worker: _database.native.worker,
-      createRegisterCallbackRequest: (callback) => AddReplicatorChangeListener(
+      startStream: (callback) => _bindings.addChangeListener(
         _replicator.pointer,
         callback.native.pointer,
       ),
@@ -285,8 +275,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
 
     if (startWithCurrentStatus) {
       return changeStreamWithInitialValue(
-        createInitialValue: () async =>
-            ReplicatorChangeImpl(this, await _status()),
+        createInitialValue: () => ReplicatorChangeImpl(this, _status()),
         createChangeStream: () => changes,
       );
     } else {
@@ -298,9 +287,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
   Stream<DocumentReplication> documentReplications() =>
       useSync(() => CallbackStreamController(
             parent: this,
-            worker: _database.native.worker,
-            createRegisterCallbackRequest: (callback) =>
-                AddReplicatorDocumentListener(
+            startStream: (callback) => _bindings.addDocumentReplicationListener(
               _replicator.pointer,
               callback.native.pointer,
             ),
@@ -318,24 +305,19 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
           ).stream);
 
   @override
-  Future<Set<String>> pendingDocumentIds() => use(() => runKeepAlive(() async {
+  Set<String> pendingDocumentIds() => useSync(() {
         final dict = fl.Dict.fromPointer(
-          (await _worker.execute(
-                  GetReplicatorPendingDocumentIds(_replicator.pointer)))
-              .pointer,
+          _replicator.keepAlive(_bindings.pendingDocumentIDs),
           retain: false,
           release: true,
         );
         return dict.keys.toSet();
-      }));
+      });
 
   @override
-  Future<bool> isDocumentPending(String documentId) =>
-      use(() => runKeepAlive(() {
-            return _worker.execute(GetReplicatorIsDocumentPening(
-              _replicator.pointer,
-              documentId,
-            ));
+  bool isDocumentPending(String documentId) =>
+      useSync(() => _replicator.keepAlive((pointer) {
+            return _bindings.isDocumentPending(pointer, documentId);
           }));
 
   @override
@@ -349,7 +331,7 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
       await status.asyncMap((status) async {
         if (status.activity != ReplicatorActivityLevel.stopped && !stopping) {
           stopping = true;
-          await _stop();
+          _stop();
         }
         return status;
       }).firstWhere((status) {

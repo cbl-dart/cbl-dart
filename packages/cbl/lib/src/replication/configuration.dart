@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import '../database.dart';
 import '../document/document.dart';
-import '../utils.dart';
+import '../support/utils.dart';
 import 'authenticator.dart';
 import 'conflict_resolver.dart';
 import 'endpoint.dart';

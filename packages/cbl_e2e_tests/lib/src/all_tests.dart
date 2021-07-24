@@ -9,7 +9,7 @@ import 'fleece/containers_test.dart' as fleece_containers;
 import 'fleece/integration_test.dart' as fleece_integration;
 import 'fleece/slice_test.dart' as fleece_slice;
 import 'logging_test.dart' as logging;
-import 'native_callback_test.dart' as native_callback;
+import 'support/native_callback_test.dart' as native_callback;
 import 'replication/authenticator_test.dart' as replication_authenticator;
 import 'replication/configuration_test.dart' as replication_configuration;
 import 'replication/conflict_test.dart' as replication_conflict;

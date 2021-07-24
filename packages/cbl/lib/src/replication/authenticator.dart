@@ -1,4 +1,4 @@
-import '../utils.dart';
+import '../support/utils.dart';
 
 /// The authentication credentials for a remote server.
 abstract class Authenticator {}

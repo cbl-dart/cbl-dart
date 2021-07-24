@@ -3,8 +3,6 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import 'worker/worker.dart';
-
 /// Keeps a [NativeObject] alive while the [Function] [fn] is running.
 ///
 /// If [fn] returns a [Future] [object] is kept alive until the future
@@ -121,33 +119,6 @@ class NativeObject<T extends NativeType> {
   int get hashCode => _pointer.address.hashCode;
 }
 
-/// A native object, whose operations are executed in a [Worker].
-mixin WorkerObject<T extends NativeType> on NativeObject<T> {
-  /// The worker on which operations of this object are executed.
-  Worker get worker;
-
-  /// Executes an operation of this object on [worker] and returns the result.
-  ///
-  /// The call to [createRequest] is wrapped in [runKeepAlive].
-  ///
-  /// [createRequest] is passed the address of this object as an `int` and
-  /// has to return the [WorkerRequest] to be executed.
-  Future<R> execute<R>(
-    FutureOr<WorkerRequest<R>> Function(Pointer<T> pointer) createRequest,
-  ) =>
-      runKeepAlive(() async {
-        return worker.execute(await createRequest(pointer));
-      });
-}
-
-class SimpleWorkerObject<T extends NativeType> extends NativeObject<T>
-    with WorkerObject {
-  SimpleWorkerObject(Pointer<T> pointer, this.worker) : super(pointer);
-
-  @override
-  final Worker worker;
-}
-
 /// Represents a reference to a CouchbaseLite C API object that is reference
 /// counted.
 class CblRefCountedObject<T extends NativeType> extends NativeObject<T> {
@@ -176,26 +147,6 @@ class CblRefCountedObject<T extends NativeType> extends NativeObject<T> {
       );
     }
   }
-}
-
-/// A [CblRefCountedObject] which is also a [WorkerObject].
-class CblRefCountedWorkerObject<T extends NativeType>
-    extends CblRefCountedObject<T> with WorkerObject {
-  CblRefCountedWorkerObject(
-    Pointer<T> pointer,
-    this.worker, {
-    required bool release,
-    required bool retain,
-    required String? debugName,
-  }) : super(
-          pointer,
-          release: release,
-          retain: retain,
-          debugName: debugName,
-        );
-
-  @override
-  final Worker worker;
 }
 
 /// Represents a reference to a CBLReplicator.

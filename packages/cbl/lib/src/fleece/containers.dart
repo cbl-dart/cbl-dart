@@ -6,8 +6,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import '../errors.dart';
-import '../native_object.dart';
-import '../resource.dart';
+import '../support/native_object.dart';
+import '../support/resource.dart';
 import 'encoder.dart';
 import 'slice.dart';
 

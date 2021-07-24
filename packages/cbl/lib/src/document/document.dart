@@ -9,9 +9,9 @@ import 'package:synchronized/synchronized.dart';
 import '../database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
-import '../native_object.dart';
-import '../resource.dart';
-import '../utils.dart';
+import '../support/native_object.dart';
+import '../support/resource.dart';
+import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
@@ -109,11 +109,6 @@ class DocumentImpl with IterableMixin<String> implements Document {
           retain: retain,
           debugName: debugName,
         );
-
-  /// Lock which is used to serialize async operations on this document.
-  final _lock = Lock();
-
-  Future<T> useLocked<T>(T Function() fn) => _lock.synchronized(fn);
 
   /// The database to which this document belongs.
   ///
@@ -288,18 +283,6 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
           properties.native.pointer.cast(),
         ));
   }
-
-  @override
-  int get sequence => _sequenceOverride ?? super.sequence;
-  int? _sequenceOverride;
-
-  // While a document is being saved and the [SaveConflictHandler] is running,
-  // the sequence cannot be read from the native document because of a lock.
-  // To allow the sequence to be read in the handler, code which invokes the
-  // handler needs to call [saveSequence] before calling the handler and
-  // [restoreSequence] after the handler is done.
-  void saveSequence() => _sequenceOverride = sequence;
-  void restoreSequence() => _sequenceOverride = null;
 
   @override
   void setValue(Object? value, {required String key}) =>

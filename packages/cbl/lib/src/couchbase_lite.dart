@@ -9,10 +9,9 @@ import 'document/blob.dart';
 import 'document/common.dart';
 import 'fleece/fleece.dart';
 import 'fleece/integration/integration.dart';
-import 'native_object.dart';
-import 'streams.dart';
-import 'utils.dart';
-import 'worker/cbl_worker.dart';
+import 'support/native_object.dart';
+import 'support/streams.dart';
+import 'support/utils.dart';
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
 /// `DynamicLibrary` at a later time.
@@ -231,15 +230,6 @@ set debugRefCounted(bool value) {
   }
 }
 
-late WorkerFactory _workerFactory;
-
-/// The global worker factory used by all resources which need to create
-/// workers.
-WorkerFactory get workerFactory {
-  debugCouchbaseLiteIsInitialized();
-  return _workerFactory;
-}
-
 /// Initializes global resources and configures global settings, such as
 /// logging.
 class CouchbaseLite {
@@ -253,7 +243,6 @@ class CouchbaseLite {
       _initialization.execute(() {
         final ffiLibraries = libraries._toFfi();
         CBLBindings.initInstance(ffiLibraries);
-        _workerFactory = CblWorkerFactory(libraries: ffiLibraries);
         MDelegate.instance = CblMDelegate();
         SlotSetter.register(BlobImplSetter());
       });

@@ -3,17 +3,16 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import 'couchbase_lite.dart';
 import 'document/document.dart';
 import 'errors.dart';
 import 'fleece/fleece.dart' as fl;
-import 'native_callback.dart';
-import 'native_object.dart';
+import 'support/native_object.dart';
 import 'query.dart';
-import 'resource.dart';
-import 'streams.dart';
-import 'utils.dart';
-import 'worker/cbl_worker.dart';
+import 'support/resource.dart';
+import 'support/streams.dart';
+import 'support/utils.dart';
+
+late final _bindings = CBLBindings.instance.database;
 
 /// Database configuration options.
 class DatabaseConfiguration {
@@ -206,24 +205,21 @@ class FullTextIndex extends Index {
 /// See:
 /// - [Database.saveDocumentResolving] for saving a [Document] with a custom
 ///   conflict handler.
-typedef SaveConflictHandler = FutureOr<bool> Function(
+typedef SaveConflictHandler = bool Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
 
 /// A database is both a filesystem object and a container for documents.
 abstract class Database with ClosableResource {
-  static late final _staticWorker =
-      TransientWorkerExecutor('Database.Static', workerFactory);
-
   /// Returns true if a database with the given [name] exists in the given
   /// [directory].
   ///
   /// [name] is the database name (without the ".cblite2" extension.).
   ///
   /// [directory] is the directory containing the database.
-  static Future<bool> exists(String name, {required String directory}) =>
-      _staticWorker.execute(DatabaseExists(name, directory));
+  static bool exists(String name, {required String directory}) =>
+      _bindings.databaseExists(name, directory);
 
   /// Copies a database file to a new location, and assigns it a new internal
   /// UUID to distinguish it from the original database when replicating.
@@ -233,18 +229,13 @@ abstract class Database with ClosableResource {
   ///
   /// [toName] is the new database name (without the ".cblite2" extension.).
   ///
-  /// [config] is the database configuration of the new database
-  /// (directory and encryption option.)
-  static Future<void> copy({
+  /// [directory] is the directory containing the copied database.
+  static void copy({
     required String fromPath,
     required String toName,
-    DatabaseConfiguration? config,
+    String? directory,
   }) =>
-      _staticWorker.execute(CopyDatabase(
-        fromPath,
-        toName,
-        config?.directory,
-      ));
+      _bindings.copyDatabase(fromPath, toName, directory);
 
   /// Deletes a database file.
   ///
@@ -253,11 +244,8 @@ abstract class Database with ClosableResource {
   /// [name] is the database name (without the ".cblite2" extension.)
   ///
   /// [directory] is the directory containing the database.
-  static Future<bool> remove(String name, {required String directory}) =>
-      _staticWorker.execute(DeleteDatabaseFile(name, directory));
-
-  /// Counter to generate unique ids for opened [Database]s.
-  static int _nextDatabaseId = 0;
+  static bool remove(String name, {required String directory}) =>
+      _bindings.deleteDatabase(name, directory);
 
   /// Opens a database, or creates it if it doesn't exist yet, returning a new
   /// [Database] instance.
@@ -270,42 +258,28 @@ abstract class Database with ClosableResource {
   ///
   /// [config] contains the database configuration (directory and encryption
   /// option.)
-  static Future<Database> open(
+  static Database open(
     String name, {
     DatabaseConfiguration? config,
-  }) async {
-    final databaseId = _nextDatabaseId++;
-
-    final worker =
-        await workerFactory.createWorker(id: 'Database(#$databaseId|$name)');
-
-    try {
-      final result = await worker.execute(OpenDatabase(
-        name,
-        config?.directory,
-      ));
-      return DatabaseImpl(name, config, result.pointer, worker);
-    } catch (error) {
-      await worker.stop();
-      rethrow;
-    }
+  }) {
+    return DatabaseImpl(name, config, _bindings.open(name, config?.directory));
   }
 
   // === Database ==============================================================
 
   /// The database's name.
-  Future<String> get name;
+  String get name;
 
   /// The database's full filesystem path.
-  Future<String> get path;
+  String get path;
 
   /// The number of documents in the database.
-  Future<int> get count;
+  int get count;
 
   /// The database's configuration, as given when it was opened.
   ///
   /// The encryption key is not filled in, for security reasons.
-  Future<DatabaseConfiguration> get config;
+  DatabaseConfiguration get config;
 
   /// Closes and deletes this database.
   ///
@@ -320,7 +294,7 @@ abstract class Database with ClosableResource {
   ///
   /// See:
   /// - [MaintenanceType] for the types of maintenance the database can perform.
-  Future<void> performMaintenance(MaintenanceType type);
+  void performMaintenance(MaintenanceType type);
 
   /// Begins a batch operation, similar to a transaction.
   ///
@@ -330,12 +304,12 @@ abstract class Database with ClosableResource {
   /// Changes will not be visible to other CBLDatabase instances on the same
   /// database until the batch operation ends. Batch operations can nest.
   /// Changes are not committed until the outer batch ends.
-  Future<void> beginBatch();
+  void beginBatch();
 
   /// Ends a batch operation.
   ///
   /// This must be called after [beginBatch].
-  Future<void> endBatch();
+  void endBatch();
 
   // === Documents =============================================================
 
@@ -343,13 +317,13 @@ abstract class Database with ClosableResource {
   /// object.
   ///
   /// Returns `null` if no document with [id] exists.
-  Future<Document?> getDocument(String id);
+  Document? getDocument(String id);
 
   /// Reads a document from the database, in mutable form that can be updated
   /// and saved.
   ///
   /// This function is otherwise identical to [getDocument].
-  Future<MutableDocument?> getMutableDocument(String id);
+  MutableDocument? getMutableDocument(String id);
 
   /// Saves a (mutable) document to the database.
   ///
@@ -382,7 +356,7 @@ abstract class Database with ClosableResource {
   /// Deletes this document from the database.
   ///
   /// Deletions are replicated.
-  Future<void> deleteDocument(
+  void deleteDocument(
     Document doc, [
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]);
@@ -394,19 +368,19 @@ abstract class Database with ClosableResource {
   /// when pulled.
   ///
   /// To delete a [Document], use [deleteDocument] method.
-  Future<bool> purgeDocumentById(String id);
+  bool purgeDocumentById(String id);
 
   /// Returns the time, if any, at which a given document will expire and be
   /// purged.
   ///
   /// Documents don't normally expire; you have to call [setDocumentExpiration]
   /// to set a document's expiration time.
-  Future<DateTime?> getDocumentExpiration(String id);
+  DateTime? getDocumentExpiration(String id);
 
   /// Sets or clears the expiration time of a document.
   ///
   /// When [time] is `null` the document will never expire.
-  Future<void> setDocumentExpiration(String id, DateTime? time);
+  void setDocumentExpiration(String id, DateTime? time);
 
   // === Changes ===============================================================
 
@@ -422,7 +396,7 @@ abstract class Database with ClosableResource {
   ///
   /// Changes made to the database file by other processes will __not__ be
   /// notified.
-  Stream<void> changesOfDocument(String id);
+  void changesOfDocument(String id);
 
   /// Creates a stream that emits a list of document ids each time documents
   /// in this databse have changed.
@@ -450,7 +424,7 @@ abstract class Database with ClosableResource {
   ///
   /// See:
   /// - [Query] for how to write and use queries.
-  Future<Query> query(QueryDefinition queryDefinition);
+  Query query(QueryDefinition queryDefinition);
 
   // === Indexes ===============================================================
 
@@ -463,27 +437,25 @@ abstract class Database with ClosableResource {
   ///
   /// If a non-identical index with that name already exists, it is deleted and
   /// re-created.
-  Future<void> createIndex(String name, Index index);
+  void createIndex(String name, Index index);
 
   /// Deletes an index given its name.
-  Future<void> deleteIndex(String name);
+  void deleteIndex(String name);
 
   /// Returns the names of the indexes on this database, as an array of strings.
-  Future<List<String>> indexNames();
+  List<String> indexNames();
 }
 
-class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
+class DatabaseImpl extends NativeResource<NativeObject<CBLDatabase>>
     with ClosableResourceMixin
     implements Database {
   DatabaseImpl(
     this._debugName,
     DatabaseConfiguration? config,
     Pointer<CBLDatabase> pointer,
-    Worker worker,
   )   : _config = config,
-        super(CblRefCountedWorkerObject(
+        super(CblRefCountedObject(
           pointer,
-          worker,
           release: true,
           retain: false,
           debugName: 'Database($_debugName)',
@@ -493,167 +465,152 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
 
   final DatabaseConfiguration? _config;
 
+  var _deleteWhenClosing = false;
+
   // === Database ==============================================================
 
   @override
-  Future<String> get name =>
-      use(() => native.execute((pointer) => GetDatabaseName(pointer)));
+  String get name => useSync(() => native.keepAlive(_bindings.name));
 
   @override
-  Future<String> get path =>
-      use(() => native.execute((pointer) => GetDatabasePath(pointer)));
+  String get path => useSync(() => native.keepAlive(_bindings.path));
 
   @override
-  Future<int> get count =>
-      use(() => native.execute((pointer) => GetDatabaseCount(pointer)));
+  int get count => useSync(() => native.keepAlive(_bindings.count));
 
   @override
-  Future<DatabaseConfiguration> get config async =>
+  DatabaseConfiguration get config =>
       _config ??
       (throw StateError('Database was created without configuration.'));
 
   @override
   Future<void> delete() async {
-    _createCloseRequest = (pointer) => DeleteDatabase(pointer);
+    _deleteWhenClosing = true;
     await close();
   }
 
   @override
-  Future<void> performMaintenance(MaintenanceType type) => use(() =>
-      native.execute((pointer) => PerformDatabaseMaintenance(pointer, type)));
+  void performMaintenance(MaintenanceType type) =>
+      useSync(() => native.keepAlive((pointer) => _bindings.performMaintenance(
+            pointer,
+            type.toCBLMaintenanceType(),
+          )));
 
   @override
-  Future<void> beginBatch() =>
-      use(() => native.execute((pointer) => BeginDatabaseTransaction(pointer)));
+  void beginBatch() =>
+      useSync(() => native.keepAlive(_bindings.beginTransaction));
 
   @override
-  Future<void> endBatch() => use(
-      () => native.execute((pointer) => EndDatabaseTransaction(pointer, true)));
-
-  WorkerRequest Function(Pointer<CBLDatabase>) _createCloseRequest =
-      (pointer) => CloseDatabase(pointer);
+  void endBatch() => useSync(() =>
+      native.keepAlive((pointer) => _bindings.endTransaction(pointer, true)));
 
   @override
   Future<void> performClose() async {
-    await native.execute(_createCloseRequest);
-    await native.worker.stop();
+    if (_deleteWhenClosing) {
+      native.keepAlive(_bindings.delete);
+    }
   }
 
   // === Documents =============================================================
 
   @override
-  Future<Document?> getDocument(String id) => use(() => native
-      .execute((pointer) => GetDatabaseDocument(pointer, id))
-      .then((address) => address?.let((it) => DocumentImpl(
+  Document? getDocument(String id) => useSync(() => native
+      .keepAlive((pointer) => _bindings.getDocument(pointer, id))
+      ?.let((pointer) => DocumentImpl(
             database: this,
-            doc: it.pointer,
+            doc: pointer,
             retain: false,
             debugCreator: 'Database.getDocument()',
-          ))));
+          )));
 
   @override
-  Future<MutableDocument?> getMutableDocument(String id) => use(() => native
-      .execute((pointer) => GetDatabaseMutableDocument(pointer, id))
-      .then((address) => address?.let((it) => MutableDocumentImpl(
-            doc: it.pointer,
+  MutableDocument? getMutableDocument(String id) => useSync(() => native
+      .keepAlive((pointer) => _bindings.getMutableDocument(pointer, id))
+      ?.let((pointer) => MutableDocumentImpl(
+            database: this,
+            doc: pointer,
             retain: false,
             debugCreator: 'Database.getMutableDocument()',
-          ))));
+          )));
 
   @override
   Future<void> saveDocument(
     covariant MutableDocumentImpl doc, {
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   }) =>
-      use(() => doc.useLocked(() async {
-            doc.database = this;
-            await doc.flushProperties();
-
-            return native.execute(
-                (pointer) => SaveDatabaseDocumentWithConcurrencyControl(
-                      pointer,
-                      doc.doc.pointer.cast(),
-                      concurrency,
-                    ));
-          }));
+      use(() async {
+        doc.database = this;
+        await doc.flushProperties();
+        native.keepAlive((pointer) {
+          _bindings.saveDocumentWithConcurrencyControl(
+            pointer,
+            doc.doc.pointer.cast(),
+            concurrency.toCBLConcurrencyControl(),
+          );
+        });
+      });
 
   @override
   Future<void> saveDocumentResolving(
     covariant MutableDocumentImpl doc,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() => doc.useLocked(() async {
-            doc.database = this;
-            await doc.flushProperties();
+      use(() async {
+        doc.database = this;
+        await doc.flushProperties();
 
-            final callback = NativeCallback(
-              (arguments) async {
-                final message =
-                    SaveDocumentResolvingCallbackMessage.fromArguments(
-                        arguments);
+        bool _conflictHandler(
+          Pointer<CBLMutableDocument> _,
+          Pointer<CBLDocument>? conflictingDocument,
+        ) {
+          final _conflictingDocument = conflictingDocument?.let(
+            (pointer) => DocumentImpl(
+              database: this,
+              doc: pointer,
+              retain: true,
+              debugCreator: 'SaveConflictHandler(conflictingDocument)',
+            ),
+          );
 
-                final conflictingDocument = message.conflictingDocument?.let(
-                  (pointer) => DocumentImpl(
-                    database: this,
-                    doc: pointer,
-                    retain: true,
-                    debugCreator: 'SaveConflictHandler(conflictingDocument)',
-                  ),
-                );
+          final decision = conflictHandler(doc, _conflictingDocument);
 
-                final decision = await conflictHandler(
-                  doc,
-                  conflictingDocument,
-                );
-                await doc.flushProperties();
+          doc.flushProperties();
 
-                return decision;
-              },
-              // In case the handler throws an error we are canceling the save.
-              errorResult: false,
-              debugName: 'SaveConflictHandler',
-            );
+          return decision;
+        }
 
-            doc.saveSequence();
-
-            await native
-                .execute((pointer) => SaveDatabaseDocumentWithConflictHandler(
-                      pointer,
-                      doc.doc.pointer.cast(),
-                      callback.native.pointer,
-                    ))
-                .whenComplete(() {
-              doc.restoreSequence();
-              callback.close();
-            });
-          }));
+        runKeepAlive(() => _bindings.saveDocumentWithConflictHandlerSync(
+              native.pointer,
+              doc.doc.pointer.cast(),
+              _conflictHandler,
+            ));
+      });
 
   @override
-  Future<void> deleteDocument(
+  void deleteDocument(
     covariant DocumentImpl doc, [
     ConcurrencyControl concurrency = ConcurrencyControl.failOnConflict,
   ]) =>
-      use(() => doc.useLocked(() async {
-            await native
-                .execute((pointer) => DeleteDocumentWithConcurrencyControl(
-                      pointer,
-                      doc.doc.pointer,
-                      concurrency,
-                    ));
+      useSync(() => native.keepAlive((pointer) {
+            _bindings.deleteDocumentWithConcurrencyControl(
+              pointer,
+              doc.doc.pointer,
+              concurrency.toCBLConcurrencyControl(),
+            );
           }));
 
   @override
-  Future<bool> purgeDocumentById(String id) => use(() =>
-      native.execute((pointer) => PurgeDatabaseDocumentById(pointer, id)));
+  bool purgeDocumentById(String id) => useSync(() =>
+      native.keepAlive((pointer) => _bindings.purgeDocumentByID(pointer, id)));
 
   @override
-  Future<DateTime?> getDocumentExpiration(String id) => use(() =>
-      native.execute((pointer) => GetDatabaseDocumentExpiration(pointer, id)));
+  DateTime? getDocumentExpiration(String id) => useSync(() => native
+      .keepAlive((pointer) => _bindings.getDocumentExpiration(pointer, id)));
 
   @override
-  Future<void> setDocumentExpiration(String id, DateTime? time) =>
-      use(() => native.execute(
-          (pointer) => SetDatabaseDocumentExpiration(pointer, id, time)));
+  void setDocumentExpiration(String id, DateTime? time) =>
+      useSync(() => native.keepAlive(
+          (pointer) => _bindings.setDocumentExpiration(pointer, id, time)));
 
   // === Changes ===============================================================
 
@@ -661,9 +618,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   Stream<void> changesOfDocument(String id) =>
       useSync(() => CallbackStreamController<void, void>(
             parent: this,
-            worker: native.worker,
-            createRegisterCallbackRequest: (callback) =>
-                AddDocumentChangeListener(
+            startStream: (callback) => _bindings.addDocumentChangeListener(
               native.pointer,
               id,
               callback.native.pointer,
@@ -675,9 +630,7 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   Stream<List<String>> changesOfAllDocuments() =>
       useSync(() => CallbackStreamController<List<String>, void>(
             parent: this,
-            worker: native.worker,
-            createRegisterCallbackRequest: (callback) =>
-                AddDatabaseChangeListener(
+            startStream: (callback) => _bindings.addChangeListener(
               native.pointer,
               callback.native.pointer,
             ),
@@ -689,39 +642,69 @@ class DatabaseImpl extends NativeResource<WorkerObject<CBLDatabase>>
   // === Queries ===============================================================
 
   @override
-  Future<Query> query(QueryDefinition queryDefinition) async => use(() => native
-      .execute((pointer) => CreateDatabaseQuery(
-            pointer,
-            queryDefinition.queryString,
-            queryDefinition.language,
-          ))
-      .then((result) => QueryImpl(
-            database: this,
-            pointer: result.pointer,
-            debugCreator: 'Database.query()',
-          )));
+  Query query(QueryDefinition queryDefinition) => useSync(() => QueryImpl(
+        database: this,
+        language: queryDefinition.language,
+        query: queryDefinition.queryString,
+        debugCreator: 'Database.query()',
+      ));
 
   // === Indexes ===============================================================
 
   @override
-  Future<void> createIndex(String name, Index index) => use(() =>
-      native.execute((pointer) => CreateDatabaseIndex(pointer, name, index)));
+  void createIndex(String name, Index index) =>
+      useSync(() => native.keepAlive((pointer) {
+            if (index is ValueIndex) {
+              _bindings.createIndex(
+                pointer,
+                name,
+                CBLdart_IndexType.value,
+                CBLQueryLanguage.json,
+                index.expressions,
+                null,
+                null,
+              );
+            } else if (index is FullTextIndex) {
+              _bindings.createIndex(
+                pointer,
+                name,
+                CBLdart_IndexType.fullText,
+                CBLQueryLanguage.json,
+                index.expressions,
+                index.ignoreAccents,
+                index.language,
+              );
+            } else {
+              throw UnimplementedError(
+                '${index.runtimeType} is not implemented',
+              );
+            }
+          }));
 
   @override
-  Future<void> deleteIndex(String name) async => use(
-      () => native.execute((pointer) => DeleteDatabaseIndex(pointer, name)));
+  void deleteIndex(String name) => useSync(() =>
+      native.keepAlive((pointer) => _bindings.deleteIndex(pointer, name)));
 
   @override
-  Future<List<String>> indexNames() async => use(() => native
-      .execute((pointer) => GetDatabaseIndexNames(pointer))
-      .then((result) => fl.Array.fromPointer(
-            result.pointer,
-            release: true,
-            retain: false,
-          ).map((it) => it.asString!).toList()));
+  List<String> indexNames() => useSync(() {
+        return fl.Array.fromPointer(
+          native.keepAlive(_bindings.indexNames),
+          release: true,
+          retain: false,
+        ).map((it) => it.asString!).toList();
+      });
 
   // === Object ================================================================
 
   @override
   String toString() => 'Database($_debugName)';
+}
+
+extension on MaintenanceType {
+  CBLMaintenanceType toCBLMaintenanceType() => CBLMaintenanceType.values[index];
+}
+
+extension on ConcurrencyControl {
+  CBLConcurrencyControl toCBLConcurrencyControl() =>
+      CBLConcurrencyControl.values[index];
 }

@@ -13,12 +13,10 @@ import '../errors.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
 import '../fleece/fleece.dart' as fl;
-import '../native_object.dart';
-import '../resource.dart';
-import '../streams.dart';
-import '../utils.dart';
-import '../worker/cbl_worker.dart';
-import '../worker/cbl_worker/blob.dart';
+import '../support/native_object.dart';
+import '../support/resource.dart';
+import '../support/streams.dart';
+import '../support/utils.dart';
 import 'common.dart';
 import 'document.dart';
 
@@ -120,6 +118,8 @@ class BlobImplSetter extends fl.SlotSetter {
   void setSlotValue(Pointer<FLSlot> slot, covariant BlobImpl value) =>
       value._blob!.keepAlive((pointer) => _blobBindings.setBlob(slot, pointer));
 }
+
+late final _bindings = CBLBindings.instance.blobs;
 
 class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl({
@@ -390,39 +390,33 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   }
 }
 
-class _BlobWriteStream
-    extends NativeResource<SimpleWorkerObject<CBLBlobWriteStream>>
+class _BlobWriteStream extends NativeResource<NativeObject<CBLBlobWriteStream>>
     with ClosableResourceMixin
     implements StreamConsumer<Uint8List> {
   _BlobWriteStream(DatabaseImpl database)
-      : super(SimpleWorkerObject(
+      : super(NativeObject(
           withCBLErrorExceptionTranslation(() {
             return database.native.keepAlive(_blobWriteStreamBindings.create);
           }),
-          database.native.worker,
         )) {
     database.registerChildResource(this);
   }
 
   @override
   Future<void> addStream(Stream<Uint8List> stream) => use(() => stream
-      .asyncMap((chunk) =>
-          native.execute((pointer) => WriteToBlobWriteStream(pointer, chunk)))
+      .asyncMap((chunk) => native
+          .keepAlive((pointer) => _bindings.writeStream.write(pointer, chunk)))
       .drain());
 
   Future<Pointer<CBLBlob>> createBlob({String? contentType}) => closeAndUse(
-        () => native
-            .execute((pointer) => CreateBlobWithWriteStream(
-                  pointer,
-                  contentType,
-                ))
-            .then((result) => result.pointer),
+        () => native.keepAlive((pointer) =>
+            _bindings.writeStream.createBlobWithStream(contentType, pointer)),
         doPerformClose: false,
       );
 
   @override
-  Future<void> performClose() =>
-      native.execute((pointer) => CloseBlobWriteStream(pointer));
+  Future<void> performClose() async =>
+      native.keepAlive(_bindings.writeStream.close);
 }
 
 class _BlobReadStreamController
@@ -431,14 +425,12 @@ class _BlobReadStreamController
 
   final BlobImpl _blob;
 
-  Worker get _worker => _blob._database!.native.worker;
-
-  Future<void>? _setupDone;
+  var _streamIsOpen = false;
   late Pointer<CBLBlobReadStream> _streamPointer;
   var _isPaused = false;
 
   @override
-  Future<void> onListen() => _start();
+  void onListen() => _start();
 
   @override
   void onPause() => _pause();
@@ -447,36 +439,38 @@ class _BlobReadStreamController
   void onResume() => _start();
 
   @override
-  Future<void> onCancel() async {
+  void onCancel() {
     _pause();
-    await _cleanUp();
+    _cleanUp();
   }
 
-  Future<void> _setup() async {
-    _streamPointer = await runKeepAlive(() => _worker
-        .execute(OpenBlobReadStream(_blob._blob!.pointer, _readStreamChunkSize))
-        .then((result) => result.pointer));
+  void _ensureStreamIsOpen() {
+    if (_streamIsOpen) {
+      return;
+    }
+    _streamIsOpen = true;
+    _streamPointer = _blob._blob!.keepAlive((pointer) =>
+        _bindings.readStream.openContentStream(pointer, _readStreamChunkSize));
   }
 
-  Future<void> _cleanUp() async {
-    await _setupDone;
-
-    await _worker.execute(CloseBlobReadStream(_streamPointer));
+  void _cleanUp() {
+    if (_streamIsOpen) {
+      _bindings.readStream.close(_streamPointer);
+    }
   }
 
-  Future<void> _start() async {
+  void _start() {
     try {
       _isPaused = false;
 
-      await (_setupDone ??= _setup());
+      _ensureStreamIsOpen();
 
       while (!_isPaused) {
-        final buffer =
-            await _worker.execute(ReadFromBlobReadStream(_streamPointer));
+        final buffer = _bindings.readStream.read(_streamPointer);
 
         // The read stream is done (EOF).
         if (buffer == null) {
-          await controller.close();
+          controller.close();
           break;
         }
 
@@ -484,7 +478,7 @@ class _BlobReadStreamController
       }
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);
-      await controller.close();
+      controller.close();
     }
   }
 
