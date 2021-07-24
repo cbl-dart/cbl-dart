@@ -18,7 +18,7 @@ import 'replication/endpoint_test.dart' as replication_endpoint;
 import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
-import 'support/async_callback_test.dart' as super_async_callback;
+import 'support/async_callback_test.dart' as support_async_callback;
 
 final tests = [
   database.main,
@@ -39,7 +39,7 @@ final tests = [
   replication_endpoint.main,
   replication_replicator_change.main,
   replication_replicator.main,
-  super_async_callback.main,
+  support_async_callback.main,
 ];
 
 void main() {

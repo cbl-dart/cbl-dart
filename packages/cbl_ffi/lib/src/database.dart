@@ -376,8 +376,8 @@ typedef CBLDatabase_GetIndexNames = Pointer<FLArray> Function(
   Pointer<CBLDatabase> db,
 );
 
-class asynchronously extends Bindings {
-  asynchronously(Bindings parent) : super(parent) {
+class DatabaseBindings extends Bindings {
+  DatabaseBindings(Bindings parent) : super(parent) {
     _copyDatabase = libs.cblDart
         .lookupFunction<CBLDart_CBL_CopyDatabase_C, CBLDart_CBL_CopyDatabase>(
       'CBLDart_CBL_CopyDatabase',

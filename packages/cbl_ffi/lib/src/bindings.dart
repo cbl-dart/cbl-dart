@@ -72,7 +72,7 @@ class CBLBindings extends Bindings {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
     logging = LoggingBindings(this);
-    database = asynchronously(this);
+    database = DatabaseBindings(this);
     document = DocumentBindings(this);
     mutableDocument = MutableDocumentBindings(this);
     query = QueryBindings(this);
@@ -85,7 +85,7 @@ class CBLBindings extends Bindings {
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;
   late final LoggingBindings logging;
-  late final asynchronously database;
+  late final DatabaseBindings database;
   late final DocumentBindings document;
   late final MutableDocumentBindings mutableDocument;
   late final QueryBindings query;
