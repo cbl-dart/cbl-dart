@@ -73,7 +73,7 @@ Now you can use `Database.open` to open a database:
 import 'package:cbl/cbl.dart';
 import 'package:path_provider/path_provider.dart';
 
-Future<void> openDatabase() async {
+Future<void> useDatabase() async {
   final documentsDir = await getApplicationDocumentsDirectory();
 
   final db = Database.open(

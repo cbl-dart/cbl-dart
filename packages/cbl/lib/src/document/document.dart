@@ -89,25 +89,24 @@ class DocumentImpl
   DocumentImpl({
     required DatabaseImpl database,
     required Pointer<CBLDocument> doc,
-    required bool retain,
+    bool adopt = true,
     required String debugCreator,
   }) : this._(
           database: database,
           doc: doc,
-          retain: retain,
+          adopt: adopt,
           debugName: 'Document(creator: $debugCreator)',
         );
 
   DocumentImpl._({
     DatabaseImpl? database,
     required Pointer<CBLDocument> doc,
-    required bool retain,
+    required bool adopt,
     required String debugName,
   })  : _database = database,
-        native = CblRefCountedObject(
+        native = CblObject(
           doc,
-          release: true,
-          retain: retain,
+          adopt: adopt,
           debugName: debugName,
         );
 
@@ -194,8 +193,6 @@ class DocumentImpl
   @override
   MutableDocument toMutable() => MutableDocumentImpl(
         doc: native.call(_mutableDocumentBindings.mutableCopy),
-        // `mutableCopy` returns a new instance with +1 ref count.
-        retain: false,
         debugCreator: 'Document.toMutable()',
       );
 
@@ -234,12 +231,12 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   MutableDocumentImpl({
     DatabaseImpl? database,
     required Pointer<CBLMutableDocument> doc,
-    required bool retain,
+    bool adopt = true,
     required String debugCreator,
   }) : super._(
           database: database,
           doc: doc.cast(),
-          retain: retain,
+          adopt: adopt,
           debugName: 'MutableDocument(creator: $debugCreator)',
         );
 
@@ -250,8 +247,6 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   }) {
     final result = MutableDocumentImpl(
       doc: _mutableDocumentBindings.createWithID(id),
-      // `createWithID` returns a new instance with +1 ref count.
-      retain: false,
       debugCreator: debugCreator,
     );
 

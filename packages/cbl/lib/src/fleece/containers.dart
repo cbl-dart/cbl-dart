@@ -7,7 +7,6 @@ import 'package:collection/collection.dart';
 
 import '../errors.dart';
 import '../support/native_object.dart';
-import '../support/resource.dart';
 import 'encoder.dart';
 import 'slice.dart';
 
@@ -32,7 +31,7 @@ extension on Iterable<CopyFlag> {
 
 /// An [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
-class Doc extends NativeResource<FLDoc> {
+class Doc extends FleeceDocObject {
   static late final _bindings = CBLBindings.instance.fleece.doc;
 
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
@@ -54,16 +53,13 @@ class Doc extends NativeResource<FLDoc> {
   ///
   /// The data is first encoded into Fleece, and the Fleece data is kept by the
   /// doc.
-  factory Doc.fromJson(String json) {
-    try {
-      return Doc.fromPointer(_bindings.fromJson(json));
-    } on CBLErrorException catch (e) {
-      throw translateCBLErrorException(e);
-    }
-  }
+  factory Doc.fromJson(String json) =>
+      runWithErrorTranslation(() => Doc.fromPointer(_bindings.fromJson(json)));
 
   /// Creates an [Doc] based on a [pointer] to the the native value.
-  Doc.fromPointer(Pointer<FLDoc> pointer) : super(FleeceDocObject(pointer));
+  ///
+  /// Note: Does not retain the native doc.
+  Doc.fromPointer(Pointer<FLDoc> pointer) : super(pointer);
 
   /// Returns the root value in the [Doc], usually an [Dict].
   Value get root => Value.fromPointer(native.call(_bindings.getRoot));
@@ -114,7 +110,7 @@ extension on FLValueType {
 ///   and Dict. To coerce an Value to a collection type, call [asArray] or
 ///   [asDict]. If the value is not of that type, null is returned. (Array and
 ///   Dict are documented fully in their own sections.)
-class Value extends NativeResource<FLValue> {
+class Value extends FleeceValueObject<FLValue> {
   static late final _bindings = CBLBindings.instance.fleece.value;
 
   /// Creates a [Value] based on a [pointer] to the the native value.
@@ -124,13 +120,13 @@ class Value extends NativeResource<FLValue> {
   /// data) has not been garbage collected.
   Value.fromPointer(
     Pointer<FLValue> pointer, {
-    bool release = false,
-    bool retain = false,
-  }) : super(FleeceRefCountedObject(
+    bool isRefCounted = true,
+    bool adopt = false,
+  }) : super(
           pointer.cast(),
-          release: release,
-          retain: retain,
-        ));
+          isRefCounted: isRefCounted,
+          adopt: adopt,
+        );
 
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
@@ -279,9 +275,13 @@ class Array extends Value with ListMixin<Value> {
   /// Creates an [Array] based on a [pointer] to the the native value.
   Array.fromPointer(
     Pointer<FLArray> pointer, {
-    bool release = true,
-    bool retain = true,
-  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
+    bool isRefCounted = true,
+    bool adopt = false,
+  }) : super.fromPointer(
+          pointer.cast(),
+          isRefCounted: isRefCounted,
+          adopt: adopt,
+        );
 
   @override
   int get length => native.call((pointer) => _bindings.count(pointer.cast()));
@@ -303,9 +303,7 @@ class Array extends Value with ListMixin<Value> {
   MutableArray? get asMutable {
     final pointer =
         native.call((pointer) => _bindings.asMutable(pointer.cast()));
-    return pointer == null
-        ? null
-        : MutableArray.fromPointer(pointer, release: true, retain: true);
+    return pointer == null ? null : MutableArray.fromPointer(pointer);
   }
 
   @override
@@ -313,7 +311,9 @@ class Array extends Value with ListMixin<Value> {
 
   @override
   Value operator [](int index) => Value.fromPointer(
-      native.call((pointer) => _bindings.get(pointer.cast(), index)));
+        native.call((pointer) => _bindings.get(pointer.cast(), index)),
+        isRefCounted: false,
+      );
 
   @override
   void operator []=(int index, Object? value) =>
@@ -329,15 +329,14 @@ class MutableArray extends Array {
   /// Creates a [MutableArray] based on a [pointer] to the the native value.
   MutableArray.fromPointer(
     Pointer<FLMutableArray> pointer, {
-    bool release = true,
-    bool retain = true,
-  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
+    bool adopt = false,
+  }) : super.fromPointer(pointer.cast(), isRefCounted: true, adopt: adopt);
 
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
     final result = MutableArray.fromPointer(
       _bindings.create(),
-      retain: false,
+      adopt: true,
     );
 
     if (from != null) {
@@ -365,11 +364,11 @@ class MutableArray extends Array {
               pointer.cast(),
               flags.toFLCopyFlags(),
             )),
-        retain: false,
+        adopt: true,
       );
 
-  /// If the Array was created by [MutableArray.mutableCopy], returns the original
-  /// source Array.
+  /// If the Array was created by [MutableArray.mutableCopy], returns the
+  /// original source Array.
   Array? get source {
     final pointer =
         native.call((pointer) => _bindings.getSource(pointer.cast()));
@@ -443,9 +442,7 @@ class MutableArray extends Array {
   MutableDict? mutableDict(int index) {
     final pointer = native
         .call((pointer) => _bindings.getMutableDict(pointer.cast(), index));
-    return pointer == null
-        ? null
-        : MutableDict.fromPointer(pointer, release: true, retain: true);
+    return pointer == null ? null : MutableDict.fromPointer(pointer);
   }
 
   /// Convenience function for getting a array-valued property in mutable form.
@@ -457,9 +454,7 @@ class MutableArray extends Array {
   MutableArray? mutableArray(int index) {
     final pointer = native
         .call((pointer) => _bindings.getMutableArray(pointer.cast(), index));
-    return pointer == null
-        ? null
-        : MutableArray.fromPointer(pointer, retain: true, release: true);
+    return pointer == null ? null : MutableArray.fromPointer(pointer);
   }
 }
 
@@ -472,9 +467,13 @@ class Dict extends Value with MapMixin<String, Value> {
   /// Creates a [Dict] based on a [pointer] to the the native value.
   Dict.fromPointer(
     Pointer<FLDict> pointer, {
-    bool release = true,
-    bool retain = true,
-  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
+    bool isRefCounted = true,
+    bool adopt = false,
+  }) : super.fromPointer(
+          pointer.cast(),
+          isRefCounted: isRefCounted,
+          adopt: adopt,
+        );
 
   /// Returns the number of items in a dictionary.
   @override
@@ -493,9 +492,7 @@ class Dict extends Value with MapMixin<String, Value> {
   MutableDict? get asMutable {
     final pointer =
         native.call((pointer) => _bindings.asMutable(pointer.cast()));
-    return pointer == null
-        ? null
-        : MutableDict.fromPointer(pointer, release: true, retain: true);
+    return pointer == null ? null : MutableDict.fromPointer(pointer);
   }
 
   @override
@@ -505,7 +502,9 @@ class Dict extends Value with MapMixin<String, Value> {
   Value operator [](Object? key) {
     assert(key is String, 'Dict key must be a non-null String');
     return Value.fromPointer(
-        native.call((pointer) => _bindings.get(pointer.cast(), key as String)));
+      native.call((pointer) => _bindings.get(pointer.cast(), key as String)),
+      isRefCounted: false,
+    );
   }
 
   @override
@@ -582,15 +581,19 @@ class MutableDict extends Dict {
   /// Creates a [MutableDict] based on a [pointer] to the the native value.
   MutableDict.fromPointer(
     Pointer<FLMutableDict> pointer, {
-    bool release = true,
-    bool retain = true,
-  }) : super.fromPointer(pointer.cast(), retain: retain, release: release);
+    bool isRefCounted = true,
+    bool adopt = false,
+  }) : super.fromPointer(
+          pointer.cast(),
+          isRefCounted: isRefCounted,
+          adopt: adopt,
+        );
 
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {
     final result = MutableDict.fromPointer(
       _bindings.create(),
-      retain: false,
+      adopt: true,
     );
 
     if (from != null) {
@@ -617,7 +620,7 @@ class MutableDict extends Dict {
               pointer.cast(),
               flags.toFLCopyFlags(),
             )),
-        retain: false,
+        adopt: true,
       );
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
@@ -668,9 +671,7 @@ class MutableDict extends Dict {
   MutableDict? mutableDict(String key) {
     final pointer =
         native.call((pointer) => _bindings.getMutableDict(pointer.cast(), key));
-    return pointer == null
-        ? null
-        : MutableDict.fromPointer(pointer, release: true, retain: true);
+    return pointer == null ? null : MutableDict.fromPointer(pointer);
   }
 
   /// Convenience function for getting a array-valued property in mutable form.
@@ -682,9 +683,7 @@ class MutableDict extends Dict {
   MutableArray? mutableArray(String key) {
     final pointer = native
         .call((pointer) => _bindings.getMutableArray(pointer.cast(), key));
-    return pointer == null
-        ? null
-        : MutableArray.fromPointer(pointer, release: true, retain: true);
+    return pointer == null ? null : MutableArray.fromPointer(pointer);
   }
 }
 

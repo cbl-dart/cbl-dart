@@ -446,7 +446,7 @@ abstract class Database with ClosableResource {
   List<String> indexNames();
 }
 
-class DatabaseImpl extends NativeResource<CBLDatabase>
+class DatabaseImpl extends CblObject<CBLDatabase>
     with ClosableResourceMixin
     implements Database {
   DatabaseImpl(
@@ -454,12 +454,10 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
     DatabaseConfiguration? config,
     Pointer<CBLDatabase> pointer,
   )   : _config = config,
-        super(CblRefCountedObject(
+        super(
           pointer,
-          release: true,
-          retain: false,
           debugName: 'Database($_debugName)',
-        ));
+        );
 
   final String _debugName;
 
@@ -518,7 +516,6 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
       ?.let((pointer) => DocumentImpl(
             database: this,
             doc: pointer,
-            retain: false,
             debugCreator: 'Database.getDocument()',
           )));
 
@@ -528,7 +525,6 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
       ?.let((pointer) => MutableDocumentImpl(
             database: this,
             doc: pointer,
-            retain: false,
             debugCreator: 'Database.getMutableDocument()',
           )));
 
@@ -566,7 +562,7 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
             (pointer) => DocumentImpl(
               database: this,
               doc: pointer,
-              retain: true,
+              adopt: false,
               debugCreator: 'SaveConflictHandler(conflictingDocument)',
             ),
           );
@@ -687,7 +683,7 @@ class DatabaseImpl extends NativeResource<CBLDatabase>
   List<String> indexNames() => useSync(() {
         return fl.Array.fromPointer(
           native.call(_bindings.indexNames),
-          retain: false,
+          adopt: true,
         ).map((it) => it.asString!).toList();
       });
 

@@ -25,7 +25,7 @@ class MRoot extends MCollection {
     Pointer<FLValue> value, {
     required MContext context,
     required bool isMutable,
-  })  : value = FleeceRefCountedObject(value, release: true, retain: true),
+  })  : value = FleeceValueObject(value, isRefCounted: true, adopt: false),
         _slot = MValue.withValue(context.decoder.loadValue(value)!),
         super(context: context, isMutable: isMutable) {
     _slot.updateParent(this);
@@ -33,7 +33,7 @@ class MRoot extends MCollection {
 
   SliceResult? data;
 
-  FleeceRefCountedObject<FLValue>? value;
+  FleeceValueObject<FLValue>? value;
 
   final MValue _slot;
 

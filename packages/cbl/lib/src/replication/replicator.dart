@@ -298,7 +298,7 @@ class ReplicatorImpl
   Set<String> get pendingDocumentIds => useSync(() {
         final dict = fl.Dict.fromPointer(
           native.call(_bindings.pendingDocumentIDs),
-          retain: false,
+          adopt: true,
         );
         return dict.keys.toSet();
       });
@@ -414,7 +414,7 @@ AsyncCallback _wrapReplicationFilter(
       final doc = DocumentImpl(
         database: database,
         doc: message.document,
-        retain: true,
+        adopt: false,
         debugCreator: 'ReplicationFilter()',
       );
 
@@ -436,14 +436,14 @@ AsyncCallback _wrapConflictResolver(
       final local = message.localDocument?.let((it) => DocumentImpl(
             database: database,
             doc: it,
-            retain: true,
+            adopt: false,
             debugCreator: 'ConflictResolver(local)',
           ));
 
       final remote = message.remoteDocument?.let((it) => DocumentImpl(
             database: database,
             doc: it,
-            retain: true,
+            adopt: false,
             debugCreator: 'ConflictResolver(remote)',
           ));
 

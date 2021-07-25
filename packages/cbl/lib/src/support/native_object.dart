@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../errors.dart';
+import 'resource.dart';
 
 /// Keeps a [NativeObject] alive while the [Function] [fn] is running.
 ///
@@ -18,7 +19,7 @@ T keepAlive<P extends NativeType, T>(
     return true;
   }());
 
-  final result = fn(object.pointer);
+  final result = fn(object._pointer);
 
   if (result is Future) {
     return result.whenComplete(() {
@@ -57,7 +58,7 @@ void _keepAliveUntil(Object? object) {}
 /// them from being garbage collected while their pointers are being used.
 T runKeepAlive<T>(T Function() body) => runZoned(
       body,
-      zoneValues: {#_aliveNativeObjects: <NativeObject>{}},
+      zoneValues: {#_aliveNativeObjects: Set<NativeObject>.identity()},
     );
 
 Set<NativeObject>? get _aliveNativeObjects =>
@@ -75,21 +76,21 @@ extension NativeObjectCallExtension<P extends NativeType> on NativeObject<P> {
       runWithErrorTranslation(() => _keepAlive(this, fn));
 }
 
-/// Represents an object on the native side.
-///
-/// The lifetime of the native object is determined by the lifetime of this
-/// object.
-class NativeObject<T extends NativeType> {
+/// Handle to an object on the native side.
+class NativeObject<T extends NativeType> with NativeResourceMixin<T> {
   NativeObject(Pointer<T> pointer) : _pointer = pointer;
 
   final Pointer<T> _pointer;
 
   var _debugKeepAliveRefCount = 0;
 
+  @override
+  NativeObject<T> get native => this;
+
   /// The pointer to the native object.
   ///
-  /// Code which access this property must be run in a
-  /// [runNativeCalls].
+  /// Code which access this property must be run in a [runKeepAlive] or use
+  /// [keepAlive] or [NativeObjectCallExtension].
   Pointer<T> get pointer {
     final aliveNativeObjects = _aliveNativeObjects;
 
@@ -109,9 +110,6 @@ class NativeObject<T extends NativeType> {
   ///
   /// Callers must guarantee that the returned pointer is only used while this
   /// object has not been garbage collected.
-  ///
-  /// See:
-  /// - [runNativeCalls] for what a native object keep alive is.
   Pointer<T> get pointerUnsafe => _pointer;
 
   @override
@@ -125,39 +123,31 @@ class NativeObject<T extends NativeType> {
   int get hashCode => _pointer.address.hashCode;
 }
 
-/// Represents a reference to a CouchbaseLite C API object that is reference
-/// counted.
-class CblRefCountedObject<T extends NativeType> extends NativeObject<T> {
-  /// Creates a reference to a reference counted native CouchbaseLite C API
-  /// object.
+/// Handle to a CouchbaseLite C API object.
+class CblObject<T extends NativeType> extends NativeObject<T> {
+  /// Creates a handle to a CouchbaseLite C API object.
   ///
-  /// When [release] is `true`, the reference count of the native object
-  /// will be decremented when the Dart object is garbage collected.
-  ///
-  /// When [retain] is `true`, the reference count of the native object
-  /// will be increment as part of creating the Dart object.
-  CblRefCountedObject(
+  /// [adopt] should be `true` when an existing reference to the native object
+  /// is transferred to the created [CblObject] or the native object
+  /// has just been created and the created [CblObject] is the initial
+  /// reference holder.
+  CblObject(
     Pointer<T> pointer, {
-    required bool release,
-    required bool retain,
+    bool adopt = true,
     required String? debugName,
   }) : super(pointer) {
-    assert(!retain || release, 'only a retained object can be released');
-
-    if (release) {
-      CBLBindings.instance.base.bindCBLRefCountedToDartObject(
-        this,
-        pointer.cast(),
-        retain,
-        debugName,
-      );
-    }
+    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+      this,
+      pointer.cast(),
+      !adopt,
+      debugName,
+    );
   }
 }
 
-/// Represents a reference to a CBLReplicator.
+/// Handle to a CBLReplicator.
 class CBLReplicatorObject extends NativeObject<CBLReplicator> {
-  /// Creates a reference to a CBLReplicator.
+  /// Creates a handle to a CBLReplicator.
   CBLReplicatorObject(
     Pointer<CBLReplicator> pointer, {
     required String? debugName,
@@ -167,39 +157,42 @@ class CBLReplicatorObject extends NativeObject<CBLReplicator> {
   }
 }
 
-/// Represents a reference to a Fleece document.
+/// Handle to a Fleece doc.
 class FleeceDocObject extends NativeObject<FLDoc> {
-  /// Creates a reference to a Fleece document.
+  /// Creates a handle to a Fleece doc.
   FleeceDocObject(Pointer<FLDoc> pointer) : super(pointer) {
     CBLBindings.instance.fleece.doc.bindToDartObject(this, pointer);
   }
 }
 
-/// Represents a reference to a Fleece value that is reference counted.
-class FleeceRefCountedObject<T extends NativeType> extends NativeObject<T> {
-  /// Creates a reference to a Fleece value that is reference counted.
+/// Handle to a Fleece value.
+class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
+  /// Creates a handle to a Fleece value.
   ///
-  /// When [release] is `true`, the reference count of the native object
-  /// will be decremented when the Dart object is garbage collected.
-  ///
-  /// When [retain] is `true`, the reference count of the native object
-  /// will be increment as part of creating the Dart object.
-  FleeceRefCountedObject(
+  /// [adopt] should be `true` when an existing reference to the native object
+  /// is transferred to the created [FleeceValueObject] or the native object
+  /// has just been created and the created [FleeceValueObject] is the initial
+  /// reference holder.
+  FleeceValueObject(
     Pointer<T> pointer, {
-    required bool release,
-    required bool retain,
+    this.isRefCounted = true,
+    bool adopt = false,
   }) : super(pointer) {
     assert(
-      !(retain && !release),
-      'only an object which will be released can be retained',
+      !adopt || isRefCounted,
+      'only an object which is ref counted can be adopted',
     );
 
-    if (release) {
+    if (isRefCounted) {
       CBLBindings.instance.fleece.value.bindToDartObject(
         this,
         pointer.cast(),
-        retain,
+        !adopt,
       );
     }
   }
+
+  /// Whether this object updates the ref count of the native object when
+  /// it is created and garbage collected.
+  final bool isRefCounted;
 }

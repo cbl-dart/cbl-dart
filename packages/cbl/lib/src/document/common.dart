@@ -147,9 +147,8 @@ class CblMDelegate extends MDelegate {
             return BlobImpl(
               database: database,
               blob: blob,
-              // `getBlob` returns an existing instance retained by the
-              // containing document.
-              retain: true,
+              // The containing document owns the reference to the blob.
+              adopt: false,
               debugCreator: 'CblMDelegate.toNative()',
             );
           } else {
@@ -157,8 +156,7 @@ class CblMDelegate extends MDelegate {
               flValue.value.cast(),
               // This value is alive as long as the MRoot is alive and the
               // MRoot does not necessarily read form a Doc.
-              retain: false,
-              release: false,
+              isRefCounted: false,
             );
             return BlobImpl.fromProperties(dict.toObject());
           }

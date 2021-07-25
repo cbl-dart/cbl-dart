@@ -107,14 +107,13 @@ class BlobImpl
   BlobImpl({
     required DatabaseImpl? database,
     required Pointer<CBLBlob> blob,
-    required bool retain,
+    bool adopt = true,
     required String debugCreator,
   })  : assert(blob != nullptr),
         _database = database,
-        _blob = CblRefCountedObject(
+        _blob = CblObject(
           blob,
-          release: true,
-          retain: retain,
+          adopt: adopt,
           debugName: 'Blob(creator: $debugCreator)',
         ) {
     _contentType = native.call(_blobBindings.contentType);
@@ -123,10 +122,8 @@ class BlobImpl
   }
 
   BlobImpl.fromData(String contentType, Uint8List data)
-      : _blob = CblRefCountedObject(
+      : _blob = CblObject(
           _blobBindings.createWithData(contentType, data),
-          release: true,
-          retain: false,
           debugName: 'Blob.fromData()',
         ),
         _contentType = contentType,
@@ -141,9 +138,9 @@ class BlobImpl
         _digest = properties[_blobDigestProperty] as String;
 
   DatabaseImpl? _database;
-  CblRefCountedObject<CBLBlob>? _blob;
+  CblObject<CBLBlob>? _blob;
   @override
-  CblRefCountedObject<CBLBlob> get native => _blob!;
+  CblObject<CBLBlob> get native => _blob!;
   Uint8List? _content;
   String? _contentType;
   int? _length;

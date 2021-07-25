@@ -275,7 +275,7 @@ abstract class Query implements Resource {
   Stream<ResultSet> changes();
 }
 
-class QueryImpl extends NativeResource<CBLQuery>
+class QueryImpl extends CblObject<CBLQuery>
     with DelegatingResourceMixin
     implements Query {
   static late final _bindings = CBLBindings.instance.query;
@@ -285,16 +285,14 @@ class QueryImpl extends NativeResource<CBLQuery>
     required QueryLanguage language,
     required String query,
     required String? debugCreator,
-  }) : super(CblRefCountedObject(
+  }) : super(
           database.native.call((pointer) => _bindings.create(
                 pointer,
                 language.toCBLQueryLanguage(),
                 query,
               )),
-          release: true,
-          retain: false,
           debugName: 'Query(creator: $debugCreator)',
-        )) {
+        ) {
     database.registerChildResource(this);
   }
 
@@ -327,8 +325,6 @@ class QueryImpl extends NativeResource<CBLQuery>
         _flushParameters();
         return ResultSet._(
           native.call(_bindings.execute),
-          release: true,
-          retain: false,
           debugCreator: 'Query.execute()',
         );
       });
@@ -366,8 +362,6 @@ class QueryImpl extends NativeResource<CBLQuery>
                     listenerToken,
                   );
                 }),
-                release: true,
-                retain: false,
                 debugCreator: 'Query.changes()',
               );
             },
@@ -477,19 +471,14 @@ class _ResultSetIterator extends NativeResource<CBLResultSet>
 ///
 /// See:
 /// - [Result] for how to consume a single Result.
-class ResultSet extends NativeResource<CBLResultSet>
-    with IterableMixin<Result> {
+class ResultSet extends CblObject<CBLResultSet> with IterableMixin<Result> {
   ResultSet._(
     Pointer<CBLResultSet> pointer, {
-    required bool release,
-    required bool retain,
     required String? debugCreator,
-  }) : super(CblRefCountedObject(
+  }) : super(
           pointer,
-          release: release,
-          retain: retain,
           debugName: 'ResultSet(creator: $debugCreator)',
-        ));
+        );
 
   var _consumed = false;
 
