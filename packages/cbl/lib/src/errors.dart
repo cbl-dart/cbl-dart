@@ -364,7 +364,7 @@ extension CBLErrorExceptionExt on CBLErrorException {
   BaseException translate() => translateCBLErrorException(this);
 }
 
-T withCBLErrorExceptionTranslation<T>(T Function() fn) {
+T runWithErrorTranslation<T>(T Function() fn) {
   try {
     return fn();
   } on CBLErrorException catch (e) {

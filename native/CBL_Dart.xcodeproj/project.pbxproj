@@ -12,9 +12,9 @@
 		C09E6C24263456C700127155 /* Utils.hh in Headers */ = {isa = PBXBuildFile; fileRef = C09E6C22263456C700127155 /* Utils.hh */; };
 		C0D8CBEB25CF2AD7008B87C0 /* Fleece+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */; };
 		C0D8CBEC25CF2AD7008B87C0 /* Fleece+Dart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */; };
-		C0D8CBED25CF2AD7008B87C0 /* Callbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE725CF2AD7008B87C0 /* Callbacks.cpp */; };
+		C0D8CBED25CF2AD7008B87C0 /* AsyncCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE725CF2AD7008B87C0 /* AsyncCallback.cpp */; };
 		C0D8CBEE25CF2AD7008B87C0 /* CBL+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE825CF2AD7008B87C0 /* CBL+Dart.h */; };
-		C0D8CBEF25CF2AD7008B87C0 /* Callbacks.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE925CF2AD7008B87C0 /* Callbacks.h */; };
+		C0D8CBEF25CF2AD7008B87C0 /* AsyncCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE925CF2AD7008B87C0 /* AsyncCallback.h */; };
 		C0D8CBF325CF2C63008B87C0 /* cbldart_export.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBF225CF2C63008B87C0 /* cbldart_export.h */; };
 		C0D8CC3225CF2ECC008B87C0 /* CBL+Dart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */; };
 		C0D8CC6525CF325B008B87C0 /* dart_api_dl.c in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CC6425CF325B008B87C0 /* dart_api_dl.c */; };
@@ -72,9 +72,9 @@
 		C0D8CBCB25CF285A008B87C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = XCode/Info.plist; sourceTree = SOURCE_ROOT; };
 		C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Fleece+Dart.h"; sourceTree = "<group>"; };
 		C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Fleece+Dart.cpp"; sourceTree = "<group>"; };
-		C0D8CBE725CF2AD7008B87C0 /* Callbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Callbacks.cpp; sourceTree = "<group>"; };
+		C0D8CBE725CF2AD7008B87C0 /* AsyncCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AsyncCallback.cpp; sourceTree = "<group>"; };
 		C0D8CBE825CF2AD7008B87C0 /* CBL+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBL+Dart.h"; sourceTree = "<group>"; };
-		C0D8CBE925CF2AD7008B87C0 /* Callbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Callbacks.h; sourceTree = "<group>"; };
+		C0D8CBE925CF2AD7008B87C0 /* AsyncCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncCallback.h; sourceTree = "<group>"; };
 		C0D8CBF225CF2C63008B87C0 /* cbldart_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cbldart_export.h; sourceTree = "<group>"; };
 		C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "CBL+Dart.cpp"; sourceTree = "<group>"; };
 		C0D8CC6425CF325B008B87C0 /* dart_api_dl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dart_api_dl.c; path = ../../../../vendor/dart/include/dart/dart_api_dl.c; sourceTree = "<group>"; };
@@ -152,8 +152,8 @@
 				C09E6C1A263456C700127155 /* Utils.cpp */,
 				C09E6C22263456C700127155 /* Utils.hh */,
 				C0D8CBF225CF2C63008B87C0 /* cbldart_export.h */,
-				C0D8CBE725CF2AD7008B87C0 /* Callbacks.cpp */,
-				C0D8CBE925CF2AD7008B87C0 /* Callbacks.h */,
+				C0D8CBE725CF2AD7008B87C0 /* AsyncCallback.cpp */,
+				C0D8CBE925CF2AD7008B87C0 /* AsyncCallback.h */,
 				C0D8CBE825CF2AD7008B87C0 /* CBL+Dart.h */,
 				C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */,
 				C0D8CBE525CF2AD7008B87C0 /* Fleece+Dart.h */,
@@ -211,7 +211,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0D8CBEF25CF2AD7008B87C0 /* Callbacks.h in Headers */,
+				C0D8CBEF25CF2AD7008B87C0 /* AsyncCallback.h in Headers */,
 				C09E6C24263456C700127155 /* Utils.hh in Headers */,
 				C0D8CBEB25CF2AD7008B87C0 /* Fleece+Dart.h in Headers */,
 				C0D8CBEE25CF2AD7008B87C0 /* CBL+Dart.h in Headers */,
@@ -330,7 +330,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C0D8CBED25CF2AD7008B87C0 /* Callbacks.cpp in Sources */,
+				C0D8CBED25CF2AD7008B87C0 /* AsyncCallback.cpp in Sources */,
 				C0D8CC6525CF325B008B87C0 /* dart_api_dl.c in Sources */,
 				C0D8CC3225CF2ECC008B87C0 /* CBL+Dart.cpp in Sources */,
 				C09E6C23263456C700127155 /* Utils.cpp in Sources */,

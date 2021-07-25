@@ -4,14 +4,13 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:synchronized/synchronized.dart';
 
 import '../database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
-import '../native_object.dart';
-import '../resource.dart';
-import '../utils.dart';
+import '../support/native_object.dart';
+import '../support/resource.dart';
+import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
@@ -84,36 +83,32 @@ class DocumentEncoderContext {
   final DocumentImpl document;
 }
 
-class DocumentImpl with IterableMixin<String> implements Document {
+class DocumentImpl
+    with IterableMixin<String>, NativeResourceMixin<CBLDocument>
+    implements Document {
   DocumentImpl({
     required DatabaseImpl database,
     required Pointer<CBLDocument> doc,
-    required bool retain,
+    bool adopt = true,
     required String debugCreator,
   }) : this._(
           database: database,
           doc: doc,
-          retain: retain,
+          adopt: adopt,
           debugName: 'Document(creator: $debugCreator)',
         );
 
   DocumentImpl._({
     DatabaseImpl? database,
     required Pointer<CBLDocument> doc,
-    required bool retain,
+    required bool adopt,
     required String debugName,
   })  : _database = database,
-        doc = CblRefCountedObject(
+        native = CblObject(
           doc,
-          release: true,
-          retain: retain,
+          adopt: adopt,
           debugName: debugName,
         );
-
-  /// Lock which is used to serialize async operations on this document.
-  final _lock = Lock();
-
-  Future<T> useLocked<T>(T Function() fn) => _lock.synchronized(fn);
 
   /// The database to which this document belongs.
   ///
@@ -133,9 +128,10 @@ class DocumentImpl with IterableMixin<String> implements Document {
     }
   }
 
-  final NativeObject<CBLDocument> doc;
+  @override
+  final NativeObject<CBLDocument> native;
 
-  late final _root = doc.keepAlive((pointer) => MRoot.fromValue(
+  late final _root = native.call((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
         isMutable: false,
@@ -144,13 +140,13 @@ class DocumentImpl with IterableMixin<String> implements Document {
   late final Dictionary _properties = _root.asNative as Dictionary;
 
   @override
-  String get id => doc.keepAlive(_documentBindings.id);
+  String get id => native.call(_documentBindings.id);
 
   @override
-  String? get revisionId => doc.keepAlive(_documentBindings.revisionId);
+  String? get revisionId => native.call(_documentBindings.revisionId);
 
   @override
-  int get sequence => doc.keepAlive(_documentBindings.sequence);
+  int get sequence => native.call(_documentBindings.sequence);
 
   @override
   int get length => _properties.length;
@@ -196,9 +192,7 @@ class DocumentImpl with IterableMixin<String> implements Document {
 
   @override
   MutableDocument toMutable() => MutableDocumentImpl(
-        doc: doc.keepAlive(_mutableDocumentBindings.mutableCopy),
-        // `mutableCopy` returns a new instance with +1 ref count.
-        retain: false,
+        doc: native.call(_mutableDocumentBindings.mutableCopy),
         debugCreator: 'Document.toMutable()',
       );
 
@@ -237,12 +231,12 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   MutableDocumentImpl({
     DatabaseImpl? database,
     required Pointer<CBLMutableDocument> doc,
-    required bool retain,
+    bool adopt = true,
     required String debugCreator,
   }) : super._(
           database: database,
           doc: doc.cast(),
-          retain: retain,
+          adopt: adopt,
           debugName: 'MutableDocument(creator: $debugCreator)',
         );
 
@@ -253,8 +247,6 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   }) {
     final result = MutableDocumentImpl(
       doc: _mutableDocumentBindings.createWithID(id),
-      // `createWithID` returns a new instance with +1 ref count.
-      retain: false,
       debugCreator: debugCreator,
     );
 
@@ -266,7 +258,7 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   }
 
   @override
-  late final _root = doc.keepAlive((pointer) => MRoot.fromValue(
+  late final _root = native.call((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
         isMutable: true,
@@ -278,28 +270,17 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
 
   /// Encodes `_properties` and sets the result as the new properties of the
   /// native `Document`.
-  Future<void> flushProperties() async {
+  void flushProperties() {
     assert(database != null);
     final encoder = DocumentFleeceEncoder(document: this);
-    await _root.encodeTo(encoder);
+    final encodeToFuture = _root.encodeTo(encoder);
+    assert(encodeToFuture is! Future);
     final properties = encoder.finishProperties();
-    runKeepAlive(() => _mutableDocumentBindings.setProperties(
-          doc.pointer.cast(),
+    runNativeCalls(() => _mutableDocumentBindings.setProperties(
+          native.pointer.cast(),
           properties.native.pointer.cast(),
         ));
   }
-
-  @override
-  int get sequence => _sequenceOverride ?? super.sequence;
-  int? _sequenceOverride;
-
-  // While a document is being saved and the [SaveConflictHandler] is running,
-  // the sequence cannot be read from the native document because of a lock.
-  // To allow the sequence to be read in the handler, code which invokes the
-  // handler needs to call [saveSequence] before calling the handler and
-  // [restoreSequence] after the handler is done.
-  void saveSequence() => _sequenceOverride = sequence;
-  void restoreSequence() => _sequenceOverride = null;
 
   @override
   void setValue(Object? value, {required String key}) =>

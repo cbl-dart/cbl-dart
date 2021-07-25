@@ -11,4 +11,4 @@ void CBLDart_CObject_SetEmptyArray(Dart_CObject* object);
 
 void CBLDart_CObject_SetPointer(Dart_CObject* object, const void* pointer);
 
-void CBLDart_CObject_SetFLString(Dart_CObject* object, FLString* string);
+void CBLDart_CObject_SetFLString(Dart_CObject* object, const FLString string);

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
 import 'database.dart';
@@ -7,7 +8,6 @@ import 'document.dart';
 import 'fleece.dart';
 import 'libraries.dart';
 import 'logging.dart';
-import 'native_callback.dart';
 import 'query.dart';
 import 'replicator.dart';
 import 'string_table.dart';
@@ -70,7 +70,7 @@ class CBLBindings extends Bindings {
   CBLBindings(Libraries libs, StringTable stringTable)
       : super.root(libs, stringTable) {
     base = BaseBindings(this);
-    nativeCallback = NativeCallbackBindings(this);
+    asyncCallback = AsyncCallbackBindings(this);
     logging = LoggingBindings(this);
     database = DatabaseBindings(this);
     document = DocumentBindings(this);
@@ -83,7 +83,7 @@ class CBLBindings extends Bindings {
   }
 
   late final BaseBindings base;
-  late final NativeCallbackBindings nativeCallback;
+  late final AsyncCallbackBindings asyncCallback;
   late final LoggingBindings logging;
   late final DatabaseBindings database;
   late final DocumentBindings document;

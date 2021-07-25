@@ -48,7 +48,7 @@ void main() {
       config.maxRetries = null;
       expect(config.maxRetries, 9);
       config.continuous = true;
-      expect(config.maxRetries, 1 << 64);
+      expect(config.maxRetries, 0xFFFFFFFF - 1);
 
       expect(() => config.maxRetries = -1, throwsArgumentError);
 

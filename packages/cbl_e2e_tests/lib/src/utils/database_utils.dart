@@ -9,12 +9,12 @@ import '../test_binding.dart';
 /// unless [useNameDirectly] is `true`. Then [dbName] is used directly.
 ///
 /// The database will be created in the [tmpDir].
-Future<Database> openTestDb(
+Database openTestDb(
   String? dbName, {
   bool useNameDirectly = false,
   bool autoClose = true,
-}) async {
-  final db = await Database.open(
+}) {
+  final db = Database.open(
     useNameDirectly ? dbName! : testDbName(dbName),
     config: DatabaseConfiguration(
       directory: tmpDir,
@@ -28,26 +28,24 @@ Future<Database> openTestDb(
 
 extension DatabaseUtilsExtension on Database {
   /// Returns a stream wich emits the ids of all the documents in this database.
-  Stream<String> getAllIds() => query(N1QLQuery('SELECT META().id'))
-      .then((query) => query.execute())
-      .asStream()
-      .expand((resultSet) => resultSet.map((result) => result[0] as String));
+  Iterable<String> getAllIds() => query(N1QLQuery('SELECT META().id'))
+      .execute()
+      .map((result) => result[0] as String);
 
   /// Returns a stream which emits the ids of all the documents in the
   /// database when they change.
-  Stream<List<String>> watchAllIds() => query(N1QLQuery('SELECT META().id'))
-      .asStream()
-      .asyncExpand((q) => q.changes())
-      .map((resultSet) => resultSet.map((rs) => rs[0] as String).toList());
+  Stream<List<String>> watchAllIds() =>
+      query(N1QLQuery('SELECT META().id')).changes().map((resultSet) =>
+          resultSet.map((result) => result[0] as String).toList());
 
   /// Deletes all documents in this database and returns whether any documents
   /// where deleted.
-  Future<bool> deleteAllDocuments() async {
+  bool deleteAllDocuments() {
     var deletedAnyDocument = false;
-    await for (final id in getAllIds()) {
-      final doc = await getDocument(id);
+    for (final id in getAllIds()) {
+      final doc = getDocument(id);
       if (doc != null) {
-        await deleteDocument(doc);
+        deleteDocument(doc);
       }
       deletedAnyDocument = doc != null;
     }

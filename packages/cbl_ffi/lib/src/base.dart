@@ -54,7 +54,7 @@ enum CBLErrorDomain {
   webSocket,
 }
 
-extension on int {
+extension IntCBLErrorDomainExt on int {
   CBLErrorDomain toErrorDomain() {
     assert(this >= 1 || this <= 6);
     return CBLErrorDomain.values[this - 1];

@@ -9,7 +9,6 @@ import 'fleece/containers_test.dart' as fleece_containers;
 import 'fleece/integration_test.dart' as fleece_integration;
 import 'fleece/slice_test.dart' as fleece_slice;
 import 'logging_test.dart' as logging;
-import 'native_callback_test.dart' as native_callback;
 import 'replication/authenticator_test.dart' as replication_authenticator;
 import 'replication/configuration_test.dart' as replication_configuration;
 import 'replication/conflict_test.dart' as replication_conflict;
@@ -19,6 +18,7 @@ import 'replication/endpoint_test.dart' as replication_endpoint;
 import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
+import 'support/async_callback_test.dart' as support_async_callback;
 
 final tests = [
   database.main,
@@ -32,7 +32,6 @@ final tests = [
   fleece_integration.main,
   fleece_slice.main,
   logging.main,
-  native_callback.main,
   replication_authenticator.main,
   replication_configuration.main,
   replication_conflict.main,
@@ -40,6 +39,7 @@ final tests = [
   replication_endpoint.main,
   replication_replicator_change.main,
   replication_replicator.main,
+  support_async_callback.main,
 ];
 
 void main() {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/couchbase_lite.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
@@ -73,11 +74,11 @@ abstract class CblE2eTestBinding {
   StreamSubscription<void>? _cblTestLogger;
 
   Future<void> startTestLogger() async {
-    _cblTestLogger = CouchbaseLite.logMessages().logToLogger();
+    // _cblTestLogger = CouchbaseLite.logMessages().logToLogger();
   }
 
   Future<void> stopTestLogger() async {
-    await _cblTestLogger!.cancel();
+    await _cblTestLogger?.cancel();
   }
 
   void _setupLogging() {

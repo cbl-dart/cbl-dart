@@ -1,13 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/blob.dart';
-import 'package:cbl/src/streams.dart';
-import 'package:cbl/src/utils.dart';
-import 'package:collection/collection.dart';
+import 'package:cbl/src/support/streams.dart';
+import 'package:cbl/src/support/utils.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -16,7 +14,6 @@ import '../utils/database_utils.dart';
 final contentType = 'application/octet-stream';
 final fixedTestContent = utf8.encode('content') as Uint8List;
 final fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
-Stream<Uint8List> fixedTestContentStream() => Stream.value(fixedTestContent);
 
 /// Returns random bytes for blob.
 ///
@@ -35,7 +32,7 @@ Uint8List randomBytes(int size) {
   return data.buffer.asUint8List(0, size);
 }
 
-enum WriteBlob { data, stream, file, properties }
+enum WriteBlob { data, properties }
 enum ReadTime { beforeSave, afterSave }
 enum ReadMode { future, stream }
 enum ReadBlob { sourceBlob, loadedBlob }
@@ -47,8 +44,8 @@ void main() {
   group('Blob', () {
     late Database db;
 
-    setUpAll(() async {
-      db = await openTestDb('Blob-Common');
+    setUpAll(() {
+      db = openTestDb('Blob-Common');
     });
 
     group('from data', () {
@@ -62,57 +59,6 @@ void main() {
           'length': fixedTestContent.length,
           'digest': fixedTestContentDigest,
         });
-      });
-    });
-
-    group('from stream', () {
-      test('is initialized with contentType', () {
-        final blob = Blob.fromStream(contentType, fixedTestContentStream());
-        expect(blob.contentType, contentType);
-        expect(blob.length, isNull);
-        expect(blob.digest, isNull);
-        expect(blob.properties, {
-          'content_type': contentType,
-          'length': null,
-          'digest': null,
-        });
-      });
-
-      test('throws error when saving blob with failed stream again', () async {
-        final blob = Blob.fromStream(contentType, Stream.error('Whoops'));
-        final doc = MutableDocument({'blob': blob});
-        await expectLater(db.saveDocument(doc), throwsA('Whoops'));
-        await expectLater(
-          db.saveDocument(doc),
-          throwsA(
-            isA<StateError>().having(
-              (it) => it.message,
-              'message',
-              contains(
-                'A document contains a blob which previously was unable to '
-                'read the stream it was created from.',
-              ),
-            ),
-          ),
-        );
-      });
-    });
-
-    group('from file', () {
-      test('throws exception when file does not exist', () {
-        expect(
-          () =>
-              Blob.fromFileUrl(contentType, Uri.parse('$tmpDir/does_no_exist')),
-          throwsArgumentError,
-        );
-      });
-
-      test('has the content of file as content', () async {
-        final content = randomTestContent();
-        final file = File('$tmpDir/blob_content');
-        file.writeAsBytesSync(content);
-        final blob = Blob.fromFileUrl(contentType, file.uri);
-        expect(await blob.content(), content);
       });
     });
 
@@ -156,14 +102,14 @@ void main() {
       });
     });
 
-    test('throws error when saving blob from different database', () async {
-      final otherDb = await openTestDb('Blobs-OtherDB');
+    test('throws error when saving blob from different database', () {
+      final otherDb = openTestDb('Blobs-OtherDB');
       final blob = Blob.fromData(contentType, randomTestContent());
       final doc = MutableDocument({'blob': blob});
-      await otherDb.saveDocument(doc);
+      otherDb.saveDocument(doc);
 
       final docB = MutableDocument({'blob': blob});
-      expect(db.saveDocument(docB), throwsStateError);
+      expect(() => db.saveDocument(docB), throwsStateError);
     });
 
     group('read', () {
@@ -190,18 +136,9 @@ void main() {
               case WriteBlob.data:
                 _writeBlob = Blob.fromData(contentType, content);
                 break;
-              case WriteBlob.stream:
-                _writeBlob =
-                    Blob.fromStream(contentType, Stream.value(content));
-                break;
-              case WriteBlob.file:
-                final file = File('$tmpDir/blob');
-                await file.writeAsBytes(content);
-                _writeBlob = Blob.fromFileUrl(contentType, file.uri);
-                break;
               case WriteBlob.properties:
                 final blob = Blob.fromData(contentType, content);
-                await db.saveDocument(MutableDocument({'blob': blob}));
+                db.saveDocument(MutableDocument({'blob': blob}));
                 doc['blob'].value = <String, Object?>{
                   '@type': 'blob',
                   'digest': blob.digest,
@@ -222,7 +159,7 @@ void main() {
                   _readBlob = _writeBlob!;
                   break;
                 case ReadBlob.loadedBlob:
-                  final loadedDoc = (await db.getDocument(doc.id))!;
+                  final loadedDoc = (db.getDocument(doc.id))!;
                   _readBlob = loadedDoc.blob('blob')!;
                   break;
               }
@@ -245,7 +182,7 @@ void main() {
                 await read();
                 break;
               case ReadTime.afterSave:
-                await db.saveDocument(doc);
+                db.saveDocument(doc);
                 await read();
                 break;
             }
@@ -275,13 +212,13 @@ void main() {
       }
     });
 
-    test('remove from document', () async {
+    test('remove from document', () {
       final blob = Blob.fromData(contentType, fixedTestContent);
       final doc = MutableDocument({'blob': blob});
-      await db.saveDocument(doc);
+      db.saveDocument(doc);
       doc.removeValue('blob');
-      await db.saveDocument(doc);
-      final loadedDoc = (await db.getDocument(doc.id))!;
+      db.saveDocument(doc);
+      final loadedDoc = (db.getDocument(doc.id))!;
       expect(loadedDoc.value('blob'), isNull);
     });
 
@@ -293,24 +230,15 @@ void main() {
       a = Blob.fromData(contentType, fixedTestContent);
       expect(a, a);
 
-      // Blobs with equal digest are equal.
+      // Blobs from data with equal content are equal.
       a = Blob.fromData(contentType, fixedTestContent);
       b = Blob.fromData(contentType, fixedTestContent);
-      expect(a.digest, isNotNull);
-      expect(a.digest, b.digest);
       expect(a, b);
 
-      // Blobs with equal content are equal.
-      a = Blob.fromStream(contentType, fixedTestContentStream());
-      b = Blob.fromStream(contentType, fixedTestContentStream());
-
-      // -> Blobs without digest and synchronously available content are not
-      //    equal.
-      expect(a, isNot(b));
-
-      // -> Ensure that content is synchronously available.
-      await a.content();
-      await b.content();
+      // Blobs from data with equal content but different content type are
+      // equal.
+      a = Blob.fromData('A', fixedTestContent);
+      b = Blob.fromData('B', fixedTestContent);
       expect(a, b);
     });
 
@@ -321,17 +249,16 @@ void main() {
       blob = Blob.fromData(contentType, fixedTestContent);
       expect(blob.hashCode, blob.digest.hashCode);
 
-      // Uses hashCode of content if available.
-      blob = Blob.fromStream(contentType, fixedTestContentStream());
-      final content = await blob.content();
-      expect(blob.hashCode, const DeepCollectionEquality().hash(content));
-
       // Uses hashCode of object as fallback.
-      blob = Blob.fromStream(contentType, fixedTestContentStream());
+      blob = BlobImpl.fromProperties({
+        '@type': 'blob',
+        'digest': '',
+        'length': 0,
+      });
       expect(blob.hashCode, isNot(null.hashCode));
     });
 
-    test('toString provides debug representation', () {
+    test('toString', () {
       expect(
         Blob.fromData(contentType, Uint8List(1024)).toString(),
         'Blob($contentType; 1.5 KB)',
@@ -340,12 +267,6 @@ void main() {
       expect(
         Blob.fromData(contentType, Uint8List(0)).toString(),
         'Blob($contentType; 0.5 KB)',
-      );
-
-      // Blob whose length has not been determined yet.
-      expect(
-        Blob.fromStream(contentType, Stream.empty()).toString(),
-        'Blob($contentType; ? KB)',
       );
 
       // Blob without content type.

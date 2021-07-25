@@ -22,12 +22,12 @@ void CBLDart_CObject_SetPointer(Dart_CObject* object, const void* pointer) {
   }
 }
 
-void CBLDart_CObject_SetFLString(Dart_CObject* object, FLString* string) {
-  if (string->buf) {
+void CBLDart_CObject_SetFLString(Dart_CObject* object, const FLString string) {
+  if (string.buf) {
     object->type = Dart_CObject_kTypedData;
     object->value.as_typed_data.type = Dart_TypedData_kUint8;
-    object->value.as_typed_data.values = (uint8_t*)(string->buf);
-    object->value.as_typed_data.length = string->size;
+    object->value.as_typed_data.values = (uint8_t*)string.buf;
+    object->value.as_typed_data.length = string.size;
   } else {
     object->type = Dart_CObject_kNull;
   }

@@ -24,16 +24,15 @@ Matcher isTestDocument(String value) => isA<Document>()
 extension TestDocumentDatabaseExtension on Database {
   /// Writes [value] in the properties of the test document. If its does not
   /// exist already in this database, it is created.
-  Future<Document> writeTestDocument(String value) async {
-    final doc =
-        await getTestDocumentOrNull().then((it) => it ?? MutableDocument());
+  Document writeTestDocument(String value) {
+    final doc = getTestDocumentOrNull() ?? MutableDocument();
     testDocumentId ??= doc.id;
     doc.setValue(value, key: 'value');
-    await saveDocument(doc);
+    saveDocument(doc);
     return doc;
   }
 
   /// Gets the test document or `null` if does not exist.
-  Future<MutableDocument?> getTestDocumentOrNull() async =>
+  MutableDocument? getTestDocumentOrNull() =>
       testDocumentId == null ? null : getMutableDocument(testDocumentId!);
 }

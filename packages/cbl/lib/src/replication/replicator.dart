@@ -8,12 +8,11 @@ import '../database.dart';
 import '../document/document.dart';
 import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
-import '../native_callback.dart';
-import '../native_object.dart';
-import '../resource.dart';
-import '../streams.dart';
-import '../utils.dart';
-import '../worker/cbl_worker.dart';
+import '../support/async_callback.dart';
+import '../support/native_object.dart';
+import '../support/resource.dart';
+import '../support/streams.dart';
+import '../support/utils.dart';
 import 'authenticator.dart';
 import 'configuration.dart';
 import 'conflict.dart';
@@ -108,7 +107,7 @@ abstract class Replicator implements ClosableResource {
   ReplicatorConfiguration get config;
 
   /// Returns this replicator's status.
-  Future<ReplicatorStatus> status();
+  ReplicatorStatus get status;
 
   /// Starts this replicator with an option to [reset] the local checkpoint of
   /// the replicator.
@@ -118,7 +117,7 @@ abstract class Replicator implements ClosableResource {
   ///
   /// The method returns immediately; the replicator runs asynchronously and
   /// will report its progress through the [changes] stream.
-  Future<void> start({bool reset = false});
+  void start({bool reset = false});
 
   /// Stops this replicator, if running.
   ///
@@ -126,11 +125,11 @@ abstract class Replicator implements ClosableResource {
   /// replicator will change the [ReplicatorActivityLevel] of its [status] to
   /// [ReplicatorActivityLevel.stopped]. and the [changes] stream will
   /// be notified accordingly.
-  Future<void> stop();
+  void stop();
 
   /// Returns a [Stream] which emits a [ReplicatorChange] event when this
   /// replicators [status] changes.
-  Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false});
+  Stream<ReplicatorChange> changes();
 
   /// Returns a [Stream] wich emits a [DocumentReplication] event when a set
   /// of [Document]s have been replicated.
@@ -146,23 +145,26 @@ abstract class Replicator implements ClosableResource {
   ///
   /// This API is a snapshot and results may change between the time the call
   /// was mad and the time the call returns.
-  Future<Set<String>> pendingDocumentIds();
+  Set<String> get pendingDocumentIds;
 
   /// Returns whether the [Document] with the given [documentId] has revisions
   /// pending push.
   ///
   /// This API is a snapshot and the result may change between the time the call
   /// was made and the time the call returns.
-  Future<bool> isDocumentPending(String documentId);
+  bool isDocumentPending(String documentId);
 }
 
 late final _bindings = CBLBindings.instance.replicator;
 
-class ReplicatorImpl with ClosableResourceMixin implements Replicator {
-  ReplicatorImpl(this._config, {required String debugCreator}) {
+class ReplicatorImpl
+    with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
+    implements Replicator {
+  ReplicatorImpl(ReplicatorConfiguration config, {required String debugCreator})
+      : _config = ReplicatorConfiguration.from(config) {
     final database = _database = (_config.database as DatabaseImpl);
 
-    runKeepAlive(() {
+    runNativeCalls(() {
       final pushFilterCallback =
           config.pushFilter?.let((it) => _wrapReplicationFilter(database, it));
       final pullFilterCallback =
@@ -180,36 +182,34 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
       final authenticator = config.createAuthenticator();
 
       try {
-        final replicator =
-            withCBLErrorExceptionTranslation(() => _bindings.createReplicator(
-                  database.native.pointer,
-                  endpoint,
-                  config.replicatorType.toCBLReplicatorType(),
-                  config.continuous,
-                  null,
-                  config.maxRetries + 1,
-                  config.maxRetryWaitTime.inSeconds,
-                  config.heartbeat.inSeconds,
-                  authenticator,
-                  null,
-                  null,
-                  null,
-                  null,
-                  null,
-                  config.headers
-                      ?.let((it) => fl.MutableDict(it).native.pointer.cast()),
-                  config.pinnedServerCertificate,
-                  null,
-                  config.channels
-                      ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-                  config.documentIds
-                      ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-                  pushFilterCallback?.native.pointer,
-                  pullFilterCallback?.native.pointer,
-                  conflictResolverCallback?.native.pointer,
-                ));
+        final replicator = _bindings.createReplicator(
+          database.native.pointer,
+          endpoint,
+          config.replicatorType.toCBLReplicatorType(),
+          config.continuous,
+          null,
+          config.maxRetries + 1,
+          config.maxRetryWaitTime.inSeconds,
+          config.heartbeat.inSeconds,
+          authenticator,
+          null,
+          null,
+          null,
+          null,
+          null,
+          config.headers?.let((it) => fl.MutableDict(it).native.pointer.cast()),
+          config.pinnedServerCertificate,
+          null,
+          config.channels
+              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+          config.documentIds
+              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+          pushFilterCallback?.native.pointer,
+          pullFilterCallback?.native.pointer,
+          conflictResolverCallback?.native.pointer,
+        );
 
-        _replicator = CBLReplicatorObject(
+        native = CBLReplicatorObject(
           replicator,
           debugName: 'Replicator(creator: $debugCreator)',
         );
@@ -231,130 +231,95 @@ class ReplicatorImpl with ClosableResourceMixin implements Replicator {
 
   late final DatabaseImpl _database;
 
-  Worker get _worker => _database.native.worker;
+  @override
+  late final NativeObject<CBLReplicator> native;
 
-  late final NativeObject<CBLReplicator> _replicator;
-
-  late final List<NativeCallback> _callbacks;
+  late final List<AsyncCallback> _callbacks;
 
   @override
   ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
 
   @override
-  Future<ReplicatorStatus> status() => use(_status);
+  ReplicatorStatus get status => useSync(() => _status);
 
-  Future<ReplicatorStatus> _status() => runKeepAlive(() {
-        return _worker
-            .execute(GetReplicatorStatus(_replicator.pointer))
-            .then((status) => status.toReplicatorStatus());
-      });
+  ReplicatorStatus get _status =>
+      native.call(_bindings.status).toReplicatorStatus();
 
   @override
-  Future<void> start({bool reset = false}) => use(() => runKeepAlive(() {
-        return _worker.execute(StartReplicator(_replicator.pointer, reset));
-      }));
+  void start({bool reset = false}) =>
+      useSync(() => native.call((pointer) => _bindings.start(pointer, reset)));
 
   @override
-  Future<void> stop() => use(_stop);
+  void stop() => useSync(_stop);
 
-  Future<void> _stop() => runKeepAlive(() {
-        return _worker.execute(StopReplicator(_replicator.pointer));
-      });
+  void _stop() => native.call(_bindings.stop);
 
   @override
-  Stream<ReplicatorChange> changes({bool startWithCurrentStatus = false}) =>
-      useSync(() => _changes(startWithCurrentStatus: startWithCurrentStatus));
+  Stream<ReplicatorChange> changes() => useSync(_changes);
 
-  Stream<ReplicatorChange> _changes({bool startWithCurrentStatus = false}) {
-    final changes = CallbackStreamController<ReplicatorChange, void>(
-      parent: this,
-      worker: _database.native.worker,
-      createRegisterCallbackRequest: (callback) => AddReplicatorChangeListener(
-        _replicator.pointer,
-        callback.native.pointer,
-      ),
-      createEvent: (_, arguments) {
-        final message =
-            ReplicatorStatusCallbackMessage.fromArguments(arguments);
-        return ReplicatorChangeImpl(
-          this,
-          message.status.toReplicatorStatus(),
-        );
-      },
-    ).stream;
-
-    if (startWithCurrentStatus) {
-      return changeStreamWithInitialValue(
-        createInitialValue: () async =>
-            ReplicatorChangeImpl(this, await _status()),
-        createChangeStream: () => changes,
-      );
-    } else {
-      return changes;
-    }
-  }
+  Stream<ReplicatorChange> _changes() =>
+      CallbackStreamController<ReplicatorChange, void>(
+        parent: this,
+        startStream: (callback) => _bindings.addChangeListener(
+          native.pointer,
+          callback.native.pointer,
+        ),
+        createEvent: (_, arguments) {
+          final message =
+              ReplicatorStatusCallbackMessage.fromArguments(arguments);
+          return ReplicatorChangeImpl(
+            this,
+            message.status.toReplicatorStatus(),
+          );
+        },
+      ).stream;
 
   @override
   Stream<DocumentReplication> documentReplications() =>
       useSync(() => CallbackStreamController(
             parent: this,
-            worker: _database.native.worker,
-            createRegisterCallbackRequest: (callback) =>
-                AddReplicatorDocumentListener(
-              _replicator.pointer,
+            startStream: (callback) => _bindings.addDocumentReplicationListener(
+              native.pointer,
               callback.native.pointer,
             ),
             createEvent: (_, arguments) {
               final message =
                   DocumentReplicationsCallbackMessage.fromArguments(arguments);
 
-              final documents = List.generate(
-                message.documentCount,
-                (index) => message.documents.elementAt(index),
-              ).map((it) => it.ref.toReplicatedDocument()).toList();
+              final documents = message.documents
+                  .map((it) => it.toReplicatedDocument())
+                  .toList();
 
               return DocumentReplicationImpl(this, message.isPush, documents);
             },
           ).stream);
 
   @override
-  Future<Set<String>> pendingDocumentIds() => use(() => runKeepAlive(() async {
+  Set<String> get pendingDocumentIds => useSync(() {
         final dict = fl.Dict.fromPointer(
-          (await _worker.execute(
-                  GetReplicatorPendingDocumentIds(_replicator.pointer)))
-              .pointer,
-          retain: false,
-          release: true,
+          native.call(_bindings.pendingDocumentIDs),
+          adopt: true,
         );
         return dict.keys.toSet();
-      }));
+      });
 
   @override
-  Future<bool> isDocumentPending(String documentId) =>
-      use(() => runKeepAlive(() {
-            return _worker.execute(GetReplicatorIsDocumentPening(
-              _replicator.pointer,
-              documentId,
-            ));
+  bool isDocumentPending(String documentId) =>
+      useSync(() => native.call((pointer) {
+            return _bindings.isDocumentPending(pointer, documentId);
           }));
 
   @override
   Future<void> performClose() async {
     try {
-      final status =
-          _changes(startWithCurrentStatus: true).map((change) => change.status);
-
       var stopping = false;
-
-      await status.asyncMap((status) async {
-        if (status.activity != ReplicatorActivityLevel.stopped && !stopping) {
+      while (_status.activity != ReplicatorActivityLevel.stopped) {
+        if (!stopping) {
+          _stop();
           stopping = true;
-          await _stop();
         }
-        return status;
-      }).firstWhere((status) {
-        return status.activity == ReplicatorActivityLevel.stopped;
-      });
+        await Future<void>.delayed(Duration(milliseconds: 100));
+      }
     } finally {
       _disposeCallbacks();
     }
@@ -400,11 +365,11 @@ extension on CBLReplicatorStatus {
       );
 }
 
-extension on CBLDart_ReplicatedDocument {
+extension on CBLReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocumentImpl(
-        ID,
+        id,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-        exception?.translate(),
+        error?.translate(),
       );
 }
 
@@ -440,16 +405,16 @@ extension on ReplicatorConfiguration {
   }
 }
 
-NativeCallback _wrapReplicationFilter(
+AsyncCallback _wrapReplicationFilter(
   DatabaseImpl database,
   ReplicationFilter filter,
 ) =>
-    NativeCallback((arguments) async {
+    AsyncCallback((arguments) async {
       final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
       final doc = DocumentImpl(
         database: database,
         doc: message.document,
-        retain: true,
+        adopt: false,
         debugCreator: 'ReplicationFilter()',
       );
 
@@ -460,25 +425,25 @@ NativeCallback _wrapReplicationFilter(
     }, errorResult: false, debugName: 'ReplicationFilter')
       ..errors.listen(null);
 
-NativeCallback _wrapConflictResolver(
+AsyncCallback _wrapConflictResolver(
   DatabaseImpl database,
   ConflictResolver resolver,
 ) =>
-    NativeCallback((arguments) async {
+    AsyncCallback((arguments) async {
       final message =
           ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
       final local = message.localDocument?.let((it) => DocumentImpl(
             database: database,
             doc: it,
-            retain: true,
+            adopt: false,
             debugCreator: 'ConflictResolver(local)',
           ));
 
       final remote = message.remoteDocument?.let((it) => DocumentImpl(
             database: database,
             doc: it,
-            retain: true,
+            adopt: false,
             debugCreator: 'ConflictResolver(remote)',
           ));
 
@@ -486,10 +451,10 @@ NativeCallback _wrapConflictResolver(
       final resolved = await resolver.resolve(conflict) as DocumentImpl?;
       if (resolved is MutableDocumentImpl) {
         resolved.database = database;
-        await resolved.flushProperties();
+        resolved.flushProperties();
       }
 
-      final resolvedPointer = resolved?.doc.pointerUnsafe;
+      final resolvedPointer = resolved?.native.pointerUnsafe;
 
       // If the resolver returned a document other than `local` or `remote`,
       // the ref count of `resolved` needs to be incremented because the

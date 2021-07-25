@@ -34,13 +34,13 @@ class _MyAppState extends State<MyApp> {
   Future<void> _init() async {
     final appDocsDir = await getApplicationDocumentsDirectory();
 
-    _db = await Database.open(
+    _db = Database.open(
       'Example',
       config: DatabaseConfiguration(directory: appDocsDir.path),
     );
 
-    final query = await _db
-        .query(N1QLQuery('SELECT post FROM post WHERE post.type = "post"'));
+    final query =
+        _db.query(N1QLQuery('SELECT post FROM post WHERE post.type = "post"'));
 
     query
         .changes()
@@ -61,20 +61,21 @@ class _MyAppState extends State<MyApp> {
       },
     });
 
-    await _db.saveDocument(post);
+    _db.saveDocument(post);
   }
 
   void _clearDatabase() async {
-    final ids = await _db
+    final ids = _db
         .query(N1QLQuery('SELECT META.id'))
-        .then((q) => q.execute())
-        .then((rs) => rs.map((r) => r[0] as String).toList());
+        .execute()
+        .map((r) => r[0] as String)
+        .toList();
 
-    await _db.beginBatch();
+    _db.beginBatch();
     try {
-      await Future.wait(ids.map((id) => _db.purgeDocumentById(id)));
+      ids.map((id) => _db.purgeDocumentById(id));
     } finally {
-      await _db.endBatch();
+      _db.endBatch();
     }
   }
 

@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import '../database.dart';
 import '../document/document.dart';
-import '../utils.dart';
+import '../support/utils.dart';
 import 'authenticator.dart';
 import 'conflict_resolver.dart';
 import 'endpoint.dart';
@@ -91,7 +91,7 @@ class ReplicatorConfiguration {
         _maxRetries = config.maxRetries,
         _maxRetryWaitTime = config.maxRetryWaitTime;
 
-  static const _defaultContinuousMaxRetries = 1 << 64;
+  static const _defaultContinuousMaxRetries = 0xFFFFFFFF - 1;
   static const _defaultSingleShotMaxRetries = 9;
 
   /// The local [Database] to replicate with the replication [target].

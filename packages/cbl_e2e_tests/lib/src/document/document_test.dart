@@ -12,17 +12,17 @@ void main() {
   late Database db;
 
   setUpAll(() async {
-    db = await openTestDb('Document-Common');
+    db = openTestDb('Document-Common');
   });
 
-  Future<Document> savedDocument([Map<String, Object?>? data]) async {
+  Document savedDocument([Map<String, Object?>? data]) {
     var doc = MutableDocument(data);
-    await db.saveDocument(doc);
-    return (await db.getDocument(doc.id))!;
+    db.saveDocument(doc);
+    return db.getDocument(doc.id)!;
   }
 
   group('Document', () {
-    test('properties', () async {
+    test('properties', () {
       var revisionId = '1-581ad726ee407c8376fc94aad966051d013893c4';
       final doc = MutableDocument.withId('id');
 
@@ -30,26 +30,26 @@ void main() {
       expect(doc.revisionId, isNull);
       expect(doc.sequence, 0);
 
-      await db.saveDocument(doc);
+      db.saveDocument(doc);
 
       expect(doc.revisionId, revisionId);
       expect(doc.sequence, 1);
 
-      final loadedDoc = (await db.getDocument(doc.id))!;
+      final loadedDoc = db.getDocument(doc.id)!;
 
       expect(loadedDoc.id, 'id');
       expect(loadedDoc.revisionId, revisionId);
       expect(loadedDoc.sequence, 1);
     });
 
-    test('==', () async {
-      final doc = await savedDocument({'type': 'immutable'});
+    test('==', () {
+      final doc = savedDocument({'type': 'immutable'});
 
       // Identical docs are equal.
       expect(doc, doc);
 
       // Two instances at the same revision are equal.
-      expect(await db.getDocument(doc.id), doc);
+      expect(db.getDocument(doc.id), doc);
 
       final mutableDoc = doc.toMutable();
 
@@ -61,20 +61,20 @@ void main() {
       // Mutated mutable copy is not equal.
       expect(mutableDoc, isNot(doc));
 
-      await db.saveDocument(mutableDoc);
+      db.saveDocument(mutableDoc);
 
       // Two instances at different revision are not equal.
-      expect(await db.getDocument(doc.id), isNot(doc));
+      expect(db.getDocument(doc.id), isNot(doc));
     });
 
-    test('hashCode', () async {
-      final doc = await savedDocument({'type': 'immutable'});
+    test('hashCode', () {
+      final doc = savedDocument({'type': 'immutable'});
 
       // Identical docs have the same hashCode.
       expect(doc.hashCode, doc.hashCode);
 
       // Two instances at the same revision have the same hashCode.
-      expect((await db.getDocument(doc.id)).hashCode, doc.hashCode);
+      expect((db.getDocument(doc.id)).hashCode, doc.hashCode);
 
       final mutableDoc = doc.toMutable();
 
@@ -86,17 +86,17 @@ void main() {
       // Mutated mutable copy has different hashCode.
       expect(mutableDoc.hashCode, isNot(doc.hashCode));
 
-      await db.saveDocument(mutableDoc);
+      db.saveDocument(mutableDoc);
 
       // Two instances at different revision do not have the same hashCode.
-      expect((await db.getDocument(doc.id)).hashCode, isNot(doc.hashCode));
+      expect((db.getDocument(doc.id)).hashCode, isNot(doc.hashCode));
     });
 
     group('immutable', () {
-      test('implements DictionaryInterface for properties', () async {
+      test('implements DictionaryInterface for properties', () {
         final date = DateTime.now();
         final blob = Blob.fromData('', Uint8List(0));
-        final doc = await savedDocument({
+        final doc = savedDocument({
           'value': 'x',
           'string': 'a',
           'int': 1,
@@ -161,18 +161,18 @@ void main() {
         expect(doc.toList(), ['a', 'b', 'c']);
       });
 
-      test('toMutable', () async {
-        final doc = await savedDocument({'type': 'immutable'});
+      test('toMutable', () {
+        final doc = savedDocument({'type': 'immutable'});
         expect(doc, isNot(isA<MutableDocument>()));
         final mutableDoc = doc.toMutable();
         expect(mutableDoc, doc);
       });
 
-      test('toString', () async {
-        final db = await openTestDb('Document-toString');
+      test('toString', () {
+        final db = openTestDb('Document-toString');
         final doc = MutableDocument();
-        await db.saveDocument(doc);
-        final loadedDoc = await db.getDocument(doc.id);
+        db.saveDocument(doc);
+        final loadedDoc = db.getDocument(doc.id);
         expect(
           loadedDoc.toString(),
           'Document('
@@ -258,7 +258,7 @@ void main() {
       expect(doc.toMutable(), same(doc));
     });
 
-    test('toString', () async {
+    test('toString', () {
       final mutableDoc = MutableDocument();
       expect(
         mutableDoc.toString(),

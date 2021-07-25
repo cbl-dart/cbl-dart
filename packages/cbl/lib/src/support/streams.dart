@@ -3,10 +3,9 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
-import 'native_callback.dart';
+import 'async_callback.dart';
 import 'native_object.dart';
 import 'resource.dart';
-import 'worker/worker.dart';
 
 /// A template for creating a [StreamController] which is as [ClosableResource].
 abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
@@ -49,33 +48,29 @@ abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
   Future<void> performClose() => controller.close();
 }
 
-/// A [Stream] controller to create a [Stream] from a [NativeCallback].
+/// A [Stream] controller to create a [Stream] from a [AsyncCallback].
 class CallbackStreamController<T, S>
     extends ClosableResourceStreamController<T> {
   /// Creates a [Stream] controller to create a [Stream] from a
-  /// [NativeCallback].
+  /// [AsyncCallback].
   ///
-  /// Callbacks are registered through a request (created by
-  /// [createRegisterCallbackRequest]), which is executed on a [worker] to not
-  /// block the calling Isolate.
+  /// Callbacks need to be registered with native code in [startStream].
   ///
   /// [createEvent] receives the result of the callback registration request and
-  /// the arguments from the native side and turns them into an event of type [T].
+  /// the arguments from the native side and turns them into an event of type
+  /// [T].
   ///
   /// The returned stream is single subscription.
   CallbackStreamController({
     required AbstractResource parent,
-    required this.worker,
-    required this.createRegisterCallbackRequest,
+    required this.startStream,
     required this.createEvent,
   }) : super(parent: parent);
 
-  final Worker worker;
-  final WorkerRequest<S> Function(NativeCallback callback)
-      createRegisterCallbackRequest;
+  final S Function(AsyncCallback callback) startStream;
   final FutureOr<T> Function(S registrationResult, List arguments) createEvent;
 
-  late NativeCallback _callback;
+  late AsyncCallback _callback;
   late Future<bool> _callbackRegistered;
   late S _registrationResult;
   var _canceled = false;
@@ -85,7 +80,7 @@ class CallbackStreamController<T, S>
     final callbackRegistered = Completer<bool>();
     _callbackRegistered = callbackRegistered.future;
 
-    _callback = NativeCallback((arguments) async {
+    _callback = AsyncCallback((arguments) async {
       try {
         // Callbacks can come in before the registration request from the
         // worker comes back. In this case `registrationResult` has not be
@@ -104,9 +99,7 @@ class CallbackStreamController<T, S>
     }, debugName: 'Stream<$T>');
 
     try {
-      _registrationResult = await runKeepAlive(() {
-        return worker.execute(createRegisterCallbackRequest(_callback));
-      });
+      _registrationResult = runNativeCalls(() => startStream(_callback));
       callbackRegistered.complete(true);
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);
@@ -125,17 +118,17 @@ class CallbackStreamController<T, S>
 }
 
 StreamController<T> callbackBroadcastStreamController<T>({
-  required void Function(NativeCallback callback) startStream,
+  required void Function(AsyncCallback callback) startStream,
   required T Function(List arguments) createEvent,
 }) {
-  late NativeCallback callback;
+  late AsyncCallback callback;
   late StreamController<T> controller;
   var canceled = false;
 
   void onListen() {
     canceled = false;
 
-    callback = NativeCallback((arguments) {
+    callback = AsyncCallback((arguments) {
       if (canceled) return;
       try {
         final event = createEvent(arguments);
@@ -158,7 +151,7 @@ StreamController<T> callbackBroadcastStreamController<T>({
 }
 
 Stream<T> changeStreamWithInitialValue<T>({
-  required Future<T> Function() createInitialValue,
+  required FutureOr<T> Function() createInitialValue,
   required Stream<T> Function() createChangeStream,
 }) {
   late final StreamController<T> controller;
@@ -184,7 +177,7 @@ Stream<T> changeStreamWithInitialValue<T>({
       },
     );
 
-    createInitialValue().then(
+    Future(createInitialValue).then(
       (value) {
         if (!streamIsDone && !subIsCanceled && firstStreamEvent == null) {
           initialValue = value;

@@ -4,13 +4,14 @@ import 'dart:isolate';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import 'native_object.dart';
+import 'resource.dart';
 
-/// Handler which is invoked to respond to a [NativeCallback].
+/// Handler which is invoked to respond to a [AsyncCallback].
 ///
 /// The handler receives a list of [arguments] from native side.
-typedef CallbackHandler = FutureOr<Object?> Function(List arguments);
+typedef AsyncCallbackHandler = FutureOr<Object?> Function(List arguments);
 
-late final _bindings = CBLBindings.instance.nativeCallback;
+late final _bindings = CBLBindings.instance.asyncCallback;
 
 var _nextId = 0;
 int _generateId() {
@@ -19,16 +20,17 @@ int _generateId() {
   return id;
 }
 
-/// A callback which can be called from the native side.
+/// A callback which can be asynchronously called from the native side.
 ///
-/// [NativeCallback]s have to be [close]d to free allocated resources on the
+/// [AsyncCallback]s have to be [close]d to free allocated resources on the
 /// native side and close its [ReceivePort]. The isolate will not exist, as
 /// long as there is an open [ReceivePort].
-class NativeCallback {
-  /// Creates a callback which can be called from the native side.
+class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
+  /// Creates a callback which can be asynchronously called from the native
+  /// side.
   ///
   /// [handler] is the function which responds to calls from the native side.
-  NativeCallback(
+  AsyncCallback(
     this.handler, {
     this.errorResult = failureResult,
     required this.debugName,
@@ -50,12 +52,12 @@ class NativeCallback {
 
   /// A special result which signals the native side to throw a C++
   /// `std::runtime_exception`.
-  static const failureResult = '__NATIVE_CALLBACK_FAILED__';
+  static const failureResult = '__ASYNC_CALLBACK_FAILED__';
 
   final _id = _generateId();
 
   /// The handler which responds to calls to this callback.
-  final CallbackHandler handler;
+  final AsyncCallbackHandler handler;
 
   /// The result to send to the native side when [handler] throws an exception.
   ///
@@ -78,7 +80,8 @@ class NativeCallback {
 
   late final ReceivePort _receivePort;
 
-  late final NativeObject<Callback> native;
+  @override
+  late final NativeObject<CBLDartAsyncCallback> native;
 
   late final _errorStreamController = StreamController<Object?>();
 
@@ -91,7 +94,7 @@ class NativeCallback {
   void close() {
     _debugLog('closing');
     _closed = true;
-    native.keepAlive(_bindings.close);
+    native.call(_bindings.close);
     _receivePort.close();
     _errorStreamController.close();
   }
@@ -122,7 +125,7 @@ class NativeCallback {
     assert(
       (sendPort != null && callAddress != null) ||
           (sendPort == null && callAddress == null),
-      'CBLDart::CallbackCall must send both a sendPort and '
+      'CBLDart::AsyncCallbackCall must send both a sendPort and '
       'a callAddress or none',
     );
 
@@ -162,7 +165,7 @@ class NativeCallback {
   void _debugLog(String message) {
     assert(() {
       if (debug) {
-        print('NativeCallback #$_id -> $message');
+        print('AsyncCallback #$_id -> $message');
       }
       return true;
     }());

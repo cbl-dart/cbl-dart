@@ -1,9 +1,5 @@
 export 'src/couchbase_lite.dart'
-    hide
-        debugCouchbaseLiteIsInitialized,
-        workerFactory,
-        logMessage,
-        debugRefCounted;
+    hide debugCouchbaseLiteIsInitialized, logMessage, debugRefCounted;
 export 'src/database.dart' hide DatabaseImpl;
 export 'src/document/array.dart' hide ArrayImpl, MutableArrayImpl;
 export 'src/document/blob.dart' hide BlobImpl, BlobImplSetter;
@@ -28,4 +24,4 @@ export 'src/replication/document_replication.dart'
 export 'src/replication/endpoint.dart';
 export 'src/replication/replicator.dart' hide ReplicatorImpl;
 export 'src/replication/replicator_change.dart' hide ReplicatorChangeImpl;
-export 'src/resource.dart' show Resource, ClosableResource;
+export 'src/support/resource.dart' show Resource, ClosableResource;
