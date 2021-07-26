@@ -148,16 +148,10 @@ void AsyncCallback::unregisterCall(AsyncCallbackCall &call) {
 }
 
 bool AsyncCallback::sendRequest(Dart_CObject *request) {
-  {
-    std::scoped_lock lock(mutex_);
-    if (closed_) {
-      return false;
-    }
-  }
-
-  auto didSendRequest = Dart_PostCObject_DL(sendPort_, request);
-  assert(didSendRequest);
-  return true;
+  // If the send port and therefore the callack is closed before the request can
+  // be sent, this call retruns false. This allows us to avoid calling this
+  // function under a lock.
+  return Dart_PostCObject_DL(sendPort_, request);
 }
 
 inline void AsyncCallback::debugLog(const char *message) {
