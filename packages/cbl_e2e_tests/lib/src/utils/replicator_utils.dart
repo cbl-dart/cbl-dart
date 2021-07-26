@@ -66,9 +66,25 @@ Matcher hasActivityLevel(
     isReplicatorStatus.having((it) => it.activity, 'activity', activityLevel);
 
 extension ReplicatorUtilsExtension on Replicator {
-  Stream<ReplicatorStatus> statusStartingWithCurrent() async* {
-    yield status;
-    yield* changes().map((change) => change.status);
+  /// Returns a stream of the [status]se of this replicator by polling it.
+  ///
+  /// Polling can be more reliable when it is not possible to listen to
+  /// [changes] before the replicator has been started.
+  ///
+  /// If the replicator has already been started it is difficult to obtain a
+  /// stream of status changes which begins with the current status.
+  ///
+  /// If you get the current status and then start to listen for changes you
+  /// might miss changes in between.
+  ///
+  /// If you start to listen for changes first and than get the current status
+  /// you can receive status changes from before the current status and wont be
+  /// able to put them and the current status into the correct order.
+  Stream<ReplicatorStatus> pollStatus() async* {
+    while (true) {
+      yield status;
+      await Future<void>.delayed(Duration(milliseconds: 50));
+    }
   }
 
   /// Calls [fn] and waits until the replicator's status matches
@@ -88,7 +104,7 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var isInitialStatus = true;
 
-    await statusStartingWithCurrent().asyncMap((status) async {
+    await pollStatus().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
       if (isInitialStatus) {
@@ -121,7 +137,7 @@ extension ReplicatorUtilsExtension on Replicator {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
     var calledDriveFn = false;
 
-    await statusStartingWithCurrent().asyncMap((status) async {
+    await pollStatus().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
       var isMatch = _matches(status, statusMatcher);
@@ -145,7 +161,7 @@ extension ReplicatorUtilsExtension on Replicator {
   }) async {
     validStatusMatcher ??= isNot(isErrorReplicatorStatus);
 
-    await statusStartingWithCurrent().asyncMap((status) async {
+    await pollStatus().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
       var isMatch = _matches(status, statusMatcher);
