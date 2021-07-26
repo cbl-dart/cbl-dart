@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import '../database.dart';
+import '../database/database.dart';
 import '../document/document.dart';
 import '../support/utils.dart';
 import 'authenticator.dart';

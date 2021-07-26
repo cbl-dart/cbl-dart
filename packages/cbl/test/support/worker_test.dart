@@ -1,5 +1,5 @@
-import 'package:cbl/src/worker/request_router.dart';
-import 'package:cbl/src/worker/worker.dart';
+import 'package:cbl/src/support/worker/request_router.dart';
+import 'package:cbl/src/support/worker/worker.dart';
 import 'package:test/test.dart';
 
 class Pong {}

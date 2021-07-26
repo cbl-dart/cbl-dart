@@ -6,7 +6,6 @@ import 'document/blob.dart';
 import 'document/common.dart';
 import 'fleece/fleece.dart';
 import 'fleece/integration/integration.dart';
-import 'support/native_object.dart';
 import 'support/utils.dart';
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
@@ -68,22 +67,6 @@ class Libraries {
         cbl: cbl._toFfi(),
         cblDart: cblDart._toFfi(),
       );
-}
-
-void debugCouchbaseLiteIsInitialized() {
-  CouchbaseLite._initialization.debugCheckHasExecuted();
-}
-
-/// Setting this flag to `true` enables printing of debug information for
-/// [CblObject] in debug builds.
-bool get debugRefCounted => _debugRefCountedObject;
-bool _debugRefCountedObject = false;
-
-set debugRefCounted(bool value) {
-  if (_debugRefCountedObject != value) {
-    _debugRefCountedObject = value;
-    ffi.CBLBindings.instance.base.debugRefCounted = value;
-  }
 }
 
 /// Initializes global resources and configures global settings, such as
