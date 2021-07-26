@@ -13,31 +13,18 @@ void main() {
   group('AsyncCallback', () {
     late final bindings = CBLBindings.instance.asyncCallback;
 
-    test('callbacks are invoked in the Zone where the callback was registered',
-        () async {
-      final zoneValues = {#test: 'asyncCallback'};
-      final argument = 42;
-
-      final callback = runZoned(
-        () => AsyncCallback(
-          expectAsync1(
-            (arguments) {
-              expect(arguments, equals([argument]));
-
-              expect(Zone.current[#test], 'asyncCallback');
-            },
-            count: 1,
-          ),
-          debugName: 'Test',
-          debug: true,
-        ),
-        zoneValues: zoneValues,
-      );
+    test('propagates error to Zone in which it was created', () {
+      final callback = runZonedGuarded(() {
+        return AsyncCallback(expectAsync1((_) {
+          throw false;
+        }), debugName: 'Test', debug: true);
+      }, expectAsync2((error, stackTrace) {
+        expect(error, false);
+      }))!;
 
       addTearDown(callback.close);
 
-      callback.native
-          .call((pointer) => bindings.callForTest(pointer, argument));
+      callback.native.call((pointer) => bindings.callForTest(pointer, 0));
     });
   });
 }

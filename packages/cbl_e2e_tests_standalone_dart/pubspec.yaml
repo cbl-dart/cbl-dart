@@ -7,7 +7,6 @@ environment:
 dev_dependencies:
   cbl: ^0.6.0
   cbl_ffi: ^0.6.0
-  logging: ^1.0.1
   path: ^1.8.0
   pedantic: ^1.11.0
   rxdart: ^0.26.0

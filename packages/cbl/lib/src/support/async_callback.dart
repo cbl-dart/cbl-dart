@@ -73,17 +73,10 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
   /// This feature is only functional in debug mode.
   final bool debug;
 
-  /// A [Stream] of the errors thrown by [handler].
-  ///
-  /// The stream supports a single subscriber.
-  Stream<void> get errors => _errorStreamController.stream;
-
   late final ReceivePort _receivePort;
 
   @override
   late final NativeObject<CBLDartAsyncCallback> native;
-
-  late final _errorStreamController = StreamController<Object?>();
 
   var _closed = false;
 
@@ -96,7 +89,6 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
     _closed = true;
     native.call(_bindings.close);
     _receivePort.close();
-    _errorStreamController.close();
   }
 
   void _messageHandler(List<Object?> message) {
@@ -154,7 +146,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
       },
       onError: (Object error, StackTrace stackTrace) {
         sendResult(errorResult);
-        _errorStreamController.addError(error, stackTrace);
+        throw error;
       },
     );
   }

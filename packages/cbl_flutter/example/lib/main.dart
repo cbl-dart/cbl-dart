@@ -25,8 +25,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     CouchbaseLite.initialize(libraries: flutterLibraries());
-    CouchbaseLite.logMessages().logToLogger();
-    CouchbaseLite.logLevel = LogLevel.verbose;
 
     _initFuture = _init();
   }
