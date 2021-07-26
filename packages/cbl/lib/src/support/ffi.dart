@@ -1,6 +1,6 @@
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-late final cblBindings = () {
+late final CBLBindings cblBindings = () {
   final bindings = CBLBindings.maybeInstance;
   if (bindings == null) {
     throw StateError(
