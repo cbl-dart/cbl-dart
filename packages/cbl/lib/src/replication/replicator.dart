@@ -422,8 +422,7 @@ AsyncCallback _wrapReplicationFilter(
         doc,
         message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
       );
-    }, errorResult: false, debugName: 'ReplicationFilter')
-      ..errors.listen(null);
+    }, errorResult: false, debugName: 'ReplicationFilter');
 
 AsyncCallback _wrapConflictResolver(
   DatabaseImpl database,
@@ -477,5 +476,4 @@ AsyncCallback _wrapConflictResolver(
       }
 
       return resolvedPointer?.address;
-    }, debugName: 'ConflictResolver')
-      ..errors.listen(null);
+    }, debugName: 'ConflictResolver');

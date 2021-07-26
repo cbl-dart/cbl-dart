@@ -69,10 +69,21 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message);
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_RestoreOriginalCallback();
+uint8_t CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback);
+
+static uint32_t CBLDart_LogFileConfigIllegalCapability = 0;
+
+typedef struct {
+  CBLLogLevel level;
+  CBLDart_FLString directory;
+  uint32_t maxRotateCount;
+  uint64_t maxSize;
+  uint8_t usePlaintext;
+} CBLDart_CBLLogFileConfiguration;
 
 CBLDART_EXPORT
-void CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback);
+uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
+                                     uint32_t capability, CBLError *errorOut);
 
 // -- Document
 

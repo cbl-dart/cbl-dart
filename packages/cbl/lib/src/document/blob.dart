@@ -5,11 +5,11 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import '../couchbase_lite.dart';
 import '../database.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
 import '../fleece/fleece.dart' as fl;
+import '../log/logger.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -188,7 +188,7 @@ class BlobImpl
 
   Never _throwNoDataError() {
     if (_digest != null) {
-      logMessage(
+      cblLogMessage(
         LogDomain.database,
         LogLevel.warning,
         'Cannot access content from a blob that contains only metadata. '

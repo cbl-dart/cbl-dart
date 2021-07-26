@@ -8,7 +8,9 @@ import 'fleece/coding_test.dart' as fleece_coding;
 import 'fleece/containers_test.dart' as fleece_containers;
 import 'fleece/integration_test.dart' as fleece_integration;
 import 'fleece/slice_test.dart' as fleece_slice;
-import 'logging_test.dart' as logging;
+import 'log/consoler_logger_test.dart' as log_console_logger;
+import 'log/file_logger_test.dart' as log_file_logger;
+import 'log/logger_test.dart' as log_logger;
 import 'replication/authenticator_test.dart' as replication_authenticator;
 import 'replication/configuration_test.dart' as replication_configuration;
 import 'replication/conflict_test.dart' as replication_conflict;
@@ -31,7 +33,9 @@ final tests = [
   fleece_containers.main,
   fleece_integration.main,
   fleece_slice.main,
-  logging.main,
+  log_console_logger.main,
+  log_file_logger.main,
+  log_logger.main,
   replication_authenticator.main,
   replication_configuration.main,
   replication_conflict.main,

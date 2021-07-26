@@ -1,6 +1,7 @@
 #include <map>
 #include <mutex>
 #include <shared_mutex>
+#include <thread>
 
 #include "CBL+Dart.h"
 #include "Utils.hh"
@@ -33,18 +34,20 @@ void CBLDart_AsyncCallback_Close(CBLDart::AsyncCallback *callback) {
 
 void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
                                        int64_t argument) {
-  Dart_CObject argument__;
-  argument__.type = Dart_CObject_kInt64;
-  argument__.value.as_int64 = argument;
+  std::thread([callback, argument]() {
+    Dart_CObject argument__;
+    argument__.type = Dart_CObject_kInt64;
+    argument__.value.as_int64 = argument;
 
-  Dart_CObject *argsValues[] = {&argument__};
+    Dart_CObject *argsValues[] = {&argument__};
 
-  Dart_CObject args;
-  args.type = Dart_CObject_kArray;
-  args.value.as_array.length = 1;
-  args.value.as_array.values = argsValues;
+    Dart_CObject args;
+    args.type = Dart_CObject_kArray;
+    args.value.as_array.length = 1;
+    args.value.as_array.values = argsValues;
 
-  CBLDart::AsyncCallbackCall(*callback).execute(args);
+    CBLDart::AsyncCallbackCall(*callback).execute(args);
+  }).detach();
 }
 
 // Couchbase Lite --------------------------------------------------------------
@@ -131,10 +134,9 @@ void CBLDart_CBLListenerFinalizer(void *context) {
 // -- Log
 
 std::shared_mutex loggingMutex;
-
-auto originalLogCallback = CBLLog_Callback();
-
 CBLDart::AsyncCallback *dartLogCallback = nullptr;
+uint32_t logFileConfigurationCapability =
+    CBLDart_LogFileConfigIllegalCapability;
 
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message) {
@@ -144,7 +146,7 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
 
 void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
                                 FLString message) {
-  const std::shared_lock<std::shared_mutex> lock(loggingMutex);
+  std::shared_lock lock(loggingMutex);
 
   Dart_CObject domain_;
   domain_.type = Dart_CObject_kInt32;
@@ -168,26 +170,66 @@ void CBLDart_LogCallbackWrapper(CBLLogDomain domain, CBLLogLevel level,
 }
 
 void CBLDart_LogCallbackFinalizer(void *context) {
-  CBLDart_CBLLog_RestoreOriginalCallback();
-}
-
-void CBLDart_CBLLog_RestoreOriginalCallback() {
-  const std::unique_lock<std::shared_mutex> lock(loggingMutex);
+  std::unique_lock lock(loggingMutex);
+  CBLLog_SetCallback(nullptr);
   dartLogCallback = nullptr;
-  CBLLog_SetCallback(originalLogCallback);
 }
 
-void CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback) {
-  const std::unique_lock<std::shared_mutex> lock(loggingMutex);
+uint8_t CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback) {
+  std::unique_lock lock(loggingMutex);
 
-  dartLogCallback = callback;
+  // Don't set the new callback if one has already been set. Another isolate,
+  // different from the one currenlty calling, has already set its callback.
+  if (callback != nullptr && dartLogCallback != nullptr) {
+    return false;
+  }
 
   if (callback == nullptr) {
-    CBLLog_SetCallback(NULL);
+    dartLogCallback = nullptr;
+    CBLLog_SetCallback(nullptr);
   } else {
+    dartLogCallback = callback;
     callback->setFinalizer(nullptr, CBLDart_LogCallbackFinalizer);
     CBLLog_SetCallback(CBLDart_LogCallbackWrapper);
   }
+
+  return true;
+}
+
+uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
+                                     uint32_t capability, CBLError *errorOut) {
+  assert(capability != CBLDart_LogFileConfigIllegalCapability);
+
+  std::unique_lock lock(loggingMutex);
+
+  // Another isolate has already set the log file configuration and must first
+  // reset it before another isolate can set a new configuration.
+  if (logFileConfigurationCapability !=
+          CBLDart_LogFileConfigIllegalCapability &&
+      logFileConfigurationCapability != capability) {
+    // 3 is used to signal this conflict because CBLLog_SetFileConfig returns a
+    // bool.
+    return 3;
+  }
+
+  CBLLogFileConfiguration config_;
+  if (config) {
+    logFileConfigurationCapability = capability;
+    config_.level = config->level;
+    config_.directory = CBLDart_FLStringFromDart(config->directory);
+    config_.maxRotateCount = config->maxRotateCount;
+    config_.maxSize = config->maxSize;
+    config_.usePlaintext = config->usePlaintext;
+  } else {
+    logFileConfigurationCapability = CBLDart_LogFileConfigIllegalCapability;
+    config_.level = CBLLogNone;
+    config_.directory = FLStr("");
+    config_.usePlaintext = false;
+    config_.maxRotateCount = 0;
+    config_.maxSize = 0;
+  }
+
+  return CBLLog_SetFileConfig(config_, errorOut);
 }
 
 // -- Document

@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/couchbase_lite.dart';
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
@@ -38,9 +37,7 @@ abstract class CblE2eTestBinding {
     if (_instance != null) return;
     _instance = createBinding();
 
-    _instance!
-      .._setupLogging()
-      .._setupTestLifecycleHooks();
+    _instance!._setupTestLifecycleHooks();
   }
 
   static CblE2eTestBinding? _instance;
@@ -71,50 +68,11 @@ abstract class CblE2eTestBinding {
 
   TestHook get addTearDownFn => t.addTearDown;
 
-  StreamSubscription<void>? _cblTestLogger;
-
-  Future<void> startTestLogger() async {
-    // _cblTestLogger = CouchbaseLite.logMessages().logToLogger();
-  }
-
-  Future<void> stopTestLogger() async {
-    await _cblTestLogger?.cancel();
-  }
-
-  void _setupLogging() {
-    Zone.root.run(() {
-      Logger.root.onRecord.listen((record) {
-        final stringBuilder = StringBuffer();
-
-        stringBuilder.write('[${record.level.name}]'.padRight(9));
-        stringBuilder.write(' | ');
-        stringBuilder.write(record.loggerName.padRight(10).substring(0, 10));
-        stringBuilder.write(' | ');
-        stringBuilder.write(record.message);
-
-        if (record.error != null) {
-          stringBuilder.write('\nError: ${record.error}');
-        }
-
-        if (record.stackTrace != null) {
-          stringBuilder.write('\n${record.stackTrace}');
-        }
-
-        print(stringBuilder.toString());
-      });
-    });
-  }
-
   void _setupTestLifecycleHooks() {
     setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
       CouchbaseLite.initialize(libraries: libraries);
-      await startTestLogger();
-    });
-
-    tearDownAllFn(() async {
-      await stopTestLogger();
     });
   }
 

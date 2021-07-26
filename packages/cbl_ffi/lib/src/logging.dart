@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ffi/ffi.dart';
+
 import '../cbl_ffi.dart';
-import 'bindings.dart';
 import 'async_callback.dart';
+import 'bindings.dart';
+import 'utils.dart';
 
 enum CBLLogDomain {
   all,
@@ -56,8 +60,8 @@ typedef CBLLog_ConsoleLevel = int Function();
 typedef CBLLog_SetConsoleLevel_C = Void Function(Uint8 logLevel);
 typedef CBLLog_SetConsoleLevel = void Function(int logLevel);
 
-typedef CBLDart_CBLLog_RestoreOriginalCallback_C = Void Function();
-typedef CBLDart_CBLLog_RestoreOriginalCallback = void Function();
+typedef CBLLog_SetCallbackLevel_C = Void Function(Uint8 logLevel);
+typedef CBLLog_SetCallbackLevel = void Function(int logLevel);
 
 class LogCallbackMessage {
   LogCallbackMessage(this.domain, this.level, this.message);
@@ -74,11 +78,54 @@ class LogCallbackMessage {
   final String message;
 }
 
-typedef CBLDart_CBLLog_SetCallback_C = Void Function(
+typedef CBLDart_CBLLog_SetCallback_C = Uint8 Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
-typedef CBLDart_CBLLog_SetCallback = void Function(
+typedef CBLDart_CBLLog_SetCallback = int Function(
   Pointer<CBLDartAsyncCallback> callback,
+);
+
+class _CBLDart_CBLLogFileConfiguration extends Struct {
+  @Uint8()
+  external int level;
+
+  external FLString directory;
+
+  @Uint32()
+  external int maxRotateCount;
+
+  @Uint64()
+  external int maxSize;
+
+  @Uint8()
+  external int usePlainText;
+}
+
+class CBLLogFileConfiguration {
+  CBLLogFileConfiguration({
+    required this.level,
+    required this.directory,
+    required this.maxRotateCount,
+    required this.maxSize,
+    required this.usePlainText,
+  });
+
+  final CBLLogLevel level;
+  final String directory;
+  final int maxRotateCount;
+  final int maxSize;
+  final bool usePlainText;
+}
+
+typedef CBLDart_CBLLog_SetFileConfig_C = Uint8 Function(
+  Pointer<_CBLDart_CBLLogFileConfiguration> configuration,
+  Uint32 capability,
+  Pointer<CBLError> errorOut,
+);
+typedef CBLDart_CBLLog_SetFileConfig = int Function(
+  Pointer<_CBLDart_CBLLogFileConfiguration> configuration,
+  int capability,
+  Pointer<CBLError> errorOut,
 );
 
 class LoggingBindings extends Bindings {
@@ -95,22 +142,28 @@ class LoggingBindings extends Bindings {
         .lookupFunction<CBLLog_SetConsoleLevel_C, CBLLog_SetConsoleLevel>(
       'CBLLog_SetConsoleLevel',
     );
-    _restoreOriginalCallback = libs.cblDart.lookupFunction<
-        CBLDart_CBLLog_RestoreOriginalCallback_C,
-        CBLDart_CBLLog_RestoreOriginalCallback>(
-      'CBLDart_CBLLog_RestoreOriginalCallback',
+    _setCallbackLevel = libs.cbl
+        .lookupFunction<CBLLog_SetCallbackLevel_C, CBLLog_SetCallbackLevel>(
+      'CBLLog_SetCallbackLevel',
     );
     _setCallback = libs.cblDart.lookupFunction<CBLDart_CBLLog_SetCallback_C,
         CBLDart_CBLLog_SetCallback>(
       'CBLDart_CBLLog_SetCallback',
     );
+    _setFileConfig = libs.cblDart.lookupFunction<CBLDart_CBLLog_SetFileConfig_C,
+        CBLDart_CBLLog_SetFileConfig>(
+      'CBLDart_CBLLog_SetFileConfig',
+    );
   }
+
+  final _logFileConfigCapability = Random.secure().nextInt(1 << 32) + 1;
 
   late final CBLDart_CBL_LogMessage _logMessage;
   late final CBLLog_ConsoleLevel _consoleLevel;
   late final CBLLog_SetConsoleLevel _setConsoleLevel;
-  late final CBLDart_CBLLog_RestoreOriginalCallback _restoreOriginalCallback;
+  late final CBLLog_SetCallbackLevel _setCallbackLevel;
   late final CBLDart_CBLLog_SetCallback _setCallback;
+  late final CBLDart_CBLLog_SetFileConfig _setFileConfig;
 
   void logMessage(
     CBLLogDomain domain,
@@ -132,13 +185,46 @@ class LoggingBindings extends Bindings {
     _setConsoleLevel(logLevel.toInt());
   }
 
-  // TODO: does not actually work because the original callback returned by
-  // the cbl API is `null`
-  void restoreOriginalCallback() {
-    _restoreOriginalCallback();
+  void setCallbackLevel(CBLLogLevel logLevel) {
+    _setCallbackLevel(logLevel.toInt());
   }
 
-  void setCallback(Pointer<CBLDartAsyncCallback> callback) {
-    _setCallback(callback);
+  bool setCallback(Pointer<CBLDartAsyncCallback> callback) {
+    return _setCallback(callback).toBool();
+  }
+
+  bool setFileLogConfiguration(CBLLogFileConfiguration? configuration) {
+    return withZoneArena(() {
+      final result = _setFileConfig(
+        configuration != null ? _logFileConfig(configuration) : nullptr,
+        _logFileConfigCapability,
+        globalCBLError,
+      );
+
+      // The config could not be set because another isolate has already set
+      // a config.
+      if (result == 3) {
+        return false;
+      }
+
+      result.checkCBLError();
+
+      return true;
+    });
+  }
+
+  Pointer<_CBLDart_CBLLogFileConfiguration> _logFileConfig(
+    CBLLogFileConfiguration config,
+  ) {
+    final result = zoneArena<_CBLDart_CBLLogFileConfiguration>();
+
+    result.ref
+      ..level = config.level.toInt()
+      ..directory = stringTable.flString(config.directory, arena: true).ref
+      ..maxRotateCount = config.maxRotateCount
+      ..maxSize = config.maxSize
+      ..usePlainText = config.usePlainText.toInt();
+
+    return result;
   }
 }

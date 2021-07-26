@@ -1,5 +1,5 @@
 export 'src/couchbase_lite.dart'
-    hide debugCouchbaseLiteIsInitialized, logMessage, debugRefCounted;
+    hide debugCouchbaseLiteIsInitialized, debugRefCounted;
 export 'src/database.dart' hide DatabaseImpl;
 export 'src/document/array.dart' hide ArrayImpl, MutableArrayImpl;
 export 'src/document/blob.dart' hide BlobImpl, BlobImplSetter;
@@ -14,6 +14,7 @@ export 'src/document/document.dart'
 export 'src/document/fragment.dart'
     hide FragmentImpl, MutableFragmentImpl, DocumentFragmentImpl;
 export 'src/errors.dart' hide translateCBLErrorException, CBLErrorExceptionExt;
+export 'src/log.dart';
 export 'src/query.dart' hide QueryImpl;
 export 'src/replication/authenticator.dart';
 export 'src/replication/configuration.dart';
