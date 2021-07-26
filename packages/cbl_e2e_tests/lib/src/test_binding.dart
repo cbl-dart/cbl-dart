@@ -74,7 +74,7 @@ abstract class CblE2eTestBinding {
     setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
-      CouchbaseLite.initialize(libraries: libraries);
+      CouchbaseLite.init(libraries: libraries);
     });
   }
 

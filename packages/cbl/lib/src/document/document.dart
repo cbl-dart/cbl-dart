@@ -8,6 +8,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../database/database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/utils.dart';
@@ -16,8 +17,8 @@ import 'blob.dart';
 import 'dictionary.dart';
 import 'fragment.dart';
 
-late final _documentBindings = CBLBindings.instance.document;
-late final _mutableDocumentBindings = CBLBindings.instance.mutableDocument;
+late final _documentBindings = cblBindings.document;
+late final _mutableDocumentBindings = cblBindings.mutableDocument;
 
 /// A Couchbase Lite document.
 ///

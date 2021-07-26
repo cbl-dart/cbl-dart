@@ -1,19 +1,18 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
 import '../database/database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
+import '../support/ffi.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
 import 'document.dart';
 
-late final _blobBindings = CBLBindings.instance.blobs.blob;
+late final _blobBindings = cblBindings.blobs.blob;
 
 abstract class CblConversions {
   Object? toPlainObject();

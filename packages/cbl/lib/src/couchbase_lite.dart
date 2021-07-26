@@ -74,11 +74,11 @@ class Libraries {
 class CouchbaseLite {
   static final _initialization = Once<void>(
     rejectMultipleExecutions: true,
-    debugName: 'CouchbaseLite.initialize()',
+    debugName: 'CouchbaseLite.init()',
   );
 
   /// Initializes the `cbl` package.
-  static void initialize({required Libraries libraries}) =>
+  static void init({required Libraries libraries}) =>
       _initialization.execute(() {
         ffi.CBLBindings.initInstance(libraries._toFfi());
         MDelegate.instance = CblMDelegate();

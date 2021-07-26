@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import 'ffi.dart';
 import 'native_object.dart';
 import 'resource.dart';
 
@@ -11,7 +12,7 @@ import 'resource.dart';
 /// The handler receives a list of [arguments] from native side.
 typedef AsyncCallbackHandler = FutureOr<Object?> Function(List arguments);
 
-late final _bindings = CBLBindings.instance.asyncCallback;
+late final _bindings = cblBindings.asyncCallback;
 
 var _nextId = 0;
 int _generateId() {

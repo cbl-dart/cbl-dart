@@ -29,6 +29,6 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
 
 void initCbl() {
-  CouchbaseLite.initialize(libraries: flutterLibraries());
+  CouchbaseLite.init(libraries: flutterLibraries());
 }
 ```

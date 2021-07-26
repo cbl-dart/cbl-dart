@@ -9,6 +9,7 @@ import '../document/document.dart';
 import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/async_callback.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -155,7 +156,7 @@ abstract class Replicator implements ClosableResource {
   bool isDocumentPending(String documentId);
 }
 
-late final _bindings = CBLBindings.instance.replicator;
+late final _bindings = cblBindings.replicator;
 
 class ReplicatorImpl
     with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
@@ -464,7 +465,7 @@ AsyncCallback _wrapConflictResolver(
       // if (resolvedPointer != null &&
       //     resolved != local &&
       //     resolved != remote) {
-      //   CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+      //   cblBindings.base.retainRefCounted(resolvedPointer.cast());
       // }
 
       // Workaround for a bug in CBL C SDK, which frees all resolved
@@ -472,7 +473,7 @@ AsyncCallback _wrapConflictResolver(
       // commented out code block should replace this one.
       // https://github.com/couchbase/couchbase-lite-C/issues/148
       if (resolvedPointer != null) {
-        CBLBindings.instance.base.retainRefCounted(resolvedPointer.cast());
+        cblBindings.base.retainRefCounted(resolvedPointer.cast());
       }
 
       return resolvedPointer?.address;

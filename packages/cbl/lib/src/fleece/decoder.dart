@@ -4,9 +4,10 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../support/ffi.dart';
 import 'slice.dart';
 
-late final _decoderBinds = CBLBindings.instance.fleece.decoder;
+late final _decoderBinds = cblBindings.fleece.decoder;
 
 /// A cache for strings which are encoded as unique shared strings in Fleece
 /// data.

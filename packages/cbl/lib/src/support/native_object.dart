@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../errors.dart';
+import 'ffi.dart';
 import 'resource.dart';
 
 /// Keeps a [NativeObject] alive while the [Function] [fn] is running.
@@ -136,7 +137,7 @@ class CblObject<T extends NativeType> extends NativeObject<T> {
     bool adopt = true,
     required String? debugName,
   }) : super(pointer) {
-    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+    cblBindings.base.bindCBLRefCountedToDartObject(
       this,
       pointer.cast(),
       !adopt,
@@ -152,8 +153,7 @@ class CBLReplicatorObject extends NativeObject<CBLReplicator> {
     Pointer<CBLReplicator> pointer, {
     required String? debugName,
   }) : super(pointer) {
-    CBLBindings.instance.replicator
-        .bindReplicatorToDartObject(this, pointer, debugName);
+    cblBindings.replicator.bindReplicatorToDartObject(this, pointer, debugName);
   }
 }
 
@@ -161,7 +161,7 @@ class CBLReplicatorObject extends NativeObject<CBLReplicator> {
 class FleeceDocObject extends NativeObject<FLDoc> {
   /// Creates a handle to a Fleece doc.
   FleeceDocObject(Pointer<FLDoc> pointer) : super(pointer) {
-    CBLBindings.instance.fleece.doc.bindToDartObject(this, pointer);
+    cblBindings.fleece.doc.bindToDartObject(this, pointer);
   }
 }
 
@@ -184,7 +184,7 @@ class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
     );
 
     if (isRefCounted) {
-      CBLBindings.instance.fleece.value.bindToDartObject(
+      cblBindings.fleece.value.bindToDartObject(
         this,
         pointer.cast(),
         !adopt,

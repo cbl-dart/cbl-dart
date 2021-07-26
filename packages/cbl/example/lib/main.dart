@@ -13,7 +13,7 @@ Libraries getLibraries() {
 
 Future<void> main() async {
   // The `cbl` package needs to be initialized before it can be used.
-  CouchbaseLite.initialize(libraries: getLibraries());
+  CouchbaseLite.init(libraries: getLibraries());
 
   // Now open a database.
   final db = Database.open(

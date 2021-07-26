@@ -10,6 +10,7 @@ import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
 import '../fleece/fleece.dart' as fl;
 import '../log/logger.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -17,7 +18,7 @@ import '../support/utils.dart';
 import 'common.dart';
 import 'document.dart';
 
-late final _blobBindings = CBLBindings.instance.blobs.blob;
+late final _blobBindings = cblBindings.blobs.blob;
 
 /// Max size of data that will be cached in memory with the [Blob].
 const _maxCachedContentLength = 8 * 1024;
@@ -99,7 +100,7 @@ class BlobImplSetter extends fl.SlotSetter {
       value.native.call((pointer) => _blobBindings.setBlob(slot, pointer));
 }
 
-late final _bindings = CBLBindings.instance.blobs;
+late final _bindings = cblBindings.blobs;
 
 class BlobImpl
     with NativeResourceMixin<CBLBlob>

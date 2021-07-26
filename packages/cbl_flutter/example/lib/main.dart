@@ -24,7 +24,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    CouchbaseLite.initialize(libraries: flutterLibraries());
+    CouchbaseLite.init(libraries: flutterLibraries());
 
     _initFuture = _init();
   }
