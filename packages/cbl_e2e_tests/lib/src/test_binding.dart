@@ -7,6 +7,8 @@ import 'package:cbl/src/couchbase_lite.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
+import 'utils/file_system.dart';
+
 export 'package:test/test.dart'
     hide
         test,
@@ -76,13 +78,7 @@ abstract class CblE2eTestBinding {
     });
   }
 
-  Future _cleanTestTmpDir() async {
-    final tmpDir = Directory(this.tmpDir);
-    if (await tmpDir.exists()) {
-      await tmpDir.delete(recursive: true);
-    }
-    await tmpDir.create(recursive: true);
-  }
+  Future _cleanTestTmpDir() => Directory(tmpDir).reset();
 }
 
 /// Alias of [CblE2eTestBinding.tmpDir].

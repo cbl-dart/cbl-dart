@@ -71,6 +71,18 @@ class LogFileConfiguration {
           usePlainText == other.usePlainText &&
           maxSize == other.maxSize &&
           maxRotateCount == other.maxRotateCount;
+
+  @override
+  String toString() => [
+        'LogFileConfiguration(',
+        [
+          'directory: $directory',
+          if (usePlainText) 'USE-PLAIN-TEXT',
+          'maxSize: ${(maxSize / 1024).toStringAsFixed(1)} KB',
+          'maxRotateCount: $maxRotateCount',
+        ].join(', '),
+        ')'
+      ].join();
 }
 
 /// Logger for writing log messages to files.
