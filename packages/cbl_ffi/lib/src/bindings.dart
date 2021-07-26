@@ -56,6 +56,8 @@ class CBLBindings extends Bindings {
     return instance;
   }
 
+  static CBLBindings? get maybeInstance => _instance;
+
   static void initInstance(Libraries libraries) {
     _instance ??= CBLBindings(
       libraries,

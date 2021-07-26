@@ -5,7 +5,9 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
-late final _sliceBinds = CBLBindings.instance.fleece.slice;
+import '../support/ffi.dart';
+
+late final _sliceBinds = cblBindings.fleece.slice;
 
 /// A contiguous area of native memory, whose livetime is tied to some other
 /// object.

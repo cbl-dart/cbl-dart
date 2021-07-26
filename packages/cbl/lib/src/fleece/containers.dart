@@ -6,6 +6,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import '../errors.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'encoder.dart';
 import 'slice.dart';
@@ -32,7 +33,7 @@ extension on Iterable<CopyFlag> {
 /// An [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
 class Doc extends FleeceDocObject {
-  static late final _bindings = CBLBindings.instance.fleece.doc;
+  static late final _bindings = cblBindings.fleece.doc;
 
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
   factory Doc.fromResultData(SliceResult data, FLTrust trust) {
@@ -111,7 +112,7 @@ extension on FLValueType {
 ///   [asDict]. If the value is not of that type, null is returned. (Array and
 ///   Dict are documented fully in their own sections.)
 class Value extends FleeceValueObject<FLValue> {
-  static late final _bindings = CBLBindings.instance.fleece.value;
+  static late final _bindings = cblBindings.fleece.value;
 
   /// Creates a [Value] based on a [pointer] to the the native value.
   ///
@@ -270,7 +271,7 @@ class Value extends FleeceValueObject<FLValue> {
 
 /// A Fleece array.
 class Array extends Value with ListMixin<Value> {
-  static late final _bindings = CBLBindings.instance.fleece.array;
+  static late final _bindings = cblBindings.fleece.array;
 
   /// Creates an [Array] based on a [pointer] to the the native value.
   Array.fromPointer(
@@ -324,7 +325,7 @@ class Array extends Value with ListMixin<Value> {
 }
 
 class MutableArray extends Array {
-  static late final _bindings = CBLBindings.instance.fleece.mutableArray;
+  static late final _bindings = cblBindings.fleece.mutableArray;
 
   /// Creates a [MutableArray] based on a [pointer] to the the native value.
   MutableArray.fromPointer(
@@ -462,7 +463,7 @@ class MutableArray extends Array {
 
 /// A Fleece dictionary.
 class Dict extends Value with MapMixin<String, Value> {
-  static late final _bindings = CBLBindings.instance.fleece.dict;
+  static late final _bindings = cblBindings.fleece.dict;
 
   /// Creates a [Dict] based on a [pointer] to the the native value.
   Dict.fromPointer(
@@ -539,7 +540,7 @@ class _DictKeyIterable extends Iterable<String> {
 
 /// Iterator which iterates over the keys of a [Dict].
 class _DictKeyIterator extends Iterator<String> {
-  static late final _bindings = CBLBindings.instance.fleece.dictIterator;
+  static late final _bindings = cblBindings.fleece.dictIterator;
 
   _DictKeyIterator(this.dict);
 
@@ -576,7 +577,7 @@ class _DictKeyIterator extends Iterator<String> {
 
 /// A mutable Fleece [Dict].
 class MutableDict extends Dict {
-  static late final _bindings = CBLBindings.instance.fleece.mutableDict;
+  static late final _bindings = cblBindings.fleece.mutableDict;
 
   /// Creates a [MutableDict] based on a [pointer] to the the native value.
   MutableDict.fromPointer(
@@ -718,7 +719,7 @@ abstract class SlotSetter {
 }
 
 class _DefaultSlotSetter implements SlotSetter {
-  late final _slotBindings = CBLBindings.instance.fleece.slot;
+  late final _slotBindings = cblBindings.fleece.slot;
 
   @override
   bool canSetValue(Object? value) =>

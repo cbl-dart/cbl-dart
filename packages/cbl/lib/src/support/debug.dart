@@ -1,5 +1,4 @@
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import 'ffi.dart';
 import 'native_object.dart';
 
 /// Setting this flag to `true` enables printing of debug information for
@@ -10,6 +9,6 @@ bool _debugRefCountedObject = false;
 set debugRefCounted(bool value) {
   if (_debugRefCountedObject != value) {
     _debugRefCountedObject = value;
-    CBLBindings.instance.base.debugRefCounted = value;
+    cblBindings.base.debugRefCounted = value;
   }
 }

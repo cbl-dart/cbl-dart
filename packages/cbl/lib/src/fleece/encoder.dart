@@ -3,10 +3,11 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../support/ffi.dart';
 import 'decoder.dart';
 import 'slice.dart';
 
-late final _encoderBinds = CBLBindings.instance.fleece.encoder;
+late final _encoderBinds = cblBindings.fleece.encoder;
 
 /// An encoder, which generates encoded Fleece or JSON data.
 ///
