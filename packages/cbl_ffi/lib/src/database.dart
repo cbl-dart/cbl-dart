@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
@@ -610,7 +611,18 @@ class DatabaseBindings extends Bindings {
 
   CBLDatabaseConfiguration defaultConfiguration() {
     final config = _defaultConfiguration();
-    return CBLDatabaseConfiguration(config.directory.toDartString()!);
+    String directory;
+    if (Platform.isAndroid) {
+      // TODO: useful database directory default for Android
+      // The default for the database directory on Android is broken.
+      // Android does not support allocating memory for the string returned from
+      // `getcwd`. Aside from that the current working directory is not
+      // something that Android apps usually use.
+      directory = Directory.current.path;
+    } else {
+      directory = config.directory.toDartString()!;
+    }
+    return CBLDatabaseConfiguration(directory);
   }
 
   Pointer<CBLDatabase> open(
