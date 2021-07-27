@@ -14,12 +14,6 @@ class LogFileConfiguration {
     int? maxSize,
     int? maxRotateCount,
   }) {
-    // Ensure that directory exists.
-    final _directory = Directory(directory);
-    if (!_directory.existsSync()) {
-      _directory.create(recursive: true);
-    }
-
     this.maxSize = maxSize ?? this.maxSize;
     this.maxRotateCount = maxRotateCount ?? this.maxRotateCount;
   }
@@ -151,6 +145,12 @@ class FileLoggerImpl extends FileLogger {
 
     CBLLogFileConfiguration? newConfig;
     if (config != null) {
+      // Ensure that the directory exists.
+      final directory = Directory(config.directory);
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+
       newConfig = CBLLogFileConfiguration(
         level: _level.toCBLLogLevel(),
         directory: config.directory,
