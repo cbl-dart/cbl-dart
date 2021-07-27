@@ -13,8 +13,8 @@ void main() {
       final config = DatabaseConfiguration();
       // Directory is the default directory provided by the CBL C SDK.
       if (Platform.isAndroid) {
-        // On non Apple platforms `getcwd` is used which is not seem to provide
-        // a useful result on Android.
+        // On non Apple platforms `getcwd` is used which does not seem to
+        // provide a useful result on Android.
         expect(config.directory, isEmpty);
       } else {
         expect(config.directory, isNotEmpty);
