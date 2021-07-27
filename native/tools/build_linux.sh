@@ -50,7 +50,7 @@ function _build() {
 function _copyToLib() {
     mkdir -p "$libDir"
 
-    cp -d \
+    cp -P \
         "$buildDir/cbl-dart/libcblitedart.so" \
         "$buildDir/vendor/couchbase-lite-C/libcblite.so"* \
         "$libDir"

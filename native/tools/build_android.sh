@@ -127,7 +127,7 @@ function _copyArchToLib() {
     rm -rf "$libArchDir"
     mkdir -p "$libArchDir"
 
-    cp -d \
+    cp -P \
         "$buildArchDir/cbl-dart/libcblitedart.so" \
         "$buildArchDir/vendor/couchbase-lite-C/libcblite.so"* \
         "$libArchDir"
