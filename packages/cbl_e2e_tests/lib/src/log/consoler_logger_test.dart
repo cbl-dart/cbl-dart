@@ -8,14 +8,14 @@ void main() {
 
   group('ConsolerLogger', () {
     test('get and set level', () {
-      final initialLogLevel = Log.console.level;
-      addTearDown(() => Log.console.level = initialLogLevel);
+      final initialLogLevel = Database.log.console.level;
+      addTearDown(() => Database.log.console.level = initialLogLevel);
 
       // The initial log level.
-      expect(Log.console.level, LogLevel.info);
+      expect(Database.log.console.level, LogLevel.info);
 
-      Log.console.level = LogLevel.verbose;
-      expect(Log.console.level, LogLevel.verbose);
+      Database.log.console.level = LogLevel.verbose;
+      expect(Database.log.console.level, LogLevel.verbose);
     });
   });
 }

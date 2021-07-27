@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../document.dart';
-import '_database.dart';
+import 'database.dart';
 
 /// A [Database] change event.
 @immutable

@@ -159,7 +159,7 @@ void main() {
                   _readBlob = _writeBlob!;
                   break;
                 case ReadBlob.loadedBlob:
-                  final loadedDoc = (db.getDocument(doc.id))!;
+                  final loadedDoc = (db.document(doc.id))!;
                   _readBlob = loadedDoc.blob('blob')!;
                   break;
               }
@@ -218,7 +218,7 @@ void main() {
       db.saveDocument(doc);
       doc.removeValue('blob');
       db.saveDocument(doc);
-      final loadedDoc = (db.getDocument(doc.id))!;
+      final loadedDoc = (db.document(doc.id))!;
       expect(loadedDoc.value('blob'), isNull);
     });
 

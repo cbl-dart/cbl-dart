@@ -1,7 +1,23 @@
-import 'package:cbl/src/database.dart';
+import 'dart:ffi';
 
-import '../document.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
+import '../document/document.dart';
+import '../document/fragment.dart';
+import '../errors.dart';
+import '../fleece/fleece.dart' as fl;
+import '../log.dart';
+import '../log/log.dart';
+import '../query.dart';
+import '../replication.dart';
+import '../support/ffi.dart';
+import '../support/native_object.dart';
 import '../support/resource.dart';
+import '../support/streams.dart';
+import '../support/utils.dart';
+import 'database_change.dart';
+import 'database_configuration.dart';
+import 'document_change.dart';
 
 /// Conflict-handling options when saving or deleting a document.
 enum ConcurrencyControl {
@@ -32,8 +48,8 @@ enum MaintenanceType {
 /// by application code) since it was loaded into the [Document] being saved.
 ///
 /// The [documentBeingSaved] (same as the parameter you passed to
-/// [Database.saveDocumentResolving].) may be modify by the callback as
-/// necessary to resolve the conflict.
+/// [Database.saveDocumentWithConflictHandler].) may be modify by the callback
+/// as necessary to resolve the conflict.
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
 /// the database, which has been changed since [documentBeingSaved] was loaded.
@@ -46,21 +62,49 @@ enum MaintenanceType {
 /// aborted.
 ///
 /// See:
-/// - [Database.saveDocumentResolving] for saving a [Document] with a custom
-///   conflict handler.
+/// - [Database.saveDocumentWithConflictHandler] for saving a [Document] with a
+///   custom conflict handler.
 typedef SaveConflictHandler = bool Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
 
 /// A Couchbase Lite database.
-abstract class Database extends ClosableResource {
+abstract class Database implements ClosableResource {
   /// Initializes a Couchbase Lite database with a given name and
   /// [configuration].
   ///
   /// If the database does not yet exist, it will be created.
   factory Database(String name, [DatabaseConfiguration? configuration]) =>
       throw UnimplementedError();
+
+  /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
+  static final Log log = LogImpl();
+
+  /// Deletes a database of the given [name] in the given [directory].
+  static void remove(String name, {String? directory}) => runNativeCalls(() {
+        _bindings.deleteDatabase(name, directory);
+      });
+
+  /// Checks whether a database of the given [name] exists in the given
+  /// [directory] or not.
+  static bool exists(String name, {String? directory}) => runNativeCalls(() {
+        return _bindings.databaseExists(name, directory);
+      });
+
+  /// Copies a canned database [from] the given path to a new database with the
+  /// given [name] and [configuration].
+  ///
+  /// The new database will be created at the directory specified in the
+  /// [configuration].
+  static void copy({
+    required String from,
+    required String name,
+    DatabaseConfiguration? configuration,
+  }) =>
+      runNativeCalls(() {
+        _bindings.copyDatabase(from, name, configuration?.directory);
+      });
 
   /// The name of this database.
   String get name;
@@ -147,14 +191,320 @@ abstract class Database extends ClosableResource {
   /// Sets an [expiration] date for a [Document] by its [id].
   ///
   /// After the given date the document will be purged from the database
-  void setDocumentExpiration(String id, DateTime expiration);
+  void setDocumentExpiration(String id, DateTime? expiration);
 
   /// Gets the expiration date of a [Document] by its [id], if it exists.
   DateTime? getDocumentExpiration(String id);
 
   /// Returns a [Stream] that emits [DatabaseChange] events when [Document]s
-  /// are inserted into this database or are updated or deleted.
+  /// are inserted, updated or deleted in this database.
   Stream<DatabaseChange> changes();
 
+  /// Returns a [Stream] that emits [DocumentChange] events when a specific
+  /// [Document] is inserted, updated or deleted in this database.
   Stream<DocumentChange> documentChanges(String id);
+
+  /// Closes this database.
+  ///
+  /// Before closing this database, [Replicator]s and change streams are closed.
+  @override
+  Future<void> close();
+
+  /// Closes and deletes this database.
+  ///
+  /// Before closing this database, [Replicator]s and change streams are closed.
+  Future<void> delete();
+
+  /// Performs database maintenance.
+  void performMaintenance(MaintenanceType type);
+
+  /// The names of all existing indexes.
+  List<String> get indexes;
+
+  /// Creates a value or full-text search [index] with the given [name].
+  ///
+  /// The name can be used for deleting the index. Creating a new different
+  /// index with an existing index name will replace the old index; creating the
+  /// same index with the same name is a no-op.
+  void createIndex(String name, Index index);
+
+  /// Deletes the [Index] of the given [name].
+  void deleteIndex(String name);
+}
+
+// === Impl ====================================================================
+
+late final _bindings = cblBindings.database;
+
+class DatabaseImpl extends CblObject<CBLDatabase>
+    with ClosableResourceMixin
+    implements Database {
+  DatabaseImpl(String name, [DatabaseConfiguration? configuration])
+      : _config = DatabaseConfiguration.from(
+          configuration ?? DatabaseConfiguration(),
+        ),
+        super(
+          _bindings.open(name, configuration?.directory),
+          debugName: 'Database($name)',
+        );
+
+  final DatabaseConfiguration _config;
+
+  var _deleteOnClose = false;
+
+  @override
+  String get name => useSync(() => _name);
+
+  String get _name => call(_bindings.name);
+
+  @override
+  String? get path => useSync(() => call(_bindings.path));
+
+  @override
+  int get count => useSync(() => call(_bindings.count));
+
+  @override
+  DatabaseConfiguration get config =>
+      useSync(() => DatabaseConfiguration.from(_config));
+
+  @override
+  Document? document(String id) =>
+      useSync(() => call((pointer) => _bindings.getDocument(pointer, id))
+          ?.let((pointer) => DocumentImpl(
+                database: this,
+                doc: pointer,
+                debugCreator: 'Database.document()',
+              )));
+
+  @override
+  DocumentFragment operator [](String id) => DocumentFragmentImpl(document(id));
+
+  @override
+  bool saveDocument(
+    covariant MutableDocumentImpl document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      useSync(() {
+        document.database = this;
+        document.flushProperties();
+        return _catchConflictException(() {
+          runNativeCalls(() {
+            _bindings.saveDocumentWithConcurrencyControl(
+              native.pointer,
+              document.native.pointer.cast(),
+              concurrencyControl.toCBLConcurrencyControl(),
+            );
+          });
+        });
+      });
+
+  @override
+  bool saveDocumentWithConflictHandler(
+    covariant MutableDocumentImpl document,
+    SaveConflictHandler conflictHandler,
+  ) =>
+      useSync(() {
+        document.database = this;
+        document.flushProperties();
+
+        bool _conflictHandler(
+          Pointer<CBLMutableDocument> _,
+          Pointer<CBLDocument>? conflictingDocument,
+        ) {
+          final _conflictingDocument = conflictingDocument?.let(
+            (pointer) => DocumentImpl(
+              database: this,
+              doc: pointer,
+              adopt: false,
+              debugCreator: 'SaveConflictHandler(conflictingDocument)',
+            ),
+          );
+
+          final decision = conflictHandler(document, _conflictingDocument);
+
+          document.flushProperties();
+
+          return decision;
+        }
+
+        return _catchConflictException(() {
+          runNativeCalls(() => _bindings.saveDocumentWithConflictHandler(
+                native.pointer,
+                document.native.pointer.cast(),
+                _conflictHandler,
+              ));
+        });
+      });
+
+  @override
+  bool deleteDocument(
+    covariant DocumentImpl document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      useSync(() {
+        document.database = this;
+        return _catchConflictException(() {
+          runNativeCalls(() {
+            _bindings.deleteDocumentWithConcurrencyControl(
+              native.pointer,
+              document.native.pointer.cast(),
+              concurrencyControl.toCBLConcurrencyControl(),
+            );
+          });
+        });
+      });
+
+  @override
+  void purgeDocument(covariant DocumentImpl document) => useSync(() {
+        document.database = this;
+        purgeDocumentById(document.id);
+      });
+
+  @override
+  void purgeDocumentById(String id) => useSync(() {
+        call((pointer) => _bindings.purgeDocumentByID(pointer, id));
+      });
+
+  @override
+  void inBatch(void Function() fn) {
+    void endTransaction(bool commit) =>
+        call((pointer) => _bindings.endTransaction(pointer, commit));
+
+    return useSync(() {
+      call(_bindings.beginTransaction);
+      try {
+        fn();
+        endTransaction(true);
+      } catch (e) {
+        endTransaction(false);
+        rethrow;
+      }
+    });
+  }
+
+  @override
+  void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
+        call((pointer) =>
+            _bindings.setDocumentExpiration(pointer, id, expiration));
+      });
+
+  @override
+  DateTime? getDocumentExpiration(String id) => useSync(() {
+        return call((pointer) => _bindings.getDocumentExpiration(pointer, id));
+      });
+
+  @override
+  Stream<DatabaseChange> changes() =>
+      useSync(() => CallbackStreamController<DatabaseChange, void>(
+            parent: this,
+            startStream: (callback) => _bindings.addChangeListener(
+              native.pointer,
+              callback.native.pointer,
+            ),
+            createEvent: (_, arguments) {
+              final message =
+                  DatabaseChangeCallbackMessage.fromArguments(arguments);
+              return DatabaseChange(this, message.documentIds);
+            },
+          ).stream);
+
+  @override
+  Stream<DocumentChange> documentChanges(String id) =>
+      useSync(() => CallbackStreamController<DocumentChange, void>(
+            parent: this,
+            startStream: (callback) => _bindings.addDocumentChangeListener(
+              native.pointer,
+              id,
+              callback.native.pointer,
+            ),
+            createEvent: (_, __) => DocumentChange(this, id),
+          ).stream);
+
+  @override
+  Future<void> performClose() async {
+    if (_deleteOnClose) {
+      call(_bindings.delete);
+    } else {
+      call(_bindings.close);
+    }
+  }
+
+  @override
+  Future<void> delete() => use(() {
+        _deleteOnClose = true;
+        return close();
+      });
+
+  @override
+  void performMaintenance(MaintenanceType type) => useSync(() {
+        call((pointer) =>
+            _bindings.performMaintenance(pointer, type.toCBLMaintenanceType()));
+      });
+
+  @override
+  List<String> get indexes => useSync(() {
+        return fl.Array.fromPointer(
+          native.call(_bindings.indexNames),
+          adopt: true,
+        ).toObject().cast<String>();
+      });
+
+  @override
+  void createIndex(String name, Index index) =>
+      useSync(() => native.call((pointer) {
+            if (index is ValueIndex) {
+              _bindings.createIndex(
+                pointer,
+                name,
+                CBLdart_IndexType.value,
+                CBLQueryLanguage.json,
+                index.expressions,
+                null,
+                null,
+              );
+            } else if (index is FullTextIndex) {
+              _bindings.createIndex(
+                pointer,
+                name,
+                CBLdart_IndexType.fullText,
+                CBLQueryLanguage.json,
+                index.expressions,
+                index.ignoreAccents,
+                index.language,
+              );
+            } else {
+              throw UnimplementedError(
+                '${index.runtimeType} is not implemented',
+              );
+            }
+          }));
+
+  @override
+  void deleteIndex(String name) => useSync(() {
+        call((pointer) => _bindings.deleteIndex(pointer, name));
+      });
+
+  @override
+  String toString() => 'Database($_name)';
+}
+
+extension on MaintenanceType {
+  CBLMaintenanceType toCBLMaintenanceType() => CBLMaintenanceType.values[index];
+}
+
+extension on ConcurrencyControl {
+  CBLConcurrencyControl toCBLConcurrencyControl() =>
+      CBLConcurrencyControl.values[index];
+}
+
+bool _catchConflictException(void Function() fn) {
+  try {
+    fn();
+    return true;
+  } on CouchbaseLiteException catch (e) {
+    if (e.code == CouchbaseLiteErrorCode.conflict) {
+      return false;
+    }
+    rethrow;
+  }
 }

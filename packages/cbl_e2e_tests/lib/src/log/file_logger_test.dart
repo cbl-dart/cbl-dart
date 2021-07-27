@@ -76,11 +76,12 @@ void main() {
       var logDir = Directory('$tmpDir/EnableFileLogger');
       await logDir.reset();
 
-      Log.file.config = LogFileConfiguration(
-        directory: logDir.path,
-        usePlainText: true,
-      );
-      Log.file.level = LogLevel.error;
+      Database.log.file
+        ..config = LogFileConfiguration(
+          directory: logDir.path,
+          usePlainText: true,
+        )
+        ..level = LogLevel.error;
 
       final logMessage = 'TEST_LOG_MESSAGE';
       cblLogMessage(LogDomain.network, LogLevel.error, logMessage);
@@ -94,6 +95,7 @@ void main() {
 }
 
 void resetFileLogger() {
-  Log.file.config = null;
-  Log.file.level = LogLevel.none;
+  Database.log.file
+    ..config = null
+    ..level = LogLevel.none;
 }

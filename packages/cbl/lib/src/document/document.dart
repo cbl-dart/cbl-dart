@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database/_database.dart';
+import '../database/database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';
@@ -121,7 +121,7 @@ class DocumentImpl
     if (_database != database) {
       if (_database != null) {
         throw StateError(
-          'The document cannot be saved in $database because it already '
+          'The document cannot be used with  $database because it already '
           'belongs to $_database: $this',
         );
       }

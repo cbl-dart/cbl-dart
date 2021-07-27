@@ -3,17 +3,17 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:ffi';
 
-import 'package:cbl/src/support/ffi.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
-import '../database/_database.dart';
+import '../database/database.dart';
 import '../document/array.dart';
 import '../document/blob.dart';
 import '../document/common.dart';
 import '../document/dictionary.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -36,7 +36,7 @@ enum QueryLanguage {
 /// corresponding language.
 ///
 /// See:
-/// - [Database.query] for creating [Query]s.
+/// - [Query] for creating [Query]s.
 @immutable
 abstract class QueryDefinition {
   /// The query language this query is defined in.
@@ -216,6 +216,14 @@ class Parameters {
 /// - [QueryDefinition] for the object which represents an uncompiled database
 ///   query.
 abstract class Query implements Resource {
+  /// Creates a query in the given [database] form a [QueryDefinition].
+  factory Query(Database database, QueryDefinition query) => QueryImpl(
+        database: database as DatabaseImpl,
+        language: query.language,
+        query: query.queryString,
+        debugCreator: 'Query()',
+      );
+
   /// The database this query is operating on.
   Database get database;
 

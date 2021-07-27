@@ -18,7 +18,7 @@ void main() {
   Document savedDocument([Map<String, Object?>? data]) {
     var doc = MutableDocument(data);
     db.saveDocument(doc);
-    return db.getDocument(doc.id)!;
+    return db.document(doc.id)!;
   }
 
   group('Document', () {
@@ -35,7 +35,7 @@ void main() {
       expect(doc.revisionId, revisionId);
       expect(doc.sequence, 1);
 
-      final loadedDoc = db.getDocument(doc.id)!;
+      final loadedDoc = db.document(doc.id)!;
 
       expect(loadedDoc.id, 'id');
       expect(loadedDoc.revisionId, revisionId);
@@ -49,7 +49,7 @@ void main() {
       expect(doc, doc);
 
       // Two instances at the same revision are equal.
-      expect(db.getDocument(doc.id), doc);
+      expect(db.document(doc.id), doc);
 
       final mutableDoc = doc.toMutable();
 
@@ -64,7 +64,7 @@ void main() {
       db.saveDocument(mutableDoc);
 
       // Two instances at different revision are not equal.
-      expect(db.getDocument(doc.id), isNot(doc));
+      expect(db.document(doc.id), isNot(doc));
     });
 
     test('hashCode', () {
@@ -74,7 +74,7 @@ void main() {
       expect(doc.hashCode, doc.hashCode);
 
       // Two instances at the same revision have the same hashCode.
-      expect((db.getDocument(doc.id)).hashCode, doc.hashCode);
+      expect((db.document(doc.id)).hashCode, doc.hashCode);
 
       final mutableDoc = doc.toMutable();
 
@@ -89,7 +89,7 @@ void main() {
       db.saveDocument(mutableDoc);
 
       // Two instances at different revision do not have the same hashCode.
-      expect((db.getDocument(doc.id)).hashCode, isNot(doc.hashCode));
+      expect((db.document(doc.id)).hashCode, isNot(doc.hashCode));
     });
 
     group('immutable', () {
@@ -172,7 +172,7 @@ void main() {
         final db = openTestDb('Document-toString');
         final doc = MutableDocument();
         db.saveDocument(doc);
-        final loadedDoc = db.getDocument(doc.id);
+        final loadedDoc = db.document(doc.id);
         expect(
           loadedDoc.toString(),
           'Document('

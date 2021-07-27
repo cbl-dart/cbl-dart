@@ -1,4 +1,4 @@
-import '../document/document.dart';
+import '../document.dart';
 import 'configuration.dart';
 import 'replicator.dart';
 

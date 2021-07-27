@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../document.dart';
-import '_database.dart';
+import 'database.dart';
 
 /// A [Document] change event.
 @immutable

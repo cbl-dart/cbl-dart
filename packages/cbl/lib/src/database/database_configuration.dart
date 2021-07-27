@@ -1,4 +1,4 @@
-import '_database.dart';
+import 'database.dart';
 
 /// Configuration for opening a [Database].
 class DatabaseConfiguration {

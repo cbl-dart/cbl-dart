@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../document/document.dart';
+import '../document.dart';
 import 'configuration.dart';
 import 'conflict.dart';
 import 'replicator.dart';

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import '../database/_database.dart';
-import '../document/document.dart';
+import '../database.dart';
+import '../document.dart';
 import '../support/utils.dart';
 import 'authenticator.dart';
 import 'conflict_resolver.dart';

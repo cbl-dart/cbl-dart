@@ -34,5 +34,5 @@ extension TestDocumentDatabaseExtension on Database {
 
   /// Gets the test document or `null` if does not exist.
   MutableDocument? getTestDocumentOrNull() =>
-      testDocumentId == null ? null : getMutableDocument(testDocumentId!);
+      testDocumentId == null ? null : document(testDocumentId!)?.toMutable();
 }

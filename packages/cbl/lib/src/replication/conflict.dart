@@ -1,4 +1,4 @@
-import '../document/document.dart';
+import '../document.dart';
 
 /// A conflict between changes in a local and remote [Document].
 abstract class Conflict {

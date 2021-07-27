@@ -10,11 +10,11 @@ void main() {
   setupTestBinding();
 
   group('Logger', () {
-    setUp(() => Log.custom = null);
-    tearDownAll(() => Log.custom = null);
+    setUp(() => Database.log.custom = null);
+    tearDownAll(() => Database.log.custom = null);
 
     test('is called with log message', () {
-      Log.custom = TestLogger(expectAsync3((level, domain, message) {
+      Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
         expect(level, LogLevel.warning);
         expect(domain, LogDomain.network);
         expect(message, 'A');
@@ -24,7 +24,7 @@ void main() {
     });
 
     test('update level of logger', () {
-      final logger = Log.custom = TestLogger(
+      final logger = Database.log.custom = TestLogger(
         expectAsync3((level, domain, message) {}),
         level: LogLevel.error,
       );
@@ -41,7 +41,7 @@ void main() {
     test('remove logger', () async {
       final receivedMessage = Completer<void>();
 
-      Log.custom = TestLogger(expectAsync3((level, domain, message) {
+      Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
         receivedMessage.complete();
       }), level: LogLevel.error);
 
@@ -52,7 +52,7 @@ void main() {
       // it nevers sees the message.
       await receivedMessage.future;
 
-      Log.custom = null;
+      Database.log.custom = null;
 
       // Wont be logged because logger has been removed.
       cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
@@ -61,7 +61,7 @@ void main() {
 
   group('StreamLogger', () {
     test('emits log messages', () {
-      final logger = Log.custom = StreamLogger(LogLevel.warning);
+      final logger = Database.log.custom = StreamLogger(LogLevel.warning);
 
       expect(
         logger.stream,
