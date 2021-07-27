@@ -100,6 +100,8 @@ enum CBLMaintenanceType {
   compact,
   reindex,
   integrityCheck,
+  optimize,
+  fullOptimize
 }
 
 extension CBLMaintenanceTypeIntExt on CBLMaintenanceType {

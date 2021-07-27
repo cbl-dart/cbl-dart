@@ -12,8 +12,8 @@ Libraries flutterLibraries() {
     );
   } else if (Platform.isAndroid) {
     return Libraries(
-      cbl: LibraryConfiguration.dynamic('libCouchbaseLiteC'),
-      cblDart: LibraryConfiguration.dynamic('libCouchbaseLiteDart'),
+      cbl: LibraryConfiguration.dynamic('libcblite'),
+      cblDart: LibraryConfiguration.dynamic('libcblitedart'),
     );
   } else {
     throw UnsupportedError('This platform is not supported.');
