@@ -76,9 +76,9 @@ import 'package:path_provider/path_provider.dart';
 Future<void> useDatabase() async {
   final documentsDir = await getApplicationDocumentsDirectory();
 
-  final db = Database.open(
+  final db = Database(
       'MyFirstDB',
-      config: DatabaseConfiguration(directory: documentsDir.path),
+      DatabaseConfiguration(directory: documentsDir.path),
   );
 
   final doc = MutableDocument({

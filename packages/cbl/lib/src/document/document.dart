@@ -121,7 +121,7 @@ class DocumentImpl
     if (_database != database) {
       if (_database != null) {
         throw StateError(
-          'The document cannot be saved in $database because it already '
+          'The document cannot be used with  $database because it already '
           'belongs to $_database: $this',
         );
       }

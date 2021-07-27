@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:ffi';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
@@ -101,6 +100,17 @@ class _CBLDart_CBLLogFileConfiguration extends Struct {
   external int usePlainText;
 }
 
+extension on _CBLDart_CBLLogFileConfiguration {
+  CBLLogFileConfiguration toCBLLogFileConfiguration() =>
+      CBLLogFileConfiguration(
+        level: level.toLogLevel(),
+        directory: directory.toDartString()!,
+        maxRotateCount: maxRotateCount,
+        maxSize: maxSize,
+        usePlainText: usePlainText.toBool(),
+      );
+}
+
 class CBLLogFileConfiguration {
   CBLLogFileConfiguration({
     required this.level,
@@ -115,18 +125,45 @@ class CBLLogFileConfiguration {
   final int maxRotateCount;
   final int maxSize;
   final bool usePlainText;
+
+  CBLLogFileConfiguration copyWith({
+    CBLLogLevel? level,
+    String? directory,
+    int? maxRotateCount,
+    int? maxSize,
+    bool? usePlainText,
+  }) =>
+      CBLLogFileConfiguration(
+        level: level ?? this.level,
+        directory: directory ?? this.directory,
+        maxRotateCount: maxRotateCount ?? this.maxRotateCount,
+        maxSize: maxSize ?? this.maxSize,
+        usePlainText: usePlainText ?? this.usePlainText,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CBLLogFileConfiguration &&
+          runtimeType == other.runtimeType &&
+          level == other.level &&
+          directory == other.directory &&
+          maxRotateCount == other.maxRotateCount &&
+          maxSize == other.maxSize &&
+          usePlainText == other.usePlainText;
 }
 
 typedef CBLDart_CBLLog_SetFileConfig_C = Uint8 Function(
   Pointer<_CBLDart_CBLLogFileConfiguration> configuration,
-  Uint32 capability,
   Pointer<CBLError> errorOut,
 );
 typedef CBLDart_CBLLog_SetFileConfig = int Function(
   Pointer<_CBLDart_CBLLogFileConfiguration> configuration,
-  int capability,
   Pointer<CBLError> errorOut,
 );
+
+typedef CBLDart_CBLLog_GetFileConfig = Pointer<_CBLDart_CBLLogFileConfiguration>
+    Function();
 
 class LoggingBindings extends Bindings {
   LoggingBindings(Bindings parent) : super(parent) {
@@ -154,9 +191,11 @@ class LoggingBindings extends Bindings {
         CBLDart_CBLLog_SetFileConfig>(
       'CBLDart_CBLLog_SetFileConfig',
     );
+    _getFileConfig = libs.cblDart.lookupFunction<CBLDart_CBLLog_GetFileConfig,
+        CBLDart_CBLLog_GetFileConfig>(
+      'CBLDart_CBLLog_GetFileConfig',
+    );
   }
-
-  final _logFileConfigCapability = Random.secure().nextInt(1 << 32) + 1;
 
   late final CBLDart_CBL_LogMessage _logMessage;
   late final CBLLog_ConsoleLevel _consoleLevel;
@@ -164,6 +203,7 @@ class LoggingBindings extends Bindings {
   late final CBLLog_SetCallbackLevel _setCallbackLevel;
   late final CBLDart_CBLLog_SetCallback _setCallback;
   late final CBLDart_CBLLog_SetFileConfig _setFileConfig;
+  late final CBLDart_CBLLog_GetFileConfig _getFileConfig;
 
   void logMessage(
     CBLLogDomain domain,
@@ -193,29 +233,23 @@ class LoggingBindings extends Bindings {
     return _setCallback(callback).toBool();
   }
 
-  bool setFileLogConfiguration(CBLLogFileConfiguration? configuration) {
-    return withZoneArena(() {
-      final result = _setFileConfig(
-        configuration != null ? _logFileConfig(configuration) : nullptr,
-        _logFileConfigCapability,
+  void setFileLogConfiguration(CBLLogFileConfiguration? configuration) {
+    withZoneArena(() {
+      _setFileConfig(
+        _logFileConfig(configuration),
         globalCBLError,
-      );
-
-      // The config could not be set because another isolate has already set
-      // a config.
-      if (result == 3) {
-        return false;
-      }
-
-      result.checkCBLError();
-
-      return true;
+      ).checkCBLError();
     });
   }
 
+  CBLLogFileConfiguration? getLogFileConfiguration() =>
+      _getFileConfig().toNullable()?.ref.toCBLLogFileConfiguration();
+
   Pointer<_CBLDart_CBLLogFileConfiguration> _logFileConfig(
-    CBLLogFileConfiguration config,
+    CBLLogFileConfiguration? config,
   ) {
+    if (config == null) return nullptr;
+
     final result = zoneArena<_CBLDart_CBLLogFileConfiguration>();
 
     result.ref

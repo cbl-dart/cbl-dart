@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
@@ -13,10 +15,6 @@ import 'fleece.dart';
 import 'query.dart';
 import 'utils.dart';
 
-class CBLDart_CBLDatabaseConfiguration extends Struct {
-  external FLString directory;
-}
-
 enum CBLConcurrencyControl {
   lastWriteWins,
   failOnConflict,
@@ -27,6 +25,16 @@ extension CBLConcurrencyControlExt on CBLConcurrencyControl {
 }
 
 class CBLDatabase extends Opaque {}
+
+class CBLDatabaseConfiguration {
+  CBLDatabaseConfiguration(this.directory);
+
+  final String directory;
+}
+
+class CBLDart_CBLDatabaseConfiguration extends Struct {
+  external FLString directory;
+}
 
 typedef CBLDart_CBLDatabaseConfiguration_Default
     = CBLDart_CBLDatabaseConfiguration Function();
@@ -178,7 +186,7 @@ typedef SaveConflictHandler_C = Uint8 Function(
   Pointer<CBLMutableDocument> documentBeingSave,
   Pointer<CBLDocument> conflictingDocument,
 );
-typedef SaveConflictHandler = int Function(
+typedef SaveConflictHandlerWrapper = int Function(
   Pointer<CBLMutableDocument> documentBeingSave,
   Pointer<CBLDocument> conflictingDocument,
 );
@@ -390,6 +398,11 @@ class DatabaseBindings extends Bindings {
         CBLDart_CBLDatabase_Exists>(
       'CBLDart_CBL_DatabaseExists',
     );
+    _defaultConfiguration = libs.cblDart.lookupFunction<
+        CBLDart_CBLDatabaseConfiguration_Default,
+        CBLDart_CBLDatabaseConfiguration_Default>(
+      'CBLDart_CBLDatabaseConfiguration_Default',
+    );
     _open = libs.cblDart
         .lookupFunction<CBLDart_CBLDatabase_Open, CBLDart_CBLDatabase_Open>(
       'CBLDart_CBLDatabase_Open',
@@ -442,7 +455,13 @@ class DatabaseBindings extends Bindings {
       'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
     );
     _saveConflictHandler = Pointer.fromFunction<SaveConflictHandler_C>(
-        _staticSaveConflictHandler, 0);
+      _staticSaveConflictHandler,
+      // The function should throw because it catches all exceptions of the dart
+      // conflict handler.
+      // Passing `0` here (representing `false`) is a fail save to abort the
+      // save operation in case there is a bug in the bindings layer.
+      0,
+    );
     _saveDocumentWithConflictHandler = libs.cbl.lookupFunction<
         CBLDatabase_SaveDocumentWithConflictHandler_C,
         CBLDatabase_SaveDocumentWithConflictHandler>(
@@ -500,7 +519,7 @@ class DatabaseBindings extends Bindings {
   /// The conflict handler which will be set by
   /// [saveDocumentWithConflictHandler] before making the call to the CBL API
   /// and cleared when that call finishes.
-  static SaveConflictHandler? _currentSaveConflictHandler;
+  static SaveConflictHandlerWrapper? _currentSaveConflictHandler;
 
   /// Static invoker of [_currentSaveConflictHandler].
   ///
@@ -521,6 +540,7 @@ class DatabaseBindings extends Bindings {
   late final CBLDart_CBL_CopyDatabase _copyDatabase;
   late final CBLDart_CBL_DeleteDatabase _deleteDatabase;
   late final CBLDart_CBLDatabase_Exists _databaseExists;
+  late final CBLDart_CBLDatabaseConfiguration_Default _defaultConfiguration;
   late final CBLDart_CBLDatabase_Open _open;
   late final CBLDatabase_Close _close;
   late final CBLDatabase_Delete _delete;
@@ -554,18 +574,16 @@ class DatabaseBindings extends Bindings {
   late final CBLDatabase_GetIndexNames _indexNames;
 
   bool copyDatabase(
-    String fromPath,
-    String toPath,
-    String? directory,
+    String from,
+    String name,
+    CBLDatabaseConfiguration? configuration,
   ) {
     return withZoneArena(() {
       return stringTable.autoFree(() {
         return _copyDatabase(
-          stringTable.flString(fromPath).ref,
-          stringTable.flString(toPath).ref,
-          _createConfig(
-            directory,
-          ),
+          stringTable.flString(from).ref,
+          stringTable.flString(name).ref,
+          _createConfig(configuration),
           globalCBLError,
         ).checkCBLError().toBool();
       });
@@ -591,17 +609,31 @@ class DatabaseBindings extends Bindings {
     });
   }
 
+  CBLDatabaseConfiguration defaultConfiguration() {
+    final config = _defaultConfiguration();
+    String directory;
+    if (Platform.isAndroid) {
+      // TODO: useful database directory default for Android
+      // The default for the database directory on Android is broken.
+      // Android does not support allocating memory for the string returned from
+      // `getcwd`. Aside from that the current working directory is not
+      // something that Android apps usually use.
+      directory = Directory.current.path;
+    } else {
+      directory = config.directory.toDartString()!;
+    }
+    return CBLDatabaseConfiguration(directory);
+  }
+
   Pointer<CBLDatabase> open(
     String name,
-    String? directory,
+    CBLDatabaseConfiguration? configuration,
   ) {
     return withZoneArena(() {
       return stringTable.autoFree(() {
         return _open(
           stringTable.flString(name).ref,
-          _createConfig(
-            directory,
-          ),
+          _createConfig(configuration),
           globalCBLError,
         ).checkCBLError();
       });
@@ -686,9 +718,19 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLMutableDocument> doc,
     CBLSaveConflictHandler conflictHandler,
   ) {
-    _currentSaveConflictHandler = (documentBeingSaved, conflictingDocument) =>
-        conflictHandler(documentBeingSaved, conflictingDocument.toNullable())
-            .toInt();
+    final zone = Zone.current;
+    conflictHandler = zone.registerBinaryCallback(conflictHandler);
+    _currentSaveConflictHandler = (documentBeingSaved, conflictingDocument) {
+      var resolvedConflict = false;
+      zone.runGuarded(() {
+        resolvedConflict = conflictHandler(
+          documentBeingSaved,
+          conflictingDocument.toNullable(),
+        );
+      });
+      return resolvedConflict.toInt();
+    };
+
     try {
       _saveDocumentWithConflictHandler(
         db,
@@ -828,13 +870,16 @@ class DatabaseBindings extends Bindings {
   }
 
   Pointer<CBLDart_CBLDatabaseConfiguration> _createConfig(
-    String? directory,
+    CBLDatabaseConfiguration? config,
   ) {
+    if (config == null) {
+      return nullptr;
+    }
+
     final result = zoneArena<CBLDart_CBLDatabaseConfiguration>();
 
-    if (directory != null) {
-      result.ref.directory = stringTable.flString(directory, arena: true).ref;
-    }
+    result.ref.directory =
+        stringTable.flString(config.directory, arena: true).ref;
 
     return result;
   }

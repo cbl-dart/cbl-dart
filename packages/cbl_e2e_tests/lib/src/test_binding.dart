@@ -75,6 +75,17 @@ abstract class CblE2eTestBinding {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
       CouchbaseLite.init(libraries: libraries);
+
+      Database.log.file
+        ..config = LogFileConfiguration(
+          directory: '$tmpDir/logs',
+          usePlainText: true,
+          maxRotateCount: 100,
+          // Should be large enough to captures all logs of a test run without
+          // file splitting.
+          maxSize: 100 * 1024 * 1024, // 100 MB
+        )
+        ..level = LogLevel.verbose;
     });
   }
 

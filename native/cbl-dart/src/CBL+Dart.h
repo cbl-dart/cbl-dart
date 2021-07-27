@@ -16,10 +16,9 @@
  */
 
 extern "C" {
-// Dart --------------------------------------------------------------------
 
 CBLDART_EXPORT
-void CBLDart_InitDartApiDL(void *data);
+void CBLDart_Init(void *data);
 
 // -- Callbacks
 
@@ -71,8 +70,6 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
 CBLDART_EXPORT
 uint8_t CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback);
 
-static uint32_t CBLDart_LogFileConfigIllegalCapability = 0;
-
 typedef struct {
   CBLLogLevel level;
   CBLDart_FLString directory;
@@ -83,7 +80,10 @@ typedef struct {
 
 CBLDART_EXPORT
 uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
-                                     uint32_t capability, CBLError *errorOut);
+                                     CBLError *errorOut);
+
+CBLDART_EXPORT
+CBLDart_CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig();
 
 // -- Document
 

@@ -1,4 +1,8 @@
-import 'database_test.dart' as database;
+import 'database/database_change_test.dart' as database_database_change;
+import 'database/database_configuration_test.dart'
+    as database_database_configuration;
+import 'database/database_test.dart' as database_database;
+import 'database/document_change_test.dart' as database_document_change;
 import 'document/array_test.dart' as document_array_test;
 import 'document/blob_test.dart' as document_blob_test;
 import 'document/dictionary_test.dart' as document_dictionary_test;
@@ -23,7 +27,10 @@ import 'replication/replicator_test.dart' as replication_replicator;
 import 'support/async_callback_test.dart' as support_async_callback;
 
 final tests = [
-  database.main,
+  database_database_change.main,
+  database_database_configuration.main,
+  database_database.main,
+  database_document_change.main,
   document_array_test.main,
   document_blob_test.main,
   document_dictionary_test.main,

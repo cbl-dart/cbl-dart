@@ -13,6 +13,7 @@ import '../document/common.dart';
 import '../document/dictionary.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -35,7 +36,7 @@ enum QueryLanguage {
 /// corresponding language.
 ///
 /// See:
-/// - [Database.query] for creating [Query]s.
+/// - [Query] for creating [Query]s.
 @immutable
 abstract class QueryDefinition {
   /// The query language this query is defined in.
@@ -215,6 +216,14 @@ class Parameters {
 /// - [QueryDefinition] for the object which represents an uncompiled database
 ///   query.
 abstract class Query implements Resource {
+  /// Creates a query in the given [database] form a [QueryDefinition].
+  factory Query(Database database, QueryDefinition query) => QueryImpl(
+        database: database as DatabaseImpl,
+        language: query.language,
+        query: query.queryString,
+        debugCreator: 'Query()',
+      );
+
   /// The database this query is operating on.
   Database get database;
 
@@ -278,7 +287,7 @@ abstract class Query implements Resource {
 class QueryImpl extends CblObject<CBLQuery>
     with DelegatingResourceMixin
     implements Query {
-  static late final _bindings = CBLBindings.instance.query;
+  static late final _bindings = cblBindings.query;
 
   QueryImpl({
     required this.database,
@@ -392,7 +401,7 @@ abstract class Result {
 
 class _ResultSetIterator extends NativeResource<CBLResultSet>
     implements Iterator<Result>, Result {
-  static late final _bindings = CBLBindings.instance.resultSet;
+  static late final _bindings = cblBindings.resultSet;
 
   _ResultSetIterator(NativeObject<CBLResultSet> native) : super(native);
 

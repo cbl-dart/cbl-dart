@@ -217,7 +217,7 @@ void main() {
         await puller.replicateOneShot();
 
         // Documents where filter throws are not pushed.
-        expect(pullDb.getDocument(doc.id), isNull);
+        expect(pullDb.document(doc.id), isNull);
       }, (error, _) {
         uncaughtError = error;
       });
@@ -281,7 +281,7 @@ void main() {
         await puller.replicateOneShot();
 
         // Documents where filter throws are not pulled.
-        expect(pullDb.getDocument(doc.id), isNull);
+        expect(pullDb.document(doc.id), isNull);
       }, (error, _) {
         uncaughtError = error;
       });

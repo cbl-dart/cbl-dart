@@ -14,9 +14,9 @@ Database openTestDb(
   bool useNameDirectly = false,
   bool autoClose = true,
 }) {
-  final db = Database.open(
+  final db = Database(
     useNameDirectly ? dbName! : testDbName(dbName),
-    config: DatabaseConfiguration(
+    DatabaseConfiguration(
       directory: tmpDir,
     ),
   );
@@ -28,14 +28,14 @@ Database openTestDb(
 
 extension DatabaseUtilsExtension on Database {
   /// Returns a stream wich emits the ids of all the documents in this database.
-  Iterable<String> getAllIds() => query(N1QLQuery('SELECT META().id'))
+  Iterable<String> getAllIds() => Query(this, N1QLQuery('SELECT META().id'))
       .execute()
       .map((result) => result[0] as String);
 
   /// Returns a stream which emits the ids of all the documents in the
   /// database when they change.
   Stream<List<String>> watchAllIds() =>
-      query(N1QLQuery('SELECT META().id')).changes().map((resultSet) =>
+      Query(this, N1QLQuery('SELECT META().id')).changes().map((resultSet) =>
           resultSet.map((result) => result[0] as String).toList());
 
   /// Deletes all documents in this database and returns whether any documents
@@ -43,7 +43,7 @@ extension DatabaseUtilsExtension on Database {
   bool deleteAllDocuments() {
     var deletedAnyDocument = false;
     for (final id in getAllIds()) {
-      final doc = getDocument(id);
+      final doc = document(id);
       if (doc != null) {
         deleteDocument(doc);
       }
