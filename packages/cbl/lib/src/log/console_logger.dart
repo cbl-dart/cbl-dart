@@ -7,7 +7,7 @@ abstract class ConsoleLogger {
 
   /// The minium [LogLevel] of the log messages to be logged.
   ///
-  /// The default log level is [LogLevel.info].
+  /// The default log level is [LogLevel.warning].
   LogLevel get level;
 
   set level(LogLevel value);

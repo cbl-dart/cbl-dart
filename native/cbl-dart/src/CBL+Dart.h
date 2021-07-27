@@ -16,10 +16,9 @@
  */
 
 extern "C" {
-// Dart --------------------------------------------------------------------
 
 CBLDART_EXPORT
-void CBLDart_InitDartApiDL(void *data);
+void CBLDart_Init(void *data);
 
 // -- Callbacks
 

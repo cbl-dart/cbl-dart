@@ -36,12 +36,8 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 // === Dart ====================================================================
 
-typedef CBLDart_InitDartApiDL_C = Void Function(
-  Pointer<Void> data,
-);
-typedef CBLDart_InitDartApiDL = void Function(
-  Pointer<Void> data,
-);
+typedef CBLDart_Init_C = Void Function(Pointer<Void> data);
+typedef CBLDart_Init = void Function(Pointer<Void> data);
 
 // === CBLError ================================================================
 
@@ -296,9 +292,8 @@ typedef CBLListener_Remove = void Function(
 
 class BaseBindings extends Bindings {
   BaseBindings(Bindings parent) : super(parent) {
-    _initDartApiDL = libs.cblDart
-        .lookupFunction<CBLDart_InitDartApiDL_C, CBLDart_InitDartApiDL>(
-      'CBLDart_InitDartApiDL',
+    _init = libs.cblDart.lookupFunction<CBLDart_Init_C, CBLDart_Init>(
+      'CBLDart_Init',
     );
     _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
         CBLDart_BindCBLRefCountedToDartObject_C,
@@ -325,7 +320,7 @@ class BaseBindings extends Bindings {
   late final Pointer<CBLError> _globalCBLError = malloc();
   late final Pointer<Int32> _globalErrorPosition = malloc();
 
-  late final CBLDart_InitDartApiDL _initDartApiDL;
+  late final CBLDart_Init _init;
   late final CBLDart_BindCBLRefCountedToDartObject
       _bindCBLRefCountedToDartObject;
   late final CBLDart_SetDebugRefCounted _setDebugRefCounted;
@@ -333,8 +328,8 @@ class BaseBindings extends Bindings {
   late final CBLDart_CBLError_Message _Error_Message;
   late final CBLListener_Remove _Listener_Remove;
 
-  void initDartApiDL() {
-    _initDartApiDL(NativeApi.initializeApiDLData);
+  void init() {
+    _init(NativeApi.initializeApiDLData);
   }
 
   void bindCBLRefCountedToDartObject(

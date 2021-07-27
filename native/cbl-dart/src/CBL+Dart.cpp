@@ -6,17 +6,14 @@
 #include "CBL+Dart.h"
 #include "Utils.hh"
 
-// Dart ------------------------------------------------------------------------
-
-std::mutex initDartApiDLMutex;
-bool initDartApiDLDone = false;
-
-void CBLDart_InitDartApiDL(void *data) {
-  const std::scoped_lock lock(initDartApiDLMutex);
-  if (!initDartApiDLDone) {
+void CBLDart_Init(void *data) {
+  std::once_flag init;
+  std::call_once(init, [=]() {
     Dart_InitializeApiDL(data);
-    initDartApiDLDone = true;
-  }
+
+    // Set console log level to warning
+    CBLLog_SetConsoleLevel(CBLLogWarning);
+  });
 }
 
 // -- AsyncCallback

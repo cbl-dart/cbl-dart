@@ -66,7 +66,7 @@ class CBLBindings extends Bindings {
         minCachedStringSize: 0,
         maxCachedStringSize: 512,
       ),
-    )..base.initDartApiDL();
+    )..base.init();
   }
 
   CBLBindings(Libraries libs, StringTable stringTable)

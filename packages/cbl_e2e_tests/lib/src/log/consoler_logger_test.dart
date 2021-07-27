@@ -16,7 +16,7 @@ void main() {
     });
 
     test('initial level is info', () {
-      expect(Database.log.console.level, LogLevel.info);
+      expect(Database.log.console.level, LogLevel.warning);
     });
 
     test('get and set level', () {
