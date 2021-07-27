@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -76,7 +77,7 @@ abstract class Database implements ClosableResource {
   ///
   /// If the database does not yet exist, it will be created.
   factory Database(String name, [DatabaseConfiguration? configuration]) =>
-      throw UnimplementedError();
+      DatabaseImpl(name, configuration);
 
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
@@ -103,7 +104,11 @@ abstract class Database implements ClosableResource {
     DatabaseConfiguration? configuration,
   }) =>
       runNativeCalls(() {
-        _bindings.copyDatabase(from, name, configuration?.directory);
+        _bindings.copyDatabase(
+          from,
+          name,
+          configuration?.toCBLDatabaseConfiguration(),
+        );
       });
 
   /// The name of this database.
@@ -150,6 +155,12 @@ abstract class Database implements ClosableResource {
   /// the resolved document. If the conflict handler returns `false`, the save
   /// operation will be canceled with `false` as the result. If the conflict
   /// handler returns `true` or there is no conflict the result is `true`.
+  ///
+  /// [conflictHandler] should not throw to abort the save operation. If the
+  /// handler does throw, the save operation is aborted as if the handler had
+  /// returned `false`, but errors thrown by the [conflictHandler] __cannot__ be
+  /// caught by executing this method in a try-catch block. These errors are
+  /// uncaught errors within the current [Zone].
   bool saveDocumentWithConflictHandler(
     MutableDocument document,
     SaveConflictHandler conflictHandler,
@@ -191,6 +202,9 @@ abstract class Database implements ClosableResource {
   /// Sets an [expiration] date for a [Document] by its [id].
   ///
   /// After the given date the document will be purged from the database
+  ///
+  /// This is more drastic than deletion: It removes all traces of the document.
+  /// The purge will __not__ be replicated to other databases.
   void setDocumentExpiration(String id, DateTime? expiration);
 
   /// Gets the expiration date of a [Document] by its [id], if it exists.
@@ -244,7 +258,7 @@ class DatabaseImpl extends CblObject<CBLDatabase>
           configuration ?? DatabaseConfiguration(),
         ),
         super(
-          _bindings.open(name, configuration?.directory),
+          _bindings.open(name, configuration?.toCBLDatabaseConfiguration()),
           debugName: 'Database($name)',
         );
 
@@ -307,10 +321,12 @@ class DatabaseImpl extends CblObject<CBLDatabase>
         document.database = this;
         document.flushProperties();
 
-        bool _conflictHandler(
+        bool conflictHandlerAdapter(
           Pointer<CBLMutableDocument> _,
           Pointer<CBLDocument>? conflictingDocument,
         ) {
+          var saveDocument = false;
+
           final _conflictingDocument = conflictingDocument?.let(
             (pointer) => DocumentImpl(
               database: this,
@@ -320,20 +336,21 @@ class DatabaseImpl extends CblObject<CBLDatabase>
             ),
           );
 
-          final decision = conflictHandler(document, _conflictingDocument);
-
+          saveDocument = conflictHandler(document, _conflictingDocument);
           document.flushProperties();
 
-          return decision;
+          return saveDocument;
         }
 
-        return _catchConflictException(() {
+        final result = _catchConflictException(() {
           runNativeCalls(() => _bindings.saveDocumentWithConflictHandler(
                 native.pointer,
                 document.native.pointer.cast(),
-                _conflictHandler,
+                conflictHandlerAdapter,
               ));
         });
+
+        return result;
       });
 
   @override
@@ -495,6 +512,11 @@ extension on MaintenanceType {
 extension on ConcurrencyControl {
   CBLConcurrencyControl toCBLConcurrencyControl() =>
       CBLConcurrencyControl.values[index];
+}
+
+extension on DatabaseConfiguration {
+  CBLDatabaseConfiguration toCBLDatabaseConfiguration() =>
+      CBLDatabaseConfiguration(directory);
 }
 
 bool _catchConflictException(void Function() fn) {

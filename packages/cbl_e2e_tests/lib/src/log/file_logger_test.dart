@@ -17,14 +17,17 @@ void main() {
         throwsArgumentError,
       );
       expect(
-        () => LogFileConfiguration(directory: 'A', maxSize: -1),
+        () => LogFileConfiguration(directory: 'A', maxSize: 0),
         throwsArgumentError,
       );
 
       final config = LogFileConfiguration(directory: 'A');
 
+      config.maxRotateCount = 0;
       expect(() => config.maxRotateCount = -1, throwsArgumentError);
-      expect(() => config.maxSize = -1, throwsArgumentError);
+
+      config.maxSize = 1;
+      expect(() => config.maxSize = 0, throwsArgumentError);
     });
 
     test('from', () {
@@ -69,8 +72,44 @@ void main() {
   });
 
   group('FileLogger', () {
-    setUp(resetFileLogger);
-    tearDownAll(resetFileLogger);
+    LogFileConfiguration? originalLogConfig;
+    LogLevel? originalLogLevel;
+
+    setUp(() {
+      originalLogConfig ??= Database.log.file.config;
+      originalLogLevel ??= Database.log.file.level;
+
+      Database.log.file
+        ..config = null
+        ..level = LogLevel.none;
+    });
+
+    tearDownAll(() {
+      Database.log.file
+        ..config = originalLogConfig
+        ..level = originalLogLevel!;
+    });
+
+    test('get and set config', () {
+      final config = LogFileConfiguration(
+        directory: '$tmpDir/GetAndSetLogFileConfig',
+        maxSize: 2,
+        maxRotateCount: 3,
+        usePlainText: true,
+      );
+
+      expect(Database.log.file.config, isNull);
+
+      Database.log.file.config = config;
+      expect(Database.log.file.config, config);
+    });
+
+    test('get and set level', () {
+      expect(Database.log.file.level, LogLevel.none);
+
+      Database.log.file.level = LogLevel.verbose;
+      expect(Database.log.file.level, LogLevel.verbose);
+    });
 
     test('enable file logger', () async {
       var logDir = Directory('$tmpDir/EnableFileLogger');
@@ -92,10 +131,4 @@ void main() {
       expect(errorFileContents, contains('[WS] ERROR: $logMessage'));
     });
   });
-}
-
-void resetFileLogger() {
-  Database.log.file
-    ..config = null
-    ..level = LogLevel.none;
 }

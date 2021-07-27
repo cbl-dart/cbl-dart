@@ -7,13 +7,19 @@ void main() {
   setupTestBinding();
 
   group('ConsolerLogger', () {
-    test('get and set level', () {
-      final initialLogLevel = Database.log.console.level;
-      addTearDown(() => Database.log.console.level = initialLogLevel);
+    late LogLevel originalLogLevel;
+    setUpAll(() {
+      originalLogLevel = Database.log.console.level;
+    });
+    tearDownAll(() {
+      Database.log.console.level = originalLogLevel;
+    });
 
-      // The initial log level.
+    test('initial level is info', () {
       expect(Database.log.console.level, LogLevel.info);
+    });
 
+    test('get and set level', () {
       Database.log.console.level = LogLevel.verbose;
       expect(Database.log.console.level, LogLevel.verbose);
     });

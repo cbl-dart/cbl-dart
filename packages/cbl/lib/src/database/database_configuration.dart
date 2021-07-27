@@ -1,16 +1,20 @@
+import '../support/ffi.dart';
 import 'database.dart';
+
+late final _defaultConfiguration = cblBindings.database.defaultConfiguration();
 
 /// Configuration for opening a [Database].
 class DatabaseConfiguration {
   /// Creates a configuration for opening a [Database].
-  DatabaseConfiguration({this.directory});
+  DatabaseConfiguration({String? directory})
+      : directory = directory ?? _defaultConfiguration.directory;
 
   /// Creates a configuration of another [config] be copying its properties.
   DatabaseConfiguration.from(DatabaseConfiguration config)
       : this(directory: config.directory);
 
   /// Path to the directory to store the [Database] in.
-  String? directory;
+  String directory;
 
   @override
   bool operator ==(Object other) =>
@@ -26,7 +30,7 @@ class DatabaseConfiguration {
   String toString() => [
         'DatabaseConfiguration(',
         [
-          if (directory != null) 'directory: $directory',
+          'directory: $directory',
         ].join(', '),
         ')',
       ].join();

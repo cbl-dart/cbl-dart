@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/ffi.dart';
@@ -12,6 +14,12 @@ class LogFileConfiguration {
     int? maxSize,
     int? maxRotateCount,
   }) {
+    // Ensure that directory exists.
+    final _directory = Directory(directory);
+    if (!_directory.existsSync()) {
+      _directory.create(recursive: true);
+    }
+
     this.maxSize = maxSize ?? this.maxSize;
     this.maxRotateCount = maxRotateCount ?? this.maxRotateCount;
   }
@@ -53,7 +61,7 @@ class LogFileConfiguration {
   int _maxRotateCount = _defaultMaxRotateCount;
 
   set maxRotateCount(int maxRotateCount) {
-    if (maxRotateCount <= 0) {
+    if (maxRotateCount < 0) {
       throw ArgumentError.value(
         maxRotateCount,
         'maxRotateCount',
@@ -122,55 +130,47 @@ class FileLoggerImpl extends FileLogger {
 
   @override
   LogFileConfiguration? get config =>
-      _config != null ? LogFileConfiguration.from(_config!) : null;
-  LogFileConfiguration? _config;
+      _bindings.getLogFileConfiguration()?.toLogFileConfiguration();
 
   @override
-  set config(LogFileConfiguration? config) {
-    if (_config == config) {
-      return;
-    }
-    _updateConfig(_level, config);
-  }
+  set config(LogFileConfiguration? config) => _update(config);
 
   @override
-  LogLevel get level => _level;
+  LogLevel get level =>
+      _bindings.getLogFileConfiguration()?.level.toLogLevel() ?? _level;
   LogLevel _level = LogLevel.none;
 
   @override
   set level(LogLevel level) {
-    if (_level == level) {
-      return;
-    }
-    _updateConfig(level, _config);
+    _level = level;
+    _update(config);
   }
 
-  void _updateConfig(LogLevel level, LogFileConfiguration? config) {
-    if (config == null) {
-      if (_config == null) {
-        return;
-      }
+  void _update(LogFileConfiguration? config) {
+    final oldConfig = _bindings.getLogFileConfiguration();
 
-      _bindings.setFileLogConfiguration(null);
-      _config = null;
-      return;
-    }
-
-    final cblConfig = CBLLogFileConfiguration(
-      level: level.toCBLLogLevel(),
-      directory: config.directory,
-      maxRotateCount: config.maxRotateCount,
-      maxSize: config.maxSize,
-      usePlainText: config.usePlainText,
-    );
-
-    if (!_bindings.setFileLogConfiguration(cblConfig)) {
-      throw StateError(
-        'Another isolate has already set a log file configuration.',
+    CBLLogFileConfiguration? newConfig;
+    if (config != null) {
+      newConfig = CBLLogFileConfiguration(
+        level: _level.toCBLLogLevel(),
+        directory: config.directory,
+        maxRotateCount: config.maxRotateCount,
+        maxSize: config.maxSize,
+        usePlainText: config.usePlainText,
       );
     }
 
-    _config = LogFileConfiguration.from(config);
-    _level = level;
+    if (oldConfig != newConfig) {
+      _bindings.setFileLogConfiguration(newConfig);
+    }
   }
+}
+
+extension on CBLLogFileConfiguration {
+  LogFileConfiguration? toLogFileConfiguration() => LogFileConfiguration(
+        directory: directory,
+        usePlainText: usePlainText,
+        maxRotateCount: maxRotateCount,
+        maxSize: maxSize,
+      );
 }

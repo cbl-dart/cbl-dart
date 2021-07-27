@@ -1,45 +1,69 @@
+import 'dart:async';
+
 import 'package:cbl/cbl.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:cbl/src/log/logger.dart';
 
-import '../test_binding_impl.dart';
-import 'test_binding.dart';
-import 'utils/database_utils.dart';
-import 'utils/matchers.dart';
+import '../../test_binding_impl.dart';
+import '../test_binding.dart';
+import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
 
   group('Database', () {
-    group('exists', () {
-      test('works with inDirectory', () async {
-        final dbName = testDbName('DatabaseExistsWithDir');
+    test('remove', () async {
+      cblLogMessage(LogDomain.network, LogLevel.error, 'remove');
 
-        expect(
-          Database.exists(dbName, directory: tmpDir),
-          isFalse,
-        );
+      final db = openTestDb('Remove');
+      final name = db.name;
+      final directory = db.config.directory;
+      await db.close();
 
-        final db = Database(dbName, DatabaseConfiguration(directory: tmpDir));
-        await db.close();
+      expect(Database.exists(name, directory: directory), isTrue);
 
-        expect(
-          Database.exists(dbName, directory: tmpDir),
-          isTrue,
-        );
-      });
+      Database.remove(name, directory: directory);
+
+      expect(Database.exists(name, directory: directory), isFalse);
     });
 
-    group('open', () {
-      test('creates database if it does not exist', () {
-        final db = Database(
-          testDbName('OpenNonExistingDatabase'),
-          DatabaseConfiguration(
-            directory: tmpDir,
-          ),
-        );
+    test('exists', () async {
+      final dbName = testDbName('DatabaseExistsWithDir');
 
-        expect(db.path, isDirectory);
-      });
+      expect(
+        Database.exists(dbName, directory: tmpDir),
+        isFalse,
+      );
+
+      final db = Database(dbName, DatabaseConfiguration(directory: tmpDir));
+      await db.close();
+
+      expect(Database.exists(dbName, directory: tmpDir), isTrue);
+    });
+
+    test('copy', () {
+      final db = openTestDb('Copy-Source');
+      final copyName = testDbName('Copy-Copy');
+
+      Database.copy(
+        from: db.path!,
+        name: copyName,
+        configuration: DatabaseConfiguration(directory: tmpDir),
+      );
+
+      expect(Database.exists(copyName, directory: tmpDir), isTrue);
+    });
+
+    test('creates database if it does not exist', () {
+      final db = Database(
+        testDbName('OpenNonExistingDatabase'),
+        DatabaseConfiguration(
+          directory: tmpDir,
+        ),
+      );
+
+      expect(db.path, isDirectory);
     });
 
     late String dbName;
@@ -79,7 +103,7 @@ void main() {
         await db.delete();
 
         expect(
-          Database.exists(name, directory: dbConfig.directory!),
+          Database.exists(name, directory: dbConfig.directory),
           isFalse,
         );
       });
@@ -131,7 +155,7 @@ void main() {
         test('invokes the callback on conflict', () {
           final versionA = MutableDocument();
           db.saveDocument(versionA);
-          final versionB = (db.document(versionA.id)?.toMutable())!
+          final versionB = (db.document(versionA.id)!.toMutable())
             ..setValue('b', key: 'a');
           db.saveDocument(versionB);
 
@@ -148,12 +172,12 @@ void main() {
         test('cancels save if handler returns false', () {
           final versionA = MutableDocument();
           db.saveDocument(versionA);
-          final versionB = (db.document(versionA.id)?.toMutable())!
+          final versionB = (db.document(versionA.id)!.toMutable())
             ..setValue('b', key: 'a');
           db.saveDocument(versionB);
 
           expect(
-            () => db.saveDocumentWithConflictHandler(
+            db.saveDocumentWithConflictHandler(
               versionA.toMutable(),
               expectAsync2((documentBeingSaved, conflictingDocument) {
                 expect(documentBeingSaved, versionA);
@@ -161,12 +185,27 @@ void main() {
                 return false;
               }),
             ),
-            throwsA(isA<CouchbaseLiteException>().having(
-              (it) => it.code,
-              'code',
-              CouchbaseLiteErrorCode.conflict,
-            )),
+            isFalse,
           );
+        });
+
+        test('handler exceptions are unhandled in current zone', () {
+          final versionA = MutableDocument();
+          db.saveDocument(versionA);
+          final versionB = (db.document(versionA.id)!.toMutable())
+            ..setValue('b', key: 'a');
+          db.saveDocument(versionB);
+
+          runZonedGuarded(() {
+            db.saveDocumentWithConflictHandler(
+              versionA.toMutable(),
+              (documentBeingSaved, conflictingDocument) {
+                throw false;
+              },
+            );
+          }, expectAsync2((error, __) {
+            expect(error, isFalse);
+          }));
         });
       });
 
@@ -243,7 +282,7 @@ void main() {
 
         expect(
           db.documentChanges(doc.id),
-          emitsInOrder(<dynamic>[null]),
+          emitsInOrder(<dynamic>[DocumentChange(db, doc.id)]),
         );
 
         db.saveDocument(doc);
@@ -255,7 +294,7 @@ void main() {
         expect(
           db.changes(),
           emitsInOrder(<dynamic>[
-            [doc.id]
+            DatabaseChange(db, [doc.id])
           ]),
         );
 
@@ -514,7 +553,7 @@ SELECT foo()
         expect(
           dbA.changes(),
           emitsInOrder(<dynamic>[
-            [doc.id]
+            DatabaseChange(dbA, [doc.id])
           ]),
         );
 

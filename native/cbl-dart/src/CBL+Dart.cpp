@@ -34,7 +34,7 @@ void CBLDart_AsyncCallback_Close(CBLDart::AsyncCallback *callback) {
 
 void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
                                        int64_t argument) {
-  std::thread([callback, argument]() {
+  std::thread([=]() {
     Dart_CObject argument__;
     argument__.type = Dart_CObject_kInt64;
     argument__.value.as_int64 = argument;
@@ -135,8 +135,7 @@ void CBLDart_CBLListenerFinalizer(void *context) {
 
 std::shared_mutex loggingMutex;
 CBLDart::AsyncCallback *dartLogCallback = nullptr;
-uint32_t logFileConfigurationCapability =
-    CBLDart_LogFileConfigIllegalCapability;
+CBLDart_CBLLogFileConfiguration *logFileConfig = nullptr;
 
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message) {
@@ -197,39 +196,70 @@ uint8_t CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback) {
 }
 
 uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
-                                     uint32_t capability, CBLError *errorOut) {
-  assert(capability != CBLDart_LogFileConfigIllegalCapability);
-
+                                     CBLError *errorOut) {
   std::unique_lock lock(loggingMutex);
 
-  // Another isolate has already set the log file configuration and must first
-  // reset it before another isolate can set a new configuration.
-  if (logFileConfigurationCapability !=
-          CBLDart_LogFileConfigIllegalCapability &&
-      logFileConfigurationCapability != capability) {
-    // 3 is used to signal this conflict because CBLLog_SetFileConfig returns a
-    // bool.
-    return 3;
-  }
-
-  CBLLogFileConfiguration config_;
-  if (config) {
-    logFileConfigurationCapability = capability;
-    config_.level = config->level;
-    config_.directory = CBLDart_FLStringFromDart(config->directory);
-    config_.maxRotateCount = config->maxRotateCount;
-    config_.maxSize = config->maxSize;
-    config_.usePlaintext = config->usePlaintext;
+  if (!config) {
+    auto success = CBLLog_SetFileConfig(
+        {
+            .level = CBLLogNone,
+            .directory = {nullptr, 0},
+            .maxRotateCount = 0,
+            .maxSize = 0,
+            .usePlaintext = false,
+        },
+        errorOut);
+    if (success) {
+      if (logFileConfig) {
+        delete logFileConfig;
+        logFileConfig = nullptr;
+      }
+    }
+    return success;
   } else {
-    logFileConfigurationCapability = CBLDart_LogFileConfigIllegalCapability;
-    config_.level = CBLLogNone;
-    config_.directory = FLStr("");
-    config_.usePlaintext = false;
-    config_.maxRotateCount = 0;
-    config_.maxSize = 0;
+    auto success = CBLLog_SetFileConfig(
+        {
+            .level = config->level,
+            .directory = CBLDart_FLStringFromDart(config->directory),
+            .maxRotateCount = config->maxRotateCount,
+            .maxSize = config->maxSize,
+            .usePlaintext = (bool)config->usePlaintext,
+        },
+        errorOut);
+    if (success) {
+      auto config_ = CBLLog_FileConfig();
+      if (!logFileConfig) {
+        logFileConfig = new CBLDart_CBLLogFileConfiguration;
+      }
+      *logFileConfig = {
+          .level = config_->level,
+          .directory = CBLDart_FLStringToDart(config_->directory),
+          .maxRotateCount = config_->maxRotateCount,
+          .maxSize = config->maxSize,
+          .usePlaintext = config_->usePlaintext,
+      };
+    }
+    return success;
   }
+}
 
-  return CBLLog_SetFileConfig(config_, errorOut);
+CBLDart_CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig() {
+  std::shared_lock lock(loggingMutex);
+  return logFileConfig;
+}
+
+static bool CBLDart_LogFileConfigIsSet() { return logFileConfig != nullptr; }
+
+static void CBLDart_CheckFileLogging() {
+  static std::once_flag checkFileLogging;
+  std::call_once(checkFileLogging, []() {
+    if (!CBLDart_LogFileConfigIsSet()) {
+      CBL_Log(
+          kCBLLogDomainDatabase, CBLLogWarning,
+          "Database.log.file.config is null, meaning file logging is disabled. "
+          "Log files required for product support are not being generated.");
+    }
+  });
 }
 
 // -- Document
@@ -290,6 +320,7 @@ uint8_t CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
 CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
                                       CBLDart_CBLDatabaseConfiguration *config,
                                       CBLError *errorOut) {
+  CBLDart_CheckFileLogging();
   CBLDatabaseConfiguration config_;
   config_.directory = CBLDart_FLStringFromDart(config->directory);
   return CBLDatabase_Open(CBLDart_FLStringFromDart(name), &config_, errorOut);
