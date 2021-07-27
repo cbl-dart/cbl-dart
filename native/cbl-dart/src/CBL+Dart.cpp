@@ -219,7 +219,7 @@ uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
             .level = config->level,
             .directory = CBLDart_FLStringFromDart(config->directory),
             .maxRotateCount = config->maxRotateCount,
-            .maxSize = config->maxSize,
+            .maxSize = static_cast<size_t>(config->maxSize),
             .usePlaintext = (bool)config->usePlaintext,
         },
         errorOut);
