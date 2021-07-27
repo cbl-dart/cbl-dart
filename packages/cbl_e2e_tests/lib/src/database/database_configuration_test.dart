@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:cbl/cbl.dart';
-import 'package:path/path.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -10,8 +11,14 @@ void main() {
   group('DatabaseConfiguration', () {
     test('default', () {
       final config = DatabaseConfiguration();
-      // Should be the default directory provided by the CBL C SDK.
-      expect(isAbsolute(config.directory), isTrue);
+      // Directory is the default directory provided by the CBL C SDK.
+      if (Platform.isAndroid) {
+        // On non Apple platforms `getcwd` is used which is not seem to provide
+        // a useful result on Android.
+        expect(config.directory, isEmpty);
+      } else {
+        expect(config.directory, isNotEmpty);
+      }
     });
 
     test('from', () {
