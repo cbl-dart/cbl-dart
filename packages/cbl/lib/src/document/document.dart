@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database/database.dart';
+import '../database/_database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';

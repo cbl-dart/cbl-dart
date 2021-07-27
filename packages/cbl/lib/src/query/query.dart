@@ -3,10 +3,11 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:ffi';
 
+import 'package:cbl/src/support/ffi.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
-import '../database/database.dart';
+import '../database/_database.dart';
 import '../document/array.dart';
 import '../document/blob.dart';
 import '../document/common.dart';
@@ -278,7 +279,7 @@ abstract class Query implements Resource {
 class QueryImpl extends CblObject<CBLQuery>
     with DelegatingResourceMixin
     implements Query {
-  static late final _bindings = CBLBindings.instance.query;
+  static late final _bindings = cblBindings.query;
 
   QueryImpl({
     required this.database,
@@ -392,7 +393,7 @@ abstract class Result {
 
 class _ResultSetIterator extends NativeResource<CBLResultSet>
     implements Iterator<Result>, Result {
-  static late final _bindings = CBLBindings.instance.resultSet;
+  static late final _bindings = cblBindings.resultSet;
 
   _ResultSetIterator(NativeObject<CBLResultSet> native) : super(native);
 

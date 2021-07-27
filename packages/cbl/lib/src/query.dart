@@ -1,3 +1,4 @@
+export 'query/index.dart' show FullTextIndex, Index, ValueIndex;
 export 'query/query.dart'
     show
         JSONQuery,

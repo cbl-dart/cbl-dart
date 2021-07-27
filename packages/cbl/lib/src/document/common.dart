@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import '../database/database.dart';
+import '../database/_database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart' as fl;

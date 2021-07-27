@@ -178,7 +178,7 @@ typedef SaveConflictHandler_C = Uint8 Function(
   Pointer<CBLMutableDocument> documentBeingSave,
   Pointer<CBLDocument> conflictingDocument,
 );
-typedef SaveConflictHandler = int Function(
+typedef SaveConflictHandlerWrapper = int Function(
   Pointer<CBLMutableDocument> documentBeingSave,
   Pointer<CBLDocument> conflictingDocument,
 );
@@ -500,7 +500,7 @@ class DatabaseBindings extends Bindings {
   /// The conflict handler which will be set by
   /// [saveDocumentWithConflictHandler] before making the call to the CBL API
   /// and cleared when that call finishes.
-  static SaveConflictHandler? _currentSaveConflictHandler;
+  static SaveConflictHandlerWrapper? _currentSaveConflictHandler;
 
   /// Static invoker of [_currentSaveConflictHandler].
   ///
