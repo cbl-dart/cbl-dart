@@ -28,15 +28,17 @@ Database openTestDb(
 
 extension DatabaseUtilsExtension on Database {
   /// Returns a stream wich emits the ids of all the documents in this database.
-  Iterable<String> getAllIds() => Query(this, N1QLQuery('SELECT META().id'))
-      .execute()
-      .map((result) => result[0] as String);
+  Iterable<String> getAllIds() =>
+      Query(this, N1QLQuery('SELECT META().id FROM _'))
+          .execute()
+          .map((result) => result[0] as String);
 
   /// Returns a stream which emits the ids of all the documents in the
   /// database when they change.
   Stream<List<String>> watchAllIds() =>
-      Query(this, N1QLQuery('SELECT META().id')).changes().map((resultSet) =>
-          resultSet.map((result) => result[0] as String).toList());
+      Query(this, N1QLQuery('SELECT META().id FROM _')).changes().map(
+          (resultSet) =>
+              resultSet.map((result) => result[0] as String).toList());
 
   /// Deletes all documents in this database and returns whether any documents
   /// where deleted.

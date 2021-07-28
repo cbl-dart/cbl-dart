@@ -240,7 +240,7 @@ abstract class Query implements Resource {
   /// final query = await db.query(N1QLQuery(
   ///   '''
   ///   SELECT p.name, r.rating
-  ///     FROM _default AS p
+  ///     FROM _ AS p
   ///     INNER JOIN _default AS r ON array_contains(p.reviewList, META(r).id)
   ///       WHERE META(p).id = $PRODUCT_ID
   ///   ''',

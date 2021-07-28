@@ -182,19 +182,27 @@ class CBLErrorException implements Exception {
     this.errorSource,
   });
 
-  CBLErrorException.fromCBLError(
+  CBLErrorException.fromCBLError(Pointer<CBLError> error)
+      : this(
+          error.ref.domain,
+          error.ref.code,
+          _baseBinds.CBLErrorMessage(globalCBLError)!,
+        );
+
+  CBLErrorException.fromCBLErrorWithSource(
     Pointer<CBLError> error, {
-    String? errorSource,
-    int? errorPosition,
+    required String errorSource,
+    required int errorPosition,
   }) : this(
           error.ref.domain,
           error.ref.code,
           _baseBinds.CBLErrorMessage(globalCBLError)!,
           errorSource: errorSource,
-          errorPosition:
-              error.ref.code == CBLErrorCode.invalidQuery && errorPosition != -1
-                  ? errorPosition
-                  : null,
+          errorPosition: error.ref.code == CBLErrorCode.invalidQuery &&
+                  errorPosition != -1 &&
+                  errorPosition < errorSource.length
+              ? errorPosition
+              : null,
         );
 
   final String message;
@@ -215,11 +223,17 @@ class CBLErrorException implements Exception {
 
 void checkCBLError({String? errorSource}) {
   if (!globalCBLError.ref.isOk) {
-    throw CBLErrorException.fromCBLError(
-      globalCBLError,
-      errorSource: errorSource,
-      errorPosition: globalErrorPosition.value,
-    );
+    if (errorSource == null) {
+      throw CBLErrorException.fromCBLError(
+        globalCBLError,
+      );
+    } else {
+      throw CBLErrorException.fromCBLErrorWithSource(
+        globalCBLError,
+        errorSource: errorSource,
+        errorPosition: globalErrorPosition.value,
+      );
+    }
   }
 }
 
