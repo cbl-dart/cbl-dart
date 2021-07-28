@@ -30,8 +30,8 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
     late String cblDartLib;
 
     if (Platform.isLinux) {
-      cblLib = '$libDir/libCouchbaseLiteC';
-      cblDartLib = '$libDir/libCouchbaseLiteDart';
+      cblLib = '$libDir/libcblite';
+      cblDartLib = '$libDir/libcblitedart';
 
       return Libraries(
         cbl: LibraryConfiguration.dynamic(cblLib),

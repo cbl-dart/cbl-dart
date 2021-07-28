@@ -10,7 +10,6 @@ import 'bindings.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {
-  all,
   database,
   query,
   replicator,

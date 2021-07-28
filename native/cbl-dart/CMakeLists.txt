@@ -15,8 +15,6 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
 set(CBL_DART_INCLUDES
     src
     ${ROOT_DIR}/vendor/dart/include
-    ${ROOT_DIR}/vendor/couchbase-lite-C/include
-    ${ROOT_DIR}/vendor/couchbase-lite-C/vendor/couchbase-lite-core/vendor/fleece/API
     ${PROJECT_BINARY_DIR}
 )
 
@@ -28,23 +26,23 @@ set(CBL_DART_SOURCES
     ${ROOT_DIR}/vendor/dart/include/dart/dart_api_dl.c
 )
 
-add_library(CouchbaseLiteDart
+add_library(cblitedart
     SHARED 
     ${CBL_DART_SOURCES}
 )
 
-set_target_properties(CouchbaseLiteDart 
+set_target_properties(cblitedart 
     PROPERTIES 
     CXX_VISIBILITY_PRESET hidden
     BUILD_WITH_INSTALL_RPATH TRUE
     INSTALL_RPATH "\${ORIGIN}"
 )
 
-target_include_directories(CouchbaseLiteDart
+target_include_directories(cblitedart
     PRIVATE
     ${CBL_DART_INCLUDES}
 )
 
-target_link_libraries(CouchbaseLiteDart 
-    CouchbaseLiteC
+target_link_libraries(cblitedart 
+    cblite
 )

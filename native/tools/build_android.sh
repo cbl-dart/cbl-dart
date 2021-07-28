@@ -114,7 +114,7 @@ function _buildArch() {
 
     cd "$archDir"
 
-    "${cmake_path}/cmake" --build . --target CouchbaseLiteDart
+    "${cmake_path}/cmake" --build . --target cblitedart
 
     _copyArchToLib $arch
 }
@@ -127,8 +127,10 @@ function _copyArchToLib() {
     rm -rf "$libArchDir"
     mkdir -p "$libArchDir"
 
-    cp "$buildArchDir/cbl-dart/libCouchbaseLiteDart.so" "$libArchDir/libCouchbaseLiteDart.so"
-    cp "$buildArchDir/vendor/couchbase-lite-C/libCouchbaseLiteC.so" "$libArchDir/libCouchbaseLiteC.so"
+    cp -P \
+        "$buildArchDir/cbl-dart/libcblitedart.so" \
+        "$buildArchDir/vendor/couchbase-lite-C/libcblite.so"* \
+        "$libArchDir"
 }
 
 function _createLinksForDev() {

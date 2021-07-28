@@ -8,7 +8,6 @@ import '../support/native_object.dart';
 
 /// Subsystems that log information.
 enum LogDomain {
-  all,
   database,
   query,
   replicator,
