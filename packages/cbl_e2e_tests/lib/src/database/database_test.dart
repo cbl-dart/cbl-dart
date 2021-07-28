@@ -502,7 +502,7 @@ void main() {
             (it) => it.toString(),
             'toString()',
             '''
-DatabaseException(query syntax error, code: DatabaseErrorCode.invalidQuery)
+DatabaseException(query syntax error, code: invalidQuery)
 SELECT foo()
           ^
 ''',
