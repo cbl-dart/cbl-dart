@@ -456,7 +456,7 @@ void main() {
           queryPlan,
           allOf([
             contains('SCAN TABLE'),
-            contains('{"WHAT":[[".doc"]]}'),
+            contains('{"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}'),
           ]),
         );
       });
