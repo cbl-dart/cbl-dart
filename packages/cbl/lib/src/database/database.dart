@@ -523,8 +523,8 @@ bool _catchConflictException(void Function() fn) {
   try {
     fn();
     return true;
-  } on CouchbaseLiteException catch (e) {
-    if (e.code == CouchbaseLiteErrorCode.conflict) {
+  } on DatabaseException catch (e) {
+    if (e.code == DatabaseErrorCode.conflict) {
       return false;
     }
     rethrow;

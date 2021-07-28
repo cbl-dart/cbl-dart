@@ -498,11 +498,11 @@ void main() {
       test('bad query: error position highlighting', () {
         expect(
           () => Query(db, N1QLQuery('SELECT foo()')),
-          throwsA(isA<CouchbaseLiteException>().having(
+          throwsA(isA<DatabaseException>().having(
             (it) => it.toString(),
             'toString()',
             '''
-CouchbaseLiteException(message: query syntax error, code: CouchbaseLiteErrorCode.invalidQuery)
+DatabaseException(query syntax error, code: DatabaseErrorCode.invalidQuery)
 SELECT foo()
           ^
 ''',

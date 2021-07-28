@@ -3,7 +3,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../errors.dart';
+import 'errors.dart';
 import 'ffi.dart';
 import 'resource.dart';
 

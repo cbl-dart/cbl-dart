@@ -40,6 +40,60 @@ String redact(String string) {
   return ('*' * redactedChars) + unredactedCharsStr.string;
 }
 
+/// Highlights a position in a string at the given [offset].
+///
+/// Adapted from [FormatException.toString].
+String highlightPosition(String string, {required int offset}) {
+  var report = '';
+
+  var lineStart = 0;
+  var previousCharWasCR = false;
+  for (var i = 0; i < offset; i++) {
+    var char = string.codeUnitAt(i);
+    if (char == 0x0a) {
+      if (lineStart != i || !previousCharWasCR) {}
+      lineStart = i + 1;
+      previousCharWasCR = false;
+    } else if (char == 0x0d) {
+      lineStart = i + 1;
+      previousCharWasCR = true;
+    }
+  }
+  var lineEnd = string.length;
+  for (var i = offset; i < string.length; i++) {
+    var char = string.codeUnitAt(i);
+    if (char == 0x0a || char == 0x0d) {
+      lineEnd = i;
+      break;
+    }
+  }
+  var length = lineEnd - lineStart;
+  var start = lineStart;
+  var end = lineEnd;
+  var prefix = '';
+  var postfix = '';
+  if (length > 78) {
+    // Can't show entire line. Try to anchor at the nearest end, if
+    // one is within reach.
+    var index = offset - lineStart;
+    if (index < 75) {
+      end = start + 75;
+      postfix = '...';
+    } else if (end - offset < 75) {
+      start = end - 75;
+      prefix = '...';
+    } else {
+      // Neither end is near, just pick an area around the offset.
+      start = offset - 36;
+      end = offset + 36;
+      prefix = postfix = '...';
+    }
+  }
+  var slice = string.substring(start, end);
+  var markOffset = offset - start + prefix.length;
+  return "$report$prefix$slice$postfix\n${" " * markOffset}^\n";
+}
+
 class Once<T> {
   Once({
     this.rejectMultipleExecutions = false,
