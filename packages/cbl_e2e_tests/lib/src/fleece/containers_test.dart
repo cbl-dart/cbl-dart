@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:cbl/cbl.dart' show FleeceErrorCode, FleeceException;
+import 'package:cbl/cbl.dart' show InvalidJsonException;
 import 'package:cbl/src/fleece/fleece.dart';
 
 import '../../test_binding_impl.dart';
@@ -20,16 +20,7 @@ void main() {
         });
 
         test('throw when given invalid json', () {
-          expect(
-            () => Doc.fromJson('x'),
-            throwsA(
-              isA<FleeceException>().having(
-                (it) => it.code,
-                'code',
-                equals(FleeceErrorCode.jsonError),
-              ),
-            ),
-          );
+          expect(() => Doc.fromJson('x'), throwsA(isA<InvalidJsonException>()));
         });
       });
 

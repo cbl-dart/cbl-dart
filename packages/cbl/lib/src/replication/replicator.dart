@@ -6,9 +6,9 @@ import 'package:collection/collection.dart';
 
 import '../database/database.dart';
 import '../document/document.dart';
-import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/async_callback.dart';
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
@@ -362,7 +362,7 @@ extension on CBLReplicatorStatus {
           progressDocumentCount,
           progressComplete,
         ),
-        error?.translate(),
+        error?.toCouchbaseLiteException(),
       );
 }
 
@@ -370,7 +370,7 @@ extension on CBLReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocumentImpl(
         id,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-        error?.translate(),
+        error?.toCouchbaseLiteException(),
       );
 }
 

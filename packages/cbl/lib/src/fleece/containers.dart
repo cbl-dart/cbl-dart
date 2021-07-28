@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import '../errors.dart';
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'encoder.dart';
@@ -42,10 +42,7 @@ class Doc extends FleeceDocObject {
       trust,
     );
     if (doc == null) {
-      throw FleeceException(
-        'The data is not valid Fleece data.',
-        FleeceErrorCode.invalidData,
-      );
+      throw ArgumentError.value(data, 'data', 'is not valid Fleece data');
     }
     return Doc.fromPointer(doc);
   }
