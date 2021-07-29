@@ -1,6 +1,7 @@
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../../support/utils.dart';
 import 'index.dart';
 
 /// A specification of an [Index] through a list of N1QL [expressions].
@@ -25,7 +26,7 @@ abstract class FullTextIndexConfiguration extends IndexConfiguration {
   factory FullTextIndexConfiguration(
     List<String> expressions, {
     bool? ignoreAccents,
-    String? language,
+    FullTextLanguage? language,
   }) =>
       _FullTextIndexConfiguration(expressions, ignoreAccents, language);
 
@@ -35,30 +36,46 @@ abstract class FullTextIndexConfiguration extends IndexConfiguration {
   bool get ignoreAccents;
   set ignoreAccents(bool value);
 
-  /// The dominant language. Setting this enables word stemming, i.e.
-  /// matching different cases of the same word ("big" and "bigger", for
-  /// instance) and ignoring common "stop-words" ("the", "a", "of", etc.)
+  /// The dominant language.
   ///
-  /// Can be an ISO-639 language code or a lowercase (English) language name;
-  /// supported languages are: da/danish, nl/dutch, en/english, fi/finnish,
-  /// fr/french, de/german, hu/hungarian, it/italian, no/norwegian,
-  /// pt/portuguese, ro/romanian, ru/russian, es/spanish, sv/swedish,
-  /// tr/turkish.
+  /// Setting this enables word stemming, i.e. matching different cases of the
+  /// same word ("big" and "bigger", for instance) and ignoring common
+  /// "stop-words" ("the", "a", "of", etc.)
   ///
-  /// If left `null`, or set to an unrecognized language, no language-specific
-  /// behaviors such as stemming and stop-word removal occur.
-  String? get language;
-  set language(String? value);
+  /// If left `null` no language-specific behaviors such as stemming and
+  /// stop-word removal occur.
+  FullTextLanguage? get language;
+  set language(FullTextLanguage? value);
 }
 
 // === Impl ====================================================================
 
-class _ValueIndexConfiguration
-    implements ValueIndexConfiguration, IndexImplInterface {
-  _ValueIndexConfiguration(this.expressions);
+abstract class _IndexConfiguration extends IndexConfiguration {
+  _IndexConfiguration(List<String> expressions) {
+    this.expressions = expressions;
+  }
+
+  List<String> _expressions = [];
 
   @override
-  List<String> expressions;
+  List<String> get expressions => _expressions;
+
+  @override
+  set expressions(List<String> expressions) {
+    if (expressions.isEmpty) {
+      throw ArgumentError.value(
+        expressions,
+        'expressions',
+        'must not be empty',
+      );
+    }
+    _expressions = expressions;
+  }
+}
+
+class _ValueIndexConfiguration extends _IndexConfiguration
+    implements ValueIndexConfiguration, IndexImplInterface {
+  _ValueIndexConfiguration(List<String> expressions) : super(expressions);
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
@@ -71,6 +88,7 @@ class _ValueIndexConfiguration
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is _ValueIndexConfiguration &&
+          runtimeType == other.runtimeType &&
           const DeepCollectionEquality().equals(expressions, other.expressions);
 
   @override
@@ -80,22 +98,20 @@ class _ValueIndexConfiguration
   String toString() => 'ValueIndexConfiguration(${expressions.join(', ')})';
 }
 
-class _FullTextIndexConfiguration
+class _FullTextIndexConfiguration extends _IndexConfiguration
     implements FullTextIndexConfiguration, IndexImplInterface {
   _FullTextIndexConfiguration(
-    this.expressions,
+    List<String> expressions,
     bool? ignoreAccents,
     this.language,
-  ) : ignoreAccents = ignoreAccents ?? false;
-
-  @override
-  List<String> expressions;
+  )   : ignoreAccents = ignoreAccents ?? false,
+        super(expressions);
 
   @override
   bool ignoreAccents;
 
   @override
-  String? language;
+  FullTextLanguage? language;
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
@@ -103,13 +119,14 @@ class _FullTextIndexConfiguration
         expressions: expressions.join(', '),
         type: CBLIndexType.fullText,
         ignoreAccents: ignoreAccents,
-        language: language,
+        language: language?.let(describeEnum),
       );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is _FullTextIndexConfiguration &&
+          runtimeType == other.runtimeType &&
           const DeepCollectionEquality()
               .equals(expressions, other.expressions) &&
           ignoreAccents == other.ignoreAccents &&
@@ -125,13 +142,13 @@ class _FullTextIndexConfiguration
   String toString() {
     final properties = [
       if (ignoreAccents) 'IGNORE-ACCENTS',
-      if (language != null) 'language: $language',
+      if (language != null) 'language: ${describeEnum(language!)}',
     ];
 
     return [
       'FullTextIndexConfiguration(',
       '${expressions.join(', ')}',
-      if (properties.isNotEmpty) '| ',
+      if (properties.isNotEmpty) ' | ',
       properties.join(', '),
       ')'
     ].join('');

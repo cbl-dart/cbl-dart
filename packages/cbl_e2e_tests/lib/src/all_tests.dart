@@ -15,6 +15,11 @@ import 'fleece/slice_test.dart' as fleece_slice;
 import 'log/consoler_logger_test.dart' as log_console_logger;
 import 'log/file_logger_test.dart' as log_file_logger;
 import 'log/logger_test.dart' as log_logger;
+import 'query/index/index_configuration_test.dart'
+    as query_index_index_configuration;
+import 'query/parameters_test.dart' as query_parameters;
+import 'query/query_test.dart' as query_query;
+import 'query/result_test.dart' as query_result;
 import 'replication/authenticator_test.dart' as replication_authenticator;
 import 'replication/configuration_test.dart' as replication_configuration;
 import 'replication/conflict_test.dart' as replication_conflict;
@@ -43,6 +48,10 @@ final tests = [
   log_console_logger.main,
   log_file_logger.main,
   log_logger.main,
+  query_index_index_configuration.main,
+  query_parameters.main,
+  query_query.main,
+  query_result.main,
   replication_authenticator.main,
   replication_configuration.main,
   replication_conflict.main,

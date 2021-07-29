@@ -33,8 +33,7 @@ class ResultSetImpl extends CblObject<CBLResultSet>
 
   final DatabaseMContext _context;
   final List<String> _columnNames;
-  var _hasMore = true;
-  bool _hasCurrent = false;
+  var _isDone = false;
   Result? _current;
 
   @override
@@ -42,7 +41,7 @@ class ResultSetImpl extends CblObject<CBLResultSet>
 
   @override
   Result get current {
-    _checkHasCurrent();
+    assert(_current != null || !_isDone);
     return _current ??= ResultImpl(
       context: _context,
       columnValues: fl.Array.fromPointer(native.call(_bindings.resultArray)),
@@ -52,22 +51,12 @@ class ResultSetImpl extends CblObject<CBLResultSet>
 
   @override
   bool moveNext() {
-    if (_hasMore) {
-      _current = null;
-      _hasCurrent = native.call(_bindings.next);
-      if (!_hasCurrent) {
-        _hasMore = false;
-      }
+    if (_isDone) {
+      return false;
     }
-    return _hasMore;
-  }
-
-  void _checkHasCurrent() {
-    if (!_hasCurrent) {
-      throw StateError(
-        'ResultSet is empty or its moveNext method has not been called.',
-      );
-    }
+    _current = null;
+    _isDone = !native.call(_bindings.next);
+    return !_isDone;
   }
 
   @override

@@ -55,8 +55,8 @@ abstract class Query {
   /// query, especially to add database indexes. It's not machine-readable and
   /// its format may change.
   ///
-  /// As currently implemented, the result has three sections, separated by
-  /// newline characters:
+  /// As currently implemented, the result has three sections, separated by two
+  /// newlines:
   /// * The first section is this query compiled into an SQLite query.
   /// * The second section is the output of SQLite's "EXPLAIN QUERY PLAN"
   ///   command applied to that query; for help interpreting this, see
@@ -64,7 +64,7 @@ abstract class Query {
   ///   that if you see "SCAN TABLE", it means that SQLite is doing a slow
   ///   linear scan of the documents instead of using an index.
   /// * The third sections is this queries JSON representation. This is the data
-  ///   structure that is built by the the query to describe this query
+  ///   structure that is built to describe this query, either by the the query
   ///   builder or when a N1QL query is compiled.
   String explain();
 
@@ -133,7 +133,7 @@ class QueryImpl extends CblObject<CBLQuery>
     if (value == null) {
       _parameters = null;
     } else {
-      _parameters = ParametersImpl.from(value, readonly: true);
+      _parameters = ParametersImpl.from(value);
     }
     _applyParameters();
   }

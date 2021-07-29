@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -68,7 +67,7 @@ void main() {
     late Database db;
 
     setUpAll(() {
-      dbName = testDbName('Common');
+      dbName = testDbName('Database|Common');
       dbConfig = DatabaseConfiguration(directory: tmpDir);
       db = Database(dbName, dbConfig);
       addTearDown(db.close);
@@ -363,13 +362,8 @@ void main() {
     });
 
     group('Index', () {
-      late Database db;
-
-      setUp(() {
-        db = openTestDb('Index');
-      });
-
       test('createIndex should work with ValueIndexConfiguration', () {
+        final db = openTestDb('CreateValueIndexConfiguration');
         db.createIndex('a', ValueIndexConfiguration(['a']));
 
         final q = Query(db, 'SELECT * FROM _ WHERE a = "a"');
@@ -380,6 +374,7 @@ void main() {
       });
 
       test('createIndex should work with FullTextIndexConfiguration', () {
+        final db = openTestDb('CreateFullTextIndexConfiguration');
         db.createIndex('a', FullTextIndexConfiguration(['a']));
 
         final q = Query(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
@@ -390,6 +385,7 @@ void main() {
       });
 
       test('deleteIndex should delete the given index', () {
+        final db = openTestDb('DeleteIndex');
         db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
@@ -400,145 +396,12 @@ void main() {
       });
 
       test('indexes should return the names of all existing indexes', () {
+        final db = openTestDb('DatabaseIndexNames');
         expect(db.indexes, isEmpty);
 
         db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
-      });
-    });
-
-    group('Query', () {
-      late Database db;
-
-      setUp(() {
-        db = openTestDb('Query');
-      });
-
-      test('execute query with parameters', () {
-        final q = Query(db, r'SELECT doc FROM _ WHERE META().id = $ID');
-        db.saveDocument(MutableDocument.withId('A'));
-
-        q.parameters = Parameters()..setValue('A', name: 'ID');
-        expect((q.execute()), isNotEmpty);
-
-        q.parameters = Parameters()..setValue('B', name: 'ID');
-        expect((q.execute()), isEmpty);
-      });
-
-      test('listen to query with parameters', () async {
-        final q = Query(db, r'SELECT doc FROM _ WHERE META().id = $ID');
-        db.saveDocument(MutableDocument.withId('A'));
-
-        q.parameters = Parameters()..setValue('A', name: 'ID');
-        expect((await q.changes().first), isNotEmpty);
-
-        q.parameters = Parameters()..setValue('B', name: 'ID');
-        expect((await q.changes().first), isEmpty);
-      });
-
-      test('execute does not throw', () async {
-        final q = Query(db, 'SELECT doc FROM _');
-        expect(q.execute(), isEmpty);
-      });
-
-      test('explain returns the query plan explanation', () {
-        final q = Query(db, 'SELECT doc FROM _');
-        final queryPlan = q.explain();
-
-        expect(
-          queryPlan,
-          allOf([
-            contains('SCAN TABLE'),
-            contains('{"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}'),
-          ]),
-        );
-      });
-
-      test('listener is notified of changes', () {
-        final q = Query(db, 'SELECT a FROM _ AS a WHERE a.b = "c"');
-
-        final doc = MutableDocument({'b': 'c'});
-        final result = {'a': doc.toPlainMap()};
-        final stream = q
-            .changes()
-            .map((resultSet) =>
-                resultSet.map((dict) => dict.toPlainMap()).toList())
-            .shareReplay();
-
-        // ignore: unawaited_futures
-        stream.first.then((_) => db.saveDocument(doc));
-
-        expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            isEmpty,
-            [result],
-          ]),
-        );
-      });
-
-      test('bad query: error position highlighting', () {
-        expect(
-          () => Query(db, 'SELECT foo()'),
-          throwsA(isA<DatabaseException>().having(
-            (it) => it.toString(),
-            'toString()',
-            '''
-DatabaseException(query syntax error, code: invalidQuery)
-SELECT foo()
-          ^
-''',
-          )),
-        );
-      });
-
-      group('ResultSet', () {
-        // TODO: fix bug which prevents id from being used an alias
-        // The test uses id_ as a workaround.
-        // https://github.com/couchbase/couchbase-lite-C/issues/149
-        test('supports getting column by name', () async {
-          final doc = MutableDocument.withId('ResultSetColumnByName');
-          db.saveDocument(doc);
-
-          final q = Query(
-            db,
-            r'SELECT META().id AS id_ FROM _ WHERE META().id = $ID',
-          );
-          q.parameters = Parameters()..setString(doc.id, name: 'ID');
-
-          final resultSet = q.execute();
-          final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current['id_'].string, doc.id);
-        });
-
-        test('supports getting column by index', () async {
-          final doc = MutableDocument.withId('ResultSetColumnIndex');
-          db.saveDocument(doc);
-
-          final q = Query(db, r'SELECT META().id FROM _ WHERE META().id = $ID');
-          q.parameters = Parameters()..setString(doc.id, name: 'ID');
-
-          final resultSet = q.execute();
-          final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current[0].string, doc.id);
-        });
-      });
-
-      group('Result', () {
-        test('access column by name', () {
-          final db = openTestDb('Result|ColumnByName');
-          db.saveDocument(MutableDocument({
-            'a': {'b': true}
-          }));
-          final query = Query(db, 'SELECT a AS alias, a.b, count() FROM _');
-
-          final result = query.execute().first;
-          expect(result.keys, ['alias', 'b', r'$1']);
-          expect(result.dictionary('alias')!.toPlainMap(), {'b': true});
-          expect(result.value('b'), isTrue);
-          expect(result.value(r'$1'), 1);
-        });
       });
     });
 

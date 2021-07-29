@@ -8,9 +8,10 @@ import '../fleece/encoder.dart';
 /// Query parameters used for setting values to the query parameters defined in
 /// the query.
 abstract class Parameters {
-  /// Creates new [Parameters], optionally initialized with other [parameters].
-  factory Parameters([Parameters? parameters]) =>
-      ParametersImpl._(source: parameters);
+  /// Creates new [Parameters], optionally initialized with parameters from
+  /// a plain map.
+  factory Parameters([Map<String, Object?>? parameters]) =>
+      ParametersImpl(parameters);
 
   /// Gets the value of the parameter referenced by the given [name].
   Object? value(String name);
@@ -77,18 +78,18 @@ abstract class Parameters {
 }
 
 class ParametersImpl implements Parameters, FleeceEncodable {
-  ParametersImpl({bool readonly = false}) : this._(readonly: readonly);
-
-  ParametersImpl.from(Parameters source, {bool readonly = false})
-      : this._(source: source, readonly: readonly);
-
-  ParametersImpl._({Parameters? source, bool readonly = false})
-      : _readonly = readonly {
-    if (source != null) {
-      final data = (source as ParametersImpl)._data;
-      for (final key in data) {
-        _data.setValue(data.value(key), key: key);
+  ParametersImpl([Map<String, Object?>? parameters]) : _readonly = false {
+    if (parameters != null) {
+      for (var entry in parameters.entries) {
+        setValue(entry.value, name: entry.key);
       }
+    }
+  }
+
+  ParametersImpl.from(Parameters source) : _readonly = true {
+    final data = (source as ParametersImpl)._data;
+    for (final key in data) {
+      _data.setValue(data.value(key), key: key);
     }
   }
 
@@ -96,7 +97,7 @@ class ParametersImpl implements Parameters, FleeceEncodable {
   late final _data = MutableDictionary() as MutableDictionaryImpl;
 
   @override
-  Object? value(String name) => _data[name];
+  Object? value(String name) => _data.value(name);
 
   @override
   void setValue(Object? value, {required String name}) {
@@ -164,7 +165,7 @@ class ParametersImpl implements Parameters, FleeceEncodable {
         'Parameters(',
         [
           for (final columnName in _data.keys)
-            '$columnName: ${_data.value(columnName)}'
+            '\$$columnName: ${_data.value(columnName)}'
         ].join(', '),
         ')'
       ].join();

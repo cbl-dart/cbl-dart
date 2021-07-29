@@ -1,5 +1,7 @@
 import 'dart:collection';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../document.dart';
 import '../document/array.dart';
 import '../document/dictionary.dart';
@@ -128,7 +130,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   T? value<T extends Object>(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.value(nameOrIndex);
     }
@@ -137,7 +139,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   String? string(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.string(nameOrIndex);
     }
@@ -146,7 +148,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   int integer(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.integer(nameOrIndex);
     }
@@ -155,7 +157,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   double float(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.float(nameOrIndex);
     }
@@ -164,7 +166,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   num? number(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.number(nameOrIndex);
     }
@@ -173,7 +175,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   bool boolean(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.boolean(nameOrIndex);
     }
@@ -182,7 +184,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   DateTime? date(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.date(nameOrIndex);
     }
@@ -191,7 +193,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Blob? blob(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.blob(nameOrIndex);
     }
@@ -200,7 +202,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Array? array(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.array(nameOrIndex);
     }
@@ -209,7 +211,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Dictionary? dictionary(Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.dictionary(nameOrIndex);
     }
@@ -218,7 +220,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   bool contains(Object? nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return nameOrIndex >= 0 && nameOrIndex < _columnNames.length;
     }
@@ -227,7 +229,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Fragment operator [](Object nameOrIndex) {
-    _debugChecknameOrIndex(nameOrIndex);
+    _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array[nameOrIndex];
     }
@@ -242,7 +244,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   String toJSON() {
-    final encoder = fl.FleeceEncoder();
+    final encoder = fl.FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
     return encoder.finish().toDartString();
@@ -265,8 +267,14 @@ class ResultImpl with IterableMixin<String> implements Result {
     return dictionary;
   }
 
-  void _debugChecknameOrIndex(Object? nameOrIndex) {
-    assert(nameOrIndex is int || nameOrIndex is String);
+  void _checknameOrIndex(Object? nameOrIndex) {
+    if (!(nameOrIndex is int || nameOrIndex is String)) {
+      throw ArgumentError.value(
+        nameOrIndex,
+        'nameOrIndex',
+        'must be a String or int',
+      );
+    }
   }
 
   @override
