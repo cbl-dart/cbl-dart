@@ -1,3 +1,4 @@
+export 'query/query.dart' show Query;
 export 'query/index/index.dart' show Index;
 export 'query/index/index_configuration.dart'
     show
@@ -5,12 +6,5 @@ export 'query/index/index_configuration.dart'
         IndexConfiguration,
         ValueIndexConfiguration;
 export 'query/parameters.dart' show Parameters;
-export 'query/query.dart'
-    show
-        JSONQuery,
-        N1QLQuery,
-        Query,
-        QueryDefinition,
-        Result,
-        ResultSet,
-        QueryLanguage;
+export 'query/result.dart' show Result;
+export 'query/result_set.dart' show ResultSet;

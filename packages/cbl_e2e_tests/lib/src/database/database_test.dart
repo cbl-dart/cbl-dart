@@ -372,7 +372,7 @@ void main() {
       test('createIndex should work with ValueIndexConfiguration', () {
         db.createIndex('a', ValueIndexConfiguration(['a']));
 
-        final q = Query(db, N1QLQuery('SELECT * FROM _ WHERE a = "a"'));
+        final q = Query(db, 'SELECT * FROM _ WHERE a = "a"');
 
         final explain = q.explain();
 
@@ -382,8 +382,7 @@ void main() {
       test('createIndex should work with FullTextIndexConfiguration', () {
         db.createIndex('a', FullTextIndexConfiguration(['a']));
 
-        final q =
-            Query(db, N1QLQuery("SELECT * FROM _ WHERE MATCH('a', 'query')"));
+        final q = Query(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
 
         final explain = q.explain();
 
@@ -417,36 +416,34 @@ void main() {
       });
 
       test('execute query with parameters', () {
-        final q =
-            Query(db, N1QLQuery(r'SELECT doc FROM _ WHERE META().id = $ID'));
+        final q = Query(db, r'SELECT doc FROM _ WHERE META().id = $ID');
         db.saveDocument(MutableDocument.withId('A'));
 
-        q.parameters.setValue('A', name: 'ID');
+        q.parameters = Parameters()..setValue('A', name: 'ID');
         expect((q.execute()), isNotEmpty);
 
-        q.parameters.setValue('B', name: 'ID');
+        q.parameters = Parameters()..setValue('B', name: 'ID');
         expect((q.execute()), isEmpty);
       });
 
       test('listen to query with parameters', () async {
-        final q =
-            Query(db, N1QLQuery(r'SELECT doc FROM _ WHERE META().id = $ID'));
+        final q = Query(db, r'SELECT doc FROM _ WHERE META().id = $ID');
         db.saveDocument(MutableDocument.withId('A'));
 
-        q.parameters.setValue('A', name: 'ID');
+        q.parameters = Parameters()..setValue('A', name: 'ID');
         expect((await q.changes().first), isNotEmpty);
 
-        q.parameters.setValue('B', name: 'ID');
+        q.parameters = Parameters()..setValue('B', name: 'ID');
         expect((await q.changes().first), isEmpty);
       });
 
       test('execute does not throw', () async {
-        final q = Query(db, N1QLQuery('SELECT doc FROM _'));
+        final q = Query(db, 'SELECT doc FROM _');
         expect(q.execute(), isEmpty);
       });
 
       test('explain returns the query plan explanation', () {
-        final q = Query(db, N1QLQuery('SELECT doc FROM _'));
+        final q = Query(db, 'SELECT doc FROM _');
         final queryPlan = q.explain();
 
         expect(
@@ -458,26 +455,15 @@ void main() {
         );
       });
 
-      test('columCount returns correct count', () {
-        final q = Query(db, N1QLQuery('SELECT a FROM _'));
-        expect(q.columnCount(), 1);
-      });
-
-      test('columnName returns correct name', () {
-        final q = Query(db, N1QLQuery('SELECT a FROM _'));
-        expect(q.columnName(0), 'a');
-      });
-
       test('listener is notified of changes', () {
-        final q = Query(db, N1QLQuery('SELECT a FROM _ AS a WHERE a.b = "c"'));
+        final q = Query(db, 'SELECT a FROM _ AS a WHERE a.b = "c"');
 
         final doc = MutableDocument({'b': 'c'});
         final result = {'a': doc.toPlainMap()};
         final stream = q
             .changes()
-            .map((resultSet) => resultSet.asDictionaries
-                .map((dict) => dict.toPlainMap())
-                .toList())
+            .map((resultSet) =>
+                resultSet.map((dict) => dict.toPlainMap()).toList())
             .shareReplay();
 
         // ignore: unawaited_futures
@@ -494,7 +480,7 @@ void main() {
 
       test('bad query: error position highlighting', () {
         expect(
-          () => Query(db, N1QLQuery('SELECT foo()')),
+          () => Query(db, 'SELECT foo()'),
           throwsA(isA<DatabaseException>().having(
             (it) => it.toString(),
             'toString()',
@@ -517,9 +503,9 @@ SELECT foo()
 
           final q = Query(
             db,
-            N1QLQuery(r'SELECT META().id AS id_ FROM _ WHERE META().id = $ID'),
+            r'SELECT META().id AS id_ FROM _ WHERE META().id = $ID',
           );
-          q.parameters.setString(doc.id, name: 'ID');
+          q.parameters = Parameters()..setString(doc.id, name: 'ID');
 
           final resultSet = q.execute();
           final iterator = resultSet.iterator..moveNext();
@@ -530,9 +516,8 @@ SELECT foo()
           final doc = MutableDocument.withId('ResultSetColumnIndex');
           db.saveDocument(doc);
 
-          final q = Query(
-              db, N1QLQuery(r'SELECT META().id FROM _ WHERE META().id = $ID'));
-          q.parameters.setString(doc.id, name: 'ID');
+          final q = Query(db, r'SELECT META().id FROM _ WHERE META().id = $ID');
+          q.parameters = Parameters()..setString(doc.id, name: 'ID');
 
           final resultSet = q.execute();
           final iterator = resultSet.iterator..moveNext();
@@ -585,23 +570,21 @@ SELECT foo()
 
         final q = Query(
           db,
-          N1QLQuery(
-            r'''
-            SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
-            FROM _ AS dish
-            JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
-            WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
-            GROUP BY dish._id
-            ORDER BY max(meal.date)
-            ''',
-          ),
+          r'''
+          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
+          FROM _ AS dish
+          JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
+          WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
+          GROUP BY dish._id
+          ORDER BY max(meal.date)
+          ''',
         );
 
         print(q.explain());
 
         var resultSet = q.execute();
 
-        for (final result in resultSet.asDictionaries) {
+        for (final result in resultSet) {
           print(result);
         }
       });

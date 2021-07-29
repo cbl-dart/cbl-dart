@@ -62,7 +62,7 @@ class _ValueIndexConfiguration
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
-        expressionLanguage: CBLQueryLanguage.N1QL,
+        expressionLanguage: CBLQueryLanguage.n1ql,
         expressions: expressions.join(', '),
         type: CBLIndexType.value,
       );
@@ -99,7 +99,7 @@ class _FullTextIndexConfiguration
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
-        expressionLanguage: CBLQueryLanguage.N1QL,
+        expressionLanguage: CBLQueryLanguage.n1ql,
         expressions: expressions.join(', '),
         type: CBLIndexType.fullText,
         ignoreAccents: ignoreAccents,

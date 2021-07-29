@@ -32,6 +32,7 @@ abstract class Parameters {
   /// [name].
   ///
   /// {@macro cbl.Parameters.parameterDefinition};
+  void setInteger(int? value, {required String name});
 
   /// Set a floating point number to the query parameter referenced by the given
   /// [name].
@@ -87,8 +88,7 @@ class ParametersImpl implements Parameters, FleeceEncodable {
   }
 
   final bool _readonly;
-  late final MutableDictionaryImpl _data =
-      MutableDictionary() as MutableDictionaryImpl;
+  late final _data = MutableDictionary() as MutableDictionaryImpl;
 
   @override
   Object? value(String name) => _data[name];
@@ -103,6 +103,7 @@ class ParametersImpl implements Parameters, FleeceEncodable {
   void setString(String? value, {required String name}) =>
       setValue(value, name: name);
 
+  @override
   void setInteger(int? value, {required String name}) =>
       setValue(value, name: name);
 
@@ -142,4 +143,24 @@ class ParametersImpl implements Parameters, FleeceEncodable {
       throw StateError('This parameters object is readonly.');
     }
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ParametersImpl &&
+          runtimeType == other.runtimeType &&
+          _data == other._data;
+
+  @override
+  int get hashCode => _data.hashCode;
+
+  @override
+  String toString() => [
+        'Parameters(',
+        [
+          for (final columnName in _data.keys)
+            '$columnName: ${_data.value(columnName)}'
+        ].join(', '),
+        ')'
+      ].join();
 }

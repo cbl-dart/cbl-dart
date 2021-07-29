@@ -14,6 +14,7 @@ import '../support/resource.dart';
 import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
+import 'common.dart';
 import 'dictionary.dart';
 import 'fragment.dart';
 
@@ -65,17 +66,14 @@ abstract class MutableDocument implements Document, MutableDictionaryInterface {
 }
 
 /// The context for [MCollection]s within a [DocumentImpl].
-class DocumentMContext extends MContext {
+class DocumentMContext extends MContext implements DatabaseMContext {
   DocumentMContext(this.document);
 
   /// The [DocumentImpl] to which [MCollection]s with this context belong to.
-  ///
-  /// It is important that [MCollection] values have a reference to the
-  /// document in their context, because this ensures that the document is not
-  /// garbage collected before them. Otherwise the finalizer which
-  /// releases the native document would potentially be executed while
-  /// a [MCollection], which relies on the documents data, stays alive.
   final DocumentImpl document;
+
+  @override
+  DatabaseImpl get database => document.database!;
 }
 
 class DocumentEncoderContext {

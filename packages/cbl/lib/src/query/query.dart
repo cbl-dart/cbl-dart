@@ -1,210 +1,114 @@
-import 'dart:async';
-import 'dart:collection';
-import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:meta/meta.dart';
 
+import '../database.dart';
 import '../database/database.dart';
-import '../document/array.dart';
-import '../document/dictionary.dart';
 import '../fleece/fleece.dart' as fl;
-import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/utils.dart';
 import 'parameters.dart';
+import 'result.dart';
+import 'result_set.dart';
 
-/// A query language
-enum QueryLanguage {
-  /// [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
-  json,
+/// A [Database] query.
+abstract class Query {
+  /// Creates a [Database] query from an N1QL [query].
+  factory Query(Database database, String query) =>
+      QueryImpl(database, query, debugCreator: 'Query()');
 
-  /// [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
-  N1QL
-}
-
-/// A definition for a database query which can be compiled into a [Query].
-///
-/// {@macro cbl.Query.language}
-///
-/// Use [N1QLQuery] and [JSONQuery] to create query definitions in the
-/// corresponding language.
-///
-/// See:
-/// - [Query] for creating [Query]s.
-@immutable
-abstract class QueryDefinition {
-  /// The query language this query is defined in.
-  QueryLanguage get language;
-
-  /// The query string which defines this query.
-  String get queryString;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is QueryDefinition &&
-          runtimeType == other.runtimeType &&
-          language == other.language &&
-          queryString == other.queryString;
-
-  @override
-  int get hashCode => language.hashCode ^ queryString.hashCode;
-}
-
-/// A [QueryDefinition] written in N1QL.
-class N1QLQuery extends QueryDefinition {
-  static String _removeWhiteSpaceFromQueryDefinition(String query) =>
-      query.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-  /// Creates a [QueryDefinition] written in N1QL.
-  N1QLQuery(String queryDefinition)
-      : queryString = _removeWhiteSpaceFromQueryDefinition(queryDefinition);
-
-  @override
-  QueryLanguage get language => QueryLanguage.N1QL;
-
-  @override
-  final String queryString;
-
-  @override
-  String toString() => 'N1QLQuery($queryString)';
-}
-
-/// A [QueryDefinition] in the JSON syntax.
-class JSONQuery extends QueryDefinition {
-  /// Creates a [QueryDefinition] in the JSON syntax from JSON
-  /// represented as primitive Dart values.
-  JSONQuery(List<dynamic> queryDefinition)
-      : queryString = jsonEncode(queryDefinition);
-
-  /// Creates a [QueryDefinition] in the JSON syntax from a JSON string.
-  JSONQuery.fromString(this.queryString);
-
-  @override
-  QueryLanguage get language => QueryLanguage.json;
-
-  @override
-  final String queryString;
-
-  @override
-  String toString() => 'JSONQuery($queryString)';
-}
-
-/// A [Query] represents a compiled database query.
-///
-/// {@template cbl.Query.language}
-/// The query language is a large subset of the
-/// [N1QL](https://www.couchbase.com/products/n1ql) language from Couchbase
-/// Server, which you can think of as "SQL for JSON" or "SQL++".
-///
-/// Queries may be given either in
-/// [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html),
-/// or in JSON using a
-/// [schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
-/// that resembles a parse tree of N1QL. The JSON syntax is harder for humans,
-/// but much more amenable to machine generation, if you need to create queries
-/// programmatically or translate them from some other form.
-/// {@endtemplate}
-///
-/// ## Listening to a Query
-/// Adding a change listener to a query turns it into a "live query". When
-/// changes are made to documents, the query will periodically re-run and
-/// compare its results with the prior results; if the new results are
-/// different, the listener callback will be called.
-///
-/// The [ResultSet] passed to the listener is the _entire new result set_, not
-/// just the rows that changed.
-///
-/// See:
-/// - [QueryDefinition] for the object which represents an uncompiled database
-///   query.
-abstract class Query implements Resource {
-  /// Creates a query in the given [database] form a [QueryDefinition].
-  factory Query(Database database, QueryDefinition query) => QueryImpl(
-        database: database as DatabaseImpl,
-        language: query.language,
-        query: query.queryString,
-        debugCreator: 'Query()',
+  /// Creates a [Database] query from a JSON representation of the query.
+  factory Query.fromJsonRepresentation(Database database, String json) =>
+      QueryImpl.fromJsonRepresentation(
+        database,
+        json,
+        debugCreator: 'Query.fromJsonRepresentation()',
       );
 
-  /// The database this query is operating on.
-  Database get database;
+  /// [Parameters] used for setting values to the query parameters defined
+  /// in the query.
+  ///
+  /// All parameters defined in the query must be given values before running
+  /// the query, or the query will fail.
+  ///
+  /// The returned [Parameters] will be readonly.
+  Parameters? get parameters;
+  set parameters(Parameters? value);
 
-  /// The current values of the parameters of this [Query].
+  /// Executes this query.
   ///
-  /// These values will be substituted for those parameters whenever the query
-  /// is executed, until they are next assigned.
+  /// Returns a [ResultSet] that iterates over [Result] rows one at a time.
+  /// You can run the query any number of times, and you can have multiple
+  /// [ResultSet]s active at once.
   ///
-  /// Parameters are specified in the query source as e.g. `$PARAM` (N1QL) or
-  /// `["$PARAM"]` (JSON). In this example, the assigned [Parameters] should
-  /// have a key `PARAM` that maps to the value of the parameter.
-  ///
-  /// ```dart
-  /// final query = await db.query(N1QLQuery(
-  ///   '''
-  ///   SELECT p.name, r.rating
-  ///     FROM _ AS p
-  ///     INNER JOIN _default AS r ON array_contains(p.reviewList, META(r).id)
-  ///       WHERE META(p).id = $PRODUCT_ID
-  ///   ''',
-  /// ));
-  ///
-  /// query.parameters.setString('product320', name: 'PRODUCT_ID');
-  /// ```
-  Parameters get parameters;
-  set parameters(Parameters value);
-
-  /// Runs the query, returning the results.
+  /// The results come from a snapshot of the database taken at the moment
+  /// [execute] is called, so they will not reflect any changes made to the
+  /// database afterwards.
   ResultSet execute();
 
-  /// Returns information about the query, including the translated SQLite form,
-  /// and the search strategy. You can use this to help optimize the query:
-  /// the word `SCAN` in the strategy indicates a linear scan of the entire
-  /// database, which should be avoided by adding an index. The strategy will
-  /// also show which index(es), if any, are used.
+  /// Returns a string describing the implementation of the compiled query.
+  ///
+  /// This is intended to be read by a developer for purposes of optimizing the
+  /// query, especially to add database indexes. It's not machine-readable and
+  /// its format may change.
+  ///
+  /// As currently implemented, the result is two or more lines separated by
+  /// newline characters:
+  /// * The first line is the SQLite SELECT statement.
+  /// * The subsequent lines are the output of SQLite's "EXPLAIN QUERY PLAN"
+  ///   command applied to that statement; for help interpreting this, see
+  ///   https://www.sqlite.org/eqp.html . The most important thing to know is
+  ///   that if you see "SCAN TABLE", it means that SQLite is doing a slow
+  ///   linear scan of the documents instead of using an index.
   String explain();
 
-  /// Returns the number of columns in each result.
-  int columnCount();
-
-  /// Returns the name of a column in the result.
-  ///
-  /// The column name is based on its expression in the `SELECT...` or `WHAT:`
-  /// section of the query. A column that returns a property or property path
-  /// will be named after that property. A column that returns an expression
-  /// will have an automatically-generated name like `$1`. To give a column a
-  /// custom name, use the `AS` syntax in the query. Every column is guaranteed
-  /// to have a unique name.
-  String? columnName(int index);
-
-  /// Returns a [Stream] which emits a [ResultSet] when this query's results
-  /// change, turning it into a "live query" until the stream is canceled.
-  ///
-  /// When the first change stream is created, the query will run and notify the
-  /// subscriber of the results when ready. After that, it will run in the
-  /// background after the database changes, and only notify the subscriber when
-  /// the result set changes.
+  /// Returns a [Stream] of [ResultSet]s which emits when the [ResultSet] of
+  /// this query changes.
   Stream<ResultSet> changes();
 }
+
+// === Impl ====================================================================
+
+late final _bindings = cblBindings.query;
 
 class QueryImpl extends CblObject<CBLQuery>
     with DelegatingResourceMixin
     implements Query {
-  static late final _bindings = cblBindings.query;
+  QueryImpl(Database database, String query, {required String debugCreator})
+      : this._(
+          database: database as DatabaseImpl,
+          language: CBLQueryLanguage.n1ql,
+          query: query,
+          debugCreator: debugCreator,
+        );
 
-  QueryImpl({
-    required this.database,
-    required QueryLanguage language,
+  /// Creates a [Database] query from a JSON representation of the query.
+  QueryImpl.fromJsonRepresentation(
+    Database database,
+    String json, {
+    required String debugCreator,
+  }) : this._(
+          database: database as DatabaseImpl,
+          language: CBLQueryLanguage.json,
+          query: json,
+          debugCreator: debugCreator,
+        );
+
+  QueryImpl._({
+    required DatabaseImpl database,
+    required CBLQueryLanguage language,
     required String query,
     required String? debugCreator,
-  }) : super(
+  })  : _database = database,
+        _language = language,
+        _query = query,
+        super(
           database.native.call((pointer) => _bindings.create(
                 pointer,
-                language.toCBLQueryLanguage(),
+                language,
                 query,
               )),
           debugName: 'Query(creator: $debugCreator)',
@@ -212,21 +116,67 @@ class QueryImpl extends CblObject<CBLQuery>
     database.registerChildResource(this);
   }
 
-  @override
-  final DatabaseImpl database;
+  final DatabaseImpl _database;
+  final CBLQueryLanguage _language;
+  final String _query;
+  late final _columnNames = _getColumnNames();
 
   @override
-  ParametersImpl get parameters => useSync(() => _parameters);
-  var _parameters = ParametersImpl();
+  Parameters? get parameters => _parameters;
+  ParametersImpl? _parameters;
 
   @override
-  set parameters(covariant ParametersImpl value) =>
-      useSync(() => _parameters = value);
+  set parameters(Parameters? value) {
+    if (value == null) {
+      _parameters = null;
+    } else {
+      _parameters = ParametersImpl.from(value, readonly: true);
+    }
+    _applyParameters();
+  }
 
-  void _flushParameters() {
+  @override
+  ResultSet execute() => useSync(() => ResultSetImpl(
+        native.call(_bindings.execute),
+        database: _database,
+        columnNames: _columnNames,
+        debugCreator: 'Query.execute()',
+      ));
+
+  @override
+  String explain() => useSync(() => native.call(_bindings.explain));
+
+  @override
+  Stream<ResultSet> changes() => useSync(
+      () => CallbackStreamController<ResultSet, Pointer<CBLListenerToken>>(
+            parent: this,
+            startStream: (callback) => _bindings.addChangeListener(
+              native.pointer,
+              callback.native.pointer,
+            ),
+            createEvent: (listenerToken, _) => ResultSetImpl(
+              native.call((pointer) {
+                // The native side sends no arguments. When the native side
+                // notfies the listener it has to copy the current query
+                // result set.
+                return _bindings.copyCurrentResults(pointer, listenerToken);
+              }),
+              database: _database,
+              columnNames: _columnNames,
+              debugCreator: 'Query.changes()',
+            ),
+          ).stream);
+
+  void _applyParameters() {
     final encoder = fl.FleeceEncoder();
-    final result = parameters.encodeTo(encoder);
-    assert(result is! Future);
+    final parameters = _parameters;
+    if (parameters != null) {
+      final result = parameters.encodeTo(encoder);
+      assert(result is! Future);
+    } else {
+      encoder.beginDict(0);
+      encoder.endDict();
+    }
     final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
     final flDict = doc.root.asDict!;
@@ -236,186 +186,11 @@ class QueryImpl extends CblObject<CBLQuery>
         ));
   }
 
-  @override
-  ResultSet execute() => useSync(() {
-        _flushParameters();
-        return ResultSet._(
-          native.call(_bindings.execute),
-          debugCreator: 'Query.execute()',
-        );
+  List<String> _getColumnNames() =>
+      List.generate(native.call(_bindings.columnCount), (index) {
+        return native.call((pointer) => _bindings.columnName(pointer, index));
       });
 
   @override
-  String explain() => useSync(() => native.call(_bindings.explain));
-
-  @override
-  int columnCount() => useSync(() => native.call(_bindings.columnCount));
-
-  @override
-  String? columnName(int index) => useSync(() => native.call((pointer) {
-        return _bindings.columnName(pointer, index);
-      }));
-
-  @override
-  Stream<ResultSet> changes() => useSync(
-      () => CallbackStreamController<ResultSet, Pointer<CBLListenerToken>>(
-            parent: this,
-            startStream: (callback) {
-              _flushParameters();
-              return _bindings.addChangeListener(
-                native.pointer,
-                callback.native.pointer,
-              );
-            },
-            createEvent: (listenerToken, _) {
-              return ResultSet._(
-                native.call((pointer) {
-                  // The native side sends no arguments. When the native side
-                  // notfies the listener it has to copy the current query result
-                  // set.
-                  return _bindings.copyCurrentResults(
-                    pointer,
-                    listenerToken,
-                  );
-                }),
-                debugCreator: 'Query.changes()',
-              );
-            },
-          ).stream);
-}
-
-/// One of the results that [Query]s return in [ResultSet]s.
-///
-/// A Result is only valid until the next Result has been received. To retain
-/// data pull it out of the Result before moving on to the next Result.
-abstract class Result {
-  /// Returns the value of a column of the current result, given its
-  /// (zero-based) numeric index as an `int` or its name as a [String].
-  ///
-  /// This may return `null`, indicating `MISSING`, if the value doesn't exist,
-  /// e.g. if the column is a property that doesn't exist in the document.
-  ///
-  /// See:
-  /// - [Query.columnName] for a discussion of column names.
-  Object? operator [](Object keyOrIndex);
-
-  /// Returns the current result as an array of column values.
-  Array get array;
-
-  /// Returns the current result as a dictionary mapping column names to values.
-  Dictionary get dictionary;
-}
-
-class _ResultSetIterator extends NativeResource<CBLResultSet>
-    implements Iterator<Result>, Result {
-  static late final _bindings = cblBindings.resultSet;
-
-  _ResultSetIterator(NativeObject<CBLResultSet> native) : super(native);
-
-  var _hasMore = true;
-  var _hasCurrent = false;
-
-  @override
-  Result get current => this;
-
-  @override
-  bool moveNext() {
-    if (_hasMore) {
-      _hasCurrent = native.call(_bindings.next);
-      if (!_hasCurrent) {
-        _hasMore = false;
-      }
-    }
-    return _hasMore;
-  }
-
-  @override
-  Object? operator [](Object keyOrIndex) {
-    _checkHasCurrent();
-    Pointer<FLValue> pointer;
-
-    if (keyOrIndex is String) {
-      pointer =
-          native.call((pointer) => _bindings.valueForKey(pointer, keyOrIndex));
-    } else if (keyOrIndex is int) {
-      pointer =
-          native.call((pointer) => _bindings.valueAtIndex(pointer, keyOrIndex));
-    } else {
-      throw ArgumentError.value(keyOrIndex, 'keyOrIndex');
-    }
-
-    return MRoot.fromValue(
-      pointer,
-      context: MContext(),
-      isMutable: false,
-    ).asNative;
-  }
-
-  @override
-  Array get array {
-    _checkHasCurrent();
-    return MRoot.fromValue(
-      native.call(_bindings.resultArray).cast(),
-      context: MContext(),
-      isMutable: false,
-    ).asNative as Array;
-  }
-
-  @override
-  Dictionary get dictionary {
-    _checkHasCurrent();
-    return MRoot.fromValue(
-      native.call(_bindings.resultDict).cast(),
-      context: MContext(),
-      isMutable: false,
-    ).asNative as Dictionary;
-  }
-
-  void _checkHasCurrent() {
-    if (!_hasCurrent) {
-      throw StateError(
-        'ResultSet iterator is empty or its moveNext method has not been '
-        'called.',
-      );
-    }
-  }
-}
-
-/// A [ResultSet] is an iterable of the [Result]s returned by a query.
-///
-/// It can only be iterated __once__.
-///
-/// See:
-/// - [Result] for how to consume a single Result.
-class ResultSet extends CblObject<CBLResultSet> with IterableMixin<Result> {
-  ResultSet._(
-    Pointer<CBLResultSet> pointer, {
-    required String? debugCreator,
-  }) : super(
-          pointer,
-          debugName: 'ResultSet(creator: $debugCreator)',
-        );
-
-  var _consumed = false;
-
-  @override
-  Iterator<Result> get iterator {
-    if (_consumed) {
-      throw StateError(
-        'ResultSet can only be consumed once and already has been.',
-      );
-    }
-    _consumed = true;
-    return _ResultSetIterator(native);
-  }
-
-  /// All the results as [Array]s.
-  Iterable<Array> get asArrays => map((result) => result.array);
-
-  /// All the results as [Dictionary]s.
-  Iterable<Dictionary> get asDictionaries => map((result) => result.dictionary);
-}
-
-extension on QueryLanguage {
-  CBLQueryLanguage toCBLQueryLanguage() => CBLQueryLanguage.values[index];
+  String toString() => 'Query(${describeEnum(_language)}: $_query)';
 }
