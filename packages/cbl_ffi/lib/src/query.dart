@@ -1,15 +1,15 @@
 import 'dart:ffi';
 
+import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'database.dart';
 import 'fleece.dart';
-import 'async_callback.dart';
 import 'utils.dart';
 
 enum CBLQueryLanguage {
   json,
-  N1QL,
+  n1ql,
 }
 
 extension CBLQueryLanguageExt on CBLQueryLanguage {

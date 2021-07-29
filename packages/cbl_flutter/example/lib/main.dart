@@ -39,12 +39,12 @@ class _MyAppState extends State<MyApp> {
 
     final query = Query(
       _db,
-      N1QLQuery('SELECT post FROM _ AS post WHERE post.type = "post"'),
+      'SELECT post FROM _ AS post WHERE post.type = "post"',
     );
 
     query
         .changes()
-        .map((resultSet) => resultSet.asDictionaries
+        .map((resultSet) => resultSet
             .map((result) => result['post'].dictionary!.toPlainMap())
             .toList())
         .listen((posts) => setState(() => _posts = posts));
@@ -65,9 +65,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _clearDatabase() async {
-    final ids = Query(_db, N1QLQuery('SELECT META().id FROM _'))
+    final ids = Query(_db, 'SELECT META().id FROM _')
         .execute()
-        .map((r) => r[0] as String)
+        .map((r) => r[0].string!)
         .toList();
 
     _db.inBatch(() {

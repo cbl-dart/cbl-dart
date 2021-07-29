@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/log/logger.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -14,8 +12,6 @@ void main() {
 
   group('Database', () {
     test('remove', () async {
-      cblLogMessage(LogDomain.network, LogLevel.error, 'remove');
-
       final db = openTestDb('Remove');
       final name = db.name;
       final directory = db.config.directory;
@@ -71,7 +67,7 @@ void main() {
     late Database db;
 
     setUpAll(() {
-      dbName = testDbName('Common');
+      dbName = testDbName('Database|Common');
       dbConfig = DatabaseConfiguration(directory: tmpDir);
       db = Database(dbName, dbConfig);
       addTearDown(db.close);
@@ -114,7 +110,7 @@ void main() {
 
       test('performMaintenance: reindex', () {
         final db = openTestDb('PerformMaintenance|Reindex');
-        db.createIndex('a', ValueIndex('[".type"]'));
+        db.createIndex('a', ValueIndexConfiguration(['type']));
         final doc = MutableDocument({'type': 'A'});
         db.saveDocument(doc);
         db.performMaintenance(MaintenanceType.reindex);
@@ -329,7 +325,7 @@ void main() {
         expect(doc.sequence, isPositive);
       });
 
-      test('toMap returns the documents properties', () {
+      test('toPlainMap returns the documents properties', () {
         final props = {'a': 'b'};
         final doc = MutableDocument(props);
 
@@ -366,27 +362,22 @@ void main() {
     });
 
     group('Index', () {
-      late Database db;
+      test('createIndex should work with ValueIndexConfiguration', () {
+        final db = openTestDb('CreateValueIndexConfiguration');
+        db.createIndex('a', ValueIndexConfiguration(['a']));
 
-      setUp(() {
-        db = openTestDb('Index');
-      });
-
-      test('createIndex should work with ValueIndex', () {
-        db.createIndex('a', ValueIndex('[[".a"]]'));
-
-        final q = Query(db, N1QLQuery('SELECT * FROM _ WHERE a = "a"'));
+        final q = Query(db, 'SELECT * FROM _ WHERE a = "a"');
 
         final explain = q.explain();
 
         expect(explain, contains('USING INDEX a'));
       });
 
-      test('createIndex should work with FullTextIndex', () {
-        db.createIndex('a', FullTextIndex('[[".a"]]'));
+      test('createIndex should work with FullTextIndexConfiguration', () {
+        final db = openTestDb('CreateFullTextIndexConfiguration');
+        db.createIndex('a', FullTextIndexConfiguration(['a']));
 
-        final q =
-            Query(db, N1QLQuery("SELECT * FROM _ WHERE MATCH('a', 'query')"));
+        final q = Query(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
 
         final explain = q.explain();
 
@@ -394,7 +385,8 @@ void main() {
       });
 
       test('deleteIndex should delete the given index', () {
-        db.createIndex('a', ValueIndex('[[".a"]]'));
+        final db = openTestDb('DeleteIndex');
+        db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
 
@@ -403,144 +395,13 @@ void main() {
         expect(db.indexes, isEmpty);
       });
 
-      test('indexNames should return the names of all existing indexes', () {
+      test('indexes should return the names of all existing indexes', () {
+        final db = openTestDb('DatabaseIndexNames');
         expect(db.indexes, isEmpty);
 
-        db.createIndex('a', ValueIndex('[[".a"]]'));
+        db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
-      });
-    });
-
-    group('Query', () {
-      late Database db;
-
-      setUp(() {
-        db = openTestDb('Query');
-      });
-
-      test('execute query with parameters', () {
-        final q =
-            Query(db, N1QLQuery(r'SELECT doc FROM _ WHERE META().id = $ID'));
-        db.saveDocument(MutableDocument.withId('A'));
-
-        q.parameters.setValue('A', name: 'ID');
-        expect((q.execute()), isNotEmpty);
-
-        q.parameters.setValue('B', name: 'ID');
-        expect((q.execute()), isEmpty);
-      });
-
-      test('listen to query with parameters', () async {
-        final q =
-            Query(db, N1QLQuery(r'SELECT doc FROM _ WHERE META().id = $ID'));
-        db.saveDocument(MutableDocument.withId('A'));
-
-        q.parameters.setValue('A', name: 'ID');
-        expect((await q.changes().first), isNotEmpty);
-
-        q.parameters.setValue('B', name: 'ID');
-        expect((await q.changes().first), isEmpty);
-      });
-
-      test('execute does not throw', () async {
-        final q = Query(db, N1QLQuery('SELECT doc FROM _'));
-        expect(q.execute(), isEmpty);
-      });
-
-      test('explain returns the query plan explanation', () {
-        final q = Query(db, N1QLQuery('SELECT doc FROM _'));
-        final queryPlan = q.explain();
-
-        expect(
-          queryPlan,
-          allOf([
-            contains('SCAN TABLE'),
-            contains('{"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}'),
-          ]),
-        );
-      });
-
-      test('columCount returns correct count', () {
-        final q = Query(db, N1QLQuery('SELECT a FROM _'));
-        expect(q.columnCount(), 1);
-      });
-
-      test('columnName returns correct name', () {
-        final q = Query(db, N1QLQuery('SELECT a FROM _'));
-        expect(q.columnName(0), 'a');
-      });
-
-      test('listener is notified of changes', () {
-        final q = Query(db, N1QLQuery('SELECT a FROM _ AS a WHERE a.b = "c"'));
-
-        final doc = MutableDocument({'b': 'c'});
-        final result = {'a': doc.toPlainMap()};
-        final stream = q
-            .changes()
-            .map((resultSet) => resultSet.asDictionaries
-                .map((dict) => dict.toPlainMap())
-                .toList())
-            .shareReplay();
-
-        // ignore: unawaited_futures
-        stream.first.then((_) => db.saveDocument(doc));
-
-        expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            isEmpty,
-            [result],
-          ]),
-        );
-      });
-
-      test('bad query: error position highlighting', () {
-        expect(
-          () => Query(db, N1QLQuery('SELECT foo()')),
-          throwsA(isA<DatabaseException>().having(
-            (it) => it.toString(),
-            'toString()',
-            '''
-DatabaseException(query syntax error, code: invalidQuery)
-SELECT foo()
-          ^
-''',
-          )),
-        );
-      });
-
-      group('ResultSet', () {
-        // TODO: fix bug which prevents id from being used an alias
-        // The test uses id_ as a workaround.
-        // https://github.com/couchbase/couchbase-lite-C/issues/149
-        test('supports getting column by name', () async {
-          final doc = MutableDocument.withId('ResultSetColumnByName');
-          db.saveDocument(doc);
-
-          final q = Query(
-            db,
-            N1QLQuery(r'SELECT META().id AS id_ FROM _ WHERE META().id = $ID'),
-          );
-          q.parameters.setString(doc.id, name: 'ID');
-
-          final resultSet = q.execute();
-          final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current['id_'] as String, doc.id);
-        });
-
-        test('supports getting column by index', () async {
-          final doc = MutableDocument.withId('ResultSetColumnIndex');
-          db.saveDocument(doc);
-
-          final q = Query(
-              db, N1QLQuery(r'SELECT META().id FROM _ WHERE META().id = $ID'));
-          q.parameters.setString(doc.id, name: 'ID');
-
-          final resultSet = q.execute();
-          final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current[0] as String, doc.id);
-        });
       });
     });
 
@@ -563,8 +424,8 @@ SELECT foo()
       });
 
       test('N1QL meal planner example', () {
-        db.createIndex('date', ValueIndex('[".type"]'));
-        db.createIndex('group_index', ValueIndex('[".group"]'));
+        db.createIndex('date', ValueIndexConfiguration(['type']));
+        db.createIndex('group_index', ValueIndexConfiguration(['`group`']));
 
         final dish = MutableDocument({
           'type': 'dish',
@@ -588,8 +449,7 @@ SELECT foo()
 
         final q = Query(
           db,
-          N1QLQuery(
-            r'''
+          r'''
           SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
           FROM _ AS dish
           JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
@@ -597,14 +457,13 @@ SELECT foo()
           GROUP BY dish._id
           ORDER BY max(meal.date)
           ''',
-          ),
         );
 
         print(q.explain());
 
         var resultSet = q.execute();
 
-        for (final result in resultSet.asDictionaries) {
+        for (final result in resultSet) {
           print(result);
         }
       });

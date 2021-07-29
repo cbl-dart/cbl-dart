@@ -358,7 +358,7 @@ void main() {
       expect(status.progress.completed, 0);
     });
 
-    test('statusChanges emits when the replicators status changes', () {
+    test('changes emits when the replicators status changes', () {
       final db = openTestDb('ReplicatorStatusChanges');
       final replicator = db.createTestReplicator();
 

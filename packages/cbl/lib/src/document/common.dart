@@ -10,7 +10,6 @@ import '../support/ffi.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
-import 'document.dart';
 
 late final _blobBindings = cblBindings.blobs.blob;
 
@@ -86,6 +85,12 @@ abstract class MCollectionWrapper {
   MCollection get mCollection;
 }
 
+class DatabaseMContext extends MContext {
+  DatabaseMContext(this.database);
+
+  final DatabaseImpl database;
+}
+
 class CblMDelegate extends MDelegate {
   @override
   MCollection? collectionFromNative(Object? native) {
@@ -140,8 +145,8 @@ class CblMDelegate extends MDelegate {
           if (blob != null) {
             final context = parent.context;
             DatabaseImpl? database;
-            if (context is DocumentMContext) {
-              database = context.document.database;
+            if (context is DatabaseMContext) {
+              database = context.database;
             }
             return BlobImpl(
               database: database,

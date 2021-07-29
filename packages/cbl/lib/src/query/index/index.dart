@@ -1,0 +1,33 @@
+import 'package:cbl_ffi/cbl_ffi.dart';
+
+import '../../database.dart';
+import '../query.dart';
+
+/// A description of a [Database] index. Indexes improve [Query] performance.
+abstract class Index {}
+
+/// A language which can be used to configure as the primary language for a
+/// full text index.
+enum FullTextLanguage {
+  danish,
+  dutch,
+  english,
+  finnish,
+  french,
+  german,
+  hungarian,
+  italian,
+  norwegian,
+  portuguese,
+  romanian,
+  russian,
+  spanish,
+  swedish,
+  turkish,
+}
+
+/// Interface for classes wich implement [Index].
+abstract class IndexImplInterface extends Index {
+  /// Returns this index specified as a [CBLIndexSpec].
+  CBLIndexSpec toCBLIndexSpec();
+}
