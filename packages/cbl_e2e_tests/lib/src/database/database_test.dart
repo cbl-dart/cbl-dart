@@ -524,6 +524,22 @@ SELECT foo()
           expect(iterator.current[0].string, doc.id);
         });
       });
+
+      group('Result', () {
+        test('access column by name', () {
+          final db = openTestDb('Result|ColumnByName');
+          db.saveDocument(MutableDocument({
+            'a': {'b': true}
+          }));
+          final query = Query(db, 'SELECT a AS alias, a.b, count() FROM _');
+
+          final result = query.execute().first;
+          expect(result.keys, ['alias', 'b', r'$1']);
+          expect(result.dictionary('alias')!.toPlainMap(), {'b': true});
+          expect(result.value('b'), isTrue);
+          expect(result.value(r'$1'), 1);
+        });
+      });
     });
 
     group('Scenarios', () {

@@ -55,14 +55,17 @@ abstract class Query {
   /// query, especially to add database indexes. It's not machine-readable and
   /// its format may change.
   ///
-  /// As currently implemented, the result is two or more lines separated by
+  /// As currently implemented, the result has three sections, separated by
   /// newline characters:
-  /// * The first line is the SQLite SELECT statement.
-  /// * The subsequent lines are the output of SQLite's "EXPLAIN QUERY PLAN"
-  ///   command applied to that statement; for help interpreting this, see
+  /// * The first section is this query compiled into an SQLite query.
+  /// * The second section is the output of SQLite's "EXPLAIN QUERY PLAN"
+  ///   command applied to that query; for help interpreting this, see
   ///   https://www.sqlite.org/eqp.html . The most important thing to know is
   ///   that if you see "SCAN TABLE", it means that SQLite is doing a slow
   ///   linear scan of the documents instead of using an index.
+  /// * The third sections is this queries JSON representation. This is the data
+  ///   structure that is built by the the query to describe this query
+  ///   builder or when a N1QL query is compiled.
   String explain();
 
   /// Returns a [Stream] of [ResultSet]s which emits when the [ResultSet] of
@@ -197,4 +200,4 @@ class QueryImpl extends CblObject<CBLQuery>
 
 String _normalizeN1qlQuery(String query) => query
     // Collapse whitespace.
-    .replaceAll('\s+', ' ');
+    .replaceAll(RegExp(r'\s+'), ' ');

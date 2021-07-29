@@ -6,12 +6,19 @@ import '../document/dictionary.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/native_object.dart';
-import 'query.dart';
 import 'result_set.dart';
 
-/// A single row in the [ResultSet] that is created when executing a [Query].
+/// A single row in a [ResultSet].
 ///
-// TODO: explain how columns are named
+/// The name of a column is determined by the first applicable rule of the
+/// following rules:
+///
+/// 1. The alias name of an aliased column.
+/// 2. The last component of a property expression. Functions for example,
+///    are __not__ property expressions.
+/// 3. A generated key of the format `$1`, `$2`, `$3`, ...
+///    The number after `$` corresponds to the position of the column among the
+///    rest of the unnamed columns and starts at `1`.
 abstract class Result
     implements Iterable<String>, ArrayInterface, DictionaryInterface {
   /// The number of column in this result.
@@ -22,75 +29,75 @@ abstract class Result
   @override
   List<String> get keys;
 
-  /// Returns the column at the given [keyOrIndex].
+  /// Returns the column at the given [nameOrIndex].
   ///
   /// Returns `null` if the column is `null`.
   ///
-  /// Throws a [RangeError] if [keyOrIndex] is ouf of range.
-  T? value<T extends Object>(Object keyOrIndex);
+  /// Throws a [RangeError] if [nameOrIndex] is ouf of range.
+  T? value<T extends Object>(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as a [String].
+  /// Returns the column at the given [nameOrIndex] as a [String].
   ///
   /// {@template cbl.Result.typedNullableGetter}
   /// Returns `null` if the value is not a of the expected typ or it is
   /// `null`.
   ///
-  /// Throws a [RangeError] if the [keyOrIndex] is ouf of range.
+  /// Throws a [RangeError] if the [nameOrIndex] is ouf of range.
   /// {@endtemplate}
-  String? string(Object keyOrIndex);
+  String? string(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as an integer number.
+  /// Returns the column at the given [nameOrIndex] as an integer number.
   ///
   /// {@template cbl.Result.typedDefaultedGetter}
   /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`)
   /// if the column is not of the expected type or is `null`.
   ///
-  /// Throws a [RangeError] if the [keyOrIndex] is ouf of range.
+  /// Throws a [RangeError] if the [nameOrIndex] is ouf of range.
   /// {@endtemplate}
-  int integer(Object keyOrIndex);
+  int integer(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as an floating point number.
+  /// Returns the column at the given [nameOrIndex] as an floating point number.
   ///
   /// {@macro cbl.Result.typedDefaultedGetter}
-  double float(Object keyOrIndex);
+  double float(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as a [num].
+  /// Returns the column at the given [nameOrIndex] as a [num].
   ///
   /// {@macro cbl.Result.typedNullableGetter}
-  num? number(Object keyOrIndex);
+  num? number(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as a [bool].
+  /// Returns the column at the given [nameOrIndex] as a [bool].
   ///
   /// {@macro cbl.Result.typedDefaultedGetter}
-  bool boolean(Object keyOrIndex);
+  bool boolean(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as a [DateTime].
+  /// Returns the column at the given [nameOrIndex] as a [DateTime].
   ///
   /// {@macro cbl.Result.typedNullableGetter}
-  DateTime? date(Object keyOrIndex);
+  DateTime? date(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as a [Blob].
+  /// Returns the column at the given [nameOrIndex] as a [Blob].
   ///
   /// {@macro cbl.Result.typedNullableGetter}
-  Blob? blob(Object keyOrIndex);
+  Blob? blob(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as an [Array].
+  /// Returns the column at the given [nameOrIndex] as an [Array].
   ///
   /// {@macro cbl.Result.typedNullableGetter}
-  Array? array(Object keyOrIndex);
+  Array? array(Object nameOrIndex);
 
-  /// Returns the column at the given [keyOrIndex] as a [Dictionary].
+  /// Returns the column at the given [nameOrIndex] as a [Dictionary].
   ///
   /// {@macro cbl.Result.typedNullableGetter}
-  Dictionary? dictionary(Object keyOrIndex);
+  Dictionary? dictionary(Object nameOrIndex);
 
-  /// Returns whether a column with the given [keyOrIndex] exists in this
+  /// Returns whether a column with the given [nameOrIndex] exists in this
   /// result.
   @override
-  bool contains(Object? keyOrIndex);
+  bool contains(Object? nameOrIndex);
 
-  /// Returns a [Fragment] for the column at the given [keyOrIndex].
-  Fragment operator [](Object keyOrIndex);
+  /// Returns a [Fragment] for the column at the given [nameOrIndex].
+  Fragment operator [](Object nameOrIndex);
 
   /// Returns a JSON string which contains a dictionary of the named columns of
   /// this result.
@@ -120,111 +127,111 @@ class ResultImpl with IterableMixin<String> implements Result {
   List<String> get keys => _columnNames;
 
   @override
-  T? value<T extends Object>(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.value(keyOrIndex);
+  T? value<T extends Object>(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.value(nameOrIndex);
     }
-    return _dictionary.value(keyOrIndex as String);
+    return _dictionary.value(nameOrIndex as String);
   }
 
   @override
-  String? string(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.string(keyOrIndex);
+  String? string(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.string(nameOrIndex);
     }
-    return _dictionary.string(keyOrIndex as String);
+    return _dictionary.string(nameOrIndex as String);
   }
 
   @override
-  int integer(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.integer(keyOrIndex);
+  int integer(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.integer(nameOrIndex);
     }
-    return _dictionary.integer(keyOrIndex as String);
+    return _dictionary.integer(nameOrIndex as String);
   }
 
   @override
-  double float(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.float(keyOrIndex);
+  double float(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.float(nameOrIndex);
     }
-    return _dictionary.float(keyOrIndex as String);
+    return _dictionary.float(nameOrIndex as String);
   }
 
   @override
-  num? number(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.number(keyOrIndex);
+  num? number(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.number(nameOrIndex);
     }
-    return _dictionary.number(keyOrIndex as String);
+    return _dictionary.number(nameOrIndex as String);
   }
 
   @override
-  bool boolean(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.boolean(keyOrIndex);
+  bool boolean(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.boolean(nameOrIndex);
     }
-    return _dictionary.boolean(keyOrIndex as String);
+    return _dictionary.boolean(nameOrIndex as String);
   }
 
   @override
-  DateTime? date(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.date(keyOrIndex);
+  DateTime? date(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.date(nameOrIndex);
     }
-    return _dictionary.date(keyOrIndex as String);
+    return _dictionary.date(nameOrIndex as String);
   }
 
   @override
-  Blob? blob(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.blob(keyOrIndex);
+  Blob? blob(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.blob(nameOrIndex);
     }
-    return _dictionary.blob(keyOrIndex as String);
+    return _dictionary.blob(nameOrIndex as String);
   }
 
   @override
-  Array? array(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.array(keyOrIndex);
+  Array? array(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.array(nameOrIndex);
     }
-    return _dictionary.array(keyOrIndex as String);
+    return _dictionary.array(nameOrIndex as String);
   }
 
   @override
-  Dictionary? dictionary(Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array.dictionary(keyOrIndex);
+  Dictionary? dictionary(Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array.dictionary(nameOrIndex);
     }
-    return _dictionary.dictionary(keyOrIndex as String);
+    return _dictionary.dictionary(nameOrIndex as String);
   }
 
   @override
-  bool contains(Object? keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return keyOrIndex >= 0 && keyOrIndex < _columnNames.length;
+  bool contains(Object? nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return nameOrIndex >= 0 && nameOrIndex < _columnNames.length;
     }
-    return _columnNames.contains(keyOrIndex as String);
+    return _columnNames.contains(nameOrIndex as String);
   }
 
   @override
-  Fragment operator [](Object keyOrIndex) {
-    _debugCheckKeyOrIndex(keyOrIndex);
-    if (keyOrIndex is int) {
-      return _array[keyOrIndex];
+  Fragment operator [](Object nameOrIndex) {
+    _debugChecknameOrIndex(nameOrIndex);
+    if (nameOrIndex is int) {
+      return _array[nameOrIndex];
     }
-    return _dictionary[keyOrIndex as String];
+    return _dictionary[nameOrIndex as String];
   }
 
   @override
@@ -258,8 +265,8 @@ class ResultImpl with IterableMixin<String> implements Result {
     return dictionary;
   }
 
-  void _debugCheckKeyOrIndex(Object? keyOrIndex) {
-    assert(keyOrIndex is int || keyOrIndex is String);
+  void _debugChecknameOrIndex(Object? nameOrIndex) {
+    assert(nameOrIndex is int || nameOrIndex is String);
   }
 
   @override
