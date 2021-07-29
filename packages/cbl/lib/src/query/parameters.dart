@@ -18,8 +18,13 @@ abstract class Parameters {
   /// Set a value to the query parameter referenced by the given [name].
   ///
   /// {@template cbl.Parameters.parameterDefinition}
-  /// TODO: describe how query parameters are defined.
+  /// In N1QL queries, a parameter is defined by prefixing an identifier with
+  /// `$`. For example, this query defines a parameter with the name `TYPE`:
+  /// ```sql
+  /// SELECT * FROM _ WHERE type = $TYPE;
+  /// ```
   /// {@endtemplate}
+  // TODO: describe how query parameters are defined with query builder
   void setValue(Object? value, {required String name});
 
   /// Set a [String] to the query parameter referenced by the given

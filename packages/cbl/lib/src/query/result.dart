@@ -11,7 +11,7 @@ import 'result_set.dart';
 
 /// A single row in the [ResultSet] that is created when executing a [Query].
 ///
-/// TODO: explain how columns are named
+// TODO: explain how columns are named
 abstract class Result
     implements Iterable<String>, ArrayInterface, DictionaryInterface {
   /// The number of column in this result.
