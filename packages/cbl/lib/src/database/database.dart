@@ -9,7 +9,7 @@ import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
 import '../log.dart';
 import '../log/log.dart';
-import '../query.dart';
+import '../query/index/index.dart';
 import '../replication.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
@@ -467,33 +467,9 @@ class DatabaseImpl extends CblObject<CBLDatabase>
       });
 
   @override
-  void createIndex(String name, Index index) =>
+  void createIndex(String name, covariant IndexImplInterface index) =>
       useSync(() => native.call((pointer) {
-            if (index is ValueIndex) {
-              _bindings.createIndex(
-                pointer,
-                name,
-                CBLdart_IndexType.value,
-                CBLQueryLanguage.json,
-                index.expressions,
-                null,
-                null,
-              );
-            } else if (index is FullTextIndex) {
-              _bindings.createIndex(
-                pointer,
-                name,
-                CBLdart_IndexType.fullText,
-                CBLQueryLanguage.json,
-                index.expressions,
-                index.ignoreAccents,
-                index.language,
-              );
-            } else {
-              throw UnimplementedError(
-                '${index.runtimeType} is not implemented',
-              );
-            }
+            _bindings.createIndex(pointer, name, index.toCBLIndexSpec());
           }));
 
   @override

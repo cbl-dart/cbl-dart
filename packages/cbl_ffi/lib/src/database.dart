@@ -319,20 +319,36 @@ class DatabaseChangeCallbackMessage {
   final List<String> documentIds;
 }
 
-enum CBLdart_IndexType {
+class CBLIndexSpec {
+  CBLIndexSpec({
+    required this.type,
+    required this.expressionLanguage,
+    required this.expressions,
+    this.ignoreAccents,
+    this.language,
+  });
+
+  final CBLIndexType type;
+  final CBLQueryLanguage expressionLanguage;
+  final String expressions;
+  final bool? ignoreAccents;
+  final String? language;
+}
+
+enum CBLIndexType {
   value,
   fullText,
 }
 
-extension on CBLdart_IndexType {
-  int toInt() => CBLdart_IndexType.values.indexOf(this);
+extension on CBLIndexType {
+  int toInt() => CBLIndexType.values.indexOf(this);
 }
 
 extension on int {
-  CBLdart_IndexType toIndexType() => CBLdart_IndexType.values[this];
+  CBLIndexType toIndexType() => CBLIndexType.values[this];
 }
 
-class CBLDart_CBLIndexSpec extends Struct {
+class _CBLDart_CBLIndexSpec extends Struct {
   @Uint8()
   external int _type;
 
@@ -350,9 +366,9 @@ class CBLDart_CBLIndexSpec extends Struct {
 }
 
 // ignore: camel_case_extensions
-extension CBLDart_CBLIndexSpecExt on CBLDart_CBLIndexSpec {
-  CBLdart_IndexType get type => _type.toIndexType();
-  set type(CBLdart_IndexType value) => _type = value.toInt();
+extension CBLDart_CBLIndexSpecExt on _CBLDart_CBLIndexSpec {
+  CBLIndexType get type => _type.toIndexType();
+  set type(CBLIndexType value) => _type = value.toInt();
   set expressionLanguage(CBLQueryLanguage value) =>
       _expressionLanguage = value.toInt();
   set ignoreAccents(bool value) => _ignoreAccents = value.toInt();
@@ -361,13 +377,13 @@ extension CBLDart_CBLIndexSpecExt on CBLDart_CBLIndexSpec {
 typedef CBLDart_CBLDatabase_CreateIndex_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   FLString name,
-  CBLDart_CBLIndexSpec indexSpec,
+  _CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
 typedef CBLDart_CBLDatabase_CreateIndex = int Function(
   Pointer<CBLDatabase> db,
   FLString name,
-  CBLDart_CBLIndexSpec indexSpec,
+  _CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
 
@@ -833,24 +849,14 @@ class DatabaseBindings extends Bindings {
   void createIndex(
     Pointer<CBLDatabase> db,
     String name,
-    CBLdart_IndexType type,
-    CBLQueryLanguage expressionLanguage,
-    String expressions,
-    bool? ignoreAccents,
-    String? language,
+    CBLIndexSpec spec,
   ) {
     withZoneArena(() {
       stringTable.autoFree(() {
         _createIndex(
           db,
           stringTable.flString(name).ref,
-          _createIndexSpec(
-            type,
-            expressionLanguage,
-            expressions,
-            ignoreAccents,
-            language,
-          ).ref,
+          _createIndexSpec(spec).ref,
           globalCBLError,
         ).checkCBLError();
       });
@@ -886,21 +892,15 @@ class DatabaseBindings extends Bindings {
     return result;
   }
 
-  Pointer<CBLDart_CBLIndexSpec> _createIndexSpec(
-    CBLdart_IndexType type,
-    CBLQueryLanguage expressionLanguage,
-    String expressions,
-    bool? ignoreAccents,
-    String? language,
-  ) {
-    final result = zoneArena<CBLDart_CBLIndexSpec>();
+  Pointer<_CBLDart_CBLIndexSpec> _createIndexSpec(CBLIndexSpec spec) {
+    final result = zoneArena<_CBLDart_CBLIndexSpec>();
 
     result.ref
-      ..type = type
-      ..expressionLanguage = expressionLanguage
-      ..expressions = stringTable.flString(expressions, arena: true).ref
-      ..ignoreAccents = ignoreAccents ?? false
-      ..language = stringTable.flString(language, arena: true).ref;
+      ..type = spec.type
+      ..expressionLanguage = spec.expressionLanguage
+      ..expressions = stringTable.flString(spec.expressions, arena: true).ref
+      ..ignoreAccents = spec.ignoreAccents ?? false
+      ..language = stringTable.flString(spec.language, arena: true).ref;
 
     return result;
   }

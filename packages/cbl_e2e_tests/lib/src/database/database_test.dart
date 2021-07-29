@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/log/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../test_binding_impl.dart';
@@ -14,8 +13,6 @@ void main() {
 
   group('Database', () {
     test('remove', () async {
-      cblLogMessage(LogDomain.network, LogLevel.error, 'remove');
-
       final db = openTestDb('Remove');
       final name = db.name;
       final directory = db.config.directory;
@@ -114,7 +111,7 @@ void main() {
 
       test('performMaintenance: reindex', () {
         final db = openTestDb('PerformMaintenance|Reindex');
-        db.createIndex('a', ValueIndex('[".type"]'));
+        db.createIndex('a', ValueIndexConfiguration(['type']));
         final doc = MutableDocument({'type': 'A'});
         db.saveDocument(doc);
         db.performMaintenance(MaintenanceType.reindex);
@@ -329,7 +326,7 @@ void main() {
         expect(doc.sequence, isPositive);
       });
 
-      test('toMap returns the documents properties', () {
+      test('toPlainMap returns the documents properties', () {
         final props = {'a': 'b'};
         final doc = MutableDocument(props);
 
@@ -372,8 +369,8 @@ void main() {
         db = openTestDb('Index');
       });
 
-      test('createIndex should work with ValueIndex', () {
-        db.createIndex('a', ValueIndex('[[".a"]]'));
+      test('createIndex should work with ValueIndexConfiguration', () {
+        db.createIndex('a', ValueIndexConfiguration(['a']));
 
         final q = Query(db, N1QLQuery('SELECT * FROM _ WHERE a = "a"'));
 
@@ -382,8 +379,8 @@ void main() {
         expect(explain, contains('USING INDEX a'));
       });
 
-      test('createIndex should work with FullTextIndex', () {
-        db.createIndex('a', FullTextIndex('[[".a"]]'));
+      test('createIndex should work with FullTextIndexConfiguration', () {
+        db.createIndex('a', FullTextIndexConfiguration(['a']));
 
         final q =
             Query(db, N1QLQuery("SELECT * FROM _ WHERE MATCH('a', 'query')"));
@@ -394,7 +391,7 @@ void main() {
       });
 
       test('deleteIndex should delete the given index', () {
-        db.createIndex('a', ValueIndex('[[".a"]]'));
+        db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
 
@@ -403,10 +400,10 @@ void main() {
         expect(db.indexes, isEmpty);
       });
 
-      test('indexNames should return the names of all existing indexes', () {
+      test('indexes should return the names of all existing indexes', () {
         expect(db.indexes, isEmpty);
 
-        db.createIndex('a', ValueIndex('[[".a"]]'));
+        db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
       });
@@ -563,8 +560,8 @@ SELECT foo()
       });
 
       test('N1QL meal planner example', () {
-        db.createIndex('date', ValueIndex('[".type"]'));
-        db.createIndex('group_index', ValueIndex('[".group"]'));
+        db.createIndex('date', ValueIndexConfiguration(['type']));
+        db.createIndex('group_index', ValueIndexConfiguration(['`group`']));
 
         final dish = MutableDocument({
           'type': 'dish',
@@ -590,13 +587,13 @@ SELECT foo()
           db,
           N1QLQuery(
             r'''
-          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
-          FROM _ AS dish
-          JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
-          WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
-          GROUP BY dish._id
-          ORDER BY max(meal.date)
-          ''',
+            SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
+            FROM _ AS dish
+            JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
+            WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
+            GROUP BY dish._id
+            ORDER BY max(meal.date)
+            ''',
           ),
         );
 

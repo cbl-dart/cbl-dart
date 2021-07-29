@@ -8,8 +8,6 @@ import 'package:meta/meta.dart';
 
 import '../database/database.dart';
 import '../document/array.dart';
-import '../document/blob.dart';
-import '../document/common.dart';
 import '../document/dictionary.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
@@ -17,7 +15,7 @@ import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
-import '../support/utils.dart';
+import 'parameters.dart';
 
 /// A query language
 enum QueryLanguage {
@@ -94,97 +92,6 @@ class JSONQuery extends QueryDefinition {
 
   @override
   String toString() => 'JSONQuery($queryString)';
-}
-
-/// Query parameters used for setting values to the query parameters defined in
-/// the query.
-class Parameters {
-  /// Creates new [Parameters], optionally initialized with other [parameters].
-  Parameters([Parameters? parameters]) : this._(parameters: parameters);
-
-  Parameters._({Parameters? parameters, bool readonly = false})
-      : _data = parameters?._data?.let((it) => Map.of(it)),
-        _readonly = readonly;
-
-  final bool _readonly;
-  Map<String, Object?>? _data;
-
-  /// Gets the value of the parameter referenced by the given [name].
-  Object? value(String name) => _data?[name];
-
-  /// Set a value to the query parameter referenced by the given [name].
-  ///
-  /// {@template cbl.Parameters.parameterDefinition}
-  /// TODO: describe how query parameters are defined.
-  /// {@endtemplate}
-  void setValue(Object? value, {required String name}) {
-    _checkReadonly();
-    _data ??= {};
-    _data![name] = CblConversions.convertToCblObject(value);
-  }
-
-  /// Set a [String] to the query parameter referenced by the given
-  /// [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setString(String? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set an integer number to the query parameter referenced by the given
-  /// [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setInteger(int? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set a floating point number to the query parameter referenced by the given
-  /// [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setFloat(double? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set a [num] to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setNumber(num? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set a [bool] to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setBoolean(bool? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set a [DateTime] to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setDate(DateTime? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set a [Blob] to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setBlob(Blob? value, {required String name}) =>
-      setValue(value, name: name);
-
-  /// Set an [Array]  to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setArray(Array? value, {required String name}) =>
-      setValue(value?.toList(), name: name);
-
-  /// Set a [Dictionary] to the query parameter referenced by the given [name].
-  ///
-  /// {@macro cbl.Parameters.parameterDefinition}
-  void setDictionary(Dictionary? value, {required String name}) =>
-      setValue(value?.toPlainMap(), name: name);
-
-  void _checkReadonly() {
-    if (_readonly) {
-      throw StateError('This parameters object is readonly.');
-    }
-  }
 }
 
 /// A [Query] represents a compiled database query.
@@ -309,16 +216,16 @@ class QueryImpl extends CblObject<CBLQuery>
   final DatabaseImpl database;
 
   @override
-  Parameters get parameters => useSync(() => _parameters);
-  var _parameters = Parameters();
+  ParametersImpl get parameters => useSync(() => _parameters);
+  var _parameters = ParametersImpl();
 
   @override
-  set parameters(Parameters value) => useSync(() => _parameters = value);
+  set parameters(covariant ParametersImpl value) =>
+      useSync(() => _parameters = value);
 
   void _flushParameters() {
-    final dict = MutableDictionary(parameters._data) as MutableDictionaryImpl;
     final encoder = fl.FleeceEncoder();
-    final result = dict.encodeTo(encoder);
+    final result = parameters.encodeTo(encoder);
     assert(result is! Future);
     final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
