@@ -81,7 +81,7 @@ class QueryImpl extends CblObject<CBLQuery>
       : this._(
           database: database as DatabaseImpl,
           language: CBLQueryLanguage.n1ql,
-          query: query,
+          query: _normalizeN1qlQuery(query),
           debugCreator: debugCreator,
         );
 
@@ -194,3 +194,7 @@ class QueryImpl extends CblObject<CBLQuery>
   @override
   String toString() => 'Query(${describeEnum(_language)}: $_query)';
 }
+
+String _normalizeN1qlQuery(String query) => query
+    // Collapse whitespace.
+    .replaceAll('\s+', ' ');

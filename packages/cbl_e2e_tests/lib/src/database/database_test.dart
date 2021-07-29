@@ -509,7 +509,7 @@ SELECT foo()
 
           final resultSet = q.execute();
           final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current['id_'] as String, doc.id);
+          expect(iterator.current['id_'].string, doc.id);
         });
 
         test('supports getting column by index', () async {
@@ -521,7 +521,7 @@ SELECT foo()
 
           final resultSet = q.execute();
           final iterator = resultSet.iterator..moveNext();
-          expect(iterator.current[0] as String, doc.id);
+          expect(iterator.current[0].string, doc.id);
         });
       });
     });

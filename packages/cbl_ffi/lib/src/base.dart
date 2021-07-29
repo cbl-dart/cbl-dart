@@ -198,11 +198,16 @@ class CBLErrorException implements Exception {
           error.ref.code,
           _baseBinds.CBLErrorMessage(globalCBLError)!,
           errorSource: errorSource,
-          errorPosition: error.ref.code == CBLErrorCode.invalidQuery &&
-                  errorPosition != -1 &&
-                  errorPosition < errorSource.length
-              ? errorPosition
-              : null,
+          errorPosition:
+              // This test should only need to check whether `errorPosition`
+              // is `-1`. A regrission in the CBL C SDK leaves `errorPosition`
+              // sometimes uninitialized.
+              // TODO: https://github.com/couchbase/couchbase-lite-C/issues/175
+              error.ref.code == CBLErrorCode.invalidQuery &&
+                      errorPosition >= 0 &&
+                      errorPosition < errorSource.length
+                  ? errorPosition
+                  : null,
         );
 
   final String message;

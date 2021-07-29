@@ -231,7 +231,7 @@ class ResultImpl with IterableMixin<String> implements Result {
   List<Object?> toPlainList() => _array.toPlainList();
 
   @override
-  Map<String, dynamic> toPlainMap() => toPlainMap();
+  Map<String, dynamic> toPlainMap() => _dictionary.toPlainMap();
 
   @override
   String toJSON() {
@@ -251,7 +251,7 @@ class ResultImpl with IterableMixin<String> implements Result {
   }
 
   DictionaryImpl _createDictionary() {
-    final dictionary = fl.MutableDict() as MutableDictionaryImpl;
+    final dictionary = MutableDictionary() as MutableDictionaryImpl;
     for (var i = 0; i < _columnNames.length; i++) {
       dictionary.setValue(_array.value(i), key: _columnNames[i]);
     }

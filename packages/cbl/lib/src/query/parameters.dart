@@ -87,7 +87,7 @@ class ParametersImpl implements Parameters, FleeceEncodable {
     if (source != null) {
       final data = (source as ParametersImpl)._data;
       for (final key in data) {
-        _data.setValue(data[key], key: key);
+        _data.setValue(data.value(key), key: key);
       }
     }
   }
