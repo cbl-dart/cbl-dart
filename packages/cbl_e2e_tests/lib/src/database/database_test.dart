@@ -381,7 +381,35 @@ void main() {
 
         final explain = q.explain();
 
-        expect(explain, contains('["MATCH()","a","query"]'));
+        expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
+      });
+
+      test('createIndex should work with ValueIndex', () {
+        final db = openTestDb('CreateValueIndex');
+        db.createIndex(
+          'a',
+          IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
+        );
+
+        final q = Query(db, 'SELECT * FROM _ WHERE a = "a"');
+
+        final explain = q.explain();
+
+        expect(explain, contains('USING INDEX a'));
+      });
+
+      test('createIndex should work with FullTextIndex', () {
+        final db = openTestDb('CreateFullTextIndex');
+        db.createIndex(
+          'a',
+          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
+        );
+
+        final q = Query(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
+
+        final explain = q.explain();
+
+        expect(explain, contains('fts1 VIRTUAL TABLE INDEX'));
       });
 
       test('deleteIndex should delete the given index', () {

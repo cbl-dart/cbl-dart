@@ -26,6 +26,8 @@ enum FullTextLanguage {
   turkish,
 }
 
+// === Impl ====================================================================
+
 /// Interface for classes wich implement [Index].
 abstract class IndexImplInterface extends Index {
   /// Returns this index specified as a [CBLIndexSpec].

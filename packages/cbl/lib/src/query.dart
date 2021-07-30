@@ -18,6 +18,13 @@ export 'query/functions/array_function.dart' show ArrayFunction;
 export 'query/group_by.dart' show GroupBy;
 export 'query/having.dart' show Having;
 export 'query/index/index.dart' show Index, FullTextLanguage;
+export 'query/index/index_builder.dart'
+    show
+        FullTextIndex,
+        FullTextIndexItem,
+        IndexBuilder,
+        ValueIndex,
+        ValueIndexItem;
 export 'query/index/index_configuration.dart'
     show
         FullTextIndexConfiguration,
