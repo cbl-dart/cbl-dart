@@ -15,6 +15,7 @@ export 'query/expressions/variable_expression.dart'
 export 'query/from.dart' show From;
 export 'query/function.dart' show Function_;
 export 'query/functions/array_function.dart' show ArrayFunction;
+export 'query/functions/full_text_function.dart' show FullTextFunction;
 export 'query/group_by.dart' show GroupBy;
 export 'query/having.dart' show Having;
 export 'query/index/index.dart' show Index, FullTextLanguage;

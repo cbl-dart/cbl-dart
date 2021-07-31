@@ -17,11 +17,11 @@ class Ordering {
   Ordering._();
 
   /// Creates an ordering expression from the given [propertyPath].
-  SortOrder property(String propertyPath) =>
+  static SortOrder property(String propertyPath) =>
       expression(Expression.property(propertyPath));
 
   /// Creates an ordering expression from the given [expression].
-  SortOrder expression(ExpressionInterface expression) =>
+  static SortOrder expression(ExpressionInterface expression) =>
       SortOrderImpl(expression: expression);
 }
 

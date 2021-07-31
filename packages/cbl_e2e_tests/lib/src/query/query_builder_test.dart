@@ -10,28 +10,26 @@ void main() {
   setupTestBinding();
 
   group('QueryBuilder', () {
-    setUpAll(() {
-      evalExprDb = openTestDb('EvalExpr');
-      // Insert exactly one document.
-      evalExprDb.saveDocument(MutableDocument());
-    });
+    setupEvalExprUtils();
 
-    test('SelectResult.all()', () {
-      final db = openTestDb('QueryBuilderSmoke');
+    group('SelectResult', () {
+      test('SelectResult.all()', () {
+        final db = openTestDb('SelectResultAll');
 
-      db.saveDocument(MutableDocument({'a': true}));
+        db.saveDocument(MutableDocument({'a': true}));
 
-      final result = QueryBuilder.selectOne(SelectResult.all())
-          .from(DataSource.database(db))
-          .execute()
-          .map((result) => result.toPlainMap())
-          .toList();
+        final result = QueryBuilder.selectOne(SelectResult.all())
+            .from(DataSource.database(db))
+            .execute()
+            .map((result) => result.toPlainMap())
+            .toList();
 
-      expect(result, [
-        {
-          db.name: {'a': true}
-        }
-      ]);
+        expect(result, [
+          {
+            db.name: {'a': true}
+          }
+        ]);
+      });
     });
 
     group('Function', () {
@@ -56,21 +54,30 @@ void main() {
       });
 
       test('acos', () {
-        expect(evalExpr(Function_.acos(valExpr(0))), 1.5707963267948966);
+        expect(
+          evalExpr(Function_.acos(valExpr(0))),
+          closeEnough(1.5707963267948966),
+        );
       });
 
       test('asin', () {
-        expect(evalExpr(Function_.asin(valExpr(.5))), 0.5235987755982989);
+        expect(
+          evalExpr(Function_.asin(valExpr(.5))),
+          closeEnough(0.5235987755982989),
+        );
       });
 
       test('atan', () {
-        expect(evalExpr(Function_.atan(valExpr(.5))), 0.4636476090008061);
+        expect(
+          evalExpr(Function_.atan(valExpr(.5))),
+          closeEnough(0.4636476090008061),
+        );
       });
 
       test('atan2', () {
         expect(
           evalExpr(Function_.atan2(x: valExpr(1), y: valExpr(1))),
-          0.7853981633974483,
+          closeEnough(0.7853981633974483),
         );
       });
 
@@ -79,7 +86,10 @@ void main() {
       });
 
       test('cos', () {
-        expect(evalExpr(Function_.cos(valExpr(.5))), 0.8775825618903728);
+        expect(
+          evalExpr(Function_.cos(valExpr(.5))),
+          closeEnough(0.8775825618903728),
+        );
       });
 
       test('degrees', () {
@@ -87,11 +97,14 @@ void main() {
       });
 
       test('e', () {
-        expect(evalExpr(Function_.e()), 2.718281828459045);
+        expect(evalExpr(Function_.e()), closeEnough(e));
       });
 
       test('exp', () {
-        expect(evalExpr(Function_.exp(valExpr(2))), 7.38905609893065);
+        expect(
+          evalExpr(Function_.exp(valExpr(2))),
+          closeEnough(7.38905609893065),
+        );
       });
 
       test('floor', () {
@@ -99,11 +112,17 @@ void main() {
       });
 
       test('ln', () {
-        expect(evalExpr(Function_.ln(valExpr(.5))), -0.6931471805599453);
+        expect(
+          evalExpr(Function_.ln(valExpr(.5))),
+          closeEnough(-0.6931471805599453),
+        );
       });
 
       test('log', () {
-        expect(evalExpr(Function_.log(valExpr(.5))), -0.3010299956639812);
+        expect(
+          evalExpr(Function_.log(valExpr(.5))),
+          closeEnough(-0.3010299956639812),
+        );
       });
 
       test('pi', () {
@@ -113,12 +132,12 @@ void main() {
       test('power', () {
         expect(
           evalExpr(Function_.power(base: valExpr(.5), exponent: valExpr(.5))),
-          0.7071067811865476,
+          closeEnough(0.7071067811865476),
         );
       });
 
       test('radians', () {
-        expect(evalExpr(Function_.radians(valExpr(180))), pi);
+        expect(evalExpr(Function_.radians(valExpr(180))), closeEnough(pi));
       });
 
       test('round', () {
@@ -135,15 +154,24 @@ void main() {
       });
 
       test('sin', () {
-        expect(evalExpr(Function_.sin(valExpr(.5))), 0.479425538604203);
+        expect(
+          evalExpr(Function_.sin(valExpr(.5))),
+          closeEnough(0.479425538604203),
+        );
       });
 
       test('sqrt', () {
-        expect(evalExpr(Function_.sqrt(valExpr(.5))), 0.7071067811865476);
+        expect(
+          evalExpr(Function_.sqrt(valExpr(.5))),
+          closeEnough(0.7071067811865476),
+        );
       });
 
       test('tan', () {
-        expect(evalExpr(Function_.tan(valExpr(.5))), 0.5463024898437905);
+        expect(
+          evalExpr(Function_.tan(valExpr(.5))),
+          closeEnough(0.5463024898437905),
+        );
       });
 
       test('trunc', () {
@@ -206,7 +234,7 @@ void main() {
       test('millisToString', () {
         expect(
           evalExpr(Function_.millisToString(valExpr(0))),
-          contains('1970-01-01T01:00:00+'),
+          contains('1970-01-01T01:00:00'),
         );
       });
 
@@ -217,12 +245,107 @@ void main() {
         );
       });
     });
+
+    group('ArrayFunction', () {
+      test('contains', () {
+        final db = openTestDb('ArrayFunctionContains');
+        var doc = MutableDocument({
+          'a': [42]
+        });
+        db.saveDocument(doc);
+
+        List<String> findByArrayContains(Object? value) =>
+            QueryBuilder.selectOne(SelectResult.expression(Meta.id))
+                .from(DataSource.database(db))
+                .where(ArrayFunction.contains(
+                  Expression.property('a'),
+                  value: Expression.value(value),
+                ))
+                .execute()
+                .map((result) => result.string(0)!)
+                .toList();
+
+        expect(findByArrayContains(42), [doc.id]);
+        expect(findByArrayContains(0), isEmpty);
+      });
+
+      test('length', () {
+        final db = openTestDb('ArrayFunctionLength');
+        var doc = MutableDocument({
+          'a': [42],
+          'b': <void>[]
+        });
+        db.saveDocument(doc);
+
+        SelectResultAs selectLength(String propertyPath) =>
+            SelectResult.expression(
+                ArrayFunction.length(Expression.property(propertyPath)));
+
+        final lengths = QueryBuilder.select([
+          selectLength('a'),
+          selectLength('b'),
+        ])
+            .from(DataSource.database(db))
+            .execute()
+            .map((e) => e.toPlainList())
+            .first;
+
+        expect(lengths, [1, 0]);
+      });
+    });
+
+    group('FullTextFunction', () {
+      test('match and rank', () {
+        final db = openTestDb('FullTextFunctionRank');
+        db.createIndex(
+          'a',
+          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
+        );
+        var docA = MutableDocument({
+          'a': 'The quick brown fox',
+        });
+        db.saveDocument(docA);
+        var docB = MutableDocument({
+          'a': 'The slow brown fox',
+        });
+        db.saveDocument(docB);
+
+        final results = QueryBuilder.select([
+          SelectResult.expression(Meta.id),
+          SelectResult.expression(FullTextFunction.rank('a')),
+        ])
+            .from(DataSource.database(db))
+            .where(FullTextFunction.match(
+              indexName: 'a',
+              query: 'the OR quick OR brown OR fox',
+            ))
+            .orderByOne(Ordering.expression(FullTextFunction.rank('a')))
+            .execute()
+            .map((result) => result.toPlainList())
+            .toList();
+
+        expect(results, [
+          [docB.id, 1.5],
+          [docA.id, 2.5],
+        ]);
+      });
+    });
+  });
+}
+
+// === Eval expression utils ===================================================
+
+late Database evalExprDb;
+
+void setupEvalExprUtils() {
+  setUpAll(() {
+    evalExprDb = openTestDb('EvalExpr');
+    // Insert exactly one document.
+    evalExprDb.saveDocument(MutableDocument());
   });
 }
 
 ExpressionInterface valExpr(Object? value) => Expression.value(value);
-
-late Database evalExprDb;
 
 Object? evalExpr(ExpressionInterface expression) =>
     QueryBuilder.selectOne(SelectResult.expression(expression))
@@ -230,6 +353,8 @@ Object? evalExpr(ExpressionInterface expression) =>
         .execute()
         .first
         .value(0);
+
+// === Aggregate query utils ===================================================
 
 const aggNumberProperty = 'number';
 const aggGroupProperty = 'group';
@@ -258,3 +383,12 @@ extension on Database {
           .first
           .toPlainList();
 }
+
+// === Misc utils ==============================================================
+
+/// Matches numbers which are close to [value].
+///
+/// This matcher is necessary because the results of database functions vary
+/// slightly between different platforms, usually only in the leas significant
+/// decimal point. We just want to confirm we are using the right function.
+Matcher closeEnough(num value) => closeTo(value, .00000000001);
