@@ -232,10 +232,8 @@ void main() {
       });
 
       test('millisToString', () {
-        expect(
-          evalExpr(Function_.millisToString(valExpr(0))),
-          contains('1970-01-01T01:00:00'),
-        );
+        var result = evalExpr(Function_.millisToString(valExpr(0))) as String;
+        expect(DateTime.parse(result), DateTime.utc(1970));
       });
 
       test('millisToUTC', () {
