@@ -106,4 +106,4 @@ Read [CONTRIBUTING] to get started developing.
 
 > **Warning:** This is not an official Couchbase product.
 
-[contributing]: ../../CONTRIBUTING.md
+[contributing]: https://github.com/cofu-app/cbl-dart/blob/main/CONTRIBUTING.md
