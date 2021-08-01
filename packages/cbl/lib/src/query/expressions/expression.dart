@@ -1,6 +1,7 @@
 import '../collation.dart';
 import '../query.dart';
 import 'property_expression.dart';
+import 'variable_expression.dart';
 
 /// Represents an expression when building a [Query] through the [QueryBuilder].
 abstract class ExpressionInterface {
@@ -62,7 +63,7 @@ abstract class ExpressionInterface {
 
   /// Returns a new expression which evaluates whether this expression `IS NOT`
   /// equal to given [expression].
-  ExpressionInterface isNot_(ExpressionInterface expression);
+  ExpressionInterface isNot(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression is
   /// `null` or missing.
@@ -116,14 +117,12 @@ class Expression {
   /// Creates a literal value expression.
   ///
   /// The supported value types are [String], [num], [int], [double], [bool],
-  /// [DateTime], [Map] (Map<String, Object?>) and [List] (List<String?>).
+  /// [DateTime], [Map] (Map<String, Object?>) and [Iterable]
+  /// (Iterable<String?>).
   static ExpressionInterface value(Object? value) => ValueExpression(value);
 
   /// Creates a literal [String] expression.
   static ExpressionInterface string(String? value) => Expression.value(value);
-
-  /// Creates a literal [num] expression.
-  static ExpressionInterface number(num? value) => Expression.value(value);
 
   /// Creates a literal integer number expression.
   static ExpressionInterface integer(int value) => Expression.value(value);
@@ -131,12 +130,14 @@ class Expression {
   /// Creates a literal floating point number expression.
   static ExpressionInterface float(double value) => Expression.value(value);
 
+  /// Creates a literal [num] expression.
+  static ExpressionInterface number(num? value) => Expression.value(value);
+
   /// Creates a literal [bool] expression.
   static ExpressionInterface boolean(bool value) => Expression.value(value);
 
   /// Creates a literal [DateTime] expression.
-  static ExpressionInterface date(DateTime? value) =>
-      Expression.value(value?.toIso8601String());
+  static ExpressionInterface date(DateTime? value) => Expression.value(value);
 
   /// Creates a literal dictionary expression.
   static ExpressionInterface dictionary(Map<String, Object?>? value) =>
@@ -162,6 +163,8 @@ class Expression {
 // === Impl ====================================================================
 
 abstract class ExpressionImpl implements ExpressionInterface {
+  static final missing = NullaryExpression('MISSING');
+
   @override
   ExpressionInterface multiply(ExpressionInterface expression) =>
       BinaryExpression('*', this, expression);
@@ -219,16 +222,15 @@ abstract class ExpressionImpl implements ExpressionInterface {
       BinaryExpression('IS', this, expression);
 
   @override
-  ExpressionInterface isNot_(ExpressionInterface expression) =>
+  ExpressionInterface isNot(ExpressionInterface expression) =>
       BinaryExpression('IS NOT', this, expression);
 
   @override
   ExpressionInterface isNullOrMissing() =>
-      is_(Expression.value(null)).or(NoOperandExpression('MISSING'));
+      is_(Expression.value(null)).or(is_(missing));
 
   @override
-  ExpressionInterface notNullOrMissing() =>
-      isNot_(Expression.value(null)).or(NoOperandExpression('MISSING'));
+  ExpressionInterface notNullOrMissing() => Expression.not(isNullOrMissing());
 
   @override
   ExpressionInterface and(ExpressionInterface expression) =>
@@ -243,11 +245,11 @@ abstract class ExpressionImpl implements ExpressionInterface {
     ExpressionInterface expression, {
     required ExpressionInterface and,
   }) =>
-      TertiaryExpression('BETWEEN', this, expression, and);
+      TernaryExpression('BETWEEN', this, expression, and);
 
   @override
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions) =>
-      VariableOperandsExpression('IN', [this, ...expressions]);
+      BinaryExpression('IN', this, Expression.value(expressions));
 
   @override
   ExpressionInterface collate(CollationInterface collation) =>
@@ -257,19 +259,22 @@ abstract class ExpressionImpl implements ExpressionInterface {
 }
 
 class ValueExpression extends ExpressionImpl {
-  ValueExpression(Object? value) : _value = _convertValue(value);
+  ValueExpression(Object? value) : _value = value;
 
   final Object? _value;
 
   @override
-  Object? toJson() => _value;
+  Object? toJson() => _valueToJson(_value);
 
-  static Object? _convertValue(Object? value) {
+  static Object? _valueToJson(Object? value) {
+    if (value is DateTime) {
+      return value.toIso8601String();
+    }
     if (value is Map<String, Object?>) {
-      return _convertMap(value);
+      return _mapToJson(value);
     }
     if (value is Iterable<Object?>) {
-      return _convertIterable(value);
+      return _iterableToJson(value);
     }
     if (value is ExpressionImpl) {
       return value.toJson();
@@ -277,16 +282,15 @@ class ValueExpression extends ExpressionImpl {
     return value;
   }
 
-  static Map<String, Object?> _convertMap(Map<String, Object?> value) => {
-        for (final entry in value.entries) entry.key: _convertValue(entry.value)
-      };
+  static Object? _mapToJson(Map<String, Object?> map) =>
+      {for (final entry in map.entries) entry.key: _valueToJson(entry.value)};
 
-  static List<Object?> _convertIterable(Iterable<Object?> value) =>
-      [for (final element in value) _convertValue(element)];
+  static Object? _iterableToJson(Iterable<Object?> iterable) =>
+      ['[]', ...iterable.map(_valueToJson)];
 }
 
-class NoOperandExpression extends ExpressionImpl {
-  NoOperandExpression(String operator) : _operator = operator;
+class NullaryExpression extends ExpressionImpl {
+  NullaryExpression(String operator) : _operator = operator;
 
   final String _operator;
 
@@ -322,8 +326,8 @@ class BinaryExpression extends ExpressionImpl {
       [_operator, _left.toJson(), if (_right != null) _right!.toJson()];
 }
 
-class TertiaryExpression extends ExpressionImpl {
-  TertiaryExpression(
+class TernaryExpression extends ExpressionImpl {
+  TernaryExpression(
     String operator,
     ExpressionInterface operand0,
     ExpressionInterface operand1,
@@ -343,8 +347,8 @@ class TertiaryExpression extends ExpressionImpl {
       [_operator, _operand0.toJson(), _operand1.toJson(), _operand2.toJson()];
 }
 
-class VariableOperandsExpression extends ExpressionImpl {
-  VariableOperandsExpression(
+class VariadicExpression extends ExpressionImpl {
+  VariadicExpression(
     String operator,
     Iterable<ExpressionInterface> operands,
   )   : _operator = operator,
@@ -369,5 +373,50 @@ class CollateExpression extends ExpressionImpl {
   final ExpressionImpl _expression;
 
   @override
-  Object? toJson() => ['COLLATION', _collation.toJson(), _expression.toJson()];
+  Object? toJson() => ['COLLATE', _collation.toJson(), _expression.toJson()];
+}
+
+enum Quantifier {
+  any,
+  every,
+  anyAndEvery,
+}
+
+class RangePredicateExpression extends ExpressionImpl {
+  RangePredicateExpression(
+    Quantifier quantifier,
+    VariableExpressionInterface variable,
+    ExpressionInterface in_,
+    ExpressionInterface satisfies,
+  )   : _quantifier = quantifier,
+        _variable = variable as VariableExpressionImpl,
+        _in = in_ as ExpressionImpl,
+        _satisfies = satisfies as ExpressionImpl;
+
+  final Quantifier _quantifier;
+  final VariableExpressionImpl _variable;
+  final ExpressionImpl _in;
+  final ExpressionImpl _satisfies;
+
+  @override
+  Object? toJson() {
+    String operator;
+    switch (_quantifier) {
+      case Quantifier.any:
+        operator = 'ANY';
+        break;
+      case Quantifier.every:
+        operator = 'EVERY';
+        break;
+      case Quantifier.anyAndEvery:
+        operator = 'ANY AND EVERY';
+        break;
+    }
+    return [
+      operator,
+      _variable.propertyPath,
+      _in.toJson(),
+      _satisfies.toJson()
+    ];
+  }
 }

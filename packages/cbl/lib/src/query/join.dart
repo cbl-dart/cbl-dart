@@ -36,8 +36,8 @@ class Join {
       JoinOnImpl(type: JoinType.inner, dataSource: dataSource);
 
   /// Creates an `CROSS JOIN` with the given [dataSource].
-  static JoinOnInterface crossJoin(DataSourceInterface dataSource) =>
-      JoinOnImpl(dataSource: dataSource);
+  static JoinInterface crossJoin(DataSourceInterface dataSource) =>
+      JoinImpl(dataSource: dataSource);
 }
 
 // === Impl ====================================================================
@@ -64,14 +64,14 @@ class JoinImpl implements JoinInterface {
   JoinImpl({
     JoinType? type,
     required DataSourceInterface dataSource,
-    required ExpressionInterface on,
+    ExpressionInterface? on,
   })  : _type = type,
         _dataSource = dataSource as DataSourceImpl,
-        _on = on as ExpressionImpl;
+        _on = on as ExpressionImpl?;
 
   final JoinType? _type;
   final DataSourceImpl _dataSource;
-  final ExpressionImpl _on;
+  final ExpressionImpl? _on;
 
   Map<String, Object?> toJson() {
     String join;
@@ -90,7 +90,7 @@ class JoinImpl implements JoinInterface {
     return {
       ..._dataSource.toJson(),
       'JOIN': join,
-      'ON': _on.toJson(),
+      if (_on != null) 'ON': _on!.toJson(),
     };
   }
 }

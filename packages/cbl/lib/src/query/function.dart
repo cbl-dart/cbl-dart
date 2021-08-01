@@ -74,7 +74,7 @@ class Function_ {
 
   /// Creates a function expression which evaluates to the mathematical constant
   /// `e`.
-  static ExpressionInterface e() => NoOperandExpression('e()');
+  static ExpressionInterface e() => NullaryExpression('e()');
 
   /// Creates a function expression which evaluates [e] to the power of the
   /// given numeric [expression].
@@ -98,7 +98,7 @@ class Function_ {
 
   /// Creates a function expression which evaluates to the mathematical constant
   /// `Pi`.
-  static ExpressionInterface pi() => NoOperandExpression('pi()');
+  static ExpressionInterface pi() => NullaryExpression('pi()');
 
   /// Creates a function expression which evaluates to value of the [base] to
   /// the power of the [exponent].

@@ -1,14 +1,15 @@
-import 'array_expression.dart';
 import 'expression.dart';
+import 'array_expression.dart';
 import 'variable_expression.dart';
 
-/// Represents the expression array items are matched against, in a quantified
-/// `IN` array expression.
+/// Represents the `SATISFIES` clause of a range predicate.
 abstract class ArrayExpressionSatisfies {
-  /// Specifies the [expression] against which array items in a quantified `IN`
-  /// array expression are matched.
+  /// Specifies the condition that array elements are matched against, in a
+  /// range predicate.
   ///
-  /// Returns the complete quantified `IN` array expression.
+  /// See also:
+  ///
+  ///  * [ArrayExpression] for more information on range predicates.
   ExpressionInterface satisfies(ExpressionInterface expression);
 }
 
@@ -20,27 +21,14 @@ class ArrayExpressionSatisfiesImpl implements ArrayExpressionSatisfies {
     VariableExpressionInterface variable,
     ExpressionInterface array,
   )   : _quantifier = quantifier,
-        _variable = variable as VariableExpressionImpl,
-        _array = array as ExpressionImpl;
+        _variable = variable,
+        _array = array;
 
   final Quantifier _quantifier;
-  final VariableExpressionImpl _variable;
-  final ExpressionImpl _array;
+  final VariableExpressionInterface _variable;
+  final ExpressionInterface _array;
 
   @override
-  ExpressionInterface satisfies(ExpressionInterface expression) {
-    String operator;
-    switch (_quantifier) {
-      case Quantifier.any:
-        operator = 'ANY';
-        break;
-      case Quantifier.every:
-        operator = 'EVERY';
-        break;
-      case Quantifier.anyAndEvery:
-        operator = 'ANY AND EVERY';
-        break;
-    }
-    return TertiaryExpression(operator, _variable, _array, expression);
-  }
+  ExpressionInterface satisfies(ExpressionInterface expression) =>
+      RangePredicateExpression(_quantifier, _variable, _array, expression);
 }

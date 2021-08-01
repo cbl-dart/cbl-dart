@@ -6,8 +6,12 @@ abstract class VariableExpressionInterface extends ExpressionInterface {}
 
 // === Impl ====================================================================
 
-class VariableExpressionImpl extends VariableOperandsExpression
+class VariableExpressionImpl extends ExpressionImpl
     implements VariableExpressionInterface {
-  VariableExpressionImpl(String propertyPath)
-      : super('?', propertyPath.split('.').map(Expression.string));
+  VariableExpressionImpl(this.propertyPath);
+
+  final String propertyPath;
+
+  @override
+  Object? toJson() => ['?$propertyPath'];
 }

@@ -308,13 +308,17 @@ class BuilderQuery extends QueryImpl {
       ];
 
   @override
-  CblObject<CBLQuery> _prepareQuery() {
+  T useSync<T>(T Function() f) {
     if (_from == null) {
       throw StateError(
         'Ensure that a query has a FROM clause before using it.',
       );
     }
+    return super.useSync(f);
+  }
 
+  @override
+  CblObject<CBLQuery> _prepareQuery() {
     _definition = jsonEncode(_buildJsonRepresentation());
     return super._prepareQuery();
   }

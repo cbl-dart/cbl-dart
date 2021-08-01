@@ -3,13 +3,14 @@ import 'array_expression_satisfies.dart';
 import 'expression.dart';
 import 'variable_expression.dart';
 
-/// Represents the `IN` clause in a quantified `IN` array expression.
-///
-/// The `IN` clause is used to specify the array or the expression evaluated as
-/// an array.
+/// Represents the `IN` clause of a range predicate.
 abstract class ArrayExpressionIn {
-  /// Specifies the array or the [expression] evaluated as an array in a
-  /// quantified `IN` array expression.
+  /// Specifies the array or the [expression] evaluated as an array of a
+  /// range predicate.
+  ///
+  /// See also:
+  ///
+  ///  * [ArrayExpression] for more information on range predicates.
   ArrayExpressionSatisfies in_(ExpressionInterface expression);
 }
 

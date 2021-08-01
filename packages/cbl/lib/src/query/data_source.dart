@@ -30,7 +30,7 @@ class DataSourceImpl implements DataSourceInterface {
   final String? _alias;
 
   Map<String, Object?> toJson() => {
-        if (_alias != null) 'ALIAS': _alias,
+        if (_alias != null) 'AS': _alias,
         'COLLECTION': database.name,
       };
 }
