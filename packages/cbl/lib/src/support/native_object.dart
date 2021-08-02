@@ -153,7 +153,14 @@ class CBLReplicatorObject extends NativeObject<CBLReplicator> {
     Pointer<CBLReplicator> pointer, {
     required String? debugName,
   }) : super(pointer) {
-    cblBindings.replicator.bindReplicatorToDartObject(this, pointer, debugName);
+    cblBindings.replicator.bindToDartObject(this, pointer, debugName);
+  }
+}
+
+class CBLBlobReadStreamObject extends NativeObject<CBLBlobReadStream> {
+  /// Creates a handle to a CBLBlobReadStream.
+  CBLBlobReadStreamObject(Pointer<CBLBlobReadStream> pointer) : super(pointer) {
+    cblBindings.blobs.readStream.bindToDartObject(this, pointer);
   }
 }
 

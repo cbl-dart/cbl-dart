@@ -606,7 +606,7 @@ class ReplicatorBindings extends Bindings {
     });
   }
 
-  void bindReplicatorToDartObject(
+  void bindToDartObject(
     Object object,
     Pointer<CBLReplicator> replicator,
     String? debugName,

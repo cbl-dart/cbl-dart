@@ -150,9 +150,18 @@ class SliceResult extends Slice {
           ? null
           : SliceResult._(slice.buf, slice.size, retain: retain);
 
+  /// Expando which is used to keep a [SliceResult] alive, while [Uint8List]s
+  /// are alive which are backed by it.
+  static final _backingSliceOfBytes =
+      Expando<SliceResult>('SliceResult.backingSliceOfBytes');
+
   /// Returns an modifiable view of the data of this slice.
   @override
-  Uint8List asBytes() => buf.asTypedList(size);
+  Uint8List asBytes() {
+    final bytes = buf.asTypedList(size);
+    _backingSliceOfBytes[bytes] = this;
+    return bytes;
+  }
 
   @override
   String toString() => 'SliceResult(buf: $buf, size: $size)';

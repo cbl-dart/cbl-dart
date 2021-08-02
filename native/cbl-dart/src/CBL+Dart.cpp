@@ -574,10 +574,35 @@ CBLDart_FLSliceResult CBLDart_CBLBlob_Content(const CBLBlob *blob,
   return CBLDart_FLSliceResultToDart(CBLBlob_Content(blob, errorOut));
 }
 
-uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream, void *buf,
-                                    uint64_t bufSize, CBLError *outError) {
-  return CBLBlobReader_Read(stream, buf, static_cast<size_t>(bufSize),
-                            outError);
+static void CBLDart_FinalizeCBLBlobReadStream(void *isolate_callback_data,
+                                              void *peer) {
+  CBLBlobReader_Close(reinterpret_cast<CBLBlobReadStream *>(peer));
+}
+
+void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
+                                            CBLBlobReadStream *stream) {
+  Dart_NewFinalizableHandle_DL(object, stream, 0,
+                               CBLDart_FinalizeCBLBlobReadStream);
+}
+
+CBLDart_FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
+                                                 uint64_t bufferSize,
+                                                 CBLError *outError) {
+  auto bufferSize_t = static_cast<size_t>(bufferSize);
+  auto buffer = FLSliceResult_New(bufferSize_t);
+
+  auto bytesRead = CBLBlobReader_Read(stream, const_cast<void *>(buffer.buf),
+                                      bufferSize_t, outError);
+
+  // Handle error
+  if (bytesRead == -1) {
+    FLSliceResult_Release(buffer);
+    return {nullptr, 0};
+  }
+
+  buffer.size = bytesRead;
+
+  return CBLDart_FLSliceResultToDart(buffer);
 }
 
 CBLBlob *CBLDart_CBLBlob_CreateWithData(CBLDart_FLString contentType,

@@ -317,8 +317,10 @@ class _BlobReadStreamController
 
   final BlobImpl _blob;
 
-  var _streamIsOpen = false;
-  late Pointer<CBLBlobReadStream> _streamPointer;
+  late final _stream = CBLBlobReadStreamObject(
+    _blob.native.call(_bindings.readStream.openContentStream),
+  );
+
   var _isPaused = false;
 
   @override
@@ -331,34 +333,17 @@ class _BlobReadStreamController
   void onResume() => _start();
 
   @override
-  void onCancel() {
-    _pause();
-    _cleanUp();
-  }
-
-  void _ensureStreamIsOpen() {
-    if (_streamIsOpen) {
-      return;
-    }
-    _streamIsOpen = true;
-    _streamPointer = _blob.native.call((pointer) =>
-        _bindings.readStream.openContentStream(pointer, _readStreamChunkSize));
-  }
-
-  void _cleanUp() {
-    if (_streamIsOpen) {
-      _bindings.readStream.close(_streamPointer);
-    }
-  }
+  void onCancel() => _pause();
 
   void _start() {
     try {
       _isPaused = false;
 
-      _ensureStreamIsOpen();
-
       while (!_isPaused) {
-        final buffer = _bindings.readStream.read(_streamPointer);
+        final buffer = _stream
+            .call((pointer) =>
+                _bindings.readStream.read(pointer, _readStreamChunkSize))
+            ?.let(SliceResult.fromFLSliceResult);
 
         // The read stream is done (EOF).
         if (buffer == null) {
@@ -366,7 +351,7 @@ class _BlobReadStreamController
           break;
         }
 
-        controller.add(Uint8List.fromList(buffer.bytes));
+        controller.add(buffer.asBytes());
       }
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);

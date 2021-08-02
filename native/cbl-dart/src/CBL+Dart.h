@@ -244,8 +244,13 @@ CBLDart_FLSliceResult CBLDart_CBLBlob_Content(const CBLBlob *blob,
                                               CBLError *errorOut);
 
 CBLDART_EXPORT
-uint64_t CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream, void *buf,
-                                    uint64_t bufSize, CBLError *outError);
+void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
+                                            CBLBlobReadStream *stream);
+
+CBLDART_EXPORT
+CBLDart_FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
+                                                 uint64_t bufferSize,
+                                                 CBLError *outError);
 
 CBLDART_EXPORT
 CBLBlob *CBLDart_CBLBlob_CreateWithData(CBLDart_FLString contentType,
