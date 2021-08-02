@@ -581,8 +581,8 @@ static void CBLDart_FinalizeCBLBlobReadStream(void *isolate_callback_data,
 
 void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
                                             CBLBlobReadStream *stream) {
-  Dart_NewFinalizableHandle(object, stream, 0,
-                            CBLDart_FinalizeCBLBlobReadStream);
+  Dart_NewFinalizableHandle_DL(object, stream, 0,
+                               CBLDart_FinalizeCBLBlobReadStream);
 }
 
 CBLDart_FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
