@@ -1,6 +1,8 @@
 import 'package:cbl/src/support/worker/request_router.dart';
 import 'package:cbl/src/support/worker/worker.dart';
-import 'package:test/test.dart';
+
+import '../../test_binding_impl.dart';
+import '../test_binding.dart';
 
 class Pong {}
 
@@ -35,6 +37,8 @@ class WorkerTestDelegate extends WorkerDelegate {
 Worker testWorker() => Worker(id: 'test', delegate: WorkerTestDelegate());
 
 void main() {
+  setupTestBinding();
+
   group('Worker', () {
     group('execute', () {
       test('should respond to ping request with pong', () async {
