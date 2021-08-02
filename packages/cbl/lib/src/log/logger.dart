@@ -108,7 +108,7 @@ extension LogLevelExt on LogLevel {
 late final _bindings = cblBindings.logging;
 
 Logger? _logger;
-void Function(List<dynamic>)? _loggerCallback;
+void Function(List<Object?>)? _loggerCallback;
 AsyncCallback? _callback;
 
 void setupCustomLogger(Logger? logger) {

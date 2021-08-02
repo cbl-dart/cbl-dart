@@ -245,7 +245,7 @@ void main() {
       doc.removeValue('data');
       expect(doc, isEmpty);
 
-      doc.setData({'array': <dynamic>[], 'dictionary': <String, dynamic>{}});
+      doc.setData({'array': <Object?>[], 'dictionary': <String, Object?>{}});
       expect(doc.array('array'), MutableArray());
       expect(doc.dictionary('dictionary'), MutableDictionary());
 

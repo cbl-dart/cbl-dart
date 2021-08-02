@@ -156,10 +156,10 @@ void main() {
             'd': true,
             'e': false,
             'f': 'a',
-            'g': <String, dynamic>{},
-            'h': <dynamic>[]
+            'g': <String, Object?>{},
+            'h': <Object?>[]
           },
-          <dynamic>[],
+          <Object?>[],
         ]);
       });
 
@@ -231,7 +231,7 @@ void main() {
             41,
             3.14,
             'a',
-            <dynamic>[true],
+            [true],
             {'a': true},
             {true}
           ]);
@@ -245,7 +245,7 @@ void main() {
           41,
           3.14,
           'a',
-          <dynamic>[true],
+          [true],
           {'a': true},
           [true]
         ]);
@@ -304,7 +304,7 @@ void main() {
             41,
             3.14,
             'a',
-            <dynamic>[],
+            <Object?>[],
             {'a': true}
           ],
         );
@@ -318,9 +318,9 @@ abstract class DecodingBenchmark extends Benchmark {
 
   late final jsonString = largeJsonDoc;
 
-  late final dynamic _expectedResult = jsonDecode(jsonString);
+  late final Object? _expectedResult = jsonDecode(jsonString);
 
-  dynamic result;
+  Object? result;
 
   @override
   FutureOr<void> validate() {

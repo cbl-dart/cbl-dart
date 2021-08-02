@@ -125,7 +125,7 @@ extension CBLDartReplicatorConfigurationExt on CBLDartReplicatorConfiguration {
 class ReplicationFilterCallbackMessage {
   ReplicationFilterCallbackMessage(this.document, this.flags);
 
-  ReplicationFilterCallbackMessage.fromArguments(List<dynamic> arguments)
+  ReplicationFilterCallbackMessage.fromArguments(List<Object?> arguments)
       : this(
           (arguments[0] as int).toPointer(),
           CBLReplicatedDocumentFlag._parseCFlags(arguments[1] as int),
@@ -143,7 +143,7 @@ class ReplicationConflictResolverCallbackMessage {
   );
 
   ReplicationConflictResolverCallbackMessage.fromArguments(
-    List<dynamic> arguments,
+    List<Object?> arguments,
   ) : this(
           utf8.decode(arguments[0] as Uint8List),
           (arguments[1] as int?)?.toPointer(),
@@ -357,10 +357,10 @@ typedef CBLDart_CBLReplicator_AddDocumentReplicationListener = void Function(
 class ReplicatorStatusCallbackMessage {
   ReplicatorStatusCallbackMessage(this.status);
 
-  ReplicatorStatusCallbackMessage.fromArguments(List<dynamic> arguments)
-      : this(parseArguments(arguments[0] as List<dynamic>));
+  ReplicatorStatusCallbackMessage.fromArguments(List<Object?> arguments)
+      : this(parseArguments(arguments[0] as List<Object?>));
 
-  static CBLReplicatorStatus parseArguments(List<dynamic> status) {
+  static CBLReplicatorStatus parseArguments(List<Object?> status) {
     CBLErrorException? error;
     if (status.length > 3) {
       error = CBLErrorException(
@@ -399,14 +399,14 @@ class DocumentReplicationsCallbackMessage {
     this.documents,
   );
 
-  DocumentReplicationsCallbackMessage.fromArguments(List<dynamic> arguments)
+  DocumentReplicationsCallbackMessage.fromArguments(List<Object?> arguments)
       : this(
           arguments[0] as bool,
-          parseDocuments(arguments[1] as List<dynamic>),
+          parseDocuments(arguments[1] as List<Object?>),
         );
 
-  static List<CBLReplicatedDocument> parseDocuments(List<dynamic> documents) {
-    return documents.cast<List<dynamic>>().map((document) {
+  static List<CBLReplicatedDocument> parseDocuments(List<Object?> documents) {
+    return documents.cast<List<Object?>>().map((document) {
       CBLErrorException? error;
       if (document.length > 2) {
         error = CBLErrorException(

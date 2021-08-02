@@ -186,4 +186,4 @@ extension ReplicatorUtilsExtension on Replicator {
 }
 
 bool _matches(Object actual, Object expected) =>
-    wrapMatcher(expected).matches(actual, <dynamic, dynamic>{});
+    wrapMatcher(expected).matches(actual, <Object?, Object?>{});

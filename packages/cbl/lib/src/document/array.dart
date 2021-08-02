@@ -88,7 +88,7 @@ abstract class ArrayInterface implements ArrayFragment {
   ///    not converted.
   ///  - [Array] are converted to a list of type `List<Object?>` where each
   ///    element has been recursively converted.
-  ///  - [Dictionary]s are converted to a map of type `Map<String, dynamic>`
+  ///  - [Dictionary]s are converted to a map of type `Map<String, Object?>`
   ///    where each value has been recursively converted.
   /// {@endtemplate}
   List<Object?> toPlainList();

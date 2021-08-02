@@ -10,7 +10,9 @@ import 'resource.dart';
 /// Handler which is invoked to respond to a [AsyncCallback].
 ///
 /// The handler receives a list of [arguments] from native side.
-typedef AsyncCallbackHandler = FutureOr<Object?> Function(List arguments);
+typedef AsyncCallbackHandler = FutureOr<Object?> Function(
+  List<Object?> arguments,
+);
 
 late final _bindings = cblBindings.asyncCallback;
 

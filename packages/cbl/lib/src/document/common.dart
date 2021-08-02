@@ -44,7 +44,7 @@ class _DefaultCblConversions implements CblConversions {
       return object;
     }
 
-    if (object is Map<String, dynamic>) {
+    if (object is Map<String, Object?>) {
       if (Blob.isBlob(object)) {
         return BlobImpl.fromProperties(object);
       }

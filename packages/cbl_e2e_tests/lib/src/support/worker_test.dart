@@ -82,7 +82,7 @@ void main() {
         final worker = testWorker();
         await worker.start();
 
-        await worker.execute(Crash()).then((value) {}, onError: (dynamic _) {});
+        await worker.execute(Crash()).then((value) {}, onError: (Object? _) {});
 
         await Future<void>.delayed(Duration(milliseconds: 500));
 

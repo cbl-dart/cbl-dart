@@ -64,7 +64,7 @@ void main() {
 
     group('from properties', () {
       test('is initialized with all properties', () {
-        final blob = BlobImpl.fromProperties(<String, dynamic>{
+        final blob = BlobImpl.fromProperties({
           '@type': 'blob',
           'digest': 'digest',
           'length': 0,
@@ -77,7 +77,7 @@ void main() {
       });
 
       test('throws when reading content before saving', () {
-        final blob = BlobImpl.fromProperties(<String, dynamic>{
+        final blob = BlobImpl.fromProperties({
           '@type': 'blob',
           'digest': 'digest',
           'length': 0,
@@ -271,7 +271,7 @@ void main() {
 
       // Blob without content type.
       expect(
-        BlobImpl.fromProperties(<String, dynamic>{
+        BlobImpl.fromProperties({
           '@type': 'blob',
           'length': 0,
           'digest': '',

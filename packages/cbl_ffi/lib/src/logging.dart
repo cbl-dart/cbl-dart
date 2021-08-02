@@ -64,7 +64,7 @@ typedef CBLLog_SetCallbackLevel = void Function(int logLevel);
 class LogCallbackMessage {
   LogCallbackMessage(this.domain, this.level, this.message);
 
-  LogCallbackMessage.fromArguments(List<dynamic> arguments)
+  LogCallbackMessage.fromArguments(List<Object?> arguments)
       : this(
           (arguments[0] as int).toLogDomain(),
           (arguments[1] as int).toLogLevel(),

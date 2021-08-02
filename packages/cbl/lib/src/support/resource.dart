@@ -106,7 +106,7 @@ mixin ClosableResourceMixin implements ClosableResource, AbstractResource {
 
     return Future.value(f()).also((it) {
       late Future<void> request;
-      void removePendingRequest(dynamic _) => _pendingRequests.remove(request);
+      void removePendingRequest(Object? _) => _pendingRequests.remove(request);
       request = it
           .then(removePendingRequest, onError: removePendingRequest)
           .also(_pendingRequests.add);

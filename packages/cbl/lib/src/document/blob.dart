@@ -73,10 +73,10 @@ abstract class Blob {
   String? get digest;
 
   /// The metadata associated with this [Blob].
-  Map<String, dynamic> get properties;
+  Map<String, Object?> get properties;
 
   /// Wether a plain Dart [Map] represents a [Blob].
-  static bool isBlob(Map<String, dynamic> properties) {
+  static bool isBlob(Map<String, Object?> properties) {
     if (!properties.containsKey(_blobDigestProperty) ||
         properties[_blobDigestProperty] is! String ||
         !properties.containsKey(_typeProperty) ||
@@ -210,13 +210,13 @@ class BlobImpl
   String? get digest => _digest;
 
   @override
-  Map<String, dynamic> get properties => <String, dynamic>{
+  Map<String, Object?> get properties => {
         _blobContentTypeProperty: _contentType,
         _blobLengthProperty: _length,
         _blobDigestProperty: _digest,
       };
 
-  Map<String, dynamic> get _blobProperties => <String, dynamic>{
+  Map<String, Object?> get _blobProperties => {
         _typeProperty: _blobType,
         ...properties,
       };

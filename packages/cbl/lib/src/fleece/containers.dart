@@ -726,8 +726,8 @@ class _DefaultSlotSetter implements SlotSetter {
       value is double ||
       value is String ||
       value is TypedData ||
-      value is Iterable ||
-      value is Map ||
+      value is Iterable<Object?> ||
+      value is Map<String, Object?> ||
       value is Value;
 
   @override

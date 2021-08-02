@@ -83,7 +83,7 @@ abstract class DictionaryInterface implements DictionaryFragment {
   /// objects and returns it.
   ///
   /// {@macro cbl.ArrayInterface.toPrimitiveObjectConversion}
-  Map<String, dynamic> toPlainMap();
+  Map<String, Object?> toPlainMap();
 }
 
 /// Provides readonly access to dictionary data.
@@ -216,8 +216,8 @@ class DictionaryImpl
   Dictionary? dictionary(String key) => _getAs(key);
 
   @override
-  Map<String, dynamic> toPlainMap() =>
-      Map<String, dynamic>.fromEntries(map((key) => MapEntry<String, dynamic>(
+  Map<String, Object?> toPlainMap() =>
+      Map<String, Object?>.fromEntries(map((key) => MapEntry<String, Object?>(
             key,
             CblConversions.convertToPlainObject(value(key)),
           )));

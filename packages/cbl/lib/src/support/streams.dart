@@ -68,7 +68,8 @@ class CallbackStreamController<T, S>
   }) : super(parent: parent);
 
   final S Function(AsyncCallback callback) startStream;
-  final FutureOr<T> Function(S registrationResult, List arguments) createEvent;
+  final FutureOr<T> Function(S registrationResult, List<Object?> arguments)
+      createEvent;
 
   late AsyncCallback _callback;
   late Future<bool> _callbackRegistered;
@@ -119,7 +120,7 @@ class CallbackStreamController<T, S>
 
 StreamController<T> callbackBroadcastStreamController<T>({
   required void Function(AsyncCallback callback) startStream,
-  required T Function(List arguments) createEvent,
+  required T Function(List<Object?> arguments) createEvent,
 }) {
   late AsyncCallback callback;
   late StreamController<T> controller;

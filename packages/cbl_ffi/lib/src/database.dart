@@ -218,7 +218,7 @@ class SaveDocumentResolvingAsyncCallbackMessage {
     this.conflictingDocument,
   );
 
-  SaveDocumentResolvingAsyncCallbackMessage.fromArguments(List<dynamic> message)
+  SaveDocumentResolvingAsyncCallbackMessage.fromArguments(List<Object?> message)
       : this(
           (message[0] as int).toPointer<CBLMutableDocument>(),
           (message[1] as int?)?.toPointer<CBLDocument>(),
@@ -313,7 +313,7 @@ typedef CBLDart_CBLDatabase_AddChangeListener = void Function(
 class DatabaseChangeCallbackMessage {
   DatabaseChangeCallbackMessage(this.documentIds);
 
-  DatabaseChangeCallbackMessage.fromArguments(List<dynamic> message)
+  DatabaseChangeCallbackMessage.fromArguments(List<Object?> message)
       : this(message.cast<Uint8List>().map(utf8.decode).toList());
 
   final List<String> documentIds;

@@ -267,12 +267,12 @@ class FleeceDecoder {
     } else if (value is CollectionFLValue) {
       if (value.isArray) {
         final array = value.value.cast<FLArray>();
-        return List<dynamic>.generate(value.length, (index) {
+        return List<Object?>.generate(value.length, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
           return _globalLoadedValueToDartObject();
         });
       } else {
-        final result = <String, dynamic>{};
+        final result = <String, Object?>{};
         final iterator = DictIterator(
           value.value.cast(),
           keyOut: globalFLString,
@@ -330,12 +330,12 @@ class FleeceDecoder {
         return value.asData.toUint8List();
       case FLValueType.array:
         final array = value.asValue.cast<FLArray>();
-        return List<dynamic>.generate(value.collectionSize, (index) {
+        return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
           return _globalLoadedValueToDartObject();
         });
       case FLValueType.dict:
-        final result = <String, dynamic>{};
+        final result = <String, Object?>{};
         final iterator = DictIterator(
           value.asValue.cast(),
           keyOut: globalFLString,

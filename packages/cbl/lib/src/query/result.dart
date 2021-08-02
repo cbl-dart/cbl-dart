@@ -240,7 +240,7 @@ class ResultImpl with IterableMixin<String> implements Result {
   List<Object?> toPlainList() => _array.toPlainList();
 
   @override
-  Map<String, dynamic> toPlainMap() => _dictionary.toPlainMap();
+  Map<String, Object?> toPlainMap() => _dictionary.toPlainMap();
 
   @override
   String toJSON() {

@@ -6,10 +6,10 @@ final fleeceEncoder = FleeceEncoder();
 
 SliceResult fleeceEncodeJson(String json) => fleeceEncoder.convertJson(json);
 
-SliceResult fleeceEncode(dynamic value) {
+SliceResult fleeceEncode(Object? value) {
   fleeceEncoder.reset();
   fleeceEncoder.writeDartObject(value);
   return fleeceEncoder.finish();
 }
 
-dynamic fleeceDecode(Slice data) => FleeceDecoder().dataToDartObject(data);
+Object? fleeceDecode(Slice data) => FleeceDecoder().dataToDartObject(data);

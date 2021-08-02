@@ -187,7 +187,7 @@ class DocumentImpl
   Fragment operator [](String key) => _properties[key];
 
   @override
-  Map<String, dynamic> toPlainMap() => _properties.toPlainMap();
+  Map<String, Object?> toPlainMap() => _properties.toPlainMap();
 
   @override
   MutableDocument toMutable() => MutableDocumentImpl(

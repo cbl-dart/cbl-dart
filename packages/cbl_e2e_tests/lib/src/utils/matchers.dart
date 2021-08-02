@@ -19,7 +19,7 @@ class _IsDirectory extends Matcher {
       description.add('is directory');
 
   @override
-  bool matches(final dynamic item, Map matchState) {
+  bool matches(final Object? item, Map matchState) {
     final String path;
     if (item is FileSystemEntity) {
       path = item.path;
@@ -47,7 +47,7 @@ class _JsonMatcher extends Matcher {
 
   final Object? expected;
 
-  late final dynamic _decodedExpected =
+  late final Object? _decodedExpected =
       expected is String ? _tryToDecodeJson(expected as String) : expected;
 
   @override
@@ -57,7 +57,7 @@ class _JsonMatcher extends Matcher {
 
   @override
   Description describeMismatch(
-    dynamic item,
+    Object? item,
     Description mismatchDescription,
     Map matchState,
     bool verbose,
@@ -65,14 +65,14 @@ class _JsonMatcher extends Matcher {
     if (!matchState.containsKey(_actualDecodedKey)) {
       return mismatchDescription;
     }
-    final dynamic actualDecoded = matchState[_actualDecodedKey];
+    final Object? actualDecoded = matchState[_actualDecodedKey];
     return mismatchDescription
         .add('was decoded as\n${_formatJson(actualDecoded)}');
   }
 
   @override
-  bool matches(dynamic item, Map matchState) {
-    dynamic actual;
+  bool matches(Object? item, Map matchState) {
+    Object? actual;
     if (item is String) {
       actual = _tryToDecodeJson(item);
       if (item != actual) {
@@ -87,7 +87,7 @@ class _JsonMatcher extends Matcher {
     return const DeepCollectionEquality().equals(actual, _decodedExpected);
   }
 
-  String _formatJson(dynamic json) {
+  String _formatJson(Object? json) {
     return const JsonEncoder.withIndent('  ').convert(json);
   }
 
