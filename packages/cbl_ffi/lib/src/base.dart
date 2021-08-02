@@ -228,17 +228,19 @@ class CBLErrorException implements Exception {
 
 void checkCBLError({String? errorSource}) {
   if (!globalCBLError.ref.isOk) {
-    if (errorSource == null) {
-      throw CBLErrorException.fromCBLError(
-        globalCBLError,
-      );
-    } else {
-      throw CBLErrorException.fromCBLErrorWithSource(
-        globalCBLError,
-        errorSource: errorSource,
-        errorPosition: globalErrorPosition.value,
-      );
-    }
+    throwCBLError(errorSource: errorSource);
+  }
+}
+
+Never throwCBLError({String? errorSource}) {
+  if (errorSource == null) {
+    throw CBLErrorException.fromCBLError(globalCBLError);
+  } else {
+    throw CBLErrorException.fromCBLErrorWithSource(
+      globalCBLError,
+      errorSource: errorSource,
+      errorPosition: globalErrorPosition.value,
+    );
   }
 }
 
