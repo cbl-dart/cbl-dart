@@ -2,18 +2,16 @@
 [![License](https://badgen.net/pub/license/cbl)](https://github.com/cofu-app/cbl-dart/blob/main/packages/cbl/LICENSE)
 [![CI](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml)
 
-> :warning: This project has not yet reached a stable production release.
+:warning: This is a beta prerelease of `v1.0.0`.
 
 ## Features - Couchbase Lite
 
 - Schemaless JSON documents
-- Binary JSON format (Fleece)
-  - Reading without parsing
 - Blobs
   - A binary data value associated with a document
 - Queries
   - Supports large subset of N1QL query language
-  - Machine readable representation of queries as JSON
+  - `QueryBuilder` to build queries trough a typed API
   - Full text search
   - Indexes
   - Observable queries
@@ -22,7 +20,7 @@
 
 ## Features - Dart API
 
-- Calls Couchbase Lite C API through FFI
+- Synchronous and asynchronous API ([WIP][async-api])
 - Streams for event based APIs
 - Support for Flutter apps
 - Support for standalone Dart (for example a CLI)
@@ -67,7 +65,7 @@ void initCbl() {
 }
 ```
 
-Now you can use `Database.open` to open a database:
+Now you can use `Database()` to open a database:
 
 ```dart
 import 'package:cbl/cbl.dart';
@@ -77,7 +75,7 @@ Future<void> useDatabase() async {
   final documentsDir = await getApplicationDocumentsDirectory();
 
   final db = Database(
-      'MyFirstDB',
+      'my-first-db',
       DatabaseConfiguration(directory: documentsDir.path),
   );
 
@@ -93,6 +91,32 @@ Future<void> useDatabase() async {
 }
 ```
 
+## Sync vs Async API
+
+:construction: The async API is not yet available and work is tracked in
+[#109][async-api].
+
+This package provides a synchronous and an asynchronous API.
+
+The sync API is simpler to use and has less overhead than the async API. The
+async API requires two [isolates][isolate] to communicate with each other and
+async APIs have a slight overhead in general.
+
+A caveat of the sync API is that it is blocking the calling isolate. UI apps,
+such as Flutter apps, must not block the main UI thread to avoid jank or
+unresponsiveness. To offload work from one isolate, other isolates can be
+spawned, which execute concurrently. This is what the async API does. Each time
+a database is opened, it creates a worker isolate, where all of the work of that
+database is performed. The async API is convenient, because it transparently
+handles all the communication between the two isolates.
+
+When optimizing tasks that make many calls to the API, it might be advantageous
+to avoid the overhead of the async API and handle offloading the work onto
+another isolate manually.
+
+The sync API is exported from `package:cbl/cbl.dart` and the async API from
+`package:cbl/async.dart`.
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to
@@ -104,6 +128,8 @@ Read [CONTRIBUTING] to get started developing.
 
 # Disclaimer
 
-> **Warning:** This is not an official Couchbase product.
+:warning: This is not an official Couchbase product.
 
+[async-api]: https://github.com/cofu-app/cbl-dart/issues/109
+[isolate]: https://api.dart.dev/stable/2.12.4/dart-isolate/Isolate-class.html
 [contributing]: https://github.com/cofu-app/cbl-dart/blob/main/CONTRIBUTING.md
