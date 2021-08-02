@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:synchronized/synchronized.dart';
+
+import '../../log/logger.dart';
 
 /// Base class for all worker requests.
 ///
@@ -101,8 +102,6 @@ class Worker extends WorkerExecutor {
 
   /// The delegate of this worker.
   final WorkerDelegate _delegate;
-
-  late final _log = Logger(_debugName);
 
   late final _debugName = 'Worker($id)';
 
@@ -202,14 +201,18 @@ class Worker extends WorkerExecutor {
         // If it crashes during a request we restart it.
         // ignore: unawaited_futures
         _onCrashed!.catchError((Object error, StackTrace stackTrace) {
-          _log.severe(
-            'Worker crashed. This is a bug. Restarting it...',
-            error,
-            stackTrace,
+          cblLogMessage(
+            LogDomain.database,
+            LogLevel.error,
+            'Worker crashed. This is a bug. Restarting it...\n$stackTrace',
           );
           _reset();
           start().then((_) {
-            _log.severe('Worker restarted.');
+            cblLogMessage(
+              LogDomain.database,
+              LogLevel.info,
+              'Worker restarted.',
+            );
           });
         });
 
