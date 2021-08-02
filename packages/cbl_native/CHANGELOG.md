@@ -1,3 +1,7 @@
+## 5.0.0-beta.0
+
+ - Bump "cbl_native" to `5.0.0-beta.0`.
+
 ## 4.2.1
 
  - **FIX**: format paths for current system.

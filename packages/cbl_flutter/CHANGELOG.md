@@ -1,3 +1,7 @@
+## 1.0.0-beta.0
+
+ - Bump "cbl_flutter" to `1.0.0-beta.0`.
+
 ## 0.4.0+2
 
  - **FIX**: fix variable reference in `install_binaries.sh`.

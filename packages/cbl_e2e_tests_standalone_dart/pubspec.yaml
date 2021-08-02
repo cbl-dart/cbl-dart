@@ -5,8 +5,8 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dev_dependencies:
-  cbl: ^0.6.0
-  cbl_ffi: ^0.6.0
+  cbl: ^1.0.0-beta.0
+  cbl_ffi: ^0.7.0-beta.0
   path: ^1.8.0
   pedantic: ^1.11.0
   rxdart: ^0.26.0

@@ -1,3 +1,9 @@
+## 1.0.0-beta.0
+
+> Note: This release has breaking changes.
+
+ -  **FEAT**: redesign of entire API to align with Swift SDK
+
 ## 0.6.0
 
 > Note: This release has breaking changes.

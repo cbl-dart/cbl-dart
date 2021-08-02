@@ -21,7 +21,7 @@ Make sure you have set the required minimum target version in the build systems
 of the platforms you support.
 
 Before you access any part of the library, `CouchbaseLite` needs to be
-initialized before it can be used. For Flutter apps you provide the `initialize`
+initialized before it can be used. For Flutter apps you provide the `init`
 function with the dynamic libraries returned from `flutterLibraries`:
 
 ```dart
