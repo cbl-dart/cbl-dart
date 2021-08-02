@@ -1,3 +1,7 @@
+## 1.0.0-beta.1
+
+ - **FIX**: remove last usage of `logging` package.
+
 ## 1.0.0-beta.0
 
 > Note: This release has breaking changes.
