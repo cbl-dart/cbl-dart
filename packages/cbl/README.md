@@ -34,7 +34,7 @@
 | -------: | --------------- |
 |      iOS | 11              |
 |    macOS | 10.13           |
-|  Android | 19              |
+|  Android | 22              |
 
 ## Installation
 

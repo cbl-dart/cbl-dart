@@ -101,7 +101,7 @@ function _configureArch() {
         -DCMAKE_INSTALL_PREFIX="$buildDir/install" \
         -DCMAKE_TOOLCHAIN_FILE="${sdkHome}/ndk/${ndk_ver}/build/cmake/android.toolchain.cmake" \
         -DCMAKE_MAKE_PROGRAM="${cmake_path}/ninja" \
-        -DANDROID_NATIVE_API_LEVEL=19 \
+        -DANDROID_NATIVE_API_LEVEL=22 \
         -DANDROID_ABI="$arch" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         $options \
