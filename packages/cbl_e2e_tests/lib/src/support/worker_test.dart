@@ -81,14 +81,13 @@ void main() {
       test('should restart Worker when it crashes', () async {
         final worker = testWorker();
         await worker.start();
+        addTearDown(worker.stop);
 
         await worker.execute(Crash()).then((value) {}, onError: (Object? _) {});
 
-        await Future<void>.delayed(Duration(milliseconds: 500));
-
-        expect(worker.running, isTrue);
-
-        await worker.stop();
+        while (!worker.running) {
+          await Future<void>.delayed(Duration(milliseconds: 100));
+        }
       });
     });
   });
