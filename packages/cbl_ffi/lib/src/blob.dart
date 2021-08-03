@@ -94,7 +94,7 @@ class BlobBindings extends Bindings {
 
   Pointer<CBLBlob> createWithData(String? contentType, TypedData content) {
     return withZoneArena(() => _createWithData(
-          stringTable.flString(contentType, arena: true).ref,
+          contentType.toFLStringInArena().ref,
           content.copyToGlobalSliceInArena().ref,
         ));
   }
@@ -305,9 +305,9 @@ class BlobWriteStreamBindings extends Bindings {
     String? contentType,
     Pointer<CBLBlobWriteStream> stream,
   ) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _createBlobWithStream(
-        stringTable.flString(contentType).ref,
+        contentType.toFLStringInArena().ref,
         stream,
       );
     });

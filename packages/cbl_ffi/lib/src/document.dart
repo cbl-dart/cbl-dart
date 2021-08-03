@@ -1,8 +1,11 @@
 import 'dart:ffi';
 
+import 'package:ffi/ffi.dart';
+
 import 'base.dart';
 import 'bindings.dart';
 import 'fleece.dart';
+import 'utils.dart';
 
 class CBLDocument extends Opaque {}
 
@@ -136,8 +139,8 @@ class MutableDocumentBindings extends Bindings {
   late final CBLDart_CBLDocument_SetJSON _setJSON;
 
   Pointer<CBLMutableDocument> createWithID([String? id]) {
-    return stringTable.autoFree(() => _createWithID(
-          stringTable.flString(id).ref,
+    return withZoneArena(() => _createWithID(
+          id.toFLStringInArena().ref,
         ));
   }
 
@@ -160,10 +163,10 @@ class MutableDocumentBindings extends Bindings {
     Pointer<CBLMutableDocument> doc,
     String properties,
   ) {
-    stringTable.autoFree(() {
+    withZoneArena(() {
       _setJSON(
         doc,
-        stringTable.flString(properties).ref,
+        properties.toFLStringInArena().ref,
         globalCBLError,
       ).checkCBLError();
     });

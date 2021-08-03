@@ -209,10 +209,10 @@ class LoggingBindings extends Bindings {
     CBLLogLevel level,
     String message,
   ) {
-    stringTable.autoFree(() => _logMessage(
+    withZoneArena(() => _logMessage(
           domain.toInt(),
           level.toInt(),
-          stringTable.flString(message, cache: false).ref,
+          message.toFLStringInArena().ref,
         ));
   }
 
@@ -253,7 +253,7 @@ class LoggingBindings extends Bindings {
 
     result.ref
       ..level = config.level.toInt()
-      ..directory = stringTable.flString(config.directory, arena: true).ref
+      ..directory = config.directory.toFLStringInArena().ref
       ..maxRotateCount = config.maxRotateCount
       ..maxSize = config.maxSize
       ..usePlainText = config.usePlainText.toInt();

@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
+
+import 'fleece.dart';
 
 // === Lang ====================================================================
 
@@ -16,6 +19,29 @@ extension IntBoolExt on int {
 
 extension BoolIntExt on bool {
   int toInt() => this ? 1 : 0;
+}
+
+final _flStringSizeOf = sizeOf<FLString>();
+final _flStringSizeOfAligned = _flStringSizeOf + (_flStringSizeOf % 8);
+
+extension StringFLStringExt on String? {
+  Pointer<FLString> toFLStringInArena() {
+    final string = this;
+    if (string == null) {
+      return nullFLString;
+    }
+
+    final encoded = utf8.encode(string);
+    final flStringAndBuffer =
+        zoneArena<Uint8>(_flStringSizeOfAligned + encoded.length);
+    final flString = flStringAndBuffer.cast<FLString>();
+    final buffer = flStringAndBuffer.elementAt(_flStringSizeOfAligned);
+    buffer.asTypedList(encoded.length).setAll(0, encoded);
+    flString.ref
+      ..buf = buffer
+      ..size = encoded.length;
+    return flString;
+  }
 }
 
 extension Utf8PointerExt on Pointer<Utf8> {

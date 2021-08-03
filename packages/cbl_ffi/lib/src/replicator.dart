@@ -519,8 +519,8 @@ class ReplicatorBindings extends Bindings {
       _addDocumentReplicationListener;
 
   Pointer<CBLEndpoint> createEndpointWithUrl(String url) {
-    return stringTable
-        .autoFree(() => _endpointCreateWithUrl(stringTable.flString(url).ref));
+    return withZoneArena(
+        () => _endpointCreateWithUrl(url.toFLStringInArena().ref));
   }
 
   void freeEndpoint(Pointer<CBLEndpoint> endpoint) {
@@ -531,9 +531,9 @@ class ReplicatorBindings extends Bindings {
     String username,
     String password,
   ) {
-    return stringTable.autoFree(() => _authCreatePassword(
-          stringTable.flString(username).ref,
-          stringTable.flString(password).ref,
+    return withZoneArena(() => _authCreatePassword(
+          username.toFLStringInArena().ref,
+          password.toFLStringInArena().ref,
         ));
   }
 
@@ -541,9 +541,9 @@ class ReplicatorBindings extends Bindings {
     String sessionID,
     String? cookieName,
   ) {
-    return stringTable.autoFree(() => _authCreateSession(
-          stringTable.flString(sessionID).ref,
-          stringTable.flString(cookieName).ref,
+    return withZoneArena(() => _authCreateSession(
+          sessionID.toFLStringInArena().ref,
+          cookieName.toFLStringInArena().ref,
         ));
   }
 
@@ -646,10 +646,10 @@ class ReplicatorBindings extends Bindings {
     Pointer<CBLReplicator> replicator,
     String docID,
   ) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _isDocumentPending(
         replicator,
-        stringTable.flString(docID).ref,
+        docID.toFLStringInArena().ref,
         globalCBLError,
       ).checkCBLError().toBool();
     });
@@ -739,11 +739,10 @@ class ReplicatorBindings extends Bindings {
 
     result.ref
       ..type = type
-      ..hostname = stringTable.flString(hostname!, arena: true).ref
+      ..hostname = hostname!.toFLStringInArena().ref
       ..port = port!
-      ..username = stringTable.flString(username, arena: true).ref
-      ..password =
-          stringTable.flString(password, arena: true, cache: false).ref;
+      ..username = username.toFLStringInArena().ref
+      ..password = password.toFLStringInArena().ref;
 
     return result;
   }

@@ -362,8 +362,7 @@ class SlotBindings extends Bindings {
   }
 
   void setString(Pointer<FLSlot> slot, String value) {
-    stringTable
-        .autoFree(() => _setString(slot, stringTable.flString(value).ref));
+    withZoneArena(() => _setString(slot, value.toFLStringInArena().ref));
   }
 
   void setData(Pointer<FLSlot> slot, TypedData value) {
@@ -445,8 +444,8 @@ class DocBindings extends Bindings {
   }
 
   Pointer<FLDoc> fromJson(String json) {
-    return stringTable.autoFree(() {
-      return _fromJSON(stringTable.flString(json).ref, _globalFleeceErrorCode)
+    return withZoneArena(() {
+      return _fromJSON(json.toFLStringInArena().ref, _globalFleeceErrorCode)
           .checkFleeceError();
     });
   }
@@ -967,8 +966,7 @@ class DictBindings extends Bindings {
   late final FLDict_AsMutable _asMutable;
 
   Pointer<FLValue> get(Pointer<FLDict> dict, String key) {
-    return stringTable
-        .autoFree(() => _get(dict, stringTable.flString(key).ref));
+    return withZoneArena(() => _get(dict, key.toFLStringInArena().ref));
   }
 
   int count(Pointer<FLDict> dict) {
@@ -1158,12 +1156,11 @@ class MutableDictBindings extends Bindings {
   }
 
   Pointer<FLSlot> set(Pointer<FLMutableDict> dict, String key) {
-    return stringTable
-        .autoFree(() => _set(dict, stringTable.flString(key).ref));
+    return withZoneArena(() => _set(dict, key.toFLStringInArena().ref));
   }
 
   void remove(Pointer<FLMutableDict> dict, String key) {
-    stringTable.autoFree(() => _remove(dict, stringTable.flString(key).ref));
+    withZoneArena(() => _remove(dict, key.toFLStringInArena().ref));
   }
 
   void removeAll(Pointer<FLMutableDict> dict) {
@@ -1174,9 +1171,8 @@ class MutableDictBindings extends Bindings {
     Pointer<FLMutableDict> array,
     String key,
   ) {
-    return stringTable.autoFree(() {
-      return _getMutableArray(array, stringTable.flString(key).ref)
-          .toNullable();
+    return withZoneArena(() {
+      return _getMutableArray(array, key.toFLStringInArena().ref).toNullable();
     });
   }
 
@@ -1184,8 +1180,8 @@ class MutableDictBindings extends Bindings {
     Pointer<FLMutableDict> array,
     String key,
   ) {
-    return stringTable.autoFree(() {
-      return _getMutableDict(array, stringTable.flString(key).ref).toNullable();
+    return withZoneArena(() {
+      return _getMutableDict(array, key.toFLStringInArena().ref).toNullable();
     });
   }
 }
@@ -1390,10 +1386,10 @@ class FleeceDecoderBindings extends Bindings {
     Pointer<FLDict> array,
     String key,
   ) {
-    stringTable.autoFree(() {
+    withZoneArena(() {
       _getLoadedFLValueFromDict(
         array,
-        stringTable.flString(key).ref,
+        key.toFLStringInArena().ref,
         _globalLoadedFLValue,
       );
     });
@@ -1729,10 +1725,10 @@ class FleeceEncoderBindings extends Bindings {
   }
 
   void writeString(Pointer<FLEncoder> encoder, String value) {
-    stringTable.autoFree(() {
+    withZoneArena(() {
       _checkError(
         encoder,
-        _writeString(encoder, stringTable.flString(value).ref),
+        _writeString(encoder, value.toFLStringInArena().ref),
       );
     });
   }
@@ -1747,10 +1743,10 @@ class FleeceEncoderBindings extends Bindings {
   }
 
   void writeJSON(Pointer<FLEncoder> encoder, String value) {
-    stringTable.autoFree(() {
+    withZoneArena(() {
       _checkError(
         encoder,
-        _writeJSON(encoder, stringTable.flString(value).ref),
+        _writeJSON(encoder, value.toFLStringInArena().ref),
       );
     });
   }
@@ -1768,10 +1764,10 @@ class FleeceEncoderBindings extends Bindings {
   }
 
   void writeKey(Pointer<FLEncoder> encoder, String value) {
-    stringTable.autoFree(() {
+    withZoneArena(() {
       _checkError(
         encoder,
-        _writeKey(encoder, stringTable.flString(value).ref),
+        _writeKey(encoder, value.toFLStringInArena().ref),
       );
     });
   }
