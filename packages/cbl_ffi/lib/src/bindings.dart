@@ -10,22 +10,15 @@ import 'libraries.dart';
 import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
-import 'string_table.dart';
 
 abstract class Bindings {
-  Bindings(Bindings parent)
-      : libs = parent.libs,
-        stringTable = parent.stringTable {
+  Bindings(Bindings parent) : libs = parent.libs {
     parent._children.add(this);
   }
 
-  Bindings.root(Libraries libs, StringTable stringTable)
-      : libs = libs,
-        stringTable = stringTable;
+  Bindings.root(Libraries libs) : libs = libs;
 
   final Libraries libs;
-
-  final StringTable stringTable;
 
   List<Bindings> get _children => [];
 
@@ -59,18 +52,10 @@ class CBLBindings extends Bindings {
   static CBLBindings? get maybeInstance => _instance;
 
   static void initInstance(Libraries libraries) {
-    _instance ??= CBLBindings(
-      libraries,
-      StringTable(
-        maxCacheSize: 512,
-        minCachedStringSize: 0,
-        maxCachedStringSize: 512,
-      ),
-    )..base.init();
+    _instance ??= CBLBindings(libraries)..base.init();
   }
 
-  CBLBindings(Libraries libs, StringTable stringTable)
-      : super.root(libs, stringTable) {
+  CBLBindings(Libraries libs) : super.root(libs) {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
     logging = LoggingBindings(this);
@@ -95,10 +80,4 @@ class CBLBindings extends Bindings {
   late final BlobsBindings blobs;
   late final ReplicatorBindings replicator;
   late final FleeceBindings fleece;
-
-  @override
-  void dispose() {
-    stringTable.dispose();
-    super.dispose();
-  }
 }

@@ -87,28 +87,6 @@ jobs:
       - name: Run tests
         run: melos run test:cbl
 
-  tests-cbl_ffi:
-    name: Tests - cbl_ffi
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Run tests
-        run: melos run test:cbl_ffi
-
   tests-cbl_native:
     name: Tests - cbl_native
     runs-on: ubuntu-20.04

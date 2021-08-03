@@ -597,32 +597,30 @@ class DatabaseBindings extends Bindings {
     CBLDatabaseConfiguration? configuration,
   ) {
     return withZoneArena(() {
-      return stringTable.autoFree(() {
-        return _copyDatabase(
-          stringTable.flString(from).ref,
-          stringTable.flString(name).ref,
-          _createConfig(configuration),
-          globalCBLError,
-        ).checkCBLError().toBool();
-      });
+      return _copyDatabase(
+        from.toFLStringInArena().ref,
+        name.toFLStringInArena().ref,
+        _createConfig(configuration),
+        globalCBLError,
+      ).checkCBLError().toBool();
     });
   }
 
   bool deleteDatabase(String name, String? inDirectory) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _deleteDatabase(
-        stringTable.flString(name).ref,
-        stringTable.flString(inDirectory).ref,
+        name.toFLStringInArena().ref,
+        inDirectory.toFLStringInArena().ref,
         globalCBLError,
       ).checkCBLError().toBool();
     });
   }
 
   bool databaseExists(String name, String? inDirectory) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _databaseExists(
-        stringTable.flString(name).ref,
-        stringTable.flString(inDirectory).ref,
+        name.toFLStringInArena().ref,
+        inDirectory.toFLStringInArena().ref,
       ).toBool();
     });
   }
@@ -648,13 +646,11 @@ class DatabaseBindings extends Bindings {
     CBLDatabaseConfiguration? configuration,
   ) {
     return withZoneArena(() {
-      return stringTable.autoFree(() {
-        return _open(
-          stringTable.flString(name).ref,
-          _createConfig(configuration),
-          globalCBLError,
-        ).checkCBLError();
-      });
+      return _open(
+        name.toFLStringInArena().ref,
+        _createConfig(configuration),
+        globalCBLError,
+      ).checkCBLError();
     });
   }
 
@@ -698,8 +694,8 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     String docId,
   ) {
-    return stringTable.autoFree(() {
-      return _getDocument(db, stringTable.flString(docId).ref, globalCBLError)
+    return withZoneArena(() {
+      return _getDocument(db, docId.toFLStringInArena().ref, globalCBLError)
           .checkCBLError()
           .toNullable();
     });
@@ -709,10 +705,10 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     String docId,
   ) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _getMutableDocument(
         db,
-        stringTable.flString(docId).ref,
+        docId.toFLStringInArena().ref,
         globalCBLError,
       ).checkCBLError().toNullable();
     });
@@ -789,20 +785,20 @@ class DatabaseBindings extends Bindings {
   }
 
   bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _purgeDocumentByID(
         db,
-        stringTable.flString(docId).ref,
+        docId.toFLStringInArena().ref,
         globalCBLError,
       ).checkCBLError().toBool();
     });
   }
 
   DateTime? getDocumentExpiration(Pointer<CBLDatabase> db, String docId) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       final result = _getDocumentExpiration(
         db,
-        stringTable.flString(docId).ref,
+        docId.toFLStringInArena().ref,
         globalCBLError,
       );
 
@@ -819,10 +815,10 @@ class DatabaseBindings extends Bindings {
     String docId,
     DateTime? expiration,
   ) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       _setDocumentExpiration(
         db,
-        stringTable.flString(docId).ref,
+        docId.toFLStringInArena().ref,
         expiration?.millisecondsSinceEpoch ?? 0,
         globalCBLError,
       ).checkCBLError();
@@ -834,8 +830,8 @@ class DatabaseBindings extends Bindings {
     String docId,
     Pointer<CBLDartAsyncCallback> listener,
   ) {
-    stringTable.autoFree(() {
-      _addDocumentChangeListener(db, stringTable.flString(docId).ref, listener);
+    withZoneArena(() {
+      _addDocumentChangeListener(db, docId.toFLStringInArena().ref, listener);
     });
   }
 
@@ -852,22 +848,20 @@ class DatabaseBindings extends Bindings {
     CBLIndexSpec spec,
   ) {
     withZoneArena(() {
-      stringTable.autoFree(() {
-        _createIndex(
-          db,
-          stringTable.flString(name).ref,
-          _createIndexSpec(spec).ref,
-          globalCBLError,
-        ).checkCBLError();
-      });
+      _createIndex(
+        db,
+        name.toFLStringInArena().ref,
+        _createIndexSpec(spec).ref,
+        globalCBLError,
+      ).checkCBLError();
     });
   }
 
   void deleteIndex(Pointer<CBLDatabase> db, String name) {
-    stringTable.autoFree(() {
+    withZoneArena(() {
       _deleteIndex(
         db,
-        stringTable.flString(name).ref,
+        name.toFLStringInArena().ref,
         globalCBLError,
       ).checkCBLError();
     });
@@ -886,8 +880,7 @@ class DatabaseBindings extends Bindings {
 
     final result = zoneArena<CBLDart_CBLDatabaseConfiguration>();
 
-    result.ref.directory =
-        stringTable.flString(config.directory, arena: true).ref;
+    result.ref.directory = config.directory.toFLStringInArena().ref;
 
     return result;
   }
@@ -898,9 +891,9 @@ class DatabaseBindings extends Bindings {
     result.ref
       ..type = spec.type
       ..expressionLanguage = spec.expressionLanguage
-      ..expressions = stringTable.flString(spec.expressions, arena: true).ref
+      ..expressions = spec.expressions.toFLStringInArena().ref
       ..ignoreAccents = spec.ignoreAccents ?? false
-      ..language = stringTable.flString(spec.language, arena: true).ref;
+      ..language = spec.language.toFLStringInArena().ref;
 
     return result;
   }

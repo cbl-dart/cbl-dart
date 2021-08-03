@@ -1,5 +1,7 @@
 import 'dart:ffi';
 
+import 'package:ffi/ffi.dart';
+
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
@@ -138,11 +140,11 @@ class QueryBindings extends Bindings {
     CBLQueryLanguage language,
     String queryString,
   ) {
-    return stringTable.autoFree(() {
+    return withZoneArena(() {
       return _createQuery(
         db,
         language.toInt(),
-        stringTable.flString(queryString).ref,
+        queryString.toFLStringInArena().ref,
         globalErrorPosition,
         globalCBLError,
       ).checkCBLError(errorSource: queryString);
@@ -266,9 +268,9 @@ class ResultSetBindings extends Bindings {
     Pointer<CBLResultSet> resultSet,
     String key,
   ) {
-    return stringTable.autoFree(() => _valueForKey(
+    return withZoneArena(() => _valueForKey(
           resultSet,
-          stringTable.flString(key).ref,
+          key.toFLStringInArena().ref,
         ));
   }
 
