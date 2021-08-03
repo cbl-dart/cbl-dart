@@ -150,7 +150,7 @@ jobs:
           key: tests-standalone-dart-linux
 
       - name: Build native binaries
-        run: ./native/tools/build_linux.sh build Debug
+        run: ./native/tools/build_unix.sh build Debug
 
       - name: Cache Dart dependencies
         uses: actions/cache@v2

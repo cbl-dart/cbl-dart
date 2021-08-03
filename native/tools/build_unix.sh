@@ -7,8 +7,8 @@ set -e
 toolsDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 nativeDir="$(cd "$toolsDir/.." && pwd)"
 projectDir="$(cd "$nativeDir/.." && pwd)"
-buildDir="$projectDir/build/linux"
-libDir="$projectDir/build/linux/lib"
+buildDir="$projectDir/build/unix"
+libDir="$projectDir/build/unix/lib"
 
 # === Commands ===
 
@@ -51,8 +51,8 @@ function _copyToLib() {
     mkdir -p "$libDir"
 
     cp -P \
-        "$buildDir/cbl-dart/libcblitedart.so" \
-        "$buildDir/vendor/couchbase-lite-C/libcblite.so"* \
+        "$buildDir/cbl-dart/libcblitedart."* \
+        "$buildDir/vendor/couchbase-lite-C/libcblite."* \
         "$libDir"
 }
 

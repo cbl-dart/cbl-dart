@@ -45,8 +45,8 @@ jobs:
 
       - name: Build
         run: |
-          ./native/tools/build_linux.sh build
-          tar -czf binaries-linux.tar.gz -C build/linux/lib .
+          ./native/tools/build_unix.sh build
+          tar -czf binaries-linux.tar.gz -C build/unix/lib .
 
       - name: Upload binaries to release
         uses: actions/upload-release-asset@v1
