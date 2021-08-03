@@ -164,11 +164,6 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
     CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync(
-    CBLDatabase *db, CBLDocument *doc, CBLDart::AsyncCallback *conflictHandler,
-    CBLError *errorOut);
-
-CBLDART_EXPORT
 uint8_t CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
                                               CBLDart_FLString docID,
                                               CBLError *errorOut);
