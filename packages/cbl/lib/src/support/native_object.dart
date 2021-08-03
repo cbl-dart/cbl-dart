@@ -146,6 +146,17 @@ class CblObject<T extends NativeType> extends NativeObject<T> {
   }
 }
 
+/// Handle to a CBLDatabase.
+class CBLDatabaseObject extends NativeObject<CBLDatabase> {
+  /// Creates a handle to a CBLDatabase.
+  CBLDatabaseObject(
+    Pointer<CBLDatabase> pointer, {
+    required String debugName,
+  }) : super(pointer) {
+    cblBindings.database.bindToDartObject(this, pointer, debugName);
+  }
+}
+
 /// Handle to a CBLReplicator.
 class CBLReplicatorObject extends NativeObject<CBLReplicator> {
   /// Creates a handle to a CBLReplicator.

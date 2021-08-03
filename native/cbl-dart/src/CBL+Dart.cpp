@@ -288,6 +288,41 @@ int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
 
 // -- Database
 
+/**
+ * A list of all the currently open database.
+ *
+ * Used to ensure that databases are closed only once.
+ */
+std::vector<CBLDatabase *> openDatabases;
+std::mutex openDatabasesMutex;
+
+static void CBLDart_RegisterOpenDatabase(CBLDatabase *database) {
+  std::scoped_lock lock(openDatabasesMutex);
+  openDatabases.push_back(database);
+}
+
+uint8_t CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
+                                  CBLError *errorOut) {
+  {
+    std::scoped_lock lock(openDatabasesMutex);
+    // Check if the database is still open.
+    auto it = std::find(openDatabases.begin(), openDatabases.end(), database);
+    if (it == openDatabases.end()) {
+      // Return early since the database has already been closed.
+      return true;
+    }
+
+    // Remove the database from the list of open databasea and close it.
+    openDatabases.erase(it);
+  }
+
+  if (andDelete) {
+    return CBLDatabase_Delete(database, errorOut);
+  } else {
+    return CBLDatabase_Close(database, errorOut);
+  }
+}
+
 CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
   auto config = CBLDatabaseConfiguration_Default();
   CBLDart_CBLDatabaseConfiguration result;
@@ -324,7 +359,33 @@ CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
   CBLDart_CheckFileLogging();
   CBLDatabaseConfiguration config_;
   config_.directory = CBLDart_FLStringFromDart(config->directory);
-  return CBLDatabase_Open(CBLDart_FLStringFromDart(name), &config_, errorOut);
+  auto database =
+      CBLDatabase_Open(CBLDart_FLStringFromDart(name), &config_, errorOut);
+  if (database) {
+    CBLDart_RegisterOpenDatabase(database);
+  }
+  return database;
+}
+
+void CBLDart_DatabaseFinalizer(void *dart_callback_data, void *peer) {
+  auto database = reinterpret_cast<CBLDatabase *>(peer);
+  CBLError error;
+  if (!CBLDart_CBLDatabase_Close(database, false, &error)) {
+    auto errorMessage = CBLError_Message(&error);
+    CBL_Log(kCBLLogDomainDatabase, CBLLogError,
+            "Error closing database %p in Dart finalizer: %*.s", database,
+            static_cast<int>(errorMessage.size), (char *)errorMessage.buf);
+    FLSliceResult_Release(errorMessage);
+  }
+  CBLDart_CBLRefCountedFinalizer_Impl(
+      reinterpret_cast<CBLRefCounted *>(database));
+}
+
+void CBLDart_BindDatabaseToDartObject(Dart_Handle object, CBLDatabase *database,
+                                      char *debugName) {
+  CBLDart_BindCBLRefCountedToDartObject_Impl(
+      object, reinterpret_cast<CBLRefCounted *>(database), false, debugName,
+      CBLDart_DatabaseFinalizer);
 }
 
 CBLDart_FLString CBLDart_CBLDatabase_Name(CBLDatabase *db) {
@@ -823,6 +884,8 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
     callbackWrapperContext = nh.mapped();
   }
   delete callbackWrapperContext;
+
+  CBLReplicator_Stop(replicator);
 
   CBLDart_CBLRefCountedFinalizer_Impl(
       reinterpret_cast<CBLRefCounted *>(replicator));
