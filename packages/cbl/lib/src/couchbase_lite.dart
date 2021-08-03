@@ -16,33 +16,39 @@ class LibraryConfiguration {
   ///
   /// If [appendExtension] is `true` (default), the file extension which is used
   /// for dynamic libraries on the current platform is appended to [name].
-  LibraryConfiguration.dynamic(String name, {bool appendExtension = true})
+  LibraryConfiguration.dynamic(String name,
+      {bool appendExtension = true, String? version})
       : process = null,
         name = name,
-        appendExtension = appendExtension;
+        appendExtension = appendExtension,
+        version = version;
 
   /// Creates a configuration for a dynamic library opened with
   /// [DynamicLibrary.process].
   LibraryConfiguration.process()
       : process = true,
         name = null,
-        appendExtension = null;
+        appendExtension = null,
+        version = null;
 
   /// Creates a configuration for a dynamic library opened with
   /// [DynamicLibrary.executable].
   LibraryConfiguration.executable()
       : process = false,
         name = null,
-        appendExtension = null;
+        appendExtension = null,
+        version = null;
 
   final bool? process;
   final String? name;
   final bool? appendExtension;
+  final String? version;
 
   ffi.LibraryConfiguration _toFfi() => ffi.LibraryConfiguration(
         process: process,
         name: name,
         appendExtension: appendExtension,
+        version: version,
       );
 }
 

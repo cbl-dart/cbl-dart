@@ -32,11 +32,11 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
     final isUnix = Platform.isLinux || Platform.isMacOS;
 
     if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
-      cblLib = '$libDir/libcblite.3';
+      cblLib = '$libDir/libcblite';
       cblDartLib = '$libDir/libcblitedart';
 
       return Libraries(
-        cbl: LibraryConfiguration.dynamic(cblLib),
+        cbl: LibraryConfiguration.dynamic(cblLib, version: '3'),
         cblDart: LibraryConfiguration.dynamic(cblDartLib),
       );
     } else if (Platform.isMacOS) {
