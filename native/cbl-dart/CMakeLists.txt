@@ -11,11 +11,11 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
     $<$<CONFIG:Debug>:DEBUG>
 )
-if (APPLE)
+if(APPLE)
     set(CBL_DART_INSTALL_RPATH "@loader_path")
 else()
     set(CBL_DART_INSTALL_RPATH "\${ORIGIN}")
-endif(APPLE)
+endif()
 
 set(CBL_DART_INCLUDES
     src
