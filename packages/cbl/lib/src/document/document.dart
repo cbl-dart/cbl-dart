@@ -127,16 +127,24 @@ class DocumentImpl
     }
   }
 
-  @override
-  final NativeObject<CBLDocument> native;
+  final bool _isMutable = false;
 
-  late final _root = native.call((pointer) => MRoot.fromValue(
+  @override
+  NativeObject<CBLDocument> native;
+
+  MRoot get _root => __root ??= native.call((pointer) => MRoot.fromValue(
         _documentBindings.properties(pointer).cast(),
         context: DocumentMContext(this),
-        isMutable: false,
-      ));
+        isMutable: _isMutable,
+      ))!;
+  MRoot? __root;
 
-  late final Dictionary _properties = _root.asNative as Dictionary;
+  Dictionary get _properties => _root.asNative as Dictionary;
+
+  void _replaceNative(NativeObject<CBLDocument> native) {
+    this.native = native;
+    __root = null;
+  }
 
   @override
   String get id => native.call(_documentBindings.id);
@@ -257,15 +265,17 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   }
 
   @override
-  late final _root = native.call((pointer) => MRoot.fromValue(
-        _documentBindings.properties(pointer).cast(),
-        context: DocumentMContext(this),
-        isMutable: true,
-      ));
+  final bool _isMutable = true;
 
   @override
-  late final MutableDictionary _properties =
-      _root.asNative as MutableDictionary;
+  MutableDictionary get _properties => _root.asNative as MutableDictionary;
+
+  void replaceNativeFrom(DocumentImpl document) {
+    _replaceNative(CblObject(
+      document.native.call(_mutableDocumentBindings.mutableCopy).cast(),
+      debugName: 'MutableDocument.replaceNativeFrom()',
+    ));
+  }
 
   /// Encodes `_properties` and sets the result as the new properties of the
   /// native `Document`.

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
@@ -184,65 +183,6 @@ typedef CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   int concurrency,
-  Pointer<CBLError> errorOut,
-);
-
-typedef SaveConflictHandler_C = Uint8 Function(
-  Pointer<Void> context,
-  Pointer<CBLMutableDocument> documentBeingSave,
-  Pointer<CBLDocument> conflictingDocument,
-);
-typedef SaveConflictHandlerWrapper = int Function(
-  Pointer<CBLMutableDocument> documentBeingSave,
-  Pointer<CBLDocument> conflictingDocument,
-);
-typedef CBLSaveConflictHandler = bool Function(
-  Pointer<CBLMutableDocument> documentBeingSave,
-  Pointer<CBLDocument>? conflictingDocument,
-);
-
-typedef CBLDatabase_SaveDocumentWithConflictHandler_C = Uint8 Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLMutableDocument> doc,
-  Pointer<NativeFunction<SaveConflictHandler_C>> conflictHandler,
-  Pointer<Void> context,
-  Pointer<CBLError> errorOut,
-);
-typedef CBLDatabase_SaveDocumentWithConflictHandler = int Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLMutableDocument> doc,
-  Pointer<NativeFunction<SaveConflictHandler_C>> conflictHandler,
-  Pointer<Void> context,
-  Pointer<CBLError> errorOut,
-);
-
-class SaveDocumentResolvingAsyncCallbackMessage {
-  SaveDocumentResolvingAsyncCallbackMessage(
-    this.documentBeingSaved,
-    this.conflictingDocument,
-  );
-
-  SaveDocumentResolvingAsyncCallbackMessage.fromArguments(List<Object?> message)
-      : this(
-          (message[0] as int).toPointer<CBLMutableDocument>(),
-          (message[1] as int?)?.toPointer<CBLDocument>(),
-        );
-
-  final Pointer<CBLMutableDocument> documentBeingSaved;
-  final Pointer<CBLDocument>? conflictingDocument;
-}
-
-typedef CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync_C = Uint8
-    Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLMutableDocument> doc,
-  Pointer<CBLDartAsyncCallback> conflictHandler,
-  Pointer<CBLError> errorOut,
-);
-typedef CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync = int Function(
-  Pointer<CBLDatabase> db,
-  Pointer<CBLMutableDocument> doc,
-  Pointer<CBLDartAsyncCallback> conflictHandler,
   Pointer<CBLError> errorOut,
 );
 
@@ -478,24 +418,6 @@ class DatabaseBindings extends Bindings {
         CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl>(
       'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
     );
-    _saveConflictHandler = Pointer.fromFunction<SaveConflictHandler_C>(
-      _staticSaveConflictHandler,
-      // The function should throw because it catches all exceptions of the dart
-      // conflict handler.
-      // Passing `0` here (representing `false`) is a fail save to abort the
-      // save operation in case there is a bug in the bindings layer.
-      0,
-    );
-    _saveDocumentWithConflictHandler = libs.cbl.lookupFunction<
-        CBLDatabase_SaveDocumentWithConflictHandler_C,
-        CBLDatabase_SaveDocumentWithConflictHandler>(
-      'CBLDatabase_SaveDocumentWithConflictHandler',
-    );
-    _saveDocumentWithConflictHandlerAsync = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync_C,
-        CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync>(
-      'CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync',
-    );
     _deleteDocumentWithConcurrencyControl = libs.cbl.lookupFunction<
         CBLDatabase_DeleteDocumentWithConcurrencyControl_C,
         CBLDatabase_DeleteDocumentWithConcurrencyControl>(
@@ -540,27 +462,6 @@ class DatabaseBindings extends Bindings {
     );
   }
 
-  /// The conflict handler which will be set by
-  /// [saveDocumentWithConflictHandler] before making the call to the CBL API
-  /// and cleared when that call finishes.
-  static SaveConflictHandlerWrapper? _currentSaveConflictHandler;
-
-  /// Static invoker of [_currentSaveConflictHandler].
-  ///
-  /// This is necessary because only static functions can be passed as C
-  /// function pointers to native APIs.
-  static int _staticSaveConflictHandler(
-    Pointer<Void> context,
-    Pointer<CBLMutableDocument> documentBeingSaved,
-    Pointer<CBLDocument> conflictingDocument,
-  ) {
-    assert(_currentSaveConflictHandler != null);
-    return _currentSaveConflictHandler!(
-      documentBeingSaved,
-      conflictingDocument,
-    );
-  }
-
   late final CBLDart_CBL_CopyDatabase _copyDatabase;
   late final CBLDart_CBL_DeleteDatabase _deleteDatabase;
   late final CBLDart_CBLDatabase_Exists _databaseExists;
@@ -579,12 +480,6 @@ class DatabaseBindings extends Bindings {
   late final CBLDart_CBLDatabase_GetMutableDocument _getMutableDocument;
   late final CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl
       _saveDocumentWithConcurrencyControl;
-  late final Pointer<NativeFunction<SaveConflictHandler_C>>
-      _saveConflictHandler;
-  late final CBLDatabase_SaveDocumentWithConflictHandler
-      _saveDocumentWithConflictHandler;
-  late final CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync
-      _saveDocumentWithConflictHandlerAsync;
   late final CBLDatabase_DeleteDocumentWithConcurrencyControl
       _deleteDocumentWithConcurrencyControl;
   late final CBLDart_CBLDatabase_PurgeDocumentByID _purgeDocumentByID;
@@ -741,50 +636,6 @@ class DatabaseBindings extends Bindings {
       db,
       doc,
       concurrencyControl.toInt(),
-      globalCBLError,
-    ).checkCBLError();
-  }
-
-  void saveDocumentWithConflictHandler(
-    Pointer<CBLDatabase> db,
-    Pointer<CBLMutableDocument> doc,
-    CBLSaveConflictHandler conflictHandler,
-  ) {
-    final zone = Zone.current;
-    conflictHandler = zone.registerBinaryCallback(conflictHandler);
-    _currentSaveConflictHandler = (documentBeingSaved, conflictingDocument) {
-      var resolvedConflict = false;
-      zone.runGuarded(() {
-        resolvedConflict = conflictHandler(
-          documentBeingSaved,
-          conflictingDocument.toNullable(),
-        );
-      });
-      return resolvedConflict.toInt();
-    };
-
-    try {
-      _saveDocumentWithConflictHandler(
-        db,
-        doc,
-        _saveConflictHandler,
-        nullptr,
-        globalCBLError,
-      ).checkCBLError();
-    } finally {
-      _currentSaveConflictHandler = null;
-    }
-  }
-
-  void saveDocumentWithConflictHandlerAsync(
-    Pointer<CBLDatabase> db,
-    Pointer<CBLMutableDocument> doc,
-    Pointer<CBLDartAsyncCallback> conflictHandler,
-  ) {
-    _saveDocumentWithConflictHandlerAsync(
-      db,
-      doc,
-      conflictHandler,
       globalCBLError,
     ).checkCBLError();
   }

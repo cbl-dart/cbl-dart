@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -65,7 +64,7 @@ enum MaintenanceType {
 /// See:
 /// - [Database.saveDocumentWithConflictHandler] for saving a [Document] with a
 ///   custom conflict handler.
-typedef SaveConflictHandler = bool Function(
+typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
@@ -161,7 +160,7 @@ abstract class Database implements ClosableResource {
   /// returned `false`, but errors thrown by the [conflictHandler] __cannot__ be
   /// caught by executing this method in a try-catch block. These errors are
   /// uncaught errors within the current [Zone].
-  bool saveDocumentWithConflictHandler(
+  Future<bool> saveDocumentWithConflictHandler(
     MutableDocument document,
     SaveConflictHandler conflictHandler,
   );
@@ -313,44 +312,46 @@ class DatabaseImpl extends CBLDatabaseObject
       });
 
   @override
-  bool saveDocumentWithConflictHandler(
+  Future<bool> saveDocumentWithConflictHandler(
     covariant MutableDocumentImpl document,
     SaveConflictHandler conflictHandler,
   ) =>
-      useSync(() {
-        document.database = this;
-        document.flushProperties();
+      use(() async {
+        // Implementing the conflict resolution in Dart, instead of using
+        // the C implementation, allows us to make the conflict handler
+        // asynchronous.
+        var success = false;
+        var retry = false;
+        var documentBeingSaved = document;
 
-        bool conflictHandlerAdapter(
-          Pointer<CBLMutableDocument> _,
-          Pointer<CBLDocument>? conflictingDocument,
-        ) {
-          var saveDocument = false;
+        do {
+          if (saveDocument(
+            documentBeingSaved,
+            ConcurrencyControl.failOnConflict,
+          )) {
+            success = true;
+            retry = false;
+          } else {
+            // Load the conflicting document.
+            final conflictingDocument =
+                this.document(document.id) as DocumentImpl?;
 
-          final _conflictingDocument = conflictingDocument?.let(
-            (pointer) => DocumentImpl(
-              database: this,
-              doc: pointer,
-              adopt: false,
-              debugCreator: 'SaveConflictHandler(conflictingDocument)',
-            ),
-          );
+            // Let conflict handler try resolving the conflict.
+            retry = await conflictHandler(
+              documentBeingSaved,
+              conflictingDocument,
+            );
 
-          saveDocument = conflictHandler(document, _conflictingDocument);
-          document.flushProperties();
+            if (retry) {
+              mergeConflictingDocuments(
+                documentBeingSaved,
+                conflictingDocument,
+              );
+            }
+          }
+        } while (retry);
 
-          return saveDocument;
-        }
-
-        final result = _catchConflictException(() {
-          runNativeCalls(() => _bindings.saveDocumentWithConflictHandler(
-                native.pointer,
-                document.native.pointer.cast(),
-                conflictHandlerAdapter,
-              ));
-        });
-
-        return result;
+        return success;
       });
 
   @override
@@ -505,4 +506,25 @@ bool _catchConflictException(void Function() fn) {
     }
     rethrow;
   }
+}
+
+void mergeConflictingDocuments(
+  MutableDocumentImpl documentBeingSaved,
+  DocumentImpl? conflictingDocument,
+) {
+  // Make a copy of the resolved properties.
+  final resolvedProperties = {
+    for (final key in documentBeingSaved.keys)
+      key: documentBeingSaved.value(key),
+  };
+
+  // If the document was deleted it has to be recreated.
+  conflictingDocument ??=
+      MutableDocument.withId(documentBeingSaved.id) as MutableDocumentImpl;
+
+  // Replace the underlying native document of the document being saved with
+  // that of the conflicting document.
+  documentBeingSaved
+    ..replaceNativeFrom(conflictingDocument)
+    ..setData(resolvedProperties);
 }

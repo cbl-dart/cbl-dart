@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
@@ -148,60 +146,70 @@ void main() {
       });
 
       group('saveDocumentWithConflictHandler', () {
-        test('invokes the callback on conflict', () {
-          final versionA = MutableDocument();
-          db.saveDocument(versionA);
-          final versionB = (db.document(versionA.id)!.toMutable())
+        test('save updated document', () async {
+          final doc = MutableDocument();
+          db.saveDocument(doc);
+          final updatedDoc = (db.document(doc.id)!.toMutable())
             ..setValue('b', key: 'a');
-          db.saveDocument(versionB);
+          db.saveDocument(updatedDoc);
 
-          db.saveDocumentWithConflictHandler(
-            versionA.toMutable(),
-            expectAsync2((documentBeingSaved, conflictingDocument) {
-              expect(documentBeingSaved, versionA);
-              expect(conflictingDocument, versionB);
-              return true;
-            }),
+          await expectLater(
+            db.saveDocumentWithConflictHandler(
+              doc.toMutable(),
+              expectAsync2((documentBeingSaved, conflictingDocument) {
+                expect(documentBeingSaved, doc);
+                expect(conflictingDocument, updatedDoc);
+                documentBeingSaved.setValue('c', key: 'a');
+                return true;
+              }),
+            ),
+            completion(isTrue),
           );
+
+          expect(doc.value('a'), 'c');
+          expect(db.document(doc.id)!.value('a'), 'c');
         });
 
-        test('cancels save if handler returns false', () {
-          final versionA = MutableDocument();
-          db.saveDocument(versionA);
-          final versionB = (db.document(versionA.id)!.toMutable())
-            ..setValue('b', key: 'a');
-          db.saveDocument(versionB);
+        test('save deleted document', () async {
+          final doc = MutableDocument();
+          db.saveDocument(doc);
+          db.deleteDocument(db.document(doc.id)!);
 
-          expect(
+          await expectLater(
             db.saveDocumentWithConflictHandler(
-              versionA.toMutable(),
+              doc,
               expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, versionA);
-                expect(conflictingDocument, versionB);
+                expect(documentBeingSaved, doc);
+                expect(conflictingDocument, isNull);
+                documentBeingSaved.setValue('c', key: 'a');
+                return true;
+              }),
+            ),
+            completion(isTrue),
+          );
+
+          expect(doc.value('a'), 'c');
+          expect(db.document(doc.id)!.value('a'), 'c');
+        });
+
+        test('cancels save if handler returns false', () async {
+          final doc = MutableDocument();
+          db.saveDocument(doc);
+          final updatedDoc = (db.document(doc.id)!.toMutable())
+            ..setValue('b', key: 'a');
+          db.saveDocument(updatedDoc);
+
+          await expectLater(
+            db.saveDocumentWithConflictHandler(
+              doc.toMutable(),
+              expectAsync2((documentBeingSaved, conflictingDocument) {
+                expect(documentBeingSaved, doc);
+                expect(conflictingDocument, updatedDoc);
                 return false;
               }),
             ),
-            isFalse,
+            completion(isFalse),
           );
-        });
-
-        test('handler exceptions are unhandled in current zone', () {
-          final versionA = MutableDocument();
-          db.saveDocument(versionA);
-          final versionB = (db.document(versionA.id)!.toMutable())
-            ..setValue('b', key: 'a');
-          db.saveDocument(versionB);
-
-          runZonedGuarded(() {
-            db.saveDocumentWithConflictHandler(
-              versionA.toMutable(),
-              (documentBeingSaved, conflictingDocument) {
-                throw false;
-              },
-            );
-          }, expectAsync2((error, __) {
-            expect(error, isFalse);
-          }));
         });
       });
 

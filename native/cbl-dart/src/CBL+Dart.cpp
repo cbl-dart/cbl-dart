@@ -424,51 +424,6 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
                                                         errorOut);
 }
 
-bool CBLDart_SaveConflictHandlerWrapper(
-    void *context, CBLDocument *documentBeingSaved,
-    const CBLDocument *conflictingDocument) {
-  auto callback = CBLDart_AsAsyncCallback(context);
-
-  // documentBeingSaved cannot be accessed from the Dart Isolate main thread
-  // because this thread has a lock on it. So we make a copy give that to the
-  // callback  and transfer the properties from the copy back to the original.
-  auto documentBeingSavedCopy = CBLDocument_MutableCopy(documentBeingSaved);
-
-  Dart_CObject documentBeingSaved_;
-  CBLDart_CObject_SetPointer(&documentBeingSaved_, documentBeingSavedCopy);
-
-  Dart_CObject conflictingDocument_;
-  CBLDart_CObject_SetPointer(&conflictingDocument_, conflictingDocument);
-
-  Dart_CObject *argsValues[] = {&documentBeingSaved_, &conflictingDocument_};
-
-  Dart_CObject args;
-  args.type = Dart_CObject_kArray;
-  args.value.as_array.length = 2;
-  args.value.as_array.values = argsValues;
-
-  bool decision;
-
-  auto resultHandler = [&](Dart_CObject *result) {
-    decision = result->value.as_bool;
-  };
-
-  CBLDart::AsyncCallbackCall(*callback, resultHandler).execute(args);
-
-  auto newProperties = CBLDocument_MutableProperties(documentBeingSavedCopy);
-  CBLDocument_SetProperties(documentBeingSaved, newProperties);
-  CBLDocument_Release(documentBeingSavedCopy);
-
-  return decision;
-}
-
-uint8_t CBLDart_CBLDatabase_SaveDocumentWithConflictHandlerAsync(
-    CBLDatabase *db, CBLDocument *doc, CBLDart::AsyncCallback *conflictHandler,
-    CBLError *errorOut) {
-  return CBLDatabase_SaveDocumentWithConflictHandler(
-      db, doc, CBLDart_SaveConflictHandlerWrapper, conflictHandler, errorOut);
-}
-
 CBLDART_EXPORT
 uint8_t CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
                                               CBLDart_FLString docID,
