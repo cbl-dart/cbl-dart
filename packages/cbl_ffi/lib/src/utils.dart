@@ -32,12 +32,14 @@ extension StringFLStringExt on String? {
     }
 
     final encoded = utf8.encode(string);
-    final buffer = zoneArena<Uint8>(_flStringSizeOfAligned + encoded.length);
-    final flString = buffer.cast<FLString>();
-    buffer
-        .elementAt(_flStringSizeOfAligned)
-        .asTypedList(encoded.length)
-        .setAll(0, encoded);
+    final flStringAndBuffer =
+        zoneArena<Uint8>(_flStringSizeOfAligned + encoded.length);
+    final flString = flStringAndBuffer.cast<FLString>();
+    final buffer = flStringAndBuffer.elementAt(_flStringSizeOfAligned);
+    buffer.asTypedList(encoded.length).setAll(0, encoded);
+    flString.ref
+      ..buf = buffer
+      ..size = encoded.length;
     return flString;
   }
 }
