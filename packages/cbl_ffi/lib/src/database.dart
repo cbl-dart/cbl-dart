@@ -78,21 +78,25 @@ typedef CBLDart_CBLDatabase_Open = Pointer<CBLDatabase> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_Close_C = Uint8 Function(
+typedef CBLDart_BindDatabaseToDartObject_C = Void Function(
+  Handle object,
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> errorOut,
+  Pointer<Utf8> debugName,
 );
-typedef CBLDatabase_Close = int Function(
+typedef CBLDart_BindDatabaseToDartObject = void Function(
+  Object object,
   Pointer<CBLDatabase> db,
-  Pointer<CBLError> errorOut,
+  Pointer<Utf8> debugName,
 );
 
-typedef CBLDatabase_Delete_C = Uint8 Function(
+typedef CBLDart_CBLDatabase_Close_C = Uint8 Function(
   Pointer<CBLDatabase> db,
+  Uint8 andDelete,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_Delete = int Function(
+typedef CBLDart_CBLDatabase_Close = int Function(
   Pointer<CBLDatabase> db,
+  int andDelete,
   Pointer<CBLError> errorOut,
 );
 
@@ -425,11 +429,13 @@ class DatabaseBindings extends Bindings {
         .lookupFunction<CBLDart_CBLDatabase_Open, CBLDart_CBLDatabase_Open>(
       'CBLDart_CBLDatabase_Open',
     );
-    _close = libs.cbl.lookupFunction<CBLDatabase_Close_C, CBLDatabase_Close>(
-      'CBLDatabase_Close',
+    _bindtoDartObject = libs.cblDart.lookupFunction<
+        CBLDart_BindDatabaseToDartObject_C, CBLDart_BindDatabaseToDartObject>(
+      'CBLDart_BindDatabaseToDartObject',
     );
-    _delete = libs.cbl.lookupFunction<CBLDatabase_Delete_C, CBLDatabase_Delete>(
-      'CBLDatabase_Delete',
+    _close = libs.cblDart
+        .lookupFunction<CBLDart_CBLDatabase_Close_C, CBLDart_CBLDatabase_Close>(
+      'CBLDart_CBLDatabase_Close',
     );
     _performMaintenance = libs.cbl.lookupFunction<
         CBLDatabase_PerformMaintenance_C, CBLDatabase_PerformMaintenance>(
@@ -560,8 +566,8 @@ class DatabaseBindings extends Bindings {
   late final CBLDart_CBLDatabase_Exists _databaseExists;
   late final CBLDart_CBLDatabaseConfiguration_Default _defaultConfiguration;
   late final CBLDart_CBLDatabase_Open _open;
-  late final CBLDatabase_Close _close;
-  late final CBLDatabase_Delete _delete;
+  late final CBLDart_BindDatabaseToDartObject _bindtoDartObject;
+  late final CBLDart_CBLDatabase_Close _close;
   late final CBLDatabase_PerformMaintenance _performMaintenance;
   late final CBLDatabase_BeginTransaction _beginTransaction;
   late final CBLDatabase_EndTransaction _endTransaction;
@@ -654,12 +660,24 @@ class DatabaseBindings extends Bindings {
     });
   }
 
+  void bindToDartObject(
+    Object object,
+    Pointer<CBLDatabase> db,
+    String debugName,
+  ) {
+    _bindtoDartObject(
+      object,
+      db,
+      debugName.toNativeUtf8(),
+    );
+  }
+
   void close(Pointer<CBLDatabase> db) {
-    _close(db, globalCBLError).checkCBLError();
+    _close(db, false.toInt(), globalCBLError).checkCBLError();
   }
 
   void delete(Pointer<CBLDatabase> db) {
-    _delete(db, globalCBLError).checkCBLError();
+    _close(db, true.toInt(), globalCBLError).checkCBLError();
   }
 
   void performMaintenance(Pointer<CBLDatabase> db, CBLMaintenanceType type) {

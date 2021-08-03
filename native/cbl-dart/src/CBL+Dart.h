@@ -133,7 +133,14 @@ CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
                                       CBLError *errorOut);
 
 CBLDART_EXPORT
-CBLDart_FLString CBLDart_CBLDatabase_Name(CBLDatabase *db);
+void CBLDart_BindDatabaseToDartObject(Dart_Handle object, CBLDatabase *database,
+                                      char *debugName);
+
+CBLDART_EXPORT
+uint8_t CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
+                                  CBLError *errorOut);
+
+CBLDART_EXPORT CBLDart_FLString CBLDart_CBLDatabase_Name(CBLDatabase *db);
 
 CBLDART_EXPORT
 CBLDart_FLStringResult CBLDart_CBLDatabase_Path(CBLDatabase *db);

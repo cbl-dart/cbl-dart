@@ -250,7 +250,7 @@ abstract class Database implements ClosableResource {
 
 late final _bindings = cblBindings.database;
 
-class DatabaseImpl extends CblObject<CBLDatabase>
+class DatabaseImpl extends CBLDatabaseObject
     with ClosableResourceMixin
     implements Database {
   DatabaseImpl(String name, [DatabaseConfiguration? configuration])
