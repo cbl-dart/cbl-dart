@@ -11,6 +11,11 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
     $<$<CONFIG:Debug>:DEBUG>
 )
+if(APPLE)
+    set(CBL_DART_INSTALL_RPATH "@loader_path")
+else()
+    set(CBL_DART_INSTALL_RPATH "\${ORIGIN}")
+endif()
 
 set(CBL_DART_INCLUDES
     src
@@ -35,7 +40,7 @@ set_target_properties(cblitedart
     PROPERTIES 
     CXX_VISIBILITY_PRESET hidden
     BUILD_WITH_INSTALL_RPATH TRUE
-    INSTALL_RPATH "\${ORIGIN}"
+    INSTALL_RPATH ${CBL_DART_INSTALL_RPATH}
 )
 
 target_include_directories(cblitedart

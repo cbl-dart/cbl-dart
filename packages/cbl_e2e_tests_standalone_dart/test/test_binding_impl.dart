@@ -29,12 +29,14 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
     late String cblLib;
     late String cblDartLib;
 
-    if (Platform.isLinux) {
+    final isUnix = Platform.isLinux || Platform.isMacOS;
+
+    if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
       cblLib = '$libDir/libcblite';
       cblDartLib = '$libDir/libcblitedart';
 
       return Libraries(
-        cbl: LibraryConfiguration.dynamic(cblLib),
+        cbl: LibraryConfiguration.dynamic(cblLib, version: '3'),
         cblDart: LibraryConfiguration.dynamic(cblDartLib),
       );
     } else if (Platform.isMacOS) {
@@ -52,7 +54,7 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
         ),
       );
     } else {
-      throw UnimplementedError();
+      throw StateError('Could not find libraries for current platform');
     }
   })();
 }

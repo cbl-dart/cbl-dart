@@ -53,7 +53,7 @@ sudo apt-get install cmake ninja-build ccache clang-10 icu-dev
 Build the native binaries with build type `Debug`:
 
 ```shell
-./native/tools/build_linux.sh build Debug
+./native/tools/build_unix.sh build Debug
 ```
 
 ### Android
