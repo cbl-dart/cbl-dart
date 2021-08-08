@@ -30,13 +30,6 @@ void main() {
       expect(Slice.fromFLSlice(globalFLSlice.ref), isNull);
     });
 
-    test('Slice.asBytes returns unmodifiable view of data', () {
-      final slice = Slice.fromSlice(SliceResult.fromString('a'));
-
-      expect(slice.asUint8List(), [0x61]);
-      expect(() => slice.asUint8List()..setAll(0, []), throwsUnsupportedError);
-    });
-
     test('toDartString decodes the slice data as UTF-8 and returns a String',
         () {
       final slice = SliceResult.fromString('a❤');
