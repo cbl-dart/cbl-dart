@@ -10,6 +10,7 @@ import 'bindings.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
+import 'slice.dart';
 import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
@@ -567,8 +568,8 @@ class ReplicatorBindings extends Bindings {
     String? proxyUsername,
     String? proxyPassword,
     Pointer<FLDict>? headers,
-    Uint8List? pinnedServerCertificate,
-    Uint8List? trustedRootCertificates,
+    ByteBuffer? pinnedServerCertificate,
+    ByteBuffer? trustedRootCertificates,
     Pointer<FLArray>? channels,
     Pointer<FLArray>? documentIDs,
     Pointer<CBLDartAsyncCallback>? pushFilter,
@@ -685,8 +686,8 @@ class ReplicatorBindings extends Bindings {
     String? proxyUsername,
     String? proxyPassword,
     Pointer<FLDict>? headers,
-    Uint8List? pinnedServerCertificate,
-    Uint8List? trustedRootCertificates,
+    ByteBuffer? pinnedServerCertificate,
+    ByteBuffer? trustedRootCertificates,
     Pointer<FLArray>? channels,
     Pointer<FLArray>? documentIDs,
     Pointer<CBLDartAsyncCallback>? pushFilter,
@@ -714,9 +715,9 @@ class ReplicatorBindings extends Bindings {
       )
       ..headers = headers ?? nullptr
       ..pinnedServerCertificate =
-          pinnedServerCertificate?.copyToGlobalSliceInArena() ?? nullptr
+          pinnedServerCertificate?.toSliceResult().flSlice(zoneArena) ?? nullptr
       ..trustedRootCertificates =
-          trustedRootCertificates?.copyToGlobalSliceInArena() ?? nullptr
+          trustedRootCertificates?.toSliceResult().flSlice(zoneArena) ?? nullptr
       ..channels = channels ?? nullptr
       ..documentIDs = documentIDs ?? nullptr
       ..pushFilter = pushFilter ?? nullptr

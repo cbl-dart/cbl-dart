@@ -7,6 +7,7 @@ import 'base.dart';
 import 'bindings.dart';
 import 'database.dart';
 import 'fleece.dart';
+import 'slice.dart';
 import 'utils.dart';
 
 // === CBLBlob =================================================================
@@ -92,10 +93,10 @@ class BlobBindings extends Bindings {
   late final CBLDart_CBLBlob_ContentType _contentType;
   late final CBLBlob_Properties _properties;
 
-  Pointer<CBLBlob> createWithData(String? contentType, TypedData content) {
+  Pointer<CBLBlob> createWithData(String? contentType, ByteBuffer content) {
     return withZoneArena(() => _createWithData(
           contentType.toFLStringInArena().ref,
-          content.copyToGlobalSliceInArena().ref,
+          content.toSliceResult().makeGlobal().ref,
         ));
   }
 
@@ -289,16 +290,11 @@ class BlobWriteStreamBindings extends Bindings {
     _close(stream);
   }
 
-  bool write(Pointer<CBLBlobWriteStream> stream, Uint8List buf) {
-    final nativeBuf = malloc<Uint8>(buf.length);
-    nativeBuf.asTypedList(buf.length).setAll(0, buf);
-    try {
-      return _write(stream, nativeBuf, buf.length, globalCBLError)
-          .checkCBLError()
-          .toBool();
-    } finally {
-      malloc.free(nativeBuf);
-    }
+  bool write(Pointer<CBLBlobWriteStream> stream, ByteBuffer buf) {
+    final slice = buf.toSliceResult();
+    return _write(stream, slice.buf, slice.size, globalCBLError)
+        .checkCBLError()
+        .toBool();
   }
 
   Pointer<CBLBlob> createBlobWithStream(

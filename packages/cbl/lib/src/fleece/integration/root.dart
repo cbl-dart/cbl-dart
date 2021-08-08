@@ -1,23 +1,23 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../support/native_object.dart';
 import '../encoder.dart';
-import '../slice.dart';
 import 'collection.dart';
 import 'context.dart';
 import 'value.dart';
 
 class MRoot extends MCollection {
   MRoot.fromData(
-    SliceResult data, {
+    ByteBuffer data, {
     required MContext context,
     required bool isMutable,
-  })  : data = data,
-        _slot = MValue.withValue(context.decoder.loadValueFromData(data)!),
+  })  : data = data.toSliceResult(),
         super(context: context, isMutable: isMutable) {
+    _slot = MValue.withValue(context.decoder.loadValueFromData(this.data!)!);
     _slot.updateParent(this);
   }
 
@@ -35,7 +35,7 @@ class MRoot extends MCollection {
 
   FleeceValueObject<FLValue>? value;
 
-  final MValue _slot;
+  late final MValue _slot;
 
   @override
   MContext get context => super.context!;

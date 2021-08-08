@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cbl/src/fleece/fleece.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 

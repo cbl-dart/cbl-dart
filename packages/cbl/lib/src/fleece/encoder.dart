@@ -5,7 +5,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/ffi.dart';
 import 'decoder.dart';
-import 'slice.dart';
 
 late final _encoderBinds = cblBindings.fleece.encoder;
 
@@ -144,7 +143,8 @@ class FleeceEncoder {
   void writeString(String value) => _encoderBinds.writeString(_pointer, value);
 
   /// Writes the [TypedData] [value] to this encoder.
-  void writeData(TypedData value) => _encoderBinds.writeData(_pointer, value);
+  void writeData(TypedData value) =>
+      _encoderBinds.writeData(_pointer, value.buffer);
 
   /// Writes the JSON string [value] to this encoder.
   void writeJson(String value) => _encoderBinds.writeJSON(_pointer, value);

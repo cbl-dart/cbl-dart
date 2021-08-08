@@ -5,6 +5,7 @@ import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'bindings.dart';
+import 'slice.dart';
 import 'utils.dart';
 
 // === Common ==================================================================
@@ -79,8 +80,7 @@ class FLSlice extends Struct {
 
 extension FLSliceExt on FLSlice {
   bool get isNull => buf == nullptr;
-  Uint8List? toUint8List() =>
-      isNull ? null : Uint8List.fromList(buf.asTypedList(size));
+  ByteBuffer? toByteBuffer() => SliceResult.copyFLSlice(this);
 }
 
 class FLSliceResult extends Struct {
@@ -92,8 +92,7 @@ class FLSliceResult extends Struct {
 
 extension FLResultSliceExt on FLSliceResult {
   bool get isNull => buf == nullptr;
-  Uint8List? toUint8List() =>
-      isNull ? null : Uint8List.fromList(buf.asTypedList(size));
+  ByteBuffer? toByteBuffer() => SliceResult.copyFLSliceResult(this);
 }
 
 class FLString extends Struct {
@@ -139,22 +138,6 @@ late final globalFLSliceResult =
     CBLBindings.instance.fleece.slice.globalSliceResult;
 late final globalFLString =
     CBLBindings.instance.fleece.slice.globalSlice.cast<FLString>();
-
-extension TypedDataFLSliceExt on TypedData {
-  Pointer<FLSlice> copyToGlobalSliceInArena() {
-    final buf = zoneArena.allocate<Uint8>(lengthInBytes);
-
-    buf
-        .asTypedList(lengthInBytes)
-        .setAll(0, buffer.asUint8List(0, lengthInBytes));
-
-    globalFLSlice.ref
-      ..buf = buf
-      ..size = lengthInBytes;
-
-    return globalFLSlice;
-  }
-}
 
 typedef CBLDart_FLSlice_Equal_C = Uint8 Function(FLSlice a, FLSlice b);
 typedef CBLDart_FLSlice_Equal = int Function(FLSlice a, FLSlice b);
@@ -365,8 +348,8 @@ class SlotBindings extends Bindings {
     withZoneArena(() => _setString(slot, value.toFLStringInArena().ref));
   }
 
-  void setData(Pointer<FLSlot> slot, TypedData value) {
-    withZoneArena(() => _setData(slot, value.copyToGlobalSliceInArena().ref));
+  void setData(Pointer<FLSlot> slot, ByteBuffer value) {
+    _setData(slot, value.toSliceResult().makeGlobal().ref);
   }
 
   void setValue(Pointer<FLSlot> slot, Pointer<FLValue> value) {
@@ -644,8 +627,8 @@ class ValueBindings extends Bindings {
     return _asString(value).toDartString();
   }
 
-  Uint8List? asData(Pointer<FLValue> value) {
-    return _asData(value).toUint8List();
+  ByteBuffer? asData(Pointer<FLValue> value) {
+    return _asData(value).toByteBuffer();
   }
 
   String? scalarToString(Pointer<FLValue> value) {
@@ -1733,13 +1716,11 @@ class FleeceEncoderBindings extends Bindings {
     });
   }
 
-  void writeData(Pointer<FLEncoder> encoder, TypedData value) {
-    withZoneArena(() {
-      _checkError(
-        encoder,
-        _writeData(encoder, value.copyToGlobalSliceInArena().ref),
-      );
-    });
+  void writeData(Pointer<FLEncoder> encoder, ByteBuffer value) {
+    _checkError(
+      encoder,
+      _writeData(encoder, value.toSliceResult().makeGlobal().ref),
+    );
   }
 
   void writeJSON(Pointer<FLEncoder> encoder, String value) {

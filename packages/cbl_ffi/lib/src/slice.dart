@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:ffi/ffi.dart';
 
-import '../support/ffi.dart';
+import 'bindings.dart';
+import 'fleece.dart';
+import 'utils.dart';
 
-late final _sliceBinds = cblBindings.fleece.slice;
+late final _sliceBinds = CBLBindings.instance.fleece.slice;
 
 /// A contiguous area of native memory, whose livetime is tied to some other
 /// object.
@@ -17,7 +18,7 @@ late final _sliceBinds = cblBindings.fleece.slice;
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class Slice {
+class Slice implements ByteBuffer {
   /// Private constructor to initialize slice.
   Slice._(this.buf, this.size) : assert(buf != nullptr && size >= 0);
 
@@ -42,9 +43,6 @@ class Slice {
   /// The size of this slice in bytes.
   final int size;
 
-  /// Returns an unmodifiable view of the data of this slice.
-  Uint8List asBytes() => UnmodifiableUint8ListView(buf.asTypedList(size));
-
   /// Interprets the data of this slice as an UTF-8 encoded string.
   String toDartString() => buf.cast<Utf8>().toDartString(length: size);
 
@@ -54,6 +52,15 @@ class Slice {
       ..buf = buf
       ..size = size;
     return globalFLSlice;
+  }
+
+  /// Allocates a [FLSlice] sets it to this slice.
+  Pointer<FLSlice> flSlice([Allocator allocator = malloc]) {
+    final result = allocator<FLSlice>();
+    result.ref
+      ..buf = buf
+      ..size = size;
+    return result;
   }
 
   /// Compares this slice lexicographically to [other].
@@ -101,6 +108,73 @@ class Slice {
 
   @override
   String toString() => 'Slice(buf: $buf, size: $size)';
+
+  // === ByteBuffer ============================================================
+
+  late final _buffer = buf.asTypedList(size).buffer;
+
+  @override
+  int get lengthInBytes => size;
+
+  @override
+  Uint8List asUint8List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asUint8List(offsetInBytes, length);
+
+  @override
+  Int8List asInt8List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asInt8List(offsetInBytes, length);
+
+  @override
+  Uint8ClampedList asUint8ClampedList([int offsetInBytes = 0, int? length]) =>
+      _buffer.asUint8ClampedList(offsetInBytes, length);
+
+  @override
+  Uint16List asUint16List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asUint16List(offsetInBytes, length);
+
+  @override
+  Int16List asInt16List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asInt16List(offsetInBytes, length);
+
+  @override
+  Uint32List asUint32List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asUint32List(offsetInBytes, length);
+
+  @override
+  Int32List asInt32List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asInt32List(offsetInBytes, length);
+
+  @override
+  Uint64List asUint64List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asUint64List(offsetInBytes, length);
+
+  @override
+  Int64List asInt64List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asInt64List(offsetInBytes, length);
+
+  @override
+  Int32x4List asInt32x4List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asInt32x4List(offsetInBytes, length);
+
+  @override
+  Float32List asFloat32List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asFloat32List(offsetInBytes, length);
+
+  @override
+  Float64List asFloat64List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asFloat64List(offsetInBytes, length);
+
+  @override
+  Float32x4List asFloat32x4List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asFloat32x4List(offsetInBytes, length);
+
+  @override
+  Float64x2List asFloat64x2List([int offsetInBytes = 0, int? length]) =>
+      _buffer.asFloat64x2List(offsetInBytes, length);
+
+  @override
+  ByteData asByteData([int offsetInBytes = 0, int? length]) =>
+      _buffer.asByteData(offsetInBytes, length);
 }
 
 /// A contiguous area of native memory, which stays alive at least as long as
@@ -112,7 +186,7 @@ class Slice {
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class SliceResult extends Slice {
+class SliceResult extends Slice implements ByteBuffer {
   /// Private constructor to initialize slice.
   SliceResult._(
     Pointer<Uint8> buf,
@@ -129,6 +203,18 @@ class SliceResult extends Slice {
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
       : super._(_sliceBinds.copy(slice.makeGlobal().ref).buf, slice.size);
+
+  /// Creates a [SliceResult] and copies the data from [byteBuffer] into it.
+  ///
+  /// If [byteBuffer] already is a [SliceResult] it is returned instead.
+  factory SliceResult.fromByteBuffer(ByteBuffer byteBuffer) {
+    if (byteBuffer is SliceResult) {
+      return byteBuffer;
+    }
+
+    return SliceResult(byteBuffer.lengthInBytes)
+      ..asUint8List().setAll(0, byteBuffer.asUint8List());
+  }
 
   /// Creates a [SliceResult] which contains [string] encoded as UTF-8.
   factory SliceResult.fromString(String string) {
@@ -150,19 +236,38 @@ class SliceResult extends Slice {
           ? null
           : SliceResult._(slice.buf, slice.size, retain: retain);
 
-  /// Expando which is used to keep a [SliceResult] alive, while [Uint8List]s
-  /// are alive which are backed by it.
-  static final _backingSliceOfBytes =
-      Expando<SliceResult>('SliceResult.backingSliceOfBytes');
+  /// Creates a [SliceResult] from a [FLSlice] by copying its content.
+  static SliceResult? copyFLSlice(FLSlice slice) =>
+      Slice.fromFLSlice(slice)?.let((slice) => SliceResult.fromSlice(slice));
 
-  /// Returns an modifiable view of the data of this slice.
-  @override
-  Uint8List asBytes() {
-    final bytes = buf.asTypedList(size);
-    _backingSliceOfBytes[bytes] = this;
-    return bytes;
-  }
+  /// Creates a [SliceResult] from a [FLSliceResult] by copying its content.
+  static SliceResult? copyFLSliceResult(
+          FLSliceResult slice) =>
+      slice.buf == nullptr
+          ? null
+          : Slice._(slice.buf, slice.size)
+              .let((slice) => SliceResult.fromSlice(slice));
 
   @override
   String toString() => 'SliceResult(buf: $buf, size: $size)';
+
+  // === ByteBuffer ============================================================
+
+  /// Expando which is used to keep a [SliceResult] alive, while [_buffer]
+  /// is alive.
+  static final _retainedForBuffer =
+      Expando<SliceResult>('SliceResult.retainedForBuffer');
+
+  @override
+  late final ByteBuffer _buffer = () {
+    final result = buf.asTypedList(size).buffer;
+    _retainedForBuffer[result] = this;
+    return result;
+  }();
+}
+
+extension SliceResultByteBufferExt on ByteBuffer {
+  /// Turns this byte buffer into a [SliceResult] through
+  /// [SliceResult.fromByteBuffer].
+  SliceResult toSliceResult() => SliceResult.fromByteBuffer(this);
 }
