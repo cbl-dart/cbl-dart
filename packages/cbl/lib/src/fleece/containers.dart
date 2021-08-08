@@ -9,7 +9,6 @@ import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'encoder.dart';
-import 'slice.dart';
 
 /// Options for how values are copied.
 enum CopyFlag {
@@ -167,7 +166,7 @@ class Value extends FleeceValueObject<FLValue> {
   String? get asString => native.call(_bindings.asString);
 
   /// Returns the exact contents of a data value, or null for all other types.
-  Uint8List? get asData => native.call(_bindings.asData);
+  Uint8List? get asData => native.call(_bindings.asData)?.asUint8List();
 
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray => type == ValueType.array
@@ -745,7 +744,7 @@ class _DefaultSlotSetter implements SlotSetter {
     } else if (value is String) {
       _slotBindings.setString(slot, value);
     } else if (value is TypedData) {
-      _slotBindings.setData(slot, value);
+      _slotBindings.setData(slot, value.buffer);
     } else if (value is Value) {
       value.native.call((pointer) => _slotBindings.setValue(slot, pointer));
     }

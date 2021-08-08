@@ -52,7 +52,7 @@ class SimpleMDelegate extends MDelegate {
       cacheIt();
       return flValue.isString
           ? flValue.slice.toDartString()
-          : flValue.slice.asBytes();
+          : flValue.slice.asUint8List();
     } else if (flValue is CollectionFLValue) {
       cacheIt();
       return flValue.isArray

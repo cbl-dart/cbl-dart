@@ -199,7 +199,7 @@ class ReplicatorImpl
           null,
           null,
           config.headers?.let((it) => fl.MutableDict(it).native.pointer.cast()),
-          config.pinnedServerCertificate,
+          config.pinnedServerCertificate?.buffer,
           null,
           config.channels
               ?.let((it) => fl.MutableArray(it).native.pointer.cast()),

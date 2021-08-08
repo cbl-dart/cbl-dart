@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/ffi.dart';
-import 'slice.dart';
 
 late final _decoderBinds = cblBindings.fleece.decoder;
 
@@ -263,7 +262,7 @@ class FleeceDecoder {
     } else if (value is SliceFLValue) {
       return value.isString
           ? sharedStrings.sliceToDartString(value.slice)!
-          : Uint8List.fromList(value.slice.asBytes());
+          : Uint8List.fromList(value.slice.asUint8List());
     } else if (value is CollectionFLValue) {
       if (value.isArray) {
         final array = value.value.cast<FLArray>();
@@ -327,7 +326,7 @@ class FleeceDecoder {
       case FLValueType.string:
         return sharedStrings.flStringToDartString(value.asString);
       case FLValueType.data:
-        return value.asData.toUint8List();
+        return value.asData.toByteBuffer();
       case FLValueType.array:
         final array = value.asValue.cast<FLArray>();
         return List<Object?>.generate(value.collectionSize, (index) {

@@ -1,6 +1,5 @@
 import 'dart:ffi';
 
-import 'package:cbl/src/fleece/slice.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
@@ -34,8 +33,8 @@ void main() {
     test('Slice.asBytes returns unmodifiable view of data', () {
       final slice = Slice.fromSlice(SliceResult.fromString('a'));
 
-      expect(slice.asBytes(), [0x61]);
-      expect(() => slice.asBytes()..setAll(0, []), throwsUnsupportedError);
+      expect(slice.asUint8List(), [0x61]);
+      expect(() => slice.asUint8List()..setAll(0, []), throwsUnsupportedError);
     });
 
     test('toDartString decodes the slice data as UTF-8 and returns a String',
@@ -82,9 +81,9 @@ void main() {
 
       expect(slice.size, 2);
 
-      slice.asBytes().setAll(0, [1, 2]);
+      slice.asUint8List().setAll(0, [1, 2]);
 
-      expect(slice.asBytes(), [1, 2]);
+      expect(slice.asUint8List(), [1, 2]);
     });
 
     test('create SliceResult from FLSliceResult', () {

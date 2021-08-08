@@ -124,7 +124,7 @@ class BlobImpl
 
   BlobImpl.fromData(String contentType, Uint8List data)
       : _blob = CblObject(
-          _blobBindings.createWithData(contentType, data),
+          _blobBindings.createWithData(contentType, data.buffer),
           debugName: 'Blob.fromData()',
         ),
         _contentType = contentType,
@@ -176,7 +176,7 @@ class BlobImpl
         final slice = blob
             .call(_blobBindings.content)
             .let(SliceResult.fromFLSliceResult)!;
-        content = slice.asBytes();
+        content = slice.asUint8List();
         if (content.length <= _maxCachedContentLength) {
           _content = content;
           _length = content.length;
@@ -351,7 +351,7 @@ class _BlobReadStreamController
           break;
         }
 
-        controller.add(buffer.asBytes());
+        controller.add(buffer.asUint8List());
       }
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);
