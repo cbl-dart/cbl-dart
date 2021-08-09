@@ -19,6 +19,7 @@ class CBLEndpoint extends Opaque {}
 
 typedef CBLDart_CBLEndpoint_CreateWithURL = Pointer<CBLEndpoint> Function(
   FLString url,
+  Pointer<CBLError> errorOut,
 );
 
 typedef CBLEndpoint_Free_C = Void Function(
@@ -520,8 +521,10 @@ class ReplicatorBindings extends Bindings {
       _addDocumentReplicationListener;
 
   Pointer<CBLEndpoint> createEndpointWithUrl(String url) {
-    return withZoneArena(
-        () => _endpointCreateWithUrl(url.toFLStringInArena().ref));
+    return withZoneArena(() => _endpointCreateWithUrl(
+          url.toFLStringInArena().ref,
+          globalCBLError,
+        ).checkCBLError());
   }
 
   void freeEndpoint(Pointer<CBLEndpoint> endpoint) {
