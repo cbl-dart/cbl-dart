@@ -12,7 +12,7 @@ void CBLDart_Init(void *data) {
     Dart_InitializeApiDL(data);
 
     // Set console log level to warning
-    CBLLog_SetConsoleLevel(CBLLogWarning);
+    CBLLog_SetConsoleLevel(kCBLLogWarning);
   });
 }
 
@@ -203,7 +203,7 @@ uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
   if (!config) {
     auto success = CBLLog_SetFileConfig(
         {
-            .level = CBLLogNone,
+            .level = kCBLLogNone,
             .directory = {nullptr, 0},
             .maxRotateCount = 0,
             .maxSize = 0,
@@ -255,7 +255,7 @@ static void CBLDart_CheckFileLogging() {
   static std::once_flag checkFileLogging;
   std::call_once(checkFileLogging, []() {
     if (!CBLDart_LogFileConfigIsSet()) {
-      CBL_Log(kCBLLogDomainDatabase, CBLLogWarning,
+      CBL_Log(kCBLLogDomainDatabase, kCBLLogWarning,
               "Database.log.file.config is nullptr, meaning file logging is "
               "disabled. Log files required for product support are not being "
               "generated.");
@@ -372,7 +372,7 @@ void CBLDart_DatabaseFinalizer(void *dart_callback_data, void *peer) {
   CBLError error;
   if (!CBLDart_CBLDatabase_Close(database, false, &error)) {
     auto errorMessage = CBLError_Message(&error);
-    CBL_Log(kCBLLogDomainDatabase, CBLLogError,
+    CBL_Log(kCBLLogDomainDatabase, kCBLLogError,
             "Error closing database %p in Dart finalizer: %*.s", database,
             static_cast<int>(errorMessage.size), (char *)errorMessage.buf);
     FLSliceResult_Release(errorMessage);
@@ -635,8 +635,9 @@ CBLBlob *CBLDart_CBLBlob_CreateWithStream(CBLDart_FLString contentType,
 
 // -- Replicator
 
-CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url) {
-  return CBLEndpoint_CreateWithURL(CBLDart_FLStringFromDart(url));
+CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url,
+                                               CBLError *errorOut) {
+  return CBLEndpoint_CreateWithURL(CBLDart_FLStringFromDart(url), errorOut);
 }
 
 CBLAuthenticator *CBLDart_CBLAuth_CreatePassword(CBLDart_FLString username,

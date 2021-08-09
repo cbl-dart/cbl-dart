@@ -264,7 +264,8 @@ CBLDART_EXPORT CBLBlob *CBLDart_CBLBlob_CreateWithStream(
 // -- Replicator
 
 CBLDART_EXPORT
-CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url);
+CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url,
+                                               CBLError *errorOut);
 
 CBLDART_EXPORT
 CBLAuthenticator *CBLDart_CBLAuth_CreatePassword(CBLDart_FLString username,
