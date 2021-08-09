@@ -16,8 +16,9 @@ import '../support/streams.dart';
 import 'common.dart';
 import 'document.dart';
 
-late final _blobBindings = cblBindings.blobs.blob;
 late final _databaseBindings = cblBindings.database;
+late final _blobBindings = cblBindings.blobs.blob;
+late final _writeStreamBindings = cblBindings.blobs.writeStream;
 
 /// Max size of data that will be cached in memory with the [Blob].
 const _maxCachedContentLength = 8 * 1024;
@@ -46,6 +47,14 @@ abstract class Blob {
   /// Creates a [Blob] with the given in-memory data.
   factory Blob.fromData(String contentType, Uint8List data) =>
       BlobImpl.fromData(contentType, data);
+
+  /// Creates a [Blob] from a [stream] of chunks of data.
+  static Future<Blob> fromStream(
+    String contentType,
+    Stream<Uint8List> stream,
+    Database database,
+  ) =>
+      BlobImpl.fromStream(contentType, stream, database);
 
   /// Gets the contents of this [Blob] as a block of memory.
   ///
@@ -138,6 +147,24 @@ class BlobImpl
     }
   }
 
+  static Future<Blob> fromStream(
+    String contentType,
+    Stream<Uint8List> stream,
+    Database database,
+  ) async {
+    final blob = await _createBlobFromStream(
+      database as DatabaseImpl,
+      stream,
+      contentType,
+    );
+
+    return BlobImpl(
+      database: database,
+      blob: blob,
+      debugCreator: 'Blob.fromStream()',
+    ).._installInDatabase();
+  }
+
   DatabaseImpl? _database;
   CblObject<CBLBlob>? _blob;
   @override
@@ -149,7 +176,7 @@ class BlobImpl
   String? _digest;
 
   @override
-  Future<Uint8List> content() async => byteStreamToFuture(contentStream());
+  Future<Uint8List> content() => byteStreamToFuture(contentStream());
 
   @override
   Stream<Uint8List> contentStream() =>
@@ -202,17 +229,10 @@ class BlobImpl
     }
   }
 
-  Never _throwNoDataError() {
-    if (_digest != null) {
-      cblLogMessage(
-        LogDomain.database,
-        LogLevel.warning,
-        'Cannot access content from a blob that contains only metadata. '
-        'To access the content, save the document first.',
-      );
-    }
-
-    throw StateError('Blob has no data available.');
+  void _installInDatabase() {
+    runNativeCalls(() {
+      _databaseBindings.saveBlob(_database!.native.pointer, native.pointer);
+    });
   }
 
   @override
@@ -252,15 +272,26 @@ class BlobImpl
         }
 
         if (_needsToBeInstalled) {
-          runNativeCalls(() {
-            _databaseBindings.saveBlob(database.native.pointer, native.pointer);
-          });
+          _installInDatabase();
           _needsToBeInstalled = false;
         }
       }
     }
 
     encoder.writeDartObject(_blobProperties);
+  }
+
+  Never _throwNoDataError() {
+    if (_digest != null) {
+      cblLogMessage(
+        LogDomain.database,
+        LogLevel.warning,
+        'Cannot access content from a blob that contains only metadata. '
+        'To access the content, save the document first.',
+      );
+    }
+
+    throw StateError('Blob has no data available.');
   }
 
   void _checkBlobIsFromSameDatabase(DatabaseImpl database) {
@@ -326,6 +357,24 @@ class BlobImpl
         ? '${((_length! + 512) / 1024).toStringAsFixed(1)} KB'
         : '? KB';
     return 'Blob($contentType$length)';
+  }
+}
+
+Future<Pointer<CBLBlob>> _createBlobFromStream(
+  DatabaseImpl database,
+  Stream<Uint8List> stream,
+  String contentType,
+) async {
+  final writeStream = database.native.call(_writeStreamBindings.create);
+
+  try {
+    await stream
+        .forEach((data) => _writeStreamBindings.write(writeStream, data));
+
+    return _writeStreamBindings.createBlobWithStream(contentType, writeStream);
+  } catch (e) {
+    _writeStreamBindings.close(writeStream);
+    rethrow;
   }
 }
 

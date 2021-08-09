@@ -32,7 +32,7 @@ Uint8List randomBytes(int size) {
   return data.buffer.asUint8List(0, size);
 }
 
-enum WriteBlob { data, properties }
+enum WriteBlob { data, properties, stream }
 enum ReadTime { beforeSave, afterSave }
 enum ReadMode { future, stream }
 enum ReadBlob { sourceBlob, loadedBlob }
@@ -145,6 +145,13 @@ void main() {
                   'length': blob.length,
                   'content_type': blob.contentType,
                 };
+                break;
+              case WriteBlob.stream:
+                _writeBlob = await Blob.fromStream(
+                  contentType,
+                  Stream.value(content),
+                  db,
+                );
                 break;
             }
 

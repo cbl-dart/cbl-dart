@@ -473,6 +473,10 @@ class DatabaseBindings extends Bindings {
         CBLDart_CBLDatabase_DeleteIndex_C, CBLDart_CBLDatabase_DeleteIndex>(
       'CBLDart_CBLDatabase_DeleteIndex',
     );
+    _indexNames = libs.cbl
+        .lookupFunction<CBLDatabase_GetIndexNames, CBLDatabase_GetIndexNames>(
+      'CBLDatabase_GetIndexNames',
+    );
     _getBlob =
         libs.cbl.lookupFunction<CBLDatabase_GetBlob, CBLDatabase_GetBlob>(
       'CBLDatabase_GetBlob',
