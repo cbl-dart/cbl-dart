@@ -230,7 +230,8 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final encoder = fl.FleeceEncoder();
   final encodingResult = values.encodeTo(encoder);
   assert(encodingResult is! Future);
-  final doc = fl.Doc.fromResultData(encoder.finish(), FLTrust.trusted);
+  final doc =
+      fl.Doc.fromResultData(encoder.finish().asUint8List(), FLTrust.trusted);
   return ResultImpl(
     context: MContext(),
     columnNames: columnNames,

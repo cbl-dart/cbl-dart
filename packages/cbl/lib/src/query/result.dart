@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -247,7 +248,7 @@ class ResultImpl with IterableMixin<String> implements Result {
     final encoder = fl.FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
-    return encoder.finish().toDartString();
+    return utf8.decode(encoder.finish().asUint8List());
   }
 
   ArrayImpl _createArray() {

@@ -14,7 +14,6 @@ import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
-import '../support/utils.dart';
 import 'common.dart';
 import 'document.dart';
 
@@ -124,7 +123,7 @@ class BlobImpl
 
   BlobImpl.fromData(String contentType, Uint8List data)
       : _blob = CblObject(
-          _blobBindings.createWithData(contentType, data.buffer),
+          _blobBindings.createWithData(contentType, data),
           debugName: 'Blob.fromData()',
         ),
         _contentType = contentType,
@@ -173,10 +172,7 @@ class BlobImpl
     if (content == null) {
       final blob = _blob;
       if (blob != null) {
-        final slice = blob
-            .call(_blobBindings.content)
-            .let(SliceResult.fromFLSliceResult)!;
-        content = slice.asUint8List();
+        content = blob.call(_blobBindings.content)!;
         if (content.length <= _maxCachedContentLength) {
           _content = content;
           _length = content.length;
@@ -340,10 +336,8 @@ class _BlobReadStreamController
       _isPaused = false;
 
       while (!_isPaused) {
-        final buffer = _stream
-            .call((pointer) =>
-                _bindings.readStream.read(pointer, _readStreamChunkSize))
-            ?.let(SliceResult.fromFLSliceResult);
+        final buffer = _stream.call((pointer) =>
+            _bindings.readStream.read(pointer, _readStreamChunkSize));
 
         // The read stream is done (EOF).
         if (buffer == null) {
@@ -351,7 +345,7 @@ class _BlobReadStreamController
           break;
         }
 
-        controller.add(buffer.asUint8List());
+        controller.add(buffer);
       }
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);

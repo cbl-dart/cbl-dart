@@ -93,7 +93,7 @@ class BlobBindings extends Bindings {
   late final CBLDart_CBLBlob_ContentType _contentType;
   late final CBLBlob_Properties _properties;
 
-  Pointer<CBLBlob> createWithData(String? contentType, ByteBuffer content) {
+  Pointer<CBLBlob> createWithData(String? contentType, Uint8List content) {
     return withZoneArena(() => _createWithData(
           contentType.toFLStringInArena().ref,
           content.toSliceResult().makeGlobal().ref,
@@ -120,8 +120,11 @@ class BlobBindings extends Bindings {
     return _digest(blob).toDartString()!;
   }
 
-  FLSliceResult content(Pointer<CBLBlob> blob) {
-    return _content(blob, globalCBLError).checkCBLError();
+  Uint8List content(Pointer<CBLBlob> blob) {
+    return _content(blob, globalCBLError)
+        .checkCBLError()
+        .let(SliceResult.fromFLSliceResult)!
+        .asUint8List();
   }
 
   String? contentType(Pointer<CBLBlob> blob) {
@@ -206,7 +209,7 @@ class BlobReadStreamBindings extends Bindings {
     return _openContentStream(blob, globalCBLError).checkCBLError();
   }
 
-  FLSliceResult? read(Pointer<CBLBlobReadStream> stream, int bufferSize) {
+  Uint8List? read(Pointer<CBLBlobReadStream> stream, int bufferSize) {
     final buffer = _read(stream, bufferSize, globalCBLError);
 
     // A null slice signals an error.
@@ -215,7 +218,9 @@ class BlobReadStreamBindings extends Bindings {
     }
 
     // Empty buffer means stream has been fully read.
-    return buffer.size == 0 ? null : buffer;
+    return buffer.size == 0
+        ? null
+        : SliceResult.fromFLSliceResult(buffer)!.asUint8List();
   }
 
   void close(Pointer<CBLBlobReadStream> stream) {
@@ -290,8 +295,8 @@ class BlobWriteStreamBindings extends Bindings {
     _close(stream);
   }
 
-  bool write(Pointer<CBLBlobWriteStream> stream, ByteBuffer buf) {
-    final slice = buf.toSliceResult();
+  bool write(Pointer<CBLBlobWriteStream> stream, Uint8List data) {
+    final slice = data.toSliceResult();
     return _write(stream, slice.buf, slice.size, globalCBLError)
         .checkCBLError()
         .toBool();

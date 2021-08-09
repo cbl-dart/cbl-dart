@@ -197,7 +197,7 @@ class FleeceDecoder {
   /// Returns a string which shows how values are encoded in the Fleece [data].
   ///
   /// This method exists for debugging and learning purposes.
-  String dumpData(Slice data) => _decoderBinds.dumpData(data.makeGlobal().ref);
+  String dumpData(Uint8List data) => _decoderBinds.dumpData(data);
 
   // === LoadedFLValue ==========================================================
 
@@ -209,7 +209,7 @@ class FleeceDecoder {
     Slice data, {
     FLTrust trust = FLTrust.untrusted,
   }) {
-    if (!_decoderBinds.getLoadedFLValueFromData(data.makeGlobal().ref, trust)) {
+    if (!_decoderBinds.getLoadedFLValueFromData(data, trust)) {
       return null;
     }
     return _globalLoadedValueObject();
@@ -244,10 +244,10 @@ class FleeceDecoder {
   /// Specify whether you [trust] the source of the [data] to ensure it is valid
   /// Fleece data. If [data] is not valid, `null` is returned.
   Object? dataToDartObject(
-    Slice data, {
+    Uint8List data, {
     FLTrust trust = FLTrust.untrusted,
   }) {
-    final root = loadValueFromData(data, trust: trust);
+    final root = loadValueFromData(data.toSliceResult(), trust: trust);
     if (root == null) {
       return null;
     }
@@ -326,7 +326,7 @@ class FleeceDecoder {
       case FLValueType.string:
         return sharedStrings.flStringToDartString(value.asString);
       case FLValueType.data:
-        return value.asData.toByteBuffer();
+        return value.asData.toUint8List();
       case FLValueType.array:
         final array = value.asValue.cast<FLArray>();
         return List<Object?>.generate(value.collectionSize, (index) {

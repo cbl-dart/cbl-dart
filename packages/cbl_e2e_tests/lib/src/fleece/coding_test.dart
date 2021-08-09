@@ -46,7 +46,7 @@ void main() {
         final data = encoder.convertJson('{"a": true}');
 
         expect(
-          decoder.dumpData(data),
+          decoder.dumpData(data.asUint8List()),
           '''
  0000: 70 01       : Dict {
  0002: 41 61       :   "a":
@@ -265,7 +265,7 @@ void main() {
         encoder.writeLoadedValue(sliceValue);
         encoder.endArray();
 
-        expect(decoder.dataToDartObject(encoder.finish()), [
+        expect(decoder.dataToDartObject(encoder.finish().asUint8List()), [
           [true, 'a'],
           true,
           'a'
@@ -348,7 +348,7 @@ class FleeceDecodingBenchmark extends DecodingBenchmark {
 
   late FleeceDecoder _decoder;
 
-  late final SliceResult data = FleeceEncoder().convertJson(jsonString);
+  late final data = FleeceEncoder().convertJson(jsonString);
 
   @override
   FutureOr<void> setUp() {

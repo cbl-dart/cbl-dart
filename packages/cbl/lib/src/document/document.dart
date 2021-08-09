@@ -374,7 +374,7 @@ class DocumentFleeceEncoder extends fl.FleeceEncoder {
   /// Finishes encoding and returns the encoded document properties.
   fl.MutableDict finishProperties() {
     final data = finish();
-    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
+    final doc = fl.Doc.fromResultData(data.asUint8List(), FLTrust.trusted);
     final properties = fl.MutableDict.mutableCopy(doc.root.asDict!);
 
     if (_blobs.isNotEmpty) {
@@ -458,7 +458,7 @@ class DocumentFleeceEncoder extends fl.FleeceEncoder {
   }
 
   @override
-  void writeData(TypedData value) {
+  void writeData(Uint8List value) {
     _writeValue();
     super.writeData(value);
   }
