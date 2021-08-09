@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:cbl/cbl.dart';
+import 'package:meta/meta.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -146,70 +149,117 @@ void main() {
       });
 
       group('saveDocumentWithConflictHandler', () {
-        test('save updated document', () async {
+        @isTest
+        void matrixTest(
+          String description,
+          FutureOr<void> Function(bool async) fn,
+        ) {
+          void _test(bool async) {
+            test('$description (variant: async: $async)', () => fn(async));
+          }
+
+          _test(true);
+          _test(false);
+        }
+
+        SaveConflictHandler toSync(AsyncSaveConflictHandler handler) =>
+            (documentBeingSaved, conflictingDocument) =>
+                handler(documentBeingSaved, conflictingDocument) as bool;
+
+        matrixTest('save updated document', (async) async {
           final doc = MutableDocument();
           db.saveDocument(doc);
           final updatedDoc = (db.document(doc.id)!.toMutable())
             ..setValue('b', key: 'a');
           db.saveDocument(updatedDoc);
 
-          await expectLater(
-            db.saveDocumentWithConflictHandler(
-              doc.toMutable(),
+          final AsyncSaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, doc);
-                expect(conflictingDocument, updatedDoc);
-                documentBeingSaved.setValue('c', key: 'a');
-                return true;
-              }),
-            ),
-            completion(isTrue),
-          );
+            expect(documentBeingSaved, doc);
+            expect(conflictingDocument, updatedDoc);
+            documentBeingSaved.setValue('c', key: 'a');
+            if (async) {
+              return Future.value(true);
+            }
+            return true;
+          });
+
+          if (async) {
+            await expectLater(
+              db.saveDocumentWithConflictHandlerAsync(doc, handler),
+              completion(isTrue),
+            );
+          } else {
+            expect(
+              db.saveDocumentWithConflictHandler(doc, toSync(handler)),
+              isTrue,
+            );
+          }
 
           expect(doc.value('a'), 'c');
           expect(db.document(doc.id)!.value('a'), 'c');
         });
 
-        test('save deleted document', () async {
+        matrixTest('save deleted document', (async) async {
           final doc = MutableDocument();
           db.saveDocument(doc);
           db.deleteDocument(db.document(doc.id)!);
 
-          await expectLater(
-            db.saveDocumentWithConflictHandler(
-              doc,
+          final AsyncSaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, doc);
-                expect(conflictingDocument, isNull);
-                documentBeingSaved.setValue('c', key: 'a');
-                return true;
-              }),
-            ),
-            completion(isTrue),
-          );
+            expect(documentBeingSaved, doc);
+            expect(conflictingDocument, isNull);
+            documentBeingSaved.setValue('c', key: 'a');
+            if (async) {
+              return Future.value(true);
+            }
+            return true;
+          });
+
+          if (async) {
+            await expectLater(
+              db.saveDocumentWithConflictHandlerAsync(doc, handler),
+              completion(isTrue),
+            );
+          } else {
+            expect(
+              db.saveDocumentWithConflictHandler(doc, toSync(handler)),
+              isTrue,
+            );
+          }
 
           expect(doc.value('a'), 'c');
           expect(db.document(doc.id)!.value('a'), 'c');
         });
 
-        test('cancels save if handler returns false', () async {
+        matrixTest('cancels save if handler returns false', (async) async {
           final doc = MutableDocument();
           db.saveDocument(doc);
           final updatedDoc = (db.document(doc.id)!.toMutable())
             ..setValue('b', key: 'a');
           db.saveDocument(updatedDoc);
 
-          await expectLater(
-            db.saveDocumentWithConflictHandler(
-              doc.toMutable(),
+          final AsyncSaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, doc);
-                expect(conflictingDocument, updatedDoc);
-                return false;
-              }),
-            ),
-            completion(isFalse),
-          );
+            expect(documentBeingSaved, doc);
+            expect(conflictingDocument, updatedDoc);
+            if (async) {
+              return Future.value(false);
+            }
+            return false;
+          });
+
+          if (async) {
+            await expectLater(
+              db.saveDocumentWithConflictHandlerAsync(doc, handler),
+              completion(isFalse),
+            );
+          } else {
+            expect(
+              db.saveDocumentWithConflictHandler(doc, toSync(handler)),
+              isFalse,
+            );
+          }
         });
       });
 

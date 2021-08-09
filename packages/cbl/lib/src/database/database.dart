@@ -43,12 +43,13 @@ enum MaintenanceType {
 
 /// Custom conflict handler for saving or deleting a document.
 ///
+/// {@template cbl.SaveConflictHandler}
 /// This handler is called if the save would cause a conflict, i.e. if the
 /// document in the database has been updated (probably by a pull replicator, or
 /// by application code) since it was loaded into the [Document] being saved.
 ///
 /// The [documentBeingSaved] (same as the parameter you passed to
-/// [Database.saveDocumentWithConflictHandler].) may be modify by the callback
+/// [Database.saveDocumentWithConflictHandlerAsync].) may be modify by the callback
 /// as necessary to resolve the conflict.
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
@@ -58,13 +59,26 @@ enum MaintenanceType {
 /// The handler has to make a decision by returning `true` to save the document
 /// or `false` to abort the save.
 ///
-/// If the handler throws or returns a [Future] which rejects, the save will be
-/// aborted.
+/// If the handler throws or , the save will be aborted.
+/// {@endtemplate}
+/// See also:
 ///
-/// See:
-/// - [Database.saveDocumentWithConflictHandler] for saving a [Document] with a
-///   custom conflict handler.
-typedef SaveConflictHandler = FutureOr<bool> Function(
+///  * [Database.saveDocumentWithConflictHandler] for saving a [Document] with a
+///    custom conflict handler.
+typedef SaveConflictHandler = bool Function(
+  MutableDocument documentBeingSaved,
+  Document? conflictingDocument,
+);
+
+/// Custom async conflict handler for saving or deleting a document.
+///
+/// {@macro cbl.SaveConflictHandler}
+///
+/// See also:
+///
+///  * [Database.saveDocumentWithConflictHandlerAsync] for saving a [Document]
+///    with a custom async conflict handler.
+typedef AsyncSaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
@@ -147,6 +161,7 @@ abstract class Database implements ClosableResource {
   /// Saves a [document] to this database, resolving conflicts with a
   /// [conflictHandler].
   ///
+  /// {@template cbl.Database.saveDocumentWithConflictHandler}
   /// When write operations are executed concurrently and if conflicts occur,
   /// the [conflictHandler] will be called. Use the conflict handler to
   /// directly edit the [Document] to resolve the conflict. When the conflict
@@ -154,15 +169,19 @@ abstract class Database implements ClosableResource {
   /// the resolved document. If the conflict handler returns `false`, the save
   /// operation will be canceled with `false` as the result. If the conflict
   /// handler returns `true` or there is no conflict the result is `true`.
-  ///
-  /// [conflictHandler] should not throw to abort the save operation. If the
-  /// handler does throw, the save operation is aborted as if the handler had
-  /// returned `false`, but errors thrown by the [conflictHandler] __cannot__ be
-  /// caught by executing this method in a try-catch block. These errors are
-  /// uncaught errors within the current [Zone].
-  Future<bool> saveDocumentWithConflictHandler(
+  /// {@endtemplate}
+  bool saveDocumentWithConflictHandler(
     MutableDocument document,
     SaveConflictHandler conflictHandler,
+  );
+
+  /// Saves a [document] to this database, resolving conflicts with an async
+  /// [conflictHandler].
+  ///
+  /// {@macro cbl.Database.saveDocumentWithConflictHandler}
+  Future<bool> saveDocumentWithConflictHandlerAsync(
+    MutableDocument document,
+    AsyncSaveConflictHandler conflictHandler,
   );
 
   /// Deletes a [document] from this database, resolving conflicts through
@@ -312,47 +331,82 @@ class DatabaseImpl extends CBLDatabaseObject
       });
 
   @override
-  Future<bool> saveDocumentWithConflictHandler(
+  bool saveDocumentWithConflictHandler(
     covariant MutableDocumentImpl document,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() async {
-        // Implementing the conflict resolution in Dart, instead of using
-        // the C implementation, allows us to make the conflict handler
-        // asynchronous.
-        var success = false;
-        var retry = false;
-        var documentBeingSaved = document;
+      useSync(() {
+        // Because the conflict handler is sync the result of the maybe async
+        // method is always sync.
+        return _saveDocumentWithConflictHandlerMaybeAsync(
+          document,
+          conflictHandler,
+        ) as bool;
+      });
 
-        do {
-          if (saveDocument(
+  @override
+  Future<bool> saveDocumentWithConflictHandlerAsync(
+    covariant MutableDocumentImpl document,
+    AsyncSaveConflictHandler conflictHandler,
+  ) =>
+      use(() => _saveDocumentWithConflictHandlerMaybeAsync(
+            document,
+            conflictHandler,
+          ));
+
+  FutureOr<bool> _saveDocumentWithConflictHandlerMaybeAsync(
+    covariant MutableDocumentImpl document,
+    AsyncSaveConflictHandler conflictHandler,
+  ) {
+    // Implementing the conflict resolution in Dart, instead of using
+    // the C implementation, allows us to make the conflict handler
+    // asynchronous.
+
+    var success = false;
+
+    final done = iterateMaybeAsync(() sync* {
+      var retry = false;
+      var documentBeingSaved = document;
+
+      do {
+        if (saveDocument(
+          documentBeingSaved,
+          ConcurrencyControl.failOnConflict,
+        )) {
+          success = true;
+          retry = false;
+        } else {
+          // Load the conflicting document.
+          final conflictingDocument =
+              this.document(document.id) as DocumentImpl?;
+
+          // Let conflict handler try resolving the conflict.
+          final handlerDescision = conflictHandler(
             documentBeingSaved,
-            ConcurrencyControl.failOnConflict,
-          )) {
-            success = true;
-            retry = false;
-          } else {
-            // Load the conflicting document.
-            final conflictingDocument =
-                this.document(document.id) as DocumentImpl?;
+            conflictingDocument,
+          );
 
-            // Let conflict handler try resolving the conflict.
-            retry = await conflictHandler(
+          if (handlerDescision is Future<bool>) {
+            yield handlerDescision.then((it) => retry = it);
+          } else {
+            retry = handlerDescision;
+          }
+
+          if (retry) {
+            mergeConflictingDocuments(
               documentBeingSaved,
               conflictingDocument,
             );
-
-            if (retry) {
-              mergeConflictingDocuments(
-                documentBeingSaved,
-                conflictingDocument,
-              );
-            }
           }
-        } while (retry);
+        }
+      } while (retry);
+    }());
 
-        return success;
-      });
+    if (done is Future<void>) {
+      return done.then((_) => success);
+    }
+    return success;
+  }
 
   @override
   bool deleteDocument(
