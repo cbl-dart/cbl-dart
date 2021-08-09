@@ -12,7 +12,7 @@ import 'value.dart';
 
 class MRoot extends MCollection {
   MRoot.fromData(
-    ByteBuffer data, {
+    Uint8List data, {
     required MContext context,
     required bool isMutable,
   })  : data = data.toSliceResult(),

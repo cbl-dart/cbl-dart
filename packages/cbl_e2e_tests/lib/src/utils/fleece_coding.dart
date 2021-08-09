@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cbl/src/fleece/fleece.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -13,4 +15,4 @@ SliceResult fleeceEncode(Object? value) {
   return fleeceEncoder.finish();
 }
 
-Object? fleeceDecode(Slice data) => FleeceDecoder().dataToDartObject(data);
+Object? fleeceDecode(Uint8List data) => FleeceDecoder().dataToDartObject(data);

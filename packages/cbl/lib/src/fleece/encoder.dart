@@ -79,7 +79,7 @@ class FleeceEncoder {
       writeDouble(value);
     } else if (value is String) {
       writeString(value);
-    } else if (value is TypedData) {
+    } else if (value is Uint8List) {
       writeData(value);
     } else if (value is Iterable) {
       final list = value.toList();
@@ -143,8 +143,7 @@ class FleeceEncoder {
   void writeString(String value) => _encoderBinds.writeString(_pointer, value);
 
   /// Writes the [TypedData] [value] to this encoder.
-  void writeData(TypedData value) =>
-      _encoderBinds.writeData(_pointer, value.buffer);
+  void writeData(Uint8List value) => _encoderBinds.writeData(_pointer, value);
 
   /// Writes the JSON string [value] to this encoder.
   void writeJson(String value) => _encoderBinds.writeJSON(_pointer, value);
@@ -173,8 +172,7 @@ class FleeceEncoder {
   ///
   /// To begin a new piece of Fleece data call [reset].
   SliceResult finish() {
-    final result =
-        SliceResult.fromFLSliceResult(_encoderBinds.finish(_pointer));
+    final result = _encoderBinds.finish(_pointer);
 
     if (result == null) {
       throw StateError('Encoder did not encode anything');

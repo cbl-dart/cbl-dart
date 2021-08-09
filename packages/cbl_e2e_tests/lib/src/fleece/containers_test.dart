@@ -491,22 +491,8 @@ void main() {
     });
 
     group('conversion when setting values in containers', () {
-      test('should set TypedData as ValueType.data', () {
-        expect(MutableArray([ByteData(0)]).first.type, ValueType.data);
-        expect(MutableArray([Float32List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Float32x4List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Float64List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Float64x2List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Int8List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Int16List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Int32List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Int32x4List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Int64List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Uint8ClampedList(0)]).first.type, ValueType.data);
+      test('should set Uint8List as ValueType.data', () {
         expect(MutableArray([Uint8List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Uint16List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Uint32List(0)]).first.type, ValueType.data);
-        expect(MutableArray([Uint64List(0)]).first.type, ValueType.data);
       });
     });
 

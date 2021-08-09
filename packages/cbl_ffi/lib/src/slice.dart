@@ -197,12 +197,32 @@ class SliceResult extends Slice implements ByteBuffer {
     _sliceBinds.bindToDartObject(this, globalFLSliceResult.ref, retain);
   }
 
+  SliceResult._subSlice(SliceResult slice, int start, int end)
+      : assert(start >= 0, start < slice.size),
+        assert(end >= start && end <= slice.size),
+        super._(slice.buf.elementAt(start), end - start) {
+    _sliceBinds.bindToDartObject(this, slice.makeGlobalResult().ref, true);
+  }
+
   /// Creates an uninitialized [SliceResult] of [size].
   SliceResult(int size) : super._(_sliceBinds.create(size).buf, size);
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
       : super._(_sliceBinds.copy(slice.makeGlobal().ref).buf, slice.size);
+
+  /// Returns a [SliceResult] which has the content and size of [list].
+  factory SliceResult.fromUint8List(Uint8List list) {
+    final buffer = list.buffer;
+    if (buffer is SliceResult) {
+      return buffer.subSlice(
+        list.offsetInBytes,
+        list.offsetInBytes + list.lengthInBytes,
+      );
+    }
+
+    return SliceResult(list.lengthInBytes)..asUint8List().setAll(0, list);
+  }
 
   /// Creates a [SliceResult] and copies the data from [byteBuffer] into it.
   ///
@@ -248,6 +268,46 @@ class SliceResult extends Slice implements ByteBuffer {
           : Slice._(slice.buf, slice.size)
               .let((slice) => SliceResult.fromSlice(slice));
 
+  /// Sets the [globalFLSliceResult] to this slice and returns it.
+  Pointer<FLSliceResult> makeGlobalResult() {
+    globalFLSliceResult.ref
+      ..buf = buf
+      ..size = size;
+    return globalFLSliceResult;
+  }
+
+  /// Allocates a [FLSliceResult] sets it to this slice.
+  Pointer<FLSliceResult> flSliceResult([Allocator allocator = malloc]) {
+    final result = allocator<FLSliceResult>();
+    result.ref
+      ..buf = buf
+      ..size = size;
+    return result;
+  }
+
+  /// Returns a [SliceResult] which contains the bytes of this slice, defined by
+  /// the range between [start] and [end].
+  ///
+  /// The default of [end] is [size].
+  SliceResult subSlice(int start, [int? end]) {
+    end ??= size;
+
+    if (start >= size) {
+      throw RangeError.index(start, this, 'start', null, size);
+    }
+
+    if (end > size || end < start) {
+      throw RangeError.range(end, start, size, 'end');
+    }
+
+    if (start == 0 && end == size) {
+      // Range is the whole slice.
+      return this;
+    }
+
+    return SliceResult._subSlice(this, start, end);
+  }
+
   @override
   String toString() => 'SliceResult(buf: $buf, size: $size)';
 
@@ -266,8 +326,8 @@ class SliceResult extends Slice implements ByteBuffer {
   }();
 }
 
-extension SliceResultByteBufferExt on ByteBuffer {
-  /// Turns this byte buffer into a [SliceResult] through
-  /// [SliceResult.fromByteBuffer].
-  SliceResult toSliceResult() => SliceResult.fromByteBuffer(this);
+extension SliceResultUint8ListExt on Uint8List {
+  /// Turns this [Uint8List] into a [SliceResult] which has the content and
+  /// size of this list.
+  SliceResult toSliceResult() => SliceResult.fromUint8List(this);
 }

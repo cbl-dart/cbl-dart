@@ -220,7 +220,7 @@ class QueryImpl
       encoder.endDict();
     }
     final data = encoder.finish();
-    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
+    final doc = fl.Doc.fromResultData(data.asUint8List(), FLTrust.trusted);
     final flDict = doc.root.asDict!;
     runNativeCalls(() => _bindings.setParameters(
           native.pointer,

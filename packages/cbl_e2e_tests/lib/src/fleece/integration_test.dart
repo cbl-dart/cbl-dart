@@ -264,7 +264,7 @@ void main() {
 }
 
 MRoot testMRoot(Object from) => MRoot.fromData(
-      fleeceEncode(from),
+      fleeceEncode(from).asUint8List(),
       context: MContext(),
       isMutable: true,
     );

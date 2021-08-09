@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
@@ -72,13 +73,17 @@ class _JsonMatcher extends Matcher {
 
   @override
   bool matches(Object? item, Map matchState) {
+    if (item is SliceResult) {
+      item = item.asUint8List();
+    }
+
     Object? actual;
     if (item is String) {
       actual = _tryToDecodeJson(item);
       if (item != actual) {
         matchState[_actualDecodedKey] = actual;
       }
-    } else if (item is Slice) {
+    } else if (item is Uint8List) {
       actual = fleeceDecode(item);
       if (actual == null) return false;
       matchState[_actualDecodedKey] = actual;

@@ -35,11 +35,8 @@ class Doc extends FleeceDocObject {
   static late final _bindings = cblBindings.fleece.doc;
 
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
-  factory Doc.fromResultData(SliceResult data, FLTrust trust) {
-    final doc = _bindings.fromResultData(
-      data.makeGlobal().cast<FLSliceResult>().ref,
-      trust,
-    );
+  factory Doc.fromResultData(Uint8List data, FLTrust trust) {
+    final doc = _bindings.fromResultData(data, trust);
     if (doc == null) {
       throw ArgumentError.value(data, 'data', 'is not valid Fleece data');
     }
@@ -166,7 +163,7 @@ class Value extends FleeceValueObject<FLValue> {
   String? get asString => native.call(_bindings.asString);
 
   /// Returns the exact contents of a data value, or null for all other types.
-  Uint8List? get asData => native.call(_bindings.asData)?.asUint8List();
+  Uint8List? get asData => native.call(_bindings.asData);
 
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray => type == ValueType.array
@@ -724,7 +721,7 @@ class _DefaultSlotSetter implements SlotSetter {
       value is int ||
       value is double ||
       value is String ||
-      value is TypedData ||
+      value is Uint8List ||
       value is Iterable<Object?> ||
       value is Map<String, Object?> ||
       value is Value;
@@ -743,8 +740,8 @@ class _DefaultSlotSetter implements SlotSetter {
       _slotBindings.setDouble(slot, value);
     } else if (value is String) {
       _slotBindings.setString(slot, value);
-    } else if (value is TypedData) {
-      _slotBindings.setData(slot, value.buffer);
+    } else if (value is Uint8List) {
+      _slotBindings.setData(slot, value);
     } else if (value is Value) {
       value.native.call((pointer) => _slotBindings.setValue(slot, pointer));
     }
@@ -753,7 +750,7 @@ class _DefaultSlotSetter implements SlotSetter {
   static Object? _recursivelyConvertCollectionsToFleece(Object? value) {
     // These collection types can be set directly though the `set...` methods of
     // FLSLot.
-    if (value is Value || value is TypedData) return value;
+    if (value is Value || value is Uint8List) return value;
 
     if (value is Map) {
       return MutableDict()..addAll(value.cast());
