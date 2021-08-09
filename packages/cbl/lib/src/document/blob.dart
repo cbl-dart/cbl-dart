@@ -8,7 +8,6 @@ import 'package:collection/collection.dart';
 import '../database/database.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
-import '../fleece/fleece.dart' as fl;
 import '../log/logger.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
@@ -18,6 +17,7 @@ import 'common.dart';
 import 'document.dart';
 
 late final _blobBindings = cblBindings.blobs.blob;
+late final _databaseBindings = cblBindings.database;
 
 /// Max size of data that will be cached in memory with the [Blob].
 const _maxCachedContentLength = 8 * 1024;
@@ -90,15 +90,6 @@ abstract class Blob {
   }
 }
 
-class BlobImplSetter extends fl.SlotSetter {
-  @override
-  bool canSetValue(Object? value) => value is BlobImpl;
-
-  @override
-  void setSlotValue(Pointer<FLSlot> slot, covariant BlobImpl value) =>
-      value.native.call((pointer) => _blobBindings.setBlob(slot, pointer));
-}
-
 late final _bindings = cblBindings.blobs;
 
 class BlobImpl
@@ -115,7 +106,8 @@ class BlobImpl
           blob,
           adopt: adopt,
           debugName: 'Blob(creator: $debugCreator)',
-        ) {
+        ),
+        _needsToBeInstalled = false {
     _contentType = native.call(_blobBindings.contentType);
     _length = native.call(_blobBindings.length);
     _digest = native.call(_blobBindings.digest);
@@ -126,21 +118,31 @@ class BlobImpl
           _blobBindings.createWithData(contentType, data),
           debugName: 'Blob.fromData()',
         ),
+        _needsToBeInstalled = true,
         _contentType = contentType,
         _length = data.length {
     _digest = native.call(_blobBindings.digest);
   }
 
-  BlobImpl.fromProperties(Map<String, Object?> properties)
-      : assert(properties[_typeProperty] == _blobType),
+  BlobImpl.fromProperties(
+    Map<String, Object?> properties, {
+    DatabaseImpl? database,
+  })  : assert(properties[_typeProperty] == _blobType),
+        _database = database,
+        _needsToBeInstalled = false,
         _contentType = properties[_blobContentTypeProperty] as String?,
         _length = properties[_blobLengthProperty] as int,
-        _digest = properties[_blobDigestProperty] as String;
+        _digest = properties[_blobDigestProperty] as String {
+    if (_database != null && _digest != null) {
+      _setupBlobFromProperties();
+    }
+  }
 
   DatabaseImpl? _database;
   CblObject<CBLBlob>? _blob;
   @override
   CblObject<CBLBlob> get native => _blob!;
+  bool _needsToBeInstalled;
   Uint8List? _content;
   String? _contentType;
   int? _length;
@@ -168,19 +170,36 @@ class BlobImpl
 
   Uint8List? _loadContentSync() {
     var content = _content;
+    if (content != null) {
+      return content;
+    }
 
-    if (content == null) {
-      final blob = _blob;
-      if (blob != null) {
-        content = blob.call(_blobBindings.content)!;
-        if (content.length <= _maxCachedContentLength) {
-          _content = content;
-          _length = content.length;
-        }
+    final blob = _blob;
+    if (blob != null) {
+      content = blob.call(_blobBindings.content)!;
+      if (content.length <= _maxCachedContentLength) {
+        _content = content;
+        _length = content.length;
       }
     }
 
     return content;
+  }
+
+  void _setupBlobFromProperties() {
+    final properties = MutableDict(_blobProperties);
+    final blob = runNativeCalls(() {
+      return _databaseBindings.getBlob(
+        _database!.native.pointer,
+        properties.native.pointer.cast(),
+      );
+    });
+    if (blob != null) {
+      _blob = CblObject(
+        blob,
+        debugName: 'Blob._setupBlobFromProperties()',
+      );
+    }
   }
 
   Never _throwNoDataError() {
@@ -219,26 +238,29 @@ class BlobImpl
 
   @override
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
-    if (encoder is DocumentFleeceEncoder) {
-      if (_digest != null && _blob == null) {
-        // Blob was created from properties.
-        encoder.writeDartObject(_blobProperties);
-      } else {
-        encoder.writeBlob(this);
-      }
-
-      final database = encoder.extraInfo.document.database;
+    var extraInfo = encoder.extraInfo;
+    if (extraInfo is DocumentEncoderContext) {
+      final database = extraInfo.document.database;
       if (database != null) {
         _checkBlobIsFromSameDatabase(database);
         _database = database;
 
         if (_digest == null) {
           return _throwNoDataError();
+        } else if (_blob == null) {
+          _setupBlobFromProperties();
+        }
+
+        if (_needsToBeInstalled) {
+          runNativeCalls(() {
+            _databaseBindings.saveBlob(database.native.pointer, native.pointer);
+          });
+          _needsToBeInstalled = false;
         }
       }
-    } else {
-      encoder.writeDartObject(_blobProperties);
     }
+
+    encoder.writeDartObject(_blobProperties);
   }
 
   void _checkBlobIsFromSameDatabase(DatabaseImpl database) {

@@ -346,6 +346,23 @@ typedef CBLDatabase_GetIndexNames = Pointer<FLArray> Function(
   Pointer<CBLDatabase> db,
 );
 
+typedef CBLDatabase_GetBlob = Pointer<CBLBlob> Function(
+  Pointer<CBLDatabase> db,
+  Pointer<FLDict> properties,
+  Pointer<CBLError> errorOut,
+);
+
+typedef CBLDatabase_SaveBlob_C = Uint8 Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLBlob> blob,
+  Pointer<CBLError> errorOut,
+);
+typedef CBLDatabase_SaveBlob = int Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLBlob> blob,
+  Pointer<CBLError> errorOut,
+);
+
 class DatabaseBindings extends Bindings {
   DatabaseBindings(Bindings parent) : super(parent) {
     _copyDatabase = libs.cblDart
@@ -456,9 +473,13 @@ class DatabaseBindings extends Bindings {
         CBLDart_CBLDatabase_DeleteIndex_C, CBLDart_CBLDatabase_DeleteIndex>(
       'CBLDart_CBLDatabase_DeleteIndex',
     );
-    _indexNames = libs.cbl
-        .lookupFunction<CBLDatabase_GetIndexNames, CBLDatabase_GetIndexNames>(
-      'CBLDatabase_GetIndexNames',
+    _getBlob =
+        libs.cbl.lookupFunction<CBLDatabase_GetBlob, CBLDatabase_GetBlob>(
+      'CBLDatabase_GetBlob',
+    );
+    _saveBlob =
+        libs.cbl.lookupFunction<CBLDatabase_SaveBlob_C, CBLDatabase_SaveBlob>(
+      'CBLDatabase_SaveBlob',
     );
   }
 
@@ -491,6 +512,8 @@ class DatabaseBindings extends Bindings {
   late final CBLDart_CBLDatabase_CreateIndex _createIndex;
   late final CBLDart_CBLDatabase_DeleteIndex _deleteIndex;
   late final CBLDatabase_GetIndexNames _indexNames;
+  late final CBLDatabase_GetBlob _getBlob;
+  late final CBLDatabase_SaveBlob _saveBlob;
 
   bool copyDatabase(
     String from,
@@ -738,6 +761,19 @@ class DatabaseBindings extends Bindings {
 
   Pointer<FLArray> indexNames(Pointer<CBLDatabase> db) {
     return _indexNames(db);
+  }
+
+  Pointer<CBLBlob>? getBlob(
+    Pointer<CBLDatabase> db,
+    Pointer<FLDict> properties,
+  ) {
+    return _getBlob(db, properties, globalCBLError)
+        .checkCBLError()
+        .toNullable();
+  }
+
+  void saveBlob(Pointer<CBLDatabase> db, Pointer<CBLBlob> blob) {
+    _saveBlob(db, blob, globalCBLError).checkCBLError();
   }
 
   Pointer<CBLDart_CBLDatabaseConfiguration> _createConfig(
