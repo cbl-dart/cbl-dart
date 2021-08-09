@@ -2,9 +2,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 
-import 'document/blob.dart';
 import 'document/common.dart';
-import 'fleece/fleece.dart';
 import 'fleece/integration/integration.dart';
 import 'support/utils.dart';
 
@@ -88,7 +86,6 @@ class CouchbaseLite {
       _initialization.execute(() {
         ffi.CBLBindings.initInstance(libraries._toFfi());
         MDelegate.instance = CblMDelegate();
-        SlotSetter.register(BlobImplSetter());
       });
 
   /// Private constructor to allow control over instance creation.
