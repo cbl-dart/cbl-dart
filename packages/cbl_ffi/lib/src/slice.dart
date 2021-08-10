@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
@@ -111,70 +112,71 @@ class Slice implements ByteBuffer {
 
   // === ByteBuffer ============================================================
 
-  late final _buffer = buf.asTypedList(size).buffer;
-
   @override
   int get lengthInBytes => size;
 
   @override
   Uint8List asUint8List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asUint8List(offsetInBytes, length);
+      _SliceUint8List(offsetInBytes, length ?? lengthInBytes, this);
 
   @override
   Int8List asInt8List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asInt8List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Uint8ClampedList asUint8ClampedList([int offsetInBytes = 0, int? length]) =>
-      _buffer.asUint8ClampedList(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Uint16List asUint16List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asUint16List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Int16List asInt16List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asInt16List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Uint32List asUint32List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asUint32List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Int32List asInt32List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asInt32List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Uint64List asUint64List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asUint64List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Int64List asInt64List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asInt64List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Int32x4List asInt32x4List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asInt32x4List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Float32List asFloat32List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asFloat32List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Float64List asFloat64List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asFloat64List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Float32x4List asFloat32x4List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asFloat32x4List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   Float64x2List asFloat64x2List([int offsetInBytes = 0, int? length]) =>
-      _buffer.asFloat64x2List(offsetInBytes, length);
+      _throwUnsupportedError();
 
   @override
   ByteData asByteData([int offsetInBytes = 0, int? length]) =>
-      _buffer.asByteData(offsetInBytes, length);
+      _throwUnsupportedError();
+
+  Never _throwUnsupportedError() =>
+      throw UnsupportedError('Not supported by Slice.');
 }
 
 /// A contiguous area of native memory, which stays alive at least as long as
@@ -222,18 +224,6 @@ class SliceResult extends Slice implements ByteBuffer {
     }
 
     return SliceResult(list.lengthInBytes)..asUint8List().setAll(0, list);
-  }
-
-  /// Creates a [SliceResult] and copies the data from [byteBuffer] into it.
-  ///
-  /// If [byteBuffer] already is a [SliceResult] it is returned instead.
-  factory SliceResult.fromByteBuffer(ByteBuffer byteBuffer) {
-    if (byteBuffer is SliceResult) {
-      return byteBuffer;
-    }
-
-    return SliceResult(byteBuffer.lengthInBytes)
-      ..asUint8List().setAll(0, byteBuffer.asUint8List());
   }
 
   /// Creates a [SliceResult] which contains [string] encoded as UTF-8.
@@ -292,13 +282,7 @@ class SliceResult extends Slice implements ByteBuffer {
   SliceResult subSlice(int start, [int? end]) {
     end ??= size;
 
-    if (start >= size) {
-      throw RangeError.index(start, this, 'start', null, size);
-    }
-
-    if (end > size || end < start) {
-      throw RangeError.range(end, start, size, 'end');
-    }
+    RangeError.checkValidRange(start, end, size);
 
     if (start == 0 && end == size) {
       // Range is the whole slice.
@@ -310,20 +294,6 @@ class SliceResult extends Slice implements ByteBuffer {
 
   @override
   String toString() => 'SliceResult(buf: $buf, size: $size)';
-
-  // === ByteBuffer ============================================================
-
-  /// Expando which is used to keep a [SliceResult] alive, while [_buffer]
-  /// is alive.
-  static final _retainedForBuffer =
-      Expando<SliceResult>('SliceResult.retainedForBuffer');
-
-  @override
-  late final ByteBuffer _buffer = () {
-    final result = buf.asTypedList(size).buffer;
-    _retainedForBuffer[result] = this;
-    return result;
-  }();
 }
 
 extension SliceResultUint8ListExt on Uint8List {
@@ -331,3 +301,84 @@ extension SliceResultUint8ListExt on Uint8List {
   /// size of this list.
   SliceResult toSliceResult() => SliceResult.fromUint8List(this);
 }
+
+abstract class _SliceTypedDataList with ListMixin<int> implements TypedData {
+  _SliceTypedDataList(this.offsetInBytes, this.lengthInBytes, this.buffer);
+
+  int _get(int index);
+
+  void _set(int index, int value);
+
+  T _createSubList<T>(
+    int start,
+    int? end,
+    T Function(int offsetInByte, int lengthInBytes) create,
+  ) {
+    end ??= length;
+    RangeError.checkValidRange(start, end, length);
+    return create(_offsetInBytes(start), _lengthInBytes(end - start));
+  }
+
+  @override
+  final Slice buffer;
+
+  @override
+  final int offsetInBytes;
+
+  @override
+  final int lengthInBytes;
+
+  @override
+  int get length => lengthInBytes ~/ elementSizeInBytes;
+
+  @override
+  set length(int value) =>
+      throw UnsupportedError('TypedData cannot be resized.');
+
+  int _lengthInBytes(int length) => length * elementSizeInBytes;
+
+  int _offsetInBytes(int offset) => offsetInBytes + offset * elementSizeInBytes;
+
+  @override
+  int operator [](int index) {
+    RangeError.checkValidIndex(index, this);
+    final result = _get(index);
+    _keepAliveUntil(buffer);
+    return result;
+  }
+
+  @override
+  void operator []=(int index, int value) {
+    RangeError.checkValidIndex(index, this);
+    _set(index, value);
+    _keepAliveUntil(buffer);
+  }
+}
+
+class _SliceUint8List extends _SliceTypedDataList implements Uint8List {
+  _SliceUint8List(int offsetInBytes, int lengthInBytes, Slice buffer)
+      : _buf = buffer.buf.elementAt(offsetInBytes),
+        super(offsetInBytes, lengthInBytes, buffer);
+
+  final Pointer<Uint8> _buf;
+
+  @override
+  final int elementSizeInBytes = 1;
+
+  @override
+  int _get(int index) => _buf[index];
+
+  @override
+  void _set(int index, int value) => _buf[index] = value;
+
+  @override
+  Uint8List sublist(int start, [int? end]) => _createSubList(
+        start,
+        end,
+        (offsetInByte, lengthInBytes) =>
+            _SliceUint8List(offsetInBytes, lengthInBytes, buffer),
+      );
+}
+
+@pragma('vm:never-inline')
+void _keepAliveUntil(Object? object) {}
