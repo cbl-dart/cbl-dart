@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../database/database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
@@ -129,7 +131,7 @@ class CblMDelegate extends MDelegate {
       cacheIt();
       return flValue.isString
           ? flValue.slice.toDartString()
-          : flValue.slice.asUint8List();
+          : SliceResult.fromSlice(flValue.slice).asUint8List();
     } else if (flValue is CollectionFLValue) {
       cacheIt();
       if (flValue.isArray) {
