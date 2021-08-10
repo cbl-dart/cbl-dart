@@ -585,12 +585,12 @@ class DatabaseBindings extends Bindings {
   void bindToDartObject(
     Object object,
     Pointer<CBLDatabase> db,
-    String debugName,
+    String? debugName,
   ) {
     _bindtoDartObject(
       object,
       db,
-      debugName.toNativeUtf8(),
+      debugName?.toNativeUtf8() ?? nullptr,
     );
   }
 

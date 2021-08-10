@@ -3,6 +3,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import 'debug.dart';
 import 'errors.dart';
 import 'ffi.dart';
 import 'resource.dart';
@@ -135,13 +136,13 @@ class CblObject<T extends NativeType> extends NativeObject<T> {
   CblObject(
     Pointer<T> pointer, {
     bool adopt = true,
-    required String? debugName,
+    required String debugName,
   }) : super(pointer) {
     cblBindings.base.bindCBLRefCountedToDartObject(
       this,
       pointer.cast(),
       !adopt,
-      debugName,
+      _filterDebugRefCountedName(debugName),
     );
   }
 }
@@ -153,7 +154,11 @@ class CBLDatabaseObject extends NativeObject<CBLDatabase> {
     Pointer<CBLDatabase> pointer, {
     required String debugName,
   }) : super(pointer) {
-    cblBindings.database.bindToDartObject(this, pointer, debugName);
+    cblBindings.database.bindToDartObject(
+      this,
+      pointer,
+      _filterDebugRefCountedName(debugName),
+    );
   }
 }
 
@@ -162,9 +167,13 @@ class CBLReplicatorObject extends NativeObject<CBLReplicator> {
   /// Creates a handle to a CBLReplicator.
   CBLReplicatorObject(
     Pointer<CBLReplicator> pointer, {
-    required String? debugName,
+    required String debugName,
   }) : super(pointer) {
-    cblBindings.replicator.bindToDartObject(this, pointer, debugName);
+    cblBindings.replicator.bindToDartObject(
+      this,
+      pointer,
+      _filterDebugRefCountedName(debugName),
+    );
   }
 }
 
@@ -214,3 +223,6 @@ class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
   /// it is created and garbage collected.
   final bool isRefCounted;
 }
+
+String? _filterDebugRefCountedName(String debugName) =>
+    debugRefCounted ? debugName : null;
