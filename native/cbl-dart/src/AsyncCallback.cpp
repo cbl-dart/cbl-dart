@@ -77,6 +77,12 @@ void AsyncCallback::close() {
     closed_ = true;
   }
 
+  if (finalizer_) {
+    finalizer_(finalizerContext_);
+    finalizer_ = nullptr;
+    finalizerContext_ = nullptr;
+  }
+
   if (dartCallbackHandle_) {
     Dart_DeleteWeakPersistentHandle_DL(dartCallbackHandle_);
     dartCallbackHandle_ = nullptr;
