@@ -70,15 +70,15 @@ inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
   char *debugName = nullptr;
   {
     std::scoped_lock lock(cblRefCountedDebugMutex);
-    if (cblRefCountedDebugEnabled) {
-      auto nh = cblRefCountedDebugNames.extract(refCounted);
-      if (!nh.empty()) {
-        debugName = nh.mapped();
-      }
+    auto nh = cblRefCountedDebugNames.extract(refCounted);
+    if (!nh.empty()) {
+      debugName = nh.mapped();
     }
   }
   if (debugName) {
-    printf("CBLRefCountedFinalizer: %p %s\n", refCounted, debugName);
+    if (cblRefCountedDebugEnabled) {
+      printf("CBLRefCountedFinalizer: %p %s\n", refCounted, debugName);
+    }
     free(debugName);
   }
 #endif

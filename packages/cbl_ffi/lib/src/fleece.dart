@@ -1768,10 +1768,7 @@ class FleeceEncoderBindings extends Bindings {
       __getError(encoder).toFleeceErrorCode();
 
   String _getErrorMessage(Pointer<FLEncoder> encoder) {
-    final pointer = __getErrorMessage(encoder);
-    final result = pointer.toDartString();
-    malloc.free(pointer);
-    return result;
+    return __getErrorMessage(encoder).toDartStringAndFree();
   }
 
   T _checkError<T>(Pointer<FLEncoder> encoder, T result) {
