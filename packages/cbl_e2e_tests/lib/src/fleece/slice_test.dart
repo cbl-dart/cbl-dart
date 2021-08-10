@@ -83,6 +83,7 @@ void main() {
       final source = SliceResult.fromString('source');
       final slice = SliceResult.fromFLSliceResult(
         source.makeGlobal().cast<FLSliceResult>().ref,
+        retain: true,
       );
 
       expect(slice, source);

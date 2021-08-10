@@ -217,10 +217,10 @@ class BlobReadStreamBindings extends Bindings {
       throwCBLError();
     }
 
-    // Empty buffer means stream has been fully read.
-    return buffer.size == 0
-        ? null
-        : SliceResult.fromFLSliceResult(buffer)!.asUint8List();
+    // Empty buffer means stream has been fully read, but its important to
+    // create a SliceResult to ensure the the FLSliceResult is freed.
+    var sliceResult = SliceResult.fromFLSliceResult(buffer)!;
+    return sliceResult.size == 0 ? null : sliceResult.asUint8List();
   }
 
   void close(Pointer<CBLBlobReadStream> stream) {

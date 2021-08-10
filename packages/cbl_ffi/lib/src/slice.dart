@@ -207,11 +207,11 @@ class SliceResult extends Slice implements ByteBuffer {
   }
 
   /// Creates an uninitialized [SliceResult] of [size].
-  SliceResult(int size) : super._(_sliceBinds.create(size).buf, size);
+  SliceResult(int size) : this._(_sliceBinds.create(size).buf, size);
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-      : super._(_sliceBinds.copy(slice.makeGlobal().ref).buf, slice.size);
+      : this._(_sliceBinds.copy(slice.makeGlobal().ref).buf, slice.size);
 
   /// Returns a [SliceResult] which has the content and size of [list].
   factory SliceResult.fromUint8List(Uint8List list) {
