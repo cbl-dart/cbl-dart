@@ -222,3 +222,26 @@ class SliceResult extends Slice {
   @override
   String toString() => 'SliceResult(buf: $buf, size: $size)';
 }
+
+/// A form of a [SliceResult] which can be sent through an isolate port.
+///
+/// A [TransferableSliceResult] must only be materialized once and only in one
+/// isolate.
+///
+/// If a [TransferableSliceResult] is never materialized the memory of the slice
+/// result is leaked.
+class TransferableSliceResult {
+  TransferableSliceResult(SliceResult sliceResult)
+      : _bufAddress = sliceResult.buf.address,
+        _size = sliceResult.size {
+    // Retain the slice now, in case `sliceResult` is garbage collected
+    // before this transferable slice result is materialized.
+    _sliceBindings.retainSliceResult(sliceResult.makeGlobalResult().ref);
+  }
+
+  final int _bufAddress;
+  final int _size;
+
+  SliceResult materialize() =>
+      SliceResult.fromBufferAndSize(Pointer.fromAddress(_bufAddress), _size);
+}

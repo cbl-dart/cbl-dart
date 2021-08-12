@@ -162,8 +162,12 @@ typedef _CBLDart_FLSliceResult_BindToDartObject = void Function(
   int retain,
 );
 
+typedef _CBLDart_FLSliceResult_Retain_C = Void Function(FLSliceResult);
+typedef _CBLDart_FLSliceResult_Retain = void Function(FLSliceResult);
+
 typedef _CBLDart_FLSliceResult_Release_C = Void Function(FLSliceResult);
 typedef _CBLDart_FLSliceResult_Release = void Function(FLSliceResult);
+
 typedef _CBLDart_FLStringResult_Release_C = Void Function(FLStringResult);
 typedef _CBLDart_FLStringResult_Release = void Function(FLStringResult);
 
@@ -190,6 +194,10 @@ class SliceBindings extends Bindings {
         _CBLDart_FLSliceResult_BindToDartObject>(
       'CBLDart_FLSliceResult_BindToDartObject',
     );
+    _retainSliceResult = libs.cblDart.lookupFunction<
+        _CBLDart_FLSliceResult_Retain_C, _CBLDart_FLSliceResult_Retain>(
+      'CBLDart_FLSliceResult_Retain',
+    );
     _releaseSliceResult = libs.cblDart.lookupFunction<
         _CBLDart_FLSliceResult_Release_C, _CBLDart_FLSliceResult_Release>(
       'CBLDart_FLSliceResult_Release',
@@ -212,8 +220,10 @@ class SliceBindings extends Bindings {
   late final _CBLDart_FLSliceResult_New _new;
   late final _CBLDart_FLSlice_Copy _copy;
   late final _CBLDart_FLSliceResult_BindToDartObject _bindToDartObject;
+  late final _CBLDart_FLSliceResult_Retain _retainSliceResult;
   late final _CBLDart_FLSliceResult_Release _releaseSliceResult;
   late final _CBLDart_FLStringResult_Release _releaseStringResult;
+
 
   bool equal(FLSlice a, FLSlice b) => _equal(a, b).toBool();
 
@@ -229,6 +239,10 @@ class SliceBindings extends Bindings {
     required bool retain,
   }) {
     _bindToDartObject(object, sliceResult, retain.toInt());
+  }
+
+  void retainSliceResult(FLSliceResult result) {
+    _retainSliceResult(result);
   }
 
   void releaseSliceResult(FLSliceResult result) {

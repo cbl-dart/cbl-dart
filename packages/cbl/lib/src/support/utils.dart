@@ -5,6 +5,13 @@ import 'dart:typed_data';
 
 import 'package:characters/characters.dart';
 
+typedef StringMap = Map<String, Object?>;
+
+extension StringMapExt on StringMap {
+  T getAs<T>(String key) => this[key] as T;
+  List<T> getAsList<T>(String key) => (this[key] as List).cast();
+}
+
 extension ValueExt<T> on T {
   R let<R>(R Function(T it) f) => f(this);
   T also(void Function(T it) f) {

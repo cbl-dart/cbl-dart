@@ -59,6 +59,9 @@ void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
                                             uint8_t retain);
 
 CBLDART_EXPORT
+void CBLDart_FLSliceResult_Retain(CBLDart_FLSliceResult slice);
+
+CBLDART_EXPORT
 void CBLDart_FLSliceResult_Release(CBLDart_FLSliceResult slice);
 
 // Doc ---------------------------------------------------------------------

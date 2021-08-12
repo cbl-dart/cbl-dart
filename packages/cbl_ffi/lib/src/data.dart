@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'slice.dart';
@@ -9,9 +10,21 @@ abstract class Data {
 
   factory Data.fromSliceResult(SliceResult slice) => _SliceResultData(slice);
 
+  int get size;
+
   Uint8List toTypedList();
 
   SliceResult toSliceResult();
+
+  TransferableData _createTransferableData();
+}
+
+abstract class TransferableData {
+  factory TransferableData(Data data) => data._createTransferableData();
+
+  TransferableData._();
+
+  Data materialize();
 }
 
 class _TypedListData extends Data {
@@ -22,10 +35,28 @@ class _TypedListData extends Data {
   SliceResult? slice;
 
   @override
+  int get size => list.lengthInBytes;
+
+  @override
   Uint8List toTypedList() => list;
 
   @override
   SliceResult toSliceResult() => slice ??= SliceResult.fromTypedList(list);
+
+  @override
+  TransferableData _createTransferableData() =>
+      _TransferableTypedListData(list);
+}
+
+class _TransferableTypedListData extends TransferableData {
+  _TransferableTypedListData(Uint8List list)
+      : data = TransferableTypedData.fromList([list]),
+        super._();
+
+  final TransferableTypedData data;
+
+  @override
+  Data materialize() => _TypedListData(data.materialize().asUint8List());
 }
 
 class _SliceResultData extends Data {
@@ -34,10 +65,28 @@ class _SliceResultData extends Data {
   final SliceResult slice;
 
   @override
+  int get size => slice.size;
+
+  @override
   Uint8List toTypedList() => slice.asTypedList();
 
   @override
   SliceResult toSliceResult() => slice;
+
+  @override
+  TransferableData _createTransferableData() =>
+      _TransferableSliceResultData(slice);
+}
+
+class _TransferableSliceResultData extends TransferableData {
+  _TransferableSliceResultData(SliceResult slice)
+      : data = TransferableSliceResult(slice),
+        super._();
+
+  final TransferableSliceResult data;
+
+  @override
+  Data materialize() => _SliceResultData(data.materialize());
 }
 
 extension DataSliceResultExt on SliceResult {
