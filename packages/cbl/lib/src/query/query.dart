@@ -5,6 +5,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database.dart';
 import '../database/database.dart';
+import '../document/common.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/ffi.dart';
 import '../support/native_object.dart';
@@ -211,6 +212,7 @@ class QueryImpl
 
   void _applyParameters() {
     final encoder = fl.FleeceEncoder();
+    encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
     final parameters = _parameters;
     if (parameters != null) {
       final result = parameters.encodeTo(encoder);

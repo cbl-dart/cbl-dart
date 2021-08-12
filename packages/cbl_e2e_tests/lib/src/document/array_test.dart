@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
+import 'package:cbl/src/document/common.dart';
 import 'package:cbl/src/fleece/fleece.dart' as fl;
 import 'package:cbl/src/fleece/integration/integration.dart';
 
@@ -306,6 +307,8 @@ void main() {
 Array immutableArray([List<Object?>? data]) {
   final array = MutableArray(data) as MutableArrayImpl;
   final encoder = fl.FleeceEncoder();
+  // FleeceEncoderContext is needed to compare unsaved Blobs in test.
+  encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(

@@ -72,13 +72,7 @@ class DocumentMContext extends MContext implements DatabaseMContext {
   final DocumentImpl document;
 
   @override
-  DatabaseImpl get database => document.database!;
-}
-
-class DocumentEncoderContext {
-  DocumentEncoderContext(this.document);
-
-  final DocumentImpl document;
+  Object get database => document.database!;
 }
 
 class DocumentImpl
@@ -283,7 +277,10 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
   void flushProperties() {
     assert(database != null);
     final encoder = fl.FleeceEncoder();
-    encoder.extraInfo = DocumentEncoderContext(this);
+    encoder.extraInfo = FleeceEncoderContext(
+      database: database,
+      encodeQueryParameter: true,
+    );
     final encodeToFuture = _root.encodeTo(encoder);
     assert(encodeToFuture is! Future);
     final data = encoder.finish();
