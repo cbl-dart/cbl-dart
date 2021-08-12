@@ -75,6 +75,10 @@ void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
                                CBLDart_ReleaseDartObjectBoundFLSliceResult);
 }
 
+void CBLDart_FLSliceResult_Retain(CBLDart_FLSliceResult slice) {
+  FLSliceResult_Retain(CBLDart_FLSliceResultFromDart(slice));
+}
+
 void CBLDart_FLSliceResult_Release(CBLDart_FLSliceResult slice) {
   FLSliceResult_Release(CBLDart_FLSliceResultFromDart(slice));
 }
