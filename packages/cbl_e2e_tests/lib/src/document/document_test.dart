@@ -78,12 +78,7 @@ void main() {
 
       final mutableDoc = doc.toMutable();
 
-      // Unmutated mutable copy has the same hashCode.
-      expect(mutableDoc.hashCode, doc.hashCode);
-
-      mutableDoc['a'].value = 'b';
-
-      // Mutated mutable copy has different hashCode.
+      // Mutable copy has different hashCode.
       expect(mutableDoc.hashCode, isNot(doc.hashCode));
 
       db.saveDocument(mutableDoc);
