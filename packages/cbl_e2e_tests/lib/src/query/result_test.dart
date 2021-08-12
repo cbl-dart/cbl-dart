@@ -6,7 +6,6 @@ import 'package:cbl/src/document/common.dart';
 import 'package:cbl/src/fleece/fleece.dart' as fl;
 import 'package:cbl/src/fleece/integration/integration.dart';
 import 'package:cbl/src/query/result.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -143,8 +142,8 @@ void main() {
       expect(testResult(['a'], [true]).toPlainMap(), {'a': true});
     });
 
-    test('toJSON', () {
-      expect(testResult(['a'], [true]).toJSON(), '{"a":true}');
+    test('toJson', () {
+      expect(testResult(['a'], [true]).toJson(), '{"a":true}');
     });
 
     test('==', () {
@@ -233,11 +232,9 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
   encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
   final encodingResult = values.encodeTo(encoder);
   assert(encodingResult is! Future);
-  final doc =
-      fl.Doc.fromResultData(encoder.finish().asUint8List(), FLTrust.trusted);
-  return ResultImpl(
+  return ResultImpl.fromValuesData(
+    encoder.finish().asUint8List(),
     context: MContext(),
     columnNames: columnNames,
-    columnValues: doc.root.asArray!,
   );
 }

@@ -16,9 +16,7 @@ abstract class ResultSet implements Iterable<Result>, Iterator<Result> {}
 
 late final _bindings = cblBindings.resultSet;
 
-class ResultSetImpl extends CblObject<CBLResultSet>
-    with IterableMixin<Result>
-    implements ResultSet {
+class ResultSetImpl with IterableMixin<Result> implements ResultSet {
   ResultSetImpl(
     Pointer<CBLResultSet> pointer, {
     required DatabaseImpl database,
@@ -26,27 +24,60 @@ class ResultSetImpl extends CblObject<CBLResultSet>
     required String debugCreator,
   })  : _context = DatabaseMContext(database),
         _columnNames = columnNames,
-        super(
+        _iterator = ResultSetIterator(
           pointer,
-          debugName: 'ResultSet(creator: $debugCreator)',
+          debugCreator: debugCreator,
         );
 
   final DatabaseMContext _context;
   final List<String> _columnNames;
-  var _isDone = false;
+  final ResultSetIterator _iterator;
   Result? _current;
 
   @override
   Iterator<Result> get iterator => this;
 
   @override
-  Result get current {
+  Result get current => _current ??= ResultImpl.fromValuesArray(
+        _iterator.current,
+        context: _context,
+        columnNames: _columnNames,
+      );
+
+  @override
+  bool moveNext() {
+    _current = null;
+    return _iterator.moveNext();
+  }
+
+  @override
+  String toString() => 'ResultSet()';
+}
+
+class ResultSetIterator extends CblObject<CBLResultSet>
+    with IterableMixin<fl.Array>
+    implements Iterator<fl.Array> {
+  ResultSetIterator(
+    Pointer<CBLResultSet> pointer, {
+    this.encodeArray = false,
+    required String debugCreator,
+  }) : super(
+          pointer,
+          debugName: 'ResultSetIterator(creator: $debugCreator)',
+        );
+
+  final bool encodeArray;
+  var _isDone = false;
+  fl.Array? _current;
+
+  @override
+  Iterator<fl.Array> get iterator => this;
+
+  @override
+  fl.Array get current {
     assert(_current != null || !_isDone);
-    return _current ??= ResultImpl(
-      context: _context,
-      columnValues: fl.Array.fromPointer(native.call(_bindings.resultArray)),
-      columnNames: _columnNames,
-    );
+    return _current ??=
+        fl.Array.fromPointer(native.call(_bindings.resultArray));
   }
 
   @override
@@ -58,7 +89,4 @@ class ResultSetImpl extends CblObject<CBLResultSet>
     _isDone = !native.call(_bindings.next);
     return !_isDone;
   }
-
-  @override
-  String toString() => 'ResultSet()';
 }
