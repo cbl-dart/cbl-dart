@@ -1,39 +1,25 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../database/blob_store.dart';
 import '../database/database.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
 import '../log/logger.dart';
-import '../support/ffi.dart';
-import '../support/native_object.dart';
-import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/utils.dart';
 import 'common.dart';
 import 'document.dart';
 
-late final _databaseBindings = cblBindings.database;
-late final _blobBindings = cblBindings.blobs.blob;
-late final _writeStreamBindings = cblBindings.blobs.writeStream;
+const cblObjectTypeProperty = '@type';
+const cblObjectTypeBlob = 'blob';
 
-/// Max size of data that will be cached in memory with the [Blob].
-const _maxCachedContentLength = 8 * 1024;
-
-/// Size of the chunks which a blob read stream emits.
-const _readStreamChunkSize = 8 * 1024;
-
-const _typeProperty = '@type';
-const _blobType = 'blob';
-
-const _blobDigestProperty = 'digest';
-// TODO: _blobDataProperty
-// const _blobDataProperty = 'data';
-const _blobLengthProperty = 'length';
-const _blobContentTypeProperty = 'content_type';
+const blobDigestProperty = 'digest';
+const blobDataProperty = 'data';
+const blobLengthProperty = 'length';
+const blobContentTypeProperty = 'content_type';
 
 /// A Blob contains arbitrary binary data, tagged with a MIME type.
 ///
@@ -85,155 +71,64 @@ abstract class Blob {
 
   /// Wether a plain Dart [Map] represents a [Blob].
   static bool isBlob(Map<String, Object?> properties) {
-    if (!properties.containsKey(_blobDigestProperty) ||
-        properties[_blobDigestProperty] is! String ||
-        !properties.containsKey(_typeProperty) ||
-        properties[_typeProperty] != _blobType ||
-        !properties.containsKey(_blobContentTypeProperty) ||
-        properties[_blobContentTypeProperty] is! String ||
-        !properties.containsKey(_blobLengthProperty) ||
-        properties[_blobLengthProperty] is! int) {
+    if (!properties.containsKey(blobDigestProperty) ||
+        properties[blobDigestProperty] is! String ||
+        !properties.containsKey(cblObjectTypeProperty) ||
+        properties[cblObjectTypeProperty] != cblObjectTypeBlob ||
+        !properties.containsKey(blobContentTypeProperty) ||
+        properties[blobContentTypeProperty] is! String ||
+        !properties.containsKey(blobLengthProperty) ||
+        properties[blobLengthProperty] is! int) {
       return false;
     }
     return true;
   }
 }
 
-late final _bindings = cblBindings.blobs;
-
-class BlobImpl
-    with NativeResourceMixin<CBLBlob>
-    implements Blob, FleeceEncodable, CblConversions {
-  BlobImpl({
-    required DatabaseImpl? database,
-    required Pointer<CBLBlob> blob,
-    bool adopt = true,
-    required String debugCreator,
-  })  : assert(blob != nullptr),
-        _database = database,
-        _blob = CblObject(
-          blob,
-          adopt: adopt,
-          debugName: 'Blob(creator: $debugCreator)',
-        ),
-        _needsToBeInstalled = false {
-    _contentType = native.call(_blobBindings.contentType);
-    _length = native.call(_blobBindings.length);
-    _digest = native.call(_blobBindings.digest);
-  }
-
+class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl.fromData(String contentType, Uint8List data)
-      : _blob = CblObject(
-          _blobBindings.createWithData(contentType, data),
-          debugName: 'Blob.fromData()',
-        ),
-        _needsToBeInstalled = true,
-        _contentType = contentType,
-        _length = data.length {
-    _digest = native.call(_blobBindings.digest);
-  }
+      : _contentType = contentType,
+        _length = data.length,
+        _content = data;
 
   BlobImpl.fromProperties(
     Map<String, Object?> properties, {
-    DatabaseImpl? database,
-  })  : assert(properties[_typeProperty] == _blobType),
+    Object? database,
+  })  : assert(properties[cblObjectTypeProperty] == cblObjectTypeBlob),
         _database = database,
-        _needsToBeInstalled = false,
-        _contentType = properties[_blobContentTypeProperty] as String?,
-        _length = properties[_blobLengthProperty] as int,
-        _digest = properties[_blobDigestProperty] as String {
-    if (_database != null && _digest != null) {
-      _setupBlobFromProperties();
+        _contentType = properties[blobContentTypeProperty] as String?,
+        _length = properties[blobLengthProperty] as int,
+        _digest = properties[blobDigestProperty] as String?,
+        _content = (properties[blobDataProperty] as Uint8List?) {
+    if (_digest == null && _content == null) {
+      throw StateError(
+        'Blob loaded from database has neither the `digest` nor the `data` '
+        'property.',
+      );
     }
   }
 
   static Future<Blob> fromStream(
     String contentType,
     Stream<Uint8List> stream,
-    Database database,
+    Object database,
   ) async {
-    final blob = await _createBlobFromStream(
-      database as DatabaseImpl,
-      stream,
-      contentType,
-    );
-
-    return BlobImpl(
-      database: database,
-      blob: blob,
-      debugCreator: 'Blob.fromStream()',
-    ).._installInDatabase();
+    final blobStore = (database as BlobStoreHolder).blobStore;
+    final properties = await blobStore.saveBlobFromStream(contentType, stream);
+    return BlobImpl.fromProperties(properties, database: database);
   }
 
-  DatabaseImpl? _database;
-  CblObject<CBLBlob>? _blob;
-  @override
-  CblObject<CBLBlob> get native => _blob!;
-  bool _needsToBeInstalled;
+  /// Max size of data that will be cached in memory with the [Blob].
+  static const _maxCachedContentLength = 8 * 1024;
+
+  Object? _database;
+  BlobStore? get _blobStore => (_database as BlobStoreHolder?)?.blobStore;
+
   Uint8List? _content;
-  String? _contentType;
-  int? _length;
+
+  final String? _contentType;
+  final int _length;
   String? _digest;
-
-  @override
-  Future<Uint8List> content() => byteStreamToFuture(contentStream());
-
-  @override
-  Stream<Uint8List> contentStream() =>
-      _loadSavedContentAsync() ??
-      Future(() {
-        final content = _loadContentSync();
-        if (content == null) {
-          _throwNoDataError();
-        }
-        return content;
-      }).asStream();
-
-  Stream<Uint8List>? _loadSavedContentAsync() {
-    if (_blob != null && _database != null) {
-      return _BlobReadStreamController(this).stream;
-    }
-  }
-
-  Uint8List? _loadContentSync() {
-    var content = _content;
-    if (content != null) {
-      return content;
-    }
-
-    final blob = _blob;
-    if (blob != null) {
-      content = blob.call(_blobBindings.content)!;
-      if (content.length <= _maxCachedContentLength) {
-        _content = content;
-        _length = content.length;
-      }
-    }
-
-    return content;
-  }
-
-  void _setupBlobFromProperties() {
-    final properties = MutableDict(_blobProperties);
-    final blob = runNativeCalls(() {
-      return _databaseBindings.getBlob(
-        _database!.native.pointer,
-        properties.native.pointer.cast(),
-      );
-    });
-    if (blob != null) {
-      _blob = CblObject(
-        blob,
-        debugName: 'Blob._setupBlobFromProperties()',
-      );
-    }
-  }
-
-  void _installInDatabase() {
-    runNativeCalls(() {
-      _databaseBindings.saveBlob(_database!.native.pointer, native.pointer);
-    });
-  }
 
   @override
   String? get contentType => _contentType;
@@ -245,62 +140,114 @@ class BlobImpl
   String? get digest => _digest;
 
   @override
+  Future<Uint8List> content() => byteStreamToFuture(contentStream());
+
+  @override
+  Stream<Uint8List> contentStream() {
+    final content = _content;
+    if (content != null) {
+      return Stream.value(content);
+    }
+
+    if (_digest != null && _blobStore != null) {
+      final stream = _blobStore!.readBlob(_blobProperties());
+      if (stream == null) {
+        _throwNotFoundError();
+      }
+
+      if (_shouldCacheContent) {
+        final byteBuilder = BytesBuilder(copy: false);
+        return stream.transform(StreamTransformer.fromHandlers(
+          handleData: (data, sink) {
+            if (_content == null) {
+              byteBuilder.add(data);
+            }
+            sink.add(UnmodifiableUint8ListView(data));
+          },
+          handleDone: (sink) {
+            _content ??= byteBuilder.toBytes();
+            sink.close();
+          },
+        ));
+      }
+
+      return stream;
+    }
+
+    _throwNoDataError();
+  }
+
+  Uint8List? _loadContentSync() {
+    if (_content != null) {
+      return _content;
+    }
+
+    final blobStore = _blobStore;
+    if (_digest != null && blobStore is SyncBlobStore) {
+      final content =
+          (blobStore as SyncBlobStore).readBlobSync(_blobProperties());
+      if (content == null) {
+        _throwNotFoundError();
+      }
+
+      if (_shouldCacheContent) {
+        _content = content;
+      }
+
+      return content;
+    }
+  }
+
+  @override
   Map<String, Object?> get properties => {
-        _blobContentTypeProperty: _contentType,
-        _blobLengthProperty: _length,
-        _blobDigestProperty: _digest,
+        blobContentTypeProperty: _contentType,
+        blobLengthProperty: _length,
+        blobDigestProperty: _digest,
       };
 
-  Map<String, Object?> get _blobProperties => {
-        _typeProperty: _blobType,
+  Map<String, Object?> _blobProperties({bool mayIncludeData = false}) => {
+        cblObjectTypeProperty: cblObjectTypeBlob,
         ...properties,
+        if (mayIncludeData && _digest == null) blobDataProperty: _content,
       };
 
   @override
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
-    var extraInfo = encoder.extraInfo;
-    if (extraInfo is DocumentEncoderContext) {
-      final database = extraInfo.document.database;
+    final extraInfo = encoder.extraInfo;
+    final context = (extraInfo is FleeceEncoderContext) ? extraInfo : null;
+
+    void writeProperties(Map<String, Object?> properties) {
+      _digest = properties[blobDigestProperty] as String?;
+      encoder.writeDartObject(_blobProperties(
+        mayIncludeData: context?.encodeQueryParameter ?? false,
+      ));
+    }
+
+    if (context != null) {
+      final database = context.database;
       if (database != null) {
         _checkBlobIsFromSameDatabase(database);
         _database = database;
 
         if (_digest == null) {
-          return _throwNoDataError();
-        } else if (_blob == null) {
-          _setupBlobFromProperties();
-        }
+          assert(_content != null);
 
-        if (_needsToBeInstalled) {
-          _installInDatabase();
-          _needsToBeInstalled = false;
+          final blobStore = _blobStore!;
+
+          if (blobStore is SyncBlobStore) {
+            return (blobStore as SyncBlobStore)
+                .saveBlobFromDataSync(_contentType!, _content!)
+                .let(writeProperties);
+          } else {
+            return blobStore
+                .saveBlobFromData(_contentType!, _content!)
+                .then(writeProperties);
+          }
         }
       }
     }
 
-    encoder.writeDartObject(_blobProperties);
-  }
-
-  Never _throwNoDataError() {
-    if (_digest != null) {
-      cblLogMessage(
-        LogDomain.database,
-        LogLevel.warning,
-        'Cannot access content from a blob that contains only metadata. '
-        'To access the content, save the document first.',
-      );
-    }
-
-    throw StateError('Blob has no data available.');
-  }
-
-  void _checkBlobIsFromSameDatabase(DatabaseImpl database) {
-    if (_database != null && _database != database) {
-      throw StateError(
-        'A document contains a blob that was saved to a different database. '
-        'The save operation cannot complete.',
-      );
-    }
+    writeProperties(_blobProperties());
   }
 
   @override
@@ -353,76 +300,35 @@ class BlobImpl
   @override
   String toString() {
     final contentType = _contentType != null ? '$_contentType; ' : '';
-    final length = _length != null
-        ? '${((_length! + 512) / 1024).toStringAsFixed(1)} KB'
-        : '? KB';
+    final length = '${((_length + 512) / 1024).toStringAsFixed(1)} KB';
     return 'Blob($contentType$length)';
   }
-}
 
-Future<Pointer<CBLBlob>> _createBlobFromStream(
-  DatabaseImpl database,
-  Stream<Uint8List> stream,
-  String contentType,
-) async {
-  final writeStream = database.native.call(_writeStreamBindings.create);
+  bool get _shouldCacheContent => _length < _maxCachedContentLength;
 
-  try {
-    await stream
-        .forEach((data) => _writeStreamBindings.write(writeStream, data));
+  Never _throwNoDataError() {
+    if (_digest != null) {
+      cblLogMessage(
+        LogDomain.database,
+        LogLevel.warning,
+        'Cannot access content from a blob that contains only metadata. '
+        'To access the content, save the document first.',
+      );
+    }
 
-    return _writeStreamBindings.createBlobWithStream(contentType, writeStream);
-  } catch (e) {
-    _writeStreamBindings.close(writeStream);
-    rethrow;
+    throw StateError('Blob has no data available.');
   }
-}
 
-class _BlobReadStreamController
-    extends ClosableResourceStreamController<Uint8List> {
-  _BlobReadStreamController(this._blob) : super(parent: _blob._database!);
+  Never _throwNotFoundError() {
+    throw StateError('Could not find blob in $_database: $_blobProperties');
+  }
 
-  final BlobImpl _blob;
-
-  late final _stream = CBLBlobReadStreamObject(
-    _blob.native.call(_bindings.readStream.openContentStream),
-  );
-
-  var _isPaused = false;
-
-  @override
-  void onListen() => _start();
-
-  @override
-  void onPause() => _pause();
-
-  @override
-  void onResume() => _start();
-
-  @override
-  void onCancel() => _pause();
-
-  void _start() {
-    try {
-      _isPaused = false;
-
-      while (!_isPaused) {
-        final buffer = _stream.call((pointer) =>
-            _bindings.readStream.read(pointer, _readStreamChunkSize));
-
-        // The read stream is done (EOF).
-        if (buffer == null) {
-          controller.close();
-          break;
-        }
-
-        controller.add(buffer);
-      }
-    } catch (error, stackTrace) {
-      controller.addError(error, stackTrace);
-      controller.close();
+  void _checkBlobIsFromSameDatabase(Object database) {
+    if (_database != null && _database != database) {
+      throw StateError(
+        'A document contains a blob that was saved to a different database. '
+        'The save operation cannot complete.',
+      );
     }
   }
-
-  void _pause() => _isPaused = true;
 }

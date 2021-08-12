@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database/database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart' as fl;
@@ -61,11 +60,8 @@ class _DefaultCblConversions implements CblConversions {
       return object.toIso8601String();
     }
 
-    if (object is TypedData) {
-      return Blob.fromData(
-        'application/octet-stream',
-        object.buffer.asUint8List(),
-      );
+    if (object is Uint8List) {
+      return Blob.fromData('application/octet-stream', object);
     }
 
     throw ArgumentError.value(
@@ -83,6 +79,17 @@ abstract class FleeceEncodable {
   FutureOr<void> encodeTo(FleeceEncoder encoder);
 }
 
+class FleeceEncoderContext {
+  FleeceEncoderContext({
+    this.database,
+    this.encodeQueryParameter = false,
+  });
+
+  final Object? database;
+
+  final bool encodeQueryParameter;
+}
+
 abstract class MCollectionWrapper {
   MCollection get mCollection;
 }
@@ -90,7 +97,7 @@ abstract class MCollectionWrapper {
 class DatabaseMContext extends MContext {
   DatabaseMContext(this.database);
 
-  final DatabaseImpl database;
+  final Object database;
 }
 
 class CblMDelegate extends MDelegate {
@@ -107,7 +114,7 @@ class CblMDelegate extends MDelegate {
         native is String ||
         native is num ||
         native is bool ||
-        native is TypedData) {
+        native is Uint8List) {
       encoder.writeDartObject(native);
     } else if (native is DateTime) {
       encoder.writeString(native.toIso8601String());
@@ -143,29 +150,19 @@ class CblMDelegate extends MDelegate {
         }
       } else {
         if (_blobBindings.isBlob(flValue.value.cast())) {
-          final blob = _blobBindings.getBlob(flValue.value.cast());
-          if (blob != null) {
-            final context = parent.context;
-            DatabaseImpl? database;
-            if (context is DatabaseMContext) {
-              database = context.database;
-            }
-            return BlobImpl(
-              database: database,
-              blob: blob,
-              // The containing document owns the reference to the blob.
-              adopt: false,
-              debugCreator: 'CblMDelegate.toNative()',
-            );
-          } else {
-            final dict = fl.Dict.fromPointer(
-              flValue.value.cast(),
-              // This value is alive as long as the MRoot is alive and the
-              // MRoot does not necessarily read form a Doc.
-              isRefCounted: false,
-            );
-            return BlobImpl.fromProperties(dict.toObject());
+          final context = parent.context;
+          Object? database;
+          if (context is DatabaseMContext) {
+            database = context.database;
           }
+
+          final dict = fl.Dict.fromPointer(
+            flValue.value.cast(),
+            // This value is alive as long as the MRoot is alive and the
+            // MRoot does not necessarily read form a Doc.
+            isRefCounted: false,
+          );
+          return BlobImpl.fromProperties(dict.toObject(), database: database);
         }
         final dictionary = MDict.asChild(value, parent);
         if (parent.hasMutableChildren) {

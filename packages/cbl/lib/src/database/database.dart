@@ -15,6 +15,7 @@ import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
+import 'blob_store.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -270,7 +271,7 @@ late final _bindings = cblBindings.database;
 
 class DatabaseImpl extends CBLDatabaseObject
     with ClosableResourceMixin
-    implements Database {
+    implements Database, BlobStoreHolder {
   DatabaseImpl(String name, [DatabaseConfiguration? configuration])
       : _config = DatabaseConfiguration.from(
           configuration ?? DatabaseConfiguration(),
@@ -279,6 +280,9 @@ class DatabaseImpl extends CBLDatabaseObject
           _bindings.open(name, configuration?.toCBLDatabaseConfiguration()),
           debugName: 'Database($name)',
         );
+
+  @override
+  late final blobStore = NativeBlobStore(this);
 
   final DatabaseConfiguration _config;
 

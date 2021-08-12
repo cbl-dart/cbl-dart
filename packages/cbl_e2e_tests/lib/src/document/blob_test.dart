@@ -49,21 +49,21 @@ void main() {
     });
 
     group('from data', () {
-      test('is initialized with all properties', () {
+      test('initial properties', () {
         final blob = Blob.fromData(contentType, fixedTestContent);
         expect(blob.contentType, contentType);
         expect(blob.length, fixedTestContent.length);
-        expect(blob.digest, fixedTestContentDigest);
+        expect(blob.digest, isNull);
         expect(blob.properties, {
           'content_type': contentType,
           'length': fixedTestContent.length,
-          'digest': fixedTestContentDigest,
+          'digest': null,
         });
       });
     });
 
     group('from properties', () {
-      test('is initialized with all properties', () {
+      test('initial properties', () {
         final blob = BlobImpl.fromProperties({
           '@type': 'blob',
           'digest': 'digest',
@@ -84,7 +84,7 @@ void main() {
           'content_type': contentType,
         });
         expect(
-          blob.content(),
+          () => blob.content(),
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
@@ -92,7 +92,7 @@ void main() {
           )),
         );
         expect(
-          blob.contentStream().first,
+          () => blob.contentStream(),
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
@@ -253,7 +253,12 @@ void main() {
       Blob blob;
 
       // Uses hashCode of digest if available.
-      blob = Blob.fromData(contentType, fixedTestContent);
+      blob = BlobImpl.fromProperties({
+        '@type': 'blob',
+        'digest': 'A',
+        'length': 0,
+      });
+      ;
       expect(blob.hashCode, blob.digest.hashCode);
 
       // Uses hashCode of object as fallback.
