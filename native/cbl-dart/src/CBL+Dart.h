@@ -35,6 +35,12 @@ CBLDART_EXPORT
 void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
                                        int64_t argument);
 
+// -- Dart Finalizer
+
+CBLDART_EXPORT
+void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
+                                   int64_t token);
+
 // Couchbase Lite ----------------------------------------------------------
 
 // -- Base

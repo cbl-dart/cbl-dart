@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
+import 'dart_finalizer.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
@@ -69,8 +70,24 @@ class CBLBindings extends Bindings {
     _instance ??= CBLBindings(libraries)..base.init();
   }
 
+  CBLBindings(Libraries libs) : super.root(libs) {
+    base = BaseBindings(this);
+    asyncCallback = AsyncCallbackBindings(this);
+    dartFinalizer = DartFinalizerBindings(this);
+    logging = LoggingBindings(this);
+    database = DatabaseBindings(this);
+    document = DocumentBindings(this);
+    mutableDocument = MutableDocumentBindings(this);
+    query = QueryBindings(this);
+    resultSet = ResultSetBindings(this);
+    blobs = BlobsBindings(this);
+    replicator = ReplicatorBindings(this);
+    fleece = FleeceBindings(this);
+  }
+
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;
+  late final DartFinalizerBindings dartFinalizer;
   late final LoggingBindings logging;
   late final DatabaseBindings database;
   late final DocumentBindings document;
