@@ -4,6 +4,7 @@ import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 
 import 'document/common.dart';
 import 'fleece/integration/integration.dart';
+import 'support/ffi.dart' as ffi_support;
 import 'support/utils.dart';
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
@@ -85,6 +86,7 @@ class CouchbaseLite {
   /// Initializes the `cbl` package.
   static void init({required Libraries libraries}) =>
       _initialization.execute(() {
+        ffi_support.libraries = libraries;
         ffi.CBLBindings.initInstance(libraries._toFfi());
         MDelegate.instance = CblMDelegate();
       });
