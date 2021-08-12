@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -104,20 +105,31 @@ abstract class Result
 
   /// Returns a JSON string which contains a dictionary of the named columns of
   /// this result.
-  String toJSON();
+  String toJson();
 }
 
 class ResultImpl with IterableMixin<String> implements Result {
-  ResultImpl({
+  ResultImpl.fromValuesData(
+    Uint8List data, {
     required MContext context,
-    required fl.Array columnValues,
     required List<String> columnNames,
   })  : _context = context,
-        _columnValues = columnValues,
+        _columnValuesArray = null,
+        _columnValuesData = data,
+        _columnNames = columnNames;
+
+  ResultImpl.fromValuesArray(
+    fl.Array array, {
+    required MContext context,
+    required List<String> columnNames,
+  })  : _context = context,
+        _columnValuesArray = array,
+        _columnValuesData = null,
         _columnNames = columnNames;
 
   final MContext _context;
-  final fl.Array _columnValues;
+  final Uint8List? _columnValuesData;
+  final fl.Array? _columnValuesArray;
   final List<String> _columnNames;
 
   late final ArrayImpl _array = _createArray();
@@ -244,7 +256,7 @@ class ResultImpl with IterableMixin<String> implements Result {
   Map<String, Object?> toPlainMap() => _dictionary.toPlainMap();
 
   @override
-  String toJSON() {
+  String toJson() {
     final encoder = fl.FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
@@ -252,11 +264,20 @@ class ResultImpl with IterableMixin<String> implements Result {
   }
 
   ArrayImpl _createArray() {
-    final root = _columnValues.native.call((pointer) => MRoot.fromValue(
-          pointer,
-          context: _context,
-          isMutable: false,
-        ));
+    MRoot root;
+    if (_columnValuesArray != null) {
+      root = _columnValuesArray!.native.call((pointer) => MRoot.fromValue(
+            pointer,
+            context: _context,
+            isMutable: false,
+          ));
+    } else {
+      root = MRoot.fromData(
+        _columnValuesData!,
+        context: _context,
+        isMutable: false,
+      );
+    }
     return root.asNative as ArrayImpl;
   }
 
