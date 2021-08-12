@@ -191,7 +191,7 @@ void main() {
 
       test('create with generated it', () {
         final doc = MutableDocument();
-        expect(doc.id, startsWith('~'));
+        expect(doc.id, startsWith('-'));
       });
 
       test('initialize with data', () {
