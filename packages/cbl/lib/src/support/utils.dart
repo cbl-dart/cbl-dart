@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -142,4 +143,24 @@ FutureOr<void> iterateMaybeAsync(Iterable<FutureOr<void>> iterable) {
       });
     }
   }
+}
+
+final _secureRandom = Random.secure();
+
+String createUuid() {
+  // Ported from:
+  // https://github.com/couchbase/couchbase-lite-ios/blob/c93864c93ab0e2c98e73866502b2f4a6f4c97bfb/Objective-C/Internal/CBLMisc.m#L23
+  final bytes = ByteData(17);
+  for (var offset = 0; offset < 16; offset += 4) {
+    bytes.setUint32(offset, _secureRandom.nextInt(1 << 32));
+  }
+  bytes.setUint8(16, _secureRandom.nextInt(0xFF));
+
+  var uuid = base64Encode(Uint8List.sublistView(bytes));
+  uuid = uuid
+      .substring(0, uuid.length - 2)
+      .replaceAll('/', '_')
+      .replaceAll('+', '-');
+
+  return '-$uuid';
 }

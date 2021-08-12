@@ -10,6 +10,7 @@ import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
+import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'common.dart';
@@ -250,6 +251,8 @@ class MutableDocumentImpl extends DocumentImpl implements MutableDocument {
     Map<String, Object?>? data,
     required String debugCreator,
   }) {
+    id ??= createUuid();
+
     final result = MutableDocumentImpl(
       doc: _mutableDocumentBindings.createWithID(id),
       debugCreator: debugCreator,
