@@ -1,3 +1,4 @@
+#include <future>
 #include <map>
 #include <mutex>
 #include <shared_mutex>
@@ -49,6 +50,35 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
 
 static CBLDart::AsyncCallback *CBLDart_AsAsyncCallback(void *pointer) {
   return reinterpret_cast<CBLDart::AsyncCallback *>(pointer);
+}
+
+// -- Dart Finalizer
+
+struct CBLDart_DartFinalizerContext {
+  Dart_Port registry;
+  int64_t token;
+};
+
+static void CBLDart_RunDartFinalizer(void *dart_callback_data, void *peer) {
+  auto context = reinterpret_cast<CBLDart_DartFinalizerContext *>(peer);
+  // Finalizer callbacks must not call back into the VM through most of the
+  // `Dart_` methods. That's why the finalizer registry is notified
+  // asynchronously from another thread. The result of `async` needs to be
+  // assigned to a reference. Otherwise it blocks until the async task
+  // completes.
+  auto _ = std::async(std::launch::async, [=]() {
+    Dart_PostInteger_DL(context->registry, context->token);
+    delete context;
+  });
+}
+
+void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
+                                   int64_t token) {
+  auto context = new CBLDart_DartFinalizerContext{
+      .registry = registry,
+      .token = token,
+  };
+  Dart_NewFinalizableHandle_DL(object, context, 0, CBLDart_RunDartFinalizer);
 }
 
 // Couchbase Lite --------------------------------------------------------------
@@ -357,13 +387,19 @@ CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
                                       CBLDart_CBLDatabaseConfiguration *config,
                                       CBLError *errorOut) {
   CBLDart_CheckFileLogging();
-  CBLDatabaseConfiguration config_;
-  config_.directory = CBLDart_FLStringFromDart(config->directory);
+
+  CBLDatabaseConfiguration config_ = {.directory = {nullptr, 0}};
+  if (config) {
+    config_.directory = CBLDart_FLStringFromDart(config->directory);
+  }
+
   auto database =
       CBLDatabase_Open(CBLDart_FLStringFromDart(name), &config_, errorOut);
+
   if (database) {
     CBLDart_RegisterOpenDatabase(database);
   }
+
   return database;
 }
 
