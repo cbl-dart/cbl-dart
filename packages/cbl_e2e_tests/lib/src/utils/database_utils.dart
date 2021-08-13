@@ -9,12 +9,12 @@ import '../test_binding.dart';
 /// unless [useNameDirectly] is `true`. Then [dbName] is used directly.
 ///
 /// The database will be created in the [tmpDir].
-Database openTestDb(
+SyncDatabase openSyncTestDb(
   String? dbName, {
   bool useNameDirectly = false,
   bool autoClose = true,
 }) {
-  final db = Database(
+  final db = SyncDatabase(
     useNameDirectly ? dbName! : testDbName(dbName),
     DatabaseConfiguration(
       directory: tmpDir,
@@ -26,16 +26,17 @@ Database openTestDb(
   return db;
 }
 
-extension DatabaseUtilsExtension on Database {
+extension DatabaseUtilsExtension on SyncDatabase {
   /// Returns a stream wich emits the ids of all the documents in this database.
-  Iterable<String> getAllIds() => Query(this, 'SELECT META().id FROM _')
-      .execute()
-      .map((result) => result[0].string!);
+  Iterable<String> getAllIds() =>
+      SyncQuery.fromN1ql(this, 'SELECT META().id FROM _')
+          .execute()
+          .map((result) => result[0].string!);
 
   /// Returns a stream which emits the ids of all the documents in the
   /// database when they change.
   Stream<List<String>> watchAllIds() =>
-      Query(this, 'SELECT META().id FROM _').changes().map(
+      SyncQuery.fromN1ql(this, 'SELECT META().id FROM _').changes().map(
           (resultSet) => resultSet.map((result) => result[0].string!).toList());
 
   /// Deletes all documents in this database and returns whether any documents

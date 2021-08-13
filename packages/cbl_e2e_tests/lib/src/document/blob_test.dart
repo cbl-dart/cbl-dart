@@ -42,10 +42,10 @@ void main() {
   setupTestBinding();
 
   group('Blob', () {
-    late Database db;
+    late SyncDatabase db;
 
     setUpAll(() {
-      db = openTestDb('Blob-Common');
+      db = openSyncTestDb('Blob-Common');
     });
 
     group('from data', () {
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('throws error when saving blob from different database', () {
-      final otherDb = openTestDb('Blobs-OtherDB');
+      final otherDb = openSyncTestDb('Blobs-OtherDB');
       final blob = Blob.fromData(contentType, randomTestContent());
       final doc = MutableDocument({'blob': blob});
       otherDb.saveDocument(doc);

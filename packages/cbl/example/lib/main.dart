@@ -16,8 +16,10 @@ Future<void> main() async {
   CouchbaseLite.init(libraries: getLibraries());
 
   // Now open a database.
-  final db =
-      Database('DB', DatabaseConfiguration(directory: Directory.current.path));
+  final db = SyncDatabase(
+    'DB',
+    DatabaseConfiguration(directory: Directory.current.path),
+  );
 
   // To create a new document start with an empty [MutableDocument] and fill
   // its properties.

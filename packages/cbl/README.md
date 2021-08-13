@@ -76,7 +76,7 @@ import 'package:path_provider/path_provider.dart';
 Future<void> useDatabase() async {
   final documentsDir = await getApplicationDocumentsDirectory();
 
-  final db = Database(
+  final db = SyncDatabase(
       'MyFirstDB',
       DatabaseConfiguration(directory: documentsDir.path),
   );

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../database.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart' as fl;
@@ -85,7 +86,7 @@ class FleeceEncoderContext {
     this.encodeQueryParameter = false,
   });
 
-  final Object? database;
+  final Database? database;
 
   final bool encodeQueryParameter;
 }
@@ -97,7 +98,7 @@ abstract class MCollectionWrapper {
 class DatabaseMContext extends MContext {
   DatabaseMContext(this.database);
 
-  final Object database;
+  final Database database;
 }
 
 class CblMDelegate extends MDelegate {
@@ -151,7 +152,7 @@ class CblMDelegate extends MDelegate {
       } else {
         if (_blobBindings.isBlob(flValue.value.cast())) {
           final context = parent.context;
-          Object? database;
+          Database? database;
           if (context is DatabaseMContext) {
             database = context.database;
           }

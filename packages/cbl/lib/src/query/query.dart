@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
 
@@ -23,19 +24,7 @@ import 'select.dart';
 import 'select_result.dart';
 
 /// A [Database] query.
-abstract class Query {
-  /// Creates a [Database] query from a N1QL [query].
-  factory Query(Database database, String query) =>
-      QueryImpl(database, query, debugCreator: 'Query()');
-
-  /// Creates a [Database] query from a JSON representation of the query.
-  factory Query.fromJsonRepresentation(Database database, String json) =>
-      QueryImpl.fromJsonRepresentation(
-        database,
-        json,
-        debugCreator: 'Query.fromJsonRepresentation()',
-      );
-
+abstract class Query implements Resource {
   /// [Parameters] used for setting values to the query parameters defined
   /// in the query.
   ///
@@ -48,14 +37,14 @@ abstract class Query {
 
   /// Executes this query.
   ///
-  /// Returns a [ResultSet] that iterates over [Result] rows one at a time.
-  /// You can run the query any number of times, and you can have multiple
+  /// Returns a [ResultSet] that iterates over [Result] rows one at a time. You
+  /// can run the query any number of times, and you can have multiple
   /// [ResultSet]s active at once.
   ///
   /// The results come from a snapshot of the database taken at the moment
   /// [execute] is called, so they will not reflect any changes made to the
   /// database afterwards.
-  ResultSet execute();
+  FutureOr<ResultSet> execute();
 
   /// Returns a string describing the implementation of the compiled query.
   ///
@@ -74,7 +63,7 @@ abstract class Query {
   /// * The third sections is this queries JSON representation. This is the data
   ///   structure that is built to describe this query, either by the the query
   ///   builder or when a N1QL query is compiled.
-  String explain();
+  FutureOr<String> explain();
 
   /// Returns a [Stream] of [ResultSet]s which emits when the [ResultSet] of
   /// this query changes.
@@ -83,55 +72,254 @@ abstract class Query {
   /// The JSON representation of this query.
   ///
   /// This value can be used to recreate this query with
-  /// [Query.fromJsonRepresentation].
+  /// [SyncQuery.fromJsonRepresentation] or [AsyncQuery.fromJsonRepresentation].
   ///
   /// Is `null`, if this query was created from a N1QL query.
   String? get jsonRepresentation;
 }
 
-class QueryBuilder {
-  QueryBuilder._();
+/// A [Query] with a primarily synchronous API.
+abstract class SyncQuery implements Query {
+  /// Creates a [SyncQuery] from a N1QL [query].
+  factory SyncQuery.fromN1ql(SyncDatabase database, String query) =>
+      FfiQuery(database, query, debugCreator: 'SyncQuery.fromN1ql()');
 
-  static Select selectOne(SelectResultInterface result) => select([result]);
+  /// Creates a [SyncQuery] from a JSON representation of the query.
+  factory SyncQuery.fromJsonRepresentation(
+          SyncDatabase database, String json) =>
+      FfiQuery.fromJsonRepresentation(
+        database,
+        json,
+        debugCreator: 'SyncQuery.fromJsonRepresentation()',
+      );
 
-  static Select select(Iterable<SelectResultInterface> results) =>
-      SelectImpl(results.cast(), false);
+  @override
+  SyncResultSet execute();
 
-  static Select selectOneDistinct(SelectResultInterface result) =>
-      selectDistinct([result]);
+  @override
+  String explain();
 
-  static Select selectDistinct(Iterable<SelectResultInterface> results) =>
-      SelectImpl(results.cast(), true);
+  @override
+  Stream<SyncResultSet> changes();
+}
+
+/// A [Query] query with a primarily asynchronous API.
+abstract class AsyncQuery implements Query {
+  /// Creates an [AsyncQuery] query from a N1QL [query].
+  static Future<AsyncQuery> fromN1ql(AsyncDatabase database, String query) =>
+      throw UnimplementedError();
+
+  /// Creates a [AsyncQuery] from a JSON representation of the query.
+  static Future<AsyncQuery> fromJsonRepresentation(
+    AsyncDatabase database,
+    String json,
+  ) =>
+      throw UnimplementedError();
+
+  @override
+  Future<ResultSet> execute();
+
+  @override
+  Future<String> explain();
+}
+
+/// Entry point for building [Query]s through the query builder API.
+abstract class QueryBuilder {
+  /// Starts a new query and defines the selected columns.
+  Select select(
+    SelectResultInterface result0, [
+    SelectResultInterface? result1,
+    SelectResultInterface? result2,
+    SelectResultInterface? result3,
+    SelectResultInterface? result4,
+    SelectResultInterface? result5,
+    SelectResultInterface? result6,
+    SelectResultInterface? result7,
+    SelectResultInterface? result8,
+    SelectResultInterface? result9,
+  ]);
+
+  /// Starts a new query and defines the selected columns.
+  Select selectAll(Iterable<SelectResultInterface> results);
+
+  /// Starts a new query, which returns distinct rows and defines the selected
+  /// columns.
+  Select selectDistinct(
+    SelectResultInterface result0, [
+    SelectResultInterface? result1,
+    SelectResultInterface? result2,
+    SelectResultInterface? result3,
+    SelectResultInterface? result4,
+    SelectResultInterface? result5,
+    SelectResultInterface? result6,
+    SelectResultInterface? result7,
+    SelectResultInterface? result8,
+    SelectResultInterface? result9,
+  ]);
+
+  /// Starts a new query, which returns distinct rows and defines the selected
+  /// columns.
+  Select selectAllDistinct(Iterable<SelectResultInterface> results);
+}
+
+/// The [QueryBuilder] for building [SyncQuery]s.
+class SyncQueryBuilder implements QueryBuilder {
+  const SyncQueryBuilder();
+
+  @override
+  SyncSelect select(
+    SelectResultInterface result0, [
+    SelectResultInterface? result1,
+    SelectResultInterface? result2,
+    SelectResultInterface? result3,
+    SelectResultInterface? result4,
+    SelectResultInterface? result5,
+    SelectResultInterface? result6,
+    SelectResultInterface? result7,
+    SelectResultInterface? result8,
+    SelectResultInterface? result9,
+  ]) =>
+      selectAll([
+        result0,
+        result1,
+        result2,
+        result3,
+        result4,
+        result5,
+        result6,
+        result7,
+        result8,
+        result9,
+      ].whereType());
+
+  @override
+  SyncSelect selectAll(Iterable<SelectResultInterface> results) =>
+      SyncSelectImpl(results.cast(), false);
+
+  @override
+  SyncSelect selectDistinct(
+    SelectResultInterface result0, [
+    SelectResultInterface? result1,
+    SelectResultInterface? result2,
+    SelectResultInterface? result3,
+    SelectResultInterface? result4,
+    SelectResultInterface? result5,
+    SelectResultInterface? result6,
+    SelectResultInterface? result7,
+    SelectResultInterface? result8,
+    SelectResultInterface? result9,
+  ]) =>
+      selectAllDistinct([
+        result0,
+        result1,
+        result2,
+        result3,
+        result4,
+        result5,
+        result6,
+        result7,
+        result8,
+        result9,
+      ].whereType());
+
+  @override
+  SyncSelect selectAllDistinct(Iterable<SelectResultInterface> results) =>
+      SyncSelectImpl(results.cast(), true);
+}
+
+/// The [QueryBuilder] for building [AsyncQuery]s.
+class AsyncQueryBuilder implements QueryBuilder {
+  const AsyncQueryBuilder();
+
+  @override
+  AsyncSelect select(
+    SelectResultInterface result0, [
+    SelectResultInterface? result1,
+    SelectResultInterface? result2,
+    SelectResultInterface? result3,
+    SelectResultInterface? result4,
+    SelectResultInterface? result5,
+    SelectResultInterface? result6,
+    SelectResultInterface? result7,
+    SelectResultInterface? result8,
+    SelectResultInterface? result9,
+  ]) =>
+      selectAll([
+        result0,
+        result1,
+        result2,
+        result3,
+        result4,
+        result5,
+        result6,
+        result7,
+        result8,
+        result9,
+      ].whereType());
+
+  @override
+  AsyncSelect selectAll(Iterable<SelectResultInterface> results) =>
+      AsyncSelectImpl(results, false);
+
+  @override
+  AsyncSelect selectDistinct(
+    SelectResultInterface result0, [
+    SelectResultInterface? result1,
+    SelectResultInterface? result2,
+    SelectResultInterface? result3,
+    SelectResultInterface? result4,
+    SelectResultInterface? result5,
+    SelectResultInterface? result6,
+    SelectResultInterface? result7,
+    SelectResultInterface? result8,
+    SelectResultInterface? result9,
+  ]) =>
+      selectAllDistinct([
+        result0,
+        result1,
+        result2,
+        result3,
+        result4,
+        result5,
+        result6,
+        result7,
+        result8,
+        result9,
+      ].whereType());
+
+  @override
+  AsyncSelect selectAllDistinct(Iterable<SelectResultInterface> results) =>
+      AsyncSelectImpl(results, true);
 }
 
 // === Impl ====================================================================
 
 late final _bindings = cblBindings.query;
 
-class QueryImpl
+class FfiQuery
     with NativeResourceMixin<CBLQuery>, DelegatingResourceMixin
-    implements Query {
-  QueryImpl(Database database, String query, {required String debugCreator})
+    implements SyncQuery {
+  FfiQuery(Database database, String query, {required String debugCreator})
       : this._(
-          database: database as DatabaseImpl,
+          database: database as FfiDatabase,
           language: CBLQueryLanguage.n1ql,
           query: _normalizeN1qlQuery(query),
           debugCreator: debugCreator,
         );
 
-  QueryImpl.fromJsonRepresentation(
+  FfiQuery.fromJsonRepresentation(
     Database database,
     String json, {
     required String debugCreator,
   }) : this._(
-          database: database as DatabaseImpl,
+          database: database as FfiDatabase,
           language: CBLQueryLanguage.json,
           query: json,
           debugCreator: debugCreator,
         );
 
-  QueryImpl._({
-    DatabaseImpl? database,
+  FfiQuery._({
+    FfiDatabase? database,
     required CBLQueryLanguage language,
     String? query,
     required String debugCreator,
@@ -144,7 +332,7 @@ class QueryImpl
 
   final String _debugCreator;
   final CBLQueryLanguage _language;
-  final DatabaseImpl? _database;
+  final FfiDatabase? _database;
   String? _definition;
   late final _columnNames = _prepareColumnNames();
 
@@ -166,25 +354,25 @@ class QueryImpl
   }
 
   @override
-  ResultSet execute() => useSync(() => ResultSetImpl(
+  SyncResultSet execute() => useSync(() => FfiResultSet(
         native.call(_bindings.execute),
         database: _database!,
         columnNames: _columnNames,
-        debugCreator: 'Query.execute()',
+        debugCreator: 'FfiQuery.execute()',
       ));
 
   @override
   String explain() => useSync(() => native.call(_bindings.explain));
 
   @override
-  Stream<ResultSet> changes() => useSync(
-      () => CallbackStreamController<ResultSet, Pointer<CBLListenerToken>>(
+  Stream<SyncResultSet> changes() => useSync(
+      () => CallbackStreamController<SyncResultSet, Pointer<CBLListenerToken>>(
             parent: this,
             startStream: (callback) => _bindings.addChangeListener(
               native.pointer,
               callback.native.pointer,
             ),
-            createEvent: (listenerToken, _) => ResultSetImpl(
+            createEvent: (listenerToken, _) => FfiResultSet(
               native.call((pointer) {
                 // The native side sends no arguments. When the native side
                 // notfies the listener it has to copy the current query
@@ -193,7 +381,7 @@ class QueryImpl
               }),
               database: _database!,
               columnNames: _columnNames,
-              debugCreator: 'Query.changes()',
+              debugCreator: 'FfiQuery.changes()',
             ),
           ).stream);
 
@@ -203,7 +391,7 @@ class QueryImpl
               _language,
               _definition!,
             )),
-        debugName: 'Query(creator: $_debugCreator)',
+        debugName: 'FfiQuery(creator: $_debugCreator)',
       );
 
   @override
@@ -243,9 +431,9 @@ String _normalizeN1qlQuery(String query) => query
     // Collapse whitespace.
     .replaceAll(RegExp(r'\s+'), ' ');
 
-class BuilderQuery extends QueryImpl {
-  BuilderQuery({
-    BuilderQuery? query,
+abstract class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
+  SyncBuilderQuery({
+    SyncBuilderQuery? query,
     Iterable<SelectResultInterface>? selects,
     bool? distinct,
     DataSourceInterface? from,
@@ -256,36 +444,109 @@ class BuilderQuery extends QueryImpl {
     Iterable<OrderingInterface>? orderings,
     ExpressionInterface? limit,
     ExpressionInterface? offset,
-  })  : _selects = selects?.toList().cast() ?? query?._selects,
-        _distinct = distinct ?? query?._distinct,
-        _from = from as DataSourceImpl? ?? query?._from,
-        _joins = joins?.toList().cast() ?? query?._joins,
-        _where = where as ExpressionImpl? ?? query?._where,
-        _groupBys = groupBys?.toList().cast() ?? query?._groupBys,
-        _having = having as ExpressionImpl? ?? query?._having,
-        _orderings = orderings?.toList().cast() ?? query?._orderings,
-        _limit = limit as ExpressionImpl? ?? query?._limit,
-        _offset = offset as ExpressionImpl? ?? query?._offset,
-        super._(
-          database: from?.database ?? query?._database,
+  }) : super._(
+          database: (from as DataSourceImpl?)?.database as FfiDatabase? ??
+              query?._database,
           language: CBLQueryLanguage.json,
           debugCreator: 'BuilderQuery()',
-        );
-
-  final List<SelectResultImpl>? _selects;
-  final bool? _distinct;
-  final DataSourceImpl? _from;
-  final List<JoinImpl>? _joins;
-  final ExpressionImpl? _where;
-  final List<ExpressionImpl>? _groupBys;
-  final ExpressionImpl? _having;
-  final List<OrderingImpl>? _orderings;
-  final ExpressionImpl? _limit;
-  final ExpressionImpl? _offset;
+        ) {
+    init(
+      query: query,
+      selects: selects,
+      distinct: distinct,
+      from: from,
+      joins: joins,
+      where: where,
+      groupBys: groupBys,
+      having: having,
+      orderings: orderings,
+      limit: limit,
+      offset: offset,
+    );
+  }
 
   @override
-  String? get jsonRepresentation =>
-      _definition ?? jsonEncode(_buildJsonRepresentation());
+  String? get jsonRepresentation => _definition ?? super.jsonRepresentation;
+
+  @override
+  CblObject<CBLQuery> _prepareQuery() {
+    _definition = super.jsonRepresentation;
+    return super._prepareQuery();
+  }
+}
+
+abstract class AsyncBuilderQuery implements AsyncQuery {
+  AsyncBuilderQuery({
+    AsyncBuilderQuery? query,
+    Iterable<SelectResultInterface>? selects,
+    bool? distinct,
+    DataSourceInterface? from,
+    Iterable<JoinInterface>? joins,
+    ExpressionInterface? where,
+    Iterable<ExpressionInterface>? groupBys,
+    ExpressionInterface? having,
+    Iterable<OrderingInterface>? orderings,
+    ExpressionInterface? limit,
+    ExpressionInterface? offset,
+  });
+
+  @override
+  Parameters? parameters;
+
+  @override
+  Future<ResultSet> execute() => throw UnimplementedError();
+
+  @override
+  Future<String> explain() => throw UnimplementedError();
+
+  @override
+  Stream<ResultSet> changes() => throw UnimplementedError();
+
+  @override
+  String? get jsonRepresentation => throw UnimplementedError();
+
+  @override
+  bool get isClosed => throw UnimplementedError();
+}
+
+mixin BuilderQueryMixin on AbstractResource {
+  late final List<SelectResultImpl>? _selects;
+  late final bool? _distinct;
+  late final DataSourceImpl? _from;
+  late final List<JoinImpl>? _joins;
+  late final ExpressionImpl? _where;
+  late final List<ExpressionImpl>? _groupBys;
+  late final ExpressionImpl? _having;
+  late final List<OrderingImpl>? _orderings;
+  late final ExpressionImpl? _limit;
+  late final ExpressionImpl? _offset;
+
+  void init({
+    BuilderQueryMixin? query,
+    Iterable<SelectResultInterface>? selects,
+    bool? distinct,
+    DataSourceInterface? from,
+    Iterable<JoinInterface>? joins,
+    ExpressionInterface? where,
+    Iterable<ExpressionInterface>? groupBys,
+    ExpressionInterface? having,
+    Iterable<OrderingInterface>? orderings,
+    ExpressionInterface? limit,
+    ExpressionInterface? offset,
+  }) {
+    _selects = selects?.toList().cast() ?? query?._selects;
+    _distinct = distinct ?? query?._distinct;
+    _from = from as DataSourceImpl? ?? query?._from;
+    _joins = joins?.toList().cast() ?? query?._joins;
+    _where = where as ExpressionImpl? ?? query?._where;
+    _groupBys = groupBys?.toList().cast() ?? query?._groupBys;
+    _having = having as ExpressionImpl? ?? query?._having;
+    _orderings = orderings?.toList().cast() ?? query?._orderings;
+    _limit = limit as ExpressionImpl? ?? query?._limit;
+    _offset = offset as ExpressionImpl? ?? query?._offset;
+  }
+
+  String? get jsonRepresentation => jsonEncode(_buildJsonRepresentation());
 
   Object _buildJsonRepresentation() => [
         'SELECT',
@@ -311,20 +572,24 @@ class BuilderQuery extends QueryImpl {
 
   @override
   T useSync<T>(T Function() f) {
+    _checkHasFrom();
+    return super.useSync(f);
+  }
+
+  @override
+  Future<T> use<T>(FutureOr<T> Function() f) {
+    _checkHasFrom();
+    return super.use(f);
+  }
+
+  @override
+  String toString() => 'Query(json: $jsonRepresentation)';
+
+  void _checkHasFrom() {
     if (_from == null) {
       throw StateError(
         'Ensure that a query has a FROM clause before using it.',
       );
     }
-    return super.useSync(f);
   }
-
-  @override
-  CblObject<CBLQuery> _prepareQuery() {
-    _definition = jsonEncode(_buildJsonRepresentation());
-    return super._prepareQuery();
-  }
-
-  @override
-  String toString() => 'Query(json: $jsonRepresentation)';
 }

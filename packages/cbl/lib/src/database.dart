@@ -3,8 +3,10 @@ export 'database/database.dart'
         Database,
         ConcurrencyControl,
         MaintenanceType,
-        AsyncSaveConflictHandler,
-        SaveConflictHandler;
+        SaveConflictHandler,
+        SyncSaveConflictHandler,
+        SyncDatabase,
+        AsyncDatabase;
 export 'database/database_change.dart' show DatabaseChange;
 export 'database/database_configuration.dart' show DatabaseConfiguration;
 export 'database/document_change.dart' show DocumentChange;

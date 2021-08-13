@@ -9,10 +9,10 @@ import '../utils/database_utils.dart';
 void main() {
   setupTestBinding();
 
-  late Database db;
+  late SyncDatabase db;
 
   setUpAll(() async {
-    db = openTestDb('Document-Common');
+    db = openSyncTestDb('Document-Common');
   });
 
   Document savedDocument([Map<String, Object?>? data]) {
@@ -164,7 +164,7 @@ void main() {
       });
 
       test('toString', () {
-        final db = openTestDb('Document-toString');
+        final db = openSyncTestDb('Document-toString');
         final doc = MutableDocument();
         db.saveDocument(doc);
         final loadedDoc = db.document(doc.id);

@@ -11,49 +11,49 @@ import '../utils/matchers.dart';
 void main() {
   setupTestBinding();
 
-  group('Database', () {
+  group('SyncDatabase', () {
     test('remove', () async {
-      final db = openTestDb('Remove');
+      final db = openSyncTestDb('Remove');
       final name = db.name;
       final directory = db.config.directory;
       await db.close();
 
-      expect(Database.exists(name, directory: directory), isTrue);
+      expect(SyncDatabase.exists(name, directory: directory), isTrue);
 
-      Database.remove(name, directory: directory);
+      SyncDatabase.remove(name, directory: directory);
 
-      expect(Database.exists(name, directory: directory), isFalse);
+      expect(SyncDatabase.exists(name, directory: directory), isFalse);
     });
 
     test('exists', () async {
       final dbName = testDbName('DatabaseExistsWithDir');
 
       expect(
-        Database.exists(dbName, directory: tmpDir),
+        SyncDatabase.exists(dbName, directory: tmpDir),
         isFalse,
       );
 
-      final db = Database(dbName, DatabaseConfiguration(directory: tmpDir));
+      final db = SyncDatabase(dbName, DatabaseConfiguration(directory: tmpDir));
       await db.close();
 
-      expect(Database.exists(dbName, directory: tmpDir), isTrue);
+      expect(SyncDatabase.exists(dbName, directory: tmpDir), isTrue);
     });
 
     test('copy', () {
-      final db = openTestDb('Copy-Source');
+      final db = openSyncTestDb('Copy-Source');
       final copyName = testDbName('Copy-Copy');
 
-      Database.copy(
+      SyncDatabase.copy(
         from: db.path!,
         name: copyName,
         configuration: DatabaseConfiguration(directory: tmpDir),
       );
 
-      expect(Database.exists(copyName, directory: tmpDir), isTrue);
+      expect(SyncDatabase.exists(copyName, directory: tmpDir), isTrue);
     });
 
     test('creates database if it does not exist', () {
-      final db = Database(
+      final db = SyncDatabase(
         testDbName('OpenNonExistingDatabase'),
         DatabaseConfiguration(
           directory: tmpDir,
@@ -65,12 +65,12 @@ void main() {
 
     late String dbName;
     late DatabaseConfiguration dbConfig;
-    late Database db;
+    late SyncDatabase db;
 
     setUpAll(() {
       dbName = testDbName('Database|Common');
       dbConfig = DatabaseConfiguration(directory: tmpDir);
-      db = Database(dbName, dbConfig);
+      db = SyncDatabase(dbName, dbConfig);
       addTearDown(db.close);
     });
 
@@ -88,19 +88,19 @@ void main() {
       });
 
       test('close does not throw', () async {
-        final db = Database(testDbName('CloseDatabase'), dbConfig);
+        final db = SyncDatabase(testDbName('CloseDatabase'), dbConfig);
 
         await db.close();
       });
 
       test('delete deletes the database file', () async {
         final name = testDbName('DeleteDatabase');
-        final db = Database(name, dbConfig);
+        final db = SyncDatabase(name, dbConfig);
 
         await db.delete();
 
         expect(
-          Database.exists(name, directory: dbConfig.directory),
+          SyncDatabase.exists(name, directory: dbConfig.directory),
           isFalse,
         );
       });
@@ -110,7 +110,7 @@ void main() {
       });
 
       test('performMaintenance: reindex', () {
-        final db = openTestDb('PerformMaintenance|Reindex');
+        final db = openSyncTestDb('PerformMaintenance|Reindex');
         db.createIndex('a', ValueIndexConfiguration(['type']));
         final doc = MutableDocument({'type': 'A'});
         db.saveDocument(doc);
@@ -121,10 +121,48 @@ void main() {
         db.performMaintenance(MaintenanceType.integrityCheck);
       });
 
-      test('batch operations do not throw', () {
-        db.inBatch(() {
-          db.saveDocument(MutableDocument());
+      test('inBatch commits transaction', () async {
+        final doc = MutableDocument();
+
+        await db.inBatch(() {
+          db.saveDocument(doc);
         });
+
+        expect(db.document(doc.id), isNotNull);
+      });
+
+      test('inBatchSync commits transaction', () {
+        final doc = MutableDocument();
+
+        db.inBatchSync(() {
+          db.saveDocument(doc);
+        });
+
+        expect(db.document(doc.id), isNotNull);
+      });
+
+      test('inBatch aborts transaction when callback throws', () async {
+        final doc = MutableDocument();
+
+        await expectLater(db.inBatch(() async {
+          db.saveDocument(doc);
+          throw 'error';
+        }), throwsA('error'));
+
+        expect(db.document(doc.id), isNull);
+      });
+
+      test('inBatchSync aborts transaction when callback throws', () {
+        final doc = MutableDocument();
+
+        expect(
+            () => db.inBatch(() {
+                  db.saveDocument(doc);
+                  throw 'error';
+                }),
+            throwsA('error'));
+
+        expect(db.document(doc.id), isNull);
       });
 
       test('document returns null when the document does not exist', () {
@@ -162,7 +200,7 @@ void main() {
           _test(false);
         }
 
-        SaveConflictHandler toSync(AsyncSaveConflictHandler handler) =>
+        SyncSaveConflictHandler toSync(SaveConflictHandler handler) =>
             (documentBeingSaved, conflictingDocument) =>
                 handler(documentBeingSaved, conflictingDocument) as bool;
 
@@ -173,7 +211,7 @@ void main() {
             ..setValue('b', key: 'a');
           db.saveDocument(updatedDoc);
 
-          final AsyncSaveConflictHandler handler =
+          final SaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, updatedDoc);
@@ -186,12 +224,12 @@ void main() {
 
           if (async) {
             await expectLater(
-              db.saveDocumentWithConflictHandlerAsync(doc, handler),
+              db.saveDocumentWithConflictHandler(doc, handler),
               completion(isTrue),
             );
           } else {
             expect(
-              db.saveDocumentWithConflictHandler(doc, toSync(handler)),
+              db.saveDocumentWithConflictHandlerSync(doc, toSync(handler)),
               isTrue,
             );
           }
@@ -205,7 +243,7 @@ void main() {
           db.saveDocument(doc);
           db.deleteDocument(db.document(doc.id)!);
 
-          final AsyncSaveConflictHandler handler =
+          final SaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, isNull);
@@ -218,12 +256,12 @@ void main() {
 
           if (async) {
             await expectLater(
-              db.saveDocumentWithConflictHandlerAsync(doc, handler),
+              db.saveDocumentWithConflictHandler(doc, handler),
               completion(isTrue),
             );
           } else {
             expect(
-              db.saveDocumentWithConflictHandler(doc, toSync(handler)),
+              db.saveDocumentWithConflictHandlerSync(doc, toSync(handler)),
               isTrue,
             );
           }
@@ -239,7 +277,7 @@ void main() {
             ..setValue('b', key: 'a');
           db.saveDocument(updatedDoc);
 
-          final AsyncSaveConflictHandler handler =
+          final SaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, updatedDoc);
@@ -251,12 +289,12 @@ void main() {
 
           if (async) {
             await expectLater(
-              db.saveDocumentWithConflictHandlerAsync(doc, handler),
+              db.saveDocumentWithConflictHandler(doc, handler),
               completion(isFalse),
             );
           } else {
             expect(
-              db.saveDocumentWithConflictHandler(doc, toSync(handler)),
+              db.saveDocumentWithConflictHandlerSync(doc, toSync(handler)),
               isFalse,
             );
           }
@@ -421,10 +459,10 @@ void main() {
 
     group('Index', () {
       test('createIndex should work with ValueIndexConfiguration', () {
-        final db = openTestDb('CreateValueIndexConfiguration');
+        final db = openSyncTestDb('CreateValueIndexConfiguration');
         db.createIndex('a', ValueIndexConfiguration(['a']));
 
-        final q = Query(db, 'SELECT * FROM _ WHERE a = "a"');
+        final q = SyncQuery.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
 
         final explain = q.explain();
 
@@ -432,10 +470,11 @@ void main() {
       });
 
       test('createIndex should work with FullTextIndexConfiguration', () {
-        final db = openTestDb('CreateFullTextIndexConfiguration');
+        final db = openSyncTestDb('CreateFullTextIndexConfiguration');
         db.createIndex('a', FullTextIndexConfiguration(['a']));
 
-        final q = Query(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
+        final q =
+            SyncQuery.fromN1ql(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
 
         final explain = q.explain();
 
@@ -443,13 +482,13 @@ void main() {
       });
 
       test('createIndex should work with ValueIndex', () {
-        final db = openTestDb('CreateValueIndex');
+        final db = openSyncTestDb('CreateValueIndex');
         db.createIndex(
           'a',
           IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
         );
 
-        final q = Query(db, 'SELECT * FROM _ WHERE a = "a"');
+        final q = SyncQuery.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
 
         final explain = q.explain();
 
@@ -457,13 +496,14 @@ void main() {
       });
 
       test('createIndex should work with FullTextIndex', () {
-        final db = openTestDb('CreateFullTextIndex');
+        final db = openSyncTestDb('CreateFullTextIndex');
         db.createIndex(
           'a',
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
-        final q = Query(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
+        final q =
+            SyncQuery.fromN1ql(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
 
         final explain = q.explain();
 
@@ -471,7 +511,7 @@ void main() {
       });
 
       test('deleteIndex should delete the given index', () {
-        final db = openTestDb('DeleteIndex');
+        final db = openSyncTestDb('DeleteIndex');
         db.createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
@@ -482,7 +522,7 @@ void main() {
       });
 
       test('indexes should return the names of all existing indexes', () {
-        final db = openTestDb('DatabaseIndexNames');
+        final db = openSyncTestDb('DatabaseIndexNames');
         expect(db.indexes, isEmpty);
 
         db.createIndex('a', ValueIndexConfiguration(['a']));
@@ -495,8 +535,8 @@ void main() {
       test('open the same database twice and receive change notifications',
           () async {
         final dbName = testDbName('OpenDbTwice');
-        final dbA = openTestDb(dbName, useNameDirectly: true);
-        final dbB = openTestDb(dbName, useNameDirectly: true);
+        final dbA = openSyncTestDb(dbName, useNameDirectly: true);
+        final dbB = openSyncTestDb(dbName, useNameDirectly: true);
         final doc = MutableDocument();
 
         expect(
@@ -533,7 +573,7 @@ void main() {
           'date': '2021-01-15',
         }));
 
-        final q = Query(
+        final q = SyncQuery.fromN1ql(
           db,
           r'''
           SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 

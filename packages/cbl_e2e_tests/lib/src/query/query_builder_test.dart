@@ -9,19 +9,20 @@ import '../utils/database_utils.dart';
 void main() {
   setupTestBinding();
 
-  group('QueryBuilder', () {
+  group('SyncQueryBuilder', () {
     setupEvalExprUtils();
 
     group('SelectResult', () {
-      late final Database db;
+      late final SyncDatabase db;
 
       setUpAll(() {
-        db = openTestDb('SelectResultCommon');
+        db = openSyncTestDb('SelectResultCommon');
         db.saveDocument(MutableDocument({'a': true}));
       });
 
       Object? selectOneResult(SelectResultInterface selectResult) =>
-          QueryBuilder.selectOne(selectResult)
+          SyncQueryBuilder()
+              .select(selectResult)
               .from(DataSource.database(db))
               .execute()
               .map((result) => result.toPlainMap())
@@ -65,11 +66,12 @@ void main() {
 
     group('Query', () {
       test('distinct', () {
-        final db = openTestDb('SelectDistinct');
+        final db = openSyncTestDb('SelectDistinct');
         db.saveDocument(MutableDocument({'a': true}));
         db.saveDocument(MutableDocument({'a': true}));
 
-        final result = QueryBuilder.selectOneDistinct(SelectResult.all())
+        final result = SyncQueryBuilder()
+            .selectDistinct(SelectResult.all())
             .from(DataSource.database(db))
             .execute()
             .map((e) => e.toPlainList()[0])
@@ -81,7 +83,7 @@ void main() {
       });
 
       test('join', () {
-        final db = openTestDb('Join');
+        final db = openSyncTestDb('Join');
 
         // Inner join without right side
         expect(
@@ -177,16 +179,17 @@ void main() {
       });
 
       test('orderBy', () {
-        final db = openTestDb('QueryBuilderOrderBy');
+        final db = openSyncTestDb('QueryBuilderOrderBy');
         final docs = List.generate(5, (_) => MutableDocument());
 
         db.inBatch(() {
           docs.forEach(db.saveDocument);
         });
 
-        final results = QueryBuilder.selectOne(SelectResult.expression(Meta.id))
+        final results = SyncQueryBuilder()
+            .select(SelectResult.expression(Meta.id))
             .from(DataSource.database(db))
-            .orderByOne(Ordering.expression(Meta.id))
+            .orderBy(Ordering.expression(Meta.id))
             .execute()
             .map((result) => result.value(0))
             .toList();
@@ -195,16 +198,17 @@ void main() {
       });
 
       test('limit', () {
-        final db = openTestDb('QueryBuilderLimit');
+        final db = openSyncTestDb('QueryBuilderLimit');
         final docs = List.generate(5, (_) => MutableDocument());
 
         db.inBatch(() {
           docs.forEach(db.saveDocument);
         });
 
-        final results = QueryBuilder.selectOne(SelectResult.expression(Meta.id))
+        final results = SyncQueryBuilder()
+            .select(SelectResult.expression(Meta.id))
             .from(DataSource.database(db))
-            .orderByOne(Ordering.expression(Meta.id))
+            .orderBy(Ordering.expression(Meta.id))
             .limit(Expression.value(3), offset: Expression.value(2))
             .execute()
             .map((result) => result.value(0))
@@ -513,7 +517,7 @@ void main() {
       setUpAll(() {
         doc = MutableDocument();
         deletedDoc = MutableDocument();
-        db = openTestDb('QueryBuilderMeta');
+        db = openSyncTestDb('QueryBuilderMeta');
         db.saveDocument(doc);
         db.setDocumentExpiration(doc.id, expirationDate);
         db.saveDocument(deletedDoc);
@@ -531,7 +535,8 @@ void main() {
           where = where.and(Meta.isDeleted.equalTo(valExpr(1)));
         }
 
-        return QueryBuilder.selectOne(SelectResult.expression(expression))
+        return SyncQueryBuilder()
+            .select(SelectResult.expression(expression))
             .from(DataSource.database(db))
             .where(where)
             .execute()
@@ -566,7 +571,7 @@ void main() {
 
     group('Function', () {
       test('aggregate', () {
-        final db = openTestDb('QueryBuilderAggregateFunctions');
+        final db = openSyncTestDb('QueryBuilderAggregateFunctions');
         db.insertAggNumbers([0, 1, 2, 3, 4, 5]);
 
         expect(
@@ -806,7 +811,7 @@ void main() {
 
     group('FullTextFunction', () {
       test('match and rank', () {
-        final db = openTestDb('FullTextFunctionRank');
+        final db = openSyncTestDb('FullTextFunctionRank');
         db.createIndex(
           'a',
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
@@ -820,16 +825,17 @@ void main() {
         });
         db.saveDocument(docB);
 
-        final results = QueryBuilder.select([
-          SelectResult.expression(Meta.id),
-          SelectResult.expression(FullTextFunction.rank('a')),
-        ])
+        final results = SyncQueryBuilder()
+            .selectAll([
+              SelectResult.expression(Meta.id),
+              SelectResult.expression(FullTextFunction.rank('a')),
+            ])
             .from(DataSource.database(db))
             .where(FullTextFunction.match(
               indexName: 'a',
               query: 'the OR quick OR brown OR fox',
             ))
-            .orderByOne(Ordering.expression(FullTextFunction.rank('a')))
+            .orderBy(Ordering.expression(FullTextFunction.rank('a')))
             .execute()
             .map((result) => result.toPlainList())
             .toList();
@@ -845,11 +851,11 @@ void main() {
 
 // === Eval expression utils ===================================================
 
-late Database evalExprDb;
+late SyncDatabase evalExprDb;
 
 void setupEvalExprUtils() {
   setUpAll(() {
-    evalExprDb = openTestDb('EvalExpr');
+    evalExprDb = openSyncTestDb('EvalExpr');
     // Insert exactly one document.
     evalExprDb.saveDocument(MutableDocument());
   });
@@ -876,7 +882,7 @@ Object? evalExpr(
   // Giving the select result an alias prevents interpreting top level string
   // literals as property paths.
   final selectResult = SelectResult.expression(expression).as('_');
-  final query = QueryBuilder.selectOne(selectResult).from(dataSource);
+  final query = SyncQueryBuilder().select(selectResult).from(dataSource);
 
   // print(query.explain());
 
@@ -936,7 +942,8 @@ extension on Database {
       });
 
   List<Object?> aggQuery(Iterable<SelectResultInterface> selectResults) =>
-      QueryBuilder.select(selectResults.toList())
+      SyncQueryBuilder()
+          .selectAll(selectResults.toList())
           .from(DataSource.database(this))
           .groupBy(Expression.property(aggGroupProperty))
           .execute()
@@ -966,7 +973,7 @@ MutableDocument rightJoinDoc({
 }) =>
     MutableDocument.withId(id, {'side': 'right', if (on != null) 'on': on});
 
-extension on Database {
+extension on SyncDatabase {
   Object? evalJoin({
     required JoinType type,
     required Iterable<MutableDocument> docs,
@@ -1007,10 +1014,11 @@ extension on Database {
         break;
     }
 
-    return QueryBuilder.select([
-      SelectResult.expression(Meta.id.from(leftSide)),
-      SelectResult.expression(Meta.id.from(rightSide)),
-    ])
+    return SyncQueryBuilder()
+        .selectAll([
+          SelectResult.expression(Meta.id.from(leftSide)),
+          SelectResult.expression(Meta.id.from(rightSide)),
+        ])
         .from(DataSource.database(this).as(leftSide))
         .join(join)
         .where(sideProp.from(leftSide).equalTo(valExpr(leftSide)))

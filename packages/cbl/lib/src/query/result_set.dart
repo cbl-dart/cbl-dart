@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:ffi';
 
@@ -11,15 +12,28 @@ import '../support/native_object.dart';
 import 'query.dart';
 import 'result.dart';
 
-/// An [Iterable] over the [Result]s of executing a [Query].
-abstract class ResultSet implements Iterable<Result>, Iterator<Result> {}
+/// A set of [Result]s which is returned when executing a [Query].
+abstract class ResultSet {
+  /// Returns a stream which consumes this result set and emits its results.
+  ///
+  /// A result set can only be consumed once and listening to the returned
+  /// stream counts as consuming it. Other methods for consuming this result set
+  /// must not be used when using a stream.
+  Stream<Result> asStream();
+}
+
+/// A [ResultSet] which can be iterated synchronously as well asynchronously.
+abstract class SyncResultSet
+    implements ResultSet, Iterable<Result>, Iterator<Result> {}
 
 late final _bindings = cblBindings.resultSet;
 
-class ResultSetImpl with IterableMixin<Result> implements ResultSet {
-  ResultSetImpl(
+class FfiResultSet
+    with IterableMixin<Result>, ResultSetStreamMixin
+    implements SyncResultSet {
+  FfiResultSet(
     Pointer<CBLResultSet> pointer, {
-    required DatabaseImpl database,
+    required FfiDatabase database,
     required List<String> columnNames,
     required String debugCreator,
   })  : _context = DatabaseMContext(database),
@@ -35,23 +49,36 @@ class ResultSetImpl with IterableMixin<Result> implements ResultSet {
   Result? _current;
 
   @override
-  Iterator<Result> get iterator => this;
+  Stream<Result> asStream() {
+    onCreateStream();
+    return Stream.fromIterable(this);
+  }
 
   @override
-  Result get current => _current ??= ResultImpl.fromValuesArray(
-        _iterator.current,
-        context: _context,
-        columnNames: _columnNames,
-      );
+  Iterator<Result> get iterator {
+    checkHasNotStream();
+    return this;
+  }
+
+  @override
+  Result get current {
+    checkHasNotStream();
+    return _current ??= ResultImpl.fromValuesArray(
+      _iterator.current,
+      context: _context,
+      columnNames: _columnNames,
+    );
+  }
 
   @override
   bool moveNext() {
+    checkHasNotStream();
     _current = null;
     return _iterator.moveNext();
   }
 
   @override
-  String toString() => 'ResultSet()';
+  String toString() => 'FfiResultSet()';
 }
 
 class ResultSetIterator extends CblObject<CBLResultSet>
@@ -88,5 +115,20 @@ class ResultSetIterator extends CblObject<CBLResultSet>
     _current = null;
     _isDone = !native.call(_bindings.next);
     return !_isDone;
+  }
+}
+
+mixin ResultSetStreamMixin {
+  bool _hasStream = false;
+
+  void checkHasNotStream() {
+    if (_hasStream) {
+      throw StateError('The result set is already being consumed by a stream.');
+    }
+  }
+
+  void onCreateStream() {
+    checkHasNotStream();
+    _hasStream = true;
   }
 }

@@ -93,7 +93,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
   BlobImpl.fromProperties(
     Map<String, Object?> properties, {
-    Object? database,
+    Database? database,
   })  : assert(properties[cblObjectTypeProperty] == cblObjectTypeBlob),
         _database = database,
         _contentType = properties[blobContentTypeProperty] as String?,
@@ -111,7 +111,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   static Future<Blob> fromStream(
     String contentType,
     Stream<Uint8List> stream,
-    Object database,
+    Database database,
   ) async {
     final blobStore = (database as BlobStoreHolder).blobStore;
     final properties = await blobStore.saveBlobFromStream(contentType, stream);
@@ -121,7 +121,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   /// Max size of data that will be cached in memory with the [Blob].
   static const _maxCachedContentLength = 8 * 1024;
 
-  Object? _database;
+  Database? _database;
   BlobStore? get _blobStore => (_database as BlobStoreHolder?)?.blobStore;
 
   Uint8List? _content;

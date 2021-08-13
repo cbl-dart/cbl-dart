@@ -187,10 +187,10 @@ void main() {
     });
 
     group('e2e', () {
-      late Database db;
+      late SyncDatabase db;
 
       setUpAll(() {
-        db = openTestDb('Result|Common');
+        db = openSyncTestDb('Result|Common');
       });
 
       test('access column by name', () {
@@ -198,7 +198,7 @@ void main() {
           'a': {'b': true}
         });
         db.saveDocument(doc);
-        final q = Query(
+        final q = SyncQuery.fromN1ql(
           db,
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
         );
@@ -215,7 +215,10 @@ void main() {
         final doc = MutableDocument.withId('ResultSetColumnByIndex');
         db.saveDocument(doc);
 
-        final q = Query(db, r'SELECT META().id FROM _ WHERE META().id = $ID');
+        final q = SyncQuery.fromN1ql(
+          db,
+          r'SELECT META().id FROM _ WHERE META().id = $ID',
+        );
         q.parameters = Parameters({'ID': doc.id});
 
         final result = q.execute().first;

@@ -17,5 +17,7 @@ export 'replication/replicator.dart'
         Replicator,
         ReplicatorProgress,
         ReplicatorActivityLevel,
-        ReplicatorStatus;
+        ReplicatorStatus,
+        SyncReplicator,
+        AsyncReplicator;
 export 'replication/replicator_change.dart' show ReplicatorChange;
