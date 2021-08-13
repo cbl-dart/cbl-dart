@@ -23,10 +23,10 @@ class DataSource {
 
 class DataSourceImpl implements DataSourceInterface {
   DataSourceImpl({required Database database, String? alias})
-      : database = database as DatabaseImpl,
+      : database = database,
         _alias = alias;
 
-  final DatabaseImpl database;
+  final Database database;
   final String? _alias;
 
   Map<String, Object?> toJson() => {

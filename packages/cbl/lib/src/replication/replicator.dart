@@ -97,18 +97,11 @@ class ReplicatorStatus {
 /// can also be one-shot ore continuous. The replicator runs asynchronously, so
 /// observe the [status] to be notified of progress.
 abstract class Replicator implements ClosableResource {
-  /// Creates a replicator for replicating [Document]s between a local database
-  /// and a target database.
-  factory Replicator(ReplicatorConfiguration config) => ReplicatorImpl(
-        config,
-        debugCreator: 'Replicator()',
-      );
-
   /// This replicator's configuration.
   ReplicatorConfiguration get config;
 
   /// Returns this replicator's status.
-  ReplicatorStatus get status;
+  FutureOr<ReplicatorStatus> get status;
 
   /// Starts this replicator with an option to [reset] the local checkpoint of
   /// the replicator.
@@ -118,7 +111,7 @@ abstract class Replicator implements ClosableResource {
   ///
   /// The method returns immediately; the replicator runs asynchronously and
   /// will report its progress through the [changes] stream.
-  void start({bool reset = false});
+  FutureOr<void> start({bool reset = false});
 
   /// Stops this replicator, if running.
   ///
@@ -126,7 +119,7 @@ abstract class Replicator implements ClosableResource {
   /// replicator will change the [ReplicatorActivityLevel] of its [status] to
   /// [ReplicatorActivityLevel.stopped]. and the [changes] stream will
   /// be notified accordingly.
-  void stop();
+  FutureOr<void> stop();
 
   /// Returns a [Stream] which emits a [ReplicatorChange] event when this
   /// replicators [status] changes.
@@ -146,24 +139,70 @@ abstract class Replicator implements ClosableResource {
   ///
   /// This API is a snapshot and results may change between the time the call
   /// was mad and the time the call returns.
-  Set<String> get pendingDocumentIds;
+  FutureOr<Set<String>> get pendingDocumentIds;
 
   /// Returns whether the [Document] with the given [documentId] has revisions
   /// pending push.
   ///
   /// This API is a snapshot and the result may change between the time the call
   /// was made and the time the call returns.
+  FutureOr<bool> isDocumentPending(String documentId);
+}
+
+/// A [Replicator] with a primarily synchronous API.
+abstract class SyncReplicator implements Replicator {
+  /// Creates a replicator for replicating [Document]s between a local database
+  /// and a target database.
+  factory SyncReplicator(ReplicatorConfiguration config) => FfiReplicator(
+        config,
+        debugCreator: 'SyncReplicator()',
+      );
+
+  @override
+  ReplicatorStatus get status;
+
+  @override
+  void start({bool reset = false});
+
+  @override
+  void stop();
+
+  @override
+  Set<String> get pendingDocumentIds;
+
+  @override
   bool isDocumentPending(String documentId);
+}
+
+/// A [Replicator] with a primarily asynchronous API.
+abstract class AsyncReplicator implements Replicator {
+  static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
+      throw UnimplementedError();
+
+  @override
+  Future<ReplicatorStatus> get status;
+
+  @override
+  Future<void> start({bool reset = false});
+
+  @override
+  Future<void> stop();
+
+  @override
+  Future<Set<String>> get pendingDocumentIds;
+
+  @override
+  Future<bool> isDocumentPending(String documentId);
 }
 
 late final _bindings = cblBindings.replicator;
 
-class ReplicatorImpl
+class FfiReplicator
     with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
-    implements Replicator {
-  ReplicatorImpl(ReplicatorConfiguration config, {required String debugCreator})
+    implements SyncReplicator {
+  FfiReplicator(ReplicatorConfiguration config, {required String debugCreator})
       : _config = ReplicatorConfiguration.from(config) {
-    final database = _database = (_config.database as DatabaseImpl);
+    final database = _database = (_config.database as FfiDatabase);
 
     runNativeCalls(() {
       final pushFilterCallback =
@@ -230,7 +269,7 @@ class ReplicatorImpl
 
   final ReplicatorConfiguration _config;
 
-  late final DatabaseImpl _database;
+  late final FfiDatabase _database;
 
   @override
   late final NativeObject<CBLReplicator> native;
@@ -331,7 +370,7 @@ class ReplicatorImpl
 
   @override
   String toString() => [
-        'Replicator(',
+        'FfiReplicator(',
         [
           'database: $_database',
           'type: ${describeEnum(config.replicatorType)}',
@@ -407,7 +446,7 @@ extension on ReplicatorConfiguration {
 }
 
 AsyncCallback _wrapReplicationFilter(
-  DatabaseImpl database,
+  FfiDatabase database,
   ReplicationFilter filter,
 ) =>
     AsyncCallback((arguments) async {
@@ -426,7 +465,7 @@ AsyncCallback _wrapReplicationFilter(
     }, errorResult: false, debugName: 'ReplicationFilter');
 
 AsyncCallback _wrapConflictResolver(
-  DatabaseImpl database,
+  FfiDatabase database,
   ConflictResolver resolver,
 ) =>
     AsyncCallback((arguments) async {

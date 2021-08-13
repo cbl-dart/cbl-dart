@@ -50,7 +50,7 @@ enum MaintenanceType {
 /// by application code) since it was loaded into the [Document] being saved.
 ///
 /// The [documentBeingSaved] (same as the parameter you passed to
-/// [Database.saveDocumentWithConflictHandlerAsync].) may be modify by the callback
+/// [Database.saveDocumentWithConflictHandler].) may be modify by the callback
 /// as necessary to resolve the conflict.
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
@@ -60,41 +60,180 @@ enum MaintenanceType {
 /// The handler has to make a decision by returning `true` to save the document
 /// or `false` to abort the save.
 ///
-/// If the handler throws or , the save will be aborted.
+/// If the handler throws the save will be aborted.
 /// {@endtemplate}
-/// See also:
-///
-///  * [Database.saveDocumentWithConflictHandler] for saving a [Document] with a
-///    custom conflict handler.
-typedef SaveConflictHandler = bool Function(
-  MutableDocument documentBeingSaved,
-  Document? conflictingDocument,
-);
-
-/// Custom async conflict handler for saving or deleting a document.
-///
-/// {@macro cbl.SaveConflictHandler}
 ///
 /// See also:
 ///
-///  * [Database.saveDocumentWithConflictHandlerAsync] for saving a [Document]
-///    with a custom async conflict handler.
-typedef AsyncSaveConflictHandler = FutureOr<bool> Function(
+///  * [Database.saveDocumentWithConflictHandler] for saving a [Document] with
+///    a custom async conflict handler.
+typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
 
 /// A Couchbase Lite database.
 abstract class Database implements ClosableResource {
-  /// Initializes a Couchbase Lite database with a given name and
-  /// [configuration].
-  ///
-  /// If the database does not yet exist, it will be created.
-  factory Database(String name, [DatabaseConfiguration? configuration]) =>
-      DatabaseImpl(name, configuration);
-
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
+
+  /// The name of this database.
+  String get name;
+
+  /// The path to this database.
+  ///
+  /// Is `null` if the database is closed or deleted.
+  String? get path;
+
+  /// The total number of documents in the database.
+  FutureOr<int> get count;
+
+  /// The configuration which was used to open this database.
+  DatabaseConfiguration get config;
+
+  /// Returns the [Document] with the given [id], if it exists.
+  FutureOr<Document?> document(String id);
+
+  /// Returns the [DocumentFragment] for the [Document] with the given [id].
+  FutureOr<DocumentFragment> operator [](String id);
+
+  /// Saves a [document] to this database, resolving conflicts through
+  /// [ConcurrencyControl].
+  ///
+  /// When write operations are executed concurrently, the last writer will win
+  /// by default. In this case the result is always `true`.
+  ///
+  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
+  /// [concurrencyControl]. In this case, if the document could not be saved
+  /// the result is `false`. On success it is `true`.
+  FutureOr<bool> saveDocument(
+    MutableDocument document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  /// Saves a [document] to this database, resolving conflicts with a
+  /// [conflictHandler].
+  ///
+  /// {@template cbl.Database.saveDocumentWithConflictHandler}
+  /// When write operations are executed concurrently and if conflicts occur,
+  /// the [conflictHandler] will be called. Use the conflict handler to
+  /// directly edit the [Document] to resolve the conflict. When the conflict
+  /// handler returns `true`, the save method will save the edited document as
+  /// the resolved document. If the conflict handler returns `false`, the save
+  /// operation will be canceled with `false` as the result. If the conflict
+  /// handler returns `true` or there is no conflict the result is `true`.
+  /// {@endtemplate}
+  FutureOr<bool> saveDocumentWithConflictHandler(
+    MutableDocument document,
+    SaveConflictHandler conflictHandler,
+  );
+
+  /// Deletes a [document] from this database, resolving conflicts through
+  /// [ConcurrencyControl].
+  ///
+  /// When write operations are executed concurrently, the last writer will win
+  /// by default. In this case the result is always `true`.
+  ///
+  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
+  /// [concurrencyControl]. In this case, if the document could not be deleted
+  /// the result is `false`. On success it is `true`.
+  FutureOr<bool> deleteDocument(
+    Document document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  /// Purges a [document] from this database.
+  ///
+  /// This is more drastic than deletion: It removes all traces of the document.
+  /// The purge will __not__ be replicated to other databases.
+  FutureOr<void> purgeDocument(Document document);
+
+  /// Purges a [Document] from this database by its [id].
+  ///
+  /// This is more drastic than deletion: It removes all traces of the document.
+  /// The purge will __not__ be replicated to other databases.
+  FutureOr<void> purgeDocumentById(String id);
+
+  /// Runs a group of database operations in a batch.
+  ///
+  /// {@template cbl.Database.inBatch}
+  /// Use this when performance bulk write operations like multiple
+  /// inserts/updates; it saves the overhead of multiple database commits,
+  /// greatly improving performance.
+  /// {@endtemplate}
+  FutureOr<void> inBatch(FutureOr<void> Function() fn);
+
+  /// Sets an [expiration] date for a [Document] by its [id].
+  ///
+  /// After the given date the document will be purged from the database
+  ///
+  /// This is more drastic than deletion: It removes all traces of the document.
+  /// The purge will __not__ be replicated to other databases.
+  FutureOr<void> setDocumentExpiration(String id, DateTime? expiration);
+
+  /// Gets the expiration date of a [Document] by its [id], if it exists.
+  FutureOr<DateTime?> getDocumentExpiration(String id);
+
+  /// Returns a [Stream] that emits [DatabaseChange] events when [Document]s
+  /// are inserted, updated or deleted in this database.
+  Stream<DatabaseChange> changes();
+
+  /// Returns a [Stream] that emits [DocumentChange] events when a specific
+  /// [Document] is inserted, updated or deleted in this database.
+  Stream<DocumentChange> documentChanges(String id);
+
+  /// Closes this database.
+  ///
+  /// Before closing this database, [Replicator]s and change streams are closed.
+  @override
+  Future<void> close();
+
+  /// Closes and deletes this database.
+  ///
+  /// Before closing this database, [Replicator]s and change streams are closed.
+  Future<void> delete();
+
+  /// Performs database maintenance.
+  FutureOr<void> performMaintenance(MaintenanceType type);
+
+  /// The names of all existing indexes.
+  FutureOr<List<String>> get indexes;
+
+  /// Creates a value or full-text search [index] with the given [name].
+  ///
+  /// The name can be used for deleting the index. Creating a new different
+  /// index with an existing index name will replace the old index; creating the
+  /// same index with the same name is a no-op.
+  FutureOr<void> createIndex(String name, Index index);
+
+  /// Deletes the [Index] of the given [name].
+  FutureOr<void> deleteIndex(String name);
+}
+
+/// Custom sync conflict handler for saving or deleting a document.
+///
+/// {@macro cbl.SaveConflictHandler}
+///
+/// See also:
+///
+///  * [SyncDatabase.saveDocumentWithConflictHandlerSync] for saving a
+///    [Document] with a custom sync conflict handler.
+typedef SyncSaveConflictHandler = bool Function(
+  MutableDocument documentBeingSaved,
+  Document? conflictingDocument,
+);
+
+/// A [Database] with a primarily synchronous API.
+abstract class SyncDatabase implements Database {
+  /// Opens a Couchbase Lite database with a given name and [configuration].
+  ///
+  /// If the database does not yet exist, it will be created.
+  factory SyncDatabase(String name, [DatabaseConfiguration? configuration]) =>
+      FfiDatabase(
+        name: name,
+        configuration: configuration,
+        debugCreator: 'SyncDatabase()',
+      );
 
   /// Deletes a database of the given [name] in the given [directory].
   static void remove(String name, {String? directory}) => runNativeCalls(() {
@@ -125,164 +264,175 @@ abstract class Database implements ClosableResource {
         );
       });
 
-  /// The name of this database.
-  String get name;
-
-  /// The path to this database.
-  ///
-  /// Is `null` if the database is closed or deleted.
-  String? get path;
-
-  /// The total number of documents in the database.
+  @override
   int get count;
 
-  /// The configuration which was used to open this database.
-  DatabaseConfiguration get config;
-
-  /// Returns the [Document] with the given [id], if it exists.
+  @override
   Document? document(String id);
 
-  /// Returns the [DocumentFragment] for the [Document] with the given [id].
+  @override
   DocumentFragment operator [](String id);
 
-  /// Saves a [document] to this database, resolving conflicts through
-  /// [ConcurrencyControl].
-  ///
-  /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
-  ///
-  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved
-  /// the result is `false`. On success it is `true`.
+  @override
   bool saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
-  /// Saves a [document] to this database, resolving conflicts with a
-  /// [conflictHandler].
-  ///
-  /// {@template cbl.Database.saveDocumentWithConflictHandler}
-  /// When write operations are executed concurrently and if conflicts occur,
-  /// the [conflictHandler] will be called. Use the conflict handler to
-  /// directly edit the [Document] to resolve the conflict. When the conflict
-  /// handler returns `true`, the save method will save the edited document as
-  /// the resolved document. If the conflict handler returns `false`, the save
-  /// operation will be canceled with `false` as the result. If the conflict
-  /// handler returns `true` or there is no conflict the result is `true`.
-  /// {@endtemplate}
-  bool saveDocumentWithConflictHandler(
-    MutableDocument document,
-    SaveConflictHandler conflictHandler,
-  );
-
-  /// Saves a [document] to this database, resolving conflicts with an async
+  /// Saves a [document] to this database, resolving conflicts with an sync
   /// [conflictHandler].
   ///
   /// {@macro cbl.Database.saveDocumentWithConflictHandler}
-  Future<bool> saveDocumentWithConflictHandlerAsync(
+  bool saveDocumentWithConflictHandlerSync(
     MutableDocument document,
-    AsyncSaveConflictHandler conflictHandler,
+    SyncSaveConflictHandler conflictHandler,
   );
 
-  /// Deletes a [document] from this database, resolving conflicts through
-  /// [ConcurrencyControl].
-  ///
-  /// When write operations are executed concurrently, the last writer will win
-  /// by default. In this case the result is always `true`.
-  ///
-  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be deleted
-  /// the result is `false`. On success it is `true`.
+  @override
   bool deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
-  /// Purges a [document] from this database.
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  @override
   void purgeDocument(Document document);
 
-  /// Purges a [Document] from this database by its [id].
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  @override
   void purgeDocumentById(String id);
 
-  /// Runs a group of database operations in a batch.
+  /// Runs a group of database operations in a batch, synchronously.
   ///
-  /// Use this when performance bulk write operations like multiple
-  /// inserts/updates; it saves the overhead of multiple database commits,
-  /// greatly improving performance.
-  void inBatch(void Function() fn);
+  /// {@macro cbl.Database.inBatch}
+  void inBatchSync(void Function() fn);
 
-  /// Sets an [expiration] date for a [Document] by its [id].
-  ///
-  /// After the given date the document will be purged from the database
-  ///
-  /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  @override
   void setDocumentExpiration(String id, DateTime? expiration);
 
-  /// Gets the expiration date of a [Document] by its [id], if it exists.
+  @override
   DateTime? getDocumentExpiration(String id);
 
-  /// Returns a [Stream] that emits [DatabaseChange] events when [Document]s
-  /// are inserted, updated or deleted in this database.
-  Stream<DatabaseChange> changes();
-
-  /// Returns a [Stream] that emits [DocumentChange] events when a specific
-  /// [Document] is inserted, updated or deleted in this database.
-  Stream<DocumentChange> documentChanges(String id);
-
-  /// Closes this database.
-  ///
-  /// Before closing this database, [Replicator]s and change streams are closed.
   @override
-  Future<void> close();
-
-  /// Closes and deletes this database.
-  ///
-  /// Before closing this database, [Replicator]s and change streams are closed.
-  Future<void> delete();
-
-  /// Performs database maintenance.
   void performMaintenance(MaintenanceType type);
 
-  /// The names of all existing indexes.
+  @override
   List<String> get indexes;
 
-  /// Creates a value or full-text search [index] with the given [name].
-  ///
-  /// The name can be used for deleting the index. Creating a new different
-  /// index with an existing index name will replace the old index; creating the
-  /// same index with the same name is a no-op.
+  @override
   void createIndex(String name, Index index);
 
-  /// Deletes the [Index] of the given [name].
+  @override
   void deleteIndex(String name);
+}
+
+/// A [Database] with a primarily asynchronous API.
+
+abstract class AsyncDatabase implements Database {
+  /// Opens a Couchbase Lite database with a given name and [configuration].
+  ///
+  /// If the database does not yet exist, it will be created.
+  static Future<AsyncDatabase> open(
+    String name, [
+    DatabaseConfiguration? configuration,
+  ]) =>
+      throw UnimplementedError();
+
+  /// Deletes a database of the given [name] in the given [directory].
+  static Future<void> remove(String name, {String? directory}) =>
+      throw UnimplementedError();
+
+  /// Checks whether a database of the given [name] exists in the given
+  /// [directory] or not.
+  static Future<bool> exists(String name, {String? directory}) =>
+      throw UnimplementedError();
+
+  /// Copies a canned database [from] the given path to a new database with the
+  /// given [name] and [configuration].
+  ///
+  /// The new database will be created at the directory specified in the
+  /// [configuration].
+  static Future<void> copy({
+    required String from,
+    required String name,
+    DatabaseConfiguration? configuration,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Future<int> get count;
+
+  @override
+  Future<Document?> document(String id);
+
+  @override
+  Future<DocumentFragment> operator [](String id);
+
+  @override
+  Future<bool> saveDocument(
+    MutableDocument document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  Future<bool> saveDocumentWithConflictHandler(
+    MutableDocument document,
+    SaveConflictHandler conflictHandler,
+  );
+
+  @override
+  Future<bool> deleteDocument(
+    Document document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  Future<void> purgeDocument(Document document);
+
+  @override
+  Future<void> purgeDocumentById(String id);
+
+  @override
+  Future<void> inBatch(FutureOr<void> Function() fn);
+
+  @override
+  Future<void> setDocumentExpiration(String id, DateTime? expiration);
+
+  @override
+  Future<DateTime?> getDocumentExpiration(String id);
+
+  @override
+  Future<void> performMaintenance(MaintenanceType type);
+
+  @override
+  Future<List<String>> get indexes;
+
+  @override
+  Future<void> createIndex(String name, Index index);
+
+  @override
+  Future<void> deleteIndex(String name);
 }
 
 // === Impl ====================================================================
 
 late final _bindings = cblBindings.database;
 
-class DatabaseImpl extends CBLDatabaseObject
+class FfiDatabase extends CBLDatabaseObject
     with ClosableResourceMixin
-    implements Database, BlobStoreHolder {
-  DatabaseImpl(String name, [DatabaseConfiguration? configuration])
-      : _config = DatabaseConfiguration.from(
+    implements SyncDatabase, BlobStoreHolder {
+  FfiDatabase({
+    required String name,
+    DatabaseConfiguration? configuration,
+    required String debugCreator,
+  })  : _config = DatabaseConfiguration.from(
           configuration ?? DatabaseConfiguration(),
         ),
         super(
           _bindings.open(name, configuration?.toCBLDatabaseConfiguration()),
-          debugName: 'Database($name)',
+          debugName: 'FfiDatabase($name, creator: $debugCreator)',
         );
 
   @override
-  late final blobStore = NativeBlobStore(this);
+  late final blobStore = FfiBlobStore(this);
 
   final DatabaseConfiguration _config;
 
@@ -309,7 +459,7 @@ class DatabaseImpl extends CBLDatabaseObject
           ?.let((pointer) => DocumentImpl(
                 database: this,
                 doc: pointer,
-                debugCreator: 'Database.document()',
+                debugCreator: 'FfiDatabase.document()',
               )));
 
   @override
@@ -335,32 +485,32 @@ class DatabaseImpl extends CBLDatabaseObject
       });
 
   @override
-  bool saveDocumentWithConflictHandler(
+  Future<bool> saveDocumentWithConflictHandler(
     covariant MutableDocumentImpl document,
     SaveConflictHandler conflictHandler,
+  ) =>
+      use(() => _saveDocumentWithConflictHandler(
+            document,
+            conflictHandler,
+          ));
+
+  @override
+  bool saveDocumentWithConflictHandlerSync(
+    covariant MutableDocumentImpl document,
+    SyncSaveConflictHandler conflictHandler,
   ) =>
       useSync(() {
         // Because the conflict handler is sync the result of the maybe async
         // method is always sync.
-        return _saveDocumentWithConflictHandlerMaybeAsync(
+        return _saveDocumentWithConflictHandler(
           document,
           conflictHandler,
         ) as bool;
       });
 
-  @override
-  Future<bool> saveDocumentWithConflictHandlerAsync(
+  FutureOr<bool> _saveDocumentWithConflictHandler(
     covariant MutableDocumentImpl document,
-    AsyncSaveConflictHandler conflictHandler,
-  ) =>
-      use(() => _saveDocumentWithConflictHandlerMaybeAsync(
-            document,
-            conflictHandler,
-          ));
-
-  FutureOr<bool> _saveDocumentWithConflictHandlerMaybeAsync(
-    covariant MutableDocumentImpl document,
-    AsyncSaveConflictHandler conflictHandler,
+    SaveConflictHandler conflictHandler,
   ) {
     // Implementing the conflict resolution in Dart, instead of using
     // the C implementation, allows us to make the conflict handler
@@ -442,20 +592,37 @@ class DatabaseImpl extends CBLDatabaseObject
       });
 
   @override
-  void inBatch(void Function() fn) {
+  Future<void> inBatch(FutureOr<void> Function() fn) => use(() => _inBatch(fn));
+
+  @override
+  void inBatchSync(void Function() fn) => useSync(() {
+        // Since fn is sync the result must also be sync.
+        final result = _inBatch(fn);
+        assert(result is! Future<void>);
+      });
+
+  FutureOr<void> _inBatch(FutureOr<void> Function() fn) {
     void endTransaction(bool commit) =>
         call((pointer) => _bindings.endTransaction(pointer, commit));
 
-    return useSync(() {
-      call(_bindings.beginTransaction);
-      try {
-        fn();
+    call(_bindings.beginTransaction);
+    try {
+      final result = fn();
+      if (result is Future<void>) {
+        return result.then(
+          (_) => endTransaction(true),
+          onError: (Object error) {
+            endTransaction(false);
+            throw error;
+          },
+        );
+      } else {
         endTransaction(true);
-      } catch (e) {
-        endTransaction(false);
-        rethrow;
       }
-    });
+    } catch (e) {
+      endTransaction(false);
+      rethrow;
+    }
   }
 
   @override
@@ -537,7 +704,7 @@ class DatabaseImpl extends CBLDatabaseObject
       });
 
   @override
-  String toString() => 'Database($_name)';
+  String toString() => 'FfiDatabase($_name)';
 }
 
 extension on MaintenanceType {

@@ -38,13 +38,13 @@ abstract class BlobStoreHolder {
   BlobStore get blobStore;
 }
 
-class NativeBlobStore implements BlobStore, SyncBlobStore {
-  NativeBlobStore(this.database);
+class FfiBlobStore implements BlobStore, SyncBlobStore {
+  FfiBlobStore(this.database);
 
   static late final _databaseBindings = cblBindings.database;
   static late final _blobBindings = cblBindings.blobs.blob;
 
-  final DatabaseImpl database;
+  final FfiDatabase database;
 
   @override
   Map<String, Object?> saveBlobFromDataSync(
@@ -117,7 +117,7 @@ class NativeBlobStore implements BlobStore, SyncBlobStore {
 late final _writeStreamBindings = cblBindings.blobs.writeStream;
 
 Future<CblObject<CBLBlob>> _createBlobFromStream(
-  DatabaseImpl database,
+  FfiDatabase database,
   Stream<Uint8List> stream,
   String contentType,
 ) async {
@@ -139,7 +139,7 @@ Future<CblObject<CBLBlob>> _createBlobFromStream(
 
 class _BlobReadStreamController
     extends ClosableResourceStreamController<Uint8List> {
-  _BlobReadStreamController(DatabaseImpl database, this.blob)
+  _BlobReadStreamController(FfiDatabase database, this.blob)
       : super(parent: database);
 
   /// Size of the chunks which a blob read stream emits.

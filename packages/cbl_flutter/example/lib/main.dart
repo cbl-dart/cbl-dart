@@ -17,7 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late Future<void> _initFuture;
-  late Database _db;
+  late SyncDatabase _db;
 
   var _posts = <Map<String, Object?>>[];
 
@@ -32,12 +32,12 @@ class _MyAppState extends State<MyApp> {
   Future<void> _init() async {
     final appDocsDir = await getApplicationDocumentsDirectory();
 
-    _db = Database(
+    _db = SyncDatabase(
       'Example',
       DatabaseConfiguration(directory: appDocsDir.path),
     );
 
-    final query = Query(
+    final query = SyncQuery.fromN1ql(
       _db,
       'SELECT post FROM _ AS post WHERE post.type = "post"',
     );
@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _clearDatabase() async {
-    final ids = Query(_db, 'SELECT META().id FROM _')
+    final ids = SyncQuery.fromN1ql(_db, 'SELECT META().id FROM _')
         .execute()
         .map((r) => r[0].string!)
         .toList();

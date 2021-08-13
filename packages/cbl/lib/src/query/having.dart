@@ -9,21 +9,94 @@ import 'router/order_by_router.dart';
 /// A query component representing the `HAVING` clause of a [Query].
 abstract class Having implements Query, OrderByRouter, LimitRouter {}
 
+/// Version of [Having] for building [SyncQuery]s.
+abstract class SyncHaving
+    implements Having, SyncQuery, SyncOrderByRouter, SyncLimitRouter {}
+
+/// Version of [Having] for building [AsyncQuery]s.
+abstract class AsyncHaving
+    implements Having, AsyncQuery, AsyncOrderByRouter, AsyncLimitRouter {}
+
 // === Impl ====================================================================
 
-class HavingImpl extends BuilderQuery implements Having {
-  HavingImpl(
-      {required BuilderQuery query, required ExpressionInterface expression})
-      : super(query: query, having: expression);
+class SyncHavingImpl extends SyncBuilderQuery implements SyncHaving {
+  SyncHavingImpl({
+    required SyncBuilderQuery query,
+    required ExpressionInterface expression,
+  }) : super(query: query, having: expression);
 
   @override
-  OrderBy orderByOne(OrderingInterface ordering) => orderBy([ordering]);
+  SyncOrderBy orderBy(
+    OrderingInterface ordering0, [
+    OrderingInterface? ordering1,
+    OrderingInterface? ordering2,
+    OrderingInterface? ordering3,
+    OrderingInterface? ordering4,
+    OrderingInterface? ordering5,
+    OrderingInterface? ordering6,
+    OrderingInterface? ordering7,
+    OrderingInterface? ordering8,
+    OrderingInterface? ordering9,
+  ]) =>
+      orderByAll([
+        ordering0,
+        ordering1,
+        ordering2,
+        ordering3,
+        ordering4,
+        ordering5,
+        ordering6,
+        ordering7,
+        ordering8,
+        ordering9,
+      ].whereType());
 
   @override
-  OrderBy orderBy(Iterable<OrderingInterface> orderings) =>
-      OrderByImpl(query: this, orderings: orderings);
+  SyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
+      SyncOrderByImpl(query: this, orderings: orderings);
 
   @override
-  Limit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
-      LimitImpl(query: this, limit: limit, offset: offset);
+  SyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
+      SyncLimitImpl(query: this, limit: limit, offset: offset);
+}
+
+class AsyncHavingImpl extends AsyncBuilderQuery implements AsyncHaving {
+  AsyncHavingImpl({
+    required AsyncBuilderQuery query,
+    required ExpressionInterface expression,
+  }) : super(query: query, having: expression);
+
+  @override
+  AsyncOrderBy orderBy(
+    OrderingInterface ordering0, [
+    OrderingInterface? ordering1,
+    OrderingInterface? ordering2,
+    OrderingInterface? ordering3,
+    OrderingInterface? ordering4,
+    OrderingInterface? ordering5,
+    OrderingInterface? ordering6,
+    OrderingInterface? ordering7,
+    OrderingInterface? ordering8,
+    OrderingInterface? ordering9,
+  ]) =>
+      orderByAll([
+        ordering0,
+        ordering1,
+        ordering2,
+        ordering3,
+        ordering4,
+        ordering5,
+        ordering6,
+        ordering7,
+        ordering8,
+        ordering9,
+      ].whereType());
+
+  @override
+  AsyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
+      AsyncOrderByImpl(query: this, orderings: orderings);
+
+  @override
+  AsyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
+      AsyncLimitImpl(query: this, limit: limit, offset: offset);
 }

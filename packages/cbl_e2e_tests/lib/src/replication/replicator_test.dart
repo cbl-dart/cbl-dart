@@ -13,13 +13,13 @@ import '../utils/test_document.dart';
 void main() {
   setupTestBinding();
 
-  group('Replicator', () {
+  group('SyncReplicator', () {
     setupTestDocument();
 
     test('create Replicator smoke test', () async {
-      final db = openTestDb('CreateReplicatorSmoke');
+      final db = openSyncTestDb('CreateReplicatorSmoke');
 
-      final repl = Replicator(ReplicatorConfiguration(
+      final repl = SyncReplicator(ReplicatorConfiguration(
         database: db,
         target: UrlEndpoint(testSyncGatewayUrl),
         replicatorType: ReplicatorType.pushAndPull,
@@ -44,12 +44,12 @@ void main() {
     });
 
     test('config returns copy', () {
-      final db = openTestDb(null);
+      final db = openSyncTestDb(null);
       final config = ReplicatorConfiguration(
         database: db,
         target: UrlEndpoint(testSyncGatewayUrl),
       );
-      final repl = Replicator(config);
+      final repl = SyncReplicator(config);
       final configA = repl.config;
       final configB = repl.config;
       expect(configA, isNot(same(config)));
@@ -57,8 +57,8 @@ void main() {
     });
 
     test('continuous replication', () {
-      final pushDb = openTestDb('ContinuousReplication-Push');
-      final pullDb = openTestDb('ContinuousReplication-Pull');
+      final pushDb = openSyncTestDb('ContinuousReplication-Push');
+      final pullDb = openSyncTestDb('ContinuousReplication-Pull');
 
       final pusher = pushDb.createTestReplicator(
         replicatorType: ReplicatorType.push,
@@ -91,7 +91,7 @@ void main() {
     });
 
     test('listen to query while replicator is pulling', () {
-      final pullDb = openTestDb('ContinuousReplication-Pull');
+      final pullDb = openSyncTestDb('ContinuousReplication-Pull');
 
       final puller = pullDb.createTestReplicator(
         replicatorType: ReplicatorType.pull,
@@ -108,8 +108,8 @@ void main() {
       // Sync pull db  with server
       // => pull db contains doc A
 
-      final pushDb = openTestDb('ReplicationWithDocumentIds-Push');
-      final pullDb = openTestDb('ReplicationWithDocumentIds-Pull');
+      final pushDb = openSyncTestDb('ReplicationWithDocumentIds-Push');
+      final pullDb = openSyncTestDb('ReplicationWithDocumentIds-Pull');
 
       final docA = MutableDocument();
       pushDb.saveDocument(docA);
@@ -137,8 +137,8 @@ void main() {
       // Sync pull db with server with channels == ['A']
       // => pull db contains doc A
 
-      final pushDb = openTestDb('ReplicationWithChannels-Push');
-      final pullDb = openTestDb('ReplicationWithChannels-Push');
+      final pushDb = openSyncTestDb('ReplicationWithChannels-Push');
+      final pullDb = openSyncTestDb('ReplicationWithChannels-Push');
 
       final docA = MutableDocument({'channels': 'A'});
       pushDb.saveDocument(docA);
@@ -161,8 +161,8 @@ void main() {
     });
 
     test('use pushFilter to filter pushed documents', () async {
-      final pushDb = openTestDb('ReplicationWithPushFilter-Push');
-      final pullDb = openTestDb('ReplicationWithPushFilter-Pull');
+      final pushDb = openSyncTestDb('ReplicationWithPushFilter-Push');
+      final pullDb = openSyncTestDb('ReplicationWithPushFilter-Pull');
 
       final docA = MutableDocument();
       pushDb.saveDocument(docA);
@@ -195,8 +195,10 @@ void main() {
     test('pushFilter exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(() async {
-        final pushDb = openTestDb('PushFilterExceptionHandling-Throws-Push');
-        final pullDb = openTestDb('PushFilterExceptionHandling-Throws-Pull');
+        final pushDb =
+            openSyncTestDb('PushFilterExceptionHandling-Throws-Push');
+        final pullDb =
+            openSyncTestDb('PushFilterExceptionHandling-Throws-Pull');
 
         final doc = MutableDocument();
         pushDb.saveDocument(doc);
@@ -225,8 +227,8 @@ void main() {
     });
 
     test('use pullFilter to filter pulled documents', () async {
-      final pushDb = openTestDb('PullFilterExceptionHandling-Push');
-      final pullDb = openTestDb('PullFilterExceptionHandling-Pull');
+      final pushDb = openSyncTestDb('PullFilterExceptionHandling-Push');
+      final pullDb = openSyncTestDb('PullFilterExceptionHandling-Pull');
 
       final docA = MutableDocument();
       pushDb.saveDocument(docA);
@@ -259,8 +261,8 @@ void main() {
     test('pullFilter exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(() async {
-        final pushDb = openTestDb('ReplicationWithPullFilter-Throws-Push');
-        final pullDb = openTestDb('ReplicationWithPullFilter-Throws-Pull');
+        final pushDb = openSyncTestDb('ReplicationWithPullFilter-Throws-Push');
+        final pullDb = openSyncTestDb('ReplicationWithPullFilter-Throws-Pull');
 
         final doc = MutableDocument();
         pushDb.saveDocument(doc);
@@ -298,7 +300,7 @@ void main() {
       // Sync db A with server
       // => Conflict in db A
 
-      final dbA = openTestDb('ConflictResolver-DB-A');
+      final dbA = openSyncTestDb('ConflictResolver-DB-A');
       final replicatorA = dbA.createTestReplicator(
         conflictResolver: expectAsync1((conflict) {
           expect(conflict.documentId, testDocumentId);
@@ -308,7 +310,7 @@ void main() {
         }),
       );
 
-      final dbB = openTestDb('ConflictResolver-DB-B');
+      final dbB = openSyncTestDb('ConflictResolver-DB-B');
       final replicatorB = dbB.createTestReplicator();
 
       dbA.writeTestDocument('DB-A-1');
@@ -325,14 +327,14 @@ void main() {
     test('conflict resolver exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(() async {
-        final dbA = openTestDb('ConflictResolver-Exception-Handling-A');
+        final dbA = openSyncTestDb('ConflictResolver-Exception-Handling-A');
         final replicatorA = dbA.createTestReplicator(
           conflictResolver: expectAsync1((conflict) {
             throw 'Conflict resolver failed';
           }),
         );
 
-        final dbB = openTestDb('ConflictResolver-Exception-Handling-B');
+        final dbB = openSyncTestDb('ConflictResolver-Exception-Handling-B');
         final replicatorB = dbB.createTestReplicator();
 
         dbA.writeTestDocument('DB-A-1');
@@ -349,7 +351,7 @@ void main() {
     });
 
     test('status returns the current status of the replicator', () {
-      final db = openTestDb('GetReplicatorStatus');
+      final db = openSyncTestDb('GetReplicatorStatus');
       final replicator = db.createTestReplicator();
       final status = replicator.status;
       expect(status.activity, ReplicatorActivityLevel.stopped);
@@ -359,7 +361,7 @@ void main() {
     });
 
     test('changes emits when the replicators status changes', () {
-      final db = openTestDb('ReplicatorStatusChanges');
+      final db = openSyncTestDb('ReplicatorStatusChanges');
       final replicator = db.createTestReplicator();
 
       expect(
@@ -372,7 +374,7 @@ void main() {
 
     test('pendingDocumentIds returns ids of documents waiting to be pushed',
         () {
-      final db = openTestDb('PendingDocumentIds');
+      final db = openSyncTestDb('PendingDocumentIds');
       final replicator = db.createTestReplicator();
       final doc = MutableDocument();
       db.saveDocument(doc);
@@ -382,7 +384,7 @@ void main() {
 
     test('isDocumentPending returns whether a document is waiting to be pushed',
         () {
-      final db = openTestDb('IsDocumentPending');
+      final db = openSyncTestDb('IsDocumentPending');
       final replicator = db.createTestReplicator();
       final doc = MutableDocument();
       db.saveDocument(doc);
@@ -392,7 +394,7 @@ void main() {
     test(
         'documentReplications emits events when documents have been replicated',
         () {
-      final db = openTestDb('DocumentReplications');
+      final db = openSyncTestDb('DocumentReplications');
       final replicator = db.createTestReplicator(
         replicatorType: ReplicatorType.push,
       );
@@ -415,7 +417,7 @@ void main() {
     });
 
     test('start and stop', () async {
-      final db = openTestDb('Replicator-Start-Stop');
+      final db = openSyncTestDb('Replicator-Start-Stop');
       final repl = db.createTestReplicator(continuous: true);
 
       await repl.driveToStatus(

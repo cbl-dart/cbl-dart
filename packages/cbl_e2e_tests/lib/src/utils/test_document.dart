@@ -21,7 +21,7 @@ Matcher isTestDocument(String value) => isA<Document>()
     .having((it) => it.id, 'id', testDocumentId)
     .having((it) => it.toPlainMap(), 'toMap()', {'value': value});
 
-extension TestDocumentDatabaseExtension on Database {
+extension TestDocumentDatabaseExtension on SyncDatabase {
   /// Writes [value] in the properties of the test document. If its does not
   /// exist already in this database, it is created.
   Document writeTestDocument(String value) {

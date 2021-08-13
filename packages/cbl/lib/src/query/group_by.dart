@@ -12,26 +12,112 @@ import 'router/order_by_router.dart';
 abstract class GroupBy
     implements Query, HavingRouter, OrderByRouter, LimitRouter {}
 
+/// Version of [GroupBy] for building [SyncQuery]s.
+abstract class SyncGroupBy
+    implements
+        GroupBy,
+        SyncQuery,
+        SyncHavingRouter,
+        SyncOrderByRouter,
+        SyncLimitRouter {}
+
+/// Version of [GroupBy] for building [AsyncQuery]s.
+abstract class AsyncGroupBy
+    implements
+        GroupBy,
+        AsyncQuery,
+        AsyncHavingRouter,
+        AsyncOrderByRouter,
+        AsyncLimitRouter {}
+
 // === Impl ====================================================================
 
-class GroupByImpl extends BuilderQuery implements GroupBy {
-  GroupByImpl({
-    required BuilderQuery query,
+class SyncGroupByImpl extends SyncBuilderQuery implements SyncGroupBy {
+  SyncGroupByImpl({
+    required SyncBuilderQuery query,
     required Iterable<ExpressionInterface> expressions,
   }) : super(query: query, groupBys: expressions);
 
   @override
-  Having having(ExpressionInterface expression) =>
-      HavingImpl(query: this, expression: expression);
+  SyncHaving having(ExpressionInterface expression) =>
+      SyncHavingImpl(query: this, expression: expression);
 
   @override
-  OrderBy orderByOne(OrderingInterface ordering) => orderBy([ordering]);
+  SyncOrderBy orderBy(
+    OrderingInterface ordering0, [
+    OrderingInterface? ordering1,
+    OrderingInterface? ordering2,
+    OrderingInterface? ordering3,
+    OrderingInterface? ordering4,
+    OrderingInterface? ordering5,
+    OrderingInterface? ordering6,
+    OrderingInterface? ordering7,
+    OrderingInterface? ordering8,
+    OrderingInterface? ordering9,
+  ]) =>
+      orderByAll([
+        ordering0,
+        ordering1,
+        ordering2,
+        ordering3,
+        ordering4,
+        ordering5,
+        ordering6,
+        ordering7,
+        ordering8,
+        ordering9,
+      ].whereType());
 
   @override
-  OrderBy orderBy(Iterable<OrderingInterface> orderings) =>
-      OrderByImpl(query: this, orderings: orderings);
+  SyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
+      SyncOrderByImpl(query: this, orderings: orderings);
 
   @override
-  Limit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
-      LimitImpl(query: this, limit: limit, offset: offset);
+  SyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
+      SyncLimitImpl(query: this, limit: limit, offset: offset);
+}
+
+class AsyncGroupByImpl extends AsyncBuilderQuery implements AsyncGroupBy {
+  AsyncGroupByImpl({
+    required AsyncBuilderQuery query,
+    required Iterable<ExpressionInterface> expressions,
+  }) : super(query: query, groupBys: expressions);
+
+  @override
+  AsyncHaving having(ExpressionInterface expression) =>
+      AsyncHavingImpl(query: this, expression: expression);
+
+  @override
+  AsyncOrderBy orderBy(
+    OrderingInterface ordering0, [
+    OrderingInterface? ordering1,
+    OrderingInterface? ordering2,
+    OrderingInterface? ordering3,
+    OrderingInterface? ordering4,
+    OrderingInterface? ordering5,
+    OrderingInterface? ordering6,
+    OrderingInterface? ordering7,
+    OrderingInterface? ordering8,
+    OrderingInterface? ordering9,
+  ]) =>
+      orderByAll([
+        ordering0,
+        ordering1,
+        ordering2,
+        ordering3,
+        ordering4,
+        ordering5,
+        ordering6,
+        ordering7,
+        ordering8,
+        ordering9,
+      ].whereType());
+
+  @override
+  AsyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
+      AsyncOrderByImpl(query: this, orderings: orderings);
+
+  @override
+  AsyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
+      AsyncLimitImpl(query: this, limit: limit, offset: offset);
 }

@@ -14,10 +14,10 @@ final testSyncGatewayUrl = Uri.parse('ws://localhost:4984/db');
 Future<void> preReplicatorStopDelay() =>
     Future<void>.delayed(Duration(milliseconds: 500));
 
-extension ReplicatorUtilsDatabaseExtension on Database {
+extension ReplicatorUtilsDatabaseExtension on SyncDatabase {
   /// Creates a replicator which is configured with the test sync gateway
   /// endpoint.
-  Replicator createTestReplicator({
+  SyncReplicator createTestReplicator({
     ReplicatorType? replicatorType,
     bool? continuous,
     List<String>? channels,
@@ -26,7 +26,7 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     ReplicationFilter? pullFilter,
     ConflictResolverFunction? conflictResolver,
   }) {
-    final replicator = Replicator(ReplicatorConfiguration(
+    final replicator = SyncReplicator(ReplicatorConfiguration(
       database: this,
       target: UrlEndpoint(testSyncGatewayUrl),
       replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
@@ -65,7 +65,7 @@ Matcher hasActivityLevel(
 ) =>
     isReplicatorStatus.having((it) => it.activity, 'activity', activityLevel);
 
-extension ReplicatorUtilsExtension on Replicator {
+extension ReplicatorUtilsExtension on SyncReplicator {
   /// Returns a stream of the [status]se of this replicator by polling it.
   ///
   /// Polling can be more reliable when it is not possible to listen to

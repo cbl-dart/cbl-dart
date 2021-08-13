@@ -24,40 +24,236 @@ abstract class From
         OrderByRouter,
         LimitRouter {}
 
+/// Version of [From] for building [SyncQuery]s.
+abstract class SyncFrom
+    implements
+        From,
+        SyncQuery,
+        SyncJoinRouter,
+        SyncWhereRouter,
+        SyncGroupByRouter,
+        SyncOrderByRouter,
+        SyncLimitRouter {}
+
+/// Version of [From] for building [AsyncQuery]s.
+abstract class AsyncFrom
+    implements
+        From,
+        AsyncQuery,
+        AsyncJoinRouter,
+        AsyncWhereRouter,
+        AsyncGroupByRouter,
+        AsyncOrderByRouter,
+        AsyncLimitRouter {}
+
 // === Impl ====================================================================
 
-class FromImpl extends BuilderQuery implements From {
-  FromImpl({
-    required BuilderQuery query,
+class SyncFromImpl extends SyncBuilderQuery implements SyncFrom {
+  SyncFromImpl({
+    required SyncBuilderQuery query,
     required DataSourceInterface from,
   }) : super(query: query, from: from);
 
   @override
-  Joins join(JoinInterface join) => joinMany([join]);
+  SyncJoins join(
+    JoinInterface join0, [
+    JoinInterface? join1,
+    JoinInterface? join2,
+    JoinInterface? join3,
+    JoinInterface? join4,
+    JoinInterface? join5,
+    JoinInterface? join6,
+    JoinInterface? join7,
+    JoinInterface? join8,
+    JoinInterface? join9,
+  ]) =>
+      joinAll([
+        join0,
+        join1,
+        join2,
+        join3,
+        join4,
+        join5,
+        join6,
+        join7,
+        join8,
+        join9,
+      ].whereType());
 
   @override
-  Joins joinMany(Iterable<JoinInterface> joins) =>
-      JoinsImpl(query: this, joins: joins);
+  SyncJoins joinAll(Iterable<JoinInterface> joins) =>
+      SyncJoinsImpl(query: this, joins: joins);
 
   @override
-  Where where(ExpressionInterface expression) =>
-      WhereImpl(query: this, expression: expression);
+  SyncWhere where(ExpressionInterface expression) =>
+      SyncWhereImpl(query: this, expression: expression);
 
   @override
-  GroupBy groupBy(ExpressionInterface expression) => groupByMany([expression]);
+  SyncGroupBy groupBy(
+    ExpressionInterface expression0, [
+    ExpressionInterface? expression1,
+    ExpressionInterface? expression2,
+    ExpressionInterface? expression3,
+    ExpressionInterface? expression4,
+    ExpressionInterface? expression5,
+    ExpressionInterface? expression6,
+    ExpressionInterface? expression7,
+    ExpressionInterface? expression8,
+    ExpressionInterface? expression9,
+  ]) =>
+      groupByAll([
+        expression0,
+        expression1,
+        expression2,
+        expression3,
+        expression4,
+        expression5,
+        expression6,
+        expression7,
+        expression8,
+        expression9,
+      ].whereType());
 
   @override
-  GroupBy groupByMany(Iterable<ExpressionInterface> expressions) =>
-      GroupByImpl(query: this, expressions: expressions);
+  SyncGroupBy groupByAll(Iterable<ExpressionInterface> expressions) =>
+      SyncGroupByImpl(query: this, expressions: expressions);
 
   @override
-  OrderBy orderByOne(OrderingInterface ordering) => orderBy([ordering]);
+  SyncOrderBy orderBy(
+    OrderingInterface ordering0, [
+    OrderingInterface? ordering1,
+    OrderingInterface? ordering2,
+    OrderingInterface? ordering3,
+    OrderingInterface? ordering4,
+    OrderingInterface? ordering5,
+    OrderingInterface? ordering6,
+    OrderingInterface? ordering7,
+    OrderingInterface? ordering8,
+    OrderingInterface? ordering9,
+  ]) =>
+      orderByAll([
+        ordering0,
+        ordering1,
+        ordering2,
+        ordering3,
+        ordering4,
+        ordering5,
+        ordering6,
+        ordering7,
+        ordering8,
+        ordering9,
+      ].whereType());
 
   @override
-  OrderBy orderBy(Iterable<OrderingInterface> orderings) =>
-      OrderByImpl(query: this, orderings: orderings);
+  SyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
+      SyncOrderByImpl(query: this, orderings: orderings);
 
   @override
-  Limit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
-      LimitImpl(query: this, limit: limit, offset: offset);
+  SyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
+      SyncLimitImpl(query: this, limit: limit, offset: offset);
+}
+
+class AsyncFromImpl extends AsyncBuilderQuery implements AsyncFrom {
+  AsyncFromImpl({
+    required AsyncBuilderQuery query,
+    required DataSourceInterface from,
+  }) : super(query: query, from: from);
+
+  @override
+  AsyncJoins join(
+    JoinInterface join0, [
+    JoinInterface? join1,
+    JoinInterface? join2,
+    JoinInterface? join3,
+    JoinInterface? join4,
+    JoinInterface? join5,
+    JoinInterface? join6,
+    JoinInterface? join7,
+    JoinInterface? join8,
+    JoinInterface? join9,
+  ]) =>
+      joinAll([
+        join0,
+        join1,
+        join2,
+        join3,
+        join4,
+        join5,
+        join6,
+        join7,
+        join8,
+        join9,
+      ].whereType());
+
+  @override
+  AsyncJoins joinAll(Iterable<JoinInterface> joins) =>
+      AsyncJoinsImpl(query: this, joins: joins);
+
+  @override
+  AsyncWhere where(ExpressionInterface expression) =>
+      AsyncWhereImpl(query: this, expression: expression);
+
+  @override
+  AsyncGroupBy groupBy(
+    ExpressionInterface expression0, [
+    ExpressionInterface? expression1,
+    ExpressionInterface? expression2,
+    ExpressionInterface? expression3,
+    ExpressionInterface? expression4,
+    ExpressionInterface? expression5,
+    ExpressionInterface? expression6,
+    ExpressionInterface? expression7,
+    ExpressionInterface? expression8,
+    ExpressionInterface? expression9,
+  ]) =>
+      groupByAll([
+        expression0,
+        expression1,
+        expression2,
+        expression3,
+        expression4,
+        expression5,
+        expression6,
+        expression7,
+        expression8,
+        expression9,
+      ].whereType());
+
+  @override
+  AsyncGroupBy groupByAll(Iterable<ExpressionInterface> expressions) =>
+      AsyncGroupByImpl(query: this, expressions: expressions);
+
+  @override
+  AsyncOrderBy orderBy(
+    OrderingInterface ordering0, [
+    OrderingInterface? ordering1,
+    OrderingInterface? ordering2,
+    OrderingInterface? ordering3,
+    OrderingInterface? ordering4,
+    OrderingInterface? ordering5,
+    OrderingInterface? ordering6,
+    OrderingInterface? ordering7,
+    OrderingInterface? ordering8,
+    OrderingInterface? ordering9,
+  ]) =>
+      orderByAll([
+        ordering0,
+        ordering1,
+        ordering2,
+        ordering3,
+        ordering4,
+        ordering5,
+        ordering6,
+        ordering7,
+        ordering8,
+        ordering9,
+      ].whereType());
+
+  @override
+  AsyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
+      AsyncOrderByImpl(query: this, orderings: orderings);
+
+  @override
+  AsyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset}) =>
+      AsyncLimitImpl(query: this, limit: limit, offset: offset);
 }

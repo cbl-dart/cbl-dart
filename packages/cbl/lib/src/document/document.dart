@@ -73,17 +73,17 @@ class DocumentMContext extends MContext implements DatabaseMContext {
   final DocumentMixin document;
 
   @override
-  Object get database => document.database!;
+  Database get database => document.database!;
 }
 
 mixin DocumentMixin implements Document {
   final bool _isMutable = false;
   final String _typeName = 'Document';
 
-  Object? get database => _database;
-  Object? _database;
+  Database? get database => _database;
+  Database? _database;
 
-  set database(Object? database) {
+  set database(Database? database) {
     if (_database != database) {
       if (_database != null) {
         throw StateError(
@@ -281,7 +281,7 @@ class DocumentImpl
         NativeResourceMixin<CBLDocument>,
         DocumentMixin {
   DocumentImpl({
-    required DatabaseImpl database,
+    required FfiDatabase database,
     required Pointer<CBLDocument> doc,
     bool adopt = true,
     required String debugCreator,
@@ -293,7 +293,7 @@ class DocumentImpl
         );
 
   DocumentImpl._({
-    DatabaseImpl? database,
+    FfiDatabase? database,
     required Pointer<CBLDocument> doc,
     required bool adopt,
     required String debugName,
@@ -336,7 +336,7 @@ class DocumentImpl
 
 class MutableDocumentImpl extends DocumentImpl with MutableDocumentMixin {
   MutableDocumentImpl({
-    DatabaseImpl? database,
+    FfiDatabase? database,
     required Pointer<CBLMutableDocument> doc,
     bool adopt = true,
     required String debugCreator,

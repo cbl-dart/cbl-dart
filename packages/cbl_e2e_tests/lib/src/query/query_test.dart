@@ -8,19 +8,19 @@ import '../utils/database_utils.dart';
 void main() {
   setupTestBinding();
 
-  group('Query', () {
-    late Database db;
+  group('SyncQuery', () {
+    late SyncDatabase db;
 
     setUp(() {
-      db = openTestDb('Query|Common');
+      db = openSyncTestDb('Query|Common');
     });
 
     test('execute simple query', () {
-      final db = openTestDb('ExecuteSimpleQuery');
+      final db = openSyncTestDb('ExecuteSimpleQuery');
       db.saveDocument(MutableDocument({'a': 0}));
       db.saveDocument(MutableDocument({'a': 1}));
 
-      final q = Query(db, 'SELECT a FROM _ ORDER BY a');
+      final q = SyncQuery.fromN1ql(db, 'SELECT a FROM _ ORDER BY a');
 
       expect(q.execute().map((e) => e.toPlainMap()).toList(), [
         {'a': 0},
@@ -29,7 +29,8 @@ void main() {
     });
 
     test('execute query with parameters', () {
-      final q = Query(db, r'SELECT doc FROM _ WHERE META().id = $ID');
+      final q =
+          SyncQuery.fromN1ql(db, r'SELECT doc FROM _ WHERE META().id = $ID');
       db.saveDocument(MutableDocument.withId('A'));
 
       q.parameters = Parameters({'ID': 'A'});
@@ -40,7 +41,8 @@ void main() {
     });
 
     test('listen to query with parameters', () async {
-      final q = Query(db, r'SELECT doc FROM _ WHERE META().id = $ID');
+      final q =
+          SyncQuery.fromN1ql(db, r'SELECT doc FROM _ WHERE META().id = $ID');
       db.saveDocument(MutableDocument.withId('A'));
 
       q.parameters = Parameters({'ID': 'A'});
@@ -51,7 +53,7 @@ void main() {
     });
 
     test('explain returns the query plan explanation', () {
-      final q = Query(db, 'SELECT doc FROM _');
+      final q = SyncQuery.fromN1ql(db, 'SELECT doc FROM _');
 
       expect(
         q.explain(),
@@ -66,7 +68,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
     });
 
     test('listener is notified of changes', () {
-      final q = Query(db, 'SELECT a FROM _ AS a WHERE a.b = "c"');
+      final q = SyncQuery.fromN1ql(db, 'SELECT a FROM _ AS a WHERE a.b = "c"');
 
       final doc = MutableDocument({'b': 'c'});
       final result = {'a': doc.toPlainMap()};
@@ -90,7 +92,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
 
     test('bad query: error position highlighting', () {
       expect(
-        () => Query(db, 'SELECT foo()'),
+        () => SyncQuery.fromN1ql(db, 'SELECT foo()'),
         throwsA(isA<DatabaseException>().having(
           (it) => it.toString(),
           'toString()',
@@ -105,7 +107,7 @@ SELECT foo()
 
     test('toString', () {
       expect(
-        Query(db, 'SELECT * FROM _').toString(),
+        SyncQuery.fromN1ql(db, 'SELECT * FROM _').toString(),
         'Query(n1ql: SELECT * FROM _)',
       );
     });

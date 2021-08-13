@@ -1,13 +1,65 @@
 import '../join.dart';
 import '../joins.dart';
+import '../query.dart';
 
 /// Interface for creating and chaining `JOIN` clauses.
 abstract class JoinRouter {
   /// Creates and returns a `JOIN` clause query component with the given
-  /// [join].
-  Joins join(JoinInterface join);
+  /// joins.
+  Joins join(
+    JoinInterface join0, [
+    JoinInterface? join1,
+    JoinInterface? join2,
+    JoinInterface? join3,
+    JoinInterface? join4,
+    JoinInterface? join5,
+    JoinInterface? join6,
+    JoinInterface? join7,
+    JoinInterface? join8,
+    JoinInterface? join9,
+  ]);
 
   /// Creates and returns a query component representing many `JOIN` clauses
   /// with the given [joins].
-  Joins joinMany(Iterable<JoinInterface> joins);
+  Joins joinAll(Iterable<JoinInterface> joins);
+}
+
+/// Version of [JoinRouter] for building [SyncQuery]s.
+abstract class SyncJoinRouter implements JoinRouter {
+  @override
+  SyncJoins join(
+    JoinInterface join0, [
+    JoinInterface? join1,
+    JoinInterface? join2,
+    JoinInterface? join3,
+    JoinInterface? join4,
+    JoinInterface? join5,
+    JoinInterface? join6,
+    JoinInterface? join7,
+    JoinInterface? join8,
+    JoinInterface? join9,
+  ]);
+
+  @override
+  SyncJoins joinAll(Iterable<JoinInterface> joins);
+}
+
+/// Version of [JoinRouter] for building [AsyncQuery]s.
+abstract class AsyncJoinRouter implements JoinRouter {
+  @override
+  AsyncJoins join(
+    JoinInterface join0, [
+    JoinInterface? join1,
+    JoinInterface? join2,
+    JoinInterface? join3,
+    JoinInterface? join4,
+    JoinInterface? join5,
+    JoinInterface? join6,
+    JoinInterface? join7,
+    JoinInterface? join8,
+    JoinInterface? join9,
+  ]);
+
+  @override
+  AsyncJoins joinAll(Iterable<JoinInterface> joins);
 }
