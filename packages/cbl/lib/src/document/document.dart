@@ -51,62 +51,120 @@ abstract class MutableDocument implements Document, MutableDictionaryInterface {
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument([Map<String, Object?>? data]) =>
-      MutableDocumentImpl.create(data: data, debugCreator: 'MutableDocument()');
+      MutableDelegateDocument(NewDocumentDelegate(), data: data);
 
   /// Creates a new [MutableDocument] with a given [id], optionally
   /// initialized with [data].
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument.withId(String id, [Map<String, Object?>? data]) =>
-      MutableDocumentImpl.create(
-        id: id,
-        data: data,
-        debugCreator: 'MutableDocument.withId()',
-      );
+      MutableDelegateDocument(NewDocumentDelegate(id), data: data);
 }
 
-/// The context for [MCollection]s within a [DocumentImpl].
+abstract class DocumentDelegate {
+  String get id;
+
+  String? get revisionId;
+
+  int get sequence;
+
+  Uint8List get properties;
+
+  set properties(Uint8List value);
+
+  DocumentDelegate toMutable();
+}
+
+class NewDocumentDelegate implements DocumentDelegate {
+  NewDocumentDelegate([String? id]) : id = id ?? createUuid();
+
+  @override
+  final id;
+
+  @override
+  final revisionId = null;
+
+  @override
+  final sequence = 0;
+
+  @override
+  late Uint8List properties = _emptyProperties;
+
+  @override
+  DocumentDelegate toMutable() => this;
+
+  static late final _emptyProperties = _createEmptyProperties();
+
+  static Uint8List _createEmptyProperties() {
+    final encoder = fl.FleeceEncoder();
+    encoder
+      ..beginDict(0)
+      ..endDict();
+    return encoder.finish().asUint8List();
+  }
+}
+
+/// The context for [MCollection]s within a [DelegateDocument].
 class DocumentMContext extends MContext implements DatabaseMContext {
   DocumentMContext(this.document);
 
-  /// The [DocumentImpl] to which [MCollection]s with this context belong to.
-  final DocumentMixin document;
+  /// The [DelegateDocument] to which [MCollection]s with this context belong
+  /// to.
+  final DelegateDocument document;
 
   @override
   Database get database => document.database!;
 }
 
-mixin DocumentMixin implements Document {
-  final bool _isMutable = false;
-  final String _typeName = 'Document';
+class DelegateDocument with IterableMixin<String> implements Document {
+  DelegateDocument(
+    DocumentDelegate delegate, {
+    Database? database,
+  })  : _delegate = delegate,
+        _database = database {
+    _initPropertiesDictionary(delegate.properties);
+  }
+
+  DocumentDelegate get delegate => _delegate;
+  DocumentDelegate _delegate;
+
+  void setDelegate(
+    DocumentDelegate delegate, {
+    bool updateDocumentProperties = true,
+  }) {
+    if (_delegate == delegate) {
+      return;
+    }
+
+    _delegate = delegate;
+    if (updateDocumentProperties) {
+      _initPropertiesDictionary(delegate.properties);
+    }
+  }
 
   Database? get database => _database;
   Database? _database;
 
   set database(Database? database) {
-    if (_database != database) {
-      if (_database != null) {
-        throw StateError(
-          'The document cannot be used with  $database because it already '
-          'belongs to $_database: $this',
-        );
-      }
-      _database = database;
+    if (_database == database) {
+      return;
     }
+
+    if (_database != null) {
+      throw StateError(
+        'The document cannot be used with  $database because it already '
+        'belongs to $_database: $this',
+      );
+    }
+    _database = database;
   }
 
-  void setPropertiesFromData(Uint8List data) {
+  final bool _isMutable = false;
+  final String _typeName = 'Document';
+
+  void _initPropertiesDictionary(Uint8List data) {
     _root = MRoot.fromData(
       data,
-      context: DocumentMContext(this),
-      isMutable: _isMutable,
-    );
-    _properties = _root.asNative as Dictionary;
-  }
-
-  void setPropertiesFromDict(Pointer<FLDict> dict) {
-    _root = MRoot.fromValue(
-      dict.cast(),
       context: DocumentMContext(this),
       isMutable: _isMutable,
     );
@@ -116,6 +174,15 @@ mixin DocumentMixin implements Document {
   late MRoot _root;
 
   late Dictionary _properties;
+
+  @override
+  String get id => _delegate.id;
+
+  @override
+  String? get revisionId => _delegate.revisionId;
+
+  @override
+  int get sequence => _delegate.sequence;
 
   @override
   int get length => _properties.length;
@@ -160,12 +227,18 @@ mixin DocumentMixin implements Document {
   Map<String, Object?> toPlainMap() => _properties.toPlainMap();
 
   @override
+  MutableDocument toMutable() => MutableDelegateDocument(
+        delegate.toMutable(),
+        database: _database,
+      );
+
+  @override
   Iterator<String> get iterator => _properties.iterator;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DocumentMixin &&
+      other is DelegateDocument &&
           id == other.id &&
           (!_isMutable && !other._isMutable
               ? revisionId == other.revisionId
@@ -182,7 +255,22 @@ mixin DocumentMixin implements Document {
       ')';
 }
 
-mixin MutableDocumentMixin on DocumentMixin implements MutableDocument {
+class MutableDelegateDocument extends DelegateDocument
+    implements MutableDocument {
+  MutableDelegateDocument(
+    DocumentDelegate delegate, {
+    Database? database,
+    Map<String, Object?>? data,
+  }) : super(delegate, database: database) {
+    if (data != null) {
+      setData(data);
+    }
+  }
+
+  void flushPropertiesToDelegate() {
+    delegate.properties = _encodeProperties().asUint8List();
+  }
+
   @override
   final _typeName = 'MutableDocument';
 
@@ -192,18 +280,12 @@ mixin MutableDocumentMixin on DocumentMixin implements MutableDocument {
   late MutableDictionary _mutableProperties;
 
   @override
-  void setPropertiesFromData(Uint8List data) {
-    super.setPropertiesFromData(data);
+  void _initPropertiesDictionary(Uint8List data) {
+    super._initPropertiesDictionary(data);
     _mutableProperties = _properties as MutableDictionary;
   }
 
-  @override
-  void setPropertiesFromDict(Pointer<FLDict> dict) {
-    super.setPropertiesFromDict(dict);
-    _mutableProperties = _properties as MutableDictionary;
-  }
-
-  SliceResult encodeProperties() {
+  SliceResult _encodeProperties() {
     assert(database != null);
     final encoder = fl.FleeceEncoder();
     encoder.extraInfo = FleeceEncoderContext(
@@ -275,36 +357,24 @@ mixin MutableDocumentMixin on DocumentMixin implements MutableDocument {
   MutableDocument toMutable() => this;
 }
 
-class DocumentImpl
-    with
-        IterableMixin<String>,
-        NativeResourceMixin<CBLDocument>,
-        DocumentMixin {
-  DocumentImpl({
-    required FfiDatabase database,
+class FfiDocumentDelegate
+    with NativeResourceMixin<CBLDocument>
+    implements DocumentDelegate {
+  FfiDocumentDelegate({
     required Pointer<CBLDocument> doc,
     bool adopt = true,
     required String debugCreator,
-  }) : this._(
-          database: database,
-          doc: doc,
-          adopt: adopt,
-          debugName: 'Document(creator: $debugCreator)',
-        );
-
-  DocumentImpl._({
-    FfiDatabase? database,
-    required Pointer<CBLDocument> doc,
-    required bool adopt,
-    required String debugName,
   }) : native = CblObject(
           doc,
           adopt: adopt,
-          debugName: debugName,
-        ) {
-    this.database = database;
-    _loadProperties();
-  }
+          debugName: 'FfiDocumentDelegate(creator: $debugCreator)',
+        );
+
+  FfiDocumentDelegate.createMutable([String? id])
+      : this(
+          doc: _mutableDocumentBindings.createWithID(id).cast(),
+          debugCreator: 'FfiDocumentDelegate.mutable()',
+        );
 
   @override
   NativeObject<CBLDocument> native;
@@ -318,73 +388,81 @@ class DocumentImpl
   @override
   int get sequence => native.call(_documentBindings.sequence);
 
+  Uint8List? _properties;
+
   @override
-  MutableDocument toMutable() => MutableDocumentImpl(
-        doc: native.call(_mutableDocumentBindings.mutableCopy),
-        debugCreator: 'Document.toMutable()',
-      );
+  Uint8List get properties => _properties ??= _readProperties();
 
-  void _replaceNative(NativeObject<CBLDocument> native) {
-    this.native = native;
-    _loadProperties();
+  @override
+  set properties(Uint8List value) {
+    _writeProperties(value);
+    _properties = value;
   }
 
-  void _loadProperties() {
-    setPropertiesFromDict(native.call(_documentBindings.properties));
-  }
-}
+  Uint8List _readProperties() {
+    final dict = fl.Dict.fromPointer(native.call(_documentBindings.properties));
 
-class MutableDocumentImpl extends DocumentImpl with MutableDocumentMixin {
-  MutableDocumentImpl({
-    FfiDatabase? database,
-    required Pointer<CBLMutableDocument> doc,
-    bool adopt = true,
-    required String debugCreator,
-  }) : super._(
-          database: database,
-          doc: doc.cast(),
-          adopt: adopt,
-          debugName: 'MutableDocument(creator: $debugCreator)',
-        );
-
-  factory MutableDocumentImpl.create({
-    String? id,
-    Map<String, Object?>? data,
-    required String debugCreator,
-  }) {
-    id ??= createUuid();
-
-    final result = MutableDocumentImpl(
-      doc: _mutableDocumentBindings.createWithID(id),
-      debugCreator: debugCreator,
-    );
-
+    final data = dict.doc?.allocedData?.asUint8List();
     if (data != null) {
-      result.setData(data);
+      return data;
     }
 
-    return result;
+    return runNativeCalls(() {
+      return (fl.FleeceEncoder()..writeValue(dict.native.pointer))
+          .finish()
+          .asUint8List();
+    });
   }
 
-  void replaceNativeFrom(DocumentImpl document) {
-    _replaceNative(CblObject(
-      document.native.call(_mutableDocumentBindings.mutableCopy).cast(),
-      debugName: 'MutableDocument.replaceNativeFrom()',
-    ));
-  }
-
-  /// Encodes `_properties` and sets the result as the new properties of the
-  /// native `Document`.
-  void flushProperties() {
-    _writePropertiesFromData(encodeProperties().asUint8List());
-  }
-
-  void _writePropertiesFromData(Uint8List data) {
-    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
+  void _writeProperties(Uint8List value) {
+    final doc = fl.Doc.fromResultData(value, FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
+
     runNativeCalls(() => _mutableDocumentBindings.setProperties(
           native.pointer.cast(),
           dict.native.pointer.cast(),
         ));
+  }
+
+  @override
+  DocumentDelegate toMutable() => FfiDocumentDelegate(
+        doc: native.call(_mutableDocumentBindings.mutableCopy).cast(),
+        debugCreator: 'FfiDocumentDelegate.toMutable()',
+      );
+
+  static void replaceWithMutableCopy({
+    required DelegateDocument source,
+    required MutableDelegateDocument target,
+  }) {
+    final sourceDelegate = source.delegate as FfiDocumentDelegate;
+    target.setDelegate(sourceDelegate.toMutable());
+  }
+}
+
+extension FfiMutableDelegateDocumentExt on MutableDelegateDocument {
+  FfiDocumentDelegate prepareFfiDelegate() {
+    var currentDelegate = delegate;
+    if (currentDelegate is FfiDocumentDelegate) {
+      flushPropertiesToDelegate();
+      return currentDelegate;
+    }
+
+    if (currentDelegate is NewDocumentDelegate) {
+      flushPropertiesToDelegate();
+
+      final newDelegate = FfiDocumentDelegate.createMutable(delegate.id)
+        ..properties = currentDelegate.properties;
+
+      // We just copied the properties so there is no need to update the
+      // documents properties.
+      setDelegate(newDelegate, updateDocumentProperties: false);
+
+      return newDelegate;
+    }
+
+    throw StateError(
+      'DocumentDelegate of unexpected type ${delegate.runtimeType}. '
+      'This is a bug.',
+    );
   }
 }

@@ -389,6 +389,8 @@ typedef CBLDart_FLDoc_BindToDartObject = void Function(
   Pointer<FLDoc> doc,
 );
 
+typedef FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
+
 typedef FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
 
 class DocBindings extends Bindings {
@@ -405,6 +407,10 @@ class DocBindings extends Bindings {
         CBLDart_FLDoc_BindToDartObject_C, CBLDart_FLDoc_BindToDartObject>(
       'CBLDart_FLDoc_BindToDartObject',
     );
+    _getAllocedData =
+        libs.cbl.lookupFunction<FLDoc_GetAllocedData, FLDoc_GetAllocedData>(
+      'FLDoc_GetAllocedData',
+    );
     _getRoot = libs.cbl.lookupFunction<FLDoc_GetRoot, FLDoc_GetRoot>(
       'FLDoc_GetRoot',
     );
@@ -413,6 +419,7 @@ class DocBindings extends Bindings {
   late final CBLDart_FLDoc_FromResultData _fromResultData;
   late final CBLDart_FLDoc_FromJSON _fromJSON;
   late final CBLDart_FLDoc_BindToDartObject _bindToDartObject;
+  late final FLDoc_GetAllocedData _getAllocedData;
   late final FLDoc_GetRoot _getRoot;
 
   Pointer<FLDoc>? fromResultData(
@@ -436,6 +443,10 @@ class DocBindings extends Bindings {
 
   void bindToDartObject(Object object, Pointer<FLDoc> doc) {
     _bindToDartObject(object, doc);
+  }
+
+  FLSliceResult getAllocedData(Pointer<FLDoc> doc) {
+    return _getAllocedData(doc);
   }
 
   Pointer<FLValue> getRoot(Pointer<FLDoc> doc) {
