@@ -456,10 +456,12 @@ class FfiDatabase extends CBLDatabaseObject
   @override
   Document? document(String id) =>
       useSync(() => call((pointer) => _bindings.getDocument(pointer, id))
-          ?.let((pointer) => DocumentImpl(
+          ?.let((pointer) => DelegateDocument(
+                FfiDocumentDelegate(
+                  doc: pointer,
+                  debugCreator: 'FfiDatabase.document()',
+                ),
                 database: this,
-                doc: pointer,
-                debugCreator: 'FfiDatabase.document()',
               )));
 
   @override
@@ -467,17 +469,18 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   bool saveDocument(
-    covariant MutableDocumentImpl document, [
+    covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       useSync(() {
         document.database = this;
-        document.flushProperties();
+        final delegate = document.prepareFfiDelegate();
+
         return _catchConflictException(() {
           runNativeCalls(() {
             _bindings.saveDocumentWithConcurrencyControl(
               native.pointer,
-              document.native.pointer.cast(),
+              delegate.native.pointer.cast(),
               concurrencyControl.toCBLConcurrencyControl(),
             );
           });
@@ -486,7 +489,7 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   Future<bool> saveDocumentWithConflictHandler(
-    covariant MutableDocumentImpl document,
+    covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) =>
       use(() => _saveDocumentWithConflictHandler(
@@ -496,7 +499,7 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   bool saveDocumentWithConflictHandlerSync(
-    covariant MutableDocumentImpl document,
+    covariant MutableDelegateDocument document,
     SyncSaveConflictHandler conflictHandler,
   ) =>
       useSync(() {
@@ -509,7 +512,7 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   FutureOr<bool> _saveDocumentWithConflictHandler(
-    covariant MutableDocumentImpl document,
+    covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) {
     // Implementing the conflict resolution in Dart, instead of using
@@ -532,7 +535,7 @@ class FfiDatabase extends CBLDatabaseObject
         } else {
           // Load the conflicting document.
           final conflictingDocument =
-              this.document(document.id) as DocumentImpl?;
+              this.document(document.id) as DelegateDocument?;
 
           // Let conflict handler try resolving the conflict.
           final handlerDescision = conflictHandler(
@@ -564,16 +567,18 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   bool deleteDocument(
-    covariant DocumentImpl document, [
+    covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       useSync(() {
         document.database = this;
+        final delegate = document.delegate as FfiDocumentDelegate;
+
         return _catchConflictException(() {
           runNativeCalls(() {
             _bindings.deleteDocumentWithConcurrencyControl(
               native.pointer,
-              document.native.pointer.cast(),
+              delegate.native.pointer.cast(),
               concurrencyControl.toCBLConcurrencyControl(),
             );
           });
@@ -581,7 +586,7 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  void purgeDocument(covariant DocumentImpl document) => useSync(() {
+  void purgeDocument(covariant DelegateDocument document) => useSync(() {
         document.database = this;
         purgeDocumentById(document.id);
       });
@@ -734,8 +739,8 @@ bool _catchConflictException(void Function() fn) {
 }
 
 void mergeConflictingDocuments(
-  MutableDocumentImpl documentBeingSaved,
-  DocumentImpl? conflictingDocument,
+  MutableDelegateDocument documentBeingSaved,
+  DelegateDocument? conflictingDocument,
 ) {
   // Make a copy of the resolved properties.
   final resolvedProperties = {
@@ -744,12 +749,19 @@ void mergeConflictingDocuments(
   };
 
   // If the document was deleted it has to be recreated.
-  conflictingDocument ??=
-      MutableDocument.withId(documentBeingSaved.id) as MutableDocumentImpl;
+  conflictingDocument ??= MutableDelegateDocument(
+    FfiDocumentDelegate.createMutable(documentBeingSaved.id),
+  );
 
-  // Replace the underlying native document of the document being saved with
-  // that of the conflicting document.
-  documentBeingSaved
-    ..replaceNativeFrom(conflictingDocument)
-    ..setData(resolvedProperties);
+  // Replace the delegate of documentBeingSaved with a copy of that of
+  // conflictingDocument. After this call, documentBeingSaved is the same as
+  // conflictingDocument.
+  FfiDocumentDelegate.replaceWithMutableCopy(
+    source: conflictingDocument,
+    target: documentBeingSaved,
+  );
+
+  // Restore the resolved properties which where overwritten in the previous
+  // step.
+  documentBeingSaved.setData(resolvedProperties);
 }

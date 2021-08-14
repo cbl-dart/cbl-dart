@@ -451,11 +451,13 @@ AsyncCallback _wrapReplicationFilter(
 ) =>
     AsyncCallback((arguments) async {
       final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
-      final doc = DocumentImpl(
+      final doc = DelegateDocument(
+        FfiDocumentDelegate(
+          doc: message.document,
+          adopt: false,
+          debugCreator: 'ReplicationFilter()',
+        ),
         database: database,
-        doc: message.document,
-        adopt: false,
-        debugCreator: 'ReplicationFilter()',
       );
 
       return filter(
@@ -472,28 +474,38 @@ AsyncCallback _wrapConflictResolver(
       final message =
           ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-      final local = message.localDocument?.let((it) => DocumentImpl(
+      final local = message.localDocument?.let((it) => DelegateDocument(
+            FfiDocumentDelegate(
+              doc: it,
+              adopt: false,
+              debugCreator: 'ConflictResolver(local)',
+            ),
             database: database,
-            doc: it,
-            adopt: false,
-            debugCreator: 'ConflictResolver(local)',
           ));
 
-      final remote = message.remoteDocument?.let((it) => DocumentImpl(
+      final remote = message.remoteDocument?.let((it) => DelegateDocument(
+            FfiDocumentDelegate(
+              doc: it,
+              adopt: false,
+              debugCreator: 'ConflictResolver(remote)',
+            ),
             database: database,
-            doc: it,
-            adopt: false,
-            debugCreator: 'ConflictResolver(remote)',
           ));
 
       final conflict = ConflictImpl(message.documentId, local, remote);
-      final resolved = await resolver.resolve(conflict) as DocumentImpl?;
-      if (resolved is MutableDocumentImpl) {
-        resolved.database = database;
-        resolved.flushProperties();
+      final resolved = await resolver.resolve(conflict) as DelegateDocument?;
+
+      FfiDocumentDelegate? resolvedDelegate;
+      if (resolved != null) {
+        if (resolved is MutableDelegateDocument) {
+          resolved.database = database;
+          resolvedDelegate = resolved.prepareFfiDelegate();
+        } else {
+          resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
+        }
       }
 
-      final resolvedPointer = resolved?.native.pointerUnsafe;
+      final resolvedPointer = resolvedDelegate?.native.pointerUnsafe;
 
       // If the resolver returned a document other than `local` or `remote`,
       // the ref count of `resolved` needs to be incremented because the
@@ -501,17 +513,7 @@ AsyncCallback _wrapConflictResolver(
       // with a ref count of +1, which the caller balances with a release.
       // This must happen on the Dart side, because `resolved` can be garbage
       // collected before `resolvedAddress` makes it back to the native side.
-      // if (resolvedPointer != null &&
-      //     resolved != local &&
-      //     resolved != remote) {
-      //   cblBindings.base.retainRefCounted(resolvedPointer.cast());
-      // }
-
-      // Workaround for a bug in CBL C SDK, which frees all resolved
-      // documents, not just merged ones. When this bug is fixed the above
-      // commented out code block should replace this one.
-      // https://github.com/couchbase/couchbase-lite-C/issues/148
-      if (resolvedPointer != null) {
+      if (resolvedPointer != null && resolved != local && resolved != remote) {
         cblBindings.base.retainRefCounted(resolvedPointer.cast());
       }
 

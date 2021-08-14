@@ -55,6 +55,10 @@ class Doc extends FleeceDocObject {
   /// Note: Does not retain the native doc.
   Doc.fromPointer(Pointer<FLDoc> pointer) : super(pointer);
 
+  /// Returns the data owned by the document, if any, else `null`.
+  SliceResult? get allocedData =>
+      SliceResult.fromFLSliceResult(native.call(_bindings.getAllocedData));
+
   /// Returns the root value in the [Doc], usually an [Dict].
   Value get root => Value.fromPointer(native.call(_bindings.getRoot));
 }
