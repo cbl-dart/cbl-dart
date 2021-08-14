@@ -72,10 +72,13 @@ abstract class DocumentDelegate {
 
   set properties(Uint8List value);
 
+  MRoot createMRoot(MContext context, bool isMutable) =>
+      MRoot.fromData(properties, context: context, isMutable: isMutable);
+
   DocumentDelegate toMutable();
 }
 
-class NewDocumentDelegate implements DocumentDelegate {
+class NewDocumentDelegate extends DocumentDelegate {
   NewDocumentDelegate([String? id]) : id = id ?? createUuid();
 
   @override
@@ -163,11 +166,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
   final String _typeName = 'Document';
 
   void _initPropertiesDictionary(Uint8List data) {
-    _root = MRoot.fromData(
-      data,
-      context: DocumentMContext(this),
-      isMutable: _isMutable,
-    );
+    _root = delegate.createMRoot(DocumentMContext(this), _isMutable);
     _properties = _root.asNative as Dictionary;
   }
 
@@ -357,9 +356,8 @@ class MutableDelegateDocument extends DelegateDocument
   MutableDocument toMutable() => this;
 }
 
-class FfiDocumentDelegate
-    with NativeResourceMixin<CBLDocument>
-    implements DocumentDelegate {
+class FfiDocumentDelegate extends DocumentDelegate
+    with NativeResourceMixin<CBLDocument> {
   FfiDocumentDelegate({
     required Pointer<CBLDocument> doc,
     bool adopt = true,
@@ -395,26 +393,29 @@ class FfiDocumentDelegate
 
   @override
   set properties(Uint8List value) {
-    _writeProperties(value);
+    _writePropertiesDict(value);
     _properties = value;
   }
 
-  Uint8List _readProperties() {
-    final dict = fl.Dict.fromPointer(native.call(_documentBindings.properties));
+  @override
+  MRoot createMRoot(MContext context, bool isMutable) => runNativeCalls(() {
+        return MRoot.fromValue(
+          _readPropertiesDict().pointer,
+          context: context,
+          isMutable: isMutable,
+        );
+      });
 
-    final data = dict.doc?.allocedData?.asUint8List();
-    if (data != null) {
-      return data;
-    }
+  Uint8List _readProperties() => runNativeCalls(() {
+        return (fl.FleeceEncoder()..writeValue(_readPropertiesDict().pointer))
+            .finish()
+            .asUint8List();
+      });
 
-    return runNativeCalls(() {
-      return (fl.FleeceEncoder()..writeValue(dict.native.pointer))
-          .finish()
-          .asUint8List();
-    });
-  }
+  fl.Dict _readPropertiesDict() =>
+      fl.Dict.fromPointer(native.call(_documentBindings.properties));
 
-  void _writeProperties(Uint8List value) {
+  void _writePropertiesDict(Uint8List value) {
     final doc = fl.Doc.fromResultData(value, FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
 
