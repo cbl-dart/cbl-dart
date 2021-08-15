@@ -8,6 +8,7 @@ import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -22,10 +23,15 @@ void main() {
     });
 
     test('==', () {
-      expect(immutableArray(), immutableArray());
-      expect(immutableArray([1]), immutableArray([1]));
-      expect(immutableArray(), isNot(immutableArray([1])));
-      expect(immutableArray([0, 1]), isNot(immutableArray([1, 0])));
+      expect(immutableArray(), equality(immutableArray()));
+      expect(immutableArray([1]), equality(immutableArray([1])));
+      expect(immutableArray(), isNot(equality(immutableArray([1]))));
+      expect(immutableArray([0, 1]), isNot(equality(immutableArray([1, 0]))));
+
+      expect(immutableArray(), equality(MutableArray()));
+      expect(immutableArray([1]), equality(MutableArray([1])));
+      expect(immutableArray(), isNot(equality(MutableArray([1]))));
+      expect(immutableArray([0, 1]), isNot(equality(MutableArray([1, 0]))));
     });
 
     test('hashCode', () {

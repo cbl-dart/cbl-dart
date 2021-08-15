@@ -104,3 +104,67 @@ class _JsonMatcher extends Matcher {
     }
   }
 }
+
+// === equality ================================================================
+
+/// Returns a matcher which checks wether the matched value implements mutual
+/// equality with [expected].
+///
+/// Mutual equality is implemented when:
+/// - `actual == expected`
+/// - `expected == actual`
+/// - `actual.hashCode == expected.hashCode`
+Matcher equality(Object? expected) => _Equality(expected);
+
+enum _EqualityFailure { expected, actual, hash }
+
+class _Equality extends Matcher {
+  _Equality(this.expected);
+
+  final Object? expected;
+
+  @override
+  Description describe(Description description) =>
+      description.add('is mutually equal to ')..addDescriptionOf(expected);
+
+  @override
+  bool matches(Object? actual, Map matchState) {
+    bool failure(_EqualityFailure failure) {
+      matchState['EQUALITY_FAILURE'] = failure;
+      return false;
+    }
+
+    if (actual != expected) {
+      return failure(_EqualityFailure.actual);
+    }
+
+    if (expected != actual) {
+      return failure(_EqualityFailure.expected);
+    }
+
+    if (actual.hashCode != expected.hashCode) {
+      return failure(_EqualityFailure.hash);
+    }
+
+    return true;
+  }
+
+  @override
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map matchState,
+    bool verbose,
+  ) {
+    final failure = matchState['EQUALITY_FAILURE'] as _EqualityFailure;
+    switch (failure) {
+      case _EqualityFailure.expected:
+        return mismatchDescription.add('expected == actual was not true');
+      case _EqualityFailure.actual:
+        return mismatchDescription.add('actual == expected was not true');
+      case _EqualityFailure.hash:
+        return mismatchDescription
+            .add('actual.hashCode == expected.hashCode was not true');
+    }
+  }
+}

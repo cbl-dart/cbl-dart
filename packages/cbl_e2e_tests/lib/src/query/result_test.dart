@@ -10,6 +10,7 @@ import 'package:cbl/src/query/result.dart';
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -151,17 +152,17 @@ void main() {
       Result b;
 
       a = testResult([], []);
-      expect(a, a);
+      expect(a, equality(a));
 
       b = testResult([], []);
-      expect(a, b);
+      expect(a, equality(b));
 
       b = testResult(['a'], [true]);
-      expect(a, isNot(b));
+      expect(a, isNot(equality(b)));
 
       a = testResult(['a'], [true]);
       b = testResult(['a'], [true]);
-      expect(a, b);
+      expect(a, equality(b));
     });
 
     test('hashCode', () {
