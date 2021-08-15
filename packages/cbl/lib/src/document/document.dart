@@ -238,13 +238,14 @@ class DelegateDocument with IterableMixin<String> implements Document {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is DelegateDocument &&
+          (_database == other._database ||
+              _database?.name == other._database?.name) &&
           id == other.id &&
-          (!_isMutable && !other._isMutable
-              ? revisionId == other.revisionId
-              : _properties == other._properties);
+          _properties == other._properties;
 
   @override
-  int get hashCode => id.hashCode ^ _properties.hashCode;
+  int get hashCode =>
+      (_database?.name).hashCode ^ id.hashCode ^ _properties.hashCode;
 
   @override
   String toString() => '$_typeName('

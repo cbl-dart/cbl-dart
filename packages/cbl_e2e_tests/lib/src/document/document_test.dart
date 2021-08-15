@@ -62,30 +62,48 @@ void main() {
       // Mutated mutable copy is not equal.
       expect(mutableDoc, isNot(equality(doc)));
 
-      db.saveDocument(mutableDoc);
+      expect(
+        MutableDocument.withId('a'),
+        equality(MutableDocument.withId('a')),
+      );
+      expect(
+        MutableDocument.withId('a'),
+        isNot(equality(MutableDocument.withId('b'))),
+      );
 
-      // Two instances at different revision are not equal.
-      expect(db.document(doc.id), isNot(equality(doc)));
+      expect(
+        MutableDocument.withId('a', {'a': true}),
+        equality(MutableDocument.withId('a', {'a': true})),
+      );
+      expect(
+        MutableDocument.withId('a', {'a': true}),
+        isNot(equality(MutableDocument.withId('b', {'a': false}))),
+      );
     });
 
     test('hashCode', () {
       final doc = savedDocument({'type': 'immutable'});
 
-      // Identical docs have the same hashCode.
       expect(doc.hashCode, doc.hashCode);
-
-      // Two instances at the same revision have the same hashCode.
       expect((db.document(doc.id)).hashCode, doc.hashCode);
 
-      final mutableDoc = doc.toMutable();
+      expect(
+        MutableDocument.withId('a').hashCode,
+        MutableDocument.withId('a').hashCode,
+      );
+      expect(
+        MutableDocument.withId('a').hashCode,
+        isNot(MutableDocument.withId('b').hashCode),
+      );
 
-      // Mutable copy has different hashCode.
-      expect(mutableDoc.hashCode, isNot(doc.hashCode));
-
-      db.saveDocument(mutableDoc);
-
-      // Two instances at different revision do not have the same hashCode.
-      expect((db.document(doc.id)).hashCode, isNot(doc.hashCode));
+      expect(
+        MutableDocument.withId('a', {'a': true}).hashCode,
+        MutableDocument.withId('a', {'a': true}).hashCode,
+      );
+      expect(
+        MutableDocument.withId('a', {'a': true}).hashCode,
+        isNot(MutableDocument.withId('b', {'a': false}).hashCode),
+      );
     });
 
     group('immutable', () {
