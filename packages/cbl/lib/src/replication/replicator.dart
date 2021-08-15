@@ -1,25 +1,12 @@
 import 'dart:async';
-import 'dart:ffi';
-
-import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:collection/collection.dart';
 
 import '../database/database.dart';
 import '../document/document.dart';
-import '../fleece/fleece.dart' as fl;
-import '../support/async_callback.dart';
-import '../support/errors.dart';
-import '../support/ffi.dart';
-import '../support/native_object.dart';
 import '../support/resource.dart';
-import '../support/streams.dart';
 import '../support/utils.dart';
-import 'authenticator.dart';
 import 'configuration.dart';
-import 'conflict.dart';
-import 'conflict_resolver.dart';
 import 'document_replication.dart';
-import 'endpoint.dart';
+import 'ffi_replicator.dart';
 import 'replicator_change.dart';
 
 /// The states a [Replicator] can be in during its lifecycle.
@@ -45,7 +32,7 @@ enum ReplicatorActivityLevel {
 /// If [progress] is zero, the process is indeterminate; otherwise, dividing the
 /// two will produce a fraction that can be used to draw a progress bar.
 class ReplicatorProgress {
-  ReplicatorProgress._(this.completed, this.progress);
+  ReplicatorProgress(this.completed, this.progress);
 
   /// The number of [Document]s processed so far.
   final int completed;
@@ -67,7 +54,7 @@ class ReplicatorProgress {
 /// Combined [ReplicatorActivityLevel], [ReplicatorProgress] and possibly error
 /// of a [Replicator].
 class ReplicatorStatus {
-  ReplicatorStatus._(this.activity, this.progress, this.error);
+  ReplicatorStatus(this.activity, this.progress, this.error);
 
   /// The current activity level of the [Replicator].
   final ReplicatorActivityLevel activity;
@@ -97,6 +84,20 @@ class ReplicatorStatus {
 /// can also be one-shot ore continuous. The replicator runs asynchronously, so
 /// observe the [status] to be notified of progress.
 abstract class Replicator implements ClosableResource {
+  /// {@template cbl.Replicator.create}
+  /// Creates a replicator for replicating [Document]s between a local
+  /// [AsyncDatabase] and a target database.
+  /// {@endtemplate}
+  static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
+      AsyncReplicator.create(config);
+
+  /// {@template cbl.Replicator.createSync}
+  /// Creates a replicator for replicating [Document]s between a local
+  /// [SyncDatabase] and a target database.
+  /// {@endtemplate}
+  static SyncReplicator createSync(ReplicatorConfiguration config) =>
+      SyncReplicator(config);
+
   /// This replicator's configuration.
   ReplicatorConfiguration get config;
 
@@ -151,8 +152,7 @@ abstract class Replicator implements ClosableResource {
 
 /// A [Replicator] with a primarily synchronous API.
 abstract class SyncReplicator implements Replicator {
-  /// Creates a replicator for replicating [Document]s between a local database
-  /// and a target database.
+  /// {@macro cbl.Replicator.createSync}
   factory SyncReplicator(ReplicatorConfiguration config) => FfiReplicator(
         config,
         debugCreator: 'SyncReplicator()',
@@ -176,6 +176,7 @@ abstract class SyncReplicator implements Replicator {
 
 /// A [Replicator] with a primarily asynchronous API.
 abstract class AsyncReplicator implements Replicator {
+  /// {@macro cbl.Replicator.create}
   static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
       throw UnimplementedError();
 
@@ -194,328 +195,3 @@ abstract class AsyncReplicator implements Replicator {
   @override
   Future<bool> isDocumentPending(String documentId);
 }
-
-late final _bindings = cblBindings.replicator;
-
-class FfiReplicator
-    with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
-    implements SyncReplicator {
-  FfiReplicator(ReplicatorConfiguration config, {required String debugCreator})
-      : _config = ReplicatorConfiguration.from(config) {
-    final database = _database = (_config.database as FfiDatabase);
-
-    runNativeCalls(() {
-      final pushFilterCallback =
-          config.pushFilter?.let((it) => _wrapReplicationFilter(database, it));
-      final pullFilterCallback =
-          config.pullFilter?.let((it) => _wrapReplicationFilter(database, it));
-      final conflictResolverCallback = config.conflictResolver
-          ?.let((it) => _wrapConflictResolver(database, it));
-
-      _callbacks = [
-        pushFilterCallback,
-        pullFilterCallback,
-        conflictResolverCallback
-      ].whereNotNull().toList();
-
-      final endpoint = config.createEndpoint();
-      final authenticator = config.createAuthenticator();
-
-      try {
-        final replicator = _bindings.createReplicator(
-          database.native.pointer,
-          endpoint,
-          config.replicatorType.toCBLReplicatorType(),
-          config.continuous,
-          null,
-          config.maxRetries + 1,
-          config.maxRetryWaitTime.inSeconds,
-          config.heartbeat.inSeconds,
-          authenticator,
-          null,
-          null,
-          null,
-          null,
-          null,
-          config.headers?.let((it) => fl.MutableDict(it).native.pointer.cast()),
-          config.pinnedServerCertificate,
-          null,
-          config.channels
-              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-          config.documentIds
-              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-          pushFilterCallback?.native.pointer,
-          pullFilterCallback?.native.pointer,
-          conflictResolverCallback?.native.pointer,
-        );
-
-        native = CBLReplicatorObject(
-          replicator,
-          debugName: 'Replicator(creator: $debugCreator)',
-        );
-
-        database.registerChildResource(this);
-      } catch (e) {
-        _disposeCallbacks();
-        rethrow;
-      } finally {
-        _bindings.freeEndpoint(endpoint);
-        if (authenticator != null) {
-          _bindings.freeAuthenticator(authenticator);
-        }
-      }
-    });
-  }
-
-  final ReplicatorConfiguration _config;
-
-  late final FfiDatabase _database;
-
-  @override
-  late final NativeObject<CBLReplicator> native;
-
-  late final List<AsyncCallback> _callbacks;
-
-  @override
-  ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
-
-  @override
-  ReplicatorStatus get status => useSync(() => _status);
-
-  ReplicatorStatus get _status =>
-      native.call(_bindings.status).toReplicatorStatus();
-
-  @override
-  void start({bool reset = false}) =>
-      useSync(() => native.call((pointer) => _bindings.start(pointer, reset)));
-
-  @override
-  void stop() => useSync(_stop);
-
-  void _stop() => native.call(_bindings.stop);
-
-  @override
-  Stream<ReplicatorChange> changes() => useSync(_changes);
-
-  Stream<ReplicatorChange> _changes() =>
-      CallbackStreamController<ReplicatorChange, void>(
-        parent: this,
-        startStream: (callback) => _bindings.addChangeListener(
-          native.pointer,
-          callback.native.pointer,
-        ),
-        createEvent: (_, arguments) {
-          final message =
-              ReplicatorStatusCallbackMessage.fromArguments(arguments);
-          return ReplicatorChangeImpl(
-            this,
-            message.status.toReplicatorStatus(),
-          );
-        },
-      ).stream;
-
-  @override
-  Stream<DocumentReplication> documentReplications() =>
-      useSync(() => CallbackStreamController(
-            parent: this,
-            startStream: (callback) => _bindings.addDocumentReplicationListener(
-              native.pointer,
-              callback.native.pointer,
-            ),
-            createEvent: (_, arguments) {
-              final message =
-                  DocumentReplicationsCallbackMessage.fromArguments(arguments);
-
-              final documents = message.documents
-                  .map((it) => it.toReplicatedDocument())
-                  .toList();
-
-              return DocumentReplicationImpl(this, message.isPush, documents);
-            },
-          ).stream);
-
-  @override
-  Set<String> get pendingDocumentIds => useSync(() {
-        final dict = fl.Dict.fromPointer(
-          native.call(_bindings.pendingDocumentIDs),
-          adopt: true,
-        );
-        return dict.keys.toSet();
-      });
-
-  @override
-  bool isDocumentPending(String documentId) =>
-      useSync(() => native.call((pointer) {
-            return _bindings.isDocumentPending(pointer, documentId);
-          }));
-
-  @override
-  Future<void> performClose() async {
-    try {
-      var stopping = false;
-      while (_status.activity != ReplicatorActivityLevel.stopped) {
-        if (!stopping) {
-          _stop();
-          stopping = true;
-        }
-        await Future<void>.delayed(Duration(milliseconds: 100));
-      }
-    } finally {
-      _disposeCallbacks();
-    }
-  }
-
-  void _disposeCallbacks() =>
-      _callbacks.forEach((callback) => callback.close());
-
-  @override
-  String toString() => [
-        'FfiReplicator(',
-        [
-          'database: $_database',
-          'type: ${describeEnum(config.replicatorType)}',
-          if (config.continuous) 'CONTINUOUS'
-        ].join(', '),
-        ')'
-      ].join();
-}
-
-extension on ReplicatorType {
-  CBLReplicatorType toCBLReplicatorType() => CBLReplicatorType.values[index];
-}
-
-extension on CBLReplicatorActivityLevel {
-  ReplicatorActivityLevel toReplicatorActivityLevel() =>
-      ReplicatorActivityLevel.values[index];
-}
-
-extension on CBLReplicatedDocumentFlag {
-  DocumentFlag toReplicatedDocumentFlag() =>
-      DocumentFlag.values[CBLReplicatedDocumentFlag.values.indexOf(this)];
-}
-
-extension on CBLReplicatorStatus {
-  ReplicatorStatus toReplicatorStatus() => ReplicatorStatus._(
-        activity.toReplicatorActivityLevel(),
-        ReplicatorProgress._(
-          progressDocumentCount,
-          progressComplete,
-        ),
-        error?.toCouchbaseLiteException(),
-      );
-}
-
-extension on CBLReplicatedDocument {
-  ReplicatedDocument toReplicatedDocument() => ReplicatedDocumentImpl(
-        id,
-        flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-        error?.toCouchbaseLiteException(),
-      );
-}
-
-extension on ReplicatorConfiguration {
-  Pointer<CBLEndpoint> createEndpoint() {
-    final target = this.target;
-    if (target is UrlEndpoint) {
-      return _bindings.createEndpointWithUrl(target.url.toString());
-    } else {
-      throw UnimplementedError('Endpoint type is not implemented: $target');
-    }
-  }
-
-  Pointer<CBLAuthenticator>? createAuthenticator() {
-    final authenticator = this.authenticator;
-    if (authenticator == null) return null;
-
-    if (authenticator is BasicAuthenticator) {
-      return _bindings.createPasswordAuthenticator(
-        authenticator.username,
-        authenticator.password,
-      );
-    } else if (authenticator is SessionAuthenticator) {
-      return _bindings.createSessionAuthenticator(
-        authenticator.sessionId,
-        authenticator.cookieName,
-      );
-    } else {
-      throw UnimplementedError(
-        'Authenticator type is not implemented: $authenticator',
-      );
-    }
-  }
-}
-
-AsyncCallback _wrapReplicationFilter(
-  FfiDatabase database,
-  ReplicationFilter filter,
-) =>
-    AsyncCallback((arguments) async {
-      final message = ReplicationFilterCallbackMessage.fromArguments(arguments);
-      final doc = DelegateDocument(
-        FfiDocumentDelegate(
-          doc: message.document,
-          adopt: false,
-          debugCreator: 'ReplicationFilter()',
-        ),
-        database: database,
-      );
-
-      return filter(
-        doc,
-        message.flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-      );
-    }, errorResult: false, debugName: 'ReplicationFilter');
-
-AsyncCallback _wrapConflictResolver(
-  FfiDatabase database,
-  ConflictResolver resolver,
-) =>
-    AsyncCallback((arguments) async {
-      final message =
-          ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
-
-      final local = message.localDocument?.let((it) => DelegateDocument(
-            FfiDocumentDelegate(
-              doc: it,
-              adopt: false,
-              debugCreator: 'ConflictResolver(local)',
-            ),
-            database: database,
-          ));
-
-      final remote = message.remoteDocument?.let((it) => DelegateDocument(
-            FfiDocumentDelegate(
-              doc: it,
-              adopt: false,
-              debugCreator: 'ConflictResolver(remote)',
-            ),
-            database: database,
-          ));
-
-      final conflict = ConflictImpl(message.documentId, local, remote);
-      final resolved = await resolver.resolve(conflict) as DelegateDocument?;
-
-      FfiDocumentDelegate? resolvedDelegate;
-      if (resolved != null) {
-        if (resolved is MutableDelegateDocument) {
-          resolved.database = database;
-          resolvedDelegate = resolved.prepareFfiDelegate();
-        } else {
-          resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
-        }
-      }
-
-      final resolvedPointer = resolvedDelegate?.native.pointerUnsafe;
-
-      // If the resolver returned a document other than `local` or `remote`,
-      // the ref count of `resolved` needs to be incremented because the
-      // native conflict resolver callback is expected to returned a document
-      // with a ref count of +1, which the caller balances with a release.
-      // This must happen on the Dart side, because `resolved` can be garbage
-      // collected before `resolvedAddress` makes it back to the native side.
-      if (resolvedPointer != null && resolved != local && resolved != remote) {
-        cblBindings.base.retainRefCounted(resolvedPointer.cast());
-      }
-
-      return resolvedPointer?.address;
-    }, debugName: 'ConflictResolver');

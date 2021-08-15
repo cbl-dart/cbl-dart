@@ -1,5 +1,6 @@
 import '../collation.dart';
 import '../query.dart';
+import '../query_builder.dart';
 import 'property_expression.dart';
 import 'variable_expression.dart';
 

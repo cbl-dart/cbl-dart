@@ -1,5 +1,7 @@
+import 'proxy_query.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
+import 'ffi_query.dart';
 import 'group_by.dart';
 import 'join.dart';
 import 'joins.dart';

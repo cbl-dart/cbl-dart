@@ -4,7 +4,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database/database.dart';
+import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/ffi.dart';

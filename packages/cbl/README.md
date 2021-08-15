@@ -74,12 +74,7 @@ import 'package:cbl/cbl.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<void> useDatabase() async {
-  final documentsDir = await getApplicationDocumentsDirectory();
-
-  final db = SyncDatabase(
-      'MyFirstDB',
-      DatabaseConfiguration(directory: documentsDir.path),
-  );
+  final db = await Database.open('chat-messages');
 
   final doc = MutableDocument({
     'type': 'message',
@@ -87,7 +82,7 @@ Future<void> useDatabase() async {
     'from': 'Alice',
   });
 
-  db.saveDocument(doc);
+  await db.saveDocument(doc);
 
   await db.close();
 }

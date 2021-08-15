@@ -4,7 +4,6 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,7 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late Future<void> _initFuture;
-  late SyncDatabase _db;
+  late AsyncDatabase _db;
 
   var _posts = <Map<String, Object?>>[];
 
@@ -30,21 +29,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _init() async {
-    final appDocsDir = await getApplicationDocumentsDirectory();
+    _db = await Database.open('Example');
 
-    _db = SyncDatabase(
-      'Example',
-      DatabaseConfiguration(directory: appDocsDir.path),
-    );
-
-    final query = SyncQuery.fromN1ql(
+    final query = await Query.fromN1ql(
       _db,
       'SELECT post FROM _ AS post WHERE post.type = "post"',
     );
 
     query
         .changes()
-        .map((resultSet) => resultSet
+        .asyncMap((resultSet) => resultSet
+            .asStream()
             .map((result) => result['post'].dictionary!.toPlainMap())
             .toList())
         .listen((posts) => setState(() => _posts = posts));
@@ -61,17 +56,17 @@ class _MyAppState extends State<MyApp> {
       },
     });
 
-    _db.saveDocument(post);
+    await _db.saveDocument(post);
   }
 
   void _clearDatabase() async {
-    final ids = SyncQuery.fromN1ql(_db, 'SELECT META().id FROM _')
-        .execute()
-        .map((r) => r[0].string!)
-        .toList();
+    final ids = await Query.fromN1ql(_db, 'SELECT META().id FROM _')
+        .then((query) => query.execute())
+        .then((resultSet) =>
+            resultSet.asStream().map((result) => result[0].string!).toList());
 
-    _db.inBatch(() {
-      ids.map((id) => _db.purgeDocumentById(id));
+    await _db.inBatch(() {
+      return Future.wait(ids.map((id) => _db.purgeDocumentById(id)));
     });
   }
 
