@@ -244,8 +244,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
               : _properties == other._properties);
 
   @override
-  int get hashCode =>
-      id.hashCode ^ (!_isMutable ? revisionId.hashCode : _properties.hashCode);
+  int get hashCode => id.hashCode ^ _properties.hashCode;
 
   @override
   String toString() => '$_typeName('

@@ -5,6 +5,7 @@ import 'package:cbl/cbl.dart';
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -46,25 +47,25 @@ void main() {
       final doc = savedDocument({'type': 'immutable'});
 
       // Identical docs are equal.
-      expect(doc, doc);
+      expect(doc, equality(doc));
 
       // Two instances at the same revision are equal.
-      expect(db.document(doc.id), doc);
+      expect(db.document(doc.id), equality(doc));
 
       final mutableDoc = doc.toMutable();
 
       // Unmutated mutable copy is equal to original.
-      expect(mutableDoc, doc);
+      expect(mutableDoc, equality(doc));
 
       mutableDoc['a'].value = 'b';
 
       // Mutated mutable copy is not equal.
-      expect(mutableDoc, isNot(doc));
+      expect(mutableDoc, isNot(equality(doc)));
 
       db.saveDocument(mutableDoc);
 
       // Two instances at different revision are not equal.
-      expect(db.document(doc.id), isNot(doc));
+      expect(db.document(doc.id), isNot(equality(doc)));
     });
 
     test('hashCode', () {

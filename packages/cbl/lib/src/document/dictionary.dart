@@ -176,8 +176,6 @@ class DictionaryImpl
   @override
   List<String> get keys => toList();
 
-  Iterable<Object?> get _values => map(value);
-
   @pragma('vm:prefer-inline')
   T? _getAs<T>(String key) => coerceObject(_dict.get(key)?.asNative(_dict));
 
@@ -247,19 +245,32 @@ class DictionaryImpl
       _dict.iterable.map((entry) => entry.key).iterator;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is DictionaryImpl &&
-          runtimeType == other.runtimeType &&
-          // Compare the keys.
-          const IterableEquality<String>().equals(this, other) &&
-          // Compare the values.
-          const IterableEquality<Object?>().equals(_values, other._values);
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other is! DictionaryImpl) {
+      return false;
+    }
+
+    if (!const UnorderedIterableEquality<String>().equals(this, other)) {
+      return false;
+    }
+
+    for (final key in this) {
+      if (value(key) != other.value(key)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   @override
   int get hashCode =>
       const IterableEquality<String>().hash(this) ^
-      const IterableEquality<Object?>().hash(_values);
+      const IterableEquality<Object?>().hash(map(value));
 
   @override
   String toString() => toPlainMap().toString();

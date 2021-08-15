@@ -8,6 +8,7 @@ import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -22,12 +23,32 @@ void main() {
     });
 
     test('==', () {
-      expect(immutableDictionary(), immutableDictionary());
-      expect(immutableDictionary({'a': 'b'}), immutableDictionary({'a': 'b'}));
-      expect(immutableDictionary(), isNot(immutableDictionary({'a': 'b'})));
+      expect(immutableDictionary(), equality(immutableDictionary()));
       expect(
         immutableDictionary({'a': 'b'}),
-        isNot(immutableDictionary({'c': 'd'})),
+        equality(immutableDictionary({'a': 'b'})),
+      );
+      expect(
+        immutableDictionary(),
+        isNot(equality(immutableDictionary({'a': 'b'}))),
+      );
+      expect(
+        immutableDictionary({'a': 'b'}),
+        isNot(equality(immutableDictionary({'c': 'd'}))),
+      );
+
+      expect(immutableDictionary(), equality(MutableDictionary()));
+      expect(
+        immutableDictionary({'a': 'b'}),
+        equality(MutableDictionary({'a': 'b'})),
+      );
+      expect(
+        immutableDictionary(),
+        isNot(equality(MutableDictionary({'a': 'b'}))),
+      );
+      expect(
+        immutableDictionary({'a': 'b'}),
+        isNot(equality(MutableDictionary({'c': 'd'}))),
       );
     });
 

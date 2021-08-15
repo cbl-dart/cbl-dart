@@ -380,7 +380,6 @@ class ArrayImpl
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ArrayImpl &&
-          runtimeType == other.runtimeType &&
           const IterableEquality<Object?>().equals(this, other);
 
   @override
