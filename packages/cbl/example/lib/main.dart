@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cbl/cbl.dart';
 
 /// You need to specify how to access the native libraries, on top of which
@@ -16,10 +14,7 @@ Future<void> main() async {
   CouchbaseLite.init(libraries: getLibraries());
 
   // Now open a database.
-  final db = SyncDatabase(
-    'DB',
-    DatabaseConfiguration(directory: Directory.current.path),
-  );
+  final db = await Database.open('chat-messages');
 
   // To create a new document start with an empty [MutableDocument] and fill
   // its properties.
@@ -30,7 +25,7 @@ Future<void> main() async {
   });
 
   // Saving a document will return an immutable [Document].
-  db.saveDocument(doc);
+  await db.saveDocument(doc);
 
   print(doc);
   print(doc.toPlainMap());

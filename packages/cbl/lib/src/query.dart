@@ -37,14 +37,9 @@ export 'query/limit.dart' show SyncLimit, Limit, AsyncLimit;
 export 'query/order_by.dart' show SyncOrderBy, OrderBy, AsyncOrderBy;
 export 'query/ordering.dart' show Ordering, OrderingInterface, SortOrder;
 export 'query/parameters.dart' show Parameters;
-export 'query/query.dart'
-    show
-        Query,
-        SyncQueryBuilder,
-        SyncQuery,
-        AsyncQuery,
-        QueryBuilder,
-        AsyncQueryBuilder;
+export 'query/query.dart' show Query, SyncQuery, AsyncQuery;
+export 'query/query_builder.dart'
+    show SyncQueryBuilder, QueryBuilder, AsyncQueryBuilder;
 export 'query/result.dart' show Result;
 export 'query/result_set.dart' show ResultSet, SyncResultSet;
 export 'query/router/from_router.dart'

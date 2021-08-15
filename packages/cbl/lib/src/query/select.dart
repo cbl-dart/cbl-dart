@@ -1,6 +1,8 @@
 import '../database/database.dart';
 import '../query.dart';
+import 'proxy_query.dart';
 import 'data_source.dart';
+import 'ffi_query.dart';
 import 'from.dart';
 import 'query.dart';
 import 'router/from_router.dart';
