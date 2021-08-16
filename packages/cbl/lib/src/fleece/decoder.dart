@@ -199,7 +199,7 @@ class FleeceDecoder {
   /// Returns a string which shows how values are encoded in the Fleece [data].
   ///
   /// This method exists for debugging and learning purposes.
-  String dumpData(Uint8List data) => _decoderBinds.dumpData(data);
+  String dumpData(Data data) => _decoderBinds.dumpData(data);
 
   // === LoadedFLValue =========================================================
 
@@ -208,10 +208,10 @@ class FleeceDecoder {
   /// Specify whether you [trust] the source of the [data] to ensure it is valid
   /// Fleece data. If [data] is not valid, `null` is returned.
   LoadedFLValue? loadValueFromData(
-    Slice data, {
+    Data data, {
     FLTrust trust = FLTrust.untrusted,
   }) {
-    if (!_decoderBinds.getLoadedFLValueFromData(data, trust)) {
+    if (!_decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust)) {
       return null;
     }
     return _globalLoadedValueObject();
@@ -246,10 +246,10 @@ class FleeceDecoder {
   /// Specify whether you [trust] the source of the [data] to ensure it is valid
   /// Fleece data. If [data] is not valid, `null` is returned.
   Object? dataToDartObject(
-    Uint8List data, {
+    Data data, {
     FLTrust trust = FLTrust.untrusted,
   }) {
-    final root = loadValueFromData(data.toSliceResult(), trust: trust);
+    final root = loadValueFromData(data, trust: trust);
     if (root == null) {
       return null;
     }
@@ -264,7 +264,7 @@ class FleeceDecoder {
     } else if (value is SliceFLValue) {
       return value.isString
           ? sharedStrings.sliceToDartString(value.slice)!
-          : Uint8List.fromList(value.slice.asUint8List());
+          : Uint8List.fromList(value.slice.asTypedList());
     } else if (value is CollectionFLValue) {
       if (value.isArray) {
         final array = value.value.cast<FLArray>();
@@ -328,7 +328,7 @@ class FleeceDecoder {
       case FLValueType.string:
         return sharedStrings.flStringToDartString(value.asString);
       case FLValueType.data:
-        return value.asData.toUint8List();
+        return value.asData.toData()?.toTypedList();
       case FLValueType.array:
         final array = value.asValue.cast<FLArray>();
         return List<Object?>.generate(value.collectionSize, (index) {

@@ -9,10 +9,10 @@ import 'package:ffi/ffi.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'data.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
-import 'slice.dart';
 import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
@@ -171,8 +171,8 @@ class CBLReplicatorConfiguration {
   final Pointer<CBLAuthenticator>? authenticator;
   final CBLProxySettings? proxy;
   final Pointer<FLDict>? headers;
-  final Uint8List? pinnedServerCertificate;
-  final Uint8List? trustedRootCertificates;
+  final Data? pinnedServerCertificate;
+  final Data? trustedRootCertificates;
   final Pointer<FLArray>? channels;
   final Pointer<FLArray>? documentIDs;
   final Pointer<CBLDartAsyncCallback>? pushFilter;

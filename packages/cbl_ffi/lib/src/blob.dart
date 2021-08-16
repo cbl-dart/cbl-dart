@@ -1,10 +1,10 @@
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'bindings.dart';
+import 'data.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'slice.dart';
@@ -93,7 +93,7 @@ class BlobBindings extends Bindings {
   late final _CBLDart_CBLBlob_ContentType _contentType;
   late final _CBLBlob_Properties _properties;
 
-  Pointer<CBLBlob> createWithData(String? contentType, Uint8List content) =>
+  Pointer<CBLBlob> createWithData(String? contentType, Data content) =>
       withZoneArena(() => _createWithData(
             contentType.toFLStringInArena().ref,
             content.toSliceResult().makeGlobal().ref,
@@ -111,10 +111,10 @@ class BlobBindings extends Bindings {
 
   String digest(Pointer<CBLBlob> blob) => _digest(blob).toDartString()!;
 
-  Uint8List content(Pointer<CBLBlob> blob) => _content(blob, globalCBLError)
+  Data content(Pointer<CBLBlob> blob) => _content(blob, globalCBLError)
       .checkCBLError()
       .let(SliceResult.fromFLSliceResult)!
-      .asUint8List();
+      .toData();
 
   String? contentType(Pointer<CBLBlob> blob) =>
       _contentType(blob).toDartString();
@@ -194,7 +194,7 @@ class BlobReadStreamBindings extends Bindings {
   Pointer<CBLBlobReadStream> openContentStream(Pointer<CBLBlob> blob) =>
       _openContentStream(blob, globalCBLError).checkCBLError();
 
-  Uint8List? read(Pointer<CBLBlobReadStream> stream, int bufferSize) {
+  Data? read(Pointer<CBLBlobReadStream> stream, int bufferSize) {
     final buffer = _read(stream, bufferSize, globalCBLError);
 
     // A null slice signals an error.
@@ -205,7 +205,7 @@ class BlobReadStreamBindings extends Bindings {
     // Empty buffer means stream has been fully read, but its important to
     // create a SliceResult to ensure the the FLSliceResult is freed.
     final sliceResult = SliceResult.fromFLSliceResult(buffer)!;
-    return sliceResult.size == 0 ? null : sliceResult.asUint8List();
+    return sliceResult.size == 0 ? null : sliceResult.toData();
   }
 
   void close(Pointer<CBLBlobReadStream> stream) {
@@ -279,7 +279,7 @@ class BlobWriteStreamBindings extends Bindings {
     _close(stream);
   }
 
-  bool write(Pointer<CBLBlobWriteStream> stream, Uint8List data) {
+  bool write(Pointer<CBLBlobWriteStream> stream, Data data) {
     final slice = data.toSliceResult();
     return _write(stream, slice.buf, slice.size, globalCBLError)
         .checkCBLError()

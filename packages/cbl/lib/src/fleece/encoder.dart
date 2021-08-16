@@ -61,7 +61,7 @@ class FleeceEncoder {
   Object? extraInfo;
 
   /// Converts the [json] string to [format] and returns the result.
-  SliceResult convertJson(String json) {
+  Data convertJson(String json) {
     reset();
     writeJson(json);
     return finish();
@@ -85,7 +85,7 @@ class FleeceEncoder {
     } else if (value is String) {
       writeString(value);
     } else if (value is Uint8List) {
-      writeData(value);
+      writeData(value.toData());
     } else if (value is Iterable) {
       final list = value.toList();
       beginArray(list.length);
@@ -147,7 +147,7 @@ class FleeceEncoder {
   void writeString(String value) => _encoderBinds.writeString(_pointer, value);
 
   /// Writes the [TypedData] [value] to this encoder.
-  void writeData(Uint8List value) => _encoderBinds.writeData(_pointer, value);
+  void writeData(Data value) => _encoderBinds.writeData(_pointer, value);
 
   /// Writes the JSON string [value] to this encoder.
   void writeJson(String value) => _encoderBinds.writeJSON(_pointer, value);
@@ -175,7 +175,7 @@ class FleeceEncoder {
   /// Finishes encoding and returns the result.
   ///
   /// To begin a new piece of Fleece data call [reset].
-  SliceResult finish() {
+  Data finish() {
     final result = _encoderBinds.finish(_pointer);
 
     if (result == null) {

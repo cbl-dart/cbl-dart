@@ -69,7 +69,7 @@ class FfiReplicator
         authenticator: authenticator,
         headers: config.headers
             ?.let((it) => fl.MutableDict(it).native.pointer.cast()),
-        pinnedServerCertificate: config.pinnedServerCertificate,
+        pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
         channels: config.channels
             ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
         documentIDs: config.documentIds

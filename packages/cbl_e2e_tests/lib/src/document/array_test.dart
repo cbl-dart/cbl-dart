@@ -315,7 +315,7 @@ Array immutableArray([List<Object?>? data]) {
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(
-    fleeceData.asUint8List(),
+    fleeceData,
     context: MContext(),
     isMutable: false,
   );

@@ -1,5 +1,4 @@
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -43,13 +42,13 @@ class FfiDocumentDelegate extends DocumentDelegate
   @override
   int get sequence => native.call(_documentBindings.sequence);
 
-  Uint8List? _properties;
+  Data? _properties;
 
   @override
-  Uint8List get properties => _properties ??= _readProperties();
+  Data get properties => _properties ??= _readProperties();
 
   @override
-  set properties(Uint8List value) {
+  set properties(Data value) {
     _writePropertiesDict(value);
     _properties = value;
   }
@@ -62,15 +61,13 @@ class FfiDocumentDelegate extends DocumentDelegate
             isMutable: isMutable,
           ));
 
-  Uint8List _readProperties() => runNativeCalls(() => (fl.FleeceEncoder()
-        ..writeValue(_readPropertiesDict().pointer))
-      .finish()
-      .asUint8List());
+  Data _readProperties() => runNativeCalls(() =>
+      (fl.FleeceEncoder()..writeValue(_readPropertiesDict().pointer)).finish());
 
   fl.Dict _readPropertiesDict() =>
       fl.Dict.fromPointer(native.call(_documentBindings.properties));
 
-  void _writePropertiesDict(Uint8List value) {
+  void _writePropertiesDict(Data value) {
     final doc = fl.Doc.fromResultData(value, FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
 

@@ -140,7 +140,7 @@ class CblMDelegate extends MDelegate {
       cacheIt();
       return flValue.isString
           ? flValue.slice.toDartString()
-          : SliceResult.fromSlice(flValue.slice).asUint8List();
+          : SliceResult.fromSlice(flValue.slice).asTypedList();
     } else if (flValue is CollectionFLValue) {
       cacheIt();
       if (flValue.isArray) {

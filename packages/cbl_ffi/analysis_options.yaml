@@ -4,4 +4,3 @@ linter:
   rules:
     camel_case_types: false
     avoid_private_typedef_functions: false
-    subtype_of_disallowed_type: false

@@ -75,9 +75,9 @@ void main() {
 
       expect(slice.size, 2);
 
-      slice.asUint8List().setAll(0, [1, 2]);
+      slice.asTypedList().setAll(0, [1, 2]);
 
-      expect(slice.asUint8List(), [1, 2]);
+      expect(slice.asTypedList(), [1, 2]);
     });
 
     test('create SliceResult from FLSliceResult', () {

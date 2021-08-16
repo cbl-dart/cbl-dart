@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
@@ -75,7 +74,7 @@ class _JsonMatcher extends Matcher {
   bool matches(Object? item, Map matchState) {
     if (item is SliceResult) {
       // ignore: parameter_assignments
-      item = item.asUint8List();
+      item = item.asTypedList();
     }
 
     Object? actual;
@@ -84,7 +83,7 @@ class _JsonMatcher extends Matcher {
       if (item != actual) {
         matchState[_actualDecodedKey] = actual;
       }
-    } else if (item is Uint8List) {
+    } else if (item is Data) {
       actual = fleeceDecode(item);
       if (actual == null) {
         return false;
