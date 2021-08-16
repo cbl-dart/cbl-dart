@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_function_declarations_over_variables
+
 import 'package:cbl_flutter/cbl_flutter.dart';
 import 'package:flutter_test/flutter_test.dart' as ft;
 import 'package:integration_test/integration_test.dart';
@@ -24,12 +26,11 @@ class FlutterCblE2eTestBinding extends CblE2eTestBinding {
       getTemporaryDirectory().then((dir) => path.join(dir.path, 'cbl_flutter'));
 
   @override
-  final testFn = (dynamic description, body) =>
-      ft.testWidgets(description as String, (tester) async => await body());
+  final testFn = (description, body) =>
+      ft.testWidgets(description, (tester) async => await body());
 
   @override
-  final groupFn =
-      (dynamic description, body) => ft.group(description as Object, body);
+  final groupFn = ft.group;
 
   @override
   final setUpAllFn = ft.setUpAll;

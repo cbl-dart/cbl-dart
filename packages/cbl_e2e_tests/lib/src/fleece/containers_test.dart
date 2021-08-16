@@ -55,7 +55,7 @@ void main() {
       test('isNull returns true when type is `Null`', () {
         final doc = Doc.fromJson('{"a": null}');
         final value = doc.root.asDict!['a'];
-        expect(value.type, equals(ValueType.Null));
+        expect(value.type, equals(ValueType.null_));
         expect(value.isNull, isTrue);
       });
 
@@ -78,7 +78,7 @@ void main() {
       });
 
       test('asInt returns value as int', () {
-        final number = 9223372036854775807;
+        const number = 9223372036854775807;
         final doc = Doc.fromJson('{"a": $number}');
         final value = doc.root.asDict!['a'];
         expect(value.asInt, equals(number));
@@ -127,7 +127,7 @@ void main() {
       });
 
       test('toJson returns json representation of value', () {
-        final json = '[{"a":42},"b"]';
+        const json = '[{"a":42},"b"]';
         final doc = Doc.fromJson(json);
         final value = doc.root;
         expect(value.toJson(), equals(json));
@@ -145,24 +145,35 @@ void main() {
       });
 
       test('toString returns debug description', () {
-        final doc = Doc.fromJson(r'''
-      {
-        "null": null,
-        "int": 1,
-        "bool": true,
-        "double": 0.5,
-        "string": "a",
-        "dict": {},
-        "array": []
-      }
-      ''');
+        final doc = Doc.fromJson(
+          '''
+          {
+            "null": null,
+            "int": 1,
+            "bool": true,
+            "double": 0.5,
+            "string": "a",
+            "dict": {},
+            "array": []
+          }
+          ''',
+        );
 
         final root = doc.root.asDict!;
 
         expect(
           root.toString(),
           equals(
-            '{array: [], bool: true, dict: {}, double: 0.5, int: 1, null: null, string: "a"}',
+            '{'
+            'array: [], '
+            'bool: true, '
+            'dict: {}, '
+            'double: 0.5, '
+            'int: 1, '
+            'null: null, '
+            // ignore: missing_whitespace_between_adjacent_strings
+            'string: "a"'
+            '}',
           ),
         );
 
@@ -245,8 +256,7 @@ void main() {
       test('isChanged returns true if array was changed from source', () {
         final doc = Doc.fromJson('["a"]');
         final source = doc.root.asArray;
-        final array = MutableArray.mutableCopy(source!);
-        array.removeAt(0);
+        final array = MutableArray.mutableCopy(source!)..removeAt(0);
         expect(array.isChanged, isTrue);
       });
 
@@ -262,8 +272,7 @@ void main() {
       });
 
       test('[]= sets value at index', () {
-        final array = MutableArray();
-        array.length = 1;
+        final array = MutableArray()..length = 1;
         array[0] = true;
         expect(array[0].asBool, equals(true));
       });
@@ -275,22 +284,21 @@ void main() {
       });
 
       test('add appends value at end of array', () {
-        final array = MutableArray();
-        array.add(true);
+        final array = MutableArray()..add(true);
         expect(array[0].asBool, equals(true));
       });
 
       test('removeRange removes range of values from array', () {
-        final array = MutableArray();
-        array.addAll([0, 1, 2, 3]);
-        array.removeRange(1, 3);
+        final array = MutableArray()
+          ..addAll([0, 1, 2, 3])
+          ..removeRange(1, 3);
         expect(array, equals(MutableArray()..addAll([0, 3])));
       });
 
       test('insertNulls insert nulls into array', () {
-        final array = MutableArray();
-        array.addAll([1, 2]);
-        array.insertNulls(1, 2);
+        final array = MutableArray()
+          ..addAll([1, 2])
+          ..insertNulls(1, 2);
         final expected = MutableArray([1, null, null, 2]);
         expect(array[0], expected[0]);
         expect(array[1].type, expected[1].type);
@@ -302,32 +310,28 @@ void main() {
         final array = MutableArray();
         expect(array, isEmpty);
         array.length = 3;
-        expect(array[0].type, ValueType.Null);
-        expect(array[1].type, ValueType.Null);
-        expect(array[2].type, ValueType.Null);
+        expect(array[0].type, ValueType.null_);
+        expect(array[1].type, ValueType.null_);
+        expect(array[2].type, ValueType.null_);
       });
 
       test('mutableDict returns null when value at index is not an dict', () {
-        final array = MutableArray();
-        array.add(true);
+        final array = MutableArray()..add(true);
         expect(array.mutableDict(0), isNull);
       });
 
       test('mutableDict returns dict when value at index is a dict', () {
-        final array = MutableArray();
-        array.add(MutableDict());
+        final array = MutableArray()..add(MutableDict());
         expect(array.mutableDict(0), isNotNull);
       });
 
       test('mutableArray returns null when value at index is not an array', () {
-        final array = MutableArray();
-        array.add(true);
+        final array = MutableArray()..add(true);
         expect(array.mutableArray(0), isNull);
       });
 
       test('mutableArray returns dict when value at index is a dict', () {
-        final array = MutableArray();
-        array.add(MutableArray());
+        final array = MutableArray()..add(MutableArray());
         expect(array.mutableArray(0), isNotNull);
       });
     });
@@ -587,19 +591,24 @@ void main() {
       }
       ''');
 
+      // ignore: avoid_print
       print(doc.root.asDict!.toObject());
 
-      print(doc
-          .root
-          .asDict!['glossary']
-          .asDict!['GlossDiv']
-          .asDict!['GlossList']
-          .asDict!['GlossEntry']
-          .asDict!['GlossDef']
-          .asDict!['GlossSeeAlso']
-          .asArray![0]
-          .asString);
+      // ignore: avoid_print
+      print(
+        doc
+            .root
+            .asDict!['glossary']
+            .asDict!['GlossDiv']
+            .asDict!['GlossList']
+            .asDict!['GlossEntry']
+            .asDict!['GlossDef']
+            .asDict!['GlossSeeAlso']
+            .asArray![0]
+            .asString,
+      );
 
+      // ignore: avoid_print
       print(MutableDict({
         'a': {
           'b': [
@@ -611,6 +620,7 @@ void main() {
         }
       }));
 
+      // ignore: avoid_print
       print(MutableArray([
         null,
         [null],

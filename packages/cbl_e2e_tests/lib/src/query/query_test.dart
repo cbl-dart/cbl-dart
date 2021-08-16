@@ -16,9 +16,9 @@ void main() {
     });
 
     test('execute simple query', () {
-      final db = openSyncTestDb('ExecuteSimpleQuery');
-      db.saveDocument(MutableDocument({'a': 0}));
-      db.saveDocument(MutableDocument({'a': 1}));
+      final db = openSyncTestDb('ExecuteSimpleQuery')
+        ..saveDocument(MutableDocument({'a': 0}))
+        ..saveDocument(MutableDocument({'a': 1}));
 
       final q = SyncQuery.fromN1ql(db, 'SELECT a FROM _ ORDER BY a');
 
@@ -34,10 +34,10 @@ void main() {
       db.saveDocument(MutableDocument.withId('A'));
 
       q.parameters = Parameters({'ID': 'A'});
-      expect((q.execute()), isNotEmpty);
+      expect(q.execute(), isNotEmpty);
 
       q.parameters = Parameters({'ID': 'B'});
-      expect((q.execute()), isEmpty);
+      expect(q.execute(), isEmpty);
     });
 
     test('listen to query with parameters', () async {
@@ -46,10 +46,10 @@ void main() {
       db.saveDocument(MutableDocument.withId('A'));
 
       q.parameters = Parameters({'ID': 'A'});
-      expect((await q.changes().first), isNotEmpty);
+      expect(await q.changes().first, isNotEmpty);
 
       q.parameters = Parameters({'ID': 'B'});
-      expect((await q.changes().first), isEmpty);
+      expect(await q.changes().first, isEmpty);
     });
 
     test('explain returns the query plan explanation', () {

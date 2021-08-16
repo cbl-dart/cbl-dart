@@ -55,19 +55,17 @@ class FfiDocumentDelegate extends DocumentDelegate
   }
 
   @override
-  MRoot createMRoot(MContext context, bool isMutable) => runNativeCalls(() {
-        return MRoot.fromValue(
-          _readPropertiesDict().pointer,
-          context: context,
-          isMutable: isMutable,
-        );
-      });
+  MRoot createMRoot(MContext context, {required bool isMutable}) =>
+      runNativeCalls(() => MRoot.fromValue(
+            _readPropertiesDict().pointer,
+            context: context,
+            isMutable: isMutable,
+          ));
 
-  Uint8List _readProperties() => runNativeCalls(() {
-        return (fl.FleeceEncoder()..writeValue(_readPropertiesDict().pointer))
-            .finish()
-            .asUint8List();
-      });
+  Uint8List _readProperties() => runNativeCalls(() => (fl.FleeceEncoder()
+        ..writeValue(_readPropertiesDict().pointer))
+      .finish()
+      .asUint8List());
 
   fl.Dict _readPropertiesDict() =>
       fl.Dict.fromPointer(native.call(_documentBindings.properties));
@@ -99,7 +97,7 @@ class FfiDocumentDelegate extends DocumentDelegate
 
 extension FfiMutableDelegateDocumentExt on MutableDelegateDocument {
   FfiDocumentDelegate prepareFfiDelegate() {
-    var currentDelegate = delegate;
+    final currentDelegate = delegate;
     if (currentDelegate is FfiDocumentDelegate) {
       flushPropertiesToDelegate();
       return currentDelegate;

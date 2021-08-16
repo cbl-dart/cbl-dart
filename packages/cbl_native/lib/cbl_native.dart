@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_slow_async_io, avoid_print
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -185,10 +187,12 @@ Future<T> _retry<T>(
   final random = Random();
   var attempts = 0;
 
+  // ignore: literal_only_boolean_expressions
   while (true) {
     attempts++;
     try {
       return await action();
+      // ignore: avoid_catches_without_on_clauses
     } catch (error) {
       if (attempts >= maxAttempts || !(await retryIf(error))) {
         rethrow;

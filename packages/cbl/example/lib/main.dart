@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cbl/cbl.dart';
 
 /// You need to specify how to access the native libraries, on top of which

@@ -35,6 +35,7 @@ abstract class FullTextIndex extends Index {
   /// Specifies whether the index ignores accents and diacritical marks.
   ///
   /// The default value is `false`.
+  // ignore: avoid_positional_boolean_parameters
   FullTextIndex ignoreAccents(bool ignoreAccents);
 
   /// Specifies the dominant language of the index.

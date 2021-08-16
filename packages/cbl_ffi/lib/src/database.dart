@@ -19,7 +19,7 @@ enum CBLConcurrencyControl {
   failOnConflict,
 }
 
-extension CBLConcurrencyControlExt on CBLConcurrencyControl {
+extension on CBLConcurrencyControl {
   int toInt() => CBLConcurrencyControl.values.indexOf(this);
 }
 
@@ -31,69 +31,69 @@ class CBLDatabaseConfiguration {
   final String directory;
 }
 
-class CBLDart_CBLDatabaseConfiguration extends Struct {
+class _CBLDart_CBLDatabaseConfiguration extends Struct {
   external FLString directory;
 }
 
-typedef CBLDart_CBLDatabaseConfiguration_Default
-    = CBLDart_CBLDatabaseConfiguration Function();
+typedef _CBLDart_CBLDatabaseConfiguration_Default
+    = _CBLDart_CBLDatabaseConfiguration Function();
 
-typedef CBLDart_CBL_CopyDatabase_C = Uint8 Function(
+typedef _CBLDart_CBL_CopyDatabase_C = Uint8 Function(
   FLString fromPath,
   FLString toPath,
-  Pointer<CBLDart_CBLDatabaseConfiguration> config,
+  Pointer<_CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBL_CopyDatabase = int Function(
+typedef _CBLDart_CBL_CopyDatabase = int Function(
   FLString fromPath,
   FLString toPath,
-  Pointer<CBLDart_CBLDatabaseConfiguration> config,
+  Pointer<_CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBL_DeleteDatabase_C = Uint8 Function(
+typedef _CBLDart_CBL_DeleteDatabase_C = Uint8 Function(
   FLString name,
   FLString inDirectory,
   Pointer<CBLError> outError,
 );
-typedef CBLDart_CBL_DeleteDatabase = int Function(
+typedef _CBLDart_CBL_DeleteDatabase = int Function(
   FLString name,
   FLString inDirectory,
   Pointer<CBLError> outError,
 );
 
-typedef CBLDart_CBLDatabase_Exists_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_Exists_C = Uint8 Function(
   FLString name,
   FLString inDirectory,
 );
-typedef CBLDart_CBLDatabase_Exists = int Function(
+typedef _CBLDart_CBLDatabase_Exists = int Function(
   FLString name,
   FLString inDirectory,
 );
 
-typedef CBLDart_CBLDatabase_Open = Pointer<CBLDatabase> Function(
+typedef _CBLDart_CBLDatabase_Open = Pointer<CBLDatabase> Function(
   FLString name,
-  Pointer<CBLDart_CBLDatabaseConfiguration> config,
+  Pointer<_CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_BindDatabaseToDartObject_C = Void Function(
+typedef _CBLDart_BindDatabaseToDartObject_C = Void Function(
   Handle object,
   Pointer<CBLDatabase> db,
   Pointer<Utf8> debugName,
 );
-typedef CBLDart_BindDatabaseToDartObject = void Function(
+typedef _CBLDart_BindDatabaseToDartObject = void Function(
   Object object,
   Pointer<CBLDatabase> db,
   Pointer<Utf8> debugName,
 );
 
-typedef CBLDart_CBLDatabase_Close_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_Close_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Uint8 andDelete,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_Close = int Function(
+typedef _CBLDart_CBLDatabase_Close = int Function(
   Pointer<CBLDatabase> db,
   int andDelete,
   Pointer<CBLError> errorOut,
@@ -107,149 +107,145 @@ enum CBLMaintenanceType {
   fullOptimize
 }
 
-extension CBLMaintenanceTypeIntExt on CBLMaintenanceType {
+extension on CBLMaintenanceType {
   int toInt() => CBLMaintenanceType.values.indexOf(this);
 }
 
-typedef CBLDatabase_PerformMaintenance_C = Uint8 Function(
+typedef _CBLDatabase_PerformMaintenance_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Uint32 type,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_PerformMaintenance = int Function(
+typedef _CBLDatabase_PerformMaintenance = int Function(
   Pointer<CBLDatabase> db,
   int type,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_BeginTransaction_C = Uint8 Function(
+typedef _CBLDatabase_BeginTransaction_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_BeginTransaction = int Function(
+typedef _CBLDatabase_BeginTransaction = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_EndTransaction_C = Uint8 Function(
+typedef _CBLDatabase_EndTransaction_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Uint8 commit,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_EndTransaction = int Function(
+typedef _CBLDatabase_EndTransaction = int Function(
   Pointer<CBLDatabase> db,
   int commit,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_Name = FLString Function(Pointer<CBLDatabase> db);
+typedef _CBLDart_CBLDatabase_Name = FLString Function(Pointer<CBLDatabase> db);
 
-typedef CBLDart_CBLDatabase_Path = FLStringResult Function(
+typedef _CBLDart_CBLDatabase_Path = FLStringResult Function(
   Pointer<CBLDatabase> db,
 );
 
-typedef CBLDatabase_Count_C = Uint64 Function(
+typedef _CBLDatabase_Count_C = Uint64 Function(
   Pointer<CBLDatabase> db,
 );
-typedef CBLDatabase_Count = int Function(
+typedef _CBLDatabase_Count = int Function(
   Pointer<CBLDatabase> db,
 );
 
-typedef CBLDart_CBLDatabase_Config = CBLDart_CBLDatabaseConfiguration Function(
-  Pointer<CBLDatabase> dbm,
-);
-
-typedef CBLDart_CBLDatabase_GetDocument = Pointer<CBLDocument> Function(
+typedef _CBLDart_CBLDatabase_GetDocument = Pointer<CBLDocument> Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_GetMutableDocument = Pointer<CBLMutableDocument>
+typedef _CBLDart_CBLDatabase_GetMutableDocument = Pointer<CBLMutableDocument>
     Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C = Uint8
+typedef _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C = Uint8
     Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Uint8 concurrency,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = int Function(
+typedef _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   int concurrency,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_DeleteDocumentWithConcurrencyControl_C = Uint8 Function(
+typedef _CBLDatabase_DeleteDocumentWithConcurrencyControl_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLDocument> document,
   Uint8 concurrency,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_DeleteDocumentWithConcurrencyControl = int Function(
+typedef _CBLDatabase_DeleteDocumentWithConcurrencyControl = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLDocument> document,
   int concurrency,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_PurgeDocumentByID = int Function(
-  Pointer<CBLDatabase> db,
-  FLString docId,
-  Pointer<CBLError> errorOut,
-);
-
-typedef CBLDart_CBLDatabase_GetDocumentExpiration_C = Int64 Function(
-  Pointer<CBLDatabase> db,
-  FLString docId,
-  Pointer<CBLError> errorOut,
-);
-typedef CBLDart_CBLDatabase_GetDocumentExpiration = int Function(
+typedef _CBLDart_CBLDatabase_PurgeDocumentByID = int Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_GetDocumentExpiration_C = Int64 Function(
+  Pointer<CBLDatabase> db,
+  FLString docId,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLDart_CBLDatabase_GetDocumentExpiration = int Function(
+  Pointer<CBLDatabase> db,
+  FLString docId,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLDart_CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Int64 expiration,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_SetDocumentExpiration = int Function(
+typedef _CBLDart_CBLDatabase_SetDocumentExpiration = int Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   int expiration,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_AddDocumentChangeListener_C = Void Function(
+typedef _CBLDart_CBLDatabase_AddDocumentChangeListener_C = Void Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLDartAsyncCallback> listener,
 );
-typedef CBLDart_CBLDatabase_AddDocumentChangeListener = void Function(
+typedef _CBLDart_CBLDatabase_AddDocumentChangeListener = void Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLDartAsyncCallback> listener,
 );
 
-typedef CBLDart_CBLDatabase_AddChangeListener_C = Void Function(
+typedef _CBLDart_CBLDatabase_AddChangeListener_C = Void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLDartAsyncCallback> listener,
 );
-typedef CBLDart_CBLDatabase_AddChangeListener = void Function(
+typedef _CBLDart_CBLDatabase_AddChangeListener = void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLDartAsyncCallback> listener,
 );
@@ -288,12 +284,9 @@ extension on CBLIndexType {
   int toInt() => CBLIndexType.values.indexOf(this);
 }
 
-extension on int {
-  CBLIndexType toIndexType() => CBLIndexType.values[this];
-}
-
 class _CBLDart_CBLIndexSpec extends Struct {
   @Uint8()
+  // ignore: unused_field
   external int _type;
 
   @Uint32()
@@ -310,54 +303,53 @@ class _CBLDart_CBLIndexSpec extends Struct {
 }
 
 // ignore: camel_case_extensions
-extension CBLDart_CBLIndexSpecExt on _CBLDart_CBLIndexSpec {
-  CBLIndexType get type => _type.toIndexType();
+extension on _CBLDart_CBLIndexSpec {
   set type(CBLIndexType value) => _type = value.toInt();
   set expressionLanguage(CBLQueryLanguage value) =>
       _expressionLanguage = value.toInt();
   set ignoreAccents(bool value) => _ignoreAccents = value.toInt();
 }
 
-typedef CBLDart_CBLDatabase_CreateIndex_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_CreateIndex_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   FLString name,
   _CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_CreateIndex = int Function(
+typedef _CBLDart_CBLDatabase_CreateIndex = int Function(
   Pointer<CBLDatabase> db,
   FLString name,
   _CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDart_CBLDatabase_DeleteIndex_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_DeleteIndex_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   FLString name,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDart_CBLDatabase_DeleteIndex = int Function(
+typedef _CBLDart_CBLDatabase_DeleteIndex = int Function(
   Pointer<CBLDatabase> db,
   FLString name,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_GetIndexNames = Pointer<FLArray> Function(
+typedef _CBLDatabase_GetIndexNames = Pointer<FLArray> Function(
   Pointer<CBLDatabase> db,
 );
 
-typedef CBLDatabase_GetBlob = Pointer<CBLBlob> Function(
+typedef _CBLDatabase_GetBlob = Pointer<CBLBlob> Function(
   Pointer<CBLDatabase> db,
   Pointer<FLDict> properties,
   Pointer<CBLError> errorOut,
 );
 
-typedef CBLDatabase_SaveBlob_C = Uint8 Function(
+typedef _CBLDatabase_SaveBlob_C = Uint8 Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLBlob> blob,
   Pointer<CBLError> errorOut,
 );
-typedef CBLDatabase_SaveBlob = int Function(
+typedef _CBLDatabase_SaveBlob = int Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLBlob> blob,
   Pointer<CBLError> errorOut,
@@ -366,198 +358,184 @@ typedef CBLDatabase_SaveBlob = int Function(
 class DatabaseBindings extends Bindings {
   DatabaseBindings(Bindings parent) : super(parent) {
     _copyDatabase = libs.cblDart
-        .lookupFunction<CBLDart_CBL_CopyDatabase_C, CBLDart_CBL_CopyDatabase>(
+        .lookupFunction<_CBLDart_CBL_CopyDatabase_C, _CBLDart_CBL_CopyDatabase>(
       'CBLDart_CBL_CopyDatabase',
     );
-    _deleteDatabase = libs.cblDart.lookupFunction<CBLDart_CBL_DeleteDatabase_C,
-        CBLDart_CBL_DeleteDatabase>(
+    _deleteDatabase = libs.cblDart.lookupFunction<_CBLDart_CBL_DeleteDatabase_C,
+        _CBLDart_CBL_DeleteDatabase>(
       'CBLDart_CBL_DeleteDatabase',
     );
-    _databaseExists = libs.cblDart.lookupFunction<CBLDart_CBLDatabase_Exists_C,
-        CBLDart_CBLDatabase_Exists>(
+    _databaseExists = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_Exists_C,
+        _CBLDart_CBLDatabase_Exists>(
       'CBLDart_CBL_DatabaseExists',
     );
     _defaultConfiguration = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabaseConfiguration_Default,
-        CBLDart_CBLDatabaseConfiguration_Default>(
+        _CBLDart_CBLDatabaseConfiguration_Default,
+        _CBLDart_CBLDatabaseConfiguration_Default>(
       'CBLDart_CBLDatabaseConfiguration_Default',
     );
     _open = libs.cblDart
-        .lookupFunction<CBLDart_CBLDatabase_Open, CBLDart_CBLDatabase_Open>(
+        .lookupFunction<_CBLDart_CBLDatabase_Open, _CBLDart_CBLDatabase_Open>(
       'CBLDart_CBLDatabase_Open',
     );
     _bindtoDartObject = libs.cblDart.lookupFunction<
-        CBLDart_BindDatabaseToDartObject_C, CBLDart_BindDatabaseToDartObject>(
+        _CBLDart_BindDatabaseToDartObject_C, _CBLDart_BindDatabaseToDartObject>(
       'CBLDart_BindDatabaseToDartObject',
     );
-    _close = libs.cblDart
-        .lookupFunction<CBLDart_CBLDatabase_Close_C, CBLDart_CBLDatabase_Close>(
+    _close = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_Close_C,
+        _CBLDart_CBLDatabase_Close>(
       'CBLDart_CBLDatabase_Close',
     );
     _performMaintenance = libs.cbl.lookupFunction<
-        CBLDatabase_PerformMaintenance_C, CBLDatabase_PerformMaintenance>(
+        _CBLDatabase_PerformMaintenance_C, _CBLDatabase_PerformMaintenance>(
       'CBLDatabase_PerformMaintenance',
     );
-    _beginTransaction = libs.cbl.lookupFunction<CBLDatabase_BeginTransaction_C,
-        CBLDatabase_BeginTransaction>(
+    _beginTransaction = libs.cbl.lookupFunction<_CBLDatabase_BeginTransaction_C,
+        _CBLDatabase_BeginTransaction>(
       'CBLDatabase_BeginTransaction',
     );
-    _endTransaction = libs.cbl.lookupFunction<CBLDatabase_EndTransaction_C,
-        CBLDatabase_EndTransaction>(
+    _endTransaction = libs.cbl.lookupFunction<_CBLDatabase_EndTransaction_C,
+        _CBLDatabase_EndTransaction>(
       'CBLDatabase_EndTransaction',
     );
     _name = libs.cblDart
-        .lookupFunction<CBLDart_CBLDatabase_Name, CBLDart_CBLDatabase_Name>(
+        .lookupFunction<_CBLDart_CBLDatabase_Name, _CBLDart_CBLDatabase_Name>(
       'CBLDart_CBLDatabase_Name',
     );
     _path = libs.cblDart
-        .lookupFunction<CBLDart_CBLDatabase_Path, CBLDart_CBLDatabase_Path>(
+        .lookupFunction<_CBLDart_CBLDatabase_Path, _CBLDart_CBLDatabase_Path>(
       'CBLDart_CBLDatabase_Path',
     );
-    _count = libs.cbl.lookupFunction<CBLDatabase_Count_C, CBLDatabase_Count>(
+    _count = libs.cbl.lookupFunction<_CBLDatabase_Count_C, _CBLDatabase_Count>(
       'CBLDatabase_Count',
     );
-    _config = libs.cblDart
-        .lookupFunction<CBLDart_CBLDatabase_Config, CBLDart_CBLDatabase_Config>(
-      'CBLDart_CBLDatabase_Config',
-    );
-    _getDocument = libs.cblDart.lookupFunction<CBLDart_CBLDatabase_GetDocument,
-        CBLDart_CBLDatabase_GetDocument>(
+    _getDocument = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_GetDocument,
+        _CBLDart_CBLDatabase_GetDocument>(
       'CBLDart_CBLDatabase_GetDocument',
     );
     _getMutableDocument = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_GetMutableDocument,
-        CBLDart_CBLDatabase_GetMutableDocument>(
+        _CBLDart_CBLDatabase_GetMutableDocument,
+        _CBLDart_CBLDatabase_GetMutableDocument>(
       'CBLDart_CBLDatabase_GetMutableDocument',
     );
     _saveDocumentWithConcurrencyControl = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C,
-        CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl>(
+        _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C,
+        _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl>(
       'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
     );
     _deleteDocumentWithConcurrencyControl = libs.cbl.lookupFunction<
-        CBLDatabase_DeleteDocumentWithConcurrencyControl_C,
-        CBLDatabase_DeleteDocumentWithConcurrencyControl>(
+        _CBLDatabase_DeleteDocumentWithConcurrencyControl_C,
+        _CBLDatabase_DeleteDocumentWithConcurrencyControl>(
       'CBLDatabase_DeleteDocumentWithConcurrencyControl',
     );
     _purgeDocumentByID = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_PurgeDocumentByID_C,
-        CBLDart_CBLDatabase_PurgeDocumentByID>(
+        _CBLDart_CBLDatabase_PurgeDocumentByID_C,
+        _CBLDart_CBLDatabase_PurgeDocumentByID>(
       'CBLDart_CBLDatabase_PurgeDocumentByID',
     );
     _getDocumentExpiration = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_GetDocumentExpiration_C,
-        CBLDart_CBLDatabase_GetDocumentExpiration>(
+        _CBLDart_CBLDatabase_GetDocumentExpiration_C,
+        _CBLDart_CBLDatabase_GetDocumentExpiration>(
       'CBLDart_CBLDatabase_GetDocumentExpiration',
     );
     _setDocumentExpiration = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_SetDocumentExpiration_C,
-        CBLDart_CBLDatabase_SetDocumentExpiration>(
+        _CBLDart_CBLDatabase_SetDocumentExpiration_C,
+        _CBLDart_CBLDatabase_SetDocumentExpiration>(
       'CBLDart_CBLDatabase_SetDocumentExpiration',
     );
     _addDocumentChangeListener = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_AddDocumentChangeListener_C,
-        CBLDart_CBLDatabase_AddDocumentChangeListener>(
+        _CBLDart_CBLDatabase_AddDocumentChangeListener_C,
+        _CBLDart_CBLDatabase_AddDocumentChangeListener>(
       'CBLDart_CBLDatabase_AddDocumentChangeListener',
     );
     _addChangeListener = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_AddChangeListener_C,
-        CBLDart_CBLDatabase_AddChangeListener>(
+        _CBLDart_CBLDatabase_AddChangeListener_C,
+        _CBLDart_CBLDatabase_AddChangeListener>(
       'CBLDart_CBLDatabase_AddChangeListener',
     );
     _createIndex = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_CreateIndex_C, CBLDart_CBLDatabase_CreateIndex>(
+        _CBLDart_CBLDatabase_CreateIndex_C, _CBLDart_CBLDatabase_CreateIndex>(
       'CBLDart_CBLDatabase_CreateIndex',
     );
     _deleteIndex = libs.cblDart.lookupFunction<
-        CBLDart_CBLDatabase_DeleteIndex_C, CBLDart_CBLDatabase_DeleteIndex>(
+        _CBLDart_CBLDatabase_DeleteIndex_C, _CBLDart_CBLDatabase_DeleteIndex>(
       'CBLDart_CBLDatabase_DeleteIndex',
     );
     _indexNames = libs.cbl
-        .lookupFunction<CBLDatabase_GetIndexNames, CBLDatabase_GetIndexNames>(
+        .lookupFunction<_CBLDatabase_GetIndexNames, _CBLDatabase_GetIndexNames>(
       'CBLDatabase_GetIndexNames',
     );
     _getBlob =
-        libs.cbl.lookupFunction<CBLDatabase_GetBlob, CBLDatabase_GetBlob>(
+        libs.cbl.lookupFunction<_CBLDatabase_GetBlob, _CBLDatabase_GetBlob>(
       'CBLDatabase_GetBlob',
     );
     _saveBlob =
-        libs.cbl.lookupFunction<CBLDatabase_SaveBlob_C, CBLDatabase_SaveBlob>(
+        libs.cbl.lookupFunction<_CBLDatabase_SaveBlob_C, _CBLDatabase_SaveBlob>(
       'CBLDatabase_SaveBlob',
     );
   }
 
-  late final CBLDart_CBL_CopyDatabase _copyDatabase;
-  late final CBLDart_CBL_DeleteDatabase _deleteDatabase;
-  late final CBLDart_CBLDatabase_Exists _databaseExists;
-  late final CBLDart_CBLDatabaseConfiguration_Default _defaultConfiguration;
-  late final CBLDart_CBLDatabase_Open _open;
-  late final CBLDart_BindDatabaseToDartObject _bindtoDartObject;
-  late final CBLDart_CBLDatabase_Close _close;
-  late final CBLDatabase_PerformMaintenance _performMaintenance;
-  late final CBLDatabase_BeginTransaction _beginTransaction;
-  late final CBLDatabase_EndTransaction _endTransaction;
-  late final CBLDart_CBLDatabase_Name _name;
-  late final CBLDart_CBLDatabase_Path _path;
-  late final CBLDatabase_Count _count;
-  late final CBLDart_CBLDatabase_Config _config;
-  late final CBLDart_CBLDatabase_GetDocument _getDocument;
-  late final CBLDart_CBLDatabase_GetMutableDocument _getMutableDocument;
-  late final CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl
+  late final _CBLDart_CBL_CopyDatabase _copyDatabase;
+  late final _CBLDart_CBL_DeleteDatabase _deleteDatabase;
+  late final _CBLDart_CBLDatabase_Exists _databaseExists;
+  late final _CBLDart_CBLDatabaseConfiguration_Default _defaultConfiguration;
+  late final _CBLDart_CBLDatabase_Open _open;
+  late final _CBLDart_BindDatabaseToDartObject _bindtoDartObject;
+  late final _CBLDart_CBLDatabase_Close _close;
+  late final _CBLDatabase_PerformMaintenance _performMaintenance;
+  late final _CBLDatabase_BeginTransaction _beginTransaction;
+  late final _CBLDatabase_EndTransaction _endTransaction;
+  late final _CBLDart_CBLDatabase_Name _name;
+  late final _CBLDart_CBLDatabase_Path _path;
+  late final _CBLDatabase_Count _count;
+  late final _CBLDart_CBLDatabase_GetDocument _getDocument;
+  late final _CBLDart_CBLDatabase_GetMutableDocument _getMutableDocument;
+  late final _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl
       _saveDocumentWithConcurrencyControl;
-  late final CBLDatabase_DeleteDocumentWithConcurrencyControl
+  late final _CBLDatabase_DeleteDocumentWithConcurrencyControl
       _deleteDocumentWithConcurrencyControl;
-  late final CBLDart_CBLDatabase_PurgeDocumentByID _purgeDocumentByID;
-  late final CBLDart_CBLDatabase_GetDocumentExpiration _getDocumentExpiration;
-  late final CBLDart_CBLDatabase_SetDocumentExpiration _setDocumentExpiration;
-  late final CBLDart_CBLDatabase_AddDocumentChangeListener
+  late final _CBLDart_CBLDatabase_PurgeDocumentByID _purgeDocumentByID;
+  late final _CBLDart_CBLDatabase_GetDocumentExpiration _getDocumentExpiration;
+  late final _CBLDart_CBLDatabase_SetDocumentExpiration _setDocumentExpiration;
+  late final _CBLDart_CBLDatabase_AddDocumentChangeListener
       _addDocumentChangeListener;
-  late final CBLDart_CBLDatabase_AddChangeListener _addChangeListener;
-  late final CBLDart_CBLDatabase_CreateIndex _createIndex;
-  late final CBLDart_CBLDatabase_DeleteIndex _deleteIndex;
-  late final CBLDatabase_GetIndexNames _indexNames;
-  late final CBLDatabase_GetBlob _getBlob;
-  late final CBLDatabase_SaveBlob _saveBlob;
+  late final _CBLDart_CBLDatabase_AddChangeListener _addChangeListener;
+  late final _CBLDart_CBLDatabase_CreateIndex _createIndex;
+  late final _CBLDart_CBLDatabase_DeleteIndex _deleteIndex;
+  late final _CBLDatabase_GetIndexNames _indexNames;
+  late final _CBLDatabase_GetBlob _getBlob;
+  late final _CBLDatabase_SaveBlob _saveBlob;
 
   bool copyDatabase(
     String from,
     String name,
     CBLDatabaseConfiguration? configuration,
-  ) {
-    return withZoneArena(() {
-      return _copyDatabase(
-        from.toFLStringInArena().ref,
-        name.toFLStringInArena().ref,
-        _createConfig(configuration),
-        globalCBLError,
-      ).checkCBLError().toBool();
-    });
-  }
+  ) =>
+      withZoneArena(() => _copyDatabase(
+            from.toFLStringInArena().ref,
+            name.toFLStringInArena().ref,
+            _createConfig(configuration),
+            globalCBLError,
+          ).checkCBLError().toBool());
 
-  bool deleteDatabase(String name, String? inDirectory) {
-    return withZoneArena(() {
-      return _deleteDatabase(
-        name.toFLStringInArena().ref,
-        inDirectory.toFLStringInArena().ref,
-        globalCBLError,
-      ).checkCBLError().toBool();
-    });
-  }
+  bool deleteDatabase(String name, String? inDirectory) =>
+      withZoneArena(() => _deleteDatabase(
+            name.toFLStringInArena().ref,
+            inDirectory.toFLStringInArena().ref,
+            globalCBLError,
+          ).checkCBLError().toBool());
 
-  bool databaseExists(String name, String? inDirectory) {
-    return withZoneArena(() {
-      return _databaseExists(
-        name.toFLStringInArena().ref,
-        inDirectory.toFLStringInArena().ref,
-      ).toBool();
-    });
-  }
+  bool databaseExists(String name, String? inDirectory) =>
+      withZoneArena(() => _databaseExists(
+            name.toFLStringInArena().ref,
+            inDirectory.toFLStringInArena().ref,
+          ).toBool());
 
   CBLDatabaseConfiguration defaultConfiguration() {
     final config = _defaultConfiguration();
     String directory;
     if (Platform.isAndroid) {
-      // TODO: useful database directory default for Android
+      // TODO(blaugold): initialize android platform config, https://github.com/cofu-app/cbl-dart/issues/134
       // The default for the database directory on Android is broken.
       // Android does not support allocating memory for the string returned from
       // `getcwd`. Aside from that the current working directory is not
@@ -572,15 +550,12 @@ class DatabaseBindings extends Bindings {
   Pointer<CBLDatabase> open(
     String name,
     CBLDatabaseConfiguration? configuration,
-  ) {
-    return withZoneArena(() {
-      return _open(
-        name.toFLStringInArena().ref,
-        _createConfig(configuration),
-        globalCBLError,
-      ).checkCBLError();
-    });
-  }
+  ) =>
+      withZoneArena(() => _open(
+            name.toFLStringInArena().ref,
+            _createConfig(configuration),
+            globalCBLError,
+          ).checkCBLError());
 
   void bindToDartObject(
     Object object,
@@ -610,49 +585,34 @@ class DatabaseBindings extends Bindings {
     _beginTransaction(db, globalCBLError).checkCBLError();
   }
 
-  void endTransaction(Pointer<CBLDatabase> db, bool commit) {
+  void endTransaction(Pointer<CBLDatabase> db, {required bool commit}) {
     _endTransaction(db, commit.toInt(), globalCBLError).checkCBLError();
   }
 
-  String name(Pointer<CBLDatabase> db) {
-    return _name(db).toDartString()!;
-  }
+  String name(Pointer<CBLDatabase> db) => _name(db).toDartString()!;
 
-  String path(Pointer<CBLDatabase> db) {
-    return _path(db).toDartStringAndRelease()!;
-  }
+  String path(Pointer<CBLDatabase> db) => _path(db).toDartStringAndRelease()!;
 
-  int count(Pointer<CBLDatabase> db) {
-    return _count(db);
-  }
-
-  CBLDart_CBLDatabaseConfiguration config(Pointer<CBLDatabase> db) {
-    return _config(db);
-  }
+  int count(Pointer<CBLDatabase> db) => _count(db);
 
   Pointer<CBLDocument>? getDocument(
     Pointer<CBLDatabase> db,
     String docId,
-  ) {
-    return withZoneArena(() {
-      return _getDocument(db, docId.toFLStringInArena().ref, globalCBLError)
-          .checkCBLError()
-          .toNullable();
-    });
-  }
+  ) =>
+      withZoneArena(() =>
+          _getDocument(db, docId.toFLStringInArena().ref, globalCBLError)
+              .checkCBLError()
+              .toNullable());
 
   Pointer<CBLMutableDocument>? getMutableDocument(
     Pointer<CBLDatabase> db,
     String docId,
-  ) {
-    return withZoneArena(() {
-      return _getMutableDocument(
-        db,
-        docId.toFLStringInArena().ref,
-        globalCBLError,
-      ).checkCBLError().toNullable();
-    });
-  }
+  ) =>
+      withZoneArena(() => _getMutableDocument(
+            db,
+            docId.toFLStringInArena().ref,
+            globalCBLError,
+          ).checkCBLError().toNullable());
 
   void saveDocumentWithConcurrencyControl(
     Pointer<CBLDatabase> db,
@@ -671,55 +631,49 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     Pointer<CBLDocument> document,
     CBLConcurrencyControl concurrency,
-  ) {
-    return _deleteDocumentWithConcurrencyControl(
-      db,
-      document,
-      concurrency.toInt(),
-      globalCBLError,
-    ).checkCBLError().toBool();
-  }
-
-  bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) {
-    return withZoneArena(() {
-      return _purgeDocumentByID(
+  ) =>
+      _deleteDocumentWithConcurrencyControl(
         db,
-        docId.toFLStringInArena().ref,
+        document,
+        concurrency.toInt(),
         globalCBLError,
       ).checkCBLError().toBool();
-    });
-  }
 
-  DateTime? getDocumentExpiration(Pointer<CBLDatabase> db, String docId) {
-    return withZoneArena(() {
-      final result = _getDocumentExpiration(
-        db,
-        docId.toFLStringInArena().ref,
-        globalCBLError,
-      );
+  bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) =>
+      withZoneArena(() => _purgeDocumentByID(
+            db,
+            docId.toFLStringInArena().ref,
+            globalCBLError,
+          ).checkCBLError().toBool());
 
-      if (result == -1) {
-        checkCBLError();
-      }
+  DateTime? getDocumentExpiration(Pointer<CBLDatabase> db, String docId) =>
+      withZoneArena(() {
+        final result = _getDocumentExpiration(
+          db,
+          docId.toFLStringInArena().ref,
+          globalCBLError,
+        );
 
-      return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
-    });
-  }
+        if (result == -1) {
+          checkCBLError();
+        }
+
+        return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
+      });
 
   void setDocumentExpiration(
     Pointer<CBLDatabase> db,
     String docId,
     DateTime? expiration,
-  ) {
-    return withZoneArena(() {
-      _setDocumentExpiration(
-        db,
-        docId.toFLStringInArena().ref,
-        expiration?.millisecondsSinceEpoch ?? 0,
-        globalCBLError,
-      ).checkCBLError();
-    });
-  }
+  ) =>
+      withZoneArena(() {
+        _setDocumentExpiration(
+          db,
+          docId.toFLStringInArena().ref,
+          expiration?.millisecondsSinceEpoch ?? 0,
+          globalCBLError,
+        ).checkCBLError();
+      });
 
   void addDocumentChangeListener(
     Pointer<CBLDatabase> db,
@@ -763,31 +717,26 @@ class DatabaseBindings extends Bindings {
     });
   }
 
-  Pointer<FLArray> indexNames(Pointer<CBLDatabase> db) {
-    return _indexNames(db);
-  }
+  Pointer<FLArray> indexNames(Pointer<CBLDatabase> db) => _indexNames(db);
 
   Pointer<CBLBlob>? getBlob(
     Pointer<CBLDatabase> db,
     Pointer<FLDict> properties,
-  ) {
-    return _getBlob(db, properties, globalCBLError)
-        .checkCBLError()
-        .toNullable();
-  }
+  ) =>
+      _getBlob(db, properties, globalCBLError).checkCBLError().toNullable();
 
   void saveBlob(Pointer<CBLDatabase> db, Pointer<CBLBlob> blob) {
     _saveBlob(db, blob, globalCBLError).checkCBLError();
   }
 
-  Pointer<CBLDart_CBLDatabaseConfiguration> _createConfig(
+  Pointer<_CBLDart_CBLDatabaseConfiguration> _createConfig(
     CBLDatabaseConfiguration? config,
   ) {
     if (config == null) {
       return nullptr;
     }
 
-    final result = zoneArena<CBLDart_CBLDatabaseConfiguration>();
+    final result = zoneArena<_CBLDart_CBLDatabaseConfiguration>();
 
     result.ref.directory = config.directory.toFLStringInArena().ref;
 

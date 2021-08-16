@@ -20,7 +20,6 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  pedantic: ^1.11.0
   rxdart: ^0.26.0
   test: any
 

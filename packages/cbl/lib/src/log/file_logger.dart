@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -74,6 +76,13 @@ class LogFileConfiguration {
           usePlainText == other.usePlainText &&
           maxSize == other.maxSize &&
           maxRotateCount == other.maxRotateCount;
+
+  @override
+  int get hashCode =>
+      directory.hashCode ^
+      usePlainText.hashCode ^
+      maxSize.hashCode ^
+      maxRotateCount.hashCode;
 
   @override
   String toString() => [

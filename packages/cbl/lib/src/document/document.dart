@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
@@ -65,7 +67,7 @@ abstract class DocumentDelegate {
 
   set properties(Uint8List value);
 
-  MRoot createMRoot(MContext context, bool isMutable) =>
+  MRoot createMRoot(MContext context, {required bool isMutable}) =>
       MRoot.fromData(properties, context: context, isMutable: isMutable);
 
   DocumentDelegate toMutable();
@@ -75,10 +77,10 @@ class NewDocumentDelegate extends DocumentDelegate {
   NewDocumentDelegate([String? id]) : id = id ?? createUuid();
 
   @override
-  final id;
+  final String id;
 
   @override
-  final revisionId = null;
+  final String? revisionId = null;
 
   @override
   final sequence = 0;
@@ -91,13 +93,11 @@ class NewDocumentDelegate extends DocumentDelegate {
 
   static late final _emptyProperties = _createEmptyProperties();
 
-  static Uint8List _createEmptyProperties() {
-    final encoder = fl.FleeceEncoder();
-    encoder
-      ..beginDict(0)
-      ..endDict();
-    return encoder.finish().asUint8List();
-  }
+  static Uint8List _createEmptyProperties() => (fl.FleeceEncoder()
+        ..beginDict(0)
+        ..endDict())
+      .finish()
+      .asUint8List();
 }
 
 /// The context for [MCollection]s within a [DelegateDocument].
@@ -164,11 +164,11 @@ class DelegateDocument with IterableMixin<String> implements Document {
     FLEncoderFormat format = FLEncoderFormat.fleece,
   }) {
     assert(database != null);
-    final encoder = fl.FleeceEncoder(format: format);
-    encoder.extraInfo = FleeceEncoderContext(
-      database: database,
-      encodeQueryParameter: true,
-    );
+    final encoder = fl.FleeceEncoder(format: format)
+      ..extraInfo = FleeceEncoderContext(
+        database: database,
+        encodeQueryParameter: true,
+      );
     final encodeToFuture = _root.encodeTo(encoder);
     assert(encodeToFuture is! Future);
     return encoder.finish();
@@ -178,7 +178,8 @@ class DelegateDocument with IterableMixin<String> implements Document {
   final String _typeName = 'Document';
 
   void _initPropertiesDictionary(Uint8List data) {
-    _root = delegate.createMRoot(DocumentMContext(this), _isMutable);
+    _root = delegate.createMRoot(DocumentMContext(this), isMutable: _isMutable);
+    // ignore: cast_nullable_to_non_nullable
     _properties = _root.asNative as Dictionary;
   }
 
@@ -262,6 +263,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
   @override
   String toString() => '$_typeName('
       'id: $id, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'revisionId: $revisionId'
       ')';
 }
@@ -283,9 +285,11 @@ class MutableDelegateDocument extends DelegateDocument
   }
 
   @override
+  // ignore: overridden_fields
   final _typeName = 'MutableDocument';
 
   @override
+  // ignore: overridden_fields
   final _isMutable = true;
 
   late MutableDictionary _mutableProperties;

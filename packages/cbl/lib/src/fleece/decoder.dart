@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:meta/meta.dart';
 
 import '../support/ffi.dart';
 
@@ -37,12 +38,10 @@ class SharedStrings {
     return _addressToDartString[slice.buf.address] ??= slice.toDartString();
   }
 
-  bool hasString(String string) {
-    return _addressToDartString.values.contains(string);
-  }
+  bool hasString(String string) => _addressToDartString.values.contains(string);
 }
 
-// === LoadedFLValue ============================================================
+// === LoadedFLValue ===========================================================
 
 /// A representation of an [FLValue] which can be loaded efficiently.
 ///
@@ -51,6 +50,7 @@ class SharedStrings {
 ///
 /// Values wich correspond to [FLValueType.undefined] are represented as `null`
 /// in Dart.
+@immutable
 abstract class LoadedFLValue {}
 
 /// A [LoadedFLValue] for `null`, `boolean` and `number` values.
@@ -112,6 +112,7 @@ class SliceFLValue extends ComplexFLValue {
   String toString() => 'SliceFLValue('
       '${isString ? 'string' : 'data'}, '
       'length: ${slice.size}, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'value: $value'
       ')';
 }
@@ -135,6 +136,7 @@ class CollectionFLValue extends ComplexFLValue {
   String toString() => 'CollectionFLValue('
       '${isArray ? 'array' : 'dict'}, '
       'length: $length, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'value: $value'
       ')';
 }
@@ -144,7 +146,7 @@ extension on CBLDart_LoadedFLValue {
     switch (type) {
       case FLValueType.undefined:
         return null;
-      case FLValueType.Null:
+      case FLValueType.null_:
         return SimpleFLValue(null);
       case FLValueType.boolean:
         return SimpleFLValue(asBool);
@@ -199,7 +201,7 @@ class FleeceDecoder {
   /// This method exists for debugging and learning purposes.
   String dumpData(Uint8List data) => _decoderBinds.dumpData(data);
 
-  // === LoadedFLValue ==========================================================
+  // === LoadedFLValue =========================================================
 
   /// Loads the root value from [data] as a [LoadedFLValue].
   ///
@@ -317,7 +319,7 @@ class FleeceDecoder {
         throw UnsupportedError(
           'undefined cannot be represented as Dart value',
         );
-      case FLValueType.Null:
+      case FLValueType.null_:
         return null;
       case FLValueType.boolean:
         return value.asBool;
@@ -396,6 +398,7 @@ class DictIterator implements Iterator<void> {
   late final Pointer<CBLDart_FLDictIterator2> _iterator;
 
   @override
+  // ignore: avoid_returning_null_for_void
   void get current => null;
 
   @override

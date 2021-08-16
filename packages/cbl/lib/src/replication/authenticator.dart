@@ -17,6 +17,7 @@ class BasicAuthenticator extends Authenticator {
   @override
   String toString() => 'BasicAuthenticator('
       'username: $username, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'password: ${redact(password)}'
       ')';
 }
@@ -42,6 +43,7 @@ class SessionAuthenticator extends Authenticator {
   @override
   String toString() => 'SessionAuthenticator('
       'sessionId: ${redact(sessionId)}, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'cookieName: $cookieName'
       ')';
 }

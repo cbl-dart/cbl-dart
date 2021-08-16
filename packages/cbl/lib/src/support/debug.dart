@@ -6,6 +6,7 @@ import 'native_object.dart';
 bool get debugRefCounted => _debugRefCountedObject;
 bool _debugRefCountedObject = false;
 
+// ignore: avoid_positional_boolean_parameters
 set debugRefCounted(bool value) {
   if (_debugRefCountedObject != value) {
     _debugRefCountedObject = value;

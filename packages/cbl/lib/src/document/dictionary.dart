@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -113,6 +115,7 @@ abstract class MutableDictionaryInterface
   void setNumber(num? value, {required String key});
 
   /// Sets a [bool] for the given [key].
+  // ignore: avoid_positional_boolean_parameters
   void setBoolean(bool value, {required String key});
 
   /// Sets a [DateTime] for the given [key].
@@ -282,6 +285,7 @@ class MutableDictionaryImpl extends DictionaryImpl
 
   @override
   void setValue(Object? value, {required String key}) {
+    // ignore: parameter_assignments
     value = CblConversions.convertToCblObject(value);
     if (valueWouldChange(value, _dict.get(key), _dict)) {
       _dict.set(key, value);
@@ -328,9 +332,9 @@ class MutableDictionaryImpl extends DictionaryImpl
   @override
   void setData(Map<String, Object?> data) {
     _dict.clear();
-    data.entries.forEach((entry) {
+    for (final entry in data.entries) {
       _dict.set(entry.key, CblConversions.convertToCblObject(entry.value));
-    });
+    }
   }
 
   // === Remove ================================================================

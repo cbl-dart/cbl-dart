@@ -3,6 +3,7 @@ import '../query.dart';
 import '../where.dart';
 
 /// Interface for creating and chaining `WHERE` clauses.
+// ignore: one_member_abstracts
 abstract class WhereRouter {
   /// Creates and returns a `WHERE` clause query component with the given
   /// [expression].

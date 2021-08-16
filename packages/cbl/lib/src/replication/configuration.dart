@@ -243,7 +243,7 @@ class ReplicatorConfiguration {
         'maxRetryWaitTime: ${_maxRetryWaitTime.inSeconds}',
       ].join(', '),
       ')'
-    ].join('');
+    ].join();
   }
 }
 

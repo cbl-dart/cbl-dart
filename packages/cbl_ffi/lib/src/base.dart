@@ -36,8 +36,8 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 // === Dart ====================================================================
 
-typedef CBLDart_Init_C = Void Function(Pointer<Void> data);
-typedef CBLDart_Init = void Function(Pointer<Void> data);
+typedef _CBLDart_Init_C = Void Function(Pointer<Void> data);
+typedef _CBLDart_Init = void Function(Pointer<Void> data);
 
 // === CBLError ================================================================
 
@@ -133,11 +133,11 @@ class CBLError extends Struct {
   external int _code;
 
   @Uint32()
-  // ignore: unused_field
+  // ignore: unused_field, non_constant_identifier_names
   external int _internal_info;
 }
 
-typedef CBLDart_CBLError_Message = FLStringResult Function(
+typedef _CBLDart_CBLError_Message = FLStringResult Function(
   Pointer<CBLError> error,
 );
 
@@ -158,8 +158,6 @@ extension CBLErrorExt on CBLError {
         return _code.toNetworkErrorCode();
       case CBLErrorDomain.webSocket:
         return _code;
-      default:
-        throw UnimplementedError();
     }
   }
 
@@ -186,7 +184,7 @@ class CBLErrorException implements Exception {
       : this(
           error.ref.domain,
           error.ref.code,
-          _baseBinds.CBLErrorMessage(globalCBLError)!,
+          _baseBinds.getErrorMessage(globalCBLError)!,
         );
 
   CBLErrorException.fromCBLErrorWithSource(
@@ -196,13 +194,12 @@ class CBLErrorException implements Exception {
   }) : this(
           error.ref.domain,
           error.ref.code,
-          _baseBinds.CBLErrorMessage(globalCBLError)!,
+          _baseBinds.getErrorMessage(globalCBLError)!,
           errorSource: errorSource,
           errorPosition:
               // This test should only need to check whether `errorPosition`
               // is `-1`. A regrission in the CBL C SDK leaves `errorPosition`
               // sometimes uninitialized.
-              // TODO: https://github.com/couchbase/couchbase-lite-C/issues/175
               error.ref.code == CBLErrorCode.invalidQuery &&
                       errorPosition >= 0 &&
                       errorPosition < errorSource.length
@@ -222,6 +219,7 @@ class CBLErrorException implements Exception {
       'code: $code, '
       'message: $message, '
       'errorSource: $errorSource, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'errorPosition: $errorPosition'
       ')';
 }
@@ -244,7 +242,7 @@ Never throwCBLError({String? errorSource}) {
   }
 }
 
-final _checkCBLError = checkCBLError;
+const _checkCBLError = checkCBLError;
 
 extension CheckCBLErrorPointerExt<T extends Pointer> on T {
   T checkCBLError({String? errorSource}) {
@@ -278,23 +276,23 @@ extension CheckCBLErrorIntExt on int {
 
 class CBLRefCounted extends Opaque {}
 
-typedef CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
+typedef _CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
   Handle object,
   Pointer<CBLRefCounted> refCounted,
   Uint8 retain,
   Pointer<Utf8> debugName,
 );
-typedef CBLDart_BindCBLRefCountedToDartObject = void Function(
+typedef _CBLDart_BindCBLRefCountedToDartObject = void Function(
   Object object,
   Pointer<CBLRefCounted> refCounted,
   int retain,
   Pointer<Utf8> debugName,
 );
 
-typedef CBLDart_SetDebugRefCounted_C = Void Function(Uint8 enabled);
-typedef CBLDart_SetDebugRefCounted = void Function(int enabled);
+typedef _CBLDart_SetDebugRefCounted_C = Void Function(Uint8 enabled);
+typedef _CBLDart_SetDebugRefCounted = void Function(int enabled);
 
-typedef CBL_Retain = Pointer<CBLRefCounted> Function(
+typedef _CBL_Retain = Pointer<CBLRefCounted> Function(
   Pointer<CBLRefCounted> refCounted,
 );
 
@@ -302,10 +300,10 @@ typedef CBL_Retain = Pointer<CBLRefCounted> Function(
 
 class CBLListenerToken extends Opaque {}
 
-typedef CBLListener_Remove_C = Void Function(
+typedef _CBLListener_Remove_C = Void Function(
   Pointer<CBLListenerToken> listenerToken,
 );
-typedef CBLListener_Remove = void Function(
+typedef _CBLListener_Remove = void Function(
   Pointer<CBLListenerToken> listenerToken,
 );
 
@@ -313,27 +311,27 @@ typedef CBLListener_Remove = void Function(
 
 class BaseBindings extends Bindings {
   BaseBindings(Bindings parent) : super(parent) {
-    _init = libs.cblDart.lookupFunction<CBLDart_Init_C, CBLDart_Init>(
+    _init = libs.cblDart.lookupFunction<_CBLDart_Init_C, _CBLDart_Init>(
       'CBLDart_Init',
     );
     _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
-        CBLDart_BindCBLRefCountedToDartObject_C,
-        CBLDart_BindCBLRefCountedToDartObject>(
+        _CBLDart_BindCBLRefCountedToDartObject_C,
+        _CBLDart_BindCBLRefCountedToDartObject>(
       'CBLDart_BindCBLRefCountedToDartObject',
     );
     _setDebugRefCounted = libs.cblDart.lookupFunction<
-        CBLDart_SetDebugRefCounted_C, CBLDart_SetDebugRefCounted>(
+        _CBLDart_SetDebugRefCounted_C, _CBLDart_SetDebugRefCounted>(
       'CBLDart_SetDebugRefCounted',
     );
-    _retainRefCounted = libs.cblDart.lookupFunction<CBL_Retain, CBL_Retain>(
+    _retainRefCounted = libs.cblDart.lookupFunction<_CBL_Retain, _CBL_Retain>(
       'CBL_Retain',
     );
-    _Error_Message = libs.cblDart
-        .lookupFunction<CBLDart_CBLError_Message, CBLDart_CBLError_Message>(
+    _getErrorMessage = libs.cblDart
+        .lookupFunction<_CBLDart_CBLError_Message, _CBLDart_CBLError_Message>(
       'CBLDart_CBLError_Message',
     );
-    _Listener_Remove =
-        libs.cbl.lookupFunction<CBLListener_Remove_C, CBLListener_Remove>(
+    _removeListener =
+        libs.cbl.lookupFunction<_CBLListener_Remove_C, _CBLListener_Remove>(
       'CBLListener_Remove',
     );
   }
@@ -341,24 +339,26 @@ class BaseBindings extends Bindings {
   late final Pointer<CBLError> _globalCBLError = malloc();
   late final Pointer<Int32> _globalErrorPosition = malloc();
 
-  late final CBLDart_Init _init;
-  late final CBLDart_BindCBLRefCountedToDartObject
+  late final _CBLDart_Init _init;
+  late final _CBLDart_BindCBLRefCountedToDartObject
       _bindCBLRefCountedToDartObject;
-  late final CBLDart_SetDebugRefCounted _setDebugRefCounted;
-  late final CBL_Retain _retainRefCounted;
-  late final CBLDart_CBLError_Message _Error_Message;
-  late final CBLListener_Remove _Listener_Remove;
+  late final _CBLDart_SetDebugRefCounted _setDebugRefCounted;
+  late final _CBL_Retain _retainRefCounted;
+  // ignore: non_constant_identifier_names
+  late final _CBLDart_CBLError_Message _getErrorMessage;
+  // ignore: non_constant_identifier_names
+  late final _CBLListener_Remove _removeListener;
 
   void init() {
     _init(NativeApi.initializeApiDLData);
   }
 
   void bindCBLRefCountedToDartObject(
-    Object handle,
-    Pointer<CBLRefCounted> refCounted,
-    bool retain,
+    Object handle, {
+    required Pointer<CBLRefCounted> refCounted,
+    required bool retain,
     String? debugName,
-  ) {
+  }) {
     _bindCBLRefCountedToDartObject(
       handle,
       refCounted,
@@ -367,23 +367,23 @@ class BaseBindings extends Bindings {
     );
   }
 
+  // ignore: avoid_setters_without_getters
   set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled.toInt());
 
   void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
     _retainRefCounted(refCounted);
   }
 
-  String? CBLErrorMessage(Pointer<CBLError> error) =>
-      _Error_Message(error).toDartStringAndRelease();
+  String? getErrorMessage(Pointer<CBLError> error) =>
+      _getErrorMessage(error).toDartStringAndRelease();
 
   void removeListener(Pointer<CBLListenerToken> token) {
-    _Listener_Remove(token);
+    _removeListener(token);
   }
 
   @override
   void dispose() {
-    malloc.free(_globalCBLError);
-    malloc.free(_globalErrorPosition);
+    malloc..free(_globalCBLError)..free(_globalErrorPosition);
     super.dispose();
   }
 }

@@ -60,6 +60,7 @@ abstract class ExpressionInterface {
 
   /// Returns a new expression which evaluates whether this expression `IS`
   /// equal to given [expression].
+  // ignore: non_constant_identifier_names
   ExpressionInterface is_(ExpressionInterface expression);
 
   /// Returns a new expression which evaluates whether this expression `IS NOT`
@@ -91,6 +92,7 @@ abstract class ExpressionInterface {
 
   /// Returns a new expression which evaluates to whether this expression
   /// is in the given [expressions].
+  // ignore: non_constant_identifier_names
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions);
 
   /// Returns a new expression which applies the given [collation] to this
@@ -135,6 +137,7 @@ class Expression {
   static ExpressionInterface number(num? value) => Expression.value(value);
 
   /// Creates a literal [bool] expression.
+  // ignore: avoid_positional_boolean_parameters
   static ExpressionInterface boolean(bool value) => Expression.value(value);
 
   /// Creates a literal [DateTime] expression.
@@ -219,6 +222,7 @@ abstract class ExpressionImpl implements ExpressionInterface {
       BinaryExpression('regexp_like()', this, expression);
 
   @override
+  // ignore: non_constant_identifier_names
   ExpressionInterface is_(ExpressionInterface expression) =>
       BinaryExpression('IS', this, expression);
 
@@ -249,6 +253,7 @@ abstract class ExpressionImpl implements ExpressionInterface {
       TernaryExpression('BETWEEN', this, expression, and);
 
   @override
+  // ignore: non_constant_identifier_names
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions) =>
       BinaryExpression('IN', this, Expression.value(expressions));
 
@@ -387,6 +392,7 @@ class RangePredicateExpression extends ExpressionImpl {
   RangePredicateExpression(
     Quantifier quantifier,
     VariableExpressionInterface variable,
+    // ignore: non_constant_identifier_names
     ExpressionInterface in_,
     ExpressionInterface satisfies,
   )   : _quantifier = quantifier,

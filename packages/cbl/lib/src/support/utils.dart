@@ -45,12 +45,10 @@ String redact(String string) {
 ///
 /// Adapted from [FormatException.toString].
 String highlightPosition(String string, {required int offset}) {
-  var report = '';
-
   var lineStart = 0;
   var previousCharWasCR = false;
   for (var i = 0; i < offset; i++) {
-    var char = string.codeUnitAt(i);
+    final char = string.codeUnitAt(i);
     if (char == 0x0a) {
       if (lineStart != i || !previousCharWasCR) {}
       lineStart = i + 1;
@@ -62,13 +60,13 @@ String highlightPosition(String string, {required int offset}) {
   }
   var lineEnd = string.length;
   for (var i = offset; i < string.length; i++) {
-    var char = string.codeUnitAt(i);
+    final char = string.codeUnitAt(i);
     if (char == 0x0a || char == 0x0d) {
       lineEnd = i;
       break;
     }
   }
-  var length = lineEnd - lineStart;
+  final length = lineEnd - lineStart;
   var start = lineStart;
   var end = lineEnd;
   var prefix = '';
@@ -76,7 +74,7 @@ String highlightPosition(String string, {required int offset}) {
   if (length > 78) {
     // Can't show entire line. Try to anchor at the nearest end, if
     // one is within reach.
-    var index = offset - lineStart;
+    final index = offset - lineStart;
     if (index < 75) {
       end = start + 75;
       postfix = '...';
@@ -90,9 +88,9 @@ String highlightPosition(String string, {required int offset}) {
       prefix = postfix = '...';
     }
   }
-  var slice = string.substring(start, end);
-  var markOffset = offset - start + prefix.length;
-  return "$report$prefix$slice$postfix\n${" " * markOffset}^\n";
+  final slice = string.substring(start, end);
+  final markOffset = offset - start + prefix.length;
+  return "$prefix$slice$postfix\n${" " * markOffset}^\n";
 }
 
 class Once<T> {
@@ -128,6 +126,7 @@ class Once<T> {
     }
   }
 
+  // ignore: no_runtimetype_tostring
   String get _debugName => debugName ?? runtimeType.toString();
 }
 
@@ -136,12 +135,44 @@ FutureOr<void> iterateMaybeAsync(Iterable<FutureOr<void>> iterable) {
   while (iterator.moveNext()) {
     final result = iterator.current;
     if (result is Future) {
+      // ignore: avoid_types_on_closure_parameters
       return result.then((void _) async {
         while (iterator.moveNext()) {
           await iterator.current;
         }
       });
     }
+  }
+}
+
+FutureOr<T> finallyMaybeAsync<T>(
+  void Function(bool didThrow) finallyFn,
+  FutureOr<T> Function() fn,
+) {
+  try {
+    final result = fn();
+    if (result is Future<T>) {
+      return result.then(
+        (result) {
+          finallyFn(false);
+          return result;
+        },
+        // ignore: avoid_types_on_closure_parameters
+        onError: (Object error) {
+          finallyFn(true);
+          // ignore: only_throw_errors
+          throw error;
+        },
+      );
+    }
+
+    finallyFn(false);
+    return result;
+  }
+  // ignore: avoid_catches_without_on_clauses
+  catch (e) {
+    finallyFn(true);
+    rethrow;
   }
 }
 

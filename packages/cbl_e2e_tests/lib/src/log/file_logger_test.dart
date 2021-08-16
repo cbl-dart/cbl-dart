@@ -21,9 +21,8 @@ void main() {
         throwsArgumentError,
       );
 
-      final config = LogFileConfiguration(directory: 'A');
+      final config = LogFileConfiguration(directory: 'A')..maxRotateCount = 0;
 
-      config.maxRotateCount = 0;
       expect(() => config.maxRotateCount = -1, throwsArgumentError);
 
       config.maxSize = 1;
@@ -65,6 +64,7 @@ void main() {
         'directory: A, '
         'USE-PLAIN-TEXT, '
         'maxSize: 500.0 KB, '
+        // ignore: missing_whitespace_between_adjacent_strings
         'maxRotateCount: 1'
         ')',
       );
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('enable file logger', () async {
-      var logDir = Directory('$tmpDir/EnableFileLogger');
+      final logDir = Directory('$tmpDir/EnableFileLogger');
       await logDir.reset();
 
       Database.log.file
@@ -122,7 +122,7 @@ void main() {
         )
         ..level = LogLevel.error;
 
-      final logMessage = 'TEST_LOG_MESSAGE';
+      const logMessage = 'TEST_LOG_MESSAGE';
       cblLogMessage(LogDomain.network, LogLevel.error, logMessage);
 
       final errorFileContents = await logDir

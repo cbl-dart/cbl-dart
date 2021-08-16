@@ -45,7 +45,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
       _id,
       this,
       _receivePort.sendPort,
-      debug,
+      debug: debug,
     ));
 
     _receivePort.cast<List<Object?>>().listen(_messageHandler);
@@ -99,6 +99,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
 
     final sendPort = message[0] as SendPort?;
     final callAddress = message[1] as int?;
+    // ignore: cast_nullable_to_non_nullable
     final args = message[2] as List<Object?>;
 
     String debugFormatArgs() => args.map((arg) {
@@ -147,8 +148,10 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
         assert(result == null || sendPort != null);
         sendResult(result);
       },
+      // ignore: avoid_types_on_closure_parameters
       onError: (Object error, StackTrace stackTrace) {
         sendResult(errorResult);
+        // ignore: only_throw_errors
         throw error;
       },
     );
@@ -160,6 +163,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
   void _debugLog(String message) {
     assert(() {
       if (debug) {
+        // ignore: avoid_print
         print('AsyncCallback #$_id -> $message');
       }
       return true;

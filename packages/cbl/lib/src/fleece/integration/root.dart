@@ -53,7 +53,7 @@ class MRoot extends MCollection {
   Object? get asNative => _slot.asNative(this);
 
   SliceResult encode() {
-    var encoder = FleeceEncoder();
+    final encoder = FleeceEncoder();
     final result = encodeTo(encoder);
     assert(result is! Future);
     return encoder.finish();

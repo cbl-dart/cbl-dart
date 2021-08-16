@@ -20,6 +20,7 @@ CouchbaseLiteException _toCouchbaseLiteException(CBLErrorException exception) {
     case CBLErrorDomain.couchbaseLite:
       return DatabaseException(
         exception.message,
+        // ignore: cast_nullable_to_non_nullable
         (exception.code as CBLErrorCode).toDatabaseErrorCode(),
         errorPosition: exception.errorPosition,
         queryString: exception.errorSource,
@@ -39,6 +40,7 @@ CouchbaseLiteException _toCouchbaseLiteException(CBLErrorException exception) {
     case CBLErrorDomain.network:
       return NetworkException(
         exception.message,
+        // ignore: cast_nullable_to_non_nullable
         (exception.code as CBLNetworkErrorCode).toNetworkErrorCode(),
       );
     case CBLErrorDomain.webSocket:
@@ -46,6 +48,7 @@ CouchbaseLiteException _toCouchbaseLiteException(CBLErrorException exception) {
           ? exception.message
           : '${exception.message} (${exception.code})';
 
+      // ignore: cast_nullable_to_non_nullable
       if (exception.code as int < 1000) {
         final code = _httpErrorCodeMap[exception.code];
         return HttpException(formatMessage(code), code);

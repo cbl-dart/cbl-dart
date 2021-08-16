@@ -19,6 +19,7 @@ abstract class Query implements Resource {
   /// {@template cbl.Query.fromN1qlSync}
   /// Creates a [SyncQuery] from a N1QL [query].
   /// {@endtemplate}
+  // ignore: prefer_constructors_over_static_methods
   static SyncQuery fromN1qlSync(SyncDatabase database, String query) =>
       SyncQuery.fromN1ql(database, query);
 
@@ -34,6 +35,7 @@ abstract class Query implements Resource {
   /// {@template cbl.Query.fromJsonRepresentation}
   /// Creates an [SyncQuery] from the [Query.jsonRepresentation] of a query.
   /// {@endtemplate}
+  // ignore: prefer_constructors_over_static_methods
   static SyncQuery fromJsonRepresentationSync(
     SyncDatabase database,
     String jsonRepresentation,

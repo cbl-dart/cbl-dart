@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io' as io;
 import 'dart:io';
 
@@ -23,6 +25,7 @@ Future<void> main(List<String> args) async {
 }
 
 Configuration parseArgs(List<String> args) {
+  // ignore_for_file: parameter_assignments
   args = args.toList();
 
   if (args.isEmpty) {

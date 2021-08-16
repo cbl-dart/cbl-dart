@@ -30,7 +30,6 @@ import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
 import 'support/async_callback_test.dart' as support_async_callback;
-import 'support/worker_test.dart' as support_worker;
 
 final tests = [
   database_database_change.main,
@@ -61,7 +60,6 @@ final tests = [
   replication_replicator_change.main,
   replication_replicator.main,
   support_async_callback.main,
-  support_worker.main,
 ];
 
 void main() {

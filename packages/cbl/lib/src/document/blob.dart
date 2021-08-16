@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
 import '../database/blob_store.dart';
 import '../database/database.dart';
@@ -29,6 +30,7 @@ const blobContentTypeProperty = 'content_type';
 /// Blob’s metadata (type, [length] and a [digest] of the data) in a small
 /// object. The data itself is stored externally to the document, keyed by the
 /// digest.
+@immutable
 abstract class Blob {
   /// Creates a [Blob] with the given in-memory data.
   factory Blob.fromData(String contentType, Uint8List data) =>
@@ -85,6 +87,9 @@ abstract class Blob {
   }
 }
 
+// The semantics of a Blob are that it is immutable but the implementation is
+// not.
+// ignore: must_be_immutable
 class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl.fromData(String contentType, Uint8List data)
       : _contentType = contentType,
@@ -97,8 +102,10 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   })  : assert(properties[cblObjectTypeProperty] == cblObjectTypeBlob),
         _database = database,
         _contentType = properties[blobContentTypeProperty] as String?,
+        // ignore: cast_nullable_to_non_nullable
         _length = properties[blobLengthProperty] as int,
         _digest = properties[blobDigestProperty] as String?,
+        // ignore: unnecessary_parenthesis
         _content = (properties[blobDataProperty] as Uint8List?) {
     if (_digest == null && _content == null) {
       throw StateError(
@@ -184,8 +191,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
     final blobStore = _blobStore;
     if (_digest != null && blobStore is SyncBlobStore) {
-      final content =
-          (blobStore as SyncBlobStore).readBlobSync(_blobProperties());
+      final content = blobStore.readBlobSync(_blobProperties());
       if (content == null) {
         _throwNotFoundError();
       }
@@ -235,7 +241,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
           final blobStore = _blobStore!;
 
           if (blobStore is SyncBlobStore) {
-            return (blobStore as SyncBlobStore)
+            return blobStore
                 .saveBlobFromDataSync(_contentType!, _content!)
                 .let(writeProperties);
           } else {

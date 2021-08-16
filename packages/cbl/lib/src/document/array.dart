@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 import 'dart:collection';
 
@@ -137,6 +139,7 @@ abstract class MutableArrayInterface
   /// Sets a [bool] [at] the given index.
   ///
   /// {@macro cbl.MutableArrayInterface.setter}
+  // ignore: avoid_positional_boolean_parameters
   void setBoolean(bool value, {required int at});
 
   /// Sets a [DateTime] [at] the given index.
@@ -182,6 +185,7 @@ abstract class MutableArrayInterface
   void addBlob(Blob? value);
 
   /// Adds a [bool] at the end of this array.
+  // ignore: avoid_positional_boolean_parameters
   void addBoolean(bool value);
 
   /// Adds a [DateTime] at the end of this array.
@@ -227,6 +231,7 @@ abstract class MutableArrayInterface
   /// Inserts a [bool] [at] the given index.
   ///
   /// {@macro cbl.MutableArrayInterface.inserter}
+  // ignore: avoid_positional_boolean_parameters
   void insertBoolean(bool value, {required int at});
 
   /// Inserts a [DateTime] [at] the given index.
@@ -396,6 +401,7 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
 
   @override
   void setValue(Object? value, {required int at}) {
+    // ignore: parameter_assignments
     value = CblConversions.convertToCblObject(value);
     if (valueWouldChange(value, _array.get(at), _array)) {
       if (!_array.set(at, value)) {

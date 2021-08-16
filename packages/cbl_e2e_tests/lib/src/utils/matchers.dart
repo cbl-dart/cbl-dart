@@ -10,7 +10,7 @@ import 'fleece_coding.dart';
 
 // === isDirectory Matcher =====================================================
 
-final isDirectory = const _IsDirectory();
+const isDirectory = _IsDirectory();
 
 class _IsDirectory extends Matcher {
   const _IsDirectory();
@@ -42,19 +42,19 @@ class _IsDirectory extends Matcher {
 Matcher json(Object? expected) => _JsonMatcher(expected);
 
 class _JsonMatcher extends Matcher {
-  static const _actualDecodedKey = 'actualDecoded';
-
   _JsonMatcher(this.expected);
+
+  static const _actualDecodedKey = 'actualDecoded';
 
   final Object? expected;
 
   late final Object? _decodedExpected =
+      // ignore: cast_nullable_to_non_nullable
       expected is String ? _tryToDecodeJson(expected as String) : expected;
 
   @override
-  Description describe(Description description) {
-    return description.add('matches JSON\n${_formatJson(_decodedExpected)}');
-  }
+  Description describe(Description description) =>
+      description.add('matches JSON\n${_formatJson(_decodedExpected)}');
 
   @override
   Description describeMismatch(
@@ -74,6 +74,7 @@ class _JsonMatcher extends Matcher {
   @override
   bool matches(Object? item, Map matchState) {
     if (item is SliceResult) {
+      // ignore: parameter_assignments
       item = item.asUint8List();
     }
 
@@ -85,20 +86,22 @@ class _JsonMatcher extends Matcher {
       }
     } else if (item is Uint8List) {
       actual = fleeceDecode(item);
-      if (actual == null) return false;
+      if (actual == null) {
+        return false;
+      }
       matchState[_actualDecodedKey] = actual;
     }
 
     return const DeepCollectionEquality().equals(actual, _decodedExpected);
   }
 
-  String _formatJson(Object? json) {
-    return const JsonEncoder.withIndent('  ').convert(json);
-  }
+  String _formatJson(Object? json) =>
+      const JsonEncoder.withIndent('  ').convert(json);
 
   Object? _tryToDecodeJson(String json) {
     try {
       return jsonDecode(json);
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       return json;
     }
@@ -138,6 +141,7 @@ class _Equality extends Matcher {
       return failure(_EqualityFailure.actual);
     }
 
+    // ignore: invariant_booleans
     if (expected != actual) {
       return failure(_EqualityFailure.expected);
     }

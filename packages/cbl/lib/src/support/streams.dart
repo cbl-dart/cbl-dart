@@ -89,12 +89,21 @@ class CallbackStreamController<T, S>
         // `registrationResult` is guarantied to be set after this line.
         await _callbackRegistered;
 
-        if (_canceled) return;
+        if (_canceled) {
+          return;
+        }
         final event = await createEvent(_registrationResult, arguments);
-        if (_canceled) return;
+        // ignore: invariant_booleans
+        if (_canceled) {
+          return;
+        }
         controller.add(event);
+        // ignore: avoid_catches_without_on_clauses
       } catch (error, stackTrace) {
-        if (_canceled) return;
+        // ignore: invariant_booleans
+        if (_canceled) {
+          return;
+        }
         controller.addError(error, stackTrace);
       }
     }, debugName: 'Stream<$T>');
@@ -102,6 +111,7 @@ class CallbackStreamController<T, S>
     try {
       _registrationResult = runNativeCalls(() => startStream(_callback));
       callbackRegistered.complete(true);
+      // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {
       controller.addError(error, stackTrace);
       await controller.close();
@@ -123,6 +133,7 @@ StreamController<T> callbackBroadcastStreamController<T>({
   required T Function(List<Object?> arguments) createEvent,
 }) {
   late AsyncCallback callback;
+  // ignore: close_sinks
   late StreamController<T> controller;
   var canceled = false;
 
@@ -130,10 +141,13 @@ StreamController<T> callbackBroadcastStreamController<T>({
     canceled = false;
 
     callback = AsyncCallback((arguments) {
-      if (canceled) return;
+      if (canceled) {
+        return;
+      }
       try {
         final event = createEvent(arguments);
         controller.add(event);
+        // ignore: avoid_catches_without_on_clauses
       } catch (error, stacktrace) {
         controller.addError(error, stacktrace);
       }
@@ -185,6 +199,7 @@ Stream<T> changeStreamWithInitialValue<T>({
           controller.add(value);
         }
       },
+      // ignore: avoid_types_on_closure_parameters
       onError: (Object error, StackTrace stackTrace) {
         if (!streamIsDone && !subIsCanceled) {
           controller.addError(error, stackTrace);
@@ -214,8 +229,6 @@ Stream<T> changeStreamWithInitialValue<T>({
 
 Future<Uint8List> byteStreamToFuture(Stream<Uint8List> stream) async {
   final builder = BytesBuilder(copy: false);
-  await for (final chunk in stream) {
-    builder.add(chunk);
-  }
+  await stream.forEach(builder.add);
   return builder.toBytes();
 }

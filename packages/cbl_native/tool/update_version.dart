@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:yaml/yaml.dart';
 
-final libPath = 'lib/cbl_native.dart';
+const libPath = 'lib/cbl_native.dart';
 
 Future<void> main() async {
   final pubspec = await loadPubspec();
@@ -22,7 +22,7 @@ Future<void> updateVersion(String version) async {
   final libContent = await libFile.readAsString();
 
   final updatedLib = libContent.replaceFirst(
-    RegExp(r"'([^']+)'; // cbl_native: version"),
+    RegExp("'([^']+)'; // cbl_native: version"),
     "'$version'; // cbl_native: version",
   );
 

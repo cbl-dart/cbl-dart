@@ -84,6 +84,7 @@ abstract class Database implements ClosableResource {
   ///
   /// If the database does not yet exist, it will be created.
   /// {@endtemplate}
+  // ignore: prefer_constructors_over_static_methods
   static SyncDatabase openSync(
     String name, [
     DatabaseConfiguration? configuration,

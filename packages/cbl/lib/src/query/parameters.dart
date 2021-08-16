@@ -1,9 +1,12 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 
 import '../document.dart';
 import '../document/common.dart';
 import '../document/dictionary.dart';
 import '../fleece/encoder.dart';
+import '../query.dart';
 
 /// Query parameters used for setting values to the query parameters defined in
 /// the query.
@@ -19,13 +22,15 @@ abstract class Parameters {
   /// Set a value to the query parameter referenced by the given [name].
   ///
   /// {@template cbl.Parameters.parameterDefinition}
-  /// In N1QL queries, a parameter is defined by prefixing an identifier with
+  /// In N1QL queries, a parameter is referenced by prefixing an identifier with
   /// `$`. For example, this query defines a parameter with the name `TYPE`:
   /// ```sql
   /// SELECT * FROM _ WHERE type = $TYPE;
   /// ```
+  ///
+  /// When building a query through the [QueryBuilder], you can create a
+  /// parameter expression with [Expression.parameter].
   /// {@endtemplate}
-  // TODO: describe how query parameters are defined with query builder
   void setValue(Object? value, {required String name});
 
   /// Set a [String] to the query parameter referenced by the given
@@ -54,6 +59,7 @@ abstract class Parameters {
   /// Set a [bool] to the query parameter referenced by the given [name].
   ///
   /// {@macro cbl.Parameters.parameterDefinition}
+  // ignore: avoid_positional_boolean_parameters
   void setBoolean(bool? value, {required String name});
 
   /// Set a [DateTime] to the query parameter referenced by the given [name].
@@ -80,7 +86,7 @@ abstract class Parameters {
 class ParametersImpl implements Parameters, FleeceEncodable {
   ParametersImpl([Map<String, Object?>? parameters]) : _readonly = false {
     if (parameters != null) {
-      for (var entry in parameters.entries) {
+      for (final entry in parameters.entries) {
         setValue(entry.value, name: entry.key);
       }
     }

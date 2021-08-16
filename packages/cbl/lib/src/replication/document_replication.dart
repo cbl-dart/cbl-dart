@@ -29,6 +29,7 @@ abstract class ReplicatedDocument {
 }
 
 class DocumentReplicationImpl implements DocumentReplication {
+  // ignore: avoid_positional_boolean_parameters
   DocumentReplicationImpl(this.replicator, this.isPush, this.documents);
 
   @override

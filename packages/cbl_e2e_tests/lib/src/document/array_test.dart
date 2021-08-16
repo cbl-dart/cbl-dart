@@ -169,6 +169,8 @@ void main() {
 
       test('set values', () {
         final array = MutableArray([null]);
+
+        // ignore: cascade_invocations
         array.setValue('x', at: 0);
         expect(array.value(0), 'x');
         array.setString('a', at: 0);
@@ -211,9 +213,7 @@ void main() {
       test('append values', () {
         final date = DateTime(0);
         final blob = Blob.fromData('', Uint8List(0));
-        final array = MutableArray();
-
-        array
+        final array = MutableArray()
           ..addValue('x')
           ..addString('a')
           ..addInteger(1)
@@ -242,9 +242,7 @@ void main() {
       test('insert values', () {
         final date = DateTime(0);
         final blob = Blob.fromData('', Uint8List(0));
-        final array = MutableArray();
-
-        array
+        final array = MutableArray()
           ..insertValue('x', at: 0)
           ..insertString('a', at: 0)
           ..insertInteger(1, at: 0)
@@ -273,20 +271,19 @@ void main() {
       test('setData', () {
         final date = DateTime.now();
         final blob = Blob.fromData('', Uint8List(0));
-        final array = MutableArray();
-
-        array.setData([
-          'x',
-          'a',
-          1,
-          .2,
-          3,
-          true,
-          date,
-          blob,
-          <Object?>[],
-          <String, Object>{},
-        ]);
+        final array = MutableArray()
+          ..setData([
+            'x',
+            'a',
+            1,
+            .2,
+            3,
+            true,
+            date,
+            blob,
+            <Object?>[],
+            <String, Object>{},
+          ]);
 
         expect(array.toPlainList(), [
           'x',
@@ -312,9 +309,9 @@ void main() {
 
 Array immutableArray([List<Object?>? data]) {
   final array = MutableArray(data) as MutableArrayImpl;
-  final encoder = fl.FleeceEncoder();
-  // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-  encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+  final encoder = fl.FleeceEncoder()
+    // FleeceEncoderContext is needed to compare unsaved Blobs in test.
+    ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(
@@ -322,5 +319,6 @@ Array immutableArray([List<Object?>? data]) {
     context: MContext(),
     isMutable: false,
   );
+  // ignore: cast_nullable_to_non_nullable
   return root.asNative as Array;
 }

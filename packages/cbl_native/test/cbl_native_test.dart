@@ -32,7 +32,7 @@ void main() {
   });
 
   test('binary_url script downloads and installs binaries', () async {
-    final tmpTestDir = 'test/.tmp';
+    const tmpTestDir = 'test/.tmp';
     final installDir =
         '$tmpTestDir/${DateTime.now().millisecondsSinceEpoch}-linux/lib';
 

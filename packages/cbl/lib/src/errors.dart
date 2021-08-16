@@ -14,7 +14,7 @@ abstract class CouchbaseLiteException implements Exception {
   String toString() => [
         '$_typeName(',
         [
-          '$message',
+          message,
           if (code != null) 'code: ${describeEnum(code!)}',
         ].join(', '),
         ')'

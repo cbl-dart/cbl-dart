@@ -15,7 +15,7 @@ abstract class BlobStore {
   Stream<Uint8List>? readBlob(Map<String, Object?> properties);
 }
 
-abstract class SyncBlobStore {
+abstract class SyncBlobStore extends BlobStore {
   Map<String, Object?> saveBlobFromDataSync(
     String contentType,
     Uint8List data,

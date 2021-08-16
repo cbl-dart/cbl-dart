@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_unused_constructor_parameters
+
 import '../../cbl.dart';
 
 abstract class AsyncBuilderQuery implements AsyncQuery {

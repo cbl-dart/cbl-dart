@@ -6,6 +6,7 @@ import 'query.dart';
 abstract class JoinInterface {}
 
 /// Represents the `ON` clause of `JOIN` clause.
+// ignore: one_member_abstracts
 abstract class JoinOnInterface {
   /// Specifies the given [expression] as the join condition.
   JoinInterface on(ExpressionInterface expression);
@@ -48,8 +49,10 @@ enum JoinType {
 }
 
 class JoinOnImpl implements JoinOnInterface {
-  JoinOnImpl({JoinType? type, required DataSourceInterface dataSource})
-      : _type = type,
+  JoinOnImpl({
+    JoinType? type,
+    required DataSourceInterface dataSource,
+  })  : _type = type,
         _dataSource = dataSource as DataSourceImpl;
 
   final JoinType? _type;

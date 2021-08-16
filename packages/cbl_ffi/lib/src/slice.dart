@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:ffi';
@@ -9,7 +11,7 @@ import 'bindings.dart';
 import 'fleece.dart';
 import 'utils.dart';
 
-late final _sliceBinds = CBLBindings.instance.fleece.slice;
+late final _sliceBindings = CBLBindings.instance.fleece.slice;
 
 /// A contiguous area of native memory, whose livetime is tied to some other
 /// object.
@@ -79,7 +81,7 @@ class Slice implements ByteBuffer {
       ..size = other.size;
 
     try {
-      return _sliceBinds.compare(aFLSlice.ref, bFLSlice.ref);
+      return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
       malloc.free(bFLSlice);
     }
@@ -87,9 +89,13 @@ class Slice implements ByteBuffer {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
-    if (other is! Slice) return false;
+    if (other is! Slice) {
+      return false;
+    }
 
     final aFLSlice = makeGlobal();
     final bFLSlice = malloc<FLSlice>();
@@ -98,7 +104,7 @@ class Slice implements ByteBuffer {
       ..size = other.size;
 
     try {
-      return _sliceBinds.equal(aFLSlice.ref, bFLSlice.ref);
+      return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
       malloc.free(bFLSlice);
     }
@@ -189,6 +195,9 @@ class Slice implements ByteBuffer {
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
 class SliceResult extends Slice implements ByteBuffer {
+  /// Creates an uninitialized [SliceResult] of [size].
+  SliceResult(int size) : this._(_sliceBindings.create(size).buf, size);
+
   /// Private constructor to initialize slice.
   SliceResult._(
     Pointer<Uint8> buf,
@@ -196,22 +205,24 @@ class SliceResult extends Slice implements ByteBuffer {
     bool retain = false,
   }) : super._(buf, size) {
     makeGlobal();
-    _sliceBinds.bindToDartObject(this, globalFLSliceResult.ref, retain);
+    _sliceBindings.bindToDartObject(this, globalFLSliceResult.ref,
+        retain: retain);
   }
 
   SliceResult._subSlice(SliceResult slice, int start, int end)
       : assert(start >= 0, start < slice.size),
         assert(end >= start && end <= slice.size),
         super._(slice.buf.elementAt(start), end - start) {
-    _sliceBinds.bindToDartObject(this, slice.makeGlobalResult().ref, true);
+    _sliceBindings.bindToDartObject(
+      this,
+      slice.makeGlobalResult().ref,
+      retain: true,
+    );
   }
-
-  /// Creates an uninitialized [SliceResult] of [size].
-  SliceResult(int size) : this._(_sliceBinds.create(size).buf, size);
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-      : this._(_sliceBinds.copy(slice.makeGlobal().ref).buf, slice.size);
+      : this._(_sliceBindings.copy(slice.makeGlobal().ref).buf, slice.size);
 
   /// Returns a [SliceResult] which has the content and size of [list].
   factory SliceResult.fromUint8List(Uint8List list) {
@@ -314,6 +325,7 @@ abstract class _SliceTypedDataList with ListMixin<int> implements TypedData {
     int? end,
     T Function(int offsetInByte, int lengthInBytes) create,
   ) {
+    // ignore: parameter_assignments
     end ??= length;
     RangeError.checkValidRange(start, end, length);
     return create(_offsetInBytes(start), _lengthInBytes(end - start));

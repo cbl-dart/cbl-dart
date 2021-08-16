@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
@@ -102,6 +104,7 @@ class _FullTextIndexConfiguration extends _IndexConfiguration
     implements FullTextIndexConfiguration, IndexImplInterface {
   _FullTextIndexConfiguration(
     List<String> expressions,
+    // ignore: avoid_positional_boolean_parameters
     bool? ignoreAccents,
     this.language,
   )   : ignoreAccents = ignoreAccents ?? false,
@@ -147,10 +150,10 @@ class _FullTextIndexConfiguration extends _IndexConfiguration
 
     return [
       'FullTextIndexConfiguration(',
-      '${expressions.join(', ')}',
+      expressions.join(', '),
       if (properties.isNotEmpty) ' | ',
       properties.join(', '),
       ')'
-    ].join('');
+    ].join();
   }
 }

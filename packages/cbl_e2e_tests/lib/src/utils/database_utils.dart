@@ -21,7 +21,9 @@ SyncDatabase openSyncTestDb(
     ),
   );
 
-  if (autoClose) addTearDown(db.close);
+  if (autoClose) {
+    addTearDown(db.close);
+  }
 
   return db;
 }

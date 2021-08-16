@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:collection';
 import 'dart:ffi';
 import 'dart:typed_data';
@@ -32,8 +34,6 @@ extension on Iterable<CopyFlag> {
 /// An [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
 class Doc extends FleeceDocObject {
-  static late final _bindings = cblBindings.fleece.doc;
-
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
   factory Doc.fromResultData(Uint8List data, FLTrust trust) {
     final doc = _bindings.fromResultData(data, trust);
@@ -55,6 +55,8 @@ class Doc extends FleeceDocObject {
   /// Note: Does not retain the native doc.
   Doc.fromPointer(Pointer<FLDoc> pointer) : super(pointer);
 
+  static late final _bindings = cblBindings.fleece.doc;
+
   /// Returns the data owned by the document, if any, else `null`.
   SliceResult? get allocedData =>
       SliceResult.fromFLSliceResult(native.call(_bindings.getAllocedData));
@@ -72,7 +74,8 @@ enum ValueType {
   undefined,
 
   /// Equivalent to a JSON 'null'.
-  Null,
+  // ignore: constant_identifier_names
+  null_,
 
   /// A `true` or `false` value.
   boolean,
@@ -109,8 +112,6 @@ extension on FLValueType {
 ///   [asDict]. If the value is not of that type, null is returned. (Array and
 ///   Dict are documented fully in their own sections.)
 class Value extends FleeceValueObject<FLValue> {
-  static late final _bindings = cblBindings.fleece.value;
-
   /// Creates a [Value] based on a [pointer] to the the native value.
   ///
   /// Accessing immutable values is only allowed, while the enclosing container
@@ -126,6 +127,8 @@ class Value extends FleeceValueObject<FLValue> {
           adopt: adopt,
         );
 
+  static late final _bindings = cblBindings.fleece.value;
+
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
   Doc? get doc {
@@ -140,7 +143,7 @@ class Value extends FleeceValueObject<FLValue> {
   bool get isUndefined => type == ValueType.undefined;
 
   /// Whether this value represents null.
-  bool get isNull => type == ValueType.Null;
+  bool get isNull => type == ValueType.null_;
 
   /// Returns true if the value is non-null and represents an integer.
   bool get isInteger => native.call(_bindings.isInteger);
@@ -190,7 +193,11 @@ class Value extends FleeceValueObject<FLValue> {
     bool json5 = false,
     bool canonical = true,
   }) =>
-      native.call((pointer) => _bindings.toJSONX(pointer, json5, canonical));
+      native.call((pointer) => _bindings.toJSONX(
+            pointer,
+            json5: json5,
+            canonical: canonical,
+          ));
 
   Object? toObject() {
     switch (type) {
@@ -198,7 +205,7 @@ class Value extends FleeceValueObject<FLValue> {
         throw UnsupportedError(
           'ValueType.undefined has no equivalent Dart type',
         );
-      case ValueType.Null:
+      case ValueType.null_:
         return null;
       case ValueType.boolean:
         return asBool;
@@ -226,7 +233,7 @@ class Value extends FleeceValueObject<FLValue> {
   int get hashCode {
     switch (type) {
       case ValueType.undefined:
-      case ValueType.Null:
+      case ValueType.null_:
         return 0;
       case ValueType.boolean:
         return asBool.hashCode;
@@ -248,7 +255,7 @@ class Value extends FleeceValueObject<FLValue> {
     switch (type) {
       case ValueType.undefined:
         return 'undefined';
-      case ValueType.Null:
+      case ValueType.null_:
       case ValueType.boolean:
       case ValueType.number:
         return scalarToString!;
@@ -268,8 +275,6 @@ class Value extends FleeceValueObject<FLValue> {
 
 /// A Fleece array.
 class Array extends Value with ListMixin<Value> {
-  static late final _bindings = cblBindings.fleece.array;
-
   /// Creates an [Array] based on a [pointer] to the the native value.
   Array.fromPointer(
     Pointer<FLArray> pointer, {
@@ -280,6 +285,8 @@ class Array extends Value with ListMixin<Value> {
           isRefCounted: isRefCounted,
           adopt: adopt,
         );
+
+  static late final _bindings = cblBindings.fleece.array;
 
   @override
   int get length => native.call((pointer) => _bindings.count(pointer.cast()));
@@ -318,18 +325,11 @@ class Array extends Value with ListMixin<Value> {
       throw _immutableValueException();
 
   @override
+  // ignore: hash_and_equals
   int get hashCode => fold(0, (hashCode, value) => hashCode ^ value.hashCode);
 }
 
 class MutableArray extends Array {
-  static late final _bindings = cblBindings.fleece.mutableArray;
-
-  /// Creates a [MutableArray] based on a [pointer] to the the native value.
-  MutableArray.fromPointer(
-    Pointer<FLMutableArray> pointer, {
-    bool adopt = false,
-  }) : super.fromPointer(pointer.cast(), isRefCounted: true, adopt: adopt);
-
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
     final result = MutableArray.fromPointer(
@@ -343,6 +343,12 @@ class MutableArray extends Array {
 
     return result;
   }
+
+  /// Creates a [MutableArray] based on a [pointer] to the the native value.
+  MutableArray.fromPointer(
+    Pointer<FLMutableArray> pointer, {
+    bool adopt = false,
+  }) : super.fromPointer(pointer.cast(), isRefCounted: true, adopt: adopt);
 
   /// Creates a new [MutableArray] that's a copy of the source [Array].
   ///
@@ -364,6 +370,8 @@ class MutableArray extends Array {
             )),
         adopt: true,
       );
+
+  static late final _bindings = cblBindings.fleece.mutableArray;
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
@@ -460,8 +468,6 @@ class MutableArray extends Array {
 
 /// A Fleece dictionary.
 class Dict extends Value with MapMixin<String, Value> {
-  static late final _bindings = cblBindings.fleece.dict;
-
   /// Creates a [Dict] based on a [pointer] to the the native value.
   Dict.fromPointer(
     Pointer<FLDict> pointer, {
@@ -472,6 +478,8 @@ class Dict extends Value with MapMixin<String, Value> {
           isRefCounted: isRefCounted,
           adopt: adopt,
         );
+
+  static late final _bindings = cblBindings.fleece.dict;
 
   /// Returns the number of items in a dictionary.
   @override
@@ -498,9 +506,12 @@ class Dict extends Value with MapMixin<String, Value> {
 
   @override
   Value operator [](Object? key) {
-    assert(key is String, 'Dict key must be a non-null String');
+    if (key is! String) {
+      throw ArgumentError.value(key, 'key', 'must be a String');
+    }
+
     return Value.fromPointer(
-      native.call((pointer) => _bindings.get(pointer.cast(), key as String)),
+      native.call((pointer) => _bindings.get(pointer.cast(), key)),
       isRefCounted: false,
     );
   }
@@ -516,9 +527,11 @@ class Dict extends Value with MapMixin<String, Value> {
   Value? remove(Object? key) => throw _immutableValueException();
 
   @override
-  int get hashCode => entries.fold(0, (hashCode, entry) {
-        return hashCode ^ entry.key.hashCode ^ entry.value.hashCode;
-      });
+  // ignore: hash_and_equals
+  int get hashCode => entries.fold(
+      0,
+      (hashCode, entry) =>
+          hashCode ^ entry.key.hashCode ^ entry.value.hashCode);
 
   @override
   Map<String, Object?> toObject() =>
@@ -537,9 +550,9 @@ class _DictKeyIterable extends Iterable<String> {
 
 /// Iterator which iterates over the keys of a [Dict].
 class _DictKeyIterator extends Iterator<String> {
-  static late final _bindings = cblBindings.fleece.dictIterator;
-
   _DictKeyIterator(this.dict);
+
+  static late final _bindings = cblBindings.fleece.dictIterator;
 
   final Dict dict;
 
@@ -555,7 +568,9 @@ class _DictKeyIterator extends Iterator<String> {
         dict.native.call((pointer) => _bindings.begin(this, pointer.cast()));
 
     // The iterator has no more elements.
-    if (iterator!.ref.done) return false;
+    if (iterator!.ref.done) {
+      return false;
+    }
 
     // Advance to the next item.
     _bindings.next(iterator!);
@@ -563,7 +578,9 @@ class _DictKeyIterator extends Iterator<String> {
     final keyString = iterator!.ref.keyString;
 
     // If iterator has no elements at all, slice is the kNullSlice.
-    if (keyString == null) return false;
+    if (keyString == null) {
+      return false;
+    }
 
     // Update current with keyString.
     current = keyString;
@@ -574,19 +591,6 @@ class _DictKeyIterator extends Iterator<String> {
 
 /// A mutable Fleece [Dict].
 class MutableDict extends Dict {
-  static late final _bindings = cblBindings.fleece.mutableDict;
-
-  /// Creates a [MutableDict] based on a [pointer] to the the native value.
-  MutableDict.fromPointer(
-    Pointer<FLMutableDict> pointer, {
-    bool isRefCounted = true,
-    bool adopt = false,
-  }) : super.fromPointer(
-          pointer.cast(),
-          isRefCounted: isRefCounted,
-          adopt: adopt,
-        );
-
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {
     final result = MutableDict.fromPointer(
@@ -600,6 +604,17 @@ class MutableDict extends Dict {
 
     return result;
   }
+
+  /// Creates a [MutableDict] based on a [pointer] to the the native value.
+  MutableDict.fromPointer(
+    Pointer<FLMutableDict> pointer, {
+    bool isRefCounted = true,
+    bool adopt = false,
+  }) : super.fromPointer(
+          pointer.cast(),
+          isRefCounted: isRefCounted,
+          adopt: adopt,
+        );
 
   /// Creates a new [MutableDict] that's a copy of the source [Dict].
   ///
@@ -620,6 +635,8 @@ class MutableDict extends Dict {
             )),
         adopt: true,
       );
+
+  static late final _bindings = cblBindings.fleece.mutableDict;
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
@@ -652,10 +669,13 @@ class MutableDict extends Dict {
 
   @override
   Value? remove(Object? key) {
-    assert(key is String);
+    if (key is! String) {
+      throw ArgumentError.value(key, 'kye', 'must be a String');
+    }
+
     final value = this[key];
 
-    native.call((pointer) => _bindings.remove(pointer.cast(), key as String));
+    native.call((pointer) => _bindings.remove(pointer.cast(), key));
 
     return value;
   }
@@ -732,6 +752,7 @@ class _DefaultSlotSetter implements SlotSetter {
 
   @override
   void setSlotValue(Pointer<FLSlot> slot, Object? value) {
+    // ignore: parameter_assignments
     value = _recursivelyConvertCollectionsToFleece(value);
 
     if (value == null) {
@@ -754,7 +775,9 @@ class _DefaultSlotSetter implements SlotSetter {
   static Object? _recursivelyConvertCollectionsToFleece(Object? value) {
     // These collection types can be set directly though the `set...` methods of
     // FLSLot.
-    if (value is Value || value is Uint8List) return value;
+    if (value is Value || value is Uint8List) {
+      return value;
+    }
 
     if (value is Map) {
       return MutableDict()..addAll(value.cast());
@@ -773,5 +796,5 @@ void _setSlotValue(Pointer<FLSlot> slot, Object? value) {
 
 // === Misc ====================================================================
 
-Object _immutableValueException() =>
+Error _immutableValueException() =>
     UnsupportedError('You cannot mutate an immutable Value.');

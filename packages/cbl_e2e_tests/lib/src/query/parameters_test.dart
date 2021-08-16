@@ -19,6 +19,7 @@ void main() {
       final blob = Blob.fromData('', Uint8List(0));
       final parameters = Parameters();
 
+      // ignore: cascade_invocations
       parameters.setValue('x', name: 'value');
       expect(parameters.value('value'), 'x');
 

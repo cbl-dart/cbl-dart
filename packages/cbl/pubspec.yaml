@@ -1,8 +1,8 @@
 name: 'cbl'
 version: 0.6.0
 description: >-
-  CouchbaseLite for Dart based on the C API. A NoSQL database with 
-  change notification, full text search and replication.
+  CouchbaseLite for Dart based on the C API. A NoSQL database with  change
+  notification, full text search and replication.
 homepage: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl
 repository: https://github.com/cofu-app/cbl-dart
 issue_tracker: https://github.com/cofu-app/cbl-dart/issues
@@ -19,5 +19,4 @@ dependencies:
   synchronized: ^3.0.0
 
 dev_dependencies:
-  pedantic: ^1.11.0
   test: ^1.17.2
