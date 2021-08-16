@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
@@ -121,7 +122,10 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     Database database,
   ) async {
     final blobStore = (database as BlobStoreHolder).blobStore;
-    final properties = await blobStore.saveBlobFromStream(contentType, stream);
+    final properties = await blobStore.saveBlobFromStream(
+      contentType,
+      stream.map((list) => list.toData()),
+    );
     return BlobImpl.fromProperties(properties, database: database);
   }
 
@@ -157,7 +161,9 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     }
 
     if (_digest != null && _blobStore != null) {
-      final stream = _blobStore!.readBlob(_blobProperties());
+      final stream = _blobStore!
+          .readBlob(_blobProperties())
+          ?.map((data) => data.toTypedList());
       if (stream == null) {
         _throwNotFoundError();
       }
@@ -191,7 +197,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
     final blobStore = _blobStore;
     if (_digest != null && blobStore is SyncBlobStore) {
-      final content = blobStore.readBlobSync(_blobProperties());
+      final content = blobStore.readBlobSync(_blobProperties())?.toTypedList();
       if (content == null) {
         _throwNotFoundError();
       }
@@ -242,11 +248,11 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
           if (blobStore is SyncBlobStore) {
             return blobStore
-                .saveBlobFromDataSync(_contentType!, _content!)
+                .saveBlobFromDataSync(_contentType!, _content!.toData())
                 .let(writeProperties);
           } else {
             return blobStore
-                .saveBlobFromData(_contentType!, _content!)
+                .saveBlobFromData(_contentType!, _content!.toData())
                 .then(writeProperties);
           }
         }

@@ -2,7 +2,6 @@
 
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -112,7 +111,7 @@ abstract class Result
 
 class ResultImpl with IterableMixin<String> implements Result {
   ResultImpl.fromValuesData(
-    Uint8List data, {
+    Data data, {
     required MContext context,
     required List<String> columnNames,
   })  : _context = context,
@@ -130,7 +129,7 @@ class ResultImpl with IterableMixin<String> implements Result {
         _columnNames = columnNames;
 
   final MContext _context;
-  final Uint8List? _columnValuesData;
+  final Data? _columnValuesData;
   final fl.Array? _columnValuesArray;
   final List<String> _columnNames;
 
@@ -263,7 +262,7 @@ class ResultImpl with IterableMixin<String> implements Result {
     final encoder = fl.FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
-    return utf8.decode(encoder.finish().asUint8List());
+    return utf8.decode(encoder.finish().toTypedList());
   }
 
   ArrayImpl _createArray() {

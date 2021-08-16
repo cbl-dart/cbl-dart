@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -21,10 +20,7 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   final FfiDatabase database;
 
   @override
-  Map<String, Object?> saveBlobFromDataSync(
-    String contentType,
-    Uint8List data,
-  ) {
+  Map<String, Object?> saveBlobFromDataSync(String contentType, Data data) {
     final blob = CblObject(
       _blobBindings.createWithData(contentType, data),
       debugName: 'NativeBlobStore.saveBlobFromDataSync()',
@@ -36,14 +32,14 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   @override
   Future<Map<String, Object?>> saveBlobFromData(
     String contentType,
-    Uint8List data,
+    Data data,
   ) async =>
       saveBlobFromDataSync(contentType, data);
 
   @override
   Future<Map<String, Object?>> saveBlobFromStream(
     String contentType,
-    Stream<Uint8List> stream,
+    Stream<Data> stream,
   ) async {
     final blob = await _createBlobFromStream(database, stream, contentType);
     _saveBlob(blob);
@@ -51,11 +47,11 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   }
 
   @override
-  Uint8List? readBlobSync(Map<String, Object?> properties) =>
+  Data? readBlobSync(Map<String, Object?> properties) =>
       _getBlob(properties)?.let((it) => it.native.call(_blobBindings.content));
 
   @override
-  Stream<Uint8List>? readBlob(Map<String, Object?> properties) =>
+  Stream<Data>? readBlob(Map<String, Object?> properties) =>
       _getBlob(properties)
           ?.let((it) => _BlobReadStreamController(database, it).stream);
 
@@ -90,7 +86,7 @@ late final _writeStreamBindings = cblBindings.blobs.writeStream;
 
 Future<CblObject<CBLBlob>> _createBlobFromStream(
   FfiDatabase database,
-  Stream<Uint8List> stream,
+  Stream<Data> stream,
   String contentType,
 ) async {
   final writeStream = database.native.call(_writeStreamBindings.create);
@@ -110,8 +106,7 @@ Future<CblObject<CBLBlob>> _createBlobFromStream(
   }
 }
 
-class _BlobReadStreamController
-    extends ClosableResourceStreamController<Uint8List> {
+class _BlobReadStreamController extends ClosableResourceStreamController<Data> {
   _BlobReadStreamController(FfiDatabase database, this.blob)
       : super(parent: database);
 

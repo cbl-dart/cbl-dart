@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -12,12 +11,14 @@ import 'value.dart';
 
 class MRoot extends MCollection {
   MRoot.fromData(
-    Uint8List data, {
+    Data data, {
     required MContext context,
     required bool isMutable,
-  })  : data = data.toSliceResult(),
-        super(context: context, isMutable: isMutable) {
-    _slot = MValue.withValue(context.decoder.loadValueFromData(this.data!)!);
+  }) : super(context: context, isMutable: isMutable) {
+    this.data = data.toSliceResult();
+    _slot = MValue.withValue(
+      context.decoder.loadValueFromData(this.data!.toData())!,
+    );
     _slot.updateParent(this);
   }
 
@@ -31,7 +32,7 @@ class MRoot extends MCollection {
     _slot.updateParent(this);
   }
 
-  SliceResult? data;
+  late final SliceResult? data;
 
   FleeceValueObject<FLValue>? value;
 
@@ -52,7 +53,7 @@ class MRoot extends MCollection {
 
   Object? get asNative => _slot.asNative(this);
 
-  SliceResult encode() {
+  Data encode() {
     final encoder = FleeceEncoder();
     final result = encodeTo(encoder);
     assert(result is! Future);

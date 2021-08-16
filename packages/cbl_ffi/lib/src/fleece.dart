@@ -1,10 +1,10 @@
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'bindings.dart';
+import 'data.dart';
 import 'slice.dart';
 import 'utils.dart';
 
@@ -80,7 +80,7 @@ class FLSlice extends Struct {
 
 extension FLSliceExt on FLSlice {
   bool get isNull => buf == nullptr;
-  Uint8List? toUint8List() => SliceResult.copyFLSlice(this)?.asUint8List();
+  Data? toData() => SliceResult.copyFLSlice(this)?.toData();
 }
 
 class FLSliceResult extends Struct {
@@ -92,8 +92,7 @@ class FLSliceResult extends Struct {
 
 extension FLResultSliceExt on FLSliceResult {
   bool get isNull => buf == nullptr;
-  Uint8List? toUint8List() =>
-      SliceResult.copyFLSliceResult(this)?.asUint8List();
+  Data? toData() => SliceResult.copyFLSliceResult(this)?.toData();
 }
 
 class FLString extends Struct {
@@ -346,7 +345,7 @@ class SlotBindings extends Bindings {
     withZoneArena(() => _setString(slot, value.toFLStringInArena().ref));
   }
 
-  void setData(Pointer<FLSlot> slot, Uint8List value) {
+  void setData(Pointer<FLSlot> slot, Data value) {
     _setData(slot, value.toSliceResult().makeGlobal().ref);
   }
 
@@ -420,7 +419,7 @@ class DocBindings extends Bindings {
   late final _FLDoc_GetRoot _getRoot;
 
   Pointer<FLDoc>? fromResultData(
-    Uint8List data,
+    Data data,
     FLTrust trust,
   ) =>
       _fromResultData(
@@ -618,7 +617,7 @@ class ValueBindings extends Bindings {
 
   String? asString(Pointer<FLValue> value) => _asString(value).toDartString();
 
-  Uint8List? asData(Pointer<FLValue> value) => _asData(value).toUint8List();
+  Data? asData(Pointer<FLValue> value) => _asData(value).toData();
 
   String? scalarToString(Pointer<FLValue> value) =>
       _scalarToString(value).toDartStringAndRelease();
@@ -1282,9 +1281,8 @@ class FleeceDecoderBindings extends Bindings {
   late final _CBLDart_FLDictIterator2_Begin _dictIteratorBegin;
   late final _CBLDart_FLDictIterator2_Next _dictIteratorNext;
 
-  String dumpData(Uint8List data) =>
-      _dumpData(data.toSliceResult().makeGlobal().ref)
-          .toDartStringAndRelease()!;
+  String dumpData(Data data) => _dumpData(data.toSliceResult().makeGlobal().ref)
+      .toDartStringAndRelease()!;
 
   bool getLoadedFLValueFromData(Slice data, FLTrust trust) =>
       _getLoadedFLValueFromData(
@@ -1649,7 +1647,7 @@ class FleeceEncoderBindings extends Bindings {
     });
   }
 
-  void writeData(Pointer<FLEncoder> encoder, Uint8List value) {
+  void writeData(Pointer<FLEncoder> encoder, Data value) {
     _checkError(
       encoder,
       _writeData(encoder, value.toSliceResult().makeGlobal().ref),
@@ -1690,9 +1688,10 @@ class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, _endDict(encoder));
   }
 
-  SliceResult? finish(Pointer<FLEncoder> encoder) =>
+  Data? finish(Pointer<FLEncoder> encoder) =>
       _checkError(encoder, _finish(encoder, _globalFleeceErrorCode))
-          .let(SliceResult.fromFLSliceResult);
+          .let(SliceResult.fromFLSliceResult)
+          ?.toData();
 
   FLErrorCode _getError(Pointer<FLEncoder> encoder) =>
       __getError(encoder).toFleeceErrorCode();

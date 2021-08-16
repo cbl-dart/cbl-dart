@@ -47,7 +47,7 @@ void main() {
         final data = encoder.convertJson('{"a": true}');
 
         expect(
-          decoder.dumpData(data.asUint8List()),
+          decoder.dumpData(data),
           '''
  0000: 70 01       : Dict {
  0002: 41 61       :   "a":
@@ -72,7 +72,7 @@ void main() {
 
       test('loadValueFromData returns null when the data is invalid', () {
         final decoder = FleeceDecoder();
-        final data = SliceResult(0);
+        final data = SliceResult(0).toData();
         expect(decoder.loadValueFromData(data), isNull);
       });
 
@@ -269,7 +269,7 @@ void main() {
           ..writeLoadedValue(sliceValue)
           ..endArray();
 
-        expect(decoder.dataToDartObject(encoder.finish().asUint8List()), [
+        expect(decoder.dataToDartObject(encoder.finish()), [
           [true, 'a'],
           true,
           'a'

@@ -54,7 +54,7 @@ class SimpleMDelegate extends MDelegate {
       cacheIt();
       return flValue.isString
           ? flValue.slice.toDartString()
-          : flValue.slice.asUint8List();
+          : flValue.slice.asTypedList();
     } else if (flValue is CollectionFLValue) {
       cacheIt();
       return flValue.isArray

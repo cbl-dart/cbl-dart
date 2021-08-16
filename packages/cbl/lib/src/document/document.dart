@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -63,9 +62,9 @@ abstract class DocumentDelegate {
 
   int get sequence;
 
-  Uint8List get properties;
+  Data get properties;
 
-  set properties(Uint8List value);
+  set properties(Data value);
 
   MRoot createMRoot(MContext context, {required bool isMutable}) =>
       MRoot.fromData(properties, context: context, isMutable: isMutable);
@@ -86,18 +85,17 @@ class NewDocumentDelegate extends DocumentDelegate {
   final sequence = 0;
 
   @override
-  late Uint8List properties = _emptyProperties;
+  late Data properties = _emptyProperties;
 
   @override
   DocumentDelegate toMutable() => this;
 
   static late final _emptyProperties = _createEmptyProperties();
 
-  static Uint8List _createEmptyProperties() => (fl.FleeceEncoder()
+  static Data _createEmptyProperties() => (fl.FleeceEncoder()
         ..beginDict(0)
         ..endDict())
-      .finish()
-      .asUint8List();
+      .finish();
 }
 
 /// The context for [MCollection]s within a [DelegateDocument].
@@ -118,7 +116,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
     Database? database,
   })  : _delegate = delegate,
         _database = database {
-    _initPropertiesDictionary(delegate.properties);
+    _initPropertiesDictionary();
   }
 
   DocumentDelegate get delegate => _delegate;
@@ -134,7 +132,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
 
     _delegate = delegate;
     if (updateDocumentProperties) {
-      _initPropertiesDictionary(delegate.properties);
+      _initPropertiesDictionary();
     }
   }
 
@@ -155,12 +153,12 @@ class DelegateDocument with IterableMixin<String> implements Document {
     _database = database;
   }
 
-  void setProperties(Uint8List properties) {
+  void setProperties(Data properties) {
     delegate.properties = properties;
-    _initPropertiesDictionary(delegate.properties);
+    _initPropertiesDictionary();
   }
 
-  SliceResult encodeProperties({
+  Data encodeProperties({
     FLEncoderFormat format = FLEncoderFormat.fleece,
   }) {
     assert(database != null);
@@ -177,7 +175,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
   final bool _isMutable = false;
   final String _typeName = 'Document';
 
-  void _initPropertiesDictionary(Uint8List data) {
+  void _initPropertiesDictionary() {
     _root = delegate.createMRoot(DocumentMContext(this), isMutable: _isMutable);
     // ignore: cast_nullable_to_non_nullable
     _properties = _root.asNative as Dictionary;
@@ -281,7 +279,7 @@ class MutableDelegateDocument extends DelegateDocument
   }
 
   void flushPropertiesToDelegate() {
-    delegate.properties = encodeProperties().asUint8List();
+    delegate.properties = encodeProperties();
   }
 
   @override
@@ -295,8 +293,8 @@ class MutableDelegateDocument extends DelegateDocument
   late MutableDictionary _mutableProperties;
 
   @override
-  void _initPropertiesDictionary(Uint8List data) {
-    super._initPropertiesDictionary(data);
+  void _initPropertiesDictionary() {
+    super._initPropertiesDictionary();
     _mutableProperties = _properties as MutableDictionary;
   }
 

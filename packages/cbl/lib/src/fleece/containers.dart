@@ -35,7 +35,7 @@ extension on Iterable<CopyFlag> {
 /// to its Fleece values.
 class Doc extends FleeceDocObject {
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
-  factory Doc.fromResultData(Uint8List data, FLTrust trust) {
+  factory Doc.fromResultData(Data data, FLTrust trust) {
     final doc = _bindings.fromResultData(data, trust);
     if (doc == null) {
       throw ArgumentError.value(data, 'data', 'is not valid Fleece data');
@@ -170,7 +170,7 @@ class Value extends FleeceValueObject<FLValue> {
   String? get asString => native.call(_bindings.asString);
 
   /// Returns the exact contents of a data value, or null for all other types.
-  Uint8List? get asData => native.call(_bindings.asData);
+  Uint8List? get asData => native.call(_bindings.asData)?.toTypedList();
 
   /// If a Value represents an array, returns it as a [Array], else null.
   Array? get asArray => type == ValueType.array
@@ -766,7 +766,7 @@ class _DefaultSlotSetter implements SlotSetter {
     } else if (value is String) {
       _slotBindings.setString(slot, value);
     } else if (value is Uint8List) {
-      _slotBindings.setData(slot, value);
+      _slotBindings.setData(slot, value.toData());
     } else if (value is Value) {
       value.native.call((pointer) => _slotBindings.setValue(slot, pointer));
     }

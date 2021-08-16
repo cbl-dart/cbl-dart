@@ -238,7 +238,7 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final encodingResult = values.encodeTo(encoder);
   assert(encodingResult is! Future);
   return ResultImpl.fromValuesData(
-    encoder.finish().asUint8List(),
+    encoder.finish(),
     context: MContext(),
     columnNames: columnNames,
   );
