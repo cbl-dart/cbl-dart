@@ -43,9 +43,8 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   /// {@macro cbl.Database.existsSync}
-  static bool exists(String name, {String? directory}) => runNativeCalls(() {
-        return _bindings.databaseExists(name, directory);
-      });
+  static bool exists(String name, {String? directory}) =>
+      runNativeCalls(() => _bindings.databaseExists(name, directory));
 
   /// {@macro cbl.Database.copySync}
   static void copy({
@@ -132,17 +131,16 @@ class FfiDatabase extends CBLDatabaseObject
     covariant MutableDelegateDocument document,
     SyncSaveConflictHandler conflictHandler,
   ) =>
-      useSync(() {
-        // Because the conflict handler is sync the result of the maybe async
-        // method is always sync.
-        return _saveDocumentWithConflictHandler(
-          document,
-          conflictHandler,
-        ) as bool;
-      });
+      useSync(
+          // Because the conflict handler is sync the result of the maybe async
+          // method is always sync.
+          () => _saveDocumentWithConflictHandler(
+                document,
+                conflictHandler,
+              ) as bool);
 
   FutureOr<bool> _saveDocumentWithConflictHandler(
-    covariant MutableDelegateDocument document,
+    covariant MutableDelegateDocument documentBeingSaved,
     SaveConflictHandler conflictHandler,
   ) {
     // Implementing the conflict resolution in Dart, instead of using
@@ -153,7 +151,6 @@ class FfiDatabase extends CBLDatabaseObject
 
     final done = iterateMaybeAsync(() sync* {
       var retry = false;
-      var documentBeingSaved = document;
 
       do {
         if (saveDocument(
@@ -165,7 +162,7 @@ class FfiDatabase extends CBLDatabaseObject
         } else {
           // Load the conflicting document.
           final conflictingDocument =
-              this.document(document.id) as DelegateDocument?;
+              document(documentBeingSaved.id) as DelegateDocument?;
 
           // Let conflict handler try resolving the conflict.
           final handlerDescision = conflictHandler(
@@ -237,28 +234,17 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   FutureOr<void> _inBatch(FutureOr<void> Function() fn) {
-    void endTransaction(bool commit) =>
-        call((pointer) => _bindings.endTransaction(pointer, commit));
-
-    call(_bindings.beginTransaction);
-    try {
-      final result = fn();
-      if (result is Future<void>) {
-        return result.then(
-          (_) => endTransaction(true),
-          onError: (Object error) {
-            endTransaction(false);
-            throw error;
-          },
-        );
-      } else {
-        endTransaction(true);
-      }
-    } catch (e) {
-      endTransaction(false);
-      rethrow;
-    }
+    _beginTransaction();
+    return finallyMaybeAsync(
+      (didThrow) => _endTransaction(commit: !didThrow),
+      fn,
+    );
   }
+
+  void _beginTransaction() => call(_bindings.beginTransaction);
+
+  void _endTransaction({required bool commit}) =>
+      call((pointer) => _bindings.endTransaction(pointer, commit: commit));
 
   @override
   void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
@@ -267,9 +253,8 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  DateTime? getDocumentExpiration(String id) => useSync(() {
-        return call((pointer) => _bindings.getDocumentExpiration(pointer, id));
-      });
+  DateTime? getDocumentExpiration(String id) => useSync(
+      () => call((pointer) => _bindings.getDocumentExpiration(pointer, id)));
 
   @override
   Stream<DatabaseChange> changes() =>
@@ -320,12 +305,10 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  List<String> get indexes => useSync(() {
-        return fl.Array.fromPointer(
-          native.call(_bindings.indexNames),
-          adopt: true,
-        ).toObject().cast<String>();
-      });
+  List<String> get indexes => useSync(() => fl.Array.fromPointer(
+        native.call(_bindings.indexNames),
+        adopt: true,
+      ).toObject().cast<String>());
 
   @override
   void createIndex(String name, covariant IndexImplInterface index) =>
@@ -379,6 +362,7 @@ void mergeConflictingDocuments(
   };
 
   // If the document was deleted it has to be recreated.
+  // ignore: parameter_assignments
   conflictingDocument ??= MutableDelegateDocument(
     FfiDocumentDelegate.createMutable(documentBeingSaved.id),
   );

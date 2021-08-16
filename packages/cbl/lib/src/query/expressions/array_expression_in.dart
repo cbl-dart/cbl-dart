@@ -4,6 +4,7 @@ import 'expression.dart';
 import 'variable_expression.dart';
 
 /// Represents the `IN` clause of a range predicate.
+// ignore: one_member_abstracts
 abstract class ArrayExpressionIn {
   /// Specifies the array or the [expression] evaluated as an array of a
   /// range predicate.
@@ -11,6 +12,7 @@ abstract class ArrayExpressionIn {
   /// See also:
   ///
   ///  * [ArrayExpression] for more information on range predicates.
+  // ignore: non_constant_identifier_names
   ArrayExpressionSatisfies in_(ExpressionInterface expression);
 }
 
@@ -26,6 +28,7 @@ class ArrayExpressionInImpl implements ArrayExpressionIn {
   final VariableExpressionImpl _variable;
 
   @override
+  // ignore: non_constant_identifier_names
   ArrayExpressionSatisfies in_(ExpressionInterface expression) =>
       ArrayExpressionSatisfiesImpl(_quantifier, _variable, expression);
 }

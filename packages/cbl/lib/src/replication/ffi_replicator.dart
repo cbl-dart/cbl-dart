@@ -58,34 +58,29 @@ class FfiReplicator
 
       final endpoint = config.createEndpoint();
       final authenticator = config.createAuthenticator();
+      final configuration = CBLReplicatorConfiguration(
+        database: database.native.pointer,
+        endpoint: endpoint,
+        replicatorType: config.replicatorType.toCBLReplicatorType(),
+        continuous: config.continuous,
+        maxAttempts: config.maxRetries + 1,
+        maxAttemptWaitTime: config.maxRetryWaitTime.inSeconds,
+        heartbeat: config.heartbeat.inSeconds,
+        authenticator: authenticator,
+        headers: config.headers
+            ?.let((it) => fl.MutableDict(it).native.pointer.cast()),
+        pinnedServerCertificate: config.pinnedServerCertificate,
+        channels: config.channels
+            ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+        documentIDs: config.documentIds
+            ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
+        pushFilter: pushFilterCallback?.native.pointer,
+        pullFilter: pullFilterCallback?.native.pointer,
+        conflictResolver: conflictResolverCallback?.native.pointer,
+      );
 
       try {
-        final replicator = _bindings.createReplicator(
-          database.native.pointer,
-          endpoint,
-          config.replicatorType.toCBLReplicatorType(),
-          config.continuous,
-          null,
-          config.maxRetries + 1,
-          config.maxRetryWaitTime.inSeconds,
-          config.heartbeat.inSeconds,
-          authenticator,
-          null,
-          null,
-          null,
-          null,
-          null,
-          config.headers?.let((it) => fl.MutableDict(it).native.pointer.cast()),
-          config.pinnedServerCertificate,
-          null,
-          config.channels
-              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-          config.documentIds
-              ?.let((it) => fl.MutableArray(it).native.pointer.cast()),
-          pushFilterCallback?.native.pointer,
-          pullFilterCallback?.native.pointer,
-          conflictResolverCallback?.native.pointer,
-        );
+        final replicator = _bindings.createReplicator(configuration);
 
         native = CBLReplicatorObject(
           replicator,
@@ -93,6 +88,7 @@ class FfiReplicator
         );
 
         database.registerChildResource(this);
+        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         _disposeCallbacks();
         rethrow;
@@ -125,7 +121,10 @@ class FfiReplicator
 
   @override
   void start({bool reset = false}) =>
-      useSync(() => native.call((pointer) => _bindings.start(pointer, reset)));
+      useSync(() => native.call((pointer) => _bindings.start(
+            pointer,
+            resetCheckpoint: reset,
+          )));
 
   @override
   void stop() => useSync(_stop);
@@ -182,10 +181,8 @@ class FfiReplicator
       });
 
   @override
-  bool isDocumentPending(String documentId) =>
-      useSync(() => native.call((pointer) {
-            return _bindings.isDocumentPending(pointer, documentId);
-          }));
+  bool isDocumentPending(String documentId) => useSync(() => native
+      .call((pointer) => _bindings.isDocumentPending(pointer, documentId)));
 
   @override
   Future<void> performClose() async {
@@ -196,15 +193,18 @@ class FfiReplicator
           _stop();
           stopping = true;
         }
-        await Future<void>.delayed(Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
       }
     } finally {
       _disposeCallbacks();
     }
   }
 
-  void _disposeCallbacks() =>
-      _callbacks.forEach((callback) => callback.close());
+  void _disposeCallbacks() {
+    for (final callback in _callbacks) {
+      callback.close();
+    }
+  }
 
   @override
   String toString() => [
@@ -263,7 +263,9 @@ extension on ReplicatorConfiguration {
 
   Pointer<CBLAuthenticator>? createAuthenticator() {
     final authenticator = this.authenticator;
-    if (authenticator == null) return null;
+    if (authenticator == null) {
+      return null;
+    }
 
     if (authenticator is BasicAuthenticator) {
       return _bindings.createPasswordAuthenticator(

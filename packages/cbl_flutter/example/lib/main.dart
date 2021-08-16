@@ -9,6 +9,7 @@ void main() {
   runApp(MyApp());
 }
 
+// ignore: use_key_in_widget_constructors
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
@@ -45,7 +46,7 @@ class _MyAppState extends State<MyApp> {
         .listen((posts) => setState(() => _posts = posts));
   }
 
-  void _createPost() async {
+  Future<void> _createPost() async {
     final post = MutableDocument({
       'type': 'post',
       'title': 'The first post',
@@ -59,97 +60,95 @@ class _MyAppState extends State<MyApp> {
     await _db.saveDocument(post);
   }
 
-  void _clearDatabase() async {
+  Future<void> _clearDatabase() async {
     final ids = await Query.fromN1ql(_db, 'SELECT META().id FROM _')
         .then((query) => query.execute())
         .then((resultSet) =>
             resultSet.asStream().map((result) => result[0].string!).toList());
 
-    await _db.inBatch(() {
-      return Future.wait(ids.map((id) => _db.purgeDocumentById(id)));
-    });
+    await _db
+        .inBatch(() => Future.wait(ids.map((id) => _db.purgeDocumentById(id))));
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Padding(
-          padding: EdgeInsets.all(16),
-          child: FutureBuilder<void>(
-            future: _initFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.active) {
+  Widget build(BuildContext context) => MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Plugin example app'),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: FutureBuilder<void>(
+              future: _initFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.active) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Initializing...')
+                      ],
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: IconAndMessage(
+                      icon: Icons.close,
+                      iconColor: Colors.red,
+                      text: 'Initialization failed:\n'
+                          '${snapshot.error}',
+                    ),
+                  );
+                }
+
                 return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Initializing...')
+                      const IconAndMessage(
+                        icon: Icons.check,
+                        iconColor: Colors.green,
+                        text: 'Initialized',
+                      ),
+                      const SizedBox(height: 32),
+                      ButtonBar(
+                        alignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _createPost,
+                            child: const Text('Crate a Post'),
+                          ),
+                          ElevatedButton(
+                            onPressed: _clearDatabase,
+                            child: const Text('Clear Database'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              const JsonEncoder.withIndent('  ')
+                                  .convert(_posts),
+                              style: const TextStyle(fontFamily: ''),
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   ),
                 );
-              }
-
-              if (snapshot.hasError) {
-                return Center(
-                  child: IconAndMessage(
-                    icon: Icons.close,
-                    iconColor: Colors.red,
-                    text: 'Initialization failed:\n'
-                        '${snapshot.error}',
-                  ),
-                );
-              }
-
-              return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconAndMessage(
-                      icon: Icons.check,
-                      iconColor: Colors.green,
-                      text: 'Initialized',
-                    ),
-                    SizedBox(height: 32),
-                    ButtonBar(
-                      alignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: _createPost,
-                          child: Text('Crate a Post'),
-                        ),
-                        ElevatedButton(
-                          onPressed: _clearDatabase,
-                          child: Text('Clear Database'),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 32),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            const JsonEncoder.withIndent('  ').convert(_posts),
-                            style: TextStyle(fontFamily: ''),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
+              },
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class IconAndMessage extends StatelessWidget {
@@ -165,32 +164,30 @@ class IconAndMessage extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 20,
-                offset: Offset(0, 6),
-              )
-            ],
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 20,
+                  offset: Offset(0, 6),
+                )
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Icon(
+              icon,
+              size: 48,
+              color: iconColor,
+            ),
           ),
-          padding: EdgeInsets.all(16),
-          child: Icon(
-            icon,
-            size: 48,
-            color: iconColor,
-          ),
-        ),
-        SizedBox(height: 32),
-        Text(text),
-      ],
-    );
-  }
+          const SizedBox(height: 32),
+          Text(text),
+        ],
+      );
 }

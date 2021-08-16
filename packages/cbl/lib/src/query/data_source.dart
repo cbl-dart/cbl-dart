@@ -22,15 +22,13 @@ class DataSource {
 // === Impl ====================================================================
 
 class DataSourceImpl implements DataSourceInterface {
-  DataSourceImpl({required Database database, String? alias})
-      : database = database,
-        _alias = alias;
+  DataSourceImpl({required this.database, this.alias});
 
   final Database database;
-  final String? _alias;
+  final String? alias;
 
   Map<String, Object?> toJson() => {
-        if (_alias != null) 'AS': _alias,
+        if (alias != null) 'AS': alias,
         'COLLECTION': database.name,
       };
 }

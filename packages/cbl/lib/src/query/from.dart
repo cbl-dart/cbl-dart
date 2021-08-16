@@ -1,4 +1,3 @@
-import 'proxy_query.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'ffi_query.dart';
@@ -8,6 +7,7 @@ import 'joins.dart';
 import 'limit.dart';
 import 'order_by.dart';
 import 'ordering.dart';
+import 'proxy_query.dart';
 import 'query.dart';
 import 'router/group_by_router.dart';
 import 'router/join_router.dart';

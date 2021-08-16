@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 
 import '../decoder.dart';
@@ -8,17 +10,17 @@ import 'delegate.dart';
 MDelegate get _delegate => MDelegate.instance!;
 
 class MValue {
-  MValue.empty() : this(null, null, hasNative: false);
-
-  MValue.withValue(LoadedFLValue value) : this(value, null, hasNative: false);
-
-  MValue.withNative(Object? native) : this(null, native, hasNative: true);
-
   MValue(LoadedFLValue? value, Object? native, {required bool hasNative})
       : assert(hasNative || native == null),
         _value = value,
         _hasNative = hasNative,
         _native = native;
+
+  MValue.empty() : this(null, null, hasNative: false);
+
+  MValue.withValue(LoadedFLValue value) : this(value, null, hasNative: false);
+
+  MValue.withNative(Object? native) : this(null, native, hasNative: true);
 
   bool get isEmpty => !hasValue && !hasNative;
 
@@ -55,7 +57,9 @@ class MValue {
       _setNative(native, parent: parent, hasNative: true);
 
   void setEmpty(MCollection parent) {
-    if (isEmpty) return;
+    if (isEmpty) {
+      return;
+    }
     _value = null;
     _setNative(null, parent: parent, hasNative: false);
   }
@@ -91,7 +95,9 @@ class MValue {
       'native must be null when hasNative is false',
     );
 
-    if (_native == native && _hasNative == hasNative) return;
+    if (_native == native && _hasNative == hasNative) {
+      return;
+    }
 
     // Update parent of old native value
     _updateNativeParent(null, null);
@@ -105,7 +111,9 @@ class MValue {
   }
 
   void _updateNativeParent(MValue? slot, MCollection? parent) {
-    if (!_hasNative) return;
+    if (!_hasNative) {
+      return;
+    }
     _delegate.collectionFromNative(_native)?.updateParent(slot, parent);
   }
 
@@ -126,6 +134,7 @@ class MValue {
       'hasValue: $hasValue, '
       'hasNative: $hasNative, '
       'value: $_value, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'native: $_native'
       ')';
 }

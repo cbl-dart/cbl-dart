@@ -3,6 +3,7 @@ import '../from.dart';
 import '../query.dart';
 
 /// Interface for creating and chaining `FROM` clauses.
+// ignore: one_member_abstracts
 abstract class FromRouter {
   /// Creates and returns a `FROM` clause query component with the given
   /// [dataSource].

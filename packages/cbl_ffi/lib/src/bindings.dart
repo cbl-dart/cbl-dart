@@ -16,7 +16,7 @@ abstract class Bindings {
     parent._children.add(this);
   }
 
-  Bindings.root(Libraries libs) : libs = libs;
+  Bindings.root(this.libs);
 
   final Libraries libs;
 
@@ -31,13 +31,27 @@ abstract class Bindings {
 
     _isDisposed = true;
 
-    _children.forEach((element) {
-      element.dispose();
-    });
+    for (final child in _children) {
+      child.dispose();
+    }
   }
 }
 
 class CBLBindings extends Bindings {
+  CBLBindings(Libraries libs) : super.root(libs) {
+    base = BaseBindings(this);
+    asyncCallback = AsyncCallbackBindings(this);
+    logging = LoggingBindings(this);
+    database = DatabaseBindings(this);
+    document = DocumentBindings(this);
+    mutableDocument = MutableDocumentBindings(this);
+    query = QueryBindings(this);
+    resultSet = ResultSetBindings(this);
+    blobs = BlobsBindings(this);
+    replicator = ReplicatorBindings(this);
+    fleece = FleeceBindings(this);
+  }
+
   static CBLBindings? _instance;
 
   static CBLBindings get instance {
@@ -53,20 +67,6 @@ class CBLBindings extends Bindings {
 
   static void initInstance(Libraries libraries) {
     _instance ??= CBLBindings(libraries)..base.init();
-  }
-
-  CBLBindings(Libraries libs) : super.root(libs) {
-    base = BaseBindings(this);
-    asyncCallback = AsyncCallbackBindings(this);
-    logging = LoggingBindings(this);
-    database = DatabaseBindings(this);
-    document = DocumentBindings(this);
-    mutableDocument = MutableDocumentBindings(this);
-    query = QueryBindings(this);
-    resultSet = ResultSetBindings(this);
-    blobs = BlobsBindings(this);
-    replicator = ReplicatorBindings(this);
-    fleece = FleeceBindings(this);
   }
 
   late final BaseBindings base;

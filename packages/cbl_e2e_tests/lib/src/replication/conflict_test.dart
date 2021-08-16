@@ -16,6 +16,7 @@ void main() {
         conflict.toString(),
         'Conflict('
         'local: MutableDocument(id: local, revisionId: null), '
+        // ignore: missing_whitespace_between_adjacent_strings
         'remote: MutableDocument(id: remote, revisionId: null)'
         ')',
       );

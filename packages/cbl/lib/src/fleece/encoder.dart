@@ -23,7 +23,12 @@ class FleeceEncoder {
     this.reserveSize = 256,
     this.uniqueStrings = true,
   }) {
-    _pointer = _encoderBinds.create(this, format, reserveSize, uniqueStrings);
+    _pointer = _encoderBinds.create(
+      this,
+      format: format,
+      reserveSize: reserveSize,
+      uniqueStrings: uniqueStrings,
+    );
   }
 
   late final Pointer<FLEncoder> _pointer;
@@ -84,9 +89,7 @@ class FleeceEncoder {
     } else if (value is Iterable) {
       final list = value.toList();
       beginArray(list.length);
-      for (final element in list) {
-        writeDartObject(element);
-      }
+      list.forEach(writeDartObject);
       endArray();
     } else if (value is Map) {
       beginDict(value.length);
@@ -131,6 +134,7 @@ class FleeceEncoder {
   void writeNull() => _encoderBinds.writeNull(_pointer);
 
   /// Writes the [bool] [value] to this encoder.
+  // ignore: avoid_positional_boolean_parameters
   void writeBool(bool value) => _encoderBinds.writeBool(_pointer, value);
 
   /// Writes the [int] [value] to this encoder.

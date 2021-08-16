@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../../support/utils.dart';
 import '../encoder.dart';
 import 'context.dart';
 import 'value.dart';
@@ -66,25 +67,16 @@ abstract class MCollection {
 
     _isEncoding = true;
 
-    try {
-      final result = performEncodeTo(encoder);
-
-      if (result is Future) {
-        return result.whenComplete(() => _isEncoding = false);
-      } else {
-        _isEncoding = false;
-      }
-    } catch (e) {
-      _isEncoding = false;
-      rethrow;
-    }
+    return finallyMaybeAsync(
+      (_) => _isEncoding = false,
+      () => performEncodeTo(encoder),
+    );
   }
 
   FutureOr<void> performEncodeTo(FleeceEncoder encoder);
 
   @protected
   void mutate() {
-    // TODO: should this always throw, not just in debug mode?
     assert(isMutable && !isEncoding);
 
     if (!_isMutated) {
@@ -118,7 +110,9 @@ abstract class MCollection {
   }
 
   void _updateContext(MContext? context) {
-    if (context == null || _context == context) return;
+    if (context == null || _context == context) {
+      return;
+    }
 
     assert(
       _context == null || _context == context,
@@ -128,6 +122,8 @@ abstract class MCollection {
     _context = context;
 
     // Propagate context to children.
-    values.forEach((value) => value.updateParent(this));
+    for (final value in values) {
+      value.updateParent(this);
+    }
   }
 }

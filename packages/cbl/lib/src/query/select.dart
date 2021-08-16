@@ -1,9 +1,9 @@
 import '../database/database.dart';
 import '../query.dart';
-import 'proxy_query.dart';
 import 'data_source.dart';
 import 'ffi_query.dart';
 import 'from.dart';
+import 'proxy_query.dart';
 import 'query.dart';
 import 'router/from_router.dart';
 import 'select_result.dart';
@@ -20,8 +20,10 @@ abstract class AsyncSelect implements Select, AsyncQuery, AsyncFromRouter {}
 // === Impl ====================================================================
 
 class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
-  SyncSelectImpl(Iterable<SelectResultInterface> select, bool distinct)
-      : super(selects: select, distinct: distinct);
+  SyncSelectImpl(
+    Iterable<SelectResultInterface> select, {
+    required bool distinct,
+  }) : super(selects: select, distinct: distinct);
 
   @override
   SyncFrom from(DataSourceInterface dataSource) {
@@ -37,8 +39,10 @@ class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
 }
 
 class AsyncSelectImpl extends AsyncBuilderQuery implements AsyncSelect {
-  AsyncSelectImpl(Iterable<SelectResultInterface> select, bool distinct)
-      : super(selects: select, distinct: distinct);
+  AsyncSelectImpl(
+    Iterable<SelectResultInterface> select, {
+    required bool distinct,
+  }) : super(selects: select, distinct: distinct);
 
   @override
   AsyncFrom from(DataSourceInterface dataSource) {

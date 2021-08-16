@@ -25,8 +25,11 @@ class MDict extends MCollection {
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
 
   MDict.asChild(MValue slot, MCollection parent, {bool? isMutable})
-      : _dict = (slot.value as CollectionFLValue).value.cast(),
+      :
+        // ignore: cast_nullable_to_non_nullable
+        _dict = (slot.value as CollectionFLValue).value.cast(),
         _values = {},
+        // ignore: cast_nullable_to_non_nullable
         _length = (slot.value as CollectionFLValue).length,
         _valuesHasAllKeys = false,
         super.asChild(
@@ -82,7 +85,9 @@ class MDict extends MCollection {
 
     // Clear out all entires.
     mutate();
-    _values.values.forEach((value) => value.removeFromParent());
+    for (final value in _values.values) {
+      value.removeFromParent();
+    }
     _values.clear();
     _length = 0;
 
@@ -120,7 +125,7 @@ class MDict extends MCollection {
 
   Iterable<MapEntry<String, MValue>> get iterable sync* {
     // Iterate over entries in _values.
-    for (var entry in _values.entries) {
+    for (final entry in _values.entries) {
       // Empty MValues represent that the entry was removed.
       if (entry.value.isNotEmpty) {
         yield entry;
@@ -128,7 +133,9 @@ class MDict extends MCollection {
     }
 
     // _values shadows all keys in _dict so there is no use in iterating _dict.
-    if (_valuesHasAllKeys) return;
+    if (_valuesHasAllKeys) {
+      return;
+    }
 
     // Iterate over entries in _dict.
     for (final entry in context!.decoder.dictIterable(_dict!)) {
@@ -151,7 +158,9 @@ class MDict extends MCollection {
 
   MValue? _loadValue(String key) {
     final dict = _dict;
-    if (dict == null) return null;
+    if (dict == null) {
+      return null;
+    }
 
     return context!.decoder
         .loadValueFromDict(dict, key)

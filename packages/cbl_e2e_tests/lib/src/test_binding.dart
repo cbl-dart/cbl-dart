@@ -23,7 +23,7 @@ export 'package:test/test.dart'
         markTestSkipped;
 
 /// Signature of the function to return from [CblE2eTestBinding.testFn].
-typedef TestFn = void Function(dynamic description, dynamic Function() body);
+typedef TestFn = void Function(String description, dynamic Function() body);
 
 typedef TestHook = void Function(dynamic Function() body);
 
@@ -36,7 +36,9 @@ typedef TestHook = void Function(dynamic Function() body);
 /// through `widgetTest`.
 abstract class CblE2eTestBinding {
   static void ensureInitialized(CblE2eTestBinding Function() createBinding) {
-    if (_instance != null) return;
+    if (_instance != null) {
+      return;
+    }
     _instance = createBinding();
 
     _instance!._setupTestLifecycleHooks();
@@ -106,11 +108,11 @@ String testDbName(String? testName) => [
     ].join('-');
 
 @isTest
-void test(dynamic description, dynamic Function() body) =>
+void test(String description, dynamic Function() body) =>
     CblE2eTestBinding.instance.testFn(description, body);
 
 @isTestGroup
-void group(dynamic description, dynamic Function() body) =>
+void group(String description, dynamic Function() body) =>
     CblE2eTestBinding.instance.groupFn(description, body);
 
 void setUpAll(dynamic Function() body) =>

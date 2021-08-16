@@ -14,12 +14,11 @@ class LibraryConfiguration {
   ///
   /// If [appendExtension] is `true` (default), the file extension which is used
   /// for dynamic libraries on the current platform is appended to [name].
-  LibraryConfiguration.dynamic(String name,
-      {bool appendExtension = true, String? version})
-      : process = null,
-        name = name,
-        appendExtension = appendExtension,
-        version = version;
+  LibraryConfiguration.dynamic(
+    this.name, {
+    this.appendExtension = true,
+    this.version,
+  }) : process = null;
 
   /// Creates a configuration for a dynamic library opened with
   /// [DynamicLibrary.process].
@@ -54,11 +53,10 @@ class LibraryConfiguration {
 /// support layer.
 class Libraries {
   Libraries({
+    required this.cbl,
+    required this.cblDart,
     this.enterpriseEdition = false,
-    required LibraryConfiguration cbl,
-    required LibraryConfiguration cblDart,
-  })  : cbl = cbl,
-        cblDart = cblDart;
+  });
 
   final LibraryConfiguration cbl;
   final LibraryConfiguration cblDart;
@@ -76,6 +74,9 @@ class Libraries {
 /// Initializes global resources and configures global settings, such as
 /// logging.
 class CouchbaseLite {
+  /// Private constructor to allow control over instance creation.
+  CouchbaseLite._();
+
   static final _initialization = Once<void>(
     rejectMultipleExecutions: true,
     debugName: 'CouchbaseLite.init()',
@@ -87,7 +88,4 @@ class CouchbaseLite {
         ffi.CBLBindings.initInstance(libraries._toFfi());
         MDelegate.instance = CblMDelegate();
       });
-
-  /// Private constructor to allow control over instance creation.
-  CouchbaseLite._();
 }

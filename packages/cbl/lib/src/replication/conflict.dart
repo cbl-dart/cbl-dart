@@ -27,6 +27,7 @@ class ConflictImpl implements Conflict {
   @override
   String toString() => 'Conflict('
       'local: $localDocument, '
+      // ignore: missing_whitespace_between_adjacent_strings
       'remote: $remoteDocument'
       ')';
 }

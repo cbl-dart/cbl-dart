@@ -105,12 +105,11 @@ class FfiQuery
               callback.native.pointer,
             ),
             createEvent: (listenerToken, _) => FfiResultSet(
-              native.call((pointer) {
-                // The native side sends no arguments. When the native side
-                // notfies the listener it has to copy the current query
-                // result set.
-                return _bindings.copyCurrentResults(pointer, listenerToken);
-              }),
+              // The native side sends no arguments. When the native side
+              // notfies the listener it has to copy the current query
+              // result set.
+              native.call((pointer) =>
+                  _bindings.copyCurrentResults(pointer, listenerToken)),
               database: _database!,
               columnNames: _columnNames,
               debugCreator: 'FfiQuery.changes()',
@@ -131,15 +130,16 @@ class FfiQuery
       _language == CBLQueryLanguage.json ? _definition : null;
 
   void _applyParameters() {
-    final encoder = fl.FleeceEncoder();
-    encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+    final encoder = fl.FleeceEncoder()
+      ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
     final parameters = _parameters;
     if (parameters != null) {
       final result = parameters.encodeTo(encoder);
       assert(result is! Future);
     } else {
-      encoder.beginDict(0);
-      encoder.endDict();
+      encoder
+        ..beginDict(0)
+        ..endDict();
     }
     final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data.asUint8List(), FLTrust.trusted);
@@ -150,10 +150,11 @@ class FfiQuery
         ));
   }
 
-  List<String> _prepareColumnNames() =>
-      List.generate(native.call(_bindings.columnCount), (index) {
-        return native.call((pointer) => _bindings.columnName(pointer, index));
-      });
+  List<String> _prepareColumnNames() => List.generate(
+        native.call(_bindings.columnCount),
+        (index) =>
+            native.call((pointer) => _bindings.columnName(pointer, index)),
+      );
 
   @override
   String toString() => 'Query(${describeEnum(_language)}: $_definition)';

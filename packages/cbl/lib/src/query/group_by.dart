@@ -1,10 +1,10 @@
-import 'proxy_query.dart';
 import 'expressions/expression.dart';
 import 'ffi_query.dart';
 import 'having.dart';
 import 'limit.dart';
 import 'order_by.dart';
 import 'ordering.dart';
+import 'proxy_query.dart';
 import 'query.dart';
 import 'router/having_router.dart';
 import 'router/limit_router.dart';

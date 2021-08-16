@@ -1,6 +1,6 @@
-import 'proxy_query.dart';
 import 'expressions/expression.dart';
 import 'ffi_query.dart';
+import 'proxy_query.dart';
 import 'query.dart';
 
 /// A query component representing the `LIMIT` clause of a [Query].

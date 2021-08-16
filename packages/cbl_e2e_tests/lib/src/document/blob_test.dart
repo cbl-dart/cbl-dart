@@ -11,9 +11,9 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/database_utils.dart';
 
-final contentType = 'application/octet-stream';
+const contentType = 'application/octet-stream';
 final fixedTestContent = utf8.encode('content') as Uint8List;
-final fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
+const fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
 
 /// Returns random bytes for blob.
 ///
@@ -84,7 +84,7 @@ void main() {
           'content_type': contentType,
         });
         expect(
-          () => blob.content(),
+          blob.content,
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
@@ -92,7 +92,7 @@ void main() {
           )),
         );
         expect(
-          () => blob.contentStream(),
+          blob.contentStream,
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
@@ -258,7 +258,7 @@ void main() {
         'digest': 'A',
         'length': 0,
       });
-      ;
+
       expect(blob.hashCode, blob.digest.hashCode);
 
       // Uses hashCode of object as fallback.

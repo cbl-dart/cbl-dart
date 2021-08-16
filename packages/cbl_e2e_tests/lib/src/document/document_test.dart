@@ -17,14 +17,14 @@ void main() {
   });
 
   Document savedDocument([Map<String, Object?>? data]) {
-    var doc = MutableDocument(data);
+    final doc = MutableDocument(data);
     db.saveDocument(doc);
     return db.document(doc.id)!;
   }
 
   group('Document', () {
     test('properties', () {
-      var revisionId = '1-581ad726ee407c8376fc94aad966051d013893c4';
+      const revisionId = '1-581ad726ee407c8376fc94aad966051d013893c4';
       final doc = MutableDocument.withId('id');
 
       expect(doc.id, 'id');
@@ -191,6 +191,7 @@ void main() {
           loadedDoc.toString(),
           'Document('
           'id: ${doc.id}, '
+          // ignore: missing_whitespace_between_adjacent_strings
           'revisionId: ${doc.revisionId}'
           ')',
         );
@@ -227,9 +228,7 @@ void main() {
     test('implements MutableDictionaryInterface for properties', () {
       final date = DateTime.now();
       final blob = Blob.fromData('', Uint8List(0));
-      final doc = MutableDocument();
-
-      doc
+      final doc = MutableDocument()
         ..setValue('x', key: 'value')
         ..setString('a', key: 'string')
         ..setInteger(1, key: 'int')
@@ -240,6 +239,7 @@ void main() {
         ..setBlob(blob, key: 'blob')
         ..setArray(MutableArray([true]), key: 'array')
         ..setDictionary(MutableDictionary({'key': 'value'}), key: 'dictionary');
+
       expect(doc.toPlainMap(), {
         'value': 'x',
         'string': 'a',
@@ -278,6 +278,7 @@ void main() {
         mutableDoc.toString(),
         'MutableDocument('
         'id: ${mutableDoc.id}, '
+        // ignore: missing_whitespace_between_adjacent_strings
         'revisionId: ${mutableDoc.revisionId}'
         ')',
       );

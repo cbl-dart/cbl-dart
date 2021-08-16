@@ -110,11 +110,12 @@ void main() {
       });
 
       test('performMaintenance: reindex', () {
-        final db = openSyncTestDb('PerformMaintenance|Reindex');
-        db.createIndex('a', ValueIndexConfiguration(['type']));
+        final db = openSyncTestDb('PerformMaintenance|Reindex')
+          ..createIndex('a', ValueIndexConfiguration(['type']));
         final doc = MutableDocument({'type': 'A'});
-        db.saveDocument(doc);
-        db.performMaintenance(MaintenanceType.reindex);
+        db
+          ..saveDocument(doc)
+          ..performMaintenance(MaintenanceType.reindex);
       });
 
       test('performMaintenance: integrityCheck', () {
@@ -146,8 +147,8 @@ void main() {
 
         await expectLater(db.inBatch(() async {
           db.saveDocument(doc);
-          throw 'error';
-        }), throwsA('error'));
+          throw StateError('Error');
+        }), throwsA(isStateError));
 
         expect(db.document(doc.id), isNull);
       });
@@ -156,11 +157,13 @@ void main() {
         final doc = MutableDocument();
 
         expect(
-            () => db.inBatch(() {
-                  db.saveDocument(doc);
-                  throw 'error';
-                }),
-            throwsA('error'));
+          // ignore: void_checks
+          () => db.inBatch(() {
+            db.saveDocument(doc);
+            throw StateError('Error');
+          }),
+          throwsA(isStateError),
+        );
 
         expect(db.document(doc.id), isNull);
       });
@@ -240,8 +243,9 @@ void main() {
 
         matrixTest('save deleted document', (async) async {
           final doc = MutableDocument();
-          db.saveDocument(doc);
-          db.deleteDocument(db.document(doc.id)!);
+          db
+            ..saveDocument(doc)
+            ..deleteDocument(db.document(doc.id)!);
 
           final SaveConflictHandler handler =
               expectAsync2((documentBeingSaved, conflictingDocument) {
@@ -303,16 +307,17 @@ void main() {
 
       test('deleteDocument should remove document from the database', () {
         final doc = MutableDocument();
-        db.saveDocument(doc);
-        db.deleteDocument(doc);
+        db
+          ..saveDocument(doc)
+          ..deleteDocument(doc);
         expect(db.document(doc.id), isNull);
       });
 
       test('purgeDocumentById purges a document by id', () {
         final doc = MutableDocument();
-        db.saveDocument(doc);
-
-        db.purgeDocumentById(doc.id);
+        db
+          ..saveDocument(doc)
+          ..purgeDocumentById(doc.id);
 
         expect(db.document(doc.id), isNull);
       });
@@ -326,11 +331,11 @@ void main() {
         });
 
         test('returns the time of expiration if the document has one', () {
-          final expiration = DateTime.now().add(Duration(days: 1));
+          final expiration = DateTime.now().add(const Duration(days: 1));
           final doc = MutableDocument();
-          db.saveDocument(doc);
-
-          db.setDocumentExpiration(doc.id, expiration);
+          db
+            ..saveDocument(doc)
+            ..setDocumentExpiration(doc.id, expiration);
 
           final storedExpiration = db.getDocumentExpiration(doc.id);
 
@@ -343,11 +348,11 @@ void main() {
 
       group('setDocumentExpiration', () {
         test('sets a new time of expiration', () {
-          final expiration = DateTime.now().add(Duration(days: 1));
+          final expiration = DateTime.now().add(const Duration(days: 1));
           final doc = MutableDocument();
-          db.saveDocument(doc);
-
-          db.setDocumentExpiration(doc.id, expiration);
+          db
+            ..saveDocument(doc)
+            ..setDocumentExpiration(doc.id, expiration);
 
           final storedExpiration = db.getDocumentExpiration(doc.id);
 
@@ -358,12 +363,12 @@ void main() {
         });
 
         test('sets the time of expiration to null', () {
-          final expiration = DateTime.now().add(Duration(days: 1));
+          final expiration = DateTime.now().add(const Duration(days: 1));
           final doc = MutableDocument();
-          db.saveDocument(doc);
-
-          db.setDocumentExpiration(doc.id, expiration);
-          db.setDocumentExpiration(doc.id, null);
+          db
+            ..saveDocument(doc)
+            ..setDocumentExpiration(doc.id, expiration)
+            ..setDocumentExpiration(doc.id, null);
 
           expect(db.getDocumentExpiration(doc.id), isNull);
         });
@@ -459,8 +464,8 @@ void main() {
 
     group('Index', () {
       test('createIndex should work with ValueIndexConfiguration', () {
-        final db = openSyncTestDb('CreateValueIndexConfiguration');
-        db.createIndex('a', ValueIndexConfiguration(['a']));
+        final db = openSyncTestDb('CreateValueIndexConfiguration')
+          ..createIndex('a', ValueIndexConfiguration(['a']));
 
         final q = SyncQuery.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
 
@@ -470,8 +475,8 @@ void main() {
       });
 
       test('createIndex should work with FullTextIndexConfiguration', () {
-        final db = openSyncTestDb('CreateFullTextIndexConfiguration');
-        db.createIndex('a', FullTextIndexConfiguration(['a']));
+        final db = openSyncTestDb('CreateFullTextIndexConfiguration')
+          ..createIndex('a', FullTextIndexConfiguration(['a']));
 
         final q =
             SyncQuery.fromN1ql(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
@@ -482,11 +487,11 @@ void main() {
       });
 
       test('createIndex should work with ValueIndex', () {
-        final db = openSyncTestDb('CreateValueIndex');
-        db.createIndex(
-          'a',
-          IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
-        );
+        final db = openSyncTestDb('CreateValueIndex')
+          ..createIndex(
+            'a',
+            IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
+          );
 
         final q = SyncQuery.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
 
@@ -496,11 +501,11 @@ void main() {
       });
 
       test('createIndex should work with FullTextIndex', () {
-        final db = openSyncTestDb('CreateFullTextIndex');
-        db.createIndex(
-          'a',
-          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
-        );
+        final db = openSyncTestDb('CreateFullTextIndex')
+          ..createIndex(
+            'a',
+            IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
+          );
 
         final q =
             SyncQuery.fromN1ql(db, "SELECT * FROM _ WHERE MATCH('a', 'query')");
@@ -511,8 +516,8 @@ void main() {
       });
 
       test('deleteIndex should delete the given index', () {
-        final db = openSyncTestDb('DeleteIndex');
-        db.createIndex('a', ValueIndexConfiguration(['a']));
+        final db = openSyncTestDb('DeleteIndex')
+          ..createIndex('a', ValueIndexConfiguration(['a']));
 
         expect(db.indexes, ['a']);
 
@@ -550,32 +555,33 @@ void main() {
       });
 
       test('N1QL meal planner example', () {
-        db.createIndex('date', ValueIndexConfiguration(['type']));
-        db.createIndex('group_index', ValueIndexConfiguration(['`group`']));
+        db
+          ..createIndex('date', ValueIndexConfiguration(['type']))
+          ..createIndex('group_index', ValueIndexConfiguration(['`group`']));
 
         final dish = MutableDocument({
           'type': 'dish',
           'title': 'Lasagna',
         });
-        db.saveDocument(dish);
 
-        db.saveDocument(MutableDocument({
-          'type': 'meal',
-          'dishes': [dish.id],
-          'group': 'fam',
-          'date': '2020-06-30',
-        }));
-
-        db.saveDocument(MutableDocument({
-          'type': 'meal',
-          'dishes': [dish.id],
-          'group': 'fam',
-          'date': '2021-01-15',
-        }));
+        db
+          ..saveDocument(dish)
+          ..saveDocument(MutableDocument({
+            'type': 'meal',
+            'dishes': [dish.id],
+            'group': 'fam',
+            'date': '2020-06-30',
+          }))
+          ..saveDocument(MutableDocument({
+            'type': 'meal',
+            'dishes': [dish.id],
+            'group': 'fam',
+            'date': '2021-01-15',
+          }));
 
         final q = SyncQuery.fromN1ql(
           db,
-          r'''
+          '''
           SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
           FROM _ AS dish
           JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
@@ -585,13 +591,11 @@ void main() {
           ''',
         );
 
+        // ignore: avoid_print
         print(q.explain());
 
-        var resultSet = q.execute();
-
-        for (final result in resultSet) {
-          print(result);
-        }
+        // ignore: avoid_print
+        q.execute().forEach(print);
       });
     });
   });

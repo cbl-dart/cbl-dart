@@ -12,19 +12,19 @@ void main() {
       DatabaseChange a;
       DatabaseChange b;
 
-      a = DatabaseChange(database, ['A']);
+      a = DatabaseChange(database, const ['A']);
       expect(a, a);
 
-      b = DatabaseChange(database, ['A']);
+      b = DatabaseChange(database, const ['A']);
       expect(a, b);
 
-      b = DatabaseChange(_Database(), ['B']);
+      b = DatabaseChange(_Database(), const ['B']);
       expect(b, isNot(a));
     });
 
     test('toString', () {
       expect(
-        DatabaseChange(_Database(), ['A']).toString(),
+        DatabaseChange(_Database(), const ['A']).toString(),
         'DatabaseChange(database: _Database(), documentIds: [A])',
       );
     });

@@ -187,6 +187,8 @@ void main() {
 
       test('set values', () {
         final dictionary = MutableDictionary({'a': true});
+
+        // ignore: cascade_invocations
         dictionary.setValue('x', key: 'a');
         expect(dictionary.value('a'), 'x');
         dictionary.setString('a', key: 'a');
@@ -213,20 +215,19 @@ void main() {
       test('setData', () {
         final date = DateTime.now();
         final blob = Blob.fromData('', Uint8List(0));
-        final dictionary = MutableDictionary();
-
-        dictionary.setData({
-          'value': 'x',
-          'string': 'a',
-          'int': 1,
-          'float': .2,
-          'number': 3,
-          'bool': true,
-          'date': date,
-          'blob': blob,
-          'array': [false],
-          'dictionary': {'key': 'value'},
-        });
+        final dictionary = MutableDictionary()
+          ..setData({
+            'value': 'x',
+            'string': 'a',
+            'int': 1,
+            'float': .2,
+            'number': 3,
+            'bool': true,
+            'date': date,
+            'blob': blob,
+            'array': [false],
+            'dictionary': {'key': 'value'},
+          });
 
         expect(dictionary.toPlainMap(), {
           'value': 'x',
@@ -247,9 +248,9 @@ void main() {
 
 Dictionary immutableDictionary([Map<String, Object?>? data]) {
   final array = MutableDictionary(data) as MutableDictionaryImpl;
-  final encoder = fl.FleeceEncoder();
-  // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-  encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+  final encoder = fl.FleeceEncoder()
+    // FleeceEncoderContext is needed to compare unsaved Blobs in test.
+    ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(
@@ -257,5 +258,6 @@ Dictionary immutableDictionary([Map<String, Object?>? data]) {
     context: MContext(),
     isMutable: false,
   );
+  // ignore: cast_nullable_to_non_nullable
   return root.asNative as Dictionary;
 }

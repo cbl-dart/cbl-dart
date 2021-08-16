@@ -21,8 +21,11 @@ class MArray extends MCollection {
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
 
   MArray.asChild(MValue slot, MCollection parent, {bool? isMutable})
-      : _array = (slot.value as CollectionFLValue).value.cast(),
+      :
+        // ignore: cast_nullable_to_non_nullable
+        _array = (slot.value as CollectionFLValue).value.cast(),
         _values = List<MValue?>.filled(
+          // ignore: cast_nullable_to_non_nullable
           (slot.value as CollectionFLValue).length,
           null,
           growable: true,
@@ -41,7 +44,9 @@ class MArray extends MCollection {
   MValue? get(int index) {
     assert(index >= 0);
 
-    if (index >= _values.length) return null;
+    if (index >= _values.length) {
+      return null;
+    }
 
     return _values[index] ??= _loadMValue(index)!;
   }
@@ -112,8 +117,9 @@ class MArray extends MCollection {
     }
 
     mutate();
-    _values.forEach((value) => value?.removeFromParent());
-    _values.clear();
+    _values
+      ..forEach((value) => value?.removeFromParent())
+      ..clear();
   }
 
   @override
@@ -141,7 +147,9 @@ class MArray extends MCollection {
   Iterable<MValue> get values => _values.whereNotNull();
 
   void _populateValues() {
-    if (_array == null) return;
+    if (_array == null) {
+      return;
+    }
 
     var i = 0;
     for (final value in _values) {
@@ -154,7 +162,9 @@ class MArray extends MCollection {
 
   MValue? _loadMValue(int index) {
     final array = _array;
-    if (array == null) return null;
+    if (array == null) {
+      return null;
+    }
 
     return context!.decoder
         .loadValueFromArray(array, index)

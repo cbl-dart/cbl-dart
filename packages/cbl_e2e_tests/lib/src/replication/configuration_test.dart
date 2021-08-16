@@ -25,20 +25,19 @@ void main() {
       expect(config.pushFilter, isNull);
       expect(config.pullFilter, isNull);
       expect(config.conflictResolver, isNull);
-      expect(config.heartbeat, Duration(seconds: 300));
+      expect(config.heartbeat, const Duration(seconds: 300));
       expect(config.maxRetries, 9);
-      expect(config.maxRetryWaitTime, Duration(seconds: 300));
+      expect(config.maxRetryWaitTime, const Duration(seconds: 300));
     });
 
     test('set validated properties', () {
       final config = ReplicatorConfiguration(
         database: _Database(),
         target: UrlEndpoint(Uri.parse('ws://host/db')),
-      );
+      )..heartbeat = const Duration(seconds: 1);
 
-      config.heartbeat = Duration(seconds: 1);
-      expect(config.heartbeat, Duration(seconds: 1));
-      expect(() => config.heartbeat = Duration(), throwsArgumentError);
+      expect(config.heartbeat, const Duration(seconds: 1));
+      expect(() => config.heartbeat = Duration.zero, throwsArgumentError);
 
       config.maxRetries = 0;
       expect(config.maxRetries, 0);
@@ -52,9 +51,12 @@ void main() {
 
       expect(() => config.maxRetries = -1, throwsArgumentError);
 
-      config.maxRetryWaitTime = Duration(seconds: 1);
-      expect(config.maxRetryWaitTime, Duration(seconds: 1));
-      expect(() => config.maxRetryWaitTime = Duration(), throwsArgumentError);
+      config.maxRetryWaitTime = const Duration(seconds: 1);
+      expect(config.maxRetryWaitTime, const Duration(seconds: 1));
+      expect(
+        () => config.maxRetryWaitTime = Duration.zero,
+        throwsArgumentError,
+      );
     });
 
     test('from', () {
@@ -71,9 +73,9 @@ void main() {
         pushFilter: (document, flags) => true,
         pullFilter: (document, flags) => true,
         conflictResolver: ConflictResolver.from((_) {}),
-        heartbeat: Duration(seconds: 1),
+        heartbeat: const Duration(seconds: 1),
         maxRetries: 0,
-        maxRetryWaitTime: Duration(seconds: 1),
+        maxRetryWaitTime: const Duration(seconds: 1),
       );
 
       final copy = ReplicatorConfiguration.from(source);
@@ -110,6 +112,7 @@ void main() {
         'replicatorType: pushAndPull, '
         'heartbeat: 300, '
         'maxRetries: 9, '
+        // ignore: missing_whitespace_between_adjacent_strings
         'maxRetryWaitTime: 300'
         ')',
       );
@@ -127,9 +130,9 @@ void main() {
         pushFilter: (document, flags) => true,
         pullFilter: (document, flags) => true,
         conflictResolver: ConflictResolver.from((_) {}),
-        heartbeat: Duration(seconds: 1),
+        heartbeat: const Duration(seconds: 1),
         maxRetries: 0,
-        maxRetryWaitTime: Duration(seconds: 1),
+        maxRetryWaitTime: const Duration(seconds: 1),
       );
 
       expect(
@@ -139,7 +142,8 @@ void main() {
         'target: UrlEndpoint(ws://host/db), '
         'replicatorType: pull, '
         'CONTINUOUS, '
-        'authenticator: SessionAuthenticator(sessionId: ******nId, cookieName: SyncGatewaySession), '
+        'authenticator: SessionAuthenticator(sessionId: ******nId, '
+        'cookieName: SyncGatewaySession), '
         'PINNED-SERVER-CERTIFICATE, '
         'headers: {Client: cbl-dart, Authentication: REDACTED}, '
         'channels: [A], '
@@ -149,6 +153,7 @@ void main() {
         'CUSTOM-CONFLICT-RESOLVER, '
         'heartbeat: 1, '
         'maxRetries: 0, '
+        // ignore: missing_whitespace_between_adjacent_strings
         'maxRetryWaitTime: 1'
         ')',
       );

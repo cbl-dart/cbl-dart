@@ -74,12 +74,10 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   CblObject<CBLBlob>? _getBlob(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final blobPointer = runNativeCalls(() {
-      return _databaseBindings.getBlob(
-        database.native.pointer,
-        dict.native.pointer.cast(),
-      );
-    });
+    final blobPointer = runNativeCalls(() => _databaseBindings.getBlob(
+          database.native.pointer,
+          dict.native.pointer.cast(),
+        ));
 
     return blobPointer?.let((it) => CblObject(
           it,
@@ -105,6 +103,7 @@ Future<CblObject<CBLBlob>> _createBlobFromStream(
       _writeStreamBindings.createBlobWithStream(contentType, writeStream),
       debugName: '_createBlobFromStream',
     );
+    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     _writeStreamBindings.close(writeStream);
     rethrow;
@@ -157,9 +156,11 @@ class _BlobReadStreamController
 
         controller.add(buffer);
       }
+      // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {
-      controller.addError(error, stackTrace);
-      controller.close();
+      controller
+        ..addError(error, stackTrace)
+        ..close();
     }
   }
 

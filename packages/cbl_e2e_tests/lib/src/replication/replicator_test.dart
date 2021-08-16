@@ -22,8 +22,6 @@ void main() {
       final repl = SyncReplicator(ReplicatorConfiguration(
         database: db,
         target: UrlEndpoint(testSyncGatewayUrl),
-        replicatorType: ReplicatorType.pushAndPull,
-        continuous: false,
         authenticator: BasicAuthenticator(
           username: 'user',
           password: 'password',
@@ -36,11 +34,12 @@ void main() {
         pushFilter: (document, isDeleted) => true,
         conflictResolver:
             ConflictResolver.from((conflict) => conflict.localDocument),
-      ));
-
-      repl.start();
+      ))
+        ..start();
 
       await preReplicatorStopDelay();
+
+      await repl.close();
     });
 
     test('config returns copy', () {
@@ -60,17 +59,19 @@ void main() {
       final pushDb = openSyncTestDb('ContinuousReplication-Push');
       final pullDb = openSyncTestDb('ContinuousReplication-Pull');
 
-      final pusher = pushDb.createTestReplicator(
-        replicatorType: ReplicatorType.push,
-        continuous: true,
-      );
-      pusher.start();
+      pushDb
+          .createTestReplicator(
+            replicatorType: ReplicatorType.push,
+            continuous: true,
+          )
+          .start();
 
-      final puller = pullDb.createTestReplicator(
-        replicatorType: ReplicatorType.pull,
-        continuous: true,
-      );
-      puller.start();
+      pullDb
+          .createTestReplicator(
+            replicatorType: ReplicatorType.pull,
+            continuous: true,
+          )
+          .start();
 
       final timestamp = DateTime.now().microsecondsSinceEpoch;
       final doc =
@@ -93,11 +94,12 @@ void main() {
     test('listen to query while replicator is pulling', () {
       final pullDb = openSyncTestDb('ContinuousReplication-Pull');
 
-      final puller = pullDb.createTestReplicator(
-        replicatorType: ReplicatorType.pull,
-        continuous: true,
-      );
-      puller.start();
+      pullDb
+          .createTestReplicator(
+            replicatorType: ReplicatorType.pull,
+            continuous: true,
+          )
+          .start();
 
       pullDb.watchAllIds().take(1).listen((event) {});
     });
@@ -206,7 +208,7 @@ void main() {
         final pusher = pushDb.createTestReplicator(
           replicatorType: ReplicatorType.push,
           pushFilter: (document, flags) {
-            throw 'Push failed';
+            throw Exception();
           },
         );
 
@@ -223,7 +225,7 @@ void main() {
       }, (error, _) {
         uncaughtError = error;
       });
-      expect(uncaughtError, 'Push failed');
+      expect(uncaughtError, isException);
     });
 
     test('use pullFilter to filter pulled documents', () async {
@@ -276,7 +278,7 @@ void main() {
         final puller = pullDb.createTestReplicator(
           replicatorType: ReplicatorType.pull,
           pullFilter: (document, flags) {
-            throw 'Pull failed';
+            throw Exception();
           },
         );
 
@@ -287,7 +289,7 @@ void main() {
       }, (error, _) {
         uncaughtError = error;
       });
-      expect(uncaughtError, 'Pull failed');
+      expect(uncaughtError, isException);
     });
 
     test('custom conflict resolver', () async {
@@ -330,7 +332,7 @@ void main() {
         final dbA = openSyncTestDb('ConflictResolver-Exception-Handling-A');
         final replicatorA = dbA.createTestReplicator(
           conflictResolver: expectAsync1((conflict) {
-            throw 'Conflict resolver failed';
+            throw Exception();
           }),
         );
 
@@ -347,7 +349,7 @@ void main() {
       }, (error, _) {
         uncaughtError = error;
       });
-      expect(uncaughtError, 'Conflict resolver failed');
+      expect(uncaughtError, isException);
     });
 
     test('status returns the current status of the replicator', () {

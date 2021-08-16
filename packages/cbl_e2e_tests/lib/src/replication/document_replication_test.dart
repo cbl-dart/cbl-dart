@@ -16,6 +16,7 @@ void main() {
         docRep.toString(),
         'DocumentReplication('
         'replicator: _Replicator(), '
+        // ignore: missing_whitespace_between_adjacent_strings
         'PUSH, [ReplicatedDocument(id)]'
         ')',
       );

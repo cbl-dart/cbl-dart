@@ -108,7 +108,9 @@ void main() {
 
     test('contains', () {
       final result = testResult(['a'], [true]);
+      // ignore: iterable_contains_unrelated_type
       expect(result.contains(0), isTrue);
+      // ignore: iterable_contains_unrelated_type
       expect(result.contains(1), isFalse);
       expect(result.contains('a'), isTrue);
       expect(result.contains('b'), isFalse);
@@ -195,15 +197,14 @@ void main() {
       });
 
       test('access column by name', () {
-        var doc = MutableDocument.withId('ResultSetColumnByName', {
+        final doc = MutableDocument.withId('ResultSetColumnByName', {
           'a': {'b': true}
         });
         db.saveDocument(doc);
         final q = SyncQuery.fromN1ql(
           db,
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
-        );
-        q.parameters = Parameters({'ID': doc.id});
+        )..parameters = Parameters({'ID': doc.id});
 
         final result = q.execute().first;
         expect(result.keys, ['alias', 'b', r'$1']);
@@ -219,8 +220,7 @@ void main() {
         final q = SyncQuery.fromN1ql(
           db,
           r'SELECT META().id FROM _ WHERE META().id = $ID',
-        );
-        q.parameters = Parameters({'ID': doc.id});
+        )..parameters = Parameters({'ID': doc.id});
 
         final result = q.execute().first;
         expect(result.string(0), doc.id);
@@ -231,9 +231,10 @@ void main() {
 
 Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final values = MutableArray(columnValues) as MutableArrayImpl;
-  final encoder = fl.FleeceEncoder();
-  // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-  encoder.extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+  final encoder = fl.FleeceEncoder()
+    // FleeceEncoderContext is needed to compare unsaved Blobs in test.
+    ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+
   final encodingResult = values.encodeTo(encoder);
   assert(encodingResult is! Future);
   return ResultImpl.fromValuesData(

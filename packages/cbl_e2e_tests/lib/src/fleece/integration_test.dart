@@ -1,3 +1,5 @@
+// ignore_for_file: cast_nullable_to_non_nullable
+
 import 'package:cbl/src/fleece/fleece.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
@@ -11,7 +13,7 @@ void main() {
 
   group('Fleece Integration', () {
     // The previous delegate needs to be restored because
-    // `CouchbaseLite.initnly called once for all tests, which is
+    // `CouchbaseLite.init called once for all tests, which is
     // where the MDelegate implementation for CouchbaseList is set up.
     MDelegate? previousDelegate;
 
@@ -113,10 +115,9 @@ void main() {
 
       test('inserting in the middle after shadowing original value', () {
         final root = testMRoot([1, 2]);
-        final dict = root.asNative as MArray;
-
-        dict.set(0, null);
-        dict.insert(1, null);
+        (root.asNative as MArray)
+          ..set(0, null)
+          ..insert(1, null);
 
         expect(root.encode(), json([null, null, 2]));
       });
@@ -128,16 +129,16 @@ void main() {
 
       test('encodeTo mutated existing array ', () {
         final root = testMRoot([null]);
-        final array = root.asNative as MArray;
-        array.insert(0, true);
-        array.append(false);
+        (root.asNative as MArray)
+          ..insert(0, true)
+          ..append(false);
         expect(root.encode(), json([true, null, false]));
       });
 
       test('encodeTo new array ', () {
         final root = testMRoot([null]);
-        final array = root.asNative as MArray;
-        array.append(MArray()..append(true));
+        (root.asNative as MArray).append(MArray()..append(true));
+
         expect(
           root.encode(),
           json([
@@ -157,6 +158,8 @@ void main() {
         dict.remove('a');
         expect(dict.length, 0);
         dict.set('a', null);
+
+        // ignore: cascade_invocations
         dict.clear();
         expect(dict.length, 0);
       });
@@ -170,6 +173,8 @@ void main() {
         dict.remove('a');
         expect(dict.length, 1);
         dict.set('a', null);
+
+        // ignore: cascade_invocations
         dict.clear();
         expect(dict.length, 0);
       });
@@ -220,15 +225,15 @@ void main() {
 
       test('encodeTo mutated existing dict ', () {
         final root = testMRoot({'a': null});
-        final dict = root.asNative as MDict;
-        dict.set('b', true);
+        (root.asNative as MDict).set('b', true);
+
         expect(root.encode(), json({'a': null, 'b': true}));
       });
 
       test('encodeTo new dict', () {
         final root = testMRoot({'a': null});
-        final dict = root.asNative as MDict;
-        dict.set('b', MDict()..set('c', true));
+        (root.asNative as MDict).set('b', MDict()..set('c', true));
+
         expect(
           root.encode(),
           json({
@@ -249,8 +254,8 @@ void main() {
 
       test('iterable for mutated dict', () {
         final root = testMRoot({'a': null});
-        final dict = root.asNative as MDict;
-        dict.set('b', true);
+        final dict = (root.asNative as MDict)..set('b', true);
+
         expect(
           Map.fromEntries(dict.iterable),
           {

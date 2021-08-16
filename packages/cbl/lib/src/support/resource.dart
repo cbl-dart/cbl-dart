@@ -165,7 +165,9 @@ mixin ClosableResourceMixin implements ClosableResource, AbstractResource {
       })();
 
   void _checkIsNotClosed() {
-    if (isClosed) throw StateError('Resource has already been closed: $this');
+    if (isClosed) {
+      throw StateError('Resource has already been closed: $this');
+    }
   }
 }
 
@@ -201,6 +203,7 @@ abstract class NativeResource<T extends NativeType> {
   final NativeObject<T> native;
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is NativeResource &&
@@ -208,6 +211,7 @@ abstract class NativeResource<T extends NativeType> {
           native == other.native;
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => native.hashCode;
 }
 

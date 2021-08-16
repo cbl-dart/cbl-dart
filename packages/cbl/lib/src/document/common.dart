@@ -76,6 +76,7 @@ class _DefaultCblConversions implements CblConversions {
   Object? toPlainObject([Object? object]) => object;
 }
 
+// ignore: one_member_abstracts
 abstract class FleeceEncodable {
   FutureOr<void> encodeTo(FleeceEncoder encoder);
 }

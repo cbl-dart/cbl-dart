@@ -12,7 +12,7 @@ final testSyncGatewayUrl = Uri.parse('ws://localhost:4984/db');
 /// it makes a connection to the server after it was stopped, causing a crash.
 /// This is a bug in Couchbase Lite.
 Future<void> preReplicatorStopDelay() =>
-    Future<void>.delayed(Duration(milliseconds: 500));
+    Future<void>.delayed(const Duration(milliseconds: 500));
 
 extension ReplicatorUtilsDatabaseExtension on SyncDatabase {
   /// Creates a replicator which is configured with the test sync gateway
@@ -81,9 +81,10 @@ extension ReplicatorUtilsExtension on SyncReplicator {
   /// you can receive status changes from before the current status and wont be
   /// able to put them and the current status into the correct order.
   Stream<ReplicatorStatus> pollStatus() async* {
+    // ignore: literal_only_boolean_expressions
     while (true) {
       yield status;
-      await Future<void>.delayed(Duration(milliseconds: 50));
+      await Future<void>.delayed(const Duration(milliseconds: 50));
     }
   }
 
@@ -140,7 +141,7 @@ extension ReplicatorUtilsExtension on SyncReplicator {
     await pollStatus().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
-      var isMatch = _matches(status, statusMatcher);
+      final isMatch = _matches(status, statusMatcher);
       if (!calledDriveFn && !isMatch) {
         calledDriveFn = true;
         await fn();
@@ -164,7 +165,7 @@ extension ReplicatorUtilsExtension on SyncReplicator {
     await pollStatus().asyncMap((status) async {
       expect(status, validStatusMatcher);
 
-      var isMatch = _matches(status, statusMatcher);
+      final isMatch = _matches(status, statusMatcher);
       if (isMatch) {
         await fn();
       }

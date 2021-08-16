@@ -21,7 +21,9 @@ abstract class MDelegate {
 class SimpleMDelegate extends MDelegate {
   @override
   MCollection? collectionFromNative(Object? native) {
-    if (native is MCollection) return native;
+    if (native is MCollection) {
+      return native;
+    }
   }
 
   @override

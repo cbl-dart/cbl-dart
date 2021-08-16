@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 import 'dart:ffi';
 
@@ -41,7 +43,7 @@ T keepAlive<P extends NativeType, T>(
   return result;
 }
 
-final _keepAlive = keepAlive;
+const _keepAlive = keepAlive;
 
 @pragma('vm:never-inline')
 void _keepAliveUntil(Object? object) {}
@@ -140,9 +142,9 @@ class CblObject<T extends NativeType> extends NativeObject<T> {
   }) : super(pointer) {
     cblBindings.base.bindCBLRefCountedToDartObject(
       this,
-      pointer.cast(),
-      !adopt,
-      _filterDebugRefCountedName(debugName),
+      refCounted: pointer.cast(),
+      retain: !adopt,
+      debugName: _filterDebugRefCountedName(debugName),
     );
   }
 }
@@ -204,17 +206,16 @@ class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
     Pointer<T> pointer, {
     this.isRefCounted = true,
     bool adopt = false,
-  }) : super(pointer) {
-    assert(
-      !adopt || isRefCounted,
-      'only an object which is ref counted can be adopted',
-    );
-
+  })  : assert(
+          !adopt || isRefCounted,
+          'only an object which is ref counted can be adopted',
+        ),
+        super(pointer) {
     if (isRefCounted) {
       cblBindings.fleece.value.bindToDartObject(
         this,
-        pointer.cast(),
-        !adopt,
+        value: pointer.cast(),
+        retain: !adopt,
       );
     }
   }

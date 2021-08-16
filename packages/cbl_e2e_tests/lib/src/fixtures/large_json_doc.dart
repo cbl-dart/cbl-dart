@@ -1,3 +1,4 @@
+// ignore: leading_newlines_in_multiline_strings
 const largeJsonDoc = r'''[
   {
     "_id": "6096ca433633dd805e942030",

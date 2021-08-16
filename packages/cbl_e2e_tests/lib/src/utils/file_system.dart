@@ -7,7 +7,7 @@ extension DirectoryExt on Directory {
     final entries = await list().toList();
     final file = entries.whereType<File>().firstWhereOrNull(fn);
     if (file is File) {
-      return await file.readAsString();
+      return file.readAsString();
     }
   }
 

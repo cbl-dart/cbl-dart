@@ -14,12 +14,15 @@ void main() {
     late final bindings = CBLBindings.instance.asyncCallback;
 
     test('propagates error to Zone in which it was created', () {
-      final callback = runZonedGuarded(() {
-        return AsyncCallback(expectAsync1((_) {
-          throw false;
-        }), debugName: 'Test', debug: true);
-      }, expectAsync2((error, stackTrace) {
-        expect(error, false);
+      final callback = runZonedGuarded(
+          () => AsyncCallback(
+                expectAsync1((_) {
+                  throw Exception();
+                }),
+                debugName: 'Test',
+                debug: true,
+              ), expectAsync2((error, stackTrace) {
+        expect(error, isException);
       }))!;
 
       addTearDown(callback.close);

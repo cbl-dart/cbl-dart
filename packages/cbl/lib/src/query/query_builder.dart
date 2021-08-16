@@ -15,11 +15,13 @@ abstract class QueryBuilder {
   /// {@template cbl.QueryBuilder.create}
   /// Creates an [AsyncQueryBuilder] for building [AsyncQuery]s.
   /// {@endtemplate}
+  // ignore: prefer_constructors_over_static_methods
   static AsyncQueryBuilder create() => const AsyncQueryBuilder();
 
   /// {@template cbl.QueryBuilder.createSync}
   /// Creates a [SyncQueryBuilder] for building [SyncQuery]s.
   /// {@endtemplate}
+  // ignore: prefer_constructors_over_static_methods
   static SyncQueryBuilder createSync() => const SyncQueryBuilder();
 
   /// Starts a new query and defines the selected columns.
@@ -92,7 +94,7 @@ class SyncQueryBuilder implements QueryBuilder {
 
   @override
   SyncSelect selectAll(Iterable<SelectResultInterface> results) =>
-      SyncSelectImpl(results.cast(), false);
+      SyncSelectImpl(results.cast(), distinct: false);
 
   @override
   SyncSelect selectDistinct(
@@ -122,7 +124,7 @@ class SyncQueryBuilder implements QueryBuilder {
 
   @override
   SyncSelect selectAllDistinct(Iterable<SelectResultInterface> results) =>
-      SyncSelectImpl(results.cast(), true);
+      SyncSelectImpl(results.cast(), distinct: true);
 }
 
 /// The [QueryBuilder] for building [AsyncQuery]s.
@@ -158,7 +160,7 @@ class AsyncQueryBuilder implements QueryBuilder {
 
   @override
   AsyncSelect selectAll(Iterable<SelectResultInterface> results) =>
-      AsyncSelectImpl(results, false);
+      AsyncSelectImpl(results, distinct: false);
 
   @override
   AsyncSelect selectDistinct(
@@ -188,7 +190,7 @@ class AsyncQueryBuilder implements QueryBuilder {
 
   @override
   AsyncSelect selectAllDistinct(Iterable<SelectResultInterface> results) =>
-      AsyncSelectImpl(results, true);
+      AsyncSelectImpl(results, distinct: true);
 }
 
 mixin BuilderQueryMixin on AbstractResource {

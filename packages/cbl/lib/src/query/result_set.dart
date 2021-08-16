@@ -13,6 +13,7 @@ import 'query.dart';
 import 'result.dart';
 
 /// A set of [Result]s which is returned when executing a [Query].
+// ignore: one_member_abstracts
 abstract class ResultSet {
   /// Returns a stream which consumes this result set and emits its results.
   ///

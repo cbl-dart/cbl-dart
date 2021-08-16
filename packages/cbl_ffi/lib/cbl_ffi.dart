@@ -2,7 +2,7 @@ export 'src/async_callback.dart';
 export 'src/base.dart' hide OptionIterable;
 export 'src/bindings.dart';
 export 'src/blob.dart';
-export 'src/database.dart' hide CBLConcurrencyControlExt;
+export 'src/database.dart';
 export 'src/document.dart';
 export 'src/fleece.dart' hide FLErrorCodeIntExt;
 export 'src/libraries.dart';

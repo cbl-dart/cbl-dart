@@ -3,6 +3,7 @@ import '../having.dart';
 import '../query.dart';
 
 /// Interface for creating and chaining `HAVING` clauses.
+// ignore: one_member_abstracts
 abstract class HavingRouter {
   /// Creates and returns a `HAVING` clause query component with the given
   /// [expression].

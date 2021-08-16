@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -232,12 +234,13 @@ class ResultImpl with IterableMixin<String> implements Result {
   }
 
   @override
+  // ignore: avoid_renaming_method_parameters
   bool contains(Object? nameOrIndex) {
     _checknameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return nameOrIndex >= 0 && nameOrIndex < _columnNames.length;
     }
-    return _columnNames.contains(nameOrIndex as String);
+    return _columnNames.contains(nameOrIndex);
   }
 
   @override
@@ -278,6 +281,8 @@ class ResultImpl with IterableMixin<String> implements Result {
         isMutable: false,
       );
     }
+
+    // ignore: cast_nullable_to_non_nullable
     return root.asNative as ArrayImpl;
   }
 

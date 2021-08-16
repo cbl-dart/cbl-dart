@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: cast_nullable_to_non_nullable, avoid_setters_without_getters, one_member_abstracts
+
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';

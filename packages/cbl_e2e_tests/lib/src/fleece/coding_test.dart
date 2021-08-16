@@ -29,15 +29,16 @@ void main() {
       expect(decoder.sharedStrings.hasString('................'), isFalse);
     });
 
-    test('Decoding Benchmark', () {
-      return runBenchmarks(
+    test(
+      'Decoding Benchmark',
+      () => runBenchmarks(
         [
           JsonInDartDecodingBenchmark(),
           FleeceDecodingBenchmark(),
         ],
         repetitions: 250,
-      );
-    });
+      ),
+    );
 
     group('FleeceDecoder', () {
       test('dumpData shows the internal structure of Fleece data', () {
@@ -206,6 +207,7 @@ void main() {
         }
         ''',
       );
+      // ignore: cast_nullable_to_non_nullable
       final value = decoder.loadValueFromData(data) as CollectionFLValue;
 
       expect(
@@ -254,16 +256,18 @@ void main() {
         final decoder = FleeceDecoder();
         final encoder = FleeceEncoder()..writeDartObject([true, 'a']);
         final array =
+            // ignore: cast_nullable_to_non_nullable
             decoder.loadValueFromData(encoder.finish()) as CollectionFLValue;
         final simpleValue = decoder.loadValueFromArray(array.value.cast(), 0)!;
         final sliceValue = decoder.loadValueFromArray(array.value.cast(), 1)!;
 
-        encoder.reset();
-        encoder.beginArray(3);
-        encoder.writeLoadedValue(array);
-        encoder.writeLoadedValue(simpleValue);
-        encoder.writeLoadedValue(sliceValue);
-        encoder.endArray();
+        encoder
+          ..reset()
+          ..beginArray(3)
+          ..writeLoadedValue(array)
+          ..writeLoadedValue(simpleValue)
+          ..writeLoadedValue(sliceValue)
+          ..endArray();
 
         expect(decoder.dataToDartObject(encoder.finish().asUint8List()), [
           [true, 'a'],
@@ -274,22 +278,21 @@ void main() {
 
       test('write values', () {
         final decoder = FleeceDecoder();
-        final encoder = FleeceEncoder();
-
-        encoder.beginArray(0);
-        encoder.writeNull();
-        encoder.writeBool(true);
-        encoder.writeBool(false);
-        encoder.writeInt(41);
-        encoder.writeDouble(3.14);
-        encoder.writeString('a');
-        encoder.beginArray(0);
-        encoder.endArray();
-        encoder.beginDict(0);
-        encoder.writeKey('a');
-        encoder.writeBool(true);
-        encoder.endDict();
-        encoder.endArray();
+        final encoder = FleeceEncoder()
+          ..beginArray(0)
+          ..writeNull()
+          ..writeBool(true)
+          ..writeBool(false)
+          ..writeInt(41)
+          ..writeDouble(3.14)
+          ..writeString('a')
+          ..beginArray(0)
+          ..endArray()
+          ..beginDict(0)
+          ..writeKey('a')
+          ..writeBool(true)
+          ..endDict()
+          ..endArray();
 
         final data = encoder.finish();
         final root = decoder.loadValueFromData(data)!;
@@ -334,7 +337,7 @@ class JsonInDartDecodingBenchmark extends DecodingBenchmark {
 
   @override
   FutureOr<void> setUp() {
-    _decoder = JsonDecoder();
+    _decoder = const JsonDecoder();
   }
 
   @override

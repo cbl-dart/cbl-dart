@@ -55,16 +55,18 @@ class LibraryConfiguration {
       }
       return DynamicLibrary.open(name);
     }
-    if (process == true) return DynamicLibrary.process();
+    if (process == true) {
+      return DynamicLibrary.process();
+    }
     return DynamicLibrary.executable();
   }
 }
 
 class Libraries {
   Libraries({
-    this.enterpriseEdition = false,
     required LibraryConfiguration cbl,
     required LibraryConfiguration cblDart,
+    this.enterpriseEdition = false,
   })  : _cbl = cbl,
         _cblDart = cblDart;
 

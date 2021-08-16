@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:math';
 
@@ -21,10 +23,10 @@ Future<void> runBenchmarks(
     throw ArgumentError.value(benchmarks, 'benchmarks', 'must not be empty');
   }
 
-  final formattingDecimalPoints = 2;
-  final middleLineDeco = '\u251c\u2500\u25B6';
-  final lastLineDeco = '\u2514\u2500\u25B6';
-  final singleLineDeco = '\u2576\u2500\u25B6';
+  const formattingDecimalPoints = 2;
+  const middleLineDeco = '\u251c\u2500\u25B6';
+  const lastLineDeco = '\u2514\u2500\u25B6';
+  const singleLineDeco = '\u2576\u2500\u25B6';
 
   final stopwatch = Stopwatch();
 
@@ -67,7 +69,7 @@ Future<void> runBenchmarks(
 
   print('Relative Results:');
   for (final benchmark in benchmarks) {
-    final relativeTime = (results[benchmark]! / fastestTime);
+    final relativeTime = results[benchmark]! / fastestTime;
     final relativeTimeStr =
         relativeTime.toStringAsFixed(formattingDecimalPoints);
     print('$singleLineDeco ${benchmark.description}: ${relativeTimeStr}x');
