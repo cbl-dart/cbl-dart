@@ -251,17 +251,17 @@ class SliceBindings extends Bindings {
 
 class FLSlot extends Opaque {}
 
-typedef FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
-typedef FLSlot_SetNull = void Function(Pointer<FLSlot> slot);
+typedef _FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
+typedef _FLSlot_SetNull = void Function(Pointer<FLSlot> slot);
 
-typedef FLSlot_SetBool_C = Void Function(Pointer<FLSlot> slot, Uint8 value);
-typedef FLSlot_SetBool = void Function(Pointer<FLSlot> slot, int value);
+typedef _FLSlot_SetBool_C = Void Function(Pointer<FLSlot> slot, Uint8 value);
+typedef _FLSlot_SetBool = void Function(Pointer<FLSlot> slot, int value);
 
-typedef FLSlot_SetInt_C = Void Function(Pointer<FLSlot> slot, Int64 value);
-typedef FLSlot_SetInt = void Function(Pointer<FLSlot> slot, int value);
+typedef _FLSlot_SetInt_C = Void Function(Pointer<FLSlot> slot, Int64 value);
+typedef _FLSlot_SetInt = void Function(Pointer<FLSlot> slot, int value);
 
-typedef FLSlot_SetDouble_C = Void Function(Pointer<FLSlot> slot, Double value);
-typedef FLSlot_SetDouble = void Function(Pointer<FLSlot> slot, double value);
+typedef _FLSlot_SetDouble_C = Void Function(Pointer<FLSlot> slot, Double value);
+typedef _FLSlot_SetDouble = void Function(Pointer<FLSlot> slot, double value);
 
 typedef _CBLDart_FLSlot_SetString_C = Void Function(
   Pointer<FLSlot> slot,
@@ -272,57 +272,58 @@ typedef _CBLDart_FLSlot_SetString = void Function(
   FLString value,
 );
 
-typedef FLSlot_SetData_C = Void Function(
+typedef _FLSlot_SetData_C = Void Function(
   Pointer<FLSlot> slot,
   FLSlice value,
 );
-typedef FLSlot_SetData = void Function(
+typedef _FLSlot_SetData = void Function(
   Pointer<FLSlot> slot,
   FLSlice value,
 );
 
-typedef FLSlot_SetValue_C = Void Function(
+typedef _FLSlot_SetValue_C = Void Function(
   Pointer<FLSlot> slot,
   Pointer<FLValue> value,
 );
-typedef FLSlot_SetValue = void Function(
+typedef _FLSlot_SetValue = void Function(
   Pointer<FLSlot> slot,
   Pointer<FLValue> value,
 );
 
 class SlotBindings extends Bindings {
   SlotBindings(Bindings parent) : super(parent) {
-    _setNull = libs.cbl.lookupFunction<FLSlot_SetNull_C, FLSlot_SetNull>(
+    _setNull = libs.cbl.lookupFunction<_FLSlot_SetNull_C, _FLSlot_SetNull>(
       'FLSlot_SetNull',
     );
-    _setBool = libs.cbl.lookupFunction<FLSlot_SetBool_C, FLSlot_SetBool>(
+    _setBool = libs.cbl.lookupFunction<_FLSlot_SetBool_C, _FLSlot_SetBool>(
       'FLSlot_SetBool',
     );
-    _setInt = libs.cbl.lookupFunction<FLSlot_SetInt_C, FLSlot_SetInt>(
+    _setInt = libs.cbl.lookupFunction<_FLSlot_SetInt_C, _FLSlot_SetInt>(
       'FLSlot_SetInt',
     );
-    _setDouble = libs.cbl.lookupFunction<FLSlot_SetDouble_C, FLSlot_SetDouble>(
+    _setDouble =
+        libs.cbl.lookupFunction<_FLSlot_SetDouble_C, _FLSlot_SetDouble>(
       'FLSlot_SetDouble',
     );
     _setString = libs.cblDart
         .lookupFunction<_CBLDart_FLSlot_SetString_C, _CBLDart_FLSlot_SetString>(
       'CBLDart_FLSlot_SetString',
     );
-    _setData = libs.cblDart.lookupFunction<FLSlot_SetData_C, FLSlot_SetData>(
+    _setData = libs.cblDart.lookupFunction<_FLSlot_SetData_C, _FLSlot_SetData>(
       'FLSlot_SetData',
     );
-    _setValue = libs.cbl.lookupFunction<FLSlot_SetValue_C, FLSlot_SetValue>(
+    _setValue = libs.cbl.lookupFunction<_FLSlot_SetValue_C, _FLSlot_SetValue>(
       'FLSlot_SetValue',
     );
   }
 
-  late final FLSlot_SetNull _setNull;
-  late final FLSlot_SetBool _setBool;
-  late final FLSlot_SetInt _setInt;
-  late final FLSlot_SetDouble _setDouble;
+  late final _FLSlot_SetNull _setNull;
+  late final _FLSlot_SetBool _setBool;
+  late final _FLSlot_SetInt _setInt;
+  late final _FLSlot_SetDouble _setDouble;
   late final _CBLDart_FLSlot_SetString _setString;
-  late final FLSlot_SetData _setData;
-  late final FLSlot_SetValue _setValue;
+  late final _FLSlot_SetData _setData;
+  late final _FLSlot_SetValue _setValue;
 
   void setNull(Pointer<FLSlot> slot) {
     _setNull(slot);
@@ -385,9 +386,9 @@ typedef _CBLDart_FLDoc_BindToDartObject = void Function(
   Pointer<FLDoc> doc,
 );
 
-typedef FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
+typedef _FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
 
-typedef FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
+typedef _FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
 
 class DocBindings extends Bindings {
   DocBindings(Bindings parent) : super(parent) {
@@ -404,10 +405,10 @@ class DocBindings extends Bindings {
       'CBLDart_FLDoc_BindToDartObject',
     );
     _getAllocedData =
-        libs.cbl.lookupFunction<FLDoc_GetAllocedData, FLDoc_GetAllocedData>(
+        libs.cbl.lookupFunction<_FLDoc_GetAllocedData, _FLDoc_GetAllocedData>(
       'FLDoc_GetAllocedData',
     );
-    _getRoot = libs.cbl.lookupFunction<FLDoc_GetRoot, FLDoc_GetRoot>(
+    _getRoot = libs.cbl.lookupFunction<_FLDoc_GetRoot, _FLDoc_GetRoot>(
       'FLDoc_GetRoot',
     );
   }
@@ -415,8 +416,8 @@ class DocBindings extends Bindings {
   late final _CBLDart_FLDoc_FromResultData _fromResultData;
   late final _CBLDart_FLDoc_FromJSON _fromJSON;
   late final _CBLDart_FLDoc_BindToDartObject _bindToDartObject;
-  late final FLDoc_GetAllocedData _getAllocedData;
-  late final FLDoc_GetRoot _getRoot;
+  late final _FLDoc_GetAllocedData _getAllocedData;
+  late final _FLDoc_GetRoot _getRoot;
 
   Pointer<FLDoc>? fromResultData(
     Uint8List data,
@@ -476,25 +477,25 @@ typedef _CBLDart_FLValue_BindToDartObject = void Function(
   int retain,
 );
 
-typedef FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
+typedef _FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
 
-typedef FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
-typedef FLValue_GetType = int Function(Pointer<FLValue> value);
+typedef _FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
+typedef _FLValue_GetType = int Function(Pointer<FLValue> value);
 
-typedef FLValue_IsInteger_C = Uint8 Function(Pointer<FLValue> value);
-typedef FLValue_IsInteger = int Function(Pointer<FLValue> value);
+typedef _FLValue_IsInteger_C = Uint8 Function(Pointer<FLValue> value);
+typedef _FLValue_IsInteger = int Function(Pointer<FLValue> value);
 
-typedef FLValue_IsDouble_C = Uint8 Function(Pointer<FLValue> value);
-typedef FLValue_IsDouble = int Function(Pointer<FLValue> value);
+typedef _FLValue_IsDouble_C = Uint8 Function(Pointer<FLValue> value);
+typedef _FLValue_IsDouble = int Function(Pointer<FLValue> value);
 
-typedef FLValue_AsBool_C = Uint8 Function(Pointer<FLValue> value);
-typedef FLValue_AsBool = int Function(Pointer<FLValue> value);
+typedef _FLValue_AsBool_C = Uint8 Function(Pointer<FLValue> value);
+typedef _FLValue_AsBool = int Function(Pointer<FLValue> value);
 
-typedef FLValue_AsInt_C = Int64 Function(Pointer<FLValue> value);
-typedef FLValue_AsInt = int Function(Pointer<FLValue> value);
+typedef _FLValue_AsInt_C = Int64 Function(Pointer<FLValue> value);
+typedef _FLValue_AsInt = int Function(Pointer<FLValue> value);
 
-typedef FLValue_AsDouble_C = Double Function(Pointer<FLValue> value);
-typedef FLValue_AsDouble = double Function(Pointer<FLValue> value);
+typedef _FLValue_AsDouble_C = Double Function(Pointer<FLValue> value);
+typedef _FLValue_AsDouble = double Function(Pointer<FLValue> value);
 
 typedef _CBLDart_FLValue_AsString_C = FLString Function(Pointer<FLValue> value);
 typedef _CBLDart_FLValue_AsString = FLString Function(Pointer<FLValue> value);
@@ -509,11 +510,11 @@ typedef _CBLDart_FLValue_ToString = FLStringResult Function(
   Pointer<FLValue> value,
 );
 
-typedef FLValue_IsEqual_C = Uint8 Function(
+typedef _FLValue_IsEqual_C = Uint8 Function(
   Pointer<FLValue> v1,
   Pointer<FLValue> v2,
 );
-typedef FLValue_IsEqual = int Function(
+typedef _FLValue_IsEqual = int Function(
   Pointer<FLValue> v1,
   Pointer<FLValue> v2,
 );
@@ -535,26 +536,26 @@ class ValueBindings extends Bindings {
         _CBLDart_FLValue_BindToDartObject_C, _CBLDart_FLValue_BindToDartObject>(
       'CBLDart_FLValue_BindToDartObject',
     );
-    _findDoc = libs.cbl.lookupFunction<FLValue_FindDoc, FLValue_FindDoc>(
+    _findDoc = libs.cbl.lookupFunction<_FLValue_FindDoc, _FLValue_FindDoc>(
       'FLValue_FindDoc',
     );
-    _getType = libs.cbl.lookupFunction<FLValue_GetType_C, FLValue_GetType>(
+    _getType = libs.cbl.lookupFunction<_FLValue_GetType_C, _FLValue_GetType>(
       'FLValue_GetType',
     );
     _isInteger =
-        libs.cbl.lookupFunction<FLValue_IsInteger_C, FLValue_IsInteger>(
+        libs.cbl.lookupFunction<_FLValue_IsInteger_C, _FLValue_IsInteger>(
       'FLValue_IsInteger',
     );
-    _isDouble = libs.cbl.lookupFunction<FLValue_IsDouble_C, FLValue_IsDouble>(
+    _isDouble = libs.cbl.lookupFunction<_FLValue_IsDouble_C, _FLValue_IsDouble>(
       'FLValue_IsDouble',
     );
-    _asBool = libs.cbl.lookupFunction<FLValue_AsBool_C, FLValue_AsBool>(
+    _asBool = libs.cbl.lookupFunction<_FLValue_AsBool_C, _FLValue_AsBool>(
       'FLValue_AsBool',
     );
-    _asInt = libs.cbl.lookupFunction<FLValue_AsInt_C, FLValue_AsInt>(
+    _asInt = libs.cbl.lookupFunction<_FLValue_AsInt_C, _FLValue_AsInt>(
       'FLValue_AsInt',
     );
-    _asDouble = libs.cbl.lookupFunction<FLValue_AsDouble_C, FLValue_AsDouble>(
+    _asDouble = libs.cbl.lookupFunction<_FLValue_AsDouble_C, _FLValue_AsDouble>(
       'FLValue_AsDouble',
     );
     _asString = libs.cblDart
@@ -569,7 +570,7 @@ class ValueBindings extends Bindings {
         .lookupFunction<_CBLDart_FLValue_ToString_C, _CBLDart_FLValue_ToString>(
       'CBLDart_FLValue_ToString',
     );
-    _isEqual = libs.cbl.lookupFunction<FLValue_IsEqual_C, FLValue_IsEqual>(
+    _isEqual = libs.cbl.lookupFunction<_FLValue_IsEqual_C, _FLValue_IsEqual>(
       'FLValue_IsEqual',
     );
     _toJson = libs.cblDart
@@ -579,17 +580,17 @@ class ValueBindings extends Bindings {
   }
 
   late final _CBLDart_FLValue_BindToDartObject _bindToDartObject;
-  late final FLValue_FindDoc _findDoc;
-  late final FLValue_GetType _getType;
-  late final FLValue_IsInteger _isInteger;
-  late final FLValue_IsDouble _isDouble;
-  late final FLValue_AsBool _asBool;
-  late final FLValue_AsInt _asInt;
-  late final FLValue_AsDouble _asDouble;
+  late final _FLValue_FindDoc _findDoc;
+  late final _FLValue_GetType _getType;
+  late final _FLValue_IsInteger _isInteger;
+  late final _FLValue_IsDouble _isDouble;
+  late final _FLValue_AsBool _asBool;
+  late final _FLValue_AsInt _asInt;
+  late final _FLValue_AsDouble _asDouble;
   late final _CBLDart_FLValue_AsString _asString;
   late final _CBLDart_FLValue_AsData _asData;
   late final _CBLDart_FLValue_ToString _scalarToString;
-  late final FLValue_IsEqual _isEqual;
+  late final _FLValue_IsEqual _isEqual;
   late final _CBLDart_FLValue_ToJSONX _toJson;
 
   void bindToDartObject(
@@ -638,45 +639,46 @@ class ValueBindings extends Bindings {
 
 class FLArray extends Opaque {}
 
-typedef FLArray_Count_C = Uint32 Function(Pointer<FLArray> array);
-typedef FLArray_Count = int Function(Pointer<FLArray> array);
+typedef _FLArray_Count_C = Uint32 Function(Pointer<FLArray> array);
+typedef _FLArray_Count = int Function(Pointer<FLArray> array);
 
-typedef FLArray_IsEmpty_C = Uint8 Function(Pointer<FLArray> array);
-typedef FLArray_IsEmpty = int Function(Pointer<FLArray> array);
+typedef _FLArray_IsEmpty_C = Uint8 Function(Pointer<FLArray> array);
+typedef _FLArray_IsEmpty = int Function(Pointer<FLArray> array);
 
-typedef FLArray_AsMutable = Pointer<FLMutableArray> Function(
+typedef _FLArray_AsMutable = Pointer<FLMutableArray> Function(
   Pointer<FLArray> array,
 );
 
-typedef FLArray_Get_C = Pointer<FLValue> Function(
+typedef _FLArray_Get_C = Pointer<FLValue> Function(
   Pointer<FLArray> array,
   Uint32 index,
 );
-typedef FLArray_Get = Pointer<FLValue> Function(
+typedef _FLArray_Get = Pointer<FLValue> Function(
   Pointer<FLArray> array,
   int index,
 );
 
 class ArrayBindings extends Bindings {
   ArrayBindings(Bindings parent) : super(parent) {
-    _count = libs.cbl.lookupFunction<FLArray_Count_C, FLArray_Count>(
+    _count = libs.cbl.lookupFunction<_FLArray_Count_C, _FLArray_Count>(
       'FLArray_Count',
     );
-    _isEmpty = libs.cbl.lookupFunction<FLArray_IsEmpty_C, FLArray_IsEmpty>(
+    _isEmpty = libs.cbl.lookupFunction<_FLArray_IsEmpty_C, _FLArray_IsEmpty>(
       'FLArray_IsEmpty',
     );
-    _asMutable = libs.cbl.lookupFunction<FLArray_AsMutable, FLArray_AsMutable>(
+    _asMutable =
+        libs.cbl.lookupFunction<_FLArray_AsMutable, _FLArray_AsMutable>(
       'FLArray_AsMutable',
     );
-    _get = libs.cbl.lookupFunction<FLArray_Get_C, FLArray_Get>(
+    _get = libs.cbl.lookupFunction<_FLArray_Get_C, _FLArray_Get>(
       'FLArray_Get',
     );
   }
 
-  late final FLArray_Count _count;
-  late final FLArray_IsEmpty _isEmpty;
-  late final FLArray_AsMutable _asMutable;
-  late final FLArray_Get _get;
+  late final _FLArray_Count _count;
+  late final _FLArray_IsEmpty _isEmpty;
+  late final _FLArray_AsMutable _asMutable;
+  late final _FLArray_Get _get;
 
   int count(Pointer<FLArray> array) => _count(array);
 
@@ -692,86 +694,86 @@ class ArrayBindings extends Bindings {
 
 class FLMutableArray extends Opaque {}
 
-typedef FLArray_MutableCopy_C = Pointer<FLMutableArray> Function(
+typedef _FLArray_MutableCopy_C = Pointer<FLMutableArray> Function(
   Pointer<FLArray> array,
   Uint32 flags,
 );
-typedef FLArray_MutableCopy = Pointer<FLMutableArray> Function(
+typedef _FLArray_MutableCopy = Pointer<FLMutableArray> Function(
   Pointer<FLArray> array,
   int flags,
 );
 
-typedef FLMutableArray_New = Pointer<FLMutableArray> Function();
+typedef _FLMutableArray_New = Pointer<FLMutableArray> Function();
 
-typedef FLMutableArray_GetSource = Pointer<FLArray> Function(
+typedef _FLMutableArray_GetSource = Pointer<FLArray> Function(
   Pointer<FLMutableArray> array,
 );
 
-typedef FLMutableArray_IsChanged_C = Uint8 Function(
+typedef _FLMutableArray_IsChanged_C = Uint8 Function(
   Pointer<FLMutableArray> array,
 );
-typedef FLMutableArray_IsChanged = int Function(
+typedef _FLMutableArray_IsChanged = int Function(
   Pointer<FLMutableArray> array,
 );
 
-typedef FLMutableArray_Set_C = Pointer<FLSlot> Function(
+typedef _FLMutableArray_Set_C = Pointer<FLSlot> Function(
   Pointer<FLMutableArray> array,
   Uint32 index,
 );
-typedef FLMutableArray_Set = Pointer<FLSlot> Function(
+typedef _FLMutableArray_Set = Pointer<FLSlot> Function(
   Pointer<FLMutableArray> array,
   int index,
 );
 
-typedef FLMutableArray_Append = Pointer<FLSlot> Function(
+typedef _FLMutableArray_Append = Pointer<FLSlot> Function(
   Pointer<FLMutableArray> array,
 );
 
-typedef FLMutableArray_Insert_C = Void Function(
+typedef _FLMutableArray_Insert_C = Void Function(
   Pointer<FLMutableArray> array,
   Uint32 firstIndex,
   Uint32 count,
 );
-typedef FLMutableArray_Insert = void Function(
+typedef _FLMutableArray_Insert = void Function(
   Pointer<FLMutableArray> array,
   int firstIndex,
   int count,
 );
 
-typedef FLMutableArray_Remove_C = Void Function(
+typedef _FLMutableArray_Remove_C = Void Function(
   Pointer<FLMutableArray> array,
   Uint32 firstIndex,
   Uint32 count,
 );
-typedef FLMutableArray_Remove = void Function(
+typedef _FLMutableArray_Remove = void Function(
   Pointer<FLMutableArray> array,
   int firstIndex,
   int count,
 );
 
-typedef FLMutableArray_Resize_C = Void Function(
+typedef _FLMutableArray_Resize_C = Void Function(
   Pointer<FLMutableArray> array,
   Uint32 size,
 );
-typedef FLMutableArray_Resize = void Function(
+typedef _FLMutableArray_Resize = void Function(
   Pointer<FLMutableArray> array,
   int size,
 );
 
-typedef FLMutableArray_GetMutableArray_C = Pointer<FLMutableArray> Function(
+typedef _FLMutableArray_GetMutableArray_C = Pointer<FLMutableArray> Function(
   Pointer<FLMutableArray> array,
   Uint32 index,
 );
-typedef FLMutableArray_GetMutableArray = Pointer<FLMutableArray> Function(
+typedef _FLMutableArray_GetMutableArray = Pointer<FLMutableArray> Function(
   Pointer<FLMutableArray> array,
   int index,
 );
 
-typedef FLMutableArray_GetMutableDict_C = Pointer<FLMutableDict> Function(
+typedef _FLMutableArray_GetMutableDict_C = Pointer<FLMutableDict> Function(
   Pointer<FLMutableArray> array,
   Uint32 index,
 );
-typedef FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
+typedef _FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
   Pointer<FLMutableArray> array,
   int index,
 );
@@ -779,60 +781,60 @@ typedef FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
 class MutableArrayBindings extends Bindings {
   MutableArrayBindings(Bindings parent) : super(parent) {
     _mutableCopy =
-        libs.cbl.lookupFunction<FLArray_MutableCopy_C, FLArray_MutableCopy>(
+        libs.cbl.lookupFunction<_FLArray_MutableCopy_C, _FLArray_MutableCopy>(
       'FLArray_MutableCopy',
     );
-    _new = libs.cbl.lookupFunction<FLMutableArray_New, FLMutableArray_New>(
+    _new = libs.cbl.lookupFunction<_FLMutableArray_New, _FLMutableArray_New>(
       'FLMutableArray_New',
     );
     _getSource = libs.cbl
-        .lookupFunction<FLMutableArray_GetSource, FLMutableArray_GetSource>(
+        .lookupFunction<_FLMutableArray_GetSource, _FLMutableArray_GetSource>(
       'FLMutableArray_GetSource',
     );
     _isChanged = libs.cbl
-        .lookupFunction<FLMutableArray_IsChanged_C, FLMutableArray_IsChanged>(
+        .lookupFunction<_FLMutableArray_IsChanged_C, _FLMutableArray_IsChanged>(
       'FLMutableArray_IsChanged',
     );
-    _set = libs.cbl.lookupFunction<FLMutableArray_Set_C, FLMutableArray_Set>(
+    _set = libs.cbl.lookupFunction<_FLMutableArray_Set_C, _FLMutableArray_Set>(
       'FLMutableArray_Set',
     );
     _append =
-        libs.cbl.lookupFunction<FLMutableArray_Append, FLMutableArray_Append>(
+        libs.cbl.lookupFunction<_FLMutableArray_Append, _FLMutableArray_Append>(
       'FLMutableArray_Append',
     );
-    _insert =
-        libs.cbl.lookupFunction<FLMutableArray_Insert_C, FLMutableArray_Insert>(
+    _insert = libs.cbl
+        .lookupFunction<_FLMutableArray_Insert_C, _FLMutableArray_Insert>(
       'FLMutableArray_Insert',
     );
-    _remove =
-        libs.cbl.lookupFunction<FLMutableArray_Remove_C, FLMutableArray_Remove>(
+    _remove = libs.cbl
+        .lookupFunction<_FLMutableArray_Remove_C, _FLMutableArray_Remove>(
       'FLMutableArray_Remove',
     );
-    _resize =
-        libs.cbl.lookupFunction<FLMutableArray_Resize_C, FLMutableArray_Resize>(
+    _resize = libs.cbl
+        .lookupFunction<_FLMutableArray_Resize_C, _FLMutableArray_Resize>(
       'FLMutableArray_Resize',
     );
-    _getMutableArray = libs.cbl.lookupFunction<FLMutableArray_GetMutableArray_C,
-        FLMutableArray_GetMutableArray>(
+    _getMutableArray = libs.cbl.lookupFunction<
+        _FLMutableArray_GetMutableArray_C, _FLMutableArray_GetMutableArray>(
       'FLMutableArray_GetMutableArray',
     );
-    _getMutableDict = libs.cbl.lookupFunction<FLMutableArray_GetMutableDict_C,
-        FLMutableArray_GetMutableDict>(
+    _getMutableDict = libs.cbl.lookupFunction<_FLMutableArray_GetMutableDict_C,
+        _FLMutableArray_GetMutableDict>(
       'FLMutableArray_GetMutableDict',
     );
   }
 
-  late final FLArray_MutableCopy _mutableCopy;
-  late final FLMutableArray_New _new;
-  late final FLMutableArray_GetSource _getSource;
-  late final FLMutableArray_IsChanged _isChanged;
-  late final FLMutableArray_Set _set;
-  late final FLMutableArray_Append _append;
-  late final FLMutableArray_Insert _insert;
-  late final FLMutableArray_Remove _remove;
-  late final FLMutableArray_Resize _resize;
-  late final FLMutableArray_GetMutableArray _getMutableArray;
-  late final FLMutableArray_GetMutableDict _getMutableDict;
+  late final _FLArray_MutableCopy _mutableCopy;
+  late final _FLMutableArray_New _new;
+  late final _FLMutableArray_GetSource _getSource;
+  late final _FLMutableArray_IsChanged _isChanged;
+  late final _FLMutableArray_Set _set;
+  late final _FLMutableArray_Append _append;
+  late final _FLMutableArray_Insert _insert;
+  late final _FLMutableArray_Remove _remove;
+  late final _FLMutableArray_Resize _resize;
+  late final _FLMutableArray_GetMutableArray _getMutableArray;
+  late final _FLMutableArray_GetMutableDict _getMutableDict;
 
   Pointer<FLMutableArray> mutableCopy(
     Pointer<FLArray> array,
@@ -877,17 +879,17 @@ class MutableArrayBindings extends Bindings {
 
 class FLDict extends Opaque {}
 
-typedef FLDict_Count_C = Uint32 Function(Pointer<FLDict> dict);
-typedef FLDict_Count = int Function(Pointer<FLDict> dict);
+typedef _FLDict_Count_C = Uint32 Function(Pointer<FLDict> dict);
+typedef _FLDict_Count = int Function(Pointer<FLDict> dict);
 
-typedef FLDict_IsEmpty_C = Uint8 Function(Pointer<FLDict> dict);
-typedef FLDict_IsEmpty = int Function(Pointer<FLDict> dict);
+typedef _FLDict_IsEmpty_C = Uint8 Function(Pointer<FLDict> dict);
+typedef _FLDict_IsEmpty = int Function(Pointer<FLDict> dict);
 
-typedef FLDict_AsMutable = Pointer<FLMutableDict> Function(
+typedef _FLDict_AsMutable = Pointer<FLMutableDict> Function(
   Pointer<FLDict> dict,
 );
 
-typedef FLDict_Get = Pointer<FLValue> Function(
+typedef _FLDict_Get = Pointer<FLValue> Function(
   Pointer<FLDict> dict,
   FLString key,
 );
@@ -895,21 +897,21 @@ typedef FLDict_Get = Pointer<FLValue> Function(
 class DictBindings extends Bindings {
   DictBindings(Bindings parent) : super(parent) {
     _get = libs.cblDart
-        .lookupFunction<FLDict_Get, FLDict_Get>('CBLDart_FLDict_Get');
+        .lookupFunction<_FLDict_Get, _FLDict_Get>('CBLDart_FLDict_Get');
     _count =
-        libs.cbl.lookupFunction<FLDict_Count_C, FLDict_Count>('FLDict_Count');
-    _isEmpty = libs.cbl.lookupFunction<FLDict_IsEmpty_C, FLDict_IsEmpty>(
+        libs.cbl.lookupFunction<_FLDict_Count_C, _FLDict_Count>('FLDict_Count');
+    _isEmpty = libs.cbl.lookupFunction<_FLDict_IsEmpty_C, _FLDict_IsEmpty>(
       'FLDict_IsEmpty',
     );
-    _asMutable = libs.cbl.lookupFunction<FLDict_AsMutable, FLDict_AsMutable>(
+    _asMutable = libs.cbl.lookupFunction<_FLDict_AsMutable, _FLDict_AsMutable>(
       'FLDict_AsMutable',
     );
   }
 
-  late final FLDict_Get _get;
-  late final FLDict_Count _count;
-  late final FLDict_IsEmpty _isEmpty;
-  late final FLDict_AsMutable _asMutable;
+  late final _FLDict_Get _get;
+  late final _FLDict_Count _count;
+  late final _FLDict_IsEmpty _isEmpty;
+  late final _FLDict_AsMutable _asMutable;
 
   Pointer<FLValue> get(Pointer<FLDict> dict, String key) =>
       withZoneArena(() => _get(dict, key.toFLStringInArena().ref));
@@ -978,23 +980,25 @@ class DictIteratorBindings extends Bindings {
 
 class FLMutableDict extends Opaque {}
 
-typedef FLDict_MutableCopy_C = Pointer<FLMutableDict> Function(
+typedef _FLDict_MutableCopy_C = Pointer<FLMutableDict> Function(
   Pointer<FLDict> source,
   Uint32 flags,
 );
-typedef FLDict_MutableCopy = Pointer<FLMutableDict> Function(
+typedef _FLDict_MutableCopy = Pointer<FLMutableDict> Function(
   Pointer<FLDict> source,
   int flags,
 );
 
-typedef FLMutableDict_New = Pointer<FLMutableDict> Function();
+typedef _FLMutableDict_New = Pointer<FLMutableDict> Function();
 
-typedef FLMutableDict_GetSource = Pointer<FLDict> Function(
+typedef _FLMutableDict_GetSource = Pointer<FLDict> Function(
   Pointer<FLMutableDict> dict,
 );
 
-typedef FLMutableDict_IsChanged_C = Uint8 Function(Pointer<FLMutableDict> dict);
-typedef FLMutableDict_IsChanged = int Function(Pointer<FLMutableDict> dict);
+typedef _FLMutableDict_IsChanged_C = Uint8 Function(
+  Pointer<FLMutableDict> dict,
+);
+typedef _FLMutableDict_IsChanged = int Function(Pointer<FLMutableDict> dict);
 
 typedef _CBLDart_FLMutableDict_Set = Pointer<FLSlot> Function(
   Pointer<FLMutableDict> dict,
@@ -1010,8 +1014,8 @@ typedef _CBLDart_FLMutableDict_Remove = void Function(
   FLString key,
 );
 
-typedef FLMutableDict_RemoveAll_C = Void Function(Pointer<FLMutableDict> dict);
-typedef FLMutableDict_RemoveAll = void Function(Pointer<FLMutableDict> dict);
+typedef _FLMutableDict_RemoveAll_C = Void Function(Pointer<FLMutableDict> dict);
+typedef _FLMutableDict_RemoveAll = void Function(Pointer<FLMutableDict> dict);
 
 typedef _CBLDart_FLMutableDict_GetMutableArray = Pointer<FLMutableArray>
     Function(
@@ -1027,18 +1031,18 @@ typedef _CBLDart_FLMutableDict_GetMutableDict = Pointer<FLMutableDict> Function(
 class MutableDictBindings extends Bindings {
   MutableDictBindings(Bindings parent) : super(parent) {
     _mutableCopy =
-        libs.cbl.lookupFunction<FLDict_MutableCopy_C, FLDict_MutableCopy>(
+        libs.cbl.lookupFunction<_FLDict_MutableCopy_C, _FLDict_MutableCopy>(
       'FLDict_MutableCopy',
     );
-    _new = libs.cbl.lookupFunction<FLMutableDict_New, FLMutableDict_New>(
+    _new = libs.cbl.lookupFunction<_FLMutableDict_New, _FLMutableDict_New>(
       'FLMutableDict_New',
     );
     _getSource = libs.cbl
-        .lookupFunction<FLMutableDict_GetSource, FLMutableDict_GetSource>(
+        .lookupFunction<_FLMutableDict_GetSource, _FLMutableDict_GetSource>(
       'FLMutableDict_GetSource',
     );
     _isChanged = libs.cbl
-        .lookupFunction<FLMutableDict_IsChanged_C, FLMutableDict_IsChanged>(
+        .lookupFunction<_FLMutableDict_IsChanged_C, _FLMutableDict_IsChanged>(
       'FLMutableDict_IsChanged',
     );
     _set = libs.cblDart
@@ -1050,7 +1054,7 @@ class MutableDictBindings extends Bindings {
       'CBLDart_FLMutableDict_Remove',
     );
     _removeAll = libs.cbl
-        .lookupFunction<FLMutableDict_RemoveAll_C, FLMutableDict_RemoveAll>(
+        .lookupFunction<_FLMutableDict_RemoveAll_C, _FLMutableDict_RemoveAll>(
       'FLMutableDict_RemoveAll',
     );
     _getMutableArray = libs.cblDart.lookupFunction<
@@ -1065,13 +1069,13 @@ class MutableDictBindings extends Bindings {
     );
   }
 
-  late final FLDict_MutableCopy _mutableCopy;
-  late final FLMutableDict_New _new;
-  late final FLMutableDict_GetSource _getSource;
-  late final FLMutableDict_IsChanged _isChanged;
+  late final _FLDict_MutableCopy _mutableCopy;
+  late final _FLMutableDict_New _new;
+  late final _FLMutableDict_GetSource _getSource;
+  late final _FLMutableDict_IsChanged _isChanged;
   late final _CBLDart_FLMutableDict_Set _set;
   late final _CBLDart_FLMutableDict_Remove _remove;
-  late final FLMutableDict_RemoveAll _removeAll;
+  late final _FLMutableDict_RemoveAll _removeAll;
   late final _CBLDart_FLMutableDict_GetMutableArray _getMutableArray;
   late final _CBLDart_FLMutableDict_GetMutableDict _getMutableDict;
 
@@ -1166,7 +1170,7 @@ typedef _CBLDart_FLValue_FromData = int Function(
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
-typedef _CBLDart_GetLoadedFLValue_C = Void Function(
+typedef _CBLDart_GetLoaded_FLValue_C = Void Function(
   Pointer<FLValue> value,
   Pointer<CBLDart_LoadedFLValue> out,
 );
@@ -1175,7 +1179,7 @@ typedef _CBLDart_GetLoadedFLValue = void Function(
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
-typedef _CBLDart_FLArray_GetLoadedFLValue_C = Void Function(
+typedef _CBLDart_FLArray_GetLoaded_FLValue_C = Void Function(
   Pointer<FLArray> array,
   Uint32 index,
   Pointer<CBLDart_LoadedFLValue> out,
@@ -1186,7 +1190,7 @@ typedef _CBLDart_FLArray_GetLoadedFLValue = void Function(
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
-typedef _CBLDart_FLDict_GetLoadedFLValue_C = Void Function(
+typedef _CBLDart_FLDict_GetLoaded_FLValue_C = Void Function(
   Pointer<FLDict> dict,
   FLString key,
   Pointer<CBLDart_LoadedFLValue> out,
@@ -1245,16 +1249,17 @@ class FleeceDecoderBindings extends Bindings {
         .lookupFunction<_CBLDart_FLValue_FromData_C, _CBLDart_FLValue_FromData>(
       'CBLDart_FLValue_FromData',
     );
-    _getLoadedFLValue = libs.cblDart
-        .lookupFunction<_CBLDart_GetLoadedFLValue_C, _CBLDart_GetLoadedFLValue>(
+    _getLoadedFLValue = libs.cblDart.lookupFunction<
+        _CBLDart_GetLoaded_FLValue_C, _CBLDart_GetLoadedFLValue>(
       'CBLDart_GetLoadedFLValue',
     );
     _getLoadedFLValueFromArray = libs.cblDart.lookupFunction<
-        _CBLDart_FLArray_GetLoadedFLValue_C, _CBLDart_FLArray_GetLoadedFLValue>(
+        _CBLDart_FLArray_GetLoaded_FLValue_C,
+        _CBLDart_FLArray_GetLoadedFLValue>(
       'CBLDart_FLArray_GetLoadedFLValue',
     );
     _getLoadedFLValueFromDict = libs.cblDart.lookupFunction<
-        _CBLDart_FLDict_GetLoadedFLValue_C, _CBLDart_FLDict_GetLoadedFLValue>(
+        _CBLDart_FLDict_GetLoaded_FLValue_C, _CBLDart_FLDict_GetLoadedFLValue>(
       'CBLDart_FLDict_GetLoadedFLValue',
     );
     _dictIteratorBegin = libs.cblDart.lookupFunction<
@@ -1333,16 +1338,9 @@ class FleeceDecoderBindings extends Bindings {
 
 // === Encoder =================================================================
 
-/// Output formats a Fleece encoder can generate.
 enum FLEncoderFormat {
-  /// Fleece encoding
   fleece,
-
-  /// JSON encoding
   json,
-
-  /// [JSON5](http://json5.org); an extension of JSON with a more readable
-  /// syntax.
   json5,
 }
 
@@ -1365,8 +1363,8 @@ typedef _CBLDart_FLEncoder_New = Pointer<FLEncoder> Function(
   int uniqueStrings,
 );
 
-typedef FLEncoder_Reset_C = Void Function(Pointer<FLEncoder> encoder);
-typedef FLEncoder_Reset = void Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_Reset_C = Void Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_Reset = void Function(Pointer<FLEncoder> encoder);
 
 typedef _CBLDart_FLEncoder_WriteArrayValue_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
@@ -1379,41 +1377,41 @@ typedef _CBLDart_FLEncoder_WriteArrayValue = int Function(
   int index,
 );
 
-typedef FLEncoder_WriteValue_C = Uint8 Function(
+typedef _FLEncoder_WriteValue_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
   Pointer<FLValue> value,
 );
-typedef FLEncoder_WriteValue = int Function(
+typedef _FLEncoder_WriteValue = int Function(
   Pointer<FLEncoder> encoder,
   Pointer<FLValue> value,
 );
 
-typedef FLEncoder_WriteNull_C = Uint8 Function(Pointer<FLEncoder> encoder);
-typedef FLEncoder_WriteNull = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_WriteNull_C = Uint8 Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_WriteNull = int Function(Pointer<FLEncoder> encoder);
 
-typedef FLEncoder_WriteBool_C = Uint8 Function(
+typedef _FLEncoder_WriteBool_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
   Uint8 value,
 );
-typedef FLEncoder_WriteBool = int Function(
+typedef _FLEncoder_WriteBool = int Function(
   Pointer<FLEncoder> encoder,
   int value,
 );
 
-typedef FLEncoder_WriteInt_C = Uint8 Function(
+typedef _FLEncoder_WriteInt_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
   Int64 value,
 );
-typedef FLEncoder_WriteInt = int Function(
+typedef _FLEncoder_WriteInt = int Function(
   Pointer<FLEncoder> encoder,
   int value,
 );
 
-typedef FLEncoder_WriteDouble_C = Uint8 Function(
+typedef _FLEncoder_WriteDouble_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
   Double value,
 );
-typedef FLEncoder_WriteDouble = int Function(
+typedef _FLEncoder_WriteDouble = int Function(
   Pointer<FLEncoder> encoder,
   double value,
 );
@@ -1454,8 +1452,8 @@ typedef _CBLDart_FLEncoder_BeginArray = int Function(
   int reserveCount,
 );
 
-typedef FLEncoder_EndArray_C = Uint8 Function(Pointer<FLEncoder> encoder);
-typedef FLEncoder_EndArray = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndArray_C = Uint8 Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndArray = int Function(Pointer<FLEncoder> encoder);
 
 typedef _CBLDart_FLEncoder_BeginDict_C = Uint8 Function(
   Pointer<FLEncoder> encoder,
@@ -1475,8 +1473,8 @@ typedef _CBLDart_FLEncoder_WriteKey = int Function(
   FLString key,
 );
 
-typedef FLEncoder_EndDict_C = Uint8 Function(Pointer<FLEncoder> encoder);
-typedef FLEncoder_EndDict = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndDict_C = Uint8 Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndDict = int Function(Pointer<FLEncoder> encoder);
 
 typedef _CBLDart_FLEncoder_Finish_C = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
@@ -1487,13 +1485,13 @@ typedef _CBLDart_FLEncoder_Finish = FLSliceResult Function(
   Pointer<Uint32> errorOut,
 );
 
-typedef FLEncoder_GetError_C = Uint32 Function(Pointer<FLEncoder> encoder);
-typedef FLEncoder_GetError = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_GetError_C = Uint32 Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_GetError = int Function(Pointer<FLEncoder> encoder);
 
-typedef FLEncoder_GetErrorMessage_C = Pointer<Utf8> Function(
+typedef _FLEncoder_GetErrorMessage_C = Pointer<Utf8> Function(
   Pointer<FLEncoder> encoder,
 );
-typedef FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
+typedef _FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
   Pointer<FLEncoder> encoder,
 );
 
@@ -1503,7 +1501,7 @@ class FleeceEncoderBindings extends Bindings {
         .lookupFunction<_CBLDart_FLEncoder_New_C, _CBLDart_FLEncoder_New>(
       'CBLDart_FLEncoder_New',
     );
-    _reset = libs.cbl.lookupFunction<FLEncoder_Reset_C, FLEncoder_Reset>(
+    _reset = libs.cbl.lookupFunction<_FLEncoder_Reset_C, _FLEncoder_Reset>(
       'FLEncoder_Reset',
     );
     _writeArrayValue = libs.cblDart.lookupFunction<
@@ -1512,23 +1510,23 @@ class FleeceEncoderBindings extends Bindings {
       'CBLDart_FLEncoder_WriteArrayValue',
     );
     _writeValue =
-        libs.cbl.lookupFunction<FLEncoder_WriteValue_C, FLEncoder_WriteValue>(
+        libs.cbl.lookupFunction<_FLEncoder_WriteValue_C, _FLEncoder_WriteValue>(
       'FLEncoder_WriteValue',
     );
     _writeNull =
-        libs.cbl.lookupFunction<FLEncoder_WriteNull_C, FLEncoder_WriteNull>(
+        libs.cbl.lookupFunction<_FLEncoder_WriteNull_C, _FLEncoder_WriteNull>(
       'FLEncoder_WriteNull',
     );
     _writeBool =
-        libs.cbl.lookupFunction<FLEncoder_WriteBool_C, FLEncoder_WriteBool>(
+        libs.cbl.lookupFunction<_FLEncoder_WriteBool_C, _FLEncoder_WriteBool>(
       'FLEncoder_WriteBool',
     );
     _writeInt =
-        libs.cbl.lookupFunction<FLEncoder_WriteInt_C, FLEncoder_WriteInt>(
+        libs.cbl.lookupFunction<_FLEncoder_WriteInt_C, _FLEncoder_WriteInt>(
       'FLEncoder_WriteInt',
     );
-    _writeDouble =
-        libs.cbl.lookupFunction<FLEncoder_WriteDouble_C, FLEncoder_WriteDouble>(
+    _writeDouble = libs.cbl
+        .lookupFunction<_FLEncoder_WriteDouble_C, _FLEncoder_WriteDouble>(
       'FLEncoder_WriteDouble',
     );
     _writeString = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_WriteString_C,
@@ -1548,7 +1546,7 @@ class FleeceEncoderBindings extends Bindings {
       'CBLDart_FLEncoder_BeginArray',
     );
     _endArray =
-        libs.cbl.lookupFunction<FLEncoder_EndArray_C, FLEncoder_EndArray>(
+        libs.cbl.lookupFunction<_FLEncoder_EndArray_C, _FLEncoder_EndArray>(
       'FLEncoder_EndArray',
     );
     _beginDict = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_BeginDict_C,
@@ -1559,7 +1557,8 @@ class FleeceEncoderBindings extends Bindings {
         _CBLDart_FLEncoder_WriteKey>(
       'CBLDart_FLEncoder_WriteKey',
     );
-    _endDict = libs.cbl.lookupFunction<FLEncoder_EndDict_C, FLEncoder_EndDict>(
+    _endDict =
+        libs.cbl.lookupFunction<_FLEncoder_EndDict_C, _FLEncoder_EndDict>(
       'FLEncoder_EndDict',
     );
     _finish = libs.cblDart
@@ -1567,34 +1566,34 @@ class FleeceEncoderBindings extends Bindings {
       'CBLDart_FLEncoder_Finish',
     );
     __getError =
-        libs.cbl.lookupFunction<FLEncoder_GetError_C, FLEncoder_GetError>(
+        libs.cbl.lookupFunction<_FLEncoder_GetError_C, _FLEncoder_GetError>(
       'FLEncoder_GetError',
     );
-    __getErrorMessage = libs.cblDart
-        .lookupFunction<FLEncoder_GetErrorMessage_C, FLEncoder_GetErrorMessage>(
+    __getErrorMessage = libs.cblDart.lookupFunction<
+        _FLEncoder_GetErrorMessage_C, _FLEncoder_GetErrorMessage>(
       'FLEncoder_GetErrorMessage',
     );
   }
 
   late final _CBLDart_FLEncoder_New _new;
-  late final FLEncoder_Reset _reset;
+  late final _FLEncoder_Reset _reset;
   late final _CBLDart_FLEncoder_WriteArrayValue _writeArrayValue;
-  late final FLEncoder_WriteValue _writeValue;
-  late final FLEncoder_WriteNull _writeNull;
-  late final FLEncoder_WriteBool _writeBool;
-  late final FLEncoder_WriteInt _writeInt;
-  late final FLEncoder_WriteDouble _writeDouble;
+  late final _FLEncoder_WriteValue _writeValue;
+  late final _FLEncoder_WriteNull _writeNull;
+  late final _FLEncoder_WriteBool _writeBool;
+  late final _FLEncoder_WriteInt _writeInt;
+  late final _FLEncoder_WriteDouble _writeDouble;
   late final _CBLDart_FLEncoder_WriteString _writeString;
   late final _CBLDart_FLEncoder_WriteData _writeData;
   late final _CBLDart_FLEncoder_WriteJSON _writeJSON;
   late final _CBLDart_FLEncoder_BeginArray _beginArray;
-  late final FLEncoder_EndArray _endArray;
+  late final _FLEncoder_EndArray _endArray;
   late final _CBLDart_FLEncoder_BeginDict _beginDict;
   late final _CBLDart_FLEncoder_WriteKey _writeKey;
-  late final FLEncoder_EndDict _endDict;
+  late final _FLEncoder_EndDict _endDict;
   late final _CBLDart_FLEncoder_Finish _finish;
-  late final FLEncoder_GetError __getError;
-  late final FLEncoder_GetErrorMessage __getErrorMessage;
+  late final _FLEncoder_GetError __getError;
+  late final _FLEncoder_GetErrorMessage __getErrorMessage;
 
   Pointer<FLEncoder> create(
     Object object, {

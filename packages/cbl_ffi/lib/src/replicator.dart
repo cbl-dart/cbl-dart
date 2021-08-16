@@ -358,7 +358,6 @@ typedef _CBLDart_CBLReplicator_AddChangeListener = void Function(
   Pointer<CBLDartAsyncCallback> listener,
 );
 
-/// Flags describing a replicated document.
 class CBLReplicatedDocumentFlag extends Option {
   const CBLReplicatedDocumentFlag(String debugName, int bits)
       : super(debugName, bits);

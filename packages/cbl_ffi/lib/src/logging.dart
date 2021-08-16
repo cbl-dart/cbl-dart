@@ -6,9 +6,10 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import '../cbl_ffi.dart';
 import 'async_callback.dart';
+import 'base.dart';
 import 'bindings.dart';
+import 'fleece.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {

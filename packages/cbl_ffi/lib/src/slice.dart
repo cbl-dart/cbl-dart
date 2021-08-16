@@ -11,7 +11,7 @@ import 'bindings.dart';
 import 'fleece.dart';
 import 'utils.dart';
 
-late final _sliceBinds = CBLBindings.instance.fleece.slice;
+late final _sliceBindings = CBLBindings.instance.fleece.slice;
 
 /// A contiguous area of native memory, whose livetime is tied to some other
 /// object.
@@ -81,7 +81,7 @@ class Slice implements ByteBuffer {
       ..size = other.size;
 
     try {
-      return _sliceBinds.compare(aFLSlice.ref, bFLSlice.ref);
+      return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
       malloc.free(bFLSlice);
     }
@@ -104,7 +104,7 @@ class Slice implements ByteBuffer {
       ..size = other.size;
 
     try {
-      return _sliceBinds.equal(aFLSlice.ref, bFLSlice.ref);
+      return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
       malloc.free(bFLSlice);
     }
@@ -196,7 +196,7 @@ class Slice implements ByteBuffer {
 /// nullable and are represented with `null`.
 class SliceResult extends Slice implements ByteBuffer {
   /// Creates an uninitialized [SliceResult] of [size].
-  SliceResult(int size) : this._(_sliceBinds.create(size).buf, size);
+  SliceResult(int size) : this._(_sliceBindings.create(size).buf, size);
 
   /// Private constructor to initialize slice.
   SliceResult._(
@@ -205,14 +205,15 @@ class SliceResult extends Slice implements ByteBuffer {
     bool retain = false,
   }) : super._(buf, size) {
     makeGlobal();
-    _sliceBinds.bindToDartObject(this, globalFLSliceResult.ref, retain: retain);
+    _sliceBindings.bindToDartObject(this, globalFLSliceResult.ref,
+        retain: retain);
   }
 
   SliceResult._subSlice(SliceResult slice, int start, int end)
       : assert(start >= 0, start < slice.size),
         assert(end >= start && end <= slice.size),
         super._(slice.buf.elementAt(start), end - start) {
-    _sliceBinds.bindToDartObject(
+    _sliceBindings.bindToDartObject(
       this,
       slice.makeGlobalResult().ref,
       retain: true,
@@ -221,7 +222,7 @@ class SliceResult extends Slice implements ByteBuffer {
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-      : this._(_sliceBinds.copy(slice.makeGlobal().ref).buf, slice.size);
+      : this._(_sliceBindings.copy(slice.makeGlobal().ref).buf, slice.size);
 
   /// Returns a [SliceResult] which has the content and size of [list].
   factory SliceResult.fromUint8List(Uint8List list) {
