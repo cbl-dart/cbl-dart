@@ -16,7 +16,7 @@ Future<void> main() async {
   CouchbaseLite.init(libraries: getLibraries());
 
   // Now open a database.
-  final db = await Database.open('chat-messages');
+  final db = await Database.openAsync('chat-messages');
 
   // To create a new document start with an empty [MutableDocument] and fill
   // its properties.
