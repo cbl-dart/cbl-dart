@@ -85,11 +85,25 @@ class ReplicatorStatus {
 /// can also be one-shot ore continuous. The replicator runs asynchronously, so
 /// observe the [status] to be notified of progress.
 abstract class Replicator implements ClosableResource {
-  /// {@template cbl.Replicator.create}
+  /// Creates a replicator for replicating [Document]s between a local
+  /// [Database] and a target database.
+  static FutureOr<Replicator> create(ReplicatorConfiguration config) {
+    if (config.database is AsyncDatabase) {
+      return Replicator.createAsync(config);
+    }
+
+    if (config.database is SyncDatabase) {
+      return Replicator.createSync(config);
+    }
+
+    throw UnimplementedError();
+  }
+
+  /// {@template cbl.Replicator.createAsync}
   /// Creates a replicator for replicating [Document]s between a local
   /// [AsyncDatabase] and a target database.
   /// {@endtemplate}
-  static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
+  static Future<AsyncReplicator> createAsync(ReplicatorConfiguration config) =>
       AsyncReplicator.create(config);
 
   /// {@template cbl.Replicator.createSync}
@@ -178,7 +192,7 @@ abstract class SyncReplicator implements Replicator {
 
 /// A [Replicator] with a primarily asynchronous API.
 abstract class AsyncReplicator implements Replicator {
-  /// {@macro cbl.Replicator.create}
+  /// {@macro cbl.Replicator.createAsync}
   static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
       throw UnimplementedError();
 

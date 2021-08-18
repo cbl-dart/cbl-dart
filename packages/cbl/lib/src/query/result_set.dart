@@ -21,6 +21,9 @@ abstract class ResultSet {
   /// stream counts as consuming it. Other methods for consuming this result set
   /// must not be used when using a stream.
   Stream<Result> asStream();
+
+  /// Consumes this result set and returns a list of all its [Result]s.
+  FutureOr<List<Result>> allResults();
 }
 
 /// A [ResultSet] which can be iterated synchronously as well asynchronously.
@@ -54,6 +57,9 @@ class FfiResultSet
     onCreateStream();
     return Stream.fromIterable(this);
   }
+
+  @override
+  FutureOr<List<Result>> allResults() => toList();
 
   @override
   Iterator<Result> get iterator {

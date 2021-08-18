@@ -10,10 +10,26 @@ import 'result_set.dart';
 
 /// A [Database] query.
 abstract class Query implements Resource {
-  /// {@template cbl.Query.fromN1ql}
+  /// Creates an [Query] from a N1QL [query].
+  static FutureOr<Query> fromN1ql(Database database, String query) {
+    if (database is AsyncDatabase) {
+      return Query.fromN1qlAsync(database, query);
+    }
+
+    if (database is SyncDatabase) {
+      return Query.fromN1qlSync(database, query);
+    }
+
+    throw UnimplementedError();
+  }
+
+  /// {@template cbl.Query.fromN1qlAsync}
   /// Creates an [AsyncQuery] from a N1QL [query].
   /// {@endtemplate}
-  static Future<AsyncQuery> fromN1ql(AsyncDatabase database, String query) =>
+  static Future<AsyncQuery> fromN1qlAsync(
+    AsyncDatabase database,
+    String query,
+  ) =>
       AsyncQuery.fromN1ql(database, query);
 
   /// {@template cbl.Query.fromN1qlSync}
@@ -23,10 +39,26 @@ abstract class Query implements Resource {
   static SyncQuery fromN1qlSync(SyncDatabase database, String query) =>
       SyncQuery.fromN1ql(database, query);
 
+  /// Creates a [Query] from the [Query.jsonRepresentation] of a query.
+  static FutureOr<Query> fromJsonRepresentation(
+    Database database,
+    String jsonRepresentation,
+  ) {
+    if (database is AsyncDatabase) {
+      return Query.fromJsonRepresentationAsync(database, jsonRepresentation);
+    }
+
+    if (database is SyncDatabase) {
+      return Query.fromJsonRepresentationSync(database, jsonRepresentation);
+    }
+
+    throw UnimplementedError();
+  }
+
   /// {@template cbl.Query.fromJsonRepresentation}
   /// Creates an [AsyncQuery] from the [Query.jsonRepresentation] of a query.
   /// {@endtemplate}
-  static Future<AsyncQuery> fromJsonRepresentation(
+  static Future<AsyncQuery> fromJsonRepresentationAsync(
     AsyncDatabase database,
     String jsonRepresentation,
   ) =>
@@ -122,7 +154,7 @@ abstract class SyncQuery implements Query {
 
 /// A [Query] query with a primarily asynchronous API.
 abstract class AsyncQuery implements Query {
-  /// {@macro cbl.Query.fromN1ql}
+  /// {@macro cbl.Query.fromN1qlAsync}
   static Future<AsyncQuery> fromN1ql(AsyncDatabase database, String query) =>
       throw UnimplementedError();
 

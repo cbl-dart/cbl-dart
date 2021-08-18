@@ -74,7 +74,7 @@ import 'package:cbl/cbl.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<void> useDatabase() async {
-  final db = await Database.open('chat-messages');
+  final db = await Database.openAsync('chat-messages');
 
   final doc = MutableDocument({
     'type': 'message',

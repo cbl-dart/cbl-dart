@@ -30,9 +30,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _init() async {
-    _db = await Database.open('Example');
+    _db = await Database.openAsync('Example');
 
-    final query = await Query.fromN1ql(
+    final query = await Query.fromN1qlAsync(
       _db,
       'SELECT post FROM _ AS post WHERE post.type = "post"',
     );
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _clearDatabase() async {
-    final ids = await Query.fromN1ql(_db, 'SELECT META().id FROM _')
+    final ids = await Query.fromN1qlAsync(_db, 'SELECT META().id FROM _')
         .then((query) => query.execute())
         .then((resultSet) =>
             resultSet.asStream().map((result) => result[0].string!).toList());

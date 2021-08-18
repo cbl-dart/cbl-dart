@@ -66,13 +66,13 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 
 /// A Couchbase Lite database.
 abstract class Database implements ClosableResource {
-  /// {@template cbl.Database.open}
+  /// {@template cbl.Database.openAsync}
   /// Opens a Couchbase Lite database with the given [name] and [configuration],
   /// which executes in a separate worker isolate.
   ///
   /// If the database does not yet exist, it will be created.
   /// {@endtemplate}
-  static Future<AsyncDatabase> open(
+  static Future<AsyncDatabase> openAsync(
     String name, [
     DatabaseConfiguration? configuration,
   ]) =>
@@ -383,7 +383,7 @@ abstract class SyncDatabase implements Database {
 /// A [Database] with a primarily asynchronous API.
 
 abstract class AsyncDatabase implements Database {
-  /// {@macro cbl.Database.open}
+  /// {@macro cbl.Database.openAsync}
   static Future<AsyncDatabase> open(
     String name, [
     DatabaseConfiguration? configuration,
