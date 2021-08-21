@@ -4,26 +4,25 @@ import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
 
-  late SyncDatabase db;
-
-  setUpAll(() async {
-    db = openSyncTestDb('Document-Common');
-  });
-
-  Document savedDocument([Map<String, Object?>? data]) {
+  Future<Document> savedDocument(
+    Database db, [
+    Map<String, Object?>? data,
+  ]) async {
     final doc = MutableDocument(data);
-    db.saveDocument(doc);
-    return db.document(doc.id)!;
+    await db.saveDocument(doc);
+    return (await db.document(doc.id))!;
   }
 
   group('Document', () {
-    test('properties', () {
+    apiTest('properties', () async {
+      final db = await openTestDatabase();
       const revisionId = '1-581ad726ee407c8376fc94aad966051d013893c4';
       final doc = MutableDocument.withId('id');
 
@@ -31,26 +30,27 @@ void main() {
       expect(doc.revisionId, isNull);
       expect(doc.sequence, 0);
 
-      db.saveDocument(doc);
+      await db.saveDocument(doc);
 
       expect(doc.revisionId, revisionId);
       expect(doc.sequence, 1);
 
-      final loadedDoc = db.document(doc.id)!;
+      final loadedDoc = (await db.document(doc.id))!;
 
       expect(loadedDoc.id, 'id');
       expect(loadedDoc.revisionId, revisionId);
       expect(loadedDoc.sequence, 1);
     });
 
-    test('==', () {
-      final doc = savedDocument({'type': 'immutable'});
+    apiTest('==', () async {
+      final db = await openTestDatabase();
+      final doc = await savedDocument(db, {'type': 'immutable'});
 
       // Identical docs are equal.
       expect(doc, equality(doc));
 
       // Two instances at the same revision are equal.
-      expect(db.document(doc.id), equality(doc));
+      expect(await db.document(doc.id), equality(doc));
 
       final mutableDoc = doc.toMutable();
 
@@ -81,11 +81,12 @@ void main() {
       );
     });
 
-    test('hashCode', () {
-      final doc = savedDocument({'type': 'immutable'});
+    apiTest('hashCode', () async {
+      final db = await openTestDatabase();
+      final doc = await savedDocument(db, {'type': 'immutable'});
 
       expect(doc.hashCode, doc.hashCode);
-      expect((db.document(doc.id)).hashCode, doc.hashCode);
+      expect((await db.document(doc.id)).hashCode, doc.hashCode);
 
       expect(
         MutableDocument.withId('a').hashCode,
@@ -107,10 +108,11 @@ void main() {
     });
 
     group('immutable', () {
-      test('implements DictionaryInterface for properties', () {
+      apiTest('implements DictionaryInterface for properties', () async {
+        final db = await openTestDatabase();
         final date = DateTime.now();
         final blob = Blob.fromData('', Uint8List(0));
-        final doc = savedDocument({
+        final doc = await savedDocument(db, {
           'value': 'x',
           'string': 'a',
           'int': 1,
@@ -175,15 +177,16 @@ void main() {
         expect(doc.toList(), ['a', 'b', 'c']);
       });
 
-      test('toMutable', () {
-        final doc = savedDocument({'type': 'immutable'});
+      apiTest('toMutable', () async {
+        final db = await openTestDatabase();
+        final doc = await savedDocument(db, {'type': 'immutable'});
         expect(doc, isNot(isA<MutableDocument>()));
         final mutableDoc = doc.toMutable();
         expect(mutableDoc, doc);
       });
 
       test('toString', () {
-        final db = openSyncTestDb('Document-toString');
+        final db = openSyncTestDatabase();
         final doc = MutableDocument();
         db.saveDocument(doc);
         final loadedDoc = db.document(doc.id);
@@ -191,8 +194,9 @@ void main() {
           loadedDoc.toString(),
           'Document('
           'id: ${doc.id}, '
+          'revisionId: ${doc.revisionId}, '
           // ignore: missing_whitespace_between_adjacent_strings
-          'revisionId: ${doc.revisionId}'
+          'sequence: ${doc.sequence}'
           ')',
         );
       });
@@ -278,8 +282,9 @@ void main() {
         mutableDoc.toString(),
         'MutableDocument('
         'id: ${mutableDoc.id}, '
+        'revisionId: ${mutableDoc.revisionId}, '
         // ignore: missing_whitespace_between_adjacent_strings
-        'revisionId: ${mutableDoc.revisionId}'
+        'sequence: ${mutableDoc.sequence}'
         ')',
       );
     });

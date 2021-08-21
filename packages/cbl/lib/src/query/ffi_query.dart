@@ -1,10 +1,9 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database.dart';
-import '../database/database.dart';
 import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/fleece.dart' as fl;
@@ -12,7 +11,6 @@ import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
-import '../support/utils.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'join.dart';
@@ -20,75 +18,55 @@ import 'ordering.dart';
 import 'parameters.dart';
 import 'query.dart';
 import 'query_builder.dart';
+import 'result.dart';
 import 'result_set.dart';
 import 'select_result.dart';
 
 late final _bindings = cblBindings.query;
 
-class FfiQuery
-    with NativeResourceMixin<CBLQuery>, DelegatingResourceMixin
+class FfiQuery extends QueryBase
+    with NativeResourceMixin<CBLQuery>
     implements SyncQuery {
-  FfiQuery(
-    SyncDatabase database,
-    String query, {
+  FfiQuery({
     required String debugCreator,
-  }) : this._(
-          database: database,
-          language: CBLQueryLanguage.n1ql,
-          query: _normalizeN1qlQuery(query),
-          debugCreator: debugCreator,
-        );
-
-  FfiQuery.fromJsonRepresentation(
-    SyncDatabase database,
-    String json, {
-    required String debugCreator,
-  }) : this._(
-          database: database,
-          language: CBLQueryLanguage.json,
-          query: json,
-          debugCreator: debugCreator,
-        );
-
-  FfiQuery._({
-    SyncDatabase? database,
+    FfiDatabase? database,
     required CBLQueryLanguage language,
-    String? query,
-    required String debugCreator,
-  })  : _database = database as FfiDatabase?,
-        _language = language,
-        _definition = query,
-        _debugCreator = debugCreator {
-    database?.registerChildResource(this);
-  }
-
-  final String _debugCreator;
-  final CBLQueryLanguage _language;
-  final FfiDatabase? _database;
-  String? _definition;
-  late final _columnNames = _prepareColumnNames();
+    String? definition,
+  }) : super(
+          typeName: 'FfiQuery',
+          debugCreator: debugCreator,
+          database: database,
+          language: language,
+          definition: definition,
+        );
 
   @override
-  late final CblObject<CBLQuery> native = _prepareQuery();
+  FfiDatabase? get database => super.database as FfiDatabase?;
+
+  @override
+  late final NativeObject<CBLQuery> native;
+
+  List<String> get columnNames => useSync(() => _columnNames);
+  late final List<String> _columnNames;
 
   @override
   Parameters? get parameters => _parameters;
   ParametersImpl? _parameters;
 
   @override
-  set parameters(Parameters? value) {
-    if (value == null) {
-      _parameters = null;
-    } else {
-      _parameters = ParametersImpl.from(value);
-    }
-    _applyParameters();
-  }
+  set parameters(Parameters? value) => useSync(() {
+        if (value == null) {
+          _parameters = null;
+        } else {
+          _parameters = ParametersImpl.from(value);
+        }
+        _applyParameters();
+      });
 
   @override
   SyncResultSet execute() => useSync(() => FfiResultSet(
         native.call(_bindings.execute),
-        database: _database!,
+        database: database!,
         columnNames: _columnNames,
         debugCreator: 'FfiQuery.execute()',
       ));
@@ -110,24 +88,31 @@ class FfiQuery
               // result set.
               native.call((pointer) =>
                   _bindings.copyCurrentResults(pointer, listenerToken)),
-              database: _database!,
+              database: database!,
               columnNames: _columnNames,
               debugCreator: 'FfiQuery.changes()',
             ),
           ).stream);
 
-  CblObject<CBLQuery> _prepareQuery() => CblObject(
-        _database!.native.call((pointer) => _bindings.create(
-              pointer,
-              _language,
-              _definition!,
-            )),
-        debugName: 'FfiQuery(creator: $_debugCreator)',
-      );
+  @override
+  void prepare() => super.prepare();
 
   @override
-  String? get jsonRepresentation =>
-      _language == CBLQueryLanguage.json ? _definition : null;
+  FutureOr<void> performPrepare() {
+    native = CblObject(
+      database!.native.call((pointer) => _bindings.create(
+            pointer,
+            language,
+            definition!,
+          )),
+      debugName: 'FfiQuery(creator: $debugCreator)',
+    );
+
+    _columnNames = List.generate(
+      native.call(_bindings.columnCount),
+      (index) => native.call((pointer) => _bindings.columnName(pointer, index)),
+    );
+  }
 
   void _applyParameters() {
     final encoder = fl.FleeceEncoder()
@@ -149,24 +134,94 @@ class FfiQuery
           flDict.native.pointer.cast(),
         ));
   }
+}
 
-  List<String> _prepareColumnNames() => List.generate(
-        native.call(_bindings.columnCount),
-        (index) =>
-            native.call((pointer) => _bindings.columnName(pointer, index)),
+class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
+  FfiResultSet(
+    Pointer<CBLResultSet> pointer, {
+    required FfiDatabase database,
+    required List<String> columnNames,
+    required String debugCreator,
+  })  : _context = DatabaseMContext(database),
+        _columnNames = columnNames,
+        _iterator = ResultSetIterator(
+          pointer,
+          debugCreator: debugCreator,
+        );
+
+  final DatabaseMContext _context;
+  final List<String> _columnNames;
+  final ResultSetIterator _iterator;
+  Result? _current;
+
+  @override
+  Stream<Result> asStream() => Stream.fromIterable(this);
+
+  @override
+  FutureOr<List<Result>> allResults() => toList();
+
+  @override
+  Iterator<Result> get iterator => this;
+
+  @override
+  Result get current => _current ??= ResultImpl.fromValuesArray(
+        _iterator.current,
+        context: _context,
+        columnNames: _columnNames,
       );
 
   @override
-  String toString() => 'Query(${describeEnum(_language)}: $_definition)';
+  bool moveNext() {
+    _current = null;
+    return _iterator.moveNext();
+  }
+
+  @override
+  String toString() => 'FfiResultSet()';
 }
 
-String _normalizeN1qlQuery(String query) => query
-    // Collapse whitespace.
-    .replaceAll(RegExp(r'\s+'), ' ');
+class ResultSetIterator extends CblObject<CBLResultSet>
+    with IterableMixin<fl.Array>
+    implements Iterator<fl.Array> {
+  ResultSetIterator(
+    Pointer<CBLResultSet> pointer, {
+    this.encodeArray = false,
+    required String debugCreator,
+  }) : super(
+          pointer,
+          debugName: 'ResultSetIterator(creator: $debugCreator)',
+        );
+
+  static late final _bindings = cblBindings.resultSet;
+
+  final bool encodeArray;
+  var _isDone = false;
+  fl.Array? _current;
+
+  @override
+  Iterator<fl.Array> get iterator => this;
+
+  @override
+  fl.Array get current {
+    assert(_current != null || !_isDone);
+    return _current ??=
+        fl.Array.fromPointer(native.call(_bindings.resultArray));
+  }
+
+  @override
+  bool moveNext() {
+    if (_isDone) {
+      return false;
+    }
+    _current = null;
+    _isDone = !native.call(_bindings.next);
+    return !_isDone;
+  }
+}
 
 abstract class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
   SyncBuilderQuery({
-    SyncBuilderQuery? query,
+    BuilderQueryMixin? query,
     Iterable<SelectResultInterface>? selects,
     bool? distinct,
     DataSourceInterface? from,
@@ -177,13 +232,13 @@ abstract class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
     Iterable<OrderingInterface>? orderings,
     ExpressionInterface? limit,
     ExpressionInterface? offset,
-  }) : super._(
+  }) : super(
+          debugCreator: 'SyncBuilderQuery()',
           database: (from as DataSourceImpl?)?.database as FfiDatabase? ??
-              query?._database,
+              query?.database as FfiDatabase?,
           language: CBLQueryLanguage.json,
-          debugCreator: 'BuilderQuery()',
         ) {
-    init(
+    initBuilderQuery(
       query: query,
       selects: selects,
       distinct: distinct,
@@ -196,14 +251,5 @@ abstract class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
       limit: limit,
       offset: offset,
     );
-  }
-
-  @override
-  String? get jsonRepresentation => _definition ?? super.jsonRepresentation;
-
-  @override
-  CblObject<CBLQuery> _prepareQuery() {
-    _definition = super.jsonRepresentation;
-    return super._prepareQuery();
   }
 }

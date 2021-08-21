@@ -17,13 +17,14 @@ import 'blob_store.dart';
 import 'database.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
+import 'database_helper.dart';
 import 'document_change.dart';
 import 'ffi_blob_store.dart';
 
 late final _bindings = cblBindings.database;
 
 class FfiDatabase extends CBLDatabaseObject
-    with ClosableResourceMixin
+    with DatabaseHelper<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncDatabase, BlobStoreHolder {
   FfiDatabase({
     required String name,
@@ -33,9 +34,13 @@ class FfiDatabase extends CBLDatabaseObject
           configuration ?? DatabaseConfiguration(),
         ),
         super(
-          _bindings.open(name, configuration?.toCBLDatabaseConfiguration()),
+          runNativeCalls(() => _bindings.open(
+              name, configuration?.toCBLDatabaseConfiguration())),
           debugName: 'FfiDatabase($name, creator: $debugCreator)',
-        );
+        ) {
+    this.name = call(_bindings.name);
+    _path = call(_bindings.path);
+  }
 
   /// {@macro cbl.Database.removeSync}
   static void remove(String name, {String? directory}) => runNativeCalls(() {
@@ -68,25 +73,23 @@ class FfiDatabase extends CBLDatabaseObject
   var _deleteOnClose = false;
 
   @override
-  String get name => useSync(() => _name);
-
-  String get _name => call(_bindings.name);
+  late final String name;
 
   @override
-  String? get path => useSync(() => call(_bindings.path));
+  String? get path => _path;
+  String? _path;
 
   @override
   int get count => useSync(() => call(_bindings.count));
 
   @override
-  DatabaseConfiguration get config =>
-      useSync(() => DatabaseConfiguration.from(_config));
+  DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
 
   @override
   Document? document(String id) =>
       useSync(() => call((pointer) => _bindings.getDocument(pointer, id))
           ?.let((pointer) => DelegateDocument(
-                FfiDocumentDelegate(
+                FfiDocumentDelegate.fromPointer(
                   doc: pointer,
                   debugCreator: 'FfiDatabase.document()',
                 ),
@@ -102,8 +105,7 @@ class FfiDatabase extends CBLDatabaseObject
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       useSync(() {
-        document.database = this;
-        final delegate = document.prepareFfiDelegate();
+        final delegate = prepareDocument(document) as FfiDocumentDelegate;
 
         return _catchConflictException(() {
           runNativeCalls(() {
@@ -121,7 +123,7 @@ class FfiDatabase extends CBLDatabaseObject
     covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() => _saveDocumentWithConflictHandler(
+      use(() => saveDocumentWithConflictHandlerHelper(
             document,
             conflictHandler,
           ));
@@ -134,63 +136,10 @@ class FfiDatabase extends CBLDatabaseObject
       useSync(
           // Because the conflict handler is sync the result of the maybe async
           // method is always sync.
-          () => _saveDocumentWithConflictHandler(
+          () => saveDocumentWithConflictHandlerHelper(
                 document,
                 conflictHandler,
               ) as bool);
-
-  FutureOr<bool> _saveDocumentWithConflictHandler(
-    covariant MutableDelegateDocument documentBeingSaved,
-    SaveConflictHandler conflictHandler,
-  ) {
-    // Implementing the conflict resolution in Dart, instead of using
-    // the C implementation, allows us to make the conflict handler
-    // asynchronous.
-
-    var success = false;
-
-    final done = iterateMaybeAsync(() sync* {
-      var retry = false;
-
-      do {
-        if (saveDocument(
-          documentBeingSaved,
-          ConcurrencyControl.failOnConflict,
-        )) {
-          success = true;
-          retry = false;
-        } else {
-          // Load the conflicting document.
-          final conflictingDocument =
-              document(documentBeingSaved.id) as DelegateDocument?;
-
-          // Let conflict handler try resolving the conflict.
-          final handlerDescision = conflictHandler(
-            documentBeingSaved,
-            conflictingDocument,
-          );
-
-          if (handlerDescision is Future<bool>) {
-            yield handlerDescision.then((it) => retry = it);
-          } else {
-            retry = handlerDescision;
-          }
-
-          if (retry) {
-            mergeConflictingDocuments(
-              documentBeingSaved,
-              conflictingDocument,
-            );
-          }
-        }
-      } while (retry);
-    }());
-
-    if (done is Future<void>) {
-      return done.then((_) => success);
-    }
-    return success;
-  }
 
   @override
   bool deleteDocument(
@@ -198,8 +147,8 @@ class FfiDatabase extends CBLDatabaseObject
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       useSync(() {
-        document.database = this;
-        final delegate = document.delegate as FfiDocumentDelegate;
+        final delegate = prepareDocument(document, syncProperties: false)
+            as FfiDocumentDelegate;
 
         return _catchConflictException(() {
           runNativeCalls(() {
@@ -234,16 +183,16 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   FutureOr<void> _inBatch(FutureOr<void> Function() fn) {
-    _beginTransaction();
-    return finallyMaybeAsync(
-      (didThrow) => _endTransaction(commit: !didThrow),
+    beginTransaction();
+    return finallySyncOrAsync(
+      (didThrow) => endTransaction(commit: !didThrow),
       fn,
     );
   }
 
-  void _beginTransaction() => call(_bindings.beginTransaction);
+  void beginTransaction() => call(_bindings.beginTransaction);
 
-  void _endTransaction({required bool commit}) =>
+  void endTransaction({required bool commit}) =>
       call((pointer) => _bindings.endTransaction(pointer, commit: commit));
 
   @override
@@ -322,7 +271,11 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  String toString() => 'FfiDatabase($_name)';
+  String toString() => 'FfiDatabase($name)';
+
+  @override
+  FfiDocumentDelegate createNewDocumentDelegate(DocumentDelegate oldDelegate) =>
+      FfiDocumentDelegate.create(oldDelegate.id);
 }
 
 extension on MaintenanceType {
@@ -349,33 +302,4 @@ bool _catchConflictException(void Function() fn) {
     }
     rethrow;
   }
-}
-
-void mergeConflictingDocuments(
-  MutableDelegateDocument documentBeingSaved,
-  DelegateDocument? conflictingDocument,
-) {
-  // Make a copy of the resolved properties.
-  final resolvedProperties = {
-    for (final key in documentBeingSaved.keys)
-      key: documentBeingSaved.value(key),
-  };
-
-  // If the document was deleted it has to be recreated.
-  // ignore: parameter_assignments
-  conflictingDocument ??= MutableDelegateDocument(
-    FfiDocumentDelegate.createMutable(documentBeingSaved.id),
-  );
-
-  // Replace the delegate of documentBeingSaved with a copy of that of
-  // conflictingDocument. After this call, documentBeingSaved is the same as
-  // conflictingDocument.
-  FfiDocumentDelegate.replaceWithMutableCopy(
-    source: conflictingDocument,
-    target: documentBeingSaved,
-  );
-
-  // Restore the resolved properties which where overwritten in the previous
-  // step.
-  documentBeingSaved.setData(resolvedProperties);
 }

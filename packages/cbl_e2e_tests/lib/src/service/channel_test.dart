@@ -22,26 +22,33 @@ import 'package:web_socket_channel/io.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/test_variant.dart';
 
 void main() {
   setupTestBinding();
 
   group('Channel', () {
-    matrixTest('call with normal return', (channel) async {
+    channelTest('call with normal return', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.call(EchoRequest('Hello')),
         completion('Input: Hello'),
       );
     });
 
-    matrixTest('call with exceptional return', (channel) async {
+    channelTest('call with exceptional return', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.call(ThrowTestError()),
         throwsA(const TestError('Oops')),
       );
     });
 
-    matrixTest('call with data in request and response', (channel) async {
+    channelTest('call with data in request and response', () async {
+      final channel = await openTestChannel();
+
       Future<void> expectData(Data input, Object output) => expectLater(
             channel
                 .call(DataRequest(input))
@@ -57,7 +64,9 @@ void main() {
       await expectData(input.toSliceResult().toData(), [42, 1]);
     });
 
-    matrixTest('call non-existent endpoint', (channel) async {
+    channelTest('call non-existent endpoint', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.call(NonExistentEndpoint()),
         throwsA(isA<UnimplementedError>().having(
@@ -68,7 +77,9 @@ void main() {
       );
     });
 
-    matrixTest('stream emits event', (channel) async {
+    channelTest('stream emits event', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.stream(EchoRequest('Hello')),
         emitsInOrder(<Object>[
@@ -78,7 +89,9 @@ void main() {
       );
     });
 
-    matrixTest('stream emits error', (channel) async {
+    channelTest('stream emits error', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.stream(ThrowTestError()),
         emitsInOrder(<Object>[
@@ -88,14 +101,18 @@ void main() {
       );
     });
 
-    matrixTest('close infinite stream', (channel) async {
+    channelTest('close infinite stream', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.stream(InfiniteStream()),
         emits(null),
       );
     });
 
-    matrixTest('list to stream of non-existente endpoint', (channel) async {
+    channelTest('list to stream of non-existente endpoint', () async {
+      final channel = await openTestChannel();
+
       expect(
         channel.stream(NonExistentEndpoint()),
         emitsInOrder(<Object>[
@@ -112,88 +129,90 @@ void main() {
 }
 
 @isTest
-void matrixTest(
-  String description,
-  Future Function(Channel channel) fn,
-) {
-  void _test(
-      ChannelTransport transport, SerializationTarget serializationType) {
-    test(
-      '$description (variant: '
-      'transport: ${describeEnum(transport)}, '
-      // ignore: missing_whitespace_between_adjacent_strings
-      'target: ${describeEnum(serializationType)}'
-      ')',
-      () async {
-        StreamChannel<Object?> localTransport;
-
-        switch (transport) {
-          case ChannelTransport.controller:
-            final controller = StreamChannelController<Object?>();
-            localTransport = controller.local;
-            final remote = Channel(
-              transport: controller.foreign,
-              packetCodec: packetCoded(serializationType),
-              serializationRegistry: testSerializationRegistry(),
-            );
-            addTearDown(remote.close);
-            registerTestHandlers(remote);
-            break;
-          case ChannelTransport.isolatPort:
-            final receivePort = ReceivePort();
-            localTransport = IsolateChannel.connectReceive(receivePort);
-            final isolate = await Isolate.spawn(
-              testIsolateMain,
-              TestIsolateConfig(
-                libraries,
-                receivePort.sendPort,
-                serializationType,
-              ),
-            );
-            addTearDown(isolate.kill);
-            break;
-          case ChannelTransport.webSocket:
-            final httpServer = await HttpServer.bind('127.0.0.1', 0);
-            addTearDown(() => httpServer.close(force: true));
-
-            httpServer.transform(WebSocketTransformer()).listen((webSocket) {
-              final remote = Channel(
-                transport: IOWebSocketChannel(webSocket),
-                packetCodec: packetCoded(serializationType),
-                serializationRegistry: testSerializationRegistry(),
-              );
-
-              registerTestHandlers(remote);
-            });
-
-            localTransport =
-                IOWebSocketChannel.connect('ws://127.0.0.1:${httpServer.port}');
-            break;
-        }
-
-        final local = Channel(
-          transport: localTransport,
-          packetCodec: packetCoded(serializationType),
-          serializationRegistry: testSerializationRegistry(),
-        );
-        addTearDown(local.close);
-
-        await fn(local);
-      },
-    );
-  }
-
-  _test(ChannelTransport.controller, SerializationTarget.isolatePort);
-  _test(ChannelTransport.controller, SerializationTarget.json);
-  _test(ChannelTransport.isolatPort, SerializationTarget.isolatePort);
-  _test(ChannelTransport.isolatPort, SerializationTarget.json);
-  _test(ChannelTransport.webSocket, SerializationTarget.json);
+void channelTest(String description, Future Function() body) {
+  variantTest(description, body, variants: [
+    channelTransport,
+    serializationTarget,
+  ]);
 }
 
 enum ChannelTransport {
   isolatPort,
   webSocket,
   controller,
+}
+
+final channelTransport = EnumVariant<ChannelTransport>(
+  ChannelTransport.values,
+  isCompatible: (value, other, otherValue) {
+    if (value == ChannelTransport.webSocket) {
+      if (other == serializationTarget) {
+        return otherValue == SerializationTarget.json;
+      }
+    }
+
+    return true;
+  },
+  order: 100,
+);
+
+final serializationTarget = EnumVariant(SerializationTarget.values, order: 90);
+
+Future<Channel> openTestChannel() async {
+  StreamChannel<Object?> localTransport;
+
+  switch (channelTransport.value) {
+    case ChannelTransport.controller:
+      final controller = StreamChannelController<Object?>();
+      localTransport = controller.local;
+      final remote = Channel(
+        transport: controller.foreign,
+        packetCodec: packetCoded(serializationTarget.value),
+        serializationRegistry: testSerializationRegistry(),
+      );
+      addTearDown(remote.close);
+      registerTestHandlers(remote);
+      break;
+    case ChannelTransport.isolatPort:
+      final receivePort = ReceivePort();
+      localTransport = IsolateChannel.connectReceive(receivePort);
+      final isolate = await Isolate.spawn(
+        testIsolateMain,
+        TestIsolateConfig(
+          libraries,
+          receivePort.sendPort,
+          serializationTarget.value,
+        ),
+      );
+      addTearDown(isolate.kill);
+      break;
+    case ChannelTransport.webSocket:
+      final httpServer = await HttpServer.bind('127.0.0.1', 0);
+      addTearDown(() => httpServer.close(force: true));
+
+      httpServer.transform(WebSocketTransformer()).listen((webSocket) {
+        final remote = Channel(
+          transport: IOWebSocketChannel(webSocket),
+          packetCodec: packetCoded(serializationTarget.value),
+          serializationRegistry: testSerializationRegistry(),
+        );
+
+        registerTestHandlers(remote);
+      });
+
+      localTransport =
+          IOWebSocketChannel.connect('ws://127.0.0.1:${httpServer.port}');
+      break;
+  }
+
+  final local = Channel(
+    transport: localTransport,
+    packetCodec: packetCoded(serializationTarget.value),
+    serializationRegistry: testSerializationRegistry(),
+  );
+  addTearDown(local.close);
+
+  return local;
 }
 
 void registerTestHandlers(Channel channel) {

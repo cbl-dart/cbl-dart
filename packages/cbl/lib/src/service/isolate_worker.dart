@@ -1,3 +1,6 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: avoid_types_on_closure_parameters, prefer_void_to_null, prefer_constructors_over_static_methods
+
 import 'dart:async';
 import 'dart:isolate';
 
@@ -91,10 +94,11 @@ class IsolateWorker {
   SendPort _setupErrorHandler() {
     final receivePort = ReceivePort();
 
-    _onErrorSub = receivePort.asyncExpand((dynamic message) {
-      final errorAndStackTrace = message as List<Object?>;
-      final error = errorAndStackTrace[0] as Object;
-      final stackTrace = StackTrace.fromString(errorAndStackTrace[1] as String);
+    _onErrorSub = receivePort.asyncExpand((Object? message) {
+      final errorAndStackTrace = message! as List<Object?>;
+      final error = errorAndStackTrace[0]!;
+      final stackTrace =
+          StackTrace.fromString(errorAndStackTrace[1]! as String);
       return Stream<void>.error(error, stackTrace);
     }).listen(null, onError: _onErrorCompleter.completeError);
 

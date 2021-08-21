@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/support/utils.dart';
 
 import '../test_binding.dart';
 
@@ -14,10 +15,10 @@ final testSyncGatewayUrl = Uri.parse('ws://localhost:4984/db');
 Future<void> preReplicatorStopDelay() =>
     Future<void>.delayed(const Duration(milliseconds: 500));
 
-extension ReplicatorUtilsDatabaseExtension on SyncDatabase {
+extension ReplicatorUtilsDatabaseExtension on Database {
   /// Creates a replicator which is configured with the test sync gateway
   /// endpoint.
-  SyncReplicator createTestReplicator({
+  FutureOr<Replicator> createTestReplicator({
     ReplicatorType? replicatorType,
     bool? continuous,
     List<String>? channels,
@@ -25,27 +26,28 @@ extension ReplicatorUtilsDatabaseExtension on SyncDatabase {
     ReplicationFilter? pushFilter,
     ReplicationFilter? pullFilter,
     ConflictResolverFunction? conflictResolver,
-  }) {
-    final replicator = SyncReplicator(ReplicatorConfiguration(
-      database: this,
-      target: UrlEndpoint(testSyncGatewayUrl),
-      replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
-      continuous: continuous ?? false,
-      channels: channels,
-      documentIds: documentIds,
-      pushFilter: pushFilter,
-      pullFilter: pullFilter,
-      conflictResolver: conflictResolver != null
-          ? ConflictResolver.from(conflictResolver)
-          : null,
-    ));
-
-    /// Ensures that when the replicator is closed as part of closing the
-    /// database it wont be stopped to quickly.
-    addTearDown(preReplicatorStopDelay);
-
-    return replicator;
-  }
+  }) =>
+      Replicator.create(ReplicatorConfiguration(
+        database: this,
+        target: UrlEndpoint(testSyncGatewayUrl),
+        replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
+        continuous: continuous ?? false,
+        channels: channels,
+        documentIds: documentIds,
+        pushFilter: pushFilter,
+        pullFilter: pullFilter,
+        conflictResolver: conflictResolver != null
+            ? ConflictResolver.from(conflictResolver)
+            : null,
+      )).then((replicator) {
+        addTearDown(() async {
+          /// Ensures that when the replicator is closed as part of closing the
+          /// database it wont be stopped to quickly.
+          await preReplicatorStopDelay();
+          return replicator.stop();
+        });
+        return replicator;
+      });
 }
 
 final isReplicatorStatus = isA<ReplicatorStatus>();
@@ -65,7 +67,7 @@ Matcher hasActivityLevel(
 ) =>
     isReplicatorStatus.having((it) => it.activity, 'activity', activityLevel);
 
-extension ReplicatorUtilsExtension on SyncReplicator {
+extension ReplicatorUtilsExtension on Replicator {
   /// Returns a stream of the [status]se of this replicator by polling it.
   ///
   /// Polling can be more reliable when it is not possible to listen to
@@ -83,7 +85,7 @@ extension ReplicatorUtilsExtension on SyncReplicator {
   Stream<ReplicatorStatus> pollStatus() async* {
     // ignore: literal_only_boolean_expressions
     while (true) {
-      yield status;
+      yield await status;
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
   }

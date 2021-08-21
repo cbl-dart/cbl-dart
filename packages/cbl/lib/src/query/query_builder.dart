@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import '../support/resource.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'join.dart';
@@ -11,12 +10,14 @@ import 'select.dart';
 import 'select_result.dart';
 
 /// Entry point for building [Query]s through the query builder API.
-abstract class QueryBuilder {
-  /// {@template cbl.QueryBuilder.create}
+class QueryBuilder {
+  const QueryBuilder();
+
+  /// {@template cbl.QueryBuilder.createAsync}
   /// Creates an [AsyncQueryBuilder] for building [AsyncQuery]s.
   /// {@endtemplate}
   // ignore: prefer_constructors_over_static_methods
-  static AsyncQueryBuilder create() => const AsyncQueryBuilder();
+  static AsyncQueryBuilder createAsync() => const AsyncQueryBuilder();
 
   /// {@template cbl.QueryBuilder.createSync}
   /// Creates a [SyncQueryBuilder] for building [SyncQuery]s.
@@ -36,10 +37,23 @@ abstract class QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]);
+  ]) =>
+      selectAll([
+        result0,
+        result1,
+        result2,
+        result3,
+        result4,
+        result5,
+        result6,
+        result7,
+        result8,
+        result9,
+      ].whereType());
 
   /// Starts a new query and defines the selected columns.
-  Select selectAll(Iterable<SelectResultInterface> results);
+  Select selectAll(Iterable<SelectResultInterface> results) =>
+      SelectImpl(results, distinct: false);
 
   /// Starts a new query, which returns distinct rows and defines the selected
   /// columns.
@@ -54,11 +68,24 @@ abstract class QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]);
+  ]) =>
+      selectAllDistinct([
+        result0,
+        result1,
+        result2,
+        result3,
+        result4,
+        result5,
+        result6,
+        result7,
+        result8,
+        result9,
+      ].whereType());
 
   /// Starts a new query, which returns distinct rows and defines the selected
   /// columns.
-  Select selectAllDistinct(Iterable<SelectResultInterface> results);
+  Select selectAllDistinct(Iterable<SelectResultInterface> results) =>
+      SelectImpl(results, distinct: true);
 }
 
 /// The [QueryBuilder] for building [SyncQuery]s.
@@ -129,7 +156,7 @@ class SyncQueryBuilder implements QueryBuilder {
 
 /// The [QueryBuilder] for building [AsyncQuery]s.
 class AsyncQueryBuilder implements QueryBuilder {
-  /// {@macro cbl.QueryBuilder.create}
+  /// {@macro cbl.QueryBuilder.createAsync}
   const AsyncQueryBuilder();
 
   @override
@@ -193,7 +220,7 @@ class AsyncQueryBuilder implements QueryBuilder {
       AsyncSelectImpl(results, distinct: true);
 }
 
-mixin BuilderQueryMixin on AbstractResource {
+mixin BuilderQueryMixin on QueryBase {
   late final List<SelectResultImpl>? _selects;
   late final bool? _distinct;
   late final DataSourceImpl? _from;
@@ -205,7 +232,7 @@ mixin BuilderQueryMixin on AbstractResource {
   late final ExpressionImpl? _limit;
   late final ExpressionImpl? _offset;
 
-  void init({
+  void initBuilderQuery({
     BuilderQueryMixin? query,
     Iterable<SelectResultInterface>? selects,
     bool? distinct,
@@ -230,7 +257,11 @@ mixin BuilderQueryMixin on AbstractResource {
     _offset = offset as ExpressionImpl? ?? query?._offset;
   }
 
-  String? get jsonRepresentation => jsonEncode(_buildJsonRepresentation());
+  @override
+  String get definition => jsonRepresentation;
+
+  @override
+  late String jsonRepresentation = jsonEncode(_buildJsonRepresentation());
 
   Object _buildJsonRepresentation() => [
         'SELECT',
@@ -267,7 +298,7 @@ mixin BuilderQueryMixin on AbstractResource {
   }
 
   @override
-  String toString() => 'Query(json: $jsonRepresentation)';
+  String toString() => '$typeName(json: $jsonRepresentation)';
 
   void _checkHasFrom() {
     if (_from == null) {

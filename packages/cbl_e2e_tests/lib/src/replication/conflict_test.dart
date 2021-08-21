@@ -15,9 +15,9 @@ void main() {
       expect(
         conflict.toString(),
         'Conflict('
-        'local: MutableDocument(id: local, revisionId: null), '
+        'local: MutableDocument(id: local, revisionId: null, sequence: 0), '
         // ignore: missing_whitespace_between_adjacent_strings
-        'remote: MutableDocument(id: remote, revisionId: null)'
+        'remote: MutableDocument(id: remote, revisionId: null, sequence: 0)'
         ')',
       );
     });

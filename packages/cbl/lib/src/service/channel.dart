@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_constructors_over_static_methods
+
 import 'dart:async';
 
 import 'package:stream_channel/stream_channel.dart';
@@ -95,6 +97,7 @@ class Channel {
   Stream<R> stream<R>(Request<R> request) {
     _checkIsOpen();
     final id = _generateConversationId();
+    // ignore: close_sinks
     final controller = _streamControllers[id] = StreamController<Object?>(
       onListen: () => _sendMessage(_ListenToStream(id, request)),
       onCancel: () {
@@ -109,26 +112,38 @@ class Channel {
   /// Adds a call endpoint to this side of the channel.
   void addCallEndpoint<T extends Request<R>, R>(CallHandler<T, R> handler) {
     _checkStatusIsNot(ChannelStatus.closed);
-    assert(!_callHandlers.containsKey(T));
-    _callHandlers[T] = (request) => Future.value(handler(_checkType(request)));
+    assert(
+      !_callHandlers.containsKey(T),
+      'call endpoint already added: $T',
+    );
+    _callHandlers[T] = (request) => handler(_checkType(request));
   }
 
   /// Adds a stream endpoint to this side of the channel.
   void addStreamEndpoint<T extends Request<R>, R>(StreamHandler<T, R> handler) {
     _checkStatusIsNot(ChannelStatus.closed);
-    assert(!_streamHandlers.containsKey(T));
+    assert(
+      !_streamHandlers.containsKey(T),
+      'stream endpoint already added: $T',
+    );
     _streamHandlers[T] = (request) => handler(_checkType(request));
   }
 
   /// Removes a call endpoint from this side of the channel.
   void removeCallEndpoint(Type requestType) {
-    assert(_callHandlers.containsKey(requestType));
+    assert(
+      _callHandlers.containsKey(requestType),
+      'call endpoint does not exist: $requestType',
+    );
     _callHandlers.remove(requestType);
   }
 
   /// Removes a stream endpoint from this side of the channel.
   void removeStreamEndpoint(Type requestType) {
-    assert(_streamHandlers.containsKey(requestType));
+    assert(
+      _streamHandlers.containsKey(requestType),
+      'stream endpoint does not exist: $requestType',
+    );
     _streamHandlers.remove(requestType);
   }
 
@@ -227,6 +242,7 @@ class Channel {
 
     Future.sync(() => handler(message.request)).then(
       (result) => _sendCallSuccess(message.conversationId, result),
+      // ignore: avoid_types_on_closure_parameters
       onError: (Object error, StackTrace stackTrace) =>
           _sendCallError(message.conversationId, error, stackTrace),
     );
@@ -254,6 +270,7 @@ class Channel {
       (event) {
         _sendStreamEvent(message.conversationId, event);
       },
+      // ignore: avoid_types_on_closure_parameters
       onError: (Object error, StackTrace stackTrace) =>
           _sendStreamError(message.conversationId, error, stackTrace),
       onDone: () => _sendStreamDone(message.conversationId),
@@ -324,19 +341,17 @@ class Channel {
     return completer;
   }
 
-  StreamController<Object?>? _getStreamController(_Message message) {
-    // It's possible that an event is received after the stream has been
-    // canceled and the `_CancelStream` message has been sent. In this case
-    // the event is ignored.
-    return _streamControllers[message.conversationId];
-  }
+  StreamController<Object?>? _getStreamController(_Message message) =>
+      // It's possible that an event is received after the stream has been
+      // canceled and the `_CancelStream` message has been sent. In this case
+      // the event is ignored.
+      _streamControllers[message.conversationId];
 
-  StreamSubscription? _takeStreamSubscription(_Message message) {
-    // It's possible that a stream never created a subscription, for example
-    // when the request could not be deserialized. In those cases the
-    // `_CancelStream` is ignored.
-    return _streamSubscriptions.remove(message.conversationId);
-  }
+  StreamSubscription? _takeStreamSubscription(_Message message) =>
+      // It's possible that a stream never created a subscription, for example
+      // when the request could not be deserialized. In those cases the
+      // `_CancelStream` is ignored.
+      _streamSubscriptions.remove(message.conversationId);
 
   // === Message sending =======================================================
 
@@ -433,7 +448,7 @@ SerializationRegistry channelSerializationRegistry() => SerializationRegistry()
   ..addObjectCodec<ArgumentError>(
     'ArgumentError',
     serialize: (value, _) => {'message': value.toString()},
-    deserialize: (json, _) => ArgumentError(json['message'] as String),
+    deserialize: (map, _) => ArgumentError(map.getAs<String>('message')),
     isIsolatePortSafe: false,
   )
 
@@ -459,19 +474,21 @@ extension on SerializationRegistry {
 abstract class _Message implements Serializable {
   _Message(this.conversationId);
 
-  _Message.deserialize(StringMap map) : conversationId = map['cid'] as int;
+  _Message.deserialize(StringMap map)
+      : conversationId = map.getAs('conversationId');
 
   final int conversationId;
 
   @override
-  StringMap serialize(SerializationContext context) => {'cid': conversationId};
+  StringMap serialize(SerializationContext context) =>
+      {'conversationId': conversationId};
 }
 
 abstract class _RequestMessage extends _Message {
   _RequestMessage(int conversationId, this.request) : super(conversationId);
 
   _RequestMessage.deserialize(StringMap map, SerializationContext context)
-      : request = context.deserializePolymorphic(map['req']),
+      : request = context.deserializePolymorphic(map['request']),
         super.deserialize(map);
 
   final Object? request;
@@ -479,7 +496,7 @@ abstract class _RequestMessage extends _Message {
   @override
   StringMap serialize(SerializationContext context) => {
         ...super.serialize(context),
-        'req': context.serializePolymorphic(request),
+        'request': context.serializePolymorphic(request),
       };
 }
 
@@ -487,7 +504,7 @@ abstract class _SuccessMessage extends _Message {
   _SuccessMessage(int conversationId, this.result) : super(conversationId);
 
   _SuccessMessage.deserialize(StringMap map, SerializationContext context)
-      : result = context.deserializePolymorphic(map['res']),
+      : result = context.deserializePolymorphic(map['result']),
         super.deserialize(map);
 
   final Object? result;
@@ -495,7 +512,7 @@ abstract class _SuccessMessage extends _Message {
   @override
   StringMap serialize(SerializationContext context) => {
         ...super.serialize(context),
-        'res': context.serializePolymorphic(result),
+        'result': context.serializePolymorphic(result),
       };
 }
 
@@ -504,19 +521,26 @@ abstract class _ErrorMessage extends _Message {
       : super(conversationId);
 
   _ErrorMessage.deserialize(StringMap map, SerializationContext context)
-      : error = context.deserializePolymorphic(map['e'])!,
-        stackTrace = context.deserializeAs(map['s']),
+      : error = context.deserializePolymorphic(map['error'])!,
+        stackTrace = context.deserializeAs(map['stackTrace']),
         super.deserialize(map);
 
   final Object error;
   final StackTrace? stackTrace;
 
   @override
-  StringMap serialize(SerializationContext context) => {
-        ...super.serialize(context),
-        'e': context.serializePolymorphic(error),
-        's': context.serialize(stackTrace),
-      };
+  StringMap serialize(SerializationContext context) {
+    Object? error = this.error;
+    if (!context.canSerialize(error)) {
+      error = SerializationError('No serializer registered for error: $error');
+    }
+
+    return {
+      ...super.serialize(context),
+      'error': context.serializePolymorphic(error),
+      'stackTrace': context.serialize(stackTrace),
+    };
+  }
 }
 
 class _CallRequest extends _RequestMessage {

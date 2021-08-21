@@ -1,10 +1,17 @@
 import 'dart:async';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:meta/meta.dart';
+
 import '../database.dart';
 import '../database/database.dart';
+import '../database/ffi_database.dart';
+import '../database/proxy_database.dart';
 import '../support/resource.dart';
+import '../support/utils.dart';
 import 'ffi_query.dart';
 import 'parameters.dart';
+import 'proxy_query.dart';
 import 'result.dart';
 import 'result_set.dart';
 
@@ -130,17 +137,24 @@ abstract class Query implements Resource {
 /// A [Query] with a primarily synchronous API.
 abstract class SyncQuery implements Query {
   /// {@macro cbl.Query.fromN1qlSync}
-  factory SyncQuery.fromN1ql(SyncDatabase database, String query) =>
-      FfiQuery(database, query, debugCreator: 'SyncQuery.fromN1ql()');
+  factory SyncQuery.fromN1ql(SyncDatabase database, String query) => FfiQuery(
+        database: database as FfiDatabase,
+        definition: query,
+        language: CBLQueryLanguage.n1ql,
+        debugCreator: 'SyncQuery.fromN1ql()',
+      )..prepare();
 
   /// {@macro cbl.Query.fromJsonRepresentationSync}
   factory SyncQuery.fromJsonRepresentation(
-          SyncDatabase database, String json) =>
-      FfiQuery.fromJsonRepresentation(
-        database,
-        json,
+    SyncDatabase database,
+    String json,
+  ) =>
+      FfiQuery(
+        database: database as FfiDatabase,
+        definition: json,
+        language: CBLQueryLanguage.json,
         debugCreator: 'SyncQuery.fromJsonRepresentation()',
-      );
+      )..prepare();
 
   @override
   SyncResultSet execute();
@@ -155,15 +169,38 @@ abstract class SyncQuery implements Query {
 /// A [Query] query with a primarily asynchronous API.
 abstract class AsyncQuery implements Query {
   /// {@macro cbl.Query.fromN1qlAsync}
-  static Future<AsyncQuery> fromN1ql(AsyncDatabase database, String query) =>
-      throw UnimplementedError();
+  static Future<AsyncQuery> fromN1ql(
+    AsyncDatabase database,
+    String query,
+  ) async {
+    final q = ProxyQuery(
+      database: database as ProxyDatabase,
+      debugCreator: 'AsyncQuery.fromN1ql()',
+      language: CBLQueryLanguage.n1ql,
+      definition: query,
+    );
+
+    await q.prepare();
+
+    return q;
+  }
 
   /// {@macro cbl.Query.fromJsonRepresentation}
   static Future<AsyncQuery> fromJsonRepresentation(
     AsyncDatabase database,
     String json,
-  ) =>
-      throw UnimplementedError();
+  ) async {
+    final q = ProxyQuery(
+      database: database as ProxyDatabase,
+      debugCreator: 'AsyncQuery.fromJsonRepresentation()',
+      language: CBLQueryLanguage.json,
+      definition: json,
+    );
+
+    await q.prepare();
+
+    return q;
+  }
 
   @override
   Future<ResultSet> execute();
@@ -171,3 +208,81 @@ abstract class AsyncQuery implements Query {
   @override
   Future<String> explain();
 }
+
+abstract class QueryBase with DelegatingResourceMixin implements Query {
+  QueryBase({
+    required this.typeName,
+    required this.debugCreator,
+    this.database,
+    required this.language,
+    String? definition,
+  }) : definition = language == CBLQueryLanguage.n1ql
+            ? _normalizeN1qlQuery(definition!)
+            : definition;
+
+  final String typeName;
+  final String debugCreator;
+  final Database? database;
+  final CBLQueryLanguage language;
+  String? definition;
+  bool _didRegisterAsResource = false;
+  FutureOr<bool>? _prepared = false;
+
+  FutureOr<void> prepare() {
+    _registerAsResource();
+
+    if (_prepared != false) {
+      return null;
+    }
+
+    // ignore: void_checks
+    return _prepared = performPrepare().then((_) => true);
+  }
+
+  @protected
+  FutureOr<void> performPrepare();
+
+  @override
+  T useSync<T>(T Function() f) {
+    _registerAsResource();
+    return super.useSync(() {
+      assert(_prepared is! Future);
+      if (_prepared == false) {
+        final result = performPrepare();
+        assert(result is! Future);
+        _prepared = true;
+      }
+      return f();
+    });
+  }
+
+  @override
+  Future<T> use<T>(FutureOr<T> Function() f) {
+    _registerAsResource();
+    return super.use(() async {
+      if (_prepared == false) {
+        _prepared = performPrepare().then((_) => true);
+      }
+      await _prepared;
+      return f();
+    });
+  }
+
+  @override
+  String? get jsonRepresentation =>
+      language == CBLQueryLanguage.json ? definition : null;
+
+  @override
+  String toString() => '$typeName(${describeEnum(language)}: $definition)';
+
+  void _registerAsResource() {
+    if (!_didRegisterAsResource) {
+      (database! as AbstractResource).registerChildResource(this);
+      _didRegisterAsResource = true;
+    }
+  }
+}
+
+String _normalizeN1qlQuery(String query) => query
+    // Collapse whitespace.
+    .replaceAll(RegExp(r'\s+'), ' ');

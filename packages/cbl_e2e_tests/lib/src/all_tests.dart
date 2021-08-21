@@ -18,6 +18,7 @@ import 'log/logger_test.dart' as log_logger;
 import 'query/index/index_configuration_test.dart'
     as query_index_index_configuration;
 import 'query/parameters_test.dart' as query_parameters;
+import 'query/query_builder_test.dart' as query_builder;
 import 'query/query_test.dart' as query_query;
 import 'query/result_test.dart' as query_result;
 import 'replication/authenticator_test.dart' as replication_authenticator;
@@ -29,6 +30,7 @@ import 'replication/endpoint_test.dart' as replication_endpoint;
 import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
+import 'service/cbl_worker_test.dart' as service_cbl_worker;
 import 'service/channel_test.dart' as service_channel;
 import 'service/isolate_worker_test.dart' as service_isolate_worker;
 import 'support/async_callback_test.dart' as support_async_callback;
@@ -53,6 +55,7 @@ final tests = [
   log_logger.main,
   query_index_index_configuration.main,
   query_parameters.main,
+  query_builder.main,
   query_query.main,
   query_result.main,
   replication_authenticator.main,
@@ -62,6 +65,7 @@ final tests = [
   replication_endpoint.main,
   replication_replicator_change.main,
   replication_replicator.main,
+  service_cbl_worker.main,
   service_isolate_worker.main,
   service_channel.main,
   support_async_callback.main,

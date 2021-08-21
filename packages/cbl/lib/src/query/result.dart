@@ -10,6 +10,7 @@ import '../document/array.dart';
 import '../document/dictionary.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
+import '../support/encoding.dart';
 import '../support/native_object.dart';
 import 'result_set.dart';
 
@@ -263,6 +264,34 @@ class ResultImpl with IterableMixin<String> implements Result {
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
     return utf8.decode(encoder.finish().toTypedList());
+  }
+
+  EncodedData encodeColumnValues(EncodingFormat format) {
+    fl.Array columnValues;
+
+    switch (format) {
+      case EncodingFormat.fleece:
+        if (_columnValuesData != null) {
+          return EncodedData.fleece(_columnValuesData!);
+        } else {
+          columnValues = _columnValuesArray!;
+        }
+        break;
+      case EncodingFormat.json:
+        // ignore: invariant_booleans
+        if (_columnValuesData != null) {
+          columnValues =
+              fl.Doc.fromResultData(_columnValuesData!, FLTrust.trusted).root
+                  as fl.Array;
+        } else {
+          columnValues = _columnValuesArray!;
+        }
+        break;
+    }
+
+    final encoder = fl.FleeceEncoder(format: format.toFLEncoderFormat());
+    columnValues.call(encoder.writeValue);
+    return EncodedData(format, encoder.finish());
   }
 
   ArrayImpl _createArray() {

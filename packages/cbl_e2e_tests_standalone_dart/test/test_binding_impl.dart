@@ -16,7 +16,7 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   }
 
   @override
-  String resolveTmpDir() => './test/.tmp';
+  String resolveTmpDir() => Directory('test/.tmp').absolute.path;
 
   @override
   late final libraries = (() {
