@@ -85,11 +85,14 @@ class FleeceEncoderContext {
   FleeceEncoderContext({
     this.database,
     this.encodeQueryParameter = false,
+    this.saveExternalData = false,
   });
 
   final Database? database;
 
   final bool encodeQueryParameter;
+
+  final bool saveExternalData;
 }
 
 abstract class MCollectionWrapper {

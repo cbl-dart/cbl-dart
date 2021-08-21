@@ -67,7 +67,7 @@ abstract class MCollection {
 
     _isEncoding = true;
 
-    return finallyMaybeAsync(
+    return finallySyncOrAsync(
       (_) => _isEncoding = false,
       () => performEncodeTo(encoder),
     );

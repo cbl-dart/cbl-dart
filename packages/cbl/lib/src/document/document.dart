@@ -3,11 +3,10 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
 import '../database/database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
+import '../support/encoding.dart';
 import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
@@ -45,14 +44,14 @@ abstract class MutableDocument implements Document, MutableDictionaryInterface {
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument([Map<String, Object?>? data]) =>
-      MutableDelegateDocument(NewDocumentDelegate(), data: data);
+      MutableDelegateDocument(data);
 
   /// Creates a new [MutableDocument] with a given [id], optionally
   /// initialized with [data].
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument.withId(String id, [Map<String, Object?>? data]) =>
-      MutableDelegateDocument(NewDocumentDelegate(id), data: data);
+      MutableDelegateDocument.withId(id, data);
 }
 
 abstract class DocumentDelegate {
@@ -62,18 +61,26 @@ abstract class DocumentDelegate {
 
   int get sequence;
 
-  Data get properties;
+  EncodedData get properties;
 
-  set properties(Data value);
+  set properties(EncodedData value);
 
   MRoot createMRoot(MContext context, {required bool isMutable}) =>
-      MRoot.fromData(properties, context: context, isMutable: isMutable);
+      MRoot.fromData(
+        properties.toFleece(),
+        context: context,
+        isMutable: isMutable,
+      );
 
   DocumentDelegate toMutable();
 }
 
 class NewDocumentDelegate extends DocumentDelegate {
   NewDocumentDelegate([String? id]) : id = id ?? createUuid();
+
+  NewDocumentDelegate.mutableCopy(NewDocumentDelegate delegate)
+      : id = delegate.id,
+        properties = delegate.properties;
 
   @override
   final String id;
@@ -85,17 +92,18 @@ class NewDocumentDelegate extends DocumentDelegate {
   final sequence = 0;
 
   @override
-  late Data properties = _emptyProperties;
+  late EncodedData properties = _emptyProperties;
 
   @override
-  DocumentDelegate toMutable() => this;
+  DocumentDelegate toMutable() => NewDocumentDelegate.mutableCopy(this);
 
   static late final _emptyProperties = _createEmptyProperties();
 
-  static Data _createEmptyProperties() => (fl.FleeceEncoder()
-        ..beginDict(0)
-        ..endDict())
-      .finish();
+  static EncodedData _createEmptyProperties() =>
+      EncodedData.fleece((fl.FleeceEncoder()
+            ..beginDict(0)
+            ..endDict())
+          .finish());
 }
 
 /// The context for [MCollection]s within a [DelegateDocument].
@@ -116,7 +124,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
     Database? database,
   })  : _delegate = delegate,
         _database = database {
-    _initPropertiesDictionary();
+    _setupProperties();
   }
 
   DocumentDelegate get delegate => _delegate;
@@ -124,15 +132,16 @@ class DelegateDocument with IterableMixin<String> implements Document {
 
   void setDelegate(
     DocumentDelegate delegate, {
-    bool updateDocumentProperties = true,
+    bool updateProperties = true,
   }) {
     if (_delegate == delegate) {
       return;
     }
 
     _delegate = delegate;
-    if (updateDocumentProperties) {
-      _initPropertiesDictionary();
+
+    if (updateProperties) {
+      _setupProperties();
     }
   }
 
@@ -153,29 +162,36 @@ class DelegateDocument with IterableMixin<String> implements Document {
     _database = database;
   }
 
-  void setProperties(Data properties) {
+  void setProperties(EncodedData properties) {
     delegate.properties = properties;
-    _initPropertiesDictionary();
+    _setupProperties();
   }
 
-  Data encodeProperties({
-    FLEncoderFormat format = FLEncoderFormat.fleece,
+  FutureOr<EncodedData> getProperties({
+    EncodingFormat format = EncodingFormat.fleece,
+    bool saveExternalData = false,
   }) {
     assert(database != null);
-    final encoder = fl.FleeceEncoder(format: format)
+
+    final encoder = fl.FleeceEncoder(format: format.toFLEncoderFormat())
       ..extraInfo = FleeceEncoderContext(
         database: database,
         encodeQueryParameter: true,
+        saveExternalData: saveExternalData,
       );
-    final encodeToFuture = _root.encodeTo(encoder);
-    assert(encodeToFuture is! Future);
-    return encoder.finish();
+
+    return _root
+        .encodeTo(encoder)
+        .then((_) => EncodedData(format, encoder.finish()));
   }
+
+  FutureOr<void> syncProperties() => getProperties(saveExternalData: true)
+      .then((properties) => delegate.properties = properties);
 
   final bool _isMutable = false;
   final String _typeName = 'Document';
 
-  void _initPropertiesDictionary() {
+  void _setupProperties() {
     _root = delegate.createMRoot(DocumentMContext(this), isMutable: _isMutable);
     // ignore: cast_nullable_to_non_nullable
     _properties = _root.asNative as Dictionary;
@@ -237,7 +253,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
   Map<String, Object?> toPlainMap() => _properties.toPlainMap();
 
   @override
-  MutableDocument toMutable() => MutableDelegateDocument(
+  MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
         delegate.toMutable(),
         database: _database,
       );
@@ -261,14 +277,21 @@ class DelegateDocument with IterableMixin<String> implements Document {
   @override
   String toString() => '$_typeName('
       'id: $id, '
+      'revisionId: $revisionId, '
       // ignore: missing_whitespace_between_adjacent_strings
-      'revisionId: $revisionId'
+      'sequence: $sequence'
       ')';
 }
 
 class MutableDelegateDocument extends DelegateDocument
     implements MutableDocument {
-  MutableDelegateDocument(
+  MutableDelegateDocument([Map<String, Object?>? data])
+      : this.fromDelegate(NewDocumentDelegate(), data: data);
+
+  MutableDelegateDocument.withId(String id, [Map<String, Object?>? data])
+      : this.fromDelegate(NewDocumentDelegate(id), data: data);
+
+  MutableDelegateDocument.fromDelegate(
     DocumentDelegate delegate, {
     Database? database,
     Map<String, Object?>? data,
@@ -276,10 +299,6 @@ class MutableDelegateDocument extends DelegateDocument
     if (data != null) {
       setData(data);
     }
-  }
-
-  void flushPropertiesToDelegate() {
-    delegate.properties = encodeProperties();
   }
 
   @override
@@ -293,8 +312,8 @@ class MutableDelegateDocument extends DelegateDocument
   late MutableDictionary _mutableProperties;
 
   @override
-  void _initPropertiesDictionary() {
-    super._initPropertiesDictionary();
+  void _setupProperties() {
+    super._setupProperties();
     _mutableProperties = _properties as MutableDictionary;
   }
 

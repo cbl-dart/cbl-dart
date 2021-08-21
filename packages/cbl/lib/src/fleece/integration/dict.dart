@@ -105,7 +105,7 @@ class MDict extends MCollection {
     if (!isMutated) {
       encoder.writeValue(_dict!.cast());
     } else {
-      return iterateMaybeAsync(() sync* {
+      return syncOrAsync(() sync* {
         encoder.beginDict(length);
         for (final entry in iterable) {
           encoder.writeKey(entry.key);

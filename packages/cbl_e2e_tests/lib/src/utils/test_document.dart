@@ -21,18 +21,20 @@ Matcher isTestDocument(String value) => isA<Document>()
     .having((it) => it.id, 'id', testDocumentId)
     .having((it) => it.toPlainMap(), 'toMap()', {'value': value});
 
-extension TestDocumentDatabaseExtension on SyncDatabase {
+extension TestDocumentDatabaseExtension on Database {
   /// Writes [value] in the properties of the test document. If its does not
   /// exist already in this database, it is created.
-  Document writeTestDocument(String value) {
-    final doc = getTestDocumentOrNull() ?? MutableDocument();
+  Future<Document> writeTestDocument(String value) async {
+    final doc = (await getTestDocumentOrNull()) ?? MutableDocument();
     testDocumentId ??= doc.id;
     doc.setValue(value, key: 'value');
-    saveDocument(doc);
+    await saveDocument(doc);
     return doc;
   }
 
   /// Gets the test document or `null` if does not exist.
-  MutableDocument? getTestDocumentOrNull() =>
-      testDocumentId == null ? null : document(testDocumentId!)?.toMutable();
+  Future<MutableDocument?> getTestDocumentOrNull() async =>
+      testDocumentId == null
+          ? null
+          : (await document(testDocumentId!))?.toMutable();
 }

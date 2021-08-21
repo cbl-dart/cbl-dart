@@ -7,6 +7,7 @@ import '../support/utils.dart';
 import 'configuration.dart';
 import 'document_replication.dart';
 import 'ffi_replicator.dart';
+import 'proxy_replicator.dart';
 import 'replicator_change.dart';
 
 /// The states a [Replicator] can be in during its lifecycle.
@@ -194,7 +195,7 @@ abstract class SyncReplicator implements Replicator {
 abstract class AsyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createAsync}
   static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
-      throw UnimplementedError();
+      ProxyReplicator.create(config);
 
   @override
   Future<ReplicatorStatus> get status;

@@ -9,7 +9,7 @@ typedef StringMap = Map<String, Object?>;
 
 extension StringMapExt on StringMap {
   T getAs<T>(String key) => this[key] as T;
-  List<T> getAsList<T>(String key) => (this[key] as List).cast();
+  List<T> getAsList<T>(String key) => (this[key]! as List).cast();
 }
 
 extension ValueExt<T> on T {
@@ -19,6 +19,8 @@ extension ValueExt<T> on T {
     return this;
   }
 }
+
+String enumName(Object value) => value.toString().split('.').first;
 
 /// Returns the name of a enum value.
 ///
@@ -137,7 +139,7 @@ class Once<T> {
   String get _debugName => debugName ?? runtimeType.toString();
 }
 
-FutureOr<void> iterateMaybeAsync(Iterable<FutureOr<void>> iterable) {
+FutureOr<void> syncOrAsync(Iterable<FutureOr<void>> iterable) {
   final iterator = iterable.iterator;
   while (iterator.moveNext()) {
     final result = iterator.current;
@@ -152,7 +154,20 @@ FutureOr<void> iterateMaybeAsync(Iterable<FutureOr<void>> iterable) {
   }
 }
 
-FutureOr<T> finallyMaybeAsync<T>(
+extension FutureOrExt<T> on FutureOr<T> {
+  FutureOr<R> then<R>(FutureOr<R> Function(T value) then) {
+    final self = this;
+    if (self is Future<T>) {
+      return self.then(then);
+    } else {
+      return then(self);
+    }
+  }
+
+  Future<T> toFuture() => Future.value(this);
+}
+
+FutureOr<T> finallySyncOrAsync<T>(
   void Function(bool didThrow) finallyFn,
   FutureOr<T> Function() fn,
 ) {

@@ -30,7 +30,7 @@ typedef Serializer<T extends Object> = Object Function(
 
 /// Deserializes a value decoded from json to a value of type [T].
 typedef Deserializer<T extends Object> = T Function(
-  Object json,
+  Object value,
   SerializationContext context,
 );
 
@@ -86,7 +86,13 @@ class SerializationContext {
 
   final SerializationTarget target;
 
-  List<Data> get data => _data;
+  bool canSerialize(Object? value) {
+    if (value == null) {
+      return true;
+    }
+
+    return registry.resolveRegisteredType(value) != null;
+  }
 
   Object? serialize<R extends Object>(R? value) {
     if (value == null) {
@@ -134,7 +140,7 @@ class SerializationContext {
     return deserializer(value, this);
   }
 
-  Object? deserializePolymorphic(Object? json) {
+  T? deserializePolymorphic<T>(Object? json) {
     if (json == null) {
       return null;
     }
@@ -151,8 +157,17 @@ class SerializationContext {
 
     final deserializer = registry.getDeserializer(type)!;
 
-    return deserializer(list[1]!, this);
+    final value = deserializer(list[1]!, this);
+    if (value is! T) {
+      throw SerializationError(
+        'Value was polymorphically deserialized, but is not of the expected '
+        'type $T: $value',
+      );
+    }
+    return value as T;
   }
+
+  List<Data> get data => _data;
 
   int addData(Data data) {
     _data.add(data);
@@ -327,51 +342,56 @@ SerializationRegistry _basicSerializationRegistry() =>
     SerializationRegistry.empty()
       ..addCodec<String>(
         '__String__',
-        serialize: (value, codec) => value,
-        deserialize: (json, codec) => json as String,
+        serialize: (value, context) => value,
+        deserialize: (value, context) => value as String,
       )
       ..addCodec<int>(
         '__int__',
-        serialize: (value, codec) => value,
-        deserialize: (json, codec) => json as int,
+        serialize: (value, context) => value,
+        deserialize: (value, context) => value as int,
       )
       ..addCodec<double>(
         '__double__',
-        serialize: (value, codec) => value,
-        deserialize: (json, codec) => json as double,
+        serialize: (value, context) => value,
+        deserialize: (value, context) => value as double,
       )
       ..addCodec<num>(
         '__num__',
-        serialize: (value, codec) => value,
-        deserialize: (json, codec) => json as num,
+        serialize: (value, context) => value,
+        deserialize: (value, context) => value as num,
       )
       ..addCodec<bool>(
         '__bool__',
-        serialize: (value, codec) => value,
-        deserialize: (json, codec) => json as bool,
+        serialize: (value, context) => value,
+        deserialize: (value, context) => value as bool,
       )
       ..addObjectCodec<DateTime>(
         '__DateTime__',
-        serialize: (value, _) => {
+        serialize: (value, context) => {
           'us': value.microsecondsSinceEpoch,
           'isUtc': value.isUtc,
         },
-        deserialize: (json, _) => DateTime.fromMicrosecondsSinceEpoch(
-          json['us']! as int,
-          isUtc: json['isUtc']! as bool,
+        deserialize: (value, context) => DateTime.fromMicrosecondsSinceEpoch(
+          value.getAs('us'),
+          isUtc: value.getAs('isUtc'),
         ),
+      )
+      ..addCodec<Duration>(
+        '__Duration__',
+        serialize: (value, context) => value.inMicroseconds,
+        deserialize: (value, context) => Duration(microseconds: value as int),
       )
       ..addCodec<Data>(
         '__Data__',
         serialize: (value, context) => context.addData(value),
-        deserialize: (json, context) => context.getData(json as int),
+        deserialize: (value, context) => context.getData(value as int),
         handleSubTypes: true,
         isIsolatePortSafe: false,
       )
       ..addCodec<StackTrace>(
         '__StackTrace__',
-        serialize: (value, codec) => value.toString(),
-        deserialize: (json, codec) => StackTrace.fromString(json as String),
+        serialize: (value, context) => value.toString(),
+        deserialize: (value, context) => StackTrace.fromString(value as String),
         isIsolatePortSafe: false,
       )
       ..addSerializableCodec(

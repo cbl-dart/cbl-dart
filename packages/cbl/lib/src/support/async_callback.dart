@@ -36,6 +36,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
   AsyncCallback(
     this.handler, {
     this.errorResult = failureResult,
+    this.ignoreErrorsInDart = false,
     required this.debugName,
     this.debug = false,
   }) {
@@ -67,6 +68,11 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
   /// The default is to send [failureResult], which is a special value which
   /// signals the native side to throw a C++ `std::runtime_exception`.
   final Object? errorResult;
+
+  /// If `true` errors thrown by [handler] are ignored. Otherwise they are
+  /// treated as unhandled errors in the [Zone] in which the [AsyncCallback]
+  /// was created.
+  final bool ignoreErrorsInDart;
 
   /// A debug description of this callback.
   final String debugName;
@@ -143,7 +149,7 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
       sendPort!.send([callAddress, result]);
     }
 
-    Future(() => handler(args)).then(
+    Future.sync(() => handler(args)).then(
       (result) {
         assert(result == null || sendPort != null);
         sendResult(result);
@@ -151,8 +157,10 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
       // ignore: avoid_types_on_closure_parameters
       onError: (Object error, StackTrace stackTrace) {
         sendResult(errorResult);
-        // ignore: only_throw_errors
-        throw error;
+        if (!ignoreErrorsInDart) {
+          // ignore: only_throw_errors
+          throw error;
+        }
       },
     );
   }

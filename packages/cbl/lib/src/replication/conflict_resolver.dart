@@ -53,3 +53,29 @@ class _FunctionConflictResolver implements ConflictResolver {
   @override
   FutureOr<Document?> resolve(Conflict conflict) => _resolve(conflict);
 }
+
+/// The default [ConflictResolver].
+///
+/// This resolver can be used, in a custom [ConflictResolver], to use the
+/// default strategy for some documents and a custom strategy for others.
+class DefaultConflictResolver implements ConflictResolver {
+  const DefaultConflictResolver();
+
+  @override
+  FutureOr<Document?> resolve(Conflict conflict) {
+    final remoteDocument = conflict.remoteDocument;
+    final localDocument = conflict.localDocument;
+
+    // If the document has been deleted (either locally or remotely), delete it.
+    if (remoteDocument == null || localDocument == null) {
+      return null;
+    }
+
+    // Resolve to the most recently changed document.
+    if (localDocument.revisionId!.compareTo(remoteDocument.revisionId!) > 0) {
+      return localDocument;
+    } else {
+      return remoteDocument;
+    }
+  }
+}

@@ -235,7 +235,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       ));
     }
 
-    if (context != null) {
+    if (context != null && context.saveExternalData) {
       final database = context.database;
       if (database != null) {
         _checkBlobIsFromSameDatabase(database);
@@ -245,7 +245,6 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
           assert(_content != null);
 
           final blobStore = _blobStore!;
-
           if (blobStore is SyncBlobStore) {
             return blobStore
                 .saveBlobFromDataSync(_contentType!, _content!.toData())

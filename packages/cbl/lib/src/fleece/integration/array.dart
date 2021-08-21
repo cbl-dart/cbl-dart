@@ -127,7 +127,7 @@ class MArray extends MCollection {
     if (!isMutated) {
       encoder.writeValue(_array!.cast());
     } else {
-      return iterateMaybeAsync(() sync* {
+      return syncOrAsync(() sync* {
         encoder.beginArray(length);
         var index = 0;
         for (final value in _values) {

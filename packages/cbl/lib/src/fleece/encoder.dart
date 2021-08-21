@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -63,7 +64,7 @@ class FleeceEncoder {
   /// Converts the [json] string to [format] and returns the result.
   Data convertJson(String json) {
     reset();
-    writeJson(json);
+    writeJson(Data.fromTypedList(utf8.encode(json) as Uint8List));
     return finish();
   }
 
@@ -149,8 +150,8 @@ class FleeceEncoder {
   /// Writes the [TypedData] [value] to this encoder.
   void writeData(Data value) => _encoderBinds.writeData(_pointer, value);
 
-  /// Writes the JSON string [value] to this encoder.
-  void writeJson(String value) => _encoderBinds.writeJSON(_pointer, value);
+  /// Writes the UTF-8 encoded JSON string [value] to this encoder.
+  void writeJson(Data value) => _encoderBinds.writeJSON(_pointer, value);
 
   /// Begins an array and reserves space for [reserveLength] element.
   void beginArray(int reserveLength) =>

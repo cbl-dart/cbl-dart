@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/couchbase_lite.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
+import 'utils/database_utils.dart';
 import 'utils/file_system.dart';
 
 export 'package:test/test.dart'
@@ -22,8 +22,15 @@ export 'package:test/test.dart'
         printOnFailure,
         markTestSkipped;
 
-/// Signature of the function to return from [CblE2eTestBinding.testFn].
-typedef TestFn = void Function(String description, dynamic Function() body);
+typedef TestFn = void Function(
+  String description,
+  FutureOr<void> Function() body,
+);
+
+typedef GroupFn = void Function(
+  String description,
+  void Function() body,
+);
 
 typedef TestHook = void Function(dynamic Function() body);
 
@@ -60,7 +67,7 @@ abstract class CblE2eTestBinding {
 
   TestFn get testFn => t.test;
 
-  TestFn get groupFn => t.group;
+  GroupFn get groupFn => t.group;
 
   TestHook get setUpAllFn => t.setUpAll;
 
@@ -71,6 +78,24 @@ abstract class CblE2eTestBinding {
   TestHook get tearDownFn => t.tearDown;
 
   TestHook get addTearDownFn => t.addTearDown;
+
+  final _groupDescriptions = <String>[];
+
+  void _test(String description, FutureOr<void> Function() body) {
+    final testDescriptions = [..._groupDescriptions, description];
+    testFn(
+      description,
+      () => runZoned<dynamic>(body, zoneValues: {
+        #testDescriptions: testDescriptions,
+      }),
+    );
+  }
+
+  void _group(String description, void Function() body) {
+    _groupDescriptions.add(description);
+    groupFn(description, body);
+    _groupDescriptions.removeLast();
+  }
 
   void _setupTestLifecycleHooks() {
     setUpAllFn(() async {
@@ -89,6 +114,9 @@ abstract class CblE2eTestBinding {
         )
         ..level = LogLevel.verbose;
     });
+
+    setupSharedTestCblWorker();
+    setupSharedTestDatabases();
   }
 
   Future _cleanTestTmpDir() => Directory(tmpDir).reset();
@@ -99,21 +127,16 @@ late final tmpDir = CblE2eTestBinding.instance.tmpDir;
 
 late final libraries = CblE2eTestBinding.instance.libraries;
 
-/// Returns a unique name for a database every time it is called, which starts
-/// with [testName].
-String testDbName(String? testName) => [
-      if (testName != null) testName,
-      '${DateTime.now().millisecondsSinceEpoch}',
-      '${Random().nextInt(10000)}'
-    ].join('-');
+List<String>? get testDescriptions =>
+    Zone.current[#testDescriptions] as List<String>?;
 
 @isTest
-void test(String description, dynamic Function() body) =>
-    CblE2eTestBinding.instance.testFn(description, body);
+void test(String description, FutureOr<void> Function() body) =>
+    CblE2eTestBinding.instance._test(description, body);
 
 @isTestGroup
-void group(String description, dynamic Function() body) =>
-    CblE2eTestBinding.instance.groupFn(description, body);
+void group(String description, void Function() body) =>
+    CblE2eTestBinding.instance._group(description, body);
 
 void setUpAll(dynamic Function() body) =>
     CblE2eTestBinding.instance.setUpAllFn(body);

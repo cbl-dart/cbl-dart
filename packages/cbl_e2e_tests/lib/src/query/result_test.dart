@@ -9,6 +9,7 @@ import 'package:cbl/src/query/result.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
 
@@ -190,39 +191,39 @@ void main() {
     });
 
     group('e2e', () {
-      late SyncDatabase db;
-
-      setUpAll(() {
-        db = openSyncTestDb('Result|Common');
-      });
-
-      test('access column by name', () {
+      apiTest('access column by name', () async {
+        final db = await openTestDatabase();
         final doc = MutableDocument.withId('ResultSetColumnByName', {
           'a': {'b': true}
         });
-        db.saveDocument(doc);
-        final q = SyncQuery.fromN1ql(
+        await db.saveDocument(doc);
+        final q = await Query.fromN1ql(
           db,
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
-        )..parameters = Parameters({'ID': doc.id});
+        )
+          ..parameters = Parameters({'ID': doc.id});
 
-        final result = q.execute().first;
+        final resultSet = await q.execute();
+        final result = await resultSet.asStream().first;
         expect(result.keys, ['alias', 'b', r'$1']);
         expect(result.dictionary('alias')!.toPlainMap(), {'b': true});
         expect(result.value('b'), isTrue);
         expect(result.value(r'$1'), 1);
       });
 
-      test('access column by index', () async {
+      apiTest('access column by index', () async {
+        final db = await openTestDatabase();
         final doc = MutableDocument.withId('ResultSetColumnByIndex');
-        db.saveDocument(doc);
+        await db.saveDocument(doc);
 
-        final q = SyncQuery.fromN1ql(
+        final q = await Query.fromN1ql(
           db,
           r'SELECT META().id FROM _ WHERE META().id = $ID',
-        )..parameters = Parameters({'ID': doc.id});
+        )
+          ..parameters = Parameters({'ID': doc.id});
 
-        final result = q.execute().first;
+        final resultSet = await q.execute();
+        final result = await resultSet.asStream().first;
         expect(result.string(0), doc.id);
       });
     });

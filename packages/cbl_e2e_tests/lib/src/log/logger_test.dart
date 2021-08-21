@@ -11,7 +11,7 @@ void main() {
 
   group('Logger', () {
     setUp(() => Database.log.custom = null);
-    tearDownAll(() => Database.log.custom = null);
+    tearDown(() => Database.log.custom = null);
 
     test('is called with log message', () {
       Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
@@ -62,6 +62,7 @@ void main() {
   group('StreamLogger', () {
     test('emits log messages', () {
       final logger = Database.log.custom = StreamLogger(LogLevel.warning);
+      addTearDown(() => Database.log.custom = null);
 
       expect(
         logger.stream,

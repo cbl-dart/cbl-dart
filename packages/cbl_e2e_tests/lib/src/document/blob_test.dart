@@ -5,49 +5,17 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/blob.dart';
 import 'package:cbl/src/support/streams.dart';
-import 'package:cbl/src/support/utils.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
-
-const contentType = 'application/octet-stream';
-final fixedTestContent = utf8.encode('content') as Uint8List;
-const fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
-
-/// Returns random bytes for blob.
-///
-/// When [large] is true the content is to large to be cached and results in
-/// multiple chunks when streamed.
-Uint8List randomTestContent({bool large = false}) =>
-    randomBytes(large ? 8 * 1024 * 2 : 16);
-
-final random = Random(0);
-
-Uint8List randomBytes(int size) {
-  final data = Uint32List(size ~/ 4);
-  for (var i = 0; i < data.length; i++) {
-    data[i] = random.nextInt(1 << 32);
-  }
-  return data.buffer.asUint8List(0, size);
-}
-
-enum WriteBlob { data, properties, stream }
-enum ReadTime { beforeSave, afterSave }
-enum ReadMode { future, stream }
-enum ReadBlob { sourceBlob, loadedBlob }
-enum BlobSize { small, large }
+import '../utils/test_variant.dart';
 
 void main() {
   setupTestBinding();
 
   group('Blob', () {
-    late SyncDatabase db;
-
-    setUpAll(() {
-      db = openSyncTestDb('Blob-Common');
-    });
-
     group('from data', () {
       test('initial properties', () {
         final blob = Blob.fromData(contentType, fixedTestContent);
@@ -102,134 +70,105 @@ void main() {
       });
     });
 
-    test('throws error when saving blob from different database', () {
-      final otherDb = openSyncTestDb('Blobs-OtherDB');
+    apiTest('throws error when saving blob from different database', () async {
+      final db = await openTestDatabase();
+      final otherDb = await openTestDatabase(name: 'other');
       final blob = Blob.fromData(contentType, randomTestContent());
       final doc = MutableDocument({'blob': blob});
-      otherDb.saveDocument(doc);
+      await otherDb.saveDocument(doc);
 
       final docB = MutableDocument({'blob': blob});
       expect(() => db.saveDocument(docB), throwsStateError);
     });
 
-    group('read', () {
-      void blobReadTest(
-        WriteBlob writeBlob,
-        ReadTime readTime,
-        ReadMode readMode,
-        ReadBlob readBlob,
-        BlobSize size,
-      ) {
-        test(
-          'created from ${describeEnum(writeBlob)} '
-          'read ${describeEnum(readMode)} '
-          'from ${describeEnum(readBlob)} '
-          '${describeEnum(readTime)} '
-          '(${describeEnum(size)})',
-          () async {
-            final content = randomTestContent(large: size == BlobSize.large);
+    apiTest(
+      'read',
+      () async {
+        final db = await openTestDatabase();
 
-            Blob? _writeBlob;
-            final doc = MutableDocument();
+        final content =
+            randomTestContent(large: blobSize.value == BlobSize.large);
 
-            switch (writeBlob) {
-              case WriteBlob.data:
-                _writeBlob = Blob.fromData(contentType, content);
-                break;
-              case WriteBlob.properties:
-                final blob = Blob.fromData(contentType, content);
-                db.saveDocument(MutableDocument({'blob': blob}));
-                doc['blob'].value = <String, Object?>{
-                  '@type': 'blob',
-                  'digest': blob.digest,
-                  'length': blob.length,
-                  'content_type': blob.contentType,
-                };
-                break;
-              case WriteBlob.stream:
-                _writeBlob = await Blob.fromStream(
-                  contentType,
-                  Stream.value(content),
-                  db,
-                );
-                break;
-            }
+        Blob? _writeBlob;
+        final doc = MutableDocument();
 
-            if (_writeBlob != null) {
-              doc['blob'].value = _writeBlob;
-            }
+        switch (writeBlob.value) {
+          case WriteBlob.data:
+            _writeBlob = Blob.fromData(contentType, content);
+            break;
+          case WriteBlob.properties:
+            final blob = Blob.fromData(contentType, content);
+            await db.saveDocument(MutableDocument({'blob': blob}));
+            doc['blob'].value = <String, Object?>{
+              '@type': 'blob',
+              'digest': blob.digest,
+              'length': blob.length,
+              'content_type': blob.contentType,
+            };
+            break;
+          case WriteBlob.stream:
+            _writeBlob = await Blob.fromStream(
+              contentType,
+              Stream.value(content),
+              db,
+            );
+            break;
+        }
 
-            Future<void> read() async {
-              Blob _readBlob;
-              switch (readBlob) {
-                case ReadBlob.sourceBlob:
-                  _readBlob = _writeBlob!;
-                  break;
-                case ReadBlob.loadedBlob:
-                  final loadedDoc = (db.document(doc.id))!;
-                  _readBlob = loadedDoc.blob('blob')!;
-                  break;
-              }
+        if (_writeBlob != null) {
+          doc['blob'].value = _writeBlob;
+        }
 
-              switch (readMode) {
-                case ReadMode.future:
-                  expect(await _readBlob.content(), content);
-                  break;
-                case ReadMode.stream:
-                  expect(
-                    await byteStreamToFuture(_readBlob.contentStream()),
-                    content,
-                  );
-                  break;
-              }
-            }
+        Future<void> read() async {
+          Blob _readBlob;
+          switch (readBlob.value) {
+            case ReadBlob.sourceBlob:
+              _readBlob = _writeBlob!;
+              break;
+            case ReadBlob.loadedBlob:
+              final loadedDoc = (await db.document(doc.id))!;
+              _readBlob = loadedDoc.blob('blob')!;
+              break;
+          }
 
-            switch (readTime) {
-              case ReadTime.beforeSave:
-                await read();
-                break;
-              case ReadTime.afterSave:
-                db.saveDocument(doc);
-                await read();
-                break;
-            }
-          },
-        );
-      }
-
-      for (final writeBlob in WriteBlob.values) {
-        for (final readTime in ReadTime.values) {
-          for (final readMode in ReadMode.values) {
-            for (final readBlob in ReadBlob.values) {
-              for (final size in BlobSize.values) {
-                // Condition for [ReadBlob.loadedBlob].
-                if (readBlob != ReadBlob.loadedBlob ||
-                    readTime == ReadTime.afterSave) {
-                  // Conditions for [WriteBlob.properties].
-                  if (writeBlob != WriteBlob.properties ||
-                      (readTime == ReadTime.afterSave &&
-                          readBlob == ReadBlob.loadedBlob)) {
-                    blobReadTest(writeBlob, readTime, readMode, readBlob, size);
-                  }
-                }
-              }
-            }
+          switch (readMode.value) {
+            case ReadMode.future:
+              expect(await _readBlob.content(), content);
+              break;
+            case ReadMode.stream:
+              expect(
+                await byteStreamToFuture(_readBlob.contentStream()),
+                content,
+              );
+              break;
           }
         }
-      }
-    });
 
-    test('remove from document', () {
+        switch (readTime.value) {
+          case ReadTime.beforeSave:
+            await read();
+            break;
+          case ReadTime.afterSave:
+            await db.saveDocument(doc);
+            await read();
+            break;
+        }
+      },
+      variants: [writeBlob, readTime, readMode, readBlob, blobSize],
+    );
+
+    apiTest('remove from document', () async {
+      final db = await openTestDatabase();
       final blob = Blob.fromData(contentType, fixedTestContent);
       final doc = MutableDocument({'blob': blob});
-      db.saveDocument(doc);
+      await db.saveDocument(doc);
       doc.removeValue('blob');
-      db.saveDocument(doc);
-      final loadedDoc = (db.document(doc.id))!;
+      await db.saveDocument(doc);
+      final loadedDoc = (await db.document(doc.id))!;
       expect(loadedDoc.value('blob'), isNull);
     });
 
-    test('==', () async {
+    test('==', () {
       Blob a;
       Blob b;
 
@@ -249,7 +188,7 @@ void main() {
       expect(a, b);
     });
 
-    test('hashCode', () async {
+    test('hashCode', () {
       Blob blob;
 
       // Uses hashCode of digest if available.
@@ -293,3 +232,57 @@ void main() {
     });
   });
 }
+
+const contentType = 'application/octet-stream';
+final fixedTestContent = utf8.encode('content') as Uint8List;
+const fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
+
+/// Returns random bytes for blob.
+///
+/// When [large] is true the content is to large to be cached and results in
+/// multiple chunks when streamed.
+Uint8List randomTestContent({bool large = false}) =>
+    randomBytes(large ? 8 * 1024 * 2 : 16);
+
+final random = Random(0);
+
+Uint8List randomBytes(int size) {
+  final data = Uint32List(size ~/ 4);
+  for (var i = 0; i < data.length; i++) {
+    data[i] = random.nextInt(1 << 32);
+  }
+  return data.buffer.asUint8List(0, size);
+}
+
+enum WriteBlob { data, properties, stream }
+enum ReadTime { beforeSave, afterSave }
+enum ReadMode { future, stream }
+enum ReadBlob { sourceBlob, loadedBlob }
+enum BlobSize { small, large }
+
+final writeBlob = EnumVariant<WriteBlob>(
+  WriteBlob.values,
+  isCompatible: (value, other, otherValue) {
+    if (value == WriteBlob.properties) {
+      if (other == readBlob) {
+        return otherValue == ReadBlob.loadedBlob;
+      }
+    }
+
+    return true;
+  },
+  order: 100,
+);
+final readTime = EnumVariant(ReadTime.values, order: 90);
+final readMode = EnumVariant(ReadMode.values, order: 80);
+final readBlob = EnumVariant<ReadBlob>(
+  ReadBlob.values,
+  isCompatible: (value, other, otherValue) {
+    if (value == ReadBlob.loadedBlob && other == readTime) {
+      return otherValue == ReadTime.afterSave;
+    }
+    return true;
+  },
+  order: 70,
+);
+final blobSize = EnumVariant(BlobSize.values, order: 60);

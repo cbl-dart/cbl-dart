@@ -11,6 +11,12 @@ import 'resource.dart';
 abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
   ClosableResourceStreamController({required this.parent});
 
+  factory ClosableResourceStreamController.fromStream({
+    required AbstractResource parent,
+    required Stream<T> stream,
+  }) =>
+      _ClosableResourceStreamControllerStream(parent: parent, stream: stream);
+
   /// The parent resources of this stream controller.
   final AbstractResource parent;
 
@@ -18,6 +24,16 @@ abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
   late final StreamController<T> controller = StreamController(
     onListen: () {
       parent.registerChildResource(this);
+
+      // ignore: avoid_types_on_closure_parameters
+      controller.done.then((Object? _) {
+        // If the stream subscription is canceled, instead of the resource
+        // being closed, we close the resource when the stream is done.
+        if (!isClosed) {
+          closeAndUse(() {}, doPerformClose: false);
+        }
+      });
+
       use(onListen);
     },
     onPause: onPause,
@@ -46,6 +62,41 @@ abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
 
   @override
   Future<void> performClose() => controller.close();
+}
+
+extension ClosableResourceStreamExt<T> on Stream<T> {
+  Stream<T> toClosableResourceStream(AbstractResource parent) =>
+      ClosableResourceStreamController.fromStream(parent: parent, stream: this)
+          .stream;
+}
+
+class _ClosableResourceStreamControllerStream<T>
+    extends ClosableResourceStreamController<T> {
+  _ClosableResourceStreamControllerStream({
+    required AbstractResource parent,
+    required Stream<T> stream,
+  })  : _stream = stream,
+        super(parent: parent);
+
+  final Stream<T> _stream;
+
+  late final StreamSubscription<T> _sub;
+
+  @override
+  FutureOr<void> onListen() => _sub = _stream.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: controller.close,
+      );
+
+  @override
+  void onPause() => _sub.pause();
+
+  @override
+  void onResume() => _sub.resume();
+
+  @override
+  FutureOr<void> onCancel() => _sub.cancel();
 }
 
 /// A [Stream] controller to create a [Stream] from a [AsyncCallback].

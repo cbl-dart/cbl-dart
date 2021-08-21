@@ -21,26 +21,27 @@ void main() {
 
       await worker.start();
 
-      expect(() => worker.start(), throwsStateError);
+      expect(worker.start, throwsStateError);
 
       await worker.stop();
 
-      expect(() => worker.start(), throwsStateError);
+      expect(worker.start, throwsStateError);
     });
 
     test('stopping worker which has not be started throws', () async {
       final worker = testWorker();
 
-      expect(() => worker.stop(), throwsStateError);
+      expect(worker.stop, throwsStateError);
 
       await worker.start();
       await worker.stop();
 
-      expect(() => worker.stop(), throwsStateError);
+      expect(worker.stop, throwsStateError);
     });
   });
 }
 
+// ignore: prefer_expression_function_bodies
 IsolateWorker testWorker() {
   return IsolateWorker(delegate: TestWorkerDelegate());
 }

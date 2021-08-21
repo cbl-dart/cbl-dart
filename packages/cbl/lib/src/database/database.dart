@@ -11,6 +11,7 @@ import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
 import 'ffi_database.dart';
+import 'proxy_database.dart';
 
 /// Conflict-handling options when saving or deleting a document.
 enum ConcurrencyControl {
@@ -388,15 +389,15 @@ abstract class AsyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? configuration,
   ]) =>
-      throw UnimplementedError();
+      WorkerDatabase.open(name, configuration);
 
   /// {@macro cbl.Database.remove}
   static Future<void> remove(String name, {String? directory}) =>
-      throw UnimplementedError();
+      WorkerDatabase.remove(name, directory: directory);
 
   /// {@macro cbl.Database.exists}
   static Future<bool> exists(String name, {String? directory}) =>
-      throw UnimplementedError();
+      WorkerDatabase.exists(name, directory: directory);
 
   /// {@macro cbl.Database.copy}
   static Future<void> copy({
@@ -404,7 +405,11 @@ abstract class AsyncDatabase implements Database {
     required String name,
     DatabaseConfiguration? configuration,
   }) =>
-      throw UnimplementedError();
+      WorkerDatabase.copy(
+        from: from,
+        name: name,
+        configuration: configuration,
+      );
 
   @override
   Future<int> get count;

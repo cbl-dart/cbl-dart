@@ -224,7 +224,6 @@ class SliceBindings extends Bindings {
   late final _CBLDart_FLSliceResult_Release _releaseSliceResult;
   late final _CBLDart_FLStringResult_Release _releaseStringResult;
 
-
   bool equal(FLSlice a, FLSlice b) => _equal(a, b).toBool();
 
   int compare(FLSlice a, FLSlice b) => _compare(a, b);
@@ -1668,13 +1667,14 @@ class FleeceEncoderBindings extends Bindings {
     );
   }
 
-  void writeJSON(Pointer<FLEncoder> encoder, String value) {
-    withZoneArena(() {
-      _checkError(
+  void writeJSON(Pointer<FLEncoder> encoder, Data value) {
+    _checkError(
+      encoder,
+      _writeJSON(
         encoder,
-        _writeJSON(encoder, value.toFLStringInArena().ref),
-      );
-    });
+        value.toSliceResult().makeGlobal().cast<FLString>().ref,
+      ),
+    );
   }
 
   void beginArray(Pointer<FLEncoder> encoder, int reserveCount) {

@@ -9,6 +9,7 @@ import 'order_by.dart';
 import 'ordering.dart';
 import 'proxy_query.dart';
 import 'query.dart';
+import 'query_builder.dart';
 import 'router/group_by_router.dart';
 import 'router/join_router.dart';
 import 'router/limit_router.dart';
@@ -52,7 +53,7 @@ abstract class AsyncFrom
 
 class SyncFromImpl extends SyncBuilderQuery implements SyncFrom {
   SyncFromImpl({
-    required SyncBuilderQuery query,
+    required BuilderQueryMixin query,
     required DataSourceInterface from,
   }) : super(query: query, from: from);
 
@@ -157,7 +158,7 @@ class SyncFromImpl extends SyncBuilderQuery implements SyncFrom {
 
 class AsyncFromImpl extends AsyncBuilderQuery implements AsyncFrom {
   AsyncFromImpl({
-    required AsyncBuilderQuery query,
+    required BuilderQueryMixin query,
     required DataSourceInterface from,
   }) : super(query: query, from: from);
 

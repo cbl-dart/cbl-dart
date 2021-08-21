@@ -1,80 +1,93 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
 
 void main() {
   setupTestBinding();
 
-  group('SyncQueryBuilder', () {
+  group('QueryBuilder', () {
     setupEvalExprUtils();
 
     group('SelectResult', () {
-      late final SyncDatabase db;
+      setUpAll(runWithApiValues(() async {
+        final db = await openSharedTestDatabase();
+        final doc = MutableDocument.withId('SelectOneResult', {'a': true});
+        await db.saveDocument(doc);
+      }));
 
-      setUpAll(() {
-        db = openSyncTestDb('SelectResultCommon')
-          ..saveDocument(MutableDocument({'a': true}));
-      });
+      Future<Object?> selectOneResult(SelectResultInterface selectResult) =>
+          Future.value(openSharedTestDatabase()).then((db) async {
+            final resultSet = await const QueryBuilder()
+                .select(selectResult)
+                .from(DataSource.database(db))
+                .where(Meta.id.equalTo(Expression.string('SelectOneResult')))
+                .execute();
 
-      Object? selectOneResult(SelectResultInterface selectResult) =>
-          const SyncQueryBuilder()
-              .select(selectResult)
-              .from(DataSource.database(db))
-              .execute()
-              .map((result) => result.toPlainMap())
-              .first;
+            return resultSet.plainMapStream().first;
+          });
 
-      test('SelectResult.all()', () {
-        expect(selectOneResult(SelectResult.all()), {
+      apiTest('SelectResult.all()', () async {
+        final db = await openSharedTestDatabase();
+
+        expect(await selectOneResult(SelectResult.all()), {
           db.name: {'a': true}
         });
       });
 
-      test('SelectResult.all().from()', () {
-        expect(selectOneResult(SelectResult.all().from(db.name)), {
+      apiTest('SelectResult.all().from()', () async {
+        final db = await openSharedTestDatabase();
+
+        expect(await selectOneResult(SelectResult.all().from(db.name)), {
           db.name: {'a': true}
         });
       });
 
-      test('SelectResult.property()', () {
-        expect(selectOneResult(SelectResult.property('a')), {'a': true});
+      apiTest('SelectResult.property()', () async {
+        expect(await selectOneResult(SelectResult.property('a')), {'a': true});
       });
 
-      test('SelectResult.property().as()', () {
+      apiTest('SelectResult.property().as()', () async {
         expect(
-            selectOneResult(SelectResult.property('a').as('b')), {'b': true});
+          await selectOneResult(SelectResult.property('a').as('b')),
+          {'b': true},
+        );
       });
 
-      test('SelectResult.expression()', () {
+      apiTest('SelectResult.expression()', () async {
         expect(
-          selectOneResult(SelectResult.expression(valExpr(42))),
+          await selectOneResult(SelectResult.expression(valExpr(42))),
           {r'$1': 42},
         );
       });
 
-      test('SelectResult.expression().as()', () {
+      apiTest('SelectResult.expression().as()', () async {
         expect(
-          selectOneResult(SelectResult.expression(valExpr(42)).as('a')),
+          await selectOneResult(SelectResult.expression(valExpr(42)).as('a')),
           {'a': 42},
         );
       });
     });
 
     group('Query', () {
-      test('distinct', () {
-        final db = openSyncTestDb('SelectDistinct')
-          ..saveDocument(MutableDocument({'a': true}))
-          ..saveDocument(MutableDocument({'a': true}));
+      apiTest('distinct', () async {
+        final db = await openTestDatabase();
+        await db.saveDocument(MutableDocument({'a': true}));
+        await db.saveDocument(MutableDocument({'a': true}));
 
-        final result = const SyncQueryBuilder()
+        final resultSet = await const QueryBuilder()
             .selectDistinct(SelectResult.all())
             .from(DataSource.database(db))
-            .execute()
-            .map((e) => e.toPlainList()[0])
+            .execute();
+
+        final result = await resultSet
+            .asStream()
+            .map((result) => result.toPlainList()[0])
             .toList();
 
         expect(result, [
@@ -82,12 +95,12 @@ void main() {
         ]);
       });
 
-      test('join', () {
-        final db = openSyncTestDb('Join');
+      apiTest('join', () async {
+        final db = await openTestDatabase();
 
         // Inner join without right side
         expect(
-          db.evalJoin(type: JoinType.join, docs: [
+          await db.evalJoin(type: JoinType.join, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
           ]),
           isEmpty,
@@ -95,7 +108,7 @@ void main() {
 
         // Inner join with right side
         expect(
-          db.evalJoin(type: JoinType.join, docs: [
+          await db.evalJoin(type: JoinType.join, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
             rightJoinDoc(id: 'B', on: 'A'),
           ]),
@@ -106,7 +119,7 @@ void main() {
 
         // Left outer join without right side
         expect(
-          db.evalJoin(type: JoinType.leftJoin, docs: [
+          await db.evalJoin(type: JoinType.leftJoin, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
           ]),
           [
@@ -116,7 +129,7 @@ void main() {
 
         // Left outer join with right side
         expect(
-          db.evalJoin(type: JoinType.leftJoin, docs: [
+          await db.evalJoin(type: JoinType.leftJoin, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
             rightJoinDoc(id: 'B', on: 'A'),
           ]),
@@ -127,7 +140,7 @@ void main() {
 
         // Left outer join without right side
         expect(
-          db.evalJoin(type: JoinType.leftOuterJoin, docs: [
+          await db.evalJoin(type: JoinType.leftOuterJoin, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
           ]),
           [
@@ -137,7 +150,7 @@ void main() {
 
         // Left outer join with right side
         expect(
-          db.evalJoin(type: JoinType.leftOuterJoin, docs: [
+          await db.evalJoin(type: JoinType.leftOuterJoin, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
             rightJoinDoc(id: 'B', on: 'A'),
           ]),
@@ -148,7 +161,7 @@ void main() {
 
         // Inner join without right side
         expect(
-          db.evalJoin(type: JoinType.innerJoin, docs: [
+          await db.evalJoin(type: JoinType.innerJoin, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
           ]),
           isEmpty,
@@ -156,7 +169,7 @@ void main() {
 
         // Inner join with right side
         expect(
-          db.evalJoin(type: JoinType.innerJoin, docs: [
+          await db.evalJoin(type: JoinType.innerJoin, docs: [
             leftJoinDoc(id: 'A', on: 'A'),
             rightJoinDoc(id: 'B', on: 'A'),
           ]),
@@ -167,7 +180,7 @@ void main() {
 
         // Cross join without left side
         expect(
-          db.evalJoin(type: JoinType.crossJoin, docs: [
+          await db.evalJoin(type: JoinType.crossJoin, docs: [
             leftJoinDoc(id: 'A'),
             rightJoinDoc(id: 'B'),
           ]),
@@ -178,39 +191,41 @@ void main() {
         );
       });
 
-      test('orderBy', () {
-        final db = openSyncTestDb('QueryBuilderOrderBy');
+      apiTest('orderBy', () async {
+        final db = await openTestDatabase();
         final docs = List.generate(5, (_) => MutableDocument());
 
-        db.inBatch(() {
-          docs.forEach(db.saveDocument);
-        });
+        await db.saveAllDocuments(docs);
 
-        final results = const SyncQueryBuilder()
+        final resultSet = await const QueryBuilder()
             .select(SelectResult.expression(Meta.id))
             .from(DataSource.database(db))
             .orderBy(Ordering.expression(Meta.id))
-            .execute()
+            .execute();
+
+        final results = await resultSet
+            .asStream()
             .map((result) => result.value(0))
             .toList();
 
         expect(results, docs.map((doc) => doc.id).toList()..sort());
       });
 
-      test('limit', () {
-        final db = openSyncTestDb('QueryBuilderLimit');
+      apiTest('limit', () async {
+        final db = await openTestDatabase();
         final docs = List.generate(5, (_) => MutableDocument());
 
-        db.inBatch(() {
-          docs.forEach(db.saveDocument);
-        });
+        await db.saveAllDocuments(docs);
 
-        final results = const SyncQueryBuilder()
+        final resultSet = await const QueryBuilder()
             .select(SelectResult.expression(Meta.id))
             .from(DataSource.database(db))
             .orderBy(Ordering.expression(Meta.id))
             .limit(Expression.value(3), offset: Expression.value(2))
-            .execute()
+            .execute();
+
+        final results = await resultSet
+            .asStream()
             .map((result) => result.value(0))
             .toList();
 
@@ -219,8 +234,8 @@ void main() {
     });
 
     group('ArrayExpression', () {
-      test('range predicate ANY', () {
-        bool evalAny({
+      apiTest('range predicate ANY', () async {
+        Future<bool> evalAny({
           required Iterable<Object?> values,
           required Object? equalTo,
         }) =>
@@ -229,16 +244,16 @@ void main() {
               quantifier: Quantifier.any,
               values: values,
               equalTo: equalTo,
-            )) as bool;
+            ));
 
-        expect(evalAny(values: [], equalTo: 'a'), false);
-        expect(evalAny(values: ['b'], equalTo: 'a'), false);
-        expect(evalAny(values: ['a'], equalTo: 'a'), true);
-        expect(evalAny(values: ['a', 'b'], equalTo: 'a'), true);
+        expect(await evalAny(values: [], equalTo: 'a'), false);
+        expect(await evalAny(values: ['b'], equalTo: 'a'), false);
+        expect(await evalAny(values: ['a'], equalTo: 'a'), true);
+        expect(await evalAny(values: ['a', 'b'], equalTo: 'a'), true);
       });
 
-      test('range predicate EVERY', () {
-        Object? evalEvery({
+      apiTest('range predicate EVERY', () async {
+        Future<Object?> evalEvery({
           required Iterable<Object?> values,
           required Object? equalTo,
         }) =>
@@ -248,14 +263,14 @@ void main() {
               equalTo: equalTo,
             ));
 
-        expect(evalEvery(values: [], equalTo: 'a'), 1);
-        expect(evalEvery(values: ['b'], equalTo: 'a'), 0);
-        expect(evalEvery(values: ['a'], equalTo: 'a'), 1);
-        expect(evalEvery(values: ['a', 'b'], equalTo: 'a'), 0);
+        expect(await evalEvery(values: [], equalTo: 'a'), 1);
+        expect(await evalEvery(values: ['b'], equalTo: 'a'), 0);
+        expect(await evalEvery(values: ['a'], equalTo: 'a'), 1);
+        expect(await evalEvery(values: ['a', 'b'], equalTo: 'a'), 0);
       });
 
-      test('range predicate ANY AND EVERY', () {
-        Object? evalAnyAndEvery({
+      apiTest('range predicate ANY AND EVERY', () async {
+        Future<Object?> evalAnyAndEvery({
           required Iterable<Object?> values,
           required Object? equalTo,
         }) =>
@@ -268,22 +283,25 @@ void main() {
               doc: MutableDocument({'array': values}),
             );
 
-        expect(evalAnyAndEvery(values: [], equalTo: 'a'), 0);
-        expect(evalAnyAndEvery(values: ['b'], equalTo: 'a'), 0);
-        expect(evalAnyAndEvery(values: ['a'], equalTo: 'a'), 1);
-        expect(evalAnyAndEvery(values: ['a', 'b'], equalTo: 'a'), 0);
+        expect(await evalAnyAndEvery(values: [], equalTo: 'a'), 0);
+        expect(await evalAnyAndEvery(values: ['b'], equalTo: 'a'), 0);
+        expect(await evalAnyAndEvery(values: ['a'], equalTo: 'a'), 1);
+        expect(await evalAnyAndEvery(values: ['a', 'b'], equalTo: 'a'), 0);
       });
     });
 
     group('Expression', () {
-      test('property()', () {
+      apiTest('property()', () async {
         expect(
-          evalExpr(Expression.property('a'), doc: MutableDocument({'a': true})),
+          await evalExpr(
+            Expression.property('a'),
+            doc: MutableDocument({'a': true}),
+          ),
           true,
         );
 
         expect(
-          evalExpr(
+          await evalExpr(
             Expression.property('a.b'),
             doc: MutableDocument({
               'a': {'b': true}
@@ -293,9 +311,9 @@ void main() {
         );
       });
 
-      test('property().from()', () {
+      apiTest('property().from()', () async {
         expect(
-          evalExpr(
+          await evalExpr(
             Expression.property('a').from('b'),
             doc: MutableDocument({'a': true}),
             dataSourceAlias: 'b',
@@ -304,16 +322,16 @@ void main() {
         );
       });
 
-      test('all()', () {
+      apiTest('all()', () async {
         expect(
-          evalExpr(Expression.all(), doc: MutableDocument({'a': true})),
+          await evalExpr(Expression.all(), doc: MutableDocument({'a': true})),
           {'a': true},
         );
       });
 
-      test('all().from()', () {
+      apiTest('all().from()', () async {
         expect(
-          evalExpr(
+          await evalExpr(
             Expression.all().from('b'),
             doc: MutableDocument({'a': true}),
             dataSourceAlias: 'b',
@@ -322,46 +340,46 @@ void main() {
         );
       });
 
-      test('value()', () {
-        expect(evalExpr(valExpr('x')), 'x');
+      apiTest('value()', () async {
+        expect(await evalExpr(valExpr('x')), 'x');
       });
 
-      test('string()', () {
-        expect(evalExpr(Expression.string('a')), 'a');
+      apiTest('string()', () async {
+        expect(await evalExpr(Expression.string('a')), 'a');
       });
 
-      test('integer()', () {
-        expect(evalExpr(Expression.integer(1)), 1);
+      apiTest('integer()', () async {
+        expect(await evalExpr(Expression.integer(1)), 1);
       });
 
-      test('float()', () {
-        expect(evalExpr(Expression.float(.2)), .2);
+      apiTest('float()', () async {
+        expect(await evalExpr(Expression.float(.2)), .2);
       });
 
-      test('number()', () {
-        expect(evalExpr(Expression.number(3)), 3);
+      apiTest('number()', () async {
+        expect(await evalExpr(Expression.number(3)), 3);
       });
 
-      test('boolean()', () {
-        expect(evalExpr(Expression.boolean(true)), true);
+      apiTest('boolean()', () async {
+        expect(await evalExpr(Expression.boolean(true)), true);
       });
 
-      test('date()', () {
+      apiTest('date()', () async {
         final date = DateTime.utc(0);
-        expect(evalExpr(Expression.date(date)), date.toIso8601String());
+        expect(await evalExpr(Expression.date(date)), date.toIso8601String());
       });
 
-      test('dictionary()', () {
-        expect(evalExpr(Expression.dictionary({'a': true})), {'a': true});
+      apiTest('dictionary()', () async {
+        expect(await evalExpr(Expression.dictionary({'a': true})), {'a': true});
       });
 
-      test('array()', () {
-        expect(evalExpr(Expression.array(['a'])), ['a']);
+      apiTest('array()', () async {
+        expect(await evalExpr(Expression.array(['a'])), ['a']);
       });
 
-      test('parameter()', () {
+      apiTest('parameter()', () async {
         expect(
-          evalExpr(
+          await evalExpr(
             Expression.parameter('a'),
             parameters: Parameters({'a': 'x'}),
           ),
@@ -369,128 +387,134 @@ void main() {
         );
       });
 
-      test('negated()', () {
-        expect(evalExpr(Expression.negated(valExpr(true))), 0);
+      apiTest('negated()', () async {
+        expect(await evalExpr(Expression.negated(valExpr(true))), 0);
       });
 
-      test('not()', () {
-        expect(evalExpr(Expression.not(valExpr(true))), 0);
+      apiTest('not()', () async {
+        expect(await evalExpr(Expression.not(valExpr(true))), 0);
       });
 
-      test('multiply()', () {
-        expect(evalExpr(valExpr(2).multiply(valExpr(3))), 6);
+      apiTest('multiply()', () async {
+        expect(await evalExpr(valExpr(2).multiply(valExpr(3))), 6);
       });
 
-      test('divide()', () {
-        expect(evalExpr(valExpr(6).divide(valExpr(2))), 3);
+      apiTest('divide()', () async {
+        expect(await evalExpr(valExpr(6).divide(valExpr(2))), 3);
       });
 
-      test('modulo()', () {
-        expect(evalExpr(valExpr(1).modulo(valExpr(2))), 1);
+      apiTest('modulo()', () async {
+        expect(await evalExpr(valExpr(1).modulo(valExpr(2))), 1);
       });
 
-      test('add()', () {
-        expect(evalExpr(valExpr(1).add(valExpr(2))), 3);
+      apiTest('add()', () async {
+        expect(await evalExpr(valExpr(1).add(valExpr(2))), 3);
       });
 
-      test('subtract()', () {
-        expect(evalExpr(valExpr(1).subtract(valExpr(2))), -1);
+      apiTest('subtract()', () async {
+        expect(await evalExpr(valExpr(1).subtract(valExpr(2))), -1);
       });
 
-      test('lessThan()', () {
-        expect(evalExpr(valExpr(1).lessThan(valExpr(2))), 1);
-        expect(evalExpr(valExpr(1).lessThan(valExpr(1))), 0);
+      apiTest('lessThan()', () async {
+        expect(await evalExpr(valExpr(1).lessThan(valExpr(2))), 1);
+        expect(await evalExpr(valExpr(1).lessThan(valExpr(1))), 0);
       });
 
-      test('lessThanOrEqualTo()', () {
-        expect(evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(2))), 1);
-        expect(evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(1))), 1);
-        expect(evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(0))), 0);
+      apiTest('lessThanOrEqualTo()', () async {
+        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(2))), 1);
+        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(1))), 1);
+        expect(await evalExpr(valExpr(1).lessThanOrEqualTo(valExpr(0))), 0);
       });
 
-      test('greaterThan()', () {
-        expect(evalExpr(valExpr(1).greaterThan(valExpr(0))), 1);
-        expect(evalExpr(valExpr(1).greaterThan(valExpr(1))), 0);
+      apiTest('greaterThan()', () async {
+        expect(await evalExpr(valExpr(1).greaterThan(valExpr(0))), 1);
+        expect(await evalExpr(valExpr(1).greaterThan(valExpr(1))), 0);
       });
 
-      test('greaterThanOrEqualTo()', () {
-        expect(evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(2))), 0);
-        expect(evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(1))), 1);
-        expect(evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(0))), 1);
+      apiTest('greaterThanOrEqualTo()', () async {
+        expect(await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(2))), 0);
+        expect(await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(1))), 1);
+        expect(await evalExpr(valExpr(1).greaterThanOrEqualTo(valExpr(0))), 1);
       });
 
-      test('equalTo()', () {
-        expect(evalExpr(valExpr(1).equalTo(valExpr(0))), 0);
-        expect(evalExpr(valExpr(1).equalTo(valExpr(1))), 1);
+      apiTest('equalTo()', () async {
+        expect(await evalExpr(valExpr(1).equalTo(valExpr(0))), 0);
+        expect(await evalExpr(valExpr(1).equalTo(valExpr(1))), 1);
       });
 
-      test('notEqualTo()', () {
-        expect(evalExpr(valExpr(1).notEqualTo(valExpr(0))), 1);
-        expect(evalExpr(valExpr(1).notEqualTo(valExpr(1))), 0);
+      apiTest('notEqualTo()', () async {
+        expect(await evalExpr(valExpr(1).notEqualTo(valExpr(0))), 1);
+        expect(await evalExpr(valExpr(1).notEqualTo(valExpr(1))), 0);
       });
 
-      test('like()', () {
-        expect(evalExpr(valExpr('a').like(valExpr('a'))), 1);
-        expect(evalExpr(valExpr('ab').like(valExpr('a_'))), 1);
+      apiTest('like()', () async {
+        expect(await evalExpr(valExpr('a').like(valExpr('a'))), 1);
+        expect(await evalExpr(valExpr('ab').like(valExpr('a_'))), 1);
       });
 
-      test('regex()', () {
-        expect(evalExpr(valExpr('a').regex(valExpr('a'))), true);
-        expect(evalExpr(valExpr('ab').regex(valExpr('a.'))), true);
+      apiTest('regex()', () async {
+        expect(await evalExpr(valExpr('a').regex(valExpr('a'))), true);
+        expect(await evalExpr(valExpr('ab').regex(valExpr('a.'))), true);
       });
 
-      test('is_()', () {
-        expect(evalExpr(valExpr('a').is_(valExpr('a'))), 1);
-        expect(evalExpr(valExpr('a').is_(valExpr('b'))), 0);
+      apiTest('is_()', () async {
+        expect(await evalExpr(valExpr('a').is_(valExpr('a'))), 1);
+        expect(await evalExpr(valExpr('a').is_(valExpr('b'))), 0);
       });
 
-      test('isNot()', () {
-        expect(evalExpr(valExpr('a').isNot(valExpr('a'))), 0);
-        expect(evalExpr(valExpr('a').isNot(valExpr('b'))), 1);
+      apiTest('isNot()', () async {
+        expect(await evalExpr(valExpr('a').isNot(valExpr('a'))), 0);
+        expect(await evalExpr(valExpr('a').isNot(valExpr('b'))), 1);
       });
 
-      test('isNullOrMissing()', () {
-        expect(evalExpr(valExpr(null).isNullOrMissing()), 1);
+      apiTest('isNullOrMissing()', () async {
+        expect(await evalExpr(valExpr(null).isNullOrMissing()), 1);
         expect(
-          evalExpr(valExpr(Expression.property('X')).isNullOrMissing()),
+          await evalExpr(valExpr(Expression.property('X')).isNullOrMissing()),
           1,
         );
-        expect(evalExpr(valExpr('a').isNullOrMissing()), 0);
+        expect(await evalExpr(valExpr('a').isNullOrMissing()), 0);
       });
 
-      test('notNullOrMissing()', () {
-        expect(evalExpr(valExpr(null).notNullOrMissing()), 0);
+      apiTest('notNullOrMissing()', () async {
+        expect(await evalExpr(valExpr(null).notNullOrMissing()), 0);
         expect(
-          evalExpr(valExpr(Expression.property('X')).notNullOrMissing()),
+          await evalExpr(valExpr(Expression.property('X')).notNullOrMissing()),
           0,
         );
-        expect(evalExpr(valExpr('a').notNullOrMissing()), 1);
+        expect(await evalExpr(valExpr('a').notNullOrMissing()), 1);
       });
 
-      test('and()', () {
-        expect(evalExpr(valExpr(true).and(valExpr(true))), 1);
-        expect(evalExpr(valExpr(true).and(valExpr(false))), 0);
+      apiTest('and()', () async {
+        expect(await evalExpr(valExpr(true).and(valExpr(true))), 1);
+        expect(await evalExpr(valExpr(true).and(valExpr(false))), 0);
       });
 
-      test('or()', () {
-        expect(evalExpr(valExpr(true).or(valExpr(true))), 1);
-        expect(evalExpr(valExpr(true).or(valExpr(false))), 1);
-        expect(evalExpr(valExpr(false).or(valExpr(false))), 0);
+      apiTest('or()', () async {
+        expect(await evalExpr(valExpr(true).or(valExpr(true))), 1);
+        expect(await evalExpr(valExpr(true).or(valExpr(false))), 1);
+        expect(await evalExpr(valExpr(false).or(valExpr(false))), 0);
       });
 
-      test('between()', () {
-        expect(evalExpr(valExpr(0).between(valExpr(0), and: valExpr(1))), 1);
-        expect(evalExpr(valExpr(2).between(valExpr(0), and: valExpr(1))), 0);
-      });
-
-      test('in_()', () {
-        expect(evalExpr(valExpr('a').in_([valExpr('a')])), 1);
-        expect(evalExpr(valExpr('a').in_([valExpr('b')])), 0);
-      });
-
-      test('collation()', () {
+      apiTest('between()', () async {
         expect(
-          evalExpr(
+          await evalExpr(valExpr(0).between(valExpr(0), and: valExpr(1))),
+          1,
+        );
+        expect(
+          await evalExpr(valExpr(2).between(valExpr(0), and: valExpr(1))),
+          0,
+        );
+      });
+
+      apiTest('in_()', () async {
+        expect(await evalExpr(valExpr('a').in_([valExpr('a')])), 1);
+        expect(await evalExpr(valExpr('a').in_([valExpr('b')])), 0);
+      });
+
+      apiTest('collation()', () async {
+        expect(
+          await evalExpr(
             valExpr('A')
                 .equalTo(valExpr('a'))
                 .collate(Collation.ascii().ignoreCase(true)),
@@ -499,7 +523,7 @@ void main() {
         );
 
         expect(
-          evalExpr(
+          await evalExpr(
             valExpr('A')
                 .equalTo(valExpr('a'))
                 .collate(Collation.unicode().ignoreCase(true)),
@@ -510,73 +534,72 @@ void main() {
     });
 
     group('Meta', () {
-      final expirationDate = DateTime.utc(3000);
-      late final MutableDocument doc;
-      late final MutableDocument deletedDoc;
-      late final Database db;
+      final expirationDate = DateTime.now().add(const Duration(days: 1));
+      final doc = apiProvider((_) => MutableDocument());
+      final deletedDoc = apiProvider((_) => MutableDocument());
 
-      setUpAll(() {
-        doc = MutableDocument();
-        deletedDoc = MutableDocument();
-        db = openSyncTestDb('QueryBuilderMeta')
-          ..saveDocument(doc)
-          ..setDocumentExpiration(doc.id, expirationDate)
-          ..saveDocument(deletedDoc)
-          ..deleteDocument(deletedDoc);
-      });
+      setUpAll(runWithApiValues(() async {
+        final db = await openSharedTestDatabase();
+        await db.saveDocument(doc());
+        await db.setDocumentExpiration(doc().id, expirationDate);
+        await db.saveDocument(deletedDoc());
+        await db.deleteDocument(deletedDoc());
+      }));
 
-      Object? evalMetaExpr(
+      Future<Object?> evalMetaExpr(
         ExpressionInterface expression, {
         bool deleted = false,
-      }) {
-        final id = deleted ? deletedDoc.id : doc.id;
+      }) async {
+        final db = await openSharedTestDatabase();
+
+        final id = deleted ? deletedDoc().id : doc().id;
         var where = Meta.id.equalTo(valExpr(id));
 
         if (deleted) {
           where = where.and(Meta.isDeleted.equalTo(valExpr(1)));
         }
 
-        return const SyncQueryBuilder()
+        final resultSet = await const QueryBuilder()
             .select(SelectResult.expression(expression))
             .from(DataSource.database(db))
             .where(where)
-            .execute()
-            .first
-            .value(0);
+            .execute();
+
+        return resultSet.asStream().map((result) => result.value(0)).first;
       }
 
-      test('id', () {
-        expect(evalMetaExpr(Meta.id), doc.id);
+      apiTest('id', () async {
+        expect(await evalMetaExpr(Meta.id), doc().id);
       });
 
-      test('revisionId', () {
-        expect(evalMetaExpr(Meta.revisionId), doc.revisionId);
+      apiTest('revisionId', () async {
+        expect(await evalMetaExpr(Meta.revisionId), doc().revisionId);
       });
 
-      test('sequence', () {
-        expect(evalMetaExpr(Meta.sequence), doc.sequence);
+      apiTest('sequence', () async {
+        expect(await evalMetaExpr(Meta.sequence), doc().sequence);
       });
 
-      test('deleted', () {
-        expect(evalMetaExpr(Meta.isDeleted), 0);
-        expect(evalMetaExpr(Meta.isDeleted, deleted: true), 1);
+      apiTest('deleted', () async {
+        expect(await evalMetaExpr(Meta.isDeleted), 0);
+        expect(await evalMetaExpr(Meta.isDeleted, deleted: true), 1);
       });
 
-      test('expiration', () {
+      apiTest('expiration', () async {
         expect(
-          evalMetaExpr(Meta.expiration),
+          await evalMetaExpr(Meta.expiration),
           expirationDate.millisecondsSinceEpoch,
         );
       });
     });
 
     group('Function', () {
-      test('aggregate', () {
-        final db = openSyncTestDb('QueryBuilderAggregateFunctions')
-          ..insertAggNumbers([0, 1, 2, 3, 4, 5]);
+      apiTest('aggregate', () async {
+        final db = await openTestDatabase();
+        await db.insertAggNumbers([0, 1, 2, 3, 4, 5]);
 
         expect(
-          db.aggQuery([
+          await db.aggQuery([
             aggNumberResult(Function_.avg),
             aggNumberResult(Function_.count),
             aggNumberResult(Function_.min),
@@ -587,204 +610,220 @@ void main() {
         );
       });
 
-      test('abs', () {
-        expect(evalExpr(Function_.abs(valExpr(-1))), 1);
+      apiTest('abs', () async {
+        expect(await evalExpr(Function_.abs(valExpr(-1))), 1);
       });
 
-      test('acos', () {
+      apiTest('acos', () async {
         expect(
-          evalExpr(Function_.acos(valExpr(0))),
+          await evalExpr(Function_.acos(valExpr(0))),
           closeEnough(1.5707963267948966),
         );
       });
 
-      test('asin', () {
+      apiTest('asin', () async {
         expect(
-          evalExpr(Function_.asin(valExpr(.5))),
+          await evalExpr(Function_.asin(valExpr(.5))),
           closeEnough(0.5235987755982989),
         );
       });
 
-      test('atan', () {
+      apiTest('atan', () async {
         expect(
-          evalExpr(Function_.atan(valExpr(.5))),
+          await evalExpr(Function_.atan(valExpr(.5))),
           closeEnough(0.4636476090008061),
         );
       });
 
-      test('atan2', () {
+      apiTest('atan2', () async {
         expect(
-          evalExpr(Function_.atan2(x: valExpr(1), y: valExpr(1))),
+          await evalExpr(Function_.atan2(x: valExpr(1), y: valExpr(1))),
           closeEnough(0.7853981633974483),
         );
       });
 
-      test('ceil', () {
-        expect(evalExpr(Function_.ceil(valExpr(.5))), 1);
+      apiTest('ceil', () async {
+        expect(await evalExpr(Function_.ceil(valExpr(.5))), 1);
       });
 
-      test('cos', () {
+      apiTest('cos', () async {
         expect(
-          evalExpr(Function_.cos(valExpr(.5))),
+          await evalExpr(Function_.cos(valExpr(.5))),
           closeEnough(0.8775825618903728),
         );
       });
 
-      test('degrees', () {
-        expect(evalExpr(Function_.degrees(valExpr(pi))), 180);
+      apiTest('degrees', () async {
+        expect(await evalExpr(Function_.degrees(valExpr(pi))), 180);
       });
 
-      test('e', () {
-        expect(evalExpr(Function_.e()), closeEnough(e));
+      apiTest('e', () async {
+        expect(await evalExpr(Function_.e()), closeEnough(e));
       });
 
-      test('exp', () {
+      apiTest('exp', () async {
         expect(
-          evalExpr(Function_.exp(valExpr(2))),
+          await evalExpr(Function_.exp(valExpr(2))),
           closeEnough(7.38905609893065),
         );
       });
 
-      test('floor', () {
-        expect(evalExpr(Function_.floor(valExpr(.5))), 0);
+      apiTest('floor', () async {
+        expect(await evalExpr(Function_.floor(valExpr(.5))), 0);
       });
 
-      test('ln', () {
+      apiTest('ln', () async {
         expect(
-          evalExpr(Function_.ln(valExpr(.5))),
+          await evalExpr(Function_.ln(valExpr(.5))),
           closeEnough(-0.6931471805599453),
         );
       });
 
-      test('log', () {
+      apiTest('log', () async {
         expect(
-          evalExpr(Function_.log(valExpr(.5))),
+          await evalExpr(Function_.log(valExpr(.5))),
           closeEnough(-0.3010299956639812),
         );
       });
 
-      test('pi', () {
-        expect(evalExpr(Function_.pi()), pi);
+      apiTest('pi', () async {
+        expect(await evalExpr(Function_.pi()), pi);
       });
 
-      test('power', () {
+      apiTest('power', () async {
         expect(
-          evalExpr(Function_.power(base: valExpr(.5), exponent: valExpr(.5))),
+          await evalExpr(
+            Function_.power(base: valExpr(.5), exponent: valExpr(.5)),
+          ),
           closeEnough(0.7071067811865476),
         );
       });
 
-      test('radians', () {
-        expect(evalExpr(Function_.radians(valExpr(180))), closeEnough(pi));
+      apiTest('radians', () async {
+        expect(
+          await evalExpr(Function_.radians(valExpr(180))),
+          closeEnough(pi),
+        );
       });
 
-      test('round', () {
+      apiTest('round', () async {
         expect(
-          evalExpr(Function_.round(valExpr(.55), digits: valExpr(1))),
+          await evalExpr(Function_.round(valExpr(.55), digits: valExpr(1))),
           0.6,
         );
       });
 
-      test('sign', () {
-        expect(evalExpr(Function_.sign(valExpr(5))), 1);
-        expect(evalExpr(Function_.sign(valExpr(0))), 0);
-        expect(evalExpr(Function_.sign(valExpr(-5))), -1);
+      apiTest('sign', () async {
+        expect(await evalExpr(Function_.sign(valExpr(5))), 1);
+        expect(await evalExpr(Function_.sign(valExpr(0))), 0);
+        expect(await evalExpr(Function_.sign(valExpr(-5))), -1);
       });
 
-      test('sin', () {
+      apiTest('sin', () async {
         expect(
-          evalExpr(Function_.sin(valExpr(.5))),
+          await evalExpr(Function_.sin(valExpr(.5))),
           closeEnough(0.479425538604203),
         );
       });
 
-      test('sqrt', () {
+      apiTest('sqrt', () async {
         expect(
-          evalExpr(Function_.sqrt(valExpr(.5))),
+          await evalExpr(Function_.sqrt(valExpr(.5))),
           closeEnough(0.7071067811865476),
         );
       });
 
-      test('tan', () {
+      apiTest('tan', () async {
         expect(
-          evalExpr(Function_.tan(valExpr(.5))),
+          await evalExpr(Function_.tan(valExpr(.5))),
           closeEnough(0.5463024898437905),
         );
       });
 
-      test('trunc', () {
+      apiTest('trunc', () async {
         expect(
-          evalExpr(Function_.trunc(valExpr(.55), digits: valExpr(1))),
+          await evalExpr(Function_.trunc(
+            valExpr(.55),
+            digits: valExpr(1),
+          )),
           0.5,
         );
       });
 
-      test('contains', () {
+      apiTest('contains', () async {
         expect(
-          evalExpr(Function_.contains(valExpr('aa'), substring: valExpr('a'))),
+          await evalExpr(Function_.contains(
+            valExpr('aa'),
+            substring: valExpr('a'),
+          )),
           true,
         );
         expect(
-          evalExpr(Function_.contains(valExpr('a'), substring: valExpr('b'))),
+          await evalExpr(Function_.contains(
+            valExpr('a'),
+            substring: valExpr('b'),
+          )),
           false,
         );
       });
 
-      test('length', () {
-        expect(evalExpr(Function_.length(valExpr(''))), 0);
-        expect(evalExpr(Function_.length(valExpr('a'))), 1);
+      apiTest('length', () async {
+        expect(await evalExpr(Function_.length(valExpr(''))), 0);
+        expect(await evalExpr(Function_.length(valExpr('a'))), 1);
       });
 
-      test('lower', () {
-        expect(evalExpr(Function_.lower(valExpr('A'))), 'a');
+      apiTest('lower', () async {
+        expect(await evalExpr(Function_.lower(valExpr('A'))), 'a');
       });
 
-      test('ltrim', () {
-        expect(evalExpr(Function_.ltrim(valExpr(' a '))), 'a ');
+      apiTest('ltrim', () async {
+        expect(await evalExpr(Function_.ltrim(valExpr(' a '))), 'a ');
       });
 
-      test('rtrim', () {
-        expect(evalExpr(Function_.rtrim(valExpr(' a '))), ' a');
+      apiTest('rtrim', () async {
+        expect(await evalExpr(Function_.rtrim(valExpr(' a '))), ' a');
       });
 
-      test('trim', () {
-        expect(evalExpr(Function_.trim(valExpr(' a '))), 'a');
+      apiTest('trim', () async {
+        expect(await evalExpr(Function_.trim(valExpr(' a '))), 'a');
       });
 
-      test('upper', () {
-        expect(evalExpr(Function_.upper(valExpr('a'))), 'A');
+      apiTest('upper', () async {
+        expect(await evalExpr(Function_.upper(valExpr('a'))), 'A');
       });
 
-      test('stringToMillis', () {
+      apiTest('stringToMillis', () async {
         expect(
-          evalExpr(Function_.stringToMillis(valExpr('1970-01-01T00:00:00Z'))),
+          await evalExpr(
+              Function_.stringToMillis(valExpr('1970-01-01T00:00:00Z'))),
           0,
         );
       });
 
-      test('stringToUTC', () {
+      apiTest('stringToUTC', () async {
         expect(
-          evalExpr(Function_.stringToUTC(valExpr('1970-01-01T00:00:00Z'))),
+          await evalExpr(
+              Function_.stringToUTC(valExpr('1970-01-01T00:00:00Z'))),
           '1970-01-01T00:00:00Z',
         );
       });
 
-      test('millisToString', () {
+      apiTest('millisToString', () async {
         // ignore: cast_nullable_to_non_nullable
-        final result = evalExpr(Function_.millisToString(valExpr(0))) as String;
-        expect(DateTime.parse(result), DateTime.utc(1970));
+        final result = await evalExpr(Function_.millisToString(valExpr(0)));
+        expect(DateTime.parse(result! as String), DateTime.utc(1970));
       });
 
-      test('millisToUTC', () {
+      apiTest('millisToUTC', () async {
         expect(
-          evalExpr(Function_.millisToUTC(valExpr(0))),
+          await evalExpr(Function_.millisToUTC(valExpr(0))),
           '1970-01-01T00:00:00Z',
         );
       });
     });
 
     group('ArrayFunction', () {
-      test('contains', () {
+      apiTest('contains', () async {
         ExpressionInterface containsExpr(
           Iterable<Object?> values,
           Object? value,
@@ -794,42 +833,42 @@ void main() {
               value: valExpr(value),
             );
 
-        expect(evalExpr(containsExpr([], 'a')), false);
-        expect(evalExpr(containsExpr(['a'], 'a')), true);
-        expect(evalExpr(containsExpr(['b'], 'a')), false);
+        expect(await evalExpr(containsExpr([], 'a')), false);
+        expect(await evalExpr(containsExpr(['a'], 'a')), true);
+        expect(await evalExpr(containsExpr(['b'], 'a')), false);
       });
 
-      test('length', () {
+      apiTest('length', () async {
         ExpressionInterface lengthExpr(
           Iterable<Object?> values,
         ) =>
             ArrayFunction.length(valExpr(values));
 
-        expect(evalExpr(lengthExpr([])), 0);
-        expect(evalExpr(lengthExpr([true])), 1);
-        expect(evalExpr(lengthExpr([true, true])), 2);
+        expect(await evalExpr(lengthExpr([])), 0);
+        expect(await evalExpr(lengthExpr([true])), 1);
+        expect(await evalExpr(lengthExpr([true, true])), 2);
       });
     });
 
     group('FullTextFunction', () {
-      test('match and rank', () {
-        final db = openSyncTestDb('FullTextFunctionRank')
-          ..createIndex(
-            'a',
-            IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
-          );
+      apiTest('match and rank', () async {
+        final db = await openTestDatabase();
+        await db.createIndex(
+          'a',
+          IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
+        );
 
         final docA = MutableDocument({
           'a': 'The quick brown fox',
         });
-        db.saveDocument(docA);
+        await db.saveDocument(docA);
 
         final docB = MutableDocument({
           'a': 'The slow brown fox',
         });
-        db.saveDocument(docB);
+        await db.saveDocument(docB);
 
-        final results = const SyncQueryBuilder()
+        final resultSet = await const QueryBuilder()
             .selectAll([
               SelectResult.expression(Meta.id),
               SelectResult.expression(FullTextFunction.rank('a')),
@@ -840,9 +879,9 @@ void main() {
               query: 'the OR quick OR brown OR fox',
             ))
             .orderBy(Ordering.expression(FullTextFunction.rank('a')))
-            .execute()
-            .map((result) => result.toPlainList())
-            .toList();
+            .execute();
+
+        final results = await resultSet.allPlainListResults();
 
         expect(results, [
           [docB.id, 1.5],
@@ -855,31 +894,27 @@ void main() {
 
 // === Eval expression utils ===================================================
 
-late SyncDatabase evalExprDb;
-
 void setupEvalExprUtils() {
-  setUpAll(() {
-    evalExprDb = openSyncTestDb('EvalExpr');
-    // Insert exactly one document.
-    evalExprDb.saveDocument(MutableDocument());
-  });
+  setUpAll(runWithApiValues(() async {
+    final db = await openSharedTestDatabase();
+    await db.saveDocument(MutableDocument.withId('EvalExpr'));
+  }));
 }
 
 ExpressionInterface valExpr(Object? value) => Expression.value(value);
 
-Object? evalExpr(
+Future<T> evalExpr<T extends Object?>(
   ExpressionInterface expression, {
   MutableDocument? doc,
   String? dataSourceAlias,
   Parameters? parameters,
-}) {
+}) async {
+  final db = await openSharedTestDatabase();
   if (doc != null) {
-    evalExprDb
-      ..deleteAllDocuments()
-      ..saveDocument(doc);
+    await db.saveDocument(doc);
   }
 
-  DataSourceInterface dataSource = DataSource.database(evalExprDb);
+  DataSourceInterface dataSource = DataSource.database(db);
   if (dataSourceAlias != null) {
     dataSource = (dataSource as DataSourceAs).as(dataSourceAlias);
   }
@@ -887,10 +922,18 @@ Object? evalExpr(
   // Giving the select result an alias prevents interpreting top level string
   // literals as property paths.
   final selectResult = SelectResult.expression(expression).as('_');
-  final query = const SyncQueryBuilder().select(selectResult).from(dataSource)
-    ..parameters = parameters;
+  final query = const QueryBuilder()
+      .select(selectResult)
+      .from(dataSource)
+      .where(Meta.id.equalTo(Expression.string(doc?.id ?? 'EvalExpr')))
+        ..parameters = parameters;
 
-  return query.execute().first.toPlainList()[0];
+  final resultSet = await query.execute();
+
+  return resultSet
+      .asStream()
+      .map((result) => result.toPlainList()[0] as T)
+      .first;
 }
 
 enum Quantifier {
@@ -934,23 +977,23 @@ SelectResultInterface aggNumberResult(
     SelectResult.expression(fn(aggNumberExpression));
 
 extension on Database {
-  void insertAggNumbers(Iterable<num> numbers) => inBatch(() {
-        for (final number in numbers) {
-          saveDocument(MutableDocument({
+  FutureOr<void> insertAggNumbers(Iterable<num> numbers) =>
+      saveAllDocuments(numbers.map((number) => MutableDocument({
             aggGroupProperty: '0',
             aggNumberProperty: number,
-          }));
-        }
-      });
+          })));
 
-  List<Object?> aggQuery(Iterable<SelectResultInterface> selectResults) =>
-      const SyncQueryBuilder()
-          .selectAll(selectResults.toList())
-          .from(DataSource.database(this))
-          .groupBy(Expression.property(aggGroupProperty))
-          .execute()
-          .first
-          .toPlainList();
+  Future<List<Object?>> aggQuery(
+    Iterable<SelectResultInterface> selectResults,
+  ) async {
+    final resultSet = await const QueryBuilder()
+        .selectAll(selectResults.toList())
+        .from(DataSource.database(this))
+        .groupBy(Expression.property(aggGroupProperty))
+        .execute();
+
+    return resultSet.plainListStream().first;
+  }
 }
 
 // === Join utils ==============================================================
@@ -975,15 +1018,13 @@ MutableDocument rightJoinDoc({
 }) =>
     MutableDocument.withId(id, {'side': 'right', if (on != null) 'on': on});
 
-extension on SyncDatabase {
-  Object? evalJoin({
+extension on Database {
+  Future<Object?> evalJoin({
     required JoinType type,
     required Iterable<MutableDocument> docs,
-  }) {
-    deleteAllDocuments();
-    inBatch(() {
-      docs.forEach(saveDocument);
-    });
+  }) async {
+    await deleteAllDocuments();
+    await saveAllDocuments(docs);
     const leftSide = 'left';
     const rightSide = 'right';
 
@@ -1016,7 +1057,7 @@ extension on SyncDatabase {
         break;
     }
 
-    return const SyncQueryBuilder()
+    final resultSet = await const QueryBuilder()
         .selectAll([
           SelectResult.expression(Meta.id.from(leftSide)),
           SelectResult.expression(Meta.id.from(rightSide)),
@@ -1024,9 +1065,9 @@ extension on SyncDatabase {
         .from(DataSource.database(this).as(leftSide))
         .join(join)
         .where(sideProp.from(leftSide).equalTo(valExpr(leftSide)))
-        .execute()
-        .map((e) => e.toPlainList())
-        .toList();
+        .execute();
+
+    return resultSet.allPlainListResults();
   }
 }
 
