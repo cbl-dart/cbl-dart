@@ -36,10 +36,8 @@ void main() {
             ConflictResolver.from((conflict) => conflict.localDocument),
       ));
 
+      // Check that is possible to start the replicator with this configuration.
       await repl.start();
-
-      await preReplicatorStopDelay();
-
       await repl.close();
     });
 
