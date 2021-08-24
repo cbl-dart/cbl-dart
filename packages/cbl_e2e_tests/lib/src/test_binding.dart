@@ -113,6 +113,8 @@ abstract class CblE2eTestBinding {
           maxSize: 100 * 1024 * 1024, // 100 MB
         )
         ..level = LogLevel.verbose;
+
+      Database.log.custom = DartConsoleLogger();
     });
 
     setupSharedTestCblWorker();

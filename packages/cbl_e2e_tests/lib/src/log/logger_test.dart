@@ -10,8 +10,10 @@ void main() {
   setupTestBinding();
 
   group('Logger', () {
+    late final Logger? originalLogger;
+    setUpAll(() => originalLogger = Database.log.custom);
+    tearDownAll(() => Database.log.custom = originalLogger);
     setUp(() => Database.log.custom = null);
-    tearDown(() => Database.log.custom = null);
 
     test('is called with log message', () {
       Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
