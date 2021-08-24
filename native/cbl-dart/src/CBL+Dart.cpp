@@ -8,7 +8,7 @@
 #include "Utils.hh"
 
 void CBLDart_Init(void *data) {
-  std::once_flag init;
+  static std::once_flag init;
   std::call_once(init, [=]() {
     Dart_InitializeApiDL(data);
 
@@ -286,7 +286,7 @@ static void CBLDart_CheckFileLogging() {
   std::call_once(checkFileLogging, []() {
     if (!CBLDart_LogFileConfigIsSet()) {
       CBL_Log(kCBLLogDomainDatabase, kCBLLogWarning,
-              "Database.log.file.config is nullptr, meaning file logging is "
+              "Database.log.file.config is null, meaning file logging is "
               "disabled. Log files required for product support are not being "
               "generated.");
     }
