@@ -264,6 +264,24 @@ jobs:
       - name: Run tests
         run: melos run test:flutter:ios
 
+      - name: Prepare Couchbase Lite logs
+        if: ${{ always() }}
+        run: |
+          APP_DATA_DIR="$(xcrun simctl get_app_container booted com.terwesten.gabriel.cblFlutterExample data)"
+          CACHES_DIR="$APP_DATA_DIR/Library/Caches"
+          CBL_LOGS_DIR="$CACHES_DIR/cbl_flutter/logs"
+          if [ -d "$CBL_LOGS_DIR" ]; then
+            cp -a "$CBL_LOGS_DIR/" cbl_logs
+          fi
+
+      - name: Upload Couchbase Lite logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: cbl_logs
+          path: cbl_logs
+
+
   tests-flutter-macos:
     name: Tests - Flutter - macOS
     runs-on: macos-10.15
@@ -314,6 +332,23 @@ jobs:
 
       - name: Run tests
         run: melos run test:flutter:macos
+
+      - name: Prepare Couchbase Lite logs
+        if: ${{ always() }}
+        run: |
+          APP_DATA_DIR="~/Library/Containers/com.terwesten.gabriel.cblFlutterExample/Data"
+          CACHES_DIR="$APP_DATA_DIR/Library/Caches"
+          CBL_LOGS_DIR="$CACHES_DIR/cbl_flutter/logs"
+          if [ -d "$CBL_LOGS_DIR" ]; then
+            cp -a "$CBL_LOGS_DIR/" cbl_logs
+          fi
+
+      - name: Upload Couchbase Lite logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: cbl_logs
+          path: cbl_logs
 
   tests-flutter-android:
     name: Tests - Flutter - Android
@@ -397,6 +432,19 @@ jobs:
           disable-animations: true
           script: |
             # Start port forwarding of Sync Gateway to emulator
+            adb root
             adb reverse tcp:4984 tcp:4984
 
             melos run test:flutter:android
+            TEST_EXIT_CODE="$?"
+
+            adb pull /data/data/com.terwesten.gabriel.cbl_flutter_example/cache/flutter_cbl/logs cbl_logs
+
+            exit "$TEST_EXIT_CODE"
+        
+      - name: Upload Couchbase Lite logs
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: cbl_logs
+          path: cbl_logs
