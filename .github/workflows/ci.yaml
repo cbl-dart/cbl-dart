@@ -278,7 +278,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: cbl_logs
+          name: cbl_logs_flutter_ios
           path: cbl_logs
 
 
@@ -336,7 +336,6 @@ jobs:
       - name: Prepare Couchbase Lite logs
         if: ${{ always() }}
         run: |
-          set -ex
           APP_DATA_DIR="$HOME/Library/Containers/com.terwesten.gabriel.cblFlutterExample/Data"
           CACHES_DIR="$APP_DATA_DIR/Library/Caches"
           CBL_LOGS_DIR="$CACHES_DIR/cbl_flutter/logs"
@@ -348,7 +347,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: cbl_logs
+          name: cbl_logs_flutter_macos
           path: cbl_logs
 
   tests-flutter-android:
@@ -447,5 +446,5 @@ jobs:
         uses: actions/upload-artifact@v2
         if: ${{ always() }}
         with:
-          name: cbl_logs
+          name: cbl_logs_flutter_android
           path: cbl_logs
