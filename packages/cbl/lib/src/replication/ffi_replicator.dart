@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
@@ -116,6 +117,8 @@ class FfiReplicator
     });
   }
 
+  static const _sleepWaitingForConnection = Duration(milliseconds: 5);
+
   final ReplicatorConfiguration _config;
 
   late final FfiDatabase _database;
@@ -144,7 +147,28 @@ class FfiReplicator
   @override
   void stop() => useSync(_stop);
 
-  void _stop() => native.call(_bindings.stop);
+  void _stop() {
+    // As a workaround for a bug in Couchbase Lite, a replicator is only stopped
+    // when it is not connecting. The bug can cause a crash if a replicator is
+    // stopped before the web socket connection to the target has been
+    // established.
+    // ignore: literal_only_boolean_expressions
+    while (true) {
+      switch (_status.activity) {
+        case ReplicatorActivityLevel.stopped:
+          return;
+        case ReplicatorActivityLevel.connecting:
+          sleep(_sleepWaitingForConnection);
+          continue;
+        case ReplicatorActivityLevel.busy:
+        case ReplicatorActivityLevel.idle:
+        case ReplicatorActivityLevel.offline:
+      }
+      break;
+    }
+
+    native.call(_bindings.stop);
+  }
 
   @override
   Stream<ReplicatorChange> changes() => useSync(_changes);

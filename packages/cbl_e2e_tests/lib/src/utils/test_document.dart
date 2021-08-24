@@ -19,7 +19,7 @@ void setupTestDocument() {
 /// [testDocumentId] which has [value] in its properties.
 Matcher isTestDocument(String value) => isA<Document>()
     .having((it) => it.id, 'id', testDocumentId)
-    .having((it) => it.toPlainMap(), 'toMap()', {'value': value});
+    .having((it) => it.toPlainMap(), 'toPlainMap()', {'value': value});
 
 extension TestDocumentDatabaseExtension on Database {
   /// Writes [value] in the properties of the test document. If its does not
