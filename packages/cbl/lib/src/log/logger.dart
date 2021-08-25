@@ -5,6 +5,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../support/async_callback.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
+import '../support/utils.dart';
+import 'console_logger.dart';
 
 /// Subsystems that log information.
 enum LogDomain {
@@ -72,9 +74,9 @@ class LogMessage {
   final String message;
 }
 
-/// A [Logger] implementation which emits the received [LogMessage]s into a
-/// [stream].
+/// A [Logger] which emits the received [LogMessage]s from a [stream].
 class StreamLogger extends Logger {
+  /// Creates a [Logger] which emits the received [LogMessage]s from a [stream].
   StreamLogger([LogLevel? level]) : super(level);
 
   final _controller = StreamController<LogMessage>.broadcast();
@@ -85,6 +87,58 @@ class StreamLogger extends Logger {
   @override
   void log(LogLevel level, LogDomain domain, String message) =>
       _controller.add(LogMessage(level, domain, message));
+}
+
+/// A [Logger] which formats logs in the same way as [ConsoleLogger] but uses
+/// Dart's [print] function.
+class DartConsoleLogger extends Logger {
+  /// Creates a [Logger] which formats logs in the same way as [ConsoleLogger]
+  /// but uses Dart's [print] function.
+  DartConsoleLogger([LogLevel? level]) : super(level);
+
+  @override
+  void log(LogLevel level, LogDomain domain, String message) {
+    // ignore: avoid_print
+    print(_formatLogMessage(level, domain, message));
+  }
+
+  static String _formatLogMessage(
+    LogLevel level,
+    LogDomain domain,
+    String message,
+  ) =>
+      '${_logTimeStamp()}| '
+      '[${_formatDomain(domain)}] '
+      '${describeEnum(level)}: $message';
+
+  static String _logTimeStamp() {
+    final now = DateTime.now();
+
+    final h = _twoDigits(now.hour);
+    final m = _twoDigits(now.minute);
+    final s = _twoDigits(now.second);
+    final microseconds = now.millisecond * 1000 + now.microsecond;
+    final us = _paddedDigits(microseconds, digits: 6);
+    return '$h:$m:$s.$us';
+  }
+
+  static String _formatDomain(LogDomain domain) {
+    switch (domain) {
+      case LogDomain.database:
+        return 'DB';
+      case LogDomain.query:
+        return 'Query';
+      case LogDomain.replicator:
+        return 'Sync';
+      case LogDomain.network:
+        return 'WS';
+    }
+  }
+
+  static String _paddedDigits(int value, {required int digits}) =>
+      value.toString().padLeft(digits, '0');
+
+  static String _twoDigits(int value) => _paddedDigits(value, digits: 2);
 }
 
 // === Impl ====================================================================

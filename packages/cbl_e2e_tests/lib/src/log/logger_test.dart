@@ -10,8 +10,10 @@ void main() {
   setupTestBinding();
 
   group('Logger', () {
+    late final Logger? originalLogger;
+    setUpAll(() => originalLogger = Database.log.custom);
+    tearDownAll(() => Database.log.custom = originalLogger);
     setUp(() => Database.log.custom = null);
-    tearDown(() => Database.log.custom = null);
 
     test('is called with log message', () {
       Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
@@ -57,24 +59,24 @@ void main() {
       // Wont be logged because logger has been removed.
       cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
     });
-  });
 
-  group('StreamLogger', () {
-    test('emits log messages', () {
-      final logger = Database.log.custom = StreamLogger(LogLevel.warning);
-      addTearDown(() => Database.log.custom = null);
+    group('StreamLogger', () {
+      test('emits log messages', () {
+        final logger = Database.log.custom = StreamLogger(LogLevel.warning);
+        addTearDown(() => Database.log.custom = null);
 
-      expect(
-        logger.stream,
-        emits(
-          isA<LogMessage>()
-              .having((it) => it.domain, 'domain', LogDomain.network)
-              .having((it) => it.level, 'lever', LogLevel.warning)
-              .having((it) => it.message, 'message', 'A'),
-        ),
-      );
+        expect(
+          logger.stream,
+          emits(
+            isA<LogMessage>()
+                .having((it) => it.domain, 'domain', LogDomain.network)
+                .having((it) => it.level, 'lever', LogLevel.warning)
+                .having((it) => it.message, 'message', 'A'),
+          ),
+        );
 
-      cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
+        cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
+      });
     });
   });
 }

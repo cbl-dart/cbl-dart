@@ -65,6 +65,8 @@ abstract class CblE2eTestBinding {
   /// Temporary directory for tests.
   late final String tmpDir;
 
+  bool get useDartConsoleLogger => false;
+
   TestFn get testFn => t.test;
 
   GroupFn get groupFn => t.group;
@@ -103,6 +105,9 @@ abstract class CblE2eTestBinding {
       await _cleanTestTmpDir();
       CouchbaseLite.init(libraries: libraries);
 
+      const consoleLogLevel = LogLevel.info;
+      const fileLogLevel = LogLevel.verbose;
+
       Database.log.file
         ..config = LogFileConfiguration(
           directory: '$tmpDir/logs',
@@ -112,7 +117,13 @@ abstract class CblE2eTestBinding {
           // file splitting.
           maxSize: 100 * 1024 * 1024, // 100 MB
         )
-        ..level = LogLevel.verbose;
+        ..level = fileLogLevel;
+
+      if (useDartConsoleLogger) {
+        Database.log.custom = DartConsoleLogger(consoleLogLevel);
+      } else {
+        Database.log.console.level = consoleLogLevel;
+      }
     });
 
     setupSharedTestCblWorker();

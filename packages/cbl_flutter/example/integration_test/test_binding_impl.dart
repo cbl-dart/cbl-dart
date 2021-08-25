@@ -30,6 +30,9 @@ class FlutterCblE2eTestBinding extends CblE2eTestBinding {
       getTemporaryDirectory().then((dir) => path.join(dir.path, 'cbl_flutter'));
 
   @override
+  bool get useDartConsoleLogger => true;
+
+  @override
   final testFn = (description, body) =>
       ft.testWidgets(description, (tester) async => await body());
 

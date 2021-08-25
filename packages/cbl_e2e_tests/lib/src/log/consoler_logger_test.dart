@@ -8,16 +8,8 @@ void main() {
 
   group('ConsolerLogger', () {
     late LogLevel originalLogLevel;
-    setUpAll(() {
-      originalLogLevel = Database.log.console.level;
-    });
-    tearDownAll(() {
-      Database.log.console.level = originalLogLevel;
-    });
-
-    test('initial level is info', () {
-      expect(Database.log.console.level, LogLevel.warning);
-    });
+    setUpAll(() => originalLogLevel = Database.log.console.level);
+    tearDownAll(() => Database.log.console.level = originalLogLevel);
 
     test('get and set level', () {
       Database.log.console.level = LogLevel.verbose;
