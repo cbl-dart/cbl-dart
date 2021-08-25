@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
+set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
+
 project(CouchbaseLite_Dart)
 
 get_filename_component(ROOT_DIR ../ ABSOLUTE)
