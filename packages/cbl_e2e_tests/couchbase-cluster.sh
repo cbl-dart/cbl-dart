@@ -4,8 +4,6 @@ set -e
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dockerComposeFile="$scriptDir/docker-compose.yaml"
-initCouchbaseServerScript="$scriptDir/init-couchbase-server.sh"
-couchbaseServerVersionMacOS=6.6.0
 syncGatewayVersionMacOS=2.8.2
 
 function waitForService() {
@@ -36,42 +34,8 @@ function waitForService() {
     echo "::endgroup::"
 }
 
-function waitForCouchbaseServer() {
-    waitForService "Couchbase Server" localhost:8091
-}
-
 function waitForSyncGateway() {
     waitForService "Sync Gateway" localhost:4984
-}
-
-function installCouchbaseServerMacOS {
-    applicationsDir="/Applications"
-    couchbaseServerDMG="couchbase-server-community_$couchbaseServerVersionMacOS-macos_x86_64.dmg"
-    couchbaseServerUrl="https://packages.couchbase.com/releases/$couchbaseServerVersionMacOS/$couchbaseServerDMG"
-    couchbaseServerAppName="Couchbase Server.app"
-    couchbaseServerDMGMountPoint="/Volumes/Couchbase Installer "
-    couchbaseServerApp="$applicationsDir/$couchbaseServerAppName"
-    couchbaseServerAppBin="$couchbaseServerApp/Contents/Resources/couchbase-core/bin"
-
-    echo "::group::Install Couchbase Server"
-
-    curl "$couchbaseServerUrl" -o "$couchbaseServerDMG"
-    sudo hdiutil attach "$couchbaseServerDMG"
-    cp -R "$couchbaseServerDMGMountPoint/$couchbaseServerAppName" "$applicationsDir"
-    sudo hdiutil detach "$couchbaseServerDMGMountPoint"
-    rm "$couchbaseServerDMG"
-
-    sudo xattr -d -r com.apple.quarantine "$couchbaseServerApp"
-    open "$couchbaseServerApp"
-
-    export PATH="$couchbaseServerAppBin:$PATH"
-
-    # Make server reachable under "couchbase" host name so that
-    # the Sync Gatway config can use the same server address for Docker
-    # and direct install.
-    echo "127.0.0.1 couchbase" | sudo tee -a /etc/hosts
-
-    echo "::endgroup::"
 }
 
 function installSyncGatewayMacOS {
@@ -99,9 +63,6 @@ function installSyncGatewayMacOS {
 }
 
 function setupMacOS() {
-    installCouchbaseServerMacOS
-    waitForCouchbaseServer
-    "$initCouchbaseServerScript"
     installSyncGatewayMacOS
     waitForSyncGateway
 }
@@ -114,19 +75,7 @@ function startDockerService {
     echo "::endgroup::"
 }
 
-function initCouchbaseServerDocker() {
-    docker run \
-        --rm \
-        -v "$initCouchbaseServerScript:/init.sh:ro" \
-        --network cbl_e2e_tests_default \
-        couchbase:community-6.6.0 \
-        /init.sh
-}
-
 function setupDocker() {
-    startDockerService couchbase "Couchbase Server"
-    waitForCouchbaseServer
-    initCouchbaseServerDocker
     startDockerService sync-gateway "Sync Gateway"
     waitForSyncGateway
 }

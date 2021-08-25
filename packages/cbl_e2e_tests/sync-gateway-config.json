@@ -7,15 +7,12 @@
       "color_enabled": true
     }
   },
+
+  "adminInterface": ":4985",
+
   "databases": {
     "db": {
-      "server": "http://couchbase:8091",
-      "username": "sync-gateway",
-      "password": "password",
-      "bucket": "default",
-      "import_docs": true,
-      "enable_shared_bucket_access": true,
-      "num_index_replicas": 0,
+      "server": "walrus:",
       "users": {
         "GUEST": {
           "disabled": false,

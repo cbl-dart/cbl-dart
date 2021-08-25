@@ -1,10 +1,87 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+import 'package:http/http.dart';
 
 import '../test_binding.dart';
 
-final testSyncGatewayUrl = Uri.parse('ws://localhost:4984/db');
+const syncGatewayHost = 'localhost';
+const syncGatewayPublicPort = 4984;
+const syncGatewayAdminPort = 4985;
+const syncGatewayDatabase = 'db';
+final syncGatewayReplicationUrl = Uri(
+  scheme: 'ws',
+  host: syncGatewayHost,
+  port: syncGatewayPublicPort,
+  path: syncGatewayDatabase,
+);
+final syncGatewayAdminApiUrl = Uri(
+  scheme: 'http',
+  host: syncGatewayHost,
+  port: syncGatewayAdminPort,
+);
+
+Future<String> syncGatewayRequest(
+  Uri url, {
+  String method = 'GET',
+  Map<String, String>? headers,
+  String? body,
+  bool admin = false,
+}) {
+  final baseUrl = Uri(
+    scheme: 'http',
+    host: syncGatewayHost,
+    port: admin ? syncGatewayAdminPort : syncGatewayPublicPort,
+  );
+  final fullUrl = baseUrl.resolveUri(url);
+
+  final request = Request(method, fullUrl);
+
+  request.headers['Content-Type'] = 'application/json';
+  if (headers != null) {
+    request.headers.addAll(headers);
+  }
+
+  if (body != null) {
+    request.body = body;
+  }
+
+  // ignore: avoid_print
+  print('SyncGateway Request: $method $url, admin: $admin');
+
+  return _withClient((client) async {
+    final response = await client.send(request);
+    final body = await response.stream.bytesToString();
+
+    final expectedStatusCode = method == 'PUT' ? 201 : 200;
+
+    if (response.statusCode != expectedStatusCode) {
+      throw StateError(
+        'Got a response with status code ${response.statusCode} from '
+        'SyncGateway but expected status code $expectedStatusCode: $body',
+      );
+    }
+
+    return body;
+  });
+}
+
+Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
+  final client = Client();
+  try {
+    return await fn(client);
+  } finally {
+    client.close();
+  }
+}
+
+Future<void> flushSyncGatewayDatabase() async {
+  await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/_flush'),
+    method: 'POST',
+    admin: true,
+  );
+}
 
 extension ReplicatorUtilsDatabaseExtension on Database {
   /// Creates a replicator which is configured with the test sync gateway
@@ -20,7 +97,7 @@ extension ReplicatorUtilsDatabaseExtension on Database {
   }) =>
       Replicator.create(ReplicatorConfiguration(
         database: this,
-        target: UrlEndpoint(testSyncGatewayUrl),
+        target: UrlEndpoint(syncGatewayReplicationUrl),
         replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
         continuous: continuous ?? false,
         channels: channels,

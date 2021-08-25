@@ -16,12 +16,14 @@ void main() {
   group('Replicator', () {
     setupTestDocument();
 
+    setUp(flushSyncGatewayDatabase);
+
     apiTest('create Replicator smoke test', () async {
       final db = await openTestDatabase();
 
       final repl = await Replicator.create(ReplicatorConfiguration(
         database: db,
-        target: UrlEndpoint(testSyncGatewayUrl),
+        target: UrlEndpoint(syncGatewayReplicationUrl),
         authenticator: BasicAuthenticator(
           username: 'user',
           password: 'password',
@@ -45,9 +47,10 @@ void main() {
       final db = await openTestDatabase();
       final config = ReplicatorConfiguration(
         database: db,
-        target: UrlEndpoint(testSyncGatewayUrl),
+        target: UrlEndpoint(syncGatewayReplicationUrl),
       );
       final repl = await Replicator.create(config);
+      addTearDown(repl.close);
       final configA = repl.config;
       final configB = repl.config;
       expect(configA, isNot(same(config)));
