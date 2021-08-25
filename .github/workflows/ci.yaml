@@ -398,5 +398,6 @@ jobs:
           script: |
             # Start port forwarding of Sync Gateway to emulator
             adb reverse tcp:4984 tcp:4984
+            adb reverse tcp:4985 tcp:4985
 
             melos run test:flutter:android

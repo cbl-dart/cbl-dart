@@ -16,12 +16,15 @@ dependencies:
 
 dev_dependencies:
   cbl_ffi: ^0.6.0
+  collection: ^1.15.0
   flutter_test:
     sdk: flutter
+  http: ^0.13.3
   integration_test:
     sdk: flutter
   rxdart: ^0.26.0
   test: any
+  web_socket_channel: ^2.1.0
 
 flutter:
   uses-material-design: true
