@@ -33,7 +33,7 @@
 | Platform | Minimum version |
 | -------: | --------------- |
 |      iOS | 11              |
-|    macOS | 10.13           |
+|    macOS | 10.15           |
 |  Android | 22              |
 
 ## Installation

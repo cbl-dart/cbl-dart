@@ -12,7 +12,7 @@ This package provides binaries required to use
 | Platform | Minimum version |
 | -------: | --------------- |
 |      iOS | 11              |
-|    macOS | 10.13           |
+|    macOS | 10.15           |
 |  Android | 22              |
 
 ## Usage
