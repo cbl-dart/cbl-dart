@@ -54,17 +54,17 @@ SyncDatabase openSyncTestDatabase({
   return db;
 }
 
-late CblWorker _sharedWorker;
+CblWorker? _sharedWorker;
 late CblServiceClient _sharedClient;
 
 void setupSharedTestCblWorker() {
   setUpAll(() async {
     _sharedWorker = CblWorker();
-    await _sharedWorker.start();
-    _sharedClient = CblServiceClient(channel: _sharedWorker.channel);
+    await _sharedWorker!.start();
+    _sharedClient = CblServiceClient(channel: _sharedWorker!.channel);
   });
 
-  tearDownAll(() => _sharedWorker.stop());
+  tearDownAll(() => _sharedWorker?.stop());
 }
 
 Future<AsyncDatabase> openAsyncTestDatabase({

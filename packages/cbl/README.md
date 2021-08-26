@@ -22,7 +22,7 @@
 
 ## Features - Dart API
 
-- Calls Couchbase Lite C API through FFI
+- Async and sync APIs
 - Streams for event based APIs
 - Support for Flutter apps
 - Support for standalone Dart (for example a CLI)
@@ -36,13 +36,10 @@
 |    macOS | 10.15           |
 |  Android | 22              |
 
-## Installation
+## Getting started on Flutter
 
-This package only contains Dart code and requires binary libraries to be
-packaged with any app that wants to use it. For Flutter apps, you need to add
-[`cbl_flutter`](https://pub.dev/packages/cbl_flutter) as a dependency to include
-those libraries in the build. `cbl_flutter` currently supports iOS, macOS and
-Android.
+You need to add `cbl` and [`cbl_flutter`](https://pub.dev/packages/cbl_flutter)
+as dependencies. `cbl_flutter` currently supports iOS, macOS and Android.
 
 ```pubspec
 dependencies:
@@ -50,20 +47,16 @@ dependencies:
     cbl_flutter: ...
 ```
 
-## Getting started
-
 Make sure you have set the required minimum target version in the build systems
 of the platforms you support.
 
-Before you access any part of the library, `CouchbaseLite` needs to be
-initialized with a configuration of how to load the binary libraries.
+Couchbase Lite needs to be initialized, before it can be used:
 
 ```dart
-import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
 
-void initCbl() {
-  CouchbaseLite.init(libraries: flutterLibraries());
+Future<void> initCouchbaseLite() async {
+  await CouchbaseLiteFlutter.init();
 }
 ```
 
@@ -71,9 +64,8 @@ Now you can use `Database.open` to open a database:
 
 ```dart
 import 'package:cbl/cbl.dart';
-import 'package:path_provider/path_provider.dart';
 
-Future<void> useDatabase() async {
+Future<void> useCouchbaseLite() async {
   final db = await Database.openAsync('chat-messages');
 
   final doc = MutableDocument({

@@ -1,18 +1,10 @@
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 
-import '../couchbase_lite.dart';
+/// The native libraries used by worker isolates.
+late ffi.Libraries workerLibraries;
 
-Libraries? _libraries;
-
-Libraries get libraries {
-  if (_libraries == null) {
-    _throwCblNotInitializedError();
-  }
-  return _libraries!;
-}
-
-set libraries(Libraries value) => _libraries = value;
-
+/// Convenience accessor for `CBLBindings.instance`, which throws an informative
+/// error when used before the bindings are initialized.
 late final ffi.CBLBindings cblBindings = () {
   final bindings = ffi.CBLBindings.maybeInstance;
   if (bindings == null) {

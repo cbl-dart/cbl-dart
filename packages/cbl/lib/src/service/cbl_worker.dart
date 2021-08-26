@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
-import '../couchbase_lite.dart';
 import '../errors.dart';
-import '../support/ffi.dart' as ffi;
+import '../init.dart';
+import '../support/ffi.dart';
 import '../support/utils.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
@@ -15,9 +16,8 @@ import 'serialization/serialization.dart';
 
 class CblWorker {
   CblWorker({
-    Libraries? libraries,
     this.serializationTarget = SerializationTarget.isolatePort,
-  }) : libraries = libraries ?? ffi.libraries;
+  });
 
   static Future<T> executeCall<T>(Request<T> request) async {
     final worker = CblWorker();
@@ -31,8 +31,6 @@ class CblWorker {
       rethrow;
     }
   }
-
-  final Libraries libraries;
 
   final SerializationTarget serializationTarget;
 
@@ -60,7 +58,7 @@ class CblWorker {
 
     _worker = IsolateWorker(
       delegate: _ServiceWorkerDelegate(
-        libraries: libraries,
+        libraries: workerLibraries,
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
@@ -120,7 +118,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
 
   @override
   FutureOr<void> initialize() {
-    CouchbaseLite.init(libraries: libraries);
+    initIsolate(libraries: libraries);
 
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),

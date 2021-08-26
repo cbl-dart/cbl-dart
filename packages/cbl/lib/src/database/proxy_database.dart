@@ -15,7 +15,6 @@ import '../service/channel.dart';
 import '../service/proxy_object.dart';
 import '../service/serialization/json_packet_codec.dart';
 import '../support/encoding.dart';
-import '../support/ffi.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import 'blob_store.dart';
@@ -277,7 +276,7 @@ class WorkerDatabase extends ProxyDatabase {
   ]) async {
     configuration ??= DatabaseConfiguration();
 
-    final worker = CblWorker(libraries: libraries);
+    final worker = CblWorker();
     await worker.start();
 
     try {

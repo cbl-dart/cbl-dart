@@ -11,8 +11,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  path: ^1.8.0
-  path_provider: ^2.0.1
 
 dev_dependencies:
   cbl_ffi: ^0.6.0
@@ -22,6 +20,7 @@ dev_dependencies:
   http: ^0.13.3
   integration_test:
     sdk: flutter
+  path_provider: ^2.0.1
   rxdart: ^0.26.0
   test: any
   web_socket_channel: ^2.1.0

@@ -445,7 +445,7 @@ void main() {
 
           final q = await Query.fromN1ql(
             db,
-            "SELECT * FROM _ WHERE MATCH('a', 'query')",
+            "SELECT * FROM _ WHERE MATCH(a, 'query')",
           );
 
           final explain = await q.explain();
@@ -477,7 +477,7 @@ void main() {
 
         final q = await Query.fromN1ql(
           db,
-          "SELECT * FROM _ WHERE MATCH('a', 'query')",
+          "SELECT * FROM _ WHERE MATCH(a, 'query')",
         );
 
         final explain = await q.explain();

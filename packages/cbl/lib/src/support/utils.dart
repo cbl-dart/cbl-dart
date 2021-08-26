@@ -102,43 +102,6 @@ String highlightPosition(String string, {required int offset}) {
   return "$prefix$slice$postfix\n${" " * markOffset}^\n";
 }
 
-class Once<T> {
-  Once({
-    this.rejectMultipleExecutions = false,
-    this.debugName,
-  });
-
-  final bool rejectMultipleExecutions;
-
-  final String? debugName;
-
-  bool get hasExecuted => _hasExecuted;
-  bool _hasExecuted = false;
-
-  T? get result => _result;
-  T? _result;
-
-  void execute(T Function() fn) {
-    if (_hasExecuted) {
-      if (rejectMultipleExecutions) {
-        throw StateError('$_debugName must not be executed more than once.');
-      }
-      return;
-    }
-    _result = fn();
-    _hasExecuted = true;
-  }
-
-  void debugCheckHasExecuted() {
-    if (!_hasExecuted) {
-      throw StateError('$_debugName has not been executed.');
-    }
-  }
-
-  // ignore: no_runtimetype_tostring
-  String get _debugName => debugName ?? runtimeType.toString();
-}
-
 FutureOr<void> syncOrAsync(Iterable<FutureOr<void>> iterable) {
   final iterator = iterable.iterator;
   while (iterator.moveNext()) {
