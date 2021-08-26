@@ -289,7 +289,7 @@ extension on ConcurrencyControl {
 
 extension on DatabaseConfiguration {
   CBLDatabaseConfiguration toCBLDatabaseConfiguration() =>
-      CBLDatabaseConfiguration(directory);
+      CBLDatabaseConfiguration(directory: directory);
 }
 
 bool _catchConflictException(void Function() fn) {

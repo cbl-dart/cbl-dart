@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
                       icon: Icons.close,
                       iconColor: Colors.red,
                       text: 'Initialization failed:\n'
-                          '${snapshot.error}',
+                          '${snapshot.error}\n${snapshot.stackTrace}',
                     ),
                   );
                 }
