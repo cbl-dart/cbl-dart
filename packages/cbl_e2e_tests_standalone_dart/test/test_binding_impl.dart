@@ -17,12 +17,12 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   }
 
   @override
-  String resolveTmpDir() => Directory('test/.tmp').absolute.path;
-
-  @override
   FutureOr<void> initCouchbaseLite() {
     CouchbaseLite.init(libraries: _libraries());
   }
+
+  @override
+  String resolveTmpDir() => Directory('test/.tmp').absolute.path;
 }
 
 Libraries _libraries() {

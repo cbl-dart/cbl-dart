@@ -2,10 +2,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 
-import 'document/common.dart';
-import 'fleece/integration/integration.dart';
-import 'service/cbl_worker.dart';
-import 'support/ffi.dart';
+import 'init.dart';
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
 /// `DynamicLibrary` at a later time.
@@ -81,19 +78,4 @@ class CouchbaseLite {
   /// Initializes the `cbl` package.
   static void init({required Libraries libraries}) =>
       initMainIsolate(libraries: libraries._toFfi());
-}
-
-void initIsolate({required ffi.Libraries libraries}) {
-  ffi.CBLBindings.init(libraries);
-  MDelegate.instance = CblMDelegate();
-}
-
-void initMainIsolate({
-  required ffi.Libraries libraries,
-  ffi.CBLInitContext? context,
-}) {
-  initIsolate(libraries: libraries);
-
-  CblWorker.init(libraries: libraries);
-  cblBindings.base.init(context: context);
 }

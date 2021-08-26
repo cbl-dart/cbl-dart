@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:cbl/cbl.dart';
 // ignore: implementation_imports
-import 'package:cbl/src/couchbase_lite.dart';
-import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
+import 'package:cbl/src/init.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Initializes global resources and configures global settings, such as
@@ -21,19 +20,19 @@ class CouchbaseLiteFlutter {
 
 /// Locates and returns the [Libraries] shipped by this package (`cbl_flutter`),
 /// handling the differences between platforms.
-ffi.Libraries _libraries() {
+Libraries _libraries() {
   if (Platform.isIOS || Platform.isMacOS) {
-    return ffi.Libraries(
-      cbl: ffi.LibraryConfiguration(process: true),
-      cblDart: ffi.LibraryConfiguration(process: true),
+    return Libraries(
+      cbl: LibraryConfiguration(process: true),
+      cblDart: LibraryConfiguration(process: true),
     );
   } else if (Platform.isAndroid) {
-    return ffi.Libraries(
-      cbl: ffi.LibraryConfiguration(
+    return Libraries(
+      cbl: LibraryConfiguration(
         name: 'libcblite',
         appendExtension: true,
       ),
-      cblDart: ffi.LibraryConfiguration(
+      cblDart: LibraryConfiguration(
         name: 'libcblitedart',
         appendExtension: true,
       ),
@@ -43,13 +42,13 @@ ffi.Libraries _libraries() {
   }
 }
 
-Future<ffi.CBLInitContext?> _context() async {
+Future<CBLInitContext?> _context() async {
   if (Platform.isAndroid) {
     final filesDir = await getApplicationSupportDirectory();
     final externalFilesDir = await getExternalStorageDirectory();
     final tempDir = Directory.fromUri(externalFilesDir!.uri.resolve('CBLTemp'));
     await tempDir.create();
-    return ffi.CBLInitContext(
+    return CBLInitContext(
       filesDir: filesDir.path,
       tempDir: tempDir.path,
     );

@@ -12,7 +12,7 @@ bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
   auto result = true;
 
   static std::once_flag init;
-  std::call_once(init, [=]() {
+  std::call_once(init, [&]() {
 #ifdef __ANDROID__
     if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
                   errorOut)) {
