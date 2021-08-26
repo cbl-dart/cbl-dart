@@ -181,7 +181,7 @@ Future<Channel> openTestChannel() async {
       final isolate = await Isolate.spawn(
         testIsolateMain,
         TestIsolateConfig(
-          libraries!,
+          workerLibraries,
           receivePort.sendPort,
           serializationTarget.value,
         ),

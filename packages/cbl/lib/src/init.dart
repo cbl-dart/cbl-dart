@@ -4,17 +4,23 @@ import 'document/common.dart';
 import 'fleece/integration/integration.dart';
 import 'support/ffi.dart' as ffi;
 
+/// Initializes this isolate for use of Couchbase Lite.
 void initIsolate({required Libraries libraries}) {
   CBLBindings.init(libraries);
   MDelegate.instance = CblMDelegate();
 }
 
+/// Initializes this isolate for use of Couchbase Lite, by an end user of
+/// the `cbl` library.
 void initMainIsolate({
   required Libraries libraries,
   CBLInitContext? context,
 }) {
   initIsolate(libraries: libraries);
 
-  ffi.libraries = libraries;
+  // Setup the native libraries used to in worker isolates.
+  ffi.workerLibraries = libraries;
+
+  // Initialize the native libraries.
   ffi.cblBindings.base.init(context: context);
 }

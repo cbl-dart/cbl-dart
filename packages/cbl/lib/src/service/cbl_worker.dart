@@ -58,7 +58,7 @@ class CblWorker {
 
     _worker = IsolateWorker(
       delegate: _ServiceWorkerDelegate(
-        libraries: libraries!,
+        libraries: workerLibraries,
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),

@@ -45,9 +45,13 @@ Libraries _libraries() {
 Future<CBLInitContext?> _context() async {
   if (Platform.isAndroid) {
     final filesDir = await getApplicationSupportDirectory();
-    final externalFilesDir = await getExternalStorageDirectory();
-    final tempDir = Directory.fromUri(externalFilesDir!.uri.resolve('CBLTemp'));
+
+    // For temporary files, we try to use the apps external storage directory
+    // and fallback to the internal directory, if it's not available.
+    var tempDir = (await getExternalStorageDirectory()) ?? filesDir;
+    tempDir = Directory.fromUri(tempDir.uri.resolve('CBLTemp'));
     await tempDir.create();
+
     return CBLInitContext(
       filesDir: filesDir.path,
       tempDir: tempDir.path,
