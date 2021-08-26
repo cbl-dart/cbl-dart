@@ -1,3 +1,7 @@
+## 0.7.0-beta.1
+
+ - Bump "cbl_ffi" to `0.7.0-beta.1`.
+
 ## 0.6.0
 
 > Note: This release has breaking changes.

@@ -1,3 +1,7 @@
+## 1.0.0-beta.2
+
+ - Bump "cbl" to `1.0.0-beta.2`.
+
 ## 0.6.0
 
 > Note: This release has breaking changes.
