@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../couchbase_lite.dart';
 import '../errors.dart';
-import '../support/ffi.dart' as ffi;
 import '../support/utils.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
@@ -15,9 +15,15 @@ import 'serialization/serialization.dart';
 
 class CblWorker {
   CblWorker({
-    Libraries? libraries,
     this.serializationTarget = SerializationTarget.isolatePort,
-  }) : libraries = libraries ?? ffi.libraries;
+  });
+
+  static ffi.Libraries? _libraries;
+
+  static void init({required ffi.Libraries libraries}) {
+    assert(_libraries == null);
+    _libraries = libraries;
+  }
 
   static Future<T> executeCall<T>(Request<T> request) async {
     final worker = CblWorker();
@@ -31,8 +37,6 @@ class CblWorker {
       rethrow;
     }
   }
-
-  final Libraries libraries;
 
   final SerializationTarget serializationTarget;
 
@@ -48,6 +52,8 @@ class CblWorker {
   late final IsolateWorker _worker;
 
   Future<void> start() async {
+    assert(_libraries != null);
+
     _checkStatusIs(_WorkerStatus.initial);
     _status = _WorkerStatus.starting;
 
@@ -60,7 +66,7 @@ class CblWorker {
 
     _worker = IsolateWorker(
       delegate: _ServiceWorkerDelegate(
-        libraries: libraries,
+        libraries: _libraries!,
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
@@ -111,7 +117,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
     required this.serializationType,
   });
 
-  final Libraries libraries;
+  final ffi.Libraries libraries;
   final SendPort channel;
   final SerializationTarget serializationType;
 
@@ -120,7 +126,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
 
   @override
   FutureOr<void> initialize() {
-    CouchbaseLite.init(libraries: libraries);
+    initIsolate(libraries: libraries);
 
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),

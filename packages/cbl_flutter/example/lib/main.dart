@@ -24,12 +24,12 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    CouchbaseLite.init(libraries: flutterLibraries());
-
     _initFuture = _init();
   }
 
   Future<void> _init() async {
+    await CouchbaseLiteFlutter.init();
+
     _db = await Database.openAsync('Example');
 
     final query = await Query.fromN1qlAsync(

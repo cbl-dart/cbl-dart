@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
@@ -19,42 +20,46 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   String resolveTmpDir() => Directory('test/.tmp').absolute.path;
 
   @override
-  late final libraries = (() {
-    final libDir = p.absolute('lib');
-    final frameworksDir = p.absolute('Frameworks');
+  FutureOr<void> initCouchbaseLite() {
+    CouchbaseLite.init(libraries: _libraries());
+  }
+}
 
-    String findLibInFrameworks(String name) =>
-        '$frameworksDir/$name.framework/Versions/A/$name';
+Libraries _libraries() {
+  final libDir = p.absolute('lib');
+  final frameworksDir = p.absolute('Frameworks');
 
-    late String cblLib;
-    late String cblDartLib;
+  String findLibInFrameworks(String name) =>
+      '$frameworksDir/$name.framework/Versions/A/$name';
 
-    final isUnix = Platform.isLinux || Platform.isMacOS;
+  late String cblLib;
+  late String cblDartLib;
 
-    if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
-      cblLib = '$libDir/libcblite';
-      cblDartLib = '$libDir/libcblitedart';
+  final isUnix = Platform.isLinux || Platform.isMacOS;
 
-      return Libraries(
-        cbl: LibraryConfiguration.dynamic(cblLib, version: '3'),
-        cblDart: LibraryConfiguration.dynamic(cblDartLib),
-      );
-    } else if (Platform.isMacOS) {
-      cblLib = findLibInFrameworks('CouchbaseLite');
-      cblDartLib = findLibInFrameworks('CouchbaseLiteDart');
+  if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
+    cblLib = '$libDir/libcblite';
+    cblDartLib = '$libDir/libcblitedart';
 
-      return Libraries(
-        cbl: LibraryConfiguration.dynamic(
-          cblLib,
-          appendExtension: false,
-        ),
-        cblDart: LibraryConfiguration.dynamic(
-          cblDartLib,
-          appendExtension: false,
-        ),
-      );
-    } else {
-      throw StateError('Could not find libraries for current platform');
-    }
-  })();
+    return Libraries(
+      cbl: LibraryConfiguration.dynamic(cblLib, version: '3'),
+      cblDart: LibraryConfiguration.dynamic(cblDartLib),
+    );
+  } else if (Platform.isMacOS) {
+    cblLib = findLibInFrameworks('CouchbaseLite');
+    cblDartLib = findLibInFrameworks('CouchbaseLiteDart');
+
+    return Libraries(
+      cbl: LibraryConfiguration.dynamic(
+        cblLib,
+        appendExtension: false,
+      ),
+      cblDart: LibraryConfiguration.dynamic(
+        cblDartLib,
+        appendExtension: false,
+      ),
+    );
+  } else {
+    throw StateError('Could not find libraries for current platform');
+  }
 }

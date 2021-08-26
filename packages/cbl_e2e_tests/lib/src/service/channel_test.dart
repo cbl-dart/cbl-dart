@@ -6,7 +6,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:cbl/cbl.dart';
 import 'package:cbl/src/service/channel.dart';
 import 'package:cbl/src/service/serialization/isolate_packet_codec.dart';
 import 'package:cbl/src/service/serialization/json_packet_codec.dart';
@@ -179,7 +178,6 @@ Future<Channel> openTestChannel() async {
       final isolate = await Isolate.spawn(
         testIsolateMain,
         TestIsolateConfig(
-          libraries,
           receivePort.sendPort,
           serializationTarget.value,
         ),
@@ -235,19 +233,15 @@ void registerTestHandlers(Channel channel) {
 
 class TestIsolateConfig {
   TestIsolateConfig(
-    this.libraries,
     this.sendPort,
     this.target,
   );
 
-  final Libraries libraries;
   final SendPort? sendPort;
   final SerializationTarget target;
 }
 
 void testIsolateMain(TestIsolateConfig config) {
-  CouchbaseLite.init(libraries: config.libraries);
-
   final remote = Channel(
     transport: IsolateChannel.connectSend(config.sendPort!),
     autoOpen: false,

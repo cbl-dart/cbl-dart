@@ -4,8 +4,8 @@
 
 # cbl_flutter
 
-This package provides binaries required to use
-[`cbl`](https://pub.dev/packages/cbl) in Flutter apps.
+This package enables using Couchbase Lite
+([`cbl`](https://pub.dev/packages/cbl)) in Flutter apps.
 
 ## Supported Platforms
 
@@ -15,20 +15,46 @@ This package provides binaries required to use
 |    macOS | 10.13           |
 |  Android | 22              |
 
-## Usage
+## Getting started
+
+You need to add `cbl` and [`cbl_flutter`](https://pub.dev/packages/cbl_flutter)
+as dependencies. `cbl_flutter` currently supports iOS, macOS and Android.
+
+```pubspec
+dependencies:
+    cbl: ...
+    cbl_flutter: ...
+```
 
 Make sure you have set the required minimum target version in the build systems
 of the platforms you support.
 
-Before you access any part of the library, `CouchbaseLite` needs to be
-initialized before it can be used. For Flutter apps you provide the `initialize`
-function with the dynamic libraries returned from `flutterLibraries`:
+Couchbase Lite needs to be initialized, before it can be used:
+
+```dart
+import 'package:cbl_flutter/cbl_flutter.dart';
+
+Future<void> initCouchbaseLite() async {
+  await CouchbaseLiteFlutter.init();
+}
+```
+
+Now you can use `Database.open` to open a database:
 
 ```dart
 import 'package:cbl/cbl.dart';
-import 'package:cbl_flutter/cbl_flutter.dart';
 
-void initCbl() {
-  CouchbaseLite.init(libraries: flutterLibraries());
+Future<void> useCouchbaseLite() async {
+  final db = await Database.openAsync('chat-messages');
+
+  final doc = MutableDocument({
+    'type': 'message',
+    'body': 'Heyo',
+    'from': 'Alice',
+  });
+
+  await db.saveDocument(doc);
+
+  await db.close();
 }
 ```

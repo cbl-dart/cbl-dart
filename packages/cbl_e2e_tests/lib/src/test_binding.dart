@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/couchbase_lite.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
@@ -56,8 +55,7 @@ abstract class CblE2eTestBinding {
   /// The global instance of [CblE2eTestBinding] by which is used by tests.
   static CblE2eTestBinding get instance => _instance!;
 
-  /// The [Libraries] to use in tests.
-  Libraries get libraries;
+  FutureOr<void> initCouchbaseLite();
 
   /// Temporary directory for files created during tests, such as databases.
   FutureOr<String> resolveTmpDir();
@@ -103,7 +101,7 @@ abstract class CblE2eTestBinding {
     setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
       await _cleanTestTmpDir();
-      CouchbaseLite.init(libraries: libraries);
+      await initCouchbaseLite();
 
       const consoleLogLevel = LogLevel.info;
       const fileLogLevel = LogLevel.verbose;
@@ -135,8 +133,6 @@ abstract class CblE2eTestBinding {
 
 /// Alias of [CblE2eTestBinding.tmpDir].
 late final tmpDir = CblE2eTestBinding.instance.tmpDir;
-
-late final libraries = CblE2eTestBinding.instance.libraries;
 
 List<String>? get testDescriptions =>
     Zone.current[#testDescriptions] as List<String>?;

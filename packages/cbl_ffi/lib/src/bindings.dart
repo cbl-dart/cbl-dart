@@ -67,9 +67,7 @@ class CBLBindings extends Bindings {
 
   static CBLBindings? get maybeInstance => _instance;
 
-  static void initInstance(Libraries libraries) {
-    _instance ??= CBLBindings(libraries)..base.init();
-  }
+  static void init(Libraries libraries) => _instance ??= CBLBindings(libraries);
 
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;

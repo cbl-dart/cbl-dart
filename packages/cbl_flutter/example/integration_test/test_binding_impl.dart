@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_function_declarations_over_variables
 
+import 'dart:async';
+
 import 'package:cbl_flutter/cbl_flutter.dart';
 import 'package:flutter_test/flutter_test.dart' as ft;
 import 'package:integration_test/integration_test.dart';
@@ -23,11 +25,11 @@ class FlutterCblE2eTestBinding extends CblE2eTestBinding {
   }
 
   @override
-  final libraries = flutterLibraries();
-
-  @override
   Future<String> resolveTmpDir() =>
       getTemporaryDirectory().then((dir) => path.join(dir.path, 'cbl_flutter'));
+
+  @override
+  FutureOr<void> initCouchbaseLite() => CouchbaseLiteFlutter.init();
 
   @override
   bool get useDartConsoleLogger => true;

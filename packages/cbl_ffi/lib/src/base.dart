@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
@@ -34,10 +35,30 @@ extension OptionIterable<T extends Option> on Iterable<T> {
       where((option) => (flags & option.bits) == option.bits).toSet();
 }
 
-// === Dart ====================================================================
+// === Init ====================================================================
 
-typedef _CBLDart_Init_C = Void Function(Pointer<Void> data);
-typedef _CBLDart_Init = void Function(Pointer<Void> data);
+class CBLInitContext {
+  CBLInitContext({required this.filesDir, required this.tempDir});
+
+  final String filesDir;
+  final String tempDir;
+}
+
+class _CBLInitContext extends Struct {
+  external Pointer<Utf8> filesDir;
+  external Pointer<Utf8> tempDir;
+}
+
+typedef _CBLDart_Init_C = Uint8 Function(
+  Pointer<Void> data,
+  Pointer<_CBLInitContext> context,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLDart_Init = int Function(
+  Pointer<Void> data,
+  Pointer<_CBLInitContext> context,
+  Pointer<CBLError> errorOut,
+);
 
 // === CBLError ================================================================
 
@@ -349,8 +370,25 @@ class BaseBindings extends Bindings {
   // ignore: non_constant_identifier_names
   late final _CBLListener_Remove _removeListener;
 
-  void init() {
-    _init(NativeApi.initializeApiDLData);
+  void init({CBLInitContext? context}) {
+    if (Platform.isAndroid && context == null) {
+      throw ArgumentError(
+        'Couchbase Lite must be initialized with context on Android.',
+      );
+    }
+
+    withZoneArena(() {
+      Pointer<_CBLInitContext> contextPointer = nullptr;
+      if (context != null) {
+        contextPointer = zoneArena();
+        contextPointer.ref
+          ..filesDir = context.filesDir.toNativeUtf8(allocator: zoneArena)
+          ..tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
+      }
+
+      _init(NativeApi.initializeApiDLData, contextPointer, globalCBLError)
+          .checkCBLError();
+    });
   }
 
   void bindCBLRefCountedToDartObject(
