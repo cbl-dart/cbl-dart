@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cbl/cbl.dart' show Database, DartConsoleLogger, LogLevel;
 // ignore: implementation_imports
 import 'package:cbl/src/init.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -15,6 +16,7 @@ class CouchbaseLiteFlutter {
   static Future<void> init() async => initMainIsolate(
         libraries: _libraries(),
         context: await _context(),
+        onFirstInit: _setupLogging,
       );
 }
 
@@ -57,4 +59,13 @@ Future<CBLInitContext?> _context() async {
       tempDir: tempDir.path,
     );
   }
+}
+
+void _setupLogging() {
+  Database.log
+    // stdout and stderr is not visible to Flutter developers, usually. That is
+    // why the console logger is disabled and a custom logger which logs to
+    // Dart's `print` functions is installed.
+    ..console.level = LogLevel.none
+    ..custom = DartConsoleLogger(LogLevel.warning);
 }

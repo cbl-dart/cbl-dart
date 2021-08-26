@@ -15,6 +15,7 @@ void initIsolate({required Libraries libraries}) {
 void initMainIsolate({
   required Libraries libraries,
   CBLInitContext? context,
+  void Function()? onFirstInit,
 }) {
   initIsolate(libraries: libraries);
 
@@ -22,5 +23,7 @@ void initMainIsolate({
   ffi.workerLibraries = libraries;
 
   // Initialize the native libraries.
-  ffi.cblBindings.base.init(context: context);
+  if (ffi.cblBindings.base.init(context: context)) {
+    onFirstInit?.call();
+  }
 }

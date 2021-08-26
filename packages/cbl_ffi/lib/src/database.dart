@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:ffi';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
@@ -26,12 +25,20 @@ extension on CBLConcurrencyControl {
 class CBLDatabase extends Opaque {}
 
 class CBLDatabaseConfiguration {
-  CBLDatabaseConfiguration(this.directory);
+  CBLDatabaseConfiguration({required this.directory});
 
   final String directory;
 }
 
 class _CBLDart_CBLDatabaseConfiguration extends Struct {
+  // Workaround for a likely bug in Dart's FFI implementation. Without this
+  // padding at the start of the struct the `buf` pointer in `directory`
+  // points to a random location.
+  //
+  // When the bug is fixed and the padding can be removed, also remove it on
+  // the native side.
+  @Uint32()
+  external int padding;
   external FLString directory;
 }
 
@@ -533,18 +540,9 @@ class DatabaseBindings extends Bindings {
 
   CBLDatabaseConfiguration defaultConfiguration() {
     final config = _defaultConfiguration();
-    String directory;
-    if (Platform.isAndroid) {
-      // TODO(blaugold): initialize android platform config, https://github.com/cofu-app/cbl-dart/issues/134
-      // The default for the database directory on Android is broken.
-      // Android does not support allocating memory for the string returned from
-      // `getcwd`. Aside from that the current working directory is not
-      // something that Android apps usually use.
-      directory = Directory.current.path;
-    } else {
-      directory = config.directory.toDartString()!;
-    }
-    return CBLDatabaseConfiguration(directory);
+    return CBLDatabaseConfiguration(
+      directory: config.directory.toDartString()!,
+    );
   }
 
   Pointer<CBLDatabase> open(

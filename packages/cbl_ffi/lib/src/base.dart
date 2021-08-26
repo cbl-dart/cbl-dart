@@ -370,14 +370,14 @@ class BaseBindings extends Bindings {
   // ignore: non_constant_identifier_names
   late final _CBLListener_Remove _removeListener;
 
-  void init({CBLInitContext? context}) {
+  bool init({CBLInitContext? context}) {
     if (Platform.isAndroid && context == null) {
       throw ArgumentError(
         'Couchbase Lite must be initialized with context on Android.',
       );
     }
 
-    withZoneArena(() {
+    return withZoneArena(() {
       Pointer<_CBLInitContext> contextPointer = nullptr;
       if (context != null) {
         contextPointer = zoneArena();
@@ -386,8 +386,11 @@ class BaseBindings extends Bindings {
           ..tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
       }
 
-      _init(NativeApi.initializeApiDLData, contextPointer, globalCBLError)
-          .checkCBLError();
+      return _init(
+        NativeApi.initializeApiDLData,
+        contextPointer,
+        globalCBLError,
+      ).checkCBLError().toBool();
     });
   }
 

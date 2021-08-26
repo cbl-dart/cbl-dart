@@ -9,14 +9,21 @@
 
 bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
                   CBLError *errorOut) {
-  auto result = true;
+  if (errorOut) {
+    errorOut->code = 0;
+  }
+
+  auto firstInit = false;
+  auto error = false;
 
   static std::once_flag init;
   std::call_once(init, [&]() {
+    firstInit = true;
+
 #ifdef __ANDROID__
     if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
                   errorOut)) {
-      result = false;
+      error = true;
       return;
     }
 #endif
@@ -27,7 +34,7 @@ bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
     Dart_InitializeApiDL(dartApiDLData);
   });
 
-  return result;
+  return !error && firstInit;
 }
 
 // -- AsyncCallback
@@ -368,9 +375,9 @@ uint8_t CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
 
 CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
   auto config = CBLDatabaseConfiguration_Default();
-  CBLDart_CBLDatabaseConfiguration result;
-  result.directory = CBLDart_FLStringToDart(config.directory);
-  return result;
+  return {
+      .directory = CBLDart_FLStringToDart(config.directory),
+  };
 }
 
 uint8_t CBLDart_CBL_DatabaseExists(CBLDart_FLString name,

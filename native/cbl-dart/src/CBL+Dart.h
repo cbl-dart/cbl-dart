@@ -113,6 +113,7 @@ int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
 // -- Database
 
 struct CBLDart_CBLDatabaseConfiguration {
+  uint32_t _padding;
   CBLDart_FLString directory;
 };
 
