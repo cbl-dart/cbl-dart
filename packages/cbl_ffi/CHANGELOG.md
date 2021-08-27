@@ -1,3 +1,7 @@
+## 0.7.0-beta.2
+
+ - Bump "cbl_ffi" to `0.7.0-beta.2`.
+
 ## 0.7.0-beta.1
 
  - Bump "cbl_ffi" to `0.7.0-beta.1`.

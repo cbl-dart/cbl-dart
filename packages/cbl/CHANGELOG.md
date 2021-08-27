@@ -1,3 +1,7 @@
+## 1.0.0-beta.3
+
+ - Bump "cbl" to `1.0.0-beta.3`.
+
 ## 1.0.0-beta.2
 
  - Bump "cbl" to `1.0.0-beta.2`.
