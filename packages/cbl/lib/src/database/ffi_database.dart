@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:ffi';
+import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -28,14 +30,14 @@ class FfiDatabase extends CBLDatabaseObject
     implements SyncDatabase, BlobStoreHolder {
   FfiDatabase({
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
     required String debugCreator,
   })  : _config = DatabaseConfiguration.from(
-          configuration ?? DatabaseConfiguration(),
+          config ?? DatabaseConfiguration(),
         ),
         super(
-          runNativeCalls(() => _bindings.open(
-              name, configuration?.toCBLDatabaseConfiguration())),
+          runNativeCalls(
+              () => _bindings.open(name, config?.toCBLDatabaseConfiguration())),
           debugName: 'FfiDatabase($name, creator: $debugCreator)',
         ) {
     this.name = call(_bindings.name);
@@ -55,13 +57,13 @@ class FfiDatabase extends CBLDatabaseObject
   static void copy({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
       runNativeCalls(() {
         _bindings.copyDatabase(
           from,
           name,
-          configuration?.toCBLDatabaseConfiguration(),
+          config?.toCBLDatabaseConfiguration(),
         );
       });
 

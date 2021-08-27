@@ -516,12 +516,12 @@ class DatabaseBindings extends Bindings {
   bool copyDatabase(
     String from,
     String name,
-    CBLDatabaseConfiguration? configuration,
+    CBLDatabaseConfiguration? config,
   ) =>
       withZoneArena(() => _copyDatabase(
             from.toFLStringInArena().ref,
             name.toFLStringInArena().ref,
-            _createConfig(configuration),
+            _createConfig(config),
             globalCBLError,
           ).checkCBLError().toBool());
 
@@ -547,11 +547,11 @@ class DatabaseBindings extends Bindings {
 
   Pointer<CBLDatabase> open(
     String name,
-    CBLDatabaseConfiguration? configuration,
+    CBLDatabaseConfiguration? config,
   ) =>
       withZoneArena(() => _open(
             name.toFLStringInArena().ref,
-            _createConfig(configuration),
+            _createConfig(config),
             globalCBLError,
           ).checkCBLError());
 

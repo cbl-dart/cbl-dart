@@ -456,18 +456,18 @@ class CopyDatabase extends Request<bool> {
   CopyDatabase(
     this.from,
     this.name,
-    this.configuration,
+    this.config,
   );
 
   final String from;
   final String name;
-  final DatabaseConfiguration? configuration;
+  final DatabaseConfiguration? config;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'from': from,
         'name': name,
-        'configuration': context.serialize(configuration),
+        'config': context.serialize(config),
       };
 
   static CopyDatabase deserialize(
@@ -477,23 +477,23 @@ class CopyDatabase extends Request<bool> {
       CopyDatabase(
         map.getAs('from'),
         map.getAs('name'),
-        context.deserializeAs(map['configuration']),
+        context.deserializeAs(map['config']),
       );
 }
 
 class OpenDatabase extends Request<DatabaseState> {
   OpenDatabase(
     this.name,
-    this.configuration,
+    this.config,
   );
 
   final String name;
-  final DatabaseConfiguration? configuration;
+  final DatabaseConfiguration? config;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'name': name,
-        'configuration': context.serialize(configuration),
+        'config': context.serialize(config),
       };
 
   static OpenDatabase deserialize(
@@ -502,7 +502,7 @@ class OpenDatabase extends Request<DatabaseState> {
   ) =>
       OpenDatabase(
         map.getAs('name'),
-        context.deserializeAs(map['configuration']),
+        context.deserializeAs(map['config']),
       );
 }
 

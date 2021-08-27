@@ -68,19 +68,19 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 /// A Couchbase Lite database.
 abstract class Database implements ClosableResource {
   /// {@template cbl.Database.openAsync}
-  /// Opens a Couchbase Lite database with the given [name] and [configuration],
+  /// Opens a Couchbase Lite database with the given [name] and [config],
   /// which executes in a separate worker isolate.
   ///
   /// If the database does not yet exist, it will be created.
   /// {@endtemplate}
   static Future<AsyncDatabase> openAsync(
     String name, [
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   ]) =>
-      AsyncDatabase.open(name, configuration);
+      AsyncDatabase.open(name, config);
 
   /// {@template cbl.Database.openSync}
-  /// Opens a Couchbase Lite database with the given [name] and [configuration],
+  /// Opens a Couchbase Lite database with the given [name] and [config],
   /// which executes in the current isolate.
   ///
   /// If the database does not yet exist, it will be created.
@@ -88,9 +88,9 @@ abstract class Database implements ClosableResource {
   // ignore: prefer_constructors_over_static_methods
   static SyncDatabase openSync(
     String name, [
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   ]) =>
-      SyncDatabase(name, configuration);
+      SyncDatabase(name, config);
 
   /// {@template cbl.Database.remove}
   /// Deletes a database of the given [name] in the given [directory].
@@ -120,31 +120,31 @@ abstract class Database implements ClosableResource {
 
   /// {@template cbl.Database.copy}
   /// Copies a canned database [from] the given path to a new database with the
-  /// given [name] and [configuration].
+  /// given [name] and [config].
   ///
   /// The new database will be created at the directory specified in the
-  /// [configuration].
+  /// [config].
   /// {@endtemplate}
   static Future<void> copy({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
-      AsyncDatabase.copy(from: from, name: name, configuration: configuration);
+      AsyncDatabase.copy(from: from, name: name, config: config);
 
   /// {@template cbl.Database.copySync}
   /// Copies a canned database [from] the given path to a new database with the
-  /// given [name] and [configuration].
+  /// given [name] and [config].
   ///
   /// The new database will be created at the directory specified in the
-  /// [configuration].
+  /// [config].
   /// {@endtemplate}
   static void copySync({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
-      SyncDatabase.copy(from: from, name: name, configuration: configuration);
+      SyncDatabase.copy(from: from, name: name, config: config);
 
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
@@ -298,10 +298,10 @@ typedef SyncSaveConflictHandler = bool Function(
 /// A [Database] with a primarily synchronous API.
 abstract class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
-  factory SyncDatabase(String name, [DatabaseConfiguration? configuration]) =>
+  factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
       FfiDatabase(
         name: name,
-        configuration: configuration,
+        config: config,
         debugCreator: 'SyncDatabase()',
       );
 
@@ -317,9 +317,9 @@ abstract class SyncDatabase implements Database {
   static void copy({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
-      FfiDatabase.copy(from: from, name: name, configuration: configuration);
+      FfiDatabase.copy(from: from, name: name, config: config);
 
   @override
   int get count;
@@ -387,9 +387,9 @@ abstract class AsyncDatabase implements Database {
   /// {@macro cbl.Database.openAsync}
   static Future<AsyncDatabase> open(
     String name, [
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   ]) =>
-      WorkerDatabase.open(name, configuration);
+      WorkerDatabase.open(name, config);
 
   /// {@macro cbl.Database.remove}
   static Future<void> remove(String name, {String? directory}) =>
@@ -403,13 +403,9 @@ abstract class AsyncDatabase implements Database {
   static Future<void> copy({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
-      WorkerDatabase.copy(
-        from: from,
-        name: name,
-        configuration: configuration,
-      );
+      WorkerDatabase.copy(from: from, name: name, config: config);
 
   @override
   Future<int> get count;

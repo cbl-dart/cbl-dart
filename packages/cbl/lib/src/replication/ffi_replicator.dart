@@ -74,7 +74,7 @@ class FfiReplicator
 
       final endpoint = config.createEndpoint();
       final authenticator = config.createAuthenticator();
-      final configuration = CBLReplicatorConfiguration(
+      final ffiConfig = CBLReplicatorConfiguration(
         database: database.native.pointer,
         endpoint: endpoint,
         replicatorType: config.replicatorType.toCBLReplicatorType(),
@@ -96,7 +96,7 @@ class FfiReplicator
       );
 
       try {
-        final replicator = _bindings.createReplicator(configuration);
+        final replicator = _bindings.createReplicator(ffiConfig);
 
         native = CBLReplicatorObject(
           replicator,

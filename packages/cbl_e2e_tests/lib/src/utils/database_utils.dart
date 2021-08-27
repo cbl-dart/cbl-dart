@@ -18,34 +18,33 @@ String databaseDirectoryForTest() => [
 
 FutureOr<Database> openTestDatabase({
   String name = 'db',
-  DatabaseConfiguration? configuration,
+  DatabaseConfiguration? config,
   bool tearDown = true,
 }) =>
     runApi(
       sync: () => openSyncTestDatabase(
         name: name,
-        configuration: configuration,
+        config: config,
         tearDown: tearDown,
       ),
       async: () => openAsyncTestDatabase(
         name: name,
-        configuration: configuration,
+        config: config,
         tearDown: tearDown,
       ),
     );
 
 SyncDatabase openSyncTestDatabase({
   String name = 'db',
-  DatabaseConfiguration? configuration,
+  DatabaseConfiguration? config,
   bool tearDown = true,
 }) {
-  configuration ??=
-      DatabaseConfiguration(directory: databaseDirectoryForTest());
+  config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
   // Ensure directory exists.
-  File(configuration.directory).parent.createSync(recursive: true);
+  File(config.directory).parent.createSync(recursive: true);
 
-  final db = SyncDatabase(name, configuration);
+  final db = SyncDatabase(name, config);
 
   if (tearDown) {
     addTearDown(db.close);
@@ -69,18 +68,17 @@ void setupSharedTestCblWorker() {
 
 Future<AsyncDatabase> openAsyncTestDatabase({
   String name = 'db',
-  DatabaseConfiguration? configuration,
+  DatabaseConfiguration? config,
   bool tearDown = true,
 }) async {
-  configuration ??=
-      DatabaseConfiguration(directory: databaseDirectoryForTest());
+  config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
   // Ensure directory exists
-  await File(configuration.directory).parent.create(recursive: true);
+  await File(config.directory).parent.create(recursive: true);
 
   final db = await ProxyDatabase.open(
     name: name,
-    configuration: configuration,
+    config: config,
     client: _sharedClient,
   );
 

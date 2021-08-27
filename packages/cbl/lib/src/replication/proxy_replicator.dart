@@ -25,35 +25,35 @@ class ProxyReplicator extends ProxyObject
   ProxyReplicator({
     required this.database,
     required int objectId,
-    required ReplicatorConfiguration configuration,
+    required ReplicatorConfiguration config,
     required void Function() unregisterCallbacks,
-  })  : assert(database == configuration.database),
-        _config = ReplicatorConfiguration.from(configuration),
+  })  : assert(database == config.database),
+        _config = ReplicatorConfiguration.from(config),
         _unregisterCallbacks = unregisterCallbacks,
         super(database.channel, objectId) {
     database.registerChildResource(this);
   }
 
   static Future<ProxyReplicator> create(
-    ReplicatorConfiguration configuration,
+    ReplicatorConfiguration config,
   ) async {
-    final database = configuration.database;
+    final database = config.database;
     if (database is! ProxyDatabase) {
       throw ArgumentError.value(
         database,
-        'configuration.database',
+        'config.database',
         'must be a ProxyDatabase',
       );
     }
     final client = database.client;
 
-    final pushFilterId = configuration.pushFilter
+    final pushFilterId = config.pushFilter
         ?.let((it) => _wrapReplicationFilter(it, database))
         .let(client.registerReplicationFilter);
-    final pullFilterId = configuration.pullFilter
+    final pullFilterId = config.pullFilter
         ?.let((it) => _wrapReplicationFilter(it, database))
         .let(client.registerReplicationFilter);
-    final conflictResolverId = configuration.conflictResolver
+    final conflictResolverId = config.conflictResolver
         ?.let((it) => _wrapConflictResolver(it, database))
         .let(client.registerConflictResolver);
 
@@ -67,26 +67,25 @@ class ProxyReplicator extends ProxyObject
       final objectId = await database.channel.call(CreateReplicator(
         databaseObjectId: database.objectId,
         propertiesFormat: EncodingFormat.fleece,
-        target: configuration.target,
-        replicatorType: configuration.replicatorType,
-        continuous: configuration.continuous,
-        authenticator: configuration.authenticator,
-        pinnedServerCertificate:
-            configuration.pinnedServerCertificate?.toData(),
-        headers: configuration.headers,
-        channels: configuration.channels,
-        documentIds: configuration.documentIds,
+        target: config.target,
+        replicatorType: config.replicatorType,
+        continuous: config.continuous,
+        authenticator: config.authenticator,
+        pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
+        headers: config.headers,
+        channels: config.channels,
+        documentIds: config.documentIds,
         pushFilterId: pushFilterId,
         pullFilterId: pullFilterId,
         conflictResolverId: conflictResolverId,
-        heartbeat: configuration.heartbeat,
-        maxRetries: configuration.maxRetries,
-        maxRetryWaitTime: configuration.maxRetryWaitTime,
+        heartbeat: config.heartbeat,
+        maxRetries: config.maxRetries,
+        maxRetryWaitTime: config.maxRetryWaitTime,
       ));
       return ProxyReplicator(
         database: database,
         objectId: objectId,
-        configuration: configuration,
+        config: config,
         unregisterCallbacks: unregisterCallbacks,
       );
     }
