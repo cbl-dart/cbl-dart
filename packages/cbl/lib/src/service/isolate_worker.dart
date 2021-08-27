@@ -134,10 +134,10 @@ class IsolateWorker {
     }
   }
 
-  static void _main(_WorkerConfiguration configuration) {
-    final delegate = configuration.delegate;
+  static void _main(_WorkerConfiguration config) {
+    final delegate = config.delegate;
     final controlChannel = Channel(
-      transport: IsolateChannel.connectSend(configuration.controlChannel),
+      transport: IsolateChannel.connectSend(config.controlChannel),
       serializationRegistry: _workerSerializationRegistry(),
     );
 

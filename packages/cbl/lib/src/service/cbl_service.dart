@@ -194,11 +194,11 @@ class CblService {
   void _copyDatabase(CopyDatabase request) => FfiDatabase.copy(
         from: request.from,
         name: request.name,
-        configuration: request.configuration,
+        config: request.config,
       );
 
   DatabaseState _openDatabase(OpenDatabase request) {
-    final database = SyncDatabase(request.name, request.configuration);
+    final database = SyncDatabase(request.name, request.config);
     _objectRegistry.addObject(database);
     return _createDatabaseState(database);
   }

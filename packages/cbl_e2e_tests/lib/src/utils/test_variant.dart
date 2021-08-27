@@ -70,10 +70,10 @@ void variantTest(
   required List<TestVariant> variants,
 }) {
   for (final combination in _VariantEntry.combinations(variants)) {
-    final configuration = _VariantConfiguration(combination);
+    final config = _VariantConfiguration(combination);
     test(
-      '$description (variant: ${configuration.describeVariants()})',
-      () => _runWithVariants(body, configuration: configuration),
+      '$description (variant: ${config.describeVariants()})',
+      () => _runWithVariants(body, config: config),
     );
   }
 }
@@ -83,8 +83,8 @@ Future<void> runVariantCombinations(
   required List<TestVariant> variants,
 }) async {
   for (final combination in _VariantEntry.combinations(variants)) {
-    final configuration = _VariantConfiguration(combination);
-    await _runWithVariants(body, configuration: configuration);
+    final config = _VariantConfiguration(combination);
+    await _runWithVariants(body, config: config);
   }
 }
 
@@ -169,6 +169,6 @@ int _variantOrder(TestVariant a, TestVariant b) {
 
 T _runWithVariants<T>(
   T Function() fn, {
-  required _VariantConfiguration configuration,
+  required _VariantConfiguration config,
 }) =>
-    runZoned(fn, zoneValues: {#variantTestConfiguration: configuration});
+    runZoned(fn, zoneValues: {#variantTestConfiguration: config});

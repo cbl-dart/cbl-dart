@@ -42,7 +42,7 @@ void main() {
       await copyDatabaseWithApi(
         from: source.path!,
         name: 'copy',
-        configuration: DatabaseConfiguration(directory: directory),
+        config: DatabaseConfiguration(directory: directory),
       );
 
       expect(await databaseExistsWithApi('copy', directory: directory), isTrue);
@@ -50,13 +50,13 @@ void main() {
 
     group('Database', () {
       apiTest('config', () async {
-        final configuration =
+        final config =
             DatabaseConfiguration(directory: databaseDirectoryForTest());
-        final db = await openTestDatabase(configuration: configuration);
+        final db = await openTestDatabase(config: config);
 
         expect(db.name, 'db');
         expect(db.path, '${databaseDirectoryForTest()}/db.cblite2/');
-        expect(db.config, configuration);
+        expect(db.config, config);
       });
 
       apiTest('close', () async {
@@ -590,17 +590,17 @@ FutureOr<bool> databaseExistsWithApi(String name, {String? directory}) =>
 FutureOr<void> copyDatabaseWithApi({
   required String from,
   required String name,
-  DatabaseConfiguration? configuration,
+  DatabaseConfiguration? config,
 }) =>
     runApi(
       sync: () => SyncDatabase.copy(
         from: from,
         name: name,
-        configuration: configuration,
+        config: config,
       ),
       async: () => AsyncDatabase.copy(
         from: from,
         name: name,
-        configuration: configuration,
+        config: config,
       ),
     );
