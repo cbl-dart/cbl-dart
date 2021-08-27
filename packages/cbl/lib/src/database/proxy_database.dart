@@ -39,11 +39,11 @@ class ProxyDatabase extends ProxyObject
 
   static Future<ProxyDatabase> open({
     required String name,
-    required DatabaseConfiguration configuration,
+    required DatabaseConfiguration config,
     required CblServiceClient client,
   }) async {
-    final state = await client.channel.call(OpenDatabase(name, configuration));
-    return ProxyDatabase(client, configuration, state);
+    final state = await client.channel.call(OpenDatabase(name, config));
+    return ProxyDatabase(client, config, state);
   }
 
   var _deleteOnClose = false;
@@ -272,17 +272,16 @@ class WorkerDatabase extends ProxyDatabase {
 
   static Future<WorkerDatabase> open(
     String name, [
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   ]) async {
-    configuration ??= DatabaseConfiguration();
+    config ??= DatabaseConfiguration();
 
     final worker = CblWorker();
     await worker.start();
 
     try {
-      final state =
-          await worker.channel.call(OpenDatabase(name, configuration));
-      return WorkerDatabase._(worker, configuration, state);
+      final state = await worker.channel.call(OpenDatabase(name, config));
+      return WorkerDatabase._(worker, config, state);
     } on CouchbaseLiteException {
       await worker.stop();
       rethrow;
@@ -298,9 +297,9 @@ class WorkerDatabase extends ProxyDatabase {
   static Future<void> copy({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
-      CblWorker.executeCall(CopyDatabase(from, name, configuration));
+      CblWorker.executeCall(CopyDatabase(from, name, config));
 
   final CblWorker worker;
 
@@ -321,7 +320,7 @@ class RemoteDatabase extends ProxyDatabase {
   static Future<RemoteDatabase> open(
     Uri uri,
     String name,
-    DatabaseConfiguration configuration,
+    DatabaseConfiguration config,
   ) async {
     final channel = Channel(
       transport: WebSocketChannel.connect(uri),
@@ -329,8 +328,8 @@ class RemoteDatabase extends ProxyDatabase {
       serializationRegistry: cblServiceSerializationRegistry(),
     );
     final client = CblServiceClient(channel: channel);
-    final state = await channel.call(OpenDatabase(name, configuration));
-    return RemoteDatabase._(client, configuration, state);
+    final state = await channel.call(OpenDatabase(name, config));
+    return RemoteDatabase._(client, config, state);
   }
 
   @override

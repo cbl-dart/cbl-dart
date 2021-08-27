@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/support/utils.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -42,21 +43,34 @@ void main() {
       await copyDatabaseWithApi(
         from: source.path!,
         name: 'copy',
-        configuration: DatabaseConfiguration(directory: directory),
+        config: DatabaseConfiguration(directory: directory),
       );
 
       expect(await databaseExistsWithApi('copy', directory: directory), isTrue);
     });
 
+    apiTest('open in default directory', () async {
+      final name = createUuid();
+      final defaultConfig = DatabaseConfiguration();
+
+      final db = await runApi(
+        sync: () => Database.openSync(name),
+        async: () => Database.openAsync(name),
+      );
+      addTearDown(db.delete);
+
+      expect(db.path, startsWith(defaultConfig.directory));
+    });
+
     group('Database', () {
       apiTest('config', () async {
-        final configuration =
+        final config =
             DatabaseConfiguration(directory: databaseDirectoryForTest());
-        final db = await openTestDatabase(configuration: configuration);
+        final db = await openTestDatabase(config: config);
 
         expect(db.name, 'db');
         expect(db.path, '${databaseDirectoryForTest()}/db.cblite2/');
-        expect(db.config, configuration);
+        expect(db.config, config);
       });
 
       apiTest('close', () async {
@@ -590,17 +604,17 @@ FutureOr<bool> databaseExistsWithApi(String name, {String? directory}) =>
 FutureOr<void> copyDatabaseWithApi({
   required String from,
   required String name,
-  DatabaseConfiguration? configuration,
+  DatabaseConfiguration? config,
 }) =>
     runApi(
       sync: () => SyncDatabase.copy(
         from: from,
         name: name,
-        configuration: configuration,
+        config: config,
       ),
       async: () => AsyncDatabase.copy(
         from: from,
         name: name,
-        configuration: configuration,
+        config: config,
       ),
     );

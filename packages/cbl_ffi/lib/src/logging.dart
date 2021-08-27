@@ -157,11 +157,11 @@ class CBLLogFileConfiguration {
 }
 
 typedef _CBLDart_CBLLog_SetFileConfig_C = Uint8 Function(
-  Pointer<_CBLDart_CBLLogFileConfiguration> configuration,
+  Pointer<_CBLDart_CBLLogFileConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 typedef _CBLDart_CBLLog_SetFileConfig = int Function(
-  Pointer<_CBLDart_CBLLogFileConfiguration> configuration,
+  Pointer<_CBLDart_CBLLogFileConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
@@ -233,10 +233,10 @@ class LoggingBindings extends Bindings {
   bool setCallback(Pointer<CBLDartAsyncCallback> callback) =>
       _setCallback(callback).toBool();
 
-  void setFileLogConfiguration(CBLLogFileConfiguration? configuration) {
+  void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withZoneArena(() {
       _setFileConfig(
-        _logFileConfig(configuration),
+        _logFileConfig(config),
         globalCBLError,
       ).checkCBLError();
     });

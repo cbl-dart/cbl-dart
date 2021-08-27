@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:ffi';
+import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -26,19 +28,40 @@ late final _bindings = cblBindings.database;
 class FfiDatabase extends CBLDatabaseObject
     with DatabaseHelper<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncDatabase, BlobStoreHolder {
-  FfiDatabase({
+  factory FfiDatabase({
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
     required String debugCreator,
-  })  : _config = DatabaseConfiguration.from(
-          configuration ?? DatabaseConfiguration(),
-        ),
-        super(
-          runNativeCalls(() => _bindings.open(
-              name, configuration?.toCBLDatabaseConfiguration())),
-          debugName: 'FfiDatabase($name, creator: $debugCreator)',
-        ) {
-    this.name = call(_bindings.name);
+  }) {
+    if (config != null) {
+      // Make a copy of the configuration since it's mutable.
+      config = DatabaseConfiguration.from(config);
+    } else {
+      config = DatabaseConfiguration();
+    }
+
+    // Ensure the directory exists, in which to create the database,
+    Directory(config.directory).createSync(recursive: true);
+
+    final pointer = runNativeCalls(() => _bindings.open(
+          name,
+          config!.toCBLDatabaseConfiguration(),
+        ));
+
+    return FfiDatabase._(
+      config: config,
+      pointer: pointer,
+      debugName: 'FfiDatabase($name, creator: $debugCreator)',
+    );
+  }
+
+  FfiDatabase._({
+    required DatabaseConfiguration config,
+    required Pointer<CBLDatabase> pointer,
+    required String debugName,
+  })  : _config = config,
+        super(pointer, debugName: debugName) {
+    name = call(_bindings.name);
     _path = call(_bindings.path);
   }
 
@@ -55,13 +78,13 @@ class FfiDatabase extends CBLDatabaseObject
   static void copy({
     required String from,
     required String name,
-    DatabaseConfiguration? configuration,
+    DatabaseConfiguration? config,
   }) =>
       runNativeCalls(() {
         _bindings.copyDatabase(
           from,
           name,
-          configuration?.toCBLDatabaseConfiguration(),
+          config?.toCBLDatabaseConfiguration(),
         );
       });
 

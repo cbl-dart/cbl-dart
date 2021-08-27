@@ -577,10 +577,9 @@ class ReplicatorBindings extends Bindings {
     _authFree(authenticator);
   }
 
-  Pointer<CBLReplicator> createReplicator(
-          CBLReplicatorConfiguration configuration) =>
+  Pointer<CBLReplicator> createReplicator(CBLReplicatorConfiguration config) =>
       withZoneArena(() => _create(
-            _createConfiguration(configuration),
+            _createConfiguration(config),
             globalCBLError,
           ).checkCBLError());
 
@@ -652,35 +651,33 @@ class ReplicatorBindings extends Bindings {
   }
 
   Pointer<_CBLDartReplicatorConfiguration> _createConfiguration(
-    CBLReplicatorConfiguration configuration,
+    CBLReplicatorConfiguration config,
   ) {
     final result = zoneArena<_CBLDartReplicatorConfiguration>();
 
     result.ref
-      ..database = configuration.database
-      ..endpoint = configuration.endpoint
-      ..replicatorType = configuration.replicatorType
-      ..continuous = configuration.continuous
-      ..disableAutoPurge = configuration.disableAutoPurge ?? false
-      ..maxAttempts = configuration.maxAttempts ?? 0
-      ..maxAttemptWaitTime = configuration.maxAttemptWaitTime ?? 0
-      ..heartbeat = configuration.heartbeat ?? 0
-      ..authenticator = configuration.authenticator ?? nullptr
-      ..proxy = _createProxySettings(configuration.proxy)
-      ..headers = configuration.headers ?? nullptr
-      ..pinnedServerCertificate = configuration.pinnedServerCertificate
-              ?.toSliceResult()
-              .flSlice(zoneArena) ??
-          nullptr
-      ..trustedRootCertificates = configuration.trustedRootCertificates
-              ?.toSliceResult()
-              .flSlice(zoneArena) ??
-          nullptr
-      ..channels = configuration.channels ?? nullptr
-      ..documentIDs = configuration.documentIDs ?? nullptr
-      ..pushFilter = configuration.pushFilter ?? nullptr
-      ..pullFilter = configuration.pullFilter ?? nullptr
-      ..conflictResolver = configuration.conflictResolver ?? nullptr;
+      ..database = config.database
+      ..endpoint = config.endpoint
+      ..replicatorType = config.replicatorType
+      ..continuous = config.continuous
+      ..disableAutoPurge = config.disableAutoPurge ?? false
+      ..maxAttempts = config.maxAttempts ?? 0
+      ..maxAttemptWaitTime = config.maxAttemptWaitTime ?? 0
+      ..heartbeat = config.heartbeat ?? 0
+      ..authenticator = config.authenticator ?? nullptr
+      ..proxy = _createProxySettings(config.proxy)
+      ..headers = config.headers ?? nullptr
+      ..pinnedServerCertificate =
+          config.pinnedServerCertificate?.toSliceResult().flSlice(zoneArena) ??
+              nullptr
+      ..trustedRootCertificates =
+          config.trustedRootCertificates?.toSliceResult().flSlice(zoneArena) ??
+              nullptr
+      ..channels = config.channels ?? nullptr
+      ..documentIDs = config.documentIDs ?? nullptr
+      ..pushFilter = config.pushFilter ?? nullptr
+      ..pullFilter = config.pullFilter ?? nullptr
+      ..conflictResolver = config.conflictResolver ?? nullptr;
 
     return result;
   }
