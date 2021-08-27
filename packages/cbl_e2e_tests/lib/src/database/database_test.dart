@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/support/utils.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -46,6 +47,19 @@ void main() {
       );
 
       expect(await databaseExistsWithApi('copy', directory: directory), isTrue);
+    });
+
+    apiTest('open in default directory', () async {
+      final name = createUuid();
+      final defaultConfig = DatabaseConfiguration();
+
+      final db = await runApi(
+        sync: () => Database.openSync(name),
+        async: () => Database.openAsync(name),
+      );
+      addTearDown(db.delete);
+
+      expect(db.path, startsWith(defaultConfig.directory));
     });
 
     group('Database', () {
