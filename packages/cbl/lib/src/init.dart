@@ -8,22 +8,15 @@ import 'support/ffi.dart' as ffi;
 void initIsolate({required Libraries libraries}) {
   CBLBindings.init(libraries);
   MDelegate.instance = CblMDelegate();
+  ffi.workerLibraries = libraries;
 }
 
-/// Initializes this isolate for use of Couchbase Lite, by an end user of
-/// the `cbl` library.
+/// Initializes this isolate for use of Couchbase Lite, and initializes the
+/// native library.
 void initMainIsolate({
   required Libraries libraries,
   CBLInitContext? context,
-  void Function()? onFirstInit,
 }) {
   initIsolate(libraries: libraries);
-
-  // Setup the native libraries used to in worker isolates.
-  ffi.workerLibraries = libraries;
-
-  // Initialize the native libraries.
-  if (ffi.cblBindings.base.init(context: context)) {
-    onFirstInit?.call();
-  }
+  ffi.cblBindings.base.init(context: context);
 }

@@ -9,16 +9,13 @@
 
 bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
                   CBLError *errorOut) {
+  auto error = false;
   if (errorOut) {
     errorOut->code = 0;
   }
 
-  auto firstInit = false;
-  auto error = false;
-
   static std::once_flag init;
   std::call_once(init, [&]() {
-    firstInit = true;
 
 #ifdef __ANDROID__
     if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
@@ -28,13 +25,10 @@ bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
     }
 #endif
 
-    // Set console log level to warning
-    CBLLog_SetConsoleLevel(kCBLLogWarning);
-
     Dart_InitializeApiDL(dartApiDLData);
   });
 
-  return !error && firstInit;
+  return !error;
 }
 
 // -- AsyncCallback
