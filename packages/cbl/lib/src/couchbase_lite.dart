@@ -2,7 +2,9 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 
+import 'database/database.dart';
 import 'init.dart';
+import 'log.dart';
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
 /// `DynamicLibrary` at a later time.
@@ -75,7 +77,19 @@ class CouchbaseLite {
   /// Private constructor to allow control over instance creation.
   CouchbaseLite._();
 
-  /// Initializes the `cbl` package.
-  static void init({required Libraries libraries}) =>
-      initMainIsolate(libraries: libraries._toFfi());
+  /// Initializes the `cbl` package, for the main isolate.
+  static void init({required Libraries libraries}) {
+    initMainIsolate(libraries: libraries._toFfi());
+
+    _setupLogging();
+  }
+
+  /// Initializes the `cbl` package, for a secondary isolate.
+  static void initSecondary({required Libraries libraries}) {
+    initIsolate(libraries: libraries._toFfi());
+  }
+}
+
+void _setupLogging() {
+  Database.log.console.level = LogLevel.warning;
 }

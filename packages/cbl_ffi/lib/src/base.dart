@@ -365,12 +365,10 @@ class BaseBindings extends Bindings {
       _bindCBLRefCountedToDartObject;
   late final _CBLDart_SetDebugRefCounted _setDebugRefCounted;
   late final _CBL_Retain _retainRefCounted;
-  // ignore: non_constant_identifier_names
   late final _CBLDart_CBLError_Message _getErrorMessage;
-  // ignore: non_constant_identifier_names
   late final _CBLListener_Remove _removeListener;
 
-  bool init({CBLInitContext? context}) {
+  void init({CBLInitContext? context}) {
     if (Platform.isAndroid && context == null) {
       throw ArgumentError(
         'Couchbase Lite must be initialized with context on Android.',
@@ -386,11 +384,11 @@ class BaseBindings extends Bindings {
           ..tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
       }
 
-      return _init(
+      _init(
         NativeApi.initializeApiDLData,
         contextPointer,
         globalCBLError,
-      ).checkCBLError().toBool();
+      ).checkCBLError();
     });
   }
 
