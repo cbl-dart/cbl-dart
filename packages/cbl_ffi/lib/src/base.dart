@@ -143,6 +143,25 @@ extension on int {
   }
 }
 
+extension IntErrorCodeExt on int {
+  Object toErrorCode(CBLErrorDomain domain) {
+    switch (domain) {
+      case CBLErrorDomain.couchbaseLite:
+        return toCouchbaseLiteErrorCode();
+      case CBLErrorDomain.posix:
+        return this;
+      case CBLErrorDomain.sqLite:
+        return this;
+      case CBLErrorDomain.fleece:
+        return toFleeceErrorCode();
+      case CBLErrorDomain.network:
+        return toNetworkErrorCode();
+      case CBLErrorDomain.webSocket:
+        return this;
+    }
+  }
+}
+
 late final globalCBLError = _baseBinds._globalCBLError;
 late final globalErrorPosition = _baseBinds._globalErrorPosition;
 
@@ -165,22 +184,7 @@ typedef _CBLDart_CBLError_Message = FLStringResult Function(
 extension CBLErrorExt on CBLError {
   CBLErrorDomain get domain => _domain.toErrorDomain();
 
-  Object get code {
-    switch (domain) {
-      case CBLErrorDomain.couchbaseLite:
-        return _code.toCouchbaseLiteErrorCode();
-      case CBLErrorDomain.posix:
-        return _code;
-      case CBLErrorDomain.sqLite:
-        return _code;
-      case CBLErrorDomain.fleece:
-        return _code.toFleeceErrorCode();
-      case CBLErrorDomain.network:
-        return _code.toNetworkErrorCode();
-      case CBLErrorDomain.webSocket:
-        return _code;
-    }
-  }
+  Object get code => _code.toErrorCode(domain);
 
   /// `true` if there is no error stored in this [CBLError].
   bool get isOk => _code == 0;
