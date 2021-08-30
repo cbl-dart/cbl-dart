@@ -11,6 +11,7 @@ export 'src/base.dart'
         IntCBLErrorDomainExt,
         globalCBLError,
         globalErrorPosition,
+        IntErrorCodeExt,
         CBLError;
 export 'src/bindings.dart';
 export 'src/blob.dart';
