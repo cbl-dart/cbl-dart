@@ -13,6 +13,9 @@ typedef ConflictResolverFunction = FutureOr<Document?> Function(
 /// An object which is able to resolve a [Conflict] between the local and remote
 /// versions of a replicated [Document].
 abstract class ConflictResolver {
+  /// Constructor to allow subclasses to extend [ConflictResolver].
+  const ConflictResolver();
+
   /// Creates a [ConflictResolver] from a function which is called to resolve
   /// the conflict.
   factory ConflictResolver.from(
