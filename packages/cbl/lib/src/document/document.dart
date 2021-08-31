@@ -35,6 +35,9 @@ abstract class Document implements DictionaryInterface, Iterable<String> {
 
   /// Returns a mutable copy of the document.
   MutableDocument toMutable();
+
+  /// Returns this document's properties as JSON.
+  String toJson();
 }
 
 /// A mutable version of [Document].
@@ -257,6 +260,9 @@ class DelegateDocument with IterableMixin<String> implements Document {
         delegate.toMutable(),
         database: _database,
       );
+
+  @override
+  String toJson() => _properties.toJson();
 
   @override
   Iterator<String> get iterator => _properties.iterator;

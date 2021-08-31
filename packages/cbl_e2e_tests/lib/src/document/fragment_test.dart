@@ -1,8 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 
 void main() {
@@ -27,8 +26,6 @@ void main() {
   });
 
   test('getters for values in array', () {
-    final date = DateTime.now();
-    final blob = Blob.fromData('', Uint8List(0));
     final array = MutableArray([
       'x',
       'a',
@@ -36,8 +33,8 @@ void main() {
       .2,
       3,
       true,
-      date,
-      blob,
+      testDate,
+      testBlob,
       <Object?>[true],
       <String, Object>{'key': 'value'},
     ]);
@@ -49,15 +46,13 @@ void main() {
     expect(array[3].float, .2);
     expect(array[4].number, 3);
     expect(array[5].boolean, true);
-    expect(array[6].date, date);
-    expect(array[7].blob, blob);
+    expect(array[6].date, testDate);
+    expect(array[7].blob, testBlob);
     expect(array[8].array, MutableArray([true]));
     expect(array[9].dictionary, MutableDictionary({'key': 'value'}));
   });
 
   test('getters for values in dictionary', () {
-    final date = DateTime.now();
-    final blob = Blob.fromData('', Uint8List(0));
     final dictionary = MutableDictionary({
       'value': 'x',
       'string': 'a',
@@ -65,8 +60,8 @@ void main() {
       'float': .2,
       'number': 3,
       'bool': true,
-      'date': date,
-      'blob': blob,
+      'date': testDate,
+      'blob': testBlob,
       'array': [true],
       'dictionary': {'key': 'value'},
     });
@@ -78,8 +73,8 @@ void main() {
     expect(dictionary['float'].float, .2);
     expect(dictionary['number'].number, 3);
     expect(dictionary['bool'].boolean, true);
-    expect(dictionary['date'].date, date);
-    expect(dictionary['blob'].blob, blob);
+    expect(dictionary['date'].date, testDate);
+    expect(dictionary['blob'].blob, testBlob);
     expect(dictionary['array'].array, MutableArray([true]));
     expect(
       dictionary['dictionary'].dictionary,
@@ -118,8 +113,6 @@ void main() {
   });
 
   test('setters for index in array set value', () {
-    final date = DateTime.now();
-    final blob = Blob.fromData('', Uint8List(0));
     final array = MutableArray([null]);
 
     array[0].value = 'x';
@@ -134,10 +127,10 @@ void main() {
     expect(array.value(0), 3);
     array[0].boolean = true;
     expect(array.value(0), true);
-    array[0].date = date;
-    expect(array.date(0), date);
-    array[0].blob = blob;
-    expect(array.value(0), blob);
+    array[0].date = testDate;
+    expect(array.date(0), testDate);
+    array[0].blob = testBlob;
+    expect(array.value(0), testBlob);
     array[0].array = MutableArray([true]);
     expect(array.value(0), MutableArray([true]));
     array[0].dictionary = MutableDictionary({'key': 'value'});
@@ -145,8 +138,6 @@ void main() {
   });
 
   test('setters for keys in dictionary set value', () {
-    final date = DateTime.now();
-    final blob = Blob.fromData('', Uint8List(0));
     final dictionary = MutableDictionary({'x': null});
 
     dictionary['x'].value = 'x';
@@ -161,10 +152,10 @@ void main() {
     expect(dictionary.value('x'), 3);
     dictionary['x'].boolean = true;
     expect(dictionary.value('x'), true);
-    dictionary['x'].date = date;
-    expect(dictionary.date('x'), date);
-    dictionary['x'].blob = blob;
-    expect(dictionary.value('x'), blob);
+    dictionary['x'].date = testDate;
+    expect(dictionary.date('x'), testDate);
+    dictionary['x'].blob = testBlob;
+    expect(dictionary.value('x'), testBlob);
     dictionary['x'].array = MutableArray([true]);
     expect(dictionary.value('x'), MutableArray([true]));
     dictionary['x'].dictionary = MutableDictionary({'key': 'value'});
@@ -172,8 +163,6 @@ void main() {
   });
 
   test('setters throw if Fragment index is out of range', () {
-    final date = DateTime.now();
-    final blob = Blob.fromData('', Uint8List(0));
     final array = MutableArray();
 
     expect(() => array[0].value = 'x', throwsRangeError);
@@ -182,15 +171,13 @@ void main() {
     expect(() => array[0].float = 0, throwsRangeError);
     expect(() => array[0].number = 0, throwsRangeError);
     expect(() => array[0].boolean = false, throwsRangeError);
-    expect(() => array[0].date = date, throwsRangeError);
-    expect(() => array[0].blob = blob, throwsRangeError);
+    expect(() => array[0].date = testDate, throwsRangeError);
+    expect(() => array[0].blob = testBlob, throwsRangeError);
     expect(() => array[0].array = MutableArray(), throwsRangeError);
     expect(() => array[0].dictionary = MutableDictionary(), throwsRangeError);
   });
 
   test('setters throw if Fragment path is outside existing collection', () {
-    final date = DateTime.now();
-    final blob = Blob.fromData('', Uint8List(0));
     final array = MutableArray();
 
     expect(() => array[0][0].value = 'x', throwsStateError);
@@ -199,8 +186,8 @@ void main() {
     expect(() => array[0][0].float = 0, throwsStateError);
     expect(() => array[0][0].number = 0, throwsStateError);
     expect(() => array[0][0].boolean = false, throwsStateError);
-    expect(() => array[0][0].date = date, throwsStateError);
-    expect(() => array[0][0].blob = blob, throwsStateError);
+    expect(() => array[0][0].date = testDate, throwsStateError);
+    expect(() => array[0][0].blob = testBlob, throwsStateError);
     expect(() => array[0][0].array = MutableArray(), throwsStateError);
     expect(
         () => array[0][0].dictionary = MutableDictionary(), throwsStateError);

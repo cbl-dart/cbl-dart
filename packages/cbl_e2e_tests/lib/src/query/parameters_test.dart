@@ -1,8 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 
 void main() {
@@ -15,8 +14,6 @@ void main() {
     });
 
     test('set parameters', () {
-      final date = DateTime.now();
-      final blob = Blob.fromData('', Uint8List(0));
       final parameters = Parameters();
 
       // ignore: cascade_invocations
@@ -38,11 +35,11 @@ void main() {
       parameters.setBoolean(true, name: 'boolean');
       expect(parameters.value('boolean'), true);
 
-      parameters.setDate(date, name: 'date');
-      expect(parameters.value('date'), date.toIso8601String());
+      parameters.setDate(testDate, name: 'date');
+      expect(parameters.value('date'), testDate.toIso8601String());
 
-      parameters.setBlob(blob, name: 'blob');
-      expect(parameters.value('blob'), blob);
+      parameters.setBlob(testBlob, name: 'blob');
+      expect(parameters.value('blob'), testBlob);
 
       parameters.setArray(MutableArray([true]), name: 'array');
       expect(parameters.value('array'), MutableArray([true]));

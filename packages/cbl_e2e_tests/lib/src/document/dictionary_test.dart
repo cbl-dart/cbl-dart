@@ -1,12 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/document/common.dart';
 import 'package:cbl/src/document/dictionary.dart';
 import 'package:cbl/src/fleece/fleece.dart' as fl;
 import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/matchers.dart';
 
@@ -85,8 +83,6 @@ void main() {
     });
 
     test('toPlainMap', () {
-      final date = DateTime.now();
-      final blob = Blob.fromData('', Uint8List(0));
       final dictionary = immutableDictionary({
         'value': 'x',
         'string': 'a',
@@ -94,8 +90,8 @@ void main() {
         'float': .2,
         'number': 3,
         'bool': true,
-        'date': date,
-        'blob': blob,
+        'date': testDate,
+        'blob': testBlob,
         'array': [false],
         'dictionary': {'key': 'value'},
       });
@@ -106,16 +102,75 @@ void main() {
         'float': .2,
         'number': 3,
         'bool': true,
-        'date': date.toIso8601String(),
-        'blob': blob,
+        'date': testDate.toIso8601String(),
+        'blob': testBlob,
         'array': [false],
         'dictionary': {'key': 'value'},
       });
     });
 
+    test('toJson', () {
+      expect(immutableDictionary().toJson(), '{}');
+      expect(
+        immutableDictionary({
+          'null': null,
+          'string': 'a',
+          'integer': 1,
+          'float': .2,
+          'bool': true,
+          'date': testDate,
+          'blob': testBlob,
+          'array': <Object?>[],
+          'dictionary': <String, Object?>{},
+        }).toJson(),
+        json(
+          '''
+          {
+            "null": null, 
+            "string": "a", 
+            "integer": 1, 
+            "float": 0.2, 
+            "bool": true, 
+            "date": "${testDate.toIso8601String()}", 
+            "blob": ${testBlob.toJson()}, 
+            "array": [], 
+            "dictionary": {}
+          }
+          ''',
+        ),
+      );
+      expect(MutableDictionary().toJson(), '{}');
+      expect(
+        MutableDictionary({
+          'null': null,
+          'string': 'a',
+          'integer': 1,
+          'float': .2,
+          'bool': true,
+          'date': testDate,
+          'blob': testBlob,
+          'array': <Object?>[],
+          'dictionary': <String, Object?>{},
+        }).toJson(),
+        json(
+          '''
+          {
+            "null": null, 
+            "string": "a", 
+            "integer": 1, 
+            "float": 0.2, 
+            "bool": true, 
+            "date": "${testDate.toIso8601String()}", 
+            "blob": ${testBlob.toJson()}, 
+            "array": [], 
+            "dictionary": {}
+          }
+          ''',
+        ),
+      );
+    });
+
     test('get value with matching typed getter', () {
-      final date = DateTime.now();
-      final blob = Blob.fromData('', Uint8List(0));
       final dictionary = immutableDictionary({
         'value': 'x',
         'string': 'a',
@@ -123,8 +178,8 @@ void main() {
         'float': .2,
         'number': 3,
         'bool': true,
-        'date': date,
-        'blob': blob,
+        'date': testDate,
+        'blob': testBlob,
         'array': [false],
         'dictionary': {'key': 'value'},
       });
@@ -135,8 +190,8 @@ void main() {
       expect(dictionary.float('float'), .2);
       expect(dictionary.number('number'), 3);
       expect(dictionary.boolean('bool'), true);
-      expect(dictionary.date('date'), date);
-      expect(dictionary.blob('blob'), blob);
+      expect(dictionary.date('date'), testDate);
+      expect(dictionary.blob('blob'), testBlob);
       expect(dictionary.array('array'), MutableArray([false]));
       expect(
         dictionary.dictionary('dictionary'),
@@ -201,11 +256,10 @@ void main() {
         expect(dictionary.value('a'), 3);
         dictionary.setBoolean(true, key: 'a');
         expect(dictionary.value('a'), true);
-        dictionary.setDate(DateTime(0), key: 'a');
-        expect(dictionary.date('a'), DateTime(0));
-        final blob = Blob.fromData('', Uint8List(0));
-        dictionary.setBlob(blob, key: 'a');
-        expect(dictionary.value('a'), blob);
+        dictionary.setDate(testDate, key: 'a');
+        expect(dictionary.date('a'), testDate);
+        dictionary.setBlob(testBlob, key: 'a');
+        expect(dictionary.value('a'), testBlob);
         dictionary.setArray(MutableArray([true]), key: 'a');
         expect(dictionary.value('a'), MutableArray([true]));
         dictionary.setDictionary(MutableDictionary({'key': 'value'}), key: 'a');
@@ -213,8 +267,6 @@ void main() {
       });
 
       test('setData', () {
-        final date = DateTime.now();
-        final blob = Blob.fromData('', Uint8List(0));
         final dictionary = MutableDictionary()
           ..setData({
             'value': 'x',
@@ -223,8 +275,8 @@ void main() {
             'float': .2,
             'number': 3,
             'bool': true,
-            'date': date,
-            'blob': blob,
+            'date': testDate,
+            'blob': testBlob,
             'array': [false],
             'dictionary': {'key': 'value'},
           });
@@ -236,8 +288,8 @@ void main() {
           'float': .2,
           'number': 3,
           'bool': true,
-          'date': date.toIso8601String(),
-          'blob': blob,
+          'date': testDate.toIso8601String(),
+          'blob': testBlob,
           'array': [false],
           'dictionary': {'key': 'value'},
         });
@@ -248,9 +300,7 @@ void main() {
 
 Dictionary immutableDictionary([Map<String, Object?>? data]) {
   final array = MutableDictionary(data) as MutableDictionaryImpl;
-  final encoder = fl.FleeceEncoder()
-    // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-    ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+  final encoder = fl.FleeceEncoder();
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(
