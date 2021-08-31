@@ -225,5 +225,13 @@ class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
   final bool isRefCounted;
 }
 
+/// Handle to a Fleece encoder.
+class FleeceEncoderObject extends NativeObject<FLEncoder> {
+  /// Creates a handle to a Fleece encoder.
+  FleeceEncoderObject(Pointer<FLEncoder> pointer) : super(pointer) {
+    cblBindings.fleece.encoder.bindToDartObject(this, pointer);
+  }
+}
+
 String? _filterDebugRefCountedName(String debugName) =>
     debugRefCounted ? debugName : null;

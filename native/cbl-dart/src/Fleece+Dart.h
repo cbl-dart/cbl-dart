@@ -181,8 +181,11 @@ void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator);
 // Encoder --------------------------------------------------------------------
 
 CBLDART_EXPORT
-FLEncoder CBLDart_FLEncoder_New(Dart_Handle object, uint8_t format,
-                                uint64_t reserveSize, uint8_t uniqueStrings);
+void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder);
+
+CBLDART_EXPORT
+FLEncoder CBLDart_FLEncoder_New(uint8_t format, uint64_t reserveSize,
+                                uint8_t uniqueStrings);
 
 CBLDART_EXPORT
 uint8_t CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
