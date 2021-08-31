@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -276,7 +277,7 @@ class WorkerDatabase extends ProxyDatabase {
   ]) async {
     config ??= DatabaseConfiguration();
 
-    final worker = CblWorker();
+    final worker = CblWorker(debugName: _databaseName(name));
     await worker.start();
 
     try {
@@ -289,17 +290,26 @@ class WorkerDatabase extends ProxyDatabase {
   }
 
   static Future<void> remove(String name, {String? directory}) =>
-      CblWorker.executeCall(RemoveDatabase(name, directory));
+      CblWorker.executeCall(
+        RemoveDatabase(name, directory),
+        debugName: 'WorkerDatabase.remove',
+      );
 
   static Future<bool> exists(String name, {String? directory}) =>
-      CblWorker.executeCall(DatabaseExists(name, directory));
+      CblWorker.executeCall(
+        DatabaseExists(name, directory),
+        debugName: 'WorkerDatabase.exists',
+      );
 
   static Future<void> copy({
     required String from,
     required String name,
     DatabaseConfiguration? config,
   }) =>
-      CblWorker.executeCall(CopyDatabase(from, name, config));
+      CblWorker.executeCall(
+        CopyDatabase(from, name, config),
+        debugName: 'WorkerDatabase.copy',
+      );
 
   final CblWorker worker;
 
@@ -338,3 +348,5 @@ class RemoteDatabase extends ProxyDatabase {
     await channel.close();
   }
 }
+
+String _databaseName(String path) => path.split(Platform.pathSeparator).last;

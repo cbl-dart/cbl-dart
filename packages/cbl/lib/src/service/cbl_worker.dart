@@ -17,10 +17,14 @@ import 'serialization/serialization.dart';
 class CblWorker {
   CblWorker({
     this.serializationTarget = SerializationTarget.isolatePort,
+    required this.debugName,
   });
 
-  static Future<T> executeCall<T>(Request<T> request) async {
-    final worker = CblWorker();
+  static Future<T> executeCall<T>(
+    Request<T> request, {
+    required String debugName,
+  }) async {
+    final worker = CblWorker(debugName: debugName);
     await worker.start();
     try {
       final result = await worker.channel.call(request);
@@ -33,6 +37,7 @@ class CblWorker {
   }
 
   final SerializationTarget serializationTarget;
+  final String debugName;
 
   var _status = _WorkerStatus.initial;
 
@@ -57,6 +62,7 @@ class CblWorker {
     );
 
     _worker = IsolateWorker(
+      debugName: 'CblWorker($debugName)',
       delegate: _ServiceWorkerDelegate(
         libraries: workerLibraries,
         serializationType: serializationTarget,
