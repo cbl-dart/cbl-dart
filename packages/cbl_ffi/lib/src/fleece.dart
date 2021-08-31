@@ -1361,14 +1361,21 @@ extension on FLEncoderFormat {
 
 class FLEncoder extends Opaque {}
 
-typedef _CBLDart_FLEncoder_New_C = Pointer<FLEncoder> Function(
+typedef _CBLDart_FLEncoder_BindToDartObject_C = Void Function(
   Handle object,
+  Pointer<FLEncoder> encoder,
+);
+typedef _CBLDart_FLEncoder_BindToDartObject = void Function(
+  Object object,
+  Pointer<FLEncoder> encoder,
+);
+
+typedef _CBLDart_FLEncoder_New_C = Pointer<FLEncoder> Function(
   Uint8 format,
   Uint64 reserveSize,
   Uint8 uniqueStrings,
 );
 typedef _CBLDart_FLEncoder_New = Pointer<FLEncoder> Function(
-  Object object,
   int format,
   int reserveSize,
   int uniqueStrings,
@@ -1508,6 +1515,11 @@ typedef _FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
 
 class FleeceEncoderBindings extends Bindings {
   FleeceEncoderBindings(Bindings parent) : super(parent) {
+    _bindToDartObject = libs.cblDart.lookupFunction<
+        _CBLDart_FLEncoder_BindToDartObject_C,
+        _CBLDart_FLEncoder_BindToDartObject>(
+      'CBLDart_FLEncoder_BindToDartObject',
+    );
     _new = libs.cblDart
         .lookupFunction<_CBLDart_FLEncoder_New_C, _CBLDart_FLEncoder_New>(
       'CBLDart_FLEncoder_New',
@@ -1586,6 +1598,7 @@ class FleeceEncoderBindings extends Bindings {
     );
   }
 
+  late final _CBLDart_FLEncoder_BindToDartObject _bindToDartObject;
   late final _CBLDart_FLEncoder_New _new;
   late final _FLEncoder_Reset _reset;
   late final _CBLDart_FLEncoder_WriteArrayValue _writeArrayValue;
@@ -1606,13 +1619,16 @@ class FleeceEncoderBindings extends Bindings {
   late final _FLEncoder_GetError __getError;
   late final _FLEncoder_GetErrorMessage __getErrorMessage;
 
-  Pointer<FLEncoder> create(
-    Object object, {
+  void bindToDartObject(Object object, Pointer<FLEncoder> encoder) {
+    _bindToDartObject(object, encoder);
+  }
+
+  Pointer<FLEncoder> create({
     required FLEncoderFormat format,
     required int reserveSize,
     required bool uniqueStrings,
   }) =>
-      _new(object, format.toInt(), reserveSize, uniqueStrings.toInt());
+      _new(format.toInt(), reserveSize, uniqueStrings.toInt());
 
   void reset(Pointer<FLEncoder> encoder) {
     _reset(encoder);
