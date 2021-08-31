@@ -160,7 +160,7 @@ class FleeceEncoder extends FleeceEncoderObject {
       call((pointer) => _encoderBinds.beginArray(pointer, reserveLength));
 
   /// Ends an array.
-  void endArray() => call((pointer) => _encoderBinds.endArray);
+  void endArray() => call(_encoderBinds.endArray);
 
   /// Begins a dict and reserves space for [reserveLength] entries.
   void beginDict(int reserveLength) =>
