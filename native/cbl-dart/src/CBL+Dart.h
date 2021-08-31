@@ -18,8 +18,7 @@
 extern "C" {
 
 CBLDART_EXPORT
-bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
-                  CBLError *errorOut);
+void CBLDart_InitializeApiDL(void *data);
 
 // -- Callbacks
 

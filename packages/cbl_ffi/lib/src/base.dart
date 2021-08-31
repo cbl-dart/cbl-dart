@@ -1,10 +1,11 @@
 import 'dart:ffi';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:ffi/ffi.dart';
 
 import 'bindings.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 late final _baseBinds = CBLBindings.instance.base;
@@ -37,6 +38,9 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 // === Init ====================================================================
 
+typedef _CBLDart_InitializeApiDL_C = Void Function(Pointer<Void> data);
+typedef _CBLDart_InitializeApiDL = void Function(Pointer<Void> data);
+
 class CBLInitContext {
   CBLInitContext({required this.filesDir, required this.tempDir});
 
@@ -49,14 +53,12 @@ class _CBLInitContext extends Struct {
   external Pointer<Utf8> tempDir;
 }
 
-typedef _CBLDart_Init_C = Uint8 Function(
-  Pointer<Void> data,
-  Pointer<_CBLInitContext> context,
+typedef _CBL_Init_C = Uint8 Function(
+  _CBLInitContext context,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_Init = int Function(
-  Pointer<Void> data,
-  Pointer<_CBLInitContext> context,
+typedef _CBL_Init = int Function(
+  _CBLInitContext context,
   Pointer<CBLError> errorOut,
 );
 
@@ -161,9 +163,6 @@ extension IntErrorCodeExt on int {
     }
   }
 }
-
-late final globalCBLError = _baseBinds._globalCBLError;
-late final globalErrorPosition = _baseBinds._globalErrorPosition;
 
 class CBLError extends Struct {
   @Uint8()
@@ -336,9 +335,15 @@ typedef _CBLListener_Remove = void Function(
 
 class BaseBindings extends Bindings {
   BaseBindings(Bindings parent) : super(parent) {
-    _init = libs.cblDart.lookupFunction<_CBLDart_Init_C, _CBLDart_Init>(
-      'CBLDart_Init',
+    _initializeApiDL = libs.cblDart
+        .lookupFunction<_CBLDart_InitializeApiDL_C, _CBLDart_InitializeApiDL>(
+      'CBLDart_InitializeApiDL',
     );
+    if (io.Platform.isAndroid) {
+      _init = libs.cbl.lookupFunction<_CBL_Init_C, _CBL_Init>(
+        'CBL_Init',
+      );
+    }
     _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_BindCBLRefCountedToDartObject_C,
         _CBLDart_BindCBLRefCountedToDartObject>(
@@ -361,10 +366,8 @@ class BaseBindings extends Bindings {
     );
   }
 
-  late final Pointer<CBLError> _globalCBLError = malloc();
-  late final Pointer<Int32> _globalErrorPosition = malloc();
-
-  late final _CBLDart_Init _init;
+  late final _CBLDart_InitializeApiDL _initializeApiDL;
+  late final _CBL_Init _init;
   late final _CBLDart_BindCBLRefCountedToDartObject
       _bindCBLRefCountedToDartObject;
   late final _CBLDart_SetDebugRefCounted _setDebugRefCounted;
@@ -372,28 +375,23 @@ class BaseBindings extends Bindings {
   late final _CBLDart_CBLError_Message _getErrorMessage;
   late final _CBLListener_Remove _removeListener;
 
-  void init({CBLInitContext? context}) {
-    if (Platform.isAndroid && context == null) {
-      throw ArgumentError(
-        'Couchbase Lite must be initialized with context on Android.',
-      );
+  void init([CBLInitContext? context]) {
+    assert(!io.Platform.isAndroid || context != null);
+
+    _initializeApiDL(NativeApi.initializeApiDLData);
+
+    if (context != null) {
+      withZoneArena(() {
+        final _context = zoneArena<_CBLInitContext>()
+          ..ref.filesDir = context.filesDir.toNativeUtf8(allocator: zoneArena)
+          ..ref.tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
+
+        _init(
+          _context.ref,
+          globalCBLError,
+        ).checkCBLError();
+      });
     }
-
-    return withZoneArena(() {
-      Pointer<_CBLInitContext> contextPointer = nullptr;
-      if (context != null) {
-        contextPointer = zoneArena();
-        contextPointer.ref
-          ..filesDir = context.filesDir.toNativeUtf8(allocator: zoneArena)
-          ..tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
-      }
-
-      _init(
-        NativeApi.initializeApiDLData,
-        contextPointer,
-        globalCBLError,
-      ).checkCBLError();
-    });
   }
 
   void bindCBLRefCountedToDartObject(
@@ -422,11 +420,5 @@ class BaseBindings extends Bindings {
 
   void removeListener(Pointer<CBLListenerToken> token) {
     _removeListener(token);
-  }
-
-  @override
-  void dispose() {
-    malloc..free(_globalCBLError)..free(_globalErrorPosition);
-    super.dispose();
   }
 }

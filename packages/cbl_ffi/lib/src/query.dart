@@ -7,6 +7,7 @@ import 'base.dart';
 import 'bindings.dart';
 import 'database.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 enum CBLQueryLanguage {

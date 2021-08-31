@@ -18,5 +18,5 @@ void initMainIsolate({
   CBLInitContext? context,
 }) {
   initIsolate(libraries: libraries);
-  ffi.cblBindings.base.init(context: context);
+  ffi.cblBindings.base.init(context);
 }

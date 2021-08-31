@@ -9,8 +9,6 @@ export 'src/base.dart'
         checkCBLError,
         throwCBLError,
         IntCBLErrorDomainExt,
-        globalCBLError,
-        globalErrorPosition,
         IntErrorCodeExt,
         CBLError;
 export 'src/bindings.dart';
@@ -20,14 +18,13 @@ export 'src/data.dart';
 export 'src/database.dart';
 export 'src/document.dart';
 export 'src/fleece.dart'
-    hide
-        FLErrorCodeIntExt,
-        nullFLSlice,
-        nullFLString,
+    hide FLErrorCodeIntExt, FLResultSliceExt, FLStringResultExt;
+export 'src/global.dart'
+    show
+        globalLoadedFLValue,
         globalFLSlice,
-        globalFLSliceResult,
-        FLResultSliceExt,
-        FLStringResultExt;
+        globalFLString,
+        globalFLSliceResult;
 export 'src/libraries.dart';
 export 'src/logging.dart';
 export 'src/query.dart' hide CBLQueryLanguageExt;
