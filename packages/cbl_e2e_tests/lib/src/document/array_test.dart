@@ -1,12 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
-import 'package:cbl/src/document/common.dart';
 import 'package:cbl/src/fleece/fleece.dart' as fl;
 import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/matchers.dart';
 
@@ -50,8 +48,6 @@ void main() {
     });
 
     test('toPlainList', () {
-      final date = DateTime.now();
-      final blob = Blob.fromData('', Uint8List(0));
       final array = immutableArray([
         'x',
         'a',
@@ -59,8 +55,8 @@ void main() {
         .2,
         3,
         true,
-        date,
-        blob,
+        testDate,
+        testBlob,
         <Object?>[],
         <String, Object>{},
       ]);
@@ -71,11 +67,72 @@ void main() {
         .2,
         3,
         true,
-        date.toIso8601String(),
-        blob,
+        testDate.toIso8601String(),
+        testBlob,
         <Object?>[],
         <String, Object?>{},
       ]);
+    });
+
+    test('toJson', () {
+      expect(immutableArray().toJson(), '[]');
+      expect(
+        immutableArray([
+          null,
+          'a',
+          1,
+          .2,
+          true,
+          testDate,
+          testBlob,
+          <Object?>[],
+          <String, Object?>{},
+        ]).toJson(),
+        json(
+          '''
+          [
+            null,
+            "a",
+            1,
+            0.2,
+            true,
+            "${testDate.toIso8601String()}",
+            ${testBlob.toJson()},
+            [],
+            {}
+          ]
+          ''',
+        ),
+      );
+      expect(MutableArray().toJson(), '[]');
+      expect(
+        MutableArray([
+          null,
+          'a',
+          1,
+          .2,
+          true,
+          testDate,
+          testBlob,
+          <Object?>[],
+          <String, Object?>{},
+        ]).toJson(),
+        json(
+          '''
+          [
+            null,
+            "a",
+            1,
+            0.2,
+            true,
+            "${testDate.toIso8601String()}",
+            ${testBlob.toJson()},
+            [],
+            {}
+          ]
+          ''',
+        ),
+      );
     });
 
     test('iterable', () {
@@ -85,8 +142,6 @@ void main() {
     });
 
     test('get value with matching typed getter', () {
-      final date = DateTime.now();
-      final blob = Blob.fromData('', Uint8List(0));
       final array = immutableArray([
         'x',
         'a',
@@ -94,8 +149,8 @@ void main() {
         .2,
         3,
         true,
-        date,
-        blob,
+        testDate,
+        testBlob,
         <Object?>[],
         <String, Object>{},
       ]);
@@ -106,8 +161,8 @@ void main() {
       expect(array.float(3), .2);
       expect(array.number(4), 3);
       expect(array.boolean(5), true);
-      expect(array.date(6), date);
-      expect(array.blob(7), blob);
+      expect(array.date(6), testDate);
+      expect(array.blob(7), testBlob);
       expect(array.array(8), MutableArray());
       expect(array.dictionary(9), MutableDictionary());
     });
@@ -183,11 +238,10 @@ void main() {
         expect(array.value(0), 3);
         array.setBoolean(true, at: 0);
         expect(array.value(0), true);
-        array.setDate(DateTime(0), at: 0);
-        expect(array.date(0), DateTime(0));
-        final blob = Blob.fromData('', Uint8List(0));
-        array.setBlob(blob, at: 0);
-        expect(array.value(0), blob);
+        array.setDate(testDate, at: 0);
+        expect(array.date(0), testDate);
+        array.setBlob(testBlob, at: 0);
+        expect(array.value(0), testBlob);
         array.setArray(MutableArray([true]), at: 0);
         expect(array.value(0), MutableArray([true]));
         array.setDictionary(MutableDictionary({'key': 'value'}), at: 0);
@@ -202,17 +256,14 @@ void main() {
         expect(() => array.setFloat(0, at: 0), throwsRangeError);
         expect(() => array.setNumber(0, at: 0), throwsRangeError);
         expect(() => array.setBoolean(true, at: 0), throwsRangeError);
-        expect(() => array.setDate(DateTime.now(), at: 0), throwsRangeError);
-        expect(() => array.setBlob(Blob.fromData('', Uint8List(0)), at: 0),
-            throwsRangeError);
+        expect(() => array.setDate(testDate, at: 0), throwsRangeError);
+        expect(() => array.setBlob(testBlob, at: 0), throwsRangeError);
         expect(() => array.setArray(MutableArray(), at: 0), throwsRangeError);
         expect(() => array.setDictionary(MutableDictionary(), at: 0),
             throwsRangeError);
       });
 
       test('append values', () {
-        final date = DateTime(0);
-        final blob = Blob.fromData('', Uint8List(0));
         final array = MutableArray()
           ..addValue('x')
           ..addString('a')
@@ -220,8 +271,8 @@ void main() {
           ..addFloat(.2)
           ..addNumber(3)
           ..addBoolean(true)
-          ..addDate(date)
-          ..addBlob(blob)
+          ..addDate(testDate)
+          ..addBlob(testBlob)
           ..addArray(MutableArray([true]))
           ..addDictionary(MutableDictionary({'key': 'value'}));
 
@@ -232,16 +283,14 @@ void main() {
           .2,
           3,
           true,
-          date.toIso8601String(),
-          blob,
+          testDate.toIso8601String(),
+          testBlob,
           [true],
           {'key': 'value'},
         ]);
       });
 
       test('insert values', () {
-        final date = DateTime(0);
-        final blob = Blob.fromData('', Uint8List(0));
         final array = MutableArray()
           ..insertValue('x', at: 0)
           ..insertString('a', at: 0)
@@ -249,16 +298,16 @@ void main() {
           ..insertFloat(.2, at: 0)
           ..insertNumber(3, at: 0)
           ..insertBoolean(true, at: 0)
-          ..insertDate(date, at: 0)
-          ..insertBlob(blob, at: 0)
+          ..insertDate(testDate, at: 0)
+          ..insertBlob(testBlob, at: 0)
           ..insertArray(MutableArray([true]), at: 0)
           ..insertDictionary(MutableDictionary({'key': 'value'}), at: 0);
 
         expect(array.toPlainList(), [
           {'key': 'value'},
           [true],
-          blob,
-          date.toIso8601String(),
+          testBlob,
+          testDate.toIso8601String(),
           true,
           3,
           .2,
@@ -269,8 +318,6 @@ void main() {
       });
 
       test('setData', () {
-        final date = DateTime.now();
-        final blob = Blob.fromData('', Uint8List(0));
         final array = MutableArray()
           ..setData([
             'x',
@@ -279,8 +326,8 @@ void main() {
             .2,
             3,
             true,
-            date,
-            blob,
+            testDate,
+            testBlob,
             <Object?>[],
             <String, Object>{},
           ]);
@@ -292,8 +339,8 @@ void main() {
           .2,
           3,
           true,
-          date.toIso8601String(),
-          blob,
+          testDate.toIso8601String(),
+          testBlob,
           <Object?>[],
           <String, Object>{},
         ]);
@@ -309,9 +356,7 @@ void main() {
 
 Array immutableArray([List<Object?>? data]) {
   final array = MutableArray(data) as MutableArrayImpl;
-  final encoder = fl.FleeceEncoder()
-    // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-    ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+  final encoder = fl.FleeceEncoder();
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(

@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import '../fleece/fleece.dart';
@@ -100,6 +101,9 @@ abstract class ArrayInterface implements ArrayFragment {
 abstract class Array implements ArrayInterface, Iterable<Object?> {
   /// Returns a mutable copy of this array.
   MutableArray toMutable();
+
+  /// Returns this array's data as JSON.
+  String toJson();
 }
 
 /// Defines a set of methods for getting and setting array data.
@@ -365,6 +369,14 @@ class ArrayImpl
   @override
   MutableArray toMutable() =>
       MutableArrayImpl(MArray.asCopy(_array, isMutable: true));
+
+  @override
+  String toJson() {
+    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+    final done = encodeTo(encoder);
+    assert(done is! Future);
+    return encoder.finish().toDartString();
+  }
 
   @override
   MCollection get mCollection => _array;

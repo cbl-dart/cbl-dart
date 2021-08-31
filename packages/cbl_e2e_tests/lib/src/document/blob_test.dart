@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert' hide json;
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -7,9 +7,11 @@ import 'package:cbl/src/document/blob.dart';
 import 'package:cbl/src/support/streams.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 import '../utils/test_variant.dart';
 
 void main() {
@@ -25,7 +27,6 @@ void main() {
         expect(blob.properties, {
           'content_type': contentType,
           'length': fixedTestContent.length,
-          'digest': null,
         });
       });
     });
@@ -56,7 +57,8 @@ void main() {
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
-            contains('Blob has no data available.'),
+            "Cannot load blob's content. "
+                'Save the document, containing the blob, first.',
           )),
         );
         expect(
@@ -64,7 +66,8 @@ void main() {
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
-            contains('Blob has no data available.'),
+            "Cannot load blob's content. "
+                'Save the document, containing the blob, first.',
           )),
         );
       });
@@ -168,6 +171,30 @@ void main() {
       expect(loadedDoc.value('blob'), isNull);
     });
 
+    test('toJson returns JSON representation of saved blob', () async {
+      final db = openSyncTestDatabase();
+      final blob = Blob.fromData(contentType, Uint8List(0));
+      final doc = MutableDocument({'blob': blob});
+      db.saveDocument(doc);
+
+      expect(
+        blob.toJson(),
+        json('''
+          {
+            "@type": "blob",
+            "content_type": "application/octet-stream",
+            "length": 0,
+            "digest":"sha1-2jmj7l5rSw0yVb/vlWAYkK/YBwk="
+          }
+          '''),
+      );
+    });
+
+    test('toJson throws when blob has not been saved', () {
+      final blob = Blob.fromData(contentType, Uint8List(0));
+      expect(blob.toJson, throwsStateError);
+    });
+
     test('==', () {
       Blob a;
       Blob b;
@@ -176,37 +203,32 @@ void main() {
       a = Blob.fromData(contentType, fixedTestContent);
       expect(a, a);
 
-      // Blobs from data with equal content are equal.
-      a = Blob.fromData(contentType, fixedTestContent);
-      b = Blob.fromData(contentType, fixedTestContent);
-      expect(a, b);
+      // Blobs with same digest are equal.
+      a = testBlob;
+      b = BlobImpl.fromProperties({
+        cblObjectTypeProperty: cblObjectTypeBlob,
+        ...testBlob.properties,
+      });
+      expect(a, equality(b));
+    });
 
-      // Blobs from data with equal content but different content type are
-      // equal.
-      a = Blob.fromData('A', fixedTestContent);
-      b = Blob.fromData('B', fixedTestContent);
-      expect(a, b);
+    test('== throws if either blob has no digest', () {
+      final blobWithDigest = testBlob;
+      final blobWithoutDigest = Blob.fromData(contentType, fixedTestContent);
+
+      expect(() => blobWithDigest == blobWithoutDigest, throwsStateError);
+      expect(() => blobWithoutDigest == blobWithDigest, throwsStateError);
     });
 
     test('hashCode', () {
-      Blob blob;
+      expect(testBlob.hashCode, testBlob.digest.hashCode);
+    });
 
-      // Uses hashCode of digest if available.
-      blob = BlobImpl.fromProperties({
-        '@type': 'blob',
-        'digest': 'A',
-        'length': 0,
-      });
-
-      expect(blob.hashCode, blob.digest.hashCode);
-
-      // Uses hashCode of object as fallback.
-      blob = BlobImpl.fromProperties({
-        '@type': 'blob',
-        'digest': '',
-        'length': 0,
-      });
-      expect(blob.hashCode, isNot(null.hashCode));
+    test('hashCode throws if blob has no digest', () {
+      expect(
+        () => Blob.fromData(contentType, fixedTestContent).hashCode,
+        throwsStateError,
+      );
     });
 
     test('toString', () {

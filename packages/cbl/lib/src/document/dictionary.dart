@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
 import '../fleece/encoder.dart';
@@ -92,6 +93,9 @@ abstract class DictionaryInterface implements DictionaryFragment {
 abstract class Dictionary implements DictionaryInterface, Iterable<String> {
   /// Returns a mutable copy of this dictionary.
   MutableDictionary toMutable();
+
+  /// Returns this dictionary's data as JSON.
+  String toJson();
 }
 
 /// Defines a set of methods for getting and setting dictionary data.
@@ -230,6 +234,14 @@ class DictionaryImpl
   @override
   MutableDictionary toMutable() =>
       MutableDictionaryImpl(MDict.asCopy(_dict, isMutable: true));
+
+  @override
+  String toJson() {
+    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+    final done = encodeTo(encoder);
+    assert(done is! Future);
+    return encoder.finish().toDartString();
+  }
 
   @override
   MCollection get mCollection => _dict;

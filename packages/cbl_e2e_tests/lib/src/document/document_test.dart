@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
@@ -107,11 +108,75 @@ void main() {
       );
     });
 
+    test('toJson', () async {
+      final db = await openAsyncTestDatabase();
+      final blob = Blob.fromData('contentType', Uint8List(0));
+
+      expect((await savedDocument(db, {})).toJson(), '{}');
+      expect(
+        (await savedDocument(db, {
+          'null': null,
+          'string': 'a',
+          'integer': 1,
+          'float': .2,
+          'bool': true,
+          'date': testDate,
+          'blob': blob,
+          'array': <Object?>[],
+          'dictionary': <String, Object?>{},
+        }))
+            .toJson(),
+        json(
+          '''
+          {
+            "null": null, 
+            "string": "a", 
+            "integer": 1, 
+            "float": 0.2, 
+            "bool": true, 
+            "date": "${testDate.toIso8601String()}", 
+            "blob": ${blob.toJson()}, 
+            "array": [], 
+            "dictionary": {}
+          }
+          ''',
+        ),
+      );
+      expect(MutableDocument().toJson(), '{}');
+      expect(
+        MutableDocument({
+          'null': null,
+          'string': 'a',
+          'integer': 1,
+          'float': .2,
+          'bool': true,
+          'date': testDate,
+          'blob': testBlob,
+          'array': <Object?>[],
+          'dictionary': <String, Object?>{},
+        }).toJson(),
+        json(
+          '''
+          {
+            "null": null, 
+            "string": "a", 
+            "integer": 1, 
+            "float": 0.2, 
+            "bool": true, 
+            "date": "${testDate.toIso8601String()}", 
+            "blob": ${testBlob.toJson()}, 
+            "array": [], 
+            "dictionary": {}
+          }
+          ''',
+        ),
+      );
+    });
+
     group('immutable', () {
       apiTest('implements DictionaryInterface for properties', () async {
-        final db = await openTestDatabase();
-        final date = DateTime.now();
         final blob = Blob.fromData('', Uint8List(0));
+        final db = await openTestDatabase();
         final doc = await savedDocument(db, {
           'value': 'x',
           'string': 'a',
@@ -119,7 +184,7 @@ void main() {
           'float': .2,
           'number': 3,
           'bool': true,
-          'date': date,
+          'date': testDate,
           'blob': blob,
           'array': [false],
           'dictionary': {'key': 'value'},
@@ -147,7 +212,7 @@ void main() {
         expect(doc.float('float'), .2);
         expect(doc.number('number'), 3);
         expect(doc.boolean('bool'), true);
-        expect(doc.date('date'), date);
+        expect(doc.date('date'), testDate);
         expect(doc.blob('blob'), blob);
         expect(doc.array('array'), MutableArray([false]));
         expect(
@@ -163,7 +228,7 @@ void main() {
           'float': .2,
           'number': 3,
           'bool': true,
-          'date': date.toIso8601String(),
+          'date': testDate.toIso8601String(),
           'blob': blob,
           'array': [false],
           'dictionary': {'key': 'value'},
@@ -230,8 +295,6 @@ void main() {
     });
 
     test('implements MutableDictionaryInterface for properties', () {
-      final date = DateTime.now();
-      final blob = Blob.fromData('', Uint8List(0));
       final doc = MutableDocument()
         ..setValue('x', key: 'value')
         ..setString('a', key: 'string')
@@ -239,8 +302,8 @@ void main() {
         ..setFloat(.2, key: 'float')
         ..setNumber(3, key: 'number')
         ..setBoolean(true, key: 'bool')
-        ..setDate(date, key: 'date')
-        ..setBlob(blob, key: 'blob')
+        ..setDate(testDate, key: 'date')
+        ..setBlob(testBlob, key: 'blob')
         ..setArray(MutableArray([true]), key: 'array')
         ..setDictionary(MutableDictionary({'key': 'value'}), key: 'dictionary');
 
@@ -251,8 +314,8 @@ void main() {
         'float': .2,
         'number': 3,
         'bool': true,
-        'date': date.toIso8601String(),
-        'blob': blob,
+        'date': testDate.toIso8601String(),
+        'blob': testBlob,
         'array': [true],
         'dictionary': {'key': 'value'},
       });
