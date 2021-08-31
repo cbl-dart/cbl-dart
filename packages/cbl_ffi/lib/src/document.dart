@@ -5,6 +5,7 @@ import 'package:ffi/ffi.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 class CBLDocument extends Opaque {}

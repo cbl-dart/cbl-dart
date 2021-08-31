@@ -10,6 +10,7 @@ import 'base.dart';
 import 'bindings.dart';
 import 'document.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'query.dart';
 import 'utils.dart';
 

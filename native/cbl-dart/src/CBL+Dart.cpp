@@ -7,29 +7,7 @@
 #include "CBL+Dart.h"
 #include "Utils.hh"
 
-bool CBLDart_Init(void *dartApiDLData, void *cblInitContext,
-                  CBLError *errorOut) {
-  auto error = false;
-  if (errorOut) {
-    errorOut->code = 0;
-  }
-
-  static std::once_flag init;
-  std::call_once(init, [&]() {
-
-#ifdef __ANDROID__
-    if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
-                  errorOut)) {
-      error = true;
-      return;
-    }
-#endif
-
-    Dart_InitializeApiDL(dartApiDLData);
-  });
-
-  return !error;
-}
+void CBLDart_InitializeApiDL(void *data) { Dart_InitializeApiDL(data); }
 
 // -- AsyncCallback
 

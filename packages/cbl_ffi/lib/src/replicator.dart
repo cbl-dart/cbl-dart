@@ -13,6 +13,7 @@ import 'data.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
