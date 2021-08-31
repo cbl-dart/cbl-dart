@@ -175,6 +175,7 @@ void main() {
 
     group('immutable', () {
       apiTest('implements DictionaryInterface for properties', () async {
+        final blob = Blob.fromData('', Uint8List(0));
         final db = await openTestDatabase();
         final doc = await savedDocument(db, {
           'value': 'x',
@@ -184,7 +185,7 @@ void main() {
           'number': 3,
           'bool': true,
           'date': testDate,
-          'blob': testBlob,
+          'blob': blob,
           'array': [false],
           'dictionary': {'key': 'value'},
         });
@@ -212,7 +213,7 @@ void main() {
         expect(doc.number('number'), 3);
         expect(doc.boolean('bool'), true);
         expect(doc.date('date'), testDate);
-        expect(doc.blob('blob'), testBlob);
+        expect(doc.blob('blob'), blob);
         expect(doc.array('array'), MutableArray([false]));
         expect(
           doc.dictionary('dictionary'),
@@ -228,7 +229,7 @@ void main() {
           'number': 3,
           'bool': true,
           'date': testDate.toIso8601String(),
-          'blob': testBlob,
+          'blob': blob,
           'array': [false],
           'dictionary': {'key': 'value'},
         });
