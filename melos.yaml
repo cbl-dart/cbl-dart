@@ -100,6 +100,15 @@ scripts:
     select-package:
       scope: 'cbl_flutter_example'
 
+  test:flutter:linux:
+    run: melos exec --
+      flutter test
+      -r expanded
+      -d linux
+      integration_test/cbl_e2e_test.dart
+    select-package:
+      scope: 'cbl_flutter_example'
+
   version:cbl_native:update_lib:
     description: Updates the hard coded `currentVersion` in `cbl_native`.
       Must be run before publishing and after bumping the version of
