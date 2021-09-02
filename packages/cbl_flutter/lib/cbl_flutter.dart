@@ -47,6 +47,20 @@ Libraries _libraries() {
         appendExtension: true,
       ),
     );
+  } else if (Platform.isLinux) {
+    final bundleDirectory = _dirname(Platform.resolvedExecutable);
+    final libDirectory = _joinPaths(bundleDirectory, 'lib');
+    return Libraries(
+      cbl: LibraryConfiguration(
+        name: _joinPaths(libDirectory, 'libcblite'),
+        version: '3',
+        appendExtension: true,
+      ),
+      cblDart: LibraryConfiguration(
+        name: _joinPaths(libDirectory, 'libcblitedart'),
+        appendExtension: true,
+      ),
+    );
   } else {
     throw UnsupportedError('This platform is not supported.');
   }
@@ -82,3 +96,10 @@ void _setupLogging() {
     ..console.level = LogLevel.none
     ..custom = DartConsoleLogger(LogLevel.warning);
 }
+
+String _dirname(String path) =>
+    (path.split(Platform.pathSeparator)..removeLast())
+        .join(Platform.pathSeparator);
+
+String _joinPaths(String path0, String path1) =>
+    '$path0${Platform.pathSeparator}$path1';

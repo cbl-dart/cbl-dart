@@ -30,11 +30,12 @@
 
 ## Supported Platforms
 
-| Platform | Minimum version |
-| -------: | --------------- |
-|      iOS | 11              |
-|    macOS | 10.15           |
-|  Android | 22              |
+| Platform | Version                |
+| -------: | ---------------------- |
+|      iOS | >= 11                  |
+|    macOS | >= 10.15               |
+|  Android | >= 22                  |
+|    Linux | == Ubuntu 20.04 x86_64 |
 
 ## Getting started on Flutter
 

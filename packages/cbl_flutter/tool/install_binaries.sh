@@ -18,7 +18,7 @@ if [ -n "$CBL_FLUTTER_SKIP_INSTALL_BINARIES" ]; then
 fi
 
 # The directory of this script.
-dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 # The directory of the 'cbl_flutter' package. 
 pkgDir="$(cd "$dir/.." && pwd)"
@@ -54,6 +54,9 @@ function installBinariesForPlatform() {
         ;;
     apple)
         installDir="$pkgDir/Xcframeworks"
+        ;;
+    linux)
+        installDir="$pkgDir/linux/lib"
         ;;
     *)
         echo "cbl_flutter: Unknown platform $platform"
