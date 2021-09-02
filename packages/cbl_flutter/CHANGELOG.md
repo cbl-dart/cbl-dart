@@ -1,3 +1,8 @@
+## 1.0.0-beta.4
+
+ - **FEAT**: add support for Linux + Flutter.
+ - **FEAT**: add initializer for secondary isolate.
+
 ## 1.0.0-beta.3
 
  - Bump "cbl_flutter" to `1.0.0-beta.3`.

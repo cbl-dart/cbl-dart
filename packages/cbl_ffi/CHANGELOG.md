@@ -1,3 +1,11 @@
+## 0.7.0-beta.3
+
+ - **FIX**: decode error code in `ReplicatorStatusCallbackMessage.parseArguments`.
+ - **FEAT**: add `toJson` methods to containers (#167).
+ - **FEAT**: allocate global memory in `SliceResult`.
+ - **FEAT**: make `FleeceEncoder` a `NativeObject` (#166).
+ - **FEAT**: add initializer for secondary isolate.
+
 ## 0.7.0-beta.2
 
  - Bump "cbl_ffi" to `0.7.0-beta.2`.

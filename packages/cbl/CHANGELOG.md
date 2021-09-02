@@ -1,3 +1,13 @@
+## 1.0.0-beta.4
+
+ - **FIX**: allow `ConflictResolver` to be extended.
+ - **FEAT**: add support for Linux + Flutter.
+ - **FEAT**: `CblWorker` isolate debug name.
+ - **FEAT**: add `toJson` methods to containers (#167).
+ - **FEAT**: allocate global memory in `SliceResult`.
+ - **FEAT**: make `FleeceEncoder` a `NativeObject` (#166).
+ - **FEAT**: add initializer for secondary isolate.
+
 ## 1.0.0-beta.3
 
  - Bump "cbl" to `1.0.0-beta.3`.
