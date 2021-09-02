@@ -401,3 +401,60 @@ jobs:
             adb reverse tcp:4985 tcp:4985
 
             melos run test:flutter:android
+
+  tests-flutter-linux:
+    name: Tests - Flutter - Linux
+    runs-on: ubuntu-20.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: tests-flutter-linux
+
+      - name: Build native binaries
+        run: ./native/tools/build_unix.sh build Debug
+
+      - name: Cache Dart dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
+            dart-pub-cache
+
+      - name: Setup Dart environment
+        env:
+          SKIP_MELOS_BOOTSTRAP: true
+        uses: ./.github/actions/setup-dart-env
+
+      - name: Install Flutter linux dependencies
+        run: | 
+          sudo apt-get update 
+          sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - name: Enable Flutter on Linux
+        run: flutter config --enable-linux-desktop
+
+      - name: Prepare flutter projects
+        run: melos run flutter:prepare
+
+      - name: Start test Couchbase cluster
+        run: melos run test:setupCouchbaseClusterDocker
+
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: melos run test:flutter:linux

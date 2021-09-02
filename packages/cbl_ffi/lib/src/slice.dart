@@ -8,6 +8,7 @@ import 'package:ffi/ffi.dart';
 
 import 'bindings.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 late final _sliceBindings = CBLBindings.instance.fleece.slice;
@@ -129,11 +130,20 @@ class Slice {
 /// nullable and are represented with `null`.
 class SliceResult extends Slice {
   /// Creates an uninitialized [SliceResult] of [size].
-  SliceResult(int size)
-      : this.fromBufferAndSize(_sliceBindings.create(size).buf, size);
+  SliceResult(int size) : this._fromFLSliceResult(_sliceBindings.create(size));
 
-  /// Private constructor to initialize slice.
-  SliceResult.fromBufferAndSize(
+  /// Creates a [SliceResult] and copies the data from [slice] into it.
+  SliceResult.fromSlice(Slice slice)
+      : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
+
+  SliceResult._fromFLSliceResult(
+    FLSliceResult slice, {
+    bool retain = false,
+  }) : super._(slice.buf, slice.size) {
+    _sliceBindings.bindToDartObject(this, slice, retain: retain);
+  }
+
+  SliceResult._(
     Pointer<Uint8> buf,
     int size, {
     bool retain = false,
@@ -145,13 +155,6 @@ class SliceResult extends Slice {
       retain: retain,
     );
   }
-
-  /// Creates a [SliceResult] and copies the data from [slice] into it.
-  SliceResult.fromSlice(Slice slice)
-      : this.fromBufferAndSize(
-          _sliceBindings.copy(slice.makeGlobal().ref).buf,
-          slice.size,
-        );
 
   /// Returns a [SliceResult] which has the content and size of [list].
   factory SliceResult.fromTypedList(Uint8List list) =>
@@ -175,11 +178,7 @@ class SliceResult extends Slice {
   }) =>
       slice.buf == nullptr
           ? null
-          : SliceResult.fromBufferAndSize(
-              slice.buf,
-              slice.size,
-              retain: retain,
-            );
+          : SliceResult._fromFLSliceResult(slice, retain: retain);
 
   /// Creates a [SliceResult] from a [FLSlice] by copying its content.
   static SliceResult? copyFLSlice(FLSlice slice) =>
@@ -243,5 +242,35 @@ class TransferableSliceResult {
   final int _size;
 
   SliceResult materialize() =>
-      SliceResult.fromBufferAndSize(Pointer.fromAddress(_bufAddress), _size);
+      SliceResult._(Pointer.fromAddress(_bufAddress), _size);
+}
+
+final sliceResult = SliceResultAllocator();
+
+/// Allocator which allocates memory through [SliceResult]s.
+///
+/// This allocator has the advantage that allocated memory is freed when the
+/// corresponding Dart [SliceResult] object is finalized, including when an
+/// isolate is destroyed.
+class SliceResultAllocator implements Allocator {
+  final _slices = <SliceResult>[];
+
+  @override
+  Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment}) {
+    if (alignment != null) {
+      throw ArgumentError.value(alignment, 'alignment', 'is not supported');
+    }
+
+    final slice = SliceResult(byteCount);
+
+    // Keep the slice alive for as long as the allocated memory is in use.
+    _slices.add(slice);
+
+    return slice.buf.cast();
+  }
+
+  @override
+  void free(Pointer<NativeType> pointer) {
+    _slices.removeWhere((slice) => slice.buf.address == pointer.address);
+  }
 }

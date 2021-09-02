@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
@@ -22,20 +20,6 @@ abstract class Bindings {
   final Libraries libs;
 
   List<Bindings> get _children => [];
-
-  bool get isDisposed => _isDisposed;
-  bool _isDisposed = false;
-
-  @mustCallSuper
-  void dispose() {
-    assert(!_isDisposed);
-
-    _isDisposed = true;
-
-    for (final child in _children) {
-      child.dispose();
-    }
-  }
 }
 
 class CBLBindings extends Bindings {

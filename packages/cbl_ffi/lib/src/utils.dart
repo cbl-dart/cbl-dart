@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'fleece.dart';
+import 'global.dart';
 
 // === Lang ====================================================================
 

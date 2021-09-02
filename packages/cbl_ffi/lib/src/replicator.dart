@@ -13,6 +13,7 @@ import 'data.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
@@ -390,11 +391,10 @@ class ReplicatorStatusCallbackMessage {
   static CBLReplicatorStatus parseArguments(List<Object?> status) {
     CBLErrorException? error;
     if (status.length > 3) {
-      error = CBLErrorException(
-        (status[3] as int).toErrorDomain(),
-        status[4] as int,
-        utf8.decode(status[5] as Uint8List),
-      );
+      final domain = (status[3] as int).toErrorDomain();
+      final errorCode = (status[4] as int).toErrorCode(domain);
+      final message = utf8.decode(status[5] as Uint8List);
+      error = CBLErrorException(domain, errorCode, message);
     }
 
     return CBLReplicatorStatus(

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/common.dart';
@@ -8,6 +6,7 @@ import 'package:cbl/src/fleece/integration/integration.dart';
 import 'package:cbl/src/query/result.dart';
 
 import '../../test_binding_impl.dart';
+import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
@@ -70,18 +69,16 @@ void main() {
     });
 
     test('get date', () {
-      final date = DateTime.now();
-      final result = testResult(['a'], [date]);
-      expect(result.date(0), date);
-      expect(result.date('a'), date);
+      final result = testResult(['a'], [testDate]);
+      expect(result.date(0), testDate);
+      expect(result.date('a'), testDate);
       expect(result.blob('b'), null);
     });
 
     test('get blob', () {
-      final blob = Blob.fromData('', Uint8List(0));
-      final result = testResult(['a'], [blob]);
-      expect(result.blob(0), blob);
-      expect(result.blob('a'), blob);
+      final result = testResult(['a'], [testBlob]);
+      expect(result.blob(0), testBlob);
+      expect(result.blob('a'), testBlob);
       expect(result.blob('b'), null);
     });
 

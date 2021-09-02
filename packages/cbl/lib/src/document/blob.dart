@@ -2,14 +2,12 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../database/blob_store.dart';
 import '../database/database.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
-import '../log/logger.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'common.dart';
@@ -71,6 +69,9 @@ abstract class Blob {
 
   /// The metadata associated with this [Blob].
   Map<String, Object?> get properties;
+
+  /// Returns this blob's JSON representation.
+  String toJson();
 
   /// Wether a plain Dart [Map] represents a [Blob].
   static bool isBlob(Map<String, Object?> properties) {
@@ -187,34 +188,14 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       return stream;
     }
 
-    _throwNoDataError();
-  }
-
-  Uint8List? _loadContentSync() {
-    if (_content != null) {
-      return _content;
-    }
-
-    final blobStore = _blobStore;
-    if (_digest != null && blobStore is SyncBlobStore) {
-      final content = blobStore.readBlobSync(_blobProperties())?.toTypedList();
-      if (content == null) {
-        _throwNotFoundError();
-      }
-
-      if (_shouldCacheContent) {
-        _content = content;
-      }
-
-      return content;
-    }
+    _throwNotSavedError("Cannot load blob's content.");
   }
 
   @override
   Map<String, Object?> get properties => {
-        blobContentTypeProperty: _contentType,
+        if (_contentType != null) blobContentTypeProperty: _contentType,
         blobLengthProperty: _length,
-        blobDigestProperty: _digest,
+        if (_digest != null) blobDigestProperty: _digest,
       };
 
   Map<String, Object?> _blobProperties({bool mayIncludeData = false}) => {
@@ -224,15 +205,31 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       };
 
   @override
+  String toJson() {
+    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+    final done = encodeTo(encoder);
+    assert(done is! Future);
+    return encoder.finish().toDartString();
+  }
+
+  @override
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
     final extraInfo = encoder.extraInfo;
     final context = (extraInfo is FleeceEncoderContext) ? extraInfo : null;
 
     void writeProperties(Map<String, Object?> properties) {
       _digest = properties[blobDigestProperty] as String?;
-      encoder.writeDartObject(_blobProperties(
+
+      final blobProperties = _blobProperties(
         mayIncludeData: context?.encodeQueryParameter ?? false,
-      ));
+      );
+
+      if (blobProperties[blobDigestProperty] == null &&
+          blobProperties[blobDataProperty] == null) {
+        _throwNotSavedError('Cannot serialize unsaved blob.');
+      }
+
+      encoder.writeDartObject(blobProperties);
     }
 
     if (context != null && context.saveExternalData) {
@@ -277,35 +274,20 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       return false;
     }
 
-    if (_digest != null && other._digest != null) {
-      return _digest == other._digest;
+    if (_digest == null || other._digest == null) {
+      _throwNotSavedError('Cannot compare unsaved blobs.');
     }
 
-    final content = _loadContentSync();
-    final otherContent = other._loadContentSync();
-    if (content != null && otherContent != null) {
-      return const DeepCollectionEquality().equals(
-        _loadContentSync(),
-        other._loadContentSync(),
-      );
-    }
-
-    return false;
+    return _digest == other._digest;
   }
 
   @override
   int get hashCode {
-    final digest = _digest;
-    if (digest != null) {
-      return digest.hashCode;
+    if (_digest == null) {
+      _throwNotSavedError("Cannot compute the blob's hash code.");
     }
 
-    final content = _loadContentSync();
-    if (content != null) {
-      return const DeepCollectionEquality().hash(content);
-    }
-
-    return super.hashCode;
+    return _digest.hashCode;
   }
 
   @override
@@ -317,17 +299,10 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
   bool get _shouldCacheContent => _length < _maxCachedContentLength;
 
-  Never _throwNoDataError() {
-    if (_digest != null) {
-      cblLogMessage(
-        LogDomain.database,
-        LogLevel.warning,
-        'Cannot access content from a blob that contains only metadata. '
-        'To access the content, save the document first.',
-      );
-    }
-
-    throw StateError('Blob has no data available.');
+  Never _throwNotSavedError(String message) {
+    throw StateError(
+      '$message Save the document, containing the blob, first.',
+    );
   }
 
   Never _throwNotFoundError() {

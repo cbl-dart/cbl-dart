@@ -5,6 +5,7 @@ import 'package:ffi/ffi.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'data.dart';
+import 'global.dart';
 import 'slice.dart';
 import 'utils.dart';
 
@@ -43,11 +44,8 @@ extension FLErrorCodeIntExt on int {
   }
 }
 
-late final _globalFleeceErrorCode =
-    CBLBindings.instance.fleece._globalFleeceErrorCode;
-
 void _checkFleeceError() {
-  final code = _globalFleeceErrorCode.value.toFleeceErrorCode();
+  final code = globalFLErrorCode.value.toFleeceErrorCode();
   if (code != FLErrorCode.noError) {
     throw CBLErrorException(CBLErrorDomain.fleece, code, 'Fleece error');
   }
@@ -130,15 +128,6 @@ extension FLStringResultExt on FLStringResult {
   }
 }
 
-late final nullFLSlice = CBLBindings.instance.fleece.slice.nullSlice;
-late final nullFLString =
-    CBLBindings.instance.fleece.slice.nullSlice.cast<FLString>();
-late final globalFLSlice = CBLBindings.instance.fleece.slice.globalSlice;
-late final globalFLSliceResult =
-    CBLBindings.instance.fleece.slice.globalSliceResult;
-late final globalFLString =
-    CBLBindings.instance.fleece.slice.globalSlice.cast<FLString>();
-
 typedef _CBLDart_FLSlice_Equal_C = Uint8 Function(FLSlice a, FLSlice b);
 typedef _CBLDart_FLSlice_Equal = int Function(FLSlice a, FLSlice b);
 
@@ -208,12 +197,6 @@ class SliceBindings extends Bindings {
     );
   }
 
-  late final Pointer<FLSlice> nullSlice = malloc()
-    ..ref.buf = nullptr
-    ..ref.size = 0;
-  late final Pointer<FLSlice> globalSlice = malloc();
-  late final Pointer<FLSliceResult> globalSliceResult = globalSlice.cast();
-
   late final _CBLDart_FLSlice_Equal _equal;
   late final _CBLDart_FLSlice_Compare _compare;
 
@@ -250,12 +233,6 @@ class SliceBindings extends Bindings {
 
   void releaseStringResult(FLStringResult result) {
     _releaseStringResult(result);
-  }
-
-  @override
-  void dispose() {
-    malloc..free(nullSlice)..free(globalSlice);
-    super.dispose();
   }
 }
 
@@ -443,7 +420,7 @@ class DocBindings extends Bindings {
       ).toNullable();
 
   Pointer<FLDoc> fromJson(String json) => withZoneArena(() =>
-      _fromJSON(json.toFLStringInArena().ref, _globalFleeceErrorCode)
+      _fromJSON(json.toFLStringInArena().ref, globalFLErrorCode)
           .checkFleeceError());
 
   void bindToDartObject(Object object, Pointer<FLDoc> doc) {
@@ -1165,9 +1142,6 @@ extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
   bool get asBool => _asBool.toBool();
 }
 
-late final Pointer<CBLDart_LoadedFLValue> globalLoadedFLValue =
-    CBLBindings.instance.fleece.decoder._globalLoadedFLValue;
-
 typedef _CBLDart_FLData_Dump_C = FLStringResult Function(FLSlice slice);
 typedef _CBLDart_FLData_Dump = FLStringResult Function(FLSlice slice);
 
@@ -1284,8 +1258,6 @@ class FleeceDecoderBindings extends Bindings {
     );
   }
 
-  final Pointer<CBLDart_LoadedFLValue> _globalLoadedFLValue = malloc();
-
   late final _CBLDart_FLData_Dump _dumpData;
   late final _CBLDart_FLValue_FromData _getLoadedFLValueFromData;
   late final _CBLDart_GetLoadedFLValue _getLoadedFLValue;
@@ -1301,18 +1273,18 @@ class FleeceDecoderBindings extends Bindings {
       _getLoadedFLValueFromData(
         data.makeGlobal().ref,
         trust.toInt(),
-        _globalLoadedFLValue,
+        globalLoadedFLValue,
       ).toBool();
 
   void getLoadedValue(Pointer<FLValue> value) {
-    _getLoadedFLValue(value, _globalLoadedFLValue);
+    _getLoadedFLValue(value, globalLoadedFLValue);
   }
 
   void getLoadedValueFromArray(
     Pointer<FLArray> array,
     int index,
   ) {
-    _getLoadedFLValueFromArray(array, index, _globalLoadedFLValue);
+    _getLoadedFLValueFromArray(array, index, globalLoadedFLValue);
   }
 
   void getLoadedValueFromDict(
@@ -1323,7 +1295,7 @@ class FleeceDecoderBindings extends Bindings {
       _getLoadedFLValueFromDict(
         array,
         key.toFLStringInArena().ref,
-        _globalLoadedFLValue,
+        globalLoadedFLValue,
       );
     });
   }
@@ -1338,12 +1310,6 @@ class FleeceDecoderBindings extends Bindings {
 
   void dictIteratorNext(Pointer<CBLDart_FLDictIterator2> iterator) {
     _dictIteratorNext(iterator);
-  }
-
-  @override
-  void dispose() {
-    malloc.free(_globalLoadedFLValue);
-    super.dispose();
   }
 }
 
@@ -1361,14 +1327,21 @@ extension on FLEncoderFormat {
 
 class FLEncoder extends Opaque {}
 
-typedef _CBLDart_FLEncoder_New_C = Pointer<FLEncoder> Function(
+typedef _CBLDart_FLEncoder_BindToDartObject_C = Void Function(
   Handle object,
+  Pointer<FLEncoder> encoder,
+);
+typedef _CBLDart_FLEncoder_BindToDartObject = void Function(
+  Object object,
+  Pointer<FLEncoder> encoder,
+);
+
+typedef _CBLDart_FLEncoder_New_C = Pointer<FLEncoder> Function(
   Uint8 format,
   Uint64 reserveSize,
   Uint8 uniqueStrings,
 );
 typedef _CBLDart_FLEncoder_New = Pointer<FLEncoder> Function(
-  Object object,
   int format,
   int reserveSize,
   int uniqueStrings,
@@ -1508,6 +1481,11 @@ typedef _FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
 
 class FleeceEncoderBindings extends Bindings {
   FleeceEncoderBindings(Bindings parent) : super(parent) {
+    _bindToDartObject = libs.cblDart.lookupFunction<
+        _CBLDart_FLEncoder_BindToDartObject_C,
+        _CBLDart_FLEncoder_BindToDartObject>(
+      'CBLDart_FLEncoder_BindToDartObject',
+    );
     _new = libs.cblDart
         .lookupFunction<_CBLDart_FLEncoder_New_C, _CBLDart_FLEncoder_New>(
       'CBLDart_FLEncoder_New',
@@ -1586,6 +1564,7 @@ class FleeceEncoderBindings extends Bindings {
     );
   }
 
+  late final _CBLDart_FLEncoder_BindToDartObject _bindToDartObject;
   late final _CBLDart_FLEncoder_New _new;
   late final _FLEncoder_Reset _reset;
   late final _CBLDart_FLEncoder_WriteArrayValue _writeArrayValue;
@@ -1606,13 +1585,16 @@ class FleeceEncoderBindings extends Bindings {
   late final _FLEncoder_GetError __getError;
   late final _FLEncoder_GetErrorMessage __getErrorMessage;
 
-  Pointer<FLEncoder> create(
-    Object object, {
+  void bindToDartObject(Object object, Pointer<FLEncoder> encoder) {
+    _bindToDartObject(object, encoder);
+  }
+
+  Pointer<FLEncoder> create({
     required FLEncoderFormat format,
     required int reserveSize,
     required bool uniqueStrings,
   }) =>
-      _new(object, format.toInt(), reserveSize, uniqueStrings.toInt());
+      _new(format.toInt(), reserveSize, uniqueStrings.toInt());
 
   void reset(Pointer<FLEncoder> encoder) {
     _reset(encoder);
@@ -1703,7 +1685,7 @@ class FleeceEncoderBindings extends Bindings {
   }
 
   Data? finish(Pointer<FLEncoder> encoder) =>
-      _checkError(encoder, _finish(encoder, _globalFleeceErrorCode))
+      _checkError(encoder, _finish(encoder, globalFLErrorCode))
           .let(SliceResult.fromFLSliceResult)
           ?.toData();
 
@@ -1751,7 +1733,6 @@ class FleeceBindings extends Bindings {
     encoder = FleeceEncoderBindings(this);
   }
 
-  late final Pointer<Uint32> _globalFleeceErrorCode = malloc();
   late final SliceBindings slice;
   late final SlotBindings slot;
   late final DocBindings doc;
@@ -1763,10 +1744,4 @@ class FleeceBindings extends Bindings {
   late final MutableDictBindings mutableDict;
   late final FleeceDecoderBindings decoder;
   late final FleeceEncoderBindings encoder;
-
-  @override
-  void dispose() {
-    malloc.free(_globalFleeceErrorCode);
-    super.dispose();
-  }
 }

@@ -58,7 +58,7 @@ late CblServiceClient _sharedClient;
 
 void setupSharedTestCblWorker() {
   setUpAll(() async {
-    _sharedWorker = CblWorker();
+    _sharedWorker = CblWorker(debugName: 'Shared');
     await _sharedWorker!.start();
     _sharedClient = CblServiceClient(channel: _sharedWorker!.channel);
   });

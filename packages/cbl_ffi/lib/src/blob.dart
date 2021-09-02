@@ -7,6 +7,7 @@ import 'bindings.dart';
 import 'data.dart';
 import 'database.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'slice.dart';
 import 'utils.dart';
 

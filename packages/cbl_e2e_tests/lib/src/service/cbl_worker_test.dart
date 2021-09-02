@@ -9,7 +9,7 @@ void main() {
 
   group('CblWorker', () {
     test('call Ping endpoint', () async {
-      final worker = CblWorker();
+      final worker = CblWorker(debugName: '');
 
       await worker.start();
       addTearDown(worker.stop);
@@ -18,7 +18,7 @@ void main() {
     });
 
     test('using channel of not started worker throws', () async {
-      final worker = CblWorker();
+      final worker = CblWorker(debugName: '');
 
       expect(() => worker.channel.call(PingRequest()), throwsStateError);
 

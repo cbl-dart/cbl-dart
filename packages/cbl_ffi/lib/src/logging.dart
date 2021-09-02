@@ -10,6 +10,7 @@ import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'fleece.dart';
+import 'global.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {

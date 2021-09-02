@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:isolate';
 import 'dart:typed_data';
 
@@ -15,6 +16,9 @@ abstract class Data {
   Uint8List toTypedList();
 
   SliceResult toSliceResult();
+
+  String toDartString({Encoding encoding = utf8}) =>
+      encoding.decode(toTypedList());
 
   TransferableData _createTransferableData();
 }

@@ -332,15 +332,15 @@ void CBLDart_ReleaseDartObjectBoundFLEncoder(void *dart_callback_data,
   FLEncoder_Free(encoder);
 }
 
-FLEncoder CBLDart_FLEncoder_New(Dart_Handle object, uint8_t format,
-                                uint64_t reserveSize, uint8_t uniqueStrings) {
-  auto encoder = FLEncoder_NewWithOptions(static_cast<FLEncoderFormat>(format),
-                                          reserveSize, uniqueStrings);
-
+void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder) {
   Dart_NewFinalizableHandle_DL(object, encoder, 0,
                                CBLDart_ReleaseDartObjectBoundFLEncoder);
+}
 
-  return encoder;
+FLEncoder CBLDart_FLEncoder_New(uint8_t format, uint64_t reserveSize,
+                                uint8_t uniqueStrings) {
+  return FLEncoder_NewWithOptions(static_cast<FLEncoderFormat>(format),
+                                  reserveSize, uniqueStrings);
 }
 
 uint8_t CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
