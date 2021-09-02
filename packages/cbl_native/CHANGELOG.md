@@ -1,3 +1,7 @@
+## 5.0.0-beta.3
+
+ - Bump "cbl_native" to `5.0.0-beta.3`.
+
 ## 5.0.0-beta.2
 
  - Bump "cbl_native" to `5.0.0-beta.2`.
