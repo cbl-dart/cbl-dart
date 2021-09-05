@@ -427,5 +427,19 @@ void main() {
         repl.stop,
       );
     });
+
+    apiTest(
+      'ISSUE #162: authenticator + document replications stream',
+      () async {
+        final db = await openTestDatabase();
+        final repl = await db.createTestReplicator(
+          authenticator: basicAuthUserAuthenticator,
+        );
+
+        repl.documentReplications().listen((event) {});
+
+        await repl.start();
+      },
+    );
   });
 }

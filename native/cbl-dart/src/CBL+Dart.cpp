@@ -681,6 +681,15 @@ CBLAuthenticator *CBLDart_CBLAuth_CreateSession(CBLDart_FLString sessionID,
 }
 
 struct ReplicatorCallbackWrapperContext {
+  ~ReplicatorCallbackWrapperContext() {
+    CBLEndpoint_Free(endpoint);
+    if (authenticator) {
+      CBLAuth_Free(authenticator);
+    }
+  }
+
+  CBLEndpoint *endpoint;
+  CBLAuthenticator *authenticator;
   CBLDart::AsyncCallback *pullFilter;
   CBLDart::AsyncCallback *pushFilter;
   CBLDart::AsyncCallback *conflictResolver;
@@ -837,10 +846,13 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
                                  ? nullptr
                                  : CBLDart_ReplicatorConflictResolverWrapper;
 
-  auto context = new ReplicatorCallbackWrapperContext;
-  context->pullFilter = config->pullFilter;
-  context->pushFilter = config->pushFilter;
-  context->conflictResolver = config->conflictResolver;
+  auto context = new ReplicatorCallbackWrapperContext{
+      .endpoint = config->endpoint,
+      .authenticator = config->authenticator,
+      .pullFilter = config->pullFilter,
+      .pushFilter = config->pushFilter,
+      .conflictResolver = config->conflictResolver,
+  };
   config_.context = context;
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
@@ -867,12 +879,13 @@ void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
     auto nh = replicatorCallbackWrapperContexts.extract(replicator);
     callbackWrapperContext = nh.mapped();
   }
-  delete callbackWrapperContext;
 
   CBLReplicator_Stop(replicator);
 
   CBLDart_CBLRefCountedFinalizer_Impl(
       reinterpret_cast<CBLRefCounted *>(replicator));
+
+  delete callbackWrapperContext;
 }
 
 void CBLDart_BindReplicatorToDartObject(Dart_Handle object,

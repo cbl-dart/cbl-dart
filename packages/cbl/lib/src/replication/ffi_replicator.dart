@@ -72,17 +72,15 @@ class FfiReplicator
         conflictResolverCallback
       ].whereNotNull().toList();
 
-      final endpoint = config.createEndpoint();
-      final authenticator = config.createAuthenticator();
       final ffiConfig = CBLReplicatorConfiguration(
         database: database.native.pointer,
-        endpoint: endpoint,
+        endpoint: config.createEndpoint(),
         replicatorType: config.replicatorType.toCBLReplicatorType(),
         continuous: config.continuous,
         maxAttempts: config.maxRetries + 1,
         maxAttemptWaitTime: config.maxRetryWaitTime.inSeconds,
         heartbeat: config.heartbeat.inSeconds,
-        authenticator: authenticator,
+        authenticator: config.createAuthenticator(),
         headers: config.headers
             ?.let((it) => fl.MutableDict(it).native.pointer.cast()),
         pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
@@ -108,11 +106,6 @@ class FfiReplicator
       } catch (e) {
         _disposeCallbacks();
         rethrow;
-      } finally {
-        _bindings.freeEndpoint(endpoint);
-        if (authenticator != null) {
-          _bindings.freeAuthenticator(authenticator);
-        }
       }
     });
   }

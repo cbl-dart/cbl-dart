@@ -17,6 +17,9 @@
         "GUEST": {
           "disabled": false,
           "admin_channels": ["*"]
+        },
+        "basic_auth": {
+          "password": "basic_auth"
         }
       }
     }

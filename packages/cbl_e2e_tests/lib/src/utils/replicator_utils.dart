@@ -20,6 +20,10 @@ final syncGatewayAdminApiUrl = Uri(
   host: syncGatewayHost,
   port: syncGatewayAdminPort,
 );
+final basicAuthUserAuthenticator = BasicAuthenticator(
+  username: 'basic_auth',
+  password: 'basic_auth',
+);
 
 Future<String> syncGatewayRequest(
   Uri url, {
@@ -89,6 +93,7 @@ extension ReplicatorUtilsDatabaseExtension on Database {
   FutureOr<Replicator> createTestReplicator({
     ReplicatorType? replicatorType,
     bool? continuous,
+    Authenticator? authenticator,
     List<String>? channels,
     List<String>? documentIds,
     ReplicationFilter? pushFilter,
@@ -100,6 +105,7 @@ extension ReplicatorUtilsDatabaseExtension on Database {
         target: UrlEndpoint(syncGatewayReplicationUrl),
         replicatorType: replicatorType ?? ReplicatorType.pushAndPull,
         continuous: continuous ?? false,
+        authenticator: authenticator,
         channels: channels,
         documentIds: documentIds,
         pushFilter: pushFilter,
