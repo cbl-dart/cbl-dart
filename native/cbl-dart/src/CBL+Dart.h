@@ -17,8 +17,16 @@
 
 extern "C" {
 
+/**
+ * Initializes the native libraries.
+ *
+ * This function can be called multiple times and is thread save. The
+ * libraries are only initialized by the first call and subsequent calls are
+ * NOOPs.
+ */
 CBLDART_EXPORT
-void CBLDart_InitializeApiDL(void *data);
+bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
+                        CBLError *errorOut);
 
 // -- Callbacks
 
