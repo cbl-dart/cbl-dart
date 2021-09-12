@@ -926,7 +926,7 @@ Future<T> evalExpr<T extends Object?>(
       .select(selectResult)
       .from(dataSource)
       .where(Meta.id.equalTo(Expression.string(doc?.id ?? 'EvalExpr')))
-        ..parameters = parameters;
+    ..parameters = parameters;
 
   final resultSet = await query.execute();
 

@@ -8,28 +8,39 @@ on:
     branches:
       - main
 
+env:
+  flutter-version-stable: '2.5.0'
+  flutter-version-beta: beta
+  dart-version-stable: '2.14.0'
+  dart-version-beta: beta
+  melos-version: '1.0.0-dev.3'
+
 jobs:
   formatting-dart:
     name: Formatting - Dart
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        dart: [stable, beta]
+    continue-on-error: ${{ matrix.dart != 'stable' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
         with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
+          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Check formatting
         run: melos run formatting:check
+
+      - name: Show formatting changes
+        if: failure()
+        run: git diff
 
   formatting-clang:
     name: Formatting - Clang
@@ -46,415 +57,161 @@ jobs:
   analyze-dart:
     name: Analyze Dart code
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        dart: [stable, beta]
+    continue-on-error: ${{ matrix.dart != 'stable' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
         with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
+          flutter-version: ${{ env.flutter-version-stable }}
 
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
+
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
+      - name: Bootstrap Dart packages
+        run: melos bootstrap
 
       - name: Analyze code
         run: melos run analyze
 
-  tests-cbl:
-    name: Tests - cbl
+  test-dart-unit:
+    name: Dart unit tests
+    strategy:
+      matrix:
+        package: [cbl, cbl_native]
+        dart: [stable, beta]
+    continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
         with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
+          flutter-version: ${{ env.flutter-version-stable }}
 
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
+
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
+      - name: Bootstrap Dart packages
+        run: melos bootstrap
 
       - name: Run tests
-        run: melos run test:cbl
+        run: melos run test:${{ matrix.package }}
 
-  tests-cbl_native:
-    name: Tests - cbl_native
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Run tests
-        run: melos run test:cbl_native
-
-  tests-standalone-dart-linux:
-    name: Tests - Standalone Dart - Linux
-    runs-on: ubuntu-20.04
+  test-e2e:
+    name: E2E tests
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        embedder: [standalone, flutter]
+        os: [iOS, macOS, Android, Ubuntu]
+        exclude:
+          - embedder: standalone
+            os: iOS
+          - embedder: standalone
+            os: Android
+    runs-on: >-
+      ${{ fromJSON('{ 
+        "iOS":"macos-11",
+        "macOS":"macos-11",
+        "Android":"macos-11",
+        "Ubuntu":"ubuntu-20.04"
+      }')[matrix.os] }}
+    env:
+      MATRIX_EMBEDDER: ${{ matrix.embedder }}
+      MATRIX_OS: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-          submodules: 'recursive'
+          submodules: recursive
 
-      - name: Get CMake and Ninja
+      - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: tests-standalone-dart-linux
-
-      - name: Build native binaries
-        run: ./native/tools/build_unix.sh build Debug
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Start test Couchbase cluster
-        run: melos run test:setupCouchbaseClusterDocker
-
-      - name: Run tests
-        run: |
-          ulimit -c unlimited
-          sudo sysctl -w kernel.core_pattern=core
-          melos run test:standalone_dart
-
-      - name: Print debug info
-        if: failure()
-        working-directory: packages/cbl_e2e_tests_standalone_dart
-        run: |
-          if [ ! -f ./core ]; then
-            echo "Did not find core dump"
-            exit 0
-          fi
-
-          echo "::group::Instal gdb"
-          sudo apt-get install gdb
-          echo "::endgroup::"
-
-          echo "::group::Print back trace"
-          gdb -batch -ex 'thread apply all bt' "$(which dart)" core
-          echo "::endgroup::"
-
-  tests-standalone-dart-macos:
-    name: Tests - Standalone Dart - macOS
-    runs-on: macos-10.15
-    timeout-minutes: 45
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: tests-standalone-dart-macos
-
       # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
       # bash >=4 is needed in build_apple.sh.
-      - name: Install dependencies with brew
+      - name: Install doxygen and bash
+        if: runner.os == 'macOS'
         run: brew install doxygen bash
 
-      - name: Build native binaries
-        run: ./native/tools/build_apple.sh build macos Debug
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Start test Couchbase cluster
-        run: melos run test:setupCouchbaseClusterMacOS
-
-      - name: Run tests
-        run: melos run test:standalone_dart
-
-  tests-flutter-ios:
-    name: Tests - Flutter - iOS
-    runs-on: macos-10.15
-    timeout-minutes: 45
-    env:
-      CBL_FLUTTER_SKIP_INSTALL_BINARIES: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: tests-flutter-ios
+          key: test-e2e-${{ matrix.os }}-${{ matrix.embedder }}
 
-      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
-      # bash >=4 is needed in build_apple.sh.
-      - name: Install dependencies with brew
-        run: brew install doxygen bash
+      - name: Build native libraries
+        run: ./tool/ci-steps.sh buildNativeLibraries
 
-      - name: Build native binaries
-        run: ./native/tools/build_apple.sh build ios_simulator Debug
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        env:
-          SKIP_MELOS_BOOTSTRAP: true
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Prepare flutter projects
-        run: melos run flutter:prepare
-
-      - name: Start test Couchbase cluster
-        run: melos run test:setupCouchbaseClusterMacOS
-
-      - name: Start simulator
-        uses: futureware-tech/simulator-action@v1
-        with:
-          model: 'iPhone 12'
-          erase_before_boot: false
-          shutdown_after_job: false
-
-      - name: Run tests
-        run: melos run test:flutter:ios
-
-  tests-flutter-macos:
-    name: Tests - Flutter - macOS
-    runs-on: macos-10.15
-    timeout-minutes: 45
-    env:
-      CBL_FLUTTER_SKIP_INSTALL_BINARIES: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: tests-flutter-macos
-
-      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
-      # bash >=4 is needed in build_apple.sh.
-      - name: Install dependencies with brew
-        run: brew install doxygen bash
-
-      - name: Build native binaries
-        run: ./native/tools/build_apple.sh build macos Debug
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        env:
-          SKIP_MELOS_BOOTSTRAP: true
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Enable Flutter on macOS
-        run: flutter config --enable-macos-desktop
-
-      - name: Prepare flutter projects
-        run: melos run flutter:prepare
-
-      - name: Start test Couchbase cluster
-        run: melos run test:setupCouchbaseClusterMacOS
-
-      - name: Run tests
-        run: melos run test:flutter:macos
-
-  tests-flutter-android:
-    name: Tests - Flutter - Android
-    runs-on: macos-10.15
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: test-flutter-android
-
-      - name: Build
-        run: ./native/tools/build_android.sh build Debug
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        env:
-          SKIP_MELOS_BOOTSTRAP: true
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Prepare flutter projects
-        run: melos run flutter:prepare
-
-      - name: Start test Couchbase cluster
-        run: melos run test:setupCouchbaseClusterMacOS
-
-      - name: AVD cache
-        uses: actions/cache@v2
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-cache
-
-      - name: Create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 22
-          force-avd-creation: false
-          emulator-options: 
-            -no-window 
-            -gpu swiftshader_indirect 
-            -noaudio 
-            -camera-back none 
-            -camera-front none 
-            -no-boot-anim
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
-
-      - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          # We need to use API level > 21 because of a bug related to the splash screen in Flutter
-          # There is a PR with a fix which has not landed in stable yet:
-          # https://github.com/flutter/engine/pull/26083
-          api-level: 22
-          force-avd-creation: false
-          emulator-options: 
-            -no-window 
-            -gpu swiftshader_indirect 
-            -noaudio 
-            -camera-back none 
-            -camera-front none 
-            -no-boot-anim 
-            -no-snapshot-save 
-            -logcat *:d
-          disable-animations: true
-          script: |
-            # Start port forwarding of Sync Gateway to emulator
-            adb reverse tcp:4984 tcp:4984
-            adb reverse tcp:4985 tcp:4985
-
-            melos run test:flutter:android
-
-  tests-flutter-linux:
-    name: Tests - Flutter - Linux
-    runs-on: ubuntu-20.04
-    timeout-minutes: 45
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-
-      - name: Get CMake and Ninja
-        uses: lukka/get-cmake@latest
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: tests-flutter-linux
-
-      - name: Build native binaries
-        run: ./native/tools/build_unix.sh build Debug
-
-      - name: Cache Dart dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.pub-cache
-          key: dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            dart-pub-cache-${{ hashFiles('**/pubspec.yaml') }}
-            dart-pub-cache
-
-      - name: Setup Dart environment
-        env:
-          SKIP_MELOS_BOOTSTRAP: true
-        uses: ./.github/actions/setup-dart-env
-
-      - name: Install Flutter linux dependencies
-        run: | 
-          sudo apt-get update 
+      - name: Install Fluter Linux Desktop dependencies
+        if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
+        run:
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
 
-      - name: Enable Flutter on Linux
-        run: flutter config --enable-linux-desktop
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter-version-stable }}
 
-      - name: Prepare flutter projects
-        run: melos run flutter:prepare
+      - name: Configure flutter
+        if: matrix.embedder == 'flutter'
+        run: ./tool/ci-steps.sh configureFlutter
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        if: matrix.embedder == 'standalone'
+        with:
+          sdk: ${{ env.dart-version-stable }}
+
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
+      - name: Bootstrap Dart packages
+        run: ./tool/ci-steps.sh bootstrapPackages
 
       - name: Start test Couchbase cluster
-        run: melos run test:setupCouchbaseClusterDocker
-
-      - name: Start Xvfb
         run: |
-          Xvfb :99 &
-          echo "DISPLAY=:99" >> $GITHUB_ENV
+          case ${{ runner.os }} in
+            macOS)
+              melos run test:setupCouchbaseClusterMacOS
+            ;;
+            *)
+              melos run test:setupCouchbaseClusterDocker
+            ;;
+          esac
+
+      - name: Start virtual devices
+        if: matrix.embedder == 'flutter'
+        run: ./tool/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        run: melos run test:flutter:linux
+        run: ./tool/ci-steps.sh runE2ETests
+
+      - name: Collect test results
+        if: failure()
+        run: ./tool/ci-steps.sh collectTestResults
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.embedder }}
+          path: test-results

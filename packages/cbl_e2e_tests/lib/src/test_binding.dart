@@ -7,6 +7,7 @@ import 'package:test/test.dart' as t;
 
 import 'utils/database_utils.dart';
 import 'utils/file_system.dart';
+import 'utils/time_bomb.dart';
 
 export 'package:test/test.dart'
     hide
@@ -124,11 +125,29 @@ abstract class CblE2eTestBinding {
       }
     });
 
+    setupTestTimeBomb();
     setupSharedTestCblWorker();
     setupSharedTestDatabases();
   }
 
-  Future _cleanTestTmpDir() => Directory(tmpDir).reset();
+  Future _cleanTestTmpDir() async {
+    final dir = Directory(tmpDir);
+    await dir.create(recursive: true);
+    final pidFile = File.fromUri(dir.uri.resolve('pid'));
+
+    // Load the pid currently in the pid file.
+    final currentPid = await pidFile
+        .readAsString()
+        .then<int?>(int.parse)
+        .onError<FileSystemException>((_, __) => null);
+
+    // Each process should only reset the tmp directory once, so isolates
+    // don't delete the data written to the directory by other isolates.
+    if (currentPid != pid) {
+      await dir.reset();
+      await pidFile.writeAsString(pid.toString());
+    }
+  }
 }
 
 /// Alias of [CblE2eTestBinding.tmpDir].
