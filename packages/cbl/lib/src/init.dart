@@ -12,11 +12,11 @@ void initIsolate({required Libraries libraries}) {
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
-/// native library.
+/// native libraries.
 void initMainIsolate({
   required Libraries libraries,
   CBLInitContext? context,
 }) {
   initIsolate(libraries: libraries);
-  ffi.cblBindings.base.init(context);
+  ffi.cblBindings.base.initializeNativeLibraries(context);
 }
