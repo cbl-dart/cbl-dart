@@ -52,12 +52,12 @@ class _CBLInitContext extends Struct {
 
 typedef _CBLDart_Initialize_C = Uint8 Function(
   Pointer<Void> dartInitializeDlData,
-  _CBLInitContext cblInitContext,
+  Pointer<_CBLInitContext> cblInitContext,
   Pointer<CBLError> errorOut,
 );
 typedef _CBLDart_Initialize = int Function(
   Pointer<Void> dartInitializeDlData,
-  _CBLInitContext cblInitContext,
+  Pointer<_CBLInitContext> cblInitContext,
   Pointer<CBLError> errorOut,
 );
 
@@ -383,7 +383,7 @@ class BaseBindings extends Bindings {
 
       _initialize(
         NativeApi.initializeApiDLData,
-        _context.ref,
+        _context,
         globalCBLError,
       ).checkCBLError();
     });

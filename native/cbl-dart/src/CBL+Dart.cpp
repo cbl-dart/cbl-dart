@@ -21,7 +21,8 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 
 #ifdef __ANDROID__
   // Initialize the Couchbase Lite library.
-  if (!CBL_Init(reinterpret_cast<CBLInitContext *>(cblInitContext), errorOut)) {
+  if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
+                errorOut)) {
     return false;
   }
 #endif
