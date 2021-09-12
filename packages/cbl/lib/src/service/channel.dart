@@ -98,8 +98,12 @@ class Channel {
     _checkIsOpen();
     final id = _generateConversationId();
     // ignore: close_sinks
-    final controller = _streamControllers[id] = StreamController<Object?>(
-      onListen: () => _sendMessage(_ListenToStream(id, request)),
+    late StreamController<Object?> controller;
+    controller = StreamController<Object?>(
+      onListen: () {
+        _streamControllers[id] = controller;
+        _sendMessage(_ListenToStream(id, request));
+      },
       onCancel: () {
         _streamControllers.remove(id);
         _sendMessage(_CancelStream(id));
