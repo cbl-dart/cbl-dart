@@ -52,12 +52,12 @@ class _CBLInitContext extends Struct {
 
 typedef _CBLDart_Initialize_C = Uint8 Function(
   Pointer<Void> dartInitializeDlData,
-  Pointer<_CBLInitContext> cblInitContext,
+  Pointer<Void> cblInitContext,
   Pointer<CBLError> errorOut,
 );
 typedef _CBLDart_Initialize = int Function(
   Pointer<Void> dartInitializeDlData,
-  Pointer<_CBLInitContext> cblInitContext,
+  Pointer<Void> cblInitContext,
   Pointer<CBLError> errorOut,
 );
 
@@ -381,11 +381,17 @@ class BaseBindings extends Bindings {
           ..ref.tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
       }
 
-      _initialize(
+      // The `globalCBLError` cannot be used at this point because it requires
+      // initialization to be completed.
+      final error = zoneArena<CBLError>();
+
+      if (!_initialize(
         NativeApi.initializeApiDLData,
-        _context,
-        globalCBLError,
-      ).checkCBLError();
+        _context.cast(),
+        error,
+      ).toBool()) {
+        throw CBLErrorException.fromCBLError(error);
+      }
     });
   }
 
