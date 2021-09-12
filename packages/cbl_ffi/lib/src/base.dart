@@ -335,8 +335,8 @@ typedef _CBLListener_Remove = void Function(
 class BaseBindings extends Bindings {
   BaseBindings(Bindings parent) : super(parent) {
     _initialize =
-        libs.cbl.lookupFunction<_CBLDart_Initialize_C, _CBLDart_Initialize>(
-      'CBL_Initialize',
+        libs.cblDart.lookupFunction<_CBLDart_Initialize_C, _CBLDart_Initialize>(
+      'CBLDart_Initialize',
     );
 
     _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
