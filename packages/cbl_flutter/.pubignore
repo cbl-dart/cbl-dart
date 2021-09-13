@@ -1,0 +1,8 @@
+.dart_tool
+/android/lib
+/example
+/ios/Xcframeworks
+/linux/lib
+/macos/Xcframeworks
+*.iml
+pubspec.lock
