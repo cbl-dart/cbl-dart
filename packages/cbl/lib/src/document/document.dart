@@ -383,8 +383,9 @@ class MutableDelegateDocument extends DelegateDocument
   MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
         delegate.toMutable(),
         database: _database,
-        // We make a deep copy of the current properties of this mutable
-        // document, to transfer changes that have been made them.
+        // We make a deep copy of the properties, to include modifications of
+        // this document, which have not been synced with the delegate, in the
+        // copy.
         data: toPlainMap(),
       );
 }

@@ -562,7 +562,11 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
   // === Array =================================================================
 
   @override
-  MutableArray toMutable() => MutableArray(toPlainList(growable: false));
+  MutableArray toMutable() =>
+      // We make a deep copy of this array, to allow the result to be used
+      // with a different document and prevent modifications of this array
+      // or the result affect each other.
+      MutableArray(toPlainList(growable: false));
 
   // === CblConversions ========================================================
 
