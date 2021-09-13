@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:cbl/cbl.dart' show Database, DartConsoleLogger, LogLevel;
 // ignore: implementation_imports
-import 'package:cbl/src/init.dart';
+import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -14,17 +15,29 @@ class CouchbaseLiteFlutter {
 
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init() async {
-    initMainIsolate(
+    initMainIsolate(IsolateContext(
       libraries: _libraries(),
-      context: await _context(),
-    );
+      cblInitContext: await _context(),
+    ));
 
     _setupLogging();
   }
 
+  /// Context object to pass to [initSecondary], when initializing a secondary
+  /// [Isolate].
+  ///
+  /// This object can be safely passed from one [Isolate] to another.
+  Object get context => IsolateContext.instance;
+
   /// Initializes the `cbl` package, for a secondary isolate.
-  static Future<void> initSecondary() async {
-    initIsolate(libraries: _libraries());
+  ///
+  /// A value for [context] can be obtained from [CouchbaseLiteFlutter.context].
+  static Future<void> initSecondary(Object context) async {
+    if (context is! IsolateContext) {
+      throw ArgumentError.value(context, 'context', 'is invalid');
+    }
+
+    initIsolate(context);
   }
 }
 
@@ -66,26 +79,24 @@ Libraries _libraries() {
   }
 }
 
-Future<CBLInitContext?> _context() async {
-  if (Platform.isAndroid) {
-    final directories = await Future.wait([
-      getApplicationSupportDirectory(),
-      getExternalStorageDirectory(),
-    ]);
+Future<CBLInitContext> _context() async {
+  final directories = await Future.wait([
+    getApplicationSupportDirectory(),
+    getExternalStorageDirectory().onError<UnsupportedError>((_, __) => null),
+  ]);
 
-    final filesDir = directories[0]!;
+  final filesDir = directories[0]!;
 
-    // For temporary files, we try to use the apps external storage directory
-    // and fallback to the internal directory, if it's not available.
-    final tempDir = directories[1] ?? filesDir;
-    final clbTempDir = Directory.fromUri(tempDir.uri.resolve('CBLTemp'));
-    await clbTempDir.create();
+  // For temporary files, we try to use the apps external storage directory
+  // and fallback to the application support directory, if it's not available.
+  final tempDir = directories[1] ?? filesDir;
+  final clbTempDir = Directory.fromUri(tempDir.uri.resolve('CBLTemp'));
+  await clbTempDir.create();
 
-    return CBLInitContext(
-      filesDir: filesDir.path,
-      tempDir: clbTempDir.path,
-    );
-  }
+  return CBLInitContext(
+    filesDir: filesDir.path,
+    tempDir: clbTempDir.path,
+  );
 }
 
 void _setupLogging() {
