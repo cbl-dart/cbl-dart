@@ -1,3 +1,10 @@
+## 1.0.0-beta.5
+
+ - **FEAT**: use consistent database default directory for Flutter (#177).
+ - **CI**: improve diagnostics for failing tests.
+ - **CHORE**: cut release of `cbl_native`.
+ - **CHORE**: cut `cbl_native` release.
+
 ## 1.0.0-beta.4
 
  - **FEAT**: add support for Linux + Flutter.

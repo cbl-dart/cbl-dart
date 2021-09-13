@@ -1,3 +1,9 @@
+## 0.7.0-beta.4
+
+ - **FIX**: initialize native libraries exactly once (#176).
+ - **CHORE**: cut release of `cbl_native`.
+ - **CHORE**: cut `cbl_native` release.
+
 ## 0.7.0-beta.3
 
  - **FIX**: decode error code in `ReplicatorStatusCallbackMessage.parseArguments`.

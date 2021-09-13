@@ -1,3 +1,10 @@
+## 1.0.0-beta.5
+
+ - **FIX**: initialize native libraries exactly once (#176).
+ - **FIX**: register controller of `Channel` stream when listened to (#171).
+ - **FEAT**: return mutable copies from `toMutable` methods (#178).
+ - **FEAT**: use consistent database default directory for Flutter (#177).
+
 ## 1.0.0-beta.4
 
  - **FIX**: allow `ConflictResolver` to be extended.
