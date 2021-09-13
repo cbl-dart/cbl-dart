@@ -242,14 +242,6 @@ void main() {
         expect(doc.toList(), ['a', 'b', 'c']);
       });
 
-      apiTest('toMutable', () async {
-        final db = await openTestDatabase();
-        final doc = await savedDocument(db, {'type': 'immutable'});
-        expect(doc, isNot(isA<MutableDocument>()));
-        final mutableDoc = doc.toMutable();
-        expect(mutableDoc, doc);
-      });
-
       test('toString', () {
         final db = openSyncTestDatabase();
         final doc = MutableDocument();
@@ -265,6 +257,32 @@ void main() {
           ')',
         );
       });
+    });
+
+    test('toMutable: new mutable doc', () {
+      final doc = MutableDocument({'a': true});
+
+      final mutableDoc = doc.toMutable();
+      expect(mutableDoc, doc);
+      expect(mutableDoc, isNot(same(doc)));
+    });
+
+    apiTest('toMutable: saved immutable doc', () async {
+      final db = await openTestDatabase();
+      final doc = await savedDocument(db, {'a': true});
+
+      final mutableDoc = doc.toMutable();
+      expect(mutableDoc, doc);
+      expect(mutableDoc, isNot(same(doc)));
+    });
+
+    apiTest('toMutable: saved mutable doc', () async {
+      final db = await openTestDatabase();
+      final doc = (await savedDocument(db, {'a': true})).toMutable();
+
+      final mutableDoc = doc.toMutable();
+      expect(mutableDoc, doc);
+      expect(mutableDoc, isNot(same(doc)));
     });
 
     group('mutable', () {
@@ -332,11 +350,6 @@ void main() {
 
       doc['value'].value = 'x';
       expect(doc['value'].value, 'x');
-    });
-
-    test('toMutable', () {
-      final doc = MutableDocument();
-      expect(doc.toMutable(), same(doc));
     });
 
     test('toString', () {
