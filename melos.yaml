@@ -109,16 +109,13 @@ scripts:
     select-package:
       scope: 'cbl_flutter_example'
 
-  version:cbl_native:update_lib:
-    description: Updates the hard coded `currentVersion` in `cbl_native`.
-      Must be run before publishing and after bumping the version of
-      `cbl_native` in pubspec.yaml.
-    run: melos exec -- dart run tool/update_version.dart
-    select-package:
-      scope: 'cbl_native'
-
   clean:packages:
     run: git clean -xdfq packages
 
   clean:all:
     run: git clean -xdfq .
+
+  version:
+    run: melos exec -- 'dart run tool/generate_version.dart && git add lib/version.g.dart'
+    select-package:
+      scope: cbl_native
