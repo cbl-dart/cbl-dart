@@ -59,3 +59,12 @@ Future<void> useCouchbaseLite() async {
   await db.close();
 }
 ```
+
+## Default database directory
+
+When opening a database without specifying a directory,
+[`path_provider`][path_provider]'s `getApplicationSupportDirectory` is used to
+resolve it. See that function's documentation for the concrete locations on the
+various platforms.
+
+[path_provider]: https://pub.dev/packages/path_provider

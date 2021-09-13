@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../errors.dart';
-import '../init.dart';
-import '../support/ffi.dart';
+import '../support/isolate.dart';
 import '../support/utils.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
@@ -64,7 +62,7 @@ class CblWorker {
     _worker = IsolateWorker(
       debugName: 'CblWorker($debugName)',
       delegate: _ServiceWorkerDelegate(
-        libraries: workerLibraries,
+        context: IsolateContext.instance,
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
@@ -110,12 +108,12 @@ enum _WorkerStatus {
 
 class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
   _ServiceWorkerDelegate({
-    required this.libraries,
+    required this.context,
     required this.channel,
     required this.serializationType,
   });
 
-  final Libraries libraries;
+  final IsolateContext context;
   final SendPort channel;
   final SerializationTarget serializationType;
 
@@ -124,7 +122,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
 
   @override
   FutureOr<void> initialize() {
-    initIsolate(libraries: libraries);
+    initIsolate(context);
 
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),

@@ -1,10 +1,11 @@
 import 'dart:ffi';
+import 'dart:isolate';
 
 import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
 
 import 'database/database.dart';
-import 'init.dart';
 import 'log.dart';
+import 'support/isolate.dart';
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
 /// `DynamicLibrary` at a later time.
@@ -79,14 +80,26 @@ class CouchbaseLite {
 
   /// Initializes the `cbl` package, for the main isolate.
   static void init({required Libraries libraries}) {
-    initMainIsolate(libraries: libraries._toFfi());
+    initMainIsolate(IsolateContext(libraries: libraries._toFfi()));
 
     _setupLogging();
   }
 
+  /// Context object to pass to [initSecondary], when initializing a secondary
+  /// [Isolate].
+  ///
+  /// This object can be safely passed from one [Isolate] to another.
+  Object get context => IsolateContext.instance;
+
   /// Initializes the `cbl` package, for a secondary isolate.
-  static void initSecondary({required Libraries libraries}) {
-    initIsolate(libraries: libraries._toFfi());
+  ///
+  /// A value for [context] can be obtained from [CouchbaseLite.context].
+  static void initSecondary(Object context) {
+    if (context is! IsolateContext) {
+      throw ArgumentError.value(context, 'context', 'is invalid');
+    }
+
+    initIsolate(context);
   }
 }
 
