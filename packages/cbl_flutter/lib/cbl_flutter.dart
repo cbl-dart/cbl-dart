@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:cbl/cbl.dart' show Database, DartConsoleLogger, LogLevel;
 // ignore: implementation_imports
@@ -21,23 +20,6 @@ class CouchbaseLiteFlutter {
     ));
 
     _setupLogging();
-  }
-
-  /// Context object to pass to [initSecondary], when initializing a secondary
-  /// [Isolate].
-  ///
-  /// This object can be safely passed from one [Isolate] to another.
-  Object get context => IsolateContext.instance;
-
-  /// Initializes the `cbl` package, for a secondary isolate.
-  ///
-  /// A value for [context] can be obtained from [CouchbaseLiteFlutter.context].
-  static Future<void> initSecondary(Object context) async {
-    if (context is! IsolateContext) {
-      throw ArgumentError.value(context, 'context', 'is invalid');
-    }
-
-    initIsolate(context);
   }
 }
 
