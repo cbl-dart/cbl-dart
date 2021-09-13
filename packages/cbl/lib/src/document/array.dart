@@ -562,7 +562,7 @@ class MutableArrayImpl extends ArrayImpl implements MutableArray {
   // === Array =================================================================
 
   @override
-  MutableArray toMutable() => this;
+  MutableArray toMutable() => MutableArray(toPlainList(growable: false));
 
   // === CblConversions ========================================================
 

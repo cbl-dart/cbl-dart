@@ -95,7 +95,7 @@ class NewDocumentDelegate extends DocumentDelegate {
   final sequence = 0;
 
   @override
-  late EncodedData properties = _emptyProperties;
+  EncodedData properties = _emptyProperties;
 
   @override
   DocumentDelegate toMutable() => NewDocumentDelegate.mutableCopy(this);
@@ -380,5 +380,11 @@ class MutableDelegateDocument extends DelegateDocument
   MutableFragment operator [](String key) => _mutableProperties[key];
 
   @override
-  MutableDocument toMutable() => this;
+  MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
+        delegate.toMutable(),
+        database: _database,
+        // We make a deep copy of the current properties of this mutable
+        // document, to transfer changes that have been made them.
+        data: toPlainMap(),
+      );
 }

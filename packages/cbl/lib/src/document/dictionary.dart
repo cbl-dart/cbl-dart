@@ -372,7 +372,7 @@ class MutableDictionaryImpl extends DictionaryImpl
   // === Dictionary ============================================================
 
   @override
-  MutableDictionary toMutable() => this;
+  MutableDictionary toMutable() => MutableDictionary(toPlainMap());
 
   // === CblConversions ========================================================
 
