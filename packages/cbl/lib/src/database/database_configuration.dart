@@ -1,15 +1,16 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import '../support/ffi.dart';
-import 'database.dart';
+import 'dart:io';
 
-late final _defaultConfiguration = cblBindings.database.defaultConfiguration();
+import '../support/ffi.dart';
+import '../support/isolate.dart';
+import 'database.dart';
 
 /// Configuration for opening a [Database].
 class DatabaseConfiguration {
   /// Creates a configuration for opening a [Database].
   DatabaseConfiguration({String? directory})
-      : directory = directory ?? _defaultConfiguration.directory;
+      : directory = directory ?? _defaultDirectory();
 
   /// Creates a configuration of another [config] be copying its properties.
   DatabaseConfiguration.from(DatabaseConfiguration config)
@@ -36,4 +37,13 @@ class DatabaseConfiguration {
         ].join(', '),
         ')',
       ].join();
+}
+
+String _defaultDirectory() {
+  final filesDir = IsolateContext.instance.cblInitContext?.filesDir;
+  if (filesDir != null) {
+    return '$filesDir${Platform.pathSeparator}CouchbaseLite';
+  }
+
+  return cblBindings.database.defaultConfiguration().directory;
 }

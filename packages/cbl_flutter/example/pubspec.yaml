@@ -1,5 +1,6 @@
 name: cbl_flutter_example
 description: Demonstrates how to use the cbl_flutter plugin.
+version: 0.0.0+0
 publish_to: 'none'
 
 environment:
@@ -24,6 +25,10 @@ dev_dependencies:
   rxdart: ^0.26.0
   test: any
   web_socket_channel: ^2.1.0
+
+dependency_overrides:
+  cbl_flutter:
+    path: ..
 
 flutter:
   uses-material-design: true

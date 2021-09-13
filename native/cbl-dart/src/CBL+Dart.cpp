@@ -7,7 +7,32 @@
 #include "CBL+Dart.h"
 #include "Utils.hh"
 
-void CBLDart_InitializeApiDL(void *data) { Dart_InitializeApiDL(data); }
+std::mutex initializeMutex;
+bool initialized = false;
+
+bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
+                        CBLError *errorOut) {
+  std::scoped_lock lock(initializeMutex);
+
+  if (initialized) {
+    // Only initialize libraries once.
+    return true;
+  }
+
+#ifdef __ANDROID__
+  // Initialize the Couchbase Lite library.
+  if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
+                errorOut)) {
+    return false;
+  }
+#endif
+
+  // Initialize the Dart API for this dynamic library.
+  Dart_InitializeApiDL(dartInitializeDlData);
+
+  initialized = true;
+  return true;
+}
 
 // -- AsyncCallback
 

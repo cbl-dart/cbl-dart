@@ -219,7 +219,8 @@ void main() {
       test('toMutable', () {
         final array = MutableArray([true]);
         final mutableArray = array.toMutable();
-        expect(mutableArray, same(array));
+        expect(mutableArray, array);
+        expect(mutableArray, isNot(same(array)));
       });
 
       test('set values', () {

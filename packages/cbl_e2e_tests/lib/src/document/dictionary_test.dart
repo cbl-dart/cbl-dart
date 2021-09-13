@@ -237,7 +237,8 @@ void main() {
       test('toMutable', () {
         final dictionary = MutableDictionary({'a': true});
         final mutableDictionary = dictionary.toMutable();
-        expect(mutableDictionary, same(dictionary));
+        expect(mutableDictionary, dictionary);
+        expect(mutableDictionary, isNot(same(dictionary)));
       });
 
       test('set values', () {

@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'dart:io';
 
 import 'package:cbl_native/cbl_native.dart';
+import 'package:cbl_native/version.g.dart';
 import 'package:collection/collection.dart';
 
 Future<void> main(List<String> args) async {
@@ -75,7 +76,7 @@ Configuration parseArgs(List<String> args) {
   final installDir =
       installDirInput == null ? null : Directory(installDirInput).absolute;
 
-  final version = parseOption('version') ?? currentVersion;
+  final version = parseOption('version') ?? cblNativeVersion;
 
   final overrideInstallDir = parseFlag('overrideInstallDir');
 

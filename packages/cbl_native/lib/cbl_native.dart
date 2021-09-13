@@ -7,6 +7,8 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 
+import 'version.g.dart';
+
 /// GitHub repository data.
 class GitHubRepo {
   GitHubRepo({
@@ -61,14 +63,11 @@ final cblDartRepo = GitHubRepo(
   repo: 'cbl-dart',
 );
 
-/// The current version of `cbl_native`.
-const currentVersion = '5.0.0-beta.3'; // cbl_native: version
-
 /// Binaries for `cbl_native` for one [Platform].
 class CblNativeBinaries {
   CblNativeBinaries({
     required this.platform,
-    this.version = currentVersion,
+    this.version = cblNativeVersion,
   });
 
   /// The name of the `cbl_native` package.
