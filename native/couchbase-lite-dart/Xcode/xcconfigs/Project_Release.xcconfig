@@ -1,0 +1,10 @@
+//
+//  Release.xcconfig
+//  CBL_Dart
+//
+//  Created by Gabriel Terwesten on 07.02.21.
+//
+
+#include "Project.xcconfig"
+
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
