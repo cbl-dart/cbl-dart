@@ -163,7 +163,8 @@ jobs:
 
       - name: Install Fluter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
-        run:
+        run: |
+          sudo apt-get update
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
