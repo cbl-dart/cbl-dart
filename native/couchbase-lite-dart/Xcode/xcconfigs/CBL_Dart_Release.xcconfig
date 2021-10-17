@@ -1,0 +1,13 @@
+//
+//  CBL_Dart_Release.xcconfig
+//  CBL_Dart
+//
+//  Created by Gabriel Terwesten on 07.02.21.
+//
+
+#include "CBL_Dart.xcconfig"
+
+DEPLOYMENT_POSTPROCESSING   = YES
+STRIP_STYLE                 = non-global
+STRIP_INSTALLED_PRODUCT     = YES                   // Strip debug symbols
+LD_GENERATE_MAP_FILE        = YES                   // Generate link map, to analyze code size
