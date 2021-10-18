@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:cbl/cbl.dart' show Database, DartConsoleLogger, LogLevel;
+import 'package:cbl/cbl.dart';
 // ignore: implementation_imports
 import 'package:cbl/src/support/isolate.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Initializes global resources and configures global settings, such as
@@ -16,7 +15,7 @@ class CouchbaseLiteFlutter {
   static Future<void> init() async {
     initMainIsolate(IsolateContext(
       libraries: _libraries(),
-      cblInitContext: await _context(),
+      initContext: await _context(),
     ));
 
     _setupLogging();
@@ -28,32 +27,24 @@ class CouchbaseLiteFlutter {
 Libraries _libraries() {
   if (Platform.isIOS || Platform.isMacOS) {
     return Libraries(
-      cbl: LibraryConfiguration(process: true),
-      cblDart: LibraryConfiguration(process: true),
+      cbl: LibraryConfiguration.process(),
+      cblDart: LibraryConfiguration.process(),
     );
   } else if (Platform.isAndroid) {
     return Libraries(
-      cbl: LibraryConfiguration(
-        name: 'libcblite',
-        appendExtension: true,
-      ),
-      cblDart: LibraryConfiguration(
-        name: 'libcblitedart',
-        appendExtension: true,
-      ),
+      cbl: LibraryConfiguration.dynamic('libcblite'),
+      cblDart: LibraryConfiguration.dynamic('libcblitedart'),
     );
   } else if (Platform.isLinux) {
     final bundleDirectory = _dirname(Platform.resolvedExecutable);
     final libDirectory = _joinPaths(bundleDirectory, 'lib');
     return Libraries(
-      cbl: LibraryConfiguration(
-        name: _joinPaths(libDirectory, 'libcblite'),
+      cbl: LibraryConfiguration.dynamic(
+        _joinPaths(libDirectory, 'libcblite'),
         version: '3',
-        appendExtension: true,
       ),
-      cblDart: LibraryConfiguration(
-        name: _joinPaths(libDirectory, 'libcblitedart'),
-        appendExtension: true,
+      cblDart: LibraryConfiguration.dynamic(
+        _joinPaths(libDirectory, 'libcblitedart'),
       ),
     );
   } else {
@@ -61,7 +52,7 @@ Libraries _libraries() {
   }
 }
 
-Future<CBLInitContext> _context() async {
+Future<InitContext> _context() async {
   final directories = await Future.wait([
     getApplicationSupportDirectory(),
     getExternalStorageDirectory().onError<UnsupportedError>((_, __) => null),
@@ -75,7 +66,7 @@ Future<CBLInitContext> _context() async {
   final clbTempDir = Directory.fromUri(tempDir.uri.resolve('CBLTemp'));
   await clbTempDir.create();
 
-  return CBLInitContext(
+  return InitContext(
     filesDir: filesDir.path,
     tempDir: clbTempDir.path,
   );
