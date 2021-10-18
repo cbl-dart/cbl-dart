@@ -40,7 +40,7 @@ class DatabaseConfiguration {
 }
 
 String _defaultDirectory() {
-  final filesDir = IsolateContext.instance.cblInitContext?.filesDir;
+  final filesDir = IsolateContext.instance.initContext?.filesDir;
   if (filesDir != null) {
     return '$filesDir${Platform.pathSeparator}CouchbaseLite';
   }
