@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  cbl_flutter_local
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

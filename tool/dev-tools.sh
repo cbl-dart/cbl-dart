@@ -15,10 +15,11 @@ couchbaseLiteVersion="$(cat "$nativeDir/CouchbaseLite.version")"
 couchbaseLiteDartVersion="$(cat "$couchbaseLiteDartDir/CouchbaseLiteDart.version")"
 cblE2eTestsStandaloneDartDir="$projectDir/packages/cbl_e2e_tests_standalone_dart"
 cblE2eTestsStandaloneDartLibDir="$cblE2eTestsStandaloneDartDir/lib"
-cblFlutterDir="$projectDir/packages/cbl_flutter"
-cblFlutterAndroidLibDir="$cblFlutterDir/android/lib"
-cblFlutterXcframeworksDir="$cblFlutterDir/Xcframeworks"
-cblFlutterLinuxLibDir="$cblFlutterDir/linux/lib"
+cblFlutterLocalDir="$projectDir/packages/cbl_flutter_local"
+cblFlutterLocalAndroidJniLibsDir="$cblFlutterLocalDir/android/src/main/jniLibs"
+cblFlutterLocalIosFrameworksDir="$cblFlutterLocalDir/ios/Frameworks"
+cblFlutterLocalMacosLibrariesDir="$cblFlutterLocalDir/macos/Libraries"
+cblFlutterLocalLinuxLibDir="$cblFlutterLocalDir/linux/lib"
 
 function prepareNativeLibraries() {
     local edition="${1:-enterprise}"
@@ -64,46 +65,55 @@ function prepareNativeLibraries() {
     android)
         "$couchbaseLiteDartDir/tools/build_android.sh" "$edition" "$buildMode"
 
-        # Copy Couchbase Lite C + Dart binaries to cbl_flutter/android
-        rm -rf "$cblFlutterAndroidLibDir"
-        mkdir -p "$cblFlutterAndroidLibDir"
-        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/"* "$cblFlutterAndroidLibDir"
-        cp -a "$couchbaseLiteDartBuildDir/android/libcblitedart-"*"/lib/"* "$cblFlutterAndroidLibDir"
-        mv "$cblFlutterAndroidLibDir/aarch64-linux-android" "$cblFlutterAndroidLibDir/arm64-v8a"
-        mv "$cblFlutterAndroidLibDir/arm-linux-androideabi" "$cblFlutterAndroidLibDir/armeabi-v7a"
-        mv "$cblFlutterAndroidLibDir/i686-linux-android" "$cblFlutterAndroidLibDir/x86"
-        mv "$cblFlutterAndroidLibDir/x86_64-linux-android" "$cblFlutterAndroidLibDir/x86_64"
+        echo "Copying libraries to cbl_flutter_local"
+        rm -rf "$cblFlutterLocalAndroidJniLibsDir"
+        mkdir -p "$cblFlutterLocalAndroidJniLibsDir"
+        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/"* "$cblFlutterLocalAndroidJniLibsDir"
+        cp -a "$couchbaseLiteDartBuildDir/android/libcblitedart-"*"/lib/"* "$cblFlutterLocalAndroidJniLibsDir"
+        rm -rf "$cblFlutterLocalAndroidJniLibsDir/"*"/cmake"
+        mv "$cblFlutterLocalAndroidJniLibsDir/aarch64-linux-android" "$cblFlutterLocalAndroidJniLibsDir/arm64-v8a"
+        mv "$cblFlutterLocalAndroidJniLibsDir/arm-linux-androideabi" "$cblFlutterLocalAndroidJniLibsDir/armeabi-v7a"
+        mv "$cblFlutterLocalAndroidJniLibsDir/i686-linux-android" "$cblFlutterLocalAndroidJniLibsDir/x86"
+        mv "$cblFlutterLocalAndroidJniLibsDir/x86_64-linux-android" "$cblFlutterLocalAndroidJniLibsDir/x86_64"
         ;;
     ios)
         "$couchbaseLiteDartDir/tools/build_ios.sh" "$edition" "$buildMode"
 
-        # Copy Couchbase Lite C + Dart binaries to cbl_flutter/Xcframeworks
-        rm -rf "$cblFlutterXcframeworksDir"
-        mkdir -p "$cblFlutterXcframeworksDir"
-        cp -a "$couchbaseLiteCArchiveDir/CouchbaseLite.xcframework"* "$cblFlutterXcframeworksDir"
-        cp -a "$couchbaseLiteDartBuildDir/CouchbaseLiteDart.xcframework"* "$cblFlutterXcframeworksDir"
+        echo "Copying libraries to cbl_flutter_local"
+        rm -rf "$cblFlutterLocalIosFrameworksDir"
+        mkdir -p "$cblFlutterLocalIosFrameworksDir"
+        cp -a "$couchbaseLiteCArchiveDir/CouchbaseLite.xcframework"* "$cblFlutterLocalIosFrameworksDir"
+        cp -a "$couchbaseLiteDartBuildDir/CouchbaseLiteDart.xcframework"* "$cblFlutterLocalIosFrameworksDir"
         ;;
     macos)
         "$couchbaseLiteDartDir/tools/build_unix.sh" "$edition" "$buildMode"
 
-        # Copy Couchbase Lite C + Dart binaries to standalone dart test package
+        echo "Copying libraries to cbl_e2e_tests_standalone_dart"
         rm -rf "$cblE2eTestsStandaloneDartLibDir"
         mkdir -p "$cblE2eTestsStandaloneDartLibDir"
         cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite"* "$cblE2eTestsStandaloneDartLibDir"
         cp -a "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart"* "$cblE2eTestsStandaloneDartLibDir"
 
-        # TODO flutter
+        echo "Copying libraries to cbl_flutter_local"
+        rm -rf "$cblFlutterLocalMacosLibrariesDir"
+        mkdir -p "$cblFlutterLocalMacosLibrariesDir"
+        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite"* "$cblFlutterLocalMacosLibrariesDir"
+        cp -a "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart"* "$cblFlutterLocalMacosLibrariesDir"
         ;;
     ubuntu20.04-x86_64)
         "$couchbaseLiteDartDir/tools/build_unix.sh" "$edition" "$buildMode"
 
-        # Copy Couchbase Lite C + Dart binaries to standalone dart test package
+        echo "Copying libraries to cbl_e2e_tests_standalone_dart"
         rm -rf "$cblE2eTestsStandaloneDartLibDir"
         mkdir -p "$cblE2eTestsStandaloneDartLibDir"
         cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/x86_64-linux-gnu/libcblite"* "$cblE2eTestsStandaloneDartLibDir"
         cp -a "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/x86_64-linux-gnu/libcblitedart"* "$cblE2eTestsStandaloneDartLibDir"
 
-        # TODO flutter
+        echo "Copying libraries to cbl_flutter_local"
+        rm -rf "$cblFlutterLocalLinuxLibDir"
+        mkdir -p "$cblFlutterLocalLinuxLibDir"
+        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/x86_64-linux-gnu/libcblite"* "$cblFlutterLocalLinuxLibDir"
+        cp -a "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/x86_64-linux-gnu/libcblitedart"* "$cblFlutterLocalLinuxLibDir"
         ;;
     esac
 }

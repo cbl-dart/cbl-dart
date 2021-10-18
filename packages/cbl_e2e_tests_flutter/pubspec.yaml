@@ -7,10 +7,6 @@ environment:
   flutter: '>=2.5.0'
 
 dependencies:
-  flutter:
-    sdk: flutter
-
-dev_dependencies:
   cbl: ^0.6.0
   cbl_ffi: ^0.6.0
   cbl_flutter_2:
@@ -18,6 +14,8 @@ dev_dependencies:
   cbl_flutter_local:
     path: ../cbl_flutter_local
   collection: ^1.15.0
+  flutter:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   http: ^0.13.3

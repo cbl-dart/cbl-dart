@@ -13,7 +13,9 @@ import 'cbl_e2e_tests/test_binding.dart';
 
 void setupTestBinding() {
   // TODO(blaugold): remove when mobile support registration of dart plugins
-  CblFlutterLocal.registerWith();
+  if (Platform.isIOS || Platform.isAndroid) {
+    CblFlutterLocal.registerWith();
+  }
 
   final widgetBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized()
       as IntegrationTestWidgetsFlutterBinding;
