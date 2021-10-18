@@ -1,0 +1,29 @@
+name: cbl_e2e_tests_flutter
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=2.5.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  cbl: ^0.6.0
+  cbl_ffi: ^0.6.0
+  cbl_flutter_2:
+    path: ../cbl_flutter_2
+  cbl_flutter_local:
+    path: ../cbl_flutter_local
+  collection: ^1.15.0
+  flutter_test:
+    sdk: flutter
+  http: ^0.13.3
+  integration_test:
+    sdk: flutter
+  path_provider: ^2.0.1
+  rxdart: ^0.26.0
+  test: any
+  web_socket_channel: ^2.1.0
