@@ -11,8 +11,14 @@ environment:
 
 dependencies:
   cbl_native: ^4.2.1
-  cbl_libcblite_api: ^3.0.0
-  cbl_libcblitedart_api: ^1.0.0
+  # TODO: remove path dependencies when the first versions of the native lib 
+  # API packages are published
+  # cbl_libcblite_api: ^3.0.0
+  # cbl_libcblitedart_api: ^1.0.0
+  cbl_libcblite_api:
+    path: ../cbl_libcblite_api
+  cbl_libcblitedart_api:
+    path: ../cbl_libcblitedart_api
   ffi: ^1.1.2
   meta: ^1.3.0
 
