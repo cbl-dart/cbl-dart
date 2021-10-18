@@ -10,14 +10,16 @@ Couchbase Lite for Dart.
 
 All Dart code is organized in several [packages].
 
-| Package                         | Description                                      | Pub                                                                               | Internal     |
-| ------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------- | ------------ |
-| [cbl]                           | The Dart API for Couchbase Lite                  | [![](https://badgen.net/pub/v/cbl)](https://pub.dev/packages/cbl)                 |              |
-| [cbl_e2e_tests]                 | E2E tests                                        |                                                                                   |              |
-| [cbl_e2e_tests_standalone_dart] | Run E2E tests with standalone Dart               |                                                                                   |              |
-| [cbl_ffi]                       | FFI bindings for `libcblite` and `libcblitedart` | [![](https://badgen.net/pub/v/cbl_ffi)](https://pub.dev/packages/cbl_ffi)         | :red_circle: |
-| [cbl_flutter]                   | Packaging of binary libraries with Flutter apps  | [![](https://badgen.net/pub/v/cbl_flutter)](https://pub.dev/packages/cbl_flutter) |              |
-| [cbl_native]                    | Binary library distribution                      | [![](https://badgen.net/pub/v/cbl_native)](https://pub.dev/packages/cbl_native)   | :red_circle: |
+| Package                         | Description                                        | Pub                                                                                                   | Internal     |
+| ------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------ |
+| [cbl]                           | The Dart API for Couchbase Lite                    | [![](https://badgen.net/pub/v/cbl)](https://pub.dev/packages/cbl)                                     |              |
+| [cbl_e2e_tests]                 | E2E tests                                          |                                                                                                       |              |
+| [cbl_e2e_tests_standalone_dart] | Run E2E tests with standalone Dart                 |                                                                                                       |              |
+| [cbl_ffi]                       | FFI bindings for `libcblite` and `libcblitedart`   | [![](https://badgen.net/pub/v/cbl_ffi)](https://pub.dev/packages/cbl_ffi)                             | :red_circle: |
+| [cbl_libcblite_api]             | Marker package for API versions of `libcblite`     | [![](https://badgen.net/pub/v/cbl_libcblite_api)](https://pub.dev/packages/cbl_libcblite_api)         | :red_circle: |
+| [cbl_libcblitedart_api]         | Marker package for API versions of `libcblitedart` | [![](https://badgen.net/pub/v/cbl_libcblitedart_api)](https://pub.dev/packages/cbl_libcblitedart_api) | :red_circle: |
+| [cbl_flutter]                   | Packaging of binary libraries with Flutter apps    | [![](https://badgen.net/pub/v/cbl_flutter)](https://pub.dev/packages/cbl_flutter)                     |              |
+| [cbl_native]                    | Binary library distribution                        | [![](https://badgen.net/pub/v/cbl_native)](https://pub.dev/packages/cbl_native)                       | :red_circle: |
 
 ## Native libraries
 
@@ -44,6 +46,10 @@ Read [CONTRIBUTING] to get started developing.
 [cbl_e2e_tests_standalone_dart]:
   https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests_standalone_dart
 [cbl_ffi]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_ffi
+[cbl_libcblite_api]:
+  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_libcblite_api
+[cbl_libcblitedart_api]:
+  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_libcblitedart_api
 [cbl_flutter]:
   https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter
 [cbl_native]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_native
