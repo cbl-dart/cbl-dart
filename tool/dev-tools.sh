@@ -83,7 +83,7 @@ function prepareNativeLibraries() {
         rm -rf "$cblFlutterLocalIosFrameworksDir"
         mkdir -p "$cblFlutterLocalIosFrameworksDir"
         cp -a "$couchbaseLiteCArchiveDir/CouchbaseLite.xcframework"* "$cblFlutterLocalIosFrameworksDir"
-        cp -a "$couchbaseLiteDartBuildDir/CouchbaseLiteDart.xcframework"* "$cblFlutterLocalIosFrameworksDir"
+        cp -a "$couchbaseLiteDartBuildDir/ios/CouchbaseLiteDart.xcframework"* "$cblFlutterLocalIosFrameworksDir"
         ;;
     macos)
         "$couchbaseLiteDartDir/tools/build_unix.sh" "$edition" "$buildMode"
@@ -97,8 +97,8 @@ function prepareNativeLibraries() {
         echo "Copying libraries to cbl_flutter_local"
         rm -rf "$cblFlutterLocalMacosLibrariesDir"
         mkdir -p "$cblFlutterLocalMacosLibrariesDir"
-        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite"* "$cblFlutterLocalMacosLibrariesDir"
-        cp -a "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart"* "$cblFlutterLocalMacosLibrariesDir"
+        cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
+        cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
         ;;
     ubuntu20.04-x86_64)
         "$couchbaseLiteDartDir/tools/build_unix.sh" "$edition" "$buildMode"

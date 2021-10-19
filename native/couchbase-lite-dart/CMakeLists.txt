@@ -5,9 +5,13 @@ get_filename_component(NATIVE_DIR ../ ABSOLUTE)
 
 file(READ CouchbaseLiteDart.version CBL_DART_VERSION)
 
-set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Apple Deployment Target")
+set(CMAKE_OSX_ARCHITECTURES x86_64 arm64 CACHE STRING "Apple Target Architectures")
 
 project(CouchbaseLite_Dart VERSION ${CBL_DART_VERSION})
+
+set(CBL_DART_LIB_VERSION ${CouchbaseLite_Dart_VERSION})
+set(CBL_DART_API_VERSION ${CouchbaseLite_Dart_VERSION_MAJOR})
 
 if(NOT DEFINED CBL_EDITION)
     set(CBL_EDITION community)
@@ -50,12 +54,6 @@ if(${CBL_EDITION} STREQUAL enterprise)
     add_compile_definitions(COUCHBASE_ENTERPRISE)
 endif()
 
-if(APPLE)
-    set(CMAKE_INSTALL_RPATH "@loader_path")
-else()
-    set(CMAKE_INSTALL_RPATH "\\\${ORIGIN}")
-endif()
-
 add_library(cblitedart
     SHARED
     src/AsyncCallback.cpp
@@ -74,7 +72,8 @@ target_include_directories(cblitedart
 
 set_target_properties(cblitedart 
     PROPERTIES
-    VERSION ${PROJECT_VERSION}
+    VERSION "${CBL_DART_LIB_VERSION}" 
+    SOVERSION "${CBL_DART_API_VERSION}"
 )
 
 target_link_libraries(cblitedart 
