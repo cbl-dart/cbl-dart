@@ -56,7 +56,6 @@ function build() {
     local buildMode="${1:-RelWithDebInfo}"
     _configureAllArchs "$buildMode"
     _buildAllArchs
-    _createLinksForDev
 }
 
 function _configureAllArchs() {
@@ -131,12 +130,6 @@ function _copyArchToLib() {
         "$buildArchDir/cbl-dart/libcblitedart.so" \
         "$buildArchDir/vendor/couchbase-lite-C/libcblite.so"* \
         "$libArchDir"
-}
-
-function _createLinksForDev() {
-    cd "$projectDir/packages/cbl_flutter/android"
-    rm -f lib
-    ln -s "$libDir"
 }
 
 "$@"

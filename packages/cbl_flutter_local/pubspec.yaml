@@ -18,7 +18,7 @@ dev_dependencies:
 
 flutter:
   plugin:
-    implements: cbl_flutter_2
+    implements: cbl_flutter
     platforms:
       android:
         dartPluginClass: CblFlutterLocal

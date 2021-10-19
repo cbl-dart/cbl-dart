@@ -9,8 +9,8 @@ environment:
 dependencies:
   cbl: ^0.6.0
   cbl_ffi: ^0.6.0
-  cbl_flutter_2:
-    path: ../cbl_flutter_2
+  cbl_flutter:
+    path: ../cbl_flutter
   cbl_flutter_local:
     path: ../cbl_flutter_local
   collection: ^1.15.0
