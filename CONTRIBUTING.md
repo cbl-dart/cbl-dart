@@ -89,10 +89,10 @@ and `ios_simulator`.
 
 ## Running tests
 
-The packages `cbl`, `cbl_ffi`, and `cbl_native` are pure Dart packages and have
-unit tests, which can be run through the normal methods, e.g
-`dart test`/`flutter test` or the IDE. These unit tests only test components
-which are independent of the native binaries.
+The packages `cbl`, and `cbl_ffi` are pure Dart packages and have unit tests,
+which can be run through the normal methods, e.g `dart test`/`flutter test` or
+the IDE. These unit tests only test components which are independent of the
+native binaries.
 
 To ensure good test coverage a suite of E2E tests is maintained in
 `cbl_e2e_tests`. This package is not used to run the tests, through.

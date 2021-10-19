@@ -22,7 +22,6 @@ All Dart code is organized into several [packages].
 | [cbl_flutter]                    | Flutter plugin for Couchbase Lite (frontend)             | [![](https://badgen.net/pub/v/cbl_flutter)](https://pub.dev/packages/cbl_flutter)                     |              |
 | [cbl_flutter_platform_interface] | Platform interface for [cbl_flutter]                     | [![](https://badgen.net/pub/v/cbl_flutter)](https://pub.dev/packages/cbl_flutter_platform_interface)  | :red_circle: |
 | [cbl_flutter_local]              | Platform implementation of [cbl_flutter] for development |                                                                                                       |              |
-| [cbl_native]                     | Binary library distribution                              | [![](https://badgen.net/pub/v/cbl_native)](https://pub.dev/packages/cbl_native)                       | :red_circle: |
 
 ## Native libraries
 
@@ -61,7 +60,6 @@ Read [CONTRIBUTING] to get started developing.
   https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter_platform_interface
 [cbl_flutter_local]:
   https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter_local
-[cbl_native]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_native
 [native]: https://github.com/cofu-app/cbl-dart/tree/main/native
 [libcblitedart]: https://github.com/cofu-app/cbl-dart/tree/main/native/cbl-dart
 [couchbase-lite-c]: https://github.com/couchbaselabs/couchbase-lite-C

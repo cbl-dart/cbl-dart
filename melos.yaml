@@ -28,20 +28,8 @@ scripts:
     select-package:
       scope: 'cbl'
 
-  test:cbl_native:
-    run: melos exec -- flutter test --no-pub -r expanded
-    select-package:
-      scope: 'cbl_native'
-
   clean:packages:
     run: git clean -xdfq packages
 
   clean:all:
     run: git clean -xdfq .
-
-  version:
-    run:
-      melos exec -- 'dart run tool/generate_version.dart && git add
-      lib/version.g.dart'
-    select-package:
-      scope: cbl_native
