@@ -1,4 +1,4 @@
-[![CI](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml)
+[![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
 
 # cbl-dart
@@ -41,26 +41,26 @@ Please make sure to update tests as appropriate.
 
 Read [CONTRIBUTING] to get started developing.
 
-[packages]: https://github.com/cofu-app/cbl-dart/tree/main/packages
-[cbl]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl
+[packages]: https://github.com/cbl-dart/cbl-dart/tree/main/packages
+[cbl]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl
 [cbl_e2e_tests]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_e2e_tests
 [cbl_e2e_tests_standalone_dart]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests_standalone_dart
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_e2e_tests_standalone_dart
 [cbl_e2e_tests_flutter]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_e2e_tests_flutter
-[cbl_ffi]: https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_ffi
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_e2e_tests_flutter
+[cbl_ffi]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_ffi
 [cbl_libcblite_api]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_libcblite_api
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_libcblite_api
 [cbl_libcblitedart_api]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_libcblitedart_api
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_libcblitedart_api
 [cbl_flutter]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter
 [cbl_flutter_platform_interface]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter_platform_interface
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_platform_interface
 [cbl_flutter_local]:
-  https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter_local
-[native]: https://github.com/cofu-app/cbl-dart/tree/main/native
+  https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_local
+[native]: https://github.com/cbl-dart/cbl-dart/tree/main/native
 [libcblite]: https://github.com/couchbaselabs/couchbase-lite-C
-[libcblitedart]: https://github.com/cofu-app/cbl-dart/tree/main/native/cbl-dart
+[libcblitedart]: https://github.com/cbl-dart/cbl-dart/tree/main/native/cbl-dart
 [contributing]: ./CONTRIBUTING.md

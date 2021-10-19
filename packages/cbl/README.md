@@ -1,6 +1,6 @@
 [![Version](https://badgen.net/pub/v/cbl)](https://pub.dev/packages/cbl)
-[![License](https://badgen.net/pub/license/cbl)](https://github.com/cofu-app/cbl-dart/blob/main/packages/cbl/LICENSE)
-[![CI](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml)
+[![License](https://badgen.net/pub/license/cbl)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/LICENSE)
+[![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 
 > :warning: This project has not yet reached a stable production release.
 
@@ -94,4 +94,4 @@ Read [CONTRIBUTING] to get started developing.
 
 > **Warning:** This is not an official Couchbase product.
 
-[contributing]: https://github.com/cofu-app/cbl-dart/blob/main/CONTRIBUTING.md
+[contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md

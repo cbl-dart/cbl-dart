@@ -66,7 +66,7 @@ extension _FleeceErrorExt<T> on T {
 class FLSlice extends Struct {
   external Pointer<Uint8> buf;
 
-  // TODO(blaugold): remove FLSlice wrapper, https://github.com/cofu-app/cbl-dart/issues/139
+  // TODO(blaugold): remove FLSlice wrapper, https://github.com/cbl-dart/cbl-dart/issues/139
   // This is actually a size_t, but Dart FFI does not support it yet.
   // See https://github.com/dart-lang/sdk/issues/36140.
   // We work around this by translating between an actual FLSlice(Result)

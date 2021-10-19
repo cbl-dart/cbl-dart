@@ -121,7 +121,7 @@ void main() {
       });
 
       test('asArray returns Array when value is an array', () {
-        // TODO(blaugold): use empty array, https://github.com/cofu-app/cbl-dart/issues/152
+        // TODO(blaugold): use empty array, https://github.com/cbl-dart/cbl-dart/issues/152
         final doc = Doc.fromJson('[null]');
         final value = doc.root;
         expect(value.asArray, isNotNull);
@@ -189,19 +189,19 @@ void main() {
       });
 
       test('setting length throw UnsupportedError', () {
-        // TODO(blaugold): use empty array, https://github.com/cofu-app/cbl-dart/issues/152
+        // TODO(blaugold): use empty array, https://github.com/cbl-dart/cbl-dart/issues/152
         final doc = Doc.fromJson('[null]');
         expect(() => doc.root.asArray!.length = 0, throwsUnsupportedError);
       });
 
       test('isEmpty returns whether array is empty', () {
-        // TODO(blaugold): use empty array, https://github.com/cofu-app/cbl-dart/issues/152
+        // TODO(blaugold): use empty array, https://github.com/cbl-dart/cbl-dart/issues/152
         final doc = Doc.fromJson('[[]]');
         expect(doc.root.asArray![0].asArray!.isEmpty, isTrue);
       });
 
       test('asMutable returns null if array is not mutable', () {
-        // TODO(blaugold): use empty array, https://github.com/cofu-app/cbl-dart/issues/152
+        // TODO(blaugold): use empty array, https://github.com/cbl-dart/cbl-dart/issues/152
         final doc = Doc.fromJson('[null]');
         expect(doc.root.asArray!.asMutable, isNull);
       });
@@ -217,13 +217,13 @@ void main() {
       });
 
       test('[] returns undefined Value when index is out of range', () {
-        // TODO(blaugold): use empty array, https://github.com/cofu-app/cbl-dart/issues/152
+        // TODO(blaugold): use empty array, https://github.com/cbl-dart/cbl-dart/issues/152
         final doc = Doc.fromJson('[null]');
         expect(doc.root.asArray![1].isUndefined, isTrue);
       });
 
       test('[]= throws UnsupportedError', () {
-        // TODO(blaugold): use empty array, https://github.com/cofu-app/cbl-dart/issues/152
+        // TODO(blaugold): use empty array, https://github.com/cbl-dart/cbl-dart/issues/152
         final doc = Doc.fromJson('[null]');
         expect(() => doc.root.asArray![0] = null, throwsUnsupportedError);
       });

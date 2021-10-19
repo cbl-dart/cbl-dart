@@ -12,7 +12,7 @@ are limited to a single package use it as the commit message's scope, e.g.
 Get started by cloning the repo, including submodules:
 
 ```shell
-git clone --recurse-submodules https://github.com/cofu-app/cbl-dart.git
+git clone --recurse-submodules https://github.com/cbl-dart/cbl-dart.git
 ```
 
 ## Dart/Flutter
