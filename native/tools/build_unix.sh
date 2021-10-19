@@ -25,7 +25,6 @@ function build() {
     local buildMode="${1:-RelWithDebInfo}"
     _configure "$buildMode"
     _build
-    _createLinksForDev
 }
 
 function _configure() {
@@ -96,16 +95,6 @@ function _stripSymbolsMacOS() {
     local libraryPath="$1"
     dsymutil "${libraryPath}" -o "$libraryPath.dSYM"
     strip -x "${libraryPath}"
-}
-
-function _createLinksForDev() {
-    cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
-    rm -f lib
-    ln -s "$libDir"
-
-    cd "$projectDir/packages/cbl_flutter/linux"
-    rm -f lib
-    ln -s "$libDir"
 }
 
 "$@"

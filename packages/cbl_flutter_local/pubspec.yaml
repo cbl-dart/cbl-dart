@@ -1,0 +1,36 @@
+name: cbl_flutter_local
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=2.5.0'
+
+dependencies:
+  cbl_flutter_platform_interface:
+    path: ../cbl_flutter_platform_interface
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    implements: cbl_flutter
+    platforms:
+      android:
+        dartPluginClass: CblFlutterLocal
+        package: com.terwesten.gabriel.cbl_flutter_local
+        pluginClass: CblFlutterLocalPlugin
+      ios:
+        dartPluginClass: CblFlutterLocal
+        pluginClass: CblFlutterLocalPlugin
+      macos:
+        dartPluginClass: CblFlutterLocal
+        pluginClass: CblFlutterLocalPlugin
+      linux:
+        dartPluginClass: CblFlutterLocal
+        pluginClass: CblFlutterLocalPlugin
+

@@ -39,8 +39,6 @@ function build() {
     done
 
     createXcframeworks "$platformIds" "$configuration"
-
-    _createLinksForDev
 }
 
 function createXcframeworks() {
@@ -50,16 +48,6 @@ function createXcframeworks() {
     for framework in "${frameworks[@]}"; do
         createXcframework "$framework" "$platformIds" "$configuration"
     done
-}
-
-function _createLinksForDev() {
-    cd "$projectDir/packages/cbl_e2e_tests_standalone_dart"
-    rm -f Frameworks
-    ln -s "$archivesDir/macos.xcarchive/Products/Library/Frameworks"
-
-    cd "$projectDir/packages/cbl_flutter"
-    rm -f Xcframeworks
-    ln -s "$xcframeworksDir"
 }
 
 function buildPlatform() {

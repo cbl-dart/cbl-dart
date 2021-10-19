@@ -53,7 +53,7 @@ function _buildArchive() {
 
     case "$archiveExt" in
     zip)
-        zip -q -r "$archiveFile" "$productDirPrefix"*
+        zip -q -r --symlinks "$archiveFile" "$productDirPrefix"*
         ;;
     tar.gz)
         tar -czf "$archiveFile" "$productDirPrefix"*

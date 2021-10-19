@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cbl/cbl.dart';
 // ignore: implementation_imports
 import 'package:cbl/src/support/isolate.dart';
+import 'package:cbl_flutter_platform_interface/cbl_flutter_platform_interface.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Initializes global resources and configures global settings, such as
@@ -14,41 +15,11 @@ class CouchbaseLiteFlutter {
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init() async {
     initMainIsolate(IsolateContext(
-      libraries: _libraries(),
+      libraries: CblFlutterPlatform.instance.libraries(),
       initContext: await _context(),
     ));
 
     _setupLogging();
-  }
-}
-
-/// Locates and returns the [Libraries] shipped by this package (`cbl_flutter`),
-/// handling the differences between platforms.
-Libraries _libraries() {
-  if (Platform.isIOS || Platform.isMacOS) {
-    return Libraries(
-      cbl: LibraryConfiguration.process(),
-      cblDart: LibraryConfiguration.process(),
-    );
-  } else if (Platform.isAndroid) {
-    return Libraries(
-      cbl: LibraryConfiguration.dynamic('libcblite'),
-      cblDart: LibraryConfiguration.dynamic('libcblitedart'),
-    );
-  } else if (Platform.isLinux) {
-    final bundleDirectory = _dirname(Platform.resolvedExecutable);
-    final libDirectory = _joinPaths(bundleDirectory, 'lib');
-    return Libraries(
-      cbl: LibraryConfiguration.dynamic(
-        _joinPaths(libDirectory, 'libcblite'),
-        version: '3',
-      ),
-      cblDart: LibraryConfiguration.dynamic(
-        _joinPaths(libDirectory, 'libcblitedart'),
-      ),
-    );
-  } else {
-    throw UnsupportedError('This platform is not supported.');
   }
 }
 
@@ -80,10 +51,3 @@ void _setupLogging() {
     ..console.level = LogLevel.none
     ..custom = DartConsoleLogger(LogLevel.warning);
 }
-
-String _dirname(String path) =>
-    (path.split(Platform.pathSeparator)..removeLast())
-        .join(Platform.pathSeparator);
-
-String _joinPaths(String path0, String path1) =>
-    '$path0${Platform.pathSeparator}$path1';

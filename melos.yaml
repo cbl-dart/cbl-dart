@@ -4,34 +4,9 @@ packages:
   - packages/**
 
 scripts:
-  flutter:prepare:
-    description: Runs `flutter pub get` followed by `melos bootstrap` in all flutter packages.
-    run: melos run flutter:pub_get --no-select && melos run flutter:bootstrap
-
-  flutter:pub_get:
-    run: melos exec -- flutter pub get
-    description:
-      Runs `flutter pub get` in all flutter packages, to generate files
-      which `melos bootstrap` doesn't.
-    select-package:
-      flutter: true
-
-  flutter:bootstrap:
-    run: melos bootstrap --flutter
-
-  install:binaries:all:
-    description: Installs the latest published binaries into `cbl_flutter`.
-    run: melos exec --scope cbl_flutter -- ./tool/install_binaries.sh all
-
   formatting:check: melos exec -- dart format --set-exit-if-changed .
 
   analyze: melos exec -- dart analyze --fatal-infos
-
-  build:cbl_flutter:test:ios:
-    description: Builds the e2e tests for `cbl_flutter`.
-    run: melos exec -- flutter build ios --no-pub --simulator integration_test/cbl_e2e_test.dart
-    select-package:
-      scope: cbl_flutter_example
 
   test:setupCouchbaseClusterDocker:
     run: melos exec -- "./couchbase-cluster.sh setupDocker"
@@ -48,13 +23,6 @@ scripts:
     select-package:
       scope: cbl_e2e_tests
 
-  test:all: melos run test:cbl &&
-    melos run test:cbl_native &&
-    melos run test:standalone_dart &&
-    melos run test:flutter:macos &&
-    melos run test:flutter:ios &&
-    melos run test:flutter:android
-
   test:cbl:
     run: melos exec -- flutter test --no-pub -r expanded
     select-package:
@@ -65,50 +33,6 @@ scripts:
     select-package:
       scope: 'cbl_native'
 
-  test:standalone_dart:
-    run: melos exec -- dart test -r expanded -j 1
-    select-package:
-      scope: 'cbl_e2e_tests_standalone_dart'
-
-  test:flutter:macos:
-    run: melos exec --
-      flutter test
-      --no-pub
-      -r expanded
-      -d macOS
-      integration_test/cbl_e2e_test.dart
-    select-package:
-      scope: 'cbl_flutter_example'
-
-  test:flutter:ios:
-    run: melos exec --
-      flutter test
-      --no-pub
-      -r expanded
-      -d iPhone
-      integration_test/cbl_e2e_test.dart
-    select-package:
-      scope: 'cbl_flutter_example'
-
-  test:flutter:android:
-    run: melos exec --
-      flutter test
-      --no-pub
-      -r expanded
-      -d emulator
-      integration_test/cbl_e2e_test.dart
-    select-package:
-      scope: 'cbl_flutter_example'
-
-  test:flutter:linux:
-    run: melos exec --
-      flutter test
-      -r expanded
-      -d linux
-      integration_test/cbl_e2e_test.dart
-    select-package:
-      scope: 'cbl_flutter_example'
-
   clean:packages:
     run: git clean -xdfq packages
 
@@ -116,6 +40,8 @@ scripts:
     run: git clean -xdfq .
 
   version:
-    run: melos exec -- 'dart run tool/generate_version.dart && git add lib/version.g.dart'
+    run:
+      melos exec -- 'dart run tool/generate_version.dart && git add
+      lib/version.g.dart'
     select-package:
       scope: cbl_native
