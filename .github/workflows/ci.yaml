@@ -88,7 +88,7 @@ jobs:
     name: Dart unit tests
     strategy:
       matrix:
-        package: [cbl, cbl_native]
+        package: [cbl]
         dart: [stable, beta]
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: ubuntu-20.04

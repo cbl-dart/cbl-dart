@@ -38,12 +38,6 @@
       "toolArgs": ["--no-pub"]
     },
     {
-      "name": "cbl_native",
-      "cwd": "packages/cbl_native",
-      "request": "launch",
-      "type": "dart"
-    },
-    {
       "name": "cbl_e2e_tests_standalone_dart (gdb)",
       "type": "cppdbg",
       "request": "launch",
