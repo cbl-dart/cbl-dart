@@ -1,13 +1,5 @@
 import 'support/utils.dart';
 
-Never throwNotInitializedError() {
-  throw StateError('"package:cbl" must be initialized before using it');
-}
-
-Never throwAlreadyInitializedError() {
-  throw StateError('"package:cbl" has already been initialized');
-}
-
 /// Base class for custom exceptions in the `cbl` package.
 abstract class CouchbaseLiteException implements Exception {
   /// A description of this exception.
