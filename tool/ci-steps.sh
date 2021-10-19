@@ -129,7 +129,7 @@ function runE2ETests() {
             # Enable core dumps.
             device="Linux"
             ulimit -c unlimited
-            echo "core.%p" >/proc/sys/kernel/core_pattern
+            sudo echo "core.%p" >/proc/sys/kernel/core_pattern
             ;;
         esac
 
