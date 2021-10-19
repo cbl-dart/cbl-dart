@@ -54,6 +54,12 @@ if(${CBL_EDITION} STREQUAL enterprise)
     add_compile_definitions(COUCHBASE_ENTERPRISE)
 endif()
 
+if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path")
+else()
+    set(CMAKE_INSTALL_RPATH "\\\${ORIGIN}")
+endif()
+
 add_library(cblitedart
     SHARED
     src/AsyncCallback.cpp

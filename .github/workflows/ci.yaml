@@ -52,7 +52,7 @@ jobs:
       - name: Check formatting
         uses: jidicula/clang-format-action@v3.1.0
         with:
-          check-path: 'native/cbl-dart/src'
+          check-path: 'native/couchbase-lite-dart'
 
   analyze-dart:
     name: Analyze Dart code
@@ -141,22 +141,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          submodules: recursive
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      # Doxygen is needed in build of Couchbase-Lite-C, which cannot be easily changed.
-      # bash >=4 is needed in build_apple.sh.
-      - name: Install doxygen and bash
+      # bash >=4 is needed by scripts
+      - name: Install bash
         if: runner.os == 'macOS'
-        run: brew install doxygen bash
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: test-e2e-${{ matrix.os }}-${{ matrix.embedder }}
+        run: brew install bash
 
       - name: Build native libraries
         run: ./tool/ci-steps.sh buildNativeLibraries
