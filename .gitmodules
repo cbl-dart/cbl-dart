@@ -1,4 +1,0 @@
-[submodule "native/vendor/couchbase-lite-C"]
-	path = native/vendor/couchbase-lite-C
-	url = https://github.com/couchbase/couchbase-lite-C.git
-	branch = master

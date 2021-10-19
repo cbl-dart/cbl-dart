@@ -27,10 +27,10 @@ All Dart code is organized into several [packages].
 
 Two native libraries are required to enable Couchbase Lite for Dart.
 
-| Library         | Description                                                                     |
-| --------------- | ------------------------------------------------------------------------------- |
-| libcblite       | Couchbase Lite implementation behind a C API (vendored from [couchbase-lite-C]) |
-| [libcblitedart] | Compatibility layer to allow Dart code to use the Couchbase Lite C API          |
+| Library         | Description                                                      |
+| --------------- | ---------------------------------------------------------------- |
+| [libcblite]     | Couchbase Lite C                                                 |
+| [libcblitedart] | Support library required by Dart to make use of Couchbase Lite C |
 
 ## Contributing
 
@@ -61,6 +61,6 @@ Read [CONTRIBUTING] to get started developing.
 [cbl_flutter_local]:
   https://github.com/cofu-app/cbl-dart/tree/main/packages/cbl_flutter_local
 [native]: https://github.com/cofu-app/cbl-dart/tree/main/native
+[libcblite]: https://github.com/couchbaselabs/couchbase-lite-C
 [libcblitedart]: https://github.com/cofu-app/cbl-dart/tree/main/native/cbl-dart
-[couchbase-lite-c]: https://github.com/couchbaselabs/couchbase-lite-C
 [contributing]: ./CONTRIBUTING.md
