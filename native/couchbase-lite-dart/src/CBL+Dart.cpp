@@ -388,7 +388,13 @@ uint8_t CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
                                  CBLDart_CBLDatabaseConfiguration *config,
                                  CBLError *errorOut) {
   CBLDatabaseConfiguration config_;
+
   config_.directory = CBLDart_FLStringFromDart(config->directory);
+
+#ifdef COUCHBASE_ENTERPRISE
+  config_.encryptionKey.algorithm = kCBLEncryptionNone;
+#endif
+
   return CBL_CopyDatabase(CBLDart_FLStringFromDart(fromPath),
                           CBLDart_FLStringFromDart(toName), &config_, errorOut);
 }
@@ -405,10 +411,17 @@ CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
                                       CBLError *errorOut) {
   CBLDart_CheckFileLogging();
 
-  CBLDatabaseConfiguration config_ = {.directory = {nullptr, 0}};
+  CBLDatabaseConfiguration config_;
+
   if (config) {
     config_.directory = CBLDart_FLStringFromDart(config->directory);
+  } else {
+    config_.directory = {nullptr, 0};
   }
+
+#ifdef COUCHBASE_ENTERPRISE
+  config_.encryptionKey.algorithm = kCBLEncryptionNone;
+#endif
 
   auto database =
       CBLDatabase_Open(CBLDart_FLStringFromDart(name), &config_, errorOut);
