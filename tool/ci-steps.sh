@@ -181,7 +181,7 @@ function _collectCrashReportsLinuxFlutter() {
 
         ./tool/create-crash-report-linux.sh \
             -e "$flutterTestsPackageDir/build/linux/x64/debug/bundle/$flutterTestsPackage" \
-            -c "$flutterTestsPackageDir/core" \
+            -c "$core" \
             -o "$coreTestResultsDir"
     done
 }
