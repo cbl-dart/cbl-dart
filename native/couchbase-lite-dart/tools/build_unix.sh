@@ -104,4 +104,8 @@ mkdir -p "$productDir"
 
 _build "$edition" "$buildMode"
 _copyArtifactsToProductDir
-_stipSymbols
+
+# Since it makes debugging easier and the library is small, we leave debug
+# symbols in, for now. With dart's FFI capabilities becoming better, even less
+# code will be needed in this library.
+# _stipSymbols

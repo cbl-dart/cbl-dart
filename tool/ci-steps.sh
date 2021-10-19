@@ -127,8 +127,9 @@ function runE2ETests() {
             ;;
         Ubuntu)
             # Enable core dumps.
-            ulimit -c unlimited
             device="Linux"
+            ulimit -c unlimited
+            echo "core.%p" >/proc/sys/kernel/core_pattern
             ;;
         esac
 
@@ -173,10 +174,16 @@ function _collectCrashReportsLinuxStandalone() {
 }
 
 function _collectCrashReportsLinuxFlutter() {
-    ./tool/create-crash-report-linux.sh \
-        -e "$flutterTestsPackageDir/build/linux/x64/debug/bundle/$flutterTestsPackage" \
-        -c "$flutterTestsPackageDir/core" \
-        -o "$testResultsDir"
+    for core in "$flutterTestsPackageDir/core."*; do
+        local pid="${core##*.}"
+        local coreTestResultsDir="$testResultsDir/$pid"
+        mkdir -p "$coreTestResultsDir"
+
+        ./tool/create-crash-report-linux.sh \
+            -e "$flutterTestsPackageDir/build/linux/x64/debug/bundle/$flutterTestsPackage" \
+            -c "$flutterTestsPackageDir/core" \
+            -o "$coreTestResultsDir"
+    done
 }
 
 function _collectCrashReportsAndroid() {
