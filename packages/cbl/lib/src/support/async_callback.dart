@@ -101,8 +101,6 @@ class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
   }
 
   void _messageHandler(List<Object?> message) {
-    assert(message is List, 'callback call message must be a list');
-
     final sendPort = message[0] as SendPort?;
     final callAddress = message[1] as int?;
     // ignore: cast_nullable_to_non_nullable

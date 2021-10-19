@@ -4,10 +4,10 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import '../cbl_ffi.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'blob.dart';
 import 'document.dart';
 import 'fleece.dart';
 import 'global.dart';
@@ -386,7 +386,7 @@ class DatabaseBindings extends Bindings {
         .lookupFunction<_CBLDart_CBLDatabase_Open, _CBLDart_CBLDatabase_Open>(
       'CBLDart_CBLDatabase_Open',
     );
-    _bindtoDartObject = libs.cblDart.lookupFunction<
+    _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_BindDatabaseToDartObject_C, _CBLDart_BindDatabaseToDartObject>(
       'CBLDart_BindDatabaseToDartObject',
     );
@@ -488,7 +488,7 @@ class DatabaseBindings extends Bindings {
   late final _CBLDart_CBLDatabase_Exists _databaseExists;
   late final _CBLDart_CBLDatabaseConfiguration_Default _defaultConfiguration;
   late final _CBLDart_CBLDatabase_Open _open;
-  late final _CBLDart_BindDatabaseToDartObject _bindtoDartObject;
+  late final _CBLDart_BindDatabaseToDartObject _bindToDartObject;
   late final _CBLDart_CBLDatabase_Close _close;
   late final _CBLDatabase_PerformMaintenance _performMaintenance;
   late final _CBLDatabase_BeginTransaction _beginTransaction;
@@ -561,7 +561,7 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     String? debugName,
   ) {
-    _bindtoDartObject(
+    _bindToDartObject(
       object,
       db,
       debugName?.toNativeUtf8() ?? nullptr,
