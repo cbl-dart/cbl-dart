@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database/database.dart';
-import '../query.dart';
 import 'data_source.dart';
 import 'ffi_query.dart';
 import 'from.dart';
+import 'parameters.dart';
 import 'proxy_query.dart';
 import 'query.dart';
 import 'query_builder.dart';
+import 'result_set.dart';
 import 'router/from_router.dart';
 import 'select_result.dart';
 
