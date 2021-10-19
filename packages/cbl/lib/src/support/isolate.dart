@@ -1,8 +1,8 @@
 import 'package:cbl_ffi/cbl_ffi.dart' hide Libraries;
 
 import '../document/common.dart';
-import '../errors.dart';
 import '../fleece/integration/integration.dart';
+import 'errors.dart';
 import 'ffi.dart';
 
 class InitContext {

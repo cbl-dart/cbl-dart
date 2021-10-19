@@ -2,6 +2,14 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../errors.dart';
 
+Never throwNotInitializedError() {
+  throw StateError('"package:cbl" must be initialized before using it');
+}
+
+Never throwAlreadyInitializedError() {
+  throw StateError('"package:cbl" has already been initialized');
+}
+
 extension CBLErrorExceptionExt on CBLErrorException {
   CouchbaseLiteException toCouchbaseLiteException() =>
       _toCouchbaseLiteException(this);
