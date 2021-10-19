@@ -3,7 +3,7 @@
 Implementation of [cbl_flutter](../cbl_flutter) for local development and
 testing and CI.
 
-[dev-tools.sh](../../tool/dev-tools.sh)'s `prepareNativeLibraries` command
+[dev-tools.sh](../../tools/dev-tools.sh)'s `prepareNativeLibraries` command
 populates platform specific directories of this plugin with the native libraries
 (`cblite` and `cblitedart`).
 

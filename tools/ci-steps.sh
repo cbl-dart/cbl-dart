@@ -47,7 +47,7 @@ function buildNativeLibraries() {
         ;;
     esac
 
-    ./tool/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
+    ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
 }
 
 function configureFlutter() {
@@ -77,12 +77,12 @@ function bootstrapPackages() {
 function startVirtualDevices() {
     case "$MATRIX_OS" in
     iOS)
-        ./tool/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
+        ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
     Android)
-        ./tool/android-emulator.sh createAndStart -a "$androidVersion" -d "$androidDevice"
-        ./tool/android-emulator.sh setupReversePort 4984
-        ./tool/android-emulator.sh setupReversePort 4985
+        ./tools/android-emulator.sh createAndStart -a "$androidVersion" -d "$androidDevice"
+        ./tools/android-emulator.sh setupReversePort 4984
+        ./tools/android-emulator.sh setupReversePort 4985
         ;;
     Ubuntu)
         Xvfb :99 &
@@ -167,7 +167,7 @@ function _collectCrashReportsMacOS() {
 }
 
 function _collectCrashReportsLinuxStandalone() {
-    ./tool/create-crash-report-linux.sh \
+    ./tools/create-crash-report-linux.sh \
         -e "$(which dart)" \
         -c "$standaloneTestsPackageDir/core" \
         -o "$testResultsDir"
@@ -179,7 +179,7 @@ function _collectCrashReportsLinuxFlutter() {
         local coreTestResultsDir="$testResultsDir/$pid"
         mkdir -p "$coreTestResultsDir"
 
-        ./tool/create-crash-report-linux.sh \
+        ./tools/create-crash-report-linux.sh \
             -e "$flutterTestsPackageDir/build/linux/x64/debug/bundle/$flutterTestsPackage" \
             -c "$core" \
             -o "$coreTestResultsDir"
@@ -187,7 +187,7 @@ function _collectCrashReportsLinuxFlutter() {
 }
 
 function _collectCrashReportsAndroid() {
-    ./tool/android-emulator.sh bugreport -o "$testResultsDir"
+    ./tools/android-emulator.sh bugreport -o "$testResultsDir"
 }
 
 function _collectCblLogsStandalone() {
@@ -208,7 +208,7 @@ function _collectCblLogsStandalone() {
 function _collectCblLogsIosSimulator() {
     echo "Collecting Couchbase Lite logs from iOS Simulator app"
 
-    ./tool/apple-simulator.sh copyData \
+    ./tools/apple-simulator.sh copyData \
         -o "iOS-$iosVersion" \
         -d "$iosDevice" \
         -b "$testAppBundleId" \

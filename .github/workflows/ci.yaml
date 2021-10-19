@@ -154,7 +154,7 @@ jobs:
         run: brew install bash
 
       - name: Build native libraries
-        run: ./tool/ci-steps.sh buildNativeLibraries
+        run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Install Fluter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
@@ -169,7 +169,7 @@ jobs:
 
       - name: Configure flutter
         if: matrix.embedder == 'flutter'
-        run: ./tool/ci-steps.sh configureFlutter
+        run: ./tools/ci-steps.sh configureFlutter
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -181,7 +181,7 @@ jobs:
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart packages
-        run: ./tool/ci-steps.sh bootstrapPackages
+        run: ./tools/ci-steps.sh bootstrapPackages
 
       - name: Start test Couchbase cluster
         run: |
@@ -196,14 +196,14 @@ jobs:
 
       - name: Start virtual devices
         if: matrix.embedder == 'flutter'
-        run: ./tool/ci-steps.sh startVirtualDevices
+        run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        run: ./tool/ci-steps.sh runE2ETests
+        run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
-        run: ./tool/ci-steps.sh collectTestResults
+        run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
         if: failure()
