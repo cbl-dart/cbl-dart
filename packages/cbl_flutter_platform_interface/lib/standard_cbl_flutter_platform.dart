@@ -7,9 +7,9 @@ import 'cbl_flutter_platform_interface.dart';
 /// [CblFlutterPlatform] implementation which expects to be able to access the
 /// native libraries (`cblite` and `cblitedart`) through a platform specific
 /// standard mechanism.
-/// 
+///
 /// Platform implementations must ensure that the native libraries are bundled
-/// with the Flutter app so that they are locatable through the mechanism 
+/// with the Flutter app so that they are locatable through the mechanism
 /// described below.
 ///
 /// # iOS and macOS

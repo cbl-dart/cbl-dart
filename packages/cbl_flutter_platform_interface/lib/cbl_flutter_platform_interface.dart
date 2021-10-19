@@ -16,8 +16,8 @@ abstract class CblFlutterPlatform extends PlatformInterface {
     final instance = _instance;
 
     if (instance == null) {
-      // TODO(blaugold): remove note about manually registering platform 
-      // implementation when dart plugin classes are register automatically on 
+      // TODO(blaugold): remove note about manually registering platform
+      // implementation when dart plugin classes are register automatically on
       // mobile platforms.
       throw StateError(
         'No cbl_flutter platform implementation has been registered. '
