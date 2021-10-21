@@ -138,6 +138,7 @@ FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
 // Decoder --------------------------------------------------------------------
 
 struct CBLDart_LoadedFLValue {
+  uint8_t exists;
   int8_t type;
   uint8_t isInteger;
   uint32_t collectionSize;
@@ -153,8 +154,8 @@ CBLDART_EXPORT
 CBLDart_FLStringResult CBLDart_FLData_Dump(CBLDart_FLSlice data);
 
 CBLDART_EXPORT
-uint8_t CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
-                                 CBLDart_LoadedFLValue *out);
+void CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
+                              CBLDart_LoadedFLValue *out);
 
 CBLDART_EXPORT
 void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out);

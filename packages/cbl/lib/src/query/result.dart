@@ -145,7 +145,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   T? value<T extends Object>(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.value(nameOrIndex);
     }
@@ -154,7 +154,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   String? string(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.string(nameOrIndex);
     }
@@ -163,7 +163,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   int integer(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.integer(nameOrIndex);
     }
@@ -172,7 +172,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   double float(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.float(nameOrIndex);
     }
@@ -181,7 +181,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   num? number(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.number(nameOrIndex);
     }
@@ -190,7 +190,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   bool boolean(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.boolean(nameOrIndex);
     }
@@ -199,7 +199,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   DateTime? date(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.date(nameOrIndex);
     }
@@ -208,7 +208,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Blob? blob(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.blob(nameOrIndex);
     }
@@ -217,7 +217,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Array? array(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.array(nameOrIndex);
     }
@@ -226,7 +226,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Dictionary? dictionary(Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array.dictionary(nameOrIndex);
     }
@@ -236,7 +236,7 @@ class ResultImpl with IterableMixin<String> implements Result {
   @override
   // ignore: avoid_renaming_method_parameters
   bool contains(Object? nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return nameOrIndex >= 0 && nameOrIndex < _columnNames.length;
     }
@@ -245,7 +245,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   Fragment operator [](Object nameOrIndex) {
-    _checknameOrIndex(nameOrIndex);
+    _checkNameOrIndex(nameOrIndex);
     if (nameOrIndex is int) {
       return _array[nameOrIndex];
     }
@@ -322,7 +322,7 @@ class ResultImpl with IterableMixin<String> implements Result {
     return dictionary;
   }
 
-  void _checknameOrIndex(Object? nameOrIndex) {
+  void _checkNameOrIndex(Object? nameOrIndex) {
     if (!(nameOrIndex is int || nameOrIndex is String)) {
       throw ArgumentError.value(
         nameOrIndex,

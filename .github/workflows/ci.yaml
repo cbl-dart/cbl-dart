@@ -228,6 +228,8 @@ jobs:
           path: test-results
 
   test-e2e-cbl_flutter_prebuilt:
+    # Temporarily disabled until compatible version of `cbl` is published.
+    if: ${{ false }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:

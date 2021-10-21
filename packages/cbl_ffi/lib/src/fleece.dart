@@ -1118,6 +1118,8 @@ extension on FLTrust {
 }
 
 class CBLDart_LoadedFLValue extends Struct {
+  @Uint8()
+  external int _exists;
   @Int8()
   external int _type;
   @Uint8()
@@ -1137,6 +1139,7 @@ class CBLDart_LoadedFLValue extends Struct {
 
 // ignore: camel_case_extensions
 extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
+  bool get exists => _exists.toBool();
   FLValueType get type => _type.toFLValueType();
   bool get isInteger => _isInteger.toBool();
   bool get asBool => _asBool.toBool();
@@ -1145,12 +1148,12 @@ extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
 typedef _CBLDart_FLData_Dump_C = FLStringResult Function(FLSlice slice);
 typedef _CBLDart_FLData_Dump = FLStringResult Function(FLSlice slice);
 
-typedef _CBLDart_FLValue_FromData_C = Uint8 Function(
+typedef _CBLDart_FLValue_FromData_C = Void Function(
   FLSlice data,
   Uint8 trust,
   Pointer<CBLDart_LoadedFLValue> out,
 );
-typedef _CBLDart_FLValue_FromData = int Function(
+typedef _CBLDart_FLValue_FromData = void Function(
   FLSlice data,
   int trust,
   Pointer<CBLDart_LoadedFLValue> out,
@@ -1269,12 +1272,12 @@ class FleeceDecoderBindings extends Bindings {
   String dumpData(Data data) => _dumpData(data.toSliceResult().makeGlobal().ref)
       .toDartStringAndRelease()!;
 
-  bool getLoadedFLValueFromData(Slice data, FLTrust trust) =>
+  void getLoadedFLValueFromData(Slice data, FLTrust trust) =>
       _getLoadedFLValueFromData(
         data.makeGlobal().ref,
         trust.toInt(),
         globalLoadedFLValue,
-      ).toBool();
+      );
 
   void getLoadedValue(Pointer<FLValue> value) {
     _getLoadedFLValue(value, globalLoadedFLValue);

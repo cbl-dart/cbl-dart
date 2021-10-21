@@ -111,7 +111,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
           (it) => it.toString(),
           'toString()',
           '''
-DatabaseException(query syntax error, code: invalidQuery)
+DatabaseException(N1QL syntax error near character 11, code: invalidQuery)
 SELECT foo()
           ^
 ''',

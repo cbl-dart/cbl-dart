@@ -66,7 +66,7 @@ void main() {
       test('get value from existing array', () {
         final root = testMRoot([null]);
         final array = root.asNative as MArray;
-        expect(array.get(0), MValue.withValue(SimpleFLValue(null)));
+        expect(array.get(0), MValue.withValue(const SimpleFLValue(null)));
         array.remove(0);
         expect(array.get(0), isNull);
         array.append(null);
@@ -101,7 +101,7 @@ void main() {
         expect(root.isMutated, isFalse);
         expect(array.isMutated, isFalse);
         expect(value.isMutated, isFalse);
-        expect(value, MValue.withValue(SimpleFLValue(0)));
+        expect(value, MValue.withValue(const SimpleFLValue(0)));
 
         array.set(0, 1);
 
@@ -191,7 +191,7 @@ void main() {
       test('get value from existing dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        expect(dict.get('a'), MValue.withValue(SimpleFLValue(null)));
+        expect(dict.get('a'), MValue.withValue(const SimpleFLValue(null)));
         dict.remove('a');
         expect(dict.get('a'), isNull);
         dict.set('a', null);
@@ -206,7 +206,7 @@ void main() {
         expect(root.isMutated, isFalse);
         expect(dict.isMutated, isFalse);
         expect(value!.isMutated, isFalse);
-        expect(value, MValue.withValue(SimpleFLValue(true)));
+        expect(value, MValue.withValue(const SimpleFLValue(true)));
 
         dict.set('a', false);
 
@@ -248,7 +248,7 @@ void main() {
         final dict = root.asNative as MDict;
         expect(
           Map.fromEntries(dict.iterable),
-          {'a': MValue.withValue(SimpleFLValue(null))},
+          {'a': MValue.withValue(const SimpleFLValue(null))},
         );
       });
 
@@ -259,7 +259,7 @@ void main() {
         expect(
           Map.fromEntries(dict.iterable),
           {
-            'a': MValue.withValue(SimpleFLValue(null)),
+            'a': MValue.withValue(const SimpleFLValue(null)),
             'b': MValue.withNative(true),
           },
         );

@@ -51,11 +51,19 @@ class SharedStrings {
 /// Values wich correspond to [FLValueType.undefined] are represented as `null`
 /// in Dart.
 @immutable
-abstract class LoadedFLValue {}
+abstract class LoadedFLValue {
+  const LoadedFLValue();
+}
+
+class _UndefinedFLValue extends LoadedFLValue {
+  const _UndefinedFLValue._();
+}
+
+const undefinedFLValue = _UndefinedFLValue._();
 
 /// A [LoadedFLValue] for `null`, `boolean` and `number` values.
 class SimpleFLValue extends LoadedFLValue {
-  SimpleFLValue(this.value)
+  const SimpleFLValue(this.value)
       : assert(value == null || value is bool || value is num);
 
   /// The Dart representation of the [FLValue].
@@ -143,11 +151,15 @@ class CollectionFLValue extends ComplexFLValue {
 
 extension on CBLDart_LoadedFLValue {
   LoadedFLValue? toLoadedFLValue() {
+    if (!exists) {
+      return null;
+    }
+
     switch (type) {
       case FLValueType.undefined:
-        return null;
+        return undefinedFLValue;
       case FLValueType.null_:
-        return SimpleFLValue(null);
+        return const SimpleFLValue(null);
       case FLValueType.boolean:
         return SimpleFLValue(asBool);
       case FLValueType.number:
@@ -211,9 +223,7 @@ class FleeceDecoder {
     Data data, {
     FLTrust trust = FLTrust.untrusted,
   }) {
-    if (!_decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust)) {
-      return null;
-    }
+    _decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust);
     return _globalLoadedValueObject();
   }
 
@@ -259,7 +269,9 @@ class FleeceDecoder {
   /// Returns a Dart representation of [value]. Collections are recursively
   /// converted to Dart objects.
   Object? loadedValueToDartObject(LoadedFLValue value) {
-    if (value is SimpleFLValue) {
+    if (value == undefinedFLValue) {
+      _throwUndefinedDartRepresentation();
+    } else if (value is SimpleFLValue) {
       return value.value;
     } else if (value is SliceFLValue) {
       return value.isString
@@ -316,9 +328,7 @@ class FleeceDecoder {
     final value = globalLoadedFLValue.ref;
     switch (value.type) {
       case FLValueType.undefined:
-        throw UnsupportedError(
-          'undefined cannot be represented as Dart value',
-        );
+        _throwUndefinedDartRepresentation();
       case FLValueType.null_:
         return null;
       case FLValueType.boolean:
@@ -350,6 +360,9 @@ class FleeceDecoder {
     }
   }
 }
+
+Never _throwUndefinedDartRepresentation() =>
+    throw UnsupportedError('undefined has not Dart representation');
 
 // === DictIterable ============================================================
 

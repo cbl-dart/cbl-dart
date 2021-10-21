@@ -90,7 +90,7 @@ void main() {
         final data = encoder.convertJson('[true]');
         final root = decoder.loadValueFromData(data)! as CollectionFLValue;
         final value = decoder.loadValueFromArray(root.value.cast(), 0);
-        expect(value, SimpleFLValue(true));
+        expect(value, const SimpleFLValue(true));
       });
 
       test('loadValueFromArray returns null if index is out of bounds', () {
@@ -108,7 +108,7 @@ void main() {
         final data = encoder.convertJson('{"a": true}');
         final root = decoder.loadValueFromData(data)! as CollectionFLValue;
         final value = decoder.loadValueFromDict(root.value.cast(), 'a');
-        expect(value, SimpleFLValue(true));
+        expect(value, const SimpleFLValue(true));
       });
 
       test('loadValueFromDict returns null if entry for key does not exits',
@@ -172,9 +172,9 @@ void main() {
         expect(
           Map.fromEntries(decoder.dictIterable(root.value.cast())),
           {
-            'a': SimpleFLValue(true),
-            'b': SimpleFLValue(null),
-            'c': SimpleFLValue(3.14),
+            'a': const SimpleFLValue(true),
+            'b': const SimpleFLValue(null),
+            'c': const SimpleFLValue(3.14),
           },
         );
       });
