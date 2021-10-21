@@ -48,3 +48,15 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
+
+task installLibraries(type: Exec) {
+    workingDir file("$projectDir/..")
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'cmd', '/c', 'C:/Program Files/Git/bin/bash', './tool/install_libraries.sh', 'android'
+    } else {
+        commandLine './tool/install_libraries.sh', 'android'
+    }
+}
+
+tasks.preBuild.dependsOn(installLibraries)

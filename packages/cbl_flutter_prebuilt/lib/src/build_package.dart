@@ -88,13 +88,41 @@ Future<void> _copyFilePermissions(
   String file, {
   required String from,
 }) async {
-  final chmodResult = await Process.run('chmod', ['--reference', from, file]);
+  if (Platform.isWindows) {
+    final result = await Process.run('powershell.exe', [
+      '-Command',
+      'Get-Acl -Path "$from" | Set-Acl -Path $file"',
+    ]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'Could not set mode of copied file: $file\n'
+        '${result.stdout}\n'
+        '${result.stderr}',
+      );
+    }
+  } else if (Platform.isLinux || Platform.isMacOS) {
+    final statResult = await Process.run('stat', ['-f', '%p', from]);
+    if (statResult.exitCode != 0) {
+      throw StateError(
+        'Could not get permissions of file: $from\n'
+        '${statResult.stdout}\n'
+        '${statResult.stderr}',
+      );
+    }
 
-  if (chmodResult.exitCode != 0) {
-    throw StateError(
-      'Could not set mode of copied file: $file\n'
-      '${chmodResult.stdout}\n'
-      '${chmodResult.stderr}',
+    final octalMode = (statResult.stdout as String).trim().substring(2);
+
+    final chmodResult = await Process.run('chmod', [octalMode, file]);
+    if (chmodResult.exitCode != 0) {
+      throw StateError(
+        'Could not set mode of copied file: $file\n'
+        '${chmodResult.stdout}\n'
+        '${chmodResult.stderr}',
+      );
+    }
+  } else {
+    throw UnimplementedError(
+      'Copying file permission is not implemented on this platform',
     );
   }
 }

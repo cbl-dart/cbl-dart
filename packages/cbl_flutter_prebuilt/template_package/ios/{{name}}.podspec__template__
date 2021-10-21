@@ -10,6 +10,7 @@ Pod::Spec.new do |s|
   s.source              = { :path => '.' }
   s.source_files        = 'Classes/**/*'
   s.vendored_frameworks = 'Frameworks/*'
+  s.prepare_command     = '../tool/install_libraries.sh ios'
   s.dependency 'Flutter'
 
   # Flutter.framework does not contain a i386 slice.
