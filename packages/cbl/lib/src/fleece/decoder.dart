@@ -59,6 +59,7 @@ class _UndefinedFLValue extends LoadedFLValue {
   const _UndefinedFLValue._();
 }
 
+/// A [LoadedFLValue] for a value that is undefined or missing.
 const undefinedFLValue = _UndefinedFLValue._();
 
 /// A [LoadedFLValue] for `null`, `boolean` and `number` values.
