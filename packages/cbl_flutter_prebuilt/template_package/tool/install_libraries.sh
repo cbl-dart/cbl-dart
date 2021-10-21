@@ -60,8 +60,8 @@ function _archiveExt() {
 # target of Couchbase Lite C.
 function _couchbaseLiteCDownloadUrl() {
     local edition="$1"
-    local release="$3"
-    local target="$4"
+    local release="$2"
+    local target="$3"
     echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target.$(_archiveExt $target)"
 }
 
@@ -69,8 +69,8 @@ function _couchbaseLiteCDownloadUrl() {
 # target of Couchbase Lite Dart.
 function _couchbaseLiteDartDownloadUrl() {
     local edition="$1"
-    local release="$3"
-    local target="$4"
+    local release="$2"
+    local target="$3"
     echo "https://github.com/cbl-dart/cbl-dart/releases/download/libcblitedart-v$release/couchbase-lite-dart-$release-$edition-$target.$(_archiveExt $target)"
 }
 
