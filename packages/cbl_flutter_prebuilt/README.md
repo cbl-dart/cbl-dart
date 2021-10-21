@@ -12,17 +12,17 @@ providing prebuilt official versions of the native libraries (`libcblite` and
 used to generate the two packages. Files whose names contain `__template__` are
 process as mustache templates with the following context.
 
-| Name                      | Value                            | Type    | Description                                                  |
-| ------------------------- | -------------------------------- | ------- | ------------------------------------------------------------ |
-| name                      | cbl_flutter_ce \| cbl_flutter_ee | String  | The name of the package.                                     |
-| edition                   | community \| enterprise          | String  | The Couchbase Lite edition distributed by the package.       |
-| enterpriseEdition         |                                  | Boolean | Whether this package is distributing the enterprise edition. |
-| pluginClass               | CblFlutterCe \| CblFlutterEe     | String  | The name of the plugin classes.                              |
-| couchbaseLiteC.version    |                                  | String  | The version of Couchbase Lite C to distribute.               |
-| couchbaseLiteC.build      |                                  | String  | The build of Couchbase Lite C to distribute.                 |
-| couchbaseLiteDart.version |                                  | String  | The version of Couchbase Lite Dart to distribute.            |
-| couchbaseLiteDart.build   |                                  | String  | The build of Couchbase Lite Dart to distribute.              |
-| capitalize                |                                  | Lambda  | Capitalizes content of the tag.                              |
+| Name                      | Value                            | Type    | Description                                                   |
+| ------------------------- | -------------------------------- | ------- | ------------------------------------------------------------- |
+| name                      | cbl_flutter_ce \| cbl_flutter_ee | String  | The name of the package.                                      |
+| edition                   | community \| enterprise          | String  | The Couchbase Lite edition distributed by the package.        |
+| enterpriseEdition         |                                  | Boolean | Whether this package is distributing the enterprise edition.  |
+| pluginClass               | CblFlutterCe \| CblFlutterEe     | String  | The name of the plugin classes.                               |
+| couchbaseLiteC.version    |                                  | String  | The version of Couchbase Lite C to distribute.                |
+| couchbaseLiteC.release    |                                  | String  | The name of the release of Couchbase Lite C to distribute.    |
+| couchbaseLiteDart.version |                                  | String  | The version of Couchbase Lite Dart to distribute.             |
+| couchbaseLiteDart.release |                                  | String  | The name of the release of Couchbase Lite Dart to distribute. |
+| capitalize                |                                  | Lambda  | Capitalizes content of the tag.                               |
 
 The output file name has `__template__` removed.
 

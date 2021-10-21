@@ -56,24 +56,22 @@ function _archiveExt() {
     esac
 }
 
-# Outputs the URL of the archive for the given edition, version, build and
+# Outputs the URL of the archive for the given edition, release and
 # target of Couchbase Lite C.
 function _couchbaseLiteCDownloadUrl() {
     local edition="$1"
-    local version="$2"
-    local build="$3"
+    local release="$3"
     local target="$4"
-    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$version-$build/couchbase-lite-c-$edition-$version-$build-$target.$(_archiveExt $target)"
+    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target.$(_archiveExt $target)"
 }
 
-# Outputs the URL of the archive for the given edition, version, build and
+# Outputs the URL of the archive for the given edition, release and
 # target of Couchbase Lite Dart.
 function _couchbaseLiteDartDownloadUrl() {
     local edition="$1"
-    local version="$2"
-    local build="$3"
+    local release="$3"
     local target="$4"
-    echo "https://github.com/cbl-dart/cbl-dart/releases/download/libcblitedart-v$version-$build/couchbase-lite-dart-$version-$build-$edition-$target.$(_archiveExt $target)"
+    echo "https://github.com/cbl-dart/cbl-dart/releases/download/libcblitedart-v$release/couchbase-lite-dart-$release-$edition-$target.$(_archiveExt $target)"
 }
 
 target="$1"
@@ -100,8 +98,7 @@ couchbaseLiteDartArchiveFile="$tmpDir/couchbase-lite-dart.$(_archiveExt "$target
 curl "$(
     _couchbaseLiteCDownloadUrl \
         "$COUCHBASE_EDITION" \
-        "$COUCHBASE_LITE_C_VERSION" \
-        "$COUCHBASE_LITE_C_BUILD" \
+        "$COUCHBASE_LITE_C_RELEASE" \
         "$target"
 )" \
     --silent \
@@ -113,8 +110,7 @@ curl "$(
 curl "$(
     _couchbaseLiteDartDownloadUrl \
         "$COUCHBASE_EDITION" \
-        "$COUCHBASE_LITE_DART_VERSION" \
-        "$COUCHBASE_LITE_DART_BUILD" \
+        "$COUCHBASE_LITE_DART_RELEASE" \
         "$target"
 )" \
     --location \

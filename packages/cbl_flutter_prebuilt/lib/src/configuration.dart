@@ -14,11 +14,11 @@ final packageConfigurations = [
       edition: edition,
       couchbaseLiteC: const LibraryInfo(
         version: '3.0.0',
-        build: 'beta01',
+        release: '3.0.0-beta01',
       ),
       couchbaseLiteDart: const LibraryInfo(
         version: '1.0.0',
-        build: 'beta.0',
+        release: '1.0.0-beta.0',
       ),
     )
 ];
@@ -26,10 +26,10 @@ final packageConfigurations = [
 enum Edition { community, enterprise }
 
 class LibraryInfo {
-  const LibraryInfo({required this.version, required this.build});
+  const LibraryInfo({required this.version, required this.release});
 
   final String version;
-  final String build;
+  final String release;
 }
 
 class PackageConfiguration {

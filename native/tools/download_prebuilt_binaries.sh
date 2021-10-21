@@ -5,8 +5,8 @@
 #
 # The binaries will be installed into `native/vendor/couchbase-lite-C-prebuilt`.
 # For each target both the community and enterprise editions are installed.
-# The version of Couchbase Lite C, this script downloads, is defined in
-# `native/CouchbaseLite.version`.
+# The release of Couchbase Lite C, this script downloads, is defined in
+# `native/CouchbaseLiteC.release`.
 #
 # # Usage
 #
@@ -23,8 +23,7 @@ nativeDir="$(cd $scriptDir/.. && pwd)"
 vendorDir="$nativeDir/vendor"
 binariesDir="$vendorDir/couchbase-lite-C-prebuilt"
 tmpDir="$binariesDir/tmp"
-versionFile="$nativeDir/CouchbaseLite.version"
-version="$(cat "$versionFile")"
+couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 editions=(community enterprise)
 targets=(android ios macos ubuntu20.04-x86_64)
 
@@ -43,32 +42,32 @@ function _archiveExt() {
     esac
 }
 
-# Outputs the URL of the archive for the given version, edition and target of
+# Outputs the URL of the archive for the given release, edition and target of
 # Couchbase Lite C.
 function _downloadUrl() {
-    local version=$1
+    local release=$1
     local edition=$2
     local target=$3
-    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$version/couchbase-lite-c-$edition-$version-$target.$(_archiveExt $target)"
+    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target.$(_archiveExt $target)"
 }
 
-# Downloads and unpacks the binares for the given version, edition and target
+# Downloads and unpacks the binares for the given release, edition and target
 # of Couchbase Lite C.
 function _downloadBinaries() {
-    local version=$1
+    local release=$1
     local edition=$2
     local target=$3
-    local archiveFile="$tmpDir/$version-$edition-$target.$(_archiveExt $target)"
-    local installDir="$binariesDir/$version-$edition-$target"
+    local archiveFile="$tmpDir/$release-$edition-$target.$(_archiveExt $target)"
+    local installDir="$binariesDir/$release-$edition-$target"
 
     if [ -d "$installDir" ]; then
-        echo "Skipping download for exisiting binaries: $version-$edition-$target"
+        echo "Skipping download for exisiting binaries: $release-$edition-$target"
         return 0
     fi
 
-    echo "Downloading prebuild binaries: $version-$edition-$target"
+    echo "Downloading prebuild binaries: $release-$edition-$target"
 
-    curl "$(_downloadUrl $version $edition $target)" \
+    curl "$(_downloadUrl $release $edition $target)" \
         --silent \
         --fail \
         --retry 5 \
@@ -88,18 +87,18 @@ function _downloadBinaries() {
     esac
 }
 
-# Downloads the binaries for the given version and all the given editions and
+# Downloads the binaries for the given release and all the given editions and
 # targets of Couchbase Lite C.
 #
 # The edition and targets must be space sperated lists. If either one is empty,
 # the binaries for all respectively allowed value are downloaded.
 function _downloadMultipleBinaries() {
-    local _version=$1
+    local _release=$1
     local _editions=$2
     local _targets=$3
 
-    if [[ -z "$_version" ]]; then
-        _version="$version"
+    if [[ -z "$_release" ]]; then
+        _release="$couchbaseLiteCRelease"
     fi
 
     if [[ -z "$_editions" ]]; then
@@ -112,7 +111,7 @@ function _downloadMultipleBinaries() {
 
     for edition in $_editions; do
         for target in $_targets; do
-            _downloadBinaries "$version" "$edition" "$target"
+            _downloadBinaries "$_release" "$edition" "$target"
         done
     done
 }

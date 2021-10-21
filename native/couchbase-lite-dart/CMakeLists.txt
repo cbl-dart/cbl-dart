@@ -17,8 +17,8 @@ if(NOT DEFINED CBL_EDITION)
     set(CBL_EDITION community)
 endif()
 
-if(NOT DEFINED CBL_VERSION)
-    file(READ ${NATIVE_DIR}/CouchbaseLite.version CBL_VERSION)
+if(NOT DEFINED CBL_RELEASE)
+    file(READ ${NATIVE_DIR}/CouchbaseLiteC.release CBL_RELEASE)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
@@ -31,7 +31,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 endif()
 
 file(GLOB CBL_PREBUILT_DIR  
-    ${NATIVE_DIR}/vendor/couchbase-lite-C-prebuilt/${CBL_VERSION}-${CBL_EDITION}-${CBL_TARGET}/libcblite-*
+    ${NATIVE_DIR}/vendor/couchbase-lite-C-prebuilt/${CBL_RELEASE}-${CBL_EDITION}-${CBL_TARGET}/libcblite-*
 )
 
 find_package(CouchbaseLite 

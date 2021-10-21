@@ -10,7 +10,7 @@ JsonMap createTemplateContext({required PackageConfiguration configuration}) =>
     };
 
 extension on LibraryInfo {
-  JsonMap templateContext() => {'version': version, 'build': build};
+  JsonMap templateContext() => {'version': version, 'release': release};
 }
 
 extension on PackageConfiguration {
