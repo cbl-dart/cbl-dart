@@ -100,7 +100,16 @@ Future<void> _copyFilePermissions(
         '${result.stderr}',
       );
     }
-  } else if (Platform.isLinux || Platform.isMacOS) {
+  } else if (Platform.isLinux) {
+    final result = await Process.run('chmod', ['--reference', from, file]);
+    if (result.exitCode != 0) {
+      throw StateError(
+        'Could not set mode of copied file: $file\n'
+        '${result.stdout}\n'
+        '${result.stderr}',
+      );
+    }
+  } else if (Platform.isMacOS) {
     final statResult = await Process.run('stat', ['-f', '%p', from]);
     if (statResult.exitCode != 0) {
       throw StateError(

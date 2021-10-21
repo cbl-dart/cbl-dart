@@ -110,7 +110,7 @@ tests have been linked into
 tests are not configured as Flutter unit tests, but instead as Flutter
 integration tests. Integration tests can can be launched through the IDE or
 through `flutter test` with a specific test file in `integration_test`. By using
-`integration_test/cbl_e2e_test.dart` as the test file all tests are executed.
+`integration_test/e2e_test.dart` as the test file all tests are executed.
 
 [install flutter]: https://flutter.dev/docs/get-started/install
 [packages]: ../packages
