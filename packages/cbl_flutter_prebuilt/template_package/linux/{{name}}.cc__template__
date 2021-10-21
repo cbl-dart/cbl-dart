@@ -1,0 +1,29 @@
+#include "include/{{name}}/{{name}}.h"
+
+#include <flutter_linux/flutter_linux.h>
+#include <gtk/gtk.h>
+#include <sys/utsname.h>
+
+#include <cstring>
+
+#define CBL_FLUTTER_PREBUILT(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj), {{name}}_get_type(), \
+                              {{pluginClass}}))
+
+struct _{{pluginClass}} {
+  GObject parent_instance;
+};
+
+G_DEFINE_TYPE({{pluginClass}}, {{name}}, g_object_get_type())
+
+static void {{name}}_dispose(GObject* object) {
+  G_OBJECT_CLASS({{name}}_parent_class)->dispose(object);
+}
+
+static void {{name}}_class_init({{pluginClass}}Class* klass) {
+  G_OBJECT_CLASS(klass)->dispose = {{name}}_dispose;
+}
+
+static void {{name}}_init({{pluginClass}}* self) {}
+
+void {{name}}_register_with_registrar(FlPluginRegistrar* registrar) {}
