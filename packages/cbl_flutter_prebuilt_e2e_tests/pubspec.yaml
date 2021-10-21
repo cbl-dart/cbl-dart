@@ -1,0 +1,24 @@
+name: cbl_flutter_prebuilt_e2e_tests
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=2.5.0'
+
+dependencies:
+  cbl: ^0.6.0
+  cbl_flutter:
+    path: ../cbl_flutter
+  cbl_flutter_ee:
+    path: ../cbl_flutter_prebuilt/build/cbl_flutter_ee
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+dependency_overrides:
+  cbl_ffi:
+    path: ../cbl_ffi

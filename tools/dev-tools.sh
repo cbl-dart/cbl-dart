@@ -9,9 +9,9 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 nativeDir="$projectDir/native"
 couchbaseLiteCPrebuiltDir="$nativeDir/vendor/couchbase-lite-C-prebuilt"
+couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 couchbaseLiteDartDir="$nativeDir/couchbase-lite-dart"
 couchbaseLiteDartBuildDir="$couchbaseLiteDartDir/build"
-couchbaseLiteVersion="$(cat "$nativeDir/CouchbaseLite.version")"
 couchbaseLiteDartVersion="$(cat "$couchbaseLiteDartDir/CouchbaseLiteDart.version")"
 cblE2eTestsStandaloneDartDir="$projectDir/packages/cbl_e2e_tests_standalone_dart"
 cblE2eTestsStandaloneDartLibDir="$cblE2eTestsStandaloneDartDir/lib"
@@ -59,7 +59,7 @@ function prepareNativeLibraries() {
 
     "$nativeDir/tools/download_prebuilt_binaries.sh" "$target"
 
-    local couchbaseLiteCArchiveDir="$couchbaseLiteCPrebuiltDir/$couchbaseLiteVersion-$edition-$target"
+    local couchbaseLiteCArchiveDir="$couchbaseLiteCPrebuiltDir/$couchbaseLiteCRelease-$edition-$target"
 
     case "$target" in
     android)

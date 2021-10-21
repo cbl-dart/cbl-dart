@@ -11,19 +11,17 @@ function requireEnvVar() {
     fi
 }
 
-requireEnvVar MATRIX_EMBEDDER
-requireEnvVar MATRIX_OS
-
 # === Constants ===============================================================
 
 testResultsDir="test-results"
-standaloneTestsPackage="cbl_e2e_tests_standalone_dart"
-flutterTestsPackage="cbl_e2e_tests_flutter"
-standaloneTestsPackageDir="packages/$standaloneTestsPackage"
-flutterTestsPackageDir="packages/$flutterTestsPackage"
+cblFlutterPrebuiltPackage="cbl_flutter_prebuilt"
+embedder="$EMBEDDER"
+targetOs="$TARGET_OS"
+testPackage="$TEST_PACKAGE"
+testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
-iosVersion="14-5"
-iosDevice="iPhone 12"
+iosVersion="15-0"
+iosDevice="iPhone 13"
 androidVersion="22"
 androidDevice="pixel_4"
 
@@ -32,7 +30,7 @@ androidDevice="pixel_4"
 function buildNativeLibraries() {
     local target=
 
-    case "$MATRIX_OS" in
+    case "$targetOs" in
     iOS)
         target=ios
         ;;
@@ -50,8 +48,14 @@ function buildNativeLibraries() {
     ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
 }
 
+function buildCblFlutterPrebuiltPackages() {
+    melos run build:cbl_flutter_prebuilt
+}
+
 function configureFlutter() {
-    case "$MATRIX_OS" in
+    requireEnvVar TARGET_OS
+
+    case "$targetOs" in
     macOS)
         flutter config --enable-macos-desktop
         ;;
@@ -62,20 +66,25 @@ function configureFlutter() {
 }
 
 function bootstrapPackages() {
-    case "$MATRIX_EMBEDDER" in
+    requireEnvVar EMBEDDER
+    requireEnvVar TEST_PACKAGE
+
+    case "$embedder" in
     standalone)
-        melos bootstrap --scope "$standaloneTestsPackage"
+        melos bootstrap --scope "$testPackage"
         ;;
     flutter)
         # `flutter pub get` creates some files which `melos bootstrap` doesn't.
-        melos exec --scope "$flutterTestsPackage" -- flutter pub get
-        melos bootstrap --scope "$flutterTestsPackage"
+        melos exec --scope "$testPackage" -- flutter pub get
+        melos bootstrap --scope "$testPackage"
         ;;
     esac
 }
 
 function startVirtualDevices() {
-    case "$MATRIX_OS" in
+    requireEnvVar TARGET_OS
+
+    case "$targetOs" in
     iOS)
         ./tools/apple-simulator.sh start -o "iOS-$iosVersion" -d "$iosDevice"
         ;;
@@ -92,14 +101,18 @@ function startVirtualDevices() {
 }
 
 function runE2ETests() {
-    case "$MATRIX_EMBEDDER" in
+    requireEnvVar EMBEDDER
+    requireEnvVar TARGET_OS
+    requireEnvVar TEST_PACKAGE
+
+    case "$embedder" in
     standalone)
-        cd "$standaloneTestsPackageDir"
+        cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
         testCommand="dart test -r expanded -j 1"
 
-        case "$MATRIX_OS" in
+        case "$targetOs" in
         macOS)
             # The tests are run with sudo, so that macOS records crash reports.
             sudo $testCommand
@@ -112,10 +125,10 @@ function runE2ETests() {
         esac
         ;;
     flutter)
-        cd "$flutterTestsPackageDir"
+        cd "$testPackageDir"
 
         device=""
-        case "$MATRIX_OS" in
+        case "$targetOs" in
         iOS)
             device="iPhone"
             ;;
@@ -139,7 +152,7 @@ function runE2ETests() {
             --dart-define enableTimeBomb=true \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
-            --target integration_test/cbl_e2e_test.dart
+            --target integration_test/e2e_test.dart
         ;;
     esac
 }
@@ -147,7 +160,7 @@ function runE2ETests() {
 function _collectFlutterIntegrationResponseData() {
     echo "Collecting Flutter integration test response data"
 
-    local integrationResponseData="$flutterTestsPackageDir/build/integration_response_data"
+    local integrationResponseData="$testPackageDir/build/integration_response_data"
 
     if [ ! -e "$integrationResponseData" ]; then
         echo "Did not find data"
@@ -169,18 +182,18 @@ function _collectCrashReportsMacOS() {
 function _collectCrashReportsLinuxStandalone() {
     ./tools/create-crash-report-linux.sh \
         -e "$(which dart)" \
-        -c "$standaloneTestsPackageDir/core" \
+        -c "$testPackageDir/core" \
         -o "$testResultsDir"
 }
 
 function _collectCrashReportsLinuxFlutter() {
-    for core in "$flutterTestsPackageDir/core."*; do
+    for core in "$testPackageDir/core."*; do
         local pid="${core##*.}"
         local coreTestResultsDir="$testResultsDir/$pid"
         mkdir -p "$coreTestResultsDir"
 
         ./tools/create-crash-report-linux.sh \
-            -e "$flutterTestsPackageDir/build/linux/x64/debug/bundle/$flutterTestsPackage" \
+            -e "$testPackageDir/build/linux/x64/debug/bundle/$testPackage" \
             -c "$core" \
             -o "$coreTestResultsDir"
     done
@@ -193,7 +206,7 @@ function _collectCrashReportsAndroid() {
 function _collectCblLogsStandalone() {
     echo "Collecting Couchbase Lite logs"
 
-    local cblLogsDir="$standaloneTestsPackageDir/test/.tmp/logs"
+    local cblLogsDir="$testPackageDir/test/.tmp/logs"
 
     if [ ! -e "$cblLogsDir" ]; then
         echo "Did not find logs"
@@ -233,14 +246,18 @@ function _collectCblLogsMacOS() {
 }
 
 function collectTestResults() {
+    requireEnvVar EMBEDDER
+    requireEnvVar TARGET_OS
+    requireEnvVar TEST_PACKAGE
+
     mkdir "$testResultsDir"
 
     # Wait for crash reports/core dumps.
     sleep 60
 
-    case "$MATRIX_EMBEDDER" in
+    case "$embedder" in
     standalone)
-        case "$MATRIX_OS" in
+        case "$targetOs" in
         macOS)
             _collectCrashReportsMacOS
             _collectCblLogsStandalone
@@ -254,7 +271,7 @@ function collectTestResults() {
     flutter)
         _collectFlutterIntegrationResponseData
 
-        case "$MATRIX_OS" in
+        case "$targetOs" in
         macOS)
             _collectCrashReportsMacOS
             _collectCblLogsMacOS

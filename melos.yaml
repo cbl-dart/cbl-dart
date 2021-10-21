@@ -4,6 +4,11 @@ packages:
   - packages/**
 
 scripts:
+  build:cbl_flutter_prebuilt:
+    run: melos exec -- dart run
+    select-package:
+      scope: cbl_flutter_prebuilt
+
   formatting:check: melos exec -- dart format --set-exit-if-changed .
 
   analyze: melos exec -- dart analyze --fatal-infos

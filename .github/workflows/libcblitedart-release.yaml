@@ -11,7 +11,7 @@ jobs:
     outputs:
       upload-url: ${{ steps.create-release.outputs.upload_url }}
       tag: ${{ steps.set-outputs.outputs.tag }}
-      version: ${{ steps.set-outputs.outputs.version }}
+      release: ${{ steps.set-outputs.outputs.release }}
     steps:
       - name: Create Release
         id: create-release
@@ -27,7 +27,7 @@ jobs:
         id: set-outputs
         run: |
           echo "::set-output name=tag::${GITHUB_REF/refs\/tags\//}"
-          echo "::set-output name=version::${GITHUB_REF/refs\/tags\/libcblitedart-v/}"
+          echo "::set-output name=release::${GITHUB_REF/refs\/tags\/libcblitedart-v/}"
 
   linux:
     needs: create-release
@@ -45,7 +45,7 @@ jobs:
       - name: Build release
         run: |
           ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.version }} \
+            ${{ needs.create-release.outputs.release }} \
             ubuntu20.04-x86_64
 
       - name: Upload archives
@@ -68,7 +68,7 @@ jobs:
       - name: Build release
         run: |
           ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.version }} \
+            ${{ needs.create-release.outputs.release }} \
             android
 
       - name: Upload archives
@@ -94,7 +94,7 @@ jobs:
       - name: Build release
         run: |
           ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.version }} \
+            ${{ needs.create-release.outputs.release }} \
             ios
 
       - name: Upload archives
@@ -123,7 +123,7 @@ jobs:
       - name: Build release
         run: |
           ./native/couchbase-lite-dart/tools/build_release.sh \
-            ${{ needs.create-release.outputs.version }} \
+            ${{ needs.create-release.outputs.release }} \
             macos
 
       - name: Upload archives

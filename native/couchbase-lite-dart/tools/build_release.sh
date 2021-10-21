@@ -15,7 +15,7 @@ targets=(android ios macos ubuntu20.04-x86_64)
 
 function _buildArchive() {
     local edition="$1"
-    local releaseVersion="$2"
+    local release="$2"
     local targetBuildDir=
     local productDirPrefix="libcblitedart-"
     local archiveExt=zip
@@ -45,7 +45,7 @@ function _buildArchive() {
         ;;
     esac
 
-    local archiveFile="$buildDir/couchbase-lite-dart-$releaseVersion-$edition-$target.$archiveExt"
+    local archiveFile="$buildDir/couchbase-lite-dart-$release-$edition-$target.$archiveExt"
 
     rm -f "$archiveFile"
 
@@ -61,11 +61,11 @@ function _buildArchive() {
     esac
 }
 
-releaseVersion="$1"
+release="$1"
 target="$2"
 
-if [[ -z "$releaseVersion" ]]; then
-    echo "Please provide a version for this release"
+if [[ -z "$release" ]]; then
+    echo "Please provide a name for this release"
     exit 1
 fi
 
@@ -74,10 +74,10 @@ if [[ ! " ${targets[*]} " =~ " $target " ]]; then
     exit 1
 fi
 
-echo "Building Couchbase Lite Dart release archives version $releaseVersion for $target"
+echo "Building Couchbase Lite Dart release $release for $target"
 
 mkdir -p "$buildDir"
 
 for edition in ${editions[@]}; do
-    _buildArchive "$edition" "$releaseVersion"
+    _buildArchive "$edition" "$release"
 done

@@ -13,8 +13,7 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 nativeDir="$(cd "$projectDir/.." && pwd)"
 vendorDir="$nativeDir/vendor"
-cblVersionFile="$nativeDir/CouchbaseLite.version"
-cblVersion="$(cat "$cblVersionFile")"
+couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 buildDir="$projectDir/build/ios"
 archivesDir="$buildDir/archives"
 versionFile="$projectDir/CouchbaseLiteDart.version"
@@ -26,7 +25,7 @@ platformIds="${!platforms[@]}"
 
 function _linkCouchbaseLiteFramework() {
     local edition="$1"
-    local frameworkPath="$vendorDir/couchbase-lite-C-prebuilt/$cblVersion-$edition-ios/CouchbaseLite.xcframework"
+    local frameworkPath="$vendorDir/couchbase-lite-C-prebuilt/$couchbaseLiteCRelease-$edition-ios/CouchbaseLite.xcframework"
 
     echo "Setting up to build against Couchbase Lite C $edition edition"
 
