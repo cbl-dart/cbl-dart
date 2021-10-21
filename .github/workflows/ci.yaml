@@ -75,11 +75,11 @@ jobs:
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
+
+      - name: Build cbl_flutter_prebuilt packages
+        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
 
       - name: Bootstrap Dart packages
         run: melos bootstrap
@@ -109,11 +109,11 @@ jobs:
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
+
+      - name: Build cbl_flutter_prebuilt packages
+        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
 
       - name: Bootstrap Dart packages
         run: melos bootstrap
@@ -189,11 +189,11 @@ jobs:
         with:
           sdk: ${{ env.dart-version-stable }}
 
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
+
+      - name: Build cbl_flutter_prebuilt packages
+        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
 
       - name: Bootstrap Dart packages
         run: ./tools/ci-steps.sh bootstrapPackages
