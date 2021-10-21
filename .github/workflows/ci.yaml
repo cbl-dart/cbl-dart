@@ -152,7 +152,7 @@ jobs:
     # TODO: Enable Flutter/Linux tests
     # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
     if:
-      ${{ matrix.os != 'Ubuntu' && matrix.embedder != 'flutter' }}
+      ${{ !(matrix.os == 'Ubuntu' && matrix.embedder == 'flutter') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
