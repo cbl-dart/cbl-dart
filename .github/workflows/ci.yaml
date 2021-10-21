@@ -149,10 +149,10 @@ jobs:
           "standalone":"cbl_e2e_tests_standalone_dart",
           "flutter":"cbl_e2e_tests_flutter"
         }')[matrix.embedder] }}
-    # TODO: Fully enable Flutter/Linux tests
+    # TODO: Enable Flutter/Linux tests
     # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
-    continue-on-error:
-      ${{ matrix.os == 'Ubuntu' && matrix.embedder == 'flutter' }}
+    if:
+      ${{ matrix.os != 'Ubuntu' && matrix.embedder != 'flutter' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
