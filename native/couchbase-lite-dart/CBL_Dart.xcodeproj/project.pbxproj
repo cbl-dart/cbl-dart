@@ -22,7 +22,7 @@
 
 /* Begin PBXFileReference section */
 		C005BBA925CF27DB0086E1B3 /* CouchbaseLiteDart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CouchbaseLiteDart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CouchbaseLite.xcframework; path = "../vendor/couchbase-lite-C-prebuilt/3.0.0-beta01-community-ios/CouchbaseLite.xcframework"; sourceTree = "<group>"; };
+		C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CouchbaseLite.xcframework; path = "./Xcode/CouchbaseLite.xcframework"; sourceTree = "<group>"; };
 		C0971C0E25CF7745006EE2DC /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		C0971C0F25CF774C006EE2DC /* Project_Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project_Release.xcconfig; sourceTree = "<group>"; };
 		C0971C1025CF7752006EE2DC /* Project_Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project_Debug.xcconfig; sourceTree = "<group>"; };
