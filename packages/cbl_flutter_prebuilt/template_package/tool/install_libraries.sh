@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 targets=(android ios macos ubuntu20.04-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -87,6 +87,8 @@ if _librariesAreInstalled "$target"; then
     echo "Native libraries for Couchbase Lite for $target are already installed"
     exit 0
 fi
+
+echo "Installing native libraries for Couchbase Lite for $target"
 
 # Create a tmp dir
 tmpDir="$(mktemp -d 2>/dev/null || mktemp -d -t 'cbl_flutter_prebuilt')"

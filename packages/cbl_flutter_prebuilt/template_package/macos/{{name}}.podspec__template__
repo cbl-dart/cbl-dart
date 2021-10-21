@@ -1,3 +1,6 @@
+# Install libraries if they have not been installed yet.
+`../tool/install_libraries.sh macos`
+
 Pod::Spec.new do |s|
   s.name                = '{{name}}'
   s.version             = '0.0.1'
@@ -10,7 +13,6 @@ Pod::Spec.new do |s|
   s.source              = { :path => '.' }
   s.source_files        = 'Classes/**/*'
   s.vendored_libraries  = 'Libraries/*'
-  .prepare_command      = '../tool/install_libraries.sh macos'
   s.dependency 'FlutterMacOS'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }

@@ -19,8 +19,12 @@ requireEnvVar MATRIX_OS
 testResultsDir="test-results"
 standaloneTestsPackage="cbl_e2e_tests_standalone_dart"
 flutterTestsPackage="cbl_e2e_tests_flutter"
+cblFlutterPrebuiltPackage="cbl_flutter_prebuilt"
+cblFlutterPrebuiltTestsPackage="cbl_flutter_prebuilt_e2e_tests"
 standaloneTestsPackageDir="packages/$standaloneTestsPackage"
 flutterTestsPackageDir="packages/$flutterTestsPackage"
+cblFlutterPrebuiltPackageDir="packages/$cblFlutterPrebuiltPackage"
+cblFlutterPrebuiltTestsPackageDir="packages/$cblFlutterPrebuiltTestsPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
 iosVersion="14-5"
 iosDevice="iPhone 12"
@@ -48,6 +52,11 @@ function buildNativeLibraries() {
     esac
 
     ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
+}
+
+function buildCblFlutterPrebuiltPackages() {
+    cd "$cblFlutterPrebuiltPackageDir"
+    dart run
 }
 
 function configureFlutter() {
@@ -144,6 +153,36 @@ function runE2ETests() {
     esac
 }
 
+function runCblFlutterPrebuiltE2ETests() {
+    cd "$cblFlutterPrebuiltTestsPackageDir"
+
+    device=""
+    case "$MATRIX_OS" in
+    iOS)
+        device="iPhone"
+        ;;
+    macOS)
+        device="macOS"
+        ;;
+    Android)
+        device="Android"
+        ;;
+    Ubuntu)
+        # Enable core dumps.
+        device="Linux"
+        ulimit -c unlimited
+        sudo sysctl -w kernel.core_pattern="core.%p"
+        ;;
+    esac
+
+    flutter drive \
+        --no-pub \
+        -d "$device" \
+        --keep-app-running \
+        --driver test_driver/integration_test.dart \
+        --target integration_test/smoke_test.dart
+}
+
 function _collectFlutterIntegrationResponseData() {
     echo "Collecting Flutter integration test response data"
 
@@ -174,7 +213,7 @@ function _collectCrashReportsLinuxStandalone() {
 }
 
 function _collectCrashReportsLinuxFlutter() {
-    for core in "$flutterTestsPackageDir/core."*; do
+    for core in {"$flutterTestsPackageDir","$cblFlutterPrebuiltTestsPackageDir"}"/core."*; do
         local pid="${core##*.}"
         local coreTestResultsDir="$testResultsDir/$pid"
         mkdir -p "$coreTestResultsDir"

@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 group 'com.terwesten.gabriel.{{name}}'
 version '1.0-SNAPSHOT'
 
