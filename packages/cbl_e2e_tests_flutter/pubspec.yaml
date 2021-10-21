@@ -9,7 +9,8 @@ environment:
 dependencies:
   cbl: ^0.6.0
   cbl_ffi: ^0.6.0
-  cbl_flutter: ^0.4.0+2
+  cbl_flutter:
+    path: ../cbl_flutter
   cbl_flutter_local:
     path: ../cbl_flutter_local
   collection: ^1.15.0
@@ -24,3 +25,7 @@ dependencies:
   rxdart: ^0.26.0
   test: any
   web_socket_channel: ^2.1.0
+
+dependency_overrides:
+  cbl_ffi:
+    path: ../cbl_ffi
