@@ -2,6 +2,14 @@
 
 set -e
 
+error() {
+    local sourceFile=$1
+    local lineno=$2
+    echo "Error in line $lineno in file $sourceFile"
+}
+
+trap 'error "${BASH_SOURCE[0]}" "${LINENO}"' ERR
+
 targets=(android ios macos ubuntu20.04-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 packageDir="$(cd "$scriptDir/.." && pwd)"
