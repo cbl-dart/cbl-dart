@@ -14,8 +14,7 @@ environment:
 
 dependencies:
   cbl: ^1.0.0-beta.6
-  cbl_flutter_platform_interface:
-    path: ../cbl_flutter_platform_interface
+  cbl_flutter_platform_interface: ^1.0.0-beta.0
   flutter:
     sdk: flutter
   path_provider: ^2.0.1
