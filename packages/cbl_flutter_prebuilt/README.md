@@ -32,8 +32,8 @@ All other files are copied as is.
 All file paths are interpreted as mustache templates and the rendered string is
 used as the output path.
 
-To generate the packages run `dart run` in this packages directory. The output
-is written to `./build`.
+To generate the packages run `dart run` in this packages directory. The packages
+are written to `packages/cbl_flutter_ce|ee`.
 
 ## Publishing
 

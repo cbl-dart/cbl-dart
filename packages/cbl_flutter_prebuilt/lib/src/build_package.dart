@@ -17,11 +17,17 @@ Future<void> buildPackage(PackageConfiguration configuration) async {
   }
   await packageBuildDirectory.create(recursive: true);
 
+  final templateDirectory = Directory(templatePackageDir);
+  final outputDirectory = Directory(packageBuildDir);
+  final templateContext = createTemplateContext(configuration: configuration);
+
   await _renderTemplateDirectory(
-    templateDirectory: Directory(templatePackageDir),
-    outputDirectory: Directory(packageBuildDir),
-    templateContext: createTemplateContext(configuration: configuration),
+    templateDirectory: templateDirectory,
+    outputDirectory: outputDirectory,
+    templateContext: templateContext,
   );
+
+  await _formatDartCode(directory: outputDirectory);
 }
 
 Future<void> _renderTemplateDirectory({
@@ -132,6 +138,17 @@ Future<void> _copyFilePermissions(
   } else {
     throw UnimplementedError(
       'Copying file permission is not implemented on this platform',
+    );
+  }
+}
+
+Future<void> _formatDartCode({required Directory directory}) async {
+  final result = await Process.run('dart', ['format', directory.path]);
+  if (result.exitCode != 0) {
+    throw StateError(
+      'Could not format dart code in: $directory\n'
+      '${result.stdout}\n'
+      '${result.stderr}',
     );
   }
 }
