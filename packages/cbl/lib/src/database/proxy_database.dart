@@ -227,7 +227,7 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> performMaintenance(MaintenanceType type) =>
-      use(() => channel.call(PerformeDatabaseMaintenance(
+      use(() => channel.call(PerformDatabaseMaintenance(
             databaseId: objectId,
             type: type,
           )));

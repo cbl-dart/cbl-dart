@@ -143,7 +143,7 @@ class CblService {
       ..addCallEndpoint(_endDatabaseTransaction)
       ..addCallEndpoint(_setDocumentExpiration)
       ..addCallEndpoint(_getDocumentExpiration)
-      ..addCallEndpoint(_performeDatabaseMaintenance)
+      ..addCallEndpoint(_performDatabaseMaintenance)
       ..addStreamEndpoint(_databaseChanges)
       ..addStreamEndpoint(_documentChanges)
       ..addCallEndpoint(_deleteIndex)
@@ -284,7 +284,7 @@ class CblService {
   DateTime? _getDocumentExpiration(GetDocumentExpiration request) =>
       _getDatabaseById(request.databaseId).getDocumentExpiration(request.id);
 
-  void _performeDatabaseMaintenance(PerformeDatabaseMaintenance request) =>
+  void _performDatabaseMaintenance(PerformDatabaseMaintenance request) =>
       _getDatabaseById(request.databaseId).performMaintenance(request.type);
 
   Stream<List<String>> _databaseChanges(DatabaseChanges request) =>

@@ -61,8 +61,8 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec('DatabaseChanges', DatabaseChanges.deserialize)
       ..addSerializableCodec('DocumentChanges', DocumentChanges.deserialize)
       ..addSerializableCodec(
-        'PerformeDatabaseMaintenance',
-        PerformeDatabaseMaintenance.deserialize,
+        'PerformDatabaseMaintenance',
+        PerformDatabaseMaintenance.deserialize,
       )
       ..addSerializableCodec('CreateIndex', CreateIndex.deserialize)
       ..addSerializableCodec('DeleteIndex', DeleteIndex.deserialize)
@@ -760,8 +760,8 @@ class DatabaseChanges implements Request<List<String>> {
       DatabaseChanges(databaseId: map.getAs('databaseId'));
 }
 
-class PerformeDatabaseMaintenance implements Request<Null> {
-  PerformeDatabaseMaintenance({
+class PerformDatabaseMaintenance implements Request<Null> {
+  PerformDatabaseMaintenance({
     required this.databaseId,
     required this.type,
   });
@@ -775,11 +775,11 @@ class PerformeDatabaseMaintenance implements Request<Null> {
         'type': context.serialize(type),
       };
 
-  static PerformeDatabaseMaintenance deserialize(
+  static PerformDatabaseMaintenance deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      PerformeDatabaseMaintenance(
+      PerformDatabaseMaintenance(
         databaseId: map.getAs('databaseId'),
         type: context.deserializeAs(map['type'])!,
       );

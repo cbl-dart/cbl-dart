@@ -382,7 +382,6 @@ abstract class SyncDatabase implements Database {
 }
 
 /// A [Database] with a primarily asynchronous API.
-
 abstract class AsyncDatabase implements Database {
   /// {@macro cbl.Database.openAsync}
   static Future<AsyncDatabase> open(
