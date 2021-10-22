@@ -19,6 +19,7 @@ extension on PackageConfiguration {
 
     return {
       'name': name,
+      'version': version,
       'edition': editionString,
       'enterpriseEdition': edition == Edition.enterprise,
       'pluginClass': 'CblFlutter${editionString[0].toUpperCase()}e',

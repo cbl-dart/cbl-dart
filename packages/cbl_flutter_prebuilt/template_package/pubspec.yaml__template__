@@ -2,11 +2,10 @@ name: {{name}}
 description:
   Provides the Couchbase Lite {{#capitalize}}{{edition}}{{/capitalize}} Edition
   for Flutter apps.
-version: 1.0.0-beta.0
+version: {{version}}
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/{{name}}
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
-publish_to: none
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -14,6 +13,8 @@ environment:
 
 dependencies:
   cbl_flutter_platform_interface: ^1.0.0-beta.0
+  cbl_libcblite_api: {{couchbaseLiteC.release}}
+  cbl_libcblitedart_api: {{couchbaseLiteDart.release}}
   flutter:
     sdk: flutter
 
