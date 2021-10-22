@@ -1,3 +1,3 @@
-## 3.0.0
+## 3.0.0-beta02
 
-- Initial release.
+ - Bump "cbl_libcblite_api" to `3.0.0-beta02`.
