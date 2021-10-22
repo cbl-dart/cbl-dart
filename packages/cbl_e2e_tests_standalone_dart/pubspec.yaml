@@ -6,7 +6,7 @@ environment:
 
 dev_dependencies:
   cbl: ^0.6.0
-  cbl_ffi: ^0.6.0
+  cbl_ffi: ^0.7.0-beta.5
   collection: ^1.15.0
   http: ^0.13.3
   rxdart: ^0.26.0

@@ -1,3 +1,30 @@
+## 0.7.0-beta.5
+
+ - **FEAT**: add dependencies on API packages for native libraries
+ - **FEAT**: support reading `undefined` from Fleece collections
+
+## 0.7.0-beta.4
+
+ - **FIX**: initialize native libraries exactly once (#176).
+ - **CHORE**: cut release of `cbl_native`.
+ - **CHORE**: cut `cbl_native` release.
+
+## 0.7.0-beta.3
+
+ - **FIX**: decode error code in `ReplicatorStatusCallbackMessage.parseArguments`.
+ - **FEAT**: add `toJson` methods to containers (#167).
+ - **FEAT**: allocate global memory in `SliceResult`.
+ - **FEAT**: make `FleeceEncoder` a `NativeObject` (#166).
+ - **FEAT**: add initializer for secondary isolate.
+
+## 0.7.0-beta.2
+
+ - Bump "cbl_ffi" to `0.7.0-beta.2`.
+
+## 0.7.0-beta.1
+
+ - Bump "cbl_ffi" to `0.7.0-beta.1`.
+
 ## 0.6.0
 
 > Note: This release has breaking changes.
