@@ -1,6 +1,6 @@
 const templatePackageDir = './template_package';
 const templateFileMarker = '__template__';
-const buildDir = './build';
+const buildDir = '..';
 
 final packageNames = {
   Edition.community: 'cbl_flutter_ce',

@@ -11,7 +11,7 @@ dependencies:
   cbl_flutter:
     path: ../cbl_flutter
   cbl_flutter_ee:
-    path: ../cbl_flutter_prebuilt/build/cbl_flutter_ee
+    path: ../cbl_flutter_ee
   flutter:
     sdk: flutter
   flutter_test:
