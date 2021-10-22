@@ -4,8 +4,7 @@
 
 # cbl_flutter
 
-This package enables using Couchbase Lite
-([`cbl`](https://pub.dev/packages/cbl)) in Flutter apps.
+Flutter plugin for Couchbase Lite ([`cbl`](https://pub.dev/packages/cbl)).
 
 ## Supported Platforms
 
@@ -16,31 +15,58 @@ This package enables using Couchbase Lite
 |  Android | >= 22                  |
 |    Linux | == Ubuntu 20.04 x86_64 |
 
+:zap: Linux is currently broken because of a
+[bug in the Flutter](https://github.com/flutter/flutter/issues/66575). Most
+notably, operations trying to return an error crash the app.
+
 ## Getting started
 
-You need to add `cbl` and [`cbl_flutter`](https://pub.dev/packages/cbl_flutter)
-as dependencies. `cbl_flutter` currently supports iOS, macOS and Android.
+1. You need to add `cbl` and
+   [`cbl_flutter`](https://pub.dev/packages/cbl_flutter) and as dependencies:
 
 ```pubspec
 dependencies:
-    cbl: ...
-    cbl_flutter: ...
+    cbl: 1.0.0-beta.6
+    cbl_flutter: 1.0.0-beta.6
 ```
 
-Make sure you have set the required minimum target version in the build systems
-of the platforms you support.
+2. Select the edition of Couchbase Lite you want to use, by adding as a
+   dependency either [`cbl_flutter_ce`](https://pub.dev/packages/cbl_flutter_ce)
+   for the Community Edition or
+   [`cbl_flutter_ee`](https://pub.dev/packages/cbl_flutter_ee) for the
+   Enterprise Edition:
 
-Couchbase Lite needs to be initialized, before it can be used:
+```pubspec
+    # This dependency selects the Couchbase Lite Community Edition.
+    cbl_flutter_ce: 1.0.0-beta.0
+```
+
+:warning: You need to comply with the Couchbase licensing terms of the edition
+of Couchbase Lite you select.
+
+3. Make sure you have set the required minimum target version in the build
+   systems of the platforms you support.
+
+4. Couchbase Lite needs to be initialized, before it can be used:
 
 ```dart
+import 'dart:io';
+
 import 'package:cbl_flutter/cbl_flutter.dart';
+import 'package:cbl_flutter_ce/cbl_flutter_ce.dart';
 
 Future<void> initCouchbaseLite() async {
+  // On mobile platforms, `CblFlutterCe` and `CblFlutterEe` currently need to 
+  // be registered manually. This is due to a temporary limitation in how Flutter 
+  // initializes plugins, and will become obsolete eventually.
+  if (Platform.isIOS || Platform.isAndroid) {
+    CblFlutterCe.registerWith();
+  }
   await CouchbaseLiteFlutter.init();
 }
 ```
 
-Now you can use `Database.open` to open a database:
+5. Now you can start using Couchbase Lite, for example by opening a database:
 
 ```dart
 import 'package:cbl/cbl.dart';
