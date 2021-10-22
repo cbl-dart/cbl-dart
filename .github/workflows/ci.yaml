@@ -134,6 +134,10 @@ jobs:
             os: iOS
           - embedder: standalone
             os: Android
+            # TODO: Enable Flutter/Linux tests
+            # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
+          - embedder: flutter
+            os: Ubuntu
     runs-on: >-
       ${{ fromJSON('{ 
         "iOS":"macos-11",
@@ -149,10 +153,6 @@ jobs:
           "standalone":"cbl_e2e_tests_standalone_dart",
           "flutter":"cbl_e2e_tests_flutter"
         }')[matrix.embedder] }}
-    # TODO: Fully enable Flutter/Linux tests
-    # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
-    continue-on-error:
-      ${{ matrix.os == 'Ubuntu' && matrix.embedder == 'flutter' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -228,6 +228,8 @@ jobs:
           path: test-results
 
   test-e2e-cbl_flutter_prebuilt:
+    # Temporarily disabled until compatible version of `cbl` is published.
+    if: ${{ false }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:

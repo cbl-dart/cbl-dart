@@ -137,7 +137,18 @@ class CblMDelegate extends MDelegate {
   @override
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt) {
     final flValue = value.value;
-    if (flValue is SimpleFLValue) {
+
+    if (flValue == undefinedFLValue) {
+      // `undefined` is a somewhat unusual value to be found in a Fleece
+      // collection, since it is not JSON. It cannot be encoded to Fleece or
+      // JSON, but is used by some APIs to signal a special condition.
+      // For example, query results can contain `undefined`.
+      //
+      // There is no Dart representation for `undefined` in the API, yet. It
+      // would be a breaking change to start returning something other than
+      // `null`.
+      return null;
+    } else if (flValue is SimpleFLValue) {
       return flValue.value;
     } else if (flValue is SliceFLValue) {
       cacheIt();

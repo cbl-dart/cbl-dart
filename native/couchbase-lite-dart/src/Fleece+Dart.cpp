@@ -213,19 +213,20 @@ CBLDart_FLStringResult CBLDart_FLData_Dump(CBLDart_FLSlice data) {
       FLData_Dump(CBLDart_FLSliceFromDart(data)));
 }
 
-uint8_t CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
-                                 CBLDart_LoadedFLValue *out) {
+void CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
+                              CBLDart_LoadedFLValue *out) {
   auto value = FLValue_FromData(CBLDart_FLSliceFromDart(data), trust);
-  if (!value) {
-    return false;
-  }
-
   CBLDart_GetLoadedFLValue(value, out);
-
-  return true;
 }
 
 void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
+  if (value) {
+    out->exists = true;
+  } else {
+    out->exists = false;
+    return;
+  }
+
   auto type = FLValue_GetType(value);
   out->type = type;
 
