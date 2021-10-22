@@ -1,3 +1,27 @@
+## 1.0.0-beta.6
+
+ - **BREAKING** **FEAT**: support Couchbase Lite Community and Enterprise Editions  
+
+## 1.0.0-beta.5
+
+ - **FEAT**: use consistent database default directory for Flutter (#177).
+ - **CI**: improve diagnostics for failing tests.
+ - **CHORE**: cut release of `cbl_native`.
+ - **CHORE**: cut `cbl_native` release.
+
+## 1.0.0-beta.4
+
+ - **FEAT**: add support for Linux + Flutter.
+ - **FEAT**: add initializer for secondary isolate.
+
+## 1.0.0-beta.3
+
+ - Bump "cbl_flutter" to `1.0.0-beta.3`.
+
+## 1.0.0-beta.2
+
+ - Bump "cbl_flutter" to `1.0.0-beta.2`.
+
 ## 0.4.0+2
 
  - **FIX**: fix variable reference in `install_binaries.sh`.

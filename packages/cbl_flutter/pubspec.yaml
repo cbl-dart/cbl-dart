@@ -2,11 +2,10 @@ name: cbl_flutter
 description: >-
   Couchbase Lite for Flutter. Couchbase Lite is A NoSQL database with change
   notification, full text search and replication.
-version: 0.4.0+2
+version: 1.0.0-beta.6
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
-publish_to: none
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

@@ -26,8 +26,8 @@ notably, operations trying to return an error crash the app.
 
 ```pubspec
 dependencies:
-    cbl: 1.0.0-beta.6
-    cbl_flutter: 1.0.0-beta.6
+    cbl: ^1.0.0-beta.6
+    cbl_flutter: ^1.0.0-beta.6
 ```
 
 2. Select the edition of Couchbase Lite you want to use, by adding as a
@@ -38,7 +38,7 @@ dependencies:
 
 ```pubspec
     # This dependency selects the Couchbase Lite Community Edition.
-    cbl_flutter_ce: 1.0.0-beta.0
+    cbl_flutter_ce: ^1.0.0-beta.0
 ```
 
 :warning: You need to comply with the Couchbase licensing terms of the edition
