@@ -1,5 +1,5 @@
 name: 'cbl'
-version: 0.6.0
+version: 1.0.0-beta.6
 description: >-
   Couchbase Lite for Dart. A NoSQL database with change notification, full text
   search and replication.
@@ -11,7 +11,7 @@ environment:
   sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
-  cbl_ffi: ^0.6.0
+  cbl_ffi: ^0.7.0-beta.5
   characters: ^1.1.0
   collection: ^1.15.0
   ffi: ^1.0.0

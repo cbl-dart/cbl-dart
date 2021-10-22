@@ -1,3 +1,33 @@
+## 1.0.0-beta.6
+
+ - **FIX**: make accidentally exported functions private
+ - **CHORE**: Update dependency
+
+## 1.0.0-beta.5
+
+ - **FIX**: initialize native libraries exactly once (#176).
+ - **FIX**: register controller of `Channel` stream when listened to (#171).
+ - **FEAT**: return mutable copies from `toMutable` methods (#178).
+ - **FEAT**: use consistent database default directory for Flutter (#177).
+
+## 1.0.0-beta.4
+
+ - **FIX**: allow `ConflictResolver` to be extended.
+ - **FEAT**: add support for Linux + Flutter.
+ - **FEAT**: `CblWorker` isolate debug name.
+ - **FEAT**: add `toJson` methods to containers (#167).
+ - **FEAT**: allocate global memory in `SliceResult`.
+ - **FEAT**: make `FleeceEncoder` a `NativeObject` (#166).
+ - **FEAT**: add initializer for secondary isolate.
+
+## 1.0.0-beta.3
+
+ - Bump "cbl" to `1.0.0-beta.3`.
+
+## 1.0.0-beta.2
+
+ - Bump "cbl" to `1.0.0-beta.2`.
+
 ## 0.6.0
 
 > Note: This release has breaking changes.
