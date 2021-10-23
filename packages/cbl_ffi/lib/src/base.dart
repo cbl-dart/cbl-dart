@@ -219,15 +219,7 @@ class CBLErrorException implements Exception {
           error.ref.code,
           _baseBinds.getErrorMessage(globalCBLError)!,
           errorSource: errorSource,
-          errorPosition:
-              // This test should only need to check whether `errorPosition`
-              // is `-1`. A regrission in the CBL C SDK leaves `errorPosition`
-              // sometimes uninitialized.
-              error.ref.code == CBLErrorCode.invalidQuery &&
-                      errorPosition >= 0 &&
-                      errorPosition < errorSource.length
-                  ? errorPosition
-                  : null,
+          errorPosition: errorPosition == -1 ? null : errorPosition,
         );
 
   final String message;
