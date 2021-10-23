@@ -5,56 +5,34 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "cbl",
+      "name": "cbl (test)",
       "cwd": "packages/cbl",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "program": "test"
     },
     {
-      "name": "cbl_e2e_tests_standalone_dart",
+      "name": "cbl_e2e_tests_flutter (test)",
+      "cwd": "packages/cbl_e2e_tests_flutter",
+      "request": "launch",
+      "type": "dart",
+      "program": "integration_test/e2e_test.dart",
+      "toolArgs": ["--no-pub"]
+    },
+    {
+      "name": "cbl_e2e_tests_standalone_dart (test)",
       "cwd": "packages/cbl_e2e_tests_standalone_dart",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "program": "test"
     },
     {
-      "name": "cbl_ffi",
-      "cwd": "packages/cbl_ffi",
-      "request": "launch",
-      "type": "dart"
-    },
-    {
-      "name": "cbl_flutter",
-      "cwd": "packages/cbl_flutter",
+      "name": "cbl_flutter_prebuilt_e2e_tests (test)",
+      "cwd": "packages/cbl_flutter_prebuilt_e2e_tests",
       "request": "launch",
       "type": "dart",
+      "program": "integration_test/e2e_test.dart",
       "toolArgs": ["--no-pub"]
-    },
-    {
-      "name": "cbl_flutter (profile mode)",
-      "cwd": "packages/cbl_flutter",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "profile",
-      "toolArgs": ["--no-pub"]
-    },
-    {
-      "name": "cbl_e2e_tests_standalone_dart (gdb)",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "/usr/lib/dart/bin/dart",
-      "args": ["test", "-j", "1", "-r", "expanded"],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/packages/cbl_e2e_tests_standalone_dart",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
     }
   ]
 }
