@@ -10,7 +10,7 @@
 		C0132E08271C1E81005293A6 /* CouchbaseLite.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */; };
 		C09A4C4B271B7E3A0090EC68 /* Fleece+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C48271B7E3A0090EC68 /* Fleece+Dart.h */; };
 		C09A4C4C271B7E3A0090EC68 /* CBL+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C49271B7E3A0090EC68 /* CBL+Dart.h */; };
-		C09A4C4D271B7E3A0090EC68 /* cbldart_export.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C4A271B7E3A0090EC68 /* cbldart_export.h */; };
+		C09A4C4D271B7E3A0090EC68 /* CBLDart_Export.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C4A271B7E3A0090EC68 /* CBLDart_Export.h */; };
 		C09E6C23263456C700127155 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C09E6C1A263456C700127155 /* Utils.cpp */; };
 		C09E6C24263456C700127155 /* Utils.hh in Headers */ = {isa = PBXBuildFile; fileRef = C09E6C22263456C700127155 /* Utils.hh */; };
 		C0D8CBEC25CF2AD7008B87C0 /* Fleece+Dart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */; };
@@ -31,7 +31,7 @@
 		C0971C1325CF7ABA006EE2DC /* CBL_Dart_Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = CBL_Dart_Debug.xcconfig; sourceTree = "<group>"; };
 		C09A4C48271B7E3A0090EC68 /* Fleece+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Fleece+Dart.h"; sourceTree = "<group>"; };
 		C09A4C49271B7E3A0090EC68 /* CBL+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBL+Dart.h"; sourceTree = "<group>"; };
-		C09A4C4A271B7E3A0090EC68 /* cbldart_export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cbldart_export.h; sourceTree = "<group>"; };
+		C09A4C4A271B7E3A0090EC68 /* CBLDart_Export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CBLDart_Export.h; sourceTree = "<group>"; };
 		C09E6C1A263456C700127155 /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
 		C09E6C22263456C700127155 /* Utils.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hh; sourceTree = "<group>"; };
 		C0D8CBCB25CF285A008B87C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = XCode/Info.plist; sourceTree = SOURCE_ROOT; };
@@ -101,7 +101,7 @@
 			children = (
 				C09A4C48271B7E3A0090EC68 /* Fleece+Dart.h */,
 				C09A4C49271B7E3A0090EC68 /* CBL+Dart.h */,
-				C09A4C4A271B7E3A0090EC68 /* cbldart_export.h */,
+				C09A4C4A271B7E3A0090EC68 /* CBLDart_Export.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -169,7 +169,7 @@
 			files = (
 				C0D8CBEF25CF2AD7008B87C0 /* AsyncCallback.h in Headers */,
 				C09E6C24263456C700127155 /* Utils.hh in Headers */,
-				C09A4C4D271B7E3A0090EC68 /* cbldart_export.h in Headers */,
+				C09A4C4D271B7E3A0090EC68 /* CBLDart_Export.h in Headers */,
 				C09A4C4C271B7E3A0090EC68 /* CBL+Dart.h in Headers */,
 				C09A4C4B271B7E3A0090EC68 /* Fleece+Dart.h in Headers */,
 			);

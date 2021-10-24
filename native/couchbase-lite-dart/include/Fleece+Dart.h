@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cbldart_export.h"
+#include "CBLDart_Export.h"
 #include "dart/dart_api_dl.h"
 #ifdef CBL_FRAMEWORK_HEADERS
 #include <CouchbaseLite/Fleece.h>
