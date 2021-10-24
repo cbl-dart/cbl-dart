@@ -50,9 +50,6 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_FLAGS -g)
 
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG>)
-if(${CBL_EDITION} STREQUAL enterprise)
-    add_compile_definitions(COUCHBASE_ENTERPRISE)
-endif()
 
 if(APPLE)
     set(CMAKE_INSTALL_RPATH "@loader_path")
