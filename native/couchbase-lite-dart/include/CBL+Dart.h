@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "AsyncCallback.h"
 #include "Fleece+Dart.h"
 #ifdef CBL_FRAMEWORK_HEADERS
 #include <CouchbaseLite/CouchbaseLite.h>
@@ -34,17 +33,18 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 
 // -- Callbacks
 
-CBLDART_EXPORT
-CBLDart::AsyncCallback *CBLDart_AsyncCallback_New(uint32_t id,
-                                                  Dart_Handle object,
-                                                  Dart_Port sendPort,
-                                                  uint8_t debug);
+typedef struct _CBLDart_AsyncCallback *CBLDart_AsyncCallback;
 
 CBLDART_EXPORT
-void CBLDart_AsyncCallback_Close(CBLDart::AsyncCallback *callback);
+CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
+                                                Dart_Port sendPort,
+                                                uint8_t debug);
 
 CBLDART_EXPORT
-void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
+void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback);
+
+CBLDART_EXPORT
+void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
                                        int64_t argument);
 
 // -- Dart Finalizer
@@ -86,7 +86,7 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback);
+uint8_t CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
 
 typedef struct {
   CBLLogLevel level;
@@ -201,11 +201,11 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddDocumentChangeListener(
     const CBLDatabase *db, const CBLDart_FLString docID,
-    CBLDart::AsyncCallback *listener);
+    CBLDart_AsyncCallback listener);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           CBLDart::AsyncCallback *listener);
+                                           CBLDart_AsyncCallback listener);
 
 typedef enum : uint8_t {
   kCBLDart_IndexTypeValue,
@@ -250,7 +250,7 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
 
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
-    CBLQuery *query, CBLDart::AsyncCallback *listener);
+    CBLQuery *query, CBLDart_AsyncCallback listener);
 
 // -- Blob
 
@@ -318,9 +318,9 @@ struct CBLDart_ReplicatorConfiguration {
   FLSlice *trustedRootCertificates;
   FLArray channels;
   FLArray documentIDs;
-  CBLDart::AsyncCallback *pushFilter;
-  CBLDart::AsyncCallback *pullFilter;
-  CBLDart::AsyncCallback *conflictResolver;
+  CBLDart_AsyncCallback pushFilter;
+  CBLDart_AsyncCallback pullFilter;
+  CBLDart_AsyncCallback conflictResolver;
 };
 
 CBLDART_EXPORT
@@ -337,10 +337,10 @@ uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
                                                 CBLDart_FLString docId,
                                                 CBLError *errorOut);
 CBLDART_EXPORT
-void CBLDart_CBLReplicator_AddChangeListener(
-    CBLReplicator *replicator, CBLDart::AsyncCallback *listenerId);
+void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
+                                             CBLDart_AsyncCallback listenerId);
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, CBLDart::AsyncCallback *listenerId);
+    CBLReplicator *replicator, CBLDart_AsyncCallback listenerId);
 }
