@@ -4,6 +4,7 @@
 #include <shared_mutex>
 #include <thread>
 
+#include "AsyncCallback.h"
 #include "CBL+Dart.h"
 #include "Utils.hh"
 
@@ -36,18 +37,24 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 
 // -- AsyncCallback
 
-CBLDart::AsyncCallback *CBLDart_AsyncCallback_New(uint32_t id,
-                                                  Dart_Handle object,
-                                                  Dart_Port sendPort,
-                                                  uint8_t debug) {
-  return new CBLDart::AsyncCallback(id, object, sendPort, debug);
+#define ASYNC_CALLBACK_FROM_C(callback) \
+  reinterpret_cast<CBLDart::AsyncCallback *>(callback)
+
+#define ASYNC_CALLBACK_TO_C(callback) \
+  reinterpret_cast<CBLDart_AsyncCallback>(callback)
+
+CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
+                                                Dart_Port sendPort,
+                                                uint8_t debug) {
+  return ASYNC_CALLBACK_TO_C(
+      new CBLDart::AsyncCallback(id, object, sendPort, debug));
 }
 
-void CBLDart_AsyncCallback_Close(CBLDart::AsyncCallback *callback) {
-  callback->close();
+void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback) {
+  ASYNC_CALLBACK_FROM_C(callback)->close();
 }
 
-void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
+void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
                                        int64_t argument) {
   std::thread([=]() {
     Dart_CObject argument__;
@@ -61,7 +68,7 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart::AsyncCallback *callback,
     args.value.as_array.length = 1;
     args.value.as_array.values = argsValues;
 
-    CBLDart::AsyncCallbackCall(*callback).execute(args);
+    CBLDart::AsyncCallbackCall(*ASYNC_CALLBACK_FROM_C(callback)).execute(args);
   }).detach();
 }
 
@@ -222,21 +229,22 @@ void CBLDart_LogCallbackFinalizer(void *context) {
   logCallback = nullptr;
 }
 
-uint8_t CBLDart_CBLLog_SetCallback(CBLDart::AsyncCallback *callback) {
+uint8_t CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
   std::unique_lock lock(loggingMutex);
+  auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
 
   // Don't set the new callback if one has already been set. Another isolate,
   // different from the one currenlty calling, has already set its callback.
-  if (callback != nullptr && logCallback != nullptr) {
+  if (callback_ != nullptr && logCallback != nullptr) {
     return false;
   }
 
-  if (callback == nullptr) {
+  if (callback_ == nullptr) {
     logCallback = nullptr;
     CBLLog_SetCallback(nullptr);
   } else {
-    logCallback = callback;
-    callback->setFinalizer(nullptr, CBLDart_LogCallbackFinalizer);
+    logCallback = callback_;
+    callback_->setFinalizer(nullptr, CBLDart_LogCallbackFinalizer);
     CBLLog_SetCallback(CBLDart_LogCallbackWrapper);
   }
 
@@ -525,12 +533,13 @@ void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
 
 void CBLDart_CBLDatabase_AddDocumentChangeListener(
     const CBLDatabase *db, const CBLDart_FLString docID,
-    CBLDart::AsyncCallback *listener) {
+    CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLDatabase_AddDocumentChangeListener(
       db, CBLDart_FLStringFromDart(docID),
       CBLDart_DocumentChangeListenerWrapper, listener);
 
-  listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
+  ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
+                                                CBLDart_CBLListenerFinalizer);
 }
 
 void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
@@ -555,11 +564,12 @@ void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
 }
 
 void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           CBLDart::AsyncCallback *listener) {
+                                           CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLDatabase_AddChangeListener(
       db, CBLDart_DatabaseChangeListenerWrapper, listener);
 
-  listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
+  ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
+                                                CBLDart_CBLListenerFinalizer);
 }
 
 uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
@@ -632,11 +642,12 @@ void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
 }
 
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
-    CBLQuery *query, CBLDart::AsyncCallback *listener) {
+    CBLQuery *query, CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLQuery_AddChangeListener(
       query, CBLDart_QueryChangeListenerWrapper, listener);
 
-  listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
+  ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
+                                                CBLDart_CBLListenerFinalizer);
 
   return listenerToken;
 }
@@ -876,9 +887,9 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
                                  : CBLDart_ReplicatorConflictResolverWrapper;
 
   auto context = new ReplicatorCallbackWrapperContext;
-  context->pullFilter = config->pullFilter;
-  context->pushFilter = config->pushFilter;
-  context->conflictResolver = config->conflictResolver;
+  context->pullFilter = ASYNC_CALLBACK_FROM_C(config->pullFilter);
+  context->pushFilter = ASYNC_CALLBACK_FROM_C(config->pushFilter);
+  context->conflictResolver = ASYNC_CALLBACK_FROM_C(config->conflictResolver);
   config_.context = context;
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
@@ -1008,11 +1019,12 @@ void CBLDart_Replicator_ChangeListenerWrapper(
 }
 
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
-                                             CBLDart::AsyncCallback *listener) {
+                                             CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLReplicator_AddChangeListener(
       replicator, CBLDart_Replicator_ChangeListenerWrapper, listener);
 
-  listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
+  ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
+                                                CBLDart_CBLListenerFinalizer);
 }
 
 class CObject_ReplicatedDocument {
@@ -1103,10 +1115,11 @@ void CBLDart_Replicator_DocumentReplicationListenerWrapper(
 }
 
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, CBLDart::AsyncCallback *listener) {
+    CBLReplicator *replicator, CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLReplicator_AddDocumentReplicationListener(
       replicator, CBLDart_Replicator_DocumentReplicationListenerWrapper,
       (void *)listener);
 
-  listener->setFinalizer(listenerToken, CBLDart_CBLListenerFinalizer);
+  ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
+                                                CBLDart_CBLListenerFinalizer);
 }
