@@ -9,6 +9,12 @@ scripts:
     select-package:
       scope: cbl_flutter_prebuilt
 
+  build:nativeLibraries:
+    run: ./tools/dev-tools.sh prepareNativeLibraries
+
+  flutter:pubGet:
+    run: melos exec --flutter -- flutter pub get
+
   formatting:check: melos exec -- dart format --set-exit-if-changed .
 
   analyze: melos exec -- dart analyze --fatal-infos
