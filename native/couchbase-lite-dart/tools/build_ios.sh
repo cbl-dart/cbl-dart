@@ -42,11 +42,6 @@ function _buildFramework() {
     local platform="${platforms[$platformId]}"
     local destination="generic/platform=$platform"
     local configuration="${buildMode^}"
-    local compileDefinitions=
-
-    if [[ "$edition" == enterprise ]]; then
-        compileDefinitions="COUCHBASE_ENTERPRISE"
-    fi
 
     echo "Building artifacts for $platform platform"
 
@@ -56,7 +51,6 @@ function _buildFramework() {
         -configuration "$configuration" \
         -archivePath "$archivesDir/$platformId" \
         CURRENT_PROJECT_VERSION=1 \
-        GCC_PREPROCESSOR_DEFINITIONS="\$(inherited) $compileDefinitions" \
         SKIP_INSTALL=NO \
         BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
         CODE_SIGNING_ALLOWED="NO" |
