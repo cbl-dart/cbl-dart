@@ -14,6 +14,11 @@ dev_dependencies:
   web_socket_channel: ^2.1.0
 
 dependency_overrides:
+  # Normally melos should bootstrap local dependencies and handle theses 
+  # overrides.
+  # The problem is that running tests with `dart test` instead of `flutter test`,
+  # runs `pub get` implicitly, because of the changes `melos bootstrap` makes 
+  # to the dependency resolution files.
   cbl:
     path: ../cbl
   cbl_ffi:

@@ -24,7 +24,3 @@ dependencies:
   rxdart: ^0.26.0
   test: any
   web_socket_channel: ^2.1.0
-
-dependency_overrides:
-  cbl_ffi:
-    path: ../cbl_ffi

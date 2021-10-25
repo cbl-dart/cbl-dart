@@ -12,9 +12,9 @@ are limited to a single package use it as the commit message's scope, e.g.
 ## Requirements
 
 - Flutter (stable)
-- melos (1.0.0-dev.3)
+- melos (1.0.0-dev.4)
   ```shell
-  flutter pub global activate melos 1.0.0-dev.3
+  flutter pub global activate melos 1.0.0-dev.4
   ```
 
 ### Linux

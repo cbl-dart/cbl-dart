@@ -8,17 +8,11 @@ environment:
 
 dependencies:
   cbl: ^1.0.0-beta.6
-  cbl_flutter:
-    path: ../cbl_flutter
-  cbl_flutter_ee:
-    path: ../cbl_flutter_ee
+  cbl_flutter: ^1.0.0-beta.6
+  cbl_flutter_ee: ^1.0.0-beta.0
   flutter:
     sdk: flutter
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-
-dependency_overrides:
-  cbl_ffi:
-    path: ../cbl_ffi
