@@ -1,7 +1,10 @@
 name: cbl_dart
-
+repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/**
+command:
+  version:
+    linkToCommits: true
 
 scripts:
   build:cbl_flutter_prebuilt:
