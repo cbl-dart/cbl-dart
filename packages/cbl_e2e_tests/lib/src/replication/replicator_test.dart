@@ -427,5 +427,58 @@ void main() {
         repl.stop,
       );
     });
+
+    apiTest(
+      'enableAutoPurge: true',
+      () => autoPurgeTest(enableAutoPurge: true),
+    );
+
+    apiTest(
+      'enableAutoPurge: false',
+      () => autoPurgeTest(enableAutoPurge: false),
+    );
   });
+}
+
+/// Test that verifies behavior of [enableAutoPurge].
+Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
+  Database.log.console.level = LogLevel.warning;
+  final db = await openTestDatabase();
+  final replicator = await db.createTestReplicator(
+    authenticator: aliceAuthenticator,
+    continuous: true,
+    enableAutoPurge: enableAutoPurge,
+  );
+
+  final doc = MutableDocument({
+    'channels': ['Alice']
+  });
+
+  late StreamSubscription sub;
+  sub = replicator.documentReplications().listen((replication) {
+    final replDoc = replication.documents.first;
+    expect(replDoc.id, doc.id);
+
+    // Document has been pushed.
+    if (replication.isPush) {
+      // Remove user's channel.
+      doc.setValue(<void>[], key: 'channels');
+      db.saveDocument(doc);
+    }
+
+    // User has lost access.
+    if (!replication.isPush) {
+      expect(replDoc.flags, contains(DocumentFlag.accessRemoved));
+
+      // Check that document either does or does not exist in database.
+      Future.value(db.document(doc.id)).then((loadedDoc) {
+        expect(loadedDoc, enableAutoPurge ? isNull : isNotNull);
+        sub.cancel();
+      });
+    }
+  });
+
+  await replicator.start();
+
+  await db.saveDocument(doc);
 }

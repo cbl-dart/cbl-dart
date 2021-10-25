@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cbl/cbl.dart';
 import 'package:http/http.dart';
@@ -20,6 +21,10 @@ final syncGatewayAdminApiUrl = Uri(
   host: syncGatewayHost,
   port: syncGatewayAdminPort,
 );
+final janeAuthenticator =
+    BasicAuthenticator(username: 'Jane', password: 'Jane');
+final aliceAuthenticator =
+    BasicAuthenticator(username: 'Alice', password: 'Alice');
 
 Future<String> syncGatewayRequest(
   Uri url, {
@@ -83,6 +88,27 @@ Future<void> flushSyncGatewayDatabase() async {
   );
 }
 
+Future<void> deleteDocumentOnSyncGateway(String id, String revisionId) async {
+  await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/$id?rev=$revisionId'),
+    method: 'DELETE',
+    admin: true,
+  );
+}
+
+Future<void> updateDocumentChannelsOnSyncGateway(
+  String id,
+  String revisionId,
+  Map<String, Object?> properties,
+) async {
+  await syncGatewayRequest(
+    Uri.parse('$syncGatewayDatabase/$id?rev=$revisionId'),
+    method: 'PUT',
+    admin: true,
+    body: jsonEncode(properties),
+  );
+}
+
 extension ReplicatorUtilsDatabaseExtension on Database {
   /// Creates a replicator which is configured with the test sync gateway
   /// endpoint.
@@ -94,6 +120,8 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     ReplicationFilter? pushFilter,
     ReplicationFilter? pullFilter,
     ConflictResolverFunction? conflictResolver,
+    bool? enableAutoPurge,
+    Authenticator? authenticator,
   }) =>
       Replicator.create(ReplicatorConfiguration(
         database: this,
@@ -107,6 +135,8 @@ extension ReplicatorUtilsDatabaseExtension on Database {
         conflictResolver: conflictResolver != null
             ? ConflictResolver.from(conflictResolver)
             : null,
+        enableAutoPurge: enableAutoPurge ?? true,
+        authenticator: authenticator ?? janeAuthenticator,
       ));
 }
 

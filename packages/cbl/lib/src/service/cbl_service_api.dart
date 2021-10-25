@@ -1082,6 +1082,7 @@ class CreateReplicator extends Request<int> {
     this.pushFilterId,
     this.pullFilterId,
     this.conflictResolverId,
+    this.enableAutoPurge = true,
     this.heartbeat,
     this.maxRetries,
     this.maxRetryWaitTime,
@@ -1100,6 +1101,7 @@ class CreateReplicator extends Request<int> {
   final int? pushFilterId;
   final int? pullFilterId;
   final int? conflictResolverId;
+  final bool enableAutoPurge;
   final Duration? heartbeat;
   final int? maxRetries;
   final Duration? maxRetryWaitTime;
@@ -1119,6 +1121,7 @@ class CreateReplicator extends Request<int> {
         'pushFilterId': pushFilterId,
         'pullFilterId': pullFilterId,
         'conflictResolverId': conflictResolverId,
+        'enableAutoPurge': enableAutoPurge,
         'heartbeat': context.serialize(heartbeat),
         'maxRetries': maxRetries,
         'maxRetryWaitTime': context.serialize(maxRetryWaitTime),
@@ -1143,6 +1146,7 @@ class CreateReplicator extends Request<int> {
         pushFilterId: map.getAs('pushFilterId'),
         pullFilterId: map.getAs('pullFilterId'),
         conflictResolverId: map.getAs('conflictResolverId'),
+        enableAutoPurge: map.getAs('enableAutoPurge'),
         heartbeat: context.deserializeAs(map['heartbeat']),
         maxRetries: map.getAs('maxRetries'),
         maxRetryWaitTime: context.deserializeAs(map['maxRetryWaitTime']),

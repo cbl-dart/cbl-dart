@@ -93,6 +93,7 @@ class FfiReplicator
         pushFilter: pushFilterCallback?.native.pointer,
         pullFilter: pullFilterCallback?.native.pointer,
         conflictResolver: conflictResolverCallback?.native.pointer,
+        disableAutoPurge: !config.enableAutoPurge,
       );
 
       try {

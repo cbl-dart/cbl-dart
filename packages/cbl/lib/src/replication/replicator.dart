@@ -146,11 +146,13 @@ abstract class Replicator implements ClosableResource {
   /// Returns a [Stream] wich emits a [DocumentReplication] event when a set
   /// of [Document]s have been replicated.
   ///
-  /// Because of performance optimization in the replicator, the returned
-  /// [Stream] needs to be listened to before starting the replicator. If the
-  /// [Stream] is listened to after this replicator is started, the replicator
-  /// needs to be stopped and restarted again to ensure that the [Stream] will
+  /// {@template cbl.Replicator.documentReplications.listening}
+  /// Because of performance optimization in the replicator, document change
+  /// stream needs to be listened to before starting the replicator. If the
+  /// stream is listened to after the replicator is started, the replicator
+  /// needs to be stopped and restarted again to ensure that the stream will
   /// get the document replication events.
+  /// {@endtemplate}
   Stream<DocumentReplication> documentReplications();
 
   /// Returns a [Set] of [Document] ids, who have revisions pending push.

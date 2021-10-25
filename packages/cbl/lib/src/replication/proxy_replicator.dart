@@ -78,6 +78,7 @@ class ProxyReplicator extends ProxyObject
         pushFilterId: pushFilterId,
         pullFilterId: pullFilterId,
         conflictResolverId: conflictResolverId,
+        enableAutoPurge: config.enableAutoPurge,
         heartbeat: config.heartbeat,
         maxRetries: config.maxRetries,
         maxRetryWaitTime: config.maxRetryWaitTime,
@@ -154,6 +155,17 @@ class ProxyReplicator extends ProxyObject
     _unregisterCallbacks();
     finalizeEarly();
   }
+
+  @override
+  String toString() => [
+        'ProxyReplicator(',
+        [
+          'database: $database',
+          'type: ${describeEnum(config.replicatorType)}',
+          if (config.continuous) 'CONTINUOUS'
+        ].join(', '),
+        ')'
+      ].join();
 }
 
 CblServiceReplicationFilter _wrapReplicationFilter(

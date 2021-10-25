@@ -62,6 +62,7 @@ class ReplicatorConfiguration {
     this.pushFilter,
     this.pullFilter,
     this.conflictResolver,
+    this.enableAutoPurge = true,
     Duration? heartbeat,
     int? maxRetries,
     Duration? maxRetryWaitTime,
@@ -87,6 +88,7 @@ class ReplicatorConfiguration {
         pushFilter = config.pushFilter,
         pullFilter = config.pullFilter,
         conflictResolver = config.conflictResolver,
+        enableAutoPurge = config.enableAutoPurge,
         _heartbeat = config.heartbeat,
         _maxRetries = config.maxRetries,
         _maxRetryWaitTime = config.maxRetryWaitTime;
@@ -147,6 +149,23 @@ class ReplicatorConfiguration {
   /// If this value is not set, or set to `null`, the default conflict resolver
   /// will be applied.
   ConflictResolver? conflictResolver;
+
+  /// Whether to automatically purge a document when the user looses access to
+  /// it, on the server.
+  ///
+  /// The default value is `true` which means that the document will be
+  /// automatically purged by the pull replicator when the user loses access to
+  /// the document.
+  ///
+  /// When the property is set to `false`, documents for which the user has
+  /// lost access remain in the database.
+  ///
+  /// Regardless of value of this option, when the user looses access to a
+  /// document, an access removed event will be sent to any document change
+  /// streams that are active on the replicator.
+  ///
+  /// {@macro cbl.Replicator.documentReplications.listening}
+  bool enableAutoPurge;
 
   /// The heartbeat interval.
   ///
@@ -238,6 +257,7 @@ class ReplicatorConfiguration {
         if (pushFilter != null) 'PUSH-FILTER',
         if (pushFilter != null) 'PULL-FILTER',
         if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
+        if (!enableAutoPurge) 'DISABLE-AUTO-PURGE',
         'heartbeat: ${_heartbeat.inSeconds}',
         'maxRetries: $maxRetries',
         'maxRetryWaitTime: ${_maxRetryWaitTime.inSeconds}',
@@ -250,11 +270,10 @@ class ReplicatorConfiguration {
 Map<String, String> _redactHeaders(Map<String, String> headers) {
   final redactedHeaders = ['authentication'];
 
-  return Map.fromEntries(
-    headers.entries.map(
-      (e) => redactedHeaders.contains(e.key.toLowerCase())
-          ? MapEntry(e.key, 'REDACTED')
-          : MapEntry(e.key, e.value),
-    ),
-  );
+  return {
+    for (final entry in headers.entries)
+      entry.key: redactedHeaders.contains(entry.key.toLowerCase())
+          ? 'REDACTED'
+          : entry.value
+  };
 }

@@ -374,6 +374,7 @@ class CblService {
                 id,
                 propertiesFormat: request.propertiesFormat,
               )),
+      enableAutoPurge: request.enableAutoPurge,
       heartbeat: request.heartbeat,
       maxRetries: request.maxRetries,
       maxRetryWaitTime: request.maxRetryWaitTime,

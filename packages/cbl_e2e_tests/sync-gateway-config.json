@@ -14,9 +14,15 @@
     "db": {
       "server": "walrus:",
       "users": {
-        "GUEST": {
+        "Jane": {
+          "password": "Jane",
           "disabled": false,
           "admin_channels": ["*"]
+        },
+        "Alice": {
+          "password": "Alice",
+          "disabled": false,
+          "admin_channels": ["Alice"]
         }
       }
     }
