@@ -64,13 +64,13 @@ class ReplicatorConfiguration {
     this.conflictResolver,
     this.enableAutoPurge = true,
     Duration? heartbeat,
-    int? maxRetries,
-    Duration? maxRetryWaitTime,
+    int? maxAttempts,
+    Duration? maxAttemptWaitTime,
   }) {
     this
-      ..heartbeat = heartbeat ?? this.heartbeat
-      ..maxRetries = maxRetries
-      ..maxRetryWaitTime = maxRetryWaitTime ?? this.maxRetryWaitTime;
+      ..heartbeat = heartbeat
+      ..maxAttempts = maxAttempts
+      ..maxAttemptWaitTime = maxAttemptWaitTime;
   }
 
   /// Creates a configuration for a [Replicator] from another [config] by coping
@@ -90,11 +90,8 @@ class ReplicatorConfiguration {
         conflictResolver = config.conflictResolver,
         enableAutoPurge = config.enableAutoPurge,
         _heartbeat = config.heartbeat,
-        _maxRetries = config.maxRetries,
-        _maxRetryWaitTime = config.maxRetryWaitTime;
-
-  static const _defaultContinuousMaxRetries = 0xFFFFFFFF - 1;
-  static const _defaultSingleShotMaxRetries = 9;
+        _maxAttempts = config.maxAttempts,
+        _maxAttemptWaitTime = config.maxAttemptWaitTime;
 
   /// The local [Database] to replicate with the replication [target].
   final Database database;
@@ -172,13 +169,15 @@ class ReplicatorConfiguration {
   /// The interval when the [Replicator] sends the ping message to check whether
   /// the other peer is still alive.
   ///
-  /// Setting the heartbeat to zero will result in an [ArgumentError] being
-  /// thrown.
-  Duration get heartbeat => _heartbeat;
-  Duration _heartbeat = const Duration(seconds: 300);
+  /// Setting this value to [Duration.zero] or a negative [Duration] will
+  /// result in an [ArgumentError] being thrown.
+  ///
+  /// To use the default of 300 seconds, set this property to `null`.
+  Duration? get heartbeat => _heartbeat;
+  Duration? _heartbeat;
 
-  set heartbeat(Duration heartbeat) {
-    if (heartbeat.inSeconds <= 0) {
+  set heartbeat(Duration? heartbeat) {
+    if (heartbeat != null && heartbeat.inSeconds <= 0) {
       throw ArgumentError.value(
         heartbeat,
         'heartbeat',
@@ -188,54 +187,53 @@ class ReplicatorConfiguration {
     _heartbeat = heartbeat;
   }
 
-  /// The maximum attempts to retry.
+  /// The maximum attempts to connect.
   ///
-  /// The retry attempt will be reset when the replicator is able to connect and
+  /// The attempts will be reset when the replicator is able to connect and
   /// replicate with the remote server again.
   ///
-  /// Without setting the [maxRetries] value, the default max retires of 9 times
-  /// for single shot replicators and infinite times for continuous replicators
-  /// will be applied and present to users.
-  /// Setting the value to 0 with result in no retry attempts.
+  /// Setting the [maxAttempts] value to `null`, the default max attempts of 10
+  /// times for single shot replicators and infinite times for continuous
+  /// replicators will be applied.
+  /// Setting the value to `1` with result in no retry attempts.
   ///
-  /// Setting a negative number will result in an [ArgumentError] being thrown.
-  int get maxRetries =>
-      _maxRetries ??
-      (continuous
-          ? _defaultContinuousMaxRetries
-          : _defaultSingleShotMaxRetries);
-  int? _maxRetries;
+  /// Setting `0` a negative number will result in an [ArgumentError] being
+  /// thrown.
+  int? get maxAttempts => _maxAttempts;
+  int? _maxAttempts;
 
-  set maxRetries(int? maxRetries) {
-    if (maxRetries != null && maxRetries < 0) {
+  set maxAttempts(int? maxAttempts) {
+    if (maxAttempts != null && maxAttempts <= 0) {
       throw ArgumentError.value(
-        maxRetries,
-        'maxRetries',
-        'must not be negative',
-      );
-    }
-    _maxRetries = maxRetries;
-  }
-
-  /// Max wait time for the next retry.
-  ///
-  /// The exponential backoff for calculating the wait time will be used by
-  /// default and cannot be customized.
-  ///
-  /// Setting the [maxRetryWaitTime] to zero or negative [Duration] will result
-  /// in an [ArgumentError] being thrown.
-  Duration get maxRetryWaitTime => _maxRetryWaitTime;
-  Duration _maxRetryWaitTime = const Duration(seconds: 300);
-
-  set maxRetryWaitTime(Duration maxRetryWaitTime) {
-    if (maxRetryWaitTime.inSeconds <= 0) {
-      throw ArgumentError.value(
-        maxRetryWaitTime,
-        'maxRetryWaitTime',
+        maxAttempts,
+        'maxAttempts',
         'must not be zero or negative',
       );
     }
-    _maxRetryWaitTime = maxRetryWaitTime;
+    _maxAttempts = maxAttempts;
+  }
+
+  /// Max wait time between attempts.
+  ///
+  /// Exponential backoff is used for calculating the wait time and cannot be
+  /// customized.
+  ///
+  /// Setting this value to [Duration.zero] or a negative [Duration] will
+  /// result in an [ArgumentError] being thrown.
+  ///
+  /// To use the default of 300 seconds, set this property to `null`.
+  Duration? get maxAttemptWaitTime => _maxAttemptWaitTime;
+  Duration? _maxAttemptWaitTime;
+
+  set maxAttemptWaitTime(Duration? maxAttemptWaitTime) {
+    if (maxAttemptWaitTime != null && maxAttemptWaitTime.inSeconds <= 0) {
+      throw ArgumentError.value(
+        maxAttemptWaitTime,
+        'maxAttemptWaitTime',
+        'must not be zero or negative',
+      );
+    }
+    _maxAttemptWaitTime = maxAttemptWaitTime;
   }
 
   @override
@@ -258,9 +256,10 @@ class ReplicatorConfiguration {
         if (pushFilter != null) 'PULL-FILTER',
         if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
         if (!enableAutoPurge) 'DISABLE-AUTO-PURGE',
-        'heartbeat: ${_heartbeat.inSeconds}',
-        'maxRetries: $maxRetries',
-        'maxRetryWaitTime: ${_maxRetryWaitTime.inSeconds}',
+        if (heartbeat != null) 'heartbeat: ${_heartbeat!.inSeconds}s',
+        if (maxAttempts != null) 'maxAttempts: $maxAttempts',
+        if (maxAttemptWaitTime != null)
+          'maxAttemptWaitTime: ${_maxAttemptWaitTime!.inSeconds}s',
       ].join(', '),
       ')'
     ].join();

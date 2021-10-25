@@ -26,9 +26,9 @@ void main() {
       expect(config.pullFilter, isNull);
       expect(config.conflictResolver, isNull);
       expect(config.enableAutoPurge, isTrue);
-      expect(config.heartbeat, const Duration(seconds: 300));
-      expect(config.maxRetries, 9);
-      expect(config.maxRetryWaitTime, const Duration(seconds: 300));
+      expect(config.heartbeat, isNull);
+      expect(config.maxAttempts, isNull);
+      expect(config.maxAttemptWaitTime, isNull);
     });
 
     test('set validated properties', () {
@@ -39,23 +39,20 @@ void main() {
 
       expect(config.heartbeat, const Duration(seconds: 1));
       expect(() => config.heartbeat = Duration.zero, throwsArgumentError);
-
-      config.maxRetries = 0;
-      expect(config.maxRetries, 0);
-
-      // Setting maxRetries to null restores default values which depend on
-      // continuous.
-      config.maxRetries = null;
-      expect(config.maxRetries, 9);
-      config.continuous = true;
-      expect(config.maxRetries, 0xFFFFFFFF - 1);
-
-      expect(() => config.maxRetries = -1, throwsArgumentError);
-
-      config.maxRetryWaitTime = const Duration(seconds: 1);
-      expect(config.maxRetryWaitTime, const Duration(seconds: 1));
       expect(
-        () => config.maxRetryWaitTime = Duration.zero,
+        () => config.heartbeat = const Duration(seconds: -1),
+        throwsArgumentError,
+      );
+
+      config.maxAttempts = 1;
+      expect(config.maxAttempts, 1);
+      expect(() => config.maxAttempts = 0, throwsArgumentError);
+      expect(() => config.maxAttempts = -1, throwsArgumentError);
+
+      config.maxAttemptWaitTime = const Duration(seconds: 1);
+      expect(config.maxAttemptWaitTime, const Duration(seconds: 1));
+      expect(
+        () => config.maxAttemptWaitTime = Duration.zero,
         throwsArgumentError,
       );
     });
@@ -76,8 +73,8 @@ void main() {
         conflictResolver: ConflictResolver.from((_) {}),
         enableAutoPurge: false,
         heartbeat: const Duration(seconds: 1),
-        maxRetries: 0,
-        maxRetryWaitTime: const Duration(seconds: 1),
+        maxAttempts: 1,
+        maxAttemptWaitTime: const Duration(seconds: 1),
       );
 
       final copy = ReplicatorConfiguration.from(source);
@@ -96,8 +93,8 @@ void main() {
       expect(copy.conflictResolver, source.conflictResolver);
       expect(copy.enableAutoPurge, source.enableAutoPurge);
       expect(copy.heartbeat, source.heartbeat);
-      expect(copy.maxRetries, source.maxRetries);
-      expect(copy.maxRetryWaitTime, source.maxRetryWaitTime);
+      expect(copy.maxAttempts, source.maxAttempts);
+      expect(copy.maxAttemptWaitTime, source.maxAttemptWaitTime);
     });
 
     test('toString', () {
@@ -112,11 +109,8 @@ void main() {
         'ReplicatorConfiguration('
         'database: _Database, '
         'target: UrlEndpoint(ws://host/db), '
-        'replicatorType: pushAndPull, '
-        'heartbeat: 300, '
-        'maxRetries: 9, '
         // ignore: missing_whitespace_between_adjacent_strings
-        'maxRetryWaitTime: 300'
+        'replicatorType: pushAndPull'
         ')',
       );
 
@@ -135,8 +129,8 @@ void main() {
         conflictResolver: ConflictResolver.from((_) {}),
         enableAutoPurge: false,
         heartbeat: const Duration(seconds: 1),
-        maxRetries: 0,
-        maxRetryWaitTime: const Duration(seconds: 1),
+        maxAttempts: 1,
+        maxAttemptWaitTime: const Duration(seconds: 1),
       );
 
       expect(
@@ -156,10 +150,10 @@ void main() {
         'PULL-FILTER, '
         'CUSTOM-CONFLICT-RESOLVER, '
         'DISABLE-AUTO-PURGE, '
-        'heartbeat: 1, '
-        'maxRetries: 0, '
+        'heartbeat: 1s, '
+        'maxAttempts: 1, '
         // ignore: missing_whitespace_between_adjacent_strings
-        'maxRetryWaitTime: 1'
+        'maxAttemptWaitTime: 1s'
         ')',
       );
     });

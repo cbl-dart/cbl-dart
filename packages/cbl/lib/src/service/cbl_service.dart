@@ -376,8 +376,8 @@ class CblService {
               )),
       enableAutoPurge: request.enableAutoPurge,
       heartbeat: request.heartbeat,
-      maxRetries: request.maxRetries,
-      maxRetryWaitTime: request.maxRetryWaitTime,
+      maxAttempts: request.maxAttempts,
+      maxAttemptWaitTime: request.maxAttemptWaitTime,
     );
     final replicator = FfiReplicator(
       config,

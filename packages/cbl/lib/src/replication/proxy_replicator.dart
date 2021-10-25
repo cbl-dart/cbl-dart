@@ -80,8 +80,8 @@ class ProxyReplicator extends ProxyObject
         conflictResolverId: conflictResolverId,
         enableAutoPurge: config.enableAutoPurge,
         heartbeat: config.heartbeat,
-        maxRetries: config.maxRetries,
-        maxRetryWaitTime: config.maxRetryWaitTime,
+        maxAttempts: config.maxAttempts,
+        maxAttemptWaitTime: config.maxAttemptWaitTime,
       ));
       return ProxyReplicator(
         database: database,

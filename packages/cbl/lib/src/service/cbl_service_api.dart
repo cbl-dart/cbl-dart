@@ -1084,8 +1084,8 @@ class CreateReplicator extends Request<int> {
     this.conflictResolverId,
     this.enableAutoPurge = true,
     this.heartbeat,
-    this.maxRetries,
-    this.maxRetryWaitTime,
+    this.maxAttempts,
+    this.maxAttemptWaitTime,
   });
 
   final int databaseObjectId;
@@ -1103,8 +1103,8 @@ class CreateReplicator extends Request<int> {
   final int? conflictResolverId;
   final bool enableAutoPurge;
   final Duration? heartbeat;
-  final int? maxRetries;
-  final Duration? maxRetryWaitTime;
+  final int? maxAttempts;
+  final Duration? maxAttemptWaitTime;
 
   @override
   StringMap serialize(SerializationContext context) => {
@@ -1123,8 +1123,8 @@ class CreateReplicator extends Request<int> {
         'conflictResolverId': conflictResolverId,
         'enableAutoPurge': enableAutoPurge,
         'heartbeat': context.serialize(heartbeat),
-        'maxRetries': maxRetries,
-        'maxRetryWaitTime': context.serialize(maxRetryWaitTime),
+        'maxAttempts': maxAttempts,
+        'maxAttemptWaitTime': context.serialize(maxAttemptWaitTime),
       };
 
   static CreateReplicator deserialize(
@@ -1148,8 +1148,8 @@ class CreateReplicator extends Request<int> {
         conflictResolverId: map.getAs('conflictResolverId'),
         enableAutoPurge: map.getAs('enableAutoPurge'),
         heartbeat: context.deserializeAs(map['heartbeat']),
-        maxRetries: map.getAs('maxRetries'),
-        maxRetryWaitTime: context.deserializeAs(map['maxRetryWaitTime']),
+        maxAttempts: map.getAs('maxAttempts'),
+        maxAttemptWaitTime: context.deserializeAs(map['maxAttemptWaitTime']),
       );
 }
 

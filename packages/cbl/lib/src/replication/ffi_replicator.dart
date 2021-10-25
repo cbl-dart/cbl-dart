@@ -79,9 +79,9 @@ class FfiReplicator
         endpoint: endpoint,
         replicatorType: config.replicatorType.toCBLReplicatorType(),
         continuous: config.continuous,
-        maxAttempts: config.maxRetries + 1,
-        maxAttemptWaitTime: config.maxRetryWaitTime.inSeconds,
-        heartbeat: config.heartbeat.inSeconds,
+        heartbeat: config.heartbeat?.inSeconds,
+        maxAttempts: config.maxAttempts,
+        maxAttemptWaitTime: config.maxAttemptWaitTime?.inSeconds,
         authenticator: authenticator,
         headers: config.headers
             ?.let((it) => fl.MutableDict(it).native.pointer.cast()),
