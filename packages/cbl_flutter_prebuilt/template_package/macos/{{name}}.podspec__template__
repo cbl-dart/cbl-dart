@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.homepage            = 'https://github.com/cbl-dart/cbl-dart'
   s.license             = { :file => '../LICENSE' }
   s.author              = { 'Gabriel Terwesten' => 'gabriel@terwesten.com' }
-  s.platform            = :osx, '10.15'
+  s.platform            = :osx, '10.14'
   s.source              = { :path => '.' }
   s.source_files        = 'Classes/**/*'
   s.vendored_libraries  = 'Libraries/*'

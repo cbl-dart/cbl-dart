@@ -5,7 +5,7 @@ get_filename_component(NATIVE_DIR ../ ABSOLUTE)
 
 file(READ CouchbaseLiteDart.version CBL_DART_VERSION)
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "Apple Deployment Target")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14 CACHE STRING "Apple Deployment Target")
 set(CMAKE_OSX_ARCHITECTURES x86_64 arm64 CACHE STRING "Apple Target Architectures")
 
 project(CouchbaseLite_Dart VERSION ${CBL_DART_VERSION})

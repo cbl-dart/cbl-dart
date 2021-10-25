@@ -5,9 +5,9 @@
 //  Created by Gabriel Terwesten on 07.02.21.
 //
 
-IPHONEOS_DEPLOYMENT_TARGET                         = 11.0
-MACOSX_DEPLOYMENT_TARGET                           = 10.15
-TVOS_DEPLOYMENT_TARGET                             = 11.0
+IPHONEOS_DEPLOYMENT_TARGET                         = 10.0
+MACOSX_DEPLOYMENT_TARGET                           = 10.14
+TVOS_DEPLOYMENT_TARGET                             = 10.0
 SUPPORTED_PLATFORMS                                = macosx iphoneos iphonesimulator appletvsimulator
 
 ALWAYS_SEARCH_USER_PATHS                           = NO

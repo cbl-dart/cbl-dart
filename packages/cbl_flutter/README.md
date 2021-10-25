@@ -10,8 +10,8 @@ Flutter plugin for Couchbase Lite ([`cbl`](https://pub.dev/packages/cbl)).
 
 | Platform | Version                |
 | -------: | ---------------------- |
-|      iOS | >= 11                  |
-|    macOS | >= 10.15               |
+|      iOS | >= 10.0                |
+|    macOS | >= 10.14               |
 |  Android | >= 22                  |
 |    Linux | == Ubuntu 20.04 x86_64 |
 
@@ -56,8 +56,8 @@ import 'package:cbl_flutter/cbl_flutter.dart';
 import 'package:cbl_flutter_ce/cbl_flutter_ce.dart';
 
 Future<void> initCouchbaseLite() async {
-  // On mobile platforms, `CblFlutterCe` and `CblFlutterEe` currently need to 
-  // be registered manually. This is due to a temporary limitation in how Flutter 
+  // On mobile platforms, `CblFlutterCe` and `CblFlutterEe` currently need to
+  // be registered manually. This is due to a temporary limitation in how Flutter
   // initializes plugins, and will become obsolete eventually.
   if (Platform.isIOS || Platform.isAndroid) {
     CblFlutterCe.registerWith();

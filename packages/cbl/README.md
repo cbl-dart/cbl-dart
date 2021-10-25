@@ -32,8 +32,8 @@
 
 | Platform | Version                |
 | -------: | ---------------------- |
-|      iOS | >= 11                  |
-|    macOS | >= 10.15               |
+|      iOS | >= 10.0                |
+|    macOS | >= 10.14               |
 |  Android | >= 22                  |
 |    Linux | == Ubuntu 20.04 x86_64 |
 
