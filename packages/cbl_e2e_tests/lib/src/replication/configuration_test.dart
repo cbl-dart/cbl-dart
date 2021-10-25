@@ -25,6 +25,7 @@ void main() {
       expect(config.pushFilter, isNull);
       expect(config.pullFilter, isNull);
       expect(config.conflictResolver, isNull);
+      expect(config.enableAutoPurge, isTrue);
       expect(config.heartbeat, const Duration(seconds: 300));
       expect(config.maxRetries, 9);
       expect(config.maxRetryWaitTime, const Duration(seconds: 300));
@@ -73,6 +74,7 @@ void main() {
         pushFilter: (document, flags) => true,
         pullFilter: (document, flags) => true,
         conflictResolver: ConflictResolver.from((_) {}),
+        enableAutoPurge: false,
         heartbeat: const Duration(seconds: 1),
         maxRetries: 0,
         maxRetryWaitTime: const Duration(seconds: 1),
@@ -92,6 +94,7 @@ void main() {
       expect(copy.pushFilter, source.pushFilter);
       expect(copy.pullFilter, source.pullFilter);
       expect(copy.conflictResolver, source.conflictResolver);
+      expect(copy.enableAutoPurge, source.enableAutoPurge);
       expect(copy.heartbeat, source.heartbeat);
       expect(copy.maxRetries, source.maxRetries);
       expect(copy.maxRetryWaitTime, source.maxRetryWaitTime);
@@ -130,6 +133,7 @@ void main() {
         pushFilter: (document, flags) => true,
         pullFilter: (document, flags) => true,
         conflictResolver: ConflictResolver.from((_) {}),
+        enableAutoPurge: false,
         heartbeat: const Duration(seconds: 1),
         maxRetries: 0,
         maxRetryWaitTime: const Duration(seconds: 1),
@@ -151,6 +155,7 @@ void main() {
         'PUSH-FILTER, '
         'PULL-FILTER, '
         'CUSTOM-CONFLICT-RESOLVER, '
+        'DISABLE-AUTO-PURGE, '
         'heartbeat: 1, '
         'maxRetries: 0, '
         // ignore: missing_whitespace_between_adjacent_strings
