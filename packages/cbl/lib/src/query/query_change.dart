@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 
 import '../query.dart';
-import 'query.dart';
 
 /// A [Query] change event.
 @immutable

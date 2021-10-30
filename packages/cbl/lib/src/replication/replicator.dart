@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import '../couchbase_lite.dart';
 import '../database/database.dart';
 import '../document/document.dart';
+import '../support/listener_token.dart';
 import '../support/resource.dart';
+import '../support/streams.dart';
 import '../support/utils.dart';
 import 'configuration.dart';
 import 'document_replication.dart';

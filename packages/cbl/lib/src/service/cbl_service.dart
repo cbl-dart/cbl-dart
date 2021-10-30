@@ -6,7 +6,6 @@ import '../database/database.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/proxy_document.dart';
-import '../query.dart';
 import '../query/ffi_query.dart';
 import '../query/index/index.dart';
 import '../query/parameters.dart';
