@@ -10,7 +10,9 @@ import '../document/fragment.dart';
 import '../errors.dart';
 import '../fleece/fleece.dart' as fl;
 import '../query/index/index.dart';
+import '../support/async_callback.dart';
 import '../support/ffi.dart';
+import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -90,6 +92,8 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   late final blobStore = FfiBlobStore(this);
+
+  late final _listenerTokens = ListenerTokenRegistry(this);
 
   final DatabaseConfiguration _config;
 
@@ -229,34 +233,77 @@ class FfiDatabase extends CBLDatabaseObject
       () => call((pointer) => _bindings.getDocumentExpiration(pointer, id)));
 
   @override
-  Stream<DatabaseChange> changes() =>
-      useSync(() => CallbackStreamController<DatabaseChange, void>(
-            parent: this,
-            startStream: (callback) => _bindings.addChangeListener(
-              native.pointer,
-              callback.native.pointer,
-            ),
-            createEvent: (_, arguments) {
-              final message =
-                  DatabaseChangeCallbackMessage.fromArguments(arguments);
-              return DatabaseChange(this, message.documentIds);
-            },
-          ).stream);
+  ListenerToken addChangeListener(DatabaseChangeListener listener) =>
+      useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
+
+  AbstractListenerToken _addChangeListener(DatabaseChangeListener listener) {
+    final callback = AsyncCallback(
+      (arguments) {
+        final message = DatabaseChangeCallbackMessage.fromArguments(arguments);
+        final change = DatabaseChange(this, message.documentIds);
+        listener(change);
+      },
+      debugName: 'FfiDatabase.addChangeListener',
+    );
+
+    runNativeCalls(() => _bindings.addChangeListener(
+          native.pointer,
+          callback.native.pointer,
+        ));
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  ListenerToken addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) =>
+      useSync(() =>
+          _addDocumentChangeListener(id, listener).also(_listenerTokens.add));
+
+  AbstractListenerToken _addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) {
+    final callback = AsyncCallback(
+      (_) {
+        final change = DocumentChange(this, id);
+        listener(change);
+      },
+      debugName: 'FfiDatabase.addDocumentChangeListener',
+    );
+
+    runNativeCalls(() => _bindings.addDocumentChangeListener(
+          native.pointer,
+          id,
+          callback.native.pointer,
+        ));
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  void removeChangeListener(ListenerToken token) => useSync(() {
+        final result = _listenerTokens.remove(token);
+        assert(result is! Future);
+      });
+
+  @override
+  Stream<DatabaseChange> changes() => useSync(() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      ));
 
   @override
   Stream<DocumentChange> documentChanges(String id) =>
-      useSync(() => CallbackStreamController<DocumentChange, void>(
+      useSync(() => ListenerStream(
             parent: this,
-            startStream: (callback) => _bindings.addDocumentChangeListener(
-              native.pointer,
-              id,
-              callback.native.pointer,
-            ),
-            createEvent: (_, __) => DocumentChange(this, id),
-          ).stream);
+            addListener: (listener) => _addDocumentChangeListener(id, listener),
+          ));
 
   @override
-  Future<void> performClose() async {
+  Future<void> finalize() async {
     if (_deleteOnClose) {
       call(_bindings.delete);
     } else {

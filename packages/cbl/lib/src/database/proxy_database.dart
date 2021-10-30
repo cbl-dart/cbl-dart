@@ -16,8 +16,10 @@ import '../service/channel.dart';
 import '../service/proxy_object.dart';
 import '../service/serialization/json_packet_codec.dart';
 import '../support/encoding.dart';
+import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/utils.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_change.dart';
@@ -36,7 +38,7 @@ class ProxyDatabase extends ProxyObject
   )   : name = state.name,
         path = state.path,
         _config = DatabaseConfiguration.from(config),
-        super(client.channel, state.objectId);
+        super(client.channel, state.id);
 
   static Future<ProxyDatabase> open({
     required String name,
@@ -53,6 +55,8 @@ class ProxyDatabase extends ProxyObject
 
   @override
   late final BlobStore blobStore = ProxyBlobStore(this);
+
+  late final _listenerTokens = ListenerTokenRegistry(this);
 
   final DatabaseConfiguration _config;
 
@@ -182,34 +186,84 @@ class ProxyDatabase extends ProxyObject
   Future<void> setDocumentExpiration(String id, DateTime? expiration) =>
       use(() => channel.call(SetDocumentExpiration(
             databaseId: objectId,
-            id: id,
+            documentId: id,
             expiration: expiration,
           )));
 
   @override
-  Future<DateTime?> getDocumentExpiration(String id) => use(
-      () => channel.call(GetDocumentExpiration(databaseId: objectId, id: id)));
+  Future<DateTime?> getDocumentExpiration(String id) => use(() => channel
+      .call(GetDocumentExpiration(databaseId: objectId, documentId: id)));
 
   @override
-  Stream<DatabaseChange> changes() =>
-      useSync(() => ClosableResourceStreamController.fromStream(
+  Future<ListenerToken> addChangeListener(DatabaseChangeListener listener) =>
+      use(() async {
+        final token = await _addChangeListener(listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addChangeListener(
+    DatabaseChangeListener listener,
+  ) async {
+    late final ProxyListenerToken<DatabaseChange> token;
+    final listenerId = client.registerDatabaseChangeListener((documentIds) {
+      token.callListener(DatabaseChange(this, documentIds));
+    });
+
+    await channel.call(AddDatabaseChangeListener(
+      databaseId: objectId,
+      listenerId: listenerId,
+    ));
+
+    return token = ProxyListenerToken(client, this, listenerId, listener);
+  }
+
+  @override
+  Future<ListenerToken> addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) =>
+      use(() async {
+        final token = await _addDocumentChangeListener(id, listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) async {
+    late final ProxyListenerToken<DocumentChange> token;
+    final listenerId = client.registerDocumentChangeListener(() {
+      token.callListener(DocumentChange(this, id));
+    });
+
+    await channel.call(AddDocumentChangeListener(
+      databaseId: objectId,
+      documentId: id,
+      listenerId: listenerId,
+    ));
+
+    return token = ProxyListenerToken(client, this, listenerId, listener);
+  }
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token) async =>
+      use(() => _listenerTokens.remove(token));
+
+  @override
+  AsyncListenStream<DatabaseChange> changes() => useSync(() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      ));
+
+  @override
+  AsyncListenStream<DocumentChange> documentChanges(String id) =>
+      useSync(() => ListenerStream(
             parent: this,
-            stream: channel
-                .stream(DatabaseChanges(databaseId: objectId))
-                .map((documentIds) => DatabaseChange(this, documentIds)),
-          ).stream);
+            addListener: (listener) => _addDocumentChangeListener(id, listener),
+          ));
 
   @override
-  Stream<DocumentChange> documentChanges(String id) =>
-      useSync(() => ClosableResourceStreamController.fromStream(
-            parent: this,
-            stream: channel
-                .stream(DocumentChanges(databaseId: objectId, id: id))
-                .map((_) => DocumentChange(this, id)),
-          ).stream);
-
-  @override
-  Future<void> performClose() async {
+  Future<void> finalize() async {
     if (_deleteOnClose) {
       await channel.call(DeleteDatabase(objectId));
     } else {
@@ -314,8 +368,8 @@ class WorkerDatabase extends ProxyDatabase {
   final CblWorker worker;
 
   @override
-  Future<void> performClose() async {
-    await super.performClose();
+  Future<void> finalize() async {
+    await super.finalize();
     await worker.stop();
   }
 }
@@ -343,8 +397,8 @@ class RemoteDatabase extends ProxyDatabase {
   }
 
   @override
-  Future<void> performClose() async {
-    await super.performClose();
+  Future<void> finalize() async {
+    await super.finalize();
     await channel.close();
   }
 }

@@ -208,12 +208,12 @@ abstract class LogMessage {
 /// efficient than converting them to plain Dart objects
 /// (e.g. [DictionaryInterface.toPlainMap]). These objects pull only the
 /// data that is accessed, out of the binary encoded, stored data.
-class DictionaryLogMessage extends LogMessage {
-  DictionaryLogMessage(this.dict);
+class CblLogMessage extends LogMessage {
+  CblLogMessage(this.dict);
 
   final DictionaryInterface dict;
 
-  // `dict` could be, for example, a `Document` or a `Result` from a query.
+  // `dict` could be a `Document` or a `Result` from a query.
   // The extension `DictionaryDocumentIdExt` handels getting the id in both
   // cases.
   @override
@@ -241,12 +241,14 @@ class LogMessageRepository {
 
   Database database;
 
-  Future<void> createLogMessage(String message) async {
-    await database.saveDocument(MutableDocument({
+  Future<LogMessage> createLogMessage(String message) async {
+    final doc = MutableDocument({
       'type': 'logMessage',
       'createdAt': DateTime.now(),
       'message': message,
-    }));
+    });
+    await database.saveDocument(doc);
+    return CblLogMessage(doc);
   }
 
   Stream<List<LogMessage>> allLogMessagesStream() {
@@ -268,9 +270,9 @@ class LogMessageRepository {
     // 4|0|0| SEARCH TABLE kv_default AS example USING INDEX type+createdAt (<expr>=?)
     Future(query.explain).then(print);
 
-    return query.changes().asyncMap((resultSet) => resultSet
+    return query.changes().asyncMap((change) => change.results
         .asStream()
-        .map((result) => DictionaryLogMessage(result))
+        .map((result) => CblLogMessage(result))
         .toList());
   }
 }

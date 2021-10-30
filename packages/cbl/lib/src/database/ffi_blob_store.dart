@@ -6,6 +6,7 @@ import '../document/blob.dart';
 import '../fleece/fleece.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
+import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'blob_store.dart';
@@ -21,7 +22,7 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   @override
   Map<String, Object?> saveBlobFromDataSync(String contentType, Data data) {
-    final blob = CblObject(
+    final blob = CBLObject(
       _blobBindings.createWithData(contentType, data),
       debugName: 'NativeBlobStore.saveBlobFromDataSync()',
     );
@@ -52,30 +53,29 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   @override
   Stream<Data>? readBlob(Map<String, Object?> properties) =>
-      _getBlob(properties)
-          ?.let((it) => _BlobReadStreamController(database, it).stream);
+      _getBlob(properties)?.let((it) => _BlobReadStream(database, it));
 
-  void _saveBlob(CblObject<CBLBlob> blob) {
+  void _saveBlob(CBLObject<CBLBlob> blob) {
     runNativeCalls(() {
       _databaseBindings.saveBlob(database.native.pointer, blob.native.pointer);
     });
   }
 
-  Map<String, Object?> _createBlobProperties(CblObject<CBLBlob> blob) => {
+  Map<String, Object?> _createBlobProperties(CBLObject<CBLBlob> blob) => {
         cblObjectTypeProperty: cblObjectTypeBlob,
         blobDigestProperty: blob.native.call(_blobBindings.digest),
         blobLengthProperty: blob.native.call(_blobBindings.length),
         blobContentTypeProperty: blob.native.call(_blobBindings.contentType),
       };
 
-  CblObject<CBLBlob>? _getBlob(Map<String, Object?> properties) {
+  CBLObject<CBLBlob>? _getBlob(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
     final blobPointer = runNativeCalls(() => _databaseBindings.getBlob(
           database.native.pointer,
           dict.native.pointer.cast(),
         ));
 
-    return blobPointer?.let((it) => CblObject(
+    return blobPointer?.let((it) => CBLObject(
           it,
           debugName: 'NativeBlobStore._getBlob',
         ));
@@ -84,7 +84,7 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
 late final _writeStreamBindings = cblBindings.blobs.writeStream;
 
-Future<CblObject<CBLBlob>> _createBlobFromStream(
+Future<CBLObject<CBLBlob>> _createBlobFromStream(
   FfiDatabase database,
   Stream<Data> stream,
   String contentType,
@@ -95,7 +95,7 @@ Future<CblObject<CBLBlob>> _createBlobFromStream(
     await stream
         .forEach((data) => _writeStreamBindings.write(writeStream, data));
 
-    return CblObject(
+    return CBLObject(
       _writeStreamBindings.createBlobWithStream(contentType, writeStream),
       debugName: '_createBlobFromStream',
     );
@@ -106,34 +106,29 @@ Future<CblObject<CBLBlob>> _createBlobFromStream(
   }
 }
 
-class _BlobReadStreamController extends ClosableResourceStreamController<Data> {
-  _BlobReadStreamController(FfiDatabase database, this.blob)
-      : super(parent: database);
+class _BlobReadStream extends Stream<Data> {
+  _BlobReadStream(this.parent, this.blob);
 
   /// Size of the chunks which a blob read stream emits.
   static const _readStreamChunkSize = 8 * 1024;
 
   static late final _readStreamBindings = cblBindings.blobs.readStream;
 
-  final CblObject<CBLBlob> blob;
+  final ClosableResourceMixin parent;
+  final CBLObject<CBLBlob> blob;
+
+  late final _controller = StreamController<Data>(
+    onListen: _start,
+    onPause: _pause,
+    onResume: _start,
+    onCancel: _pause,
+  );
 
   late final _stream = CBLBlobReadStreamObject(
     blob.native.call(_readStreamBindings.openContentStream),
   );
 
   var _isPaused = false;
-
-  @override
-  void onListen() => _start();
-
-  @override
-  void onPause() => _pause();
-
-  @override
-  void onResume() => _start();
-
-  @override
-  void onCancel() => _pause();
 
   void _start() {
     try {
@@ -145,19 +140,35 @@ class _BlobReadStreamController extends ClosableResourceStreamController<Data> {
 
         // The read stream is done (EOF).
         if (buffer == null) {
-          controller.close();
+          _controller.close();
           break;
         }
 
-        controller.add(buffer);
+        _controller.add(buffer);
       }
       // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {
-      controller
+      _controller
         ..addError(error, stackTrace)
         ..close();
     }
   }
 
   void _pause() => _isPaused = true;
+
+  @override
+  StreamSubscription<Data> listen(
+    void Function(Data event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) =>
+      _controller.stream
+          .transform(ResourceStreamTransformer(parent: parent, blocking: true))
+          .listen(
+            onData,
+            onError: onError,
+            onDone: onDone,
+            cancelOnError: cancelOnError,
+          );
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../cbl.dart';
 import '../database/proxy_database.dart';
@@ -10,8 +11,9 @@ import '../fleece/integration/context.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
-import '../support/resource.dart';
+import '../support/listener_token.dart';
 import '../support/streams.dart';
+import '../support/utils.dart';
 import 'data_source.dart';
 import 'parameters.dart';
 import 'query.dart';
@@ -32,22 +34,23 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
           definition: definition,
         );
 
-  @override
-  ProxyDatabase? get database => super.database as ProxyDatabase?;
-
+  late final _lock = Lock();
+  late final _listenerTokens = ListenerTokenRegistry(this);
   late List<String> _columnNames;
 
-  Future<void>? _parametersAreSet = Future.value();
+  @override
+  ProxyDatabase? get database => super.database as ProxyDatabase?;
 
   @override
   Parameters? get parameters => _parameters;
   Parameters? _parameters;
 
   @override
-  set parameters(Parameters? parameters) {
-    _parameters = parameters;
-    _parametersAreSet = null;
-  }
+  Future<void> setParameters(Parameters? parameters) =>
+      use(() => _lock.synchronized(() async {
+            await _applyParameters(parameters);
+            _parameters = parameters;
+          }));
 
   @override
   Future<ResultSet> execute() => use(() => ProxyResultSet(
@@ -60,17 +63,49 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
       use(() => database!.channel.call(ExplainQuery(queryId: objectId!)));
 
   @override
-  Stream<ResultSet> changes() =>
-      use(() => database!.channel.stream(QueryChanges(queryId: objectId!)))
-          .asStream()
-          .asyncExpand((changes) => changes.map((resultSetId) => ProxyResultSet(
-                query: this,
-                results: database!.channel.stream(QueryChangeResultSet(
-                  queryId: objectId!,
-                  resultSetId: resultSetId,
-                )),
-              )))
-          .toClosableResourceStream(this);
+  Future<ListenerToken> addChangeListener(QueryChangeListener listener) =>
+      use(() async {
+        final token = await _addChangeListener(listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addChangeListener(
+    QueryChangeListener listener,
+  ) async {
+    final client = database!.client;
+    late final ProxyListenerToken<QueryChange> token;
+    final listenerId = client.registerQueryChangeListener((resultSetId) {
+      final results = ProxyResultSet(
+        query: this,
+        results: client.channel.stream(QueryChangeResultSet(
+          queryId: objectId!,
+          resultSetId: resultSetId,
+        )),
+      );
+      final change = QueryChange(this, results);
+      token.callListener(change);
+    });
+
+    await client.channel.call(AddQueryChangeListener(
+      queryId: objectId!,
+      listenerId: listenerId,
+    ));
+
+    return token = ProxyListenerToken(client, this, listenerId, listener);
+  }
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token) =>
+      use(() => _listenerTokens.remove(token));
+
+  @override
+  AsyncListenStream<QueryChange> changes() =>
+      // ignore: lines_longer_than_80_chars
+      // TODO(blaugold): refactor `QueryBase` so `changes` can be wrapped with `useSync`
+      ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      );
 
   @override
   // ignore: cast_nullable_to_non_nullable
@@ -87,14 +122,12 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
     _columnNames = state.columnNames;
 
-    bindToTargetObject(database!.channel, state.objectId);
-    registerChildResource(_ProxyQueryFinalizer(finalizeEarly));
+    bindToTargetObject(database!.channel, state.id);
   }
 
-  Future<void> _setParameters() {
+  Future<void> _applyParameters(Parameters? parameters) {
     EncodedData? encodedParameters;
 
-    final parameters = _parameters;
     if (parameters != null) {
       final encoder = FleeceEncoder();
       (parameters as ParametersImpl).encodeTo(encoder);
@@ -106,21 +139,6 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
       parameters: encodedParameters,
     ));
   }
-
-  @override
-  Future<T> use<T>(FutureOr<T> Function() f) => super.use(() async {
-        await (_parametersAreSet ??= _setParameters());
-        return f();
-      });
-}
-
-class _ProxyQueryFinalizer with ClosableResourceMixin {
-  _ProxyQueryFinalizer(this.finalize);
-
-  final void Function() finalize;
-
-  @override
-  Future<void> performClose() async => finalize();
 }
 
 class ProxyResultSet extends ResultSet {
@@ -141,7 +159,7 @@ class ProxyResultSet extends ResultSet {
             context: _context,
             columnNames: query._columnNames,
           ))
-      .toClosableResourceStream(query);
+      .transform(ResourceStreamTransformer(parent: query, blocking: true));
 
   @override
   Future<List<Result>> allResults() => asStream().toList();

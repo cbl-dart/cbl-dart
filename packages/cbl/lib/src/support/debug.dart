@@ -2,7 +2,7 @@ import 'ffi.dart';
 import 'native_object.dart';
 
 /// Setting this flag to `true` enables printing of debug information for
-/// [CblObject] in debug builds.
+/// [CBLObject] in debug builds.
 bool get debugRefCounted => _debugRefCountedObject;
 bool _debugRefCountedObject = false;
 

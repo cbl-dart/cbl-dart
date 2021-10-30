@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database/database.dart';
+import '../support/listener_token.dart';
 import 'data_source.dart';
 import 'ffi_query.dart';
 import 'from.dart';
@@ -10,6 +11,7 @@ import 'parameters.dart';
 import 'proxy_query.dart';
 import 'query.dart';
 import 'query_builder.dart';
+import 'query_change.dart';
 import 'result_set.dart';
 import 'router/from_router.dart';
 import 'select_result.dart';
@@ -56,7 +58,11 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   }
 
   @override
-  Parameters? parameters;
+  Parameters? get parameters => throw UnimplementedError();
+
+  @override
+  FutureOr<void> setParameters(Parameters? value) =>
+      useSync(() => throw UnimplementedError());
 
   @override
   FutureOr<ResultSet> execute() => useSync(() => throw UnimplementedError());
@@ -65,10 +71,21 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   FutureOr<String> explain() => useSync(() => throw UnimplementedError());
 
   @override
-  Stream<ResultSet> changes() => useSync(() => throw UnimplementedError());
+  FutureOr<ListenerToken> addChangeListener(QueryChangeListener listener) =>
+      useSync(() => throw UnimplementedError());
 
   @override
-  FutureOr<void> performPrepare() {}
+  FutureOr<void> removeChangeListener(ListenerToken token) =>
+      useSync(() => throw UnimplementedError());
+
+  @override
+  Stream<QueryChange> changes() => useSync(() => throw UnimplementedError());
+
+  @override
+  FutureOr<void> performPrepare() => throw UnimplementedError();
+
+  @override
+  Future<void> finalize() => throw UnimplementedError();
 }
 
 class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {

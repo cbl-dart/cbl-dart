@@ -12,6 +12,7 @@ import '../fleece/fleece.dart' as fl;
 import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
+import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -28,8 +29,8 @@ import 'replicator_change.dart';
 late final _bindings = cblBindings.replicator;
 
 class FfiReplicator
-    with ClosableResourceMixin, NativeResourceMixin<CBLReplicator>
-    implements SyncReplicator {
+    with ClosableResourceMixin
+    implements SyncReplicator, NativeResource<CBLReplicator> {
   FfiReplicator(
     ReplicatorConfiguration config, {
     required String debugCreator,
@@ -104,7 +105,7 @@ class FfiReplicator
           debugName: 'Replicator(creator: $debugCreator)',
         );
 
-        database.registerChildResource(this);
+        attachTo(database);
         // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         _disposeCallbacks();
@@ -119,6 +120,8 @@ class FfiReplicator
   }
 
   static const _sleepWaitingForConnection = Duration(milliseconds: 5);
+
+  late final _listenerTokens = ListenerTokenRegistry(this);
 
   final ReplicatorConfiguration _config;
 
@@ -172,44 +175,84 @@ class FfiReplicator
   }
 
   @override
-  Stream<ReplicatorChange> changes() => useSync(_changes);
+  ListenerToken addChangeListener(ReplicatorChangeListener listener) =>
+      useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
 
-  Stream<ReplicatorChange> _changes() =>
-      CallbackStreamController<ReplicatorChange, void>(
-        parent: this,
-        startStream: (callback) => _bindings.addChangeListener(
+  AbstractListenerToken _addChangeListener(ReplicatorChangeListener listener) {
+    final callback = AsyncCallback(
+      (arguments) {
+        final message =
+            ReplicatorStatusCallbackMessage.fromArguments(arguments);
+        final change = ReplicatorChangeImpl(
+          this,
+          message.status.toReplicatorStatus(),
+        );
+        listener(change);
+      },
+      debugName: 'FfiReplicator.addChangeListener',
+    );
+
+    runNativeCalls(() => _bindings.addChangeListener(
           native.pointer,
           callback.native.pointer,
-        ),
-        createEvent: (_, arguments) {
-          final message =
-              ReplicatorStatusCallbackMessage.fromArguments(arguments);
-          return ReplicatorChangeImpl(
-            this,
-            message.status.toReplicatorStatus(),
-          );
-        },
-      ).stream;
+        ));
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  ListenerToken addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  ) =>
+      useSync(() =>
+          _addDocumentReplicationListener(listener).also(_listenerTokens.add));
+
+  AbstractListenerToken _addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  ) {
+    final callback = AsyncCallback(
+      (arguments) {
+        final message =
+            DocumentReplicationsCallbackMessage.fromArguments(arguments);
+
+        final documents =
+            message.documents.map((it) => it.toReplicatedDocument()).toList();
+
+        final replication =
+            DocumentReplicationImpl(this, message.isPush, documents);
+        listener(replication);
+      },
+      debugName: 'FfiReplicator.addDocumentReplicationListener',
+    );
+
+    runNativeCalls(() => _bindings.addDocumentReplicationListener(
+          native.pointer,
+          callback.native.pointer,
+        ));
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  void removeChangeListener(ListenerToken token) => useSync(() {
+        final result = _listenerTokens.remove(token);
+        assert(result is! Future);
+      });
+
+  @override
+  Stream<ReplicatorChange> changes() => useSync(_changes);
+
+  Stream<ReplicatorChange> _changes() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      );
 
   @override
   Stream<DocumentReplication> documentReplications() =>
-      useSync(() => CallbackStreamController(
+      useSync(() => ListenerStream(
             parent: this,
-            startStream: (callback) => _bindings.addDocumentReplicationListener(
-              native.pointer,
-              callback.native.pointer,
-            ),
-            createEvent: (_, arguments) {
-              final message =
-                  DocumentReplicationsCallbackMessage.fromArguments(arguments);
-
-              final documents = message.documents
-                  .map((it) => it.toReplicatedDocument())
-                  .toList();
-
-              return DocumentReplicationImpl(this, message.isPush, documents);
-            },
-          ).stream);
+            addListener: _addDocumentReplicationListener,
+          ));
 
   @override
   Set<String> get pendingDocumentIds => useSync(() {
@@ -225,7 +268,7 @@ class FfiReplicator
       .call((pointer) => _bindings.isDocumentPending(pointer, documentId)));
 
   @override
-  Future<void> performClose() async {
+  Future<void> finalize() async {
     try {
       var stopping = false;
       while (_status.activity != ReplicatorActivityLevel.stopped) {

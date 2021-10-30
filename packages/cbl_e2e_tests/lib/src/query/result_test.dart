@@ -197,8 +197,8 @@ void main() {
         final q = await Query.fromN1ql(
           db,
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
-        )
-          ..parameters = Parameters({'ID': doc.id});
+        );
+        await q.setParameters(Parameters({'ID': doc.id}));
 
         final resultSet = await q.execute();
         final result = await resultSet.asStream().first;
@@ -216,8 +216,8 @@ void main() {
         final q = await Query.fromN1ql(
           db,
           r'SELECT META().id FROM _ WHERE META().id = $ID',
-        )
-          ..parameters = Parameters({'ID': doc.id});
+        );
+        await q.setParameters(Parameters({'ID': doc.id}));
 
         final resultSet = await q.execute();
         final result = await resultSet.asStream().first;

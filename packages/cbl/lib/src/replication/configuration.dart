@@ -161,7 +161,12 @@ class ReplicatorConfiguration {
   /// document, an access removed event will be sent to any document change
   /// streams that are active on the replicator.
   ///
-  /// {@macro cbl.Replicator.documentReplications.listening}
+  /// {@macro cbl.Replicator.addDocumentReplicationListener.listening}
+  ///
+  /// See also:
+  ///
+  ///   - [Replicator.addDocumentReplicationListener] for listening to
+  ///     [DocumentReplication]s performed by a [Replicator].
   bool enableAutoPurge;
 
   /// The heartbeat interval.

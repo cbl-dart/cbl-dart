@@ -9,6 +9,7 @@ import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
+import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
@@ -31,7 +32,7 @@ class ProxyReplicator extends ProxyObject
         _config = ReplicatorConfiguration.from(config),
         _unregisterCallbacks = unregisterCallbacks,
         super(database.channel, objectId) {
-    database.registerChildResource(this);
+    attachTo(database);
   }
 
   static Future<ProxyReplicator> create(
@@ -58,14 +59,14 @@ class ProxyReplicator extends ProxyObject
         .let(client.registerConflictResolver);
 
     void unregisterCallbacks() {
-      pushFilterId?.let(client.unregisterReplicationFilter);
-      pullFilterId?.let(client.unregisterReplicationFilter);
-      conflictResolverId?.let(client.unregisterConflictResolver);
+      [pushFilterId, pullFilterId, conflictResolverId]
+          .whereType<int>()
+          .forEach(client.unregisterObject);
     }
 
     try {
       final objectId = await database.channel.call(CreateReplicator(
-        databaseObjectId: database.objectId,
+        databaseId: database.objectId,
         propertiesFormat: EncodingFormat.fleece,
         target: config.target,
         replicatorType: config.replicatorType,
@@ -101,6 +102,8 @@ class ProxyReplicator extends ProxyObject
 
   final void Function() _unregisterCallbacks;
 
+  late final _listenerTokens = ListenerTokenRegistry(this);
+
   @override
   ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
   final ReplicatorConfiguration _config;
@@ -108,49 +111,107 @@ class ProxyReplicator extends ProxyObject
   @override
   Future<ReplicatorStatus> get status =>
       use(() => channel.call(GetReplicatorStatus(
-            replicatorObjectId: objectId,
+            replicatorId: objectId,
           )));
 
   @override
   Future<void> start({bool reset = false}) =>
       use(() => channel.call(StartReplicator(
-            replicatorObjectId: objectId,
+            replicatorId: objectId,
             reset: reset,
           )));
 
   @override
   Future<void> stop() => use(_stop);
 
-  Future<void> _stop() =>
-      channel.call(StopReplicator(replicatorObjectId: objectId));
+  Future<void> _stop() => channel.call(StopReplicator(replicatorId: objectId));
 
   @override
-  Stream<ReplicatorChange> changes() => useSync(() => channel
-      .stream(ReplicatorChanges(replicatorObjectId: objectId))
-      .map((status) => ReplicatorChangeImpl(this, status))
-      .toClosableResourceStream(this));
+  Future<ListenerToken> addChangeListener(ReplicatorChangeListener listener) =>
+      use(() async {
+        final token = await _addChangeListener(listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addChangeListener(
+      ReplicatorChangeListener listener) async {
+    late final ProxyListenerToken<ReplicatorChange> token;
+    final listenerId =
+        database.client.registerReplicatorChangeListener((status) {
+      token.callListener(ReplicatorChangeImpl(this, status));
+    });
+
+    await channel.call(AddReplicatorChangeListener(
+      replicatorId: objectId,
+      listenerId: listenerId,
+    ));
+
+    return token =
+        ProxyListenerToken(database.client, this, listenerId, listener);
+  }
 
   @override
-  Stream<DocumentReplication> documentReplications() => useSync(() => channel
-      .stream(ReplicatorDocumentReplications(replicatorObjectId: objectId))
-      .map((event) =>
-          DocumentReplicationImpl(this, event.isPush, event.documents))
-      .toClosableResourceStream(this));
+  Future<ListenerToken> addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  ) =>
+      use(() async {
+        final token = await _addDocumentReplicationListener(listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  ) async {
+    late final ProxyListenerToken<DocumentReplication> token;
+    final listenerId =
+        database.client.registerDocumentReplicationListener((event) {
+      token.callListener(DocumentReplicationImpl(
+        this,
+        event.isPush,
+        event.documents,
+      ));
+    });
+
+    await channel.call(AddDocumentReplicationListener(
+      replicatorId: objectId,
+      listenerId: listenerId,
+    ));
+
+    return token =
+        ProxyListenerToken(database.client, this, listenerId, listener);
+  }
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token) =>
+      use(() => _listenerTokens.remove(token));
+
+  @override
+  AsyncListenStream<ReplicatorChange> changes() => useSync(() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      ));
+
+  @override
+  AsyncListenStream<DocumentReplication> documentReplications() =>
+      useSync(() => ListenerStream(
+            parent: this,
+            addListener: _addDocumentReplicationListener,
+          ));
 
   @override
   Future<bool> isDocumentPending(String documentId) =>
       use(() => channel.call(ReplicatorIsDocumentPending(
-            replicatorObjectId: objectId,
-            id: documentId,
+            replicatorId: objectId,
+            documentId: documentId,
           )));
 
   @override
   Future<Set<String>> get pendingDocumentIds => use(() => channel
-      .call(ReplicatorPendingDocumentIds(replicatorObjectId: objectId))
+      .call(ReplicatorPendingDocumentIds(replicatorId: objectId))
       .then((value) => value.toSet()));
 
   @override
-  Future<void> performClose() async {
+  Future<void> finalize() async {
     await _stop();
     _unregisterCallbacks();
     finalizeEarly();

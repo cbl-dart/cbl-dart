@@ -925,8 +925,9 @@ Future<T> evalExpr<T extends Object?>(
   final query = const QueryBuilder()
       .select(selectResult)
       .from(dataSource)
-      .where(Meta.id.equalTo(Expression.string(doc?.id ?? 'EvalExpr')))
-    ..parameters = parameters;
+      .where(Meta.id.equalTo(Expression.string(doc?.id ?? 'EvalExpr')));
+
+  await query.setParameters(parameters);
 
   final resultSet = await query.execute();
 

@@ -6,7 +6,9 @@ import 'support/ffi.dart';
 import 'support/isolate.dart';
 
 export 'support/ffi.dart' show Libraries, LibraryConfiguration;
+export 'support/listener_token.dart' show ListenerToken;
 export 'support/resource.dart' show Resource, ClosableResource;
+export 'support/streams.dart' show AsyncListenStream;
 
 /// Initializes global resources and configures global settings, such as
 /// logging.

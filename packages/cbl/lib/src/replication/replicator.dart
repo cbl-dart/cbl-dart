@@ -2,7 +2,9 @@ import 'dart:async';
 
 import '../database/database.dart';
 import '../document/document.dart';
+import '../support/listener_token.dart';
 import '../support/resource.dart';
+import '../support/streams.dart';
 import '../support/utils.dart';
 import 'configuration.dart';
 import 'document_replication.dart';
@@ -79,6 +81,15 @@ class ReplicatorStatus {
       ].join();
 }
 
+/// A listener that is called when a [Replicator]s [Replicator.status] changes.
+typedef ReplicatorChangeListener = void Function(ReplicatorChange change);
+
+/// A listener that is called when a [Replicator] has replicated one or more
+/// [Document]s.
+typedef DocumentReplicationListener = void Function(
+  DocumentReplication change,
+);
+
 /// A replicator for replicating [Document]s between a local database and a
 /// target database.
 ///
@@ -139,20 +150,69 @@ abstract class Replicator implements ClosableResource {
   /// be notified accordingly.
   FutureOr<void> stop();
 
-  /// Returns a [Stream] which emits a [ReplicatorChange] event when this
-  /// replicators [status] changes.
-  Stream<ReplicatorChange> changes();
-
-  /// Returns a [Stream] wich emits a [DocumentReplication] event when a set
-  /// of [Document]s have been replicated.
+  /// Adds a [listener] to be notified of changes to the [status] of this
+  /// replicator.
   ///
-  /// {@template cbl.Replicator.documentReplications.listening}
-  /// Because of performance optimization in the replicator, document change
-  /// stream needs to be listened to before starting the replicator. If the
-  /// stream is listened to after the replicator is started, the replicator
-  /// needs to be stopped and restarted again to ensure that the stream will
+  /// {@macro cbl.Database.addChangeListener}
+  ///
+  /// See also:
+  ///
+  ///   - [ReplicatorChange] for the change event given to [listener].
+  ///   - [addDocumentReplicationListener] for listening for
+  ///     [DocumentReplication]s performed by this replicator.
+  ///   - [removeChangeListener] for removing a previously added listener.
+  FutureOr<ListenerToken> addChangeListener(ReplicatorChangeListener listener);
+
+  /// Adds a [listener] to be notified of [DocumentReplication]s performed by
+  /// this replicator.
+  ///
+  /// {@template cbl.Replicator.addDocumentReplicationListener.listening}
+  /// Because of performance optimization in the replicator, document
+  /// replications need to be listened to before starting the replicator. If the
+  /// listener is added after the replicator is started, the replicator
+  /// needs to be stopped and restarted again to ensure that the listener will
   /// get the document replication events.
   /// {@endtemplate}
+  ///
+  /// {@macro cbl.Database.addChangeListener}
+  ///
+  /// See also:
+  ///
+  ///   - [DocumentReplication] for the change event given to [listener].
+  ///   - [addChangeListener] for listening for changes to the [status] this
+  ///     replicator.
+  ///   - [removeChangeListener] for removing a previously added listener.
+  FutureOr<ListenerToken> addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  );
+
+  /// {@macro cbl.Database.removeChangeListener}
+  ///
+  /// See also:
+  ///
+  ///   - [addChangeListener] for listening for changes to the [status] this
+  ///     replicator.
+  ///   - [addDocumentReplicationListener] for listening for
+  ///     [DocumentReplication]s performed by this replicator.
+  FutureOr<void> removeChangeListener(ListenerToken token);
+
+  /// Returns a [Stream] to be notified of changes to the [status] of this
+  /// replicator.
+  ///
+  /// This is an alternative stream based API for the [addChangeListener] API.
+  ///
+  /// {@macro cbl.Database.AsyncListenStream}
+  Stream<ReplicatorChange> changes();
+
+  /// Returns a [Stream] to be notified of [DocumentReplication]s performed by
+  /// this replicator.
+  ///
+  /// This is an alternative stream based API for the
+  /// [addDocumentReplicationListener] API.
+  ///
+  /// {@macro cbl.Replicator.addDocumentReplicationListener.listening}
+  ///
+  /// {@macro cbl.Database.AsyncListenStream}
   Stream<DocumentReplication> documentReplications();
 
   /// Returns a [Set] of [Document] ids, who have revisions pending push.
@@ -187,6 +247,17 @@ abstract class SyncReplicator implements Replicator {
   void stop();
 
   @override
+  ListenerToken addChangeListener(ReplicatorChangeListener listener);
+
+  @override
+  ListenerToken addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  );
+
+  @override
+  void removeChangeListener(ListenerToken token);
+
+  @override
   Set<String> get pendingDocumentIds;
 
   @override
@@ -207,6 +278,23 @@ abstract class AsyncReplicator implements Replicator {
 
   @override
   Future<void> stop();
+
+  @override
+  Future<ListenerToken> addChangeListener(ReplicatorChangeListener listener);
+
+  @override
+  Future<ListenerToken> addDocumentReplicationListener(
+    DocumentReplicationListener listener,
+  );
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token);
+
+  @override
+  AsyncListenStream<ReplicatorChange> changes();
+
+  @override
+  AsyncListenStream<DocumentReplication> documentReplications();
 
   @override
   Future<Set<String>> get pendingDocumentIds;
