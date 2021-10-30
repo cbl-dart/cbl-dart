@@ -334,23 +334,53 @@ void main() {
         });
       });
 
+      apiTest('database change listener is notified while listening', () async {
+        final db = await openTestDatabase();
+        final doc = MutableDocument();
+        final listenerWasCalled = Completer<void>();
+
+        final token = await db.addChangeListener(expectAsync1((change) {
+          expect(change.database, db);
+          expect(change.documentIds, [doc.id]);
+          listenerWasCalled.complete();
+        }));
+
+        // Change the database.
+        await db.saveDocument(doc);
+
+        // Wait for listener to be called and remove it.
+        await listenerWasCalled.future;
+        await db.removeChangeListener(token);
+
+        // Change the database again, to verify listener is not called anymore.
+        await db.saveDocument(MutableDocument());
+      });
+
+      apiTest('document change listener is notified while listening', () async {
+        final db = await openTestDatabase();
+        final doc = MutableDocument();
+        final listenerWasCalled = Completer<void>();
+
+        final token =
+            await db.addDocumentChangeListener(doc.id, expectAsync1((change) {
+          expect(change.database, db);
+          expect(change.documentId, doc.id);
+          listenerWasCalled.complete();
+        }));
+
+        // Saved the document.
+        await db.saveDocument(doc);
+
+        // Wait for listener to be called and remove it.
+        await listenerWasCalled.future;
+        await db.removeChangeListener(token);
+
+        // Save the document again, to verify listener is not called anymore.
+        await db.saveDocument(doc);
+      });
+
       apiTest(
-        'document change listener is called when the document changes',
-        () async {
-          final db = await openTestDatabase();
-          final doc = MutableDocument();
-
-          expect(
-            db.documentChanges(doc.id),
-            emitsInOrder(<dynamic>[DocumentChange(db, doc.id)]),
-          );
-
-          await db.saveDocument(doc);
-        },
-      );
-
-      apiTest(
-        'database change listener is called when a document changes',
+        'database change stream emits event when database changes',
         () async {
           final db = await openTestDatabase();
           final doc = MutableDocument();
@@ -360,6 +390,21 @@ void main() {
             emitsInOrder(<dynamic>[
               DatabaseChange(db, [doc.id])
             ]),
+          );
+
+          await db.saveDocument(doc);
+        },
+      );
+
+      apiTest(
+        'document change stream emits event when the document changes',
+        () async {
+          final db = await openTestDatabase();
+          final doc = MutableDocument();
+
+          expect(
+            db.documentChanges(doc.id),
+            emitsInOrder(<dynamic>[DocumentChange(db, doc.id)]),
           );
 
           await db.saveDocument(doc);

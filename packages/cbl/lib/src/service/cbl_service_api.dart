@@ -23,6 +23,10 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       // Request
       ..addSerializableCodec('Ping', PingRequest.deserialize)
       ..addSerializableCodec('ReleaseObject', ReleaseObject.deserialize)
+      ..addSerializableCodec(
+        'RemoveChangeListener',
+        RemoveChangeListener.deserialize,
+      )
       ..addSerializableCodec('RemoveDatabase', RemoveDatabase.deserialize)
       ..addSerializableCodec('DatabaseExists', DatabaseExists.deserialize)
       ..addSerializableCodec('CopyDatabase', CopyDatabase.deserialize)
@@ -58,8 +62,22 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         'GetDocumentExpiration',
         GetDocumentExpiration.deserialize,
       )
-      ..addSerializableCodec('DatabaseChanges', DatabaseChanges.deserialize)
-      ..addSerializableCodec('DocumentChanges', DocumentChanges.deserialize)
+      ..addSerializableCodec(
+        'AddDatabaseChangeListener',
+        AddDatabaseChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'CallDatabaseChangeListener',
+        CallDatabaseChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'AddDocumentChangeListener',
+        AddDocumentChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'CallDocumentChangeListener',
+        CallDocumentChangeListener.deserialize,
+      )
       ..addSerializableCodec(
         'PerformDatabaseMaintenance',
         PerformDatabaseMaintenance.deserialize,
@@ -77,7 +95,14 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
       ..addSerializableCodec('ExplainQuery', ExplainQuery.deserialize)
       ..addSerializableCodec('ExecuteQuery', ExecuteQuery.deserialize)
-      ..addSerializableCodec('QueryChanges', QueryChanges.deserialize)
+      ..addSerializableCodec(
+        'AddQueryChangeListener',
+        AddQueryChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'CallQueryChangeListener',
+        CallQueryChangeListener.deserialize,
+      )
       ..addSerializableCodec(
         'QueryChangeResultSet',
         QueryChangeResultSet.deserialize,
@@ -103,10 +128,21 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
       ..addSerializableCodec('StartReplicator', StartReplicator.deserialize)
       ..addSerializableCodec('StopReplicator', StopReplicator.deserialize)
-      ..addSerializableCodec('ReplicatorChanges', ReplicatorChanges.deserialize)
       ..addSerializableCodec(
-        'ReplicatorDocumentReplications',
-        ReplicatorDocumentReplications.deserialize,
+        'AddReplicatorChangeListener',
+        AddReplicatorChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'CallReplicatorChangeListener',
+        CallReplicatorChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'AddDocumentReplicationListener',
+        AddDocumentReplicationListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'CallDocumentReplicationListener',
+        CallDocumentReplicationListener.deserialize,
       )
       ..addSerializableCodec(
         'ReplicatorIsDocumentPending',
@@ -406,6 +442,32 @@ class ReleaseObject extends Request<Null> {
       ReleaseObject(map.getAs('objectId'));
 }
 
+class RemoveChangeListener implements Request<Null> {
+  RemoveChangeListener({
+    required this.targetId,
+    required this.listenerId,
+  });
+
+  final int targetId;
+
+  final int listenerId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'targetId': targetId,
+        'listenerId': listenerId,
+      };
+
+  static RemoveChangeListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      RemoveChangeListener(
+        targetId: map.getAs('targetId'),
+        listenerId: map.getAs('listenerId'),
+      );
+}
+
 class RemoveDatabase extends Request<bool> {
   RemoveDatabase(
     this.name,
@@ -507,64 +569,67 @@ class OpenDatabase extends Request<DatabaseState> {
 }
 
 class GetDatabase extends Request<DatabaseState> {
-  GetDatabase(this.objectId);
+  GetDatabase(this.databaseId);
 
-  final int objectId;
+  final int databaseId;
 
   @override
-  StringMap serialize(SerializationContext context) => {'objectId': objectId};
+  StringMap serialize(SerializationContext context) =>
+      {'databaseId': databaseId};
 
   static GetDatabase deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      GetDatabase(map.getAs('objectId'));
+      GetDatabase(map.getAs('databaseId'));
 }
 
 class CloseDatabase extends Request<Null> {
-  CloseDatabase(this.objectId);
+  CloseDatabase(this.databaseId);
 
-  final int objectId;
+  final int databaseId;
 
   @override
-  StringMap serialize(SerializationContext context) => {'objectId': objectId};
+  StringMap serialize(SerializationContext context) =>
+      {'databaseId': databaseId};
 
   static CloseDatabase deserialize(
           StringMap map, SerializationContext context) =>
-      CloseDatabase(map.getAs('objectId'));
+      CloseDatabase(map.getAs('databaseId'));
 }
 
 class DeleteDatabase extends Request<Null> {
-  DeleteDatabase(this.objectId);
+  DeleteDatabase(this.databaseId);
 
-  final int objectId;
+  final int databaseId;
 
   @override
-  StringMap serialize(SerializationContext context) => {'objectId': objectId};
+  StringMap serialize(SerializationContext context) =>
+      {'databaseId': databaseId};
 
   static DeleteDatabase deserialize(
           StringMap map, SerializationContext context) =>
-      DeleteDatabase(map.getAs('objectId'));
+      DeleteDatabase(map.getAs('databaseId'));
 }
 
 class GetDocument extends Request<DocumentState?> {
-  GetDocument(this.databaseId, this.id, this.propertiesFormat);
+  GetDocument(this.databaseId, this.documentId, this.propertiesFormat);
 
   final int databaseId;
-  final String id;
+  final String documentId;
   final EncodingFormat propertiesFormat;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'databaseId': databaseId,
-        'id': id,
+        'documentId': documentId,
         'propertiesFormat': context.serialize(propertiesFormat),
       };
 
   static GetDocument deserialize(StringMap map, SerializationContext context) =>
       GetDocument(
         map.getAs('databaseId'),
-        map.getAs('id'),
+        map.getAs('documentId'),
         context.deserializeAs(map['propertiesFormat'])!,
       );
 }
@@ -628,15 +693,15 @@ class DeleteDocument extends Request<DocumentState?> {
 }
 
 class PurgeDocument implements Request<Null> {
-  PurgeDocument(this.databaseId, this.id);
+  PurgeDocument(this.databaseId, this.documentId);
 
   final int databaseId;
-  final String id;
+  final String documentId;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'databaseId': databaseId,
-        'id': id,
+        'documentId': documentId,
       };
 
   static PurgeDocument deserialize(
@@ -645,7 +710,7 @@ class PurgeDocument implements Request<Null> {
   ) =>
       PurgeDocument(
         map.getAs('databaseId'),
-        map.getAs('id'),
+        map.getAs('documentId'),
       );
 }
 
@@ -691,18 +756,18 @@ class EndDatabaseTransaction implements Request<Null> {
 class SetDocumentExpiration implements Request<Null> {
   SetDocumentExpiration({
     required this.databaseId,
-    required this.id,
+    required this.documentId,
     required this.expiration,
   });
 
   final int databaseId;
-  final String id;
+  final String documentId;
   final DateTime? expiration;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'databaseId': databaseId,
-        'id': id,
+        'documentId': documentId,
         'expiration': context.serialize(expiration),
       };
 
@@ -712,7 +777,7 @@ class SetDocumentExpiration implements Request<Null> {
   ) =>
       SetDocumentExpiration(
         databaseId: map.getAs('databaseId'),
-        id: map.getAs('id'),
+        documentId: map.getAs('documentId'),
         expiration: context.deserializeAs(map['expiration']),
       );
 }
@@ -720,16 +785,16 @@ class SetDocumentExpiration implements Request<Null> {
 class GetDocumentExpiration implements Request<DateTime?> {
   GetDocumentExpiration({
     required this.databaseId,
-    required this.id,
+    required this.documentId,
   });
 
   final int databaseId;
-  final String id;
+  final String documentId;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'databaseId': databaseId,
-        'id': id,
+        'documentId': documentId,
       };
 
   static GetDocumentExpiration deserialize(
@@ -738,26 +803,107 @@ class GetDocumentExpiration implements Request<DateTime?> {
   ) =>
       GetDocumentExpiration(
         databaseId: map.getAs('databaseId'),
-        id: map.getAs('id'),
+        documentId: map.getAs('documentId'),
       );
 }
 
-class DatabaseChanges implements Request<List<String>> {
-  DatabaseChanges({
+class AddDatabaseChangeListener implements Request<Null> {
+  AddDatabaseChangeListener({
     required this.databaseId,
+    required this.listenerId,
   });
 
   final int databaseId;
 
-  @override
-  StringMap serialize(SerializationContext context) =>
-      {'databaseId': databaseId};
+  final int listenerId;
 
-  static DatabaseChanges deserialize(
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'listenerId': listenerId,
+      };
+
+  static AddDatabaseChangeListener deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      DatabaseChanges(databaseId: map.getAs('databaseId'));
+      AddDatabaseChangeListener(
+        databaseId: map.getAs('databaseId'),
+        listenerId: map.getAs('listenerId'),
+      );
+}
+
+class CallDatabaseChangeListener implements Request<Null> {
+  CallDatabaseChangeListener({
+    required this.listenerId,
+    required this.documentIds,
+  });
+
+  final int listenerId;
+
+  final List<String> documentIds;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'listenerId': listenerId,
+        'documentIds': context.serialize(documentIds),
+      };
+
+  static CallDatabaseChangeListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CallDatabaseChangeListener(
+        listenerId: map.getAs('listenerId'),
+        documentIds: context.deserializeAs(map['documentIds'])!,
+      );
+}
+
+class AddDocumentChangeListener implements Request<Null> {
+  AddDocumentChangeListener({
+    required this.databaseId,
+    required this.documentId,
+    required this.listenerId,
+  });
+
+  final int databaseId;
+
+  final String documentId;
+
+  final int listenerId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'documentId': documentId,
+        'listenerId': listenerId,
+      };
+
+  static AddDocumentChangeListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      AddDocumentChangeListener(
+        databaseId: map.getAs('databaseId'),
+        documentId: map.getAs('documentId'),
+        listenerId: map.getAs('listenerId'),
+      );
+}
+
+class CallDocumentChangeListener implements Request<Null> {
+  CallDocumentChangeListener({required this.listenerId});
+
+  final int listenerId;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'listenerId': listenerId};
+
+  static CallDocumentChangeListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CallDocumentChangeListener(listenerId: map.getAs('listenerId'));
 }
 
 class PerformDatabaseMaintenance implements Request<Null> {
@@ -782,31 +928,6 @@ class PerformDatabaseMaintenance implements Request<Null> {
       PerformDatabaseMaintenance(
         databaseId: map.getAs('databaseId'),
         type: context.deserializeAs(map['type'])!,
-      );
-}
-
-class DocumentChanges implements Request<Null> {
-  DocumentChanges({
-    required this.databaseId,
-    required this.id,
-  });
-
-  final int databaseId;
-  final String id;
-
-  @override
-  StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
-        'id': id,
-      };
-
-  static DocumentChanges deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      DocumentChanges(
-        databaseId: map.getAs('databaseId'),
-        id: map.getAs('id'),
       );
 }
 
@@ -1027,19 +1148,56 @@ class ExecuteQuery implements Request<EncodedData> {
       ExecuteQuery(queryId: map.getAs('queryId'));
 }
 
-class QueryChanges implements Request<int> {
-  QueryChanges({required this.queryId});
+class AddQueryChangeListener implements Request<Null> {
+  AddQueryChangeListener({
+    required this.queryId,
+    required this.listenerId,
+  });
 
   final int queryId;
 
-  @override
-  StringMap serialize(SerializationContext context) => {'queryId': queryId};
+  final int listenerId;
 
-  static QueryChanges deserialize(
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'queryId': queryId,
+        'listenerId': listenerId,
+      };
+
+  static AddQueryChangeListener deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      QueryChanges(queryId: map.getAs('queryId'));
+      AddQueryChangeListener(
+        queryId: map.getAs('queryId'),
+        listenerId: map.getAs('listenerId'),
+      );
+}
+
+class CallQueryChangeListener implements Request<Null> {
+  CallQueryChangeListener({
+    required this.listenerId,
+    required this.resultSetId,
+  });
+
+  final int listenerId;
+
+  final int resultSetId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'listenerId': listenerId,
+        'resultSetId': resultSetId,
+      };
+
+  static CallQueryChangeListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CallQueryChangeListener(
+        listenerId: map.getAs('listenerId'),
+        resultSetId: map.getAs('resultSetId'),
+      );
 }
 
 class QueryChangeResultSet implements Request<EncodedData> {
@@ -1069,7 +1227,7 @@ class QueryChangeResultSet implements Request<EncodedData> {
 
 class CreateReplicator extends Request<int> {
   CreateReplicator({
-    required this.databaseObjectId,
+    required this.databaseId,
     required this.propertiesFormat,
     required this.target,
     this.replicatorType = ReplicatorType.pushAndPull,
@@ -1088,7 +1246,7 @@ class CreateReplicator extends Request<int> {
     this.maxAttemptWaitTime,
   });
 
-  final int databaseObjectId;
+  final int databaseId;
   final EncodingFormat propertiesFormat;
   final Endpoint target;
   final ReplicatorType replicatorType;
@@ -1108,7 +1266,7 @@ class CreateReplicator extends Request<int> {
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseObjectId': databaseObjectId,
+        'databaseId': databaseId,
         'propertiesFormat': context.serialize(propertiesFormat),
         'target': context.serializePolymorphic(target),
         'replicatorType': context.serialize(replicatorType),
@@ -1132,7 +1290,7 @@ class CreateReplicator extends Request<int> {
     SerializationContext context,
   ) =>
       CreateReplicator(
-        databaseObjectId: map.getAs('databaseObjectId'),
+        databaseId: map.getAs('databaseId'),
         propertiesFormat: context.deserializeAs(map['propertiesFormat'])!,
         target: context.deserializePolymorphic(map['target'])!,
         replicatorType: context.deserializeAs(map['replicatorType'])!,
@@ -1155,18 +1313,18 @@ class CreateReplicator extends Request<int> {
 
 class CallReplicationFilter extends Request<bool> {
   CallReplicationFilter({
-    required this.id,
+    required this.filterId,
     required this.state,
     required this.flags,
   });
 
-  final int id;
+  final int filterId;
   final DocumentState state;
   final Set<DocumentFlag> flags;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'id': id,
+        'filterId': filterId,
         'state': context.serialize(state),
         'flags': flags.toList(),
       };
@@ -1176,7 +1334,7 @@ class CallReplicationFilter extends Request<bool> {
     SerializationContext context,
   ) =>
       CallReplicationFilter(
-        id: map.getAs('id'),
+        filterId: map.getAs('filterId'),
         state: context.deserializeAs(map['state'])!,
         flags: map
             .getAs<List<Object?>>('flags')
@@ -1187,18 +1345,18 @@ class CallReplicationFilter extends Request<bool> {
 
 class CallConflictResolver extends Request<DocumentState?> {
   CallConflictResolver({
-    required this.id,
+    required this.resolverId,
     required this.localState,
     required this.remoteState,
   });
 
-  final int id;
+  final int resolverId;
   final DocumentState? localState;
   final DocumentState? remoteState;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'id': id,
+        'resolverId': resolverId,
         'localState': context.serialize(localState),
         'remoteState': context.serialize(remoteState),
       };
@@ -1208,20 +1366,20 @@ class CallConflictResolver extends Request<DocumentState?> {
     SerializationContext context,
   ) =>
       CallConflictResolver(
-        id: map.getAs('id'),
+        resolverId: map.getAs('resolverId'),
         localState: context.deserializeAs(map['localState']),
         remoteState: context.deserializeAs(map['remoteState']),
       );
 }
 
 class GetReplicatorStatus extends Request<ReplicatorStatus> {
-  GetReplicatorStatus({required this.replicatorObjectId});
+  GetReplicatorStatus({required this.replicatorId});
 
-  final int replicatorObjectId;
+  final int replicatorId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
+        'replicatorId': replicatorId,
       };
 
   static GetReplicatorStatus deserialize(
@@ -1229,22 +1387,22 @@ class GetReplicatorStatus extends Request<ReplicatorStatus> {
     SerializationContext context,
   ) =>
       GetReplicatorStatus(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
+        replicatorId: map.getAs('replicatorId'),
       );
 }
 
 class StartReplicator extends Request<Null> {
   StartReplicator({
-    required this.replicatorObjectId,
+    required this.replicatorId,
     required this.reset,
   });
 
-  final int replicatorObjectId;
+  final int replicatorId;
   final bool reset;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
+        'replicatorId': replicatorId,
         'reset': reset,
       };
 
@@ -1253,21 +1411,21 @@ class StartReplicator extends Request<Null> {
     SerializationContext context,
   ) =>
       StartReplicator(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
+        replicatorId: map.getAs('replicatorId'),
         reset: map.getAs('reset'),
       );
 }
 
 class StopReplicator extends Request<Null> {
   StopReplicator({
-    required this.replicatorObjectId,
+    required this.replicatorId,
   });
 
-  final int replicatorObjectId;
+  final int replicatorId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
+        'replicatorId': replicatorId,
       };
 
   static StopReplicator deserialize(
@@ -1275,65 +1433,125 @@ class StopReplicator extends Request<Null> {
     SerializationContext context,
   ) =>
       StopReplicator(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
+        replicatorId: map.getAs('replicatorId'),
       );
 }
 
-class ReplicatorChanges extends Request<ReplicatorStatus> {
-  ReplicatorChanges({
-    required this.replicatorObjectId,
+class AddReplicatorChangeListener implements Request<Null> {
+  AddReplicatorChangeListener({
+    required this.replicatorId,
+    required this.listenerId,
   });
 
-  final int replicatorObjectId;
+  final int replicatorId;
+
+  final int listenerId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
+        'replicatorId': replicatorId,
+        'listenerId': listenerId,
       };
 
-  static ReplicatorChanges deserialize(
+  static AddReplicatorChangeListener deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      ReplicatorChanges(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
+      AddReplicatorChangeListener(
+        replicatorId: map.getAs('replicatorId'),
+        listenerId: map.getAs('listenerId'),
       );
 }
 
-class ReplicatorDocumentReplications extends Request<DocumentReplicationEvent> {
-  ReplicatorDocumentReplications({
-    required this.replicatorObjectId,
+class CallReplicatorChangeListener implements Request<Null> {
+  CallReplicatorChangeListener({
+    required this.listenerId,
+    required this.status,
   });
 
-  final int replicatorObjectId;
+  final int listenerId;
+
+  final ReplicatorStatus status;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
+        'listenerId': listenerId,
+        'status': context.serialize(status),
       };
 
-  static ReplicatorDocumentReplications deserialize(
+  static CallReplicatorChangeListener deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      ReplicatorDocumentReplications(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
+      CallReplicatorChangeListener(
+        listenerId: map.getAs('listenerId'),
+        status: context.deserializeAs(map['status'])!,
+      );
+}
+
+class AddDocumentReplicationListener implements Request<Null> {
+  AddDocumentReplicationListener({
+    required this.replicatorId,
+    required this.listenerId,
+  });
+
+  final int replicatorId;
+
+  final int listenerId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'replicatorId': replicatorId,
+        'listenerId': listenerId,
+      };
+
+  static AddDocumentReplicationListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      AddDocumentReplicationListener(
+        replicatorId: map.getAs('replicatorId'),
+        listenerId: map.getAs('listenerId'),
+      );
+}
+
+class CallDocumentReplicationListener implements Request<Null> {
+  CallDocumentReplicationListener(
+      {required this.listenerId, required this.event});
+
+  final int listenerId;
+
+  final DocumentReplicationEvent event;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'listenerId': listenerId,
+        'event': context.serialize(event),
+      };
+
+  static CallDocumentReplicationListener deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CallDocumentReplicationListener(
+        listenerId: map.getAs('listenerId'),
+        event: context.deserializeAs(map['event'])!,
       );
 }
 
 class ReplicatorIsDocumentPending extends Request<bool> {
   ReplicatorIsDocumentPending({
-    required this.replicatorObjectId,
-    required this.id,
+    required this.replicatorId,
+    required this.documentId,
   });
 
-  final int replicatorObjectId;
-  final String id;
+  final int replicatorId;
+  final String documentId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
-        'id': id,
+        'replicatorId': replicatorId,
+        'documentId': documentId,
       };
 
   static ReplicatorIsDocumentPending deserialize(
@@ -1341,21 +1559,21 @@ class ReplicatorIsDocumentPending extends Request<bool> {
     SerializationContext context,
   ) =>
       ReplicatorIsDocumentPending(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
-        id: map.getAs('id'),
+        replicatorId: map.getAs('replicatorId'),
+        documentId: map.getAs('documentId'),
       );
 }
 
 class ReplicatorPendingDocumentIds extends Request<List<String>> {
   ReplicatorPendingDocumentIds({
-    required this.replicatorObjectId,
+    required this.replicatorId,
   });
 
-  final int replicatorObjectId;
+  final int replicatorId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'replicatorObjectId': replicatorObjectId,
+        'replicatorId': replicatorId,
       };
 
   static ReplicatorPendingDocumentIds deserialize(
@@ -1363,39 +1581,22 @@ class ReplicatorPendingDocumentIds extends Request<List<String>> {
     SerializationContext context,
   ) =>
       ReplicatorPendingDocumentIds(
-        replicatorObjectId: map.getAs('replicatorObjectId'),
+        replicatorId: map.getAs('replicatorId'),
       );
 }
 
 // === Responses ===============================================================
 
-abstract class ObjectResponse implements Serializable {
-  ObjectResponse(this.objectId);
-
-  ObjectResponse.deserialize(StringMap map) : objectId = map.getAs('objectId');
-
-  final int objectId;
-
-  @override
-  StringMap serialize(SerializationContext context) => {'objectId': objectId};
-}
-
-class DatabaseState extends ObjectResponse {
+class DatabaseState implements Serializable {
   DatabaseState({
-    required int objectId,
+    required this.id,
     required this.name,
     required this.path,
     required this.count,
     required this.indexes,
-  }) : super(objectId);
+  });
 
-  DatabaseState._fromJson(StringMap map)
-      : name = map.getAs('name'),
-        path = map.getAs('path'),
-        count = map.getAs('count'),
-        indexes = map.getAsList('indexes'),
-        super.deserialize(map);
-
+  final int id;
   final String name;
   final String? path;
   final int count;
@@ -1403,7 +1604,7 @@ class DatabaseState extends ObjectResponse {
 
   @override
   StringMap serialize(SerializationContext context) => {
-        ...super.serialize(context),
+        'id': id,
         'name': name,
         'path': path,
         'count': count,
@@ -1414,7 +1615,13 @@ class DatabaseState extends ObjectResponse {
     StringMap map,
     SerializationContext context,
   ) =>
-      DatabaseState._fromJson(map);
+      DatabaseState(
+        id: map.getAs('id'),
+        name: map.getAs('name'),
+        path: map.getAs('path'),
+        count: map.getAs('count'),
+        indexes: map.getAsList('indexes'),
+      );
 }
 
 @immutable
@@ -1480,16 +1687,16 @@ class SaveBlobResponse implements Serializable {
 
 class QueryState implements Serializable {
   QueryState({
-    required this.objectId,
+    required this.id,
     required this.columnNames,
   });
 
-  final int objectId;
+  final int id;
   final List<String> columnNames;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'id': objectId,
+        'id': id,
         'columnNames': columnNames,
       };
 
@@ -1498,7 +1705,7 @@ class QueryState implements Serializable {
     SerializationContext context,
   ) =>
       QueryState(
-        objectId: map.getAs('id'),
+        id: map.getAs('id'),
         columnNames: map.getAs('columnNames'),
       );
 }

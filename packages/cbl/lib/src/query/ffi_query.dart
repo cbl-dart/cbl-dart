@@ -7,10 +7,14 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/fleece.dart' as fl;
+import '../query.dart';
+import '../support/async_callback.dart';
 import '../support/ffi.dart';
+import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/utils.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'join.dart';
@@ -25,8 +29,7 @@ import 'select_result.dart';
 late final _bindings = cblBindings.query;
 
 class FfiQuery extends QueryBase
-    with NativeResourceMixin<CBLQuery>
-    implements SyncQuery {
+    implements SyncQuery, NativeResource<CBLQuery> {
   FfiQuery({
     required String debugCreator,
     FfiDatabase? database,
@@ -39,6 +42,8 @@ class FfiQuery extends QueryBase
           language: language,
           definition: definition,
         );
+
+  late final _listenerTokens = ListenerTokenRegistry(this);
 
   @override
   FfiDatabase? get database => super.database as FfiDatabase?;
@@ -54,7 +59,7 @@ class FfiQuery extends QueryBase
   ParametersImpl? _parameters;
 
   @override
-  set parameters(Parameters? value) => useSync(() {
+  void setParameters(Parameters? value) => useSync(() {
         if (value == null) {
           _parameters = null;
         } else {
@@ -75,31 +80,61 @@ class FfiQuery extends QueryBase
   String explain() => useSync(() => native.call(_bindings.explain));
 
   @override
-  Stream<SyncResultSet> changes() => useSync(
-      () => CallbackStreamController<SyncResultSet, Pointer<CBLListenerToken>>(
-            parent: this,
-            startStream: (callback) => _bindings.addChangeListener(
-              native.pointer,
-              callback.native.pointer,
-            ),
-            createEvent: (listenerToken, _) => FfiResultSet(
-              // The native side sends no arguments. When the native side
-              // notfies the listener it has to copy the current query
-              // result set.
-              native.call((pointer) =>
-                  _bindings.copyCurrentResults(pointer, listenerToken)),
-              database: database!,
-              columnNames: _columnNames,
-              debugCreator: 'FfiQuery.changes()',
-            ),
-          ).stream);
+  ListenerToken addChangeListener(
+    QueryChangeListener<SyncResultSet> listener,
+  ) =>
+      useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
+
+  AbstractListenerToken _addChangeListener(
+    QueryChangeListener<SyncResultSet> listener,
+  ) {
+    late Pointer<CBLListenerToken> listenerToken;
+
+    final callback = AsyncCallback(
+      (_) {
+        final results = FfiResultSet(
+          // The native side sends no arguments. When the native side
+          // notifies the listener it has to copy the current query
+          // result set.
+          native.call((pointer) =>
+              _bindings.copyCurrentResults(pointer, listenerToken)),
+          database: database!,
+          columnNames: _columnNames,
+          debugCreator: 'FfiQuery.changes()',
+        );
+
+        final change = QueryChange(this, results);
+        listener(change);
+      },
+      debugName: 'FfiQuery.addChangeListener',
+    );
+
+    listenerToken = runNativeCalls(() => _bindings.addChangeListener(
+          native.pointer,
+          callback.native.pointer,
+        ));
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  void removeChangeListener(ListenerToken token) => useSync(() {
+        final result = _listenerTokens.remove(token);
+        assert(result is! Future);
+      });
+
+  @override
+  Stream<QueryChange<SyncResultSet>> changes() => useSync(() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      ));
 
   @override
   void prepare() => super.prepare();
 
   @override
   FutureOr<void> performPrepare() {
-    native = CblObject(
+    native = CBLObject(
       database!.native.call((pointer) => _bindings.create(
             pointer,
             language,
@@ -180,7 +215,7 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   String toString() => 'FfiResultSet()';
 }
 
-class ResultSetIterator extends CblObject<CBLResultSet>
+class ResultSetIterator extends CBLObject<CBLResultSet>
     with IterableMixin<fl.Array>
     implements Iterator<fl.Array> {
   ResultSetIterator(

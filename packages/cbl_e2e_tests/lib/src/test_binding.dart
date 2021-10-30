@@ -19,8 +19,7 @@ export 'package:test/test.dart'
         tearDown,
         addTearDown,
         registerException,
-        printOnFailure,
-        markTestSkipped;
+        printOnFailure;
 
 typedef TestFn = void Function(
   String description,

@@ -6,6 +6,7 @@ import '../database/database.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/proxy_document.dart';
+import '../query.dart';
 import '../query/ffi_query.dart';
 import '../query/index/index.dart';
 import '../query/parameters.dart';
@@ -14,10 +15,19 @@ import '../query/result_set.dart';
 import '../replication.dart';
 import '../replication/ffi_replicator.dart';
 import '../support/encoding.dart';
+import '../support/listener_token.dart';
 import '../support/utils.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
 import 'object_registry.dart';
+
+typedef CblServiceDatabaseChangeListener = void Function(
+  List<String> documentIds,
+);
+
+typedef CblServiceDocumentChangeListener = void Function();
+
+typedef CblServiceQueryChangeListener = void Function(int resultSetId);
 
 typedef CblServiceReplicationFilter = FutureOr<bool> Function(
   DocumentState state,
@@ -30,20 +40,61 @@ typedef CblServiceConflictResolver = FutureOr<DocumentState?> Function(
   DocumentState? remoteState,
 );
 
+typedef CblServiceReplicatorChangeListener = void Function(
+  ReplicatorStatus status,
+);
+
+typedef CblServiceDocumentReplicationListener = void Function(
+  DocumentReplicationEvent event,
+);
+
 class CblServiceClient {
   CblServiceClient({
     required this.channel,
   }) {
     channel
+      ..addCallEndpoint(_callDatabaseChangeListener)
+      ..addCallEndpoint(_callDocumentChangeListener)
       ..addStreamEndpoint(_readBlobUpload)
+      ..addCallEndpoint(_callQueryChangeListener)
       ..addCallEndpoint(_callReplicationFilter)
-      ..addCallEndpoint(_callConflictResolver);
+      ..addCallEndpoint(_callConflictResolver)
+      ..addCallEndpoint(_callReplicatorChangeListener)
+      ..addCallEndpoint(_callDocumentReplicationListener);
   }
 
   final Channel channel;
 
+  void unregisterObject(int id) => _objectRegistry.removeObjectById(id);
+
+  int registerDatabaseChangeListener(
+    CblServiceDatabaseChangeListener listener,
+  ) {
+    void handler(CallDatabaseChangeListener request) =>
+        listener(request.documentIds);
+
+    return _objectRegistry.addObject(_bindListenerToZone(handler));
+  }
+
+  int registerDocumentChangeListener(
+    CblServiceDocumentChangeListener listener,
+  ) {
+    void handler(CallDocumentChangeListener request) => listener();
+
+    return _objectRegistry.addObject(_bindListenerToZone(handler));
+  }
+
   int registerBlobUpload(Stream<Data> stream) =>
       _objectRegistry.addObject(stream);
+
+  int registerQueryChangeListener(
+    CblServiceQueryChangeListener listener,
+  ) {
+    void handler(CallQueryChangeListener request) =>
+        listener(request.resultSetId);
+
+    return _objectRegistry.addObject(_bindListenerToZone(handler));
+  }
 
   int registerReplicationFilter(CblServiceReplicationFilter filter) {
     FutureOr<bool> handler(CallReplicationFilter request) =>
@@ -51,9 +102,6 @@ class CblServiceClient {
 
     return _objectRegistry.addObject(_bindCallbackToZone(handler));
   }
-
-  void unregisterReplicationFilter(int id) =>
-      _objectRegistry.removeObjectById(id);
 
   int registerConflictResolver(CblServiceConflictResolver resolver) {
     FutureOr<DocumentState?> handler(CallConflictResolver request) => resolver(
@@ -65,31 +113,78 @@ class CblServiceClient {
     return _objectRegistry.addObject(_bindCallbackToZone(handler));
   }
 
-  void unregisterConflictResolver(int id) =>
-      _objectRegistry.removeObjectById(id);
+  int registerReplicatorChangeListener(
+    CblServiceReplicatorChangeListener listener,
+  ) {
+    void handler(CallReplicatorChangeListener request) =>
+        listener(request.status);
+
+    return _objectRegistry.addObject(_bindListenerToZone(handler));
+  }
+
+  int registerDocumentReplicationListener(
+    CblServiceDocumentReplicationListener listener,
+  ) {
+    void handler(CallDocumentReplicationListener request) =>
+        listener(request.event);
+
+    return _objectRegistry.addObject(_bindListenerToZone(handler));
+  }
 
   // === Request handlers ======================================================
+
+  void _callDatabaseChangeListener(CallDatabaseChangeListener request) =>
+      _getDatabaseChangeListenerById(request.listenerId)(request);
+
+  void _callDocumentChangeListener(CallDocumentChangeListener request) =>
+      _getDocumentChangeListenerById(request.listenerId)(request);
 
   Stream<Data> _readBlobUpload(ReadBlobUpload request) =>
       _takeBlobUploadById(request.uploadId);
 
+  void _callQueryChangeListener(CallQueryChangeListener request) =>
+      _getQueryChangeListenerById(request.listenerId)(request);
+
   FutureOr<bool> _callReplicationFilter(CallReplicationFilter request) =>
-      _getReplicationFilterById(request.id)(request);
+      _getReplicationFilterById(request.filterId)(request);
 
   FutureOr<DocumentState?> _callConflictResolver(
     CallConflictResolver request,
   ) =>
-      _getConflictResolverById(request.id)(request);
+      _getConflictResolverById(request.resolverId)(request);
+
+  void _callReplicatorChangeListener(CallReplicatorChangeListener request) =>
+      _getReplicatorChangeListenerById(request.listenerId)(request);
+
+  void _callDocumentReplicationListener(
+    CallDocumentReplicationListener request,
+  ) =>
+      _getDocumentReplicationListenerById(request.listenerId)(request);
 
   // === Objects ===============================================================
 
   final _objectRegistry = ObjectRegistry();
+
+  void Function(CallDatabaseChangeListener) _getDatabaseChangeListenerById(
+    int id,
+  ) =>
+      _objectRegistry.getObjectOrThrow(id);
+
+  void Function(CallDocumentChangeListener) _getDocumentChangeListenerById(
+    int id,
+  ) =>
+      _objectRegistry.getObjectOrThrow(id);
 
   Stream<Data> _takeBlobUploadById(int id) {
     final upload = _objectRegistry.getObjectOrThrow<Stream<Data>>(id);
     _objectRegistry.removeObject(upload);
     return upload;
   }
+
+  void Function(CallQueryChangeListener) _getQueryChangeListenerById(
+    int id,
+  ) =>
+      _objectRegistry.getObjectOrThrow(id);
 
   FutureOr<bool> Function(CallReplicationFilter) _getReplicationFilterById(
     int id,
@@ -98,17 +193,31 @@ class CblServiceClient {
 
   FutureOr<DocumentState?> Function(CallConflictResolver)
       _getConflictResolverById(int id) => _objectRegistry.getObjectOrThrow(id);
+
+  void Function(CallReplicatorChangeListener) _getReplicatorChangeListenerById(
+    int id,
+  ) =>
+      _objectRegistry.getObjectOrThrow(id);
+
+  void Function(CallDocumentReplicationListener)
+      _getDocumentReplicationListenerById(int id) =>
+          _objectRegistry.getObjectOrThrow(id);
 }
 
+/// Returns a new function which wraps [fn], but treats exceptions as uncaught
+/// error within the current [Zone], in addition to returning a rejected
+/// [Future].
 Future<R> Function(T) _bindCallbackToZone<T, R>(FutureOr<R> Function(T) fn) {
+  final zone = Zone.current;
+
   // ignore: avoid_types_on_closure_parameters
-  final zonedFn = Zone.current.bindUnaryCallback((T arg) async {
+  final zonedFn = zone.bindUnaryCallback((T arg) async {
     try {
       return await fn(arg);
     }
     // ignore: avoid_catches_without_on_clauses
     catch (error, stackTrace) {
-      Zone.current.handleUncaughtError(error, stackTrace);
+      zone.handleUncaughtError(error, stackTrace);
       return AsyncError(error, stackTrace);
     }
   });
@@ -121,6 +230,16 @@ Future<R> Function(T) _bindCallbackToZone<T, R>(FutureOr<R> Function(T) fn) {
       });
 }
 
+void Function(T) _bindListenerToZone<T>(void Function(T) fn) {
+  final boundFn = _bindCallbackToZone(fn);
+  return (arg) => boundFn(arg)
+      // Callers of listeners are not interested in results or errors.
+      // Errors in listeners should just be unhandled errors, in the zone
+      // the listener was created in, which is what `_bindCallbackToZone`
+      // already does.
+      .onError((_, __) {});
+}
+
 class CblService {
   CblService({
     required this.channel,
@@ -128,6 +247,7 @@ class CblService {
     channel
       ..addCallEndpoint(_ping)
       ..addCallEndpoint(_releaseObject)
+      ..addCallEndpoint(_removeChangeListener)
       ..addCallEndpoint(_removeDatabase)
       ..addCallEndpoint(_databaseExists)
       ..addCallEndpoint(_copyDatabase)
@@ -144,8 +264,8 @@ class CblService {
       ..addCallEndpoint(_setDocumentExpiration)
       ..addCallEndpoint(_getDocumentExpiration)
       ..addCallEndpoint(_performDatabaseMaintenance)
-      ..addStreamEndpoint(_databaseChanges)
-      ..addStreamEndpoint(_documentChanges)
+      ..addCallEndpoint(_addDatabaseChangeListener)
+      ..addCallEndpoint(_addDocumentChangeListener)
       ..addCallEndpoint(_deleteIndex)
       ..addCallEndpoint(_createIndex)
       ..addStreamEndpoint(_readBlob)
@@ -154,14 +274,14 @@ class CblService {
       ..addCallEndpoint(_setQueryParameters)
       ..addCallEndpoint(_explainQuery)
       ..addStreamEndpoint(_executeQuery)
-      ..addStreamEndpoint(_queryChanges)
+      ..addCallEndpoint(_addQueryChangeListener)
       ..addStreamEndpoint(_queryChangeResultSet)
       ..addCallEndpoint(_createReplicator)
       ..addCallEndpoint(_getReplicatorStatus)
       ..addCallEndpoint(_startReplicator)
       ..addCallEndpoint(_stopReplicator)
-      ..addStreamEndpoint(_replicatorChanges)
-      ..addStreamEndpoint(_replicatorDocumentReplications)
+      ..addCallEndpoint(_addReplicatorChangeListener)
+      ..addCallEndpoint(_addDocumentReplicationsListener)
       ..addCallEndpoint(_replicatorIsDocumentPending)
       ..addCallEndpoint(_replicatorPendingDocumentIds);
   }
@@ -185,6 +305,27 @@ class CblService {
   void _releaseObject(ReleaseObject request) =>
       _objectRegistry.removeObjectById(request.objectId);
 
+  Future<void> _removeChangeListener(
+    RemoveChangeListener request,
+  ) async {
+    final target = _objectRegistry.getObjectOrThrow<Object>(request.targetId);
+    final token = _listenerIdsToTokens.remove(request.listenerId)!
+        as AbstractListenerToken;
+
+    if (target is Database) {
+      await target.removeChangeListener(token);
+    } else if (target is _Query) {
+      target.query.removeChangeListener(token);
+    } else if (target is Replicator) {
+      await target.removeChangeListener(token);
+    } else {
+      assert(
+        false,
+        'target to remove change listener from is of unknown type: $target',
+      );
+    }
+  }
+
   void _removeDatabase(RemoveDatabase request) =>
       FfiDatabase.remove(request.name, directory: request.directory);
 
@@ -204,17 +345,17 @@ class CblService {
   }
 
   DatabaseState _getDatabase(GetDatabase request) =>
-      _createDatabaseState(_getDatabaseById(request.objectId));
+      _createDatabaseState(_getDatabaseById(request.databaseId));
 
   Future<void> _closeDatabase(CloseDatabase request) =>
-      _getDatabaseById(request.objectId).close();
+      _getDatabaseById(request.databaseId).close();
 
   Future<void> _deleteDatabase(DeleteDatabase request) =>
-      _getDatabaseById(request.objectId).delete();
+      _getDatabaseById(request.databaseId).delete();
 
   Future<DocumentState?> _getDocument(GetDocument request) async {
-    final document = _getDatabaseById(request.databaseId).document(request.id)
-        as DelegateDocument?;
+    final document = _getDatabaseById(request.databaseId)
+        .document(request.documentId) as DelegateDocument?;
 
     if (document == null) {
       return null;
@@ -268,7 +409,8 @@ class CblService {
   }
 
   void _purgeDocument(PurgeDocument request) =>
-      _getDatabaseById(request.databaseId).purgeDocumentById(request.id);
+      _getDatabaseById(request.databaseId)
+          .purgeDocumentById(request.documentId);
 
   void _beginDatabaseTransaction(BeginDatabaseTransaction request) =>
       _getDatabaseById(request.databaseId).beginTransaction();
@@ -279,24 +421,32 @@ class CblService {
 
   void _setDocumentExpiration(SetDocumentExpiration request) =>
       _getDatabaseById(request.databaseId)
-          .setDocumentExpiration(request.id, request.expiration);
+          .setDocumentExpiration(request.documentId, request.expiration);
 
   DateTime? _getDocumentExpiration(GetDocumentExpiration request) =>
-      _getDatabaseById(request.databaseId).getDocumentExpiration(request.id);
+      _getDatabaseById(request.databaseId)
+          .getDocumentExpiration(request.documentId);
 
   void _performDatabaseMaintenance(PerformDatabaseMaintenance request) =>
       _getDatabaseById(request.databaseId).performMaintenance(request.type);
 
-  Stream<List<String>> _databaseChanges(DatabaseChanges request) =>
-      _getDatabaseById(request.databaseId)
-          .changes()
-          .map((change) => change.documentIds);
+  void _addDatabaseChangeListener(AddDatabaseChangeListener request) {
+    _listenerIdsToTokens[request.listenerId] =
+        _getDatabaseById(request.databaseId).addChangeListener((change) {
+      channel.call(CallDatabaseChangeListener(
+        listenerId: request.listenerId,
+        documentIds: change.documentIds,
+      ));
+    });
+  }
 
-  Stream<void> _documentChanges(DocumentChanges request) =>
-      _getDatabaseById(request.databaseId)
-          .documentChanges(request.id)
-          // ignore: avoid_returning_null_for_void
-          .map((_) => null);
+  void _addDocumentChangeListener(AddDocumentChangeListener request) {
+    _listenerIdsToTokens[request.listenerId] =
+        _getDatabaseById(request.databaseId)
+            .addDocumentChangeListener(request.documentId, (_) {
+      channel.call(CallDocumentChangeListener(listenerId: request.listenerId));
+    });
+  }
 
   void _createIndex(CreateIndex request) =>
       _getDatabaseById(request.databaseId).createIndex(
@@ -328,13 +478,14 @@ class CblService {
       debugCreator: 'CblService._createQuery()',
     );
     final id = _objectRegistry.addObject(_Query(query, request.resultEncoding));
-    return QueryState(objectId: id, columnNames: query.columnNames);
+    return QueryState(id: id, columnNames: query.columnNames);
   }
 
   void _setQueryParameters(SetQueryParameters request) {
-    _getQueryById(request.queryId).query.parameters =
-        (request.parameters?.toPlainObject() as StringMap?)
-            ?.let((it) => Parameters(it));
+    _getQueryById(request.queryId).query.setParameters(
+          (request.parameters?.toPlainObject() as StringMap?)
+              ?.let((it) => Parameters(it)),
+        );
   }
 
   String _explainQuery(ExplainQuery request) =>
@@ -343,14 +494,21 @@ class CblService {
   Stream<EncodedData> _executeQuery(ExecuteQuery request) =>
       _getQueryById(request.queryId).execute();
 
-  Stream<int> _queryChanges(QueryChanges request) =>
-      _getQueryById(request.queryId).changes();
+  void _addQueryChangeListener(AddQueryChangeListener request) {
+    _listenerIdsToTokens[request.listenerId] =
+        _getQueryById(request.queryId).addChangeListener((resultSetId) {
+      channel.call(CallQueryChangeListener(
+        listenerId: request.listenerId,
+        resultSetId: resultSetId,
+      ));
+    });
+  }
 
   Stream<EncodedData> _queryChangeResultSet(QueryChangeResultSet request) =>
       _getQueryById(request.queryId).takeResultSet(request.resultSetId);
 
   int _createReplicator(CreateReplicator request) {
-    final db = _getDatabaseById(request.databaseObjectId);
+    final db = _getDatabaseById(request.databaseId);
     final config = ReplicatorConfiguration(
       database: db,
       target: request.target,
@@ -391,45 +549,53 @@ class CblService {
   }
 
   ReplicatorStatus _getReplicatorStatus(GetReplicatorStatus request) =>
-      _getReplicatorById(request.replicatorObjectId).status;
+      _getReplicatorById(request.replicatorId).status;
 
   void _startReplicator(StartReplicator request) =>
-      _getReplicatorById(request.replicatorObjectId)
-          .start(reset: request.reset);
+      _getReplicatorById(request.replicatorId).start(reset: request.reset);
 
   void _stopReplicator(StopReplicator request) =>
-      _getReplicatorById(request.replicatorObjectId).stop();
+      _getReplicatorById(request.replicatorId).stop();
 
-  Stream<ReplicatorStatus> _replicatorChanges(ReplicatorChanges request) =>
-      _getReplicatorById(request.replicatorObjectId)
-          .changes()
-          .map((change) => change.status);
+  void _addReplicatorChangeListener(AddReplicatorChangeListener request) {
+    _listenerIdsToTokens[request.listenerId] =
+        _getReplicatorById(request.replicatorId).addChangeListener((change) {
+      channel.call(CallReplicatorChangeListener(
+        listenerId: request.listenerId,
+        status: change.status,
+      ));
+    });
+  }
 
-  Stream<DocumentReplicationEvent> _replicatorDocumentReplications(
-    ReplicatorDocumentReplications request,
-  ) =>
-      _getReplicatorById(request.replicatorObjectId)
-          .documentReplications()
-          .map((event) => DocumentReplicationEvent(
-                isPush: event.isPush,
-                documents: event.documents,
-              ));
+  void _addDocumentReplicationsListener(
+    AddDocumentReplicationListener request,
+  ) {
+    _listenerIdsToTokens[request.listenerId] =
+        _getReplicatorById(request.replicatorId)
+            .addDocumentReplicationListener((change) {
+      channel.call(CallDocumentReplicationListener(
+        listenerId: request.listenerId,
+        event: DocumentReplicationEvent(
+          isPush: change.isPush,
+          documents: change.documents,
+        ),
+      ));
+    });
+  }
 
   bool _replicatorIsDocumentPending(ReplicatorIsDocumentPending request) =>
-      _getReplicatorById(request.replicatorObjectId)
-          .isDocumentPending(request.id);
+      _getReplicatorById(request.replicatorId)
+          .isDocumentPending(request.documentId);
 
   List<String> _replicatorPendingDocumentIds(
     ReplicatorPendingDocumentIds request,
   ) =>
-      _getReplicatorById(request.replicatorObjectId)
-          .pendingDocumentIds
-          .toList();
+      _getReplicatorById(request.replicatorId).pendingDocumentIds.toList();
 
   // === Misc ==================================================================
 
   DatabaseState _createDatabaseState(SyncDatabase database) => DatabaseState(
-        objectId: _objectRegistry.getObjectId(database)!,
+        id: _objectRegistry.getObjectId(database)!,
         name: database.name,
         path: database.path,
         count: database.count,
@@ -490,7 +656,7 @@ class CblService {
             .getState(propertiesFormat: propertiesFormat);
 
         return channel.call(CallReplicationFilter(
-          id: filterId,
+          filterId: filterId,
           state: state,
           flags: flags,
         ));
@@ -507,7 +673,7 @@ class CblService {
             ?.getState(propertiesFormat: propertiesFormat);
 
         final resolvedState = await channel.call(CallConflictResolver(
-          id: resolverId,
+          resolverId: resolverId,
           localState: localState,
           remoteState: remoteState,
         ));
@@ -535,6 +701,8 @@ class CblService {
 
   FfiReplicator _getReplicatorById(int id) =>
       _objectRegistry.getObjectOrThrow(id);
+
+  final _listenerIdsToTokens = <int, ListenerToken>{};
 }
 
 class _CBLIndexSpecIndex implements IndexImplInterface {
@@ -557,8 +725,6 @@ class _Query {
 
   Stream<EncodedData> execute() => _resultSetStream(query.execute());
 
-  Stream<int> changes() => query.changes().map(_storeResultSet);
-
   int _storeResultSet(ResultSet resultSet) {
     final id = _nextResultSetId++;
     _resultSets[id] = resultSet;
@@ -571,6 +737,11 @@ class _Query {
   Stream<EncodedData> _resultSetStream(ResultSet resultSet) =>
       resultSet.asStream().map((result) =>
           (result as ResultImpl).encodeColumnValues(resultEncoding));
+
+  ListenerToken addChangeListener(void Function(int resultSetId) listener) =>
+      query.addChangeListener((change) {
+        listener(_storeResultSet(change.results));
+      });
 }
 
 extension on ObjectRegistry {

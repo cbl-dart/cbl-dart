@@ -29,7 +29,7 @@ mixin ProxyObjectMixin {
   int? get objectId => _objectId;
   int? _objectId;
 
-  late void Function() finalizeEarly;
+  late Object _finalizerToken;
 
   void bindToTargetObject(Channel channel, int objectId) {
     if (_channel != null) {
@@ -39,15 +39,17 @@ mixin ProxyObjectMixin {
     _channel = channel;
     _objectId = objectId;
 
-    final finalizerToken = dartFinalizerRegistry.registerFinalizer(
+    _finalizerToken = dartFinalizerRegistry.registerFinalizer(
       this,
       _finalizer(_channel!, _objectId!),
     );
+  }
 
-    finalizeEarly = () => dartFinalizerRegistry.unregisterFinalizer(
-          finalizerToken,
-          callFinalizer: true,
-        );
+  void finalizeEarly() {
+    dartFinalizerRegistry.unregisterFinalizer(
+      _finalizerToken,
+      callFinalizer: true,
+    );
   }
 }
 

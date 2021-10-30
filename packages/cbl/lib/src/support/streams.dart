@@ -1,285 +1,289 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
-
-import 'async_callback.dart';
-import 'native_object.dart';
+import 'listener_token.dart';
 import 'resource.dart';
-
-/// A template for creating a [StreamController] which is as [ClosableResource].
-abstract class ClosableResourceStreamController<T> with ClosableResourceMixin {
-  ClosableResourceStreamController({required this.parent});
-
-  factory ClosableResourceStreamController.fromStream({
-    required AbstractResource parent,
-    required Stream<T> stream,
-  }) =>
-      _ClosableResourceStreamControllerStream(parent: parent, stream: stream);
-
-  /// The parent resources of this stream controller.
-  final AbstractResource parent;
-
-  @protected
-  late final StreamController<T> controller = StreamController(
-    onListen: () {
-      parent.registerChildResource(this);
-
-      // ignore: avoid_types_on_closure_parameters
-      controller.done.then((Object? _) {
-        // If the stream subscription is canceled, instead of the resource
-        // being closed, we close the resource when the stream is done.
-        if (!isClosed) {
-          closeAndUse(() {}, doPerformClose: false);
-        }
-      });
-
-      use(onListen);
-    },
-    onPause: onPause,
-    onResume: onResume,
-    onCancel: onCancel,
-  );
-
-  /// The stream this stream controller is controlling.
-  Stream<T> get stream => controller.stream;
-
-  /// Must be implemented by subclasses to start the stream.
-  @protected
-  FutureOr<void> onListen();
-
-  /// May be implemented by subclasses to pause the stream.
-  @protected
-  void onPause() {}
-
-  /// May be implemented by subclasses to resume the stream.
-  @protected
-  void onResume() {}
-
-  /// May be implemented by subclasses to cancel the stream.
-  @protected
-  FutureOr<void> onCancel() {}
-
-  @override
-  Future<void> performClose() => controller.close();
-}
-
-extension ClosableResourceStreamExt<T> on Stream<T> {
-  Stream<T> toClosableResourceStream(AbstractResource parent) =>
-      ClosableResourceStreamController.fromStream(parent: parent, stream: this)
-          .stream;
-}
-
-class _ClosableResourceStreamControllerStream<T>
-    extends ClosableResourceStreamController<T> {
-  _ClosableResourceStreamControllerStream({
-    required AbstractResource parent,
-    required Stream<T> stream,
-  })  : _stream = stream,
-        super(parent: parent);
-
-  final Stream<T> _stream;
-
-  late final StreamSubscription<T> _sub;
-
-  @override
-  FutureOr<void> onListen() => _sub = _stream.listen(
-        controller.add,
-        onError: controller.addError,
-        onDone: controller.close,
-      );
-
-  @override
-  void onPause() => _sub.pause();
-
-  @override
-  void onResume() => _sub.resume();
-
-  @override
-  FutureOr<void> onCancel() => _sub.cancel();
-}
-
-/// A [Stream] controller to create a [Stream] from a [AsyncCallback].
-class CallbackStreamController<T, S>
-    extends ClosableResourceStreamController<T> {
-  /// Creates a [Stream] controller to create a [Stream] from a
-  /// [AsyncCallback].
-  ///
-  /// Callbacks need to be registered with native code in [startStream].
-  ///
-  /// [createEvent] receives the result of the callback registration request and
-  /// the arguments from the native side and turns them into an event of type
-  /// [T].
-  ///
-  /// The returned stream is single subscription.
-  CallbackStreamController({
-    required AbstractResource parent,
-    required this.startStream,
-    required this.createEvent,
-  }) : super(parent: parent);
-
-  final S Function(AsyncCallback callback) startStream;
-  final FutureOr<T> Function(S registrationResult, List<Object?> arguments)
-      createEvent;
-
-  late AsyncCallback _callback;
-  late Future<bool> _callbackRegistered;
-  late S _registrationResult;
-  var _canceled = false;
-
-  @override
-  Future<void> onListen() async {
-    final callbackRegistered = Completer<bool>();
-    _callbackRegistered = callbackRegistered.future;
-
-    _callback = AsyncCallback((arguments) async {
-      try {
-        // Callbacks can come in before the registration request from the
-        // worker comes back. In this case `registrationResult` has not be
-        // initialized yet. By waiting for `callbackRegistered`,
-        // `registrationResult` is guarantied to be set after this line.
-        await _callbackRegistered;
-
-        if (_canceled) {
-          return;
-        }
-        final event = await createEvent(_registrationResult, arguments);
-        // ignore: invariant_booleans
-        if (_canceled) {
-          return;
-        }
-        controller.add(event);
-        // ignore: avoid_catches_without_on_clauses
-      } catch (error, stackTrace) {
-        // ignore: invariant_booleans
-        if (_canceled) {
-          return;
-        }
-        controller.addError(error, stackTrace);
-      }
-    }, debugName: 'Stream<$T>');
-
-    try {
-      _registrationResult = runNativeCalls(() => startStream(_callback));
-      callbackRegistered.complete(true);
-      // ignore: avoid_catches_without_on_clauses
-    } catch (error, stackTrace) {
-      controller.addError(error, stackTrace);
-      await controller.close();
-      callbackRegistered.complete(false);
-    }
-  }
-
-  @override
-  Future<void> onCancel() async {
-    _canceled = true;
-    if (await _callbackRegistered) {
-      _callback.close();
-    }
-  }
-}
-
-StreamController<T> callbackBroadcastStreamController<T>({
-  required void Function(AsyncCallback callback) startStream,
-  required T Function(List<Object?> arguments) createEvent,
-}) {
-  late AsyncCallback callback;
-  // ignore: close_sinks
-  late StreamController<T> controller;
-  var canceled = false;
-
-  void onListen() {
-    canceled = false;
-
-    callback = AsyncCallback((arguments) {
-      if (canceled) {
-        return;
-      }
-      try {
-        final event = createEvent(arguments);
-        controller.add(event);
-        // ignore: avoid_catches_without_on_clauses
-      } catch (error, stacktrace) {
-        controller.addError(error, stacktrace);
-      }
-    }, debugName: 'Stream<$T>.broadcast');
-
-    startStream(callback);
-  }
-
-  void onCancel() {
-    canceled = true;
-    callback.close();
-  }
-
-  return controller =
-      StreamController.broadcast(onListen: onListen, onCancel: onCancel);
-}
-
-Stream<T> changeStreamWithInitialValue<T>({
-  required FutureOr<T> Function() createInitialValue,
-  required Stream<T> Function() createChangeStream,
-}) {
-  late final StreamController<T> controller;
-  late final StreamSubscription<T> sub;
-  T? initialValue;
-  T? firstStreamEvent;
-  var streamIsDone = false;
-  var subIsCanceled = false;
-
-  void onListen() {
-    sub = createChangeStream().listen(
-      (event) {
-        firstStreamEvent ??= event;
-        if (event == firstStreamEvent && firstStreamEvent == initialValue) {
-          return;
-        }
-        controller.add(event);
-      },
-      onError: controller.addError,
-      onDone: () {
-        streamIsDone = true;
-        controller.close();
-      },
-    );
-
-    Future(createInitialValue).then(
-      (value) {
-        if (!streamIsDone && !subIsCanceled && firstStreamEvent == null) {
-          initialValue = value;
-          controller.add(value);
-        }
-      },
-      // ignore: avoid_types_on_closure_parameters
-      onError: (Object error, StackTrace stackTrace) {
-        if (!streamIsDone && !subIsCanceled) {
-          controller.addError(error, stackTrace);
-        }
-      },
-    );
-  }
-
-  Future<void> onCancel() {
-    subIsCanceled = true;
-    return sub.cancel();
-  }
-
-  void onPause() => sub.pause();
-
-  void onResume() => sub.resume();
-
-  controller = StreamController(
-    onListen: onListen,
-    onCancel: onCancel,
-    onPause: onPause,
-    onResume: onResume,
-  );
-
-  return controller.stream;
-}
 
 Future<Uint8List> byteStreamToFuture(Stream<Uint8List> stream) async {
   final builder = BytesBuilder(copy: false);
   await stream.forEach(builder.add);
   return builder.toBytes();
+}
+
+/// Transforms streams into [ResourceStream]s.
+class ResourceStreamTransformer<T> extends StreamTransformerBase<T, T> {
+  ResourceStreamTransformer({
+    required this.parent,
+    this.blocking = false,
+  });
+
+  /// See [ResourceStream.parent].
+  final ClosableResourceMixin parent;
+
+  /// See [ResourceStream.blocking].
+  final bool blocking;
+
+  @override
+  Stream<T> bind(Stream<T> stream) => ResourceStream(
+        parent: parent,
+        stream: stream,
+        blocking: blocking,
+      );
+}
+
+/// A stream that exposes another [stream] as a [ClosableResource].
+///
+/// Listening to the stream requires the [parent] resource to be open.
+///
+/// When a stream is closed through [ClosableResource.close], the stream
+/// either blocks by waiting for the subscription to be canceled or the wrapped
+/// [stream] sending the done event, or it cancels itself early.
+///
+/// This behavior can be controlled through [blocking].
+class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
+  ResourceStream({
+    required this.parent,
+    required this.stream,
+    this.blocking = false,
+  });
+
+  /// The parent resource of this stream.
+  final ClosableResourceMixin parent;
+
+  /// The stream wrapped by this stream.
+  final Stream<T> stream;
+
+  /// Whether to block [close] by waiting for the subscription to be canceled or
+  /// the wrapped [stream] sending the done event, or to cancel the stream
+  /// early.
+  final bool blocking;
+
+  Function? _onError;
+  void Function()? _onDone;
+
+  var _hasListener = false;
+  var _isDone = false;
+  late final _doneCompleter = Completer<void>();
+
+  // ignore: cancel_subscriptions
+  late StreamSubscription<T> _subscription;
+  late Future<void> _cancellation;
+
+  @override
+  StreamSubscription<T> listen(
+    void Function(T event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    if (_hasListener) {
+      throw StateError(
+        'Cannot listen to this single subscription stream, because it has '
+        'already been listened to.',
+      );
+    }
+
+    _hasListener = true;
+
+    attachTo(parent);
+
+    return useSync(() {
+      _onError = onError;
+      _onDone = onDone;
+
+      _subscription = stream.listen(
+        onData,
+        // ignore: avoid_types_on_closure_parameters
+        onError: (Object error, StackTrace stackTrace) {
+          if (cancelOnError == true) {
+            _makeDone();
+          }
+
+          final onError = _onError;
+          if (onError is void Function(Object)) {
+            onError(error);
+          } else if (onError is void Function(Object, StackTrace)) {
+            onError(error, stackTrace);
+          }
+        },
+        onDone: () {
+          _makeDone();
+
+          _onDone?.call();
+        },
+        cancelOnError: cancelOnError,
+      );
+
+      return _ResourceStreamSubscription(this);
+    });
+  }
+
+  void _makeDone() {
+    _isDone = true;
+
+    if (blocking) {
+      _doneCompleter.complete();
+    }
+
+    if (!isClosed) {
+      needsFinalization = false;
+    }
+
+    _cancellation = Future.wait([
+      _subscription.cancel(),
+      // Ensures that ResourceStreams that are done don't gather as children of
+      // their parents and continue to consume resources.
+      if (!isClosed) close(),
+    ]);
+  }
+
+  Future<void> _cancelFromSubscription() {
+    if (!_isDone) {
+      _makeDone();
+    }
+
+    return _cancellation;
+  }
+
+  Future<void> _cancelFromResource() {
+    if (!_isDone) {
+      _makeDone();
+    }
+
+    // Instead of the wrapped stream ending the stream, the resource is ending
+    // it.
+    _onDone?.call();
+
+    return _cancellation;
+  }
+
+  @override
+  FutureOr<void> finalize() async {
+    // This method is only called for streams that have been used because,
+    // streams are only registered with their parent when being listened to.
+
+    if (blocking) {
+      // Wait for the stream to end, either through the listener canceling
+      // or exhausting the wrapped stream.
+      await _doneCompleter.future;
+    } else {
+      await _cancelFromResource();
+    }
+  }
+}
+
+class _ResourceStreamSubscription<T> extends StreamSubscription<T> {
+  _ResourceStreamSubscription(this.stream);
+
+  final ResourceStream<T> stream;
+
+  @override
+  Future<E> asFuture<E>([E? futureValue]) => throw UnimplementedError();
+
+  @override
+  void onData(void Function(T data)? handleData) =>
+      stream._subscription.onData(handleData);
+
+  @override
+  void onError(Function? handleError) => stream._onError = handleError;
+
+  @override
+  void onDone(void Function()? handleDone) => stream._onDone = handleDone;
+
+  @override
+  bool get isPaused => stream._subscription.isPaused;
+
+  @override
+  void pause([Future<void>? resumeSignal]) =>
+      stream._subscription.pause(resumeSignal);
+
+  @override
+  void resume() => stream._subscription.resume();
+
+  @override
+  Future<void> cancel() => stream._cancelFromSubscription();
+}
+
+/// A single subscription [Stream] which does asynchronous work before being
+/// fully subscribed to.
+///
+/// The [Future] in [listening] completes once the stream is fully subscribe and
+/// rejects with an error if subscribing to the stream failed.
+abstract class AsyncListenStream<T> extends Stream<T> {
+  /// Future that completes once the stream is fully subscribe and rejects with
+  /// an error if subscribing to the stream failed.
+  Future<void> get listening;
+}
+
+class ListenerStream<T> extends AsyncListenStream<T> {
+  ListenerStream({
+    required this.parent,
+    required this.addListener,
+  });
+
+  final ClosableResourceMixin parent;
+  final FutureOr<AbstractListenerToken> Function(void Function(T)) addListener;
+
+  @override
+  late final Future<void> listening = _listeningCompleter.future;
+  final _listeningCompleter = Completer<void>();
+
+  late final _controller = StreamController<T>(
+    onListen: _onListen,
+    onCancel: _onCancel,
+  );
+  var _isCanceled = false;
+  late AbstractListenerToken _token;
+
+  void _onListen() => Future.sync(() => addListener(_listener)).then(
+        (token) {
+          _token = token;
+          _listeningCompleter.complete();
+        },
+        onError: _onAddListenerError,
+      );
+
+  Future<void> _onCancel() async {
+    _isCanceled = true;
+
+    await listening.then(
+      (_) => _token.removeListener(),
+      // ignore: avoid_types_on_closure_parameters
+      onError: (Object _) {
+        // If listening threw an error there is no token and no listener to
+        // remove.
+      },
+    );
+  }
+
+  void _listener(T event) {
+    if (!_isCanceled) {
+      _controller.add(event);
+    }
+  }
+
+  void _onAddListenerError(Object error, StackTrace stackTrace) {
+    if (!_isCanceled) {
+      _controller
+        ..addError(error, stackTrace)
+        ..close();
+    }
+    _listeningCompleter.completeError(error, stackTrace);
+  }
+
+  @override
+  StreamSubscription<T> listen(
+    void Function(T event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) =>
+      _controller.stream
+          .transform(ResourceStreamTransformer(parent: parent))
+          .listen(
+            onData,
+            onError: onError,
+            onDone: onDone,
+            cancelOnError: cancelOnError,
+          );
 }

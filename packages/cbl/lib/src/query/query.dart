@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
+import '../couchbase_lite.dart';
 import '../database.dart';
 import '../database/database.dart';
 import '../database/ffi_database.dart';
@@ -12,8 +13,14 @@ import '../support/utils.dart';
 import 'ffi_query.dart';
 import 'parameters.dart';
 import 'proxy_query.dart';
+import 'query_change.dart';
 import 'result.dart';
 import 'result_set.dart';
+
+/// A listener that is called when the results of a [Query] have changed.
+typedef QueryChangeListener<T extends ResultSet> = void Function(
+  QueryChange<T> change,
+);
 
 /// A [Database] query.
 abstract class Query implements Resource {
@@ -81,15 +88,16 @@ abstract class Query implements Resource {
   ) =>
       SyncQuery.fromJsonRepresentation(database, jsonRepresentation);
 
-  /// [Parameters] used for setting values to the query parameters defined
-  /// in the query.
+  /// The values with which to substitute the parameters defined in the query.
   ///
   /// All parameters defined in the query must be given values before running
   /// the query, or the query will fail.
   ///
   /// The returned [Parameters] will be readonly.
   Parameters? get parameters;
-  set parameters(Parameters? value);
+
+  /// Sets the [parameters] of this query.
+  FutureOr<void> setParameters(Parameters? value);
 
   /// Executes this query.
   ///
@@ -121,9 +129,35 @@ abstract class Query implements Resource {
   ///   builder or when a N1QL query is compiled.
   FutureOr<String> explain();
 
-  /// Returns a [Stream] of [ResultSet]s which emits when the [ResultSet] of
-  /// this query changes.
-  Stream<ResultSet> changes();
+  /// Adds a [listener] to be notified of changes to the results of this query.
+  ///
+  /// A new listener will be called with the current results, after being added.
+  /// Subsequently it will only be called when the results change, either
+  /// because the contents of the database have changed or this query's
+  /// [parameters] have been changed through [setParameters].
+  ///
+  /// {@macro cbl.Database.addChangeListener}
+  ///
+  /// See also:
+  ///
+  ///   - [QueryChange] for the change event given to [listener].
+  ///   - [removeChangeListener] for removing a previously added listener.
+  FutureOr<ListenerToken> addChangeListener(QueryChangeListener listener);
+
+  /// {@macro cbl.Database.removeChangeListener}
+  ///
+  /// See also:
+  ///
+  ///   - [addChangeListener] for listening to changes in the results of this
+  ///     query.
+  FutureOr<void> removeChangeListener(ListenerToken token);
+
+  /// Returns a [Stream] to be notified of changes to the results of this query.
+  ///
+  /// This is an alternative stream based API for the [addChangeListener] API.
+  ///
+  /// {@macro cbl.Database.AsyncListenStream}
+  Stream<QueryChange> changes();
 
   /// The JSON representation of this query.
   ///
@@ -157,13 +191,22 @@ abstract class SyncQuery implements Query {
       )..prepare();
 
   @override
+  void setParameters(Parameters? value);
+
+  @override
   SyncResultSet execute();
 
   @override
   String explain();
 
   @override
-  Stream<SyncResultSet> changes();
+  ListenerToken addChangeListener(QueryChangeListener<SyncResultSet> listener);
+
+  @override
+  void removeChangeListener(ListenerToken token);
+
+  @override
+  Stream<QueryChange<SyncResultSet>> changes();
 }
 
 /// A [Query] query with a primarily asynchronous API.
@@ -203,13 +246,25 @@ abstract class AsyncQuery implements Query {
   }
 
   @override
+  Future<void> setParameters(Parameters? value);
+
+  @override
   Future<ResultSet> execute();
 
   @override
   Future<String> explain();
+
+  @override
+  Future<ListenerToken> addChangeListener(QueryChangeListener listener);
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token);
+
+  @override
+  AsyncListenStream<QueryChange> changes();
 }
 
-abstract class QueryBase with DelegatingResourceMixin implements Query {
+abstract class QueryBase with ClosableResourceMixin implements Query {
   QueryBase({
     required this.typeName,
     required this.debugCreator,
@@ -225,13 +280,15 @@ abstract class QueryBase with DelegatingResourceMixin implements Query {
   final Database? database;
   final CBLQueryLanguage language;
   String? definition;
-  bool _didRegisterAsResource = false;
+  bool _didAttachToParentResource = false;
+
+  bool get _wasPrepared => _prepared != false;
   FutureOr<bool>? _prepared = false;
 
   FutureOr<void> prepare() {
-    _registerAsResource();
+    _attachToParentResource();
 
-    if (_prepared != false) {
+    if (_wasPrepared) {
       return null;
     }
 
@@ -244,7 +301,7 @@ abstract class QueryBase with DelegatingResourceMixin implements Query {
 
   @override
   T useSync<T>(T Function() f) {
-    _registerAsResource();
+    _attachToParentResource();
     return super.useSync(() {
       assert(_prepared is! Future);
       if (_prepared == false) {
@@ -258,7 +315,7 @@ abstract class QueryBase with DelegatingResourceMixin implements Query {
 
   @override
   Future<T> use<T>(FutureOr<T> Function() f) {
-    _registerAsResource();
+    _attachToParentResource();
     return super.use(() async {
       if (_prepared == false) {
         _prepared = performPrepare().then((_) => true);
@@ -275,10 +332,11 @@ abstract class QueryBase with DelegatingResourceMixin implements Query {
   @override
   String toString() => '$typeName(${describeEnum(language)}: $definition)';
 
-  void _registerAsResource() {
-    if (!_didRegisterAsResource) {
-      (database! as AbstractResource).registerChildResource(this);
-      _didRegisterAsResource = true;
+  void _attachToParentResource() {
+    if (!_didAttachToParentResource) {
+      needsFinalization = false;
+      attachTo(database! as ClosableResourceMixin);
+      _didAttachToParentResource = true;
     }
   }
 }

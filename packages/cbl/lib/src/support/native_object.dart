@@ -81,7 +81,7 @@ extension NativeObjectCallExtension<P extends NativeType> on NativeObject<P> {
 }
 
 /// Handle to an object on the native side.
-class NativeObject<T extends NativeType> with NativeResourceMixin<T> {
+class NativeObject<T extends NativeType> implements NativeResource<T> {
   NativeObject(Pointer<T> pointer) : _pointer = pointer;
 
   final Pointer<T> _pointer;
@@ -128,14 +128,14 @@ class NativeObject<T extends NativeType> with NativeResourceMixin<T> {
 }
 
 /// Handle to a CouchbaseLite C API object.
-class CblObject<T extends NativeType> extends NativeObject<T> {
+class CBLObject<T extends NativeType> extends NativeObject<T> {
   /// Creates a handle to a CouchbaseLite C API object.
   ///
   /// [adopt] should be `true` when an existing reference to the native object
-  /// is transferred to the created [CblObject] or the native object
-  /// has just been created and the created [CblObject] is the initial
+  /// is transferred to the created [CBLObject] or the native object
+  /// has just been created and the created [CBLObject] is the initial
   /// reference holder.
-  CblObject(
+  CBLObject(
     Pointer<T> pointer, {
     bool adopt = true,
     required String debugName,

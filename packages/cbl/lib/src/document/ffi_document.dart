@@ -14,12 +14,12 @@ late final _documentBindings = cblBindings.document;
 late final _mutableDocumentBindings = cblBindings.mutableDocument;
 
 class FfiDocumentDelegate extends DocumentDelegate
-    with NativeResourceMixin<CBLDocument> {
+    implements NativeResource<CBLDocument> {
   FfiDocumentDelegate.fromPointer({
     required Pointer<CBLDocument> doc,
     bool adopt = true,
     required String debugCreator,
-  }) : native = CblObject(
+  }) : native = CBLObject(
           doc,
           adopt: adopt,
           debugName: 'FfiDocumentDelegate(creator: $debugCreator)',

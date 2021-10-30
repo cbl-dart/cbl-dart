@@ -130,7 +130,7 @@ extension AsyncDatabaseUtilsExtension on Database {
       .asStream()
       .asyncExpand((query) => query.changes())
       .asyncMap(
-          (resultSet) => resultSet.asStream().map(_getIdFromResult).toList());
+          (change) => change.results.asStream().map(_getIdFromResult).toList());
 
   FutureOr<Query> _allIdsQuery() =>
       Query.fromN1ql(this, 'SELECT META().id FROM _');

@@ -353,16 +353,80 @@ void main() {
       expect(status.progress.completed, 0);
     });
 
-    apiTest('changes emits when the replicators status changes', () async {
+    apiTest('change listener is notified while listening', () async {
+      final db = await openTestDatabase();
+      final replicator = await db.createTestReplicator();
+
+      late final ListenerToken token;
+      token = await replicator.addChangeListener(expectAsync1((change) {
+        expect(change.replicator, replicator);
+        expect(change.status.activity, ReplicatorActivityLevel.busy);
+        replicator.removeChangeListener(token);
+      }));
+
+      // A full replication notifies listeners more than once. This allows us
+      // to verify that after having been removed, the listener is not called
+      // any more.
+      await replicator.replicateOneShot();
+    });
+
+    apiTest('document replication listener is notified while listening',
+        () async {
+      final db = await openTestDatabase();
+      final replicator = await db.createTestReplicator();
+      final doc = MutableDocument();
+      await db.saveDocument(doc);
+
+      late final ListenerToken token;
+      token = await replicator
+          .addDocumentReplicationListener(expectAsync1((change) {
+        expect(change.replicator, replicator);
+        expect(change.isPush, isTrue);
+        expect(change.documents.map((it) => it.id), [doc.id]);
+        replicator.removeChangeListener(token);
+      }));
+
+      // Trigger two replication runs, to verify that after the listener is
+      // removed it won't be called any more.
+      await replicator.replicateOneShot();
+      await db.saveDocument(doc);
+      await replicator.replicateOneShot();
+    });
+
+    apiTest('changes stream emits replicator changes', () async {
       final db = await openTestDatabase();
       final replicator = await db.createTestReplicator();
 
       expect(
         replicator.changes().map((it) => it.status.activity),
-        emitsThrough(ReplicatorActivityLevel.stopped),
+        emitsInOrder(<Object>[
+          emits(ReplicatorActivityLevel.busy),
+          emitsThrough(ReplicatorActivityLevel.stopped)
+        ]),
       );
 
-      await replicator.start();
+      await replicator.replicateOneShot();
+    });
+
+    apiTest('documentReplications emits document replications', () async {
+      final db = await openTestDatabase();
+      final replicator = await db.createTestReplicator();
+      final doc = MutableDocument();
+      await db.saveDocument(doc);
+
+      expect(
+        replicator.documentReplications(),
+        emits(isA<DocumentReplication>()
+            .having((it) => it.isPush, 'isPush', isTrue)
+            .having((it) => it.documents, 'documents', [
+          isA<ReplicatedDocument>()
+              .having((it) => it.id, 'id', doc.id)
+              .having((it) => it.flags, 'flags', isEmpty)
+              .having((it) => it.error, 'error', isNull)
+        ])),
+      );
+
+      await replicator.replicateOneShot();
     });
 
     apiTest(
@@ -385,32 +449,6 @@ void main() {
         final doc = MutableDocument();
         await db.saveDocument(doc);
         expect(await replicator.isDocumentPending(doc.id), isTrue);
-      },
-    );
-
-    apiTest(
-      'documentReplications emits events when documents have been replicated',
-      () async {
-        final db = await openTestDatabase();
-        final replicator = await db.createTestReplicator(
-          replicatorType: ReplicatorType.push,
-        );
-        final doc = MutableDocument();
-        await db.saveDocument(doc);
-
-        expect(
-          replicator.documentReplications(),
-          emits(isA<DocumentReplication>()
-              .having((it) => it.isPush, 'isPush', isTrue)
-              .having((it) => it.documents, 'documents', [
-            isA<ReplicatedDocument>()
-                .having((it) => it.id, 'id', doc.id)
-                .having((it) => it.flags, 'flags', isEmpty)
-                .having((it) => it.error, 'error', isNull)
-          ])),
-        );
-
-        await replicator.start();
       },
     );
 

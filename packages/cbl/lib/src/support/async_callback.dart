@@ -28,7 +28,7 @@ int _generateId() {
 /// [AsyncCallback]s have to be [close]d to free allocated resources on the
 /// native side and close its [ReceivePort]. The isolate will not exist, as
 /// long as there is an open [ReceivePort].
-class AsyncCallback with NativeResourceMixin<CBLDartAsyncCallback> {
+class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
   /// Creates a callback which can be asynchronously called from the native
   /// side.
   ///

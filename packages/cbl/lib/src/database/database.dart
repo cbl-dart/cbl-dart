@@ -6,7 +6,9 @@ import '../log.dart';
 import '../log/log.dart';
 import '../query/index/index.dart';
 import '../replication.dart';
+import '../support/listener_token.dart';
 import '../support/resource.dart';
+import '../support/streams.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -64,6 +66,13 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
+
+/// Listener which is called when one or more [Document]s in a [Database] have
+/// changed.
+typedef DatabaseChangeListener = void Function(DatabaseChange change);
+
+/// Listener which is called when a single [Document] has changed.
+typedef DocumentChangeListener = void Function(DocumentChange change);
 
 /// A Couchbase Lite database.
 abstract class Database implements ClosableResource {
@@ -246,12 +255,88 @@ abstract class Database implements ClosableResource {
   /// Gets the expiration date of a [Document] by its [id], if it exists.
   FutureOr<DateTime?> getDocumentExpiration(String id);
 
-  /// Returns a [Stream] that emits [DatabaseChange] events when [Document]s
-  /// are inserted, updated or deleted in this database.
+  /// Adds a [listener] to be notified of all changes to [Document]s in this
+  /// database.
+  ///
+  /// {@template cbl.Database.addChangeListener}
+  /// ## Adding a listener
+  ///
+  /// If a [Future] is returned, the listener will only start listening after
+  /// the [Future] has completed. Otherwise the listener is listening
+  /// immediately after this method returns.
+  ///
+  /// ## Removing a listener
+  ///
+  /// The returned [ListenerToken] needs to be provided to
+  /// [removeChangeListener], to remove the given listener.
+  /// Regardless of whether a [Future] is returned or not, the listener
+  /// immediately stops being called.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   - [DatabaseChange] for the change event given to [listener].
+  ///   - [changes] for alternatively listening to changes through a [Stream].
+  ///   - [addDocumentChangeListener] for listening for changes to a single
+  ///     [Document].
+  ///   - [removeChangeListener] for removing a previously added listener.
+  FutureOr<ListenerToken> addChangeListener(DatabaseChangeListener listener);
+
+  /// Adds a [listener] to be notified of changes to the [Document] with the
+  /// given [id].
+  ///
+  /// {@macro cbl.Database.addChangeListener}
+  ///
+  /// See also:
+  ///
+  ///   - [DocumentChange] for the change event given to [listener].
+  ///   - [documentChanges] for alternatively listening to changes through a
+  ///     [Stream].
+  ///   - [addChangeListener] for listening for changes to this database.
+  ///   - [removeChangeListener] for removing a previously added listener.
+  FutureOr<ListenerToken> addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  );
+
+  /// {@template cbl.Database.removeChangeListener}
+  /// Removes a previously added change listener.
+  ///
+  /// Pass in the [token] that was handed out when adding the listener.
+  ///
+  /// Regardless of whether a [Future] is returned or not, the listener
+  /// immediately stops being called.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   - [addChangeListener] for listening for changes to this database.
+  ///   - [addDocumentChangeListener] for listening for changes to a single
+  ///     [Document].
+  FutureOr<void> removeChangeListener(ListenerToken token);
+
+  /// Returns a [Stream] to be notified of all changes to [Document]s in this
+  /// database.
+  ///
+  /// This is an alternative stream based API for the [addChangeListener] API.
+  ///
+  /// {@template cbl.Database.AsyncListenStream}
+  /// ## AsyncListenStream
+  ///
+  /// If the stream is missing changes, check if the returned stream is an
+  /// [AsyncListenStream]. This type of stream needs to perform some async work
+  /// to be fully listening. You can wait for that moment by awaiting
+  /// [AsyncListenStream.listening].
+  /// {@endtemplate}
   Stream<DatabaseChange> changes();
 
-  /// Returns a [Stream] that emits [DocumentChange] events when a specific
-  /// [Document] is inserted, updated or deleted in this database.
+  /// Returns a [Stream] to be notified of changes to the [Document] with the
+  /// given [id].
+  ///
+  /// This is an alternative stream based API for the
+  /// [addDocumentChangeListener] API.
+  ///
+  /// {@macro cbl.Database.AsyncListenStream}
   Stream<DocumentChange> documentChanges(String id);
 
   /// Closes this database.
@@ -369,6 +454,18 @@ abstract class SyncDatabase implements Database {
   DateTime? getDocumentExpiration(String id);
 
   @override
+  ListenerToken addChangeListener(DatabaseChangeListener listener);
+
+  @override
+  ListenerToken addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  );
+
+  @override
+  void removeChangeListener(ListenerToken token);
+
+  @override
   void performMaintenance(MaintenanceType type);
 
   @override
@@ -447,6 +544,24 @@ abstract class AsyncDatabase implements Database {
 
   @override
   Future<DateTime?> getDocumentExpiration(String id);
+
+  @override
+  Future<ListenerToken> addChangeListener(DatabaseChangeListener listener);
+
+  @override
+  Future<ListenerToken> addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  );
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token);
+
+  @override
+  AsyncListenStream<DatabaseChange> changes();
+
+  @override
+  AsyncListenStream<DocumentChange> documentChanges(String id);
 
   @override
   Future<void> performMaintenance(MaintenanceType type);

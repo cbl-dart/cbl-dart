@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_constructors_over_static_methods
+// ignore_for_file: prefer_constructors_over_static_methods, avoid_print
 
 import 'dart:async';
 
@@ -54,6 +54,7 @@ class Channel {
     PacketCodec? packetCodec,
     SerializationRegistry? serializationRegistry,
     bool autoOpen = true,
+    this.debug = false,
   }) {
     serializationRegistry =
         serializationRegistry?.merge(channelSerializationRegistry()) ??
@@ -70,6 +71,8 @@ class Channel {
       open();
     }
   }
+
+  final bool debug;
 
   late final StreamChannel<_Message> _transport;
   int _nextConversationId = 0;
@@ -364,6 +367,27 @@ class Channel {
       // If the channel has been closed, messages to the other side are dropped.
       return;
     }
+
+    if (debug) {
+      if (message is _CallRequest) {
+        print('-> ${message.request.runtimeType}');
+      } else if (message is _CallSuccess) {
+        print('<- ${message.result?.runtimeType}');
+      } else if (message is _CallError) {
+        print('!- ${message.error}');
+      } else if (message is _ListenToStream) {
+        print('=> ${message.request.runtimeType}');
+      } else if (message is _CancelStream) {
+        print('=|');
+      } else if (message is _StreamEvent) {
+        print('=> ${message.result?.runtimeType}');
+      } else if (message is _StreamDone) {
+        print('|=');
+      } else if (message is _StreamError) {
+        print('=!  ${message.error}');
+      }
+    }
+
     _transport.sink.add(message);
   }
 
