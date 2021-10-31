@@ -11,7 +11,7 @@ set -e
 # The output is written to `$PACKAGE_DIR$/coverage/lcov.info`.
 function dartToLcov() {
     local packageDir="$1"
-    local coverageDir="$packageDir/coverage/dart"
+    local coverageDir="$packageDir/coverage"
     local input="$coverageDir/dart"
     local output="$coverageDir/lcov.info"
     local packagesFile="$packageDir/.packages"
