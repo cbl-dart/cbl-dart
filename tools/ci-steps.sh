@@ -110,7 +110,7 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test -r expanded -j 1"
+        testCommand="dart test --coverage coverage/dart -r expanded -j 1"
 
         case "$targetOs" in
         macOS)
@@ -150,6 +150,7 @@ function runE2ETests() {
             --no-pub \
             -d "$device" \
             --dart-define enableTimeBomb=true \
+            --coverage \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart
@@ -291,6 +292,47 @@ function collectTestResults() {
         esac
         ;;
     esac
+}
+
+# Uploads coverage data to codecov.
+#
+# The first and only paramter is a comma separated list of flags to be 
+# associated with the uploaded coverage data.
+function uploadCoverageData() {
+    requireEnvVar EMBEDDER
+    requireEnvVar TEST_PACKAGE
+
+    local flags="$1"
+
+    # Format coverage data as lcov
+    case "$embedder" in
+    standalone)
+        ./tools/coverage.sh dartToLcov "$packageDir"
+        ;;
+    flutter)
+        # Flutter already outputs coverage data as lcov and into the correct
+        # location.
+        ;;
+    esac
+
+    # Install codecove uploader
+    case "$OSTYPE" in
+    linux*)
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ;;
+    darwin*)
+        curl -Os https://uploader.codecov.io/latest/macos/codecov
+        chmod +x codecov
+        ;;
+    msys* | cygwin*)
+        echo "Code coverage upload for $OSTYPE is not implmented"
+        exit 1
+        ;;
+    esac
+
+    # Upload coverage data
+    codecov -F "$flags" -f "$packageDir/coverage/lcov.info"
 }
 
 "$@"
