@@ -122,10 +122,11 @@ jobs:
         run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
 
       - name: Bootstrap Dart packages
-        run: melos bootstrap
+        run: melos bootstrap --scope ${{ matrix.package }}
 
       - name: Run tests
-        run: melos run test:${{ matrix.package }}
+        working-directory: packages/${{ matrix.package }}
+        run: dart test --coverage coverage/dart
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
