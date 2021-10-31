@@ -103,7 +103,7 @@ abstract class CblE2eTestBinding {
       await _cleanTestTmpDir();
       await initCouchbaseLite();
 
-      const consoleLogLevel = LogLevel.info;
+      const consoleLogLevel = LogLevel.warning;
       const fileLogLevel = LogLevel.verbose;
 
       Database.log.file
@@ -125,7 +125,8 @@ abstract class CblE2eTestBinding {
     });
 
     setupTestTimeBomb();
-    setupSharedTestCblWorker();
+    setupSharedTestMainIsolateClient();
+    setupSharedTestWorkerIsolateClient();
     setupSharedTestDatabases();
   }
 
