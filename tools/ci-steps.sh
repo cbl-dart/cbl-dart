@@ -116,10 +116,11 @@ function runE2ETests() {
         macOS)
             # The tests are run with sudo, so that macOS records crash reports.
             sudo $testCommand
-            # Since we ran the tests under sudo, the coverage data is owned by sudo.
-            # Here we recursively restore ownership of the the coverage
-            # directory back to the normal user.
-            sudo chown -R "$(whoami)" "coverage"
+            # Since we ran the tests under sudo, the test outputs such as
+            # coverage data and logs are owned by sudo.
+            # Here we recursively restore ownership of the package directory
+            # back to the normal user.
+            sudo chown -R "$(whoami)" "."
             ;;
         Ubuntu)
             # Enable core dumps.
