@@ -116,6 +116,10 @@ function runE2ETests() {
         macOS)
             # The tests are run with sudo, so that macOS records crash reports.
             sudo $testCommand
+            # Since we ran the tests under sudo, the coverage data is owned by sudo.
+            # Here we recursively restore ownership of the the coverage
+            # directory back to the normal user.
+            sudo chown -R "$(whoami)":"$(whoami)" "coverage"
             ;;
         Ubuntu)
             # Enable core dumps.
@@ -310,9 +314,7 @@ function uploadCoverageData() {
     # Format coverage data as lcov
     case "$embedder" in
     standalone)
-        # For some reason sudo access is required on the GitHub macOS runner to
-        # run this script.
-        sudo -E ./tools/coverage.sh dartToLcov "$testPackageDir"
+        ./tools/coverage.sh dartToLcov "$testPackageDir"
         ;;
     flutter)
         # Flutter already outputs coverage data as lcov and into the correct
