@@ -240,6 +240,8 @@ jobs:
           path: test-results
 
       - name: Upload coverage data
+        # Disabled until we figure out how to get coverage data from flutter tests
+        if: ${{ false }}
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e,${{ matrix.os }},${{ matrix.embedder }}"
 
@@ -309,5 +311,7 @@ jobs:
           path: test-results
 
       - name: Upload coverage data
+        # Disabled until we figure out how to get coverage data from flutter tests
+        if: ${{ false }}
         run: |
           ./tools/ci-steps.sh uploadCoverageData "prebuilt,${{ matrix.os }},${{ matrix.embedder }}"

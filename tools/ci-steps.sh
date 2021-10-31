@@ -146,11 +146,14 @@ function runE2ETests() {
             ;;
         esac
 
+        # Note: We would like to collect coverage data from tests, but
+        # `flutter drive` does not support the `--coverage` flag. While
+        # `flutter test` does, it does not support the `--keep-app-running`
+        # flag, which we need to collect logs from devices.
         flutter drive \
             --no-pub \
             -d "$device" \
             --dart-define enableTimeBomb=true \
-            --coverage \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart
@@ -296,7 +299,7 @@ function collectTestResults() {
 
 # Uploads coverage data to codecov.
 #
-# The first and only paramter is a comma separated list of flags to be 
+# The first and only paramter is a comma separated list of flags to be
 # associated with the uploaded coverage data.
 function uploadCoverageData() {
     requireEnvVar EMBEDDER
@@ -332,7 +335,7 @@ function uploadCoverageData() {
     esac
 
     # Upload coverage data
-    codecov -F "$flags" -f "$packageDir/coverage/lcov.info"
+    ./codecov -F "$flags" -f "$packageDir/coverage/lcov.info"
 }
 
 "$@"
