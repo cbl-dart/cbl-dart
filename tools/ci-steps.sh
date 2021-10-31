@@ -307,7 +307,7 @@ function uploadCoverageData() {
     # Format coverage data as lcov
     case "$embedder" in
     standalone)
-        ./tools/coverage.sh dartToLcov "$packageDir"
+        ./tools/coverage.sh dartToLcov "$testPackageDir"
         ;;
     flutter)
         # Flutter already outputs coverage data as lcov and into the correct
