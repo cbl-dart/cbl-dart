@@ -110,12 +110,17 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test -r expanded -j 1"
+        testCommand="dart test --coverage coverage/dart -r expanded -j 1"
 
         case "$targetOs" in
         macOS)
             # The tests are run with sudo, so that macOS records crash reports.
             sudo $testCommand
+            # Since we ran the tests under sudo, the test outputs such as
+            # coverage data and logs are owned by sudo.
+            # Here we recursively restore ownership of the package directory
+            # back to the normal user.
+            sudo chown -R "$(whoami)" "."
             ;;
         Ubuntu)
             # Enable core dumps.
@@ -146,6 +151,10 @@ function runE2ETests() {
             ;;
         esac
 
+        # Note: We would like to collect coverage data from tests, but
+        # `flutter drive` does not support the `--coverage` flag. While
+        # `flutter test` does, it does not support the `--keep-app-running`
+        # flag, which we need to collect logs from devices.
         flutter drive \
             --no-pub \
             -d "$device" \
@@ -291,6 +300,47 @@ function collectTestResults() {
         esac
         ;;
     esac
+}
+
+# Uploads coverage data to codecov.
+#
+# The first and only paramter is a comma separated list of flags to be
+# associated with the uploaded coverage data.
+function uploadCoverageData() {
+    requireEnvVar EMBEDDER
+    requireEnvVar TEST_PACKAGE
+
+    local flags="$1"
+
+    # Format coverage data as lcov
+    case "$embedder" in
+    standalone)
+        ./tools/coverage.sh dartToLcov "$testPackageDir"
+        ;;
+    flutter)
+        # Flutter already outputs coverage data as lcov and into the correct
+        # location.
+        ;;
+    esac
+
+    # Install codecove uploader
+    case "$OSTYPE" in
+    linux*)
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ;;
+    darwin*)
+        curl -Os https://uploader.codecov.io/latest/macos/codecov
+        chmod +x codecov
+        ;;
+    msys* | cygwin*)
+        echo "Code coverage upload for $OSTYPE is not implmented"
+        exit 1
+        ;;
+    esac
+
+    # Upload coverage data
+    ./codecov -F "$flags" -f "$testPackageDir/coverage/lcov.info"
 }
 
 "$@"

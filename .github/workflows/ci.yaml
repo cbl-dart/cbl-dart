@@ -93,6 +93,12 @@ jobs:
       matrix:
         package: [cbl]
         dart: [stable, beta]
+        embedder: [standalone]
+        os: [Ubuntu]
+    env:
+      EMBEDDER: ${{ matrix.embedder }}
+      TARGET_OS: ${{ matrix.os }}
+      TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: ubuntu-20.04
     steps:
@@ -116,10 +122,16 @@ jobs:
         run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
 
       - name: Bootstrap Dart packages
-        run: melos bootstrap
+        run: melos bootstrap --scope ${{ matrix.package }}
 
       - name: Run tests
-        run: melos run test:${{ matrix.package }}
+        working-directory: packages/${{ matrix.package }}
+        run: dart test --coverage coverage/dart
+
+      - name: Upload coverage data
+        if: ${{ matrix.dart == 'stable' }}
+        run: |
+          ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
 
   test-e2e:
     name: E2E tests
@@ -227,6 +239,12 @@ jobs:
           name: test-results-${{ matrix.os }}-${{ matrix.embedder }}
           path: test-results
 
+      - name: Upload coverage data
+        # Disabled until we figure out how to get coverage data from flutter tests
+        if: ${{ matrix.embedder != 'flutter' }}
+        run: |
+          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
+
   test-e2e-cbl_flutter_prebuilt:
     # Temporarily disabled until compatible version of `cbl` is published.
     if: ${{ false }}
@@ -235,6 +253,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        embedder: [flutter]
         os: [iOS, macOS, Android, Ubuntu]
     runs-on: >-
       ${{ fromJSON('{ 
@@ -244,7 +263,7 @@ jobs:
         "Ubuntu":"ubuntu-20.04"
       }')[matrix.os] }}
     env:
-      EMBEDDER: flutter
+      EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: cbl_flutter_prebuilt_e2e_tests
     steps:
@@ -290,3 +309,9 @@ jobs:
         with:
           name: test-results-cbl_flutter_prebuilt-${{ matrix.os }}
           path: test-results
+
+      - name: Upload coverage data
+        # Disabled until we figure out how to get coverage data from flutter tests
+        if: ${{ false }}
+        run: |
+          ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"

@@ -37,11 +37,6 @@ scripts:
     select-package:
       scope: cbl_e2e_tests
 
-  test:cbl:
-    run: melos exec -- flutter test --no-pub -r expanded
-    select-package:
-      scope: 'cbl'
-
   clean:packages:
     run: git clean -xdfq packages
 

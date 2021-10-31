@@ -1,0 +1,8 @@
+ignore:
+  # Ignore all test code
+  - '**/test'
+  - '**/integration_test'
+
+codecov:
+  notify:
+    after_n_builds: 2

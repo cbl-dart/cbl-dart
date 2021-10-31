@@ -305,3 +305,4 @@ DerivedData/
 .idea
 *.iml
 WIP.md
+coverage
