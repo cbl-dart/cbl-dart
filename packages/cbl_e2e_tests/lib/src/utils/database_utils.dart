@@ -7,6 +7,7 @@ import 'package:cbl/src/service/cbl_service.dart';
 import 'package:cbl/src/service/cbl_service_api.dart';
 import 'package:cbl/src/service/cbl_worker.dart';
 import 'package:cbl/src/service/channel.dart';
+import 'package:cbl/src/service/serialization/json_packet_codec.dart';
 import 'package:cbl/src/support/utils.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -132,13 +133,19 @@ void setupSharedTestMainIsolateClient() {
   setUpAll(() {
     transportChannels = _streamControllerChannelPair();
 
+    // We are using the `JsonPacketCodec` here to maximize code coverage.
+    // The shared test worker already covers the `IsolatePacketCodec`.
+    final packetCodec = JsonPacketCodec();
+
     final serviceChannel = Channel(
       transport: transportChannels[0],
       serializationRegistry: cblServiceSerializationRegistry(),
+      packetCodec: packetCodec,
     );
     final clientChannel = Channel(
       transport: transportChannels[1],
       serializationRegistry: cblServiceSerializationRegistry(),
+      packetCodec: packetCodec,
     );
 
     service = CblService(channel: serviceChannel);
