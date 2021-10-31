@@ -119,7 +119,7 @@ function runE2ETests() {
             # Since we ran the tests under sudo, the coverage data is owned by sudo.
             # Here we recursively restore ownership of the the coverage
             # directory back to the normal user.
-            sudo chown -R "$(whoami)":"$(whoami)" "coverage"
+            sudo chown -R "$(whoami)" "coverage"
             ;;
         Ubuntu)
             # Enable core dumps.
