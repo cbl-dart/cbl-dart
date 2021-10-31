@@ -312,7 +312,7 @@ function uploadCoverageData() {
     standalone)
         # For some reason sudo access is required on the GitHub macOS runner to
         # run this script.
-        sudo ./tools/coverage.sh dartToLcov "$testPackageDir"
+        sudo -E ./tools/coverage.sh dartToLcov "$testPackageDir"
         ;;
     flutter)
         # Flutter already outputs coverage data as lcov and into the correct
