@@ -131,7 +131,7 @@ jobs:
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "unit,${{ matrix.package }}"
+          ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
 
   test-e2e:
     name: E2E tests
@@ -243,7 +243,7 @@ jobs:
         # Disabled until we figure out how to get coverage data from flutter tests
         if: ${{ matrix.embedder != 'flutter' }}
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "e2e,${{ matrix.os }},${{ matrix.embedder }}"
+          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
   test-e2e-cbl_flutter_prebuilt:
     # Temporarily disabled until compatible version of `cbl` is published.
@@ -314,4 +314,4 @@ jobs:
         # Disabled until we figure out how to get coverage data from flutter tests
         if: ${{ false }}
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "prebuilt,${{ matrix.os }},${{ matrix.embedder }}"
+          ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
