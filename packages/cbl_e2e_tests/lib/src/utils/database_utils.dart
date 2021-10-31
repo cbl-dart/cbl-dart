@@ -4,8 +4,12 @@ import 'dart:io';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/database/proxy_database.dart';
 import 'package:cbl/src/service/cbl_service.dart';
+import 'package:cbl/src/service/cbl_service_api.dart';
 import 'package:cbl/src/service/cbl_worker.dart';
+import 'package:cbl/src/service/channel.dart';
+import 'package:cbl/src/service/serialization/json_packet_codec.dart';
 import 'package:cbl/src/support/utils.dart';
+import 'package:stream_channel/stream_channel.dart';
 
 import '../test_binding.dart';
 import 'api_variant.dart';
@@ -31,6 +35,7 @@ FutureOr<Database> openTestDatabase({
         name: name,
         config: config,
         tearDown: tearDown,
+        isolate: isolate.value,
       ),
     );
 
@@ -53,33 +58,31 @@ SyncDatabase openSyncTestDatabase({
   return db;
 }
 
-CblWorker? _sharedWorker;
-late CblServiceClient _sharedClient;
-
-void setupSharedTestCblWorker() {
-  setUpAll(() async {
-    _sharedWorker = CblWorker(debugName: 'Shared');
-    await _sharedWorker!.start();
-    _sharedClient = CblServiceClient(channel: _sharedWorker!.channel);
-  });
-
-  tearDownAll(() => _sharedWorker?.stop());
-}
-
 Future<AsyncDatabase> openAsyncTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
+  Isolate isolate = Isolate.worker,
 }) async {
   config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
   // Ensure directory exists
   await File(config.directory).parent.create(recursive: true);
 
+  CblServiceClient client;
+  switch (isolate) {
+    case Isolate.main:
+      client = _sharedMainIsolateClient;
+      break;
+    case Isolate.worker:
+      client = _sharedWorkerIsolateClient;
+      break;
+  }
+
   final db = await ProxyDatabase.open(
     name: name,
     config: config,
-    client: _sharedClient,
+    client: client,
   );
 
   if (tearDown) {
@@ -89,20 +92,9 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   return db;
 }
 
-SyncDatabase? _sharedSyncDatabase;
-Future<AsyncDatabase>? _sharedAsyncDatabase;
-
-void setupSharedTestDatabases() {
-  tearDownAll(() => Future.wait([
-        _sharedSyncDatabase?.close(),
-        _sharedAsyncDatabase?.then((db) => db.close())
-      ].whereType<Future<void>>()));
-}
-
-Future<AsyncDatabase> openSharedAsyncTestDatabase() =>
-    _sharedAsyncDatabase ??= openAsyncTestDatabase(
-      name: 'shared-async',
-      tearDown: false,
+FutureOr<Database> openSharedTestDatabase() => runApi(
+      sync: openSharedSyncTestDatabase,
+      async: () => openSharedAsyncTestDatabase(isolate: isolate.value),
     );
 
 SyncDatabase openSharedSyncTestDatabase() =>
@@ -111,10 +103,89 @@ SyncDatabase openSharedSyncTestDatabase() =>
       tearDown: false,
     );
 
-FutureOr<Database> openSharedTestDatabase() => runApi(
-      sync: openSharedSyncTestDatabase,
-      async: openSharedAsyncTestDatabase,
+Future<AsyncDatabase> openSharedAsyncTestDatabase({
+  Isolate isolate = Isolate.worker,
+}) =>
+    _sharedServiceDatabase ??= openAsyncTestDatabase(
+      name: 'shared-async',
+      tearDown: false,
+      isolate: isolate,
     );
+
+SyncDatabase? _sharedSyncDatabase;
+Future<AsyncDatabase>? _sharedServiceDatabase;
+Future<AsyncDatabase>? _sharedWorkerDatabase;
+
+void setupSharedTestDatabases() {
+  tearDownAll(() => Future.wait([
+        _sharedSyncDatabase?.close(),
+        _sharedServiceDatabase?.then((db) => db.close()),
+        _sharedWorkerDatabase?.then((db) => db.close()),
+      ].whereType<Future<void>>()));
+}
+
+late CblServiceClient _sharedMainIsolateClient;
+
+void setupSharedTestMainIsolateClient() {
+  late final List<StreamChannel<Object?>> transportChannels;
+  late CblService service;
+
+  setUpAll(() {
+    transportChannels = _streamControllerChannelPair();
+
+    // We are using the `JsonPacketCodec` here to maximize code coverage.
+    // The shared test worker already covers the `IsolatePacketCodec`.
+    final packetCodec = JsonPacketCodec();
+
+    final serviceChannel = Channel(
+      transport: transportChannels[0],
+      serializationRegistry: cblServiceSerializationRegistry(),
+      packetCodec: packetCodec,
+    );
+    final clientChannel = Channel(
+      transport: transportChannels[1],
+      serializationRegistry: cblServiceSerializationRegistry(),
+      packetCodec: packetCodec,
+    );
+
+    service = CblService(channel: serviceChannel);
+    _sharedMainIsolateClient = CblServiceClient(channel: clientChannel);
+  });
+
+  tearDownAll(() async {
+    await _sharedMainIsolateClient.channel.close();
+    await service.dispose();
+    await service.channel.close();
+  });
+}
+
+List<StreamChannel<T>> _streamControllerChannelPair<T>() {
+  // ignore: close_sinks
+  final controllerA = StreamController<T>();
+  // ignore: close_sinks
+  final controllerB = StreamController<T>();
+  return [
+    StreamChannel(controllerA.stream, controllerB.sink),
+    StreamChannel(controllerB.stream, controllerA.sink),
+  ];
+}
+
+late CblServiceClient _sharedWorkerIsolateClient;
+
+void setupSharedTestWorkerIsolateClient() {
+  late final CblWorker worker;
+
+  setUpAll(() async {
+    worker = CblWorker(debugName: 'Shared');
+    await worker.start();
+
+    _sharedWorkerIsolateClient = CblServiceClient(channel: worker.channel);
+  });
+
+  tearDownAll(() async {
+    await worker.stop();
+  });
+}
 
 extension AsyncDatabaseUtilsExtension on Database {
   /// Returns a stream wich emits the ids of all the documents in this database.

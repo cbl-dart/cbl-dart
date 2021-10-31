@@ -11,6 +11,25 @@ enum Api { sync, async }
 
 final api = EnumVariant(Api.values);
 
+enum Isolate {
+  main,
+  worker,
+}
+
+final isolate = EnumVariant(
+  Isolate.values,
+  isCompatible: (value, other, otherValue) {
+    if (other is TestVariant<Api>) {
+      if (otherValue == Api.sync) {
+        return value == Isolate.main;
+      }
+
+      return true;
+    }
+    return true;
+  },
+);
+
 @isTest
 void apiTest(
   String description,
@@ -20,7 +39,11 @@ void apiTest(
   variantTest(
     description,
     body,
-    variants: [api, if (variants != null) ...variants],
+    variants: [
+      api,
+      isolate,
+      if (variants != null) ...variants,
+    ],
   );
 }
 
@@ -28,7 +51,7 @@ Future<void> Function() runWithApiValues(
   FutureOr<void> Function() fn, {
   List<TestVariant>? variants,
 }) =>
-    () => runVariantCombinations(fn, variants: [api]);
+    () => runVariantCombinations(fn, variants: [api, isolate]);
 
 FutureOr<T> apiFutureOr<T>(T value) {
   switch (api.value) {

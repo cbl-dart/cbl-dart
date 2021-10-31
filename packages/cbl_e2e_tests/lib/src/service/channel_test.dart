@@ -138,7 +138,7 @@ void channelTest(String description, Future Function() body) {
 }
 
 enum ChannelTransport {
-  isolatPort,
+  isolatePort,
   webSocket,
   controller,
 }
@@ -174,7 +174,7 @@ Future<Channel> openTestChannel() async {
       addTearDown(remote.close);
       registerTestHandlers(remote);
       break;
-    case ChannelTransport.isolatPort:
+    case ChannelTransport.isolatePort:
       final receivePort = ReceivePort();
       localTransport = IsolateChannel.connectReceive(receivePort);
       final isolate = await Isolate.spawn(

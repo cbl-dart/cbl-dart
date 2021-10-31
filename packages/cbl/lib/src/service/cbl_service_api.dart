@@ -348,7 +348,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         },
         deserialize: (map, context) => DatabaseException(
           map.getAs('message'),
-          context.deserializeAs('code')!,
+          context.deserializeAs(map['code'])!,
           queryString: map.getAs('queryString'),
           errorPosition: map.getAs('errorPosition'),
         ),
@@ -1274,8 +1274,8 @@ class CreateReplicator extends Request<int> {
         'authenticator': context.serializePolymorphic(authenticator),
         'pinnedServerCertificate': context.serialize(pinnedServerCertificate),
         'headers': headers,
-        'channels': channels,
-        'documentIds': documentIds,
+        'channels': context.serialize(channels),
+        'documentIds': context.serialize(documentIds),
         'pushFilterId': pushFilterId,
         'pullFilterId': pullFilterId,
         'conflictResolverId': conflictResolverId,
@@ -1299,8 +1299,8 @@ class CreateReplicator extends Request<int> {
         pinnedServerCertificate:
             context.deserializeAs(map['pinnedServerCertificate']),
         headers: map.getAs<StringMap?>('headers')?.cast(),
-        channels: map.getAs('channels'),
-        documentIds: map.getAs('documentIds'),
+        channels: context.deserializeAs(map['channels']),
+        documentIds: context.deserializeAs(map['documentIds']),
         pushFilterId: map.getAs('pushFilterId'),
         pullFilterId: map.getAs('pullFilterId'),
         conflictResolverId: map.getAs('conflictResolverId'),
@@ -1697,7 +1697,7 @@ class QueryState implements Serializable {
   @override
   StringMap serialize(SerializationContext context) => {
         'id': id,
-        'columnNames': columnNames,
+        'columnNames': context.serialize(columnNames),
       };
 
   static QueryState deserialize(
@@ -1706,7 +1706,7 @@ class QueryState implements Serializable {
   ) =>
       QueryState(
         id: map.getAs('id'),
-        columnNames: map.getAs('columnNames'),
+        columnNames: context.deserializeAs(map['columnNames'])!,
       );
 }
 
