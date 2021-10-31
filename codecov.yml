@@ -1,7 +1,8 @@
 ignore:
   # Ignore all test code
-  - '**/test'
-  - '**/integration_test'
+  - 'packages/**/test'
+  - 'packages/**/integration_test'
+  - 'packages/cbl_e2e_tests'
 
 codecov:
   notify:
