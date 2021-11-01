@@ -492,6 +492,41 @@ void main() {
       'enableAutoPurge: false',
       () => autoPurgeTest(enableAutoPurge: false),
     );
+
+    apiTest('use database endpoint', () async {
+      final dbA = await openTestDatabase(name: 'a');
+      final dbB = await openTestDatabase(name: 'b');
+      final repl = await Replicator.create(ReplicatorConfiguration(
+        database: dbA,
+        target: DatabaseEndpoint(dbB),
+      ));
+
+      final doc = MutableDocument();
+      await dbA.saveDocument(doc);
+
+      await repl.replicateOneShot();
+
+      expect(await dbB.document(doc.id), isNotNull);
+    });
+
+    apiTest(
+      'throws when wrong type of database is used with database endpoint',
+      () async {
+        final dbA = await openTestDatabase(name: 'a');
+        final dbB = await runWithApi(
+          sync: getSharedAsyncTestDatabase,
+          async: getSharedSyncTestDatabase,
+        );
+
+        expect(
+          Future.sync(() => Replicator.create(ReplicatorConfiguration(
+                database: dbA,
+                target: DatabaseEndpoint(dbB),
+              ))),
+          throwsArgumentError,
+        );
+      },
+    );
   });
 }
 

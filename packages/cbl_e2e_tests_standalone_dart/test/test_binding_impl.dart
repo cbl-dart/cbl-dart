@@ -26,6 +26,7 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
 }
 
 Libraries _libraries() {
+  const enterpriseEdition = true;
   final libDir = p.absolute('lib');
   final frameworksDir = p.absolute('Frameworks');
 
@@ -42,6 +43,7 @@ Libraries _libraries() {
     cblDartLib = '$libDir/libcblitedart';
 
     return Libraries(
+      enterpriseEdition: enterpriseEdition,
       cbl: LibraryConfiguration.dynamic(cblLib, version: '3'),
       cblDart: LibraryConfiguration.dynamic(cblDartLib),
     );
@@ -50,6 +52,7 @@ Libraries _libraries() {
     cblDartLib = findLibInFrameworks('CouchbaseLiteDart');
 
     return Libraries(
+      enterpriseEdition: enterpriseEdition,
       cbl: LibraryConfiguration.dynamic(
         cblLib,
         appendExtension: false,

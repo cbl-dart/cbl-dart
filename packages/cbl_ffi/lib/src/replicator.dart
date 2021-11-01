@@ -25,6 +25,10 @@ typedef _CBLDart_CBLEndpoint_CreateWithURL = Pointer<CBLEndpoint> Function(
   Pointer<CBLError> errorOut,
 );
 
+typedef _CBLDart_CBLEndpoint_CreateWithLocalDB = Pointer<CBLEndpoint> Function(
+  Pointer<CBLDatabase> database,
+);
+
 typedef _CBLEndpoint_Free_C = Void Function(
   Pointer<CBLEndpoint> endpoint,
 );
@@ -463,6 +467,12 @@ class ReplicatorBindings extends Bindings {
         _CBLDart_CBLEndpoint_CreateWithURL, _CBLDart_CBLEndpoint_CreateWithURL>(
       'CBLDart_CBLEndpoint_CreateWithURL',
     );
+    if (libs.enterpriseEdition) {
+      _endpointCreateWithLocalDB = libs.cbl.lookupFunction<
+              _CBLDart_CBLEndpoint_CreateWithLocalDB,
+              _CBLDart_CBLEndpoint_CreateWithLocalDB>(
+          'CBLEndpoint_CreateWithLocalDB');
+    }
     _endpointFree =
         libs.cbl.lookupFunction<_CBLEndpoint_Free_C, _CBLEndpoint_Free>(
       'CBLEndpoint_Free',
@@ -528,6 +538,7 @@ class ReplicatorBindings extends Bindings {
   }
 
   late final _CBLDart_CBLEndpoint_CreateWithURL _endpointCreateWithUrl;
+  late final _CBLDart_CBLEndpoint_CreateWithLocalDB _endpointCreateWithLocalDB;
   late final _CBLEndpoint_Free _endpointFree;
   late final _CBLDart_CBLAuth_CreatePassword _authCreatePassword;
   late final _CBLDart_CBLAuth_CreateSession _authCreateSession;
@@ -550,6 +561,11 @@ class ReplicatorBindings extends Bindings {
             url.toFLStringInArena().ref,
             globalCBLError,
           ).checkCBLError());
+
+  Pointer<CBLEndpoint> createEndpointWithLocalDB(
+    Pointer<CBLDatabase> database,
+  ) =>
+      _endpointCreateWithLocalDB(database);
 
   void freeEndpoint(Pointer<CBLEndpoint> endpoint) {
     _endpointFree(endpoint);

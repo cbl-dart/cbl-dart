@@ -11,7 +11,7 @@ export 'replication/conflict_resolver.dart'
     show ConflictResolver, ConflictResolverFunction;
 export 'replication/document_replication.dart'
     show DocumentReplication, ReplicatedDocument;
-export 'replication/endpoint.dart' show Endpoint, UrlEndpoint;
+export 'replication/endpoint.dart' show Endpoint, UrlEndpoint, DatabaseEndpoint;
 export 'replication/replicator.dart'
     show
         Replicator,

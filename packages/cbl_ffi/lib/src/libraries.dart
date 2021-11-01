@@ -77,7 +77,5 @@ class Libraries {
 
   DynamicLibrary get cbl => _cbl.library;
 
-  DynamicLibrary? get cblEE => enterpriseEdition ? cbl : null;
-
   DynamicLibrary get cblDart => _cblDart.library;
 }

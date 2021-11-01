@@ -10,6 +10,7 @@ import '../document/document.dart';
 import '../document/ffi_document.dart';
 import '../fleece/fleece.dart' as fl;
 import '../support/async_callback.dart';
+import '../support/edition.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
@@ -43,6 +44,19 @@ class FfiReplicator
         'config.database',
         'must by a SyncDatabase',
       );
+    }
+
+    final target = config.target;
+    if (target is DatabaseEndpoint) {
+      useEnterpriseFeature(EnterpriseFeature.localDbReplication);
+
+      if (target.database is! FfiDatabase) {
+        throw ArgumentError.value(
+          target,
+          'config.target.database',
+          'must by a SyncDatabase',
+        );
+      }
     }
 
     _database = database;
@@ -339,6 +353,9 @@ extension on ReplicatorConfiguration {
     final target = this.target;
     if (target is UrlEndpoint) {
       return _bindings.createEndpointWithUrl(target.url.toString());
+    } else if (target is DatabaseEndpoint) {
+      final db = target.database as FfiDatabase;
+      return db.native.call(_bindings.createEndpointWithLocalDB);
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }

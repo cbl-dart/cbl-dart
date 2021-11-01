@@ -254,6 +254,10 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         deserialize: (map, context) =>
             UrlEndpoint(context.deserializeAs(map['url'])!),
       )
+      ..addSerializableCodec(
+        'ServiceDatabaseEndpoint',
+        ServiceDatabaseEndpoint.deserialize,
+      )
       ..addCodec<ReplicatorType>(
         'ReplicatorType',
         serialize: (value, context) => value.index,
@@ -1223,6 +1227,22 @@ class QueryChangeResultSet implements Request<EncodedData> {
         queryId: map.getAs('queryId'),
         resultSetId: map.getAs('resultSetId'),
       );
+}
+
+class ServiceDatabaseEndpoint extends Endpoint implements Serializable {
+  ServiceDatabaseEndpoint(this.databaseId);
+
+  final int databaseId;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'databaseId': databaseId};
+
+  static ServiceDatabaseEndpoint deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      ServiceDatabaseEndpoint(map.getAs('databaseId'));
 }
 
 class CreateReplicator extends Request<int> {

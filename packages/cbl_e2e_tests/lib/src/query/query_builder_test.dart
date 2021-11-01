@@ -16,13 +16,13 @@ void main() {
 
     group('SelectResult', () {
       setUpAll(runWithApiValues(() async {
-        final db = await openSharedTestDatabase();
+        final db = await getSharedTestDatabase();
         final doc = MutableDocument.withId('SelectOneResult', {'a': true});
         await db.saveDocument(doc);
       }));
 
       Future<Object?> selectOneResult(SelectResultInterface selectResult) =>
-          Future.value(openSharedTestDatabase()).then((db) async {
+          Future.value(getSharedTestDatabase()).then((db) async {
             final resultSet = await const QueryBuilder()
                 .select(selectResult)
                 .from(DataSource.database(db))
@@ -33,7 +33,7 @@ void main() {
           });
 
       apiTest('SelectResult.all()', () async {
-        final db = await openSharedTestDatabase();
+        final db = await getSharedTestDatabase();
 
         expect(await selectOneResult(SelectResult.all()), {
           db.name: {'a': true}
@@ -41,7 +41,7 @@ void main() {
       });
 
       apiTest('SelectResult.all().from()', () async {
-        final db = await openSharedTestDatabase();
+        final db = await getSharedTestDatabase();
 
         expect(await selectOneResult(SelectResult.all().from(db.name)), {
           db.name: {'a': true}
@@ -539,7 +539,7 @@ void main() {
       final deletedDoc = apiProvider((_) => MutableDocument());
 
       setUpAll(runWithApiValues(() async {
-        final db = await openSharedTestDatabase();
+        final db = await getSharedTestDatabase();
         await db.saveDocument(doc());
         await db.setDocumentExpiration(doc().id, expirationDate);
         await db.saveDocument(deletedDoc());
@@ -550,7 +550,7 @@ void main() {
         ExpressionInterface expression, {
         bool deleted = false,
       }) async {
-        final db = await openSharedTestDatabase();
+        final db = await getSharedTestDatabase();
 
         final id = deleted ? deletedDoc().id : doc().id;
         var where = Meta.id.equalTo(valExpr(id));
@@ -896,7 +896,7 @@ void main() {
 
 void setupEvalExprUtils() {
   setUpAll(runWithApiValues(() async {
-    final db = await openSharedTestDatabase();
+    final db = await getSharedTestDatabase();
     await db.saveDocument(MutableDocument.withId('EvalExpr'));
   }));
 }
@@ -909,7 +909,7 @@ Future<T> evalExpr<T extends Object?>(
   String? dataSourceAlias,
   Parameters? parameters,
 }) async {
-  final db = await openSharedTestDatabase();
+  final db = await getSharedTestDatabase();
   if (doc != null) {
     await db.saveDocument(doc);
   }

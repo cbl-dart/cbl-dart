@@ -1,3 +1,5 @@
+import '../database/database.dart';
+
 /// The location of a database to replicate with.
 abstract class Endpoint {}
 
@@ -17,4 +19,19 @@ class UrlEndpoint extends Endpoint {
 
   @override
   String toString() => 'UrlEndpoint($url)';
+}
+
+/// An endpoint representing a local [Database] as the replication target.
+///
+/// Available in the **Enterprise Edition** only.
+class DatabaseEndpoint extends Endpoint {
+  /// Creates an endpoint representing a local [database] as the replication
+  /// target.
+  DatabaseEndpoint(this.database);
+
+  /// The local [Database] to replicate with.
+  final Database database;
+
+  @override
+  String toString() => 'DatabaseEndpoint($database)';
 }
