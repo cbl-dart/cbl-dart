@@ -126,6 +126,43 @@ void main() {
         ]),
       );
     });
+
+    channelTest('pause and resume stream', () async {
+      final channel = await openTestChannel();
+
+      var isPaused = false;
+      var events = 0;
+      final sub = channel.stream(InfiniteStream()).listen((event) {
+        expect(isPaused, isFalse);
+        events++;
+      });
+
+      // Verify that the stream is emitting events.
+      while (events <= 0) {
+        await Future<void>.delayed(InfiniteStream.interval);
+      }
+
+      // Pause the stream.
+      sub.pause();
+      await Future<void>.delayed(InfiniteStream.interval * 2);
+      isPaused = true;
+
+      // Wait a view intervals while stream is paused to verify that the stream
+      // is paused.
+      await Future<void>.delayed(InfiniteStream.interval * 10);
+
+      // Resume the stream
+      isPaused = false;
+      events = 0;
+      sub.resume();
+
+      // Verify that the stream is emitting events again.
+      while (events <= 0) {
+        await Future<void>.delayed(InfiniteStream.interval);
+      }
+
+      await sub.cancel();
+    });
   });
 }
 
@@ -230,8 +267,8 @@ void registerTestHandlers(Channel channel) {
         (EchoRequest req) => Stream.value('Input: ${req.input}'))
     ..addStreamEndpoint((ThrowTestError _) =>
         Stream<void>.error(const TestError('Oops'), StackTrace.current))
-    ..addStreamEndpoint((InfiniteStream _) =>
-        Stream<void>.periodic(const Duration(milliseconds: 100)));
+    ..addStreamEndpoint(
+        (InfiniteStream _) => Stream<void>.periodic(InfiniteStream.interval));
 }
 
 class TestIsolateConfig {
@@ -317,6 +354,8 @@ class ThrowTestError extends Request<Null> {
 }
 
 class InfiniteStream extends Request<Null> {
+  static const interval = Duration(milliseconds: 10);
+
   @override
   StringMap serialize(SerializationContext context) => {};
 
