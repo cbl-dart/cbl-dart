@@ -1,32 +1,28 @@
 [![Version](https://badgen.net/pub/v/cbl)](https://pub.dev/packages/cbl)
 [![License](https://badgen.net/pub/license/cbl)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/LICENSE)
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
 > :warning: This project has not yet reached a stable production release.
 
-## Features - Couchbase Lite
+## Features
 
-- Schemaless JSON documents
-- Binary JSON format (Fleece)
-  - Reading without parsing
-- Blobs
-  - A binary data value associated with a document
+- Offline first
+- Data is stored in JSON documents
+  - Schemaless
+  - Stored in efficient binary format
+  - Support storing binary blobs
 - Queries
-  - Supports large subset of N1QL query language
-  - Machine readable representation of queries as JSON
+  - Construct queries through a type safe builder API or write them in [N1QL]
   - Full text search
   - Indexes
-  - Observable queries
-- Replication
+- Synchronization with central Database
   - Synchronize with Couchbase Server through Sync Gateway
-
-## Features - Dart API
-
-- Async and sync APIs
-- Streams for event based APIs
-- Support for Flutter apps
-- Support for standalone Dart (for example a CLI)
-- Well documented
+  - Local conflict resolution
+- Change observer APIs for:
+  - Database
+  - Query
+  - Replicator
 
 ## Supported Platforms
 
@@ -37,49 +33,10 @@
 |  Android | >= 22                  |
 |    Linux | == Ubuntu 20.04 x86_64 |
 
-## Getting started on Flutter
+## Getting started for Flutter
 
-You need to add `cbl` and [`cbl_flutter`](https://pub.dev/packages/cbl_flutter)
-as dependencies. `cbl_flutter` currently supports iOS, macOS and Android.
-
-```pubspec
-dependencies:
-    cbl: ...
-    cbl_flutter: ...
-```
-
-Make sure you have set the required minimum target version in the build systems
-of the platforms you support.
-
-Couchbase Lite needs to be initialized, before it can be used:
-
-```dart
-import 'package:cbl_flutter/cbl_flutter.dart';
-
-Future<void> initCouchbaseLite() async {
-  await CouchbaseLiteFlutter.init();
-}
-```
-
-Now you can use `Database.open` to open a database:
-
-```dart
-import 'package:cbl/cbl.dart';
-
-Future<void> useCouchbaseLite() async {
-  final db = await Database.openAsync('chat-messages');
-
-  final doc = MutableDocument({
-    'type': 'message',
-    'body': 'Heyo',
-    'from': 'Alice',
-  });
-
-  await db.saveDocument(doc);
-
-  await db.close();
-}
-```
+Head over to the [Flutter plugin for Couchbase Lite][cbl_flutter] to get started
+using Couchbase Lite in your Flutter App.
 
 ## Contributing
 
@@ -95,3 +52,5 @@ Read [CONTRIBUTING] to get started developing.
 > **Warning:** This is not an official Couchbase product.
 
 [contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md
+[n1ql]: https://www.couchbase.com/products/n1ql
+[cbl_flutter]: https://pub.dev/packages/cbl_flutter

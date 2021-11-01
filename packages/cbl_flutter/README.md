@@ -1,10 +1,14 @@
 [![Version](https://badgen.net/pub/v/cbl_flutter)](https://pub.dev/packages/cbl_flutter)
 [![License](https://badgen.net/pub/license/cbl_flutter)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_flutter/LICENSE)
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
 # cbl_flutter
 
-Flutter plugin for Couchbase Lite ([`cbl`](https://pub.dev/packages/cbl)).
+This is the Flutter plugin for Couchbase Lite.
+
+It allows your Flutter app to make use of the [`cbl`][cbl] package, through
+which you access Couchbase Lite.
 
 ## Supported Platforms
 
@@ -21,16 +25,15 @@ notably, operations trying to return an error crash the app.
 
 ## Getting started
 
-1. You need to add `cbl` and
-   [`cbl_flutter`](https://pub.dev/packages/cbl_flutter) and as dependencies:
+1. You need to add [`cbl`][cbl] and `cbl_flutter` as dependencies:
 
 ```pubspec
 dependencies:
-    cbl: ^1.0.0-beta.6
-    cbl_flutter: ^1.0.0-beta.6
+    cbl: ^1.0.0-beta.7
+    cbl_flutter: ^1.0.0-beta.7
 ```
 
-2. Select the edition of Couchbase Lite you want to use, by adding as a
+1. Select the edition of Couchbase Lite you want to use, by adding as a
    dependency either [`cbl_flutter_ce`](https://pub.dev/packages/cbl_flutter_ce)
    for the Community Edition or
    [`cbl_flutter_ee`](https://pub.dev/packages/cbl_flutter_ee) for the
@@ -38,7 +41,7 @@ dependencies:
 
 ```pubspec
     # This dependency selects the Couchbase Lite Community Edition.
-    cbl_flutter_ce: ^1.0.0-beta.0
+    cbl_flutter_ce: ^1.0.0-beta.1
 ```
 
 :warning: You need to comply with the Couchbase licensing terms of the edition
@@ -94,3 +97,9 @@ resolve it. See that function's documentation for the concrete locations on the
 various platforms.
 
 [path_provider]: https://pub.dev/packages/path_provider
+
+# Disclaimer
+
+> **Warning:** This is not an official Couchbase product.
+
+[cbl]: https://pub.dev/packages/cbl
