@@ -1,3 +1,9 @@
+## 0.7.0-beta.6
+
+ - **REFACTOR**: remove workaround in `CBLErrorException.fromCBLErrorWithSource` for bug in CBL C (#196). ([c89bf0c9](https://github.com/cbl-dart/cbl-dart/commit/c89bf0c9e57a5165a2a53803a1b81545bf5c321d))
+ - **CHORE**: cut release `cbl_libcblitedart_api` `v1.0.0-beta.2`. ([f503c8ea](https://github.com/cbl-dart/cbl-dart/commit/f503c8ead1f0735d37dae536d20a0043185875e4))
+ - **CHORE**: change version format of `cbl_libcblite_api`. ([dc5c49de](https://github.com/cbl-dart/cbl-dart/commit/dc5c49def1705803daa0ce52e9f28ac38b69c510))
+
 ## 0.7.0-beta.5
 
  - **FEAT**: add dependencies on API packages for native libraries

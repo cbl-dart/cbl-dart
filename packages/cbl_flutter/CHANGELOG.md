@@ -1,3 +1,11 @@
+## 1.0.0-beta.7
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: downgrade iOS + macOS minimum deployment targets. ([d932dbd8](https://github.com/cbl-dart/cbl-dart/commit/d932dbd87496e350559aa3dc1672b71a665e2421))
+ - **DOCS**: update README. ([d82d6369](https://github.com/cbl-dart/cbl-dart/commit/d82d636943bd3ffce03fab48bb123005af076a71))
+ - **BREAKING** **FEAT**: add listener based observer API (#205). ([e67859b2](https://github.com/cbl-dart/cbl-dart/commit/e67859b2bc6333395e86f3ad640ae5a07a742ad7))
+
 ## 1.0.0-beta.6
 
  - **BREAKING** **FEAT**: support Couchbase Lite Community and Enterprise Editions  
