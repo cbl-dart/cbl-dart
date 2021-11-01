@@ -40,6 +40,28 @@ class ProxyDatabase extends ProxyObject
         _config = DatabaseConfiguration.from(config),
         super(client.channel, state.id);
 
+  static Future<void> remove(
+    String name, {
+    String? directory,
+    required CblServiceClient client,
+  }) =>
+      client.channel.call(RemoveDatabase(name, directory));
+
+  static Future<bool> exists(
+    String name, {
+    String? directory,
+    required CblServiceClient client,
+  }) =>
+      client.channel.call(DatabaseExists(name, directory));
+
+  static Future<void> copy({
+    required String from,
+    required String name,
+    DatabaseConfiguration? config,
+    required CblServiceClient client,
+  }) =>
+      client.channel.call(CopyDatabase(from, name, config));
+
   static Future<ProxyDatabase> open({
     required String name,
     required DatabaseConfiguration config,

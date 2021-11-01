@@ -14,6 +14,41 @@ import 'package:stream_channel/stream_channel.dart';
 import '../test_binding.dart';
 import 'api_variant.dart';
 
+Future<void> removeDatabaseWithSharedIsolate(
+  String name, {
+  String? directory,
+  Isolate isolate = Isolate.worker,
+}) =>
+    ProxyDatabase.remove(
+      name,
+      directory: directory,
+      client: _sharedIsolateClient(isolate),
+    );
+
+Future<bool> databaseExistsWithSharedIsolate(
+  String name, {
+  String? directory,
+  Isolate isolate = Isolate.worker,
+}) =>
+    ProxyDatabase.exists(
+      name,
+      directory: directory,
+      client: _sharedIsolateClient(isolate),
+    );
+
+Future<void> copyDatabaseWithSharedIsolate({
+  required String from,
+  required String name,
+  DatabaseConfiguration? config,
+  Isolate isolate = Isolate.worker,
+}) =>
+    ProxyDatabase.copy(
+      from: from,
+      name: name,
+      config: config,
+      client: _sharedIsolateClient(isolate),
+    );
+
 String databaseDirectoryForTest() => [
       tmpDir,
       'Databases',
@@ -25,7 +60,7 @@ FutureOr<Database> openTestDatabase({
   DatabaseConfiguration? config,
   bool tearDown = true,
 }) =>
-    runApi(
+    runWithApi(
       sync: () => openSyncTestDatabase(
         name: name,
         config: config,
@@ -69,20 +104,10 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   // Ensure directory exists
   await File(config.directory).parent.create(recursive: true);
 
-  CblServiceClient client;
-  switch (isolate) {
-    case Isolate.main:
-      client = _sharedMainIsolateClient;
-      break;
-    case Isolate.worker:
-      client = _sharedWorkerIsolateClient;
-      break;
-  }
-
   final db = await ProxyDatabase.open(
     name: name,
     config: config,
-    client: client,
+    client: _sharedIsolateClient(isolate),
   );
 
   if (tearDown) {
@@ -92,7 +117,20 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   return db;
 }
 
-FutureOr<Database> openSharedTestDatabase() => runApi(
+CblServiceClient _sharedIsolateClient(Isolate isolate) {
+  CblServiceClient client;
+  switch (isolate) {
+    case Isolate.main:
+      client = _sharedMainIsolateClient;
+      break;
+    case Isolate.worker:
+      client = _sharedWorkerIsolateClient;
+      break;
+  }
+  return client;
+}
+
+FutureOr<Database> openSharedTestDatabase() => runWithApi(
       sync: openSharedSyncTestDatabase,
       async: () => openSharedAsyncTestDatabase(isolate: isolate.value),
     );
