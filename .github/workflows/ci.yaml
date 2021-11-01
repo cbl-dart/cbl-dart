@@ -130,6 +130,8 @@ jobs:
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
 
@@ -242,6 +244,8 @@ jobs:
       - name: Upload coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
         if: ${{ matrix.embedder != 'flutter' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
@@ -313,5 +317,7 @@ jobs:
       - name: Upload coverage data
         # Disabled until we figure out how to get coverage data from flutter tests
         if: ${{ false }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
