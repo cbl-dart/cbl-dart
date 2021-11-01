@@ -73,6 +73,26 @@ void main() {
         expect(db.config, config);
       });
 
+      apiTest('count', () async {
+        final db = await openTestDatabase();
+
+        expect(await db.count, 0);
+
+        await db.saveDocument(MutableDocument());
+
+        expect(await db.count, 1);
+      });
+
+      apiTest('document fragment', () async {
+        final db = await openTestDatabase();
+
+        expect((await db['a']).exists, isFalse);
+
+        await db.saveDocument(MutableDocument.withId('a'));
+
+        expect((await db['a']).exists, isTrue);
+      });
+
       apiTest('close', () async {
         final db = await openTestDatabase();
         await db.close();
@@ -196,7 +216,7 @@ void main() {
           });
 
           await expectLater(
-            db.saveDocumentWithConflictHandler(doc, handler),
+            db.saveDocumentWithConflictHandlerWithApi(doc, handler),
             completion(isTrue),
           );
 
@@ -220,7 +240,7 @@ void main() {
           });
 
           await expectLater(
-            db.saveDocumentWithConflictHandler(doc, handler),
+            db.saveDocumentWithConflictHandlerWithApi(doc, handler),
             completion(isTrue),
           );
 
@@ -245,7 +265,7 @@ void main() {
           });
 
           await expectLater(
-            db.saveDocumentWithConflictHandler(doc, handler),
+            db.saveDocumentWithConflictHandlerWithApi(doc, handler),
             completion(isFalse),
           );
         });
@@ -263,6 +283,16 @@ void main() {
           expect(await db.document(doc.id), isNull);
         },
       );
+
+      apiTest('purgeDocument purges a document', () async {
+        final db = await openTestDatabase();
+
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+        await db.purgeDocument(doc);
+
+        expect(await db.document(doc.id), isNull);
+      });
 
       apiTest('purgeDocumentById purges a document by id', () async {
         final db = await openTestDatabase();
@@ -636,14 +666,14 @@ void main() {
 
 FutureOr<void> removeDatabaseWithApi(String name, {String? directory}) =>
     runApi(
-      sync: () => SyncDatabase.remove(name, directory: directory),
-      async: () => AsyncDatabase.remove(name, directory: directory),
+      sync: () => Database.removeSync(name, directory: directory),
+      async: () => Database.remove(name, directory: directory),
     );
 
 FutureOr<bool> databaseExistsWithApi(String name, {String? directory}) =>
     runApi(
-      sync: () => SyncDatabase.exists(name, directory: directory),
-      async: () => AsyncDatabase.exists(name, directory: directory),
+      sync: () => Database.existsSync(name, directory: directory),
+      async: () => Database.exists(name, directory: directory),
     );
 
 FutureOr<void> copyDatabaseWithApi({
@@ -652,14 +682,29 @@ FutureOr<void> copyDatabaseWithApi({
   DatabaseConfiguration? config,
 }) =>
     runApi(
-      sync: () => SyncDatabase.copy(
+      sync: () => Database.copySync(
         from: from,
         name: name,
         config: config,
       ),
-      async: () => AsyncDatabase.copy(
+      async: () => Database.copy(
         from: from,
         name: name,
         config: config,
       ),
     );
+
+extension on Database {
+  Future<bool> saveDocumentWithConflictHandlerWithApi(
+    MutableDocument doc,
+    SaveConflictHandler handler,
+  ) async =>
+      runApi<bool>(
+        sync: () => (this as SyncDatabase).saveDocumentWithConflictHandlerSync(
+          doc,
+          (documentBeingSaved, conflictingDocument) =>
+              handler(documentBeingSaved, conflictingDocument) as bool,
+        ),
+        async: () async => saveDocumentWithConflictHandler(doc, handler),
+      );
+}

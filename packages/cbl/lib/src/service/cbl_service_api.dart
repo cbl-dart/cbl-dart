@@ -366,7 +366,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         },
         deserialize: (map, context) => NetworkException(
           map.getAs('message'),
-          context.deserializeAs('code')!,
+          context.deserializeAs(map['code'])!,
         ),
       )
       ..addCodec<NetworkErrorCode>(
@@ -382,7 +382,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         },
         deserialize: (map, context) => HttpException(
           map.getAs('message'),
-          context.deserializeAs('code'),
+          context.deserializeAs(map['code']),
         ),
       )
       ..addCodec<HttpErrorCode>(
@@ -398,7 +398,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         },
         deserialize: (map, context) => WebSocketException(
           map.getAs('message'),
-          context.deserializeAs('code'),
+          context.deserializeAs(map['code']),
         ),
       )
       ..addCodec<WebSocketErrorCode>(
