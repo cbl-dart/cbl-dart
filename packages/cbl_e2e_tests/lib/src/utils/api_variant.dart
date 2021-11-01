@@ -75,7 +75,7 @@ T Function() apiProvider<T>(T Function(Api api) create) {
   };
 }
 
-FutureOr<T> runApi<T>({
+FutureOr<T> runWithApi<T>({
   required T Function() sync,
   required Future<T> Function() async,
 }) {
@@ -87,12 +87,24 @@ FutureOr<T> runApi<T>({
   }
 }
 
+FutureOr<T> runWithIsolate<T>({
+  required FutureOr<T> Function() main,
+  required FutureOr<T> Function() worker,
+}) {
+  switch (isolate.value) {
+    case Isolate.main:
+      return main();
+    case Isolate.worker:
+      return worker();
+  }
+}
+
 FutureOr<T> createApiResource<T extends ClosableResource>({
   required T Function() sync,
   required Future<T> Function() async,
   bool tearDown = true,
 }) =>
-    runApi(sync: sync, async: async).then((value) {
+    runWithApi(sync: sync, async: async).then((value) {
       if (tearDown) {
         addTearDown(value.close);
       }

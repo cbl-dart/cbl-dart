@@ -18,42 +18,42 @@ void main() {
       final directory = db.config.directory;
       await db.close();
 
-      expect(await databaseExistsWithApi(name, directory: directory), isTrue);
+      expect(await databaseExists(name, directory: directory), isTrue);
 
-      await removeDatabaseWithApi(name, directory: directory);
+      await removeDatabase(name, directory: directory);
 
-      expect(await databaseExistsWithApi(name, directory: directory), isFalse);
+      expect(await databaseExists(name, directory: directory), isFalse);
     });
 
     apiTest('exists', () async {
       const name = 'a';
       final directory = databaseDirectoryForTest();
 
-      expect(await databaseExistsWithApi(name, directory: directory), isFalse);
+      expect(await databaseExists(name, directory: directory), isFalse);
 
       await openTestDatabase(name: name);
 
-      expect(await databaseExistsWithApi(name, directory: directory), isTrue);
+      expect(await databaseExists(name, directory: directory), isTrue);
     });
 
     apiTest('copy', () async {
       final source = await openTestDatabase();
       final directory = databaseDirectoryForTest();
 
-      await copyDatabaseWithApi(
+      await copyDatabase(
         from: source.path!,
         name: 'copy',
         config: DatabaseConfiguration(directory: directory),
       );
 
-      expect(await databaseExistsWithApi('copy', directory: directory), isTrue);
+      expect(await databaseExists('copy', directory: directory), isTrue);
     });
 
     apiTest('open in default directory', () async {
       final name = createUuid();
       final defaultConfig = DatabaseConfiguration();
 
-      final db = await runApi(
+      final db = await runWithApi(
         sync: () => Database.openSync(name),
         async: () => Database.openAsync(name),
       );
@@ -73,6 +73,26 @@ void main() {
         expect(db.config, config);
       });
 
+      apiTest('count', () async {
+        final db = await openTestDatabase();
+
+        expect(await db.count, 0);
+
+        await db.saveDocument(MutableDocument());
+
+        expect(await db.count, 1);
+      });
+
+      apiTest('document fragment', () async {
+        final db = await openTestDatabase();
+
+        expect((await db['a']).exists, isFalse);
+
+        await db.saveDocument(MutableDocument.withId('a'));
+
+        expect((await db['a']).exists, isTrue);
+      });
+
       apiTest('close', () async {
         final db = await openTestDatabase();
         await db.close();
@@ -84,7 +104,7 @@ void main() {
         await db.delete();
 
         expect(
-          await databaseExistsWithApi(
+          await databaseExists(
             'default',
             directory: db.config.directory,
           ),
@@ -116,7 +136,7 @@ void main() {
 
         final doc = MutableDocument();
 
-        await runApi(
+        await runWithApi(
           sync: () => (db as SyncDatabase).inBatchSync(() {
             db.saveDocument(doc);
           }),
@@ -133,7 +153,7 @@ void main() {
 
         final doc = MutableDocument();
 
-        await runApi(
+        await runWithApi(
           sync: () => expect(
             () => (db as SyncDatabase).inBatchSync(() {
               db.saveDocument(doc);
@@ -249,6 +269,32 @@ void main() {
             completion(isFalse),
           );
         });
+
+        test('save updated document with sync conflict handler', () async {
+          final db = openSyncTestDatabase();
+
+          final doc = MutableDocument();
+          db.saveDocument(doc);
+          final updatedDoc = ((db.document(doc.id))!.toMutable())
+            ..setValue('b', key: 'a');
+          db.saveDocument(updatedDoc);
+
+          final SyncSaveConflictHandler handler =
+              expectAsync2((documentBeingSaved, conflictingDocument) {
+            expect(documentBeingSaved, doc);
+            expect(conflictingDocument, updatedDoc);
+            documentBeingSaved.setValue('c', key: 'a');
+            return true;
+          });
+
+          await expectLater(
+            db.saveDocumentWithConflictHandlerSync(doc, handler),
+            isTrue,
+          );
+
+          expect(doc.value('a'), 'c');
+          expect((db.document(doc.id))!.value('a'), 'c');
+        });
       });
 
       apiTest(
@@ -263,6 +309,16 @@ void main() {
           expect(await db.document(doc.id), isNull);
         },
       );
+
+      apiTest('purgeDocument purges a document', () async {
+        final db = await openTestDatabase();
+
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+        await db.purgeDocument(doc);
+
+        expect(await db.document(doc.id), isNull);
+      });
 
       apiTest('purgeDocumentById purges a document by id', () async {
         final db = await openTestDatabase();
@@ -634,32 +690,48 @@ void main() {
   });
 }
 
-FutureOr<void> removeDatabaseWithApi(String name, {String? directory}) =>
-    runApi(
-      sync: () => SyncDatabase.remove(name, directory: directory),
-      async: () => AsyncDatabase.remove(name, directory: directory),
+FutureOr<void> removeDatabase(String name, {String? directory}) => runWithApi(
+      sync: () => Database.removeSync(name, directory: directory),
+      async: () => runWithIsolate(
+        main: () => removeDatabaseWithSharedIsolate(
+          name,
+          directory: directory,
+          isolate: Isolate.main,
+        ),
+        worker: () => Database.remove(name, directory: directory),
+      ),
     );
 
-FutureOr<bool> databaseExistsWithApi(String name, {String? directory}) =>
-    runApi(
-      sync: () => SyncDatabase.exists(name, directory: directory),
-      async: () => AsyncDatabase.exists(name, directory: directory),
+FutureOr<bool> databaseExists(String name, {String? directory}) => runWithApi(
+      sync: () => Database.existsSync(name, directory: directory),
+      async: () async => runWithIsolate(
+        main: () => databaseExistsWithSharedIsolate(
+          name,
+          directory: directory,
+          isolate: Isolate.main,
+        ),
+        worker: () => Database.exists(name, directory: directory),
+      ),
     );
 
-FutureOr<void> copyDatabaseWithApi({
+FutureOr<void> copyDatabase({
   required String from,
   required String name,
   DatabaseConfiguration? config,
 }) =>
-    runApi(
-      sync: () => SyncDatabase.copy(
+    runWithApi(
+      sync: () => Database.copySync(
         from: from,
         name: name,
         config: config,
       ),
-      async: () => AsyncDatabase.copy(
-        from: from,
-        name: name,
-        config: config,
+      async: () async => runWithIsolate(
+        main: () => copyDatabaseWithSharedIsolate(
+          from: from,
+          name: name,
+          config: config,
+          isolate: Isolate.main,
+        ),
+        worker: () => Database.copy(from: from, name: name, config: config),
       ),
     );

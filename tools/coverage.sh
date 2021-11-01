@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 # Converts the dart coverage output for a package to lcov.
 #

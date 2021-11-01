@@ -31,6 +31,34 @@ void main() {
       );
     });
 
+    apiTest('execute query from JSON representation', () async {
+      final db = await openTestDatabase();
+      await db.saveDocument(MutableDocument({'a': 0}));
+      await db.saveDocument(MutableDocument({'a': 1}));
+
+      final builderQuery = const QueryBuilder()
+          .select(SelectResult.property('a'))
+          .from(DataSource.database(db))
+          .orderBy(Ordering.property('a'));
+
+      final query = await Query.fromJsonRepresentation(
+        db,
+        builderQuery.jsonRepresentation!,
+      );
+      final resultSet = await query.execute();
+
+      expect(
+        await resultSet
+            .asStream()
+            .map((result) => result.toPlainMap())
+            .toList(),
+        [
+          {'a': 0},
+          {'a': 1}
+        ],
+      );
+    });
+
     apiTest('execute query with parameters', () async {
       final db = await openTestDatabase();
       final q =
