@@ -16,6 +16,7 @@ final packageConfigurations = [
       couchbaseLiteC: const LibraryInfo(
         version: '3.0.0',
         release: '3.0.0-beta02',
+        apiPackageRelease: '3.0.0-beta.2',
       ),
       couchbaseLiteDart: const LibraryInfo(
         version: '1.0.0',
@@ -27,10 +28,15 @@ final packageConfigurations = [
 enum Edition { community, enterprise }
 
 class LibraryInfo {
-  const LibraryInfo({required this.version, required this.release});
+  const LibraryInfo({
+    required this.version,
+    required this.release,
+    String? apiPackageRelease,
+  }) : apiPackageRelease = apiPackageRelease ?? release;
 
   final String version;
   final String release;
+  final String apiPackageRelease;
 }
 
 class PackageConfiguration {

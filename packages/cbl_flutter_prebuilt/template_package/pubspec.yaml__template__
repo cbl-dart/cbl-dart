@@ -13,8 +13,8 @@ environment:
 
 dependencies:
   cbl_flutter_platform_interface: ^1.0.0-beta.0
-  cbl_libcblite_api: {{couchbaseLiteC.release}}
-  cbl_libcblitedart_api: {{couchbaseLiteDart.release}}
+  cbl_libcblite_api: {{couchbaseLiteC.apiPackageRelease}}
+  cbl_libcblitedart_api: {{couchbaseLiteDart.apiPackageRelease}}
   flutter:
     sdk: flutter
 

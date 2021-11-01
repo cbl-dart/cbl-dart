@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:mustache_template/mustache.dart';
@@ -8,11 +9,19 @@ import 'template_context.dart';
 import 'utils.dart';
 
 Future<void> buildPackage(PackageConfiguration configuration) async {
+  void log(String message) {
+    // ignore: avoid_print
+    print('${configuration.name}: $message');
+  }
+
+  log('Building package');
+
   final packageBuildDir = p.join(buildDir, configuration.name);
   final packageBuildDirectory = Directory(packageBuildDir);
 
   // Clean the package build dir and ensure it exists
   if (packageBuildDirectory.existsSync()) {
+    log('Removing existing package output: $packageBuildDirectory');
     await packageBuildDirectory.delete(recursive: true);
   }
   await packageBuildDirectory.create(recursive: true);
@@ -20,6 +29,15 @@ Future<void> buildPackage(PackageConfiguration configuration) async {
   final templateDirectory = Directory(templatePackageDir);
   final outputDirectory = Directory(packageBuildDir);
   final templateContext = createTemplateContext(configuration: configuration);
+
+  final templateContextJson =
+      // ignore: avoid_annotating_with_dynamic
+      JsonEncoder.withIndent('  ', (dynamic value) {
+    if (value is Function) {
+      return '<lambda>';
+    }
+  }).convert(templateContext);
+  log('Template context:\n$templateContextJson');
 
   await _renderTemplateDirectory(
     templateDirectory: templateDirectory,
