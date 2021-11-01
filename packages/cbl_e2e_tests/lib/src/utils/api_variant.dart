@@ -76,8 +76,8 @@ T Function() apiProvider<T>(T Function(Api api) create) {
 }
 
 FutureOr<T> runWithApi<T>({
-  required T Function() sync,
-  required Future<T> Function() async,
+  required FutureOr<T> Function() sync,
+  required FutureOr<T> Function() async,
 }) {
   switch (api.value) {
     case Api.sync:

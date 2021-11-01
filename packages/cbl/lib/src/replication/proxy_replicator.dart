@@ -8,6 +8,7 @@ import '../document/proxy_document.dart';
 import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
+import '../support/edition.dart';
 import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
@@ -17,6 +18,7 @@ import 'configuration.dart';
 import 'conflict.dart';
 import 'conflict_resolver.dart';
 import 'document_replication.dart';
+import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
 
@@ -46,6 +48,23 @@ class ProxyReplicator extends ProxyObject
         'must be a ProxyDatabase',
       );
     }
+
+    var target = config.target;
+    if (target is DatabaseEndpoint) {
+      useEnterpriseFeature(EnterpriseFeature.localDbReplication);
+
+      if (target.database is! ProxyDatabase) {
+        throw ArgumentError.value(
+          target,
+          'config.target.database',
+          'must by an AsyncDatabase',
+        );
+      }
+
+      final database = target.database as ProxyDatabase;
+      target = ServiceDatabaseEndpoint(database.objectId);
+    }
+
     final client = database.client;
 
     final pushFilterId = config.pushFilter
@@ -68,7 +87,7 @@ class ProxyReplicator extends ProxyObject
       final objectId = await database.channel.call(CreateReplicator(
         databaseId: database.objectId,
         propertiesFormat: EncodingFormat.fleece,
-        target: config.target,
+        target: target,
         replicatorType: config.replicatorType,
         continuous: config.continuous,
         authenticator: config.authenticator,

@@ -508,9 +508,15 @@ class CblService {
 
   int _createReplicator(CreateReplicator request) {
     final db = _getDatabaseById(request.databaseId);
+
+    var target = request.target;
+    if (target is ServiceDatabaseEndpoint) {
+      target = DatabaseEndpoint(_getDatabaseById(target.databaseId));
+    }
+
     final config = ReplicatorConfiguration(
       database: db,
-      target: request.target,
+      target: target,
       replicatorType: request.replicatorType,
       continuous: request.continuous,
       authenticator: request.authenticator,

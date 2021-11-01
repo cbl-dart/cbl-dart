@@ -130,22 +130,22 @@ CblServiceClient _sharedIsolateClient(Isolate isolate) {
   return client;
 }
 
-FutureOr<Database> openSharedTestDatabase() => runWithApi(
-      sync: openSharedSyncTestDatabase,
-      async: () => openSharedAsyncTestDatabase(isolate: isolate.value),
+FutureOr<Database> getSharedTestDatabase() => runWithApi(
+      sync: getSharedSyncTestDatabase,
+      async: () => getSharedAsyncTestDatabase(isolate: isolate.value),
     );
 
-SyncDatabase openSharedSyncTestDatabase() =>
+SyncDatabase getSharedSyncTestDatabase() =>
     _sharedSyncDatabase ??= openSyncTestDatabase(
       name: 'shared-sync',
       tearDown: false,
     );
 
-Future<AsyncDatabase> openSharedAsyncTestDatabase({
+Future<AsyncDatabase> getSharedAsyncTestDatabase({
   Isolate isolate = Isolate.worker,
 }) =>
     _sharedServiceDatabase ??= openAsyncTestDatabase(
-      name: 'shared-async',
+      name: 'shared-async-${describeEnum(isolate)}',
       tearDown: false,
       isolate: isolate,
     );
