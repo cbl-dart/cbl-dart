@@ -126,7 +126,9 @@ jobs:
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
-        run: dart test --coverage coverage/dart
+        # TODO: Actually use `dart` to run test, once its possible to override
+        # local dependencies. Review ./tools/ci-steps.sh uploadCoverageData.
+        run: flutter test --coverage
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
