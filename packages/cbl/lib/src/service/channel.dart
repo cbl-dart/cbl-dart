@@ -107,6 +107,8 @@ class Channel {
         _streamControllers[id] = controller;
         _sendMessage(_ListenToStream(id, request));
       },
+      onPause: () => _sendMessage(_PauseStream(id)),
+      onResume: () => _sendMessage(_ResumeStream(id)),
       onCancel: () {
         _streamControllers.remove(id);
         _sendMessage(_CancelStream(id));
@@ -180,6 +182,10 @@ class Channel {
         _handleCallErrorResponse(message);
       } else if (message is _ListenToStream) {
         _handleListenToStream(message);
+      } else if (message is _PauseStream) {
+        _handlePauseStream(message);
+      } else if (message is _ResumeStream) {
+        _handleResumeStream(message);
       } else if (message is _CancelStream) {
         _handleCancelStream(message);
       } else if (message is _StreamEvent) {
@@ -284,14 +290,14 @@ class Channel {
     );
   }
 
-  void _handleCancelStream(_CancelStream message) {
-    final subscription = _takeStreamSubscription(message);
-    if (subscription == null) {
-      return;
-    }
+  void _handlePauseStream(_PauseStream message) =>
+      _getStreamSubscription(message)?.pause();
 
-    subscription.cancel();
-  }
+  void _handleResumeStream(_ResumeStream message) =>
+      _getStreamSubscription(message)?.resume();
+
+  void _handleCancelStream(_CancelStream message) =>
+      _takeStreamSubscription(message)?.cancel();
 
   void _handleStreamEvent(_StreamEvent message) =>
       _getStreamController(message)?.add(message.result);
@@ -353,6 +359,12 @@ class Channel {
       // canceled and the `_CancelStream` message has been sent. In this case
       // the event is ignored.
       _streamControllers[message.conversationId];
+
+  StreamSubscription? _getStreamSubscription(_Message message) =>
+      // It's possible that a stream never created a subscription, for example
+      // when the request could not be deserialized. In those cases the
+      // event is ignored.
+      _streamSubscriptions[message.conversationId];
 
   StreamSubscription? _takeStreamSubscription(_Message message) =>
       // It's possible that a stream never created a subscription, for example
@@ -485,6 +497,8 @@ SerializationRegistry channelSerializationRegistry() => SerializationRegistry()
   .._addProtocolMessage('CallSuccess', _CallSuccess.deserialize)
   .._addProtocolMessage('CallError', _CallError.deserialize)
   .._addProtocolMessage('ListenToStream', _ListenToStream.deserialize)
+  .._addProtocolMessage('PauseStream', _PauseStream.deserialize)
+  .._addProtocolMessage('ResumeStream', _ResumeStream.deserialize)
   .._addProtocolMessage('CancelStream', _CancelStream.deserialize)
   .._addProtocolMessage('StreamEvent', _StreamEvent.deserialize)
   .._addProtocolMessage('StreamError', _StreamError.deserialize)
@@ -579,7 +593,9 @@ class _CallRequest extends _RequestMessage {
       : super.deserialize(map, context);
 
   static _CallRequest deserialize(
-          StringMap map, SerializationContext context) =>
+    StringMap map,
+    SerializationContext context,
+  ) =>
       _CallRequest._fromJson(map, context);
 }
 
@@ -591,7 +607,9 @@ class _CallSuccess extends _SuccessMessage {
       : super.deserialize(map, context);
 
   static _CallSuccess deserialize(
-          StringMap map, SerializationContext context) =>
+    StringMap map,
+    SerializationContext context,
+  ) =>
       _CallSuccess._fromJson(map, context);
 }
 
@@ -614,8 +632,34 @@ class _ListenToStream extends _RequestMessage {
       : super.deserialize(map, context);
 
   static _ListenToStream deserialize(
-          StringMap map, SerializationContext context) =>
+    StringMap map,
+    SerializationContext context,
+  ) =>
       _ListenToStream._fromJson(map, context);
+}
+
+class _PauseStream extends _Message {
+  _PauseStream(int conversationId) : super(conversationId);
+
+  _PauseStream._fromJson(StringMap map) : super.deserialize(map);
+
+  static _PauseStream deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      _PauseStream._fromJson(map);
+}
+
+class _ResumeStream extends _Message {
+  _ResumeStream(int conversationId) : super(conversationId);
+
+  _ResumeStream._fromJson(StringMap map) : super.deserialize(map);
+
+  static _ResumeStream deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      _ResumeStream._fromJson(map);
 }
 
 class _CancelStream extends _Message {
