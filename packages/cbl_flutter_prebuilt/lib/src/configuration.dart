@@ -11,7 +11,7 @@ final packageConfigurations = [
   for (final edition in Edition.values)
     PackageConfiguration(
       name: packageNames[edition]!,
-      version: '1.0.0-beta.0',
+      version: '1.0.0-beta.1',
       edition: edition,
       couchbaseLiteC: const LibraryInfo(
         version: '3.0.0',
@@ -20,7 +20,7 @@ final packageConfigurations = [
       ),
       couchbaseLiteDart: const LibraryInfo(
         version: '1.0.0',
-        release: '1.0.0-beta.1',
+        release: '1.0.0-beta.2',
       ),
     )
 ];

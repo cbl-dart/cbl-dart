@@ -9,7 +9,7 @@ environment:
 dependencies:
   cbl: ^1.0.0-beta.7
   cbl_flutter: ^1.0.0-beta.7
-  cbl_flutter_ee: ^1.0.0-beta.0
+  cbl_flutter_ee: ^1.0.0-beta.1
   flutter:
     sdk: flutter
   flutter_test:
