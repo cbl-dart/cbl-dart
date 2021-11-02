@@ -137,7 +137,7 @@ echo "Building Couchbase Lite Dart for iOS against $edition edition in $buildMod
 
 _linkCouchbaseLiteFramework "$edition"
 
-for platformId in $platformIds; do
+for platformId in "${platformIds[@]}"; do
     _buildFramework "$edition" "$buildMode" "$platformId"
 done
 
