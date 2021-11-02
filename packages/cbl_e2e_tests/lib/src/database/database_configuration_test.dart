@@ -71,6 +71,14 @@ void main() {
         expect(openSyncTestDatabase, throwsNotADatabaseFileError);
       });
     });
+
+    test('==', () {
+      final a = EncryptionKey.key(randomRawEncryptionKey());
+      final b = EncryptionKey.key(randomRawEncryptionKey());
+
+      expect(a, equality(a));
+      expect(a, isNot(b));
+    });
   });
 
   group('DatabaseConfiguration', () {
@@ -80,10 +88,20 @@ void main() {
       expect(config.directory, isNotEmpty);
     });
 
-    test('from', () {
+    test('from copies directory', () {
       final config = DatabaseConfiguration(directory: 'A');
       final copy = DatabaseConfiguration.from(config);
+
       expect(copy, config);
+    });
+
+    test('from does not copy encryptionKey', () {
+      final config = DatabaseConfiguration(
+        encryptionKey: EncryptionKey.key(randomRawEncryptionKey()),
+      );
+      final copy = DatabaseConfiguration.from(config);
+
+      expect(copy.encryptionKey, isNull);
     });
 
     test('==', () {
