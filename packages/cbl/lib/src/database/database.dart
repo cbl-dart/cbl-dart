@@ -353,6 +353,15 @@ abstract class Database implements ClosableResource {
   /// Performs database maintenance.
   FutureOr<void> performMaintenance(MaintenanceType type);
 
+  /// Encrypts or decrypts a [Database], or changes its [EncryptionKey].
+  ///
+  /// {@macro cbl.EncryptionKey.enterpriseFeature}
+  ///
+  /// If [newKey] is `null`, the database will be decrypted.
+  /// Otherwise the database will be encrypted with that key; if it was already
+  /// encrypted, it will be re-encrypted with the new key.
+  FutureOr<void> changeEncryptionKey(EncryptionKey? newKey);
+
   /// The names of all existing indexes.
   FutureOr<List<String>> get indexes;
 
@@ -469,6 +478,9 @@ abstract class SyncDatabase implements Database {
   void performMaintenance(MaintenanceType type);
 
   @override
+  void changeEncryptionKey(EncryptionKey? newKey);
+
+  @override
   List<String> get indexes;
 
   @override
@@ -565,6 +577,9 @@ abstract class AsyncDatabase implements Database {
 
   @override
   Future<void> performMaintenance(MaintenanceType type);
+
+  @override
+  Future<void> changeEncryptionKey(EncryptionKey? newKey);
 
   @override
   Future<List<String>> get indexes;

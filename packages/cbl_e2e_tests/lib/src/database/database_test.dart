@@ -7,6 +7,8 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/encryption.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -129,6 +131,57 @@ void main() {
       apiTest('performMaintenance: integrityCheck', () async {
         final db = await openTestDatabase();
         await db.performMaintenance(MaintenanceType.integrityCheck);
+      });
+
+      apiTest('changeEncryptionKey: encrypt database', () async {
+        final key = EncryptionKey.key(randomRawEncryptionKey());
+        final db = await openTestDatabase();
+
+        await db.changeEncryptionKey(key);
+
+        expect(Future(openTestDatabase), throwsNotADatabaseFileError);
+      });
+
+      apiTest('changeEncryptionKey: decrypt database', () async {
+        final key = EncryptionKey.key(randomRawEncryptionKey());
+        final db = await openTestDatabase(
+          config: DatabaseConfiguration(
+            directory: databaseDirectoryForTest(),
+            encryptionKey: key,
+          ),
+        );
+
+        await expectLater(
+          Future(openTestDatabase),
+          throwsNotADatabaseFileError,
+        );
+
+        await db.changeEncryptionKey(null);
+
+        expect(Future(openTestDatabase), completes);
+      });
+
+      apiTest('changeEncryptionKey: change key', () async {
+        final keyA = EncryptionKey.key(randomRawEncryptionKey());
+        final keyB = EncryptionKey.key(randomRawEncryptionKey());
+        final db = await openTestDatabase(
+          config: DatabaseConfiguration(
+            directory: databaseDirectoryForTest(),
+            encryptionKey: keyA,
+          ),
+        );
+
+        await db.changeEncryptionKey(keyB);
+
+        expect(
+          Future(() => openTestDatabase(
+                config: DatabaseConfiguration(
+                  directory: databaseDirectoryForTest(),
+                  encryptionKey: keyA,
+                ),
+              )),
+          throwsNotADatabaseFileError,
+        );
       });
 
       apiTest('inBatch commits transaction', () async {

@@ -8,5 +8,6 @@ export 'database/database.dart'
         SyncDatabase,
         AsyncDatabase;
 export 'database/database_change.dart' show DatabaseChange;
-export 'database/database_configuration.dart' show DatabaseConfiguration;
+export 'database/database_configuration.dart'
+    show DatabaseConfiguration, EncryptionKey;
 export 'database/document_change.dart' show DocumentChange;

@@ -1,0 +1,5 @@
+dartdoc:
+  categories:
+    'Enterprise Edition':
+      markdown: 'doc/enterprise-edition.md'
+  categoryOrder: ['Enterprise Edition']

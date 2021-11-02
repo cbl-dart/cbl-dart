@@ -343,6 +343,13 @@ int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
 
 // -- Database
 
+#ifdef COUCHBASE_ENTERPRISE
+bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey *key,
+                                           CBLDart_FLString password) {
+  return CBLEncryptionKey_FromPassword(key, CBLDart_FLStringFromDart(password));
+}
+#endif
+
 /**
  * A list of all the currently open database.
  *
@@ -400,7 +407,7 @@ uint8_t CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
   config_.directory = CBLDart_FLStringFromDart(config->directory);
 
 #ifdef COUCHBASE_ENTERPRISE
-  config_.encryptionKey.algorithm = kCBLEncryptionNone;
+  config_.encryptionKey = config->encryptionKey;
 #endif
 
   return CBL_CopyDatabase(CBLDart_FLStringFromDart(fromPath),
@@ -428,7 +435,7 @@ CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
   }
 
 #ifdef COUCHBASE_ENTERPRISE
-  config_.encryptionKey.algorithm = kCBLEncryptionNone;
+  config_.encryptionKey = config->encryptionKey;
 #endif
 
   auto database =

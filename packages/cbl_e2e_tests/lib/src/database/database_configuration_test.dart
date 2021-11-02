@@ -1,10 +1,77 @@
+import 'dart:typed_data';
+
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/api_variant.dart';
+import '../utils/database_utils.dart';
+import '../utils/encryption.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
+
+  group('EncryptionKey', () {
+    group('key', () {
+      test('throws when raw key is not exactly 32 bytes long', () {
+        expect(
+          () => EncryptionKey.key(Uint8List(0)),
+          throwsArgumentError,
+        );
+      });
+
+      test('creates key from raw key', () async {
+        final databaseDirectory = databaseDirectoryForTest();
+        final rawKey = randomRawEncryptionKey();
+
+        // Open the database for the first time, creating it.
+        openSyncTestDatabase(
+          config: DatabaseConfiguration(
+            directory: databaseDirectory,
+            encryptionKey: EncryptionKey.key(rawKey),
+          ),
+        );
+
+        // Open it again with the correct key.
+        openSyncTestDatabase(
+          config: DatabaseConfiguration(
+            directory: databaseDirectory,
+            encryptionKey: EncryptionKey.key(rawKey),
+          ),
+        );
+
+        // Open it again without key.
+        expect(openSyncTestDatabase, throwsNotADatabaseFileError);
+      });
+    });
+
+    group('password', () {
+      apiTest('creates key from a password', () async {
+        final databaseDirectory = databaseDirectoryForTest();
+        const password = 'A';
+
+        // Open the database for the first time, creating it.
+        openSyncTestDatabase(
+          config: DatabaseConfiguration(
+            directory: databaseDirectory,
+            encryptionKey: await createTestEncryptionKeyWithPassword(password),
+          ),
+        );
+
+        // Open it again with the correct key.
+        openSyncTestDatabase(
+          config: DatabaseConfiguration(
+            directory: databaseDirectory,
+            encryptionKey: await createTestEncryptionKeyWithPassword(password),
+          ),
+        );
+
+        // Open it again without key.
+        expect(openSyncTestDatabase, throwsNotADatabaseFileError);
+      });
+    });
+  });
 
   group('DatabaseConfiguration', () {
     test('default', () {

@@ -69,7 +69,7 @@ abstract class Query implements Resource {
     throw UnimplementedError();
   }
 
-  /// {@template cbl.Query.fromJsonRepresentation}
+  /// {@template cbl.Query.fromJsonRepresentationAsync}
   /// Creates an [AsyncQuery] from the [Query.jsonRepresentation] of a query.
   /// {@endtemplate}
   static Future<AsyncQuery> fromJsonRepresentationAsync(
@@ -78,7 +78,7 @@ abstract class Query implements Resource {
   ) =>
       AsyncQuery.fromJsonRepresentation(database, jsonRepresentation);
 
-  /// {@template cbl.Query.fromJsonRepresentation}
+  /// {@template cbl.Query.fromJsonRepresentationSync}
   /// Creates an [SyncQuery] from the [Query.jsonRepresentation] of a query.
   /// {@endtemplate}
   // ignore: prefer_constructors_over_static_methods
@@ -228,7 +228,7 @@ abstract class AsyncQuery implements Query {
     return q;
   }
 
-  /// {@macro cbl.Query.fromJsonRepresentation}
+  /// {@macro cbl.Query.fromJsonRepresentationAsync}
   static Future<AsyncQuery> fromJsonRepresentation(
     AsyncDatabase database,
     String json,

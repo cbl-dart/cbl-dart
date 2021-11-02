@@ -35,12 +35,7 @@ class FfiDatabase extends CBLDatabaseObject
     DatabaseConfiguration? config,
     required String debugCreator,
   }) {
-    if (config != null) {
-      // Make a copy of the configuration since it's mutable.
-      config = DatabaseConfiguration.from(config);
-    } else {
-      config = DatabaseConfiguration();
-    }
+    config ??= DatabaseConfiguration();
 
     // Ensure the directory exists, in which to create the database,
     Directory(config.directory).createSync(recursive: true);
@@ -51,7 +46,8 @@ class FfiDatabase extends CBLDatabaseObject
         ));
 
     return FfiDatabase._(
-      config: config,
+      // Make a copy of the configuration, since its mutable.
+      config: DatabaseConfiguration.from(config),
       pointer: pointer,
       debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
@@ -324,6 +320,14 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
+  void changeEncryptionKey(EncryptionKey? newKey) => useSync(() {
+        call((pointer) => _bindings.changeEncryptionKey(
+              pointer,
+              (newKey as EncryptionKeyImpl?)?.cblKey,
+            ));
+      });
+
+  @override
   List<String> get indexes => useSync(() => fl.Array.fromPointer(
         native.call(_bindings.indexNames),
         adopt: true,
@@ -359,7 +363,10 @@ extension on ConcurrencyControl {
 
 extension on DatabaseConfiguration {
   CBLDatabaseConfiguration toCBLDatabaseConfiguration() =>
-      CBLDatabaseConfiguration(directory: directory);
+      CBLDatabaseConfiguration(
+        directory: directory,
+        encryptionKey: (encryptionKey as EncryptionKeyImpl?)?.cblKey,
+      );
 }
 
 bool _catchConflictException(void Function() fn) {

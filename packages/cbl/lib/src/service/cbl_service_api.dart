@@ -5,6 +5,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
 import '../database.dart';
+import '../database/database_configuration.dart';
 import '../errors.dart';
 import '../replication/authenticator.dart';
 import '../replication/configuration.dart';
@@ -26,6 +27,10 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec(
         'RemoveChangeListener',
         RemoveChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'EncryptionKeyFromPassword',
+        EncryptionKeyFromPassword.deserialize,
       )
       ..addSerializableCodec('RemoveDatabase', RemoveDatabase.deserialize)
       ..addSerializableCodec('DatabaseExists', DatabaseExists.deserialize)
@@ -81,6 +86,10 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec(
         'PerformDatabaseMaintenance',
         PerformDatabaseMaintenance.deserialize,
+      )
+      ..addSerializableCodec(
+        'ChangeDatabaseEncryptionKey',
+        ChangeDatabaseEncryptionKey.deserialize,
       )
       ..addSerializableCodec('CreateIndex', CreateIndex.deserialize)
       ..addSerializableCodec('DeleteIndex', DeleteIndex.deserialize)
@@ -200,11 +209,43 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
 
       // Database types
+      ..addCodec<CBLEncryptionAlgorithm>(
+        'CBLEncryptionAlgorithm',
+        serialize: (value, context) => value.index,
+        deserialize: (value, context) =>
+            CBLEncryptionAlgorithm.values[value as int],
+      )
+      ..addObjectCodec<CBLEncryptionKey>(
+        'CBLEncryptionKey',
+        serialize: (value, context) => {
+          'algorithm': context.serialize(value.algorithm),
+          'bytes': context.addData(value.bytes),
+        },
+        deserialize: (map, context) => CBLEncryptionKey(
+          algorithm: context.deserializeAs(map['algorithm'])!,
+          bytes: context.getData(map.getAs('bytes')),
+        ),
+      )
+      ..addObjectCodec<EncryptionKeyImpl>(
+        'EncryptionKeyImpl',
+        serialize: (value, context) => {
+          'cblKey': context.serialize(value.cblKey),
+        },
+        deserialize: (map, context) =>
+            EncryptionKeyImpl(context.deserializeAs(map['cblKey'])!),
+      )
       ..addObjectCodec<DatabaseConfiguration>(
         'DatabaseConfiguration',
-        serialize: (value, context) => {'directory': value.directory},
-        deserialize: (map, context) =>
-            DatabaseConfiguration(directory: map.getAs('directory')),
+        serialize: (value, context) => {
+          'directory': value.directory,
+          'encryptionKey':
+              context.serialize(value.encryptionKey as EncryptionKeyImpl?)
+        },
+        deserialize: (map, context) => DatabaseConfiguration(
+          directory: map.getAs('directory'),
+          encryptionKey:
+              context.deserializeAs<EncryptionKeyImpl>(map['encryptionKey']),
+        ),
       )
       ..addCodec<ConcurrencyControl>(
         'ConcurrencyControl',
@@ -470,6 +511,21 @@ class RemoveChangeListener implements Request<Null> {
         targetId: map.getAs('targetId'),
         listenerId: map.getAs('listenerId'),
       );
+}
+
+class EncryptionKeyFromPassword extends Request<EncryptionKeyImpl> {
+  EncryptionKeyFromPassword(this.password);
+
+  final String password;
+
+  @override
+  StringMap serialize(SerializationContext context) => {'password': password};
+
+  static EncryptionKeyFromPassword deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      EncryptionKeyFromPassword(map.getAs('password'));
 }
 
 class RemoveDatabase extends Request<bool> {
@@ -932,6 +988,32 @@ class PerformDatabaseMaintenance implements Request<Null> {
       PerformDatabaseMaintenance(
         databaseId: map.getAs('databaseId'),
         type: context.deserializeAs(map['type'])!,
+      );
+}
+
+class ChangeDatabaseEncryptionKey implements Request<Null> {
+  ChangeDatabaseEncryptionKey({
+    required this.databaseId,
+    required this.encryptionKey,
+  });
+
+  final int databaseId;
+  final EncryptionKey? encryptionKey;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'encryptionKey': context.serialize(encryptionKey as EncryptionKeyImpl?),
+      };
+
+  static ChangeDatabaseEncryptionKey deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      ChangeDatabaseEncryptionKey(
+        databaseId: map.getAs('databaseId'),
+        encryptionKey:
+            context.deserializeAs<EncryptionKeyImpl>(map['encryptionKey']),
       );
 }
 
