@@ -90,7 +90,7 @@ function _buildXcframework() {
 
     local frameworksArgs=()
 
-    for platformId in $platformIds; do
+    for platformId in "${platformIds[@]}"; do
         local archive="$archivesDir/$platformId.xcarchive"
 
         if [ ! -e "$archive" ]; then
