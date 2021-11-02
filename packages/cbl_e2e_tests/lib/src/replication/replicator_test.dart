@@ -16,7 +16,7 @@ void main() {
   group('Replicator', () {
     setupTestDocument();
 
-    setUp(flushSyncGatewayDatabase);
+    setUp(flushDatabaseByAdmin);
 
     apiTest('create Replicator smoke test', () async {
       final db = await openTestDatabase();
@@ -560,11 +560,8 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
         expect(replDoc.flags, isEmpty);
 
         // Remove user document from the users channel.
-        updateDocumentChannelsOnSyncGateway(
-          doc.id,
-          doc.revisionId!,
-          {'channels': <void>[]},
-        );
+        doc['channels'].value = null;
+        db.saveDocument(doc);
         break;
       case 1:
         // The user has lost access to the doc on the server.
