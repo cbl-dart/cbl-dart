@@ -1,6 +1,8 @@
 import '../expressions/expression.dart';
 
 /// Factory for creating array function expressions.
+///
+/// {@category Query Builder}
 class ArrayFunction {
   ArrayFunction._();
 

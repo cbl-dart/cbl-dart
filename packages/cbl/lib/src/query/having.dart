@@ -9,13 +9,19 @@ import 'router/limit_router.dart';
 import 'router/order_by_router.dart';
 
 /// A query component representing the `HAVING` clause of a [Query].
+///
+/// {@category Query Builder}
 abstract class Having implements Query, OrderByRouter, LimitRouter {}
 
 /// Version of [Having] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncHaving
     implements Having, SyncQuery, SyncOrderByRouter, SyncLimitRouter {}
 
 /// Version of [Having] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncHaving
     implements Having, AsyncQuery, AsyncOrderByRouter, AsyncLimitRouter {}
 

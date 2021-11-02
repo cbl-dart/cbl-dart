@@ -2,15 +2,21 @@ import '../database/database.dart';
 import 'query.dart';
 
 /// A [Query] data source.
+///
+/// {@category Query Builder}
 abstract class DataSourceInterface {}
 
 /// A [Query] data source, with the ability to assign it an alias.
+///
+/// {@category Query Builder}
 abstract class DataSourceAs extends DataSourceInterface {
   /// Specifies an [alias] for this data source.
   DataSourceInterface as(String alias);
 }
 
 /// Factory for creating data sources.
+///
+/// {@category Query Builder}
 class DataSource {
   DataSource._();
 

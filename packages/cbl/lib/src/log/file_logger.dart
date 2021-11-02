@@ -8,6 +8,8 @@ import '../support/ffi.dart';
 import 'logger.dart';
 
 /// The configuration for log files.
+///
+/// {@category Logging}
 class LogFileConfiguration {
   /// Creates the configuration for log files.
   LogFileConfiguration({
@@ -106,6 +108,8 @@ class LogFileConfiguration {
 /// appropriately before setting it in the logger. The logger makes a copy of
 /// the instance you provide and uses that copy. Once configured, the logger
 /// object ignores any changes you make to the configuration.
+///
+/// {@category Logging}
 abstract class FileLogger {
   FileLogger._();
 

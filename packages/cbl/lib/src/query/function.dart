@@ -1,6 +1,8 @@
 import 'expressions/expression.dart';
 
 /// Factory for creating function expressions.
+///
+/// {@category Query Builder}
 // ignore: camel_case_types
 class Function_ {
   Function_._();

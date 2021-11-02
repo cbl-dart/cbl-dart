@@ -40,6 +40,7 @@ import 'database.dart';
 ///   - [Database.changeEncryptionKey] for changing the encryption key of a
 ///     [Database].
 ///
+/// {@category Database}
 /// {@category Enterprise Edition}
 abstract class EncryptionKey {
   /// Creates an [EncryptionKey] from raw [bytes].
@@ -132,6 +133,8 @@ class EncryptionKeyImpl implements EncryptionKey {
 }
 
 /// Configuration for opening or copying a [Database].
+///
+/// {@category Database}
 class DatabaseConfiguration {
   /// Creates a configuration for opening or copying a [Database].
   DatabaseConfiguration({String? directory, this.encryptionKey})

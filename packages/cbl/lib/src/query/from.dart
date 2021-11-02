@@ -18,6 +18,8 @@ import 'router/where_router.dart';
 import 'where.dart';
 
 /// A query component representing the `FROM` clause of a [Query].
+///
+/// {@category Query Builder}
 abstract class From
     implements
         Query,
@@ -28,6 +30,8 @@ abstract class From
         LimitRouter {}
 
 /// Version of [From] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncFrom
     implements
         From,
@@ -39,6 +43,8 @@ abstract class SyncFrom
         SyncLimitRouter {}
 
 /// Version of [From] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncFrom
     implements
         From,

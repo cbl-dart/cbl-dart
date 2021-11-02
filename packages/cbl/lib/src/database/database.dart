@@ -16,6 +16,8 @@ import 'ffi_database.dart';
 import 'proxy_database.dart';
 
 /// Conflict-handling options when saving or deleting a document.
+///
+/// {@category Database}
 enum ConcurrencyControl {
   /// The current save/delete will overwrite a conflicting revision if there is
   /// a conflict.
@@ -26,6 +28,8 @@ enum ConcurrencyControl {
 }
 
 /// The type of maintenance a database can perform.
+///
+/// {@category Database}
 enum MaintenanceType {
   /// Compact the database file and delete unused attachments.
   compact,
@@ -62,6 +66,8 @@ enum MaintenanceType {
 ///
 ///  * [Database.saveDocumentWithConflictHandler] for saving a [Document] with
 ///    a custom async conflict handler.
+///
+/// {@category Database}
 typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
@@ -69,12 +75,18 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 
 /// Listener which is called when one or more [Document]s in a [Database] have
 /// changed.
+///
+/// {@category Database}
 typedef DatabaseChangeListener = void Function(DatabaseChange change);
 
 /// Listener which is called when a single [Document] has changed.
+///
+/// {@category Database}
 typedef DocumentChangeListener = void Function(DocumentChange change);
 
 /// A Couchbase Lite database.
+///
+/// {@category Database}
 abstract class Database implements ClosableResource {
   /// {@template cbl.Database.openAsync}
   /// Opens a Couchbase Lite database with the given [name] and [config],
@@ -384,12 +396,16 @@ abstract class Database implements ClosableResource {
 ///
 ///  * [SyncDatabase.saveDocumentWithConflictHandlerSync] for saving a
 ///    [Document] with a custom sync conflict handler.
+///
+/// {@category Database}
 typedef SyncSaveConflictHandler = bool Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
 );
 
 /// A [Database] with a primarily synchronous API.
+///
+/// {@category Database}
 abstract class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
@@ -491,6 +507,8 @@ abstract class SyncDatabase implements Database {
 }
 
 /// A [Database] with a primarily asynchronous API.
+///
+/// {@category Database}
 abstract class AsyncDatabase implements Database {
   /// {@macro cbl.Database.openAsync}
   static Future<AsyncDatabase> open(

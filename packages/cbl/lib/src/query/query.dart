@@ -18,11 +18,15 @@ import 'result.dart';
 import 'result_set.dart';
 
 /// A listener that is called when the results of a [Query] have changed.
+///
+/// {@category Query}
 typedef QueryChangeListener<T extends ResultSet> = void Function(
   QueryChange<T> change,
 );
 
 /// A [Database] query.
+///
+/// {@category Query}
 abstract class Query implements Resource {
   /// Creates an [Query] from a N1QL [query].
   static FutureOr<Query> fromN1ql(Database database, String query) {
@@ -169,6 +173,8 @@ abstract class Query implements Resource {
 }
 
 /// A [Query] with a primarily synchronous API.
+///
+/// {@category Query}
 abstract class SyncQuery implements Query {
   /// {@macro cbl.Query.fromN1qlSync}
   factory SyncQuery.fromN1ql(SyncDatabase database, String query) => FfiQuery(
@@ -210,6 +216,8 @@ abstract class SyncQuery implements Query {
 }
 
 /// A [Query] query with a primarily asynchronous API.
+///
+/// {@category Query}
 abstract class AsyncQuery implements Query {
   /// {@macro cbl.Query.fromN1qlAsync}
   static Future<AsyncQuery> fromN1ql(

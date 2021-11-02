@@ -4,6 +4,8 @@ import '../document.dart';
 import 'database.dart';
 
 /// A [Document] change event.
+///
+/// {@category Database}
 @immutable
 class DocumentChange {
   /// Creates a [Document] change event.

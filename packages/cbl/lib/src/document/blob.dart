@@ -29,6 +29,9 @@ const blobContentTypeProperty = 'content_type';
 /// Blob’s metadata (type, [length] and a [digest] of the data) in a small
 /// object. The data itself is stored externally to the document, keyed by the
 /// digest.
+///
+/// {@category Document}
+/// {@category Document}
 @immutable
 abstract class Blob {
   /// Creates a [Blob] with the given in-memory data.

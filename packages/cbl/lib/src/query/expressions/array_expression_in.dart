@@ -4,6 +4,8 @@ import 'expression.dart';
 import 'variable_expression.dart';
 
 /// Represents the `IN` clause of a range predicate.
+///
+/// {@category Query Builder}
 // ignore: one_member_abstracts
 abstract class ArrayExpressionIn {
   /// Specifies the array or the [expression] evaluated as an array of a

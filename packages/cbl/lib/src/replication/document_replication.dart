@@ -3,6 +3,8 @@ import 'configuration.dart';
 import 'replicator.dart';
 
 /// Event which is emitted when [Document]s have been replicated.
+///
+/// {@category Replication}
 abstract class DocumentReplication {
   /// The source [Replicator].
   Replicator get replicator;
@@ -15,6 +17,8 @@ abstract class DocumentReplication {
 }
 
 /// Information about a [Document] that has been replicated.
+///
+/// {@category Replication}
 abstract class ReplicatedDocument {
   /// The id of the replicated [Document].
   String get id;

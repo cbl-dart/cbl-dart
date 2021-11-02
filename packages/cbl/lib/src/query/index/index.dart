@@ -4,10 +4,14 @@ import '../../database.dart';
 import '../query.dart';
 
 /// A description of a [Database] index. Indexes improve [Query] performance.
+///
+/// {@category Query}
 abstract class Index {}
 
 /// A language which can be used to configure as the primary language for a
 /// full text index.
+///
+/// {@category Query}
 enum FullTextLanguage {
   danish,
   dutch,

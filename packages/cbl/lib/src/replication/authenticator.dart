@@ -1,9 +1,13 @@
 import '../support/utils.dart';
 
 /// The authentication credentials for a remote server.
+///
+/// {@category Replication}
 abstract class Authenticator {}
 
 /// An authenticator for HTTP Basic (username/password) auth.
+///
+/// {@category Replication}
 class BasicAuthenticator extends Authenticator {
   /// Creates an authenticator for HTTP Basic (username/password) auth.
   BasicAuthenticator({required this.username, required this.password});
@@ -24,6 +28,8 @@ class BasicAuthenticator extends Authenticator {
 
 /// An authenticator using a Couchbase Sync Gateway login session identifier,
 /// and optionally a cookie name (pass `null` for the default.)
+///
+/// {@category Replication}
 class SessionAuthenticator extends Authenticator {
   /// Creates an authenticator using a Couchbase Sync Gateway login session
   /// identifier, and optionally a cookie name (pass `null` for the default.)

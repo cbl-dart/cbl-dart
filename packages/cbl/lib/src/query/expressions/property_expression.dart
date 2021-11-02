@@ -1,6 +1,8 @@
 import 'expression.dart';
 
 /// A property expression.
+///
+/// {@category Query Builder}
 abstract class PropertyExpressionInterface extends ExpressionInterface {
   /// Specifies the [alias] of the data source to query the data from.
   ExpressionInterface from(String alias);

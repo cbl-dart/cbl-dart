@@ -7,12 +7,16 @@ import '../expressions/expression.dart';
 import 'index.dart';
 
 /// A value index for regular queries.
+///
+/// {@category Query}
 class ValueIndex extends Index {
   /// Creates a value index from the [ValueIndexItem]s to index.
   factory ValueIndex(Iterable<ValueIndexItem> items) => ValueIndexImpl(items);
 }
 
 /// An item in a [ValueIndex].
+///
+/// {@category Query}
 class ValueIndexItem {
   /// Creates a value index item from a [propertyPath] to index.
   factory ValueIndexItem.property(String propertyPath) =>
@@ -27,6 +31,8 @@ class ValueIndexItem {
 
 /// A full-text search index for full-text search queries with the `MATCH`
 /// operator.
+///
+/// {@category Query}
 abstract class FullTextIndex extends Index {
   /// Creates a full text index from the [FullTextIndexItem]s to index.
   factory FullTextIndex(Iterable<FullTextIndexItem> items) =>
@@ -50,6 +56,8 @@ abstract class FullTextIndex extends Index {
 }
 
 /// An item in a [FullTextIndexItem].
+///
+/// {@category Query}
 class FullTextIndexItem {
   /// Creates a full-text index item from a [propertyPath] to index.
   FullTextIndexItem.property(String propertyPath)
@@ -59,6 +67,8 @@ class FullTextIndexItem {
 }
 
 /// Factor to create query indexes.
+///
+/// {@category Query}
 class IndexBuilder {
   IndexBuilder._();
 

@@ -6,12 +6,16 @@ import 'conflict.dart';
 import 'replicator.dart';
 
 /// Functional version of [ConflictResolver].
+///
+/// {@category Replication}
 typedef ConflictResolverFunction = FutureOr<Document?> Function(
   Conflict conflict,
 );
 
 /// An object which is able to resolve a [Conflict] between the local and remote
 /// versions of a replicated [Document].
+///
+/// {@category Replication}
 abstract class ConflictResolver {
   /// Constructor to allow subclasses to extend [ConflictResolver].
   const ConflictResolver();
@@ -61,6 +65,8 @@ class _FunctionConflictResolver implements ConflictResolver {
 ///
 /// This resolver can be used, in a custom [ConflictResolver], to use the
 /// default strategy for some documents and a custom strategy for others.
+///
+/// {@category Replication}
 class DefaultConflictResolver implements ConflictResolver {
   const DefaultConflictResolver();
 

@@ -7,12 +7,18 @@ import 'query.dart';
 import 'router/limit_router.dart';
 
 /// A query component representing the `ORDER BY` clause of a [Query].
+///
+/// {@category Query Builder}
 abstract class OrderBy implements Query, LimitRouter {}
 
 /// Version of [OrderBy] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncOrderBy implements OrderBy, SyncQuery, SyncLimitRouter {}
 
 /// Version of [OrderBy] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncOrderBy implements OrderBy, AsyncQuery, AsyncLimitRouter {}
 
 // === Impl ====================================================================

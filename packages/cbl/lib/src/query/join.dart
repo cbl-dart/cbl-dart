@@ -3,9 +3,13 @@ import 'expressions/expression.dart';
 import 'query.dart';
 
 /// Represent a `JOIN` clause in a [Query].
+///
+/// {@category Query Builder}
 abstract class JoinInterface {}
 
 /// Represents the `ON` clause of `JOIN` clause.
+///
+/// {@category Query Builder}
 // ignore: one_member_abstracts
 abstract class JoinOnInterface {
   /// Specifies the given [expression] as the join condition.
@@ -13,6 +17,8 @@ abstract class JoinOnInterface {
 }
 
 /// Factory for creating `JOIN` clauses.
+///
+/// {@category Query Builder}
 class Join {
   Join._();
 

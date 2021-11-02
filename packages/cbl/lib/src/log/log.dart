@@ -3,6 +3,8 @@ import 'file_logger.dart';
 import 'logger.dart';
 
 /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
+///
+/// {@category Logging}
 abstract class Log {
   Log._();
 

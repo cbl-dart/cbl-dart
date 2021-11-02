@@ -2,15 +2,21 @@ import 'expressions/expression.dart';
 import 'result.dart';
 
 /// Represents a single return value of a `SELECT` statement.
+///
+/// {@category Query Builder}
 abstract class SelectResultInterface {}
 
 /// Allows the specification of an alias for a select result value.
+///
+/// {@category Query Builder}
 abstract class SelectResultAs extends SelectResultInterface {
   /// Specifies the [alias] of the select result value.
   SelectResultInterface as(String? alias);
 }
 
 /// Allows the specification of the data source of a select result value.
+///
+/// {@category Query Builder}
 abstract class SelectResultFrom extends SelectResultInterface {
   /// Specifies the [alias] of the data source to query for the select result
   /// value.
@@ -18,6 +24,8 @@ abstract class SelectResultFrom extends SelectResultInterface {
 }
 
 /// Factory for select results.
+///
+/// {@category Query Builder}
 class SelectResult {
   SelectResult._();
 

@@ -2,4 +2,24 @@ dartdoc:
   categories:
     'Enterprise Edition':
       markdown: 'doc/enterprise-edition.md'
-  categoryOrder: ['Enterprise Edition']
+    'Document':
+      markdown: 'doc/document.md'
+    'Database':
+      markdown: 'doc/database.md'
+    'Query':
+      markdown: 'doc/query.md'
+    'Query Builder':
+      markdown: 'doc/query-builder.md'
+    'Replication':
+      markdown: 'doc/replication.md'
+    'Logging':
+      markdown: 'doc/logging.md'
+  categoryOrder:
+    - 'Document'
+    - 'Database'
+    - 'Query'
+    - 'Query Builder'
+    - 'Replication'
+    - 'Logging'
+    - 'Enterprise Edition'
+  showUndocumentedCategories: true

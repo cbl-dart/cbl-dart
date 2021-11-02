@@ -3,6 +3,8 @@ import '../ordering.dart';
 import '../query.dart';
 
 /// Interface for creating and chaining `ORDER BY` clauses.
+///
+/// {@category Query Builder}
 abstract class OrderByRouter {
   /// Creates and returns a `ORDER BY` clause query component with the given
   /// orderings.
@@ -25,6 +27,8 @@ abstract class OrderByRouter {
 }
 
 /// Version of [OrderByRouter] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncOrderByRouter implements OrderByRouter {
   @override
   SyncOrderBy orderBy(
@@ -45,6 +49,8 @@ abstract class SyncOrderByRouter implements OrderByRouter {
 }
 
 /// Version of [OrderByRouter] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncOrderByRouter implements OrderByRouter {
   @override
   AsyncOrderBy orderBy(

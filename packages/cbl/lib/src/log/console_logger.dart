@@ -2,6 +2,8 @@ import '../support/ffi.dart';
 import 'logger.dart';
 
 /// Logger for writing log messages to the system console.
+///
+/// {@category Logging}
 abstract class ConsoleLogger {
   ConsoleLogger._();
 

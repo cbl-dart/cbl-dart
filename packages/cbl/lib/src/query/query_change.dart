@@ -3,6 +3,8 @@ import 'package:meta/meta.dart';
 import '../query.dart';
 
 /// A [Query] change event.
+///
+/// {@category Query}
 @immutable
 class QueryChange<R extends ResultSet> {
   /// Creates a [Query] change event.

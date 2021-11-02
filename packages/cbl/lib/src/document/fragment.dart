@@ -7,6 +7,8 @@ import 'dictionary.dart';
 import 'document.dart';
 
 /// Readonly access to the data value wrapped by a [Fragment] object.
+///
+/// {@category Document}
 abstract class FragmentInterface {
   /// The value of this fragment as a value of type [T].
   T? valueAs<T extends Object>();
@@ -46,6 +48,8 @@ abstract class FragmentInterface {
 }
 
 /// Read and write access to the data value wrapped by a [Fragment] object.
+///
+/// {@category Document}
 abstract class MutableFragmentInterface implements FragmentInterface {
   /// Sets the value of this fragment.
   ///
@@ -63,24 +67,32 @@ abstract class MutableFragmentInterface implements FragmentInterface {
 }
 
 /// Provides subscript access to [Fragment] objects by index.
+///
+/// {@category Document}
 abstract class ArrayFragment {
   /// Returns a [Fragment] for the value at the given [index].
   Fragment operator [](int index);
 }
 
 /// Provides subscript access to [MutableFragment] objects by index.
+///
+/// {@category Document}
 abstract class MutableArrayFragment {
   /// Returns a [MutableFragment] for the value at the given [index].
   MutableFragment operator [](int index);
 }
 
 /// Provides subscript access to [Fragment] objects by key.
+///
+/// {@category Document}
 abstract class DictionaryFragment {
   /// Returns a [Fragment] for the value at the given [key].
   Fragment operator [](String key);
 }
 
 /// Provides subscript access to [MutableFragment] objects by key.
+///
+/// {@category Document}
 abstract class MutableDictionaryFragment {
   /// Returns a [MutableFragment] for the value at the given [key].
   MutableFragment operator [](String key);
@@ -90,6 +102,8 @@ abstract class MutableDictionaryFragment {
 ///
 /// [Fragment] also provides subscript access by either key or index to the
 /// nested values which are wrapped by [Fragment] objects.
+///
+/// {@category Document}
 abstract class Fragment
     implements FragmentInterface, ArrayFragment, DictionaryFragment {
   Fragment operator [](Object indexOrKey);
@@ -99,6 +113,8 @@ abstract class Fragment
 ///
 /// [MutableFragment] also provides subscript access by either key or index to
 /// the nested values which are wrapped by [MutableFragment] objects.
+///
+/// {@category Document}
 abstract class MutableFragment
     implements
         Fragment,
@@ -112,6 +128,8 @@ abstract class MutableFragment
 ///
 /// [DocumentFragment] also provides subscript access by either key to
 /// the data values of the document which are wrapped by Fragment objects.
+///
+/// {@category Document}
 abstract class DocumentFragment implements DictionaryFragment {
   /// Whether the document exists in the database or not.
   bool get exists;
