@@ -20,8 +20,31 @@ versionFile="$projectDir/CouchbaseLiteDart.version"
 version="$(cat "$versionFile")"
 productDir="$buildDir"
 scheme="CBL_Dart"
-declare -A platforms=([ios]=iOS [ios_simulator]="iOS Simulator")
-platformIds="${!platforms[@]}"
+platformIds=(ios ios_simulator)
+
+function _platformFromId() {
+    local id="$1"
+    case "$id" in
+    ios)
+        echo 'iOS'
+        ;;
+    ios_simulator)
+        echo 'iOS Simulator'
+        ;;
+    esac
+}
+
+function _configurationFromBuildMode() {
+    local buildMode="$1"
+    case "$buildMode" in
+    debug)
+        echo 'Debug'
+        ;;
+    release)
+        echo 'Release'
+        ;;
+    esac
+}
 
 function _linkCouchbaseLiteFramework() {
     local edition="$1"
@@ -39,9 +62,9 @@ function _buildFramework() {
     local edition="$1"
     local buildMode="$2"
     local platformId="$3"
-    local platform="${platforms[$platformId]}"
+    local platform="$(_platformFromId "$platformId")"
     local destination="generic/platform=$platform"
-    local configuration="${buildMode^}"
+    local configuration="$(_configurationFromBuildMode "$buildMode")"
 
     echo "Building artifacts for $platform platform"
 
@@ -67,7 +90,7 @@ function _buildXcframework() {
 
     local frameworksArgs=()
 
-    for platformId in $platformIds; do
+    for platformId in "${platformIds[@]}"; do
         local archive="$archivesDir/$platformId.xcarchive"
 
         if [ ! -e "$archive" ]; then
@@ -114,7 +137,7 @@ echo "Building Couchbase Lite Dart for iOS against $edition edition in $buildMod
 
 _linkCouchbaseLiteFramework "$edition"
 
-for platformId in $platformIds; do
+for platformId in "${platformIds[@]}"; do
     _buildFramework "$edition" "$buildMode" "$platformId"
 done
 
