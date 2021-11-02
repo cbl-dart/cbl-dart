@@ -1,9 +1,13 @@
 import 'expressions/expression.dart';
 
 /// Represents on of the expressions in the `ORDER BY` query clause.
+///
+/// {@category Query Builder}
 abstract class OrderingInterface {}
 
 /// Allows the specification of the direction of an ordering expression.
+///
+/// {@category Query Builder}
 abstract class SortOrder extends OrderingInterface {
   /// Specifies ascending sort order.
   OrderingInterface ascending();
@@ -13,6 +17,8 @@ abstract class SortOrder extends OrderingInterface {
 }
 
 /// Factory for ordering expressions of the `ORDER BY` clause of a query.
+///
+/// {@category Query Builder}
 class Ordering {
   Ordering._();
 

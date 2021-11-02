@@ -10,6 +10,8 @@ import 'select.dart';
 import 'select_result.dart';
 
 /// Entry point for building [Query]s through the query builder API.
+///
+/// {@category Query Builder}
 class QueryBuilder {
   const QueryBuilder();
 
@@ -89,6 +91,8 @@ class QueryBuilder {
 }
 
 /// The [QueryBuilder] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 class SyncQueryBuilder implements QueryBuilder {
   /// {@macro cbl.QueryBuilder.createSync}
   const SyncQueryBuilder();
@@ -155,6 +159,8 @@ class SyncQueryBuilder implements QueryBuilder {
 }
 
 /// The [QueryBuilder] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 class AsyncQueryBuilder implements QueryBuilder {
   /// {@macro cbl.QueryBuilder.createAsync}
   const AsyncQueryBuilder();

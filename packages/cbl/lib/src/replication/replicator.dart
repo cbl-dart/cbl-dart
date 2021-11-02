@@ -13,6 +13,8 @@ import 'proxy_replicator.dart';
 import 'replicator_change.dart';
 
 /// The states a [Replicator] can be in during its lifecycle.
+///
+/// {@category Replication}
 enum ReplicatorActivityLevel {
   /// The replicator is unstarted, finished, or hit a fatal error.
   stopped,
@@ -34,6 +36,8 @@ enum ReplicatorActivityLevel {
 ///
 /// If [progress] is zero, the process is indeterminate; otherwise, dividing the
 /// two will produce a fraction that can be used to draw a progress bar.
+///
+/// {@category Replication}
 class ReplicatorProgress {
   ReplicatorProgress(this.completed, this.progress);
 
@@ -57,6 +61,8 @@ class ReplicatorProgress {
 
 /// Combined [ReplicatorActivityLevel], [ReplicatorProgress] and possibly error
 /// of a [Replicator].
+///
+/// {@category Replication}
 class ReplicatorStatus {
   ReplicatorStatus(this.activity, this.progress, this.error);
 
@@ -82,10 +88,14 @@ class ReplicatorStatus {
 }
 
 /// A listener that is called when a [Replicator]s [Replicator.status] changes.
+///
+/// {@category Replication}
 typedef ReplicatorChangeListener = void Function(ReplicatorChange change);
 
 /// A listener that is called when a [Replicator] has replicated one or more
 /// [Document]s.
+///
+/// {@category Replication}
 typedef DocumentReplicationListener = void Function(
   DocumentReplication change,
 );
@@ -96,6 +106,8 @@ typedef DocumentReplicationListener = void Function(
 /// The replicator can be bidirectional or either push or pull. The replicator
 /// can also be one-shot ore continuous. The replicator runs asynchronously, so
 /// observe the [status] to be notified of progress.
+///
+/// {@category Replication}
 abstract class Replicator implements ClosableResource {
   /// Creates a replicator for replicating [Document]s between a local
   /// [Database] and a target database.
@@ -230,6 +242,8 @@ abstract class Replicator implements ClosableResource {
 }
 
 /// A [Replicator] with a primarily synchronous API.
+///
+/// {@category Replication}
 abstract class SyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createSync}
   factory SyncReplicator(ReplicatorConfiguration config) => FfiReplicator(
@@ -265,6 +279,8 @@ abstract class SyncReplicator implements Replicator {
 }
 
 /// A [Replicator] with a primarily asynchronous API.
+///
+/// {@category Replication}
 abstract class AsyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createAsync}
   static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>

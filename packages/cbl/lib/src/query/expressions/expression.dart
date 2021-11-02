@@ -5,6 +5,8 @@ import 'property_expression.dart';
 import 'variable_expression.dart';
 
 /// Represents an expression when building a [Query] through the [QueryBuilder].
+///
+/// {@category Query Builder}
 abstract class ExpressionInterface {
   /// Returns a new expression which multiplies this expression with the given
   /// [expression].
@@ -106,6 +108,8 @@ abstract class ExpressionInterface {
 
 /// Factory for creating expressions when building [Query]s through the
 /// [QueryBuilder].
+///
+/// {@category Query Builder}
 class Expression {
   Expression._();
 

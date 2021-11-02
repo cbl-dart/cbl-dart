@@ -9,6 +9,8 @@ abstract class Endpoint {}
 /// hostname, and its path must be the name of the database on that server.
 /// The port can be omitted; it defaults to 80 for `ws` and 443 for `wss`.
 /// For example: `wss://example.org/dbname`
+///
+/// {@category Replication}
 class UrlEndpoint extends Endpoint {
   /// Creates an endpoint representing a server-based database at the given
   /// [url].
@@ -25,6 +27,7 @@ class UrlEndpoint extends Endpoint {
 ///
 /// {@macro cbl.EncryptionKey.enterpriseFeature}
 ///
+/// {@category Replication}
 /// {@category Enterprise Edition}
 class DatabaseEndpoint extends Endpoint {
   /// Creates an endpoint representing a local [database] as the replication

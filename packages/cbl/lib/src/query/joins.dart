@@ -12,10 +12,14 @@ import 'router/where_router.dart';
 import 'where.dart';
 
 /// A query component representing the `JOIN` clauses of a [Query].
+///
+/// {@category Query Builder}
 abstract class Joins implements Query, WhereRouter, OrderByRouter, LimitRouter {
 }
 
 /// Version of [Joins] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncJoins
     implements
         Joins,
@@ -25,6 +29,8 @@ abstract class SyncJoins
         SyncLimitRouter {}
 
 /// Version of [Joins] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncJoins
     implements
         Joins,

@@ -14,6 +14,8 @@ import 'common.dart';
 import 'fragment.dart';
 
 /// Defines a set of methods for readonly accessing [Dictionary] data.
+///
+/// {@category Document}
 abstract class DictionaryInterface implements DictionaryFragment {
   /// The number of entries in this dictionary.
   int get length;
@@ -90,6 +92,8 @@ abstract class DictionaryInterface implements DictionaryFragment {
 }
 
 /// Provides readonly access to dictionary data.
+///
+/// {@category Document}
 abstract class Dictionary implements DictionaryInterface, Iterable<String> {
   /// Returns a mutable copy of this dictionary.
   MutableDictionary toMutable();
@@ -99,6 +103,8 @@ abstract class Dictionary implements DictionaryInterface, Iterable<String> {
 }
 
 /// Defines a set of methods for getting and setting dictionary data.
+///
+/// {@category Document}
 abstract class MutableDictionaryInterface
     implements DictionaryInterface, MutableDictionaryFragment {
   /// Sets a [value] for the given [key].
@@ -156,6 +162,8 @@ abstract class MutableDictionaryInterface
 }
 
 /// Provides access to dictionary data.
+///
+/// {@category Document}
 abstract class MutableDictionary
     implements Dictionary, MutableDictionaryInterface {
   /// Creates a [MutableDictionary], optionally initialized with [data].

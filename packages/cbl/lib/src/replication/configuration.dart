@@ -10,6 +10,8 @@ import 'endpoint.dart';
 import 'replicator.dart';
 
 /// Direction of replication: push, pull, or both.
+///
+/// {@category Replication}
 enum ReplicatorType {
   /// Bidirectional; both push and pull
   pushAndPull,
@@ -22,6 +24,8 @@ enum ReplicatorType {
 }
 
 /// Flags describing a replicated [Document].
+///
+/// {@category Replication}
 enum DocumentFlag {
   /// The document has been deleted.
   deleted,
@@ -41,12 +45,16 @@ enum DocumentFlag {
 /// the document.
 ///
 /// Return `true` if the document should be replicated, `false` to skip it.
+///
+/// {@category Replication}
 typedef ReplicationFilter = FutureOr<bool> Function(
   Document document,
   Set<DocumentFlag> flags,
 );
 
 /// Configuration for a [Replicator].
+///
+/// {@category Replication}
 class ReplicatorConfiguration {
   /// Creates a configuration for a [Replicator].
   ReplicatorConfiguration({

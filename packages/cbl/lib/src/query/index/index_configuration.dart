@@ -7,6 +7,8 @@ import '../../support/utils.dart';
 import 'index.dart';
 
 /// A specification of an [Index] through a list of N1QL [expressions].
+///
+/// {@category Query}
 abstract class IndexConfiguration extends Index {
   /// The N1QL expressions to use to create the index.
   List<String> get expressions;
@@ -14,6 +16,8 @@ abstract class IndexConfiguration extends Index {
 }
 
 /// A specification of a value [Index] through a list of N1QL [expressions].
+///
+/// {@category Query}
 abstract class ValueIndexConfiguration extends IndexConfiguration {
   /// Creates a specification of a value [Index] through a list of N1QL
   /// [expressions].
@@ -22,6 +26,8 @@ abstract class ValueIndexConfiguration extends IndexConfiguration {
 }
 
 /// A specification of a full text [Index] through a list of N1QL [expressions].
+///
+/// {@category Query}
 abstract class FullTextIndexConfiguration extends IndexConfiguration {
   /// Creates a specification of a full text [Index] through a list of N1QL
   /// [expressions].

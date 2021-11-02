@@ -17,6 +17,8 @@ import 'fragment.dart';
 /// A Couchbase Lite document.
 ///
 /// The [Document] is immutable.
+///
+/// {@category Document}
 abstract class Document implements DictionaryInterface, Iterable<String> {
   /// The document’s id.
   String get id;
@@ -41,6 +43,8 @@ abstract class Document implements DictionaryInterface, Iterable<String> {
 }
 
 /// A mutable version of [Document].
+///
+/// {@category Document}
 abstract class MutableDocument implements Document, MutableDictionaryInterface {
   /// Creates a new [MutableDocument] with a random UUID, optionally
   /// initialized with [data].

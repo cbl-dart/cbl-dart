@@ -11,10 +11,14 @@ import 'router/limit_router.dart';
 import 'router/order_by_router.dart';
 
 /// A query component representing the `GROUP BY` clause of a [Query].
+///
+/// {@category Query Builder}
 abstract class GroupBy
     implements Query, HavingRouter, OrderByRouter, LimitRouter {}
 
 /// Version of [GroupBy] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncGroupBy
     implements
         GroupBy,
@@ -24,6 +28,8 @@ abstract class SyncGroupBy
         SyncLimitRouter {}
 
 /// Version of [GroupBy] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncGroupBy
     implements
         GroupBy,

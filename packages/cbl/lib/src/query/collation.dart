@@ -4,6 +4,8 @@
 /// The `COLLATE` expression can be used in the `WHERE` clause when comparing
 /// two string or in the `ORDER BY` clause when specifying how the order of the
 /// query results.
+///
+/// {@category Query Builder}
 abstract class CollationInterface {}
 
 /// Factory for creating collations.
@@ -11,6 +13,8 @@ abstract class CollationInterface {}
 /// Couchbase Lite provides two types of collation: ASCII and Unicode. Without
 /// specifying the `COLLATE` expression Couchbase Lite will use case
 /// sensitive ASCII collation.
+///
+/// {@category Query Builder}
 class Collation {
   Collation._();
 
@@ -28,6 +32,8 @@ class Collation {
 }
 
 /// ASCII collation compares two string by using binary comparison.
+///
+/// {@category Query Builder}
 abstract class AsciiCollation extends CollationInterface {
   /// Specifies whether the collation is case-sensitive or not.
   ///
@@ -43,6 +49,8 @@ abstract class AsciiCollation extends CollationInterface {
 /// If the local is not specified, the collation is Unicode-aware but not
 /// localized; for example, accented Roman letters sort right after the base
 /// letter (This is implemented by using the "en_US" locale.).
+///
+/// {@category Query Builder}
 abstract class UnicodeCollation extends CollationInterface {
   /// Specifies whether the collation is case-insensitive or not.
   ///

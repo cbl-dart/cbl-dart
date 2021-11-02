@@ -10,6 +10,8 @@ import '../query.dart';
 
 /// Query parameters used for setting values to the query parameters defined in
 /// the query.
+///
+/// {@category Query}
 abstract class Parameters {
   /// Creates new [Parameters], optionally initialized with parameters from
   /// a plain map.

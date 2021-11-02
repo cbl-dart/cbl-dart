@@ -9,6 +9,8 @@ import '../support/utils.dart';
 import 'console_logger.dart';
 
 /// Subsystems that log information.
+///
+/// {@category Logging}
 enum LogDomain {
   database,
   query,
@@ -18,6 +20,8 @@ enum LogDomain {
 
 /// Levels of log messages. Higher values are more important/severe. Each level
 /// includes the lower ones.
+///
+/// {@category Logging}
 enum LogLevel {
   /// Extremely detailed messages, only written by debug builds of CBL.
   debug,
@@ -39,6 +43,8 @@ enum LogLevel {
 }
 
 /// Abstract class that custom loggers have to extended.
+///
+/// {@category Logging}
 abstract class Logger {
   Logger([LogLevel? level]) : _level = level ?? LogLevel.info;
 
@@ -60,6 +66,8 @@ abstract class Logger {
 }
 
 /// A log message.
+///
+/// {@category Logging}
 class LogMessage {
   /// Creates a log message.
   LogMessage(this.level, this.domain, this.message);
@@ -75,6 +83,8 @@ class LogMessage {
 }
 
 /// A [Logger] which emits the received [LogMessage]s from a [stream].
+///
+/// {@category Logging}
 class StreamLogger extends Logger {
   /// Creates a [Logger] which emits the received [LogMessage]s from a [stream].
   StreamLogger([LogLevel? level]) : super(level);
@@ -91,6 +101,8 @@ class StreamLogger extends Logger {
 
 /// A [Logger] which formats logs in the same way as [ConsoleLogger] but uses
 /// Dart's [print] function.
+///
+/// {@category Logging}
 class DartConsoleLogger extends Logger {
   /// Creates a [Logger] which formats logs in the same way as [ConsoleLogger]
   /// but uses Dart's [print] function.

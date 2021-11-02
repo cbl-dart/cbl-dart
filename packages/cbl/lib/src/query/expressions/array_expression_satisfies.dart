@@ -3,6 +3,8 @@ import 'expression.dart';
 import 'variable_expression.dart';
 
 /// Represents the `SATISFIES` clause of a range predicate.
+///
+/// {@category Query Builder}
 // ignore: one_member_abstracts
 abstract class ArrayExpressionSatisfies {
   /// Specifies the condition that array elements are matched against, in a

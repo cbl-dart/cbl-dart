@@ -3,6 +3,8 @@ import '../joins.dart';
 import '../query.dart';
 
 /// Interface for creating and chaining `JOIN` clauses.
+///
+/// {@category Query Builder}
 abstract class JoinRouter {
   /// Creates and returns a `JOIN` clause query component with the given
   /// joins.
@@ -25,6 +27,8 @@ abstract class JoinRouter {
 }
 
 /// Version of [JoinRouter] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncJoinRouter implements JoinRouter {
   @override
   SyncJoins join(
@@ -45,6 +49,8 @@ abstract class SyncJoinRouter implements JoinRouter {
 }
 
 /// Version of [JoinRouter] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncJoinRouter implements JoinRouter {
   @override
   AsyncJoins join(

@@ -11,10 +11,14 @@ import 'router/limit_router.dart';
 import 'router/order_by_router.dart';
 
 /// A query component representing the `WHERE` clause of a [Query].
+///
+/// {@category Query Builder}
 abstract class Where
     implements Query, GroupByRouter, OrderByRouter, LimitRouter {}
 
 /// Version of [Where] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncWhere
     implements
         Where,
@@ -24,6 +28,8 @@ abstract class SyncWhere
         SyncLimitRouter {}
 
 /// Version of [Where] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncWhere
     implements
         Where,

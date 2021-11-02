@@ -17,12 +17,18 @@ import 'router/from_router.dart';
 import 'select_result.dart';
 
 /// A query component representing the `SELECT` clause of a [Query].
+///
+/// {@category Query Builder}
 abstract class Select implements Query, FromRouter {}
 
 /// Version of [Select] for building [SyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class SyncSelect implements Select, SyncQuery, SyncFromRouter {}
 
 /// Version of [Select] for building [AsyncQuery]s.
+///
+/// {@category Query Builder}
 abstract class AsyncSelect implements Select, AsyncQuery, AsyncFromRouter {}
 
 // === Impl ====================================================================

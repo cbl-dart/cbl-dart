@@ -2,12 +2,16 @@ import 'expression.dart';
 import 'property_expression.dart';
 
 /// A document metadata expression.
+///
+/// {@category Query Builder}
 abstract class MetaExpressionInterface extends ExpressionInterface {
   /// Specifies the [alias] of the data source to query the metadata from.
   ExpressionInterface from(String alias);
 }
 
 /// Factory for creating expressions of metadata properties of a document.
+///
+/// {@category Query Builder}
 class Meta {
   Meta._();
 

@@ -4,6 +4,8 @@ import 'query.dart';
 import 'result.dart';
 
 /// A set of [Result]s which is returned when executing a [Query].
+///
+/// {@category Query}
 // ignore: one_member_abstracts
 abstract class ResultSet {
   /// Returns a stream which consumes this result set and emits its results.
@@ -18,5 +20,7 @@ abstract class ResultSet {
 }
 
 /// A [ResultSet] which can be iterated synchronously as well asynchronously.
+///
+/// {@category Query}
 abstract class SyncResultSet
     implements ResultSet, Iterable<Result>, Iterator<Result> {}

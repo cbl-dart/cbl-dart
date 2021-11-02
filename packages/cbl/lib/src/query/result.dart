@@ -25,6 +25,8 @@ import 'result_set.dart';
 /// 3. A generated key of the format `$1`, `$2`, `$3`, ...
 ///    The number after `$` corresponds to the position of the column among the
 ///    rest of the unnamed columns and starts at `1`.
+///
+/// {@category Query}
 abstract class Result
     implements Iterable<String>, ArrayInterface, DictionaryInterface {
   /// The number of column in this result.

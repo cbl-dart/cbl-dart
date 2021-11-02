@@ -1,6 +1,8 @@
 import '../document.dart';
 
 /// A conflict between changes in a local and remote [Document].
+///
+/// {@category Replication}
 abstract class Conflict {
   /// The id of the conflicting [Document].
   String get documentId;

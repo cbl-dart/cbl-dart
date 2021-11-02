@@ -1,6 +1,8 @@
 import '../expressions/expression.dart';
 
 /// Factory for creating full-text search function expressions.
+///
+/// {@category Query Builder}
 class FullTextFunction {
   FullTextFunction._();
 

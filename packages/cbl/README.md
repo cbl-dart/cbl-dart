@@ -11,7 +11,7 @@
 - Data is stored in JSON documents
   - Schemaless
   - Stored in efficient binary format
-  - Support storing binary blobs
+  - Supports storing of binary blobs
 - Queries
   - Construct queries through a type safe builder API or write them in [N1QL]
   - Rich query language, supporting complex queries
@@ -21,7 +21,7 @@
   - Synchronize with Couchbase Server through Sync Gateway
   - Local conflict resolution
   - Replication between two local databases\*
-  - Use document deltas to transfer changes\*
+  - Transfer document changes as deltas\*
 - Change observer APIs for:
   - Database
   - Query

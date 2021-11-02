@@ -14,6 +14,8 @@ import 'dictionary.dart';
 import 'fragment.dart';
 
 /// Defines a set of methods for readonly accessing array data.
+///
+/// {@category Document}
 abstract class ArrayInterface implements ArrayFragment {
   /// The number of elements in this array.
   int get length;
@@ -98,6 +100,8 @@ abstract class ArrayInterface implements ArrayFragment {
 }
 
 /// Provides readonly access to array data.
+///
+/// {@category Document}
 abstract class Array implements ArrayInterface, Iterable<Object?> {
   /// Returns a mutable copy of this array.
   MutableArray toMutable();
@@ -107,6 +111,8 @@ abstract class Array implements ArrayInterface, Iterable<Object?> {
 }
 
 /// Defines a set of methods for getting and setting array data.
+///
+/// {@category Document}
 abstract class MutableArrayInterface
     implements ArrayInterface, MutableArrayFragment {
   // === Set ===================================================================
@@ -203,7 +209,7 @@ abstract class MutableArrayInterface
 
   // === Insert ================================================================
 
-  /// Inserst a [value] [at] the given index.
+  /// Inserts a [value] [at] the given index.
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   ///
@@ -286,6 +292,8 @@ abstract class MutableArrayInterface
 }
 
 /// Provides access to array data.
+///
+/// {@category Document}
 abstract class MutableArray implements Array, MutableArrayInterface {
   /// Creates a [MutableArray], optionally initialized with [data].
   ///

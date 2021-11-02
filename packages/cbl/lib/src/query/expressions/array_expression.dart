@@ -47,6 +47,8 @@ import 'variable_expression.dart';
 ///   .variable('myVar.property')
 ///   .equalTo(Expression.value(true))
 /// ```
+///
+/// {@category Query Builder}
 class ArrayExpression {
   ArrayExpression._();
 
