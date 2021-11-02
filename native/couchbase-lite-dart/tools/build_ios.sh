@@ -34,6 +34,18 @@ function _platformFromId() {
     esac
 }
 
+function _configurationFromBuildMode() {
+    local buildMode="$1"
+    case "$buildMode" in
+    debug)
+        echo 'Debug'
+        ;;
+    release)
+        echo 'Release'
+        ;;
+    esac
+}
+
 function _linkCouchbaseLiteFramework() {
     local edition="$1"
     local frameworkPath="$vendorDir/couchbase-lite-C-prebuilt/$couchbaseLiteCRelease-$edition-ios/CouchbaseLite.xcframework"
@@ -52,7 +64,7 @@ function _buildFramework() {
     local platformId="$3"
     local platform="$(_platformFromId "$platformId")"
     local destination="generic/platform=$platform"
-    local configuration="${buildMode^}"
+    local configuration="$(_configurationFromBuildMode "$buildMode")"
 
     echo "Building artifacts for $platform platform"
 
