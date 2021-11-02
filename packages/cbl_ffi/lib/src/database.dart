@@ -8,11 +8,57 @@ import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'blob.dart';
+import 'data.dart';
 import 'document.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'query.dart';
 import 'utils.dart';
+
+enum CBLEncryptionAlgorithm {
+  aes256,
+}
+
+const _encryptionKeySizes = {
+  CBLEncryptionAlgorithm.aes256: 32,
+};
+
+extension EncryptionKeySizesExt on CBLEncryptionAlgorithm {
+  int get keySize => _encryptionKeySizes[this]!;
+}
+
+extension on int {
+  CBLEncryptionAlgorithm toCBLEncryptionAlgorithm() =>
+      CBLEncryptionAlgorithm.values[this - 1];
+}
+
+extension on CBLEncryptionAlgorithm {
+  int toInt() => CBLEncryptionAlgorithm.values.indexOf(this) + 1;
+}
+
+class CBLEncryptionKey {
+  CBLEncryptionKey({required this.algorithm, required this.bytes});
+
+  final CBLEncryptionAlgorithm algorithm;
+  final Data bytes;
+}
+
+class _CBLEncryptionKey extends Struct {
+  @Uint32()
+  external int algorithm;
+
+  @Array(32)
+  external Array<Uint8> bytes;
+}
+
+typedef _CBLDart_CBLEncryptionKey_FromPassword_C = Uint8 Function(
+  Pointer<_CBLEncryptionKey> key,
+  FLString password,
+);
+typedef _CBLDart_CBLEncryptionKey_FromPassword = int Function(
+  Pointer<_CBLEncryptionKey> key,
+  FLString password,
+);
 
 enum CBLConcurrencyControl {
   lastWriteWins,
@@ -26,9 +72,10 @@ extension on CBLConcurrencyControl {
 class CBLDatabase extends Opaque {}
 
 class CBLDatabaseConfiguration {
-  CBLDatabaseConfiguration({required this.directory});
+  CBLDatabaseConfiguration({required this.directory, this.encryptionKey});
 
   final String directory;
+  final CBLEncryptionKey? encryptionKey;
 }
 
 class _CBLDart_CBLDatabaseConfiguration extends Struct {
@@ -41,6 +88,7 @@ class _CBLDart_CBLDatabaseConfiguration extends Struct {
   @Uint32()
   external int padding;
   external FLString directory;
+  external _CBLEncryptionKey encryptionKey;
 }
 
 typedef _CBLDart_CBLDatabaseConfiguration_Default
@@ -147,6 +195,17 @@ typedef _CBLDatabase_EndTransaction_C = Uint8 Function(
 typedef _CBLDatabase_EndTransaction = int Function(
   Pointer<CBLDatabase> db,
   int commit,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLDatabase_ChangeEncryptionKey_C = Uint8 Function(
+  Pointer<CBLDatabase> db,
+  Pointer<_CBLEncryptionKey> newKey,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLDatabase_ChangeEncryptionKey = int Function(
+  Pointer<CBLDatabase> db,
+  Pointer<_CBLEncryptionKey> newKey,
   Pointer<CBLError> errorOut,
 );
 
@@ -365,6 +424,13 @@ typedef _CBLDatabase_SaveBlob = int Function(
 
 class DatabaseBindings extends Bindings {
   DatabaseBindings(Bindings parent) : super(parent) {
+    if (libs.enterpriseEdition) {
+      _encryptionKeyFromPassword = libs.cblDart.lookupFunction<
+          _CBLDart_CBLEncryptionKey_FromPassword_C,
+          _CBLDart_CBLEncryptionKey_FromPassword>(
+        'CBLDart_CBLEncryptionKey_FromPassword',
+      );
+    }
     _copyDatabase = libs.cblDart
         .lookupFunction<_CBLDart_CBL_CopyDatabase_C, _CBLDart_CBL_CopyDatabase>(
       'CBLDart_CBL_CopyDatabase',
@@ -406,6 +472,12 @@ class DatabaseBindings extends Bindings {
         _CBLDatabase_EndTransaction>(
       'CBLDatabase_EndTransaction',
     );
+    if (libs.enterpriseEdition) {
+      _changeEncryptionKey = libs.cbl.lookupFunction<
+          _CBLDatabase_ChangeEncryptionKey_C, _CBLDatabase_ChangeEncryptionKey>(
+        'CBLDatabase_ChangeEncryptionKey',
+      );
+    }
     _name = libs.cblDart
         .lookupFunction<_CBLDart_CBLDatabase_Name, _CBLDart_CBLDatabase_Name>(
       'CBLDart_CBLDatabase_Name',
@@ -483,6 +555,7 @@ class DatabaseBindings extends Bindings {
     );
   }
 
+  late final _CBLDart_CBLEncryptionKey_FromPassword _encryptionKeyFromPassword;
   late final _CBLDart_CBL_CopyDatabase _copyDatabase;
   late final _CBLDart_CBL_DeleteDatabase _deleteDatabase;
   late final _CBLDart_CBLDatabase_Exists _databaseExists;
@@ -493,6 +566,7 @@ class DatabaseBindings extends Bindings {
   late final _CBLDatabase_PerformMaintenance _performMaintenance;
   late final _CBLDatabase_BeginTransaction _beginTransaction;
   late final _CBLDatabase_EndTransaction _endTransaction;
+  late final _CBLDatabase_ChangeEncryptionKey _changeEncryptionKey;
   late final _CBLDart_CBLDatabase_Name _name;
   late final _CBLDart_CBLDatabase_Path _path;
   late final _CBLDatabase_Count _count;
@@ -513,6 +587,21 @@ class DatabaseBindings extends Bindings {
   late final _CBLDatabase_GetIndexNames _indexNames;
   late final _CBLDatabase_GetBlob _getBlob;
   late final _CBLDatabase_SaveBlob _saveBlob;
+
+  CBLEncryptionKey encryptionKeyFromPassword(String password) =>
+      withZoneArena(() {
+        final key = zoneArena<_CBLEncryptionKey>();
+        if (!_encryptionKeyFromPassword(key, password.toFLStringInArena().ref)
+            .toBool()) {
+          throw CBLErrorException(
+            CBLErrorDomain.couchbaseLite,
+            CBLErrorCode.unexpectedError,
+            'There was a problem deriving the encryption key.',
+          );
+        }
+
+        return _readEncryptionKey(key.ref);
+      });
 
   bool copyDatabase(
     String from,
@@ -586,6 +675,14 @@ class DatabaseBindings extends Bindings {
 
   void endTransaction(Pointer<CBLDatabase> db, {required bool commit}) {
     _endTransaction(db, commit.toInt(), globalCBLError).checkCBLError();
+  }
+
+  void changeEncryptionKey(Pointer<CBLDatabase> db, CBLEncryptionKey? key) {
+    withZoneArena(() {
+      final keyStruct = zoneArena<_CBLEncryptionKey>();
+      _writeEncryptionKey(keyStruct.ref, from: key);
+      _changeEncryptionKey(db, keyStruct, globalCBLError).checkCBLError();
+    });
   }
 
   String name(Pointer<CBLDatabase> db) => _name(db).toDartString()!;
@@ -728,6 +825,32 @@ class DatabaseBindings extends Bindings {
     _saveBlob(db, blob, globalCBLError).checkCBLError();
   }
 
+  void _writeEncryptionKey(_CBLEncryptionKey to, {CBLEncryptionKey? from}) {
+    if (from == null) {
+      // kCBLEncryptionNone = 0
+      to.algorithm = 0;
+      return;
+    }
+
+    to.algorithm = from.algorithm.toInt();
+    final bytes = from.bytes.toTypedList();
+    for (var i = 0; i < from.algorithm.keySize; i++) {
+      to.bytes[i] = bytes[i];
+    }
+  }
+
+  CBLEncryptionKey _readEncryptionKey(_CBLEncryptionKey key) {
+    final algorithm = key.algorithm.toCBLEncryptionAlgorithm();
+    final bytes = Uint8List(algorithm.keySize);
+    for (var i = 0; i < algorithm.keySize; i++) {
+      bytes[i] = key.bytes[i];
+    }
+    return CBLEncryptionKey(
+      algorithm: algorithm,
+      bytes: Data.fromTypedList(bytes),
+    );
+  }
+
   Pointer<_CBLDart_CBLDatabaseConfiguration> _createConfig(
     CBLDatabaseConfiguration? config,
   ) {
@@ -738,6 +861,10 @@ class DatabaseBindings extends Bindings {
     final result = zoneArena<_CBLDart_CBLDatabaseConfiguration>();
 
     result.ref.directory = config.directory.toFLStringInArena().ref;
+
+    if (libs.enterpriseEdition) {
+      _writeEncryptionKey(result.ref.encryptionKey, from: config.encryptionKey);
+    }
 
     return result;
   }

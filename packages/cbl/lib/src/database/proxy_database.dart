@@ -37,6 +37,7 @@ class ProxyDatabase extends ProxyObject
     this.state,
   )   : name = state.name,
         path = state.path,
+        // Make a copy of config, since it is mutable.
         _config = DatabaseConfiguration.from(config),
         super(client.channel, state.id);
 
@@ -306,6 +307,13 @@ class ProxyDatabase extends ProxyObject
       use(() => channel.call(PerformDatabaseMaintenance(
             databaseId: objectId,
             type: type,
+          )));
+
+  @override
+  Future<void> changeEncryptionKey(EncryptionKey? newKey) =>
+      use(() => channel.call(ChangeDatabaseEncryptionKey(
+            databaseId: objectId,
+            encryptionKey: newKey,
           )));
 
   @override

@@ -123,9 +123,18 @@ int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
 
 // -- Database
 
+#ifdef COUCHBASE_ENTERPRISE
+CBLDART_EXPORT
+bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey *key,
+                                           CBLDart_FLString password);
+#endif
+
 struct CBLDart_CBLDatabaseConfiguration {
   uint32_t _padding;
   CBLDart_FLString directory;
+#ifdef COUCHBASE_ENTERPRISE
+  CBLEncryptionKey encryptionKey;
+#endif
 };
 
 CBLDART_EXPORT

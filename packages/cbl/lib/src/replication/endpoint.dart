@@ -23,7 +23,9 @@ class UrlEndpoint extends Endpoint {
 
 /// An endpoint representing a local [Database] as the replication target.
 ///
-/// Available in the **Enterprise Edition** only.
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
+/// {@category Enterprise Edition}
 class DatabaseEndpoint extends Endpoint {
   /// Creates an endpoint representing a local [database] as the replication
   /// target.

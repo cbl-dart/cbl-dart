@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -163,17 +164,22 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
       final doc = MutableDocument();
 
       expect(
-        query.changes().asyncMap((change) => change.results
-            .asStream()
-            .map((result) => result.string(0))
-            .toList()),
+        query
+            .changes()
+            .asyncMap((change) => change.results
+                .asStream()
+                .map((result) => result.string(0))
+                .toList())
+            .doOnData((results) {
+          if (results.isEmpty) {
+            db.saveDocument(doc);
+          }
+        }),
         emitsInOrder(<Object>[
           isEmpty,
           [doc.id],
         ]),
       );
-
-      await db.saveDocument(doc);
     });
 
     apiTest('bad query: error position highlighting', () async {

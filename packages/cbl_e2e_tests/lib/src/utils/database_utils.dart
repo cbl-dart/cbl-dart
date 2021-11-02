@@ -121,10 +121,10 @@ CblServiceClient _sharedIsolateClient(Isolate isolate) {
   CblServiceClient client;
   switch (isolate) {
     case Isolate.main:
-      client = _sharedMainIsolateClient;
+      client = sharedMainIsolateClient;
       break;
     case Isolate.worker:
-      client = _sharedWorkerIsolateClient;
+      client = sharedWorkerIsolateClient;
       break;
   }
   return client;
@@ -162,7 +162,7 @@ void setupSharedTestDatabases() {
       ].whereType<Future<void>>()));
 }
 
-late CblServiceClient _sharedMainIsolateClient;
+late CblServiceClient sharedMainIsolateClient;
 
 void setupSharedTestMainIsolateClient() {
   late final List<StreamChannel<Object?>> transportChannels;
@@ -187,11 +187,11 @@ void setupSharedTestMainIsolateClient() {
     );
 
     service = CblService(channel: serviceChannel);
-    _sharedMainIsolateClient = CblServiceClient(channel: clientChannel);
+    sharedMainIsolateClient = CblServiceClient(channel: clientChannel);
   });
 
   tearDownAll(() async {
-    await _sharedMainIsolateClient.channel.close();
+    await sharedMainIsolateClient.channel.close();
     await service.dispose();
     await service.channel.close();
   });
@@ -208,7 +208,7 @@ List<StreamChannel<T>> _streamControllerChannelPair<T>() {
   ];
 }
 
-late CblServiceClient _sharedWorkerIsolateClient;
+late CblServiceClient sharedWorkerIsolateClient;
 
 void setupSharedTestWorkerIsolateClient() {
   late final CblWorker worker;
@@ -217,7 +217,7 @@ void setupSharedTestWorkerIsolateClient() {
     worker = CblWorker(debugName: 'Shared');
     await worker.start();
 
-    _sharedWorkerIsolateClient = CblServiceClient(channel: worker.channel);
+    sharedWorkerIsolateClient = CblServiceClient(channel: worker.channel);
   });
 
   tearDownAll(() async {

@@ -345,7 +345,10 @@ function uploadCoverageData() {
     esac
 
     # Upload coverage data
-    ./codecov -F "$flags" -f "$testPackageDir/coverage/lcov.info"
+    ./codecov \
+        -F "$flags" \
+        -f "$testPackageDir/coverage/lcov.info" \
+        -C "$GITHUB_SHA"
 }
 
 "$@"

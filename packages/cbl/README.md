@@ -14,15 +14,23 @@
   - Support storing binary blobs
 - Queries
   - Construct queries through a type safe builder API or write them in [N1QL]
+  - Rich query language, supporting complex queries
   - Full text search
   - Indexes
-- Synchronization with central Database
+- Replication
   - Synchronize with Couchbase Server through Sync Gateway
   - Local conflict resolution
+  - Replication between two local databases\*
+  - Use document deltas to transfer changes\*
 - Change observer APIs for:
   - Database
   - Query
   - Replicator
+- Encryption\*
+  - Full database on device
+  - End-to-end encryption of individual properties of replicated documents
+
+\*: **Enterprise Edition** only feature
 
 ## Supported Platforms
 

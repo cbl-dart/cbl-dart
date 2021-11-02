@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../database.dart';
 import '../database/database.dart';
+import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/proxy_document.dart';
@@ -247,6 +249,7 @@ class CblService {
       ..addCallEndpoint(_ping)
       ..addCallEndpoint(_releaseObject)
       ..addCallEndpoint(_removeChangeListener)
+      ..addCallEndpoint(_encryptionKeyFromPassword)
       ..addCallEndpoint(_removeDatabase)
       ..addCallEndpoint(_databaseExists)
       ..addCallEndpoint(_copyDatabase)
@@ -263,6 +266,7 @@ class CblService {
       ..addCallEndpoint(_setDocumentExpiration)
       ..addCallEndpoint(_getDocumentExpiration)
       ..addCallEndpoint(_performDatabaseMaintenance)
+      ..addCallEndpoint(_changeDatabaseEncryptionKey)
       ..addCallEndpoint(_addDatabaseChangeListener)
       ..addCallEndpoint(_addDocumentChangeListener)
       ..addCallEndpoint(_deleteIndex)
@@ -324,6 +328,11 @@ class CblService {
       );
     }
   }
+
+  EncryptionKeyImpl _encryptionKeyFromPassword(
+    EncryptionKeyFromPassword request,
+  ) =>
+      EncryptionKeyImpl.passwordSync(request.password);
 
   void _removeDatabase(RemoveDatabase request) =>
       FfiDatabase.remove(request.name, directory: request.directory);
@@ -428,6 +437,10 @@ class CblService {
 
   void _performDatabaseMaintenance(PerformDatabaseMaintenance request) =>
       _getDatabaseById(request.databaseId).performMaintenance(request.type);
+
+  void _changeDatabaseEncryptionKey(ChangeDatabaseEncryptionKey request) =>
+      _getDatabaseById(request.databaseId)
+          .changeEncryptionKey(request.encryptionKey);
 
   void _addDatabaseChangeListener(AddDatabaseChangeListener request) {
     _listenerIdsToTokens[request.listenerId] =
