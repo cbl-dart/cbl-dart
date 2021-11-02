@@ -20,8 +20,19 @@ versionFile="$projectDir/CouchbaseLiteDart.version"
 version="$(cat "$versionFile")"
 productDir="$buildDir"
 scheme="CBL_Dart"
-declare -A platforms=([ios]=iOS [ios_simulator]="iOS Simulator")
-platformIds="${!platforms[@]}"
+platformIds=(ios ios_simulator)
+
+function _platformFromId() {
+    local id="$1"
+    case "$id" in
+    ios)
+        echo 'iOS'
+        ;;
+    ios_simulator)
+        echo 'iOS Simulator'
+        ;;
+    esac
+}
 
 function _linkCouchbaseLiteFramework() {
     local edition="$1"
@@ -39,7 +50,7 @@ function _buildFramework() {
     local edition="$1"
     local buildMode="$2"
     local platformId="$3"
-    local platform="${platforms[$platformId]}"
+    local platform="$(_platformFromId "$platformId")"
     local destination="generic/platform=$platform"
     local configuration="${buildMode^}"
 

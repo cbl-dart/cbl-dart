@@ -176,11 +176,6 @@ jobs:
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      # bash >=4 is needed by scripts
-      - name: Install bash
-        if: runner.os == 'macOS'
-        run: brew install bash
-
       - name: Build native libraries
         run: ./tools/ci-steps.sh buildNativeLibraries
 
