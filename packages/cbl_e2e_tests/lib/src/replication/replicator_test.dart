@@ -16,7 +16,7 @@ void main() {
   group('Replicator', () {
     setupTestDocument();
 
-    setUp(flushSyncGatewayDatabase);
+    setUp(flushDatabaseByAdmin);
 
     apiTest('create Replicator smoke test', () async {
       final db = await openTestDatabase();
@@ -532,13 +532,10 @@ void main() {
 
 /// Test that verifies behavior of [enableAutoPurge].
 Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
-  final testDoneCompleter = Completer<void>();
+  final documentIsReplicated = Completer<void>();
+  final documentAccessRemoved = Completer<void>();
+
   final db = await openTestDatabase();
-  final replicator = await db.createTestReplicator(
-    authenticator: aliceAuthenticator,
-    continuous: true,
-    enableAutoPurge: enableAutoPurge,
-  );
 
   final doc = MutableDocument({
     'channels': ['Alice']
@@ -546,42 +543,39 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
 
   await db.saveDocument(doc);
 
-  var call = 0;
-  replicator.documentReplications().listen((replication) {
+  final replicator = await db.createTestReplicator(
+    authenticator: aliceAuthenticator,
+    continuous: true,
+    enableAutoPurge: enableAutoPurge,
+  );
+
+  await replicator.addDocumentReplicationListener((replication) {
     expect(replication.documents, hasLength(1));
     final replDoc = replication.documents.first;
     expect(replDoc.id, doc.id);
     expect(replDoc.error, isNull);
 
-    switch (call++) {
-      case 0:
-        // The doc has been replicated.
-        expect(replication.isPush, isTrue);
-        expect(replDoc.flags, isEmpty);
+    if (replication.isPush && !documentIsReplicated.isCompleted) {
+      documentIsReplicated.complete();
+    }
 
-        // Remove user document from the users channel.
-        updateDocumentChannelsOnSyncGateway(
-          doc.id,
-          doc.revisionId!,
-          {'channels': <void>[]},
-        );
-        break;
-      case 1:
-        // The user has lost access to the doc on the server.
-        expect(replication.isPush, isFalse);
-        expect(replDoc.flags, [DocumentFlag.accessRemoved]);
-
-        // Verify whether or not the document has been auto purged depending on
-        // whether auto purge is enabled.
-        Future.value(db.document(doc.id)).then((loadedDoc) {
-          expect(loadedDoc, enableAutoPurge ? isNull : isNotNull);
-          testDoneCompleter.complete();
-        });
-        break;
+    if (!replication.isPush) {
+      expect(replDoc.flags, [DocumentFlag.accessRemoved]);
+      documentAccessRemoved.complete();
     }
   });
 
   await replicator.start();
 
-  await testDoneCompleter.future;
+  await documentIsReplicated.future;
+
+  // Remove document from the user's channel.
+  doc['channels'].value = null;
+  db.saveDocument(doc);
+
+  await documentAccessRemoved.future;
+
+  // Verify whether or not the document has been auto purged depending on
+  // whether auto purge is enabled.
+  expect(await db.document(doc.id), enableAutoPurge ? isNull : isNotNull);
 }

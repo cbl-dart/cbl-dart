@@ -80,7 +80,7 @@ Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
   }
 }
 
-Future<void> flushSyncGatewayDatabase() async {
+Future<void> flushDatabaseByAdmin() async {
   await syncGatewayRequest(
     Uri.parse('$syncGatewayDatabase/_flush'),
     method: 'POST',
@@ -88,21 +88,20 @@ Future<void> flushSyncGatewayDatabase() async {
   );
 }
 
-Future<void> deleteDocumentOnSyncGateway(String id, String revisionId) async {
+Future<void> deleteDocumentByAdmin(Document doc) async {
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/$id?rev=$revisionId'),
+    Uri.parse('$syncGatewayDatabase/${doc.id}?rev=${doc.revisionId}'),
     method: 'DELETE',
     admin: true,
   );
 }
 
-Future<void> updateDocumentChannelsOnSyncGateway(
-  String id,
-  String revisionId,
+Future<void> updateDocumentByAdmin(
+  Document doc,
   Map<String, Object?> properties,
 ) async {
   await syncGatewayRequest(
-    Uri.parse('$syncGatewayDatabase/$id?rev=$revisionId'),
+    Uri.parse('$syncGatewayDatabase/${doc.id}?rev=${doc.revisionId}'),
     method: 'PUT',
     admin: true,
     body: jsonEncode(properties),
