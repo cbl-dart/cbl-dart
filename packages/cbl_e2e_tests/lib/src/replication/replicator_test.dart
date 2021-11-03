@@ -549,7 +549,7 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
     enableAutoPurge: enableAutoPurge,
   );
 
-  replicator.documentReplications().listen((replication) {
+  await replicator.addDocumentReplicationListener((replication) {
     expect(replication.documents, hasLength(1));
     final replDoc = replication.documents.first;
     expect(replDoc.id, doc.id);
