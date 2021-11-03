@@ -2,9 +2,9 @@
 [![License](https://badgen.net/pub/license/cbl)](https://github.com/cofu-app/cbl-dart/blob/main/packages/cbl/LICENSE)
 [![CI](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cofu-app/cbl-dart/actions/workflows/ci.yaml)
 
-# cbl
-
-> **Warning:** This project has not yet reached a stable production release.
+> ⚠️ New users should start with, and users of version `0.x.x` should migrate to
+> the latest beta. The API has been heavily refactored from `0.x.x` to `1.0.0`
+> and `0.x.x` wont receive any more updates.
 
 ## Features - Couchbase Lite
 
@@ -42,10 +42,11 @@
 
 ## Installation
 
-This package only contains Dart code and requires binary libraries to be packaged
-with any app that wants to use it. For Flutter apps, you need to add
+This package only contains Dart code and requires binary libraries to be
+packaged with any app that wants to use it. For Flutter apps, you need to add
 [`cbl_flutter`](https://pub.dev/packages/cbl_flutter) as a dependency to include
-those libraries in the build. `cbl_flutter` currently supports iOS, macOS and Android.
+those libraries in the build. `cbl_flutter` currently supports iOS, macOS and
+Android.
 
 ```pubspec
 dependencies:
@@ -55,11 +56,11 @@ dependencies:
 
 ## Getting started
 
-Make sure you have set the required minimum target version in the build systems of the
-platforms you support.
+Make sure you have set the required minimum target version in the build systems
+of the platforms you support.
 
-Before you access any part of the library, `CouchbaseLite` needs to be initialized with a
-configuration of how to load the binary libraries.
+Before you access any part of the library, `CouchbaseLite` needs to be
+initialized with a configuration of how to load the binary libraries.
 
 ```dart
 import 'package:cbl/cbl.dart';
