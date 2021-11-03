@@ -56,8 +56,11 @@ function installSyncGatewayMacOS {
     sudo dseditgroup -o create "$syncGatewayUser"
     sudo dseditgroup -o edit -a "$syncGatewayUser" -t user "$syncGatewayUser"
 
-    cd "$syncGatewayInstallDir/service"
-    sudo ./sync_gateway_service_install.sh --cfgpath="$syncGatewayConfig"
+    cd "$syncGatewayInstallDir"
+    bin/sync_gateway \
+        '-disable_persistent_config' \
+        '-api.admin_interface_authentication=false' \
+        "$syncGatewayConfig" &
 
     echo "::endgroup::"
 }
