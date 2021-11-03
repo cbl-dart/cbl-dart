@@ -218,7 +218,8 @@ jobs:
         run: |
           case ${{ runner.os }} in
             macOS)
-              melos run test:setupCouchbaseClusterMacOS
+              melos run test:startSyncGatewayMacOS &> /dev/null &
+              melos run test:waitForSyncGateway
             ;;
             *)
               melos run test:setupCouchbaseClusterDocker

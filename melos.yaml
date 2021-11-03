@@ -32,8 +32,13 @@ scripts:
     select-package:
       scope: cbl_e2e_tests
 
-  test:setupCouchbaseClusterMacOS:
-    run: melos exec -- "./couchbase-cluster.sh setupMacOS"
+  test:startSyncGatewayMacOS:
+    run: melos exec -- "./couchbase-cluster.sh startSyncGatewayMacOS"
+    select-package:
+      scope: cbl_e2e_tests
+
+  test:waitForSyncGateway:
+    run: melos exec -- "./couchbase-cluster.sh waitForSyncGateway"
     select-package:
       scope: cbl_e2e_tests
 

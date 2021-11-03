@@ -61,15 +61,10 @@ function startSyncGatewayMacOS {
     fi
 
     cd "$syncGatewayInstallDir"
-    nohup bin/sync_gateway \
+    bin/sync_gateway \
         '-disable_persistent_config' \
         '-api.admin_interface_authentication=false' \
-        "$syncGatewayConfig" &
-}
-
-function setupMacOS() {
-    startSyncGatewayMacOS
-    waitForSyncGateway
+        "$syncGatewayConfig"
 }
 
 function startDockerService {
