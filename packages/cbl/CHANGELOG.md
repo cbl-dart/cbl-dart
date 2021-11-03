@@ -1,3 +1,8 @@
+## 0.6.0+1
+
+ - **DOCS**: redirect users from `0.x.x` version to `1.0.0` beta.
+ - **CHORE**: publish packages.
+
 ## 0.6.0
 
 > Note: This release has breaking changes.

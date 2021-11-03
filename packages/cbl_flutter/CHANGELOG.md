@@ -1,3 +1,7 @@
+## 0.4.0+4
+
+ - **DOCS**: redirect users from `0.x.x` version to `1.0.0` beta.
+
 ## 0.4.0+3
 
  - Update a dependency to the latest release.
