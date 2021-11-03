@@ -38,7 +38,7 @@ function waitForSyncGateway() {
     waitForService "Sync Gateway" localhost:4984
 }
 
-function installSyncGatewayMacOS {
+function startSyncGatewayMacOS {
     optDir="/opt"
     syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersionMacOS}_x86_64.zip"
     syncGatewayUrl="https://packages.couchbase.com/releases/couchbase-sync-gateway/$syncGatewayVersionMacOS/$syncGatewayZip"
@@ -46,27 +46,29 @@ function installSyncGatewayMacOS {
     syncGatewayUser="sync_gateway"
     syncGatewayConfig="$scriptDir/sync-gateway-config.json"
 
-    echo "::group::Install Sync Gateway"
+    if [ ! -d "$syncGatewayInstallDir" ]; then
+        echo "::group::Install Sync Gateway"
 
-    curl "$syncGatewayUrl" -o "$syncGatewayZip"
-    sudo unzip "$syncGatewayZip" -d "$optDir"
-    rm "$syncGatewayZip"
+        curl "$syncGatewayUrl" -o "$syncGatewayZip"
+        sudo unzip "$syncGatewayZip" -d "$optDir"
+        rm "$syncGatewayZip"
 
-    sudo sysadminctl -addUser "$syncGatewayUser"
-    sudo dseditgroup -o create "$syncGatewayUser"
-    sudo dseditgroup -o edit -a "$syncGatewayUser" -t user "$syncGatewayUser"
+        sudo sysadminctl -addUser "$syncGatewayUser"
+        sudo dseditgroup -o create "$syncGatewayUser"
+        sudo dseditgroup -o edit -a "$syncGatewayUser" -t user "$syncGatewayUser"
+
+        echo "::endgroup::"
+    fi
 
     cd "$syncGatewayInstallDir"
-    bin/sync_gateway \
+    nohup bin/sync_gateway \
         '-disable_persistent_config' \
         '-api.admin_interface_authentication=false' \
         "$syncGatewayConfig" &
-
-    echo "::endgroup::"
 }
 
 function setupMacOS() {
-    installSyncGatewayMacOS
+    startSyncGatewayMacOS
     waitForSyncGateway
 }
 
