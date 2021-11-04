@@ -17,6 +17,7 @@ import '../replication.dart';
 import '../replication/ffi_replicator.dart';
 import '../support/encoding.dart';
 import '../support/listener_token.dart';
+import '../support/resource.dart';
 import '../support/utils.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
@@ -255,7 +256,6 @@ class CblService {
       ..addCallEndpoint(_copyDatabase)
       ..addCallEndpoint(_openDatabase)
       ..addCallEndpoint(_getDatabase)
-      ..addCallEndpoint(_closeDatabase)
       ..addCallEndpoint(_deleteDatabase)
       ..addCallEndpoint(_getDocument)
       ..addCallEndpoint(_saveDocument)
@@ -296,17 +296,21 @@ class CblService {
     _objectRegistry.clear();
 
     await Future.wait(objects
-        .whereType<Database>()
-        .where((database) => !database.isClosed)
-        .map((database) => database.close()));
+        .whereType<ClosableResource>()
+        .where((resource) => !resource.isClosed)
+        .map((resource) => resource.close()));
   }
 
   // === Handlers ==============================================================
 
   DateTime _ping(PingRequest _) => DateTime.now();
 
-  void _releaseObject(ReleaseObject request) =>
-      _objectRegistry.removeObjectById(request.objectId);
+  FutureOr<void> _releaseObject(ReleaseObject request) {
+    final object = _objectRegistry.removeObjectById(request.objectId);
+    if (object is ClosableResource) {
+      return object.close();
+    }
+  }
 
   Future<void> _removeChangeListener(
     RemoveChangeListener request,
@@ -355,11 +359,8 @@ class CblService {
   DatabaseState _getDatabase(GetDatabase request) =>
       _createDatabaseState(_getDatabaseById(request.databaseId));
 
-  Future<void> _closeDatabase(CloseDatabase request) =>
-      _getDatabaseById(request.databaseId).close();
-
   Future<void> _deleteDatabase(DeleteDatabase request) =>
-      _getDatabaseById(request.databaseId).delete();
+      _objectRegistry.removeObjectById<Database>(request.databaseId).delete();
 
   Future<DocumentState?> _getDocument(GetDocument request) async {
     final document = _getDatabaseById(request.databaseId)

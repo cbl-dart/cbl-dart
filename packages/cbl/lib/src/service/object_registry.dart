@@ -40,18 +40,19 @@ class ObjectRegistry {
     _idToObject.remove(id);
   }
 
-  void removeObjectById(int id) {
-    final object = _idToObject.remove(id);
+  T removeObjectById<T extends Object>(int id) {
+    final object = getObject<T>(id);
 
     if (object == null) {
       throw ArgumentError.value(
         id,
         'id',
-        'object with this id is not registered',
+        'object with this type $T and id $id is not registered',
       );
     }
 
     _objectToId.remove(object);
+    return object;
   }
 
   void clear() {

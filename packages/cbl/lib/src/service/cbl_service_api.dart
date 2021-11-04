@@ -37,7 +37,6 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec('CopyDatabase', CopyDatabase.deserialize)
       ..addSerializableCodec('OpenDatabase', OpenDatabase.deserialize)
       ..addSerializableCodec('GetDatabaseState', GetDatabase.deserialize)
-      ..addSerializableCodec('CloseDatabase', CloseDatabase.deserialize)
       ..addSerializableCodec('DeleteDatabase', DeleteDatabase.deserialize)
       ..addSerializableCodec(
         'GetDocument',
@@ -642,20 +641,6 @@ class GetDatabase extends Request<DatabaseState> {
     SerializationContext context,
   ) =>
       GetDatabase(map.getAs('databaseId'));
-}
-
-class CloseDatabase extends Request<Null> {
-  CloseDatabase(this.databaseId);
-
-  final int databaseId;
-
-  @override
-  StringMap serialize(SerializationContext context) =>
-      {'databaseId': databaseId};
-
-  static CloseDatabase deserialize(
-          StringMap map, SerializationContext context) =>
-      CloseDatabase(map.getAs('databaseId'));
 }
 
 class DeleteDatabase extends Request<Null> {

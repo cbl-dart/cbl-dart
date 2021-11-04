@@ -342,7 +342,7 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
 
   void _attachToParentResource() {
     if (!_didAttachToParentResource) {
-      needsFinalization = false;
+      needsToBeClosedByParent = false;
       attachTo(database! as ClosableResourceMixin);
       _didAttachToParentResource = true;
     }

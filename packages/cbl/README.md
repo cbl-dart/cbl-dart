@@ -24,6 +24,7 @@ native platforms which are supported by Dart.
   - [Synchronous and Asynchronous APIs](#synchronous-and-asynchronous-apis)
   - [Change listeners](#change-listeners)
   - [Change streams](#change-streams)
+  - [Closing resources](#closing-resources)
 - [📖 Usage examples](#-usage-examples)
   - [Open a database](#open-a-database)
   - [Create a document](#create-a-document)
@@ -196,6 +197,14 @@ await db.saveDocument(MutableDocument.withId('Hey'));
 To stop listening to changes just cancel the subscription, like with any other
 stream.
 
+### Closing resources
+
+Some types implement `ClosableResource`. At the moment these are `Database` and
+`Replicator`. Once you are done with an instance of these types, call its
+`close` method. This will free resources used by the object, as well as remove
+listeners, close streams and close child resources. For example closing a
+database will also close any associated replicators.
+
 ## 📖 Usage examples
 
 ### Open a database
@@ -223,9 +232,10 @@ final db = await Database.openAsync(
 If a database with the same name already exists in the directory, it will be
 opened. Otherwise a new database will be created.
 
-When you are done with the database you should close it by calling
-`Database.close`. This will free up any resources used by the database as well
-remove change listeners, close change streams and stop running replicators.
+When you are done with the database, you should close it by calling
+`Database.close`. This will free up any resources used by the database, as well
+as remove change listeners, close change streams and close associated
+replicators.
 
 ### Create a document
 
@@ -399,6 +409,10 @@ await replicator.addChangeListener((change) {
 
 await replicator.start();
 ```
+
+When you are done with the replicator, you should close it by calling
+`Replicator.close`. This will free up any resources used by the replicator, as
+well as remove change listeners and close change streams.
 
 ## 💡 Where to go next
 
