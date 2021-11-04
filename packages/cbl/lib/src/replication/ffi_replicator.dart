@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../database.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
@@ -37,26 +38,17 @@ class FfiReplicator
     required String debugCreator,
     bool ignoreCallbackErrorsInDart = false,
   }) : _config = ReplicatorConfiguration.from(config) {
-    final database = _config.database;
-    if (database is! FfiDatabase) {
-      throw ArgumentError.value(
-        config.database,
-        'config.database',
-        'must by a SyncDatabase',
-      );
-    }
+    final database =
+        assertArgumentType<SyncDatabase>(config.database, 'config.database')
+            as FfiDatabase;
 
     final target = config.target;
     if (target is DatabaseEndpoint) {
       useEnterpriseFeature(EnterpriseFeature.localDbReplication);
-
-      if (target.database is! FfiDatabase) {
-        throw ArgumentError.value(
-          target,
-          'config.target.database',
-          'must by a SyncDatabase',
-        );
-      }
+      assertArgumentType<SyncDatabase>(
+        target.database,
+        'config.target.database',
+      );
     }
 
     _database = database;

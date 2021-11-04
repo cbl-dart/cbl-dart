@@ -154,7 +154,7 @@ class ParametersImpl implements Parameters, FleeceEncodable {
 
   void _checkReadonly() {
     if (_readonly) {
-      throw StateError('This parameters object is readonly.');
+      throw StateError('These parameters are readonly.');
     }
   }
 

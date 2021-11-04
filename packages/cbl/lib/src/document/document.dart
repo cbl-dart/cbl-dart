@@ -7,6 +7,7 @@ import '../database/database.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
+import '../support/errors.dart';
 import '../support/utils.dart';
 import 'array.dart';
 import 'blob.dart';
@@ -122,7 +123,7 @@ class DocumentMContext extends MContext implements DatabaseMContext {
   final DelegateDocument document;
 
   @override
-  Database get database => document.database!;
+  Database get database => document.database;
 }
 
 class DelegateDocument with IterableMixin<String> implements Document {
@@ -152,21 +153,13 @@ class DelegateDocument with IterableMixin<String> implements Document {
     }
   }
 
-  Database? get database => _database;
+  Database get database => _database!;
   Database? _database;
 
-  set database(Database? database) {
-    if (_database == database) {
-      return;
+  set database(Database database) {
+    if (assertMatchingDatabase(_database, database, 'Document')) {
+      _database = database;
     }
-
-    if (_database != null) {
-      throw StateError(
-        'The document cannot be used with  $database because it already '
-        'belongs to $_database: $this',
-      );
-    }
-    _database = database;
   }
 
   void setProperties(EncodedData properties) {
@@ -178,8 +171,6 @@ class DelegateDocument with IterableMixin<String> implements Document {
     EncodingFormat format = EncodingFormat.fleece,
     bool saveExternalData = false,
   }) {
-    assert(database != null);
-
     final encoder = fl.FleeceEncoder(format: format.toFLEncoderFormat())
       ..extraInfo = FleeceEncoderContext(
         database: database,

@@ -183,7 +183,7 @@ class ReplicatorConfiguration {
   /// the other peer is still alive.
   ///
   /// Setting this value to [Duration.zero] or a negative [Duration] will
-  /// result in an [ArgumentError] being thrown.
+  /// result in an [RangeError] being thrown.
   ///
   /// To use the default of 300 seconds, set this property to `null`.
   Duration? get heartbeat => _heartbeat;
@@ -191,10 +191,11 @@ class ReplicatorConfiguration {
 
   set heartbeat(Duration? heartbeat) {
     if (heartbeat != null && heartbeat.inSeconds <= 0) {
-      throw ArgumentError.value(
-        heartbeat,
-        'heartbeat',
-        'must not be zero or negative',
+      throw RangeError.range(
+        heartbeat.inSeconds,
+        1,
+        null,
+        'heartbeat.inSeconds',
       );
     }
     _heartbeat = heartbeat;
@@ -210,18 +211,14 @@ class ReplicatorConfiguration {
   /// replicators will be applied.
   /// Setting the value to `1` with result in no retry attempts.
   ///
-  /// Setting `0` a negative number will result in an [ArgumentError] being
+  /// Setting `0` a negative number will result in an [RangeError] being
   /// thrown.
   int? get maxAttempts => _maxAttempts;
   int? _maxAttempts;
 
   set maxAttempts(int? maxAttempts) {
     if (maxAttempts != null && maxAttempts <= 0) {
-      throw ArgumentError.value(
-        maxAttempts,
-        'maxAttempts',
-        'must not be zero or negative',
-      );
+      throw RangeError.range(maxAttempts, 1, null, 'maxAttempts');
     }
     _maxAttempts = maxAttempts;
   }
@@ -232,7 +229,7 @@ class ReplicatorConfiguration {
   /// customized.
   ///
   /// Setting this value to [Duration.zero] or a negative [Duration] will
-  /// result in an [ArgumentError] being thrown.
+  /// result in an [RangeError] being thrown.
   ///
   /// To use the default of 300 seconds, set this property to `null`.
   Duration? get maxAttemptWaitTime => _maxAttemptWaitTime;
@@ -240,10 +237,11 @@ class ReplicatorConfiguration {
 
   set maxAttemptWaitTime(Duration? maxAttemptWaitTime) {
     if (maxAttemptWaitTime != null && maxAttemptWaitTime.inSeconds <= 0) {
-      throw ArgumentError.value(
-        maxAttemptWaitTime,
-        'maxAttemptWaitTime',
-        'must not be zero or negative',
+      throw RangeError.range(
+        maxAttemptWaitTime.inSeconds,
+        1,
+        null,
+        'maxAttemptWaitTime.inSeconds',
       );
     }
     _maxAttemptWaitTime = maxAttemptWaitTime;

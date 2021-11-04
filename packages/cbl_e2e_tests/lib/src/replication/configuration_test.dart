@@ -38,22 +38,22 @@ void main() {
       )..heartbeat = const Duration(seconds: 1);
 
       expect(config.heartbeat, const Duration(seconds: 1));
-      expect(() => config.heartbeat = Duration.zero, throwsArgumentError);
+      expect(() => config.heartbeat = Duration.zero, throwsRangeError);
       expect(
         () => config.heartbeat = const Duration(seconds: -1),
-        throwsArgumentError,
+        throwsRangeError,
       );
 
       config.maxAttempts = 1;
       expect(config.maxAttempts, 1);
-      expect(() => config.maxAttempts = 0, throwsArgumentError);
-      expect(() => config.maxAttempts = -1, throwsArgumentError);
+      expect(() => config.maxAttempts = 0, throwsRangeError);
+      expect(() => config.maxAttempts = -1, throwsRangeError);
 
       config.maxAttemptWaitTime = const Duration(seconds: 1);
       expect(config.maxAttemptWaitTime, const Duration(seconds: 1));
       expect(
         () => config.maxAttemptWaitTime = Duration.zero,
-        throwsArgumentError,
+        throwsRangeError,
       );
     });
 

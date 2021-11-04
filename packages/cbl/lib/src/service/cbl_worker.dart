@@ -91,7 +91,7 @@ class CblWorker {
     if (_status != status) {
       throw StateError(
         'Expected CblWorker to be ${describeEnum(status)} but it was '
-        '${describeEnum(_status)}',
+        '${describeEnum(_status)}.',
       );
     }
   }

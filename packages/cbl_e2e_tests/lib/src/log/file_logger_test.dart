@@ -14,19 +14,19 @@ void main() {
     test('validate properties', () {
       expect(
         () => LogFileConfiguration(directory: 'A', maxRotateCount: -1),
-        throwsArgumentError,
+        throwsRangeError,
       );
       expect(
         () => LogFileConfiguration(directory: 'A', maxSize: 0),
-        throwsArgumentError,
+        throwsRangeError,
       );
 
       final config = LogFileConfiguration(directory: 'A')..maxRotateCount = 0;
 
-      expect(() => config.maxRotateCount = -1, throwsArgumentError);
+      expect(() => config.maxRotateCount = -1, throwsRangeError);
 
       config.maxSize = 1;
-      expect(() => config.maxSize = 0, throwsArgumentError);
+      expect(() => config.maxSize = 0, throwsRangeError);
     });
 
     test('from', () {

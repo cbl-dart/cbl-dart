@@ -183,7 +183,7 @@ class FleeceEncoder extends FleeceEncoderObject {
     final result = call(_encoderBinds.finish);
 
     if (result == null) {
-      throw StateError('Encoder did not encode anything');
+      throw StateError('Encoder did not encode anything.');
     }
 
     return result;

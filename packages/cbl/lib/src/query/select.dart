@@ -102,13 +102,7 @@ class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
 
   @override
   SyncFrom from(DataSourceInterface dataSource) {
-    if ((dataSource as DataSourceImpl).database is! SyncDatabase) {
-      throw ArgumentError(
-        '`SyncQueryBuilder` must be used with a `SyncDatabase`. '
-        'To build a query for an `AsyncDatabase` use `AsyncQueryBuilder`.',
-      );
-    }
-
+    _assertDataSourceDatabaseType<SyncDatabase>(dataSource, 'Sync', 'Async');
     return SyncFromImpl(query: this, from: dataSource);
   }
 }
@@ -121,13 +115,21 @@ class AsyncSelectImpl extends AsyncBuilderQuery implements AsyncSelect {
 
   @override
   AsyncFrom from(DataSourceInterface dataSource) {
-    if ((dataSource as DataSourceImpl).database is! AsyncDatabase) {
-      throw ArgumentError(
-        '`AsyncQueryBuilder` must be used with an `AsyncDatabase`. '
-        'To build a query for a `SyncDatabase` use `SyncQueryBuilder`.',
-      );
-    }
-
+    _assertDataSourceDatabaseType<AsyncDatabase>(dataSource, 'Async', 'Sync');
     return AsyncFromImpl(query: this, from: dataSource);
+  }
+}
+
+void _assertDataSourceDatabaseType<T>(
+  DataSourceInterface dataSource,
+  String expectedStyle,
+  String actualStyle,
+) {
+  if ((dataSource as DataSourceImpl).database is! T) {
+    throw ArgumentError(
+      '${expectedStyle}QueryBuilder must be used with an '
+      '${expectedStyle}Database. To build a query for a ${actualStyle}Database '
+      'use ${actualStyle}QueryBuilder.',
+    );
   }
 }

@@ -21,7 +21,7 @@ abstract class AbstractListenerToken extends ListenerToken {
   @mustCallSuper
   FutureOr<void> removeListener() {
     if (_isRemoved) {
-      throw StateError('Listener has already been removed');
+      throw StateError('Listener has already been removed.');
     }
     _isRemoved = true;
   }

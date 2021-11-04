@@ -6,8 +6,10 @@ import 'package:meta/meta.dart';
 
 import '../database/blob_store.dart';
 import '../database/database.dart';
+import '../errors.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart';
+import '../support/errors.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'common.dart';
@@ -113,9 +115,11 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
         // ignore: unnecessary_parenthesis
         _content = (properties[blobDataProperty] as Uint8List?) {
     if (_digest == null && _content == null) {
-      throw StateError(
+      throw ArgumentError.value(
+        properties,
+        'properties',
         'Blob loaded from database has neither the `digest` nor the `data` '
-        'property.',
+            'property.',
       );
     }
   }
@@ -238,7 +242,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     if (context != null && context.saveExternalData) {
       final database = context.database;
       if (database != null) {
-        _checkBlobIsFromSameDatabase(database);
+        assertMatchingDatabase(_database, database, 'Blob');
         _database = database;
 
         if (_digest == null) {
@@ -309,15 +313,9 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   }
 
   Never _throwNotFoundError() {
-    throw StateError('Could not find blob in $_database: $_blobProperties');
-  }
-
-  void _checkBlobIsFromSameDatabase(Object database) {
-    if (_database != null && _database != database) {
-      throw StateError(
-        'A document contains a blob that was saved to a different database. '
-        'The save operation cannot complete.',
-      );
-    }
+    throw DatabaseException(
+      'Could not find blob in $_database: $_blobProperties',
+      DatabaseErrorCode.notFound,
+    );
   }
 }
