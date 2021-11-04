@@ -36,7 +36,7 @@ abstract class NativeResource<T extends NativeType> {
 
 mixin ClosableResourceMixin implements ClosableResource {
   ClosableResourceMixin? _parent;
-  late final Set<ClosableResourceMixin> _finalizableChildren = {};
+  late final Set<ClosableResourceMixin> _childrenToClose = {};
   late final _pendingRequests = <Future<void>>[];
   Future<void>? _pendingClose;
 
@@ -49,52 +49,59 @@ mixin ClosableResourceMixin implements ClosableResource {
     _checkIsNotClosed();
 
     _parent = parent;
-    _updateFinalizationRegistration();
+    _updateParentRegistration();
   }
 
-  /// Whether this resource needs to have its [finalize] method called when
-  /// it or its parent is closed.
-  bool get needsFinalization => _needsFinalization;
-  bool _needsFinalization = true;
+  /// Whether this resource needs to be closed when its parent is closed to
+  /// not leak resources.
+  ///
+  /// Even if this property is `false`, the parent might still closed it.
+  bool get needsToBeClosedByParent => _needsToBeClosedByParent;
+  bool _needsToBeClosedByParent = true;
 
-  set needsFinalization(bool needsFinalization) {
+  set needsToBeClosedByParent(bool value) {
     _checkIsNotClosed();
 
-    if (_needsFinalization != needsFinalization) {
-      _needsFinalization = needsFinalization;
-      _updateFinalizationRegistration();
+    if (_needsToBeClosedByParent != value) {
+      _needsToBeClosedByParent = value;
+      _updateParentRegistration();
     }
   }
 
-  /// Performs any work necessary to close this resource.
+  /// Performs the actual work work necessary to close this resource.
+  ///
+  /// Should not be called directly. Instead call [close].
   @protected
-  FutureOr<void> finalize() {}
+  FutureOr<void> performClose() {}
 
-  void _setChildFinalizationEnabled(ClosableResourceMixin child, bool enabled) {
-    if (enabled) {
-      _finalizableChildren.add(child);
+  void _updateChild(
+    ClosableResourceMixin child, {
+    required bool needsToBeClosed,
+  }) {
+    if (needsToBeClosed) {
+      _childrenToClose.add(child);
     } else {
-      _finalizableChildren.remove(child);
+      _childrenToClose.remove(child);
     }
 
-    _updateFinalizationRegistration();
+    _updateParentRegistration();
   }
 
-  bool? _needsFinalizationRegistration;
+  bool? _needsToBeClosed;
 
-  void _updateFinalizationRegistration() {
-    final needsFinalizationRegistration = _needsFinalization ||
-        _finalizableChildren.isNotEmpty ||
+  void _updateParentRegistration() {
+    final needsToBeClosed = _needsToBeClosedByParent ||
+        _childrenToClose.isNotEmpty ||
         _pendingRequests.isNotEmpty;
 
-    if (_needsFinalizationRegistration == needsFinalizationRegistration) {
+    if (_needsToBeClosed == needsToBeClosed) {
       return;
     }
 
-    _needsFinalizationRegistration = needsFinalizationRegistration;
-    _parent?._setChildFinalizationEnabled(
+    _needsToBeClosed = needsToBeClosed;
+    _parent?._updateChild(
       this,
-      needsFinalizationRegistration,
+      needsToBeClosed: needsToBeClosed,
     );
   }
 
@@ -117,14 +124,14 @@ mixin ClosableResourceMixin implements ClosableResource {
 
       void removePendingRequest(Object? _) {
         _pendingRequests.remove(request);
-        _updateFinalizationRegistration();
+        _updateParentRegistration();
       }
 
       request = it
           .then(removePendingRequest, onError: removePendingRequest)
           .also(_pendingRequests.add);
 
-      _updateFinalizationRegistration();
+      _updateParentRegistration();
     });
   }
 
@@ -132,21 +139,19 @@ mixin ClosableResourceMixin implements ClosableResource {
   Future<void> close() => _pendingClose ??= Future.sync(() async {
         final parent = _parent;
         if (parent != null && !parent._isClosed) {
-          _parent?._setChildFinalizationEnabled(this, false);
+          _parent?._updateChild(this, needsToBeClosed: false);
         }
 
         _isClosed = true;
 
         await Future.wait([
           ..._pendingRequests,
-          ..._finalizableChildren.map((child) => child.close()),
+          ..._childrenToClose.map((child) => child.close()),
         ]);
 
-        _finalizableChildren.clear();
+        _childrenToClose.clear();
 
-        if (_needsFinalization) {
-          await finalize();
-        }
+        await performClose();
       });
 
   void _checkIsNotClosed() {

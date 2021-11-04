@@ -126,7 +126,7 @@ class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
     }
 
     if (!isClosed) {
-      needsFinalization = false;
+      needsToBeClosedByParent = false;
     }
 
     _cancellation = Future.wait([
@@ -158,7 +158,11 @@ class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
   }
 
   @override
-  FutureOr<void> finalize() async {
+  FutureOr<void> performClose() async {
+    if (!needsToBeClosedByParent) {
+      return;
+    }
+
     // This method is only called for streams that have been used because,
     // streams are only registered with their parent when being listened to.
 

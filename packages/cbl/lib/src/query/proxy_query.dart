@@ -55,12 +55,12 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   @override
   Future<ResultSet> execute() => use(() => ProxyResultSet(
         query: this,
-        results: database!.channel.stream(ExecuteQuery(queryId: objectId!)),
+        results: channel!.stream(ExecuteQuery(queryId: objectId!)),
       ));
 
   @override
   Future<String> explain() =>
-      use(() => database!.channel.call(ExplainQuery(queryId: objectId!)));
+      use(() => channel!.call(ExplainQuery(queryId: objectId!)));
 
   @override
   Future<ListenerToken> addChangeListener(QueryChangeListener listener) =>
@@ -74,10 +74,11 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   ) async {
     final client = database!.client;
     late final ProxyListenerToken<QueryChange> token;
+
     final listenerId = client.registerQueryChangeListener((resultSetId) {
       final results = ProxyResultSet(
         query: this,
-        results: client.channel.stream(QueryChangeResultSet(
+        results: channel!.stream(QueryChangeResultSet(
           queryId: objectId!,
           resultSetId: resultSetId,
         )),
@@ -86,7 +87,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
       token.callListener(change);
     });
 
-    await client.channel.call(AddQueryChangeListener(
+    await channel!.call(AddQueryChangeListener(
       queryId: objectId!,
       listenerId: listenerId,
     ));
@@ -113,7 +114,9 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
   @override
   Future<void> performPrepare() async {
-    final state = await database!.channel.call(CreateQuery(
+    final channel = database!.channel;
+
+    final state = await channel.call(CreateQuery(
       databaseId: database!.objectId,
       language: language,
       queryDefinition: definition!,
@@ -122,7 +125,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
     _columnNames = state.columnNames;
 
-    bindToTargetObject(database!.channel, state.id);
+    bindToTargetObject(channel, state.id);
   }
 
   Future<void> _applyParameters(Parameters? parameters) {
@@ -134,10 +137,17 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
       encodedParameters = EncodedData.fleece(encoder.finish());
     }
 
-    return database!.channel.call(SetQueryParameters(
+    return channel!.call(SetQueryParameters(
       queryId: objectId!,
       parameters: encodedParameters,
     ));
+  }
+
+  @override
+  Future<void> performClose() async {
+    if (isBoundToTarget) {
+      return finalizeEarly();
+    }
   }
 }
 

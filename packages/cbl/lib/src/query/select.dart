@@ -91,7 +91,7 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   FutureOr<void> performPrepare() => throw UnimplementedError();
 
   @override
-  Future<void> finalize() => throw UnimplementedError();
+  Future<void> performClose() => throw UnimplementedError();
 }
 
 class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {

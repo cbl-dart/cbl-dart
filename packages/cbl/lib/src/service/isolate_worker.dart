@@ -64,11 +64,15 @@ class IsolateWorker {
 
     try {
       await Future(() async {
+        // Tell the worker to clean up.
         await _controlChannel.call(_DisposeDelegate());
+        // Wait for the isolate to exit normally.
         await Future.any([onError, _onExit]);
       }).timeout(timeout);
     } on TimeoutException {
+      // Kill the isolate after it did not exit in time.
       _isolate.kill();
+      // Wait for the isolate to finally exit.
       await Future.any([onError, _onExit]);
       rethrow;
     }

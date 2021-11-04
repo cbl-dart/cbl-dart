@@ -299,7 +299,7 @@ class FfiDatabase extends CBLDatabaseObject
           ));
 
   @override
-  Future<void> finalize() async {
+  Future<void> performClose() async {
     if (_deleteOnClose) {
       call(_bindings.delete);
     } else {

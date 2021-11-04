@@ -122,7 +122,7 @@ class FfiReplicator
         attachTo(database);
         // ignore: avoid_catches_without_on_clauses
       } catch (e) {
-        _disposeCallbacks();
+        _closeCallbacks();
         rethrow;
       } finally {
         _bindings.freeEndpoint(endpoint);
@@ -146,6 +146,10 @@ class FfiReplicator
 
   late final List<AsyncCallback> _callbacks;
 
+  var _isStarted = false;
+  var _isStopping = false;
+  Completer<void>? _stopped;
+
   @override
   ReplicatorConfiguration get config => ReplicatorConfiguration.from(_config);
 
@@ -156,16 +160,39 @@ class FfiReplicator
       native.call(_bindings.status).toReplicatorStatus();
 
   @override
-  void start({bool reset = false}) =>
-      useSync(() => native.call((pointer) => _bindings.start(
-            pointer,
-            resetCheckpoint: reset,
-          )));
+  void start({bool reset = false}) => useSync(() {
+        if (_isStarted) {
+          return;
+        }
+        _isStarted = true;
+        _isStopping = false;
+
+        late AbstractListenerToken token;
+        token = _addChangeListener((change) {
+          if (change.status.activity == ReplicatorActivityLevel.stopped) {
+            _isStarted = false;
+            _isStopping = false;
+            _stopped?.complete();
+            _stopped = null;
+            token.removeListener();
+          }
+        });
+
+        native.call((pointer) => _bindings.start(
+              pointer,
+              resetCheckpoint: reset,
+            ));
+      });
 
   @override
   void stop() => useSync(_stop);
 
   void _stop() {
+    if (_isStopping) {
+      return;
+    }
+    _isStopping = true;
+
     // As a workaround for a bug in Couchbase Lite, a replicator is only stopped
     // when it is not connecting. The bug can cause a crash if a replicator is
     // stopped before the web socket connection to the target has been
@@ -282,22 +309,24 @@ class FfiReplicator
       .call((pointer) => _bindings.isDocumentPending(pointer, documentId)));
 
   @override
-  Future<void> finalize() async {
-    try {
-      var stopping = false;
-      while (_status.activity != ReplicatorActivityLevel.stopped) {
-        if (!stopping) {
-          _stop();
-          stopping = true;
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+  Future<void> performClose() async {
+    await _ensureIsStopped();
+    _closeCallbacks();
+  }
+
+  Future<void> _ensureIsStopped() async {
+    if (_isStarted) {
+      _stopped = Completer<void>();
+
+      if (!_isStopping) {
+        _stop();
       }
-    } finally {
-      _disposeCallbacks();
+
+      await _stopped!.future;
     }
   }
 
-  void _disposeCallbacks() {
+  void _closeCallbacks() {
     for (final callback in _callbacks) {
       callback.close();
     }

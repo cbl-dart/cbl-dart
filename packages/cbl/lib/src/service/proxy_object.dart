@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import '../support/dart_finalizer.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
 
 abstract class ProxyObject with ProxyObjectMixin {
-  ProxyObject(Channel channel, int objectId) {
-    bindToTargetObject(channel, objectId);
+  ProxyObject(
+    Channel channel,
+    int objectId, {
+    FutureOr<void> Function()? proxyFinalizer,
+  }) {
+    bindToTargetObject(channel, objectId, proxyFinalizer: proxyFinalizer);
   }
 
   @override
@@ -20,6 +26,9 @@ abstract class ProxyObject with ProxyObjectMixin {
 ///
 /// The target object is accessed through a [CblService].
 mixin ProxyObjectMixin {
+  /// Whether this proxy object has been bound to a target object.
+  bool get isBoundToTarget => _objectId != null;
+
   /// The channel to the [CblService] through which the target object
   /// is accessed.
   Channel? get channel => _channel;
@@ -31,7 +40,11 @@ mixin ProxyObjectMixin {
 
   late Object _finalizerToken;
 
-  void bindToTargetObject(Channel channel, int objectId) {
+  void bindToTargetObject(
+    Channel channel,
+    int objectId, {
+    FutureOr<void> Function()? proxyFinalizer,
+  }) {
     if (_channel != null) {
       throw StateError('ProxyObject has already been already bound.');
     }
@@ -41,22 +54,27 @@ mixin ProxyObjectMixin {
 
     _finalizerToken = dartFinalizerRegistry.registerFinalizer(
       this,
-      _finalizer(_channel!, _objectId!),
+      _finalizer(_channel!, _objectId!, proxyFinalizer),
     );
   }
 
-  void finalizeEarly() {
-    dartFinalizerRegistry.unregisterFinalizer(
-      _finalizerToken,
-      callFinalizer: true,
-    );
+  Future<void> finalizeEarly() {
+    assert(isBoundToTarget);
+    dartFinalizerRegistry.unregisterFinalizer(_finalizerToken);
+    return channel!.call(ReleaseObject(objectId!));
   }
 }
 
-DartFinalizer _finalizer(Channel channel, int id) => () {
+DartFinalizer _finalizer(
+  Channel channel,
+  int id,
+  FutureOr<void> Function()? proxyFinalizer,
+) =>
+    () async {
       // If the channel has already been closed the target object will be
       // cleaned as part of closing the service.
       if (channel.status == ChannelStatus.open) {
-        channel.call(ReleaseObject(id));
+        await channel.call(ReleaseObject(id));
       }
+      await proxyFinalizer?.call();
     };

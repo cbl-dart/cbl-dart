@@ -286,14 +286,13 @@ class ProxyDatabase extends ProxyObject
           ));
 
   @override
-  Future<void> finalize() async {
+  Future<void> performClose() async {
     if (_deleteOnClose) {
       await channel.call(DeleteDatabase(objectId));
     } else {
-      await channel.call(CloseDatabase(objectId));
+      await finalizeEarly();
     }
     path = null;
-    finalizeEarly();
   }
 
   @override
@@ -398,8 +397,8 @@ class WorkerDatabase extends ProxyDatabase {
   final CblWorker worker;
 
   @override
-  Future<void> finalize() async {
-    await super.finalize();
+  Future<void> performClose() async {
+    await super.performClose();
     await worker.stop();
   }
 }
@@ -427,8 +426,8 @@ class RemoteDatabase extends ProxyDatabase {
   }
 
   @override
-  Future<void> finalize() async {
-    await super.finalize();
+  Future<void> performClose() async {
+    await super.performClose();
     await channel.close();
   }
 }

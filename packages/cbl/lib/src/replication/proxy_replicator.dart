@@ -32,8 +32,7 @@ class ProxyReplicator extends ProxyObject
     required void Function() unregisterCallbacks,
   })  : assert(database == config.database),
         _config = ReplicatorConfiguration.from(config),
-        _unregisterCallbacks = unregisterCallbacks,
-        super(database.channel, objectId) {
+        super(database.channel, objectId, proxyFinalizer: unregisterCallbacks) {
     attachTo(database);
   }
 
@@ -78,9 +77,11 @@ class ProxyReplicator extends ProxyObject
         .let(client.registerConflictResolver);
 
     void unregisterCallbacks() {
-      [pushFilterId, pullFilterId, conflictResolverId]
-          .whereType<int>()
-          .forEach(client.unregisterObject);
+      [
+        pushFilterId,
+        pullFilterId,
+        conflictResolverId,
+      ].whereType<int>().forEach(client.unregisterObject);
     }
 
     try {
@@ -118,8 +119,6 @@ class ProxyReplicator extends ProxyObject
   }
 
   final ProxyDatabase database;
-
-  final void Function() _unregisterCallbacks;
 
   late final _listenerTokens = ListenerTokenRegistry(this);
 
@@ -230,11 +229,7 @@ class ProxyReplicator extends ProxyObject
       .then((value) => value.toSet()));
 
   @override
-  Future<void> finalize() async {
-    await _stop();
-    _unregisterCallbacks();
-    finalizeEarly();
-  }
+  FutureOr<void> performClose() => finalizeEarly();
 
   @override
   String toString() => [
