@@ -323,8 +323,8 @@ struct CBLDart_ReplicatorConfiguration {
   CBLAuthenticator *authenticator;
   CBLDart_CBLProxySettings *proxy;
   FLDict headers;
-  FLSlice *pinnedServerCertificate;
-  FLSlice *trustedRootCertificates;
+  CBLDart_FLSlice *pinnedServerCertificate;
+  CBLDart_FLSlice *trustedRootCertificates;
   FLArray channels;
   FLArray documentIDs;
   CBLDart_AsyncCallback pushFilter;

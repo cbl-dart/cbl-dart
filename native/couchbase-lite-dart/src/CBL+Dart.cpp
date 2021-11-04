@@ -875,12 +875,14 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   }
 
   config_.headers = config->headers;
-  config_.pinnedServerCertificate = config->pinnedServerCertificate == nullptr
-                                        ? kFLSliceNull
-                                        : *config->pinnedServerCertificate;
-  config_.trustedRootCertificates = config->trustedRootCertificates == nullptr
-                                        ? kFLSliceNull
-                                        : *config->trustedRootCertificates;
+  config_.pinnedServerCertificate =
+      config->pinnedServerCertificate == nullptr
+          ? kFLSliceNull
+          : CBLDart_FLSliceFromDart(*config->pinnedServerCertificate);
+  config_.trustedRootCertificates =
+      config->trustedRootCertificates == nullptr
+          ? kFLSliceNull
+          : CBLDart_FLSliceFromDart(*config->trustedRootCertificates);
   config_.channels = config->channels;
   config_.documentIDs = config->documentIDs;
   config_.pullFilter = config->pullFilter == nullptr
