@@ -15,7 +15,7 @@ native platforms which are supported by Dart.
 > This package is in beta. Use it with caution and [report any issues you
 > see][issues].
 
-**Table of contents:**
+### Table of contents
 
 - [🤩 Features](#-features)
 - [⛔ Limitations](#-limitations)
@@ -38,7 +38,7 @@ native platforms which are supported by Dart.
 - [🤝 Contributing](#-contributing)
 - [⚖️ Disclaimer](#️-disclaimer)
 
-## 🤩 Features
+# 🤩 Features
 
 - Offline first
 - Documents
@@ -66,7 +66,7 @@ native platforms which are supported by Dart.
 
 **\***: **Enterprise Edition** only feature
 
-## ⛔ Limitations
+# ⛔ Limitations
 
 Some of the features supported by other platform implementation of Couchbase
 Lite are currently not supported:
@@ -77,15 +77,15 @@ Lite are currently not supported:
 - Integration with system-wide configured proxies
 - VPN On Demand on iOS
 
-## 🔌 Getting started for Flutter
+# 🔌 Getting started for Flutter
 
 Head over to the [Flutter plugin for Couchbase Lite
 (`cbl_flutter`)][cbl_flutter] to get started using Couchbase Lite in your
 Flutter app.
 
-## 🔑 Key concepts
+# 🔑 Key concepts
 
-### Synchronous and Asynchronous APIs
+## Synchronous and Asynchronous APIs
 
 The whole Couchbase Lite API comes in both a synchronous and asynchronous
 version. The synchronous version is more efficient and slightly more convenient
@@ -137,7 +137,7 @@ Future<int> runCountQuery(Query query) {
 }
 ```
 
-### Change listeners
+## Change listeners
 
 Certain objects allow you to register change listeners. In the case of
 synchronous APIs, all changes are delivered to the listeners as soon as they are
@@ -169,7 +169,7 @@ final token = await db.addChangeListener((change) { });
 await db.removeChangeListener(token);
 ```
 
-### Change streams
+## Change streams
 
 Streams are a convenient alternative to listen to changes. Similarly to change
 listeners, change streams returned from synchronous APIs are receiving changes
@@ -197,7 +197,7 @@ await db.saveDocument(MutableDocument.withId('Hey'));
 To stop listening to changes just cancel the subscription, like with any other
 stream.
 
-### Closing resources
+## Closing resources
 
 Some types implement `ClosableResource`. At the moment these are `Database` and
 `Replicator`. Once you are done with an instance of these types, call its
@@ -205,9 +205,9 @@ Some types implement `ClosableResource`. At the moment these are `Database` and
 listeners, close streams and close child resources. For example closing a
 database will also close any associated replicators.
 
-## 📖 Usage examples
+# 📖 Usage examples
 
-### Open a database
+## Open a database
 
 Every database has a name which is used to determine its filename. The full
 filename is the concatenation of the database name and the extension `.cblite2`.
@@ -237,7 +237,7 @@ When you are done with the database, you should close it by calling
 as remove change listeners, close change streams and close associated
 replicators.
 
-### Create a document
+## Create a document
 
 The default constructor of `MutableDocument` creates a document with a randomly
 generated id and optionally initializes it with some properties:
@@ -262,7 +262,7 @@ final doc = MutableDocument.withId('ali', {
 await db.saveDocument(doc);
 ```
 
-### Read a document
+## Read a document
 
 To read a document pass the document's id to `Database.document`:
 
@@ -276,7 +276,7 @@ if (doc != null) {
 }
 ```
 
-### Update a document
+## Update a document
 
 To update a document, first read it, turn it into a `MutableDocument` and update
 its properties. Then save it again with `Database.saveDocument`:
@@ -307,7 +307,7 @@ await db.saveDocument(mutableDoc);
 Check out the documentation for `Database.saveDocument` to learn about how
 conflicts are handled.
 
-### Delete a document
+## Delete a document
 
 To delete a document, you need to read it first, and than pass it to
 `Database.deleteDocument`:
@@ -321,7 +321,7 @@ await db.deleteDocument(doc);
 Check out the documentation for `Database.deleteDocument` to learn about how
 conflicts are handled.
 
-### Build a query with `QueryBuilder`
+## Build a query with `QueryBuilder`
 
 This query returns the average age of people with the same name:
 
@@ -365,7 +365,7 @@ Given these documents:
 ]
 ```
 
-### Build a query with N1QL
+## Build a query with N1QL
 
 This is the equivalent [N1QL] query to the one above:
 
@@ -380,7 +380,7 @@ final query = await Query.fromN1ql(
 );
 ```
 
-### Data sync with Sync Gateway
+## Data sync with Sync Gateway
 
 This example synchronizes the database with a remote Sync Gateway instance,
 without authentication. This only works when Sync Gateway has been configured
@@ -414,7 +414,7 @@ When you are done with the replicator, you should close it by calling
 `Replicator.close`. This will free up any resources used by the replicator, as
 well as remove change listeners and close change streams.
 
-## 💡 Where to go next
+# 💡 Where to go next
 
 - API Reference: The Dart API is well documented and organized into topics.
 - [Couchbase Lite Swift Docs]: For more information on Couchbase Lite concepts.
@@ -422,7 +422,7 @@ well as remove change listeners and close change streams.
 - [N1QL Language Reference]
 - [Sync Gateway Docs]
 
-## 🤝 Contributing
+# 🤝 Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to
 discuss what you would like to change.
@@ -431,7 +431,7 @@ Please make sure to update tests as appropriate.
 
 Read [CONTRIBUTING] to get started developing.
 
-## ⚖️ Disclaimer
+# ⚖️ Disclaimer
 
 > ⚠️ This is not an official Couchbase product.
 

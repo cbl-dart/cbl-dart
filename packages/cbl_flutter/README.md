@@ -11,17 +11,17 @@ the use of `cbl` in Flutter apps.
 > This package is in beta. Use it with caution and [report any issues you
 > see][issues].
 
-## 🎯 Platform Support
+# 🎯 Platform Support
 
-| Platform | Version         | Note                                                                                                                                                                     |
-| -------: | :-------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|      iOS | >= 10.0         |                                                                                                                                                                          |
-|    macOS | >= 10.14        |                                                                                                                                                                          |
-|  Android | >= 22           |                                                                                                                                                                          |
-|    Linux | == 20.04-x86_64 | 🐛 Currently broken because of a [bug in Flutter](https://github.com/flutter/flutter/issues/66575).<br>Most notably, operations trying to return an error crash the app. |
-|  Windows | >= 10           | 🚧 Not yet implemented                                                                                                                                                   |
+| Platform | Version                | Note                                                                                                                                                                     |
+| -------: | :--------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|      iOS | >= 10.0                |                                                                                                                                                                          |
+|    macOS | >= 10.14               |                                                                                                                                                                          |
+|  Android | >= 22                  |                                                                                                                                                                          |
+|    Linux | == Ubuntu 20.04-x86_64 | 🐛 Currently broken because of a [bug in Flutter](https://github.com/flutter/flutter/issues/66575).<br>Most notably, operations trying to return an error crash the app. |
+|  Windows | >= 10                  | 🚧 Not yet implemented                                                                                                                                                   |
 
-## 🔌 Getting started
+# 🔌 Getting started
 
 1. Add [`cbl`][cbl] and `cbl_flutter` as dependencies:
 
@@ -67,19 +67,19 @@ Future<void> initCouchbaseLite() async {
 }
 ```
 
-## Default database directory
+# Default database directory
 
 When opening a database without specifying a directory,
 [`path_provider`][path_provider]'s `getApplicationSupportDirectory` is used to
 resolve it. See that function's documentation for the concrete locations on the
 various platforms.
 
-## 💡 Where to go next
+# 💡 Where to go next
 
 - Check out the example app in the **Example** tab.
 - Look at the usage examples for [`cbl`][cbl] (go to the latest prerelease).
 
-## ⚖️ Disclaimer
+# ⚖️ Disclaimer
 
 > ⚠️ This is not an official Couchbase product.
 
