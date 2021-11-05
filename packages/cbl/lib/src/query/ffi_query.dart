@@ -142,6 +142,7 @@ class FfiQuery extends QueryBase
       return;
     }
     _isPrepared = true;
+    attachToParentResource();
     _performPrepare();
   }
 

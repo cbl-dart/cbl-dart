@@ -112,7 +112,10 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
         return f();
       });
 
-  Future<void> prepare() => _preparation ??= _performPrepare();
+  Future<void> prepare() {
+    attachToParentResource();
+    return _preparation ??= _performPrepare();
+  }
 
   Future<void> _performPrepare() async {
     final channel = database!.channel;
