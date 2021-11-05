@@ -3,7 +3,7 @@ description:
   Provides the Couchbase Lite {{#capitalize}}{{edition}}{{/capitalize}} Edition
   for Flutter apps.
 version: {{version}}
-homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter
+homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/{{name}}
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
 

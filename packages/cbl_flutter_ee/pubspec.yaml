@@ -1,0 +1,37 @@
+name: cbl_flutter_ee
+description:
+  Provides the Couchbase Lite Enterprise Edition
+  for Flutter apps.
+version: 1.0.0-beta.1
+homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_ee
+repository: https://github.com/cbl-dart/cbl-dart
+issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=2.5.0'
+
+dependencies:
+  cbl_flutter_platform_interface: ^1.0.0-beta.0
+  cbl_libcblite_api: 3.0.0-beta.2
+  cbl_libcblitedart_api: 1.0.0-beta.2
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    implements: cbl_flutter
+    platforms:
+      android:
+        package: com.terwesten.gabriel.cbl_flutter_ee
+        pluginClass: CblFlutterEe
+        dartPluginClass: CblFlutterEe
+      ios:
+        pluginClass: CblFlutterEe
+        dartPluginClass: CblFlutterEe
+      linux:
+        pluginClass: CblFlutterEe
+        dartPluginClass: CblFlutterEe
+      macos:
+        pluginClass: CblFlutterEe
+        dartPluginClass: CblFlutterEe
