@@ -1,3 +1,9 @@
+## 1.0.0-beta.8
+
+ - **DOCS**: remove references to specific package versions from README. ([c49af91f](https://github.com/cbl-dart/cbl-dart/commit/c49af91fc92c5f27da6d41b2836ef997531b5253))
+ - **DOCS**: update formatting of READMEs. ([46da1b0a](https://github.com/cbl-dart/cbl-dart/commit/46da1b0a9ad6dd887afc77c960f41e1e2e162e1a))
+ - **DOCS**: expand README. ([7ba2b701](https://github.com/cbl-dart/cbl-dart/commit/7ba2b701b06bde5bd4befb1f0f42e003a29ef53f))
+
 ## 1.0.0-beta.7
 
 > Note: This release has breaking changes.

@@ -1,3 +1,9 @@
+## 0.7.0-beta.7
+
+ - **FEAT**: add support for database encryption (#213). ([a92b9e45](https://github.com/cbl-dart/cbl-dart/commit/a92b9e4590e3424ff8d32914cc73d1ec6a1164bb))
+ - **FEAT**: add `DatabaseEndpoint` for local replication (#212). ([95274353](https://github.com/cbl-dart/cbl-dart/commit/952743535a55f48592e4542faa1eea9689cd2680))
+ - **CHORE**: cut release for `cbl_libcblitedart_api` `1.0.0-beta.3`. ([0779ed59](https://github.com/cbl-dart/cbl-dart/commit/0779ed59ba0f9e7fff167727e4678f91a0aca684))
+
 ## 0.7.0-beta.6
 
  - **REFACTOR**: remove workaround in `CBLErrorException.fromCBLErrorWithSource` for bug in CBL C (#196). ([c89bf0c9](https://github.com/cbl-dart/cbl-dart/commit/c89bf0c9e57a5165a2a53803a1b81545bf5c321d))
