@@ -1,3 +1,7 @@
+## 1.0.0-beta.2
+
+- **FEAT**: provide `libcblitedart` 1.0.0-beta.3
+
 ## 1.0.0-beta.1
 
 - **FEAT**: provide `libcblitedart` 1.0.0-beta.2
