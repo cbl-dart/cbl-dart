@@ -224,29 +224,22 @@ void main() {
       });
 
       test('set values', () {
-        final array = MutableArray([null]);
-
-        // ignore: cascade_invocations
-        array.setValue('x', at: 0);
-        expect(array.value(0), 'x');
-        array.setString('a', at: 0);
-        expect(array.value(0), 'a');
-        array.setInteger(1, at: 0);
-        expect(array.value(0), 1);
-        array.setFloat(.2, at: 0);
-        expect(array.value(0), .2);
-        array.setNumber(3, at: 0);
-        expect(array.value(0), 3);
-        array.setBoolean(true, at: 0);
-        expect(array.value(0), true);
-        array.setDate(testDate, at: 0);
-        expect(array.date(0), testDate);
-        array.setBlob(testBlob, at: 0);
-        expect(array.value(0), testBlob);
-        array.setArray(MutableArray([true]), at: 0);
-        expect(array.value(0), MutableArray([true]));
-        array.setDictionary(MutableDictionary({'key': 'value'}), at: 0);
-        expect(array.value(0), MutableDictionary({'key': 'value'}));
+        setValuesTest(
+          build: (state) => MutableArray(state),
+          initialValue: 'a',
+        );
+        setValuesTest(
+          build: (state) => immutableArray(state).toMutable(),
+          initialValue: 'a',
+        );
+        setValuesTest(
+          build: (state) => MutableArray(state),
+          initialValue: <Object?>[],
+        );
+        setValuesTest(
+          build: (state) => immutableArray(state).toMutable(),
+          initialValue: <Object?>[],
+        );
       });
 
       test('setter throw when index is out of range', () {
@@ -367,4 +360,63 @@ Array immutableArray([List<Object?>? data]) {
   );
   // ignore: cast_nullable_to_non_nullable
   return root.asNative as Array;
+}
+
+void setValuesTest({
+  required MutableArray Function(List<Object?> state) build,
+  Object? initialValue,
+}) {
+  const index = 0;
+  final initialData = [initialValue];
+  void check(void Function(MutableArray array) fn) => fn(build(initialData));
+
+  check((array) {
+    array.setValue('x', at: index);
+    expect(array.value(index), 'x');
+  });
+
+  check((array) {
+    array.setString('a', at: index);
+    expect(array.value(index), 'a');
+  });
+
+  check((array) {
+    array.setInteger(1, at: index);
+    expect(array.value(index), 1);
+  });
+
+  check((array) {
+    array.setFloat(.2, at: index);
+    expect(array.value(index), .2);
+  });
+
+  check((array) {
+    array.setNumber(3, at: index);
+    expect(array.value(index), 3);
+  });
+
+  check((array) {
+    array.setBoolean(true, at: index);
+    expect(array.value(index), true);
+  });
+
+  check((array) {
+    array.setDate(testDate, at: index);
+    expect(array.date(index), testDate);
+  });
+
+  check((array) {
+    array.setBlob(testBlob, at: index);
+    expect(array.value(index), testBlob);
+  });
+
+  check((array) {
+    array.setArray(MutableArray([true]), at: index);
+    expect(array.value(index), MutableArray([true]));
+  });
+
+  check((array) {
+    array.setDictionary(MutableDictionary({'key': 'value'}), at: index);
+    expect(array.value(index), MutableDictionary({'key': 'value'}));
+  });
 }
