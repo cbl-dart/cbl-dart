@@ -27,8 +27,8 @@ the use of `cbl` in Flutter apps.
 
 ```yaml
 dependencies:
-  cbl: ^1.0.0-beta.7
-  cbl_flutter: ^1.0.0-beta.7
+  cbl: ...
+  cbl_flutter: ...
 ```
 
 2. Select the edition of Couchbase Lite you want to use, by adding as a
@@ -38,8 +38,8 @@ dependencies:
    Enterprise Edition:
 
 ```yaml
-# This dependency selects the Couchbase Lite Community Edition.
-cbl_flutter_ce: ^1.0.0-beta.1
+  # This dependency selects the Couchbase Lite Community Edition.
+  cbl_flutter_ce: ...
 ```
 
 > ⚖️ You need to comply with the Couchbase licensing terms of the edition of
