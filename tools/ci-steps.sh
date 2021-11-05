@@ -72,12 +72,18 @@ function bootstrapPackage() {
 
     case "$embedder" in
     standalone)
-        melos bootstrap --scope "$testPackage"
+        if [[ "$noMelos" == "true" ]]; then
+            cd "$testPackageDir"
+            dart pub get
+        else
+            melos bootstrap --scope "$testPackage"
+        fi
         ;;
     flutter)
         # `flutter pub get` creates some files which `melos bootstrap` doesn't.
-        melos exec --scope "$testPackage" -- flutter pub get
-        
+        cd "$testPackageDir"
+        flutter pub get
+
         if [[ "$noMelos" != "true" ]]; then
             melos bootstrap --scope "$testPackage"
         fi

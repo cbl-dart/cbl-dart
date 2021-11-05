@@ -78,7 +78,7 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
 
-      - name: Bootstrap Dart package
+      - name: Bootstrap Dart packages
         run: melos bootstrap
 
       - name: Analyze code
@@ -116,7 +116,7 @@ jobs:
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
-        run: melos bootstrap --scope ${{ matrix.package }}
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
