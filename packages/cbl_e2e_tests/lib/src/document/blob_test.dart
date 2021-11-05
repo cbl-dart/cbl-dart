@@ -20,7 +20,7 @@ void main() {
   group('Blob', () {
     group('from data', () {
       test('initial properties', () {
-        final blob = Blob.fromData(contentType, fixedTestContent);
+        final blob = blobFromData();
         expect(blob.contentType, contentType);
         expect(blob.length, fixedTestContent.length);
         expect(blob.digest, isNull);
@@ -162,7 +162,7 @@ void main() {
 
     apiTest('remove from document', () async {
       final db = await openTestDatabase();
-      final blob = Blob.fromData(contentType, fixedTestContent);
+      final blob = blobFromData();
       final doc = MutableDocument({'blob': blob});
       await db.saveDocument(doc);
       doc.removeValue('blob');
@@ -173,7 +173,7 @@ void main() {
 
     test('toJson returns JSON representation of saved blob', () async {
       final db = openSyncTestDatabase();
-      final blob = Blob.fromData(contentType, Uint8List(0));
+      final blob = blobFromDataWithLength();
       final doc = MutableDocument({'blob': blob});
       db.saveDocument(doc);
 
@@ -191,8 +191,15 @@ void main() {
     });
 
     test('toJson throws when blob has not been saved', () {
-      final blob = Blob.fromData(contentType, Uint8List(0));
+      final blob = blobFromData();
       expect(blob.toJson, throwsStateError);
+    });
+
+    test('replace unsaved blob in document', () {
+      final doc = MutableDocument({'blob': blobFromData()});
+      final newBlob = blobFromData();
+      doc['blob'].value = newBlob;
+      expect(doc['blob'].value, newBlob);
     });
 
     test('==', () {
@@ -200,7 +207,7 @@ void main() {
       Blob b;
 
       // Identical blobs are equal.
-      a = Blob.fromData(contentType, fixedTestContent);
+      a = blobFromData();
       expect(a, a);
 
       // Blobs with same digest are equal.
@@ -212,33 +219,33 @@ void main() {
       expect(a, equality(b));
     });
 
-    test('== throws if either blob has no digest', () {
+    test('== return false if either blob has no digest', () {
       final blobWithDigest = testBlob;
-      final blobWithoutDigest = Blob.fromData(contentType, fixedTestContent);
+      final blobWithoutDigest = blobFromData();
 
-      expect(() => blobWithDigest == blobWithoutDigest, throwsStateError);
-      expect(() => blobWithoutDigest == blobWithDigest, throwsStateError);
+      expect(blobWithDigest, isNot(blobWithoutDigest));
+      expect(blobWithoutDigest, isNot(blobWithDigest));
     });
 
     test('hashCode', () {
       expect(testBlob.hashCode, testBlob.digest.hashCode);
     });
 
-    test('hashCode throws if blob has no digest', () {
+    test('hashCode returns fixed hashCode if blob has no digest', () {
       expect(
-        () => Blob.fromData(contentType, fixedTestContent).hashCode,
-        throwsStateError,
+        blobFromData().hashCode,
+        31,
       );
     });
 
     test('toString', () {
       expect(
-        Blob.fromData(contentType, Uint8List(1024)).toString(),
+        blobFromDataWithLength(1024).toString(),
         'Blob($contentType; 1.5 KB)',
       );
 
       expect(
-        Blob.fromData(contentType, Uint8List(0)).toString(),
+        blobFromDataWithLength().toString(),
         'Blob($contentType; 0.5 KB)',
       );
 
@@ -258,6 +265,11 @@ void main() {
 const contentType = 'application/octet-stream';
 final fixedTestContent = utf8.encode('content') as Uint8List;
 const fixedTestContentDigest = 'sha1-BA8G/XdAkkeNRQd09bowxdp4rMg=';
+
+Blob blobFromData() => Blob.fromData(contentType, fixedTestContent);
+
+Blob blobFromDataWithLength([int length = 0]) =>
+    Blob.fromData(contentType, Uint8List(length));
 
 /// Returns random bytes for blob.
 ///

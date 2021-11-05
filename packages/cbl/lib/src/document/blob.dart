@@ -282,7 +282,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     }
 
     if (_digest == null || other._digest == null) {
-      _throwNotSavedError('Cannot compare unsaved blobs.');
+      return false;
     }
 
     return _digest == other._digest;
@@ -291,7 +291,7 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   @override
   int get hashCode {
     if (_digest == null) {
-      _throwNotSavedError("Cannot compute the blob's hash code.");
+      return 31;
     }
 
     return _digest.hashCode;
