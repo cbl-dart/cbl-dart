@@ -242,29 +242,22 @@ void main() {
       });
 
       test('set values', () {
-        final dictionary = MutableDictionary({'a': true});
-
-        // ignore: cascade_invocations
-        dictionary.setValue('x', key: 'a');
-        expect(dictionary.value('a'), 'x');
-        dictionary.setString('a', key: 'a');
-        expect(dictionary.value('a'), 'a');
-        dictionary.setInteger(1, key: 'a');
-        expect(dictionary.value('a'), 1);
-        dictionary.setFloat(.2, key: 'a');
-        expect(dictionary.value('a'), .2);
-        dictionary.setNumber(3, key: 'a');
-        expect(dictionary.value('a'), 3);
-        dictionary.setBoolean(true, key: 'a');
-        expect(dictionary.value('a'), true);
-        dictionary.setDate(testDate, key: 'a');
-        expect(dictionary.date('a'), testDate);
-        dictionary.setBlob(testBlob, key: 'a');
-        expect(dictionary.value('a'), testBlob);
-        dictionary.setArray(MutableArray([true]), key: 'a');
-        expect(dictionary.value('a'), MutableArray([true]));
-        dictionary.setDictionary(MutableDictionary({'key': 'value'}), key: 'a');
-        expect(dictionary.value('a'), MutableDictionary({'key': 'value'}));
+        setValuesTest(
+          build: (state) => MutableDictionary(state),
+          initialValue: 'a',
+        );
+        setValuesTest(
+          build: (state) => immutableDictionary(state).toMutable(),
+          initialValue: 'a',
+        );
+        setValuesTest(
+          build: (state) => MutableDictionary(state),
+          initialValue: <Object?>{},
+        );
+        setValuesTest(
+          build: (state) => immutableDictionary(state).toMutable(),
+          initialValue: <Object?>{},
+        );
       });
 
       test('setData', () {
@@ -311,4 +304,63 @@ Dictionary immutableDictionary([Map<String, Object?>? data]) {
   );
   // ignore: cast_nullable_to_non_nullable
   return root.asNative as Dictionary;
+}
+
+void setValuesTest({
+  required MutableDictionary Function(Map<String, Object?> state) build,
+  Object? initialValue,
+}) {
+  const key = 'a';
+  final initialData = {key: initialValue};
+  void check(void Function(MutableDictionary dictionary) fn) =>
+      fn(build(initialData));
+
+  check((dictionary) {
+    dictionary.setValue('x', key: key);
+    expect(dictionary.value(key), 'x');
+  });
+  check((dictionary) {
+    dictionary.setString('a', key: key);
+    expect(dictionary.value(key), 'a');
+  });
+
+  check((dictionary) {
+    dictionary.setInteger(1, key: key);
+    expect(dictionary.value(key), 1);
+  });
+
+  check((dictionary) {
+    dictionary.setFloat(.2, key: key);
+    expect(dictionary.value(key), .2);
+  });
+
+  check((dictionary) {
+    dictionary.setNumber(3, key: key);
+    expect(dictionary.value(key), 3);
+  });
+
+  check((dictionary) {
+    dictionary.setBoolean(true, key: key);
+    expect(dictionary.value(key), true);
+  });
+
+  check((dictionary) {
+    dictionary.setDate(testDate, key: key);
+    expect(dictionary.date(key), testDate);
+  });
+
+  check((dictionary) {
+    dictionary.setBlob(testBlob, key: key);
+    expect(dictionary.value(key), testBlob);
+  });
+
+  check((dictionary) {
+    dictionary.setArray(MutableArray([true]), key: key);
+    expect(dictionary.value(key), MutableArray([true]));
+  });
+
+  check((dictionary) {
+    dictionary.setDictionary(MutableDictionary({'key': 'value'}), key: key);
+    expect(dictionary.value(key), MutableDictionary({'key': 'value'}));
+  });
 }

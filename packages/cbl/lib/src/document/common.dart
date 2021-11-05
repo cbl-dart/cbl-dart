@@ -210,7 +210,7 @@ bool valueWouldChange(
   // Collection values are assumed to result in a change to skip expensive
   // comparisons of large instances.
   if (oldValue.value is CollectionFLValue) {
-    return false;
+    return true;
   }
   if (newValue is Array || newValue is Dictionary) {
     return true;
