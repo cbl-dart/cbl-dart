@@ -8,42 +8,47 @@ command:
 
 scripts:
   build:cbl_flutter_prebuilt:
+    description: Builds the prebuild packages `cbl_flutter_ce|ee`.
     run: melos exec -- dart run
     select-package:
       scope: cbl_flutter_prebuilt
 
   build:nativeLibraries:
+    description: Builds the native libraries for the host target.
     run: ./tools/dev-tools.sh prepareNativeLibraries
 
   flutter:pubGet:
+    description: Runs pub get in all Flutter packages.
     run: melos exec --flutter -- flutter pub get
 
-  formatting:check: melos exec -- dart format --set-exit-if-changed .
+  formatting:check:
+    description: Formats all Dart files. Fails when files were changed.
+    run: melos exec -- dart format --set-exit-if-changed .
 
-  analyze: melos exec -- dart analyze --fatal-infos
+  analyze:
+    description: Analyzes all Dart files.
+    run: melos exec -- dart analyze --fatal-infos
 
   test:setupCouchbaseClusterDocker:
+    description: Sets up Couchbase services for testing in docker.
     run: melos exec -- "./couchbase-cluster.sh setupDocker"
     select-package:
       scope: cbl_e2e_tests
 
   test:teardownCouchbaseClusterDocker:
+    description: Tears down Couchbase services for testing in docker.
     run: melos exec -- "./couchbase-cluster.sh teardownDocker"
     select-package:
       scope: cbl_e2e_tests
 
   test:startSyncGatewayMacOS:
+    description: Starts Sync Gateway for testing on macOS.
     run: melos exec -- "./couchbase-cluster.sh startSyncGatewayMacOS"
     select-package:
       scope: cbl_e2e_tests
 
   test:waitForSyncGateway:
+    description: Waits Sync Gateway for testing to become available.
     run: melos exec -- "./couchbase-cluster.sh waitForSyncGateway"
     select-package:
       scope: cbl_e2e_tests
-
-  clean:packages:
-    run: git clean -xdfq packages
-
-  clean:all:
-    run: git clean -xdfq .

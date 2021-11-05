@@ -48,10 +48,6 @@ function buildNativeLibraries() {
     ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
 }
 
-function buildCblFlutterPrebuiltPackages() {
-    melos run build:cbl_flutter_prebuilt
-}
-
 function configureFlutter() {
     requireEnvVar TARGET_OS
 
@@ -65,18 +61,32 @@ function configureFlutter() {
     esac
 }
 
-function bootstrapPackages() {
+function bootstrapPackage() {
     requireEnvVar EMBEDDER
     requireEnvVar TEST_PACKAGE
 
+    local noMelos=""
+    if [[ " $* " =~ " --no-melos " ]]; then
+        noMelos="true"
+    fi
+
     case "$embedder" in
     standalone)
-        melos bootstrap --scope "$testPackage"
+        if [[ "$noMelos" == "true" ]]; then
+            cd "$testPackageDir"
+            dart pub get
+        else
+            melos bootstrap --scope "$testPackage"
+        fi
         ;;
     flutter)
         # `flutter pub get` creates some files which `melos bootstrap` doesn't.
-        melos exec --scope "$testPackage" -- flutter pub get
-        melos bootstrap --scope "$testPackage"
+        cd "$testPackageDir"
+        flutter pub get
+
+        if [[ "$noMelos" != "true" ]]; then
+            melos bootstrap --scope "$testPackage"
+        fi
         ;;
     esac
 }

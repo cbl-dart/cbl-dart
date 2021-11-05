@@ -78,9 +78,6 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
 
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
       - name: Bootstrap Dart packages
         run: melos bootstrap
 
@@ -118,11 +115,8 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
 
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
-      - name: Bootstrap Dart packages
-        run: melos bootstrap --scope ${{ matrix.package }}
+      - name: Bootstrap Dart package
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
@@ -203,11 +197,8 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
 
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
-      - name: Bootstrap Dart packages
-        run: ./tools/ci-steps.sh bootstrapPackages
+      - name: Bootstrap Dart package
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Start test Couchbase cluster
         run: |
@@ -248,8 +239,6 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
   test-e2e-cbl_flutter_prebuilt:
-    # Temporarily disabled until compatible version of `cbl` is published.
-    if: ${{ false }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:
@@ -286,14 +275,8 @@ jobs:
       - name: Configure flutter
         run: ./tools/ci-steps.sh configureFlutter
 
-      - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
-
-      - name: Build cbl_flutter_prebuilt packages
-        run: ./tools/ci-steps.sh buildCblFlutterPrebuiltPackages
-
-      - name: Bootstrap Dart packages
-        run: ./tools/ci-steps.sh bootstrapPackages
+      - name: Bootstrap Dart package
+        run: ./tools/ci-steps.sh bootstrapPackage --no-melos
 
       - name: Start virtual devices
         run: ./tools/ci-steps.sh startVirtualDevices
