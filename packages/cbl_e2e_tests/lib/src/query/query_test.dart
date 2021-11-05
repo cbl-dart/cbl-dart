@@ -182,6 +182,19 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
       );
     });
 
+    apiTest('listen to change stream of query created by builder', () async {
+      // https://github.com/cbl-dart/cbl-dart/issues/225
+      final db = await openTestDatabase();
+      final query = const QueryBuilder()
+          .select(SelectResult.all())
+          .from(DataSource.database(db));
+
+      expect(
+        query.changes().asyncMap((change) => change.results.allResults()),
+        emitsInOrder(<Object>[isEmpty]),
+      );
+    });
+
     apiTest('bad query: error position highlighting', () async {
       final db = await openTestDatabase();
       expect(

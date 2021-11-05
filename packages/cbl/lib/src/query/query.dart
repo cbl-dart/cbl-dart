@@ -288,49 +288,19 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
   final Database? database;
   final CBLQueryLanguage language;
   String? definition;
+
   bool _didAttachToParentResource = false;
-
-  bool get _wasPrepared => _prepared != false;
-  FutureOr<bool>? _prepared = false;
-
-  FutureOr<void> prepare() {
-    _attachToParentResource();
-
-    if (_wasPrepared) {
-      return null;
-    }
-
-    // ignore: void_checks
-    return _prepared = performPrepare().then((_) => true);
-  }
-
-  @protected
-  FutureOr<void> performPrepare();
 
   @override
   T useSync<T>(T Function() f) {
-    _attachToParentResource();
-    return super.useSync(() {
-      assert(_prepared is! Future);
-      if (_prepared == false) {
-        final result = performPrepare();
-        assert(result is! Future);
-        _prepared = true;
-      }
-      return f();
-    });
+    attachToParentResource();
+    return super.useSync(f);
   }
 
   @override
   Future<T> use<T>(FutureOr<T> Function() f) {
-    _attachToParentResource();
-    return super.use(() async {
-      if (_prepared == false) {
-        _prepared = performPrepare().then((_) => true);
-      }
-      await _prepared;
-      return f();
-    });
+    attachToParentResource();
+    return super.use(f);
   }
 
   @override
@@ -340,7 +310,8 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
   @override
   String toString() => '$typeName(${describeEnum(language)}: $definition)';
 
-  void _attachToParentResource() {
+  @protected
+  void attachToParentResource() {
     if (!_didAttachToParentResource) {
       needsToBeClosedByParent = false;
       attachTo(database! as ClosableResourceMixin);

@@ -43,6 +43,8 @@ class FfiQuery extends QueryBase
           definition: definition,
         );
 
+  var _isPrepared = false;
+
   late final _listenerTokens = ListenerTokenRegistry(this);
 
   @override
@@ -130,10 +132,20 @@ class FfiQuery extends QueryBase
       ));
 
   @override
-  void prepare() => super.prepare();
+  T useSync<T>(T Function() f) => super.useSync(() {
+        prepare();
+        return f();
+      });
 
-  @override
-  FutureOr<void> performPrepare() {
+  void prepare() {
+    if (_isPrepared) {
+      return;
+    }
+    _isPrepared = true;
+    _performPrepare();
+  }
+
+  void _performPrepare() {
     native = CBLObject(
       database!.native.call((pointer) => _bindings.create(
             pointer,
