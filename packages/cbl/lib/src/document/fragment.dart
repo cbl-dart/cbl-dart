@@ -1,6 +1,7 @@
 // ignore: lines_longer_than_80_chars
 // ignore_for_file: cast_nullable_to_non_nullable, avoid_setters_without_getters, one_member_abstracts
 
+import '../support/errors.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
@@ -279,13 +280,7 @@ class FragmentImpl implements Fragment {
       _updateSubscript(indexOrKey) ? this : _emptyInstance;
 
   bool _updateSubscript(Object indexOrKey) {
-    if (indexOrKey is! int && indexOrKey is! String) {
-      throw ArgumentError.value(
-        indexOrKey,
-        'indexOrKey',
-        'must be of type int or String',
-      );
-    }
+    assertIndexOrKey(indexOrKey);
 
     final value = this.value;
 

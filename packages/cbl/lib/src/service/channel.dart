@@ -434,7 +434,7 @@ class Channel {
     if (_status != status) {
       throw StateError(
         'Expected Channel to be ${describeEnum(status)} but it was '
-        '${describeEnum(_status)}',
+        '${describeEnum(_status)}.',
       );
     }
   }
@@ -442,7 +442,7 @@ class Channel {
   void _checkStatusIsNot(ChannelStatus status) {
     if (_status == status) {
       throw StateError(
-        'Expected Channel not to be ${describeEnum(status)} but it was',
+        'Expected Channel not to be ${describeEnum(status)} but it was.',
       );
     }
   }

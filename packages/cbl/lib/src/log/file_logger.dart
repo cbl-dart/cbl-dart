@@ -47,7 +47,7 @@ class LogFileConfiguration {
 
   set maxSize(int maxSize) {
     if (maxSize <= 0) {
-      throw ArgumentError.value(maxSize, 'maxSize', 'must be greater than 0');
+      throw RangeError.range(maxSize, 1, null, 'maxSize');
     }
     _maxSize = maxSize;
   }
@@ -60,11 +60,7 @@ class LogFileConfiguration {
 
   set maxRotateCount(int maxRotateCount) {
     if (maxRotateCount < 0) {
-      throw ArgumentError.value(
-        maxRotateCount,
-        'maxRotateCount',
-        'must be greater or the same as 0',
-      );
+      throw RangeError.range(maxRotateCount, 0, null, 'maxRotateCount');
     }
     _maxRotateCount = maxRotateCount;
   }

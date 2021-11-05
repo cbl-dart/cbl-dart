@@ -133,7 +133,7 @@ class IsolateWorker {
     if (_status != lifecycle) {
       throw StateError(
         'Expected Worker to be ${describeEnum(lifecycle)} but it was '
-        '${describeEnum(_status)}',
+        '${describeEnum(_status)}.',
       );
     }
   }

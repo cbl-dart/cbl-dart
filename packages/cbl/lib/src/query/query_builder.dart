@@ -308,9 +308,7 @@ mixin BuilderQueryMixin on QueryBase {
 
   void _checkHasFrom() {
     if (_from == null) {
-      throw StateError(
-        'Ensure that a query has a FROM clause before using it.',
-      );
+      throw StateError('Query has no FROM clause.');
     }
   }
 }

@@ -505,16 +505,10 @@ class Dict extends Value with MapMixin<String, Value> {
   late final Iterable<String> keys = _DictKeyIterable(this);
 
   @override
-  Value operator [](Object? key) {
-    if (key is! String) {
-      throw ArgumentError.value(key, 'key', 'must be a String');
-    }
-
-    return Value.fromPointer(
-      native.call((pointer) => _bindings.get(pointer.cast(), key)),
-      isRefCounted: false,
-    );
-  }
+  Value operator [](Object? key) => Value.fromPointer(
+        native.call((pointer) => _bindings.get(pointer.cast(), assertKey(key))),
+        isRefCounted: false,
+      );
 
   @override
   void operator []=(String key, Object? value) =>
@@ -669,13 +663,11 @@ class MutableDict extends Dict {
 
   @override
   Value? remove(Object? key) {
-    if (key is! String) {
-      throw ArgumentError.value(key, 'kye', 'must be a String');
-    }
+    final _key = assertKey(key);
 
-    final value = this[key];
+    final value = this[_key];
 
-    native.call((pointer) => _bindings.remove(pointer.cast(), key));
+    native.call((pointer) => _bindings.remove(pointer.cast(), _key));
 
     return value;
   }
