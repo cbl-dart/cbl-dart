@@ -34,6 +34,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
           definition: definition,
         );
 
+  Future<void>? _preparation;
   late final _lock = Lock();
   late final _listenerTokens = ListenerTokenRegistry(this);
   late List<String> _columnNames;
@@ -100,20 +101,23 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
       use(() => _listenerTokens.remove(token));
 
   @override
-  AsyncListenStream<QueryChange> changes() =>
-      // ignore: lines_longer_than_80_chars
-      // TODO(blaugold): refactor `QueryBase` so `changes` can be wrapped with `useSync`
-      ListenerStream(
+  AsyncListenStream<QueryChange> changes() => useSync(() => ListenerStream(
         parent: this,
-        addListener: _addChangeListener,
-      );
+        addListener: (listener) => use(() => _addChangeListener(listener)),
+      ));
 
   @override
-  // ignore: cast_nullable_to_non_nullable
-  Future<void> prepare() => super.prepare() as Future<void>;
+  Future<T> use<T>(FutureOr<T> Function() f) => super.use(() async {
+        await prepare();
+        return f();
+      });
 
-  @override
-  Future<void> performPrepare() async {
+  Future<void> prepare() {
+    attachToParentResource();
+    return _preparation ??= _performPrepare();
+  }
+
+  Future<void> _performPrepare() async {
     final channel = database!.channel;
 
     final state = await channel.call(CreateQuery(

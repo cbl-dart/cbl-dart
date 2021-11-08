@@ -88,9 +88,6 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   Stream<QueryChange> changes() => useSync(() => throw UnimplementedError());
 
   @override
-  FutureOr<void> performPrepare() => throw UnimplementedError();
-
-  @override
   Future<void> performClose() => throw UnimplementedError();
 }
 
