@@ -7,7 +7,6 @@ import '../../cbl.dart';
 import '../database/proxy_database.dart';
 import '../document/common.dart';
 import '../fleece/fleece.dart';
-import '../fleece/integration/context.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
@@ -157,23 +156,24 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
 class ProxyResultSet extends ResultSet {
   ProxyResultSet({
-    required this.query,
+    required ProxyQuery query,
     required Stream<EncodedData> results,
-  })  : _results = results,
-        _context = DatabaseMContext(query.database!);
+  })  : _query = query,
+        _results = results;
 
-  final ProxyQuery query;
+  final ProxyQuery _query;
   final Stream<EncodedData> _results;
-  final MContext _context;
 
   @override
   Stream<Result> asStream() => _results
       .map((event) => ResultImpl.fromValuesData(
             event.toFleece(),
-            context: _context,
-            columnNames: query._columnNames,
+            // Every result needs its own context, because each result is
+            // encoded independently.
+            context: DatabaseMContext(_query.database!),
+            columnNames: _query._columnNames,
           ))
-      .transform(ResourceStreamTransformer(parent: query, blocking: true));
+      .transform(ResourceStreamTransformer(parent: _query, blocking: true));
 
   @override
   Future<List<Result>> allResults() => asStream().toList();
