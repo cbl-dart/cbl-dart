@@ -7,6 +7,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/fleece.dart' as fl;
+import '../fleece/integration/context.dart';
 import '../support/async_callback.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
@@ -71,7 +72,7 @@ class FfiQuery extends QueryBase
   @override
   SyncResultSet execute() => useSync(() => FfiResultSet(
         native.call(_bindings.execute),
-        database: database!,
+        query: this,
         columnNames: _columnNames,
         debugCreator: 'FfiQuery.execute()',
       ));
@@ -98,7 +99,7 @@ class FfiQuery extends QueryBase
           // result set.
           native.call((pointer) =>
               _bindings.copyCurrentResults(pointer, listenerToken)),
-          database: database!,
+          query: this,
           columnNames: _columnNames,
           debugCreator: 'FfiQuery.changes()',
         );
@@ -174,19 +175,19 @@ class FfiQuery extends QueryBase
 class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   FfiResultSet(
     Pointer<CBLResultSet> pointer, {
-    required FfiDatabase database,
+    required FfiQuery query,
     required List<String> columnNames,
     required String debugCreator,
-  })  : _context = DatabaseMContext(database),
-        _columnNames = columnNames,
+  })  : _columnNames = columnNames,
         _iterator = ResultSetIterator(
           pointer,
           debugCreator: debugCreator,
-        );
+        ),
+        _context = DatabaseMContext(query.database!);
 
-  final DatabaseMContext _context;
   final List<String> _columnNames;
   final ResultSetIterator _iterator;
+  final MContext _context;
   Result? _current;
 
   @override
@@ -201,6 +202,8 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   @override
   Result get current => _current ??= ResultImpl.fromValuesArray(
         _iterator.current,
+        // Results from the same result set can share the same context, because
+        // in CBL C, a result set is encoded in a single Fleece doc.
         context: _context,
         columnNames: _columnNames,
       );

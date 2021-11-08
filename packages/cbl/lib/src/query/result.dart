@@ -113,6 +113,10 @@ abstract class Result
 }
 
 class ResultImpl with IterableMixin<String> implements Result {
+  /// Creates a result from an array of the column values, encoded in a chunk of
+  /// Fleece [data].
+  ///
+  /// The [context] must not be shared with other [Result]s.
   ResultImpl.fromValuesData(
     Data data, {
     required MContext context,
@@ -122,6 +126,10 @@ class ResultImpl with IterableMixin<String> implements Result {
         _columnValuesData = data,
         _columnNames = columnNames;
 
+  /// Creates a result from a fleece [array] fo the column values.
+  ///
+  /// The [context] can be shared with other [Result]s, if it is guaranteed
+  /// that all results are from the same chunk of encoded Fleece data.
   ResultImpl.fromValuesArray(
     fl.Array array, {
     required MContext context,
