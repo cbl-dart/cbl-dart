@@ -19,7 +19,7 @@ native platforms which are supported by Dart.
 
 - [🤩 Features](#-features)
 - [⛔ Limitations](#-limitations)
-- [🔌 Getting started for Flutter](#-getting-started-for-flutter)
+- [🔌 Getting started](#-getting-started)
 - [🔑 Key concepts](#-key-concepts)
   - [Synchronous and Asynchronous APIs](#synchronous-and-asynchronous-apis)
   - [Change listeners](#change-listeners)
@@ -77,11 +77,14 @@ Lite are currently not supported:
 - Integration with system-wide configured proxies
 - VPN On Demand on iOS
 
-# 🔌 Getting started for Flutter
+# 🔌 Getting started
 
-Head over to the [Flutter plugin for Couchbase Lite
-(`cbl_flutter`)][cbl_flutter] to get started using Couchbase Lite in your
-Flutter app.
+To use Couchbase Lite in a
+
+- **Dart** app go to [`cbl_dart`][cbl_dart]
+- **Flutter** app go to [`cbl_flutter`][cbl_flutter]
+
+and follow the instructions for getting started.
 
 # 🔑 Key concepts
 
@@ -441,6 +444,7 @@ Read [CONTRIBUTING] to get started developing.
   https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/index.html
 [couchbase lite swift docs]:
   https://docs.couchbase.com/couchbase-lite/3.0/swift/quickstart.html
+[cbl_dart]: https://pub.dev/packages/cbl_dart
 [cbl_flutter]: https://pub.dev/packages/cbl_flutter
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
 [sync gateway]: https://www.couchbase.com/sync-gateway

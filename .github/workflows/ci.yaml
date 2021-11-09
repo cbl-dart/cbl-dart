@@ -302,3 +302,44 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
+
+  test-cbl_dart:
+    name: cbl_dart unit tests
+    strategy:
+      matrix:
+        package: [cbl_dart]
+        dart: [stable]
+        embedder: [standalone]
+        os: [macOS, Ubuntu]
+    env:
+      EMBEDDER: ${{ matrix.embedder }}
+      TARGET_OS: ${{ matrix.os }}
+      TEST_PACKAGE: ${{ matrix.package }}
+    continue-on-error: ${{ matrix.dart != 'stable' }}
+    runs-on: >-
+      ${{ fromJSON('{ 
+        "macOS":"macos-11",
+        "Ubuntu":"ubuntu-20.04"
+      }')[matrix.os] }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
+
+      - name: Bootstrap Dart package
+        run: ./tools/ci-steps.sh bootstrapPackage --no-melos
+
+      - name: Run tests
+        working-directory: packages/${{ matrix.package }}
+        run: dart test --coverage coverage/dart
+
+      - name: Upload coverage data
+        if: ${{ matrix.dart == 'stable' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
