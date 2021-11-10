@@ -13,7 +13,8 @@ All Dart code is organized into several [packages].
 
 | Package                          | Description                                                                                                                                 | Pub                                                                                                   | Internal     |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------ |
-| [cbl]                            | Dart package for Couchbase Lite                                                                                                             | [![](https://badgen.net/pub/v/cbl)](https://pub.dev/packages/cbl)                                     |              |
+| [cbl]                            | Dart API Couchbase Lite                                                                                                                     | [![](https://badgen.net/pub/v/cbl)](https://pub.dev/packages/cbl)                                     |              |
+| [cbl_dart]                       | Package to use Couchbase Lite in pure Dart apps                                                                                             | [![](https://badgen.net/pub/v/cbl_dart)](https://pub.dev/packages/cbl_dart)                           |              |
 | [cbl_e2e_tests]                  | E2E tests                                                                                                                                   |                                                                                                       |              |
 | [cbl_e2e_tests_flutter]          | E2E tests runner for Flutter                                                                                                                |                                                                                                       |              |
 | [cbl_e2e_tests_standalone_dart]  | E2E tests runner for standalone Dart                                                                                                        |                                                                                                       |              |
@@ -48,6 +49,7 @@ Read [CONTRIBUTING] to get started developing.
 
 [packages]: https://github.com/cbl-dart/cbl-dart/tree/main/packages
 [cbl]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl
+[cbl_dart]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_dart
 [cbl_e2e_tests]:
   https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_e2e_tests
 [cbl_e2e_tests_standalone_dart]:
