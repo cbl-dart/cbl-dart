@@ -89,7 +89,14 @@ LibraryConfiguration nativeLibraryConfiguration(
 }) {
   if (Platform.isMacOS || Platform.isLinux) {
     final libraryFile = p.join(directory, package.library.name);
-    return LibraryConfiguration.dynamic(libraryFile);
+    return LibraryConfiguration.dynamic(
+      libraryFile,
+      // Specifying an exact version should not be necessary, but is because
+      // the beta of libcblite does not distribute properly symlinked libraries
+      // for macos. We need to use the libcblite.x.dylib because that is what
+      // libcblitedart is linking against.
+      version: package.version.split('.').first,
+    );
   } else {
     throw UnsupportedError('Unsupported platform.');
   }

@@ -8,10 +8,9 @@ import 'package:test/test.dart';
 void main() {
   test('database is created in filesDir', () async {
     final filesDir = await Directory.systemTemp.createTemp();
-    Directory.current = filesDir.path;
 
     await CouchbaseLiteDart.init(
-      edition: Edition.community,
+      edition: Edition.enterprise,
       filesDir: filesDir.path,
     );
 
