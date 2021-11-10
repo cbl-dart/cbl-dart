@@ -53,9 +53,7 @@ class AsyncCallback {
  private:
   friend class AsyncCallbackCall;
 
-  void static dartCallbackHandleFinalizer(void *dart_callback_data, void *peer);
-
-  ~AsyncCallback();
+  void static dartFinalizer(void *dart_callback_data, void *peer);
 
   void registerCall(AsyncCallbackCall &call);
   void unregisterCall(AsyncCallbackCall &call);
@@ -65,6 +63,7 @@ class AsyncCallback {
   uint32_t id_;
   bool debug_;
   std::mutex mutex_;
+  std::condition_variable cv_;
   bool closed_ = false;
   Dart_Port sendPort_ = ILLEGAL_PORT;
   void *finalizerContext_ = nullptr;

@@ -54,7 +54,7 @@ AsyncCallback::AsyncCallback(uint32_t id, Dart_Handle dartCallback,
                              Dart_Port sendport, bool debug)
     : id_(id), debug_(debug), sendPort_(sendport) {
   dartCallbackHandle_ = Dart_NewWeakPersistentHandle_DL(
-      dartCallback, this, 0, AsyncCallback::dartCallbackHandleFinalizer);
+      dartCallback, this, 0, AsyncCallback::dartFinalizer);
   assert(dartCallbackHandle_ != nullptr);
 
   AsyncCallbackRegistry::instance.registerCallback(*this);
@@ -90,39 +90,28 @@ void AsyncCallback::close() {
 
   {
     std::scoped_lock lock(mutex_);
-    if (!activeCalls_.empty()) {
-      // Close calls which are executing or could be executed.
-      for (auto const &call : activeCalls_) {
-        call->close();
-      }
-
-      // If there are still active calls, wait for them to finish and delete
-      // this callback when the last call is done.
-      return;
+    // Close calls which are executing or could be executed.
+    for (auto const &call : activeCalls_) {
+      call->close();
     }
   }
+
+  // Wait for all active calls to finish.
+  std::unique_lock lock(mutex_);
+  cv_.wait(lock, [this] { return activeCalls_.empty(); });
+
+  AsyncCallbackRegistry::instance.unregisterCallback(*this);
+
+  debugLog("closed");
 
   delete this;
 }
 
-void AsyncCallback::dartCallbackHandleFinalizer(void *dart_callback_data,
-                                                void *peer) {
+void AsyncCallback::dartFinalizer(void *dart_callback_data, void *peer) {
   auto callback = reinterpret_cast<AsyncCallback *>(peer);
   callback->debugLog("closing from Dart finalizer");
   callback->dartCallbackHandle_ = nullptr;
   callback->close();
-}
-
-AsyncCallback::~AsyncCallback() {
-  debugLog("deleting");
-
-  assert(activeCalls_.empty());
-
-  AsyncCallbackRegistry::instance.unregisterCallback(*this);
-
-  if (finalizer_) {
-    finalizer_(finalizerContext_);
-  }
 }
 
 void AsyncCallback::registerCall(AsyncCallbackCall &call) {
@@ -134,22 +123,14 @@ void AsyncCallback::registerCall(AsyncCallbackCall &call) {
 }
 
 void AsyncCallback::unregisterCall(AsyncCallbackCall &call) {
-  auto shouldDelete = false;
-  {
-    std::scoped_lock lock(mutex_);
-    activeCalls_.erase(
-        std::remove(activeCalls_.begin(), activeCalls_.end(), &call),
-        activeCalls_.end());
+  std::scoped_lock lock(mutex_);
+  activeCalls_.erase(
+      std::remove(activeCalls_.begin(), activeCalls_.end(), &call),
+      activeCalls_.end());
 
-    if (closed_ && activeCalls_.empty()) {
-      // This callback was not deleted in `close` because it still had active
-      // calls. Now that is no active call any more, it can be deleted.
-      shouldDelete = true;
-    }
-  }
-
-  if (shouldDelete) {
-    delete this;
+  if (closed_ && activeCalls_.empty()) {
+    // Notify the `close` method that all calls have been unregistered.
+    cv_.notify_one();
   }
 }
 
