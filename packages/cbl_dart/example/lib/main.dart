@@ -8,8 +8,18 @@ import 'package:cbl_dart/cbl_dart.dart';
 late final Database db;
 
 Future<void> main(List<String> args) async {
-  if (args.isNotEmpty && args.length != 1) {
-    print('Usage: [message]');
+  if (args.contains('--help') ||
+      args.contains('-h') ||
+      (args.isNotEmpty && args.length != 1)) {
+    print(
+      '''
+Usage: dart lib/main.dart [message]
+
+The provided message will be stored in the database.
+
+If no message is provided, all stored messages will be listed.
+''',
+    );
     exit(1);
   }
 

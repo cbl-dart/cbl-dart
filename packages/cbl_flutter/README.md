@@ -79,10 +79,10 @@ various platforms.
 Flutter unit tests are executed by a headless version of Flutter, on the
 development host.
 
+> 🚧 `cbl_dart` is not yet implemented for Windows.
+
 You can use the `cbl` package in your unit tests, but you need to use
 [`cbl_dart`][cbl_dart] to initialize Couchbase Lite, instead of `cbl_flutter`:
-
-> 🚧 `cbl_dart` is not yet implemented for Windows.
 
 ```dart
 import 'dart:io';
@@ -92,7 +92,6 @@ import 'package:cbl_dart/cbl_dart.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   setupAll(() async {
     // If no `filesDir` is specified when initializing CouchbaseLiteDart, the
     // working directory is used as the default database directory.

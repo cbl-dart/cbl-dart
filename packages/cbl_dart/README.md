@@ -3,7 +3,7 @@
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
-Couchbase Lite for pure Dart apps, such as servers and CLI tools.
+Couchbase Lite for pure Dart apps, such as servers and CLIs.
 
 The Couchbase Lite API is in the [`cbl`][cbl] package. This package is enabling
 the use of `cbl` in pure Dart apps.
@@ -40,9 +40,9 @@ the use of `cbl` in pure Dart apps.
    }
    ```
 
-   Note that `init` downloads the needed native libraries, if they have not
-   already been cached. See the documentation for `CouchbaseLiteDart.init` more
-   information.
+   Note that `init` downloads the needed native libraries if they have not
+   already been cached. See the documentation for `CouchbaseLiteDart.init` for
+   more information.
 
    > ⚖️ You need to comply with the Couchbase licensing terms of the edition of
    > Couchbase Lite you select.
