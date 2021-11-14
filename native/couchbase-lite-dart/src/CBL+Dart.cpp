@@ -182,9 +182,27 @@ void CBLDart_SetDebugRefCounted(uint8_t enabled) {
 #endif
 }
 
+static std::mutex listenerTokenToDatabaseMutex;
+static std::map<CBLListenerToken *, const CBLDatabase *>
+    listenerTokenToDatabase;
+
+void CBLDart_RetainDatabaseForListenerToken(const CBLDatabase *database,
+                                            CBLListenerToken *token) {
+  CBLDatabase_Retain(database);
+
+  std::scoped_lock lock(listenerTokenToDatabaseMutex);
+  listenerTokenToDatabase[token] = database;
+}
+
 void CBLDart_CBLListenerFinalizer(void *context) {
   auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
   CBLListener_Remove(listenerToken);
+
+  std::scoped_lock lock(listenerTokenToDatabaseMutex);
+  auto nh = listenerTokenToDatabase.extract(listenerToken);
+  if (!nh.empty()) {
+    CBLDatabase_Release(nh.mapped());
+  }
 }
 
 // -- Log
@@ -655,6 +673,10 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(
   auto listenerToken = CBLDatabase_AddDocumentChangeListener(
       db, CBLDart_FLStringFromDart(docID),
       CBLDart_DocumentChangeListenerWrapper, listener);
+
+  // TODO(blaugold): remove this when bug fix in CBL has landed
+  // https://issues.couchbase.com/browse/CBL-2548
+  CBLDart_RetainDatabaseForListenerToken(db, listenerToken);
 
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);
