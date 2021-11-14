@@ -20,7 +20,7 @@ final packageConfigurations = [
       ),
       couchbaseLiteDart: const LibraryInfo(
         version: '1.0.0',
-        release: '1.0.0-beta.3',
+        release: '1.0.0-beta.4',
       ),
     )
 ];

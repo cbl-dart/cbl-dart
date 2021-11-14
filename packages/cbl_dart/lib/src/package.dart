@@ -97,7 +97,7 @@ class Package {
 
   static const latestReleases = {
     Library.libcblite: '3.0.0-beta02',
-    Library.libcblitedart: '1.0.0-beta.3',
+    Library.libcblitedart: '1.0.0-beta.4',
   };
 
   static final _archiveUrlResolvers = <Library, String Function(Package)>{
