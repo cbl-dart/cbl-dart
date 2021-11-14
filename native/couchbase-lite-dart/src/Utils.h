@@ -4,6 +4,9 @@
 #else
 #include "fleece/Fleece.h"
 #endif
+#include "Fleece+Dart.h"
+
+// === Dart Native ============================================================
 
 /**
  * Returns the value of the given Dart CObject, wich is expected to be either an
@@ -16,3 +19,25 @@ void CBLDart_CObject_SetEmptyArray(Dart_CObject* object);
 void CBLDart_CObject_SetPointer(Dart_CObject* object, const void* pointer);
 
 void CBLDart_CObject_SetFLString(Dart_CObject* object, const FLString string);
+
+// === Fleece =================================================================
+
+#define kCBLDartNullSlice ((CBLDart_FLSlice){NULL, 0})
+
+FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice);
+
+CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice);
+
+FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSliceResult slice);
+
+CBLDart_FLSliceResult CBLDart_FLSliceResultToDart(FLSliceResult slice);
+
+FLString CBLDart_FLStringFromDart(CBLDart_FLString slice);
+
+CBLDart_FLString CBLDart_FLStringToDart(FLString slice);
+
+FLStringResult CBLDart_FLStringResultFromDart(CBLDart_FLStringResult slice);
+
+CBLDart_FLStringResult CBLDart_FLStringResultToDart(FLStringResult slice);
+
+std::string CBLDart_FLStringToString(FLString slice);

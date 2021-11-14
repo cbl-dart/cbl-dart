@@ -13,12 +13,12 @@ typedef sentry_value_t (*sentry_value_new_breadcrumb_t)(const char *type,
 typedef void (*sentry_add_breadcrumb_t)(sentry_value_t breadcrumb);
 
 // Function pointers
-sentry_value_new_string_t sentry_value_new_string_fp = nullptr;
-sentry_value_set_by_key_t sentry_value_set_by_key_fp = nullptr;
-sentry_value_new_breadcrumb_t sentry_value_new_breadcrumb_fp = nullptr;
-sentry_add_breadcrumb_t sentry_add_breadcrumb_fp = nullptr;
+static sentry_value_new_string_t sentry_value_new_string_fp = nullptr;
+static sentry_value_set_by_key_t sentry_value_set_by_key_fp = nullptr;
+static sentry_value_new_breadcrumb_t sentry_value_new_breadcrumb_fp = nullptr;
+static sentry_add_breadcrumb_t sentry_add_breadcrumb_fp = nullptr;
 
-bool sentryAPIisAvailable = false;
+static bool sentryAPIisAvailable = false;
 
 bool CBLDart_InitSentryAPI() {
   static std::once_flag initFlag;

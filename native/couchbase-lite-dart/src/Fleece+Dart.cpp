@@ -1,40 +1,9 @@
 #include "Fleece+Dart.h"
+#include "Utils.h"
 
-// Fleece ----------------------------------------------------------------------
+// === Fleece =================================================================
 
-// -- Slice
-
-FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice) {
-  return {slice.buf, slice.size};
-}
-
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSliceResult slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLSliceResult CBLDart_FLSliceResultToDart(FLSliceResult slice) {
-  return {slice.buf, slice.size};
-}
-
-FLString CBLDart_FLStringFromDart(CBLDart_FLString slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLString CBLDart_FLStringToDart(FLString slice) {
-  return {slice.buf, slice.size};
-}
-
-FLStringResult CBLDart_FLStringResultFromDart(CBLDart_FLStringResult slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLStringResult CBLDart_FLStringResultToDart(FLStringResult slice) {
-  return {slice.buf, slice.size};
-}
+// === Slice
 
 uint8_t CBLDart_FLSlice_Equal(CBLDart_FLSlice a, CBLDart_FLSlice b) {
   return FLSlice_Equal(CBLDart_FLSliceFromDart(a), CBLDart_FLSliceFromDart(b));
@@ -54,8 +23,8 @@ CBLDart_FLSliceResult CBLDart_FLSlice_Copy(CBLDart_FLSlice slice) {
       FLSlice_Copy(CBLDart_FLSliceFromDart(slice)));
 }
 
-void CBLDart_ReleaseDartObjectBoundFLSliceResult(void *dart_callback_data,
-                                                 void *peer) {
+static void CBLDart_FLSliceResultFinalizer(void *dart_callback_data,
+                                           void *peer) {
   auto slice = reinterpret_cast<FLSliceResult *>(peer);
   FLSliceResult_Release(*slice);
   delete slice;
@@ -72,7 +41,7 @@ void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
   }
 
   Dart_NewFinalizableHandle_DL(object, _slice, 0,
-                               CBLDart_ReleaseDartObjectBoundFLSliceResult);
+                               CBLDart_FLSliceResultFinalizer);
 }
 
 void CBLDart_FLSliceResult_Retain(CBLDart_FLSliceResult slice) {
@@ -83,7 +52,7 @@ void CBLDart_FLSliceResult_Release(CBLDart_FLSliceResult slice) {
   FLSliceResult_Release(CBLDart_FLSliceResultFromDart(slice));
 }
 
-// -- Doc
+// === Doc
 
 FLDoc CBLDart_FLDoc_FromResultData(CBLDart_FLSliceResult data, uint8_t trust,
                                    FLSharedKeys sharedKeys,
@@ -97,20 +66,18 @@ FLDoc CBLDart_FLDoc_FromJSON(CBLDart_FLString json, FLError *errorOut) {
   return FLDoc_FromJSON(CBLDart_FLStringFromDart(json), errorOut);
 }
 
-void CBLDart_ReleaseDartObjectBoundFLDoc(void *dart_callback_data, void *peer) {
+static void CBLDart_FLDocFinalizer(void *dart_callback_data, void *peer) {
   auto doc = reinterpret_cast<FLDoc>(peer);
   FLDoc_Release(doc);
 }
 
 void CBLDart_FLDoc_BindToDartObject(Dart_Handle object, FLDoc doc) {
-  Dart_NewFinalizableHandle_DL(object, doc, 0,
-                               CBLDart_ReleaseDartObjectBoundFLDoc);
+  Dart_NewFinalizableHandle_DL(object, doc, 0, CBLDart_FLDocFinalizer);
 }
 
-// -- Value
+// === Value
 
-void CBLDart_ReleaseDartObjectBoundFLValue(void *dart_callback_data,
-                                           void *peer) {
+static void CBLDart_FLValueFinalizer(void *dart_callback_data, void *peer) {
   auto value = reinterpret_cast<FLValue>(peer);
   FLValue_Release(value);
 }
@@ -120,7 +87,7 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
   if (retain) FLValue_Retain(value);
 
   Dart_NewFinalizableHandle_DL(object, (void *)value, 0,
-                               CBLDart_ReleaseDartObjectBoundFLValue);
+                               CBLDart_FLValueFinalizer);
 }
 
 CBLDart_FLString CBLDart_FLValue_AsString(FLValue value) {
@@ -141,14 +108,14 @@ CBLDart_FLStringResult CBLDart_FLValue_ToJSONX(FLValue value, uint8_t json5,
       FLValue_ToJSONX(value, json5, canonicalForm));
 }
 
-// -- Dict
+// === Dict
 
 FLValue CBLDart_FLDict_Get(FLDict dict, CBLDart_FLString keyString) {
   return FLDict_Get(dict, CBLDart_FLStringFromDart(keyString));
 }
 
-void CBLDart_FinalizeDartObjectBoundDictIterator(void *dart_callback_data,
-                                                 void *peer) {
+static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
+                                          void *peer) {
   auto iterator = reinterpret_cast<CBLDart_DictIterator *>(peer);
 
   if (!iterator->done) FLDictIterator_End(iterator->iterator);
@@ -167,7 +134,7 @@ CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle object,
   FLDictIterator_Begin(dict, iterator->iterator);
 
   Dart_NewFinalizableHandle_DL(object, iterator, sizeof(iterator),
-                               CBLDart_FinalizeDartObjectBoundDictIterator);
+                               CBLDart_DictIteratorFinalizer);
 
   return iterator;
 }
@@ -206,7 +173,7 @@ FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
   return FLMutableDict_GetMutableDict(dict, CBLDart_FLStringFromDart(key));
 }
 
-// Decoder --------------------------------------------------------------------
+// === Decoder ================================================================
 
 CBLDart_FLStringResult CBLDart_FLData_Dump(CBLDart_FLSlice data) {
   return CBLDart_FLStringResultToDart(
@@ -283,8 +250,8 @@ void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, CBLDart_FLString key,
                            out);
 }
 
-void CBLDart_FinalizeDartObjectBoundDictIterator2(void *dart_callback_data,
-                                                  void *peer) {
+static void CBLDart_DictIterator2Finalizer(void *dart_callback_data,
+                                           void *peer) {
   auto iterator = reinterpret_cast<CBLDart_FLDictIterator2 *>(peer);
 
   if (!iterator->isDone) FLDictIterator_End(iterator->_iterator);
@@ -305,7 +272,7 @@ CBLDart_FLDictIterator2 *CBLDart_FLDictIterator2_Begin(
   FLDictIterator_Begin(dict, iterator->_iterator);
 
   Dart_NewFinalizableHandle_DL(object, iterator, sizeof(iterator),
-                               CBLDart_FinalizeDartObjectBoundDictIterator2);
+                               CBLDart_DictIterator2Finalizer);
 
   return iterator;
 }
@@ -325,17 +292,15 @@ void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator) {
   }
 }
 
-// Encoder --------------------------------------------------------------------
+// === Encoder ================================================================
 
-void CBLDart_ReleaseDartObjectBoundFLEncoder(void *dart_callback_data,
-                                             void *peer) {
+static void CBLDart_FLEncoderFinalizer(void *dart_callback_data, void *peer) {
   auto encoder = reinterpret_cast<FLEncoder>(peer);
   FLEncoder_Free(encoder);
 }
 
 void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder) {
-  Dart_NewFinalizableHandle_DL(object, encoder, 0,
-                               CBLDart_ReleaseDartObjectBoundFLEncoder);
+  Dart_NewFinalizableHandle_DL(object, encoder, 0, CBLDart_FLEncoderFinalizer);
 }
 
 FLEncoder CBLDart_FLEncoder_New(uint8_t format, uint64_t reserveSize,
