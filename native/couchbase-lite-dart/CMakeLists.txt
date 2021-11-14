@@ -62,6 +62,7 @@ add_library(cblitedart
     src/AsyncCallback.cpp
     src/CBL+Dart.cpp
     src/Fleece+Dart.cpp
+    src/Sentry.cpp
     src/Utils.cpp
     ${NATIVE_DIR}/vendor/dart/include/dart/dart_api_dl.c
 )
