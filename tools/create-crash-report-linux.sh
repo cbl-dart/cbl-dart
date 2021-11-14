@@ -77,8 +77,13 @@ function installGdb() {
 }
 
 function checkCoreDump() {
+    # Wait a few seconds befor checking for core dump
+    sleep 5
+
     if [ ! -e "$coreDump" ]; then
         echo "Not generating report: Could not find core dump"
+        echo "Directory has these contents"
+        ls -alh "$(dirname "$coreDump")"
         exit 0
     else
         echo "Found core dump:"
