@@ -183,5 +183,5 @@ String _defaultDirectory() {
     return '$filesDir${Platform.pathSeparator}CouchbaseLite';
   }
 
-  return cblBindings.database.defaultConfiguration().directory;
+  return Directory.current.path;
 }
