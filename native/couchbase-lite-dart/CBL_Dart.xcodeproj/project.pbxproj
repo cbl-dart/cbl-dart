@@ -12,7 +12,9 @@
 		C09A4C4C271B7E3A0090EC68 /* CBL+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C49271B7E3A0090EC68 /* CBL+Dart.h */; };
 		C09A4C4D271B7E3A0090EC68 /* CBLDart_Export.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C4A271B7E3A0090EC68 /* CBLDart_Export.h */; };
 		C09E6C23263456C700127155 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C09E6C1A263456C700127155 /* Utils.cpp */; };
-		C09E6C24263456C700127155 /* Utils.hh in Headers */ = {isa = PBXBuildFile; fileRef = C09E6C22263456C700127155 /* Utils.hh */; };
+		C09E6C24263456C700127155 /* Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = C09E6C22263456C700127155 /* Utils.h */; };
+		C0BFDD2327415FDC007AD8DC /* Sentry.h in Headers */ = {isa = PBXBuildFile; fileRef = C0BFDD2127415FDC007AD8DC /* Sentry.h */; };
+		C0BFDD2427415FDC007AD8DC /* Sentry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0BFDD2227415FDC007AD8DC /* Sentry.cpp */; };
 		C0D8CBEC25CF2AD7008B87C0 /* Fleece+Dart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */; };
 		C0D8CBED25CF2AD7008B87C0 /* AsyncCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C0D8CBE725CF2AD7008B87C0 /* AsyncCallback.cpp */; };
 		C0D8CBEF25CF2AD7008B87C0 /* AsyncCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = C0D8CBE925CF2AD7008B87C0 /* AsyncCallback.h */; };
@@ -22,7 +24,7 @@
 
 /* Begin PBXFileReference section */
 		C005BBA925CF27DB0086E1B3 /* CouchbaseLiteDart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CouchbaseLiteDart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CouchbaseLite.xcframework; path = "./Xcode/CouchbaseLite.xcframework"; sourceTree = "<group>"; };
+		C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CouchbaseLite.xcframework; path = ./Xcode/CouchbaseLite.xcframework; sourceTree = "<group>"; };
 		C0971C0E25CF7745006EE2DC /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		C0971C0F25CF774C006EE2DC /* Project_Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project_Release.xcconfig; sourceTree = "<group>"; };
 		C0971C1025CF7752006EE2DC /* Project_Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project_Debug.xcconfig; sourceTree = "<group>"; };
@@ -33,7 +35,9 @@
 		C09A4C49271B7E3A0090EC68 /* CBL+Dart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CBL+Dart.h"; sourceTree = "<group>"; };
 		C09A4C4A271B7E3A0090EC68 /* CBLDart_Export.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CBLDart_Export.h; sourceTree = "<group>"; };
 		C09E6C1A263456C700127155 /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
-		C09E6C22263456C700127155 /* Utils.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hh; sourceTree = "<group>"; };
+		C09E6C22263456C700127155 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.h; sourceTree = "<group>"; };
+		C0BFDD2127415FDC007AD8DC /* Sentry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sentry.h; sourceTree = "<group>"; };
+		C0BFDD2227415FDC007AD8DC /* Sentry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sentry.cpp; sourceTree = "<group>"; };
 		C0D8CBCB25CF285A008B87C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Info.plist; path = XCode/Info.plist; sourceTree = SOURCE_ROOT; };
 		C0D8CBE625CF2AD7008B87C0 /* Fleece+Dart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Fleece+Dart.cpp"; sourceTree = "<group>"; };
 		C0D8CBE725CF2AD7008B87C0 /* AsyncCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AsyncCallback.cpp; sourceTree = "<group>"; };
@@ -109,8 +113,10 @@
 		C0D8CBE225CF28F3008B87C0 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				C0BFDD2227415FDC007AD8DC /* Sentry.cpp */,
+				C0BFDD2127415FDC007AD8DC /* Sentry.h */,
 				C09E6C1A263456C700127155 /* Utils.cpp */,
-				C09E6C22263456C700127155 /* Utils.hh */,
+				C09E6C22263456C700127155 /* Utils.h */,
 				C0D8CBE725CF2AD7008B87C0 /* AsyncCallback.cpp */,
 				C0D8CBE925CF2AD7008B87C0 /* AsyncCallback.h */,
 				C0D8CC3125CF2ECC008B87C0 /* CBL+Dart.cpp */,
@@ -168,8 +174,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0D8CBEF25CF2AD7008B87C0 /* AsyncCallback.h in Headers */,
-				C09E6C24263456C700127155 /* Utils.hh in Headers */,
+				C09E6C24263456C700127155 /* Utils.h in Headers */,
 				C09A4C4D271B7E3A0090EC68 /* CBLDart_Export.h in Headers */,
+				C0BFDD2327415FDC007AD8DC /* Sentry.h in Headers */,
 				C09A4C4C271B7E3A0090EC68 /* CBL+Dart.h in Headers */,
 				C09A4C4B271B7E3A0090EC68 /* Fleece+Dart.h in Headers */,
 			);
@@ -246,6 +253,7 @@
 				C0D8CC6525CF325B008B87C0 /* dart_api_dl.c in Sources */,
 				C0D8CC3225CF2ECC008B87C0 /* CBL+Dart.cpp in Sources */,
 				C09E6C23263456C700127155 /* Utils.cpp in Sources */,
+				C0BFDD2427415FDC007AD8DC /* Sentry.cpp in Sources */,
 				C0D8CBEC25CF2AD7008B87C0 /* Fleece+Dart.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
