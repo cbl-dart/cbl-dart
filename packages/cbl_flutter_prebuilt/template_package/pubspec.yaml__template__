@@ -12,7 +12,7 @@ environment:
   flutter: '>=2.5.0'
 
 dependencies:
-  cbl_flutter_platform_interface: ^1.0.0-beta.2
+  cbl_flutter_platform_interface: ^1.0.0-beta.3
   cbl_libcblite_api: {{couchbaseLiteC.apiPackageRelease}}
   cbl_libcblitedart_api: {{couchbaseLiteDart.apiPackageRelease}}
   flutter:
