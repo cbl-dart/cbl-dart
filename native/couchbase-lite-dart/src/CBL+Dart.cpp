@@ -52,7 +52,9 @@ CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
 }
 
 void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback) {
-  ASYNC_CALLBACK_FROM_C(callback)->close();
+  auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
+  callback_->close();
+  delete callback_;
 }
 
 void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
@@ -954,6 +956,7 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
       case Dart_CObject_kNull:
         descision = nullptr;
         break;
+      case Dart_CObject_kInt32:
       case Dart_CObject_kInt64:
         descision = reinterpret_cast<const CBLDocument *>(
             CBLDart_CObject_getIntValueAsInt64(result));
@@ -966,8 +969,12 @@ const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
           break;
         }
       default:
-        throw std::logic_error(
-            "Unexpected result from replicator conflict resolver.");
+        auto message = std::string(
+            "Unexpected result from replicator conflict resolver, with "
+            "Dart_CObject_Type: ");
+        message += std::to_string(result->type);
+
+        throw std::logic_error(message);
         break;
     }
   };
@@ -1033,6 +1040,11 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   context->pushFilter = ASYNC_CALLBACK_FROM_C(config->pushFilter);
   context->conflictResolver = ASYNC_CALLBACK_FROM_C(config->conflictResolver);
   config_.context = context;
+
+#ifdef COUCHBASE_ENTERPRISE
+  config_.propertyEncryptor = nullptr;
+  config_.propertyDecryptor = nullptr;
+#endif
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
 
