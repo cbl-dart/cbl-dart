@@ -31,7 +31,9 @@ CBLDART_EXPORT
 bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
                         CBLError *errorOut);
 
-// -- Callbacks
+// === Dart Native ============================================================
+
+// === Async Callbacks
 
 typedef struct _CBLDart_AsyncCallback *CBLDart_AsyncCallback;
 
@@ -47,15 +49,15 @@ CBLDART_EXPORT
 void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
                                        int64_t argument);
 
-// -- Dart Finalizer
+// === Dart Finalizer
 
 CBLDART_EXPORT
 void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
                                    int64_t token);
 
-// Couchbase Lite ----------------------------------------------------------
+// === Couchbase Lite =========================================================
 
-// -- Base
+// === Base
 
 CBLDART_EXPORT
 CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error);
@@ -79,7 +81,7 @@ void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
 CBLDART_EXPORT
 void CBLDart_SetDebugRefCounted(uint8_t enabled);
 
-// -- Log
+// === Log
 
 CBLDART_EXPORT
 void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
@@ -109,7 +111,7 @@ CBLDart_CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig();
 CBLDART_EXPORT
 bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
-// -- Document
+// === Document
 
 CBLDART_EXPORT
 CBLDart_FLString CBLDart_CBLDocument_ID(CBLDocument *doc);
@@ -127,7 +129,7 @@ CBLDART_EXPORT
 int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
                                    CBLError *errorOut);
 
-// -- Database
+// === Database
 
 #ifdef COUCHBASE_ENTERPRISE
 CBLDART_EXPORT
@@ -244,7 +246,7 @@ CBLDART_EXPORT
 uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
                                         CBLError *errorOut);
 
-// -- Query
+// === Query
 
 CBLDART_EXPORT
 CBLQuery *CBLDart_CBLDatabase_CreateQuery(CBLDatabase *db,
@@ -267,7 +269,7 @@ CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
     CBLQuery *query, CBLDart_AsyncCallback listener);
 
-// -- Blob
+// === Blob
 
 CBLDART_EXPORT
 CBLDart_FLString CBLDart_CBLBlob_Digest(CBLBlob *blob);
@@ -295,7 +297,7 @@ CBLBlob *CBLDart_CBLBlob_CreateWithData(CBLDart_FLString contentType,
 CBLDART_EXPORT CBLBlob *CBLDart_CBLBlob_CreateWithStream(
     CBLDart_FLString contentType, CBLBlobWriteStream *writer);
 
-// -- Replicator
+// === Replicator
 
 CBLDART_EXPORT
 CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url,

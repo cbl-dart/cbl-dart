@@ -9,7 +9,8 @@
 #endif
 
 extern "C" {
-// Slice -------------------------------------------------------------------
+
+// === Slice ==================================================================
 
 /**
  * See `FLSlice` in Dart code.
@@ -26,24 +27,6 @@ struct CBLDart_FLSliceResult {
 
 typedef CBLDart_FLSlice CBLDart_FLString;
 typedef CBLDart_FLSliceResult CBLDart_FLStringResult;
-
-#define kCBLDartNullSlice ((CBLDart_FLSlice){NULL, 0})
-
-FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice);
-
-CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice);
-
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSliceResult slice);
-
-CBLDart_FLSliceResult CBLDart_FLSliceResultToDart(FLSliceResult slice);
-
-FLString CBLDart_FLStringFromDart(CBLDart_FLString slice);
-
-CBLDart_FLString CBLDart_FLStringToDart(FLString slice);
-
-FLStringResult CBLDart_FLStringResultFromDart(CBLDart_FLStringResult slice);
-
-CBLDart_FLStringResult CBLDart_FLStringResultToDart(FLStringResult slice);
 
 CBLDART_EXPORT
 uint8_t CBLDart_FLSlice_Equal(CBLDart_FLSlice a, CBLDart_FLSlice b);
@@ -68,7 +51,7 @@ void CBLDart_FLSliceResult_Retain(CBLDart_FLSliceResult slice);
 CBLDART_EXPORT
 void CBLDart_FLSliceResult_Release(CBLDart_FLSliceResult slice);
 
-// Doc ---------------------------------------------------------------------
+// === Doc ====================================================================
 
 CBLDART_EXPORT
 FLDoc CBLDart_FLDoc_FromResultData(CBLDart_FLSliceResult data, uint8_t trust,
@@ -81,7 +64,7 @@ FLDoc CBLDart_FLDoc_FromJSON(CBLDart_FLString json, FLError *errorOut);
 CBLDART_EXPORT
 void CBLDart_FLDoc_BindToDartObject(Dart_Handle object, FLDoc doc);
 
-// Value -------------------------------------------------------------------
+// === Value ==================================================================
 
 CBLDART_EXPORT
 void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
@@ -100,7 +83,7 @@ CBLDART_EXPORT
 CBLDart_FLStringResult CBLDart_FLValue_ToJSONX(FLValue value, uint8_t json5,
                                                uint8_t canonicalForm);
 
-// Dict --------------------------------------------------------------------
+// === Dict ===================================================================
 
 CBLDART_EXPORT
 FLValue CBLDart_FLDict_Get(FLDict dict, CBLDart_FLString keyString);
@@ -135,7 +118,7 @@ CBLDART_EXPORT
 FLMutableDict CBLDart_FLMutableDict_GetMutableDict(FLMutableDict dict,
                                                    CBLDart_FLString key);
 
-// Decoder --------------------------------------------------------------------
+// === Decoder ================================================================
 
 struct CBLDart_LoadedFLValue {
   uint8_t exists;
@@ -183,7 +166,7 @@ CBLDart_FLDictIterator2 *CBLDart_FLDictIterator2_Begin(
 CBLDART_EXPORT
 void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator);
 
-// Encoder --------------------------------------------------------------------
+// === Encoder ================================================================
 
 CBLDART_EXPORT
 void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder);

@@ -9,8 +9,8 @@
 #include "Sentry.h"
 #include "Utils.h"
 
-std::mutex initializeMutex;
-bool initialized = false;
+static std::mutex initializeMutex;
+static bool initialized = false;
 
 bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
                         CBLError *errorOut) {
@@ -36,7 +36,9 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
   return true;
 }
 
-// -- AsyncCallback
+// === Dart Native ============================================================
+
+// === Async Callbacks
 
 #define ASYNC_CALLBACK_FROM_C(callback) \
   reinterpret_cast<CBLDart::AsyncCallback *>(callback)
@@ -79,7 +81,7 @@ static CBLDart::AsyncCallback *CBLDart_AsAsyncCallback(void *pointer) {
   return reinterpret_cast<CBLDart::AsyncCallback *>(pointer);
 }
 
-// -- Dart Finalizer
+// === Dart Finalizer
 
 struct CBLDart_DartFinalizerContext {
   Dart_Port registry;
@@ -108,18 +110,18 @@ void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
   Dart_NewFinalizableHandle_DL(object, context, 0, CBLDart_RunDartFinalizer);
 }
 
-// Couchbase Lite --------------------------------------------------------------
+// === Couchbase Lite =========================================================
 
-// -- Base
+// === Base
 
 CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error) {
   return CBLDart_FLStringResultToDart(CBLError_Message(error));
 }
 
 #ifdef DEBUG
-bool cblRefCountedDebugEnabled = false;
-std::map<CBLRefCounted *, char *> cblRefCountedDebugNames;
-std::mutex cblRefCountedDebugMutex;
+static bool cblRefCountedDebugEnabled = false;
+static std::map<CBLRefCounted *, char *> cblRefCountedDebugNames;
+static std::mutex cblRefCountedDebugMutex;
 #endif
 
 inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
@@ -163,7 +165,8 @@ inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
 /**
  * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
  */
-void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data, void *peer) {
+static void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data,
+                                           void *peer) {
   CBLDart_CBLRefCountedFinalizer_Impl(reinterpret_cast<CBLRefCounted *>(peer));
 }
 
@@ -188,15 +191,15 @@ static std::mutex listenerTokenToDatabaseMutex;
 static std::map<CBLListenerToken *, const CBLDatabase *>
     listenerTokenToDatabase;
 
-void CBLDart_RetainDatabaseForListenerToken(const CBLDatabase *database,
-                                            CBLListenerToken *token) {
+static void CBLDart_RetainDatabaseForListenerToken(const CBLDatabase *database,
+                                                   CBLListenerToken *token) {
   CBLDatabase_Retain(database);
 
   std::scoped_lock lock(listenerTokenToDatabaseMutex);
   listenerTokenToDatabase[token] = database;
 }
 
-void CBLDart_CBLListenerFinalizer(void *context) {
+static void CBLDart_CBLListenerFinalizer(void *context) {
   auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
   CBLListener_Remove(listenerToken);
 
@@ -207,13 +210,13 @@ void CBLDart_CBLListenerFinalizer(void *context) {
   }
 }
 
-// -- Log
+// === Log
 
-std::shared_mutex loggingMutex;
-CBLDart::AsyncCallback *logCallback = nullptr;
-CBLLogLevel logCallbackLevel = CBLLog_CallbackLevel();
-CBLDart_CBLLogFileConfiguration *logFileConfig = nullptr;
-bool logSentryBreadcrumbsEnabled = false;
+static std::shared_mutex loggingMutex;
+static CBLDart::AsyncCallback *logCallback = nullptr;
+static CBLLogLevel logCallbackLevel = CBLLog_CallbackLevel();
+static CBLDart_CBLLogFileConfiguration *logFileConfig = nullptr;
+static bool logSentryBreadcrumbsEnabled = false;
 
 // Forward declarations for the logging functions.
 static void CBLDart_LogSentryBreadcrumb(CBLLogDomain domain, CBLLogLevel level,
@@ -254,8 +257,8 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
           static_cast<const char *>(message.buf));
 }
 
-void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
-                                 FLString message) {
+static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
+                                        FLString message) {
   std::shared_lock lock(loggingMutex);
 
   Dart_CObject domain_;
@@ -279,7 +282,7 @@ void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
   CBLDart::AsyncCallbackCall(*logCallback).execute(args);
 }
 
-void CBLDart_LogCallbackFinalizer(void *context) {
+static void CBLDart_LogCallbackFinalizer(void *context) {
   std::unique_lock lock(loggingMutex);
   logCallback = nullptr;
   CBLDart_UpdateEffectiveLogCallback();
@@ -412,10 +415,6 @@ static const char *CBLDart_LogLevelToSentryLevel(CBLLogLevel level) {
   }
 }
 
-static std::string CBLDart_FLStringToString(FLString slice) {
-  return std::string((char *)slice.buf, slice.size);
-}
-
 static void CBLDart_LogSentryBreadcrumb(CBLLogDomain domain, CBLLogLevel level,
                                         FLString message) {
   // Prepare breadcrumb data.
@@ -449,7 +448,7 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
   return true;
 }
 
-// -- Document
+// === Document
 
 CBLDart_FLString CBLDart_CBLDocument_ID(CBLDocument *doc) {
   return CBLDart_FLStringToDart(CBLDocument_ID(doc));
@@ -472,7 +471,7 @@ int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
   return CBLDocument_SetJSON(doc, CBLDart_FLStringFromDart(json), errorOut);
 }
 
-// -- Database
+// === Database
 
 #ifdef COUCHBASE_ENTERPRISE
 bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey *key,
@@ -486,8 +485,8 @@ bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey *key,
  *
  * Used to ensure that databases are closed only once.
  */
-std::vector<CBLDatabase *> openDatabases;
-std::mutex openDatabasesMutex;
+static std::vector<CBLDatabase *> openDatabases;
+static std::mutex openDatabasesMutex;
 
 static void CBLDart_RegisterOpenDatabase(CBLDatabase *database) {
   std::scoped_lock lock(openDatabasesMutex);
@@ -579,7 +578,7 @@ CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
   return database;
 }
 
-void CBLDart_DatabaseFinalizer(void *dart_callback_data, void *peer) {
+static void CBLDart_DatabaseFinalizer(void *dart_callback_data, void *peer) {
   auto database = reinterpret_cast<CBLDatabase *>(peer);
   CBLError error;
   if (!CBLDart_CBLDatabase_Close(database, false, &error)) {
@@ -636,7 +635,6 @@ uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
                                                         errorOut);
 }
 
-CBLDART_EXPORT
 uint8_t CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
                                               CBLDart_FLString docID,
                                               CBLError *errorOut) {
@@ -659,8 +657,9 @@ uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
                                            expiration, errorOut);
 }
 
-void CBLDart_DocumentChangeListenerWrapper(void *context, const CBLDatabase *db,
-                                           FLString docID) {
+static void CBLDart_DocumentChangeListenerWrapper(void *context,
+                                                  const CBLDatabase *db,
+                                                  FLString docID) {
   auto callback = CBLDart_AsAsyncCallback(context);
 
   Dart_CObject args;
@@ -684,8 +683,10 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(
                                                 CBLDart_CBLListenerFinalizer);
 }
 
-void CBLDart_DatabaseChangeListenerWrapper(void *context, const CBLDatabase *db,
-                                           unsigned numDocs, FLString *docIDs) {
+static void CBLDart_DatabaseChangeListenerWrapper(void *context,
+                                                  const CBLDatabase *db,
+                                                  unsigned numDocs,
+                                                  FLString *docIDs) {
   auto callback = CBLDart_AsAsyncCallback(context);
 
   Dart_CObject docIDs_[numDocs];
@@ -747,7 +748,7 @@ uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
   return CBLDatabase_DeleteIndex(db, CBLDart_FLStringFromDart(name), errorOut);
 }
 
-// -- Query
+// === Query
 
 CBLQuery *CBLDart_CBLDatabase_CreateQuery(CBLDatabase *db,
                                           CBLQueryLanguage language,
@@ -773,8 +774,8 @@ FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
   return CBLResultSet_ValueForKey(rs, CBLDart_FLStringFromDart(key));
 }
 
-void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
-                                        CBLListenerToken *token) {
+static void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
+                                               CBLListenerToken *token) {
   auto callback = CBLDart_AsAsyncCallback(context);
 
   Dart_CObject args;
@@ -794,7 +795,7 @@ CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
   return listenerToken;
 }
 
-// -- Blob
+// === Blob
 
 CBLDart_FLString CBLDart_CBLBlob_Digest(CBLBlob *blob) {
   return CBLDart_FLStringToDart(CBLBlob_Digest(blob));
@@ -852,7 +853,7 @@ CBLBlob *CBLDart_CBLBlob_CreateWithStream(CBLDart_FLString contentType,
                                   writer);
 }
 
-// -- Replicator
+// === Replicator
 
 CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url,
                                                CBLError *errorOut) {
@@ -877,13 +878,13 @@ struct ReplicatorCallbackWrapperContext {
   CBLDart::AsyncCallback *conflictResolver;
 };
 
-std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *>
+static std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *>
     replicatorCallbackWrapperContexts;
-std::mutex replicatorCallbackWrapperContexts_mutex;
+static std::mutex replicatorCallbackWrapperContexts_mutex;
 
-bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
-                                     CBLDocument *document,
-                                     CBLDocumentFlags flags) {
+static bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
+                                            CBLDocument *document,
+                                            CBLDocumentFlags flags) {
   Dart_CObject document_;
   CBLDart_CObject_SetPointer(&document_, document);
 
@@ -909,23 +910,25 @@ bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
   return descision;
 }
 
-bool CBLDart_ReplicatorPullFilterWrapper(void *context, CBLDocument *document,
-                                         CBLDocumentFlags flags) {
+static bool CBLDart_ReplicatorPullFilterWrapper(void *context,
+                                                CBLDocument *document,
+                                                CBLDocumentFlags flags) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
   return CBLDart_ReplicatorFilterWrapper(wrapperContext->pullFilter, document,
                                          flags);
 }
 
-bool CBLDart_ReplicatorPushFilterWrapper(void *context, CBLDocument *document,
-                                         CBLDocumentFlags flags) {
+static bool CBLDart_ReplicatorPushFilterWrapper(void *context,
+                                                CBLDocument *document,
+                                                CBLDocumentFlags flags) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
   return CBLDart_ReplicatorFilterWrapper(wrapperContext->pushFilter, document,
                                          flags);
 }
 
-const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
+static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
     void *context, FLString documentID, const CBLDocument *localDocument,
     const CBLDocument *remoteDocument) {
   auto wrapperContext =
@@ -1060,7 +1063,7 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   return replicator;
 }
 
-void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
+static void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   auto replicator = reinterpret_cast<CBLReplicator *>(peer);
 
   // Clean up context for callback wrapper
@@ -1154,7 +1157,7 @@ class CObject_ReplicatorStatus {
   FLSliceResult errorMessageStr = {nullptr, 0};
 };
 
-void CBLDart_Replicator_ChangeListenerWrapper(
+static void CBLDart_Replicator_ChangeListenerWrapper(
     void *context, CBLReplicator *replicator,
     const CBLReplicatorStatus *status) {
   auto callback = CBLDart_AsAsyncCallback(context);
@@ -1235,7 +1238,7 @@ class CObject_ReplicatedDocument {
   FLSliceResult errorMessageStr = {nullptr, 0};
 };
 
-void CBLDart_Replicator_DocumentReplicationListenerWrapper(
+static void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     void *context, CBLReplicator *replicator, bool isPush,
     unsigned numDocuments, const CBLReplicatedDocument *documents) {
   auto callback = CBLDart_AsAsyncCallback(context);
