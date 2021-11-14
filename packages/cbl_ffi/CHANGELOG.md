@@ -1,3 +1,8 @@
+## 0.7.0-beta.8
+
+ - **FEAT**: add logging breadcrumbs to Sentry Native SDK (#234). ([5b76eac4](https://github.com/cbl-dart/cbl-dart/commit/5b76eac490c6fe19c4e60ac6dfc8e73c232e105c))
+ - **CHORE**: cut `1.0.0-beta.4` for `cbl_libcblitedart_api`. ([8723fe06](https://github.com/cbl-dart/cbl-dart/commit/8723fe06b4e98ba22cf2d7d27ec3506fe5be1772))
+
 ## 0.7.0-beta.7
 
  - **FEAT**: add support for database encryption (#213). ([a92b9e45](https://github.com/cbl-dart/cbl-dart/commit/a92b9e4590e3424ff8d32914cc73d1ec6a1164bb))

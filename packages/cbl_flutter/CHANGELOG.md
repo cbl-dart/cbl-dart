@@ -1,3 +1,8 @@
+## 1.0.0-beta.9
+
+ - **FEAT**: add `cbl_dart` package (#230). ([09f3da5e](https://github.com/cbl-dart/cbl-dart/commit/09f3da5eef02b2d0543f0653f83676a24648ccd9))
+ - **CHORE**: publish packages. ([d9f5ea83](https://github.com/cbl-dart/cbl-dart/commit/d9f5ea83de703324b0537ce28fab75804cd61d2e))
+
 ## 1.0.0-beta.8
 
  - **DOCS**: remove references to specific package versions from README. ([c49af91f](https://github.com/cbl-dart/cbl-dart/commit/c49af91fc92c5f27da6d41b2836ef997531b5253))

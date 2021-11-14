@@ -1,5 +1,5 @@
 name: cbl_dart
-version: 1.0.0-beta.0
+version: 1.0.0-beta.1
 description: >-
   Couchbase Lite for pure Dart apps: An embedded, NoSQL JSON Document Style
   database, supporting Blobs, Encryption, N1QL Queries, Live Queries, Full-Text
@@ -12,7 +12,7 @@ environment:
   sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
-  cbl: ^1.0.0-beta.9
+  cbl: ^1.0.0-beta.10
   cbl_libcblite_api: 3.0.0-beta.2
   cbl_libcblitedart_api: 1.0.0-beta.4
   crypto: ^3.0.1
