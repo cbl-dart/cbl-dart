@@ -62,8 +62,8 @@ typedef _CBLLog_ConsoleLevel = int Function();
 typedef _CBLLog_SetConsoleLevel_C = Void Function(Uint8 logLevel);
 typedef _CBLLog_SetConsoleLevel = void Function(int logLevel);
 
-typedef _CBLLog_SetCallbackLevel_C = Void Function(Uint8 logLevel);
-typedef _CBLLog_SetCallbackLevel = void Function(int logLevel);
+typedef _CBLDart_CBLLog_SetCallbackLevel_C = Void Function(Uint8 logLevel);
+typedef _CBLDart_CBLLog_SetCallbackLevel = void Function(int logLevel);
 
 class LogCallbackMessage {
   LogCallbackMessage(this.domain, this.level, this.message);
@@ -169,6 +169,9 @@ typedef _CBLDart_CBLLog_SetFileConfig = int Function(
 typedef _CBLDart_CBLLog_GetFileConfig
     = Pointer<_CBLDart_CBLLogFileConfiguration> Function();
 
+typedef _CBLDart_CBLLog_SetSentryBreadcrumbs_C = Uint8 Function(Uint8 enabled);
+typedef _CBLDart_CBLLog_SetSentryBreadcrumbs = int Function(int enabled);
+
 class LoggingBindings extends Bindings {
   LoggingBindings(Bindings parent) : super(parent) {
     _logMessage = libs.cblDart
@@ -183,9 +186,9 @@ class LoggingBindings extends Bindings {
         .lookupFunction<_CBLLog_SetConsoleLevel_C, _CBLLog_SetConsoleLevel>(
       'CBLLog_SetConsoleLevel',
     );
-    _setCallbackLevel = libs.cbl
-        .lookupFunction<_CBLLog_SetCallbackLevel_C, _CBLLog_SetCallbackLevel>(
-      'CBLLog_SetCallbackLevel',
+    _setCallbackLevel = libs.cblDart.lookupFunction<
+        _CBLDart_CBLLog_SetCallbackLevel_C, _CBLDart_CBLLog_SetCallbackLevel>(
+      'CBLDart_CBLLog_SetCallbackLevel',
     );
     _setCallback = libs.cblDart.lookupFunction<_CBLDart_CBLLog_SetCallback_C,
         _CBLDart_CBLLog_SetCallback>(
@@ -199,15 +202,21 @@ class LoggingBindings extends Bindings {
         _CBLDart_CBLLog_GetFileConfig>(
       'CBLDart_CBLLog_GetFileConfig',
     );
+    _setSentryBreadcrumbs = libs.cblDart.lookupFunction<
+        _CBLDart_CBLLog_SetSentryBreadcrumbs_C,
+        _CBLDart_CBLLog_SetSentryBreadcrumbs>(
+      'CBLDart_CBLLog_SetSentryBreadcrumbs',
+    );
   }
 
   late final _CBLDart_CBL_LogMessage _logMessage;
   late final _CBLLog_ConsoleLevel _consoleLevel;
   late final _CBLLog_SetConsoleLevel _setConsoleLevel;
-  late final _CBLLog_SetCallbackLevel _setCallbackLevel;
+  late final _CBLDart_CBLLog_SetCallbackLevel _setCallbackLevel;
   late final _CBLDart_CBLLog_SetCallback _setCallback;
   late final _CBLDart_CBLLog_SetFileConfig _setFileConfig;
   late final _CBLDart_CBLLog_GetFileConfig _getFileConfig;
+  late final _CBLDart_CBLLog_SetSentryBreadcrumbs _setSentryBreadcrumbs;
 
   void logMessage(
     CBLLogDomain domain,
@@ -245,6 +254,9 @@ class LoggingBindings extends Bindings {
 
   CBLLogFileConfiguration? getLogFileConfiguration() =>
       _getFileConfig().toNullable()?.ref.toCBLLogFileConfiguration();
+
+  bool setSentryBreadcrumbs({required bool enabled}) =>
+      _setSentryBreadcrumbs(enabled.toInt()).toBool();
 
   Pointer<_CBLDart_CBLLogFileConfiguration> _logFileConfig(
     CBLLogFileConfiguration? config,

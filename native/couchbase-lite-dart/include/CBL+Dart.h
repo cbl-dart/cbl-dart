@@ -88,6 +88,9 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
 CBLDART_EXPORT
 uint8_t CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
 
+CBLDART_EXPORT
+void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level);
+
 typedef struct {
   CBLLogLevel level;
   CBLDart_FLString directory;
@@ -102,6 +105,9 @@ uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
 
 CBLDART_EXPORT
 CBLDart_CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig();
+
+CBLDART_EXPORT
+bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
 // -- Document
 

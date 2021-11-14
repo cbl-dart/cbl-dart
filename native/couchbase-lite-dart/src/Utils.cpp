@@ -1,4 +1,4 @@
-#include "Utils.hh"
+#include "Utils.h"
 
 int64_t CBLDart_CObject_getIntValueAsInt64(Dart_CObject* object) {
   assert(object->type == Dart_CObject_kInt64 ||
