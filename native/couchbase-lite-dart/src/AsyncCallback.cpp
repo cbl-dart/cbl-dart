@@ -103,8 +103,6 @@ void AsyncCallback::close() {
   AsyncCallbackRegistry::instance.unregisterCallback(*this);
 
   debugLog("closed");
-
-  delete this;
 }
 
 void AsyncCallback::dartFinalizer(void *dart_callback_data, void *peer) {
@@ -112,6 +110,7 @@ void AsyncCallback::dartFinalizer(void *dart_callback_data, void *peer) {
   callback->debugLog("closing from Dart finalizer");
   callback->dartCallbackHandle_ = nullptr;
   callback->close();
+  delete callback;
 }
 
 void AsyncCallback::registerCall(AsyncCallbackCall &call) {
