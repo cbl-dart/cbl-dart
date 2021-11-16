@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:cbl/src/couchbase_lite.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
+import '../couchbase_lite.dart';
 import '../errors.dart';
-import '../support/isolate.dart';
 import '../support/utils.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
