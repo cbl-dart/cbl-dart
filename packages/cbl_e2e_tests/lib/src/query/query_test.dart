@@ -219,4 +219,17 @@ SELECT foo()
       );
     });
   });
+
+  group('QueryChange', () {
+    test('toString', () {
+      final db = openSyncTestDatabase();
+      final query = SyncQuery.fromN1ql(db, 'SELECT * FROM _');
+      final results = query.execute();
+      final change = QueryChange(query, results);
+      expect(
+        change.toString(),
+        'QueryChange(query: FfiQuery(n1ql: SELECT * FROM _))',
+      );
+    });
+  });
 }

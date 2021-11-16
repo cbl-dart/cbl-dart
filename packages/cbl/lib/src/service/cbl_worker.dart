@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:cbl/src/couchbase_lite.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../errors.dart';
@@ -62,7 +63,7 @@ class CblWorker {
     _worker = IsolateWorker(
       debugName: 'CblWorker($debugName)',
       delegate: _ServiceWorkerDelegate(
-        context: IsolateContext.instance,
+        context: CouchbaseLite.context,
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
@@ -115,7 +116,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
     required this.serializationType,
   });
 
-  final IsolateContext context;
+  final Object context;
   final SendPort channel;
   final SerializationTarget serializationType;
 
@@ -124,7 +125,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
 
   @override
   FutureOr<void> initialize() {
-    initIsolate(context);
+    CouchbaseLite.initSecondary(context);
 
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),
