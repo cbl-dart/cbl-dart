@@ -11,6 +11,7 @@ import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
 import '../support/listener_token.dart';
+import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'data_source.dart';
@@ -37,6 +38,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   late final _lock = Lock();
   late final _listenerTokens = ListenerTokenRegistry(this);
   late List<String> _columnNames;
+  _ProxyQueryEarlyFinalizer? _earlyFinalizer;
 
   @override
   ProxyDatabase? get database => super.database as ProxyDatabase?;
@@ -128,7 +130,18 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
     _columnNames = state.columnNames;
 
-    bindToTargetObject(channel, state.id);
+    // We need this so we don't capture `this` in the closure of proxyFinalizer.
+    late final _ProxyQueryEarlyFinalizer earlyFinalizer;
+
+    bindToTargetObject(
+      channel,
+      state.id,
+      // ignore: unnecessary_lambdas
+      proxyFinalizer: () => earlyFinalizer.deactivate(),
+    );
+
+    _earlyFinalizer =
+        earlyFinalizer = _ProxyQueryEarlyFinalizer(database!, finalizeEarly);
   }
 
   Future<void> _applyParameters(Parameters? parameters) {
@@ -147,9 +160,25 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   }
 
   @override
-  Future<void> performClose() async {
-    if (isBoundToTarget) {
-      return finalizeEarly();
+  FutureOr<void> performClose() => _earlyFinalizer?.close();
+}
+
+class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
+  _ProxyQueryEarlyFinalizer(ProxyDatabase database, this._finalizerEarly) {
+    // We need to attach to the database and not to the query. Otherwise,
+    // the query could never be garbage collected.
+    attachTo(database);
+  }
+
+  final Future<void> Function() _finalizerEarly;
+
+  @override
+  FutureOr<void> performClose() => _finalizerEarly();
+
+  /// Deactivates this finalizer if it has not been closed yet.
+  void deactivate() {
+    if (!isClosed) {
+      needsToBeClosedByParent = false;
     }
   }
 }
