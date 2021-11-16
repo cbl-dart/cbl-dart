@@ -68,17 +68,17 @@ abstract class DictionaryInterface implements DictionaryFragment {
 
   /// Returns the value for the given [key] as a [Blob].
   ///
-  /// {@macro cbl.DictionaryInterface.typedNullableGetter
+  /// {@macro cbl.DictionaryInterface.typedNullableGetter}
   Blob? blob(String key);
 
   /// Returns the value for the given [key] as an [Array].
   ///
-  /// {@macro cbl.DictionaryInterface.typedNullableGetter
+  /// {@macro cbl.DictionaryInterface.typedNullableGetter}
   Array? array(String key);
 
   /// Returns the value for the given [key] as a [Dictionary].
   ///
-  /// {@macro cbl.DictionaryInterface.typedNullableGetter
+  /// {@macro cbl.DictionaryInterface.typedNullableGetter}
   Dictionary? dictionary(String key);
 
   /// Returns whether an entry with the given [key] exists in this dictionary.
@@ -150,13 +150,13 @@ abstract class MutableDictionaryInterface
 
   /// Returns the value for the given [key] as an [MutableArray].
   ///
-  /// {@macro cbl.DictionaryInterface.typedNullableGetter
+  /// {@macro cbl.DictionaryInterface.typedNullableGetter}
   @override
   MutableArray? array(String key);
 
   /// Returns the value for the given [key] as a [MutableDictionary].
   ///
-  /// {@macro cbl.DictionaryInterface.typedNullableGetter
+  /// {@macro cbl.DictionaryInterface.typedNullableGetter}
   @override
   MutableDictionary? dictionary(String key);
 }

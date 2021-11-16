@@ -44,7 +44,7 @@ abstract class Parameters {
   /// Set an integer number to the query parameter referenced by the given
   /// [name].
   ///
-  /// {@macro cbl.Parameters.parameterDefinition};
+  /// {@macro cbl.Parameters.parameterDefinition}
   void setInteger(int? value, {required String name});
 
   /// Set a floating point number to the query parameter referenced by the given
