@@ -7,12 +7,214 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
 
   group('QueryBuilder', () {
     setupEvalExprUtils();
+
+    apiTest('throws when query is used without FROM clause', () async {
+      final query = await runWithApi(
+        sync: () => QueryBuilder.createSync().select(SelectResult.all()),
+        async: () => QueryBuilder.createAsync().select(SelectResult.all()),
+      );
+      expect(query.execute, throwsA(isA<StateError>()));
+    });
+
+    apiTest('from throws when data source has wrong type', () async {
+      final db = await openTestDatabase();
+      final query = await runWithApi(
+        sync: () => const AsyncQueryBuilder(),
+        async: () => const SyncQueryBuilder(),
+      );
+
+      expect(
+        () => query.select(SelectResult.all()).from(DataSource.database(db)),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    apiTest('routers', () async {
+      final db = await openTestDatabase();
+      final builder = await runWithApi(
+        sync: QueryBuilder.createSync,
+        async: QueryBuilder.createAsync,
+      );
+
+      void expectBuilderQuery(
+        Query query,
+        Map<String, Object?> selectQuery,
+      ) {
+        expect(
+          query.jsonRepresentation,
+          json(['SELECT', selectQuery]),
+        );
+      }
+
+      void exploreBuilderQuery(
+        final Query query,
+        final Map<String, Object?> selectQuery,
+      ) {
+        if (query is FromRouter) {
+          final fromRouter = query as FromRouter;
+          return exploreBuilderQuery(
+            fromRouter.from(DataSource.database(db)),
+            {
+              ...selectQuery,
+              'FROM': [
+                {'COLLECTION': 'db'}
+              ],
+            },
+          );
+        }
+
+        expectBuilderQuery(query, selectQuery);
+
+        if (query is JoinRouter) {
+          final joinRouter = query as JoinRouter;
+          exploreBuilderQuery(
+            joinRouter.join(
+              Join.join(DataSource.database(db)).on(Expression.property('a')),
+            ),
+            {
+              ...selectQuery,
+              'FROM': <Object>[
+                ...selectQuery['FROM']! as List<Object>,
+                {
+                  'COLLECTION': 'db',
+                  'JOIN': 'INNER',
+                  'ON': ['.a']
+                }
+              ]
+            },
+          );
+          exploreBuilderQuery(
+            joinRouter.joinAll([
+              Join.join(DataSource.database(db)).on(Expression.property('a')),
+            ]),
+            {
+              ...selectQuery,
+              'FROM': <Object>[
+                ...selectQuery['FROM']! as List<Object>,
+                {
+                  'COLLECTION': 'db',
+                  'JOIN': 'INNER',
+                  'ON': ['.a']
+                }
+              ]
+            },
+          );
+        }
+
+        if (query is WhereRouter) {
+          final whereRouter = query as WhereRouter;
+          exploreBuilderQuery(
+            whereRouter.where(Expression.value(true)),
+            {
+              ...selectQuery,
+              'WHERE': true,
+            },
+          );
+        }
+
+        if (query is GroupByRouter) {
+          final groupByRouter = query as GroupByRouter;
+          exploreBuilderQuery(
+            groupByRouter.groupBy(Expression.property('a')),
+            {
+              ...selectQuery,
+              'GROUP_BY': [
+                ['.a']
+              ],
+            },
+          );
+          exploreBuilderQuery(
+            groupByRouter.groupByAll([Expression.property('a')]),
+            {
+              ...selectQuery,
+              'GROUP_BY': [
+                ['.a']
+              ],
+            },
+          );
+        }
+
+        if (query is HavingRouter) {
+          final havingRouter = query as HavingRouter;
+          exploreBuilderQuery(
+            havingRouter.having(Expression.value(true)),
+            {
+              ...selectQuery,
+              'HAVING': true,
+            },
+          );
+        }
+
+        if (query is OrderByRouter) {
+          final orderByRouter = query as OrderByRouter;
+          exploreBuilderQuery(
+            orderByRouter.orderBy(Ordering.property('a')),
+            {
+              ...selectQuery,
+              'ORDER_BY': [
+                ['.a']
+              ],
+            },
+          );
+          exploreBuilderQuery(
+            orderByRouter.orderByAll([Ordering.property('a')]),
+            {
+              ...selectQuery,
+              'ORDER_BY': [
+                ['.a']
+              ],
+            },
+          );
+        }
+
+        if (query is LimitRouter) {
+          final limitRouter = query as LimitRouter;
+          exploreBuilderQuery(
+            limitRouter.limit(
+              Expression.value(1),
+              offset: Expression.value(0),
+            ),
+            {
+              ...selectQuery,
+              'LIMIT': 1,
+              'OFFSET': 0,
+            },
+          );
+        }
+      }
+
+      exploreBuilderQuery(builder.select(SelectResult.all()), {
+        'WHAT': [
+          ['.']
+        ],
+        'DISTINCT': false,
+      });
+      exploreBuilderQuery(builder.selectAll([SelectResult.all()]), {
+        'WHAT': [
+          ['.']
+        ],
+        'DISTINCT': false,
+      });
+      exploreBuilderQuery(builder.selectDistinct(SelectResult.all()), {
+        'WHAT': [
+          ['.']
+        ],
+        'DISTINCT': true,
+      });
+      exploreBuilderQuery(builder.selectAllDistinct([SelectResult.all()]), {
+        'WHAT': [
+          ['.']
+        ],
+        'DISTINCT': true,
+      });
+    });
 
     group('SelectResult', () {
       setUpAll(runWithApiValues(() async {

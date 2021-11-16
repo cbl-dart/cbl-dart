@@ -364,12 +364,10 @@ typedef _CBLDart_CBLReplicator_AddChangeListener = void Function(
 );
 
 class CBLReplicatedDocumentFlag extends Option {
-  const CBLReplicatedDocumentFlag(String debugName, int bits)
-      : super(debugName, bits);
+  const CBLReplicatedDocumentFlag(int bits) : super(bits);
 
-  static const deleted = CBLReplicatedDocumentFlag('deleted', 1 << 0);
-  static const accessRemoved =
-      CBLReplicatedDocumentFlag('accessRemoved', 1 << 1);
+  static const deleted = CBLReplicatedDocumentFlag(0);
+  static const accessRemoved = CBLReplicatedDocumentFlag(1);
 
   static const values = [deleted, accessRemoved];
 

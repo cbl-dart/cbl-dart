@@ -13,27 +13,22 @@ late final _baseBinds = CBLBindings.instance.base;
 // === Option ==================================================================
 
 class Option {
-  const Option(this.debugName, this.bits);
+  const Option(int bit) : bitMask = 1 << bit;
 
-  final String debugName;
-
-  final int bits;
-
-  @override
-  String toString() => debugName;
+  final int bitMask;
 }
 
 extension OptionIterable<T extends Option> on Iterable<T> {
   int toCFlags() {
     var result = 0;
     for (final option in this) {
-      result |= option.bits;
+      result |= option.bitMask;
     }
     return result;
   }
 
   Set<T> parseCFlags(int flags) =>
-      where((option) => (flags & option.bits) == option.bits).toSet();
+      where((option) => (flags & option.bitMask) == option.bitMask).toSet();
 }
 
 // === Init ====================================================================
@@ -227,16 +222,6 @@ class CBLErrorException implements Exception {
   final Object? code;
   final String? errorSource;
   final int? errorPosition;
-
-  @override
-  String toString() => 'CBLErrorException('
-      'domain: $domain, '
-      'code: $code, '
-      'message: $message, '
-      'errorSource: $errorSource, '
-      // ignore: missing_whitespace_between_adjacent_strings
-      'errorPosition: $errorPosition'
-      ')';
 }
 
 void checkCBLError({String? errorSource}) {
@@ -401,12 +386,16 @@ class BaseBindings extends Bindings {
     );
   }
 
+  // coverage:ignore-start
+
   // ignore: avoid_setters_without_getters
   set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled.toInt());
 
   void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
     _retainRefCounted(refCounted);
   }
+
+  // coverage:ignore-end
 
   String? getErrorMessage(Pointer<CBLError> error) =>
       _getErrorMessage(error).toDartStringAndRelease();

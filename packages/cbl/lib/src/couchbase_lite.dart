@@ -27,7 +27,7 @@ class CouchbaseLite {
   /// [Isolate].
   ///
   /// This object can be safely passed from one [Isolate] to another.
-  Object get context => IsolateContext.instance;
+  static Object get context => IsolateContext.instance;
 
   /// Initializes the `cbl` package, for a secondary isolate.
   ///
