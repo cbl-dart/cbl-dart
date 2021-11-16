@@ -56,6 +56,7 @@ mixin ClosableResourceMixin implements ClosableResource {
   /// not leak resources.
   ///
   /// Even if this property is `false`, the parent might still closed it.
+  @protected
   bool get needsToBeClosedByParent => _needsToBeClosedByParent;
   bool _needsToBeClosedByParent = true;
 

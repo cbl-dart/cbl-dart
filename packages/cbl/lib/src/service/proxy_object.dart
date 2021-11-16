@@ -58,10 +58,18 @@ mixin ProxyObjectMixin {
     );
   }
 
-  Future<void> finalizeEarly() {
+  Future<void> Function() get finalizeEarly {
     assert(isBoundToTarget);
-    dartFinalizerRegistry.unregisterFinalizer(_finalizerToken);
-    return channel!.call(ReleaseObject(objectId!));
+
+    // Don't capture `this` in the closure of the returned function.
+    final finalizerToken = _finalizerToken;
+    final objectId = this.objectId!;
+    final channel = this.channel!;
+
+    return () {
+      dartFinalizerRegistry.unregisterFinalizer(finalizerToken);
+      return channel.call(ReleaseObject(objectId));
+    };
   }
 }
 
