@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/encoder.dart';
@@ -232,6 +233,7 @@ void main() {
             41,
             3.14,
             'a',
+            Uint8List.fromList([42]),
             [true],
             {'a': true},
             {true}
@@ -246,6 +248,7 @@ void main() {
           41,
           3.14,
           'a',
+          Uint8List.fromList([42]),
           [true],
           {'a': true},
           [true]
@@ -286,6 +289,7 @@ void main() {
           ..writeInt(41)
           ..writeDouble(3.14)
           ..writeString('a')
+          ..writeData(Data.fromTypedList(Uint8List.fromList([42])))
           ..beginArray(0)
           ..endArray()
           ..beginDict(0)
@@ -306,6 +310,7 @@ void main() {
             41,
             3.14,
             'a',
+            Uint8List.fromList([42]),
             <Object?>[],
             {'a': true}
           ],

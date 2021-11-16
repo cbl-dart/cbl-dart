@@ -22,6 +22,7 @@ function dartToLcov() {
     cd "$packageDir"
 
     format_coverage \
+        --check-ignore \
         --in "$input" \
         --lcov \
         --out "$output" \

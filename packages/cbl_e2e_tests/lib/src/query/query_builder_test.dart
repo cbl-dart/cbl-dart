@@ -7,12 +7,302 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
 
   group('QueryBuilder', () {
     setupEvalExprUtils();
+
+    apiTest('throws when query is used without FROM clause', () async {
+      final query = await runWithApi(
+        sync: () => QueryBuilder.createSync().select(SelectResult.all()),
+        async: () => QueryBuilder.createAsync().select(SelectResult.all()),
+      );
+      expect(query.execute, throwsA(isA<StateError>()));
+    });
+
+    apiTest('from throws when data source has wrong type', () async {
+      final db = await openTestDatabase();
+      final query = await runWithApi(
+        sync: () => const AsyncQueryBuilder(),
+        async: () => const SyncQueryBuilder(),
+      );
+
+      expect(
+        () => query.select(SelectResult.all()).from(DataSource.database(db)),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    apiTest('routers', () async {
+      final db = await openTestDatabase();
+      final query = await runWithApi(
+        sync: QueryBuilder.createSync,
+        async: QueryBuilder.createAsync,
+      );
+
+      void expectJsonRepresentation(
+        Query query,
+        List<Object?> expected,
+      ) {
+        expect(
+          query.jsonRepresentation,
+          json(expected),
+        );
+      }
+
+      expectJsonRepresentation(
+        query.select(SelectResult.all()).from(DataSource.database(db)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'}
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query.selectAll([SelectResult.all()]).from(DataSource.database(db)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'}
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query.selectDistinct(SelectResult.all()).from(DataSource.database(db)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': true,
+            'FROM': [
+              {'COLLECTION': 'db'}
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query.selectAllDistinct([SelectResult.all()]).from(
+            DataSource.database(db)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': true,
+            'FROM': [
+              {'COLLECTION': 'db'}
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query.select(SelectResult.all()).from(DataSource.database(db)).join(
+            Join.join(DataSource.database(db)).on(Expression.property('a'))),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+              {
+                'COLLECTION': 'db',
+                'JOIN': 'INNER',
+                'ON': ['.a']
+              }
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query.select(SelectResult.all()).from(DataSource.database(db)).joinAll(
+            [Join.join(DataSource.database(db)).on(Expression.property('a'))]),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+              {
+                'COLLECTION': 'db',
+                'JOIN': 'INNER',
+                'ON': ['.a']
+              }
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .where(Expression.value(true)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'WHERE': true
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .groupBy(Expression.property('a')),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'GROUP_BY': [
+              ['.a']
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .groupByAll([Expression.property('a')]),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'GROUP_BY': [
+              ['.a']
+            ]
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .groupBy(Expression.property('a'))
+            .having(Expression.value(true)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'GROUP_BY': [
+              ['.a']
+            ],
+            'HAVING': true
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .orderBy(Ordering.property('a')),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'ORDER_BY': [
+              ['.a']
+            ],
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .orderByAll([Ordering.property('a')]),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'ORDER_BY': [
+              ['.a']
+            ],
+          }
+        ],
+      );
+      expectJsonRepresentation(
+        query
+            .select(SelectResult.all())
+            .from(DataSource.database(db))
+            .limit(Expression.value(1), offset: Expression.value(2)),
+        [
+          'SELECT',
+          {
+            'WHAT': [
+              ['.']
+            ],
+            'DISTINCT': false,
+            'FROM': [
+              {'COLLECTION': 'db'},
+            ],
+            'LIMIT': 1,
+            'OFFSET': 2,
+          }
+        ],
+      );
+    });
 
     group('SelectResult', () {
       setUpAll(runWithApiValues(() async {

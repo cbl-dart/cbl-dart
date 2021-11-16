@@ -63,8 +63,14 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
     throw UnimplementedError();
   }
 
+  // All these methods will never execute their body because the `useSync`
+  // method from `BuilderQueryMixin` throws because the query has not FROM
+  // clause. They just have to be implemented to satisfy the interface.
+
+  // coverage:ignore-start
+
   @override
-  Parameters? get parameters => throw UnimplementedError();
+  Parameters? get parameters => useSync(() => throw UnimplementedError());
 
   @override
   FutureOr<void> setParameters(Parameters? value) =>
@@ -87,8 +93,7 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   @override
   Stream<QueryChange> changes() => useSync(() => throw UnimplementedError());
 
-  @override
-  Future<void> performClose() => throw UnimplementedError();
+  // coverage:ignore-end
 }
 
 class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
