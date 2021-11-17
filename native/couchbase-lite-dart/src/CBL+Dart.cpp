@@ -880,7 +880,7 @@ struct ReplicatorCallbackWrapperContext {
 
 static std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *>
     replicatorCallbackWrapperContexts;
-static std::mutex replicatorCallbackWrapperContexts_mutex;
+static std::mutex replicatorCallbackWrapperContextsMutex;
 
 static bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
                                             CBLDocument *document,
@@ -1054,7 +1054,7 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   if (replicator) {
     // Associate callback context with this instance so we can it released
     // when the replicator is released.
-    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
+    std::scoped_lock lock(replicatorCallbackWrapperContextsMutex);
     replicatorCallbackWrapperContexts[replicator] = context;
   } else {
     delete context;
@@ -1063,22 +1063,38 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   return replicator;
 }
 
+static void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
+  // Release the replicator.
+  CBLDart_CBLRefCountedFinalizer_Impl(
+      reinterpret_cast<CBLRefCounted *>(replicator));
+
+  // Clean up context for callback wrappers as the last step.
+  std::scoped_lock lock(replicatorCallbackWrapperContextsMutex);
+  auto nh = replicatorCallbackWrapperContexts.extract(replicator);
+  delete nh.mapped();
+}
+
 static void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
   auto replicator = reinterpret_cast<CBLReplicator *>(peer);
 
-  // Clean up context for callback wrapper
-  ReplicatorCallbackWrapperContext *callbackWrapperContext;
-  {
-    std::scoped_lock lock(replicatorCallbackWrapperContexts_mutex);
-    auto nh = replicatorCallbackWrapperContexts.extract(replicator);
-    callbackWrapperContext = nh.mapped();
+  if (CBLReplicator_Status(replicator).activity == kCBLReplicatorStopped) {
+    CBLDart_CBLReplicator_Release(replicator);
+  } else {
+    // Stop the replicator, since it is still running.
+    CBLReplicator_Stop(replicator);
+
+    // Get of the Dart finalizer thread.
+    auto _ = std::async(std::launch::async, [=]() {
+      // Wait for the replicator to stop.
+      while (CBLReplicator_Status(replicator).activity !=
+             kCBLReplicatorStopped) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      }
+
+      // Now release the replicator.
+      CBLDart_CBLReplicator_Release(replicator);
+    });
   }
-  delete callbackWrapperContext;
-
-  CBLReplicator_Stop(replicator);
-
-  CBLDart_CBLRefCountedFinalizer_Impl(
-      reinterpret_cast<CBLRefCounted *>(replicator));
 }
 
 void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
