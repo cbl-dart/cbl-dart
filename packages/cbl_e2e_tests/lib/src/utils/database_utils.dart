@@ -52,7 +52,7 @@ Future<void> copyDatabaseWithSharedIsolate({
 String databaseDirectoryForTest() => [
       tmpDir,
       'Databases',
-      if (testDescriptions != null) ...testDescriptions!
+      if (testId != null) testId,
     ].join(Platform.pathSeparator);
 
 FutureOr<Database> openTestDatabase({

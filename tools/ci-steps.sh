@@ -43,6 +43,9 @@ function buildNativeLibraries() {
     Ubuntu)
         target=ubuntu20.04-x86_64
         ;;
+    Windows)
+        target=windows-x86_64
+        ;;
     esac
 
     ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
@@ -57,6 +60,9 @@ function configureFlutter() {
         ;;
     Ubuntu)
         flutter config --enable-linux-desktop
+        ;;
+    Windows)
+        flutter config --enable-windows-desktop
         ;;
     esac
 }
@@ -135,6 +141,10 @@ function runE2ETests() {
         Ubuntu)
             # Enable core dumps.
             ulimit -c unlimited
+            $testCommand
+            ;;
+        Windows)
+            # Not collecting crash reports for Windows for now.
             $testCommand
             ;;
         esac
@@ -285,6 +295,10 @@ function collectTestResults() {
             _collectCrashReportsLinuxStandalone
             _collectCblLogsStandalone
             ;;
+        Windows)
+            # Not collecting crash reports for Windows for now.
+            _collectCblLogsStandalone
+            ;;
         esac
         ;;
     flutter)
@@ -348,14 +362,13 @@ function uploadCoverageData() {
         curl -Os https://uploader.codecov.io/latest/macos/codecov
         chmod +x codecov
         ;;
-    msys* | cygwin*)
-        echo "Code coverage upload for $OSTYPE is not implmented"
-        exit 1
+    mingw* | msys* | cygwin*)
+        curl -Os https://uploader.codecov.io/latest/window/codecov.exe
         ;;
     esac
 
     # Upload coverage data
-    ./codecov \
+    ./codecov* \
         -F "$flags" \
         -f "$testPackageDir/coverage/lcov.info" \
         -C "$GITHUB_SHA"

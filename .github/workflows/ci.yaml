@@ -138,7 +138,7 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [standalone, flutter]
-        os: [iOS, macOS, Android, Ubuntu]
+        os: [iOS, macOS, Android, Ubuntu, Windows]
         exclude:
           - embedder: standalone
             os: iOS
@@ -148,12 +148,16 @@ jobs:
             # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
           - embedder: flutter
             os: Ubuntu
+            # Flutter Windows is not implemented yet
+          - embedder: flutter
+            os: Windows
     runs-on: >-
       ${{ fromJSON('{ 
         "iOS":"macos-11",
         "macOS":"macos-11",
         "Android":"macos-11",
-        "Ubuntu":"ubuntu-20.04"
+        "Ubuntu":"ubuntu-20.04",
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}

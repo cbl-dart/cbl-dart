@@ -122,7 +122,7 @@ class QueryBindings extends Bindings {
         _CBLDart_CBLQuery_AddChangeListener>(
       'CBLDart_CBLQuery_AddChangeListener',
     );
-    _copyCurrentResults = libs.cblDart.lookupFunction<
+    _copyCurrentResults = libs.cbl.lookupFunction<
         _CBLQuery_CopyCurrentResults, _CBLQuery_CopyCurrentResults>(
       'CBLQuery_CopyCurrentResults',
     );

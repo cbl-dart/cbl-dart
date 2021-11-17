@@ -4,7 +4,7 @@ set -e
 
 editions=(community enterprise)
 buildModes=(debug release)
-targets=(android ios macos ubuntu20.04-x86_64)
+targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 nativeDir="$projectDir/native"
@@ -15,6 +15,7 @@ couchbaseLiteDartBuildDir="$couchbaseLiteDartDir/build"
 couchbaseLiteDartVersion="$(cat "$couchbaseLiteDartDir/CouchbaseLiteDart.version")"
 cblE2eTestsStandaloneDartDir="$projectDir/packages/cbl_e2e_tests_standalone_dart"
 cblE2eTestsStandaloneDartLibDir="$cblE2eTestsStandaloneDartDir/lib"
+cblE2eTestsStandaloneDartBinDir="$cblE2eTestsStandaloneDartDir/bin"
 cblFlutterLocalDir="$projectDir/packages/cbl_flutter_local"
 cblFlutterLocalAndroidJniLibsDir="$cblFlutterLocalDir/android/src/main/jniLibs"
 cblFlutterLocalIosFrameworksDir="$cblFlutterLocalDir/ios/Frameworks"
@@ -44,6 +45,9 @@ function prepareNativeLibraries() {
             ;;
         Darwin)
             target="macos"
+            ;;
+        MINGW64* | MSYS* | CYGWIN*)
+            target="windows-x86_64"
             ;;
         *)
             echo "Unsupported host platform: $(uname)"
@@ -114,6 +118,15 @@ function prepareNativeLibraries() {
         mkdir -p "$cblFlutterLocalLinuxLibDir"
         cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/x86_64-linux-gnu/libcblite"* "$cblFlutterLocalLinuxLibDir"
         cp -a "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/x86_64-linux-gnu/libcblitedart"* "$cblFlutterLocalLinuxLibDir"
+        ;;
+    windows-x86_64)
+        "$couchbaseLiteDartDir/tools/build_windows.sh" "$edition" "$buildMode"
+
+        echo "Copying libraries to cbl_e2e_tests_standalone_dart"
+        rm -rf "$cblE2eTestsStandaloneDartBinDir"
+        mkdir -p "$cblE2eTestsStandaloneDartBinDir"
+        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/bin/cblite"* "$cblE2eTestsStandaloneDartBinDir"
+        cp -a "$couchbaseLiteDartBuildDir/windows/libcblitedart-"*"/bin/cblitedart"* "$cblE2eTestsStandaloneDartBinDir"
         ;;
     esac
 }

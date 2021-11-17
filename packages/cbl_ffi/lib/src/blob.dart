@@ -165,7 +165,7 @@ class BlobReadStreamBindings extends Bindings {
         .lookupFunction<_CBLBlob_OpenContentStream, _CBLBlob_OpenContentStream>(
       'CBLBlob_OpenContentStream',
     );
-    _bindtoDartObject = libs.cblDart.lookupFunction<
+    _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_BindBlobReadStreamToDartObject_C,
         _CBLDart_BindBlobReadStreamToDartObject>(
       'CBLDart_BindBlobReadStreamToDartObject',
@@ -174,14 +174,14 @@ class BlobReadStreamBindings extends Bindings {
         _CBLDart_CBLBlobReader_Read>(
       'CBLDart_CBLBlobReader_Read',
     );
-    _close = libs.cblDart
-        .lookupFunction<_CBLBlobReader_Close_C, _CBLBlobReader_Close>(
+    _close =
+        libs.cbl.lookupFunction<_CBLBlobReader_Close_C, _CBLBlobReader_Close>(
       'CBLBlobReader_Close',
     );
   }
 
   late final _CBLBlob_OpenContentStream _openContentStream;
-  late final _CBLDart_BindBlobReadStreamToDartObject _bindtoDartObject;
+  late final _CBLDart_BindBlobReadStreamToDartObject _bindToDartObject;
   late final _CBLDart_CBLBlobReader_Read _read;
   late final _CBLBlobReader_Close _close;
 
@@ -189,7 +189,7 @@ class BlobReadStreamBindings extends Bindings {
     Object object,
     Pointer<CBLBlobReadStream> pointer,
   ) {
-    _bindtoDartObject(object, pointer);
+    _bindToDartObject(object, pointer);
   }
 
   Pointer<CBLBlobReadStream> openContentStream(Pointer<CBLBlob> blob) =>

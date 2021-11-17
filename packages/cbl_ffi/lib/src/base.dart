@@ -325,7 +325,7 @@ class BaseBindings extends Bindings {
         _CBLDart_SetDebugRefCounted_C, _CBLDart_SetDebugRefCounted>(
       'CBLDart_SetDebugRefCounted',
     );
-    _retainRefCounted = libs.cblDart.lookupFunction<_CBL_Retain, _CBL_Retain>(
+    _retainRefCounted = libs.cbl.lookupFunction<_CBL_Retain, _CBL_Retain>(
       'CBL_Retain',
     );
     _getErrorMessage = libs.cblDart
@@ -378,12 +378,18 @@ class BaseBindings extends Bindings {
     required bool retain,
     String? debugName,
   }) {
+    final debugNameCStr = debugName?.toNativeUtf8() ?? nullptr;
+
     _bindCBLRefCountedToDartObject(
       handle,
       refCounted,
       retain.toInt(),
-      debugName?.toNativeUtf8() ?? nullptr,
+      debugNameCStr,
     );
+
+    if (debugNameCStr != nullptr) {
+      malloc.free(debugNameCStr);
+    }
   }
 
   // coverage:ignore-start

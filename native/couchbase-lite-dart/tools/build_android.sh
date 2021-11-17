@@ -51,7 +51,7 @@ function _buildArch() {
         cmakeBuildMode=Debug
         ;;
     release)
-        cmakeBuildMode=RelWithDebugInfo
+        cmakeBuildMode=RelWithDebInfo
         ;;
     esac
 
