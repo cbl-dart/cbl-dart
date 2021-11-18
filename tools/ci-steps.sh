@@ -109,7 +109,7 @@ function startCouchbaseServices() {
         ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS &>/dev/null &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
-    mingw*|cygwin*|msys*)
+    MINGW64* | MSYS* | CYGWIN*)
         ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &>/dev/null &
         ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
