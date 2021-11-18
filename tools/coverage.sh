@@ -2,11 +2,14 @@
 
 set -e
 
-formatCoverageBin="format_coverage"
-if ! which "$formatCoverageBin" &>/dev/null; then
-    # On Windows bash can't find format_coverage by its simple name.
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
     formatCoverageBin="format_coverage.bat"
-fi
+;;
+*)
+    formatCoverageBin="format_coverage"
+;;
+esac
 
 # Converts the dart coverage output for a package to lcov.
 #

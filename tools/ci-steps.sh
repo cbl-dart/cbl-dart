@@ -25,11 +25,14 @@ iosDevice="iPhone 13"
 androidVersion="22"
 androidDevice="pixel_4"
 
-melosBin="melos"
-if ! which "$melosBin" &>/dev/null; then
-    # On Windows bash can't find melos by its simple name.
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
     melosBin="melos.bat"
-fi
+;;
+*)
+    melosBin="melos"
+;;
+esac
 
 # === Steps ===================================================================
 
