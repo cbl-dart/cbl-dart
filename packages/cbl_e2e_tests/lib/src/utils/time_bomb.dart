@@ -85,7 +85,7 @@ class _TimeBombWorkerDelegate extends IsolateWorkerDelegate {
 // === Abort function ==========================================================
 
 final _stdLib = Platform.isWindows
-    ? DynamicLibrary.open('kernel32.dll')
+    ? DynamicLibrary.open('ucrtbase.dll')
     : DynamicLibrary.process();
 
 late final _abort =
