@@ -78,6 +78,9 @@ function startSyncGatewayWindows {
 
     powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $syncGatewayMsi /passive'"
 
+    # Stop the service which was started during installation.
+    sc.exe stop SyncGateway || true
+
     rm "$syncGatewayMsi"
 
     echo "::endgroup::"
