@@ -204,7 +204,13 @@ jobs:
           sdk: ${{ env.dart-version-stable }}
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: |
+          dart pub global activate melos ${{ env.melos-version }}
+          melos --version
+
+      - name: Run melos from bash
+        shell: bash
+        run: melos --version
 
       - name: Bootstrap Dart package
         shell: bash
