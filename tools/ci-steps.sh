@@ -25,6 +25,12 @@ iosDevice="iPhone 13"
 androidVersion="22"
 androidDevice="pixel_4"
 
+melosBin="melos"
+if [[ ! $(which "$melosBin" &>/dev/null) ]]; then
+    # On Windows bash can't find melos by its simple name.
+    melosBin="melos.bat"
+fi
+
 # === Steps ===================================================================
 
 function buildNativeLibraries() {
@@ -82,7 +88,7 @@ function bootstrapPackage() {
             cd "$testPackageDir"
             dart pub get
         else
-            melos bootstrap --scope "$testPackage"
+            $melosBin bootstrap --scope "$testPackage"
         fi
         ;;
     flutter)
@@ -91,8 +97,20 @@ function bootstrapPackage() {
         flutter pub get
 
         if [[ "$noMelos" != "true" ]]; then
-            melos bootstrap --scope "$testPackage"
+            $melosBin bootstrap --scope "$testPackage"
         fi
+        ;;
+    esac
+}
+
+function startCouchbaseServices() {
+    case "$(uname)" in
+    Darwin)
+        $melosBin run test:startSyncGatewayMacOS &>/dev/null &
+        $melosBin run test:waitForSyncGateway
+        ;;
+    *)
+        $melosBin run test:setupCouchbaseClusterDocker
         ;;
     esac
 }

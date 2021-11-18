@@ -204,30 +204,15 @@ jobs:
           sdk: ${{ env.dart-version-stable }}
 
       - name: Setup Melos
-        run: |
-          dart pub global activate melos ${{ env.melos-version }}
-          melos --version
-
-      - name: Run melos from bash
-        shell: bash
-        run: melos --version
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
         shell: bash
         run: ./tools/ci-steps.sh bootstrapPackage
 
-      - name: Start test Couchbase cluster
+      - name: Start Couchbase services
         shell: bash
-        run: |
-          case ${{ runner.os }} in
-            macOS)
-              melos run test:startSyncGatewayMacOS &> /dev/null &
-              melos run test:waitForSyncGateway
-            ;;
-            *)
-              melos run test:setupCouchbaseClusterDocker
-            ;;
-          esac
+        run: ./tools/ci-steps.sh startCouchbaseServices
 
       - name: Start virtual devices
         if: matrix.embedder == 'flutter'
