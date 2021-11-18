@@ -53,14 +53,7 @@ Libraries _libraries() {
     cblDartLib = findLibInFrameworks('CouchbaseLiteDart');
     appendExtension = false;
   } else if (Platform.isWindows) {
-    final kernel32 = DynamicLibrary.open('Kernel32.dll');
-    final SetDllDirectory = kernel32.lookupFunction<
-        Uint8 Function(Pointer<Utf16>),
-        int Function(Pointer<Utf16>)>('SetDllDirectoryW');
-    if (SetDllDirectory(binDir.toNativeUtf16()) == 0) {
-      throw Exception('Failed to set DLL directory to $binDir');
-    }
-
+    _setDllDirectory(binDir);
     cblLib = p.join(binDir, 'cblite');
     cblDartLib = p.join(binDir, 'cblitedart');
   } else {
@@ -79,4 +72,14 @@ Libraries _libraries() {
       appendExtension: appendExtension,
     ),
   );
+}
+
+void _setDllDirectory(String dir) {
+  final kernel32 = DynamicLibrary.open('Kernel32.dll');
+  final setDllDirectoryFn = kernel32.lookupFunction<
+      Uint8 Function(Pointer<Utf16>),
+      int Function(Pointer<Utf16>)>('SetDllDirectoryW');
+  if (setDllDirectoryFn(dir.toNativeUtf16()) == 0) {
+    throw Exception('Failed to set DLL directory to $dir');
+  }
 }

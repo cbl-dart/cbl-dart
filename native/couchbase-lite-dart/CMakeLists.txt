@@ -91,4 +91,6 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 install(TARGETS cblitedart
     LIBRARY DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE}
 )
-install(FILES $<TARGET_PDB_FILE:cblitedart> DESTINATION bin)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    install(FILES $<TARGET_PDB_FILE:cblitedart> DESTINATION bin)
+endif()
