@@ -388,7 +388,7 @@ function uploadCoverageData() {
         chmod +x codecov
         ;;
     mingw* | msys* | cygwin*)
-        curl -Os https://uploader.codecov.io/latest/window/codecov.exe
+        curl -Os https://uploader.codecov.io/latest/windows/codecov.exe
         ;;
     esac
 
