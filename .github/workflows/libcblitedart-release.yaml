@@ -138,9 +138,11 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Download Couchbase Lite
+        shell: bash
         run: ./native/tools/download_prebuilt_binaries.sh windows-x86_64
 
       - name: Build release
+        shell: bash
         run: |
           ./native/couchbase-lite-dart/tools/build_release.sh \
             ${{ needs.create-release.outputs.release }} \
