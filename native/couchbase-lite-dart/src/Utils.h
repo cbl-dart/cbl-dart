@@ -22,7 +22,7 @@ void CBLDart_CObject_SetFLString(Dart_CObject* object, const FLString string);
 
 // === Fleece =================================================================
 
-#define kCBLDartNullSlice (struct CBLDart_FLSlice{nullptr, 0})
+#define kCBLDartNullSlice ({nullptr, 0})
 
 FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice);
 

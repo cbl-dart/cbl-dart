@@ -175,6 +175,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Build native libraries
+        shell: bash
         run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Install Fluter Linux Desktop dependencies
@@ -190,6 +191,7 @@ jobs:
 
       - name: Configure flutter
         if: matrix.embedder == 'flutter'
+        shell: bash
         run: ./tools/ci-steps.sh configureFlutter
 
       - name: Setup Dart
@@ -202,6 +204,7 @@ jobs:
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
+        shell: bash
         run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Start test Couchbase cluster
@@ -219,13 +222,16 @@ jobs:
 
       - name: Start virtual devices
         if: matrix.embedder == 'flutter'
+        shell: bash
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
+        shell: bash
         run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
+        shell: bash
         run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
@@ -240,6 +246,7 @@ jobs:
         if: ${{ matrix.embedder != 'flutter' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
