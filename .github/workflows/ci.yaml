@@ -13,7 +13,7 @@ env:
   flutter-version-beta: beta
   dart-version-stable: '2.14.0'
   dart-version-beta: beta
-  melos-version: '1.0.0-dev.6'
+  melos-version: '1.0.0-dev.10'
 
 jobs:
   formatting-dart:
@@ -198,12 +198,13 @@ jobs:
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
-        if: matrix.embedder == 'standalone'
+        # Disable Dart SDK until flutter is not needed anymore
+        if: false && matrix.embedder == 'standalone'
         with:
           sdk: ${{ env.dart-version-stable }}
 
       - name: Setup Melos
-        run: flutter pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
         shell: bash
