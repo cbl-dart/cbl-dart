@@ -31,24 +31,24 @@ scripts:
 
   test:setupCouchbaseClusterDocker:
     description: Sets up Couchbase services for testing in docker.
-    run: melos exec -- "./couchbase-cluster.sh setupDocker"
+    run: melos exec -- "./couchbase-services.sh setupDocker"
     select-package:
       scope: cbl_e2e_tests
 
   test:teardownCouchbaseClusterDocker:
     description: Tears down Couchbase services for testing in docker.
-    run: melos exec -- "./couchbase-cluster.sh teardownDocker"
+    run: melos exec -- "./couchbase-services.sh teardownDocker"
     select-package:
       scope: cbl_e2e_tests
 
   test:startSyncGatewayMacOS:
     description: Starts Sync Gateway for testing on macOS.
-    run: melos exec -- "./couchbase-cluster.sh startSyncGatewayMacOS"
+    run: melos exec -- "./couchbase-services.sh startSyncGatewayMacOS"
     select-package:
       scope: cbl_e2e_tests
 
   test:waitForSyncGateway:
     description: Waits Sync Gateway for testing to become available.
-    run: melos exec -- "./couchbase-cluster.sh waitForSyncGateway"
+    run: melos exec -- "./couchbase-services.sh waitForSyncGateway"
     select-package:
       scope: cbl_e2e_tests

@@ -26,7 +26,7 @@ androidVersion="22"
 androidDevice="pixel_4"
 
 melosBin="melos"
-if [[ ! $(which "$melosBin" &>/dev/null) ]]; then
+if ! which "$melosBin" &>/dev/null; then
     # On Windows bash can't find melos by its simple name.
     melosBin="melos.bat"
 fi
@@ -106,11 +106,11 @@ function bootstrapPackage() {
 function startCouchbaseServices() {
     case "$(uname)" in
     Darwin)
-        $melosBin run test:startSyncGatewayMacOS &>/dev/null &
-        $melosBin run test:waitForSyncGateway
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS &>/dev/null &
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
         ;;
     *)
-        $melosBin run test:setupCouchbaseClusterDocker
+        ./packages/cbl_e2e_tests/couchbase-services.sh setupDocker
         ;;
     esac
 }
