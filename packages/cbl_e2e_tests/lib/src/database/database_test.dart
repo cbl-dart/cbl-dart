@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/support/utils.dart';
@@ -71,7 +72,11 @@ void main() {
         final db = await openTestDatabase(config: config);
 
         expect(db.name, 'db');
-        expect(db.path, '${databaseDirectoryForTest()}/db.cblite2/');
+        expect(
+          db.path,
+          [databaseDirectoryForTest(), 'db.cblite2', '']
+              .join(Platform.pathSeparator),
+        );
         expect(db.config, config);
       });
 

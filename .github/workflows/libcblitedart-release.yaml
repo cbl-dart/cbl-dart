@@ -81,7 +81,7 @@ jobs:
   ios:
     needs: create-release
     name: iOS
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
 
@@ -104,7 +104,7 @@ jobs:
   macos:
     needs: create-release
     name: macOS
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
 
@@ -119,6 +119,32 @@ jobs:
           ./native/couchbase-lite-dart/tools/build_release.sh \
             ${{ needs.create-release.outputs.release }} \
             macos
+
+      - name: Upload archives
+        uses: alexellis/upload-assets@0.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["./native/couchbase-lite-dart/build/release/*"]'
+
+  windows:
+    needs: create-release
+    name: Windows
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Download Couchbase Lite
+        run: ./native/tools/download_prebuilt_binaries.sh windows-x86_64
+
+      - name: Build release
+        run: |
+          ./native/couchbase-lite-dart/tools/build_release.sh \
+            ${{ needs.create-release.outputs.release }} \
+            windows-x86_64
 
       - name: Upload archives
         uses: alexellis/upload-assets@0.2.2

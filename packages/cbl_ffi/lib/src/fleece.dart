@@ -298,7 +298,7 @@ class SlotBindings extends Bindings {
         .lookupFunction<_CBLDart_FLSlot_SetString_C, _CBLDart_FLSlot_SetString>(
       'CBLDart_FLSlot_SetString',
     );
-    _setData = libs.cblDart.lookupFunction<_FLSlot_SetData_C, _FLSlot_SetData>(
+    _setData = libs.cbl.lookupFunction<_FLSlot_SetData_C, _FLSlot_SetData>(
       'FLSlot_SetData',
     );
     _setValue = libs.cbl.lookupFunction<_FLSlot_SetValue_C, _FLSlot_SetValue>(
@@ -1561,8 +1561,8 @@ class FleeceEncoderBindings extends Bindings {
         libs.cbl.lookupFunction<_FLEncoder_GetError_C, _FLEncoder_GetError>(
       'FLEncoder_GetError',
     );
-    __getErrorMessage = libs.cblDart.lookupFunction<
-        _FLEncoder_GetErrorMessage_C, _FLEncoder_GetErrorMessage>(
+    __getErrorMessage = libs.cbl.lookupFunction<_FLEncoder_GetErrorMessage_C,
+        _FLEncoder_GetErrorMessage>(
       'FLEncoder_GetErrorMessage',
     );
   }

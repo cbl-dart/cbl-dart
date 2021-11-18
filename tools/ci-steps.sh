@@ -25,6 +25,15 @@ iosDevice="iPhone 13"
 androidVersion="22"
 androidDevice="pixel_4"
 
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
+    melosBin="melos.bat"
+;;
+*)
+    melosBin="melos"
+;;
+esac
+
 # === Steps ===================================================================
 
 function buildNativeLibraries() {
@@ -43,6 +52,9 @@ function buildNativeLibraries() {
     Ubuntu)
         target=ubuntu20.04-x86_64
         ;;
+    Windows)
+        target=windows-x86_64
+        ;;
     esac
 
     ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
@@ -57,6 +69,9 @@ function configureFlutter() {
         ;;
     Ubuntu)
         flutter config --enable-linux-desktop
+        ;;
+    Windows)
+        flutter config --enable-windows-desktop
         ;;
     esac
 }
@@ -76,7 +91,7 @@ function bootstrapPackage() {
             cd "$testPackageDir"
             dart pub get
         else
-            melos bootstrap --scope "$testPackage"
+            $melosBin bootstrap --scope "$testPackage"
         fi
         ;;
     flutter)
@@ -85,8 +100,24 @@ function bootstrapPackage() {
         flutter pub get
 
         if [[ "$noMelos" != "true" ]]; then
-            melos bootstrap --scope "$testPackage"
+            $melosBin bootstrap --scope "$testPackage"
         fi
+        ;;
+    esac
+}
+
+function startCouchbaseServices() {
+    case "$(uname)" in
+    Darwin)
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayMacOS &>/dev/null &
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
+        ;;
+    MINGW64* | MSYS* | CYGWIN*)
+        ./packages/cbl_e2e_tests/couchbase-services.sh startSyncGatewayWindows &>/dev/null &
+        ./packages/cbl_e2e_tests/couchbase-services.sh waitForSyncGateway
+        ;;
+    *)
+        ./packages/cbl_e2e_tests/couchbase-services.sh setupDocker
         ;;
     esac
 }
@@ -135,6 +166,10 @@ function runE2ETests() {
         Ubuntu)
             # Enable core dumps.
             ulimit -c unlimited
+            $testCommand
+            ;;
+        Windows)
+            # Not collecting crash reports for Windows for now.
             $testCommand
             ;;
         esac
@@ -285,6 +320,10 @@ function collectTestResults() {
             _collectCrashReportsLinuxStandalone
             _collectCblLogsStandalone
             ;;
+        Windows)
+            # Not collecting crash reports for Windows for now.
+            _collectCblLogsStandalone
+            ;;
         esac
         ;;
     flutter)
@@ -348,14 +387,13 @@ function uploadCoverageData() {
         curl -Os https://uploader.codecov.io/latest/macos/codecov
         chmod +x codecov
         ;;
-    msys* | cygwin*)
-        echo "Code coverage upload for $OSTYPE is not implmented"
-        exit 1
+    mingw* | msys* | cygwin*)
+        curl -Os https://uploader.codecov.io/latest/windows/codecov.exe
         ;;
     esac
 
     # Upload coverage data
-    ./codecov \
+    ./codecov* \
         -F "$flags" \
         -f "$testPackageDir/coverage/lcov.info" \
         -C "$GITHUB_SHA"

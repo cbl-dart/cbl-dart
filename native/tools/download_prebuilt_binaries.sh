@@ -25,7 +25,7 @@ binariesDir="$vendorDir/couchbase-lite-C-prebuilt"
 tmpDir="$binariesDir/tmp"
 couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 editions=(community enterprise)
-targets=(android ios macos ubuntu20.04-x86_64)
+targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
 
 # Outputs the extension of the archives for the given target.
 function _archiveExt() {

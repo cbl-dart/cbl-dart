@@ -13,6 +13,7 @@ dependencies:
   cbl_flutter_local:
     path: ../cbl_flutter_local
   collection: ^1.15.0
+  crypto: ^3.0.1
   flutter:
     sdk: flutter
   flutter_test:

@@ -42,10 +42,6 @@ Future<IsolateWorker>? _worker;
 /// stopped.
 Future<void> startTimeBomb(Duration timeout) async {
   assert(_worker == null);
-  assert(
-    _abortFunction != null,
-    'abort function must be implemented for this platform',
-  );
 
   _worker = Future(() async {
     final worker = _timeBombWorker(timeout);
@@ -77,7 +73,7 @@ class _TimeBombWorkerDelegate extends IsolateWorkerDelegate {
 
   @override
   FutureOr<void> initialize() {
-    _timer = Timer(timeout, _abortFunction!);
+    _timer = Timer(timeout, _abort);
   }
 
   @override
@@ -88,16 +84,9 @@ class _TimeBombWorkerDelegate extends IsolateWorkerDelegate {
 
 // === Abort function ==========================================================
 
-void Function()? get _abortFunction {
-  if (Platform.isAndroid ||
-      Platform.isIOS ||
-      Platform.isMacOS ||
-      Platform.isLinux ||
-      Platform.isFuchsia) {
-    return _posixAbort;
-  }
-}
+final _stdLib = Platform.isWindows
+    ? DynamicLibrary.open('ucrtbase.dll')
+    : DynamicLibrary.process();
 
-late final _process = DynamicLibrary.process();
-late final _posixAbort =
-    _process.lookupFunction<Void Function(), void Function()>('abort');
+late final _abort =
+    _stdLib.lookupFunction<Void Function(), void Function()>('abort');

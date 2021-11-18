@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/support/debug.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
 import 'utils/database_utils.dart';
 import 'utils/file_system.dart';
 import 'utils/time_bomb.dart';
+import 'utils/utils.dart';
 
 export 'package:test/test.dart'
     hide
@@ -86,6 +88,7 @@ abstract class CblE2eTestBinding {
     testFn(
       description,
       () => runZoned<dynamic>(body, zoneValues: {
+        #testId: md5OfString(testDescriptions.join()),
         #testDescriptions: testDescriptions,
       }),
     );
@@ -105,6 +108,7 @@ abstract class CblE2eTestBinding {
 
       const consoleLogLevel = LogLevel.warning;
       const fileLogLevel = LogLevel.verbose;
+      debugRefCounted = false;
 
       Database.log.file
         ..config = LogFileConfiguration(
@@ -152,6 +156,8 @@ abstract class CblE2eTestBinding {
 
 /// Alias of [CblE2eTestBinding.tmpDir].
 late final tmpDir = CblE2eTestBinding.instance.tmpDir;
+
+String? get testId => Zone.current[#testId] as String?;
 
 List<String>? get testDescriptions =>
     Zone.current[#testDescriptions] as List<String>?;

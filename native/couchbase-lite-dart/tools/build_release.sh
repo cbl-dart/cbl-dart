@@ -11,7 +11,7 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 buildDir="$projectDir/build/release"
 editions=(community enterprise)
-targets=(android ios macos ubuntu20.04-x86_64)
+targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
 
 function _buildArchive() {
     local edition="$1"
@@ -43,6 +43,10 @@ function _buildArchive() {
         targetBuildDir="$projectDir/build/unix"
         archiveExt=tar.gz
         ;;
+    windows-x86_64)
+        ./tools/build_windows.sh "$edition" release
+        targetBuildDir="$projectDir/build/windows"
+        ;;
     esac
 
     local archiveFile="$buildDir/couchbase-lite-dart-$release-$edition-$target.$archiveExt"
@@ -51,14 +55,7 @@ function _buildArchive() {
 
     cd "$targetBuildDir"
 
-    case "$archiveExt" in
-    zip)
-        zip -q -r --symlinks "$archiveFile" "$productDirPrefix"*
-        ;;
-    tar.gz)
-        tar -czf "$archiveFile" "$productDirPrefix"*
-        ;;
-    esac
+    tar -caf "$archiveFile" "$productDirPrefix"*
 }
 
 release="$1"

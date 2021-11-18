@@ -4,7 +4,7 @@ set -e
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dockerComposeFile="$scriptDir/docker-compose.yaml"
-syncGatewayVersionMacOS=3.0.0-beta02
+syncGatewayVersion=3.0.0-beta02
 
 function waitForService() {
     name="$1"
@@ -40,8 +40,8 @@ function waitForSyncGateway() {
 
 function startSyncGatewayMacOS {
     optDir="/opt"
-    syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersionMacOS}_x86_64.zip"
-    syncGatewayUrl="https://packages.couchbase.com/releases/couchbase-sync-gateway/$syncGatewayVersionMacOS/$syncGatewayZip"
+    syncGatewayZip="couchbase-sync-gateway-community_${syncGatewayVersion}_x86_64.zip"
+    syncGatewayUrl="https://packages.couchbase.com/releases/couchbase-sync-gateway/$syncGatewayVersion/$syncGatewayZip"
     syncGatewayInstallDir="$optDir/couchbase-sync-gateway"
     syncGatewayUser="sync_gateway"
     syncGatewayConfig="$scriptDir/sync-gateway-config.json"
@@ -62,6 +62,30 @@ function startSyncGatewayMacOS {
 
     cd "$syncGatewayInstallDir"
     bin/sync_gateway \
+        '-disable_persistent_config' \
+        '-api.admin_interface_authentication=false' \
+        "$syncGatewayConfig"
+}
+
+function startSyncGatewayWindows {
+    syncGatewayMsi="couchbase-sync-gateway-community_${syncGatewayVersion}_x86_64.msi"
+    syncGatewayUrl="https://packages.couchbase.com/releases/couchbase-sync-gateway/$syncGatewayVersion/$syncGatewayMsi"
+    syncGatewayConfig="$(cygpath -w "$scriptDir/sync-gateway-config.json")"
+
+    echo "::group::Install Sync Gateway"
+
+    curl "$syncGatewayUrl" -o "$syncGatewayMsi"
+
+    powershell.exe -Command "Start-Process msiexec.exe -Wait -ArgumentList '/i $syncGatewayMsi /passive'"
+
+    # Stop the service which was started during installation.
+    sc.exe stop SyncGateway || true
+
+    rm "$syncGatewayMsi"
+
+    echo "::endgroup::"
+
+    "C:\Program Files\Couchbase\Sync Gateway\sync_gateway.exe" \
         '-disable_persistent_config' \
         '-api.admin_interface_authentication=false' \
         "$syncGatewayConfig"

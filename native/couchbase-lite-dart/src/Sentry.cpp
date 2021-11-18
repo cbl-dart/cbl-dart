@@ -2,7 +2,9 @@
 
 #include <mutex>
 
+#ifdef SENTRY_PLATFORM_UNIX
 #include "dlfcn.h"
+#endif
 
 // Function typedefs
 typedef sentry_value_t (*sentry_value_new_string_t)(const char *value);

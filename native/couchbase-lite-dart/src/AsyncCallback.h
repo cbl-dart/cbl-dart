@@ -106,7 +106,7 @@ class AsyncCallbackCall {
  private:
   static void messageHandler(Dart_Port dest_port_id, Dart_CObject *message);
 
-  void waitForCompletion();
+  void waitForCompletion(std::unique_lock<std::mutex> &lock);
   bool isFailureResult(Dart_CObject *result);
   inline void debugLog(const char *message);
 

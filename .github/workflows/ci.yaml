@@ -13,7 +13,7 @@ env:
   flutter-version-beta: beta
   dart-version-stable: '2.14.0'
   dart-version-beta: beta
-  melos-version: '1.0.0-dev.6'
+  melos-version: '1.0.0-dev.10'
 
 jobs:
   formatting-dart:
@@ -138,7 +138,7 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [standalone, flutter]
-        os: [iOS, macOS, Android, Ubuntu]
+        os: [iOS, macOS, Android, Ubuntu, Windows]
         exclude:
           - embedder: standalone
             os: iOS
@@ -148,12 +148,16 @@ jobs:
             # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
           - embedder: flutter
             os: Ubuntu
+            # Flutter Windows is not implemented yet
+          - embedder: flutter
+            os: Windows
     runs-on: >-
       ${{ fromJSON('{ 
         "iOS":"macos-11",
         "macOS":"macos-11",
         "Android":"macos-11",
-        "Ubuntu":"ubuntu-20.04"
+        "Ubuntu":"ubuntu-20.04",
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -171,6 +175,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Build native libraries
+        shell: bash
         run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Install Fluter Linux Desktop dependencies
@@ -180,17 +185,21 @@ jobs:
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
+        # TODO: fix melos so it does not require flutter
+        # if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v1
         with:
           flutter-version: ${{ env.flutter-version-stable }}
 
       - name: Configure flutter
         if: matrix.embedder == 'flutter'
+        shell: bash
         run: ./tools/ci-steps.sh configureFlutter
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
-        if: matrix.embedder == 'standalone'
+        # Disable Dart SDK until flutter is not needed anymore
+        if: false && matrix.embedder == 'standalone'
         with:
           sdk: ${{ env.dart-version-stable }}
 
@@ -198,29 +207,25 @@ jobs:
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
+        shell: bash
         run: ./tools/ci-steps.sh bootstrapPackage
 
-      - name: Start test Couchbase cluster
-        run: |
-          case ${{ runner.os }} in
-            macOS)
-              melos run test:startSyncGatewayMacOS &> /dev/null &
-              melos run test:waitForSyncGateway
-            ;;
-            *)
-              melos run test:setupCouchbaseClusterDocker
-            ;;
-          esac
+      - name: Start Couchbase services
+        shell: bash
+        run: ./tools/ci-steps.sh startCouchbaseServices
 
       - name: Start virtual devices
         if: matrix.embedder == 'flutter'
+        shell: bash
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
+        shell: bash
         run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
+        shell: bash
         run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
@@ -235,6 +240,7 @@ jobs:
         if: ${{ matrix.embedder != 'flutter' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 

@@ -2,6 +2,15 @@
 
 set -e
 
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
+    formatCoverageBin="format_coverage.bat"
+;;
+*)
+    formatCoverageBin="format_coverage"
+;;
+esac
+
 # Converts the dart coverage output for a package to lcov.
 #
 # The first and only parameter is the packages directory.
@@ -21,7 +30,7 @@ function dartToLcov() {
     # `format_coverage` only works when executed from the root of the package.
     cd "$packageDir"
 
-    format_coverage \
+    $formatCoverageBin \
         --check-ignore \
         --in "$input" \
         --lcov \

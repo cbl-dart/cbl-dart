@@ -173,7 +173,7 @@ AsyncCallbackCall::~AsyncCallbackCall() {
 }
 
 void AsyncCallbackCall::execute(Dart_CObject &arguments) {
-  std::scoped_lock lock(mutex_);
+  std::unique_lock lock(mutex_);
 
   assert(!isExecuted_);
   isExecuted_ = true;
@@ -235,7 +235,7 @@ void AsyncCallbackCall::execute(Dart_CObject &arguments) {
 
   if (isBlocking()) {
     debugLog("waiting for completion");
-    waitForCompletion();
+    waitForCompletion(lock);
   } else {
     isCompleted_ = true;
   }
@@ -317,10 +317,7 @@ void AsyncCallbackCall::messageHandler(Dart_Port dest_port_id,
   call.complete(result);
 }
 
-void AsyncCallbackCall::waitForCompletion() {
-  // The mutex has already been locked when this method is called.
-  std::unique_lock lock(mutex_, std::adopt_lock);
-
+void AsyncCallbackCall::waitForCompletion(std::unique_lock<std::mutex> &lock) {
   completedCv_.wait(lock, [this] { return isCompleted_; });
 
   if (didFail_) {

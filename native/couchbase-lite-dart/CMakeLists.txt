@@ -28,13 +28,15 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     # The only currently supported Linux target. 
     set(CBL_TARGET ubuntu20.04-x86_64)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    set(CBL_TARGET windows-x86_64)
 endif()
 
 file(GLOB CBL_PREBUILT_DIR  
     ${NATIVE_DIR}/vendor/couchbase-lite-C-prebuilt/${CBL_RELEASE}-${CBL_EDITION}-${CBL_TARGET}/libcblite-*
 )
 
-find_package(CouchbaseLite 
+find_package(CouchbaseLite
     REQUIRED
     NO_CMAKE_FIND_ROOT_PATH
     NO_DEFAULT_PATH
@@ -45,9 +47,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-# Ensure that we always build with debug symbols. RelWithDebugInfo with macos
-# does not by default. Debug symbols are stripped out in a seperate step.
-set(CMAKE_CXX_FLAGS -g)
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHcs")
+endif()
 
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG>)
 
@@ -88,3 +91,6 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 install(TARGETS cblitedart
     LIBRARY DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE}
 )
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    install(FILES $<TARGET_PDB_FILE:cblitedart> DESTINATION bin)
+endif()
