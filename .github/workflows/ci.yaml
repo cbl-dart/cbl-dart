@@ -342,6 +342,8 @@ jobs:
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
+        # Disable Dart SDK until flutter is not needed anymore
+        if: ${{ false }}
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
