@@ -154,7 +154,7 @@ jobs:
         "macOS":"macos-11",
         "Android":"macos-11",
         "Ubuntu":"ubuntu-20.04",
-        "Windows":"windows-2022"
+        "Windows":"windows-2019"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -255,7 +255,7 @@ jobs:
         "macOS":"macos-11",
         "Android":"macos-11",
         "Ubuntu":"ubuntu-20.04",
-         "Windows":"windows-2022"
+         "Windows":"windows-2019"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}

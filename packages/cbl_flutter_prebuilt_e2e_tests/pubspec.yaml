@@ -18,5 +18,17 @@ dependencies:
     sdk: flutter
 
 dependency_overrides:
+  cbl:
+    path: ../cbl
+  cbl_ffi:
+    path: ../cbl_ffi
+  cbl_flutter:
+    path: ../cbl_flutter
   cbl_flutter_ee:
     path: ../cbl_flutter_ee
+  cbl_flutter_platform_interface:
+    path: ../cbl_flutter_platform_interface
+  cbl_libcblite_api:
+    path: ../cbl_libcblite_api
+  cbl_libcblitedart_api:
+    path: ../cbl_libcblitedart_api
