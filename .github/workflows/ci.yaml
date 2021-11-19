@@ -336,6 +336,9 @@ jobs:
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
       - name: Bootstrap Dart package
         run: ./tools/ci-steps.sh bootstrapPackage
 
