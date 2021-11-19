@@ -7,7 +7,7 @@ import 'install_libraries.dart';
 import 'package.dart';
 
 /// Ensures that the latest releases of the libraries are installed and
-/// returns the corresponding [Libraries] configuration.
+/// returns the corresponding [LibrariesConfiguration] configuration.
 ///
 /// See [Package.latestReleases] for the releases installed by this function.
 ///
@@ -16,7 +16,7 @@ import 'package.dart';
 /// [mergedNativeLibrariesDir] is the directory where the native libraries will
 /// be installed. If not specified, the platform specific, system-wide default
 /// directory will be used.
-Future<Libraries> acquireLibraries({
+Future<LibrariesConfiguration> acquireLibraries({
   required Edition edition,
   String? mergedNativeLibrariesDir,
 }) async {
@@ -45,7 +45,7 @@ Future<Libraries> acquireLibraries({
     directory: mergedNativeLibrariesDir,
   );
 
-  return Libraries(
+  return LibrariesConfiguration(
     enterpriseEdition: edition == Edition.enterprise,
     cbl: libraryConfiguration[Library.libcblite]!,
     cblDart: libraryConfiguration[Library.libcblitedart]!,

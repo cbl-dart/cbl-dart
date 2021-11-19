@@ -281,8 +281,11 @@ jobs:
       - name: Configure flutter
         run: ./tools/ci-steps.sh configureFlutter
 
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
       - name: Bootstrap Dart package
-        run: ./tools/ci-steps.sh bootstrapPackage --no-melos
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Start virtual devices
         run: ./tools/ci-steps.sh startVirtualDevices
@@ -331,17 +334,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.flutter-version-stable }}
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
       - name: Bootstrap Dart package
-        run: ./tools/ci-steps.sh bootstrapPackage --no-melos
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
-        run: dart test --coverage coverage/dart
+        # TODO: Actually use `dart` to run test, once its possible to override
+        # local dependencies. Review ./tools/ci-steps.sh uploadCoverageData.
+        run: flutter test --coverage
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}

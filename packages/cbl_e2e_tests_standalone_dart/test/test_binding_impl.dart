@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:ffi/ffi.dart';
 import 'package:path/path.dart' as p;
 
 import 'cbl_e2e_tests/test_binding.dart';
@@ -27,59 +25,38 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   String resolveTmpDir() => p.absolute(p.join('test', '.tmp'));
 }
 
-Libraries _libraries() {
+LibrariesConfiguration _libraries() {
   const enterpriseEdition = true;
-  final libDir = p.absolute('lib');
-  final binDir = p.absolute('bin');
-  final frameworksDir = p.absolute('Frameworks');
 
-  String findLibInFrameworks(String name) =>
-      '$frameworksDir/$name.framework/Versions/A/$name';
-
-  late String cblLib;
-  late String cblDartLib;
-  var appendExtension = true;
+  String? directory;
+  String cblLib;
+  String cblDartLib;
   String? cblVersion;
 
+  final libDir = p.absolute('lib');
   final isUnix = Platform.isLinux || Platform.isMacOS;
-
   if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
-    cblLib = p.join(libDir, 'libcblite');
-    cblDartLib = p.join(libDir, 'libcblitedart');
+    directory = libDir;
+    cblLib = 'libcblite';
+    cblDartLib = 'libcblitedart';
     // TODO(blaugold): remove version when symlinks in macOS release are fixed
     cblVersion = '3';
   } else if (Platform.isMacOS) {
-    cblLib = findLibInFrameworks('CouchbaseLite');
-    cblDartLib = findLibInFrameworks('CouchbaseLiteDart');
-    appendExtension = false;
+    directory = p.absolute('Frameworks');
+    cblLib = 'CouchbaseLite';
+    cblDartLib = 'CouchbaseLiteDart';
   } else if (Platform.isWindows) {
-    _setDllDirectory(binDir);
-    cblLib = p.join(binDir, 'cblite');
-    cblDartLib = p.join(binDir, 'cblitedart');
+    directory = p.absolute('bin');
+    cblLib = 'cblite';
+    cblDartLib = 'cblitedart';
   } else {
     throw StateError('Could not find libraries for current platform');
   }
 
-  return Libraries(
+  return LibrariesConfiguration(
     enterpriseEdition: enterpriseEdition,
-    cbl: LibraryConfiguration.dynamic(
-      cblLib,
-      version: cblVersion,
-      appendExtension: appendExtension,
-    ),
-    cblDart: LibraryConfiguration.dynamic(
-      cblDartLib,
-      appendExtension: appendExtension,
-    ),
+    directory: directory,
+    cbl: LibraryConfiguration.dynamic(cblLib, version: cblVersion),
+    cblDart: LibraryConfiguration.dynamic(cblDartLib),
   );
-}
-
-void _setDllDirectory(String dir) {
-  final kernel32 = DynamicLibrary.open('Kernel32.dll');
-  final setDllDirectoryFn = kernel32.lookupFunction<
-      Uint8 Function(Pointer<Utf16>),
-      int Function(Pointer<Utf16>)>('SetDllDirectoryW');
-  if (setDllDirectoryFn(dir.toNativeUtf16()) == 0) {
-    throw Exception('Failed to set DLL directory to $dir');
-  }
 }

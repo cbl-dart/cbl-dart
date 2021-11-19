@@ -1,14 +1,121 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:ffi';
 import 'dart:io';
 
-bool _isApple = Platform.isIOS || Platform.isMacOS;
-bool _isUnix = Platform.isIOS ||
+import 'package:ffi/ffi.dart';
+
+import 'utils.dart';
+
+class LibraryConfiguration {
+  LibraryConfiguration({
+    this.process,
+    this.name,
+    this.appendExtension,
+    this.version,
+    this.isAppleFramework,
+  }) : assert((process != null && name == null && appendExtension == null) ||
+            name != null);
+
+  final bool? process;
+  final String? name;
+  final bool? appendExtension;
+  final String? version;
+  final bool? isAppleFramework;
+}
+
+class LibrariesConfiguration {
+  LibrariesConfiguration({
+    required this.cbl,
+    required this.cblDart,
+    this.enterpriseEdition = false,
+    this.directory,
+  });
+
+  final LibraryConfiguration cbl;
+  final LibraryConfiguration cblDart;
+
+  final bool enterpriseEdition;
+
+  final String? directory;
+}
+
+class DynamicLibraries {
+  factory DynamicLibraries.fromConfig(LibrariesConfiguration config) =>
+      DynamicLibraries._loadLibraries(
+        config,
+        (library) => library._createDynamicLibrary(directory: config.directory),
+      );
+
+  factory DynamicLibraries._loadLibraries(
+    LibrariesConfiguration config,
+    DynamicLibrary Function(LibraryConfiguration library) fn,
+  ) {
+    final directory = config.directory;
+    final dllDirectoryCookie = directory != null && Platform.isWindows
+        ? _AddDllDirectory(directory)
+        : null;
+
+    final libraries = DynamicLibraries._(
+      enterpriseEdition: config.enterpriseEdition,
+      cbl: fn(config.cbl),
+      cblDart: fn(config.cblDart),
+    );
+
+    if (dllDirectoryCookie != null) {
+      _RemoveDllDirectory(dllDirectoryCookie);
+    }
+
+    return libraries;
+  }
+
+  DynamicLibraries._({
+    required this.enterpriseEdition,
+    required this.cbl,
+    required this.cblDart,
+  });
+
+  final bool enterpriseEdition;
+  final DynamicLibrary cbl;
+  final DynamicLibrary cblDart;
+}
+
+extension on LibraryConfiguration {
+  DynamicLibrary _createDynamicLibrary({String? directory}) {
+    if (name != null) {
+      var name = this.name!;
+
+      if (directory != null) {
+        name = [directory, name].join(Platform.pathSeparator);
+      }
+
+      if (isAppleFramework == true) {
+        name = '$name.framework/Versions/A/$name';
+      } else if (appendExtension == true) {
+        name += _dynamicLibraryExtension(version: version);
+      }
+
+      return DynamicLibrary.open(name);
+    }
+
+    if (process == true) {
+      return DynamicLibrary.process();
+    }
+
+    return DynamicLibrary.executable();
+  }
+}
+
+// === Library extensions ======================================================
+
+final _isApple = Platform.isIOS || Platform.isMacOS;
+final _isUnix = Platform.isIOS ||
     Platform.isMacOS ||
     Platform.isAndroid ||
     Platform.isLinux ||
     Platform.isFuchsia;
 
-String _buildDynamicLibraryExtension({String? version}) {
+String _dynamicLibraryExtension({String? version}) {
   String extension;
   if (_isApple) {
     extension = '.dylib';
@@ -33,49 +140,30 @@ String _buildDynamicLibraryExtension({String? version}) {
   return extension;
 }
 
-class LibraryConfiguration {
-  LibraryConfiguration({
-    this.process,
-    this.name,
-    this.appendExtension,
-    this.version,
-  }) : assert((process != null && name == null && appendExtension == null) ||
-            name != null);
+// === Windows DLL Loading =====================================================
 
-  final bool? process;
-  final String? name;
-  final bool? appendExtension;
-  final String? version;
+late final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-  DynamicLibrary get library {
-    if (name != null) {
-      var name = this.name!;
-      if (appendExtension == true) {
-        name += _buildDynamicLibraryExtension(version: version);
-      }
-      return DynamicLibrary.open(name);
-    }
-    if (process == true) {
-      return DynamicLibrary.process();
-    }
-    return DynamicLibrary.executable();
+late final _AddDllDirectoryFn = _kernel32.lookupFunction<
+    Pointer<Void> Function(Pointer<Utf16>),
+    Pointer<Void> Function(Pointer<Utf16>)>('AddDllDirectory');
+
+late final _RemoveDllDirectoryFn = _kernel32.lookupFunction<
+    Uint8 Function(Pointer<Void>),
+    int Function(Pointer<Void>)>('RemoveDllDirectory');
+
+Pointer<Void> _AddDllDirectory(String directory) {
+  final directoryNativeStr = directory.toNativeUtf16();
+  final result = _AddDllDirectoryFn(directoryNativeStr);
+  malloc.free(directoryNativeStr);
+  if (result == nullptr) {
+    throw StateError('Failed to add DLL directory');
   }
+  return result;
 }
 
-class Libraries {
-  Libraries({
-    required LibraryConfiguration cbl,
-    required LibraryConfiguration cblDart,
-    this.enterpriseEdition = false,
-  })  : _cbl = cbl,
-        _cblDart = cblDart;
-
-  final LibraryConfiguration _cbl;
-  final LibraryConfiguration _cblDart;
-
-  final bool enterpriseEdition;
-
-  DynamicLibrary get cbl => _cbl.library;
-
-  DynamicLibrary get cblDart => _cblDart.library;
+void _RemoveDllDirectory(Pointer<Void> cookie) {
+  if (!_RemoveDllDirectoryFn(cookie).toBool()) {
+    throw StateError('Failed to remove DLL directory');
+  }
 }

@@ -38,6 +38,7 @@ abstract class CblFlutterPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  /// Returns the [Libraries] provided by this plugin for the current platform.
-  Libraries libraries();
+  /// Returns the [LibrariesConfiguration] provided by this plugin for the
+  /// current platform.
+  LibrariesConfiguration libraries();
 }
