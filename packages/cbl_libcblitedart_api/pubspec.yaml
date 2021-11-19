@@ -2,7 +2,7 @@ name: cbl_libcblitedart_api
 description:
   Internal marker package for declaring a dependency on a version of the
   libcblitedart API.
-version: 1.0.0-beta.4
+version: 1.0.0-beta.5
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_libcblitedart_api
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
