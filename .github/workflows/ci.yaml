@@ -282,7 +282,7 @@ jobs:
         run: ./tools/ci-steps.sh configureFlutter
 
       - name: Bootstrap Dart package
-        run: ./tools/ci-steps.sh bootstrapPackage --no-melos
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Start virtual devices
         run: ./tools/ci-steps.sh startVirtualDevices
@@ -349,7 +349,9 @@ jobs:
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
-        run: dart test --coverage coverage/dart
+        # TODO: Actually use `dart` to run test, once its possible to override
+        # local dependencies. Review ./tools/ci-steps.sh uploadCoverageData.
+        run: flutter test --coverage
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}
