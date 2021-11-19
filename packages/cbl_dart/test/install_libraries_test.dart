@@ -31,8 +31,8 @@ void main() {
     expect(
       libDirBasenames,
       containsAll(<Object>[
-        startsWith('libcblite'),
-        startsWith('libcblitedart'),
+        contains('cblite.'),
+        contains('cblitedart.'),
       ]),
     );
   });

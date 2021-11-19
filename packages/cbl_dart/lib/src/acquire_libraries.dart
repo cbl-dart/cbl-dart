@@ -40,19 +40,23 @@ Future<LibrariesConfiguration> acquireLibraries({
     );
   }
 
-  final libraryConfiguration = mergedNativeLibraryConfigurations(
+  return mergedNativeLibrariesConfigurations(
     packages,
     directory: mergedNativeLibrariesDir,
   );
-
-  return LibrariesConfiguration(
-    enterpriseEdition: edition == Edition.enterprise,
-    cbl: libraryConfiguration[Library.libcblite]!,
-    cblDart: libraryConfiguration[Library.libcblitedart]!,
-  );
 }
 
-String get _homeDir => Platform.environment['HOME']!;
+String get _homeDir {
+  if (Platform.isMacOS || Platform.isLinux) {
+    return Platform.environment['HOME']!;
+  }
+
+  if (Platform.isWindows) {
+    return Platform.environment['USERPROFILE']!;
+  }
+
+  throw UnsupportedError('Not supported on this platform.');
+}
 
 String? sharedCacheDirOverride;
 
@@ -63,11 +67,17 @@ String _sharedCacheDir() {
 
   if (Platform.isMacOS) {
     return '$_homeDir/Library/Caches/cbl_dart';
-  } else if (Platform.isLinux) {
-    return '$_homeDir/.cache/cbl_dart';
-  } else {
-    throw UnsupportedError('Unsupported platform.');
   }
+
+  if (Platform.isLinux) {
+    return '$_homeDir/.cache/cbl_dart';
+  }
+
+  if (Platform.isWindows) {
+    return '$_homeDir/AppData/Local/cbl_dart';
+  }
+
+  throw UnsupportedError('Unsupported platform.');
 }
 
 String _sharedMergedNativesLibrariesDir() =>

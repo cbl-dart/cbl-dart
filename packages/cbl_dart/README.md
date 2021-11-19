@@ -13,11 +13,11 @@ the use of `cbl` in pure Dart apps.
 
 # 🎯 Platform Support
 
-| Platform | Version                | Note                   |
-| -------: | :--------------------- | ---------------------- |
-|    macOS | >= 10.14               |                        |
-|    Linux | == Ubuntu 20.04-x86_64 |                        |
-|  Windows | >= 10                  | 🚧 Not yet implemented |
+| Platform | Version                |
+| -------: | :--------------------- |
+|    macOS | >= 10.14               |
+|    Linux | == Ubuntu 20.04-x86_64 |
+|  Windows | >= 10                  |
 
 # 🔌 Getting Started
 

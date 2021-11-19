@@ -33,19 +33,8 @@ Future<void> downloadFile(String url, String outputFile) => execute(
 
 /// Unpacks a zip or tar.gz [archiveFile] into [outputDir].
 Future<void> unpackArchive(String archiveFile, String outputDir) async {
-  final archiveName = p.basename(archiveFile);
-  final archiveExtension = p.extension(archiveName, 2);
-
   await Directory(outputDir).create(recursive: true);
-
-  switch (archiveExtension) {
-    case '.zip':
-      return execute('unzip', [archiveFile, '-d', outputDir]);
-    case '.tar.gz':
-      return execute('tar', ['-xvf', archiveFile, '-C', outputDir]);
-    default:
-      throw Exception('Unsupported archive extension: $archiveName');
-  }
+  return execute('tar', ['-xf', archiveFile, '-C', outputDir]);
 }
 
 /// Copies the contents of [sourceDir] to [destinationDir].

@@ -319,7 +319,7 @@ jobs:
         package: [cbl_dart]
         dart: [stable]
         embedder: [standalone]
-        os: [macOS, Ubuntu]
+        os: [macOS, Ubuntu, Windows]
     env:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
@@ -328,7 +328,8 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{ 
         "macOS":"macos-11",
-        "Ubuntu":"ubuntu-20.04"
+        "Ubuntu":"ubuntu-20.04",
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
@@ -348,10 +349,12 @@ jobs:
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
+        shell: bash
         run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
+        shell: bash
         # TODO: Actually use `dart` to run test, once its possible to override
         # local dependencies. Review ./tools/ci-steps.sh uploadCoverageData.
         run: flutter test --coverage
@@ -360,5 +363,6 @@ jobs:
         if: ${{ matrix.dart == 'stable' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"

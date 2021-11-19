@@ -49,21 +49,6 @@ Future<void> installMergedNativeLibraries(
   }
 }
 
-Map<Library, LibraryConfiguration> mergedNativeLibraryConfigurations(
-  Iterable<Package> packages, {
-  required String directory,
-}) {
-  final libraryDir = mergedNativeLibrariesInstallDir(packages, directory);
-
-  return Map.fromIterables(
-    packages.map((package) => package.library),
-    packages.map((package) => nativeLibraryConfiguration(
-          package,
-          directory: libraryDir.path,
-        )),
-  );
-}
-
 Future<void> installNativeLibrary(
   Package package, {
   required String installDir,
@@ -74,7 +59,7 @@ Future<void> installNativeLibrary(
   final archiveFile = p.join(tmpDir, archiveBasename);
   final packageRootDir =
       p.join(tmpDir, '${package.library.name}-${package.version}');
-  final targetLibDir = p.join(packageRootDir, package.targetLibDir);
+  final targetLibDir = p.join(packageRootDir, package.librariesDir);
 
   await downloadFile(package.archiveUrl, archiveFile);
   await unpackArchive(archiveFile, tmpDir);
@@ -83,21 +68,38 @@ Future<void> installNativeLibrary(
   await copyDirectoryContents(targetLibDir, installDir);
 }
 
-LibraryConfiguration nativeLibraryConfiguration(
-  Package package, {
+LibrariesConfiguration mergedNativeLibrariesConfigurations(
+  Iterable<Package> packages, {
   required String directory,
 }) {
+  final libraryDir = mergedNativeLibrariesInstallDir(packages, directory);
+
+  Package packageFor(Library library) =>
+      packages.firstWhere((package) => package.library == library);
+
+  return LibrariesConfiguration(
+    directory: libraryDir.path,
+    enterpriseEdition: packages.first.edition == Edition.enterprise,
+    cbl: _nativeLibraryConfiguration(packageFor(Library.libcblite)),
+    cblDart: _nativeLibraryConfiguration(packageFor(Library.libcblitedart)),
+  );
+}
+
+LibraryConfiguration _nativeLibraryConfiguration(Package package) {
   if (Platform.isMacOS || Platform.isLinux) {
-    final libraryFile = p.join(directory, package.library.name);
     return LibraryConfiguration.dynamic(
-      libraryFile,
+      package.libraryName,
       // Specifying an exact version should not be necessary, but is because
       // the beta of libcblite does not distribute properly symlinked libraries
       // for macos. We need to use the libcblite.x.dylib because that is what
       // libcblitedart is linking against.
       version: package.version.split('.').first,
     );
-  } else {
-    throw UnsupportedError('Unsupported platform.');
   }
+
+  if (Platform.isWindows) {
+    return LibraryConfiguration.dynamic(package.libraryName);
+  }
+
+  throw UnsupportedError('Unsupported platform.');
 }
