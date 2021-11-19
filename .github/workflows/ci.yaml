@@ -281,6 +281,9 @@ jobs:
       - name: Configure flutter
         run: ./tools/ci-steps.sh configureFlutter
 
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
       - name: Bootstrap Dart package
         run: ./tools/ci-steps.sh bootstrapPackage
 
