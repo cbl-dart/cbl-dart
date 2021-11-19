@@ -38,7 +38,13 @@ enum Edition {
 }
 
 /// An operating system.
-enum OS { android, ios, macos, linux }
+enum OS {
+  android,
+  ios,
+  macos,
+  linux,
+  windows,
+}
 
 /// A linux distribution.
 enum Distro { ubuntu }
@@ -52,26 +58,39 @@ class Target {
   static final macos = Target(OS.macos);
   static final ubuntu20_04_x86_64 =
       LinuxTarget(OS.linux, Distro.ubuntu, '20.04', 'x86_64');
+  static final windows_x86_64 = WindowsTarget(OS.windows, 'x86_64');
 
-  static final all = [android, ios, macos, ubuntu20_04_x86_64];
+  static final all = [android, ios, macos, ubuntu20_04_x86_64, windows_x86_64];
 
   /// The target of the host machine.
   static Target get host {
     if (Platform.isMacOS) {
       return macos;
-    } else if (Platform.isLinux) {
+    }
+
+    if (Platform.isLinux) {
       // TODO(blaugold): detect distro and throw if not supported
       // The only currently supported Linux target is Ubuntu 20.04 x86_64.
       return ubuntu20_04_x86_64;
-    } else {
-      throw UnsupportedError('Unsupported host platform');
     }
+
+    if (Platform.isWindows) {
+      return windows_x86_64;
+    }
+
+    throw UnsupportedError('Unsupported host platform');
   }
 
   final OS os;
 
   /// The identifier for this target, as used in the package file names.
   String get id => os.name;
+
+  ArchiveFormat get archiveFormat => ArchiveFormat.zip;
+
+  String get librariesDir => 'lib';
+
+  String libraryName(Package package) => package.library.name;
 }
 
 /// A linux [Target].
@@ -84,6 +103,29 @@ class LinuxTarget extends Target {
 
   @override
   String get id => '${vendor.name}$version-$arch';
+
+  @override
+  ArchiveFormat get archiveFormat => ArchiveFormat.tarGz;
+
+  @override
+  String get librariesDir => p.join('lib', '$arch-linux-gnu');
+}
+
+/// A windows [Target].
+class WindowsTarget extends Target {
+  WindowsTarget(OS os, this.arch) : super(os);
+
+  final String arch;
+
+  @override
+  String get id => 'windows-$arch';
+
+  @override
+  String get librariesDir => 'bin';
+
+  @override
+  String libraryName(Package package) =>
+      package.library.name.replaceAll('lib', '');
 }
 
 /// A package though which a release of a [Library] is distributed.
@@ -97,7 +139,7 @@ class Package {
 
   static const latestReleases = {
     Library.libcblite: '3.0.0-beta02',
-    Library.libcblitedart: '1.0.0-beta.4',
+    Library.libcblitedart: '1.0.0-beta.5',
   };
 
   static final _archiveUrlResolvers = <Library, String Function(Package)>{
@@ -130,28 +172,13 @@ class Package {
 
   String get version => release.split('-').first;
 
-  ArchiveFormat get archiveFormat {
-    if (target is LinuxTarget) {
-      return ArchiveFormat.tarGz;
-    }
-    return ArchiveFormat.zip;
-  }
+  ArchiveFormat get archiveFormat => target.archiveFormat;
 
   String get archiveUrl => _archiveUrlResolvers[library]!(this);
 
-  String get targetLibDir {
-    final target = this.target;
+  String get librariesDir => target.librariesDir;
 
-    if ([OS.ios, OS.android].contains(target.os)) {
-      throw UnsupportedError('targetLibDir is not supported for ${target.os}');
-    }
-
-    if (target is LinuxTarget) {
-      return p.join('lib', '${target.arch}-linux-gnu');
-    }
-
-    return 'lib';
-  }
+  String get libraryName => target.libraryName(this);
 
   String get _signatureContent =>
       [library.name, release, edition.name, target.id].join();
