@@ -1,3 +1,5 @@
 typedef JsonMap = Map<String, Object?>;
 
-String enumToString(Object value) => value.toString().split('.')[1];
+extension EnumExt on Enum {
+  String get name => toString().split('.')[1];
+}

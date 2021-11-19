@@ -10,13 +10,24 @@ error() {
 
 trap 'error "${BASH_SOURCE[0]}" "${LINENO}"' ERR
 
-targets=(android ios macos ubuntu20.04-x86_64)
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
+    # Use bsd tar, which comes with Windows and not gnu tar from git-bash.
+    TAR="c:/Windows/system32/tar.exe"
+    ;;
+*)
+    TAR="tar"
+    ;;
+esac
+
+targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 packageDir="$(cd "$scriptDir/.." && pwd)"
 androidJniLibsDir="$packageDir/android/src/main/jniLibs"
 iosFrameworksDir="$packageDir/ios/Frameworks"
 macosLibrariesDir="$packageDir/macos/Libraries"
 linuxLibDir="$packageDir/linux/lib"
+windowsBinDir="$packageDir/windows/bin"
 
 source "$scriptDir/library_versions"
 
@@ -35,6 +46,9 @@ function _installDir() {
         ;;
     ubuntu*)
         echo "$linuxLibDir"
+        ;;
+    windows*)
+        echo "$windowsBinDir"
         ;;
     esac
 }
@@ -129,16 +143,8 @@ curl "$(
     --output "$couchbaseLiteDartArchiveFile"
 
 # Unpack archives
-case "$(_archiveExt "$target")" in
-zip)
-    unzip -q "$couchbaseLiteCArchiveFile" -d "$tmpDir"
-    unzip -q "$couchbaseLiteDartArchiveFile" -d "$tmpDir"
-    ;;
-tar.gz)
-    tar -xzf "$couchbaseLiteCArchiveFile" -C "$tmpDir"
-    tar -xzf "$couchbaseLiteDartArchiveFile" -C "$tmpDir"
-    ;;
-esac
+$TAR -xf "$couchbaseLiteCArchiveFile" -C "$tmpDir"
+$TAR -xf "$couchbaseLiteDartArchiveFile" -C "$tmpDir"
 
 # Move archives into platform directory
 tmpInstallDir="$tmpDir/installDir"
@@ -165,6 +171,10 @@ macos)
 ubuntu*)
     cp -a "$tmpDir/libcblite-$COUCHBASE_LITE_C_VERSION/lib/"*"/libcblite."* "$tmpInstallDir"
     cp -a "$tmpDir/libcblitedart-$COUCHBASE_LITE_DART_VERSION/lib/"*"/libcblitedart."* "$tmpInstallDir"
+    ;;
+windows*)
+    cp -a "$tmpDir/libcblite-$COUCHBASE_LITE_C_VERSION/bin/cblite."* "$tmpInstallDir"
+    cp -a "$tmpDir/libcblitedart-$COUCHBASE_LITE_DART_VERSION/bin/cblitedart."* "$tmpInstallDir"
     ;;
 esac
 

@@ -7,6 +7,16 @@
 
 set -e
 
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
+    # Use bsd tar, which comes with Windows and not gnu tar from git-bash.
+    TAR="$SYSTEMROOT\system32\tar.exe"
+    ;;
+*)
+    TAR="tar"
+    ;;
+esac
+
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 buildDir="$projectDir/build/release"
@@ -55,7 +65,7 @@ function _buildArchive() {
 
     cd "$targetBuildDir"
 
-    tar -caf "$archiveFile" "$productDirPrefix"*
+    $TAR -caf "$archiveFile" "$productDirPrefix"*
 }
 
 release="$1"

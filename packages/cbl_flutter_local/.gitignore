@@ -11,3 +11,4 @@ android/src/main/jniLibs/
 ios/Frameworks/
 linux/lib/
 macos/Libraries/
+windows/bin/
