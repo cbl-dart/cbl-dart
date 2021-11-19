@@ -333,7 +333,7 @@ jobs:
       ${{ fromJSON('{ 
         "macOS":"macos-11",
         "Ubuntu":"ubuntu-20.04",
-        "Windows":"windows-2022"
+        "Windows":"windows-2019"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
