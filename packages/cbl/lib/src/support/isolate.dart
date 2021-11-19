@@ -1,4 +1,4 @@
-import 'package:cbl_ffi/cbl_ffi.dart' hide Libraries;
+import 'package:cbl_ffi/cbl_ffi.dart' hide LibrariesConfiguration;
 
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
@@ -38,7 +38,7 @@ class IsolateContext {
     return config;
   }
 
-  final Libraries libraries;
+  final LibrariesConfiguration libraries;
   final InitContext? initContext;
 }
 

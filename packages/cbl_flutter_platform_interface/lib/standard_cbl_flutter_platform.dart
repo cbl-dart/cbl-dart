@@ -34,31 +34,26 @@ class StandardCblFlutterPlatform extends CblFlutterPlatform {
   final bool enterpriseEdition;
 
   @override
-  Libraries libraries() {
-    late final LibraryConfiguration cbl;
-    late final LibraryConfiguration cblDart;
+  LibrariesConfiguration libraries() {
+    String? directory;
+    final LibraryConfiguration cbl;
+    final LibraryConfiguration cblDart;
 
     if (Platform.isIOS || Platform.isMacOS) {
-      cbl = LibraryConfiguration.process();
-      cblDart = LibraryConfiguration.process();
-    } else if (Platform.isAndroid) {
+      cbl = cblDart = LibraryConfiguration.process();
+    } else if (Platform.isAndroid || Platform.isLinux) {
+      if (Platform.isLinux) {
+        directory = _joinPaths(_dirname(Platform.resolvedExecutable), 'lib');
+      }
       cbl = LibraryConfiguration.dynamic('libcblite');
       cblDart = LibraryConfiguration.dynamic('libcblitedart');
-    } else if (Platform.isLinux) {
-      final bundleDirectory = _dirname(Platform.resolvedExecutable);
-      final libDirectory = _joinPaths(bundleDirectory, 'lib');
-      cbl = LibraryConfiguration.dynamic(
-        _joinPaths(libDirectory, 'libcblite'),
-      );
-      cblDart = LibraryConfiguration.dynamic(
-        _joinPaths(libDirectory, 'libcblitedart'),
-      );
     } else {
       throw UnsupportedError('This platform is not supported.');
     }
 
-    return Libraries(
+    return LibrariesConfiguration(
       enterpriseEdition: enterpriseEdition,
+      directory: directory,
       cbl: cbl,
       cblDart: cblDart,
     );

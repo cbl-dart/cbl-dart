@@ -26,6 +26,7 @@ class LibraryConfiguration {
     this.name, {
     this.appendExtension = true,
     this.version,
+    this.isAppleFramework = false,
   }) : process = null;
 
   /// Creates a configuration for a dynamic library opened with
@@ -34,7 +35,8 @@ class LibraryConfiguration {
       : process = true,
         name = null,
         appendExtension = null,
-        version = null;
+        version = null,
+        isAppleFramework = null;
 
   /// Creates a configuration for a dynamic library opened with
   /// [DynamicLibrary.executable].
@@ -42,43 +44,66 @@ class LibraryConfiguration {
       : process = false,
         name = null,
         appendExtension = null,
-        version = null;
+        version = null,
+        isAppleFramework = null;
 
+  /// `true` if the library is available in the globally visible symbols of the
+  /// process.
   final bool? process;
+
+  /// The name of the library.
   final String? name;
+
+  /// Whether to append the platform dependent file extension to [name].
   final bool? appendExtension;
+
+  /// The version to use when building the full library path.
   final String? version;
 
+  /// Whether the library is packaged in an Apple framework .
+  final bool? isAppleFramework;
+}
+
+/// Configuration for the [DynamicLibrary]s which provide the Couchbase Lite C
+/// API and the Dart support layer.
+class LibrariesConfiguration {
+  /// Creates a configuration for the [DynamicLibrary]s which provide the
+  /// Couchbase Lite C API and the Dart support layer.
+  LibrariesConfiguration({
+    this.enterpriseEdition = false,
+    this.directory,
+    required this.cbl,
+    required this.cblDart,
+  });
+
+  /// Whether the provided Couchbase Lite C library is the enterprise edition.
+  final bool enterpriseEdition;
+
+  /// The directory in which libraries are located.
+  final String? directory;
+
+  /// The configuration for the Couchbase Lite C library.
+  final LibraryConfiguration cbl;
+
+  /// The configuration for the Dart support library.
+  final LibraryConfiguration cblDart;
+}
+
+extension on LibraryConfiguration {
   ffi.LibraryConfiguration _toCblFfi() => ffi.LibraryConfiguration(
         process: process,
         name: name,
         appendExtension: appendExtension,
         version: version,
+        isAppleFramework: isAppleFramework,
       );
 }
 
-/// The [DynamicLibrary]s which provide the Couchbase Lite C API and the Dart
-/// support layer.
-class Libraries {
-  Libraries({
-    required this.cbl,
-    required this.cblDart,
-    this.enterpriseEdition = false,
-  });
-
-  final LibraryConfiguration cbl;
-  final LibraryConfiguration cblDart;
-
-  /// Whether the provided Couchbase Lite C library is the enterprise edition.
-  final bool enterpriseEdition;
-
-  ffi.Libraries _toCblFfi() => ffi.Libraries(
+extension CblFfiLibraries on LibrariesConfiguration {
+  ffi.LibrariesConfiguration toCblFfi() => ffi.LibrariesConfiguration(
         enterpriseEdition: enterpriseEdition,
+        directory: directory,
         cbl: cbl._toCblFfi(),
         cblDart: cblDart._toCblFfi(),
       );
-}
-
-extension CblFfiLibraries on Libraries {
-  ffi.Libraries toCblFfi() => _toCblFfi();
 }

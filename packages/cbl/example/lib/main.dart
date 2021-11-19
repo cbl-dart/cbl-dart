@@ -4,7 +4,7 @@ import 'package:cbl/cbl.dart';
 
 /// You need to specify how to access the native libraries, on top of which
 /// `cbl` is implemented.
-Libraries getLibraries() {
+LibrariesConfiguration getLibraries() {
   throw UnimplementedError('TODO');
 }
 

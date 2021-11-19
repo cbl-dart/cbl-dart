@@ -17,13 +17,14 @@ abstract class Bindings {
 
   Bindings.root(this.libs);
 
-  final Libraries libs;
+  final DynamicLibraries libs;
 
   List<Bindings> get _children => [];
 }
 
 class CBLBindings extends Bindings {
-  CBLBindings(Libraries libs) : super.root(libs) {
+  CBLBindings(LibrariesConfiguration config)
+      : super.root(DynamicLibraries.fromConfig(config)) {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
     dartFinalizer = DartFinalizerBindings(this);
@@ -51,7 +52,8 @@ class CBLBindings extends Bindings {
 
   static CBLBindings? get maybeInstance => _instance;
 
-  static void init(Libraries libraries) => _instance ??= CBLBindings(libraries);
+  static void init(LibrariesConfiguration libraries) =>
+      _instance ??= CBLBindings(libraries);
 
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;

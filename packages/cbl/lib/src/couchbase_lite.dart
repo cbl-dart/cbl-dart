@@ -5,7 +5,7 @@ import 'log.dart';
 import 'support/ffi.dart';
 import 'support/isolate.dart';
 
-export 'support/ffi.dart' show Libraries, LibraryConfiguration;
+export 'support/ffi.dart' show LibrariesConfiguration, LibraryConfiguration;
 export 'support/listener_token.dart' show ListenerToken;
 export 'support/resource.dart' show Resource, ClosableResource;
 export 'support/streams.dart' show AsyncListenStream;
@@ -17,7 +17,7 @@ class CouchbaseLite {
   CouchbaseLite._();
 
   /// Initializes the `cbl` package, for the main isolate.
-  static void init({required Libraries libraries}) {
+  static void init({required LibrariesConfiguration libraries}) {
     initMainIsolate(IsolateContext(libraries: libraries));
 
     _setupLogging();
