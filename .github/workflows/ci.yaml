@@ -337,7 +337,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Bootstrap Dart package
-        run: ./tools/ci-steps.sh bootstrapPackage --no-melos
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
