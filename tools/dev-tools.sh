@@ -21,6 +21,7 @@ cblFlutterLocalAndroidJniLibsDir="$cblFlutterLocalDir/android/src/main/jniLibs"
 cblFlutterLocalIosFrameworksDir="$cblFlutterLocalDir/ios/Frameworks"
 cblFlutterLocalMacosLibrariesDir="$cblFlutterLocalDir/macos/Libraries"
 cblFlutterLocalLinuxLibDir="$cblFlutterLocalDir/linux/lib"
+cblFlutterLocalWindowsBinDir="$cblFlutterLocalDir/windows/bin"
 
 function prepareNativeLibraries() {
     local edition="${1:-enterprise}"
@@ -127,6 +128,12 @@ function prepareNativeLibraries() {
         mkdir -p "$cblE2eTestsStandaloneDartBinDir"
         cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/bin/cblite"* "$cblE2eTestsStandaloneDartBinDir"
         cp -a "$couchbaseLiteDartBuildDir/windows/libcblitedart-"*"/bin/cblitedart"* "$cblE2eTestsStandaloneDartBinDir"
+
+        echo "Copying libraries to cbl_flutter_local"
+        rm -rf "$cblFlutterLocalWindowsBinDir"
+        mkdir -p "$cblFlutterLocalWindowsBinDir"
+        cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/bin/cblite"* "$cblFlutterLocalWindowsBinDir"
+        cp -L "$couchbaseLiteDartBuildDir/windows/libcblitedart-"*"/bin/cblitedart"* "$cblFlutterLocalWindowsBinDir"
         ;;
     esac
 }

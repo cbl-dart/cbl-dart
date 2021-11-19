@@ -18,19 +18,15 @@ extension on LibraryInfo {
 }
 
 extension on PackageConfiguration {
-  JsonMap templateContext() {
-    final editionString = enumToString(edition);
-
-    return {
-      'name': name,
-      'version': version,
-      'edition': editionString,
-      'enterpriseEdition': edition == Edition.enterprise,
-      'pluginClass': 'CblFlutter${editionString[0].toUpperCase()}e',
-      'couchbaseLiteC': couchbaseLiteC.templateContext(),
-      'couchbaseLiteDart': couchbaseLiteDart.templateContext(),
-    };
-  }
+  JsonMap templateContext() => {
+        'name': name,
+        'version': version,
+        'edition': edition.name,
+        'enterpriseEdition': edition == Edition.enterprise,
+        'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',
+        'couchbaseLiteC': couchbaseLiteC.templateContext(),
+        'couchbaseLiteDart': couchbaseLiteDart.templateContext(),
+      };
 }
 
 String capitalize(LambdaContext context) {

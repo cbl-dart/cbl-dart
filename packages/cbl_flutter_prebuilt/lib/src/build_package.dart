@@ -115,7 +115,7 @@ Future<void> _copyFilePermissions(
   if (Platform.isWindows) {
     final result = await Process.run('powershell.exe', [
       '-Command',
-      'Get-Acl -Path "$from" | Set-Acl -Path $file"',
+      'Get-Acl -Path "$from" | Set-Acl -Path "$file"',
     ]);
     if (result.exitCode != 0) {
       throw StateError(

@@ -29,10 +29,10 @@ if(NOT ${INSTALL_LIBRARIES_RESULT} EQUAL 0)
   message(FATAL_ERROR "Could not install Couchbase Lite native libraries:\n${INSTALL_LIBRARIES_OUTPUT}\n${INSTALL_LIBRARIES_ERROR}")
 endif()
 
-file(GLOB cbl_flutter_ee_cbl_libraires "lib/*")
+file(GLOB cbl_flutter_ee_cbl_libraries "lib/*")
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(cbl_flutter_ee_bundled_libraries
-  ${cbl_flutter_ee_cbl_libraires}
+  ${cbl_flutter_ee_cbl_libraries}
   PARENT_SCOPE
 )

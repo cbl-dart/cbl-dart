@@ -194,6 +194,9 @@ function runE2ETests() {
             ulimit -c unlimited
             sudo sysctl -w kernel.core_pattern="core.%p"
             ;;
+        Windows)
+            device="Windows"
+            ;;
         esac
 
         # Note: We would like to collect coverage data from tests, but
@@ -346,6 +349,10 @@ function collectTestResults() {
             _collectCrashReportsLinuxFlutter
             # TODO get cbl logs from device
             ;;
+        Windows)
+            # TODO collect crash report
+            # TODO get cbl logs from device
+            ;;  
         esac
         ;;
     esac

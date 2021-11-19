@@ -32,4 +32,6 @@ flutter:
       linux:
         dartPluginClass: CblFlutterLocal
         pluginClass: CblFlutterLocalPlugin
-
+      windows:
+        dartPluginClass: CblFlutterLocal
+        pluginClass: CblFlutterLocalPlugin

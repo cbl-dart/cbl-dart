@@ -27,6 +27,11 @@ import 'cbl_flutter_platform_interface.dart';
 ///
 /// The libraries are expected to be located in the directory `lib`, next to the
 /// app executable, with the names `libcblite.so` and `libcblitedart.so`.
+///
+/// # Windows
+///
+/// The libraries are expected to be located next to the app executable, with
+/// the names `cblite.dll` and `cblitedart.dll`.
 class StandardCblFlutterPlatform extends CblFlutterPlatform {
   StandardCblFlutterPlatform({required this.enterpriseEdition});
 
@@ -47,6 +52,9 @@ class StandardCblFlutterPlatform extends CblFlutterPlatform {
       }
       cbl = LibraryConfiguration.dynamic('libcblite');
       cblDart = LibraryConfiguration.dynamic('libcblitedart');
+    } else if (Platform.isWindows) {
+      cbl = LibraryConfiguration.dynamic('cblite');
+      cblDart = LibraryConfiguration.dynamic('cblitedart');
     } else {
       throw UnsupportedError('This platform is not supported.');
     }

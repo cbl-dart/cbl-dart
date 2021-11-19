@@ -13,13 +13,17 @@ the use of `cbl` in Flutter apps.
 
 # 🎯 Platform Support
 
-| Platform | Version                | Note                                                                                                                                                                     |
-| -------: | :--------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|      iOS | >= 10.0                |                                                                                                                                                                          |
-|    macOS | >= 10.14               |                                                                                                                                                                          |
-|  Android | >= 22                  |                                                                                                                                                                          |
-|    Linux | == Ubuntu 20.04-x86_64 | 🐛 Currently broken because of a [bug in Flutter](https://github.com/flutter/flutter/issues/66575).<br>Most notably, operations trying to return an error crash the app. |
-|  Windows | >= 10                  | 🚧 Not yet implemented                                                                                                                                                   |
+|     Platform | Version                |
+| -----------: | :--------------------- |
+|          iOS | >= 10.0                |
+|        macOS | >= 10.14               |
+|      Android | >= 22                  |
+| Linux **\*** | == Ubuntu 20.04-x86_64 |
+|      Windows | >= 10                  |
+
+**\***: 🐛 Currently broken because of a
+[bug in Flutter](https://github.com/flutter/flutter/issues/66575). Most notably,
+operations trying to return an error crash the app.
 
 # 🔌 Getting started
 

@@ -148,16 +148,13 @@ jobs:
             # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
           - embedder: flutter
             os: Ubuntu
-            # Flutter Windows is not implemented yet
-          - embedder: flutter
-            os: Windows
     runs-on: >-
       ${{ fromJSON('{ 
         "iOS":"macos-11",
         "macOS":"macos-11",
         "Android":"macos-11",
         "Ubuntu":"ubuntu-20.04",
-        "Windows":"windows-2022"
+        "Windows":"windows-2019"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -251,13 +248,14 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [flutter]
-        os: [iOS, macOS, Android, Ubuntu]
+        os: [iOS, macOS, Android, Ubuntu, Windows]
     runs-on: >-
       ${{ fromJSON('{ 
         "iOS":"macos-11",
         "macOS":"macos-11",
         "Android":"macos-11",
-        "Ubuntu":"ubuntu-20.04"
+        "Ubuntu":"ubuntu-20.04",
+         "Windows":"windows-2019"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -279,22 +277,27 @@ jobs:
           flutter-version: ${{ env.flutter-version-stable }}
 
       - name: Configure flutter
+        shell: bash
         run: ./tools/ci-steps.sh configureFlutter
 
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart package
+        shell: bash
         run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Start virtual devices
+        shell: bash
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
+        shell: bash
         run: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
+        shell: bash
         run: ./tools/ci-steps.sh collectTestResults
 
       - name: Upload test results
@@ -309,6 +312,7 @@ jobs:
         if: ${{ false }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
 
@@ -329,7 +333,7 @@ jobs:
       ${{ fromJSON('{ 
         "macOS":"macos-11",
         "Ubuntu":"ubuntu-20.04",
-        "Windows":"windows-2022"
+        "Windows":"windows-2019"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository

@@ -29,10 +29,10 @@ if(NOT ${INSTALL_LIBRARIES_RESULT} EQUAL 0)
   message(FATAL_ERROR "Could not install Couchbase Lite native libraries:\n${INSTALL_LIBRARIES_OUTPUT}\n${INSTALL_LIBRARIES_ERROR}")
 endif()
 
-file(GLOB {{name}}_cbl_libraires "lib/*")
+file(GLOB {{name}}_cbl_libraries "lib/*")
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set({{name}}_bundled_libraries
-  ${{=<<>>=}}{<<={{}}=>>{{name}}_cbl_libraires}
+  ${{=<<>>=}}{<<={{}}=>>{{name}}_cbl_libraries}
   PARENT_SCOPE
 )

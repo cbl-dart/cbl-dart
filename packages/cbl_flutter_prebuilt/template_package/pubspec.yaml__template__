@@ -35,3 +35,6 @@ flutter:
       macos:
         pluginClass: {{pluginClass}}
         dartPluginClass: {{pluginClass}}
+      windows:
+        pluginClass: {{pluginClass}}
+        dartPluginClass: {{pluginClass}}
