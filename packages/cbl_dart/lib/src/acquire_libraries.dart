@@ -45,7 +45,7 @@ Future<LibrariesConfiguration> acquireLibraries({
     directory: mergedNativeLibrariesDir,
   );
 
-  return Libraries(
+  return LibrariesConfiguration(
     enterpriseEdition: edition == Edition.enterprise,
     cbl: libraryConfiguration[Library.libcblite]!,
     cblDart: libraryConfiguration[Library.libcblitedart]!,
