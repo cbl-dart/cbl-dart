@@ -7,13 +7,16 @@ environment:
   flutter: '>=2.5.0'
 
 dependencies:
-  cbl_flutter_platform_interface: ^1.0.0-beta.4
+  cbl_flutter_platform_interface:
+    path: ../cbl_flutter_platform_interface
   flutter:
     sdk: flutter
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+dependency_overrides:
+  cbl:
+    path: ../cbl
+  cbl_ffi:
+    path: ../cbl_ffi
 
 flutter:
   plugin:

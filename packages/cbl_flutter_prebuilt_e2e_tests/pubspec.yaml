@@ -7,9 +7,14 @@ environment:
   flutter: '>=2.5.0'
 
 dependencies:
-  cbl: ^1.0.0-beta.11
-  cbl_flutter: ^1.0.0-beta.10
-  cbl_flutter_ee: ^1.0.0-beta.1
+  cbl:
+    path: ../cbl
+  cbl_ffi:
+    path: ../cbl_ffi
+  cbl_flutter:
+    path: ../cbl_flutter
+  cbl_flutter_ee:
+    path: ../cbl_flutter_ee
   flutter:
     sdk: flutter
   flutter_test:
@@ -28,7 +33,3 @@ dependency_overrides:
     path: ../cbl_flutter_ee
   cbl_flutter_platform_interface:
     path: ../cbl_flutter_platform_interface
-  cbl_libcblite_api:
-    path: ../cbl_libcblite_api
-  cbl_libcblitedart_api:
-    path: ../cbl_libcblitedart_api

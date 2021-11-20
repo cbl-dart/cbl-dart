@@ -77,33 +77,9 @@ function configureFlutter() {
 }
 
 function bootstrapPackage() {
-    requireEnvVar EMBEDDER
     requireEnvVar TEST_PACKAGE
 
-    local noMelos=""
-    if [[ " $* " =~ " --no-melos " ]]; then
-        noMelos="true"
-    fi
-
-    case "$embedder" in
-    standalone)
-        if [[ "$noMelos" == "true" ]]; then
-            cd "$testPackageDir"
-            dart pub get
-        else
-            $melosBin bootstrap --scope "$testPackage"
-        fi
-        ;;
-    flutter)
-        # `flutter pub get` creates some files which `melos bootstrap` doesn't.
-        cd "$testPackageDir"
-        flutter pub get
-
-        if [[ "$noMelos" != "true" ]]; then
-            $melosBin bootstrap --scope "$testPackage"
-        fi
-        ;;
-    esac
+    ./tools/dev-tools.sh bootstrapPackage "$testPackage"
 }
 
 function startCouchbaseServices() {

@@ -2,21 +2,41 @@
 
 set -e
 
+case "$(uname)" in
+MINGW* | CYGWIN* | MSYS*)
+    melosBin="melos.bat"
+    ;;
+*)
+    melosBin="melos"
+    ;;
+esac
+
 editions=(community enterprise)
 buildModes=(debug release)
 targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 nativeDir="$projectDir/native"
+packagesDir="$projectDir/packages"
+nonMelosDartPackages=(
+    cbl_e2e_tests
+    cbl_e2e_tests_standalone_dart
+    cbl_flutter_prebuilt
+)
+nonMelosFlutterPackages=(
+    cbl_e2e_tests_flutter
+    cbl_flutter_local
+    cbl_flutter_prebuilt_e2e_tests
+)
 couchbaseLiteCPrebuiltDir="$nativeDir/vendor/couchbase-lite-C-prebuilt"
 couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 couchbaseLiteDartDir="$nativeDir/couchbase-lite-dart"
 couchbaseLiteDartBuildDir="$couchbaseLiteDartDir/build"
 couchbaseLiteDartVersion="$(cat "$couchbaseLiteDartDir/CouchbaseLiteDart.version")"
-cblE2eTestsStandaloneDartDir="$projectDir/packages/cbl_e2e_tests_standalone_dart"
+cblE2eTestsStandaloneDartDir="$packagesDir/cbl_e2e_tests_standalone_dart"
 cblE2eTestsStandaloneDartLibDir="$cblE2eTestsStandaloneDartDir/lib"
 cblE2eTestsStandaloneDartBinDir="$cblE2eTestsStandaloneDartDir/bin"
-cblFlutterLocalDir="$projectDir/packages/cbl_flutter_local"
+cblFlutterLocalDir="$packagesDir/cbl_flutter_local"
 cblFlutterLocalAndroidJniLibsDir="$cblFlutterLocalDir/android/src/main/jniLibs"
 cblFlutterLocalIosFrameworksDir="$cblFlutterLocalDir/ios/Frameworks"
 cblFlutterLocalMacosLibrariesDir="$cblFlutterLocalDir/macos/Libraries"
@@ -136,6 +156,54 @@ function prepareNativeLibraries() {
         cp -L "$couchbaseLiteDartBuildDir/windows/libcblitedart-"*"/bin/cblitedart"* "$cblFlutterLocalWindowsBinDir"
         ;;
     esac
+}
+
+function bootstrapPackage() {
+    local package="$1"
+    local packageDir="$packagesDir/$package"
+
+    # If package is nonMelosDartPackages, bootstrap it with dart.
+    if [[ " ${nonMelosDartPackages[@]} " =~ " $package " ]]; then
+        echo "Bootstrapping $package with dart"
+        dart pub get -C "$packageDir"
+        return
+    fi
+
+    # If package is nonMelosFlutterPackages, bootstrap it with flutter.
+    if [[ " ${nonMelosFlutterPackages[@]} " =~ " $package " ]]; then
+        echo "Bootstrapping $package with flutter"
+        cd "$packageDir"
+        flutter pub get
+        return
+    fi
+
+    # Package must be managed by melos, so bootstrap it with melos.
+    echo "Bootstrapping $package with melos"
+    # We first need to run flutter pub get in the package to generated flutter
+    # sepecific files.
+    cd "$packageDir"
+    flutter pub get
+    $melosBin bootstrap --scope "$package"
+}
+
+function bootstrap() {
+    # We first need to run flutter pub get in the melos managed flutter package,
+    # to generated flutter sepecific files.
+    $melosBin run flutter:pubGet
+    $melosBin bootstrap
+
+    for package in ${nonMelosDartPackages[@]} ${nonMelosFlutterPackages[@]}; do
+        bootstrapPackage $package
+    done
+}
+
+function analyze() {
+    $melosBin run analyze
+
+    for package in ${nonMelosDartPackages[@]} ${nonMelosFlutterPackages[@]}; do
+        cd "$packagesDir/$package"
+        dart analyze --fatal-infos
+    done
 }
 
 "$@"
