@@ -79,10 +79,10 @@ jobs:
         run: dart pub global activate melos ${{ env.melos-version }}
 
       - name: Bootstrap Dart packages
-        run: melos bootstrap
+        run: ./tools/dev-tools.sh bootstrap
 
       - name: Analyze code
-        run: melos run analyze
+        run: ./tools/dev-tools.sh analyze
 
   test-dart-unit:
     name: Dart unit tests

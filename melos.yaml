@@ -3,7 +3,11 @@ repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/**
 ignore:
+  - packages/cbl_e2e_tests*/*
   - packages/cbl_flutter_?e/*
+  - packages/cbl_flutter_local/*
+  - packages/cbl_flutter_prebuilt*/*
+  - packages/cbl_*_api/*
 command:
   version:
     linkToCommits: true
@@ -25,7 +29,7 @@ scripts:
 
   formatting:check:
     description: Formats all Dart files. Fails when files were changed.
-    run: melos exec -- dart format --set-exit-if-changed .
+    run: dart format --set-exit-if-changed .
 
   analyze:
     description: Analyzes all Dart files.
