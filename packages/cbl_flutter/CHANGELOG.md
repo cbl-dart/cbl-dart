@@ -1,3 +1,8 @@
+## 1.0.0-beta.10
+
+ - **FEAT**: add support for Windows for `cbl_flutter` (#249). ([b8d2115e](https://github.com/cbl-dart/cbl-dart/commit/b8d2115ed04dcc85d77f5b38211c236c26fe54b5))
+ - **FEAT**: add support for Windows for `cbl_dart` (#248). ([62093519](https://github.com/cbl-dart/cbl-dart/commit/620935196a8d23d0fa517e2a074ce078d5e13a0c))
+
 ## 1.0.0-beta.9
 
  - **FEAT**: add `cbl_dart` package (#230). ([09f3da5e](https://github.com/cbl-dart/cbl-dart/commit/09f3da5eef02b2d0543f0653f83676a24648ccd9))

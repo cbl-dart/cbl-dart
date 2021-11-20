@@ -1,3 +1,10 @@
+## 0.7.0-beta.9
+
+ - **REFACTOR**: improve coverage (#241). ([a5de00d9](https://github.com/cbl-dart/cbl-dart/commit/a5de00d97ff3b93baab9e373bd70a007bb11dd3e))
+ - **FEAT**: improve native libraries configuration (#247). ([619ca82c](https://github.com/cbl-dart/cbl-dart/commit/619ca82cd8a239dbd90bb37dd00802d0ed53ade0))
+ - **FEAT**: build `libcblitedart` for Windows (#244). ([445a4b66](https://github.com/cbl-dart/cbl-dart/commit/445a4b661d85f98155c9609cd69eb82a0f4b46c2))
+ - **CHORE**: cut `1.0.0-beta.5` for `cbl_libcblitedart_api`. ([8417a3e0](https://github.com/cbl-dart/cbl-dart/commit/8417a3e01a6873d1dac8b832cefa521570799014))
+
 ## 0.7.0-beta.8
 
  - **FEAT**: add logging breadcrumbs to Sentry Native SDK (#234). ([5b76eac4](https://github.com/cbl-dart/cbl-dart/commit/5b76eac490c6fe19c4e60ac6dfc8e73c232e105c))
