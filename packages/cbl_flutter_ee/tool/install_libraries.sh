@@ -13,7 +13,7 @@ trap 'error "${BASH_SOURCE[0]}" "${LINENO}"' ERR
 case "$(uname)" in
 MINGW* | CYGWIN* | MSYS*)
     # Use bsd tar, which comes with Windows and not gnu tar from git-bash.
-    TAR="c:/Windows/system32/tar.exe"
+    TAR="$SYSTEMROOT\system32\tar.exe"
     ;;
 *)
     TAR="tar"
