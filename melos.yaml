@@ -2,6 +2,8 @@ name: cbl_dart
 repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/**
+ignore:
+  - packages/cbl_flutter_?e/*
 command:
   version:
     linkToCommits: true
