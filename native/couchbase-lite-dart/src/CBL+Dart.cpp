@@ -225,11 +225,13 @@ static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
 
 static void CBLDart_LogCallback(CBLLogDomain domain, CBLLogLevel level,
                                 FLString message) {
+  std::shared_lock lock(loggingMutex);
+
   if (logSentryBreadcrumbsEnabled) {
     CBLDart_LogSentryBreadcrumb(domain, level, message);
   }
 
-  if (level >= logCallbackLevel) {
+  if (logCallback && level >= logCallbackLevel) {
     CBLDart_CallDartLogCallback(domain, level, message);
   }
 }
@@ -258,8 +260,6 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
 
 static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
                                         FLString message) {
-  std::shared_lock lock(loggingMutex);
-
   Dart_CObject domain_;
   domain_.type = Dart_CObject_kInt32;
   domain_.value.as_int32 = static_cast<int32_t>(domain);
