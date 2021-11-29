@@ -1,8 +1,9 @@
+// ignore_for_file: lines_longer_than_80_chars, avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:meta/meta.dart';
 
 import '../database/blob_store.dart';
 import '../database/database.dart';
@@ -32,21 +33,25 @@ const blobContentTypeProperty = 'content_type';
 /// object. The data itself is stored externally to the document, keyed by the
 /// digest.
 ///
+/// The [digest] of a Blob is only available after it has been saved to a
+/// [Database]. If a Blob is part of a [Document], it is automatically saved
+/// when that document is being saved. Alternatively, a Blob can also be saved
+/// explicitly, with [Database.saveBlob].
+///
 /// {@category Document}
-/// {@category Document}
-@immutable
 abstract class Blob {
   /// Creates a [Blob] with the given in-memory data.
   factory Blob.fromData(String contentType, Uint8List data) =>
       BlobImpl.fromData(contentType, data);
 
   /// Creates a [Blob] from a [stream] of chunks of data.
-  static Future<Blob> fromStream(
-    String contentType,
-    Stream<Uint8List> stream,
-    Database database,
-  ) =>
-      BlobImpl.fromStream(contentType, stream, database);
+  ///
+  /// Usually, an unsaved [Blob] is saved when a [Document] that contains it is
+  /// saved. This is not possible for [Blob]s created from a [stream],
+  /// when the [Document] is being saved into a [SyncDatabase]. In this case,
+  /// the [Blob] must be saved explicitly, with [Database.saveBlob].
+  factory Blob.fromStream(String contentType, Stream<Uint8List> stream) =>
+      BlobImpl.fromStream(contentType, stream);
 
   /// Gets the contents of this [Blob] as a block of memory.
   ///
@@ -72,22 +77,41 @@ abstract class Blob {
   /// identifies it.
   String? get digest;
 
-  /// The metadata associated with this [Blob].
+  /// The metadata representation of this [Blob].
+  ///
+  /// Blob metadata has the following properties:
+  ///
+  /// {@template cbl.Blob.metadataTable}
+  /// | Property     | Type         | Description                                   | Required |
+  /// |:-------------|:-------------|:----------------------------------------------|:---------|
+  /// | @type        | const "blob" | Marks dictionary as containing Blob metadata. | Yes      |
+  /// | content_type | string       | Content type ex. text/plain.                  | No       |
+  /// | length       | int          | Length of the Blob in bytes.                  | No       |
+  /// | digest       | string       | Cryptographic digest of the Blob’s content.   | Yes      |
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///   - [isBlob] to check if a [Map] contains valid Blob metadata.
   Map<String, Object?> get properties;
 
   /// Returns this blob's JSON representation.
   String toJson();
 
-  /// Wether a plain Dart [Map] represents a [Blob].
+  /// Whether a plain Dart [Map] contains valid [Blob] metadata.
+  ///
+  /// See also:
+  ///
+  ///   - [properties] for what is considered valid metadata.
   static bool isBlob(Map<String, Object?> properties) {
     if (!properties.containsKey(blobDigestProperty) ||
         properties[blobDigestProperty] is! String ||
         !properties.containsKey(cblObjectTypeProperty) ||
         properties[cblObjectTypeProperty] != cblObjectTypeBlob ||
-        !properties.containsKey(blobContentTypeProperty) ||
-        properties[blobContentTypeProperty] is! String ||
-        !properties.containsKey(blobLengthProperty) ||
-        properties[blobLengthProperty] is! int) {
+        (properties.containsKey(blobContentTypeProperty) &&
+            properties[blobContentTypeProperty] is! String) ||
+        (properties.containsKey(blobLengthProperty) &&
+            properties[blobLengthProperty] is! int)) {
       return false;
     }
     return true;
@@ -102,6 +126,10 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       : _contentType = contentType,
         _length = data.length,
         _content = data;
+
+  BlobImpl.fromStream(String contentType, Stream<Uint8List> stream)
+      : _contentType = contentType,
+        _contentStream = stream;
 
   BlobImpl.fromProperties(
     Map<String, Object?> properties, {
@@ -118,23 +146,10 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       throw ArgumentError.value(
         properties,
         'properties',
-        'Blob loaded from database has neither the `digest` nor the `data` '
+        'Blob loaded from Database has neither the `digest` nor the `data` '
             'property.',
       );
     }
-  }
-
-  static Future<Blob> fromStream(
-    String contentType,
-    Stream<Uint8List> stream,
-    Database database,
-  ) async {
-    final blobStore = (database as BlobStoreHolder).blobStore;
-    final properties = await blobStore.saveBlobFromStream(
-      contentType,
-      stream.map((list) => list.toData()),
-    );
-    return BlobImpl.fromProperties(properties, database: database);
   }
 
   /// Max size of data that will be cached in memory with the [Blob].
@@ -144,9 +159,10 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobStore? get _blobStore => (_database as BlobStoreHolder?)?.blobStore;
 
   Uint8List? _content;
+  Stream<Uint8List>? _contentStream;
 
   final String? _contentType;
-  final int _length;
+  int? _length;
   String? _digest;
 
   @override
@@ -166,6 +182,14 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     final content = _content;
     if (content != null) {
       return Stream.value(content);
+    }
+
+    final contentStream = _contentStream;
+    if (contentStream != null) {
+      if (contentStream is! RepeatableStream) {
+        _contentStream = RepeatableStream(contentStream);
+      }
+      return _contentStream!;
     }
 
     if (_digest != null && _blobStore != null) {
@@ -195,19 +219,17 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       return stream;
     }
 
-    _throwNotSavedError("Cannot load blob's content.");
+    _throwNotSavedError("Cannot load Blob's content.");
   }
 
   @override
-  Map<String, Object?> get properties => {
-        if (_contentType != null) blobContentTypeProperty: _contentType,
-        blobLengthProperty: _length,
-        if (_digest != null) blobDigestProperty: _digest,
-      };
+  Map<String, Object?> get properties => _blobProperties();
 
   Map<String, Object?> _blobProperties({bool mayIncludeData = false}) => {
         cblObjectTypeProperty: cblObjectTypeBlob,
-        ...properties,
+        if (_contentType != null) blobContentTypeProperty: _contentType,
+        if (_length != null) blobLengthProperty: _length,
+        if (_digest != null) blobDigestProperty: _digest,
         if (mayIncludeData && _digest == null) blobDataProperty: _content,
       };
 
@@ -225,8 +247,6 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
     final context = (extraInfo is FleeceEncoderContext) ? extraInfo : null;
 
     void writeProperties(Map<String, Object?> properties) {
-      _digest = properties[blobDigestProperty] as String?;
-
       final blobProperties = _blobProperties(
         mayIncludeData: context?.encodeQueryParameter ?? false,
       );
@@ -241,28 +261,68 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
     if (context != null && context.saveExternalData) {
       final database = context.database;
+
       if (database != null) {
-        assertMatchingDatabase(_database, database, 'Blob');
-        _database = database;
-
-        if (_digest == null) {
-          assert(_content != null);
-
-          final blobStore = _blobStore!;
-          if (blobStore is SyncBlobStore) {
-            return blobStore
-                .saveBlobFromDataSync(_contentType!, _content!.toData())
-                .let(writeProperties);
-          } else {
-            return blobStore
-                .saveBlobFromData(_contentType!, _content!.toData())
-                .then(writeProperties);
-          }
-        }
+        return ensureIsInstalled(database).then(writeProperties);
       }
     }
 
     writeProperties(_blobProperties());
+  }
+
+  /// Ensures that this Blob is installed in [database] and returns the Blobs
+  /// metadata.
+  ///
+  /// If this Blob has a [digest] it is assumed that the Blob is installed.
+  ///
+  /// If [allowFromStreamForSyncDatabase] is `true` and this Blob was created
+  /// from a [Stream] and the database is a [SyncDatabase] it will be installed
+  /// and the result will be a Future. Otherwise a [StateError] is thrown.
+  FutureOr<Map<String, Object?>> ensureIsInstalled(
+    Database database, {
+    bool allowFromStreamForSyncDatabase = false,
+  }) {
+    assertMatchingDatabase(_database, database, 'Blob');
+    _database = database;
+
+    Map<String, Object?> updateProperties(Map<String, Object?> metadata) {
+      _digest = metadata[blobDigestProperty] as String?;
+      _length = metadata[blobLengthProperty] as int?;
+      return metadata;
+    }
+
+    if (_digest == null) {
+      assert(_content != null || _contentStream != null);
+
+      final blobStore = _blobStore!;
+
+      if (_content != null) {
+        if (blobStore is SyncBlobStore) {
+          return blobStore
+              .saveBlobFromDataSync(
+                _contentType!,
+                _content!.toData(),
+              )
+              .let(updateProperties);
+        } else {
+          return blobStore
+              .saveBlobFromData(_contentType!, _content!.toData())
+              .then(updateProperties);
+        }
+      } else {
+        if (blobStore is SyncBlobStore && !allowFromStreamForSyncDatabase) {
+          _throwFromStreamNotAllowedError();
+        }
+
+        final stream = _contentStream!.map((chunk) => chunk.toData());
+        _contentStream = null;
+        return blobStore
+            .saveBlobFromStream(_contentType!, stream)
+            .then(updateProperties);
+      }
+    }
+
+    return _blobProperties();
   }
 
   @override
@@ -300,22 +360,42 @@ class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   @override
   String toString() {
     final contentType = _contentType != null ? '$_contentType; ' : '';
-    final length = '${((_length + 512) / 1024).toStringAsFixed(1)} KB';
+    final length = _length != null
+        ? '${((_length! + 512) / 1024).toStringAsFixed(1)} KB'
+        : '? KB';
     return 'Blob($contentType$length)';
   }
 
-  bool get _shouldCacheContent => _length < _maxCachedContentLength;
+  bool get _shouldCacheContent => _length! <= _maxCachedContentLength;
 
   Never _throwNotSavedError(String message) {
     throw StateError(
-      '$message Save the document, containing the blob, first.',
+      '$message Save the Blob or a Document containing the Blob, first.',
+    );
+  }
+
+  Never _throwFromStreamNotAllowedError() {
+    throw StateError(
+      'Blobs created from Streams cannot be saved automatically, when the '
+      'containing Document is saved into a SyncDatabase. '
+      'Use SyncDatabase.saveBlob to save the Blob first.',
     );
   }
 
   Never _throwNotFoundError() {
     throw DatabaseException(
-      'Could not find blob in $_database: $_blobProperties',
+      'Could not find Blob in $_database: $_blobProperties',
       DatabaseErrorCode.notFound,
+    );
+  }
+}
+
+void checkBlobMetadata(Map<String, Object?> properties) {
+  if (!Blob.isBlob(properties)) {
+    throw ArgumentError.value(
+      properties,
+      'properties',
+      'does not contain valid Blob metadata',
     );
   }
 }

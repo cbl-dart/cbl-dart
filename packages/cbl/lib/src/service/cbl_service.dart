@@ -271,6 +271,7 @@ class CblService {
       ..addCallEndpoint(_addDocumentChangeListener)
       ..addCallEndpoint(_deleteIndex)
       ..addCallEndpoint(_createIndex)
+      ..addCallEndpoint(_blobExists)
       ..addStreamEndpoint(_readBlob)
       ..addCallEndpoint(_saveBlob)
       ..addCallEndpoint(_createQuery)
@@ -469,6 +470,10 @@ class CblService {
 
   void _deleteIndex(DeleteIndex request) =>
       _getDatabaseById(request.databaseId).deleteIndex(request.name);
+
+  bool _blobExists(BlobExists request) => _getDatabaseById(request.databaseId)
+      .blobStore
+      .blobExists(request.properties);
 
   Stream<Data> _readBlob(ReadBlob request) =>
       _getDatabaseById(request.databaseId)

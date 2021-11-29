@@ -10,6 +10,13 @@ class ProxyBlobStore implements BlobStore {
   final ProxyDatabase database;
 
   @override
+  Future<bool> blobExists(Map<String, Object?> properties) =>
+      database.channel.call(BlobExists(
+        databaseId: database.objectId,
+        properties: properties,
+      ));
+
+  @override
   Stream<Data>? readBlob(Map<String, Object?> properties) =>
       database.channel.stream(ReadBlob(
         databaseId: database.objectId,

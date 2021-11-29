@@ -92,6 +92,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
       ..addSerializableCodec('CreateIndex', CreateIndex.deserialize)
       ..addSerializableCodec('DeleteIndex', DeleteIndex.deserialize)
+      ..addSerializableCodec('BlobExists', BlobExists.deserialize)
       ..addSerializableCodec('ReadBlob', ReadBlob.deserialize)
       ..addSerializableCodec('SaveBlob', SaveBlob.deserialize)
       ..addSerializableCodec('ReadBlobUpload', ReadBlobUpload.deserialize)
@@ -1053,6 +1054,31 @@ class DeleteIndex implements Request<Null> {
       DeleteIndex(
         databaseId: map.getAs('databaseId'),
         name: map.getAs('name'),
+      );
+}
+
+class BlobExists implements Request<bool> {
+  BlobExists({
+    required this.databaseId,
+    required this.properties,
+  });
+
+  final int databaseId;
+  final StringMap properties;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'properties': properties,
+      };
+
+  static BlobExists deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      BlobExists(
+        databaseId: map.getAs('databaseId'),
+        properties: map.getAs('properties'),
       );
 }
 

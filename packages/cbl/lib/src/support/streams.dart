@@ -291,3 +291,82 @@ class ListenerStream<T> extends AsyncListenStream<T> {
             cancelOnError: cancelOnError,
           );
 }
+
+class RepeatableStream<T> extends Stream<T> {
+  RepeatableStream(this._source);
+
+  final Stream<T> _source;
+  // ignore: cancel_subscriptions
+  StreamSubscription<T>? _sourceSub;
+  var _sourceDone = false;
+  final List<T> _sourceChunks = <T>[];
+  late final Object? _sourceError;
+  late final StackTrace? _sourceStackTrace;
+  final List<MultiStreamController<T>> _destinations = [];
+
+  late final Stream<T> _stream = Stream.multi((destination) {
+    _sourceChunks.forEach(destination.add);
+
+    if (!_sourceDone) {
+      _destinations.add(destination);
+
+      destination.onCancel = () {
+        _destinations.remove(destination);
+
+        if (!_sourceDone && _destinations.isEmpty) {
+          _sourceSub!.pause();
+        }
+      };
+
+      _sourceSub ??= _source.listen((chunk) {
+        _sourceChunks.add(chunk);
+
+        for (final controller in _destinations) {
+          controller.add(chunk);
+        }
+      }, onDone: () {
+        _sourceDone = true;
+        _sourceSub = null;
+        _sourceError = null;
+        _sourceStackTrace = null;
+
+        for (final controller in _destinations) {
+          controller.close();
+        }
+
+        _destinations.clear();
+        // ignore: avoid_types_on_closure_parameters
+      }, onError: (Object error, StackTrace stackTrace) {
+        _sourceDone = true;
+        _sourceSub = null;
+        _sourceError = error;
+        _sourceStackTrace = stackTrace;
+
+        for (final controller in _destinations) {
+          controller.addError(error, stackTrace);
+        }
+      });
+
+      _sourceSub!.resume();
+    } else {
+      if (_sourceError != null) {
+        destination.addError(_sourceError!, _sourceStackTrace);
+      }
+      destination.close();
+    }
+  });
+
+  @override
+  StreamSubscription<T> listen(
+    void Function(T event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) =>
+      _stream.listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
+}
