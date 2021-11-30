@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/support/utils.dart';
@@ -680,6 +681,52 @@ void main() {
           expect(await db.indexes, ['a']);
         },
       );
+    });
+
+    group('Blob', () {
+      apiTest('save and get blob from data', () async {
+        final db = await openTestDatabase();
+        final blob = Blob.fromData('', Uint8List.fromList([1, 2, 3]));
+        expect(blob.digest, isNull);
+        await db.saveBlob(blob);
+        expect(blob.digest, isNotNull);
+
+        final loadedBlob = await db.getBlob(blob.properties);
+        expect(loadedBlob, blob);
+        expect(await loadedBlob!.content(), await blob.content());
+      });
+
+      apiTest('save and get blob from stream', () async {
+        final db = await openTestDatabase();
+        final blob =
+            Blob.fromStream('', Stream.value(Uint8List.fromList([1, 2, 3])));
+        expect(blob.digest, isNull);
+        expect(blob.length, isNull);
+        await db.saveBlob(blob);
+        expect(blob.digest, isNotNull);
+        expect(blob.length, isNotNull);
+
+        final loadedBlob = await db.getBlob(blob.properties);
+        expect(loadedBlob, blob);
+        expect(await loadedBlob!.content(), await blob.content());
+      });
+
+      apiTest(
+        'saveBlob throws when using blob with multiple databases',
+        () async {
+          final dbA = await openTestDatabase(name: 'a');
+          final dbB = await openTestDatabase(name: 'b');
+          final blob =
+              Blob.fromStream('', Stream.value(Uint8List.fromList([1, 2, 3])));
+          await dbA.saveBlob(blob);
+          expect(() => dbB.saveBlob(blob), throwsStateError);
+        },
+      );
+
+      apiTest('getBlob throws when given metadata is invalid', () async {
+        final db = await openTestDatabase();
+        expect(() => db.getBlob({}), throwsArgumentError);
+      });
     });
 
     group('Scenarios', () {

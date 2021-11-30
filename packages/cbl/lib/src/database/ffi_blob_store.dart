@@ -48,6 +48,21 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   }
 
   @override
+  bool blobExists(Map<String, Object?> properties) {
+    final dict = MutableDict(properties);
+    final cblBlob = runNativeCalls(
+        () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()));
+
+    if (cblBlob == null) {
+      return false;
+    }
+
+    cblBindings.base.releaseRefCounted(cblBlob.cast());
+
+    return true;
+  }
+
+  @override
   Data? readBlobSync(Map<String, Object?> properties) =>
       _getBlob(properties)?.let((it) => it.native.call(_blobBindings.content));
 

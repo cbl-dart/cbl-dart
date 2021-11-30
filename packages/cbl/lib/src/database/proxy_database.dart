@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../document.dart';
+import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/fragment.dart';
 import '../document/proxy_document.dart';
@@ -184,6 +185,18 @@ class ProxyDatabase extends ProxyObject
   @override
   Future<void> purgeDocumentById(String id) =>
       use(() => channel.call(PurgeDocument(objectId, id)));
+
+  @override
+  Future<void> saveBlob(covariant BlobImpl blob) =>
+      use(() => blob.ensureIsInstalled(this));
+
+  @override
+  Future<Blob?> getBlob(Map<String, Object?> properties) => use(() async {
+        checkBlobMetadata(properties);
+        if (await blobStore.blobExists(properties)) {
+          return BlobImpl.fromProperties(properties, database: this);
+        }
+      });
 
   @override
   Future<void> inBatch(FutureOr<void> Function() fn) => use(() async {

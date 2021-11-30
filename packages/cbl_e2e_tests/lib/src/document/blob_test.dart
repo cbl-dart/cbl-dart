@@ -25,6 +25,7 @@ void main() {
         expect(blob.length, fixedTestContent.length);
         expect(blob.digest, isNull);
         expect(blob.properties, {
+          '@type': 'blob',
           'content_type': contentType,
           'length': fixedTestContent.length,
         });
@@ -57,8 +58,8 @@ void main() {
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
-            "Cannot load blob's content. "
-                'Save the document, containing the blob, first.',
+            "Cannot load Blob's content. "
+                'Save the Blob or a Document containing the Blob, first.',
           )),
         );
         expect(
@@ -66,8 +67,8 @@ void main() {
           throwsA(isStateError.having(
             (it) => it.message,
             'message',
-            "Cannot load blob's content. "
-                'Save the document, containing the blob, first.',
+            "Cannot load Blob's content. "
+                'Save the Blob or a Document containing the Blob, first.',
           )),
         );
       });
@@ -82,6 +83,14 @@ void main() {
 
       final docB = MutableDocument({'blob': blob});
       expect(() => db.saveDocument(docB), throwsStateError);
+    });
+
+    test('throws when saving document with stream blob into sync db', () {
+      final db = openSyncTestDatabase();
+      final blob =
+          Blob.fromStream(contentType, Stream.value(randomTestContent()));
+      final doc = MutableDocument({'blob': blob});
+      expect(() => db.saveDocument(doc), throwsStateError);
     });
 
     apiTest(
@@ -101,20 +110,15 @@ void main() {
             break;
           case WriteBlob.properties:
             final blob = Blob.fromData(contentType, content);
-            await db.saveDocument(MutableDocument({'blob': blob}));
-            doc['blob'].value = <String, Object?>{
-              '@type': 'blob',
-              'digest': blob.digest,
-              'length': blob.length,
-              'content_type': blob.contentType,
-            };
+            await db.saveBlob(blob);
+            doc['blob'].value = blob.properties;
             break;
           case WriteBlob.stream:
-            _writeBlob = await Blob.fromStream(
-              contentType,
-              Stream.value(content),
-              db,
-            );
+            _writeBlob = Blob.fromStream(contentType, Stream.value(content));
+
+            if (api.value == Api.sync) {
+              await db.saveBlob(_writeBlob);
+            }
             break;
         }
 
@@ -212,10 +216,7 @@ void main() {
 
       // Blobs with same digest are equal.
       a = testBlob;
-      b = BlobImpl.fromProperties({
-        cblObjectTypeProperty: cblObjectTypeBlob,
-        ...testBlob.properties,
-      });
+      b = BlobImpl.fromProperties(testBlob.properties);
       expect(a, equality(b));
     });
 
@@ -258,6 +259,37 @@ void main() {
         }).toString(),
         'Blob(0.5 KB)',
       );
+    });
+
+    test('isBlob', () {
+      final isBlob = predicate<Map<String, Object?>>(Blob.isBlob, 'is Blob');
+
+      expect(<String, Object?>{}, isNot(isBlob));
+      expect({'@type': 'blob'}, isNot(isBlob));
+      expect({'digest': ''}, isNot(isBlob));
+      expect({'@type': 0, 'digest': ''}, isNot(isBlob));
+      expect({'@type': '', 'digest': ''}, isNot(isBlob));
+      expect({'@type': 'blob', 'digest': null}, isNot(isBlob));
+      expect({'@type': 'blob', 'digest': '', 'length': '0'}, isNot(isBlob));
+      expect({'@type': 'blob', 'digest': '', 'content_type': 0}, isNot(isBlob));
+
+      expect({'@type': 'blob', 'digest': ''}, isBlob);
+      expect({
+        '@type': 'blob',
+        'digest': '',
+        'content_type': 'text/plain',
+      }, isBlob);
+      expect({
+        '@type': 'blob',
+        'digest': '',
+        'length': 0,
+      }, isBlob);
+      expect({
+        '@type': 'blob',
+        'digest': '',
+        'content_type': 'text/plain',
+        'length': 0,
+      }, isBlob);
     });
   });
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
 import '../document/fragment.dart';
@@ -87,7 +88,7 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  late final blobStore = FfiBlobStore(this);
+  late final SyncBlobStore blobStore = FfiBlobStore(this);
 
   late final _listenerTokens = ListenerTokenRegistry(this);
 
@@ -193,6 +194,18 @@ class FfiDatabase extends CBLDatabaseObject
   @override
   void purgeDocumentById(String id) => useSync(() {
         call((pointer) => _bindings.purgeDocumentByID(pointer, id));
+      });
+
+  @override
+  Future<void> saveBlob(covariant BlobImpl blob) => use(
+      () => blob.ensureIsInstalled(this, allowFromStreamForSyncDatabase: true));
+
+  @override
+  Blob? getBlob(Map<String, Object?> properties) => useSync(() {
+        checkBlobMetadata(properties);
+        if (blobStore.blobExists(properties)) {
+          return BlobImpl.fromProperties(properties, database: this);
+        }
       });
 
   @override

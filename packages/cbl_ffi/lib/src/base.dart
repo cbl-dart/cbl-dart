@@ -296,6 +296,10 @@ typedef _CBL_Retain = Pointer<CBLRefCounted> Function(
   Pointer<CBLRefCounted> refCounted,
 );
 
+typedef _CBL_Release = Pointer<CBLRefCounted> Function(
+  Pointer<CBLRefCounted> refCounted,
+);
+
 // === CBLListener =============================================================
 
 class CBLListenerToken extends Opaque {}
@@ -328,6 +332,9 @@ class BaseBindings extends Bindings {
     _retainRefCounted = libs.cbl.lookupFunction<_CBL_Retain, _CBL_Retain>(
       'CBL_Retain',
     );
+    _releaseRefCounted = libs.cbl.lookupFunction<_CBL_Release, _CBL_Release>(
+      'CBL_Release',
+    );
     _getErrorMessage = libs.cblDart
         .lookupFunction<_CBLDart_CBLError_Message, _CBLDart_CBLError_Message>(
       'CBLDart_CBLError_Message',
@@ -343,6 +350,7 @@ class BaseBindings extends Bindings {
       _bindCBLRefCountedToDartObject;
   late final _CBLDart_SetDebugRefCounted _setDebugRefCounted;
   late final _CBL_Retain _retainRefCounted;
+  late final _CBL_Release _releaseRefCounted;
   late final _CBLDart_CBLError_Message _getErrorMessage;
   late final _CBLListener_Remove _removeListener;
 
@@ -399,6 +407,10 @@ class BaseBindings extends Bindings {
 
   void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
     _retainRefCounted(refCounted);
+  }
+
+  void releaseRefCounted(Pointer<CBLRefCounted> refCounted) {
+    _releaseRefCounted(refCounted);
   }
 
   // coverage:ignore-end

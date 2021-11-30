@@ -10,11 +10,16 @@ abstract class BlobStore {
     Stream<Data> stream,
   );
 
+  FutureOr<bool> blobExists(Map<String, Object?> properties);
+
   Stream<Data>? readBlob(Map<String, Object?> properties);
 }
 
 abstract class SyncBlobStore extends BlobStore {
   Map<String, Object?> saveBlobFromDataSync(String contentType, Data data);
+
+  @override
+  bool blobExists(Map<String, Object?> properties);
 
   Data? readBlobSync(Map<String, Object?> properties);
 }

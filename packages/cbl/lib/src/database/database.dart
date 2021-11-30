@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/fragment.dart';
 import '../log.dart';
@@ -247,6 +248,27 @@ abstract class Database implements ClosableResource {
   /// The purge will __not__ be replicated to other databases.
   FutureOr<void> purgeDocumentById(String id);
 
+  /// Saves a [Blob] directly into this database without associating it with any
+  /// [Document]s.
+  ///
+  /// Note: Blobs that are not associated with any document will be removed
+  /// from the database when compacting the database.
+  FutureOr<void> saveBlob(Blob blob);
+
+  /// Gets a [Blob] using its metadata.
+  ///
+  /// If the blob with the specified metadata doesn’t exist, returns `null`.
+  ///
+  /// If the provided [properties] don't contain valid metadata, an
+  /// [ArgumentError] is thrown.
+  ///
+  /// {@macro cbl.Blob.metadataTable}
+  ///
+  /// See also:
+  ///
+  ///   - [Blob.isBlob] to check if a [Map] contains valid Blob metadata.
+  FutureOr<Blob?> getBlob(Map<String, Object?> properties);
+
   /// Runs a group of database operations in a batch.
   ///
   /// {@template cbl.Database.inBatch}
@@ -467,6 +489,12 @@ abstract class SyncDatabase implements Database {
   @override
   void purgeDocumentById(String id);
 
+  @override
+  Future<void> saveBlob(Blob blob);
+
+  @override
+  Blob? getBlob(Map<String, Object?> properties);
+
   /// Runs a group of database operations in a batch, synchronously.
   ///
   /// {@macro cbl.Database.inBatch}
@@ -565,6 +593,12 @@ abstract class AsyncDatabase implements Database {
 
   @override
   Future<void> purgeDocumentById(String id);
+
+  @override
+  Future<void> saveBlob(Blob blob);
+
+  @override
+  Future<Blob?> getBlob(Map<String, Object?> properties);
 
   @override
   Future<void> inBatch(FutureOr<void> Function() fn);
