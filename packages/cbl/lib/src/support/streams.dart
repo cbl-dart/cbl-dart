@@ -300,8 +300,8 @@ class RepeatableStream<T> extends Stream<T> {
   StreamSubscription<T>? _sourceSub;
   var _sourceDone = false;
   final List<T> _sourceChunks = <T>[];
-  late final Object? _sourceError;
-  late final StackTrace? _sourceStackTrace;
+  Object? _sourceError;
+  StackTrace? _sourceStackTrace;
   final List<MultiStreamController<T>> _destinations = [];
 
   late final Stream<T> _stream = Stream.multi((destination) {
@@ -327,8 +327,6 @@ class RepeatableStream<T> extends Stream<T> {
       }, onDone: () {
         _sourceDone = true;
         _sourceSub = null;
-        _sourceError = null;
-        _sourceStackTrace = null;
 
         for (final controller in _destinations) {
           controller.close();

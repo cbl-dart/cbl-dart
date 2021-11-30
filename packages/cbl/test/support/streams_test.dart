@@ -185,6 +185,62 @@ void main() {
       expect(token.isRemoved, isTrue);
     });
   });
+
+  group('RepeatableStream', () {
+    test('sends events to parallel subscribers', () async {
+      final stream = RepeatableStream(Stream.value('A'));
+      expect(stream, emitsInOrder(<Object>['A', emitsDone]));
+      expect(stream, emitsInOrder(<Object>['A', emitsDone]));
+    });
+
+    test('replay error to parallel subscribers', () async {
+      final stream = RepeatableStream(Stream<void>.error('A'));
+      expect(stream, emitsInOrder(<Object>[emitsError('A'), emitsDone]));
+      expect(stream, emitsInOrder(<Object>[emitsError('A'), emitsDone]));
+    });
+
+    test('replay done to parallel subscriber', () async {
+      final stream = RepeatableStream(const Stream<void>.empty());
+      expect(stream, emitsInOrder(<Object>[emitsDone]));
+      expect(stream, emitsInOrder(<Object>[emitsDone]));
+    });
+
+    test('replay events to late subscribers', () async {
+      final stream = RepeatableStream(Stream.value('A'));
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>['A', emitsDone]),
+      );
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>['A', emitsDone]),
+      );
+    });
+
+    test('replay error to late subscribers', () async {
+      final stream = RepeatableStream(Stream<void>.error('A'));
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>[emitsError('A'), emitsDone]),
+      );
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>[emitsError('A'), emitsDone]),
+      );
+    });
+
+    test('replay done to late subscriber', () async {
+      final stream = RepeatableStream(const Stream<void>.empty());
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>[emitsDone]),
+      );
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>[emitsDone]),
+      );
+    });
+  });
 }
 
 Stream<void> nullSteam() => StreamController<void>().stream;
