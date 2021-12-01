@@ -18,6 +18,14 @@
 
 set -e
 
+TAR=tar
+
+case "$(uname -s)" in
+MINGW* | CYGWIN* | MSYS*)
+    # Use bsd tar, which comes with Windows 10 and not gnu tar from git-bash.
+    TAR="$SYSTEMROOT\system32\tar.exe"
+    ;;
+esac
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 nativeDir="$(cd $scriptDir/.. && pwd)"
 vendorDir="$nativeDir/vendor"
@@ -79,10 +87,19 @@ function _downloadBinaries() {
 
     case "$(_archiveExt $target)" in
     zip)
-        unzip -q "$archiveFile" -d "$installDir"
+        case "$(uname -s)" in
+        MINGW* | CYGWIN* | MSYS*)
+            # Windows 10 does not have unzip available, but has bsdtar which can
+            # unpack zip archives.
+            $TAR -xf "$archiveFile" -C "$installDir"
+            ;;
+        *)
+            unzip -q "$archiveFile" -d "$installDir"
+            ;;
+        esac
         ;;
     tar.gz)
-        tar -xzf "$archiveFile" -C "$installDir"
+        $TAR -xzf "$archiveFile" -C "$installDir"
         ;;
     esac
 }

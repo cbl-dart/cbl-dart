@@ -7,13 +7,12 @@
 
 set -e
 
-case "$(uname)" in
+TAR=tar
+
+case "$(uname -s)" in
 MINGW* | CYGWIN* | MSYS*)
-    # Use bsd tar, which comes with Windows and not gnu tar from git-bash.
+    # Use bsd tar, which comes with Windows 10 and not gnu tar from git-bash.
     TAR="$SYSTEMROOT\system32\tar.exe"
-    ;;
-*)
-    TAR="tar"
     ;;
 esac
 
@@ -65,7 +64,27 @@ function _buildArchive() {
 
     cd "$targetBuildDir"
 
-    $TAR -caf "$archiveFile" "$productDirPrefix"*
+    case "$archiveExt" in
+    zip)
+        case "$(uname -s)" in
+        MINGW* | CYGWIN* | MSYS*)
+            # Windows 10 does not have zip available, but has bsdtar which can
+            # create zip archives.
+            $TAR -caf "$archiveFile" "$productDirPrefix"*
+            ;;
+        *)
+            zip -r "$archiveFile" "$productDirPrefix"*
+            ;;
+        esac
+        ;;
+    tar.gz)
+        $TAR -czf "$archiveFile" "$productDirPrefix"*
+        ;;
+    *)
+        echo "Unknown archive extension: $archiveExt"
+        exit 1
+        ;;
+    esac
 }
 
 release="$1"
