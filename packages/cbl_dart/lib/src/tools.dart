@@ -34,7 +34,28 @@ Future<void> downloadFile(String url, String outputFile) => execute(
 /// Unpacks a zip or tar.gz [archiveFile] into [outputDir].
 Future<void> unpackArchive(String archiveFile, String outputDir) async {
   await Directory(outputDir).create(recursive: true);
-  return execute('tar', ['-xf', archiveFile, '-C', outputDir]);
+
+  final extension = p.extension(archiveFile, 2);
+  switch (extension) {
+    case '.zip':
+      if (Platform.isWindows) {
+        await execute('powershell', [
+          '-NoProfile',
+          '-NonInteractive',
+          '-NoLogo',
+          '-Command',
+          'Expand-Archive -LiteralPath $archiveFile -DestinationPath $outputDir'
+        ]);
+      } else {
+        await execute('unzip', [archiveFile, '-d', outputDir]);
+      }
+      break;
+    case '.tar.gz':
+      await execute('tar', ['-xzf', archiveFile, '-C', outputDir]);
+      break;
+    default:
+      throw Exception('Unknown archive extension: $extension');
+  }
 }
 
 /// Copies the contents of [sourceDir] to [destinationDir].
