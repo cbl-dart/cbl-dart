@@ -1,3 +1,7 @@
+## 1.0.0-beta.5
+
+- **FIX**: fix: fix unpacking of archives and bump provided `libcblitedart`
+
 ## 1.0.0-beta.4
 
 - **FEAT**: Add support for Windows

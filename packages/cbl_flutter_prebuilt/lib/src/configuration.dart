@@ -11,7 +11,7 @@ final packageConfigurations = [
   for (final edition in Edition.values)
     PackageConfiguration(
       name: packageNames[edition]!,
-      version: '1.0.0-beta.4',
+      version: '1.0.0-beta.5',
       edition: edition,
       couchbaseLiteC: const LibraryInfo(
         version: '3.0.0',
