@@ -1,3 +1,10 @@
+## 0.7.0-beta.10
+
+> Note: This release has breaking changes.
+
+ - **CHORE**: bump dependency on `cbl_libcblitedart_api`. ([b3d38d5a](https://github.com/cbl-dart/cbl-dart/commit/b3d38d5afd1ad182ddc6d2152e420becbd626a7d))
+ - **BREAKING** **FEAT**: Add `Database.saveBlob` and `Database.getBlob` (#256). ([ec5d1931](https://github.com/cbl-dart/cbl-dart/commit/ec5d1931a65e5dc569c9e5f8da26a5235afdd4f8))
+
 ## 0.7.0-beta.9
 
  - **REFACTOR**: improve coverage (#241). ([a5de00d9](https://github.com/cbl-dart/cbl-dart/commit/a5de00d97ff3b93baab9e373bd70a007bb11dd3e))
