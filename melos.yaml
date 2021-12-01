@@ -15,9 +15,7 @@ command:
 scripts:
   build:cbl_flutter_prebuilt:
     description: Builds the prebuild packages `cbl_flutter_ce|ee`.
-    run: melos exec -- dart run
-    select-package:
-      scope: cbl_flutter_prebuilt
+    run: cd packages/cbl_flutter_prebuilt && dart run
 
   build:nativeLibraries:
     description: Builds the native libraries for the host target.

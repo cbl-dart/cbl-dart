@@ -10,13 +10,12 @@ error() {
 
 trap 'error "${BASH_SOURCE[0]}" "${LINENO}"' ERR
 
+TAR="tar"
+
 case "$(uname)" in
 MINGW* | CYGWIN* | MSYS*)
-    # Use bsd tar, which comes with Windows and not gnu tar from git-bash.
+    # Use bsd tar, which comes with Windows 10 and not gnu tar from git-bash.
     TAR="$SYSTEMROOT\system32\tar.exe"
-    ;;
-*)
-    TAR="tar"
     ;;
 esac
 
@@ -143,8 +142,26 @@ curl "$(
     --output "$couchbaseLiteDartArchiveFile"
 
 # Unpack archives
-$TAR -xf "$couchbaseLiteCArchiveFile" -C "$tmpDir"
-$TAR -xf "$couchbaseLiteDartArchiveFile" -C "$tmpDir"
+case "$(_archiveExt $target)" in
+zip)
+    case "$(uname -s)" in
+    MINGW* | CYGWIN* | MSYS*)
+        # Windows 10 does not have unzip available, but has bsdtar which can
+        # unpack zip archives.
+        $TAR -xf "$couchbaseLiteCArchiveFile" -C "$tmpDir"
+        $TAR -xf "$couchbaseLiteDartArchiveFile" -C "$tmpDir"
+        ;;
+    *)
+        unzip -q "$couchbaseLiteCArchiveFile" -d "$tmpDir"
+        unzip -q "$couchbaseLiteDartArchiveFile" -d "$tmpDir"
+        ;;
+    esac
+    ;;
+tar.gz)
+    $TAR -xzf "$couchbaseLiteCArchiveFile" -C "$tmpDir"
+    $TAR -xzf "$couchbaseLiteDartArchiveFile" -C "$tmpDir"
+    ;;
+esac
 
 # Move archives into platform directory
 tmpInstallDir="$tmpDir/installDir"
