@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
-import 'package:cbl_flutter_ee/cbl_flutter_ee.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -10,9 +7,6 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('initialize and use Couchbase Lite', (tester) async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      CblFlutterEe.registerWith();
-    }
     await CouchbaseLiteFlutter.init();
 
     final db = await Database.openAsync('init-and-use-test');

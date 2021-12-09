@@ -14,11 +14,9 @@
 library main;
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
-import 'package:cbl_flutter_ce/cbl_flutter_ce.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -286,12 +284,6 @@ late LogMessageRepository logMessageRepository;
 Future<void> initApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // On mobile platforms, `CblFlutterCe` and `CblFlutterEe` currently need to
-  // be registered manually. This is due to a temporary limitation in how
-  // Flutter initializes plugins, and will become obsolete eventually.
-  if (Platform.isIOS || Platform.isAndroid) {
-    CblFlutterCe.registerWith();
-  }
   await CouchbaseLiteFlutter.init();
 
   // Uncomment the line below to reset the database each time the app starts.

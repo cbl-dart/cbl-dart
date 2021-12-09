@@ -61,12 +61,6 @@ operations trying to return an error crash the app.
    import 'package:cbl_flutter_ce/cbl_flutter_ce.dart';
 
    Future<void> initCouchbaseLite() async {
-     // On mobile platforms, `CblFlutterCe` and `CblFlutterEe` currently need to
-     // be registered manually. This is due to a temporary limitation in how Flutter
-     // initializes plugins, and will become obsolete eventually.
-     if (Platform.isIOS || Platform.isAndroid) {
-       CblFlutterCe.registerWith();
-     }
      await CouchbaseLiteFlutter.init();
    }
    ```

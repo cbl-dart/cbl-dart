@@ -9,11 +9,11 @@ on:
       - main
 
 env:
-  flutter-version-stable: '2.5.0'
+  flutter-version-stable: '2.8.0'
   flutter-version-beta: beta
-  dart-version-stable: '2.14.0'
+  dart-version-stable: '2.15.0'
   dart-version-beta: beta
-  melos-version: '1.0.0-dev.10'
+  melos-version: '1.0.0-dev.14'
 
 jobs:
   formatting-dart:
