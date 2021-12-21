@@ -13,7 +13,7 @@ env:
   flutter-version-beta: beta
   dart-version-stable: '2.15.0'
   dart-version-beta: beta
-  melos-version: '1.0.0-dev.14'
+  melos-version: '1.0.0'
 
 jobs:
   formatting-dart:
