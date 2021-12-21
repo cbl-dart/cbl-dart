@@ -93,38 +93,47 @@ class QueryBindings extends Bindings {
     _createQuery = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_CreateQuery_C, _CBLDart_CBLDatabase_CreateQuery>(
       'CBLDart_CBLDatabase_CreateQuery',
+      isLeaf: useIsLeaf,
     );
     _setParameters = libs.cbl
         .lookupFunction<_CBLQuery_SetParameters_C, _CBLQuery_SetParameters>(
       'CBLQuery_SetParameters',
+      isLeaf: useIsLeaf,
     );
     _parameters =
         libs.cbl.lookupFunction<_CBLQuery_Parameters, _CBLQuery_Parameters>(
       'CBLQuery_Parameters',
+      isLeaf: useIsLeaf,
     );
     _execute = libs.cbl.lookupFunction<_CBLQuery_Execute, _CBLQuery_Execute>(
       'CBLQuery_Execute',
+      isLeaf: useIsLeaf,
     );
     _explain = libs.cblDart
         .lookupFunction<_CBLDart_CBLQuery_Explain_C, _CBLDart_CBLQuery_Explain>(
       'CBLDart_CBLQuery_Explain',
+      isLeaf: useIsLeaf,
     );
     _columnCount =
         libs.cbl.lookupFunction<_CBLQuery_ColumnCount_C, _CBLQuery_ColumnCount>(
       'CBLQuery_ColumnCount',
+      isLeaf: useIsLeaf,
     );
     _columnName = libs.cblDart.lookupFunction<_CBLDart_CBLQuery_ColumnName_C,
         _CBLDart_CBLQuery_ColumnName>(
       'CBLDart_CBLQuery_ColumnName',
+      isLeaf: useIsLeaf,
     );
     _addChangeListener = libs.cblDart.lookupFunction<
         _CBLDart_CBLQuery_AddChangeListener_C,
         _CBLDart_CBLQuery_AddChangeListener>(
       'CBLDart_CBLQuery_AddChangeListener',
+      isLeaf: useIsLeaf,
     );
     _copyCurrentResults = libs.cbl.lookupFunction<_CBLQuery_CopyCurrentResults,
         _CBLQuery_CopyCurrentResults>(
       'CBLQuery_CopyCurrentResults',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -216,26 +225,32 @@ class ResultSetBindings extends Bindings {
   ResultSetBindings(Bindings parent) : super(parent) {
     _next = libs.cbl.lookupFunction<_CBLResultSet_Next_C, _CBLResultSet_Next>(
       'CBLResultSet_Next',
+      isLeaf: useIsLeaf,
     );
     _valueAtIndex = libs.cbl.lookupFunction<_CBLResultSet_ValueAtIndex_C,
         _CBLResultSet_ValueAtIndex>(
       'CBLResultSet_ValueAtIndex',
+      isLeaf: useIsLeaf,
     );
     _valueForKey = libs.cblDart.lookupFunction<
         _CBLDart_CBLResultSet_ValueForKey, _CBLDart_CBLResultSet_ValueForKey>(
       'CBLDart_CBLResultSet_ValueForKey',
+      isLeaf: useIsLeaf,
     );
     _resultArray = libs.cbl
         .lookupFunction<_CBLResultSet_ResultArray, _CBLResultSet_ResultArray>(
       'CBLResultSet_ResultArray',
+      isLeaf: useIsLeaf,
     );
     _resultDict = libs.cbl
         .lookupFunction<_CBLResultSet_ResultDict, _CBLResultSet_ResultDict>(
       'CBLResultSet_ResultDict',
+      isLeaf: useIsLeaf,
     );
     _getQuery =
         libs.cbl.lookupFunction<_CBLResultSet_GetQuery, _CBLResultSet_GetQuery>(
       'CBLResultSet_GetQuery',
+      isLeaf: useIsLeaf,
     );
   }
 

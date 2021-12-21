@@ -464,31 +464,39 @@ class ReplicatorBindings extends Bindings {
     _endpointCreateWithUrl = libs.cblDart.lookupFunction<
         _CBLDart_CBLEndpoint_CreateWithURL, _CBLDart_CBLEndpoint_CreateWithURL>(
       'CBLDart_CBLEndpoint_CreateWithURL',
+      isLeaf: useIsLeaf,
     );
     if (libs.enterpriseEdition) {
       _endpointCreateWithLocalDB = libs.cbl.lookupFunction<
-              _CBLDart_CBLEndpoint_CreateWithLocalDB,
-              _CBLDart_CBLEndpoint_CreateWithLocalDB>(
-          'CBLEndpoint_CreateWithLocalDB');
+          _CBLDart_CBLEndpoint_CreateWithLocalDB,
+          _CBLDart_CBLEndpoint_CreateWithLocalDB>(
+        'CBLEndpoint_CreateWithLocalDB',
+        isLeaf: useIsLeaf,
+      );
     }
     _endpointFree =
         libs.cbl.lookupFunction<_CBLEndpoint_Free_C, _CBLEndpoint_Free>(
       'CBLEndpoint_Free',
+      isLeaf: useIsLeaf,
     );
     _authCreatePassword = libs.cblDart.lookupFunction<
         _CBLDart_CBLAuth_CreatePassword, _CBLDart_CBLAuth_CreatePassword>(
       'CBLDart_CBLAuth_CreatePassword',
+      isLeaf: useIsLeaf,
     );
     _authCreateSession = libs.cblDart.lookupFunction<
         _CBLDart_CBLAuth_CreateSession, _CBLDart_CBLAuth_CreateSession>(
       'CBLDart_CBLAuth_CreateSession',
+      isLeaf: useIsLeaf,
     );
     _authFree = libs.cbl.lookupFunction<_CBLAuth_Free_C, _CBLAuth_Free>(
       'CBLAuth_Free',
+      isLeaf: useIsLeaf,
     );
     _create = libs.cblDart.lookupFunction<_CBLDart_CBLReplicator_Create,
         _CBLDart_CBLReplicator_Create>(
       'CBLDart_CBLReplicator_Create',
+      isLeaf: useIsLeaf,
     );
     _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_BindReplicatorToDartObject_C,
@@ -498,40 +506,49 @@ class ReplicatorBindings extends Bindings {
     _start =
         libs.cbl.lookupFunction<_CBLReplicator_Start_C, _CBLReplicator_Start>(
       'CBLReplicator_Start',
+      isLeaf: useIsLeaf,
     );
     _stop = libs.cbl.lookupFunction<_CBLReplicator_Stop_C, _CBLReplicator_Stop>(
       'CBLReplicator_Stop',
+      isLeaf: useIsLeaf,
     );
     _setHostReachable = libs.cbl.lookupFunction<
         _CBLReplicator_SetHostReachable_C, _CBLReplicator_SetHostReachable>(
       'CBLReplicator_SetHostReachable',
+      isLeaf: useIsLeaf,
     );
     _setSuspended = libs.cbl.lookupFunction<_CBLReplicator_SetSuspended_C,
         _CBLReplicator_SetSuspended>(
       'CBLReplicator_SetSuspended',
+      isLeaf: useIsLeaf,
     );
     _status =
         libs.cbl.lookupFunction<_CBLReplicator_Status, _CBLReplicator_Status>(
       'CBLReplicator_Status',
+      isLeaf: useIsLeaf,
     );
     _pendingDocumentIDs = libs.cbl.lookupFunction<
         _CBLReplicator_PendingDocumentIDs, _CBLReplicator_PendingDocumentIDs>(
       'CBLReplicator_PendingDocumentIDs',
+      isLeaf: useIsLeaf,
     );
     _isDocumentPending = libs.cblDart.lookupFunction<
         _CBLDart_CBLReplicator_IsDocumentPending_C,
         _CBLDart_CBLReplicator_IsDocumentPending>(
       'CBLDart_CBLReplicator_IsDocumentPending',
+      isLeaf: useIsLeaf,
     );
     _addChangeListener = libs.cblDart.lookupFunction<
         _CBLDart_CBLReplicator_AddChangeListener_C,
         _CBLDart_CBLReplicator_AddChangeListener>(
       'CBLDart_CBLReplicator_AddChangeListener',
+      isLeaf: useIsLeaf,
     );
     _addDocumentReplicationListener = libs.cblDart.lookupFunction<
         _CBLDart_CBLReplicator_AddDocumentReplicationListener_C,
         _CBLDart_CBLReplicator_AddDocumentReplicationListener>(
       'CBLDart_CBLReplicator_AddDocumentReplicationListener',
+      isLeaf: useIsLeaf,
     );
   }
 

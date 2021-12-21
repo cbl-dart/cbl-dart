@@ -283,26 +283,33 @@ class SlotBindings extends Bindings {
   SlotBindings(Bindings parent) : super(parent) {
     _setNull = libs.cbl.lookupFunction<_FLSlot_SetNull_C, _FLSlot_SetNull>(
       'FLSlot_SetNull',
+      isLeaf: useIsLeaf,
     );
     _setBool = libs.cbl.lookupFunction<_FLSlot_SetBool_C, _FLSlot_SetBool>(
       'FLSlot_SetBool',
+      isLeaf: useIsLeaf,
     );
     _setInt = libs.cbl.lookupFunction<_FLSlot_SetInt_C, _FLSlot_SetInt>(
       'FLSlot_SetInt',
+      isLeaf: useIsLeaf,
     );
     _setDouble =
         libs.cbl.lookupFunction<_FLSlot_SetDouble_C, _FLSlot_SetDouble>(
       'FLSlot_SetDouble',
+      isLeaf: useIsLeaf,
     );
     _setString = libs.cblDart
         .lookupFunction<_CBLDart_FLSlot_SetString_C, _CBLDart_FLSlot_SetString>(
       'CBLDart_FLSlot_SetString',
+      isLeaf: useIsLeaf,
     );
     _setData = libs.cbl.lookupFunction<_FLSlot_SetData_C, _FLSlot_SetData>(
       'FLSlot_SetData',
+      isLeaf: useIsLeaf,
     );
     _setValue = libs.cbl.lookupFunction<_FLSlot_SetValue_C, _FLSlot_SetValue>(
       'FLSlot_SetValue',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -384,10 +391,12 @@ class DocBindings extends Bindings {
     _fromResultData = libs.cblDart.lookupFunction<
         _CBLDart_FLDoc_FromResultData_C, _CBLDart_FLDoc_FromResultData>(
       'CBLDart_FLDoc_FromResultData',
+      isLeaf: useIsLeaf,
     );
     _fromJSON = libs.cblDart
         .lookupFunction<_CBLDart_FLDoc_FromJSON, _CBLDart_FLDoc_FromJSON>(
       'CBLDart_FLDoc_FromJSON',
+      isLeaf: useIsLeaf,
     );
     _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_FLDoc_BindToDartObject_C, _CBLDart_FLDoc_BindToDartObject>(
@@ -396,9 +405,11 @@ class DocBindings extends Bindings {
     _getAllocedData =
         libs.cbl.lookupFunction<_FLDoc_GetAllocedData, _FLDoc_GetAllocedData>(
       'FLDoc_GetAllocedData',
+      isLeaf: useIsLeaf,
     );
     _getRoot = libs.cbl.lookupFunction<_FLDoc_GetRoot, _FLDoc_GetRoot>(
       'FLDoc_GetRoot',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -527,44 +538,56 @@ class ValueBindings extends Bindings {
     );
     _findDoc = libs.cbl.lookupFunction<_FLValue_FindDoc, _FLValue_FindDoc>(
       'FLValue_FindDoc',
+      isLeaf: useIsLeaf,
     );
     _getType = libs.cbl.lookupFunction<_FLValue_GetType_C, _FLValue_GetType>(
       'FLValue_GetType',
+      isLeaf: useIsLeaf,
     );
     _isInteger =
         libs.cbl.lookupFunction<_FLValue_IsInteger_C, _FLValue_IsInteger>(
       'FLValue_IsInteger',
+      isLeaf: useIsLeaf,
     );
     _isDouble = libs.cbl.lookupFunction<_FLValue_IsDouble_C, _FLValue_IsDouble>(
       'FLValue_IsDouble',
+      isLeaf: useIsLeaf,
     );
     _asBool = libs.cbl.lookupFunction<_FLValue_AsBool_C, _FLValue_AsBool>(
       'FLValue_AsBool',
+      isLeaf: useIsLeaf,
     );
     _asInt = libs.cbl.lookupFunction<_FLValue_AsInt_C, _FLValue_AsInt>(
       'FLValue_AsInt',
+      isLeaf: useIsLeaf,
     );
     _asDouble = libs.cbl.lookupFunction<_FLValue_AsDouble_C, _FLValue_AsDouble>(
       'FLValue_AsDouble',
+      isLeaf: useIsLeaf,
     );
     _asString = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_AsString_C, _CBLDart_FLValue_AsString>(
       'CBLDart_FLValue_AsString',
+      isLeaf: useIsLeaf,
     );
     _asData = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_AsData_C, _CBLDart_FLValue_AsData>(
       'CBLDart_FLValue_AsData',
+      isLeaf: useIsLeaf,
     );
     _scalarToString = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_ToString_C, _CBLDart_FLValue_ToString>(
       'CBLDart_FLValue_ToString',
+      isLeaf: useIsLeaf,
     );
     _isEqual = libs.cbl.lookupFunction<_FLValue_IsEqual_C, _FLValue_IsEqual>(
       'FLValue_IsEqual',
+      isLeaf: useIsLeaf,
     );
     _toJson = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_ToJSONX_C, _CBLDart_FLValue_ToJSONX>(
       'CBLDart_FLValue_ToJSONX',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -651,16 +674,20 @@ class ArrayBindings extends Bindings {
   ArrayBindings(Bindings parent) : super(parent) {
     _count = libs.cbl.lookupFunction<_FLArray_Count_C, _FLArray_Count>(
       'FLArray_Count',
+      isLeaf: useIsLeaf,
     );
     _isEmpty = libs.cbl.lookupFunction<_FLArray_IsEmpty_C, _FLArray_IsEmpty>(
       'FLArray_IsEmpty',
+      isLeaf: useIsLeaf,
     );
     _asMutable =
         libs.cbl.lookupFunction<_FLArray_AsMutable, _FLArray_AsMutable>(
       'FLArray_AsMutable',
+      isLeaf: useIsLeaf,
     );
     _get = libs.cbl.lookupFunction<_FLArray_Get_C, _FLArray_Get>(
       'FLArray_Get',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -679,7 +706,7 @@ class ArrayBindings extends Bindings {
   Pointer<FLValue> get(Pointer<FLArray> array, int index) => _get(array, index);
 }
 
-// === MutabelArray ============================================================
+// === MutableArray ============================================================
 
 class FLMutableArray extends Opaque {}
 
@@ -772,44 +799,55 @@ class MutableArrayBindings extends Bindings {
     _mutableCopy =
         libs.cbl.lookupFunction<_FLArray_MutableCopy_C, _FLArray_MutableCopy>(
       'FLArray_MutableCopy',
+      isLeaf: useIsLeaf,
     );
     _new = libs.cbl.lookupFunction<_FLMutableArray_New, _FLMutableArray_New>(
       'FLMutableArray_New',
+      isLeaf: useIsLeaf,
     );
     _getSource = libs.cbl
         .lookupFunction<_FLMutableArray_GetSource, _FLMutableArray_GetSource>(
       'FLMutableArray_GetSource',
+      isLeaf: useIsLeaf,
     );
     _isChanged = libs.cbl
         .lookupFunction<_FLMutableArray_IsChanged_C, _FLMutableArray_IsChanged>(
       'FLMutableArray_IsChanged',
+      isLeaf: useIsLeaf,
     );
     _set = libs.cbl.lookupFunction<_FLMutableArray_Set_C, _FLMutableArray_Set>(
       'FLMutableArray_Set',
+      isLeaf: useIsLeaf,
     );
     _append =
         libs.cbl.lookupFunction<_FLMutableArray_Append, _FLMutableArray_Append>(
       'FLMutableArray_Append',
+      isLeaf: useIsLeaf,
     );
     _insert = libs.cbl
         .lookupFunction<_FLMutableArray_Insert_C, _FLMutableArray_Insert>(
       'FLMutableArray_Insert',
+      isLeaf: useIsLeaf,
     );
     _remove = libs.cbl
         .lookupFunction<_FLMutableArray_Remove_C, _FLMutableArray_Remove>(
       'FLMutableArray_Remove',
+      isLeaf: useIsLeaf,
     );
     _resize = libs.cbl
         .lookupFunction<_FLMutableArray_Resize_C, _FLMutableArray_Resize>(
       'FLMutableArray_Resize',
+      isLeaf: useIsLeaf,
     );
     _getMutableArray = libs.cbl.lookupFunction<
         _FLMutableArray_GetMutableArray_C, _FLMutableArray_GetMutableArray>(
       'FLMutableArray_GetMutableArray',
+      isLeaf: useIsLeaf,
     );
     _getMutableDict = libs.cbl.lookupFunction<_FLMutableArray_GetMutableDict_C,
         _FLMutableArray_GetMutableDict>(
       'FLMutableArray_GetMutableDict',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -885,15 +923,21 @@ typedef _FLDict_Get = Pointer<FLValue> Function(
 
 class DictBindings extends Bindings {
   DictBindings(Bindings parent) : super(parent) {
-    _get = libs.cblDart
-        .lookupFunction<_FLDict_Get, _FLDict_Get>('CBLDart_FLDict_Get');
-    _count =
-        libs.cbl.lookupFunction<_FLDict_Count_C, _FLDict_Count>('FLDict_Count');
+    _get = libs.cblDart.lookupFunction<_FLDict_Get, _FLDict_Get>(
+      'CBLDart_FLDict_Get',
+      isLeaf: useIsLeaf,
+    );
+    _count = libs.cbl.lookupFunction<_FLDict_Count_C, _FLDict_Count>(
+      'FLDict_Count',
+      isLeaf: useIsLeaf,
+    );
     _isEmpty = libs.cbl.lookupFunction<_FLDict_IsEmpty_C, _FLDict_IsEmpty>(
       'FLDict_IsEmpty',
+      isLeaf: useIsLeaf,
     );
     _asMutable = libs.cbl.lookupFunction<_FLDict_AsMutable, _FLDict_AsMutable>(
       'FLDict_AsMutable',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -951,6 +995,7 @@ class DictIteratorBindings extends Bindings {
     _next = libs.cblDart.lookupFunction<_CBLDart_FLDictIterator_Next_C,
         _CBLDart_FLDictIterator_Next>(
       'CBLDart_FLDictIterator_Next',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -1022,39 +1067,48 @@ class MutableDictBindings extends Bindings {
     _mutableCopy =
         libs.cbl.lookupFunction<_FLDict_MutableCopy_C, _FLDict_MutableCopy>(
       'FLDict_MutableCopy',
+      isLeaf: useIsLeaf,
     );
     _new = libs.cbl.lookupFunction<_FLMutableDict_New, _FLMutableDict_New>(
       'FLMutableDict_New',
+      isLeaf: useIsLeaf,
     );
     _getSource = libs.cbl
         .lookupFunction<_FLMutableDict_GetSource, _FLMutableDict_GetSource>(
       'FLMutableDict_GetSource',
+      isLeaf: useIsLeaf,
     );
     _isChanged = libs.cbl
         .lookupFunction<_FLMutableDict_IsChanged_C, _FLMutableDict_IsChanged>(
       'FLMutableDict_IsChanged',
+      isLeaf: useIsLeaf,
     );
     _set = libs.cblDart
         .lookupFunction<_CBLDart_FLMutableDict_Set, _CBLDart_FLMutableDict_Set>(
       'CBLDart_FLMutableDict_Set',
+      isLeaf: useIsLeaf,
     );
     _remove = libs.cblDart.lookupFunction<_CBLDart_FLMutableDict_Remove_C,
         _CBLDart_FLMutableDict_Remove>(
       'CBLDart_FLMutableDict_Remove',
+      isLeaf: useIsLeaf,
     );
     _removeAll = libs.cbl
         .lookupFunction<_FLMutableDict_RemoveAll_C, _FLMutableDict_RemoveAll>(
       'FLMutableDict_RemoveAll',
+      isLeaf: useIsLeaf,
     );
     _getMutableArray = libs.cblDart.lookupFunction<
         _CBLDart_FLMutableDict_GetMutableArray,
         _CBLDart_FLMutableDict_GetMutableArray>(
       'CBLDart_FLMutableDict_GetMutableArray',
+      isLeaf: useIsLeaf,
     );
     _getMutableDict = libs.cblDart.lookupFunction<
         _CBLDart_FLMutableDict_GetMutableDict,
         _CBLDart_FLMutableDict_GetMutableDict>(
       'CBLDart_FLMutableDict_GetMutableDict',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -1233,23 +1287,28 @@ class FleeceDecoderBindings extends Bindings {
     _dumpData = libs.cblDart
         .lookupFunction<_CBLDart_FLData_Dump_C, _CBLDart_FLData_Dump>(
       'CBLDart_FLData_Dump',
+      isLeaf: useIsLeaf,
     );
     _getLoadedFLValueFromData = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_FromData_C, _CBLDart_FLValue_FromData>(
       'CBLDart_FLValue_FromData',
+      isLeaf: useIsLeaf,
     );
     _getLoadedFLValue = libs.cblDart.lookupFunction<
         _CBLDart_GetLoaded_FLValue_C, _CBLDart_GetLoadedFLValue>(
       'CBLDart_GetLoadedFLValue',
+      isLeaf: useIsLeaf,
     );
     _getLoadedFLValueFromArray = libs.cblDart.lookupFunction<
         _CBLDart_FLArray_GetLoaded_FLValue_C,
         _CBLDart_FLArray_GetLoadedFLValue>(
       'CBLDart_FLArray_GetLoadedFLValue',
+      isLeaf: useIsLeaf,
     );
     _getLoadedFLValueFromDict = libs.cblDart.lookupFunction<
         _CBLDart_FLDict_GetLoaded_FLValue_C, _CBLDart_FLDict_GetLoadedFLValue>(
       'CBLDart_FLDict_GetLoadedFLValue',
+      isLeaf: useIsLeaf,
     );
     _dictIteratorBegin = libs.cblDart.lookupFunction<
         _CBLDart_FLDictIterator2_Begin_C, _CBLDart_FLDictIterator2_Begin>(
@@ -1258,6 +1317,7 @@ class FleeceDecoderBindings extends Bindings {
     _dictIteratorNext = libs.cblDart.lookupFunction<
         _CBLDart_FLDictIterator2_Next_C, _CBLDart_FLDictIterator2_Next>(
       'CBLDart_FLDictIterator2_Next',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -1492,78 +1552,97 @@ class FleeceEncoderBindings extends Bindings {
     _new = libs.cblDart
         .lookupFunction<_CBLDart_FLEncoder_New_C, _CBLDart_FLEncoder_New>(
       'CBLDart_FLEncoder_New',
+      isLeaf: useIsLeaf,
     );
     _reset = libs.cbl.lookupFunction<_FLEncoder_Reset_C, _FLEncoder_Reset>(
       'FLEncoder_Reset',
+      isLeaf: useIsLeaf,
     );
     _writeArrayValue = libs.cblDart.lookupFunction<
         _CBLDart_FLEncoder_WriteArrayValue_C,
         _CBLDart_FLEncoder_WriteArrayValue>(
       'CBLDart_FLEncoder_WriteArrayValue',
+      isLeaf: useIsLeaf,
     );
     _writeValue =
         libs.cbl.lookupFunction<_FLEncoder_WriteValue_C, _FLEncoder_WriteValue>(
       'FLEncoder_WriteValue',
+      isLeaf: useIsLeaf,
     );
     _writeNull =
         libs.cbl.lookupFunction<_FLEncoder_WriteNull_C, _FLEncoder_WriteNull>(
       'FLEncoder_WriteNull',
+      isLeaf: useIsLeaf,
     );
     _writeBool =
         libs.cbl.lookupFunction<_FLEncoder_WriteBool_C, _FLEncoder_WriteBool>(
       'FLEncoder_WriteBool',
+      isLeaf: useIsLeaf,
     );
     _writeInt =
         libs.cbl.lookupFunction<_FLEncoder_WriteInt_C, _FLEncoder_WriteInt>(
       'FLEncoder_WriteInt',
+      isLeaf: useIsLeaf,
     );
     _writeDouble = libs.cbl
         .lookupFunction<_FLEncoder_WriteDouble_C, _FLEncoder_WriteDouble>(
       'FLEncoder_WriteDouble',
+      isLeaf: useIsLeaf,
     );
     _writeString = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_WriteString_C,
         _CBLDart_FLEncoder_WriteString>(
       'CBLDart_FLEncoder_WriteString',
+      isLeaf: useIsLeaf,
     );
     _writeData = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_WriteData_C,
         _CBLDart_FLEncoder_WriteData>(
       'CBLDart_FLEncoder_WriteData',
+      isLeaf: useIsLeaf,
     );
     _writeJSON = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_WriteJSON_C,
         _CBLDart_FLEncoder_WriteJSON>(
       'CBLDart_FLEncoder_WriteJSON',
+      isLeaf: useIsLeaf,
     );
     _beginArray = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_BeginArray_C,
         _CBLDart_FLEncoder_BeginArray>(
       'CBLDart_FLEncoder_BeginArray',
+      isLeaf: useIsLeaf,
     );
     _endArray =
         libs.cbl.lookupFunction<_FLEncoder_EndArray_C, _FLEncoder_EndArray>(
       'FLEncoder_EndArray',
+      isLeaf: useIsLeaf,
     );
     _beginDict = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_BeginDict_C,
         _CBLDart_FLEncoder_BeginDict>(
       'CBLDart_FLEncoder_BeginDict',
+      isLeaf: useIsLeaf,
     );
     _writeKey = libs.cblDart.lookupFunction<_CBLDart_FLEncoder_WriteKey_C,
         _CBLDart_FLEncoder_WriteKey>(
       'CBLDart_FLEncoder_WriteKey',
+      isLeaf: useIsLeaf,
     );
     _endDict =
         libs.cbl.lookupFunction<_FLEncoder_EndDict_C, _FLEncoder_EndDict>(
       'FLEncoder_EndDict',
+      isLeaf: useIsLeaf,
     );
     _finish = libs.cblDart
         .lookupFunction<_CBLDart_FLEncoder_Finish_C, _CBLDart_FLEncoder_Finish>(
       'CBLDart_FLEncoder_Finish',
+      isLeaf: useIsLeaf,
     );
     __getError =
         libs.cbl.lookupFunction<_FLEncoder_GetError_C, _FLEncoder_GetError>(
       'FLEncoder_GetError',
+      isLeaf: useIsLeaf,
     );
     __getErrorMessage = libs.cbl.lookupFunction<_FLEncoder_GetErrorMessage_C,
         _FLEncoder_GetErrorMessage>(
       'FLEncoder_GetErrorMessage',
+      isLeaf: useIsLeaf,
     );
   }
 
