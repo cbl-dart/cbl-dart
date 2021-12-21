@@ -11,4 +11,6 @@ environment:
 
 dependencies:
   cbl: ^1.0.0-beta.12
+  flutter:
+    sdk: flutter
   plugin_platform_interface: ^2.0.2
