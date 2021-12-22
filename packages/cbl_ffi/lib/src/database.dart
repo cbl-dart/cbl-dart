@@ -51,11 +51,11 @@ class _CBLEncryptionKey extends Struct {
   external Array<Uint8> bytes;
 }
 
-typedef _CBLDart_CBLEncryptionKey_FromPassword_C = Uint8 Function(
+typedef _CBLDart_CBLEncryptionKey_FromPassword_C = Bool Function(
   Pointer<_CBLEncryptionKey> key,
   FLString password,
 );
-typedef _CBLDart_CBLEncryptionKey_FromPassword = int Function(
+typedef _CBLDart_CBLEncryptionKey_FromPassword = bool Function(
   Pointer<_CBLEncryptionKey> key,
   FLString password,
 );
@@ -94,35 +94,35 @@ class _CBLDart_CBLDatabaseConfiguration extends Struct {
 typedef _CBLDart_CBLDatabaseConfiguration_Default
     = _CBLDart_CBLDatabaseConfiguration Function();
 
-typedef _CBLDart_CBL_CopyDatabase_C = Uint8 Function(
+typedef _CBLDart_CBL_CopyDatabase_C = Bool Function(
   FLString fromPath,
   FLString toPath,
   Pointer<_CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBL_CopyDatabase = int Function(
+typedef _CBLDart_CBL_CopyDatabase = bool Function(
   FLString fromPath,
   FLString toPath,
   Pointer<_CBLDart_CBLDatabaseConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBL_DeleteDatabase_C = Uint8 Function(
+typedef _CBLDart_CBL_DeleteDatabase_C = Bool Function(
   FLString name,
   FLString inDirectory,
   Pointer<CBLError> outError,
 );
-typedef _CBLDart_CBL_DeleteDatabase = int Function(
+typedef _CBLDart_CBL_DeleteDatabase = bool Function(
   FLString name,
   FLString inDirectory,
   Pointer<CBLError> outError,
 );
 
-typedef _CBLDart_CBLDatabase_Exists_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_Exists_C = Bool Function(
   FLString name,
   FLString inDirectory,
 );
-typedef _CBLDart_CBLDatabase_Exists = int Function(
+typedef _CBLDart_CBLDatabase_Exists = bool Function(
   FLString name,
   FLString inDirectory,
 );
@@ -144,14 +144,14 @@ typedef _CBLDart_BindDatabaseToDartObject = void Function(
   Pointer<Utf8> debugName,
 );
 
-typedef _CBLDart_CBLDatabase_Close_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_Close_C = Bool Function(
   Pointer<CBLDatabase> db,
-  Uint8 andDelete,
+  Bool andDelete,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDatabase_Close = int Function(
+typedef _CBLDart_CBLDatabase_Close = bool Function(
   Pointer<CBLDatabase> db,
-  int andDelete,
+  bool andDelete,
   Pointer<CBLError> errorOut,
 );
 
@@ -167,43 +167,43 @@ extension on CBLMaintenanceType {
   int toInt() => CBLMaintenanceType.values.indexOf(this);
 }
 
-typedef _CBLDatabase_PerformMaintenance_C = Uint8 Function(
+typedef _CBLDatabase_PerformMaintenance_C = Bool Function(
   Pointer<CBLDatabase> db,
   Uint32 type,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_PerformMaintenance = int Function(
+typedef _CBLDatabase_PerformMaintenance = bool Function(
   Pointer<CBLDatabase> db,
   int type,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDatabase_BeginTransaction_C = Uint8 Function(
+typedef _CBLDatabase_BeginTransaction_C = Bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_BeginTransaction = int Function(
+typedef _CBLDatabase_BeginTransaction = bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDatabase_EndTransaction_C = Uint8 Function(
+typedef _CBLDatabase_EndTransaction_C = Bool Function(
   Pointer<CBLDatabase> db,
-  Uint8 commit,
+  Bool commit,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_EndTransaction = int Function(
+typedef _CBLDatabase_EndTransaction = bool Function(
   Pointer<CBLDatabase> db,
-  int commit,
+  bool commit,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDatabase_ChangeEncryptionKey_C = Uint8 Function(
+typedef _CBLDatabase_ChangeEncryptionKey_C = Bool Function(
   Pointer<CBLDatabase> db,
   Pointer<_CBLEncryptionKey> newKey,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_ChangeEncryptionKey = int Function(
+typedef _CBLDatabase_ChangeEncryptionKey = bool Function(
   Pointer<CBLDatabase> db,
   Pointer<_CBLEncryptionKey> newKey,
   Pointer<CBLError> errorOut,
@@ -235,39 +235,39 @@ typedef _CBLDart_CBLDatabase_GetMutableDocument = Pointer<CBLMutableDocument>
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C = Uint8
+typedef _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C = Bool
     Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   Uint8 concurrency,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = int Function(
+typedef _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl = bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLMutableDocument> doc,
   int concurrency,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDatabase_DeleteDocumentWithConcurrencyControl_C = Uint8 Function(
+typedef _CBLDatabase_DeleteDocumentWithConcurrencyControl_C = Bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLDocument> document,
   Uint8 concurrency,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_DeleteDocumentWithConcurrencyControl = int Function(
+typedef _CBLDatabase_DeleteDocumentWithConcurrencyControl = bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLDocument> document,
   int concurrency,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLDatabase_PurgeDocumentByID_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_PurgeDocumentByID_C = Bool Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDatabase_PurgeDocumentByID = int Function(
+typedef _CBLDart_CBLDatabase_PurgeDocumentByID = bool Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Pointer<CBLError> errorOut,
@@ -284,13 +284,13 @@ typedef _CBLDart_CBLDatabase_GetDocumentExpiration = int Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLDatabase_SetDocumentExpiration_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_SetDocumentExpiration_C = Bool Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   Int64 expiration,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDatabase_SetDocumentExpiration = int Function(
+typedef _CBLDart_CBLDatabase_SetDocumentExpiration = bool Function(
   Pointer<CBLDatabase> db,
   FLString docId,
   int expiration,
@@ -362,9 +362,8 @@ class _CBLDart_CBLIndexSpec extends Struct {
 
   external FLString expressions;
 
-  @Uint8()
-  // ignore: unused_field
-  external int _ignoreAccents;
+  @Bool()
+  external bool ignoreAccents;
 
   external FLString language;
 }
@@ -374,28 +373,27 @@ extension on _CBLDart_CBLIndexSpec {
   set type(CBLIndexType value) => _type = value.toInt();
   set expressionLanguage(CBLQueryLanguage value) =>
       _expressionLanguage = value.toInt();
-  set ignoreAccents(bool value) => _ignoreAccents = value.toInt();
 }
 
-typedef _CBLDart_CBLDatabase_CreateIndex_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_CreateIndex_C = Bool Function(
   Pointer<CBLDatabase> db,
   FLString name,
   _CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDatabase_CreateIndex = int Function(
+typedef _CBLDart_CBLDatabase_CreateIndex = bool Function(
   Pointer<CBLDatabase> db,
   FLString name,
   _CBLDart_CBLIndexSpec indexSpec,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLDatabase_DeleteIndex_C = Uint8 Function(
+typedef _CBLDart_CBLDatabase_DeleteIndex_C = Bool Function(
   Pointer<CBLDatabase> db,
   FLString name,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDatabase_DeleteIndex = int Function(
+typedef _CBLDart_CBLDatabase_DeleteIndex = bool Function(
   Pointer<CBLDatabase> db,
   FLString name,
   Pointer<CBLError> errorOut,
@@ -411,12 +409,12 @@ typedef _CBLDatabase_GetBlob = Pointer<CBLBlob> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDatabase_SaveBlob_C = Uint8 Function(
+typedef _CBLDatabase_SaveBlob_C = Bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLBlob> blob,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_SaveBlob = int Function(
+typedef _CBLDatabase_SaveBlob = bool Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLBlob> blob,
   Pointer<CBLError> errorOut,
@@ -591,8 +589,8 @@ class DatabaseBindings extends Bindings {
   CBLEncryptionKey encryptionKeyFromPassword(String password) =>
       withZoneArena(() {
         final key = zoneArena<_CBLEncryptionKey>();
-        if (!_encryptionKeyFromPassword(key, password.toFLStringInArena().ref)
-            .toBool()) {
+        if (!_encryptionKeyFromPassword(
+            key, password.toFLStringInArena().ref)) {
           throw CBLErrorException(
             CBLErrorDomain.couchbaseLite,
             CBLErrorCode.unexpectedError,
@@ -613,20 +611,20 @@ class DatabaseBindings extends Bindings {
             name.toFLStringInArena().ref,
             _createConfig(config),
             globalCBLError,
-          ).checkCBLError().toBool());
+          ).checkCBLError());
 
   bool deleteDatabase(String name, String? inDirectory) =>
       withZoneArena(() => _deleteDatabase(
             name.toFLStringInArena().ref,
             inDirectory.toFLStringInArena().ref,
             globalCBLError,
-          ).checkCBLError().toBool());
+          ).checkCBLError());
 
   bool databaseExists(String name, String? inDirectory) =>
       withZoneArena(() => _databaseExists(
             name.toFLStringInArena().ref,
             inDirectory.toFLStringInArena().ref,
-          ).toBool());
+          ));
 
   CBLDatabaseConfiguration defaultConfiguration() {
     final config = _defaultConfiguration();
@@ -658,11 +656,11 @@ class DatabaseBindings extends Bindings {
   }
 
   void close(Pointer<CBLDatabase> db) {
-    _close(db, false.toInt(), globalCBLError).checkCBLError();
+    _close(db, false, globalCBLError).checkCBLError();
   }
 
   void delete(Pointer<CBLDatabase> db) {
-    _close(db, true.toInt(), globalCBLError).checkCBLError();
+    _close(db, true, globalCBLError).checkCBLError();
   }
 
   void performMaintenance(Pointer<CBLDatabase> db, CBLMaintenanceType type) {
@@ -674,7 +672,7 @@ class DatabaseBindings extends Bindings {
   }
 
   void endTransaction(Pointer<CBLDatabase> db, {required bool commit}) {
-    _endTransaction(db, commit.toInt(), globalCBLError).checkCBLError();
+    _endTransaction(db, commit, globalCBLError).checkCBLError();
   }
 
   void changeEncryptionKey(Pointer<CBLDatabase> db, CBLEncryptionKey? key) {
@@ -733,14 +731,14 @@ class DatabaseBindings extends Bindings {
         document,
         concurrency.toInt(),
         globalCBLError,
-      ).checkCBLError().toBool();
+      ).checkCBLError();
 
   bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) =>
       withZoneArena(() => _purgeDocumentByID(
             db,
             docId.toFLStringInArena().ref,
             globalCBLError,
-          ).checkCBLError().toBool());
+          ).checkCBLError());
 
   DateTime? getDocumentExpiration(Pointer<CBLDatabase> db, String docId) =>
       withZoneArena(() {

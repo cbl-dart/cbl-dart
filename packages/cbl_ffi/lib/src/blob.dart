@@ -20,8 +20,8 @@ typedef _CBLDart_CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
   FLSlice contents,
 );
 
-typedef _FLDict_IsBlob_C = Int8 Function(Pointer<FLDict> dict);
-typedef _FLDict_IsBlob = int Function(Pointer<FLDict> dict);
+typedef _FLDict_IsBlob_C = Bool Function(Pointer<FLDict> dict);
+typedef _FLDict_IsBlob = bool Function(Pointer<FLDict> dict);
 
 typedef _FLDict_GetBlob = Pointer<CBLBlob> Function(Pointer<FLDict> dict);
 
@@ -100,7 +100,7 @@ class BlobBindings extends Bindings {
             content.toSliceResult().makeGlobal().ref,
           ));
 
-  bool isBlob(Pointer<FLDict> dict) => _isBlob(dict).toBool();
+  bool isBlob(Pointer<FLDict> dict) => _isBlob(dict);
 
   Pointer<CBLBlob>? getBlob(Pointer<FLDict> dict) =>
       _getBlob(dict).toNullable();
@@ -230,13 +230,13 @@ typedef _CBLBlobWriter_Close = void Function(
   Pointer<CBLBlobWriteStream> stream,
 );
 
-typedef _CBLBlobWriter_Write_C = Uint8 Function(
+typedef _CBLBlobWriter_Write_C = Bool Function(
   Pointer<CBLBlobWriteStream> stream,
   Pointer<Uint8> buf,
   Uint64 bufSize,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLBlobWriter_Write = int Function(
+typedef _CBLBlobWriter_Write = bool Function(
   Pointer<CBLBlobWriteStream> stream,
   Pointer<Uint8> buf,
   int bufSize,
@@ -283,8 +283,7 @@ class BlobWriteStreamBindings extends Bindings {
   bool write(Pointer<CBLBlobWriteStream> stream, Data data) {
     final slice = data.toSliceResult();
     return _write(stream, slice.buf, slice.size, globalCBLError)
-        .checkCBLError()
-        .toBool();
+        .checkCBLError();
   }
 
   Pointer<CBLBlob> createBlobWithStream(

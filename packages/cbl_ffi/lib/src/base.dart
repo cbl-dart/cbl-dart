@@ -6,7 +6,6 @@ import 'package:ffi/ffi.dart';
 import 'bindings.dart';
 import 'fleece.dart';
 import 'global.dart';
-import 'utils.dart';
 
 late final _baseBinds = CBLBindings.instance.base;
 
@@ -45,12 +44,12 @@ class _CBLInitContext extends Struct {
   external Pointer<Utf8> tempDir;
 }
 
-typedef _CBLDart_Initialize_C = Uint8 Function(
+typedef _CBLDart_Initialize_C = Bool Function(
   Pointer<Void> dartInitializeDlData,
   Pointer<Void> cblInitContext,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_Initialize = int Function(
+typedef _CBLDart_Initialize = bool Function(
   Pointer<Void> dartInitializeDlData,
   Pointer<Void> cblInitContext,
   Pointer<CBLError> errorOut,
@@ -272,6 +271,15 @@ extension CheckCBLErrorIntExt on int {
   }
 }
 
+extension CheckCBLErrorBoolExt on bool {
+  bool checkCBLError({String? errorSource}) {
+    if (!this) {
+      _checkCBLError(errorSource: errorSource);
+    }
+    return this;
+  }
+}
+
 // === CBLRefCounted ===========================================================
 
 class CBLRefCounted extends Opaque {}
@@ -279,18 +287,18 @@ class CBLRefCounted extends Opaque {}
 typedef _CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
   Handle object,
   Pointer<CBLRefCounted> refCounted,
-  Uint8 retain,
+  Bool retain,
   Pointer<Utf8> debugName,
 );
 typedef _CBLDart_BindCBLRefCountedToDartObject = void Function(
   Object object,
   Pointer<CBLRefCounted> refCounted,
-  int retain,
+  bool retain,
   Pointer<Utf8> debugName,
 );
 
-typedef _CBLDart_SetDebugRefCounted_C = Void Function(Uint8 enabled);
-typedef _CBLDart_SetDebugRefCounted = void Function(int enabled);
+typedef _CBLDart_SetDebugRefCounted_C = Void Function(Bool enabled);
+typedef _CBLDart_SetDebugRefCounted = void Function(bool enabled);
 
 typedef _CBL_Retain = Pointer<CBLRefCounted> Function(
   Pointer<CBLRefCounted> refCounted,
@@ -370,11 +378,7 @@ class BaseBindings extends Bindings {
       // initialization to be completed.
       final error = zoneArena<CBLError>();
 
-      if (!_initialize(
-        NativeApi.initializeApiDLData,
-        _context.cast(),
-        error,
-      ).toBool()) {
+      if (!_initialize(NativeApi.initializeApiDLData, _context.cast(), error)) {
         throw CBLErrorException.fromCBLError(error);
       }
     });
@@ -388,12 +392,7 @@ class BaseBindings extends Bindings {
   }) {
     final debugNameCStr = debugName?.toNativeUtf8() ?? nullptr;
 
-    _bindCBLRefCountedToDartObject(
-      handle,
-      refCounted,
-      retain.toInt(),
-      debugNameCStr,
-    );
+    _bindCBLRefCountedToDartObject(handle, refCounted, retain, debugNameCStr);
 
     if (debugNameCStr != nullptr) {
       malloc.free(debugNameCStr);
@@ -403,7 +402,7 @@ class BaseBindings extends Bindings {
   // coverage:ignore-start
 
   // ignore: avoid_setters_without_getters
-  set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled.toInt());
+  set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled);
 
   void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
     _retainRefCounted(refCounted);

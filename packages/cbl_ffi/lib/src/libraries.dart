@@ -5,8 +5,6 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
-import 'utils.dart';
-
 class LibraryConfiguration {
   LibraryConfiguration({
     this.process,
@@ -149,8 +147,8 @@ late final _AddDllDirectoryFn = _kernel32.lookupFunction<
     Pointer<Void> Function(Pointer<Utf16>)>('AddDllDirectory');
 
 late final _RemoveDllDirectoryFn = _kernel32.lookupFunction<
-    Uint8 Function(Pointer<Void>),
-    int Function(Pointer<Void>)>('RemoveDllDirectory');
+    Bool Function(Pointer<Void>),
+    bool Function(Pointer<Void>)>('RemoveDllDirectory');
 
 Pointer<Void> _AddDllDirectory(String directory) {
   final directoryNativeStr = directory.toNativeUtf16();
@@ -163,7 +161,7 @@ Pointer<Void> _AddDllDirectory(String directory) {
 }
 
 void _RemoveDllDirectory(Pointer<Void> cookie) {
-  if (!_RemoveDllDirectoryFn(cookie).toBool()) {
+  if (!_RemoveDllDirectoryFn(cookie)) {
     throw StateError('Failed to remove DLL directory');
   }
 }

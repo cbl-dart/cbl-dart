@@ -128,8 +128,8 @@ extension FLStringResultExt on FLStringResult {
   }
 }
 
-typedef _CBLDart_FLSlice_Equal_C = Uint8 Function(FLSlice a, FLSlice b);
-typedef _CBLDart_FLSlice_Equal = int Function(FLSlice a, FLSlice b);
+typedef _CBLDart_FLSlice_Equal_C = Bool Function(FLSlice a, FLSlice b);
+typedef _CBLDart_FLSlice_Equal = bool Function(FLSlice a, FLSlice b);
 
 typedef _CBLDart_FLSlice_Compare_C = Int64 Function(FLSlice a, FLSlice b);
 typedef _CBLDart_FLSlice_Compare = int Function(FLSlice a, FLSlice b);
@@ -143,12 +143,12 @@ typedef _CBLDart_FLSlice_Copy = FLSliceResult Function(FLSlice slice);
 typedef _CBLDart_FLSliceResult_BindToDartObject_C = Void Function(
   Handle object,
   FLSliceResult slice,
-  Uint8 retain,
+  Bool retain,
 );
 typedef _CBLDart_FLSliceResult_BindToDartObject = void Function(
   Object object,
   FLSliceResult slice,
-  int retain,
+  bool retain,
 );
 
 typedef _CBLDart_FLSliceResult_Retain_C = Void Function(FLSliceResult);
@@ -207,7 +207,7 @@ class SliceBindings extends Bindings {
   late final _CBLDart_FLSliceResult_Release _releaseSliceResult;
   late final _CBLDart_FLStringResult_Release _releaseStringResult;
 
-  bool equal(FLSlice a, FLSlice b) => _equal(a, b).toBool();
+  bool equal(FLSlice a, FLSlice b) => _equal(a, b);
 
   int compare(FLSlice a, FLSlice b) => _compare(a, b);
 
@@ -220,7 +220,7 @@ class SliceBindings extends Bindings {
     FLSliceResult sliceResult, {
     required bool retain,
   }) {
-    _bindToDartObject(object, sliceResult, retain.toInt());
+    _bindToDartObject(object, sliceResult, retain);
   }
 
   void retainSliceResult(FLSliceResult result) {
@@ -243,8 +243,8 @@ class FLSlot extends Opaque {}
 typedef _FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
 typedef _FLSlot_SetNull = void Function(Pointer<FLSlot> slot);
 
-typedef _FLSlot_SetBool_C = Void Function(Pointer<FLSlot> slot, Uint8 value);
-typedef _FLSlot_SetBool = void Function(Pointer<FLSlot> slot, int value);
+typedef _FLSlot_SetBool_C = Void Function(Pointer<FLSlot> slot, Bool value);
+typedef _FLSlot_SetBool = void Function(Pointer<FLSlot> slot, bool value);
 
 typedef _FLSlot_SetInt_C = Void Function(Pointer<FLSlot> slot, Int64 value);
 typedef _FLSlot_SetInt = void Function(Pointer<FLSlot> slot, int value);
@@ -320,7 +320,7 @@ class SlotBindings extends Bindings {
 
   // ignore: avoid_positional_boolean_parameters
   void setBool(Pointer<FLSlot> slot, bool value) {
-    _setBool(slot, value.toInt());
+    _setBool(slot, value);
   }
 
   void setInt(Pointer<FLSlot> slot, int value) {
@@ -458,12 +458,12 @@ extension on int {
 typedef _CBLDart_FLValue_BindToDartObject_C = Void Function(
   Handle object,
   Pointer<FLValue> value,
-  Uint8 retain,
+  Bool retain,
 );
 typedef _CBLDart_FLValue_BindToDartObject = void Function(
   Object object,
   Pointer<FLValue> value,
-  int retain,
+  bool retain,
 );
 
 typedef _FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
@@ -471,14 +471,14 @@ typedef _FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
 typedef _FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
 typedef _FLValue_GetType = int Function(Pointer<FLValue> value);
 
-typedef _FLValue_IsInteger_C = Uint8 Function(Pointer<FLValue> value);
-typedef _FLValue_IsInteger = int Function(Pointer<FLValue> value);
+typedef _FLValue_IsInteger_C = Bool Function(Pointer<FLValue> value);
+typedef _FLValue_IsInteger = bool Function(Pointer<FLValue> value);
 
-typedef _FLValue_IsDouble_C = Uint8 Function(Pointer<FLValue> value);
-typedef _FLValue_IsDouble = int Function(Pointer<FLValue> value);
+typedef _FLValue_IsDouble_C = Bool Function(Pointer<FLValue> value);
+typedef _FLValue_IsDouble = bool Function(Pointer<FLValue> value);
 
-typedef _FLValue_AsBool_C = Uint8 Function(Pointer<FLValue> value);
-typedef _FLValue_AsBool = int Function(Pointer<FLValue> value);
+typedef _FLValue_AsBool_C = Bool Function(Pointer<FLValue> value);
+typedef _FLValue_AsBool = bool Function(Pointer<FLValue> value);
 
 typedef _FLValue_AsInt_C = Int64 Function(Pointer<FLValue> value);
 typedef _FLValue_AsInt = int Function(Pointer<FLValue> value);
@@ -499,24 +499,24 @@ typedef _CBLDart_FLValue_ToString = FLStringResult Function(
   Pointer<FLValue> value,
 );
 
-typedef _FLValue_IsEqual_C = Uint8 Function(
+typedef _FLValue_IsEqual_C = Bool Function(
   Pointer<FLValue> v1,
   Pointer<FLValue> v2,
 );
-typedef _FLValue_IsEqual = int Function(
+typedef _FLValue_IsEqual = bool Function(
   Pointer<FLValue> v1,
   Pointer<FLValue> v2,
 );
 
 typedef _CBLDart_FLValue_ToJSONX_C = FLStringResult Function(
   Pointer<FLValue> value,
-  Uint8 json5,
-  Uint8 canonicalForm,
+  Bool json5,
+  Bool canonicalForm,
 );
 typedef _CBLDart_FLValue_ToJSONX = FLStringResult Function(
   Pointer<FLValue> value,
-  int json5,
-  int canonicalForm,
+  bool json5,
+  bool canonicalForm,
 );
 
 class ValueBindings extends Bindings {
@@ -587,7 +587,7 @@ class ValueBindings extends Bindings {
     required Pointer<FLValue> value,
     required bool retain,
   }) {
-    _bindToDartObject(object, value, retain.toInt());
+    _bindToDartObject(object, value, retain);
   }
 
   Pointer<FLDoc> findDoc(Pointer<FLValue> value) => _findDoc(value);
@@ -595,11 +595,11 @@ class ValueBindings extends Bindings {
   FLValueType getType(Pointer<FLValue> value) =>
       _getType(value).toFLValueType();
 
-  bool isInteger(Pointer<FLValue> value) => _isInteger(value).toBool();
+  bool isInteger(Pointer<FLValue> value) => _isInteger(value);
 
-  bool isDouble(Pointer<FLValue> value) => _isDouble(value).toBool();
+  bool isDouble(Pointer<FLValue> value) => _isDouble(value);
 
-  bool asBool(Pointer<FLValue> value) => _asBool(value).toBool();
+  bool asBool(Pointer<FLValue> value) => _asBool(value);
 
   int asInt(Pointer<FLValue> value) => _asInt(value);
 
@@ -612,16 +612,14 @@ class ValueBindings extends Bindings {
   String? scalarToString(Pointer<FLValue> value) =>
       _scalarToString(value).toDartStringAndRelease();
 
-  bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) =>
-      _isEqual(a, b).toBool();
+  bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) => _isEqual(a, b);
 
   String toJSONX(
     Pointer<FLValue> value, {
     required bool json5,
     required bool canonical,
   }) =>
-      _toJson(value, json5.toInt(), canonical.toInt())
-          .toDartStringAndRelease()!;
+      _toJson(value, json5, canonical).toDartStringAndRelease()!;
 }
 
 // === Array ===================================================================
@@ -631,8 +629,8 @@ class FLArray extends Opaque {}
 typedef _FLArray_Count_C = Uint32 Function(Pointer<FLArray> array);
 typedef _FLArray_Count = int Function(Pointer<FLArray> array);
 
-typedef _FLArray_IsEmpty_C = Uint8 Function(Pointer<FLArray> array);
-typedef _FLArray_IsEmpty = int Function(Pointer<FLArray> array);
+typedef _FLArray_IsEmpty_C = Bool Function(Pointer<FLArray> array);
+typedef _FLArray_IsEmpty = bool Function(Pointer<FLArray> array);
 
 typedef _FLArray_AsMutable = Pointer<FLMutableArray> Function(
   Pointer<FLArray> array,
@@ -671,7 +669,7 @@ class ArrayBindings extends Bindings {
 
   int count(Pointer<FLArray> array) => _count(array);
 
-  bool isEmpty(Pointer<FLArray> array) => _isEmpty(array).toBool();
+  bool isEmpty(Pointer<FLArray> array) => _isEmpty(array);
 
   Pointer<FLMutableArray>? asMutable(Pointer<FLArray> array) =>
       _asMutable(array).toNullable();
@@ -698,10 +696,10 @@ typedef _FLMutableArray_GetSource = Pointer<FLArray> Function(
   Pointer<FLMutableArray> array,
 );
 
-typedef _FLMutableArray_IsChanged_C = Uint8 Function(
+typedef _FLMutableArray_IsChanged_C = Bool Function(
   Pointer<FLMutableArray> array,
 );
-typedef _FLMutableArray_IsChanged = int Function(
+typedef _FLMutableArray_IsChanged = bool Function(
   Pointer<FLMutableArray> array,
 );
 
@@ -836,7 +834,7 @@ class MutableArrayBindings extends Bindings {
   Pointer<FLArray> getSource(Pointer<FLMutableArray> array) =>
       _getSource(array);
 
-  bool isChanged(Pointer<FLMutableArray> array) => _isChanged(array).toBool();
+  bool isChanged(Pointer<FLMutableArray> array) => _isChanged(array);
 
   Pointer<FLSlot> set(Pointer<FLMutableArray> array, int index) =>
       _set(array, index);
@@ -871,8 +869,8 @@ class FLDict extends Opaque {}
 typedef _FLDict_Count_C = Uint32 Function(Pointer<FLDict> dict);
 typedef _FLDict_Count = int Function(Pointer<FLDict> dict);
 
-typedef _FLDict_IsEmpty_C = Uint8 Function(Pointer<FLDict> dict);
-typedef _FLDict_IsEmpty = int Function(Pointer<FLDict> dict);
+typedef _FLDict_IsEmpty_C = Bool Function(Pointer<FLDict> dict);
+typedef _FLDict_IsEmpty = bool Function(Pointer<FLDict> dict);
 
 typedef _FLDict_AsMutable = Pointer<FLMutableDict> Function(
   Pointer<FLDict> dict,
@@ -907,7 +905,7 @@ class DictBindings extends Bindings {
 
   int count(Pointer<FLDict> dict) => _count(dict);
 
-  bool isEmpty(Pointer<FLDict> dict) => _isEmpty(dict).toBool();
+  bool isEmpty(Pointer<FLDict> dict) => _isEmpty(dict);
 
   Pointer<FLMutableDict>? asMutable(Pointer<FLDict> dict) =>
       _asMutable(dict).toNullable();
@@ -917,13 +915,12 @@ class DictIterator extends Struct {
   // ignore: unused_element
   external Pointer<Void> get _iterator;
   external FLString get _keyString;
-  @Uint8()
-  external int get _done;
+  @Bool()
+  external bool get done;
 }
 
 extension DictIteratorExt on DictIterator {
   String? get keyString => _keyString.toDartString();
-  bool get done => _done.toBool();
 }
 
 typedef _CBLDart_FLDictIterator_Begin_C = Pointer<DictIterator> Function(
@@ -984,10 +981,10 @@ typedef _FLMutableDict_GetSource = Pointer<FLDict> Function(
   Pointer<FLMutableDict> dict,
 );
 
-typedef _FLMutableDict_IsChanged_C = Uint8 Function(
+typedef _FLMutableDict_IsChanged_C = Bool Function(
   Pointer<FLMutableDict> dict,
 );
-typedef _FLMutableDict_IsChanged = int Function(Pointer<FLMutableDict> dict);
+typedef _FLMutableDict_IsChanged = bool Function(Pointer<FLMutableDict> dict);
 
 typedef _CBLDart_FLMutableDict_Set = Pointer<FLSlot> Function(
   Pointer<FLMutableDict> dict,
@@ -1078,7 +1075,7 @@ class MutableDictBindings extends Bindings {
 
   Pointer<FLDict> getSource(Pointer<FLMutableDict> dict) => _getSource(dict);
 
-  bool isChanged(Pointer<FLMutableDict> dict) => _isChanged(dict).toBool();
+  bool isChanged(Pointer<FLMutableDict> dict) => _isChanged(dict);
 
   Pointer<FLSlot> set(Pointer<FLMutableDict> dict, String key) =>
       withZoneArena(() => _set(dict, key.toFLStringInArena().ref));
@@ -1118,16 +1115,16 @@ extension on FLTrust {
 }
 
 class CBLDart_LoadedFLValue extends Struct {
-  @Uint8()
-  external int _exists;
+  @Bool()
+  external bool exists;
   @Int8()
   external int _type;
-  @Uint8()
-  external int _isInteger;
+  @Bool()
+  external bool isInteger;
   @Uint32()
   external int collectionSize;
-  @Uint8()
-  external int _asBool;
+  @Bool()
+  external bool asBool;
   @Int64()
   external int asInt;
   @Double()
@@ -1139,10 +1136,7 @@ class CBLDart_LoadedFLValue extends Struct {
 
 // ignore: camel_case_extensions
 extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
-  bool get exists => _exists.toBool();
   FLValueType get type => _type.toFLValueType();
-  bool get isInteger => _isInteger.toBool();
-  bool get asBool => _asBool.toBool();
 }
 
 typedef _CBLDart_FLData_Dump_C = FLStringResult Function(FLSlice slice);
@@ -1191,19 +1185,14 @@ typedef _CBLDart_FLDict_GetLoadedFLValue = void Function(
 );
 
 class CBLDart_FLDictIterator2 extends Struct {
-  @Uint8()
-  external int _isDone;
+  @Bool()
+  external bool isDone;
   // ignore: unused_field
   external Pointer<FLString> _keyOut;
   // ignore: unused_field
   external Pointer<CBLDart_LoadedFLValue> _valueOut;
   // ignore: unused_field
   external Pointer<Void> _iterator;
-}
-
-// ignore: camel_case_extensions
-extension CBLDart_FLDictIterator2Ext on CBLDart_FLDictIterator2 {
-  bool get isDone => _isDone.toBool();
 }
 
 typedef _CBLDart_FLDictIterator2_Begin_C = Pointer<CBLDart_FLDictIterator2>
@@ -1342,126 +1331,126 @@ typedef _CBLDart_FLEncoder_BindToDartObject = void Function(
 typedef _CBLDart_FLEncoder_New_C = Pointer<FLEncoder> Function(
   Uint8 format,
   Uint64 reserveSize,
-  Uint8 uniqueStrings,
+  Bool uniqueStrings,
 );
 typedef _CBLDart_FLEncoder_New = Pointer<FLEncoder> Function(
   int format,
   int reserveSize,
-  int uniqueStrings,
+  bool uniqueStrings,
 );
 
 typedef _FLEncoder_Reset_C = Void Function(Pointer<FLEncoder> encoder);
 typedef _FLEncoder_Reset = void Function(Pointer<FLEncoder> encoder);
 
-typedef _CBLDart_FLEncoder_WriteArrayValue_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_WriteArrayValue_C = Bool Function(
   Pointer<FLEncoder> encoder,
   Pointer<FLArray> array,
   Uint32 index,
 );
-typedef _CBLDart_FLEncoder_WriteArrayValue = int Function(
+typedef _CBLDart_FLEncoder_WriteArrayValue = bool Function(
   Pointer<FLEncoder> encoder,
   Pointer<FLArray> array,
   int index,
 );
 
-typedef _FLEncoder_WriteValue_C = Uint8 Function(
+typedef _FLEncoder_WriteValue_C = Bool Function(
   Pointer<FLEncoder> encoder,
   Pointer<FLValue> value,
 );
-typedef _FLEncoder_WriteValue = int Function(
+typedef _FLEncoder_WriteValue = bool Function(
   Pointer<FLEncoder> encoder,
   Pointer<FLValue> value,
 );
 
-typedef _FLEncoder_WriteNull_C = Uint8 Function(Pointer<FLEncoder> encoder);
-typedef _FLEncoder_WriteNull = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_WriteNull_C = Bool Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_WriteNull = bool Function(Pointer<FLEncoder> encoder);
 
-typedef _FLEncoder_WriteBool_C = Uint8 Function(
+typedef _FLEncoder_WriteBool_C = Bool Function(
   Pointer<FLEncoder> encoder,
-  Uint8 value,
+  Bool value,
 );
-typedef _FLEncoder_WriteBool = int Function(
+typedef _FLEncoder_WriteBool = bool Function(
   Pointer<FLEncoder> encoder,
-  int value,
+  bool value,
 );
 
-typedef _FLEncoder_WriteInt_C = Uint8 Function(
+typedef _FLEncoder_WriteInt_C = Bool Function(
   Pointer<FLEncoder> encoder,
   Int64 value,
 );
-typedef _FLEncoder_WriteInt = int Function(
+typedef _FLEncoder_WriteInt = bool Function(
   Pointer<FLEncoder> encoder,
   int value,
 );
 
-typedef _FLEncoder_WriteDouble_C = Uint8 Function(
+typedef _FLEncoder_WriteDouble_C = Bool Function(
   Pointer<FLEncoder> encoder,
   Double value,
 );
-typedef _FLEncoder_WriteDouble = int Function(
+typedef _FLEncoder_WriteDouble = bool Function(
   Pointer<FLEncoder> encoder,
   double value,
 );
 
-typedef _CBLDart_FLEncoder_WriteString_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_WriteString_C = Bool Function(
   Pointer<FLEncoder> encoder,
   FLString value,
 );
-typedef _CBLDart_FLEncoder_WriteString = int Function(
+typedef _CBLDart_FLEncoder_WriteString = bool Function(
   Pointer<FLEncoder> encoder,
   FLString value,
 );
 
-typedef _CBLDart_FLEncoder_WriteData_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_WriteData_C = Bool Function(
   Pointer<FLEncoder> encoder,
   FLSlice value,
 );
-typedef _CBLDart_FLEncoder_WriteData = int Function(
+typedef _CBLDart_FLEncoder_WriteData = bool Function(
   Pointer<FLEncoder> encoder,
   FLSlice value,
 );
 
-typedef _CBLDart_FLEncoder_WriteJSON_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_WriteJSON_C = Bool Function(
   Pointer<FLEncoder> encoder,
   FLString value,
 );
-typedef _CBLDart_FLEncoder_WriteJSON = int Function(
+typedef _CBLDart_FLEncoder_WriteJSON = bool Function(
   Pointer<FLEncoder> encoder,
   FLString value,
 );
 
-typedef _CBLDart_FLEncoder_BeginArray_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_BeginArray_C = Bool Function(
   Pointer<FLEncoder> encoder,
   Uint64 reserveCount,
 );
-typedef _CBLDart_FLEncoder_BeginArray = int Function(
+typedef _CBLDart_FLEncoder_BeginArray = bool Function(
   Pointer<FLEncoder> encoder,
   int reserveCount,
 );
 
-typedef _FLEncoder_EndArray_C = Uint8 Function(Pointer<FLEncoder> encoder);
-typedef _FLEncoder_EndArray = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndArray_C = Bool Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndArray = bool Function(Pointer<FLEncoder> encoder);
 
-typedef _CBLDart_FLEncoder_BeginDict_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_BeginDict_C = Bool Function(
   Pointer<FLEncoder> encoder,
   Uint64 reserveCount,
 );
-typedef _CBLDart_FLEncoder_BeginDict = int Function(
+typedef _CBLDart_FLEncoder_BeginDict = bool Function(
   Pointer<FLEncoder> encoder,
   int reserveCount,
 );
 
-typedef _CBLDart_FLEncoder_WriteKey_C = Uint8 Function(
+typedef _CBLDart_FLEncoder_WriteKey_C = Bool Function(
   Pointer<FLEncoder> encoder,
   FLString key,
 );
-typedef _CBLDart_FLEncoder_WriteKey = int Function(
+typedef _CBLDart_FLEncoder_WriteKey = bool Function(
   Pointer<FLEncoder> encoder,
   FLString key,
 );
 
-typedef _FLEncoder_EndDict_C = Uint8 Function(Pointer<FLEncoder> encoder);
-typedef _FLEncoder_EndDict = int Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndDict_C = Bool Function(Pointer<FLEncoder> encoder);
+typedef _FLEncoder_EndDict = bool Function(Pointer<FLEncoder> encoder);
 
 typedef _CBLDart_FLEncoder_Finish_C = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
@@ -1597,7 +1586,7 @@ class FleeceEncoderBindings extends Bindings {
     required int reserveSize,
     required bool uniqueStrings,
   }) =>
-      _new(format.toInt(), reserveSize, uniqueStrings.toInt());
+      _new(format.toInt(), reserveSize, uniqueStrings);
 
   void reset(Pointer<FLEncoder> encoder) {
     _reset(encoder);
@@ -1625,7 +1614,7 @@ class FleeceEncoderBindings extends Bindings {
 
   // ignore: avoid_positional_boolean_parameters
   void writeBool(Pointer<FLEncoder> encoder, bool value) {
-    _checkError(encoder, _writeBool(encoder, value.toInt()));
+    _checkError(encoder, _writeBool(encoder, value));
   }
 
   void writeInt(Pointer<FLEncoder> encoder, int value) {
@@ -1699,7 +1688,7 @@ class FleeceEncoderBindings extends Bindings {
       __getErrorMessage(encoder).toDartStringAndFree();
 
   T _checkError<T>(Pointer<FLEncoder> encoder, T result) {
-    final mayHaveError = (result is int && !result.toBool()) ||
+    final mayHaveError = (result is bool && !result) ||
         (result is FLSliceResult && result.buf == nullptr);
 
     if (mayHaveError) {
