@@ -318,6 +318,7 @@ class BaseBindings extends Bindings {
     _initialize =
         libs.cblDart.lookupFunction<_CBLDart_Initialize_C, _CBLDart_Initialize>(
       'CBLDart_Initialize',
+      isLeaf: useIsLeaf,
     );
 
     _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
@@ -328,20 +329,25 @@ class BaseBindings extends Bindings {
     _setDebugRefCounted = libs.cblDart.lookupFunction<
         _CBLDart_SetDebugRefCounted_C, _CBLDart_SetDebugRefCounted>(
       'CBLDart_SetDebugRefCounted',
+      isLeaf: useIsLeaf,
     );
     _retainRefCounted = libs.cbl.lookupFunction<_CBL_Retain, _CBL_Retain>(
       'CBL_Retain',
+      isLeaf: useIsLeaf,
     );
     _releaseRefCounted = libs.cbl.lookupFunction<_CBL_Release, _CBL_Release>(
       'CBL_Release',
+      isLeaf: useIsLeaf,
     );
     _getErrorMessage = libs.cblDart
         .lookupFunction<_CBLDart_CBLError_Message, _CBLDart_CBLError_Message>(
       'CBLDart_CBLError_Message',
+      isLeaf: useIsLeaf,
     );
     _removeListener =
         libs.cbl.lookupFunction<_CBLListener_Remove_C, _CBLListener_Remove>(
       'CBLListener_Remove',
+      isLeaf: useIsLeaf,
     );
   }
 

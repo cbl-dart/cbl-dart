@@ -13,7 +13,7 @@ import 'utils.dart';
 
 late final _sliceBindings = CBLBindings.instance.fleece.slice;
 
-/// A contiguous area of native memory, whose livetime is tied to some other
+/// A contiguous area of native memory, whose lifetime is tied to some other
 /// object.
 ///
 /// [Slice]s are expected to be immutable.

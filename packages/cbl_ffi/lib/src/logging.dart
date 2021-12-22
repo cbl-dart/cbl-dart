@@ -177,35 +177,43 @@ class LoggingBindings extends Bindings {
     _logMessage = libs.cblDart
         .lookupFunction<_CBLDart_CBL_LogMessage_C, _CBLDart_CBL_LogMessage>(
       'CBLDart_CBL_LogMessage',
+      isLeaf: useIsLeaf,
     );
     _consoleLevel =
         libs.cbl.lookupFunction<_CBLLog_ConsoleLevel_C, _CBLLog_ConsoleLevel>(
       'CBLLog_ConsoleLevel',
+      isLeaf: useIsLeaf,
     );
     _setConsoleLevel = libs.cbl
         .lookupFunction<_CBLLog_SetConsoleLevel_C, _CBLLog_SetConsoleLevel>(
       'CBLLog_SetConsoleLevel',
+      isLeaf: useIsLeaf,
     );
     _setCallbackLevel = libs.cblDart.lookupFunction<
         _CBLDart_CBLLog_SetCallbackLevel_C, _CBLDart_CBLLog_SetCallbackLevel>(
       'CBLDart_CBLLog_SetCallbackLevel',
+      isLeaf: useIsLeaf,
     );
     _setCallback = libs.cblDart.lookupFunction<_CBLDart_CBLLog_SetCallback_C,
         _CBLDart_CBLLog_SetCallback>(
       'CBLDart_CBLLog_SetCallback',
+      isLeaf: useIsLeaf,
     );
     _setFileConfig = libs.cblDart.lookupFunction<
         _CBLDart_CBLLog_SetFileConfig_C, _CBLDart_CBLLog_SetFileConfig>(
       'CBLDart_CBLLog_SetFileConfig',
+      isLeaf: useIsLeaf,
     );
     _getFileConfig = libs.cblDart.lookupFunction<_CBLDart_CBLLog_GetFileConfig,
         _CBLDart_CBLLog_GetFileConfig>(
       'CBLDart_CBLLog_GetFileConfig',
+      isLeaf: useIsLeaf,
     );
     _setSentryBreadcrumbs = libs.cblDart.lookupFunction<
         _CBLDart_CBLLog_SetSentryBreadcrumbs_C,
         _CBLDart_CBLLog_SetSentryBreadcrumbs>(
       'CBLDart_CBLLog_SetSentryBreadcrumbs',
+      isLeaf: useIsLeaf,
     );
   }
 

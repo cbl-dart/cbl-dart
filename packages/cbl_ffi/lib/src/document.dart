@@ -29,22 +29,27 @@ class DocumentBindings extends Bindings {
   DocumentBindings(Bindings parent) : super(parent) {
     _id = libs.cblDart.lookupFunction<_CBLDocument_ID, _CBLDocument_ID>(
       'CBLDart_CBLDocument_ID',
+      isLeaf: useIsLeaf,
     );
     _revisionId = libs.cblDart
         .lookupFunction<_CBLDocument_RevisionID, _CBLDocument_RevisionID>(
       'CBLDart_CBLDocument_RevisionID',
+      isLeaf: useIsLeaf,
     );
     _sequence =
         libs.cbl.lookupFunction<_CBLDocument_Sequence_C, _CBLDocument_Sequence>(
       'CBLDocument_Sequence',
+      isLeaf: useIsLeaf,
     );
     _properties = libs.cbl
         .lookupFunction<_CBLDocument_Properties, _CBLDocument_Properties>(
       'CBLDocument_Properties',
+      isLeaf: useIsLeaf,
     );
     _createJSON = libs.cblDart.lookupFunction<_CBLDart_CBLDocument_CreateJSON,
         _CBLDart_CBLDocument_CreateJSON>(
       'CBLDart_CBLDocument_CreateJSON',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -107,22 +112,27 @@ class MutableDocumentBindings extends Bindings {
     _createWithID = libs.cblDart.lookupFunction<
         _CBLDart_CBLDocument_CreateWithID, _CBLDart_CBLDocument_CreateWithID>(
       'CBLDart_CBLDocument_CreateWithID',
+      isLeaf: useIsLeaf,
     );
     _mutableCopy = libs.cbl
         .lookupFunction<_CBLDocument_MutableCopy, _CBLDocument_MutableCopy>(
       'CBLDocument_MutableCopy',
+      isLeaf: useIsLeaf,
     );
     _mutableProperties = libs.cbl.lookupFunction<_CBLDocument_MutableProperties,
         _CBLDocument_MutableProperties>(
       'CBLDocument_MutableProperties',
+      isLeaf: useIsLeaf,
     );
     _setProperties = libs.cbl.lookupFunction<_CBLDocument_SetProperties_C,
         _CBLDocument_SetProperties>(
       'CBLDocument_SetProperties',
+      isLeaf: useIsLeaf,
     );
     _setJSON = libs.cblDart.lookupFunction<_CBLDocument_SetPropertiesAsJSON_C,
         _CBLDart_CBLDocument_SetJSON>(
       'CBLDart_CBLDocument_SetJSON',
+      isLeaf: useIsLeaf,
     );
   }
 

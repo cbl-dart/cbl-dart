@@ -53,34 +53,43 @@ class BlobBindings extends Bindings {
     _createWithData = libs.cblDart.lookupFunction<
         _CBLDart_CBLBlob_CreateWithData, _CBLDart_CBLBlob_CreateWithData>(
       'CBLDart_CBLBlob_CreateWithData',
+      isLeaf: useIsLeaf,
     );
     _isBlob = libs.cbl.lookupFunction<_FLDict_IsBlob_C, _FLDict_IsBlob>(
       'FLDict_IsBlob',
+      isLeaf: useIsLeaf,
     );
     _getBlob = libs.cbl.lookupFunction<_FLDict_GetBlob, _FLDict_GetBlob>(
       'FLDict_GetBlob',
+      isLeaf: useIsLeaf,
     );
     _length = libs.cbl.lookupFunction<_CBLBlob_Length_C, _CBLBlob_Length>(
       'CBLBlob_Length',
+      isLeaf: useIsLeaf,
     );
     _digest = libs.cblDart
         .lookupFunction<_CBLDart_CBLBlob_Digest, _CBLDart_CBLBlob_Digest>(
       'CBLDart_CBLBlob_Digest',
+      isLeaf: useIsLeaf,
     );
     _contentType = libs.cblDart.lookupFunction<_CBLDart_CBLBlob_ContentType,
         _CBLDart_CBLBlob_ContentType>(
       'CBLDart_CBLBlob_ContentType',
+      isLeaf: useIsLeaf,
     );
     _content = libs.cblDart
         .lookupFunction<_CBLDart_CBLBlob_Content, _CBLDart_CBLBlob_Content>(
       'CBLDart_CBLBlob_Content',
+      isLeaf: useIsLeaf,
     );
     _properties =
         libs.cbl.lookupFunction<_CBLBlob_Properties, _CBLBlob_Properties>(
       'CBLBlob_Properties',
+      isLeaf: useIsLeaf,
     );
     _setBlob = libs.cbl.lookupFunction<_FLSlot_SetBlob_C, _FLSlot_SetBlob>(
       'FLSlot_SetBlob',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -164,6 +173,7 @@ class BlobReadStreamBindings extends Bindings {
     _openContentStream = libs.cbl
         .lookupFunction<_CBLBlob_OpenContentStream, _CBLBlob_OpenContentStream>(
       'CBLBlob_OpenContentStream',
+      isLeaf: useIsLeaf,
     );
     _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_BindBlobReadStreamToDartObject_C,
@@ -173,10 +183,12 @@ class BlobReadStreamBindings extends Bindings {
     _read = libs.cblDart.lookupFunction<_CBLDart_CBLBlobReader_Read_C,
         _CBLDart_CBLBlobReader_Read>(
       'CBLDart_CBLBlobReader_Read',
+      isLeaf: useIsLeaf,
     );
     _close =
         libs.cbl.lookupFunction<_CBLBlobReader_Close_C, _CBLBlobReader_Close>(
       'CBLBlobReader_Close',
+      isLeaf: useIsLeaf,
     );
   }
 
@@ -253,18 +265,22 @@ class BlobWriteStreamBindings extends Bindings {
     _create =
         libs.cbl.lookupFunction<_CBLBlobWriter_Create, _CBLBlobWriter_Create>(
       'CBLBlobWriter_Create',
+      isLeaf: useIsLeaf,
     );
     _close =
         libs.cbl.lookupFunction<_CBLBlobWriter_Close_C, _CBLBlobWriter_Close>(
       'CBLBlobWriter_Close',
+      isLeaf: useIsLeaf,
     );
     _write =
         libs.cbl.lookupFunction<_CBLBlobWriter_Write_C, _CBLBlobWriter_Write>(
       'CBLBlobWriter_Write',
+      isLeaf: useIsLeaf,
     );
     _createBlobWithStream = libs.cblDart.lookupFunction<
         _CBLDart_CBLBlob_CreateWithStream, _CBLDart_CBLBlob_CreateWithStream>(
       'CBLDart_CBLBlob_CreateWithStream',
+      isLeaf: useIsLeaf,
     );
   }
 

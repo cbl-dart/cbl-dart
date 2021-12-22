@@ -10,6 +10,9 @@ import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
 
+/// Wether to use the `isLeaf` flag when looking up native functions.
+const useIsLeaf = true;
+
 abstract class Bindings {
   Bindings(Bindings parent) : libs = parent.libs {
     parent._children.add(this);

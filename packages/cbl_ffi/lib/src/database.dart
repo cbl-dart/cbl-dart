@@ -429,28 +429,34 @@ class DatabaseBindings extends Bindings {
           _CBLDart_CBLEncryptionKey_FromPassword_C,
           _CBLDart_CBLEncryptionKey_FromPassword>(
         'CBLDart_CBLEncryptionKey_FromPassword',
+        isLeaf: useIsLeaf,
       );
     }
     _copyDatabase = libs.cblDart
         .lookupFunction<_CBLDart_CBL_CopyDatabase_C, _CBLDart_CBL_CopyDatabase>(
       'CBLDart_CBL_CopyDatabase',
+      isLeaf: useIsLeaf,
     );
     _deleteDatabase = libs.cblDart.lookupFunction<_CBLDart_CBL_DeleteDatabase_C,
         _CBLDart_CBL_DeleteDatabase>(
       'CBLDart_CBL_DeleteDatabase',
+      isLeaf: useIsLeaf,
     );
     _databaseExists = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_Exists_C,
         _CBLDart_CBLDatabase_Exists>(
       'CBLDart_CBL_DatabaseExists',
+      isLeaf: useIsLeaf,
     );
     _defaultConfiguration = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabaseConfiguration_Default,
         _CBLDart_CBLDatabaseConfiguration_Default>(
       'CBLDart_CBLDatabaseConfiguration_Default',
+      isLeaf: useIsLeaf,
     );
     _open = libs.cblDart
         .lookupFunction<_CBLDart_CBLDatabase_Open, _CBLDart_CBLDatabase_Open>(
       'CBLDart_CBLDatabase_Open',
+      isLeaf: useIsLeaf,
     );
     _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_BindDatabaseToDartObject_C, _CBLDart_BindDatabaseToDartObject>(
@@ -459,99 +465,121 @@ class DatabaseBindings extends Bindings {
     _close = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_Close_C,
         _CBLDart_CBLDatabase_Close>(
       'CBLDart_CBLDatabase_Close',
+      isLeaf: useIsLeaf,
     );
     _performMaintenance = libs.cbl.lookupFunction<
         _CBLDatabase_PerformMaintenance_C, _CBLDatabase_PerformMaintenance>(
       'CBLDatabase_PerformMaintenance',
+      isLeaf: useIsLeaf,
     );
     _beginTransaction = libs.cbl.lookupFunction<_CBLDatabase_BeginTransaction_C,
         _CBLDatabase_BeginTransaction>(
       'CBLDatabase_BeginTransaction',
+      isLeaf: useIsLeaf,
     );
     _endTransaction = libs.cbl.lookupFunction<_CBLDatabase_EndTransaction_C,
         _CBLDatabase_EndTransaction>(
       'CBLDatabase_EndTransaction',
+      isLeaf: useIsLeaf,
     );
     if (libs.enterpriseEdition) {
       _changeEncryptionKey = libs.cbl.lookupFunction<
           _CBLDatabase_ChangeEncryptionKey_C, _CBLDatabase_ChangeEncryptionKey>(
         'CBLDatabase_ChangeEncryptionKey',
+        isLeaf: useIsLeaf,
       );
     }
     _name = libs.cblDart
         .lookupFunction<_CBLDart_CBLDatabase_Name, _CBLDart_CBLDatabase_Name>(
       'CBLDart_CBLDatabase_Name',
+      isLeaf: useIsLeaf,
     );
     _path = libs.cblDart
         .lookupFunction<_CBLDart_CBLDatabase_Path, _CBLDart_CBLDatabase_Path>(
       'CBLDart_CBLDatabase_Path',
+      isLeaf: useIsLeaf,
     );
     _count = libs.cbl.lookupFunction<_CBLDatabase_Count_C, _CBLDatabase_Count>(
       'CBLDatabase_Count',
+      isLeaf: useIsLeaf,
     );
     _getDocument = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_GetDocument,
         _CBLDart_CBLDatabase_GetDocument>(
       'CBLDart_CBLDatabase_GetDocument',
+      isLeaf: useIsLeaf,
     );
     _getMutableDocument = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_GetMutableDocument,
         _CBLDart_CBLDatabase_GetMutableDocument>(
       'CBLDart_CBLDatabase_GetMutableDocument',
+      isLeaf: useIsLeaf,
     );
     _saveDocumentWithConcurrencyControl = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl_C,
         _CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl>(
       'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
+      isLeaf: useIsLeaf,
     );
     _deleteDocumentWithConcurrencyControl = libs.cbl.lookupFunction<
         _CBLDatabase_DeleteDocumentWithConcurrencyControl_C,
         _CBLDatabase_DeleteDocumentWithConcurrencyControl>(
       'CBLDatabase_DeleteDocumentWithConcurrencyControl',
+      isLeaf: useIsLeaf,
     );
     _purgeDocumentByID = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_PurgeDocumentByID_C,
         _CBLDart_CBLDatabase_PurgeDocumentByID>(
       'CBLDart_CBLDatabase_PurgeDocumentByID',
+      isLeaf: useIsLeaf,
     );
     _getDocumentExpiration = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_GetDocumentExpiration_C,
         _CBLDart_CBLDatabase_GetDocumentExpiration>(
       'CBLDart_CBLDatabase_GetDocumentExpiration',
+      isLeaf: useIsLeaf,
     );
     _setDocumentExpiration = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_SetDocumentExpiration_C,
         _CBLDart_CBLDatabase_SetDocumentExpiration>(
       'CBLDart_CBLDatabase_SetDocumentExpiration',
+      isLeaf: useIsLeaf,
     );
     _addDocumentChangeListener = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_AddDocumentChangeListener_C,
         _CBLDart_CBLDatabase_AddDocumentChangeListener>(
       'CBLDart_CBLDatabase_AddDocumentChangeListener',
+      isLeaf: useIsLeaf,
     );
     _addChangeListener = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_AddChangeListener_C,
         _CBLDart_CBLDatabase_AddChangeListener>(
       'CBLDart_CBLDatabase_AddChangeListener',
+      isLeaf: useIsLeaf,
     );
     _createIndex = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_CreateIndex_C, _CBLDart_CBLDatabase_CreateIndex>(
       'CBLDart_CBLDatabase_CreateIndex',
+      isLeaf: useIsLeaf,
     );
     _deleteIndex = libs.cblDart.lookupFunction<
         _CBLDart_CBLDatabase_DeleteIndex_C, _CBLDart_CBLDatabase_DeleteIndex>(
       'CBLDart_CBLDatabase_DeleteIndex',
+      isLeaf: useIsLeaf,
     );
     _indexNames = libs.cbl
         .lookupFunction<_CBLDatabase_GetIndexNames, _CBLDatabase_GetIndexNames>(
       'CBLDatabase_GetIndexNames',
+      isLeaf: useIsLeaf,
     );
     _getBlob =
         libs.cbl.lookupFunction<_CBLDatabase_GetBlob, _CBLDatabase_GetBlob>(
       'CBLDatabase_GetBlob',
+      isLeaf: useIsLeaf,
     );
     _saveBlob =
         libs.cbl.lookupFunction<_CBLDatabase_SaveBlob_C, _CBLDatabase_SaveBlob>(
       'CBLDatabase_SaveBlob',
+      isLeaf: useIsLeaf,
     );
   }
 

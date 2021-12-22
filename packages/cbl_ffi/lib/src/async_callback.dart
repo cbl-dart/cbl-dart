@@ -44,11 +44,13 @@ class AsyncCallbackBindings extends Bindings {
     _close = libs.cblDart.lookupFunction<_CBLDart_AsyncCallback_Close_C,
         _CBLDart_AsyncCallback_Close>(
       'CBLDart_AsyncCallback_Close',
+      isLeaf: useIsLeaf,
     );
     _callForTest = libs.cblDart.lookupFunction<
         _CBLDart_AsyncCallback_CallForTest_C,
         _CBLDart_AsyncCallback_CallForTest>(
       'CBLDart_AsyncCallback_CallForTest',
+      isLeaf: useIsLeaf,
     );
   }
 
