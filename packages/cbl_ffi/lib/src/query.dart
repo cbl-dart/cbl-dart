@@ -46,7 +46,8 @@ typedef _CBLQuery_SetParameters = void Function(
 );
 
 typedef _CBLQuery_Parameters = Pointer<FLDict> Function(
-    Pointer<CBLQuery> query);
+  Pointer<CBLQuery> query,
+);
 
 typedef _CBLQuery_Execute = Pointer<CBLResultSet> Function(
   Pointer<CBLQuery> query,
@@ -192,8 +193,8 @@ class QueryBindings extends Bindings {
 
 class CBLResultSet extends Opaque {}
 
-typedef _CBLResultSet_Next_C = Uint8 Function(Pointer<CBLResultSet> resultSet);
-typedef _CBLResultSet_Next = int Function(Pointer<CBLResultSet> resultSet);
+typedef _CBLResultSet_Next_C = Bool Function(Pointer<CBLResultSet> resultSet);
+typedef _CBLResultSet_Next = bool Function(Pointer<CBLResultSet> resultSet);
 
 typedef _CBLResultSet_ValueAtIndex_C = Pointer<FLValue> Function(
   Pointer<CBLResultSet> resultSet,
@@ -261,7 +262,7 @@ class ResultSetBindings extends Bindings {
   late final _CBLResultSet_ResultDict _resultDict;
   late final _CBLResultSet_GetQuery _getQuery;
 
-  bool next(Pointer<CBLResultSet> resultSet) => _next(resultSet).toBool();
+  bool next(Pointer<CBLResultSet> resultSet) => _next(resultSet);
 
   Pointer<FLValue> valueAtIndex(Pointer<CBLResultSet> resultSet, int index) =>
       _valueAtIndex(resultSet, index);

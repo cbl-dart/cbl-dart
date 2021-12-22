@@ -39,8 +39,7 @@ typedef struct _CBLDart_AsyncCallback *CBLDart_AsyncCallback;
 
 CBLDART_EXPORT
 CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
-                                                Dart_Port sendPort,
-                                                uint8_t debug);
+                                                Dart_Port sendPort, bool debug);
 
 CBLDART_EXPORT
 void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback);
@@ -71,7 +70,7 @@ CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error);
 CBLDART_EXPORT
 void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
                                            CBLRefCounted *refCounted,
-                                           uint8_t retain, char *debugName);
+                                           bool retain, char *debugName);
 
 /**
  * Sets whether information to debug CBLRefCounted is printed.
@@ -79,7 +78,7 @@ void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
  * This features is only functional in debug builds.
  */
 CBLDART_EXPORT
-void CBLDart_SetDebugRefCounted(uint8_t enabled);
+void CBLDart_SetDebugRefCounted(bool enabled);
 
 // === Log
 
@@ -88,7 +87,7 @@ void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
                             CBLDart_FLString message);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
+bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback);
 
 CBLDART_EXPORT
 void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level);
@@ -98,12 +97,12 @@ typedef struct {
   CBLDart_FLString directory;
   uint32_t maxRotateCount;
   uint64_t maxSize;
-  uint8_t usePlaintext;
+  bool usePlaintext;
 } CBLDart_CBLLogFileConfiguration;
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
-                                     CBLError *errorOut);
+bool CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
+                                  CBLError *errorOut);
 
 CBLDART_EXPORT
 CBLDart_CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig();
@@ -149,19 +148,19 @@ CBLDART_EXPORT
 CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default();
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBL_DatabaseExists(CBLDart_FLString name,
-                                   CBLDart_FLString inDirectory);
+bool CBLDart_CBL_DatabaseExists(CBLDart_FLString name,
+                                CBLDart_FLString inDirectory);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
-                                 CBLDart_FLString toName,
-                                 CBLDart_CBLDatabaseConfiguration *config,
-                                 CBLError *errorOut);
+bool CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
+                              CBLDart_FLString toName,
+                              CBLDart_CBLDatabaseConfiguration *config,
+                              CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
-                                   CBLDart_FLString inDirectory,
-                                   CBLError *errorOut);
+bool CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
+                                CBLDart_FLString inDirectory,
+                                CBLError *errorOut);
 
 CBLDART_EXPORT
 CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
@@ -173,8 +172,8 @@ void CBLDart_BindDatabaseToDartObject(Dart_Handle object, CBLDatabase *database,
                                       char *debugName);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
-                                  CBLError *errorOut);
+bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
+                               CBLError *errorOut);
 
 CBLDART_EXPORT CBLDart_FLString CBLDart_CBLDatabase_Name(CBLDatabase *db);
 
@@ -195,14 +194,14 @@ CBLDocument *CBLDart_CBLDatabase_GetMutableDocument(CBLDatabase *database,
                                                     CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
+bool CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
     CBLDatabase *db, CBLDocument *doc, CBLConcurrencyControl concurrency,
     CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
-                                              CBLDart_FLString docID,
-                                              CBLError *errorOut);
+bool CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
+                                           CBLDart_FLString docID,
+                                           CBLError *errorOut);
 
 CBLDART_EXPORT
 CBLTimestamp CBLDart_CBLDatabase_GetDocumentExpiration(CBLDatabase *db,
@@ -210,10 +209,10 @@ CBLTimestamp CBLDart_CBLDatabase_GetDocumentExpiration(CBLDatabase *db,
                                                        CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
-                                                  CBLDart_FLSlice docID,
-                                                  CBLTimestamp expiration,
-                                                  CBLError *errorOut);
+bool CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
+                                               CBLDart_FLSlice docID,
+                                               CBLTimestamp expiration,
+                                               CBLError *errorOut);
 
 CBLDART_EXPORT
 void CBLDart_CBLDatabase_AddDocumentChangeListener(
@@ -233,18 +232,18 @@ struct CBLDart_CBLIndexSpec {
   CBLDart_IndexType type;
   CBLQueryLanguage expressionLanguage;
   CBLDart_FLString expressions;
-  uint8_t ignoreAccents;
+  bool ignoreAccents;
   CBLDart_FLString language;
 };
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
-                                        CBLDart_CBLIndexSpec indexSpec,
-                                        CBLError *errorOut);
+bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
+                                     CBLDart_CBLIndexSpec indexSpec,
+                                     CBLError *errorOut);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
-                                        CBLError *errorOut);
+bool CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
+                                     CBLError *errorOut);
 
 // === Query
 
@@ -323,8 +322,8 @@ struct CBLDart_ReplicatorConfiguration {
   CBLDatabase *database;
   CBLEndpoint *endpoint;
   CBLReplicatorType replicatorType;
-  uint8_t continuous;
-  uint8_t disableAutoPurge;
+  bool continuous;
+  bool disableAutoPurge;
   uint32_t maxAttempts;
   uint32_t maxAttemptWaitTime;
   uint32_t heartbeat;
@@ -350,9 +349,9 @@ void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
                                         char *debugName);
 
 CBLDART_EXPORT
-uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
-                                                CBLDart_FLString docId,
-                                                CBLError *errorOut);
+bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
+                                             CBLDart_FLString docId,
+                                             CBLError *errorOut);
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
                                              CBLDart_AsyncCallback listenerId);

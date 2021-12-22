@@ -2,7 +2,6 @@ import 'dart:ffi';
 import 'dart:isolate';
 
 import 'bindings.dart';
-import 'utils.dart';
 
 class CBLDartAsyncCallback extends Opaque {}
 
@@ -10,13 +9,13 @@ typedef _CBLDart_AsyncCallback_New_C = Pointer<CBLDartAsyncCallback> Function(
   Uint32 id,
   Handle dartCallback,
   Int64 sendPort,
-  Uint8 debug,
+  Bool debug,
 );
 typedef _CBLDart_AsyncCallback_New = Pointer<CBLDartAsyncCallback> Function(
   int id,
   Object dartCallback,
   int sendPort,
-  int debug,
+  bool debug,
 );
 
 typedef _CBLDart_AsyncCallback_Close_C = Void Function(
@@ -64,7 +63,7 @@ class AsyncCallbackBindings extends Bindings {
     SendPort sendPort, {
     required bool debug,
   }) =>
-      _new(id, dartCallback, sendPort.nativePort, debug.toInt());
+      _new(id, dartCallback, sendPort.nativePort, debug);
 
   void close(Pointer<CBLDartAsyncCallback> callback) {
     _close(callback);

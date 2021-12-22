@@ -80,10 +80,10 @@ class LogCallbackMessage {
   final String message;
 }
 
-typedef _CBLDart_CBLLog_SetCallback_C = Uint8 Function(
+typedef _CBLDart_CBLLog_SetCallback_C = Bool Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
-typedef _CBLDart_CBLLog_SetCallback = int Function(
+typedef _CBLDart_CBLLog_SetCallback = bool Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
 
@@ -99,8 +99,8 @@ class _CBLDart_CBLLogFileConfiguration extends Struct {
   @Uint64()
   external int maxSize;
 
-  @Uint8()
-  external int usePlainText;
+  @Bool()
+  external bool usePlainText;
 }
 
 extension on _CBLDart_CBLLogFileConfiguration {
@@ -110,7 +110,7 @@ extension on _CBLDart_CBLLogFileConfiguration {
         directory: directory.toDartString()!,
         maxRotateCount: maxRotateCount,
         maxSize: maxSize,
-        usePlainText: usePlainText.toBool(),
+        usePlainText: usePlainText,
       );
 }
 
@@ -157,11 +157,11 @@ class CBLLogFileConfiguration {
           usePlainText == other.usePlainText;
 }
 
-typedef _CBLDart_CBLLog_SetFileConfig_C = Uint8 Function(
+typedef _CBLDart_CBLLog_SetFileConfig_C = Bool Function(
   Pointer<_CBLDart_CBLLogFileConfiguration> config,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLLog_SetFileConfig = int Function(
+typedef _CBLDart_CBLLog_SetFileConfig = bool Function(
   Pointer<_CBLDart_CBLLogFileConfiguration> config,
   Pointer<CBLError> errorOut,
 );
@@ -169,8 +169,8 @@ typedef _CBLDart_CBLLog_SetFileConfig = int Function(
 typedef _CBLDart_CBLLog_GetFileConfig
     = Pointer<_CBLDart_CBLLogFileConfiguration> Function();
 
-typedef _CBLDart_CBLLog_SetSentryBreadcrumbs_C = Uint8 Function(Uint8 enabled);
-typedef _CBLDart_CBLLog_SetSentryBreadcrumbs = int Function(int enabled);
+typedef _CBLDart_CBLLog_SetSentryBreadcrumbs_C = Bool Function(Bool enabled);
+typedef _CBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
 class LoggingBindings extends Bindings {
   LoggingBindings(Bindings parent) : super(parent) {
@@ -249,7 +249,7 @@ class LoggingBindings extends Bindings {
   }
 
   bool setCallback(Pointer<CBLDartAsyncCallback> callback) =>
-      _setCallback(callback).toBool();
+      _setCallback(callback);
 
   void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withZoneArena(() {
@@ -264,7 +264,7 @@ class LoggingBindings extends Bindings {
       _getFileConfig().toNullable()?.ref.toCBLLogFileConfiguration();
 
   bool setSentryBreadcrumbs({required bool enabled}) =>
-      _setSentryBreadcrumbs(enabled.toInt()).toBool();
+      _setSentryBreadcrumbs(enabled);
 
   Pointer<_CBLDart_CBLLogFileConfiguration> _logFileConfig(
     CBLLogFileConfiguration? config,
@@ -279,7 +279,7 @@ class LoggingBindings extends Bindings {
       ..directory = config.directory.toFLStringInArena().ref
       ..maxRotateCount = config.maxRotateCount
       ..maxSize = config.maxSize
-      ..usePlainText = config.usePlainText.toInt();
+      ..usePlainText = config.usePlainText;
 
     return result;
   }

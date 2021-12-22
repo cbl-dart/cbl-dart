@@ -112,12 +112,10 @@ class _CBLDartReplicatorConfiguration extends Struct {
   @Uint8()
   // ignore: unused_field
   external int _replicatorType;
-  @Uint8()
-  // ignore: unused_field
-  external int _continuous;
-  @Uint8()
-  // ignore: unused_field
-  external int _disableAutoPurge;
+  @Bool()
+  external bool continuous;
+  @Bool()
+  external bool disableAutoPurge;
   @Uint32()
   external int maxAttempts;
   @Uint32()
@@ -139,8 +137,6 @@ class _CBLDartReplicatorConfiguration extends Struct {
 extension on _CBLDartReplicatorConfiguration {
   set replicatorType(CBLReplicatorType value) =>
       _replicatorType = value.toInt();
-  set continuous(bool value) => _continuous = value.toInt();
-  set disableAutoPurge(bool value) => _disableAutoPurge = value.toInt();
 }
 
 class CBLReplicatorConfiguration {
@@ -240,11 +236,11 @@ typedef _CBLDart_BindReplicatorToDartObject = void Function(
 
 typedef _CBLReplicator_Start_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Uint8 resetCheckpoint,
+  Bool resetCheckpoint,
 );
 typedef _CBLReplicator_Start = void Function(
   Pointer<CBLReplicator> replicator,
-  int resetCheckpoint,
+  bool resetCheckpoint,
 );
 
 typedef _CBLReplicator_Stop_C = Void Function(
@@ -256,20 +252,20 @@ typedef _CBLReplicator_Stop = void Function(
 
 typedef _CBLReplicator_SetHostReachable_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Uint8 reachable,
+  Bool reachable,
 );
 typedef _CBLReplicator_SetHostReachable = void Function(
   Pointer<CBLReplicator> replicator,
-  int reachable,
+  bool reachable,
 );
 
 typedef _CBLReplicator_SetSuspended_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Uint8 suspended,
+  Bool suspended,
 );
 typedef _CBLReplicator_SetSuspended = void Function(
   Pointer<CBLReplicator> replicator,
-  int suspended,
+  bool suspended,
 );
 
 // === Status and Progress =====================================================
@@ -343,12 +339,12 @@ typedef _CBLReplicator_PendingDocumentIDs = Pointer<FLDict> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLReplicator_IsDocumentPending_C = Uint8 Function(
+typedef _CBLDart_CBLReplicator_IsDocumentPending_C = Bool Function(
   Pointer<CBLReplicator> replicator,
   FLString docID,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLReplicator_IsDocumentPending = int Function(
+typedef _CBLDart_CBLReplicator_IsDocumentPending = bool Function(
   Pointer<CBLReplicator> replicator,
   FLString docID,
   Pointer<CBLError> errorOut,
@@ -630,7 +626,7 @@ class ReplicatorBindings extends Bindings {
     Pointer<CBLReplicator> replicator, {
     required bool resetCheckpoint,
   }) {
-    _start(replicator, resetCheckpoint.toInt());
+    _start(replicator, resetCheckpoint);
   }
 
   void stop(Pointer<CBLReplicator> replicator) {
@@ -641,14 +637,14 @@ class ReplicatorBindings extends Bindings {
     Pointer<CBLReplicator> replicator, {
     required bool reachable,
   }) {
-    _setHostReachable(replicator, reachable.toInt());
+    _setHostReachable(replicator, reachable);
   }
 
   void setSuspended(
     Pointer<CBLReplicator> replicator, {
     required bool suspended,
   }) {
-    _setSuspended(replicator, suspended.toInt());
+    _setSuspended(replicator, suspended);
   }
 
   CBLReplicatorStatus status(Pointer<CBLReplicator> replicator) =>
@@ -665,7 +661,7 @@ class ReplicatorBindings extends Bindings {
             replicator,
             docID.toFLStringInArena().ref,
             globalCBLError,
-          ).checkCBLError().toBool());
+          ).checkCBLError());
 
   void addChangeListener(
     Pointer<CBLReplicator> replicator,

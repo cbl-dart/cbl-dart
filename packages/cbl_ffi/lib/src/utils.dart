@@ -14,14 +14,6 @@ extension AnyExt<T> on T {
 
 // === Conversion ==============================================================
 
-extension IntBoolExt on int {
-  bool toBool() => this == 1;
-}
-
-extension BoolIntExt on bool {
-  int toInt() => this ? 1 : 0;
-}
-
 final _flStringSizeOf = sizeOf<FLString>();
 final _flStringSizeOfAligned = _flStringSizeOf + (_flStringSizeOf % 8);
 

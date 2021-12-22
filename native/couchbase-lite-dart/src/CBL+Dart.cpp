@@ -48,7 +48,7 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 
 CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
                                                 Dart_Port sendPort,
-                                                uint8_t debug) {
+                                                bool debug) {
   return ASYNC_CALLBACK_TO_C(
       new CBLDart::AsyncCallback(id, object, sendPort, debug));
 }
@@ -145,8 +145,8 @@ inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
 }
 
 inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
-    Dart_Handle object, CBLRefCounted *refCounted, uint8_t retain,
-    char *debugName, Dart_HandleFinalizer handleFinalizer) {
+    Dart_Handle object, CBLRefCounted *refCounted, bool retain, char *debugName,
+    Dart_HandleFinalizer handleFinalizer) {
 #ifdef DEBUG
   if (debugName) {
     std::scoped_lock lock(cblRefCountedDebugMutex);
@@ -171,12 +171,12 @@ static void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data,
 
 void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
                                            CBLRefCounted *refCounted,
-                                           uint8_t retain, char *debugName) {
+                                           bool retain, char *debugName) {
   CBLDart_BindCBLRefCountedToDartObject_Impl(
       object, refCounted, retain, debugName, CBLDart_CBLRefCountedFinalizer);
 }
 
-void CBLDart_SetDebugRefCounted(uint8_t enabled) {
+void CBLDart_SetDebugRefCounted(bool enabled) {
 #ifdef DEBUG
   std::scoped_lock lock(cblRefCountedDebugMutex);
   cblRefCountedDebugEnabled = enabled;
@@ -288,7 +288,7 @@ static void CBLDart_LogCallbackFinalizer(void *context) {
   CBLDart_UpdateEffectiveLogCallbackLevel();
 }
 
-uint8_t CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
+bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
   std::unique_lock lock(loggingMutex);
   auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
 
@@ -315,8 +315,8 @@ void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level) {
   CBLDart_UpdateEffectiveLogCallbackLevel();
 }
 
-uint8_t CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
-                                     CBLError *errorOut) {
+bool CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
+                                  CBLError *errorOut) {
   std::unique_lock lock(loggingMutex);
 
   if (!config) {
@@ -508,8 +508,8 @@ static void CBLDart_RegisterOpenDatabase(CBLDatabase *database) {
   openDatabases.push_back(database);
 }
 
-uint8_t CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
-                                  CBLError *errorOut) {
+bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
+                               CBLError *errorOut) {
   {
     std::scoped_lock lock(openDatabasesMutex);
     // Check if the database is still open.
@@ -535,24 +535,24 @@ CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
       CBLDatabaseConfiguration_Default());
 }
 
-uint8_t CBLDart_CBL_DatabaseExists(CBLDart_FLString name,
-                                   CBLDart_FLString inDirectory) {
+bool CBLDart_CBL_DatabaseExists(CBLDart_FLString name,
+                                CBLDart_FLString inDirectory) {
   return CBL_DatabaseExists(CBLDart_FLStringFromDart(name),
                             CBLDart_FLStringFromDart(inDirectory));
 }
 
-uint8_t CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
-                                 CBLDart_FLString toName,
-                                 CBLDart_CBLDatabaseConfiguration *config,
-                                 CBLError *errorOut) {
+bool CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
+                              CBLDart_FLString toName,
+                              CBLDart_CBLDatabaseConfiguration *config,
+                              CBLError *errorOut) {
   auto config_ = CBLDart_CBLDatabaseConfigurationFromDart(*config);
   return CBL_CopyDatabase(CBLDart_FLStringFromDart(fromPath),
                           CBLDart_FLStringFromDart(toName), &config_, errorOut);
 }
 
-uint8_t CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
-                                   CBLDart_FLString inDirectory,
-                                   CBLError *errorOut) {
+bool CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
+                                CBLDart_FLString inDirectory,
+                                CBLError *errorOut) {
   return CBL_DeleteDatabase(CBLDart_FLStringFromDart(name),
                             CBLDart_FLStringFromDart(inDirectory), errorOut);
 }
@@ -622,16 +622,16 @@ CBLDocument *CBLDart_CBLDatabase_GetMutableDocument(CBLDatabase *database,
       database, CBLDart_FLStringFromDart(docID), errorOut);
 }
 
-uint8_t CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
+bool CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
     CBLDatabase *db, CBLDocument *doc, CBLConcurrencyControl concurrency,
     CBLError *errorOut) {
   return CBLDatabase_SaveDocumentWithConcurrencyControl(db, doc, concurrency,
                                                         errorOut);
 }
 
-uint8_t CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
-                                              CBLDart_FLString docID,
-                                              CBLError *errorOut) {
+bool CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
+                                           CBLDart_FLString docID,
+                                           CBLError *errorOut) {
   return CBLDatabase_PurgeDocumentByID(
       database, CBLDart_FLStringFromDart(docID), errorOut);
 }
@@ -643,10 +643,10 @@ CBLTimestamp CBLDart_CBLDatabase_GetDocumentExpiration(CBLDatabase *db,
                                            errorOut);
 }
 
-uint8_t CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
-                                                  CBLDart_FLSlice docID,
-                                                  CBLTimestamp expiration,
-                                                  CBLError *errorOut) {
+bool CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
+                                               CBLDart_FLSlice docID,
+                                               CBLTimestamp expiration,
+                                               CBLError *errorOut) {
   return CBLDatabase_SetDocumentExpiration(db, CBLDart_FLStringFromDart(docID),
                                            expiration, errorOut);
 }
@@ -708,9 +708,9 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
                                                 CBLDart_CBLListenerFinalizer);
 }
 
-uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
-                                        CBLDart_CBLIndexSpec indexSpec,
-                                        CBLError *errorOut) {
+bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
+                                     CBLDart_CBLIndexSpec indexSpec,
+                                     CBLError *errorOut) {
   switch (indexSpec.type) {
     case kCBLDart_IndexTypeValue: {
       CBLValueIndexConfiguration config;
@@ -736,8 +736,8 @@ uint8_t CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
   return 0;
 }
 
-uint8_t CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
-                                        CBLError *errorOut) {
+bool CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
+                                     CBLError *errorOut) {
   return CBLDatabase_DeleteIndex(db, CBLDart_FLStringFromDart(name), errorOut);
 }
 
@@ -1098,9 +1098,9 @@ void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
       CBLDart_ReplicatorFinalizer);
 }
 
-uint8_t CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
-                                                CBLDart_FLString docId,
-                                                CBLError *errorOut) {
+bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
+                                             CBLDart_FLString docId,
+                                             CBLError *errorOut) {
   return CBLReplicator_IsDocumentPending(
       replicator, CBLDart_FLStringFromDart(docId), errorOut);
 }

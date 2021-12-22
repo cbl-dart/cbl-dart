@@ -5,7 +5,7 @@
 
 // === Slice
 
-uint8_t CBLDart_FLSlice_Equal(CBLDart_FLSlice a, CBLDart_FLSlice b) {
+bool CBLDart_FLSlice_Equal(CBLDart_FLSlice a, CBLDart_FLSlice b) {
   return FLSlice_Equal(CBLDart_FLSliceFromDart(a), CBLDart_FLSliceFromDart(b));
 }
 
@@ -32,7 +32,7 @@ static void CBLDart_FLSliceResultFinalizer(void *dart_callback_data,
 
 void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
                                             CBLDart_FLSliceResult slice,
-                                            uint8_t retain) {
+                                            bool retain) {
   auto _slice = new FLSliceResult;
   *_slice = CBLDart_FLSliceResultFromDart(slice);
 
@@ -83,7 +83,7 @@ static void CBLDart_FLValueFinalizer(void *dart_callback_data, void *peer) {
 }
 
 void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
-                                      uint8_t retain) {
+                                      bool retain) {
   if (retain) FLValue_Retain(value);
 
   Dart_NewFinalizableHandle_DL(object, (void *)value, 0,
@@ -102,8 +102,8 @@ CBLDart_FLStringResult CBLDart_FLValue_ToString(FLValue value) {
   return CBLDart_FLStringResultToDart(FLValue_ToString(value));
 }
 
-CBLDart_FLStringResult CBLDart_FLValue_ToJSONX(FLValue value, uint8_t json5,
-                                               uint8_t canonicalForm) {
+CBLDart_FLStringResult CBLDart_FLValue_ToJSONX(FLValue value, bool json5,
+                                               bool canonicalForm) {
   return CBLDart_FLStringResultToDart(
       FLValue_ToJSONX(value, json5, canonicalForm));
 }
@@ -180,9 +180,10 @@ CBLDart_FLStringResult CBLDart_FLData_Dump(CBLDart_FLSlice data) {
       FLData_Dump(CBLDart_FLSliceFromDart(data)));
 }
 
-void CBLDart_FLValue_FromData(CBLDart_FLSlice data, FLTrust trust,
+void CBLDart_FLValue_FromData(CBLDart_FLSlice data, uint8_t trust,
                               CBLDart_LoadedFLValue *out) {
-  auto value = FLValue_FromData(CBLDart_FLSliceFromDart(data), trust);
+  auto value = FLValue_FromData(CBLDart_FLSliceFromDart(data),
+                                static_cast<FLTrust>(trust));
   CBLDart_GetLoadedFLValue(value, out);
 }
 
@@ -304,38 +305,37 @@ void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder) {
 }
 
 FLEncoder CBLDart_FLEncoder_New(uint8_t format, uint64_t reserveSize,
-                                uint8_t uniqueStrings) {
+                                bool uniqueStrings) {
   return FLEncoder_NewWithOptions(static_cast<FLEncoderFormat>(format),
                                   reserveSize, uniqueStrings);
 }
 
-uint8_t CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
-                                          uint32_t index) {
+bool CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
+                                       uint32_t index) {
   return FLEncoder_WriteValue(encoder, FLArray_Get(array, index));
 }
 
-uint8_t CBLDart_FLEncoder_WriteString(FLEncoder encoder,
-                                      CBLDart_FLString value) {
+bool CBLDart_FLEncoder_WriteString(FLEncoder encoder, CBLDart_FLString value) {
   return FLEncoder_WriteString(encoder, CBLDart_FLStringFromDart(value));
 }
 
-uint8_t CBLDart_FLEncoder_WriteData(FLEncoder encoder, CBLDart_FLSlice value) {
+bool CBLDart_FLEncoder_WriteData(FLEncoder encoder, CBLDart_FLSlice value) {
   return FLEncoder_WriteData(encoder, CBLDart_FLSliceFromDart(value));
 }
 
-uint8_t CBLDart_FLEncoder_WriteJSON(FLEncoder encoder, CBLDart_FLString value) {
+bool CBLDart_FLEncoder_WriteJSON(FLEncoder encoder, CBLDart_FLString value) {
   return FLEncoder_ConvertJSON(encoder, CBLDart_FLStringFromDart(value));
 }
 
-uint8_t CBLDart_FLEncoder_BeginArray(FLEncoder encoder, uint64_t reserveCount) {
+bool CBLDart_FLEncoder_BeginArray(FLEncoder encoder, uint64_t reserveCount) {
   return FLEncoder_BeginArray(encoder, reserveCount);
 }
 
-uint8_t CBLDart_FLEncoder_BeginDict(FLEncoder encoder, uint64_t reserveCount) {
+bool CBLDart_FLEncoder_BeginDict(FLEncoder encoder, uint64_t reserveCount) {
   return FLEncoder_BeginDict(encoder, reserveCount);
 }
 
-uint8_t CBLDart_FLEncoder_WriteKey(FLEncoder encoder, CBLDart_FLString key) {
+bool CBLDart_FLEncoder_WriteKey(FLEncoder encoder, CBLDart_FLString key) {
   return FLEncoder_WriteKey(encoder, CBLDart_FLStringFromDart(key));
 }
 
