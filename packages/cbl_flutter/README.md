@@ -88,13 +88,13 @@ import 'package:cbl_dart/cbl_dart.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  setupAll(() async {
+  setUpAll(() async {
     // If no `filesDir` is specified when initializing CouchbaseLiteDart, the
     // working directory is used as the default database directory.
     // By specifying a `filesDir` here, we can ensure that the tests don't
     // create databases in the project directory.
     final tempFilesDir = await Directory.systemTemp.createTemp();
-    CouchbaseLiteDart.init(edition: Edition.community, filesDir: tempFilesDir.path);
+    await CouchbaseLiteDart.init(edition: Edition.community, filesDir: tempFilesDir.path);
   });
 
   test('use a database', () async {
