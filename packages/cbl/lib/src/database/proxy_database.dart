@@ -390,9 +390,10 @@ class ProxyDatabase extends ProxyObject
 class WorkerDatabase extends ProxyDatabase {
   WorkerDatabase._(
     this.worker,
+    CblServiceClient client,
     DatabaseConfiguration config,
     DatabaseState state,
-  ) : super(CblServiceClient(channel: worker.channel), config, state);
+  ) : super(client, config, state);
 
   static Future<WorkerDatabase> open(
     String name, [
@@ -403,9 +404,11 @@ class WorkerDatabase extends ProxyDatabase {
     final worker = CblWorker(debugName: _databaseName(name));
     await worker.start();
 
+    final client = CblServiceClient(channel: worker.channel);
+
     try {
-      final state = await worker.channel.call(OpenDatabase(name, config));
-      return WorkerDatabase._(worker, config, state);
+      final state = await client.channel.call(OpenDatabase(name, config));
+      return WorkerDatabase._(worker, client, config, state);
     } on CouchbaseLiteException {
       await worker.stop();
       rethrow;
