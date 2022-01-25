@@ -576,7 +576,7 @@ abstract class _Message implements Serializable {
 
   @override
   StringMap serialize(SerializationContext context) =>
-      {'conversationId': conversationId, 'context': context};
+      {'conversationId': conversationId, 'context': this.context};
 }
 
 abstract class _RequestMessage extends _Message {
