@@ -10,6 +10,8 @@ import '../replication.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/tracing.dart';
+import '../tracing.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -99,7 +101,10 @@ abstract class Database implements ClosableResource {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-      AsyncDatabase.open(name, config);
+      asyncOperationTracePoint(
+        OpenDatabaseOp(name, config),
+        () => AsyncDatabase.open(name, config),
+      );
 
   /// {@template cbl.Database.openSync}
   /// Opens a Couchbase Lite database with the given [name] and [config],
@@ -112,7 +117,10 @@ abstract class Database implements ClosableResource {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-      SyncDatabase(name, config);
+      syncOperationTracePoint(
+        OpenDatabaseOp(name, config),
+        () => SyncDatabase(name, config),
+      );
 
   /// {@template cbl.Database.remove}
   /// Deletes a database of the given [name] in the given [directory].

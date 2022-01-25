@@ -33,6 +33,7 @@ class CouchbaseLiteDart {
     required Edition edition,
     String? filesDir,
     String? nativeLibrariesDir,
+    TracingDelegate? tracingDelegate,
   }) async {
     final context = filesDir == null ? null : await _initContext(filesDir);
 
@@ -41,7 +42,11 @@ class CouchbaseLiteDart {
       mergedNativeLibrariesDir: nativeLibrariesDir,
     );
 
-    initMainIsolate(IsolateContext(initContext: context, libraries: libraries));
+    initMainIsolate(IsolateContext(
+      initContext: context,
+      libraries: libraries,
+      tracingDelegate: tracingDelegate,
+    ));
 
     _setupLogging();
   }

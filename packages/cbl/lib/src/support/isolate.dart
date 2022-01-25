@@ -2,8 +2,10 @@ import 'package:cbl_ffi/cbl_ffi.dart' hide LibrariesConfiguration;
 
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
+import '../tracing.dart';
 import 'errors.dart';
 import 'ffi.dart';
+import 'tracing.dart';
 
 class InitContext {
   InitContext({required this.filesDir, required this.tempDir});
@@ -19,6 +21,7 @@ class IsolateContext {
   IsolateContext({
     required this.libraries,
     this.initContext,
+    this.tracingDelegate,
   });
 
   static IsolateContext? _instance;
@@ -40,13 +43,24 @@ class IsolateContext {
 
   final LibrariesConfiguration libraries;
   final InitContext? initContext;
+  final TracingDelegate? tracingDelegate;
+
+  IsolateContext createSecondaryIsolateContext() => IsolateContext(
+        libraries: libraries,
+        initContext: initContext,
+        tracingDelegate: tracingDelegate?.createSecondaryIsolateDelegate(),
+      );
 }
 
 /// Initializes this isolate for use of Couchbase Lite.
 void initIsolate(IsolateContext context) {
   IsolateContext.instance = context;
-  CBLBindings.init(context.libraries.toCblFfi());
+  CBLBindings.init(
+    context.libraries.toCblFfi(),
+    onTracedCall: tracingDelegateTracedNativeCallHandler,
+  );
   MDelegate.instance = CblMDelegate();
+  tracingDelegate = context.tracingDelegate ?? tracingDelegate;
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
@@ -54,4 +68,5 @@ void initIsolate(IsolateContext context) {
 void initMainIsolate(IsolateContext context) {
   initIsolate(context);
   cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
+  onTraceData = null;
 }

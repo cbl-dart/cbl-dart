@@ -13,10 +13,11 @@ class CouchbaseLiteFlutter {
   CouchbaseLiteFlutter._();
 
   /// Initializes the `cbl` package, for the main isolate.
-  static Future<void> init() async {
+  static Future<void> init({TracingDelegate? tracingDelegate}) async {
     initMainIsolate(IsolateContext(
       libraries: CblFlutterPlatform.instance.libraries(),
       initContext: await _context(),
+      tracingDelegate: tracingDelegate,
     ));
 
     _setupLogging();

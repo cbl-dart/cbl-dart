@@ -20,7 +20,9 @@ import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/tracing.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_change.dart';
@@ -102,19 +104,22 @@ class ProxyDatabase extends ProxyObject
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
 
   @override
-  Future<Document?> document(String id) => use(() async {
-        final state = await channel
-            .call(GetDocument(objectId, id, EncodingFormat.fleece));
+  Future<Document?> document(String id) => asyncOperationTracePoint(
+        GetDocumentOp(this, id),
+        () => use(() async {
+          final state = await channel
+              .call(GetDocument(objectId, id, EncodingFormat.fleece));
 
-        if (state == null) {
-          return null;
-        }
+          if (state == null) {
+            return null;
+          }
 
-        return DelegateDocument(
-          ProxyDocumentDelegate.fromState(state),
-          database: this,
-        );
-      });
+          return DelegateDocument(
+            ProxyDocumentDelegate.fromState(state),
+            database: this,
+          );
+        }),
+      );
 
   @override
   Future<DocumentFragment> operator [](String id) => use(
@@ -125,60 +130,78 @@ class ProxyDatabase extends ProxyObject
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      use(() async {
-        final delegate = await prepareDocument(document);
+      asyncOperationTracePoint(
+        SaveDocumentOp(this, document, concurrencyControl),
+        () => use(() async {
+          final delegate = await asyncOperationTracePoint(
+            PrepareDocumentOp(document),
+            () async => prepareDocument(document),
+          );
 
-        final state = await channel.call(SaveDocument(
-          objectId,
-          delegate.getState(),
-          concurrencyControl,
-        ));
+          final state = await channel.call(SaveDocument(
+            objectId,
+            delegate.getState(),
+            concurrencyControl,
+          ));
 
-        if (state == null) {
-          return false;
-        }
+          if (state == null) {
+            return false;
+          }
 
-        delegate.setState(state);
+          delegate.setState(state);
 
-        return true;
-      });
+          return true;
+        }),
+      );
 
   @override
   Future<bool> saveDocumentWithConflictHandler(
     covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() => saveDocumentWithConflictHandlerHelper(
-            document,
-            conflictHandler,
-          ));
+      asyncOperationTracePoint(
+        SaveDocumentOp(this, document),
+        () => use(() => saveDocumentWithConflictHandlerHelper(
+              document,
+              conflictHandler,
+            )),
+      );
 
   @override
   Future<bool> deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      use(() async {
-        final delegate = await prepareDocument(document, syncProperties: false);
+      asyncOperationTracePoint(
+        DeleteDocumentOp(this, document, concurrencyControl),
+        () => use(() async {
+          final delegate = await asyncOperationTracePoint(
+            PrepareDocumentOp(document),
+            () async => prepareDocument(document, syncProperties: false),
+          );
 
-        final state = await channel.call(DeleteDocument(
-          objectId,
-          delegate.getState(withProperties: false),
-          concurrencyControl,
-        ));
+          final state = await channel.call(DeleteDocument(
+            objectId,
+            delegate.getState(withProperties: false),
+            concurrencyControl,
+          ));
 
-        if (state == null) {
-          return false;
-        }
+          if (state == null) {
+            return false;
+          }
 
-        delegate.setState(state);
+          delegate.setState(state);
 
-        return true;
-      });
+          return true;
+        }),
+      );
 
   @override
   Future<void> purgeDocument(covariant DelegateDocument document) async {
-    await prepareDocument(document, syncProperties: false);
+    await asyncOperationTracePoint(
+      PrepareDocumentOp(document),
+      () async => prepareDocument(document, syncProperties: false),
+    );
     return purgeDocumentById(document.id);
   }
 
@@ -307,6 +330,10 @@ class ProxyDatabase extends ProxyObject
     }
     path = null;
   }
+
+  @override
+  Future<void> close() =>
+      asyncOperationTracePoint(CloseDatabaseOp(this), super.close);
 
   @override
   Future<void> delete() {

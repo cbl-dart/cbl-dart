@@ -23,6 +23,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
     SerializationRegistry()
       // Request
       ..addSerializableCodec('Ping', PingRequest.deserialize)
+      ..addSerializableCodec('TraceData', TraceDataRequest.deserialize)
       ..addSerializableCodec('ReleaseObject', ReleaseObject.deserialize)
       ..addSerializableCodec(
         'RemoveChangeListener',
@@ -470,6 +471,21 @@ class PingRequest extends Request<DateTime> {
 
   static PingRequest deserialize(StringMap map, SerializationContext context) =>
       PingRequest();
+}
+
+class TraceDataRequest extends Request<void> {
+  TraceDataRequest(this.data);
+
+  final Object? data;
+
+  @override
+  StringMap serialize(SerializationContext context) => {'data': data};
+
+  static TraceDataRequest deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      TraceDataRequest(map['data']);
 }
 
 class ReleaseObject extends Request<Null> {

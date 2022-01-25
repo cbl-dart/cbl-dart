@@ -9,25 +9,33 @@ import 'libraries.dart';
 import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
+import 'tracing.dart';
 
 /// Wether to use the `isLeaf` flag when looking up native functions.
 const useIsLeaf = true;
 
 abstract class Bindings {
-  Bindings(Bindings parent) : libs = parent.libs {
+  Bindings(Bindings parent)
+      : libs = parent.libs,
+        onTracedCall = parent.onTracedCall {
     parent._children.add(this);
   }
 
-  Bindings.root(this.libs);
+  Bindings.root(this.libs, {required this.onTracedCall});
 
   final DynamicLibraries libs;
+
+  final TracedCallHandler onTracedCall;
 
   List<Bindings> get _children => [];
 }
 
 class CBLBindings extends Bindings {
-  CBLBindings(LibrariesConfiguration config)
-      : super.root(DynamicLibraries.fromConfig(config)) {
+  CBLBindings(LibrariesConfiguration config, {TracedCallHandler? onTracedCall})
+      : super.root(
+          DynamicLibraries.fromConfig(config),
+          onTracedCall: onTracedCall ?? noopTracedCallHandler,
+        ) {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
     dartFinalizer = DartFinalizerBindings(this);
@@ -55,8 +63,11 @@ class CBLBindings extends Bindings {
 
   static CBLBindings? get maybeInstance => _instance;
 
-  static void init(LibrariesConfiguration libraries) =>
-      _instance ??= CBLBindings(libraries);
+  static void init(
+    LibrariesConfiguration libraries, {
+    TracedCallHandler? onTracedCall,
+  }) =>
+      _instance ??= CBLBindings(libraries, onTracedCall: onTracedCall);
 
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;
