@@ -9,20 +9,25 @@ late final TraceDataHandler? _onTraceData = onTraceData;
 
 /// A delegate which implements a tracing mechanism for CBL Dart.
 ///
+/// The tracing API is **experimental** and subject to change.
+///
 /// # Trace points
 ///
-/// CBL Dart has builtin trace points, at which the flow control is given to
-/// the current [TracingDelegate]:
+/// CBL Dart has builtin trace points, at which flow control is given to the
+/// [TracingDelegate]:
 ///
 ///   * [traceSyncOperation] for synchronous operations.
 ///   * [traceAsyncOperation] for asynchronous operations.
+///
+/// See [TracedOperation] and its subclasses for all operations can can be
+/// traced.
 ///
 /// # Primary and secondary isolates
 ///
 /// Every isolate in which CBL Dart is used has one [TracingDelegate], which
 /// cannot be changed. When initializing CBL Dart, a [TracingDelegate] can
-/// be provided, which will become the delegate for the current (or primary)
-/// isolate. Each time CBL Dart creates background (or secondary) isolates,
+/// be provided, which will become the delegate for the current (primary)
+/// isolate. Each time CBL Dart creates background (secondary) isolates,
 /// [createSecondaryIsolateDelegate] is called on the primary isolate delegate
 /// and the returned delegate is used as the delegate for the new isolate.
 ///
@@ -30,7 +35,7 @@ late final TraceDataHandler? _onTraceData = onTraceData;
 ///
 /// When a primary isolate sends a message to a secondary isolate, the
 /// primary isolate's [TracingDelegate] can provide a tracing context, which
-/// is send to the secondary isolate, along with the message. When a secondary
+/// is sent to the secondary isolate along with the message. When a secondary
 /// isolate receives a message, it's delegate can restore the tracing context.
 /// Typically, the tracing context is stored in a zone value and
 /// [captureTracingContext] and [restoreTracingContext] are used to transfer
@@ -39,9 +44,10 @@ late final TraceDataHandler? _onTraceData = onTraceData;
 ///
 /// ## Trace data
 ///
-/// A secondary isolate can send arbitrary data through [sendTraceData] to its
-/// primary isolate, which will receive the data through a call to
-/// [onTraceData]. The data has to be JSON serializable.
+/// A delegate in a secondary isolate can send arbitrary data through
+/// [sendTraceData] to the delegate in the primary isolate, which will receive
+/// the data through a call to [onTraceData]. The data has to be JSON
+/// serializable.
 ///
 /// {@category Tracing}
 abstract class TracingDelegate {
@@ -127,9 +133,9 @@ abstract class TracingDelegate {
 
 /// A traced operation.
 ///
-/// The same type operation may be traced both at a synchronous and asynchronous
-/// trace point. The corresponding [TracingDelegate] method will be invoked
-/// depending on whether the operation is synchronous
+/// The same type of operation may be traced both at a synchronous and
+/// asynchronous trace point. The corresponding [TracingDelegate] method will be
+/// invoked depending on whether the operation is synchronous
 /// ([TracingDelegate.traceSyncOperation]), or asynchronous
 /// ([TracingDelegate.traceAsyncOperation]).
 ///
