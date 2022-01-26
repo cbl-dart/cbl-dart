@@ -115,6 +115,7 @@ class FfiQuery extends QueryBase
 
         final change = QueryChange(this, results);
         listener(change);
+        return null;
       },
       debugName: 'FfiQuery.addChangeListener',
     );

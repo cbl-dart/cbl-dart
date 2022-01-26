@@ -163,6 +163,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.value(_index);
     }
+    return null;
   }
 
   @override
@@ -172,6 +173,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.value(_index);
     }
+    return null;
   }
 
   @override
@@ -181,6 +183,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.string(_index);
     }
+    return null;
   }
 
   @override
@@ -212,6 +215,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.number(_index);
     }
+    return null;
   }
 
   @override
@@ -232,6 +236,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.date(_index);
     }
+    return null;
   }
 
   @override
@@ -241,6 +246,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.blob(_index);
     }
+    return null;
   }
 
   @override
@@ -250,6 +256,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.array(_index);
     }
+    return null;
   }
 
   @override
@@ -259,6 +266,7 @@ class FragmentImpl implements Fragment {
     } else if (_isValidIndex()) {
       return (_parent as Array?)?.dictionary(_index);
     }
+    return null;
   }
 
   @override

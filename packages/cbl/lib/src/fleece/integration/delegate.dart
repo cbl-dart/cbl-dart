@@ -24,6 +24,7 @@ class SimpleMDelegate extends MDelegate {
     if (native is MCollection) {
       return native;
     }
+    return null;
   }
 
   @override
@@ -61,5 +62,6 @@ class SimpleMDelegate extends MDelegate {
           ? MArray.asChild(value, parent)
           : MDict.asChild(value, parent);
     }
+    return null;
   }
 }
