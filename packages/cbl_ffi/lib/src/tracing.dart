@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
 
-import 'bindings.dart';
-
 /// Whether CBL Dart trace points should be included when compiling a Dart
 /// program.
 ///
@@ -53,17 +51,17 @@ T noopTracedCallHandler<T>(
 ) =>
     execute();
 
-extension TracingExtension on Bindings {
-  /// Traces a function as a [TracedNativeCall].
-  ///
-  /// The given function is not be wrapped in a try-catch block and is
-  /// expected to return normally.
-  @pragma('vm:prefer-inline')
-  T nativeCallTracePoint<T>(TracedNativeCall call, T Function() execute) {
-    if (!cblIncludeTracePoints) {
-      return execute();
-    }
+TracedCallHandler onTracedCall = noopTracedCallHandler;
 
-    return onTracedCall(call, execute);
+/// Traces a function as a [TracedNativeCall].
+///
+/// The given function is not be wrapped in a try-catch block and is
+/// expected to return normally.
+@pragma('vm:prefer-inline')
+T nativeCallTracePoint<T>(TracedNativeCall call, T Function() execute) {
+  if (!cblIncludeTracePoints) {
+    return execute();
   }
+
+  return onTracedCall(call, execute);
 }

@@ -3,8 +3,8 @@ import 'dart:isolate';
 
 import 'package:stream_channel/isolate_channel.dart';
 
-import '../couchbase_lite.dart';
 import '../errors.dart';
+import '../support/isolate.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
 import 'cbl_service.dart';
@@ -64,7 +64,7 @@ class CblWorker {
     _worker = IsolateWorker(
       debugName: 'CblWorker($debugName)',
       delegate: _ServiceWorkerDelegate(
-        context: CouchbaseLite.context,
+        context: IsolateContext.instance.createSecondaryIsolateContext(),
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
@@ -117,7 +117,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
     required this.serializationType,
   });
 
-  final Object context;
+  final IsolateContext context;
   final SendPort channel;
   final SerializationTarget serializationType;
 
@@ -126,7 +126,10 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
 
   @override
   FutureOr<void> initialize() {
-    CouchbaseLite.initSecondary(context);
+    initIsolate(
+      context,
+      onTraceData: (data) => _service.channel.call(TraceDataRequest(data)),
+    );
 
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),
@@ -135,8 +138,6 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
     );
 
     _service = CblService(channel: _serviceChannel);
-
-    onTraceData = (data) => _service.channel.call(TraceDataRequest(data));
   }
 
   @override

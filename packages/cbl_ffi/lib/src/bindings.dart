@@ -15,27 +15,20 @@ import 'tracing.dart';
 const useIsLeaf = true;
 
 abstract class Bindings {
-  Bindings(Bindings parent)
-      : libs = parent.libs,
-        onTracedCall = parent.onTracedCall {
+  Bindings(Bindings parent) : libs = parent.libs {
     parent._children.add(this);
   }
 
-  Bindings.root(this.libs, {required this.onTracedCall});
+  Bindings.root(this.libs);
 
   final DynamicLibraries libs;
-
-  final TracedCallHandler onTracedCall;
 
   List<Bindings> get _children => [];
 }
 
 class CBLBindings extends Bindings {
-  CBLBindings(LibrariesConfiguration config, {TracedCallHandler? onTracedCall})
-      : super.root(
-          DynamicLibraries.fromConfig(config),
-          onTracedCall: onTracedCall ?? noopTracedCallHandler,
-        ) {
+  CBLBindings(LibrariesConfiguration config)
+      : super.root(DynamicLibraries.fromConfig(config)) {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
     dartFinalizer = DartFinalizerBindings(this);
@@ -66,8 +59,15 @@ class CBLBindings extends Bindings {
   static void init(
     LibrariesConfiguration libraries, {
     TracedCallHandler? onTracedCall,
-  }) =>
-      _instance ??= CBLBindings(libraries, onTracedCall: onTracedCall);
+  }) {
+    assert(_instance == null, 'CBLBindings have already been initialized.');
+
+    _instance = CBLBindings(libraries);
+
+    if (onTracedCall != null) {
+      _onTracedCall = onTracedCall;
+    }
+  }
 
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;
@@ -82,3 +82,5 @@ class CBLBindings extends Bindings {
   late final ReplicatorBindings replicator;
   late final FleeceBindings fleece;
 }
+
+set _onTracedCall(TracedCallHandler value) => onTracedCall = value;

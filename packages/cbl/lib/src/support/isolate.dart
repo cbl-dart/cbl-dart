@@ -53,7 +53,7 @@ class IsolateContext {
 }
 
 /// Initializes this isolate for use of Couchbase Lite.
-void initIsolate(IsolateContext context) {
+void initIsolate(IsolateContext context, {TraceDataHandler? onTraceData}) {
   IsolateContext.instance = context;
   CBLBindings.init(
     context.libraries.toCblFfi(),
@@ -61,12 +61,14 @@ void initIsolate(IsolateContext context) {
   );
   MDelegate.instance = CblMDelegate();
   effectiveTracingDelegate = context.tracingDelegate;
+  _onTraceData = onTraceData;
 }
+
+set _onTraceData(TraceDataHandler? value) => onTraceData = value;
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
 /// native libraries.
 void initMainIsolate(IsolateContext context) {
   initIsolate(context);
   cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
-  onTraceData = null;
 }
