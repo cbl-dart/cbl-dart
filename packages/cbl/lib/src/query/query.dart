@@ -170,6 +170,15 @@ abstract class Query implements Resource {
   ///
   /// Is `null`, if this query was created from a N1QL query.
   String? get jsonRepresentation;
+
+  /// The N1QL string of this query.
+  ///
+  /// This value can be used to recreate this query with [SyncQuery.fromN1ql] or
+  /// [AsyncQuery.fromN1ql].
+  ///
+  /// Is `null`, if this query was created through the builder API or from the
+  /// JSON representation.
+  String? get n1ql;
 }
 
 /// A [Query] with a primarily synchronous API.
@@ -306,6 +315,9 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
   @override
   String? get jsonRepresentation =>
       language == CBLQueryLanguage.json ? definition : null;
+
+  @override
+  String? get n1ql => language == CBLQueryLanguage.n1ql ? definition : null;
 
   @override
   String toString() => '$typeName(${describeEnum(language)}: $definition)';

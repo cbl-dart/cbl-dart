@@ -211,6 +211,17 @@ SELECT foo()
       );
     });
 
+    test('get N1QL source string', () {
+      final db = openSyncTestDatabase();
+      final n1qlQuery = SyncQuery.fromN1ql(db, 'SELECT * FROM _');
+      final jsonQuery = const QueryBuilder()
+          .select(SelectResult.all())
+          .from(DataSource.database(db));
+
+      expect(n1qlQuery.n1ql, 'SELECT * FROM _');
+      expect(jsonQuery.n1ql, isNull);
+    });
+
     apiTest('toString', () async {
       final db = await openTestDatabase();
       expect(
