@@ -219,6 +219,7 @@ class ProxyDatabase extends ProxyObject
         if (await blobStore.blobExists(properties)) {
           return BlobImpl.fromProperties(properties, database: this);
         }
+        return null;
       });
 
   @override

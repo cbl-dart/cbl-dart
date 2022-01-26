@@ -111,6 +111,7 @@ class CblMDelegate extends MDelegate {
     if (native is MCollectionWrapper) {
       return native.mCollection;
     }
+    return null;
   }
 
   @override
@@ -248,4 +249,5 @@ T? coerceObject<T>(Object? object) {
       return DateTime.parse(object) as T;
     }
   }
+  return null;
 }

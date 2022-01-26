@@ -320,6 +320,7 @@ extension on _CBLReplicatorStatus {
       _error.copyToGlobal();
       return CBLErrorException.fromCBLError(globalCBLError);
     }
+    return null;
   }
 
   CBLReplicatorStatus toCBLReplicatorStatus() => CBLReplicatorStatus(

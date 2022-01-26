@@ -679,6 +679,8 @@ class CblService {
           return doc;
         }
     }
+
+    return null;
   }
 
   ReplicationFilter _createReplicatorFilter(
@@ -723,6 +725,8 @@ class CblService {
                 ProxyDocumentDelegate.fromState(resolvedState),
               );
         }
+
+        return null;
       });
 
   // === Objects ===============================================================

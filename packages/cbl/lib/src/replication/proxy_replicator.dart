@@ -260,6 +260,7 @@ CblServiceConflictResolver _wrapConflictResolver(
         );
         return delegate.getState(withProperties: includeProperties);
       }
+      return null;
     };
 
 DelegateDocument Function(DocumentState) _documentStateToDocument(

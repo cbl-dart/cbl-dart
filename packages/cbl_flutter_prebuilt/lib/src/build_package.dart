@@ -36,6 +36,7 @@ Future<void> buildPackage(PackageConfiguration configuration) async {
     if (value is Function) {
       return '<lambda>';
     }
+    return null;
   }).convert(templateContext);
   log('Template context:\n$templateContextJson');
 

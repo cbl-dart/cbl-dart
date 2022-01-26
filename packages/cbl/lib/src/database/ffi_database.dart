@@ -234,6 +234,7 @@ class FfiDatabase extends CBLDatabaseObject
         if (blobStore.blobExists(properties)) {
           return BlobImpl.fromProperties(properties, database: this);
         }
+        return null;
       });
 
   @override
@@ -279,6 +280,7 @@ class FfiDatabase extends CBLDatabaseObject
         final message = DatabaseChangeCallbackMessage.fromArguments(arguments);
         final change = DatabaseChange(this, message.documentIds);
         listener(change);
+        return null;
       },
       debugName: 'FfiDatabase.addChangeListener',
     );
@@ -307,6 +309,7 @@ class FfiDatabase extends CBLDatabaseObject
       (_) {
         final change = DocumentChange(this, id);
         listener(change);
+        return null;
       },
       debugName: 'FfiDatabase.addDocumentChangeListener',
     );

@@ -9,6 +9,7 @@ extension DirectoryExt on Directory {
     if (file is File) {
       return file.readAsString();
     }
+    return null;
   }
 
   Future<void> reset() async {

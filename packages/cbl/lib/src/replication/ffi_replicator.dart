@@ -221,6 +221,7 @@ class FfiReplicator
           message.status.toReplicatorStatus(),
         );
         listener(change);
+        return null;
       },
       debugName: 'FfiReplicator.addChangeListener',
     );
@@ -254,6 +255,7 @@ class FfiReplicator
         final replication =
             DocumentReplicationImpl(this, message.isPush, documents);
         listener(replication);
+        return null;
       },
       debugName: 'FfiReplicator.addDocumentReplicationListener',
     );
