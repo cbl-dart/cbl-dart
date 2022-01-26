@@ -8,6 +8,7 @@ import 'bindings.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'global.dart';
+import 'tracing.dart';
 import 'utils.dart';
 
 enum CBLQueryLanguage {
@@ -153,13 +154,20 @@ class QueryBindings extends Bindings {
     CBLQueryLanguage language,
     String queryString,
   ) =>
-      withZoneArena(() => _createQuery(
+      withZoneArena(() {
+        final queryStringFlSTr = queryString.toFLStringInArena().ref;
+        final languageInt = language.toInt();
+        return nativeCallTracePoint(
+          TracedNativeCall.queryCreate,
+          () => _createQuery(
             db,
-            language.toInt(),
-            queryString.toFLStringInArena().ref,
+            languageInt,
+            queryStringFlSTr,
             globalErrorPosition,
             globalCBLError,
-          ).checkCBLError(errorSource: queryString));
+          ),
+        ).checkCBLError(errorSource: queryString);
+      });
 
   void setParameters(Pointer<CBLQuery> query, Pointer<FLDict> parameters) {
     _setParameters(query, parameters);
@@ -168,7 +176,10 @@ class QueryBindings extends Bindings {
   Pointer<FLDict> parameters(Pointer<CBLQuery> query) => _parameters(query);
 
   Pointer<CBLResultSet> execute(Pointer<CBLQuery> query) =>
-      _execute(query, globalCBLError).checkCBLError();
+      nativeCallTracePoint(
+        TracedNativeCall.queryExecute,
+        () => _execute(query, globalCBLError),
+      ).checkCBLError();
 
   String explain(Pointer<CBLQuery> query) =>
       _explain(query).toDartStringAndRelease()!;

@@ -18,6 +18,7 @@ import '../replication/ffi_replicator.dart';
 import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
+import '../support/tracing.dart';
 import '../support/utils.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
@@ -55,6 +56,7 @@ class CblServiceClient {
     required this.channel,
   }) {
     channel
+      ..addCallEndpoint(_traceData)
       ..addCallEndpoint(_callDatabaseChangeListener)
       ..addCallEndpoint(_callDocumentChangeListener)
       ..addStreamEndpoint(_readBlobUpload)
@@ -66,6 +68,10 @@ class CblServiceClient {
   }
 
   final Channel channel;
+
+  final _onTraceData = Zone.current
+      // ignore: invalid_use_of_visible_for_overriding_member
+      .bindUnaryCallbackGuarded(effectiveTracingDelegate.onTraceData);
 
   void unregisterObject(int id) => _objectRegistry.removeObjectById(id);
 
@@ -134,6 +140,10 @@ class CblServiceClient {
   }
 
   // === Request handlers ======================================================
+
+  void _traceData(TraceDataRequest request) {
+    _onTraceData(request.data);
+  }
 
   void _callDatabaseChangeListener(CallDatabaseChangeListener request) =>
       _getDatabaseChangeListenerById(request.listenerId)(request);

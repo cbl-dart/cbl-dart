@@ -14,7 +14,9 @@ import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/tracing.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'join.dart';
@@ -72,12 +74,17 @@ class FfiQuery extends QueryBase
       });
 
   @override
-  SyncResultSet execute() => useSync(() => FfiResultSet(
-        native.call(_bindings.execute),
-        query: this,
-        columnNames: _columnNames,
-        debugCreator: 'FfiQuery.execute()',
-      ));
+  SyncResultSet execute() => syncOperationTracePoint(
+        () => ExecuteQueryOp(this),
+        () => useSync(
+          () => FfiResultSet(
+            native.call(_bindings.execute),
+            query: this,
+            columnNames: _columnNames,
+            debugCreator: 'FfiQuery.execute()',
+          ),
+        ),
+      );
 
   @override
   String explain() => useSync(() => native.call(_bindings.explain));
@@ -148,19 +155,22 @@ class FfiQuery extends QueryBase
   }
 
   void _performPrepare() {
-    native = CBLObject(
-      database!.native.call((pointer) => _bindings.create(
-            pointer,
-            language,
-            definition!,
-          )),
-      debugName: 'FfiQuery(creator: $debugCreator)',
-    );
+    syncOperationTracePoint(() => PrepareQueryOp(this), () {
+      native = CBLObject(
+        database!.native.call((pointer) => _bindings.create(
+              pointer,
+              language,
+              definition!,
+            )),
+        debugName: 'FfiQuery(creator: $debugCreator)',
+      );
 
-    _columnNames = List.generate(
-      native.call(_bindings.columnCount),
-      (index) => native.call((pointer) => _bindings.columnName(pointer, index)),
-    );
+      _columnNames = List.generate(
+        native.call(_bindings.columnCount),
+        (index) =>
+            native.call((pointer) => _bindings.columnName(pointer, index)),
+      );
+    });
   }
 
   void _applyParameters() {

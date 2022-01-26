@@ -9,6 +9,7 @@ import 'libraries.dart';
 import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
+import 'tracing.dart';
 
 /// Wether to use the `isLeaf` flag when looking up native functions.
 const useIsLeaf = true;
@@ -55,8 +56,18 @@ class CBLBindings extends Bindings {
 
   static CBLBindings? get maybeInstance => _instance;
 
-  static void init(LibrariesConfiguration libraries) =>
-      _instance ??= CBLBindings(libraries);
+  static void init(
+    LibrariesConfiguration libraries, {
+    TracedCallHandler? onTracedCall,
+  }) {
+    assert(_instance == null, 'CBLBindings have already been initialized.');
+
+    _instance = CBLBindings(libraries);
+
+    if (onTracedCall != null) {
+      _onTracedCall = onTracedCall;
+    }
+  }
 
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;
@@ -71,3 +82,5 @@ class CBLBindings extends Bindings {
   late final ReplicatorBindings replicator;
   late final FleeceBindings fleece;
 }
+
+set _onTracedCall(TracedCallHandler value) => onTracedCall = value;

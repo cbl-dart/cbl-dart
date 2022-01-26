@@ -4,6 +4,7 @@ import 'database/database.dart';
 import 'log.dart';
 import 'support/ffi.dart';
 import 'support/isolate.dart';
+import 'tracing.dart';
 
 export 'support/ffi.dart' show LibrariesConfiguration, LibraryConfiguration;
 export 'support/listener_token.dart' show ListenerToken;
@@ -17,8 +18,14 @@ class CouchbaseLite {
   CouchbaseLite._();
 
   /// Initializes the `cbl` package, for the main isolate.
-  static void init({required LibrariesConfiguration libraries}) {
-    initMainIsolate(IsolateContext(libraries: libraries));
+  static void init({
+    required LibrariesConfiguration libraries,
+    TracingDelegate? tracingDelegate,
+  }) {
+    initMainIsolate(IsolateContext(
+      libraries: libraries,
+      tracingDelegate: tracingDelegate,
+    ));
 
     _setupLogging();
   }
@@ -27,7 +34,8 @@ class CouchbaseLite {
   /// [Isolate].
   ///
   /// This object can be safely passed from one [Isolate] to another.
-  static Object get context => IsolateContext.instance;
+  static Object get context =>
+      IsolateContext.instance.createSecondaryIsolateContext();
 
   /// Initializes the `cbl` package, for a secondary isolate.
   ///

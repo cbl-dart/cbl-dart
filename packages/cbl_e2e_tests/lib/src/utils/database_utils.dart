@@ -98,17 +98,25 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   DatabaseConfiguration? config,
   bool tearDown = true,
   Isolate isolate = Isolate.worker,
+  bool? usePublicApi,
 }) async {
+  assert(usePublicApi == null || isolate == Isolate.worker);
+
   config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
   // Ensure directory exists
   await File(config.directory).parent.create(recursive: true);
 
-  final db = await ProxyDatabase.open(
-    name: name,
-    config: config,
-    client: _sharedIsolateClient(isolate),
-  );
+  final AsyncDatabase db;
+  if (usePublicApi == true) {
+    db = await AsyncDatabase.open(name, config);
+  } else {
+    db = await ProxyDatabase.open(
+      name: name,
+      config: config,
+      client: _sharedIsolateClient(isolate),
+    );
+  }
 
   if (tearDown) {
     addTearDown(db.close);

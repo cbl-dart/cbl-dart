@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../../cbl.dart';
 import '../database/proxy_database.dart';
 import '../document/common.dart';
 import '../fleece/fleece.dart';
@@ -13,12 +12,20 @@ import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/tracing.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'data_source.dart';
+import 'expressions/expression.dart';
+import 'join.dart';
+import 'ordering.dart';
 import 'parameters.dart';
 import 'query.dart';
 import 'query_builder.dart';
+import 'query_change.dart';
 import 'result.dart';
+import 'result_set.dart';
+import 'select_result.dart';
 
 class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   ProxyQuery({
@@ -55,10 +62,15 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
           }));
 
   @override
-  Future<ResultSet> execute() => use(() => ProxyResultSet(
-        query: this,
-        results: channel!.stream(ExecuteQuery(queryId: objectId!)),
-      ));
+  Future<ResultSet> execute() => asyncOperationTracePoint(
+        () => ExecuteQueryOp(this),
+        () => use(
+          () => ProxyResultSet(
+            query: this,
+            results: channel!.stream(ExecuteQuery(queryId: objectId!)),
+          ),
+        ),
+      );
 
   @override
   Future<String> explain() =>
@@ -118,31 +130,33 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
     return _preparation ??= _performPrepare();
   }
 
-  Future<void> _performPrepare() async {
-    final channel = database!.channel;
+  Future<void> _performPrepare() =>
+      asyncOperationTracePoint(() => PrepareQueryOp(this), () async {
+        final channel = database!.channel;
 
-    final state = await channel.call(CreateQuery(
-      databaseId: database!.objectId,
-      language: language,
-      queryDefinition: definition!,
-      resultEncoding: EncodingFormat.fleece,
-    ));
+        final state = await channel.call(CreateQuery(
+          databaseId: database!.objectId,
+          language: language,
+          queryDefinition: definition!,
+          resultEncoding: EncodingFormat.fleece,
+        ));
 
-    _columnNames = state.columnNames;
+        _columnNames = state.columnNames;
 
-    // We need this so we don't capture `this` in the closure of proxyFinalizer.
-    late final _ProxyQueryEarlyFinalizer earlyFinalizer;
+        // We need this so we don't capture `this` in the closure of
+        // proxyFinalizer.
+        late final _ProxyQueryEarlyFinalizer earlyFinalizer;
 
-    bindToTargetObject(
-      channel,
-      state.id,
-      // ignore: unnecessary_lambdas
-      proxyFinalizer: () => earlyFinalizer.deactivate(),
-    );
+        bindToTargetObject(
+          channel,
+          state.id,
+          // ignore: unnecessary_lambdas
+          proxyFinalizer: () => earlyFinalizer.deactivate(),
+        );
 
-    _earlyFinalizer =
-        earlyFinalizer = _ProxyQueryEarlyFinalizer(database!, finalizeEarly);
-  }
+        _earlyFinalizer = earlyFinalizer =
+            _ProxyQueryEarlyFinalizer(database!, finalizeEarly);
+      });
 
   Future<void> _applyParameters(Parameters? parameters) {
     EncodedData? encodedParameters;

@@ -17,7 +17,9 @@ import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/tracing.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_change.dart';
@@ -110,15 +112,20 @@ class FfiDatabase extends CBLDatabaseObject
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
 
   @override
-  Document? document(String id) =>
-      useSync(() => call((pointer) => _bindings.getDocument(pointer, id))
-          ?.let((pointer) => DelegateDocument(
-                FfiDocumentDelegate.fromPointer(
-                  doc: pointer,
-                  debugCreator: 'FfiDatabase.document()',
-                ),
-                database: this,
-              )));
+  Document? document(String id) => syncOperationTracePoint(
+        () => GetDocumentOp(this, id),
+        () => useSync(
+          () => call((pointer) => _bindings.getDocument(pointer, id))?.let(
+            (pointer) => DelegateDocument(
+              FfiDocumentDelegate.fromPointer(
+                doc: pointer,
+                debugCreator: 'FfiDatabase.document()',
+              ),
+              database: this,
+            ),
+          ),
+        ),
+      );
 
   @override
   DocumentFragment operator [](String id) => DocumentFragmentImpl(document(id));
@@ -128,62 +135,80 @@ class FfiDatabase extends CBLDatabaseObject
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      useSync(() {
-        final delegate = prepareDocument(document) as FfiDocumentDelegate;
+      syncOperationTracePoint(
+        () => SaveDocumentOp(this, document, concurrencyControl),
+        () => useSync(() {
+          final delegate = syncOperationTracePoint(
+            () => PrepareDocumentOp(document),
+            () => prepareDocument(document) as FfiDocumentDelegate,
+          );
 
-        return _catchConflictException(() {
-          runNativeCalls(() {
-            _bindings.saveDocumentWithConcurrencyControl(
-              native.pointer,
-              delegate.native.pointer.cast(),
-              concurrencyControl.toCBLConcurrencyControl(),
-            );
+          return _catchConflictException(() {
+            runNativeCalls(() {
+              _bindings.saveDocumentWithConcurrencyControl(
+                native.pointer,
+                delegate.native.pointer.cast(),
+                concurrencyControl.toCBLConcurrencyControl(),
+              );
+            });
           });
-        });
-      });
+        }),
+      );
 
   @override
   Future<bool> saveDocumentWithConflictHandler(
     covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) =>
-      use(() => saveDocumentWithConflictHandlerHelper(
-            document,
-            conflictHandler,
-          ));
+      asyncOperationTracePoint(
+        () => SaveDocumentOp(this, document),
+        () => use(() => saveDocumentWithConflictHandlerHelper(
+              document,
+              conflictHandler,
+            )),
+      );
 
   @override
   bool saveDocumentWithConflictHandlerSync(
     covariant MutableDelegateDocument document,
     SyncSaveConflictHandler conflictHandler,
   ) =>
-      useSync(
-          // Because the conflict handler is sync the result of the maybe async
-          // method is always sync.
-          () => saveDocumentWithConflictHandlerHelper(
-                document,
-                conflictHandler,
-              ) as bool);
+      syncOperationTracePoint(
+        () => SaveDocumentOp(this, document),
+        () => useSync(
+            // Because the conflict handler is sync the result of the maybe
+            // async method is always sync.
+            () => saveDocumentWithConflictHandlerHelper(
+                  document,
+                  conflictHandler,
+                ) as bool),
+      );
 
   @override
   bool deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      useSync(() {
-        final delegate = prepareDocument(document, syncProperties: false)
-            as FfiDocumentDelegate;
+      syncOperationTracePoint(
+        () => DeleteDocumentOp(this, document, concurrencyControl),
+        () => useSync(() {
+          final delegate = syncOperationTracePoint(
+            () => PrepareDocumentOp(document),
+            () => prepareDocument(document, syncProperties: false)
+                as FfiDocumentDelegate,
+          );
 
-        return _catchConflictException(() {
-          runNativeCalls(() {
-            _bindings.deleteDocumentWithConcurrencyControl(
-              native.pointer,
-              delegate.native.pointer.cast(),
-              concurrencyControl.toCBLConcurrencyControl(),
-            );
+          return _catchConflictException(() {
+            runNativeCalls(() {
+              _bindings.deleteDocumentWithConcurrencyControl(
+                native.pointer,
+                delegate.native.pointer.cast(),
+                concurrencyControl.toCBLConcurrencyControl(),
+              );
+            });
           });
-        });
-      });
+        }),
+      );
 
   @override
   void purgeDocument(covariant DelegateDocument document) => useSync(() {
@@ -197,8 +222,11 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  Future<void> saveBlob(covariant BlobImpl blob) => use(
-      () => blob.ensureIsInstalled(this, allowFromStreamForSyncDatabase: true));
+  Future<void> saveBlob(covariant BlobImpl blob) =>
+      use(() => blob.ensureIsInstalled(
+            this,
+            allowFromStreamForSyncDatabase: true,
+          ));
 
   @override
   Blob? getBlob(Map<String, Object?> properties) => useSync(() {
@@ -319,6 +347,10 @@ class FfiDatabase extends CBLDatabaseObject
       call(_bindings.close);
     }
   }
+
+  @override
+  Future<void> close() =>
+      asyncOperationTracePoint(() => CloseDatabaseOp(this), super.close);
 
   @override
   Future<void> delete() => use(() {

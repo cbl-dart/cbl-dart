@@ -36,6 +36,7 @@ import 'service/channel_test.dart' as service_channel;
 import 'service/isolate_worker_test.dart' as service_isolate_worker;
 import 'support/async_callback_test.dart' as support_async_callback;
 import 'support/dart_finalizer_test.dart' as support_dart_finalizer;
+import 'tracing_test.dart' as tracing;
 
 final tests = [
   database_database_change.main,
@@ -72,6 +73,7 @@ final tests = [
   service_channel.main,
   support_async_callback.main,
   support_dart_finalizer.main,
+  tracing.main,
 ];
 
 void main() {

@@ -10,6 +10,8 @@ import '../replication.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
+import '../support/tracing.dart';
+import '../tracing.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -431,10 +433,13 @@ typedef SyncSaveConflictHandler = bool Function(
 abstract class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
-      FfiDatabase(
-        name: name,
-        config: config,
-        debugCreator: 'SyncDatabase()',
+      syncOperationTracePoint(
+        () => OpenDatabaseOp(name, config),
+        () => FfiDatabase(
+          name: name,
+          config: config,
+          debugCreator: 'SyncDatabase()',
+        ),
       );
 
   /// {@macro cbl.Database.removeSync}
@@ -543,7 +548,10 @@ abstract class AsyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-      WorkerDatabase.open(name, config);
+      asyncOperationTracePoint(
+        () => OpenDatabaseOp(name, config),
+        () => WorkerDatabase.open(name, config),
+      );
 
   /// {@macro cbl.Database.remove}
   static Future<void> remove(String name, {String? directory}) =>

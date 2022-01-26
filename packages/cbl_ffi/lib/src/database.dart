@@ -13,6 +13,7 @@ import 'document.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'query.dart';
+import 'tracing.dart';
 import 'utils.dart';
 
 enum CBLEncryptionAlgorithm {
@@ -665,11 +666,14 @@ class DatabaseBindings extends Bindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) =>
-      withZoneArena(() => _open(
-            name.toFLStringInArena().ref,
-            _createConfig(config),
-            globalCBLError,
-          ).checkCBLError());
+      withZoneArena(() {
+        final nameFlStr = name.toFLStringInArena().ref;
+        final cblConfig = _createConfig(config);
+        return nativeCallTracePoint(
+          TracedNativeCall.databaseOpen,
+          () => _open(nameFlStr, cblConfig, globalCBLError),
+        ).checkCBLError();
+      });
 
   void bindToDartObject(
     Object object,
@@ -684,7 +688,10 @@ class DatabaseBindings extends Bindings {
   }
 
   void close(Pointer<CBLDatabase> db) {
-    _close(db, false, globalCBLError).checkCBLError();
+    nativeCallTracePoint(
+      TracedNativeCall.databaseClose,
+      () => _close(db, false, globalCBLError),
+    ).checkCBLError();
   }
 
   void delete(Pointer<CBLDatabase> db) {
@@ -721,45 +728,59 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     String docId,
   ) =>
-      withZoneArena(() =>
-          _getDocument(db, docId.toFLStringInArena().ref, globalCBLError)
-              .checkCBLError()
-              .toNullable());
+      withZoneArena(() {
+        final docIdFlStr = docId.toFLStringInArena().ref;
+        return nativeCallTracePoint(
+          TracedNativeCall.databaseGetDocument,
+          () => _getDocument(db, docIdFlStr, globalCBLError),
+        ).checkCBLError().toNullable();
+      });
 
   Pointer<CBLMutableDocument>? getMutableDocument(
     Pointer<CBLDatabase> db,
     String docId,
   ) =>
-      withZoneArena(() => _getMutableDocument(
-            db,
-            docId.toFLStringInArena().ref,
-            globalCBLError,
-          ).checkCBLError().toNullable());
+      withZoneArena(() {
+        final docIdFlStr = docId.toFLStringInArena().ref;
+        return nativeCallTracePoint(
+          TracedNativeCall.databaseGetMutableDocument,
+          () => _getMutableDocument(db, docIdFlStr, globalCBLError),
+        ).checkCBLError().toNullable();
+      });
 
   void saveDocumentWithConcurrencyControl(
     Pointer<CBLDatabase> db,
     Pointer<CBLMutableDocument> doc,
     CBLConcurrencyControl concurrencyControl,
   ) {
-    _saveDocumentWithConcurrencyControl(
-      db,
-      doc,
-      concurrencyControl.toInt(),
-      globalCBLError,
+    final concurrencyControlInt = concurrencyControl.toInt();
+    nativeCallTracePoint(
+      TracedNativeCall.databaseSaveDocument,
+      () => _saveDocumentWithConcurrencyControl(
+        db,
+        doc,
+        concurrencyControlInt,
+        globalCBLError,
+      ),
     ).checkCBLError();
   }
 
   bool deleteDocumentWithConcurrencyControl(
     Pointer<CBLDatabase> db,
     Pointer<CBLDocument> document,
-    CBLConcurrencyControl concurrency,
-  ) =>
-      _deleteDocumentWithConcurrencyControl(
+    CBLConcurrencyControl concurrencyControl,
+  ) {
+    final concurrencyControlInt = concurrencyControl.toInt();
+    return nativeCallTracePoint(
+      TracedNativeCall.databaseDeleteDocument,
+      () => _deleteDocumentWithConcurrencyControl(
         db,
         document,
-        concurrency.toInt(),
+        concurrencyControlInt,
         globalCBLError,
-      ).checkCBLError();
+      ),
+    ).checkCBLError();
+  }
 
   bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) =>
       withZoneArena(() => _purgeDocumentByID(
@@ -845,10 +866,16 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     Pointer<FLDict> properties,
   ) =>
-      _getBlob(db, properties, globalCBLError).checkCBLError().toNullable();
+      nativeCallTracePoint(
+        TracedNativeCall.databaseGetBlob,
+        () => _getBlob(db, properties, globalCBLError),
+      ).checkCBLError().toNullable();
 
   void saveBlob(Pointer<CBLDatabase> db, Pointer<CBLBlob> blob) {
-    _saveBlob(db, blob, globalCBLError).checkCBLError();
+    nativeCallTracePoint(
+      TracedNativeCall.databaseSaveBlob,
+      () => _saveBlob(db, blob, globalCBLError),
+    ).checkCBLError();
   }
 
   void _writeEncryptionKey(_CBLEncryptionKey to, {CBLEncryptionKey? from}) {
