@@ -1,3 +1,7 @@
+## 1.0.0-beta.4
+
+ - **FEAT**: tracing API (#269). ([4c06a977](https://github.com/cbl-dart/cbl-dart/commit/4c06a9772b6026b9e03327e18bb0957a53d28524))
+
 ## 1.0.0-beta.3
 
  - **FIX**: fix unpacking of archives and bump provided `libcblitedart` (#259). ([c0a2b81c](https://github.com/cbl-dart/cbl-dart/commit/c0a2b81c94f6e18643198a556d9c6f8c53caaaf3))

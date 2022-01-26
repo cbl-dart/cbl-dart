@@ -1,3 +1,12 @@
+## 1.0.0-beta.11
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: tracing API (#269). ([4c06a977](https://github.com/cbl-dart/cbl-dart/commit/4c06a9772b6026b9e03327e18bb0957a53d28524))
+ - **FEAT**: no longer require manual plugin registration for mobile. ([f004582d](https://github.com/cbl-dart/cbl-dart/commit/f004582df459114fc9c1efa1ee559c34ca823a76))
+ - **DOCS**: fix `cbl_flutter` test example (#266). ([358df729](https://github.com/cbl-dart/cbl-dart/commit/358df72989882b4d4f72c6dd83f54d987d2e1715))
+ - **BREAKING** **REFACTOR**: use `Bool` from `dart:ffi` (#265). ([c5f7b7be](https://github.com/cbl-dart/cbl-dart/commit/c5f7b7bea582d60958e83651457e957ee5c8d26c))
+
 ## 1.0.0-beta.10
 
  - **FEAT**: add support for Windows for `cbl_flutter` (#249). ([b8d2115e](https://github.com/cbl-dart/cbl-dart/commit/b8d2115ed04dcc85d77f5b38211c236c26fe54b5))

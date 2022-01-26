@@ -1,5 +1,5 @@
 name: 'cbl'
-version: 1.0.0-beta.12
+version: 1.0.0-beta.13
 description: >-
   Couchbase Lite is an embedded, NoSQL JSON Document Style database, supporting
   Blobs, Encryption, N1QL Queries, Live Queries, Full-Text Search and Data Sync.
@@ -11,7 +11,7 @@ environment:
   sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
-  cbl_ffi: ^0.7.0-beta.10
+  cbl_ffi: ^0.7.0-beta.11
   characters: ^1.1.0
   collection: ^1.15.0
   ffi: ^1.0.0

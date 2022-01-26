@@ -1,3 +1,11 @@
+## 0.7.0-beta.11
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: tracing API (#269). ([4c06a977](https://github.com/cbl-dart/cbl-dart/commit/4c06a9772b6026b9e03327e18bb0957a53d28524))
+ - **FEAT**: turn on `isLeaf` for FFI functions (#263). ([29997846](https://github.com/cbl-dart/cbl-dart/commit/29997846a9e9f805c3328b4ec5de7f7a6607ec74))
+ - **BREAKING** **REFACTOR**: use `Bool` from `dart:ffi` (#265). ([c5f7b7be](https://github.com/cbl-dart/cbl-dart/commit/c5f7b7bea582d60958e83651457e957ee5c8d26c))
+
 ## 0.7.0-beta.10
 
 > Note: This release has breaking changes.
