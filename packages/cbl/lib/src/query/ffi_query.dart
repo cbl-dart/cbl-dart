@@ -75,7 +75,7 @@ class FfiQuery extends QueryBase
 
   @override
   SyncResultSet execute() => syncOperationTracePoint(
-        ExecuteQueryOp(this),
+        () => ExecuteQueryOp(this),
         () => useSync(
           () => FfiResultSet(
             native.call(_bindings.execute),
@@ -155,7 +155,7 @@ class FfiQuery extends QueryBase
   }
 
   void _performPrepare() {
-    syncOperationTracePoint(PrepareQueryOp(this), () {
+    syncOperationTracePoint(() => PrepareQueryOp(this), () {
       native = CBLObject(
         database!.native.call((pointer) => _bindings.create(
               pointer,

@@ -69,9 +69,9 @@ class CblServiceClient {
 
   final Channel channel;
 
-  final _onTraceData =
+  final _onTraceData = Zone.current
       // ignore: invalid_use_of_visible_for_overriding_member
-      Zone.current.bindUnaryCallbackGuarded(tracingDelegate.onTraceData);
+      .bindUnaryCallbackGuarded(effectiveTracingDelegate.onTraceData);
 
   void unregisterObject(int id) => _objectRegistry.removeObjectById(id);
 

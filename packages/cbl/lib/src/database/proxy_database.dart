@@ -105,7 +105,7 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<Document?> document(String id) => asyncOperationTracePoint(
-        GetDocumentOp(this, id),
+        () => GetDocumentOp(this, id),
         () => use(() async {
           final state = await channel
               .call(GetDocument(objectId, id, EncodingFormat.fleece));
@@ -131,10 +131,10 @@ class ProxyDatabase extends ProxyObject
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       asyncOperationTracePoint(
-        SaveDocumentOp(this, document, concurrencyControl),
+        () => SaveDocumentOp(this, document, concurrencyControl),
         () => use(() async {
           final delegate = await asyncOperationTracePoint(
-            PrepareDocumentOp(document),
+            () => PrepareDocumentOp(document),
             () async => prepareDocument(document),
           );
 
@@ -160,7 +160,7 @@ class ProxyDatabase extends ProxyObject
     SaveConflictHandler conflictHandler,
   ) =>
       asyncOperationTracePoint(
-        SaveDocumentOp(this, document),
+        () => SaveDocumentOp(this, document),
         () => use(() => saveDocumentWithConflictHandlerHelper(
               document,
               conflictHandler,
@@ -173,10 +173,10 @@ class ProxyDatabase extends ProxyObject
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       asyncOperationTracePoint(
-        DeleteDocumentOp(this, document, concurrencyControl),
+        () => DeleteDocumentOp(this, document, concurrencyControl),
         () => use(() async {
           final delegate = await asyncOperationTracePoint(
-            PrepareDocumentOp(document),
+            () => PrepareDocumentOp(document),
             () async => prepareDocument(document, syncProperties: false),
           );
 
@@ -199,7 +199,7 @@ class ProxyDatabase extends ProxyObject
   @override
   Future<void> purgeDocument(covariant DelegateDocument document) async {
     await asyncOperationTracePoint(
-      PrepareDocumentOp(document),
+      () => PrepareDocumentOp(document),
       () async => prepareDocument(document, syncProperties: false),
     );
     return purgeDocumentById(document.id);
@@ -333,7 +333,7 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> close() =>
-      asyncOperationTracePoint(CloseDatabaseOp(this), super.close);
+      asyncOperationTracePoint(() => CloseDatabaseOp(this), super.close);
 
   @override
   Future<void> delete() {

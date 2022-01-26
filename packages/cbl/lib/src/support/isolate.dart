@@ -21,8 +21,8 @@ class IsolateContext {
   IsolateContext({
     required this.libraries,
     this.initContext,
-    this.tracingDelegate,
-  });
+    TracingDelegate? tracingDelegate,
+  }) : tracingDelegate = tracingDelegate ?? const NoopTracingDelegate();
 
   static IsolateContext? _instance;
 
@@ -43,12 +43,12 @@ class IsolateContext {
 
   final LibrariesConfiguration libraries;
   final InitContext? initContext;
-  final TracingDelegate? tracingDelegate;
+  final TracingDelegate tracingDelegate;
 
   IsolateContext createSecondaryIsolateContext() => IsolateContext(
         libraries: libraries,
-        initContext: initContext,
-        tracingDelegate: tracingDelegate?.createSecondaryIsolateDelegate(),
+        tracingDelegate:
+            effectiveTracingDelegate.createSecondaryIsolateDelegate(),
       );
 }
 
@@ -60,7 +60,7 @@ void initIsolate(IsolateContext context) {
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
   MDelegate.instance = CblMDelegate();
-  tracingDelegate = context.tracingDelegate ?? tracingDelegate;
+  effectiveTracingDelegate = context.tracingDelegate;
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the

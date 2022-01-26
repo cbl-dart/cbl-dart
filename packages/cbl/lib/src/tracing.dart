@@ -153,10 +153,10 @@ class NativeCallOp extends TracedOperation {
 ///
 /// {@category Tracing}
 class OpenDatabaseOp extends TracedOperation {
-  OpenDatabaseOp(this.dbName, this.config) : super('OpenDatabase');
+  OpenDatabaseOp(this.databaseName, this.config) : super('OpenDatabase');
 
   /// The name of the database to open.
-  final String dbName;
+  final String databaseName;
 
   /// The configuration which is used to open the database.
   final DatabaseConfiguration? config;

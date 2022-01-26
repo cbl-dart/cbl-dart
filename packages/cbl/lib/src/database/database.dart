@@ -101,10 +101,7 @@ abstract class Database implements ClosableResource {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-      asyncOperationTracePoint(
-        OpenDatabaseOp(name, config),
-        () => AsyncDatabase.open(name, config),
-      );
+      AsyncDatabase.open(name, config);
 
   /// {@template cbl.Database.openSync}
   /// Opens a Couchbase Lite database with the given [name] and [config],
@@ -117,10 +114,7 @@ abstract class Database implements ClosableResource {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-      syncOperationTracePoint(
-        OpenDatabaseOp(name, config),
-        () => SyncDatabase(name, config),
-      );
+      SyncDatabase(name, config);
 
   /// {@template cbl.Database.remove}
   /// Deletes a database of the given [name] in the given [directory].
@@ -439,10 +433,13 @@ typedef SyncSaveConflictHandler = bool Function(
 abstract class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
-      FfiDatabase(
-        name: name,
-        config: config,
-        debugCreator: 'SyncDatabase()',
+      syncOperationTracePoint(
+        () => OpenDatabaseOp(name, config),
+        () => FfiDatabase(
+          name: name,
+          config: config,
+          debugCreator: 'SyncDatabase()',
+        ),
       );
 
   /// {@macro cbl.Database.removeSync}
@@ -551,7 +548,10 @@ abstract class AsyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
-      WorkerDatabase.open(name, config);
+      asyncOperationTracePoint(
+        () => OpenDatabaseOp(name, config),
+        () => WorkerDatabase.open(name, config),
+      );
 
   /// {@macro cbl.Database.remove}
   static Future<void> remove(String name, {String? directory}) =>

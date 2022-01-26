@@ -63,7 +63,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
   @override
   Future<ResultSet> execute() => asyncOperationTracePoint(
-        ExecuteQueryOp(this),
+        () => ExecuteQueryOp(this),
         () => use(
           () => ProxyResultSet(
             query: this,
@@ -131,7 +131,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   }
 
   Future<void> _performPrepare() =>
-      asyncOperationTracePoint(PrepareQueryOp(this), () async {
+      asyncOperationTracePoint(() => PrepareQueryOp(this), () async {
         final channel = database!.channel;
 
         final state = await channel.call(CreateQuery(

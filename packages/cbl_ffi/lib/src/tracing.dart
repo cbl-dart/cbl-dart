@@ -10,7 +10,7 @@ import 'bindings.dart';
 ///
 /// Functions which use this value should be annotated with
 /// `@pragma('vm:prefer-inline')`, to make trace points a zero-cost abstraction
-/// when `--dart-define=cblIncludeTracePoints:false` is set.
+/// when `--define=cblIncludeTracePoints=false` is set.
 ///
 /// This value is set to `true` by default.
 const cblIncludeTracePoints =

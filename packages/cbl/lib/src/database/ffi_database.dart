@@ -113,7 +113,7 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   Document? document(String id) => syncOperationTracePoint(
-        GetDocumentOp(this, id),
+        () => GetDocumentOp(this, id),
         () => useSync(
           () => call((pointer) => _bindings.getDocument(pointer, id))?.let(
             (pointer) => DelegateDocument(
@@ -136,10 +136,10 @@ class FfiDatabase extends CBLDatabaseObject
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       syncOperationTracePoint(
-        SaveDocumentOp(this, document, concurrencyControl),
+        () => SaveDocumentOp(this, document, concurrencyControl),
         () => useSync(() {
           final delegate = syncOperationTracePoint(
-            PrepareDocumentOp(document),
+            () => PrepareDocumentOp(document),
             () => prepareDocument(document) as FfiDocumentDelegate,
           );
 
@@ -161,7 +161,7 @@ class FfiDatabase extends CBLDatabaseObject
     SaveConflictHandler conflictHandler,
   ) =>
       asyncOperationTracePoint(
-        SaveDocumentOp(this, document),
+        () => SaveDocumentOp(this, document),
         () => use(() => saveDocumentWithConflictHandlerHelper(
               document,
               conflictHandler,
@@ -174,7 +174,7 @@ class FfiDatabase extends CBLDatabaseObject
     SyncSaveConflictHandler conflictHandler,
   ) =>
       syncOperationTracePoint(
-        SaveDocumentOp(this, document),
+        () => SaveDocumentOp(this, document),
         () => useSync(
             // Because the conflict handler is sync the result of the maybe
             // async method is always sync.
@@ -190,10 +190,10 @@ class FfiDatabase extends CBLDatabaseObject
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
       syncOperationTracePoint(
-        DeleteDocumentOp(this, document, concurrencyControl),
+        () => DeleteDocumentOp(this, document, concurrencyControl),
         () => useSync(() {
           final delegate = syncOperationTracePoint(
-            PrepareDocumentOp(document),
+            () => PrepareDocumentOp(document),
             () => prepareDocument(document, syncProperties: false)
                 as FfiDocumentDelegate,
           );
@@ -350,7 +350,7 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   Future<void> close() =>
-      asyncOperationTracePoint(CloseDatabaseOp(this), super.close);
+      asyncOperationTracePoint(() => CloseDatabaseOp(this), super.close);
 
   @override
   Future<void> delete() => use(() {

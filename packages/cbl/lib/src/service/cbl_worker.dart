@@ -58,7 +58,7 @@ class CblWorker {
     _channel = Channel(
       transport: IsolateChannel.connectReceive(receivePort),
       serializationRegistry: cblServiceSerializationRegistry(),
-      captureMessageContext: tracingDelegate.captureTracingContext,
+      captureMessageContext: effectiveTracingDelegate.captureTracingContext,
     );
 
     _worker = IsolateWorker(
@@ -131,7 +131,7 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),
       serializationRegistry: cblServiceSerializationRegistry(),
-      restoreMessageContext: tracingDelegate.restoreTracingContext,
+      restoreMessageContext: effectiveTracingDelegate.restoreTracingContext,
     );
 
     _service = CblService(channel: _serviceChannel);
