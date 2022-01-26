@@ -1,3 +1,4 @@
+import 'service/channel.dart' as channel;
 import 'support/utils.dart';
 
 /// Base class for custom exceptions in the `cbl` package.
@@ -7,6 +8,14 @@ abstract class CouchbaseLiteException implements Exception {
 
   /// An optional error code specifies the cause of this exception.
   Object? get code => null;
+
+  /// The [StackTrace] from the execution context where this exception
+  /// originated from.
+  ///
+  /// When an exception originates in a different execution context than the
+  /// current one, this property contains the original stack trace, if it is
+  /// available.
+  StackTrace? get remoteStackTrace => channel.remoteStackTrace(this);
 
   String get _typeName;
 
