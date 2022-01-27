@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:meta/meta.dart';
 
@@ -189,6 +190,11 @@ class NativeCallOp extends TracedOperation {
   NativeCallOp(String name) : super(name);
 }
 
+/// A call over a communication channel.
+class ChannelCallOp extends TracedOperation {
+  ChannelCallOp(String name) : super(name);
+}
+
 /// Operation that opens a [Database].
 ///
 /// {@category Tracing}
@@ -219,6 +225,12 @@ class CloseDatabaseOp extends DatabaseOperationOp {
   CloseDatabaseOp(Database database) : super(database, 'CloseDatabase');
 }
 
+/// Operation that involves a [Document].
+abstract class DocumentOperationOp implements TracedOperation {
+  /// The document involved in this operation.
+  Document get document;
+}
+
 /// Operation that loads a [Document] from a [Database].
 ///
 /// {@category Tracing}
@@ -232,21 +244,24 @@ class GetDocumentOp extends DatabaseOperationOp {
 /// Operation that prepares a [Document] to be saved or deleted.
 ///
 /// {@category Tracing}
-class PrepareDocumentOp extends TracedOperation {
+class PrepareDocumentOp extends TracedOperation implements DocumentOperationOp {
   PrepareDocumentOp(this.document) : super('PrepareDocument');
 
   /// The document to prepare.
+  @override
   final Document document;
 }
 
 /// Operation that saves a [Document] to a [Database].
 ///
 /// {@category Tracing}
-class SaveDocumentOp extends DatabaseOperationOp {
+class SaveDocumentOp extends DatabaseOperationOp
+    implements DocumentOperationOp {
   SaveDocumentOp(Database database, this.document, [this.concurrencyControl])
       : super(database, 'SaveDocument');
 
   /// The document to save.
+  @override
   final Document document;
 
   /// The concurrency control to use.
@@ -262,11 +277,13 @@ class SaveDocumentOp extends DatabaseOperationOp {
 /// Operation that deletes a [Document] from a [Database].
 ///
 /// {@category Tracing}
-class DeleteDocumentOp extends DatabaseOperationOp {
+class DeleteDocumentOp extends DatabaseOperationOp
+    implements DocumentOperationOp {
   DeleteDocumentOp(Database database, this.document, this.concurrencyControl)
       : super(database, 'DeleteDocument');
 
   /// The document to delete.
+  @override
   final Document document;
 
   /// The concurrency control to use.
@@ -296,3 +313,221 @@ class PrepareQueryOp extends QueryOperationOp {
 class ExecuteQueryOp extends QueryOperationOp {
   ExecuteQueryOp(Query query) : super(query, 'ExecuteQuery');
 }
+
+/// A function to filter [TracedOperation]s.
+///
+/// {@category Tracing}
+typedef OperationFilter = bool Function(TracedOperation operation);
+
+/// Returns a new [OperationFilter] that combines the provided filters through
+/// an AND operation.
+OperationFilter combineOperationFilters(List<OperationFilter> filters) =>
+    (operation) {
+      for (final filter in filters) {
+        if (!filter(operation)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+/// A function that returns a string representation for [TracedOperation]s.
+///
+/// {@category Tracing}
+typedef OperationToStringResolver = String Function(TracedOperation operation);
+
+/// A function that resolves detailed tracing information for
+/// [TracedOperation]s.
+///
+/// {@category Tracing}
+typedef OperationDetailsResolver = Map<String, Object?>? Function(
+  TracedOperation operation,
+);
+
+/// A tracing delegate that integrates CBL Dart with the Dart DevTools.
+///
+/// This tracing delegate records [Timeline] events, which can be viewed in
+/// Dart DevTools Performance Page.
+///
+/// {@category Tracing}
+class DevToolsTracing extends TracingDelegate {
+  /// A tracing delegate that integrates CBL Dart with the dart developer tools.
+  ///
+  /// [operationFilter] is a filter that is used to determine whether an
+  /// operation should be traced. Per default, [defaultOperationFilter] is
+  /// used.
+  ///
+  /// [operationNameResolver] is the function that is used to resolve the name
+  /// of an operation. Per default, [defaultOperationNameResolver] is used.
+  ///
+  /// [operationDetailsResolver] is the function that is used to resolve
+  /// detailed tracing information for an operation. Per default,
+  /// [defaultOperationDetailsResolver] is used.
+  DevToolsTracing({
+    OperationFilter operationFilter = defaultOperationFilter,
+    OperationToStringResolver operationNameResolver =
+        defaultOperationNameResolver,
+    OperationDetailsResolver operationDetailsResolver =
+        defaultOperationDetailsResolver,
+  })  : _operationFilter = combineOperationFilters([
+          operationFilter,
+          _nestedChannelCallsFilter,
+        ]),
+        _operationNameResolver = operationNameResolver,
+        _operationDetailsResolver = operationDetailsResolver,
+        _isWorkerDelegate = false;
+
+  DevToolsTracing._workerDelegate(DevToolsTracing userDelegate)
+      : _operationFilter = userDelegate._operationFilter,
+        _operationNameResolver = userDelegate._operationNameResolver,
+        _operationDetailsResolver = userDelegate._operationDetailsResolver,
+        _isWorkerDelegate = true;
+
+  /// The default filter that is used to determine whether an operation should
+  /// be recorded to the timeline.
+  ///
+  /// It returns `true` for all operations.
+  static bool defaultOperationFilter(TracedOperation operation) => true;
+
+  static bool _nestedChannelCallsFilter(TracedOperation operation) {
+    if (operation is ChannelCallOp && _currentCblTimelineTask == null) {
+      // Only trace channel calls within an operation that is already being
+      // traced.
+      return false;
+    }
+
+    return true;
+  }
+
+  /// The default function to resolve the name of a [TracedOperation] for
+  /// its timeline events.
+  static String defaultOperationNameResolver(TracedOperation operation) {
+    if (operation is ChannelCallOp) {
+      return 'ChannelCall';
+    }
+    return operation.name;
+  }
+
+  /// The default function to resolve details of a [TracedOperation] for
+  /// its timeline events.
+  static Map<String, Object?>? defaultOperationDetailsResolver(
+    TracedOperation operation,
+  ) {
+    final details = <String, Object?>{};
+
+    if (operation is ChannelCallOp) {
+      details['callType'] = operation.name;
+      return details;
+    }
+
+    if (operation is OpenDatabaseOp) {
+      final directory = operation.config?.directory;
+      final withEncryptionKey = operation.config?.encryptionKey != null;
+
+      details['databaseName'] = operation.databaseName;
+      if (directory != null) {
+        details['directory'] = directory;
+      }
+      details['withEncryptionKey'] = withEncryptionKey;
+
+      return details;
+    }
+
+    if (operation is DatabaseOperationOp) {
+      details['databaseName'] = operation.database.name;
+    }
+
+    if (operation is DocumentOperationOp) {
+      details['documentId'] = operation.document.id;
+    }
+
+    if (operation is GetDocumentOp) {
+      details['documentId'] = operation.id;
+    }
+
+    if (operation is SaveDocumentOp) {
+      final concurrencyControl = operation.concurrencyControl;
+      if (concurrencyControl != null) {
+        details['concurrencyControl'] = concurrencyControl.name;
+      } else {
+        details['conflictHandler'] = true;
+      }
+    }
+
+    if (operation is DeleteDocumentOp) {
+      details['concurrencyControl'] = operation.concurrencyControl.name;
+    }
+
+    if (operation is QueryOperationOp) {
+      details['query'] =
+          operation.query.jsonRepresentation ?? operation.query.n1ql;
+    }
+
+    return details.isEmpty ? null : details;
+  }
+
+  final bool _isWorkerDelegate;
+  final OperationFilter _operationFilter;
+  final OperationToStringResolver _operationNameResolver;
+  final OperationDetailsResolver _operationDetailsResolver;
+
+  @override
+  TracingDelegate createWorkerDelegate() =>
+      DevToolsTracing._workerDelegate(this);
+
+  @override
+  T traceSyncOperation<T>(
+    TracedOperation operation,
+    T Function() execute,
+  ) {
+    if (!_operationFilter(operation)) {
+      return execute();
+    }
+
+    final name = _operationNameResolver(operation);
+    final details = _operationDetailsResolver(operation);
+    final task = _provideTimelineTask();
+    try {
+      task?.start(name, arguments: details);
+      return _withCblTimelineTask(
+        task,
+        () => Timeline.timeSync(name, execute, arguments: details),
+      );
+    } finally {
+      task?.finish();
+    }
+  }
+
+  @override
+  Future<T> traceAsyncOperation<T>(
+    TracedOperation operation,
+    Future<T> Function() execute,
+  ) async {
+    if (!_operationFilter(operation)) {
+      return execute();
+    }
+
+    final name = _operationNameResolver(operation);
+    final details = _operationDetailsResolver(operation);
+    final task = _provideTimelineTask();
+    try {
+      task?.start(name, arguments: details);
+      return await _withCblTimelineTask(task, execute);
+    } finally {
+      task?.finish();
+    }
+  }
+
+  TimelineTask? _provideTimelineTask() => _isWorkerDelegate
+      ? null
+      : TimelineTask(
+          parent: _currentCblTimelineTask,
+          filterKey: 'CouchbaseLite',
+        );
+}
+
+T _withCblTimelineTask<T>(TimelineTask? task, T Function() fn) =>
+    runZoned(fn, zoneValues: {#_cblTimelineTask: task});
+
+TimelineTask? get _currentCblTimelineTask =>
+    Zone.current[#_cblTimelineTask] as TimelineTask?;
