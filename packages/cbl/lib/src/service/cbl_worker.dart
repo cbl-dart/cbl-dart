@@ -64,7 +64,7 @@ class CblWorker {
     _worker = IsolateWorker(
       debugName: 'CblWorker($debugName)',
       delegate: _ServiceWorkerDelegate(
-        context: IsolateContext.instance.createSecondaryIsolateContext(),
+        context: IsolateContext.instance.createForWorkerIsolate(),
         serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
@@ -125,8 +125,8 @@ class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
   late final CblService _service;
 
   @override
-  FutureOr<void> initialize() {
-    initIsolate(
+  FutureOr<void> initialize() async {
+    await initWorkerIsolate(
       context,
       onTraceData: (data) => _service.channel.call(TraceDataRequest(data)),
     );

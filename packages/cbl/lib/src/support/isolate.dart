@@ -21,8 +21,8 @@ class IsolateContext {
   IsolateContext({
     required this.libraries,
     this.initContext,
-    TracingDelegate? tracingDelegate,
-  }) : tracingDelegate = tracingDelegate ?? const NoopTracingDelegate();
+    this.tracingDelegate,
+  });
 
   static IsolateContext? _instance;
 
@@ -43,32 +43,52 @@ class IsolateContext {
 
   final LibrariesConfiguration libraries;
   final InitContext? initContext;
-  final TracingDelegate tracingDelegate;
+  final TracingDelegate? tracingDelegate;
 
-  IsolateContext createSecondaryIsolateContext() => IsolateContext(
+  IsolateContext createForWorkerIsolate() => IsolateContext(
         libraries: libraries,
-        tracingDelegate:
-            effectiveTracingDelegate.createSecondaryIsolateDelegate(),
+        tracingDelegate: effectiveTracingDelegate.createWorkerDelegate(),
       );
 }
 
-/// Initializes this isolate for use of Couchbase Lite.
-void initIsolate(IsolateContext context, {TraceDataHandler? onTraceData}) {
+/// Initializes this isolate for use of Couchbase Lite, and initializes the
+/// native libraries.
+void initPrimaryIsolate(IsolateContext context) {
+  _initIsolate(context);
+  cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
+}
+
+/// Initializes this isolate for use of Couchbase Lite, after another primary
+/// isolate has been initialized.
+void initSecondaryIsolate(IsolateContext context) {
+  _initIsolate(context);
+}
+
+/// Initializes this isolate for use as a Couchbase Lite worker isolate.
+Future<void> initWorkerIsolate(
+  IsolateContext context, {
+  required TraceDataHandler onTraceData,
+}) async {
+  _initIsolate(context, onTraceData: onTraceData);
+
+  final tracingDelegate = context.tracingDelegate;
+  if (tracingDelegate != null) {
+    TracingDelegate.install(tracingDelegate);
+    await tracingDelegate.initializeWorkerDelegate();
+  }
+}
+
+void _initIsolate(IsolateContext context, {TraceDataHandler? onTraceData}) {
   IsolateContext.instance = context;
+
   CBLBindings.init(
     context.libraries.toCblFfi(),
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
+
   MDelegate.instance = CblMDelegate();
-  effectiveTracingDelegate = context.tracingDelegate;
+
   _onTraceData = onTraceData;
 }
 
 set _onTraceData(TraceDataHandler? value) => onTraceData = value;
-
-/// Initializes this isolate for use of Couchbase Lite, and initializes the
-/// native libraries.
-void initMainIsolate(IsolateContext context) {
-  initIsolate(context);
-  cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
-}
