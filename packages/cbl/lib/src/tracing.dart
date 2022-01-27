@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'database.dart';
@@ -22,20 +24,24 @@ late final TraceDataHandler? _onTraceData = onTraceData;
 /// See [TracedOperation] and its subclasses for all operations can can be
 /// traced.
 ///
-/// # Primary and secondary isolates
+/// # User and worker isolates
 ///
-/// Every isolate in which CBL Dart is used has one [TracingDelegate], which
-/// cannot be changed. When initializing CBL Dart, a [TracingDelegate] can
-/// be provided, which will become the delegate for the current (primary)
-/// isolate. Each time CBL Dart creates background (secondary) isolates,
-/// [createSecondaryIsolateDelegate] is called on the primary isolate delegate
-/// and the returned delegate is used as the delegate for the new isolate.
+/// User isolates are isolates in which CBL Dart is used but that are not
+/// created by CBL Dart.
+/// For every user isolate, a [TracingDelegate] can be installed through
+/// [install].
+///
+/// Each time CBL Dart creates a worker isolate, [createWorkerDelegate] is
+/// called on the user isolate delegate and the returned delegate is used as
+/// the delegate for the new isolate.
+/// Worker isolate delegates get the chance to initialize themselves in
+/// [initializeWorkerDelegate].
 ///
 /// ## Tracing context
 ///
-/// When a primary isolate sends a message to a secondary isolate, the
-/// primary isolate's [TracingDelegate] can provide a tracing context, which
-/// is sent to the secondary isolate along with the message. When a secondary
+/// When a user isolate sends a message to a worker isolate, the
+/// user isolate's [TracingDelegate] can provide a tracing context, which
+/// is sent to the worker isolate along with the message. When a worker
 /// isolate receives a message, it's delegate can restore the tracing context.
 /// Typically, the tracing context is stored in a zone value and
 /// [captureTracingContext] and [restoreTracingContext] are used to transfer
@@ -44,8 +50,8 @@ late final TraceDataHandler? _onTraceData = onTraceData;
 ///
 /// ## Trace data
 ///
-/// A delegate in a secondary isolate can send arbitrary data through
-/// [sendTraceData] to the delegate in the primary isolate, which will receive
+/// A delegate in a worker isolate can send arbitrary data through
+/// [sendTraceData] to the delegate in the user isolate, which will receive
 /// the data through a call to [onTraceData]. The data has to be JSON
 /// serializable.
 ///
@@ -54,21 +60,49 @@ abstract class TracingDelegate {
   /// Const constructor for subclasses.
   const TracingDelegate();
 
-  /// Creates a new [TracingDelegate], to be used for a secondary isolate,
+  /// Whether a [TracingDelegate] has been installed for this isolate.
+  ///
+  /// Delegates can be installed through [install].
+  static bool get hasBeenInstalled => _hasBeenInstalled;
+  static bool _hasBeenInstalled = false;
+
+  /// Installs a [TracingDelegate] for the current isolate.
+  ///
+  /// A [TracingDelegate] can only be installed once per isolate and cannot
+  /// be changed. Whether a [TracingDelegate] has been installed for this
+  /// isolate can be checked with [hasBeenInstalled].
+  static void install(TracingDelegate delegate) {
+    if (_hasBeenInstalled) {
+      throw StateError('A TracingDelegate has already been installed.');
+    }
+    _hasBeenInstalled = true;
+    effectiveTracingDelegate = delegate;
+  }
+
+  /// Creates a new [TracingDelegate], to be used for a worker isolate,
   /// which is about to be created by the current isolate.
   ///
   /// The returned object must be able to be passed from the current isolate to
-  /// to the secondary isolate.
+  /// to the worker isolate.
   ///
   /// The default implementation returns `this`.
   // ignore: avoid_returning_this
-  TracingDelegate createSecondaryIsolateDelegate() => this;
+  TracingDelegate createWorkerDelegate() => this;
 
-  /// Allows this delegate to send arbitrary data to the delegate in its
-  /// primary isolate.
+  /// Called when this delegate is about to be used in a worker isolate.
+  ///
+  /// This allows a worker delegate to initialize itself and its environment.
+  ///
+  /// [sendTraceData] cannot be called from this method.
+  ///
+  /// Delegates for a user isolate must already be initialized.
+  FutureOr<void> initializeWorkerDelegate() {}
+
+  /// Allows this delegate to send arbitrary data to the delegate it was
+  /// created by.
   ///
   /// The [data] must be JSON serializable and this delegate must be in a
-  /// secondary isolate.
+  /// worker isolate.
   @protected
   @mustCallSuper
   void sendTraceData(Object? data) {
@@ -78,21 +112,21 @@ abstract class TracingDelegate {
     _onTraceData!(data);
   }
 
-  /// Callback for receiving trace data from delegates in secondary isolates.
+  /// Callback for receiving trace data from delegates in worker isolates.
   ///
-  /// When a delegate in a secondary isolate calls [sendTraceData], the data
-  /// is sent to the primary isolate, which calls this callback.
+  /// When a delegate in a worker isolate calls [sendTraceData], the data
+  /// is sent to the user isolate, which calls this callback.
   @visibleForOverriding
   void onTraceData(Object? data) {}
 
   /// Returns the current tracing context and is called just before a message
-  /// is sent from a primary to a secondary isolate.
+  /// is sent from an user to a worker isolate.
   ///
   /// The returned value must be JSON serializable.
   Object? captureTracingContext() => null;
 
   /// Restores the tracing context and is called just after a message from a
-  /// secondary is received a a secondary isolate.
+  /// user isolate is received by a worker isolate.
   ///
   /// The provided [context] is the value that was returned by
   /// [captureTracingContext], when the message was sent.

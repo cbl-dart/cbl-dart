@@ -12,14 +12,14 @@ void main() {
 
   group('tracing', () {
     final originalTracingDelegate = effectiveTracingDelegate;
-    late TestTracingDelegate delegate;
+    late TestDelegate delegate;
 
     tearDownAll(() {
       effectiveTracingDelegate = originalTracingDelegate;
     });
 
     setUp(() {
-      effectiveTracingDelegate = delegate = TestTracingDelegate();
+      effectiveTracingDelegate = delegate = TestDelegate();
     });
 
     test('trace sync operation', () {
@@ -40,13 +40,28 @@ void main() {
     });
 
     test('send and receive trace data', () async {
-      delegate.secondaryIsolateDelegate.traceData = 'data';
+      delegate.workerDelegate.traceData = 'data';
       await openAsyncTestDatabase(usePublicApi: true);
 
       expect(delegate.traceData, ['data', 'data']);
     });
 
-    test('capture and restore tracing context', () async {
+    test('worker delegate is initialized', () async {
+      delegate.workerDelegate.initializeTraceData = 'init';
+
+      await openAsyncTestDatabase(usePublicApi: true);
+
+      expect(delegate.traceData, ['init', 'init']);
+    });
+
+    test('worker delegate can send trace data', () async {
+      delegate.workerDelegate.traceData = 'data';
+      await openAsyncTestDatabase(usePublicApi: true);
+
+      expect(delegate.traceData, ['data', 'data']);
+    });
+
+    test('user delegate can provide tracing context', () async {
       delegate.tracingContext = 'context';
       await openAsyncTestDatabase(usePublicApi: true);
 
@@ -55,13 +70,11 @@ void main() {
   });
 }
 
-class TestTracingDelegate extends TracingDelegate {
-  TestSecondaryIsolateDelegate secondaryIsolateDelegate =
-      TestSecondaryIsolateDelegate();
+class TestDelegate extends TracingDelegate {
+  TestWorkerDelegate workerDelegate = TestWorkerDelegate();
 
   @override
-  TestSecondaryIsolateDelegate createSecondaryIsolateDelegate() =>
-      secondaryIsolateDelegate;
+  TestWorkerDelegate createWorkerDelegate() => workerDelegate;
 
   final List<Object?> traceData = [];
 
@@ -94,8 +107,17 @@ class TestTracingDelegate extends TracingDelegate {
   }
 }
 
-class TestSecondaryIsolateDelegate extends TracingDelegate {
+class TestWorkerDelegate extends TracingDelegate {
+  Object? initializeTraceData;
+
   Object? traceData;
+
+  @override
+  FutureOr<void> initializeWorkerDelegate() {
+    if (initializeTraceData != null) {
+      traceData = initializeTraceData;
+    }
+  }
 
   @override
   void restoreTracingContext(Object? context, void Function() restore) {
