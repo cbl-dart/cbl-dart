@@ -79,11 +79,11 @@ abstract class TracingDelegate {
     effectiveTracingDelegate = delegate;
   }
 
-  /// Creates a new [TracingDelegate], to be used for a worker isolate,
+  /// Creates a new [TracingDelegate] to be used for a worker isolate,
   /// which is about to be created by the current isolate.
   ///
   /// The returned object must be able to be passed from the current isolate to
-  /// to the worker isolate.
+  /// the worker isolate.
   ///
   /// The default implementation returns `this`.
   // ignore: avoid_returning_this
