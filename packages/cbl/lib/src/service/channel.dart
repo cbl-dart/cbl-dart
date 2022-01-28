@@ -4,7 +4,9 @@ import 'dart:async';
 
 import 'package:stream_channel/stream_channel.dart';
 
+import '../support/tracing.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'serialization/serialization.dart';
 import 'serialization/serialization_codec.dart';
 
@@ -96,13 +98,12 @@ class Channel {
     MessageContextRestorer? restoreMessageContext,
     this.debug = false,
   })  : _captureMessageContext = captureMessageContext ?? (() => null),
-        _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()) {
-    serializationRegistry =
-        serializationRegistry?.merge(channelSerializationRegistry()) ??
-            channelSerializationRegistry();
-
+        _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()),
+        _serializationRegistry =
+            serializationRegistry?.merge(channelSerializationRegistry()) ??
+                channelSerializationRegistry() {
     final codec =
-        SerializationCodec(serializationRegistry, packetCodec: packetCodec);
+        SerializationCodec(_serializationRegistry, packetCodec: packetCodec);
 
     _transport = transport
         .transform(StreamChannelTransformer.fromCodec(codec))
@@ -118,6 +119,8 @@ class Channel {
   final MessageContextCapturer _captureMessageContext;
   final MessageContextRestorer _restoreMessageContext;
 
+  final SerializationRegistry _serializationRegistry;
+
   late final StreamChannel<_Message> _transport;
   int _nextConversationId = 0;
 
@@ -132,23 +135,29 @@ class Channel {
   final _streamSubscriptions = <int, StreamSubscription>{};
 
   /// Makes a call to an endpoint at other side of the channel.
-  Future<R> call<R>(Request<R> request) async {
-    _checkIsOpen();
-    final id = _generateConversationId();
-    final completer = _callCompleter[id] = Completer<_Message>();
-    _sendMessage(_CallRequest(id, request, _captureMessageContext()));
+  Future<R> call<R>(Request<R> request) async => asyncOperationTracePoint(
+        () {
+          final name = _serializationRegistry.getTypeName(request.runtimeType)!;
+          return ChannelCallOp(name);
+        },
+        () async {
+          _checkIsOpen();
+          final id = _generateConversationId();
+          final completer = _callCompleter[id] = Completer<_Message>();
+          _sendMessage(_CallRequest(id, request, _captureMessageContext()));
 
-    final message = await completer.future;
-    if (message is _CallSuccess) {
-      return message.data as R;
-    }
-    if (message is _CallError) {
-      // ignore: only_throw_errors
-      throw message.error;
-    }
+          final message = await completer.future;
+          if (message is _CallSuccess) {
+            return message.data as R;
+          }
+          if (message is _CallError) {
+            // ignore: only_throw_errors
+            throw message.error;
+          }
 
-    throw StateError('Unexpected message: $message');
-  }
+          throw StateError('Unexpected message: $message');
+        },
+      );
 
   /// Returns a stream for an endpoint at the other side of the channel.
   Stream<R> stream<R>(Request<R> request) {

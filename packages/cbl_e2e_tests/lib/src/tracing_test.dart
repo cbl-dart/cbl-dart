@@ -36,7 +36,11 @@ void main() {
       await openAsyncTestDatabase(usePublicApi: true);
 
       expect(delegate.syncOperations, isEmpty);
-      expect(delegate.asyncOperations, [isA<OpenDatabaseOp>()]);
+      expect(delegate.asyncOperations, [
+        isA<OpenDatabaseOp>(),
+        isA<ChannelCallOp>(),
+        isA<ChannelCallOp>(),
+      ]);
     });
 
     test('send and receive trace data', () async {

@@ -284,6 +284,8 @@ late LogMessageRepository logMessageRepository;
 Future<void> initApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  TracingDelegate.install(DevToolsTracing());
+
   await CouchbaseLiteFlutter.init();
 
   // Uncomment the line below to reset the database each time the app starts.
