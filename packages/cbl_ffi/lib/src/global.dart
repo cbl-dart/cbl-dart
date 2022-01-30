@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 import 'base.dart';
+import 'c_type.dart';
 import 'fleece.dart';
 import 'slice.dart';
 
@@ -20,4 +21,4 @@ late final globalFLString = globalFLSlice.cast<FLString>();
 late final globalLoadedFLValue = sliceResult<CBLDart_LoadedFLValue>();
 
 late final globalCBLError = sliceResult<CBLError>();
-late final globalErrorPosition = sliceResult<Int32>();
+late final globalErrorPosition = sliceResult<Int>();

@@ -22,26 +22,4 @@ void CBLDart_CObject_SetFLString(Dart_CObject* object, const FLString string);
 
 // === Fleece =================================================================
 
-#ifdef _MSC_VER
-static const CBLDart_FLSlice kCBLDartNullSlice = {NULL, 0};
-#else
-#define kCBLDartNullSlice ((CBLDart_FLSlice){NULL, 0})
-#endif
-
-FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice);
-
-CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice);
-
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSliceResult slice);
-
-CBLDart_FLSliceResult CBLDart_FLSliceResultToDart(FLSliceResult slice);
-
-FLString CBLDart_FLStringFromDart(CBLDart_FLString slice);
-
-CBLDart_FLString CBLDart_FLStringToDart(FLString slice);
-
-FLStringResult CBLDart_FLStringResultFromDart(CBLDart_FLStringResult slice);
-
-CBLDart_FLStringResult CBLDart_FLStringResultToDart(FLStringResult slice);
-
 std::string CBLDart_FLStringToString(FLString slice);

@@ -37,38 +37,6 @@ void CBLDart_CObject_SetFLString(Dart_CObject* object, const FLString string) {
 
 // === Fleece =================================================================
 
-FLSlice CBLDart_FLSliceFromDart(CBLDart_FLSlice slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLSlice CBLDart_FLSliceToDart(FLSlice slice) {
-  return {slice.buf, slice.size};
-}
-
-FLSliceResult CBLDart_FLSliceResultFromDart(CBLDart_FLSliceResult slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLSliceResult CBLDart_FLSliceResultToDart(FLSliceResult slice) {
-  return {slice.buf, slice.size};
-}
-
-FLString CBLDart_FLStringFromDart(CBLDart_FLString slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLString CBLDart_FLStringToDart(FLString slice) {
-  return {slice.buf, slice.size};
-}
-
-FLStringResult CBLDart_FLStringResultFromDart(CBLDart_FLStringResult slice) {
-  return {slice.buf, static_cast<size_t>(slice.size)};
-}
-
-CBLDart_FLStringResult CBLDart_FLStringResultToDart(FLStringResult slice) {
-  return {slice.buf, slice.size};
-}
-
 std::string CBLDart_FLStringToString(FLString slice) {
   return std::string((char*)slice.buf, slice.size);
 }

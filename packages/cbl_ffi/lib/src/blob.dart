@@ -15,7 +15,7 @@ import 'utils.dart';
 
 class CBLBlob extends Opaque {}
 
-typedef _CBLDart_CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
+typedef _CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
   FLString contentType,
   FLSlice contents,
 );
@@ -28,11 +28,11 @@ typedef _FLDict_GetBlob = Pointer<CBLBlob> Function(Pointer<FLDict> dict);
 typedef _CBLBlob_Length_C = Uint64 Function(Pointer<CBLBlob> blob);
 typedef _CBLBlob_Length = int Function(Pointer<CBLBlob> blob);
 
-typedef _CBLDart_CBLBlob_Digest = FLString Function(Pointer<CBLBlob> blob);
+typedef _CBLBlob_Digest = FLString Function(Pointer<CBLBlob> blob);
 
-typedef _CBLDart_CBLBlob_ContentType = FLString Function(Pointer<CBLBlob> blob);
+typedef _CBLBlob_ContentType = FLString Function(Pointer<CBLBlob> blob);
 
-typedef _CBLDart_CBLBlob_Content = FLSliceResult Function(
+typedef _CBLBlob_Content = FLSliceResult Function(
   Pointer<CBLBlob> blob,
   Pointer<CBLError> errorOut,
 );
@@ -50,9 +50,9 @@ typedef _FLSlot_SetBlob = void Function(
 
 class BlobBindings extends Bindings {
   BlobBindings(Bindings parent) : super(parent) {
-    _createWithData = libs.cblDart.lookupFunction<
-        _CBLDart_CBLBlob_CreateWithData, _CBLDart_CBLBlob_CreateWithData>(
-      'CBLDart_CBLBlob_CreateWithData',
+    _createWithData = libs.cbl
+        .lookupFunction<_CBLBlob_CreateWithData, _CBLBlob_CreateWithData>(
+      'CBLBlob_CreateWithData',
       isLeaf: useIsLeaf,
     );
     _isBlob = libs.cbl.lookupFunction<_FLDict_IsBlob_C, _FLDict_IsBlob>(
@@ -67,19 +67,17 @@ class BlobBindings extends Bindings {
       'CBLBlob_Length',
       isLeaf: useIsLeaf,
     );
-    _digest = libs.cblDart
-        .lookupFunction<_CBLDart_CBLBlob_Digest, _CBLDart_CBLBlob_Digest>(
-      'CBLDart_CBLBlob_Digest',
+    _digest = libs.cbl.lookupFunction<_CBLBlob_Digest, _CBLBlob_Digest>(
+      'CBLBlob_Digest',
       isLeaf: useIsLeaf,
     );
-    _contentType = libs.cblDart.lookupFunction<_CBLDart_CBLBlob_ContentType,
-        _CBLDart_CBLBlob_ContentType>(
-      'CBLDart_CBLBlob_ContentType',
+    _contentType =
+        libs.cbl.lookupFunction<_CBLBlob_ContentType, _CBLBlob_ContentType>(
+      'CBLBlob_ContentType',
       isLeaf: useIsLeaf,
     );
-    _content = libs.cblDart
-        .lookupFunction<_CBLDart_CBLBlob_Content, _CBLDart_CBLBlob_Content>(
-      'CBLDart_CBLBlob_Content',
+    _content = libs.cbl.lookupFunction<_CBLBlob_Content, _CBLBlob_Content>(
+      'CBLBlob_Content',
       isLeaf: useIsLeaf,
     );
     _properties =
@@ -93,14 +91,14 @@ class BlobBindings extends Bindings {
     );
   }
 
-  late final _CBLDart_CBLBlob_CreateWithData _createWithData;
+  late final _CBLBlob_CreateWithData _createWithData;
   late final _FLDict_IsBlob _isBlob;
   late final _FLDict_GetBlob _getBlob;
   late final _FLSlot_SetBlob _setBlob;
   late final _CBLBlob_Length _length;
-  late final _CBLDart_CBLBlob_Digest _digest;
-  late final _CBLDart_CBLBlob_Content _content;
-  late final _CBLDart_CBLBlob_ContentType _contentType;
+  late final _CBLBlob_Digest _digest;
+  late final _CBLBlob_Content _content;
+  late final _CBLBlob_ContentType _contentType;
   late final _CBLBlob_Properties _properties;
 
   Pointer<CBLBlob> createWithData(String? contentType, Data content) =>
@@ -255,7 +253,7 @@ typedef _CBLBlobWriter_Write = bool Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLBlob_CreateWithStream = Pointer<CBLBlob> Function(
+typedef _CBLBlob_CreateWithStream = Pointer<CBLBlob> Function(
   FLString contentType,
   Pointer<CBLBlobWriteStream> stream,
 );
@@ -277,9 +275,9 @@ class BlobWriteStreamBindings extends Bindings {
       'CBLBlobWriter_Write',
       isLeaf: useIsLeaf,
     );
-    _createBlobWithStream = libs.cblDart.lookupFunction<
-        _CBLDart_CBLBlob_CreateWithStream, _CBLDart_CBLBlob_CreateWithStream>(
-      'CBLDart_CBLBlob_CreateWithStream',
+    _createBlobWithStream = libs.cbl
+        .lookupFunction<_CBLBlob_CreateWithStream, _CBLBlob_CreateWithStream>(
+      'CBLBlob_CreateWithStream',
       isLeaf: useIsLeaf,
     );
   }
@@ -287,7 +285,7 @@ class BlobWriteStreamBindings extends Bindings {
   late final _CBLBlobWriter_Create _create;
   late final _CBLBlobWriter_Close _close;
   late final _CBLBlobWriter_Write _write;
-  late final _CBLDart_CBLBlob_CreateWithStream _createBlobWithStream;
+  late final _CBLBlob_CreateWithStream _createBlobWithStream;
 
   Pointer<CBLBlobWriteStream> create(Pointer<CBLDatabase> db) =>
       _create(db, globalCBLError).checkCBLError();

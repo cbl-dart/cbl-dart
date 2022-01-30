@@ -21,19 +21,19 @@ typedef _CBLDocument_Properties = Pointer<FLDict> Function(
   Pointer<CBLDocument> doc,
 );
 
-typedef _CBLDart_CBLDocument_CreateJSON = FLStringResult Function(
+typedef _CBLDocument_CreateJSON = FLStringResult Function(
   Pointer<CBLDocument> doc,
 );
 
 class DocumentBindings extends Bindings {
   DocumentBindings(Bindings parent) : super(parent) {
-    _id = libs.cblDart.lookupFunction<_CBLDocument_ID, _CBLDocument_ID>(
-      'CBLDart_CBLDocument_ID',
+    _id = libs.cbl.lookupFunction<_CBLDocument_ID, _CBLDocument_ID>(
+      'CBLDocument_ID',
       isLeaf: useIsLeaf,
     );
-    _revisionId = libs.cblDart
+    _revisionId = libs.cbl
         .lookupFunction<_CBLDocument_RevisionID, _CBLDocument_RevisionID>(
-      'CBLDart_CBLDocument_RevisionID',
+      'CBLDocument_RevisionID',
       isLeaf: useIsLeaf,
     );
     _sequence =
@@ -46,9 +46,9 @@ class DocumentBindings extends Bindings {
       'CBLDocument_Properties',
       isLeaf: useIsLeaf,
     );
-    _createJSON = libs.cblDart.lookupFunction<_CBLDart_CBLDocument_CreateJSON,
-        _CBLDart_CBLDocument_CreateJSON>(
-      'CBLDart_CBLDocument_CreateJSON',
+    _createJSON = libs.cbl
+        .lookupFunction<_CBLDocument_CreateJSON, _CBLDocument_CreateJSON>(
+      'CBLDocument_CreateJSON',
       isLeaf: useIsLeaf,
     );
   }
@@ -57,7 +57,7 @@ class DocumentBindings extends Bindings {
   late final _CBLDocument_RevisionID _revisionId;
   late final _CBLDocument_Sequence _sequence;
   late final _CBLDocument_Properties _properties;
-  late final _CBLDart_CBLDocument_CreateJSON _createJSON;
+  late final _CBLDocument_CreateJSON _createJSON;
 
   String id(Pointer<CBLDocument> doc) => _id(doc).toDartString()!;
 
@@ -74,8 +74,7 @@ class DocumentBindings extends Bindings {
 
 class CBLMutableDocument extends Opaque {}
 
-typedef _CBLDart_CBLDocument_CreateWithID = Pointer<CBLMutableDocument>
-    Function(
+typedef _CBLDocument_CreateWithID = Pointer<CBLMutableDocument> Function(
   FLString id,
 );
 
@@ -101,7 +100,7 @@ typedef _CBLDocument_SetPropertiesAsJSON_C = Uint8 Function(
   FLString json,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLDocument_SetJSON = int Function(
+typedef _CBLDocument_SetJSON = int Function(
   Pointer<CBLMutableDocument> doc,
   FLString json,
   Pointer<CBLError> errorOut,
@@ -109,9 +108,9 @@ typedef _CBLDart_CBLDocument_SetJSON = int Function(
 
 class MutableDocumentBindings extends Bindings {
   MutableDocumentBindings(Bindings parent) : super(parent) {
-    _createWithID = libs.cblDart.lookupFunction<
-        _CBLDart_CBLDocument_CreateWithID, _CBLDart_CBLDocument_CreateWithID>(
-      'CBLDart_CBLDocument_CreateWithID',
+    _createWithID = libs.cbl
+        .lookupFunction<_CBLDocument_CreateWithID, _CBLDocument_CreateWithID>(
+      'CBLDocument_CreateWithID',
       isLeaf: useIsLeaf,
     );
     _mutableCopy = libs.cbl
@@ -129,18 +128,18 @@ class MutableDocumentBindings extends Bindings {
       'CBLDocument_SetProperties',
       isLeaf: useIsLeaf,
     );
-    _setJSON = libs.cblDart.lookupFunction<_CBLDocument_SetPropertiesAsJSON_C,
-        _CBLDart_CBLDocument_SetJSON>(
-      'CBLDart_CBLDocument_SetJSON',
+    _setJSON = libs.cbl.lookupFunction<_CBLDocument_SetPropertiesAsJSON_C,
+        _CBLDocument_SetJSON>(
+      'CBLDocument_SetJSON',
       isLeaf: useIsLeaf,
     );
   }
 
-  late final _CBLDart_CBLDocument_CreateWithID _createWithID;
+  late final _CBLDocument_CreateWithID _createWithID;
   late final _CBLDocument_MutableCopy _mutableCopy;
   late final _CBLDocument_MutableProperties _mutableProperties;
   late final _CBLDocument_SetProperties _setProperties;
-  late final _CBLDart_CBLDocument_SetJSON _setJSON;
+  late final _CBLDocument_SetJSON _setJSON;
 
   Pointer<CBLMutableDocument> createWithID([String? id]) =>
       withZoneArena(() => _createWithID(

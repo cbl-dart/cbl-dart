@@ -169,7 +169,7 @@ class CBLError extends Struct {
   external int _internal_info;
 }
 
-typedef _CBLDart_CBLError_Message = FLStringResult Function(
+typedef _CBLError_Message = FLStringResult Function(
   Pointer<CBLError> error,
 );
 
@@ -347,9 +347,9 @@ class BaseBindings extends Bindings {
       'CBL_Release',
       isLeaf: useIsLeaf,
     );
-    _getErrorMessage = libs.cblDart
-        .lookupFunction<_CBLDart_CBLError_Message, _CBLDart_CBLError_Message>(
-      'CBLDart_CBLError_Message',
+    _getErrorMessage =
+        libs.cbl.lookupFunction<_CBLError_Message, _CBLError_Message>(
+      'CBLError_Message',
       isLeaf: useIsLeaf,
     );
     _removeListener =
@@ -365,7 +365,7 @@ class BaseBindings extends Bindings {
   late final _CBLDart_SetDebugRefCounted _setDebugRefCounted;
   late final _CBL_Retain _retainRefCounted;
   late final _CBL_Release _releaseRefCounted;
-  late final _CBLDart_CBLError_Message _getErrorMessage;
+  late final _CBLError_Message _getErrorMessage;
   late final _CBLListener_Remove _removeListener;
 
   void initializeNativeLibraries([CBLInitContext? context]) {

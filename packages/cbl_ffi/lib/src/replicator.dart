@@ -9,6 +9,7 @@ import 'package:ffi/ffi.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'c_type.dart';
 import 'data.dart';
 import 'database.dart';
 import 'document.dart';
@@ -20,7 +21,7 @@ import 'utils.dart';
 
 class CBLEndpoint extends Opaque {}
 
-typedef _CBLDart_CBLEndpoint_CreateWithURL = Pointer<CBLEndpoint> Function(
+typedef _CBLEndpoint_CreateWithURL = Pointer<CBLEndpoint> Function(
   FLString url,
   Pointer<CBLError> errorOut,
 );
@@ -38,12 +39,12 @@ typedef _CBLEndpoint_Free = void Function(
 
 class CBLAuthenticator extends Opaque {}
 
-typedef _CBLDart_CBLAuth_CreatePassword = Pointer<CBLAuthenticator> Function(
+typedef _CBLAuth_CreatePassword = Pointer<CBLAuthenticator> Function(
   FLString username,
   FLString password,
 );
 
-typedef _CBLDart_CBLAuth_CreateSession = Pointer<CBLAuthenticator> Function(
+typedef _CBLAuth_CreateSession = Pointer<CBLAuthenticator> Function(
   FLString sessionID,
   FLString cookieName,
 );
@@ -74,7 +75,7 @@ extension on CBLProxyType {
   int toInt() => CBLProxyType.values.indexOf(this);
 }
 
-class _CBLDart_CBLProxySettings extends Struct {
+class _CBLProxySettings extends Struct {
   @Uint8()
   // ignore: unused_field
   external int _type;
@@ -86,7 +87,7 @@ class _CBLDart_CBLProxySettings extends Struct {
 }
 
 // ignore: camel_case_extensions
-extension on _CBLDart_CBLProxySettings {
+extension on _CBLProxySettings {
   set type(CBLProxyType value) => _type = value.toInt();
 }
 
@@ -116,14 +117,14 @@ class _CBLDartReplicatorConfiguration extends Struct {
   external bool continuous;
   @Bool()
   external bool disableAutoPurge;
-  @Uint32()
+  @UnsignedInt()
   external int maxAttempts;
-  @Uint32()
+  @UnsignedInt()
   external int maxAttemptWaitTime;
-  @Uint32()
+  @UnsignedInt()
   external int heartbeat;
   external Pointer<CBLAuthenticator> authenticator;
-  external Pointer<_CBLDart_CBLProxySettings> proxy;
+  external Pointer<_CBLProxySettings> proxy;
   external Pointer<FLDict> headers;
   external Pointer<FLSlice> pinnedServerCertificate;
   external Pointer<FLSlice> trustedRootCertificates;
@@ -340,12 +341,12 @@ typedef _CBLReplicator_PendingDocumentIDs = Pointer<FLDict> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLReplicator_IsDocumentPending_C = Bool Function(
+typedef _CBLReplicator_IsDocumentPending_C = Bool Function(
   Pointer<CBLReplicator> replicator,
   FLString docID,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_CBLReplicator_IsDocumentPending = bool Function(
+typedef _CBLReplicator_IsDocumentPending = bool Function(
   Pointer<CBLReplicator> replicator,
   FLString docID,
   Pointer<CBLError> errorOut,
@@ -458,9 +459,9 @@ class DocumentReplicationsCallbackMessage {
 
 class ReplicatorBindings extends Bindings {
   ReplicatorBindings(Bindings parent) : super(parent) {
-    _endpointCreateWithUrl = libs.cblDart.lookupFunction<
-        _CBLDart_CBLEndpoint_CreateWithURL, _CBLDart_CBLEndpoint_CreateWithURL>(
-      'CBLDart_CBLEndpoint_CreateWithURL',
+    _endpointCreateWithUrl = libs.cbl
+        .lookupFunction<_CBLEndpoint_CreateWithURL, _CBLEndpoint_CreateWithURL>(
+      'CBLEndpoint_CreateWithURL',
       isLeaf: useIsLeaf,
     );
     if (libs.enterpriseEdition) {
@@ -476,14 +477,14 @@ class ReplicatorBindings extends Bindings {
       'CBLEndpoint_Free',
       isLeaf: useIsLeaf,
     );
-    _authCreatePassword = libs.cblDart.lookupFunction<
-        _CBLDart_CBLAuth_CreatePassword, _CBLDart_CBLAuth_CreatePassword>(
-      'CBLDart_CBLAuth_CreatePassword',
+    _authCreatePassword = libs.cbl
+        .lookupFunction<_CBLAuth_CreatePassword, _CBLAuth_CreatePassword>(
+      'CBLAuth_CreatePassword',
       isLeaf: useIsLeaf,
     );
-    _authCreateSession = libs.cblDart.lookupFunction<
-        _CBLDart_CBLAuth_CreateSession, _CBLDart_CBLAuth_CreateSession>(
-      'CBLDart_CBLAuth_CreateSession',
+    _authCreateSession =
+        libs.cbl.lookupFunction<_CBLAuth_CreateSession, _CBLAuth_CreateSession>(
+      'CBLAuth_CreateSession',
       isLeaf: useIsLeaf,
     );
     _authFree = libs.cbl.lookupFunction<_CBLAuth_Free_C, _CBLAuth_Free>(
@@ -529,10 +530,9 @@ class ReplicatorBindings extends Bindings {
       'CBLReplicator_PendingDocumentIDs',
       isLeaf: useIsLeaf,
     );
-    _isDocumentPending = libs.cblDart.lookupFunction<
-        _CBLDart_CBLReplicator_IsDocumentPending_C,
-        _CBLDart_CBLReplicator_IsDocumentPending>(
-      'CBLDart_CBLReplicator_IsDocumentPending',
+    _isDocumentPending = libs.cbl.lookupFunction<
+        _CBLReplicator_IsDocumentPending_C, _CBLReplicator_IsDocumentPending>(
+      'CBLReplicator_IsDocumentPending',
       isLeaf: useIsLeaf,
     );
     _addChangeListener = libs.cblDart.lookupFunction<
@@ -549,11 +549,11 @@ class ReplicatorBindings extends Bindings {
     );
   }
 
-  late final _CBLDart_CBLEndpoint_CreateWithURL _endpointCreateWithUrl;
+  late final _CBLEndpoint_CreateWithURL _endpointCreateWithUrl;
   late final _CBLDart_CBLEndpoint_CreateWithLocalDB _endpointCreateWithLocalDB;
   late final _CBLEndpoint_Free _endpointFree;
-  late final _CBLDart_CBLAuth_CreatePassword _authCreatePassword;
-  late final _CBLDart_CBLAuth_CreateSession _authCreateSession;
+  late final _CBLAuth_CreatePassword _authCreatePassword;
+  late final _CBLAuth_CreateSession _authCreateSession;
   late final _CBLAuth_Free _authFree;
   late final _CBLDart_CBLReplicator_Create _create;
   late final _CBLDart_BindReplicatorToDartObject _bindToDartObject;
@@ -563,7 +563,7 @@ class ReplicatorBindings extends Bindings {
   late final _CBLReplicator_SetSuspended _setSuspended;
   late final _CBLReplicator_Status _status;
   late final _CBLReplicator_PendingDocumentIDs _pendingDocumentIDs;
-  late final _CBLDart_CBLReplicator_IsDocumentPending _isDocumentPending;
+  late final _CBLReplicator_IsDocumentPending _isDocumentPending;
   late final _CBLDart_CBLReplicator_AddChangeListener _addChangeListener;
   late final _CBLDart_CBLReplicator_AddDocumentReplicationListener
       _addDocumentReplicationListener;
@@ -710,14 +710,14 @@ class ReplicatorBindings extends Bindings {
     return result;
   }
 
-  Pointer<_CBLDart_CBLProxySettings> _createProxySettings(
+  Pointer<_CBLProxySettings> _createProxySettings(
     CBLProxySettings? settings,
   ) {
     if (settings == null) {
       return nullptr;
     }
 
-    final result = zoneArena<_CBLDart_CBLProxySettings>();
+    final result = zoneArena<_CBLProxySettings>();
 
     result.ref
       ..type = settings.type
