@@ -1,0 +1,17 @@
+name: cbl_sentry_example
+description: A simple command-line application.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=2.13.0 <3.0.0'
+
+dependencies:
+  cbl: ^1.0.0-beta.13
+  cbl_dart: ^1.0.0-beta.4
+  cbl_sentry:
+    path: ..
+  sentry: ^6.2.2
+
+dev_dependencies:
+  flutter_lints: ^1.0.0
