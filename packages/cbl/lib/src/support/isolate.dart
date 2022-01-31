@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:cbl_ffi/cbl_ffi.dart' hide LibrariesConfiguration;
 
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
-import '../tracing.dart';
 import 'errors.dart';
 import 'ffi.dart';
 import 'tracing.dart';
@@ -21,10 +22,11 @@ class IsolateContext {
   IsolateContext({
     required this.libraries,
     this.initContext,
-    this.tracingDelegate,
   });
 
   static IsolateContext? _instance;
+
+  static bool get isInitialized => _instance != null;
 
   static set instance(IsolateContext value) {
     if (_instance != null) {
@@ -43,42 +45,24 @@ class IsolateContext {
 
   final LibrariesConfiguration libraries;
   final InitContext? initContext;
-  final TracingDelegate? tracingDelegate;
-
-  IsolateContext createForWorkerIsolate() => IsolateContext(
-        libraries: libraries,
-        tracingDelegate: effectiveTracingDelegate.createWorkerDelegate(),
-      );
 }
 
 /// Initializes this isolate for use of Couchbase Lite, and initializes the
 /// native libraries.
-void initPrimaryIsolate(IsolateContext context) {
-  _initIsolate(context);
+Future<void> initPrimaryIsolate(IsolateContext context) async {
+  await _initIsolate(context);
   cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
+  await _runPostIsolateInitTasks();
 }
 
 /// Initializes this isolate for use of Couchbase Lite, after another primary
 /// isolate has been initialized.
-void initSecondaryIsolate(IsolateContext context) {
-  _initIsolate(context);
+Future<void> initSecondaryIsolate(IsolateContext context) async {
+  await _initIsolate(context);
+  await _runPostIsolateInitTasks();
 }
 
-/// Initializes this isolate for use as a Couchbase Lite worker isolate.
-Future<void> initWorkerIsolate(
-  IsolateContext context, {
-  required TraceDataHandler onTraceData,
-}) async {
-  _initIsolate(context, onTraceData: onTraceData);
-
-  final tracingDelegate = context.tracingDelegate;
-  if (tracingDelegate != null) {
-    TracingDelegate.install(tracingDelegate);
-    await tracingDelegate.initializeWorkerDelegate();
-  }
-}
-
-void _initIsolate(IsolateContext context, {TraceDataHandler? onTraceData}) {
+Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
@@ -87,8 +71,37 @@ void _initIsolate(IsolateContext context, {TraceDataHandler? onTraceData}) {
   );
 
   MDelegate.instance = CblMDelegate();
-
-  _onTraceData = onTraceData;
 }
 
-set _onTraceData(TraceDataHandler? value) => onTraceData = value;
+typedef PostIsolateInitTask = FutureOr<void> Function();
+
+final _postIsolateInitTasks = <PostIsolateInitTask>[];
+Future? _currentPostIsolateInitTask;
+
+Future<void> addPostIsolateInitTask(PostIsolateInitTask task) async {
+  if (IsolateContext.isInitialized) {
+    await task();
+  } else {
+    _postIsolateInitTasks.add(task);
+  }
+}
+
+Future<void> removePostIsolateInitTask(PostIsolateInitTask task) async {
+  if (_postIsolateInitTasks.isNotEmpty) {
+    if (_currentPostIsolateInitTask != null &&
+        _postIsolateInitTasks[0] == task) {
+      await _currentPostIsolateInitTask;
+    } else {
+      _postIsolateInitTasks.remove(task);
+    }
+  }
+}
+
+Future<void> _runPostIsolateInitTasks() async {
+  while (_postIsolateInitTasks.isNotEmpty) {
+    final task = _postIsolateInitTasks[0];
+    await (_currentPostIsolateInitTask = Future<void>.sync(task));
+    _currentPostIsolateInitTask = null;
+    _postIsolateInitTasks.removeAt(0);
+  }
+}

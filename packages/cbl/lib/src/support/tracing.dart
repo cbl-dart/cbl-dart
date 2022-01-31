@@ -3,20 +3,17 @@ import 'dart:async';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../tracing.dart';
-import 'isolate.dart';
 
-/// The tracing delegate for the current isolate, that is actually being used.
-///
-/// This can be different from the [TracingDelegate] in [IsolateContext],
-/// so it can be temporarily overridden, for testing.
-TracingDelegate effectiveTracingDelegate = const NoopTracingDelegate();
+/// The current tracing delegate.
+TracingDelegate currentTracingDelegate = const NoopTracingDelegate();
 
 /// Sends trace data that is collected in this isolate to the main isolate.
 typedef TraceDataHandler = void Function(Object? data);
 
-/// The [TraceDataHandler] for the current isolate, if it is a secondary
-/// isolate.
-late final TraceDataHandler? onTraceData;
+void _noopTraceDataHandler(Object? data) {}
+
+/// The current trace data handler.
+TraceDataHandler onTraceData = _noopTraceDataHandler;
 
 class NoopTracingDelegate extends TracingDelegate {
   const NoopTracingDelegate();
@@ -31,7 +28,7 @@ T syncOperationTracePoint<T>(
     return execute();
   }
 
-  return effectiveTracingDelegate.traceSyncOperation(
+  return currentTracingDelegate.traceSyncOperation(
     createOperation(),
     execute,
   );
@@ -46,7 +43,7 @@ Future<T> asyncOperationTracePoint<T>(
     return execute();
   }
 
-  return effectiveTracingDelegate.traceAsyncOperation(
+  return currentTracingDelegate.traceAsyncOperation(
     createOperation(),
     execute,
   );
@@ -57,5 +54,5 @@ T tracingDelegateTracedNativeCallHandler<T>(
   T Function() execute,
 ) {
   final info = NativeCallOp(call.symbol);
-  return effectiveTracingDelegate.traceSyncOperation(info, execute);
+  return currentTracingDelegate.traceSyncOperation(info, execute);
 }

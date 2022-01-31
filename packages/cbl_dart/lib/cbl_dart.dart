@@ -1,8 +1,10 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-// ignore: implementation_imports
 import 'package:cbl/src/support/isolate.dart';
+import 'package:cbl/src/support/tracing.dart';
 
 import 'src/acquire_libraries.dart';
 import 'src/package.dart';
@@ -33,21 +35,22 @@ class CouchbaseLiteDart {
     required Edition edition,
     String? filesDir,
     String? nativeLibrariesDir,
-  }) async {
-    final context = filesDir == null ? null : await _initContext(filesDir);
+  }) =>
+      asyncOperationTracePoint(() => InitializeOp(), () async {
+        final context = filesDir == null ? null : await _initContext(filesDir);
 
-    final libraries = await acquireLibraries(
-      edition: edition,
-      mergedNativeLibrariesDir: nativeLibrariesDir,
-    );
+        final libraries = await acquireLibraries(
+          edition: edition,
+          mergedNativeLibrariesDir: nativeLibrariesDir,
+        );
 
-    initPrimaryIsolate(IsolateContext(
-      initContext: context,
-      libraries: libraries,
-    ));
+        await initPrimaryIsolate(IsolateContext(
+          initContext: context,
+          libraries: libraries,
+        ));
 
-    _setupLogging();
-  }
+        _setupLogging();
+      });
 }
 
 Future<InitContext> _initContext(String filesDir) async {
