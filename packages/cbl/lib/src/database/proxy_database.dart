@@ -407,14 +407,21 @@ class WorkerDatabase extends ProxyDatabase {
 
     final client = CblServiceClient(channel: worker.channel);
 
+    await client.channel.call(InstallTracingDelegate(
+      currentTracingDelegate.createWorkerDelegate(),
+    ));
+
     try {
       final state = await client.channel.call(OpenDatabase(name, config));
       return WorkerDatabase._(worker, client, config, state);
     } on CouchbaseLiteException {
+      await client.channel.call(UninstallTracingDelegate());
       await worker.stop();
       rethrow;
     }
   }
+
+  // TODO(blaugold): use tracing delegates in one-off workers
 
   static Future<void> remove(String name, {String? directory}) =>
       CblWorker.executeCall(
@@ -443,6 +450,7 @@ class WorkerDatabase extends ProxyDatabase {
   @override
   Future<void> performClose() async {
     await super.performClose();
+    await client.channel.call(UninstallTracingDelegate());
     await worker.stop();
   }
 }

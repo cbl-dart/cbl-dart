@@ -284,7 +284,7 @@ late LogMessageRepository logMessageRepository;
 Future<void> initApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  TracingDelegate.install(DevToolsTracing());
+  await TracingDelegate.install(DevToolsTracing());
 
   await CouchbaseLiteFlutter.init();
 

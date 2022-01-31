@@ -1,8 +1,10 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-// ignore: implementation_imports
 import 'package:cbl/src/support/isolate.dart';
+import 'package:cbl/src/support/tracing.dart';
 import 'package:cbl_flutter_platform_interface/cbl_flutter_platform_interface.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -13,14 +15,15 @@ class CouchbaseLiteFlutter {
   CouchbaseLiteFlutter._();
 
   /// Initializes the `cbl` package, for the main isolate.
-  static Future<void> init() async {
-    initPrimaryIsolate(IsolateContext(
-      libraries: CblFlutterPlatform.instance.libraries(),
-      initContext: await _context(),
-    ));
+  static Future<void> init() =>
+      asyncOperationTracePoint(() => InitializeOp(), () async {
+        await initPrimaryIsolate(IsolateContext(
+          libraries: CblFlutterPlatform.instance.libraries(),
+          initContext: await _context(),
+        ));
 
-    _setupLogging();
-  }
+        _setupLogging();
+      });
 }
 
 Future<InitContext> _context() async {

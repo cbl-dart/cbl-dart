@@ -4,6 +4,8 @@ import 'database/database.dart';
 import 'log.dart';
 import 'support/ffi.dart';
 import 'support/isolate.dart';
+import 'support/tracing.dart';
+import 'tracing.dart';
 
 export 'support/ffi.dart' show LibrariesConfiguration, LibraryConfiguration;
 export 'support/listener_token.dart' show ListenerToken;
@@ -17,11 +19,12 @@ class CouchbaseLite {
   CouchbaseLite._();
 
   /// Initializes the `cbl` package, for the main isolate.
-  static void init({required LibrariesConfiguration libraries}) {
-    initPrimaryIsolate(IsolateContext(libraries: libraries));
+  static Future<void> init({required LibrariesConfiguration libraries}) =>
+      asyncOperationTracePoint(() => InitializeOp(), () async {
+        await initPrimaryIsolate(IsolateContext(libraries: libraries));
 
-    _setupLogging();
-  }
+        _setupLogging();
+      });
 
   /// Context object to pass to [initSecondary], when initializing a secondary
   /// [Isolate].
@@ -32,13 +35,14 @@ class CouchbaseLite {
   /// Initializes the `cbl` package, for a secondary isolate.
   ///
   /// A value for [context] can be obtained from [CouchbaseLite.context].
-  static void initSecondary(Object context) {
-    if (context is! IsolateContext) {
-      throw ArgumentError.value(context, 'context', 'is invalid');
-    }
+  static Future<void> initSecondary(Object context) =>
+      asyncOperationTracePoint(() => InitializeOp(), () async {
+        if (context is! IsolateContext) {
+          throw ArgumentError.value(context, 'context', 'is invalid');
+        }
 
-    initSecondaryIsolate(context);
-  }
+        await initSecondaryIsolate(context);
+      });
 }
 
 void _setupLogging() {

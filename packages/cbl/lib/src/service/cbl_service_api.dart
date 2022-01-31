@@ -14,6 +14,7 @@ import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../support/encoding.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'channel.dart';
 import 'serialization/serialization.dart';
 
@@ -23,6 +24,14 @@ SerializationRegistry cblServiceSerializationRegistry() =>
     SerializationRegistry()
       // Request
       ..addSerializableCodec('Ping', PingRequest.deserialize)
+      ..addSerializableCodec(
+        'InstallTracingDelegate',
+        InstallTracingDelegate.deserialize,
+      )
+      ..addSerializableCodec(
+        'UninstallTracingDelegate',
+        UninstallTracingDelegate.deserialize,
+      )
       ..addSerializableCodec('TraceData', TraceDataRequest.deserialize)
       ..addSerializableCodec('ReleaseObject', ReleaseObject.deserialize)
       ..addSerializableCodec(
@@ -471,6 +480,35 @@ class PingRequest extends Request<DateTime> {
 
   static PingRequest deserialize(StringMap map, SerializationContext context) =>
       PingRequest();
+}
+
+class InstallTracingDelegate extends Request<void> {
+  InstallTracingDelegate(this.delegate);
+
+  final TracingDelegate delegate;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      throw UnsupportedError('TracingDelegate is not serializable');
+
+  static InstallTracingDelegate deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      throw UnsupportedError('TracingDelegate is not serializable');
+}
+
+class UninstallTracingDelegate extends Request<void> {
+  UninstallTracingDelegate();
+
+  @override
+  StringMap serialize(SerializationContext context) => {};
+
+  static UninstallTracingDelegate deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      UninstallTracingDelegate();
 }
 
 class TraceDataRequest extends Request<void> {

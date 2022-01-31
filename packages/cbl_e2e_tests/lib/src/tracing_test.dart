@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/support/tracing.dart';
 
 import '../test_binding_impl.dart';
 import 'test_binding.dart';
@@ -11,15 +10,39 @@ void main() {
   setupTestBinding();
 
   group('tracing', () {
-    final originalTracingDelegate = effectiveTracingDelegate;
     late TestDelegate delegate;
 
-    tearDownAll(() {
-      effectiveTracingDelegate = originalTracingDelegate;
+    setUp(() async {
+      delegate = TestDelegate();
+      await TracingDelegate.install(delegate);
     });
 
-    setUp(() {
-      effectiveTracingDelegate = delegate = TestDelegate();
+    tearDown(() async {
+      await TracingDelegate.uninstall(delegate);
+    });
+
+    test(
+      'hasBeenInstalled returns whether a delegate has been installed',
+      () async {
+        await TracingDelegate.uninstall(delegate);
+        expect(TracingDelegate.hasBeenInstalled, isFalse);
+        await TracingDelegate.install(delegate);
+        expect(TracingDelegate.hasBeenInstalled, isTrue);
+      },
+    );
+
+    test('install throws if another delegate is already installed', () async {
+      expect(
+        () => TracingDelegate.install(TestDelegate()),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('uninstall throws if the given delegate is not installed', () async {
+      expect(
+        () => TracingDelegate.uninstall(TestDelegate()),
+        throwsA(isA<StateError>()),
+      );
     });
 
     test('trace sync operation', () {
@@ -38,8 +61,9 @@ void main() {
       expect(delegate.syncOperations, isEmpty);
       expect(delegate.asyncOperations, [
         isA<OpenDatabaseOp>(),
-        isA<ChannelCallOp>(),
-        isA<ChannelCallOp>(),
+        isA<ChannelCallOp>(), // Initialize worker
+        isA<ChannelCallOp>(), // Install tracing delegate
+        isA<ChannelCallOp>(), // Open database
       ]);
     });
 
@@ -55,7 +79,17 @@ void main() {
 
       await openAsyncTestDatabase(usePublicApi: true);
 
-      expect(delegate.traceData, ['init', 'init']);
+      expect(delegate.traceData, ['init']);
+    });
+
+    test('worker delegate is closed', () async {
+      delegate.workerDelegate.closeTraceData = 'close';
+
+      final db =
+          await openAsyncTestDatabase(usePublicApi: true, tearDown: false);
+      await db.close();
+
+      expect(delegate.traceData, ['close']);
     });
 
     test('worker delegate can send trace data', () async {
@@ -113,13 +147,21 @@ class TestDelegate extends TracingDelegate {
 
 class TestWorkerDelegate extends TracingDelegate {
   Object? initializeTraceData;
+  Object? closeTraceData;
 
   Object? traceData;
 
   @override
-  FutureOr<void> initializeWorkerDelegate() {
+  FutureOr<void> initialize() {
     if (initializeTraceData != null) {
-      traceData = initializeTraceData;
+      sendTraceData(initializeTraceData);
+    }
+  }
+
+  @override
+  FutureOr<void> close() {
+    if (closeTraceData != null) {
+      sendTraceData(closeTraceData);
     }
   }
 

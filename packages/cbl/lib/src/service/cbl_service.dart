@@ -20,6 +20,7 @@ import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
+import '../tracing.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
 import 'object_registry.dart';
@@ -69,9 +70,10 @@ class CblServiceClient {
 
   final Channel channel;
 
-  final _onTraceData = Zone.current
-      // ignore: invalid_use_of_visible_for_overriding_member
-      .bindUnaryCallbackGuarded(effectiveTracingDelegate.onTraceData);
+  final _onTraceData = Zone.current.bindUnaryCallbackGuarded(
+    // ignore: invalid_use_of_visible_for_overriding_member
+    (data) => currentTracingDelegate.onTraceData(data),
+  );
 
   void unregisterObject(int id) => _objectRegistry.removeObjectById(id);
 
@@ -258,6 +260,8 @@ class CblService {
   }) {
     channel
       ..addCallEndpoint(_ping)
+      ..addCallEndpoint(_installTracingDelegate)
+      ..addCallEndpoint(_uninstallTracingDelegate)
       ..addCallEndpoint(_releaseObject)
       ..addCallEndpoint(_removeChangeListener)
       ..addCallEndpoint(_encryptionKeyFromPassword)
@@ -315,6 +319,12 @@ class CblService {
   // === Handlers ==============================================================
 
   DateTime _ping(PingRequest _) => DateTime.now();
+
+  Future<void> _installTracingDelegate(InstallTracingDelegate request) =>
+      TracingDelegate.install(request.delegate);
+
+  Future<void> _uninstallTracingDelegate(UninstallTracingDelegate _) =>
+      TracingDelegate.uninstall(currentTracingDelegate);
 
   FutureOr<void> _releaseObject(ReleaseObject request) {
     final object = _objectRegistry.removeObjectById(request.objectId);

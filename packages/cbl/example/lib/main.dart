@@ -10,7 +10,7 @@ LibrariesConfiguration getLibraries() {
 
 Future<void> main() async {
   // Couchbase Lite needs to be initialized before it can be used.
-  CouchbaseLite.init(libraries: getLibraries());
+  await CouchbaseLite.init(libraries: getLibraries());
 
   final db = await Database.openAsync('chat-messages');
 

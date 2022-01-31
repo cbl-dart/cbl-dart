@@ -6,9 +6,10 @@ import 'package:meta/meta.dart';
 import 'database.dart';
 import 'document.dart';
 import 'query.dart';
+import 'support/isolate.dart';
 import 'support/tracing.dart';
 
-late final TraceDataHandler? _onTraceData = onTraceData;
+TraceDataHandler get _onTraceData => onTraceData;
 
 /// A delegate which implements a tracing mechanism for CBL Dart.
 ///
@@ -25,18 +26,29 @@ late final TraceDataHandler? _onTraceData = onTraceData;
 /// See [TracedOperation] and its subclasses for all operations can can be
 /// traced.
 ///
+/// # Lifecycle
+///
+/// The [initialize] method is called when a isolate is [install]ed, if CBL Dart
+/// has already been initialized. If CBL Dart has not been initialized when
+/// [install] is called, the delegate is initialized after CBL Dart has been
+/// initialized.
+///
+/// The [close] method is called when a delegate is [uninstall]ed.
+///
+/// A delegate might be installed and uninstalled multiple times.
+///
 /// # User and worker isolates
 ///
 /// User isolates are isolates in which CBL Dart is used but that are not
 /// created by CBL Dart.
 /// For every user isolate, a [TracingDelegate] can be installed through
-/// [install].
+/// [install] and uninstalled again through [uninstall].
+/// It is usually a mistake to uninstall the current delegate while worker
+/// isolates with delegates created by the current delegate are still running.
 ///
 /// Each time CBL Dart creates a worker isolate, [createWorkerDelegate] is
-/// called on the user isolate delegate and the returned delegate is used as
-/// the delegate for the new isolate.
-/// Worker isolate delegates get the chance to initialize themselves in
-/// [initializeWorkerDelegate].
+/// called on the user isolate delegate and the returned delegate is installed
+/// in the new isolate.
 ///
 /// ## Tracing context
 ///
@@ -63,21 +75,48 @@ abstract class TracingDelegate {
 
   /// Whether a [TracingDelegate] has been installed for this isolate.
   ///
-  /// Delegates can be installed through [install].
+  /// See also:
+  ///
+  ///   * [install] for installing a [TracingDelegate] for this isolate.
+  ///   * [uninstall] for uninstalling the current [TracingDelegate].
   static bool get hasBeenInstalled => _hasBeenInstalled;
   static bool _hasBeenInstalled = false;
 
   /// Installs a [TracingDelegate] for the current isolate.
   ///
-  /// A [TracingDelegate] can only be installed once per isolate and cannot
-  /// be changed. Whether a [TracingDelegate] has been installed for this
-  /// isolate can be checked with [hasBeenInstalled].
-  static void install(TracingDelegate delegate) {
+  /// Only one [TracingDelegate] can be installed for a single isolate at any
+  /// given moment.
+  ///
+  /// Whether a [TracingDelegate] has been installed for this isolate can be
+  /// checked with [hasBeenInstalled].
+  static Future<void> install(TracingDelegate delegate) async {
     if (_hasBeenInstalled) {
       throw StateError('A TracingDelegate has already been installed.');
     }
+
     _hasBeenInstalled = true;
-    effectiveTracingDelegate = delegate;
+    currentTracingDelegate = delegate;
+    await addPostIsolateInitTask(delegate.initialize);
+  }
+
+  /// Uninstalls a [TracingDelegate] from the current isolate.
+  ///
+  /// The given [delegate] must be the current delegate for this isolate.
+  ///
+  /// It is usually a mistake to uninstall the current delegate while worker
+  /// isolates with delegates created by the current delegate are still running.
+  ///
+  /// After the current delegate has been uninstalled, a new delegate can be
+  /// installed through [install].
+  static Future<void> uninstall(TracingDelegate delegate) async {
+    if (currentTracingDelegate != delegate) {
+      throw StateError('The given TracingDelegate is not installed: $delegate');
+    }
+
+    _hasBeenInstalled = false;
+    currentTracingDelegate = const NoopTracingDelegate();
+    await removePostIsolateInitTask(delegate.initialize);
+    await delegate.close();
   }
 
   /// Creates a new [TracingDelegate] to be used for a worker isolate,
@@ -90,14 +129,15 @@ abstract class TracingDelegate {
   // ignore: avoid_returning_this
   TracingDelegate createWorkerDelegate() => this;
 
-  /// Called when this delegate is about to be used in a worker isolate.
+  /// Called before this delegate is used as the current delegate.
   ///
-  /// This allows a worker delegate to initialize itself and its environment.
+  /// This allows a delegate to initialize itself and its environment.
+  FutureOr<void> initialize() {}
+
+  /// Called after this delegate is no longer used as the current delegate.
   ///
-  /// [sendTraceData] cannot be called from this method.
-  ///
-  /// Delegates for a user isolate must already be initialized.
-  FutureOr<void> initializeWorkerDelegate() {}
+  /// This allows a delegate to clean up and free resources.
+  FutureOr<void> close() {}
 
   /// Allows this delegate to send arbitrary data to the delegate it was
   /// created by.
@@ -106,12 +146,7 @@ abstract class TracingDelegate {
   /// worker isolate.
   @protected
   @mustCallSuper
-  void sendTraceData(Object? data) {
-    if (_onTraceData == null) {
-      throw StateError('The current isolate cannot send trace data.');
-    }
-    _onTraceData!(data);
-  }
+  void sendTraceData(Object? data) => _onTraceData(data);
 
   /// Callback for receiving trace data from delegates in worker isolates.
   ///
@@ -181,6 +216,9 @@ abstract class TracedOperation {
 
   /// The name of this operation.
   final String name;
+
+  @override
+  String toString() => '$runtimeType($name)';
 }
 
 /// A call to a native function.
@@ -193,6 +231,13 @@ class NativeCallOp extends TracedOperation {
 /// A call over a communication channel.
 class ChannelCallOp extends TracedOperation {
   ChannelCallOp(String name) : super(name);
+}
+
+/// Operation that initializes CBL Dart.
+///
+/// {@category Tracing}
+class InitializeOp extends TracedOperation {
+  InitializeOp() : super('Initialize');
 }
 
 /// Operation that opens a [Database].
@@ -293,7 +338,7 @@ class DeleteDocumentOp extends DatabaseOperationOp
 /// Operation that involves a [Query].
 ///
 /// {@category Tracing}
-class QueryOperationOp extends TracedOperation {
+abstract class QueryOperationOp extends TracedOperation {
   QueryOperationOp(this.query, String name) : super(name);
 
   /// The query involved in this operation.
