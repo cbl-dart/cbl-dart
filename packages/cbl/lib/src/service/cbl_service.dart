@@ -291,9 +291,9 @@ class CblService {
       ..addCallEndpoint(_createQuery)
       ..addCallEndpoint(_setQueryParameters)
       ..addCallEndpoint(_explainQuery)
-      ..addStreamEndpoint(_executeQuery)
+      ..addCallEndpoint(_executeQuery)
+      ..addStreamEndpoint(_getQueryResultSet)
       ..addCallEndpoint(_addQueryChangeListener)
-      ..addStreamEndpoint(_queryChangeResultSet)
       ..addCallEndpoint(_createReplicator)
       ..addCallEndpoint(_getReplicatorStatus)
       ..addCallEndpoint(_startReplicator)
@@ -529,8 +529,11 @@ class CblService {
   String _explainQuery(ExplainQuery request) =>
       _getQueryById(request.queryId).query.explain();
 
-  Stream<EncodedData> _executeQuery(ExecuteQuery request) =>
+  int _executeQuery(ExecuteQuery request) =>
       _getQueryById(request.queryId).execute();
+
+  Stream<EncodedData> _getQueryResultSet(GetQueryResultSet request) =>
+      _getQueryById(request.queryId).takeResultSet(request.resultSetId);
 
   void _addQueryChangeListener(AddQueryChangeListener request) {
     _listenerIdsToTokens[request.listenerId] =
@@ -541,9 +544,6 @@ class CblService {
       ));
     });
   }
-
-  Stream<EncodedData> _queryChangeResultSet(QueryChangeResultSet request) =>
-      _getQueryById(request.queryId).takeResultSet(request.resultSetId);
 
   int _createReplicator(CreateReplicator request) {
     final db = _getDatabaseById(request.databaseId);
@@ -771,7 +771,7 @@ class _Query {
   int _nextResultSetId = 0;
   final _resultSets = <int, ResultSet>{};
 
-  Stream<EncodedData> execute() => _resultSetStream(query.execute());
+  int execute() => _storeResultSet(query.execute());
 
   int _storeResultSet(ResultSet resultSet) {
     final id = _nextResultSetId++;
