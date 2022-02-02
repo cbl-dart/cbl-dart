@@ -64,12 +64,18 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   @override
   Future<ResultSet> execute() => asyncOperationTracePoint(
         () => ExecuteQueryOp(this),
-        () => use(
-          () => ProxyResultSet(
+        () => use(() async {
+          final resultSetId =
+              await channel!.call(ExecuteQuery(queryId: objectId!));
+
+          return ProxyResultSet(
             query: this,
-            results: channel!.stream(ExecuteQuery(queryId: objectId!)),
-          ),
-        ),
+            results: channel!.stream(GetQueryResultSet(
+              queryId: objectId!,
+              resultSetId: resultSetId,
+            )),
+          );
+        }),
       );
 
   @override
@@ -92,7 +98,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
     final listenerId = client.registerQueryChangeListener((resultSetId) {
       final results = ProxyResultSet(
         query: this,
-        results: channel!.stream(QueryChangeResultSet(
+        results: channel!.stream(GetQueryResultSet(
           queryId: objectId!,
           resultSetId: resultSetId,
         )),

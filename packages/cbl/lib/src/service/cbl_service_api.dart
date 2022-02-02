@@ -115,16 +115,16 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec('ExplainQuery', ExplainQuery.deserialize)
       ..addSerializableCodec('ExecuteQuery', ExecuteQuery.deserialize)
       ..addSerializableCodec(
+        'GetQueryResultSet',
+        GetQueryResultSet.deserialize,
+      )
+      ..addSerializableCodec(
         'AddQueryChangeListener',
         AddQueryChangeListener.deserialize,
       )
       ..addSerializableCodec(
         'CallQueryChangeListener',
         CallQueryChangeListener.deserialize,
-      )
-      ..addSerializableCodec(
-        'QueryChangeResultSet',
-        QueryChangeResultSet.deserialize,
       )
       ..addSerializableCodec(
         'CreateReplicator',
@@ -1282,7 +1282,7 @@ class ExplainQuery implements Request<String> {
       ExplainQuery(queryId: map.getAs('queryId'));
 }
 
-class ExecuteQuery implements Request<EncodedData> {
+class ExecuteQuery implements Request<int> {
   ExecuteQuery({
     required this.queryId,
   });
@@ -1297,6 +1297,31 @@ class ExecuteQuery implements Request<EncodedData> {
     SerializationContext context,
   ) =>
       ExecuteQuery(queryId: map.getAs('queryId'));
+}
+
+class GetQueryResultSet implements Request<EncodedData> {
+  GetQueryResultSet({
+    required this.queryId,
+    required this.resultSetId,
+  });
+
+  final int queryId;
+  final int resultSetId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'queryId': queryId,
+        'resultSetId': resultSetId,
+      };
+
+  static GetQueryResultSet deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      GetQueryResultSet(
+        queryId: map.getAs('queryId'),
+        resultSetId: map.getAs('resultSetId'),
+      );
 }
 
 class AddQueryChangeListener implements Request<Null> {
@@ -1347,31 +1372,6 @@ class CallQueryChangeListener implements Request<Null> {
   ) =>
       CallQueryChangeListener(
         listenerId: map.getAs('listenerId'),
-        resultSetId: map.getAs('resultSetId'),
-      );
-}
-
-class QueryChangeResultSet implements Request<EncodedData> {
-  QueryChangeResultSet({
-    required this.queryId,
-    required this.resultSetId,
-  });
-
-  final int queryId;
-  final int resultSetId;
-
-  @override
-  StringMap serialize(SerializationContext context) => {
-        'queryId': queryId,
-        'resultSetId': resultSetId,
-      };
-
-  static QueryChangeResultSet deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      QueryChangeResultSet(
-        queryId: map.getAs('queryId'),
         resultSetId: map.getAs('resultSetId'),
       );
 }
