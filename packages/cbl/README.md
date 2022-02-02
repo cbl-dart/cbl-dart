@@ -46,6 +46,7 @@ need depends on the target platform and features you want to use:
   - [Build a query with `QueryBuilder`](#build-a-query-with-querybuilder)
   - [Build a query with N1QL](#build-a-query-with-n1ql)
   - [Data sync with Sync Gateway](#data-sync-with-sync-gateway)
+- [🔮 Tracing](#-tracing)
 - [💡 Where to go next](#-where-to-go-next)
 - [🤝 Contributing](#-contributing)
 - [⚖️ Disclaimer](#️-disclaimer)
@@ -428,6 +429,27 @@ await replicator.start();
 When you are done with the replicator, you should close it by calling
 `Replicator.close`. This will free up any resources used by the replicator, as
 well as remove change listeners and close change streams.
+
+# 🔮 Tracing
+
+The execution of certain operations can be traced through the tracing API. This
+is useful for debugging and performance profiling.
+
+CBL Dart has builtin trace points, at which flow control is given to the
+currently installed `TracingDelegate`.
+
+Included in this package is the `DevToolsTracing` delegate, which records
+timeline events, that can be later visualized through the Dart DevTools
+Performance Page.
+
+You can install a delegate by calling `TracingDelegate.install`:
+
+```dart
+await TracingDelegate.install(DevToolsTracing());
+```
+
+The Sentry integration provided by [`cbl_sentry`][cbl_sentry] installs a
+`TracingDelegate` to transparently record breadcrumbs and transaction spans.
 
 # 💡 Where to go next
 
