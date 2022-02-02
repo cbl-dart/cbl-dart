@@ -1,3 +1,14 @@
+## 1.0.0-beta.14
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: eagerly execute query in `ProxyQuery.execute`. ([21139ed6](https://github.com/cbl-dart/cbl-dart/commit/21139ed67ae857e360dd56a0818f0f815a88ec86))
+ - **FEAT**: add `DevToolsTracing` `TracingDelegate` (#278). ([fbc8ecb8](https://github.com/cbl-dart/cbl-dart/commit/fbc8ecb861683b3d63f180f5b314065df907bffe))
+ - **DOCS**: add **Tracing** section to README. ([bbef3cd0](https://github.com/cbl-dart/cbl-dart/commit/bbef3cd0b82e07a22c21adc5caef38172fa831ab))
+ - **DOCS**: document more clearly when to use each package. ([9156c459](https://github.com/cbl-dart/cbl-dart/commit/9156c45930eda98fda552f92897ebecee4c07bdd))
+ - **BREAKING** **FEAT**: revise tracing API. ([093003f2](https://github.com/cbl-dart/cbl-dart/commit/093003f27e2e5920c6e4a59c8402bf7942b42021))
+ - **BREAKING** **FEAT**: revise tracing API (#276). ([22c2b5b6](https://github.com/cbl-dart/cbl-dart/commit/22c2b5b6113f72970bdc26f0123486f8b13d1f24))
+
 ## 1.0.0-beta.13
 
  - **FEAT**: make source N1QL query string available on `Query`. ([a0321727](https://github.com/cbl-dart/cbl-dart/commit/a032172773016ccf30742531828edb8f0ba6fc83))

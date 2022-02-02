@@ -7,8 +7,8 @@ environment:
   sdk: '>=2.13.0 <3.0.0'
 
 dependencies:
-  cbl: ^1.0.0-beta.13
-  cbl_dart: ^1.0.0-beta.4
+  cbl: ^1.0.0-beta.14
+  cbl_dart: ^1.0.0-beta.5
   cbl_sentry:
     path: ..
   sentry: ^6.2.2
