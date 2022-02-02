@@ -221,6 +221,8 @@ class SentryTracingDelegate extends TracingDelegate {
           description: operation.debugDescription,
         );
       }
+
+      return null;
     }
 
     ISentrySpan? startChildTransaction() {
@@ -234,6 +236,8 @@ class SentryTracingDelegate extends TracingDelegate {
           ).copyWith(description: operation.debugDescription),
         );
       }
+
+      return null;
     }
 
     final span = startChildSpan() ?? startChildTransaction();

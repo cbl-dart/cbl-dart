@@ -40,6 +40,8 @@ extension OperationDebugInfoExt on TracedOperation {
     if (self is QueryOperationOp) {
       return self.query.jsonRepresentation ?? self.query.n1ql;
     }
+
+    return null;
   }
 
   Map<String, Object?>? get debugDetails {
@@ -57,5 +59,7 @@ extension OperationDebugInfoExt on TracedOperation {
     if (self is DeleteDocumentOp) {
       return {'concurrencyControl': self.concurrencyControl.name};
     }
+
+    return null;
   }
 }
