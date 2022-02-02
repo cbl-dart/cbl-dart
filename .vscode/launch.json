@@ -33,6 +33,14 @@
       "type": "dart",
       "program": "integration_test/e2e_test.dart",
       "toolArgs": ["--no-pub"]
+    },
+    {
+      "name": "cbl_sentry (test)",
+      "templateFor": "packages/cbl_sentry/test",
+      "type": "dart",
+      "request": "launch",
+      "customTool": "${workspaceFolder}/tools/flutter-test-wrapper.sh",
+      "customToolReplacesArgs": 3,
     }
   ]
 }

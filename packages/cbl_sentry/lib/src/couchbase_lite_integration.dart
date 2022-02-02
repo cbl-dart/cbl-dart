@@ -1,0 +1,106 @@
+import 'dart:async';
+
+import 'package:cbl/cbl.dart';
+import 'package:sentry/sentry.dart';
+
+import 'breadcrumb_logger.dart';
+import 'sentry_tracing_delegate.dart';
+import 'zone_span.dart';
+
+/// A Sentry [Integration] that integrates CBL Dart with Sentry.
+///
+/// # Logging
+///
+/// CBL Dart emits log messages that can be used to record Sentry breadcrumbs.
+/// Messages at [breadcrumbLogLevel] level or higher will be recorded as
+/// breadcrumbs. [LogLevel.none] disables all recording of logging breadcrumbs.
+/// The default is [LogLevel.warning].
+///
+/// This integration configures [Database.log.custom] to use a
+/// [BreadcrumbLogger], which can also be used by itself.
+///
+/// # Operations
+///
+/// CBL Dart has support for tracing of operations through the [TracingDelegate]
+/// API. This integration configures a [TracingDelegate] to record Sentry
+/// breadcrumbs and transaction spans for [TracedOperation]s.
+///
+/// ## Breadcrumbs
+///
+/// The start of a [TracedOperation] that is the result of usage of the CBL Dart
+/// API is recorded as a breadcrumb. Internal operations are not recorded as
+/// breadcrumbs.
+///
+/// ## Transaction spans
+///
+/// Sentry transaction spans for [TracedOperation]s are recorded if a parent
+/// span is available though [Sentry.getSpan] or [cblSentrySpan], when the
+/// operation is executed.
+///
+/// Whether or not internal operations are traced is controlled by the
+/// [traceInternalOperations] option (defaults to `false`).
+/// ```
+class CouchbaseLiteIntegration extends Integration {
+  CouchbaseLiteIntegration({
+    this.traceInternalOperations = false,
+    this.breadcrumbLogLevel = LogLevel.warning,
+  });
+
+  /// Whether to trace internal operations.
+  ///
+  /// Activating this option can be useful to debug issues with CBL Dart itself.
+  final bool traceInternalOperations;
+
+  /// The log level at which Couchbase Lite logs are added as Sentry
+  /// breadcrumbs.
+  final LogLevel breadcrumbLogLevel;
+
+  SentryTracingDelegate? _tracingDelegate;
+  Logger? _breadcrumbLogger;
+
+  @override
+  FutureOr<void> call(Hub hub, SentryOptions options) {
+    if (TracingDelegate.hasBeenInstalled) {
+      Sentry.captureException(
+        'CouchbaseLiteIntegration: Cannot install SentryTracingDelegate '
+        'because another delegate has already been installed.',
+        stackTrace: StackTrace.current,
+      );
+      return null;
+    }
+
+    final tracingDelegate = _tracingDelegate = SentryTracingDelegate(
+      sentryDsn: options.dsn,
+      traceInternalOperations: traceInternalOperations,
+      onInitialize: () {
+        if (breadcrumbLogLevel != LogLevel.none) {
+          Database.log.custom =
+              _breadcrumbLogger = BreadcrumbLogger(level: breadcrumbLogLevel);
+        }
+      },
+    );
+    TracingDelegate.install(tracingDelegate);
+
+    options.sdk.addIntegration('couchbaseLiteIntegration');
+  }
+
+  @override
+  FutureOr<void> close() async {
+    if (_breadcrumbLogger != null) {
+      if (Database.log.custom == _breadcrumbLogger) {
+        Database.log.custom = null;
+      }
+      _breadcrumbLogger = null;
+    }
+
+    final tracingDelegate = _tracingDelegate;
+    if (tracingDelegate != null) {
+      await TracingDelegate.uninstall(tracingDelegate);
+      _tracingDelegate = null;
+    }
+  }
+}
+
+extension TestingCouchbaseLiteIntegration on CouchbaseLiteIntegration {
+  SentryTracingDelegate? get tracingDelegate => _tracingDelegate;
+}
