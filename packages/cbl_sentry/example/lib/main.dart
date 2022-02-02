@@ -1,16 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl_dart/cbl_dart.dart';
 import 'package:cbl_sentry/cbl_sentry.dart';
 import 'package:sentry/sentry.dart';
 
-import 'sentry_credentials.dart';
-
 Future<void> main() async {
   await Sentry.init(
     (options) => options
-      ..dsn = sentryDsn
+      ..dsn = File.fromUri(Uri.parse('sentry_dsn.txt')).readAsStringSync()
       ..tracesSampleRate = 1
       ..addIntegration(CouchbaseLiteIntegration()),
     appRunner: () async {
