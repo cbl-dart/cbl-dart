@@ -3,10 +3,20 @@
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
-This is the Flutter plugin for Couchbase Lite.
+This package is required to use `cbl` in Flutter apps.
 
-The Couchbase Lite API is in the [`cbl`][cbl] package. This package is enabling
-the use of `cbl` in Flutter apps.
+The Couchbase Lite API is provided by [`cbl`][cbl], which you always need, to
+use Couchbase Lite. Which other packages you need depends on the target platform
+and features you want to use:
+
+| Package          | Required when you want to:                                            | Pub                                          | Likes                                         | Points                                         | Popularity                                         |
+| ---------------- | --------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| [cbl]            | use Couchbase Lite.                                                   | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)         | ![](https://badgen.net/pub/points/cbl)         | ![](https://badgen.net/pub/popularity/cbl)         |
+| [cbl_dart]       | use Couchbase Lite in a Dart app (e.g. CLI) or in Flutter unit tests. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)    | ![](https://badgen.net/pub/points/cbl_dart)    | ![](https://badgen.net/pub/popularity/cbl_dart)    |
+| [cbl_flutter]    | use Couchbase Lite in a Flutter app.                                  | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter) | ![](https://badgen.net/pub/points/cbl_flutter) | ![](https://badgen.net/pub/popularity/cbl_flutter) |
+| [cbl_flutter_ce] | use the Community Edition in a Flutter app.                           | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                               |                                                |                                                    |
+| [cbl_flutter_ee] | use the Enterprise Edition in a Flutter app.                          | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                               |                                                |                                                    |
+| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.        | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)  | ![](https://badgen.net/pub/points/cbl_sentry)  | ![](https://badgen.net/pub/popularity/cbl_sentry)  |
 
 > This package is in beta. Use it with caution and [report any issues you
 > see][issues].
@@ -126,4 +136,8 @@ system versions and devices can still crop up.
 [path_provider]: https://pub.dev/packages/path_provider
 [cbl]: https://pub.dev/packages/cbl
 [cbl_dart]: https://pub.dev/packages/cbl_dart
+[cbl_flutter]: https://pub.dev/packages/cbl_flutter
+[cbl_flutter_ce]: https://pub.dev/packages/cbl_flutter_ce
+[cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
+[cbl_sentry]: https://pub.dev/packages/cbl_sentry
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
