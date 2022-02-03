@@ -7,6 +7,9 @@ class MockHub implements Hub {
   final transactions = <MockSpan>[];
 
   @override
+  SentryOptions get options => SentryOptions();
+
+  @override
   void addBreadcrumb(Breadcrumb crumb, {Object? hint}) {
     breadcrumbs.add(crumb);
   }
@@ -81,6 +84,9 @@ class MockHub implements Hub {
     String operation, {
     String? description,
     bool? bindToScope,
+    bool? waitForChildren,
+    Duration? autoFinishAfter,
+    bool? trimEnd,
     Map<String, dynamic>? customSamplingContext,
   }) =>
       startTransactionWithContext(
@@ -91,6 +97,9 @@ class MockHub implements Hub {
         ),
         customSamplingContext: customSamplingContext,
         bindToScope: bindToScope,
+        waitForChildren: waitForChildren,
+        autoFinishAfter: autoFinishAfter,
+        trimEnd: trimEnd,
       );
 
   @override
@@ -98,6 +107,9 @@ class MockHub implements Hub {
     SentryTransactionContext transactionContext, {
     Map<String, dynamic>? customSamplingContext,
     bool? bindToScope,
+    bool? waitForChildren,
+    Duration? autoFinishAfter,
+    bool? trimEnd,
   }) {
     final span = MockSpan(
       transactionContext.operation,

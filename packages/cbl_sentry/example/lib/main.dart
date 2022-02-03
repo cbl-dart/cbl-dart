@@ -12,18 +12,9 @@ Future<void> main() async {
       ..dsn = File.fromUri(Uri.parse('sentry_dsn.txt')).readAsStringSync()
       ..tracesSampleRate = 1
       ..addIntegration(CouchbaseLiteIntegration()),
-    appRunner: () async {
-      try {
-        await runApp();
-      } finally {
-        // TODO(blaugold): call Sentry.close when Sentry.init finishes
-        // This is a workaround for
-        // https://github.com/getsentry/sentry-dart/issues/730
-        Future<void>.delayed(const Duration(seconds: 3), Sentry.close);
-      }
-    },
+    appRunner: runApp,
   );
-  // await Sentry.close();
+  await Sentry.close();
 }
 
 late final AsyncDatabase db;
