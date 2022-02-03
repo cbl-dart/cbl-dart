@@ -269,7 +269,8 @@ class LogMessageRepository {
     Future(query.explain).then(print);
 
     return query.changes().asyncMap(
-        (change) => change.results.asStream().map(CblLogMessage.new).toList());
+          (change) => change.results.asStream().map(CblLogMessage.new).toList(),
+        );
   }
 }
 
