@@ -243,7 +243,7 @@ void main() {
 
       test('set values', () {
         setValuesTest(
-          build: (state) => MutableDictionary(state),
+          build: MutableDictionary.new,
           initialValue: 'a',
         );
         setValuesTest(
@@ -251,7 +251,7 @@ void main() {
           initialValue: 'a',
         );
         setValuesTest(
-          build: (state) => MutableDictionary(state),
+          build: MutableDictionary.new,
           initialValue: <Object?>{},
         );
         setValuesTest(

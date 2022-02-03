@@ -168,6 +168,6 @@ class MArray extends MCollection {
 
     return context!.decoder
         .loadValueFromArray(array, index)
-        ?.let((it) => MValue.withValue(it));
+        ?.let(MValue.withValue);
   }
 }

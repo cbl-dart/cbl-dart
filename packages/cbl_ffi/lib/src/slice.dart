@@ -182,15 +182,13 @@ class SliceResult extends Slice {
 
   /// Creates a [SliceResult] from a [FLSlice] by copying its content.
   static SliceResult? copyFLSlice(FLSlice slice) =>
-      Slice.fromFLSlice(slice)?.let((slice) => SliceResult.fromSlice(slice));
+      Slice.fromFLSlice(slice)?.let(SliceResult.fromSlice);
 
   /// Creates a [SliceResult] from a [FLSliceResult] by copying its content.
-  static SliceResult? copyFLSliceResult(
-          FLSliceResult slice) =>
+  static SliceResult? copyFLSliceResult(FLSliceResult slice) =>
       slice.buf == nullptr
           ? null
-          : Slice._(slice.buf, slice.size)
-              .let((slice) => SliceResult.fromSlice(slice));
+          : Slice._(slice.buf, slice.size).let(SliceResult.fromSlice);
 
   static final _keepAliveForTypedList = Expando<Slice>();
 

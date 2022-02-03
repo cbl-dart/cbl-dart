@@ -16,7 +16,7 @@ class CouchbaseLiteFlutter {
 
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init() =>
-      asyncOperationTracePoint(() => InitializeOp(), () async {
+      asyncOperationTracePoint(InitializeOp.new, () async {
         await initPrimaryIsolate(IsolateContext(
           libraries: CblFlutterPlatform.instance.libraries(),
           initContext: await _context(),

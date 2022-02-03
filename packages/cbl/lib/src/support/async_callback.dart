@@ -144,7 +144,7 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
         _debugLog('sending result: $result');
       }
 
-      sendPort!.send([callAddress, result]);
+      sendPort.send([callAddress, result]);
     }
 
     Future.sync(() => handler(args)).then(

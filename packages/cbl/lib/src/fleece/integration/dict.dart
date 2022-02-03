@@ -162,8 +162,6 @@ class MDict extends MCollection {
       return null;
     }
 
-    return context!.decoder
-        .loadValueFromDict(dict, key)
-        ?.let((it) => MValue.withValue(it));
+    return context!.decoder.loadValueFromDict(dict, key)?.let(MValue.withValue);
   }
 }

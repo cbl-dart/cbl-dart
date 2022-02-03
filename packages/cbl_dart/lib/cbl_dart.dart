@@ -36,7 +36,7 @@ class CouchbaseLiteDart {
     String? filesDir,
     String? nativeLibrariesDir,
   }) =>
-      asyncOperationTracePoint(() => InitializeOp(), () async {
+      asyncOperationTracePoint(InitializeOp.new, () async {
         final context = filesDir == null ? null : await _initContext(filesDir);
 
         final libraries = await acquireLibraries(
