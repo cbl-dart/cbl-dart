@@ -20,7 +20,7 @@ class CouchbaseLite {
 
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init({required LibrariesConfiguration libraries}) =>
-      asyncOperationTracePoint(() => InitializeOp(), () async {
+      asyncOperationTracePoint(InitializeOp.new, () async {
         await initPrimaryIsolate(IsolateContext(libraries: libraries));
 
         _setupLogging();
@@ -36,7 +36,7 @@ class CouchbaseLite {
   ///
   /// A value for [context] can be obtained from [CouchbaseLite.context].
   static Future<void> initSecondary(Object context) =>
-      asyncOperationTracePoint(() => InitializeOp(), () async {
+      asyncOperationTracePoint(InitializeOp.new, () async {
         if (context is! IsolateContext) {
           throw ArgumentError.value(context, 'context', 'is invalid');
         }

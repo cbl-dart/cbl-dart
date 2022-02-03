@@ -225,7 +225,7 @@ void main() {
 
       test('set values', () {
         setValuesTest(
-          build: (state) => MutableArray(state),
+          build: MutableArray.new,
           initialValue: 'a',
         );
         setValuesTest(
@@ -233,7 +233,7 @@ void main() {
           initialValue: 'a',
         );
         setValuesTest(
-          build: (state) => MutableArray(state),
+          build: MutableArray.new,
           initialValue: <Object?>[],
         );
         setValuesTest(

@@ -122,8 +122,8 @@ class ProxyDatabase extends ProxyObject
       );
 
   @override
-  Future<DocumentFragment> operator [](String id) => use(
-      () => document(id).then((document) => DocumentFragmentImpl(document)));
+  Future<DocumentFragment> operator [](String id) =>
+      use(() => document(id).then(DocumentFragmentImpl.new));
 
   @override
   Future<bool> saveDocument(

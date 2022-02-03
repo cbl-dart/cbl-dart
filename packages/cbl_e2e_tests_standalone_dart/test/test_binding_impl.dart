@@ -12,8 +12,7 @@ void setupTestBinding() {
 
 class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
   static void ensureInitialized() {
-    CblE2eTestBinding.ensureInitialized(
-        () => StandaloneDartCblE2eTestBinding());
+    CblE2eTestBinding.ensureInitialized(StandaloneDartCblE2eTestBinding.new);
   }
 
   @override

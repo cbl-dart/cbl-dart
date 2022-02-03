@@ -522,7 +522,7 @@ class CblService {
   void _setQueryParameters(SetQueryParameters request) {
     _getQueryById(request.queryId).query.setParameters(
           (request.parameters?.toPlainObject() as StringMap?)
-              ?.let((it) => Parameters(it)),
+              ?.let(Parameters.new),
         );
   }
 

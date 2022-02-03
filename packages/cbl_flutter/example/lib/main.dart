@@ -268,10 +268,8 @@ class LogMessageRepository {
     // 4|0|0| SEARCH TABLE kv_default AS example USING INDEX type+createdAt (<expr>=?)
     Future(query.explain).then(print);
 
-    return query.changes().asyncMap((change) => change.results
-        .asStream()
-        .map((result) => CblLogMessage(result))
-        .toList());
+    return query.changes().asyncMap(
+        (change) => change.results.asStream().map(CblLogMessage.new).toList());
   }
 }
 
