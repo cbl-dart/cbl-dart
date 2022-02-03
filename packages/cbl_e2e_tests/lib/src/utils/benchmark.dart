@@ -1,62 +1,24 @@
 // ignore_for_file: avoid_print
 
-import 'dart:async';
 import 'dart:math';
 
-abstract class Benchmark {
-  Benchmark(this.description);
+import 'package:benchmark_harness/benchmark_harness.dart';
 
-  final String description;
-
-  FutureOr<void> run();
-
-  FutureOr<void> setUp() {}
-
-  FutureOr<void> validate();
-}
-
-Future<void> runBenchmarks(
-  Iterable<Benchmark> benchmarks, {
-  int repetitions = 10000,
-}) async {
+void runBenchmarks(Iterable<BenchmarkBase> benchmarks) {
   if (benchmarks.isEmpty) {
     throw ArgumentError.value(benchmarks, 'benchmarks', 'must not be empty');
   }
 
   const formattingDecimalPoints = 2;
-  const middleLineDeco = '\u251c\u2500\u25B6';
   const lastLineDeco = '\u2514\u2500\u25B6';
   const singleLineDeco = '\u2576\u2500\u25B6';
 
-  final stopwatch = Stopwatch();
-
-  final results = <Benchmark, double>{};
+  final results = <BenchmarkBase, double>{};
 
   for (final benchmark in benchmarks) {
-    print('Running benchmark: ${benchmark.description} ($repetitions reps)');
+    print('Running benchmark: ${benchmark.name}');
 
-    var totalUs = 0;
-
-    for (var i = 0; i < repetitions; i++) {
-      await benchmark.setUp();
-
-      stopwatch
-        ..reset()
-        ..start();
-      await benchmark.run();
-      stopwatch.stop();
-
-      totalUs += stopwatch.elapsedMicroseconds;
-
-      await benchmark.validate();
-    }
-
-    final totalMs = totalUs / 1000;
-    final avgUs = totalUs / repetitions;
-    print(
-      '$middleLineDeco Total: '
-      '${totalMs.toStringAsFixed(formattingDecimalPoints)} ms',
-    );
+    final avgUs = benchmark.measure();
     print(
       '$lastLineDeco Avg:   '
       '${avgUs.toStringAsFixed(formattingDecimalPoints)} us',
@@ -72,6 +34,6 @@ Future<void> runBenchmarks(
     final relativeTime = results[benchmark]! / fastestTime;
     final relativeTimeStr =
         relativeTime.toStringAsFixed(formattingDecimalPoints);
-    print('$singleLineDeco ${benchmark.description}: ${relativeTimeStr}x');
+    print('$singleLineDeco ${benchmark.name}: ${relativeTimeStr}x');
   }
 }
