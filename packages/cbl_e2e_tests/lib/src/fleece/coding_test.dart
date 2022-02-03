@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cbl/src/fleece/decoder.dart';
@@ -7,9 +5,7 @@ import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
-import '../fixtures/large_json_doc.dart';
 import '../test_binding.dart';
-import '../utils/benchmark.dart';
 
 void main() {
   setupTestBinding();
@@ -29,17 +25,6 @@ void main() {
       expect(decoder.sharedStrings.hasString('...............'), isTrue);
       expect(decoder.sharedStrings.hasString('................'), isFalse);
     });
-
-    test(
-      'Decoding Benchmark',
-      () => runBenchmarks(
-        [
-          JsonInDartDecodingBenchmark(),
-          FleeceDecodingBenchmark(),
-        ],
-        repetitions: 250,
-      ),
-    );
 
     group('FleeceDecoder', () {
       test('dumpData shows the internal structure of Fleece data', () {
@@ -318,54 +303,4 @@ void main() {
       });
     });
   });
-}
-
-abstract class DecodingBenchmark extends Benchmark {
-  DecodingBenchmark(String description) : super('Decoding: $description');
-
-  late final jsonString = largeJsonDoc;
-
-  late final Object? _expectedResult = jsonDecode(jsonString);
-
-  Object? result;
-
-  @override
-  FutureOr<void> validate() {
-    expect(result, _expectedResult);
-  }
-}
-
-class JsonInDartDecodingBenchmark extends DecodingBenchmark {
-  JsonInDartDecodingBenchmark() : super('JSON (in Dart)');
-
-  late JsonDecoder _decoder;
-
-  @override
-  FutureOr<void> setUp() {
-    _decoder = const JsonDecoder();
-  }
-
-  @override
-  FutureOr<void> run() {
-    result = _decoder.convert(jsonString);
-  }
-}
-
-class FleeceDecodingBenchmark extends DecodingBenchmark {
-  FleeceDecodingBenchmark() : super('Fleece');
-
-  late FleeceDecoder _decoder;
-
-  late final data = FleeceEncoder().convertJson(jsonString);
-
-  @override
-  FutureOr<void> setUp() {
-    _decoder = FleeceDecoder();
-  }
-
-  @override
-  FutureOr<void> run() {
-    final value = _decoder.loadValueFromData(data, trust: FLTrust.trusted)!;
-    result = _decoder.loadedValueToDartObject(value);
-  }
 }
