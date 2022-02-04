@@ -24,19 +24,18 @@ class TracedNativeCall {
   static const databaseOpen = TracedNativeCall('CBLDart_CBLDatabase_Open');
   static const databaseClose = TracedNativeCall('CBLDart_CBLDatabase_Close');
   static const databaseGetDocument =
-      TracedNativeCall('CBLDart_CBLDatabase_GetDocument');
+      TracedNativeCall('CBLDatabase_GetDocument');
   static const databaseGetMutableDocument =
-      TracedNativeCall('CBLDart_CBLDatabase_GetMutableDocument');
+      TracedNativeCall('CBLDatabase_GetMutableDocument');
   static const databaseSaveDocument = TracedNativeCall(
-    'CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl',
+    'CBLDatabase_SaveDocumentWithConcurrencyControl',
   );
   static const databaseDeleteDocument = TracedNativeCall(
     'CBLDatabase_DeleteDocumentWithConcurrencyControl',
   );
   static const databaseGetBlob = TracedNativeCall('CBLDatabase_GetBlob');
   static const databaseSaveBlob = TracedNativeCall('CBLDatabase_SaveBlob');
-  static const queryCreate =
-      TracedNativeCall('CBLDart_CBLDatabase_CreateQuery');
+  static const queryCreate = TracedNativeCall('CBLDatabase_CreateQuery');
   static const queryExecute = TracedNativeCall('CBLQuery_Execute');
 }
 

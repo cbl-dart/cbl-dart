@@ -114,10 +114,6 @@ void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
 
 // === Base
 
-CBLDart_FLStringResult CBLDart_CBLError_Message(CBLError *error) {
-  return CBLDart_FLStringResultToDart(CBLError_Message(error));
-}
-
 #ifdef DEBUG
 static bool cblRefCountedDebugEnabled = false;
 static std::map<CBLRefCounted *, std::string> cblRefCountedDebugNames;
@@ -214,7 +210,7 @@ static void CBLDart_CBLListenerFinalizer(void *context) {
 static std::shared_mutex loggingMutex;
 static CBLDart::AsyncCallback *logCallback = nullptr;
 static CBLLogLevel logCallbackLevel = CBLLog_CallbackLevel();
-static CBLDart_CBLLogFileConfiguration *logFileConfig = nullptr;
+static CBLLogFileConfiguration *logFileConfig = nullptr;
 static bool logSentryBreadcrumbsEnabled = false;
 
 // Forward declarations for the logging functions.
@@ -250,12 +246,6 @@ static void CBLDart_UpdateEffectiveLogCallbackLevel() {
   } else {
     CBLLog_SetCallbackLevel(logCallbackLevel);
   }
-}
-
-void CBLDart_CBL_LogMessage(CBLLogDomain domain, CBLLogLevel level,
-                            CBLDart_FLString message) {
-  CBL_Log(domain, level, "%.*s", static_cast<int>(message.size),
-          static_cast<const char *>(message.buf));
 }
 
 static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
@@ -315,7 +305,7 @@ void CBLDart_CBLLog_SetCallbackLevel(CBLLogLevel level) {
   CBLDart_UpdateEffectiveLogCallbackLevel();
 }
 
-bool CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
+bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration *config,
                                   CBLError *errorOut) {
   std::unique_lock lock(loggingMutex);
 
@@ -338,19 +328,19 @@ bool CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
   } else {
     CBLLogFileConfiguration config_;
     config_.level = config->level;
-    config_.directory = CBLDart_FLStringFromDart(config->directory);
+    config_.directory = config->directory;
     config_.maxRotateCount = config->maxRotateCount;
-    config_.maxSize = static_cast<size_t>(config->maxSize);
-    config_.usePlaintext = static_cast<bool>(config->usePlaintext);
+    config_.maxSize = config->maxSize;
+    config_.usePlaintext = config->usePlaintext;
 
     auto success = CBLLog_SetFileConfig(config_, errorOut);
     if (success) {
       auto config_ = CBLLog_FileConfig();
       if (!logFileConfig) {
-        logFileConfig = new CBLDart_CBLLogFileConfiguration;
+        logFileConfig = new CBLLogFileConfiguration;
       }
       logFileConfig->level = config_->level;
-      logFileConfig->directory = CBLDart_FLStringToDart(config_->directory);
+      logFileConfig->directory = config_->directory;
       logFileConfig->maxRotateCount = config_->maxRotateCount;
       logFileConfig->maxSize = config->maxSize;
       logFileConfig->usePlaintext = config_->usePlaintext;
@@ -359,7 +349,7 @@ bool CBLDart_CBLLog_SetFileConfig(CBLDart_CBLLogFileConfiguration *config,
   }
 }
 
-CBLDart_CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig() {
+CBLLogFileConfiguration *CBLDart_CBLLog_GetFileConfig() {
   std::shared_lock lock(loggingMutex);
   return logFileConfig;
 }
@@ -443,57 +433,7 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
   return true;
 }
 
-// === Document
-
-CBLDart_FLString CBLDart_CBLDocument_ID(CBLDocument *doc) {
-  return CBLDart_FLStringToDart(CBLDocument_ID(doc));
-}
-
-CBLDart_FLString CBLDart_CBLDocument_RevisionID(CBLDocument *doc) {
-  return CBLDart_FLStringToDart(CBLDocument_RevisionID(doc));
-}
-
-CBLDart_FLStringResult CBLDart_CBLDocument_CreateJSON(CBLDocument *doc) {
-  return CBLDart_FLStringResultToDart(CBLDocument_CreateJSON(doc));
-}
-
-CBLDocument *CBLDart_CBLDocument_CreateWithID(CBLDart_FLString docID) {
-  return CBLDocument_CreateWithID(CBLDart_FLStringFromDart(docID));
-}
-
-int8_t CBLDart_CBLDocument_SetJSON(CBLDocument *doc, CBLDart_FLString json,
-                                   CBLError *errorOut) {
-  return CBLDocument_SetJSON(doc, CBLDart_FLStringFromDart(json), errorOut);
-}
-
 // === Database
-
-static CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfigurationToDart(
-    CBLDatabaseConfiguration config) {
-  CBLDart_CBLDatabaseConfiguration config_;
-  config_.directory = CBLDart_FLStringToDart(config.directory);
-#ifdef COUCHBASE_ENTERPRISE
-  config_.encryptionKey = config.encryptionKey;
-#endif
-  return config_;
-}
-
-static CBLDatabaseConfiguration CBLDart_CBLDatabaseConfigurationFromDart(
-    CBLDart_CBLDatabaseConfiguration config) {
-  CBLDatabaseConfiguration config_;
-  config_.directory = CBLDart_FLStringFromDart(config.directory);
-#ifdef COUCHBASE_ENTERPRISE
-  config_.encryptionKey = config.encryptionKey;
-#endif
-  return config_;
-}
-
-#ifdef COUCHBASE_ENTERPRISE
-bool CBLDart_CBLEncryptionKey_FromPassword(CBLEncryptionKey *key,
-                                           CBLDart_FLString password) {
-  return CBLEncryptionKey_FromPassword(key, CBLDart_FLStringFromDart(password));
-}
-#endif
 
 /**
  * A list of all the currently open database.
@@ -530,43 +470,14 @@ bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
   }
 }
 
-CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
-  return CBLDart_CBLDatabaseConfigurationToDart(
-      CBLDatabaseConfiguration_Default());
-}
-
-bool CBLDart_CBL_DatabaseExists(CBLDart_FLString name,
-                                CBLDart_FLString inDirectory) {
-  return CBL_DatabaseExists(CBLDart_FLStringFromDart(name),
-                            CBLDart_FLStringFromDart(inDirectory));
-}
-
-bool CBLDart_CBL_CopyDatabase(CBLDart_FLString fromPath,
-                              CBLDart_FLString toName,
-                              CBLDart_CBLDatabaseConfiguration *config,
-                              CBLError *errorOut) {
-  auto config_ = CBLDart_CBLDatabaseConfigurationFromDart(*config);
-  return CBL_CopyDatabase(CBLDart_FLStringFromDart(fromPath),
-                          CBLDart_FLStringFromDart(toName), &config_, errorOut);
-}
-
-bool CBLDart_CBL_DeleteDatabase(CBLDart_FLString name,
-                                CBLDart_FLString inDirectory,
-                                CBLError *errorOut) {
-  return CBL_DeleteDatabase(CBLDart_FLStringFromDart(name),
-                            CBLDart_FLStringFromDart(inDirectory), errorOut);
-}
-
-CBLDatabase *CBLDart_CBLDatabase_Open(CBLDart_FLString name,
-                                      CBLDart_CBLDatabaseConfiguration *config,
+CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
+                                      CBLDatabaseConfiguration *config,
                                       CBLError *errorOut) {
   CBLDart_CheckFileLogging();
 
-  auto config_ = config ? CBLDart_CBLDatabaseConfigurationFromDart(*config)
-                        : CBLDatabaseConfiguration_Default();
+  auto config_ = config ? *config : CBLDatabaseConfiguration_Default();
 
-  auto database =
-      CBLDatabase_Open(CBLDart_FLStringFromDart(name), &config_, errorOut);
+  auto database = CBLDatabase_Open(name, &config_, errorOut);
 
   if (database) {
     CBLDart_RegisterOpenDatabase(database);
@@ -596,61 +507,6 @@ void CBLDart_BindDatabaseToDartObject(Dart_Handle object, CBLDatabase *database,
       CBLDart_DatabaseFinalizer);
 }
 
-CBLDart_FLString CBLDart_CBLDatabase_Name(CBLDatabase *db) {
-  return CBLDart_FLStringToDart(CBLDatabase_Name(db));
-}
-
-CBLDart_FLStringResult CBLDart_CBLDatabase_Path(CBLDatabase *db) {
-  return CBLDart_FLStringResultToDart(CBLDatabase_Path(db));
-}
-
-CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabase_Config(CBLDatabase *db) {
-  return CBLDart_CBLDatabaseConfigurationToDart(CBLDatabase_Config(db));
-}
-
-const CBLDocument *CBLDart_CBLDatabase_GetDocument(CBLDatabase *database,
-                                                   CBLDart_FLString docID,
-                                                   CBLError *errorOut) {
-  return CBLDatabase_GetDocument(database, CBLDart_FLStringFromDart(docID),
-                                 errorOut);
-}
-
-CBLDocument *CBLDart_CBLDatabase_GetMutableDocument(CBLDatabase *database,
-                                                    CBLDart_FLString docID,
-                                                    CBLError *errorOut) {
-  return CBLDatabase_GetMutableDocument(
-      database, CBLDart_FLStringFromDart(docID), errorOut);
-}
-
-bool CBLDart_CBLDatabase_SaveDocumentWithConcurrencyControl(
-    CBLDatabase *db, CBLDocument *doc, CBLConcurrencyControl concurrency,
-    CBLError *errorOut) {
-  return CBLDatabase_SaveDocumentWithConcurrencyControl(db, doc, concurrency,
-                                                        errorOut);
-}
-
-bool CBLDart_CBLDatabase_PurgeDocumentByID(CBLDatabase *database,
-                                           CBLDart_FLString docID,
-                                           CBLError *errorOut) {
-  return CBLDatabase_PurgeDocumentByID(
-      database, CBLDart_FLStringFromDart(docID), errorOut);
-}
-
-CBLTimestamp CBLDart_CBLDatabase_GetDocumentExpiration(CBLDatabase *db,
-                                                       CBLDart_FLSlice docID,
-                                                       CBLError *errorOut) {
-  return CBLDatabase_GetDocumentExpiration(db, CBLDart_FLStringFromDart(docID),
-                                           errorOut);
-}
-
-bool CBLDart_CBLDatabase_SetDocumentExpiration(CBLDatabase *db,
-                                               CBLDart_FLSlice docID,
-                                               CBLTimestamp expiration,
-                                               CBLError *errorOut) {
-  return CBLDatabase_SetDocumentExpiration(db, CBLDart_FLStringFromDart(docID),
-                                           expiration, errorOut);
-}
-
 static void CBLDart_DocumentChangeListenerWrapper(void *context,
                                                   const CBLDatabase *db,
                                                   FLString docID) {
@@ -663,11 +519,10 @@ static void CBLDart_DocumentChangeListenerWrapper(void *context,
 }
 
 void CBLDart_CBLDatabase_AddDocumentChangeListener(
-    const CBLDatabase *db, const CBLDart_FLString docID,
+    const CBLDatabase *db, const FLString docID,
     CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLDatabase_AddDocumentChangeListener(
-      db, CBLDart_FLStringFromDart(docID),
-      CBLDart_DocumentChangeListenerWrapper, listener);
+      db, docID, CBLDart_DocumentChangeListenerWrapper, listener);
 
   // TODO(blaugold): remove this when bug fix in CBL has landed
   // https://issues.couchbase.com/browse/CBL-2548
@@ -708,64 +563,33 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
                                                 CBLDart_CBLListenerFinalizer);
 }
 
-bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, CBLDart_FLString name,
+bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
                                      CBLDart_CBLIndexSpec indexSpec,
                                      CBLError *errorOut) {
   switch (indexSpec.type) {
     case kCBLDart_IndexTypeValue: {
       CBLValueIndexConfiguration config;
       config.expressionLanguage = indexSpec.expressionLanguage;
-      config.expressions = CBLDart_FLStringFromDart(indexSpec.expressions);
+      config.expressions = indexSpec.expressions;
 
-      return CBLDatabase_CreateValueIndex(db, CBLDart_FLStringFromDart(name),
-                                          config, errorOut);
+      return CBLDatabase_CreateValueIndex(db, name, config, errorOut);
     }
     case kCBLDart_IndexTypeFullText: {
     }
       CBLFullTextIndexConfiguration config;
       config.expressionLanguage = indexSpec.expressionLanguage;
-      config.expressions = CBLDart_FLStringFromDart(indexSpec.expressions);
+      config.expressions = indexSpec.expressions;
       config.ignoreAccents = static_cast<bool>(indexSpec.ignoreAccents);
-      config.language = CBLDart_FLSliceFromDart(indexSpec.language);
+      config.language = indexSpec.language;
 
-      return CBLDatabase_CreateFullTextIndex(db, CBLDart_FLStringFromDart(name),
-                                             config, errorOut);
+      return CBLDatabase_CreateFullTextIndex(db, name, config, errorOut);
   }
 
   // Is never reached, but stops the compiler warnings.
   return 0;
 }
 
-bool CBLDart_CBLDatabase_DeleteIndex(CBLDatabase *db, CBLDart_FLString name,
-                                     CBLError *errorOut) {
-  return CBLDatabase_DeleteIndex(db, CBLDart_FLStringFromDart(name), errorOut);
-}
-
 // === Query
-
-CBLQuery *CBLDart_CBLDatabase_CreateQuery(CBLDatabase *db,
-                                          CBLQueryLanguage language,
-                                          CBLDart_FLString queryString,
-                                          int *errorPosOut,
-                                          CBLError *errorOut) {
-  return CBLDatabase_CreateQuery(db, language,
-                                 CBLDart_FLStringFromDart(queryString),
-                                 errorPosOut, errorOut);
-}
-
-CBLDart_FLStringResult CBLDart_CBLQuery_Explain(const CBLQuery *query) {
-  return CBLDart_FLStringResultToDart(CBLQuery_Explain(query));
-}
-
-CBLDart_FLString CBLDart_CBLQuery_ColumnName(const CBLQuery *query,
-                                             unsigned columnIndex) {
-  return CBLDart_FLStringToDart(CBLQuery_ColumnName(query, columnIndex));
-}
-
-FLValue CBLDart_CBLResultSet_ValueForKey(CBLResultSet *rs,
-                                         CBLDart_FLString key) {
-  return CBLResultSet_ValueForKey(rs, CBLDart_FLStringFromDart(key));
-}
 
 static void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
                                                CBLListenerToken *token) {
@@ -790,19 +614,6 @@ CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
 
 // === Blob
 
-CBLDart_FLString CBLDart_CBLBlob_Digest(CBLBlob *blob) {
-  return CBLDart_FLStringToDart(CBLBlob_Digest(blob));
-}
-
-CBLDart_FLString CBLDart_CBLBlob_ContentType(CBLBlob *blob) {
-  return CBLDart_FLStringToDart(CBLBlob_ContentType(blob));
-}
-
-CBLDart_FLSliceResult CBLDart_CBLBlob_Content(const CBLBlob *blob,
-                                              CBLError *errorOut) {
-  return CBLDart_FLSliceResultToDart(CBLBlob_Content(blob, errorOut));
-}
-
 static void CBLDart_FinalizeCBLBlobReadStream(void *isolate_callback_data,
                                               void *peer) {
   CBLBlobReader_Close(reinterpret_cast<CBLBlobReadStream *>(peer));
@@ -814,9 +625,9 @@ void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
                                CBLDart_FinalizeCBLBlobReadStream);
 }
 
-CBLDart_FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
-                                                 uint64_t bufferSize,
-                                                 CBLError *outError) {
+FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
+                                         uint64_t bufferSize,
+                                         CBLError *outError) {
   auto bufferSize_t = static_cast<size_t>(bufferSize);
   auto buffer = FLSliceResult_New(bufferSize_t);
 
@@ -831,39 +642,10 @@ CBLDart_FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
 
   buffer.size = bytesRead;
 
-  return CBLDart_FLSliceResultToDart(buffer);
-}
-
-CBLBlob *CBLDart_CBLBlob_CreateWithData(CBLDart_FLString contentType,
-                                        CBLDart_FLSlice contents) {
-  return CBLBlob_CreateWithData(CBLDart_FLStringFromDart(contentType),
-                                CBLDart_FLSliceFromDart(contents));
-}
-
-CBLBlob *CBLDart_CBLBlob_CreateWithStream(CBLDart_FLString contentType,
-                                          CBLBlobWriteStream *writer) {
-  return CBLBlob_CreateWithStream(CBLDart_FLStringFromDart(contentType),
-                                  writer);
+  return buffer;
 }
 
 // === Replicator
-
-CBLEndpoint *CBLDart_CBLEndpoint_CreateWithURL(CBLDart_FLString url,
-                                               CBLError *errorOut) {
-  return CBLEndpoint_CreateWithURL(CBLDart_FLStringFromDart(url), errorOut);
-}
-
-CBLAuthenticator *CBLDart_CBLAuth_CreatePassword(CBLDart_FLString username,
-                                                 CBLDart_FLString password) {
-  return CBLAuth_CreatePassword(CBLDart_FLStringFromDart(username),
-                                CBLDart_FLStringFromDart(password));
-}
-
-CBLAuthenticator *CBLDart_CBLAuth_CreateSession(CBLDart_FLString sessionID,
-                                                CBLDart_FLString cookieName) {
-  return CBLAuth_CreateSession(CBLDart_FLStringFromDart(sessionID),
-                               CBLDart_FLStringFromDart(cookieName));
-}
 
 struct ReplicatorCallbackWrapperContext {
   CBLDart::AsyncCallback *pullFilter;
@@ -997,28 +779,14 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   config_.maxAttemptWaitTime = config->maxAttemptWaitTime;
   config_.heartbeat = config->heartbeat;
   config_.authenticator = config->authenticator;
-
-  CBLProxySettings proxy;
-  if (config->proxy) {
-    proxy.type = config->proxy->type;
-    proxy.hostname = CBLDart_FLStringFromDart(config->proxy->hostname);
-    proxy.port = config->proxy->port;
-    proxy.username = CBLDart_FLStringFromDart(config->proxy->username);
-    proxy.password = CBLDart_FLStringFromDart(config->proxy->password);
-    config_.proxy = &proxy;
-  } else {
-    config_.proxy = nullptr;
-  }
-
+  config_.proxy = config->proxy;
   config_.headers = config->headers;
-  config_.pinnedServerCertificate =
-      config->pinnedServerCertificate == nullptr
-          ? kFLSliceNull
-          : CBLDart_FLSliceFromDart(*config->pinnedServerCertificate);
-  config_.trustedRootCertificates =
-      config->trustedRootCertificates == nullptr
-          ? kFLSliceNull
-          : CBLDart_FLSliceFromDart(*config->trustedRootCertificates);
+  config_.pinnedServerCertificate = config->pinnedServerCertificate == nullptr
+                                        ? kFLSliceNull
+                                        : *config->pinnedServerCertificate;
+  config_.trustedRootCertificates = config->trustedRootCertificates == nullptr
+                                        ? kFLSliceNull
+                                        : *config->trustedRootCertificates;
   config_.channels = config->channels;
   config_.documentIDs = config->documentIDs;
   config_.pullFilter = config->pullFilter == nullptr
@@ -1096,13 +864,6 @@ void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
   CBLDart_BindCBLRefCountedToDartObject_Impl(
       object, reinterpret_cast<CBLRefCounted *>(replicator), false, debugName,
       CBLDart_ReplicatorFinalizer);
-}
-
-bool CBLDart_CBLReplicator_IsDocumentPending(CBLReplicator *replicator,
-                                             CBLDart_FLString docId,
-                                             CBLError *errorOut) {
-  return CBLReplicator_IsDocumentPending(
-      replicator, CBLDart_FLStringFromDart(docId), errorOut);
 }
 
 class ReplicatorStatus_CObject_Helper {

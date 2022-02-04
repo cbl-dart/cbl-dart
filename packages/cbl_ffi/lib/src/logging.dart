@@ -9,6 +9,7 @@ import 'package:ffi/ffi.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'c_type.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
@@ -45,12 +46,12 @@ extension on int {
   CBLLogLevel toLogLevel() => CBLLogLevel.values[this];
 }
 
-typedef _CBLDart_CBL_LogMessage_C = Void Function(
+typedef _CBL_LogMessage_C = Void Function(
   Uint8 domain,
   Uint8 level,
   FLString message,
 );
-typedef _CBLDart_CBL_LogMessage = void Function(
+typedef _CBL_LogMessage = void Function(
   int domain,
   int level,
   FLString message,
@@ -87,7 +88,7 @@ typedef _CBLDart_CBLLog_SetCallback = bool Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
 
-class _CBLDart_CBLLogFileConfiguration extends Struct {
+class _CBLLogFileConfiguration extends Struct {
   @Uint8()
   external int level;
 
@@ -96,14 +97,14 @@ class _CBLDart_CBLLogFileConfiguration extends Struct {
   @Uint32()
   external int maxRotateCount;
 
-  @Uint64()
+  @Size()
   external int maxSize;
 
   @Bool()
   external bool usePlainText;
 }
 
-extension on _CBLDart_CBLLogFileConfiguration {
+extension on _CBLLogFileConfiguration {
   CBLLogFileConfiguration toCBLLogFileConfiguration() =>
       CBLLogFileConfiguration(
         level: level.toLogLevel(),
@@ -158,25 +159,24 @@ class CBLLogFileConfiguration {
 }
 
 typedef _CBLDart_CBLLog_SetFileConfig_C = Bool Function(
-  Pointer<_CBLDart_CBLLogFileConfiguration> config,
+  Pointer<_CBLLogFileConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 typedef _CBLDart_CBLLog_SetFileConfig = bool Function(
-  Pointer<_CBLDart_CBLLogFileConfiguration> config,
+  Pointer<_CBLLogFileConfiguration> config,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_CBLLog_GetFileConfig
-    = Pointer<_CBLDart_CBLLogFileConfiguration> Function();
+typedef _CBLDart_CBLLog_GetFileConfig = Pointer<_CBLLogFileConfiguration>
+    Function();
 
 typedef _CBLDart_CBLLog_SetSentryBreadcrumbs_C = Bool Function(Bool enabled);
 typedef _CBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
 class LoggingBindings extends Bindings {
   LoggingBindings(Bindings parent) : super(parent) {
-    _logMessage = libs.cblDart
-        .lookupFunction<_CBLDart_CBL_LogMessage_C, _CBLDart_CBL_LogMessage>(
-      'CBLDart_CBL_LogMessage',
+    _logMessage = libs.cbl.lookupFunction<_CBL_LogMessage_C, _CBL_LogMessage>(
+      'CBL_LogMessage',
       isLeaf: useIsLeaf,
     );
     _consoleLevel =
@@ -217,7 +217,7 @@ class LoggingBindings extends Bindings {
     );
   }
 
-  late final _CBLDart_CBL_LogMessage _logMessage;
+  late final _CBL_LogMessage _logMessage;
   late final _CBLLog_ConsoleLevel _consoleLevel;
   late final _CBLLog_SetConsoleLevel _setConsoleLevel;
   late final _CBLDart_CBLLog_SetCallbackLevel _setCallbackLevel;
@@ -266,13 +266,13 @@ class LoggingBindings extends Bindings {
   bool setSentryBreadcrumbs({required bool enabled}) =>
       _setSentryBreadcrumbs(enabled);
 
-  Pointer<_CBLDart_CBLLogFileConfiguration> _logFileConfig(
+  Pointer<_CBLLogFileConfiguration> _logFileConfig(
     CBLLogFileConfiguration? config,
   ) {
     // ignore: always_put_control_body_on_new_line
     if (config == null) return nullptr;
 
-    final result = zoneArena<_CBLDart_CBLLogFileConfiguration>();
+    final result = zoneArena<_CBLLogFileConfiguration>();
 
     result.ref
       ..level = config.level.toInt()
