@@ -1,3 +1,4 @@
+// ignore: lines_longer_than_80_chars
 // TODO(blaugold): Remove this file when `package:ffi` 1.2.0 or Dart 2.17.0 is released.
 // This file has been copied from `package:ffi`. This is a workaround for
 // an incompatibility with `package:win32`, which is used by Flutter.
