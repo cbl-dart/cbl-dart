@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
@@ -527,6 +528,38 @@ void main() {
         );
       },
     );
+
+    test('replicate blob', () async {
+      Database.log.console.level = LogLevel.info;
+
+      final random = Random();
+
+      final dbA = await openAsyncTestDatabase(name: 'a');
+      final dbB = await openAsyncTestDatabase(name: 'b');
+      final replicatorA = await dbA.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+      );
+      final replicatorB = await dbB.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+      );
+
+      for (final _ in Iterable<int>.generate(200)) {
+        await dbA.saveDocument(MutableDocument({
+          'blob': Blob.fromData(
+            '',
+            Uint8List.fromList(
+              Iterable<int>.generate(1024 * 100)
+                  .map((_) => random.nextInt(255))
+                  .toList(),
+            ),
+          )
+        }));
+      }
+
+      await replicatorA.replicateOneShot();
+
+      await replicatorB.replicateOneShot();
+    });
   });
 }
 
