@@ -11,6 +11,7 @@ class SentryTracingDelegate extends TracingDelegate {
     required this.sentryDsn,
     this.tracingEnabled = true,
     this.traceInternalOperations = false,
+    this.operationBreadcrumbs = true,
     this.onInitialize,
     Hub? hub,
   })  : _hub = hub ?? HubAdapter(),
@@ -20,6 +21,7 @@ class SentryTracingDelegate extends TracingDelegate {
       : sentryDsn = userDelegate.sentryDsn,
         tracingEnabled = userDelegate.tracingEnabled,
         traceInternalOperations = userDelegate.traceInternalOperations,
+        operationBreadcrumbs = false,
         onInitialize = null,
         _hub = userDelegate._hub,
         _isWorkerDelegate = true;
@@ -30,11 +32,13 @@ class SentryTracingDelegate extends TracingDelegate {
 
   final bool traceInternalOperations;
 
-  final bool _isWorkerDelegate;
+  final bool operationBreadcrumbs;
 
   final void Function()? onInitialize;
 
   final Hub _hub;
+
+  final bool _isWorkerDelegate;
 
   final _operationSpans = <ISentrySpan>[];
 
@@ -164,7 +168,7 @@ class SentryTracingDelegate extends TracingDelegate {
   // === Breadcrumbs ===========================================================
 
   bool _shouldAddBreadcrumbForOperation(TracedOperation operation) {
-    if (_isInsideOperation) {
+    if (!operationBreadcrumbs || _isInsideOperation) {
       return false;
     }
 
