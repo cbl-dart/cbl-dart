@@ -330,7 +330,9 @@ class SlotBindings extends Bindings {
   }
 
   void setString(Pointer<FLSlot> slot, String value) {
-    withZoneArena(() => _setString(slot, value.toFLStringInArena().ref));
+    runWithSingleFLString(value, (flValue) {
+      _setString(slot, flValue);
+    });
   }
 
   void setData(Pointer<FLSlot> slot, Data value) {
@@ -420,9 +422,10 @@ class DocBindings extends Bindings {
         nullFLSlice.ref,
       ).toNullable();
 
-  Pointer<FLDoc> fromJson(String json) => withZoneArena(() =>
-      _fromJSON(json.toFLStringInArena().ref, globalFLErrorCode)
-          .checkFleeceError());
+  Pointer<FLDoc> fromJson(String json) => runWithSingleFLString(
+        json,
+        (flJson) => _fromJSON(flJson, globalFLErrorCode).checkFleeceError(),
+      );
 
   void bindToDartObject(Object object, Pointer<FLDoc> doc) {
     _bindToDartObject(object, doc);
@@ -932,7 +935,7 @@ class DictBindings extends Bindings {
   late final _FLDict_AsMutable _asMutable;
 
   Pointer<FLValue> get(Pointer<FLDict> dict, String key) =>
-      withZoneArena(() => _get(dict, key.toFLStringInArena().ref));
+      runWithSingleFLString(key, (flKey) => _get(dict, flKey));
 
   int count(Pointer<FLDict> dict) => _count(dict);
 
@@ -1115,10 +1118,10 @@ class MutableDictBindings extends Bindings {
   bool isChanged(Pointer<FLMutableDict> dict) => _isChanged(dict);
 
   Pointer<FLSlot> set(Pointer<FLMutableDict> dict, String key) =>
-      withZoneArena(() => _set(dict, key.toFLStringInArena().ref));
+      runWithSingleFLString(key, (flKey) => _set(dict, flKey));
 
   void remove(Pointer<FLMutableDict> dict, String key) {
-    withZoneArena(() => _remove(dict, key.toFLStringInArena().ref));
+    runWithSingleFLString(key, (flKey) => _remove(dict, flKey));
   }
 
   void removeAll(Pointer<FLMutableDict> dict) {
@@ -1129,15 +1132,19 @@ class MutableDictBindings extends Bindings {
     Pointer<FLMutableDict> array,
     String key,
   ) =>
-      withZoneArena(() =>
-          _getMutableArray(array, key.toFLStringInArena().ref).toNullable());
+      runWithSingleFLString(
+        key,
+        (flKey) => _getMutableArray(array, flKey).toNullable(),
+      );
 
   Pointer<FLMutableDict>? getMutableDict(
     Pointer<FLMutableDict> array,
     String key,
   ) =>
-      withZoneArena(() =>
-          _getMutableDict(array, key.toFLStringInArena().ref).toNullable());
+      runWithSingleFLString(
+        key,
+        (flKey) => _getMutableDict(array, flKey).toNullable(),
+      );
 }
 
 // === Decoder =================================================================
@@ -1325,12 +1332,8 @@ class FleeceDecoderBindings extends Bindings {
     Pointer<FLDict> array,
     String key,
   ) {
-    withZoneArena(() {
-      _getLoadedFLValueFromDict(
-        array,
-        key.toFLStringInArena().ref,
-        globalLoadedFLValue,
-      );
+    runWithSingleFLString(key, (flKey) {
+      _getLoadedFLValueFromDict(array, flKey, globalLoadedFLValue);
     });
   }
 
@@ -1686,29 +1689,30 @@ class FleeceEncoderBindings extends Bindings {
   }
 
   void writeString(Pointer<FLEncoder> encoder, String value) {
-    withZoneArena(() {
-      _checkError(
-        encoder,
-        _writeString(encoder, value.toFLStringInArena().ref),
-      );
+    runWithSingleFLString(value, (flValue) {
+      _checkError(encoder, _writeString(encoder, flValue));
     });
   }
 
   void writeData(Pointer<FLEncoder> encoder, Data value) {
+    final sliceResult = value.toSliceResult();
     _checkError(
       encoder,
-      _writeData(encoder, value.toSliceResult().makeGlobal().ref),
+      _writeData(encoder, sliceResult.makeGlobal().ref),
     );
+    keepAlive(sliceResult);
   }
 
   void writeJSON(Pointer<FLEncoder> encoder, Data value) {
+    final sliceResult = value.toSliceResult();
     _checkError(
       encoder,
       _writeJSON(
         encoder,
-        value.toSliceResult().makeGlobal().cast<FLString>().ref,
+        sliceResult.makeGlobal().cast<FLString>().ref,
       ),
     );
+    keepAlive(sliceResult);
   }
 
   void beginArray(Pointer<FLEncoder> encoder, int reserveCount) {
@@ -1723,12 +1727,9 @@ class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, _beginDict(encoder, reserveCount));
   }
 
-  void writeKey(Pointer<FLEncoder> encoder, String value) {
-    withZoneArena(() {
-      _checkError(
-        encoder,
-        _writeKey(encoder, value.toFLStringInArena().ref),
-      );
+  void writeKey(Pointer<FLEncoder> encoder, String key) {
+    runWithSingleFLString(key, (flKey) {
+      _checkError(encoder, _writeKey(encoder, flKey));
     });
   }
 

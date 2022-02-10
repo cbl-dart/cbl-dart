@@ -75,7 +75,7 @@ class Slice {
   /// |     > 0 | this slice is after [other]    |
   int compareTo(Slice other) {
     final aFLSlice = makeGlobal();
-    final bFLSlice = malloc<FLSlice>();
+    final bFLSlice = singleSliceResultAllocator<FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -83,7 +83,7 @@ class Slice {
     try {
       return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
-      malloc.free(bFLSlice);
+      singleSliceResultAllocator.free(bFLSlice);
     }
   }
 
@@ -100,7 +100,7 @@ class Slice {
     }
 
     final aFLSlice = makeGlobal();
-    final bFLSlice = malloc<FLSlice>();
+    final bFLSlice = singleSliceResultAllocator<FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -108,7 +108,7 @@ class Slice {
     try {
       return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
-      malloc.free(bFLSlice);
+      singleSliceResultAllocator.free(bFLSlice);
     }
   }
 
@@ -148,7 +148,7 @@ class SliceResult extends Slice {
     int size, {
     bool retain = false,
   }) : super._(buf, size) {
-    makeGlobal();
+    makeGlobalResult();
     _sliceBindings.bindToDartObject(
       this,
       globalFLSliceResult.ref,
@@ -243,7 +243,7 @@ class TransferableSliceResult {
       SliceResult._(Pointer.fromAddress(_bufAddress), _size);
 }
 
-final sliceResult = SliceResultAllocator();
+final sliceResultAllocator = SliceResultAllocator();
 
 /// Allocator which allocates memory through [SliceResult]s.
 ///
@@ -272,3 +272,46 @@ class SliceResultAllocator implements Allocator {
     _slices.removeWhere((slice) => slice.buf.address == pointer.address);
   }
 }
+
+/// Allocator which owns a single [SliceResult] to quickly allocate memory.
+///
+/// If the [SliceResult] is already allocated, this allocator will use another
+/// delegate allocator to allocate the requested memory.
+class SingleSliceResultAllocator implements Allocator {
+  SingleSliceResultAllocator({
+    required SliceResult sliceResult,
+    Allocator delegate = calloc,
+  })  : _delegate = delegate,
+        _sliceResult = sliceResult;
+
+  final Allocator _delegate;
+  final SliceResult _sliceResult;
+  var _sliceResultIsUsed = false;
+
+  @override
+  Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment}) {
+    if (alignment == null &&
+        !_sliceResultIsUsed &&
+        byteCount <= _sliceResult.size) {
+      _sliceResultIsUsed = true;
+      return _sliceResult.buf.cast();
+    }
+
+    return _delegate.allocate<T>(byteCount, alignment: alignment);
+  }
+
+  @override
+  void free(Pointer<NativeType> pointer) {
+    if (pointer.address == _sliceResult.buf.address) {
+      assert(_sliceResultIsUsed);
+      _sliceResultIsUsed = false;
+    } else {
+      _delegate.free(pointer);
+    }
+  }
+}
+
+late final singleSliceResultAllocator = SingleSliceResultAllocator(
+  sliceResult: SliceResult(1024),
+  delegate: malloc,
+);

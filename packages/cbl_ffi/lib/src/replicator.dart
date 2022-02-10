@@ -569,10 +569,11 @@ class ReplicatorBindings extends Bindings {
       _addDocumentReplicationListener;
 
   Pointer<CBLEndpoint> createEndpointWithUrl(String url) =>
-      withZoneArena(() => _endpointCreateWithUrl(
-            url.toFLStringInArena().ref,
-            globalCBLError,
-          ).checkCBLError());
+      runWithSingleFLString(
+        url,
+        (flUrl) =>
+            _endpointCreateWithUrl(flUrl, globalCBLError).checkCBLError(),
+      );
 
   Pointer<CBLEndpoint> createEndpointWithLocalDB(
     Pointer<CBLDatabase> database,
@@ -587,18 +588,18 @@ class ReplicatorBindings extends Bindings {
     String username,
     String password,
   ) =>
-      withZoneArena(() => _authCreatePassword(
-            username.toFLStringInArena().ref,
-            password.toFLStringInArena().ref,
+      withGlobalArena(() => _authCreatePassword(
+            username.toFLString().ref,
+            password.toFLString().ref,
           ));
 
   Pointer<CBLAuthenticator> createSessionAuthenticator(
     String sessionID,
     String? cookieName,
   ) =>
-      withZoneArena(() => _authCreateSession(
-            sessionID.toFLStringInArena().ref,
-            cookieName.toFLStringInArena().ref,
+      withGlobalArena(() => _authCreateSession(
+            sessionID.toFLString().ref,
+            cookieName.toFLString().ref,
           ));
 
   void freeAuthenticator(Pointer<CBLAuthenticator> authenticator) {
@@ -606,7 +607,7 @@ class ReplicatorBindings extends Bindings {
   }
 
   Pointer<CBLReplicator> createReplicator(CBLReplicatorConfiguration config) =>
-      withZoneArena(() => _create(
+      withGlobalArena(() => _create(
             _createConfiguration(config),
             globalCBLError,
           ).checkCBLError());
@@ -658,11 +659,11 @@ class ReplicatorBindings extends Bindings {
     Pointer<CBLReplicator> replicator,
     String docID,
   ) =>
-      withZoneArena(() => _isDocumentPending(
-            replicator,
-            docID.toFLStringInArena().ref,
-            globalCBLError,
-          ).checkCBLError());
+      runWithSingleFLString(
+        docID,
+        (flDocID) => _isDocumentPending(replicator, flDocID, globalCBLError)
+            .checkCBLError(),
+      );
 
   void addChangeListener(
     Pointer<CBLReplicator> replicator,
@@ -681,7 +682,7 @@ class ReplicatorBindings extends Bindings {
   Pointer<_CBLDartReplicatorConfiguration> _createConfiguration(
     CBLReplicatorConfiguration config,
   ) {
-    final result = zoneArena<_CBLDartReplicatorConfiguration>();
+    final result = globalArena<_CBLDartReplicatorConfiguration>();
 
     result.ref
       ..database = config.database
@@ -695,12 +696,14 @@ class ReplicatorBindings extends Bindings {
       ..authenticator = config.authenticator ?? nullptr
       ..proxy = _createProxySettings(config.proxy)
       ..headers = config.headers ?? nullptr
-      ..pinnedServerCertificate =
-          config.pinnedServerCertificate?.toSliceResult().flSlice(zoneArena) ??
-              nullptr
-      ..trustedRootCertificates =
-          config.trustedRootCertificates?.toSliceResult().flSlice(zoneArena) ??
-              nullptr
+      ..pinnedServerCertificate = config.pinnedServerCertificate
+              ?.toSliceResult()
+              .flSlice(globalArena) ??
+          nullptr
+      ..trustedRootCertificates = config.trustedRootCertificates
+              ?.toSliceResult()
+              .flSlice(globalArena) ??
+          nullptr
       ..channels = config.channels ?? nullptr
       ..documentIDs = config.documentIDs ?? nullptr
       ..pushFilter = config.pushFilter ?? nullptr
@@ -717,14 +720,14 @@ class ReplicatorBindings extends Bindings {
       return nullptr;
     }
 
-    final result = zoneArena<_CBLProxySettings>();
+    final result = globalArena<_CBLProxySettings>();
 
     result.ref
       ..type = settings.type
-      ..hostname = settings.hostname.toFLStringInArena().ref
+      ..hostname = settings.hostname.toFLString().ref
       ..port = settings.port
-      ..username = settings.username.toFLStringInArena().ref
-      ..password = settings.password.toFLStringInArena().ref;
+      ..username = settings.username.toFLString().ref
+      ..password = settings.password.toFLString().ref;
 
     return result;
   }

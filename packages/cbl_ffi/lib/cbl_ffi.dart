@@ -29,6 +29,11 @@ export 'src/libraries.dart';
 export 'src/logging.dart';
 export 'src/query.dart' hide CBLQueryLanguageExt;
 export 'src/replicator.dart';
-export 'src/slice.dart';
+export 'src/slice.dart'
+    hide
+        singleSliceResultAllocator,
+        sliceResultAllocator,
+        SingleSliceResultAllocator,
+        SliceResultAllocator;
 export 'src/tracing.dart'
     show cblIncludeTracePoints, TracedNativeCall, TracedCallHandler;

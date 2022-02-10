@@ -13,41 +13,30 @@ import '../utils/benchmark.dart';
 abstract class DecodingBenchmark extends BenchmarkBase {
   DecodingBenchmark(String description) : super('Decoding: $description');
 
-  late final jsonString = largeJsonDoc;
+  final jsonString = largeJsonDoc;
 }
 
 class JsonInDartDecodingBenchmark extends DecodingBenchmark {
   JsonInDartDecodingBenchmark() : super('JSON (in Dart)');
 
-  late JsonDecoder _decoder;
-
-  @override
-  void setup() {
-    _decoder = const JsonDecoder();
-  }
+  final utf8String = utf8.encode(largeJsonDoc);
 
   @override
   void run() {
-    _decoder.convert(jsonString);
+    utf8.decoder.fuse(json.decoder).convert(utf8String);
   }
 }
 
 class FleeceDecodingBenchmark extends DecodingBenchmark {
   FleeceDecodingBenchmark() : super('Fleece');
 
-  late FleeceDecoder _decoder;
-
   late final data = FleeceEncoder().convertJson(jsonString);
 
   @override
-  void setup() {
-    _decoder = FleeceDecoder();
-  }
-
-  @override
   void run() {
-    final value = _decoder.loadValueFromData(data, trust: FLTrust.trusted)!;
-    _decoder.loadedValueToDartObject(value);
+    final decoder = FleeceDecoder();
+    final value = decoder.loadValueFromData(data, trust: FLTrust.trusted)!;
+    decoder.loadedValueToDartObject(value);
   }
 }
 

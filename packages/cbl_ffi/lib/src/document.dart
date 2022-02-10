@@ -1,7 +1,5 @@
 import 'dart:ffi';
 
-import 'package:ffi/ffi.dart';
-
 import 'base.dart';
 import 'bindings.dart';
 import 'fleece.dart';
@@ -142,9 +140,7 @@ class MutableDocumentBindings extends Bindings {
   late final _CBLDocument_SetJSON _setJSON;
 
   Pointer<CBLMutableDocument> createWithID([String? id]) =>
-      withZoneArena(() => _createWithID(
-            id.toFLStringInArena().ref,
-          ));
+      runWithSingleFLString(id, _createWithID);
 
   Pointer<CBLMutableDocument> mutableCopy(Pointer<CBLDocument> source) =>
       _mutableCopy(source);
@@ -158,16 +154,9 @@ class MutableDocumentBindings extends Bindings {
   ) =>
       _setProperties(doc, properties);
 
-  void setJSON(
-    Pointer<CBLMutableDocument> doc,
-    String properties,
-  ) {
-    withZoneArena(() {
-      _setJSON(
-        doc,
-        properties.toFLStringInArena().ref,
-        globalCBLError,
-      ).checkCBLError();
+  void setJSON(Pointer<CBLMutableDocument> doc, String properties) {
+    runWithSingleFLString(properties, (flProperties) {
+      _setJSON(doc, flProperties, globalCBLError).checkCBLError();
     });
   }
 }
