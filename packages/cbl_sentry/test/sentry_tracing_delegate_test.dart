@@ -165,6 +165,42 @@ void main() {
       expect(child.finished, isTrue);
     });
 
+    test('does not trace sync operations when tracing is disabled', () {
+      final delegate = SentryTracingDelegate(
+        sentryDsn: '',
+        tracingEnabled: false,
+        hub: hub,
+      );
+      final root = MockSpan('root');
+
+      runWithCblSentrySpan(root, () {
+        delegate.traceSyncOperation(
+          InitializeOp(),
+          () {},
+        );
+      });
+
+      expect(root.children, isEmpty);
+    });
+
+    test('does not trace async operations when tracing is disabled', () async {
+      final delegate = SentryTracingDelegate(
+        sentryDsn: '',
+        tracingEnabled: false,
+        hub: hub,
+      );
+      final root = MockSpan('root');
+
+      await runWithCblSentrySpan(root, () async {
+        await delegate.traceAsyncOperation(
+          InitializeOp(),
+          () async {},
+        );
+      });
+
+      expect(root.children, isEmpty);
+    });
+
     test('does not trace sync internal operations', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       final root = MockSpan('root');

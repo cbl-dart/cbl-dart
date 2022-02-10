@@ -37,14 +37,24 @@ import 'zone_span.dart';
 /// span is available though [Sentry.getSpan] or [cblSentrySpan], when the
 /// operation is executed.
 ///
+/// Tracing of operations is by default enabled if Sentry has been configured
+/// for tracing. This can be overridden by setting [tracingEnabled].
+///
 /// Whether or not internal operations are traced is controlled by the
 /// [traceInternalOperations] option (defaults to `false`).
 /// ```
 class CouchbaseLiteIntegration extends Integration {
   CouchbaseLiteIntegration({
+    this.tracingEnabled,
     this.traceInternalOperations = false,
     this.breadcrumbLogLevel = LogLevel.warning,
   });
+
+  /// Whether tracing of Couchbase Lite operations is enabled.
+  ///
+  /// If this property is not set, tracing is enabled if Sentry has been
+  /// configured for tracing.
+  final bool? tracingEnabled;
 
   /// Whether to trace internal operations.
   ///
@@ -71,6 +81,7 @@ class CouchbaseLiteIntegration extends Integration {
 
     final tracingDelegate = _tracingDelegate = SentryTracingDelegate(
       sentryDsn: options.dsn,
+      tracingEnabled: tracingEnabled ?? options.isTracingEnabled(),
       traceInternalOperations: traceInternalOperations,
       onInitialize: () {
         if (breadcrumbLogLevel != LogLevel.none) {

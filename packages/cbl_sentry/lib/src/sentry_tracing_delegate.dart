@@ -9,6 +9,7 @@ import 'zone_span.dart';
 class SentryTracingDelegate extends TracingDelegate {
   SentryTracingDelegate({
     required this.sentryDsn,
+    this.tracingEnabled = true,
     this.traceInternalOperations = false,
     this.onInitialize,
     Hub? hub,
@@ -17,12 +18,15 @@ class SentryTracingDelegate extends TracingDelegate {
 
   SentryTracingDelegate._workerDelegate(SentryTracingDelegate userDelegate)
       : sentryDsn = userDelegate.sentryDsn,
+        tracingEnabled = userDelegate.tracingEnabled,
         traceInternalOperations = userDelegate.traceInternalOperations,
         onInitialize = null,
         _hub = userDelegate._hub,
         _isWorkerDelegate = true;
 
   final String? sentryDsn;
+
+  final bool tracingEnabled;
 
   final bool traceInternalOperations;
 
@@ -83,7 +87,7 @@ class SentryTracingDelegate extends TracingDelegate {
 
   @override
   Object? captureTracingContext() {
-    if (!traceInternalOperations || !_isInsideOperation) {
+    if (!tracingEnabled || !traceInternalOperations || !_isInsideOperation) {
       return null;
     }
 
@@ -193,6 +197,10 @@ class SentryTracingDelegate extends TracingDelegate {
   // === Performance tracing ===================================================
 
   bool _shouldStartSpanForOperation(TracedOperation operation) {
+    if (!tracingEnabled) {
+      return false;
+    }
+
     final isInternalOperation = _isInsideOperation;
     if (isInternalOperation && !traceInternalOperations) {
       return false;
