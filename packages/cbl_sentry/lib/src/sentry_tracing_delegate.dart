@@ -193,7 +193,7 @@ class SentryTracingDelegate extends TracingDelegate {
   Breadcrumb _createBreadcrumbForOperationStart(TracedOperation operation) =>
       Breadcrumb(
         type: operation is QueryOperationOp ? 'query' : 'info',
-        category: operation.debugName,
+        category: operation.debugName(isInWorker: _isWorkerDelegate),
         message: operation.debugDescription,
         data: operation.debugDetails,
       );
@@ -229,7 +229,7 @@ class SentryTracingDelegate extends TracingDelegate {
       final parentSpan = cblSentrySpan;
       if (parentSpan != null) {
         return parentSpan.startChild(
-          operation.debugName,
+          operation.debugName(isInWorker: _isWorkerDelegate),
           description: operation.debugDescription,
         );
       }
@@ -243,7 +243,7 @@ class SentryTracingDelegate extends TracingDelegate {
         return _hub.startTransactionWithContext(
           SentryTransactionContext.fromSentryTrace(
             'CBLWorker',
-            operation.debugName,
+            operation.debugName(isInWorker: _isWorkerDelegate),
             parentTraceHeader,
           ).copyWith(description: operation.debugDescription),
         );

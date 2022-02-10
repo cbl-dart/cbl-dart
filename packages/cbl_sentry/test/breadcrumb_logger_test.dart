@@ -14,17 +14,28 @@ void main() {
   group('debugName', () {
     test('TracedOperations', () {
       // Decapitalize name.
-      expect(InitializeOp().debugName, 'cbl.initialize');
+      expect(InitializeOp().debugName(isInWorker: false), 'cbl.initialize');
+      // Appends '.worker' if in worker.
+      expect(
+        InitializeOp().debugName(isInWorker: true),
+        'cbl.initialize.worker',
+      );
     });
 
     test('NativeCallOp', () {
       // Prefix with .native and do not decapitalize name.
-      expect(NativeCallOp('Foo').debugName, 'cbl.native.Foo');
+      expect(
+        NativeCallOp('Foo').debugName(isInWorker: false),
+        'cbl.native.Foo',
+      );
     });
 
     test('ChannelCallOp', () {
       // Prefix with .channel and do decapitalize name.
-      expect(ChannelCallOp('Foo').debugName, 'cbl.channel.foo');
+      expect(
+        ChannelCallOp('Foo').debugName(isInWorker: false),
+        'cbl.channel.foo',
+      );
     });
   });
 
