@@ -149,7 +149,7 @@ jobs:
           - embedder: flutter
             os: Ubuntu
     runs-on: >-
-      ${{ fromJSON('{ 
+      ${{ fromJSON('{
         "iOS":"macos-11",
         "macOS":"macos-11",
         "Android":"macos-11",
@@ -160,7 +160,7 @@ jobs:
       EMBEDDER: ${{ matrix.embedder }}
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: >-
-        ${{ fromJSON('{ 
+        ${{ fromJSON('{
           "standalone":"cbl_e2e_tests_standalone_dart",
           "flutter":"cbl_e2e_tests_flutter"
         }')[matrix.embedder] }}
@@ -242,8 +242,6 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
   test-e2e-cbl_flutter_prebuilt:
-    # TODO: reenable once new version of native libraries have been published
-    if: ${{ false }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:
@@ -252,7 +250,7 @@ jobs:
         embedder: [flutter]
         os: [iOS, macOS, Android, Ubuntu, Windows]
     runs-on: >-
-      ${{ fromJSON('{ 
+      ${{ fromJSON('{
         "iOS":"macos-11",
         "macOS":"macos-11",
         "Android":"macos-11",
@@ -319,8 +317,6 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
 
   test-cbl_dart:
-    # TODO: reenable once new version of native libraries have been published
-    if: ${{ false }}
     name: cbl_dart unit tests
     strategy:
       matrix:
@@ -334,7 +330,7 @@ jobs:
       TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: >-
-      ${{ fromJSON('{ 
+      ${{ fromJSON('{
         "macOS":"macos-11",
         "Ubuntu":"ubuntu-20.04",
         "Windows":"windows-2019"
