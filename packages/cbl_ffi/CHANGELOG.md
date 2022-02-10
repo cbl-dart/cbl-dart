@@ -1,3 +1,12 @@
+## 0.7.0-beta.12
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: remove native type conversions   (#279). ([b79a43fc](https://github.com/cbl-dart/cbl-dart/commit/b79a43fc2df737fb1a16c8903322ed85db995072))
+ - **PERF**: improve `String` to `FLSring` conversion (#293). ([98f723f6](https://github.com/cbl-dart/cbl-dart/commit/98f723f6c5b03af441faa9b331541da53766595e))
+ - **FEAT**: add environment constant `cblFfiUseIsLeaf` and make it `false` per default. ([e72a31ca](https://github.com/cbl-dart/cbl-dart/commit/e72a31ca72f141d1c6f2a408d7d6d072f8e08566))
+ - **BREAKING** **FEAT**: upgrade to Dart `2.16.0` and Flutter `2.10.0` (#290). ([5d8d0829](https://github.com/cbl-dart/cbl-dart/commit/5d8d082967f8a13b47df788fda42bd0ef54d6def))
+
 ## 0.7.0-beta.11
 
 > Note: This release has breaking changes.

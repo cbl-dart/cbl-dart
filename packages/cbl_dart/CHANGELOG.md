@@ -1,3 +1,10 @@
+## 1.0.0-beta.6
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: upgrade to `libcblitedart` `1.0.0-beta.7`. ([42778d0f](https://github.com/cbl-dart/cbl-dart/commit/42778d0fc470221d34946d68af2189dbdb79278e))
+ - **BREAKING** **FEAT**: upgrade to Dart `2.16.0` and Flutter `2.10.0` (#290). ([5d8d0829](https://github.com/cbl-dart/cbl-dart/commit/5d8d082967f8a13b47df788fda42bd0ef54d6def))
+
 ## 1.0.0-beta.5
 
 > Note: This release has breaking changes.

@@ -1,3 +1,9 @@
+## 1.0.0-beta.13
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: upgrade to Dart `2.16.0` and Flutter `2.10.0` (#290). ([5d8d0829](https://github.com/cbl-dart/cbl-dart/commit/5d8d082967f8a13b47df788fda42bd0ef54d6def))
+
 ## 1.0.0-beta.12
 
 > Note: This release has breaking changes.
