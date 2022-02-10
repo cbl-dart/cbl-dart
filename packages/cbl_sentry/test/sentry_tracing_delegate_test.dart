@@ -380,7 +380,7 @@ void main() {
         expect(hub.transactions, hasLength(1));
         final transaction = hub.transactions.first;
         expect(transaction.children, isEmpty);
-        expect(transaction.operation, 'cbl.initialize');
+        expect(transaction.operation, 'cbl.initialize.worker');
         expect(transaction.transactionParentSpanId, root.children.first.id);
       });
     });

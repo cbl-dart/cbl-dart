@@ -3,7 +3,7 @@ import 'package:cbl/cbl.dart';
 import 'utils.dart';
 
 extension OperationDebugInfoExt on TracedOperation {
-  String get debugName {
+  String debugName({required bool isInWorker}) {
     final self = this;
     if (self is ChannelCallOp) {
       return 'cbl.channel.${self.name.uncapitalized}';
@@ -11,7 +11,7 @@ extension OperationDebugInfoExt on TracedOperation {
     if (self is NativeCallOp) {
       return 'cbl.native.$name';
     }
-    return 'cbl.${name.uncapitalized}';
+    return 'cbl.${name.uncapitalized}${isInWorker ? '.worker' : ''}';
   }
 
   String? get debugDescription {
