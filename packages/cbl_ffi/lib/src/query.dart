@@ -1,7 +1,5 @@
 import 'dart:ffi';
 
-import 'package:ffi/ffi.dart';
-
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
@@ -154,8 +152,8 @@ class QueryBindings extends Bindings {
     CBLQueryLanguage language,
     String queryString,
   ) =>
-      withZoneArena(() {
-        final queryStringFlSTr = queryString.toFLStringInArena().ref;
+      withGlobalArena(() {
+        final queryStringFlSTr = queryString.makeGlobalFLString().ref;
         final languageInt = language.toInt();
         return nativeCallTracePoint(
           TracedNativeCall.queryCreate,
@@ -282,10 +280,7 @@ class ResultSetBindings extends Bindings {
     Pointer<CBLResultSet> resultSet,
     String key,
   ) =>
-      withZoneArena(() => _valueForKey(
-            resultSet,
-            key.toFLStringInArena().ref,
-          ));
+      runWithSingleFLString(key, (flKey) => _valueForKey(resultSet, flKey));
 
   Pointer<FLArray> resultArray(Pointer<CBLResultSet> resultSet) =>
       _resultArray(resultSet);

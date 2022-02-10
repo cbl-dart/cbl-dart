@@ -18,15 +18,17 @@ final _flStringSizeOf = sizeOf<FLString>();
 final _flStringSizeOfAligned = _flStringSizeOf + (_flStringSizeOf % 8);
 
 extension StringFLStringExt on String? {
-  Pointer<FLString> toFLStringInArena() {
-    final string = this;
-    if (string == null) {
+  Pointer<FLString> toFLString([Allocator? allocator]) {
+    final self = this;
+    if (self == null) {
       return nullFLString;
     }
 
-    final encoded = utf8.encode(string);
+    final effectiveAllocator = allocator ?? globalArena;
+
+    final encoded = utf8.encode(self);
     final flStringAndBuffer =
-        zoneArena<Uint8>(_flStringSizeOfAligned + encoded.length);
+        effectiveAllocator<Uint8>(_flStringSizeOfAligned + encoded.length);
     final flString = flStringAndBuffer.cast<FLString>();
     final buffer = flStringAndBuffer.elementAt(_flStringSizeOfAligned);
     buffer.asTypedList(encoded.length).setAll(0, encoded);
@@ -34,6 +36,35 @@ extension StringFLStringExt on String? {
       ..buf = buffer
       ..size = encoded.length;
     return flString;
+  }
+
+  Pointer<FLString> makeGlobalFLString([Allocator? allocator]) {
+    final self = this;
+    if (self == null) {
+      globalFLString.ref
+        ..size = 0
+        ..buf = nullptr;
+      return globalFLString;
+    }
+
+    final effectiveAllocator = allocator ?? globalArena;
+
+    final encoded = utf8.encode(self);
+    final buffer = effectiveAllocator<Uint8>(encoded.length);
+    buffer.asTypedList(encoded.length).setAll(0, encoded);
+    globalFLString.ref
+      ..size = encoded.length
+      ..buf = buffer;
+    return globalFLString;
+  }
+}
+
+T runWithSingleFLString<T>(String? string, T Function(FLString flString) fn) {
+  final flString = string.makeGlobalFLString(cblFfiAllocator).ref;
+  try {
+    return fn(flString);
+  } finally {
+    cblFfiAllocator.free(flString.buf);
   }
 }
 
@@ -65,3 +96,6 @@ extension PointerExt<T extends NativeType> on Pointer<T> {
 extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
   Pointer<T> elseNullptr() => this == null ? nullptr : this!;
 }
+
+@pragma('vm:never-inline')
+void keepAlive(Object object) {}

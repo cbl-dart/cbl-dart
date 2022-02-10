@@ -1,7 +1,5 @@
 import 'dart:ffi';
 
-import 'package:ffi/ffi.dart';
-
 import 'base.dart';
 import 'bindings.dart';
 import 'data.dart';
@@ -102,10 +100,16 @@ class BlobBindings extends Bindings {
   late final _CBLBlob_Properties _properties;
 
   Pointer<CBLBlob> createWithData(String? contentType, Data content) =>
-      withZoneArena(() => _createWithData(
-            contentType.toFLStringInArena().ref,
-            content.toSliceResult().makeGlobal().ref,
-          ));
+      runWithSingleFLString(
+        contentType,
+        (flContentType) {
+          final sliceResult = content.toSliceResult();
+          final result =
+              _createWithData(flContentType, sliceResult.makeGlobal().ref);
+          keepAlive(sliceResult);
+          return result;
+        },
+      );
 
   bool isBlob(Pointer<FLDict> dict) => _isBlob(dict);
 
@@ -304,10 +308,10 @@ class BlobWriteStreamBindings extends Bindings {
     String? contentType,
     Pointer<CBLBlobWriteStream> stream,
   ) =>
-      withZoneArena(() => _createBlobWithStream(
-            contentType.toFLStringInArena().ref,
-            stream,
-          ));
+      runWithSingleFLString(
+        contentType,
+        (flContentType) => _createBlobWithStream(flContentType, stream),
+      );
 }
 
 // === BlobsBindings ===========================================================

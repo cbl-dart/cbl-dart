@@ -243,7 +243,7 @@ class TransferableSliceResult {
       SliceResult._(Pointer.fromAddress(_bufAddress), _size);
 }
 
-final sliceResult = SliceResultAllocator();
+final sliceResultAllocator = SliceResultAllocator();
 
 /// Allocator which allocates memory through [SliceResult]s.
 ///
@@ -270,5 +270,49 @@ class SliceResultAllocator implements Allocator {
   @override
   void free(Pointer<NativeType> pointer) {
     _slices.removeWhere((slice) => slice.buf.address == pointer.address);
+  }
+}
+
+/// Allocator which owns a single [SliceResult] to quickly allocate memory.
+///
+/// If the [SliceResult] is already allocated, this allocator will use another
+/// delegate allocator to allocate the requested memory.
+class SingleSliceResultAllocator implements Allocator {
+  SingleSliceResultAllocator({
+    required SliceResult sliceResult,
+    Allocator delegate = calloc,
+  })  : _delegate = delegate,
+        _sliceResult = sliceResult,
+        _size = sliceResult.size,
+        _bufPointer = sliceResult.buf,
+        _bufPointerAddress = sliceResult.buf.address;
+
+  final Allocator _delegate;
+  // We need to keep a reference to the slice result to keep it alive.
+  // ignore: unused_field
+  final SliceResult _sliceResult;
+  final int _size;
+  final Pointer<Uint8> _bufPointer;
+  final int _bufPointerAddress;
+  var _sliceResultIsUsed = false;
+
+  @override
+  Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment}) {
+    if (alignment == null && !_sliceResultIsUsed && byteCount <= _size) {
+      _sliceResultIsUsed = true;
+      return _bufPointer.cast();
+    }
+
+    return _delegate.allocate<T>(byteCount, alignment: alignment);
+  }
+
+  @override
+  void free(Pointer<NativeType> pointer) {
+    if (pointer.address == _bufPointerAddress) {
+      assert(_sliceResultIsUsed);
+      _sliceResultIsUsed = false;
+    } else {
+      _delegate.free(pointer);
+    }
   }
 }

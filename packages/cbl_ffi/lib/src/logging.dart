@@ -4,8 +4,6 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart';
-
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
@@ -231,11 +229,10 @@ class LoggingBindings extends Bindings {
     CBLLogLevel level,
     String message,
   ) {
-    withZoneArena(() => _logMessage(
-          domain.toInt(),
-          level.toInt(),
-          message.toFLStringInArena().ref,
-        ));
+    runWithSingleFLString(
+      message,
+      (flMessage) => _logMessage(domain.toInt(), level.toInt(), flMessage),
+    );
   }
 
   CBLLogLevel consoleLevel() => _consoleLevel().toLogLevel();
@@ -252,7 +249,7 @@ class LoggingBindings extends Bindings {
       _setCallback(callback);
 
   void setFileLogConfiguration(CBLLogFileConfiguration? config) {
-    withZoneArena(() {
+    withGlobalArena(() {
       _setFileConfig(
         _logFileConfig(config),
         globalCBLError,
@@ -272,11 +269,11 @@ class LoggingBindings extends Bindings {
     // ignore: always_put_control_body_on_new_line
     if (config == null) return nullptr;
 
-    final result = zoneArena<_CBLLogFileConfiguration>();
+    final result = globalArena<_CBLLogFileConfiguration>();
 
     result.ref
       ..level = config.level.toInt()
-      ..directory = config.directory.toFLStringInArena().ref
+      ..directory = config.directory.toFLString().ref
       ..maxRotateCount = config.maxRotateCount
       ..maxSize = config.maxSize
       ..usePlainText = config.usePlainText;

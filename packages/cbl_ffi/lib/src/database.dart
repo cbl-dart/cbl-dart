@@ -600,10 +600,12 @@ class DatabaseBindings extends Bindings {
   late final _CBLDatabase_SaveBlob _saveBlob;
 
   CBLEncryptionKey encryptionKeyFromPassword(String password) =>
-      withZoneArena(() {
-        final key = zoneArena<_CBLEncryptionKey>();
+      withGlobalArena(() {
+        final key = globalArena<_CBLEncryptionKey>();
         if (!_encryptionKeyFromPassword(
-            key, password.toFLStringInArena().ref)) {
+          key,
+          password.makeGlobalFLString().ref,
+        )) {
           throw CBLErrorException(
             CBLErrorDomain.couchbaseLite,
             CBLErrorCode.unexpectedError,
@@ -619,24 +621,24 @@ class DatabaseBindings extends Bindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) =>
-      withZoneArena(() => _copyDatabase(
-            from.toFLStringInArena().ref,
-            name.toFLStringInArena().ref,
+      withGlobalArena(() => _copyDatabase(
+            from.toFLString().ref,
+            name.toFLString().ref,
             _createConfig(config),
             globalCBLError,
           ).checkCBLError());
 
   bool deleteDatabase(String name, String? inDirectory) =>
-      withZoneArena(() => _deleteDatabase(
-            name.toFLStringInArena().ref,
-            inDirectory.toFLStringInArena().ref,
+      withGlobalArena(() => _deleteDatabase(
+            name.toFLString().ref,
+            inDirectory.toFLString().ref,
             globalCBLError,
           ).checkCBLError());
 
   bool databaseExists(String name, String? inDirectory) =>
-      withZoneArena(() => _databaseExists(
-            name.toFLStringInArena().ref,
-            inDirectory.toFLStringInArena().ref,
+      withGlobalArena(() => _databaseExists(
+            name.toFLString().ref,
+            inDirectory.toFLString().ref,
           ));
 
   CBLDatabaseConfiguration defaultConfiguration() {
@@ -650,8 +652,8 @@ class DatabaseBindings extends Bindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) =>
-      withZoneArena(() {
-        final nameFlStr = name.toFLStringInArena().ref;
+      withGlobalArena(() {
+        final nameFlStr = name.toFLString().ref;
         final cblConfig = _createConfig(config);
         return nativeCallTracePoint(
           TracedNativeCall.databaseOpen,
@@ -695,8 +697,8 @@ class DatabaseBindings extends Bindings {
   }
 
   void changeEncryptionKey(Pointer<CBLDatabase> db, CBLEncryptionKey? key) {
-    withZoneArena(() {
-      final keyStruct = zoneArena<_CBLEncryptionKey>();
+    withGlobalArena(() {
+      final keyStruct = globalArena<_CBLEncryptionKey>();
       _writeEncryptionKey(keyStruct.ref, from: key);
       _changeEncryptionKey(db, keyStruct, globalCBLError).checkCBLError();
     });
@@ -712,25 +714,25 @@ class DatabaseBindings extends Bindings {
     Pointer<CBLDatabase> db,
     String docId,
   ) =>
-      withZoneArena(() {
-        final docIdFlStr = docId.toFLStringInArena().ref;
-        return nativeCallTracePoint(
+      runWithSingleFLString(
+        docId,
+        (flDocId) => nativeCallTracePoint(
           TracedNativeCall.databaseGetDocument,
-          () => _getDocument(db, docIdFlStr, globalCBLError),
-        ).checkCBLError().toNullable();
-      });
+          () => _getDocument(db, flDocId, globalCBLError),
+        ).checkCBLError().toNullable(),
+      );
 
   Pointer<CBLMutableDocument>? getMutableDocument(
     Pointer<CBLDatabase> db,
     String docId,
   ) =>
-      withZoneArena(() {
-        final docIdFlStr = docId.toFLStringInArena().ref;
-        return nativeCallTracePoint(
+      runWithSingleFLString(
+        docId,
+        (flDocId) => nativeCallTracePoint(
           TracedNativeCall.databaseGetMutableDocument,
-          () => _getMutableDocument(db, docIdFlStr, globalCBLError),
-        ).checkCBLError().toNullable();
-      });
+          () => _getMutableDocument(db, flDocId, globalCBLError),
+        ).checkCBLError().toNullable(),
+      );
 
   void saveDocumentWithConcurrencyControl(
     Pointer<CBLDatabase> db,
@@ -767,19 +769,15 @@ class DatabaseBindings extends Bindings {
   }
 
   bool purgeDocumentByID(Pointer<CBLDatabase> db, String docId) =>
-      withZoneArena(() => _purgeDocumentByID(
-            db,
-            docId.toFLStringInArena().ref,
-            globalCBLError,
-          ).checkCBLError());
+      runWithSingleFLString(
+        docId,
+        (flDocId) =>
+            _purgeDocumentByID(db, flDocId, globalCBLError).checkCBLError(),
+      );
 
   DateTime? getDocumentExpiration(Pointer<CBLDatabase> db, String docId) =>
-      withZoneArena(() {
-        final result = _getDocumentExpiration(
-          db,
-          docId.toFLStringInArena().ref,
-          globalCBLError,
-        );
+      runWithSingleFLString(docId, (flDocId) {
+        final result = _getDocumentExpiration(db, flDocId, globalCBLError);
 
         if (result == -1) {
           checkCBLError();
@@ -793,10 +791,10 @@ class DatabaseBindings extends Bindings {
     String docId,
     DateTime? expiration,
   ) =>
-      withZoneArena(() {
+      runWithSingleFLString(docId, (flDocId) {
         _setDocumentExpiration(
           db,
-          docId.toFLStringInArena().ref,
+          flDocId,
           expiration?.millisecondsSinceEpoch ?? 0,
           globalCBLError,
         ).checkCBLError();
@@ -807,8 +805,8 @@ class DatabaseBindings extends Bindings {
     String docId,
     Pointer<CBLDartAsyncCallback> listener,
   ) {
-    withZoneArena(() {
-      _addDocumentChangeListener(db, docId.toFLStringInArena().ref, listener);
+    runWithSingleFLString(docId, (flDocId) {
+      _addDocumentChangeListener(db, flDocId, listener);
     });
   }
 
@@ -824,10 +822,10 @@ class DatabaseBindings extends Bindings {
     String name,
     CBLIndexSpec spec,
   ) {
-    withZoneArena(() {
+    withGlobalArena(() {
       _createIndex(
         db,
-        name.toFLStringInArena().ref,
+        name.toFLString().ref,
         _createIndexSpec(spec).ref,
         globalCBLError,
       ).checkCBLError();
@@ -835,12 +833,8 @@ class DatabaseBindings extends Bindings {
   }
 
   void deleteIndex(Pointer<CBLDatabase> db, String name) {
-    withZoneArena(() {
-      _deleteIndex(
-        db,
-        name.toFLStringInArena().ref,
-        globalCBLError,
-      ).checkCBLError();
+    runWithSingleFLString(name, (flName) {
+      _deleteIndex(db, flName, globalCBLError).checkCBLError();
     });
   }
 
@@ -895,9 +889,9 @@ class DatabaseBindings extends Bindings {
       return nullptr;
     }
 
-    final result = zoneArena<_CBLDatabaseConfiguration>();
+    final result = globalArena<_CBLDatabaseConfiguration>();
 
-    result.ref.directory = config.directory.toFLStringInArena().ref;
+    result.ref.directory = config.directory.toFLString().ref;
 
     if (libs.enterpriseEdition) {
       _writeEncryptionKey(result.ref.encryptionKey, from: config.encryptionKey);
@@ -907,14 +901,14 @@ class DatabaseBindings extends Bindings {
   }
 
   Pointer<_CBLDart_CBLIndexSpec> _createIndexSpec(CBLIndexSpec spec) {
-    final result = zoneArena<_CBLDart_CBLIndexSpec>();
+    final result = globalArena<_CBLDart_CBLIndexSpec>();
 
     result.ref
       ..type = spec.type
       ..expressionLanguage = spec.expressionLanguage
-      ..expressions = spec.expressions.toFLStringInArena().ref
+      ..expressions = spec.expressions.toFLString().ref
       ..ignoreAccents = spec.ignoreAccents ?? false
-      ..language = spec.language.toFLStringInArena().ref;
+      ..language = spec.language.toFLString().ref;
 
     return result;
   }
