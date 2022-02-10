@@ -75,7 +75,7 @@ class Slice {
   /// |     > 0 | this slice is after [other]    |
   int compareTo(Slice other) {
     final aFLSlice = makeGlobal();
-    final bFLSlice = malloc<FLSlice>();
+    final bFLSlice = singleSliceResultAllocator<FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -83,7 +83,7 @@ class Slice {
     try {
       return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
-      malloc.free(bFLSlice);
+      singleSliceResultAllocator.free(bFLSlice);
     }
   }
 
@@ -100,7 +100,7 @@ class Slice {
     }
 
     final aFLSlice = makeGlobal();
-    final bFLSlice = malloc<FLSlice>();
+    final bFLSlice = singleSliceResultAllocator<FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -108,7 +108,7 @@ class Slice {
     try {
       return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
-      malloc.free(bFLSlice);
+      singleSliceResultAllocator.free(bFLSlice);
     }
   }
 
@@ -282,25 +282,19 @@ class SingleSliceResultAllocator implements Allocator {
     required SliceResult sliceResult,
     Allocator delegate = calloc,
   })  : _delegate = delegate,
-        _sliceResult = sliceResult,
-        _size = sliceResult.size,
-        _bufPointer = sliceResult.buf,
-        _bufPointerAddress = sliceResult.buf.address;
+        _sliceResult = sliceResult;
 
   final Allocator _delegate;
-  // We need to keep a reference to the slice result to keep it alive.
-  // ignore: unused_field
   final SliceResult _sliceResult;
-  final int _size;
-  final Pointer<Uint8> _bufPointer;
-  final int _bufPointerAddress;
   var _sliceResultIsUsed = false;
 
   @override
   Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment}) {
-    if (alignment == null && !_sliceResultIsUsed && byteCount <= _size) {
+    if (alignment == null &&
+        !_sliceResultIsUsed &&
+        byteCount <= _sliceResult.size) {
       _sliceResultIsUsed = true;
-      return _bufPointer.cast();
+      return _sliceResult.buf.cast();
     }
 
     return _delegate.allocate<T>(byteCount, alignment: alignment);
@@ -308,7 +302,7 @@ class SingleSliceResultAllocator implements Allocator {
 
   @override
   void free(Pointer<NativeType> pointer) {
-    if (pointer.address == _bufPointerAddress) {
+    if (pointer.address == _sliceResult.buf.address) {
       assert(_sliceResultIsUsed);
       _sliceResultIsUsed = false;
     } else {
@@ -318,6 +312,6 @@ class SingleSliceResultAllocator implements Allocator {
 }
 
 late final singleSliceResultAllocator = SingleSliceResultAllocator(
-  sliceResult: SliceResult(512),
+  sliceResult: SliceResult(1024),
   delegate: malloc,
 );

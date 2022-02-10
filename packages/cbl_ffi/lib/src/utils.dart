@@ -33,9 +33,11 @@ extension StringFLStringExt on String? {
     final flString = flStringAndBuffer.cast<FLString>();
     final buffer = flStringAndBuffer.elementAt(_flStringSizeOfAligned);
     buffer.asTypedList(encoded.length).setAll(0, encoded);
+
     flString.ref
       ..buf = buffer
       ..size = encoded.length;
+
     return flString;
   }
 
@@ -45,6 +47,7 @@ extension StringFLStringExt on String? {
       globalFLString.ref
         ..size = 0
         ..buf = nullptr;
+
       return globalFLString;
     }
 
@@ -53,9 +56,11 @@ extension StringFLStringExt on String? {
     final encoded = utf8.encode(self);
     final buffer = effectiveAllocator<Uint8>(encoded.length);
     buffer.asTypedList(encoded.length).setAll(0, encoded);
+
     globalFLString.ref
       ..size = encoded.length
       ..buf = buffer;
+
     return globalFLString;
   }
 }
