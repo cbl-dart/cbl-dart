@@ -148,7 +148,7 @@ class SliceResult extends Slice {
     int size, {
     bool retain = false,
   }) : super._(buf, size) {
-    makeGlobal();
+    makeGlobalResult();
     _sliceBindings.bindToDartObject(
       this,
       globalFLSliceResult.ref,
@@ -316,3 +316,8 @@ class SingleSliceResultAllocator implements Allocator {
     }
   }
 }
+
+late final singleSliceResultAllocator = SingleSliceResultAllocator(
+  sliceResult: SliceResult(512),
+  delegate: malloc,
+);

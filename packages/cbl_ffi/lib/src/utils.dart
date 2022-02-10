@@ -5,6 +5,7 @@ import 'package:ffi/ffi.dart';
 
 import 'fleece.dart';
 import 'global.dart';
+import 'slice.dart';
 
 // === Lang ====================================================================
 
@@ -60,11 +61,11 @@ extension StringFLStringExt on String? {
 }
 
 T runWithSingleFLString<T>(String? string, T Function(FLString flString) fn) {
-  final flString = string.makeGlobalFLString(cblFfiAllocator).ref;
+  final flString = string.makeGlobalFLString(singleSliceResultAllocator).ref;
   try {
     return fn(flString);
   } finally {
-    cblFfiAllocator.free(flString.buf);
+    singleSliceResultAllocator.free(flString.buf);
   }
 }
 

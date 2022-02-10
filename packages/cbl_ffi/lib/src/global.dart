@@ -7,12 +7,7 @@ import 'c_type.dart';
 import 'fleece.dart';
 import 'slice.dart';
 
-late final cblFfiAllocator = SingleSliceResultAllocator(
-  sliceResult: SliceResult(512),
-  delegate: malloc,
-);
-
-late final globalArena = Arena(cblFfiAllocator);
+late final globalArena = Arena(singleSliceResultAllocator);
 
 T withGlobalArena<T>(T Function() f) {
   try {
@@ -30,10 +25,10 @@ late final nullFLSlice = sliceResultAllocator<FLSlice>()
 late final globalFLSlice = sliceResultAllocator<FLSlice>();
 
 late final nullFLSliceResult = nullFLSlice.cast<FLSliceResult>();
-late final globalFLSliceResult = globalFLSlice.cast<FLSliceResult>();
+late final globalFLSliceResult = sliceResultAllocator<FLSliceResult>();
 
 late final nullFLString = nullFLSlice.cast<FLString>();
-late final globalFLString = globalFLSlice.cast<FLString>();
+late final globalFLString = sliceResultAllocator<FLString>();
 
 late final globalLoadedFLValue = sliceResultAllocator<CBLDart_LoadedFLValue>();
 
