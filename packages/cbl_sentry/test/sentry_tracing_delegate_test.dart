@@ -62,6 +62,34 @@ void main() {
       expect(breadcrumb.data, {'withConflictHandler': true});
     });
 
+    test("doesn't add sync operation breadcrumbs if disabled", () {
+      final delegate = SentryTracingDelegate(
+        sentryDsn: '',
+        operationBreadcrumbs: false,
+        hub: hub,
+      );
+      delegate.traceSyncOperation(
+        InitializeOp(),
+        () => expect(hub.breadcrumbs, isEmpty),
+      );
+
+      expect(hub.breadcrumbs, isEmpty);
+    });
+
+    test("doesn't add async operation breadcrumbs if disabled", () async {
+      final delegate = SentryTracingDelegate(
+        sentryDsn: '',
+        operationBreadcrumbs: false,
+        hub: hub,
+      );
+      await delegate.traceAsyncOperation(
+        InitializeOp(),
+        () async => expect(hub.breadcrumbs, isEmpty),
+      );
+
+      expect(hub.breadcrumbs, isEmpty);
+    });
+
     test('adds query operations with breadcrumb type query', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       delegate.traceSyncOperation(

@@ -97,6 +97,20 @@ void main() {
 
       expect(integration.tracingDelegate?.traceInternalOperations, true);
     });
+
+    test('defaults operationBreadcrumbs to false', () async {
+      final integration = await callTestIntegration(CouchbaseLiteIntegration());
+
+      expect(integration.tracingDelegate?.operationBreadcrumbs, true);
+    });
+
+    test('passes operationBreadcrumbs option to delegate', () async {
+      final integration = await callTestIntegration(CouchbaseLiteIntegration(
+        operationBreadcrumbs: false,
+      ));
+
+      expect(integration.tracingDelegate?.operationBreadcrumbs, false);
+    });
   });
 
   group('logging', () {

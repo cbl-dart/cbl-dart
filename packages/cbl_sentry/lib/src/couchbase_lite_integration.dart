@@ -27,9 +27,12 @@ import 'zone_span.dart';
 ///
 /// ## Breadcrumbs
 ///
-/// The start of a [TracedOperation] that is the result of usage of the CBL Dart
-/// API is recorded as a breadcrumb. Internal operations are not recorded as
-/// breadcrumbs.
+/// For [TracedOperation]s that signify a direct interaction with the CBL Dart
+/// API a breadcrumb is recorded at their start. This means that internal
+/// operations are not recorded as breadcrumbs.
+///
+/// Recording of these types of breadcrumbs is enabled by default and can be
+/// disabled by setting [operationBreadcrumbs] to `false`.
 ///
 /// ## Transaction spans
 ///
@@ -44,9 +47,11 @@ import 'zone_span.dart';
 /// [traceInternalOperations] option (defaults to `false`).
 /// ```
 class CouchbaseLiteIntegration extends Integration {
+  /// Creates a Sentry [Integration] that integrates CBL Dart with Sentry.
   CouchbaseLiteIntegration({
     this.tracingEnabled,
     this.traceInternalOperations = false,
+    this.operationBreadcrumbs = true,
     this.breadcrumbLogLevel = LogLevel.warning,
   });
 
@@ -60,6 +65,10 @@ class CouchbaseLiteIntegration extends Integration {
   ///
   /// Activating this option can be useful to debug issues with CBL Dart itself.
   final bool traceInternalOperations;
+
+  /// Whether to record breadcrumbs for direct interactions with the CBL Dart
+  /// API.
+  final bool operationBreadcrumbs;
 
   /// The log level at which Couchbase Lite logs are added as Sentry
   /// breadcrumbs.
@@ -83,6 +92,7 @@ class CouchbaseLiteIntegration extends Integration {
       sentryDsn: options.dsn,
       tracingEnabled: tracingEnabled ?? options.isTracingEnabled(),
       traceInternalOperations: traceInternalOperations,
+      operationBreadcrumbs: operationBreadcrumbs,
       onInitialize: () {
         if (breadcrumbLogLevel != LogLevel.none) {
           Database.log.custom =
