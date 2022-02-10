@@ -1,3 +1,7 @@
+## 1.0.0-beta.6
+
+- **FEAT**: provide `libcblitedart` 1.0.0-beta.7
+
 ## 1.0.0-beta.5
 
 - **FIX**: fix: fix unpacking of archives and bump provided `libcblitedart`
