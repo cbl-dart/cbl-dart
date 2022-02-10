@@ -62,6 +62,28 @@ void main() {
       expect(integration.tracingDelegate?.sentryDsn, 'a');
     });
 
+    test('disables tracing if not enabled for Sentry', () async {
+      final integration = await callTestIntegration(CouchbaseLiteIntegration());
+
+      expect(integration.tracingDelegate?.tracingEnabled, false);
+    });
+
+    test('enables tracing if enabled for Sentry', () async {
+      options.tracesSampleRate = 1;
+      final integration = await callTestIntegration(CouchbaseLiteIntegration());
+
+      expect(integration.tracingDelegate?.tracingEnabled, true);
+    });
+
+    test('allows overriding enabling of tracing', () async {
+      options.tracesSampleRate = 1;
+      final integration = await callTestIntegration(CouchbaseLiteIntegration(
+        tracingEnabled: false,
+      ));
+
+      expect(integration.tracingDelegate?.tracingEnabled, false);
+    });
+
     test('defaults traceInternalOperations to false', () async {
       final integration = await callTestIntegration(CouchbaseLiteIntegration());
 
