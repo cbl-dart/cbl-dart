@@ -12,7 +12,8 @@ import 'replicator.dart';
 import 'tracing.dart';
 
 /// Wether to use the `isLeaf` flag when looking up native functions.
-const useIsLeaf = true;
+// ignore: do_not_use_environment
+const useIsLeaf = bool.fromEnvironment('cblFfiUseIsLeaf');
 
 abstract class Bindings {
   Bindings(Bindings parent) : libs = parent.libs {
