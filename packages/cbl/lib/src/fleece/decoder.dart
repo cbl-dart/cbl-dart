@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -17,28 +18,29 @@ class SharedStrings {
   // this cache.
   //
   // https://github.com/couchbaselabs/fleece/blob/f8923b7916e88551ee17727f56e599cae4dabe52/Fleece/Core/Internal.hh#L78-L79
-  static const minSharedStringSize = 2;
-  static const maxSharedStringSize = 15;
+  static const _minSharedStringSize = 2;
+  static const _maxSharedStringSize = 15;
 
-  final _addressToDartString = <int, String?>{};
+  final _addressToDartString = HashMap<int, String?>();
 
-  String? sliceToDartString(Slice slice) {
-    if (slice.size < minSharedStringSize || slice.size > maxSharedStringSize) {
-      return slice.toDartString();
+  String sliceToDartString(Slice slice) =>
+      _toDartString(slice.size, slice.buf.cast());
+
+  String flStringToDartString(FLString slice) =>
+      _toDartString(slice.size, slice.buf);
+
+  String _toDartString(int size, Pointer<Uint8> buf) {
+    assert(buf != nullptr);
+
+    if (size < _minSharedStringSize || size > _maxSharedStringSize) {
+      return utf8.decode(buf.asTypedList(size));
     }
 
-    return _addressToDartString[slice.buf.address] ??= slice.toDartString();
+    return _addressToDartString[buf.address] ??=
+        utf8.decode(buf.asTypedList(size));
   }
 
-  String? flStringToDartString(FLString slice) {
-    if (slice.size < minSharedStringSize || slice.size > maxSharedStringSize) {
-      return slice.toDartString();
-    }
-
-    return _addressToDartString[slice.buf.address] ??= slice.toDartString();
-  }
-
-  bool hasString(String string) => _addressToDartString.values.contains(string);
+  bool hasString(String string) => _addressToDartString.containsValue(string);
 }
 
 // === LoadedFLValue ===========================================================
@@ -276,7 +278,7 @@ class FleeceDecoder {
       return value.value;
     } else if (value is SliceFLValue) {
       return value.isString
-          ? sharedStrings.sliceToDartString(value.slice)!
+          ? sharedStrings.sliceToDartString(value.slice)
           : Uint8List.fromList(value.slice.asTypedList());
     } else if (value is CollectionFLValue) {
       if (value.isArray) {
@@ -293,7 +295,7 @@ class FleeceDecoder {
           valueOut: globalLoadedFLValue,
         );
         while (iterator.moveNext()) {
-          final key = sharedStrings.flStringToDartString(globalFLString.ref)!;
+          final key = sharedStrings.flStringToDartString(globalFLString.ref);
           result[key] = _globalLoadedValueToDartObject();
         }
         return result;
@@ -314,14 +316,14 @@ class FleeceDecoder {
         keyOut: globalFLString,
         valueOut: globalLoadedFLValue,
       ).map((_) => MapEntry(
-            sharedStrings.flStringToDartString(globalFLString.ref)!,
+            sharedStrings.flStringToDartString(globalFLString.ref),
             _globalLoadedValueObject()!,
           ));
 
   /// Returns an [Iterable] which iterates over the keys of [dict].
   Iterable<String> dictKeyIterable(Pointer<FLDict> dict) =>
       DictIterable(dict, keyOut: globalFLString)
-          .map((it) => sharedStrings.flStringToDartString(globalFLString.ref)!);
+          .map((it) => sharedStrings.flStringToDartString(globalFLString.ref));
 
   // === Impl ==================================================================
 
@@ -354,7 +356,7 @@ class FleeceDecoder {
           valueOut: globalLoadedFLValue,
         );
         while (iterator.moveNext()) {
-          final key = sharedStrings.flStringToDartString(globalFLString.ref)!;
+          final key = sharedStrings.flStringToDartString(globalFLString.ref);
           result[key] = _globalLoadedValueToDartObject();
         }
         return result;
