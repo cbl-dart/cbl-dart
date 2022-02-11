@@ -8,6 +8,9 @@
     }
   },
 
+  "SSLCert": "/etc/sg-tls-cert/cert.pem",
+  "SSLKey": "/etc/sg-tls-cert/privkey.pem",
+
   "adminInterface": ":4985",
 
   "databases": {

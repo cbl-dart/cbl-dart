@@ -30,7 +30,7 @@ void main() {
           password: 'password',
         ),
         headers: {'Client': 'test'},
-        pinnedServerCertificate: Uint8List(0),
+        pinnedServerCertificate: syncGatewayCert,
         channels: ['channel'],
         documentIds: ['id'],
         pullFilter: (document, isDeleted) => true,
@@ -54,6 +54,7 @@ void main() {
           sessionId: 'a',
           cookieName: 'b',
         ),
+        pinnedServerCertificate: syncGatewayCert,
       ));
 
       // Check that is possible to start the replicator with this configuration.

@@ -13,4 +13,5 @@ services:
       - 4985:4985
     volumes:
       - ./sync-gateway-config.json:/etc/sync-gateway-config.json:ro
+      - ./sg-tls-cert/:/etc/sg-tls-cert/:ro
     restart: on-failure

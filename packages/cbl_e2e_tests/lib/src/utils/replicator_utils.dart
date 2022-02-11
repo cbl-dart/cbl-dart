@@ -1,23 +1,46 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:http/http.dart';
+import 'package:http/io_client.dart';
 
 import '../test_binding.dart';
 
+const syncGatewayCertString = '''
+-----BEGIN CERTIFICATE-----
+MIICqDCCAZACCQCCTz3VF4joNjANBgkqhkiG9w0BAQsFADAWMRQwEgYDVQQDDAtl
+eGFtcGxlLmNvbTAeFw0yMjAyMTEwODUwMDlaFw0yNTAyMTAwODUwMDlaMBYxFDAS
+BgNVBAMMC2V4YW1wbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+AQEAzqyc+tozRiQKPnlPygf96kD1EPqhe9v06pinEip8MYzpXJWD+IzfzLMwHsaK
+yjw/AQjSjEGC4vc3DvEkabEHlTYEEG1Leed+eeeIr+aMR+AQX/4GUIOo53xE8Q/D
+eSSfeLgftImbGXtydYeUMYrNbkBIk3mfdcwtMKD06Hf0THvemh+iiijTMT+BAGIP
+pX1AH3FUaQi5y+NK4hb5cDBTeYoq6v6KM90eWALbBZffbSn727/wrbr1bYqc/lOo
+io0qD7Ycx0C81V8kNDHbbHE9mqguXGl9483WyIwHOQ9lwjR0WnKqxc0qHaWu7dqv
+jIoXC36ENnMbhiei/Ezb5aF92QIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQA6urNb
+tuPsrBjZ/YwIoAAvUfhpA4SHZMM5ZbULMhwaERucE7qrnrawCQtnrlFojvWWrHfn
+ZZ3MNKmp6vfvuQIrfQ7QuuOkFGOOJTNKvcmMkj0+X74kxBVrZzx/NTrJ7khmQM0b
+4S8E3HoA0qluhLvN0MrwPW3LRDJApHwjW5WC1GsuDUq5SyEx6KFMVS/P0YaN+hAD
+aueR3ElzsuiDv4/gxYgG4qzzcjSBu2QY+5ProA+V6OWwA5K7XpohBe8NCV1azaqI
+hObm9pvpuDA1OmQqOEWUlNBclIpMa490C2N3yifCX1oiYCvCMNRsG5RsTpTrFG8g
+3a5L91jQhacz6qZS
+-----END CERTIFICATE-----
+''';
+final syncGatewayCert = Uint8List.fromList(utf8.encode(syncGatewayCertString));
 const syncGatewayHost = 'localhost';
 const syncGatewayPublicPort = 4984;
 const syncGatewayAdminPort = 4985;
 const syncGatewayDatabase = 'db';
 final syncGatewayReplicationUrl = Uri(
-  scheme: 'ws',
+  scheme: 'wss',
   host: syncGatewayHost,
   port: syncGatewayPublicPort,
   path: syncGatewayDatabase,
 );
 final syncGatewayAdminApiUrl = Uri(
-  scheme: 'http',
+  scheme: 'https',
   host: syncGatewayHost,
   port: syncGatewayAdminPort,
 );
@@ -34,7 +57,7 @@ Future<String> syncGatewayRequest(
   bool admin = false,
 }) {
   final baseUrl = Uri(
-    scheme: 'http',
+    scheme: 'https',
     host: syncGatewayHost,
     port: admin ? syncGatewayAdminPort : syncGatewayPublicPort,
   );
@@ -72,7 +95,11 @@ Future<String> syncGatewayRequest(
 }
 
 Future<T> _withClient<T>(Future<T> Function(Client) fn) async {
-  final client = Client();
+  final securityContext = SecurityContext()
+    ..setTrustedCertificatesBytes(syncGatewayCert);
+  final httpClient = HttpClient(context: securityContext)
+    ..badCertificateCallback = (cert, host, port) => true;
+  final client = IOClient(httpClient);
   try {
     return await fn(client);
   } finally {
@@ -136,6 +163,7 @@ extension ReplicatorUtilsDatabaseExtension on Database {
             : null,
         enableAutoPurge: enableAutoPurge ?? true,
         authenticator: authenticator ?? janeAuthenticator,
+        pinnedServerCertificate: syncGatewayCert,
       ));
 }
 
