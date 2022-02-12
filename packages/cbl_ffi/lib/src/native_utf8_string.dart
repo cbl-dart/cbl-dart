@@ -15,6 +15,12 @@ class NativeUtf8String {
   }
 }
 
+// =============================================================================
+// The code below is the Utf8Encoder from the Dart standard library, adapted
+// for encoding directly to external memory.
+
+// coverage:ignore-start
+
 // UTF-8 constants.
 const int _oneByteLimit = 0x7f; // 7 bits
 const int _twoByteLimit = 0x7ff; // 11 bits
@@ -185,3 +191,5 @@ class _Utf8Encoder {
     return stringIndex;
   }
 }
+
+ // coverage:ignore-end
