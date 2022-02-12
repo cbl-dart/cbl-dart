@@ -30,14 +30,14 @@ CBL_Dart {
 		CBLDart_FLSliceResult_Release;
 		CBLDart_FLDoc_BindToDartObject;
 		CBLDart_FLValue_BindToDartObject;
-		CBLDart_FLDictIterator_Begin;
-		CBLDart_FLDictIterator_Next;
 		CBLDart_FLValue_FromData;
 		CBLDart_GetLoadedFLValue;
 		CBLDart_FLArray_GetLoadedFLValue;
 		CBLDart_FLDict_GetLoadedFLValue;
-		CBLDart_FLDictIterator2_Begin;
-		CBLDart_FLDictIterator2_Next;
+		CBLDart_FLDictIterator_Begin;
+		CBLDart_FLDictIterator_Next;
+		CBLDart_FLArrayIterator_Begin;
+		CBLDart_FLArrayIterator_Next;
 		CBLDart_FLEncoder_BindToDartObject;
 		CBLDart_FLEncoder_WriteArrayValue;
 	local:

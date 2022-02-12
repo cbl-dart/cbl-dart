@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
+import 'decoder.dart';
 import 'encoder.dart';
 
 /// Options for how values are copied.
@@ -546,40 +547,22 @@ class _DictKeyIterable extends Iterable<String> {
 class _DictKeyIterator extends Iterator<String> {
   _DictKeyIterator(this.dict);
 
-  static late final _bindings = cblBindings.fleece.dictIterator;
-
   final Dict dict;
 
-  Pointer<DictIterator>? iterator;
+  late final DictIterator iterator = dict.native
+      .call((pointer) => DictIterator(pointer.cast(), keyOut: globalFLString));
 
   @override
   late String current;
 
   @override
   bool moveNext() {
-    // Create the iterator if it does not exist yet.
-    iterator ??=
-        dict.native.call((pointer) => _bindings.begin(this, pointer.cast()));
-
-    // The iterator has no more elements.
-    if (iterator!.ref.done) {
+    if (iterator.moveNext()) {
+      current = globalFLString.ref.toDartString()!;
+      return true;
+    } else {
       return false;
     }
-
-    // Advance to the next item.
-    _bindings.next(iterator!);
-
-    final keyString = iterator!.ref.keyString;
-
-    // If iterator has no elements at all, slice is the kNullSlice.
-    if (keyString == null) {
-      return false;
-    }
-
-    // Update current with keyString.
-    current = keyString;
-
-    return true;
   }
 }
 

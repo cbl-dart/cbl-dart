@@ -104,4 +104,4 @@ extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
 }
 
 @pragma('vm:never-inline')
-void keepAlive(Object object) {}
+void cblReachabilityFence(Object object) {}

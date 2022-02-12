@@ -945,58 +945,6 @@ class DictBindings extends Bindings {
       _asMutable(dict).toNullable();
 }
 
-class DictIterator extends Struct {
-  // ignore: unused_element
-  external Pointer<Void> get _iterator;
-  external FLString get _keyString;
-  @Bool()
-  external bool get done;
-}
-
-extension DictIteratorExt on DictIterator {
-  String? get keyString => _keyString.toDartString();
-}
-
-typedef _CBLDart_FLDictIterator_Begin_C = Pointer<DictIterator> Function(
-  Handle object,
-  Pointer<FLDict> dict,
-);
-typedef _CBLDart_FLDictIterator_Begin = Pointer<DictIterator> Function(
-  Object object,
-  Pointer<FLDict> dict,
-);
-
-typedef _CBLDart_FLDictIterator_Next_C = Void Function(
-  Pointer<DictIterator> iterator,
-);
-typedef _CBLDart_FLDictIterator_Next = void Function(
-  Pointer<DictIterator> iterator,
-);
-
-class DictIteratorBindings extends Bindings {
-  DictIteratorBindings(Bindings parent) : super(parent) {
-    _begin = libs.cblDart.lookupFunction<_CBLDart_FLDictIterator_Begin_C,
-        _CBLDart_FLDictIterator_Begin>(
-      'CBLDart_FLDictIterator_Begin',
-    );
-    _next = libs.cblDart.lookupFunction<_CBLDart_FLDictIterator_Next_C,
-        _CBLDart_FLDictIterator_Next>(
-      'CBLDart_FLDictIterator_Next',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _CBLDart_FLDictIterator_Begin _begin;
-  late final _CBLDart_FLDictIterator_Next _next;
-
-  Pointer<DictIterator> begin(Object object, Pointer<FLDict> dict) =>
-      _begin(object, dict);
-
-  void next(Pointer<DictIterator> iterator) {
-    _next(iterator);
-  }
-}
-
 // === MutableDict =============================================================
 
 class FLMutableDict extends Opaque {}
@@ -1228,37 +1176,54 @@ typedef _CBLDart_FLDict_GetLoadedFLValue = void Function(
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
-class CBLDart_FLDictIterator2 extends Struct {
-  @Bool()
-  external bool isDone;
-  // ignore: unused_field
-  external Pointer<FLString> _keyOut;
-  // ignore: unused_field
-  external Pointer<CBLDart_LoadedFLValue> _valueOut;
-  // ignore: unused_field
-  external Pointer<Void> _iterator;
-}
+class CBLDart_FLDictIterator extends Opaque {}
 
-typedef _CBLDart_FLDictIterator2_Begin_C = Pointer<CBLDart_FLDictIterator2>
+typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
     Function(
   Handle object,
   Pointer<FLDict> dict,
   Pointer<FLString> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
+  Bool finalize,
 );
-typedef _CBLDart_FLDictIterator2_Begin = Pointer<CBLDart_FLDictIterator2>
+typedef _CBLDart_FLDictIterator_Begin = Pointer<CBLDart_FLDictIterator>
     Function(
-  Object object,
+  Object? object,
   Pointer<FLDict> dict,
   Pointer<FLString> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
+  bool finalize,
 );
 
-typedef _CBLDart_FLDictIterator2_Next_C = Void Function(
-  Pointer<CBLDart_FLDictIterator2> iterator,
+typedef _CBLDart_FLDictIterator_Next_C = Bool Function(
+  Pointer<CBLDart_FLDictIterator> iterator,
 );
-typedef _CBLDart_FLDictIterator2_Next = void Function(
-  Pointer<CBLDart_FLDictIterator2> iterator,
+typedef _CBLDart_FLDictIterator_Next = bool Function(
+  Pointer<CBLDart_FLDictIterator> iterator,
+);
+
+class CBLDart_FLArrayIterator extends Opaque {}
+
+typedef _CBLDart_FLArrayIterator_Begin_C = Pointer<CBLDart_FLArrayIterator>
+    Function(
+  Handle object,
+  Pointer<FLArray> array,
+  Pointer<CBLDart_LoadedFLValue> valueOut,
+  Bool finalize,
+);
+typedef _CBLDart_FLArrayIterator_Begin = Pointer<CBLDart_FLArrayIterator>
+    Function(
+  Object? object,
+  Pointer<FLArray> array,
+  Pointer<CBLDart_LoadedFLValue> valueOut,
+  bool finalize,
+);
+
+typedef _CBLDart_FLArrayIterator_Next_C = Bool Function(
+  Pointer<CBLDart_FLArrayIterator> iterator,
+);
+typedef _CBLDart_FLArrayIterator_Next = bool Function(
+  Pointer<CBLDart_FLArrayIterator> iterator,
 );
 
 class FleeceDecoderBindings extends Bindings {
@@ -1289,12 +1254,21 @@ class FleeceDecoderBindings extends Bindings {
       isLeaf: useIsLeaf,
     );
     _dictIteratorBegin = libs.cblDart.lookupFunction<
-        _CBLDart_FLDictIterator2_Begin_C, _CBLDart_FLDictIterator2_Begin>(
-      'CBLDart_FLDictIterator2_Begin',
+        _CBLDart_FLDictIterator_Begin_C, _CBLDart_FLDictIterator_Begin>(
+      'CBLDart_FLDictIterator_Begin',
     );
     _dictIteratorNext = libs.cblDart.lookupFunction<
-        _CBLDart_FLDictIterator2_Next_C, _CBLDart_FLDictIterator2_Next>(
-      'CBLDart_FLDictIterator2_Next',
+        _CBLDart_FLDictIterator_Next_C, _CBLDart_FLDictIterator_Next>(
+      'CBLDart_FLDictIterator_Next',
+      isLeaf: useIsLeaf,
+    );
+    _arrayIteratorBegin = libs.cblDart.lookupFunction<
+        _CBLDart_FLArrayIterator_Begin_C, _CBLDart_FLArrayIterator_Begin>(
+      'CBLDart_FLArrayIterator_Begin',
+    );
+    _arrayIteratorNext = libs.cblDart.lookupFunction<
+        _CBLDart_FLArrayIterator_Next_C, _CBLDart_FLArrayIterator_Next>(
+      'CBLDart_FLArrayIterator_Next',
       isLeaf: useIsLeaf,
     );
   }
@@ -1304,8 +1278,10 @@ class FleeceDecoderBindings extends Bindings {
   late final _CBLDart_GetLoadedFLValue _getLoadedFLValue;
   late final _CBLDart_FLArray_GetLoadedFLValue _getLoadedFLValueFromArray;
   late final _CBLDart_FLDict_GetLoadedFLValue _getLoadedFLValueFromDict;
-  late final _CBLDart_FLDictIterator2_Begin _dictIteratorBegin;
-  late final _CBLDart_FLDictIterator2_Next _dictIteratorNext;
+  late final _CBLDart_FLDictIterator_Begin _dictIteratorBegin;
+  late final _CBLDart_FLDictIterator_Next _dictIteratorNext;
+  late final _CBLDart_FLArrayIterator_Begin _arrayIteratorBegin;
+  late final _CBLDart_FLArrayIterator_Next _arrayIteratorNext;
 
   String dumpData(Data data) => _dumpData(data.toSliceResult().makeGlobal().ref)
       .toDartStringAndRelease()!;
@@ -1337,17 +1313,26 @@ class FleeceDecoderBindings extends Bindings {
     });
   }
 
-  Pointer<CBLDart_FLDictIterator2> dictIteratorBegin(
-    Object object,
+  Pointer<CBLDart_FLDictIterator> dictIteratorBegin(
+    Object? object,
     Pointer<FLDict> dict,
     Pointer<FLString> keyOut,
     Pointer<CBLDart_LoadedFLValue> valueOut,
   ) =>
-      _dictIteratorBegin(object, dict, keyOut, valueOut);
+      _dictIteratorBegin(object, dict, keyOut, valueOut, object != null);
 
-  void dictIteratorNext(Pointer<CBLDart_FLDictIterator2> iterator) {
-    _dictIteratorNext(iterator);
-  }
+  bool dictIteratorNext(Pointer<CBLDart_FLDictIterator> iterator) =>
+      _dictIteratorNext(iterator);
+
+  Pointer<CBLDart_FLArrayIterator> arrayIteratorBegin(
+    Object? object,
+    Pointer<FLArray> array,
+    Pointer<CBLDart_LoadedFLValue> valueOut,
+  ) =>
+      _arrayIteratorBegin(object, array, valueOut, object != null);
+
+  bool arrayIteratorNext(Pointer<CBLDart_FLArrayIterator> iterator) =>
+      _arrayIteratorNext(iterator);
 }
 
 // === Encoder =================================================================
@@ -1700,7 +1685,7 @@ class FleeceEncoderBindings extends Bindings {
       encoder,
       _writeData(encoder, sliceResult.makeGlobal().ref),
     );
-    keepAlive(sliceResult);
+    cblReachabilityFence(sliceResult);
   }
 
   void writeJSON(Pointer<FLEncoder> encoder, Data value) {
@@ -1712,7 +1697,7 @@ class FleeceEncoderBindings extends Bindings {
         sliceResult.makeGlobal().cast<FLString>().ref,
       ),
     );
-    keepAlive(sliceResult);
+    cblReachabilityFence(sliceResult);
   }
 
   void beginArray(Pointer<FLEncoder> encoder, int reserveCount) {
@@ -1780,7 +1765,6 @@ class FleeceBindings extends Bindings {
     array = ArrayBindings(this);
     mutableArray = MutableArrayBindings(this);
     dict = DictBindings(this);
-    dictIterator = DictIteratorBindings(this);
     mutableDict = MutableDictBindings(this);
     decoder = FleeceDecoderBindings(this);
     encoder = FleeceEncoderBindings(this);
@@ -1793,7 +1777,6 @@ class FleeceBindings extends Bindings {
   late final ArrayBindings array;
   late final MutableArrayBindings mutableArray;
   late final DictBindings dict;
-  late final DictIteratorBindings dictIterator;
   late final MutableDictBindings mutableDict;
   late final FleeceDecoderBindings decoder;
   late final FleeceEncoderBindings encoder;
