@@ -192,4 +192,4 @@ class _Utf8Encoder {
   }
 }
 
- // coverage:ignore-end
+// coverage:ignore-end
