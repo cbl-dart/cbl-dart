@@ -589,8 +589,8 @@ class ReplicatorBindings extends Bindings {
     String password,
   ) =>
       withGlobalArena(() => _authCreatePassword(
-            username.toFLString().ref,
-            password.toFLString().ref,
+            username.toFLString(),
+            password.toFLString(),
           ));
 
   Pointer<CBLAuthenticator> createSessionAuthenticator(
@@ -598,8 +598,8 @@ class ReplicatorBindings extends Bindings {
     String? cookieName,
   ) =>
       withGlobalArena(() => _authCreateSession(
-            sessionID.toFLString().ref,
-            cookieName.toFLString().ref,
+            sessionID.toFLString(),
+            cookieName.toFLString(),
           ));
 
   void freeAuthenticator(Pointer<CBLAuthenticator> authenticator) {
@@ -724,10 +724,10 @@ class ReplicatorBindings extends Bindings {
 
     result.ref
       ..type = settings.type
-      ..hostname = settings.hostname.toFLString().ref
+      ..hostname = settings.hostname.toFLString()
       ..port = settings.port
-      ..username = settings.username.toFLString().ref
-      ..password = settings.password.toFLString().ref;
+      ..username = settings.username.toFLString()
+      ..password = settings.password.toFLString();
 
     return result;
   }

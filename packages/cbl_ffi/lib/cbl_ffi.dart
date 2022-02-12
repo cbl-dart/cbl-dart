@@ -31,7 +31,7 @@ export 'src/query.dart' hide CBLQueryLanguageExt;
 export 'src/replicator.dart';
 export 'src/slice.dart'
     hide
-        singleSliceResultAllocator,
+        cachedSliceResultAllocator,
         sliceResultAllocator,
         SingleSliceResultAllocator,
         SliceResultAllocator;

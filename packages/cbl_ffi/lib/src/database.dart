@@ -604,7 +604,7 @@ class DatabaseBindings extends Bindings {
         final key = globalArena<_CBLEncryptionKey>();
         if (!_encryptionKeyFromPassword(
           key,
-          password.makeGlobalFLString().ref,
+          password.makeGlobalFLString(),
         )) {
           throw CBLErrorException(
             CBLErrorDomain.couchbaseLite,
@@ -622,23 +622,23 @@ class DatabaseBindings extends Bindings {
     CBLDatabaseConfiguration? config,
   ) =>
       withGlobalArena(() => _copyDatabase(
-            from.toFLString().ref,
-            name.toFLString().ref,
+            from.toFLString(),
+            name.toFLString(),
             _createConfig(config),
             globalCBLError,
           ).checkCBLError());
 
   bool deleteDatabase(String name, String? inDirectory) =>
       withGlobalArena(() => _deleteDatabase(
-            name.toFLString().ref,
-            inDirectory.toFLString().ref,
+            name.toFLString(),
+            inDirectory.toFLString(),
             globalCBLError,
           ).checkCBLError());
 
   bool databaseExists(String name, String? inDirectory) =>
       withGlobalArena(() => _databaseExists(
-            name.toFLString().ref,
-            inDirectory.toFLString().ref,
+            name.toFLString(),
+            inDirectory.toFLString(),
           ));
 
   CBLDatabaseConfiguration defaultConfiguration() {
@@ -653,7 +653,7 @@ class DatabaseBindings extends Bindings {
     CBLDatabaseConfiguration? config,
   ) =>
       withGlobalArena(() {
-        final nameFlStr = name.toFLString().ref;
+        final nameFlStr = name.toFLString();
         final cblConfig = _createConfig(config);
         return nativeCallTracePoint(
           TracedNativeCall.databaseOpen,
@@ -825,7 +825,7 @@ class DatabaseBindings extends Bindings {
     withGlobalArena(() {
       _createIndex(
         db,
-        name.toFLString().ref,
+        name.toFLString(),
         _createIndexSpec(spec).ref,
         globalCBLError,
       ).checkCBLError();
@@ -891,7 +891,7 @@ class DatabaseBindings extends Bindings {
 
     final result = globalArena<_CBLDatabaseConfiguration>();
 
-    result.ref.directory = config.directory.toFLString().ref;
+    result.ref.directory = config.directory.toFLString();
 
     if (libs.enterpriseEdition) {
       _writeEncryptionKey(result.ref.encryptionKey, from: config.encryptionKey);
@@ -906,9 +906,9 @@ class DatabaseBindings extends Bindings {
     result.ref
       ..type = spec.type
       ..expressionLanguage = spec.expressionLanguage
-      ..expressions = spec.expressions.toFLString().ref
+      ..expressions = spec.expressions.toFLString()
       ..ignoreAccents = spec.ignoreAccents ?? false
-      ..language = spec.language.toFLString().ref;
+      ..language = spec.language.toFLString();
 
     return result;
   }

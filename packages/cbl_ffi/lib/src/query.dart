@@ -153,14 +153,14 @@ class QueryBindings extends Bindings {
     String queryString,
   ) =>
       withGlobalArena(() {
-        final queryStringFlSTr = queryString.makeGlobalFLString().ref;
+        final flQueryString = queryString.makeGlobalFLString();
         final languageInt = language.toInt();
         return nativeCallTracePoint(
           TracedNativeCall.queryCreate,
           () => _createQuery(
             db,
             languageInt,
-            queryStringFlSTr,
+            flQueryString,
             globalErrorPosition,
             globalCBLError,
           ),
