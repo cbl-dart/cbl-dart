@@ -26,13 +26,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android)
     set(CBL_TARGET android)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-    # The only currently supported Linux target. 
+    # The only currently supported Linux target.
     set(CBL_TARGET ubuntu20.04-x86_64)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(CBL_TARGET windows-x86_64)
 endif()
 
-file(GLOB CBL_PREBUILT_DIR  
+file(GLOB CBL_PREBUILT_DIR
     ${NATIVE_DIR}/vendor/couchbase-lite-C-prebuilt/${CBL_RELEASE}-${CBL_EDITION}-${CBL_TARGET}/libcblite-*
 )
 
@@ -46,7 +46,6 @@ find_package(CouchbaseLite
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHcs")
@@ -77,13 +76,27 @@ target_include_directories(cblitedart
     ${NATIVE_DIR}/vendor/dart/include
 )
 
-set_target_properties(cblitedart 
+set_target_properties(cblitedart
     PROPERTIES
-    VERSION "${CBL_DART_LIB_VERSION}" 
+    VERSION "${CBL_DART_LIB_VERSION}"
     SOVERSION "${CBL_DART_API_VERSION}"
 )
 
-target_link_libraries(cblitedart 
+if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    set_target_properties(
+        cblitedart PROPERTIES LINK_FLAGS
+        "-exported_symbols_list ${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.exp")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android OR ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+    set_target_properties(
+        cblitedart PROPERTIES LINK_FLAGS
+        "-Wl,--version-script=${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.gnu")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    set_target_properties(
+        cblitedart PROPERTIES LINK_FLAGS
+        "/def:${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.def")
+endif()
+
+target_link_libraries(cblitedart
     cblite
 )
 

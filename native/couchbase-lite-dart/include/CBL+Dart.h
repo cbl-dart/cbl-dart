@@ -18,8 +18,6 @@
  * C API is integrated with the garbage collection of Dart objects.
  */
 
-extern "C" {
-
 /**
  * Initializes the native libraries.
  *
@@ -193,4 +191,3 @@ void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
     CBLReplicator *replicator, CBLDart_AsyncCallback listenerId);
-}

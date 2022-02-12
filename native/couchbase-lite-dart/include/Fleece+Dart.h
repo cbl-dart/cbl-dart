@@ -8,8 +8,6 @@
 #include "fleece/Fleece.h"
 #endif
 
-extern "C" {
-
 // === Slice ==================================================================
 
 CBLDART_EXPORT
@@ -101,4 +99,3 @@ void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder);
 CBLDART_EXPORT
 bool CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
                                        uint32_t index);
-}

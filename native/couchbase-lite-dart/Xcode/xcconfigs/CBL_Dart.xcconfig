@@ -10,5 +10,5 @@ PRODUCT_NAME = CouchbaseLiteDart
 
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) CBL_FRAMEWORK_HEADERS
 HEADER_SEARCH_PATHS = $(PROJECT_DIR)/../vendor/dart/include
-GCC_SYMBOLS_PRIVATE_EXTERN = YES
+EXPORTED_SYMBOLS_FILE = $(PROJECT_DIR)/src/exports/generated/CBL_Dart.exp
 LD_RUNPATH_SEARCH_PATHS = $(inherited) @loader_path/../../.. @loader_path/.
