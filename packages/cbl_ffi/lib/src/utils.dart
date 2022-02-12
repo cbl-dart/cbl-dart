@@ -24,7 +24,8 @@ extension StringFLStringExt on String? {
 
     return const NativeUtf8StringEncoder()
         .encode(self, globalArena)
-        .toFLString().ref;
+        .toFLString()
+        .ref;
   }
 
   FLString makeGlobalFLString() {
