@@ -7,7 +7,7 @@ import 'c_type.dart';
 import 'fleece.dart';
 import 'slice.dart';
 
-late final globalArena = Arena(singleSliceResultAllocator);
+late final globalArena = Arena(cachedSliceResultAllocator);
 
 T withGlobalArena<T>(T Function() f) {
   try {

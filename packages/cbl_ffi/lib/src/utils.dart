@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
 import 'fleece.dart';
 import 'global.dart';
+import 'native_utf8_string.dart';
 import 'slice.dart';
 
 // === Lang ====================================================================
@@ -15,62 +15,62 @@ extension AnyExt<T> on T {
 
 // === Conversion ==============================================================
 
-final _flStringSizeOf = sizeOf<FLString>();
-final _flStringSizeOfAligned = _flStringSizeOf + (_flStringSizeOf % 8);
-
 extension StringFLStringExt on String? {
-  Pointer<FLString> toFLString([Allocator? allocator]) {
+  FLString toFLString() {
     final self = this;
     if (self == null) {
-      return nullFLString;
+      return nullFLString.ref;
     }
 
-    final effectiveAllocator = allocator ?? globalArena;
-
-    final encoded = utf8.encode(self);
-    final flStringAndBuffer =
-        effectiveAllocator<Uint8>(_flStringSizeOfAligned + encoded.length);
-    final flString = flStringAndBuffer.cast<FLString>();
-    final buffer = flStringAndBuffer.elementAt(_flStringSizeOfAligned);
-    buffer.asTypedList(encoded.length).setAll(0, encoded);
-
-    flString.ref
-      ..buf = buffer
-      ..size = encoded.length;
-
-    return flString;
+    return const NativeUtf8StringEncoder()
+        .encode(self, globalArena)
+        .toFLString().ref;
   }
 
-  Pointer<FLString> makeGlobalFLString([Allocator? allocator]) {
+  FLString makeGlobalFLString() {
     final self = this;
     if (self == null) {
       globalFLString.ref
         ..size = 0
         ..buf = nullptr;
 
-      return globalFLString;
+      return globalFLString.ref;
     }
 
-    final effectiveAllocator = allocator ?? globalArena;
+    return const NativeUtf8StringEncoder()
+        .encode(self, globalArena)
+        .makeGlobalFLString();
+  }
+}
 
-    final encoded = utf8.encode(self);
-    final buffer = effectiveAllocator<Uint8>(encoded.length);
-    buffer.asTypedList(encoded.length).setAll(0, encoded);
+extension NativeUtf8StringFLStringExt on NativeUtf8String {
+  FLString makeGlobalFLString() => globalFLString.ref
+    ..buf = buffer
+    ..size = size;
 
-    globalFLString.ref
-      ..size = encoded.length
-      ..buf = buffer;
+  Pointer<FLString> toFLString() {
+    final flString = globalArena<FLString>();
 
-    return globalFLString;
+    flString.ref
+      ..buf = buffer
+      ..size = size;
+
+    return flString;
   }
 }
 
 T runWithSingleFLString<T>(String? string, T Function(FLString flString) fn) {
-  final flString = string.makeGlobalFLString(singleSliceResultAllocator).ref;
+  if (string == null) {
+    return fn(nullFLString.ref);
+  }
+
+  final nativeString = const NativeUtf8StringEncoder()
+      .encode(string, cachedSliceResultAllocator);
+
   try {
-    return fn(flString);
+    return fn(nativeString.makeGlobalFLString());
   } finally {
-    singleSliceResultAllocator.free(flString.buf);
+    nativeString.free();
   }
 }
 

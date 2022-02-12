@@ -75,7 +75,7 @@ class Slice {
   /// |     > 0 | this slice is after [other]    |
   int compareTo(Slice other) {
     final aFLSlice = makeGlobal();
-    final bFLSlice = singleSliceResultAllocator<FLSlice>();
+    final bFLSlice = cachedSliceResultAllocator<FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -83,7 +83,7 @@ class Slice {
     try {
       return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
-      singleSliceResultAllocator.free(bFLSlice);
+      cachedSliceResultAllocator.free(bFLSlice);
     }
   }
 
@@ -100,7 +100,7 @@ class Slice {
     }
 
     final aFLSlice = makeGlobal();
-    final bFLSlice = singleSliceResultAllocator<FLSlice>();
+    final bFLSlice = cachedSliceResultAllocator<FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -108,7 +108,7 @@ class Slice {
     try {
       return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
-      singleSliceResultAllocator.free(bFLSlice);
+      cachedSliceResultAllocator.free(bFLSlice);
     }
   }
 
@@ -311,7 +311,7 @@ class SingleSliceResultAllocator implements Allocator {
   }
 }
 
-late final singleSliceResultAllocator = SingleSliceResultAllocator(
+late final cachedSliceResultAllocator = SingleSliceResultAllocator(
   sliceResult: SliceResult(1024),
   delegate: malloc,
 );

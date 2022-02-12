@@ -273,7 +273,7 @@ class LoggingBindings extends Bindings {
 
     result.ref
       ..level = config.level.toInt()
-      ..directory = config.directory.toFLString().ref
+      ..directory = config.directory.toFLString()
       ..maxRotateCount = config.maxRotateCount
       ..maxSize = config.maxSize
       ..usePlainText = config.usePlainText;
