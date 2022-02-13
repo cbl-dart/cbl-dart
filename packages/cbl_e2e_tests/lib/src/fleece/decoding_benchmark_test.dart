@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:benchmark_harness/benchmark_harness.dart';
+import 'package:cbl/cbl.dart';
 import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/encoder.dart';
+import 'package:cbl/src/fleece/integration/context.dart';
+import 'package:cbl/src/fleece/integration/root.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
@@ -19,7 +23,7 @@ abstract class DecodingBenchmark extends BenchmarkBase {
 class JsonInDartDecodingBenchmark extends DecodingBenchmark {
   JsonInDartDecodingBenchmark() : super('JSON (in Dart)');
 
-  final utf8String = utf8.encode(largeJsonDoc);
+  late final utf8String = utf8.encode(jsonString);
 
   @override
   void run() {
@@ -27,16 +31,38 @@ class JsonInDartDecodingBenchmark extends DecodingBenchmark {
   }
 }
 
-class FleeceDecodingBenchmark extends DecodingBenchmark {
-  FleeceDecodingBenchmark() : super('Fleece');
+class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
+  FleeceRecursiveDecodingBenchmark() : super('Fleece (recursive)');
 
   late final data = FleeceEncoder().convertJson(jsonString);
 
   @override
   void run() {
-    final decoder = FleeceDecoder();
-    final value = decoder.loadValueFromData(data, trust: FLTrust.trusted)!;
-    decoder.loadedValueToDartObject(value);
+    // ignore: deprecated_member_use
+    FleeceDecoder().dataToDartObjectRecursively(data, trust: FLTrust.trusted);
+  }
+}
+
+class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
+  FleeceListenerDecodingBenchmark() : super('Fleece (listener)');
+
+  late final data = FleeceEncoder().convertJson(jsonString);
+
+  @override
+  void run() {
+    FleeceDecoder().dataToDartObject(data, trust: FLTrust.trusted);
+  }
+}
+
+class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
+  FleeceWrapperDecodingBenchmark() : super('Fleece (wrapper)');
+
+  late final data = FleeceEncoder().convertJson(jsonString);
+
+  @override
+  void run() {
+    final root = MRoot.fromData(data, context: MContext(), isMutable: false);
+    (root.asNative! as Array).toPlainList();
   }
 }
 
@@ -44,9 +70,21 @@ Future<void> main() async {
   setupTestBinding();
 
   test('Decoding Benchmark', () {
+    const breakpoints = false;
+
+    // ignore: dead_code
+    if (breakpoints) {
+      debugger();
+    }
     runBenchmarks([
       JsonInDartDecodingBenchmark(),
-      FleeceDecodingBenchmark(),
+      FleeceRecursiveDecodingBenchmark(),
+      FleeceListenerDecodingBenchmark(),
+      FleeceWrapperDecodingBenchmark(),
     ]);
+    // ignore: dead_code
+    if (breakpoints) {
+      debugger();
+    }
   });
 }

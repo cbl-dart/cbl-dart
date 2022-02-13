@@ -253,8 +253,7 @@ class FleeceDecoder {
 
   // === Conversion to Dart ====================================================
 
-  /// Returns a Dart representation of [data]. Collections are recursively
-  /// converted to Dart objects.
+  /// Returns a Dart representation of [data].
   ///
   /// Specify whether you [trust] the source of the [data] to ensure it is valid
   /// Fleece data. If [data] is not valid, `null` is returned.
@@ -262,15 +261,35 @@ class FleeceDecoder {
     Data data, {
     FLTrust trust = FLTrust.untrusted,
   }) {
-    final root = loadValueFromData(data, trust: trust);
-    if (root == null) {
+    _decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust);
+    if (!globalLoadedFLValue.ref.exists) {
       return null;
     }
-    return loadedValueToDartObject(root);
+
+    return _decodeGlobalLoadedValueAsDartObject();
   }
 
-  /// Returns a Dart representation of [value]. Collections are recursively
-  /// converted to Dart objects.
+  /// Returns a Dart representation of [data].
+  ///
+  /// **Note**: This method exists just for benchmarking the listener based
+  /// decoder.
+  ///
+  /// Specify whether you [trust] the source of the [data] to ensure it is valid
+  /// Fleece data. If [data] is not valid, `null` is returned.
+  @Deprecated('Use dataToDartObject instead.')
+  Object? dataToDartObjectRecursively(
+    Data data, {
+    FLTrust trust = FLTrust.untrusted,
+  }) {
+    _decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust);
+    if (!globalLoadedFLValue.ref.exists) {
+      return null;
+    }
+
+    return _decodeGlobalLoadedValueAsDartObjectRecursively();
+  }
+
+  /// Returns a Dart representation of [value].
   Object? loadedValueToDartObject(LoadedFLValue value) {
     if (value == undefinedFLValue) {
       _throwUndefinedDartRepresentation();
@@ -281,25 +300,8 @@ class FleeceDecoder {
           ? sharedStrings.sliceToDartString(value.slice)
           : Uint8List.fromList(value.slice.asTypedList());
     } else if (value is CollectionFLValue) {
-      if (value.isArray) {
-        final array = value.value.cast<FLArray>();
-        return List<Object?>.generate(value.length, (index) {
-          _decoderBinds.getLoadedValueFromArray(array, index);
-          return _globalLoadedValueToDartObject();
-        });
-      } else {
-        final result = <String, Object?>{};
-        final iterator = DictIterator(
-          value.value.cast(),
-          keyOut: globalFLString,
-          valueOut: globalLoadedFLValue,
-        );
-        while (iterator.moveNext()) {
-          final key = sharedStrings.flStringToDartString(globalFLString.ref);
-          result[key] = _globalLoadedValueToDartObject();
-        }
-        return result;
-      }
+      _decoderBinds.getLoadedValue(value.value);
+      return _decodeGlobalLoadedValueAsDartObject();
     } else {
       throw UnimplementedError('Value of unknown type: $value');
     }
@@ -310,24 +312,39 @@ class FleeceDecoder {
   /// Returns an [Iterable] which iterates over the entries of [dict].
   Iterable<MapEntry<String, LoadedFLValue>> dictIterable(
     Pointer<FLDict> dict,
-  ) =>
-      DictIterable(
-        dict,
-        keyOut: globalFLString,
-        valueOut: globalLoadedFLValue,
-      ).map((_) => MapEntry(
-            sharedStrings.flStringToDartString(globalFLString.ref),
-            _globalLoadedValueObject()!,
-          ));
+  ) sync* {
+    final it = DictIterator(
+      dict,
+      keyOut: globalFLString,
+      valueOut: globalLoadedFLValue,
+    );
+
+    while (it.moveNext()) {
+      yield MapEntry(
+        sharedStrings.flStringToDartString(globalFLString.ref),
+        _globalLoadedValueObject()!,
+      );
+    }
+  }
 
   /// Returns an [Iterable] which iterates over the keys of [dict].
-  Iterable<String> dictKeyIterable(Pointer<FLDict> dict) =>
-      DictIterable(dict, keyOut: globalFLString)
-          .map((it) => sharedStrings.flStringToDartString(globalFLString.ref));
+  Iterable<String> dictKeyIterable(Pointer<FLDict> dict) sync* {
+    final it = DictIterator(dict, keyOut: globalFLString);
+
+    while (it.moveNext()) {
+      yield sharedStrings.flStringToDartString(globalFLString.ref);
+    }
+  }
 
   // === Impl ==================================================================
 
-  Object? _globalLoadedValueToDartObject() {
+  Object? _decodeGlobalLoadedValueAsDartObject() {
+    final listener = _BuildDartObjectListener();
+    _FleeceListenerDecoder(sharedStrings, listener).decodeGlobalLoadedValue();
+    return listener.result;
+  }
+
+  Object? _decodeGlobalLoadedValueAsDartObjectRecursively() {
     final value = globalLoadedFLValue.ref;
     switch (value.type) {
       case FLValueType.undefined:
@@ -346,7 +363,7 @@ class FleeceDecoder {
         final array = value.asValue.cast<FLArray>();
         return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
-          return _globalLoadedValueToDartObject();
+          return _decodeGlobalLoadedValueAsDartObjectRecursively();
         });
       case FLValueType.dict:
         final result = <String, Object?>{};
@@ -357,7 +374,7 @@ class FleeceDecoder {
         );
         while (iterator.moveNext()) {
           final key = sharedStrings.flStringToDartString(globalFLString.ref);
-          result[key] = _globalLoadedValueToDartObject();
+          result[key] = _decodeGlobalLoadedValueAsDartObjectRecursively();
         }
         return result;
     }
@@ -367,17 +384,7 @@ class FleeceDecoder {
 Never _throwUndefinedDartRepresentation() =>
     throw UnsupportedError('undefined has not Dart representation');
 
-class DictIterable with IterableMixin<void> {
-  DictIterable(this.dict, {this.keyOut, this.valueOut});
-
-  final Pointer<FLDict> dict;
-  final Pointer<FLString>? keyOut;
-  final Pointer<CBLDart_LoadedFLValue>? valueOut;
-
-  @override
-  Iterator<void> get iterator =>
-      DictIterator(dict, keyOut: keyOut, valueOut: valueOut);
-}
+// === Iterators ===============================================================
 
 // ignore: prefer_void_to_null
 class DictIterator implements Iterator<Null> {
@@ -432,5 +439,324 @@ class ArrayIterator implements Iterator<Null> {
     final hasCurrent = _decoderBinds.arrayIteratorNext(_iterator);
     cblReachabilityFence(this);
     return hasCurrent;
+  }
+}
+
+// === Listener decoder ========================================================
+
+/// An object that is notified of Fleece decoding events while a Fleece value
+/// is deeply decoded.
+abstract class _FleeceListener {
+  void handleString(String value) {}
+  void handleData(Uint8List value) {}
+  void handleNumber(num value) {}
+  // ignore: avoid_positional_boolean_parameters
+  void handleBool(bool value) {}
+  void handleUndefined() {}
+  void handleNull() {}
+  void beginObject() {}
+  void propertyName() {}
+  void propertyValue() {}
+  void endObject() {}
+  void beginArray(int length) {}
+  void arrayElement() {}
+  void endArray() {}
+}
+
+/// A Fleece decoder which deeply decodes a value and notifies a
+/// [_FleeceListener] of decoding events.
+class _FleeceListenerDecoder {
+  _FleeceListenerDecoder(this._sharedStrings, this._listener);
+
+  final SharedStrings _sharedStrings;
+  final _FleeceListener _listener;
+
+  _FleeceValueLoader _currentLoader = _InitialValueLoader();
+
+  void decodeGlobalLoadedValue() {
+    try {
+      final value = globalLoadedFLValue.ref;
+
+      while (true) {
+        if (!_currentLoader.loadValue()) {
+          final parent = _currentLoader.parent;
+          if (parent == null) {
+            return;
+          }
+          _currentLoader = parent;
+          _currentLoader.handleValue();
+
+          continue;
+        }
+
+        switch (value.type) {
+          case FLValueType.undefined:
+            _listener.handleUndefined();
+            _currentLoader.handleValue();
+            break;
+          case FLValueType.null_:
+            _listener.handleNull();
+            _currentLoader.handleValue();
+            break;
+          case FLValueType.boolean:
+            _listener.handleBool(value.asBool);
+            _currentLoader.handleValue();
+            break;
+          case FLValueType.number:
+            _listener
+                .handleNumber(value.isInteger ? value.asInt : value.asDouble);
+            _currentLoader.handleValue();
+            break;
+          case FLValueType.string:
+            _listener.handleString(
+                _sharedStrings.flStringToDartString(value.asString));
+            _currentLoader.handleValue();
+            break;
+          case FLValueType.data:
+            _listener.handleData(value.asData.toData()!.toTypedList());
+            _currentLoader.handleValue();
+            break;
+          case FLValueType.array:
+            _currentLoader = _ArrayIndexLoader(
+              value.asValue.cast(),
+              value.collectionSize,
+              _listener,
+            )..parent = _currentLoader;
+            break;
+          case FLValueType.dict:
+            _currentLoader = _DictIteratorLoader(
+              value.asValue.cast(),
+              _listener,
+              _sharedStrings,
+            )..parent = _currentLoader;
+            break;
+        }
+      }
+      // ignore: avoid_catches_without_on_clauses
+    } catch (e) {
+      _drainLoaders();
+      rethrow;
+    }
+  }
+
+  void _drainLoaders() {
+    for (_FleeceValueLoader? loader = _currentLoader;
+        loader != null;
+        loader = loader.parent) {
+      loader.drain();
+    }
+  }
+}
+
+abstract class _FleeceValueLoader {
+  _FleeceValueLoader? parent;
+
+  bool loadValue();
+
+  void handleValue() {}
+
+  void drain() {}
+}
+
+class _InitialValueLoader extends _FleeceValueLoader {
+  var _loaded = false;
+
+  @override
+  bool loadValue() {
+    if (!_loaded) {
+      _loaded = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+class _ArrayIndexLoader extends _FleeceValueLoader {
+  _ArrayIndexLoader(this._array, this._length, this._listener) {
+    _listener.beginArray(_length);
+  }
+
+  final Pointer<FLArray> _array;
+  final int _length;
+  final _FleeceListener _listener;
+  var _i = 0;
+
+  @override
+  bool loadValue() {
+    if (_i < _length) {
+      _decoderBinds.getLoadedValueFromArray(_array, _i);
+      _i++;
+      return true;
+    } else {
+      _listener.endArray();
+      return false;
+    }
+  }
+
+  @override
+  void handleValue() {
+    _listener.arrayElement();
+  }
+}
+
+class _DictIteratorLoader extends _FleeceValueLoader {
+  _DictIteratorLoader(
+    Pointer<FLDict> _dict,
+    this._listener,
+    this._sharedStrings,
+  ) : _it = DictIterator(
+          _dict,
+          keyOut: globalFLString,
+          valueOut: globalLoadedFLValue,
+          partiallyConsumable: false,
+        ) {
+    _listener.beginObject();
+  }
+
+  final _FleeceListener _listener;
+  final SharedStrings _sharedStrings;
+  final DictIterator _it;
+  final _globalFLString = globalFLString.ref;
+
+  @override
+  bool loadValue() {
+    if (_it.moveNext()) {
+      _listener
+        ..handleString(_sharedStrings.flStringToDartString(_globalFLString))
+        ..propertyName();
+      return true;
+    } else {
+      _listener.endObject();
+      return false;
+    }
+  }
+
+  @override
+  void handleValue() {
+    _listener.propertyValue();
+  }
+
+  @override
+  void drain() {
+    while (_it.moveNext()) {}
+  }
+}
+
+/// A [_FleeceListener] that builds data objects from the decoder events.
+///
+/// This is a simple stack-based object builder. It keeps the most recently
+/// seen value in a variable, and uses it depending on the following event.
+class _BuildDartObjectListener extends _FleeceListener {
+  /// Read out the final result of parsing a JSON string. */
+  Object? get result {
+    assert(_currentContainer == null);
+    return _value;
+  }
+
+  /// Stack used to handle nested containers.
+  ///
+  /// The current container is pushed on the stack when a new one is
+  /// started. If the container is a [Map], there is also a current [_key]
+  /// which is also stored on the stack.
+  final List<Object?> _stack = [];
+
+  /// The current [Map] or [List] being built. */
+  Object? _currentContainer;
+
+  /// The most recently read property key. */
+  String _key = '';
+
+  /// The most recently read value. */
+  Object? _value;
+
+  /// Pushes the currently active container (and key, if a [Map]). */
+  void _pushContainer() {
+    if (_currentContainer is Map) {
+      _stack.add(_key);
+    }
+    _stack.add(_currentContainer);
+  }
+
+  /// Pops the top container from the [_stack], including a key if applicable. */
+  void _popContainer() {
+    _value = _currentContainer;
+    _currentContainer = _stack.removeLast();
+    if (_currentContainer is Map) {
+      // ignore: cast_nullable_to_non_nullable
+      _key = _stack.removeLast() as String;
+    }
+  }
+
+  @override
+  void handleString(String value) {
+    _value = value;
+  }
+
+  @override
+  void handleData(Uint8List value) {
+    _value = value;
+  }
+
+  @override
+  void handleNumber(num value) {
+    _value = value;
+  }
+
+  @override
+  void handleBool(bool value) {
+    _value = value;
+  }
+
+  @override
+  void handleUndefined() {
+    _throwUndefinedDartRepresentation();
+  }
+
+  @override
+  void handleNull() {
+    _value = null;
+  }
+
+  @override
+  void beginObject() {
+    _pushContainer();
+    _currentContainer = <String, Object?>{};
+  }
+
+  @override
+  void propertyName() {
+    _key = _value! as String;
+    _value = null;
+  }
+
+  @override
+  void propertyValue() {
+    final map = _currentContainer! as Map;
+    map[_key] = _value;
+    _key = '';
+    _value = null;
+  }
+
+  @override
+  void endObject() {
+    _popContainer();
+  }
+
+  @override
+  void beginArray(int length) {
+    _pushContainer();
+    _currentContainer = <Object?>[];
+  }
+
+  @override
+  void arrayElement() {
+    (_currentContainer! as List).add(_value);
+    _value = null;
+  }
+
+  @override
+  void endArray() {
+    _popContainer();
   }
 }
