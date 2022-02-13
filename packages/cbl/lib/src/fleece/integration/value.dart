@@ -1,8 +1,10 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'dart:async';
+import 'dart:ffi';
 
-import '../decoder.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../encoder.dart';
 import 'collection.dart';
 import 'delegate.dart';
@@ -10,7 +12,7 @@ import 'delegate.dart';
 MDelegate get _delegate => MDelegate.instance!;
 
 class MValue {
-  MValue(LoadedFLValue? value, Object? native, {required bool hasNative})
+  MValue(Pointer<FLValue>? value, Object? native, {required bool hasNative})
       : assert(hasNative || native == null),
         _value = value,
         _hasNative = hasNative,
@@ -18,7 +20,8 @@ class MValue {
 
   MValue.empty() : this(null, null, hasNative: false);
 
-  MValue.withValue(LoadedFLValue value) : this(value, null, hasNative: false);
+  MValue.withValue(Pointer<FLValue> value)
+      : this(value, null, hasNative: false);
 
   MValue.withNative(Object? native) : this(null, native, hasNative: true);
 
@@ -30,8 +33,8 @@ class MValue {
 
   bool get hasValue => _value != null;
 
-  LoadedFLValue? get value => _value;
-  LoadedFLValue? _value;
+  Pointer<FLValue>? get value => _value;
+  Pointer<FLValue>? _value;
 
   bool get hasNative => _hasNative;
   bool _hasNative;
@@ -77,7 +80,7 @@ class MValue {
 
     final value = _value;
     if (value != null) {
-      encoder.writeLoadedValue(value);
+      encoder.writeValue(value);
     } else {
       return _delegate.encodeNative(encoder, _native);
     }

@@ -470,6 +470,15 @@ typedef _CBLDart_FLValue_BindToDartObject = void Function(
   bool retain,
 );
 
+typedef _FLValue_FromData_C = Pointer<FLValue> Function(
+  FLSlice data,
+  Uint8 trust,
+);
+typedef _FLValue_FromData = Pointer<FLValue> Function(
+  FLSlice data,
+  int trust,
+);
+
 typedef _FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
 
 typedef _FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
@@ -529,6 +538,10 @@ class ValueBindings extends Bindings {
         _CBLDart_FLValue_BindToDartObject_C, _CBLDart_FLValue_BindToDartObject>(
       'CBLDart_FLValue_BindToDartObject',
     );
+    _fromData = libs.cbl.lookupFunction<_FLValue_FromData_C, _FLValue_FromData>(
+      'FLValue_FromData',
+      isLeaf: useIsLeaf,
+    );
     _findDoc = libs.cbl.lookupFunction<_FLValue_FindDoc, _FLValue_FindDoc>(
       'FLValue_FindDoc',
       isLeaf: useIsLeaf,
@@ -582,6 +595,7 @@ class ValueBindings extends Bindings {
   }
 
   late final _CBLDart_FLValue_BindToDartObject _bindToDartObject;
+  late final _FLValue_FromData _fromData;
   late final _FLValue_FindDoc _findDoc;
   late final _FLValue_GetType _getType;
   late final _FLValue_IsInteger _isInteger;
@@ -601,6 +615,14 @@ class ValueBindings extends Bindings {
     required bool retain,
   }) {
     _bindToDartObject(object, value, retain);
+  }
+
+  Pointer<FLValue>? fromData(Data data, FLTrust trust) {
+    final sliceResult = data.toSliceResult();
+    final result =
+        _fromData(sliceResult.makeGlobal().ref, trust.toInt()).toNullable();
+    cblReachabilityFence(sliceResult);
+    return result;
   }
 
   Pointer<FLDoc> findDoc(Pointer<FLValue> value) => _findDoc(value);
@@ -1185,6 +1207,7 @@ typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
   Pointer<FLString> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
   Bool finalize,
+  Bool preLoad,
 );
 typedef _CBLDart_FLDictIterator_Begin = Pointer<CBLDart_FLDictIterator>
     Function(
@@ -1193,6 +1216,7 @@ typedef _CBLDart_FLDictIterator_Begin = Pointer<CBLDart_FLDictIterator>
   Pointer<FLString> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
   bool finalize,
+  bool preLoad,
 );
 
 typedef _CBLDart_FLDictIterator_Next_C = Bool Function(
@@ -1317,9 +1341,17 @@ class FleeceDecoderBindings extends Bindings {
     Object? object,
     Pointer<FLDict> dict,
     Pointer<FLString> keyOut,
-    Pointer<CBLDart_LoadedFLValue> valueOut,
-  ) =>
-      _dictIteratorBegin(object, dict, keyOut, valueOut, object != null);
+    Pointer<CBLDart_LoadedFLValue> valueOut, {
+    required bool preLoad,
+  }) =>
+      _dictIteratorBegin(
+        object,
+        dict,
+        keyOut,
+        valueOut,
+        object != null,
+        preLoad,
+      );
 
   bool dictIteratorNext(Pointer<CBLDart_FLDictIterator> iterator) =>
       _dictIteratorNext(iterator);

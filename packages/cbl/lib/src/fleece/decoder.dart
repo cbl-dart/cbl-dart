@@ -392,6 +392,7 @@ class DictIterator implements Iterator<Null> {
     Pointer<FLDict> dict, {
     Pointer<FLString>? keyOut,
     Pointer<CBLDart_LoadedFLValue>? valueOut,
+    bool preLoad = true,
     bool partiallyConsumable = true,
   }) {
     _iterator = _decoderBinds.dictIteratorBegin(
@@ -399,6 +400,7 @@ class DictIterator implements Iterator<Null> {
       dict,
       keyOut ?? nullptr,
       valueOut ?? nullptr,
+      preLoad: preLoad,
     );
   }
 

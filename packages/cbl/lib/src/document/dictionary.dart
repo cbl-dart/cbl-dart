@@ -229,11 +229,11 @@ class DictionaryImpl
   Dictionary? dictionary(String key) => _getAs(key);
 
   @override
-  Map<String, Object?> toPlainMap() =>
-      Map<String, Object?>.fromEntries(map((key) => MapEntry<String, Object?>(
-            key,
-            CblConversions.convertToPlainObject(value(key)),
-          )));
+  Map<String, Object?> toPlainMap() => {
+        for (final entry in _dict.iterable)
+          entry.key:
+              CblConversions.convertToPlainObject(entry.value.asNative(_dict))
+      };
 
   @override
   Fragment operator [](String key) =>

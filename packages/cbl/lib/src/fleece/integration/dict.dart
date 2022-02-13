@@ -1,36 +1,42 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../../support/ffi.dart';
 import '../../support/utils.dart';
 import '../decoder.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
 
+late final _dictBindings = cblBindings.fleece.dict;
+
 class MDict extends MCollection {
   MDict()
       : _dict = null,
-        _values = {},
+        _values = HashMap(),
         _length = 0,
         _valuesHasAllKeys = true;
 
   MDict.asCopy(MDict original, {bool? isMutable})
       : _dict = original._dict,
-        _values = Map.fromEntries(original._values.entries
-            .map((entry) => MapEntry(entry.key, entry.value.clone()))),
+        _values = HashMap.fromEntries(
+          original._values.entries
+              .map((entry) => MapEntry(entry.key, entry.value.clone())),
+        ),
         _length = original._length,
         _valuesHasAllKeys = original._valuesHasAllKeys,
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
 
-  MDict.asChild(MValue slot, MCollection parent, {bool? isMutable})
+  MDict.asChild(MValue slot, MCollection parent, int length, {bool? isMutable})
       :
         // ignore: cast_nullable_to_non_nullable
-        _dict = (slot.value as CollectionFLValue).value.cast(),
-        _values = {},
+        _dict = slot.value!.cast(),
+        _values = HashMap(),
         // ignore: cast_nullable_to_non_nullable
-        _length = (slot.value as CollectionFLValue).length,
+        _length = length,
         _valuesHasAllKeys = false,
         super.asChild(
           slot,
@@ -94,7 +100,14 @@ class MDict extends MCollection {
     // Shadow all keys in _dict with empty MValue.
     if (!_valuesHasAllKeys) {
       _valuesHasAllKeys = true;
-      for (final key in context!.decoder.dictKeyIterable(_dict!)) {
+      final it = DictIterator(
+        _dict!,
+        keyOut: globalFLString,
+        partiallyConsumable: false,
+      );
+      while (it.moveNext()) {
+        final key =
+            context!.sharedStrings.flStringToDartString(globalFLString.ref);
         _values[key] = MValue.empty();
       }
     }
@@ -110,7 +123,7 @@ class MDict extends MCollection {
         for (final entry in iterable) {
           encoder.writeKey(entry.key);
           if (entry.value.hasValue) {
-            encoder.writeLoadedValue(entry.value.value!);
+            encoder.writeValue(entry.value.value!);
           } else {
             yield entry.value.encodeTo(encoder);
           }
@@ -138,15 +151,26 @@ class MDict extends MCollection {
     }
 
     // Iterate over entries in _dict.
-    for (final entry in context!.decoder.dictIterable(_dict!)) {
+    final dict = _dict!;
+    final it = DictIterator(
+      dict,
+      keyOut: globalFLString,
+      valueOut: globalLoadedFLValue,
+      preLoad: false,
+      partiallyConsumable: false,
+    );
+    while (it.moveNext()) {
+      final key =
+          context!.sharedStrings.flStringToDartString(globalFLString.ref);
+
       // Skip over entries which are shadowed by _values
-      if (_values.containsKey(entry.key)) {
+      if (_values.containsKey(key)) {
         continue;
       }
 
       // Cache the value to speed up lookups later.
-      final key = entry.key;
-      final value = _values[key] = MValue.withValue(entry.value);
+      final value =
+          _values[key] = MValue.withValue(globalLoadedFLValue.ref.asValue);
       yield MapEntry(key, value);
     }
 
@@ -162,6 +186,10 @@ class MDict extends MCollection {
       return null;
     }
 
-    return context!.decoder.loadValueFromDict(dict, key)?.let(MValue.withValue);
+    final flValue = _dictBindings.get(dict, key);
+    if (flValue == nullptr) {
+      return null;
+    }
+    return MValue.withValue(flValue);
   }
 }

@@ -2,8 +2,8 @@ import '../decoder.dart';
 
 class MContext {
   MContext({
-    FleeceDecoder? decoder,
-  }) : decoder = decoder ?? FleeceDecoder();
+    SharedStrings? sharedStrings,
+  }) : sharedStrings = sharedStrings ?? SharedStrings();
 
-  final FleeceDecoder decoder;
+  final SharedStrings sharedStrings;
 }

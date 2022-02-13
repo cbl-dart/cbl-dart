@@ -4,11 +4,13 @@ import 'dart:ffi';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../../support/ffi.dart';
 import '../../support/utils.dart';
-import '../decoder.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
+
+late final _arrayBindings = cblBindings.fleece.array;
 
 class MArray extends MCollection {
   MArray()
@@ -17,18 +19,17 @@ class MArray extends MCollection {
 
   MArray.asCopy(MArray original, {bool? isMutable})
       : _array = original._array,
-        _values = original._values.map((value) => value?.clone()).toList(),
+        _values = original._values
+            .map((value) => value?.clone())
+            .toList(growable: isMutable ?? original.isMutable),
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
 
-  MArray.asChild(MValue slot, MCollection parent, {bool? isMutable})
-      :
-        // ignore: cast_nullable_to_non_nullable
-        _array = (slot.value as CollectionFLValue).value.cast(),
+  MArray.asChild(MValue slot, MCollection parent, int length, {bool? isMutable})
+      : _array = slot.value!.cast(),
         _values = List<MValue?>.filled(
-          // ignore: cast_nullable_to_non_nullable
-          (slot.value as CollectionFLValue).length,
+          length,
           null,
-          growable: true,
+          growable: isMutable ?? parent.hasMutableChildren,
         ),
         super.asChild(
           slot,
@@ -48,7 +49,7 @@ class MArray extends MCollection {
       return null;
     }
 
-    return _values[index] ??= _loadMValue(index)!;
+    return _values[index] ??= _loadMValue(index);
   }
 
   bool set(int index, Object? native) {
@@ -146,6 +147,13 @@ class MArray extends MCollection {
   @override
   Iterable<MValue> get values => _values.whereNotNull();
 
+  Iterable<MValue> get iterable sync* {
+    final length = _values.length;
+    for (var i = 0; i < length; ++i) {
+      yield _values[i] ??= _loadMValue(i);
+    }
+  }
+
   void _populateValues() {
     if (_array == null) {
       return;
@@ -160,14 +168,6 @@ class MArray extends MCollection {
     }
   }
 
-  MValue? _loadMValue(int index) {
-    final array = _array;
-    if (array == null) {
-      return null;
-    }
-
-    return context!.decoder
-        .loadValueFromArray(array, index)
-        ?.let(MValue.withValue);
-  }
+  MValue _loadMValue(int index) =>
+      _arrayBindings.get(_array!, index).let(MValue.withValue);
 }
