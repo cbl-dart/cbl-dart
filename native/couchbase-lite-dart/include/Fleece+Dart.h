@@ -31,21 +31,6 @@ CBLDART_EXPORT
 void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
                                       bool retain);
 
-// === Dict ===================================================================
-
-typedef struct {
-  FLDictIterator *iterator;
-  FLSlice keyString;
-  bool done;
-} CBLDart_DictIterator;
-
-CBLDART_EXPORT
-CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle object,
-                                                   FLDict dict);
-
-CBLDART_EXPORT
-void CBLDart_FLDictIterator_Next(CBLDart_DictIterator *iterator);
-
 // === Decoder ================================================================
 
 struct CBLDart_LoadedFLValue {
@@ -76,20 +61,35 @@ CBLDART_EXPORT
 void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
                                      CBLDart_LoadedFLValue *out);
 
-struct CBLDart_FLDictIterator2 {
-  bool isDone;
-  FLString *keyOut;
-  CBLDart_LoadedFLValue *valueOut;
-  FLDictIterator *_iterator;
+struct CBLDart_FLDictIterator {
+  FLString *_keyOut;
+  CBLDart_LoadedFLValue *_valueOut;
+  FLDictIterator _iterator;
+  bool _isDone;
+  Dart_FinalizableHandle _objectHandle;
 };
 
 CBLDART_EXPORT
-CBLDart_FLDictIterator2 *CBLDart_FLDictIterator2_Begin(
+CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
     Dart_Handle object, FLDict dict, FLString *keyOut,
-    CBLDart_LoadedFLValue *valueOut);
+    CBLDart_LoadedFLValue *valueOut, bool finalize);
 
 CBLDART_EXPORT
-void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator);
+bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator);
+
+struct CBLDart_FLArrayIterator {
+  CBLDart_LoadedFLValue *_valueOut;
+  FLArrayIterator _iterator;
+  Dart_FinalizableHandle _objectHandle;
+};
+
+CBLDART_EXPORT
+CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
+    Dart_Handle object, FLArray array, CBLDart_LoadedFLValue *valueOut,
+    bool finalize);
+
+CBLDART_EXPORT
+bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator);
 
 // === Encoder ================================================================
 

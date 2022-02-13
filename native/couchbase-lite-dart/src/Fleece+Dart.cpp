@@ -59,45 +59,6 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
                                CBLDart_FLValueFinalizer);
 }
 
-// === Dict
-
-static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
-                                          void *peer) {
-  auto iterator = reinterpret_cast<CBLDart_DictIterator *>(peer);
-
-  if (!iterator->done) FLDictIterator_End(iterator->iterator);
-
-  delete iterator->iterator;
-  delete iterator;
-}
-
-CBLDart_DictIterator *CBLDart_FLDictIterator_Begin(Dart_Handle object,
-                                                   FLDict dict) {
-  auto iterator = new CBLDart_DictIterator;
-  iterator->iterator = new FLDictIterator;
-  iterator->keyString = kFLSliceNull;
-  iterator->done = false;
-
-  FLDictIterator_Begin(dict, iterator->iterator);
-
-  Dart_NewFinalizableHandle_DL(object, iterator, sizeof(iterator),
-                               CBLDart_DictIteratorFinalizer);
-
-  return iterator;
-}
-
-void CBLDart_FLDictIterator_Next(CBLDart_DictIterator *iterator) {
-  auto value = FLDictIterator_GetValue(iterator->iterator);
-  if (value != NULL) {
-    auto key = FLDictIterator_GetKeyString(iterator->iterator);
-    iterator->keyString = key;
-    iterator->done = !FLDictIterator_Next(iterator->iterator);
-  } else {
-    iterator->keyString = kFLSliceNull;
-    iterator->done = true;
-  }
-}
-
 // === Decoder ================================================================
 
 void CBLDart_FLValue_FromData(FLSlice data, uint8_t trust,
@@ -169,46 +130,96 @@ void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
   CBLDart_GetLoadedFLValue(FLDict_Get(dict, key), out);
 }
 
-static void CBLDart_DictIterator2Finalizer(void *dart_callback_data,
-                                           void *peer) {
-  auto iterator = reinterpret_cast<CBLDart_FLDictIterator2 *>(peer);
+static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
+                                          void *peer) {
+  auto iterator = reinterpret_cast<CBLDart_FLDictIterator *>(peer);
 
-  if (!iterator->isDone) FLDictIterator_End(iterator->_iterator);
+  if (!iterator->_isDone) FLDictIterator_End(&iterator->_iterator);
 
-  delete iterator->_iterator;
   delete iterator;
 }
 
-CBLDart_FLDictIterator2 *CBLDart_FLDictIterator2_Begin(
+CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
     Dart_Handle object, FLDict dict, FLString *keyOut,
-    CBLDart_LoadedFLValue *valueOut) {
-  auto iterator = new CBLDart_FLDictIterator2;
-  iterator->_iterator = new FLDictIterator;
-  iterator->isDone = false;
-  iterator->keyOut = keyOut;
-  iterator->valueOut = valueOut;
+    CBLDart_LoadedFLValue *valueOut, bool finalize) {
+  auto iterator = new CBLDart_FLDictIterator;
+  iterator->_isDone = false;
+  iterator->_keyOut = keyOut;
+  iterator->_valueOut = valueOut;
+  iterator->_objectHandle = finalize ? Dart_NewFinalizableHandle_DL(
+                                           object, iterator, sizeof(iterator),
+                                           CBLDart_DictIteratorFinalizer)
+                                     : nullptr;
 
-  FLDictIterator_Begin(dict, iterator->_iterator);
-
-  Dart_NewFinalizableHandle_DL(object, iterator, sizeof(iterator),
-                               CBLDart_DictIterator2Finalizer);
+  FLDictIterator_Begin(dict, &iterator->_iterator);
 
   return iterator;
 }
 
-void CBLDart_FLDictIterator2_Next(CBLDart_FLDictIterator2 *iterator) {
-  auto value = FLDictIterator_GetValue(iterator->_iterator);
-  iterator->isDone = value == nullptr;
-  if (!iterator->isDone) {
-    if (iterator->keyOut) {
-      auto key = FLDictIterator_GetKeyString(iterator->_iterator);
-      *iterator->keyOut = key;
+bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
+  auto dictIterator = &iterator->_iterator;
+  auto value = FLDictIterator_GetValue(dictIterator);
+  iterator->_isDone = value == nullptr;
+  if (value) {
+    auto keyOut = iterator->_keyOut;
+    if (keyOut) {
+      *keyOut = FLDictIterator_GetKeyString(dictIterator);
     }
 
-    if (iterator->valueOut) CBLDart_GetLoadedFLValue(value, iterator->valueOut);
+    auto valueOut = iterator->_valueOut;
+    if (valueOut) CBLDart_GetLoadedFLValue(value, valueOut);
 
-    FLDictIterator_Next(iterator->_iterator);
+    FLDictIterator_Next(dictIterator);
+
+    return true;
   }
+
+  if (!iterator->_objectHandle) {
+    delete iterator;
+  }
+
+  return false;
+}
+
+static void CBLDart_ArrayIteratorFinalizer(void *dart_callback_data,
+                                           void *peer) {
+  auto iterator = reinterpret_cast<CBLDart_FLArrayIterator *>(peer);
+
+  delete iterator;
+}
+
+CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
+    Dart_Handle object, FLArray array, CBLDart_LoadedFLValue *valueOut,
+    bool finalize) {
+  auto iterator = new CBLDart_FLArrayIterator;
+  iterator->_valueOut = valueOut;
+  iterator->_objectHandle = finalize ? Dart_NewFinalizableHandle_DL(
+                                           object, iterator, sizeof(iterator),
+                                           CBLDart_ArrayIteratorFinalizer)
+                                     : nullptr;
+
+  FLArrayIterator_Begin(array, &iterator->_iterator);
+
+  return iterator;
+}
+
+bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator) {
+  auto arrayIterator = &iterator->_iterator;
+  auto value = FLArrayIterator_GetValue(arrayIterator);
+  if (value) {
+    auto valueOut = iterator->_valueOut;
+    if (valueOut) CBLDart_GetLoadedFLValue(value, valueOut);
+
+    FLArrayIterator_Next(arrayIterator);
+
+    return true;
+  }
+
+  if (!iterator->_objectHandle) {
+    delete iterator;
+  }
+
+  return false;
 }
 
 // === Encoder ================================================================

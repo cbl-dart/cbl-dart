@@ -31,7 +31,7 @@ T keepAlive<P extends NativeType, T>(
         object._debugKeepAliveRefCount--;
         return true;
       }());
-      _keepAliveUntil(object);
+      cblReachabilityFence(object);
     }) as T;
   }
 
@@ -39,14 +39,11 @@ T keepAlive<P extends NativeType, T>(
     object._debugKeepAliveRefCount--;
     return true;
   }());
-  _keepAliveUntil(object);
+  cblReachabilityFence(object);
   return result;
 }
 
 const _keepAlive = keepAlive;
-
-@pragma('vm:never-inline')
-void _keepAliveUntil(Object? object) {}
 
 /// Runs [body] while keeping accessed [NativeObject]s alive.
 ///

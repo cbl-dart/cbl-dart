@@ -643,6 +643,3 @@ void main() {
     });
   });
 }
-
-@pragma('vm:never-inline')
-void keepAlive(Object? object) {}

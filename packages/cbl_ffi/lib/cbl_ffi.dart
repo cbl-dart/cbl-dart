@@ -37,3 +37,4 @@ export 'src/slice.dart'
         SliceResultAllocator;
 export 'src/tracing.dart'
     show cblIncludeTracePoints, TracedNativeCall, TracedCallHandler;
+export 'src/utils.dart' show cblReachabilityFence;

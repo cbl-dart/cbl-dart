@@ -367,15 +367,6 @@ class FleeceDecoder {
 Never _throwUndefinedDartRepresentation() =>
     throw UnsupportedError('undefined has not Dart representation');
 
-// === DictIterable ============================================================
-
-/// An [Iterable] wich iterates of the entries of [dict].
-///
-/// The iterable does not actually provide a value on each iteration. Instead
-/// it loads the key and value into [keyOut] and [valueOut] respectively.
-///
-/// Both [keyOut] and [valueOut] are optional and their contents are only loaded
-/// if a destination has been provided.
 class DictIterable with IterableMixin<void> {
   DictIterable(this.dict, {this.keyOut, this.valueOut});
 
@@ -388,38 +379,58 @@ class DictIterable with IterableMixin<void> {
       DictIterator(dict, keyOut: keyOut, valueOut: valueOut);
 }
 
-/// An [Iterator] wich iterates of the entries of a [FLDict].
-class DictIterator implements Iterator<void> {
-  /// Creates an [Iterator] wich iterates of the entries of a [FLDict].
-  ///
-  /// The iterator does not actually provide a value in [current]. Instead
-  /// it loads the key and value into [keyOut] and [valueOut] respectively, when
-  /// [moveNext] is called.
-  ///
-  /// Both [keyOut] and [valueOut] are optional and their contents are only
-  /// loaded if a destination has been provided.
+// ignore: prefer_void_to_null
+class DictIterator implements Iterator<Null> {
   DictIterator(
     Pointer<FLDict> dict, {
     Pointer<FLString>? keyOut,
     Pointer<CBLDart_LoadedFLValue>? valueOut,
+    bool partiallyConsumable = true,
   }) {
     _iterator = _decoderBinds.dictIteratorBegin(
-      this,
+      partiallyConsumable ? this : null,
       dict,
       keyOut ?? nullptr,
       valueOut ?? nullptr,
     );
   }
 
-  late final Pointer<CBLDart_FLDictIterator2> _iterator;
+  late final Pointer<CBLDart_FLDictIterator> _iterator;
 
   @override
-  // ignore: avoid_returning_null_for_void
-  void get current => null;
+  Null get current => null;
 
   @override
   bool moveNext() {
-    _decoderBinds.dictIteratorNext(_iterator);
-    return !_iterator.ref.isDone;
+    final hasCurrent = _decoderBinds.dictIteratorNext(_iterator);
+    cblReachabilityFence(this);
+    return hasCurrent;
+  }
+}
+
+// ignore: prefer_void_to_null
+class ArrayIterator implements Iterator<Null> {
+  ArrayIterator(
+    Pointer<FLArray> array, {
+    Pointer<CBLDart_LoadedFLValue>? valueOut,
+    bool partiallyConsumable = true,
+  }) {
+    _iterator = _decoderBinds.arrayIteratorBegin(
+      partiallyConsumable ? this : null,
+      array,
+      valueOut ?? nullptr,
+    );
+  }
+
+  late final Pointer<CBLDart_FLArrayIterator> _iterator;
+
+  @override
+  Null get current => null;
+
+  @override
+  bool moveNext() {
+    final hasCurrent = _decoderBinds.arrayIteratorNext(_iterator);
+    cblReachabilityFence(this);
+    return hasCurrent;
   }
 }
