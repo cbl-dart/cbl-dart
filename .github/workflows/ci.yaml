@@ -243,7 +243,7 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
   test-e2e-cbl_flutter_prebuilt:
-    if: env.disable-prebuilt-jobs != 'true'
+    if: ${{ env.disable-prebuilt-jobs != 'true' }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:
@@ -319,7 +319,7 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
 
   test-cbl_dart:
-    if: env.disable-prebuilt-jobs != 'true'
+    if: ${{ env.disable-prebuilt-jobs != 'true' }}
     name: cbl_dart unit tests
     strategy:
       matrix:
