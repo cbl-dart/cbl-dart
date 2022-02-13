@@ -14,7 +14,6 @@ env:
   dart-version-stable: 2.16.0
   dart-version-beta: beta
   melos-version: '1.0.0'
-  disable-prebuilt-jobs: true
 
 jobs:
   formatting-dart:
@@ -243,7 +242,7 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
   test-e2e-cbl_flutter_prebuilt:
-    if: ${{ env.disable-prebuilt-jobs != 'true' }}
+    if: ${{ false }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:
@@ -319,7 +318,7 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
 
   test-cbl_dart:
-    if: ${{ env.disable-prebuilt-jobs != 'true' }}
+    if: ${{ false }}
     name: cbl_dart unit tests
     strategy:
       matrix:
