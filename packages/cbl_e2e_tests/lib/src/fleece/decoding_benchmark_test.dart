@@ -39,7 +39,7 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
   @override
   void run() {
     // ignore: deprecated_member_use
-    FleeceDecoder().dataToDartObjectRecursively(data, trust: FLTrust.trusted);
+    const RecursiveFleeceDecoder(trust: FLTrust.trusted).convert(data);
   }
 }
 
@@ -50,7 +50,7 @@ class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
 
   @override
   void run() {
-    FleeceDecoder().dataToDartObject(data, trust: FLTrust.trusted);
+    const FleeceDecoder(trust: FLTrust.trusted).convert(data);
   }
 }
 
@@ -69,22 +69,26 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
 Future<void> main() async {
   setupTestBinding();
 
-  test('Decoding Benchmark', () {
-    const breakpoints = false;
-
-    // ignore: dead_code
-    if (breakpoints) {
-      debugger();
-    }
+  void run() {
     runBenchmarks([
       JsonInDartDecodingBenchmark(),
       FleeceRecursiveDecodingBenchmark(),
       FleeceListenerDecodingBenchmark(),
       FleeceWrapperDecodingBenchmark(),
     ]);
-    // ignore: dead_code
-    if (breakpoints) {
-      debugger();
-    }
-  });
+  }
+
+  // ignore: unused_element
+  void profile() {
+    debugger();
+    runBenchmarks([
+      JsonInDartDecodingBenchmark(),
+      FleeceRecursiveDecodingBenchmark(),
+      FleeceListenerDecodingBenchmark(),
+      FleeceWrapperDecodingBenchmark(),
+    ]);
+    debugger();
+  }
+
+  test('Decoding Benchmark', run);
 }

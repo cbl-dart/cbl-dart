@@ -64,6 +64,7 @@ void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
 struct CBLDart_FLDictIterator {
   FLString *_keyOut;
   CBLDart_LoadedFLValue *_valueOut;
+  bool _preLoad;
   FLDictIterator _iterator;
   bool _isDone;
   Dart_FinalizableHandle _objectHandle;
@@ -72,7 +73,7 @@ struct CBLDart_FLDictIterator {
 CBLDART_EXPORT
 CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
     Dart_Handle object, FLDict dict, FLString *keyOut,
-    CBLDart_LoadedFLValue *valueOut, bool finalize);
+    CBLDart_LoadedFLValue *valueOut, bool finalize, bool preLoad);
 
 CBLDART_EXPORT
 bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator);

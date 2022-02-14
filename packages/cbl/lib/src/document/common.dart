@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database.dart';
-import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
@@ -14,6 +14,8 @@ import 'blob.dart';
 import 'dictionary.dart';
 
 late final _blobBindings = cblBindings.blobs.blob;
+late final _valueBinds = cblBindings.fleece.value;
+late final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract class CblConversions {
   Object? toPlainObject();
@@ -137,36 +139,47 @@ class CblMDelegate extends MDelegate {
 
   @override
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt) {
-    final flValue = value.value;
+    _decoderBinds.getLoadedValue(value.value!);
 
-    if (flValue == undefinedFLValue) {
-      // `undefined` is a somewhat unusual value to be found in a Fleece
-      // collection, since it is not JSON. It cannot be encoded to Fleece or
-      // JSON, but is used by some APIs to signal a special condition.
-      // For example, query results can contain `undefined`.
-      //
-      // There is no Dart representation for `undefined` in the API, yet. It
-      // would be a breaking change to start returning something other than
-      // `null`.
-      return null;
-    } else if (flValue is SimpleFLValue) {
-      return flValue.value;
-    } else if (flValue is SliceFLValue) {
-      cacheIt();
-      return flValue.isString
-          ? flValue.slice.toDartString()
-          : SliceResult.fromSlice(flValue.slice).asTypedList();
-    } else if (flValue is CollectionFLValue) {
-      cacheIt();
-      if (flValue.isArray) {
-        final array = MArray.asChild(value, parent);
+    final flValue = globalLoadedFLValue.ref;
+    switch (flValue.type) {
+      case FLValueType.undefined:
+        // `undefined` is a somewhat unusual value to be found in a Fleece
+        // collection, since it is not JSON. It cannot be encoded to Fleece or
+        // JSON, but is used by some APIs to signal a special condition.
+        // For example, query results can contain `undefined`.
+        //
+        // There is no Dart representation for `undefined` in the API, yet. It
+        // would be a breaking change to start returning something other than
+        // `null`.
+        return null;
+      case FLValueType.null_:
+        return null;
+      case FLValueType.boolean:
+        return flValue.asBool;
+      case FLValueType.number:
+        return flValue.isInteger ? flValue.asInt : flValue.asDouble;
+      case FLValueType.string:
+        cacheIt();
+        return parent.context!.sharedStrings
+            .flStringToDartString(flValue.asString);
+      case FLValueType.data:
+        cacheIt();
+        return flValue.asData.toData()?.toTypedList();
+      case FLValueType.array:
+        cacheIt();
+        final array = MArray.asChild(value, parent, flValue.collectionSize);
         if (parent.hasMutableChildren) {
           return MutableArrayImpl(array);
         } else {
           return ArrayImpl(array);
         }
-      } else {
-        if (_blobBindings.isBlob(flValue.value.cast())) {
+      case FLValueType.dict:
+        cacheIt();
+
+        final flDict = flValue.asValue.cast<FLDict>();
+
+        if (_blobBindings.isBlob(flDict)) {
           final context = parent.context;
           Database? database;
           if (context is DatabaseMContext) {
@@ -174,27 +187,21 @@ class CblMDelegate extends MDelegate {
           }
 
           final dict = fl.Dict.fromPointer(
-            flValue.value.cast(),
+            flDict,
             // This value is alive as long as the MRoot is alive and the
             // MRoot does not necessarily read form a Doc.
             isRefCounted: false,
           );
           return BlobImpl.fromProperties(dict.toObject(), database: database);
         }
-        final dictionary = MDict.asChild(value, parent);
+
+        final dictionary = MDict.asChild(value, parent, flValue.collectionSize);
         if (parent.hasMutableChildren) {
           return MutableDictionaryImpl(dictionary);
         } else {
           return DictionaryImpl(dictionary);
         }
-      }
     }
-
-    throw ArgumentError.value(
-      value,
-      'value',
-      'unable to create corresponding native value',
-    );
   }
 }
 
@@ -210,8 +217,12 @@ bool valueWouldChange(
 
   // Collection values are assumed to result in a change to skip expensive
   // comparisons of large instances.
-  if (oldValue.value is CollectionFLValue) {
-    return true;
+  final flValue = oldValue.value;
+  if (flValue != null) {
+    final valueType = _valueBinds.getType(flValue);
+    if (valueType == FLValueType.array || valueType == FLValueType.dict) {
+      return true;
+    }
   }
   if (newValue is Array || newValue is Dictionary) {
     return true;

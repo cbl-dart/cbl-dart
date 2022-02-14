@@ -141,11 +141,12 @@ static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
 
 CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
     Dart_Handle object, FLDict dict, FLString *keyOut,
-    CBLDart_LoadedFLValue *valueOut, bool finalize) {
+    CBLDart_LoadedFLValue *valueOut, bool finalize, bool preLoad) {
   auto iterator = new CBLDart_FLDictIterator;
-  iterator->_isDone = false;
   iterator->_keyOut = keyOut;
   iterator->_valueOut = valueOut;
+  iterator->_preLoad = preLoad;
+  iterator->_isDone = false;
   iterator->_objectHandle = finalize ? Dart_NewFinalizableHandle_DL(
                                            object, iterator, sizeof(iterator),
                                            CBLDart_DictIteratorFinalizer)
@@ -167,7 +168,13 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
     }
 
     auto valueOut = iterator->_valueOut;
-    if (valueOut) CBLDart_GetLoadedFLValue(value, valueOut);
+    if (valueOut) {
+      if (iterator->_preLoad) {
+        CBLDart_GetLoadedFLValue(value, valueOut);
+      } else {
+        valueOut->asValue = value;
+      }
+    }
 
     FLDictIterator_Next(dictIterator);
 

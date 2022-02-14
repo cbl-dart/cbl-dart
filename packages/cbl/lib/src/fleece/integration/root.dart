@@ -3,11 +3,14 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../../support/ffi.dart';
 import '../../support/native_object.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'context.dart';
 import 'value.dart';
+
+late final _valueBinds = cblBindings.fleece.value;
 
 class MRoot extends MCollection {
   MRoot.fromData(
@@ -16,9 +19,8 @@ class MRoot extends MCollection {
     required bool isMutable,
   }) : super(context: context, isMutable: isMutable) {
     this.data = data.toSliceResult();
-    _slot = MValue.withValue(
-      context.decoder.loadValueFromData(this.data!.toData())!,
-    );
+    _slot =
+        MValue.withValue(_valueBinds.fromData(this.data!, FLTrust.trusted)!);
     _slot.updateParent(this);
   }
 
@@ -27,7 +29,7 @@ class MRoot extends MCollection {
     required MContext context,
     required bool isMutable,
   })  : value = FleeceValueObject(value, isRefCounted: true, adopt: false),
-        _slot = MValue.withValue(context.decoder.loadValue(value)!),
+        _slot = MValue.withValue(value),
         super(context: context, isMutable: isMutable) {
     _slot.updateParent(this);
   }

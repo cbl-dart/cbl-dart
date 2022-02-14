@@ -368,8 +368,10 @@ class ArrayImpl
   Dictionary? dictionary(int index) => _getAs(index);
 
   @override
-  List<Object?> toPlainList({bool growable = true}) =>
-      map(CblConversions.convertToPlainObject).toList();
+  List<Object?> toPlainList({bool growable = true}) => _array.iterable
+      .map((value) =>
+          CblConversions.convertToPlainObject(value.asNative(_array)))
+      .toList();
 
   @override
   Fragment operator [](int index) => FragmentImpl.fromArray(this, index: index);
