@@ -25,6 +25,10 @@ scripts:
     description: Runs pub get in all Flutter packages.
     run: melos exec --flutter -- flutter pub get
 
+  formatting:apply:
+    description: Formats all Dart files.
+    run: dart format .
+
   formatting:check:
     description: Formats all Dart files. Fails when files were changed.
     run: dart format --set-exit-if-changed .

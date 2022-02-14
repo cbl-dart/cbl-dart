@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database.dart';
-import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
@@ -15,6 +14,7 @@ import 'blob.dart';
 import 'dictionary.dart';
 
 late final _blobBindings = cblBindings.blobs.blob;
+late final _valueBinds = cblBindings.fleece.value;
 late final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract class CblConversions {
@@ -217,8 +217,12 @@ bool valueWouldChange(
 
   // Collection values are assumed to result in a change to skip expensive
   // comparisons of large instances.
-  if (oldValue.value is CollectionFLValue) {
-    return true;
+  final flValue = oldValue.value;
+  if (flValue != null) {
+    final valueType = _valueBinds.getType(flValue);
+    if (valueType == FLValueType.array || valueType == FLValueType.dict) {
+      return true;
+    }
   }
   if (newValue is Array || newValue is Dictionary) {
     return true;

@@ -4,11 +4,15 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:meta/meta.dart';
 
 import '../support/ffi.dart';
 
 late final _decoderBinds = cblBindings.fleece.decoder;
+
+/// Returns a string which shows how values are encoded in the Fleece [data].
+///
+/// This method exists for debugging and learning purposes.
+String dumpData(Data data) => _decoderBinds.dumpData(data);
 
 /// A cache for strings which are encoded as unique shared strings in Fleece
 /// data.
@@ -43,308 +47,62 @@ class SharedStrings {
   bool hasString(String string) => _addressToDartString.containsValue(string);
 }
 
-// === LoadedFLValue ===========================================================
-
-/// A representation of an [FLValue] which can be loaded efficiently.
-///
-/// Subclasses represent different types of values and include data which
-/// is used to efficiently read their content.
-///
-/// Values wich correspond to [FLValueType.undefined] are represented as `null`
-/// in Dart.
-@immutable
-abstract class LoadedFLValue {
-  const LoadedFLValue();
-}
-
-class _UndefinedFLValue extends LoadedFLValue {
-  const _UndefinedFLValue._();
-}
-
-/// A [LoadedFLValue] for a value that is undefined or missing.
-const undefinedFLValue = _UndefinedFLValue._();
-
-/// A [LoadedFLValue] for `null`, `boolean` and `number` values.
-class SimpleFLValue extends LoadedFLValue {
-  const SimpleFLValue(this.value)
-      : assert(value == null || value is bool || value is num);
-
-  /// The Dart representation of the [FLValue].
-  final Object? value;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SimpleFLValue &&
-          runtimeType == other.runtimeType &&
-          value == other.value;
-
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() => 'SimpleFLValue($value)';
-}
-
-/// A base class for [LoadedFLValue]s which contain a [Pointer] to the
-/// loaded [FLValue].
-abstract class ComplexFLValue extends LoadedFLValue {
-  ComplexFLValue(this.value) : assert(value != nullptr);
-
-  /// Pointer to the loaded [FLValue].
-  final Pointer<FLValue> value;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ComplexFLValue &&
-          runtimeType == other.runtimeType &&
-          value == other.value;
-
-  @override
-  int get hashCode => value.hashCode;
-}
-
-/// A [LoadedFLValue] for `string` and `data` values.
-class SliceFLValue extends ComplexFLValue {
-  SliceFLValue({
-    required this.isString,
-    required this.slice,
-    required Pointer<FLValue> value,
-  }) : super(value);
-
-  /// Whether this value represents a `string` or `data`.
-  final bool isString;
-
-  /// The [Slice] which holds the data of this value.
-  final Slice slice;
-
-  @override
-  String toString() => 'SliceFLValue('
-      '${isString ? 'string' : 'data'}, '
-      'length: ${slice.size}, '
-      // ignore: missing_whitespace_between_adjacent_strings
-      'value: $value'
-      ')';
-}
-
-/// A [LoadedFLValue] for `array` and `dict` values.
-class CollectionFLValue extends ComplexFLValue {
-  CollectionFLValue({
-    required this.isArray,
-    required this.length,
-    required Pointer<FLValue> value,
-  })  : assert(length >= 0),
-        super(value);
-
-  /// Whether this value represents an `array` or a `dict`.
-  final bool isArray;
-
-  /// The length of the collection.
-  final int length;
-
-  @override
-  String toString() => 'CollectionFLValue('
-      '${isArray ? 'array' : 'dict'}, '
-      'length: $length, '
-      // ignore: missing_whitespace_between_adjacent_strings
-      'value: $value'
-      ')';
-}
-
-extension on CBLDart_LoadedFLValue {
-  LoadedFLValue? toLoadedFLValue() {
-    if (!exists) {
-      return null;
-    }
-
-    switch (type) {
-      case FLValueType.undefined:
-        return undefinedFLValue;
-      case FLValueType.null_:
-        return const SimpleFLValue(null);
-      case FLValueType.boolean:
-        return SimpleFLValue(asBool);
-      case FLValueType.number:
-        return SimpleFLValue(isInteger ? asInt : asDouble);
-      case FLValueType.string:
-      case FLValueType.data:
-        final isString = type == FLValueType.string;
-        return SliceFLValue(
-          slice: isString
-              ? Slice.fromFLString(asString)!
-              : Slice.fromFLSlice(asData)!,
-          value: asValue,
-          isString: isString,
-        );
-      case FLValueType.array:
-      case FLValueType.dict:
-        return CollectionFLValue(
-          value: asValue,
-          length: collectionSize,
-          isArray: type == FLValueType.array,
-        );
-    }
-  }
-}
-
-LoadedFLValue? _globalLoadedValueObject() =>
-    globalLoadedFLValue.ref.toLoadedFLValue();
-
 // === FleeceDecoder ===========================================================
 
-/// A decoder for efficiently reading Fleece data from Dart.
-///
-/// You should create a new [FleeceDecoder] with a new instance of
-/// [SharedStrings] for each piece of Fleece data. Unless an instance of
-/// [SharedStrings] is provided when creating a [FleeceDecoder], a new one will
-/// be created.
-class FleeceDecoder {
-  /// Creates a decoder for efficiently reading Fleece data from Dart.
-  FleeceDecoder({SharedStrings? sharedStrings})
-      : sharedStrings = sharedStrings ?? SharedStrings();
+/// A decoder for converting Fleece data into Dart objects.
+class FleeceDecoder extends Converter<Data, Object?> {
+  /// Creates a decoder for converting Fleece data into Dart objects.
+  const FleeceDecoder({this.trust = FLTrust.untrusted});
 
-  /// The [SharedStrings] this decoder is using to read strings from Fleece
-  /// data.
+  /// Whether you [trust] the source of the data that it is valid Fleece data.
   ///
-  /// An instance of [SharedStrings] should only be used for decoding a single
-  /// piece of Fleece data.
-  final SharedStrings sharedStrings;
+  /// If data is not valid, `null` is returned.
+  final FLTrust trust;
 
-  /// Returns a string which shows how values are encoded in the Fleece [data].
-  ///
-  /// This method exists for debugging and learning purposes.
-  String dumpData(Data data) => _decoderBinds.dumpData(data);
-
-  // === LoadedFLValue =========================================================
-
-  /// Loads the root value from [data] as a [LoadedFLValue].
-  ///
-  /// Specify whether you [trust] the source of the [data] to ensure it is valid
-  /// Fleece data. If [data] is not valid, `null` is returned.
-  LoadedFLValue? loadValueFromData(
-    Data data, {
-    FLTrust trust = FLTrust.untrusted,
-  }) {
-    _decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust);
-    return _globalLoadedValueObject();
-  }
-
-  /// Loads [value] as a [LoadedFLValue] or returns `null` if it is
-  /// [FLValueType.undefined].
-  LoadedFLValue? loadValue(Pointer<FLValue> value) {
-    _decoderBinds.getLoadedValue(value);
-    return _globalLoadedValueObject();
-  }
-
-  /// Loads the value at [index] from [array] as a [LoadedFLValue] or returns
-  /// `null` if [index] is out of bounds.
-  LoadedFLValue? loadValueFromArray(Pointer<FLArray> array, int index) {
-    _decoderBinds.getLoadedValueFromArray(array, index);
-    return _globalLoadedValueObject();
-  }
-
-  /// Loads the value for [key] from [dict] as a [LoadedFLValue] or returns
-  /// `null` there is no entry for [key].
-  LoadedFLValue? loadValueFromDict(Pointer<FLDict> dict, String key) {
-    _decoderBinds.getLoadedValueFromDict(dict, key);
-    return _globalLoadedValueObject();
-  }
-
-  // === Conversion to Dart ====================================================
-
-  /// Returns a Dart representation of [data].
-  ///
-  /// Specify whether you [trust] the source of the [data] to ensure it is valid
-  /// Fleece data. If [data] is not valid, `null` is returned.
-  Object? dataToDartObject(
-    Data data, {
-    FLTrust trust = FLTrust.untrusted,
-  }) {
-    _decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust);
+  @override
+  Object? convert(Data input) {
+    final sliceResult = input.toSliceResult();
+    _decoderBinds.getLoadedFLValueFromData(sliceResult, trust);
     if (!globalLoadedFLValue.ref.exists) {
       return null;
     }
 
-    return _decodeGlobalLoadedValueAsDartObject();
-  }
-
-  /// Returns a Dart representation of [data].
-  ///
-  /// **Note**: This method exists just for benchmarking the listener based
-  /// decoder.
-  ///
-  /// Specify whether you [trust] the source of the [data] to ensure it is valid
-  /// Fleece data. If [data] is not valid, `null` is returned.
-  @Deprecated('Use dataToDartObject instead.')
-  Object? dataToDartObjectRecursively(
-    Data data, {
-    FLTrust trust = FLTrust.untrusted,
-  }) {
-    _decoderBinds.getLoadedFLValueFromData(data.toSliceResult(), trust);
-    if (!globalLoadedFLValue.ref.exists) {
-      return null;
-    }
-
-    return _decodeGlobalLoadedValueAsDartObjectRecursively();
-  }
-
-  /// Returns a Dart representation of [value].
-  Object? loadedValueToDartObject(LoadedFLValue value) {
-    if (value == undefinedFLValue) {
-      _throwUndefinedDartRepresentation();
-    } else if (value is SimpleFLValue) {
-      return value.value;
-    } else if (value is SliceFLValue) {
-      return value.isString
-          ? sharedStrings.sliceToDartString(value.slice)
-          : Uint8List.fromList(value.slice.asTypedList());
-    } else if (value is CollectionFLValue) {
-      _decoderBinds.getLoadedValue(value.value);
-      return _decodeGlobalLoadedValueAsDartObject();
-    } else {
-      throw UnimplementedError('Value of unknown type: $value');
-    }
-  }
-
-  // === Dict Iterable =========================================================
-
-  /// Returns an [Iterable] which iterates over the entries of [dict].
-  Iterable<MapEntry<String, LoadedFLValue>> dictIterable(
-    Pointer<FLDict> dict,
-  ) sync* {
-    final it = DictIterator(
-      dict,
-      keyOut: globalFLString,
-      valueOut: globalLoadedFLValue,
-    );
-
-    while (it.moveNext()) {
-      yield MapEntry(
-        sharedStrings.flStringToDartString(globalFLString.ref),
-        _globalLoadedValueObject()!,
-      );
-    }
-  }
-
-  /// Returns an [Iterable] which iterates over the keys of [dict].
-  Iterable<String> dictKeyIterable(Pointer<FLDict> dict) sync* {
-    final it = DictIterator(dict, keyOut: globalFLString);
-
-    while (it.moveNext()) {
-      yield sharedStrings.flStringToDartString(globalFLString.ref);
-    }
-  }
-
-  // === Impl ==================================================================
-
-  Object? _decodeGlobalLoadedValueAsDartObject() {
     final listener = _BuildDartObjectListener();
-    _FleeceListenerDecoder(sharedStrings, listener).decodeGlobalLoadedValue();
+    _FleeceListenerDecoder(SharedStrings(), listener).decodeGlobalLoadedValue();
+
+    cblReachabilityFence(sliceResult);
+
     return listener.result;
   }
+}
 
-  Object? _decodeGlobalLoadedValueAsDartObjectRecursively() {
+/// Fleece decoder which uses a recursive algorithm to decode Fleece data.
+///
+/// This decoder exists only to benchmark the listener based [FleeceDecoder].
+@Deprecated('Use FleeceDecoder instead.')
+class RecursiveFleeceDecoder extends Converter<Data, Object?> {
+  @Deprecated('Use FleeceDecoder instead.')
+  const RecursiveFleeceDecoder({this.trust = FLTrust.untrusted});
+
+  final FLTrust trust;
+
+  @override
+  Object? convert(Data input) {
+    final sliceResult = input.toSliceResult();
+
+    _decoderBinds.getLoadedFLValueFromData(sliceResult, trust);
+    if (!globalLoadedFLValue.ref.exists) {
+      return null;
+    }
+
+    final result = _decodeGlobalLoadedValue(SharedStrings());
+
+    cblReachabilityFence(sliceResult);
+
+    return result;
+  }
+
+  Object? _decodeGlobalLoadedValue(SharedStrings sharedStrings) {
     final value = globalLoadedFLValue.ref;
     switch (value.type) {
       case FLValueType.undefined:
@@ -363,7 +121,7 @@ class FleeceDecoder {
         final array = value.asValue.cast<FLArray>();
         return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
-          return _decodeGlobalLoadedValueAsDartObjectRecursively();
+          return _decodeGlobalLoadedValue(sharedStrings);
         });
       case FLValueType.dict:
         final result = <String, Object?>{};
@@ -374,7 +132,7 @@ class FleeceDecoder {
         );
         while (iterator.moveNext()) {
           final key = sharedStrings.flStringToDartString(globalFLString.ref);
-          result[key] = _decodeGlobalLoadedValueAsDartObjectRecursively();
+          result[key] = _decodeGlobalLoadedValue(sharedStrings);
         }
         return result;
     }

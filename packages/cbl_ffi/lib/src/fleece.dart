@@ -617,11 +617,9 @@ class ValueBindings extends Bindings {
     _bindToDartObject(object, value, retain);
   }
 
-  Pointer<FLValue>? fromData(Data data, FLTrust trust) {
-    final sliceResult = data.toSliceResult();
-    final result =
-        _fromData(sliceResult.makeGlobal().ref, trust.toInt()).toNullable();
-    cblReachabilityFence(sliceResult);
+  Pointer<FLValue>? fromData(SliceResult data, FLTrust trust) {
+    final result = _fromData(data.makeGlobal().ref, trust.toInt()).toNullable();
+    cblReachabilityFence(data);
     return result;
   }
 

@@ -14,4 +14,4 @@ Data fleeceEncode(Object? value) {
   return fleeceEncoder.finish();
 }
 
-Object? fleeceDecode(Data data) => FleeceDecoder().dataToDartObject(data);
+Object? fleeceDecode(Data data) => const FleeceDecoder().convert(data);

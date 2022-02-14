@@ -39,7 +39,7 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
   @override
   void run() {
     // ignore: deprecated_member_use
-    FleeceDecoder().dataToDartObjectRecursively(data, trust: FLTrust.trusted);
+    const RecursiveFleeceDecoder(trust: FLTrust.trusted).convert(data);
   }
 }
 
@@ -50,7 +50,7 @@ class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
 
   @override
   void run() {
-    FleeceDecoder().dataToDartObject(data, trust: FLTrust.trusted);
+    const FleeceDecoder(trust: FLTrust.trusted).convert(data);
   }
 }
 

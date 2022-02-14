@@ -6,7 +6,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/ffi.dart';
 import '../support/native_object.dart';
-import 'decoder.dart';
 
 late final _encoderBinds = cblBindings.fleece.encoder;
 
@@ -100,21 +99,6 @@ class FleeceEncoder extends FleeceEncoderObject {
         value,
         'value',
         'is not of a type which can be encoded by the FleeceEncoder',
-      );
-    }
-  }
-
-  /// Writes a loaded [value] to this encoder.
-  void writeLoadedValue(LoadedFLValue value) {
-    if (value is SimpleFLValue) {
-      writeDartObject(value.value);
-    } else if (value is SliceFLValue) {
-      writeValue(value.value);
-    } else if (value is CollectionFLValue) {
-      writeValue(value.value);
-    } else {
-      throw UnimplementedError(
-        'writing of value of this type is not implemented: $value',
       );
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
@@ -16,13 +15,13 @@ late final _dictBindings = cblBindings.fleece.dict;
 class MDict extends MCollection {
   MDict()
       : _dict = null,
-        _values = HashMap(),
+        _values = {},
         _length = 0,
         _valuesHasAllKeys = true;
 
   MDict.asCopy(MDict original, {bool? isMutable})
       : _dict = original._dict,
-        _values = HashMap.fromEntries(
+        _values = Map.fromEntries(
           original._values.entries
               .map((entry) => MapEntry(entry.key, entry.value.clone())),
         ),
@@ -34,7 +33,7 @@ class MDict extends MCollection {
       :
         // ignore: cast_nullable_to_non_nullable
         _dict = slot.value!.cast(),
-        _values = HashMap(),
+        _values = {},
         // ignore: cast_nullable_to_non_nullable
         _length = length,
         _valuesHasAllKeys = false,

@@ -19,9 +19,8 @@ class MRoot extends MCollection {
     required bool isMutable,
   }) : super(context: context, isMutable: isMutable) {
     this.data = data.toSliceResult();
-    _slot = MValue.withValue(
-      _valueBinds.fromData(this.data!.toData(), FLTrust.trusted)!,
-    );
+    _slot =
+        MValue.withValue(_valueBinds.fromData(this.data!, FLTrust.trusted)!);
     _slot.updateParent(this);
   }
 

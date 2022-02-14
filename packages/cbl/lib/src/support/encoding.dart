@@ -29,7 +29,7 @@ class EncodedData {
   EncodedData.json(this.data) : format = EncodingFormat.json;
 
   static final _jsonDecoder = const Utf8Decoder().fuse(const JsonDecoder());
-  static final _fleeceDecoder = FleeceDecoder();
+  static const _fleeceDecoder = FleeceDecoder(trust: FLTrust.trusted);
 
   final EncodingFormat format;
 
@@ -60,7 +60,7 @@ class EncodedData {
   Object? toPlainObject() {
     switch (format) {
       case EncodingFormat.fleece:
-        return _fleeceDecoder.dataToDartObject(data, trust: FLTrust.trusted);
+        return _fleeceDecoder.convert(data);
       case EncodingFormat.json:
         return _jsonDecoder.convert(data.toTypedList());
     }
