@@ -40,7 +40,7 @@ void main() {
       final flArray =
           _valueBinds.fromData(sliceResult, FLTrust.trusted)!.cast<FLArray>();
       for (var i = 0; i < 4; i++) {
-        _decoderBinds.getLoadedValueFromArray(flArray, 0);
+        _decoderBinds.getLoadedValueFromArray(flArray, i);
         sharedStrings.flStringToDartString(globalLoadedFLValue.ref.asString);
       }
 
