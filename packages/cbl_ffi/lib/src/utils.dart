@@ -22,10 +22,7 @@ extension StringFLStringExt on String? {
       return nullFLString.ref;
     }
 
-    return const NativeUtf8StringEncoder()
-        .encode(self, globalArena)
-        .toFLString()
-        .ref;
+    return nativeUtf8StringEncoder.encode(self, globalArena).toFLString().ref;
   }
 
   FLString makeGlobalFLString() {
@@ -38,7 +35,7 @@ extension StringFLStringExt on String? {
       return globalFLString.ref;
     }
 
-    return const NativeUtf8StringEncoder()
+    return nativeUtf8StringEncoder
         .encode(self, globalArena)
         .makeGlobalFLString();
   }
@@ -65,8 +62,8 @@ T runWithSingleFLString<T>(String? string, T Function(FLString flString) fn) {
     return fn(nullFLString.ref);
   }
 
-  final nativeString = const NativeUtf8StringEncoder()
-      .encode(string, cachedSliceResultAllocator);
+  final nativeString =
+      nativeUtf8StringEncoder.encode(string, cachedSliceResultAllocator);
 
   try {
     return fn(nativeString.makeGlobalFLString());

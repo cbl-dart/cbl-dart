@@ -1,17 +1,16 @@
 import 'dart:ffi';
-import 'dart:math';
 import 'dart:typed_data';
 
 /// A UTF-8 encoded string in external memory.
 class NativeUtf8String {
-  NativeUtf8String(this.allocator, this.buffer, this.size);
+  NativeUtf8String(this.buffer, this.size, {this.allocator});
 
-  final Allocator allocator;
   final Pointer<Uint8> buffer;
   final int size;
+  final Allocator? allocator;
 
   void free() {
-    allocator.free(buffer);
+    allocator?.free(buffer);
   }
 }
 
@@ -41,37 +40,68 @@ int _combineSurrogatePair(int lead, int tail) =>
     0x10000 + ((lead & _surrogateValueMask) << 10) |
     (tail & _surrogateValueMask);
 
+const nativeUtf8StringEncoder = NativeUtf8StringEncoder();
+
 /// A UTF-8 encoder that directly writes to external memory.
 ///
 /// This is more efficient than encoding to Dart memory first and than copying
 /// to external memory.
 class NativeUtf8StringEncoder {
+  /// Creates a UTF-8 encoder that directly writes to external memory.
   const NativeUtf8StringEncoder();
 
+  /// Returns the number of bytes required to encode the given string.
+  int encodedAllocationSize(String string) =>
+      // Create a buffer with a length that is guaranteed to be big enough.
+      // A single code unit uses at most 3 bytes, a surrogate pair at most 4.
+      string.length * 3;
+
+  /// Encodes [string] into a [NativeUtf8String], after allocating the required
+  /// external memory.
   NativeUtf8String encode(
     String string,
     Allocator allocator, [
     int start = 0,
     int? end,
   ]) {
-    final stringLength = string.length;
-
-    // Create a buffer with a length that is guaranteed to be big enough.
-    // A single code unit uses at most 3 bytes, a surrogate pair at most 4.
-    // Note that it is not safe to allocate 0 bytes, which is why 1 byte is
-    // allocated even for empty strings.
-    final maxUtf8Length = max(stringLength * 3, 1);
-    final buffer = allocator<Uint8>(maxUtf8Length);
-    final bufferList = buffer.asTypedList(maxUtf8Length);
-
     // ignore: parameter_assignments
-    end = RangeError.checkValidRange(start, end, stringLength);
-    final length = end - start;
-    if (length == 0) {
-      return NativeUtf8String(allocator, buffer, 0);
+    end = RangeError.checkValidRange(start, end, string.length);
+
+    if (string.isEmpty) {
+      return NativeUtf8String(nullptr, 0);
     }
 
-    final encoder = _Utf8Encoder(bufferList);
+    final allocationSize = encodedAllocationSize(string);
+    final buffer = allocator<Uint8>(allocationSize);
+
+    return encodeToBuffer(
+      string,
+      buffer,
+      allocationSize: allocationSize,
+      start: start,
+      end: end,
+      allocator: allocator,
+    );
+  }
+
+  /// Encodes [string] into a [NativeUtf8String], writing to a pre-allocated
+  /// external memory [buffer].
+  ///
+  /// [allocator] must be the allocator that was used to allocate [buffer].
+  NativeUtf8String encodeToBuffer(
+    String string,
+    Pointer<Uint8> buffer, {
+    required int allocationSize,
+    int start = 0,
+    required int end,
+    Allocator? allocator,
+  }) {
+    final length = end - start;
+    if (length == 0) {
+      return NativeUtf8String(buffer, 0, allocator: allocator);
+    }
+
+    final encoder = _Utf8Encoder(buffer.asTypedList(allocationSize));
     final endPosition = encoder._fillBuffer(string, start, end);
     assert(endPosition >= end - 1);
     if (endPosition != end) {
@@ -84,7 +114,7 @@ class NativeUtf8StringEncoder {
       encoder._writeReplacementCharacter();
     }
 
-    return NativeUtf8String(allocator, buffer, encoder._bufferIndex);
+    return NativeUtf8String(buffer, encoder._bufferIndex, allocator: allocator);
   }
 }
 

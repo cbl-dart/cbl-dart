@@ -1,11 +1,22 @@
 import 'dart:async';
 
 import '../document/document.dart';
+import '../fleece/dict_key.dart';
 import '../support/utils.dart';
 import 'database.dart';
 
-/// Helper mixin for implementing [Database].
-mixin DatabaseHelper<T extends DocumentDelegate> implements Database {
+/// Base that is mixed into all implementations of [Database].
+mixin DatabaseBase<T extends DocumentDelegate> implements Database {
+  /// The [DictKey]s that should be used when looking up properties in
+  /// [Document]s that are stored in this database.
+  ///
+  /// It is important to use the database specific [DictKey]s when accessing
+  /// Fleece data from this database because each database has its own set
+  /// of shared keys. [DictKey]s are optimized to make use of these keys and
+  /// will lookup the wrong or no entries if used with the wrong set of shared
+  /// keys.
+  DictKeys get dictKeys;
+
   /// Creates a [DocumentDelegate] from [oldDelegate] for a new document which
   /// is being used with this database for the first time.
   ///
@@ -45,7 +56,7 @@ mixin DatabaseHelper<T extends DocumentDelegate> implements Database {
 
     // If required, sync document properties with delegate.
     if (syncProperties) {
-      return document.syncProperties().then((_) => delegate as T);
+      return document.writePropertiesToDelegate().then((_) => delegate as T);
     }
 
     return delegate;

@@ -1,9 +1,13 @@
+import '../dict_key.dart';
 import '../shared_strings.dart';
 
 class MContext {
   MContext({
+    DictKeys? dictKeys,
     SharedStrings? sharedStrings,
-  }) : sharedStrings = sharedStrings ?? SharedStrings();
+  })  : dictKeys = dictKeys ?? UnoptimizingDictKeys(),
+        sharedStrings = sharedStrings ?? SharedStrings();
 
+  final DictKeys? dictKeys;
   final SharedStrings sharedStrings;
 }

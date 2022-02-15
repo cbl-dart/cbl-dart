@@ -27,6 +27,8 @@ export 'src/global.dart'
         globalFLSliceResult;
 export 'src/libraries.dart';
 export 'src/logging.dart';
+export 'src/native_utf8_string.dart'
+    show NativeUtf8String, NativeUtf8StringEncoder, nativeUtf8StringEncoder;
 export 'src/query.dart' hide CBLQueryLanguageExt;
 export 'src/replicator.dart';
 export 'src/slice.dart'

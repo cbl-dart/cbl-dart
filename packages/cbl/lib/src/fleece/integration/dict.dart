@@ -3,14 +3,11 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../support/ffi.dart';
 import '../../support/utils.dart';
 import '../decoder.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
-
-late final _dictBindings = cblBindings.fleece.dict;
 
 class MDict extends MCollection {
   MDict()
@@ -118,9 +115,14 @@ class MDict extends MCollection {
       encoder.writeValue(_dict!.cast());
     } else {
       return syncOrAsync(() sync* {
+        final dictKeys = context?.dictKeys;
         encoder.beginDict(length);
         for (final entry in iterable) {
-          encoder.writeKey(entry.key);
+          if (dictKeys != null) {
+            dictKeys.getKey(entry.key).encodeTo(encoder);
+          } else {
+            encoder.writeKey(entry.key);
+          }
           if (entry.value.hasValue) {
             encoder.writeValue(entry.value.value!);
           } else {
@@ -185,8 +187,8 @@ class MDict extends MCollection {
       return null;
     }
 
-    final flValue = _dictBindings.get(dict, key);
-    if (flValue == nullptr) {
+    final flValue = context!.dictKeys!.getKey(key).getValue(dict);
+    if (flValue == null) {
       return null;
     }
     return MValue.withValue(flValue);

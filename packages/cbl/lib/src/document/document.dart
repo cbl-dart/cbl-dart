@@ -3,6 +3,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import '../database/database_base.dart';
+import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../fleece/shared_strings.dart';
@@ -62,27 +64,41 @@ abstract class MutableDocument implements Document, MutableDictionaryInterface {
       MutableDelegateDocument.withId(id, data);
 }
 
+/// An interface to abstract over the differences between the documents of the
+/// different database implementations.
 abstract class DocumentDelegate {
+  /// The document's id.
   String get id;
 
+  /// The document's revision id.
   String? get revisionId;
 
+  /// The document's sequence number.
   int get sequence;
 
-  EncodedData get properties;
+  /// The document's encoded properties.
+  EncodedData? get properties;
 
-  set properties(EncodedData value);
+  set properties(EncodedData? value);
 
-  MRoot createMRoot(MContext context, {required bool isMutable}) =>
-      MRoot.fromData(
-        properties.toFleece(),
-        context: context,
-        isMutable: isMutable,
-      );
+  /// Creates a new [MRoot] which contains the documents properties, based on
+  /// the current state of this delegate.
+  ///
+  /// The returned [MRoot] must use the provided [context] and have the
+  /// mutability as required by [isMutable].
+  MRoot createMRoot(MContext context, {required bool isMutable});
 
+  /// Returns a copy of this delegate which can be used for a mutable document.
   DocumentDelegate toMutable();
 }
 
+/// A [DocumentDelegate] that is used when a new [MutableDocument] is created,
+/// until it is saved.
+///
+/// When a new [MutableDocument] is created there is no way to know into which
+/// database it will be saved. Until that point this type of delegate is used.
+/// This way there is no need to have one type of document for each database
+/// implementation or have a factory create new documents.
 class NewDocumentDelegate extends DocumentDelegate {
   NewDocumentDelegate([String? id]) : id = id ?? createUuid();
 
@@ -94,28 +110,43 @@ class NewDocumentDelegate extends DocumentDelegate {
   final String id;
 
   @override
-  final String? revisionId = null;
+  String? get revisionId => null;
 
   @override
-  final sequence = 0;
+  int get sequence => 0;
 
   @override
-  EncodedData properties = _emptyProperties;
+  EncodedData? properties;
+
+  @override
+  MRoot createMRoot(MContext context, {required bool isMutable}) {
+    assert(isMutable);
+
+    final properties = this.properties;
+    if (properties != null) {
+      // Usually a new document doesn't have properties, unless it is being
+      // used to insert a document that was created remotely (meaning another
+      // isolate or even process).
+      return MRoot.fromData(
+        properties.toFleece(),
+        context: context,
+        isMutable: isMutable,
+      );
+    }
+
+    return MRoot.fromMValue(
+      MValue.withNative(MutableDictionary()),
+      context: context,
+      isMutable: isMutable,
+    );
+  }
 
   @override
   DocumentDelegate toMutable() => NewDocumentDelegate.mutableCopy(this);
-
-  static late final _emptyProperties = _createEmptyProperties();
-
-  static EncodedData _createEmptyProperties() =>
-      EncodedData.fleece((fl.FleeceEncoder()
-            ..beginDict(0)
-            ..endDict())
-          .finish());
 }
 
 /// The context for [MCollection]s within a [DelegateDocument].
-class DocumentMContext extends MContext implements DatabaseMContext {
+class DocumentMContext implements DatabaseMContext {
   DocumentMContext(this.document);
 
   /// The [DelegateDocument] to which [MCollection]s with this context belong
@@ -123,13 +154,20 @@ class DocumentMContext extends MContext implements DatabaseMContext {
   final DelegateDocument document;
 
   @override
-  Database get database => document.database;
+  final sharedStrings = SharedStrings();
+
+  @override
+  DictKeys? get dictKeys => _dictKeys ??= database?.dictKeys;
+  DictKeys? _dictKeys;
+
+  @override
+  DatabaseBase? get database => document._database;
 }
 
 class DelegateDocument with IterableMixin<String> implements Document {
   DelegateDocument(
     DocumentDelegate delegate, {
-    Database? database,
+    DatabaseBase? database,
   })  : _delegate = delegate,
         _database = database {
     _setupProperties();
@@ -153,25 +191,25 @@ class DelegateDocument with IterableMixin<String> implements Document {
     }
   }
 
-  Database get database => _database!;
-  Database? _database;
+  DatabaseBase? get database => _database;
+  DatabaseBase? _database;
 
-  set database(Database database) {
-    if (assertMatchingDatabase(_database, database, 'Document')) {
+  set database(DatabaseBase? database) {
+    if (assertMatchingDatabase(_database, database!, 'Document')) {
       _database = database;
     }
   }
 
-  void setProperties(EncodedData properties) {
+  void setEncodedProperties(EncodedData properties) {
     delegate.properties = properties;
     _setupProperties();
   }
 
-  FutureOr<EncodedData> getProperties({
+  FutureOr<EncodedData> encodeProperties({
     EncodingFormat format = EncodingFormat.fleece,
     bool saveExternalData = false,
   }) {
-    final encoder = fl.FleeceEncoder(format: format.toFLEncoderFormat())
+    final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
       ..extraInfo = FleeceEncoderContext(
         database: database,
         encodeQueryParameter: true,
@@ -183,16 +221,16 @@ class DelegateDocument with IterableMixin<String> implements Document {
         .then((_) => EncodedData(format, encoder.finish()));
   }
 
-  FutureOr<void> syncProperties() => getProperties(saveExternalData: true)
-      .then((properties) => delegate.properties = properties);
+  FutureOr<void> writePropertiesToDelegate() =>
+      encodeProperties(saveExternalData: true)
+          .then((properties) => delegate.properties = properties);
 
-  final bool _isMutable = false;
-  final String _typeName = 'Document';
+  bool get _isMutable => false;
+  String get _typeName => 'Document';
 
   void _setupProperties() {
     _root = delegate.createMRoot(DocumentMContext(this), isMutable: _isMutable);
-    // ignore: cast_nullable_to_non_nullable
-    _properties = _root.asNative as Dictionary;
+    _properties = _root.asNative! as Dictionary;
   }
 
   late MRoot _root;
@@ -294,7 +332,7 @@ class MutableDelegateDocument extends DelegateDocument
 
   MutableDelegateDocument.fromDelegate(
     DocumentDelegate delegate, {
-    Database? database,
+    DatabaseBase? database,
     Map<String, Object?>? data,
   }) : super(delegate, database: database) {
     if (data != null) {
@@ -303,12 +341,10 @@ class MutableDelegateDocument extends DelegateDocument
   }
 
   @override
-  // ignore: overridden_fields
-  final _typeName = 'MutableDocument';
+  String get _typeName => 'MutableDocument';
 
   @override
-  // ignore: overridden_fields
-  final _isMutable = true;
+  bool get _isMutable => true;
 
   late MutableDictionary _mutableProperties;
 

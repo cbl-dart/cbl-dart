@@ -154,6 +154,10 @@ class FleeceEncoder extends FleeceEncoderObject {
   void writeKey(String key) =>
       call((pointer) => _encoderBinds.writeKey(pointer, key));
 
+  /// Writes a [key] for the next entry in a dict, from a [FLString].
+  void writeFLStringKey(FLString key) =>
+      call((pointer) => _encoderBinds.writeFLStringKey(pointer, key));
+
   /// Ends a dict.
   void endDict() => call(_encoderBinds.endDict);
 

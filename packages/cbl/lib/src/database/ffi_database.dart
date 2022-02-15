@@ -23,16 +23,16 @@ import '../support/utils.dart';
 import '../tracing.dart';
 import 'blob_store.dart';
 import 'database.dart';
+import 'database_base.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
-import 'database_helper.dart';
 import 'document_change.dart';
 import 'ffi_blob_store.dart';
 
 late final _bindings = cblBindings.database;
 
 class FfiDatabase extends CBLDatabaseObject
-    with DatabaseHelper<FfiDocumentDelegate>, ClosableResourceMixin
+    with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncDatabase, BlobStoreHolder {
   factory FfiDatabase({
     required String name,
@@ -89,6 +89,9 @@ class FfiDatabase extends CBLDatabaseObject
           config?.toCBLDatabaseConfiguration(),
         );
       });
+
+  @override
+  final dictKeys = OptimizingDictKeys();
 
   @override
   late final SyncBlobStore blobStore = FfiBlobStore(this);

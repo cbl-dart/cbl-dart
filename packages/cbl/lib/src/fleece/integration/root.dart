@@ -17,8 +17,9 @@ class MRoot extends MCollection {
     Data data, {
     required MContext context,
     required bool isMutable,
-  }) : super(context: context, isMutable: isMutable) {
-    this.data = data.toSliceResult();
+  })  : data = data.toSliceResult(),
+        value = null,
+        super(context: context, isMutable: isMutable) {
     _slot =
         MValue.withValue(_valueBinds.fromData(this.data!, FLTrust.trusted)!);
     _slot.updateParent(this);
@@ -28,15 +29,27 @@ class MRoot extends MCollection {
     Pointer<FLValue> value, {
     required MContext context,
     required bool isMutable,
-  })  : value = FleeceValueObject(value, isRefCounted: true, adopt: false),
+  })  : data = null,
+        value = FleeceValueObject(value, isRefCounted: true, adopt: false),
         _slot = MValue.withValue(value),
         super(context: context, isMutable: isMutable) {
     _slot.updateParent(this);
   }
 
-  late final SliceResult? data;
+  MRoot.fromMValue(
+    MValue value, {
+    required MContext context,
+    required bool isMutable,
+  })  : data = null,
+        value = null,
+        _slot = value,
+        super(context: context, isMutable: isMutable) {
+    _slot.updateParent(this);
+  }
 
-  FleeceValueObject<FLValue>? value;
+  final SliceResult? data;
+
+  final FleeceValueObject<FLValue>? value;
 
   late final MValue _slot;
 
