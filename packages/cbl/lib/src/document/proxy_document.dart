@@ -1,3 +1,5 @@
+import '../fleece/integration/context.dart';
+import '../fleece/integration/root.dart';
 import '../service/cbl_service_api.dart';
 import '../support/encoding.dart';
 import 'document.dart';
@@ -27,7 +29,15 @@ class ProxyDocumentDelegate extends DocumentDelegate {
   int _sequence;
 
   @override
-  late EncodedData properties;
+  EncodedData? properties;
+
+  @override
+  MRoot createMRoot(MContext context, {required bool isMutable}) =>
+      MRoot.fromData(
+        properties!.toFleece(),
+        context: context,
+        isMutable: isMutable,
+      );
 
   @override
   DocumentDelegate toMutable() => ProxyDocumentDelegate.fromDelegate(this);

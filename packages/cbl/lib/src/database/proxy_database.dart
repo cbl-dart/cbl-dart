@@ -9,6 +9,7 @@ import '../document/document.dart';
 import '../document/fragment.dart';
 import '../document/proxy_document.dart';
 import '../errors.dart';
+import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
 import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
@@ -25,14 +26,14 @@ import '../support/utils.dart';
 import '../tracing.dart';
 import 'blob_store.dart';
 import 'database.dart';
+import 'database_base.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
-import 'database_helper.dart';
 import 'document_change.dart';
 import 'proxy_blob_store.dart';
 
 class ProxyDatabase extends ProxyObject
-    with DatabaseHelper<ProxyDocumentDelegate>, ClosableResourceMixin
+    with DatabaseBase<ProxyDocumentDelegate>, ClosableResourceMixin
     implements AsyncDatabase, BlobStoreHolder {
   ProxyDatabase(
     this.client,
@@ -74,6 +75,9 @@ class ProxyDatabase extends ProxyObject
     final state = await client.channel.call(OpenDatabase(name, config));
     return ProxyDatabase(client, config, state);
   }
+
+  @override
+  final dictKeys = OptimizingDictKeys();
 
   var _deleteOnClose = false;
 

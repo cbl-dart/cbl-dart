@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database.dart';
+import '../database/database_base.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
@@ -102,9 +103,9 @@ abstract class MCollectionWrapper {
 }
 
 class DatabaseMContext extends MContext {
-  DatabaseMContext(this.database);
+  DatabaseMContext(this.database) : super(dictKeys: database?.dictKeys);
 
-  final Database database;
+  final DatabaseBase? database;
 }
 
 class CblMDelegate extends MDelegate {

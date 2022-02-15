@@ -219,7 +219,7 @@ class ProxyResultSet extends ResultSet {
             event.toFleece(),
             // Every result needs its own context, because each result is
             // encoded independently.
-            context: DatabaseMContext(_query.database!),
+            context: DatabaseMContext(_query.database),
             columnNames: _query._columnNames,
           ))
       .transform(ResourceStreamTransformer(parent: _query, blocking: true));

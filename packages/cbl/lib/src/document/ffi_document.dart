@@ -51,42 +51,42 @@ class FfiDocumentDelegate extends DocumentDelegate
   @override
   int get sequence => native.call(_documentBindings.sequence);
 
+  @override
+  EncodedData? get properties => _properties ??= _readEncodedProperties();
   EncodedData? _properties;
 
   @override
-  EncodedData get properties => _properties ??= _readProperties();
-
-  @override
-  set properties(EncodedData value) {
-    _writePropertiesDict(value);
+  set properties(EncodedData? value) {
+    _writeEncodedProperties(value!);
     _properties = value;
   }
 
+  Pointer<FLValue> get _nativeProperties =>
+      native.call(_documentBindings.properties).cast();
+
+  set _nativeProperties(Pointer<FLValue> value) => _mutableDocumentBindings
+      .setProperties(native.pointer.cast(), value.cast());
+
   @override
   MRoot createMRoot(MContext context, {required bool isMutable}) =>
-      runNativeCalls(() => MRoot.fromValue(
-            _readPropertiesDict().pointer,
-            context: context,
-            isMutable: isMutable,
-          ));
-
-  EncodedData _readProperties() => EncodedData.fleece(
-        runNativeCalls(() => (fl.FleeceEncoder()
-              ..writeValue(_readPropertiesDict().pointer))
-            .finish()),
+      runNativeCalls(
+        () => MRoot.fromValue(
+          _nativeProperties,
+          context: context,
+          isMutable: isMutable,
+        ),
       );
 
-  fl.Dict _readPropertiesDict() =>
-      fl.Dict.fromPointer(native.call(_documentBindings.properties));
+  EncodedData _readEncodedProperties() {
+    final encoder = FleeceEncoder();
+    runNativeCalls(() => encoder.writeValue(_nativeProperties));
+    return EncodedData.fleece(encoder.finish());
+  }
 
-  void _writePropertiesDict(EncodedData value) {
+  void _writeEncodedProperties(EncodedData value) {
     final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
-
-    runNativeCalls(() => _mutableDocumentBindings.setProperties(
-          native.pointer.cast(),
-          dict.native.pointer.cast(),
-        ));
+    runNativeCalls(() => _nativeProperties = dict.native.pointer);
   }
 
   @override

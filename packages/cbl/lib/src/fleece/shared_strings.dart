@@ -17,9 +17,6 @@ class SharedStrings {
 
   final _addressToDartString = HashMap<int, String?>();
 
-  String sliceToDartString(Slice slice) =>
-      _toDartString(slice.size, slice.buf.cast());
-
   String flStringToDartString(FLString slice) =>
       _toDartString(slice.size, slice.buf);
 

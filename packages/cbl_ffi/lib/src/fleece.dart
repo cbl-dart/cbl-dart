@@ -954,8 +954,8 @@ class DictBindings extends Bindings {
   late final _FLDict_IsEmpty _isEmpty;
   late final _FLDict_AsMutable _asMutable;
 
-  Pointer<FLValue> get(Pointer<FLDict> dict, String key) =>
-      runWithSingleFLString(key, (flKey) => _get(dict, flKey));
+  Pointer<FLValue>? get(Pointer<FLDict> dict, String key) =>
+      runWithSingleFLString(key, (flKey) => _get(dict, flKey)).toNullable();
 
   int count(Pointer<FLDict> dict) => _count(dict);
 
@@ -963,6 +963,59 @@ class DictBindings extends Bindings {
 
   Pointer<FLMutableDict>? asMutable(Pointer<FLDict> dict) =>
       _asMutable(dict).toNullable();
+}
+
+class FLDictKey extends Struct {
+  // ignore: unused_field
+  external FLSlice _private1;
+  // ignore: unused_field
+  external Pointer<Void> _private2;
+  @Uint32()
+  // ignore: unused_field
+  external int _private3;
+  @Uint32()
+  // ignore: unused_field
+  external int _private4;
+  @Bool()
+  // ignore: unused_field
+  external bool _private5;
+}
+
+typedef _FLDictKey_Init = FLDictKey Function(FLString key);
+
+typedef _FLDict_GetWithKey = Pointer<FLValue> Function(
+  Pointer<FLDict> dict,
+  Pointer<FLDictKey> key,
+);
+
+class DictKeyBindings extends Bindings {
+  DictKeyBindings(Bindings parent) : super(parent) {
+    _init = libs.cbl.lookupFunction<_FLDictKey_Init, _FLDictKey_Init>(
+      'FLDictKey_Init',
+      isLeaf: useIsLeaf,
+    );
+    _getWithKey =
+        libs.cbl.lookupFunction<_FLDict_GetWithKey, _FLDict_GetWithKey>(
+      'FLDict_GetWithKey',
+      isLeaf: useIsLeaf,
+    );
+  }
+
+  late final _FLDictKey_Init _init;
+  late final _FLDict_GetWithKey _getWithKey;
+
+  void init(FLDictKey dictKey, FLString key) {
+    final state = _init(key);
+    dictKey
+      .._private1 = state._private1
+      .._private2 = state._private2
+      .._private3 = state._private3
+      .._private4 = state._private4
+      .._private5 = state._private5;
+  }
+
+  Pointer<FLValue>? getWithKey(Pointer<FLDict> dict, Pointer<FLDictKey> key) =>
+      _getWithKey(dict, key).toNullable();
 }
 
 // === MutableDict =============================================================
@@ -1748,6 +1801,10 @@ class FleeceEncoderBindings extends Bindings {
     });
   }
 
+  void writeFLStringKey(Pointer<FLEncoder> encoder, FLString key) {
+    _checkError(encoder, _writeKey(encoder, key));
+  }
+
   void endDict(Pointer<FLEncoder> encoder) {
     _checkError(encoder, _endDict(encoder));
   }
@@ -1795,6 +1852,7 @@ class FleeceBindings extends Bindings {
     array = ArrayBindings(this);
     mutableArray = MutableArrayBindings(this);
     dict = DictBindings(this);
+    dictKey = DictKeyBindings(this);
     mutableDict = MutableDictBindings(this);
     decoder = FleeceDecoderBindings(this);
     encoder = FleeceEncoderBindings(this);
@@ -1807,6 +1865,7 @@ class FleeceBindings extends Bindings {
   late final ArrayBindings array;
   late final MutableArrayBindings mutableArray;
   late final DictBindings dict;
+  late final DictKeyBindings dictKey;
   late final MutableDictBindings mutableDict;
   late final FleeceDecoderBindings decoder;
   late final FleeceEncoderBindings encoder;

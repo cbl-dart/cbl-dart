@@ -412,7 +412,7 @@ class CblService {
       return null;
     }
 
-    document.setProperties(request.state.properties!);
+    document.setEncodedProperties(request.state.properties!);
 
     final success = database.saveDocument(document, request.concurrencyControl);
 
@@ -652,7 +652,7 @@ class CblService {
   }) async {
     EncodedData? properties;
     if (propertiesFormat != null) {
-      properties = await document.getProperties(format: propertiesFormat);
+      properties = await document.encodeProperties(format: propertiesFormat);
     }
 
     return DocumentState(
@@ -806,7 +806,7 @@ extension on DelegateDocument {
   Future<DocumentState> getState({
     required EncodingFormat propertiesFormat,
   }) async {
-    final properties = await getProperties(format: propertiesFormat);
+    final properties = await encodeProperties(format: propertiesFormat);
 
     return DocumentState(
       id: id,

@@ -199,7 +199,7 @@ void main() {
         final dict = root.asNative as MDict;
         final flDict = root.values.first.value!.cast<FLDict>();
 
-        expect(dict.get('a'), MValue.withValue(_dictBinds.get(flDict, 'a')));
+        expect(dict.get('a'), MValue.withValue(_dictBinds.get(flDict, 'a')!));
         dict.remove('a');
         expect(dict.get('a'), isNull);
         dict.set('a', null);
@@ -215,7 +215,7 @@ void main() {
         expect(root.isMutated, isFalse);
         expect(dict.isMutated, isFalse);
         expect(value!.isMutated, isFalse);
-        expect(value, MValue.withValue(_dictBinds.get(flDict, 'a')));
+        expect(value, MValue.withValue(_dictBinds.get(flDict, 'a')!));
 
         dict.set('a', false);
 
@@ -259,7 +259,7 @@ void main() {
 
         expect(
           Map.fromEntries(dict.iterable),
-          {'a': MValue.withValue(_dictBinds.get(flDict, 'a'))},
+          {'a': MValue.withValue(_dictBinds.get(flDict, 'a')!)},
         );
       });
 
@@ -272,7 +272,7 @@ void main() {
         expect(
           Map.fromEntries(dict.iterable),
           {
-            'a': MValue.withValue(_dictBinds.get(flDict, 'a')),
+            'a': MValue.withValue(_dictBinds.get(flDict, 'a')!),
             'b': MValue.withNative(true),
           },
         );

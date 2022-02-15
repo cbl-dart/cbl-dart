@@ -507,7 +507,9 @@ class Dict extends Value with MapMixin<String, Value> {
 
   @override
   Value operator [](Object? key) => Value.fromPointer(
-        native.call((pointer) => _bindings.get(pointer.cast(), assertKey(key))),
+        native.call(
+          (pointer) => _bindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
+        ),
         isRefCounted: false,
       );
 
