@@ -5,7 +5,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../database/proxy_database.dart';
 import '../document/common.dart';
-import '../fleece/fleece.dart';
+import '../fleece/encoder.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';

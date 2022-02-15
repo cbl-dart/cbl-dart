@@ -9,7 +9,7 @@ import '../database.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
-import '../fleece/fleece.dart' as fl;
+import '../fleece/containers.dart' as fl;
 import '../support/async_callback.dart';
 import '../support/edition.dart';
 import '../support/errors.dart';

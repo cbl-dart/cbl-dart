@@ -5,8 +5,8 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database.dart';
+import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
-import '../fleece/fleece.dart' as fl;
 import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';
 import 'array.dart';

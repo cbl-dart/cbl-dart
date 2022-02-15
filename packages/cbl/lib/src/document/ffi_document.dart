@@ -2,7 +2,8 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../fleece/fleece.dart' as fl;
+import '../fleece/containers.dart' as fl;
+import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
 import '../support/ffi.dart';

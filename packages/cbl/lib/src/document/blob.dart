@@ -9,7 +9,6 @@ import '../database/blob_store.dart';
 import '../database/database.dart';
 import '../errors.dart';
 import '../fleece/encoder.dart';
-import '../fleece/fleece.dart';
 import '../support/errors.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';

@@ -6,7 +6,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database/ffi_database.dart';
 import '../document/common.dart';
-import '../fleece/fleece.dart' as fl;
+import '../fleece/containers.dart' as fl;
+import '../fleece/encoder.dart';
 import '../fleece/integration/context.dart';
 import '../support/async_callback.dart';
 import '../support/ffi.dart';
@@ -175,7 +176,7 @@ class FfiQuery extends QueryBase
   }
 
   void _applyParameters() {
-    final encoder = fl.FleeceEncoder()
+    final encoder = FleeceEncoder()
       ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
     final parameters = _parameters;
     if (parameters != null) {

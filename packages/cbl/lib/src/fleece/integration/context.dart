@@ -1,4 +1,4 @@
-import '../decoder.dart';
+import '../shared_strings.dart';
 
 class MContext {
   MContext({

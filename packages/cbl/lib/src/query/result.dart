@@ -8,7 +8,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../document.dart';
 import '../document/array.dart';
 import '../document/dictionary.dart';
-import '../fleece/fleece.dart' as fl;
+import '../fleece/containers.dart' as fl;
+import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
 import '../support/native_object.dart';
@@ -270,7 +271,7 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   String toJson() {
-    final encoder = fl.FleeceEncoder(format: FLEncoderFormat.json);
+    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
     return utf8.decode(encoder.finish().toTypedList());
@@ -299,7 +300,7 @@ class ResultImpl with IterableMixin<String> implements Result {
         break;
     }
 
-    final encoder = fl.FleeceEncoder(format: format.toFLEncoderFormat());
+    final encoder = FleeceEncoder(format: format.toFLEncoderFormat());
     columnValues.call(encoder.writeValue);
     return EncodedData(format, encoder.finish());
   }
