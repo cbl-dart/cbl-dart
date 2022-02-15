@@ -1,7 +1,7 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/common.dart';
-import 'package:cbl/src/fleece/fleece.dart' as fl;
+import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 import 'package:cbl/src/query/result.dart';
 
@@ -229,7 +229,7 @@ void main() {
 
 Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final values = MutableArray(columnValues) as MutableArrayImpl;
-  final encoder = fl.FleeceEncoder()
+  final encoder = FleeceEncoder()
     // FleeceEncoderContext is needed to compare unsaved Blobs in test.
     ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
 

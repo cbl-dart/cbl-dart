@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../fleece/fleece.dart';
+import '../fleece/containers.dart';
+import '../fleece/decoder.dart';
+import '../fleece/encoder.dart';
 import 'native_object.dart';
 
 enum EncodingFormat {

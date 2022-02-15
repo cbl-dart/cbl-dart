@@ -6,7 +6,7 @@ import 'dart:collection';
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import '../fleece/fleece.dart';
+import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import 'blob.dart';
 import 'common.dart';

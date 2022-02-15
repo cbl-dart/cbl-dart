@@ -1,6 +1,6 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/dictionary.dart';
-import 'package:cbl/src/fleece/fleece.dart' as fl;
+import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
@@ -126,14 +126,14 @@ void main() {
         json(
           '''
           {
-            "null": null, 
-            "string": "a", 
-            "integer": 1, 
-            "float": 0.2, 
-            "bool": true, 
-            "date": "${testDate.toIso8601String()}", 
-            "blob": ${testBlob.toJson()}, 
-            "array": [], 
+            "null": null,
+            "string": "a",
+            "integer": 1,
+            "float": 0.2,
+            "bool": true,
+            "date": "${testDate.toIso8601String()}",
+            "blob": ${testBlob.toJson()},
+            "array": [],
             "dictionary": {}
           }
           ''',
@@ -155,14 +155,14 @@ void main() {
         json(
           '''
           {
-            "null": null, 
-            "string": "a", 
-            "integer": 1, 
-            "float": 0.2, 
-            "bool": true, 
-            "date": "${testDate.toIso8601String()}", 
-            "blob": ${testBlob.toJson()}, 
-            "array": [], 
+            "null": null,
+            "string": "a",
+            "integer": 1,
+            "float": 0.2,
+            "bool": true,
+            "date": "${testDate.toIso8601String()}",
+            "blob": ${testBlob.toJson()},
+            "array": [],
             "dictionary": {}
           }
           ''',
@@ -294,7 +294,7 @@ void main() {
 
 Dictionary immutableDictionary([Map<String, Object?>? data]) {
   final array = MutableDictionary(data) as MutableDictionaryImpl;
-  final encoder = fl.FleeceEncoder();
+  final encoder = FleeceEncoder();
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(

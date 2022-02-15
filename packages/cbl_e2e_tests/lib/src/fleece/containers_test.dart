@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart' show InvalidJsonException;
-import 'package:cbl/src/fleece/fleece.dart';
+import 'package:cbl/src/fleece/containers.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';

@@ -1,6 +1,6 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
-import 'package:cbl/src/fleece/fleece.dart' as fl;
+import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
@@ -350,7 +350,7 @@ void main() {
 
 Array immutableArray([List<Object?>? data]) {
   final array = MutableArray(data) as MutableArrayImpl;
-  final encoder = fl.FleeceEncoder();
+  final encoder = FleeceEncoder();
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(

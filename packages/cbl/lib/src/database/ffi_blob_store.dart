@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../document/blob.dart';
-import '../fleece/fleece.dart';
+import '../fleece/containers.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';

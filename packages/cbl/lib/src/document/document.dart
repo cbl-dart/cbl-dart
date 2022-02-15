@@ -3,9 +3,9 @@
 import 'dart:async';
 import 'dart:collection';
 
-import '../database/database.dart';
-import '../fleece/fleece.dart' as fl;
+import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
+import '../fleece/shared_strings.dart';
 import '../support/encoding.dart';
 import '../support/errors.dart';
 import '../support/utils.dart';
