@@ -4,10 +4,10 @@ import 'dart:async';
 import 'dart:collection';
 
 import '../database/database_base.dart';
+import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
-import '../fleece/shared_strings.dart';
 import '../support/encoding.dart';
 import '../support/errors.dart';
 import '../support/utils.dart';
@@ -154,11 +154,18 @@ class DocumentMContext implements DatabaseMContext {
   final DelegateDocument document;
 
   @override
-  final sharedStrings = SharedStrings();
+  DictKeys get dictKeys =>
+      (_dictKeys ??= database?.dictKeys) ?? const UnoptimizingDictKeys();
+  DictKeys? _dictKeys;
 
   @override
-  DictKeys? get dictKeys => _dictKeys ??= database?.dictKeys;
-  DictKeys? _dictKeys;
+  SharedKeysTable get sharedKeysTable =>
+      (_sharedKeysTable ??= database?.sharedKeysTable) ??
+      const NoopSharedKeysTable();
+  SharedKeysTable? _sharedKeysTable;
+
+  @override
+  final sharedStringsTable = SharedStringsTable();
 
   @override
   DatabaseBase? get database => document._database;

@@ -183,6 +183,19 @@ class CBLBlobReadStreamObject extends NativeObject<CBLBlobReadStream> {
   }
 }
 
+/// Handle to a Fleece SharedKeys object.
+class FleeceSharedKeysObject extends NativeObject<FLSharedKeys> {
+  /// Creates a handle to a Fleece doc.
+  FleeceSharedKeysObject(Pointer<FLSharedKeys> pointer, {bool adopt = true})
+      : super(pointer) {
+    cblBindings.fleece.sharedKeys.bindToDartObject(
+      this,
+      pointer,
+      retain: !adopt,
+    );
+  }
+}
+
 /// Handle to a Fleece doc.
 class FleeceDocObject extends NativeObject<FLDoc> {
   /// Creates a handle to a Fleece doc.

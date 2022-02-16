@@ -87,7 +87,7 @@ class _OptimizedDictKey extends DictKey {
 
   @override
   void encodeTo(FleeceEncoder encoder) {
-    encoder.writeFLStringKey(_flString);
+    encoder.writeKeyFLString(_flString);
     cblReachabilityFence(_memory);
   }
 }
@@ -95,6 +95,8 @@ class _OptimizedDictKey extends DictKey {
 /// A provider of [DictKey]s.
 // ignore: one_member_abstracts
 abstract class DictKeys {
+  const DictKeys();
+
   /// Returns a [DictKey] for the given [key].
   ///
   /// The returned value should not be stored, as subsequent calls might return
@@ -104,6 +106,8 @@ abstract class DictKeys {
 
 /// A provider of [DictKey]s that does not use optimized keys.
 class UnoptimizingDictKeys extends DictKeys {
+  const UnoptimizingDictKeys();
+
   @override
   DictKey getKey(String key) => _DartStringDictKey(key);
 }

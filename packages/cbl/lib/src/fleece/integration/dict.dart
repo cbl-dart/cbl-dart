@@ -96,14 +96,16 @@ class MDict extends MCollection {
     // Shadow all keys in _dict with empty MValue.
     if (!_valuesHasAllKeys) {
       _valuesHasAllKeys = true;
+      final sharedKeysTable = context.sharedKeysTable;
+      final sharedStringsTable = context.sharedStringsTable;
       final it = DictIterator(
         _dict!,
-        keyOut: globalFLString,
+        sharedKeysTable: sharedKeysTable,
+        keyOut: globalLoadedDictKey,
         partiallyConsumable: false,
       );
       while (it.moveNext()) {
-        final key =
-            context!.sharedStrings.flStringToDartString(globalFLString.ref);
+        final key = sharedKeysTable.decode(sharedStringsTable);
         _values[key] = MValue.empty();
       }
     }
@@ -115,18 +117,19 @@ class MDict extends MCollection {
       encoder.writeValue(_dict!.cast());
     } else {
       return syncOrAsync(() sync* {
-        final dictKeys = context?.dictKeys;
+        final dictKeys = context.dictKeys;
         encoder.beginDict(length);
         for (final entry in iterable) {
-          if (dictKeys != null) {
+          final value = entry.value;
+          if (value is _MValueWithKey) {
+            encoder.writeKeyValue(value.key);
+          } else {
             dictKeys.getKey(entry.key).encodeTo(encoder);
-          } else {
-            encoder.writeKey(entry.key);
           }
-          if (entry.value.hasValue) {
-            encoder.writeValue(entry.value.value!);
+          if (value.hasValue) {
+            encoder.writeValue(value.value!);
           } else {
-            yield entry.value.encodeTo(encoder);
+            yield value.encodeTo(encoder);
           }
         }
         encoder.endDict();
@@ -153,16 +156,20 @@ class MDict extends MCollection {
 
     // Iterate over entries in _dict.
     final dict = _dict!;
+    final sharedKeysTable = context.sharedKeysTable;
+    final sharedStringsTable = context.sharedStringsTable;
     final it = DictIterator(
       dict,
-      keyOut: globalFLString,
+      sharedKeysTable: sharedKeysTable,
+      keyOut: globalLoadedDictKey,
       valueOut: globalLoadedFLValue,
       preLoad: false,
       partiallyConsumable: false,
     );
+    final loadedKey = globalLoadedDictKey.ref;
+    final loadedValue = globalLoadedFLValue.ref;
     while (it.moveNext()) {
-      final key =
-          context!.sharedStrings.flStringToDartString(globalFLString.ref);
+      final key = sharedKeysTable.decode(sharedStringsTable);
 
       // Skip over entries which are shadowed by _values
       if (_values.containsKey(key)) {
@@ -170,8 +177,11 @@ class MDict extends MCollection {
       }
 
       // Cache the value to speed up lookups later.
-      final value =
-          _values[key] = MValue.withValue(globalLoadedFLValue.ref.asValue);
+
+      final value = _values[key] = _MValueWithKey(
+        loadedKey.value,
+        Pointer<FLValue>.fromAddress(loadedValue.value),
+      );
       yield MapEntry(key, value);
     }
 
@@ -187,10 +197,16 @@ class MDict extends MCollection {
       return null;
     }
 
-    final flValue = context!.dictKeys!.getKey(key).getValue(dict);
+    final flValue = context.dictKeys.getKey(key).getValue(dict);
     if (flValue == null) {
       return null;
     }
     return MValue.withValue(flValue);
   }
+}
+
+class _MValueWithKey extends MValue {
+  _MValueWithKey(this.key, Pointer<FLValue> value) : super.withValue(value);
+
+  final Pointer<FLValue> key;
 }

@@ -3,10 +3,13 @@ import 'dart:developer';
 
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/fleece/containers.dart' as fl;
 import 'package:cbl/src/fleece/decoder.dart';
+import 'package:cbl/src/fleece/dict_key.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/context.dart';
 import 'package:cbl/src/fleece/integration/root.dart';
+import 'package:cbl/src/support/native_object.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
@@ -33,34 +36,62 @@ class JsonInDartDecodingBenchmark extends DecodingBenchmark {
 class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
   FleeceRecursiveDecodingBenchmark() : super('Fleece (recursive)');
 
-  late final data = FleeceEncoder().convertJson(jsonString);
+  final sharedKeys = fl.SharedKeys();
+  final sharedKeysTable = SharedKeysTable();
+  late final data =
+      (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(jsonString);
 
   @override
   void run() {
     // ignore: deprecated_member_use
-    const RecursiveFleeceDecoder(trust: FLTrust.trusted).convert(data);
+    RecursiveFleeceDecoder(
+      trust: FLTrust.trusted,
+      sharedKeys: sharedKeys,
+      sharedKeysTable: sharedKeysTable,
+    ).convert(data);
   }
 }
 
 class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
   FleeceListenerDecodingBenchmark() : super('Fleece (listener)');
 
-  late final data = FleeceEncoder().convertJson(jsonString);
+  final sharedKeys = fl.SharedKeys();
+  final sharedKeysTable = SharedKeysTable();
+  late final data =
+      (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(jsonString);
 
   @override
   void run() {
-    const FleeceDecoder(trust: FLTrust.trusted).convert(data);
+    FleeceDecoder(
+      trust: FLTrust.trusted,
+      sharedKeys: sharedKeys,
+      sharedKeysTable: sharedKeysTable,
+    ).convert(data);
   }
 }
 
 class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
   FleeceWrapperDecodingBenchmark() : super('Fleece (wrapper)');
 
-  late final data = FleeceEncoder().convertJson(jsonString);
+  final dictKeys = OptimizingDictKeys();
+  final sharedKeys = fl.SharedKeys();
+  final sharedKeysTable = SharedKeysTable();
+  late final data =
+      (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(jsonString);
 
   @override
   void run() {
-    final root = MRoot.fromData(data, context: MContext(), isMutable: false);
+    final doc =
+        fl.Doc.fromResultData(data, FLTrust.trusted, sharedKeys: sharedKeys);
+    final root = doc.root.call((pointer) => MRoot.fromValue(
+          pointer,
+          context: MContext(
+            dictKeys: dictKeys,
+            sharedKeysTable: sharedKeysTable,
+            sharedStringsTable: SharedStringsTable(),
+          ),
+          isMutable: false,
+        ));
     (root.asNative! as Array).toPlainList();
   }
 }

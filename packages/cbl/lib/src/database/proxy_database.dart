@@ -9,6 +9,7 @@ import '../document/document.dart';
 import '../document/fragment.dart';
 import '../document/proxy_document.dart';
 import '../errors.dart';
+import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
 import '../service/cbl_service.dart';
@@ -78,6 +79,9 @@ class ProxyDatabase extends ProxyObject
 
   @override
   final dictKeys = OptimizingDictKeys();
+
+  @override
+  final sharedKeysTable = SharedKeysTable();
 
   var _deleteOnClose = false;
 

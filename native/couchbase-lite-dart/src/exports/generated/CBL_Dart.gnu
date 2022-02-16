@@ -28,8 +28,10 @@ CBL_Dart {
 		CBLDart_FLSliceResult_BindToDartObject;
 		CBLDart_FLSliceResult_Retain;
 		CBLDart_FLSliceResult_Release;
+		CBLDart_FLSharedKeys_BindToDartObject;
 		CBLDart_FLDoc_BindToDartObject;
 		CBLDart_FLValue_BindToDartObject;
+		CBLDart_KnownSharedKeys_New;
 		CBLDart_FLValue_FromData;
 		CBLDart_GetLoadedFLValue;
 		CBLDart_FLArray_GetLoadedFLValue;

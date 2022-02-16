@@ -1,9 +1,7 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/encoder.dart';
-import 'package:cbl/src/fleece/shared_strings.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
@@ -31,27 +29,29 @@ void main() {
       );
     });
 
-    test('SharedStrings should only cache strings encoded as shared strings',
-        () {
-      final data = FleeceEncoder()
-          .convertJson('[".", "..", "...............", "................"]');
-      final sliceResult = data.toSliceResult();
-      final sharedStrings = SharedStrings();
+    test(
+      'SharedStringsTable should only cache strings encoded as shared strings',
+      () {
+        final data = FleeceEncoder()
+            .convertJson('[".", "..", "...............", "................"]');
+        final sliceResult = data.toSliceResult();
+        final sharedStringsTable = SharedStringsTable();
 
-      final flArray =
-          _valueBinds.fromData(sliceResult, FLTrust.trusted)!.cast<FLArray>();
-      for (var i = 0; i < 4; i++) {
-        _decoderBinds.getLoadedValueFromArray(flArray, i);
-        sharedStrings.flStringToDartString(globalLoadedFLValue.ref.asString);
-      }
+        final flArray =
+            _valueBinds.fromData(sliceResult, FLTrust.trusted)!.cast<FLArray>();
+        for (var i = 0; i < 4; i++) {
+          _decoderBinds.getLoadedValueFromArray(flArray, i);
+          sharedStringsTable.decode(StringSource.value);
+        }
 
-      expect(sharedStrings.hasString('.'), isFalse);
-      expect(sharedStrings.hasString('..'), isTrue);
-      expect(sharedStrings.hasString('...............'), isTrue);
-      expect(sharedStrings.hasString('................'), isFalse);
+        expect(sharedStringsTable.hasString('.'), isFalse);
+        expect(sharedStringsTable.hasString('..'), isTrue);
+        expect(sharedStringsTable.hasString('...............'), isTrue);
+        expect(sharedStringsTable.hasString('................'), isFalse);
 
-      cblReachabilityFence(sliceResult);
-    });
+        cblReachabilityFence(sliceResult);
+      },
+    );
 
     group('FleeceDecoder', () {
       test('converts untrusted Fleece data to Dart object', () {
@@ -136,10 +136,10 @@ void main() {
         ]);
       });
 
-      test('returns null when untrusted Fleece data is invalid', () {
+      test('throws when untrusted Fleece data is invalid', () {
         final data = Data.fromTypedList(Uint8List(0));
 
-        expect(const FleeceDecoder().convert(data), isNull);
+        expect(() => const FleeceDecoder().convert(data), throwsArgumentError);
       });
     });
   });

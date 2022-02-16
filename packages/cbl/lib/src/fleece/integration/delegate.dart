@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../support/ffi.dart';
+import '../decoder.dart';
 import '../encoder.dart';
 import 'array.dart';
 import 'collection.dart';
@@ -66,8 +67,7 @@ class SimpleMDelegate extends MDelegate {
         return flValue.isInteger ? flValue.asInt : flValue.asDouble;
       case FLValueType.string:
         cacheIt();
-        return parent.context!.sharedStrings
-            .flStringToDartString(flValue.asString);
+        return parent.context.sharedStringsTable.decode(StringSource.value);
       case FLValueType.data:
         cacheIt();
         return flValue.asData.toData()?.toTypedList();

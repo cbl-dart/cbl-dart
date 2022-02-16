@@ -129,14 +129,14 @@ void main() {
         json(
           '''
           {
-            "null": null, 
-            "string": "a", 
-            "integer": 1, 
-            "float": 0.2, 
-            "bool": true, 
-            "date": "${testDate.toIso8601String()}", 
-            "blob": ${blob.toJson()}, 
-            "array": [], 
+            "null": null,
+            "string": "a",
+            "integer": 1,
+            "float": 0.2,
+            "bool": true,
+            "date": "${testDate.toIso8601String()}",
+            "blob": ${blob.toJson()},
+            "array": [],
             "dictionary": {}
           }
           ''',
@@ -158,14 +158,14 @@ void main() {
         json(
           '''
           {
-            "null": null, 
-            "string": "a", 
-            "integer": 1, 
-            "float": 0.2, 
-            "bool": true, 
-            "date": "${testDate.toIso8601String()}", 
-            "blob": ${testBlob.toJson()}, 
-            "array": [], 
+            "null": null,
+            "string": "a",
+            "integer": 1,
+            "float": 0.2,
+            "bool": true,
+            "date": "${testDate.toIso8601String()}",
+            "blob": ${testBlob.toJson()},
+            "array": [],
             "dictionary": {}
           }
           ''',
