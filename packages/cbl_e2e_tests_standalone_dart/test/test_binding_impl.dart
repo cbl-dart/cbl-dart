@@ -22,6 +22,11 @@ class StandaloneDartCblE2eTestBinding extends CblE2eTestBinding {
 
   @override
   String resolveTmpDir() => p.absolute(p.join('test', '.tmp'));
+
+  @override
+  FutureOr<String> loadLargeJsonFixture() =>
+      File(p.join('test', 'cbl_e2e_tests', 'fixtures', '1000people.json'))
+          .readAsString();
 }
 
 LibrariesConfiguration _libraries() {

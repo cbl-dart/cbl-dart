@@ -10,14 +10,13 @@ import 'package:cbl/src/fleece/integration/root.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
-import '../fixtures/large_json_doc.dart';
 import '../test_binding.dart';
 import '../utils/benchmark.dart';
 
 abstract class DecodingBenchmark extends BenchmarkBase {
   DecodingBenchmark(String description) : super('Decoding: $description');
 
-  final jsonString = largeJsonDoc;
+  final jsonString = largeJsonFixture;
 }
 
 class JsonInDartDecodingBenchmark extends DecodingBenchmark {
