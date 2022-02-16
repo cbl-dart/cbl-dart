@@ -15,13 +15,14 @@ class DocumentPropertyLookup extends BenchmarkBase {
 
   late final SyncDatabase db;
   late final String id;
+  final data = {
+    for (final i in Iterable<int>.generate(properties)) 'key$i': true,
+  };
 
   @override
   void setup() {
     db = openSyncTestDatabase();
-    final doc = MutableDocument({
-      for (final i in Iterable<int>.generate(properties)) 'key$i': true,
-    });
+    final doc = MutableDocument(data);
     id = doc.id;
     db.saveDocument(doc);
   }
@@ -39,9 +40,37 @@ class DocumentPropertyLookup extends BenchmarkBase {
     // To offset the time it takes to load a document, we access multiple
     // properties.
     final doc = db.document(id)!;
-    for (final i in Iterable<int>.generate(properties)) {
-      doc.value('key$i');
-    }
+    data.keys.forEach(doc.value);
+  }
+}
+
+class DocumentToPlainMap extends BenchmarkBase {
+  DocumentToPlainMap() : super('Document toPlainMap');
+
+  static const properties = 100;
+
+  late final SyncDatabase db;
+  late final String id;
+  final data = {
+    for (final i in Iterable<int>.generate(properties)) 'key$i': true,
+  };
+
+  @override
+  void setup() {
+    db = openSyncTestDatabase();
+    final doc = MutableDocument(data);
+    id = doc.id;
+    db.saveDocument(doc);
+  }
+
+  @override
+  void teardown() {
+    db.close();
+  }
+
+  @override
+  void run() {
+    db.document(id)!.toPlainMap();
   }
 }
 
@@ -51,6 +80,7 @@ void main() {
   test('Document benchmark', () {
     runBenchmarks([
       DocumentPropertyLookup(),
+      DocumentToPlainMap(),
     ]);
   });
 }

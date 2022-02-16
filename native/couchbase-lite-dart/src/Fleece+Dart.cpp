@@ -1,3 +1,5 @@
+#include <bitset>
+
 #include "Fleece+Dart.h"
 #include "Utils.h"
 
@@ -33,6 +35,24 @@ void CBLDart_FLSliceResult_Release(FLSliceResult slice) {
   FLSliceResult_Release(slice);
 }
 
+// === SharedKeys
+
+static void CBLDart_FLSharedKeysFinalizer(void *dart_callback_data,
+                                          void *peer) {
+  auto sharedKeys = reinterpret_cast<FLSharedKeys>(peer);
+  FLSharedKeys_Release(sharedKeys);
+}
+
+void CBLDart_FLSharedKeys_BindToDartObject(Dart_Handle object,
+                                           FLSharedKeys sharedKeys,
+                                           bool retain) {
+  if (retain) {
+    FLSharedKeys_Retain(sharedKeys);
+  }
+  Dart_NewFinalizableHandle_DL(object, sharedKeys, 0,
+                               CBLDart_FLSharedKeysFinalizer);
+}
+
 // === Doc
 
 static void CBLDart_FLDocFinalizer(void *dart_callback_data, void *peer) {
@@ -60,6 +80,67 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
 }
 
 // === Decoder ================================================================
+
+struct KnownSharedKeys {
+  /**
+   * Marks the give key as known, if it wasent already.
+   *
+   * Returns true if the key was previously unknown.
+   */
+  bool makeKeyKnown(int key) {
+    if (_knownKeys[key]) {
+      return false;
+    } else {
+      _knownKeys[key] = true;
+      return true;
+    }
+  };
+
+  std::bitset<2048> _knownKeys;
+};
+
+static void CBLDart_KnownSharedKeysFinalizer(void *dart_callback_data,
+                                             void *peer) {
+  auto keys = reinterpret_cast<KnownSharedKeys *>(peer);
+  delete keys;
+}
+
+KnownSharedKeys *CBLDart_KnownSharedKeys_New(Dart_Handle object) {
+  auto keys = new KnownSharedKeys;
+  Dart_NewFinalizableHandle_DL(object, keys, 0,
+                               CBLDart_KnownSharedKeysFinalizer);
+  return keys;
+}
+
+static void CBLDart_GetLoadedDictKey(KnownSharedKeys *knownSharedKeys,
+                                     FLDictIterator *iterator,
+                                     CBLDart_LoadedDictKey *out) {
+  auto key = out->value = FLDictIterator_GetKey(iterator);
+
+  FLString string;
+
+  if (knownSharedKeys) {
+    if (FLValue_IsInteger(key)) {
+      auto sharedKey = out->sharedKey = static_cast<int>(FLValue_AsInt(key));
+      if (knownSharedKeys->makeKeyKnown(sharedKey)) {
+        out->isKnownSharedKey = false;
+        string = FLDictIterator_GetKeyString(iterator);
+      } else {
+        out->isKnownSharedKey = true;
+        return;
+      }
+    } else {
+      out->sharedKey = -1;
+      string = FLValue_AsString(key);
+    }
+  } else {
+    out->sharedKey = -1;
+    string = FLDictIterator_GetKeyString(iterator);
+  }
+
+  out->stringBuf = string.buf;
+  out->stringSize = string.size;
+}
 
 void CBLDart_FLValue_FromData(FLSlice data, uint8_t trust,
                               CBLDart_LoadedFLValue *out) {
@@ -97,23 +178,23 @@ void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
       break;
     }
     case kFLString: {
-      out->asString = FLValue_AsString(value);
-      out->asValue = value;
+      auto string = FLValue_AsString(value);
+      out->stringBuf = string.buf;
+      out->stringSize = string.size;
       break;
     }
     case kFLData: {
       out->asData = FLValue_AsData(value);
-      out->asValue = value;
       break;
     }
     case kFLArray: {
       out->collectionSize = FLArray_Count((FLArray)value);
-      out->asValue = value;
+      out->value = value;
       break;
     }
     case kFLDict: {
       out->collectionSize = FLDict_Count((FLDict)value);
-      out->asValue = value;
+      out->value = value;
       break;
     }
   }
@@ -130,6 +211,16 @@ void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
   CBLDart_GetLoadedFLValue(FLDict_Get(dict, key), out);
 }
 
+struct CBLDart_FLDictIterator {
+  CBLDart_LoadedDictKey *_keyOut;
+  CBLDart_LoadedFLValue *_valueOut;
+  KnownSharedKeys *_knownSharedKeys;
+  bool _preLoad;
+  FLDictIterator _iterator;
+  bool _isDone;
+  Dart_FinalizableHandle _objectHandle;
+};
+
 static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
                                           void *peer) {
   auto iterator = reinterpret_cast<CBLDart_FLDictIterator *>(peer);
@@ -140,11 +231,13 @@ static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
 }
 
 CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
-    Dart_Handle object, FLDict dict, FLString *keyOut,
-    CBLDart_LoadedFLValue *valueOut, bool finalize, bool preLoad) {
+    Dart_Handle object, FLDict dict, KnownSharedKeys *knownSharedKeys,
+    CBLDart_LoadedDictKey *keyOut, CBLDart_LoadedFLValue *valueOut,
+    bool finalize, bool preLoad) {
   auto iterator = new CBLDart_FLDictIterator;
   iterator->_keyOut = keyOut;
   iterator->_valueOut = valueOut;
+  iterator->_knownSharedKeys = knownSharedKeys;
   iterator->_preLoad = preLoad;
   iterator->_isDone = false;
   iterator->_objectHandle = finalize ? Dart_NewFinalizableHandle_DL(
@@ -164,7 +257,8 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
   if (value) {
     auto keyOut = iterator->_keyOut;
     if (keyOut) {
-      *keyOut = FLDictIterator_GetKeyString(dictIterator);
+      CBLDart_GetLoadedDictKey(iterator->_knownSharedKeys, dictIterator,
+                               keyOut);
     }
 
     auto valueOut = iterator->_valueOut;
@@ -172,7 +266,7 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
       if (iterator->_preLoad) {
         CBLDart_GetLoadedFLValue(value, valueOut);
       } else {
-        valueOut->asValue = value;
+        valueOut->value = value;
       }
     }
 
@@ -187,6 +281,12 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
 
   return false;
 }
+
+struct CBLDart_FLArrayIterator {
+  CBLDart_LoadedFLValue *_valueOut;
+  FLArrayIterator _iterator;
+  Dart_FinalizableHandle _objectHandle;
+};
 
 static void CBLDart_ArrayIteratorFinalizer(void *dart_callback_data,
                                            void *peer) {

@@ -20,6 +20,13 @@ void CBLDart_FLSliceResult_Retain(FLSliceResult slice);
 CBLDART_EXPORT
 void CBLDart_FLSliceResult_Release(FLSliceResult slice);
 
+// === SharedKeys =============================================================
+
+CBLDART_EXPORT
+void CBLDart_FLSharedKeys_BindToDartObject(Dart_Handle object,
+                                           FLSharedKeys sharedKeys,
+                                           bool retain);
+
 // === Doc ====================================================================
 
 CBLDART_EXPORT
@@ -33,6 +40,23 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
 
 // === Decoder ================================================================
 
+// An object which remembers which shared keys have been seen. This is used
+// to avoid decoding the same shared key multiple times.
+struct KnownSharedKeys;
+
+CBLDART_EXPORT
+KnownSharedKeys *CBLDart_KnownSharedKeys_New(Dart_Handle object);
+
+struct CBLDart_LoadedDictKey {
+  bool isKnownSharedKey;  // Whether the key has been seen before. For shared
+                          // keys, stringBuf and stringSize are only set the
+                          // first time the key is seen.
+  int sharedKey;  // The id of the shared key or -1 if the key is not shared.
+  const void *stringBuf;  // The pointer to the start of the key string.
+  size_t stringSize;      // The length of the key string.
+  FLValue value;          // The Fleece value of the key.
+};
+
 struct CBLDart_LoadedFLValue {
   bool exists;
   int8_t type;
@@ -41,9 +65,10 @@ struct CBLDart_LoadedFLValue {
   bool asBool;
   int64_t asInt;
   double asDouble;
-  FLString asString;
+  const void *stringBuf;
+  size_t stringSize;
   FLSlice asData;
-  FLValue asValue;
+  FLValue value;
 };
 
 CBLDART_EXPORT
@@ -61,28 +86,18 @@ CBLDART_EXPORT
 void CBLDart_FLDict_GetLoadedFLValue(FLDict dict, FLString key,
                                      CBLDart_LoadedFLValue *out);
 
-struct CBLDart_FLDictIterator {
-  FLString *_keyOut;
-  CBLDart_LoadedFLValue *_valueOut;
-  bool _preLoad;
-  FLDictIterator _iterator;
-  bool _isDone;
-  Dart_FinalizableHandle _objectHandle;
-};
+struct CBLDart_FLDictIterator;
 
 CBLDART_EXPORT
 CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
-    Dart_Handle object, FLDict dict, FLString *keyOut,
-    CBLDart_LoadedFLValue *valueOut, bool finalize, bool preLoad);
+    Dart_Handle object, FLDict dict, KnownSharedKeys *knownSharedKeys,
+    CBLDart_LoadedDictKey *keyOut, CBLDart_LoadedFLValue *valueOut,
+    bool finalize, bool preLoad);
 
 CBLDART_EXPORT
 bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator);
 
-struct CBLDart_FLArrayIterator {
-  CBLDart_LoadedFLValue *_valueOut;
-  FLArrayIterator _iterator;
-  Dart_FinalizableHandle _objectHandle;
-};
+struct CBLDart_FLArrayIterator;
 
 CBLDART_EXPORT
 CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(

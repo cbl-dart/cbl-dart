@@ -21,6 +21,7 @@ export 'src/fleece.dart'
     hide FLErrorCodeIntExt, FLResultSliceExt, FLStringResultExt;
 export 'src/global.dart'
     show
+        globalLoadedDictKey,
         globalLoadedFLValue,
         globalFLSlice,
         globalFLString,

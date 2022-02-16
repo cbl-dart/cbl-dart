@@ -7,6 +7,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../database.dart';
 import '../database/database_base.dart';
 import '../fleece/containers.dart' as fl;
+import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';
@@ -103,7 +104,12 @@ abstract class MCollectionWrapper {
 }
 
 class DatabaseMContext extends MContext {
-  DatabaseMContext(this.database) : super(dictKeys: database?.dictKeys);
+  DatabaseMContext(this.database)
+      : super(
+          dictKeys: database?.dictKeys,
+          sharedKeysTable: database?.sharedKeysTable,
+          sharedStringsTable: SharedStringsTable(),
+        );
 
   final DatabaseBase? database;
 }
@@ -140,6 +146,8 @@ class CblMDelegate extends MDelegate {
 
   @override
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt) {
+    cacheIt();
+
     _decoderBinds.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
@@ -161,14 +169,10 @@ class CblMDelegate extends MDelegate {
       case FLValueType.number:
         return flValue.isInteger ? flValue.asInt : flValue.asDouble;
       case FLValueType.string:
-        cacheIt();
-        return parent.context!.sharedStrings
-            .flStringToDartString(flValue.asString);
+        return parent.context.sharedStringsTable.decode(StringSource.value);
       case FLValueType.data:
-        cacheIt();
         return flValue.asData.toData()?.toTypedList();
       case FLValueType.array:
-        cacheIt();
         final array = MArray.asChild(value, parent, flValue.collectionSize);
         if (parent.hasMutableChildren) {
           return MutableArrayImpl(array);
@@ -176,9 +180,7 @@ class CblMDelegate extends MDelegate {
           return ArrayImpl(array);
         }
       case FLValueType.dict:
-        cacheIt();
-
-        final flDict = flValue.asValue.cast<FLDict>();
+        final flDict = Pointer<FLDict>.fromAddress(flValue.value);
 
         if (_blobBindings.isBlob(flDict)) {
           final context = parent.context;

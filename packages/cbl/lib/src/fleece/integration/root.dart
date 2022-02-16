@@ -54,9 +54,6 @@ class MRoot extends MCollection {
   late final MValue _slot;
 
   @override
-  MContext get context => super.context!;
-
-  @override
   bool get isMutated => _slot.isMutated;
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
@@ -227,6 +228,63 @@ class SliceBindings extends Bindings {
   }
 }
 
+// === SharedKeys ==============================================================
+
+class FLSharedKeys extends Opaque {}
+
+typedef _FLSharedKeys_New = Pointer<FLSharedKeys> Function();
+
+typedef _CBLDart_FLSharedKeys_BindToDartObject_C = Void Function(
+  Handle object,
+  Pointer<FLSharedKeys> sharedKeys,
+  Bool retain,
+);
+typedef _CBLDart_FLSharedKeys_BindToDartObject = void Function(
+  Object object,
+  Pointer<FLSharedKeys> sharedKeys,
+  bool retain,
+);
+
+typedef _FLSharedKeys_Count_C = UnsignedInt Function(
+  Pointer<FLSharedKeys> sharedKeys,
+);
+typedef _FLSharedKeys_Count = int Function(
+  Pointer<FLSharedKeys> sharedKeys,
+);
+
+class SharedKeysBindings extends Bindings {
+  SharedKeysBindings(Bindings parent) : super(parent) {
+    _new = libs.cbl.lookupFunction<_FLSharedKeys_New, _FLSharedKeys_New>(
+      'FLSharedKeys_New',
+    );
+    _bindToDartObject = libs.cblDart.lookupFunction<
+        _CBLDart_FLSharedKeys_BindToDartObject_C,
+        _CBLDart_FLSharedKeys_BindToDartObject>(
+      'CBLDart_FLSharedKeys_BindToDartObject',
+    );
+    _count =
+        libs.cbl.lookupFunction<_FLSharedKeys_Count_C, _FLSharedKeys_Count>(
+      'FLSharedKeys_Count',
+    );
+  }
+
+  late final _FLSharedKeys_New _new;
+  late final _CBLDart_FLSharedKeys_BindToDartObject _bindToDartObject;
+  late final _FLSharedKeys_Count _count;
+
+  Pointer<FLSharedKeys> create() => _new();
+
+  void bindToDartObject(
+    Object object,
+    Pointer<FLSharedKeys> sharedKeys, {
+    required bool retain,
+  }) {
+    _bindToDartObject(object, sharedKeys, retain);
+  }
+
+  int count(Pointer<FLSharedKeys> sharedKeys) => _count(sharedKeys);
+}
+
 // === Slot ====================================================================
 
 class FLSlot extends Opaque {}
@@ -351,13 +409,13 @@ class FLDoc extends Opaque {}
 typedef _FLDoc_FromResultData_C = Pointer<FLDoc> Function(
   FLSliceResult data,
   Uint8 trust,
-  Pointer<Void> sharedKeys,
+  Pointer<FLSharedKeys> sharedKeys,
   FLSlice externalData,
 );
 typedef _FLDoc_FromResultData = Pointer<FLDoc> Function(
   FLSliceResult data,
   int trust,
-  Pointer<Void> sharedKeys,
+  Pointer<FLSharedKeys> sharedKeys,
   FLSlice externalData,
 );
 
@@ -378,6 +436,10 @@ typedef _CBLDart_FLDoc_BindToDartObject = void Function(
 typedef _FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
 
 typedef _FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
+
+typedef _FLDoc_GetSharedKeys = Pointer<FLSharedKeys> Function(
+  Pointer<FLDoc> doc,
+);
 
 class DocBindings extends Bindings {
   DocBindings(Bindings parent) : super(parent) {
@@ -403,6 +465,11 @@ class DocBindings extends Bindings {
       'FLDoc_GetRoot',
       isLeaf: useIsLeaf,
     );
+    _getSharedKeys =
+        libs.cbl.lookupFunction<_FLDoc_GetSharedKeys, _FLDoc_GetSharedKeys>(
+      'FLDoc_GetSharedKeys',
+      isLeaf: useIsLeaf,
+    );
   }
 
   late final _FLDoc_FromResultData _fromResultData;
@@ -410,17 +477,19 @@ class DocBindings extends Bindings {
   late final _CBLDart_FLDoc_BindToDartObject _bindToDartObject;
   late final _FLDoc_GetAllocedData _getAllocedData;
   late final _FLDoc_GetRoot _getRoot;
+  late final _FLDoc_GetSharedKeys _getSharedKeys;
 
-  Pointer<FLDoc>? fromResultData(
+  Pointer<FLDoc> fromResultData(
     Data data,
     FLTrust trust,
+    Pointer<FLSharedKeys>? sharedKeys,
   ) =>
       _fromResultData(
         data.toSliceResult().makeGlobalResult().ref,
         trust.toInt(),
-        nullptr,
+        sharedKeys ?? nullptr,
         nullFLSlice.ref,
-      ).toNullable();
+      );
 
   Pointer<FLDoc> fromJson(String json) => runWithSingleFLString(
         json,
@@ -434,6 +503,9 @@ class DocBindings extends Bindings {
   FLSliceResult getAllocedData(Pointer<FLDoc> doc) => _getAllocedData(doc);
 
   Pointer<FLValue> getRoot(Pointer<FLDoc> doc) => _getRoot(doc);
+
+  Pointer<FLSharedKeys>? getSharedKeys(Pointer<FLDoc> doc) =>
+      _getSharedKeys(doc).toNullable();
 }
 
 // === Value ===================================================================
@@ -1170,6 +1242,10 @@ class MutableDictBindings extends Bindings {
 
 // === Decoder =================================================================
 
+@pragma('vm:prefer-inline')
+String decodeFLString(int address, int size) =>
+    utf8.decode(Pointer<Uint8>.fromAddress(address).asTypedList(size));
+
 enum FLTrust {
   untrusted,
   trusted,
@@ -1177,6 +1253,27 @@ enum FLTrust {
 
 extension on FLTrust {
   int toInt() => index;
+}
+
+class KnownSharedKeys extends Opaque {}
+
+typedef _CBLDart_KnownSharedKeys_New_C = Pointer<KnownSharedKeys> Function(
+  Handle object,
+);
+typedef _CBLDart_KnownSharedKeys_New = Pointer<KnownSharedKeys> Function(
+  Object object,
+);
+
+class CBLDart_LoadedDictKey extends Struct {
+  @Bool()
+  external bool isKnownSharedKey;
+  @Int()
+  external int sharedKey;
+  @UintPtr()
+  external int stringBuf;
+  @Size()
+  external int stringSize;
+  external Pointer<FLValue> value;
 }
 
 class CBLDart_LoadedFLValue extends Struct {
@@ -1194,9 +1291,13 @@ class CBLDart_LoadedFLValue extends Struct {
   external int asInt;
   @Double()
   external double asDouble;
-  external FLString asString;
+  @UintPtr()
+  external int stringBuf;
+  @Size()
+  external int stringSize;
   external FLSlice asData;
-  external Pointer<FLValue> asValue;
+  @UintPtr()
+  external int value;
 }
 
 // ignore: camel_case_extensions
@@ -1255,7 +1356,8 @@ typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
     Function(
   Handle object,
   Pointer<FLDict> dict,
-  Pointer<FLString> keyOut,
+  Pointer<KnownSharedKeys> knownSharedKeys,
+  Pointer<CBLDart_LoadedDictKey> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
   Bool finalize,
   Bool preLoad,
@@ -1264,7 +1366,8 @@ typedef _CBLDart_FLDictIterator_Begin = Pointer<CBLDart_FLDictIterator>
     Function(
   Object? object,
   Pointer<FLDict> dict,
-  Pointer<FLString> keyOut,
+  Pointer<KnownSharedKeys> knownSharedKeys,
+  Pointer<CBLDart_LoadedDictKey> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
   bool finalize,
   bool preLoad,
@@ -1305,6 +1408,11 @@ class FleeceDecoderBindings extends Bindings {
   FleeceDecoderBindings(Bindings parent) : super(parent) {
     _dumpData = libs.cbl.lookupFunction<_FLData_Dump_C, _FLData_Dump>(
       'FLData_Dump',
+      isLeaf: useIsLeaf,
+    );
+    _knownSharedKeysNew = libs.cblDart.lookupFunction<
+        _CBLDart_KnownSharedKeys_New_C, _CBLDart_KnownSharedKeys_New>(
+      'CBLDart_KnownSharedKeys_New',
       isLeaf: useIsLeaf,
     );
     _getLoadedFLValueFromData = libs.cblDart
@@ -1349,6 +1457,7 @@ class FleeceDecoderBindings extends Bindings {
   }
 
   late final _FLData_Dump _dumpData;
+  late final _CBLDart_KnownSharedKeys_New _knownSharedKeysNew;
   late final _CBLDart_FLValue_FromData _getLoadedFLValueFromData;
   late final _CBLDart_GetLoadedFLValue _getLoadedFLValue;
   late final _CBLDart_FLArray_GetLoadedFLValue _getLoadedFLValueFromArray;
@@ -1360,6 +1469,9 @@ class FleeceDecoderBindings extends Bindings {
 
   String dumpData(Data data) => _dumpData(data.toSliceResult().makeGlobal().ref)
       .toDartStringAndRelease()!;
+
+  Pointer<KnownSharedKeys> createKnownSharedKeys(Object object) =>
+      _knownSharedKeysNew(object);
 
   void getLoadedFLValueFromData(Slice data, FLTrust trust) =>
       _getLoadedFLValueFromData(
@@ -1391,13 +1503,15 @@ class FleeceDecoderBindings extends Bindings {
   Pointer<CBLDart_FLDictIterator> dictIteratorBegin(
     Object? object,
     Pointer<FLDict> dict,
-    Pointer<FLString> keyOut,
+    Pointer<KnownSharedKeys> knownSharedKeys,
+    Pointer<CBLDart_LoadedDictKey> keyOut,
     Pointer<CBLDart_LoadedFLValue> valueOut, {
     required bool preLoad,
   }) =>
       _dictIteratorBegin(
         object,
         dict,
+        knownSharedKeys,
         keyOut,
         valueOut,
         object != null,
@@ -1450,6 +1564,15 @@ typedef _FLEncoder_NewWithOptions = Pointer<FLEncoder> Function(
   int format,
   int reserveSize,
   bool uniqueStrings,
+);
+
+typedef _FLEncoder_SetSharedKeys_C = Void Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLSharedKeys> sharedKeys,
+);
+typedef _FLEncoder_SetSharedKeys = void Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLSharedKeys> sharedKeys,
 );
 
 typedef _FLEncoder_Reset_C = Void Function(Pointer<FLEncoder> encoder);
@@ -1562,6 +1685,15 @@ typedef _FLEncoder_WriteKey = bool Function(
   FLString key,
 );
 
+typedef _FLEncoder_WriteKeyValue_C = Bool Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLValue> key,
+);
+typedef _FLEncoder_WriteKeyValue = bool Function(
+  Pointer<FLEncoder> encoder,
+  Pointer<FLValue> key,
+);
+
 typedef _FLEncoder_EndDict_C = Bool Function(Pointer<FLEncoder> encoder);
 typedef _FLEncoder_EndDict = bool Function(Pointer<FLEncoder> encoder);
 
@@ -1594,6 +1726,11 @@ class FleeceEncoderBindings extends Bindings {
     _new = libs.cbl
         .lookupFunction<_FLEncoder_NewWithOptions_C, _FLEncoder_NewWithOptions>(
       'FLEncoder_NewWithOptions',
+      isLeaf: useIsLeaf,
+    );
+    _setSharedKeys = libs.cbl
+        .lookupFunction<_FLEncoder_SetSharedKeys_C, _FLEncoder_SetSharedKeys>(
+      'FLEncoder_SetSharedKeys',
       isLeaf: useIsLeaf,
     );
     _reset = libs.cbl.lookupFunction<_FLEncoder_Reset_C, _FLEncoder_Reset>(
@@ -1666,6 +1803,11 @@ class FleeceEncoderBindings extends Bindings {
       'FLEncoder_WriteKey',
       isLeaf: useIsLeaf,
     );
+    _writeKeyValue = libs.cbl
+        .lookupFunction<_FLEncoder_WriteKeyValue_C, _FLEncoder_WriteKeyValue>(
+      'FLEncoder_WriteKeyValue',
+      isLeaf: useIsLeaf,
+    );
     _endDict =
         libs.cbl.lookupFunction<_FLEncoder_EndDict_C, _FLEncoder_EndDict>(
       'FLEncoder_EndDict',
@@ -1689,6 +1831,7 @@ class FleeceEncoderBindings extends Bindings {
 
   late final _CBLDart_FLEncoder_BindToDartObject _bindToDartObject;
   late final _FLEncoder_NewWithOptions _new;
+  late final _FLEncoder_SetSharedKeys _setSharedKeys;
   late final _FLEncoder_Reset _reset;
   late final _CBLDart_FLEncoder_WriteArrayValue _writeArrayValue;
   late final _FLEncoder_WriteValue _writeValue;
@@ -1703,6 +1846,7 @@ class FleeceEncoderBindings extends Bindings {
   late final _FLEncoder_EndArray _endArray;
   late final _FLEncoder_BeginDict _beginDict;
   late final _FLEncoder_WriteKey _writeKey;
+  late final _FLEncoder_WriteKeyValue _writeKeyValue;
   late final _FLEncoder_EndDict _endDict;
   late final _FLEncoder_Finish _finish;
   late final _FLEncoder_GetError __getError;
@@ -1718,6 +1862,10 @@ class FleeceEncoderBindings extends Bindings {
     required bool uniqueStrings,
   }) =>
       _new(format.toInt(), reserveSize, uniqueStrings);
+
+  void setSharedKeys(Pointer<FLEncoder> encoder, Pointer<FLSharedKeys> keys) {
+    _setSharedKeys(encoder, keys);
+  }
 
   void reset(Pointer<FLEncoder> encoder) {
     _reset(encoder);
@@ -1801,8 +1949,12 @@ class FleeceEncoderBindings extends Bindings {
     });
   }
 
-  void writeFLStringKey(Pointer<FLEncoder> encoder, FLString key) {
+  void writeKeyFLString(Pointer<FLEncoder> encoder, FLString key) {
     _checkError(encoder, _writeKey(encoder, key));
+  }
+
+  void writeKeyValue(Pointer<FLEncoder> encoder, Pointer<FLValue> key) {
+    _checkError(encoder, _writeKeyValue(encoder, key));
   }
 
   void endDict(Pointer<FLEncoder> encoder) {
@@ -1846,6 +1998,7 @@ class FleeceEncoderBindings extends Bindings {
 class FleeceBindings extends Bindings {
   FleeceBindings(Bindings parent) : super(parent) {
     slice = SliceBindings(this);
+    sharedKeys = SharedKeysBindings(this);
     slot = SlotBindings(this);
     doc = DocBindings(this);
     value = ValueBindings(this);
@@ -1859,6 +2012,7 @@ class FleeceBindings extends Bindings {
   }
 
   late final SliceBindings slice;
+  late final SharedKeysBindings sharedKeys;
   late final SlotBindings slot;
   late final DocBindings doc;
   late final ValueBindings value;

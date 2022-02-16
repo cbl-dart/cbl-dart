@@ -6,6 +6,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/ffi.dart';
 import '../support/native_object.dart';
+import 'containers.dart';
 
 late final _encoderBinds = cblBindings.fleece.encoder;
 
@@ -48,6 +49,17 @@ class FleeceEncoder extends FleeceEncoderObject {
   ///
   /// The default is `true`.
   final bool uniqueStrings;
+
+  /// Tells the encoder to use a shared-keys mapping when encoding dictionary
+  /// keys.
+  void setSharedKeys(SharedKeys? sharedKeys) {
+    runNativeCalls(() {
+      _encoderBinds.setSharedKeys(
+        pointer,
+        sharedKeys?.native.pointer ?? nullptr,
+      );
+    });
+  }
 
   /// Arbitrary information which needs to be available to code that is using
   /// this encoder.
@@ -155,8 +167,12 @@ class FleeceEncoder extends FleeceEncoderObject {
       call((pointer) => _encoderBinds.writeKey(pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLString].
-  void writeFLStringKey(FLString key) =>
-      call((pointer) => _encoderBinds.writeFLStringKey(pointer, key));
+  void writeKeyFLString(FLString key) =>
+      call((pointer) => _encoderBinds.writeKeyFLString(pointer, key));
+
+  /// Writes a [key] for the next entry in a dict, from a [FLValue].
+  void writeKeyValue(Pointer<FLValue> key) =>
+      call((pointer) => _encoderBinds.writeKeyValue(pointer, key));
 
   /// Ends a dict.
   void endDict() => call(_encoderBinds.endDict);

@@ -10,6 +10,7 @@ import '../document/ffi_document.dart';
 import '../document/fragment.dart';
 import '../errors.dart';
 import '../fleece/containers.dart' as fl;
+import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
 import '../support/async_callback.dart';
@@ -92,6 +93,9 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   final dictKeys = OptimizingDictKeys();
+
+  @override
+  final sharedKeysTable = SharedKeysTable();
 
   @override
   late final SyncBlobStore blobStore = FfiBlobStore(this);

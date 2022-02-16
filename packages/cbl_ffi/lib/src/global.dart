@@ -30,6 +30,7 @@ late final globalFLSliceResult = sliceResultAllocator<FLSliceResult>();
 late final nullFLString = nullFLSlice.cast<FLString>();
 late final globalFLString = sliceResultAllocator<FLString>();
 
+late final globalLoadedDictKey = sliceResultAllocator<CBLDart_LoadedDictKey>();
 late final globalLoadedFLValue = sliceResultAllocator<CBLDart_LoadedFLValue>();
 
 late final globalCBLError = sliceResultAllocator<CBLError>();

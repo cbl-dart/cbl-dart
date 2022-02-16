@@ -1,5 +1,7 @@
 // ignore_for_file: cast_nullable_to_non_nullable
 
+import 'dart:ffi';
+
 import 'package:cbl/src/fleece/integration/integration.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -259,7 +261,7 @@ void main() {
 
         expect(
           Map.fromEntries(dict.iterable),
-          {'a': MValue.withValue(_dictBinds.get(flDict, 'a')!)},
+          {'a': mValue(value: _dictBinds.get(flDict, 'a'))},
         );
       });
 
@@ -272,8 +274,8 @@ void main() {
         expect(
           Map.fromEntries(dict.iterable),
           {
-            'a': MValue.withValue(_dictBinds.get(flDict, 'a')!),
-            'b': MValue.withNative(true),
+            'a': mValue(value: _dictBinds.get(flDict, 'a')),
+            'b': mValue(hasNative: true),
           },
         );
       });
@@ -286,3 +288,7 @@ MRoot testMRoot(Object from) => MRoot.fromData(
       context: MContext(),
       isMutable: true,
     );
+
+Matcher mValue({Pointer<FLValue>? value, bool? hasNative}) => isA<MValue>()
+    .having((p0) => p0.value, 'value', value ?? anything)
+    .having((p0) => p0.hasNative, 'hasNative', hasNative ?? anything);

@@ -1,12 +1,10 @@
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/document/dictionary.dart';
-import 'package:cbl/src/fleece/encoder.dart';
-import 'package:cbl/src/fleece/integration/integration.dart';
 
 import '../../test_binding_impl.dart';
 import '../fixtures/values.dart';
 import '../test_binding.dart';
 import '../utils/matchers.dart';
+import 'document_test_utils.dart';
 
 void main() {
   setupTestBinding();
@@ -290,20 +288,6 @@ void main() {
       });
     });
   });
-}
-
-Dictionary immutableDictionary([Map<String, Object?>? data]) {
-  final array = MutableDictionary(data) as MutableDictionaryImpl;
-  final encoder = FleeceEncoder();
-  array.encodeTo(encoder);
-  final fleeceData = encoder.finish();
-  final root = MRoot.fromData(
-    fleeceData,
-    context: MContext(),
-    isMutable: false,
-  );
-  // ignore: cast_nullable_to_non_nullable
-  return root.asNative as Dictionary;
 }
 
 void setValuesTest({

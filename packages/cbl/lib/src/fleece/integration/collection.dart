@@ -19,7 +19,7 @@ abstract class MCollection {
   MCollection.asCopy(
     MCollection original, {
     required bool isMutable,
-  })  : _context = original.context,
+  })  : _context = original._context,
         _isMutable = isMutable,
         hasMutableChildren = isMutable,
         _isMutated = true;
@@ -34,7 +34,7 @@ abstract class MCollection {
     updateParent(slot, parent);
   }
 
-  MContext? get context => _context;
+  MContext get context => _context ?? const NoopMContext();
   MContext? _context;
 
   MValue? _slot;
@@ -91,7 +91,7 @@ abstract class MCollection {
   void updateParent(MValue? slot, MCollection? parent) {
     assert(slot == null && parent == null || slot != null && parent != null);
 
-    final parentContext = parent?.context;
+    final parentContext = parent?._context;
 
     // Nothing changed.
     if (_slot == slot && _parent == parent && _context == parentContext) {

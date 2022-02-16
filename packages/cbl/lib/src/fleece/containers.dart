@@ -30,17 +30,41 @@ extension on Iterable<CopyFlag> {
   Set<FLCopyFlag> toFLCopyFlags() => map((flag) => flag.toFLCopyFlag()).toSet();
 }
 
+// === SharedKeys ==============================================================
+
+/// FLSharedKeys represents a mapping from short strings to small integers in
+/// the range [0...2047]
+class SharedKeys extends FleeceSharedKeysObject {
+  /// Creates new empty [SharedKeys].
+  SharedKeys() : this.fromPointer(_bindings.create());
+
+  /// Creates [SharedKeys] from an exiting native instance.
+  SharedKeys.fromPointer(Pointer<FLSharedKeys> pointer, {bool adopt = true})
+      : super(pointer, adopt: adopt);
+
+  static late final _bindings = cblBindings.fleece.sharedKeys;
+
+  /// The number of keys in the mapping.
+  ///
+  /// This number increases whenever the mapping is changed, and never
+  /// decreases.
+  int get count => call(_bindings.count);
+}
+
 // === Doc =====================================================================
 
-/// An [Doc] points to (and often owns) Fleece-encoded data and provides access
+/// A [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
 class Doc extends FleeceDocObject {
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
-  factory Doc.fromResultData(Data data, FLTrust trust) {
-    final doc = _bindings.fromResultData(data, trust);
-    if (doc == null) {
-      throw ArgumentError.value(data, 'data', 'is not valid Fleece data');
-    }
+  factory Doc.fromResultData(
+    Data data,
+    FLTrust trust, {
+    SharedKeys? sharedKeys,
+  }) {
+    final doc = runNativeCalls(
+      () => _bindings.fromResultData(data, trust, sharedKeys?.pointer),
+    );
     return Doc.fromPointer(doc);
   }
 
@@ -64,6 +88,15 @@ class Doc extends FleeceDocObject {
 
   /// Returns the root value in the [Doc], usually an [Dict].
   Value get root => Value.fromPointer(native.call(_bindings.getRoot));
+
+  /// Returns the [SharedKeys] used by this [Doc], as specified when it was
+  /// created.
+  SharedKeys? get sharedKeys {
+    final pointer = native.call(_bindings.getSharedKeys);
+    return pointer == null
+        ? null
+        : SharedKeys.fromPointer(pointer, adopt: false);
+  }
 }
 
 // === Value ===================================================================
@@ -551,8 +584,10 @@ class _DictKeyIterator extends Iterator<String> {
 
   final Dict dict;
 
-  late final DictIterator iterator = dict.native
-      .call((pointer) => DictIterator(pointer.cast(), keyOut: globalFLString));
+  late final DictIterator iterator = dict.native.call((pointer) => DictIterator(
+        pointer.cast(),
+        keyOut: globalLoadedDictKey,
+      ));
 
   @override
   late String current;
@@ -560,7 +595,8 @@ class _DictKeyIterator extends Iterator<String> {
   @override
   bool moveNext() {
     if (iterator.moveNext()) {
-      current = globalFLString.ref.toDartString()!;
+      final key = globalLoadedDictKey.ref;
+      current = decodeFLString(key.stringBuf, key.stringSize);
       return true;
     } else {
       return false;
