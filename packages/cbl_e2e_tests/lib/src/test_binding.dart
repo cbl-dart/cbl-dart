@@ -65,6 +65,10 @@ abstract class CblE2eTestBinding {
   /// Temporary directory for tests.
   late final String tmpDir;
 
+  FutureOr<String> loadLargeJsonFixture();
+
+  late final String largeJsonFixture;
+
   bool get useDartConsoleLogger => false;
 
   TestFn get testFn => t.test;
@@ -126,6 +130,8 @@ abstract class CblE2eTestBinding {
       } else {
         Database.log.console.level = consoleLogLevel;
       }
+
+      largeJsonFixture = await loadLargeJsonFixture();
     });
 
     setupTestTimeBomb();
@@ -156,6 +162,8 @@ abstract class CblE2eTestBinding {
 
 /// Alias of [CblE2eTestBinding.tmpDir].
 late final tmpDir = CblE2eTestBinding.instance.tmpDir;
+
+late final largeJsonFixture = CblE2eTestBinding.instance.largeJsonFixture;
 
 String? get testId => Zone.current[#testId] as String?;
 

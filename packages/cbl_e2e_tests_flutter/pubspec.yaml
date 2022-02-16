@@ -10,6 +10,8 @@ dependencies:
   benchmark_harness: ^2.0.0
   cbl:
     path: ../cbl
+  cbl_e2e_tests:
+    path: ../cbl_e2e_tests
   cbl_ffi:
     path: ../cbl_ffi
   cbl_flutter:
@@ -41,3 +43,7 @@ dependency_overrides:
     path: ../cbl_flutter_local
   cbl_flutter_platform_interface:
     path: ../cbl_flutter_platform_interface
+
+flutter:
+  assets:
+    - packages/cbl_e2e_tests/src/fixtures/1000people.json

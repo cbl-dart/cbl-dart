@@ -4,14 +4,13 @@ import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 
 import '../../test_binding_impl.dart';
-import '../fixtures/large_json_doc.dart';
 import '../test_binding.dart';
 import '../utils/benchmark.dart';
 
 abstract class EncodingBenchmark extends BenchmarkBase {
   EncodingBenchmark(String description) : super('Encoding: $description');
 
-  final jsonValue = jsonDecode(largeJsonDoc) as List<Object?>;
+  final jsonValue = jsonDecode(largeJsonFixture) as List<Object?>;
 }
 
 class JsonInDartEncodingBenchmark extends EncodingBenchmark {
