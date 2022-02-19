@@ -4,7 +4,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/async_callback.dart';
 import '../support/ffi.dart';
-import '../support/native_object.dart';
 import '../support/utils.dart';
 import 'console_logger.dart';
 
@@ -231,10 +230,12 @@ void _setupCallback() {
   );
 
   // Try to set callback as the current global callback.
-  if (!_callback!.native.call(_bindings.setCallback)) {
+  final _callbackNative = _callback!.native;
+  if (!_bindings.setCallback(_callbackNative.pointer)) {
     _cleanUpCallback();
     throw StateError('Another isolate has already set a custom Logger.');
   }
+  cblReachabilityFence(_callbackNative);
 }
 
 void _cleanUpCallback() {

@@ -12,7 +12,6 @@ import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
-import '../support/native_object.dart';
 import 'result_set.dart';
 
 /// A single row in a [ResultSet].
@@ -300,19 +299,21 @@ class ResultImpl with IterableMixin<String> implements Result {
         break;
     }
 
-    final encoder = FleeceEncoder(format: format.toFLEncoderFormat());
-    columnValues.call(encoder.writeValue);
+    final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
+      ..writeValue(columnValues.pointer);
+    cblReachabilityFence(columnValues);
     return EncodedData(format, encoder.finish());
   }
 
   ArrayImpl _createArray() {
     MRoot root;
     if (_columnValuesArray != null) {
-      root = _columnValuesArray!.native.call((pointer) => MRoot.fromValue(
-            pointer,
-            context: _context,
-            isMutable: false,
-          ));
+      root = MRoot.fromValue(
+        _columnValuesArray!.pointer,
+        context: _context,
+        isMutable: false,
+      );
+      cblReachabilityFence(_columnValuesArray);
     } else {
       root = MRoot.fromData(
         _columnValuesData!,

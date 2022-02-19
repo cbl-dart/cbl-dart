@@ -5,7 +5,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../fleece/containers.dart';
 import '../fleece/decoder.dart';
 import '../fleece/encoder.dart';
-import 'native_object.dart';
 
 enum EncodingFormat {
   fleece,
@@ -43,8 +42,10 @@ class EncodedData {
         return data;
       case EncodingFormat.json:
         final doc = Doc.fromResultData(data, FLTrust.trusted);
+        final root = doc.root;
         final encoder = FleeceEncoder();
-        doc.root.native.call(encoder.writeValue);
+        encoder.writeValue(root.pointer);
+        cblReachabilityFence(root);
         return encoder.finish();
     }
   }

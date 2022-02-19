@@ -54,6 +54,7 @@ extension CBLErrorExceptionExt on CBLErrorException {
       _toCouchbaseLiteException(this);
 }
 
+@pragma('vm:prefer-inline')
 T runWithErrorTranslation<T>(T Function() fn) {
   try {
     return fn();

@@ -483,13 +483,17 @@ class DocBindings extends Bindings {
     Data data,
     FLTrust trust,
     Pointer<FLSharedKeys>? sharedKeys,
-  ) =>
-      _fromResultData(
-        data.toSliceResult().makeGlobalResult().ref,
-        trust.toInt(),
-        sharedKeys ?? nullptr,
-        nullFLSlice.ref,
-      );
+  ) {
+    final sliceResult = data.toSliceResult();
+    final result = _fromResultData(
+      sliceResult.makeGlobalResult().ref,
+      trust.toInt(),
+      sharedKeys ?? nullptr,
+      nullFLSlice.ref,
+    );
+    cblReachabilityFence(sliceResult);
+    return result;
+  }
 
   Pointer<FLDoc> fromJson(String json) => runWithSingleFLString(
         json,
@@ -695,7 +699,8 @@ class ValueBindings extends Bindings {
     return result;
   }
 
-  Pointer<FLDoc> findDoc(Pointer<FLValue> value) => _findDoc(value);
+  Pointer<FLDoc>? findDoc(Pointer<FLValue> value) =>
+      _findDoc(value).toNullable();
 
   FLValueType getType(Pointer<FLValue> value) =>
       _getType(value).toFLValueType();
@@ -951,8 +956,8 @@ class MutableArrayBindings extends Bindings {
 
   Pointer<FLMutableArray> create() => _new();
 
-  Pointer<FLArray> getSource(Pointer<FLMutableArray> array) =>
-      _getSource(array);
+  Pointer<FLArray>? getSource(Pointer<FLMutableArray> array) =>
+      _getSource(array).toNullable();
 
   bool isChanged(Pointer<FLMutableArray> array) => _isChanged(array);
 
@@ -1206,7 +1211,8 @@ class MutableDictBindings extends Bindings {
 
   Pointer<FLMutableDict> create() => _new();
 
-  Pointer<FLDict> getSource(Pointer<FLMutableDict> dict) => _getSource(dict);
+  Pointer<FLDict>? getSource(Pointer<FLMutableDict> dict) =>
+      _getSource(dict).toNullable();
 
   bool isChanged(Pointer<FLMutableDict> dict) => _isChanged(dict);
 

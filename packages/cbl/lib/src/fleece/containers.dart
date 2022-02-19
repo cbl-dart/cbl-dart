@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
+import '../support/utils.dart';
 import 'decoder.dart';
 import 'encoder.dart';
 
@@ -48,7 +49,11 @@ class SharedKeys extends FleeceSharedKeysObject {
   ///
   /// This number increases whenever the mapping is changed, and never
   /// decreases.
-  int get count => call(_bindings.count);
+  int get count {
+    final result = _bindings.count(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 }
 
 // === Doc =====================================================================
@@ -62,10 +67,10 @@ class Doc extends FleeceDocObject {
     FLTrust trust, {
     SharedKeys? sharedKeys,
   }) {
-    final doc = runNativeCalls(
-      () => _bindings.fromResultData(data, trust, sharedKeys?.pointer),
-    );
-    return Doc.fromPointer(doc);
+    final docPointer =
+        _bindings.fromResultData(data, trust, sharedKeys?.pointer);
+    cblReachabilityFence(sharedKeys);
+    return Doc.fromPointer(docPointer);
   }
 
   /// Creates a [Doc] from JSON-encoded data.
@@ -83,19 +88,28 @@ class Doc extends FleeceDocObject {
   static late final _bindings = cblBindings.fleece.doc;
 
   /// Returns the data owned by the document, if any, else `null`.
-  SliceResult? get allocedData =>
-      SliceResult.fromFLSliceResult(native.call(_bindings.getAllocedData));
+  SliceResult? get allocedData {
+    final result =
+        SliceResult.fromFLSliceResult(_bindings.getAllocedData(pointer));
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns the root value in the [Doc], usually an [Dict].
-  Value get root => Value.fromPointer(native.call(_bindings.getRoot));
+  Value get root {
+    final result = Value.fromPointer(_bindings.getRoot(pointer));
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns the [SharedKeys] used by this [Doc], as specified when it was
   /// created.
   SharedKeys? get sharedKeys {
-    final pointer = native.call(_bindings.getSharedKeys);
-    return pointer == null
-        ? null
-        : SharedKeys.fromPointer(pointer, adopt: false);
+    final sharedKeysPointer = _bindings.getSharedKeys(pointer);
+    final result = sharedKeysPointer
+        ?.let((it) => SharedKeys.fromPointer(it, adopt: false));
+    cblReachabilityFence(this);
+    return result;
   }
 }
 
@@ -166,12 +180,18 @@ class Value extends FleeceValueObject<FLValue> {
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
   Doc? get doc {
-    final pointer = native.call(_bindings.findDoc);
-    return pointer == nullptr ? null : Doc.fromPointer(pointer);
+    final docPointer = _bindings.findDoc(pointer);
+    final result = docPointer?.let(Doc.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   /// Returns the data type of an arbitrary Value.
-  ValueType get type => native.call(_bindings.getType).toValueType();
+  ValueType get type {
+    final result = _bindings.getType(pointer).toValueType();
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Whether this value represents an `undefined` value.
   bool get isUndefined => type == ValueType.undefined;
@@ -180,58 +200,96 @@ class Value extends FleeceValueObject<FLValue> {
   bool get isNull => type == ValueType.null_;
 
   /// Returns true if the value is non-null and represents an integer.
-  bool get isInteger => native.call(_bindings.isInteger);
+  bool get isInteger {
+    final result = _bindings.isInteger(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns true if the value is non-null and represents a 64-bit
   /// floating-point number.
-  bool get isDouble => native.call(_bindings.isDouble);
+  bool get isDouble {
+    final result = _bindings.isDouble(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns a value coerced to boolean. This will be true unless the value is
   /// undefined, null, false, or zero.
-  bool get asBool => native.call(_bindings.asBool);
+  bool get asBool {
+    final result = _bindings.asBool(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns a value coerced to an integer. True and false are returned as 1
   /// and 0, and floating-point numbers are rounded. All other types are
   /// returned as 0.
-  int get asInt => native.call(_bindings.asInt);
+  int get asInt {
+    final result = _bindings.asInt(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns a value coerced to a 64-bit floating point number. True and false
   /// are returned as 1.0 and 0.0, and integers are converted to float. All
   /// other types are returned as 0.0.
-  double get asDouble => native.call(_bindings.asDouble);
+  double get asDouble {
+    final result = _bindings.asDouble(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns the exact contents of a string value, or null for all other types.
-  String? get asString => native.call(_bindings.asString);
+  String? get asString {
+    final result = _bindings.asString(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns the exact contents of a data value, or null for all other types.
-  Uint8List? get asData => native.call(_bindings.asData)?.toTypedList();
+  Uint8List? get asData {
+    final result = _bindings.asData(pointer)?.toTypedList();
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// If a Value represents an array, returns it as a [Array], else null.
-  Array? get asArray => type == ValueType.array
-      ? native.call((pointer) => Array.fromPointer(pointer.cast()))
-      : null;
+  Array? get asArray {
+    final result =
+        type == ValueType.array ? Array.fromPointer(pointer.cast()) : null;
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// If a Value represents a dictionary, returns it as a [Dict], else null.
-  Dict? get asDict => type == ValueType.dict
-      ? native.call((pointer) => Dict.fromPointer(pointer.cast()))
-      : null;
+  Dict? get asDict {
+    final result =
+        type == ValueType.dict ? Dict.fromPointer(pointer.cast()) : null;
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns a string representation of any scalar value. Data values are
   /// returned in raw form. Arrays and dictionaries don't have a representation
   /// and will return null.
-  String? get scalarToString => native.call(_bindings.scalarToString);
+  String? get scalarToString {
+    final result = _bindings.scalarToString(pointer);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Encodes a Fleece value as JSON (or a JSON fragment.) Any Data values will
   /// become base64-encoded JSON strings.
   String toJson({
     bool json5 = false,
     bool canonical = true,
-  }) =>
-      native.call((pointer) => _bindings.toJSONX(
-            pointer,
-            json5: json5,
-            canonical: canonical,
-          ));
+  }) {
+    final result =
+        _bindings.toJSONX(pointer, json5: json5, canonical: canonical);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   Object? toObject() {
     switch (type) {
@@ -257,11 +315,13 @@ class Value extends FleeceValueObject<FLValue> {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Value &&
-          native.call((pointer) => other.native.call(
-              (otherPointer) => _bindings.isEqual(pointer, otherPointer)));
+  bool operator ==(Object other) {
+    final result = identical(this, other) ||
+        other is Value && _bindings.isEqual(pointer, other.pointer);
+    cblReachabilityFence(this);
+    cblReachabilityFence(other);
+    return result;
+  }
 
   @override
   int get hashCode {
@@ -323,14 +383,21 @@ class Array extends Value with ListMixin<Value> {
   static late final _bindings = cblBindings.fleece.array;
 
   @override
-  int get length => native.call((pointer) => _bindings.count(pointer.cast()));
+  int get length {
+    final result = _bindings.count(pointer.cast());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
   set length(int length) => throw _immutableValueException();
 
   @override
-  bool get isEmpty =>
-      native.call((pointer) => _bindings.isEmpty(pointer.cast()));
+  bool get isEmpty {
+    final result = _bindings.isEmpty(pointer.cast());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
   Value get first => this[0];
@@ -340,19 +407,24 @@ class Array extends Value with ListMixin<Value> {
 
   /// If the array is mutable, returns it cast to [MutableArray], else null.
   MutableArray? get asMutable {
-    final pointer =
-        native.call((pointer) => _bindings.asMutable(pointer.cast()));
-    return pointer == null ? null : MutableArray.fromPointer(pointer);
+    final mutableArrayPointer = _bindings.asMutable(pointer.cast());
+    final result = mutableArrayPointer?.let(MutableArray.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   @override
   List<Object?> toObject() => map((element) => element.toObject()).toList();
 
   @override
-  Value operator [](int index) => Value.fromPointer(
-        native.call((pointer) => _bindings.get(pointer.cast(), index)),
-        isRefCounted: false,
-      );
+  Value operator [](int index) {
+    final result = Value.fromPointer(
+      _bindings.get(pointer.cast(), index),
+      isRefCounted: false,
+    );
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
   void operator []=(int index, Object? value) =>
@@ -396,33 +468,39 @@ class MutableArray extends Array {
   factory MutableArray.mutableCopy(
     Array source, {
     Set<CopyFlag> flags = const {},
-  }) =>
-      MutableArray.fromPointer(
-        source.native.call((pointer) => _bindings.mutableCopy(
-              pointer.cast(),
-              flags.toFLCopyFlags(),
-            )),
-        adopt: true,
-      );
+  }) {
+    final result = MutableArray.fromPointer(
+      _bindings.mutableCopy(source.pointer.cast(), flags.toFLCopyFlags()),
+      adopt: true,
+    );
+    cblReachabilityFence(source);
+    return result;
+  }
 
   static late final _bindings = cblBindings.fleece.mutableArray;
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
   Array? get source {
-    final pointer =
-        native.call((pointer) => _bindings.getSource(pointer.cast()));
-    return pointer == nullptr ? null : Array.fromPointer(pointer);
+    final sourcePointer = _bindings.getSource(pointer.cast());
+    final result = sourcePointer?.let(Array.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   /// Returns true if the [Array] has been changed from the source it was copied
   /// from.
-  bool get isChanged =>
-      native.call((pointer) => _bindings.isChanged(pointer.cast()));
+  bool get isChanged {
+    final result = _bindings.isChanged(pointer.cast());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
-  set length(int length) =>
-      native.call((pointer) => _bindings.resize(pointer.cast(), length));
+  set length(int length) {
+    _bindings.resize(pointer.cast(), length);
+    cblReachabilityFence(this);
+  }
 
   @override
   set first(Object? value) {
@@ -437,14 +515,16 @@ class MutableArray extends Array {
   @override
   void operator []=(int index, Object? value) {
     RangeError.checkValidIndex(index, this);
-    final slot = native.call((pointer) => _bindings.set(pointer.cast(), index));
+    final slot = _bindings.set(pointer.cast(), index);
     _setSlotValue(slot, value);
+    cblReachabilityFence(this);
   }
 
   @override
   void add(Object? element) {
-    final slot = native.call((pointer) => _bindings.append(pointer.cast()));
+    final slot = _bindings.append(pointer.cast());
     _setSlotValue(slot, element);
+    cblReachabilityFence(this);
   }
 
   @override
@@ -460,8 +540,8 @@ class MutableArray extends Array {
   @override
   void removeRange(int start, int end) {
     RangeError.checkValidRange(start, end, length);
-    native.call(
-        (pointer) => _bindings.remove(pointer.cast(), start, end - start));
+    _bindings.remove(pointer.cast(), start, end - start);
+    cblReachabilityFence(this);
   }
 
   /// Inserts a contiguous range of JSON `null` values into the array.
@@ -470,7 +550,8 @@ class MutableArray extends Array {
   /// [count] is the number of items to insert.
   void insertNulls(int start, int count) {
     RangeError.checkValidIndex(start, this, 'start');
-    native.call((pointer) => _bindings.insert(pointer.cast(), start, count));
+    _bindings.insert(pointer.cast(), start, count);
+    cblReachabilityFence(this);
   }
 
   /// Convenience function for getting an dict-valued property in mutable form.
@@ -480,9 +561,10 @@ class MutableArray extends Array {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(int index) {
-    final pointer = native
-        .call((pointer) => _bindings.getMutableDict(pointer.cast(), index));
-    return pointer == null ? null : MutableDict.fromPointer(pointer);
+    final mutableDictPointer = _bindings.getMutableDict(pointer.cast(), index);
+    final result = mutableDictPointer?.let(MutableDict.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   /// Convenience function for getting a array-valued property in mutable form.
@@ -492,9 +574,11 @@ class MutableArray extends Array {
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(int index) {
-    final pointer = native
-        .call((pointer) => _bindings.getMutableArray(pointer.cast(), index));
-    return pointer == null ? null : MutableArray.fromPointer(pointer);
+    final mutableArrayPointer =
+        _bindings.getMutableArray(pointer.cast(), index);
+    final result = mutableArrayPointer?.let(MutableArray.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 }
 
@@ -517,34 +601,44 @@ class Dict extends Value with MapMixin<String, Value> {
 
   /// Returns the number of items in a dictionary.
   @override
-  int get length => native.call((pointer) => _bindings.count(pointer.cast()));
+  int get length {
+    final result = _bindings.count(pointer.cast());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Returns true if a dictionary is empty. Depending on the dictionary's
   /// representation, this can be faster than `count == 0`.
   @override
-  bool get isEmpty =>
-      native.call((pointer) => _bindings.isEmpty(pointer.cast()));
+  bool get isEmpty {
+    final result = _bindings.isEmpty(pointer.cast());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
   bool get isNotEmpty => !isEmpty;
 
   /// If the dictionary is mutable, returns it cast to [MutableDict], else null.
   MutableDict? get asMutable {
-    final pointer =
-        native.call((pointer) => _bindings.asMutable(pointer.cast()));
-    return pointer == null ? null : MutableDict.fromPointer(pointer);
+    final mutablePointer = _bindings.asMutable(pointer.cast());
+    final result = mutablePointer?.let(MutableDict.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   @override
   late final Iterable<String> keys = _DictKeyIterable(this);
 
   @override
-  Value operator [](Object? key) => Value.fromPointer(
-        native.call(
-          (pointer) => _bindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
-        ),
-        isRefCounted: false,
-      );
+  Value operator [](Object? key) {
+    final result = Value.fromPointer(
+      _bindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
+      isRefCounted: false,
+    );
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
   void operator []=(String key, Object? value) =>
@@ -584,10 +678,14 @@ class _DictKeyIterator extends Iterator<String> {
 
   final Dict dict;
 
-  late final DictIterator iterator = dict.native.call((pointer) => DictIterator(
-        pointer.cast(),
-        keyOut: globalLoadedDictKey,
-      ));
+  late final DictIterator iterator = () {
+    final result = DictIterator(
+      dict.pointer.cast(),
+      keyOut: globalLoadedDictKey,
+    );
+    cblReachabilityFence(dict);
+    return result;
+  }();
 
   @override
   late String current;
@@ -642,35 +740,39 @@ class MutableDict extends Dict {
   factory MutableDict.mutableCopy(
     Dict source, {
     Set<CopyFlag> flags = const {},
-  }) =>
-      MutableDict.fromPointer(
-        source.native.call((pointer) => _bindings.mutableCopy(
-              pointer.cast(),
-              flags.toFLCopyFlags(),
-            )),
-        adopt: true,
-      );
+  }) {
+    final result = MutableDict.fromPointer(
+      _bindings.mutableCopy(source.pointer.cast(), flags.toFLCopyFlags()),
+      adopt: true,
+    );
+    cblReachabilityFence(source);
+    return result;
+  }
 
   static late final _bindings = cblBindings.fleece.mutableDict;
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
   Dict? get source {
-    final pointer =
-        native.call((pointer) => _bindings.getSource(pointer.cast()));
-    return pointer == nullptr ? null : Dict.fromPointer(pointer);
+    final sourcePointer = _bindings.getSource(pointer.cast());
+    final result = sourcePointer?.let(Dict.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   /// Returns true if the Dict has been changed from the source it was copied
   /// from.
-  bool get isChanged =>
-      native.call((pointer) => _bindings.isChanged(pointer.cast()));
+  bool get isChanged {
+    final result = _bindings.isChanged(pointer.cast());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
-  void operator []=(String key, Object? value) => _setSlotValue(
-        native.call((pointer) => _bindings.set(pointer.cast(), key)),
-        value,
-      );
+  void operator []=(String key, Object? value) {
+    _setSlotValue(_bindings.set(pointer.cast(), key), value);
+    cblReachabilityFence(this);
+  }
 
   @override
   void addAll(Map<String, Object?> other) {
@@ -680,7 +782,10 @@ class MutableDict extends Dict {
   }
 
   @override
-  void clear() => native.call((pointer) => _bindings.removeAll(pointer.cast()));
+  void clear() {
+    _bindings.removeAll(pointer.cast());
+    cblReachabilityFence(this);
+  }
 
   @override
   Value? remove(Object? key) {
@@ -688,7 +793,8 @@ class MutableDict extends Dict {
 
     final value = this[_key];
 
-    native.call((pointer) => _bindings.remove(pointer.cast(), _key));
+    _bindings.remove(pointer.cast(), _key);
+    cblReachabilityFence(this);
 
     return value;
   }
@@ -700,9 +806,10 @@ class MutableDict extends Dict {
   /// - If the value is an immutable dict, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableDict? mutableDict(String key) {
-    final pointer =
-        native.call((pointer) => _bindings.getMutableDict(pointer.cast(), key));
-    return pointer == null ? null : MutableDict.fromPointer(pointer);
+    final mutableDictPointer = _bindings.getMutableDict(pointer.cast(), key);
+    final result = mutableDictPointer?.let(MutableDict.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 
   /// Convenience function for getting a array-valued property in mutable form.
@@ -712,9 +819,10 @@ class MutableDict extends Dict {
   /// - If the value is an immutable array, this function makes a mutable copy,
   ///   assigns the copy as the property value, and returns the copy.
   MutableArray? mutableArray(String key) {
-    final pointer = native
-        .call((pointer) => _bindings.getMutableArray(pointer.cast(), key));
-    return pointer == null ? null : MutableArray.fromPointer(pointer);
+    final mutableArrayPointer = _bindings.getMutableArray(pointer.cast(), key);
+    final result = mutableArrayPointer?.let(MutableArray.fromPointer);
+    cblReachabilityFence(this);
+    return result;
   }
 }
 
@@ -781,7 +889,8 @@ class _DefaultSlotSetter implements SlotSetter {
     } else if (value is Uint8List) {
       _slotBindings.setData(slot, value.toData());
     } else if (value is Value) {
-      value.native.call((pointer) => _slotBindings.setValue(slot, pointer));
+      _slotBindings.setValue(slot, value.pointer);
+      cblReachabilityFence(value);
     }
   }
 

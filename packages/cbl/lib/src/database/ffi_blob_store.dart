@@ -4,6 +4,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../document/blob.dart';
 import '../fleece/containers.dart';
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
@@ -50,8 +51,11 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   @override
   bool blobExists(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final cblBlob = runNativeCalls(
-        () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()));
+    final cblBlob = runWithErrorTranslation(
+      () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
+    );
+    cblReachabilityFence(database);
+    cblReachabilityFence(dict);
 
     if (cblBlob == null) {
       return false;
@@ -64,31 +68,44 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   @override
   Data? readBlobSync(Map<String, Object?> properties) =>
-      _getBlob(properties)?.let((it) => it.native.call(_blobBindings.content));
+      _getBlob(properties)?.let((it) {
+        final result =
+            runWithErrorTranslation(() => _blobBindings.content(it.pointer));
+        cblReachabilityFence(it);
+        return result;
+      });
 
   @override
   Stream<Data>? readBlob(Map<String, Object?> properties) =>
       _getBlob(properties)?.let((it) => _BlobReadStream(database, it));
 
   void _saveBlob(CBLObject<CBLBlob> blob) {
-    runNativeCalls(() {
-      _databaseBindings.saveBlob(database.native.pointer, blob.native.pointer);
+    runWithErrorTranslation(() {
+      _databaseBindings.saveBlob(database.pointer, blob.pointer);
+      cblReachabilityFence(database);
+      cblReachabilityFence(blob);
     });
   }
 
-  Map<String, Object?> _createBlobProperties(CBLObject<CBLBlob> blob) => {
-        cblObjectTypeProperty: cblObjectTypeBlob,
-        blobDigestProperty: blob.native.call(_blobBindings.digest),
-        blobLengthProperty: blob.native.call(_blobBindings.length),
-        blobContentTypeProperty: blob.native.call(_blobBindings.contentType),
-      };
+  Map<String, Object?> _createBlobProperties(CBLObject<CBLBlob> blob) {
+    final result = <String, Object?>{
+      cblObjectTypeProperty: cblObjectTypeBlob,
+      blobDigestProperty: _blobBindings.digest(blob.pointer),
+      blobLengthProperty: _blobBindings.length(blob.pointer),
+      blobContentTypeProperty: _blobBindings.contentType(blob.pointer),
+    };
+    cblReachabilityFence(blob);
+    return result;
+  }
 
   CBLObject<CBLBlob>? _getBlob(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final blobPointer = runNativeCalls(() => _databaseBindings.getBlob(
-          database.native.pointer,
-          dict.native.pointer.cast(),
+    final blobPointer = runWithErrorTranslation(() => _databaseBindings.getBlob(
+          database.pointer,
+          dict.pointer.cast(),
         ));
+    cblReachabilityFence(database);
+    cblReachabilityFence(dict);
 
     return blobPointer?.let((it) => CBLObject(
           it,
@@ -104,7 +121,10 @@ Future<CBLObject<CBLBlob>> _createBlobFromStream(
   Stream<Data> stream,
   String contentType,
 ) async {
-  final writeStream = database.native.call(_writeStreamBindings.create);
+  final writeStream = runWithErrorTranslation(
+    () => _writeStreamBindings.create(database.pointer),
+  );
+  cblReachabilityFence(database);
 
   try {
     await stream
@@ -139,9 +159,13 @@ class _BlobReadStream extends Stream<Data> {
     onCancel: _pause,
   );
 
-  late final _stream = CBLBlobReadStreamObject(
-    blob.native.call(_readStreamBindings.openContentStream),
-  );
+  late final _stream = () {
+    final result = CBLBlobReadStreamObject(
+      _readStreamBindings.openContentStream(blob.pointer),
+    );
+    cblReachabilityFence(blob);
+    return result;
+  }();
 
   var _isPaused = false;
 
@@ -150,8 +174,10 @@ class _BlobReadStream extends Stream<Data> {
       _isPaused = false;
 
       while (!_isPaused) {
-        final buffer = _stream.call((pointer) =>
-            _readStreamBindings.read(pointer, _readStreamChunkSize));
+        final buffer = runWithErrorTranslation(
+          () => _readStreamBindings.read(_stream.pointer, _readStreamChunkSize),
+        );
+        cblReachabilityFence(_stream);
 
         // The read stream is done (EOF).
         if (buffer == null) {

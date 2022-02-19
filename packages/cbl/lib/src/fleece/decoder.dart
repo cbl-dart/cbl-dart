@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/ffi.dart';
-import '../support/native_object.dart';
 import 'containers.dart';
 
 late final _decoderBinds = cblBindings.fleece.decoder;
@@ -282,7 +281,8 @@ class FleeceDecoder extends Converter<Data, Object?> {
       throw ArgumentError('Invalid Fleece data');
     }
 
-    root.call(_decoderBinds.getLoadedValue);
+    _decoderBinds.getLoadedValue(root.pointer);
+    cblReachabilityFence(root);
 
     final listener = _BuildDartObjectListener();
     _FleeceListenerDecoder(
@@ -326,7 +326,8 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       throw ArgumentError('Invalid Fleece data');
     }
 
-    root.call(_decoderBinds.getLoadedValue);
+    _decoderBinds.getLoadedValue(root.pointer);
+    cblReachabilityFence(root);
 
     final result =
         _decodeGlobalLoadedValue(sharedStringsTable ?? SharedStringsTable());

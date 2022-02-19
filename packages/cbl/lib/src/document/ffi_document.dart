@@ -32,24 +32,39 @@ class FfiDocumentDelegate extends DocumentDelegate
           debugCreator: 'FfiDocumentDelegate.mutable()',
         );
 
-  FfiDocumentDelegate.mutableCopy(FfiDocumentDelegate delegate)
-      : this.fromPointer(
-          doc:
-              delegate.native.call(_mutableDocumentBindings.mutableCopy).cast(),
-          debugCreator: 'FfiDocumentDelegate.mutableCopy()',
-        );
+  factory FfiDocumentDelegate.mutableCopy(FfiDocumentDelegate delegate) {
+    final delegateNative = delegate.native;
+    final result = FfiDocumentDelegate.fromPointer(
+      doc: _mutableDocumentBindings.mutableCopy(delegateNative.pointer).cast(),
+      debugCreator: 'FfiDocumentDelegate.mutableCopy()',
+    );
+    cblReachabilityFence(delegateNative);
+    return result;
+  }
 
   @override
   NativeObject<CBLDocument> native;
 
   @override
-  String get id => native.call(_documentBindings.id);
+  String get id {
+    final result = _documentBindings.id(native.pointer);
+    cblReachabilityFence(native);
+    return result;
+  }
 
   @override
-  String? get revisionId => native.call(_documentBindings.revisionId);
+  String? get revisionId {
+    final result = _documentBindings.revisionId(native.pointer);
+    cblReachabilityFence(native);
+    return result;
+  }
 
   @override
-  int get sequence => native.call(_documentBindings.sequence);
+  int get sequence {
+    final result = _documentBindings.sequence(native.pointer);
+    cblReachabilityFence(native);
+    return result;
+  }
 
   @override
   EncodedData? get properties => _properties ??= _readEncodedProperties();
@@ -62,31 +77,34 @@ class FfiDocumentDelegate extends DocumentDelegate
   }
 
   Pointer<FLValue> get _nativeProperties =>
-      native.call(_documentBindings.properties).cast();
+      _documentBindings.properties(native.pointer).cast();
 
   set _nativeProperties(Pointer<FLValue> value) => _mutableDocumentBindings
       .setProperties(native.pointer.cast(), value.cast());
 
   @override
-  MRoot createMRoot(MContext context, {required bool isMutable}) =>
-      runNativeCalls(
-        () => MRoot.fromValue(
-          _nativeProperties,
-          context: context,
-          isMutable: isMutable,
-        ),
-      );
+  MRoot createMRoot(MContext context, {required bool isMutable}) {
+    final result = MRoot.fromValue(
+      _nativeProperties,
+      context: context,
+      isMutable: isMutable,
+    );
+    cblReachabilityFence(native);
+    return result;
+  }
 
   EncodedData _readEncodedProperties() {
-    final encoder = FleeceEncoder();
-    runNativeCalls(() => encoder.writeValue(_nativeProperties));
+    final encoder = FleeceEncoder()..writeValue(_nativeProperties);
+    cblReachabilityFence(native);
     return EncodedData.fleece(encoder.finish());
   }
 
   void _writeEncodedProperties(EncodedData value) {
     final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
-    runNativeCalls(() => _nativeProperties = dict.native.pointer);
+    _nativeProperties = dict.pointer;
+    cblReachabilityFence(native);
+    cblReachabilityFence(dict);
   }
 
   @override

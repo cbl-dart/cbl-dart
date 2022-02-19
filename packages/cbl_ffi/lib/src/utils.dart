@@ -13,6 +13,9 @@ extension AnyExt<T> on T {
   R let<R>(R Function(T it) f) => f(this);
 }
 
+@pragma('vm:never-inline')
+void cblReachabilityFence(Object? object) {}
+
 // === Conversion ==============================================================
 
 extension StringFLStringExt on String? {
@@ -100,6 +103,3 @@ extension PointerExt<T extends NativeType> on Pointer<T> {
 extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
   Pointer<T> elseNullptr() => this == null ? nullptr : this!;
 }
-
-@pragma('vm:never-inline')
-void cblReachabilityFence(Object? object) {}
