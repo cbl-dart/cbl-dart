@@ -9,7 +9,6 @@ import 'package:cbl/src/fleece/dict_key.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/context.dart';
 import 'package:cbl/src/fleece/integration/root.dart';
-import 'package:cbl/src/support/native_object.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
@@ -83,15 +82,17 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
   void run() {
     final doc =
         fl.Doc.fromResultData(data, FLTrust.trusted, sharedKeys: sharedKeys);
-    final root = doc.root.call((pointer) => MRoot.fromValue(
-          pointer,
-          context: MContext(
-            dictKeys: dictKeys,
-            sharedKeysTable: sharedKeysTable,
-            sharedStringsTable: SharedStringsTable(),
-          ),
-          isMutable: false,
-        ));
+    final docRoot = doc.root;
+    final root = MRoot.fromValue(
+      docRoot.pointer,
+      context: MContext(
+        dictKeys: dictKeys,
+        sharedKeysTable: sharedKeysTable,
+        sharedStringsTable: SharedStringsTable(),
+      ),
+      isMutable: false,
+    );
+    cblReachabilityFence(docRoot);
     (root.asNative! as Array).toPlainList();
   }
 }

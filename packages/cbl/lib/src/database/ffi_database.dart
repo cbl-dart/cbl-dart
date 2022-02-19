@@ -14,6 +14,7 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
 import '../support/async_callback.dart';
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/native_object.dart';
@@ -45,15 +46,12 @@ class FfiDatabase extends CBLDatabaseObject
     // Ensure the directory exists, in which to create the database,
     Directory(config.directory).createSync(recursive: true);
 
-    final pointer = runNativeCalls(() => _bindings.open(
-          name,
-          config!.toCBLDatabaseConfiguration(),
-        ));
-
     return FfiDatabase._(
       // Make a copy of the configuration, since its mutable.
       config: DatabaseConfiguration.from(config),
-      pointer: pointer,
+      pointer: runWithErrorTranslation(
+        () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
+      ),
       debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
   }
@@ -64,18 +62,18 @@ class FfiDatabase extends CBLDatabaseObject
     required String debugName,
   })  : _config = config,
         super(pointer, debugName: debugName) {
-    name = call(_bindings.name);
-    _path = call(_bindings.path);
+    name = _bindings.name(pointer);
+    _path = _bindings.path(pointer);
+    cblReachabilityFence(this);
   }
 
   /// {@macro cbl.Database.removeSync}
-  static void remove(String name, {String? directory}) => runNativeCalls(() {
-        _bindings.deleteDatabase(name, directory);
-      });
+  static void remove(String name, {String? directory}) =>
+      runWithErrorTranslation(() => _bindings.deleteDatabase(name, directory));
 
   /// {@macro cbl.Database.existsSync}
   static bool exists(String name, {String? directory}) =>
-      runNativeCalls(() => _bindings.databaseExists(name, directory));
+      runWithErrorTranslation(() => _bindings.databaseExists(name, directory));
 
   /// {@macro cbl.Database.copySync}
   static void copy({
@@ -83,13 +81,13 @@ class FfiDatabase extends CBLDatabaseObject
     required String name,
     DatabaseConfiguration? config,
   }) =>
-      runNativeCalls(() {
-        _bindings.copyDatabase(
+      runWithErrorTranslation(
+        () => _bindings.copyDatabase(
           from,
           name,
           config?.toCBLDatabaseConfiguration(),
-        );
-      });
+        ),
+      );
 
   @override
   final dictKeys = OptimizingDictKeys();
@@ -114,7 +112,11 @@ class FfiDatabase extends CBLDatabaseObject
   String? _path;
 
   @override
-  int get count => useSync(() => call(_bindings.count));
+  int get count => useSync(() {
+        final result = _bindings.count(pointer);
+        cblReachabilityFence(this);
+        return result;
+      });
 
   @override
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
@@ -123,15 +125,24 @@ class FfiDatabase extends CBLDatabaseObject
   Document? document(String id) => syncOperationTracePoint(
         () => GetDocumentOp(this, id),
         () => useSync(
-          () => call((pointer) => _bindings.getDocument(pointer, id))?.let(
-            (pointer) => DelegateDocument(
+          () {
+            final documentPointer = runWithErrorTranslation(
+              () => _bindings.getDocument(pointer, id),
+            );
+            cblReachabilityFence(this);
+
+            if (documentPointer == null) {
+              return null;
+            }
+
+            return DelegateDocument(
               FfiDocumentDelegate.fromPointer(
-                doc: pointer,
+                doc: documentPointer,
                 debugCreator: 'FfiDatabase.document()',
               ),
               database: this,
-            ),
-          ),
+            );
+          },
         ),
       );
 
@@ -150,15 +161,18 @@ class FfiDatabase extends CBLDatabaseObject
             () => PrepareDocumentOp(document),
             () => prepareDocument(document) as FfiDocumentDelegate,
           );
+          final delegateNative = delegate.native;
 
           return _catchConflictException(() {
-            runNativeCalls(() {
-              _bindings.saveDocumentWithConcurrencyControl(
-                native.pointer,
-                delegate.native.pointer.cast(),
+            runWithErrorTranslation(
+              () => _bindings.saveDocumentWithConcurrencyControl(
+                pointer,
+                delegateNative.pointer.cast(),
                 concurrencyControl.toCBLConcurrencyControl(),
-              );
-            });
+              ),
+            );
+            cblReachabilityFence(this);
+            cblReachabilityFence(delegateNative);
           });
         }),
       );
@@ -205,15 +219,18 @@ class FfiDatabase extends CBLDatabaseObject
             () => prepareDocument(document, syncProperties: false)
                 as FfiDocumentDelegate,
           );
+          final delegateNative = delegate.native;
 
           return _catchConflictException(() {
-            runNativeCalls(() {
-              _bindings.deleteDocumentWithConcurrencyControl(
-                native.pointer,
-                delegate.native.pointer.cast(),
+            runWithErrorTranslation(
+              () => _bindings.deleteDocumentWithConcurrencyControl(
+                pointer,
+                delegateNative.pointer.cast(),
                 concurrencyControl.toCBLConcurrencyControl(),
-              );
-            });
+              ),
+            );
+            cblReachabilityFence(this);
+            cblReachabilityFence(delegateNative);
           });
         }),
       );
@@ -226,7 +243,8 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   void purgeDocumentById(String id) => useSync(() {
-        call((pointer) => _bindings.purgeDocumentByID(pointer, id));
+        runWithErrorTranslation(() => _bindings.purgeDocumentByID(pointer, id));
+        cblReachabilityFence(this);
       });
 
   @override
@@ -263,20 +281,34 @@ class FfiDatabase extends CBLDatabaseObject
     );
   }
 
-  void beginTransaction() => call(_bindings.beginTransaction);
+  void beginTransaction() {
+    runWithErrorTranslation(() => _bindings.beginTransaction(pointer));
+    cblReachabilityFence(this);
+  }
 
-  void endTransaction({required bool commit}) =>
-      call((pointer) => _bindings.endTransaction(pointer, commit: commit));
+  void endTransaction({required bool commit}) {
+    runWithErrorTranslation(
+      () => _bindings.endTransaction(pointer, commit: commit),
+    );
+    cblReachabilityFence(this);
+  }
 
   @override
   void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
-        call((pointer) =>
-            _bindings.setDocumentExpiration(pointer, id, expiration));
+        runWithErrorTranslation(
+          () => _bindings.setDocumentExpiration(pointer, id, expiration),
+        );
+        cblReachabilityFence(this);
       });
 
   @override
-  DateTime? getDocumentExpiration(String id) => useSync(
-      () => call((pointer) => _bindings.getDocumentExpiration(pointer, id)));
+  DateTime? getDocumentExpiration(String id) => useSync(() {
+        final result = runWithErrorTranslation(
+          () => _bindings.getDocumentExpiration(pointer, id),
+        );
+        cblReachabilityFence(this);
+        return result;
+      });
 
   @override
   ListenerToken addChangeListener(DatabaseChangeListener listener) =>
@@ -293,10 +325,12 @@ class FfiDatabase extends CBLDatabaseObject
       debugName: 'FfiDatabase.addChangeListener',
     );
 
-    runNativeCalls(() => _bindings.addChangeListener(
-          native.pointer,
-          callback.native.pointer,
-        ));
+    final callbackNative = callback.native;
+    runWithErrorTranslation(
+      () => _bindings.addChangeListener(pointer, callbackNative.pointer),
+    );
+    cblReachabilityFence(this);
+    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -322,11 +356,16 @@ class FfiDatabase extends CBLDatabaseObject
       debugName: 'FfiDatabase.addDocumentChangeListener',
     );
 
-    runNativeCalls(() => _bindings.addDocumentChangeListener(
-          native.pointer,
-          id,
-          callback.native.pointer,
-        ));
+    final callbackNative = callback.native;
+    runWithErrorTranslation(
+      () => _bindings.addDocumentChangeListener(
+        pointer,
+        id,
+        callbackNative.pointer,
+      ),
+    );
+    cblReachabilityFence(this);
+    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -352,11 +391,14 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   Future<void> performClose() async {
-    if (_deleteOnClose) {
-      call(_bindings.delete);
-    } else {
-      call(_bindings.close);
-    }
+    runWithErrorTranslation(() {
+      if (_deleteOnClose) {
+        _bindings.delete(pointer);
+      } else {
+        _bindings.close(pointer);
+      }
+    });
+    cblReachabilityFence(this);
   }
 
   @override
@@ -371,33 +413,47 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   void performMaintenance(MaintenanceType type) => useSync(() {
-        call((pointer) =>
-            _bindings.performMaintenance(pointer, type.toCBLMaintenanceType()));
+        runWithErrorTranslation(
+          () => _bindings.performMaintenance(
+            pointer,
+            type.toCBLMaintenanceType(),
+          ),
+        );
+        cblReachabilityFence(this);
       });
 
   @override
   void changeEncryptionKey(EncryptionKey? newKey) => useSync(() {
-        call((pointer) => _bindings.changeEncryptionKey(
-              pointer,
-              (newKey as EncryptionKeyImpl?)?.cblKey,
-            ));
+        runWithErrorTranslation(
+          () => _bindings.changeEncryptionKey(
+            pointer,
+            (newKey as EncryptionKeyImpl?)?.cblKey,
+          ),
+        );
+        cblReachabilityFence(this);
       });
 
   @override
-  List<String> get indexes => useSync(() => fl.Array.fromPointer(
-        native.call(_bindings.indexNames),
-        adopt: true,
-      ).toObject().cast<String>());
+  List<String> get indexes => useSync(() {
+        final array =
+            fl.Array.fromPointer(_bindings.indexNames(pointer), adopt: true);
+        cblReachabilityFence(this);
+        return array.toObject().cast<String>();
+      });
 
   @override
   void createIndex(String name, covariant IndexImplInterface index) =>
-      useSync(() => native.call((pointer) {
-            _bindings.createIndex(pointer, name, index.toCBLIndexSpec());
-          }));
+      useSync(() {
+        runWithErrorTranslation(
+          () => _bindings.createIndex(pointer, name, index.toCBLIndexSpec()),
+        );
+        cblReachabilityFence(this);
+      });
 
   @override
   void deleteIndex(String name) => useSync(() {
-        call((pointer) => _bindings.deleteIndex(pointer, name));
+        runWithErrorTranslation(() => _bindings.deleteIndex(pointer, name));
+        cblReachabilityFence(this);
       });
 
   @override

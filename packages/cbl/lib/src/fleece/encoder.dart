@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'containers.dart';
@@ -52,14 +53,10 @@ class FleeceEncoder extends FleeceEncoderObject {
 
   /// Tells the encoder to use a shared-keys mapping when encoding dictionary
   /// keys.
-  void setSharedKeys(SharedKeys? sharedKeys) {
-    runNativeCalls(() {
-      _encoderBinds.setSharedKeys(
-        pointer,
-        sharedKeys?.native.pointer ?? nullptr,
-      );
-    });
-  }
+  void setSharedKeys(SharedKeys? sharedKeys) => _use(() {
+        _encoderBinds.setSharedKeys(pointer, sharedKeys?.pointer ?? nullptr);
+        cblReachabilityFence(sharedKeys);
+      });
 
   /// Arbitrary information which needs to be available to code that is using
   /// this encoder.
@@ -117,79 +114,85 @@ class FleeceEncoder extends FleeceEncoderObject {
 
   /// Writes the value at [index] in [array] to this encoder.
   void writeArrayValue(Pointer<FLArray> array, int index) =>
-      call((pointer) => _encoderBinds.writeArrayValue(pointer, array, index));
+      _use(() => _encoderBinds.writeArrayValue(pointer, array, index));
 
   /// Writes [value] this encoder.
   void writeValue(Pointer<FLValue> value) =>
-      call((pointer) => _encoderBinds.writeValue(pointer, value));
+      _use(() => _encoderBinds.writeValue(pointer, value));
 
   /// Writes `null` to this encoder.
-  void writeNull() => call(_encoderBinds.writeNull);
+  void writeNull() => _use(() => _encoderBinds.writeNull(pointer));
 
   /// Writes the [bool] [value] to this encoder.
   // ignore: avoid_positional_boolean_parameters
   void writeBool(bool value) =>
-      call((pointer) => _encoderBinds.writeBool(pointer, value));
+      _use(() => _encoderBinds.writeBool(pointer, value));
 
   /// Writes the [int] [value] to this encoder.
   void writeInt(int value) =>
-      call((pointer) => _encoderBinds.writeInt(pointer, value));
+      _use(() => _encoderBinds.writeInt(pointer, value));
 
   /// Writes the [double] [value] to this encoder.
   void writeDouble(double value) =>
-      call((pointer) => _encoderBinds.writeDouble(pointer, value));
+      _use(() => _encoderBinds.writeDouble(pointer, value));
 
   /// Writes the [String] [value] to this encoder.
   void writeString(String value) =>
-      call((pointer) => _encoderBinds.writeString(pointer, value));
+      _use(() => _encoderBinds.writeString(pointer, value));
 
   /// Writes the [TypedData] [value] to this encoder.
   void writeData(Data value) =>
-      call((pointer) => _encoderBinds.writeData(pointer, value));
+      _use(() => _encoderBinds.writeData(pointer, value));
 
   /// Writes the UTF-8 encoded JSON string [value] to this encoder.
   void writeJson(Data value) =>
-      call((pointer) => _encoderBinds.writeJSON(pointer, value));
+      _use(() => _encoderBinds.writeJSON(pointer, value));
 
   /// Begins an array and reserves space for [reserveLength] element.
   void beginArray(int reserveLength) =>
-      call((pointer) => _encoderBinds.beginArray(pointer, reserveLength));
+      _use(() => _encoderBinds.beginArray(pointer, reserveLength));
 
   /// Ends an array.
-  void endArray() => call(_encoderBinds.endArray);
+  void endArray() => _use(() => _encoderBinds.endArray(pointer));
 
   /// Begins a dict and reserves space for [reserveLength] entries.
   void beginDict(int reserveLength) =>
-      call((pointer) => _encoderBinds.beginDict(pointer, reserveLength));
+      _use(() => _encoderBinds.beginDict(pointer, reserveLength));
 
   /// Writes a [key] for the next entry in a dict.
-  void writeKey(String key) =>
-      call((pointer) => _encoderBinds.writeKey(pointer, key));
+  void writeKey(String key) => _use(() => _encoderBinds.writeKey(pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLString].
   void writeKeyFLString(FLString key) =>
-      call((pointer) => _encoderBinds.writeKeyFLString(pointer, key));
+      _use(() => _encoderBinds.writeKeyFLString(pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLValue].
   void writeKeyValue(Pointer<FLValue> key) =>
-      call((pointer) => _encoderBinds.writeKeyValue(pointer, key));
+      _use(() => _encoderBinds.writeKeyValue(pointer, key));
 
   /// Ends a dict.
-  void endDict() => call(_encoderBinds.endDict);
+  void endDict() => _use(() => _encoderBinds.endDict(pointer));
 
   /// Resets this encoder and allows it to be used again.
-  void reset() => call(_encoderBinds.reset);
+  void reset() => _use(() => _encoderBinds.reset(pointer));
 
   /// Finishes encoding and returns the result.
   ///
   /// To begin a new piece of Fleece data call [reset].
   Data finish() {
-    final result = call(_encoderBinds.finish);
+    final result = _use(() => _encoderBinds.finish(pointer));
 
     if (result == null) {
       throw StateError('Encoder did not encode anything.');
     }
 
+    return result;
+  }
+
+  @pragma('vm:prefer-inline')
+  T _use<T>(T Function() fn) {
+    final result = runWithErrorTranslation(fn);
+    cblReachabilityFence(this);
     return result;
   }
 }

@@ -10,6 +10,7 @@ import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../fleece/integration/context.dart';
 import '../support/async_callback.dart';
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/native_object.dart';
@@ -78,17 +79,25 @@ class FfiQuery extends QueryBase
   SyncResultSet execute() => syncOperationTracePoint(
         () => ExecuteQueryOp(this),
         () => useSync(
-          () => FfiResultSet(
-            native.call(_bindings.execute),
-            query: this,
-            columnNames: _columnNames,
-            debugCreator: 'FfiQuery.execute()',
-          ),
+          () {
+            final result = FfiResultSet(
+              runWithErrorTranslation(() => _bindings.execute(native.pointer)),
+              query: this,
+              columnNames: _columnNames,
+              debugCreator: 'FfiQuery.execute()',
+            );
+            cblReachabilityFence(native);
+            return result;
+          },
         ),
       );
 
   @override
-  String explain() => useSync(() => native.call(_bindings.explain));
+  String explain() => useSync(() {
+        final result = _bindings.explain(native.pointer);
+        cblReachabilityFence(native);
+        return result;
+      });
 
   @override
   ListenerToken addChangeListener(
@@ -107,12 +116,12 @@ class FfiQuery extends QueryBase
           // The native side sends no arguments. When the native side
           // notifies the listener it has to copy the current query
           // result set.
-          native.call((pointer) =>
-              _bindings.copyCurrentResults(pointer, listenerToken)),
+          _bindings.copyCurrentResults(native.pointer, listenerToken),
           query: this,
           columnNames: _columnNames,
           debugCreator: 'FfiQuery.changes()',
         );
+        cblReachabilityFence(native);
 
         final change = QueryChange(this, results);
         listener(change);
@@ -121,10 +130,11 @@ class FfiQuery extends QueryBase
       debugName: 'FfiQuery.addChangeListener',
     );
 
-    listenerToken = runNativeCalls(() => _bindings.addChangeListener(
-          native.pointer,
-          callback.native.pointer,
-        ));
+    final callbackNative = callback.native;
+    listenerToken =
+        _bindings.addChangeListener(native.pointer, callbackNative.pointer);
+    cblReachabilityFence(native);
+    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -159,19 +169,18 @@ class FfiQuery extends QueryBase
   void _performPrepare() {
     syncOperationTracePoint(() => PrepareQueryOp(this), () {
       native = CBLObject(
-        database!.native.call((pointer) => _bindings.create(
-              pointer,
-              language,
-              definition!,
-            )),
+        runWithErrorTranslation(
+          () => _bindings.create(database!.pointer, language, definition!),
+        ),
         debugName: 'FfiQuery(creator: $debugCreator)',
       );
+      cblReachabilityFence(database);
 
       _columnNames = List.generate(
-        native.call(_bindings.columnCount),
-        (index) =>
-            native.call((pointer) => _bindings.columnName(pointer, index)),
+        _bindings.columnCount(native.pointer),
+        (index) => _bindings.columnName(native.pointer, index),
       );
+      cblReachabilityFence(native);
     });
   }
 
@@ -189,11 +198,10 @@ class FfiQuery extends QueryBase
     }
     final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
-    final flDict = doc.root.asDict!;
-    runNativeCalls(() => _bindings.setParameters(
-          native.pointer,
-          flDict.native.pointer.cast(),
-        ));
+    final dict = doc.root.asDict!;
+    _bindings.setParameters(native.pointer, dict.pointer.cast());
+    cblReachabilityFence(native);
+    cblReachabilityFence(dict);
   }
 }
 
@@ -267,8 +275,10 @@ class ResultSetIterator extends CBLObject<CBLResultSet>
   @override
   fl.Array get current {
     assert(_current != null || !_isDone);
-    return _current ??=
-        fl.Array.fromPointer(native.call(_bindings.resultArray));
+    final result =
+        _current ??= fl.Array.fromPointer(_bindings.resultArray(pointer));
+    cblReachabilityFence(this);
+    return result;
   }
 
   @override
@@ -277,7 +287,8 @@ class ResultSetIterator extends CBLObject<CBLResultSet>
       return false;
     }
     _current = null;
-    _isDone = !native.call(_bindings.next);
+    _isDone = !_bindings.next(pointer);
+    cblReachabilityFence(this);
     return !_isDone;
   }
 }

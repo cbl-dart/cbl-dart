@@ -234,6 +234,7 @@ class TransferableSliceResult {
     // Retain the slice now, in case `sliceResult` is garbage collected
     // before this transferable slice result is materialized.
     _sliceBindings.retainSliceResult(sliceResult.makeGlobalResult().ref);
+    cblReachabilityFence(sliceResult);
   }
 
   final int _bufAddress;

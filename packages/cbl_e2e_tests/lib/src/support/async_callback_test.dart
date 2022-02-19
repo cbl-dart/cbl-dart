@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cbl/src/support/async_callback.dart';
-import 'package:cbl/src/support/native_object.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
@@ -27,7 +26,9 @@ void main() {
 
       addTearDown(callback.close);
 
-      callback.native.call((pointer) => bindings.callForTest(pointer, 0));
+      final callbackNative = callback.native;
+      bindings.callForTest(callbackNative.pointer, 0);
+      cblReachabilityFence(callbackNative);
     });
   });
 }

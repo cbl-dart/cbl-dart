@@ -1,127 +1,28 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'dart:async';
 import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import 'debug.dart';
-import 'errors.dart';
 import 'ffi.dart';
-import 'resource.dart';
-
-/// Keeps a [NativeObject] alive while the [Function] [fn] is running.
-///
-/// If [fn] returns a [Future] [object] is kept alive until the future
-/// completes.
-T keepAlive<P extends NativeType, T>(
-  NativeObject<P> object,
-  T Function(Pointer<P> pointer) fn,
-) {
-  assert(() {
-    object._debugKeepAliveRefCount++;
-    return true;
-  }());
-
-  final result = fn(object._pointer);
-
-  if (result is Future) {
-    return result.whenComplete(() {
-      assert(() {
-        object._debugKeepAliveRefCount--;
-        return true;
-      }());
-      cblReachabilityFence(object);
-    }) as T;
-  }
-
-  assert(() {
-    object._debugKeepAliveRefCount--;
-    return true;
-  }());
-  cblReachabilityFence(object);
-  return result;
-}
-
-const _keepAlive = keepAlive;
-
-/// Runs [body] while keeping accessed [NativeObject]s alive.
-///
-/// A native object keep alive is a [Zone], in which [NativeObject] are
-/// recorded when their [NativeObject.pointer] property has been accessed.
-///
-/// When accessing [NativeObject.pointer] and using it, the
-/// native object needs to stay alive while its pointer is being used. While
-/// the pointer to the native object is used, the [NativeObject] can be garbage
-/// collected too early. In this case native finalizers are executed while work
-/// is ongoing. To prevent this condition, a native object keep alive creates
-/// references to [NativeObject]s, whose pointers have been accessed. This keeps
-/// them from being garbage collected while their pointers are being used.
-T runKeepAlive<T>(T Function() body) => runZoned(
-      body,
-      zoneValues: {#_aliveNativeObjects: Set<NativeObject>.identity()},
-    );
-
-Set<NativeObject>? get _aliveNativeObjects =>
-    Zone.current[#_aliveNativeObjects] as Set<NativeObject>?;
-
-T runNativeCalls<T>(T Function() body) =>
-    runWithErrorTranslation(() => runKeepAlive(body));
-
-extension NativeObjectCallExtension<P extends NativeType> on NativeObject<P> {
-  /// Keeps this [NativeObject] alive while the [Function] [fn] is running.
-  ///
-  /// If [fn] returns a [Future] this object is kept alive until the future
-  /// completes.
-  R call<R>(R Function(Pointer<P> pointer) fn) =>
-      runWithErrorTranslation(() => _keepAlive(this, fn));
-}
 
 /// Handle to an object on the native side.
-class NativeObject<T extends NativeType> implements NativeResource<T> {
-  NativeObject(Pointer<T> pointer) : _pointer = pointer;
-
-  final Pointer<T> _pointer;
-
-  var _debugKeepAliveRefCount = 0;
-
-  @override
-  NativeObject<T> get native => this;
+class NativeObject<T extends NativeType> {
+  NativeObject(this.pointer);
 
   /// The pointer to the native object.
-  ///
-  /// Code which access this property must be run in a [runKeepAlive] or use
-  /// [keepAlive] or [NativeObjectCallExtension].
-  Pointer<T> get pointer {
-    final aliveNativeObjects = _aliveNativeObjects;
-
-    assert(
-      _debugKeepAliveRefCount > 0 || aliveNativeObjects != null,
-      'NativeObject.pointer must to be accessed from within `keepAlive` or'
-      ' `runKeepAlive`',
-    );
-
-    aliveNativeObjects?.add(this);
-
-    return _pointer;
-  }
-
-  /// The pointer to the native object, without requiring a native object keep
-  /// alive.
-  ///
-  /// Callers must guarantee that the returned pointer is only used while this
-  /// object has not been garbage collected.
-  Pointer<T> get pointerUnsafe => _pointer;
+  final Pointer<T> pointer;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is NativeObject &&
           runtimeType == other.runtimeType &&
-          _pointer.address == other._pointer.address;
+          pointer.address == other.pointer.address;
 
   @override
-  int get hashCode => _pointer.address.hashCode;
+  int get hashCode => pointer.address.hashCode;
 }
 
 /// Handle to a CouchbaseLite C API object.
