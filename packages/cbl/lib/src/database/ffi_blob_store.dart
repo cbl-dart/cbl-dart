@@ -80,11 +80,11 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
       _getBlob(properties)?.let((it) => _BlobReadStream(database, it));
 
   void _saveBlob(CBLObject<CBLBlob> blob) {
-    runWithErrorTranslation(() {
-      _databaseBindings.saveBlob(database.pointer, blob.pointer);
-      cblReachabilityFence(database);
-      cblReachabilityFence(blob);
-    });
+    runWithErrorTranslation(
+      () => _databaseBindings.saveBlob(database.pointer, blob.pointer),
+    );
+    cblReachabilityFence(database);
+    cblReachabilityFence(blob);
   }
 
   Map<String, Object?> _createBlobProperties(CBLObject<CBLBlob> blob) {
@@ -100,17 +100,14 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   CBLObject<CBLBlob>? _getBlob(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final blobPointer = runWithErrorTranslation(() => _databaseBindings.getBlob(
-          database.pointer,
-          dict.pointer.cast(),
-        ));
+    final blobPointer = runWithErrorTranslation(
+      () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
+    );
     cblReachabilityFence(database);
     cblReachabilityFence(dict);
 
-    return blobPointer?.let((it) => CBLObject(
-          it,
-          debugName: 'NativeBlobStore._getBlob',
-        ));
+    return blobPointer
+        ?.let((it) => CBLObject(it, debugName: 'NativeBlobStore._getBlob'));
   }
 }
 

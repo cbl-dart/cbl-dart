@@ -282,7 +282,6 @@ class FleeceDecoder extends Converter<Data, Object?> {
     }
 
     _decoderBinds.getLoadedValue(root.pointer);
-    cblReachabilityFence(root);
 
     final listener = _BuildDartObjectListener();
     _FleeceListenerDecoder(
@@ -327,7 +326,6 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
     }
 
     _decoderBinds.getLoadedValue(root.pointer);
-    cblReachabilityFence(root);
 
     final result =
         _decodeGlobalLoadedValue(sharedStringsTable ?? SharedStringsTable());

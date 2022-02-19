@@ -49,10 +49,9 @@ class FfiDatabase extends CBLDatabaseObject
     return FfiDatabase._(
       // Make a copy of the configuration, since its mutable.
       config: DatabaseConfiguration.from(config),
-      pointer: runWithErrorTranslation(() => _bindings.open(
-            name,
-            config!.toCBLDatabaseConfiguration(),
-          )),
+      pointer: runWithErrorTranslation(
+        () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
+      ),
       debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
   }
@@ -70,9 +69,7 @@ class FfiDatabase extends CBLDatabaseObject
 
   /// {@macro cbl.Database.removeSync}
   static void remove(String name, {String? directory}) =>
-      runWithErrorTranslation(() {
-        _bindings.deleteDatabase(name, directory);
-      });
+      runWithErrorTranslation(() => _bindings.deleteDatabase(name, directory));
 
   /// {@macro cbl.Database.existsSync}
   static bool exists(String name, {String? directory}) =>
@@ -84,13 +81,13 @@ class FfiDatabase extends CBLDatabaseObject
     required String name,
     DatabaseConfiguration? config,
   }) =>
-      runWithErrorTranslation(() {
-        _bindings.copyDatabase(
+      runWithErrorTranslation(
+        () => _bindings.copyDatabase(
           from,
           name,
           config?.toCBLDatabaseConfiguration(),
-        );
-      });
+        ),
+      );
 
   @override
   final dictKeys = OptimizingDictKeys();
@@ -167,13 +164,13 @@ class FfiDatabase extends CBLDatabaseObject
           final delegateNative = delegate.native;
 
           return _catchConflictException(() {
-            runWithErrorTranslation(() {
-              _bindings.saveDocumentWithConcurrencyControl(
+            runWithErrorTranslation(
+              () => _bindings.saveDocumentWithConcurrencyControl(
                 pointer,
                 delegateNative.pointer.cast(),
                 concurrencyControl.toCBLConcurrencyControl(),
-              );
-            });
+              ),
+            );
             cblReachabilityFence(this);
             cblReachabilityFence(delegateNative);
           });
@@ -225,13 +222,13 @@ class FfiDatabase extends CBLDatabaseObject
           final delegateNative = delegate.native;
 
           return _catchConflictException(() {
-            runWithErrorTranslation(() {
-              _bindings.deleteDocumentWithConcurrencyControl(
+            runWithErrorTranslation(
+              () => _bindings.deleteDocumentWithConcurrencyControl(
                 pointer,
                 delegateNative.pointer.cast(),
                 concurrencyControl.toCBLConcurrencyControl(),
-              );
-            });
+              ),
+            );
             cblReachabilityFence(this);
             cblReachabilityFence(delegateNative);
           });
@@ -438,12 +435,10 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   List<String> get indexes => useSync(() {
-        final result = fl.Array.fromPointer(
-          _bindings.indexNames(pointer),
-          adopt: true,
-        ).toObject().cast<String>();
+        final array =
+            fl.Array.fromPointer(_bindings.indexNames(pointer), adopt: true);
         cblReachabilityFence(this);
-        return result;
+        return array.toObject().cast<String>();
       });
 
   @override

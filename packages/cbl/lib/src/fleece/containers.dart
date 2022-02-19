@@ -679,10 +679,8 @@ class _DictKeyIterator extends Iterator<String> {
   final Dict dict;
 
   late final DictIterator iterator = () {
-    final result = DictIterator(
-      dict.pointer.cast(),
-      keyOut: globalLoadedDictKey,
-    );
+    final result =
+        DictIterator(dict.pointer.cast(), keyOut: globalLoadedDictKey);
     cblReachabilityFence(dict);
     return result;
   }();

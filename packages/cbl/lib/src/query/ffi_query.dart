@@ -131,10 +131,8 @@ class FfiQuery extends QueryBase
     );
 
     final callbackNative = callback.native;
-    listenerToken = _bindings.addChangeListener(
-      native.pointer,
-      callbackNative.pointer,
-    );
+    listenerToken =
+        _bindings.addChangeListener(native.pointer, callbackNative.pointer);
     cblReachabilityFence(native);
     cblReachabilityFence(callbackNative);
 
@@ -172,11 +170,7 @@ class FfiQuery extends QueryBase
     syncOperationTracePoint(() => PrepareQueryOp(this), () {
       native = CBLObject(
         runWithErrorTranslation(
-          () => _bindings.create(
-            database!.pointer,
-            language,
-            definition!,
-          ),
+          () => _bindings.create(database!.pointer, language, definition!),
         ),
         debugName: 'FfiQuery(creator: $debugCreator)',
       );
@@ -204,13 +198,10 @@ class FfiQuery extends QueryBase
     }
     final data = encoder.finish();
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
-    final flDict = doc.root.asDict!;
-    _bindings.setParameters(
-      native.pointer,
-      flDict.pointer.cast(),
-    );
+    final dict = doc.root.asDict!;
+    _bindings.setParameters(native.pointer, dict.pointer.cast());
     cblReachabilityFence(native);
-    cblReachabilityFence(flDict);
+    cblReachabilityFence(dict);
   }
 }
 

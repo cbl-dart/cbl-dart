@@ -53,24 +53,18 @@ class FfiReplicator
 
     _database = database;
 
+    AsyncCallback Function(T) _makeCallback<T>(
+      AsyncCallback Function(T, FfiDatabase, bool) callbackFactory,
+    ) =>
+        (callback) =>
+            callbackFactory(callback, database, ignoreCallbackErrorsInDart);
+
     final pushFilterCallback =
-        config.pushFilter?.let((it) => _wrapReplicationFilter(
-              it,
-              database,
-              ignoreCallbackErrorsInDart,
-            ));
+        config.pushFilter?.let(_makeCallback(_wrapReplicationFilter));
     final pullFilterCallback =
-        config.pullFilter?.let((it) => _wrapReplicationFilter(
-              it,
-              database,
-              ignoreCallbackErrorsInDart,
-            ));
+        config.pullFilter?.let(_makeCallback(_wrapReplicationFilter));
     final conflictResolverCallback =
-        config.conflictResolver?.let((it) => _wrapConflictResolver(
-              it,
-              database,
-              ignoreCallbackErrorsInDart,
-            ));
+        config.conflictResolver?.let(_makeCallback(_wrapConflictResolver));
 
     _callbacks = [
       pushFilterCallback,
@@ -106,9 +100,8 @@ class FfiReplicator
     );
 
     try {
-      final replicator = runWithErrorTranslation(
-        () => _bindings.createReplicator(ffiConfig),
-      );
+      final replicator =
+          runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
       cblReachabilityFence(database);
       cblReachabilityFence(headersDict);
       cblReachabilityFence(channelsArray);
@@ -228,10 +221,8 @@ class FfiReplicator
       (arguments) {
         final message =
             ReplicatorStatusCallbackMessage.fromArguments(arguments);
-        final change = ReplicatorChangeImpl(
-          this,
-          message.status.toReplicatorStatus(),
-        );
+        final change =
+            ReplicatorChangeImpl(this, message.status.toReplicatorStatus());
         listener(change);
         return null;
       },
