@@ -7,6 +7,7 @@ import '../database/database.dart';
 import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
+import '../document/ffi_document.dart';
 import '../document/proxy_document.dart';
 import '../query/ffi_query.dart';
 import '../query/index/index.dart';
@@ -393,8 +394,8 @@ class CblService {
 
     _objectRegistry.addObject(document);
 
-    return _createDocumentState(
-      document,
+    return document.createState(
+      withProperties: true,
       propertiesFormat: request.propertiesFormat,
     );
   }
@@ -412,11 +413,11 @@ class CblService {
       return null;
     }
 
-    document.setEncodedProperties(request.state.properties!);
+    document.setEncodedProperties(request.state.properties!.encodedData!);
 
     final success = database.saveDocument(document, request.concurrencyControl);
 
-    return success ? _createDocumentState(document) : null;
+    return success ? document.createState(withProperties: false) : null;
   }
 
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
@@ -435,7 +436,7 @@ class CblService {
     final success =
         database.deleteDocument(document, request.concurrencyControl);
 
-    return success ? _createDocumentState(document) : null;
+    return success ? document.createState(withProperties: false) : null;
   }
 
   void _purgeDocument(PurgeDocument request) =>
@@ -532,7 +533,7 @@ class CblService {
   int _executeQuery(ExecuteQuery request) =>
       _getQueryById(request.queryId).execute();
 
-  Stream<EncodedData> _getQueryResultSet(GetQueryResultSet request) =>
+  Stream<TransferableValue> _getQueryResultSet(GetQueryResultSet request) =>
       _getQueryById(request.queryId).takeResultSet(request.resultSetId);
 
   void _addQueryChangeListener(AddQueryChangeListener request) {
@@ -553,6 +554,11 @@ class CblService {
       target = DatabaseEndpoint(_getDatabaseById(target.databaseId));
     }
 
+    T Function(int) createCallback<T>(
+      T Function(int, {required EncodingFormat? propertiesFormat}) fn,
+    ) =>
+        (id) => fn(id, propertiesFormat: request.propertiesFormat);
+
     final config = ReplicatorConfiguration(
       database: db,
       target: target,
@@ -563,19 +569,12 @@ class CblService {
       headers: request.headers,
       channels: request.channels,
       documentIds: request.documentIds,
-      pushFilter: request.pushFilterId?.let((id) => _createReplicatorFilter(
-            id,
-            propertiesFormat: request.propertiesFormat,
-          )),
-      pullFilter: request.pullFilterId?.let((id) => _createReplicatorFilter(
-            id,
-            propertiesFormat: request.propertiesFormat,
-          )),
-      conflictResolver:
-          request.conflictResolverId?.let((id) => _createConflictResolver(
-                id,
-                propertiesFormat: request.propertiesFormat,
-              )),
+      pushFilter:
+          request.pushFilterId?.let(createCallback(_createReplicatorFilter)),
+      pullFilter:
+          request.pullFilterId?.let(createCallback(_createReplicatorFilter)),
+      conflictResolver: request.conflictResolverId
+          ?.let(createCallback(_createConflictResolver)),
       enableAutoPurge: request.enableAutoPurge,
       heartbeat: request.heartbeat,
       maxAttempts: request.maxAttempts,
@@ -646,23 +645,6 @@ class CblService {
         indexes: database.indexes,
       );
 
-  Future<DocumentState> _createDocumentState(
-    DelegateDocument document, {
-    EncodingFormat? propertiesFormat,
-  }) async {
-    EncodedData? properties;
-    if (propertiesFormat != null) {
-      properties = await document.encodeProperties(format: propertiesFormat);
-    }
-
-    return DocumentState(
-      id: document.id,
-      revisionId: document.revisionId,
-      sequence: document.sequence,
-      properties: properties,
-    );
-  }
-
   MutableDelegateDocument? _getDocumentForUpdate(
     SyncDatabase database,
     DocumentState state,
@@ -695,11 +677,13 @@ class CblService {
 
   ReplicationFilter _createReplicatorFilter(
     int filterId, {
-    required EncodingFormat propertiesFormat,
+    required EncodingFormat? propertiesFormat,
   }) =>
       (document, flags) async {
-        final state = await (document as DelegateDocument)
-            .getState(propertiesFormat: propertiesFormat);
+        final state = await (document as DelegateDocument).createState(
+          withProperties: true,
+          propertiesFormat: propertiesFormat,
+        );
 
         return channel.call(CallReplicationFilter(
           filterId: filterId,
@@ -710,13 +694,19 @@ class CblService {
 
   ConflictResolver _createConflictResolver(
     int resolverId, {
-    required EncodingFormat propertiesFormat,
+    required EncodingFormat? propertiesFormat,
   }) =>
       ConflictResolver.from((conflict) async {
-        final localState = await (conflict.localDocument as DelegateDocument?)
-            ?.getState(propertiesFormat: propertiesFormat);
-        final remoteState = await (conflict.remoteDocument as DelegateDocument?)
-            ?.getState(propertiesFormat: propertiesFormat);
+        final localDocument = conflict.localDocument as DelegateDocument?;
+        final remoteDocument = conflict.remoteDocument as DelegateDocument?;
+        final localState = await localDocument?.createState(
+          withProperties: true,
+          propertiesFormat: propertiesFormat,
+        );
+        final remoteState = await remoteDocument?.createState(
+          withProperties: true,
+          propertiesFormat: propertiesFormat,
+        );
 
         final resolvedState = await channel.call(CallConflictResolver(
           resolverId: resolverId,
@@ -766,7 +756,7 @@ class _Query {
   _Query(this.query, this.resultEncoding);
 
   final FfiQuery query;
-  final EncodingFormat resultEncoding;
+  final EncodingFormat? resultEncoding;
 
   int _nextResultSetId = 0;
   final _resultSets = <int, ResultSet>{};
@@ -779,12 +769,21 @@ class _Query {
     return id;
   }
 
-  Stream<EncodedData> takeResultSet(int id) =>
+  Stream<TransferableValue> takeResultSet(int id) =>
       _resultSetStream(_resultSets.remove(id)!);
 
-  Stream<EncodedData> _resultSetStream(ResultSet resultSet) =>
-      resultSet.asStream().map((result) =>
-          (result as ResultImpl).encodeColumnValues(resultEncoding));
+  Stream<TransferableValue> _resultSetStream(ResultSet resultSet) =>
+      resultSet.asStream().map((result) {
+        final resultImpl = result as ResultImpl;
+        final resultEncoding = this.resultEncoding;
+        if (resultEncoding != null) {
+          return TransferableValue.fromEncodedData(
+            resultImpl.encodeColumnValues(resultEncoding),
+          );
+        } else {
+          return TransferableValue.fromValue(resultImpl.columnValuesArray!);
+        }
+      });
 
   ListenerToken addChangeListener(void Function(int resultSetId) listener) =>
       query.addChangeListener((change) {
@@ -803,10 +802,22 @@ extension on ObjectRegistry {
 }
 
 extension on DelegateDocument {
-  Future<DocumentState> getState({
-    required EncodingFormat propertiesFormat,
+  Future<DocumentState> createState({
+    required bool withProperties,
+    EncodingFormat? propertiesFormat,
   }) async {
-    final properties = await encodeProperties(format: propertiesFormat);
+    TransferableValue? properties;
+    if (withProperties) {
+      if (propertiesFormat != null) {
+        properties = TransferableValue.fromEncodedData(
+          await encodeProperties(format: propertiesFormat),
+        );
+      } else {
+        properties = TransferableValue.fromValue(
+          (delegate as FfiDocumentDelegate).propertiesDict,
+        );
+      }
+    }
 
     return DocumentState(
       id: id,

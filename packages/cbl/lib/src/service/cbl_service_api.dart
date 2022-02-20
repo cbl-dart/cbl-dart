@@ -1,18 +1,22 @@
 // ignore: lines_longer_than_80_chars
 // ignore_for_file: prefer_constructors_over_static_methods,prefer_void_to_null
 
+import 'dart:ffi';
+
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
 import '../database.dart';
 import '../database/database_configuration.dart';
 import '../errors.dart';
+import '../fleece/containers.dart';
 import '../replication/authenticator.dart';
 import '../replication/configuration.dart';
 import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../support/encoding.dart';
+import '../support/ffi.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -173,6 +177,11 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
 
       // CblService specific types
+      ..addSerializableCodec(
+        'TransferableValue',
+        TransferableValue.deserialize,
+        isIsolatePortSafe: false,
+      )
       ..addSerializableCodec('DatabaseState', DatabaseState.deserialize)
       ..addSerializableCodec(
         'DocumentState',
@@ -717,7 +726,7 @@ class GetDocument extends Request<DocumentState?> {
 
   final int databaseId;
   final String documentId;
-  final EncodingFormat propertiesFormat;
+  final EncodingFormat? propertiesFormat;
 
   @override
   StringMap serialize(SerializationContext context) => {
@@ -730,7 +739,7 @@ class GetDocument extends Request<DocumentState?> {
       GetDocument(
         map.getAs('databaseId'),
         map.getAs('documentId'),
-        context.deserializeAs(map['propertiesFormat'])!,
+        context.deserializeAs(map['propertiesFormat']),
       );
 }
 
@@ -1218,7 +1227,7 @@ class CreateQuery implements Request<QueryState> {
   final int databaseId;
   final CBLQueryLanguage language;
   final String queryDefinition;
-  final EncodingFormat resultEncoding;
+  final EncodingFormat? resultEncoding;
 
   @override
   StringMap serialize(SerializationContext context) => {
@@ -1236,7 +1245,7 @@ class CreateQuery implements Request<QueryState> {
         databaseId: map.getAs('databaseId'),
         language: context.deserializeAs(map['language'])!,
         queryDefinition: map.getAs('queryDefinition'),
-        resultEncoding: context.deserializeAs(map['resultEncoding'])!,
+        resultEncoding: context.deserializeAs(map['resultEncoding']),
       );
 }
 
@@ -1299,7 +1308,7 @@ class ExecuteQuery implements Request<int> {
       ExecuteQuery(queryId: map.getAs('queryId'));
 }
 
-class GetQueryResultSet implements Request<EncodedData> {
+class GetQueryResultSet implements Request<TransferableValue> {
   GetQueryResultSet({
     required this.queryId,
     required this.resultSetId,
@@ -1414,7 +1423,7 @@ class CreateReplicator extends Request<int> {
   });
 
   final int databaseId;
-  final EncodingFormat propertiesFormat;
+  final EncodingFormat? propertiesFormat;
   final Endpoint target;
   final ReplicatorType replicatorType;
   final bool continuous;
@@ -1458,7 +1467,7 @@ class CreateReplicator extends Request<int> {
   ) =>
       CreateReplicator(
         databaseId: map.getAs('databaseId'),
-        propertiesFormat: context.deserializeAs(map['propertiesFormat'])!,
+        propertiesFormat: context.deserializeAs(map['propertiesFormat']),
         target: context.deserializePolymorphic(map['target'])!,
         replicatorType: context.deserializeAs(map['replicatorType'])!,
         continuous: map.getAs('continuous'),
@@ -1754,6 +1763,45 @@ class ReplicatorPendingDocumentIds extends Request<List<String>> {
 
 // === Responses ===============================================================
 
+class TransferableValue implements Serializable {
+  TransferableValue._(this.encodedData, this.value) : _valueAddress = null;
+
+  TransferableValue.fromEncodedData(EncodedData this.encodedData)
+      : value = null,
+        _valueAddress = null;
+
+  TransferableValue.fromValue(Value this.value)
+      : encodedData = null,
+        _valueAddress = value.pointer.address {
+    cblBindings.fleece.value.retain(value!.pointer);
+  }
+
+  final EncodedData? encodedData;
+  final Value? value;
+  final int? _valueAddress;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'encodedData': context.serialize(encodedData),
+        'valueAddress': _valueAddress,
+      };
+
+  static TransferableValue deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) {
+    final encodedData = context.deserializeAs<EncodedData>(map['encodedData']);
+
+    Value? value;
+    final valueAddress = map.getAs<int?>('valueAddress');
+    if (valueAddress != null) {
+      value = Value.fromPointer(Pointer.fromAddress(valueAddress), adopt: true);
+    }
+
+    return TransferableValue._(encodedData, value);
+  }
+}
+
 class DatabaseState implements Serializable {
   DatabaseState({
     required this.id,
@@ -1803,7 +1851,7 @@ class DocumentState implements Serializable {
   final String id;
   final String? revisionId;
   final int sequence;
-  final EncodedData? properties;
+  final TransferableValue? properties;
 
   @override
   bool operator ==(Object other) =>

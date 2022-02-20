@@ -70,6 +70,12 @@ class FfiDocumentDelegate extends DocumentDelegate
   EncodedData? get properties => _properties ??= _readEncodedProperties();
   EncodedData? _properties;
 
+  fl.Dict get propertiesDict {
+    final result = fl.Dict.fromPointer(_nativeProperties.cast());
+    cblReachabilityFence(native);
+    return result;
+  }
+
   @override
   set properties(EncodedData? value) {
     _writeEncodedProperties(value!);

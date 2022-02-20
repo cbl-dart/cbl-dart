@@ -138,13 +138,14 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
 
   Future<void> _performPrepare() =>
       asyncOperationTracePoint(() => PrepareQueryOp(this), () async {
-        final channel = database!.channel;
+        final database = this.database!;
+        final channel = database.channel;
 
         final state = await channel.call(CreateQuery(
-          databaseId: database!.objectId,
+          databaseId: database.objectId,
           language: language,
           queryDefinition: definition!,
-          resultEncoding: EncodingFormat.fleece,
+          resultEncoding: database.encodingFormat,
         ));
 
         _columnNames = state.columnNames;
@@ -160,8 +161,8 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
           proxyFinalizer: () => earlyFinalizer.deactivate(),
         );
 
-        _earlyFinalizer = earlyFinalizer =
-            _ProxyQueryEarlyFinalizer(database!, finalizeEarly);
+        _earlyFinalizer =
+            earlyFinalizer = _ProxyQueryEarlyFinalizer(database, finalizeEarly);
       });
 
   Future<void> _applyParameters(Parameters? parameters) {
@@ -206,17 +207,17 @@ class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
 class ProxyResultSet extends ResultSet {
   ProxyResultSet({
     required ProxyQuery query,
-    required Stream<EncodedData> results,
+    required Stream<TransferableValue> results,
   })  : _query = query,
         _results = results;
 
   final ProxyQuery _query;
-  final Stream<EncodedData> _results;
+  final Stream<TransferableValue> _results;
 
   @override
   Stream<Result> asStream() => _results
-      .map((event) => ResultImpl.fromValuesData(
-            event.toFleece(),
+      .map((event) => ResultImpl.fromTransferableValue(
+            event,
             // Every result needs its own context, because each result is
             // encoded independently.
             context: DatabaseMContext(_query.database),

@@ -1,3 +1,6 @@
+import 'package:cbl_ffi/cbl_ffi.dart';
+
+import '../fleece/containers.dart';
 import '../fleece/integration/context.dart';
 import '../fleece/integration/root.dart';
 import '../service/cbl_service_api.dart';
@@ -6,16 +9,20 @@ import 'document.dart';
 
 class ProxyDocumentDelegate extends DocumentDelegate {
   ProxyDocumentDelegate.fromState(DocumentState state)
-      : id = state.id,
+      : assert(state.properties != null),
+        id = state.id,
         _revisionId = state.revisionId,
         _sequence = state.sequence,
-        properties = state.properties!;
+        properties = state.properties?.encodedData,
+        _propertiesDict = state.properties?.value?.asDict;
 
   ProxyDocumentDelegate.fromDelegate(DocumentDelegate delegate)
       : id = delegate.id,
         _revisionId = delegate.revisionId,
         _sequence = delegate.sequence,
-        properties = delegate.properties;
+        properties = delegate.properties,
+        _propertiesDict =
+            delegate is ProxyDocumentDelegate ? delegate._propertiesDict : null;
 
   @override
   final String id;
@@ -31,33 +38,44 @@ class ProxyDocumentDelegate extends DocumentDelegate {
   @override
   EncodedData? properties;
 
+  final Dict? _propertiesDict;
+
   @override
-  MRoot createMRoot(MContext context, {required bool isMutable}) =>
-      MRoot.fromData(
-        properties!.toFleece(),
+  MRoot createMRoot(MContext context, {required bool isMutable}) {
+    final propertiesDict = _propertiesDict;
+    if (propertiesDict != null) {
+      final result = MRoot.fromValue(
+        propertiesDict.pointer,
         context: context,
         isMutable: isMutable,
       );
+      cblReachabilityFence(propertiesDict);
+      return result;
+    }
+
+    return MRoot.fromData(
+      properties!.toFleece(),
+      context: context,
+      isMutable: isMutable,
+    );
+  }
 
   @override
   DocumentDelegate toMutable() => ProxyDocumentDelegate.fromDelegate(this);
 
-  void setState(DocumentState state) {
-    assert(id == state.id);
+  void updateMetadata(DocumentState state) {
+    assert(state.id == id);
 
     _revisionId = state.revisionId;
     _sequence = state.sequence;
-
-    final properties = state.properties;
-    if (properties != null) {
-      this.properties = properties;
-    }
   }
 
   DocumentState getState({bool withProperties = true}) => DocumentState(
         id: id,
         revisionId: revisionId,
         sequence: sequence,
-        properties: withProperties ? properties : null,
+        properties: withProperties
+            ? TransferableValue.fromEncodedData(properties!)
+            : null,
       );
 }
