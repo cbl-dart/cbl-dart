@@ -11,6 +11,7 @@ import '../document/dictionary.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
+import '../service/cbl_service_api.dart';
 import '../support/encoding.dart';
 import 'result_set.dart';
 
@@ -113,6 +114,27 @@ abstract class Result
 }
 
 class ResultImpl with IterableMixin<String> implements Result {
+  factory ResultImpl.fromTransferableValue(
+    TransferableValue value, {
+    required MContext context,
+    required List<String> columnNames,
+  }) {
+    final encodedData = value.encodedData;
+    if (encodedData != null) {
+      return ResultImpl.fromValuesData(
+        encodedData.toFleece(),
+        context: context,
+        columnNames: columnNames,
+      );
+    }
+
+    return ResultImpl.fromValuesArray(
+      value.value!.asArray!,
+      context: context,
+      columnNames: columnNames,
+    );
+  }
+
   /// Creates a result from an array of the column values, encoded in a chunk of
   /// Fleece [data].
   ///
@@ -122,9 +144,9 @@ class ResultImpl with IterableMixin<String> implements Result {
     required MContext context,
     required List<String> columnNames,
   })  : _context = context,
-        _columnValuesArray = null,
-        _columnValuesData = data,
-        _columnNames = columnNames;
+        _columnNames = columnNames,
+        columnValuesArray = null,
+        columnValuesData = data;
 
   /// Creates a result from a fleece [array] fo the column values.
   ///
@@ -135,14 +157,14 @@ class ResultImpl with IterableMixin<String> implements Result {
     required MContext context,
     required List<String> columnNames,
   })  : _context = context,
-        _columnValuesArray = array,
-        _columnValuesData = null,
-        _columnNames = columnNames;
+        _columnNames = columnNames,
+        columnValuesArray = array,
+        columnValuesData = null;
 
   final MContext _context;
-  final Data? _columnValuesData;
-  final fl.Array? _columnValuesArray;
   final List<String> _columnNames;
+  final Data? columnValuesData;
+  final fl.Array? columnValuesArray;
 
   late final ArrayImpl _array = _createArray();
   late final DictionaryImpl _dictionary = _createDictionary();
@@ -281,20 +303,20 @@ class ResultImpl with IterableMixin<String> implements Result {
 
     switch (format) {
       case EncodingFormat.fleece:
-        if (_columnValuesData != null) {
-          return EncodedData.fleece(_columnValuesData!);
+        if (columnValuesData != null) {
+          return EncodedData.fleece(columnValuesData!);
         } else {
-          columnValues = _columnValuesArray!;
+          columnValues = columnValuesArray!;
         }
         break;
       case EncodingFormat.json:
         // ignore: invariant_booleans
-        if (_columnValuesData != null) {
+        if (columnValuesData != null) {
           columnValues =
-              fl.Doc.fromResultData(_columnValuesData!, FLTrust.trusted).root
+              fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted).root
                   as fl.Array;
         } else {
-          columnValues = _columnValuesArray!;
+          columnValues = columnValuesArray!;
         }
         break;
     }
@@ -307,16 +329,16 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   ArrayImpl _createArray() {
     MRoot root;
-    if (_columnValuesArray != null) {
+    if (columnValuesArray != null) {
       root = MRoot.fromValue(
-        _columnValuesArray!.pointer,
+        columnValuesArray!.pointer,
         context: _context,
         isMutable: false,
       );
-      cblReachabilityFence(_columnValuesArray);
+      cblReachabilityFence(columnValuesArray);
     } else {
       root = MRoot.fromData(
-        _columnValuesData!,
+        columnValuesData!,
         context: _context,
         isMutable: false,
       );

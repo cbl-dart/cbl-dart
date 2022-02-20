@@ -597,6 +597,11 @@ typedef _FLValue_IsEqual = bool Function(
   Pointer<FLValue> v2,
 );
 
+typedef _FLValue_Retain = Pointer<FLValue> Function(Pointer<FLValue> value);
+
+typedef _FLValue_Release_C = Void Function(Pointer<FLValue> value);
+typedef _FLValue_Release = void Function(Pointer<FLValue> value);
+
 typedef _FLValue_ToJSONX_C = FLStringResult Function(
   Pointer<FLValue> value,
   Bool json5,
@@ -664,6 +669,14 @@ class ValueBindings extends Bindings {
       'FLValue_IsEqual',
       isLeaf: useIsLeaf,
     );
+    _retain = libs.cbl.lookupFunction<_FLValue_Retain, _FLValue_Retain>(
+      'FLValue_Retain',
+      isLeaf: useIsLeaf,
+    );
+    _release = libs.cbl.lookupFunction<_FLValue_Release_C, _FLValue_Release>(
+      'FLValue_Release',
+      isLeaf: useIsLeaf,
+    );
     _toJson = libs.cbl.lookupFunction<_FLValue_ToJSONX_C, _FLValue_ToJSONX>(
       'FLValue_ToJSONX',
       isLeaf: useIsLeaf,
@@ -683,6 +696,8 @@ class ValueBindings extends Bindings {
   late final _FLValue_AsData _asData;
   late final _FLValue_ToString _scalarToString;
   late final _FLValue_IsEqual _isEqual;
+  late final _FLValue_Retain _retain;
+  late final _FLValue_Release _release;
   late final _FLValue_ToJSONX _toJson;
 
   void bindToDartObject(
@@ -723,6 +738,10 @@ class ValueBindings extends Bindings {
       _scalarToString(value).toDartStringAndRelease();
 
   bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) => _isEqual(a, b);
+
+  void retain(Pointer<FLValue> value) => _retain(value);
+
+  void release(Pointer<FLValue> value) => _release(value);
 
   String toJSONX(
     Pointer<FLValue> value, {

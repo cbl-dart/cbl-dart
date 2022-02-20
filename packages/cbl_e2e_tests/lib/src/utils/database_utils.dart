@@ -8,6 +8,7 @@ import 'package:cbl/src/service/cbl_service_api.dart';
 import 'package:cbl/src/service/cbl_worker.dart';
 import 'package:cbl/src/service/channel.dart';
 import 'package:cbl/src/service/serialization/json_packet_codec.dart';
+import 'package:cbl/src/support/encoding.dart';
 import 'package:cbl/src/support/utils.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -115,6 +116,7 @@ Future<AsyncDatabase> openAsyncTestDatabase({
       name: name,
       config: config,
       client: _sharedIsolateClient(isolate),
+      encodingFormat: EncodingFormat.fleece,
     );
   }
 

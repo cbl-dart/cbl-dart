@@ -10,7 +10,6 @@ import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/edition.dart';
-import '../support/encoding.dart';
 import '../support/errors.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
@@ -79,7 +78,7 @@ class ProxyReplicator extends ProxyObject
     try {
       final objectId = await database.channel.call(CreateReplicator(
         databaseId: database.objectId,
-        propertiesFormat: EncodingFormat.fleece,
+        propertiesFormat: database.encodingFormat,
         target: target,
         replicatorType: config.replicatorType,
         continuous: config.continuous,

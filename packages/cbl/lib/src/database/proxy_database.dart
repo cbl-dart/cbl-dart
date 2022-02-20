@@ -40,6 +40,7 @@ class ProxyDatabase extends ProxyObject
     this.client,
     DatabaseConfiguration config,
     this.state,
+    this.encodingFormat,
   )   : name = state.name,
         path = state.path,
         // Make a copy of config, since it is mutable.
@@ -72,9 +73,10 @@ class ProxyDatabase extends ProxyObject
     required String name,
     required DatabaseConfiguration config,
     required CblServiceClient client,
+    required EncodingFormat? encodingFormat,
   }) async {
     final state = await client.channel.call(OpenDatabase(name, config));
-    return ProxyDatabase(client, config, state);
+    return ProxyDatabase(client, config, state, encodingFormat);
   }
 
   @override
@@ -86,6 +88,8 @@ class ProxyDatabase extends ProxyObject
   var _deleteOnClose = false;
 
   final CblServiceClient client;
+
+  final EncodingFormat? encodingFormat;
 
   @override
   late final BlobStore blobStore = ProxyBlobStore(this);
@@ -115,8 +119,8 @@ class ProxyDatabase extends ProxyObject
   Future<Document?> document(String id) => asyncOperationTracePoint(
         () => GetDocumentOp(this, id),
         () => use(() async {
-          final state = await channel
-              .call(GetDocument(objectId, id, EncodingFormat.fleece));
+          final state =
+              await channel.call(GetDocument(objectId, id, encodingFormat));
 
           if (state == null) {
             return null;
@@ -156,7 +160,7 @@ class ProxyDatabase extends ProxyObject
             return false;
           }
 
-          delegate.setState(state);
+          delegate.updateMetadata(state);
 
           return true;
         }),
@@ -198,7 +202,7 @@ class ProxyDatabase extends ProxyObject
             return false;
           }
 
-          delegate.setState(state);
+          delegate.updateMetadata(state);
 
           return true;
         }),
@@ -402,7 +406,7 @@ class WorkerDatabase extends ProxyDatabase {
     CblServiceClient client,
     DatabaseConfiguration config,
     DatabaseState state,
-  ) : super(client, config, state);
+  ) : super(client, config, state, null);
 
   static Future<WorkerDatabase> open(
     String name, [
@@ -468,7 +472,7 @@ class RemoteDatabase extends ProxyDatabase {
     CblServiceClient client,
     DatabaseConfiguration config,
     DatabaseState state,
-  ) : super(client, config, state);
+  ) : super(client, config, state, EncodingFormat.fleece);
 
   static Future<RemoteDatabase> open(
     Uri uri,
