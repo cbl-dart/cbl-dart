@@ -54,7 +54,7 @@ AsyncCallback::AsyncCallback(uint32_t id, Dart_Handle dartCallback,
                              Dart_Port sendport, bool debug)
     : id_(id), debug_(debug), sendPort_(sendport) {
   dartCallbackHandle_ = Dart_NewWeakPersistentHandle_DL(
-      dartCallback, this, 0, AsyncCallback::dartFinalizer);
+      dartCallback, this, sizeof(AsyncCallback), AsyncCallback::dartFinalizer);
   assert(dartCallbackHandle_ != nullptr);
 
   AsyncCallbackRegistry::instance.registerCallback(*this);
