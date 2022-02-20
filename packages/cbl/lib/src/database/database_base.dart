@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:synchronized/synchronized.dart';
+
 import '../document/document.dart';
+import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../support/utils.dart';
@@ -25,6 +28,8 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   ///
   /// The same note as for [dictKeys] applies here.
   SharedKeysTable get sharedKeysTable;
+
+  final _asyncTransactionLock = Lock();
 
   /// Creates a [DocumentDelegate] from [oldDelegate] for a new document which
   /// is being used with this database for the first time.
@@ -134,5 +139,103 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
       return done.then((_) => success);
     }
     return success;
+  }
+
+  FutureOr<void> beginTransaction();
+
+  FutureOr<void> endTransaction({required bool commit});
+
+  R runInTransactionSync<R>(R Function() fn, {bool requiresNew = false}) =>
+      _runInTransaction(fn, async: false, requiresNew: requiresNew) as R;
+
+  Future<R> runInTransactionAsync<R>(
+    FutureOr<R> Function() fn, {
+    bool requiresNew = false,
+  }) =>
+      _runInTransaction(fn, async: true, requiresNew: requiresNew) as Future<R>;
+
+  FutureOr<R> _runInTransaction<R>(
+    FutureOr<R> Function() fn, {
+    bool requiresNew = false,
+    required bool async,
+  }) {
+    final currentTransaction = Zone.current[#_transaction] as _Transaction?;
+    if (currentTransaction != null) {
+      if (requiresNew) {
+        throw DatabaseException(
+          'Cannot start a new transaction while another is already active.',
+          DatabaseErrorCode.transactionNotClosed,
+        );
+      }
+
+      // Check that the transaction associated with the current Zone is still
+      // open.
+      currentTransaction.checkIsActive();
+
+      return fn();
+    }
+
+    if (!async && _asyncTransactionLock.locked) {
+      throw DatabaseException(
+        'Cannot start a new synchronous transaction while an asynchronous '
+        'transaction is still active.',
+        DatabaseErrorCode.transactionNotClosed,
+      );
+    }
+
+    final transaction = _Transaction();
+
+    FutureOr<R> invokeFn() =>
+        runZoned(fn, zoneValues: {#_transaction: transaction});
+
+    return beginTransaction().then((_) {
+      if (async) {
+        return _asyncTransactionLock.synchronized(
+          () => Future.sync(invokeFn).then((value) async {
+            transaction.end();
+            await endTransaction(commit: true);
+            return value;
+            // ignore: avoid_types_on_closure_parameters
+          }, onError: (Object error) async {
+            transaction.end();
+            await endTransaction(commit: false);
+            // ignore: only_throw_errors
+            throw error;
+          }),
+        );
+      } else {
+        try {
+          final result = invokeFn();
+          transaction.end();
+          final endTransactionResult = endTransaction(commit: true);
+          assert(endTransactionResult is! Future);
+          return result;
+          // ignore: avoid_catches_without_on_clauses
+        } catch (e) {
+          transaction.end();
+          final endTransactionResult = endTransaction(commit: false);
+          assert(endTransactionResult is! Future);
+          rethrow;
+        }
+      }
+    });
+  }
+}
+
+class _Transaction {
+  bool get isActive => _isActive;
+  var _isActive = true;
+
+  void end() {
+    _isActive = false;
+  }
+
+  void checkIsActive() {
+    if (!isActive) {
+      throw DatabaseException(
+        'The associated transaction is not active anymore.',
+        DatabaseErrorCode.notInTransaction,
+      );
+    }
   }
 }
