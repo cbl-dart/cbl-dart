@@ -116,6 +116,14 @@ class ProxyDatabase extends ProxyObject
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
 
   @override
+  Future<void> beginTransaction() =>
+      channel.call(BeginDatabaseTransaction(databaseId: objectId));
+
+  @override
+  Future<void> endTransaction({required bool commit}) => channel
+      .call(EndDatabaseTransaction(databaseId: objectId, commit: commit));
+
+  @override
   Future<Document?> document(String id) => asyncOperationTracePoint(
         () => GetDocumentOp(this, id),
         () => use(() async {
@@ -144,26 +152,28 @@ class ProxyDatabase extends ProxyObject
   ]) =>
       asyncOperationTracePoint(
         () => SaveDocumentOp(this, document, concurrencyControl),
-        () => use(() async {
-          final delegate = await asyncOperationTracePoint(
-            () => PrepareDocumentOp(document),
-            () async => prepareDocument(document),
-          );
+        () => use(
+          () => runInTransactionAsync(() async {
+            final delegate = await asyncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () async => prepareDocument(document),
+            );
 
-          final state = await channel.call(SaveDocument(
-            objectId,
-            delegate.getState(),
-            concurrencyControl,
-          ));
+            final state = await channel.call(SaveDocument(
+              objectId,
+              delegate.getState(),
+              concurrencyControl,
+            ));
 
-          if (state == null) {
-            return false;
-          }
+            if (state == null) {
+              return false;
+            }
 
-          delegate.updateMetadata(state);
+            delegate.updateMetadata(state);
 
-          return true;
-        }),
+            return true;
+          }),
+        ),
       );
 
   @override
@@ -186,26 +196,28 @@ class ProxyDatabase extends ProxyObject
   ]) =>
       asyncOperationTracePoint(
         () => DeleteDocumentOp(this, document, concurrencyControl),
-        () => use(() async {
-          final delegate = await asyncOperationTracePoint(
-            () => PrepareDocumentOp(document),
-            () async => prepareDocument(document, syncProperties: false),
-          );
+        () => use(
+          () => runInTransactionAsync(() async {
+            final delegate = await asyncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () async => prepareDocument(document, syncProperties: false),
+            );
 
-          final state = await channel.call(DeleteDocument(
-            objectId,
-            delegate.getState(withProperties: false),
-            concurrencyControl,
-          ));
+            final state = await channel.call(DeleteDocument(
+              objectId,
+              delegate.getState(withProperties: false),
+              concurrencyControl,
+            ));
 
-          if (state == null) {
-            return false;
-          }
+            if (state == null) {
+              return false;
+            }
 
-          delegate.updateMetadata(state);
+            delegate.updateMetadata(state);
 
-          return true;
-        }),
+            return true;
+          }),
+        ),
       );
 
   @override
@@ -218,8 +230,11 @@ class ProxyDatabase extends ProxyObject
   }
 
   @override
-  Future<void> purgeDocumentById(String id) =>
-      use(() => channel.call(PurgeDocument(objectId, id)));
+  Future<void> purgeDocumentById(String id) => use(
+        () => runInTransactionAsync(
+          () => channel.call(PurgeDocument(objectId, id)),
+        ),
+      );
 
   @override
   Future<void> saveBlob(covariant BlobImpl blob) =>
@@ -235,24 +250,8 @@ class ProxyDatabase extends ProxyObject
       });
 
   @override
-  Future<void> inBatch(FutureOr<void> Function() fn) => use(() async {
-        await channel.call(BeginDatabaseTransaction(databaseId: objectId));
-        try {
-          await fn();
-          await channel.call(EndDatabaseTransaction(
-            databaseId: objectId,
-            commit: true,
-          ));
-        }
-        // ignore: avoid_catches_without_on_clauses
-        catch (e) {
-          await channel.call(EndDatabaseTransaction(
-            databaseId: objectId,
-            commit: false,
-          ));
-          rethrow;
-        }
-      });
+  Future<void> inBatch(FutureOr<void> Function() fn) =>
+      use(() => runInTransactionAsync(fn, requiresNewTransaction: true));
 
   @override
   Future<void> setDocumentExpiration(String id, DateTime? expiration) =>

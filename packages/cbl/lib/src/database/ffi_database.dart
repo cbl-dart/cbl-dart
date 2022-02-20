@@ -122,6 +122,20 @@ class FfiDatabase extends CBLDatabaseObject
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
 
   @override
+  void beginTransaction() {
+    runWithErrorTranslation(() => _bindings.beginTransaction(pointer));
+    cblReachabilityFence(this);
+  }
+
+  @override
+  void endTransaction({required bool commit}) {
+    runWithErrorTranslation(
+      () => _bindings.endTransaction(pointer, commit: commit),
+    );
+    cblReachabilityFence(this);
+  }
+
+  @override
   Document? document(String id) => syncOperationTracePoint(
         () => GetDocumentOp(this, id),
         () => useSync(
@@ -156,25 +170,27 @@ class FfiDatabase extends CBLDatabaseObject
   ]) =>
       syncOperationTracePoint(
         () => SaveDocumentOp(this, document, concurrencyControl),
-        () => useSync(() {
-          final delegate = syncOperationTracePoint(
-            () => PrepareDocumentOp(document),
-            () => prepareDocument(document) as FfiDocumentDelegate,
-          );
-          final delegateNative = delegate.native;
-
-          return _catchConflictException(() {
-            runWithErrorTranslation(
-              () => _bindings.saveDocumentWithConcurrencyControl(
-                pointer,
-                delegateNative.pointer.cast(),
-                concurrencyControl.toCBLConcurrencyControl(),
-              ),
+        () => useSync(
+          () => runInTransactionSync(() {
+            final delegate = syncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () => prepareDocument(document) as FfiDocumentDelegate,
             );
-            cblReachabilityFence(this);
-            cblReachabilityFence(delegateNative);
-          });
-        }),
+            final delegateNative = delegate.native;
+
+            return _catchConflictException(() {
+              runWithErrorTranslation(
+                () => _bindings.saveDocumentWithConcurrencyControl(
+                  pointer,
+                  delegateNative.pointer.cast(),
+                  concurrencyControl.toCBLConcurrencyControl(),
+                ),
+              );
+              cblReachabilityFence(this);
+              cblReachabilityFence(delegateNative);
+            });
+          }),
+        ),
       );
 
   @override
@@ -213,26 +229,28 @@ class FfiDatabase extends CBLDatabaseObject
   ]) =>
       syncOperationTracePoint(
         () => DeleteDocumentOp(this, document, concurrencyControl),
-        () => useSync(() {
-          final delegate = syncOperationTracePoint(
-            () => PrepareDocumentOp(document),
-            () => prepareDocument(document, syncProperties: false)
-                as FfiDocumentDelegate,
-          );
-          final delegateNative = delegate.native;
-
-          return _catchConflictException(() {
-            runWithErrorTranslation(
-              () => _bindings.deleteDocumentWithConcurrencyControl(
-                pointer,
-                delegateNative.pointer.cast(),
-                concurrencyControl.toCBLConcurrencyControl(),
-              ),
+        () => useSync(
+          () => runInTransactionSync(() {
+            final delegate = syncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () => prepareDocument(document, syncProperties: false)
+                  as FfiDocumentDelegate,
             );
-            cblReachabilityFence(this);
-            cblReachabilityFence(delegateNative);
-          });
-        }),
+            final delegateNative = delegate.native;
+
+            return _catchConflictException(() {
+              runWithErrorTranslation(
+                () => _bindings.deleteDocumentWithConcurrencyControl(
+                  pointer,
+                  delegateNative.pointer.cast(),
+                  concurrencyControl.toCBLConcurrencyControl(),
+                ),
+              );
+              cblReachabilityFence(this);
+              cblReachabilityFence(delegateNative);
+            });
+          }),
+        ),
       );
 
   @override
@@ -242,10 +260,14 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  void purgeDocumentById(String id) => useSync(() {
-        runWithErrorTranslation(() => _bindings.purgeDocumentByID(pointer, id));
-        cblReachabilityFence(this);
-      });
+  void purgeDocumentById(String id) => useSync(
+        () => runInTransactionSync(() {
+          runWithErrorTranslation(
+            () => _bindings.purgeDocumentByID(pointer, id),
+          );
+          cblReachabilityFence(this);
+        }),
+      );
 
   @override
   Future<void> saveBlob(covariant BlobImpl blob) =>
@@ -264,34 +286,12 @@ class FfiDatabase extends CBLDatabaseObject
       });
 
   @override
-  Future<void> inBatch(FutureOr<void> Function() fn) => use(() => _inBatch(fn));
+  Future<void> inBatch(FutureOr<void> Function() fn) =>
+      use(() => runInTransactionAsync(fn, requiresNewTransaction: true));
 
   @override
-  void inBatchSync(void Function() fn) => useSync(() {
-        // Since fn is sync the result must also be sync.
-        final result = _inBatch(fn);
-        assert(result is! Future<void>);
-      });
-
-  FutureOr<void> _inBatch(FutureOr<void> Function() fn) {
-    beginTransaction();
-    return finallySyncOrAsync(
-      (didThrow) => endTransaction(commit: !didThrow),
-      fn,
-    );
-  }
-
-  void beginTransaction() {
-    runWithErrorTranslation(() => _bindings.beginTransaction(pointer));
-    cblReachabilityFence(this);
-  }
-
-  void endTransaction({required bool commit}) {
-    runWithErrorTranslation(
-      () => _bindings.endTransaction(pointer, commit: commit),
-    );
-    cblReachabilityFence(this);
-  }
+  void inBatchSync(void Function() fn) =>
+      useSync(() => runInTransactionSync(fn, requiresNewTransaction: true));
 
   @override
   void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {

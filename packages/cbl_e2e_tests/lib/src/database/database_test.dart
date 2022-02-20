@@ -232,6 +232,83 @@ void main() {
         expect(await db.document(doc.id), isNull);
       });
 
+      apiTest('inBatch throws when called recursively', () async {
+        final db = await openTestDatabase();
+
+        expect(
+          Future.sync(() => db.inBatch(() => db.inBatch(() {}))),
+          throwsA(isA<DatabaseException>()),
+        );
+      });
+
+      apiTest('inBatch tracks and rejects late database uses', () async {
+        final db = await openTestDatabase();
+
+        late final Zone inBatchZone;
+        await db.inBatch(() => inBatchZone = Zone.current);
+
+        expect(
+          () => inBatchZone.run(() => db.saveDocument(MutableDocument())),
+          throwsA(isA<DatabaseException>()),
+        );
+      });
+
+      apiTest('inBatch runs async calls sequential', () async {
+        final db = await openTestDatabase();
+
+        var inBatch0isDone = false;
+        var inBatch1isDone = false;
+
+        // ignore: unawaited_futures
+        db.inBatch(() async {
+          expect(inBatch1isDone, isFalse);
+
+          // Yield to the event loop.
+          await Future(() {});
+
+          // inBatch1 should still not be running.
+          expect(inBatch1isDone, isFalse);
+
+          inBatch0isDone = true;
+        });
+        // ignore: unawaited_futures, cascade_invocations
+        db.inBatch(() {
+          expect(inBatch0isDone, isTrue);
+          inBatch1isDone = true;
+        });
+      });
+
+      test(
+        'inBatch rejects starting new sync txn while an async txn is active',
+        () async {
+          final db = openSyncTestDatabase();
+
+          final inBatch = db.inBatch(() async {});
+
+          expect(
+            () => db.saveDocument(MutableDocument()),
+            throwsA(isA<DatabaseException>()),
+          );
+
+          await inBatch;
+
+          // Verify that after inBatch is finished sync operations are allowed.
+          db.saveDocument(MutableDocument());
+        },
+      );
+
+      apiTest('inBatch rejects operations for the wrong database', () async {
+        final dbA = await openTestDatabase();
+        final dbB = await openTestDatabase();
+
+        expect(
+          dbA.inBatch(() {
+            dbB.saveDocument(MutableDocument());
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+      });
+
       apiTest('document returns null when the document does not exist',
           () async {
         final db = await openTestDatabase();

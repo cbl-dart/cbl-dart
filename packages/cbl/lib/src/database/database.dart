@@ -274,11 +274,16 @@ abstract class Database implements ClosableResource {
   /// Runs a group of database operations in a batch.
   ///
   /// {@template cbl.Database.inBatch}
-  /// Use this when performance bulk write operations like multiple
+  /// Use this when performing bulk write operations like multiple
   /// inserts/updates; it saves the overhead of multiple database commits,
   /// greatly improving performance.
+  ///
+  /// Calls to [inBatch] must not be nested.
+  ///
+  /// Any asynchronous tasks launched from inside a [inBatch] block must finish
+  /// writing to the database before the [inBatch] block completes.
   /// {@endtemplate}
-  FutureOr<void> inBatch(FutureOr<void> Function() fn);
+  Future<void> inBatch(FutureOr<void> Function() fn);
 
   /// Sets an [expiration] date for a [Document] by its [id].
   ///
