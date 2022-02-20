@@ -297,6 +297,18 @@ void main() {
         },
       );
 
+      apiTest('inBatch rejects operations for the wrong database', () async {
+        final dbA = await openTestDatabase();
+        final dbB = await openTestDatabase();
+
+        expect(
+          dbA.inBatch(() {
+            dbB.saveDocument(MutableDocument());
+          }),
+          throwsA(isA<DatabaseException>()),
+        );
+      });
+
       apiTest('document returns null when the document does not exist',
           () async {
         final db = await openTestDatabase();

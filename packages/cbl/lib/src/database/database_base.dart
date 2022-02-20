@@ -141,36 +141,61 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
     return success;
   }
 
+  /// Method to implement by by [Database] implementations to begin a new
+  /// transaction.
   FutureOr<void> beginTransaction();
 
+  /// Method to implement by by [Database] implementations to commit the current
+  /// transaction.
   FutureOr<void> endTransaction({required bool commit});
 
-  R runInTransactionSync<R>(R Function() fn, {bool requiresNew = false}) =>
-      _runInTransaction(fn, async: false, requiresNew: requiresNew) as R;
+  /// Runs [fn] in a synchronous transaction.
+  ///
+  /// If [requiresNewTransaction] is `true` any preexisting transaction causes
+  /// an exception to be thrown.
+  R runInTransactionSync<R>(
+    R Function() fn, {
+    bool requiresNewTransaction = false,
+  }) =>
+      _runInTransaction(
+        fn,
+        async: false,
+        requiresNewTransaction: requiresNewTransaction,
+      ) as R;
 
+  /// Runs [fn] in an asynchronous transaction.
+  ///
+  /// If [requiresNewTransaction] is `true` any preexisting transaction causes
+  /// an exception to be thrown.
   Future<R> runInTransactionAsync<R>(
     FutureOr<R> Function() fn, {
-    bool requiresNew = false,
+    bool requiresNewTransaction = false,
   }) =>
-      _runInTransaction(fn, async: true, requiresNew: requiresNew) as Future<R>;
+      _runInTransaction(
+        fn,
+        async: true,
+        requiresNewTransaction: requiresNewTransaction,
+      ) as Future<R>;
 
   FutureOr<R> _runInTransaction<R>(
     FutureOr<R> Function() fn, {
-    bool requiresNew = false,
+    bool requiresNewTransaction = false,
     required bool async,
   }) {
     final currentTransaction = Zone.current[#_transaction] as _Transaction?;
     if (currentTransaction != null) {
-      if (requiresNew) {
+      if (requiresNewTransaction) {
         throw DatabaseException(
           'Cannot start a new transaction while another is already active.',
           DatabaseErrorCode.transactionNotClosed,
         );
       }
 
-      // Check that the transaction associated with the current Zone is still
-      // open.
-      currentTransaction.checkIsActive();
+      currentTransaction
+        // Check that the current transaction is for the correct database.
+        ..checkDatabase(this)
+        // Check that the current transaction is still open.
+        ..checkIsActive();
 
       return fn();
     }
@@ -183,7 +208,7 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
       );
     }
 
-    final transaction = _Transaction();
+    final transaction = _Transaction(this);
 
     FutureOr<R> invokeFn() =>
         runZoned(fn, zoneValues: {#_transaction: transaction});
@@ -223,6 +248,10 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 }
 
 class _Transaction {
+  _Transaction(this.database);
+
+  final Database database;
+
   bool get isActive => _isActive;
   var _isActive = true;
 
@@ -234,6 +263,15 @@ class _Transaction {
     if (!isActive) {
       throw DatabaseException(
         'The associated transaction is not active anymore.',
+        DatabaseErrorCode.notInTransaction,
+      );
+    }
+  }
+
+  void checkDatabase(Database other) {
+    if (database != other) {
+      throw DatabaseException(
+        'The current transaction is for a different database.',
         DatabaseErrorCode.notInTransaction,
       );
     }

@@ -287,11 +287,11 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   Future<void> inBatch(FutureOr<void> Function() fn) =>
-      use(() => runInTransactionAsync(fn, requiresNew: true));
+      use(() => runInTransactionAsync(fn, requiresNewTransaction: true));
 
   @override
   void inBatchSync(void Function() fn) =>
-      useSync(() => runInTransactionSync(fn, requiresNew: true));
+      useSync(() => runInTransactionSync(fn, requiresNewTransaction: true));
 
   @override
   void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {

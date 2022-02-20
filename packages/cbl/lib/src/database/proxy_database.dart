@@ -251,7 +251,7 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> inBatch(FutureOr<void> Function() fn) =>
-      use(() => runInTransactionAsync(fn, requiresNew: true));
+      use(() => runInTransactionAsync(fn, requiresNewTransaction: true));
 
   @override
   Future<void> setDocumentExpiration(String id, DateTime? expiration) =>
