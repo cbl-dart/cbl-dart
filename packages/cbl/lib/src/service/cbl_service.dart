@@ -685,18 +685,11 @@ class CblService {
           propertiesFormat: propertiesFormat,
         );
 
-        final result = await channel.call(CallReplicationFilter(
+        return channel.call(CallReplicationFilter(
           filterId: filterId,
           state: state,
           flags: flags,
         ));
-
-        // The document must not be GCed because the `DocumentState` that
-        // is sent to the conflict resolver contains the address of the native
-        // document properties.
-        cblReachabilityFence(document);
-
-        return result;
       };
 
   ConflictResolver _createConflictResolver(
@@ -720,12 +713,6 @@ class CblService {
           localState: localState,
           remoteState: remoteState,
         ));
-
-        // The documents must not be GCed because the `DocumentState`s that
-        // are sent to the conflict resolver contain the addresses of the native
-        // documents properties.
-        cblReachabilityFence(localDocument);
-        cblReachabilityFence(remoteDocument);
 
         if (resolvedState != null) {
           final stateToExistingDocument = {
