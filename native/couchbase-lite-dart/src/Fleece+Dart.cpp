@@ -23,7 +23,7 @@ void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
     FLSliceResult_Retain(*_slice);
   }
 
-  Dart_NewFinalizableHandle_DL(object, _slice, 0,
+  Dart_NewFinalizableHandle_DL(object, _slice, slice.size,
                                CBLDart_FLSliceResultFinalizer);
 }
 
@@ -49,7 +49,8 @@ void CBLDart_FLSharedKeys_BindToDartObject(Dart_Handle object,
   if (retain) {
     FLSharedKeys_Retain(sharedKeys);
   }
-  Dart_NewFinalizableHandle_DL(object, sharedKeys, 0,
+  Dart_NewFinalizableHandle_DL(object, sharedKeys,
+                               CBLDart_kFakeExternalAllocationSize,
                                CBLDart_FLSharedKeysFinalizer);
 }
 
@@ -61,7 +62,10 @@ static void CBLDart_FLDocFinalizer(void *dart_callback_data, void *peer) {
 }
 
 void CBLDart_FLDoc_BindToDartObject(Dart_Handle object, FLDoc doc) {
-  Dart_NewFinalizableHandle_DL(object, doc, 0, CBLDart_FLDocFinalizer);
+  auto allocedData = FLDoc_GetAllocedData(doc);
+  Dart_NewFinalizableHandle_DL(object, doc, allocedData.size,
+                               CBLDart_FLDocFinalizer);
+  FLSliceResult_Release(allocedData);
 }
 
 // === Value
@@ -75,7 +79,8 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
                                       bool retain) {
   if (retain) FLValue_Retain(value);
 
-  Dart_NewFinalizableHandle_DL(object, (void *)value, 0,
+  Dart_NewFinalizableHandle_DL(object, (void *)value,
+                               CBLDart_kFakeExternalAllocationSize,
                                CBLDart_FLValueFinalizer);
 }
 
@@ -107,7 +112,7 @@ static void CBLDart_KnownSharedKeysFinalizer(void *dart_callback_data,
 
 KnownSharedKeys *CBLDart_KnownSharedKeys_New(Dart_Handle object) {
   auto keys = new KnownSharedKeys;
-  Dart_NewFinalizableHandle_DL(object, keys, 0,
+  Dart_NewFinalizableHandle_DL(object, keys, sizeof(KnownSharedKeys),
                                CBLDart_KnownSharedKeysFinalizer);
   return keys;
 }
@@ -337,7 +342,9 @@ static void CBLDart_FLEncoderFinalizer(void *dart_callback_data, void *peer) {
 }
 
 void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder) {
-  Dart_NewFinalizableHandle_DL(object, encoder, 0, CBLDart_FLEncoderFinalizer);
+  Dart_NewFinalizableHandle_DL(object, encoder,
+                               CBLDart_kFakeExternalAllocationSize,
+                               CBLDart_FLEncoderFinalizer);
 }
 
 bool CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,

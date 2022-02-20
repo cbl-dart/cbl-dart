@@ -107,7 +107,9 @@ void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
   context->registry = registry;
   context->token = token;
 
-  Dart_NewFinalizableHandle_DL(object, context, 0, CBLDart_RunDartFinalizer);
+  Dart_NewFinalizableHandle_DL(object, context,
+                               sizeof(CBLDart_DartFinalizerContext),
+                               CBLDart_RunDartFinalizer);
 }
 
 // === Couchbase Lite =========================================================
@@ -154,7 +156,8 @@ inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
 
   if (retain) CBL_Retain(refCounted);
 
-  Dart_NewFinalizableHandle_DL(object, refCounted, 0, handleFinalizer);
+  Dart_NewFinalizableHandle_DL(
+      object, refCounted, CBLDart_kFakeExternalAllocationSize, handleFinalizer);
 }
 
 /**
@@ -621,7 +624,8 @@ static void CBLDart_FinalizeCBLBlobReadStream(void *isolate_callback_data,
 
 void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
                                             CBLBlobReadStream *stream) {
-  Dart_NewFinalizableHandle_DL(object, stream, 0,
+  Dart_NewFinalizableHandle_DL(object, stream,
+                               CBLDart_kFakeExternalAllocationSize,
                                CBLDart_FinalizeCBLBlobReadStream);
 }
 

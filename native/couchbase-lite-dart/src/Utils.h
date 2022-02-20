@@ -6,6 +6,16 @@
 #endif
 #include "Fleece+Dart.h"
 
+/**
+ * The external allocation size that is used for objects for which the exact
+ * size is not known.
+ *
+ * This value is used when creating finalizers for Dart objects. The value is
+ * larger than 0 to signal to the Dart VM that running the finalizer will free
+ * memory.
+ */
+#define CBLDart_kFakeExternalAllocationSize 64
+
 // === Dart Native ============================================================
 
 /**
