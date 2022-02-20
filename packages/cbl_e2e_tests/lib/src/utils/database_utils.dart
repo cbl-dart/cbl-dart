@@ -116,7 +116,10 @@ Future<AsyncDatabase> openAsyncTestDatabase({
       name: name,
       config: config,
       client: _sharedIsolateClient(isolate),
-      encodingFormat: EncodingFormat.fleece,
+      encodingFormat:
+          // To cover both transferring encoded data and Fleece values we use
+          // different encoding formats for the two worker isolate targets.
+          isolate == Isolate.worker ? EncodingFormat.fleece : null,
     );
   }
 

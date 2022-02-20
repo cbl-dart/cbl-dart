@@ -1783,7 +1783,7 @@ class TransferableValue implements Serializable {
   @override
   StringMap serialize(SerializationContext context) => {
         'encodedData': context.serialize(encodedData),
-        'fleeceValueAddress': _valueAddress,
+        'valueAddress': _valueAddress,
       };
 
   static TransferableValue deserialize(
@@ -1793,7 +1793,7 @@ class TransferableValue implements Serializable {
     final encodedData = context.deserializeAs<EncodedData>(map['encodedData']);
 
     Value? value;
-    final valueAddress = map.getAs<int?>('fleeceValueAddress');
+    final valueAddress = map.getAs<int?>('valueAddress');
     if (valueAddress != null) {
       value = Value.fromPointer(Pointer.fromAddress(valueAddress), adopt: true);
     }
