@@ -23,7 +23,7 @@ testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
 iosVersion="15-2"
 iosDevice="iPhone 13"
 androidVersion="22"
-androidDevice="pixel_5"
+androidDevice="pixel_c"
 
 case "$(uname)" in
 MINGW* | CYGWIN* | MSYS*)

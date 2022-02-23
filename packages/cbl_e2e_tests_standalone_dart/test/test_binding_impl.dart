@@ -35,7 +35,6 @@ LibrariesConfiguration _libraries() {
   String? directory;
   String cblLib;
   String cblDartLib;
-  String? cblVersion;
 
   final libDir = p.absolute('lib');
   final isUnix = Platform.isLinux || Platform.isMacOS;
@@ -43,8 +42,6 @@ LibrariesConfiguration _libraries() {
     directory = libDir;
     cblLib = 'libcblite';
     cblDartLib = 'libcblitedart';
-    // TODO(blaugold): remove version when symlinks in macOS release are fixed
-    cblVersion = '3';
   } else if (Platform.isMacOS) {
     directory = p.absolute('Frameworks');
     cblLib = 'CouchbaseLite';
@@ -60,7 +57,7 @@ LibrariesConfiguration _libraries() {
   return LibrariesConfiguration(
     enterpriseEdition: enterpriseEdition,
     directory: directory,
-    cbl: LibraryConfiguration.dynamic(cblLib, version: cblVersion),
+    cbl: LibraryConfiguration.dynamic(cblLib),
     cblDart: LibraryConfiguration.dynamic(cblDartLib),
   );
 }
