@@ -23,15 +23,15 @@ testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
 iosVersion="15-2"
 iosDevice="iPhone 13"
 androidVersion="22"
-androidDevice="pixel_c"
+androidDevice="pixel_4"
 
 case "$(uname)" in
 MINGW* | CYGWIN* | MSYS*)
     melosBin="melos.bat"
-;;
+    ;;
 *)
     melosBin="melos"
-;;
+    ;;
 esac
 
 # === Steps ===================================================================
@@ -328,7 +328,7 @@ function collectTestResults() {
         Windows)
             # TODO collect crash report
             # TODO get cbl logs from device
-            ;;  
+            ;;
         esac
         ;;
     esac

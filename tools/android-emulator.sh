@@ -102,6 +102,7 @@ function createAndStart() {
     "$ANDROID_HOME/emulator/emulator" \
         -avd "$emulatorName" \
         -port "$emulatorPort" \
+        -partition-size 2048 \
         >/dev/null 2>&1 &
 
     # Wait for emulator to become ready.
