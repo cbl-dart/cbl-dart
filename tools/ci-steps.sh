@@ -319,15 +319,15 @@ function collectTestResults() {
             ;;
         Android)
             _collectCrashReportsAndroid
-            # TODO get cbl logs from device
+            # TODO(blaugold): get cbl logs from device
             ;;
         Ubuntu)
             _collectCrashReportsLinuxFlutter
-            # TODO get cbl logs from device
+            # TODO(blaugold): get cbl logs from device
             ;;
         Windows)
-            # TODO collect crash report
-            # TODO get cbl logs from device
+            # TODO(blaugold): collect crash report
+            # TODO(blaugold): get cbl logs from device
             ;;
         esac
         ;;

@@ -10,7 +10,8 @@ import 'package:test/test.dart';
 void main() {
   test('database is created in working directory', () async {
     return markTestSkipped(
-      'TODO: enable when cbl uses current working directory for default db dir',
+      'TODO(blaugold): enable when cbl uses current working directory for '
+      'default db dir',
     );
     final workingDir = await Directory.systemTemp.createTemp();
     // Note: There might be a problem with tests changing the current working
