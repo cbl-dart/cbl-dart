@@ -287,10 +287,8 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
     required this.debugCreator,
     this.database,
     required this.language,
-    String? definition,
-  }) : definition = language == CBLQueryLanguage.n1ql
-            ? _normalizeN1qlQuery(definition!)
-            : definition;
+    this.definition,
+  });
 
   final String typeName;
   final String debugCreator;
@@ -331,7 +329,3 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
     }
   }
 }
-
-String _normalizeN1qlQuery(String query) => query
-    // Collapse whitespace.
-    .replaceAll(RegExp(r'\s+'), ' ');

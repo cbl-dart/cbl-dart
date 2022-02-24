@@ -102,17 +102,11 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
         expect(Future.value(change.results.allResults()), completion(isEmpty));
       }));
 
-      markTestSkipped(
-        'TODO(blaugold): enable full query listener tests '
-        'This part is disabled because of an issue in CBL C. '
-        'https://issues.couchbase.com/projects/CBL/issues/CBL-2459',
-      );
       // Seconds listener gets current results, too.
-      // await query.addChangeListener(expectAsync1((change) async {
-      //   expect(change.query, query);
-      //   expect(Future.value(change.results.allResults()),
-      // completion(isEmpty));
-      // }));
+      await query.addChangeListener(expectAsync1((change) async {
+        expect(change.query, query);
+        expect(Future.value(change.results.allResults()), completion(isEmpty));
+      }));
     });
 
     apiTest('change listener is notified while listening', () async {
@@ -152,9 +146,32 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
     });
 
     apiTest('listeners receive change when parameters change', () async {
-      markTestSkipped(
-        'TODO: Blocked until fix is available '
-        'https://issues.couchbase.com/browse/CBL-2458',
+      final db = await openTestDatabase();
+      await db.saveDocument(MutableDocument.withId('A'));
+      final query = await Query.fromN1ql(
+        db,
+        r'SELECT META().id FROM _ WHERE META().id = $ID',
+      );
+      await query.setParameters(Parameters({'ID': 'A'}));
+
+      var changeIndex = 0;
+
+      expect(
+        query.changes().asyncMap((change) {
+          if (changeIndex == 0) {
+            query.setParameters(Parameters({'ID': 'B'}));
+          }
+          changeIndex++;
+
+          return change.results
+              .asStream()
+              .map((result) => result.value(0))
+              .toList();
+        }),
+        emitsInOrder(<List<String>>[
+          ['A'], // First change is always the initial query result.
+          [], // Second change is the result of the parameter change.
+        ]),
       );
     });
 
