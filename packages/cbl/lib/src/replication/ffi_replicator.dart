@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:collection/collection.dart';
 
 import '../database.dart';
 import '../database/ffi_database.dart';
@@ -33,11 +32,19 @@ late final _bindings = cblBindings.replicator;
 class FfiReplicator
     with ClosableResourceMixin
     implements SyncReplicator, NativeResource<CBLReplicator> {
-  FfiReplicator(
+  FfiReplicator._(
+      this._config, this._database, this.native, this._closeCallbacks);
+
+  static Future<FfiReplicator> create(
     ReplicatorConfiguration config, {
     required String debugCreator,
     bool ignoreCallbackErrorsInDart = false,
-  }) : _config = ReplicatorConfiguration.from(config) {
+  }) async {
+    // We make a copy of the configuration so that later modifications to the
+    // configuration don't affect this replicator.
+    // ignore: parameter_assignments
+    config = ReplicatorConfiguration.from(config);
+
     final database =
         assertArgumentType<SyncDatabase>(config.database, 'config.database')
             as FfiDatabase;
@@ -50,8 +57,6 @@ class FfiReplicator
         'config.target.database',
       );
     }
-
-    _database = database;
 
     AsyncCallback Function(T) _makeCallback<T>(
       AsyncCallback Function(T, FfiDatabase, bool) callbackFactory,
@@ -66,11 +71,11 @@ class FfiReplicator
     final conflictResolverCallback =
         config.conflictResolver?.let(_makeCallback(_wrapConflictResolver));
 
-    _callbacks = [
-      pushFilterCallback,
-      pullFilterCallback,
-      conflictResolverCallback
-    ].whereNotNull().toList();
+    void closeCallbacks() {
+      pushFilterCallback?.close();
+      pullFilterCallback?.close();
+      conflictResolverCallback?.close();
+    }
 
     final endpoint = config.createEndpoint();
     final authenticator = config.createAuthenticator();
@@ -110,15 +115,17 @@ class FfiReplicator
       cblReachabilityFence(pullFilterCallbackNative);
       cblReachabilityFence(conflictResolverCallbackNative);
 
-      native = CBLReplicatorObject(
+      final native = CBLReplicatorObject(
         replicator,
         debugName: 'Replicator(creator: $debugCreator)',
       );
 
-      attachTo(database);
+      return FfiReplicator._(config, database, native, closeCallbacks)
+        ..attachTo(database);
+
       // ignore: avoid_catches_without_on_clauses
     } catch (e) {
-      _closeCallbacks();
+      closeCallbacks();
       rethrow;
     } finally {
       _bindings.freeEndpoint(endpoint);
@@ -134,12 +141,12 @@ class FfiReplicator
 
   final ReplicatorConfiguration _config;
 
-  late final FfiDatabase _database;
+  final FfiDatabase _database;
 
   @override
-  late final NativeObject<CBLReplicator> native;
+  final NativeObject<CBLReplicator> native;
 
-  late final List<AsyncCallback> _callbacks;
+  final void Function() _closeCallbacks;
 
   var _isStarted = false;
   var _isStopping = false;
@@ -327,12 +334,6 @@ class FfiReplicator
       }
 
       await _stopped!.future;
-    }
-  }
-
-  void _closeCallbacks() {
-    for (final callback in _callbacks) {
-      callback.close();
     }
   }
 
