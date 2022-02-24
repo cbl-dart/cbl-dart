@@ -1,3 +1,7 @@
+## 1.0.0-beta.7
+
+ - Update a dependency to the latest release.
+
 ## 1.0.0-beta.6
 
 > Note: This release has breaking changes.
