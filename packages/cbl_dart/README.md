@@ -90,3 +90,4 @@ different default directory.
 [cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
 [cbl_sentry]: https://pub.dev/packages/cbl_sentry
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
+[sync gateway]: https://www.couchbase.com/sync-gateway

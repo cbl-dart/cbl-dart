@@ -42,13 +42,13 @@ Couchbase Lite you use.
   - [Change streams](#change-streams)
   - [Closing resources](#closing-resources)
 - [📖 Usage examples](#-usage-examples)
-  - [Open a `Database`](#open-a-database)
-  - [Create a `Document`](#create-a-document)
-  - [Read a `Document`](#read-a-document)
-  - [Update a `Document`](#update-a-document)
-  - [Delete a `Document`](#delete-a-document)
-  - [Build a `Query`](#build-a-query-with-querybuilderquerybuilder)
-  - [Build a `Query`](#build-a-query-with-n1ql)
+  - [Open a database](#open-a-database)
+  - [Create a document](#create-a-document)
+  - [Read a document](#read-a-document)
+  - [Update a document](#update-a-document)
+  - [Delete a document](#delete-a-document)
+  - [Build a `Query` with the `QueryBuilder` API](#build-a-query-with-the-querybuilder-api)
+  - [Build a `Query` with N1QL](#build-a-query-with-n1ql)
   - [Data sync with `Replicator` to Sync Gateway](#data-sync-with-replicator-to-sync-gateway)
 - [🔮 Tracing](#-tracing)
 - [💡 Where to go next](#-where-to-go-next)
@@ -234,10 +234,11 @@ associated replicators.
 
 # 📖 Usage examples
 
-## Open a [`Database`][database]
+## Open a database
 
-Every database has a name which is used to determine its filename. The full
-filename is the concatenation of the database name and the extension `.cblite2`.
+Every [`Database`][database] has a name which is used to determine its filename.
+The full filename is the concatenation of the database name and the extension
+`.cblite2`.
 
 When opening a database without specifying a directory it will be put into a
 default location that is platform dependent:
@@ -264,7 +265,7 @@ When you are done with the database, you should close it by calling
 as remove change listeners, close change streams and close associated
 replicators.
 
-## Create a [`Document`][document]
+## Create a document
 
 The default constructor of [`MutableDocument`][mutabledocument] creates a
 document with a randomly generated id and optionally initializes it with some
@@ -290,9 +291,9 @@ final doc = MutableDocument.withId('ali', {
 await db.saveDocument(doc);
 ```
 
-## Read a [`Document`][document]
+## Read a document
 
-To read a document pass the document's id to `Database.document`:
+To read a [`Document`][document] pass the document's id to `Database.document`:
 
 ```dart
 final doc = await db.document('ali');
@@ -304,7 +305,7 @@ if (doc != null) {
 }
 ```
 
-## Update a [`Document`][document]
+## Update a document
 
 To update a document, first read it, turn it into a
 [`MutableDocument`][mutabledocument] and update its properties. Then save it
@@ -337,7 +338,7 @@ Check out the documentation for
 [`Database.saveDocument`](https://pub.dev/documentation/cbl/latest/cbl/Database/saveDocument.html)
 to learn about how conflicts are handled.
 
-## Delete a [`Document`][document]
+## Delete a document
 
 To delete a document, you need to read it first and than pass it to
 `Database.deleteDocument`:
@@ -352,9 +353,12 @@ Check out the documentation for
 [`Database.deleteDocument`](https://pub.dev/documentation/cbl/latest/cbl/Database/deleteDocument.html)
 to learn about how conflicts are handled.
 
-## Build a [`Query`][query] with [`QueryBuilder`][querybuilder]
+## Build a `Query` with the `QueryBuilder` API
 
-This query returns the average age of people with the same name:
+A [`Query`][query] can be built in a type safe way through the
+[`QueryBuilder`][querybuilder] API.
+
+The query below returns the average age of people with the same name:
 
 ```dart
 final query = const QueryBuilder()
@@ -396,9 +400,11 @@ Given these documents:
 ]
 ```
 
-## Build a [`Query`][query] with [N1QL]
+## Build a `Query` with N1QL
 
-This is the equivalent [N1QL] query to the one above:
+[N1QL] is a query language that is similar to SQL but for JSON style data.
+
+The query below is equivalent to query from the `QueryBuilder` example above:
 
 ```dart
 final query = await Query.fromN1ql(
@@ -411,14 +417,15 @@ final query = await Query.fromN1ql(
 );
 ```
 
-## Data sync with [`Replicator`][replicator] to Sync Gateway
+## Data sync with `Replicator` to Sync Gateway
 
 This example synchronizes the database with a remote Sync Gateway instance,
 without authentication. This only works when Sync Gateway has been configured
 with the `GUEST` user.
 
-The default is to create a replicator with `type` `ReplicatorType.pushAndPull`
-and which is not `continuous`.
+A [`ReplicatorConfiguration`][replicatorconfiguration] with only default values
+creates a [`Replicator`][replicator] with `type` `ReplicatorType.pushAndPull`
+that is not `continuous`.
 
 After starting this replicator, it will push changes from the local database to
 the remote database and pull changes from the remote database to the local
@@ -511,6 +518,8 @@ Read [CONTRIBUTING] to get started developing.
   https://pub.dev/documentation/cbl/latest/cbl/ClosableResource-class.html
 [database]: https://pub.dev/documentation/cbl/latest/cbl/Database-class.html
 [replicator]: https://pub.dev/documentation/cbl/latest/cbl/Replicator-class.html
+[replicatorconfiguration]:
+  https://pub.dev/documentation/cbl/latest/cbl/ReplicatorConfiguration-class.html
 [query]: https://pub.dev/documentation/cbl/latest/cbl/Query-class.html
 [querybuilder]:
   https://pub.dev/documentation/cbl/latest/cbl/QueryBuilder-class.html
