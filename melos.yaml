@@ -7,7 +7,6 @@ ignore:
   - packages/cbl_flutter_?e/*
   - packages/cbl_flutter_local/*
   - packages/cbl_flutter_prebuilt*/*
-  - packages/cbl_*_api/*
 command:
   version:
     linkToCommits: true
