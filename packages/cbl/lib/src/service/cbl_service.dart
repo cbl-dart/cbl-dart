@@ -546,7 +546,7 @@ class CblService {
     });
   }
 
-  int _createReplicator(CreateReplicator request) {
+  Future<int> _createReplicator(CreateReplicator request) async {
     final db = _getDatabaseById(request.databaseId);
 
     var target = request.target;
@@ -580,7 +580,7 @@ class CblService {
       maxAttempts: request.maxAttempts,
       maxAttemptWaitTime: request.maxAttemptWaitTime,
     );
-    final replicator = FfiReplicator(
+    final replicator = await FfiReplicator.create(
       config,
       debugCreator: 'CblService._createReplicator()',
       // The isolate running this service should not be crashed by unhandled

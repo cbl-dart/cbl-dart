@@ -111,7 +111,7 @@ typedef DocumentReplicationListener = void Function(
 abstract class Replicator implements ClosableResource {
   /// Creates a replicator for replicating [Document]s between a local
   /// [Database] and a target database.
-  static FutureOr<Replicator> create(ReplicatorConfiguration config) {
+  static Future<Replicator> create(ReplicatorConfiguration config) {
     if (config.database is AsyncDatabase) {
       return Replicator.createAsync(config);
     }
@@ -135,8 +135,8 @@ abstract class Replicator implements ClosableResource {
   /// [SyncDatabase] and a target database.
   /// {@endtemplate}
   // ignore: prefer_constructors_over_static_methods
-  static SyncReplicator createSync(ReplicatorConfiguration config) =>
-      SyncReplicator(config);
+  static Future<SyncReplicator> createSync(ReplicatorConfiguration config) =>
+      SyncReplicator.create(config);
 
   /// This replicator's configuration.
   ReplicatorConfiguration get config;
@@ -246,10 +246,8 @@ abstract class Replicator implements ClosableResource {
 /// {@category Replication}
 abstract class SyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createSync}
-  factory SyncReplicator(ReplicatorConfiguration config) => FfiReplicator(
-        config,
-        debugCreator: 'SyncReplicator()',
-      );
+  static Future<SyncReplicator> create(ReplicatorConfiguration config) =>
+      FfiReplicator.create(config, debugCreator: 'SyncReplicator()');
 
   @override
   ReplicatorStatus get status;
