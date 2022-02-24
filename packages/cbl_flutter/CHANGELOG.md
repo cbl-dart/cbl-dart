@@ -1,3 +1,7 @@
+## 1.0.0+1
+
+ - **DOCS**: fix links in READMEs. ([ae73cde4](https://github.com/cbl-dart/cbl-dart/commit/ae73cde46fdcbb204257ea2044cfa71479b13d46))
+
 ## 1.0.0+0
 
  - **DOCS**: update README. ([3dd3aaff](https://github.com/cbl-dart/cbl-dart/commit/3dd3aaffdabe735e4c1deeb3dac28a56241b3d78))
