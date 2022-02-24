@@ -9,23 +9,27 @@ Blobs, Encryption, N1QL Queries, Live Queries, Full-Text Search and Data Sync.
 It can be used as a standalone embedded database for mobile or desktop apps. Or
 it can be combined with [Sync Gateway] to synchronize with a central data store.
 
-This package provides a Dart API through wich Couchbase Lite can be used on all
-native platforms which are supported by Dart.
+---
 
-You always need this package to use Couchbase Lite. Which other packages you
-need depends on the target platform and features you want to use:
+**What are all these packages for?**
 
-| Package          | Required when you want to:                                            | Pub                                          | Likes                                         | Points                                         | Popularity                                         |
-| ---------------- | --------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
-| [cbl]            | use Couchbase Lite.                                                   | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)         | ![](https://badgen.net/pub/points/cbl)         | ![](https://badgen.net/pub/popularity/cbl)         |
-| [cbl_dart]       | use Couchbase Lite in a Dart app (e.g. CLI) or in Flutter unit tests. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)    | ![](https://badgen.net/pub/points/cbl_dart)    | ![](https://badgen.net/pub/popularity/cbl_dart)    |
-| [cbl_flutter]    | use Couchbase Lite in a Flutter app.                                  | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter) | ![](https://badgen.net/pub/points/cbl_flutter) | ![](https://badgen.net/pub/popularity/cbl_flutter) |
-| [cbl_flutter_ce] | use the Community Edition in a Flutter app.                           | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                               |                                                |                                                    |
-| [cbl_flutter_ee] | use the Enterprise Edition in a Flutter app.                          | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                               |                                                |                                                    |
-| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.        | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)  | ![](https://badgen.net/pub/points/cbl_sentry)  | ![](https://badgen.net/pub/popularity/cbl_sentry)  |
+Couchbase Lite can be used with **standalone Dart** or with **Flutter** apps and
+comes in two editions: **Community** and **Enterprise**.
 
-> This package is in beta. Use it with caution and [report any issues you
-> see][issues].
+Regardless of the app platform and edition of Couchbase Lite you use, you always
+need the `cbl` package. All of the APIs of Couchbase Lite live in this package.
+
+What other packages you need depends on the app platform and the edition of
+Couchbase Lite you use.
+
+| Package          | Required when you want to:                                                                                 | Pub                                          | Likes                                         | Points                                         | Popularity                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| [cbl]            | use Couchbase Lite.                                                                                        | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)         | ![](https://badgen.net/pub/points/cbl)         | ![](https://badgen.net/pub/popularity/cbl)         |
+| [cbl_dart]       | use the **Community** or **Enterprise Edition** in a **standalone Dart** app or in **Flutter unit tests**. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)    | ![](https://badgen.net/pub/points/cbl_dart)    | ![](https://badgen.net/pub/popularity/cbl_dart)    |
+| [cbl_flutter]    | use Couchbase Lite in a **Flutter app**.                                                                   | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter) | ![](https://badgen.net/pub/points/cbl_flutter) | ![](https://badgen.net/pub/popularity/cbl_flutter) |
+| [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                               |                                                |                                                    |
+| [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                               |                                                |                                                    |
+| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)  | ![](https://badgen.net/pub/points/cbl_sentry)  | ![](https://badgen.net/pub/popularity/cbl_sentry)  |
 
 ### Table of contents
 
@@ -38,14 +42,14 @@ need depends on the target platform and features you want to use:
   - [Change streams](#change-streams)
   - [Closing resources](#closing-resources)
 - [📖 Usage examples](#-usage-examples)
-  - [Open a database](#open-a-database)
-  - [Create a document](#create-a-document)
-  - [Read a document](#read-a-document)
-  - [Update a document](#update-a-document)
-  - [Delete a document](#delete-a-document)
-  - [Build a query with `QueryBuilder`](#build-a-query-with-querybuilder)
-  - [Build a query with N1QL](#build-a-query-with-n1ql)
-  - [Data sync with Sync Gateway](#data-sync-with-sync-gateway)
+  - [Open a `Database`](#open-a-database)
+  - [Create a `Document`](#create-a-document)
+  - [Read a `Document`](#read-a-document)
+  - [Update a `Document`](#update-a-document)
+  - [Delete a `Document`](#delete-a-document)
+  - [Build a `Query`](#build-a-query-with-querybuilderquerybuilder)
+  - [Build a `Query`](#build-a-query-with-n1ql)
+  - [Data sync with `Replicator` to Sync Gateway](#data-sync-with-replicator-to-sync-gateway)
 - [🔮 Tracing](#-tracing)
 - [💡 Where to go next](#-where-to-go-next)
 - [🤝 Contributing](#-contributing)
@@ -94,7 +98,7 @@ Lite are currently not supported:
 
 To use Couchbase Lite in a
 
-- **Dart** app go to [`cbl_dart`][cbl_dart]
+- **Standalone Dart** app go to [`cbl_dart`][cbl_dart]
 - **Flutter** app go to [`cbl_flutter`][cbl_flutter]
 
 and follow the instructions for getting started.
@@ -105,12 +109,13 @@ and follow the instructions for getting started.
 
 The whole Couchbase Lite API comes in both a synchronous and asynchronous
 version. The synchronous version is more efficient and slightly more convenient
-to use, but has the downside that it blocks the main thread.
+to use, but has the downside that it blocks the current [isolate].
 
 In UI applications, such as Flutter apps, this is problematic. Blocking the UI
-thread for too long causes janky animations, or worse unresponsiveness. With
-only a synchronous API available, the solution would be to offload the work to a
-worker isolate. That is what the asynchronous API does, in a transparent way.
+isolate for too long causes janky animations, or worse, makes the app
+unresponsive. With only a synchronous API available, the solution would be to
+offload the work to a worker isolate. That is what the asynchronous API does in
+a transparent way.
 
 Unless you are noticing the performance impact of the overhead of the
 asynchronous API, use the asynchronous API.
@@ -123,18 +128,18 @@ Take for example this simplified version of the `Query` API:
 
 ```dart
 abstract class Query {
-  // The common base class leaves open whether the result is returned
+  // The common base class leaves open whether the results are returned
   // synchronously or asynchronously.
   FutureOr<ResultSet> execute();
 }
 
 abstract class SyncQuery extends Query {
-  // The synchronous version returns results directly.
+  // The synchronous version of `Query` returns results directly.
   ResultSet execute();
 }
 
 abstract class AsyncQuery extends Query {
-  // The asynchronous version returns results in a `Future`.
+  // The asynchronous version of `Query` returns results in a `Future`.
   Future<ResultSet> execute();
 }
 ```
@@ -187,14 +192,15 @@ await db.removeChangeListener(token);
 
 ## Change streams
 
-Streams are a convenient alternative to listen to changes. Similarly to change
+Streams are a convenient alternative to listen for changes. Similarly to change
 listeners, change streams returned from synchronous APIs are receiving changes
 as soon as the stream is subscribed to.
 
-For streams returned from asynchronous APIs, it's not possible to return a
-`Future` from `Stream.listen`. Instead, asynchronous APIs return
-`AsyncListenStream`s, which expose a `Future` in `AsyncListenStream.listening`
-that completes when the stream is fully listening:
+Streams returned from asynchronous APIs start to listen asynchronously. But it's
+not possible to return a `Future` from `Stream.listen` to signal the point in
+time after which the the stream will observe events. Instead, asynchronous APIs
+return [`AsyncListenStream`][asynclistenstream]s, which expose a `Future` in
+`AsyncListenStream.listening` that completes when the stream is fully listening:
 
 ```dart
 final stream = db.changes();
@@ -210,20 +216,25 @@ await stream.listening;
 await db.saveDocument(MutableDocument.withId('Hey'));
 ```
 
+If you only ever open the same physical database once at a time, you don't need
+to await the `listening` future. In this case the stream will always observe all
+subsequent events.
+
 To stop listening to changes just cancel the subscription, like with any other
 stream.
 
 ## Closing resources
 
-Some types implement `ClosableResource`. At the moment these are `Database` and
-`Replicator`. Once you are done with an instance of these types, call its
-`close` method. This will free resources used by the object, as well as remove
-listeners, close streams and close child resources. For example closing a
-database will also close any associated replicators.
+Some types implement [`ClosableResource`][closableresource]. At the moment these
+are [`Database`][database] and [`Replicator`][replicator]. Once you are done
+with an instance of these types, call its `close` method. This will free
+resources used by the object, as well as remove listeners, close streams and
+close child resources. For example closing a database will also close any
+associated replicators.
 
 # 📖 Usage examples
 
-## Open a database
+## Open a [`Database`][database]
 
 Every database has a name which is used to determine its filename. The full
 filename is the concatenation of the database name and the extension `.cblite2`.
@@ -253,10 +264,11 @@ When you are done with the database, you should close it by calling
 as remove change listeners, close change streams and close associated
 replicators.
 
-## Create a document
+## Create a [`Document`][document]
 
-The default constructor of `MutableDocument` creates a document with a randomly
-generated id and optionally initializes it with some properties:
+The default constructor of [`MutableDocument`][mutabledocument] creates a
+document with a randomly generated id and optionally initializes it with some
+properties:
 
 ```dart
 final doc = MutableDocument({
@@ -278,7 +290,7 @@ final doc = MutableDocument.withId('ali', {
 await db.saveDocument(doc);
 ```
 
-## Read a document
+## Read a [`Document`][document]
 
 To read a document pass the document's id to `Database.document`:
 
@@ -292,10 +304,11 @@ if (doc != null) {
 }
 ```
 
-## Update a document
+## Update a [`Document`][document]
 
-To update a document, first read it, turn it into a `MutableDocument` and update
-its properties. Then save it again with `Database.saveDocument`:
+To update a document, first read it, turn it into a
+[`MutableDocument`][mutabledocument] and update its properties. Then save it
+again with `Database.saveDocument`:
 
 ```dart
 final doc = await db.document('ali');
@@ -320,12 +333,13 @@ mutableDoc['languages'].value = ['Dart'];
 await db.saveDocument(mutableDoc);
 ```
 
-Check out the documentation for `Database.saveDocument` to learn about how
-conflicts are handled.
+Check out the documentation for
+[`Database.saveDocument`](https://pub.dev/documentation/cbl/latest/cbl/Database/saveDocument.html)
+to learn about how conflicts are handled.
 
-## Delete a document
+## Delete a [`Document`][document]
 
-To delete a document, you need to read it first, and than pass it to
+To delete a document, you need to read it first and than pass it to
 `Database.deleteDocument`:
 
 ```dart
@@ -334,10 +348,11 @@ final doc = await db.document('ali');
 await db.deleteDocument(doc);
 ```
 
-Check out the documentation for `Database.deleteDocument` to learn about how
-conflicts are handled.
+Check out the documentation for
+[`Database.deleteDocument`](https://pub.dev/documentation/cbl/latest/cbl/Database/deleteDocument.html)
+to learn about how conflicts are handled.
 
-## Build a query with `QueryBuilder`
+## Build a [`Query`][query] with [`QueryBuilder`][querybuilder]
 
 This query returns the average age of people with the same name:
 
@@ -381,7 +396,7 @@ Given these documents:
 ]
 ```
 
-## Build a query with N1QL
+## Build a [`Query`][query] with [N1QL]
 
 This is the equivalent [N1QL] query to the one above:
 
@@ -396,7 +411,7 @@ final query = await Query.fromN1ql(
 );
 ```
 
-## Data sync with Sync Gateway
+## Data sync with [`Replicator`][replicator] to Sync Gateway
 
 This example synchronizes the database with a remote Sync Gateway instance,
 without authentication. This only works when Sync Gateway has been configured
@@ -435,11 +450,11 @@ well as remove change listeners and close change streams.
 The execution of certain operations can be traced through the tracing API. This
 is useful for debugging and performance profiling.
 
-CBL Dart has builtin trace points, at which flow control is given to the
+CBL Dart has builtin trace points at which flow control is given to the
 currently installed `TracingDelegate`.
 
 Included in this package is the `DevToolsTracing` delegate, which records
-timeline events, that can be later visualized through the Dart DevTools
+timeline events that can be later visualized through the Dart DevTools
 Performance Page.
 
 You can install a delegate by calling `TracingDelegate.install`:
@@ -453,7 +468,7 @@ The Sentry integration provided by [`cbl_sentry`][cbl_sentry] installs a
 
 # 💡 Where to go next
 
-- API Reference: The Dart API is well documented and organized into topics.
+- [API Reference]: The Dart API is well documented and organized into topics.
 - [Couchbase Lite Swift Docs]: For more information on Couchbase Lite concepts.
   The Swift API is very similar to the Dart API.
 - [N1QL Language Reference]
@@ -488,3 +503,17 @@ Read [CONTRIBUTING] to get started developing.
 [sync gateway]: https://www.couchbase.com/sync-gateway
 [sync gateway docs]:
   https://docs.couchbase.com/sync-gateway/3.0/introduction.html
+[api reference]: https://pub.dev/documentation/cbl/latest/
+[isolate]: https://api.dart.dev/stable/2.16.1/dart-isolate/Isolate-class.html
+[asynclistenstream]:
+  https://pub.dev/documentation/cbl/latest/cbl/AsyncListenStream-class.html
+[closableresource]:
+  https://pub.dev/documentation/cbl/latest/cbl/ClosableResource-class.html
+[database]: https://pub.dev/documentation/cbl/latest/cbl/Database-class.html
+[replicator]: https://pub.dev/documentation/cbl/latest/cbl/Replicator-class.html
+[query]: https://pub.dev/documentation/cbl/latest/cbl/Query-class.html
+[querybuilder]:
+  https://pub.dev/documentation/cbl/latest/cbl/QueryBuilder-class.html
+[document]: https://pub.dev/documentation/cbl/latest/cbl/Document-class.html
+[mutabledocument]:
+  https://pub.dev/documentation/cbl/latest/cbl/MutableDocument-class.html
