@@ -90,8 +90,7 @@ jobs:
       matrix:
         package: [
           cbl,
-          # TODO(blaugold): re-enable when new version of binaries is released
-          # cbl_sentry
+          cbl_sentry
         ]
         dart: [stable, beta]
         embedder: [standalone]
@@ -246,8 +245,6 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
 
   test-e2e-cbl_flutter_prebuilt:
-    # (blaugold): re-enable when new version of binaries is released
-    if: ${{ false }}
     name: cbl_flutter_prebuilt E2E tests
     timeout-minutes: 45
     strategy:
@@ -323,8 +320,6 @@ jobs:
           ./tools/ci-steps.sh uploadCoverageData "e2e.prebuilt"
 
   test-cbl_dart:
-    # TODO(blaugold): re-enable when new version of binaries is released
-    if: ${{ false }}
     name: cbl_dart unit tests
     strategy:
       matrix:
