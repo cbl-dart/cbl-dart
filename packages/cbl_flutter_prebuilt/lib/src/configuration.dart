@@ -15,12 +15,11 @@ final packageConfigurations = [
       edition: edition,
       couchbaseLiteC: const LibraryInfo(
         version: '3.0.0',
-        release: '3.0.0-beta02',
-        apiPackageRelease: '3.0.0-beta.2',
+        release: '3.0.0',
       ),
       couchbaseLiteDart: const LibraryInfo(
         version: '1.0.0',
-        release: '1.0.0-beta.7',
+        release: '1.0.0',
       ),
     )
 ];
