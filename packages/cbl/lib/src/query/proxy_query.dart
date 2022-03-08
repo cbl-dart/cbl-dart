@@ -4,7 +4,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../database/proxy_database.dart';
-import '../document/common.dart';
 import '../fleece/encoder.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
@@ -220,7 +219,7 @@ class ProxyResultSet extends ResultSet {
             event,
             // Every result needs its own context, because each result is
             // encoded independently.
-            context: DatabaseMContext(_query.database),
+            context: createResultSetMContext(_query.database!),
             columnNames: _query._columnNames,
           ))
       .transform(ResourceStreamTransformer(parent: _query, blocking: true));
