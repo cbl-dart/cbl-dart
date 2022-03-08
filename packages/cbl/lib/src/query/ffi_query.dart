@@ -216,7 +216,7 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
           pointer,
           debugCreator: debugCreator,
         ),
-        _context = DatabaseMContext(query.database);
+        _context = createResultSetMContext(query.database!);
 
   final List<String> _columnNames;
   final ResultSetIterator _iterator;

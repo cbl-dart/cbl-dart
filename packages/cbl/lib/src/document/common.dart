@@ -8,6 +8,7 @@ import '../database.dart';
 import '../database/database_base.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/decoder.dart';
+import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/ffi.dart';
@@ -104,11 +105,15 @@ abstract class MCollectionWrapper {
 }
 
 class DatabaseMContext extends MContext {
-  DatabaseMContext(this.database)
-      : super(
-          dictKeys: database?.dictKeys,
-          sharedKeysTable: database?.sharedKeysTable,
-          sharedStringsTable: SharedStringsTable(),
+  DatabaseMContext({
+    this.database,
+    DictKeys? dictKeys,
+    SharedKeysTable? sharedKeysTable,
+    SharedStringsTable? sharedStringsTable,
+  }) : super(
+          dictKeys: dictKeys,
+          sharedKeysTable: sharedKeysTable,
+          sharedStringsTable: sharedStringsTable,
         );
 
   final DatabaseBase? database;
