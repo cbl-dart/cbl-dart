@@ -3,11 +3,20 @@
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
-Couchbase Lite is an embedded, NoSQL JSON Document Style database, supporting
-Blobs, Encryption, N1QL Queries, Live Queries, Full-Text Search and Data Sync.
+Couchbase Lite is an embedded, NoSQL database:
 
-It can be used as a standalone embedded database for mobile or desktop apps. Or
-it can be combined with [Sync Gateway] to synchronize with a central data store.
+- **Multi-Platform** - Android, iOS, macOS, Windows, Linux
+- **Standalone Dart and Flutter** - No manual setup required, just add the
+  package.
+- **Fast and Compact** - Uses efficient persisted data structures.
+
+It is fully featured:
+
+- **JSON Style Documents** - No explicit schema and supports deep nesting.
+- **Expressive Queries** - N1QL (SQL for JSON), QueryBuilder, Full-Text Search
+- **Observable** - Get notified of changes in database, queries and data sync.
+- **Data Sync** - Pull and push data from/to server with full control over
+  synced data.
 
 ---
 
