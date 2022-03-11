@@ -1,3 +1,8 @@
+## 1.0.1+0
+
+ - **DOCS**: update indroduction. ([9e2a578a](https://github.com/cbl-dart/cbl-dart/commit/9e2a578a11115b9e5be67bd57b844e9e72622361))
+ - **DOCS**: add contact section. ([240a4add](https://github.com/cbl-dart/cbl-dart/commit/240a4add826e3271eeff306b6dc102d27dae815a))
+
 ## 1.0.1
 
  - **FIX**: use own `SharedKeysTable` for each `ResultSet` (#323). ([8357eb1c](https://github.com/cbl-dart/cbl-dart/commit/8357eb1cc6e9e208eda2ab7fd737980e7a3b0835))
