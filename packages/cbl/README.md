@@ -11,6 +11,17 @@ it can be combined with [Sync Gateway] to synchronize with a central data store.
 
 ---
 
+❤️ If you find this package useful, please ⭐ us on [pub.dev][cbl] and
+[GitHub][repository]. 🙏
+
+🐛 & ✨ Did you find a bug or have a feature request? Please open a [GitHub
+issue][issues].
+
+👋 Do you you have a question or feedback? Let us know in a [GitHub
+discussion][discussions].
+
+---
+
 **What are all these packages for?**
 
 Couchbase Lite can be used with **standalone Dart** or with **Flutter** apps and
@@ -494,6 +505,7 @@ Read [CONTRIBUTING] to get started developing.
 
 > ⚠️ This is not an official Couchbase product.
 
+[repository]: https://github.com/cbl-dart/cbl-dart
 [contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md
 [n1ql]: https://www.couchbase.com/products/n1ql
 [n1ql language reference]:
@@ -507,6 +519,7 @@ Read [CONTRIBUTING] to get started developing.
 [cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
 [cbl_sentry]: https://pub.dev/packages/cbl_sentry
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
+[discussions]: https://github.com/cbl-dart/cbl-dart/discussions
 [sync gateway]: https://www.couchbase.com/sync-gateway
 [sync gateway docs]:
   https://docs.couchbase.com/sync-gateway/3.0/introduction.html
