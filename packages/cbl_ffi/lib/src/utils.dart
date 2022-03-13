@@ -14,7 +14,7 @@ extension AnyExt<T> on T {
 }
 
 @pragma('vm:never-inline')
-void cblReachabilityFence(Object? object) {}
+Object? cblReachabilityFence(Object? object) => object;
 
 // === Conversion ==============================================================
 
