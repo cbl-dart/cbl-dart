@@ -73,6 +73,7 @@ Couchbase Lite you use.
 - [🔮 Tracing](#-tracing)
 - [💡 Where to go next](#-where-to-go-next)
 - [🤝 Contributing](#-contributing)
+- [Prior work](#prior-work)
 - [⚖️ Disclaimer](#️-disclaimer)
 
 # 🤩 Features
@@ -509,6 +510,18 @@ discuss what you would like to change.
 Please make sure to update tests as appropriate.
 
 Read [CONTRIBUTING] to get started developing.
+
+# Prior work
+
+Thanks to the authors of earlier Couchbase Lite packages. Those packages where
+valuable references for making decisions about how to approach this project.
+
+- [Luca Christille](https://github.com/lchristille) -
+  [fluttercouch](https://github.com/fluttercouch/fluttercouch)
+- [Bryan Welter](https://github.com/bawelter) -
+  [couchbase_lite](https://github.com/SaltechSystems/couchbase_lite)
+- [Rudolf Martincsek](https://github.com/Rudiksz) -
+  [couchbase_lite_dart](https://github.com/Rudiksz/couchbase_lite_dart)
 
 # ⚖️ Disclaimer
 
