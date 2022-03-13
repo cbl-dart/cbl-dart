@@ -5,4 +5,4 @@ environment:
   sdk: '>=2.16.0 <3.0.0'
 
 dependencies:
-  cbl: ^1.0.1+0
+  cbl: ^1.0.2

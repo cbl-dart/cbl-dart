@@ -1,3 +1,7 @@
+## 0.7.0+1
+
+ - **FIX**: ensure `cblReachabilityFence` works with AOT compilation (#325). ([329c427d](https://github.com/cbl-dart/cbl-dart/commit/329c427d248bab5843dc2f303ecaa6b9c9272f13))
+
 ## 0.7.0
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
