@@ -12,7 +12,7 @@ environment:
   sdk: '>=2.16.0 <3.0.0'
 
 dependencies:
-  cbl: ^1.0.2
+  cbl: ^1.0.3
   cbl_libcblite_api: 3.0.0
   cbl_libcblitedart_api: 1.0.0
   crypto: ^3.0.1

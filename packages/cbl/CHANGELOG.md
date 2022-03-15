@@ -1,3 +1,7 @@
+## 1.0.3
+
+ - **FIX**: don't use a `SharedStringsTable` in `ResultSet` (#327). ([eee1e3e6](https://github.com/cbl-dart/cbl-dart/commit/eee1e3e6d866dfd717c605e8618c283e860a16ae))
+
 ## 1.0.2
 
  - **DOCS**: add "Prior work" section to README. ([4f37be01](https://github.com/cbl-dart/cbl-dart/commit/4f37be01c1849cbbe36c79a19a62609619099124))
