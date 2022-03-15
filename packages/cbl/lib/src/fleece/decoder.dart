@@ -105,6 +105,11 @@ enum StringSource {
 ///
 /// Every string that is decoded must be loaded through a [SharedStringsTable].
 /// Strings that are not shared are decoded directly when requested.
+///
+/// A [SharedStringsTable] must only be used with a single instance of immutable
+/// Fleece data.
+/// It is safe to use a [NoopSharedStringsTable] with mutable Fleece data,
+/// though.
 abstract class SharedStringsTable {
   /// Creates a new empty [SharedStringsTable].
   factory SharedStringsTable() => _SharedStringsTable();

@@ -38,10 +38,12 @@ abstract class SyncResultSet
 /// A bug was the result of using the databases shared keys table in the result
 /// set.
 /// https://github.com/cbl-dart/cbl-dart/issues/322
+///
+/// Result sets also cannot use a [SharedStringsTable] because the CBL C SDK
+/// does not return strictly immutable Fleece data from the result set API.
 DatabaseMContext createResultSetMContext(DatabaseBase database) =>
     DatabaseMContext(
       database: database,
       dictKeys: database.dictKeys,
       sharedKeysTable: SharedKeysTable(),
-      sharedStringsTable: SharedStringsTable(),
     );
