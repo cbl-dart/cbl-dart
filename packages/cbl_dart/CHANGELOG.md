@@ -1,3 +1,7 @@
+## 1.1.0
+
+ - **FEAT**: distribute CBL C 3.0.1. ([b1d85636](https://github.com/cbl-dart/cbl-dart/commit/b1d85636251408d4af26247ef813f5e224ba7430))
+
 ## 1.0.0+2
 
  - **DOCS**: update indroduction. ([9e2a578a](https://github.com/cbl-dart/cbl-dart/commit/9e2a578a11115b9e5be67bd57b844e9e72622361))

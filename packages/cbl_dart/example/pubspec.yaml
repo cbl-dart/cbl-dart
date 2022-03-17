@@ -6,4 +6,4 @@ environment:
 
 dependencies:
   cbl: ^1.0.3
-  cbl_dart: ^1.0.0+2
+  cbl_dart: ^1.1.0
