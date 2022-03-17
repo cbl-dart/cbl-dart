@@ -93,6 +93,9 @@ class _OptimizedDictKey extends DictKey {
 }
 
 /// A provider of [DictKey]s.
+///
+/// A [DictKeys] instance must only be used for Fleece data that shares the same
+/// set of shared keys.
 // ignore: one_member_abstracts
 abstract class DictKeys {
   const DictKeys();
