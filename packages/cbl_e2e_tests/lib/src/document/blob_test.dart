@@ -321,9 +321,13 @@ Uint8List randomBytes(int size) {
 }
 
 enum WriteBlob { data, properties, stream }
+
 enum ReadTime { beforeSave, afterSave }
+
 enum ReadMode { future, stream }
+
 enum ReadBlob { sourceBlob, loadedBlob }
+
 enum BlobSize { small, large }
 
 final writeBlob = EnumVariant<WriteBlob>(

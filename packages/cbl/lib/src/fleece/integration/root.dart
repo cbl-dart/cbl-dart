@@ -30,7 +30,7 @@ class MRoot extends MCollection {
     required MContext context,
     required bool isMutable,
   })  : data = null,
-        value = FleeceValueObject(value, isRefCounted: true, adopt: false),
+        value = FleeceValueObject(value),
         _slot = MValue.withValue(value),
         super(context: context, isMutable: isMutable) {
     _slot.updateParent(this);
