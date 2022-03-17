@@ -3,6 +3,7 @@ import 'dart:async';
 import '../database/database_base.dart';
 import '../document/common.dart';
 import '../fleece/decoder.dart';
+import '../fleece/dict_key.dart';
 import 'query.dart';
 import 'result.dart';
 
@@ -30,8 +31,8 @@ abstract class SyncResultSet
 
 /// Creates a [DatabaseMContext] for use in [ResultSet] implementations.
 ///
-/// Result sets don't use the shared keys of the database and so must not used
-/// the [SharedKeysTable] of the database.
+/// Result sets don't use the shared keys of the database and so must not use
+/// the [DictKeys] and [SharedKeysTable] of the database.
 /// See SQLiteQuery.cc for more information.
 /// https://github.com/couchbase/couchbase-lite-core/blob/733eecb4fc73a05ce35bf458703dac2d7382c296/LiteCore/Query/SQLiteQuery.cc#L514-L524
 ///
@@ -44,6 +45,6 @@ abstract class SyncResultSet
 DatabaseMContext createResultSetMContext(DatabaseBase database) =>
     DatabaseMContext(
       database: database,
-      dictKeys: database.dictKeys,
+      dictKeys: OptimizingDictKeys(),
       sharedKeysTable: SharedKeysTable(),
     );
