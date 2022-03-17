@@ -14,8 +14,8 @@ final packageConfigurations = [
       version: '1.0.0',
       edition: edition,
       couchbaseLiteC: const LibraryInfo(
-        version: '3.0.0',
-        release: '3.0.0',
+        version: '3.0.1',
+        release: '3.0.1',
       ),
       couchbaseLiteDart: const LibraryInfo(
         version: '1.0.0',
