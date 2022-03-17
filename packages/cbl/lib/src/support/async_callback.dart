@@ -97,7 +97,7 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
     _debugLog('closing');
     _closed = true;
     _bindings.close(native.pointer);
-    cblReachabilityFence(native);
+    cblReachabilityFence(this);
     _receivePort.close();
   }
 
