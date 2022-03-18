@@ -6,7 +6,7 @@ set -e
 
 function usage() {
     cat <<-EOF
-COMMANDS 
+COMMANDS
     start -o OS -d DEVICE
         starts a device simulator
 
@@ -14,10 +14,10 @@ COMMANDS
         copies data from a device simulator's container
 
 DESCRIPTION
-    -o OS 
+    -o OS
         name and version of the simulated os, e.g. iOS-14-5
 
-    -d DEVICE 
+    -d DEVICE
         name of the simulated devices
 
     -b APP-BUNDLE-ID
@@ -53,7 +53,7 @@ function _getSimulatorInfo() {
     xcrun simctl list -j |
         jq \
             ".devices[\"com.apple.CoreSimulator.SimRuntime.$os\"] \
-            | map(select(.name == \"$device\")) 
+            | map(select(.name == \"$device\"))
             | first"
 }
 

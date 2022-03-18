@@ -27,7 +27,7 @@ MINGW* | CYGWIN* | MSYS*)
     ;;
 esac
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-nativeDir="$(cd $scriptDir/.. && pwd)"
+nativeDir="$(cd "$scriptDir/.." && pwd)"
 vendorDir="$nativeDir/vendor"
 binariesDir="$vendorDir/couchbase-lite-C-prebuilt"
 tmpDir="$binariesDir/tmp"
@@ -53,19 +53,19 @@ function _archiveExt() {
 # Outputs the URL of the archive for the given release, edition and target of
 # Couchbase Lite C.
 function _downloadUrl() {
-    local release=$1
-    local edition=$2
-    local target=$3
-    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target.$(_archiveExt $target)"
+    local release="$1"
+    local edition="$2"
+    local target="$3"
+    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target.$(_archiveExt "$target")"
 }
 
 # Downloads and unpacks the binares for the given release, edition and target
 # of Couchbase Lite C.
 function _downloadBinaries() {
-    local release=$1
-    local edition=$2
-    local target=$3
-    local archiveFile="$tmpDir/$release-$edition-$target.$(_archiveExt $target)"
+    local release="$1"
+    local edition="$2"
+    local target="$3"
+    local archiveFile="$tmpDir/$release-$edition-$target.$(_archiveExt "$target")"
     local installDir="$binariesDir/$release-$edition-$target"
 
     if [ -d "$installDir" ]; then
@@ -75,7 +75,7 @@ function _downloadBinaries() {
 
     echo "Downloading prebuild binaries: $release-$edition-$target"
 
-    curl "$(_downloadUrl $release $edition $target)" \
+    curl "$(_downloadUrl "$release" "$edition" "$target")" \
         --silent \
         --fail \
         --retry 5 \
@@ -85,7 +85,7 @@ function _downloadBinaries() {
     rm -rf "$installDir"
     mkdir -p "$installDir"
 
-    case "$(_archiveExt $target)" in
+    case "$(_archiveExt "$target")" in
     zip)
         case "$(uname -s)" in
         MINGW* | CYGWIN* | MSYS*)
@@ -110,9 +110,9 @@ function _downloadBinaries() {
 # The edition and targets must be space sperated lists. If either one is empty,
 # the binaries for all respectively allowed value are downloaded.
 function _downloadMultipleBinaries() {
-    local _release=$1
-    local _editions=$2
-    local _targets=$3
+    local _release="$1"
+    local _editions="$2"
+    local _targets="$3"
 
     if [[ -z "$_release" ]]; then
         _release="$couchbaseLiteCRelease"
