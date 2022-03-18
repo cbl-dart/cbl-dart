@@ -57,7 +57,16 @@ class _OptimizedDictKey extends DictKey {
 
     _dictKeyBinds.init(flDictKey.ref, flStringRef);
 
-    return _OptimizedDictKey._(memory, flDictKey, flStringRef);
+    final result = _OptimizedDictKey._(memory, flDictKey, flStringRef);
+
+    final impl = result._flDictKeyImpl.ref;
+    assert(impl.rawString.buf == flStringRef.buf);
+    assert(impl.rawString.size == flStringRef.size);
+    assert(impl.sharedKeys == nullptr);
+    assert(impl.hint == 0xFFFFFFFF);
+    assert(!impl.hasNumericKey);
+
+    return result;
   }
 
   _OptimizedDictKey._(this._memory, this._flDictKey, this._flString);
@@ -78,9 +87,23 @@ class _OptimizedDictKey extends DictKey {
   final Pointer<FLDictKey> _flDictKey;
   final FLString _flString;
 
+  // Debugging
+  Pointer<_FLDictKeyImpl> get _flDictKeyImpl => _flDictKey.cast();
+
   @override
   Pointer<FLValue>? getValue(Pointer<FLDict> dict) {
+    final impl = _flDictKeyImpl.ref;
+    final hasNumericKey = impl.hasNumericKey;
+
     final flValue = _dictKeyBinds.getWithKey(dict, _flDictKey);
+
+    if (impl.hasNumericKey != hasNumericKey) {
+      print(
+        '$this: Now using shared key "${impl.numericKey}" for '
+        '"${_flString.toDartString()}"',
+      );
+    }
+
     cblReachabilityFence(_memory);
     return flValue;
   }
@@ -90,6 +113,21 @@ class _OptimizedDictKey extends DictKey {
     encoder.writeKeyFLString(_flString);
     cblReachabilityFence(_memory);
   }
+
+  @override
+  String toString() =>
+      'OptimizedDictKey(0x${hashCode.toRadixString(16).padLeft(8, '0')})';
+}
+
+class _FLDictKeyImpl extends Struct {
+  external FLSlice rawString;
+  external Pointer<Void> sharedKeys;
+  @Uint32()
+  external int hint;
+  @Int32()
+  external int numericKey;
+  @Bool()
+  external bool hasNumericKey;
 }
 
 /// A provider of [DictKey]s.
@@ -181,10 +219,17 @@ class OptimizingDictKeys extends DictKeys {
   void _addKeyToCache(String key, _OptimizedDictKey optimizedKey) {
     if (_optimizedKeyCache.length == _optimizedKeyCacheSize) {
       // We've reached the cache size. Remove the oldest key.
-      _optimizedKeyCache.remove(_optimizedKeyCache.keys.first);
+      final evictedKey = _optimizedKeyCache.keys.first;
+      final evictedDictKey = _optimizedKeyCache.remove(evictedKey);
+      print(
+        '$evictedDictKey: Evicted optimized key for "$evictedKey"',
+      );
     }
 
     _optimizedKeyCache[key] = optimizedKey;
+    print(
+      '$optimizedKey: Added optimized key for "$key"',
+    );
   }
 }
 
