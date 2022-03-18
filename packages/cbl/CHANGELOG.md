@@ -1,3 +1,8 @@
+## 1.0.4
+
+ - **FIX**: keep `AsyncCallback` reachable in `close` (#333). ([206950ca](https://github.com/cbl-dart/cbl-dart/commit/206950caa95c50652d66c7351bd4f3ece16ec40d))
+ - **FIX**: use own instance of `DictKeys` for each `ResultSet` (#331). ([a0090af7](https://github.com/cbl-dart/cbl-dart/commit/a0090af7a0b252045f8106affd8e20cd99e7721d))
+
 ## 1.0.3
 
  - **FIX**: don't use a `SharedStringsTable` in `ResultSet` (#327). ([eee1e3e6](https://github.com/cbl-dart/cbl-dart/commit/eee1e3e6d866dfd717c605e8618c283e860a16ae))
