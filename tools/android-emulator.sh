@@ -27,7 +27,7 @@ serialName="emulator-$emulatorPort"
 
 function usage() {
     cat <<-EOF
-COMMANDS 
+COMMANDS
     createAndStart -a API-LEVEL -d DEVICE
         creates and starts an emulator
 
@@ -38,10 +38,10 @@ COMMANDS
         creates a bugreport for the emulator
 
 DESCRIPTION
-    -a API-LEVEL 
+    -a API-LEVEL
         Android API level of the emulator
 
-    -d DEVICE 
+    -d DEVICE
         devices definition to the emulator
 
     -o OUTPUT-DIRECTORY

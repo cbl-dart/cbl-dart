@@ -85,7 +85,7 @@ set_target_properties(cblitedart
 if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
     set_target_properties(
         cblitedart PROPERTIES LINK_FLAGS
-        "-exported_symbols_list ${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.exp")
+        "-exported_symbols_list '${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.exp'")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android OR ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     set_target_properties(
         cblitedart PROPERTIES LINK_FLAGS

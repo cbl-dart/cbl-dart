@@ -10,7 +10,7 @@ crashReportName="crash-report.txt"
 
 function usage() {
     cat <<-EOF
-SYNOPSYS 
+SYNOPSYS
     -e EXECUTALBE -c CORE-DUMP -o OUTPUT-DIRECTORY
         creates a crash report for an executable given a core dump
 
@@ -19,7 +19,7 @@ DESCRIPTION
         executeable which crashed
 
     -c CORE-DUMP
-        core dump of the crashed process 
+        core dump of the crashed process
 
     -o OUTPUT-DIRECTORY
         directory to store output in
