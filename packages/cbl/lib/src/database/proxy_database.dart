@@ -80,7 +80,7 @@ class ProxyDatabase extends ProxyObject
   }
 
   @override
-  final dictKeys = OptimizingDictKeys();
+  final dictKeys = const UnoptimizingDictKeys();
 
   @override
   final sharedKeysTable = SharedKeysTable();

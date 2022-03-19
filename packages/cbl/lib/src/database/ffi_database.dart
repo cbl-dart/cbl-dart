@@ -90,7 +90,7 @@ class FfiDatabase extends CBLDatabaseObject
       );
 
   @override
-  final dictKeys = OptimizingDictKeys();
+  final dictKeys = const UnoptimizingDictKeys();
 
   @override
   final sharedKeysTable = SharedKeysTable();
