@@ -25,12 +25,28 @@ class _DartStringDictKey extends DictKey {
   final String key;
 
   @override
-  Pointer<FLValue>? getValue(Pointer<FLDict> dict) => _dictBinds.get(dict, key);
+  Pointer<FLValue>? getValue(Pointer<FLDict> dict) {
+    final flValue = _dictBinds.get(dict, key);
+
+    final type = flValue != null
+        ? cblBindings.fleece.value.getType(flValue.cast()).name
+        : '<missing>';
+    cblBindings.logging.logMessage(
+      CBLLogDomain.database,
+      CBLLogLevel.verbose,
+      '$this: Got value of type $type',
+    );
+
+    return flValue;
+  }
 
   @override
   void encodeTo(FleeceEncoder encoder) {
     encoder.writeKey(key);
   }
+
+  @override
+  String toString() => 'DictKey($key)';
 }
 
 class _OptimizedDictKey extends DictKey {
@@ -87,7 +103,6 @@ class _OptimizedDictKey extends DictKey {
   final Pointer<FLDictKey> _flDictKey;
   final FLString _flString;
 
-  // Debugging
   Pointer<_FLDictKeyImpl> get _flDictKeyImpl => _flDictKey.cast();
 
   @override
@@ -98,11 +113,22 @@ class _OptimizedDictKey extends DictKey {
     final flValue = _dictKeyBinds.getWithKey(dict, _flDictKey);
 
     if (impl.hasNumericKey != hasNumericKey) {
-      print(
+      cblBindings.logging.logMessage(
+        CBLLogDomain.database,
+        CBLLogLevel.verbose,
         '$this: Now using shared key "${impl.numericKey}" for '
         '"${_flString.toDartString()}"',
       );
     }
+
+    final type = flValue != null
+        ? cblBindings.fleece.value.getType(flValue.cast()).name
+        : '<missing>';
+    cblBindings.logging.logMessage(
+      CBLLogDomain.database,
+      CBLLogLevel.verbose,
+      '$this: Got value of type $type',
+    );
 
     cblReachabilityFence(_memory);
     return flValue;
@@ -221,13 +247,17 @@ class OptimizingDictKeys extends DictKeys {
       // We've reached the cache size. Remove the oldest key.
       final evictedKey = _optimizedKeyCache.keys.first;
       final evictedDictKey = _optimizedKeyCache.remove(evictedKey);
-      print(
+      cblBindings.logging.logMessage(
+        CBLLogDomain.database,
+        CBLLogLevel.verbose,
         '$evictedDictKey: Evicted optimized key for "$evictedKey"',
       );
     }
 
     _optimizedKeyCache[key] = optimizedKey;
-    print(
+    cblBindings.logging.logMessage(
+      CBLLogDomain.database,
+      CBLLogLevel.verbose,
       '$optimizedKey: Added optimized key for "$key"',
     );
   }
