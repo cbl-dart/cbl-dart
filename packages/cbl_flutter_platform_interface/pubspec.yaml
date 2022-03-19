@@ -10,7 +10,7 @@ environment:
   flutter: '>=2.10.0'
 
 dependencies:
-  cbl: ^1.0.4
+  cbl: ^1.0.5
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2

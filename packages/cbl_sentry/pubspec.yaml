@@ -11,7 +11,7 @@ environment:
   sdk: '>=2.16.0 <3.0.0'
 
 dependencies:
-  cbl: ^1.0.4
+  cbl: ^1.0.5
   sentry: ^6.3.0
 
 dev_dependencies:

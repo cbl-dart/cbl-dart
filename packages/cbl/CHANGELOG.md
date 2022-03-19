@@ -1,3 +1,7 @@
+## 1.0.5
+
+ - **FIX**: temporarily disable use of `FLDictKey`. ([2c729e12](https://github.com/cbl-dart/cbl-dart/commit/2c729e12506030ac8da2f843776bee57b8f69793))
+
 ## 1.0.4
 
  - **FIX**: keep `AsyncCallback` reachable in `close` (#333). ([206950ca](https://github.com/cbl-dart/cbl-dart/commit/206950caa95c50652d66c7351bd4f3ece16ec40d))

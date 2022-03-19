@@ -1,3 +1,7 @@
+## 0.7.1
+
+ - **FEAT**: add `DictBindings.getWithFLString`. ([ed98b1b2](https://github.com/cbl-dart/cbl-dart/commit/ed98b1b2555265d1d1046990aff6dd69c9756d75))
+
 ## 0.7.0+1
 
  - **FIX**: ensure `cblReachabilityFence` works with AOT compilation (#325). ([329c427d](https://github.com/cbl-dart/cbl-dart/commit/329c427d248bab5843dc2f303ecaa6b9c9272f13))
