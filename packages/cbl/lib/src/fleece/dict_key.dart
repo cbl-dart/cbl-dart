@@ -75,12 +75,19 @@ class _OptimizedDictKey extends DictKey {
       _flStringStart + _flStringSize + _flStringPadding;
 
   final SliceResult _memory;
+  // ignore: unused_field
   final Pointer<FLDictKey> _flDictKey;
   final FLString _flString;
 
   @override
   Pointer<FLValue>? getValue(Pointer<FLDict> dict) {
-    final flValue = _dictKeyBinds.getWithKey(dict, _flDictKey);
+    // TODO(blaugold): Reenable use of `FLDictKey`s when we know how to safely
+    // use them.
+    // https://github.com/cbl-dart/cbl-dart/issues/329
+    // https://github.com/couchbase/couchbase-lite-C/issues/287
+    // final flValue = _dictKeyBinds.getWithKey(dict, _flDictKey);
+
+    final flValue = _dictBinds.getWithFLString(dict, _flString);
     cblReachabilityFence(_memory);
     return flValue;
   }
