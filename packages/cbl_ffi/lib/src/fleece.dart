@@ -1053,6 +1053,9 @@ class DictBindings extends Bindings {
   Pointer<FLValue>? get(Pointer<FLDict> dict, String key) =>
       runWithSingleFLString(key, (flKey) => _get(dict, flKey)).toNullable();
 
+  Pointer<FLValue>? getWithFLString(Pointer<FLDict> dict, FLString key) =>
+      _get(dict, key).toNullable();
+
   int count(Pointer<FLDict> dict) => _count(dict);
 
   bool isEmpty(Pointer<FLDict> dict) => _isEmpty(dict);
