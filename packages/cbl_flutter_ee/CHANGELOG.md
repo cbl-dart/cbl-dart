@@ -1,3 +1,7 @@
+## 1.1.1
+
+- **FIX**: directly invoke bash when installing binaries on Windows
+
 ## 1.1.0
 
 - **FEAT**: distribute `libcblite` 3.0.1
