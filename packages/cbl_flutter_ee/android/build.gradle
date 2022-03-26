@@ -55,7 +55,7 @@ task installLibraries(type: Exec) {
     workingDir file("$projectDir/..")
 
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        commandLine 'cmd', '/c', 'C:/Program Files/Git/bin/bash', './tool/install_libraries.sh', 'android'
+        commandLine 'C:/Program Files/Git/bin/bash', './tool/install_libraries.sh', 'android'
     } else {
         commandLine './tool/install_libraries.sh', 'android'
     }
