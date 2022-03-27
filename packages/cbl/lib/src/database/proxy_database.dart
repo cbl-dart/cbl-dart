@@ -96,6 +96,8 @@ class ProxyDatabase extends ProxyObject
 
   late final _listenerTokens = ListenerTokenRegistry(this);
 
+  final _documentFinalizers = <Future<void> Function()>[];
+
   final DatabaseConfiguration _config;
 
   DatabaseState state;
@@ -135,7 +137,7 @@ class ProxyDatabase extends ProxyObject
           }
 
           return DelegateDocument(
-            ProxyDocumentDelegate.fromState(state),
+            ProxyDocumentDelegate.fromState(state, database: this),
             database: this,
           );
         }),
@@ -169,7 +171,7 @@ class ProxyDatabase extends ProxyObject
               return false;
             }
 
-            delegate.updateMetadata(state);
+            delegate.updateMetadata(state, database: this);
 
             return true;
           }),
@@ -213,7 +215,7 @@ class ProxyDatabase extends ProxyObject
               return false;
             }
 
-            delegate.updateMetadata(state);
+            delegate.updateMetadata(state, database: this);
 
             return true;
           }),
@@ -335,6 +337,11 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> performClose() async {
+    await Future.wait<void>(
+      _documentFinalizers.map((finalizer) => finalizer()),
+    );
+    _documentFinalizers.clear();
+
     if (_deleteOnClose) {
       await channel.call(DeleteDatabase(objectId));
     } else {
@@ -387,6 +394,15 @@ class ProxyDatabase extends ProxyObject
 
   @override
   String toString() => 'ProxyDatabase($name)';
+
+  void registerDocumentFinalizer(Future<void> Function() finalizer) {
+    assert(!isClosed);
+    _documentFinalizers.add(finalizer);
+  }
+
+  void unregisterDocumentFinalizer(Future<void> Function() finalizer) {
+    _documentFinalizers.remove(finalizer);
+  }
 
   Future<void> _refreshState() async {
     state = await channel.call(GetDatabase(objectId));

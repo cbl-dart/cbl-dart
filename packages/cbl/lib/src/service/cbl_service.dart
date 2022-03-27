@@ -116,7 +116,7 @@ class CblServiceClient {
 
   int registerConflictResolver(CblServiceConflictResolver resolver) {
     FutureOr<DocumentState?> handler(CallConflictResolver request) => resolver(
-          (request.localState?.id ?? request.remoteState?.id)!,
+          (request.localState?.docId ?? request.remoteState?.docId)!,
           request.localState,
           request.remoteState,
         );
@@ -388,55 +388,43 @@ class CblService {
     final document = _getDatabaseById(request.databaseId)
         .document(request.documentId) as DelegateDocument?;
 
-    if (document == null) {
-      return null;
-    }
-
-    _objectRegistry.addObject(document);
-
-    return document.createState(
+    return document?.createState(
       withProperties: true,
       propertiesFormat: request.propertiesFormat,
+      objectRegistry: _objectRegistry,
     );
   }
 
   Future<DocumentState?> _saveDocument(SaveDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document = _getDocumentForUpdate(
-      database,
-      request.state,
-      request.concurrencyControl,
-    );
+    final document = _getDocumentForSave(database, request.state)
+      ..setEncodedProperties(request.state.properties!.encodedData!);
 
-    if (document == null) {
+    if (database.saveDocument(document, request.concurrencyControl)) {
+      return document.createState(
+        withProperties: false,
+        objectRegistry: _objectRegistry,
+      );
+    } else {
       return null;
     }
-
-    document.setEncodedProperties(request.state.properties!.encodedData!);
-
-    final success = database.saveDocument(document, request.concurrencyControl);
-
-    return success ? document.createState(withProperties: false) : null;
   }
 
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document = _getDocumentForUpdate(
-      database,
-      request.state,
-      request.concurrencyControl,
-    );
+    final document =
+        _objectRegistry.getObjectOrThrow<DelegateDocument>(request.state.id!);
 
-    if (document == null) {
+    if (database.deleteDocument(document, request.concurrencyControl)) {
+      return document.createState(
+        withProperties: false,
+        objectRegistry: _objectRegistry,
+      );
+    } else {
       return null;
     }
-
-    final success =
-        database.deleteDocument(document, request.concurrencyControl);
-
-    return success ? document.createState(withProperties: false) : null;
   }
 
   void _purgeDocument(PurgeDocument request) =>
@@ -645,34 +633,26 @@ class CblService {
         indexes: database.indexes,
       );
 
-  MutableDelegateDocument? _getDocumentForUpdate(
+  MutableDelegateDocument _getDocumentForSave(
     SyncDatabase database,
     DocumentState state,
-    ConcurrencyControl concurrencyControl,
   ) {
-    // Document is new.
     if (state.revisionId == null) {
-      return MutableDocument.withId(state.id) as MutableDelegateDocument;
+      // The document is new.
+      return MutableDocument.withId(state.docId) as MutableDelegateDocument;
+    } else {
+      if (state.id != null) {
+        // A mutable document has already been obtained and added to the object
+        // registry for the proxy document.
+        return _objectRegistry.getObjectOrThrow(state.id!);
+      } else {
+        // The proxy document does not have an equivalent object in the
+        // object registry yet, and we need to create it.
+        return _objectRegistry
+            .getObjectOrThrow<DelegateDocument>(state.sourceId!)
+            .toMutable() as MutableDelegateDocument;
+      }
     }
-
-    // Document to update is not new and needs to be loaded.
-
-    final doc =
-        database.document(state.id)?.toMutable() as MutableDelegateDocument?;
-
-    switch (concurrencyControl) {
-      case ConcurrencyControl.lastWriteWins:
-        return doc ??
-            MutableDocument.withId(state.id) as MutableDelegateDocument;
-      case ConcurrencyControl.failOnConflict:
-        if (doc != null &&
-            doc.revisionId == state.revisionId &&
-            doc.sequence == state.sequence) {
-          return doc;
-        }
-    }
-
-    return null;
   }
 
   ReplicationFilter _createReplicatorFilter(
@@ -805,6 +785,7 @@ extension on DelegateDocument {
   Future<DocumentState> createState({
     required bool withProperties,
     EncodingFormat? propertiesFormat,
+    ObjectRegistry? objectRegistry,
   }) async {
     TransferableValue? properties;
     if (withProperties) {
@@ -819,8 +800,14 @@ extension on DelegateDocument {
       }
     }
 
+    int? id;
+    if (objectRegistry != null) {
+      id = objectRegistry.getObjectId(this) ?? objectRegistry.addObject(this);
+    }
+
     return DocumentState(
       id: id,
+      docId: this.id,
       revisionId: revisionId,
       sequence: sequence,
       properties: properties,

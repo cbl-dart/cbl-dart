@@ -1842,13 +1842,17 @@ class DatabaseState implements Serializable {
 @immutable
 class DocumentState implements Serializable {
   const DocumentState({
-    required this.id,
+    this.id,
+    this.sourceId,
+    required this.docId,
     required this.revisionId,
     required this.sequence,
     this.properties,
   });
 
-  final String id;
+  final int? id;
+  final int? sourceId;
+  final String docId;
   final String? revisionId;
   final int sequence;
   final TransferableValue? properties;
@@ -1858,15 +1862,24 @@ class DocumentState implements Serializable {
       identical(this, other) ||
       other is DocumentState &&
           id == other.id &&
+          sourceId == other.sourceId &&
+          docId == other.docId &&
           revisionId == other.revisionId &&
           sequence == other.sequence;
 
   @override
-  int get hashCode => id.hashCode ^ revisionId.hashCode ^ sequence.hashCode;
+  int get hashCode =>
+      id.hashCode ^
+      sourceId.hashCode ^
+      docId.hashCode ^
+      revisionId.hashCode ^
+      sequence.hashCode;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'id': id,
+        'sourceId': sourceId,
+        'docId': docId,
         'revisionId': revisionId,
         'sequence': sequence,
         'properties': context.serialize(properties),
@@ -1878,6 +1891,8 @@ class DocumentState implements Serializable {
   ) =>
       DocumentState(
         id: map.getAs('id'),
+        sourceId: map.getAs('sourceId'),
+        docId: map.getAs('docId'),
         revisionId: map.getAs('revisionId'),
         sequence: map.getAs('sequence'),
         properties: context.deserializeAs(map['properties']),
