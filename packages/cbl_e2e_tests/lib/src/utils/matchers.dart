@@ -75,7 +75,7 @@ class _JsonMatcher extends Matcher {
   bool matches(Object? item, Map matchState) {
     if (item is SliceResult) {
       // ignore: parameter_assignments
-      item = item.asTypedList();
+      item = item.toTypedList();
     }
 
     Object? actual;

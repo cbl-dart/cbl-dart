@@ -196,8 +196,9 @@ class CblMDelegate extends MDelegate {
 
           final dict = fl.Dict.fromPointer(
             flDict,
-            // This value is alive as long as the MRoot is alive and the
-            // MRoot does not necessarily read form a Doc.
+            // This value is alive as long as the data owner is alive and the
+            // data owner does not necessarily read form a Doc (which would
+            // allow Fleece values to be retained).
             isRefCounted: false,
           );
           return BlobImpl.fromProperties(dict.toObject(), database: database);
@@ -228,6 +229,7 @@ bool valueWouldChange(
   final flValue = oldValue.value;
   if (flValue != null) {
     final valueType = _valueBinds.getType(flValue);
+    cblReachabilityFence(container.dataOwner);
     if (valueType == FLValueType.array || valueType == FLValueType.dict) {
       return true;
     }

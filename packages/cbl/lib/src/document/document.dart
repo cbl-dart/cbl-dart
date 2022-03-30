@@ -128,7 +128,7 @@ class NewDocumentDelegate extends DocumentDelegate {
       // used to insert a document that was created remotely (meaning another
       // isolate or even process).
       return MRoot.fromData(
-        properties.toFleece(),
+        properties.toFleece().toSliceResult(),
         context: context,
         isMutable: isMutable,
       );

@@ -47,7 +47,11 @@ class Slice {
   final int size;
 
   /// Interprets the data of this slice as an UTF-8 encoded string.
-  String toDartString() => buf.cast<Utf8>().toDartString(length: size);
+  String toDartString() {
+    final result = buf.cast<Utf8>().toDartString(length: size);
+    cblReachabilityFence(this);
+    return result;
+  }
 
   /// Sets the [globalFLSlice] to this slice and returns it.
   Pointer<FLSlice> makeGlobal() {
@@ -84,10 +88,26 @@ class Slice {
       return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
       cachedSliceResultAllocator.free(bFLSlice);
+      cblReachabilityFence(this);
+      cblReachabilityFence(other);
     }
   }
 
+  /// Returns a [Uint8List] that is a mutable view of this [Slice].
+  ///
+  /// You must ensure that this [Slice] is valid while the returned [Uint8List]
+  /// is in use. For [SliceResult]s this can be achieved by passing it to
+  /// [cblReachabilityFence] after the last use of the [Uint8List].
+  ///
+  /// For a less efficient but safer alternative, use [toTypedList].
   Uint8List asTypedList() => buf.asTypedList(size);
+
+  /// Copies the contents of this [Slice] into a new [Uint8List] and returns it.
+  Uint8List toTypedList() {
+    final result = Uint8List.fromList(asTypedList());
+    cblReachabilityFence(this);
+    return result;
+  }
 
   @override
   bool operator ==(Object other) {
@@ -109,6 +129,8 @@ class Slice {
       return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
       cachedSliceResultAllocator.free(bFLSlice);
+      cblReachabilityFence(this);
+      cblReachabilityFence(other);
     }
   }
 
@@ -134,7 +156,11 @@ class SliceResult extends Slice {
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-      : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
+      : this._fromFLSliceResult((() {
+          final result = _sliceBindings.copy(slice.makeGlobal().ref);
+          cblReachabilityFence(slice);
+          return result;
+        })());
 
   SliceResult._fromFLSliceResult(
     FLSliceResult slice, {
@@ -157,14 +183,19 @@ class SliceResult extends Slice {
   }
 
   /// Returns a [SliceResult] which has the content and size of [list].
-  factory SliceResult.fromTypedList(Uint8List list) =>
-      SliceResult(list.lengthInBytes)..asTypedList().setAll(0, list);
+  factory SliceResult.fromTypedList(Uint8List list) {
+    final result = SliceResult(list.lengthInBytes)
+      ..asTypedList().setAll(0, list);
+    cblReachabilityFence(result);
+    return result;
+  }
 
   /// Creates a [SliceResult] which contains [string] encoded as UTF-8.
   factory SliceResult.fromString(String string) {
     final encoded = utf8.encode(string);
     final result = SliceResult(encoded.length);
-    result.buf.asTypedList(encoded.length).setAll(0, encoded);
+    result.asTypedList().setAll(0, encoded);
+    cblReachabilityFence(result);
     return result;
   }
 
@@ -190,7 +221,7 @@ class SliceResult extends Slice {
           ? null
           : Slice._(slice.buf, slice.size).let(SliceResult.fromSlice);
 
-  static final _keepAliveForTypedList = Expando<Slice>();
+  static final _keepAliveForTypedList = Expando<SliceResult>();
 
   /// Sets the [globalFLSliceResult] to this slice and returns it.
   Pointer<FLSliceResult> makeGlobalResult() {

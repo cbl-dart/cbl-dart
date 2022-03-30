@@ -65,7 +65,7 @@ class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
     }
 
     return MRoot.fromData(
-      properties!.toFleece(),
+      properties!.toFleece().toSliceResult(),
       context: context,
       isMutable: isMutable,
     );

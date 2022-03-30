@@ -14,14 +14,11 @@ late final _valueBinds = cblBindings.fleece.value;
 
 class MRoot extends MCollection {
   MRoot.fromData(
-    Data data, {
+    SliceResult data, {
     required MContext context,
     required bool isMutable,
-  })  : data = data.toSliceResult(),
-        value = null,
-        super(context: context, isMutable: isMutable) {
-    _slot =
-        MValue.withValue(_valueBinds.fromData(this.data!, FLTrust.trusted)!);
+  })  : _slot = MValue.withValue(_valueBinds.fromData(data, FLTrust.trusted)!),
+        super(context: context, isMutable: isMutable, dataOwner: data) {
     _slot.updateParent(this);
   }
 
@@ -29,10 +26,12 @@ class MRoot extends MCollection {
     Pointer<FLValue> value, {
     required MContext context,
     required bool isMutable,
-  })  : data = null,
-        value = FleeceValueObject(value),
-        _slot = MValue.withValue(value),
-        super(context: context, isMutable: isMutable) {
+  })  : _slot = MValue.withValue(value),
+        super(
+          context: context,
+          isMutable: isMutable,
+          dataOwner: FleeceValueObject(value),
+        ) {
     _slot.updateParent(this);
   }
 
@@ -40,16 +39,14 @@ class MRoot extends MCollection {
     MValue value, {
     required MContext context,
     required bool isMutable,
-  })  : data = null,
-        value = null,
-        _slot = value,
-        super(context: context, isMutable: isMutable) {
+  })  : _slot = value,
+        super(
+          context: context,
+          isMutable: isMutable,
+          dataOwner: value.hasValue ? FleeceValueObject(value.value!) : null,
+        ) {
     _slot.updateParent(this);
   }
-
-  final SliceResult? data;
-
-  final FleeceValueObject<FLValue>? value;
 
   late final MValue _slot;
 

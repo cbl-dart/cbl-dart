@@ -49,7 +49,13 @@ class MArray extends MCollection {
       return null;
     }
 
-    return _values[index] ??= _loadMValue(index);
+    var value = _values[index];
+    if (value == null) {
+      value = _values[index] = _loadMValue(index);
+      cblReachabilityFence(dataOwner);
+    }
+
+    return value;
   }
 
   bool set(int index, Object? native) {
@@ -152,6 +158,8 @@ class MArray extends MCollection {
     for (var i = 0; i < length; ++i) {
       yield _values[i] ??= _loadMValue(i);
     }
+
+    cblReachabilityFence(dataOwner);
   }
 
   void _populateValues() {
@@ -166,6 +174,8 @@ class MArray extends MCollection {
       }
       i++;
     }
+
+    cblReachabilityFence(dataOwner);
   }
 
   MValue _loadMValue(int index) =>
