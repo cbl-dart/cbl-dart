@@ -1,3 +1,9 @@
+## 1.1.0
+
+ - **PERF**: keep proxied documents in memory (#340). ([c4330975](https://github.com/cbl-dart/cbl-dart/commit/c4330975d1a1b13a9137466ad77824ce79b09eb7))
+ - **FIX**: make expected reachability of all finalized objects explicit (#341). ([d39f291f](https://github.com/cbl-dart/cbl-dart/commit/d39f291f48fc8fb22f5b8ce2b0056556e0a03e2c))
+ - **FEAT**: include stack trace in message for unserializable error. ([76f3bece](https://github.com/cbl-dart/cbl-dart/commit/76f3bece71c405fcf271cda449dd955797076a6c))
+
 ## 1.0.5
 
  - **FIX**: temporarily disable use of `FLDictKey`. ([2c729e12](https://github.com/cbl-dart/cbl-dart/commit/2c729e12506030ac8da2f843776bee57b8f69793))

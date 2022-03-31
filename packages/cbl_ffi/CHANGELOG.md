@@ -1,3 +1,8 @@
+## 0.7.2
+
+ - **FIX**: make expected reachability of all finalized objects explicit (#341). ([d39f291f](https://github.com/cbl-dart/cbl-dart/commit/d39f291f48fc8fb22f5b8ce2b0056556e0a03e2c))
+ - **FEAT**: turn asserts in `Slice` constructor into exceptions. ([0789f812](https://github.com/cbl-dart/cbl-dart/commit/0789f81279a84cd54ea11f32d2987db500fefd91))
+
 ## 0.7.1
 
  - **FEAT**: add `DictBindings.getWithFLString`. ([ed98b1b2](https://github.com/cbl-dart/cbl-dart/commit/ed98b1b2555265d1d1046990aff6dd69c9756d75))
