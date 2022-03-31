@@ -23,7 +23,14 @@ late final _sliceBindings = CBLBindings.instance.fleece.slice;
 /// nullable and are represented with `null`.
 class Slice {
   /// Private constructor to initialize slice.
-  Slice._(this.buf, this.size) : assert(buf != nullptr && size >= 0);
+  Slice._(this.buf, this.size) {
+    if (buf == nullptr) {
+      ArgumentError.value(buf, 'buf', 'must not be the null pointer');
+    }
+    if (size < 0) {
+      ArgumentError.value(size, 'size', 'must be non-negative');
+    }
+  }
 
   /// Creates a [Slice] which points to the same data as [slice].
   Slice.fromSlice(Slice slice) : this._(slice.buf, slice.size);
@@ -335,7 +342,9 @@ class SingleSliceResultAllocator implements Allocator {
   @override
   void free(Pointer<NativeType> pointer) {
     if (pointer.address == _sliceResult.buf.address) {
-      assert(_sliceResultIsUsed);
+      if (!_sliceResultIsUsed) {
+        throw StateError('pointer is not allocated: $pointer');
+      }
       _sliceResultIsUsed = false;
     } else {
       _delegate.free(pointer);
