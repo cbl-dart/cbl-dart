@@ -89,11 +89,11 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android OR ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     set_target_properties(
         cblitedart PROPERTIES LINK_FLAGS
-        "-Wl,--version-script=${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.gnu")
+        "-Wl,--version-script='${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.gnu'")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set_target_properties(
         cblitedart PROPERTIES LINK_FLAGS
-        "/def:${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.def")
+        "/def:'${PROJECT_SOURCE_DIR}/src/exports/generated/CBL_Dart.def'")
 endif()
 
 target_link_libraries(cblitedart
