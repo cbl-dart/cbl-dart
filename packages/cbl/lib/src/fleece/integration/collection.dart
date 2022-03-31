@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
 import '../../support/utils.dart';
@@ -11,6 +12,7 @@ abstract class MCollection {
   MCollection({
     MContext? context,
     bool isMutable = true,
+    this.dataOwner,
   })  : _context = context,
         _isMutable = isMutable,
         hasMutableChildren = isMutable,
@@ -20,6 +22,7 @@ abstract class MCollection {
     MCollection original, {
     required bool isMutable,
   })  : _context = original._context,
+        dataOwner = original.dataOwner,
         _isMutable = isMutable,
         hasMutableChildren = isMutable,
         _isMutated = true;
@@ -28,7 +31,8 @@ abstract class MCollection {
     MValue slot,
     MCollection parent, {
     required bool isMutable,
-  })  : _isMutable = isMutable,
+  })  : dataOwner = parent.dataOwner,
+        _isMutable = isMutable,
         hasMutableChildren = isMutable,
         _isMutated = slot.isMutated {
     updateParent(slot, parent);
@@ -36,6 +40,14 @@ abstract class MCollection {
 
   MContext get context => _context ?? const NoopMContext();
   MContext? _context;
+
+  /// An object that owns the Fleece data that this collection is contained in.
+  ///
+  /// This field is only populated if Fleece data is being used.
+  ///
+  /// Collections must ensure that this object stays reachable while accessing
+  /// Fleece data by using a [cblReachabilityFence].
+  final Object? dataOwner;
 
   MValue? _slot;
 
@@ -56,21 +68,22 @@ abstract class MCollection {
   bool _isEncoding = false;
 
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
+    FutureOr<void> encode() => performEncodeTo(encoder).then((_) {
+          // We keep the data owner alive until the end of encoding, so that
+          // MCollections can safely use Fleece data during encoding.
+          cblReachabilityFence(dataOwner);
+        });
+
     if (isEncoding) {
       // Some ancestor is the encoding root so we don't need to do the
       // bookkeeping again.
-      return performEncodeTo(encoder);
+      return encode();
+    } else {
+      // This object is the encoding root and needs to keep track of whether
+      // encoding is ongoing.
+      _isEncoding = true;
+      return finallySyncOrAsync((_) => _isEncoding = false, encode);
     }
-
-    // This object is the encoding root and needs to keep track of whether
-    // encoding is ongoing.
-
-    _isEncoding = true;
-
-    return finallySyncOrAsync(
-      (_) => _isEncoding = false,
-      () => performEncodeTo(encoder),
-    );
   }
 
   FutureOr<void> performEncodeTo(FleeceEncoder encoder);

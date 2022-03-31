@@ -72,7 +72,7 @@ class _SliceResultData extends Data {
   int get size => slice.size;
 
   @override
-  Uint8List toTypedList() => slice.asTypedList();
+  Uint8List toTypedList() => slice.toTypedList();
 
   @override
   SliceResult toSliceResult() => slice;

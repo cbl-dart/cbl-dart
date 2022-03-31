@@ -373,6 +373,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
           final key = sharedKeysTable.decode(sharedStringsTable);
           result[key] = _decodeGlobalLoadedValue(sharedStringsTable);
         }
+        cblReachabilityFence(iterator);
         return result;
     }
   }
@@ -571,6 +572,7 @@ class _DictIteratorLoader extends _FleeceValueLoader {
       _listener
         ..handleString(_sharedKeysTable.decode(_sharedStringsTable))
         ..propertyName();
+      cblReachabilityFence(_it);
       return true;
     } else {
       _listener.endObject();

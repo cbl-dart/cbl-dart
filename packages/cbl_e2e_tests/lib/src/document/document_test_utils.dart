@@ -18,7 +18,7 @@ Array immutableArray([List<Object?>? data]) {
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(
-    fleeceData,
+    fleeceData.toSliceResult(),
     context: createTestMContext(),
     isMutable: false,
   );
@@ -32,7 +32,7 @@ Dictionary immutableDictionary([Map<String, Object?>? data]) {
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromData(
-    fleeceData,
+    fleeceData.toSliceResult(),
     context: createTestMContext(),
     isMutable: false,
   );

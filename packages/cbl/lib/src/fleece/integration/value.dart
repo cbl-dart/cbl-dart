@@ -48,6 +48,11 @@ class MValue {
     } else {
       var cacheIt = false;
       final native = _delegate.toNative(this, parent, () => cacheIt = true);
+
+      // We keep the data owner alive while toNative is running, so that
+      // implementations can safely use _value.
+      cblReachabilityFence(parent.dataOwner);
+
       if (cacheIt) {
         _native = native;
         _hasNative = true;

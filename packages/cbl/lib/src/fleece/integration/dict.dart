@@ -108,6 +108,8 @@ class MDict extends MCollection {
         final key = sharedKeysTable.decode(sharedStringsTable);
         _values[key] = MValue.empty();
       }
+      cblReachabilityFence(it);
+      cblReachabilityFence(dataOwner);
     }
   }
 
@@ -155,11 +157,10 @@ class MDict extends MCollection {
     }
 
     // Iterate over entries in _dict.
-    final dict = _dict!;
     final sharedKeysTable = context.sharedKeysTable;
     final sharedStringsTable = context.sharedStringsTable;
     final it = DictIterator(
-      dict,
+      _dict!,
       sharedKeysTable: sharedKeysTable,
       keyOut: globalLoadedDictKey,
       valueOut: globalLoadedFLValue,
@@ -177,7 +178,6 @@ class MDict extends MCollection {
       }
 
       // Cache the value to speed up lookups later.
-
       final value = _values[key] = _MValueWithKey(
         loadedKey.value,
         Pointer<FLValue>.fromAddress(loadedValue.value),
@@ -186,6 +186,9 @@ class MDict extends MCollection {
     }
 
     _valuesHasAllKeys = true;
+
+    cblReachabilityFence(it);
+    cblReachabilityFence(dataOwner);
   }
 
   MValue _getValue(String key) =>
@@ -198,6 +201,7 @@ class MDict extends MCollection {
     }
 
     final flValue = context.dictKeys.getKey(key).getValue(dict);
+    cblReachabilityFence(dataOwner);
     if (flValue == null) {
       return null;
     }

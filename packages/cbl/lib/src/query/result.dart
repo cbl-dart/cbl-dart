@@ -295,7 +295,10 @@ class ResultImpl with IterableMixin<String> implements Result {
     final encoder = FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
-    return utf8.decode(encoder.finish().toTypedList());
+    final sliceResult = encoder.finish().toSliceResult();
+    final result = utf8.decode(sliceResult.asTypedList());
+    cblReachabilityFence(sliceResult);
+    return result;
   }
 
   EncodedData encodeColumnValues(EncodingFormat format) {
@@ -338,7 +341,7 @@ class ResultImpl with IterableMixin<String> implements Result {
       cblReachabilityFence(columnValuesArray);
     } else {
       root = MRoot.fromData(
-        columnValuesData!,
+        columnValuesData!.toSliceResult(),
         context: _context,
         isMutable: false,
       );
