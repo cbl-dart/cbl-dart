@@ -687,7 +687,9 @@ abstract class _ErrorMessage extends _Message {
   StringMap serialize(SerializationContext context) {
     Object? error = this.error;
     if (!context.canSerialize(error)) {
-      error = SerializationError('No serializer registered for error: $error');
+      error = SerializationError(
+        'No serializer registered for error:\n$error\n$stackTrace',
+      );
     }
 
     return {
