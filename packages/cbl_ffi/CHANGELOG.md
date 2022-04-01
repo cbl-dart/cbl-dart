@@ -1,3 +1,7 @@
+## 0.7.2+1
+
+ - **FIX**: follow up migration to variable sized C types (#346). ([07de6f1c](https://github.com/cbl-dart/cbl-dart/commit/07de6f1cf4d9771b76240283806d8357eadefa57))
+
 ## 0.7.2
 
  - **FIX**: make expected reachability of all finalized objects explicit (#341). ([d39f291f](https://github.com/cbl-dart/cbl-dart/commit/d39f291f48fc8fb22f5b8ce2b0056556e0a03e2c))

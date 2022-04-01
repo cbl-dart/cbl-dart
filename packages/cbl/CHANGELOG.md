@@ -1,3 +1,7 @@
+## 1.1.1
+
+ - **FIX**: rethrow exceptions with original stack trace (#345). ([af93a892](https://github.com/cbl-dart/cbl-dart/commit/af93a892badb969f0ece597a57073b393d3f3526))
+
 ## 1.1.0
 
  - **PERF**: keep proxied documents in memory (#340). ([c4330975](https://github.com/cbl-dart/cbl-dart/commit/c4330975d1a1b13a9137466ad77824ce79b09eb7))
