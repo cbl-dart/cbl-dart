@@ -130,7 +130,7 @@ typedef _FLSlice_Equal = bool Function(FLSlice a, FLSlice b);
 typedef _FLSlice_Compare_C = Int Function(FLSlice a, FLSlice b);
 typedef _FLSlice_Compare = int Function(FLSlice a, FLSlice b);
 
-typedef _FLSliceResult_New_C = FLSliceResult Function(Uint64 size);
+typedef _FLSliceResult_New_C = FLSliceResult Function(Size size);
 typedef _FLSliceResult_New = FLSliceResult Function(int size);
 
 typedef _FLSlice_Copy_C = FLSliceResult Function(FLSlice slice);
@@ -1585,7 +1585,7 @@ typedef _CBLDart_FLEncoder_BindToDartObject = void Function(
 
 typedef _FLEncoder_NewWithOptions_C = Pointer<FLEncoder> Function(
   Uint8 format,
-  Uint64 reserveSize,
+  Size reserveSize,
   Bool uniqueStrings,
 );
 typedef _FLEncoder_NewWithOptions = Pointer<FLEncoder> Function(
@@ -1697,7 +1697,7 @@ typedef _FLEncoder_EndArray = bool Function(Pointer<FLEncoder> encoder);
 
 typedef _FLEncoder_BeginDict_C = Bool Function(
   Pointer<FLEncoder> encoder,
-  Uint64 reserveCount,
+  Size reserveCount,
 );
 typedef _FLEncoder_BeginDict = bool Function(
   Pointer<FLEncoder> encoder,
