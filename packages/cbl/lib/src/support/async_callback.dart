@@ -148,20 +148,19 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
       sendPort.send([callAddress, result]);
     }
 
-    Future.sync(() => handler(args)).then(
-      (result) {
+    Future.sync(() async {
+      try {
+        final result = await handler(args);
         assert(result == null || sendPort != null);
         sendResult(result);
-      },
-      // ignore: avoid_types_on_closure_parameters
-      onError: (Object error, StackTrace stackTrace) {
+        // ignore: avoid_catches_without_on_clauses
+      } catch (e) {
         sendResult(errorResult);
         if (!ignoreErrorsInDart) {
-          // ignore: only_throw_errors
-          throw error;
+          rethrow;
         }
-      },
-    );
+      }
+    });
   }
 
   @pragma('vm:prefer-inline')

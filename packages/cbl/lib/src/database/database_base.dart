@@ -215,19 +215,19 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 
     return beginTransaction().then((_) {
       if (async) {
-        return _asyncTransactionLock.synchronized(
-          () => Future.sync(invokeFn).then((value) async {
+        return _asyncTransactionLock.synchronized(() async {
+          try {
+            final result = await invokeFn();
             transaction.end();
             await endTransaction(commit: true);
-            return value;
-            // ignore: avoid_types_on_closure_parameters
-          }, onError: (Object error) async {
+            return result;
+            // ignore: avoid_catches_without_on_clauses
+          } catch (e) {
             transaction.end();
             await endTransaction(commit: false);
-            // ignore: only_throw_errors
-            throw error;
-          }),
-        );
+            rethrow;
+          }
+        });
       } else {
         try {
           final result = invokeFn();
