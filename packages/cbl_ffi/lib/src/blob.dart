@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'base.dart';
 import 'bindings.dart';
+import 'c_type.dart';
 import 'data.dart';
 import 'database.dart';
 import 'fleece.dart';
@@ -247,7 +248,7 @@ typedef _CBLBlobWriter_Close = void Function(
 typedef _CBLBlobWriter_Write_C = Bool Function(
   Pointer<CBLBlobWriteStream> stream,
   Pointer<Uint8> buf,
-  Uint64 bufSize,
+  Size bufSize,
   Pointer<CBLError> errorOut,
 );
 typedef _CBLBlobWriter_Write = bool Function(
