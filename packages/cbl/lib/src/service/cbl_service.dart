@@ -398,7 +398,7 @@ class CblService {
   Future<DocumentState?> _saveDocument(SaveDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document = _getDocumentForSave(database, request.state)
+    final document = _getDocumentForUpdate(database, request.state)
       ..setEncodedProperties(request.state.properties!.encodedData!);
 
     if (database.saveDocument(document, request.concurrencyControl)) {
@@ -414,8 +414,7 @@ class CblService {
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document =
-        _objectRegistry.getObjectOrThrow<DelegateDocument>(request.state.id!);
+    final document = _getDocumentForUpdate(database, request.state);
 
     if (database.deleteDocument(document, request.concurrencyControl)) {
       return document.createState(
@@ -633,7 +632,7 @@ class CblService {
         indexes: database.indexes,
       );
 
-  MutableDelegateDocument _getDocumentForSave(
+  MutableDelegateDocument _getDocumentForUpdate(
     SyncDatabase database,
     DocumentState state,
   ) {
