@@ -398,8 +398,9 @@ class CblService {
   Future<DocumentState?> _saveDocument(SaveDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document = _getDocumentForUpdate(database, request.state)
-      ..setEncodedProperties(request.state.properties!.encodedData!);
+    final document =
+        _getDocumentForUpdate<MutableDelegateDocument>(database, request.state)
+          ..setEncodedProperties(request.state.properties!.encodedData!);
 
     if (database.saveDocument(document, request.concurrencyControl)) {
       return document.createState(
@@ -632,24 +633,25 @@ class CblService {
         indexes: database.indexes,
       );
 
-  MutableDelegateDocument _getDocumentForUpdate(
+  T _getDocumentForUpdate<T extends DelegateDocument>(
     SyncDatabase database,
     DocumentState state,
   ) {
     if (state.revisionId == null) {
       // The document is new.
-      return MutableDocument.withId(state.docId) as MutableDelegateDocument;
+      return MutableDocument.withId(state.docId) as T;
     } else {
       if (state.id != null) {
-        // A mutable document has already been obtained and added to the object
+        // A document has already been obtained and added to the object
         // registry for the proxy document.
-        return _objectRegistry.getObjectOrThrow(state.id!);
+        return _objectRegistry.getObjectOrThrow<T>(state.id!);
       } else {
-        // The proxy document does not have an equivalent object in the
-        // object registry yet, and we need to create it.
+        // The proxy document has been created through `toMutable` and does not
+        // have an equivalent object in the object registry yet, and we need to
+        // create it.
         return _objectRegistry
             .getObjectOrThrow<DelegateDocument>(state.sourceId!)
-            .toMutable() as MutableDelegateDocument;
+            .toMutable() as T;
       }
     }
   }
