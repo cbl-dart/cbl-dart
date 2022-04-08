@@ -446,6 +446,43 @@ void main() {
         },
       );
 
+      apiTest('delete document that was loaded from database', () async {
+        final db = await openTestDatabase();
+
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+        await db.deleteDocument((await db.document(doc.id))!);
+
+        expect(await db.document(doc.id), isNull);
+      });
+
+      apiTest(
+        'delete mutable document that was loaded from database',
+        () async {
+          final db = await openTestDatabase();
+
+          final doc = MutableDocument();
+          await db.saveDocument(doc);
+          await db.deleteDocument((await db.document(doc.id))!.toMutable());
+
+          expect(await db.document(doc.id), isNull);
+        },
+      );
+
+      apiTest('delete new unsaved document', () async {
+        final db = await openTestDatabase();
+
+        final doc = MutableDocument();
+        expect(
+          () => db.deleteDocument(doc),
+          throwsA(isA<DatabaseException>().having(
+            (p0) => p0.code,
+            'code',
+            DatabaseErrorCode.notFound,
+          )),
+        );
+      });
+
       apiTest('purgeDocument purges a document', () async {
         final db = await openTestDatabase();
 
