@@ -1,3 +1,7 @@
+## 1.1.2
+
+ - **FIX**: resolve proxied document correctly when deleting it (#348). ([5113d194](https://github.com/cbl-dart/cbl-dart/commit/5113d1941b88ffa5528a4fc4d45ae8252aede87e))
+
 ## 1.1.1
 
  - **FIX**: rethrow exceptions with original stack trace (#345). ([af93a892](https://github.com/cbl-dart/cbl-dart/commit/af93a892badb969f0ece597a57073b393d3f3526))
