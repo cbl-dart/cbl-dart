@@ -386,7 +386,9 @@ extension on ReplicatorConfiguration {
   Pointer<CBLEndpoint> createEndpoint() {
     final target = this.target;
     if (target is UrlEndpoint) {
-      return _bindings.createEndpointWithUrl(target.url.toString());
+      return runWithErrorTranslation(
+        () => _bindings.createEndpointWithUrl(target.url.toString()),
+      );
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
       final result = _bindings.createEndpointWithLocalDB(db.pointer);

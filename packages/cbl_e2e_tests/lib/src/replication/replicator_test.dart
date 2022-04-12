@@ -60,6 +60,23 @@ void main() {
       await repl.close();
     });
 
+    apiTest('create Replicator with invalid UrlEndpoint', () async {
+      // https://github.com/cbl-dart/cbl-dart/issues/349
+      final db = await openTestDatabase();
+
+      expect(
+        () => Replicator.create(ReplicatorConfiguration(
+          database: db,
+          target: UrlEndpoint(Uri.parse('http://foo')),
+        )),
+        throwsA(isA<DatabaseException>().having(
+          (exception) => exception.code,
+          'code',
+          DatabaseErrorCode.invalidParameter,
+        )),
+      );
+    });
+
     apiTest('config returns copy', () async {
       final db = await openTestDatabase();
       final config = ReplicatorConfiguration(
