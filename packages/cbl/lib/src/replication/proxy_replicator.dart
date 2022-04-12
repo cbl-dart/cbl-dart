@@ -266,6 +266,6 @@ DelegateDocument Function(DocumentState) _documentStateToDocument(
   ProxyDatabase database,
 ) =>
     (state) => DelegateDocument(
-          ProxyDocumentDelegate.fromState(state),
+          ProxyDocumentDelegate.fromState(state, database: database),
           database: database,
         );

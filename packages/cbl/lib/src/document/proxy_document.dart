@@ -13,15 +13,15 @@ class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
   ProxyDocumentDelegate.fromState(
     DocumentState state, {
     ProxyDatabase? database,
+    bool bindToProxiedDocument = true,
   })  : assert(state.properties != null),
         id = state.docId,
         _revisionId = state.revisionId,
         _sequence = state.sequence,
         properties = state.properties?.encodedData,
         _propertiesDict = state.properties?.value?.asDict {
-    final objectId = state.id;
-    if (objectId != null) {
-      _bindToProxiedDocument(database!, objectId);
+    if (bindToProxiedDocument) {
+      _bindToProxiedDocument(database!, state.id!);
     }
   }
 
@@ -72,8 +72,14 @@ class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
   }
 
   @override
-  DocumentDelegate toMutable() =>
-      ProxyDocumentDelegate.fromDelegate(this).._source = this;
+  DocumentDelegate toMutable() {
+    assert(
+      revisionId == null ||
+          objectId != null ||
+          (_source != null && _source!.objectId != null),
+    );
+    return ProxyDocumentDelegate.fromDelegate(this).._source = _source ?? this;
+  }
 
   void updateMetadata(DocumentState state, {required ProxyDatabase? database}) {
     assert(state.id != null);

@@ -333,6 +333,67 @@ void main() {
         expect((await db.document(doc.id))!.toPlainMap(), doc.toPlainMap());
       });
 
+      apiTest(
+        'save mutable document created from unsaved mutable document',
+        () async {
+          final db = await openTestDatabase();
+
+          final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+          await db.saveDocument(initialDoc);
+
+          final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
+
+          final doc = loadedDoc.toMutable();
+          expect(await db.saveDocument(doc), isTrue);
+        },
+      );
+
+      apiTest(
+        'save mutable document created from changed mutable document '
+        '(lastWriteWins)',
+        () async {
+          final db = await openTestDatabase();
+
+          final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+          await db.saveDocument(initialDoc);
+
+          final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
+
+          final doc = loadedDoc.toMutable();
+
+          await db.saveDocument(loadedDoc);
+
+          expect(await db.saveDocument(doc), isTrue);
+
+          expect(
+            await db.saveDocument(loadedDoc, ConcurrencyControl.failOnConflict),
+            isFalse,
+          );
+        },
+      );
+
+      apiTest(
+        'save mutable document created from changed mutable document '
+        '(failOnConflict)',
+        () async {
+          final db = await openTestDatabase();
+
+          final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+          await db.saveDocument(initialDoc);
+
+          final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
+
+          final doc = loadedDoc.toMutable();
+
+          await db.saveDocument(loadedDoc);
+
+          expect(
+            await db.saveDocument(doc, ConcurrencyControl.failOnConflict),
+            isFalse,
+          );
+        },
+      );
+
       group('saveDocumentWithConflictHandler', () {
         apiTest('save updated document', () async {
           final db = await openTestDatabase();
@@ -476,7 +537,7 @@ void main() {
         expect(
           () => db.deleteDocument(doc),
           throwsA(isA<DatabaseException>().having(
-            (p0) => p0.code,
+            (exception) => exception.code,
             'code',
             DatabaseErrorCode.notFound,
           )),
