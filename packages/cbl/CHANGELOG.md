@@ -1,3 +1,8 @@
+## 1.1.3
+
+ - **FIX**: translate exceptions when creating replicator endpoint with URL (#352). ([c2974f94](https://github.com/cbl-dart/cbl-dart/commit/c2974f9447f75cc827ebc1aa1a229293b7f6156e))
+ - **FIX**: ensure proxied document can be resolved when saving (#351). ([c8f08dfe](https://github.com/cbl-dart/cbl-dart/commit/c8f08dfe8e2a314bfb5d2884c2a337d17c1b76a8))
+
 ## 1.1.2
 
  - **FIX**: resolve proxied document correctly when deleting it (#348). ([5113d194](https://github.com/cbl-dart/cbl-dart/commit/5113d1941b88ffa5528a4fc4d45ae8252aede87e))
