@@ -30,6 +30,12 @@ class ObjectRegistry {
     return id;
   }
 
+  int addObjectIfAbsent(Object object) => _objectToId.putIfAbsent(object, () {
+        final id = _createId();
+        _idToObject[id] = object;
+        return id;
+      });
+
   void removeObject(Object object) {
     final id = _objectToId.remove(object);
 

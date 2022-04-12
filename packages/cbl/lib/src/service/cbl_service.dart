@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database.dart';
 import '../database/database.dart';
 import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
@@ -398,9 +397,15 @@ class CblService {
   Future<DocumentState?> _saveDocument(SaveDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document =
-        _getDocumentForUpdate<MutableDelegateDocument>(database, request.state)
-          ..setEncodedProperties(request.state.properties!.encodedData!);
+    final document = _getDocumentForUpdate<MutableDelegateDocument>(
+      database,
+      request.state,
+      concurrencyControl: request.concurrencyControl,
+    )?..setEncodedProperties(request.state.properties!.encodedData!);
+
+    if (document == null) {
+      return null;
+    }
 
     if (database.saveDocument(document, request.concurrencyControl)) {
       return document.createState(
@@ -415,7 +420,15 @@ class CblService {
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
     final database = _getDatabaseById(request.databaseId);
 
-    final document = _getDocumentForUpdate(database, request.state);
+    final document = _getDocumentForUpdate(
+      database,
+      request.state,
+      concurrencyControl: request.concurrencyControl,
+    );
+
+    if (document == null) {
+      return null;
+    }
 
     if (database.deleteDocument(document, request.concurrencyControl)) {
       return document.createState(
@@ -633,10 +646,11 @@ class CblService {
         indexes: database.indexes,
       );
 
-  T _getDocumentForUpdate<T extends DelegateDocument>(
+  T? _getDocumentForUpdate<T extends DelegateDocument>(
     SyncDatabase database,
-    DocumentState state,
-  ) {
+    DocumentState state, {
+    required ConcurrencyControl concurrencyControl,
+  }) {
     if (state.revisionId == null) {
       // The document is new.
       return MutableDocument.withId(state.docId) as T;
@@ -649,9 +663,17 @@ class CblService {
         // The proxy document has been created through `toMutable` and does not
         // have an equivalent object in the object registry yet, and we need to
         // create it.
-        return _objectRegistry
-            .getObjectOrThrow<DelegateDocument>(state.sourceId!)
-            .toMutable() as T;
+        final source =
+            _objectRegistry.getObjectOrThrow<DelegateDocument>(state.sourceId!);
+
+        if (concurrencyControl == ConcurrencyControl.failOnConflict &&
+            source.revisionId != state.revisionId) {
+          // The source document has been updated since the proxy document was
+          // created, so they no longer point to the same revision.
+          return null;
+        }
+
+        return source.toMutable() as T;
       }
     }
   }
@@ -664,6 +686,7 @@ class CblService {
         final state = await (document as DelegateDocument).createState(
           withProperties: true,
           propertiesFormat: propertiesFormat,
+          objectRegistry: _objectRegistry,
         );
 
         return channel.call(CallReplicationFilter(
@@ -683,10 +706,12 @@ class CblService {
         final localState = await localDocument?.createState(
           withProperties: true,
           propertiesFormat: propertiesFormat,
+          objectRegistry: _objectRegistry,
         );
         final remoteState = await remoteDocument?.createState(
           withProperties: true,
           propertiesFormat: propertiesFormat,
+          objectRegistry: _objectRegistry,
         );
 
         final resolvedState = await channel.call(CallConflictResolver(
@@ -703,7 +728,10 @@ class CblService {
 
           return stateToExistingDocument[resolvedState] ??
               MutableDelegateDocument.fromDelegate(
-                ProxyDocumentDelegate.fromState(resolvedState),
+                ProxyDocumentDelegate.fromState(
+                  resolvedState,
+                  bindToProxiedDocument: false,
+                ),
               );
         }
 
@@ -786,7 +814,7 @@ extension on DelegateDocument {
   Future<DocumentState> createState({
     required bool withProperties,
     EncodingFormat? propertiesFormat,
-    ObjectRegistry? objectRegistry,
+    required ObjectRegistry objectRegistry,
   }) async {
     TransferableValue? properties;
     if (withProperties) {
@@ -801,14 +829,9 @@ extension on DelegateDocument {
       }
     }
 
-    int? id;
-    if (objectRegistry != null) {
-      id = objectRegistry.getObjectId(this) ?? objectRegistry.addObject(this);
-    }
-
     return DocumentState(
-      id: id,
-      docId: this.id,
+      id: objectRegistry.addObjectIfAbsent(this),
+      docId: id,
       revisionId: revisionId,
       sequence: sequence,
       properties: properties,
