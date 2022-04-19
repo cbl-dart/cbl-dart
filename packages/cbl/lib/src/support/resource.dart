@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:meta/meta.dart';
@@ -37,7 +38,7 @@ abstract class NativeResource<T extends NativeType> {
 mixin ClosableResourceMixin implements ClosableResource {
   ClosableResourceMixin? _parent;
   late final Set<ClosableResourceMixin> _childrenToClose = {};
-  late final _pendingRequests = <Future<void>>[];
+  late final _pendingRequests = DoubleLinkedQueue<Future<void>>();
   Future<void>? _pendingClose;
 
   @override

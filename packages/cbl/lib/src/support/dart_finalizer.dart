@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:ffi';
 import 'dart:isolate';
 
@@ -11,7 +12,7 @@ class DartFinalizerRegistry {
   DartFinalizerRegistry._();
 
   int _nextToken = 0;
-  final _finalizers = <int, DartFinalizer>{};
+  final _finalizers = HashMap<int, DartFinalizer>();
   ReceivePort? _receivePort;
   int? _sendPort;
 

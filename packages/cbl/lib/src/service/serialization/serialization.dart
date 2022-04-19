@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
@@ -185,23 +187,25 @@ class SerializationRegistry {
   factory SerializationRegistry() => _basicSerializationRegistry();
 
   SerializationRegistry.empty()
-      : _nameToType = {},
-        _typeToName = {},
-        _typeToInstanceOf = {},
-        _serializers = {},
-        _deserializers = {};
+      : _nameToType = HashMap(),
+        _typeToName = HashMap.identity(),
+        _typeToInstanceOf = HashMap.identity(),
+        _serializers = HashMap.identity(),
+        _deserializers = HashMap.identity();
 
   SerializationRegistry.merge(
     SerializationRegistry registry, {
     required SerializationRegistry into,
-  })  : _nameToType = {...into._nameToType, ...registry._nameToType},
-        _typeToName = {...into._typeToName, ...registry._typeToName},
-        _typeToInstanceOf = {
-          ...into._typeToInstanceOf,
-          ...registry._typeToInstanceOf
-        },
-        _serializers = {...into._serializers, ...registry._serializers},
-        _deserializers = {...into._deserializers, ...registry._deserializers};
+  })  : _nameToType =
+            HashMap.of({...into._nameToType, ...registry._nameToType}),
+        _typeToName = HashMap.identity()
+          ..addAll({...into._typeToName, ...registry._typeToName}),
+        _typeToInstanceOf = HashMap.identity()
+          ..addAll({...into._typeToInstanceOf, ...registry._typeToInstanceOf}),
+        _serializers = HashMap.identity()
+          ..addAll({...into._serializers, ...registry._serializers}),
+        _deserializers = HashMap.identity()
+          ..addAll({...into._deserializers, ...registry._deserializers});
 
   final Map<String, Type> _nameToType;
   final Map<Type, String> _typeToName;

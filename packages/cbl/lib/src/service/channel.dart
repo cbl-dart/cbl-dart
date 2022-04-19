@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_constructors_over_static_methods, avoid_print
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:stream_channel/stream_channel.dart';
 
@@ -127,12 +128,12 @@ class Channel {
   var _status = ChannelStatus.initial;
   ChannelStatus get status => _status;
 
-  final _callHandlers = <Type, _UntypedCallHandler>{};
-  final _callCompleter = <int, Completer<_Message>>{};
+  final _callHandlers = HashMap<Type, _UntypedCallHandler>.identity();
+  final _callCompleter = HashMap<int, Completer<_Message>>();
 
-  final _streamHandlers = <Type, _UntypedStreamHandler>{};
-  final _streamControllers = <int, StreamController<_Message>>{};
-  final _streamSubscriptions = <int, StreamSubscription>{};
+  final _streamHandlers = HashMap<Type, _UntypedStreamHandler>.identity();
+  final _streamControllers = HashMap<int, StreamController<_Message>>();
+  final _streamSubscriptions = HashMap<int, StreamSubscription>();
 
   /// Makes a call to an endpoint at other side of the channel.
   Future<R> call<R>(Request<R> request) async => asyncOperationTracePoint(
