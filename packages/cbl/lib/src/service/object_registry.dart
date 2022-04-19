@@ -3,11 +3,8 @@ import 'dart:collection';
 class ObjectRegistry {
   int _nextId = 0;
 
-  // `Object` is typed as nullable because of a bug in Dart, which has been
-  // fixed, but is not yet in the stable branch.
-  // https://github.com/dart-lang/sdk/issues/46165
-  final _idToObject = HashMap<int, Object?>();
-  final _objectToId = HashMap<Object?, int>.identity();
+  final _idToObject = HashMap<int, Object>();
+  final _objectToId = HashMap<Object, int>.identity();
 
   T? getObject<T>(int id) {
     final object = _idToObject[id];
