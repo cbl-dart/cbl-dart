@@ -9,10 +9,15 @@ class IsolatePacketCodec extends PacketCodec {
 
   @override
   Packet decodePacket(Object? input) {
-    final packet = (input! as List).cast<Object>();
+    final packet = input! as List<Object?>;
     return Packet(
-      packet.removeAt(0),
-      packet.map(_fromTransferableData).toList(),
+      packet[0],
+      packet.length == 1
+          ? const []
+          : packet
+              .skip(1)
+              .map((data) => _fromTransferableData(data!))
+              .toList(growable: false),
     );
   }
 
