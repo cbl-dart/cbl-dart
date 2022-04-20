@@ -1,7 +1,6 @@
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
-import 'dart_finalizer.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
@@ -32,7 +31,6 @@ class CBLBindings extends Bindings {
       : super.root(DynamicLibraries.fromConfig(config)) {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
-    dartFinalizer = DartFinalizerBindings(this);
     logging = LoggingBindings(this);
     database = DatabaseBindings(this);
     document = DocumentBindings(this);
@@ -72,7 +70,6 @@ class CBLBindings extends Bindings {
 
   late final BaseBindings base;
   late final AsyncCallbackBindings asyncCallback;
-  late final DartFinalizerBindings dartFinalizer;
   late final LoggingBindings logging;
   late final DatabaseBindings database;
   late final DocumentBindings document;
