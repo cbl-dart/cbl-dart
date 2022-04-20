@@ -1441,7 +1441,6 @@ class FleeceDecoderBindings extends Bindings {
     _knownSharedKeysNew = libs.cblDart.lookupFunction<
         _CBLDart_KnownSharedKeys_New_C, _CBLDart_KnownSharedKeys_New>(
       'CBLDart_KnownSharedKeys_New',
-      isLeaf: useIsLeaf,
     );
     _getLoadedFLValueFromData = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_FromData_C, _CBLDart_FLValue_FromData>(
