@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import '../database.dart';
 import '../document.dart';
 import '../support/utils.dart';
+import '../typed_data.dart';
 import 'authenticator.dart';
 import 'conflict_resolver.dart';
 import 'endpoint.dart';
@@ -52,6 +53,11 @@ typedef ReplicationFilter = FutureOr<bool> Function(
   Set<DocumentFlag> flags,
 );
 
+typedef TypedReplicationFilter = FutureOr<bool> Function(
+  TypedDocumentObject document,
+  Set<DocumentFlag> flags,
+);
+
 /// Configuration for a [Replicator].
 ///
 /// {@category Replication}
@@ -68,8 +74,11 @@ class ReplicatorConfiguration {
     this.channels,
     this.documentIds,
     this.pushFilter,
+    this.typedPullFilter,
     this.pullFilter,
+    this.typedPushFilter,
     this.conflictResolver,
+    this.typedConflictResolver,
     this.enableAutoPurge = true,
     Duration? heartbeat,
     int? maxAttempts,
@@ -79,6 +88,24 @@ class ReplicatorConfiguration {
       ..heartbeat = heartbeat
       ..maxAttempts = maxAttempts
       ..maxAttemptWaitTime = maxAttemptWaitTime;
+
+    if (typedPullFilter != null) {
+      throw UnimplementedError(
+        'typedPullFilter is not yet supported',
+      );
+    }
+
+    if (typedPushFilter != null) {
+      throw UnimplementedError(
+        'typedPushFilter is not yet supported',
+      );
+    }
+
+    if (typedConflictResolver != null) {
+      throw UnimplementedError(
+        'typedConflictResolver is not yet supported',
+      );
+    }
   }
 
   /// Creates a configuration for a [Replicator] from another [config] by coping
@@ -143,17 +170,23 @@ class ReplicatorConfiguration {
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pushFilter;
 
+  TypedReplicationFilter? typedPushFilter;
+
   /// Filter for validating whether the [Document]s can be pulled from the
   /// remote endpoint.
   ///
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pullFilter;
 
+  TypedReplicationFilter? typedPullFilter;
+
   /// A custom conflict resolver.
   ///
   /// If this value is not set, or set to `null`, the default conflict resolver
   /// will be applied.
   ConflictResolver? conflictResolver;
+
+  TypedConflictResolver? typedConflictResolver;
 
   /// Whether to automatically purge a document when the user looses access to
   /// it, on the server.

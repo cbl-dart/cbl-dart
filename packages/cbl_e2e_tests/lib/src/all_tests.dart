@@ -3,6 +3,7 @@ import 'database/database_configuration_test.dart'
     as database_database_configuration;
 import 'database/database_test.dart' as database_database;
 import 'database/document_change_test.dart' as database_document_change;
+import 'database/typed_database_test.dart' as typed_database;
 import 'document/array_test.dart' as document_array_test;
 import 'document/blob_test.dart' as document_blob_test;
 import 'document/dictionary_test.dart' as document_dictionary_test;
@@ -46,6 +47,7 @@ final tests = [
   database_database_configuration.main,
   database_database.main,
   database_document_change.main,
+  typed_database.main,
   document_array_test.main,
   document_blob_test.main,
   document_dictionary_test.main,

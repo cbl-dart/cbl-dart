@@ -23,6 +23,8 @@ import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
+import '../typed_data.dart';
+import '../typed_data_internal.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_base.dart';
@@ -39,6 +41,7 @@ class FfiDatabase extends CBLDatabaseObject
   factory FfiDatabase({
     required String name,
     DatabaseConfiguration? config,
+    TypedDataRegistry? typedDataRegistry,
     required String debugCreator,
   }) {
     config ??= DatabaseConfiguration();
@@ -52,6 +55,7 @@ class FfiDatabase extends CBLDatabaseObject
       pointer: runWithErrorTranslation(
         () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
       ),
+      typedDataRegistry: typedDataRegistry,
       debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
   }
@@ -59,6 +63,7 @@ class FfiDatabase extends CBLDatabaseObject
   FfiDatabase._({
     required DatabaseConfiguration config,
     required Pointer<CBLDatabase> pointer,
+    required this.typedDataRegistry,
     required String debugName,
   })  : _config = config,
         super(pointer, debugName: debugName) {
@@ -88,6 +93,9 @@ class FfiDatabase extends CBLDatabaseObject
           config?.toCBLDatabaseConfiguration(),
         ),
       );
+
+  @override
+  final TypedDataRegistry? typedDataRegistry;
 
   @override
   final dictKeys = OptimizingDictKeys();
@@ -164,6 +172,10 @@ class FfiDatabase extends CBLDatabaseObject
   DocumentFragment operator [](String id) => DocumentFragmentImpl(document(id));
 
   @override
+  D? typedDocument<D extends TypedDocumentObject>(String id) =>
+      super.typedDocument<D>(id) as D?;
+
+  @override
   bool saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -223,6 +235,13 @@ class FfiDatabase extends CBLDatabaseObject
       );
 
   @override
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+          MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  ) =>
+      _FfiSaveTypedDocument(this, document);
+
+  @override
   bool deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -254,10 +273,28 @@ class FfiDatabase extends CBLDatabaseObject
       );
 
   @override
+  bool deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) {
+    useAsTypedDatabase();
+    return deleteDocument(
+      document.internal as DelegateDocument,
+      concurrencyControl,
+    );
+  }
+
+  @override
   void purgeDocument(covariant DelegateDocument document) => useSync(() {
         document.database = this;
         purgeDocumentById(document.id);
       });
+
+  @override
+  void purgeTypedDocument(TypedDocumentObject document) {
+    useAsTypedDatabase();
+    purgeDocument(document.internal as DelegateDocument);
+  }
 
   @override
   void purgeDocumentById(String id) => useSync(
@@ -491,4 +528,24 @@ bool _catchConflictException(void Function() fn) {
     }
     rethrow;
   }
+}
+
+class _FfiSaveTypedDocument<D extends TypedDocumentObject,
+        MD extends TypedMutableDocumentObject>
+    extends SaveTypedDocumentBase<D, MD>
+    implements SyncSaveTypedDocument<D, MD> {
+  _FfiSaveTypedDocument(
+    FfiDatabase database,
+    TypedMutableDocumentObject<D, MD> document,
+  ) : super(database, document);
+
+  @override
+  bool withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      super.withConcurrencyControl(concurrencyControl) as bool;
+
+  @override
+  bool withConflictHandlerSync(TypedSyncSaveConflictHandler<D, MD> handler) =>
+      withConflictHandler(handler) as bool;
 }

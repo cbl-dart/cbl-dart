@@ -1,0 +1,17 @@
+builders:
+  typed_data_generator:
+    import: package:cbl_generator/cbl_generator.dart
+    builder_factories: [typedDataBuilder]
+    build_extensions:
+      .dart:
+        - .cbl.type.g.dart
+    auto_apply: root_package
+    build_to: source
+  typed_database_generator:
+    import: package:cbl_generator/cbl_generator.dart
+    builder_factories: [typedDatabaseBuilder]
+    build_extensions:
+      .dart:
+        - .cbl.database.g.dart
+    auto_apply: root_package
+    build_to: source

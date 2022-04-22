@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:cbl/cbl.dart';
+import 'package:cbl/cbl.dart' hide TypeMatcher;
 import 'package:http/http.dart';
 
 import '../test_binding.dart';

@@ -7,13 +7,32 @@ import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../support/utils.dart';
+import '../typed_data.dart';
+import '../typed_data_internal.dart';
 import 'database.dart';
 
 /// Base that is mixed into all implementations of [Database].
 mixin DatabaseBase<T extends DocumentDelegate> implements Database {
+  /// The [TypedDataRegistry] of this database, if it is a typed database.
+  ///
+  /// It is configured with the types that are supported by this database.
+  ///
+  /// To safely access the registry, you can use [useAsTypedDatabase].
+  TypedDataRegistry? get typedDataRegistry;
+
+  TypedDataRegistry useAsTypedDatabase() {
+    final registry = typedDataRegistry;
+    if (registry == null) {
+      throw StateError(
+        'This database is not a typed database. '
+        'Use the @TypedDatabase annotation to generate one.',
+      );
+    }
+    return registry;
+  }
+
   /// The [DictKey]s that should be used when looking up properties in
   /// [Document]s that are stored in this database.
-  ///
   ///
   /// Note:
   /// It is important to use the database specific [DictKey]s when accessing
@@ -139,6 +158,26 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
       return done.then((_) => success);
     }
     return success;
+  }
+
+  @override
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) {
+    final typedDataRegistry = useAsTypedDatabase();
+
+    // We resolve the factory before loading the actual document to check that
+    // D is a recognized type early.
+    final documentFactory = typedDataRegistry.resolveDocumentFactory<D>();
+
+    return document(id).then((doc) {
+      if (doc == null) {
+        return null;
+      }
+
+      // Check that the loaded document is of the correct type.
+      typedDataRegistry.checkDocumentType<D>(doc);
+
+      return documentFactory(doc);
+    });
   }
 
   /// Method to implement by by [Database] implementations to begin a new
@@ -275,5 +314,48 @@ class _Transaction {
         DatabaseErrorCode.notInTransaction,
       );
     }
+  }
+}
+
+abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+  SaveTypedDocumentBase(this.database, this.document)
+      :
+        // This call ensures that the document type D is registered with the
+        // database. This is why we call it, even though we may never need to
+        // use the returned factory.
+        // By calling useAsTypedDatabase we also assert that database is a typed
+        // database.
+        _documentFactory =
+            database.useAsTypedDatabase().resolveDocumentFactory<D>();
+
+  final DatabaseBase database;
+  final TypedMutableDocumentObject<D, MD> document;
+  final D Function(Document) _documentFactory;
+
+  @override
+  FutureOr<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) {
+    database.typedDataRegistry!.prepareDocumentForSave(document);
+    return database.saveDocument(
+      document.internal as MutableDelegateDocument,
+      concurrencyControl,
+    );
+  }
+
+  @override
+  FutureOr<bool> withConflictHandler(TypedSaveConflictHandler<D, MD> handler) {
+    database.typedDataRegistry!.prepareDocumentForSave(document);
+    return database.saveDocumentWithConflictHandlerHelper(
+      document.internal as MutableDelegateDocument,
+      (documentBeingSaved, conflictingDocument) {
+        assert(identical(documentBeingSaved, document.internal));
+        return handler(
+          document as MD,
+          conflictingDocument?.let(_documentFactory),
+        );
+      },
+    );
   }
 }

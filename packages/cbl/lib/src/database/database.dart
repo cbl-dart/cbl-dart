@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/fragment.dart';
@@ -12,6 +14,8 @@ import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../tracing.dart';
+import '../typed_data.dart';
+import '../typed_data_internal.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -74,6 +78,24 @@ enum MaintenanceType {
 typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
+);
+
+abstract class SaveTypedDocument<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> {
+  FutureOr<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> handler,
+  );
+}
+
+typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
+        MD extends TypedMutableDocumentObject>
+    = FutureOr<bool> Function(
+  MD documentBeingSaved,
+  D? conflictingDocument,
 );
 
 /// Listener which is called when one or more [Document]s in a [Database] have
@@ -193,6 +215,8 @@ abstract class Database implements ClosableResource {
   /// Returns the [DocumentFragment] for the [Document] with the given [id].
   FutureOr<DocumentFragment> operator [](String id);
 
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
   /// Saves a [document] to this database, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -224,6 +248,12 @@ abstract class Database implements ClosableResource {
     SaveConflictHandler conflictHandler,
   );
 
+  @useResult
+  SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
   /// Deletes a [document] from this database, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -238,11 +268,18 @@ abstract class Database implements ClosableResource {
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
+  FutureOr<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
   /// Purges a [document] from this database.
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
   /// The purge will __not__ be replicated to other databases.
   FutureOr<void> purgeDocument(Document document);
+
+  FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
 
   /// Purges a [Document] from this database by its [id].
   ///
@@ -432,18 +469,51 @@ typedef SyncSaveConflictHandler = bool Function(
   Document? conflictingDocument,
 );
 
+abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+  @override
+  bool withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> handler,
+  );
+
+  bool withConflictHandlerSync(
+    TypedSyncSaveConflictHandler<D, MD> handler,
+  );
+}
+
+typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
+        MD extends TypedMutableDocumentObject>
+    = bool Function(
+  MD documentBeingSaved,
+  D? conflictingDocument,
+);
+
 /// A [Database] with a primarily synchronous API.
 ///
 /// {@category Database}
 abstract class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
+      SyncDatabase.internal(name, config);
+
+  @internal
+  factory SyncDatabase.internal(
+    String name, [
+    DatabaseConfiguration? config,
+    TypedDataRegistry? typedDataRegistry,
+  ]) =>
       syncOperationTracePoint(
         () => OpenDatabaseOp(name, config),
         () => FfiDatabase(
           name: name,
           config: config,
-          debugCreator: 'SyncDatabase()',
+          typedDataRegistry: typedDataRegistry,
+          debugCreator: 'SyncDatabase.internal()',
         ),
       );
 
@@ -473,6 +543,9 @@ abstract class SyncDatabase implements Database {
   DocumentFragment operator [](String id);
 
   @override
+  D? typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   bool saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -488,13 +561,29 @@ abstract class SyncDatabase implements Database {
   );
 
   @override
+  @useResult
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
+  @override
   bool deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
   @override
+  bool deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
   void purgeDocument(Document document);
+
+  @override
+  void purgeTypedDocument(TypedDocumentObject document);
 
   @override
   void purgeDocumentById(String id);
@@ -544,6 +633,19 @@ abstract class SyncDatabase implements Database {
   void deleteIndex(String name);
 }
 
+abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+  @override
+  Future<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  Future<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> handler,
+  );
+}
+
 /// A [Database] with a primarily asynchronous API.
 ///
 /// {@category Database}
@@ -553,9 +655,17 @@ abstract class AsyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
+      openInternal(name, config);
+
+  @internal
+  static Future<AsyncDatabase> openInternal(
+    String name, [
+    DatabaseConfiguration? config,
+    TypedDataRegistry? typedDataRegistry,
+  ]) =>
       asyncOperationTracePoint(
         () => OpenDatabaseOp(name, config),
-        () => WorkerDatabase.open(name, config),
+        () => WorkerDatabase.open(name, config, typedDataRegistry),
       );
 
   /// {@macro cbl.Database.remove}
@@ -584,6 +694,9 @@ abstract class AsyncDatabase implements Database {
   Future<DocumentFragment> operator [](String id);
 
   @override
+  Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   Future<bool> saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -596,13 +709,29 @@ abstract class AsyncDatabase implements Database {
   );
 
   @override
+  @useResult
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
+  @override
   Future<bool> deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
   @override
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
   Future<void> purgeDocument(Document document);
+
+  @override
+  Future<void> purgeTypedDocument(TypedDocumentObject document);
 
   @override
   Future<void> purgeDocumentById(String id);

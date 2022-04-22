@@ -88,3 +88,37 @@ class DefaultConflictResolver implements ConflictResolver {
     }
   }
 }
+
+/// Functional version of [TypedConflictResolver].
+///
+/// {@category Replication}
+typedef TypedConflictResolverFunction = FutureOr<Document?> Function(
+  TypedConflict conflict,
+);
+
+/// An object which is able to resolve a [TypedConflict] between the local and
+/// remote versions of a replicated [Document].
+///
+/// {@category Replication}
+abstract class TypedConflictResolver {
+  /// Constructor to allow subclasses to extend [TypedConflictResolver].
+  const TypedConflictResolver();
+
+  /// Creates a [TypedConflictResolver] from a function which is called to
+  /// resolve the conflict.
+  factory TypedConflictResolver.from(
+    TypedConflictResolverFunction resolve,
+  ) =>
+      _FunctionTypedConflictResolver(resolve);
+
+  FutureOr<Document?> resolve(TypedConflict conflict);
+}
+
+class _FunctionTypedConflictResolver implements TypedConflictResolver {
+  _FunctionTypedConflictResolver(this._resolve);
+
+  final TypedConflictResolverFunction _resolve;
+
+  @override
+  FutureOr<Document?> resolve(TypedConflict conflict) => _resolve(conflict);
+}

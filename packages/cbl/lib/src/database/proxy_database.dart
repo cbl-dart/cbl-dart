@@ -25,6 +25,8 @@ import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
+import '../typed_data.dart';
+import '../typed_data_internal.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_base.dart';
@@ -39,6 +41,7 @@ class ProxyDatabase extends ProxyObject
   ProxyDatabase(
     this.client,
     DatabaseConfiguration config,
+    this.typedDataRegistry,
     this.state,
     this.encodingFormat,
   )   : name = state.name,
@@ -73,11 +76,21 @@ class ProxyDatabase extends ProxyObject
     required String name,
     required DatabaseConfiguration config,
     required CblServiceClient client,
+    TypedDataRegistry? typedDataRegistry,
     required EncodingFormat? encodingFormat,
   }) async {
     final state = await client.channel.call(OpenDatabase(name, config));
-    return ProxyDatabase(client, config, state, encodingFormat);
+    return ProxyDatabase(
+      client,
+      config,
+      typedDataRegistry,
+      state,
+      encodingFormat,
+    );
   }
+
+  @override
+  final TypedDataRegistry? typedDataRegistry;
 
   @override
   final dictKeys = OptimizingDictKeys();
@@ -148,6 +161,11 @@ class ProxyDatabase extends ProxyObject
       use(() => document(id).then(DocumentFragmentImpl.new));
 
   @override
+  Future<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
+      // ignore: cast_nullable_to_non_nullable
+      super.typedDocument<D>(id) as Future<D?>;
+
+  @override
   Future<bool> saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -192,6 +210,13 @@ class ProxyDatabase extends ProxyObject
       );
 
   @override
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+          MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  ) =>
+      _ProxySaveTypedDocument(this, document);
+
+  @override
   Future<bool> deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -223,12 +248,30 @@ class ProxyDatabase extends ProxyObject
       );
 
   @override
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) async {
+    useAsTypedDatabase();
+    return deleteDocument(
+      document.internal as DelegateDocument,
+      concurrencyControl,
+    );
+  }
+
+  @override
   Future<void> purgeDocument(covariant DelegateDocument document) async {
     await asyncOperationTracePoint(
       () => PrepareDocumentOp(document),
       () async => prepareDocument(document, syncProperties: false),
     );
     return purgeDocumentById(document.id);
+  }
+
+  @override
+  Future<void> purgeTypedDocument(TypedDocumentObject document) async {
+    useAsTypedDatabase();
+    await purgeDocument(document.internal as DelegateDocument);
   }
 
   @override
@@ -420,12 +463,14 @@ class WorkerDatabase extends ProxyDatabase {
     this.worker,
     CblServiceClient client,
     DatabaseConfiguration config,
+    TypedDataRegistry? typedDataRegistry,
     DatabaseState state,
-  ) : super(client, config, state, null);
+  ) : super(client, config, typedDataRegistry, state, null);
 
   static Future<WorkerDatabase> open(
     String name, [
     DatabaseConfiguration? config,
+    TypedDataRegistry? typedDataRegistry,
   ]) async {
     config ??= DatabaseConfiguration();
 
@@ -440,7 +485,7 @@ class WorkerDatabase extends ProxyDatabase {
 
     try {
       final state = await client.channel.call(OpenDatabase(name, config));
-      return WorkerDatabase._(worker, client, config, state);
+      return WorkerDatabase._(worker, client, config, typedDataRegistry, state);
     } on CouchbaseLiteException {
       await client.channel.call(UninstallTracingDelegate());
       await worker.stop();
@@ -486,14 +531,16 @@ class RemoteDatabase extends ProxyDatabase {
   RemoteDatabase._(
     CblServiceClient client,
     DatabaseConfiguration config,
+    TypedDataRegistry? typedDataRegistry,
     DatabaseState state,
-  ) : super(client, config, state, EncodingFormat.fleece);
+  ) : super(client, config, typedDataRegistry, state, EncodingFormat.fleece);
 
   static Future<RemoteDatabase> open(
     Uri uri,
     String name,
-    DatabaseConfiguration config,
-  ) async {
+    DatabaseConfiguration config, [
+    TypedDataRegistry? typedDataRegistry,
+  ]) async {
     final channel = Channel(
       transport: WebSocketChannel.connect(uri),
       packetCodec: JsonPacketCodec(),
@@ -501,7 +548,7 @@ class RemoteDatabase extends ProxyDatabase {
     );
     final client = CblServiceClient(channel: channel);
     final state = await channel.call(OpenDatabase(name, config));
-    return RemoteDatabase._(client, config, state);
+    return RemoteDatabase._(client, config, typedDataRegistry, state);
   }
 
   @override
@@ -512,3 +559,22 @@ class RemoteDatabase extends ProxyDatabase {
 }
 
 String _databaseName(String path) => path.split(Platform.pathSeparator).last;
+
+class _ProxySaveTypedDocument<D extends TypedDocumentObject,
+        MD extends TypedMutableDocumentObject>
+    extends SaveTypedDocumentBase<D, MD>
+    implements AsyncSaveTypedDocument<D, MD> {
+  _ProxySaveTypedDocument(
+      ProxyDatabase database, TypedMutableDocumentObject<D, MD> document)
+      : super(database, document);
+
+  @override
+  Future<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      super.withConcurrencyControl(concurrencyControl) as Future<bool>;
+
+  @override
+  Future<bool> withConflictHandler(TypedSaveConflictHandler<D, MD> handler) =>
+      super.withConflictHandler(handler) as Future<bool>;
+}

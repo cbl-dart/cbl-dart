@@ -334,6 +334,21 @@ function collectTestResults() {
     esac
 }
 
+function checkBuildRunnerOutput() {
+    requireEnvVar TEST_PACKAGE
+
+    cd "$testPackageDir"
+
+    dart run build_runner build --delete-conflicting-outputs
+
+    # Verify that the the build output did not change by checking if the repo is dirty.
+    if [[ -n "$(git status --porcelain)" ]]; then
+        echo "Build output changed"
+        git diff
+        exit 1
+    fi
+}
+
 # Uploads coverage data to codecov.
 #
 # The first and only paramter is a comma separated list of flags to be
