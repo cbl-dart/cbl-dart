@@ -192,11 +192,12 @@ class DictionaryImpl
   List<String> get keys => toList();
 
   @pragma('vm:prefer-inline')
-  T? _getAs<T>(String key) => coerceObject(_dict.get(key)?.asNative(_dict));
+  T? _getAs<T>(String key, {bool coerceNull = false}) =>
+      coerceObject(_dict.get(key)?.asNative(_dict), coerceNull: coerceNull);
 
   @pragma('vm:prefer-inline')
   T _getAsWithDefault<T>(String key, T defaultValue) =>
-      _getAs(key) ?? defaultValue;
+      _getAs(key, coerceNull: true) ?? defaultValue;
 
   @override
   T? value<T extends Object>(String key) => _getAs(key);

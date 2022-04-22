@@ -179,6 +179,24 @@ void main() {
       expect(array.dictionary(0), isNull);
     });
 
+    test('get null value with typed getter', () {
+      final array = immutableArray([null]);
+      expect(array.value(0), isNull);
+      expect(array.value<int>(0), isNull);
+      expect(array.value<double>(0), isNull);
+      expect(array.value<num>(0), isNull);
+      expect(array.value<bool>(0), isNull);
+      expect(array.string(0), isNull);
+      expect(array.integer(0), 0);
+      expect(array.float(0), .0);
+      expect(array.number(0), isNull);
+      expect(array.boolean(0), false);
+      expect(array.date(0), isNull);
+      expect(array.blob(0), isNull);
+      expect(array.array(0), isNull);
+      expect(array.dictionary(0), isNull);
+    });
+
     test('getters throw RangeError is index is out of bounds', () {
       final array = immutableArray();
       expect(() => array.value(0), throwsRangeError);

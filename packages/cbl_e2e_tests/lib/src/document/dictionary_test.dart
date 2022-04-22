@@ -211,6 +211,24 @@ void main() {
       expect(dictionary.dictionary('x'), isNull);
     });
 
+    test('get null value with typed getter', () {
+      final dictionary = immutableDictionary({'a': null});
+      expect(dictionary.value('a'), isNull);
+      expect(dictionary.value<int>('a'), isNull);
+      expect(dictionary.value<double>('a'), isNull);
+      expect(dictionary.value<num>('a'), isNull);
+      expect(dictionary.value<bool>('a'), isNull);
+      expect(dictionary.string('a'), isNull);
+      expect(dictionary.integer('a'), 0);
+      expect(dictionary.float('a'), .0);
+      expect(dictionary.number('a'), isNull);
+      expect(dictionary.boolean('a'), false);
+      expect(dictionary.date('a'), isNull);
+      expect(dictionary.blob('a'), isNull);
+      expect(dictionary.array('a'), isNull);
+      expect(dictionary.dictionary('a'), isNull);
+    });
+
     group('immutable', () {
       test('fragment', () {
         final dictionary = immutableDictionary({'a': true});
