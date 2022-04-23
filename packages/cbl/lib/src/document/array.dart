@@ -331,11 +331,12 @@ class ArrayImpl
   }
 
   @pragma('vm:prefer-inline')
-  T? _getAs<T>(int index) => coerceObject(_get(index).asNative(_array));
+  T? _getAs<T>(int index, {bool coerceNull = false}) =>
+      coerceObject(_get(index).asNative(_array), coerceNull: coerceNull);
 
   @pragma('vm:prefer-inline')
   T _getAsWithDefault<T>(int index, T defaultValue) =>
-      _getAs(index) ?? defaultValue;
+      _getAs(index, coerceNull: true) ?? defaultValue;
 
   @override
   T? value<T extends Object>(int index) => _getAs(index);

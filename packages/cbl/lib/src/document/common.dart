@@ -242,7 +242,10 @@ bool valueWouldChange(
 }
 
 @pragma('vm:prefer-inline')
-T? coerceObject<T>(Object? object) {
+T? coerceObject<T>(Object? object, {required bool coerceNull}) {
+  if (!coerceNull && object == null) {
+    return null;
+  }
   if (object is T) {
     return object;
   }
