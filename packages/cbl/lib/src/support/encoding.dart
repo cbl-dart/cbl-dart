@@ -41,20 +41,19 @@ class EncodedData {
       case EncodingFormat.fleece:
         return data;
       case EncodingFormat.json:
-        final doc = Doc.fromResultData(data, FLTrust.trusted);
-        final root = doc.root;
-        final encoder = FleeceEncoder();
-        encoder.writeValue(root.pointer);
-        cblReachabilityFence(root);
-        return encoder.finish();
+        return (FleeceEncoder()..writeJson(data)).finish();
     }
   }
 
   Data toJson() {
     switch (format) {
       case EncodingFormat.fleece:
-        return (FleeceEncoder(format: FLEncoderFormat.json)..writeJson(data))
-            .finish();
+        final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+        final doc = Doc.fromResultData(data, FLTrust.trusted);
+        final root = doc.root;
+        encoder.writeValue(root.pointer);
+        cblReachabilityFence(root);
+        return encoder.finish();
       case EncodingFormat.json:
         return data;
     }
