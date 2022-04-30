@@ -86,7 +86,7 @@ class TypedDataRegistry {
   Factory<Document, D> resolveDocumentFactory<D extends TypedDocumentObject>() {
     if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
       final dynamicFactory =
-          dynamicDocumentFactory<D>(allowUnresolvableType: false);
+          dynamicDocumentFactory<D>(allowUnmatchedDocument: false);
       return (document) => dynamicFactory(document)!;
     }
 
@@ -104,7 +104,7 @@ class TypedDataRegistry {
   }
 
   Factory<Document, D?> dynamicDocumentFactory<D extends TypedDocumentObject>({
-    bool allowUnresolvableType = true,
+    bool allowUnmatchedDocument = true,
   }) =>
       (document) {
         final matchedMetadata =
@@ -128,7 +128,7 @@ class TypedDataRegistry {
             return metadata.mutableFactory(document.toMutable()) as D;
           }
         } else {
-          if (allowUnresolvableType) {
+          if (allowUnmatchedDocument) {
             return null;
           } else {
             throw TypedDataException(

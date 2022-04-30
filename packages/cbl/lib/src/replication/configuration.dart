@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import '../database.dart';
+import '../database/database_base.dart';
 import '../document.dart';
 import '../support/utils.dart';
 import '../typed_data.dart';
+import '../typed_data_internal.dart';
 import 'authenticator.dart';
+import 'conflict.dart';
 import 'conflict_resolver.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
@@ -74,9 +77,9 @@ class ReplicatorConfiguration {
     this.channels,
     this.documentIds,
     this.pushFilter,
-    this.typedPullFilter,
-    this.pullFilter,
     this.typedPushFilter,
+    this.pullFilter,
+    this.typedPullFilter,
     this.conflictResolver,
     this.typedConflictResolver,
     this.enableAutoPurge = true,
@@ -89,22 +92,10 @@ class ReplicatorConfiguration {
       ..maxAttempts = maxAttempts
       ..maxAttemptWaitTime = maxAttemptWaitTime;
 
-    if (typedPullFilter != null) {
-      throw UnimplementedError(
-        'typedPullFilter is not yet supported',
-      );
-    }
-
-    if (typedPushFilter != null) {
-      throw UnimplementedError(
-        'typedPushFilter is not yet supported',
-      );
-    }
-
-    if (typedConflictResolver != null) {
-      throw UnimplementedError(
-        'typedConflictResolver is not yet supported',
-      );
+    if (typedPushFilter != null ||
+        typedPullFilter != null ||
+        typedConflictResolver != null) {
+      (database as DatabaseBase).useWithTypedData();
     }
   }
 
@@ -121,8 +112,11 @@ class ReplicatorConfiguration {
         channels = config.channels,
         documentIds = config.documentIds,
         pushFilter = config.pushFilter,
+        typedPushFilter = config.typedPushFilter,
         pullFilter = config.pullFilter,
+        typedPullFilter = config.typedPullFilter,
         conflictResolver = config.conflictResolver,
+        typedConflictResolver = config.typedConflictResolver,
         enableAutoPurge = config.enableAutoPurge,
         _heartbeat = config.heartbeat,
         _maxAttempts = config.maxAttempts,
@@ -297,8 +291,11 @@ class ReplicatorConfiguration {
         if (channels != null) 'channels: $channels',
         if (documentIds != null) 'documentIds: $documentIds',
         if (pushFilter != null) 'PUSH-FILTER',
-        if (pushFilter != null) 'PULL-FILTER',
+        if (typedPushFilter != null) 'TYPED-PUSH-FILTER',
+        if (pullFilter != null) 'PULL-FILTER',
+        if (typedPullFilter != null) 'TYPED-PULL-FILTER',
         if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
+        if (typedConflictResolver != null) 'TYPED-CUSTOM-CONFLICT-RESOLVER',
         if (!enableAutoPurge) 'DISABLE-AUTO-PURGE',
         if (heartbeat != null) 'heartbeat: ${_heartbeat!.inSeconds}s',
         if (maxAttempts != null) 'maxAttempts: $maxAttempts',
@@ -320,3 +317,90 @@ Map<String, String> _redactHeaders(Map<String, String> headers) {
           : entry.value
   };
 }
+
+extension InternalReplicatorConfiguration on ReplicatorConfiguration {
+  ReplicationFilter? get combinedPushFilter => combineReplicationFilters(
+        pushFilter,
+        typedPushFilter,
+        (database as DatabaseBase).typedDataRegistry,
+      );
+
+  ReplicationFilter? get combinedPullFilter => combineReplicationFilters(
+        pullFilter,
+        typedPullFilter,
+        (database as DatabaseBase).typedDataRegistry,
+      );
+
+  ConflictResolver? get combinedConflictResolver => combineConflictResolvers(
+        conflictResolver,
+        typedConflictResolver,
+        (database as DatabaseBase).typedDataRegistry,
+      );
+}
+
+ReplicationFilter? combineReplicationFilters(
+  ReplicationFilter? filter,
+  TypedReplicationFilter? typedFilter,
+  TypedDataRegistry? registry,
+) {
+  if (typedFilter == null) {
+    return filter;
+  }
+
+  final factory =
+      registry!.dynamicDocumentFactory(allowUnmatchedDocument: filter != null);
+
+  return (document, flags) {
+    final typedDocument = factory(document);
+    if (typedDocument != null) {
+      return typedFilter(typedDocument, flags);
+    }
+
+    // There is no typed data type that can be resolved for this document, so
+    // we fallback to the untyped filter. We can assert that `filter` is not
+    // null here because we created the factory with `allowUnmatchedDocument`
+    // based on the presence of `filter` and if `filter` is null the
+    // factory throws an exception instead of returning null.
+    return filter!(document, flags);
+  };
+}
+
+ConflictResolver? combineConflictResolvers(
+  ConflictResolver? conflictResolver,
+  TypedConflictResolver? typedConflictResolver,
+  TypedDataRegistry? registry,
+) {
+  if (typedConflictResolver == null) {
+    return conflictResolver;
+  }
+
+  final factory = registry!.dynamicDocumentFactory(
+    allowUnmatchedDocument: conflictResolver != null,
+  );
+
+  return ConflictResolver.from((conflict) {
+    final localTypedDocument = conflict.localDocument?.let(factory);
+    final remoteTypedDocument = conflict.remoteDocument?.let(factory);
+    if (_equalNullability(conflict.localDocument, localTypedDocument) &&
+        _equalNullability(conflict.remoteDocument, remoteTypedDocument)) {
+      return typedConflictResolver
+          .resolve(TypedConflictImpl(
+            conflict.documentId,
+            localTypedDocument,
+            remoteTypedDocument,
+          ))
+          .then((result) => result?.internal as Document?);
+    }
+
+    // There is no typed data type that can be resolved for at least one of the
+    // documents, so we fallback to the untyped resolver. We can assert that
+    // `conflictResolver` is not null here because we created the factory with
+    // `allowUnmatchedDocument` based on the presence of `conflictResolver` and
+    // if `conflictResolver` is null the factory throws an exception instead of
+    // returning null.
+    return conflictResolver!.resolve(conflict);
+  });
+}
+
+bool _equalNullability(Object? a, Object? b) =>
+    a == null ? b == null : b != null;

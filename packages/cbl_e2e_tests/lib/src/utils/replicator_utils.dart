@@ -117,8 +117,11 @@ extension ReplicatorUtilsDatabaseExtension on Database {
     List<String>? channels,
     List<String>? documentIds,
     ReplicationFilter? pushFilter,
+    TypedReplicationFilter? typedPushFilter,
     ReplicationFilter? pullFilter,
+    TypedReplicationFilter? typedPullFilter,
     ConflictResolverFunction? conflictResolver,
+    TypedConflictResolverFunction? typedConflictResolver,
     bool? enableAutoPurge,
     Authenticator? authenticator,
   }) =>
@@ -130,9 +133,14 @@ extension ReplicatorUtilsDatabaseExtension on Database {
         channels: channels,
         documentIds: documentIds,
         pushFilter: pushFilter,
+        typedPushFilter: typedPushFilter,
         pullFilter: pullFilter,
+        typedPullFilter: typedPullFilter,
         conflictResolver: conflictResolver != null
             ? ConflictResolver.from(conflictResolver)
+            : null,
+        typedConflictResolver: typedConflictResolver != null
+            ? TypedConflictResolver.from(typedConflictResolver)
             : null,
         enableAutoPurge: enableAutoPurge ?? true,
         authenticator: authenticator ?? janeAuthenticator,

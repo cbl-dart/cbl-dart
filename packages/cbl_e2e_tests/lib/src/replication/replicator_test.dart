@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/typed_data_internal.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -221,6 +222,46 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
+    apiTest('use typedPushFilter to filter pushed documents', () async {
+      final pushDb = await openTestDatabase(
+        name: 'Push',
+        typedDataRegistry: testRegistry,
+      );
+      final pullDb = await openTestDatabase(
+        name: 'Pull',
+        typedDataRegistry: testRegistry,
+      );
+
+      final docA = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      final docB = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+        typedPushFilter: expectAsync2(
+          (document, flags) {
+            expect(flags, isEmpty);
+            expect(document, isA<TestTypedDoc>());
+            final doc = document as TestTypedDoc;
+            expect(doc.internal.id, anyOf(docA.internal.id, docB.internal.id));
+            return docA.internal.id == doc.internal.id;
+          },
+          count: 2,
+        ),
+      );
+      await pusher.replicateOneShot();
+
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+      );
+      await puller.replicateOneShot();
+
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.internal.id));
+      expect(idsInPullDb, isNot(contains(docB.internal.id)));
+    });
+
     apiTest('pushFilter exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(() async {
@@ -285,6 +326,46 @@ void main() {
       expect(idsInPullDb, isNot(contains(docB.id)));
     });
 
+    apiTest('use typedPullFilter to filter pulled documents', () async {
+      final pushDb = await openTestDatabase(
+        name: 'Push',
+        typedDataRegistry: testRegistry,
+      );
+      final pullDb = await openTestDatabase(
+        name: 'Pull',
+        typedDataRegistry: testRegistry,
+      );
+
+      final docA = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docA).withConcurrencyControl();
+      final docB = MutableTestTypedDoc();
+      await pushDb.saveTypedDocument(docB).withConcurrencyControl();
+
+      final pusher = await pushDb.createTestReplicator(
+        replicatorType: ReplicatorType.push,
+      );
+      await pusher.replicateOneShot();
+
+      final puller = await pullDb.createTestReplicator(
+        replicatorType: ReplicatorType.pull,
+        typedPullFilter: expectAsync2(
+          (document, flags) {
+            expect(flags, isEmpty);
+            expect(document, isA<TestTypedDoc>());
+            final doc = document as TestTypedDoc;
+            return docA.internal.id == doc.internal.id;
+          },
+          count: 2,
+          max: -1,
+        ),
+      );
+      await puller.replicateOneShot();
+
+      final idsInPullDb = await pullDb.getAllIds();
+      expect(idsInPullDb, contains(docA.internal.id));
+      expect(idsInPullDb, isNot(contains(docB.internal.id)));
+    });
+
     apiTest('pullFilter exception handling', () async {
       Object? uncaughtError;
       await runZonedGuarded(() async {
@@ -345,6 +426,47 @@ void main() {
       await replicatorB.replicateOneShot();
       await dbA.writeTestDocument('DB-A-2');
       await dbB.writeTestDocument('DB-B-1');
+      await replicatorB.replicateOneShot();
+      await replicatorA.replicateOneShot();
+
+      expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
+    });
+
+    apiTest('custom typed conflict resolver', () async {
+      // Create document in db A
+      // Sync db A with server
+      // Sync db B with server
+      // Change doc in db A
+      // Change doc in db B
+      // Sync db B with server
+      // Sync db A with server
+      // => Conflict in db A
+
+      final dbA = await openTestDatabase(
+        name: 'A',
+        typedDataRegistry: testRegistry,
+      );
+      final replicatorA = await dbA.createTestReplicator(
+        typedConflictResolver: expectAsync1((conflict) {
+          expect(conflict.documentId, testDocumentId);
+          expect(conflict.localDocument, isA<TestTypedDoc>());
+          expect(conflict.remoteDocument, isA<TestTypedDoc>());
+          final localDoc = conflict.localDocument! as TestTypedDoc;
+          final remoteDoc = conflict.remoteDocument! as TestTypedDoc;
+          expect(localDoc.internal, isTestDocument('DB-A-2'));
+          expect(remoteDoc.internal, isTestDocument('DB-B-1'));
+          return conflict.remoteDocument;
+        }),
+      );
+
+      final dbB = await openTestDatabase(name: 'B');
+      final replicatorB = await dbB.createTestReplicator();
+
+      await dbA.writeTestDocument('DB-A-1', type: 'TestTypedDoc');
+      await replicatorA.replicateOneShot();
+      await replicatorB.replicateOneShot();
+      await dbA.writeTestDocument('DB-A-2', type: 'TestTypedDoc');
+      await dbB.writeTestDocument('DB-B-1', type: 'TestTypedDoc');
       await replicatorB.replicateOneShot();
       await replicatorA.replicateOneShot();
 
@@ -596,3 +718,31 @@ Future<void> autoPurgeTest({required bool enableAutoPurge}) async {
   // whether auto purge is enabled.
   expect(await db.document(doc.id), enableAutoPurge ? isNull : isNotNull);
 }
+
+class TestTypedDoc<I extends Document>
+    implements TypedDocumentObject<MutableTestTypedDoc> {
+  TestTypedDoc(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableTestTypedDoc toMutable() => MutableTestTypedDoc(internal.toMutable());
+}
+
+class MutableTestTypedDoc extends TestTypedDoc<MutableDocument>
+    implements TypedMutableDocumentObject<TestTypedDoc, MutableTestTypedDoc> {
+  MutableTestTypedDoc([MutableDocument? document])
+      : super(document ?? MutableDocument());
+}
+
+final testRegistry = TypedDataRegistry(
+  types: [
+    TypedDocumentMetadata<TestTypedDoc, MutableTestTypedDoc>(
+      dartName: 'TestTypedDoc',
+      factory: TestTypedDoc.new,
+      mutableFactory: MutableTestTypedDoc.new,
+      typeMatcher: const ValueTypeMatcher(),
+    ),
+  ],
+);

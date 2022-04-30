@@ -5,10 +5,15 @@ export 'replication/configuration.dart'
         ReplicatorConfiguration,
         DocumentFlag,
         ReplicatorType,
-        ReplicationFilter;
-export 'replication/conflict.dart' show Conflict;
+        ReplicationFilter,
+        TypedReplicationFilter;
+export 'replication/conflict.dart' show Conflict, TypedConflict;
 export 'replication/conflict_resolver.dart'
-    show ConflictResolver, ConflictResolverFunction;
+    show
+        ConflictResolver,
+        ConflictResolverFunction,
+        TypedConflictResolver,
+        TypedConflictResolverFunction;
 export 'replication/document_replication.dart'
     show DocumentReplication, ReplicatedDocument;
 export 'replication/endpoint.dart' show Endpoint, UrlEndpoint, DatabaseEndpoint;

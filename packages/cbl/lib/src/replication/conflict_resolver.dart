@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../document.dart';
+import '../typed_data.dart';
 import 'configuration.dart';
 import 'conflict.dart';
 import 'replicator.dart';
@@ -92,7 +93,7 @@ class DefaultConflictResolver implements ConflictResolver {
 /// Functional version of [TypedConflictResolver].
 ///
 /// {@category Replication}
-typedef TypedConflictResolverFunction = FutureOr<Document?> Function(
+typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
   TypedConflict conflict,
 );
 
@@ -111,7 +112,7 @@ abstract class TypedConflictResolver {
   ) =>
       _FunctionTypedConflictResolver(resolve);
 
-  FutureOr<Document?> resolve(TypedConflict conflict);
+  FutureOr<TypedDocumentObject?> resolve(TypedConflict conflict);
 }
 
 class _FunctionTypedConflictResolver implements TypedConflictResolver {
@@ -120,5 +121,6 @@ class _FunctionTypedConflictResolver implements TypedConflictResolver {
   final TypedConflictResolverFunction _resolve;
 
   @override
-  FutureOr<Document?> resolve(TypedConflict conflict) => _resolve(conflict);
+  FutureOr<TypedDocumentObject?> resolve(TypedConflict conflict) =>
+      _resolve(conflict);
 }
