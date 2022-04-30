@@ -106,7 +106,7 @@ class DatabaseException extends CouchbaseLiteException {
   }
 
   @override
-  final _typeName = 'DatabaseException';
+  String get _typeName => 'DatabaseException';
 }
 
 /// A specification of the cause of a [NetworkException].
@@ -141,7 +141,7 @@ class NetworkException extends CouchbaseLiteException {
   final NetworkErrorCode code;
 
   @override
-  final _typeName = 'NetworkException';
+  String get _typeName => 'NetworkException';
 }
 
 /// A specification of the cause of a [HttpException].
@@ -189,7 +189,7 @@ class HttpException extends CouchbaseLiteException {
   final HttpErrorCode? code;
 
   @override
-  final _typeName = 'HttpException';
+  String get _typeName => 'HttpException';
 }
 
 /// A specification of the cause of a [WebSocketException].
@@ -234,7 +234,7 @@ class WebSocketException extends CouchbaseLiteException {
   final WebSocketErrorCode? code;
 
   @override
-  final _typeName = 'WebSocketException';
+  String get _typeName => 'WebSocketException';
 }
 
 /// Exception thrown when JSON data is invalid.
@@ -246,5 +246,39 @@ class InvalidJsonException extends CouchbaseLiteException {
   final String message;
 
   @override
-  final _typeName = 'InvalidJsonException';
+  String get _typeName => 'InvalidJsonException';
+}
+
+/// A specification of the cause of a [TypedDataException].
+enum TypedDataErrorCode {
+  /// The database does not support typed data.
+  typedDataNotSupported,
+
+  /// The type is not a known typed data type.
+  unknownType,
+
+  /// There is a conflict matching raw data with known typed data types.
+  typeMatchingConflict,
+
+  /// A typed data type cannot be resolved for the raw data.
+  unresolvableType,
+
+  /// The raw data does not have the expected structure.
+  dataMismatch,
+}
+
+/// Exception throw when there is a failure related to typed data.
+class TypedDataException extends CouchbaseLiteException {
+  /// Creates an exception which is throw when there is a failure related to
+  /// typed data.
+  TypedDataException(this.message, this.code);
+
+  @override
+  final String message;
+
+  @override
+  final TypedDataErrorCode code;
+
+  @override
+  String get _typeName => 'TypedDataException';
 }

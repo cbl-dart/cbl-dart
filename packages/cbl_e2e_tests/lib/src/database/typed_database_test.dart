@@ -5,19 +5,23 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
 
   group('Typed Database', () {
     group('saveTypedDocument', () {
-      apiTest('throws if not called on a typed database', () async {
+      apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
         final doc = MutableTestDocA();
 
         expect(
           () => db.saveTypedDocument(doc).withConcurrencyControl(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 
@@ -174,12 +178,15 @@ void main() {
     });
 
     group('typedDocument', () {
-      apiTest('throws if not called on a typed database', () async {
+      apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
 
         expect(
           () => db.typedDocument<TestDocA>('a'),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 
@@ -244,13 +251,15 @@ void main() {
 
         expect(
           () => db.typedDocument<TestDocA>(doc.id),
-          throwsA(isStateError.having(
-            (error) => error.message,
-            'message',
-            'Expected to find a document that matches the type matcher of '
-                'TestDocA, but found a document that matches the type matchers '
-                'of the following types: []',
-          )),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typeMatchingConflict)
+                .havingMessage(
+                  'Expected to find a document that matches the type matcher '
+                  'of TestDocA, but found a document that matches the type '
+                  'matchers of the following types: []',
+                ),
+          ),
         );
       });
 
@@ -261,13 +270,15 @@ void main() {
 
         expect(
           () => db.typedDocument<TestDocA>(doc.id),
-          throwsA(isStateError.having(
-            (error) => error.message,
-            'message',
-            'Expected to find a document that matches the type matcher of '
-                'TestDocA, but found a document that matches the type matchers '
-                'of the following types: [TestDocB]',
-          )),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typeMatchingConflict)
+                .havingMessage(
+                  'Expected to find a document that matches the type matcher '
+                  'of TestDocA, but found a document that matches the type '
+                  'matchers of the following types: [TestDocB]',
+                ),
+          ),
         );
       });
 
@@ -280,26 +291,31 @@ void main() {
 
           expect(
             () => db.typedDocument<TestDocWithoutTypeMatcher>(doc.id),
-            throwsA(isStateError.having(
-              (error) => error.message,
-              'message',
-              'Expected to find a document that matches no type matcher, but '
-                  'found a document that matches the type matchers of the '
-                  'following types: [TestDocA]',
-            )),
+            throwsA(
+              isTypedDataException
+                  .havingCode(TypedDataErrorCode.typeMatchingConflict)
+                  .havingMessage(
+                    'Expected to find a document that matches no type matcher, '
+                    'but found a document that matches the type matchers of '
+                    'the following types: [TestDocA]',
+                  ),
+            ),
           );
         },
       );
     });
 
     group('deleteTypedDocument', () {
-      apiTest('throws if not called on a typed database', () async {
+      apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
         final doc = MutableTestDocA();
 
         expect(
           () => db.deleteTypedDocument(doc),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 
@@ -314,13 +330,16 @@ void main() {
     });
 
     group('purgeTypedDocument', () {
-      apiTest('throws if not called on a typed database', () async {
+      apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
         final doc = MutableTestDocA();
 
         expect(
           () => db.purgeTypedDocument(doc),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 

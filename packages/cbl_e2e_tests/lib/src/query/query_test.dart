@@ -8,6 +8,7 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -249,13 +250,16 @@ SELECT foo()
     });
 
     group('asTypedStream', () {
-      apiTest('throws if database is not a typed database', () async {
+      apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
         final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
           () => resultSet.asTypedStream<TestTypedDict>(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 
@@ -265,7 +269,9 @@ SELECT foo()
         final resultSet = await query.execute();
         expect(
           () => resultSet.asTypedStream<TestTypedDict2>(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException.havingCode(TypedDataErrorCode.unknownType),
+          ),
         );
       });
 
@@ -282,13 +288,16 @@ SELECT foo()
     });
 
     group('allTypedResults', () {
-      apiTest('throws if database is not a typed database', () async {
+      apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
         final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
           () => resultSet.allTypedResults<TestTypedDict>(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 
@@ -298,7 +307,9 @@ SELECT foo()
         final resultSet = await query.execute();
         expect(
           () => resultSet.allTypedResults<TestTypedDict2>(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException.havingCode(TypedDataErrorCode.unknownType),
+          ),
         );
       });
 
@@ -315,13 +326,16 @@ SELECT foo()
     });
 
     group('asTypedIterable', () {
-      test('throws if database is not a typed database', () {
+      test('throws if database does not support typed data', () {
         final db = openSyncTestDatabase();
         final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
         final resultSet = query.execute();
         expect(
           () => resultSet.asTypedIterable<TestTypedDict>(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
         );
       });
 
@@ -331,7 +345,9 @@ SELECT foo()
         final resultSet = query.execute();
         expect(
           () => resultSet.asTypedIterable<TestTypedDict2>(),
-          throwsA(isStateError),
+          throwsA(
+            isTypedDataException.havingCode(TypedDataErrorCode.unknownType),
+          ),
         );
       });
 

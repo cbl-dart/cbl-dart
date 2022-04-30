@@ -17,15 +17,15 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   ///
   /// It is configured with the types that are supported by this database.
   ///
-  /// To safely access the registry, you can use [useAsTypedDatabase].
+  /// To safely access the registry, you can use [useWithTypedData].
   TypedDataRegistry? get typedDataRegistry;
 
-  TypedDataRegistry useAsTypedDatabase() {
+  TypedDataRegistry useWithTypedData() {
     final registry = typedDataRegistry;
     if (registry == null) {
-      throw StateError(
-        'This database is not a typed database. '
-        'Use the @TypedDatabase annotation to generate one.',
+      throw TypedDataException(
+        'The database does not support typed data.',
+        TypedDataErrorCode.typedDataNotSupported,
       );
     }
     return registry;
@@ -162,7 +162,7 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 
   @override
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) {
-    final typedDataRegistry = useAsTypedDatabase();
+    final typedDataRegistry = useWithTypedData();
 
     // We resolve the factory before loading the actual document to check that
     // D is a recognized type early.
@@ -324,10 +324,10 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
         // This call ensures that the document type D is registered with the
         // database. This is why we call it, even though we may never need to
         // use the returned factory.
-        // By calling useAsTypedDatabase we also assert that database is a typed
-        // database.
+        // By calling useWithTypedData we also assert that database supports
+        // typed data.
         _documentFactory =
-            database.useAsTypedDatabase().resolveDocumentFactory<D>();
+            database.useWithTypedData().resolveDocumentFactory<D>();
 
   final DatabaseBase database;
   final TypedMutableDocumentObject<D, MD> document;

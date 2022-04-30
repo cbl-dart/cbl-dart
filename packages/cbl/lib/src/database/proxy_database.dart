@@ -252,7 +252,7 @@ class ProxyDatabase extends ProxyObject
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) async {
-    useAsTypedDatabase();
+    useWithTypedData();
     return deleteDocument(
       document.internal as DelegateDocument,
       concurrencyControl,
@@ -270,7 +270,7 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> purgeTypedDocument(TypedDocumentObject document) async {
-    useAsTypedDatabase();
+    useWithTypedData();
     await purgeDocument(document.internal as DelegateDocument);
   }
 

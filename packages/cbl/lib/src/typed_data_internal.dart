@@ -1,4 +1,4 @@
-export 'typed_data/data_model.dart'
+export 'typed_data/runtime_support.dart'
     show
         TypedDataRegistry,
         TypedDataMetadata,

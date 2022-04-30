@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 
 import '../document.dart';
+import '../errors.dart';
 import '../support/utils.dart';
 import 'annotations.dart';
 import 'typed_object.dart';
@@ -84,7 +85,9 @@ class TypedDataRegistry {
 
   Factory<Document, D> resolveDocumentFactory<D extends TypedDocumentObject>() {
     if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
-      return _dynamicDocumentFactory();
+      final dynamicFactory =
+          dynamicDocumentFactory<D>(allowUnresolvableType: false);
+      return (document) => dynamicFactory(document)!;
     }
 
     final documentFactory = _documentFactoryFor<D>();
@@ -100,9 +103,46 @@ class TypedDataRegistry {
     throw _unknownTypeError(D);
   }
 
+  Factory<Document, D?> dynamicDocumentFactory<D extends TypedDocumentObject>({
+    bool allowUnresolvableType = true,
+  }) =>
+      (document) {
+        final matchedMetadata =
+            _documentMetadataByTypedMatcher(document).toList();
+        if (matchedMetadata.isNotEmpty) {
+          if (matchedMetadata.length > 1) {
+            final matchedTypeNames =
+                matchedMetadata.map((metadata) => metadata.dartName).toList();
+            throw TypedDataException(
+              'Unable to resolve a document type because multiple document '
+              'types matched the document: $matchedTypeNames',
+              TypedDataErrorCode.unresolvableType,
+            );
+          }
+
+          final metadata = matchedMetadata.first;
+          if (D == TypedDocumentObject) {
+            return metadata.factory(document) as D;
+          } else {
+            assert(D == TypedMutableDocumentObject);
+            return metadata.mutableFactory(document.toMutable()) as D;
+          }
+        } else {
+          if (allowUnresolvableType) {
+            return null;
+          } else {
+            throw TypedDataException(
+              'Unable to resolve a document type because no document types '
+              'matched the document.',
+              TypedDataErrorCode.unresolvableType,
+            );
+          }
+        }
+      };
+
   void checkDocumentType<D extends TypedDocumentObject>(Document doc) {
     if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
-      // User is not specifying a concrete type, so we can't check.
+      // User is not specifying a concrete type, so we don't need to do a check.
       return;
     }
 
@@ -112,30 +152,30 @@ class TypedDataRegistry {
       throw _unknownTypeError(D);
     }
 
+    late final matchingMetadata = _documentMetadataByTypedMatcher(doc)
+        .map((metadata) => metadata.dartName)
+        .toList();
+
     final typeMatcher = metadata._typeMatcherImpl();
     if (typeMatcher != null) {
       if (typeMatcher.isMatch(doc)) {
         return;
       }
 
-      final matchingMetadata = _documentMetadataByTypedMatcher(doc)
-          .map((metadata) => metadata.dartName)
-          .toList();
-      throw StateError(
+      throw TypedDataException(
         'Expected to find a document that matches the type matcher of '
         '${metadata.dartName}, but found a document that matches the type '
         'matchers of the following types: $matchingMetadata',
+        TypedDataErrorCode.typeMatchingConflict,
       );
     } else {
       assert(() {
-        final matchingMetadata = _documentMetadataByTypedMatcher(doc)
-            .map((metadata) => metadata.dartName)
-            .toList();
         if (matchingMetadata.isNotEmpty) {
-          throw StateError(
+          throw TypedDataException(
             'Expected to find a document that matches no type matcher, '
             'but found a document that matches the type matchers of the '
             'following types: $matchingMetadata',
+            TypedDataErrorCode.typeMatchingConflict,
           );
         }
         return true;
@@ -159,9 +199,10 @@ class TypedDataRegistry {
     if (isNew) {
       typeMatcher.makeMatch(internal);
     } else if (!typeMatcher.isMatch(internal)) {
-      throw StateError(
+      throw TypedDataException(
         'Document of type ${metadata.dartName} is not matching its '
         'TypeMatcher.',
+        TypedDataErrorCode.typeMatchingConflict,
       );
     }
   }
@@ -203,41 +244,11 @@ class TypedDataRegistry {
                     }
                     return fn(doc);
                   });
-
-  Factory<Document, D>
-      _dynamicDocumentFactory<D extends TypedDocumentObject>() => (document) {
-            final matchedMetadata =
-                _documentMetadataByTypedMatcher(document).toList();
-            if (matchedMetadata.isNotEmpty) {
-              if (matchedMetadata.length > 1) {
-                final matchedTypeNames = matchedMetadata
-                    .map((metadata) => metadata.dartName)
-                    .toList();
-                throw StateError(
-                  'Unable to resolve a document type because multiple document '
-                  'types matched the document: $matchedTypeNames',
-                );
-              }
-
-              final metadata = matchedMetadata.first;
-              if (D == TypedDocumentObject) {
-                return metadata.factory(document) as D;
-              } else {
-                assert(D == TypedMutableDocumentObject);
-                return metadata.mutableFactory(document.toMutable()) as D;
-              }
-            } else {
-              throw StateError(
-                'Unable to resolve a document type because no document types '
-                'matched the document.',
-              );
-            }
-          };
 }
 
-StateError _unknownTypeError(Type type) => StateError(
-      '$type is not a known typed data type. Ensure it has'
-      ' been registered in the @TypedDatabase annotation.',
+Exception _unknownTypeError(Type type) => TypedDataException(
+      '$type is not a known typed data type.',
+      TypedDataErrorCode.unknownType,
     );
 
 // === TypeMatcherImpl =========================================================
@@ -311,9 +322,10 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
   void _setValue(MutableDictionaryInterface data, Object value) {
     void checkCurrentValue(Object? currentValue) {
       if (currentValue != null && currentValue != value) {
-        throw StateError(
+        throw TypedDataException(
           'ValueTypeMatcher: Expected value at path $path to be null or '
           '$value, but found $currentValue.',
+          TypedDataErrorCode.dataMismatch,
         );
       }
     }
@@ -325,9 +337,10 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
         checkCurrentValue(container.value(lastSegment));
         container.setValue(value, key: lastSegment);
       } else {
-        throw StateError(
+        throw TypedDataException(
           'ValueTypeMatcher: Expected to find a Dictionary at path '
           '${path.sublist(0, path.length - 1)}, but found $container',
+          TypedDataErrorCode.dataMismatch,
         );
       }
     } else if (lastSegment is int) {
@@ -338,16 +351,18 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
         } else if (container.length == lastSegment) {
           container.addValue(value);
         } else {
-          throw StateError(
+          throw TypedDataException(
             'ValueTypeMatcher: Expected to find an Array at path '
             '${path.sublist(0, path.length - 1)}, with at least $lastSegment '
             'elements, but found one with length ${container.length}.',
+            TypedDataErrorCode.dataMismatch,
           );
         }
       } else {
-        throw StateError(
+        throw TypedDataException(
           'ValueTypeMatcher: Expected to find an Array at path '
           '${path.sublist(0, path.length - 1)}, but found $container',
+          TypedDataErrorCode.dataMismatch,
         );
       }
     }

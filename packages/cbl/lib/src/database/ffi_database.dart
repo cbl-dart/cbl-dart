@@ -277,7 +277,7 @@ class FfiDatabase extends CBLDatabaseObject
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) {
-    useAsTypedDatabase();
+    useWithTypedData();
     return deleteDocument(
       document.internal as DelegateDocument,
       concurrencyControl,
@@ -292,7 +292,7 @@ class FfiDatabase extends CBLDatabaseObject
 
   @override
   void purgeTypedDocument(TypedDocumentObject document) {
-    useAsTypedDatabase();
+    useWithTypedData();
     purgeDocument(document.internal as DelegateDocument);
   }
 

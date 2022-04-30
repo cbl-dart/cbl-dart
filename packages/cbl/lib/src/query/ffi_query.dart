@@ -229,7 +229,7 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
 
   @override
   Iterable<D> asTypedIterable<D extends TypedDictionaryObject>() {
-    final registry = _database.useAsTypedDatabase();
+    final registry = _database.useWithTypedData();
     return map((_) => _current!.asDictionary)
         .map(registry.resolveDictionaryFactory<D>());
   }
