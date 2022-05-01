@@ -1,8 +1,9 @@
-import 'package:collection/collection.dart';
+import 'dart:collection';
+
+import 'package:meta/meta.dart';
 
 import '../document.dart';
 import '../errors.dart';
-import '../support/utils.dart';
 import 'annotations.dart';
 import 'typed_object.dart';
 
@@ -23,16 +24,19 @@ abstract class TypedDataMetadata<I, MI, D, MD> {
 
   Type get _type => D;
   Type get _mutableType => MD;
-  _TypeMatcherImpl? _cachedTypeMatcherImpl;
+  late final TypeMatcherImpl? _typeMatcherImpl;
 
-  _TypeMatcherImpl? _typeMatcherImpl() {
-    final typeMatcher = this.typeMatcher;
+  void _addToRegistry(TypedDataRegistry registry) {
+    _createTypeMatcherImpl();
+  }
+
+  void _createTypeMatcherImpl() {
     if (typeMatcher == null) {
-      return null;
+      _typeMatcherImpl = null;
+    } else {
+      _typeMatcherImpl =
+          TypeMatcherImpl.fromAnnotation(typeMatcher!, forType: this);
     }
-
-    return _cachedTypeMatcherImpl ??=
-        _TypeMatcherImpl.fromAnnotation(typeMatcher, forType: this);
   }
 }
 
@@ -69,9 +73,33 @@ class TypedDocumentMetadata<D, MD>
 class TypedDataRegistry {
   TypedDataRegistry({
     Iterable<TypedDataMetadata> types = const [],
-  }) : _types = List.unmodifiable(types);
+  })  : _types = List.unmodifiable(types),
+        _dictionaryMetadataForType = HashMap.identity()
+          ..addAll({
+            for (final type in types)
+              if (type is TypedDictionaryMetadata) type._type: type
+          }),
+        _documentMetadataForType = HashMap.identity()
+          ..addAll({
+            for (final type in types)
+              if (type is TypedDocumentMetadata) type._type: type
+          }),
+        _documentMetadataForMutableType = HashMap.identity()
+          ..addAll({
+            for (final type in types)
+              if (type is TypedDocumentMetadata) type._mutableType: type
+          }) {
+    for (final type in types) {
+      type._addToRegistry(this);
+    }
+  }
 
   final List<TypedDataMetadata> _types;
+  final Map<Type, TypedDictionaryMetadata> _dictionaryMetadataForType;
+  final Map<Type, TypedDocumentMetadata> _documentMetadataForType;
+  final Map<Type, TypedDocumentMetadata> _documentMetadataForMutableType;
+  final Map<Type, Factory<Document, Object>?> _mutableDocumentFactoryCache =
+      HashMap.identity();
 
   Factory<Dictionary, D>
       resolveDictionaryFactory<D extends TypedDictionaryObject>() {
@@ -147,7 +175,7 @@ class TypedDataRegistry {
     }
 
     final metadata =
-        _documentMetadataForType(D) ?? _documentMetadataForMutableType(D);
+        _documentMetadataForType[D] ?? _documentMetadataForMutableType[D];
     if (metadata == null) {
       throw _unknownTypeError(D);
     }
@@ -156,7 +184,7 @@ class TypedDataRegistry {
         .map((metadata) => metadata.dartName)
         .toList();
 
-    final typeMatcher = metadata._typeMatcherImpl();
+    final typeMatcher = metadata._typeMatcherImpl;
     if (typeMatcher != null) {
       if (typeMatcher.isMatch(doc)) {
         return;
@@ -184,12 +212,12 @@ class TypedDataRegistry {
   }
 
   void prepareDocumentForSave(TypedMutableDocumentObject document) {
-    final metadata = _documentMetadataForMutableType(document.runtimeType);
+    final metadata = _documentMetadataForMutableType[document.runtimeType];
     if (metadata == null) {
       throw _unknownTypeError(document.runtimeType);
     }
 
-    final typeMatcher = metadata._typeMatcherImpl();
+    final typeMatcher = metadata._typeMatcherImpl;
     if (typeMatcher == null) {
       return;
     }
@@ -207,43 +235,36 @@ class TypedDataRegistry {
     }
   }
 
-  TypedDictionaryMetadata? _dictionaryMetadataForType(Type type) => _types
-      .whereType<TypedDictionaryMetadata>()
-      .firstWhereOrNull((metadata) => metadata._type == type);
-
-  TypedDocumentMetadata? _documentMetadataForType(Type type) => _types
-      .whereType<TypedDocumentMetadata>()
-      .firstWhereOrNull((metadata) => metadata._type == type);
-
-  TypedDocumentMetadata? _documentMetadataForMutableType(Type type) => _types
-      .whereType<TypedDocumentMetadata>()
-      .firstWhereOrNull((metadata) => metadata._mutableType == type);
-
   Iterable<TypedDocumentMetadata> _documentMetadataByTypedMatcher(
     Document document,
   ) =>
       _types.whereType<TypedDocumentMetadata>().where(
-            (metadata) =>
-                metadata._typeMatcherImpl()?.isMatch(document) == true,
+            (metadata) => metadata._typeMatcherImpl?.isMatch(document) == true,
           );
 
   Factory<Dictionary, D>?
       _dictionaryFactoryFor<D extends TypedDictionaryObject>() =>
-          _dictionaryMetadataForType(D)?.factory as Factory<Dictionary, D>?;
+          _dictionaryMetadataForType[D]?.factory as Factory<Dictionary, D>?;
 
   Factory<Document, D>? _documentFactoryFor<D extends TypedDocumentObject>() =>
-      _documentMetadataForType(D)?.factory as Factory<Document, D>?;
+      _documentMetadataForType[D]?.factory as Factory<Document, D>?;
 
   Factory<Document, D>?
       _mutableDocumentFactoryFor<D extends TypedDocumentObject>() =>
-          (_documentMetadataForMutableType(D)?.mutableFactory
-                  as Factory<MutableDocument, D>?)
-              ?.let((fn) => (doc) {
-                    if (doc is! MutableDocument) {
-                      doc = doc.toMutable();
-                    }
-                    return fn(doc);
-                  });
+          _mutableDocumentFactoryCache.putIfAbsent(D, () {
+            final factory = _documentMetadataForMutableType[D]?.mutableFactory
+                as Factory<MutableDocument, D>?;
+            if (factory == null) {
+              return null;
+            }
+
+            return (doc) {
+              if (doc is! MutableDocument) {
+                doc = doc.toMutable();
+              }
+              return factory(doc);
+            };
+          }) as Factory<Document, D>?;
 }
 
 Exception _unknownTypeError(Type type) => TypedDataException(
@@ -253,15 +274,16 @@ Exception _unknownTypeError(Type type) => TypedDataException(
 
 // === TypeMatcherImpl =========================================================
 
-abstract class _TypeMatcherImpl {
-  _TypeMatcherImpl();
+@visibleForTesting
+abstract class TypeMatcherImpl {
+  TypeMatcherImpl();
 
-  factory _TypeMatcherImpl.fromAnnotation(
+  factory TypeMatcherImpl.fromAnnotation(
     TypeMatcher annotation, {
     required TypedDataMetadata forType,
   }) {
     if (annotation is ValueTypeMatcher) {
-      return _ValueTypeMatcherImpl(
+      return ValueTypeMatcherImpl(
         path: annotation.path,
         value: annotation.value ?? forType.dartName,
       );
@@ -275,8 +297,9 @@ abstract class _TypeMatcherImpl {
   void makeMatch(MutableDictionaryInterface data);
 }
 
-class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
-  _ValueTypeMatcherImpl({required this.path, required this.value});
+@visibleForTesting
+class ValueTypeMatcherImpl extends TypeMatcherImpl {
+  ValueTypeMatcherImpl({required this.path, required this.value});
 
   final List<Object> path;
   final Object value;
@@ -305,7 +328,9 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
 
       if (segment is int) {
         if (currentValue is ArrayInterface) {
-          currentValue = currentValue.value(segment);
+          currentValue = currentValue.length > segment
+              ? currentValue.value(segment)
+              : null;
         } else {
           return null;
         }
@@ -321,9 +346,9 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
 
   void _setValue(MutableDictionaryInterface data, Object value) {
     void checkCurrentValue(Object? currentValue) {
-      if (currentValue != null && currentValue != value) {
+      if (currentValue != value) {
         throw TypedDataException(
-          'ValueTypeMatcher: Expected value at path $path to be null or '
+          'ValueTypeMatcher: Expected value at path $path to not exist or be '
           '$value, but found $currentValue.',
           TypedDataErrorCode.dataMismatch,
         );
@@ -334,8 +359,11 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
     final lastSegment = path.last;
     if (lastSegment is String) {
       if (container is MutableDictionaryInterface) {
-        checkCurrentValue(container.value(lastSegment));
-        container.setValue(value, key: lastSegment);
+        if (container.contains(lastSegment)) {
+          checkCurrentValue(container.value(lastSegment));
+        } else {
+          container.setValue(value, key: lastSegment);
+        }
       } else {
         throw TypedDataException(
           'ValueTypeMatcher: Expected to find a Dictionary at path '
@@ -347,7 +375,6 @@ class _ValueTypeMatcherImpl extends _TypeMatcherImpl {
       if (container is MutableArrayInterface) {
         if (container.length > lastSegment) {
           checkCurrentValue(container.value(lastSegment));
-          container.setValue(value, at: lastSegment);
         } else if (container.length == lastSegment) {
           container.addValue(value);
         } else {
