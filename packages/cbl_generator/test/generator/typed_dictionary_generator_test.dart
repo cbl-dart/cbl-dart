@@ -145,7 +145,11 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
   final I internal;
 
   @override
-  String get b => internal.value('b')!;
+  String get b => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'b',
+        key: 'b',
+      );
 
   @override
   MutableA toMutable() => MutableA.internal(internal.toMutable());

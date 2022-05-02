@@ -19,6 +19,7 @@ class TypedDataBuilder extends PartBuilder {
   static const _ignoredLints = [
     'avoid_positional_boolean_parameters',
     'lines_longer_than_80_chars',
+    'invalid_use_of_internal_member',
   ];
 
   @visibleForTesting

@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member
 
 part of 'constructor_parameters.dart';
 
@@ -20,7 +20,11 @@ abstract class _ParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableParamDoc toMutable() => MutableParamDoc.internal(internal.toMutable());
@@ -57,7 +61,11 @@ abstract class _OptionalParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String? get a => internal.value('a');
+  String? get a => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableOptionalParamDoc toMutable() =>
@@ -102,10 +110,18 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
-  String? get b => internal.value('b');
+  String? get b => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'b',
+        key: 'b',
+      );
 
   @override
   MutablePositionalMixedParamDoc toMutable() =>
@@ -156,7 +172,11 @@ abstract class _NamedParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableNamedParamDoc toMutable() =>
@@ -194,7 +214,11 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String? get a => internal.value('a');
+  String? get a => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableNamedOptionalParamDoc toMutable() =>
@@ -242,10 +266,18 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
-  String? get b => internal.value('b');
+  String? get b => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'b',
+        key: 'b',
+      );
 
   @override
   MutableNamedMixedParamDoc toMutable() =>
@@ -298,7 +330,11 @@ abstract class _ParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableParamDict toMutable() =>
@@ -336,7 +372,11 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String? get a => internal.value('a');
+  String? get a => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableOptionalParamDict toMutable() =>
@@ -384,10 +424,18 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
-  String? get b => internal.value('b');
+  String? get b => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'b',
+        key: 'b',
+      );
 
   @override
   MutablePositionalMixedParamDict toMutable() =>
@@ -438,7 +486,11 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableNamedParamDict toMutable() =>
@@ -477,7 +529,11 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String? get a => internal.value('a');
+  String? get a => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
   MutableNamedOptionalParamDict toMutable() =>
@@ -526,10 +582,18 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => internal.value('a')!;
+  String get a => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'a',
+        key: 'a',
+      );
 
   @override
-  String? get b => internal.value('b');
+  String? get b => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'b',
+        key: 'b',
+      );
 
   @override
   MutableNamedMixedParamDict toMutable() =>

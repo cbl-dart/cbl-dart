@@ -22,8 +22,8 @@ void main() {
     expect(NumDoc(.5).value, .5);
     expect(BoolDict(true).value, true);
     expect(BoolDoc(true).value, true);
-    expect(DateTimeDict(DateTime(2022)).value, DateTime(2022));
-    expect(DateTimeDoc(DateTime(2022)).value, DateTime(2022));
+    // expect(DateTimeDict(DateTime(2022)).value, DateTime(2022));
+    // expect(DateTimeDoc(DateTime(2022)).value, DateTime(2022));
     final blob = Blob.fromData('', Uint8List.fromList([42]));
     expect(BlobDict(blob).value, blob);
     expect(BlobDoc(blob).value, blob);

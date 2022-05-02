@@ -109,28 +109,20 @@ class TypeDataCodeBuilder {
         ..writeln();
     }
 
-    for (final field in clazz.fields) {
-      if (field.isDocumentId) {
-        continue;
-      }
-
-      _code
-        ..writeln('  @override')
-        ..write('  ')
-        ..write(field.typeWithNullabilitySuffix)
-        ..write(' get ')
-        ..write(field.nameInDart)
-        ..write(' => internal.value(')
-        ..write(escapeDartString(field.nameInData))
-        ..write(')');
-
-      if (!field.isNullable) {
-        _code.write('!');
-      }
-
-      _code
-        ..writeln(';')
-        ..writeln();
+    final properties =
+        clazz.fields.where((field) => !field.isDocumentId).toList();
+    for (final property in properties) {
+      final accessor = property.isNullable
+          ? 'InternalTypedDataHelpers.nullableProperty'
+          : 'InternalTypedDataHelpers.property';
+      _code.writeln('''
+@override
+${property.typeWithNullabilitySuffix} get ${property.nameInDart} => $accessor(
+    internal: internal,
+    name: ${escapeDartString(property.nameInDart)},
+    key: ${escapeDartString(property.nameInData)},
+  );
+''');
     }
 
     _code

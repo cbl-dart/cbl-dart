@@ -8,6 +8,7 @@ export 'typed_data/annotations.dart'
         TypedDocument,
         TypeMatcher,
         ValueTypeMatcher;
+export 'typed_data/runtime_support.dart' show InternalTypedDataHelpers;
 export 'typed_data/typed_object.dart'
     show
         TypedDictionaryObject,

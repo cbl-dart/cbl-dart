@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member
 
 part of 'builtin_types.dart';
 
@@ -20,7 +20,11 @@ abstract class _StringDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get value => internal.value('value')!;
+  String get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableStringDoc toMutable() =>
@@ -57,7 +61,11 @@ abstract class _IntDocImplBase<I extends Document>
   final I internal;
 
   @override
-  int get value => internal.value('value')!;
+  int get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableIntDoc toMutable() => MutableIntDoc.internal(internal.toMutable());
@@ -93,7 +101,11 @@ abstract class _DoubleDocImplBase<I extends Document>
   final I internal;
 
   @override
-  double get value => internal.value('value')!;
+  double get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableDoubleDoc toMutable() =>
@@ -130,7 +142,11 @@ abstract class _NumDocImplBase<I extends Document>
   final I internal;
 
   @override
-  num get value => internal.value('value')!;
+  num get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableNumDoc toMutable() => MutableNumDoc.internal(internal.toMutable());
@@ -166,7 +182,11 @@ abstract class _BoolDocImplBase<I extends Document>
   final I internal;
 
   @override
-  bool get value => internal.value('value')!;
+  bool get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableBoolDoc toMutable() => MutableBoolDoc.internal(internal.toMutable());
@@ -189,43 +209,6 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
   set value(bool value) => internal.setValue(value, key: 'value');
 }
 
-mixin _$DateTimeDoc implements TypedDocumentObject<MutableDateTimeDoc> {
-  DateTime get value;
-}
-
-abstract class _DateTimeDocImplBase<I extends Document>
-    with _$DateTimeDoc
-    implements DateTimeDoc {
-  _DateTimeDocImplBase(this.internal);
-
-  @override
-  final I internal;
-
-  @override
-  DateTime get value => internal.value('value')!;
-
-  @override
-  MutableDateTimeDoc toMutable() =>
-      MutableDateTimeDoc.internal(internal.toMutable());
-}
-
-class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
-  ImmutableDateTimeDoc.internal(Document internal) : super(internal);
-}
-
-class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
-    implements TypedMutableDocumentObject<DateTimeDoc, MutableDateTimeDoc> {
-  MutableDateTimeDoc(
-    DateTime value,
-  ) : super(MutableDocument()) {
-    this.value = value;
-  }
-
-  MutableDateTimeDoc.internal(MutableDocument internal) : super(internal);
-
-  set value(DateTime value) => internal.setValue(value, key: 'value');
-}
-
 mixin _$BlobDoc implements TypedDocumentObject<MutableBlobDoc> {
   Blob get value;
 }
@@ -239,7 +222,11 @@ abstract class _BlobDocImplBase<I extends Document>
   final I internal;
 
   @override
-  Blob get value => internal.value('value')!;
+  Blob get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableBlobDoc toMutable() => MutableBlobDoc.internal(internal.toMutable());
@@ -279,7 +266,11 @@ abstract class _StringDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get value => internal.value('value')!;
+  String get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableStringDict toMutable() =>
@@ -316,7 +307,11 @@ abstract class _IntDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  int get value => internal.value('value')!;
+  int get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableIntDict toMutable() => MutableIntDict.internal(internal.toMutable());
@@ -352,7 +347,11 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  double get value => internal.value('value')!;
+  double get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableDoubleDict toMutable() =>
@@ -389,7 +388,11 @@ abstract class _NumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  num get value => internal.value('value')!;
+  num get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableNumDict toMutable() => MutableNumDict.internal(internal.toMutable());
@@ -425,7 +428,11 @@ abstract class _BoolDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool get value => internal.value('value')!;
+  bool get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableBoolDict toMutable() => MutableBoolDict.internal(internal.toMutable());
@@ -448,43 +455,6 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
   set value(bool value) => internal.setValue(value, key: 'value');
 }
 
-mixin _$DateTimeDict implements TypedDictionaryObject<MutableDateTimeDict> {
-  DateTime get value;
-}
-
-abstract class _DateTimeDictImplBase<I extends Dictionary>
-    with _$DateTimeDict
-    implements DateTimeDict {
-  _DateTimeDictImplBase(this.internal);
-
-  @override
-  final I internal;
-
-  @override
-  DateTime get value => internal.value('value')!;
-
-  @override
-  MutableDateTimeDict toMutable() =>
-      MutableDateTimeDict.internal(internal.toMutable());
-}
-
-class ImmutableDateTimeDict extends _DateTimeDictImplBase {
-  ImmutableDateTimeDict.internal(Dictionary internal) : super(internal);
-}
-
-class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
-    implements TypedMutableDictionaryObject<DateTimeDict, MutableDateTimeDict> {
-  MutableDateTimeDict(
-    DateTime value,
-  ) : super(MutableDictionary()) {
-    this.value = value;
-  }
-
-  MutableDateTimeDict.internal(MutableDictionary internal) : super(internal);
-
-  set value(DateTime value) => internal.setValue(value, key: 'value');
-}
-
 mixin _$BlobDict implements TypedDictionaryObject<MutableBlobDict> {
   Blob get value;
 }
@@ -498,7 +468,11 @@ abstract class _BlobDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  Blob get value => internal.value('value')!;
+  Blob get value => InternalTypedDataHelpers.property(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableBlobDict toMutable() => MutableBlobDict.internal(internal.toMutable());
@@ -535,7 +509,11 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  int? get value => internal.value('value');
+  int? get value => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableNullableIntDict toMutable() =>
@@ -578,7 +556,11 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  double? get value => internal.value('value');
+  double? get value => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableNullableDoubleDict toMutable() =>
@@ -624,7 +606,11 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  num? get value => internal.value('value');
+  num? get value => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableNullableNumDict toMutable() =>
@@ -667,7 +653,11 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool? get value => internal.value('value');
+  bool? get value => InternalTypedDataHelpers.nullableProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+      );
 
   @override
   MutableNullableBoolDict toMutable() =>

@@ -7,6 +7,55 @@ import '../errors.dart';
 import 'annotations.dart';
 import 'typed_object.dart';
 
+// ignore: avoid_classes_with_only_static_members, camel_case_types
+class InternalTypedDataHelpers {
+  @internal
+  static T property<T extends Object>({
+    required DictionaryInterface internal,
+    required String name,
+    required String key,
+  }) {
+    final value = internal.value(key);
+    if (value is T) {
+      return value;
+    }
+
+    if (!internal.contains(key)) {
+      throw TypedDataException(
+        'Expected a value for property "$name" but there is none in the '
+        'underlying data.',
+        TypedDataErrorCode.dataMismatch,
+      );
+    }
+
+    throw TypedDataException(
+      'Expected a $T for property "$name" but the value in the underlying data '
+      'is a ${value.runtimeType}.',
+      TypedDataErrorCode.dataMismatch,
+    );
+  }
+
+  @internal
+  static T nullableProperty<T>({
+    required DictionaryInterface internal,
+    required String name,
+    required String key,
+  }) {
+    final value = internal.value(key);
+    if (value is T) {
+      return value;
+    }
+
+    throw TypedDataException(
+      'Expected a $T for property "$name" but the value in the underlying data '
+      'is a ${value.runtimeType}.',
+      TypedDataErrorCode.dataMismatch,
+    );
+  }
+}
+
+// === Typed data model ========================================================
+
 typedef Factory<I, D> = D Function(I internal);
 
 abstract class TypedDataMetadata<I, MI, D, MD> {
