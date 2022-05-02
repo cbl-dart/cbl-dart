@@ -14,7 +14,7 @@ class MRoot extends MCollection {
   MRoot.fromContext(
     MContext context, {
     required bool isMutable,
-  })  : _slot = MValue.withValue(context.value),
+  })  : _slot = MValue.withValue(context.flValue),
         super(context: context, isMutable: isMutable) {
     _slot.updateParent(this);
   }
@@ -56,7 +56,7 @@ class MRoot extends MCollection {
 }
 
 extension on MContext {
-  Pointer<FLValue> get value {
+  Pointer<FLValue> get flValue {
     final data = this.data;
     if (data is Doc) {
       return data.root.pointer;

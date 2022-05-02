@@ -123,7 +123,7 @@ class MDict extends MCollection {
         // ignore: omit_local_variable_types
         final void Function(String) writeKey = dictKeys != null
             ? (key) => dictKeys.getKey(key).encodeTo(encoder)
-            : (key) => encoder.writeKey(key);
+            : encoder.writeKey;
 
         encoder.beginDict(length);
         for (final entry in iterable) {

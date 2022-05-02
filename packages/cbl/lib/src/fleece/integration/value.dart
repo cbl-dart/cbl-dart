@@ -19,12 +19,17 @@ class MValue {
         _value = value,
         _native = hasNative ? native : _emptyNative;
 
-  MValue.empty() : this(null, null, hasNative: false);
+  MValue.empty()
+      : _value = null,
+        _native = _emptyNative;
 
   MValue.withValue(Pointer<FLValue> value)
-      : this(value, null, hasNative: false);
+      : _value = value,
+        _native = _emptyNative;
 
-  MValue.withNative(Object? native) : this(null, native, hasNative: true);
+  MValue.withNative(Object? native)
+      : _value = null,
+        _native = native;
 
   MValue._(Pointer<FLValue>? value, Object? native)
       : _value = value,
@@ -41,7 +46,7 @@ class MValue {
   Pointer<FLValue>? get value => _value;
   Pointer<FLValue>? _value;
 
-  bool get hasNative => _native != _emptyNative;
+  bool get hasNative => !identical(_native, _emptyNative);
   Object? _native;
 
   Object? asNative(MCollection parent) {
@@ -110,7 +115,7 @@ class MValue {
         _native = native;
         _nativeChangeSlot(this);
       }
-    } else if (_native != _emptyNative) {
+    } else if (this.hasNative) {
       _nativeChangeSlot(null);
       _native = _emptyNative;
     }

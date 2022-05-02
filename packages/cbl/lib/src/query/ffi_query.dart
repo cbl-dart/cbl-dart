@@ -8,7 +8,6 @@ import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
-import '../fleece/integration/context.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
