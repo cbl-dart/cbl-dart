@@ -12,25 +12,24 @@ abstract class MCollection {
   MCollection({
     MContext? context,
     this.isMutable = true,
-  })  : _context = context,
+  })  : context = context ?? const MContext(),
         _isMutated = true;
 
   MCollection.asCopy(
     MCollection original, {
     required this.isMutable,
-  })  : _context = original._context,
+  })  : context = original.context,
         _isMutated = true;
 
   MCollection.asChild(
     MValue slot,
     MCollection parent, {
     required this.isMutable,
-  })  : _context = parent._context,
+  })  : context = parent.context,
         _slot = slot,
         _parent = parent,
         _isMutated = slot.isMutated;
 
-  final MContext? _context;
   MValue? _slot;
   MCollection? _parent;
   final bool isMutable;
@@ -42,7 +41,7 @@ abstract class MCollection {
   ///
   /// Collections must ensure that this it's context stays reachable while
   /// accessing Fleece data by using a [cblReachabilityFence].
-  MContext get context => _context ?? const MContext();
+  final MContext context;
 
   bool get hasMutableChildren => isMutable;
 
