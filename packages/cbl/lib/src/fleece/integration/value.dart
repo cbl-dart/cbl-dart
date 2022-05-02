@@ -14,11 +14,6 @@ MDelegate get _delegate => MDelegate.instance!;
 final _emptyNative = Object();
 
 class MValue {
-  MValue(Pointer<FLValue>? value, Object? native, {required bool hasNative})
-      : assert(hasNative || native == null),
-        _value = value,
-        _native = hasNative ? native : _emptyNative;
-
   MValue.empty()
       : _value = null,
         _native = _emptyNative;
@@ -35,6 +30,9 @@ class MValue {
       : _value = value,
         _native = native;
 
+  Pointer<FLValue>? _value;
+  Object? _native;
+
   bool get isEmpty => !hasValue && !hasNative;
 
   bool get isNotEmpty => !isEmpty;
@@ -44,10 +42,8 @@ class MValue {
   bool get hasValue => _value != null;
 
   Pointer<FLValue>? get value => _value;
-  Pointer<FLValue>? _value;
 
   bool get hasNative => !identical(_native, _emptyNative);
-  Object? _native;
 
   Object? asNative(MCollection parent) {
     assert(!isEmpty);

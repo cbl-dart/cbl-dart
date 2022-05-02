@@ -30,6 +30,12 @@ abstract class MCollection {
         _parent = parent,
         _isMutated = slot.isMutated;
 
+  final MContext? _context;
+  MValue? _slot;
+  MCollection? _parent;
+  final bool isMutable;
+  bool _isMutated;
+
   /// The context which this collection uses when reading Fleece data.
   ///
   /// The context owns the Fleece data that this collection is based on.
@@ -37,19 +43,10 @@ abstract class MCollection {
   /// Collections must ensure that this it's context stays reachable while
   /// accessing Fleece data by using a [cblReachabilityFence].
   MContext get context => _context ?? const MContext();
-  final MContext? _context;
-
-  MValue? _slot;
-
-  MCollection? get parent => _parent;
-  MCollection? _parent;
-
-  final bool isMutable;
 
   bool get hasMutableChildren => isMutable;
 
   bool get isMutated => _isMutated;
-  bool _isMutated;
 
   Iterable<MValue> get values;
 
