@@ -220,7 +220,7 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
 
   final List<String> _columnNames;
   final ResultSetIterator _iterator;
-  final MContext _context;
+  final DatabaseMContext _context;
   Result? _current;
 
   @override

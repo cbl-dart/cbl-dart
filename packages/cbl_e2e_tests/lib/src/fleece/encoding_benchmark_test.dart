@@ -46,8 +46,8 @@ class FleeceWrapperEncodingBenchmark extends EncodingBenchmark {
 
   @override
   void run() {
-    final root = MRoot.fromMValue(
-      MValue.withNative(array),
+    final root = MRoot.fromNative(
+      array,
       context: context,
       isMutable: true,
     );

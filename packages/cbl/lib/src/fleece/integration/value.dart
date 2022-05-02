@@ -11,12 +11,13 @@ import 'delegate.dart';
 
 MDelegate get _delegate => MDelegate.instance!;
 
+final _emptyNative = Object();
+
 class MValue {
   MValue(Pointer<FLValue>? value, Object? native, {required bool hasNative})
       : assert(hasNative || native == null),
         _value = value,
-        _hasNative = hasNative,
-        _native = native;
+        _native = hasNative ? native : _emptyNative;
 
   MValue.empty() : this(null, null, hasNative: false);
 
@@ -24,6 +25,10 @@ class MValue {
       : this(value, null, hasNative: false);
 
   MValue.withNative(Object? native) : this(null, native, hasNative: true);
+
+  MValue._(Pointer<FLValue>? value, Object? native)
+      : _value = value,
+        _native = native;
 
   bool get isEmpty => !hasValue && !hasNative;
 
@@ -36,8 +41,7 @@ class MValue {
   Pointer<FLValue>? get value => _value;
   Pointer<FLValue>? _value;
 
-  bool get hasNative => _hasNative;
-  bool _hasNative;
+  bool get hasNative => _native != _emptyNative;
   Object? _native;
 
   Object? asNative(MCollection parent) {
@@ -49,36 +53,37 @@ class MValue {
       var cacheIt = false;
       final native = _delegate.toNative(this, parent, () => cacheIt = true);
 
-      // We keep the data owner alive while toNative is running, so that
+      // We keep the context alive while toNative is running, so that
       // implementations can safely use _value.
-      cblReachabilityFence(parent.dataOwner);
+      cblReachabilityFence(parent.context);
 
       if (cacheIt) {
         _native = native;
-        _hasNative = true;
       }
       return native;
     }
   }
 
-  void setNative(Object? native, MCollection parent) =>
-      _setNative(native, parent: parent, hasNative: true);
+  void setNative(Object? native) {
+    _setNative(native, hasNative: true);
+    _value = null;
+  }
 
   void setEmpty(MCollection parent) {
     if (isEmpty) {
       return;
     }
+    _setNative(null, hasNative: false);
     _value = null;
-    _setNative(null, parent: parent, hasNative: false);
   }
 
   void mutate() {
     _value = null;
   }
 
-  void updateParent(MCollection parent) => _updateNativeParent(this, parent);
+  void updateParent(MCollection parent) => _nativeChangeSlot(this);
 
-  void removeFromParent() => _updateNativeParent(null, null);
+  void removeFromParent() => _nativeChangeSlot(null);
 
   FutureOr<void> encodeTo(FleeceEncoder encoder) {
     assert(!isEmpty);
@@ -91,38 +96,31 @@ class MValue {
     }
   }
 
-  MValue clone() => MValue(_value, _native, hasNative: _hasNative);
+  MValue clone() => MValue._(_value, _native);
 
-  void _setNative(
-    Object? native, {
-    required MCollection parent,
-    required bool hasNative,
-  }) {
+  void _setNative(Object? native, {required bool hasNative}) {
     assert(
       hasNative || native == null,
       'native must be null when hasNative is false',
     );
 
-    if (_native == native && _hasNative == hasNative) {
-      return;
+    if (hasNative) {
+      if (_native != native) {
+        _nativeChangeSlot(null);
+        _native = native;
+        _nativeChangeSlot(this);
+      }
+    } else if (_native != _emptyNative) {
+      _nativeChangeSlot(null);
+      _native = _emptyNative;
     }
-
-    // Update parent of old native value
-    _updateNativeParent(null, null);
-
-    _hasNative = hasNative;
-    _native = native;
-    mutate();
-
-    // Update parent of new native value
-    _updateNativeParent(this, parent);
   }
 
-  void _updateNativeParent(MValue? slot, MCollection? parent) {
-    if (!_hasNative) {
+  void _nativeChangeSlot(MValue? slot) {
+    if (!hasNative) {
       return;
     }
-    _delegate.collectionFromNative(_native)?.updateParent(slot, parent);
+    _delegate.collectionFromNative(_native)?.setSlot(slot, this);
   }
 
   @override
@@ -131,11 +129,10 @@ class MValue {
       other is MValue &&
           runtimeType == other.runtimeType &&
           _value == other._value &&
-          _hasNative == other._hasNative &&
           _native == other._native;
 
   @override
-  int get hashCode => _value.hashCode ^ _hasNative.hashCode ^ _native.hashCode;
+  int get hashCode => _value.hashCode ^ _native.hashCode;
 
   @override
   String toString() => 'MValue('

@@ -89,10 +89,9 @@ class FfiDocumentDelegate extends DocumentDelegate
       .setProperties(native.pointer.cast(), value.cast());
 
   @override
-  MRoot createMRoot(MContext context, {required bool isMutable}) {
-    final result = MRoot.fromValue(
-      _nativeProperties,
-      context: context,
+  MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
+    final result = MRoot.fromContext(
+      DocumentMContext(document, data: FleeceValueObject(_nativeProperties)),
       isMutable: isMutable,
     );
     cblReachabilityFence(native);

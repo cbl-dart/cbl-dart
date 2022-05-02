@@ -86,18 +86,21 @@ abstract class FleeceEncodable {
   FutureOr<void> encodeTo(FleeceEncoder encoder);
 }
 
-class FleeceEncoderContext {
+class FleeceEncoderContext implements DictKeysProvider {
   FleeceEncoderContext({
     this.database,
     this.encodeQueryParameter = false,
     this.saveExternalData = false,
   });
 
-  final Database? database;
+  final DatabaseBase? database;
 
   final bool encodeQueryParameter;
 
   final bool saveExternalData;
+
+  @override
+  DictKeys? get dictKeys => database?.dictKeys;
 }
 
 abstract class MCollectionWrapper {
@@ -107,13 +110,24 @@ abstract class MCollectionWrapper {
 class DatabaseMContext extends MContext {
   DatabaseMContext({
     this.database,
+    Object? data,
     DictKeys? dictKeys,
     SharedKeysTable? sharedKeysTable,
     SharedStringsTable? sharedStringsTable,
   }) : super(
+          data: data,
           dictKeys: dictKeys,
           sharedKeysTable: sharedKeysTable,
           sharedStringsTable: sharedStringsTable,
+        );
+
+  DatabaseMContext.from(DatabaseMContext other, {Object? data})
+      : this(
+          database: other.database,
+          data: data,
+          dictKeys: other.dictKeys,
+          sharedKeysTable: other.sharedKeysTable,
+          sharedStringsTable: other.sharedStringsTable,
         );
 
   final DatabaseBase? database;
@@ -229,7 +243,7 @@ bool valueWouldChange(
   final flValue = oldValue.value;
   if (flValue != null) {
     final valueType = _valueBinds.getType(flValue);
-    cblReachabilityFence(container.dataOwner);
+    cblReachabilityFence(container.context);
     if (valueType == FLValueType.array || valueType == FLValueType.dict) {
       return true;
     }

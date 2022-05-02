@@ -101,6 +101,12 @@ class _OptimizedDictKey extends DictKey {
   }
 }
 
+/// An object which might be able to provide [DictKeys].
+abstract class DictKeysProvider {
+  /// The [DictKeys] associated with this object, if available.
+  DictKeys? get dictKeys;
+}
+
 /// A provider of [DictKey]s.
 ///
 /// A [DictKeys] instance must only be used for Fleece data that shares the same

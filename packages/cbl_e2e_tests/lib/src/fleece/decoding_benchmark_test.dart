@@ -82,17 +82,15 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
   void run() {
     final doc =
         fl.Doc.fromResultData(data, FLTrust.trusted, sharedKeys: sharedKeys);
-    final docRoot = doc.root;
-    final root = MRoot.fromValue(
-      docRoot.pointer,
-      context: MContext(
+    final root = MRoot.fromContext(
+      MContext(
+        data: doc,
         dictKeys: dictKeys,
         sharedKeysTable: sharedKeysTable,
         sharedStringsTable: SharedStringsTable(),
       ),
       isMutable: false,
     );
-    cblReachabilityFence(docRoot);
     (root.asNative! as Array).toPlainList();
   }
 }

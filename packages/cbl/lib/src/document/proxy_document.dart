@@ -2,11 +2,11 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../database/proxy_database.dart';
 import '../fleece/containers.dart';
-import '../fleece/integration/context.dart';
 import '../fleece/integration/root.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
+import '../support/native_object.dart';
 import 'document.dart';
 
 class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
@@ -52,21 +52,25 @@ class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
   final Dict? _propertiesDict;
 
   @override
-  MRoot createMRoot(MContext context, {required bool isMutable}) {
+  MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
     final propertiesDict = _propertiesDict;
     if (propertiesDict != null) {
-      final result = MRoot.fromValue(
-        propertiesDict.pointer,
-        context: context,
+      final result = MRoot.fromContext(
+        DocumentMContext(
+          document,
+          data: FleeceValueObject(propertiesDict.pointer),
+        ),
         isMutable: isMutable,
       );
       cblReachabilityFence(propertiesDict);
       return result;
     }
 
-    return MRoot.fromData(
-      properties!.toFleece().toSliceResult(),
-      context: context,
+    return MRoot.fromContext(
+      DocumentMContext(
+        document,
+        data: Doc.fromResultData(properties!.toFleece(), FLTrust.trusted),
+      ),
       isMutable: isMutable,
     );
   }

@@ -310,6 +310,53 @@ void main() {
         final doc = MutableDocument(data);
         expect(doc.toPlainMap(), data);
       });
+
+      test('add child collection to two documents', () {
+        final docA = MutableDocument();
+        final docB = MutableDocument();
+        final child = MutableDictionary({'a': 'b'});
+
+        // Add child to both documents.
+        docA.setValue(child, key: 'docA');
+        docB.setValue(child, key: 'docB');
+        expect(docA.toPlainMap(), {
+          'docA': {'a': 'b'}
+        });
+        expect(docB.toPlainMap(), {
+          'docB': {'a': 'b'}
+        });
+
+        // Modify the child collection.
+        child.setValue('c', key: 'a');
+        expect(docA.toPlainMap(), {
+          'docA': {'a': 'c'}
+        });
+        expect(docB.toPlainMap(), {
+          'docB': {'a': 'c'}
+        });
+      });
+
+      test('move child collection between two documents', () {
+        final docA = MutableDocument();
+        final docB = MutableDocument();
+        final child = MutableDictionary({'a': 'b'});
+
+        // Add child to both documents and than remove it from docA.
+        docA.setValue(child, key: 'docA');
+        docB.setValue(child, key: 'docB');
+        docA.removeValue('docA');
+        expect(docA.toPlainMap(), <String, Object?>{});
+        expect(docB.toPlainMap(), {
+          'docB': {'a': 'b'}
+        });
+
+        // Modify the child collection.
+        child.setValue('c', key: 'a');
+        expect(docA.toPlainMap(), <String, Object?>{});
+        expect(docB.toPlainMap(), {
+          'docB': {'a': 'c'}
+        });
+      });
     });
 
     test('implements MutableDictionaryInterface for properties', () {

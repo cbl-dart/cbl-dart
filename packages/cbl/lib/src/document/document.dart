@@ -3,7 +3,10 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:cbl_ffi/cbl_ffi.dart';
+
 import '../database/database_base.dart';
+import '../fleece/containers.dart' show Doc;
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
@@ -84,9 +87,8 @@ abstract class DocumentDelegate {
   /// Creates a new [MRoot] which contains the documents properties, based on
   /// the current state of this delegate.
   ///
-  /// The returned [MRoot] must use the provided [context] and have the
-  /// mutability as required by [isMutable].
-  MRoot createMRoot(MContext context, {required bool isMutable});
+  /// The returned [MRoot] must have the mutability as required by [isMutable].
+  MRoot createMRoot(DelegateDocument document, {required bool isMutable});
 
   /// Returns a copy of this delegate which can be used for a mutable document.
   DocumentDelegate toMutable();
@@ -119,7 +121,7 @@ class NewDocumentDelegate extends DocumentDelegate {
   EncodedData? properties;
 
   @override
-  MRoot createMRoot(MContext context, {required bool isMutable}) {
+  MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
     assert(isMutable);
 
     final properties = this.properties;
@@ -127,16 +129,18 @@ class NewDocumentDelegate extends DocumentDelegate {
       // Usually a new document doesn't have properties, unless it is being
       // used to insert a document that was created remotely (meaning another
       // isolate or even process).
-      return MRoot.fromData(
-        properties.toFleece().toSliceResult(),
-        context: context,
+      return MRoot.fromContext(
+        DocumentMContext(
+          document,
+          data: Doc.fromResultData(properties.toFleece(), FLTrust.trusted),
+        ),
         isMutable: isMutable,
       );
     }
 
-    return MRoot.fromMValue(
-      MValue.withNative(MutableDictionary()),
-      context: context,
+    return MRoot.fromNative(
+      MutableDictionary(),
+      context: DocumentMContext(document),
       isMutable: isMutable,
     );
   }
@@ -147,11 +151,14 @@ class NewDocumentDelegate extends DocumentDelegate {
 
 /// The context for [MCollection]s within a [DelegateDocument].
 class DocumentMContext implements DatabaseMContext {
-  DocumentMContext(this.document);
+  DocumentMContext(this.document, {this.data});
 
   /// The [DelegateDocument] to which [MCollection]s with this context belong
   /// to.
   final DelegateDocument document;
+
+  @override
+  final Object? data;
 
   @override
   DictKeys get dictKeys =>
@@ -236,7 +243,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
   String get _typeName => 'Document';
 
   void _setupProperties() {
-    _root = delegate.createMRoot(DocumentMContext(this), isMutable: _isMutable);
+    _root = delegate.createMRoot(this, isMutable: _isMutable);
     _properties = _root.asNative! as Dictionary;
   }
 

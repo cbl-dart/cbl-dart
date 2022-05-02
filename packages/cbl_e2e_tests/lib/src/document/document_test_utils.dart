@@ -1,12 +1,15 @@
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/dictionary.dart';
+import 'package:cbl/src/fleece/containers.dart' show Doc;
 import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/dict_key.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
+import 'package:cbl_ffi/cbl_ffi.dart';
 
-MContext createTestMContext() => MContext(
+MContext createTestMContext(Object data) => MContext(
+      data: data,
       dictKeys: OptimizingDictKeys(),
       sharedKeysTable: SharedKeysTable(),
       sharedStringsTable: SharedStringsTable(),
@@ -17,9 +20,8 @@ Array immutableArray([List<Object?>? data]) {
   final encoder = FleeceEncoder();
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
-  final root = MRoot.fromData(
-    fleeceData.toSliceResult(),
-    context: createTestMContext(),
+  final root = MRoot.fromContext(
+    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.trusted)),
     isMutable: false,
   );
   // ignore: cast_nullable_to_non_nullable
@@ -31,9 +33,8 @@ Dictionary immutableDictionary([Map<String, Object?>? data]) {
   final encoder = FleeceEncoder();
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
-  final root = MRoot.fromData(
-    fleeceData.toSliceResult(),
-    context: createTestMContext(),
+  final root = MRoot.fromContext(
+    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.trusted)),
     isMutable: false,
   );
   // ignore: cast_nullable_to_non_nullable
