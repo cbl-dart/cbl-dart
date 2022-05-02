@@ -1,9 +1,10 @@
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/database/database_base.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/common.dart';
 import 'package:cbl/src/fleece/encoder.dart';
-import 'package:cbl/src/fleece/integration/integration.dart';
 import 'package:cbl/src/query/result.dart';
+import 'package:cbl/src/query/result_set.dart';
 
 import '../../test_binding_impl.dart';
 import '../fixtures/values.dart';
@@ -237,7 +238,12 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
   assert(encodingResult is! Future);
   return ResultImpl.fromValuesData(
     encoder.finish(),
-    context: MContext(),
+    context: createResultSetMContext(MockDatabase()),
     columnNames: columnNames,
   );
+}
+
+class MockDatabase implements DatabaseBase {
+  @override
+  dynamic noSuchMethod(Invocation invocation) {}
 }

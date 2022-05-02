@@ -7,12 +7,14 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../document.dart';
 import '../document/array.dart';
+import '../document/common.dart';
 import '../document/dictionary.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../service/cbl_service_api.dart';
 import '../support/encoding.dart';
+import '../support/native_object.dart';
 import 'result_set.dart';
 
 /// A single row in a [ResultSet].
@@ -116,7 +118,7 @@ abstract class Result
 class ResultImpl with IterableMixin<String> implements Result {
   factory ResultImpl.fromTransferableValue(
     TransferableValue value, {
-    required MContext context,
+    required DatabaseMContext context,
     required List<String> columnNames,
   }) {
     final encodedData = value.encodedData;
@@ -141,7 +143,7 @@ class ResultImpl with IterableMixin<String> implements Result {
   /// The [context] must not be shared with other [Result]s.
   ResultImpl.fromValuesData(
     Data data, {
-    required MContext context,
+    required DatabaseMContext context,
     required List<String> columnNames,
   })  : _context = context,
         _columnNames = columnNames,
@@ -154,14 +156,14 @@ class ResultImpl with IterableMixin<String> implements Result {
   /// that all results are from the same chunk of encoded Fleece data.
   ResultImpl.fromValuesArray(
     fl.Array array, {
-    required MContext context,
+    required DatabaseMContext context,
     required List<String> columnNames,
   })  : _context = context,
         _columnNames = columnNames,
         columnValuesArray = array,
         columnValuesData = null;
 
-  final MContext _context;
+  final DatabaseMContext _context;
   final List<String> _columnNames;
   final Data? columnValuesData;
   final fl.Array? columnValuesArray;
@@ -333,16 +335,20 @@ class ResultImpl with IterableMixin<String> implements Result {
   ArrayImpl _createArray() {
     MRoot root;
     if (columnValuesArray != null) {
-      root = MRoot.fromValue(
-        columnValuesArray!.pointer,
-        context: _context,
+      root = MRoot.fromContext(
+        DatabaseMContext.from(
+          _context,
+          data: FleeceValueObject(columnValuesArray!.pointer),
+        ),
         isMutable: false,
       );
       cblReachabilityFence(columnValuesArray);
     } else {
-      root = MRoot.fromData(
-        columnValuesData!.toSliceResult(),
-        context: _context,
+      root = MRoot.fromContext(
+        DatabaseMContext.from(
+          _context,
+          data: fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted),
+        ),
         isMutable: false,
       );
     }

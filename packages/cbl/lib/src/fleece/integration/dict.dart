@@ -5,6 +5,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../support/utils.dart';
 import '../decoder.dart';
+import '../dict_key.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
@@ -27,11 +28,8 @@ class MDict extends MCollection {
         super.asCopy(original, isMutable: isMutable ?? original.isMutable);
 
   MDict.asChild(MValue slot, MCollection parent, int length, {bool? isMutable})
-      :
-        // ignore: cast_nullable_to_non_nullable
-        _dict = slot.value!.cast(),
+      : _dict = slot.value!.cast(),
         _values = {},
-        // ignore: cast_nullable_to_non_nullable
         _length = length,
         _valuesHasAllKeys = false,
         super.asChild(
@@ -64,7 +62,7 @@ class MDict extends MCollection {
     if (value.isEmpty) {
       _length++;
     }
-    value.setNative(native, this);
+    value.setNative(native);
   }
 
   void remove(String key) {
@@ -109,7 +107,7 @@ class MDict extends MCollection {
         _values[key] = MValue.empty();
       }
       cblReachabilityFence(it);
-      cblReachabilityFence(dataOwner);
+      cblReachabilityFence(context);
     }
   }
 
@@ -119,14 +117,21 @@ class MDict extends MCollection {
       encoder.writeValue(_dict!.cast());
     } else {
       return syncOrAsync(() sync* {
-        final dictKeys = context.dictKeys;
+        final extraInfo = encoder.extraInfo;
+        final dictKeys =
+            extraInfo is DictKeysProvider ? extraInfo.dictKeys : null;
+        // ignore: omit_local_variable_types
+        final void Function(String) writeKey = dictKeys != null
+            ? (key) => dictKeys.getKey(key).encodeTo(encoder)
+            : encoder.writeKey;
+
         encoder.beginDict(length);
         for (final entry in iterable) {
           final value = entry.value;
           if (value is _MValueWithKey) {
             encoder.writeKeyValue(value.key);
           } else {
-            dictKeys.getKey(entry.key).encodeTo(encoder);
+            writeKey(entry.key);
           }
           if (value.hasValue) {
             encoder.writeValue(value.value!);
@@ -188,7 +193,7 @@ class MDict extends MCollection {
     _valuesHasAllKeys = true;
 
     cblReachabilityFence(it);
-    cblReachabilityFence(dataOwner);
+    cblReachabilityFence(context);
   }
 
   MValue _getValue(String key) =>
@@ -201,7 +206,7 @@ class MDict extends MCollection {
     }
 
     final flValue = context.dictKeys.getKey(key).getValue(dict);
-    cblReachabilityFence(dataOwner);
+    cblReachabilityFence(context);
     if (flValue == null) {
       return null;
     }

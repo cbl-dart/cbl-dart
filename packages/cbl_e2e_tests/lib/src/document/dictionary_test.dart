@@ -304,6 +304,35 @@ void main() {
           'dictionary': {'key': 'value'},
         });
       });
+
+      group('from immutable', () {
+        test('share child collection', () {
+          final a = immutableDictionary({
+            'a': {'k': 'v'}
+          }).toMutable();
+          final b = MutableDictionary({'b': a.value('a')});
+
+          expect(a.toPlainMap(), {
+            'a': {'k': 'v'}
+          });
+          expect(b.toPlainMap(), {
+            'b': {'k': 'v'}
+          });
+        });
+
+        test('move child collection', () {
+          final a = immutableDictionary({
+            'a': {'k': 'v'}
+          }).toMutable();
+          final b = MutableDictionary({'b': a.value('a')});
+          a.removeValue('a');
+
+          expect(a.toPlainMap(), isEmpty);
+          expect(b.toPlainMap(), {
+            'b': {'k': 'v'}
+          });
+        });
+      });
     });
   });
 }

@@ -360,6 +360,35 @@ void main() {
         final array = MutableArray();
         expect(() => array.removeValue(0), throwsRangeError);
       });
+
+      group('from immutable', () {
+        test('share child collection', () {
+          final a = immutableArray([
+            ['a']
+          ]).toMutable();
+          final b = MutableArray([a.value(0)]);
+
+          expect(a.toPlainList(), [
+            ['a']
+          ]);
+          expect(b.toPlainList(), [
+            ['a']
+          ]);
+        });
+
+        test('move child collection', () {
+          final a = immutableArray([
+            ['a']
+          ]).toMutable();
+          final b = MutableArray([a.value(0)]);
+          a.removeValue(0);
+
+          expect(a.toPlainList(), isEmpty);
+          expect(b.toPlainList(), [
+            ['a']
+          ]);
+        });
+      });
     });
   });
 }

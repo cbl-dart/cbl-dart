@@ -52,7 +52,7 @@ class MArray extends MCollection {
     var value = _values[index];
     if (value == null) {
       value = _values[index] = _loadMValue(index);
-      cblReachabilityFence(dataOwner);
+      cblReachabilityFence(context);
     }
 
     return value;
@@ -67,7 +67,7 @@ class MArray extends MCollection {
     }
 
     mutate();
-    (_values[index] ??= MValue.empty()).setNative(native, this);
+    (_values[index] ??= MValue.empty()).setNative(native);
 
     return true;
   }
@@ -84,7 +84,7 @@ class MArray extends MCollection {
     }
 
     mutate();
-    _values.insert(index, MValue.empty()..setNative(native, this));
+    _values.insert(index, MValue.empty()..setNative(native));
 
     return true;
   }
@@ -159,7 +159,7 @@ class MArray extends MCollection {
       yield _values[i] ??= _loadMValue(i);
     }
 
-    cblReachabilityFence(dataOwner);
+    cblReachabilityFence(context);
   }
 
   void _populateValues() {
@@ -175,7 +175,7 @@ class MArray extends MCollection {
       i++;
     }
 
-    cblReachabilityFence(dataOwner);
+    cblReachabilityFence(context);
   }
 
   MValue _loadMValue(int index) =>

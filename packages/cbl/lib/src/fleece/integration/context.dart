@@ -2,7 +2,8 @@ import '../decoder.dart';
 import '../dict_key.dart';
 
 class MContext {
-  MContext({
+  const MContext({
+    this.data,
     DictKeys? dictKeys,
     SharedKeysTable? sharedKeysTable,
     SharedStringsTable? sharedStringsTable,
@@ -11,20 +12,8 @@ class MContext {
         sharedStringsTable =
             sharedStringsTable ?? const NoopSharedStringsTable();
 
+  final Object? data;
   final DictKeys dictKeys;
   final SharedKeysTable sharedKeysTable;
   final SharedStringsTable sharedStringsTable;
-}
-
-class NoopMContext implements MContext {
-  const NoopMContext();
-
-  @override
-  DictKeys get dictKeys => const UnoptimizingDictKeys();
-
-  @override
-  SharedKeysTable get sharedKeysTable => const NoopSharedKeysTable();
-
-  @override
-  SharedStringsTable get sharedStringsTable => const NoopSharedStringsTable();
 }

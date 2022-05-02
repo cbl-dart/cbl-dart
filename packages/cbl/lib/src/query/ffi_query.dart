@@ -8,7 +8,6 @@ import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
-import '../fleece/integration/context.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
@@ -220,7 +219,7 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
 
   final List<String> _columnNames;
   final ResultSetIterator _iterator;
-  final MContext _context;
+  final DatabaseMContext _context;
   Result? _current;
 
   @override

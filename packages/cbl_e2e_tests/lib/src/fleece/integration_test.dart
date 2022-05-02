@@ -2,6 +2,7 @@
 
 import 'dart:ffi';
 
+import 'package:cbl/src/fleece/containers.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -283,9 +284,8 @@ void main() {
   });
 }
 
-MRoot testMRoot(Object from) => MRoot.fromData(
-      fleeceEncode(from).toSliceResult(),
-      context: MContext(),
+MRoot testMRoot(Object from) => MRoot.fromContext(
+      MContext(data: Doc.fromResultData(fleeceEncode(from), FLTrust.trusted)),
       isMutable: true,
     );
 

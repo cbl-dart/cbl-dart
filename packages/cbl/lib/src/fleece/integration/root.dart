@@ -3,52 +3,37 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../support/ffi.dart';
 import '../../support/native_object.dart';
+import '../containers.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'context.dart';
 import 'value.dart';
 
-late final _valueBinds = cblBindings.fleece.value;
-
 class MRoot extends MCollection {
-  MRoot.fromData(
-    SliceResult data, {
-    required MContext context,
+  MRoot.fromContext(
+    MContext context, {
     required bool isMutable,
-  })  : _slot = MValue.withValue(_valueBinds.fromData(data, FLTrust.trusted)!),
-        super(context: context, isMutable: isMutable, dataOwner: data) {
+  })  : _slot = MValue.withValue(context.flValue),
+        super(context: context, isMutable: isMutable) {
     _slot.updateParent(this);
   }
 
-  MRoot.fromValue(
-    Pointer<FLValue> value, {
+  MRoot.fromNative(
+    Object native, {
     required MContext context,
     required bool isMutable,
-  })  : _slot = MValue.withValue(value),
+  })  : assert(native is! Pointer),
+        assert(context.data == null),
+        _slot = MValue.withNative(native),
         super(
           context: context,
           isMutable: isMutable,
-          dataOwner: FleeceValueObject(value),
         ) {
     _slot.updateParent(this);
   }
 
-  MRoot.fromMValue(
-    MValue value, {
-    required MContext context,
-    required bool isMutable,
-  })  : _slot = value,
-        super(
-          context: context,
-          isMutable: isMutable,
-          dataOwner: value.hasValue ? FleeceValueObject(value.value!) : null,
-        ) {
-    _slot.updateParent(this);
-  }
-
-  late final MValue _slot;
+  final MValue _slot;
 
   @override
   bool get isMutated => _slot.isMutated;
@@ -67,5 +52,18 @@ class MRoot extends MCollection {
     final result = encodeTo(encoder);
     assert(result is! Future);
     return encoder.finish();
+  }
+}
+
+extension on MContext {
+  Pointer<FLValue> get flValue {
+    final data = this.data;
+    if (data is Doc) {
+      return data.root.pointer;
+    } else if (data is FleeceValueObject) {
+      return data.pointer.cast();
+    } else {
+      throw UnsupportedError('Unsupported MContext.data value: $data');
+    }
   }
 }
