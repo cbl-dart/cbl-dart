@@ -155,3 +155,15 @@ class BuiltinScalarType extends TypedDataType {
         isNullable: isNullable,
       );
 }
+
+class TypedDataObjectType extends TypedDataType {
+  TypedDataObjectType({
+    required String dartType,
+    required bool isNullable,
+  }) : super(
+          dartType: dartType,
+          isNullable: isNullable,
+        );
+
+  late final classNames = TypedDataObjectClassNames(dartType);
+}

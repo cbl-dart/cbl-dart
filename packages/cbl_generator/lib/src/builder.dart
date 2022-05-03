@@ -20,6 +20,7 @@ class TypedDataBuilder extends PartBuilder {
     'avoid_positional_boolean_parameters',
     'lines_longer_than_80_chars',
     'invalid_use_of_internal_member',
+    'parameter_assignments',
   ];
 
   @visibleForTesting

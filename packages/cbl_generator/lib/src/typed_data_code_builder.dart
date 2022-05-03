@@ -75,6 +75,7 @@ class TypeDataCodeBuilder {
       ..writeln('  final I internal;')
       ..writeln();
 
+    // Document metadata fields
     final idFieldName = object.documentIdField?.nameInDart;
     if (idFieldName != null) {
       _code
@@ -105,13 +106,21 @@ class TypeDataCodeBuilder {
         ..writeln();
     }
 
+    // Property getters
     for (final property in object.properties) {
+      final type = property.type;
+      if (type is TypedDataObjectType) {
+        // Getters of properties of this type are implemented differently for
+        // immutable and mutable objects.
+        continue;
+      }
+
       final accessor = property.isNullable
           ? 'InternalTypedDataHelpers.nullableProperty'
           : 'InternalTypedDataHelpers.property';
       _code.writeln('''
 @override
-${property.type.dartTypeWithNullability} get ${property.nameInDart} => $accessor(
+${type.dartTypeWithNullability} get ${property.nameInDart} => $accessor(
     internal: internal,
     name: ${escapeDartString(property.nameInDart)},
     key: ${escapeDartString(property.nameInData)},
@@ -119,6 +128,7 @@ ${property.type.dartTypeWithNullability} get ${property.nameInDart} => $accessor
 ''');
     }
 
+    // `toMutable` method
     _code
       ..writeln('  @override')
       ..writeln('  ${_classNames.mutableClassName} toMutable() => '
@@ -134,7 +144,31 @@ ${property.type.dartTypeWithNullability} get ${property.nameInDart} => $accessor
       ..write('  ')
       ..write(_classNames.immutableClassName)
       ..writeln('.internal($_internalType internal): super(internal);')
-      ..writeln('}');
+      ..writeln();
+
+    // Property getters for typed data objects
+    for (final property in object.properties) {
+      final type = property.type;
+      if (type is! TypedDataObjectType) {
+        continue;
+      }
+
+      final helper = property.isNullable
+          ? 'InternalTypedDataHelpers.nullableTypedDataProperty'
+          : 'InternalTypedDataHelpers.typedDataProperty';
+
+      _code.writeln('''
+@override
+late final ${property.nameInDart} = $helper(
+  internal: internal,
+  name: ${escapeDartString(property.nameInDart)},
+  key: ${escapeDartString(property.nameInData)},
+  factory: ${type.classNames.immutableClassName}.internal,
+);
+''');
+    }
+
+    _code.writeln('}');
   }
 
   void _writeMutableClass() {
@@ -216,7 +250,7 @@ ${property.type.dartTypeWithNullability} get ${property.nameInDart} => $accessor
 
     _code.write(')');
 
-    // Field initializers
+    // Property initializers
     if (object.properties.isEmpty) {
       _code.writeln(';');
     } else {
@@ -249,27 +283,77 @@ ${property.type.dartTypeWithNullability} get ${property.nameInDart} => $accessor
       ..writeln('.internal($_mutableInternalType internal): super(internal);')
       ..writeln();
 
-    // Field setters
-    for (final field in object.properties) {
-      _code
-        ..write('  set ')
-        ..write(field.nameInDart)
-        ..write('(')
-        ..write(field.type.dartTypeWithNullability)
-        ..write(' value) => ');
+    for (final property in object.properties) {
+      final type = property.type;
+      if (type is TypedDataObjectType) {
+        // Property getter for typed data objects
+        final helper = property.isNullable
+            ? 'InternalTypedDataHelpers.mutableNullableTypedDataProperty'
+            : 'InternalTypedDataHelpers.mutableTypedDataProperty';
 
-      if (field.isNullable) {
+        final storageFieldName = '_${property.nameInDart}';
+
+        _code.writeln('''
+late ${type.dartTypeWithNullability} $storageFieldName = $helper(
+  internal: internal,
+  name: ${escapeDartString(property.nameInDart)},
+  key: ${escapeDartString(property.nameInData)},
+  factory: ${type.classNames.immutableClassName}.internal,
+);
+
+@override
+${type.dartTypeWithNullability} get ${property.nameInDart} => $storageFieldName;
+''');
+
+        // Property setter for type data object
+        if (type.isNullable) {
+          _code.writeln('''
+set ${property.nameInDart}(${type.classNames.declaringClassName}? value) {
+  if (value != null) {
+    if (value is! ${type.classNames.mutableClassName}) {
+      value = value.toMutable();
+    }
+    $storageFieldName = value;
+    internal.setValue(value.internal, key: ${escapeDartString(property.nameInData)});
+  } else {
+    $storageFieldName = null;
+    internal.removeValue(${escapeDartString(property.nameInData)});
+  }
+}
+''');
+        } else {
+          _code.writeln('''
+set ${property.nameInDart}(${type.classNames.declaringClassName} value) {
+  if (value is! ${type.classNames.mutableClassName}) {
+    value = value.toMutable();
+  }
+  $storageFieldName = value;
+  internal.setValue(value.internal, key: ${escapeDartString(property.nameInData)});
+}
+''');
+        }
+      } else {
+        // Property setters for primitive types
         _code
-          ..write('value == null ? internal.removeValue(')
-          ..write(escapeDartString(field.nameInData))
-          ..write(') : ');
-      }
+          ..write('  set ')
+          ..write(property.nameInDart)
+          ..write('(')
+          ..write(property.type.dartTypeWithNullability)
+          ..write(' value) => ');
 
-      _code
-        ..write('internal.setValue(value, key: ')
-        ..write(escapeDartString(field.nameInData))
-        ..writeln(');')
-        ..writeln();
+        if (property.isNullable) {
+          _code
+            ..write('value == null ? internal.removeValue(')
+            ..write(escapeDartString(property.nameInData))
+            ..write(') : ');
+        }
+
+        _code
+          ..write('internal.setValue(value, key: ')
+          ..write(escapeDartString(property.nameInData))
+          ..writeln(');')
+          ..writeln();
+      }
     }
 
     _code.writeln('}');

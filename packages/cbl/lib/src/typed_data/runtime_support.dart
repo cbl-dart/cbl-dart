@@ -52,6 +52,66 @@ class InternalTypedDataHelpers {
       TypedDataErrorCode.dataMismatch,
     );
   }
+
+  @internal
+  static T typedDataProperty<T>({
+    required DictionaryInterface internal,
+    required String name,
+    required String key,
+    required Factory<Dictionary, T> factory,
+  }) {
+    final data = InternalTypedDataHelpers.property<Dictionary>(
+      internal: internal,
+      name: name,
+      key: key,
+    );
+    return factory(data);
+  }
+
+  @internal
+  static T? nullableTypedDataProperty<T>({
+    required DictionaryInterface internal,
+    required String name,
+    required String key,
+    required Factory<Dictionary, T> factory,
+  }) {
+    final data = InternalTypedDataHelpers.nullableProperty<Dictionary?>(
+      internal: internal,
+      name: name,
+      key: key,
+    );
+    return data == null ? null : factory(data);
+  }
+
+  @internal
+  static T mutableTypedDataProperty<T>({
+    required DictionaryInterface internal,
+    required String name,
+    required String key,
+    required Factory<MutableDictionary, T> factory,
+  }) {
+    final data = InternalTypedDataHelpers.property<MutableDictionary>(
+      internal: internal,
+      name: name,
+      key: key,
+    );
+    return factory(data);
+  }
+
+  @internal
+  static T? mutableNullableTypedDataProperty<T>({
+    required DictionaryInterface internal,
+    required String name,
+    required String key,
+    required Factory<MutableDictionary, T> factory,
+  }) {
+    final data = InternalTypedDataHelpers.nullableProperty<MutableDictionary?>(
+      internal: internal,
+      name: name,
+      key: key,
+    );
+    return data == null ? null : factory(data);
+  }
 }
 
 // === Typed data model ========================================================

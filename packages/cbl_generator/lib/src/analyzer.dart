@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:cbl/cbl.dart';
 import 'package:collection/collection.dart';
@@ -421,17 +422,34 @@ class TypedDataAnalyzer {
   TypedDataType _resolveTypedDataType(VariableElement element) {
     final type = element.type;
     final typeName = type.getDisplayString(withNullability: false);
+    final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
 
-    if (!isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
-      throw InvalidGenerationSourceError(
-        'Unsupported type: $typeName',
-        element: element,
+    if (isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
+      return BuiltinScalarType(
+        dartType: typeName,
+        isNullable: isNullable,
       );
     }
 
-    return BuiltinScalarType(
-      dartType: typeName,
-      isNullable: type.nullabilitySuffix == NullabilitySuffix.question,
+    if (_isTypedDataObject(type)) {
+      return TypedDataObjectType(
+        dartType: typeName,
+        isNullable: isNullable,
+      );
+    }
+
+    throw InvalidGenerationSourceError(
+      'Unsupported type: $typeName',
+      element: element,
     );
   }
+}
+
+bool _isTypedDataObject(DartType type) {
+  if (type is InterfaceType) {
+    return _typedDictionaryType.hasAnnotationOfExact(type.element) ||
+        _typedDocumentType.hasAnnotationOfExact(type.element);
+  }
+
+  return false;
 }
