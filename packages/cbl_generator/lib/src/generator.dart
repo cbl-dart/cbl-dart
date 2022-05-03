@@ -11,9 +11,9 @@ import 'typed_data_code_builder.dart';
 import 'typed_database_code_builder.dart';
 
 class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
-  _TypedDictionaryGeneratorBase(this.type);
+  _TypedDictionaryGeneratorBase(this.kind);
 
-  final TypedDataType type;
+  final TypedDataObjectKind kind;
 
   @override
   Future<String?> generateForAnnotatedElement(
@@ -22,19 +22,19 @@ class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
     BuildStep buildStep,
   ) async {
     final model = await TypedDataAnalyzer(buildStep.resolver)
-        .buildTypedDataClassModel(element, type: type);
-    return TypeDataCodeBuilder(clazz: model).build();
+        .buildTypedDataClassModel(element, kind: kind);
+    return TypeDataCodeBuilder(object: model).build();
   }
 }
 
 class TypedDictionaryGenerator
     extends _TypedDictionaryGeneratorBase<TypedDictionary> {
-  TypedDictionaryGenerator() : super(TypedDataType.dictionary);
+  TypedDictionaryGenerator() : super(TypedDataObjectKind.dictionary);
 }
 
 class TypedDocumentGenerator
     extends _TypedDictionaryGeneratorBase<TypedDocument> {
-  TypedDocumentGenerator() : super(TypedDataType.document);
+  TypedDocumentGenerator() : super(TypedDataObjectKind.document);
 }
 
 class TypedDatabaseGenerator extends Generator {

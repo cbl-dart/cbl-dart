@@ -47,28 +47,28 @@ class TypeDataBaseCodeBuilder {
     return _code.toString();
   }
 
-  void _writeTypedDataMetadata(TypedDataClassModel type) {
-    switch (type.type) {
-      case TypedDataType.dictionary:
+  void _writeTypedDataMetadata(TypedDataObjectModel object) {
+    switch (object.kind) {
+      case TypedDataObjectKind.dictionary:
         _code.write('TypedDictionaryMetadata');
         break;
-      case TypedDataType.document:
+      case TypedDataObjectKind.document:
         _code.write('TypedDocumentMetadata');
         break;
     }
 
     _code
       ..writeln(
-        '<${type.classNames.declaringClassName},'
-        ' ${type.classNames.mutableClassName}>(',
+        '<${object.classNames.declaringClassName},'
+        ' ${object.classNames.mutableClassName}>(',
       )
-      ..writeln("dartName: '${type.classNames.declaringClassName}',")
-      ..writeln('factory: ${type.classNames.immutableClassName}.internal,')
+      ..writeln("dartName: '${object.classNames.declaringClassName}',")
+      ..writeln('factory: ${object.classNames.immutableClassName}.internal,')
       ..writeln(
-        'mutableFactory: ${type.classNames.mutableClassName}.internal,',
+        'mutableFactory: ${object.classNames.mutableClassName}.internal,',
       );
 
-    final typeMatcher = type.typeMatcher;
+    final typeMatcher = object.typeMatcher;
     if (typeMatcher is ValueTypeMatcher) {
       final pathLiteral = typeMatcher.path.map((segment) {
         if (segment is String) {

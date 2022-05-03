@@ -14,7 +14,6 @@ const _intType = TypeChecker.fromRuntime(int);
 const _doubleType = TypeChecker.fromRuntime(double);
 const _numType = TypeChecker.fromRuntime(num);
 const _boolType = TypeChecker.fromRuntime(bool);
-const _dateTimeType = TypeChecker.fromRuntime(DateTime);
 
 // cbl annotation types
 const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
@@ -32,7 +31,6 @@ const _builtinSupportedTypes = [
   _doubleType,
   _numType,
   _boolType,
-  _dateTimeType,
   _blobType,
 ];
 
@@ -79,16 +77,18 @@ class TypedDataAnalyzer {
     );
   }
 
-  Future<TypedDataClassModel> buildTypedDataClassModel(
+  Future<TypedDataObjectModel> buildTypedDataClassModel(
     Element element, {
-    TypedDataType? type,
+    TypedDataObjectKind? kind,
   }) async {
     // Validate element is an abstract class.
     if (element is! ClassElement) {
-      final annotationDescription = type == null
-          ? '${_describeTypedDataAnnotation(TypedDataType.dictionary)} and '
-              '${_describeTypedDataAnnotation(TypedDataType.document)}'
-          : _describeTypedDataAnnotation(type);
+      final annotationDescription = kind == null
+          // ignore: prefer_interpolation_to_compose_strings
+          ? _describeTypedDataAnnotation(TypedDataObjectKind.dictionary) +
+              ' and ' +
+              _describeTypedDataAnnotation(TypedDataObjectKind.document)
+          : _describeTypedDataAnnotation(kind);
       throw InvalidGenerationSourceError(
         '$annotationDescription can only be used on a class.',
         element: element,
@@ -97,20 +97,21 @@ class TypedDataAnalyzer {
 
     final annotatedClass = element;
 
-    type ??= _checkTypedDataAnnotation(annotatedClass, type);
+    kind ??= _checkTypedDataAnnotation(annotatedClass, kind);
 
-    final classNames = TypedDataClassNames(annotatedClass.displayName);
+    final classNames = TypedDataObjectClassNames(annotatedClass.displayName);
 
     await _checkAnnotatedTypedDataClass(
       annotatedClass,
       resolver,
       classNames,
-      type,
+      kind,
     );
 
-    final fields = _resolveTypedDataFields(annotatedClass, type);
-    final documentIdField =
-        fields.firstWhereOrNull((field) => field.isDocumentId);
+    final fields = _resolveTypedDataFields(annotatedClass, kind);
+    final documentIdField = fields
+        .whereType<TypedDataMetadataField>()
+        .firstWhereOrNull((field) => field.kind == DocumentMetadataKind.id);
 
     final documentIdFieldName =
         _resolveMetaDataFieldName<DocumentId, String>(annotatedClass);
@@ -122,7 +123,7 @@ class TypedDataAnalyzer {
       nullable: true,
     );
 
-    if (documentIdFieldName != null && documentIdField?.nameInDart != null) {
+    if (documentIdFieldName != null && documentIdField != null) {
       throw InvalidGenerationSourceError(
         '@DocumentId cannot both be used on a constructor parameter and a '
         'getter, within the same class.',
@@ -146,46 +147,67 @@ class TypedDataAnalyzer {
       );
     }
 
-    return TypedDataClassModel(
+    if (documentIdFieldName != null) {
+      fields.add(TypedDataMetadataField(
+        nameInDart: documentIdFieldName,
+        kind: DocumentMetadataKind.id,
+        type: BuiltinScalarType(dartType: 'String'),
+      ));
+    }
+
+    if (sequenceFieldName != null) {
+      fields.add(TypedDataMetadataField(
+        nameInDart: sequenceFieldName,
+        kind: DocumentMetadataKind.sequence,
+        type: BuiltinScalarType(dartType: 'int'),
+      ));
+    }
+
+    if (revisionIdFieldName != null) {
+      fields.add(TypedDataMetadataField(
+        nameInDart: revisionIdFieldName,
+        kind: DocumentMetadataKind.revisionId,
+        type: BuiltinScalarType(dartType: 'String', isNullable: true),
+      ));
+    }
+
+    return TypedDataObjectModel(
       libraryUri: annotatedClass.librarySource.uri,
-      type: type,
+      kind: kind,
       classNames: classNames,
       fields: fields,
-      idFieldName: documentIdFieldName ?? documentIdField?.nameInDart,
-      sequenceFieldName: sequenceFieldName,
-      revisionIdFieldName: revisionIdFieldName,
       typeMatcher: _resolveTypeMatcher(annotatedClass, classNames),
     );
   }
 
-  TypedDataType _checkTypedDataAnnotation(
+  TypedDataObjectKind _checkTypedDataAnnotation(
     ClassElement element,
-    TypedDataType? expectedType,
+    TypedDataObjectKind? expectedKind,
   ) {
-    final type = _readTypedDataType(element);
-    if (type == null) {
+    final kind = _readTypedDataType(element);
+    if (kind == null) {
       throw InvalidGenerationSourceError(
         'Expected class to be annotated with '
-        '${_describeTypedDataAnnotation(TypedDataType.dictionary)} or '
-        '${_describeTypedDataAnnotation(TypedDataType.document)}.',
+        '${_describeTypedDataAnnotation(TypedDataObjectKind.dictionary)} or '
+        '${_describeTypedDataAnnotation(TypedDataObjectKind.document)}.',
         element: element,
       );
-    } else if (expectedType != null && expectedType != type) {
+    } else if (expectedKind != null && expectedKind != kind) {
       throw InvalidGenerationSourceError(
         'Expected class to be annotated with '
-        '${_describeTypedDataAnnotation(expectedType)} but found '
-        '${_describeTypedDataAnnotation(type)} instead.',
+        '${_describeTypedDataAnnotation(expectedKind)} but found '
+        '${_describeTypedDataAnnotation(kind)} instead.',
         element: element,
       );
     }
-    return type;
+    return kind;
   }
 
-  TypedDataType? _readTypedDataType(ClassElement element) {
+  TypedDataObjectKind? _readTypedDataType(ClassElement element) {
     if (_typedDictionaryType.hasAnnotationOfExact(element)) {
-      return TypedDataType.dictionary;
+      return TypedDataObjectKind.dictionary;
     } else if (_typedDocumentType.hasAnnotationOfExact(element)) {
-      return TypedDataType.document;
+      return TypedDataObjectKind.document;
     } else {
       return null;
     }
@@ -194,12 +216,12 @@ class TypedDataAnalyzer {
   Future<void> _checkAnnotatedTypedDataClass(
     ClassElement clazz,
     Resolver resolver,
-    TypedDataClassNames typedDataClassNames,
-    TypedDataType type,
+    TypedDataObjectClassNames typedDataClassNames,
+    TypedDataObjectKind kind,
   ) async {
     if (!clazz.isAbstract) {
       throw InvalidGenerationSourceError(
-        '${_describeTypedDataAnnotation(type)} can only be used on an abstract '
+        '${_describeTypedDataAnnotation(kind)} can only be used on an abstract '
         'class.',
         element: clazz,
       );
@@ -231,7 +253,7 @@ class TypedDataAnalyzer {
 
   TypeMatcher? _resolveTypeMatcher(
     ClassElement clazz,
-    TypedDataClassNames classNames,
+    TypedDataObjectClassNames classNames,
   ) {
     final annotationValue = _typedDocumentType.firstAnnotationOfExact(clazz);
     if (annotationValue == null) {
@@ -290,35 +312,40 @@ class TypedDataAnalyzer {
     return null;
   }
 
-  List<TypedDataField> _resolveTypedDataFields(
+  List<TypedDataObjectField> _resolveTypedDataFields(
     ClassElement clazz,
-    TypedDataType type,
+    TypedDataObjectKind kind,
   ) =>
       clazz.unnamedConstructor!.parameters.map(
         (parameter) {
-          if (!isExactlyOneOfTypes(parameter.type, _builtinSupportedTypes)) {
-            final typeName =
-                parameter.type.getDisplayString(withNullability: false);
-            throw InvalidGenerationSourceError(
-              'Unsupported type: $typeName',
-              element: parameter,
-            );
-          }
+          final type = _resolveTypedDataType(parameter);
+
+          final constructorParameter = ConstructorParameter(
+            type: type,
+            isPositional: parameter.isPositional,
+            isRequired:
+                parameter.isRequiredNamed || parameter.isRequiredPositional,
+          );
 
           final annotations = parameter.metadata
               .map((annotation) => annotation.computeConstantValue())
               .map(ConstantReader.new);
 
-          return TypedDataField(
-            isDocumentId: _isDocumentIdField(parameter, annotations, type),
-            type: parameter.type.getDisplayString(withNullability: false),
-            isNullable:
-                parameter.type.nullabilitySuffix == NullabilitySuffix.question,
+          final isDocumentId = _isDocumentIdField(parameter, annotations, kind);
+          if (isDocumentId) {
+            return TypedDataMetadataField(
+              kind: DocumentMetadataKind.id,
+              type: (type as BuiltinScalarType).withNullability(false),
+              nameInDart: parameter.name,
+              constructorParameter: constructorParameter,
+            );
+          }
+
+          return TypedDataObjectProperty(
+            type: type,
             nameInDart: parameter.name,
             nameInData: parameter.name,
-            isPositional: parameter.isPositional,
-            isRequired:
-                parameter.isRequiredNamed || parameter.isRequiredPositional,
+            constructorParameter: constructorParameter,
           );
         },
       ).toList();
@@ -326,7 +353,7 @@ class TypedDataAnalyzer {
   bool _isDocumentIdField(
     ParameterElement parameter,
     Iterable<ConstantReader> annotations,
-    TypedDataType type,
+    TypedDataObjectKind kind,
   ) {
     final annotation = annotations.firstWhereOrNull(
       (annotation) => annotation.instanceOf(_documentIdType),
@@ -336,7 +363,7 @@ class TypedDataAnalyzer {
       return false;
     }
 
-    if (type == TypedDataType.dictionary) {
+    if (kind == TypedDataObjectKind.dictionary) {
       throw InvalidGenerationSourceError(
         '@DocumentId cannot be used in a dictionary, and only in a '
         'document.',
@@ -382,12 +409,29 @@ class TypedDataAnalyzer {
     })?.displayName;
   }
 
-  String _describeTypedDataAnnotation(TypedDataType type) {
-    switch (type) {
-      case TypedDataType.dictionary:
+  String _describeTypedDataAnnotation(TypedDataObjectKind kind) {
+    switch (kind) {
+      case TypedDataObjectKind.dictionary:
         return '@TypedDictionary';
-      case TypedDataType.document:
+      case TypedDataObjectKind.document:
         return '@TypedDocument';
     }
+  }
+
+  TypedDataType _resolveTypedDataType(VariableElement element) {
+    final type = element.type;
+    final typeName = type.getDisplayString(withNullability: false);
+
+    if (!isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
+      throw InvalidGenerationSourceError(
+        'Unsupported type: $typeName',
+        element: element,
+      );
+    }
+
+    return BuiltinScalarType(
+      dartType: typeName,
+      isNullable: type.nullabilitySuffix == NullabilitySuffix.question,
+    );
   }
 }

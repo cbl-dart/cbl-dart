@@ -1,30 +1,29 @@
-import 'package:collection/collection.dart';
 import 'package:source_helper/source_helper.dart';
 
 import 'model.dart';
 
 class TypeDataCodeBuilder {
   TypeDataCodeBuilder({
-    required this.clazz,
+    required this.object,
   }) {
-    switch (clazz.type) {
-      case TypedDataType.document:
+    switch (object.kind) {
+      case TypedDataObjectKind.document:
         _internalType = 'Document';
         break;
-      case TypedDataType.dictionary:
+      case TypedDataObjectKind.dictionary:
         _internalType = 'Dictionary';
         break;
     }
   }
 
-  final TypedDataClassModel clazz;
+  final TypedDataObjectModel object;
 
   late final String _internalType;
   late final String _mutableInternalType = 'Mutable$_internalType';
 
   final _code = StringBuffer();
 
-  TypedDataClassNames get _classNames => clazz.classNames;
+  TypedDataObjectClassNames get _classNames => object.classNames;
 
   String build() {
     _code.clear();
@@ -43,24 +42,21 @@ class TypeDataCodeBuilder {
       ..write(_classNames.mutableClassName)
       ..writeln('> {');
 
-    for (final field in clazz.fields) {
-      if (field.isDocumentId) {
-        _code
-          ..write('  ')
-          ..write(field.type)
-          ..write(' get ')
-          ..write(field.nameInDart)
-          ..writeln(';')
-          ..writeln();
-      } else {
-        _code
-          ..write('  ')
-          ..write(field.typeWithNullabilitySuffix)
-          ..write(' get ')
-          ..write(field.nameInDart)
-          ..writeln(';')
-          ..writeln();
+    for (final field in object.fields) {
+      if (field.constructorParameter == null) {
+        // Fields are either declared as constructor parameter or as abstract
+        // getters. So, we only need to write the getters in the interface mixin
+        // for fields that are constructor parameters.
+        continue;
       }
+
+      _code
+        ..write('  ')
+        ..write(field.type.dartTypeWithNullability)
+        ..write(' get ')
+        ..write(field.nameInDart)
+        ..writeln(';')
+        ..writeln();
     }
 
     _code.writeln('}');
@@ -79,7 +75,7 @@ class TypeDataCodeBuilder {
       ..writeln('  final I internal;')
       ..writeln();
 
-    final idFieldName = clazz.idFieldName;
+    final idFieldName = object.documentIdField?.nameInDart;
     if (idFieldName != null) {
       _code
         ..writeln('  @override')
@@ -89,7 +85,7 @@ class TypeDataCodeBuilder {
         ..writeln();
     }
 
-    final sequenceFieldName = clazz.sequenceFieldName;
+    final sequenceFieldName = object.documentSequenceField?.nameInDart;
     if (sequenceFieldName != null) {
       _code
         ..writeln('  @override')
@@ -99,7 +95,7 @@ class TypeDataCodeBuilder {
         ..writeln();
     }
 
-    final revisionIdFieldName = clazz.revisionIdFieldName;
+    final revisionIdFieldName = object.documentRevisionIdField?.nameInDart;
     if (revisionIdFieldName != null) {
       _code
         ..writeln('  @override')
@@ -109,15 +105,13 @@ class TypeDataCodeBuilder {
         ..writeln();
     }
 
-    final properties =
-        clazz.fields.where((field) => !field.isDocumentId).toList();
-    for (final property in properties) {
+    for (final property in object.properties) {
       final accessor = property.isNullable
           ? 'InternalTypedDataHelpers.nullableProperty'
           : 'InternalTypedDataHelpers.property';
       _code.writeln('''
 @override
-${property.typeWithNullabilitySuffix} get ${property.nameInDart} => $accessor(
+${property.type.dartTypeWithNullability} get ${property.nameInDart} => $accessor(
     internal: internal,
     name: ${escapeDartString(property.nameInDart)},
     key: ${escapeDartString(property.nameInData)},
@@ -160,27 +154,31 @@ ${property.typeWithNullabilitySuffix} get ${property.nameInDart} => $accessor(
     var isInOptionalPositionList = false;
     var isInNamedList = false;
 
-    for (final field in clazz.fields) {
-      if (field.isPositional &&
-          !field.isRequired &&
+    for (final field in object.fields) {
+      final parameter = field.constructorParameter;
+      if (parameter == null) {
+        continue;
+      }
+      if (parameter.isPositional &&
+          !parameter.isRequired &&
           !isInOptionalPositionList) {
         assert(!isInNamedList);
         isInOptionalPositionList = true;
         _code.write('[');
       }
 
-      if (!field.isPositional && !isInNamedList) {
+      if (!parameter.isPositional && !isInNamedList) {
         assert(!isInOptionalPositionList);
         isInNamedList = true;
         _code.write('{');
       }
 
-      if (!field.isPositional && field.isRequired) {
+      if (!parameter.isPositional && parameter.isRequired) {
         _code.write('required ');
       }
 
       _code
-        ..write(field.typeWithNullabilitySuffix)
+        ..write(parameter.type.dartTypeWithNullability)
         ..write(' ')
         ..write(field.nameInDart)
         ..write(',');
@@ -195,11 +193,10 @@ ${property.typeWithNullabilitySuffix} get ${property.nameInDart} => $accessor(
 
     _code.write('): super(');
 
-    final documentIdField =
-        clazz.fields.firstWhereOrNull((element) => element.isDocumentId);
-
-    if (documentIdField != null) {
-      if (documentIdField.isNullable) {
+    final documentIdField = object.documentIdField;
+    if (documentIdField != null &&
+        documentIdField.constructorParameter != null) {
+      if (documentIdField.constructorParameter!.type.isNullable) {
         _code
           ..write(documentIdField.nameInDart)
           ..write(' == null ? ')
@@ -219,15 +216,12 @@ ${property.typeWithNullabilitySuffix} get ${property.nameInDart} => $accessor(
 
     _code.write(')');
 
-    final properties =
-        clazz.fields.where((element) => !element.isDocumentId).toList();
-
     // Field initializers
-    if (properties.isEmpty) {
+    if (object.properties.isEmpty) {
       _code.writeln(';');
     } else {
       _code.writeln(' {');
-      for (final field in properties) {
+      for (final field in object.properties) {
         if (field.isNullable) {
           _code
             ..write('if (')
@@ -256,12 +250,12 @@ ${property.typeWithNullabilitySuffix} get ${property.nameInDart} => $accessor(
       ..writeln();
 
     // Field setters
-    for (final field in properties) {
+    for (final field in object.properties) {
       _code
         ..write('  set ')
         ..write(field.nameInDart)
         ..write('(')
-        ..write(field.typeWithNullabilitySuffix)
+        ..write(field.type.dartTypeWithNullability)
         ..write(' value) => ');
 
       if (field.isNullable) {
