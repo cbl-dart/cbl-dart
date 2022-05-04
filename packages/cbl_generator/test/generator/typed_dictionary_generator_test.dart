@@ -145,10 +145,11 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
   final I internal;
 
   @override
-  String get b => InternalTypedDataHelpers.property(
+  String get b => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'b',
         key: 'b',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -169,7 +170,12 @@ class MutableA extends _AImplBase<MutableDictionary>
 
   MutableA.internal(MutableDictionary internal) : super(internal);
 
-  set b(String value) => internal.setValue(value, key: 'b');
+  set b(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'b',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 ''')
       },

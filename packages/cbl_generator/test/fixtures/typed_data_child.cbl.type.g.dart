@@ -29,11 +29,11 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
   ImmutableTypedDataPropertyDoc.internal(Document internal) : super(internal);
 
   @override
-  late final value = InternalTypedDataHelpers.typedDataProperty(
+  late final value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(ImmutableBoolDict.internal),
   );
 }
 
@@ -51,11 +51,11 @@ class MutableTypedDataPropertyDoc
   MutableTypedDataPropertyDoc.internal(MutableDocument internal)
       : super(internal);
 
-  late BoolDict _value = InternalTypedDataHelpers.mutableTypedDataProperty(
+  late BoolDict _value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(MutableBoolDict.internal),
   );
 
   @override
@@ -66,7 +66,12 @@ class MutableTypedDataPropertyDoc
       value = value.toMutable();
     }
     _value = value;
-    internal.setValue(value.internal, key: 'value');
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: value,
+      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+    );
   }
 }
 
@@ -94,11 +99,11 @@ class ImmutableOptionalTypedDataPropertyDoc
       : super(internal);
 
   @override
-  late final value = InternalTypedDataHelpers.nullableTypedDataProperty(
+  late final value = InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(ImmutableBoolDict.internal),
   );
 }
 
@@ -118,28 +123,27 @@ class MutableOptionalTypedDataPropertyDoc
   MutableOptionalTypedDataPropertyDoc.internal(MutableDocument internal)
       : super(internal);
 
-  late BoolDict? _value =
-      InternalTypedDataHelpers.mutableNullableTypedDataProperty(
+  late BoolDict? _value = InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(MutableBoolDict.internal),
   );
 
   @override
   BoolDict? get value => _value;
 
   set value(BoolDict? value) {
-    if (value != null) {
-      if (value is! MutableBoolDict) {
-        value = value.toMutable();
-      }
-      _value = value;
-      internal.setValue(value.internal, key: 'value');
-    } else {
-      _value = null;
-      internal.removeValue('value');
+    if (value != null && value is! MutableBoolDict) {
+      value = value.toMutable();
     }
+    _value = value;
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'value',
+      value: value,
+      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+    );
   }
 }
 
@@ -170,11 +174,11 @@ class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
       : super(internal);
 
   @override
-  late final value = InternalTypedDataHelpers.typedDataProperty(
+  late final value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(ImmutableBoolDict.internal),
   );
 }
 
@@ -192,11 +196,11 @@ class MutableTypedDataPropertyDict
   MutableTypedDataPropertyDict.internal(MutableDictionary internal)
       : super(internal);
 
-  late BoolDict _value = InternalTypedDataHelpers.mutableTypedDataProperty(
+  late BoolDict _value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(MutableBoolDict.internal),
   );
 
   @override
@@ -207,7 +211,12 @@ class MutableTypedDataPropertyDict
       value = value.toMutable();
     }
     _value = value;
-    internal.setValue(value.internal, key: 'value');
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: value,
+      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+    );
   }
 }
 
@@ -235,11 +244,11 @@ class ImmutableOptionalTypedDataPropertyDict
       : super(internal);
 
   @override
-  late final value = InternalTypedDataHelpers.nullableTypedDataProperty(
+  late final value = InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(ImmutableBoolDict.internal),
   );
 }
 
@@ -259,27 +268,26 @@ class MutableOptionalTypedDataPropertyDict
   MutableOptionalTypedDataPropertyDict.internal(MutableDictionary internal)
       : super(internal);
 
-  late BoolDict? _value =
-      InternalTypedDataHelpers.mutableNullableTypedDataProperty(
+  late BoolDict? _value = InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    factory: ImmutableBoolDict.internal,
+    reviver: const FactoryReviver(MutableBoolDict.internal),
   );
 
   @override
   BoolDict? get value => _value;
 
   set value(BoolDict? value) {
-    if (value != null) {
-      if (value is! MutableBoolDict) {
-        value = value.toMutable();
-      }
-      _value = value;
-      internal.setValue(value.internal, key: 'value');
-    } else {
-      _value = null;
-      internal.removeValue('value');
+    if (value != null && value is! MutableBoolDict) {
+      value = value.toMutable();
     }
+    _value = value;
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'value',
+      value: value,
+      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+    );
   }
 }

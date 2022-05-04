@@ -20,10 +20,11 @@ abstract class _StringDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get value => InternalTypedDataHelpers.property(
+  String get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -45,7 +46,12 @@ class MutableStringDoc extends _StringDocImplBase<MutableDocument>
 
   MutableStringDoc.internal(MutableDocument internal) : super(internal);
 
-  set value(String value) => internal.setValue(value, key: 'value');
+  set value(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$IntDoc implements TypedDocumentObject<MutableIntDoc> {
@@ -61,10 +67,11 @@ abstract class _IntDocImplBase<I extends Document>
   final I internal;
 
   @override
-  int get value => InternalTypedDataHelpers.property(
+  int get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.intConverter,
       );
 
   @override
@@ -85,7 +92,12 @@ class MutableIntDoc extends _IntDocImplBase<MutableDocument>
 
   MutableIntDoc.internal(MutableDocument internal) : super(internal);
 
-  set value(int value) => internal.setValue(value, key: 'value');
+  set value(int value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.intConverter,
+      );
 }
 
 mixin _$DoubleDoc implements TypedDocumentObject<MutableDoubleDoc> {
@@ -101,10 +113,11 @@ abstract class _DoubleDocImplBase<I extends Document>
   final I internal;
 
   @override
-  double get value => InternalTypedDataHelpers.property(
+  double get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -126,7 +139,12 @@ class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
 
   MutableDoubleDoc.internal(MutableDocument internal) : super(internal);
 
-  set value(double value) => internal.setValue(value, key: 'value');
+  set value(double value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.doubleConverter,
+      );
 }
 
 mixin _$NumDoc implements TypedDocumentObject<MutableNumDoc> {
@@ -142,10 +160,11 @@ abstract class _NumDocImplBase<I extends Document>
   final I internal;
 
   @override
-  num get value => InternalTypedDataHelpers.property(
+  num get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.numConverter,
       );
 
   @override
@@ -166,7 +185,12 @@ class MutableNumDoc extends _NumDocImplBase<MutableDocument>
 
   MutableNumDoc.internal(MutableDocument internal) : super(internal);
 
-  set value(num value) => internal.setValue(value, key: 'value');
+  set value(num value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.numConverter,
+      );
 }
 
 mixin _$BoolDoc implements TypedDocumentObject<MutableBoolDoc> {
@@ -182,10 +206,11 @@ abstract class _BoolDocImplBase<I extends Document>
   final I internal;
 
   @override
-  bool get value => InternalTypedDataHelpers.property(
+  bool get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -206,7 +231,12 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
 
   MutableBoolDoc.internal(MutableDocument internal) : super(internal);
 
-  set value(bool value) => internal.setValue(value, key: 'value');
+  set value(bool value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.boolConverter,
+      );
 }
 
 mixin _$BlobDoc implements TypedDocumentObject<MutableBlobDoc> {
@@ -222,10 +252,11 @@ abstract class _BlobDocImplBase<I extends Document>
   final I internal;
 
   @override
-  Blob get value => InternalTypedDataHelpers.property(
+  Blob get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.blobConverter,
       );
 
   @override
@@ -246,7 +277,12 @@ class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
 
   MutableBlobDoc.internal(MutableDocument internal) : super(internal);
 
-  set value(Blob value) => internal.setValue(value, key: 'value');
+  set value(Blob value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.blobConverter,
+      );
 }
 
 // **************************************************************************
@@ -266,10 +302,11 @@ abstract class _StringDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get value => InternalTypedDataHelpers.property(
+  String get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -291,7 +328,12 @@ class MutableStringDict extends _StringDictImplBase<MutableDictionary>
 
   MutableStringDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(String value) => internal.setValue(value, key: 'value');
+  set value(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$IntDict implements TypedDictionaryObject<MutableIntDict> {
@@ -307,10 +349,11 @@ abstract class _IntDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  int get value => InternalTypedDataHelpers.property(
+  int get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.intConverter,
       );
 
   @override
@@ -331,7 +374,12 @@ class MutableIntDict extends _IntDictImplBase<MutableDictionary>
 
   MutableIntDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(int value) => internal.setValue(value, key: 'value');
+  set value(int value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.intConverter,
+      );
 }
 
 mixin _$DoubleDict implements TypedDictionaryObject<MutableDoubleDict> {
@@ -347,10 +395,11 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  double get value => InternalTypedDataHelpers.property(
+  double get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -372,7 +421,12 @@ class MutableDoubleDict extends _DoubleDictImplBase<MutableDictionary>
 
   MutableDoubleDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(double value) => internal.setValue(value, key: 'value');
+  set value(double value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.doubleConverter,
+      );
 }
 
 mixin _$NumDict implements TypedDictionaryObject<MutableNumDict> {
@@ -388,10 +442,11 @@ abstract class _NumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  num get value => InternalTypedDataHelpers.property(
+  num get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.numConverter,
       );
 
   @override
@@ -412,7 +467,12 @@ class MutableNumDict extends _NumDictImplBase<MutableDictionary>
 
   MutableNumDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(num value) => internal.setValue(value, key: 'value');
+  set value(num value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.numConverter,
+      );
 }
 
 mixin _$BoolDict implements TypedDictionaryObject<MutableBoolDict> {
@@ -428,10 +488,11 @@ abstract class _BoolDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool get value => InternalTypedDataHelpers.property(
+  bool get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -452,7 +513,12 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
 
   MutableBoolDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(bool value) => internal.setValue(value, key: 'value');
+  set value(bool value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.boolConverter,
+      );
 }
 
 mixin _$BlobDict implements TypedDictionaryObject<MutableBlobDict> {
@@ -468,10 +534,11 @@ abstract class _BlobDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  Blob get value => InternalTypedDataHelpers.property(
+  Blob get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.blobConverter,
       );
 
   @override
@@ -492,7 +559,12 @@ class MutableBlobDict extends _BlobDictImplBase<MutableDictionary>
 
   MutableBlobDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(Blob value) => internal.setValue(value, key: 'value');
+  set value(Blob value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.blobConverter,
+      );
 }
 
 mixin _$NullableIntDict
@@ -509,10 +581,11 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  int? get value => InternalTypedDataHelpers.nullableProperty(
+  int? get value => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.intConverter,
       );
 
   @override
@@ -537,9 +610,12 @@ class MutableNullableIntDict extends _NullableIntDictImplBase<MutableDictionary>
 
   MutableNullableIntDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(int? value) => value == null
-      ? internal.removeValue('value')
-      : internal.setValue(value, key: 'value');
+  set value(int? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.intConverter,
+      );
 }
 
 mixin _$NullableDoubleDict
@@ -556,10 +632,11 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  double? get value => InternalTypedDataHelpers.nullableProperty(
+  double? get value => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -587,9 +664,12 @@ class MutableNullableDoubleDict
   MutableNullableDoubleDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set value(double? value) => value == null
-      ? internal.removeValue('value')
-      : internal.setValue(value, key: 'value');
+  set value(double? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.doubleConverter,
+      );
 }
 
 mixin _$NullableNumDict
@@ -606,10 +686,11 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  num? get value => InternalTypedDataHelpers.nullableProperty(
+  num? get value => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.numConverter,
       );
 
   @override
@@ -634,9 +715,12 @@ class MutableNullableNumDict extends _NullableNumDictImplBase<MutableDictionary>
 
   MutableNullableNumDict.internal(MutableDictionary internal) : super(internal);
 
-  set value(num? value) => value == null
-      ? internal.removeValue('value')
-      : internal.setValue(value, key: 'value');
+  set value(num? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.numConverter,
+      );
 }
 
 mixin _$NullableBoolDict
@@ -653,10 +737,11 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool? get value => InternalTypedDataHelpers.nullableProperty(
+  bool? get value => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -684,7 +769,10 @@ class MutableNullableBoolDict
   MutableNullableBoolDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set value(bool? value) => value == null
-      ? internal.removeValue('value')
-      : internal.setValue(value, key: 'value');
+  set value(bool? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.boolConverter,
+      );
 }

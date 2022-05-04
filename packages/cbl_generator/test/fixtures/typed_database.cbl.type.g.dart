@@ -21,10 +21,11 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get value => InternalTypedDataHelpers.property(
+  String get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -52,5 +53,10 @@ class MutableCustomValueTypeMatcherDoc
   MutableCustomValueTypeMatcherDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set value(String value) => internal.setValue(value, key: 'value');
+  set value(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }

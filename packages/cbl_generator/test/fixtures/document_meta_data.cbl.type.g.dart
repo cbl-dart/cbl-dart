@@ -96,10 +96,11 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
   String get id => internal.id;
 
   @override
-  String get value => InternalTypedDataHelpers.property(
+  String get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -125,7 +126,12 @@ class MutableDocWithIdAndField
 
   MutableDocWithIdAndField.internal(MutableDocument internal) : super(internal);
 
-  set value(String value) => internal.setValue(value, key: 'value');
+  set value(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$DocWithOptionalIdAndField
@@ -147,10 +153,11 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
   String get id => internal.id;
 
   @override
-  String get value => InternalTypedDataHelpers.property(
+  String get value => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -179,7 +186,12 @@ class MutableDocWithOptionalIdAndField
   MutableDocWithOptionalIdAndField.internal(MutableDocument internal)
       : super(internal);
 
-  set value(String value) => internal.setValue(value, key: 'value');
+  set value(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$DocWithIdGetter implements TypedDocumentObject<MutableDocWithIdGetter> {

@@ -20,10 +20,11 @@ abstract class _ParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -44,7 +45,12 @@ class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
 
   MutableParamDoc.internal(MutableDocument internal) : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$OptionalParamDoc
@@ -61,10 +67,11 @@ abstract class _OptionalParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String? get a => InternalTypedDataHelpers.nullableProperty(
+  String? get a => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -89,9 +96,12 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
 
   MutableOptionalParamDoc.internal(MutableDocument internal) : super(internal);
 
-  set a(String? value) => value == null
-      ? internal.removeValue('a')
-      : internal.setValue(value, key: 'a');
+  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$PositionalMixedParamDoc
@@ -110,17 +120,19 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
-  String? get b => InternalTypedDataHelpers.nullableProperty(
+  String? get b => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'b',
         key: 'b',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -152,11 +164,19 @@ class MutablePositionalMixedParamDoc
   MutablePositionalMixedParamDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 
-  set b(String? value) => value == null
-      ? internal.removeValue('b')
-      : internal.setValue(value, key: 'b');
+  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'b',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$NamedParamDoc implements TypedDocumentObject<MutableNamedParamDoc> {
@@ -172,10 +192,11 @@ abstract class _NamedParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -197,7 +218,12 @@ class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
 
   MutableNamedParamDoc.internal(MutableDocument internal) : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$NamedOptionalParamDoc
@@ -214,10 +240,11 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String? get a => InternalTypedDataHelpers.nullableProperty(
+  String? get a => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -245,9 +272,12 @@ class MutableNamedOptionalParamDoc
   MutableNamedOptionalParamDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set a(String? value) => value == null
-      ? internal.removeValue('a')
-      : internal.setValue(value, key: 'a');
+  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$NamedMixedParamDoc
@@ -266,17 +296,19 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
-  String? get b => InternalTypedDataHelpers.nullableProperty(
+  String? get b => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'b',
         key: 'b',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -306,11 +338,19 @@ class MutableNamedMixedParamDoc
   MutableNamedMixedParamDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 
-  set b(String? value) => value == null
-      ? internal.removeValue('b')
-      : internal.setValue(value, key: 'b');
+  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'b',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 // **************************************************************************
@@ -330,10 +370,11 @@ abstract class _ParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -355,7 +396,12 @@ class MutableParamDict extends _ParamDictImplBase<MutableDictionary>
 
   MutableParamDict.internal(MutableDictionary internal) : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$OptionalParamDict
@@ -372,10 +418,11 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String? get a => InternalTypedDataHelpers.nullableProperty(
+  String? get a => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -403,9 +450,12 @@ class MutableOptionalParamDict
   MutableOptionalParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String? value) => value == null
-      ? internal.removeValue('a')
-      : internal.setValue(value, key: 'a');
+  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$PositionalMixedParamDict
@@ -424,17 +474,19 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
-  String? get b => InternalTypedDataHelpers.nullableProperty(
+  String? get b => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'b',
         key: 'b',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -466,11 +518,19 @@ class MutablePositionalMixedParamDict
   MutablePositionalMixedParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 
-  set b(String? value) => value == null
-      ? internal.removeValue('b')
-      : internal.setValue(value, key: 'b');
+  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'b',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$NamedParamDict implements TypedDictionaryObject<MutableNamedParamDict> {
@@ -486,10 +546,11 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -512,7 +573,12 @@ class MutableNamedParamDict extends _NamedParamDictImplBase<MutableDictionary>
 
   MutableNamedParamDict.internal(MutableDictionary internal) : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$NamedOptionalParamDict
@@ -529,10 +595,11 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String? get a => InternalTypedDataHelpers.nullableProperty(
+  String? get a => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -561,9 +628,12 @@ class MutableNamedOptionalParamDict
   MutableNamedOptionalParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String? value) => value == null
-      ? internal.removeValue('a')
-      : internal.setValue(value, key: 'a');
+  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }
 
 mixin _$NamedMixedParamDict
@@ -582,17 +652,19 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get a => InternalTypedDataHelpers.property(
+  String get a => InternalTypedDataHelpers.readProperty(
         internal: internal,
         name: 'a',
         key: 'a',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
-  String? get b => InternalTypedDataHelpers.nullableProperty(
+  String? get b => InternalTypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'b',
         key: 'b',
+        reviver: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -622,9 +694,17 @@ class MutableNamedMixedParamDict
   MutableNamedMixedParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String value) => internal.setValue(value, key: 'a');
+  set a(String value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'a',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 
-  set b(String? value) => value == null
-      ? internal.removeValue('b')
-      : internal.setValue(value, key: 'b');
+  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
+        internal: internal,
+        key: 'b',
+        value: value,
+        freezer: InternalTypedDataHelpers.stringConverter,
+      );
 }

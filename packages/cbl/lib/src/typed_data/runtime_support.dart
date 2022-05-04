@@ -1,116 +1,116 @@
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
+import 'package:meta/meta.dart' hide internal;
+import 'package:meta/meta.dart' as meta;
 
 import '../document.dart';
 import '../errors.dart';
 import 'annotations.dart';
+import 'conversion.dart';
 import 'typed_object.dart';
 
-// ignore: avoid_classes_with_only_static_members, camel_case_types
+// ignore: avoid_classes_with_only_static_members
 class InternalTypedDataHelpers {
-  @internal
-  static T property<T extends Object>({
+  // Converters
+  @meta.internal
+  static const stringConverter = IdentityConverter<String>();
+  @meta.internal
+  static const intConverter = IdentityConverter<int>();
+  @meta.internal
+  static const doubleConverter = IdentityConverter<double>();
+  @meta.internal
+  static const numConverter = IdentityConverter<num>();
+  @meta.internal
+  static const boolConverter = IdentityConverter<bool>();
+  @meta.internal
+  static const blobConverter = IdentityConverter<Blob>();
+  @meta.internal
+  static const dateTimeConverter = DateTimeConverter();
+  @meta.internal
+  static const typedDictionaryFreezer = TypedDictionaryFreezer();
+
+  // Read helpers
+  @meta.internal
+  static T readProperty<T>({
     required DictionaryInterface internal,
     required String name,
     required String key,
+    required Reviver<T> reviver,
   }) {
     final value = internal.value(key);
-    if (value is T) {
-      return value;
+    if (value == null) {
+      if (!internal.contains(name)) {
+        throw TypedDataException(
+          'Expected a value for property "$name" but there is none in the '
+          'underlying data.',
+          TypedDataErrorCode.dataMismatch,
+        );
+      } else {
+        throw TypedDataException(
+          'Expected a value for property "$name" but found "null" in the '
+          'underlying data.',
+          TypedDataErrorCode.dataMismatch,
+        );
+      }
     }
 
-    if (!internal.contains(key)) {
+    try {
+      return reviver.revive(value);
+    } on CannotReviveTypeException catch (e) {
       throw TypedDataException(
-        'Expected a value for property "$name" but there is none in the '
-        'underlying data.',
+        'Expected a ${e.expectedType} for property "$name" but the value in '
+        'the underlying data is a ${value.runtimeType}.',
         TypedDataErrorCode.dataMismatch,
       );
     }
-
-    throw TypedDataException(
-      'Expected a $T for property "$name" but the value in the underlying data '
-      'is a ${value.runtimeType}.',
-      TypedDataErrorCode.dataMismatch,
-    );
   }
 
-  @internal
-  static T nullableProperty<T>({
+  @meta.internal
+  static T? readNullableProperty<T>({
     required DictionaryInterface internal,
     required String name,
     required String key,
+    required Reviver<T> reviver,
   }) {
     final value = internal.value(key);
-    if (value is T) {
-      return value;
+    if (value == null) {
+      return null;
     }
 
-    throw TypedDataException(
-      'Expected a $T for property "$name" but the value in the underlying data '
-      'is a ${value.runtimeType}.',
-      TypedDataErrorCode.dataMismatch,
-    );
+    try {
+      return reviver.revive(value);
+    } on CannotReviveTypeException catch (e) {
+      throw TypedDataException(
+        'Expected a ${e.expectedType} for property "$name" but the value in '
+        'the underlying data is a ${value.runtimeType}.',
+        TypedDataErrorCode.dataMismatch,
+      );
+    }
   }
 
-  @internal
-  static T typedDataProperty<T>({
-    required DictionaryInterface internal,
-    required String name,
+  // Write helpers
+  @meta.internal
+  static void writeProperty<T>({
+    required MutableDictionaryInterface internal,
+    required T value,
     required String key,
-    required Factory<Dictionary, T> factory,
+    required Freezer<T> freezer,
   }) {
-    final data = InternalTypedDataHelpers.property<Dictionary>(
-      internal: internal,
-      name: name,
-      key: key,
-    );
-    return factory(data);
+    internal.setValue(freezer.freeze(value), key: key);
   }
 
-  @internal
-  static T? nullableTypedDataProperty<T>({
-    required DictionaryInterface internal,
-    required String name,
+  @meta.internal
+  static void writeNullableProperty<T>({
+    required MutableDictionaryInterface internal,
+    required T? value,
     required String key,
-    required Factory<Dictionary, T> factory,
+    required Freezer<T> freezer,
   }) {
-    final data = InternalTypedDataHelpers.nullableProperty<Dictionary?>(
-      internal: internal,
-      name: name,
-      key: key,
-    );
-    return data == null ? null : factory(data);
-  }
-
-  @internal
-  static T mutableTypedDataProperty<T>({
-    required DictionaryInterface internal,
-    required String name,
-    required String key,
-    required Factory<MutableDictionary, T> factory,
-  }) {
-    final data = InternalTypedDataHelpers.property<MutableDictionary>(
-      internal: internal,
-      name: name,
-      key: key,
-    );
-    return factory(data);
-  }
-
-  @internal
-  static T? mutableNullableTypedDataProperty<T>({
-    required DictionaryInterface internal,
-    required String name,
-    required String key,
-    required Factory<MutableDictionary, T> factory,
-  }) {
-    final data = InternalTypedDataHelpers.nullableProperty<MutableDictionary?>(
-      internal: internal,
-      name: name,
-      key: key,
-    );
-    return data == null ? null : factory(data);
+    if (value == null) {
+      internal.removeValue(key);
+    } else {
+      internal.setValue(freezer.freeze(value), key: key);
+    }
   }
 }
 

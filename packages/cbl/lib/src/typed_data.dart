@@ -8,6 +8,13 @@ export 'typed_data/annotations.dart'
         TypedDocument,
         TypeMatcher,
         ValueTypeMatcher;
+export 'typed_data/conversion.dart'
+    show
+        CannotReviveTypeException,
+        FactoryReviver,
+        Freezer,
+        Reviver,
+        TypeConverter;
 export 'typed_data/runtime_support.dart' show InternalTypedDataHelpers;
 export 'typed_data/typed_object.dart'
     show
