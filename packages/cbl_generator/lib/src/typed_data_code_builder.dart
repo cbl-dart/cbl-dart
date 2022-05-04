@@ -36,157 +36,71 @@ class TypeDataCodeBuilder {
   }
 
   void _writeInterfaceMixin() {
-    _code
-      ..write('mixin ')
-      ..write(_classNames.interfaceMixinName)
-      ..write(' implements Typed${_internalType}Object<')
-      ..write(_classNames.mutableClassName)
-      ..writeln('> {');
+    _code.writeln('''
+mixin ${_classNames.interfaceMixinName} implements
+    Typed${_internalType}Object<${_classNames.mutableClassName}> {
 
-    for (final field in object.fields) {
-      if (field.constructorParameter == null) {
-        // Fields are either declared as constructor parameter or as abstract
-        // getters. So, we only need to write the getters in the interface mixin
-        // for fields that are constructor parameters.
-        continue;
-      }
+''');
 
-      _code
-        ..write('  ')
-        ..write(field.type.dartTypeWithNullability)
-        ..write(' get ')
-        ..write(field.nameInDart)
-        ..writeln(';')
-        ..writeln();
-    }
+    // Fields are either declared as constructor parameter or as abstract
+    // getters. So, we only need to write the getters in the interface mixin
+    // for fields that are constructor parameters.
+    object.fields
+        .where((field) => field.constructorParameter != null)
+        .forEach(_writeAbstractPropertyGetter);
 
     _code.writeln('}');
   }
 
   void _writeImplBase() {
-    _code
-      ..write('abstract class ')
-      ..write(_classNames.implBaseName)
-      ..write('<I extends $_internalType>')
-      ..writeln('  with ${_classNames.interfaceMixinName}')
-      ..writeln('  implements ${_classNames.declaringClassName} {')
-      ..writeln('  ${_classNames.implBaseName}(this.internal);')
-      ..writeln()
-      ..writeln('  @override')
-      ..writeln('  final I internal;')
-      ..writeln();
+    _code.writeln('''
+abstract class ${_classNames.implBaseName}<I extends $_internalType>
+    with ${_classNames.interfaceMixinName}
+    implements ${_classNames.declaringClassName} {
+
+  ${_classNames.implBaseName}(this.internal);
+
+  @override
+  final I internal;
+
+''');
 
     // Document metadata fields
-    final idFieldName = object.documentIdField?.nameInDart;
-    if (idFieldName != null) {
-      _code
-        ..writeln('  @override')
-        ..write('String get ')
-        ..write(idFieldName)
-        ..writeln(' => internal.id;')
-        ..writeln();
-    }
-
-    final sequenceFieldName = object.documentSequenceField?.nameInDart;
-    if (sequenceFieldName != null) {
-      _code
-        ..writeln('  @override')
-        ..write('int get ')
-        ..write(sequenceFieldName)
-        ..writeln(' => internal.sequence;')
-        ..writeln();
-    }
-
-    final revisionIdFieldName = object.documentRevisionIdField?.nameInDart;
-    if (revisionIdFieldName != null) {
-      _code
-        ..writeln('  @override')
-        ..write('String? get ')
-        ..write(revisionIdFieldName)
-        ..writeln(' => internal.revisionId;')
-        ..writeln();
-    }
+    _writeDocumentMetadataGetters();
 
     // Property getters for un-cached properties
-    for (final property in object.properties) {
-      final type = property.type;
-      if (type.isCached) {
-        // Getters of properties of these types are implemented differently for
-        // immutable and mutable objects.
-        continue;
-      }
-
-      final helper = property.isNullable
-          ? 'InternalTypedDataHelpers.readNullableProperty'
-          : 'InternalTypedDataHelpers.readProperty';
-
-      _code.writeln('''
-@override
-${type.dartTypeWithNullability} get ${property.nameInDart} => $helper(
-    internal: internal,
-    name: ${escapeDartString(property.nameInDart)},
-    key: ${escapeDartString(property.nameInData)},
-    reviver: ${_buildTypeConverterExpression(type)},
-  );
-''');
-    }
+    object.properties
+        .where((property) => !property.type.isCached)
+        .forEach(_writePrimitiveScalarGetter);
 
     // `toMutable` method
-    _code
-      ..writeln('  @override')
-      ..writeln('  ${_classNames.mutableClassName} toMutable() => '
-          '${_classNames.mutableClassName}.internal(internal.toMutable());')
-      ..writeln('}');
+    _writeToMutableMethod();
   }
 
   void _writeImmutableClass() {
-    _code
-      ..write('class ')
-      ..write(_classNames.immutableClassName)
-      ..writeln(' extends ${_classNames.implBaseName} {')
-      ..write('  ')
-      ..write(_classNames.immutableClassName)
-      ..writeln('.internal($_internalType internal): super(internal);')
-      ..writeln();
+    _code.writeln('''
+class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
+
+  ${_classNames.immutableClassName}.internal($_internalType internal): super(internal);
+
+''');
 
     // Property getters for cached properties
-    for (final property in object.properties) {
-      final type = property.type;
-      if (!type.isCached) {
-        continue;
-      }
-
-      final helper = property.isNullable
-          ? 'InternalTypedDataHelpers.readNullableProperty'
-          : 'InternalTypedDataHelpers.readProperty';
-
-      _code.writeln('''
-@override
-late final ${property.nameInDart} = $helper(
-  internal: internal,
-  name: ${escapeDartString(property.nameInDart)},
-  key: ${escapeDartString(property.nameInData)},
-  reviver: ${_buildTypeConverterExpression(type)},
-);
-''');
-    }
+    object.properties
+        .where((property) => property.type.isCached)
+        .forEach(_writeImmutableCachedPropertyField);
 
     _code.writeln('}');
   }
 
   void _writeMutableClass() {
-    _code
-      ..write('class ')
-      ..write(_classNames.mutableClassName)
-      ..write(' extends ')
-      ..write(_classNames.implBaseName)
-      ..write('<$_mutableInternalType>')
-      ..write(' implements TypedMutable${_internalType}Object<')
-      ..write(_classNames.declaringClassName)
-      ..write(', ')
-      ..write(_classNames.mutableClassName)
-      ..writeln('> {')
-      ..write('  ${_classNames.mutableClassName}(');
+    _code.writeln('''
+class ${_classNames.mutableClassName}
+    extends ${_classNames.implBaseName}<$_mutableInternalType>
+    implements TypedMutable${_internalType}Object<${_classNames.declaringClassName}, ${_classNames.mutableClassName}> {
+
+  ${_classNames.mutableClassName}(
+''');
 
     var isInOptionalPositionList = false;
     var isInNamedList = false;
@@ -255,7 +169,9 @@ late final ${property.nameInDart} = $helper(
 
     // Property initializers
     if (object.properties.isEmpty) {
-      _code.writeln(';');
+      _code
+        ..writeln(';')
+        ..writeln();
     } else {
       _code.writeln(' {');
       for (final field in object.properties) {
@@ -275,132 +191,194 @@ late final ${property.nameInDart} = $helper(
           _code.writeln('}');
         }
       }
-      _code.writeln('  }');
+      _code
+        ..writeln('  }')
+        ..writeln();
     }
 
     // Internal constructor
-    _code
-      ..writeln()
-      ..write('  ')
-      ..write(_classNames.mutableClassName)
-      ..writeln('.internal($_mutableInternalType internal): super(internal);')
-      ..writeln();
+    _code.writeln('''
+${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(internal);
+
+''');
 
     for (final property in object.properties) {
       final type = property.type;
       if (type.isCached) {
-        // Property getter for cached properties
-        final readHelper = property.isNullable
-            ? 'InternalTypedDataHelpers.readNullableProperty'
-            : 'InternalTypedDataHelpers.readProperty';
+        _writeMutableCachedPropertyField(property);
+        _writeMutableCachedPropertyGetter(property);
+      }
 
-        final storageFieldName = '_${property.nameInDart}';
-
-        _code.writeln('''
-late ${type.dartTypeWithNullability} $storageFieldName = $readHelper(
-  internal: internal,
-  name: ${escapeDartString(property.nameInDart)},
-  key: ${escapeDartString(property.nameInData)},
-  reviver: ${_buildTypeConverterExpression(type)},
-);
-
-@override
-${type.dartTypeWithNullability} get ${property.nameInDart} => $storageFieldName;
-''');
-
-        if (type is TypedDataObjectType) {
-          // Property setter for type data object
-          final writeHelper = property.isNullable
-              ? 'InternalTypedDataHelpers.writeNullableProperty'
-              : 'InternalTypedDataHelpers.writeProperty';
-
-          if (type.isNullable) {
-            _code.writeln('''
-set ${property.nameInDart}(${type.classNames.declaringClassName}? value) {
-  if (value != null && value is! ${type.classNames.mutableClassName}) {
-    value = value.toMutable();
-  }
-  $storageFieldName = value;
-  $writeHelper(
-    internal: internal,
-    key: ${escapeDartString(property.nameInData)},
-    value: value,
-    freezer: ${_buildTypeConverterExpression(type)},
-  );
-}
-''');
-          } else {
-            _code.writeln('''
-set ${property.nameInDart}(${type.classNames.declaringClassName} value) {
-  if (value is! ${type.classNames.mutableClassName}) {
-    value = value.toMutable();
-  }
-  $storageFieldName = value;
-  $writeHelper(
-    internal: internal,
-    key: ${escapeDartString(property.nameInData)},
-    value: value,
-    freezer: ${_buildTypeConverterExpression(type)},
-  );
-}
-''');
-          }
-        } else if (type is TypedDataListType) {
-          // Property setter for type data lists
-          final writeHelper = property.isNullable
-              ? 'InternalTypedDataHelpers.writeNullableProperty'
-              : 'InternalTypedDataHelpers.writeProperty';
-
-          if (type.isNullable) {
-            _code.writeln('''
-set ${property.nameInDart}(${type.dartType}? value) {
-  if (value != null && (value is! TypedDataList<${type.elementType.dartType}> || value.internal is! MutableArray)) {
-    value = ${_buildTypeConverterExpression(type)}.revive(MutableArray())..addAll(value);
-  }
-  $storageFieldName = value;
-  $writeHelper(
-    internal: internal,
-    key: ${escapeDartString(property.nameInData)},
-    value: value,
-    freezer: ${_buildTypeConverterExpression(type)},
-  );
-}
-''');
-          } else {
-            _code.writeln('''
-set ${property.nameInDart}(${type.dartType} value) {
-  if (value is! TypedDataList<${type.elementType.dartType}> || value.internal is! MutableArray) {
-    value = ${_buildTypeConverterExpression(type)}.revive(MutableArray())..addAll(value);
-  }
-  $storageFieldName = value;
-  $writeHelper(
-    internal: internal,
-    key: ${escapeDartString(property.nameInData)},
-    value: value,
-    freezer: ${_buildTypeConverterExpression(type)},
-  );
-}
-''');
-          }
-        }
-      } else {
-        // Property setters for un-cached
-        final helper = property.isNullable
-            ? 'InternalTypedDataHelpers.writeNullableProperty'
-            : 'InternalTypedDataHelpers.writeProperty';
-
-        _code.writeln('''
-set ${property.nameInDart}(${type.dartTypeWithNullability} value) => $helper(
-  internal: internal,
-  key: ${escapeDartString(property.nameInData)},
-  value: value,
-  freezer: ${_buildTypeConverterExpression(type)},
-);
-''');
+      if (type is BuiltinScalarType) {
+        _writeBuiltinScalarSetter(property);
+      } else if (type is TypedDataObjectType) {
+        _writeTypeDataObjectSetter(property);
+      } else if (type is TypedDataListType) {
+        _writeTypedDataListSetter(property);
       }
     }
 
     _code.writeln('}');
+  }
+
+  void _writeAbstractPropertyGetter(TypedDataObjectField field) {
+    _code.writeln('''
+${field.type.dartTypeWithNullability} get ${field.nameInDart};
+
+    ''');
+  }
+
+  void _writeDocumentMetadataGetters() {
+    final idFieldName = object.documentIdField?.nameInDart;
+    if (idFieldName != null) {
+      _code.writeln('''
+@override
+String get $idFieldName => internal.id;
+
+    ''');
+    }
+
+    final sequenceFieldName = object.documentSequenceField?.nameInDart;
+    if (sequenceFieldName != null) {
+      _code.writeln('''
+@override
+int get $sequenceFieldName => internal.sequence;
+
+    ''');
+    }
+
+    final revisionIdFieldName = object.documentRevisionIdField?.nameInDart;
+    if (revisionIdFieldName != null) {
+      _code.writeln('''
+@override
+String? get $revisionIdFieldName => internal.revisionId;
+
+    ''');
+    }
+  }
+
+  void _writePrimitiveScalarGetter(TypedDataObjectProperty property) {
+    final type = property.type;
+
+    _code.writeln('''
+@override
+${type.dartTypeWithNullability} get ${property.nameInDart} => ${property.readHelper}(
+      internal: internal,
+      name: ${escapeDartString(property.nameInDart)},
+      key: ${escapeDartString(property.nameInData)},
+      reviver: ${_buildTypeConverterExpression(type)},
+    );
+
+    ''');
+  }
+
+  void _writeToMutableMethod() {
+    _code.writeln('''
+@override
+${_classNames.mutableClassName} toMutable() =>
+    ${_classNames.mutableClassName}.internal(internal.toMutable());
+    }
+    ''');
+  }
+
+  void _writeImmutableCachedPropertyField(TypedDataObjectProperty property) {
+    _code.writeln('''
+@override
+late final ${property.nameInDart} = ${property.readHelper}(
+    internal: internal,
+    name: ${escapeDartString(property.nameInDart)},
+    key: ${escapeDartString(property.nameInData)},
+    reviver: ${_buildTypeConverterExpression(property.type)},
+  );
+
+    ''');
+  }
+
+  void _writeMutableCachedPropertyField(TypedDataObjectProperty property) {
+    final type = property.type;
+    _code.writeln('''
+late ${type.dartTypeWithNullability} ${property.privateCacheField} = ${property.readHelper}(
+      internal: internal,
+      name: ${escapeDartString(property.nameInDart)},
+      key: ${escapeDartString(property.nameInData)},
+      reviver: ${_buildTypeConverterExpression(type)},
+    );
+
+    ''');
+  }
+
+  void _writeMutableCachedPropertyGetter(TypedDataObjectProperty property) {
+    _code.writeln('''
+@override
+${property.type.dartTypeWithNullability} get ${property.nameInDart} =>
+    ${property.privateCacheField};
+
+    ''');
+  }
+
+  void _writeBuiltinScalarSetter(TypedDataObjectProperty property) {
+    final type = property.type;
+    _code.writeln('''
+set ${property.nameInDart}(${type.dartTypeWithNullability} value) => ${property.writeHelper}(
+      internal: internal,
+      key: ${escapeDartString(property.nameInData)},
+      value: value,
+      freezer: ${_buildTypeConverterExpression(type)},
+    );
+
+    ''');
+  }
+
+  void _writeTypeDataObjectSetter(TypedDataObjectProperty property) {
+    final type = property.type as TypedDataObjectType;
+
+    var mutableValueCheck = 'value is! ${type.classNames.mutableClassName}';
+    if (type.isNullable) {
+      mutableValueCheck = 'value != null && $mutableValueCheck';
+    }
+
+    _code.writeln('''
+set ${property.nameInDart}(${type.classNames.declaringClassName}${type.isNullable ? '?' : ''} value) {
+  if ($mutableValueCheck) {
+    value = value.toMutable();
+  }
+  ${property.privateCacheField} = value;
+  ${property.writeHelper}(
+    internal: internal,
+    key: ${escapeDartString(property.nameInData)},
+    value: value,
+    freezer: ${_buildTypeConverterExpression(type)},
+  );
+}
+
+    ''');
+  }
+
+  void _writeTypedDataListSetter(TypedDataObjectProperty property) {
+    final type = property.type as TypedDataListType;
+
+    var mutableValueCheck =
+        'value is! TypedDataList<${type.elementType.dartType}> || '
+        'value.internal is! MutableArray';
+    if (type.isNullable) {
+      mutableValueCheck = 'value != null && ($mutableValueCheck)';
+    }
+
+    _code.writeln('''
+set ${property.nameInDart}(${type.dartTypeWithNullability} value) {
+  if ($mutableValueCheck) {
+    value = ${_buildTypeConverterExpression(type)}.revive(MutableArray())..addAll(value);
+  }
+  ${property.privateCacheField} = value;
+  ${property.writeHelper}(
+    internal: internal,
+    key: ${escapeDartString(property.nameInData)},
+    value: value,
+    freezer: ${_buildTypeConverterExpression(type)},
+  );
+}
+
+    ''');
   }
 
   String _buildTypeConverterExpression(TypedDataType type) {
@@ -421,4 +399,16 @@ const TypedListConverter(
       throw UnimplementedError();
     }
   }
+}
+
+extension on TypedDataObjectProperty {
+  String get readHelper => isNullable
+      ? 'InternalTypedDataHelpers.readNullableProperty'
+      : 'InternalTypedDataHelpers.readProperty';
+
+  String get writeHelper => isNullable
+      ? 'InternalTypedDataHelpers.writeNullableProperty'
+      : 'InternalTypedDataHelpers.writeProperty';
+
+  String get privateCacheField => '_$nameInDart';
 }
