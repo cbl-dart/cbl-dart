@@ -239,6 +239,53 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
       );
 }
 
+mixin _$DateTimeDoc implements TypedDocumentObject<MutableDateTimeDoc> {
+  DateTime get value;
+}
+
+abstract class _DateTimeDocImplBase<I extends Document>
+    with _$DateTimeDoc
+    implements DateTimeDoc {
+  _DateTimeDocImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  DateTime get value => InternalTypedDataHelpers.readProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        reviver: InternalTypedDataHelpers.dateTimeConverter,
+      );
+
+  @override
+  MutableDateTimeDoc toMutable() =>
+      MutableDateTimeDoc.internal(internal.toMutable());
+}
+
+class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
+  ImmutableDateTimeDoc.internal(Document internal) : super(internal);
+}
+
+class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<DateTimeDoc, MutableDateTimeDoc> {
+  MutableDateTimeDoc(
+    DateTime value,
+  ) : super(MutableDocument()) {
+    this.value = value;
+  }
+
+  MutableDateTimeDoc.internal(MutableDocument internal) : super(internal);
+
+  set value(DateTime value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.dateTimeConverter,
+      );
+}
+
 mixin _$BlobDoc implements TypedDocumentObject<MutableBlobDoc> {
   Blob get value;
 }
@@ -518,6 +565,53 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
         key: 'value',
         value: value,
         freezer: InternalTypedDataHelpers.boolConverter,
+      );
+}
+
+mixin _$DateTimeDict implements TypedDictionaryObject<MutableDateTimeDict> {
+  DateTime get value;
+}
+
+abstract class _DateTimeDictImplBase<I extends Dictionary>
+    with _$DateTimeDict
+    implements DateTimeDict {
+  _DateTimeDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  DateTime get value => InternalTypedDataHelpers.readProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        reviver: InternalTypedDataHelpers.dateTimeConverter,
+      );
+
+  @override
+  MutableDateTimeDict toMutable() =>
+      MutableDateTimeDict.internal(internal.toMutable());
+}
+
+class ImmutableDateTimeDict extends _DateTimeDictImplBase {
+  ImmutableDateTimeDict.internal(Dictionary internal) : super(internal);
+}
+
+class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
+    implements TypedMutableDictionaryObject<DateTimeDict, MutableDateTimeDict> {
+  MutableDateTimeDict(
+    DateTime value,
+  ) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableDateTimeDict.internal(MutableDictionary internal) : super(internal);
+
+  set value(DateTime value) => InternalTypedDataHelpers.writeProperty(
+        internal: internal,
+        key: 'value',
+        value: value,
+        freezer: InternalTypedDataHelpers.dateTimeConverter,
       );
 }
 

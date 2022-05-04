@@ -15,6 +15,7 @@ const _intType = TypeChecker.fromRuntime(int);
 const _doubleType = TypeChecker.fromRuntime(double);
 const _numType = TypeChecker.fromRuntime(num);
 const _boolType = TypeChecker.fromRuntime(bool);
+const _dateTimeType = TypeChecker.fromRuntime(DateTime);
 
 // cbl annotation types
 const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
@@ -32,6 +33,7 @@ const _builtinSupportedTypes = [
   _doubleType,
   _numType,
   _boolType,
+  _dateTimeType,
   _blobType,
 ];
 

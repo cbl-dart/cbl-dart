@@ -54,16 +54,15 @@ abstract class BoolDoc with _$BoolDoc {
   factory BoolDoc(bool value) = MutableBoolDoc;
 }
 
-// TODO(blaugold): implement DateTime support through type converter
-// @TypedDictionary()
-// abstract class DateTimeDict with _$DateTimeDict {
-//   factory DateTimeDict(DateTime value) = MutableDateTimeDict;
-// }
+@TypedDictionary()
+abstract class DateTimeDict with _$DateTimeDict {
+  factory DateTimeDict(DateTime value) = MutableDateTimeDict;
+}
 
-// @TypedDocument()
-// abstract class DateTimeDoc with _$DateTimeDoc {
-//   factory DateTimeDoc(DateTime value) = MutableDateTimeDoc;
-// }
+@TypedDocument()
+abstract class DateTimeDoc with _$DateTimeDoc {
+  factory DateTimeDoc(DateTime value) = MutableDateTimeDoc;
+}
 
 @TypedDictionary()
 abstract class BlobDict with _$BlobDict {
