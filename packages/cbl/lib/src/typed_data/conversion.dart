@@ -1,3 +1,4 @@
+import '../document.dart';
 import 'runtime_support.dart';
 import 'typed_object.dart';
 
@@ -23,23 +24,6 @@ abstract class TypeConverter<T> implements Reviver<T>, Freezer<T> {
   const TypeConverter();
 }
 
-class FactoryReviver<E extends Object, T> extends Reviver<T> {
-  const FactoryReviver(this._factory);
-
-  final Factory<E, T> _factory;
-
-  @override
-  T revive(Object value) =>
-      value is E ? _factory(value) : throw CannotReviveTypeException<T>();
-}
-
-class TypedDictionaryFreezer extends Freezer<TypedDictionaryObject> {
-  const TypedDictionaryFreezer();
-
-  @override
-  Object freeze(TypedDictionaryObject value) => value.internal;
-}
-
 class IdentityConverter<T extends Object> extends TypeConverter<T> {
   const IdentityConverter();
 
@@ -61,4 +45,59 @@ class DateTimeConverter extends TypeConverter<DateTime> {
 
   @override
   Object freeze(DateTime value) => value.toIso8601String();
+}
+
+class TypedDictionaryConverter<E extends Object,
+    T extends TypedDictionaryObject> extends TypeConverter<T> {
+  const TypedDictionaryConverter(this._factory);
+
+  final Factory<E, T> _factory;
+
+  @override
+  T revive(Object value) =>
+      value is E ? _factory(value) : throw CannotReviveTypeException<T>();
+
+  @override
+  Object freeze(T value) => value.internal;
+}
+
+class TypedListConverter<T> extends TypeConverter<TypedDataList<T>> {
+  const TypedListConverter({
+    required this.converter,
+    required this.isNullable,
+    required this.isCached,
+  });
+
+  final TypeConverter<T> converter;
+  final bool isNullable;
+  final bool isCached;
+
+  @override
+  TypedDataList<T> revive(Object value) {
+    if (value is MutableArray) {
+      final list = MutableTypedDataList(
+        internal: value,
+        converter: converter,
+        isNullable: isNullable,
+      );
+      if (isCached) {
+        return CachedTypedDataList(list, growable: true);
+      }
+      return list;
+    } else if (value is Array) {
+      final list = ImmutableTypedDataList(
+        internal: value,
+        converter: converter,
+        isNullable: isNullable,
+      );
+      if (isCached) {
+        return CachedTypedDataList(list, growable: false);
+      }
+      return list;
+    }
+    throw const CannotReviveTypeException<Array>();
+  }
+
+  @override
+  Object freeze(TypedDataList<T> value) => value.internal;
 }

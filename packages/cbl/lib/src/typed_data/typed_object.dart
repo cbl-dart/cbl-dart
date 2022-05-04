@@ -23,3 +23,9 @@ abstract class TypedDocumentObject<MD extends Object> {
 
 abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
     MD extends TypedDocumentObject> extends TypedDocumentObject<MD> {}
+
+abstract class TypedDataList<T> implements List<T> {
+  /// Internal field that you should never use.
+  @meta.internal
+  Object get internal;
+}

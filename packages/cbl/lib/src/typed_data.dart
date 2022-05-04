@@ -11,14 +11,16 @@ export 'typed_data/annotations.dart'
 export 'typed_data/conversion.dart'
     show
         CannotReviveTypeException,
-        FactoryReviver,
         Freezer,
         Reviver,
-        TypeConverter;
+        TypeConverter,
+        TypedDictionaryConverter,
+        TypedListConverter;
 export 'typed_data/runtime_support.dart' show InternalTypedDataHelpers;
 export 'typed_data/typed_object.dart'
     show
         TypedDictionaryObject,
         TypedMutableDictionaryObject,
         TypedDocumentObject,
-        TypedMutableDocumentObject;
+        TypedMutableDocumentObject,
+        TypedDataList;

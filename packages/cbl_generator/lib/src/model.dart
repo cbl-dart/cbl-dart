@@ -131,11 +131,14 @@ abstract class TypedDataType {
   TypedDataType({
     required this.dartType,
     required this.isNullable,
+    required this.isCached,
   });
 
   final String dartType;
 
   final bool isNullable;
+
+  final bool isCached;
 
   String get dartTypeWithNullability => isNullable ? '$dartType?' : dartType;
 }
@@ -147,6 +150,7 @@ class BuiltinScalarType extends TypedDataType {
   }) : super(
           dartType: dartType,
           isNullable: isNullable,
+          isCached: false,
         );
 
   // ignore: avoid_positional_boolean_parameters
@@ -163,7 +167,21 @@ class TypedDataObjectType extends TypedDataType {
   }) : super(
           dartType: dartType,
           isNullable: isNullable,
+          isCached: true,
         );
 
   late final classNames = TypedDataObjectClassNames(dartType);
+}
+
+class TypedDataListType extends TypedDataType {
+  TypedDataListType({
+    required bool isNullable,
+    required this.elementType,
+  }) : super(
+          dartType: 'List<${elementType.dartType}>',
+          isNullable: isNullable,
+          isCached: true,
+        );
+
+  final TypedDataType elementType;
 }

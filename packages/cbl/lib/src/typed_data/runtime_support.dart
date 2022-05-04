@@ -1,13 +1,17 @@
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart' hide internal;
 import 'package:meta/meta.dart' as meta;
 
 import '../document.dart';
 import '../errors.dart';
+import '../support/collection.dart';
 import 'annotations.dart';
 import 'conversion.dart';
 import 'typed_object.dart';
+
+// === Generator helpers =======================================================
 
 // ignore: avoid_classes_with_only_static_members
 class InternalTypedDataHelpers {
@@ -26,8 +30,6 @@ class InternalTypedDataHelpers {
   static const blobConverter = IdentityConverter<Blob>();
   @meta.internal
   static const dateTimeConverter = DateTimeConverter();
-  @meta.internal
-  static const typedDictionaryFreezer = TypedDictionaryFreezer();
 
   // Read helpers
   @meta.internal
@@ -111,6 +113,163 @@ class InternalTypedDataHelpers {
     } else {
       internal.setValue(freezer.freeze(value), key: key);
     }
+  }
+}
+
+// === TypedDataList ===========================================================
+
+class _TypedDataListBase<T, I extends Array>
+    with ListMixin<T>
+    implements TypedDataList<T> {
+  _TypedDataListBase({
+    required this.internal,
+    required TypeConverter<T> converter,
+    required bool isNullable,
+  })  : _converter = converter,
+        _isNullable = isNullable;
+
+  @override
+  final I internal;
+  final TypeConverter<T> _converter;
+  final bool _isNullable;
+
+  @override
+  int get length => internal.length;
+
+  @override
+  T operator [](int index) {
+    final value = internal.value(index);
+    if (value == null) {
+      if (_isNullable) {
+        return null as T;
+      } else {
+        throw TypedDataException(
+          'Expected a value for element $index but found "null" in the '
+          'underlying data.',
+          TypedDataErrorCode.dataMismatch,
+        );
+      }
+    }
+
+    try {
+      return _converter.revive(value);
+    } on CannotReviveTypeException catch (e) {
+      throw TypedDataException(
+        'Expected a ${e.expectedType} for element $index but the value in '
+        'the underlying data is a ${value.runtimeType}.',
+        TypedDataErrorCode.dataMismatch,
+      );
+    }
+  }
+
+  @override
+  void operator []=(int index, T value) => throw UnimplementedError();
+
+  @override
+  set length(int newLength) => throw UnimplementedError();
+}
+
+class ImmutableTypedDataList<T> extends _TypedDataListBase<T, Array>
+    with UnmodifiableListMixin {
+  ImmutableTypedDataList({
+    required Array internal,
+    required TypeConverter<T> converter,
+    required bool isNullable,
+  }) : super(internal: internal, converter: converter, isNullable: isNullable);
+}
+
+class MutableTypedDataList<T> extends _TypedDataListBase<T, MutableArray> {
+  MutableTypedDataList({
+    required MutableArray internal,
+    required TypeConverter<T> converter,
+    required bool isNullable,
+  }) : super(internal: internal, converter: converter, isNullable: isNullable);
+
+  @override
+  set length(int newLength) {
+    final oldLength = internal.length;
+    final delta = oldLength - newLength;
+    if (delta > 0) {
+      for (var i = 0; i < delta; i++) {
+        internal.removeValue(oldLength - 1 - i);
+      }
+    } else if (delta < 0) {
+      for (var i = 0; i < delta; i++) {
+        internal.addValue(null);
+      }
+    }
+  }
+
+  @override
+  void operator []=(int index, T value) {
+    internal.setValue(_converter.freeze(value), at: index);
+  }
+
+  @override
+  void add(T element) {
+    internal.addValue(_converter.freeze(element));
+  }
+
+  @override
+  void addAll(Iterable<T> iterable) {
+    for (final element in iterable) {
+      internal.addValue(_converter.freeze(element));
+    }
+  }
+}
+
+class CachedTypedDataList<T> extends DelegatingList<T>
+    implements TypedDataList<T> {
+  CachedTypedDataList(
+    TypedDataList<T> base, {
+    required bool growable,
+  })  : _cache = List.filled(base.length, null, growable: growable),
+        internal = base.internal,
+        super(base);
+
+  final List<T?> _cache;
+
+  @override
+  final Object internal;
+
+  @override
+  T operator [](int index) {
+    final cachedValue = _cache[index];
+    if (cachedValue != null) {
+      return cachedValue;
+    }
+
+    final value = this[index];
+    if (value != null) {
+      // We must not store null in the cache, because we use it to detect if
+      // a value has been cached or not.
+      _cache[index] = value;
+    }
+    return value;
+  }
+
+  @override
+  set length(int newLength) {
+    super.length = newLength;
+    _cache.length = newLength;
+  }
+
+  @override
+  void operator []=(int index, T value) {
+    super[index] = value;
+    _cache[index] = value;
+  }
+
+  @override
+  void add(T value) {
+    super.add(value);
+    _cache.add(value);
+  }
+
+  @override
+  void addAll(Iterable<T> iterable) {
+    super.addAll(iterable);
+    _cache.addAll(iterable);
   }
 }
 

@@ -16,6 +16,7 @@ const _doubleType = TypeChecker.fromRuntime(double);
 const _numType = TypeChecker.fromRuntime(num);
 const _boolType = TypeChecker.fromRuntime(bool);
 const _dateTimeType = TypeChecker.fromRuntime(DateTime);
+const _listType = TypeChecker.fromRuntime(List);
 
 // cbl annotation types
 const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
@@ -422,26 +423,46 @@ class TypedDataAnalyzer {
   }
 
   TypedDataType _resolveTypedDataType(VariableElement element) {
-    final type = element.type;
-    final typeName = type.getDisplayString(withNullability: false);
-    final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
+    TypedDataType? resolve(DartType type) {
+      final typeName = type.getDisplayString(withNullability: false);
+      final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
 
-    if (isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
-      return BuiltinScalarType(
-        dartType: typeName,
-        isNullable: isNullable,
-      );
+      if (isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
+        return BuiltinScalarType(
+          dartType: typeName,
+          isNullable: isNullable,
+        );
+      }
+
+      if (_isTypedDataObject(type)) {
+        return TypedDataObjectType(
+          dartType: typeName,
+          isNullable: isNullable,
+        );
+      }
+
+      if (_listType.isExactlyType(type)) {
+        final elementType = (type as ParameterizedType).typeArguments.first;
+        final resolvedElementType = resolve(elementType);
+        if (resolvedElementType == null) {
+          return null;
+        }
+        return TypedDataListType(
+          isNullable: isNullable,
+          elementType: resolvedElementType,
+        );
+      }
+      return null;
     }
 
-    if (_isTypedDataObject(type)) {
-      return TypedDataObjectType(
-        dartType: typeName,
-        isNullable: isNullable,
-      );
+    final type = element.type;
+    final resolvedType = resolve(type);
+    if (resolvedType != null) {
+      return resolvedType;
     }
 
     throw InvalidGenerationSourceError(
-      'Unsupported type: $typeName',
+      'Unsupported type: ${type.getDisplayString(withNullability: true)}',
       element: element,
     );
   }

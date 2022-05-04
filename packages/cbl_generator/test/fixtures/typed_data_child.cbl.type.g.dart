@@ -33,7 +33,7 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(ImmutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 }
 
@@ -55,7 +55,7 @@ class MutableTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 
   @override
@@ -70,7 +70,7 @@ class MutableTypedDataPropertyDoc
       internal: internal,
       key: 'value',
       value: value,
-      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
     );
   }
 }
@@ -103,7 +103,7 @@ class ImmutableOptionalTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(ImmutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 }
 
@@ -127,7 +127,7 @@ class MutableOptionalTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 
   @override
@@ -142,7 +142,7 @@ class MutableOptionalTypedDataPropertyDoc
       internal: internal,
       key: 'value',
       value: value,
-      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
     );
   }
 }
@@ -178,7 +178,7 @@ class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(ImmutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 }
 
@@ -200,7 +200,7 @@ class MutableTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 
   @override
@@ -215,7 +215,7 @@ class MutableTypedDataPropertyDict
       internal: internal,
       key: 'value',
       value: value,
-      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
     );
   }
 }
@@ -248,7 +248,7 @@ class ImmutableOptionalTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(ImmutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 }
 
@@ -272,7 +272,7 @@ class MutableOptionalTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const FactoryReviver(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
   );
 
   @override
@@ -287,7 +287,7 @@ class MutableOptionalTypedDataPropertyDict
       internal: internal,
       key: 'value',
       value: value,
-      freezer: InternalTypedDataHelpers.typedDictionaryFreezer,
+      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
     );
   }
 }
