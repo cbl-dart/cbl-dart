@@ -33,13 +33,17 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
       MutableDocCommentDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocCommentDict extends _DocCommentDictImplBase {
   ImmutableDocCommentDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [DocCommentDict].
 class MutableDocCommentDict extends _DocCommentDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<DocCommentDict, MutableDocCommentDict> {
+  /// Creates a new mutable [DocCommentDict].
   MutableDocCommentDict(
     String value,
   ) : super(MutableDictionary()) {

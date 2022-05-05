@@ -31,12 +31,16 @@ abstract class _ParamDocImplBase<I extends Document>
   MutableParamDoc toMutable() => MutableParamDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableParamDoc extends _ParamDocImplBase {
   ImmutableParamDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [ParamDoc].
 class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<ParamDoc, MutableParamDoc> {
+  /// Creates a new mutable [ParamDoc].
   MutableParamDoc(
     String a,
   ) : super(MutableDocument()) {
@@ -82,13 +86,17 @@ abstract class _OptionalParamDocImplBase<I extends Document>
       MutableOptionalParamDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableOptionalParamDoc extends _OptionalParamDocImplBase {
   ImmutableOptionalParamDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [OptionalParamDoc].
 class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<OptionalParamDoc, MutableOptionalParamDoc> {
+  /// Creates a new mutable [OptionalParamDoc].
   MutableOptionalParamDoc([
     String? a,
   ]) : super(MutableDocument()) {
@@ -148,17 +156,21 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
       MutablePositionalMixedParamDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutablePositionalMixedParamDoc
     extends _PositionalMixedParamDocImplBase {
   ImmutablePositionalMixedParamDoc.internal(Document internal)
       : super(internal);
 }
 
+/// Mutable version of [PositionalMixedParamDoc].
 class MutablePositionalMixedParamDoc
     extends _PositionalMixedParamDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<PositionalMixedParamDoc,
             MutablePositionalMixedParamDoc> {
+  /// Creates a new mutable [PositionalMixedParamDoc].
   MutablePositionalMixedParamDoc(
     String a, [
     String? b,
@@ -220,12 +232,16 @@ abstract class _NamedParamDocImplBase<I extends Document>
       MutableNamedParamDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
   ImmutableNamedParamDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [NamedParamDoc].
 class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<NamedParamDoc, MutableNamedParamDoc> {
+  /// Creates a new mutable [NamedParamDoc].
   MutableNamedParamDoc({
     required String a,
   }) : super(MutableDocument()) {
@@ -271,15 +287,19 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
       MutableNamedOptionalParamDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNamedOptionalParamDoc extends _NamedOptionalParamDocImplBase {
   ImmutableNamedOptionalParamDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [NamedOptionalParamDoc].
 class MutableNamedOptionalParamDoc
     extends _NamedOptionalParamDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<NamedOptionalParamDoc,
             MutableNamedOptionalParamDoc> {
+  /// Creates a new mutable [NamedOptionalParamDoc].
   MutableNamedOptionalParamDoc({
     String? a,
   }) : super(MutableDocument()) {
@@ -340,15 +360,19 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
       MutableNamedMixedParamDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocImplBase {
   ImmutableNamedMixedParamDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [NamedMixedParamDoc].
 class MutableNamedMixedParamDoc
     extends _NamedMixedParamDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<NamedMixedParamDoc,
             MutableNamedMixedParamDoc> {
+  /// Creates a new mutable [NamedMixedParamDoc].
   MutableNamedMixedParamDoc(
     String a, {
     String? b,
@@ -414,12 +438,16 @@ abstract class _ParamDictImplBase<I extends Dictionary>
       MutableParamDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableParamDict extends _ParamDictImplBase {
   ImmutableParamDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [ParamDict].
 class MutableParamDict extends _ParamDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<ParamDict, MutableParamDict> {
+  /// Creates a new mutable [ParamDict].
   MutableParamDict(
     String a,
   ) : super(MutableDictionary()) {
@@ -465,15 +493,19 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
       MutableOptionalParamDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableOptionalParamDict extends _OptionalParamDictImplBase {
   ImmutableOptionalParamDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [OptionalParamDict].
 class MutableOptionalParamDict
     extends _OptionalParamDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<OptionalParamDict,
             MutableOptionalParamDict> {
+  /// Creates a new mutable [OptionalParamDict].
   MutableOptionalParamDict([
     String? a,
   ]) : super(MutableDictionary()) {
@@ -534,17 +566,21 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
       MutablePositionalMixedParamDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutablePositionalMixedParamDict
     extends _PositionalMixedParamDictImplBase {
   ImmutablePositionalMixedParamDict.internal(Dictionary internal)
       : super(internal);
 }
 
+/// Mutable version of [PositionalMixedParamDict].
 class MutablePositionalMixedParamDict
     extends _PositionalMixedParamDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<PositionalMixedParamDict,
             MutablePositionalMixedParamDict> {
+  /// Creates a new mutable [PositionalMixedParamDict].
   MutablePositionalMixedParamDict(
     String a, [
     String? b,
@@ -606,13 +642,17 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
       MutableNamedParamDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNamedParamDict extends _NamedParamDictImplBase {
   ImmutableNamedParamDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NamedParamDict].
 class MutableNamedParamDict extends _NamedParamDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NamedParamDict, MutableNamedParamDict> {
+  /// Creates a new mutable [NamedParamDict].
   MutableNamedParamDict({
     required String a,
   }) : super(MutableDictionary()) {
@@ -658,16 +698,20 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
       MutableNamedOptionalParamDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNamedOptionalParamDict extends _NamedOptionalParamDictImplBase {
   ImmutableNamedOptionalParamDict.internal(Dictionary internal)
       : super(internal);
 }
 
+/// Mutable version of [NamedOptionalParamDict].
 class MutableNamedOptionalParamDict
     extends _NamedOptionalParamDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NamedOptionalParamDict,
             MutableNamedOptionalParamDict> {
+  /// Creates a new mutable [NamedOptionalParamDict].
   MutableNamedOptionalParamDict({
     String? a,
   }) : super(MutableDictionary()) {
@@ -728,15 +772,19 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
       MutableNamedMixedParamDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNamedMixedParamDict extends _NamedMixedParamDictImplBase {
   ImmutableNamedMixedParamDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NamedMixedParamDict].
 class MutableNamedMixedParamDict
     extends _NamedMixedParamDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NamedMixedParamDict,
             MutableNamedMixedParamDict> {
+  /// Creates a new mutable [NamedMixedParamDict].
   MutableNamedMixedParamDict(
     String a, {
     String? b,

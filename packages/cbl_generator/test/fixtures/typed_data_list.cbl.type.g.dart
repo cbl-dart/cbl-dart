@@ -24,6 +24,8 @@ abstract class _BoolListDictImplBase<I extends Dictionary>
       MutableBoolListDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBoolListDict extends _BoolListDictImplBase {
   ImmutableBoolListDict.internal(Dictionary internal) : super(internal);
 
@@ -42,8 +44,10 @@ class ImmutableBoolListDict extends _BoolListDictImplBase {
   );
 }
 
+/// Mutable version of [BoolListDict].
 class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<BoolListDict, MutableBoolListDict> {
+  /// Creates a new mutable [BoolListDict].
   MutableBoolListDict(
     List<bool> value,
   ) : super(MutableDictionary()) {
@@ -98,6 +102,8 @@ abstract class _OptionalBoolListDictImplBase<I extends Dictionary>
       MutableOptionalBoolListDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
   ImmutableOptionalBoolListDict.internal(Dictionary internal) : super(internal);
 
@@ -116,11 +122,13 @@ class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
   );
 }
 
+/// Mutable version of [OptionalBoolListDict].
 class MutableOptionalBoolListDict
     extends _OptionalBoolListDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<OptionalBoolListDict,
             MutableOptionalBoolListDict> {
+  /// Creates a new mutable [OptionalBoolListDict].
   MutableOptionalBoolListDict(
     List<bool>? value,
   ) : super(MutableDictionary()) {
@@ -179,6 +187,8 @@ abstract class _BoolDictListDictImplBase<I extends Dictionary>
       MutableBoolDictListDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
   ImmutableBoolDictListDict.internal(Dictionary internal) : super(internal);
 
@@ -198,11 +208,13 @@ class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
   );
 }
 
+/// Mutable version of [BoolDictListDict].
 class MutableBoolDictListDict
     extends _BoolDictListDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<BoolDictListDict,
             MutableBoolDictListDict> {
+  /// Creates a new mutable [BoolDictListDict].
   MutableBoolDictListDict(
     List<BoolDict> value,
   ) : super(MutableDictionary()) {
@@ -260,6 +272,8 @@ abstract class _BoolListListDictImplBase<I extends Dictionary>
       MutableBoolListListDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBoolListListDict extends _BoolListListDictImplBase {
   ImmutableBoolListListDict.internal(Dictionary internal) : super(internal);
 
@@ -282,11 +296,13 @@ class ImmutableBoolListListDict extends _BoolListListDictImplBase {
   );
 }
 
+/// Mutable version of [BoolListListDict].
 class MutableBoolListListDict
     extends _BoolListListDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<BoolListListDict,
             MutableBoolListListDict> {
+  /// Creates a new mutable [BoolListListDict].
   MutableBoolListListDict(
     List<List<bool>> value,
   ) : super(MutableDictionary()) {

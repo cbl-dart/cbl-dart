@@ -25,6 +25,8 @@ abstract class _TypedDataPropertyDocImplBase<I extends Document>
       MutableTypedDataPropertyDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
   ImmutableTypedDataPropertyDoc.internal(Document internal) : super(internal);
 
@@ -40,11 +42,13 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
   );
 }
 
+/// Mutable version of [TypedDataPropertyDoc].
 class MutableTypedDataPropertyDoc
     extends _TypedDataPropertyDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<TypedDataPropertyDoc,
             MutableTypedDataPropertyDoc> {
+  /// Creates a new mutable [TypedDataPropertyDoc].
   MutableTypedDataPropertyDoc(
     BoolDict value,
   ) : super(MutableDocument()) {
@@ -97,6 +101,8 @@ abstract class _OptionalTypedDataPropertyDocImplBase<I extends Document>
       MutableOptionalTypedDataPropertyDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableOptionalTypedDataPropertyDoc
     extends _OptionalTypedDataPropertyDocImplBase {
   ImmutableOptionalTypedDataPropertyDoc.internal(Document internal)
@@ -114,11 +120,13 @@ class ImmutableOptionalTypedDataPropertyDoc
   );
 }
 
+/// Mutable version of [OptionalTypedDataPropertyDoc].
 class MutableOptionalTypedDataPropertyDoc
     extends _OptionalTypedDataPropertyDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<OptionalTypedDataPropertyDoc,
             MutableOptionalTypedDataPropertyDoc> {
+  /// Creates a new mutable [OptionalTypedDataPropertyDoc].
   MutableOptionalTypedDataPropertyDoc(
     BoolDict? value,
   ) : super(MutableDocument()) {
@@ -177,6 +185,8 @@ abstract class _TypedDataPropertyDictImplBase<I extends Dictionary>
       MutableTypedDataPropertyDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
   ImmutableTypedDataPropertyDict.internal(Dictionary internal)
       : super(internal);
@@ -193,11 +203,13 @@ class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
   );
 }
 
+/// Mutable version of [TypedDataPropertyDict].
 class MutableTypedDataPropertyDict
     extends _TypedDataPropertyDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<TypedDataPropertyDict,
             MutableTypedDataPropertyDict> {
+  /// Creates a new mutable [TypedDataPropertyDict].
   MutableTypedDataPropertyDict(
     BoolDict value,
   ) : super(MutableDictionary()) {
@@ -250,6 +262,8 @@ abstract class _OptionalTypedDataPropertyDictImplBase<I extends Dictionary>
       MutableOptionalTypedDataPropertyDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableOptionalTypedDataPropertyDict
     extends _OptionalTypedDataPropertyDictImplBase {
   ImmutableOptionalTypedDataPropertyDict.internal(Dictionary internal)
@@ -267,11 +281,13 @@ class ImmutableOptionalTypedDataPropertyDict
   );
 }
 
+/// Mutable version of [OptionalTypedDataPropertyDict].
 class MutableOptionalTypedDataPropertyDict
     extends _OptionalTypedDataPropertyDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<OptionalTypedDataPropertyDict,
             MutableOptionalTypedDataPropertyDict> {
+  /// Creates a new mutable [OptionalTypedDataPropertyDict].
   MutableOptionalTypedDataPropertyDict(
     BoolDict? value,
   ) : super(MutableDictionary()) {

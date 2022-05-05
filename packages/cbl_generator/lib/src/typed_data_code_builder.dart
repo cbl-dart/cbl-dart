@@ -79,6 +79,8 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
 
   void _writeImmutableClass() {
     _code.writeln('''
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
 
   ${_classNames.immutableClassName}.internal($_internalType internal): super(internal);
@@ -94,10 +96,12 @@ class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
 
   void _writeMutableClass() {
     _code.writeln('''
+/// Mutable version of [${_classNames.declaringClassName}].
 class ${_classNames.mutableClassName}
     extends ${_classNames.implBaseName}<$_mutableInternalType>
     implements TypedMutable${_internalType}Object<${_classNames.declaringClassName}, ${_classNames.mutableClassName}> {
 
+  /// Creates a new mutable [${_classNames.declaringClassName}].
   ${_classNames.mutableClassName}(
 ''');
 

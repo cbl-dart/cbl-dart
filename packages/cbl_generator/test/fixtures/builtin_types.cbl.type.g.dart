@@ -32,12 +32,16 @@ abstract class _StringDocImplBase<I extends Document>
       MutableStringDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableStringDoc extends _StringDocImplBase {
   ImmutableStringDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [StringDoc].
 class MutableStringDoc extends _StringDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<StringDoc, MutableStringDoc> {
+  /// Creates a new mutable [StringDoc].
   MutableStringDoc(
     String value,
   ) : super(MutableDocument()) {
@@ -81,12 +85,16 @@ abstract class _IntDocImplBase<I extends Document>
   MutableIntDoc toMutable() => MutableIntDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableIntDoc extends _IntDocImplBase {
   ImmutableIntDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [IntDoc].
 class MutableIntDoc extends _IntDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<IntDoc, MutableIntDoc> {
+  /// Creates a new mutable [IntDoc].
   MutableIntDoc(
     int value,
   ) : super(MutableDocument()) {
@@ -131,12 +139,16 @@ abstract class _DoubleDocImplBase<I extends Document>
       MutableDoubleDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDoubleDoc extends _DoubleDocImplBase {
   ImmutableDoubleDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DoubleDoc].
 class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DoubleDoc, MutableDoubleDoc> {
+  /// Creates a new mutable [DoubleDoc].
   MutableDoubleDoc(
     double value,
   ) : super(MutableDocument()) {
@@ -180,12 +192,16 @@ abstract class _NumDocImplBase<I extends Document>
   MutableNumDoc toMutable() => MutableNumDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNumDoc extends _NumDocImplBase {
   ImmutableNumDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [NumDoc].
 class MutableNumDoc extends _NumDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<NumDoc, MutableNumDoc> {
+  /// Creates a new mutable [NumDoc].
   MutableNumDoc(
     num value,
   ) : super(MutableDocument()) {
@@ -229,12 +245,16 @@ abstract class _BoolDocImplBase<I extends Document>
   MutableBoolDoc toMutable() => MutableBoolDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBoolDoc extends _BoolDocImplBase {
   ImmutableBoolDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [BoolDoc].
 class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<BoolDoc, MutableBoolDoc> {
+  /// Creates a new mutable [BoolDoc].
   MutableBoolDoc(
     bool value,
   ) : super(MutableDocument()) {
@@ -279,12 +299,16 @@ abstract class _DateTimeDocImplBase<I extends Document>
       MutableDateTimeDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
   ImmutableDateTimeDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DateTimeDoc].
 class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DateTimeDoc, MutableDateTimeDoc> {
+  /// Creates a new mutable [DateTimeDoc].
   MutableDateTimeDoc(
     DateTime value,
   ) : super(MutableDocument()) {
@@ -328,12 +352,16 @@ abstract class _BlobDocImplBase<I extends Document>
   MutableBlobDoc toMutable() => MutableBlobDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBlobDoc extends _BlobDocImplBase {
   ImmutableBlobDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [BlobDoc].
 class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<BlobDoc, MutableBlobDoc> {
+  /// Creates a new mutable [BlobDoc].
   MutableBlobDoc(
     Blob value,
   ) : super(MutableDocument()) {
@@ -382,12 +410,16 @@ abstract class _StringDictImplBase<I extends Dictionary>
       MutableStringDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableStringDict extends _StringDictImplBase {
   ImmutableStringDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [StringDict].
 class MutableStringDict extends _StringDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<StringDict, MutableStringDict> {
+  /// Creates a new mutable [StringDict].
   MutableStringDict(
     String value,
   ) : super(MutableDictionary()) {
@@ -431,12 +463,16 @@ abstract class _IntDictImplBase<I extends Dictionary>
   MutableIntDict toMutable() => MutableIntDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableIntDict extends _IntDictImplBase {
   ImmutableIntDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [IntDict].
 class MutableIntDict extends _IntDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<IntDict, MutableIntDict> {
+  /// Creates a new mutable [IntDict].
   MutableIntDict(
     int value,
   ) : super(MutableDictionary()) {
@@ -481,12 +517,16 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
       MutableDoubleDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDoubleDict extends _DoubleDictImplBase {
   ImmutableDoubleDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [DoubleDict].
 class MutableDoubleDict extends _DoubleDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<DoubleDict, MutableDoubleDict> {
+  /// Creates a new mutable [DoubleDict].
   MutableDoubleDict(
     double value,
   ) : super(MutableDictionary()) {
@@ -530,12 +570,16 @@ abstract class _NumDictImplBase<I extends Dictionary>
   MutableNumDict toMutable() => MutableNumDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNumDict extends _NumDictImplBase {
   ImmutableNumDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NumDict].
 class MutableNumDict extends _NumDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<NumDict, MutableNumDict> {
+  /// Creates a new mutable [NumDict].
   MutableNumDict(
     num value,
   ) : super(MutableDictionary()) {
@@ -579,12 +623,16 @@ abstract class _BoolDictImplBase<I extends Dictionary>
   MutableBoolDict toMutable() => MutableBoolDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBoolDict extends _BoolDictImplBase {
   ImmutableBoolDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [BoolDict].
 class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<BoolDict, MutableBoolDict> {
+  /// Creates a new mutable [BoolDict].
   MutableBoolDict(
     bool value,
   ) : super(MutableDictionary()) {
@@ -629,12 +677,16 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
       MutableDateTimeDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDateTimeDict extends _DateTimeDictImplBase {
   ImmutableDateTimeDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [DateTimeDict].
 class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<DateTimeDict, MutableDateTimeDict> {
+  /// Creates a new mutable [DateTimeDict].
   MutableDateTimeDict(
     DateTime value,
   ) : super(MutableDictionary()) {
@@ -678,12 +730,16 @@ abstract class _BlobDictImplBase<I extends Dictionary>
   MutableBlobDict toMutable() => MutableBlobDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableBlobDict extends _BlobDictImplBase {
   ImmutableBlobDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [BlobDict].
 class MutableBlobDict extends _BlobDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<BlobDict, MutableBlobDict> {
+  /// Creates a new mutable [BlobDict].
   MutableBlobDict(
     Blob value,
   ) : super(MutableDictionary()) {
@@ -729,13 +785,17 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
       MutableNullableIntDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNullableIntDict extends _NullableIntDictImplBase {
   ImmutableNullableIntDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NullableIntDict].
 class MutableNullableIntDict extends _NullableIntDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NullableIntDict, MutableNullableIntDict> {
+  /// Creates a new mutable [NullableIntDict].
   MutableNullableIntDict(
     int? value,
   ) : super(MutableDictionary()) {
@@ -785,15 +845,19 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
       MutableNullableDoubleDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNullableDoubleDict extends _NullableDoubleDictImplBase {
   ImmutableNullableDoubleDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NullableDoubleDict].
 class MutableNullableDoubleDict
     extends _NullableDoubleDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NullableDoubleDict,
             MutableNullableDoubleDict> {
+  /// Creates a new mutable [NullableDoubleDict].
   MutableNullableDoubleDict(
     double? value,
   ) : super(MutableDictionary()) {
@@ -844,13 +908,17 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
       MutableNullableNumDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNullableNumDict extends _NullableNumDictImplBase {
   ImmutableNullableNumDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NullableNumDict].
 class MutableNullableNumDict extends _NullableNumDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NullableNumDict, MutableNullableNumDict> {
+  /// Creates a new mutable [NullableNumDict].
   MutableNullableNumDict(
     num? value,
   ) : super(MutableDictionary()) {
@@ -900,15 +968,19 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
       MutableNullableBoolDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableNullableBoolDict extends _NullableBoolDictImplBase {
   ImmutableNullableBoolDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [NullableBoolDict].
 class MutableNullableBoolDict
     extends _NullableBoolDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NullableBoolDict,
             MutableNullableBoolDict> {
+  /// Creates a new mutable [NullableBoolDict].
   MutableNullableBoolDict(
     bool? value,
   ) : super(MutableDictionary()) {

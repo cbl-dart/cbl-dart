@@ -27,12 +27,16 @@ abstract class _DocWithIdImplBase<I extends Document>
       MutableDocWithId.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithId extends _DocWithIdImplBase {
   ImmutableDocWithId.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DocWithId].
 class MutableDocWithId extends _DocWithIdImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DocWithId, MutableDocWithId> {
+  /// Creates a new mutable [DocWithId].
   MutableDocWithId(
     String id,
   ) : super(MutableDocument.withId(id));
@@ -61,15 +65,19 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
       MutableDocWithOptionalId.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithOptionalId extends _DocWithOptionalIdImplBase {
   ImmutableDocWithOptionalId.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DocWithOptionalId].
 class MutableDocWithOptionalId
     extends _DocWithOptionalIdImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithOptionalId,
             MutableDocWithOptionalId> {
+  /// Creates a new mutable [DocWithOptionalId].
   MutableDocWithOptionalId([
     String? id,
   ]) : super(id == null ? MutableDocument() : MutableDocument.withId(id));
@@ -108,15 +116,19 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
       MutableDocWithIdAndField.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithIdAndField extends _DocWithIdAndFieldImplBase {
   ImmutableDocWithIdAndField.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DocWithIdAndField].
 class MutableDocWithIdAndField
     extends _DocWithIdAndFieldImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithIdAndField,
             MutableDocWithIdAndField> {
+  /// Creates a new mutable [DocWithIdAndField].
   MutableDocWithIdAndField(
     String id,
     String value,
@@ -168,17 +180,21 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
       MutableDocWithOptionalIdAndField.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithOptionalIdAndField
     extends _DocWithOptionalIdAndFieldImplBase {
   ImmutableDocWithOptionalIdAndField.internal(Document internal)
       : super(internal);
 }
 
+/// Mutable version of [DocWithOptionalIdAndField].
 class MutableDocWithOptionalIdAndField
     extends _DocWithOptionalIdAndFieldImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithOptionalIdAndField,
             MutableDocWithOptionalIdAndField> {
+  /// Creates a new mutable [DocWithOptionalIdAndField].
   MutableDocWithOptionalIdAndField(
     String value, [
     String? id,
@@ -219,13 +235,17 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
       MutableDocWithIdGetter.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithIdGetter extends _DocWithIdGetterImplBase {
   ImmutableDocWithIdGetter.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DocWithIdGetter].
 class MutableDocWithIdGetter extends _DocWithIdGetterImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithIdGetter, MutableDocWithIdGetter> {
+  /// Creates a new mutable [DocWithIdGetter].
   MutableDocWithIdGetter() : super(MutableDocument());
 
   MutableDocWithIdGetter.internal(MutableDocument internal) : super(internal);
@@ -250,15 +270,19 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
       MutableDocWithSequenceGetter.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithSequenceGetter extends _DocWithSequenceGetterImplBase {
   ImmutableDocWithSequenceGetter.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [DocWithSequenceGetter].
 class MutableDocWithSequenceGetter
     extends _DocWithSequenceGetterImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithSequenceGetter,
             MutableDocWithSequenceGetter> {
+  /// Creates a new mutable [DocWithSequenceGetter].
   MutableDocWithSequenceGetter() : super(MutableDocument());
 
   MutableDocWithSequenceGetter.internal(MutableDocument internal)
@@ -284,17 +308,21 @@ abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
       MutableDocWithRevisionIdGetter.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableDocWithRevisionIdGetter
     extends _DocWithRevisionIdGetterImplBase {
   ImmutableDocWithRevisionIdGetter.internal(Document internal)
       : super(internal);
 }
 
+/// Mutable version of [DocWithRevisionIdGetter].
 class MutableDocWithRevisionIdGetter
     extends _DocWithRevisionIdGetterImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<DocWithRevisionIdGetter,
             MutableDocWithRevisionIdGetter> {
+  /// Creates a new mutable [DocWithRevisionIdGetter].
   MutableDocWithRevisionIdGetter() : super(MutableDocument());
 
   MutableDocWithRevisionIdGetter.internal(MutableDocument internal)

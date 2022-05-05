@@ -33,17 +33,21 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
       MutableCustomValueTypeMatcherDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableCustomValueTypeMatcherDoc
     extends _CustomValueTypeMatcherDocImplBase {
   ImmutableCustomValueTypeMatcherDoc.internal(Document internal)
       : super(internal);
 }
 
+/// Mutable version of [CustomValueTypeMatcherDoc].
 class MutableCustomValueTypeMatcherDoc
     extends _CustomValueTypeMatcherDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<CustomValueTypeMatcherDoc,
             MutableCustomValueTypeMatcherDoc> {
+  /// Creates a new mutable [CustomValueTypeMatcherDoc].
   MutableCustomValueTypeMatcherDoc(
     String value,
   ) : super(MutableDocument()) {

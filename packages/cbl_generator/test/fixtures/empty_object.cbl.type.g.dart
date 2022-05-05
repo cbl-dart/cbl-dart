@@ -21,12 +21,16 @@ abstract class _EmptyDocImplBase<I extends Document>
   MutableEmptyDoc toMutable() => MutableEmptyDoc.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableEmptyDoc extends _EmptyDocImplBase {
   ImmutableEmptyDoc.internal(Document internal) : super(internal);
 }
 
+/// Mutable version of [EmptyDoc].
 class MutableEmptyDoc extends _EmptyDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<EmptyDoc, MutableEmptyDoc> {
+  /// Creates a new mutable [EmptyDoc].
   MutableEmptyDoc() : super(MutableDocument());
 
   MutableEmptyDoc.internal(MutableDocument internal) : super(internal);
@@ -51,12 +55,16 @@ abstract class _EmptyDictImplBase<I extends Dictionary>
       MutableEmptyDict.internal(internal.toMutable());
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableEmptyDict extends _EmptyDictImplBase {
   ImmutableEmptyDict.internal(Dictionary internal) : super(internal);
 }
 
+/// Mutable version of [EmptyDict].
 class MutableEmptyDict extends _EmptyDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<EmptyDict, MutableEmptyDict> {
+  /// Creates a new mutable [EmptyDict].
   MutableEmptyDict() : super(MutableDictionary());
 
   MutableEmptyDict.internal(MutableDictionary internal) : super(internal);
