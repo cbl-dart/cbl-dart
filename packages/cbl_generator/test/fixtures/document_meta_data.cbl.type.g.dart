@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'document_meta_data.dart';
 
@@ -31,6 +31,16 @@ abstract class _DocWithIdImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithId extends _DocWithIdImplBase {
   ImmutableDocWithId.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithId &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithId].
@@ -69,6 +79,16 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithOptionalId extends _DocWithOptionalIdImplBase {
   ImmutableDocWithOptionalId.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithOptionalId &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithOptionalId].
@@ -120,6 +140,16 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithIdAndField extends _DocWithIdAndFieldImplBase {
   ImmutableDocWithIdAndField.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithIdAndField &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithIdAndField].
@@ -186,6 +216,16 @@ class ImmutableDocWithOptionalIdAndField
     extends _DocWithOptionalIdAndFieldImplBase {
   ImmutableDocWithOptionalIdAndField.internal(Document internal)
       : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithOptionalIdAndField &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithOptionalIdAndField].
@@ -239,6 +279,16 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithIdGetter extends _DocWithIdGetterImplBase {
   ImmutableDocWithIdGetter.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithIdGetter &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithIdGetter].
@@ -274,6 +324,16 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithSequenceGetter extends _DocWithSequenceGetterImplBase {
   ImmutableDocWithSequenceGetter.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithSequenceGetter &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithSequenceGetter].
@@ -314,6 +374,16 @@ class ImmutableDocWithRevisionIdGetter
     extends _DocWithRevisionIdGetterImplBase {
   ImmutableDocWithRevisionIdGetter.internal(Document internal)
       : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DocWithRevisionIdGetter &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DocWithRevisionIdGetter].

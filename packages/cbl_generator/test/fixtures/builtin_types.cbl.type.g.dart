@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'builtin_types.dart';
 
@@ -36,6 +36,16 @@ abstract class _StringDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableStringDoc extends _StringDocImplBase {
   ImmutableStringDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StringDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [StringDoc].
@@ -89,6 +99,16 @@ abstract class _IntDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableIntDoc extends _IntDocImplBase {
   ImmutableIntDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IntDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [IntDoc].
@@ -143,6 +163,16 @@ abstract class _DoubleDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDoubleDoc extends _DoubleDocImplBase {
   ImmutableDoubleDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DoubleDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DoubleDoc].
@@ -196,6 +226,16 @@ abstract class _NumDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableNumDoc extends _NumDocImplBase {
   ImmutableNumDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NumDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NumDoc].
@@ -249,6 +289,16 @@ abstract class _BoolDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableBoolDoc extends _BoolDocImplBase {
   ImmutableBoolDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoolDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BoolDoc].
@@ -303,6 +353,16 @@ abstract class _DateTimeDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
   ImmutableDateTimeDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DateTimeDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DateTimeDoc].
@@ -356,6 +416,16 @@ abstract class _BlobDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableBlobDoc extends _BlobDocImplBase {
   ImmutableBlobDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BlobDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BlobDoc].
@@ -414,6 +484,16 @@ abstract class _StringDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableStringDict extends _StringDictImplBase {
   ImmutableStringDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StringDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [StringDict].
@@ -467,6 +547,16 @@ abstract class _IntDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableIntDict extends _IntDictImplBase {
   ImmutableIntDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IntDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [IntDict].
@@ -521,6 +611,16 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableDoubleDict extends _DoubleDictImplBase {
   ImmutableDoubleDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DoubleDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DoubleDict].
@@ -574,6 +674,16 @@ abstract class _NumDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNumDict extends _NumDictImplBase {
   ImmutableNumDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NumDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NumDict].
@@ -627,6 +737,16 @@ abstract class _BoolDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableBoolDict extends _BoolDictImplBase {
   ImmutableBoolDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoolDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BoolDict].
@@ -681,6 +801,16 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableDateTimeDict extends _DateTimeDictImplBase {
   ImmutableDateTimeDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DateTimeDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [DateTimeDict].
@@ -734,6 +864,16 @@ abstract class _BlobDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableBlobDict extends _BlobDictImplBase {
   ImmutableBlobDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BlobDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BlobDict].
@@ -789,6 +929,16 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNullableIntDict extends _NullableIntDictImplBase {
   ImmutableNullableIntDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NullableIntDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NullableIntDict].
@@ -849,6 +999,16 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNullableDoubleDict extends _NullableDoubleDictImplBase {
   ImmutableNullableDoubleDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NullableDoubleDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NullableDoubleDict].
@@ -912,6 +1072,16 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNullableNumDict extends _NullableNumDictImplBase {
   ImmutableNullableNumDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NullableNumDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NullableNumDict].
@@ -972,6 +1142,16 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNullableBoolDict extends _NullableBoolDictImplBase {
   ImmutableNullableBoolDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NullableBoolDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NullableBoolDict].

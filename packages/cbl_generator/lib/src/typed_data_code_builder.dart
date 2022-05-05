@@ -65,7 +65,6 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
 
 ''');
 
-    // Document metadata fields
     _writeDocumentMetadataGetters();
 
     // Property getters for un-cached properties
@@ -73,8 +72,9 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
         .where((property) => !property.type.isCached)
         .forEach(_writeUncachedPropertyGetter);
 
-    // `toMutable` method
     _writeToMutableMethod();
+
+    _code.writeln('}');
   }
 
   void _writeImmutableClass() {
@@ -90,6 +90,8 @@ class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
     object.properties.where((property) => property.type.isCached).toList()
       ..forEach(_writePropertyConverterField)
       ..forEach(_writeImmutableCachedPropertyField);
+
+    _writeEqualsAndHashCode();
 
     _code.writeln('}');
   }
@@ -297,8 +299,22 @@ ${type.dartTypeWithNullability} get ${property.nameInDart} => ${property.readHel
 @override
 ${_classNames.mutableClassName} toMutable() =>
     ${_classNames.mutableClassName}.internal(internal.toMutable());
-    }
     ''');
+  }
+
+  void _writeEqualsAndHashCode() {
+    _code.writeln('''
+@override
+bool operator ==(Object other) =>
+    identical(this, other) ||
+    other is ${_classNames.declaringClassName} &&
+        runtimeType == other.runtimeType &&
+        internal == other.internal;
+
+@override
+int get hashCode => internal.hashCode;
+
+''');
   }
 
   void _writeImmutableCachedPropertyField(TypedDataObjectProperty property) {

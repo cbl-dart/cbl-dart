@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'constructor_parameters.dart';
 
@@ -35,6 +35,16 @@ abstract class _ParamDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableParamDoc extends _ParamDocImplBase {
   ImmutableParamDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ParamDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [ParamDoc].
@@ -90,6 +100,16 @@ abstract class _OptionalParamDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableOptionalParamDoc extends _OptionalParamDocImplBase {
   ImmutableOptionalParamDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OptionalParamDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [OptionalParamDoc].
@@ -162,6 +182,16 @@ class ImmutablePositionalMixedParamDoc
     extends _PositionalMixedParamDocImplBase {
   ImmutablePositionalMixedParamDoc.internal(Document internal)
       : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PositionalMixedParamDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [PositionalMixedParamDoc].
@@ -236,6 +266,16 @@ abstract class _NamedParamDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
   ImmutableNamedParamDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedParamDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NamedParamDoc].
@@ -291,6 +331,16 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableNamedOptionalParamDoc extends _NamedOptionalParamDocImplBase {
   ImmutableNamedOptionalParamDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedOptionalParamDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NamedOptionalParamDoc].
@@ -364,6 +414,16 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocImplBase {
   ImmutableNamedMixedParamDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedMixedParamDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NamedMixedParamDoc].
@@ -442,6 +502,16 @@ abstract class _ParamDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableParamDict extends _ParamDictImplBase {
   ImmutableParamDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ParamDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [ParamDict].
@@ -497,6 +567,16 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableOptionalParamDict extends _OptionalParamDictImplBase {
   ImmutableOptionalParamDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OptionalParamDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [OptionalParamDict].
@@ -572,6 +652,16 @@ class ImmutablePositionalMixedParamDict
     extends _PositionalMixedParamDictImplBase {
   ImmutablePositionalMixedParamDict.internal(Dictionary internal)
       : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PositionalMixedParamDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [PositionalMixedParamDict].
@@ -646,6 +736,16 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNamedParamDict extends _NamedParamDictImplBase {
   ImmutableNamedParamDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedParamDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NamedParamDict].
@@ -703,6 +803,16 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
 class ImmutableNamedOptionalParamDict extends _NamedOptionalParamDictImplBase {
   ImmutableNamedOptionalParamDict.internal(Dictionary internal)
       : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedOptionalParamDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NamedOptionalParamDict].
@@ -776,6 +886,16 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableNamedMixedParamDict extends _NamedMixedParamDictImplBase {
   ImmutableNamedMixedParamDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedMixedParamDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [NamedMixedParamDict].

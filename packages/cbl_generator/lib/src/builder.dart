@@ -23,6 +23,7 @@ class TypedDataBuilder extends PartBuilder {
     'parameter_assignments',
     'unnecessary_const',
     'prefer_relative_imports',
+    'avoid_equals_and_hash_code_on_mutable_classes',
   ];
 
   @visibleForTesting

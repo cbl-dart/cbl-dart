@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports, avoid_equals_and_hash_code_on_mutable_classes
 
 part of 'typed_data_list.dart';
 
@@ -42,6 +42,16 @@ class ImmutableBoolListDict extends _BoolListDictImplBase {
     key: 'value',
     reviver: _valueConverter,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoolListDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BoolListDict].
@@ -120,6 +130,16 @@ class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
     key: 'value',
     reviver: _valueConverter,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OptionalBoolListDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [OptionalBoolListDict].
@@ -206,6 +226,16 @@ class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
     key: 'value',
     reviver: _valueConverter,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoolDictListDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BoolDictListDict].
@@ -294,6 +324,16 @@ class ImmutableBoolListListDict extends _BoolListListDictImplBase {
     key: 'value',
     reviver: _valueConverter,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BoolListListDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
 /// Mutable version of [BoolListListDict].
