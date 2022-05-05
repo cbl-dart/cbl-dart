@@ -20,11 +20,25 @@ abstract class Freezer<T> {
   Object freeze(T value);
 }
 
-abstract class TypeConverter<T> implements Reviver<T>, Freezer<T> {
+abstract class Promoter<T extends E, E> {
+  const Promoter();
+
+  T promote(E value);
+}
+
+abstract class TypeConverter<T extends E, E>
+    implements Reviver<T>, Freezer<T>, Promoter<T, E> {
   const TypeConverter();
 }
 
-class IdentityConverter<T extends Object> extends TypeConverter<T> {
+abstract class NonPromotingTypeConverter<T> extends TypeConverter<T, T> {
+  const NonPromotingTypeConverter();
+
+  @override
+  T promote(T value) => value;
+}
+
+class IdentityConverter<T extends Object> extends NonPromotingTypeConverter<T> {
   const IdentityConverter();
 
   @override
@@ -35,7 +49,7 @@ class IdentityConverter<T extends Object> extends TypeConverter<T> {
   Object freeze(T value) => value;
 }
 
-class DateTimeConverter extends TypeConverter<DateTime> {
+class DateTimeConverter extends NonPromotingTypeConverter<DateTime> {
   const DateTimeConverter();
 
   @override
@@ -47,35 +61,44 @@ class DateTimeConverter extends TypeConverter<DateTime> {
   Object freeze(DateTime value) => value.toIso8601String();
 }
 
-class TypedDictionaryConverter<E extends Object,
-    T extends TypedDictionaryObject> extends TypeConverter<T> {
+class TypedDictionaryConverter<I extends Object, T extends E,
+    E extends TypedDictionaryObject<T>> extends TypeConverter<T, E> {
   const TypedDictionaryConverter(this._factory);
 
-  final Factory<E, T> _factory;
+  final Factory<I, T> _factory;
 
   @override
   T revive(Object value) =>
-      value is E ? _factory(value) : throw CannotReviveTypeException<T>();
+      value is I ? _factory(value) : throw CannotReviveTypeException<T>();
 
   @override
   Object freeze(T value) => value.internal;
+
+  @override
+  T promote(E value) {
+    if (value is T) {
+      return value;
+    }
+    return value.toMutable();
+  }
 }
 
-class TypedListConverter<T> extends TypeConverter<TypedDataList<T>> {
+class TypedListConverter<T extends E, E>
+    extends TypeConverter<TypedDataList<T, E>, List<E>> {
   const TypedListConverter({
     required this.converter,
     required this.isNullable,
     required this.isCached,
   });
 
-  final TypeConverter<T> converter;
+  final TypeConverter<T, E> converter;
   final bool isNullable;
   final bool isCached;
 
   @override
-  TypedDataList<T> revive(Object value) {
+  TypedDataList<T, E> revive(Object value) {
     if (value is MutableArray) {
-      final list = MutableTypedDataList(
+      final list = MutableTypedDataList<T, E>(
         internal: value,
         converter: converter,
         isNullable: isNullable,
@@ -85,7 +108,7 @@ class TypedListConverter<T> extends TypeConverter<TypedDataList<T>> {
       }
       return list;
     } else if (value is Array) {
-      final list = ImmutableTypedDataList(
+      final list = ImmutableTypedDataList<T, E>(
         internal: value,
         converter: converter,
         isNullable: isNullable,
@@ -99,5 +122,13 @@ class TypedListConverter<T> extends TypeConverter<TypedDataList<T>> {
   }
 
   @override
-  Object freeze(TypedDataList<T> value) => value.internal;
+  Object freeze(covariant TypedDataList<T, E> value) => value.internal;
+
+  @override
+  TypedDataList<T, E> promote(List<E> value) {
+    if (value is! TypedDataList<T, E> || value.internal is! MutableArray) {
+      return revive(MutableArray())..addAll(value);
+    }
+    return value;
+  }
 }

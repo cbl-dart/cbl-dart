@@ -209,13 +209,7 @@ ${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(
         _writeMutableCachedPropertyGetter(property);
       }
 
-      if (type is BuiltinScalarType) {
-        _writeBuiltinScalarSetter(property);
-      } else if (type is TypedDataObjectType) {
-        _writeTypeDataObjectSetter(property);
-      } else if (type is TypedDataListType) {
-        _writeTypedDataListSetter(property);
-      }
+      _writePropertySetter(property);
     }
 
     _code.writeln('}');
@@ -266,7 +260,7 @@ ${type.dartTypeWithNullability} get ${property.nameInDart} => ${property.readHel
       internal: internal,
       name: ${escapeDartString(property.nameInDart)},
       key: ${escapeDartString(property.nameInData)},
-      reviver: ${_buildTypeConverterExpression(type)},
+      reviver: ${_buildTypeConverterExpression(type, forMutable: false)},
     );
 
     ''');
@@ -288,7 +282,7 @@ late final ${property.nameInDart} = ${property.readHelper}(
     internal: internal,
     name: ${escapeDartString(property.nameInDart)},
     key: ${escapeDartString(property.nameInData)},
-    reviver: ${_buildTypeConverterExpression(property.type)},
+    reviver: ${_buildTypeConverterExpression(property.type, forMutable: false)},
   );
 
     ''');
@@ -297,11 +291,11 @@ late final ${property.nameInDart} = ${property.readHelper}(
   void _writeMutableCachedPropertyField(TypedDataObjectProperty property) {
     final type = property.type;
     _code.writeln('''
-late ${type.dartTypeWithNullability} ${property.privateCacheField} = ${property.readHelper}(
+late ${type.mutableDartTypeWithNullability} ${property.privateCacheField} = ${property.readHelper}(
       internal: internal,
       name: ${escapeDartString(property.nameInDart)},
       key: ${escapeDartString(property.nameInData)},
-      reviver: ${_buildTypeConverterExpression(type)},
+      reviver: ${_buildTypeConverterExpression(type, forMutable: true)},
     );
 
     ''');
@@ -310,87 +304,60 @@ late ${type.dartTypeWithNullability} ${property.privateCacheField} = ${property.
   void _writeMutableCachedPropertyGetter(TypedDataObjectProperty property) {
     _code.writeln('''
 @override
-${property.type.dartTypeWithNullability} get ${property.nameInDart} =>
+${property.type.mutableDartTypeWithNullability} get ${property.nameInDart} =>
     ${property.privateCacheField};
 
     ''');
   }
 
-  void _writeBuiltinScalarSetter(TypedDataObjectProperty property) {
+  void _writePropertySetter(TypedDataObjectProperty property) {
     final type = property.type;
-    _code.writeln('''
-set ${property.nameInDart}(${type.dartTypeWithNullability} value) => ${property.writeHelper}(
-      internal: internal,
-      key: ${escapeDartString(property.nameInData)},
-      value: value,
-      freezer: ${_buildTypeConverterExpression(type)},
-    );
-
-    ''');
-  }
-
-  void _writeTypeDataObjectSetter(TypedDataObjectProperty property) {
-    final type = property.type as TypedDataObjectType;
-
-    var mutableValueCheck = 'value is! ${type.classNames.mutableClassName}';
-    if (type.isNullable) {
-      mutableValueCheck = 'value != null && $mutableValueCheck';
-    }
-
-    _code.writeln('''
-set ${property.nameInDart}(${type.classNames.declaringClassName}${type.isNullable ? '?' : ''} value) {
-  if ($mutableValueCheck) {
-    value = value.toMutable();
-  }
-  ${property.privateCacheField} = value;
-  ${property.writeHelper}(
-    internal: internal,
-    key: ${escapeDartString(property.nameInData)},
-    value: value,
-    freezer: ${_buildTypeConverterExpression(type)},
-  );
-}
-
-    ''');
-  }
-
-  void _writeTypedDataListSetter(TypedDataObjectProperty property) {
-    final type = property.type as TypedDataListType;
-
-    var mutableValueCheck =
-        'value is! TypedDataList<${type.elementType.dartType}> || '
-        'value.internal is! MutableArray';
-    if (type.isNullable) {
-      mutableValueCheck = 'value != null && ($mutableValueCheck)';
-    }
-
-    _code.writeln('''
+    _code.writeln([
+      '''
 set ${property.nameInDart}(${type.dartTypeWithNullability} value) {
-  if ($mutableValueCheck) {
-    value = ${_buildTypeConverterExpression(type)}.revive(MutableArray())..addAll(value);
-  }
-  ${property.privateCacheField} = value;
+  const converter = ${_buildTypeConverterExpression(type, forMutable: true)};
+  final promoted = ${property.isNullable ? 'value == null ? null : ' : ''}converter.promote(value);''',
+      if (property.type.isCached)
+        '''
+  ${property.privateCacheField} = promoted;''',
+      '''
   ${property.writeHelper}(
     internal: internal,
     key: ${escapeDartString(property.nameInData)},
-    value: value,
-    freezer: ${_buildTypeConverterExpression(type)},
+    value: promoted,
+    freezer: converter,
   );
 }
 
-    ''');
+    '''
+    ].join('\n'));
   }
 
-  String _buildTypeConverterExpression(TypedDataType type) {
+  String _buildTypeConverterExpression(
+    TypedDataType type, {
+    required bool forMutable,
+  }) {
     if (type is BuiltinScalarType) {
       return 'InternalTypedDataHelpers.${type.dartType.decapitalized}Converter';
     } else if (type is TypedDataObjectType) {
-      final factory = '${type.classNames.mutableClassName}.internal';
-      return 'const TypedDictionaryConverter($factory)';
+      final classNames = type.classNames;
+      final implClass = forMutable
+          ? classNames.mutableClassName
+          : classNames.immutableClassName;
+      final factory = '$implClass.internal';
+      if (forMutable) {
+        final internalClass = forMutable ? 'MutableDictionary' : 'Dictionary';
+        final declaringClass = classNames.declaringClassName;
+        return 'const TypedDictionaryConverter<'
+            '$internalClass, $implClass, $declaringClass'
+            '>($factory)';
+      } else {
+        return 'const TypedDictionaryConverter($factory)';
+      }
     } else if (type is TypedDataListType) {
       return '''
 const TypedListConverter(
-  converter: ${_buildTypeConverterExpression(type.elementType)},
+  converter: ${_buildTypeConverterExpression(type.elementType, forMutable: forMutable)},
   isNullable: ${type.elementType.isNullable},
   isCached: ${type.elementType.isCached},
 )

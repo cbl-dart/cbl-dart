@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
 
 part of 'constructor_parameters.dart';
 
@@ -45,12 +45,16 @@ class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
 
   MutableParamDoc.internal(MutableDocument internal) : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$OptionalParamDoc
@@ -96,12 +100,16 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
 
   MutableOptionalParamDoc.internal(MutableDocument internal) : super(internal);
 
-  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$PositionalMixedParamDoc
@@ -164,19 +172,27 @@ class MutablePositionalMixedParamDoc
   MutablePositionalMixedParamDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 
-  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'b',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set b(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$NamedParamDoc implements TypedDocumentObject<MutableNamedParamDoc> {
@@ -218,12 +234,16 @@ class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
 
   MutableNamedParamDoc.internal(MutableDocument internal) : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$NamedOptionalParamDoc
@@ -272,12 +292,16 @@ class MutableNamedOptionalParamDoc
   MutableNamedOptionalParamDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$NamedMixedParamDoc
@@ -338,19 +362,27 @@ class MutableNamedMixedParamDoc
   MutableNamedMixedParamDoc.internal(MutableDocument internal)
       : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 
-  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'b',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set b(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 // **************************************************************************
@@ -396,12 +428,16 @@ class MutableParamDict extends _ParamDictImplBase<MutableDictionary>
 
   MutableParamDict.internal(MutableDictionary internal) : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$OptionalParamDict
@@ -450,12 +486,16 @@ class MutableOptionalParamDict
   MutableOptionalParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$PositionalMixedParamDict
@@ -518,19 +558,27 @@ class MutablePositionalMixedParamDict
   MutablePositionalMixedParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 
-  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'b',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set b(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$NamedParamDict implements TypedDictionaryObject<MutableNamedParamDict> {
@@ -573,12 +621,16 @@ class MutableNamedParamDict extends _NamedParamDictImplBase<MutableDictionary>
 
   MutableNamedParamDict.internal(MutableDictionary internal) : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$NamedOptionalParamDict
@@ -628,12 +680,16 @@ class MutableNamedOptionalParamDict
   MutableNamedOptionalParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }
 
 mixin _$NamedMixedParamDict
@@ -694,17 +750,25 @@ class MutableNamedMixedParamDict
   MutableNamedMixedParamDict.internal(MutableDictionary internal)
       : super(internal);
 
-  set a(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'a',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set a(String value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = converter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'a',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 
-  set b(String? value) => InternalTypedDataHelpers.writeNullableProperty(
-        internal: internal,
-        key: 'b',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set b(String? value) {
+    const converter = InternalTypedDataHelpers.stringConverter;
+    final promoted = value == null ? null : converter.promote(value);
+    InternalTypedDataHelpers.writeNullableProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      freezer: converter,
+    );
+  }
 }

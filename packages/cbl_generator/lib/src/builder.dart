@@ -21,6 +21,8 @@ class TypedDataBuilder extends PartBuilder {
     'lines_longer_than_80_chars',
     'invalid_use_of_internal_member',
     'parameter_assignments',
+    'unnecessary_const',
+    'prefer_relative_imports',
   ];
 
   @visibleForTesting

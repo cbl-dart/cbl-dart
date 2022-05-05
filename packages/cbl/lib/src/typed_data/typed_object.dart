@@ -24,8 +24,35 @@ abstract class TypedDocumentObject<MD extends Object> {
 abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
     MD extends TypedDocumentObject> extends TypedDocumentObject<MD> {}
 
-abstract class TypedDataList<T> implements List<T> {
+abstract class TypedDataList<T extends E, E> implements List<T> {
   /// Internal field that you should never use.
   @meta.internal
   Object get internal;
+
+  @override
+  void add(E value);
+
+  @override
+  void addAll(Iterable<E> iterable);
+
+  @override
+  void fillRange(int start, int end, [E? fillValue]);
+
+  @override
+  void insert(int index, E element);
+
+  @override
+  void insertAll(int index, Iterable<E> iterable);
+
+  @override
+  void replaceRange(int start, int end, Iterable<E> replacements);
+
+  @override
+  void setAll(int index, Iterable<E> iterable);
+
+  @override
+  void setRange(int start, int end, Iterable<E> iterable, [int skipCount = 0]);
+
+  @override
+  void operator []=(int index, E value);
 }

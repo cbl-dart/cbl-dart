@@ -130,17 +130,25 @@ class TypedDatabaseModel {
 abstract class TypedDataType {
   TypedDataType({
     required this.dartType,
+    required this.mutableDartType,
     required this.isNullable,
     required this.isCached,
   });
 
   final String dartType;
 
+  final String mutableDartType;
+
+  /// Whether the type is nullable.
   final bool isNullable;
 
+  /// Whether values of this type should be cached instead of re-read every
+  /// time they are accessed.
   final bool isCached;
 
   String get dartTypeWithNullability => isNullable ? '$dartType?' : dartType;
+  String get mutableDartTypeWithNullability =>
+      isNullable ? '$mutableDartType?' : mutableDartType;
 }
 
 class BuiltinScalarType extends TypedDataType {
@@ -149,6 +157,7 @@ class BuiltinScalarType extends TypedDataType {
     bool isNullable = false,
   }) : super(
           dartType: dartType,
+          mutableDartType: dartType,
           isNullable: isNullable,
           isCached: false,
         );
@@ -166,6 +175,7 @@ class TypedDataObjectType extends TypedDataType {
     required bool isNullable,
   }) : super(
           dartType: dartType,
+          mutableDartType: 'Mutable$dartType',
           isNullable: isNullable,
           isCached: true,
         );
@@ -179,6 +189,8 @@ class TypedDataListType extends TypedDataType {
     required this.elementType,
   }) : super(
           dartType: 'List<${elementType.dartType}>',
+          mutableDartType: 'TypedDataList<${elementType.mutableDartType}, '
+              '${elementType.dartType}>',
           isNullable: isNullable,
           isCached: true,
         );

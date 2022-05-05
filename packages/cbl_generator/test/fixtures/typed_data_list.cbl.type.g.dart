@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
 
 part of 'typed_data_list.dart';
 
@@ -50,7 +50,7 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
 
   MutableBoolListDict.internal(MutableDictionary internal) : super(internal);
 
-  late List<bool> _value = InternalTypedDataHelpers.readProperty(
+  late TypedDataList<bool, bool> _value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -62,27 +62,21 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
   );
 
   @override
-  List<bool> get value => _value;
+  TypedDataList<bool, bool> get value => _value;
 
   set value(List<bool> value) {
-    if (value is! TypedDataList<bool> || value.internal is! MutableArray) {
-      value = const TypedListConverter(
-        converter: InternalTypedDataHelpers.boolConverter,
-        isNullable: false,
-        isCached: false,
-      ).revive(MutableArray())
-        ..addAll(value);
-    }
-    _value = value;
+    const converter = const TypedListConverter(
+      converter: InternalTypedDataHelpers.boolConverter,
+      isNullable: false,
+      isCached: false,
+    );
+    final promoted = converter.promote(value);
+    _value = promoted;
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
-      value: value,
-      freezer: const TypedListConverter(
-        converter: InternalTypedDataHelpers.boolConverter,
-        isNullable: false,
-        isCached: false,
-      ),
+      value: promoted,
+      freezer: converter,
     );
   }
 }
@@ -137,7 +131,8 @@ class MutableOptionalBoolListDict
   MutableOptionalBoolListDict.internal(MutableDictionary internal)
       : super(internal);
 
-  late List<bool>? _value = InternalTypedDataHelpers.readNullableProperty(
+  late TypedDataList<bool, bool>? _value =
+      InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -149,28 +144,195 @@ class MutableOptionalBoolListDict
   );
 
   @override
-  List<bool>? get value => _value;
+  TypedDataList<bool, bool>? get value => _value;
 
   set value(List<bool>? value) {
-    if (value != null &&
-        (value is! TypedDataList<bool> || value.internal is! MutableArray)) {
-      value = const TypedListConverter(
-        converter: InternalTypedDataHelpers.boolConverter,
-        isNullable: false,
-        isCached: false,
-      ).revive(MutableArray())
-        ..addAll(value);
-    }
-    _value = value;
+    const converter = const TypedListConverter(
+      converter: InternalTypedDataHelpers.boolConverter,
+      isNullable: false,
+      isCached: false,
+    );
+    final promoted = value == null ? null : converter.promote(value);
+    _value = promoted;
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
-      value: value,
-      freezer: const TypedListConverter(
+      value: promoted,
+      freezer: converter,
+    );
+  }
+}
+
+mixin _$BoolDictListDict
+    implements TypedDictionaryObject<MutableBoolDictListDict> {
+  List<BoolDict> get value;
+}
+
+abstract class _BoolDictListDictImplBase<I extends Dictionary>
+    with _$BoolDictListDict
+    implements BoolDictListDict {
+  _BoolDictListDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableBoolDictListDict toMutable() =>
+      MutableBoolDictListDict.internal(internal.toMutable());
+}
+
+class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
+  ImmutableBoolDictListDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  late final value = InternalTypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    reviver: const TypedListConverter(
+      converter: const TypedDictionaryConverter(ImmutableBoolDict.internal),
+      isNullable: false,
+      isCached: true,
+    ),
+  );
+}
+
+class MutableBoolDictListDict
+    extends _BoolDictListDictImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<BoolDictListDict,
+            MutableBoolDictListDict> {
+  MutableBoolDictListDict(
+    List<BoolDict> value,
+  ) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableBoolDictListDict.internal(MutableDictionary internal)
+      : super(internal);
+
+  late TypedDataList<MutableBoolDict, BoolDict> _value =
+      InternalTypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    reviver: const TypedListConverter(
+      converter: const TypedDictionaryConverter<MutableDictionary,
+          MutableBoolDict, BoolDict>(MutableBoolDict.internal),
+      isNullable: false,
+      isCached: true,
+    ),
+  );
+
+  @override
+  TypedDataList<MutableBoolDict, BoolDict> get value => _value;
+
+  set value(List<BoolDict> value) {
+    const converter = const TypedListConverter(
+      converter: const TypedDictionaryConverter<MutableDictionary,
+          MutableBoolDict, BoolDict>(MutableBoolDict.internal),
+      isNullable: false,
+      isCached: true,
+    );
+    final promoted = converter.promote(value);
+    _value = promoted;
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      freezer: converter,
+    );
+  }
+}
+
+mixin _$BoolListListDict
+    implements TypedDictionaryObject<MutableBoolListListDict> {
+  List<List<bool>> get value;
+}
+
+abstract class _BoolListListDictImplBase<I extends Dictionary>
+    with _$BoolListListDict
+    implements BoolListListDict {
+  _BoolListListDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableBoolListListDict toMutable() =>
+      MutableBoolListListDict.internal(internal.toMutable());
+}
+
+class ImmutableBoolListListDict extends _BoolListListDictImplBase {
+  ImmutableBoolListListDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  late final value = InternalTypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    reviver: const TypedListConverter(
+      converter: const TypedListConverter(
         converter: InternalTypedDataHelpers.boolConverter,
         isNullable: false,
         isCached: false,
       ),
+      isNullable: false,
+      isCached: true,
+    ),
+  );
+}
+
+class MutableBoolListListDict
+    extends _BoolListListDictImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<BoolListListDict,
+            MutableBoolListListDict> {
+  MutableBoolListListDict(
+    List<List<bool>> value,
+  ) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableBoolListListDict.internal(MutableDictionary internal)
+      : super(internal);
+
+  late TypedDataList<TypedDataList<bool, bool>, List<bool>> _value =
+      InternalTypedDataHelpers.readProperty(
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    reviver: const TypedListConverter(
+      converter: const TypedListConverter(
+        converter: InternalTypedDataHelpers.boolConverter,
+        isNullable: false,
+        isCached: false,
+      ),
+      isNullable: false,
+      isCached: true,
+    ),
+  );
+
+  @override
+  TypedDataList<TypedDataList<bool, bool>, List<bool>> get value => _value;
+
+  set value(List<List<bool>> value) {
+    const converter = const TypedListConverter(
+      converter: const TypedListConverter(
+        converter: InternalTypedDataHelpers.boolConverter,
+        isNullable: false,
+        isCached: false,
+      ),
+      isNullable: false,
+      isCached: true,
+    );
+    final promoted = converter.promote(value);
+    _value = promoted;
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      freezer: converter,
     );
   }
 }

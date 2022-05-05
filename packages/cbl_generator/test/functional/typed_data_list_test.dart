@@ -74,4 +74,46 @@ void main() {
       [false],
     );
   });
+
+  test('nested list', () {
+    expect(
+      ImmutableBoolListListDict.internal(MutableDictionary({
+        'value': <Object>[],
+      })).value,
+      isEmpty,
+    );
+    expect(
+      ImmutableBoolListListDict.internal(MutableDictionary({
+        'value': [<Object>[]],
+      })).value.first,
+      isEmpty,
+    );
+    expect(
+      ImmutableBoolListListDict.internal(MutableDictionary({
+        'value': [
+          [true]
+        ],
+      })).value.first,
+      [true],
+    );
+    expect(MutableBoolListListDict([]).value, isEmpty);
+    expect(MutableBoolListListDict([[]]).value.first, isEmpty);
+    expect(
+      MutableBoolListListDict([
+        [true]
+      ]).value.first,
+      [true],
+    );
+    expect((MutableBoolListListDict([])..value = []).value, isEmpty);
+    expect((MutableBoolListListDict([])..value = [[]]).value.first, isEmpty);
+    expect(
+      (MutableBoolListListDict([])
+            ..value = [
+              [true]
+            ])
+          .value
+          .first,
+      [true],
+    );
+  });
 }

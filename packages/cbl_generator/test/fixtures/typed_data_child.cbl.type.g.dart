@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments
+// ignore_for_file: avoid_positional_boolean_parameters, lines_longer_than_80_chars, invalid_use_of_internal_member, parameter_assignments, unnecessary_const, prefer_relative_imports
 
 part of 'typed_data_child.dart';
 
@@ -33,7 +33,7 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(ImmutableBoolDict.internal),
   );
 }
 
@@ -51,26 +51,27 @@ class MutableTypedDataPropertyDoc
   MutableTypedDataPropertyDoc.internal(MutableDocument internal)
       : super(internal);
 
-  late BoolDict _value = InternalTypedDataHelpers.readProperty(
+  late MutableBoolDict _value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter<MutableDictionary, MutableBoolDict,
+        BoolDict>(MutableBoolDict.internal),
   );
 
   @override
-  BoolDict get value => _value;
+  MutableBoolDict get value => _value;
 
   set value(BoolDict value) {
-    if (value is! MutableBoolDict) {
-      value = value.toMutable();
-    }
-    _value = value;
+    const converter = const TypedDictionaryConverter<MutableDictionary,
+        MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+    final promoted = converter.promote(value);
+    _value = promoted;
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
-      value: value,
-      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
+      value: promoted,
+      freezer: converter,
     );
   }
 }
@@ -103,7 +104,7 @@ class ImmutableOptionalTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(ImmutableBoolDict.internal),
   );
 }
 
@@ -123,26 +124,27 @@ class MutableOptionalTypedDataPropertyDoc
   MutableOptionalTypedDataPropertyDoc.internal(MutableDocument internal)
       : super(internal);
 
-  late BoolDict? _value = InternalTypedDataHelpers.readNullableProperty(
+  late MutableBoolDict? _value = InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter<MutableDictionary, MutableBoolDict,
+        BoolDict>(MutableBoolDict.internal),
   );
 
   @override
-  BoolDict? get value => _value;
+  MutableBoolDict? get value => _value;
 
   set value(BoolDict? value) {
-    if (value != null && value is! MutableBoolDict) {
-      value = value.toMutable();
-    }
-    _value = value;
+    const converter = const TypedDictionaryConverter<MutableDictionary,
+        MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+    final promoted = value == null ? null : converter.promote(value);
+    _value = promoted;
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
-      value: value,
-      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
+      value: promoted,
+      freezer: converter,
     );
   }
 }
@@ -178,7 +180,7 @@ class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(ImmutableBoolDict.internal),
   );
 }
 
@@ -196,26 +198,27 @@ class MutableTypedDataPropertyDict
   MutableTypedDataPropertyDict.internal(MutableDictionary internal)
       : super(internal);
 
-  late BoolDict _value = InternalTypedDataHelpers.readProperty(
+  late MutableBoolDict _value = InternalTypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter<MutableDictionary, MutableBoolDict,
+        BoolDict>(MutableBoolDict.internal),
   );
 
   @override
-  BoolDict get value => _value;
+  MutableBoolDict get value => _value;
 
   set value(BoolDict value) {
-    if (value is! MutableBoolDict) {
-      value = value.toMutable();
-    }
-    _value = value;
+    const converter = const TypedDictionaryConverter<MutableDictionary,
+        MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+    final promoted = converter.promote(value);
+    _value = promoted;
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
-      value: value,
-      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
+      value: promoted,
+      freezer: converter,
     );
   }
 }
@@ -248,7 +251,7 @@ class ImmutableOptionalTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter(ImmutableBoolDict.internal),
   );
 }
 
@@ -268,26 +271,27 @@ class MutableOptionalTypedDataPropertyDict
   MutableOptionalTypedDataPropertyDict.internal(MutableDictionary internal)
       : super(internal);
 
-  late BoolDict? _value = InternalTypedDataHelpers.readNullableProperty(
+  late MutableBoolDict? _value = InternalTypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: const TypedDictionaryConverter(MutableBoolDict.internal),
+    reviver: const TypedDictionaryConverter<MutableDictionary, MutableBoolDict,
+        BoolDict>(MutableBoolDict.internal),
   );
 
   @override
-  BoolDict? get value => _value;
+  MutableBoolDict? get value => _value;
 
   set value(BoolDict? value) {
-    if (value != null && value is! MutableBoolDict) {
-      value = value.toMutable();
-    }
-    _value = value;
+    const converter = const TypedDictionaryConverter<MutableDictionary,
+        MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+    final promoted = value == null ? null : converter.promote(value);
+    _value = promoted;
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
-      value: value,
-      freezer: const TypedDictionaryConverter(MutableBoolDict.internal),
+      value: promoted,
+      freezer: converter,
     );
   }
 }
