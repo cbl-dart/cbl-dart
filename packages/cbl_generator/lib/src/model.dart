@@ -106,11 +106,13 @@ class ConstructorParameter {
     required this.type,
     required this.isPositional,
     required this.isRequired,
+    this.documentationComment,
   });
 
   final TypedDataType type;
   final bool isPositional;
   final bool isRequired;
+  final String? documentationComment;
 }
 
 class TypedDatabaseModel {

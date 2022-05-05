@@ -329,6 +329,7 @@ class TypedDataAnalyzer {
             isPositional: parameter.isPositional,
             isRequired:
                 parameter.isRequiredNamed || parameter.isRequiredPositional,
+            documentationComment: parameter.documentationCommentValue,
           );
 
           final annotations = parameter.metadata

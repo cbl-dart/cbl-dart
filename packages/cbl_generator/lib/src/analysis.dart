@@ -1,5 +1,7 @@
+import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -52,3 +54,13 @@ class _ClassHasMixinVisitor extends RecursiveAstVisitor<void> {
 
 bool isExactlyOneOfTypes(DartType type, Iterable<TypeChecker> typeCheckers) =>
     typeCheckers.any((typeChecker) => typeChecker.isExactlyType(type));
+
+extension ParameterElementExt on ParameterElement {
+  String? get documentationCommentValue =>
+      (session!.getParsedLibraryByElement(library!) as ParsedLibraryResult)
+          .getElementDeclaration(this)!
+          .node
+          .beginToken
+          .precedingComments
+          ?.value();
+}

@@ -219,6 +219,11 @@ ${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(
   }
 
   void _writeAbstractPropertyGetter(TypedDataObjectField field) {
+    final documentationComment =
+        field.constructorParameter?.documentationComment;
+    if (documentationComment != null) {
+      _code.writeln(documentationComment);
+    }
     _code.writeln('''
 ${field.type.dartTypeWithNullability} get ${field.nameInDart};
 
