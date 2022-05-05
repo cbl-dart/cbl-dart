@@ -364,12 +364,18 @@ class TestDocA<I extends Document>
 
   @override
   MutableTestDocA toMutable() => MutableTestDocA(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 class MutableTestDocA extends TestDocA<MutableDocument>
     implements TypedMutableDocumentObject<TestDocA, MutableTestDocA> {
   MutableTestDocA([MutableDocument? document])
       : super(document ?? MutableDocument());
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 class TestDocB<I extends Document>
@@ -381,6 +387,9 @@ class TestDocB<I extends Document>
 
   @override
   MutableTestDocB toMutable() => MutableTestDocB(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 class MutableTestDocB extends TestDocB<MutableDocument>
@@ -399,6 +408,9 @@ class TestDocWithoutTypeMatcher<I extends Document>
   @override
   MutableTestDocWithoutTypeMatcher toMutable() =>
       MutableTestDocWithoutTypeMatcher(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 class MutableTestDocWithoutTypeMatcher

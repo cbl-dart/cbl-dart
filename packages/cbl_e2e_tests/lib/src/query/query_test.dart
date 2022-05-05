@@ -387,6 +387,9 @@ class TestTypedDict<I extends Dictionary>
 
   @override
   MutableTestTypedDoc toMutable() => MutableTestTypedDoc(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 class MutableTestTypedDoc extends TestTypedDict<MutableDictionary>
@@ -402,6 +405,9 @@ class TestTypedDict2 implements TypedDictionaryObject<MutableTestTypedDoc> {
 
   @override
   MutableTestTypedDoc toMutable() => throw UnimplementedError();
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 final testRegistry = TypedDataRegistry(

@@ -728,6 +728,9 @@ class TestTypedDoc<I extends Document>
 
   @override
   MutableTestTypedDoc toMutable() => MutableTestTypedDoc(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => super.toString();
 }
 
 class MutableTestTypedDoc extends TestTypedDoc<MutableDocument>
