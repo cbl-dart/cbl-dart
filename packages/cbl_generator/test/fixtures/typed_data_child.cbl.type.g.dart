@@ -23,6 +23,15 @@ abstract class _TypedDataPropertyDocImplBase<I extends Document>
   @override
   MutableTypedDataPropertyDoc toMutable() =>
       MutableTypedDataPropertyDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'TypedDataPropertyDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -109,6 +118,15 @@ abstract class _OptionalTypedDataPropertyDocImplBase<I extends Document>
   @override
   MutableOptionalTypedDataPropertyDoc toMutable() =>
       MutableOptionalTypedDataPropertyDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'OptionalTypedDataPropertyDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -203,6 +221,15 @@ abstract class _TypedDataPropertyDictImplBase<I extends Dictionary>
   @override
   MutableTypedDataPropertyDict toMutable() =>
       MutableTypedDataPropertyDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'TypedDataPropertyDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -290,6 +317,15 @@ abstract class _OptionalTypedDataPropertyDictImplBase<I extends Dictionary>
   @override
   MutableOptionalTypedDataPropertyDict toMutable() =>
       MutableOptionalTypedDataPropertyDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'OptionalTypedDataPropertyDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

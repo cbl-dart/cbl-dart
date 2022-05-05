@@ -29,6 +29,15 @@ abstract class _ParamDocImplBase<I extends Document>
 
   @override
   MutableParamDoc toMutable() => MutableParamDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'ParamDoc',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -94,6 +103,15 @@ abstract class _OptionalParamDocImplBase<I extends Document>
   @override
   MutableOptionalParamDoc toMutable() =>
       MutableOptionalParamDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'OptionalParamDoc',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -174,6 +192,16 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
   @override
   MutablePositionalMixedParamDoc toMutable() =>
       MutablePositionalMixedParamDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'PositionalMixedParamDoc',
+        fields: {
+          'a': a,
+          'b': b,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -260,6 +288,15 @@ abstract class _NamedParamDocImplBase<I extends Document>
   @override
   MutableNamedParamDoc toMutable() =>
       MutableNamedParamDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NamedParamDoc',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -325,6 +362,15 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
   @override
   MutableNamedOptionalParamDoc toMutable() =>
       MutableNamedOptionalParamDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NamedOptionalParamDoc',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -408,6 +454,16 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
   @override
   MutableNamedMixedParamDoc toMutable() =>
       MutableNamedMixedParamDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NamedMixedParamDoc',
+        fields: {
+          'a': a,
+          'b': b,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -496,6 +552,15 @@ abstract class _ParamDictImplBase<I extends Dictionary>
   @override
   MutableParamDict toMutable() =>
       MutableParamDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'ParamDict',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -561,6 +626,15 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
   @override
   MutableOptionalParamDict toMutable() =>
       MutableOptionalParamDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'OptionalParamDict',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -644,6 +718,16 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
   @override
   MutablePositionalMixedParamDict toMutable() =>
       MutablePositionalMixedParamDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'PositionalMixedParamDict',
+        fields: {
+          'a': a,
+          'b': b,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -730,6 +814,15 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
   @override
   MutableNamedParamDict toMutable() =>
       MutableNamedParamDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NamedParamDict',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -796,6 +889,15 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
   @override
   MutableNamedOptionalParamDict toMutable() =>
       MutableNamedOptionalParamDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NamedOptionalParamDict',
+        fields: {
+          'a': a,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -880,6 +982,16 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
   @override
   MutableNamedMixedParamDict toMutable() =>
       MutableNamedMixedParamDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NamedMixedParamDict',
+        fields: {
+          'a': a,
+          'b': b,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

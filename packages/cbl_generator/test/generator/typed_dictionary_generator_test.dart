@@ -94,14 +94,35 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
 
   @override
   MutableA toMutable() => MutableA.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'A',
+        fields: {},
+      );
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableA extends _AImplBase {
   ImmutableA.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is A &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
+/// Mutable version of [A].
 class MutableA extends _AImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<A, MutableA> {
+  /// Creates a new mutable [A].
   MutableA() : super(MutableDictionary());
 
   MutableA.internal(MutableDictionary internal) : super(internal);
@@ -154,14 +175,37 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
 
   @override
   MutableA toMutable() => MutableA.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'A',
+        fields: {
+          'b': b,
+        },
+      );
 }
 
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
 class ImmutableA extends _AImplBase {
   ImmutableA.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is A &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
 }
 
+/// Mutable version of [A].
 class MutableA extends _AImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<A, MutableA> {
+  /// Creates a new mutable [A].
   MutableA(
     String b,
   ) : super(MutableDictionary()) {

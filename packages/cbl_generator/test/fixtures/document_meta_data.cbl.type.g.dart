@@ -25,6 +25,15 @@ abstract class _DocWithIdImplBase<I extends Document>
   @override
   MutableDocWithId toMutable() =>
       MutableDocWithId.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithId',
+        fields: {
+          'id': id,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -73,6 +82,15 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
   @override
   MutableDocWithOptionalId toMutable() =>
       MutableDocWithOptionalId.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithOptionalId',
+        fields: {
+          'id': id,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -134,6 +152,16 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
   @override
   MutableDocWithIdAndField toMutable() =>
       MutableDocWithIdAndField.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithIdAndField',
+        fields: {
+          'id': id,
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -208,6 +236,16 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
   @override
   MutableDocWithOptionalIdAndField toMutable() =>
       MutableDocWithOptionalIdAndField.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithOptionalIdAndField',
+        fields: {
+          'id': id,
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -273,6 +311,15 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
   @override
   MutableDocWithIdGetter toMutable() =>
       MutableDocWithIdGetter.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithIdGetter',
+        fields: {
+          'id': id,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -318,6 +365,15 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
   @override
   MutableDocWithSequenceGetter toMutable() =>
       MutableDocWithSequenceGetter.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithSequenceGetter',
+        fields: {
+          'sequence': sequence,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -366,6 +422,15 @@ abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
   @override
   MutableDocWithRevisionIdGetter toMutable() =>
       MutableDocWithRevisionIdGetter.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocWithRevisionIdGetter',
+        fields: {
+          'revisionId': revisionId,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

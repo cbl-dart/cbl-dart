@@ -74,6 +74,8 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
 
     _writeToMutableMethod();
 
+    _writeToStringMethod();
+
     _code.writeln('}');
   }
 
@@ -300,6 +302,42 @@ ${type.dartTypeWithNullability} get ${property.nameInDart} => ${property.readHel
 ${_classNames.mutableClassName} toMutable() =>
     ${_classNames.mutableClassName}.internal(internal.toMutable());
     ''');
+  }
+
+  void _writeToStringMethod() {
+    final metadataOrder = [
+      DocumentMetadataKind.id,
+      DocumentMetadataKind.sequence,
+      DocumentMetadataKind.revisionId,
+    ];
+    final propertyOrder = metadataOrder.length;
+    int fieldOrder(TypedDataObjectField field) {
+      if (field is TypedDataMetadataField) {
+        return metadataOrder.indexOf(field.kind);
+      } else {
+        return propertyOrder;
+      }
+    }
+
+    final sortedFields = object.fields.toList()
+      ..sort((a, b) => fieldOrder(a) - fieldOrder(b));
+
+    final fields = [
+      for (final field in sortedFields)
+        '${escapeDartString(field.nameInDart)}: ${field.nameInDart},',
+    ].join('\n');
+
+    _code.writeln('''
+@override
+String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+      indent: indent,
+      className: ${escapeDartString(_classNames.declaringClassName)},
+      fields: {
+        $fields
+      },
+    );
+
+''');
   }
 
   void _writeEqualsAndHashCode() {

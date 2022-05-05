@@ -22,6 +22,15 @@ abstract class _BoolListDictImplBase<I extends Dictionary>
   @override
   MutableBoolListDict toMutable() =>
       MutableBoolListDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BoolListDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -110,6 +119,15 @@ abstract class _OptionalBoolListDictImplBase<I extends Dictionary>
   @override
   MutableOptionalBoolListDict toMutable() =>
       MutableOptionalBoolListDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'OptionalBoolListDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -205,6 +223,15 @@ abstract class _BoolDictListDictImplBase<I extends Dictionary>
   @override
   MutableBoolDictListDict toMutable() =>
       MutableBoolDictListDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BoolDictListDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -300,6 +327,15 @@ abstract class _BoolListListDictImplBase<I extends Dictionary>
   @override
   MutableBoolListListDict toMutable() =>
       MutableBoolListListDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BoolListListDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

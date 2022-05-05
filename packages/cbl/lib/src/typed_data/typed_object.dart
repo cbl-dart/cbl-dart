@@ -7,6 +7,14 @@ abstract class TypedDictionaryObject<MD extends Object> {
 
   /// Returns a mutable copy of this object.
   MD toMutable();
+
+  /// Returns a string representation of this dictionary.
+  ///
+  /// Per default, the string representation is in a single line.
+  /// If [indent] is specified, the string representation is in multiple lines,
+  /// each field indented by [indent].
+  @override
+  String toString({String? indent});
 }
 
 abstract class TypedMutableDictionaryObject<D extends TypedDictionaryObject,
@@ -19,6 +27,14 @@ abstract class TypedDocumentObject<MD extends Object> {
 
   /// Returns a mutable copy of this object.
   MD toMutable();
+
+  /// Returns a string representation of this document.
+  ///
+  /// Per default, the string representation is in a single line.
+  /// If [indent] is specified, the string representation is in multiple lines,
+  /// each field indented by [indent].
+  @override
+  String toString({String? indent});
 }
 
 abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
@@ -55,4 +71,12 @@ abstract class TypedDataList<T extends E, E> implements List<T> {
 
   @override
   void operator []=(int index, E value);
+
+  /// Returns a string representation of this list.
+  ///
+  /// Per default, the string representation is in a single line.
+  /// If [indent] is specified, the string representation is in multiple lines,
+  /// each element indented by [indent].
+  @override
+  String toString({String? indent});
 }

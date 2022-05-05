@@ -19,6 +19,13 @@ abstract class _EmptyDocImplBase<I extends Document>
 
   @override
   MutableEmptyDoc toMutable() => MutableEmptyDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'EmptyDoc',
+        fields: {},
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -63,6 +70,13 @@ abstract class _EmptyDictImplBase<I extends Dictionary>
   @override
   MutableEmptyDict toMutable() =>
       MutableEmptyDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'EmptyDict',
+        fields: {},
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

@@ -30,6 +30,15 @@ abstract class _StringDocImplBase<I extends Document>
   @override
   MutableStringDoc toMutable() =>
       MutableStringDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'StringDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -93,6 +102,15 @@ abstract class _IntDocImplBase<I extends Document>
 
   @override
   MutableIntDoc toMutable() => MutableIntDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'IntDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -157,6 +175,15 @@ abstract class _DoubleDocImplBase<I extends Document>
   @override
   MutableDoubleDoc toMutable() =>
       MutableDoubleDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DoubleDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -220,6 +247,15 @@ abstract class _NumDocImplBase<I extends Document>
 
   @override
   MutableNumDoc toMutable() => MutableNumDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NumDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -283,6 +319,15 @@ abstract class _BoolDocImplBase<I extends Document>
 
   @override
   MutableBoolDoc toMutable() => MutableBoolDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BoolDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -347,6 +392,15 @@ abstract class _DateTimeDocImplBase<I extends Document>
   @override
   MutableDateTimeDoc toMutable() =>
       MutableDateTimeDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DateTimeDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -410,6 +464,15 @@ abstract class _BlobDocImplBase<I extends Document>
 
   @override
   MutableBlobDoc toMutable() => MutableBlobDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BlobDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -478,6 +541,15 @@ abstract class _StringDictImplBase<I extends Dictionary>
   @override
   MutableStringDict toMutable() =>
       MutableStringDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'StringDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -541,6 +613,15 @@ abstract class _IntDictImplBase<I extends Dictionary>
 
   @override
   MutableIntDict toMutable() => MutableIntDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'IntDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -605,6 +686,15 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
   @override
   MutableDoubleDict toMutable() =>
       MutableDoubleDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DoubleDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -668,6 +758,15 @@ abstract class _NumDictImplBase<I extends Dictionary>
 
   @override
   MutableNumDict toMutable() => MutableNumDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NumDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -731,6 +830,15 @@ abstract class _BoolDictImplBase<I extends Dictionary>
 
   @override
   MutableBoolDict toMutable() => MutableBoolDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BoolDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -795,6 +903,15 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
   @override
   MutableDateTimeDict toMutable() =>
       MutableDateTimeDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DateTimeDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -858,6 +975,15 @@ abstract class _BlobDictImplBase<I extends Dictionary>
 
   @override
   MutableBlobDict toMutable() => MutableBlobDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'BlobDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -923,6 +1049,15 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
   @override
   MutableNullableIntDict toMutable() =>
       MutableNullableIntDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NullableIntDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -993,6 +1128,15 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
   @override
   MutableNullableDoubleDict toMutable() =>
       MutableNullableDoubleDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NullableDoubleDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -1066,6 +1210,15 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
   @override
   MutableNullableNumDict toMutable() =>
       MutableNullableNumDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NullableNumDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -1136,6 +1289,15 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
   @override
   MutableNullableBoolDict toMutable() =>
       MutableNullableBoolDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'NullableBoolDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

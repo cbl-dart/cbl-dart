@@ -114,12 +114,68 @@ class InternalTypedDataHelpers {
       internal.setValue(freezer.freeze(value), key: key);
     }
   }
+
+  static String renderString({
+    required String? indent,
+    required String className,
+    required Map<String, Object?> fields,
+  }) {
+    if (indent == null) {
+      return [
+        className,
+        '(',
+        [for (final entry in fields.entries) '${entry.key}: ${entry.value}']
+            .join(', '),
+        ')',
+      ].join();
+    } else {
+      final buffer = StringBuffer()
+        ..write(className)
+        ..writeln('(');
+      for (final entry in fields.entries) {
+        buffer
+          ..write(indent)
+          ..write(entry.key)
+          ..write(': ');
+
+        final lines = entry.value.renderStringIndented(indent);
+
+        buffer.write(lines[0]);
+        for (final line in lines.skip(1)) {
+          buffer
+            ..writeln()
+            ..write(indent)
+            ..write(line);
+        }
+        buffer.writeln(',');
+      }
+      buffer.write(')');
+      return buffer.toString();
+    }
+  }
+}
+
+extension on Object? {
+  List<String> renderStringIndented(String indent) {
+    final value = this;
+    final String valueString;
+    if (value == null) {
+      valueString = 'null';
+    } else if (value is TypedDictionaryObject) {
+      valueString = value.toString(indent: indent);
+    } else if (value is TypedDataList) {
+      valueString = value.toString(indent: indent);
+    } else {
+      valueString = value.toString();
+    }
+    return valueString.split('\n');
+  }
 }
 
 // === TypedDataList ===========================================================
 
 abstract class _TypedDataListBase<T extends E, E, I extends Array>
-    with ListMixin<T>
+    with ListMixin<T>, TypedDataListToString
     implements TypedDataList<T, E> {
   _TypedDataListBase({
     required this.internal,
@@ -351,6 +407,7 @@ class MutableTypedDataList<T extends E, E>
 }
 
 class CachedTypedDataList<T extends E, E> extends DelegatingList<T>
+    with TypedDataListToString
     implements TypedDataList<T, E> {
   CachedTypedDataList(
     this._base, {
@@ -437,6 +494,33 @@ class CachedTypedDataList<T extends E, E> extends DelegatingList<T>
   @override
   void setRange(int start, int end, Iterable<E> iterable, [int skipCount = 0]) {
     super.setRange(start, end, iterable.map(_promote), skipCount);
+  }
+}
+
+mixin TypedDataListToString<T> on List<T> {
+  @override
+  String toString({String? indent}) {
+    if (indent == null) {
+      return super.toString();
+    } else {
+      final buffer = StringBuffer()..writeln('[');
+      for (final entry in this) {
+        final lines = entry.renderStringIndented(indent);
+
+        buffer
+          ..write(indent)
+          ..write(lines[0]);
+        for (final line in lines.skip(1)) {
+          buffer
+            ..writeln()
+            ..write(indent)
+            ..write(line);
+        }
+        buffer.writeln(',');
+      }
+      buffer.write(']');
+      return buffer.toString();
+    }
   }
 }
 

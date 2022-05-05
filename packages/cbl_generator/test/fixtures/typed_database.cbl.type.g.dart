@@ -31,6 +31,15 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
   @override
   MutableCustomValueTypeMatcherDoc toMutable() =>
       MutableCustomValueTypeMatcherDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'CustomValueTypeMatcherDoc',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

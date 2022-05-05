@@ -31,6 +31,15 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
   @override
   MutableDocCommentDict toMutable() =>
       MutableDocCommentDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DocCommentDict',
+        fields: {
+          'value': value,
+        },
+      );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
