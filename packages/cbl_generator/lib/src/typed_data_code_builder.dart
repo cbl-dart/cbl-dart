@@ -71,7 +71,7 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
     // Property getters for un-cached properties
     object.properties
         .where((property) => !property.type.isCached)
-        .forEach(_writePrimitiveScalarGetter);
+        .forEach(_writeUncachedPropertyGetter);
 
     // `toMutable` method
     _writeToMutableMethod();
@@ -85,10 +85,9 @@ class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
 
 ''');
 
-    // Property getters for cached properties
-    object.properties
-        .where((property) => property.type.isCached)
-        .forEach(_writeImmutableCachedPropertyField);
+    object.properties.where((property) => property.type.isCached).toList()
+      ..forEach(_writePropertyConverterField)
+      ..forEach(_writeImmutableCachedPropertyField);
 
     _code.writeln('}');
   }
@@ -202,6 +201,10 @@ ${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(
 
 ''');
 
+    object.properties
+        .where((property) => property.type.isCached)
+        .forEach(_writeMutablePropertyConverterField);
+
     for (final property in object.properties) {
       final type = property.type;
       if (type.isCached) {
@@ -220,6 +223,20 @@ ${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(
 ${field.type.dartTypeWithNullability} get ${field.nameInDart};
 
     ''');
+  }
+
+  void _writePropertyConverterField(TypedDataObjectProperty property) {
+    _code.writeln('''
+static const ${property.converterField} = ${_buildTypeConverterExpression(property.type, forMutable: false)};
+
+''');
+  }
+
+  void _writeMutablePropertyConverterField(TypedDataObjectProperty property) {
+    _code.writeln('''
+static const ${property.converterField} = ${_buildTypeConverterExpression(property.type, forMutable: true)};
+
+''');
   }
 
   void _writeDocumentMetadataGetters() {
@@ -251,7 +268,7 @@ String? get $revisionIdFieldName => internal.revisionId;
     }
   }
 
-  void _writePrimitiveScalarGetter(TypedDataObjectProperty property) {
+  void _writeUncachedPropertyGetter(TypedDataObjectProperty property) {
     final type = property.type;
 
     _code.writeln('''
@@ -282,7 +299,7 @@ late final ${property.nameInDart} = ${property.readHelper}(
     internal: internal,
     name: ${escapeDartString(property.nameInDart)},
     key: ${escapeDartString(property.nameInData)},
-    reviver: ${_buildTypeConverterExpression(property.type, forMutable: false)},
+    reviver: ${property.converterField},
   );
 
     ''');
@@ -291,11 +308,11 @@ late final ${property.nameInDart} = ${property.readHelper}(
   void _writeMutableCachedPropertyField(TypedDataObjectProperty property) {
     final type = property.type;
     _code.writeln('''
-late ${type.mutableDartTypeWithNullability} ${property.privateCacheField} = ${property.readHelper}(
+late ${type.mutableDartTypeWithNullability} ${property.cacheField} = ${property.readHelper}(
       internal: internal,
       name: ${escapeDartString(property.nameInDart)},
       key: ${escapeDartString(property.nameInData)},
-      reviver: ${_buildTypeConverterExpression(type, forMutable: true)},
+      reviver: ${property.converterField},
     );
 
     ''');
@@ -305,27 +322,29 @@ late ${type.mutableDartTypeWithNullability} ${property.privateCacheField} = ${pr
     _code.writeln('''
 @override
 ${property.type.mutableDartTypeWithNullability} get ${property.nameInDart} =>
-    ${property.privateCacheField};
+    ${property.cacheField};
 
     ''');
   }
 
   void _writePropertySetter(TypedDataObjectProperty property) {
     final type = property.type;
+    final converter = property.type.isCached
+        ? property.converterField
+        : _buildTypeConverterExpression(type, forMutable: true);
     _code.writeln([
       '''
 set ${property.nameInDart}(${type.dartTypeWithNullability} value) {
-  const converter = ${_buildTypeConverterExpression(type, forMutable: true)};
-  final promoted = ${property.isNullable ? 'value == null ? null : ' : ''}converter.promote(value);''',
+  final promoted = ${property.isNullable ? 'value == null ? null : ' : ''}$converter.promote(value);''',
       if (property.type.isCached)
         '''
-  ${property.privateCacheField} = promoted;''',
+  ${property.cacheField} = promoted;''',
       '''
   ${property.writeHelper}(
     internal: internal,
     key: ${escapeDartString(property.nameInData)},
     value: promoted,
-    freezer: converter,
+    freezer: $converter,
   );
 }
 
@@ -341,19 +360,20 @@ set ${property.nameInDart}(${type.dartTypeWithNullability} value) {
       return 'InternalTypedDataHelpers.${type.dartType.decapitalized}Converter';
     } else if (type is TypedDataObjectType) {
       final classNames = type.classNames;
-      final implClass = forMutable
+      final internalClass = forMutable ? 'MutableDictionary' : 'Dictionary';
+      final factoryClass = forMutable
           ? classNames.mutableClassName
           : classNames.immutableClassName;
-      final factory = '$implClass.internal';
-      if (forMutable) {
-        final internalClass = forMutable ? 'MutableDictionary' : 'Dictionary';
-        final declaringClass = classNames.declaringClassName;
-        return 'const TypedDictionaryConverter<'
-            '$internalClass, $implClass, $declaringClass'
-            '>($factory)';
-      } else {
-        return 'const TypedDictionaryConverter($factory)';
-      }
+      final targetClass = forMutable
+          ? classNames.mutableClassName
+          : classNames.declaringClassName;
+      final promotableClass = forMutable
+          ? classNames.declaringClassName
+          : 'TypedDictionaryObject<$targetClass>';
+
+      return 'const TypedDictionaryConverter<'
+          '$internalClass, $targetClass, $promotableClass'
+          '>($factoryClass.internal)';
     } else if (type is TypedDataListType) {
       return '''
 const TypedListConverter(
@@ -377,5 +397,7 @@ extension on TypedDataObjectProperty {
       ? 'InternalTypedDataHelpers.writeNullableProperty'
       : 'InternalTypedDataHelpers.writeProperty';
 
-  String get privateCacheField => '_$nameInDart';
+  String get converterField => '_${nameInDart}Converter';
+
+  String get cacheField => '_$nameInDart';
 }

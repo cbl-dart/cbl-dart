@@ -170,12 +170,15 @@ class MutableA extends _AImplBase<MutableDictionary>
 
   MutableA.internal(MutableDictionary internal) : super(internal);
 
-  set b(String value) => InternalTypedDataHelpers.writeProperty(
-        internal: internal,
-        key: 'b',
-        value: value,
-        freezer: InternalTypedDataHelpers.stringConverter,
-      );
+  set b(String value) {
+    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'b',
+      value: promoted,
+      freezer: InternalTypedDataHelpers.stringConverter,
+    );
+  }
 }
 ''')
       },

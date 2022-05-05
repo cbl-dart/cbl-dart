@@ -47,13 +47,12 @@ class MutableStringDoc extends _StringDocImplBase<MutableDocument>
   MutableStringDoc.internal(MutableDocument internal) : super(internal);
 
   set value(String value) {
-    const converter = InternalTypedDataHelpers.stringConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -97,13 +96,12 @@ class MutableIntDoc extends _IntDocImplBase<MutableDocument>
   MutableIntDoc.internal(MutableDocument internal) : super(internal);
 
   set value(int value) {
-    const converter = InternalTypedDataHelpers.intConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.intConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.intConverter,
     );
   }
 }
@@ -148,13 +146,12 @@ class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
   MutableDoubleDoc.internal(MutableDocument internal) : super(internal);
 
   set value(double value) {
-    const converter = InternalTypedDataHelpers.doubleConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.doubleConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -198,13 +195,12 @@ class MutableNumDoc extends _NumDocImplBase<MutableDocument>
   MutableNumDoc.internal(MutableDocument internal) : super(internal);
 
   set value(num value) {
-    const converter = InternalTypedDataHelpers.numConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.numConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.numConverter,
     );
   }
 }
@@ -248,13 +244,12 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
   MutableBoolDoc.internal(MutableDocument internal) : super(internal);
 
   set value(bool value) {
-    const converter = InternalTypedDataHelpers.boolConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.boolConverter,
     );
   }
 }
@@ -299,13 +294,12 @@ class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
   MutableDateTimeDoc.internal(MutableDocument internal) : super(internal);
 
   set value(DateTime value) {
-    const converter = InternalTypedDataHelpers.dateTimeConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.dateTimeConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.dateTimeConverter,
     );
   }
 }
@@ -349,13 +343,12 @@ class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
   MutableBlobDoc.internal(MutableDocument internal) : super(internal);
 
   set value(Blob value) {
-    const converter = InternalTypedDataHelpers.blobConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.blobConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.blobConverter,
     );
   }
 }
@@ -404,13 +397,12 @@ class MutableStringDict extends _StringDictImplBase<MutableDictionary>
   MutableStringDict.internal(MutableDictionary internal) : super(internal);
 
   set value(String value) {
-    const converter = InternalTypedDataHelpers.stringConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -454,13 +446,12 @@ class MutableIntDict extends _IntDictImplBase<MutableDictionary>
   MutableIntDict.internal(MutableDictionary internal) : super(internal);
 
   set value(int value) {
-    const converter = InternalTypedDataHelpers.intConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.intConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.intConverter,
     );
   }
 }
@@ -505,13 +496,12 @@ class MutableDoubleDict extends _DoubleDictImplBase<MutableDictionary>
   MutableDoubleDict.internal(MutableDictionary internal) : super(internal);
 
   set value(double value) {
-    const converter = InternalTypedDataHelpers.doubleConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.doubleConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -555,13 +545,12 @@ class MutableNumDict extends _NumDictImplBase<MutableDictionary>
   MutableNumDict.internal(MutableDictionary internal) : super(internal);
 
   set value(num value) {
-    const converter = InternalTypedDataHelpers.numConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.numConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.numConverter,
     );
   }
 }
@@ -605,13 +594,12 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
   MutableBoolDict.internal(MutableDictionary internal) : super(internal);
 
   set value(bool value) {
-    const converter = InternalTypedDataHelpers.boolConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.boolConverter,
     );
   }
 }
@@ -656,13 +644,12 @@ class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
   MutableDateTimeDict.internal(MutableDictionary internal) : super(internal);
 
   set value(DateTime value) {
-    const converter = InternalTypedDataHelpers.dateTimeConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.dateTimeConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.dateTimeConverter,
     );
   }
 }
@@ -706,13 +693,12 @@ class MutableBlobDict extends _BlobDictImplBase<MutableDictionary>
   MutableBlobDict.internal(MutableDictionary internal) : super(internal);
 
   set value(Blob value) {
-    const converter = InternalTypedDataHelpers.blobConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.blobConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.blobConverter,
     );
   }
 }
@@ -761,13 +747,14 @@ class MutableNullableIntDict extends _NullableIntDictImplBase<MutableDictionary>
   MutableNullableIntDict.internal(MutableDictionary internal) : super(internal);
 
   set value(int? value) {
-    const converter = InternalTypedDataHelpers.intConverter;
-    final promoted = value == null ? null : converter.promote(value);
+    final promoted = value == null
+        ? null
+        : InternalTypedDataHelpers.intConverter.promote(value);
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.intConverter,
     );
   }
 }
@@ -819,13 +806,14 @@ class MutableNullableDoubleDict
       : super(internal);
 
   set value(double? value) {
-    const converter = InternalTypedDataHelpers.doubleConverter;
-    final promoted = value == null ? null : converter.promote(value);
+    final promoted = value == null
+        ? null
+        : InternalTypedDataHelpers.doubleConverter.promote(value);
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -874,13 +862,14 @@ class MutableNullableNumDict extends _NullableNumDictImplBase<MutableDictionary>
   MutableNullableNumDict.internal(MutableDictionary internal) : super(internal);
 
   set value(num? value) {
-    const converter = InternalTypedDataHelpers.numConverter;
-    final promoted = value == null ? null : converter.promote(value);
+    final promoted = value == null
+        ? null
+        : InternalTypedDataHelpers.numConverter.promote(value);
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.numConverter,
     );
   }
 }
@@ -932,13 +921,14 @@ class MutableNullableBoolDict
       : super(internal);
 
   set value(bool? value) {
-    const converter = InternalTypedDataHelpers.boolConverter;
-    final promoted = value == null ? null : converter.promote(value);
+    final promoted = value == null
+        ? null
+        : InternalTypedDataHelpers.boolConverter.promote(value);
     InternalTypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.boolConverter,
     );
   }
 }

@@ -127,13 +127,12 @@ class MutableDocWithIdAndField
   MutableDocWithIdAndField.internal(MutableDocument internal) : super(internal);
 
   set value(String value) {
-    const converter = InternalTypedDataHelpers.stringConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -191,13 +190,12 @@ class MutableDocWithOptionalIdAndField
       : super(internal);
 
   set value(String value) {
-    const converter = InternalTypedDataHelpers.stringConverter;
-    final promoted = converter.promote(value);
+    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
     InternalTypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: converter,
+      freezer: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
