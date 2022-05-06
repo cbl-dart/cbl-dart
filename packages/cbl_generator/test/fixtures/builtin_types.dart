@@ -93,3 +93,15 @@ abstract class NullableNumDict with _$NullableNumDict {
 abstract class NullableBoolDict with _$NullableBoolDict {
   factory NullableBoolDict(bool? value) = MutableNullableBoolDict;
 }
+
+enum TestEnum { a }
+
+@TypedDictionary()
+abstract class EnumDict with _$EnumDict {
+  factory EnumDict(TestEnum value) = MutableEnumDict;
+}
+
+@TypedDocument()
+abstract class EnumDoc with _$EnumDoc {
+  factory EnumDoc(TestEnum value) = MutableEnumDoc;
+}

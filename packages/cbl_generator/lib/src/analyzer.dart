@@ -17,6 +17,7 @@ const _numType = TypeChecker.fromRuntime(num);
 const _boolType = TypeChecker.fromRuntime(bool);
 const _dateTimeType = TypeChecker.fromRuntime(DateTime);
 const _listType = TypeChecker.fromRuntime(List);
+const _enumType = TypeChecker.fromRuntime(Enum);
 
 // cbl annotation types
 const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
@@ -452,6 +453,14 @@ class TypedDataAnalyzer {
         return BuiltinScalarType(
           dartType: typeName,
           isNullable: isNullable,
+        );
+      }
+
+      if (_enumType.isAssignableFromType(type)) {
+        return CustomScalarType(
+          dartType: typeName,
+          isNullable: isNullable,
+          typeConverterCode: 'const EnumNameConverter($typeName.values)',
         );
       }
 

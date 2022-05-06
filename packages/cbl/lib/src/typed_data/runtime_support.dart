@@ -37,7 +37,7 @@ class InternalTypedDataHelpers {
     required DictionaryInterface internal,
     required String name,
     required String key,
-    required Reviver<T> reviver,
+    required ToTyped<T> converter,
   }) {
     final value = internal.value(key);
     if (value == null) {
@@ -57,12 +57,12 @@ class InternalTypedDataHelpers {
     }
 
     try {
-      return reviver.revive(value);
-    } on CannotReviveTypeException catch (e) {
+      return converter.toTyped(value);
+    } on UnexpectedTypeException catch (e) {
       throw TypedDataException(
-        'Expected a ${e.expectedType} for property "$name" but the value in '
-        'the underlying data is a ${value.runtimeType}.',
+        'At property "$name": $e',
         TypedDataErrorCode.dataMismatch,
+        e,
       );
     }
   }
@@ -72,7 +72,7 @@ class InternalTypedDataHelpers {
     required DictionaryInterface internal,
     required String name,
     required String key,
-    required Reviver<T> reviver,
+    required ToTyped<T> converter,
   }) {
     final value = internal.value(key);
     if (value == null) {
@@ -80,12 +80,12 @@ class InternalTypedDataHelpers {
     }
 
     try {
-      return reviver.revive(value);
-    } on CannotReviveTypeException catch (e) {
+      return converter.toTyped(value);
+    } on UnexpectedTypeException catch (e) {
       throw TypedDataException(
-        'Expected a ${e.expectedType} for property "$name" but the value in '
-        'the underlying data is a ${value.runtimeType}.',
+        'At property "$name": $e',
         TypedDataErrorCode.dataMismatch,
+        e,
       );
     }
   }
@@ -96,9 +96,9 @@ class InternalTypedDataHelpers {
     required MutableDictionaryInterface internal,
     required T value,
     required String key,
-    required Freezer<T> freezer,
+    required ToUntyped<T> converter,
   }) {
-    internal.setValue(freezer.freeze(value), key: key);
+    internal.setValue(converter.toUntyped(value), key: key);
   }
 
   @meta.internal
@@ -106,12 +106,12 @@ class InternalTypedDataHelpers {
     required MutableDictionaryInterface internal,
     required T? value,
     required String key,
-    required Freezer<T> freezer,
+    required ToUntyped<T> converter,
   }) {
     if (value == null) {
       internal.removeValue(key);
     } else {
-      internal.setValue(freezer.freeze(value), key: key);
+      internal.setValue(converter.toUntyped(value), key: key);
     }
   }
 
@@ -179,14 +179,14 @@ abstract class _TypedDataListBase<T extends E, E, I extends Array>
     implements TypedDataList<T, E> {
   _TypedDataListBase({
     required this.internal,
-    required TypeConverter<T, E> converter,
+    required DataConverter<T, E> converter,
     required bool isNullable,
   })  : _converter = converter,
         _isNullable = isNullable;
 
   @override
   final I internal;
-  final TypeConverter<T, E> _converter;
+  final DataConverter<T, E> _converter;
   final bool _isNullable;
 
   @override
@@ -208,12 +208,12 @@ abstract class _TypedDataListBase<T extends E, E, I extends Array>
     }
 
     try {
-      return _converter.revive(value);
-    } on CannotReviveTypeException catch (e) {
+      return _converter.toTyped(value);
+    } on UnexpectedTypeException catch (e) {
       throw TypedDataException(
-        'Expected a ${e.expectedType} for element $index but the value in '
-        'the underlying data is a ${value.runtimeType}.',
+        'At index $index: $e',
         TypedDataErrorCode.dataMismatch,
+        e,
       );
     }
   }
@@ -223,7 +223,7 @@ class ImmutableTypedDataList<T extends E, E>
     extends _TypedDataListBase<T, E, Array> {
   ImmutableTypedDataList({
     required Array internal,
-    required TypeConverter<T, E> converter,
+    required DataConverter<T, E> converter,
     required bool isNullable,
   }) : super(internal: internal, converter: converter, isNullable: isNullable);
 
@@ -337,7 +337,7 @@ class MutableTypedDataList<T extends E, E>
     extends _TypedDataListBase<T, E, MutableArray> {
   MutableTypedDataList({
     required MutableArray internal,
-    required TypeConverter<T, E> converter,
+    required DataConverter<T, E> converter,
     required bool isNullable,
   }) : super(internal: internal, converter: converter, isNullable: isNullable);
 
@@ -360,18 +360,18 @@ class MutableTypedDataList<T extends E, E>
 
   @override
   void operator []=(int index, E value) {
-    internal.setValue(_converter.freeze(_promote(value)), at: index);
+    internal.setValue(_converter.toUntyped(_promote(value)), at: index);
   }
 
   @override
   void add(E element) {
-    internal.addValue(_converter.freeze(_promote(element)));
+    internal.addValue(_converter.toUntyped(_promote(element)));
   }
 
   @override
   void addAll(Iterable<E> iterable) {
     for (final element in iterable) {
-      internal.addValue(_converter.freeze(_promote(element)));
+      internal.addValue(_converter.toUntyped(_promote(element)));
     }
   }
 

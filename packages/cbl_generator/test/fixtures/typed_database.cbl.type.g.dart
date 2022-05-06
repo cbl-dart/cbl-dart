@@ -25,7 +25,7 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -82,7 +82,7 @@ class MutableCustomValueTypeMatcherDoc
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }

@@ -173,6 +173,21 @@ class BuiltinScalarType extends TypedDataType {
       );
 }
 
+class CustomScalarType extends TypedDataType {
+  CustomScalarType({
+    required String dartType,
+    required bool isNullable,
+    required this.typeConverterCode,
+  }) : super(
+          dartType: dartType,
+          mutableDartType: dartType,
+          isNullable: isNullable,
+          isCached: false,
+        );
+
+  final String typeConverterCode;
+}
+
 class TypedDataObjectType extends TypedDataType {
   TypedDataObjectType({
     required String dartType,

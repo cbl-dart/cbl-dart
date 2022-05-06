@@ -300,7 +300,7 @@ ${type.dartTypeWithNullability} get ${property.name} => ${property.readHelper}(
       internal: internal,
       name: ${escapeDartString(property.name)},
       key: ${escapeDartString(property.property)},
-      reviver: ${_buildTypeConverterExpression(type, forMutable: false)},
+      converter: ${_buildTypeConverterExpression(type, forMutable: false)},
     );
 
     ''');
@@ -372,7 +372,7 @@ late final ${property.name} = ${property.readHelper}(
     internal: internal,
     name: ${escapeDartString(property.name)},
     key: ${escapeDartString(property.property)},
-    reviver: ${property.converterField},
+    converter: ${property.converterField},
   );
 
     ''');
@@ -385,7 +385,7 @@ late ${type.mutableDartTypeWithNullability} ${property.cacheField} = ${property.
       internal: internal,
       name: ${escapeDartString(property.name)},
       key: ${escapeDartString(property.property)},
-      reviver: ${property.converterField},
+      converter: ${property.converterField},
     );
 
     ''');
@@ -417,7 +417,7 @@ set ${property.name}(${type.dartTypeWithNullability} value) {
     internal: internal,
     key: ${escapeDartString(property.property)},
     value: promoted,
-    freezer: $converter,
+    converter: $converter,
   );
 }
 
@@ -431,6 +431,8 @@ set ${property.name}(${type.dartTypeWithNullability} value) {
   }) {
     if (type is BuiltinScalarType) {
       return 'InternalTypedDataHelpers.${type.dartType.decapitalized}Converter';
+    } else if (type is CustomScalarType) {
+      return 'const ScalarConverterAdapter(${type.typeConverterCode},)';
     } else if (type is TypedDataObjectType) {
       final classNames = type.classNames;
       final internalClass = forMutable ? 'MutableDictionary' : 'Dictionary';

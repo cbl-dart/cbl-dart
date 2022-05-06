@@ -146,7 +146,7 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -202,7 +202,7 @@ class MutableDocWithIdAndField
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -230,7 +230,7 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -289,7 +289,7 @@ class MutableDocWithOptionalIdAndField
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }

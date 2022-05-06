@@ -47,7 +47,7 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -84,7 +84,7 @@ class MutableTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -97,7 +97,7 @@ class MutableTypedDataPropertyDoc
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }
@@ -144,7 +144,7 @@ class ImmutableOptionalTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -183,7 +183,7 @@ class MutableOptionalTypedDataPropertyDoc
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -196,7 +196,7 @@ class MutableOptionalTypedDataPropertyDoc
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }
@@ -246,7 +246,7 @@ class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -283,7 +283,7 @@ class MutableTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -296,7 +296,7 @@ class MutableTypedDataPropertyDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }
@@ -343,7 +343,7 @@ class ImmutableOptionalTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -382,7 +382,7 @@ class MutableOptionalTypedDataPropertyDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -395,7 +395,7 @@ class MutableOptionalTypedDataPropertyDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }

@@ -24,7 +24,7 @@ abstract class _ParamDocImplBase<I extends Document>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -74,7 +74,7 @@ class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -97,7 +97,7 @@ abstract class _OptionalParamDocImplBase<I extends Document>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -153,7 +153,7 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -178,7 +178,7 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -186,7 +186,7 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
         internal: internal,
         name: 'b',
         key: 'b',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -248,7 +248,7 @@ class MutablePositionalMixedParamDoc
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 
@@ -260,7 +260,7 @@ class MutablePositionalMixedParamDoc
       internal: internal,
       key: 'b',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -282,7 +282,7 @@ abstract class _NamedParamDocImplBase<I extends Document>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -333,7 +333,7 @@ class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -356,7 +356,7 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -415,7 +415,7 @@ class MutableNamedOptionalParamDoc
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -440,7 +440,7 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -448,7 +448,7 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
         internal: internal,
         name: 'b',
         key: 'b',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -508,7 +508,7 @@ class MutableNamedMixedParamDoc
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 
@@ -520,7 +520,7 @@ class MutableNamedMixedParamDoc
       internal: internal,
       key: 'b',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -546,7 +546,7 @@ abstract class _ParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -597,7 +597,7 @@ class MutableParamDict extends _ParamDictImplBase<MutableDictionary>
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -620,7 +620,7 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -679,7 +679,7 @@ class MutableOptionalParamDict
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -704,7 +704,7 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -712,7 +712,7 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'b',
         key: 'b',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -774,7 +774,7 @@ class MutablePositionalMixedParamDict
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 
@@ -786,7 +786,7 @@ class MutablePositionalMixedParamDict
       internal: internal,
       key: 'b',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -808,7 +808,7 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -860,7 +860,7 @@ class MutableNamedParamDict extends _NamedParamDictImplBase<MutableDictionary>
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -883,7 +883,7 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -943,7 +943,7 @@ class MutableNamedOptionalParamDict
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -968,7 +968,7 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'a',
         key: 'a',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -976,7 +976,7 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'b',
         key: 'b',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -1036,7 +1036,7 @@ class MutableNamedMixedParamDict
       internal: internal,
       key: 'a',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 
@@ -1048,7 +1048,7 @@ class MutableNamedMixedParamDict
       internal: internal,
       key: 'b',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }

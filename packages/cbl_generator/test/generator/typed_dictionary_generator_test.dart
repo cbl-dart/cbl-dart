@@ -170,7 +170,7 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
         internal: internal,
         name: 'b',
         key: 'b',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -220,7 +220,7 @@ class MutableA extends _AImplBase<MutableDictionary>
       internal: internal,
       key: 'b',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }

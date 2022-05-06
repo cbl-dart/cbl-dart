@@ -271,13 +271,15 @@ enum TypedDataErrorCode {
 class TypedDataException extends CouchbaseLiteException {
   /// Creates an exception which is throw when there is a failure related to
   /// typed data.
-  TypedDataException(this.message, this.code);
+  TypedDataException(this.message, this.code, [this.originalException]);
 
   @override
   final String message;
 
   @override
   final TypedDataErrorCode code;
+
+  final Object? originalException;
 
   @override
   String get _typeName => 'TypedDataException';

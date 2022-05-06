@@ -25,7 +25,7 @@ abstract class _CustomDataNameDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'custom',
-        reviver: InternalTypedDataHelpers.boolConverter,
+        converter: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -80,7 +80,7 @@ class MutableCustomDataNameDict
       internal: internal,
       key: 'custom',
       value: promoted,
-      freezer: InternalTypedDataHelpers.boolConverter,
+      converter: InternalTypedDataHelpers.boolConverter,
     );
   }
 }
@@ -103,7 +103,7 @@ abstract class _DefaultValueDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.boolConverter,
+        converter: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -158,7 +158,7 @@ class MutableDefaultValueDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.boolConverter,
+      converter: InternalTypedDataHelpers.boolConverter,
     );
   }
 }

@@ -11,12 +11,12 @@ export 'typed_data/annotations.dart'
         ValueTypeMatcher;
 export 'typed_data/conversion.dart'
     show
-        CannotReviveTypeException,
-        Freezer,
-        Reviver,
-        TypeConverter,
+        UnexpectedTypeException,
         TypedDictionaryConverter,
-        TypedListConverter;
+        TypedListConverter,
+        ScalarConverterAdapter,
+        EnumIndexConverter,
+        EnumNameConverter;
 export 'typed_data/runtime_support.dart' show InternalTypedDataHelpers;
 export 'typed_data/typed_object.dart'
     show

@@ -49,7 +49,7 @@ class ImmutableBoolListDict extends _BoolListDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -85,7 +85,7 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -98,7 +98,7 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }
@@ -146,7 +146,7 @@ class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -189,7 +189,7 @@ class MutableOptionalBoolListDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -202,7 +202,7 @@ class MutableOptionalBoolListDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }
@@ -251,7 +251,7 @@ class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -293,7 +293,7 @@ class MutableBoolDictListDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -306,7 +306,7 @@ class MutableBoolDictListDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }
@@ -358,7 +358,7 @@ class ImmutableBoolListListDict extends _BoolListListDictImplBase {
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -403,7 +403,7 @@ class MutableBoolListListDict
     internal: internal,
     name: 'value',
     key: 'value',
-    reviver: _valueConverter,
+    converter: _valueConverter,
   );
 
   @override
@@ -416,7 +416,7 @@ class MutableBoolListListDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: _valueConverter,
+      converter: _valueConverter,
     );
   }
 }

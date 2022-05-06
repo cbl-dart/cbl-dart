@@ -27,5 +27,7 @@ void main() {
     final blob = Blob.fromData('', Uint8List.fromList([42]));
     expect(BlobDict(blob).value, blob);
     expect(BlobDoc(blob).value, blob);
+    expect(EnumDict(TestEnum.a).value, TestEnum.a);
+    expect(EnumDoc(TestEnum.a).value, TestEnum.a);
   });
 }

@@ -24,7 +24,7 @@ abstract class _StringDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -75,7 +75,7 @@ class MutableStringDoc extends _StringDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -97,7 +97,7 @@ abstract class _IntDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.intConverter,
+        converter: InternalTypedDataHelpers.intConverter,
       );
 
   @override
@@ -147,7 +147,7 @@ class MutableIntDoc extends _IntDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.intConverter,
+      converter: InternalTypedDataHelpers.intConverter,
     );
   }
 }
@@ -169,7 +169,7 @@ abstract class _DoubleDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.doubleConverter,
+        converter: InternalTypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -220,7 +220,7 @@ class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.doubleConverter,
+      converter: InternalTypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -242,7 +242,7 @@ abstract class _NumDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.numConverter,
+        converter: InternalTypedDataHelpers.numConverter,
       );
 
   @override
@@ -292,7 +292,7 @@ class MutableNumDoc extends _NumDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.numConverter,
+      converter: InternalTypedDataHelpers.numConverter,
     );
   }
 }
@@ -314,7 +314,7 @@ abstract class _BoolDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.boolConverter,
+        converter: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -364,7 +364,7 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.boolConverter,
+      converter: InternalTypedDataHelpers.boolConverter,
     );
   }
 }
@@ -386,7 +386,7 @@ abstract class _DateTimeDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.dateTimeConverter,
+        converter: InternalTypedDataHelpers.dateTimeConverter,
       );
 
   @override
@@ -437,7 +437,7 @@ class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.dateTimeConverter,
+      converter: InternalTypedDataHelpers.dateTimeConverter,
     );
   }
 }
@@ -459,7 +459,7 @@ abstract class _BlobDocImplBase<I extends Document>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.blobConverter,
+        converter: InternalTypedDataHelpers.blobConverter,
       );
 
   @override
@@ -509,7 +509,85 @@ class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.blobConverter,
+      converter: InternalTypedDataHelpers.blobConverter,
+    );
+  }
+}
+
+mixin _$EnumDoc implements TypedDocumentObject<MutableEnumDoc> {
+  TestEnum get value;
+}
+
+abstract class _EnumDocImplBase<I extends Document>
+    with _$EnumDoc
+    implements EnumDoc {
+  _EnumDocImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  TestEnum get value => InternalTypedDataHelpers.readProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        converter: const ScalarConverterAdapter(
+          const EnumNameConverter(TestEnum.values),
+        ),
+      );
+
+  @override
+  MutableEnumDoc toMutable() => MutableEnumDoc.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'EnumDoc',
+        fields: {
+          'value': value,
+        },
+      );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableEnumDoc extends _EnumDocImplBase {
+  ImmutableEnumDoc.internal(Document internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnumDoc &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [EnumDoc].
+class MutableEnumDoc extends _EnumDocImplBase<MutableDocument>
+    implements TypedMutableDocumentObject<EnumDoc, MutableEnumDoc> {
+  /// Creates a new mutable [EnumDoc].
+  MutableEnumDoc(
+    TestEnum value,
+  ) : super(MutableDocument()) {
+    this.value = value;
+  }
+
+  MutableEnumDoc.internal(MutableDocument internal) : super(internal);
+
+  set value(TestEnum value) {
+    final promoted = const ScalarConverterAdapter(
+      const EnumNameConverter(TestEnum.values),
+    ).promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: const ScalarConverterAdapter(
+        const EnumNameConverter(TestEnum.values),
+      ),
     );
   }
 }
@@ -535,7 +613,7 @@ abstract class _StringDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -586,7 +664,7 @@ class MutableStringDict extends _StringDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
@@ -608,7 +686,7 @@ abstract class _IntDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.intConverter,
+        converter: InternalTypedDataHelpers.intConverter,
       );
 
   @override
@@ -658,7 +736,7 @@ class MutableIntDict extends _IntDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.intConverter,
+      converter: InternalTypedDataHelpers.intConverter,
     );
   }
 }
@@ -680,7 +758,7 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.doubleConverter,
+        converter: InternalTypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -731,7 +809,7 @@ class MutableDoubleDict extends _DoubleDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.doubleConverter,
+      converter: InternalTypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -753,7 +831,7 @@ abstract class _NumDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.numConverter,
+        converter: InternalTypedDataHelpers.numConverter,
       );
 
   @override
@@ -803,7 +881,7 @@ class MutableNumDict extends _NumDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.numConverter,
+      converter: InternalTypedDataHelpers.numConverter,
     );
   }
 }
@@ -825,7 +903,7 @@ abstract class _BoolDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.boolConverter,
+        converter: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -875,7 +953,7 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.boolConverter,
+      converter: InternalTypedDataHelpers.boolConverter,
     );
   }
 }
@@ -897,7 +975,7 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.dateTimeConverter,
+        converter: InternalTypedDataHelpers.dateTimeConverter,
       );
 
   @override
@@ -948,7 +1026,7 @@ class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.dateTimeConverter,
+      converter: InternalTypedDataHelpers.dateTimeConverter,
     );
   }
 }
@@ -970,7 +1048,7 @@ abstract class _BlobDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.blobConverter,
+        converter: InternalTypedDataHelpers.blobConverter,
       );
 
   @override
@@ -1020,7 +1098,7 @@ class MutableBlobDict extends _BlobDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.blobConverter,
+      converter: InternalTypedDataHelpers.blobConverter,
     );
   }
 }
@@ -1043,7 +1121,7 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.intConverter,
+        converter: InternalTypedDataHelpers.intConverter,
       );
 
   @override
@@ -1099,7 +1177,7 @@ class MutableNullableIntDict extends _NullableIntDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.intConverter,
+      converter: InternalTypedDataHelpers.intConverter,
     );
   }
 }
@@ -1122,7 +1200,7 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.doubleConverter,
+        converter: InternalTypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -1181,7 +1259,7 @@ class MutableNullableDoubleDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.doubleConverter,
+      converter: InternalTypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -1204,7 +1282,7 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.numConverter,
+        converter: InternalTypedDataHelpers.numConverter,
       );
 
   @override
@@ -1260,7 +1338,7 @@ class MutableNullableNumDict extends _NullableNumDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.numConverter,
+      converter: InternalTypedDataHelpers.numConverter,
     );
   }
 }
@@ -1283,7 +1361,7 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.boolConverter,
+        converter: InternalTypedDataHelpers.boolConverter,
       );
 
   @override
@@ -1342,7 +1420,85 @@ class MutableNullableBoolDict
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.boolConverter,
+      converter: InternalTypedDataHelpers.boolConverter,
+    );
+  }
+}
+
+mixin _$EnumDict implements TypedDictionaryObject<MutableEnumDict> {
+  TestEnum get value;
+}
+
+abstract class _EnumDictImplBase<I extends Dictionary>
+    with _$EnumDict
+    implements EnumDict {
+  _EnumDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  TestEnum get value => InternalTypedDataHelpers.readProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        converter: const ScalarConverterAdapter(
+          const EnumNameConverter(TestEnum.values),
+        ),
+      );
+
+  @override
+  MutableEnumDict toMutable() => MutableEnumDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'EnumDict',
+        fields: {
+          'value': value,
+        },
+      );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableEnumDict extends _EnumDictImplBase {
+  ImmutableEnumDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnumDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [EnumDict].
+class MutableEnumDict extends _EnumDictImplBase<MutableDictionary>
+    implements TypedMutableDictionaryObject<EnumDict, MutableEnumDict> {
+  /// Creates a new mutable [EnumDict].
+  MutableEnumDict(
+    TestEnum value,
+  ) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableEnumDict.internal(MutableDictionary internal) : super(internal);
+
+  set value(TestEnum value) {
+    final promoted = const ScalarConverterAdapter(
+      const EnumNameConverter(TestEnum.values),
+    ).promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: const ScalarConverterAdapter(
+        const EnumNameConverter(TestEnum.values),
+      ),
     );
   }
 }

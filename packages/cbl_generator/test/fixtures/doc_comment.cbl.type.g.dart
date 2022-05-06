@@ -25,7 +25,7 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
         internal: internal,
         name: 'value',
         key: 'value',
-        reviver: InternalTypedDataHelpers.stringConverter,
+        converter: InternalTypedDataHelpers.stringConverter,
       );
 
   @override
@@ -77,7 +77,7 @@ class MutableDocCommentDict extends _DocCommentDictImplBase<MutableDictionary>
       internal: internal,
       key: 'value',
       value: promoted,
-      freezer: InternalTypedDataHelpers.stringConverter,
+      converter: InternalTypedDataHelpers.stringConverter,
     );
   }
 }
