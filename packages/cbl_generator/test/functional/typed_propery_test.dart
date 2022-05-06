@@ -20,4 +20,10 @@ void main() {
       isTrue,
     );
   });
+
+  test('default value', () {
+    expect(DefaultValueDict().value, isTrue);
+    expect(DefaultValueDict(true).value, isTrue);
+    expect(DefaultValueDict(false).value, isFalse);
+  });
 }

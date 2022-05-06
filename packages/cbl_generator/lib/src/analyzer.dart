@@ -351,10 +351,17 @@ class TypedDataAnalyzer {
             (annotation) => annotation.instanceOf(_typedPropertyType),
           );
           String? customProperty;
+          String? defaultValueCode;
           if (typedPropertyAnnotation != null) {
             final propertyConstant = typedPropertyAnnotation.read('property');
             if (!propertyConstant.isNull) {
               customProperty = propertyConstant.stringValue;
+            }
+
+            final defaultValueConstant =
+                typedPropertyAnnotation.read('defaultValue');
+            if (!defaultValueConstant.isNull) {
+              defaultValueCode = defaultValueConstant.stringValue;
             }
           }
 
@@ -363,6 +370,7 @@ class TypedDataAnalyzer {
             name: parameter.name,
             property: customProperty ?? parameter.name,
             constructorParameter: constructorParameter,
+            defaultValueCode: defaultValueCode,
           );
         },
       ).toList();

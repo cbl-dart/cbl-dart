@@ -84,3 +84,81 @@ class MutableCustomDataNameDict
     );
   }
 }
+
+mixin _$DefaultValueDict
+    implements TypedDictionaryObject<MutableDefaultValueDict> {
+  bool get value;
+}
+
+abstract class _DefaultValueDictImplBase<I extends Dictionary>
+    with _$DefaultValueDict
+    implements DefaultValueDict {
+  _DefaultValueDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  bool get value => InternalTypedDataHelpers.readProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        reviver: InternalTypedDataHelpers.boolConverter,
+      );
+
+  @override
+  MutableDefaultValueDict toMutable() =>
+      MutableDefaultValueDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'DefaultValueDict',
+        fields: {
+          'value': value,
+        },
+      );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableDefaultValueDict extends _DefaultValueDictImplBase {
+  ImmutableDefaultValueDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DefaultValueDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [DefaultValueDict].
+class MutableDefaultValueDict
+    extends _DefaultValueDictImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<DefaultValueDict,
+            MutableDefaultValueDict> {
+  /// Creates a new mutable [DefaultValueDict].
+  MutableDefaultValueDict([
+    bool value = true,
+  ]) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableDefaultValueDict.internal(MutableDictionary internal)
+      : super(internal);
+
+  set value(bool value) {
+    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      freezer: InternalTypedDataHelpers.boolConverter,
+    );
+  }
+}

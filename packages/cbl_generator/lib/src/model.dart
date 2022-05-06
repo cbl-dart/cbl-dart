@@ -89,6 +89,7 @@ class TypedDataObjectProperty extends TypedDataObjectField {
     required String name,
     required this.property,
     required ConstructorParameter constructorParameter,
+    this.defaultValueCode,
   }) : super(
           type: type,
           name: name,
@@ -99,6 +100,7 @@ class TypedDataObjectProperty extends TypedDataObjectField {
   ConstructorParameter get constructorParameter => super.constructorParameter!;
 
   final String property;
+  final String? defaultValueCode;
 }
 
 class ConstructorParameter {

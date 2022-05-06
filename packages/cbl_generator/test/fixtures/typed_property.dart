@@ -10,3 +10,10 @@ abstract class CustomDataNameDict with _$CustomDataNameDict {
     @TypedProperty(property: 'custom') bool value,
   ) = MutableCustomDataNameDict;
 }
+
+@TypedDictionary()
+abstract class DefaultValueDict with _$DefaultValueDict {
+  factory DefaultValueDict([
+    @TypedProperty(defaultValue: 'true') bool value,
+  ]) = MutableDefaultValueDict;
+}

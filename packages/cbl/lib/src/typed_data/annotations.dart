@@ -83,12 +83,15 @@ class DocumentRevisionId {
 
 @Target({TargetKind.parameter})
 class TypedProperty {
-  const TypedProperty({this.property});
+  const TypedProperty({this.property, this.defaultValue});
 
   /// The name of the property in the underlying data.
   ///
   /// Per default, the name of the property in the typed object is used.
   final String? property;
+
+  /// The Dart code of the default value for the property.
+  final String? defaultValue;
 }
 
 @Target({TargetKind.classType})

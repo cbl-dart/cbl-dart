@@ -138,8 +138,18 @@ class ${_classNames.mutableClassName}
       _code
         ..write(parameter.type.dartTypeWithNullability)
         ..write(' ')
-        ..write(field.name)
-        ..write(',');
+        ..write(field.name);
+
+      if (field is TypedDataObjectProperty) {
+        final defaultValueCode = field.defaultValueCode;
+        if (defaultValueCode != null) {
+          _code
+            ..write(' = ')
+            ..write(defaultValueCode);
+        }
+      }
+
+      _code.write(',');
     }
 
     if (isInOptionalPositionList) {
