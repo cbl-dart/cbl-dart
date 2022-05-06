@@ -81,6 +81,16 @@ class DocumentRevisionId {
   const DocumentRevisionId();
 }
 
+@Target({TargetKind.parameter})
+class TypedProperty {
+  const TypedProperty({this.property});
+
+  /// The name of the property in the underlying data.
+  ///
+  /// Per default, the name of the property in the typed object is used.
+  final String? property;
+}
+
 @Target({TargetKind.classType})
 class TypedDatabase {
   const TypedDatabase({required this.types});

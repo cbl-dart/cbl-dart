@@ -51,12 +51,12 @@ class TypedDataObjectClassNames {
 abstract class TypedDataObjectField {
   TypedDataObjectField({
     required this.type,
-    required this.nameInDart,
+    required this.name,
     this.constructorParameter,
   });
 
   final TypedDataType type;
-  final String nameInDart;
+  final String name;
   final ConstructorParameter? constructorParameter;
 
   bool get isNullable => type.isNullable;
@@ -71,12 +71,12 @@ enum DocumentMetadataKind {
 class TypedDataMetadataField extends TypedDataObjectField {
   TypedDataMetadataField({
     required TypedDataType type,
-    required String nameInDart,
+    required String name,
     required this.kind,
     ConstructorParameter? constructorParameter,
   }) : super(
           type: type,
-          nameInDart: nameInDart,
+          name: name,
           constructorParameter: constructorParameter,
         );
 
@@ -86,19 +86,19 @@ class TypedDataMetadataField extends TypedDataObjectField {
 class TypedDataObjectProperty extends TypedDataObjectField {
   TypedDataObjectProperty({
     required TypedDataType type,
-    required String nameInDart,
-    required this.nameInData,
+    required String name,
+    required this.property,
     required ConstructorParameter constructorParameter,
   }) : super(
           type: type,
-          nameInDart: nameInDart,
+          name: name,
           constructorParameter: constructorParameter,
         );
 
   @override
   ConstructorParameter get constructorParameter => super.constructorParameter!;
 
-  final String nameInData;
+  final String property;
 }
 
 class ConstructorParameter {

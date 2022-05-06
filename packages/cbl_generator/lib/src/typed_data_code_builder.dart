@@ -138,7 +138,7 @@ class ${_classNames.mutableClassName}
       _code
         ..write(parameter.type.dartTypeWithNullability)
         ..write(' ')
-        ..write(field.nameInDart)
+        ..write(field.name)
         ..write(',');
     }
 
@@ -156,7 +156,7 @@ class ${_classNames.mutableClassName}
         documentIdField.constructorParameter != null) {
       if (documentIdField.constructorParameter!.type.isNullable) {
         _code
-          ..write(documentIdField.nameInDart)
+          ..write(documentIdField.name)
           ..write(' == null ? ')
           ..write(_mutableInternalType)
           ..write('() : ');
@@ -164,7 +164,7 @@ class ${_classNames.mutableClassName}
       _code
         ..write(_mutableInternalType)
         ..write('.withId(')
-        ..write(documentIdField.nameInDart)
+        ..write(documentIdField.name)
         ..write(')');
     } else {
       _code
@@ -185,14 +185,14 @@ class ${_classNames.mutableClassName}
         if (field.isNullable) {
           _code
             ..write('if (')
-            ..write(field.nameInDart)
+            ..write(field.name)
             ..writeln(' != null) {');
         }
         _code
           ..write('    this.')
-          ..write(field.nameInDart)
+          ..write(field.name)
           ..write(' =')
-          ..write(field.nameInDart)
+          ..write(field.name)
           ..writeln(';');
         if (field.isNullable) {
           _code.writeln('}');
@@ -233,7 +233,7 @@ ${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(
       _code.writeln(documentationComment);
     }
     _code.writeln('''
-${field.type.dartTypeWithNullability} get ${field.nameInDart};
+${field.type.dartTypeWithNullability} get ${field.name};
 
     ''');
   }
@@ -253,7 +253,7 @@ static const ${property.converterField} = ${_buildTypeConverterExpression(proper
   }
 
   void _writeDocumentMetadataGetters() {
-    final idFieldName = object.documentIdField?.nameInDart;
+    final idFieldName = object.documentIdField?.name;
     if (idFieldName != null) {
       _code.writeln('''
 @override
@@ -262,7 +262,7 @@ String get $idFieldName => internal.id;
     ''');
     }
 
-    final sequenceFieldName = object.documentSequenceField?.nameInDart;
+    final sequenceFieldName = object.documentSequenceField?.name;
     if (sequenceFieldName != null) {
       _code.writeln('''
 @override
@@ -271,7 +271,7 @@ int get $sequenceFieldName => internal.sequence;
     ''');
     }
 
-    final revisionIdFieldName = object.documentRevisionIdField?.nameInDart;
+    final revisionIdFieldName = object.documentRevisionIdField?.name;
     if (revisionIdFieldName != null) {
       _code.writeln('''
 @override
@@ -286,10 +286,10 @@ String? get $revisionIdFieldName => internal.revisionId;
 
     _code.writeln('''
 @override
-${type.dartTypeWithNullability} get ${property.nameInDart} => ${property.readHelper}(
+${type.dartTypeWithNullability} get ${property.name} => ${property.readHelper}(
       internal: internal,
-      name: ${escapeDartString(property.nameInDart)},
-      key: ${escapeDartString(property.nameInData)},
+      name: ${escapeDartString(property.name)},
+      key: ${escapeDartString(property.property)},
       reviver: ${_buildTypeConverterExpression(type, forMutable: false)},
     );
 
@@ -324,7 +324,7 @@ ${_classNames.mutableClassName} toMutable() =>
 
     final fields = [
       for (final field in sortedFields)
-        '${escapeDartString(field.nameInDart)}: ${field.nameInDart},',
+        '${escapeDartString(field.name)}: ${field.name},',
     ].join('\n');
 
     _code.writeln('''
@@ -358,10 +358,10 @@ int get hashCode => internal.hashCode;
   void _writeImmutableCachedPropertyField(TypedDataObjectProperty property) {
     _code.writeln('''
 @override
-late final ${property.nameInDart} = ${property.readHelper}(
+late final ${property.name} = ${property.readHelper}(
     internal: internal,
-    name: ${escapeDartString(property.nameInDart)},
-    key: ${escapeDartString(property.nameInData)},
+    name: ${escapeDartString(property.name)},
+    key: ${escapeDartString(property.property)},
     reviver: ${property.converterField},
   );
 
@@ -373,8 +373,8 @@ late final ${property.nameInDart} = ${property.readHelper}(
     _code.writeln('''
 late ${type.mutableDartTypeWithNullability} ${property.cacheField} = ${property.readHelper}(
       internal: internal,
-      name: ${escapeDartString(property.nameInDart)},
-      key: ${escapeDartString(property.nameInData)},
+      name: ${escapeDartString(property.name)},
+      key: ${escapeDartString(property.property)},
       reviver: ${property.converterField},
     );
 
@@ -384,7 +384,7 @@ late ${type.mutableDartTypeWithNullability} ${property.cacheField} = ${property.
   void _writeMutableCachedPropertyGetter(TypedDataObjectProperty property) {
     _code.writeln('''
 @override
-${property.type.mutableDartTypeWithNullability} get ${property.nameInDart} =>
+${property.type.mutableDartTypeWithNullability} get ${property.name} =>
     ${property.cacheField};
 
     ''');
@@ -397,7 +397,7 @@ ${property.type.mutableDartTypeWithNullability} get ${property.nameInDart} =>
         : _buildTypeConverterExpression(type, forMutable: true);
     _code.writeln([
       '''
-set ${property.nameInDart}(${type.dartTypeWithNullability} value) {
+set ${property.name}(${type.dartTypeWithNullability} value) {
   final promoted = ${property.isNullable ? 'value == null ? null : ' : ''}$converter.promote(value);''',
       if (property.type.isCached)
         '''
@@ -405,7 +405,7 @@ set ${property.nameInDart}(${type.dartTypeWithNullability} value) {
       '''
   ${property.writeHelper}(
     internal: internal,
-    key: ${escapeDartString(property.nameInData)},
+    key: ${escapeDartString(property.property)},
     value: promoted,
     freezer: $converter,
   );
@@ -460,7 +460,7 @@ extension on TypedDataObjectProperty {
       ? 'InternalTypedDataHelpers.writeNullableProperty'
       : 'InternalTypedDataHelpers.writeProperty';
 
-  String get converterField => '_${nameInDart}Converter';
+  String get converterField => '_${name}Converter';
 
-  String get cacheField => '_$nameInDart';
+  String get cacheField => '_$name';
 }

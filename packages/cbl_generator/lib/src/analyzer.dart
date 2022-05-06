@@ -22,6 +22,7 @@ const _listType = TypeChecker.fromRuntime(List);
 const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
 const _typedDocumentType = TypeChecker.fromRuntime(TypedDocument);
 const _documentIdType = TypeChecker.fromRuntime(DocumentId);
+const _typedPropertyType = TypeChecker.fromRuntime(TypedProperty);
 const _valueTypeMatcherType = TypeChecker.fromRuntime(ValueTypeMatcher);
 const _typedDatabaseType = TypeChecker.fromRuntime(TypedDatabase);
 
@@ -140,7 +141,7 @@ class TypedDataAnalyzer {
       sequenceFieldName,
       revisionIdFieldName,
     ].whereType<String>().toSet();
-    final fieldNames = fields.map((field) => field.nameInDart).toSet();
+    final fieldNames = fields.map((field) => field.name).toSet();
     final conflictingFieldNames = metaDataFieldNames.intersection(fieldNames);
     if (conflictingFieldNames.isNotEmpty) {
       throw InvalidGenerationSourceError(
@@ -153,7 +154,7 @@ class TypedDataAnalyzer {
 
     if (documentIdFieldName != null) {
       fields.add(TypedDataMetadataField(
-        nameInDart: documentIdFieldName,
+        name: documentIdFieldName,
         kind: DocumentMetadataKind.id,
         type: BuiltinScalarType(dartType: 'String'),
       ));
@@ -161,7 +162,7 @@ class TypedDataAnalyzer {
 
     if (sequenceFieldName != null) {
       fields.add(TypedDataMetadataField(
-        nameInDart: sequenceFieldName,
+        name: sequenceFieldName,
         kind: DocumentMetadataKind.sequence,
         type: BuiltinScalarType(dartType: 'int'),
       ));
@@ -169,7 +170,7 @@ class TypedDataAnalyzer {
 
     if (revisionIdFieldName != null) {
       fields.add(TypedDataMetadataField(
-        nameInDart: revisionIdFieldName,
+        name: revisionIdFieldName,
         kind: DocumentMetadataKind.revisionId,
         type: BuiltinScalarType(dartType: 'String', isNullable: true),
       ));
@@ -341,15 +342,26 @@ class TypedDataAnalyzer {
             return TypedDataMetadataField(
               kind: DocumentMetadataKind.id,
               type: (type as BuiltinScalarType).withNullability(false),
-              nameInDart: parameter.name,
+              name: parameter.name,
               constructorParameter: constructorParameter,
             );
           }
 
+          final typedPropertyAnnotation = annotations.firstWhereOrNull(
+            (annotation) => annotation.instanceOf(_typedPropertyType),
+          );
+          String? customProperty;
+          if (typedPropertyAnnotation != null) {
+            final propertyConstant = typedPropertyAnnotation.read('property');
+            if (!propertyConstant.isNull) {
+              customProperty = propertyConstant.stringValue;
+            }
+          }
+
           return TypedDataObjectProperty(
             type: type,
-            nameInDart: parameter.name,
-            nameInData: parameter.name,
+            name: parameter.name,
+            property: customProperty ?? parameter.name,
             constructorParameter: constructorParameter,
           );
         },

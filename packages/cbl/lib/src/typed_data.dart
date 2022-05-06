@@ -6,6 +6,7 @@ export 'typed_data/annotations.dart'
         TypedDatabase,
         TypedDictionary,
         TypedDocument,
+        TypedProperty,
         TypeMatcher,
         ValueTypeMatcher;
 export 'typed_data/conversion.dart'
