@@ -87,6 +87,9 @@ class TypedDataAnalyzer {
     Element element, {
     TypedDataObjectKind? kind,
   }) async {
+    final cblLibrary =
+        await resolver.libraryFor(AssetId.parse('cbl|lib/cbl.dart'));
+
     // Validate element is an abstract class.
     if (element is! ClassElement) {
       final annotationDescription = kind == null
@@ -114,7 +117,7 @@ class TypedDataAnalyzer {
       kind,
     );
 
-    final fields = _resolveTypedDataFields(annotatedClass, kind);
+    final fields = _resolveTypedDataFields(annotatedClass, kind, cblLibrary);
     final documentIdField = fields
         .whereType<TypedDataMetadataField>()
         .firstWhereOrNull((field) => field.kind == DocumentMetadataKind.id);
@@ -321,10 +324,51 @@ class TypedDataAnalyzer {
   List<TypedDataObjectField> _resolveTypedDataFields(
     ClassElement clazz,
     TypedDataObjectKind kind,
+    LibraryElement cblLibrary,
   ) =>
       clazz.unnamedConstructor!.parameters.map(
         (parameter) {
-          final type = _resolveTypedDataType(parameter);
+          final annotations = parameter.metadata
+              .map((annotation) => annotation.computeConstantValue())
+              .map(ConstantReader.new);
+
+          final typedPropertyAnnotation = annotations.firstWhereOrNull(
+            (annotation) => annotation.instanceOf(_typedPropertyType),
+          );
+          String? customProperty;
+          String? defaultValueCode;
+          ScalarConverterInfo? scalarConverter;
+          if (typedPropertyAnnotation != null) {
+            final propertyConstant = typedPropertyAnnotation.peek('property');
+            if (propertyConstant != null) {
+              customProperty = propertyConstant.stringValue;
+            }
+
+            final defaultValueConstant =
+                typedPropertyAnnotation.peek('defaultValue');
+            if (defaultValueConstant != null) {
+              defaultValueCode = defaultValueConstant.stringValue;
+            }
+
+            final converterConstant = typedPropertyAnnotation.peek('converter');
+            if (converterConstant != null) {
+              final scalarConverterClass = cblLibrary.exportNamespace
+                  .get('ScalarConverter')! as ClassElement;
+              final convertedType = converterConstant.objectValue.type!
+                  .asInstanceOf(scalarConverterClass)!
+                  .typeArguments
+                  .first;
+              scalarConverter = ScalarConverterInfo(
+                type: convertedType,
+                code: converterConstant.code,
+              );
+            }
+          }
+
+          final type = _resolveTypedDataType(
+            parameter,
+            propertyConverter: scalarConverter,
+          );
 
           final constructorParameter = ConstructorParameter(
             type: type,
@@ -334,10 +378,6 @@ class TypedDataAnalyzer {
             documentationComment: parameter.documentationCommentValue,
           );
 
-          final annotations = parameter.metadata
-              .map((annotation) => annotation.computeConstantValue())
-              .map(ConstantReader.new);
-
           final isDocumentId = _isDocumentIdField(parameter, annotations, kind);
           if (isDocumentId) {
             return TypedDataMetadataField(
@@ -346,24 +386,6 @@ class TypedDataAnalyzer {
               name: parameter.name,
               constructorParameter: constructorParameter,
             );
-          }
-
-          final typedPropertyAnnotation = annotations.firstWhereOrNull(
-            (annotation) => annotation.instanceOf(_typedPropertyType),
-          );
-          String? customProperty;
-          String? defaultValueCode;
-          if (typedPropertyAnnotation != null) {
-            final propertyConstant = typedPropertyAnnotation.read('property');
-            if (!propertyConstant.isNull) {
-              customProperty = propertyConstant.stringValue;
-            }
-
-            final defaultValueConstant =
-                typedPropertyAnnotation.read('defaultValue');
-            if (!defaultValueConstant.isNull) {
-              defaultValueCode = defaultValueConstant.stringValue;
-            }
           }
 
           return TypedDataObjectProperty(
@@ -444,31 +466,48 @@ class TypedDataAnalyzer {
     }
   }
 
-  TypedDataType _resolveTypedDataType(VariableElement element) {
+  TypedDataType _resolveTypedDataType(
+    VariableElement element, {
+    ScalarConverterInfo? propertyConverter,
+  }) {
     TypedDataType? resolve(DartType type) {
       final typeName = type.getDisplayString(withNullability: false);
       final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
 
-      if (isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
-        return BuiltinScalarType(
-          dartType: typeName,
-          isNullable: isNullable,
-        );
-      }
+      if (propertyConverter != null) {
+        if (TypeChecker.fromStatic(propertyConverter.type)
+            .isExactlyType(type)) {
+          return CustomScalarType(
+            dartType: typeName,
+            isNullable: isNullable,
+            converter: propertyConverter,
+          );
+        }
+      } else {
+        if (isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
+          return BuiltinScalarType(
+            dartType: typeName,
+            isNullable: isNullable,
+          );
+        }
 
-      if (_enumType.isAssignableFromType(type)) {
-        return CustomScalarType(
-          dartType: typeName,
-          isNullable: isNullable,
-          typeConverterCode: 'const EnumNameConverter($typeName.values)',
-        );
-      }
+        if (_enumType.isAssignableFromType(type)) {
+          return CustomScalarType(
+            dartType: typeName,
+            isNullable: isNullable,
+            converter: ScalarConverterInfo(
+              type: type,
+              code: 'const EnumNameConverter($typeName.values)',
+            ),
+          );
+        }
 
-      if (_isTypedDataObject(type)) {
-        return TypedDataObjectType(
-          dartType: typeName,
-          isNullable: isNullable,
-        );
+        if (_isTypedDataObject(type)) {
+          return TypedDataObjectType(
+            dartType: typeName,
+            isNullable: isNullable,
+          );
+        }
       }
 
       if (_listType.isExactlyType(type)) {
@@ -482,6 +521,7 @@ class TypedDataAnalyzer {
           elementType: resolvedElementType,
         );
       }
+
       return null;
     }
 
@@ -491,8 +531,18 @@ class TypedDataAnalyzer {
       return resolvedType;
     }
 
+    final typeName = type.getDisplayString(withNullability: false);
+
+    if (propertyConverter != null) {
+      throw InvalidGenerationSourceError(
+        '$typeName is not, nor contains as a type argument, a type that '
+        "is exactly the type of the property's converter.",
+        element: element,
+      );
+    }
+
     throw InvalidGenerationSourceError(
-      'Unsupported type: ${type.getDisplayString(withNullability: true)}',
+      'Unsupported type: $typeName',
       element: element,
     );
   }

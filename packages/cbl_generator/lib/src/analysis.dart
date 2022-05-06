@@ -1,9 +1,11 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
+import 'package:source_helper/source_helper.dart';
 
 bool classHasRedirectingUnnamedConstructor(
   AstNode clazz,
@@ -63,4 +65,59 @@ extension ParameterElementExt on ParameterElement {
           .beginToken
           .precedingComments
           ?.value();
+}
+
+extension ConstantReaderExt on ConstantReader {
+  String get code {
+    if (isNull) {
+      return 'null';
+    } else if (isBool) {
+      return boolValue.toString();
+    } else if (isString) {
+      return escapeDartString(stringValue);
+    } else if (isInt) {
+      return intValue.toString();
+    } else if (isDouble) {
+      return doubleValue.toString();
+    } else if (isSymbol) {
+      return symbolValue.toString();
+    } else if (isType) {
+      return typeValue.getDisplayString(withNullability: true);
+    } else if (isList) {
+      final elements = listValue.map((it) => '${it.code},').join();
+      return 'const [$elements]';
+    } else if (isSet) {
+      final elements = setValue.map((it) => '${it.code},').join();
+      return 'const {$elements}';
+    } else if (isMap) {
+      final entries = mapValue.entries
+          .map((it) => '${it.key!.code}: ${it.value!.code},')
+          .join();
+      return 'const {$entries}';
+    } else {
+      final revivable = revive();
+      if (revivable.source.fragment.isEmpty) {
+        return revivable.accessor;
+      }
+      final code = StringBuffer(' const ${revivable.source.fragment}');
+      if (revivable.accessor.isNotEmpty) {
+        code
+          ..write('.')
+          ..write(revivable.accessor);
+      }
+      code.write('(');
+      for (final parameter in revivable.positionalArguments) {
+        code.write('${parameter.code}, ');
+      }
+      for (final parameter in revivable.namedArguments.entries) {
+        code.write('${parameter.key}: ${parameter.value.code}, ');
+      }
+      code.write(')');
+      return code.toString();
+    }
+  }
+}
+
+extension DartObjectExt on DartObject {
+  String get code => ConstantReader(this).code;
 }

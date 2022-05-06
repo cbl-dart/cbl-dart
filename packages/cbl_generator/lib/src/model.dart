@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/element/type.dart';
 import 'package:cbl/cbl.dart';
 import 'package:collection/collection.dart';
 
@@ -177,7 +178,7 @@ class CustomScalarType extends TypedDataType {
   CustomScalarType({
     required String dartType,
     required bool isNullable,
-    required this.typeConverterCode,
+    required this.converter,
   }) : super(
           dartType: dartType,
           mutableDartType: dartType,
@@ -185,7 +186,14 @@ class CustomScalarType extends TypedDataType {
           isCached: false,
         );
 
-  final String typeConverterCode;
+  final ScalarConverterInfo converter;
+}
+
+class ScalarConverterInfo {
+  ScalarConverterInfo({required this.type, required this.code});
+
+  final DartType type;
+  final String code;
 }
 
 class TypedDataObjectType extends TypedDataType {

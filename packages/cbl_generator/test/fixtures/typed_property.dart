@@ -17,3 +17,24 @@ abstract class DefaultValueDict with _$DefaultValueDict {
     @TypedProperty(defaultValue: 'true') bool value,
   ]) = MutableDefaultValueDict;
 }
+
+class TestConverter extends ScalarConverter<Uri> {
+  const TestConverter();
+  @override
+  Uri fromData(Object value) {
+    if (value is! String) {
+      throw UnexpectedTypeException(value: value, expectedTypes: [String]);
+    }
+    return Uri.parse(value);
+  }
+
+  @override
+  Object toData(Uri value) => value.toString();
+}
+
+@TypedDictionary()
+abstract class ScalarConverterDict with _$ScalarConverterDict {
+  factory ScalarConverterDict(
+    @TypedProperty(converter: TestConverter()) Uri value,
+  ) = MutableScalarConverterDict;
+}

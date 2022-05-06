@@ -26,4 +26,11 @@ void main() {
     expect(DefaultValueDict(true).value, isTrue);
     expect(DefaultValueDict(false).value, isFalse);
   });
+
+  test('converter', () {
+    expect(
+      ScalarConverterDict(Uri.parse('http://example.com')).value,
+      Uri.parse('http://example.com'),
+    );
+  });
 }

@@ -14,6 +14,7 @@ export 'typed_data/conversion.dart'
         UnexpectedTypeException,
         TypedDictionaryConverter,
         TypedListConverter,
+        ScalarConverter,
         ScalarConverterAdapter,
         EnumIndexConverter,
         EnumNameConverter;

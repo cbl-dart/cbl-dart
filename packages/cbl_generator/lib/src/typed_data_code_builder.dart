@@ -432,7 +432,7 @@ set ${property.name}(${type.dartTypeWithNullability} value) {
     if (type is BuiltinScalarType) {
       return 'InternalTypedDataHelpers.${type.dartType.decapitalized}Converter';
     } else if (type is CustomScalarType) {
-      return 'const ScalarConverterAdapter(${type.typeConverterCode},)';
+      return 'const ScalarConverterAdapter(${type.converter.code},)';
     } else if (type is TypedDataObjectType) {
       final classNames = type.classNames;
       final internalClass = forMutable ? 'MutableDictionary' : 'Dictionary';

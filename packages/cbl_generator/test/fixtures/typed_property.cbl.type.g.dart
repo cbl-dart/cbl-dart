@@ -162,3 +162,87 @@ class MutableDefaultValueDict
     );
   }
 }
+
+mixin _$ScalarConverterDict
+    implements TypedDictionaryObject<MutableScalarConverterDict> {
+  Uri get value;
+}
+
+abstract class _ScalarConverterDictImplBase<I extends Dictionary>
+    with _$ScalarConverterDict
+    implements ScalarConverterDict {
+  _ScalarConverterDictImplBase(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  Uri get value => InternalTypedDataHelpers.readProperty(
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        converter: const ScalarConverterAdapter(
+          const TestConverter(),
+        ),
+      );
+
+  @override
+  MutableScalarConverterDict toMutable() =>
+      MutableScalarConverterDict.internal(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+        indent: indent,
+        className: 'ScalarConverterDict',
+        fields: {
+          'value': value,
+        },
+      );
+}
+
+/// DO NOT USE: Internal implementation detail, which might be changed or
+/// removed in the future.
+class ImmutableScalarConverterDict extends _ScalarConverterDictImplBase {
+  ImmutableScalarConverterDict.internal(Dictionary internal) : super(internal);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScalarConverterDict &&
+          runtimeType == other.runtimeType &&
+          internal == other.internal;
+
+  @override
+  int get hashCode => internal.hashCode;
+}
+
+/// Mutable version of [ScalarConverterDict].
+class MutableScalarConverterDict
+    extends _ScalarConverterDictImplBase<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<ScalarConverterDict,
+            MutableScalarConverterDict> {
+  /// Creates a new mutable [ScalarConverterDict].
+  MutableScalarConverterDict(
+    Uri value,
+  ) : super(MutableDictionary()) {
+    this.value = value;
+  }
+
+  MutableScalarConverterDict.internal(MutableDictionary internal)
+      : super(internal);
+
+  set value(Uri value) {
+    final promoted = const ScalarConverterAdapter(
+      const TestConverter(),
+    ).promote(value);
+    InternalTypedDataHelpers.writeProperty(
+      internal: internal,
+      key: 'value',
+      value: promoted,
+      converter: const ScalarConverterAdapter(
+        const TestConverter(),
+      ),
+    );
+  }
+}

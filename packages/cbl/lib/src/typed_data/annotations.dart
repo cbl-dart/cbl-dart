@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
 
 import '../document.dart';
+import 'conversion.dart';
 
 /// Annotation for classes that declare a statically typed [Dictionary].
 @Target({TargetKind.classType})
@@ -83,7 +84,11 @@ class DocumentRevisionId {
 
 @Target({TargetKind.parameter})
 class TypedProperty {
-  const TypedProperty({this.property, this.defaultValue});
+  const TypedProperty({
+    this.property,
+    this.defaultValue,
+    this.converter,
+  });
 
   /// The name of the property in the underlying data.
   ///
@@ -92,6 +97,10 @@ class TypedProperty {
 
   /// The Dart code of the default value for the property.
   final String? defaultValue;
+
+  /// Converter for converting between the underlying data and the value of the
+  /// property.
+  final ScalarConverter? converter;
 }
 
 @Target({TargetKind.classType})
