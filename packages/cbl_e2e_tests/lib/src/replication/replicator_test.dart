@@ -225,11 +225,11 @@ void main() {
     apiTest('use typedPushFilter to filter pushed documents', () async {
       final pushDb = await openTestDatabase(
         name: 'Push',
-        typedDataRegistry: testRegistry,
+        typedDataAdapter: testAdapter,
       );
       final pullDb = await openTestDatabase(
         name: 'Pull',
-        typedDataRegistry: testRegistry,
+        typedDataAdapter: testAdapter,
       );
 
       final docA = MutableTestTypedDoc();
@@ -329,11 +329,11 @@ void main() {
     apiTest('use typedPullFilter to filter pulled documents', () async {
       final pushDb = await openTestDatabase(
         name: 'Push',
-        typedDataRegistry: testRegistry,
+        typedDataAdapter: testAdapter,
       );
       final pullDb = await openTestDatabase(
         name: 'Pull',
-        typedDataRegistry: testRegistry,
+        typedDataAdapter: testAdapter,
       );
 
       final docA = MutableTestTypedDoc();
@@ -444,7 +444,7 @@ void main() {
 
       final dbA = await openTestDatabase(
         name: 'A',
-        typedDataRegistry: testRegistry,
+        typedDataAdapter: testAdapter,
       );
       final replicatorA = await dbA.createTestReplicator(
         typedConflictResolver: expectAsync1((conflict) {
@@ -739,7 +739,7 @@ class MutableTestTypedDoc extends TestTypedDoc<MutableDocument>
       : super(document ?? MutableDocument());
 }
 
-final testRegistry = TypedDataRegistry(
+final testAdapter = TypedDataRegistry(
   types: [
     TypedDocumentMetadata<TestTypedDoc, MutableTestTypedDoc>(
       dartName: 'TestTypedDoc',

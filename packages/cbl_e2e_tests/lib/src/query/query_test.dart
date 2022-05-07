@@ -264,7 +264,7 @@ SELECT foo()
       });
 
       apiTest('throws if dictionary type is not recognized', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
@@ -276,7 +276,7 @@ SELECT foo()
       });
 
       apiTest('emits typed dictionaries', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument();
         await db.saveDocument(doc);
         final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
@@ -302,7 +302,7 @@ SELECT foo()
       });
 
       apiTest('throws if dictionary type is not recognized', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
@@ -314,7 +314,7 @@ SELECT foo()
       });
 
       apiTest('returns typed dictionaries', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument();
         await db.saveDocument(doc);
         final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
@@ -340,7 +340,7 @@ SELECT foo()
       });
 
       test('throws if dictionary type is not recognized', () {
-        final db = openSyncTestDatabase(typedDataRegistry: testRegistry);
+        final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
         final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
         final resultSet = query.execute();
         expect(
@@ -352,7 +352,7 @@ SELECT foo()
       });
 
       test('iterates over typed dictionaries', () {
-        final db = openSyncTestDatabase(typedDataRegistry: testRegistry);
+        final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument();
         db.saveDocument(doc);
         final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
@@ -410,7 +410,7 @@ class TestTypedDict2 implements TypedDictionaryObject<MutableTestTypedDoc> {
   String toString({String? indent}) => super.toString();
 }
 
-final testRegistry = TypedDataRegistry(
+final testAdapter = TypedDataRegistry(
   types: [
     TypedDictionaryMetadata<TestTypedDict, MutableTestTypedDoc>(
       dartName: 'TestTypedDict',

@@ -63,20 +63,20 @@ FutureOr<Database> openTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
-  TypedDataRegistry? typedDataRegistry,
+  TypedDataAdapter? typedDataAdapter,
 }) =>
     runWithApi(
       sync: () => openSyncTestDatabase(
         name: name,
         config: config,
         tearDown: tearDown,
-        typedDataRegistry: typedDataRegistry,
+        typedDataAdapter: typedDataAdapter,
       ),
       async: () => openAsyncTestDatabase(
         name: name,
         config: config,
         tearDown: tearDown,
-        typedDataRegistry: typedDataRegistry,
+        typedDataAdapter: typedDataAdapter,
         isolate: isolate.value,
       ),
     );
@@ -85,15 +85,15 @@ SyncDatabase openSyncTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
-  TypedDataRegistry? typedDataRegistry,
+  TypedDataAdapter? typedDataAdapter,
 }) {
   config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
   // Ensure directory exists.
   File(config.directory).parent.createSync(recursive: true);
 
-  final db = typedDataRegistry != null
-      ? SyncDatabase.internal(name, config, typedDataRegistry)
+  final db = typedDataAdapter != null
+      ? SyncDatabase.internal(name, config, typedDataAdapter)
       : SyncDatabase(name, config);
 
   if (tearDown) {
@@ -107,7 +107,7 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
-  TypedDataRegistry? typedDataRegistry,
+  TypedDataAdapter? typedDataAdapter,
   Isolate isolate = Isolate.worker,
   bool? usePublicApi,
 }) async {
@@ -120,14 +120,14 @@ Future<AsyncDatabase> openAsyncTestDatabase({
 
   final AsyncDatabase db;
   if (usePublicApi == true) {
-    db = await (typedDataRegistry != null
-        ? AsyncDatabase.openInternal(name, config, typedDataRegistry)
+    db = await (typedDataAdapter != null
+        ? AsyncDatabase.openInternal(name, config, typedDataAdapter)
         : AsyncDatabase.open(name, config));
   } else {
     db = await ProxyDatabase.open(
       name: name,
       config: config,
-      typedDataRegistry: typedDataRegistry,
+      typedDataAdapter: typedDataAdapter,
       client: _sharedIsolateClient(isolate),
       encodingFormat:
           // To cover both transferring encoded data and Fleece values we use

@@ -15,7 +15,7 @@ import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../tracing.dart';
 import '../typed_data.dart';
-import '../typed_data_internal.dart';
+import '../typed_data/adapter.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -505,14 +505,14 @@ abstract class SyncDatabase implements Database {
   factory SyncDatabase.internal(
     String name, [
     DatabaseConfiguration? config,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
   ]) =>
       syncOperationTracePoint(
         () => OpenDatabaseOp(name, config),
         () => FfiDatabase(
           name: name,
           config: config,
-          typedDataRegistry: typedDataRegistry,
+          typedDataAdapter: typedDataAdapter,
           debugCreator: 'SyncDatabase.internal()',
         ),
       );
@@ -661,11 +661,11 @@ abstract class AsyncDatabase implements Database {
   static Future<AsyncDatabase> openInternal(
     String name, [
     DatabaseConfiguration? config,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
   ]) =>
       asyncOperationTracePoint(
         () => OpenDatabaseOp(name, config),
-        () => WorkerDatabase.open(name, config, typedDataRegistry),
+        () => WorkerDatabase.open(name, config, typedDataAdapter),
       );
 
   /// {@macro cbl.Database.remove}

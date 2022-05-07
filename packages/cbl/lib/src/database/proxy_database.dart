@@ -26,7 +26,7 @@ import '../support/tracing.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import '../typed_data.dart';
-import '../typed_data_internal.dart';
+import '../typed_data/adapter.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_base.dart';
@@ -41,7 +41,7 @@ class ProxyDatabase extends ProxyObject
   ProxyDatabase(
     this.client,
     DatabaseConfiguration config,
-    this.typedDataRegistry,
+    this.typedDataAdapter,
     this.state,
     this.encodingFormat,
   )   : name = state.name,
@@ -76,21 +76,21 @@ class ProxyDatabase extends ProxyObject
     required String name,
     required DatabaseConfiguration config,
     required CblServiceClient client,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
     required EncodingFormat? encodingFormat,
   }) async {
     final state = await client.channel.call(OpenDatabase(name, config));
     return ProxyDatabase(
       client,
       config,
-      typedDataRegistry,
+      typedDataAdapter,
       state,
       encodingFormat,
     );
   }
 
   @override
-  final TypedDataRegistry? typedDataRegistry;
+  final TypedDataAdapter? typedDataAdapter;
 
   @override
   final dictKeys = OptimizingDictKeys();
@@ -463,14 +463,14 @@ class WorkerDatabase extends ProxyDatabase {
     this.worker,
     CblServiceClient client,
     DatabaseConfiguration config,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
     DatabaseState state,
-  ) : super(client, config, typedDataRegistry, state, null);
+  ) : super(client, config, typedDataAdapter, state, null);
 
   static Future<WorkerDatabase> open(
     String name, [
     DatabaseConfiguration? config,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
   ]) async {
     config ??= DatabaseConfiguration();
 
@@ -485,7 +485,7 @@ class WorkerDatabase extends ProxyDatabase {
 
     try {
       final state = await client.channel.call(OpenDatabase(name, config));
-      return WorkerDatabase._(worker, client, config, typedDataRegistry, state);
+      return WorkerDatabase._(worker, client, config, typedDataAdapter, state);
     } on CouchbaseLiteException {
       await client.channel.call(UninstallTracingDelegate());
       await worker.stop();
@@ -531,15 +531,15 @@ class RemoteDatabase extends ProxyDatabase {
   RemoteDatabase._(
     CblServiceClient client,
     DatabaseConfiguration config,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
     DatabaseState state,
-  ) : super(client, config, typedDataRegistry, state, EncodingFormat.fleece);
+  ) : super(client, config, typedDataAdapter, state, EncodingFormat.fleece);
 
   static Future<RemoteDatabase> open(
     Uri uri,
     String name,
     DatabaseConfiguration config, [
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
   ]) async {
     final channel = Channel(
       transport: WebSocketChannel.connect(uri),
@@ -548,7 +548,7 @@ class RemoteDatabase extends ProxyDatabase {
     );
     final client = CblServiceClient(channel: channel);
     final state = await channel.call(OpenDatabase(name, config));
-    return RemoteDatabase._(client, config, typedDataRegistry, state);
+    return RemoteDatabase._(client, config, typedDataAdapter, state);
   }
 
   @override

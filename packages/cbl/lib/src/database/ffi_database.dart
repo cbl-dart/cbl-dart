@@ -24,7 +24,7 @@ import '../support/tracing.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import '../typed_data.dart';
-import '../typed_data_internal.dart';
+import '../typed_data/adapter.dart';
 import 'blob_store.dart';
 import 'database.dart';
 import 'database_base.dart';
@@ -41,7 +41,7 @@ class FfiDatabase extends CBLDatabaseObject
   factory FfiDatabase({
     required String name,
     DatabaseConfiguration? config,
-    TypedDataRegistry? typedDataRegistry,
+    TypedDataAdapter? typedDataAdapter,
     required String debugCreator,
   }) {
     config ??= DatabaseConfiguration();
@@ -55,7 +55,7 @@ class FfiDatabase extends CBLDatabaseObject
       pointer: runWithErrorTranslation(
         () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
       ),
-      typedDataRegistry: typedDataRegistry,
+      typedDataAdapter: typedDataAdapter,
       debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
   }
@@ -63,7 +63,7 @@ class FfiDatabase extends CBLDatabaseObject
   FfiDatabase._({
     required DatabaseConfiguration config,
     required Pointer<CBLDatabase> pointer,
-    required this.typedDataRegistry,
+    required this.typedDataAdapter,
     required String debugName,
   })  : _config = config,
         super(pointer, debugName: debugName) {
@@ -95,7 +95,7 @@ class FfiDatabase extends CBLDatabaseObject
       );
 
   @override
-  final TypedDataRegistry? typedDataRegistry;
+  final TypedDataAdapter? typedDataAdapter;
 
   @override
   final dictKeys = OptimizingDictKeys();

@@ -26,7 +26,7 @@ void main() {
       });
 
       apiTest('with concurrency control', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
 
         expect(
@@ -38,7 +38,7 @@ void main() {
 
       group('with conflict handler', () {
         apiTest('no conflict', () async {
-          final db = await openTestDatabase(typedDataRegistry: testRegistry);
+          final db = await openTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableTestDocA();
 
           expect(
@@ -54,7 +54,7 @@ void main() {
         });
 
         apiTest('resolving to abort save', () async {
-          final db = await openTestDatabase(typedDataRegistry: testRegistry);
+          final db = await openTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableTestDocA();
           await db.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
@@ -80,7 +80,7 @@ void main() {
         });
 
         apiTest('resolving to retry save', () async {
-          final db = await openTestDatabase(typedDataRegistry: testRegistry);
+          final db = await openTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableTestDocA();
           await db.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
@@ -108,7 +108,7 @@ void main() {
 
       group('with sync conflict handler', () {
         test('no conflict', () {
-          final db = openSyncTestDatabase(typedDataRegistry: testRegistry);
+          final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableTestDocA();
 
           expect(
@@ -124,7 +124,7 @@ void main() {
         });
 
         apiTest('resolving to abort save', () {
-          final db = openSyncTestDatabase(typedDataRegistry: testRegistry);
+          final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableTestDocA();
           db.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
@@ -150,7 +150,7 @@ void main() {
         });
 
         apiTest('resolving to retry save', () {
-          final db = openSyncTestDatabase(typedDataRegistry: testRegistry);
+          final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableTestDocA();
           db.saveTypedDocument(doc).withConcurrencyControl();
           final conflictingDoc = doc.toMutable();
@@ -191,14 +191,14 @@ void main() {
       });
 
       apiTest('document does not exist', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
 
         final loadedDoc = await db.typedDocument<TestDocA>('a');
         expect(loadedDoc, isNull);
       });
 
       apiTest('load immutable doc with static type', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
         await db.saveTypedDocument(doc).withConcurrencyControl();
 
@@ -210,7 +210,7 @@ void main() {
       });
 
       apiTest('load mutable doc with static type', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
         await db.saveTypedDocument(doc).withConcurrencyControl();
 
@@ -223,7 +223,7 @@ void main() {
       });
 
       apiTest('load immutable doc with dynamic type', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
         await db.saveTypedDocument(doc).withConcurrencyControl();
 
@@ -234,7 +234,7 @@ void main() {
       });
 
       apiTest('load mutable doc with dynamic type', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
         await db.saveTypedDocument(doc).withConcurrencyControl();
 
@@ -245,7 +245,7 @@ void main() {
       });
 
       apiTest('loaded document fails type check', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument({'type': 'WrongType'});
         await db.saveDocument(doc);
 
@@ -264,7 +264,7 @@ void main() {
       });
 
       apiTest('loaded document matches incorrect type check', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument({'type': 'TestDocB'});
         await db.saveDocument(doc);
 
@@ -285,7 +285,7 @@ void main() {
       apiTest(
         'loaded document matches type check(s) for type without type matcher',
         () async {
-          final db = await openTestDatabase(typedDataRegistry: testRegistry);
+          final db = await openTestDatabase(typedDataAdapter: testAdapter);
           final doc = MutableDocument({'type': 'TestDocA'});
           await db.saveDocument(doc);
 
@@ -320,7 +320,7 @@ void main() {
       });
 
       apiTest('deletes document', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
         await db.saveTypedDocument(doc).withConcurrencyControl();
 
@@ -344,7 +344,7 @@ void main() {
       });
 
       apiTest('purges document', () async {
-        final db = await openTestDatabase(typedDataRegistry: testRegistry);
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableTestDocA();
         await db.saveTypedDocument(doc).withConcurrencyControl();
 
@@ -422,7 +422,7 @@ class MutableTestDocWithoutTypeMatcher
       : super(document ?? MutableDocument());
 }
 
-final testRegistry = TypedDataRegistry(
+final testAdapter = TypedDataRegistry(
   types: [
     TypedDocumentMetadata<TestDocA, MutableTestDocA>(
       dartName: 'TestDocA',

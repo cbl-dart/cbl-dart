@@ -21,7 +21,7 @@ class TypeDataBaseCodeBuilder {
     _code.writeln('DatabaseConfiguration? config,');
     _code.writeln(']) =>');
     _code.writeln('    // ignore: invalid_use_of_internal_member');
-    _code.writeln('AsyncDatabase.openInternal(name, config, _registry);');
+    _code.writeln('AsyncDatabase.openInternal(name, config, _adapter);');
     _code.writeln();
 
     _code.writeln('static SyncDatabase openSync(');
@@ -29,10 +29,10 @@ class TypeDataBaseCodeBuilder {
     _code.writeln('DatabaseConfiguration? config,');
     _code.writeln(']) =>');
     _code.writeln('    // ignore: invalid_use_of_internal_member');
-    _code.writeln('SyncDatabase.internal(name, config, _registry);');
+    _code.writeln('SyncDatabase.internal(name, config, _adapter);');
     _code.writeln();
 
-    _code.writeln('static final _registry = TypedDataRegistry(');
+    _code.writeln('static final _adapter = TypedDataRegistry(');
 
     _code.writeln('types: [');
 

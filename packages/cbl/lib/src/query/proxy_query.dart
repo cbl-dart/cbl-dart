@@ -229,10 +229,10 @@ class ProxyResultSet extends AsyncResultSet {
 
   @override
   Stream<D> asTypedStream<D extends TypedDictionaryObject>() {
-    final registry = _query.database!.useWithTypedData();
+    final adapter = _query.database!.useWithTypedData();
     return _asStream()
         .map((result) => result.asDictionary)
-        .map(registry.resolveDictionaryFactory<D>());
+        .map(adapter.dictionaryFactoryForType<D>());
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:meta/meta.dart' as meta;
 
 import '../document.dart';
 import '../errors.dart';
+import 'adapter.dart';
 import 'annotations.dart';
 import 'conversion.dart';
 import 'typed_object.dart';
@@ -526,8 +527,6 @@ mixin TypedDataListToString<T> on List<T> {
 
 // === Typed data model ========================================================
 
-typedef Factory<I, D> = D Function(I internal);
-
 abstract class TypedDataMetadata<I, MI, D, MD> {
   TypedDataMetadata({
     required this.dartName,
@@ -589,7 +588,7 @@ class TypedDocumentMetadata<D, MD>
         );
 }
 
-class TypedDataRegistry {
+class TypedDataRegistry extends TypedDataAdapter {
   TypedDataRegistry({
     Iterable<TypedDataMetadata> types = const [],
   })  : _types = List.unmodifiable(types),
@@ -620,8 +619,9 @@ class TypedDataRegistry {
   final Map<Type, Factory<Document, Object>?> _mutableDocumentFactoryCache =
       HashMap.identity();
 
+  @override
   Factory<Dictionary, D>
-      resolveDictionaryFactory<D extends TypedDictionaryObject>() {
+      dictionaryFactoryForType<D extends TypedDictionaryObject>() {
     final dictionaryFactory = _dictionaryFactoryFor<D>();
     if (dictionaryFactory != null) {
       return dictionaryFactory;
@@ -630,13 +630,8 @@ class TypedDataRegistry {
     throw _unknownTypeError(D);
   }
 
-  Factory<Document, D> resolveDocumentFactory<D extends TypedDocumentObject>() {
-    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
-      final dynamicFactory =
-          dynamicDocumentFactory<D>(allowUnmatchedDocument: false);
-      return (document) => dynamicFactory(document)!;
-    }
-
+  @override
+  Factory<Document, D> documentFactoryForType<D extends TypedDocumentObject>() {
     final documentFactory = _documentFactoryFor<D>();
     if (documentFactory != null) {
       return documentFactory;
@@ -650,49 +645,48 @@ class TypedDataRegistry {
     throw _unknownTypeError(D);
   }
 
-  Factory<Document, D?> dynamicDocumentFactory<D extends TypedDocumentObject>({
+  @override
+  Factory<Document, D?>
+      dynamicDocumentFactoryForType<D extends TypedDocumentObject>({
     bool allowUnmatchedDocument = true,
   }) =>
-      (document) {
-        final matchedMetadata =
-            _documentMetadataByTypedMatcher(document).toList();
-        if (matchedMetadata.isNotEmpty) {
-          if (matchedMetadata.length > 1) {
-            final matchedTypeNames =
-                matchedMetadata.map((metadata) => metadata.dartName).toList();
-            throw TypedDataException(
-              'Unable to resolve a document type because multiple document '
-              'types matched the document: $matchedTypeNames',
-              TypedDataErrorCode.unresolvableType,
-            );
-          }
+          (document) {
+            final matchedMetadata =
+                _documentMetadataByTypedMatcher(document).toList();
+            if (matchedMetadata.isNotEmpty) {
+              if (matchedMetadata.length > 1) {
+                final matchedTypeNames = matchedMetadata
+                    .map((metadata) => metadata.dartName)
+                    .toList();
+                throw TypedDataException(
+                  'Unable to resolve a document type because multiple document '
+                  'types matched the document: $matchedTypeNames',
+                  TypedDataErrorCode.unresolvableType,
+                );
+              }
 
-          final metadata = matchedMetadata.first;
-          if (D == TypedDocumentObject) {
-            return metadata.factory(document) as D;
-          } else {
-            assert(D == TypedMutableDocumentObject);
-            return metadata.mutableFactory(document.toMutable()) as D;
-          }
-        } else {
-          if (allowUnmatchedDocument) {
-            return null;
-          } else {
-            throw TypedDataException(
-              'Unable to resolve a document type because no document types '
-              'matched the document.',
-              TypedDataErrorCode.unresolvableType,
-            );
-          }
-        }
-      };
+              final metadata = matchedMetadata.first;
+              if (D == TypedDocumentObject) {
+                return metadata.factory(document) as D;
+              } else {
+                assert(D == TypedMutableDocumentObject);
+                return metadata.mutableFactory(document.toMutable()) as D;
+              }
+            } else {
+              if (allowUnmatchedDocument) {
+                return null;
+              } else {
+                throw TypedDataException(
+                  'Unable to resolve a document type because no document types '
+                  'matched the document.',
+                  TypedDataErrorCode.unresolvableType,
+                );
+              }
+            }
+          };
 
-  void checkDocumentType<D extends TypedDocumentObject>(Document doc) {
-    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
-      // User is not specifying a concrete type, so we don't need to do a check.
-      return;
-    }
-
+  @override
+  void checkDocumentIsOfType<D extends TypedDocumentObject>(Document doc) {
     final metadata =
         _documentMetadataForType[D] ?? _documentMetadataForMutableType[D];
     if (metadata == null) {
@@ -730,7 +724,12 @@ class TypedDataRegistry {
     }
   }
 
-  void prepareDocumentForSave(TypedMutableDocumentObject document) {
+  @override
+  void willSaveDocument(TypedMutableDocumentObject document) {
+    _applyTypeMatcherToDocument(document);
+  }
+
+  void _applyTypeMatcherToDocument(TypedMutableDocumentObject document) {
     final metadata = _documentMetadataForMutableType[document.runtimeType];
     if (metadata == null) {
       throw _unknownTypeError(document.runtimeType);

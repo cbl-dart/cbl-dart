@@ -6,7 +6,7 @@ import '../database/database_base.dart';
 import '../document.dart';
 import '../support/utils.dart';
 import '../typed_data.dart';
-import '../typed_data_internal.dart';
+import '../typed_data/adapter.dart';
 import 'authenticator.dart';
 import 'conflict.dart';
 import 'conflict_resolver.dart';
@@ -322,33 +322,33 @@ extension InternalReplicatorConfiguration on ReplicatorConfiguration {
   ReplicationFilter? get combinedPushFilter => combineReplicationFilters(
         pushFilter,
         typedPushFilter,
-        (database as DatabaseBase).typedDataRegistry,
+        (database as DatabaseBase).typedDataAdapter,
       );
 
   ReplicationFilter? get combinedPullFilter => combineReplicationFilters(
         pullFilter,
         typedPullFilter,
-        (database as DatabaseBase).typedDataRegistry,
+        (database as DatabaseBase).typedDataAdapter,
       );
 
   ConflictResolver? get combinedConflictResolver => combineConflictResolvers(
         conflictResolver,
         typedConflictResolver,
-        (database as DatabaseBase).typedDataRegistry,
+        (database as DatabaseBase).typedDataAdapter,
       );
 }
 
 ReplicationFilter? combineReplicationFilters(
   ReplicationFilter? filter,
   TypedReplicationFilter? typedFilter,
-  TypedDataRegistry? registry,
+  TypedDataAdapter? adapter,
 ) {
   if (typedFilter == null) {
     return filter;
   }
 
-  final factory =
-      registry!.dynamicDocumentFactory(allowUnmatchedDocument: filter != null);
+  final factory = adapter!
+      .dynamicDocumentFactoryForType(allowUnmatchedDocument: filter != null);
 
   return (document, flags) {
     final typedDocument = factory(document);
@@ -368,13 +368,13 @@ ReplicationFilter? combineReplicationFilters(
 ConflictResolver? combineConflictResolvers(
   ConflictResolver? conflictResolver,
   TypedConflictResolver? typedConflictResolver,
-  TypedDataRegistry? registry,
+  TypedDataAdapter? adapter,
 ) {
   if (typedConflictResolver == null) {
     return conflictResolver;
   }
 
-  final factory = registry!.dynamicDocumentFactory(
+  final factory = adapter!.dynamicDocumentFactoryForType(
     allowUnmatchedDocument: conflictResolver != null,
   );
 

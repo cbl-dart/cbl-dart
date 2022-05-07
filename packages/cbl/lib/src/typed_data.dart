@@ -11,13 +11,15 @@ export 'typed_data/annotations.dart'
         ValueTypeMatcher;
 export 'typed_data/conversion.dart'
     show
+        ScalarConverter,
+        EnumIndexConverter,
+        EnumNameConverter,
         UnexpectedTypeException,
+        // Start internal exports
         TypedDictionaryConverter,
         TypedListConverter,
-        ScalarConverter,
-        ScalarConverterAdapter,
-        EnumIndexConverter,
-        EnumNameConverter;
+        ScalarConverterAdapter;
+// End internal exports
 export 'typed_data/runtime_support.dart' show InternalTypedDataHelpers;
 export 'typed_data/typed_object.dart'
     show

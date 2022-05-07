@@ -1,4 +1,5 @@
 import '../document.dart';
+import 'adapter.dart';
 import 'runtime_support.dart';
 import 'typed_object.dart';
 

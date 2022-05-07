@@ -8,27 +8,27 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../support/utils.dart';
 import '../typed_data.dart';
-import '../typed_data_internal.dart';
+import '../typed_data/adapter.dart';
 import 'database.dart';
 
 /// Base that is mixed into all implementations of [Database].
 mixin DatabaseBase<T extends DocumentDelegate> implements Database {
-  /// The [TypedDataRegistry] of this database, if it is a typed database.
+  /// The [TypedDataAdapter] of this database, if it is a typed database.
   ///
   /// It is configured with the types that are supported by this database.
   ///
-  /// To safely access the registry, you can use [useWithTypedData].
-  TypedDataRegistry? get typedDataRegistry;
+  /// To safely access the adapter, you can use [useWithTypedData].
+  TypedDataAdapter? get typedDataAdapter;
 
-  TypedDataRegistry useWithTypedData() {
-    final registry = typedDataRegistry;
-    if (registry == null) {
+  TypedDataAdapter useWithTypedData() {
+    final adapter = typedDataAdapter;
+    if (adapter == null) {
       throw TypedDataException(
         'The database does not support typed data.',
         TypedDataErrorCode.typedDataNotSupported,
       );
     }
-    return registry;
+    return adapter;
   }
 
   /// The [DictKey]s that should be used when looking up properties in
@@ -162,21 +162,34 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 
   @override
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) {
-    final typedDataRegistry = useWithTypedData();
+    final adapter = useWithTypedData();
 
     // We resolve the factory before loading the actual document to check that
     // D is a recognized type early.
-    final documentFactory = typedDataRegistry.resolveDocumentFactory<D>();
+    final Factory<Document, D> factory;
+    final bool isDynamic;
+    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
+      final dynamicFactory = adapter.dynamicDocumentFactoryForType<D>(
+        allowUnmatchedDocument: false,
+      );
+      factory = (document) => dynamicFactory(document)!;
+      isDynamic = true;
+    } else {
+      factory = adapter.documentFactoryForType<D>();
+      isDynamic = false;
+    }
 
     return document(id).then((doc) {
       if (doc == null) {
         return null;
       }
 
-      // Check that the loaded document is of the correct type.
-      typedDataRegistry.checkDocumentType<D>(doc);
+      if (!isDynamic) {
+        // Check that the loaded document is of the correct type.
+        adapter.checkDocumentIsOfType<D>(doc);
+      }
 
-      return documentFactory(doc);
+      return factory(doc);
     });
   }
 
@@ -327,7 +340,7 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
         // By calling useWithTypedData we also assert that database supports
         // typed data.
         _documentFactory =
-            database.useWithTypedData().resolveDocumentFactory<D>();
+            database.useWithTypedData().documentFactoryForType<D>();
 
   final DatabaseBase database;
   final TypedMutableDocumentObject<D, MD> document;
@@ -337,7 +350,7 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
   FutureOr<bool> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) {
-    database.typedDataRegistry!.prepareDocumentForSave(document);
+    database.typedDataAdapter!.willSaveDocument(document);
     return database.saveDocument(
       document.internal as MutableDelegateDocument,
       concurrencyControl,
@@ -346,7 +359,7 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
 
   @override
   FutureOr<bool> withConflictHandler(TypedSaveConflictHandler<D, MD> handler) {
-    database.typedDataRegistry!.prepareDocumentForSave(document);
+    database.typedDataAdapter!.willSaveDocument(document);
     return database.saveDocumentWithConflictHandlerHelper(
       document.internal as MutableDelegateDocument,
       (documentBeingSaved, conflictingDocument) {

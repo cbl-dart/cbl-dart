@@ -192,11 +192,11 @@ void main() {
       group('typed filter', () {
         group('with unresolvable type', () {
           test('throw exception', () {
-            final registry = TypedDataRegistry();
+            final adapter = TypedDataRegistry();
             final combinedFilter = combineReplicationFilters(
               null,
               (document, flags) => true,
-              registry,
+              adapter,
             )!;
             expect(
               () => combinedFilter(MutableDocument(), {}),
@@ -209,14 +209,14 @@ void main() {
 
           test('use untyped filter as fallback', () {
             final doc = MutableDocument();
-            final registry = TypedDataRegistry();
+            final adapter = TypedDataRegistry();
             final combinedFilter = combineReplicationFilters(
               expectAsync2((document, flags) {
                 expect(document, doc);
                 return true;
               }),
               (document, flags) => true,
-              registry,
+              adapter,
             )!;
             expect(combinedFilter(doc, {}), isTrue);
           });
@@ -237,13 +237,13 @@ void main() {
       group('typed conflict resolver', () {
         group('with unresolved type', () {
           test('throw exception', () {
-            final registry = TypedDataRegistry();
+            final adapter = TypedDataRegistry();
 
             void expectResolverThrows(Conflict conflict) {
               final combinedFilter = combineConflictResolvers(
                 null,
                 TypedConflictResolver.from((conflict) => null),
-                registry,
+                adapter,
               )!;
               expect(
                 () => combinedFilter.resolve(conflict),
@@ -273,13 +273,13 @@ void main() {
           });
 
           test('use untyped filter as fallback', () {
-            final registry = TypedDataRegistry();
+            final adapter = TypedDataRegistry();
 
             void expectUsesUntypedResolver(Conflict conflict) {
               final combinedFilter = combineConflictResolvers(
                 ConflictResolver.from(expectAsync1((conflict) => null)),
                 TypedConflictResolver.from((conflict) => null),
-                registry,
+                adapter,
               )!;
               expect(combinedFilter.resolve(conflict), isNull);
             }
@@ -311,7 +311,7 @@ class _Database with DatabaseBase implements Database {
   void noSuchMethod(Invocation invocation) {}
 
   @override
-  TypedDataRegistry? get typedDataRegistry => TypedDataRegistry();
+  TypedDataAdapter? get typedDataAdapter => TypedDataRegistry();
 
   @override
   String toString() => '_Database';
