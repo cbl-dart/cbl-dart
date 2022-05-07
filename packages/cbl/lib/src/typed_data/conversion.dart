@@ -1,3 +1,5 @@
+// ignore_for_file: one_member_abstracts
+
 import '../document.dart';
 import 'adapter.dart';
 import 'collection.dart';
@@ -6,20 +8,14 @@ import 'typed_object.dart';
 // === API =====================================================================
 
 abstract class ToTyped<T> {
-  const ToTyped();
-
   T toTyped(Object value);
 }
 
 abstract class ToUntyped<T> {
-  const ToUntyped();
-
   Object toUntyped(T value);
 }
 
 abstract class Promoter<T extends E, E> {
-  const Promoter();
-
   T promote(E value);
 }
 

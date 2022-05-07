@@ -234,6 +234,20 @@ void main() {
             className: 'A',
             fields: {
               'a': ImmutableTypedDataList(
+                internal: MutableArray([]),
+                isNullable: false,
+                converter: TypedDataHelpers.stringConverter,
+              )
+            },
+          ),
+          'A(a: [])',
+        );
+        expect(
+          TypedDataHelpers.renderString(
+            indent: null,
+            className: 'A',
+            fields: {
+              'a': ImmutableTypedDataList(
                 internal: MutableArray(['a']),
                 isNullable: false,
                 converter: TypedDataHelpers.stringConverter,
@@ -241,6 +255,26 @@ void main() {
             },
           ),
           'A(a: [a])',
+        );
+        expect(
+          TypedDataHelpers.renderString(
+            indent: null,
+            className: 'A',
+            fields: {
+              'a': ImmutableTypedDataList(
+                internal: MutableArray([
+                  ['a']
+                ]),
+                isNullable: false,
+                converter: const TypedListConverter(
+                  converter: TypedDataHelpers.stringConverter,
+                  isNullable: false,
+                  isCached: false,
+                ),
+              )
+            },
+          ),
+          'A(a: [[a]])',
         );
       });
 
@@ -305,6 +339,23 @@ A(
             className: 'A',
             fields: {
               'a': ImmutableTypedDataList(
+                internal: MutableArray([]),
+                isNullable: false,
+                converter: TypedDataHelpers.stringConverter,
+              )
+            },
+          ),
+          '''
+A(
+  a: [],
+)''',
+        );
+        expect(
+          TypedDataHelpers.renderString(
+            indent: '  ',
+            className: 'A',
+            fields: {
+              'a': ImmutableTypedDataList(
                 internal: MutableArray(['a']),
                 isNullable: false,
                 converter: TypedDataHelpers.stringConverter,
@@ -315,6 +366,33 @@ A(
 A(
   a: [
     a,
+  ],
+)''',
+        );
+        expect(
+          TypedDataHelpers.renderString(
+            indent: '  ',
+            className: 'A',
+            fields: {
+              'a': ImmutableTypedDataList(
+                internal: MutableArray([
+                  ['a']
+                ]),
+                isNullable: false,
+                converter: const TypedListConverter(
+                  converter: TypedDataHelpers.stringConverter,
+                  isNullable: false,
+                  isCached: false,
+                ),
+              )
+            },
+          ),
+          '''
+A(
+  a: [
+    [
+      a,
+    ],
   ],
 )''',
         );

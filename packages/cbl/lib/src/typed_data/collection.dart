@@ -91,7 +91,7 @@ abstract class _TypedDataListBase<T extends E, E, I extends Array>
       return _converter.toTyped(value);
     } on UnexpectedTypeException catch (e) {
       throw TypedDataException(
-        'At index $index: $e',
+        'Type error at index $index: $e',
         TypedDataErrorCode.dataMismatch,
         e,
       );
@@ -232,6 +232,12 @@ class MutableTypedDataList<T extends E, E>
         internal.removeValue(oldLength - 1 - i);
       }
     } else if (delta < 0) {
+      if (!_isNullable) {
+        throw UnsupportedError(
+          'Cannot set the length of the list to $newLength because '
+          'the list is not nullable.',
+        );
+      }
       for (var i = 0; i < delta; i++) {
         internal.addValue(null);
       }
@@ -383,7 +389,10 @@ mixin _TypedDataListToString<T> on List<T> {
     if (indent == null) {
       return super.toString();
     } else {
-      final buffer = StringBuffer()..writeln('[');
+      final buffer = StringBuffer()..write('[');
+      if (isNotEmpty) {
+        buffer.writeln();
+      }
       for (final entry in this) {
         final lines = entry.renderStringIndented(indent);
 
