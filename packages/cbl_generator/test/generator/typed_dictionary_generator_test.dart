@@ -96,7 +96,7 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
   MutableA toMutable() => MutableA.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'A',
         fields: {},
@@ -166,18 +166,18 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
   final I internal;
 
   @override
-  String get b => InternalTypedDataHelpers.readProperty(
+  String get b => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'b',
         key: 'b',
-        converter: InternalTypedDataHelpers.stringConverter,
+        converter: TypedDataHelpers.stringConverter,
       );
 
   @override
   MutableA toMutable() => MutableA.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'A',
         fields: {
@@ -215,12 +215,12 @@ class MutableA extends _AImplBase<MutableDictionary>
   MutableA.internal(MutableDictionary internal) : super(internal);
 
   set b(String value) {
-    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'b',
       value: promoted,
-      converter: InternalTypedDataHelpers.stringConverter,
+      converter: TypedDataHelpers.stringConverter,
     );
   }
 }

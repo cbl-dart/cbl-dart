@@ -21,11 +21,11 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get value => InternalTypedDataHelpers.readProperty(
+  String get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.stringConverter,
+        converter: TypedDataHelpers.stringConverter,
       );
 
   @override
@@ -33,7 +33,7 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
       MutableDocCommentDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocCommentDict',
         fields: {
@@ -72,12 +72,12 @@ class MutableDocCommentDict extends _DocCommentDictImplBase<MutableDictionary>
   MutableDocCommentDict.internal(MutableDictionary internal) : super(internal);
 
   set value(String value) {
-    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.stringConverter,
+      converter: TypedDataHelpers.stringConverter,
     );
   }
 }

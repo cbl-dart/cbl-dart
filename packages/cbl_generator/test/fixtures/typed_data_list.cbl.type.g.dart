@@ -24,7 +24,7 @@ abstract class _BoolListDictImplBase<I extends Dictionary>
       MutableBoolListDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BoolListDict',
         fields: {
@@ -39,13 +39,13 @@ class ImmutableBoolListDict extends _BoolListDictImplBase {
   ImmutableBoolListDict.internal(Dictionary internal) : super(internal);
 
   static const _valueConverter = const TypedListConverter(
-    converter: InternalTypedDataHelpers.boolConverter,
+    converter: TypedDataHelpers.boolConverter,
     isNullable: false,
     isCached: false,
   );
 
   @override
-  late final value = InternalTypedDataHelpers.readProperty(
+  late final value = TypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -76,12 +76,12 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
   MutableBoolListDict.internal(MutableDictionary internal) : super(internal);
 
   static const _valueConverter = const TypedListConverter(
-    converter: InternalTypedDataHelpers.boolConverter,
+    converter: TypedDataHelpers.boolConverter,
     isNullable: false,
     isCached: false,
   );
 
-  late TypedDataList<bool, bool> _value = InternalTypedDataHelpers.readProperty(
+  late TypedDataList<bool, bool> _value = TypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -94,7 +94,7 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
   set value(List<bool> value) {
     final promoted = _valueConverter.promote(value);
     _value = promoted;
-    InternalTypedDataHelpers.writeProperty(
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
@@ -121,7 +121,7 @@ abstract class _OptionalBoolListDictImplBase<I extends Dictionary>
       MutableOptionalBoolListDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'OptionalBoolListDict',
         fields: {
@@ -136,13 +136,13 @@ class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
   ImmutableOptionalBoolListDict.internal(Dictionary internal) : super(internal);
 
   static const _valueConverter = const TypedListConverter(
-    converter: InternalTypedDataHelpers.boolConverter,
+    converter: TypedDataHelpers.boolConverter,
     isNullable: false,
     isCached: false,
   );
 
   @override
-  late final value = InternalTypedDataHelpers.readNullableProperty(
+  late final value = TypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -179,13 +179,13 @@ class MutableOptionalBoolListDict
       : super(internal);
 
   static const _valueConverter = const TypedListConverter(
-    converter: InternalTypedDataHelpers.boolConverter,
+    converter: TypedDataHelpers.boolConverter,
     isNullable: false,
     isCached: false,
   );
 
   late TypedDataList<bool, bool>? _value =
-      InternalTypedDataHelpers.readNullableProperty(
+      TypedDataHelpers.readNullableProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -198,7 +198,7 @@ class MutableOptionalBoolListDict
   set value(List<bool>? value) {
     final promoted = value == null ? null : _valueConverter.promote(value);
     _value = promoted;
-    InternalTypedDataHelpers.writeNullableProperty(
+    TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
@@ -225,7 +225,7 @@ abstract class _BoolDictListDictImplBase<I extends Dictionary>
       MutableBoolDictListDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BoolDictListDict',
         fields: {
@@ -247,7 +247,7 @@ class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
   );
 
   @override
-  late final value = InternalTypedDataHelpers.readProperty(
+  late final value = TypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -289,7 +289,7 @@ class MutableBoolDictListDict
   );
 
   late TypedDataList<MutableBoolDict, BoolDict> _value =
-      InternalTypedDataHelpers.readProperty(
+      TypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -302,7 +302,7 @@ class MutableBoolDictListDict
   set value(List<BoolDict> value) {
     final promoted = _valueConverter.promote(value);
     _value = promoted;
-    InternalTypedDataHelpers.writeProperty(
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
@@ -329,7 +329,7 @@ abstract class _BoolListListDictImplBase<I extends Dictionary>
       MutableBoolListListDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BoolListListDict',
         fields: {
@@ -345,7 +345,7 @@ class ImmutableBoolListListDict extends _BoolListListDictImplBase {
 
   static const _valueConverter = const TypedListConverter(
     converter: const TypedListConverter(
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
       isNullable: false,
       isCached: false,
     ),
@@ -354,7 +354,7 @@ class ImmutableBoolListListDict extends _BoolListListDictImplBase {
   );
 
   @override
-  late final value = InternalTypedDataHelpers.readProperty(
+  late final value = TypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -390,7 +390,7 @@ class MutableBoolListListDict
 
   static const _valueConverter = const TypedListConverter(
     converter: const TypedListConverter(
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
       isNullable: false,
       isCached: false,
     ),
@@ -399,7 +399,7 @@ class MutableBoolListListDict
   );
 
   late TypedDataList<TypedDataList<bool, bool>, List<bool>> _value =
-      InternalTypedDataHelpers.readProperty(
+      TypedDataHelpers.readProperty(
     internal: internal,
     name: 'value',
     key: 'value',
@@ -412,7 +412,7 @@ class MutableBoolListListDict
   set value(List<List<bool>> value) {
     final promoted = _valueConverter.promote(value);
     _value = promoted;
-    InternalTypedDataHelpers.writeProperty(
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,

@@ -1,7 +1,7 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/typed_data/runtime_support.dart';
+import 'package:cbl/src/typed_data/registry.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart' hide TypeMatcher;

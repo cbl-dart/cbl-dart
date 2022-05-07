@@ -1,9 +1,9 @@
 import '../document.dart';
 import 'adapter.dart';
-import 'runtime_support.dart';
+import 'collection.dart';
 import 'typed_object.dart';
 
-// === Conversion API ==========================================================
+// === API =====================================================================
 
 abstract class ToTyped<T> {
   const ToTyped();
@@ -68,7 +68,7 @@ class UnexpectedTypeException implements Exception {
   }
 }
 
-/// === Conversion Implementation ==============================================
+/// === Implementations ========================================================
 
 class IdentityConverter<T extends Object> extends NonPromotingDataConverter<T> {
   const IdentityConverter();
@@ -97,6 +97,7 @@ class DateTimeConverter extends NonPromotingDataConverter<DateTime> {
   Object toUntyped(DateTime value) => value.toIso8601String();
 }
 
+/// @nodoc
 class TypedDictionaryConverter<I extends Object, T extends E,
     E extends TypedDictionaryObject<T>> extends DataConverter<T, E> {
   const TypedDictionaryConverter(this._factory);
@@ -120,6 +121,7 @@ class TypedDictionaryConverter<I extends Object, T extends E,
   }
 }
 
+/// @nodoc
 class TypedListConverter<T extends E, E>
     extends DataConverter<TypedDataList<T, E>, List<E>> {
   const TypedListConverter({
@@ -173,6 +175,7 @@ class TypedListConverter<T extends E, E>
   }
 }
 
+/// @nodoc
 class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
   const ScalarConverterAdapter(this.converter);
 

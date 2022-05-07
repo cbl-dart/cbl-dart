@@ -41,7 +41,7 @@ import 'service/isolate_worker_test.dart' as service_isolate_worker;
 import 'support/async_callback_test.dart' as support_async_callback;
 import 'support/dart_finalizer_test.dart' as support_dart_finalizer;
 import 'tracing_test.dart' as tracing;
-import 'typed_data/runtime_support_test.dart' as typed_data_runtime_support;
+import 'typed_data/registry_test.dart' as typed_data_runtime_support;
 
 final tests = [
   database_database_change.main,

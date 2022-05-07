@@ -339,7 +339,7 @@ ${_classNames.mutableClassName} toMutable() =>
 
     _code.writeln('''
 @override
-String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+String toString({String? indent}) => TypedDataHelpers.renderString(
       indent: indent,
       className: ${escapeDartString(_classNames.declaringClassName)},
       fields: {
@@ -430,7 +430,7 @@ set ${property.name}(${type.dartTypeWithNullability} value) {
     required bool forMutable,
   }) {
     if (type is BuiltinScalarType) {
-      return 'InternalTypedDataHelpers.${type.dartType.decapitalized}Converter';
+      return 'TypedDataHelpers.${type.dartType.decapitalized}Converter';
     } else if (type is CustomScalarType) {
       return 'const ScalarConverterAdapter(${type.converter.code},)';
     } else if (type is TypedDataObjectType) {
@@ -465,12 +465,12 @@ const TypedListConverter(
 
 extension on TypedDataObjectProperty {
   String get readHelper => isNullable
-      ? 'InternalTypedDataHelpers.readNullableProperty'
-      : 'InternalTypedDataHelpers.readProperty';
+      ? 'TypedDataHelpers.readNullableProperty'
+      : 'TypedDataHelpers.readProperty';
 
   String get writeHelper => isNullable
-      ? 'InternalTypedDataHelpers.writeNullableProperty'
-      : 'InternalTypedDataHelpers.writeProperty';
+      ? 'TypedDataHelpers.writeNullableProperty'
+      : 'TypedDataHelpers.writeProperty';
 
   String get converterField => '_${name}Converter';
 

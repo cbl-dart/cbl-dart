@@ -27,7 +27,7 @@ abstract class _DocWithIdImplBase<I extends Document>
       MutableDocWithId.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithId',
         fields: {
@@ -84,7 +84,7 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
       MutableDocWithOptionalId.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithOptionalId',
         fields: {
@@ -142,11 +142,11 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
   String get id => internal.id;
 
   @override
-  String get value => InternalTypedDataHelpers.readProperty(
+  String get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.stringConverter,
+        converter: TypedDataHelpers.stringConverter,
       );
 
   @override
@@ -154,7 +154,7 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
       MutableDocWithIdAndField.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithIdAndField',
         fields: {
@@ -197,12 +197,12 @@ class MutableDocWithIdAndField
   MutableDocWithIdAndField.internal(MutableDocument internal) : super(internal);
 
   set value(String value) {
-    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.stringConverter,
+      converter: TypedDataHelpers.stringConverter,
     );
   }
 }
@@ -226,11 +226,11 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
   String get id => internal.id;
 
   @override
-  String get value => InternalTypedDataHelpers.readProperty(
+  String get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.stringConverter,
+        converter: TypedDataHelpers.stringConverter,
       );
 
   @override
@@ -238,7 +238,7 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
       MutableDocWithOptionalIdAndField.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithOptionalIdAndField',
         fields: {
@@ -284,12 +284,12 @@ class MutableDocWithOptionalIdAndField
       : super(internal);
 
   set value(String value) {
-    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.stringConverter,
+      converter: TypedDataHelpers.stringConverter,
     );
   }
 }
@@ -313,7 +313,7 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
       MutableDocWithIdGetter.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithIdGetter',
         fields: {
@@ -367,7 +367,7 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
       MutableDocWithSequenceGetter.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithSequenceGetter',
         fields: {
@@ -424,7 +424,7 @@ abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
       MutableDocWithRevisionIdGetter.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DocWithRevisionIdGetter',
         fields: {

@@ -21,11 +21,11 @@ abstract class _CustomDataNameDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool get value => InternalTypedDataHelpers.readProperty(
+  bool get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'custom',
-        converter: InternalTypedDataHelpers.boolConverter,
+        converter: TypedDataHelpers.boolConverter,
       );
 
   @override
@@ -33,7 +33,7 @@ abstract class _CustomDataNameDictImplBase<I extends Dictionary>
       MutableCustomDataNameDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'CustomDataNameDict',
         fields: {
@@ -75,12 +75,12 @@ class MutableCustomDataNameDict
       : super(internal);
 
   set value(bool value) {
-    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.boolConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'custom',
       value: promoted,
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
     );
   }
 }
@@ -99,11 +99,11 @@ abstract class _DefaultValueDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool get value => InternalTypedDataHelpers.readProperty(
+  bool get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.boolConverter,
+        converter: TypedDataHelpers.boolConverter,
       );
 
   @override
@@ -111,7 +111,7 @@ abstract class _DefaultValueDictImplBase<I extends Dictionary>
       MutableDefaultValueDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DefaultValueDict',
         fields: {
@@ -153,12 +153,12 @@ class MutableDefaultValueDict
       : super(internal);
 
   set value(bool value) {
-    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.boolConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
     );
   }
 }
@@ -177,7 +177,7 @@ abstract class _ScalarConverterDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  Uri get value => InternalTypedDataHelpers.readProperty(
+  Uri get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
@@ -191,7 +191,7 @@ abstract class _ScalarConverterDictImplBase<I extends Dictionary>
       MutableScalarConverterDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'ScalarConverterDict',
         fields: {
@@ -236,7 +236,7 @@ class MutableScalarConverterDict
     final promoted = const ScalarConverterAdapter(
       const TestConverter(),
     ).promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,

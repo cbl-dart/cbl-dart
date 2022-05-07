@@ -1,7 +1,9 @@
 import 'package:meta/meta.dart' as meta;
 
 abstract class TypedDictionaryObject<MD extends Object> {
-  /// Internal field that you should never use.
+  /// Internal field that end users should never access.
+  ///
+  /// @nodoc
   @meta.internal
   Object get internal;
 
@@ -26,44 +28,3 @@ abstract class TypedDocumentObject<MD extends Object>
 abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
         MD extends TypedDocumentObject> extends TypedDocumentObject<MD>
     implements TypedMutableDictionaryObject<D, MD> {}
-
-abstract class TypedDataList<T extends E, E> implements List<T> {
-  /// Internal field that you should never use.
-  @meta.internal
-  Object get internal;
-
-  @override
-  void add(E value);
-
-  @override
-  void addAll(Iterable<E> iterable);
-
-  @override
-  void fillRange(int start, int end, [E? fillValue]);
-
-  @override
-  void insert(int index, E element);
-
-  @override
-  void insertAll(int index, Iterable<E> iterable);
-
-  @override
-  void replaceRange(int start, int end, Iterable<E> replacements);
-
-  @override
-  void setAll(int index, Iterable<E> iterable);
-
-  @override
-  void setRange(int start, int end, Iterable<E> iterable, [int skipCount = 0]);
-
-  @override
-  void operator []=(int index, E value);
-
-  /// Returns a string representation of this list.
-  ///
-  /// Per default, the string representation is in a single line.
-  /// If [indent] is specified, the string representation is in multiple lines,
-  /// each element indented by [indent].
-  @override
-  String toString({String? indent});
-}

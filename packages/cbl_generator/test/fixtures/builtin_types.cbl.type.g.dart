@@ -20,11 +20,11 @@ abstract class _StringDocImplBase<I extends Document>
   final I internal;
 
   @override
-  String get value => InternalTypedDataHelpers.readProperty(
+  String get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.stringConverter,
+        converter: TypedDataHelpers.stringConverter,
       );
 
   @override
@@ -32,7 +32,7 @@ abstract class _StringDocImplBase<I extends Document>
       MutableStringDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'StringDoc',
         fields: {
@@ -70,12 +70,12 @@ class MutableStringDoc extends _StringDocImplBase<MutableDocument>
   MutableStringDoc.internal(MutableDocument internal) : super(internal);
 
   set value(String value) {
-    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.stringConverter,
+      converter: TypedDataHelpers.stringConverter,
     );
   }
 }
@@ -93,18 +93,18 @@ abstract class _IntDocImplBase<I extends Document>
   final I internal;
 
   @override
-  int get value => InternalTypedDataHelpers.readProperty(
+  int get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.intConverter,
+        converter: TypedDataHelpers.intConverter,
       );
 
   @override
   MutableIntDoc toMutable() => MutableIntDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'IntDoc',
         fields: {
@@ -142,12 +142,12 @@ class MutableIntDoc extends _IntDocImplBase<MutableDocument>
   MutableIntDoc.internal(MutableDocument internal) : super(internal);
 
   set value(int value) {
-    final promoted = InternalTypedDataHelpers.intConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.intConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.intConverter,
+      converter: TypedDataHelpers.intConverter,
     );
   }
 }
@@ -165,11 +165,11 @@ abstract class _DoubleDocImplBase<I extends Document>
   final I internal;
 
   @override
-  double get value => InternalTypedDataHelpers.readProperty(
+  double get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.doubleConverter,
+        converter: TypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -177,7 +177,7 @@ abstract class _DoubleDocImplBase<I extends Document>
       MutableDoubleDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DoubleDoc',
         fields: {
@@ -215,12 +215,12 @@ class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
   MutableDoubleDoc.internal(MutableDocument internal) : super(internal);
 
   set value(double value) {
-    final promoted = InternalTypedDataHelpers.doubleConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.doubleConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.doubleConverter,
+      converter: TypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -238,18 +238,18 @@ abstract class _NumDocImplBase<I extends Document>
   final I internal;
 
   @override
-  num get value => InternalTypedDataHelpers.readProperty(
+  num get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.numConverter,
+        converter: TypedDataHelpers.numConverter,
       );
 
   @override
   MutableNumDoc toMutable() => MutableNumDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'NumDoc',
         fields: {
@@ -287,12 +287,12 @@ class MutableNumDoc extends _NumDocImplBase<MutableDocument>
   MutableNumDoc.internal(MutableDocument internal) : super(internal);
 
   set value(num value) {
-    final promoted = InternalTypedDataHelpers.numConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.numConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.numConverter,
+      converter: TypedDataHelpers.numConverter,
     );
   }
 }
@@ -310,18 +310,18 @@ abstract class _BoolDocImplBase<I extends Document>
   final I internal;
 
   @override
-  bool get value => InternalTypedDataHelpers.readProperty(
+  bool get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.boolConverter,
+        converter: TypedDataHelpers.boolConverter,
       );
 
   @override
   MutableBoolDoc toMutable() => MutableBoolDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BoolDoc',
         fields: {
@@ -359,12 +359,12 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
   MutableBoolDoc.internal(MutableDocument internal) : super(internal);
 
   set value(bool value) {
-    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.boolConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
     );
   }
 }
@@ -382,11 +382,11 @@ abstract class _DateTimeDocImplBase<I extends Document>
   final I internal;
 
   @override
-  DateTime get value => InternalTypedDataHelpers.readProperty(
+  DateTime get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.dateTimeConverter,
+        converter: TypedDataHelpers.dateTimeConverter,
       );
 
   @override
@@ -394,7 +394,7 @@ abstract class _DateTimeDocImplBase<I extends Document>
       MutableDateTimeDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DateTimeDoc',
         fields: {
@@ -432,12 +432,12 @@ class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
   MutableDateTimeDoc.internal(MutableDocument internal) : super(internal);
 
   set value(DateTime value) {
-    final promoted = InternalTypedDataHelpers.dateTimeConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.dateTimeConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.dateTimeConverter,
+      converter: TypedDataHelpers.dateTimeConverter,
     );
   }
 }
@@ -455,18 +455,18 @@ abstract class _BlobDocImplBase<I extends Document>
   final I internal;
 
   @override
-  Blob get value => InternalTypedDataHelpers.readProperty(
+  Blob get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.blobConverter,
+        converter: TypedDataHelpers.blobConverter,
       );
 
   @override
   MutableBlobDoc toMutable() => MutableBlobDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BlobDoc',
         fields: {
@@ -504,12 +504,12 @@ class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
   MutableBlobDoc.internal(MutableDocument internal) : super(internal);
 
   set value(Blob value) {
-    final promoted = InternalTypedDataHelpers.blobConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.blobConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.blobConverter,
+      converter: TypedDataHelpers.blobConverter,
     );
   }
 }
@@ -527,7 +527,7 @@ abstract class _EnumDocImplBase<I extends Document>
   final I internal;
 
   @override
-  TestEnum get value => InternalTypedDataHelpers.readProperty(
+  TestEnum get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
@@ -540,7 +540,7 @@ abstract class _EnumDocImplBase<I extends Document>
   MutableEnumDoc toMutable() => MutableEnumDoc.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'EnumDoc',
         fields: {
@@ -581,7 +581,7 @@ class MutableEnumDoc extends _EnumDocImplBase<MutableDocument>
     final promoted = const ScalarConverterAdapter(
       const EnumNameConverter(TestEnum.values),
     ).promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
@@ -609,11 +609,11 @@ abstract class _StringDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  String get value => InternalTypedDataHelpers.readProperty(
+  String get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.stringConverter,
+        converter: TypedDataHelpers.stringConverter,
       );
 
   @override
@@ -621,7 +621,7 @@ abstract class _StringDictImplBase<I extends Dictionary>
       MutableStringDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'StringDict',
         fields: {
@@ -659,12 +659,12 @@ class MutableStringDict extends _StringDictImplBase<MutableDictionary>
   MutableStringDict.internal(MutableDictionary internal) : super(internal);
 
   set value(String value) {
-    final promoted = InternalTypedDataHelpers.stringConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.stringConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.stringConverter,
+      converter: TypedDataHelpers.stringConverter,
     );
   }
 }
@@ -682,18 +682,18 @@ abstract class _IntDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  int get value => InternalTypedDataHelpers.readProperty(
+  int get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.intConverter,
+        converter: TypedDataHelpers.intConverter,
       );
 
   @override
   MutableIntDict toMutable() => MutableIntDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'IntDict',
         fields: {
@@ -731,12 +731,12 @@ class MutableIntDict extends _IntDictImplBase<MutableDictionary>
   MutableIntDict.internal(MutableDictionary internal) : super(internal);
 
   set value(int value) {
-    final promoted = InternalTypedDataHelpers.intConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.intConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.intConverter,
+      converter: TypedDataHelpers.intConverter,
     );
   }
 }
@@ -754,11 +754,11 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  double get value => InternalTypedDataHelpers.readProperty(
+  double get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.doubleConverter,
+        converter: TypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -766,7 +766,7 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
       MutableDoubleDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DoubleDict',
         fields: {
@@ -804,12 +804,12 @@ class MutableDoubleDict extends _DoubleDictImplBase<MutableDictionary>
   MutableDoubleDict.internal(MutableDictionary internal) : super(internal);
 
   set value(double value) {
-    final promoted = InternalTypedDataHelpers.doubleConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.doubleConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.doubleConverter,
+      converter: TypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -827,18 +827,18 @@ abstract class _NumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  num get value => InternalTypedDataHelpers.readProperty(
+  num get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.numConverter,
+        converter: TypedDataHelpers.numConverter,
       );
 
   @override
   MutableNumDict toMutable() => MutableNumDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'NumDict',
         fields: {
@@ -876,12 +876,12 @@ class MutableNumDict extends _NumDictImplBase<MutableDictionary>
   MutableNumDict.internal(MutableDictionary internal) : super(internal);
 
   set value(num value) {
-    final promoted = InternalTypedDataHelpers.numConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.numConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.numConverter,
+      converter: TypedDataHelpers.numConverter,
     );
   }
 }
@@ -899,18 +899,18 @@ abstract class _BoolDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool get value => InternalTypedDataHelpers.readProperty(
+  bool get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.boolConverter,
+        converter: TypedDataHelpers.boolConverter,
       );
 
   @override
   MutableBoolDict toMutable() => MutableBoolDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BoolDict',
         fields: {
@@ -948,12 +948,12 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
   MutableBoolDict.internal(MutableDictionary internal) : super(internal);
 
   set value(bool value) {
-    final promoted = InternalTypedDataHelpers.boolConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.boolConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
     );
   }
 }
@@ -971,11 +971,11 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  DateTime get value => InternalTypedDataHelpers.readProperty(
+  DateTime get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.dateTimeConverter,
+        converter: TypedDataHelpers.dateTimeConverter,
       );
 
   @override
@@ -983,7 +983,7 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
       MutableDateTimeDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'DateTimeDict',
         fields: {
@@ -1021,12 +1021,12 @@ class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
   MutableDateTimeDict.internal(MutableDictionary internal) : super(internal);
 
   set value(DateTime value) {
-    final promoted = InternalTypedDataHelpers.dateTimeConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.dateTimeConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.dateTimeConverter,
+      converter: TypedDataHelpers.dateTimeConverter,
     );
   }
 }
@@ -1044,18 +1044,18 @@ abstract class _BlobDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  Blob get value => InternalTypedDataHelpers.readProperty(
+  Blob get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.blobConverter,
+        converter: TypedDataHelpers.blobConverter,
       );
 
   @override
   MutableBlobDict toMutable() => MutableBlobDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'BlobDict',
         fields: {
@@ -1093,12 +1093,12 @@ class MutableBlobDict extends _BlobDictImplBase<MutableDictionary>
   MutableBlobDict.internal(MutableDictionary internal) : super(internal);
 
   set value(Blob value) {
-    final promoted = InternalTypedDataHelpers.blobConverter.promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    final promoted = TypedDataHelpers.blobConverter.promote(value);
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.blobConverter,
+      converter: TypedDataHelpers.blobConverter,
     );
   }
 }
@@ -1117,11 +1117,11 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  int? get value => InternalTypedDataHelpers.readNullableProperty(
+  int? get value => TypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.intConverter,
+        converter: TypedDataHelpers.intConverter,
       );
 
   @override
@@ -1129,7 +1129,7 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
       MutableNullableIntDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'NullableIntDict',
         fields: {
@@ -1170,14 +1170,13 @@ class MutableNullableIntDict extends _NullableIntDictImplBase<MutableDictionary>
   MutableNullableIntDict.internal(MutableDictionary internal) : super(internal);
 
   set value(int? value) {
-    final promoted = value == null
-        ? null
-        : InternalTypedDataHelpers.intConverter.promote(value);
-    InternalTypedDataHelpers.writeNullableProperty(
+    final promoted =
+        value == null ? null : TypedDataHelpers.intConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.intConverter,
+      converter: TypedDataHelpers.intConverter,
     );
   }
 }
@@ -1196,11 +1195,11 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  double? get value => InternalTypedDataHelpers.readNullableProperty(
+  double? get value => TypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.doubleConverter,
+        converter: TypedDataHelpers.doubleConverter,
       );
 
   @override
@@ -1208,7 +1207,7 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
       MutableNullableDoubleDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'NullableDoubleDict',
         fields: {
@@ -1252,14 +1251,13 @@ class MutableNullableDoubleDict
       : super(internal);
 
   set value(double? value) {
-    final promoted = value == null
-        ? null
-        : InternalTypedDataHelpers.doubleConverter.promote(value);
-    InternalTypedDataHelpers.writeNullableProperty(
+    final promoted =
+        value == null ? null : TypedDataHelpers.doubleConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.doubleConverter,
+      converter: TypedDataHelpers.doubleConverter,
     );
   }
 }
@@ -1278,11 +1276,11 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  num? get value => InternalTypedDataHelpers.readNullableProperty(
+  num? get value => TypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.numConverter,
+        converter: TypedDataHelpers.numConverter,
       );
 
   @override
@@ -1290,7 +1288,7 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
       MutableNullableNumDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'NullableNumDict',
         fields: {
@@ -1331,14 +1329,13 @@ class MutableNullableNumDict extends _NullableNumDictImplBase<MutableDictionary>
   MutableNullableNumDict.internal(MutableDictionary internal) : super(internal);
 
   set value(num? value) {
-    final promoted = value == null
-        ? null
-        : InternalTypedDataHelpers.numConverter.promote(value);
-    InternalTypedDataHelpers.writeNullableProperty(
+    final promoted =
+        value == null ? null : TypedDataHelpers.numConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.numConverter,
+      converter: TypedDataHelpers.numConverter,
     );
   }
 }
@@ -1357,11 +1354,11 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  bool? get value => InternalTypedDataHelpers.readNullableProperty(
+  bool? get value => TypedDataHelpers.readNullableProperty(
         internal: internal,
         name: 'value',
         key: 'value',
-        converter: InternalTypedDataHelpers.boolConverter,
+        converter: TypedDataHelpers.boolConverter,
       );
 
   @override
@@ -1369,7 +1366,7 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
       MutableNullableBoolDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'NullableBoolDict',
         fields: {
@@ -1413,14 +1410,13 @@ class MutableNullableBoolDict
       : super(internal);
 
   set value(bool? value) {
-    final promoted = value == null
-        ? null
-        : InternalTypedDataHelpers.boolConverter.promote(value);
-    InternalTypedDataHelpers.writeNullableProperty(
+    final promoted =
+        value == null ? null : TypedDataHelpers.boolConverter.promote(value);
+    TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: InternalTypedDataHelpers.boolConverter,
+      converter: TypedDataHelpers.boolConverter,
     );
   }
 }
@@ -1438,7 +1434,7 @@ abstract class _EnumDictImplBase<I extends Dictionary>
   final I internal;
 
   @override
-  TestEnum get value => InternalTypedDataHelpers.readProperty(
+  TestEnum get value => TypedDataHelpers.readProperty(
         internal: internal,
         name: 'value',
         key: 'value',
@@ -1451,7 +1447,7 @@ abstract class _EnumDictImplBase<I extends Dictionary>
   MutableEnumDict toMutable() => MutableEnumDict.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => InternalTypedDataHelpers.renderString(
+  String toString({String? indent}) => TypedDataHelpers.renderString(
         indent: indent,
         className: 'EnumDict',
         fields: {
@@ -1492,7 +1488,7 @@ class MutableEnumDict extends _EnumDictImplBase<MutableDictionary>
     final promoted = const ScalarConverterAdapter(
       const EnumNameConverter(TestEnum.values),
     ).promote(value);
-    InternalTypedDataHelpers.writeProperty(
+    TypedDataHelpers.writeProperty(
       internal: internal,
       key: 'value',
       value: promoted,
