@@ -1,4 +1,4 @@
-import 'package:meta/meta.dart' as meta;
+import 'package:meta/meta.dart';
 
 import '../document.dart';
 import '../errors.dart';
@@ -11,24 +11,24 @@ import 'typed_object.dart';
 ///
 /// @nodoc
 class TypedDataHelpers {
-  // Converters
-  @meta.internal
+  TypedDataHelpers._();
+
+  @internal
   static const stringConverter = IdentityConverter<String>();
-  @meta.internal
+  @internal
   static const intConverter = IdentityConverter<int>();
-  @meta.internal
+  @internal
   static const doubleConverter = IdentityConverter<double>();
-  @meta.internal
+  @internal
   static const numConverter = IdentityConverter<num>();
-  @meta.internal
+  @internal
   static const boolConverter = IdentityConverter<bool>();
-  @meta.internal
+  @internal
   static const blobConverter = IdentityConverter<Blob>();
-  @meta.internal
+  @internal
   static const dateTimeConverter = DateTimeConverter();
 
-  // Read helpers
-  @meta.internal
+  @internal
   static T readProperty<T>({
     required DictionaryInterface internal,
     required String name,
@@ -37,16 +37,16 @@ class TypedDataHelpers {
   }) {
     final value = internal.value(key);
     if (value == null) {
-      if (!internal.contains(name)) {
+      if (!internal.contains(key)) {
         throw TypedDataException(
           'Expected a value for property "$name" but there is none in the '
-          'underlying data.',
+          'underlying data at key "$key".',
           TypedDataErrorCode.dataMismatch,
         );
       } else {
         throw TypedDataException(
           'Expected a value for property "$name" but found "null" in the '
-          'underlying data.',
+          'underlying data at key "$key".',
           TypedDataErrorCode.dataMismatch,
         );
       }
@@ -56,14 +56,14 @@ class TypedDataHelpers {
       return converter.toTyped(value);
     } on UnexpectedTypeException catch (e) {
       throw TypedDataException(
-        'At property "$name": $e',
+        'Type error for property "$name" at key "$key": $e',
         TypedDataErrorCode.dataMismatch,
         e,
       );
     }
   }
 
-  @meta.internal
+  @internal
   static T? readNullableProperty<T>({
     required DictionaryInterface internal,
     required String name,
@@ -79,15 +79,14 @@ class TypedDataHelpers {
       return converter.toTyped(value);
     } on UnexpectedTypeException catch (e) {
       throw TypedDataException(
-        'At property "$name": $e',
+        'Type error for property "$name" at key "$key": $e',
         TypedDataErrorCode.dataMismatch,
         e,
       );
     }
   }
 
-  // Write helpers
-  @meta.internal
+  @internal
   static void writeProperty<T>({
     required MutableDictionaryInterface internal,
     required T value,
@@ -97,7 +96,7 @@ class TypedDataHelpers {
     internal.setValue(converter.toUntyped(value), key: key);
   }
 
-  @meta.internal
+  @internal
   static void writeNullableProperty<T>({
     required MutableDictionaryInterface internal,
     required T? value,
@@ -111,6 +110,7 @@ class TypedDataHelpers {
     }
   }
 
+  @internal
   static String renderString({
     required String? indent,
     required String className,
@@ -127,9 +127,10 @@ class TypedDataHelpers {
     } else {
       final buffer = StringBuffer()
         ..write(className)
-        ..writeln('(');
+        ..write('(');
       for (final entry in fields.entries) {
         buffer
+          ..writeln()
           ..write(indent)
           ..write(entry.key)
           ..write(': ');

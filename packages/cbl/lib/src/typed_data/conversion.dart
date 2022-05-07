@@ -107,7 +107,7 @@ class TypedDictionaryConverter<I extends Object, T extends E,
   @override
   T toTyped(Object value) => value is I
       ? _factory(value)
-      : throw UnexpectedTypeException(value: value, expectedTypes: [T]);
+      : throw UnexpectedTypeException(value: value, expectedTypes: [I]);
 
   @override
   Object toUntyped(T value) => value.internal;

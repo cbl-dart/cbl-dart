@@ -41,6 +41,9 @@ import 'service/isolate_worker_test.dart' as service_isolate_worker;
 import 'support/async_callback_test.dart' as support_async_callback;
 import 'support/dart_finalizer_test.dart' as support_dart_finalizer;
 import 'tracing_test.dart' as tracing;
+import 'typed_data/collection_test.dart' as typed_data_collection;
+import 'typed_data/conversion_test.dart' as typed_data_conversion;
+import 'typed_data/helpers_test.dart' as typed_data_helpers;
 import 'typed_data/registry_test.dart' as typed_data_runtime_support;
 
 final tests = [
@@ -83,6 +86,9 @@ final tests = [
   support_async_callback.main,
   support_dart_finalizer.main,
   tracing.main,
+  typed_data_collection.main,
+  typed_data_conversion.main,
+  typed_data_helpers.main,
   typed_data_runtime_support.main,
 ];
 
