@@ -1,11 +1,11 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart' as meta;
 
 import '../document.dart';
 import '../errors.dart';
+import '../support/utils.dart';
 import 'conversion.dart';
 import 'helpers.dart';
 
@@ -238,7 +238,7 @@ class MutableTypedDataList<T extends E, E>
           'the list is not nullable.',
         );
       }
-      for (var i = 0; i < delta; i++) {
+      for (var i = 0; i < delta.abs(); i++) {
         internal.addValue(null);
       }
     }
@@ -292,14 +292,13 @@ class MutableTypedDataList<T extends E, E>
   }
 }
 
-class CachedTypedDataList<T extends E, E> extends DelegatingList<T>
+class CachedTypedDataList<T extends E, E> extends ListMixin<T>
     with _TypedDataListToString
     implements TypedDataList<T, E> {
   CachedTypedDataList(
     this._base, {
     required bool growable,
-  })  : _cache = List.filled(_base.length, null, growable: growable),
-        super(_base);
+  }) : _cache = List.filled(_base.length, null, growable: growable);
 
   final _TypedDataListBase<T, E, Array> _base;
   final List<T?> _cache;
@@ -310,51 +309,57 @@ class CachedTypedDataList<T extends E, E> extends DelegatingList<T>
   T _promote(E value) => _base._converter.promote(value);
 
   @override
+  int get length => _base.length;
+
+  @override
+  set length(int newLength) {
+    _base.length = newLength;
+    _cache.length = newLength;
+  }
+
+  @override
   T operator [](int index) {
     final cachedValue = _cache[index];
     if (cachedValue != null) {
       return cachedValue;
     }
 
-    final value = this[index];
+    // `null` in the cache could mean that the element is actually `null` or
+    // that the element is not yet cached.
+    // We load the element from the base and if it is not `null` we cache it.
+    // If it is `null`, then the cache already contains `null` for the element
+    // and we don't need to update it.
+    final value = _base[index];
     if (value != null) {
-      // We must not store null in the cache, because we use it to detect if
-      // a value has been cached or not.
       _cache[index] = value;
     }
     return value;
   }
 
   @override
-  set length(int newLength) {
-    super.length = newLength;
-    _cache.length = newLength;
-  }
-
-  @override
   void operator []=(int index, E value) {
     final promoted = _promote(value);
-    super[index] = promoted;
+    _base[index] = promoted;
     _cache[index] = promoted;
   }
 
   @override
-  void add(E value) {
-    final promoted = _promote(value);
-    super.add(promoted);
+  void add(E element) {
+    final promoted = _promote(element);
+    _base.add(promoted);
     _cache.add(promoted);
   }
 
   @override
   void addAll(Iterable<E> iterable) {
     final promoted = iterable.map(_promote).toList();
-    super.addAll(promoted);
+    _base.addAll(promoted);
     _cache.addAll(promoted);
   }
 
   @override
-  void fillRange(int start, int end, [E? fillValue]) {
-    super.fillRange(start, end, fillValue == null ? null : _promote(fillValue));
+  void fillRange(int start, int end, [E? fill]) {
+    super.fillRange(start, end, fill?.let(_promote));
   }
 
   @override
@@ -368,8 +373,8 @@ class CachedTypedDataList<T extends E, E> extends DelegatingList<T>
   }
 
   @override
-  void replaceRange(int start, int end, Iterable<E> iterable) {
-    super.replaceRange(start, end, iterable.map(_promote));
+  void replaceRange(int start, int end, Iterable<E> newContents) {
+    super.replaceRange(start, end, newContents.map(_promote));
   }
 
   @override

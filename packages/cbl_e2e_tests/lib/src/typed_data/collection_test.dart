@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: invalid_use_of_internal_member, cascade_invocations
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/typed_data/collection.dart';
@@ -122,7 +122,284 @@ void main() {
     });
   });
 
-  group('MutableTypedDataList', () {});
+  group('MutableTypedDataList', () {
+    group('set length', () {
+      test('reduce size', () {
+        final list = MutableTypedDataList(
+          internal: MutableArray(['a', 'b']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        );
+        list.length = 1;
+        expect(list, hasLength(1));
+        expect(list, ['a']);
+      });
 
-  group('CachedTypedDataList', () {});
+      test('increase size', () {
+        final list = MutableTypedDataList<String?, String?>(
+          internal: MutableArray(['a']),
+          isNullable: true,
+          converter: const IdentityConverter<String>(),
+        );
+        list.length = 2;
+        expect(list, hasLength(2));
+        expect(list, ['a', null]);
+      });
+
+      test('throws when increasing size of non-nullable list', () {
+        final list = MutableTypedDataList<String?, String?>(
+          internal: MutableArray(),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        );
+        expect(() => list.length = 1, throwsA(isUnsupportedError));
+      });
+    });
+
+    test('[]=', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list[0] = 'b';
+      expect(list, ['b']);
+    });
+
+    test('add', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.add('a');
+      expect(list, ['a']);
+    });
+
+    test('addAll', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.addAll(['a']);
+      expect(list, ['a']);
+    });
+
+    test('fillRange', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a', 'b']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.fillRange(0, 2, 'c');
+      expect(list, ['c', 'c']);
+    });
+
+    test('insert', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a', 'b']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.insert(1, 'c');
+      expect(list, ['a', 'c', 'b']);
+    });
+
+    test('insertAll', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a', 'b']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.insertAll(1, ['c']);
+      expect(list, ['a', 'c', 'b']);
+    });
+
+    test('replaceRange', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a', 'b']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.replaceRange(0, 1, ['c']);
+      expect(list, ['c', 'b']);
+    });
+
+    test('setAll', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a', 'b', 'c']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.setAll(1, ['d']);
+      expect(list, ['a', 'd', 'c']);
+    });
+
+    test('setRange', () {
+      final list = MutableTypedDataList(
+        internal: MutableArray(['a', 'b', 'c']),
+        isNullable: false,
+        converter: const IdentityConverter<String>(),
+      );
+      list.setRange(1, 2, ['d']);
+      expect(list, ['a', 'd', 'c']);
+    });
+  });
+
+  group('CachedTypedDataList', () {
+    test('caches values', () {
+      final list = CachedTypedDataList<DateTime?, DateTime?>(
+        MutableTypedDataList(
+          internal: MutableArray([null]),
+          isNullable: true,
+          converter: const DateTimeConverter(),
+        ),
+        growable: true,
+      );
+      final now = DateTime.now();
+
+      list[0] = now;
+      expect(list.first, same(now));
+
+      list.clear();
+      list.add(now);
+      expect(list.first, same(now));
+
+      list.clear();
+      list.addAll([now]);
+      expect(list.first, same(now));
+    });
+
+    test('set length', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.length = 1;
+      expect(list, hasLength(1));
+      expect(list, ['a']);
+    });
+
+    test('[]=', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list[0] = 'b';
+      expect(list, ['b']);
+    });
+
+    test('add', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.add('a');
+      expect(list, ['a']);
+    });
+
+    test('addAll', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.addAll(['a']);
+      expect(list, ['a']);
+    });
+
+    test('fillRange', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.fillRange(0, 2, 'c');
+      expect(list, ['c', 'c']);
+    });
+
+    test('insert', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.insert(1, 'c');
+      expect(list, ['a', 'c', 'b']);
+    });
+
+    test('insertAll', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.insertAll(1, ['c']);
+      expect(list, ['a', 'c', 'b']);
+    });
+
+    test('replaceRange', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.replaceRange(0, 1, ['c']);
+      expect(list, ['c', 'b']);
+    });
+
+    test('setAll', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b', 'c']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.setAll(1, ['d']);
+      expect(list, ['a', 'd', 'c']);
+    });
+
+    test('setRange', () {
+      final list = CachedTypedDataList(
+        MutableTypedDataList(
+          internal: MutableArray(['a', 'b', 'c']),
+          isNullable: false,
+          converter: const IdentityConverter<String>(),
+        ),
+        growable: true,
+      );
+      list.setRange(1, 2, ['d']);
+      expect(list, ['a', 'd', 'c']);
+    });
+  });
 }
