@@ -93,6 +93,7 @@ class DefaultConflictResolver implements ConflictResolver {
 /// Functional version of [TypedConflictResolver].
 ///
 /// {@category Replication}
+/// {@category Typed Data}
 typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
   TypedConflict conflict,
 );
@@ -101,6 +102,7 @@ typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
 /// remote versions of a replicated [Document].
 ///
 /// {@category Replication}
+/// {@category Typed Data}
 abstract class TypedConflictResolver {
   /// Constructor to allow subclasses to extend [TypedConflictResolver].
   const TypedConflictResolver();

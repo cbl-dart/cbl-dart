@@ -80,6 +80,8 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
   Document? conflictingDocument,
 );
 
+/// {@category Database}
+/// {@category Typed Data}
 abstract class SaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> {
   FutureOr<bool> withConcurrencyControl([
@@ -91,6 +93,8 @@ abstract class SaveTypedDocument<D extends TypedDocumentObject,
   );
 }
 
+/// {@category Database}
+/// {@category Typed Data}
 typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     = FutureOr<bool> Function(
@@ -469,6 +473,8 @@ typedef SyncSaveConflictHandler = bool Function(
   Document? conflictingDocument,
 );
 
+/// {@category Database}
+/// {@category Typed Data}
 abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
@@ -486,6 +492,8 @@ abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
   );
 }
 
+/// {@category Database}
+/// {@category Typed Data}
 typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     = bool Function(
@@ -501,6 +509,7 @@ abstract class SyncDatabase implements Database {
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
       SyncDatabase.internal(name, config);
 
+  /// @nodoc
   @internal
   factory SyncDatabase.internal(
     String name, [
@@ -633,6 +642,8 @@ abstract class SyncDatabase implements Database {
   void deleteIndex(String name);
 }
 
+/// {@category Database}
+/// {@category Typed Data}
 abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
@@ -657,6 +668,7 @@ abstract class AsyncDatabase implements Database {
   ]) =>
       openInternal(name, config);
 
+  /// @nodoc
   @internal
   static Future<AsyncDatabase> openInternal(
     String name, [

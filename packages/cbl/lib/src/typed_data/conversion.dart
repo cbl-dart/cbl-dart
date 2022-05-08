@@ -31,6 +31,7 @@ abstract class NonPromotingDataConverter<T> extends DataConverter<T, T> {
   T promote(T value) => value;
 }
 
+/// {@category Typed Data}
 abstract class ScalarConverter<T> {
   const ScalarConverter();
 
@@ -39,6 +40,7 @@ abstract class ScalarConverter<T> {
   Object toData(T value);
 }
 
+/// {@category Typed Data}
 class UnexpectedTypeException implements Exception {
   const UnexpectedTypeException({
     required this.value,
@@ -193,6 +195,7 @@ class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
   Object toUntyped(T value) => converter.toData(value);
 }
 
+/// {@category Typed Data}
 class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
   const EnumNameConverter(this.values);
 
@@ -215,6 +218,7 @@ class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
   Object toData(T value) => value.name;
 }
 
+/// {@category Typed Data}
 class EnumIndexConverter<T extends Enum> extends ScalarConverter<T> {
   const EnumIndexConverter(this.values);
 

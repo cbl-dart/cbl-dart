@@ -1,6 +1,8 @@
 import '../database/database.dart';
 
 /// The location of a database to replicate with.
+///
+/// {@category Replication}
 abstract class Endpoint {}
 
 /// An endpoint representing a server-based database at the given [url].

@@ -5,6 +5,8 @@ import '../document.dart';
 import 'conversion.dart';
 
 /// Annotation for classes that declare a statically typed [Dictionary].
+///
+/// {@category Typed Data}
 @Target({TargetKind.classType})
 class TypedDictionary {
   /// Creates an annotation for a class that declares a statically typed
@@ -13,6 +15,8 @@ class TypedDictionary {
 }
 
 /// Annotation for classes that declare a statically typed [Document].
+///
+/// {@category Typed Data}
 @Target({TargetKind.classType})
 class TypedDocument {
   /// Creates an annotation for class that declares a statically typed
@@ -27,6 +31,8 @@ class TypedDocument {
 
 /// Determines whether a [TypedDictionary] or [TypedDocument] can be
 /// used for a given [Dictionary] or [Document], respectively.
+///
+/// {@category Typed Data}
 @sealed
 abstract class TypeMatcher {
   /// Const constructor to allow subclasses to be const.
@@ -35,6 +41,8 @@ abstract class TypeMatcher {
 
 /// A [TypeMatcher] that matches a [Dictionary] or [Document] if it contains a
 /// fixed [value] at a fixed [path].
+///
+/// {@category Typed Data}
 class ValueTypeMatcher extends TypeMatcher {
   /// Creates a [TypeMatcher] that matches a [Dictionary] or [Document] if it
   /// contains a fixed [value] at a fixed [path].
@@ -65,6 +73,8 @@ class ValueTypeMatcher extends TypeMatcher {
 }
 
 /// Annotation for the field of a typed document that is the document id.
+///
+/// {@category Typed Data}
 @Target({TargetKind.parameter, TargetKind.getter})
 class DocumentId {
   /// Creates an annotation for the field of a typed document that is the
@@ -72,16 +82,19 @@ class DocumentId {
   const DocumentId();
 }
 
+/// {@category Typed Data}
 @Target({TargetKind.getter})
 class DocumentSequence {
   const DocumentSequence();
 }
 
+/// {@category Typed Data}
 @Target({TargetKind.getter})
 class DocumentRevisionId {
   const DocumentRevisionId();
 }
 
+/// {@category Typed Data}
 @Target({TargetKind.parameter})
 class TypedProperty {
   const TypedProperty({
@@ -103,6 +116,7 @@ class TypedProperty {
   final ScalarConverter? converter;
 }
 
+/// {@category Typed Data}
 @Target({TargetKind.classType})
 class TypedDatabase {
   const TypedDatabase({required this.types});

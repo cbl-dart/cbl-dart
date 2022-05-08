@@ -56,6 +56,8 @@ typedef ReplicationFilter = FutureOr<bool> Function(
   Set<DocumentFlag> flags,
 );
 
+/// {@category Replication}
+/// {@category Typed Data}
 typedef TypedReplicationFilter = FutureOr<bool> Function(
   TypedDocumentObject document,
   Set<DocumentFlag> flags,

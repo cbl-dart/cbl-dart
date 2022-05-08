@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart' as meta;
 
+/// {@category Typed Data}
 abstract class TypedDictionaryObject<MD extends Object> {
   /// Internal field that end users should never access.
   ///
@@ -19,12 +20,15 @@ abstract class TypedDictionaryObject<MD extends Object> {
   String toString({String? indent});
 }
 
+/// {@category Typed Data}
 abstract class TypedMutableDictionaryObject<D extends TypedDictionaryObject,
     MD extends TypedDictionaryObject> extends TypedDictionaryObject<MD> {}
 
+/// {@category Typed Data}
 abstract class TypedDocumentObject<MD extends Object>
     implements TypedDictionaryObject<MD> {}
 
+/// {@category Typed Data}
 abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
         MD extends TypedDocumentObject> extends TypedDocumentObject<MD>
     implements TypedMutableDictionaryObject<D, MD> {}

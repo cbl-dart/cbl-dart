@@ -16,6 +16,8 @@ dartdoc:
       markdown: 'doc/logging.md'
     'Tracing':
       markdown: 'doc/tracing.md'
+    'Typed Data':
+      markdown: 'doc/typed-data.md'
   categoryOrder:
     - 'Document'
     - 'Database'
@@ -25,4 +27,5 @@ dartdoc:
     - 'Logging'
     - 'Tracing'
     - 'Enterprise Edition'
+    - 'Typed Data'
   showUndocumentedCategories: true

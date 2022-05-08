@@ -1,12 +1,19 @@
 export 'database/database.dart'
     show
-        Database,
+        AsyncDatabase,
+        AsyncSaveTypedDocument,
         ConcurrencyControl,
+        Database,
+        DatabaseChangeListener,
+        DocumentChangeListener,
         MaintenanceType,
         SaveConflictHandler,
-        SyncSaveConflictHandler,
+        SaveTypedDocument,
         SyncDatabase,
-        AsyncDatabase;
+        SyncSaveConflictHandler,
+        SyncSaveTypedDocument,
+        TypedSaveConflictHandler,
+        TypedSyncSaveConflictHandler;
 export 'database/database_change.dart' show DatabaseChange;
 export 'database/database_configuration.dart'
     show DatabaseConfiguration, EncryptionKey;

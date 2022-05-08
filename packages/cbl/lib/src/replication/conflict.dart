@@ -39,6 +39,7 @@ class ConflictImpl implements Conflict {
 /// representations of the documents.
 ///
 /// {@category Replication}
+/// {@category Typed Data}
 abstract class TypedConflict {
   /// The id of the conflicting [Document].
   String get documentId;
