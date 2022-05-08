@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import 'service/channel.dart' as channel;
 import 'support/utils.dart';
 
@@ -252,6 +254,7 @@ class InvalidJsonException extends CouchbaseLiteException {
 /// A specification of the cause of a [TypedDataException].
 ///
 /// {@category Typed Data}
+@experimental
 enum TypedDataErrorCode {
   /// The database does not support typed data.
   typedDataNotSupported,
@@ -272,6 +275,7 @@ enum TypedDataErrorCode {
 /// Exception throw when there is a failure related to typed data.
 ///
 /// {@category Typed Data}
+@experimental
 class TypedDataException extends CouchbaseLiteException {
   /// Creates an exception which is throw when there is a failure related to
   /// typed data.

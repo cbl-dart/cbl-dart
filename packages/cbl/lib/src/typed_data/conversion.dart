@@ -1,5 +1,7 @@
 // ignore_for_file: one_member_abstracts
 
+import 'package:meta/meta.dart';
+
 import '../document.dart';
 import 'adapter.dart';
 import 'collection.dart';
@@ -48,6 +50,7 @@ abstract class NonPromotingDataConverter<T> extends DataConverter<T, T> {
 /// - [Blob].
 ///
 /// {@category Typed Data}
+@experimental
 abstract class ScalarConverter<T> {
   /// Const constructor to allow subclasses to be const.
   const ScalarConverter();
@@ -65,6 +68,7 @@ abstract class ScalarConverter<T> {
 /// Exception thrown by [ScalarConverter.fromData] when the given value is not
 /// of the expected type.
 /// {@category Typed Data}
+@experimental
 class UnexpectedTypeException implements Exception {
   const UnexpectedTypeException({
     required this.value,
@@ -222,6 +226,7 @@ class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
 /// A [ScalarConverter] that encodes [Enum] values by their name.
 ///
 /// {@category Typed Data}
+@experimental
 class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
   /// Creates a [ScalarConverter] that encodes [Enum] values by their name.
   const EnumNameConverter(this.values);
@@ -249,6 +254,7 @@ class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
 /// A [ScalarConverter] that encodes [Enum] values by their index.
 ///
 /// {@category Typed Data}
+@experimental
 class EnumIndexConverter<T extends Enum> extends ScalarConverter<T> {
   /// Creates a [ScalarConverter] that encodes [Enum] values by their index.
   const EnumIndexConverter(this.values);

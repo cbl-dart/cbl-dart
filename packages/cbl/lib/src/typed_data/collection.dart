@@ -15,6 +15,7 @@ import 'helpers.dart';
 /// and document.
 ///
 /// {@category Typed Data}
+@meta.experimental
 abstract class TypedDataList<T extends E, E> implements List<T> {
   /// Internal field that end users should never access.
   ///

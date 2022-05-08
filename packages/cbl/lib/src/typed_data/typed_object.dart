@@ -5,6 +5,7 @@ import 'package:meta/meta.dart' as meta;
 /// All typed dictionaries have a mutable subtype that has the type [MD].
 ///
 /// {@category Typed Data}
+@meta.experimental
 abstract class TypedDictionaryObject<MD extends Object> {
   /// Internal field that end users should never access.
   ///
@@ -30,6 +31,7 @@ abstract class TypedDictionaryObject<MD extends Object> {
 /// type [D]. [MD] is the self type of the mutable subtype.
 ///
 /// {@category Typed Data}
+@meta.experimental
 abstract class TypedMutableDictionaryObject<D extends TypedDictionaryObject,
     MD extends TypedDictionaryObject> extends TypedDictionaryObject<MD> {}
 
@@ -38,6 +40,7 @@ abstract class TypedMutableDictionaryObject<D extends TypedDictionaryObject,
 /// All typed documents have a mutable subtype that has the type [MD].
 ///
 /// {@category Typed Data}
+@meta.experimental
 abstract class TypedDocumentObject<MD extends Object>
     implements TypedDictionaryObject<MD> {}
 
@@ -47,6 +50,7 @@ abstract class TypedDocumentObject<MD extends Object>
 /// type [D]. [MD] is the self type of the mutable subtype.
 ///
 /// {@category Typed Data}
+@meta.experimental
 abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
         MD extends TypedDocumentObject> extends TypedDocumentObject<MD>
     implements TypedMutableDictionaryObject<D, MD> {}

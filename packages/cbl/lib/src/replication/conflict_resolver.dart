@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../document.dart';
 import '../typed_data.dart';
 import 'configuration.dart';
@@ -96,6 +98,7 @@ class DefaultConflictResolver implements ConflictResolver {
 ///
 /// {@category Replication}
 /// {@category Typed Data}
+@experimental
 typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
   TypedConflict conflict,
 );
@@ -105,6 +108,7 @@ typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
 ///
 /// {@category Replication}
 /// {@category Typed Data}
+@experimental
 abstract class TypedConflictResolver {
   /// Constructor to allow subclasses to extend [TypedConflictResolver].
   const TypedConflictResolver();

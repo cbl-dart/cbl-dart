@@ -93,6 +93,7 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 ///
 /// {@category Database}
 /// {@category Typed Data}
+@experimental
 abstract class SaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> {
   /// Saves the document to the database, resolving conflicts through
@@ -145,6 +146,7 @@ abstract class SaveTypedDocument<D extends TypedDocumentObject,
 ///
 /// {@category Database}
 /// {@category Typed Data}
+@experimental
 typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     = FutureOr<bool> Function(
@@ -271,6 +273,7 @@ abstract class Database implements ClosableResource {
 
   /// Returns the typed document, with type [D] and the given [id], if it
   /// exists.
+  @experimental
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
 
   /// Saves a [document] to this database, resolving conflicts through
@@ -314,6 +317,7 @@ abstract class Database implements ClosableResource {
   /// See also:
   ///
   ///  * [SaveTypedDocument] for the object used to save typed documents.
+  @experimental
   @useResult
   SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
       MD extends TypedMutableDocumentObject>(
@@ -343,6 +347,7 @@ abstract class Database implements ClosableResource {
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
   /// [concurrencyControl]. In this case, if the document could not be deleted
   /// the result is `false`. On success it is `true`.
+  @experimental
   FutureOr<bool> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -358,6 +363,7 @@ abstract class Database implements ClosableResource {
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
   /// The purge will __not__ be replicated to other databases.
+  @experimental
   FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
 
   /// Purges a [Document] from this database by its [id].
@@ -554,6 +560,7 @@ typedef SyncSaveConflictHandler = bool Function(
 ///
 /// {@category Database}
 /// {@category Typed Data}
+@experimental
 abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
@@ -586,6 +593,7 @@ abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
 ///
 /// {@category Database}
 /// {@category Typed Data}
+@experimental
 typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     = bool Function(
@@ -644,6 +652,7 @@ abstract class SyncDatabase implements Database {
   DocumentFragment operator [](String id);
 
   @override
+  @experimental
   D? typedDocument<D extends TypedDocumentObject>(String id);
 
   @override
@@ -662,6 +671,7 @@ abstract class SyncDatabase implements Database {
   );
 
   @override
+  @experimental
   @useResult
   SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
       MD extends TypedMutableDocumentObject>(
@@ -675,6 +685,7 @@ abstract class SyncDatabase implements Database {
   ]);
 
   @override
+  @experimental
   bool deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -684,6 +695,7 @@ abstract class SyncDatabase implements Database {
   void purgeDocument(Document document);
 
   @override
+  @experimental
   void purgeTypedDocument(TypedDocumentObject document);
 
   @override
@@ -740,6 +752,7 @@ abstract class SyncDatabase implements Database {
 ///
 /// {@category Database}
 /// {@category Typed Data}
+@experimental
 abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
@@ -802,6 +815,7 @@ abstract class AsyncDatabase implements Database {
   Future<DocumentFragment> operator [](String id);
 
   @override
+  @experimental
   Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
 
   @override
@@ -817,6 +831,7 @@ abstract class AsyncDatabase implements Database {
   );
 
   @override
+  @experimental
   @useResult
   AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
       MD extends TypedMutableDocumentObject>(
@@ -830,6 +845,7 @@ abstract class AsyncDatabase implements Database {
   ]);
 
   @override
+  @experimental
   Future<bool> deleteTypedDocument(
     TypedDocumentObject document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -839,6 +855,7 @@ abstract class AsyncDatabase implements Database {
   Future<void> purgeDocument(Document document);
 
   @override
+  @experimental
   Future<void> purgeTypedDocument(TypedDocumentObject document);
 
   @override

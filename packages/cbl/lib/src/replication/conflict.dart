@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import '../document.dart';
 import '../typed_data.dart';
 
@@ -40,6 +42,7 @@ class ConflictImpl implements Conflict {
 ///
 /// {@category Replication}
 /// {@category Typed Data}
+@experimental
 abstract class TypedConflict {
   /// The id of the conflicting [Document].
   String get documentId;

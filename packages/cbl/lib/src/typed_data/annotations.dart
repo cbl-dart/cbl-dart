@@ -7,6 +7,7 @@ import 'conversion.dart';
 /// Annotation for classes that are typed dictionaries.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.classType})
 class TypedDictionary {
   /// Creates an annotation for a class that is a typed dictionary.
@@ -17,6 +18,7 @@ class TypedDictionary {
 /// Annotation for classes that are typed documents.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.classType})
 class TypedDocument {
   /// Creates an annotation for a class that is a typed document.
@@ -32,6 +34,7 @@ class TypedDocument {
 /// a specific typed dictionary or document.
 ///
 /// {@category Typed Data}
+@experimental
 @sealed
 abstract class TypeMatcher {
   /// Const constructor to allow subclasses to be const.
@@ -42,6 +45,7 @@ abstract class TypeMatcher {
 /// fixed [value] at a fixed [path].
 ///
 /// {@category Typed Data}
+@experimental
 class ValueTypeMatcher extends TypeMatcher {
   /// Creates a [TypeMatcher] that matches a dictionary or document if it
   /// contains a fixed [value] at a fixed [path].
@@ -74,6 +78,7 @@ class ValueTypeMatcher extends TypeMatcher {
 /// Annotation for the property of a typed document that is the document id.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.parameter, TargetKind.getter})
 class DocumentId {
   /// Creates an annotation for the property of a typed document that is the
@@ -85,6 +90,7 @@ class DocumentId {
 /// sequence.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.getter})
 class DocumentSequence {
   /// Creates an annotation for the property of a typed document that is the
@@ -96,6 +102,7 @@ class DocumentSequence {
 /// revision id.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.getter})
 class DocumentRevisionId {
   /// Creates an annotation for the property of a typed document that is the
@@ -107,6 +114,7 @@ class DocumentRevisionId {
 /// dictionary or document property.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.parameter})
 class TypedProperty {
   /// Creates an annotation for the property of a typed dictionary or document
@@ -133,6 +141,7 @@ class TypedProperty {
 /// Annotation for classes that are typed databases.
 ///
 /// {@category Typed Data}
+@experimental
 @Target({TargetKind.classType})
 class TypedDatabase {
   /// Creates an annotation for a class that is a typed database.

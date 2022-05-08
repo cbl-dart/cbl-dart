@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 import '../database.dart';
 import '../database/database_base.dart';
 import '../document.dart';
@@ -65,6 +67,7 @@ typedef ReplicationFilter = FutureOr<bool> Function(
 ///
 /// {@category Replication}
 /// {@category Typed Data}
+@experimental
 typedef TypedReplicationFilter = FutureOr<bool> Function(
   TypedDocumentObject document,
   Set<DocumentFlag> flags,
@@ -177,6 +180,7 @@ class ReplicatorConfiguration {
   /// endpoint, which receives typed document instances.
   ///
   /// Only documents for which the function returns `true` are replicated.
+  @experimental
   TypedReplicationFilter? typedPushFilter;
 
   /// Filter for validating whether the [Document]s can be pulled from the
@@ -189,6 +193,7 @@ class ReplicatorConfiguration {
   /// remote endpoint, which receives typed document instances.
   ///
   /// Only documents for which the function returns `true` are replicated.
+  @experimental
   TypedReplicationFilter? typedPullFilter;
 
   /// A custom conflict resolver.
@@ -201,6 +206,7 @@ class ReplicatorConfiguration {
   ///
   /// If this value is not set, or set to `null`, the default conflict resolver
   /// will be applied.
+  @experimental
   TypedConflictResolver? typedConflictResolver;
 
   /// Whether to automatically purge a document when the user looses access to
