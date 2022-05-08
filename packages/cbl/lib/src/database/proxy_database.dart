@@ -575,6 +575,8 @@ class _ProxySaveTypedDocument<D extends TypedDocumentObject,
       super.withConcurrencyControl(concurrencyControl) as Future<bool>;
 
   @override
-  Future<bool> withConflictHandler(TypedSaveConflictHandler<D, MD> handler) =>
-      super.withConflictHandler(handler) as Future<bool>;
+  Future<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  ) =>
+      super.withConflictHandler(conflictHandler) as Future<bool>;
 }

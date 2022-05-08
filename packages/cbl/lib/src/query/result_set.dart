@@ -19,11 +19,19 @@ abstract class ResultSet {
   /// must not be used when using a stream.
   Stream<Result> asStream();
 
+  /// Returns a stream which consumes this result set and emits its results as
+  /// typed dictionaries of type [D].
+  ///
+  /// A result set can only be consumed once and listening to the returned
+  /// stream counts as consuming it. Other methods for consuming this result set
+  /// must not be used when using a stream.
   Stream<D> asTypedStream<D extends TypedDictionaryObject>();
 
   /// Consumes this result set and returns a list of all its [Result]s.
   FutureOr<List<Result>> allResults();
 
+  /// Consumes this result set and returns a list of all its results as typed
+  /// dictionaries of type [D].
   FutureOr<List<D>> allTypedResults<D extends TypedDictionaryObject>();
 }
 
@@ -32,6 +40,8 @@ abstract class ResultSet {
 /// {@category Query}
 abstract class SyncResultSet
     implements ResultSet, Iterable<Result>, Iterator<Result> {
+  /// Returns an iterable which consumes this result set and emits its results
+  /// as typed dictionaries of type [D].
   Iterable<D> asTypedIterable<D extends TypedDictionaryObject>();
 
   @override

@@ -546,6 +546,8 @@ class _FfiSaveTypedDocument<D extends TypedDocumentObject,
       super.withConcurrencyControl(concurrencyControl) as bool;
 
   @override
-  bool withConflictHandlerSync(TypedSyncSaveConflictHandler<D, MD> handler) =>
-      withConflictHandler(handler) as bool;
+  bool withConflictHandlerSync(
+    TypedSyncSaveConflictHandler<D, MD> conflictHandler,
+  ) =>
+      withConflictHandler(conflictHandler) as bool;
 }

@@ -42,6 +42,7 @@ enum DocumentFlag {
 /// A function that decides whether a particular [Document] should be
 /// pushed/pulled.
 ///
+/// {@template cbl.ReplicationFilter}
 /// It should not take a long time to return, or it will slow down the
 /// replicator.
 ///
@@ -49,6 +50,7 @@ enum DocumentFlag {
 /// the document.
 ///
 /// Return `true` if the document should be replicated, `false` to skip it.
+/// {@endtemplate}
 ///
 /// {@category Replication}
 typedef ReplicationFilter = FutureOr<bool> Function(
@@ -56,6 +58,11 @@ typedef ReplicationFilter = FutureOr<bool> Function(
   Set<DocumentFlag> flags,
 );
 
+/// A function that decides whether a particular typed document should be
+/// pushed/pulled.
+///
+/// {@macro cbl.ReplicationFilter}
+///
 /// {@category Replication}
 /// {@category Typed Data}
 typedef TypedReplicationFilter = FutureOr<bool> Function(
@@ -166,6 +173,10 @@ class ReplicatorConfiguration {
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pushFilter;
 
+  /// Filter for validating whether the documents can be pushed to the remote
+  /// endpoint, which receives typed document instances.
+  ///
+  /// Only documents for which the function returns `true` are replicated.
   TypedReplicationFilter? typedPushFilter;
 
   /// Filter for validating whether the [Document]s can be pulled from the
@@ -174,6 +185,10 @@ class ReplicatorConfiguration {
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pullFilter;
 
+  /// Filter for validating whether the documents can be pulled from the
+  /// remote endpoint, which receives typed document instances.
+  ///
+  /// Only documents for which the function returns `true` are replicated.
   TypedReplicationFilter? typedPullFilter;
 
   /// A custom conflict resolver.
@@ -182,6 +197,10 @@ class ReplicatorConfiguration {
   /// will be applied.
   ConflictResolver? conflictResolver;
 
+  /// A custom conflict resolver, which receives typed document instances.
+  ///
+  /// If this value is not set, or set to `null`, the default conflict resolver
+  /// will be applied.
   TypedConflictResolver? typedConflictResolver;
 
   /// Whether to automatically purge a document when the user looses access to

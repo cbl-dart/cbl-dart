@@ -167,20 +167,20 @@ class TypedDataRegistry extends TypedDataAdapter {
           };
 
   @override
-  void checkDocumentIsOfType<D extends TypedDocumentObject>(Document doc) {
+  void checkDocumentIsOfType<D extends TypedDocumentObject>(Document document) {
     final metadata =
         _documentMetadataForType[D] ?? _documentMetadataForMutableType[D];
     if (metadata == null) {
       throw _unknownTypeError(D);
     }
 
-    late final matchingMetadata = _documentMetadataByTypedMatcher(doc)
+    late final matchingMetadata = _documentMetadataByTypedMatcher(document)
         .map((metadata) => metadata.dartName)
         .toList();
 
     final typeMatcher = metadata._typeMatcherImpl;
     if (typeMatcher != null) {
-      if (typeMatcher.isMatch(doc)) {
+      if (typeMatcher.isMatch(document)) {
         return;
       }
 

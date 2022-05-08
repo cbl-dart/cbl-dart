@@ -31,15 +31,39 @@ abstract class NonPromotingDataConverter<T> extends DataConverter<T, T> {
   T promote(T value) => value;
 }
 
+/// An object that converts between untyped data and instances of type [T],
+/// which must have value semantics.
+///
+/// Objects returned from [fromData] must be immutable. [toData] must return
+/// a representation of the object, which recreates the object when given to
+/// [fromData]. The data representation must only use:
+///
+/// - `null` (except for the data representation itself),
+/// - [String],
+/// - [int],
+/// - [double],
+/// - [bool],
+/// - [List] (must only use types in this list),
+/// - [Map] (must use [String] keys and only values of types in this list) and
+/// - [Blob].
+///
 /// {@category Typed Data}
 abstract class ScalarConverter<T> {
+  /// Const constructor to allow subclasses to be const.
   const ScalarConverter();
 
+  /// Recreates an object from the given data representation.
+  ///
+  /// If the [value] is not of the expected type, this must throw an
+  /// [UnexpectedTypeException].
   T fromData(Object value);
 
+  /// Returns the data representation of the object.
   Object toData(T value);
 }
 
+/// Exception thrown by [ScalarConverter.fromData] when the given value is not
+/// of the expected type.
 /// {@category Typed Data}
 class UnexpectedTypeException implements Exception {
   const UnexpectedTypeException({
@@ -195,10 +219,14 @@ class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
   Object toUntyped(T value) => converter.toData(value);
 }
 
+/// A [ScalarConverter] that encodes [Enum] values by their name.
+///
 /// {@category Typed Data}
 class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
+  /// Creates a [ScalarConverter] that encodes [Enum] values by their name.
   const EnumNameConverter(this.values);
 
+  /// The list returned from `Enum.values`.
   final List<T> values;
 
   @override
@@ -218,10 +246,14 @@ class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
   Object toData(T value) => value.name;
 }
 
+/// A [ScalarConverter] that encodes [Enum] values by their index.
+///
 /// {@category Typed Data}
 class EnumIndexConverter<T extends Enum> extends ScalarConverter<T> {
+  /// Creates a [ScalarConverter] that encodes [Enum] values by their index.
   const EnumIndexConverter(this.values);
 
+  /// The list returned from `Enum.values`.
   final List<T> values;
 
   @override

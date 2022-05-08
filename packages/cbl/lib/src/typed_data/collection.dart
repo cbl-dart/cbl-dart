@@ -11,6 +11,9 @@ import 'helpers.dart';
 
 // === TypedDataList ===========================================================
 
+/// A list implementation that is used to represent arrays in typed dictionaries
+/// and document.
+///
 /// {@category Typed Data}
 abstract class TypedDataList<T extends E, E> implements List<T> {
   /// Internal field that end users should never access.

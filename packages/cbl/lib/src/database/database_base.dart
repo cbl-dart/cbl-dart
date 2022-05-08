@@ -358,13 +358,15 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
   }
 
   @override
-  FutureOr<bool> withConflictHandler(TypedSaveConflictHandler<D, MD> handler) {
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  ) {
     database.typedDataAdapter!.willSaveDocument(document);
     return database.saveDocumentWithConflictHandlerHelper(
       document.internal as MutableDelegateDocument,
       (documentBeingSaved, conflictingDocument) {
         assert(identical(documentBeingSaved, document.internal));
-        return handler(
+        return conflictHandler(
           document as MD,
           conflictingDocument?.let(_documentFactory),
         );

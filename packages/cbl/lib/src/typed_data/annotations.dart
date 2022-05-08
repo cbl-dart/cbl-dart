@@ -4,33 +4,32 @@ import 'package:meta/meta_meta.dart';
 import '../document.dart';
 import 'conversion.dart';
 
-/// Annotation for classes that declare a statically typed [Dictionary].
+/// Annotation for classes that are typed dictionaries.
 ///
 /// {@category Typed Data}
 @Target({TargetKind.classType})
 class TypedDictionary {
-  /// Creates an annotation for a class that declares a statically typed
+  /// Creates an annotation for a class that is a typed dictionary.
   /// [Dictionary].
   const TypedDictionary();
 }
 
-/// Annotation for classes that declare a statically typed [Document].
+/// Annotation for classes that are typed documents.
 ///
 /// {@category Typed Data}
 @Target({TargetKind.classType})
 class TypedDocument {
-  /// Creates an annotation for class that declares a statically typed
-  /// [Document].
+  /// Creates an annotation for a class that is a typed document.
   const TypedDocument({
     this.typeMatcher = const ValueTypeMatcher(),
   });
 
-  /// The type matcher to use for this typed document.
+  /// The type matcher to use for the typed document.
   final TypeMatcher? typeMatcher;
 }
 
-/// Determines whether a [TypedDictionary] or [TypedDocument] can be
-/// used for a given [Dictionary] or [Document], respectively.
+/// Determines whether a given dictionary or document can be instantiated as
+/// a specific typed dictionary or document.
 ///
 /// {@category Typed Data}
 @sealed
@@ -39,12 +38,12 @@ abstract class TypeMatcher {
   const TypeMatcher();
 }
 
-/// A [TypeMatcher] that matches a [Dictionary] or [Document] if it contains a
+/// A [TypeMatcher] that matches a dictionary or document if it contains a
 /// fixed [value] at a fixed [path].
 ///
 /// {@category Typed Data}
 class ValueTypeMatcher extends TypeMatcher {
-  /// Creates a [TypeMatcher] that matches a [Dictionary] or [Document] if it
+  /// Creates a [TypeMatcher] that matches a dictionary or document if it
   /// contains a fixed [value] at a fixed [path].
   const ValueTypeMatcher({this.path = const ['type'], this.value});
 
@@ -64,7 +63,7 @@ class ValueTypeMatcher extends TypeMatcher {
   /// | Array       | `['typeDescriptors', 0, 'id']` |
   final List<Object> path;
 
-  /// The value that the [Dictionary] or [Document] must contain at
+  /// The value that the dictionary or document must contain at
   /// [path] to match.
   ///
   /// If this is `null`, the name of the class annotated with [TypedDictionary]
@@ -72,31 +71,46 @@ class ValueTypeMatcher extends TypeMatcher {
   final String? value;
 }
 
-/// Annotation for the field of a typed document that is the document id.
+/// Annotation for the property of a typed document that is the document id.
 ///
 /// {@category Typed Data}
 @Target({TargetKind.parameter, TargetKind.getter})
 class DocumentId {
-  /// Creates an annotation for the field of a typed document that is the
+  /// Creates an annotation for the property of a typed document that is the
   /// document id.
   const DocumentId();
 }
 
+/// Annotation for the property of a typed document that is the document
+/// sequence.
+///
 /// {@category Typed Data}
 @Target({TargetKind.getter})
 class DocumentSequence {
+  /// Creates an annotation for the property of a typed document that is the
+  /// document sequence.
   const DocumentSequence();
 }
 
+/// Annotation for the property of a typed document that is the document
+/// revision id.
+///
 /// {@category Typed Data}
 @Target({TargetKind.getter})
 class DocumentRevisionId {
+  /// Creates an annotation for the property of a typed document that is the
+  /// document revision id.
   const DocumentRevisionId();
 }
 
+/// Annotation for the property of a typed dictionary or document that is a
+/// dictionary or document property.
+///
 /// {@category Typed Data}
 @Target({TargetKind.parameter})
 class TypedProperty {
+  /// Creates an annotation for the property of a typed dictionary or document
+  /// that is a dictionary or document property.
   const TypedProperty({
     this.property,
     this.defaultValue,
@@ -116,10 +130,15 @@ class TypedProperty {
   final ScalarConverter? converter;
 }
 
+/// Annotation for classes that are typed databases.
+///
 /// {@category Typed Data}
 @Target({TargetKind.classType})
 class TypedDatabase {
+  /// Creates an annotation for a class that is a typed database.
   const TypedDatabase({required this.types});
 
+  /// The typed dictionary and document types that are supported by the
+  /// database.
   final Set<Type> types;
 }
