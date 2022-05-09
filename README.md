@@ -29,6 +29,7 @@ All Dart code is organized into several [packages].
 | [cbl_flutter_ce]                 | Platform implementation of [cbl_flutter] for the Community Edition                                                                          | [![](https://badgen.net/pub/v/cbl_flutter_ce)](https://pub.dev/packages/cbl_flutter_ce)               |              |
 | [cbl_flutter_ee]                 | Platform implementation of [cbl_flutter] for the Enterprise Edition                                                                         | [![](https://badgen.net/pub/v/cbl_flutter_ee)](https://pub.dev/packages/cbl_flutter_ee)               |              |
 | [cbl_sentry]                     | Sentry integration for Couchbase Lite                                                                                                       | [![](https://badgen.net/pub/v/cbl_sentry)](https://pub.dev/packages/cbl_sentry)                       |              |
+| [cbl_generator]                  | Code generation for Couchbase Lite                                                                                                          | [![](https://badgen.net/pub/v/cbl_generator)](https://pub.dev/packages/cbl_generator)                 |              |
 
 ## Native libraries
 
