@@ -535,8 +535,7 @@ classes can be used with specialized APIs of [`Database`][database],
    @TypedDocument()
    abstract class User with _$User {
      factory User({
-       @DocumentId()
-       String? id,
+       @DocumentId() String? id,
        required PersonalName name,
        String? email,
        required String username,

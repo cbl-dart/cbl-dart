@@ -8,8 +8,7 @@ part 'user.cbl.type.g.dart';
 @TypedDocument()
 abstract class User with _$User {
   factory User({
-    @DocumentId()
-    String? id,
+    @DocumentId() String? id,
     required PersonalName name,
     String? email,
     required String username,
