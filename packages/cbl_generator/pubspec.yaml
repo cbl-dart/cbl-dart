@@ -1,7 +1,14 @@
 name: cbl_generator
+version: 0.1.0
+description:
+  Code generator for Couchbase Lite, which is an embedded, NoSQL JSON Document
+  Style database.
+homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_generator
+repository: https://github.com/cbl-dart/cbl-dart
+issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
+
 environment:
   sdk: '>=2.16.0 <3.0.0'
-publish_to: none
 
 dependencies:
   analyzer: ^4.0.0
@@ -16,6 +23,8 @@ dependencies:
 dependency_overrides:
   cbl:
     path: ../cbl
+  cbl_ffi:
+    path: ../cbl_ffi
 
 dev_dependencies:
   build_runner: ^2.1.10

@@ -1,5 +1,5 @@
-[![Version](https://badgen.net/pub/v/cbl_dart)](https://pub.dev/packages/cbl_dart)
-[![License](https://badgen.net/pub/license/cbl_dart)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_dart/LICENSE)
+[![Version](https://badgen.net/pub/v/cbl_generator)](https://pub.dev/packages/cbl_generator)
+[![License](https://badgen.net/pub/license/cbl_generator)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_generator/LICENSE)
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
@@ -52,48 +52,25 @@ Couchbase Lite you use.
 | [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
 | [cbl_generator]  | generated Dart code to access data trough a typed data model.                                              | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
 
-# 🎯 Platform Support
-
-| Platform | Version                |
-| -------: | :--------------------- |
-|    macOS | >= 10.14               |
-|    Linux | == Ubuntu 20.04-x86_64 |
-|  Windows | >= 10                  |
-
 # 🔌 Getting Started
 
-1. Add [`cbl`][cbl] and `cbl_dart` as dependencies:
+1. After setting up your app for use with [`cbl`][cbl], add `cbl_generator` and
+   `build_runner` as development dependencies:
 
    ```yaml
-   dependencies:
-     cbl: ...
-     cbl_dart: ...
+   dev_dependencies:
+     cbl_generator: ...
+     build_runner: ...
    ```
 
-1. Initialize Couchbase Lite before using it. This is also where you select the
-   edition of Couchbase Lite you want to use:
+2. Annotate Dart code with [typed data annotations][typed data docs].
 
-   ```dart
-   import 'package:cbl_dart/cbl_dart.dart';
-
-   Future<void> initCouchbaseLite() async {
-     await CouchbaseLiteDart.init(edition: Edition.community);
-   }
+3. Run the build runner to invoke the generator:
+   ```shell
+   dart run build_runner build
+   # or
+   flutter run build_runner build
    ```
-
-   Note that `init` downloads the needed native libraries if they have not
-   already been cached. See the documentation for
-   [`CouchbaseLiteDart.init`](https://pub.dev/documentation/cbl_dart/latest/cbl_dart/CouchbaseLiteDart/init.html)
-   for more information.
-
-   > ⚖️ You need to comply with the Couchbase licensing terms of the edition of
-   > Couchbase Lite you select.
-
-# Default database directory
-
-When opening a database without specifying a directory, the current working
-directory will be used. `CouchbaseLiteDart.init` allows you to specify a
-different default directory.
 
 # 💡 Where to go next
 
@@ -114,4 +91,4 @@ different default directory.
 [cbl_generator]: https://pub.dev/packages/cbl_generator
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
 [discussions]: https://github.com/cbl-dart/cbl-dart/discussions
-[sync gateway]: https://www.couchbase.com/sync-gateway
+[typed data docs]: https://pub.dev/packages/cbl#-typed-data
