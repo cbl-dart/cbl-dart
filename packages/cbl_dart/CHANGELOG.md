@@ -1,3 +1,7 @@
+## 1.1.0+0
+
+ - **FEAT**: add experimental support for typed data (#359). ([2c9a7d9e](https://github.com/cbl-dart/cbl-dart/commit/2c9a7d9ea94e50ad96354c785ce62d6a437b34bd))
+
 ## 1.1.0
 
  - **FEAT**: distribute CBL C 3.0.1. ([b1d85636](https://github.com/cbl-dart/cbl-dart/commit/b1d85636251408d4af26247ef813f5e224ba7430))

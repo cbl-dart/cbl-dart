@@ -29,6 +29,6 @@ dependency_overrides:
 dev_dependencies:
   build_runner: ^2.1.10
   build_test: ^2.1.5
-  cbl_dart: ^1.1.0
+  cbl_dart: ^1.1.0+0
   path: ^1.8.0
   test: ^1.21.0
