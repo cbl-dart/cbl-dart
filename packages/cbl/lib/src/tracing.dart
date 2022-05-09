@@ -229,6 +229,8 @@ class NativeCallOp extends TracedOperation {
 }
 
 /// A call over a communication channel.
+///
+/// {@category Tracing}
 class ChannelCallOp extends TracedOperation {
   ChannelCallOp(String name) : super(name);
 }
@@ -271,6 +273,8 @@ class CloseDatabaseOp extends DatabaseOperationOp {
 }
 
 /// Operation that involves a [Document].
+///
+/// {@category Tracing}
 abstract class DocumentOperationOp implements TracedOperation {
   /// The document involved in this operation.
   Document get document;
@@ -366,6 +370,8 @@ typedef OperationFilter = bool Function(TracedOperation operation);
 
 /// Returns a new [OperationFilter] that combines the provided filters through
 /// an AND operation.
+///
+/// {@category Tracing}
 OperationFilter combineOperationFilters(List<OperationFilter> filters) =>
     (operation) {
       for (final filter in filters) {

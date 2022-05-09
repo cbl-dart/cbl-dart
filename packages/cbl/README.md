@@ -42,14 +42,15 @@ need the `cbl` package. All of the APIs of Couchbase Lite live in this package.
 What other packages you need depends on the app platform and the edition of
 Couchbase Lite you use.
 
-| Package          | Required when you want to:                                                                                 | Pub                                          | Likes                                         | Points                                         | Popularity                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
-| [cbl]            | use Couchbase Lite.                                                                                        | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)         | ![](https://badgen.net/pub/points/cbl)         | ![](https://badgen.net/pub/popularity/cbl)         |
-| [cbl_dart]       | use the **Community** or **Enterprise Edition** in a **standalone Dart** app or in **Flutter unit tests**. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)    | ![](https://badgen.net/pub/points/cbl_dart)    | ![](https://badgen.net/pub/popularity/cbl_dart)    |
-| [cbl_flutter]    | use Couchbase Lite in a **Flutter app**.                                                                   | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter) | ![](https://badgen.net/pub/points/cbl_flutter) | ![](https://badgen.net/pub/popularity/cbl_flutter) |
-| [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                               |                                                |                                                    |
-| [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                               |                                                |                                                    |
-| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)  | ![](https://badgen.net/pub/points/cbl_sentry)  | ![](https://badgen.net/pub/popularity/cbl_sentry)  |
+| Package          | Required when you want to:                                                                                 | Pub                                          | Likes                                           | Points                                           | Popularity                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------- |
+| [cbl]            | use Couchbase Lite.                                                                                        | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)           | ![](https://badgen.net/pub/points/cbl)           | ![](https://badgen.net/pub/popularity/cbl)           |
+| [cbl_dart]       | use the **Community** or **Enterprise Edition** in a **standalone Dart** app or in **Flutter unit tests**. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)      | ![](https://badgen.net/pub/points/cbl_dart)      | ![](https://badgen.net/pub/popularity/cbl_dart)      |
+| [cbl_flutter]    | use Couchbase Lite in a **Flutter app**.                                                                   | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter)   | ![](https://badgen.net/pub/points/cbl_flutter)   | ![](https://badgen.net/pub/popularity/cbl_flutter)   |
+| [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                                 |                                                  |                                                      |
+| [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                                 |                                                  |                                                      |
+| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
+| [cbl_generator]  | generated Dart code to access data trough a typed data model.                                              | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
 
 ### Table of contents
 
@@ -71,6 +72,8 @@ Couchbase Lite you use.
   - [Build a `Query` with N1QL](#build-a-query-with-n1ql)
   - [Data sync with `Replicator` to Sync Gateway](#data-sync-with-replicator-to-sync-gateway)
 - [🔮 Tracing](#-tracing)
+- [🗂️ Typed Data](#️-typed-data)
+  - [Getting started](#getting-started)
 - [💡 Where to go next](#-where-to-go-next)
 - [🤝 Contributing](#-contributing)
 - [Prior work](#prior-work)
@@ -494,6 +497,113 @@ await TracingDelegate.install(DevToolsTracing());
 The Sentry integration provided by [`cbl_sentry`][cbl_sentry] installs a
 `TracingDelegate` to transparently record breadcrumbs and transaction spans.
 
+# 🗂️ Typed Data
+
+> ⚠️ The typed data API is **experimental** and might be missing some feature
+> that you need. Please file an [issue][issues] if you find a bug or have a
+> feature request.
+
+`cbl` allows dynamic access to data without a fixed data model, not requiring
+any code generation. This is useful when the data is very dynamic or code
+generation is undesirable.
+
+Often though, the data is known to have a regular structure, and accessing it
+through a typed Dart API makes working with it easier and safer.
+
+With the help of the [`cbl_generator`][cbl_generator] package you can quickly
+create Dart classes that can be used to access data in a typed way. Theses
+classes can be used with specialized APIs of [`Database`][database],
+[`Query`][query] and [`Replicator`][replicator].
+
+## Getting started
+
+1. Setup the [`cbl_generator`][cbl_generator] package.
+2. Create typed data classes and annotated them with `@TypedDocument` and
+   `@TypedDictionary`:
+
+   ```dart
+   // user.dart
+
+   import 'package:cbl/cbl.dart';
+
+   // Declare the part file into which the generated code will be written.
+   part 'user.cbl.type.g.dart';
+
+   // Per default the type of a document is encoded in the `type` property of the underlying data.
+   // The value is a string that is the name of the annotated class. This can be customized by
+   // setting `TypedDocument.typeMatcher`.
+   @TypedDocument()
+   abstract class User with _$User {
+     factory User({
+       @DocumentId() String? id,
+       required PersonalName name,
+       String? email,
+       required String username,
+       required DateTime createdAt,
+     }) = MutableUser;
+   }
+
+   @TypedDictionary()
+   abstract class PersonalName with _$PersonalName {
+     factory PersonalName({
+       required String first,
+       required String last,
+     }) = MutablePersonalName;
+   }
+   ```
+
+3. Create a typed database by annotating a class with `@TypedDatabase`:
+
+   ```dart
+   // app_database.dart
+
+   import 'package:cbl/cbl.dart';
+
+   import 'user.dart';
+
+   @TypedDatabase(
+     // List all the typed data classes that will be used in the database.
+     types: {
+       User,
+       PersonalName,
+     },
+   )
+   abstract class $AppDatabase {}
+   ```
+
+4. Open an instance of the typed database and use it:
+
+   ```dart
+   import 'app_database.cbl.database.g.dart';
+   import 'user.dart';
+
+   Future<void> useTypedDatabase() {
+     // Use a static method on the generated typed database class to open an instance.
+     final db = await AppDatabase.openAsync('app');
+
+     // Every typed data class has a mutable and immutable variant. The mutable
+     // class has the same name as the immutable class, but with the `Mutable`
+     // suffix. A mutable instance can be created though by constructing it, or from
+     // an immutable instance, through the `toMutable` method.
+     final user = MutableUser(
+       name: PersonalName(first: 'Alice', last: 'Green'),
+       email: 'alice@belden.com',
+       username: 'ali',
+       createdAt: DateTime.now(),
+     );
+
+     // The API to save typed documents is slightly different than the API to
+     // save plain documents. `saveTypedDocument` returns an object that has methods
+     // for saving the document with conflict resolution through concurrency control or
+     // a custom conflict handler.
+     await db.saveTypedDocument(user).withConcurrencyControl();
+
+     // To retrieve a typed document, use the `typedDocument` method and pass it the
+     // type of the requested document through the type parameter.
+     final savedUser = await db.typedDocument<User>(user.id);
+   }
+   ```
+
 # 💡 Where to go next
 
 - [API Reference]: The Dart API is well documented and organized into topics.
@@ -540,6 +650,7 @@ valuable references for making decisions about how to approach this project.
 [cbl_flutter_ce]: https://pub.dev/packages/cbl_flutter_ce
 [cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
 [cbl_sentry]: https://pub.dev/packages/cbl_sentry
+[cbl_generator]: https://pub.dev/packages/cbl_generator
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
 [discussions]: https://github.com/cbl-dart/cbl-dart/discussions
 [sync gateway]: https://www.couchbase.com/sync-gateway

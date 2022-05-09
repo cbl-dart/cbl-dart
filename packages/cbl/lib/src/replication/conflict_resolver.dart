@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../document.dart';
+import '../typed_data.dart';
 import 'configuration.dart';
 import 'conflict.dart';
 import 'replicator.dart';
@@ -30,6 +33,7 @@ abstract class ConflictResolver {
   /// Resolves the [conflict] between the local and the remote version of
   /// a [Document].
   ///
+  /// {@template cbl.ConflictResolver.resolve}
   /// This method will be invoked when the [Replicator] finds a newer
   /// server-side revision of a document that also has local changes. The local
   /// and remote changes must be resolved before the document can be pushed to
@@ -49,6 +53,7 @@ abstract class ConflictResolver {
   /// [Conflict.remoteDocument], or you can create a mutable copy of either one
   /// and modify it appropriately. Alternatively return `null` if the resolution
   /// is to delete the document.
+  /// {@endtemplate}
   FutureOr<Document?> resolve(Conflict conflict);
 }
 
@@ -87,4 +92,47 @@ class DefaultConflictResolver implements ConflictResolver {
       return remoteDocument;
     }
   }
+}
+
+/// Functional version of [TypedConflictResolver].
+///
+/// {@category Replication}
+/// {@category Typed Data}
+@experimental
+typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
+  TypedConflict conflict,
+);
+
+/// An object which is able to resolve a [TypedConflict] between the local and
+/// remote versions of a replicated document.
+///
+/// {@category Replication}
+/// {@category Typed Data}
+@experimental
+abstract class TypedConflictResolver {
+  /// Constructor to allow subclasses to extend [TypedConflictResolver].
+  const TypedConflictResolver();
+
+  /// Creates a [TypedConflictResolver] from a function which is called to
+  /// resolve the conflict.
+  factory TypedConflictResolver.from(
+    TypedConflictResolverFunction resolve,
+  ) =>
+      _FunctionTypedConflictResolver(resolve);
+
+  /// Resolves the [conflict] between the local and the remote version of
+  /// a document.
+  ///
+  /// {@macro cbl.ConflictResolver.resolve}
+  FutureOr<TypedDocumentObject?> resolve(TypedConflict conflict);
+}
+
+class _FunctionTypedConflictResolver implements TypedConflictResolver {
+  _FunctionTypedConflictResolver(this._resolve);
+
+  final TypedConflictResolverFunction _resolve;
+
+  @override
+  FutureOr<TypedDocumentObject?> resolve(TypedConflict conflict) =>
+      _resolve(conflict);
 }

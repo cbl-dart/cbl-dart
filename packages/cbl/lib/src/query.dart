@@ -42,7 +42,7 @@ export 'query/query_builder.dart'
     show SyncQueryBuilder, QueryBuilder, AsyncQueryBuilder;
 export 'query/query_change.dart' show QueryChange;
 export 'query/result.dart' show Result;
-export 'query/result_set.dart' show ResultSet, SyncResultSet;
+export 'query/result_set.dart' show AsyncResultSet, ResultSet, SyncResultSet;
 export 'query/router/from_router.dart'
     show SyncFromRouter, FromRouter, AsyncFromRouter;
 export 'query/router/group_by_router.dart'

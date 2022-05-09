@@ -88,7 +88,7 @@ jobs:
     name: Dart unit tests
     strategy:
       matrix:
-        package: [cbl, cbl_sentry]
+        package: [cbl, cbl_sentry, cbl_generator]
         dart: [stable, beta]
         embedder: [standalone]
         os: [Ubuntu]
@@ -118,11 +118,27 @@ jobs:
       - name: Bootstrap Dart package
         run: ./tools/ci-steps.sh bootstrapPackage
 
+      - name: Run build_runner
+        if: ${{ matrix.package == 'cbl_generator' }}
+        run: ./tools/ci-steps.sh checkBuildRunnerOutput
+
       - name: Run tests
         working-directory: packages/${{ matrix.package }}
         # TODO(blaugold): Actually use `dart` to run test, once its possible to override
         # local dependencies. Review ./tools/ci-steps.sh uploadCoverageData.
-        run: flutter test --coverage
+        run: |
+          case ${{ matrix.package }} in
+            cbl_generator)
+              # `flutter test` does not support `dart:mirrors`, which is used by some of the code
+              # gen packages.
+              # Running the test like this means that cbl_generator is not included in the code
+              # coverage report for now.
+              dart test
+              ;;
+            *)
+              flutter test --coverage
+              ;;
+          esac
 
       - name: Upload coverage data
         if: ${{ matrix.dart == 'stable' }}

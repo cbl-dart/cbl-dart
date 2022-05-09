@@ -171,6 +171,8 @@ class ResultImpl with IterableMixin<String> implements Result {
   late final ArrayImpl _array = _createArray();
   late final DictionaryImpl _dictionary = _createDictionary();
 
+  Dictionary get asDictionary => _dictionary;
+
   @override
   Iterator<String> get iterator => _columnNames.iterator;
 

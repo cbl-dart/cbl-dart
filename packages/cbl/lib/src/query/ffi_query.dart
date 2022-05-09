@@ -4,6 +4,7 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../database/database_base.dart';
 import '../database/ffi_database.dart';
 import '../document/common.dart';
 import '../fleece/containers.dart' as fl;
@@ -18,6 +19,7 @@ import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
+import '../typed_data.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'join.dart';
@@ -210,23 +212,41 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
     required FfiQuery query,
     required List<String> columnNames,
     required String debugCreator,
-  })  : _columnNames = columnNames,
+  })  : _database = query.database!,
+        _columnNames = columnNames,
         _iterator = ResultSetIterator(
           pointer,
           debugCreator: debugCreator,
         ),
         _context = createResultSetMContext(query.database!);
 
+  final DatabaseBase _database;
   final List<String> _columnNames;
   final ResultSetIterator _iterator;
+
   final DatabaseMContext _context;
-  Result? _current;
+  ResultImpl? _current;
+
+  @override
+  Iterable<D> asTypedIterable<D extends TypedDictionaryObject>() {
+    final adapter = _database.useWithTypedData();
+    return map((_) => _current!.asDictionary)
+        .map(adapter.dictionaryFactoryForType<D>());
+  }
 
   @override
   Stream<Result> asStream() => Stream.fromIterable(this);
 
   @override
-  FutureOr<List<Result>> allResults() => toList();
+  Stream<D> asTypedStream<D extends TypedDictionaryObject>() =>
+      Stream.fromIterable(asTypedIterable<D>());
+
+  @override
+  List<Result> allResults() => toList();
+
+  @override
+  List<D> allTypedResults<D extends TypedDictionaryObject>() =>
+      asTypedIterable<D>().toList();
 
   @override
   Iterator<Result> get iterator => this;

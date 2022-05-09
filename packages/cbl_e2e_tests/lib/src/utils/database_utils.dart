@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'dart:async';
 import 'dart:io';
 
@@ -10,6 +12,7 @@ import 'package:cbl/src/service/channel.dart';
 import 'package:cbl/src/service/serialization/json_packet_codec.dart';
 import 'package:cbl/src/support/encoding.dart';
 import 'package:cbl/src/support/utils.dart';
+import 'package:cbl/src/typed_data_internal.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import '../test_binding.dart';
@@ -60,17 +63,20 @@ FutureOr<Database> openTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
+  TypedDataAdapter? typedDataAdapter,
 }) =>
     runWithApi(
       sync: () => openSyncTestDatabase(
         name: name,
         config: config,
         tearDown: tearDown,
+        typedDataAdapter: typedDataAdapter,
       ),
       async: () => openAsyncTestDatabase(
         name: name,
         config: config,
         tearDown: tearDown,
+        typedDataAdapter: typedDataAdapter,
         isolate: isolate.value,
       ),
     );
@@ -79,13 +85,16 @@ SyncDatabase openSyncTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
+  TypedDataAdapter? typedDataAdapter,
 }) {
   config ??= DatabaseConfiguration(directory: databaseDirectoryForTest());
 
   // Ensure directory exists.
   File(config.directory).parent.createSync(recursive: true);
 
-  final db = SyncDatabase(name, config);
+  final db = typedDataAdapter != null
+      ? SyncDatabase.internal(name, config, typedDataAdapter)
+      : SyncDatabase(name, config);
 
   if (tearDown) {
     addTearDown(db.close);
@@ -98,6 +107,7 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
+  TypedDataAdapter? typedDataAdapter,
   Isolate isolate = Isolate.worker,
   bool? usePublicApi,
 }) async {
@@ -110,11 +120,14 @@ Future<AsyncDatabase> openAsyncTestDatabase({
 
   final AsyncDatabase db;
   if (usePublicApi == true) {
-    db = await AsyncDatabase.open(name, config);
+    db = await (typedDataAdapter != null
+        ? AsyncDatabase.openInternal(name, config, typedDataAdapter)
+        : AsyncDatabase.open(name, config));
   } else {
     db = await ProxyDatabase.open(
       name: name,
       config: config,
+      typedDataAdapter: typedDataAdapter,
       client: _sharedIsolateClient(isolate),
       encodingFormat:
           // To cover both transferring encoded data and Fleece values we use

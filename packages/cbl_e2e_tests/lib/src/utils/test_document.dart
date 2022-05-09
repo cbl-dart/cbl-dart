@@ -17,17 +17,23 @@ void setupTestDocument() {
 
 /// Returns a matcher which checks that the matched value is a [Document] with
 /// [testDocumentId] which has [value] in its properties.
-Matcher isTestDocument(String value) => isA<Document>()
-    .having((it) => it.id, 'id', testDocumentId)
-    .having((it) => it.toPlainMap(), 'toPlainMap()', {'value': value});
+Matcher isTestDocument(String value) =>
+    isA<Document>().having((it) => it.id, 'id', testDocumentId).having(
+      (it) => it.toPlainMap()..remove('type'),
+      'toPlainMap()',
+      {'value': value},
+    );
 
 extension TestDocumentDatabaseExtension on Database {
   /// Writes [value] in the properties of the test document. If its does not
   /// exist already in this database, it is created.
-  Future<Document> writeTestDocument(String value) async {
+  Future<Document> writeTestDocument(String value, {String? type}) async {
     final doc = (await getTestDocumentOrNull()) ?? MutableDocument();
     testDocumentId ??= doc.id;
     doc.setValue(value, key: 'value');
+    if (type != null) {
+      doc.setValue(type, key: 'type');
+    }
     await saveDocument(doc);
     return doc;
   }

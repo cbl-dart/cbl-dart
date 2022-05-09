@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/fragment.dart';
@@ -12,6 +14,8 @@ import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../tracing.dart';
+import '../typed_data.dart';
+import '../typed_data/adapter.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
@@ -44,7 +48,7 @@ enum MaintenanceType {
   integrityCheck,
 }
 
-/// Custom conflict handler for saving or deleting a document.
+/// Custom conflict handler for saving a document.
 ///
 /// {@template cbl.SaveConflictHandler}
 /// This handler is called if the save would cause a conflict, i.e. if the
@@ -68,12 +72,86 @@ enum MaintenanceType {
 /// See also:
 ///
 ///  * [Database.saveDocumentWithConflictHandler] for saving a [Document] with
-///    a custom async conflict handler.
+///    a custom conflict handler.
 ///
 /// {@category Database}
 typedef SaveConflictHandler = FutureOr<bool> Function(
   MutableDocument documentBeingSaved,
   Document? conflictingDocument,
+);
+
+// ignore: unused_result
+/// The result of [Database.saveTypedDocument], which needs to be used to
+/// actually save the document.
+///
+/// See also:
+///
+///  * [SyncSaveTypedDocument] for the synchronous version of this class, which
+///    is returned from [SyncDatabase.saveTypedDocument].
+///  * [AsyncSaveTypedDocument] for the asynchronous version of this class,
+///    which is returned from [AsyncDatabase.saveTypedDocument].
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+abstract class SaveTypedDocument<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> {
+  /// Saves the document to the database, resolving conflicts through
+  /// [ConcurrencyControl].
+  ///
+  /// When write operations are executed concurrently, the last writer will win
+  /// by default. In this case the result is always `true`.
+  ///
+  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
+  /// [concurrencyControl]. In this case, if the document could not be saved
+  /// the result is `false`. On success it is `true`.
+  FutureOr<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  /// Saves the document to the database, resolving conflicts with a
+  /// [conflictHandler].
+  ///
+  /// {@macro cbl.Database.saveDocumentWithConflictHandler}
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  );
+}
+
+/// Custom conflict handler for saving a typed document.
+///
+/// {@template cbl.TypedSaveConflictHandler}
+/// This handler is called if the save would cause a conflict, i.e. if the
+/// document in the database has been updated (probably by a pull replicator, or
+/// by application code) since it was loaded into the document being saved.
+///
+/// The [documentBeingSaved] (same as the parameter you passed to
+/// [SaveTypedDocument.withConflictHandler].) may be modify by the callback
+/// as necessary to resolve the conflict.
+///
+/// The handler receives the revision of the [conflictingDocument] currently in
+/// the database, which has been changed since [documentBeingSaved] was loaded.
+/// It can be be `null`, meaning that the document has been deleted.
+///
+/// The handler has to make a decision by returning `true` to save the document
+/// or `false` to abort the save.
+///
+/// If the handler throws the save will be aborted.
+/// {@endtemplate}
+///
+/// See also:
+///
+///  * [SaveTypedDocument.withConflictHandler] for saving a typed document with
+///    a custom conflict handler.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
+        MD extends TypedMutableDocumentObject>
+    = FutureOr<bool> Function(
+  MD documentBeingSaved,
+  D? conflictingDocument,
 );
 
 /// Listener which is called when one or more [Document]s in a [Database] have
@@ -193,6 +271,11 @@ abstract class Database implements ClosableResource {
   /// Returns the [DocumentFragment] for the [Document] with the given [id].
   FutureOr<DocumentFragment> operator [](String id);
 
+  /// Returns the typed document, with type [D] and the given [id], if it
+  /// exists.
+  @experimental
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
   /// Saves a [document] to this database, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -224,6 +307,23 @@ abstract class Database implements ClosableResource {
     SaveConflictHandler conflictHandler,
   );
 
+  /// Creates and returns an object, which can be used to save a typed
+  /// [document] to this database.
+  ///
+  /// A call to this method will not save the document to the database.
+  /// Call one of the methods of the returned object to finally save the
+  /// [document].
+  ///
+  /// See also:
+  ///
+  ///  * [SaveTypedDocument] for the object used to save typed documents.
+  @experimental
+  @useResult
+  SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
   /// Deletes a [document] from this database, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -238,11 +338,33 @@ abstract class Database implements ClosableResource {
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
+  /// Deletes a typed [document] from this database, resolving conflicts through
+  /// [ConcurrencyControl].
+  ///
+  /// When write operations are executed concurrently, the last writer will win
+  /// by default. In this case the result is always `true`.
+  ///
+  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
+  /// [concurrencyControl]. In this case, if the document could not be deleted
+  /// the result is `false`. On success it is `true`.
+  @experimental
+  FutureOr<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
   /// Purges a [document] from this database.
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
   /// The purge will __not__ be replicated to other databases.
   FutureOr<void> purgeDocument(Document document);
+
+  /// Purges a typed [document] from this database.
+  ///
+  /// This is more drastic than deletion: It removes all traces of the document.
+  /// The purge will __not__ be replicated to other databases.
+  @experimental
+  FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
 
   /// Purges a [Document] from this database by its [id].
   ///
@@ -417,7 +539,7 @@ abstract class Database implements ClosableResource {
   FutureOr<void> deleteIndex(String name);
 }
 
-/// Custom sync conflict handler for saving or deleting a document.
+/// Custom sync conflict handler for saving a document.
 ///
 /// {@macro cbl.SaveConflictHandler}
 ///
@@ -432,18 +554,75 @@ typedef SyncSaveConflictHandler = bool Function(
   Document? conflictingDocument,
 );
 
+// ignore: unused_result
+/// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
+/// actually save the document.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+  @override
+  bool withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  FutureOr<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  );
+
+  /// Saves the document to the database, resolving conflicts with a sync
+  /// [conflictHandler].
+  ///
+  /// {@macro cbl.Database.saveDocumentWithConflictHandler}
+  bool withConflictHandlerSync(
+    TypedSyncSaveConflictHandler<D, MD> conflictHandler,
+  );
+}
+
+/// Custom sync conflict handler for saving a typed document.
+///
+/// {@macro cbl.TypedSaveConflictHandler}
+///
+/// See also:
+///
+///  * [SyncSaveTypedDocument.withConflictHandlerSync] for saving a typed
+///    document with a custom sync conflict handler.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
+        MD extends TypedMutableDocumentObject>
+    = bool Function(
+  MD documentBeingSaved,
+  D? conflictingDocument,
+);
+
 /// A [Database] with a primarily synchronous API.
 ///
 /// {@category Database}
 abstract class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
+      SyncDatabase.internal(name, config);
+
+  /// @nodoc
+  @internal
+  factory SyncDatabase.internal(
+    String name, [
+    DatabaseConfiguration? config,
+    TypedDataAdapter? typedDataAdapter,
+  ]) =>
       syncOperationTracePoint(
         () => OpenDatabaseOp(name, config),
         () => FfiDatabase(
           name: name,
           config: config,
-          debugCreator: 'SyncDatabase()',
+          typedDataAdapter: typedDataAdapter,
+          debugCreator: 'SyncDatabase.internal()',
         ),
       );
 
@@ -473,6 +652,10 @@ abstract class SyncDatabase implements Database {
   DocumentFragment operator [](String id);
 
   @override
+  @experimental
+  D? typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   bool saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -488,13 +671,32 @@ abstract class SyncDatabase implements Database {
   );
 
   @override
+  @experimental
+  @useResult
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
+  @override
   bool deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
   @override
+  @experimental
+  bool deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
   void purgeDocument(Document document);
+
+  @override
+  @experimental
+  void purgeTypedDocument(TypedDocumentObject document);
 
   @override
   void purgeDocumentById(String id);
@@ -544,6 +746,26 @@ abstract class SyncDatabase implements Database {
   void deleteIndex(String name);
 }
 
+// ignore: unused_result
+/// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
+/// actually save the document.
+///
+/// {@category Database}
+/// {@category Typed Data}
+@experimental
+abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+  @override
+  Future<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
+  Future<bool> withConflictHandler(
+    TypedSaveConflictHandler<D, MD> conflictHandler,
+  );
+}
+
 /// A [Database] with a primarily asynchronous API.
 ///
 /// {@category Database}
@@ -553,9 +775,18 @@ abstract class AsyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? config,
   ]) =>
+      openInternal(name, config);
+
+  /// @nodoc
+  @internal
+  static Future<AsyncDatabase> openInternal(
+    String name, [
+    DatabaseConfiguration? config,
+    TypedDataAdapter? typedDataAdapter,
+  ]) =>
       asyncOperationTracePoint(
         () => OpenDatabaseOp(name, config),
-        () => WorkerDatabase.open(name, config),
+        () => WorkerDatabase.open(name, config, typedDataAdapter),
       );
 
   /// {@macro cbl.Database.remove}
@@ -584,6 +815,10 @@ abstract class AsyncDatabase implements Database {
   Future<DocumentFragment> operator [](String id);
 
   @override
+  @experimental
+  Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   Future<bool> saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -596,13 +831,32 @@ abstract class AsyncDatabase implements Database {
   );
 
   @override
+  @experimental
+  @useResult
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
+  @override
   Future<bool> deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
   @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
   Future<void> purgeDocument(Document document);
+
+  @override
+  @experimental
+  Future<void> purgeTypedDocument(TypedDocumentObject document);
 
   @override
   Future<void> purgeDocumentById(String id);

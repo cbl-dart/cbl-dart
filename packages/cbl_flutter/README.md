@@ -42,14 +42,15 @@ need the `cbl` package. All of the APIs of Couchbase Lite live in this package.
 What other packages you need depends on the app platform and the edition of
 Couchbase Lite you use.
 
-| Package          | Required when you want to:                                                                                 | Pub                                          | Likes                                         | Points                                         | Popularity                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------- | ---------------------------------------------- | -------------------------------------------------- |
-| [cbl]            | use Couchbase Lite.                                                                                        | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)         | ![](https://badgen.net/pub/points/cbl)         | ![](https://badgen.net/pub/popularity/cbl)         |
-| [cbl_dart]       | use the **Community** or **Enterprise Edition** in a **standalone Dart** app or in **Flutter unit tests**. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)    | ![](https://badgen.net/pub/points/cbl_dart)    | ![](https://badgen.net/pub/popularity/cbl_dart)    |
-| [cbl_flutter]    | use Couchbase Lite in a **Flutter app**.                                                                   | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter) | ![](https://badgen.net/pub/points/cbl_flutter) | ![](https://badgen.net/pub/popularity/cbl_flutter) |
-| [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                               |                                                |                                                    |
-| [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                               |                                                |                                                    |
-| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)  | ![](https://badgen.net/pub/points/cbl_sentry)  | ![](https://badgen.net/pub/popularity/cbl_sentry)  |
+| Package          | Required when you want to:                                                                                 | Pub                                          | Likes                                           | Points                                           | Popularity                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------- |
+| [cbl]            | use Couchbase Lite.                                                                                        | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)           | ![](https://badgen.net/pub/points/cbl)           | ![](https://badgen.net/pub/popularity/cbl)           |
+| [cbl_dart]       | use the **Community** or **Enterprise Edition** in a **standalone Dart** app or in **Flutter unit tests**. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)      | ![](https://badgen.net/pub/points/cbl_dart)      | ![](https://badgen.net/pub/popularity/cbl_dart)      |
+| [cbl_flutter]    | use Couchbase Lite in a **Flutter app**.                                                                   | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter)   | ![](https://badgen.net/pub/points/cbl_flutter)   | ![](https://badgen.net/pub/popularity/cbl_flutter)   |
+| [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                                 |                                                  |                                                      |
+| [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                                 |                                                  |                                                      |
+| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
+| [cbl_generator]  | generated Dart code to access data trough a typed data model.                                              | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
 
 # 🎯 Platform Support
 
@@ -171,6 +172,7 @@ system versions and devices can still crop up.
 [cbl_flutter_ce]: https://pub.dev/packages/cbl_flutter_ce
 [cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
 [cbl_sentry]: https://pub.dev/packages/cbl_sentry
+[cbl_generator]: https://pub.dev/packages/cbl_generator
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
 [discussions]: https://github.com/cbl-dart/cbl-dart/discussions
 [sync gateway]: https://www.couchbase.com/sync-gateway

@@ -14,6 +14,7 @@ import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
+import '../typed_data.dart';
 import 'data_source.dart';
 import 'expressions/expression.dart';
 import 'join.dart';
@@ -203,7 +204,7 @@ class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
   }
 }
 
-class ProxyResultSet extends ResultSet {
+class ProxyResultSet extends AsyncResultSet {
   ProxyResultSet({
     required ProxyQuery query,
     required Stream<TransferableValue> results,
@@ -213,8 +214,7 @@ class ProxyResultSet extends ResultSet {
   final ProxyQuery _query;
   final Stream<TransferableValue> _results;
 
-  @override
-  Stream<Result> asStream() => _results
+  Stream<ResultImpl> _asStream() => _results
       .map((event) => ResultImpl.fromTransferableValue(
             event,
             // Every result needs its own context, because each result is
@@ -225,7 +225,22 @@ class ProxyResultSet extends ResultSet {
       .transform(ResourceStreamTransformer(parent: _query, blocking: true));
 
   @override
+  Stream<Result> asStream() => _asStream();
+
+  @override
+  Stream<D> asTypedStream<D extends TypedDictionaryObject>() {
+    final adapter = _query.database!.useWithTypedData();
+    return _asStream()
+        .map((result) => result.asDictionary)
+        .map(adapter.dictionaryFactoryForType<D>());
+  }
+
+  @override
   Future<List<Result>> allResults() => asStream().toList();
+
+  @override
+  Future<List<D>> allTypedResults<D extends TypedDictionaryObject>() =>
+      asTypedStream<D>().toList();
 }
 
 class AsyncBuilderQuery extends ProxyQuery with BuilderQueryMixin {

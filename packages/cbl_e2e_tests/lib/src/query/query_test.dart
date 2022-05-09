@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/typed_data_internal.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 
 void main() {
   setupTestBinding();
@@ -246,6 +248,120 @@ SELECT foo()
         contains('Query(n1ql: SELECT * FROM _)'),
       );
     });
+
+    group('asTypedStream', () {
+      apiTest('throws if database does not support typed data', () async {
+        final db = await openTestDatabase();
+        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = await query.execute();
+        expect(
+          () => resultSet.asTypedStream<TestTypedDict>(),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
+        );
+      });
+
+      apiTest('throws if dictionary type is not recognized', () async {
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = await query.execute();
+        expect(
+          () => resultSet.asTypedStream<TestTypedDict2>(),
+          throwsA(
+            isTypedDataException.havingCode(TypedDataErrorCode.unknownType),
+          ),
+        );
+      });
+
+      apiTest('emits typed dictionaries', () async {
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = await query.execute();
+        final results = await resultSet.asTypedStream<TestTypedDict>().toList();
+        expect(results, hasLength(1));
+        expect(results.first.internal.value('id'), doc.id);
+      });
+    });
+
+    group('allTypedResults', () {
+      apiTest('throws if database does not support typed data', () async {
+        final db = await openTestDatabase();
+        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = await query.execute();
+        expect(
+          () => resultSet.allTypedResults<TestTypedDict>(),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
+        );
+      });
+
+      apiTest('throws if dictionary type is not recognized', () async {
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = await query.execute();
+        expect(
+          () => resultSet.allTypedResults<TestTypedDict2>(),
+          throwsA(
+            isTypedDataException.havingCode(TypedDataErrorCode.unknownType),
+          ),
+        );
+      });
+
+      apiTest('returns typed dictionaries', () async {
+        final db = await openTestDatabase(typedDataAdapter: testAdapter);
+        final doc = MutableDocument();
+        await db.saveDocument(doc);
+        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = await query.execute();
+        final results = await resultSet.allTypedResults<TestTypedDict>();
+        expect(results, hasLength(1));
+        expect(results.first.internal.value('id'), doc.id);
+      });
+    });
+
+    group('asTypedIterable', () {
+      test('throws if database does not support typed data', () {
+        final db = openSyncTestDatabase();
+        final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = query.execute();
+        expect(
+          () => resultSet.asTypedIterable<TestTypedDict>(),
+          throwsA(
+            isTypedDataException
+                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+          ),
+        );
+      });
+
+      test('throws if dictionary type is not recognized', () {
+        final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
+        final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = query.execute();
+        expect(
+          () => resultSet.asTypedIterable<TestTypedDict2>(),
+          throwsA(
+            isTypedDataException.havingCode(TypedDataErrorCode.unknownType),
+          ),
+        );
+      });
+
+      test('iterates over typed dictionaries', () {
+        final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
+        final doc = MutableDocument();
+        db.saveDocument(doc);
+        final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final resultSet = query.execute();
+        final results = resultSet.asTypedIterable<TestTypedDict>().toList();
+        expect(results, hasLength(1));
+        expect(results.first.internal.value('id'), doc.id);
+      });
+    });
   });
 
   group('QueryChange', () {
@@ -261,3 +377,45 @@ SELECT foo()
     });
   });
 }
+
+class TestTypedDict<I extends Dictionary>
+    implements TypedDictionaryObject<MutableTestTypedDoc> {
+  TestTypedDict(this.internal);
+
+  @override
+  final I internal;
+
+  @override
+  MutableTestTypedDoc toMutable() => MutableTestTypedDoc(internal.toMutable());
+
+  @override
+  String toString({String? indent}) => super.toString();
+}
+
+class MutableTestTypedDoc extends TestTypedDict<MutableDictionary>
+    implements
+        TypedMutableDictionaryObject<TestTypedDict, MutableTestTypedDoc> {
+  MutableTestTypedDoc([MutableDictionary? document])
+      : super(document ?? MutableDictionary());
+}
+
+class TestTypedDict2 implements TypedDictionaryObject<MutableTestTypedDoc> {
+  @override
+  Object get internal => throw UnimplementedError();
+
+  @override
+  MutableTestTypedDoc toMutable() => throw UnimplementedError();
+
+  @override
+  String toString({String? indent}) => super.toString();
+}
+
+final testAdapter = TypedDataRegistry(
+  types: [
+    TypedDictionaryMetadata<TestTypedDict, MutableTestTypedDoc>(
+      dartName: 'TestTypedDict',
+      factory: TestTypedDict.new,
+      mutableFactory: MutableTestTypedDoc.new,
+    ),
+  ],
+);

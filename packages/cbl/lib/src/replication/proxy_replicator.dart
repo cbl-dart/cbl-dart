@@ -57,13 +57,13 @@ class ProxyReplicator extends ProxyObject
 
     final client = database.client;
 
-    final pushFilterId = config.pushFilter
+    final pushFilterId = config.combinedPushFilter
         ?.let((it) => _wrapReplicationFilter(it, database))
         .let(client.registerReplicationFilter);
-    final pullFilterId = config.pullFilter
+    final pullFilterId = config.combinedPullFilter
         ?.let((it) => _wrapReplicationFilter(it, database))
         .let(client.registerReplicationFilter);
-    final conflictResolverId = config.conflictResolver
+    final conflictResolverId = config.combinedConflictResolver
         ?.let((it) => _wrapConflictResolver(it, database))
         .let(client.registerConflictResolver);
 

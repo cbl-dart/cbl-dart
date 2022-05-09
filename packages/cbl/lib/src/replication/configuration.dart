@@ -1,10 +1,16 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 import '../database.dart';
+import '../database/database_base.dart';
 import '../document.dart';
 import '../support/utils.dart';
+import '../typed_data.dart';
+import '../typed_data/adapter.dart';
 import 'authenticator.dart';
+import 'conflict.dart';
 import 'conflict_resolver.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
@@ -38,6 +44,7 @@ enum DocumentFlag {
 /// A function that decides whether a particular [Document] should be
 /// pushed/pulled.
 ///
+/// {@template cbl.ReplicationFilter}
 /// It should not take a long time to return, or it will slow down the
 /// replicator.
 ///
@@ -45,10 +52,24 @@ enum DocumentFlag {
 /// the document.
 ///
 /// Return `true` if the document should be replicated, `false` to skip it.
+/// {@endtemplate}
 ///
 /// {@category Replication}
 typedef ReplicationFilter = FutureOr<bool> Function(
   Document document,
+  Set<DocumentFlag> flags,
+);
+
+/// A function that decides whether a particular typed document should be
+/// pushed/pulled.
+///
+/// {@macro cbl.ReplicationFilter}
+///
+/// {@category Replication}
+/// {@category Typed Data}
+@experimental
+typedef TypedReplicationFilter = FutureOr<bool> Function(
+  TypedDocumentObject document,
   Set<DocumentFlag> flags,
 );
 
@@ -68,8 +89,11 @@ class ReplicatorConfiguration {
     this.channels,
     this.documentIds,
     this.pushFilter,
+    this.typedPushFilter,
     this.pullFilter,
+    this.typedPullFilter,
     this.conflictResolver,
+    this.typedConflictResolver,
     this.enableAutoPurge = true,
     Duration? heartbeat,
     int? maxAttempts,
@@ -79,6 +103,12 @@ class ReplicatorConfiguration {
       ..heartbeat = heartbeat
       ..maxAttempts = maxAttempts
       ..maxAttemptWaitTime = maxAttemptWaitTime;
+
+    if (typedPushFilter != null ||
+        typedPullFilter != null ||
+        typedConflictResolver != null) {
+      (database as DatabaseBase).useWithTypedData();
+    }
   }
 
   /// Creates a configuration for a [Replicator] from another [config] by coping
@@ -94,8 +124,11 @@ class ReplicatorConfiguration {
         channels = config.channels,
         documentIds = config.documentIds,
         pushFilter = config.pushFilter,
+        typedPushFilter = config.typedPushFilter,
         pullFilter = config.pullFilter,
+        typedPullFilter = config.typedPullFilter,
         conflictResolver = config.conflictResolver,
+        typedConflictResolver = config.typedConflictResolver,
         enableAutoPurge = config.enableAutoPurge,
         _heartbeat = config.heartbeat,
         _maxAttempts = config.maxAttempts,
@@ -143,17 +176,38 @@ class ReplicatorConfiguration {
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pushFilter;
 
+  /// Filter for validating whether the documents can be pushed to the remote
+  /// endpoint, which receives typed document instances.
+  ///
+  /// Only documents for which the function returns `true` are replicated.
+  @experimental
+  TypedReplicationFilter? typedPushFilter;
+
   /// Filter for validating whether the [Document]s can be pulled from the
   /// remote endpoint.
   ///
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pullFilter;
 
+  /// Filter for validating whether the documents can be pulled from the
+  /// remote endpoint, which receives typed document instances.
+  ///
+  /// Only documents for which the function returns `true` are replicated.
+  @experimental
+  TypedReplicationFilter? typedPullFilter;
+
   /// A custom conflict resolver.
   ///
   /// If this value is not set, or set to `null`, the default conflict resolver
   /// will be applied.
   ConflictResolver? conflictResolver;
+
+  /// A custom conflict resolver, which receives typed document instances.
+  ///
+  /// If this value is not set, or set to `null`, the default conflict resolver
+  /// will be applied.
+  @experimental
+  TypedConflictResolver? typedConflictResolver;
 
   /// Whether to automatically purge a document when the user looses access to
   /// it, on the server.
@@ -264,8 +318,11 @@ class ReplicatorConfiguration {
         if (channels != null) 'channels: $channels',
         if (documentIds != null) 'documentIds: $documentIds',
         if (pushFilter != null) 'PUSH-FILTER',
-        if (pushFilter != null) 'PULL-FILTER',
+        if (typedPushFilter != null) 'TYPED-PUSH-FILTER',
+        if (pullFilter != null) 'PULL-FILTER',
+        if (typedPullFilter != null) 'TYPED-PULL-FILTER',
         if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
+        if (typedConflictResolver != null) 'TYPED-CUSTOM-CONFLICT-RESOLVER',
         if (!enableAutoPurge) 'DISABLE-AUTO-PURGE',
         if (heartbeat != null) 'heartbeat: ${_heartbeat!.inSeconds}s',
         if (maxAttempts != null) 'maxAttempts: $maxAttempts',
@@ -287,3 +344,90 @@ Map<String, String> _redactHeaders(Map<String, String> headers) {
           : entry.value
   };
 }
+
+extension InternalReplicatorConfiguration on ReplicatorConfiguration {
+  ReplicationFilter? get combinedPushFilter => combineReplicationFilters(
+        pushFilter,
+        typedPushFilter,
+        (database as DatabaseBase).typedDataAdapter,
+      );
+
+  ReplicationFilter? get combinedPullFilter => combineReplicationFilters(
+        pullFilter,
+        typedPullFilter,
+        (database as DatabaseBase).typedDataAdapter,
+      );
+
+  ConflictResolver? get combinedConflictResolver => combineConflictResolvers(
+        conflictResolver,
+        typedConflictResolver,
+        (database as DatabaseBase).typedDataAdapter,
+      );
+}
+
+ReplicationFilter? combineReplicationFilters(
+  ReplicationFilter? filter,
+  TypedReplicationFilter? typedFilter,
+  TypedDataAdapter? adapter,
+) {
+  if (typedFilter == null) {
+    return filter;
+  }
+
+  final factory = adapter!
+      .dynamicDocumentFactoryForType(allowUnmatchedDocument: filter != null);
+
+  return (document, flags) {
+    final typedDocument = factory(document);
+    if (typedDocument != null) {
+      return typedFilter(typedDocument, flags);
+    }
+
+    // There is no typed data type that can be resolved for this document, so
+    // we fallback to the untyped filter. We can assert that `filter` is not
+    // null here because we created the factory with `allowUnmatchedDocument`
+    // based on the presence of `filter` and if `filter` is null the
+    // factory throws an exception instead of returning null.
+    return filter!(document, flags);
+  };
+}
+
+ConflictResolver? combineConflictResolvers(
+  ConflictResolver? conflictResolver,
+  TypedConflictResolver? typedConflictResolver,
+  TypedDataAdapter? adapter,
+) {
+  if (typedConflictResolver == null) {
+    return conflictResolver;
+  }
+
+  final factory = adapter!.dynamicDocumentFactoryForType(
+    allowUnmatchedDocument: conflictResolver != null,
+  );
+
+  return ConflictResolver.from((conflict) {
+    final localTypedDocument = conflict.localDocument?.let(factory);
+    final remoteTypedDocument = conflict.remoteDocument?.let(factory);
+    if (_equalNullability(conflict.localDocument, localTypedDocument) &&
+        _equalNullability(conflict.remoteDocument, remoteTypedDocument)) {
+      return typedConflictResolver
+          .resolve(TypedConflictImpl(
+            conflict.documentId,
+            localTypedDocument,
+            remoteTypedDocument,
+          ))
+          .then((result) => result?.internal as Document?);
+    }
+
+    // There is no typed data type that can be resolved for at least one of the
+    // documents, so we fallback to the untyped resolver. We can assert that
+    // `conflictResolver` is not null here because we created the factory with
+    // `allowUnmatchedDocument` based on the presence of `conflictResolver` and
+    // if `conflictResolver` is null the factory throws an exception instead of
+    // returning null.
+    return conflictResolver!.resolve(conflict);
+  });
+}
+
+bool _equalNullability(Object? a, Object? b) =>
+    a == null ? b == null : b != null;

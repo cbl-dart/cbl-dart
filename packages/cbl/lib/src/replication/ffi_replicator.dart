@@ -33,7 +33,11 @@ class FfiReplicator
     with ClosableResourceMixin
     implements SyncReplicator, NativeResource<CBLReplicator> {
   FfiReplicator._(
-      this._config, this._database, this.native, this._closeCallbacks);
+    this._config,
+    this._database,
+    this.native,
+    this._closeCallbacks,
+  );
 
   static Future<FfiReplicator> create(
     ReplicatorConfiguration config, {
@@ -65,11 +69,11 @@ class FfiReplicator
             callbackFactory(callback, database, ignoreCallbackErrorsInDart);
 
     final pushFilterCallback =
-        config.pushFilter?.let(_makeCallback(_wrapReplicationFilter));
+        config.combinedPushFilter?.let(_makeCallback(_wrapReplicationFilter));
     final pullFilterCallback =
-        config.pullFilter?.let(_makeCallback(_wrapReplicationFilter));
-    final conflictResolverCallback =
-        config.conflictResolver?.let(_makeCallback(_wrapConflictResolver));
+        config.combinedPullFilter?.let(_makeCallback(_wrapReplicationFilter));
+    final conflictResolverCallback = config.combinedConflictResolver
+        ?.let(_makeCallback(_wrapConflictResolver));
 
     void closeCallbacks() {
       pushFilterCallback?.close();
