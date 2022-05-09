@@ -78,6 +78,7 @@ Read [CONTRIBUTING] to get started developing.
 [cbl_flutter_ee]:
   https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_ee
 [cbl_sentry]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_sentry
+[cbl_generator]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_generator
 [libcblite]: https://github.com/couchbaselabs/couchbase-lite-C
 [libcblitedart]:
   https://github.com/cbl-dart/cbl-dart/tree/main/native/couchbase-lite-dart
