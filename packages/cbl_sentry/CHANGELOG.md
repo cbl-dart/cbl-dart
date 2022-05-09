@@ -1,3 +1,7 @@
+## 1.0.0-beta.3
+
+ - **FEAT**: add experimental support for typed data (#359). ([2c9a7d9e](https://github.com/cbl-dart/cbl-dart/commit/2c9a7d9ea94e50ad96354c785ce62d6a437b34bd))
+
 ## 1.0.0-beta.2
 
  - Update a dependency to the latest release.

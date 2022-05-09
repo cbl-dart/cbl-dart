@@ -1,5 +1,5 @@
 name: 'cbl_sentry'
-version: 1.0.0-beta.2
+version: 1.0.0-beta.3
 description: >-
   Sentry integration for Couchbase Lite with support for recording breadcrumbs
   and performance tracing.
