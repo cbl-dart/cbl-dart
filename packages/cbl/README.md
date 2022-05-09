@@ -50,7 +50,7 @@ Couchbase Lite you use.
 | [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                                 |                                                  |                                                      |
 | [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                                 |                                                  |                                                      |
 | [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
-| [cbl_generator]  | generated Dart code to access data trough a typed data model.                                              | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
+| [cbl_generator]  | generate Dart code to access data trough a typed data model.                                               | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
 
 ### Table of contents
 
@@ -529,9 +529,9 @@ classes can be used with specialized APIs of [`Database`][database],
    // Declare the part file into which the generated code will be written.
    part 'user.cbl.type.g.dart';
 
-   // Per default the type of a document is encoded in the `type` property of the underlying data.
-   // The value is a string that is the name of the annotated class. This can be customized by
-   // setting `TypedDocument.typeMatcher`.
+   // Per default the type of a document is encoded in the `type` property in
+   // the underlying data. The value is a string that is the name of the annotated
+   // class. This can be customized by setting `TypedDocument.typeMatcher`.
    @TypedDocument()
    abstract class User with _$User {
      factory User({
@@ -583,7 +583,7 @@ classes can be used with specialized APIs of [`Database`][database],
 
      // Every typed data class has a mutable and immutable variant. The mutable
      // class has the same name as the immutable class, but with the `Mutable`
-     // suffix. A mutable instance can be created though by constructing it, or from
+     // suffix. A mutable instance can be created by constructing it, or from
      // an immutable instance, through the `toMutable` method.
      final user = MutableUser(
        name: PersonalName(first: 'Alice', last: 'Green'),
