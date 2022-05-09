@@ -1,3 +1,13 @@
+## 1.2.0
+
+ - **REFACTOR**: use stricter types for collections in `ObjectRegistry`. ([e71851a5](https://github.com/cbl-dart/cbl-dart/commit/e71851a59278deda3776bfedabe23e7ed42b7e23))
+ - **PERF**: optimize `IsolatePacketCodec.decodePacket`. ([e01e1978](https://github.com/cbl-dart/cbl-dart/commit/e01e1978b89976cea5e4d3581da20e4fc96c3919))
+ - **PERF**: use collections which are more efficient for the task. ([0c33c132](https://github.com/cbl-dart/cbl-dart/commit/0c33c13271526476f67218b41e1d49718611ebf2))
+ - **FIX**: conversions in `EncodedData` (#360). ([58240ee2](https://github.com/cbl-dart/cbl-dart/commit/58240ee2d3c6a205bde26f0d9c460276eed5e680))
+ - **FIX**: don't coerce `null` to `false` in `value<bool>` getter (#357). ([24427550](https://github.com/cbl-dart/cbl-dart/commit/244275507a14adf590e5fbb8321a21b3e3d05fa4))
+ - **FEAT**: add experimental support for typed data (#359). ([2c9a7d9e](https://github.com/cbl-dart/cbl-dart/commit/2c9a7d9ea94e50ad96354c785ce62d6a437b34bd))
+ - **FEAT**: support sharing collections with multiple documents (#361). ([b3e5d12a](https://github.com/cbl-dart/cbl-dart/commit/b3e5d12a034562709e09b65df7469a3ba5ff3660))
+
 ## 1.1.3
 
  - **FIX**: translate exceptions when creating replicator endpoint with URL (#352). ([c2974f94](https://github.com/cbl-dart/cbl-dart/commit/c2974f9447f75cc827ebc1aa1a229293b7f6156e))

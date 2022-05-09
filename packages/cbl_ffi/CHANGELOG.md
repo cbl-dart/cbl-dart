@@ -1,3 +1,7 @@
+## 0.7.2+2
+
+ - **FIX**: don't use `isLeaf` with object handle (#354). ([9ed28b7c](https://github.com/cbl-dart/cbl-dart/commit/9ed28b7c141d655fb179e11b98491b3bfd351a6c))
+
 ## 0.7.2+1
 
  - **FIX**: follow up migration to variable sized C types (#346). ([07de6f1c](https://github.com/cbl-dart/cbl-dart/commit/07de6f1cf4d9771b76240283806d8357eadefa57))
