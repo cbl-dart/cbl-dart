@@ -1,3 +1,7 @@
+## 1.0.0+3
+
+ - **FEAT**: add experimental support for typed data (#359). ([2c9a7d9e](https://github.com/cbl-dart/cbl-dart/commit/2c9a7d9ea94e50ad96354c785ce62d6a437b34bd))
+
 ## 1.0.0+2
 
  - **DOCS**: update indroduction. ([9e2a578a](https://github.com/cbl-dart/cbl-dart/commit/9e2a578a11115b9e5be67bd57b844e9e72622361))

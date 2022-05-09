@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   cbl: ^1.2.0
-  cbl_flutter: ^1.0.0+2
+  cbl_flutter: ^1.0.0+3
   cbl_flutter_ce: ^1.0.0
   cupertino_icons: ^1.0.2
   flutter:
