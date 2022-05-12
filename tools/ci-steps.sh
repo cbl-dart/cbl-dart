@@ -358,11 +358,23 @@ function checkBuildRunnerOutput() {
     dart run build_runner build --delete-conflicting-outputs
 
     # Verify that the the build output did not change by checking if the repo is dirty.
-    if [[ -n "$(git status --porcelain)" ]]; then
-        echo "Build output changed"
-        git diff
-        exit 1
-    fi
+    # This check is flaky in CI. We check multiple times on the hunch that there is some kind of
+    # race condition.
+    local checkAttempt=0
+    local maxAttempts=5
+
+    while [ $checkAttempt -lt $maxAttempts ]; do
+        if [[ -z "$(git status --porcelain)" ]]; then
+            exit 0
+        fi
+        checkAttempt=$((checkAttempt + 1))
+        sleep 1
+    done
+
+    echo "Build output changed"
+    git status --porcelain
+    git diff
+    exit 1
 }
 
 # Uploads coverage data to codecov.
