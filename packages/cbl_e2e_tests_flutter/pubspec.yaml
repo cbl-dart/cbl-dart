@@ -8,16 +8,11 @@ environment:
 
 dependencies:
   benchmark_harness: ^2.0.0
-  cbl:
-    path: ../cbl
-  cbl_e2e_tests:
-    path: ../cbl_e2e_tests
-  cbl_ffi:
-    path: ../cbl_ffi
-  cbl_flutter:
-    path: ../cbl_flutter
-  cbl_flutter_local:
-    path: ../cbl_flutter_local
+  cbl: any
+  cbl_e2e_tests: any
+  cbl_ffi: any
+  cbl_flutter: any
+  cbl_flutter_local: any
   collection: ^1.15.0
   crypto: ^3.0.1
   flutter:
@@ -31,18 +26,6 @@ dependencies:
   rxdart: ^0.26.0
   test: any
   web_socket_channel: ^2.1.0
-
-dependency_overrides:
-  cbl:
-    path: ../cbl
-  cbl_ffi:
-    path: ../cbl_ffi
-  cbl_flutter:
-    path: ../cbl_flutter
-  cbl_flutter_local:
-    path: ../cbl_flutter_local
-  cbl_flutter_platform_interface:
-    path: ../cbl_flutter_platform_interface
 
 flutter:
   assets:

@@ -6,19 +6,11 @@ environment:
 
 dependencies:
   benchmark_harness: ^2.0.0
-  cbl:
-    path: ../cbl
-  cbl_ffi:
-    path: ../cbl_ffi
+  cbl: any
+  cbl_ffi: any
   collection: ^1.15.0
   crypto: ^3.0.1
   http: ^0.13.3
   rxdart: ^0.26.0
   test: ^1.17.3
   web_socket_channel: ^2.1.0
-
-dependency_overrides:
-  cbl:
-    path: ../cbl
-  cbl_ffi:
-    path: ../cbl_ffi

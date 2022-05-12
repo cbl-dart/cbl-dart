@@ -2,15 +2,14 @@ name: cbl_dart
 repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/**
-ignore:
-  - packages/cbl_e2e_tests*/*
-  - packages/cbl_flutter_?e/*
-  - packages/cbl_flutter_local/*
-  - packages/cbl_flutter_prebuilt*/*
+ide:
+  intellij: false
 command:
+  bootstrap:
+    usePubspecOverrides: true
+    runPubGetInParallel: false
   version:
     linkToCommits: true
-
 scripts:
   build:cbl_flutter_prebuilt:
     description: Builds the prebuild packages `cbl_flutter_ce|ee`.
@@ -19,10 +18,6 @@ scripts:
   build:nativeLibraries:
     description: Builds the native libraries for the host target.
     run: ./tools/dev-tools.sh prepareNativeLibraries
-
-  flutter:pubGet:
-    description: Runs pub get in all Flutter packages.
-    run: melos exec --flutter -- flutter pub get
 
   formatting:apply:
     description: Formats all Dart files.
