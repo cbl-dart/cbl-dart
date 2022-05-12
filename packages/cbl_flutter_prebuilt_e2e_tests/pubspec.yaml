@@ -10,8 +10,7 @@ dependencies:
   cbl: any
   cbl_ffi: any
   cbl_flutter: any
-  cbl_flutter_ee:
-    path: ../cbl_flutter_ee
+  cbl_flutter_ee: any
   flutter:
     sdk: flutter
   flutter_test:
