@@ -20,6 +20,7 @@ jobs:
     name: Formatting - Dart
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
         dart: [stable, beta]
     continue-on-error: ${{ matrix.dart != 'stable' }}
@@ -58,6 +59,7 @@ jobs:
     name: Analyze Dart code
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
         dart: [stable, beta]
     continue-on-error: ${{ matrix.dart != 'stable' }}
@@ -87,6 +89,7 @@ jobs:
   test-dart-unit:
     name: Dart unit tests
     strategy:
+      fail-fast: false
       matrix:
         package: [cbl, cbl_sentry, cbl_generator]
         dart: [stable, beta]
@@ -320,6 +323,7 @@ jobs:
   test-cbl_dart:
     name: cbl_dart unit tests
     strategy:
+      fail-fast: false
       matrix:
         package: [cbl_dart]
         dart: [stable]
