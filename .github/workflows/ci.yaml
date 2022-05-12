@@ -13,7 +13,7 @@ env:
   flutter-version-beta: beta
   dart-version-stable: 2.17.0
   dart-version-beta: beta
-  melos-version: '2.2.0'
+  melos-version: '2.3.0'
 
 jobs:
   formatting-dart:
@@ -105,11 +105,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version-stable }}
-
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
@@ -186,8 +181,7 @@ jobs:
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
-        # TODO(blaugold): fix melos so it does not require flutter
-        # if: matrix.embedder == 'flutter'
+        if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutter-version-stable }}
@@ -199,8 +193,7 @@ jobs:
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
-        # Disable Dart SDK until flutter is not needed anymore
-        if: false && matrix.embedder == 'standalone'
+        if: matrix.embedder == 'standalone'
         with:
           sdk: ${{ env.dart-version-stable }}
 
@@ -344,15 +337,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.flutter-version-stable }}
-
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
-        # Disable Dart SDK until flutter is not needed anymore
-        if: ${{ false }}
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
