@@ -4,7 +4,6 @@ CBL_Dart {
 		CBLDart_AsyncCallback_New;
 		CBLDart_AsyncCallback_Close;
 		CBLDart_AsyncCallback_CallForTest;
-		CBLDart_RegisterDartFinalizer;
 		CBLDart_BindCBLRefCountedToDartObject;
 		CBLDart_SetDebugRefCounted;
 		CBLDart_CBLLog_SetCallback;
