@@ -81,37 +81,6 @@ static CBLDart::AsyncCallback *CBLDart_AsAsyncCallback(void *pointer) {
   return reinterpret_cast<CBLDart::AsyncCallback *>(pointer);
 }
 
-// === Dart Finalizer
-
-struct CBLDart_DartFinalizerContext {
-  Dart_Port registry;
-  int64_t token;
-};
-
-static void CBLDart_RunDartFinalizer(void *dart_callback_data, void *peer) {
-  auto context = reinterpret_cast<CBLDart_DartFinalizerContext *>(peer);
-  // Finalizer callbacks must not call back into the VM through most of the
-  // `Dart_` methods. That's why the finalizer registry is notified
-  // asynchronously from another thread. The result of `async` needs to be
-  // assigned to a reference. Otherwise it blocks until the async task
-  // completes.
-  auto _ = std::async(std::launch::async, [=]() {
-    Dart_PostInteger_DL(context->registry, context->token);
-    delete context;
-  });
-}
-
-void CBLDart_RegisterDartFinalizer(Dart_Handle object, Dart_Port registry,
-                                   int64_t token) {
-  auto context = new CBLDart_DartFinalizerContext;
-  context->registry = registry;
-  context->token = token;
-
-  Dart_NewFinalizableHandle_DL(object, context,
-                               sizeof(CBLDart_DartFinalizerContext),
-                               CBLDart_RunDartFinalizer);
-}
-
 // === Couchbase Lite =========================================================
 
 // === Base

@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:core';
 
-import '../support/dart_finalizer.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
+
+final _proxyObjectFinalizer = Finalizer<void Function()>((fn) => fn());
 
 abstract class ProxyObject with ProxyObjectMixin {
   ProxyObject(
@@ -52,9 +54,11 @@ mixin ProxyObjectMixin {
     _channel = channel;
     _objectId = objectId;
 
-    _finalizerToken = dartFinalizerRegistry.registerFinalizer(
+    _finalizerToken = Object();
+    _proxyObjectFinalizer.attach(
       this,
       _finalizer(_channel!, _objectId!, proxyFinalizer),
+      detach: _finalizerToken,
     );
   }
 
@@ -67,13 +71,13 @@ mixin ProxyObjectMixin {
     final channel = this.channel!;
 
     return () {
-      dartFinalizerRegistry.unregisterFinalizer(finalizerToken);
+      _proxyObjectFinalizer.detach(finalizerToken);
       return channel.call(ReleaseObject(objectId));
     };
   }
 }
 
-DartFinalizer _finalizer(
+void Function() _finalizer(
   Channel channel,
   int id,
   FutureOr<void> Function()? proxyFinalizer,
