@@ -117,6 +117,22 @@ function startVirtualDevices() {
     esac
 }
 
+function runUnitTests() {
+    requireEnvVar EMBEDDER
+    requireEnvVar TEST_PACKAGE
+
+    cd "$testPackageDir"
+
+    case "$embedder" in
+    standalone)
+        dart test --coverage coverage/dart -r expanded -j 1
+        ;;
+    flutter)
+        flutter test --coverage coverage -r expanded
+        ;;
+    esac
+}
+
 function runE2ETests() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -362,12 +378,7 @@ function uploadCoverageData() {
     # Format coverage data as lcov
     case "$embedder" in
     standalone)
-        # We are checking whether dart coverage data exists because we are
-        # temporarily using `flutter` to run pure dart tests and `flutter`
-        # already outputs lcov.
-        if [ -d "$testPackageDir/coverage/dart" ]; then
-            ./tools/coverage.sh dartToLcov "$testPackageDir"
-        fi
+        ./tools/coverage.sh dartToLcov "$testPackageDir"
         ;;
     flutter)
         # Flutter already outputs coverage data as lcov and into the correct
