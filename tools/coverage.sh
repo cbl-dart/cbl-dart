@@ -23,7 +23,7 @@ function dartToLcov() {
     local coverageDir="coverage"
     local input="$coverageDir/dart"
     local output="$coverageDir/lcov.info"
-    local packagesFile=".packages"
+    local packagesFile=".dart_tool/package_config.json"
 
     dart pub global activate coverage
 

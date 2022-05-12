@@ -12,8 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import 'cbl_e2e_tests/test_binding.dart';
 
 void setupTestBinding() {
-  final widgetBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized()
-      as IntegrationTestWidgetsFlutterBinding;
+  final widgetBinding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   // ignore: cascade_invocations
   widgetBinding.defaultTestTimeout = const Timeout(Duration(seconds: 30));
 
