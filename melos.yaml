@@ -2,12 +2,9 @@ name: cbl_dart
 repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/**
-ignore:
-  - packages/cbl_e2e_tests*/*
-  - packages/cbl_flutter_?e/*
-  - packages/cbl_flutter_local/*
-  - packages/cbl_flutter_prebuilt*/*
 command:
+  bootstrap:
+    usePubspecOverrides: true
   version:
     linkToCommits: true
 

@@ -306,3 +306,4 @@ DerivedData/
 *.iml
 WIP.md
 coverage
+pubspec_overrides.yaml

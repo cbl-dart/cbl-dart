@@ -7,12 +7,9 @@ environment:
   flutter: '>=2.10.0'
 
 dependencies:
-  cbl:
-    path: ../cbl
-  cbl_ffi:
-    path: ../cbl_ffi
-  cbl_flutter:
-    path: ../cbl_flutter
+  cbl: any
+  cbl_ffi: any
+  cbl_flutter: any
   cbl_flutter_ee:
     path: ../cbl_flutter_ee
   flutter:
@@ -21,15 +18,3 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-
-dependency_overrides:
-  cbl:
-    path: ../cbl
-  cbl_ffi:
-    path: ../cbl_ffi
-  cbl_flutter:
-    path: ../cbl_flutter
-  cbl_flutter_ee:
-    path: ../cbl_flutter_ee
-  cbl_flutter_platform_interface:
-    path: ../cbl_flutter_platform_interface
