@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
-import 'c_type.dart';
 import 'fleece.dart';
 import 'slice.dart';
 

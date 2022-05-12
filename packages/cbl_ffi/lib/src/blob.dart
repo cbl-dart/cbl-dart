@@ -2,7 +2,6 @@ import 'dart:ffi';
 
 import 'base.dart';
 import 'bindings.dart';
-import 'c_type.dart';
 import 'data.dart';
 import 'database.dart';
 import 'fleece.dart';

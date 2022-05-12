@@ -9,7 +9,6 @@ import 'package:ffi/ffi.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
-import 'c_type.dart';
 import 'data.dart';
 import 'database.dart';
 import 'document.dart';

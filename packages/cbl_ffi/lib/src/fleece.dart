@@ -5,7 +5,6 @@ import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'bindings.dart';
-import 'c_type.dart';
 import 'data.dart';
 import 'global.dart';
 import 'slice.dart';

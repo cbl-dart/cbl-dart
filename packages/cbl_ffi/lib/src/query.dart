@@ -3,7 +3,6 @@ import 'dart:ffi';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
-import 'c_type.dart';
 import 'database.dart';
 import 'fleece.dart';
 import 'global.dart';

@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
-import 'c_type.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
