@@ -152,10 +152,6 @@ jobs:
             os: iOS
           - embedder: standalone
             os: Android
-            # TODO(blaugold): Enable Flutter/Linux tests
-            # Flutter for linux is breaking tests (exposes symbols from statically linked std c++ lib)
-          - embedder: flutter
-            os: Ubuntu
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-11",
