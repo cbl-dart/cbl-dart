@@ -187,9 +187,6 @@ function bootstrapPackage() {
 }
 
 function bootstrap() {
-    # We first need to run flutter pub get in the melos managed flutter package,
-    # to generated flutter sepecific files.
-    $melosBin run flutter:pubGet
     $melosBin bootstrap
 
     for package in ${nonMelosDartPackages[@]} ${nonMelosFlutterPackages[@]}; do

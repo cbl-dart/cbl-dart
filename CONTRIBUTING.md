@@ -53,11 +53,7 @@ are limited to a single package use it as the commit message's scope, e.g.
    ```shell
    melos run build:nativeLibraries
    ```
-4. Generate files that `melos bootstrap` doesn't:
-   ```shell
-   melos run flutter:pubGet
-   ```
-5. Bootstrap the Dart [packages] so they depend on the local versions of their
+4. Bootstrap the Dart [packages] so they depend on the local versions of their
    siblings:
    ```shell
    melos bootstrap
