@@ -439,7 +439,7 @@ class DocumentReplicationsCallbackMessage {
           error = CBLErrorException(
             (document[2] as int).toErrorDomain(),
             document[3] as int,
-            utf8.decode(document[4] as Uint8List),
+            utf8.decode(document[4] as Uint8List, allowMalformed: true),
           );
         }
 

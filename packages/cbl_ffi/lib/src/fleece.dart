@@ -110,12 +110,15 @@ class FLStringResult extends Struct {
 
 extension FLStringResultExt on FLStringResult {
   bool get isNull => buf == nullptr;
-  String? toDartStringAndRelease() {
+  String? toDartStringAndRelease({bool allowMalformed = false}) {
     if (isNull) {
       return null;
     }
 
-    final result = buf.cast<Utf8>().toDartString(length: size);
+    final result = utf8.decode(
+      buf.cast<Uint8>().asTypedList(size),
+      allowMalformed: allowMalformed,
+    );
 
     CBLBindings.instance.fleece.slice.releaseStringResult(this);
 
