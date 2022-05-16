@@ -1,3 +1,7 @@
+## 0.7.2+3
+
+ - **FIX**: allow malformed UTF-8 in log and error messages ([#372](https://github.com/cbl-dart/cbl-dart/issues/372)). ([a12faccc](https://github.com/cbl-dart/cbl-dart/commit/a12faccc30eb253c9662449a07423c6fbe29e3ba))
+
 ## 0.7.2+2
 
  - **FIX**: don't use `isLeaf` with object handle (#354). ([9ed28b7c](https://github.com/cbl-dart/cbl-dart/commit/9ed28b7c141d655fb179e11b98491b3bfd351a6c))
