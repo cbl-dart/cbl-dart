@@ -71,7 +71,7 @@ class LogCallbackMessage {
       : this(
           (arguments[0] as int).toLogDomain(),
           (arguments[1] as int).toLogLevel(),
-          utf8.decode(arguments[2] as Uint8List),
+          utf8.decode(arguments[2] as Uint8List, allowMalformed: true),
         );
 
   final CBLLogDomain domain;

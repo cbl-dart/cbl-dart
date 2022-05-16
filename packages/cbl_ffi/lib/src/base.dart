@@ -421,7 +421,7 @@ class BaseBindings extends Bindings {
   // coverage:ignore-end
 
   String? getErrorMessage(Pointer<CBLError> error) =>
-      _getErrorMessage(error).toDartStringAndRelease();
+      _getErrorMessage(error).toDartStringAndRelease(allowMalformed: true);
 
   void removeListener(Pointer<CBLListenerToken> token) {
     _removeListener(token);
