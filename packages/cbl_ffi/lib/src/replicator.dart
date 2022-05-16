@@ -392,7 +392,7 @@ class ReplicatorStatusCallbackMessage {
     if (status.length > 3) {
       final domain = (status[3] as int).toErrorDomain();
       final errorCode = (status[4] as int).toErrorCode(domain);
-      final message = utf8.decode(status[5] as Uint8List);
+      final message = utf8.decode(status[5] as Uint8List, allowMalformed: true);
       error = CBLErrorException(domain, errorCode, message);
     }
 
