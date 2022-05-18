@@ -29,7 +29,10 @@ class CouchbaseLiteFlutter {
 Future<InitContext> _context() async {
   final directories = await Future.wait([
     getApplicationSupportDirectory(),
-    getExternalStorageDirectory().onError<UnsupportedError>((_, __) => null),
+    if (!Platform.isIOS)
+      getExternalStorageDirectory()
+    else
+      Future<Directory?>.value()
   ]);
 
   final filesDir = directories[0]!;
