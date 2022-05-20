@@ -418,7 +418,7 @@ class ArrayImpl
 }
 
 class MutableArrayImpl extends ArrayImpl implements MutableArray {
-  MutableArrayImpl(MArray array) : super(array);
+  MutableArrayImpl(super.array);
 
   // === Set ===================================================================
 

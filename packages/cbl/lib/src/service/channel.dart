@@ -635,9 +635,9 @@ abstract class _RequestMessage extends _Message {
     Object? context,
   ) : super(conversationId, context);
 
-  _RequestMessage.deserialize(StringMap map, SerializationContext context)
+  _RequestMessage.deserialize(super.map, SerializationContext context)
       : request = context.deserializePolymorphic(map['request']),
-        super.deserialize(map);
+        super.deserialize();
 
   final Object? request;
 
@@ -655,9 +655,9 @@ abstract class _SuccessMessage extends _Message {
     Object? context,
   ) : super(conversationId, context);
 
-  _SuccessMessage.deserialize(StringMap map, SerializationContext context)
+  _SuccessMessage.deserialize(super.map, SerializationContext context)
       : data = context.deserializePolymorphic(map['data']),
-        super.deserialize(map);
+        super.deserialize();
 
   final Object? data;
 
@@ -676,10 +676,10 @@ abstract class _ErrorMessage extends _Message {
     Object? context,
   ) : super(conversationId, context);
 
-  _ErrorMessage.deserialize(StringMap map, SerializationContext context)
+  _ErrorMessage.deserialize(super.map, SerializationContext context)
       : error = context.deserializePolymorphic(map['error'])!,
         stackTrace = context.deserializeAs(map['stackTrace']),
-        super.deserialize(map);
+        super.deserialize();
 
   final Object error;
   final StackTrace? stackTrace;
@@ -702,11 +702,9 @@ abstract class _ErrorMessage extends _Message {
 }
 
 class _CallRequest extends _RequestMessage {
-  _CallRequest(int conversationId, Object? request, Object? context)
-      : super(conversationId, request, context);
+  _CallRequest(super.conversationId, super.request, super.context);
 
-  _CallRequest._fromJson(StringMap map, SerializationContext context)
-      : super.deserialize(map, context);
+  _CallRequest._fromJson(super.map, super.context) : super.deserialize();
 
   static _CallRequest deserialize(
     StringMap map,
@@ -716,11 +714,9 @@ class _CallRequest extends _RequestMessage {
 }
 
 class _CallSuccess extends _SuccessMessage {
-  _CallSuccess(int conversationId, Object? data, Object? context)
-      : super(conversationId, data, context);
+  _CallSuccess(super.conversationId, super.data, super.context);
 
-  _CallSuccess._fromJson(StringMap map, SerializationContext context)
-      : super.deserialize(map, context);
+  _CallSuccess._fromJson(super.map, super.context) : super.deserialize();
 
   static _CallSuccess deserialize(
     StringMap map,
@@ -731,25 +727,22 @@ class _CallSuccess extends _SuccessMessage {
 
 class _CallError extends _ErrorMessage {
   _CallError(
-    int conversationId,
-    Object error,
-    StackTrace? stackTrace,
-    Object? context,
-  ) : super(conversationId, error, stackTrace, context);
+    super.conversationId,
+    super.error,
+    super.stackTrace,
+    super.context,
+  );
 
-  _CallError._fromJson(StringMap map, SerializationContext context)
-      : super.deserialize(map, context);
+  _CallError._fromJson(super.map, super.context) : super.deserialize();
 
   static _CallError deserialize(StringMap map, SerializationContext context) =>
       _CallError._fromJson(map, context);
 }
 
 class _ListenToStream extends _RequestMessage {
-  _ListenToStream(int conversationId, Object? request, Object? context)
-      : super(conversationId, request, context);
+  _ListenToStream(super.conversationId, super.request, super.context);
 
-  _ListenToStream._fromJson(StringMap map, SerializationContext context)
-      : super.deserialize(map, context);
+  _ListenToStream._fromJson(super.map, super.context) : super.deserialize();
 
   static _ListenToStream deserialize(
     StringMap map,
@@ -759,10 +752,9 @@ class _ListenToStream extends _RequestMessage {
 }
 
 class _PauseStream extends _Message {
-  _PauseStream(int conversationId, Object? context)
-      : super(conversationId, context);
+  _PauseStream(super.conversationId, super.context);
 
-  _PauseStream._fromJson(StringMap map) : super.deserialize(map);
+  _PauseStream._fromJson(super.map) : super.deserialize();
 
   static _PauseStream deserialize(
     StringMap map,
@@ -772,10 +764,9 @@ class _PauseStream extends _Message {
 }
 
 class _ResumeStream extends _Message {
-  _ResumeStream(int conversationId, Object? context)
-      : super(conversationId, context);
+  _ResumeStream(super.conversationId, super.context);
 
-  _ResumeStream._fromJson(StringMap map) : super.deserialize(map);
+  _ResumeStream._fromJson(super.map) : super.deserialize();
 
   static _ResumeStream deserialize(
     StringMap map,
@@ -785,10 +776,9 @@ class _ResumeStream extends _Message {
 }
 
 class _CancelStream extends _Message {
-  _CancelStream(int conversationId, Object? context)
-      : super(conversationId, context);
+  _CancelStream(super.conversationId, super.context);
 
-  _CancelStream._fromJson(StringMap map) : super.deserialize(map);
+  _CancelStream._fromJson(super.map) : super.deserialize();
 
   static _CancelStream deserialize(
           StringMap map, SerializationContext context) =>
@@ -796,11 +786,9 @@ class _CancelStream extends _Message {
 }
 
 class _StreamData extends _SuccessMessage {
-  _StreamData(int conversationId, Object? data, Object? context)
-      : super(conversationId, data, context);
+  _StreamData(super.conversationId, super.data, super.context);
 
-  _StreamData._fromJson(StringMap map, SerializationContext context)
-      : super.deserialize(map, context);
+  _StreamData._fromJson(super.map, super.context) : super.deserialize();
 
   static _StreamData deserialize(StringMap map, SerializationContext context) =>
       _StreamData._fromJson(map, context);
@@ -808,14 +796,13 @@ class _StreamData extends _SuccessMessage {
 
 class _StreamError extends _ErrorMessage {
   _StreamError(
-    int conversationId,
-    Object error,
-    StackTrace? stackTrace,
-    Object? context,
-  ) : super(conversationId, error, stackTrace, context);
+    super.conversationId,
+    super.error,
+    super.stackTrace,
+    super.context,
+  );
 
-  _StreamError._fromJson(StringMap map, SerializationContext context)
-      : super.deserialize(map, context);
+  _StreamError._fromJson(super.map, super.context) : super.deserialize();
 
   static _StreamError deserialize(
           StringMap map, SerializationContext context) =>
@@ -823,10 +810,9 @@ class _StreamError extends _ErrorMessage {
 }
 
 class _StreamDone extends _Message {
-  _StreamDone(int conversationId, Object? context)
-      : super(conversationId, context);
+  _StreamDone(super.conversationId, super.context);
 
-  _StreamDone._fromJson(StringMap map) : super.deserialize(map);
+  _StreamDone._fromJson(super.map) : super.deserialize();
 
   static _StreamDone deserialize(StringMap map, SerializationContext context) =>
       _StreamDone._fromJson(map);

@@ -95,7 +95,7 @@ class Target {
 
 /// A linux [Target].
 class LinuxTarget extends Target {
-  LinuxTarget(OS os, this.vendor, this.version, this.arch) : super(os);
+  LinuxTarget(super.os, this.vendor, this.version, this.arch);
 
   final Distro vendor;
   final String version;
@@ -113,7 +113,7 @@ class LinuxTarget extends Target {
 
 /// A windows [Target].
 class WindowsTarget extends Target {
-  WindowsTarget(OS os, this.arch) : super(os);
+  WindowsTarget(super.os, this.arch);
 
   final String arch;
 

@@ -324,13 +324,15 @@ class FragmentImpl implements Fragment {
 class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
   MutableFragmentImpl._empty() : super._empty();
 
-  MutableFragmentImpl.fromArray(MutableArray array, {required int index})
-      : super.fromArray(array, index: index);
+  MutableFragmentImpl.fromArray(
+    MutableArray super.array, {
+    required super.index,
+  }) : super.fromArray();
 
   MutableFragmentImpl.fromDictionary(
-    MutableDictionary dictionary, {
-    required String key,
-  }) : super.fromDictionary(dictionary, key: key);
+    MutableDictionary super.dictionary, {
+    required super.key,
+  }) : super.fromDictionary();
 
   static final _emptyInstance = MutableFragmentImpl._empty();
 

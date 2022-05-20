@@ -302,7 +302,7 @@ class DictionaryImpl
 
 class MutableDictionaryImpl extends DictionaryImpl
     implements MutableDictionary {
-  MutableDictionaryImpl(MDict dictionary) : super(dictionary);
+  MutableDictionaryImpl(super.dictionary);
 
   @override
   void setValue(Object? value, {required String key}) {

@@ -176,11 +176,7 @@ class SliceResult extends Slice {
     _sliceBindings.bindToDartObject(this, slice, retain: retain);
   }
 
-  SliceResult._(
-    Pointer<Uint8> buf,
-    int size, {
-    bool retain = false,
-  }) : super._(buf, size) {
+  SliceResult._(super.buf, super.size, {bool retain = false}) : super._() {
     makeGlobalResult();
     _sliceBindings.bindToDartObject(
       this,

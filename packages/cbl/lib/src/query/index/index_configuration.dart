@@ -83,7 +83,7 @@ abstract class _IndexConfiguration extends IndexConfiguration {
 
 class _ValueIndexConfiguration extends _IndexConfiguration
     implements ValueIndexConfiguration, IndexImplInterface {
-  _ValueIndexConfiguration(List<String> expressions) : super(expressions);
+  _ValueIndexConfiguration(super.expressions);
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
@@ -109,12 +109,11 @@ class _ValueIndexConfiguration extends _IndexConfiguration
 class _FullTextIndexConfiguration extends _IndexConfiguration
     implements FullTextIndexConfiguration, IndexImplInterface {
   _FullTextIndexConfiguration(
-    List<String> expressions,
+    super.expressions,
     // ignore: avoid_positional_boolean_parameters
     bool? ignoreAccents,
     this.language,
-  )   : ignoreAccents = ignoreAccents ?? false,
-        super(expressions);
+  ) : ignoreAccents = ignoreAccents ?? false;
 
   @override
   bool ignoreAccents;

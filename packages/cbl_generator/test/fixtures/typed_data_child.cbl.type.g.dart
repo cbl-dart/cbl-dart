@@ -37,7 +37,7 @@ abstract class _TypedDataPropertyDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
-  ImmutableTypedDataPropertyDoc.internal(Document internal) : super(internal);
+  ImmutableTypedDataPropertyDoc.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<Dictionary,
       BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
@@ -74,8 +74,7 @@ class MutableTypedDataPropertyDoc
     this.value = value;
   }
 
-  MutableTypedDataPropertyDoc.internal(MutableDocument internal)
-      : super(internal);
+  MutableTypedDataPropertyDoc.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<
       MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
@@ -133,8 +132,7 @@ abstract class _OptionalTypedDataPropertyDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableOptionalTypedDataPropertyDoc
     extends _OptionalTypedDataPropertyDocImplBase {
-  ImmutableOptionalTypedDataPropertyDoc.internal(Document internal)
-      : super(internal);
+  ImmutableOptionalTypedDataPropertyDoc.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<Dictionary,
       BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
@@ -173,8 +171,7 @@ class MutableOptionalTypedDataPropertyDoc
     }
   }
 
-  MutableOptionalTypedDataPropertyDoc.internal(MutableDocument internal)
-      : super(internal);
+  MutableOptionalTypedDataPropertyDoc.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<
       MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
@@ -235,8 +232,7 @@ abstract class _TypedDataPropertyDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
-  ImmutableTypedDataPropertyDict.internal(Dictionary internal)
-      : super(internal);
+  ImmutableTypedDataPropertyDict.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<Dictionary,
       BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
@@ -273,8 +269,7 @@ class MutableTypedDataPropertyDict
     this.value = value;
   }
 
-  MutableTypedDataPropertyDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableTypedDataPropertyDict.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<
       MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
@@ -332,8 +327,7 @@ abstract class _OptionalTypedDataPropertyDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutableOptionalTypedDataPropertyDict
     extends _OptionalTypedDataPropertyDictImplBase {
-  ImmutableOptionalTypedDataPropertyDict.internal(Dictionary internal)
-      : super(internal);
+  ImmutableOptionalTypedDataPropertyDict.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<Dictionary,
       BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
@@ -372,8 +366,7 @@ class MutableOptionalTypedDataPropertyDict
     }
   }
 
-  MutableOptionalTypedDataPropertyDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableOptionalTypedDataPropertyDict.internal(super.internal);
 
   static const _valueConverter = const TypedDictionaryConverter<
       MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);

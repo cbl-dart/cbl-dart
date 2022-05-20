@@ -17,14 +17,14 @@ class MArray extends MCollection {
       : _array = null,
         _values = [];
 
-  MArray.asCopy(MArray original, {bool? isMutable})
+  MArray.asCopy(MArray super.original, {bool? isMutable})
       : _array = original._array,
         _values = original._values
             .map((value) => value?.clone())
             .toList(growable: isMutable ?? original.isMutable),
-        super.asCopy(original, isMutable: isMutable ?? original.isMutable);
+        super.asCopy(isMutable: isMutable ?? original.isMutable);
 
-  MArray.asChild(MValue slot, MCollection parent, int length, {bool? isMutable})
+  MArray.asChild(super.slot, super.parent, int length, {bool? isMutable})
       : _array = slot.value!.cast(),
         _values = List<MValue?>.filled(
           length,
@@ -32,8 +32,6 @@ class MArray extends MCollection {
           growable: isMutable ?? parent.hasMutableChildren,
         ),
         super.asChild(
-          slot,
-          parent,
           isMutable: isMutable ?? parent.hasMutableChildren,
         );
 

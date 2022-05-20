@@ -322,7 +322,7 @@ typedef _CBLListener_Remove = void Function(
 // === BaseBindings ============================================================
 
 class BaseBindings extends Bindings {
-  BaseBindings(Bindings parent) : super(parent) {
+  BaseBindings(super.parent) {
     _initialize =
         libs.cblDart.lookupFunction<_CBLDart_Initialize_C, _CBLDart_Initialize>(
       'CBLDart_Initialize',

@@ -345,10 +345,10 @@ class MutableDelegateDocument extends DelegateDocument
       : this.fromDelegate(NewDocumentDelegate(id), data: data);
 
   MutableDelegateDocument.fromDelegate(
-    DocumentDelegate delegate, {
-    DatabaseBase? database,
+    super.delegate, {
+    super.database,
     Map<String, Object?>? data,
-  }) : super(delegate, database: database) {
+  }) {
     if (data != null) {
       setData(data);
     }

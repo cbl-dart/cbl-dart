@@ -42,31 +42,21 @@ abstract class TypedDataMetadata<I, MI, D, MD> {
 class TypedDictionaryMetadata<D, MD>
     extends TypedDataMetadata<Dictionary, MutableDictionary, D, MD> {
   TypedDictionaryMetadata({
-    required String dartName,
-    required Factory<Dictionary, D> factory,
-    required Factory<MutableDictionary, MD> mutableFactory,
-    TypeMatcher? typeMatcher,
-  }) : super(
-          dartName: dartName,
-          factory: factory,
-          mutableFactory: mutableFactory,
-          typeMatcher: typeMatcher,
-        );
+    required super.dartName,
+    required super.factory,
+    required super.mutableFactory,
+    super.typeMatcher,
+  });
 }
 
 class TypedDocumentMetadata<D, MD>
     extends TypedDataMetadata<Document, MutableDocument, D, MD> {
   TypedDocumentMetadata({
-    required String dartName,
-    required Factory<Document, D> factory,
-    required Factory<MutableDocument, MD> mutableFactory,
-    TypeMatcher? typeMatcher,
-  }) : super(
-          dartName: dartName,
-          factory: factory,
-          mutableFactory: mutableFactory,
-          typeMatcher: typeMatcher,
-        );
+    required super.dartName,
+    required super.factory,
+    required super.mutableFactory,
+    super.typeMatcher,
+  });
 }
 
 class TypedDataRegistry extends TypedDataAdapter {

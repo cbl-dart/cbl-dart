@@ -53,10 +53,7 @@ class OrderingImpl implements OrderingInterface {
 }
 
 class SortOrderImpl extends OrderingImpl implements SortOrder {
-  SortOrderImpl({
-    required ExpressionInterface expression,
-    bool? isAscending,
-  }) : super(expression: expression, isAscending: isAscending);
+  SortOrderImpl({required super.expression, super.isAscending});
 
   @override
   OrderingInterface ascending() =>

@@ -46,8 +46,7 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutableCustomValueTypeMatcherDoc
     extends _CustomValueTypeMatcherDocImplBase {
-  ImmutableCustomValueTypeMatcherDoc.internal(Document internal)
-      : super(internal);
+  ImmutableCustomValueTypeMatcherDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -73,8 +72,7 @@ class MutableCustomValueTypeMatcherDoc
     this.value = value;
   }
 
-  MutableCustomValueTypeMatcherDoc.internal(MutableDocument internal)
-      : super(internal);
+  MutableCustomValueTypeMatcherDoc.internal(super.internal);
 
   set value(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);

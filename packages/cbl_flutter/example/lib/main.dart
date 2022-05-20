@@ -30,7 +30,7 @@ Future<void> main() async {
 const spacing = 16.0;
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) => const MaterialApp(
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
 }
 
 class LogMessagesPage extends StatefulWidget {
-  const LogMessagesPage({Key? key}) : super(key: key);
+  const LogMessagesPage({super.key});
 
   @override
   State<LogMessagesPage> createState() => _LogMessagesPageState();
@@ -95,10 +95,7 @@ class _LogMessagesPageState extends State<LogMessagesPage> {
 }
 
 class LogMessageTile extends StatelessWidget {
-  const LogMessageTile({
-    Key? key,
-    required this.logMessage,
-  }) : super(key: key);
+  const LogMessageTile({super.key, required this.logMessage});
 
   final LogMessage logMessage;
 
@@ -120,7 +117,7 @@ class LogMessageTile extends StatelessWidget {
 }
 
 class LogMessageForm extends StatefulWidget {
-  const LogMessageForm({Key? key, required this.onSubmit}) : super(key: key);
+  const LogMessageForm({super.key, required this.onSubmit});
 
   final ValueChanged<String> onSubmit;
 

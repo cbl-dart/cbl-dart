@@ -13,23 +13,19 @@ import 'value.dart';
 class MRoot extends MCollection {
   MRoot.fromContext(
     MContext context, {
-    required bool isMutable,
+    required super.isMutable,
   })  : _slot = MValue.withValue(context.flValue),
-        super(context: context, isMutable: isMutable) {
+        super(context: context) {
     _slot.updateParent(this);
   }
 
   MRoot.fromNative(
     Object native, {
-    required MContext context,
-    required bool isMutable,
+    required MContext super.context,
+    required super.isMutable,
   })  : assert(native is! Pointer),
         assert(context.data == null),
-        _slot = MValue.withNative(native),
-        super(
-          context: context,
-          isMutable: isMutable,
-        ) {
+        _slot = MValue.withNative(native) {
     _slot.updateParent(this);
   }
 

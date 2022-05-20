@@ -61,8 +61,7 @@ class SelectResultImpl implements SelectResultInterface {
 }
 
 class SelectResultAsImpl extends SelectResultImpl implements SelectResultAs {
-  SelectResultAsImpl({required ExpressionInterface expression, String? alias})
-      : super(expression: expression, alias: alias);
+  SelectResultAsImpl({required super.expression, super.alias});
 
   @override
   SelectResultInterface as(String? alias) =>
@@ -71,8 +70,7 @@ class SelectResultAsImpl extends SelectResultImpl implements SelectResultAs {
 
 class SelectResultFromImpl extends SelectResultImpl
     implements SelectResultFrom {
-  SelectResultFromImpl({required ExpressionInterface expression, String? alias})
-      : super(expression: expression, alias: alias);
+  SelectResultFromImpl({required super.expression, super.alias});
 
   @override
   SelectResultInterface from(String alias) => SelectResultImpl(

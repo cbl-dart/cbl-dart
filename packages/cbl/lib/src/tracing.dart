@@ -225,14 +225,14 @@ abstract class TracedOperation {
 ///
 /// {@category Tracing}
 class NativeCallOp extends TracedOperation {
-  NativeCallOp(String name) : super(name);
+  NativeCallOp(super.name);
 }
 
 /// A call over a communication channel.
 ///
 /// {@category Tracing}
 class ChannelCallOp extends TracedOperation {
-  ChannelCallOp(String name) : super(name);
+  ChannelCallOp(super.name);
 }
 
 /// Operation that initializes CBL Dart.

@@ -107,10 +107,10 @@ abstract class _TypedDataListBase<T extends E, E, I extends Array>
 class ImmutableTypedDataList<T extends E, E>
     extends _TypedDataListBase<T, E, Array> {
   ImmutableTypedDataList({
-    required Array internal,
-    required DataConverter<T, E> converter,
-    required bool isNullable,
-  }) : super(internal: internal, converter: converter, isNullable: isNullable);
+    required super.internal,
+    required super.converter,
+    required super.isNullable,
+  });
 
   @override
   void operator []=(int index, E value) {
@@ -221,10 +221,10 @@ class ImmutableTypedDataList<T extends E, E>
 class MutableTypedDataList<T extends E, E>
     extends _TypedDataListBase<T, E, MutableArray> {
   MutableTypedDataList({
-    required MutableArray internal,
-    required DataConverter<T, E> converter,
-    required bool isNullable,
-  }) : super(internal: internal, converter: converter, isNullable: isNullable);
+    required super.internal,
+    required super.converter,
+    required super.isNullable,
+  });
 
   T _promote(E value) => _converter.promote(value);
 

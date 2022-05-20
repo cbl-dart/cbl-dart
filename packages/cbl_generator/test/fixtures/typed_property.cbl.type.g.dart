@@ -45,7 +45,7 @@ abstract class _CustomDataNameDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableCustomDataNameDict extends _CustomDataNameDictImplBase {
-  ImmutableCustomDataNameDict.internal(Dictionary internal) : super(internal);
+  ImmutableCustomDataNameDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -71,8 +71,7 @@ class MutableCustomDataNameDict
     this.value = value;
   }
 
-  MutableCustomDataNameDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableCustomDataNameDict.internal(super.internal);
 
   set value(bool value) {
     final promoted = TypedDataHelpers.boolConverter.promote(value);
@@ -123,7 +122,7 @@ abstract class _DefaultValueDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDefaultValueDict extends _DefaultValueDictImplBase {
-  ImmutableDefaultValueDict.internal(Dictionary internal) : super(internal);
+  ImmutableDefaultValueDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -149,8 +148,7 @@ class MutableDefaultValueDict
     this.value = value;
   }
 
-  MutableDefaultValueDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableDefaultValueDict.internal(super.internal);
 
   set value(bool value) {
     final promoted = TypedDataHelpers.boolConverter.promote(value);
@@ -203,7 +201,7 @@ abstract class _ScalarConverterDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableScalarConverterDict extends _ScalarConverterDictImplBase {
-  ImmutableScalarConverterDict.internal(Dictionary internal) : super(internal);
+  ImmutableScalarConverterDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -229,8 +227,7 @@ class MutableScalarConverterDict
     this.value = value;
   }
 
-  MutableScalarConverterDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableScalarConverterDict.internal(super.internal);
 
   set value(Uri value) {
     final promoted = const ScalarConverterAdapter(

@@ -31,7 +31,7 @@ abstract class _EmptyDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableEmptyDoc extends _EmptyDocImplBase {
-  ImmutableEmptyDoc.internal(Document internal) : super(internal);
+  ImmutableEmptyDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -50,7 +50,7 @@ class MutableEmptyDoc extends _EmptyDocImplBase<MutableDocument>
   /// Creates a new mutable [EmptyDoc].
   MutableEmptyDoc() : super(MutableDocument());
 
-  MutableEmptyDoc.internal(MutableDocument internal) : super(internal);
+  MutableEmptyDoc.internal(super.internal);
 }
 
 // **************************************************************************
@@ -82,7 +82,7 @@ abstract class _EmptyDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableEmptyDict extends _EmptyDictImplBase {
-  ImmutableEmptyDict.internal(Dictionary internal) : super(internal);
+  ImmutableEmptyDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -101,5 +101,5 @@ class MutableEmptyDict extends _EmptyDictImplBase<MutableDictionary>
   /// Creates a new mutable [EmptyDict].
   MutableEmptyDict() : super(MutableDictionary());
 
-  MutableEmptyDict.internal(MutableDictionary internal) : super(internal);
+  MutableEmptyDict.internal(super.internal);
 }

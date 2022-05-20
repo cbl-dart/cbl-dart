@@ -36,7 +36,7 @@ abstract class _BoolListDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBoolListDict extends _BoolListDictImplBase {
-  ImmutableBoolListDict.internal(Dictionary internal) : super(internal);
+  ImmutableBoolListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: TypedDataHelpers.boolConverter,
@@ -73,7 +73,7 @@ class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableBoolListDict.internal(MutableDictionary internal) : super(internal);
+  MutableBoolListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: TypedDataHelpers.boolConverter,
@@ -133,7 +133,7 @@ abstract class _OptionalBoolListDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
-  ImmutableOptionalBoolListDict.internal(Dictionary internal) : super(internal);
+  ImmutableOptionalBoolListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: TypedDataHelpers.boolConverter,
@@ -175,8 +175,7 @@ class MutableOptionalBoolListDict
     }
   }
 
-  MutableOptionalBoolListDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableOptionalBoolListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: TypedDataHelpers.boolConverter,
@@ -237,7 +236,7 @@ abstract class _BoolDictListDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
-  ImmutableBoolDictListDict.internal(Dictionary internal) : super(internal);
+  ImmutableBoolDictListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: const TypedDictionaryConverter<Dictionary, BoolDict,
@@ -278,8 +277,7 @@ class MutableBoolDictListDict
     this.value = value;
   }
 
-  MutableBoolDictListDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableBoolDictListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: const TypedDictionaryConverter<MutableDictionary,
@@ -341,7 +339,7 @@ abstract class _BoolListListDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBoolListListDict extends _BoolListListDictImplBase {
-  ImmutableBoolListListDict.internal(Dictionary internal) : super(internal);
+  ImmutableBoolListListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: const TypedListConverter(
@@ -385,8 +383,7 @@ class MutableBoolListListDict
     this.value = value;
   }
 
-  MutableBoolListListDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableBoolListListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
     converter: const TypedListConverter(
