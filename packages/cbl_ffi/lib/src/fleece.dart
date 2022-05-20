@@ -12,13 +12,14 @@ import 'utils.dart';
 
 // === Common ==================================================================
 
-class FLCopyFlag extends Option {
-  const FLCopyFlag._(super.bits);
+enum FLCopyFlag implements Option {
+  deepCopy(0),
+  copyImmutables(1);
 
-  static const deepCopy = FLCopyFlag._(0);
-  static const copyImmutables = FLCopyFlag._(1);
+  const FLCopyFlag(this.bit);
 
-  static const values = [deepCopy, copyImmutables];
+  @override
+  final int bit;
 }
 
 // === Error ===================================================================

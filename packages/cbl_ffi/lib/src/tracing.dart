@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 /// Whether CBL Dart trace points should be included when compiling a Dart
 /// program.
 ///
@@ -15,28 +13,21 @@ const cblIncludeTracePoints =
     // ignore: do_not_use_environment
     bool.fromEnvironment('cblIncludeTracePoints', defaultValue: true);
 
-@sealed
-class TracedNativeCall {
+enum TracedNativeCall {
+  databaseOpen('CBLDart_CBLDatabase_Open'),
+  databaseClose('CBLDart_CBLDatabase_Close'),
+  databaseGetDocument('CBLDatabase_GetDocument'),
+  databaseGetMutableDocument('CBLDatabase_GetMutableDocument'),
+  databaseSaveDocument('CBLDatabase_SaveDocumentWithConcurrencyControl'),
+  databaseDeleteDocument('CBLDatabase_DeleteDocumentWithConcurrencyControl'),
+  databaseGetBlob('CBLDatabase_GetBlob'),
+  databaseSaveBlob('CBLDatabase_SaveBlob'),
+  queryCreate('CBLDatabase_CreateQuery'),
+  queryExecute('CBLQuery_Execute');
+
   const TracedNativeCall(this.symbol);
 
   final String symbol;
-
-  static const databaseOpen = TracedNativeCall('CBLDart_CBLDatabase_Open');
-  static const databaseClose = TracedNativeCall('CBLDart_CBLDatabase_Close');
-  static const databaseGetDocument =
-      TracedNativeCall('CBLDatabase_GetDocument');
-  static const databaseGetMutableDocument =
-      TracedNativeCall('CBLDatabase_GetMutableDocument');
-  static const databaseSaveDocument = TracedNativeCall(
-    'CBLDatabase_SaveDocumentWithConcurrencyControl',
-  );
-  static const databaseDeleteDocument = TracedNativeCall(
-    'CBLDatabase_DeleteDocumentWithConcurrencyControl',
-  );
-  static const databaseGetBlob = TracedNativeCall('CBLDatabase_GetBlob');
-  static const databaseSaveBlob = TracedNativeCall('CBLDatabase_SaveBlob');
-  static const queryCreate = TracedNativeCall('CBLDatabase_CreateQuery');
-  static const queryExecute = TracedNativeCall('CBLQuery_Execute');
 }
 
 typedef TracedCallHandler = T Function<T>(
