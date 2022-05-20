@@ -15,7 +15,7 @@ abstract class ConsoleLogger {
   set level(LogLevel value);
 }
 
-late final _bindings = cblBindings.logging;
+final _bindings = cblBindings.logging;
 
 class ConsoleLoggerImpl extends ConsoleLogger {
   ConsoleLoggerImpl() : super._();

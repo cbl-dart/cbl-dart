@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, lines_longer_than_80_chars
+// ignore_for_file: avoid_print, lines_longer_than_80_chars, diagnostic_describe_all_properties
 
 /// This simple example app allows users to view and add to a list of log
 /// messages.
@@ -88,7 +88,7 @@ class _LogMessagesPageState extends State<LogMessagesPage> {
               ),
             ),
             const Divider(height: 0),
-            LogMessageForm(onSubmit: logMessageRepository.createLogMessage)
+            _LogMessageForm(onSubmit: logMessageRepository.createLogMessage)
           ]),
         ),
       );
@@ -116,8 +116,8 @@ class LogMessageTile extends StatelessWidget {
       );
 }
 
-class LogMessageForm extends StatefulWidget {
-  const LogMessageForm({super.key, required this.onSubmit});
+class _LogMessageForm extends StatefulWidget {
+  const _LogMessageForm({required this.onSubmit});
 
   final ValueChanged<String> onSubmit;
 
@@ -125,7 +125,7 @@ class LogMessageForm extends StatefulWidget {
   _LogMessageFormState createState() => _LogMessageFormState();
 }
 
-class _LogMessageFormState extends State<LogMessageForm> {
+class _LogMessageFormState extends State<_LogMessageForm> {
   late final TextEditingController _messageController;
   late final FocusNode _messageFocusNode;
 

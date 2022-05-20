@@ -119,7 +119,7 @@ Future<AsyncDatabase> openAsyncTestDatabase({
   await File(config.directory).parent.create(recursive: true);
 
   final AsyncDatabase db;
-  if (usePublicApi == true) {
+  if (usePublicApi ?? false) {
     db = await (typedDataAdapter != null
         ? AsyncDatabase.openInternal(name, config, typedDataAdapter)
         : AsyncDatabase.open(name, config));

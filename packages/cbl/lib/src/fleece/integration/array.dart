@@ -10,7 +10,7 @@ import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
 
-late final _arrayBindings = cblBindings.fleece.array;
+final _arrayBindings = cblBindings.fleece.array;
 
 class MArray extends MCollection {
   MArray()

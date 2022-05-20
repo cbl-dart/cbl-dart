@@ -8,7 +8,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../support/ffi.dart';
 import 'containers.dart';
 
-late final _decoderBinds = cblBindings.fleece.decoder;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 /// Returns a string which shows how values are encoded in the Fleece [data].
 ///
@@ -547,12 +547,12 @@ class _ArrayIndexLoader extends _FleeceValueLoader {
 
 class _DictIteratorLoader extends _FleeceValueLoader {
   _DictIteratorLoader(
-    Pointer<FLDict> _dict,
+    Pointer<FLDict> dict,
     this._listener,
     this._sharedKeysTable,
     this._sharedStringsTable,
   ) : _it = DictIterator(
-          _dict,
+          dict,
           sharedKeysTable: _sharedKeysTable,
           keyOut: globalLoadedDictKey,
           valueOut: globalLoadedFLValue,

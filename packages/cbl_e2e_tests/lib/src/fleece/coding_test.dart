@@ -7,8 +7,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 
-late final _decoderBinds = CBLBindings.instance.fleece.decoder;
-late final _valueBinds = CBLBindings.instance.fleece.value;
+final _decoderBinds = CBLBindings.instance.fleece.decoder;
+final _valueBinds = CBLBindings.instance.fleece.value;
 
 void main() {
   setupTestBinding();

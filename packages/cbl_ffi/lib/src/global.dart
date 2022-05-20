@@ -6,7 +6,7 @@ import 'base.dart';
 import 'fleece.dart';
 import 'slice.dart';
 
-late final globalArena = Arena(cachedSliceResultAllocator);
+final globalArena = Arena(cachedSliceResultAllocator);
 
 T withGlobalArena<T>(T Function() f) {
   try {
@@ -16,21 +16,21 @@ T withGlobalArena<T>(T Function() f) {
   }
 }
 
-late final globalFLErrorCode = sliceResultAllocator<Uint32>();
+final globalFLErrorCode = sliceResultAllocator<Uint32>();
 
-late final nullFLSlice = sliceResultAllocator<FLSlice>()
+final nullFLSlice = sliceResultAllocator<FLSlice>()
   ..ref.buf = nullptr
   ..ref.size = 0;
-late final globalFLSlice = sliceResultAllocator<FLSlice>();
+final globalFLSlice = sliceResultAllocator<FLSlice>();
 
-late final nullFLSliceResult = nullFLSlice.cast<FLSliceResult>();
-late final globalFLSliceResult = sliceResultAllocator<FLSliceResult>();
+final nullFLSliceResult = nullFLSlice.cast<FLSliceResult>();
+final globalFLSliceResult = sliceResultAllocator<FLSliceResult>();
 
-late final nullFLString = nullFLSlice.cast<FLString>();
-late final globalFLString = sliceResultAllocator<FLString>();
+final nullFLString = nullFLSlice.cast<FLString>();
+final globalFLString = sliceResultAllocator<FLString>();
 
-late final globalLoadedDictKey = sliceResultAllocator<CBLDart_LoadedDictKey>();
-late final globalLoadedFLValue = sliceResultAllocator<CBLDart_LoadedFLValue>();
+final globalLoadedDictKey = sliceResultAllocator<CBLDart_LoadedDictKey>();
+final globalLoadedFLValue = sliceResultAllocator<CBLDart_LoadedFLValue>();
 
-late final globalCBLError = sliceResultAllocator<CBLError>();
-late final globalErrorPosition = sliceResultAllocator<Int>();
+final globalCBLError = sliceResultAllocator<CBLError>();
+final globalErrorPosition = sliceResultAllocator<Int>();

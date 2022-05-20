@@ -11,8 +11,8 @@ import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 import '../utils/matchers.dart';
 
-late final _arrayBinds = CBLBindings.instance.fleece.array;
-late final _dictBinds = CBLBindings.instance.fleece.dict;
+final _arrayBinds = CBLBindings.instance.fleece.array;
+final _dictBinds = CBLBindings.instance.fleece.dict;
 
 void main() {
   setupTestBinding();

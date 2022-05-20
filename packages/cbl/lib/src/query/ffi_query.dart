@@ -32,7 +32,7 @@ import 'result.dart';
 import 'result_set.dart';
 import 'select_result.dart';
 
-late final _bindings = cblBindings.query;
+final _bindings = cblBindings.query;
 
 class FfiQuery extends QueryBase
     implements SyncQuery, NativeResource<CBLQuery> {
@@ -273,7 +273,7 @@ class ResultSetIterator extends CBLObject<CBLResultSet>
     required String debugCreator,
   }) : super(debugName: 'ResultSetIterator(creator: $debugCreator)');
 
-  static late final _bindings = cblBindings.resultSet;
+  static final _bindings = cblBindings.resultSet;
 
   final bool encodeArray;
   var _isDone = false;

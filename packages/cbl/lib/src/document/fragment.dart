@@ -447,7 +447,7 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
   }
 
   @override
-  MutableFragment operator [](final Object indexOrKey) =>
+  MutableFragment operator [](Object indexOrKey) =>
       _updateSubscript(indexOrKey) ? this : _emptyInstance;
 
   void _checkHasParent() {

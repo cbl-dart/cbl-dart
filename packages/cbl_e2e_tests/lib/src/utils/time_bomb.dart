@@ -88,5 +88,5 @@ final _stdLib = Platform.isWindows
     ? DynamicLibrary.open('ucrtbase.dll')
     : DynamicLibrary.process();
 
-late final _abort =
+final _abort =
     _stdLib.lookupFunction<Void Function(), void Function()>('abort');

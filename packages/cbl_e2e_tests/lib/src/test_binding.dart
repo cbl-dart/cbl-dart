@@ -161,9 +161,9 @@ abstract class CblE2eTestBinding {
 }
 
 /// Alias of [CblE2eTestBinding.tmpDir].
-late final tmpDir = CblE2eTestBinding.instance.tmpDir;
+final tmpDir = CblE2eTestBinding.instance.tmpDir;
 
-late final largeJsonFixture = CblE2eTestBinding.instance.largeJsonFixture;
+final largeJsonFixture = CblE2eTestBinding.instance.largeJsonFixture;
 
 String? get testId => Zone.current[#testId] as String?;
 
