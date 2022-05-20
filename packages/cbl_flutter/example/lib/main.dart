@@ -209,7 +209,7 @@ class CblLogMessage extends LogMessage {
   final DictionaryInterface dict;
 
   // `dict` could be a `Document` or a `Result` from a query.
-  // The extension `DictionaryDocumentIdExt` handels getting the id in both
+  // The extension `DictionaryDocumentIdExt` handles getting the id in both
   // cases.
   @override
   String get id => dict.documentId;

@@ -11,10 +11,12 @@ late final _baseBinds = CBLBindings.instance.base;
 
 // === Option ==================================================================
 
-class Option {
-  const Option(int bit) : bitMask = 1 << bit;
+abstract class Option {
+  int get bit;
+}
 
-  final int bitMask;
+extension OptionExt on Option {
+  int get bitMask => 1 << bit;
 }
 
 extension OptionIterable<T extends Option> on Iterable<T> {

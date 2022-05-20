@@ -360,13 +360,14 @@ typedef _CBLDart_CBLReplicator_AddChangeListener = void Function(
   Pointer<CBLDartAsyncCallback> listener,
 );
 
-class CBLReplicatedDocumentFlag extends Option {
-  const CBLReplicatedDocumentFlag(super.bits);
+enum CBLReplicatedDocumentFlag implements Option {
+  deleted(0),
+  accessRemoved(1);
 
-  static const deleted = CBLReplicatedDocumentFlag(0);
-  static const accessRemoved = CBLReplicatedDocumentFlag(1);
+  const CBLReplicatedDocumentFlag(this.bit);
 
-  static const values = [deleted, accessRemoved];
+  @override
+  final int bit;
 
   static Set<CBLReplicatedDocumentFlag> _parseCFlags(int flag) =>
       values.parseCFlags(flag);
