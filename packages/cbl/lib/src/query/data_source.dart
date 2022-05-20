@@ -40,8 +40,7 @@ class DataSourceImpl implements DataSourceInterface {
 }
 
 class DataSourceAsImpl extends DataSourceImpl implements DataSourceAs {
-  DataSourceAsImpl({required Database database, String? alias})
-      : super(database: database, alias: alias);
+  DataSourceAsImpl({required super.database, super.alias});
 
   @override
   DataSourceInterface as(String alias) =>

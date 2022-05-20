@@ -37,17 +37,11 @@ late final _bindings = cblBindings.query;
 class FfiQuery extends QueryBase
     implements SyncQuery, NativeResource<CBLQuery> {
   FfiQuery({
-    required String debugCreator,
-    FfiDatabase? database,
-    required CBLQueryLanguage language,
-    String? definition,
-  }) : super(
-          typeName: 'FfiQuery',
-          debugCreator: debugCreator,
-          database: database,
-          language: language,
-          definition: definition,
-        );
+    required super.debugCreator,
+    FfiDatabase? super.database,
+    required super.language,
+    super.definition,
+  }) : super(typeName: 'FfiQuery');
 
   var _isPrepared = false;
 
@@ -274,13 +268,10 @@ class ResultSetIterator extends CBLObject<CBLResultSet>
     with IterableMixin<fl.Array>
     implements Iterator<fl.Array> {
   ResultSetIterator(
-    Pointer<CBLResultSet> pointer, {
+    super.pointer, {
     this.encodeArray = false,
     required String debugCreator,
-  }) : super(
-          pointer,
-          debugName: 'ResultSetIterator(creator: $debugCreator)',
-        );
+  }) : super(debugName: 'ResultSetIterator(creator: $debugCreator)');
 
   static late final _bindings = cblBindings.resultSet;
 

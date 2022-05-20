@@ -45,5 +45,5 @@ class Meta {
 
 class MetaExpressionImpl extends PropertyExpressionImpl
     implements MetaExpressionInterface {
-  MetaExpressionImpl(String propertyPath) : super(propertyPath);
+  MetaExpressionImpl(super.propertyPath);
 }

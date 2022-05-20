@@ -22,16 +22,16 @@ abstract class AsyncLimit implements Limit, AsyncQuery {}
 
 class SyncLimitImpl extends SyncBuilderQuery implements SyncLimit {
   SyncLimitImpl({
-    required SyncBuilderQuery query,
-    required ExpressionInterface limit,
-    ExpressionInterface? offset,
-  }) : super(query: query, limit: limit, offset: offset);
+    required SyncBuilderQuery super.query,
+    required ExpressionInterface super.limit,
+    super.offset,
+  });
 }
 
 class AsyncLimitImpl extends AsyncBuilderQuery implements AsyncLimit {
   AsyncLimitImpl({
-    required AsyncBuilderQuery query,
-    required ExpressionInterface limit,
-    ExpressionInterface? offset,
-  }) : super(query: query, limit: limit, offset: offset);
+    required AsyncBuilderQuery super.query,
+    required ExpressionInterface super.limit,
+    super.offset,
+  });
 }

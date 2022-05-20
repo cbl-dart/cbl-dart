@@ -39,7 +39,7 @@ abstract class _DocWithIdImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithId extends _DocWithIdImplBase {
-  ImmutableDocWithId.internal(Document internal) : super(internal);
+  ImmutableDocWithId.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -60,7 +60,7 @@ class MutableDocWithId extends _DocWithIdImplBase<MutableDocument>
     String id,
   ) : super(MutableDocument.withId(id));
 
-  MutableDocWithId.internal(MutableDocument internal) : super(internal);
+  MutableDocWithId.internal(super.internal);
 }
 
 mixin _$DocWithOptionalId
@@ -96,7 +96,7 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithOptionalId extends _DocWithOptionalIdImplBase {
-  ImmutableDocWithOptionalId.internal(Document internal) : super(internal);
+  ImmutableDocWithOptionalId.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -120,7 +120,7 @@ class MutableDocWithOptionalId
     String? id,
   ]) : super(id == null ? MutableDocument() : MutableDocument.withId(id));
 
-  MutableDocWithOptionalId.internal(MutableDocument internal) : super(internal);
+  MutableDocWithOptionalId.internal(super.internal);
 }
 
 mixin _$DocWithIdAndField
@@ -167,7 +167,7 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithIdAndField extends _DocWithIdAndFieldImplBase {
-  ImmutableDocWithIdAndField.internal(Document internal) : super(internal);
+  ImmutableDocWithIdAndField.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -194,7 +194,7 @@ class MutableDocWithIdAndField
     this.value = value;
   }
 
-  MutableDocWithIdAndField.internal(MutableDocument internal) : super(internal);
+  MutableDocWithIdAndField.internal(super.internal);
 
   set value(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -252,8 +252,7 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithOptionalIdAndField
     extends _DocWithOptionalIdAndFieldImplBase {
-  ImmutableDocWithOptionalIdAndField.internal(Document internal)
-      : super(internal);
+  ImmutableDocWithOptionalIdAndField.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -280,8 +279,7 @@ class MutableDocWithOptionalIdAndField
     this.value = value;
   }
 
-  MutableDocWithOptionalIdAndField.internal(MutableDocument internal)
-      : super(internal);
+  MutableDocWithOptionalIdAndField.internal(super.internal);
 
   set value(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -325,7 +323,7 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithIdGetter extends _DocWithIdGetterImplBase {
-  ImmutableDocWithIdGetter.internal(Document internal) : super(internal);
+  ImmutableDocWithIdGetter.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -345,7 +343,7 @@ class MutableDocWithIdGetter extends _DocWithIdGetterImplBase<MutableDocument>
   /// Creates a new mutable [DocWithIdGetter].
   MutableDocWithIdGetter() : super(MutableDocument());
 
-  MutableDocWithIdGetter.internal(MutableDocument internal) : super(internal);
+  MutableDocWithIdGetter.internal(super.internal);
 }
 
 mixin _$DocWithSequenceGetter
@@ -379,7 +377,7 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocWithSequenceGetter extends _DocWithSequenceGetterImplBase {
-  ImmutableDocWithSequenceGetter.internal(Document internal) : super(internal);
+  ImmutableDocWithSequenceGetter.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -401,8 +399,7 @@ class MutableDocWithSequenceGetter
   /// Creates a new mutable [DocWithSequenceGetter].
   MutableDocWithSequenceGetter() : super(MutableDocument());
 
-  MutableDocWithSequenceGetter.internal(MutableDocument internal)
-      : super(internal);
+  MutableDocWithSequenceGetter.internal(super.internal);
 }
 
 mixin _$DocWithRevisionIdGetter
@@ -437,8 +434,7 @@ abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
 /// removed in the future.
 class ImmutableDocWithRevisionIdGetter
     extends _DocWithRevisionIdGetterImplBase {
-  ImmutableDocWithRevisionIdGetter.internal(Document internal)
-      : super(internal);
+  ImmutableDocWithRevisionIdGetter.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -460,6 +456,5 @@ class MutableDocWithRevisionIdGetter
   /// Creates a new mutable [DocWithRevisionIdGetter].
   MutableDocWithRevisionIdGetter() : super(MutableDocument());
 
-  MutableDocWithRevisionIdGetter.internal(MutableDocument internal)
-      : super(internal);
+  MutableDocWithRevisionIdGetter.internal(super.internal);
 }

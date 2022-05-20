@@ -412,7 +412,7 @@ typedef _CBLDatabase_SaveBlob = bool Function(
 );
 
 class DatabaseBindings extends Bindings {
-  DatabaseBindings(Bindings parent) : super(parent) {
+  DatabaseBindings(super.parent) {
     if (libs.enterpriseEdition) {
       _encryptionKeyFromPassword = libs.cbl.lookupFunction<
           _CBLEncryptionKey_FromPassword_C, _CBLEncryptionKey_FromPassword>(

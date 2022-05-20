@@ -110,16 +110,11 @@ abstract class MCollectionWrapper {
 class DatabaseMContext extends MContext {
   DatabaseMContext({
     this.database,
-    Object? data,
-    DictKeys? dictKeys,
-    SharedKeysTable? sharedKeysTable,
-    SharedStringsTable? sharedStringsTable,
-  }) : super(
-          data: data,
-          dictKeys: dictKeys,
-          sharedKeysTable: sharedKeysTable,
-          sharedStringsTable: sharedStringsTable,
-        );
+    super.data,
+    super.dictKeys,
+    super.sharedKeysTable,
+    super.sharedStringsTable,
+  });
 
   DatabaseMContext.from(DatabaseMContext other, {Object? data})
       : this(

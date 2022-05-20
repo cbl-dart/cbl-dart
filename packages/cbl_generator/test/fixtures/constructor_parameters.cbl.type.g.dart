@@ -43,7 +43,7 @@ abstract class _ParamDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableParamDoc extends _ParamDocImplBase {
-  ImmutableParamDoc.internal(Document internal) : super(internal);
+  ImmutableParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -66,7 +66,7 @@ class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
     this.a = a;
   }
 
-  MutableParamDoc.internal(MutableDocument internal) : super(internal);
+  MutableParamDoc.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -117,7 +117,7 @@ abstract class _OptionalParamDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableOptionalParamDoc extends _OptionalParamDocImplBase {
-  ImmutableOptionalParamDoc.internal(Document internal) : super(internal);
+  ImmutableOptionalParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -143,7 +143,7 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
     }
   }
 
-  MutableOptionalParamDoc.internal(MutableDocument internal) : super(internal);
+  MutableOptionalParamDoc.internal(super.internal);
 
   set a(String? value) {
     final promoted =
@@ -207,8 +207,7 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
 /// removed in the future.
 class ImmutablePositionalMixedParamDoc
     extends _PositionalMixedParamDocImplBase {
-  ImmutablePositionalMixedParamDoc.internal(Document internal)
-      : super(internal);
+  ImmutablePositionalMixedParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -238,8 +237,7 @@ class MutablePositionalMixedParamDoc
     }
   }
 
-  MutablePositionalMixedParamDoc.internal(MutableDocument internal)
-      : super(internal);
+  MutablePositionalMixedParamDoc.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -300,7 +298,7 @@ abstract class _NamedParamDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
-  ImmutableNamedParamDoc.internal(Document internal) : super(internal);
+  ImmutableNamedParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -323,7 +321,7 @@ class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
     this.a = a;
   }
 
-  MutableNamedParamDoc.internal(MutableDocument internal) : super(internal);
+  MutableNamedParamDoc.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -374,7 +372,7 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNamedOptionalParamDoc extends _NamedOptionalParamDocImplBase {
-  ImmutableNamedOptionalParamDoc.internal(Document internal) : super(internal);
+  ImmutableNamedOptionalParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -402,8 +400,7 @@ class MutableNamedOptionalParamDoc
     }
   }
 
-  MutableNamedOptionalParamDoc.internal(MutableDocument internal)
-      : super(internal);
+  MutableNamedOptionalParamDoc.internal(super.internal);
 
   set a(String? value) {
     final promoted =
@@ -466,7 +463,7 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocImplBase {
-  ImmutableNamedMixedParamDoc.internal(Document internal) : super(internal);
+  ImmutableNamedMixedParamDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -496,8 +493,7 @@ class MutableNamedMixedParamDoc
     }
   }
 
-  MutableNamedMixedParamDoc.internal(MutableDocument internal)
-      : super(internal);
+  MutableNamedMixedParamDoc.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -562,7 +558,7 @@ abstract class _ParamDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableParamDict extends _ParamDictImplBase {
-  ImmutableParamDict.internal(Dictionary internal) : super(internal);
+  ImmutableParamDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -585,7 +581,7 @@ class MutableParamDict extends _ParamDictImplBase<MutableDictionary>
     this.a = a;
   }
 
-  MutableParamDict.internal(MutableDictionary internal) : super(internal);
+  MutableParamDict.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -636,7 +632,7 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableOptionalParamDict extends _OptionalParamDictImplBase {
-  ImmutableOptionalParamDict.internal(Dictionary internal) : super(internal);
+  ImmutableOptionalParamDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -664,8 +660,7 @@ class MutableOptionalParamDict
     }
   }
 
-  MutableOptionalParamDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableOptionalParamDict.internal(super.internal);
 
   set a(String? value) {
     final promoted =
@@ -729,8 +724,7 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
 /// removed in the future.
 class ImmutablePositionalMixedParamDict
     extends _PositionalMixedParamDictImplBase {
-  ImmutablePositionalMixedParamDict.internal(Dictionary internal)
-      : super(internal);
+  ImmutablePositionalMixedParamDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -760,8 +754,7 @@ class MutablePositionalMixedParamDict
     }
   }
 
-  MutablePositionalMixedParamDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutablePositionalMixedParamDict.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -822,7 +815,7 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNamedParamDict extends _NamedParamDictImplBase {
-  ImmutableNamedParamDict.internal(Dictionary internal) : super(internal);
+  ImmutableNamedParamDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -846,7 +839,7 @@ class MutableNamedParamDict extends _NamedParamDictImplBase<MutableDictionary>
     this.a = a;
   }
 
-  MutableNamedParamDict.internal(MutableDictionary internal) : super(internal);
+  MutableNamedParamDict.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -897,8 +890,7 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNamedOptionalParamDict extends _NamedOptionalParamDictImplBase {
-  ImmutableNamedOptionalParamDict.internal(Dictionary internal)
-      : super(internal);
+  ImmutableNamedOptionalParamDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -926,8 +918,7 @@ class MutableNamedOptionalParamDict
     }
   }
 
-  MutableNamedOptionalParamDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableNamedOptionalParamDict.internal(super.internal);
 
   set a(String? value) {
     final promoted =
@@ -990,7 +981,7 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNamedMixedParamDict extends _NamedMixedParamDictImplBase {
-  ImmutableNamedMixedParamDict.internal(Dictionary internal) : super(internal);
+  ImmutableNamedMixedParamDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1020,8 +1011,7 @@ class MutableNamedMixedParamDict
     }
   }
 
-  MutableNamedMixedParamDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableNamedMixedParamDict.internal(super.internal);
 
   set a(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);

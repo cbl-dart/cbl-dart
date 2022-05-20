@@ -13,7 +13,7 @@ import 'utils.dart';
 // === Common ==================================================================
 
 class FLCopyFlag extends Option {
-  const FLCopyFlag._(int bits) : super(bits);
+  const FLCopyFlag._(super.bits);
 
   static const deepCopy = FLCopyFlag._(0);
   static const copyImmutables = FLCopyFlag._(1);
@@ -159,7 +159,7 @@ typedef _CBLDart_FLStringResult_Release_C = Void Function(FLStringResult);
 typedef _CBLDart_FLStringResult_Release = void Function(FLStringResult);
 
 class SliceBindings extends Bindings {
-  SliceBindings(Bindings parent) : super(parent) {
+  SliceBindings(super.parent) {
     _equal = libs.cbl.lookupFunction<_FLSlice_Equal_C, _FLSlice_Equal>(
       'FLSlice_Equal',
     );
@@ -255,7 +255,7 @@ typedef _FLSharedKeys_Count = int Function(
 );
 
 class SharedKeysBindings extends Bindings {
-  SharedKeysBindings(Bindings parent) : super(parent) {
+  SharedKeysBindings(super.parent) {
     _new = libs.cbl.lookupFunction<_FLSharedKeys_New, _FLSharedKeys_New>(
       'FLSharedKeys_New',
     );
@@ -331,7 +331,7 @@ typedef _FLSlot_SetValue = void Function(
 );
 
 class SlotBindings extends Bindings {
-  SlotBindings(Bindings parent) : super(parent) {
+  SlotBindings(super.parent) {
     _setNull = libs.cbl.lookupFunction<_FLSlot_SetNull_C, _FLSlot_SetNull>(
       'FLSlot_SetNull',
       isLeaf: useIsLeaf,
@@ -444,7 +444,7 @@ typedef _FLDoc_GetSharedKeys = Pointer<FLSharedKeys> Function(
 );
 
 class DocBindings extends Bindings {
-  DocBindings(Bindings parent) : super(parent) {
+  DocBindings(super.parent) {
     _fromResultData =
         libs.cbl.lookupFunction<_FLDoc_FromResultData_C, _FLDoc_FromResultData>(
       'FLDoc_FromResultData',
@@ -616,7 +616,7 @@ typedef _FLValue_ToJSONX = FLStringResult Function(
 );
 
 class ValueBindings extends Bindings {
-  ValueBindings(Bindings parent) : super(parent) {
+  ValueBindings(super.parent) {
     _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_FLValue_BindToDartObject_C, _CBLDart_FLValue_BindToDartObject>(
       'CBLDart_FLValue_BindToDartObject',
@@ -777,7 +777,7 @@ typedef _FLArray_Get = Pointer<FLValue> Function(
 );
 
 class ArrayBindings extends Bindings {
-  ArrayBindings(Bindings parent) : super(parent) {
+  ArrayBindings(super.parent) {
     _count = libs.cbl.lookupFunction<_FLArray_Count_C, _FLArray_Count>(
       'FLArray_Count',
       isLeaf: useIsLeaf,
@@ -901,7 +901,7 @@ typedef _FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
 );
 
 class MutableArrayBindings extends Bindings {
-  MutableArrayBindings(Bindings parent) : super(parent) {
+  MutableArrayBindings(super.parent) {
     _mutableCopy =
         libs.cbl.lookupFunction<_FLArray_MutableCopy_C, _FLArray_MutableCopy>(
       'FLArray_MutableCopy',
@@ -1028,7 +1028,7 @@ typedef _FLDict_Get = Pointer<FLValue> Function(
 );
 
 class DictBindings extends Bindings {
-  DictBindings(Bindings parent) : super(parent) {
+  DictBindings(super.parent) {
     _get = libs.cbl.lookupFunction<_FLDict_Get, _FLDict_Get>(
       'FLDict_Get',
       isLeaf: useIsLeaf,
@@ -1090,7 +1090,7 @@ typedef _FLDict_GetWithKey = Pointer<FLValue> Function(
 );
 
 class DictKeyBindings extends Bindings {
-  DictKeyBindings(Bindings parent) : super(parent) {
+  DictKeyBindings(super.parent) {
     _init = libs.cbl.lookupFunction<_FLDictKey_Init, _FLDictKey_Init>(
       'FLDictKey_Init',
       isLeaf: useIsLeaf,
@@ -1171,7 +1171,7 @@ typedef _FLMutableDict_GetMutableDict = Pointer<FLMutableDict> Function(
 );
 
 class MutableDictBindings extends Bindings {
-  MutableDictBindings(Bindings parent) : super(parent) {
+  MutableDictBindings(super.parent) {
     _mutableCopy =
         libs.cbl.lookupFunction<_FLDict_MutableCopy_C, _FLDict_MutableCopy>(
       'FLDict_MutableCopy',
@@ -1435,7 +1435,7 @@ typedef _CBLDart_FLArrayIterator_Next = bool Function(
 );
 
 class FleeceDecoderBindings extends Bindings {
-  FleeceDecoderBindings(Bindings parent) : super(parent) {
+  FleeceDecoderBindings(super.parent) {
     _dumpData = libs.cbl.lookupFunction<_FLData_Dump_C, _FLData_Dump>(
       'FLData_Dump',
       isLeaf: useIsLeaf,
@@ -1746,7 +1746,7 @@ typedef _FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
 );
 
 class FleeceEncoderBindings extends Bindings {
-  FleeceEncoderBindings(Bindings parent) : super(parent) {
+  FleeceEncoderBindings(super.parent) {
     _bindToDartObject = libs.cblDart.lookupFunction<
         _CBLDart_FLEncoder_BindToDartObject_C,
         _CBLDart_FLEncoder_BindToDartObject>(
@@ -2025,7 +2025,7 @@ class FleeceEncoderBindings extends Bindings {
 // === FleeceBindings ==========================================================
 
 class FleeceBindings extends Bindings {
-  FleeceBindings(Bindings parent) : super(parent) {
+  FleeceBindings(super.parent) {
     slice = SliceBindings(this);
     sharedKeys = SharedKeysBindings(this);
     slot = SlotBindings(this);

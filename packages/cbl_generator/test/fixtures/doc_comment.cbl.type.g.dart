@@ -45,7 +45,7 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDocCommentDict extends _DocCommentDictImplBase {
-  ImmutableDocCommentDict.internal(Dictionary internal) : super(internal);
+  ImmutableDocCommentDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -69,7 +69,7 @@ class MutableDocCommentDict extends _DocCommentDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableDocCommentDict.internal(MutableDictionary internal) : super(internal);
+  MutableDocCommentDict.internal(super.internal);
 
   set value(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);

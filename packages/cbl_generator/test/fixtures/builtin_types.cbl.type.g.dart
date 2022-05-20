@@ -44,7 +44,7 @@ abstract class _StringDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableStringDoc extends _StringDocImplBase {
-  ImmutableStringDoc.internal(Document internal) : super(internal);
+  ImmutableStringDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -67,7 +67,7 @@ class MutableStringDoc extends _StringDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableStringDoc.internal(MutableDocument internal) : super(internal);
+  MutableStringDoc.internal(super.internal);
 
   set value(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -116,7 +116,7 @@ abstract class _IntDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableIntDoc extends _IntDocImplBase {
-  ImmutableIntDoc.internal(Document internal) : super(internal);
+  ImmutableIntDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -139,7 +139,7 @@ class MutableIntDoc extends _IntDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableIntDoc.internal(MutableDocument internal) : super(internal);
+  MutableIntDoc.internal(super.internal);
 
   set value(int value) {
     final promoted = TypedDataHelpers.intConverter.promote(value);
@@ -189,7 +189,7 @@ abstract class _DoubleDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDoubleDoc extends _DoubleDocImplBase {
-  ImmutableDoubleDoc.internal(Document internal) : super(internal);
+  ImmutableDoubleDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -212,7 +212,7 @@ class MutableDoubleDoc extends _DoubleDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableDoubleDoc.internal(MutableDocument internal) : super(internal);
+  MutableDoubleDoc.internal(super.internal);
 
   set value(double value) {
     final promoted = TypedDataHelpers.doubleConverter.promote(value);
@@ -261,7 +261,7 @@ abstract class _NumDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNumDoc extends _NumDocImplBase {
-  ImmutableNumDoc.internal(Document internal) : super(internal);
+  ImmutableNumDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -284,7 +284,7 @@ class MutableNumDoc extends _NumDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableNumDoc.internal(MutableDocument internal) : super(internal);
+  MutableNumDoc.internal(super.internal);
 
   set value(num value) {
     final promoted = TypedDataHelpers.numConverter.promote(value);
@@ -333,7 +333,7 @@ abstract class _BoolDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBoolDoc extends _BoolDocImplBase {
-  ImmutableBoolDoc.internal(Document internal) : super(internal);
+  ImmutableBoolDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -356,7 +356,7 @@ class MutableBoolDoc extends _BoolDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableBoolDoc.internal(MutableDocument internal) : super(internal);
+  MutableBoolDoc.internal(super.internal);
 
   set value(bool value) {
     final promoted = TypedDataHelpers.boolConverter.promote(value);
@@ -406,7 +406,7 @@ abstract class _DateTimeDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDateTimeDoc extends _DateTimeDocImplBase {
-  ImmutableDateTimeDoc.internal(Document internal) : super(internal);
+  ImmutableDateTimeDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -429,7 +429,7 @@ class MutableDateTimeDoc extends _DateTimeDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableDateTimeDoc.internal(MutableDocument internal) : super(internal);
+  MutableDateTimeDoc.internal(super.internal);
 
   set value(DateTime value) {
     final promoted = TypedDataHelpers.dateTimeConverter.promote(value);
@@ -478,7 +478,7 @@ abstract class _BlobDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBlobDoc extends _BlobDocImplBase {
-  ImmutableBlobDoc.internal(Document internal) : super(internal);
+  ImmutableBlobDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -501,7 +501,7 @@ class MutableBlobDoc extends _BlobDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableBlobDoc.internal(MutableDocument internal) : super(internal);
+  MutableBlobDoc.internal(super.internal);
 
   set value(Blob value) {
     final promoted = TypedDataHelpers.blobConverter.promote(value);
@@ -552,7 +552,7 @@ abstract class _EnumDocImplBase<I extends Document>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableEnumDoc extends _EnumDocImplBase {
-  ImmutableEnumDoc.internal(Document internal) : super(internal);
+  ImmutableEnumDoc.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -575,7 +575,7 @@ class MutableEnumDoc extends _EnumDocImplBase<MutableDocument>
     this.value = value;
   }
 
-  MutableEnumDoc.internal(MutableDocument internal) : super(internal);
+  MutableEnumDoc.internal(super.internal);
 
   set value(TestEnum value) {
     final promoted = const ScalarConverterAdapter(
@@ -633,7 +633,7 @@ abstract class _StringDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableStringDict extends _StringDictImplBase {
-  ImmutableStringDict.internal(Dictionary internal) : super(internal);
+  ImmutableStringDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -656,7 +656,7 @@ class MutableStringDict extends _StringDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableStringDict.internal(MutableDictionary internal) : super(internal);
+  MutableStringDict.internal(super.internal);
 
   set value(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
@@ -705,7 +705,7 @@ abstract class _IntDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableIntDict extends _IntDictImplBase {
-  ImmutableIntDict.internal(Dictionary internal) : super(internal);
+  ImmutableIntDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -728,7 +728,7 @@ class MutableIntDict extends _IntDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableIntDict.internal(MutableDictionary internal) : super(internal);
+  MutableIntDict.internal(super.internal);
 
   set value(int value) {
     final promoted = TypedDataHelpers.intConverter.promote(value);
@@ -778,7 +778,7 @@ abstract class _DoubleDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDoubleDict extends _DoubleDictImplBase {
-  ImmutableDoubleDict.internal(Dictionary internal) : super(internal);
+  ImmutableDoubleDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -801,7 +801,7 @@ class MutableDoubleDict extends _DoubleDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableDoubleDict.internal(MutableDictionary internal) : super(internal);
+  MutableDoubleDict.internal(super.internal);
 
   set value(double value) {
     final promoted = TypedDataHelpers.doubleConverter.promote(value);
@@ -850,7 +850,7 @@ abstract class _NumDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNumDict extends _NumDictImplBase {
-  ImmutableNumDict.internal(Dictionary internal) : super(internal);
+  ImmutableNumDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -873,7 +873,7 @@ class MutableNumDict extends _NumDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableNumDict.internal(MutableDictionary internal) : super(internal);
+  MutableNumDict.internal(super.internal);
 
   set value(num value) {
     final promoted = TypedDataHelpers.numConverter.promote(value);
@@ -922,7 +922,7 @@ abstract class _BoolDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBoolDict extends _BoolDictImplBase {
-  ImmutableBoolDict.internal(Dictionary internal) : super(internal);
+  ImmutableBoolDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -945,7 +945,7 @@ class MutableBoolDict extends _BoolDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableBoolDict.internal(MutableDictionary internal) : super(internal);
+  MutableBoolDict.internal(super.internal);
 
   set value(bool value) {
     final promoted = TypedDataHelpers.boolConverter.promote(value);
@@ -995,7 +995,7 @@ abstract class _DateTimeDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableDateTimeDict extends _DateTimeDictImplBase {
-  ImmutableDateTimeDict.internal(Dictionary internal) : super(internal);
+  ImmutableDateTimeDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1018,7 +1018,7 @@ class MutableDateTimeDict extends _DateTimeDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableDateTimeDict.internal(MutableDictionary internal) : super(internal);
+  MutableDateTimeDict.internal(super.internal);
 
   set value(DateTime value) {
     final promoted = TypedDataHelpers.dateTimeConverter.promote(value);
@@ -1067,7 +1067,7 @@ abstract class _BlobDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableBlobDict extends _BlobDictImplBase {
-  ImmutableBlobDict.internal(Dictionary internal) : super(internal);
+  ImmutableBlobDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1090,7 +1090,7 @@ class MutableBlobDict extends _BlobDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableBlobDict.internal(MutableDictionary internal) : super(internal);
+  MutableBlobDict.internal(super.internal);
 
   set value(Blob value) {
     final promoted = TypedDataHelpers.blobConverter.promote(value);
@@ -1141,7 +1141,7 @@ abstract class _NullableIntDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNullableIntDict extends _NullableIntDictImplBase {
-  ImmutableNullableIntDict.internal(Dictionary internal) : super(internal);
+  ImmutableNullableIntDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1167,7 +1167,7 @@ class MutableNullableIntDict extends _NullableIntDictImplBase<MutableDictionary>
     }
   }
 
-  MutableNullableIntDict.internal(MutableDictionary internal) : super(internal);
+  MutableNullableIntDict.internal(super.internal);
 
   set value(int? value) {
     final promoted =
@@ -1219,7 +1219,7 @@ abstract class _NullableDoubleDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNullableDoubleDict extends _NullableDoubleDictImplBase {
-  ImmutableNullableDoubleDict.internal(Dictionary internal) : super(internal);
+  ImmutableNullableDoubleDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1247,8 +1247,7 @@ class MutableNullableDoubleDict
     }
   }
 
-  MutableNullableDoubleDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableNullableDoubleDict.internal(super.internal);
 
   set value(double? value) {
     final promoted =
@@ -1300,7 +1299,7 @@ abstract class _NullableNumDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNullableNumDict extends _NullableNumDictImplBase {
-  ImmutableNullableNumDict.internal(Dictionary internal) : super(internal);
+  ImmutableNullableNumDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1326,7 +1325,7 @@ class MutableNullableNumDict extends _NullableNumDictImplBase<MutableDictionary>
     }
   }
 
-  MutableNullableNumDict.internal(MutableDictionary internal) : super(internal);
+  MutableNullableNumDict.internal(super.internal);
 
   set value(num? value) {
     final promoted =
@@ -1378,7 +1377,7 @@ abstract class _NullableBoolDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableNullableBoolDict extends _NullableBoolDictImplBase {
-  ImmutableNullableBoolDict.internal(Dictionary internal) : super(internal);
+  ImmutableNullableBoolDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1406,8 +1405,7 @@ class MutableNullableBoolDict
     }
   }
 
-  MutableNullableBoolDict.internal(MutableDictionary internal)
-      : super(internal);
+  MutableNullableBoolDict.internal(super.internal);
 
   set value(bool? value) {
     final promoted =
@@ -1459,7 +1457,7 @@ abstract class _EnumDictImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableEnumDict extends _EnumDictImplBase {
-  ImmutableEnumDict.internal(Dictionary internal) : super(internal);
+  ImmutableEnumDict.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -1482,7 +1480,7 @@ class MutableEnumDict extends _EnumDictImplBase<MutableDictionary>
     this.value = value;
   }
 
-  MutableEnumDict.internal(MutableDictionary internal) : super(internal);
+  MutableEnumDict.internal(super.internal);
 
   set value(TestEnum value) {
     final promoted = const ScalarConverterAdapter(

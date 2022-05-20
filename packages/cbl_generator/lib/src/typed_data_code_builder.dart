@@ -85,7 +85,7 @@ abstract class ${_classNames.implBaseName}<I extends $_internalType>
 /// removed in the future.
 class ${_classNames.immutableClassName} extends ${_classNames.implBaseName} {
 
-  ${_classNames.immutableClassName}.internal($_internalType internal): super(internal);
+  ${_classNames.immutableClassName}.internal(super.internal);
 
 ''');
 
@@ -215,7 +215,7 @@ class ${_classNames.mutableClassName}
 
     // Internal constructor
     _code.writeln('''
-${_classNames.mutableClassName}.internal($_mutableInternalType internal): super(internal);
+${_classNames.mutableClassName}.internal(super.internal);
 
 ''');
 

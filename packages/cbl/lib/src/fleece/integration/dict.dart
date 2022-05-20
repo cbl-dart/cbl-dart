@@ -17,7 +17,7 @@ class MDict extends MCollection {
         _length = 0,
         _valuesHasAllKeys = true;
 
-  MDict.asCopy(MDict original, {bool? isMutable})
+  MDict.asCopy(MDict super.original, {bool? isMutable})
       : _dict = original._dict,
         _values = Map.fromEntries(
           original._values.entries
@@ -25,16 +25,14 @@ class MDict extends MCollection {
         ),
         _length = original._length,
         _valuesHasAllKeys = original._valuesHasAllKeys,
-        super.asCopy(original, isMutable: isMutable ?? original.isMutable);
+        super.asCopy(isMutable: isMutable ?? original.isMutable);
 
-  MDict.asChild(MValue slot, MCollection parent, int length, {bool? isMutable})
+  MDict.asChild(super.slot, super.parent, int length, {bool? isMutable})
       : _dict = slot.value!.cast(),
         _values = {},
         _length = length,
         _valuesHasAllKeys = false,
         super.asChild(
-          slot,
-          parent,
           isMutable: isMutable ?? parent.hasMutableChildren,
         );
 

@@ -534,10 +534,7 @@ class _FfiSaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements SyncSaveTypedDocument<D, MD> {
-  _FfiSaveTypedDocument(
-    FfiDatabase database,
-    TypedMutableDocumentObject<D, MD> document,
-  ) : super(database, document);
+  _FfiSaveTypedDocument(FfiDatabase super.database, super.document);
 
   @override
   bool withConcurrencyControl([

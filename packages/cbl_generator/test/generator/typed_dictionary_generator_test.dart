@@ -106,7 +106,7 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableA extends _AImplBase {
-  ImmutableA.internal(Dictionary internal) : super(internal);
+  ImmutableA.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -125,7 +125,7 @@ class MutableA extends _AImplBase<MutableDictionary>
   /// Creates a new mutable [A].
   MutableA() : super(MutableDictionary());
 
-  MutableA.internal(MutableDictionary internal) : super(internal);
+  MutableA.internal(super.internal);
 }
 ''')
       },
@@ -189,7 +189,7 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableA extends _AImplBase {
-  ImmutableA.internal(Dictionary internal) : super(internal);
+  ImmutableA.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -212,7 +212,7 @@ class MutableA extends _AImplBase<MutableDictionary>
     this.b = b;
   }
 
-  MutableA.internal(MutableDictionary internal) : super(internal);
+  MutableA.internal(super.internal);
 
   set b(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);

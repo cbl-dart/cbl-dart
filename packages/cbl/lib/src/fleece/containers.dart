@@ -40,8 +40,7 @@ class SharedKeys extends FleeceSharedKeysObject {
   SharedKeys() : this.fromPointer(_bindings.create());
 
   /// Creates [SharedKeys] from an exiting native instance.
-  SharedKeys.fromPointer(Pointer<FLSharedKeys> pointer, {bool adopt = true})
-      : super(pointer, adopt: adopt);
+  SharedKeys.fromPointer(super.pointer, {super.adopt});
 
   static late final _bindings = cblBindings.fleece.sharedKeys;
 
@@ -83,7 +82,7 @@ class Doc extends FleeceDocObject {
   /// Creates an [Doc] based on a [pointer] to the the native value.
   ///
   /// Note: Does not retain the native doc.
-  Doc.fromPointer(Pointer<FLDoc> pointer) : super(pointer);
+  Doc.fromPointer(super.pointer);
 
   static late final _bindings = cblBindings.fleece.doc;
 

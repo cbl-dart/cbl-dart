@@ -171,7 +171,7 @@ typedef _CBLDart_CBLLog_SetSentryBreadcrumbs_C = Bool Function(Bool enabled);
 typedef _CBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
 class LoggingBindings extends Bindings {
-  LoggingBindings(Bindings parent) : super(parent) {
+  LoggingBindings(super.parent) {
     _logMessage = libs.cbl.lookupFunction<_CBL_LogMessage_C, _CBL_LogMessage>(
       'CBL_LogMessage',
       isLeaf: useIsLeaf,

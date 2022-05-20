@@ -24,7 +24,7 @@ typedef _CBLDocument_CreateJSON = FLStringResult Function(
 );
 
 class DocumentBindings extends Bindings {
-  DocumentBindings(Bindings parent) : super(parent) {
+  DocumentBindings(super.parent) {
     _id = libs.cbl.lookupFunction<_CBLDocument_ID, _CBLDocument_ID>(
       'CBLDocument_ID',
       isLeaf: useIsLeaf,
@@ -105,7 +105,7 @@ typedef _CBLDocument_SetJSON = int Function(
 );
 
 class MutableDocumentBindings extends Bindings {
-  MutableDocumentBindings(Bindings parent) : super(parent) {
+  MutableDocumentBindings(super.parent) {
     _createWithID = libs.cbl
         .lookupFunction<_CBLDocument_CreateWithID, _CBLDocument_CreateWithID>(
       'CBLDocument_CreateWithID',

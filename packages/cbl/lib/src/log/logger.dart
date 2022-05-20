@@ -86,7 +86,7 @@ class LogMessage {
 /// {@category Logging}
 class StreamLogger extends Logger {
   /// Creates a [Logger] which emits the received [LogMessage]s from a [stream].
-  StreamLogger([LogLevel? level]) : super(level);
+  StreamLogger([super.level]);
 
   final _controller = StreamController<LogMessage>.broadcast();
 
@@ -105,7 +105,7 @@ class StreamLogger extends Logger {
 class DartConsoleLogger extends Logger {
   /// Creates a [Logger] which formats logs in the same way as [ConsoleLogger]
   /// but uses Dart's [print] function.
-  DartConsoleLogger([LogLevel? level]) : super(level);
+  DartConsoleLogger([super.level]);
 
   @override
   void log(LogLevel level, LogDomain domain, String message) {

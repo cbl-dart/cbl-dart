@@ -353,7 +353,7 @@ class MutableConverterTestDict extends ConverterTestDict
     implements
         TypedMutableDictionaryObject<ConverterTestDict,
             MutableConverterTestDict> {
-  MutableConverterTestDict(MutableDictionary internal) : super(internal);
+  MutableConverterTestDict(super.internal);
 
   @override
   MutableConverterTestDict toMutable() => this;

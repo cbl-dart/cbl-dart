@@ -71,31 +71,23 @@ enum DocumentMetadataKind {
 
 class TypedDataMetadataField extends TypedDataObjectField {
   TypedDataMetadataField({
-    required TypedDataType type,
-    required String name,
+    required super.type,
+    required super.name,
     required this.kind,
-    ConstructorParameter? constructorParameter,
-  }) : super(
-          type: type,
-          name: name,
-          constructorParameter: constructorParameter,
-        );
+    super.constructorParameter,
+  });
 
   final DocumentMetadataKind kind;
 }
 
 class TypedDataObjectProperty extends TypedDataObjectField {
   TypedDataObjectProperty({
-    required TypedDataType type,
-    required String name,
+    required super.type,
+    required super.name,
     required this.property,
-    required ConstructorParameter constructorParameter,
+    required ConstructorParameter super.constructorParameter,
     this.defaultValueCode,
-  }) : super(
-          type: type,
-          name: name,
-          constructorParameter: constructorParameter,
-        );
+  });
 
   @override
   ConstructorParameter get constructorParameter => super.constructorParameter!;
@@ -157,15 +149,8 @@ abstract class TypedDataType {
 }
 
 class BuiltinScalarType extends TypedDataType {
-  BuiltinScalarType({
-    required String dartType,
-    bool isNullable = false,
-  }) : super(
-          dartType: dartType,
-          mutableDartType: dartType,
-          isNullable: isNullable,
-          isCached: false,
-        );
+  BuiltinScalarType({required super.dartType, super.isNullable = false})
+      : super(mutableDartType: dartType, isCached: false);
 
   // ignore: avoid_positional_boolean_parameters
   BuiltinScalarType withNullability(bool isNullable) => BuiltinScalarType(
@@ -176,15 +161,10 @@ class BuiltinScalarType extends TypedDataType {
 
 class CustomScalarType extends TypedDataType {
   CustomScalarType({
-    required String dartType,
-    required bool isNullable,
+    required super.dartType,
+    required super.isNullable,
     required this.converter,
-  }) : super(
-          dartType: dartType,
-          mutableDartType: dartType,
-          isNullable: isNullable,
-          isCached: false,
-        );
+  }) : super(mutableDartType: dartType, isCached: false);
 
   final ScalarConverterInfo converter;
 }
@@ -197,28 +177,18 @@ class ScalarConverterInfo {
 }
 
 class TypedDataObjectType extends TypedDataType {
-  TypedDataObjectType({
-    required String dartType,
-    required bool isNullable,
-  }) : super(
-          dartType: dartType,
-          mutableDartType: 'Mutable$dartType',
-          isNullable: isNullable,
-          isCached: true,
-        );
+  TypedDataObjectType({required super.dartType, required super.isNullable})
+      : super(mutableDartType: 'Mutable$dartType', isCached: true);
 
   late final classNames = TypedDataObjectClassNames(dartType);
 }
 
 class TypedDataListType extends TypedDataType {
-  TypedDataListType({
-    required bool isNullable,
-    required this.elementType,
-  }) : super(
+  TypedDataListType({required super.isNullable, required this.elementType})
+      : super(
           dartType: 'List<${elementType.dartType}>',
           mutableDartType: 'TypedDataList<${elementType.mutableDartType}, '
               '${elementType.dartType}>',
-          isNullable: isNullable,
           isCached: true,
         );
 

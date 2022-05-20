@@ -361,7 +361,7 @@ typedef _CBLDart_CBLReplicator_AddChangeListener = void Function(
 );
 
 class CBLReplicatedDocumentFlag extends Option {
-  const CBLReplicatedDocumentFlag(int bits) : super(bits);
+  const CBLReplicatedDocumentFlag(super.bits);
 
   static const deleted = CBLReplicatedDocumentFlag(0);
   static const accessRemoved = CBLReplicatedDocumentFlag(1);
@@ -457,7 +457,7 @@ class DocumentReplicationsCallbackMessage {
 // === ReplicatorBindings ======================================================
 
 class ReplicatorBindings extends Bindings {
-  ReplicatorBindings(Bindings parent) : super(parent) {
+  ReplicatorBindings(super.parent) {
     _endpointCreateWithUrl = libs.cbl
         .lookupFunction<_CBLEndpoint_CreateWithURL, _CBLEndpoint_CreateWithURL>(
       'CBLEndpoint_CreateWithURL',

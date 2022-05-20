@@ -564,9 +564,7 @@ class _ProxySaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements AsyncSaveTypedDocument<D, MD> {
-  _ProxySaveTypedDocument(
-      ProxyDatabase database, TypedMutableDocumentObject<D, MD> document)
-      : super(database, document);
+  _ProxySaveTypedDocument(ProxyDatabase super.database, super.document);
 
   @override
   Future<bool> withConcurrencyControl([

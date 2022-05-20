@@ -72,7 +72,7 @@ abstract class _UserImplBase<I extends Document> with _$User implements User {
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutableUser extends _UserImplBase {
-  ImmutableUser.internal(Document internal) : super(internal);
+  ImmutableUser.internal(super.internal);
 
   static const _nameConverter = const TypedDictionaryConverter<
       Dictionary,
@@ -117,7 +117,7 @@ class MutableUser extends _UserImplBase<MutableDocument>
     this.createdAt = createdAt;
   }
 
-  MutableUser.internal(MutableDocument internal) : super(internal);
+  MutableUser.internal(super.internal);
 
   static const _nameConverter = const TypedDictionaryConverter<
       MutableDictionary,
@@ -229,7 +229,7 @@ abstract class _PersonalNameImplBase<I extends Dictionary>
 /// DO NOT USE: Internal implementation detail, which might be changed or
 /// removed in the future.
 class ImmutablePersonalName extends _PersonalNameImplBase {
-  ImmutablePersonalName.internal(Dictionary internal) : super(internal);
+  ImmutablePersonalName.internal(super.internal);
 
   @override
   bool operator ==(Object other) =>
@@ -254,7 +254,7 @@ class MutablePersonalName extends _PersonalNameImplBase<MutableDictionary>
     this.last = last;
   }
 
-  MutablePersonalName.internal(MutableDictionary internal) : super(internal);
+  MutablePersonalName.internal(super.internal);
 
   set first(String value) {
     final promoted = TypedDataHelpers.stringConverter.promote(value);
