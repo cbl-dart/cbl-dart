@@ -301,6 +301,7 @@ class CachedTypedDataList<T extends E, E> extends ListMixin<T>
     with _TypedDataListToString
     implements TypedDataList<T, E> {
   CachedTypedDataList(
+    // ignore: library_private_types_in_public_api
     this._base, {
     required bool growable,
   }) : _cache = List.filled(_base.length, null, growable: growable);

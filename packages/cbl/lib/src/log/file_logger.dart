@@ -126,7 +126,7 @@ abstract class FileLogger {
 
 // === Impl ====================================================================
 
-late final _bindings = cblBindings.logging;
+final _bindings = cblBindings.logging;
 
 class FileLoggerImpl extends FileLogger {
   FileLoggerImpl() : super._();

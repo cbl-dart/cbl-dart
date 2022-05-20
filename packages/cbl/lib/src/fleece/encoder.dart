@@ -9,7 +9,7 @@ import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'containers.dart';
 
-late final _encoderBinds = cblBindings.fleece.encoder;
+final _encoderBinds = cblBindings.fleece.encoder;
 
 /// An encoder, which generates encoded Fleece or JSON data.
 ///

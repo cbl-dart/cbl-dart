@@ -170,7 +170,7 @@ extension LogLevelExt on LogLevel {
   CBLLogLevel toCBLLogLevel() => CBLLogLevel.values[index];
 }
 
-late final _bindings = cblBindings.logging;
+final _bindings = cblBindings.logging;
 
 Logger? _logger;
 void Function(List<Object?>)? _loggerCallback;

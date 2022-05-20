@@ -27,7 +27,7 @@ import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
 
-late final _bindings = cblBindings.replicator;
+final _bindings = cblBindings.replicator;
 
 class FfiReplicator
     with ClosableResourceMixin

@@ -16,9 +16,9 @@ import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
 
-late final _blobBindings = cblBindings.blobs.blob;
-late final _valueBinds = cblBindings.fleece.value;
-late final _decoderBinds = cblBindings.fleece.decoder;
+final _blobBindings = cblBindings.blobs.blob;
+final _valueBinds = cblBindings.fleece.value;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract class CblConversions {
   Object? toPlainObject();

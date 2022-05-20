@@ -11,8 +11,8 @@ import '../support/native_object.dart';
 import '../support/resource.dart';
 import 'document.dart';
 
-late final _documentBindings = cblBindings.document;
-late final _mutableDocumentBindings = cblBindings.mutableDocument;
+final _documentBindings = cblBindings.document;
+final _mutableDocumentBindings = cblBindings.mutableDocument;
 
 class FfiDocumentDelegate extends DocumentDelegate
     implements NativeResource<CBLDocument> {

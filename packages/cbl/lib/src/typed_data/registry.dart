@@ -228,7 +228,7 @@ class TypedDataRegistry extends TypedDataAdapter {
     Document document,
   ) =>
       _types.whereType<TypedDocumentMetadata>().where(
-            (metadata) => metadata._typeMatcherImpl?.isMatch(document) == true,
+            (metadata) => metadata._typeMatcherImpl?.isMatch(document) ?? false,
           );
 
   Factory<Dictionary, D>?

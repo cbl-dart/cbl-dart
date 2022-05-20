@@ -33,7 +33,7 @@ import 'database_configuration.dart';
 import 'document_change.dart';
 import 'ffi_blob_store.dart';
 
-late final _bindings = cblBindings.database;
+final _bindings = cblBindings.database;
 
 class FfiDatabase extends CBLDatabaseObject
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin

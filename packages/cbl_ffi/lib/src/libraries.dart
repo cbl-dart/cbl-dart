@@ -87,16 +87,16 @@ extension on LibraryConfiguration {
         name = [directory, name].join(Platform.pathSeparator);
       }
 
-      if (isAppleFramework == true) {
+      if (isAppleFramework ?? false) {
         name = '$name.framework/Versions/A/$name';
-      } else if (appendExtension == true) {
+      } else if (appendExtension ?? false) {
         name += _dynamicLibraryExtension(version: version);
       }
 
       return DynamicLibrary.open(name);
     }
 
-    if (process == true) {
+    if (process ?? false) {
       return DynamicLibrary.process();
     }
 
@@ -140,13 +140,13 @@ String _dynamicLibraryExtension({String? version}) {
 
 // === Windows DLL Loading =====================================================
 
-late final _kernel32 = DynamicLibrary.open('kernel32.dll');
+final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-late final _AddDllDirectoryFn = _kernel32.lookupFunction<
+final _AddDllDirectoryFn = _kernel32.lookupFunction<
     Pointer<Void> Function(Pointer<Utf16>),
     Pointer<Void> Function(Pointer<Utf16>)>('AddDllDirectory');
 
-late final _RemoveDllDirectoryFn = _kernel32.lookupFunction<
+final _RemoveDllDirectoryFn = _kernel32.lookupFunction<
     Bool Function(Pointer<Void>),
     bool Function(Pointer<Void>)>('RemoveDllDirectory');
 

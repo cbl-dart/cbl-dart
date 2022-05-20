@@ -16,8 +16,8 @@ import 'ffi_database.dart';
 class FfiBlobStore implements BlobStore, SyncBlobStore {
   FfiBlobStore(this.database);
 
-  static late final _databaseBindings = cblBindings.database;
-  static late final _blobBindings = cblBindings.blobs.blob;
+  static final _databaseBindings = cblBindings.database;
+  static final _blobBindings = cblBindings.blobs.blob;
 
   final FfiDatabase database;
 
@@ -111,7 +111,7 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   }
 }
 
-late final _writeStreamBindings = cblBindings.blobs.writeStream;
+final _writeStreamBindings = cblBindings.blobs.writeStream;
 
 Future<CBLObject<CBLBlob>> _createBlobFromStream(
   FfiDatabase database,
@@ -144,7 +144,7 @@ class _BlobReadStream extends Stream<Data> {
   /// Size of the chunks which a blob read stream emits.
   static const _readStreamChunkSize = 8 * 1024;
 
-  static late final _readStreamBindings = cblBindings.blobs.readStream;
+  static final _readStreamBindings = cblBindings.blobs.readStream;
 
   final ClosableResourceMixin parent;
   final CBLObject<CBLBlob> blob;

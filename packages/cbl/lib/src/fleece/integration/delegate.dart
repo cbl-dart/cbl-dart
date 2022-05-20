@@ -12,7 +12,7 @@ import 'collection.dart';
 import 'dict.dart';
 import 'value.dart';
 
-late final _decoderBinds = cblBindings.fleece.decoder;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract class MDelegate {
   static MDelegate? instance;

@@ -72,8 +72,8 @@ class SentryTracingDelegate extends TracingDelegate {
           // Transactions are always started from the user delegate. In the
           // worker delegate we only sample a transaction if the user delegate
           // decided to sample it.
-          ..tracesSampler =
-              (trace) => trace.transactionContext.parentSampled == true ? 1 : 0;
+          ..tracesSampler = (trace) =>
+              trace.transactionContext.parentSampled ?? false ? 1 : 0;
       });
     } else {
       onInitialize?.call();

@@ -42,7 +42,7 @@ class SharedKeys extends FleeceSharedKeysObject {
   /// Creates [SharedKeys] from an exiting native instance.
   SharedKeys.fromPointer(super.pointer, {super.adopt});
 
-  static late final _bindings = cblBindings.fleece.sharedKeys;
+  static final _bindings = cblBindings.fleece.sharedKeys;
 
   /// The number of keys in the mapping.
   ///
@@ -84,7 +84,7 @@ class Doc extends FleeceDocObject {
   /// Note: Does not retain the native doc.
   Doc.fromPointer(super.pointer);
 
-  static late final _bindings = cblBindings.fleece.doc;
+  static final _bindings = cblBindings.fleece.doc;
 
   /// Returns the data owned by the document, if any, else `null`.
   SliceResult? get allocedData {
@@ -174,7 +174,7 @@ class Value extends FleeceValueObject<FLValue> {
           adopt: adopt,
         );
 
-  static late final _bindings = cblBindings.fleece.value;
+  static final _bindings = cblBindings.fleece.value;
 
   /// Looks up the Doc containing the Value, or null if the Value was created
   /// without a Doc.
@@ -379,7 +379,7 @@ class Array extends Value with ListMixin<Value> {
           adopt: adopt,
         );
 
-  static late final _bindings = cblBindings.fleece.array;
+  static final _bindings = cblBindings.fleece.array;
 
   @override
   int get length {
@@ -476,7 +476,7 @@ class MutableArray extends Array {
     return result;
   }
 
-  static late final _bindings = cblBindings.fleece.mutableArray;
+  static final _bindings = cblBindings.fleece.mutableArray;
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
@@ -596,7 +596,7 @@ class Dict extends Value with MapMixin<String, Value> {
           adopt: adopt,
         );
 
-  static late final _bindings = cblBindings.fleece.dict;
+  static final _bindings = cblBindings.fleece.dict;
 
   /// Returns the number of items in a dictionary.
   @override
@@ -747,7 +747,7 @@ class MutableDict extends Dict {
     return result;
   }
 
-  static late final _bindings = cblBindings.fleece.mutableDict;
+  static final _bindings = cblBindings.fleece.mutableDict;
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
@@ -787,11 +787,11 @@ class MutableDict extends Dict {
 
   @override
   Value? remove(Object? key) {
-    final _key = assertKey(key);
+    final stringKey = assertKey(key);
 
-    final value = this[_key];
+    final value = this[stringKey];
 
-    _bindings.remove(pointer.cast(), _key);
+    _bindings.remove(pointer.cast(), stringKey);
     cblReachabilityFence(this);
 
     return value;

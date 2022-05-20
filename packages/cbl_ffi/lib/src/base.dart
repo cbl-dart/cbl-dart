@@ -7,7 +7,7 @@ import 'bindings.dart';
 import 'fleece.dart';
 import 'global.dart';
 
-late final _baseBinds = CBLBindings.instance.base;
+final _baseBinds = CBLBindings.instance.base;
 
 // === Option ==================================================================
 
@@ -374,10 +374,10 @@ class BaseBindings extends Bindings {
     assert(!io.Platform.isAndroid || context != null);
 
     withZoneArena(() {
-      Pointer<_CBLInitContext> _context = nullptr;
+      Pointer<_CBLInitContext> contextStruct = nullptr;
 
       if (context != null) {
-        _context = zoneArena<_CBLInitContext>()
+        contextStruct = zoneArena<_CBLInitContext>()
           ..ref.filesDir = context.filesDir.toNativeUtf8(allocator: zoneArena)
           ..ref.tempDir = context.tempDir.toNativeUtf8(allocator: zoneArena);
       }
@@ -386,7 +386,11 @@ class BaseBindings extends Bindings {
       // initialization to be completed.
       final error = zoneArena<CBLError>();
 
-      if (!_initialize(NativeApi.initializeApiDLData, _context.cast(), error)) {
+      if (!_initialize(
+        NativeApi.initializeApiDLData,
+        contextStruct.cast(),
+        error,
+      )) {
         throw CBLErrorException.fromCBLError(error);
       }
     });

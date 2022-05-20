@@ -95,7 +95,7 @@ class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
         onData,
         // ignore: avoid_types_on_closure_parameters
         onError: (Object error, StackTrace stackTrace) {
-          if (cancelOnError == true) {
+          if (cancelOnError ?? false) {
             _makeDone();
           }
 

@@ -100,13 +100,12 @@ void main() {
 
         final content =
             randomTestContent(large: blobSize.value == BlobSize.large);
-
-        Blob? _writeBlob;
+        Blob? writeBlobInstance;
         final doc = MutableDocument();
 
         switch (writeBlob.value) {
           case WriteBlob.data:
-            _writeBlob = Blob.fromData(contentType, content);
+            writeBlobInstance = Blob.fromData(contentType, content);
             break;
           case WriteBlob.properties:
             final blob = Blob.fromData(contentType, content);
@@ -114,37 +113,38 @@ void main() {
             doc['blob'].value = blob.properties;
             break;
           case WriteBlob.stream:
-            _writeBlob = Blob.fromStream(contentType, Stream.value(content));
+            writeBlobInstance =
+                Blob.fromStream(contentType, Stream.value(content));
 
             if (api.value == Api.sync) {
-              await db.saveBlob(_writeBlob);
+              await db.saveBlob(writeBlobInstance);
             }
             break;
         }
 
-        if (_writeBlob != null) {
-          doc['blob'].value = _writeBlob;
+        if (writeBlobInstance != null) {
+          doc['blob'].value = writeBlobInstance;
         }
 
         Future<void> read() async {
-          Blob _readBlob;
+          Blob readBlobInstance;
           switch (readBlob.value) {
             case ReadBlob.sourceBlob:
-              _readBlob = _writeBlob!;
+              readBlobInstance = writeBlobInstance!;
               break;
             case ReadBlob.loadedBlob:
               final loadedDoc = (await db.document(doc.id))!;
-              _readBlob = loadedDoc.blob('blob')!;
+              readBlobInstance = loadedDoc.blob('blob')!;
               break;
           }
 
           switch (readMode.value) {
             case ReadMode.future:
-              expect(await _readBlob.content(), content);
+              expect(await readBlobInstance.content(), content);
               break;
             case ReadMode.stream:
               expect(
-                await byteStreamToFuture(_readBlob.contentStream()),
+                await byteStreamToFuture(readBlobInstance.contentStream()),
                 content,
               );
               break;

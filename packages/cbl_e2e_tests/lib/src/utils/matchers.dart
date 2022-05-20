@@ -21,7 +21,7 @@ class _IsDirectory extends Matcher {
       description.add('is directory');
 
   @override
-  bool matches(final Object? item, Map matchState) {
+  bool matches(Object? item, Map matchState) {
     final String path;
     if (item is FileSystemEntity) {
       path = item.path;

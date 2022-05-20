@@ -14,7 +14,7 @@ typedef AsyncCallbackHandler = FutureOr<Object?> Function(
   List<Object?> arguments,
 );
 
-late final _bindings = cblBindings.asyncCallback;
+final _bindings = cblBindings.asyncCallback;
 
 var _nextId = 0;
 int _generateId() {

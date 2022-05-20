@@ -54,8 +54,8 @@ void main() {
       }
 
       void exploreBuilderQuery(
-        final Query query,
-        final Map<String, Object?> selectQuery,
+        Query query,
+        Map<String, Object?> selectQuery,
       ) {
         if (query is FromRouter) {
           final fromRouter = query as FromRouter;

@@ -7,8 +7,8 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 import '../support/ffi.dart';
 import 'encoder.dart';
 
-late final _dictBinds = cblBindings.fleece.dict;
-late final _dictKeyBinds = cblBindings.fleece.dictKey;
+final _dictBinds = cblBindings.fleece.dict;
+final _dictKeyBinds = cblBindings.fleece.dictKey;
 
 /// A Fleece dictionary key for efficient decoding and encoding of dictionaries.
 abstract class DictKey {

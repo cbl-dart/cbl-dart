@@ -11,7 +11,7 @@ import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
-late final _sliceBindings = CBLBindings.instance.fleece.slice;
+final _sliceBindings = CBLBindings.instance.fleece.slice;
 
 /// A contiguous area of native memory, whose lifetime is tied to some other
 /// object.
@@ -348,7 +348,7 @@ class SingleSliceResultAllocator implements Allocator {
   }
 }
 
-late final cachedSliceResultAllocator = SingleSliceResultAllocator(
+final cachedSliceResultAllocator = SingleSliceResultAllocator(
   sliceResult: SliceResult(1024),
   delegate: malloc,
 );
