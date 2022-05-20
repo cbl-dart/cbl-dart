@@ -55,7 +55,6 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
     cblReachabilityFence(database);
-    cblReachabilityFence(dict);
 
     if (cblBlob == null) {
       return false;
@@ -104,7 +103,6 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
     cblReachabilityFence(database);
-    cblReachabilityFence(dict);
 
     return blobPointer
         ?.let((it) => CBLObject(it, debugName: 'NativeBlobStore._getBlob'));

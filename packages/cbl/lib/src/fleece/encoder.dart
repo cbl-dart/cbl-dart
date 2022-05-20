@@ -55,7 +55,6 @@ class FleeceEncoder extends FleeceEncoderObject {
   /// keys.
   void setSharedKeys(SharedKeys? sharedKeys) => _use(() {
         _encoderBinds.setSharedKeys(pointer, sharedKeys?.pointer ?? nullptr);
-        cblReachabilityFence(sharedKeys);
       });
 
   /// Arbitrary information which needs to be available to code that is using

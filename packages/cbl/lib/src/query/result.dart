@@ -14,7 +14,6 @@ import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../service/cbl_service_api.dart';
 import '../support/encoding.dart';
-import '../support/native_object.dart';
 import 'result_set.dart';
 
 /// A single row in a [ResultSet].
@@ -329,7 +328,6 @@ class ResultImpl with IterableMixin<String> implements Result {
 
     final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
       ..writeValue(columnValues.pointer);
-    cblReachabilityFence(columnValues);
     return EncodedData(format, encoder.finish());
   }
 
@@ -339,11 +337,10 @@ class ResultImpl with IterableMixin<String> implements Result {
       root = MRoot.fromContext(
         DatabaseMContext.from(
           _context,
-          data: FleeceValueObject(columnValuesArray!.pointer),
+          data: fl.Value.fromPointer(columnValuesArray!.pointer),
         ),
         isMutable: false,
       );
-      cblReachabilityFence(columnValuesArray);
     } else {
       root = MRoot.fromContext(
         DatabaseMContext.from(

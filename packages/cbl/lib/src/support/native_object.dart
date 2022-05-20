@@ -83,58 +83,6 @@ class CBLBlobReadStreamObject extends NativeObject<CBLBlobReadStream> {
   }
 }
 
-/// Handle to a Fleece SharedKeys object.
-class FleeceSharedKeysObject extends NativeObject<FLSharedKeys> {
-  /// Creates a handle to a Fleece doc.
-  FleeceSharedKeysObject(Pointer<FLSharedKeys> pointer, {bool adopt = true})
-      : super(pointer) {
-    cblBindings.fleece.sharedKeys.bindToDartObject(
-      this,
-      pointer,
-      retain: !adopt,
-    );
-  }
-}
-
-/// Handle to a Fleece doc.
-class FleeceDocObject extends NativeObject<FLDoc> {
-  /// Creates a handle to a Fleece doc.
-  FleeceDocObject(Pointer<FLDoc> pointer) : super(pointer) {
-    cblBindings.fleece.doc.bindToDartObject(this, pointer);
-  }
-}
-
-/// Handle to a Fleece value.
-class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
-  /// Creates a handle to a Fleece value.
-  ///
-  /// [adopt] should be `true` when an existing reference to the native object
-  /// is transferred to the created [FleeceValueObject] or the native object has
-  /// just been created and the created [FleeceValueObject] is the initial
-  /// reference holder.
-  FleeceValueObject(
-    Pointer<T> pointer, {
-    this.isRefCounted = true,
-    bool adopt = false,
-  })  : assert(
-          !adopt || isRefCounted,
-          'only an object which is ref counted can be adopted',
-        ),
-        super(pointer) {
-    if (isRefCounted) {
-      cblBindings.fleece.value.bindToDartObject(
-        this,
-        value: pointer.cast(),
-        retain: !adopt,
-      );
-    }
-  }
-
-  /// Whether this object updates the ref count of the native object when it is
-  /// created and garbage collected.
-  final bool isRefCounted;
-}
-
 /// Handle to a Fleece encoder.
 class FleeceEncoderObject extends NativeObject<FLEncoder> {
   /// Creates a handle to a Fleece encoder.

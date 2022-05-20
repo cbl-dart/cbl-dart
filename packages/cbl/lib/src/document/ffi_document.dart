@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../fleece/containers.dart' as fl;
+import '../fleece/containers.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
@@ -91,7 +92,7 @@ class FfiDocumentDelegate extends DocumentDelegate
   @override
   MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
     final result = MRoot.fromContext(
-      DocumentMContext(document, data: FleeceValueObject(_nativeProperties)),
+      DocumentMContext(document, data: Value.fromPointer(_nativeProperties)),
       isMutable: isMutable,
     );
     cblReachabilityFence(native);
@@ -109,7 +110,6 @@ class FfiDocumentDelegate extends DocumentDelegate
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
     _nativeProperties = dict.pointer;
     cblReachabilityFence(native);
-    cblReachabilityFence(dict);
   }
 
   @override

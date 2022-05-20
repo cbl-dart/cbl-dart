@@ -196,7 +196,6 @@ class FfiQuery extends QueryBase
     final dict = doc.root.asDict!;
     _bindings.setParameters(native.pointer, dict.pointer.cast());
     cblReachabilityFence(native);
-    cblReachabilityFence(dict);
   }
 }
 

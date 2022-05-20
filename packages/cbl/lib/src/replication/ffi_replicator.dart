@@ -112,9 +112,6 @@ class FfiReplicator
       final replicator =
           runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
       cblReachabilityFence(database);
-      cblReachabilityFence(headersDict);
-      cblReachabilityFence(channelsArray);
-      cblReachabilityFence(documentIDsArray);
       cblReachabilityFence(pushFilterCallbackNative);
       cblReachabilityFence(pullFilterCallbackNative);
       cblReachabilityFence(conflictResolverCallbackNative);

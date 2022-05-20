@@ -294,8 +294,6 @@ class FleeceDecoder extends Converter<Data, Object?> {
       listener,
     ).decodeGlobalLoadedValue();
 
-    cblReachabilityFence(doc);
-
     return listener.result;
   }
 }
@@ -331,12 +329,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
 
     _decoderBinds.getLoadedValue(root.pointer);
 
-    final result =
-        _decodeGlobalLoadedValue(sharedStringsTable ?? SharedStringsTable());
-
-    cblReachabilityFence(doc);
-
-    return result;
+    return _decodeGlobalLoadedValue(sharedStringsTable ?? SharedStringsTable());
   }
 
   Object? _decodeGlobalLoadedValue(SharedStringsTable sharedStringsTable) {
