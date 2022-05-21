@@ -72,19 +72,16 @@ void bindCBLDatabaseToDartObject(
   );
 }
 
-/// Handle to a CBLReplicator.
-class CBLReplicatorObject extends NativeObject<CBLReplicator> {
-  /// Creates a handle to a CBLReplicator.
-  CBLReplicatorObject(
-    Pointer<CBLReplicator> pointer, {
-    required String debugName,
-  }) : super(pointer) {
-    cblBindings.replicator.bindToDartObject(
-      this,
-      pointer,
-      _filterDebugRefCountedName(debugName),
-    );
-  }
+void bindCBLReplicatorToDartObject(
+  Object object, {
+  required Pointer<CBLReplicator> pointer,
+  required String debugName,
+}) {
+  cblBindings.replicator.bindToDartObject(
+    object,
+    pointer,
+    _filterDebugRefCountedName(debugName),
+  );
 }
 
 class CBLBlobReadStreamObject extends NativeObject<CBLBlobReadStream> {

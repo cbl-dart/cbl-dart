@@ -31,13 +31,23 @@ final _bindings = cblBindings.replicator;
 
 class FfiReplicator
     with ClosableResourceMixin
-    implements SyncReplicator, NativeResource<CBLReplicator> {
-  FfiReplicator._(
-    this._config,
-    this._database,
-    this.native,
-    this._closeCallbacks,
-  );
+    implements SyncReplicator, Finalizable {
+  FfiReplicator._({
+    required ReplicatorConfiguration config,
+    required this.pointer,
+    required FfiDatabase database,
+    required void Function() closeCallbacks,
+    required String debugCreator,
+  })  : _config = config,
+        _database = database,
+        _closeCallbacks = closeCallbacks {
+    bindCBLReplicatorToDartObject(
+      this,
+      pointer: pointer,
+      debugName: 'Replicator(creator: $debugCreator)',
+    );
+    attachTo(_database);
+  }
 
   static Future<FfiReplicator> create(
     ReplicatorConfiguration config, {
@@ -106,16 +116,16 @@ class FfiReplicator
     );
 
     try {
-      final replicator =
+      final pointer =
           runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
 
-      final native = CBLReplicatorObject(
-        replicator,
-        debugName: 'Replicator(creator: $debugCreator)',
+      return FfiReplicator._(
+        config: config,
+        pointer: pointer,
+        database: database,
+        closeCallbacks: closeCallbacks,
+        debugCreator: debugCreator,
       );
-
-      return FfiReplicator._(config, database, native, closeCallbacks)
-        ..attachTo(database);
 
       // ignore: avoid_catches_without_on_clauses
     } catch (e) {
@@ -137,8 +147,7 @@ class FfiReplicator
 
   final FfiDatabase _database;
 
-  @override
-  final NativeObject<CBLReplicator> native;
+  final Pointer<CBLReplicator> pointer;
 
   final void Function() _closeCallbacks;
 
@@ -152,11 +161,8 @@ class FfiReplicator
   @override
   ReplicatorStatus get status => useSync(() => _status);
 
-  ReplicatorStatus get _status {
-    final result = _bindings.status(native.pointer).toReplicatorStatus();
-    cblReachabilityFence(native);
-    return result;
-  }
+  ReplicatorStatus get _status =>
+      _bindings.status(pointer).toReplicatorStatus();
 
   @override
   void start({bool reset = false}) => useSync(() {
@@ -177,8 +183,7 @@ class FfiReplicator
           }
         });
 
-        _bindings.start(native.pointer, resetCheckpoint: reset);
-        cblReachabilityFence(native);
+        _bindings.start(pointer, resetCheckpoint: reset);
       });
 
   @override
@@ -209,8 +214,7 @@ class FfiReplicator
       break;
     }
 
-    _bindings.stop(native.pointer);
-    cblReachabilityFence(native);
+    _bindings.stop(pointer);
   }
 
   @override
@@ -230,8 +234,7 @@ class FfiReplicator
       debugName: 'FfiReplicator.addChangeListener',
     );
 
-    _bindings.addChangeListener(native.pointer, callback.pointer);
-    cblReachabilityFence(native);
+    _bindings.addChangeListener(pointer, callback.pointer);
 
     return FfiListenerToken(callback);
   }
@@ -262,11 +265,7 @@ class FfiReplicator
       debugName: 'FfiReplicator.addDocumentReplicationListener',
     );
 
-    _bindings.addDocumentReplicationListener(
-      native.pointer,
-      callback.pointer,
-    );
-    cblReachabilityFence(native);
+    _bindings.addDocumentReplicationListener(pointer, callback.pointer);
 
     return FfiListenerToken(callback);
   }
@@ -295,19 +294,15 @@ class FfiReplicator
   @override
   Set<String> get pendingDocumentIds => useSync(() {
         final dict = fl.Dict.fromPointer(
-          _bindings.pendingDocumentIDs(native.pointer),
+          _bindings.pendingDocumentIDs(pointer),
           adopt: true,
         );
-        cblReachabilityFence(native);
         return dict.keys.toSet();
       });
 
   @override
-  bool isDocumentPending(String documentId) => useSync(() {
-        final result = _bindings.isDocumentPending(native.pointer, documentId);
-        cblReachabilityFence(native);
-        return result;
-      });
+  bool isDocumentPending(String documentId) =>
+      useSync(() => _bindings.isDocumentPending(pointer, documentId));
 
   @override
   Future<void> performClose() async {
