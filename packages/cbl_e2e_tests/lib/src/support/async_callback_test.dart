@@ -14,15 +14,15 @@ void main() {
 
     test('propagates error to Zone in which it was created', () {
       final callback = runZonedGuarded(
-          () => AsyncCallback(
-                expectAsync1((_) {
-                  throw Exception();
-                }),
-                debugName: 'Test',
-                debug: true,
-              ), expectAsync2((error, stackTrace) {
-        expect(error, isException);
-      }))!;
+        () => AsyncCallback(
+          expectAsync1((_) => Future.error(Exception())),
+          debugName: 'Test',
+          debug: true,
+        ),
+        expectAsync2((error, stackTrace) {
+          expect(error, isException);
+        }),
+      )!;
 
       addTearDown(callback.close);
 
