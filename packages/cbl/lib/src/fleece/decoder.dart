@@ -46,7 +46,7 @@ class NoopSharedKeysTable extends SharedKeysTable {
       sharedStringsTable.decode(StringSource.dictKey);
 }
 
-class _SharedKeysTable extends SharedKeysTable {
+class _SharedKeysTable extends SharedKeysTable implements Finalizable {
   _SharedKeysTable() : super._() {
     _knownSharedKeys = _decoderBinds.createKnownSharedKeys(this);
   }
@@ -193,7 +193,7 @@ class _SharedStringsTable extends SharedStringsTable {
 // === Iterators ===============================================================
 
 // ignore: prefer_void_to_null
-class DictIterator implements Iterator<Null> {
+class DictIterator implements Iterator<Null>, Finalizable {
   DictIterator(
     Pointer<FLDict> dict, {
     SharedKeysTable? sharedKeysTable,
@@ -210,7 +210,6 @@ class DictIterator implements Iterator<Null> {
       valueOut ?? nullptr,
       preLoad: preLoad,
     );
-    cblReachabilityFence(sharedKeysTable);
   }
 
   final SharedKeysTable? _sharedKeysTable;
@@ -221,16 +220,11 @@ class DictIterator implements Iterator<Null> {
   Null get current => null;
 
   @override
-  bool moveNext() {
-    final hasCurrent = _decoderBinds.dictIteratorNext(_iterator);
-    cblReachabilityFence(this);
-    cblReachabilityFence(_sharedKeysTable);
-    return hasCurrent;
-  }
+  bool moveNext() => _decoderBinds.dictIteratorNext(_iterator);
 }
 
 // ignore: prefer_void_to_null
-class ArrayIterator implements Iterator<Null> {
+class ArrayIterator implements Iterator<Null>, Finalizable {
   ArrayIterator(
     Pointer<FLArray> array, {
     Pointer<CBLDart_LoadedFLValue>? valueOut,
@@ -249,11 +243,7 @@ class ArrayIterator implements Iterator<Null> {
   Null get current => null;
 
   @override
-  bool moveNext() {
-    final hasCurrent = _decoderBinds.arrayIteratorNext(_iterator);
-    cblReachabilityFence(this);
-    return hasCurrent;
-  }
+  bool moveNext() => _decoderBinds.arrayIteratorNext(_iterator);
 }
 
 // === Decoder =================================================================
@@ -365,7 +355,6 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
           final key = sharedKeysTable.decode(sharedStringsTable);
           result[key] = _decodeGlobalLoadedValue(sharedStringsTable);
         }
-        cblReachabilityFence(iterator);
         return result;
     }
   }
@@ -564,7 +553,6 @@ class _DictIteratorLoader extends _FleeceValueLoader {
       _listener
         ..handleString(_sharedKeysTable.decode(_sharedStringsTable))
         ..propertyName();
-      cblReachabilityFence(_it);
       return true;
     } else {
       _listener.endObject();

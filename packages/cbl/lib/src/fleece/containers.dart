@@ -557,7 +557,6 @@ class _DictKeyIterator extends Iterator<String> {
     if (iterator.moveNext()) {
       final key = globalLoadedDictKey.ref;
       current = decodeFLString(key.stringBuf, key.stringSize);
-      cblReachabilityFence(iterator);
       return true;
     } else {
       return false;

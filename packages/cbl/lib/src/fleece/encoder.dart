@@ -6,7 +6,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/errors.dart';
 import '../support/ffi.dart';
-import '../support/native_object.dart';
 import 'containers.dart';
 
 final _encoderBinds = cblBindings.fleece.encoder;
@@ -19,17 +18,21 @@ final _encoderBinds = cblBindings.fleece.encoder;
 /// it. (Of course a value in a collection can itself be another collection.)
 /// When writing a dictionary, you have to call writeKey before writing each
 /// value.
-class FleeceEncoder extends FleeceEncoderObject {
+class FleeceEncoder implements Finalizable {
   /// Creates an encoder, which generates encoded Fleece or JSON data.
   FleeceEncoder({
     this.format = FLEncoderFormat.fleece,
     this.reserveSize = 256,
     this.uniqueStrings = true,
-  }) : super(_encoderBinds.create(
+  }) : _pointer = _encoderBinds.create(
           format: format,
           reserveSize: reserveSize,
           uniqueStrings: uniqueStrings,
-        ));
+        ) {
+    _encoderBinds.bindToDartObject(this, _pointer);
+  }
+
+  final Pointer<FLEncoder> _pointer;
 
   /// The output format to generate.
   ///
@@ -53,8 +56,8 @@ class FleeceEncoder extends FleeceEncoderObject {
 
   /// Tells the encoder to use a shared-keys mapping when encoding dictionary
   /// keys.
-  void setSharedKeys(SharedKeys? sharedKeys) => _use(() {
-        _encoderBinds.setSharedKeys(pointer, sharedKeys?.pointer ?? nullptr);
+  void setSharedKeys(SharedKeys? sharedKeys) => runWithErrorTranslation(() {
+        _encoderBinds.setSharedKeys(_pointer, sharedKeys?.pointer ?? nullptr);
       });
 
   /// Arbitrary information which needs to be available to code that is using
@@ -113,85 +116,84 @@ class FleeceEncoder extends FleeceEncoderObject {
 
   /// Writes the value at [index] in [array] to this encoder.
   void writeArrayValue(Pointer<FLArray> array, int index) =>
-      _use(() => _encoderBinds.writeArrayValue(pointer, array, index));
+      runWithErrorTranslation(
+          () => _encoderBinds.writeArrayValue(_pointer, array, index));
 
   /// Writes [value] this encoder.
   void writeValue(Pointer<FLValue> value) =>
-      _use(() => _encoderBinds.writeValue(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeValue(_pointer, value));
 
   /// Writes `null` to this encoder.
-  void writeNull() => _use(() => _encoderBinds.writeNull(pointer));
+  void writeNull() =>
+      runWithErrorTranslation(() => _encoderBinds.writeNull(_pointer));
 
   /// Writes the [bool] [value] to this encoder.
   // ignore: avoid_positional_boolean_parameters
   void writeBool(bool value) =>
-      _use(() => _encoderBinds.writeBool(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeBool(_pointer, value));
 
   /// Writes the [int] [value] to this encoder.
   void writeInt(int value) =>
-      _use(() => _encoderBinds.writeInt(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeInt(_pointer, value));
 
   /// Writes the [double] [value] to this encoder.
   void writeDouble(double value) =>
-      _use(() => _encoderBinds.writeDouble(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeDouble(_pointer, value));
 
   /// Writes the [String] [value] to this encoder.
   void writeString(String value) =>
-      _use(() => _encoderBinds.writeString(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeString(_pointer, value));
 
   /// Writes the [TypedData] [value] to this encoder.
   void writeData(Data value) =>
-      _use(() => _encoderBinds.writeData(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeData(_pointer, value));
 
   /// Writes the UTF-8 encoded JSON string [value] to this encoder.
   void writeJson(Data value) =>
-      _use(() => _encoderBinds.writeJSON(pointer, value));
+      runWithErrorTranslation(() => _encoderBinds.writeJSON(_pointer, value));
 
   /// Begins an array and reserves space for [reserveLength] element.
-  void beginArray(int reserveLength) =>
-      _use(() => _encoderBinds.beginArray(pointer, reserveLength));
+  void beginArray(int reserveLength) => runWithErrorTranslation(
+      () => _encoderBinds.beginArray(_pointer, reserveLength));
 
   /// Ends an array.
-  void endArray() => _use(() => _encoderBinds.endArray(pointer));
+  void endArray() =>
+      runWithErrorTranslation(() => _encoderBinds.endArray(_pointer));
 
   /// Begins a dict and reserves space for [reserveLength] entries.
-  void beginDict(int reserveLength) =>
-      _use(() => _encoderBinds.beginDict(pointer, reserveLength));
+  void beginDict(int reserveLength) => runWithErrorTranslation(
+      () => _encoderBinds.beginDict(_pointer, reserveLength));
 
   /// Writes a [key] for the next entry in a dict.
-  void writeKey(String key) => _use(() => _encoderBinds.writeKey(pointer, key));
+  void writeKey(String key) =>
+      runWithErrorTranslation(() => _encoderBinds.writeKey(_pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLString].
-  void writeKeyFLString(FLString key) =>
-      _use(() => _encoderBinds.writeKeyFLString(pointer, key));
+  void writeKeyFLString(FLString key) => runWithErrorTranslation(
+      () => _encoderBinds.writeKeyFLString(_pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLValue].
   void writeKeyValue(Pointer<FLValue> key) =>
-      _use(() => _encoderBinds.writeKeyValue(pointer, key));
+      runWithErrorTranslation(() => _encoderBinds.writeKeyValue(_pointer, key));
 
   /// Ends a dict.
-  void endDict() => _use(() => _encoderBinds.endDict(pointer));
+  void endDict() =>
+      runWithErrorTranslation(() => _encoderBinds.endDict(_pointer));
 
   /// Resets this encoder and allows it to be used again.
-  void reset() => _use(() => _encoderBinds.reset(pointer));
+  void reset() => runWithErrorTranslation(() => _encoderBinds.reset(_pointer));
 
   /// Finishes encoding and returns the result.
   ///
   /// To begin a new piece of Fleece data call [reset].
   Data finish() {
-    final result = _use(() => _encoderBinds.finish(pointer));
+    final result =
+        runWithErrorTranslation(() => _encoderBinds.finish(_pointer));
 
     if (result == null) {
       throw StateError('Encoder did not encode anything.');
     }
 
-    return result;
-  }
-
-  @pragma('vm:prefer-inline')
-  T _use<T>(T Function() fn) {
-    final result = runWithErrorTranslation(fn);
-    cblReachabilityFence(this);
     return result;
   }
 }
