@@ -46,6 +46,20 @@ class CBLObject<T extends NativeType> extends NativeObject<T> {
   }
 }
 
+void bindCBLRefCountedToDartObject<T extends NativeType>(
+  Object object, {
+  required Pointer<T> pointer,
+  bool adopt = true,
+  required String debugName,
+}) {
+  cblBindings.base.bindCBLRefCountedToDartObject(
+    object,
+    refCounted: pointer.cast(),
+    retain: !adopt,
+    debugName: _filterDebugRefCountedName(debugName),
+  );
+}
+
 /// Handle to a CBLDatabase.
 class CBLDatabaseObject extends NativeObject<CBLDatabase> {
   /// Creates a handle to a CBLDatabase.

@@ -435,8 +435,7 @@ AsyncCallback _wrapReplicationFilter(
             ReplicationFilterCallbackMessage.fromArguments(arguments);
         final doc = DelegateDocument(
           FfiDocumentDelegate.fromPointer(
-            doc: message.document,
-            adopt: false,
+            message.document,
             debugCreator: 'ReplicationFilter()',
           ),
           database: database,
@@ -462,33 +461,33 @@ AsyncCallback _wrapConflictResolver(
         final message =
             ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-        final local = message.localDocument?.let((it) => DelegateDocument(
+        final local = message.localDocument?.let((pointer) => DelegateDocument(
               FfiDocumentDelegate.fromPointer(
-                doc: it,
-                adopt: false,
+                pointer,
+                adopt: true,
                 debugCreator: 'ConflictResolver(local)',
               ),
               database: database,
             ));
 
-        final remote = message.remoteDocument?.let((it) => DelegateDocument(
-              FfiDocumentDelegate.fromPointer(
-                doc: it,
-                adopt: false,
-                debugCreator: 'ConflictResolver(remote)',
-              ),
-              database: database,
-            ));
+        final remote =
+            message.remoteDocument?.let((pointer) => DelegateDocument(
+                  FfiDocumentDelegate.fromPointer(
+                    pointer,
+                    adopt: true,
+                    debugCreator: 'ConflictResolver(remote)',
+                  ),
+                  database: database,
+                ));
 
         final conflict = ConflictImpl(message.documentId, local, remote);
         final resolved = await resolver.resolve(conflict) as DelegateDocument?;
 
-        NativeObject<CBLDocument>? resolvedDelegateNative;
+        FfiDocumentDelegate? resolvedDelegate;
         if (resolved != null) {
           if (resolved != local && resolved != remote) {
             final resolvedDelegate =
                 database.prepareDocument(resolved) as FfiDocumentDelegate;
-            resolvedDelegateNative = resolvedDelegate.native;
 
             // If the resolver returned a document other than `local` or
             // `remote`, the ref count of `resolved` needs to be incremented
@@ -497,17 +496,13 @@ AsyncCallback _wrapConflictResolver(
             // balances with a release. This must happen on the Dart side,
             // because `resolved` can be garbage collected before
             // `resolvedAddress` makes it back to the native side.
-            cblBindings.base
-                .retainRefCounted(resolvedDelegateNative.pointer.cast());
+            cblBindings.base.retainRefCounted(resolvedDelegate.pointer.cast());
           } else {
-            resolvedDelegateNative =
-                (resolved.delegate as FfiDocumentDelegate).native;
+            resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
           }
         }
 
-        final result = resolvedDelegateNative?.pointer.address;
-        cblReachabilityFence(resolvedDelegateNative);
-        return result;
+        return resolvedDelegate?.pointer.address;
       },
       ignoreErrorsInDart: ignoreErrorsInDart,
       debugName: 'ConflictResolver',

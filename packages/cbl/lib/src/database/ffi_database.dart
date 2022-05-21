@@ -159,7 +159,8 @@ class FfiDatabase extends CBLDatabaseObject
 
             return DelegateDocument(
               FfiDocumentDelegate.fromPointer(
-                doc: documentPointer,
+                documentPointer,
+                adopt: true,
                 debugCreator: 'FfiDatabase.document()',
               ),
               database: this,
@@ -188,18 +189,16 @@ class FfiDatabase extends CBLDatabaseObject
               () => PrepareDocumentOp(document),
               () => prepareDocument(document) as FfiDocumentDelegate,
             );
-            final delegateNative = delegate.native;
 
             return _catchConflictException(() {
               runWithErrorTranslation(
                 () => _bindings.saveDocumentWithConcurrencyControl(
                   pointer,
-                  delegateNative.pointer.cast(),
+                  delegate.pointer.cast(),
                   concurrencyControl.toCBLConcurrencyControl(),
                 ),
               );
               cblReachabilityFence(this);
-              cblReachabilityFence(delegateNative);
             });
           }),
         ),
@@ -255,18 +254,16 @@ class FfiDatabase extends CBLDatabaseObject
               () => prepareDocument(document, syncProperties: false)
                   as FfiDocumentDelegate,
             );
-            final delegateNative = delegate.native;
 
             return _catchConflictException(() {
               runWithErrorTranslation(
                 () => _bindings.deleteDocumentWithConcurrencyControl(
                   pointer,
-                  delegateNative.pointer.cast(),
+                  delegate.pointer.cast(),
                   concurrencyControl.toCBLConcurrencyControl(),
                 ),
               );
               cblReachabilityFence(this);
-              cblReachabilityFence(delegateNative);
             });
           }),
         ),
