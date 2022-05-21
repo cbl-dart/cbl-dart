@@ -9,9 +9,9 @@ on:
       - main
 
 env:
-  flutter-version-stable: 3.0.0
+  flutter-version-stable: 3.0.1
   flutter-version-beta: beta
-  dart-version-stable: 2.17.0
+  dart-version-stable: 2.17.1
   dart-version-beta: beta
   melos-version: "2.3.0"
 
