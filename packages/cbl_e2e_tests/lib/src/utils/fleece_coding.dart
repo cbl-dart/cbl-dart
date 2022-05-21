@@ -15,10 +15,12 @@ Data fleeceEncode(Object? value) {
   return fleeceEncoder.finish();
 }
 
-Object? fleeceDecode(Data data) =>
+Object? fleeceDecode(Data data) => testFleeceDecoder().convert(data);
+
+FleeceDecoder testFleeceDecoder({FLTrust trust = FLTrust.untrusted}) =>
     // TODO(blaugold): investigate why using const constructor won't compile
     // There seems to be a bug in the Dart VM that causes the following line to
     // throw an compile error when running tests and using the const
     // constructor.
     // ignore: prefer_const_constructors
-    FleeceDecoder().convert(data);
+    FleeceDecoder(trust: trust);
