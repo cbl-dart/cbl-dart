@@ -1,8 +1,7 @@
 import 'ffi.dart';
-import 'native_object.dart';
 
 /// Setting this flag to `true` enables printing of debug information for
-/// [CBLObject] in debug builds.
+/// ref counted native CBL objects in debug builds.
 bool get debugRefCounted => _debugRefCountedObject;
 bool _debugRefCountedObject = false;
 

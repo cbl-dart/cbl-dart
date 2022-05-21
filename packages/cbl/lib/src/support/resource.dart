@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ffi';
 
 import 'package:meta/meta.dart';
 
-import 'native_object.dart';
 import 'utils.dart';
 
 /// An object with a limited lifespan.
@@ -27,12 +25,6 @@ abstract class ClosableResource implements Resource {
   /// After this method has been called this resource may not be used any more,
   /// even if returned [Future] has not completed yet.
   Future<void> close();
-}
-
-/// A resource which is based on a [NativeObject].
-abstract class NativeResource<T extends NativeType> {
-  /// The native object underlying this resource.
-  NativeObject<T> get native;
 }
 
 mixin ClosableResourceMixin implements ClosableResource {
