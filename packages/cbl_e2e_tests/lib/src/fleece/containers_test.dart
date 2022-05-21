@@ -37,7 +37,7 @@ void main() {
         final root = doc.root;
         final foundDoc = root.doc;
 
-        expect(foundDoc, equals(doc));
+        expect(foundDoc?.pointer, doc.pointer);
       });
 
       test('findDoc returns null if value is not backed by Doc', () {
