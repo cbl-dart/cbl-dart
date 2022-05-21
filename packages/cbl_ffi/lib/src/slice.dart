@@ -103,8 +103,7 @@ class Slice {
   /// Returns a [Uint8List] that is a mutable view of this [Slice].
   ///
   /// You must ensure that this [Slice] is valid while the returned [Uint8List]
-  /// is in use. For [SliceResult]s this can be achieved by passing it to
-  /// [cblReachabilityFence] after the last use of the [Uint8List].
+  /// is in use.
   ///
   /// For a less efficient but safer alternative, use [toTypedList].
   Uint8List asTypedList() => buf.asTypedList(size);
@@ -157,7 +156,7 @@ class Slice {
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class SliceResult extends Slice {
+class SliceResult extends Slice implements Finalizable {
   /// Creates an uninitialized [SliceResult] of [size].
   SliceResult(int size) : this._fromFLSliceResult(_sliceBindings.create(size));
 
@@ -186,20 +185,13 @@ class SliceResult extends Slice {
   }
 
   /// Returns a [SliceResult] which has the content and size of [list].
-  factory SliceResult.fromTypedList(Uint8List list) {
-    final result = SliceResult(list.lengthInBytes)
-      ..asTypedList().setAll(0, list);
-    cblReachabilityFence(result);
-    return result;
-  }
+  factory SliceResult.fromTypedList(Uint8List list) =>
+      SliceResult(list.lengthInBytes)..asTypedList().setAll(0, list);
 
   /// Creates a [SliceResult] which contains [string] encoded as UTF-8.
   factory SliceResult.fromString(String string) {
     final encoded = utf8.encode(string);
-    final result = SliceResult(encoded.length);
-    result.asTypedList().setAll(0, encoded);
-    cblReachabilityFence(result);
-    return result;
+    return SliceResult(encoded.length)..asTypedList().setAll(0, encoded);
   }
 
   /// Creates a [SliceResult] from [FLSliceResult].
@@ -268,7 +260,6 @@ class TransferableSliceResult {
     // Retain the slice now, in case `sliceResult` is garbage collected
     // before this transferable slice result is materialized.
     _sliceBindings.retainSliceResult(sliceResult.makeGlobalResult().ref);
-    cblReachabilityFence(sliceResult);
   }
 
   final int _bufAddress;

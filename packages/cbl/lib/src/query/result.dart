@@ -298,9 +298,7 @@ class ResultImpl with IterableMixin<String> implements Result {
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
     final sliceResult = encoder.finish().toSliceResult();
-    final result = utf8.decode(sliceResult.asTypedList());
-    cblReachabilityFence(sliceResult);
-    return result;
+    return utf8.decode(sliceResult.asTypedList());
   }
 
   EncodedData encodeColumnValues(EncodingFormat format) {

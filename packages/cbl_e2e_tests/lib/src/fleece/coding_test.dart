@@ -49,8 +49,6 @@ void main() {
         expect(sharedStringsTable.hasString('..'), isTrue);
         expect(sharedStringsTable.hasString('...............'), isTrue);
         expect(sharedStringsTable.hasString('................'), isFalse);
-
-        cblReachabilityFence(sliceResult);
       },
     );
 

@@ -104,10 +104,7 @@ class BlobBindings extends Bindings {
         contentType,
         (flContentType) {
           final sliceResult = content.toSliceResult();
-          final result =
-              _createWithData(flContentType, sliceResult.makeGlobal().ref);
-          cblReachabilityFence(sliceResult);
-          return result;
+          return _createWithData(flContentType, sliceResult.makeGlobal().ref);
         },
       );
 

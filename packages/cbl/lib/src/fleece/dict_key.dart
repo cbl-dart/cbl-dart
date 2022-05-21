@@ -57,8 +57,6 @@ class _OptimizedDictKey extends DictKey {
 
     _dictKeyBinds.init(flDictKey.ref, flStringRef);
 
-    cblReachabilityFence(memory);
-
     return _OptimizedDictKey._(memory, flDictKey, flStringRef);
   }
 

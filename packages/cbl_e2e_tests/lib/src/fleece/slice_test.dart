@@ -77,8 +77,6 @@ void main() {
       slice.asTypedList().setAll(0, [1, 2]);
 
       expect(slice.asTypedList(), [1, 2]);
-
-      cblReachabilityFence(slice);
     });
 
     test('create SliceResult from FLSliceResult', () {
