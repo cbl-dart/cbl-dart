@@ -111,7 +111,6 @@ class FfiReplicator
     try {
       final replicator =
           runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
-      cblReachabilityFence(database);
       cblReachabilityFence(pushFilterCallbackNative);
       cblReachabilityFence(pullFilterCallbackNative);
       cblReachabilityFence(conflictResolverCallbackNative);
@@ -392,9 +391,7 @@ extension on ReplicatorConfiguration {
       );
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
-      final result = _bindings.createEndpointWithLocalDB(db.pointer);
-      cblReachabilityFence(db);
-      return result;
+      return _bindings.createEndpointWithLocalDB(db.pointer);
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }

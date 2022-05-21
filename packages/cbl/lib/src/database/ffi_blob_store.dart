@@ -54,7 +54,6 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
     final cblBlob = runWithErrorTranslation(
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
-    cblReachabilityFence(database);
 
     if (cblBlob == null) {
       return false;
@@ -82,7 +81,6 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
     runWithErrorTranslation(
       () => _databaseBindings.saveBlob(database.pointer, blob.pointer),
     );
-    cblReachabilityFence(database);
     cblReachabilityFence(blob);
   }
 
@@ -102,7 +100,6 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
     final blobPointer = runWithErrorTranslation(
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
-    cblReachabilityFence(database);
 
     return blobPointer
         ?.let((it) => CBLObject(it, debugName: 'NativeBlobStore._getBlob'));
@@ -119,7 +116,6 @@ Future<CBLObject<CBLBlob>> _createBlobFromStream(
   final writeStream = runWithErrorTranslation(
     () => _writeStreamBindings.create(database.pointer),
   );
-  cblReachabilityFence(database);
 
   try {
     await stream

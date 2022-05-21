@@ -60,19 +60,16 @@ void bindCBLRefCountedToDartObject<T extends NativeType>(
   );
 }
 
-/// Handle to a CBLDatabase.
-class CBLDatabaseObject extends NativeObject<CBLDatabase> {
-  /// Creates a handle to a CBLDatabase.
-  CBLDatabaseObject(
-    Pointer<CBLDatabase> pointer, {
-    required String debugName,
-  }) : super(pointer) {
-    cblBindings.database.bindToDartObject(
-      this,
-      pointer,
-      _filterDebugRefCountedName(debugName),
-    );
-  }
+void bindCBLDatabaseToDartObject(
+  Object object, {
+  required Pointer<CBLDatabase> pointer,
+  required String debugName,
+}) {
+  cblBindings.database.bindToDartObject(
+    object,
+    pointer,
+    _filterDebugRefCountedName(debugName),
+  );
 }
 
 /// Handle to a CBLReplicator.

@@ -169,7 +169,6 @@ class FfiQuery extends QueryBase
         ),
         debugName: 'FfiQuery(creator: $debugCreator)',
       );
-      cblReachabilityFence(database);
 
       _columnNames = List.generate(
         _bindings.columnCount(native.pointer),
