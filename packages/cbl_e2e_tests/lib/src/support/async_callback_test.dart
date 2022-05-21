@@ -26,9 +26,7 @@ void main() {
 
       addTearDown(callback.close);
 
-      final callbackNative = callback.native;
-      bindings.callForTest(callbackNative.pointer, 0);
-      cblReachabilityFence(callbackNative);
+      bindings.callForTest(callback.pointer, 0);
     });
   });
 }

@@ -125,11 +125,9 @@ class FfiQuery extends QueryBase
       debugName: 'FfiQuery.addChangeListener',
     );
 
-    final callbackNative = callback.native;
     listenerToken =
-        _bindings.addChangeListener(native.pointer, callbackNative.pointer);
+        _bindings.addChangeListener(native.pointer, callback.pointer);
     cblReachabilityFence(native);
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }

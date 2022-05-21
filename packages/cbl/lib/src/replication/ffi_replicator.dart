@@ -86,9 +86,6 @@ class FfiReplicator
     final headersDict = config.headers?.let(fl.MutableDict.new);
     final channelsArray = config.channels?.let(fl.MutableArray.new);
     final documentIDsArray = config.documentIds?.let(fl.MutableArray.new);
-    final pushFilterCallbackNative = pushFilterCallback?.native;
-    final pullFilterCallbackNative = pullFilterCallback?.native;
-    final conflictResolverCallbackNative = conflictResolverCallback?.native;
     final ffiConfig = CBLReplicatorConfiguration(
       database: database.pointer,
       endpoint: endpoint,
@@ -102,18 +99,15 @@ class FfiReplicator
       pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
       channels: channelsArray?.pointer.cast(),
       documentIDs: documentIDsArray?.pointer.cast(),
-      pushFilter: pushFilterCallbackNative?.pointer,
-      pullFilter: pullFilterCallbackNative?.pointer,
-      conflictResolver: conflictResolverCallbackNative?.pointer,
+      pushFilter: pushFilterCallback?.pointer,
+      pullFilter: pullFilterCallback?.pointer,
+      conflictResolver: conflictResolverCallback?.pointer,
       disableAutoPurge: !config.enableAutoPurge,
     );
 
     try {
       final replicator =
           runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
-      cblReachabilityFence(pushFilterCallbackNative);
-      cblReachabilityFence(pullFilterCallbackNative);
-      cblReachabilityFence(conflictResolverCallbackNative);
 
       final native = CBLReplicatorObject(
         replicator,
@@ -236,10 +230,8 @@ class FfiReplicator
       debugName: 'FfiReplicator.addChangeListener',
     );
 
-    final callbackNative = callback.native;
-    _bindings.addChangeListener(native.pointer, callbackNative.pointer);
+    _bindings.addChangeListener(native.pointer, callback.pointer);
     cblReachabilityFence(native);
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -270,13 +262,11 @@ class FfiReplicator
       debugName: 'FfiReplicator.addDocumentReplicationListener',
     );
 
-    final callbackNative = callback.native;
     _bindings.addDocumentReplicationListener(
       native.pointer,
-      callbackNative.pointer,
+      callback.pointer,
     );
     cblReachabilityFence(native);
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }

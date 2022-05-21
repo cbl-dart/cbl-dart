@@ -347,11 +347,9 @@ class FfiDatabase
       debugName: 'FfiDatabase.addChangeListener',
     );
 
-    final callbackNative = callback.native;
     runWithErrorTranslation(
-      () => _bindings.addChangeListener(pointer, callbackNative.pointer),
+      () => _bindings.addChangeListener(pointer, callback.pointer),
     );
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -377,15 +375,13 @@ class FfiDatabase
       debugName: 'FfiDatabase.addDocumentChangeListener',
     );
 
-    final callbackNative = callback.native;
     runWithErrorTranslation(
       () => _bindings.addDocumentChangeListener(
         pointer,
         id,
-        callbackNative.pointer,
+        callback.pointer,
       ),
     );
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
