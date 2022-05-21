@@ -461,7 +461,6 @@ AsyncCallback _wrapConflictResolver(
         final local = message.localDocument?.let((pointer) => DelegateDocument(
               FfiDocumentDelegate.fromPointer(
                 pointer,
-                adopt: true,
                 debugCreator: 'ConflictResolver(local)',
               ),
               database: database,
@@ -471,7 +470,6 @@ AsyncCallback _wrapConflictResolver(
             message.remoteDocument?.let((pointer) => DelegateDocument(
                   FfiDocumentDelegate.fromPointer(
                     pointer,
-                    adopt: true,
                     debugCreator: 'ConflictResolver(remote)',
                   ),
                   database: database,
