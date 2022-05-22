@@ -1,0 +1,9 @@
+version: '3.1'
+services:
+  devcontainer:
+    build: ../../.devcontainer
+    command: sleep infinity
+    volumes:
+      - ../..:/workspace:cached
+    user: vscode
+    network_mode: service:sync-gateway
