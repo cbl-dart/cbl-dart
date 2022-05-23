@@ -15,12 +15,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && bash -c "$(curl -fsSL "https://raw.githubusercontent.com/microsoft/vscode-dev-containers/$VSCODE_DEV_CONTAINERS/script-library/common-debian.sh")" -- "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install and start xvfb.
-ENV DISPLAY=":99"
-
+# Install xvfb.
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends xvfb \
-    && Xvfb "$DISPLAY" & \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Install Flutter Linux Desktop dependencies
