@@ -157,8 +157,4 @@ function bootstrap() {
     $melosBin bootstrap
 }
 
-function analyze() {
-    $melosBin run analyze
-}
-
 "$@"

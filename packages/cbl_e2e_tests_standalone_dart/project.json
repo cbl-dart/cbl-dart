@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "targets": {
+    "format": {
+      "executor": "@nx-dart/nx-dart:format",
+      "outputs": []
+    },
+    "analyze": {
+      "executor": "@nx-dart/nx-dart:analyze",
+      "outputs": []
+    },
+    "e2e": {
+      "executor": "@nx-dart/nx-dart:test",
+      "outputs": ["packages/cbl_e2e_tests_standalone_dart/coverage"]
+    }
+  }
+}

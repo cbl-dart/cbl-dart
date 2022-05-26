@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "targets": {
+    "format": {
+      "executor": "@nx-dart/nx-dart:format",
+      "outputs": []
+    },
+    "analyze": {
+      "executor": "@nx-dart/nx-dart:analyze",
+      "outputs": []
+    },
+    "test": {
+      "executor": "@nx-dart/nx-dart:test",
+      "outputs": ["packages/cbl_sentry/coverage"]
+    }
+  }
+}

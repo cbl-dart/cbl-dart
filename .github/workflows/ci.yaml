@@ -27,21 +27,22 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v2
+
+      - name: Install NodeJS dependencies
+        run: npm ci
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
-      - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
-
       - name: Check formatting
-        run: melos run formatting:check
-
-      - name: Show formatting changes
-        if: failure()
-        run: git diff
+        run: npx nx affected --target format
 
   formatting-clang:
     name: Formatting - Clang
@@ -66,6 +67,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v2
+
+      - name: Install NodeJS dependencies
+        run: npm ci
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -83,8 +92,8 @@ jobs:
       - name: Bootstrap Dart packages
         run: ./tools/dev-tools.sh bootstrap
 
-      - name: Analyze code
-        run: ./tools/dev-tools.sh analyze
+      - name: Analyze Dart code
+        run: npx nx affected --target analyze
 
   test-dart-unit:
     name: Dart unit tests
