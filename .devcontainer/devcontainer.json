@@ -1,0 +1,15 @@
+{
+  "dockerComposeFile": [
+    "../packages/cbl_e2e_tests/docker-compose.yaml",
+    "docker-compose.devcontainer.yaml"
+  ],
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": ["Dart-Code.dart-code"]
+    }
+  },
+  "onCreateCommand": "melos bootstrap",
+  "remoteUser": "vscode"
+}
