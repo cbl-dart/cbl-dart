@@ -92,9 +92,6 @@ jobs:
       - name: Bootstrap Dart packages
         run: ./tools/dev-tools.sh bootstrap
 
-      - name: Analyze code
-        run: ./tools/dev-tools.sh analyze
-
       - name: Analyze Dart code
         run: npx nx affected --target analyze
 
