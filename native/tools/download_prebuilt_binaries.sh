@@ -34,6 +34,7 @@ tmpDir="$binariesDir/tmp"
 couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 editions=(community enterprise)
 targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
+targetsWithExternalSymbols=(macos ubuntu20.04-x86_64 windows-x86_64)
 
 # Outputs the extension of the archives for the given target.
 function _archiveExt() {
@@ -59,6 +60,13 @@ function _downloadUrl() {
     echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target.$(_archiveExt "$target")"
 }
 
+function _symbolsDownloadUrl() {
+    local release="$1"
+    local edition="$2"
+    local target="$3"
+    echo "https://packages.couchbase.com/releases/couchbase-lite-c/$release/couchbase-lite-c-$edition-$release-$target-symbols.$(_archiveExt "$target")"
+}
+
 # Downloads and unpacks the binares for the given release, edition and target
 # of Couchbase Lite C.
 function _downloadBinaries() {
@@ -66,6 +74,7 @@ function _downloadBinaries() {
     local edition="$2"
     local target="$3"
     local archiveFile="$tmpDir/$release-$edition-$target.$(_archiveExt "$target")"
+    local symbolsArchiveFile="$tmpDir/$release-$edition-$target-symbols.$(_archiveExt "$target")"
     local installDir="$binariesDir/$release-$edition-$target"
 
     if [ -d "$installDir" ]; then
@@ -82,11 +91,43 @@ function _downloadBinaries() {
         --retry-max-time 30 \
         --output "$archiveFile"
 
+    if [[ " ${targetsWithExternalSymbols[*]} " == *" $target "* ]]; then
+        curl "$(_symbolsDownloadUrl "$release" "$edition" "$target")" \
+            --silent \
+            --fail \
+            --retry 5 \
+            --retry-max-time 30 \
+            --output "$symbolsArchiveFile"
+    fi
+
     rm -rf "$installDir"
     mkdir -p "$installDir"
 
-    case "$(_archiveExt "$target")" in
-    zip)
+    _unpackArchive "$archiveFile" "$installDir"
+
+    if [[ " ${targetsWithExternalSymbols[*]} " == *" $target "* ]]; then
+        _unpackArchive "$symbolsArchiveFile" "$installDir"
+
+        case "$target" in
+        macos)
+            mv "$installDir/libcblite-$release/libcblite.dylib.dSYM" "$installDir/libcblite-$release/lib"
+            ;;
+        ubuntu*)
+            mv "$installDir/libcblite-$release/libcblite.so.sym" "$installDir/libcblite-$release/lib/"*-linux-gnu
+            ;;
+        windows*)
+            mv "$installDir/cblite.pdb" "$installDir/libcblite-$release/bin"
+            ;;
+        esac
+    fi
+}
+
+function _unpackArchive() {
+    local archiveFile="$1"
+    local installDir="$2"
+
+    case "$archiveFile" in
+    *.zip)
         case "$(uname -s)" in
         MINGW* | CYGWIN* | MSYS*)
             # Windows 10 does not have unzip available, but has bsdtar which can
@@ -98,7 +139,7 @@ function _downloadBinaries() {
             ;;
         esac
         ;;
-    tar.gz)
+    *.tar.gz)
         $TAR -xzf "$archiveFile" -C "$installDir"
         ;;
     esac
