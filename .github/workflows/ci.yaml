@@ -189,8 +189,7 @@ jobs:
         if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v2
         with:
-          # flutter-version: ${{ env.flutter-version-stable }}
-          channel: master
+          flutter-version: ${{ env.flutter-version-stable }}
 
       - name: Configure flutter
         if: matrix.embedder == 'flutter'
