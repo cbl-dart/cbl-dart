@@ -59,12 +59,8 @@ Couchbase Lite you use.
 |          iOS | >= 10.0                |
 |        macOS | >= 10.14               |
 |      Android | >= 22                  |
-| Linux **\*** | == Ubuntu 20.04-x86_64 |
+|        Linux | == Ubuntu 20.04-x86_64 |
 |      Windows | >= 10                  |
-
-**\***: 🐛 Currently broken because of a
-[bug in Flutter](https://github.com/flutter/flutter/issues/66575). Most notably,
-operations trying to return an error crash the app.
 
 # 🔌 Getting started
 
