@@ -113,6 +113,7 @@ function prepareNativeLibraries() {
         rm -rf "$cblFlutterLocalMacosLibrariesDir"
         mkdir -p "$cblFlutterLocalMacosLibrariesDir"
         cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
+        cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite.dylib.dSYM" "$cblFlutterLocalMacosLibrariesDir"
         cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
         ;;
     ubuntu20.04-x86_64)

@@ -294,6 +294,21 @@ function _collectCblLogsMacOS() {
     echo "Copied files"
 }
 
+function _collectCblLogsLinux() {
+    echo "Collecting Couchbase Lite logs"
+
+    local cblLogsDir="/tmp/cbl_flutter/logs"
+
+    if [ ! -e "$cblLogsDir" ]; then
+        echo "Did not find logs"
+        return 0
+    fi
+
+    echo "Copying files..."
+    cp -a "$cblLogsDir" "$testResultsDir"
+    echo "Copied files"
+}
+
 function collectTestResults() {
     requireEnvVar EMBEDDER
     requireEnvVar TARGET_OS
@@ -339,7 +354,7 @@ function collectTestResults() {
             ;;
         Ubuntu)
             _collectCrashReportsLinuxFlutter
-            # TODO(blaugold): get cbl logs from device
+            _collectCblLogsLinux
             ;;
         Windows)
             # TODO(blaugold): collect crash report
