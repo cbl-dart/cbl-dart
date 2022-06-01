@@ -21,7 +21,7 @@ final _sliceBindings = CBLBindings.instance.fleece.slice;
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class Slice {
+class Slice implements Finalizable {
   /// Private constructor to initialize slice.
   Slice._(this.buf, this.size) {
     if (buf == nullptr) {
@@ -54,11 +54,7 @@ class Slice {
   final int size;
 
   /// Interprets the data of this slice as an UTF-8 encoded string.
-  String toDartString() {
-    final result = buf.cast<Utf8>().toDartString(length: size);
-    cblReachabilityFence(this);
-    return result;
-  }
+  String toDartString() => buf.cast<Utf8>().toDartString(length: size);
 
   /// Sets the [globalFLSlice] to this slice and returns it.
   Pointer<FLSlice> makeGlobal() {
@@ -95,8 +91,6 @@ class Slice {
       return _sliceBindings.compare(aFLSlice.ref, bFLSlice.ref);
     } finally {
       cachedSliceResultAllocator.free(bFLSlice);
-      cblReachabilityFence(this);
-      cblReachabilityFence(other);
     }
   }
 
@@ -109,11 +103,7 @@ class Slice {
   Uint8List asTypedList() => buf.asTypedList(size);
 
   /// Copies the contents of this [Slice] into a new [Uint8List] and returns it.
-  Uint8List toTypedList() {
-    final result = Uint8List.fromList(asTypedList());
-    cblReachabilityFence(this);
-    return result;
-  }
+  Uint8List toTypedList() => Uint8List.fromList(asTypedList());
 
   @override
   bool operator ==(Object other) {
@@ -135,8 +125,6 @@ class Slice {
       return _sliceBindings.equal(aFLSlice.ref, bFLSlice.ref);
     } finally {
       cachedSliceResultAllocator.free(bFLSlice);
-      cblReachabilityFence(this);
-      cblReachabilityFence(other);
     }
   }
 
@@ -156,17 +144,13 @@ class Slice {
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class SliceResult extends Slice implements Finalizable {
+class SliceResult extends Slice {
   /// Creates an uninitialized [SliceResult] of [size].
   SliceResult(int size) : this._fromFLSliceResult(_sliceBindings.create(size));
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-      : this._fromFLSliceResult((() {
-          final result = _sliceBindings.copy(slice.makeGlobal().ref);
-          cblReachabilityFence(slice);
-          return result;
-        })());
+      : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
 
   SliceResult._fromFLSliceResult(
     FLSliceResult slice, {
