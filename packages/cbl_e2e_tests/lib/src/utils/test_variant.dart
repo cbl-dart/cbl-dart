@@ -121,7 +121,7 @@ class _VariantEntry {
   static List<List<_VariantEntry>> combinations(List<TestVariant> variants) {
     assert(variants.isNotEmpty);
 
-    List<List<_VariantEntry>> _generateCombinations(
+    List<List<_VariantEntry>> generateCombinations(
       List<TestVariant> variants,
     ) {
       assert(variants.isNotEmpty);
@@ -134,7 +134,7 @@ class _VariantEntry {
         ];
       }
 
-      final combinations = _generateCombinations(variants.sublist(1));
+      final combinations = generateCombinations(variants.sublist(1));
 
       return entries
           .expand((entry) => combinations
@@ -143,7 +143,7 @@ class _VariantEntry {
           .toList();
     }
 
-    return _generateCombinations(variants..sort(_variantOrder));
+    return generateCombinations(variants..sort(_variantOrder));
   }
 
   bool isCompatibleWith(_VariantEntry other) =>

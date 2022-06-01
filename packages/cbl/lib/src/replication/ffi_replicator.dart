@@ -72,18 +72,18 @@ class FfiReplicator
       );
     }
 
-    AsyncCallback Function(T) _makeCallback<T>(
+    AsyncCallback Function(T) makeCallback<T>(
       AsyncCallback Function(T, FfiDatabase, bool) callbackFactory,
     ) =>
         (callback) =>
             callbackFactory(callback, database, ignoreCallbackErrorsInDart);
 
     final pushFilterCallback =
-        config.combinedPushFilter?.let(_makeCallback(_wrapReplicationFilter));
+        config.combinedPushFilter?.let(makeCallback(_wrapReplicationFilter));
     final pullFilterCallback =
-        config.combinedPullFilter?.let(_makeCallback(_wrapReplicationFilter));
+        config.combinedPullFilter?.let(makeCallback(_wrapReplicationFilter));
     final conflictResolverCallback = config.combinedConflictResolver
-        ?.let(_makeCallback(_wrapConflictResolver));
+        ?.let(makeCallback(_wrapConflictResolver));
 
     void closeCallbacks() {
       pushFilterCallback?.close();
