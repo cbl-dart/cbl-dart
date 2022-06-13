@@ -626,7 +626,6 @@ class _BuildDartObjectListener extends _FleeceListener {
   }
 
   /// Pops the top container from the [_stack], including a key if applicable.
-  ///
   void _popContainer() {
     _value = _currentContainer;
     _currentContainer = _stack.removeLast();

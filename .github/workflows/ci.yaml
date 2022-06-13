@@ -13,36 +13,26 @@ env:
   flutter-version-beta: beta
   dart-version-stable: 2.17.0
   dart-version-beta: beta
-  melos-version: '2.3.0'
+  melos-version: "2.3.0"
 
 jobs:
   formatting-dart:
     name: Formatting - Dart
     runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix:
-        dart: [stable, beta]
-    continue-on-error: ${{ matrix.dart != 'stable' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v2
-
-      - name: Install NodeJS dependencies
-        run: npm ci
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
+      - name: Install daco
+        run: dart pub global activate daco
+
       - name: Check formatting
-        run: npx nx affected --target format
+        run: daco format --set-exit-if-changed .
 
   formatting-clang:
     name: Formatting - Clang
@@ -54,7 +44,7 @@ jobs:
       - name: Check formatting
         uses: jidicula/clang-format-action@v4.4.0
         with:
-          check-path: 'native/couchbase-lite-dart'
+          check-path: "native/couchbase-lite-dart"
 
   analyze-dart:
     name: Analyze Dart code
