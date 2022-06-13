@@ -1,3 +1,16 @@
+## 0.8.0
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: enable more lint rules ([#376](https://github.com/cbl-dart/cbl-dart/issues/376)). ([69a6423f](https://github.com/cbl-dart/cbl-dart/commit/69a6423fd518ac11ff485ac8fea7608176c9b272))
+ - **REFACTOR**: make use of enhanced enums ([#375](https://github.com/cbl-dart/cbl-dart/issues/375)). ([d3f21516](https://github.com/cbl-dart/cbl-dart/commit/d3f215169be68632e5f88b8440cd4d5e0cea3a2e))
+ - **REFACTOR**: use super parameters ([#374](https://github.com/cbl-dart/cbl-dart/issues/374)). ([d35feaf0](https://github.com/cbl-dart/cbl-dart/commit/d35feaf04039b1ae7629623f4e1cf4184f22de8a))
+ - **REFACTOR**: use `Finalizer` for finalizing `ProxyObject` ([#368](https://github.com/cbl-dart/cbl-dart/issues/368)). ([a10bfb94](https://github.com/cbl-dart/cbl-dart/commit/a10bfb9424c699501ce882f4daa06bfb9e08231d))
+ - **REFACTOR**: use C types from `dart:ffi` ([#367](https://github.com/cbl-dart/cbl-dart/issues/367)). ([5cb7fc29](https://github.com/cbl-dart/cbl-dart/commit/5cb7fc29cd375d4f20082361ab341294a1de0708))
+ - **FIX**: allow malformed UTF-8 in log and error messages ([#372](https://github.com/cbl-dart/cbl-dart/issues/372)). ([68e4f3f7](https://github.com/cbl-dart/cbl-dart/commit/68e4f3f72e9c976d44fe44c702e4eda1e5625e93))
+ - **DOCS**: reformat comments with daco ([#385](https://github.com/cbl-dart/cbl-dart/issues/385)). ([e692a51b](https://github.com/cbl-dart/cbl-dart/commit/e692a51b2ae2f9d4a7d240175e5b3c22fb79c783))
+ - **BREAKING** **FEAT**: require Flutter `3.0.0` and Dart `2.17.0` ([#366](https://github.com/cbl-dart/cbl-dart/issues/366)). ([480912b6](https://github.com/cbl-dart/cbl-dart/commit/480912b617cb92cda7879d01ad4a0a3ea5b61abe))
+
 ## 0.7.2+2
 
  - **FIX**: don't use `isLeaf` with object handle (#354). ([9ed28b7c](https://github.com/cbl-dart/cbl-dart/commit/9ed28b7c141d655fb179e11b98491b3bfd351a6c))
