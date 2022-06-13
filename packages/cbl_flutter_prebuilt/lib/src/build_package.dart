@@ -19,15 +19,7 @@ Future<void> buildPackage(PackageConfiguration configuration) async {
   final packageBuildDir = p.join(buildDir, configuration.name);
   final packageBuildDirectory = Directory(packageBuildDir);
 
-  // Clean the package build dir and ensure it exists
-  if (packageBuildDirectory.existsSync()) {
-    log('Removing existing package output: $packageBuildDirectory');
-    await packageBuildDirectory.delete(recursive: true);
-  }
-  await packageBuildDirectory.create(recursive: true);
-
   final templateDirectory = Directory(templatePackageDir);
-  final outputDirectory = Directory(packageBuildDir);
   final templateContext = createTemplateContext(configuration: configuration);
 
   final templateContextJson =
@@ -42,11 +34,11 @@ Future<void> buildPackage(PackageConfiguration configuration) async {
 
   await _renderTemplateDirectory(
     templateDirectory: templateDirectory,
-    outputDirectory: outputDirectory,
+    outputDirectory: packageBuildDirectory,
     templateContext: templateContext,
   );
 
-  await _formatDartCode(directory: outputDirectory);
+  await _formatDartCode(directory: packageBuildDirectory);
 }
 
 Future<void> _renderTemplateDirectory({

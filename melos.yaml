@@ -54,3 +54,9 @@ scripts:
     run: melos exec -- "./couchbase-services.sh waitForSyncGateway"
     select-package:
       scope: cbl_e2e_tests
+
+  version:
+    description:
+      Pre-commit hook for the version command to update the `cbl_flutter_ce|ee`
+      packages.
+    run: melos build:cbl_flutter_prebuilt

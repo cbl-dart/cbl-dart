@@ -1,3 +1,8 @@
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
+
 const templatePackageDir = './template_package';
 const templateFileMarker = '__template__';
 const buildDir = '..';
@@ -7,21 +12,39 @@ final packageNames = {
   Edition.enterprise: 'cbl_flutter_ee',
 };
 
+const _couchbaseLiteCReleaseOverrides = <String, String>{};
+const _couchbaseLiteDartReleaseOverrides = <String, String>{};
+
+PackageConfiguration _loadPackageConfiguration(Edition edition) {
+  final name = packageNames[edition]!;
+  final pubspecPath = p.join(buildDir, name, 'pubspec.yaml');
+  final pubspecFile = File(pubspecPath);
+  final pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+  final version = pubspec['version']! as String;
+  final dependencies = pubspec['dependencies']! as YamlMap;
+  final couchbaseLiteCVersion = dependencies['cbl_libcblite_api']! as String;
+  final couchbaseLiteDartVersion =
+      dependencies['cbl_libcblitedart_api']! as String;
+
+  return PackageConfiguration(
+    name: name,
+    version: version,
+    edition: edition,
+    couchbaseLiteC: LibraryInfo(
+      version: couchbaseLiteCVersion,
+      release: _couchbaseLiteCReleaseOverrides[couchbaseLiteCVersion] ??
+          couchbaseLiteCVersion,
+    ),
+    couchbaseLiteDart: LibraryInfo(
+      version: couchbaseLiteDartVersion,
+      release: _couchbaseLiteDartReleaseOverrides[couchbaseLiteDartVersion] ??
+          couchbaseLiteDartVersion,
+    ),
+  );
+}
+
 final packageConfigurations = [
-  for (final edition in Edition.values)
-    PackageConfiguration(
-      name: packageNames[edition]!,
-      version: '1.1.1',
-      edition: edition,
-      couchbaseLiteC: const LibraryInfo(
-        version: '3.0.1',
-        release: '3.0.1',
-      ),
-      couchbaseLiteDart: const LibraryInfo(
-        version: '1.0.0',
-        release: '1.0.0',
-      ),
-    )
+  for (final edition in Edition.values) _loadPackageConfiguration(edition)
 ];
 
 enum Edition { community, enterprise }
