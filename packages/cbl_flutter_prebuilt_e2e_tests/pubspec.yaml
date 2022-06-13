@@ -7,10 +7,10 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl: any
-  cbl_ffi: any
-  cbl_flutter: any
-  cbl_flutter_ee: any
+  cbl: ^1.2.0
+  cbl_ffi: ^0.7.2+2
+  cbl_flutter: ^1.0.0+3
+  cbl_flutter_ee: ^1.1.1
   flutter:
     sdk: flutter
   flutter_test:
