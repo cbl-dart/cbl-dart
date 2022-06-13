@@ -1,5 +1,4 @@
 [![Version](https://badgen.net/pub/v/cbl_dart)](https://pub.dev/packages/cbl_dart)
-[![License](https://badgen.net/pub/license/cbl_dart)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_dart/LICENSE)
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
