@@ -46,9 +46,9 @@ abstract class Blob {
   /// Creates a [Blob] from a [stream] of chunks of data.
   ///
   /// Usually, an unsaved [Blob] is saved when a [Document] that contains it is
-  /// saved. This is not possible for [Blob]s created from a [stream],
-  /// when the [Document] is being saved into a [SyncDatabase]. In this case,
-  /// the [Blob] must be saved explicitly, with [Database.saveBlob].
+  /// saved. This is not possible for [Blob]s created from a [stream], when the
+  /// [Document] is being saved into a [SyncDatabase]. In this case, the [Blob]
+  /// must be saved explicitly, with [Database.saveBlob].
   factory Blob.fromStream(String contentType, Stream<Uint8List> stream) =>
       BlobImpl.fromStream(contentType, stream);
 
@@ -58,7 +58,8 @@ abstract class Blob {
   /// RAM.
   ///
   /// See also:
-  ///  * [contentStream] for streaming of the Blob's contents in chunks.
+  ///
+  /// - [contentStream] for streaming of the Blob's contents in chunks.
   Future<Uint8List> content();
 
   /// A stream of the content of this [Blob].
@@ -81,17 +82,19 @@ abstract class Blob {
   /// Blob metadata has the following properties:
   ///
   /// {@template cbl.Blob.metadataTable}
+  ///
   /// | Property     | Type         | Description                                   | Required |
-  /// |:-------------|:-------------|:----------------------------------------------|:---------|
+  /// | :----------- | :----------- | :-------------------------------------------- | :------- |
   /// | @type        | const "blob" | Marks dictionary as containing Blob metadata. | Yes      |
   /// | content_type | string       | Content type ex. text/plain.                  | No       |
   /// | length       | int          | Length of the Blob in bytes.                  | No       |
   /// | digest       | string       | Cryptographic digest of the Blob’s content.   | Yes      |
+  ///
   /// {@endtemplate}
   ///
   /// See also:
   ///
-  ///   - [isBlob] to check if a [Map] contains valid Blob metadata.
+  /// - [isBlob] to check if a [Map] contains valid Blob metadata.
   Map<String, Object?> get properties;
 
   /// Returns this blob's JSON representation.
@@ -101,7 +104,7 @@ abstract class Blob {
   ///
   /// See also:
   ///
-  ///   - [properties] for what is considered valid metadata.
+  /// - [properties] for what is considered valid metadata.
   static bool isBlob(Map<String, Object?> properties) {
     if (!properties.containsKey(blobDigestProperty) ||
         properties[blobDigestProperty] is! String ||

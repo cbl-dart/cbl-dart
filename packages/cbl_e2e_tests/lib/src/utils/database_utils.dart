@@ -258,8 +258,8 @@ extension AsyncDatabaseUtilsExtension on Database {
       .then((resultSet) => resultSet.allResults())
       .then((results) => results.map(_getIdFromResult).toList());
 
-  /// Returns a stream which emits the ids of all the documents in the
-  /// database when they change.
+  /// Returns a stream which emits the ids of all the documents in the database
+  /// when they change.
   Stream<List<String>> watchAllIds() => _allIdsQuery()
       .toFuture()
       .asStream()

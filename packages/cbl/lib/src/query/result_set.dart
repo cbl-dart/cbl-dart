@@ -72,13 +72,12 @@ abstract class AsyncResultSet extends ResultSet {
 /// Creates a [DatabaseMContext] for use in [ResultSet] implementations.
 ///
 /// Result sets don't use the shared keys of the database and so must not use
-/// the [DictKeys] and [SharedKeysTable] of the database.
-/// See SQLiteQuery.cc for more information.
+/// the [DictKeys] and [SharedKeysTable] of the database. See SQLiteQuery.cc for
+/// more information.
 /// https://github.com/couchbase/couchbase-lite-core/blob/733eecb4fc73a05ce35bf458703dac2d7382c296/LiteCore/Query/SQLiteQuery.cc#L514-L524
 ///
 /// A bug was the result of using the databases shared keys table in the result
-/// set.
-/// https://github.com/cbl-dart/cbl-dart/issues/322
+/// set. https://github.com/cbl-dart/cbl-dart/issues/322
 ///
 /// Result sets also cannot use a [SharedStringsTable] because the CBL C SDK
 /// does not return strictly immutable Fleece data from the result set API.

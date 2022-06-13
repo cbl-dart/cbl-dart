@@ -18,17 +18,17 @@ abstract class TypedDictionaryObject<MD extends Object> {
 
   /// Returns a string representation of this object.
   ///
-  /// Per default, the string representation is in a single line.
-  /// If [indent] is specified, the string representation is in multiple lines,
-  /// each field indented by [indent].
+  /// Per default, the string representation is in a single line. If [indent] is
+  /// specified, the string representation is in multiple lines, each field
+  /// indented by [indent].
   @override
   String toString({String? indent});
 }
 
 /// The type that is implemented by all typed mutable dictionaries.
 ///
-/// All typed mutable dictionaries have an immutable supertype that has the
-/// type [D]. [MD] is the self type of the mutable subtype.
+/// All typed mutable dictionaries have an immutable supertype that has the type
+/// [D]. [MD] is the self type of the mutable subtype.
 ///
 /// {@category Typed Data}
 @meta.experimental
@@ -46,8 +46,8 @@ abstract class TypedDocumentObject<MD extends Object>
 
 /// The type that is implemented by all typed mutable documents.
 ///
-/// All typed mutable documents have an immutable supertype that has the
-/// type [D]. [MD] is the self type of the mutable subtype.
+/// All typed mutable documents have an immutable supertype that has the type
+/// [D]. [MD] is the self type of the mutable subtype.
 ///
 /// {@category Typed Data}
 @meta.experimental

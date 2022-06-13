@@ -23,11 +23,11 @@ import 'result_set.dart';
 /// following rules:
 ///
 /// 1. The alias name of an aliased column.
-/// 2. The last component of a property expression. Functions for example,
-///    are __not__ property expressions.
-/// 3. A generated key of the format `$1`, `$2`, `$3`, ...
-///    The number after `$` corresponds to the position of the column among the
-///    rest of the unnamed columns and starts at `1`.
+/// 2. The last component of a property expression. Functions for example, are
+///    **not** property expressions.
+/// 3. A generated key of the format `$1`, `$2`, `$3`, ... The number after `$`
+///    corresponds to the position of the column among the rest of the unnamed
+///    columns and starts at `1`.
 ///
 /// {@category Query}
 abstract class Result
@@ -50,8 +50,7 @@ abstract class Result
   /// Returns the column at the given [nameOrIndex] as a [String].
   ///
   /// {@template cbl.Result.typedNullableGetter}
-  /// Returns `null` if the value is not a of the expected typ or it is
-  /// `null`.
+  /// Returns `null` if the value is not a of the expected typ or it is `null`.
   ///
   /// Throws a [RangeError] if the [nameOrIndex] is ouf of range.
   /// {@endtemplate}
@@ -60,8 +59,8 @@ abstract class Result
   /// Returns the column at the given [nameOrIndex] as an integer number.
   ///
   /// {@template cbl.Result.typedDefaultedGetter}
-  /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`)
-  /// if the column is not of the expected type or is `null`.
+  /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`) if
+  /// the column is not of the expected type or is `null`.
   ///
   /// Throws a [RangeError] if the [nameOrIndex] is ouf of range.
   /// {@endtemplate}
@@ -152,8 +151,8 @@ class ResultImpl with IterableMixin<String> implements Result {
 
   /// Creates a result from a fleece [array] fo the column values.
   ///
-  /// The [context] can be shared with other [Result]s, if it is guaranteed
-  /// that all results are from the same chunk of encoded Fleece data.
+  /// The [context] can be shared with other [Result]s, if it is guaranteed that
+  /// all results are from the same chunk of encoded Fleece data.
   ResultImpl.fromValuesArray(
     fl.Array array, {
     required DatabaseMContext context,

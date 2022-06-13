@@ -12,7 +12,7 @@ abstract class ArrayExpressionSatisfies {
   ///
   /// See also:
   ///
-  ///  * [ArrayExpression] for more information on range predicates.
+  /// - [ArrayExpression] for more information on range predicates.
   ExpressionInterface satisfies(ExpressionInterface expression);
 }
 

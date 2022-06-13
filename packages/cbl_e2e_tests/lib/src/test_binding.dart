@@ -35,8 +35,8 @@ typedef GroupFn = void Function(
 
 typedef TestHook = void Function(dynamic Function() body);
 
-/// The properties which end are the functions used to declare tests, groups
-/// and lifecycle hooks. Per default these properties return the corresponding
+/// The properties which end are the functions used to declare tests, groups and
+/// lifecycle hooks. Per default these properties return the corresponding
 /// functions from the `test` package.
 ///
 /// Overriding these properties is useful to run tests with the

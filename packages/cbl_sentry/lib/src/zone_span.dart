@@ -6,11 +6,12 @@ import 'package:sentry/sentry.dart';
 ///
 /// This getter will be removed once Sentry has support for zones.
 ///
-/// Falls back to [Sentry.getSpan] if no span is associated with the
-/// current zone.
+/// Falls back to [Sentry.getSpan] if no span is associated with the current
+/// zone.
 ///
 /// See also:
-///   * [runWithCblSentrySpan] for running a function with a new span.
+///
+/// - [runWithCblSentrySpan] for running a function with a new span.
 ISentrySpan? get cblSentrySpan =>
     Zone.current[#_sentrySpan] as ISentrySpan? ?? Sentry.getSpan();
 

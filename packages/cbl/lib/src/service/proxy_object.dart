@@ -31,8 +31,8 @@ mixin ProxyObjectMixin {
   /// Whether this proxy object has been bound to a target object.
   bool get isBoundToTarget => _objectId != null;
 
-  /// The channel to the [CblService] through which the target object
-  /// is accessed.
+  /// The channel to the [CblService] through which the target object is
+  /// accessed.
   Channel? get channel => _channel;
   Channel? _channel;
 

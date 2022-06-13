@@ -4,6 +4,7 @@
 /// messages.
 ///
 /// It demonstrates how to:
+///
 /// - initialize Couchbase Lite,
 /// - open a database,
 /// - create an index,
@@ -195,14 +196,15 @@ abstract class LogMessage {
 /// contains a log message.
 ///
 /// [DictionaryInterface] is implemented by a few types in `cbl`:
+///
 /// - [Document],
 /// - [Dictionary],
 /// - [Result].
 ///
-/// Accessing data through objects returned from the `cbl` API is more
-/// efficient than converting them to plain Dart objects
-/// (e.g. [DictionaryInterface.toPlainMap]). These objects pull only the
-/// data that is accessed, out of the binary encoded, stored data.
+/// Accessing data through objects returned from the `cbl` API is more efficient
+/// than converting them to plain Dart objects (e.g.
+/// [DictionaryInterface.toPlainMap]). These objects pull only the data that is
+/// accessed, out of the binary encoded, stored data.
 class CblLogMessage extends LogMessage {
   CblLogMessage(this.dict);
 

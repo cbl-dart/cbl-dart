@@ -53,8 +53,8 @@ mixin ClosableResourceMixin implements ClosableResource {
     _updateParentRegistration();
   }
 
-  /// Whether this resource needs to be closed when its parent is closed to
-  /// not leak resources.
+  /// Whether this resource needs to be closed when its parent is closed to not
+  /// leak resources.
   ///
   /// Even if this property is `false`, the parent might still closed it.
   @protected

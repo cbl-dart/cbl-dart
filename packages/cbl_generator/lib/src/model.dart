@@ -139,8 +139,8 @@ abstract class TypedDataType {
   /// Whether the type is nullable.
   final bool isNullable;
 
-  /// Whether values of this type should be cached instead of re-read every
-  /// time they are accessed.
+  /// Whether values of this type should be cached instead of re-read every time
+  /// they are accessed.
   final bool isCached;
 
   String get dartTypeWithNullability => isNullable ? '$dartType?' : dartType;

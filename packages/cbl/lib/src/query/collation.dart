@@ -11,8 +11,8 @@ abstract class CollationInterface {}
 /// Factory for creating collations.
 ///
 /// Couchbase Lite provides two types of collation: ASCII and Unicode. Without
-/// specifying the `COLLATE` expression Couchbase Lite will use case
-/// sensitive ASCII collation.
+/// specifying the `COLLATE` expression Couchbase Lite will use case sensitive
+/// ASCII collation.
 ///
 /// {@category Query Builder}
 class Collation {

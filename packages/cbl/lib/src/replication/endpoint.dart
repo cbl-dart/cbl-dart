@@ -8,9 +8,9 @@ abstract class Endpoint {}
 /// An endpoint representing a server-based database at the given [url].
 ///
 /// The Url's scheme must be `ws` or `wss`, it must of course have a valid
-/// hostname, and its path must be the name of the database on that server.
-/// The port can be omitted; it defaults to 80 for `ws` and 443 for `wss`.
-/// For example: `wss://example.org/dbname`
+/// hostname, and its path must be the name of the database on that server. The
+/// port can be omitted; it defaults to 80 for `ws` and 443 for `wss`. For
+/// example: `wss://example.org/dbname`
 ///
 /// {@category Replication}
 class UrlEndpoint extends Endpoint {

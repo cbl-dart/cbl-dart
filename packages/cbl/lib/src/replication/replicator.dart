@@ -158,8 +158,8 @@ abstract class Replicator implements ClosableResource {
   ///
   /// This method returns immediately; when the replicator actually stops, the
   /// replicator will change the [ReplicatorActivityLevel] of its [status] to
-  /// [ReplicatorActivityLevel.stopped]. and the [changes] stream will
-  /// be notified accordingly.
+  /// [ReplicatorActivityLevel.stopped]. and the [changes] stream will be
+  /// notified accordingly.
   FutureOr<void> stop();
 
   /// Adds a [listener] to be notified of changes to the [status] of this
@@ -169,10 +169,10 @@ abstract class Replicator implements ClosableResource {
   ///
   /// See also:
   ///
-  ///   - [ReplicatorChange] for the change event given to [listener].
-  ///   - [addDocumentReplicationListener] for listening for
-  ///     [DocumentReplication]s performed by this replicator.
-  ///   - [removeChangeListener] for removing a previously added listener.
+  /// - [ReplicatorChange] for the change event given to [listener].
+  /// - [addDocumentReplicationListener] for listening for
+  ///   [DocumentReplication]s performed by this replicator.
+  /// - [removeChangeListener] for removing a previously added listener.
   FutureOr<ListenerToken> addChangeListener(ReplicatorChangeListener listener);
 
   /// Adds a [listener] to be notified of [DocumentReplication]s performed by
@@ -181,19 +181,19 @@ abstract class Replicator implements ClosableResource {
   /// {@template cbl.Replicator.addDocumentReplicationListener.listening}
   /// Because of performance optimization in the replicator, document
   /// replications need to be listened to before starting the replicator. If the
-  /// listener is added after the replicator is started, the replicator
-  /// needs to be stopped and restarted again to ensure that the listener will
-  /// get the document replication events.
+  /// listener is added after the replicator is started, the replicator needs to
+  /// be stopped and restarted again to ensure that the listener will get the
+  /// document replication events.
   /// {@endtemplate}
   ///
   /// {@macro cbl.Database.addChangeListener}
   ///
   /// See also:
   ///
-  ///   - [DocumentReplication] for the change event given to [listener].
-  ///   - [addChangeListener] for listening for changes to the [status] this
-  ///     replicator.
-  ///   - [removeChangeListener] for removing a previously added listener.
+  /// - [DocumentReplication] for the change event given to [listener].
+  /// - [addChangeListener] for listening for changes to the [status] this
+  ///   replicator.
+  /// - [removeChangeListener] for removing a previously added listener.
   FutureOr<ListenerToken> addDocumentReplicationListener(
     DocumentReplicationListener listener,
   );
@@ -202,10 +202,10 @@ abstract class Replicator implements ClosableResource {
   ///
   /// See also:
   ///
-  ///   - [addChangeListener] for listening for changes to the [status] this
-  ///     replicator.
-  ///   - [addDocumentReplicationListener] for listening for
-  ///     [DocumentReplication]s performed by this replicator.
+  /// - [addChangeListener] for listening for changes to the [status] this
+  ///   replicator.
+  /// - [addDocumentReplicationListener] for listening for
+  ///   [DocumentReplication]s performed by this replicator.
   FutureOr<void> removeChangeListener(ListenerToken token);
 
   /// Returns a [Stream] to be notified of changes to the [status] of this

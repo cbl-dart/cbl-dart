@@ -30,8 +30,7 @@ class Meta {
   static MetaExpressionInterface get sequence =>
       MetaExpressionImpl('_sequence');
 
-  /// Creates a metadata expression referring to the deleted flag of a
-  /// document.
+  /// Creates a metadata expression referring to the deleted flag of a document.
   static MetaExpressionInterface get isDeleted =>
       MetaExpressionImpl('_deleted');
 

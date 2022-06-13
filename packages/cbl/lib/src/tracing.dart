@@ -20,8 +20,8 @@ TraceDataHandler get _onTraceData => onTraceData;
 /// CBL Dart has builtin trace points, at which flow control is given to the
 /// [TracingDelegate]:
 ///
-///   * [traceSyncOperation] for synchronous operations.
-///   * [traceAsyncOperation] for asynchronous operations.
+/// - [traceSyncOperation] for synchronous operations.
+/// - [traceAsyncOperation] for asynchronous operations.
 ///
 /// See [TracedOperation] and its subclasses for all operations can can be
 /// traced.
@@ -40,11 +40,10 @@ TraceDataHandler get _onTraceData => onTraceData;
 /// # User and worker isolates
 ///
 /// User isolates are isolates in which CBL Dart is used but that are not
-/// created by CBL Dart.
-/// For every user isolate, a [TracingDelegate] can be installed through
-/// [install] and uninstalled again through [uninstall].
-/// It is usually a mistake to uninstall the current delegate while worker
-/// isolates with delegates created by the current delegate are still running.
+/// created by CBL Dart. For every user isolate, a [TracingDelegate] can be
+/// installed through [install] and uninstalled again through [uninstall]. It is
+/// usually a mistake to uninstall the current delegate while worker isolates
+/// with delegates created by the current delegate are still running.
 ///
 /// Each time CBL Dart creates a worker isolate, [createWorkerDelegate] is
 /// called on the user isolate delegate and the returned delegate is installed
@@ -52,21 +51,19 @@ TraceDataHandler get _onTraceData => onTraceData;
 ///
 /// ## Tracing context
 ///
-/// When a user isolate sends a message to a worker isolate, the
-/// user isolate's [TracingDelegate] can provide a tracing context, which
-/// is sent to the worker isolate along with the message. When a worker
-/// isolate receives a message, it's delegate can restore the tracing context.
-/// Typically, the tracing context is stored in a zone value and
-/// [captureTracingContext] and [restoreTracingContext] are used to transfer
-/// this value. The value returned by [captureTracingContext] must be JSON
-/// serializable.
+/// When a user isolate sends a message to a worker isolate, the user isolate's
+/// [TracingDelegate] can provide a tracing context, which is sent to the worker
+/// isolate along with the message. When a worker isolate receives a message,
+/// it's delegate can restore the tracing context. Typically, the tracing
+/// context is stored in a zone value and [captureTracingContext] and
+/// [restoreTracingContext] are used to transfer this value. The value returned
+/// by [captureTracingContext] must be JSON serializable.
 ///
 /// ## Trace data
 ///
 /// A delegate in a worker isolate can send arbitrary data through
-/// [sendTraceData] to the delegate in the user isolate, which will receive
-/// the data through a call to [onTraceData]. The data has to be JSON
-/// serializable.
+/// [sendTraceData] to the delegate in the user isolate, which will receive the
+/// data through a call to [onTraceData]. The data has to be JSON serializable.
 ///
 /// {@category Tracing}
 abstract class TracingDelegate {
@@ -77,8 +74,8 @@ abstract class TracingDelegate {
   ///
   /// See also:
   ///
-  ///   * [install] for installing a [TracingDelegate] for this isolate.
-  ///   * [uninstall] for uninstalling the current [TracingDelegate].
+  /// - [install] for installing a [TracingDelegate] for this isolate.
+  /// - [uninstall] for uninstalling the current [TracingDelegate].
   static bool get hasBeenInstalled => _hasBeenInstalled;
   static bool _hasBeenInstalled = false;
 
@@ -119,8 +116,8 @@ abstract class TracingDelegate {
     await delegate.close();
   }
 
-  /// Creates a new [TracingDelegate] to be used for a worker isolate,
-  /// which is about to be created by the current isolate.
+  /// Creates a new [TracingDelegate] to be used for a worker isolate, which is
+  /// about to be created by the current isolate.
   ///
   /// The returned object must be able to be passed from the current isolate to
   /// the worker isolate.
@@ -139,24 +136,24 @@ abstract class TracingDelegate {
   /// This allows a delegate to clean up and free resources.
   FutureOr<void> close() {}
 
-  /// Allows this delegate to send arbitrary data to the delegate it was
-  /// created by.
+  /// Allows this delegate to send arbitrary data to the delegate it was created
+  /// by.
   ///
-  /// The [data] must be JSON serializable and this delegate must be in a
-  /// worker isolate.
+  /// The [data] must be JSON serializable and this delegate must be in a worker
+  /// isolate.
   @protected
   @mustCallSuper
   void sendTraceData(Object? data) => _onTraceData(data);
 
   /// Callback for receiving trace data from delegates in worker isolates.
   ///
-  /// When a delegate in a worker isolate calls [sendTraceData], the data
-  /// is sent to the user isolate, which calls this callback.
+  /// When a delegate in a worker isolate calls [sendTraceData], the data is
+  /// sent to the user isolate, which calls this callback.
   @visibleForOverriding
   void onTraceData(Object? data) {}
 
-  /// Returns the current tracing context and is called just before a message
-  /// is sent from an user to a worker isolate.
+  /// Returns the current tracing context and is called just before a message is
+  /// sent from an user to a worker isolate.
   ///
   /// The returned value must be JSON serializable.
   Object? captureTracingContext() => null;
@@ -167,8 +164,8 @@ abstract class TracingDelegate {
   /// The provided [context] is the value that was returned by
   /// [captureTracingContext], when the message was sent.
   ///
-  /// When this method is called, it must call [restore] exactly once,
-  /// and do so before returning.
+  /// When this method is called, it must call [restore] exactly once, and do so
+  /// before returning.
   void restoreTracingContext(Object? context, void Function() restore) {
     restore();
   }
@@ -397,16 +394,15 @@ typedef OperationDetailsResolver = Map<String, Object?>? Function(
 
 /// A tracing delegate that integrates CBL Dart with the Dart DevTools.
 ///
-/// This tracing delegate records [Timeline] events, which can be viewed in
-/// Dart DevTools Performance Page.
+/// This tracing delegate records [Timeline] events, which can be viewed in Dart
+/// DevTools Performance Page.
 ///
 /// {@category Tracing}
 class DevToolsTracing extends TracingDelegate {
   /// A tracing delegate that integrates CBL Dart with the dart developer tools.
   ///
   /// [operationFilter] is a filter that is used to determine whether an
-  /// operation should be traced. Per default, [defaultOperationFilter] is
-  /// used.
+  /// operation should be traced. Per default, [defaultOperationFilter] is used.
   ///
   /// [operationNameResolver] is the function that is used to resolve the name
   /// of an operation. Per default, [defaultOperationNameResolver] is used.
@@ -450,8 +446,8 @@ class DevToolsTracing extends TracingDelegate {
     return true;
   }
 
-  /// The default function to resolve the name of a [TracedOperation] for
-  /// its timeline events.
+  /// The default function to resolve the name of a [TracedOperation] for its
+  /// timeline events.
   static String defaultOperationNameResolver(TracedOperation operation) {
     if (operation is ChannelCallOp) {
       return 'ChannelCall';
@@ -459,8 +455,8 @@ class DevToolsTracing extends TracingDelegate {
     return operation.name;
   }
 
-  /// The default function to resolve details of a [TracedOperation] for
-  /// its timeline events.
+  /// The default function to resolve details of a [TracedOperation] for its
+  /// timeline events.
   static Map<String, Object?>? defaultOperationDetailsResolver(
     TracedOperation operation,
   ) {

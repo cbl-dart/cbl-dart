@@ -107,9 +107,8 @@ enum StringSource {
 /// Strings that are not shared are decoded directly when requested.
 ///
 /// A [SharedStringsTable] must only be used with a single instance of immutable
-/// Fleece data.
-/// It is safe to use a [NoopSharedStringsTable] with mutable Fleece data,
-/// though.
+/// Fleece data. It is safe to use a [NoopSharedStringsTable] with mutable
+/// Fleece data, though.
 abstract class SharedStringsTable {
   /// Creates a new empty [SharedStringsTable].
   factory SharedStringsTable() => _SharedStringsTable();
@@ -382,8 +381,8 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
 Never _throwUndefinedDartRepresentation() =>
     throw UnsupportedError('undefined has not Dart representation');
 
-/// An object that is notified of Fleece decoding events while a Fleece value
-/// is deeply decoded.
+/// An object that is notified of Fleece decoding events while a Fleece value is
+/// deeply decoded.
 abstract class _FleeceListener {
   void handleString(String value) {}
   void handleData(Uint8List value) {}
@@ -593,10 +592,10 @@ class _DictIteratorLoader extends _FleeceValueLoader {
 
 /// A [_FleeceListener] that builds data objects from the decoder events.
 ///
-/// This is a simple stack-based object builder. It keeps the most recently
-/// seen value in a variable, and uses it depending on the following event.
+/// This is a simple stack-based object builder. It keeps the most recently seen
+/// value in a variable, and uses it depending on the following event.
 class _BuildDartObjectListener extends _FleeceListener {
-  /// Read out the final result of parsing a JSON string. */
+  /// Read out the final result of parsing a JSON string.
   Object? get result {
     assert(_currentContainer == null);
     return _value;
@@ -604,21 +603,21 @@ class _BuildDartObjectListener extends _FleeceListener {
 
   /// Stack used to handle nested containers.
   ///
-  /// The current container is pushed on the stack when a new one is
-  /// started. If the container is a [Map], there is also a current [_key]
-  /// which is also stored on the stack.
+  /// The current container is pushed on the stack when a new one is started. If
+  /// the container is a [Map], there is also a current [_key] which is also
+  /// stored on the stack.
   final List<Object?> _stack = [];
 
-  /// The current [Map] or [List] being built. */
+  /// The current [Map] or [List] being built.
   Object? _currentContainer;
 
-  /// The most recently read property key. */
+  /// The most recently read property key.
   String _key = '';
 
-  /// The most recently read value. */
+  /// The most recently read value.
   Object? _value;
 
-  /// Pushes the currently active container (and key, if a [Map]). */
+  /// Pushes the currently active container (and key, if a [Map]).
   void _pushContainer() {
     if (_currentContainer is Map) {
       _stack.add(_key);
@@ -626,7 +625,8 @@ class _BuildDartObjectListener extends _FleeceListener {
     _stack.add(_currentContainer);
   }
 
-  /// Pops the top container from the [_stack], including a key if applicable. */
+  /// Pops the top container from the [_stack], including a key if applicable.
+  ///
   void _popContainer() {
     _value = _currentContainer;
     _currentContainer = _stack.removeLast();

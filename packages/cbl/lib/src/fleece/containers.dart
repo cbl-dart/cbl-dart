@@ -114,8 +114,8 @@ class Doc extends FleeceDocObject {
 
 // === Value ===================================================================
 
-/// Types of Fleece values. Basically JSON, with the addition of Data
-/// (raw blob).
+/// Types of Fleece values. Basically JSON, with the addition of Data (raw
+/// blob).
 enum ValueType {
   /// Type of a null pointer, i.e. no such value, like JSON `undefined`.
   undefined,
@@ -545,8 +545,8 @@ class MutableArray extends Array {
 
   /// Inserts a contiguous range of JSON `null` values into the array.
   ///
-  /// [start] is the zero-based index of the first value to be inserted.
-  /// [count] is the number of items to insert.
+  /// [start] is the zero-based index of the first value to be inserted. [count]
+  /// is the number of items to insert.
   void insertNulls(int start, int count) {
     RangeError.checkValidIndex(start, this, 'start');
     _bindings.insert(pointer.cast(), start, count);

@@ -26,8 +26,8 @@ abstract class PacketCodec {
   Object? encodePacket(Packet packet);
 }
 
-/// A [Codec] which uses a [PacketCodec] and a [SerializationRegistry] to
-/// encode and decode values.
+/// A [Codec] which uses a [PacketCodec] and a [SerializationRegistry] to encode
+/// and decode values.
 class SerializationCodec extends Codec<Object?, Object?> {
   /// Creates a [SerializationCodec] with the given [registry] and
   /// [packetCodec].

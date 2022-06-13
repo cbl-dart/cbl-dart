@@ -79,11 +79,11 @@ class Slice {
 
   /// Compares this slice lexicographically to [other].
   ///
-  /// |  Result | Meaning                        |
-  /// |--------:|:-------------------------------|
-  /// |     < 0 | this slice is before [other]   |
-  /// |    == 0 | this slice is equal to [other] |
-  /// |     > 0 | this slice is after [other]    |
+  /// | Result | Meaning                        |
+  /// | -----: | :----------------------------- |
+  /// |    < 0 | this slice is before [other]   |
+  /// |   == 0 | this slice is equal to [other] |
+  /// |    > 0 | this slice is after [other]    |
   int compareTo(Slice other) {
     final aFLSlice = makeGlobal();
     final bFLSlice = cachedSliceResultAllocator<FLSlice>();
@@ -151,8 +151,8 @@ class Slice {
 /// A contiguous area of native memory, which stays alive at least as long as
 /// this object.
 ///
-/// [SliceResult]s are expected to be immutable after they have been returned
-/// as a result.
+/// [SliceResult]s are expected to be immutable after they have been returned as
+/// a result.
 ///
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
@@ -204,8 +204,8 @@ class SliceResult extends Slice {
 
   /// Creates a [SliceResult] from [FLSliceResult].
   ///
-  /// If the the slice should be retained, set [retain] to `true`.
-  /// The slice will be release when this object is garbage collected.
+  /// If the the slice should be retained, set [retain] to `true`. The slice
+  /// will be release when this object is garbage collected.
   static SliceResult? fromFLSliceResult(
     FLSliceResult slice, {
     bool retain = false,

@@ -23,22 +23,21 @@ import 'database.dart';
 ///
 /// This is an AES-256 key, which is 32 bytes long.
 ///
-/// A key can be created from the raw bytes through [key].
-/// It is important to use a cryptographically secure source of randomness to
-/// generate this key, for example [Random.secure].
+/// A key can be created from the raw bytes through [key]. It is important to
+/// use a cryptographically secure source of randomness to generate this key,
+/// for example [Random.secure].
 ///
 /// Alternatively a key can be derived from a password through [passwordAsync]
-/// or [passwordAsync].
-/// If your UI uses passwords, call one of these method to create the key used
-/// to encrypt the database. They are designed for security, and deliberately
-/// run slowly to make brute-force attacks impractical.
+/// or [passwordAsync]. If your UI uses passwords, call one of these method to
+/// create the key used to encrypt the database. They are designed for security,
+/// and deliberately run slowly to make brute-force attacks impractical.
 ///
 /// See also:
 ///
-///   - [DatabaseConfiguration.encryptionKey] for the encryption key used when
-///     opening or copying a [Database].
-///   - [Database.changeEncryptionKey] for changing the encryption key of a
-///     [Database].
+/// - [DatabaseConfiguration.encryptionKey] for the encryption key used when
+///   opening or copying a [Database].
+/// - [Database.changeEncryptionKey] for changing the encryption key of a
+///   [Database].
 ///
 /// {@category Database}
 /// {@category Enterprise Edition}
@@ -53,25 +52,25 @@ abstract class EncryptionKey {
 
   /// Derives an [EncryptionKey] from a [password].
   ///
-  /// If your UI uses passwords, call this method to create the key used
-  /// to encrypt the database. It is designed for security, and deliberately
-  /// runs slowly to make brute-force attacks impractical.
+  /// If your UI uses passwords, call this method to create the key used to
+  /// encrypt the database. It is designed for security, and deliberately runs
+  /// slowly to make brute-force attacks impractical.
   ///
   /// See also:
   ///
-  ///   - [passwordAsync] for the asynchronous version of this method.
+  /// - [passwordAsync] for the asynchronous version of this method.
   static EncryptionKey passwordSync(String password) =>
       EncryptionKeyImpl.passwordSync(password);
 
   /// Derives an [EncryptionKey] from a [password].
   ///
-  /// If your UI uses passwords, call this method to create the key used
-  /// to encrypt the database. It is designed for security, and deliberately
-  /// runs slowly to make brute-force attacks impractical.
+  /// If your UI uses passwords, call this method to create the key used to
+  /// encrypt the database. It is designed for security, and deliberately runs
+  /// slowly to make brute-force attacks impractical.
   ///
   /// See also:
   ///
-  ///   - [passwordSync] for the synchronous version of this method.
+  /// - [passwordSync] for the synchronous version of this method.
   static Future<EncryptionKey> passwordAsync(String password) =>
       EncryptionKeyImpl.passwordAsync(password);
 }

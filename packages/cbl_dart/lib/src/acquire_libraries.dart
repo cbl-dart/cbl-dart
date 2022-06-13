@@ -6,8 +6,8 @@ import 'package:path/path.dart' as p;
 import 'install_libraries.dart';
 import 'package.dart';
 
-/// Ensures that the latest releases of the libraries are installed and
-/// returns the corresponding [LibrariesConfiguration] configuration.
+/// Ensures that the latest releases of the libraries are installed and returns
+/// the corresponding [LibrariesConfiguration] configuration.
 ///
 /// See [Package.latestReleases] for the releases installed by this function.
 ///

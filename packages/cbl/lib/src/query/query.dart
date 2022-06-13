@@ -122,13 +122,14 @@ abstract class Query implements Resource {
   ///
   /// As currently implemented, the result has three sections, separated by two
   /// newlines:
-  /// * The first section is this query compiled into an SQLite query.
-  /// * The second section is the output of SQLite's "EXPLAIN QUERY PLAN"
+  ///
+  /// - The first section is this query compiled into an SQLite query.
+  /// - The second section is the output of SQLite's "EXPLAIN QUERY PLAN"
   ///   command applied to that query; for help interpreting this, see
   ///   https://www.sqlite.org/eqp.html . The most important thing to know is
   ///   that if you see "SCAN TABLE", it means that SQLite is doing a slow
   ///   linear scan of the documents instead of using an index.
-  /// * The third sections is this queries JSON representation. This is the data
+  /// - The third sections is this queries JSON representation. This is the data
   ///   structure that is built to describe this query, either by the the query
   ///   builder or when a N1QL query is compiled.
   FutureOr<String> explain();
@@ -144,16 +145,16 @@ abstract class Query implements Resource {
   ///
   /// See also:
   ///
-  ///   - [QueryChange] for the change event given to [listener].
-  ///   - [removeChangeListener] for removing a previously added listener.
+  /// - [QueryChange] for the change event given to [listener].
+  /// - [removeChangeListener] for removing a previously added listener.
   FutureOr<ListenerToken> addChangeListener(QueryChangeListener listener);
 
   /// {@macro cbl.Database.removeChangeListener}
   ///
   /// See also:
   ///
-  ///   - [addChangeListener] for listening to changes in the results of this
-  ///     query.
+  /// - [addChangeListener] for listening to changes in the results of this
+  ///   query.
   FutureOr<void> removeChangeListener(ListenerToken token);
 
   /// Returns a [Stream] to be notified of changes to the results of this query.

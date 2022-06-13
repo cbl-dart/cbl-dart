@@ -69,12 +69,12 @@ abstract class ExpressionInterface {
   /// equal to given [expression].
   ExpressionInterface isNot(ExpressionInterface expression);
 
-  /// Returns a new expression which evaluates whether this expression is
-  /// `null` or missing.
+  /// Returns a new expression which evaluates whether this expression is `null`
+  /// or missing.
   ExpressionInterface isNullOrMissing();
 
-  /// Returns a new expression which evaluates whether this expression is
-  /// not `null` nor missing.
+  /// Returns a new expression which evaluates whether this expression is not
+  /// `null` nor missing.
   ExpressionInterface notNullOrMissing();
 
   /// Returns a new expression which performs a logical `AND` of this expression
@@ -85,15 +85,15 @@ abstract class ExpressionInterface {
   /// and the given [expression].
   ExpressionInterface or(ExpressionInterface expression);
 
-  /// Returns a new expression which evaluates to whether this expression
-  /// is between the two given expressions inclusively.
+  /// Returns a new expression which evaluates to whether this expression is
+  /// between the two given expressions inclusively.
   ExpressionInterface between(
     ExpressionInterface expression, {
     required ExpressionInterface and,
   });
 
-  /// Returns a new expression which evaluates to whether this expression
-  /// is in the given [expressions].
+  /// Returns a new expression which evaluates to whether this expression is in
+  /// the given [expressions].
   // ignore: non_constant_identifier_names
   ExpressionInterface in_(Iterable<ExpressionInterface> expressions);
 
