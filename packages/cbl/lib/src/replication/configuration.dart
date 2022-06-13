@@ -12,6 +12,7 @@ import '../typed_data/adapter.dart';
 import 'authenticator.dart';
 import 'conflict.dart';
 import 'conflict_resolver.dart';
+import 'document_replication.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
 
@@ -48,8 +49,8 @@ enum DocumentFlag {
 /// It should not take a long time to return, or it will slow down the
 /// replicator.
 ///
-/// The function receives the [document] in question and [flags] describing
-/// the document.
+/// The function receives the [document] in question and [flags] describing the
+/// document.
 ///
 /// Return `true` if the document should be replicated, `false` to skip it.
 /// {@endtemplate}
@@ -161,8 +162,8 @@ class ReplicatorConfiguration {
   /// Ignored for push replication. If unset, all accessible channels will be
   /// pulled.
   ///
-  /// Note: channels that are not accessible to the user will be ignored by
-  /// Sync Gateway.
+  /// Note: channels that are not accessible to the user will be ignored by Sync
+  /// Gateway.
   List<String>? channels;
 
   /// A set of document IDs to filter by.
@@ -189,8 +190,8 @@ class ReplicatorConfiguration {
   /// Only documents for which the function returns `true` are replicated.
   ReplicationFilter? pullFilter;
 
-  /// Filter for validating whether the documents can be pulled from the
-  /// remote endpoint, which receives typed document instances.
+  /// Filter for validating whether the documents can be pulled from the remote
+  /// endpoint, which receives typed document instances.
   ///
   /// Only documents for which the function returns `true` are replicated.
   @experimental
@@ -216,8 +217,8 @@ class ReplicatorConfiguration {
   /// automatically purged by the pull replicator when the user loses access to
   /// the document.
   ///
-  /// When the property is set to `false`, documents for which the user has
-  /// lost access remain in the database.
+  /// When the property is set to `false`, documents for which the user has lost
+  /// access remain in the database.
   ///
   /// Regardless of value of this option, when the user looses access to a
   /// document, an access removed event will be sent to any document change
@@ -227,8 +228,8 @@ class ReplicatorConfiguration {
   ///
   /// See also:
   ///
-  ///   - [Replicator.addDocumentReplicationListener] for listening to
-  ///     [DocumentReplication]s performed by a [Replicator].
+  /// - [Replicator.addDocumentReplicationListener] for listening to
+  ///   [DocumentReplication]s performed by a [Replicator].
   bool enableAutoPurge;
 
   /// The heartbeat interval.
@@ -236,8 +237,8 @@ class ReplicatorConfiguration {
   /// The interval when the [Replicator] sends the ping message to check whether
   /// the other peer is still alive.
   ///
-  /// Setting this value to [Duration.zero] or a negative [Duration] will
-  /// result in an [RangeError] being thrown.
+  /// Setting this value to [Duration.zero] or a negative [Duration] will result
+  /// in an [RangeError] being thrown.
   ///
   /// To use the default of 300 seconds, set this property to `null`.
   Duration? get heartbeat => _heartbeat;
@@ -262,11 +263,10 @@ class ReplicatorConfiguration {
   ///
   /// Setting the [maxAttempts] value to `null`, the default max attempts of 10
   /// times for single shot replicators and infinite times for continuous
-  /// replicators will be applied.
-  /// Setting the value to `1` with result in no retry attempts.
+  /// replicators will be applied. Setting the value to `1` with result in no
+  /// retry attempts.
   ///
-  /// Setting `0` a negative number will result in an [RangeError] being
-  /// thrown.
+  /// Setting `0` a negative number will result in an [RangeError] being thrown.
   int? get maxAttempts => _maxAttempts;
   int? _maxAttempts;
 
@@ -282,8 +282,8 @@ class ReplicatorConfiguration {
   /// Exponential backoff is used for calculating the wait time and cannot be
   /// customized.
   ///
-  /// Setting this value to [Duration.zero] or a negative [Duration] will
-  /// result in an [RangeError] being thrown.
+  /// Setting this value to [Duration.zero] or a negative [Duration] will result
+  /// in an [RangeError] being thrown.
   ///
   /// To use the default of 300 seconds, set this property to `null`.
   Duration? get maxAttemptWaitTime => _maxAttemptWaitTime;

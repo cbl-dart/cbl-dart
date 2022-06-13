@@ -26,8 +26,8 @@ int _generateId() {
 /// A callback which can be asynchronously called from the native side.
 ///
 /// [AsyncCallback]s have to be [close]d to free allocated resources on the
-/// native side and close its [ReceivePort]. The isolate will not exist, as
-/// long as there is an open [ReceivePort].
+/// native side and close its [ReceivePort]. The isolate will not exist, as long
+/// as there is an open [ReceivePort].
 class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
   /// Creates a callback which can be asynchronously called from the native
   /// side.
@@ -70,8 +70,8 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
   final Object? errorResult;
 
   /// If `true` errors thrown by [handler] are ignored. Otherwise they are
-  /// treated as unhandled errors in the [Zone] in which the [AsyncCallback]
-  /// was created.
+  /// treated as unhandled errors in the [Zone] in which the [AsyncCallback] was
+  /// created.
   final bool ignoreErrorsInDart;
 
   /// A debug description of this callback.
@@ -89,8 +89,8 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
 
   var _closed = false;
 
-  /// Close this callback to free resources on the native side and the
-  /// Dart side.
+  /// Close this callback to free resources on the native side and the Dart
+  /// side.
   ///
   /// After calling this method the callback must not be used any more.
   void close() {

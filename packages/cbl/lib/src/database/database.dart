@@ -1,3 +1,5 @@
+// ignore_for_file: unused_result
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -71,8 +73,8 @@ enum MaintenanceType {
 ///
 /// See also:
 ///
-///  * [Database.saveDocumentWithConflictHandler] for saving a [Document] with
-///    a custom conflict handler.
+/// - [Database.saveDocumentWithConflictHandler] for saving a [Document] with a
+///   custom conflict handler.
 ///
 /// {@category Database}
 typedef SaveConflictHandler = FutureOr<bool> Function(
@@ -80,16 +82,15 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
   Document? conflictingDocument,
 );
 
-// ignore: unused_result
 /// The result of [Database.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// See also:
 ///
-///  * [SyncSaveTypedDocument] for the synchronous version of this class, which
-///    is returned from [SyncDatabase.saveTypedDocument].
-///  * [AsyncSaveTypedDocument] for the asynchronous version of this class,
-///    which is returned from [AsyncDatabase.saveTypedDocument].
+/// - [SyncSaveTypedDocument] for the synchronous version of this class, which
+///   is returned from [SyncDatabase.saveTypedDocument].
+/// - [AsyncSaveTypedDocument] for the asynchronous version of this class, which
+///   is returned from [AsyncDatabase.saveTypedDocument].
 ///
 /// {@category Database}
 /// {@category Typed Data}
@@ -103,8 +104,8 @@ abstract class SaveTypedDocument<D extends TypedDocumentObject,
   /// by default. In this case the result is always `true`.
   ///
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved
-  /// the result is `false`. On success it is `true`.
+  /// [concurrencyControl]. In this case, if the document could not be saved the
+  /// result is `false`. On success it is `true`.
   FutureOr<bool> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
@@ -126,8 +127,8 @@ abstract class SaveTypedDocument<D extends TypedDocumentObject,
 /// by application code) since it was loaded into the document being saved.
 ///
 /// The [documentBeingSaved] (same as the parameter you passed to
-/// [SaveTypedDocument.withConflictHandler].) may be modify by the callback
-/// as necessary to resolve the conflict.
+/// [SaveTypedDocument.withConflictHandler].) may be modify by the callback as
+/// necessary to resolve the conflict.
 ///
 /// The handler receives the revision of the [conflictingDocument] currently in
 /// the database, which has been changed since [documentBeingSaved] was loaded.
@@ -141,8 +142,8 @@ abstract class SaveTypedDocument<D extends TypedDocumentObject,
 ///
 /// See also:
 ///
-///  * [SaveTypedDocument.withConflictHandler] for saving a typed document with
-///    a custom conflict handler.
+/// - [SaveTypedDocument.withConflictHandler] for saving a typed document with a
+///   custom conflict handler.
 ///
 /// {@category Database}
 /// {@category Typed Data}
@@ -170,8 +171,8 @@ typedef DocumentChangeListener = void Function(DocumentChange change);
 /// {@category Database}
 abstract class Database implements ClosableResource {
   /// {@template cbl.Database.openAsync}
-  /// Opens a Couchbase Lite database with the given [name] and [config],
-  /// which executes in a separate worker isolate.
+  /// Opens a Couchbase Lite database with the given [name] and [config], which
+  /// executes in a separate worker isolate.
   ///
   /// If the database does not yet exist, it will be created.
   /// {@endtemplate}
@@ -182,8 +183,8 @@ abstract class Database implements ClosableResource {
       AsyncDatabase.open(name, config);
 
   /// {@template cbl.Database.openSync}
-  /// Opens a Couchbase Lite database with the given [name] and [config],
-  /// which executes in the current isolate.
+  /// Opens a Couchbase Lite database with the given [name] and [config], which
+  /// executes in the current isolate.
   ///
   /// If the database does not yet exist, it will be created.
   /// {@endtemplate}
@@ -283,8 +284,8 @@ abstract class Database implements ClosableResource {
   /// by default. In this case the result is always `true`.
   ///
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
-  /// [concurrencyControl]. In this case, if the document could not be saved
-  /// the result is `false`. On success it is `true`.
+  /// [concurrencyControl]. In this case, if the document could not be saved the
+  /// result is `false`. On success it is `true`.
   FutureOr<bool> saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -295,10 +296,10 @@ abstract class Database implements ClosableResource {
   ///
   /// {@template cbl.Database.saveDocumentWithConflictHandler}
   /// When write operations are executed concurrently and if conflicts occur,
-  /// the [conflictHandler] will be called. Use the conflict handler to
-  /// directly edit the [Document] to resolve the conflict. When the conflict
-  /// handler returns `true`, the save method will save the edited document as
-  /// the resolved document. If the conflict handler returns `false`, the save
+  /// the [conflictHandler] will be called. Use the conflict handler to directly
+  /// edit the [Document] to resolve the conflict. When the conflict handler
+  /// returns `true`, the save method will save the edited document as the
+  /// resolved document. If the conflict handler returns `false`, the save
   /// operation will be canceled with `false` as the result. If the conflict
   /// handler returns `true` or there is no conflict the result is `true`.
   /// {@endtemplate}
@@ -310,13 +311,12 @@ abstract class Database implements ClosableResource {
   /// Creates and returns an object, which can be used to save a typed
   /// [document] to this database.
   ///
-  /// A call to this method will not save the document to the database.
-  /// Call one of the methods of the returned object to finally save the
-  /// [document].
+  /// A call to this method will not save the document to the database. Call one
+  /// of the methods of the returned object to finally save the [document].
   ///
   /// See also:
   ///
-  ///  * [SaveTypedDocument] for the object used to save typed documents.
+  /// - [SaveTypedDocument] for the object used to save typed documents.
   @experimental
   @useResult
   SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
@@ -356,27 +356,27 @@ abstract class Database implements ClosableResource {
   /// Purges a [document] from this database.
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  /// The purge will **not** be replicated to other databases.
   FutureOr<void> purgeDocument(Document document);
 
   /// Purges a typed [document] from this database.
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  /// The purge will **not** be replicated to other databases.
   @experimental
   FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
 
   /// Purges a [Document] from this database by its [id].
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  /// The purge will **not** be replicated to other databases.
   FutureOr<void> purgeDocumentById(String id);
 
   /// Saves a [Blob] directly into this database without associating it with any
   /// [Document]s.
   ///
-  /// Note: Blobs that are not associated with any document will be removed
-  /// from the database when compacting the database.
+  /// Note: Blobs that are not associated with any document will be removed from
+  /// the database when compacting the database.
   FutureOr<void> saveBlob(Blob blob);
 
   /// Gets a [Blob] using its metadata.
@@ -390,7 +390,7 @@ abstract class Database implements ClosableResource {
   ///
   /// See also:
   ///
-  ///   - [Blob.isBlob] to check if a [Map] contains valid Blob metadata.
+  /// - [Blob.isBlob] to check if a [Map] contains valid Blob metadata.
   FutureOr<Blob?> getBlob(Map<String, Object?> properties);
 
   /// Runs a group of database operations in a batch.
@@ -412,7 +412,7 @@ abstract class Database implements ClosableResource {
   /// After the given date the document will be purged from the database
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
-  /// The purge will __not__ be replicated to other databases.
+  /// The purge will **not** be replicated to other databases.
   FutureOr<void> setDocumentExpiration(String id, DateTime? expiration);
 
   /// Gets the expiration date of a [Document] by its [id], if it exists.
@@ -422,6 +422,7 @@ abstract class Database implements ClosableResource {
   /// database.
   ///
   /// {@template cbl.Database.addChangeListener}
+  ///
   /// ## Adding a listener
   ///
   /// If a [Future] is returned, the listener will only start listening after
@@ -431,18 +432,19 @@ abstract class Database implements ClosableResource {
   /// ## Removing a listener
   ///
   /// The returned [ListenerToken] needs to be provided to
-  /// [removeChangeListener], to remove the given listener.
-  /// Regardless of whether a [Future] is returned or not, the listener
-  /// immediately stops being called.
+  /// [removeChangeListener], to remove the given listener. Regardless of
+  /// whether a [Future] is returned or not, the listener immediately stops
+  /// being called.
+  ///
   /// {@endtemplate}
   ///
   /// See also:
   ///
-  ///   - [DatabaseChange] for the change event given to [listener].
-  ///   - [changes] for alternatively listening to changes through a [Stream].
-  ///   - [addDocumentChangeListener] for listening for changes to a single
-  ///     [Document].
-  ///   - [removeChangeListener] for removing a previously added listener.
+  /// - [DatabaseChange] for the change event given to [listener].
+  /// - [changes] for alternatively listening to changes through a [Stream].
+  /// - [addDocumentChangeListener] for listening for changes to a single
+  ///   [Document].
+  /// - [removeChangeListener] for removing a previously added listener.
   FutureOr<ListenerToken> addChangeListener(DatabaseChangeListener listener);
 
   /// Adds a [listener] to be notified of changes to the [Document] with the
@@ -452,11 +454,11 @@ abstract class Database implements ClosableResource {
   ///
   /// See also:
   ///
-  ///   - [DocumentChange] for the change event given to [listener].
-  ///   - [documentChanges] for alternatively listening to changes through a
-  ///     [Stream].
-  ///   - [addChangeListener] for listening for changes to this database.
-  ///   - [removeChangeListener] for removing a previously added listener.
+  /// - [DocumentChange] for the change event given to [listener].
+  /// - [documentChanges] for alternatively listening to changes through a
+  ///   [Stream].
+  /// - [addChangeListener] for listening for changes to this database.
+  /// - [removeChangeListener] for removing a previously added listener.
   FutureOr<ListenerToken> addDocumentChangeListener(
     String id,
     DocumentChangeListener listener,
@@ -473,9 +475,9 @@ abstract class Database implements ClosableResource {
   ///
   /// See also:
   ///
-  ///   - [addChangeListener] for listening for changes to this database.
-  ///   - [addDocumentChangeListener] for listening for changes to a single
-  ///     [Document].
+  /// - [addChangeListener] for listening for changes to this database.
+  /// - [addDocumentChangeListener] for listening for changes to a single
+  ///   [Document].
   FutureOr<void> removeChangeListener(ListenerToken token);
 
   /// Returns a [Stream] to be notified of all changes to [Document]s in this
@@ -484,12 +486,14 @@ abstract class Database implements ClosableResource {
   /// This is an alternative stream based API for the [addChangeListener] API.
   ///
   /// {@template cbl.Database.AsyncListenStream}
+  ///
   /// ## AsyncListenStream
   ///
   /// If the stream is missing changes, check if the returned stream is an
   /// [AsyncListenStream]. This type of stream needs to perform some async work
   /// to be fully listening. You can wait for that moment by awaiting
   /// [AsyncListenStream.listening].
+  ///
   /// {@endtemplate}
   Stream<DatabaseChange> changes();
 
@@ -520,9 +524,9 @@ abstract class Database implements ClosableResource {
   ///
   /// {@macro cbl.EncryptionKey.enterpriseFeature}
   ///
-  /// If [newKey] is `null`, the database will be decrypted.
-  /// Otherwise the database will be encrypted with that key; if it was already
-  /// encrypted, it will be re-encrypted with the new key.
+  /// If [newKey] is `null`, the database will be decrypted. Otherwise the
+  /// database will be encrypted with that key; if it was already encrypted, it
+  /// will be re-encrypted with the new key.
   FutureOr<void> changeEncryptionKey(EncryptionKey? newKey);
 
   /// The names of all existing indexes.
@@ -545,8 +549,8 @@ abstract class Database implements ClosableResource {
 ///
 /// See also:
 ///
-///  * [SyncDatabase.saveDocumentWithConflictHandlerSync] for saving a
-///    [Document] with a custom sync conflict handler.
+/// - [SyncDatabase.saveDocumentWithConflictHandlerSync] for saving a [Document]
+///   with a custom sync conflict handler.
 ///
 /// {@category Database}
 typedef SyncSaveConflictHandler = bool Function(
@@ -554,7 +558,6 @@ typedef SyncSaveConflictHandler = bool Function(
   Document? conflictingDocument,
 );
 
-// ignore: unused_result
 /// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
@@ -588,8 +591,8 @@ abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
 ///
 /// See also:
 ///
-///  * [SyncSaveTypedDocument.withConflictHandlerSync] for saving a typed
-///    document with a custom sync conflict handler.
+/// - [SyncSaveTypedDocument.withConflictHandlerSync] for saving a typed
+///   document with a custom sync conflict handler.
 ///
 /// {@category Database}
 /// {@category Typed Data}
@@ -746,7 +749,6 @@ abstract class SyncDatabase implements Database {
   void deleteIndex(String name);
 }
 
-// ignore: unused_result
 /// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///

@@ -6,8 +6,7 @@ import '../query.dart';
 ///
 /// {@category Query Builder}
 abstract class JoinRouter {
-  /// Creates and returns a `JOIN` clause query component with the given
-  /// joins.
+  /// Creates and returns a `JOIN` clause query component with the given joins.
   Joins join(
     JoinInterface join0, [
     JoinInterface? join1,

@@ -40,8 +40,8 @@ abstract class ArrayInterface implements ArrayFragment {
   /// Returns the element at the given [index] as an integer number.
   ///
   /// {@template cbl.ArrayInterface.typedDefaultedGetter}
-  /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`)
-  /// if the element is not of the expected type or is `null`.
+  /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`) if
+  /// the element is not of the expected type or is `null`.
   ///
   /// Throws a [RangeError] if the [index] is ouf of range.
   /// {@endtemplate}
@@ -82,19 +82,22 @@ abstract class ArrayInterface implements ArrayFragment {
   /// {@macro cbl.ArrayInterface.typedNullableGetter}
   Dictionary? dictionary(int index);
 
-  /// Deeply converts this array into a representation of plain Dart objects
-  /// and returns it.
+  /// Deeply converts this array into a representation of plain Dart objects and
+  /// returns it.
   ///
   /// {@template cbl.ArrayInterface.toPrimitiveObjectConversion}
+  ///
   /// ## Type conversion
   ///
   /// Values of type:
-  ///  - `null`, [int], [double], [bool], [String], [DateTime] and [Blob] are
-  ///    not converted.
-  ///  - [Array] are converted to a list of type `List<Object?>` where each
-  ///    element has been recursively converted.
-  ///  - [Dictionary]s are converted to a map of type `Map<String, Object?>`
-  ///    where each value has been recursively converted.
+  ///
+  /// - `null`, [int], [double], [bool], [String], [DateTime] and [Blob] are not
+  ///   converted.
+  /// - [Array] are converted to a list of type `List<Object?>` where each
+  ///   element has been recursively converted.
+  /// - [Dictionary]s are converted to a map of type `Map<String, Object?>`
+  ///   where each value has been recursively converted.
+  ///
   /// {@endtemplate}
   List<Object?> toPlainList();
 }

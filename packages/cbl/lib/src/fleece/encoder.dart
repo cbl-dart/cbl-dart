@@ -41,12 +41,12 @@ class FleeceEncoder extends FleeceEncoderObject {
   /// The default is 256.
   final int reserveSize;
 
-  /// If true, string values that appear multiple times will be written
-  /// as a single shared value. (Fleece only)
+  /// If true, string values that appear multiple times will be written as a
+  /// single shared value. (Fleece only)
   ///
-  /// This saves space but makes encoding slightly slower.
-  /// You should only turn this off if you know you're going to be writing large
-  /// numbers of non-repeated strings.
+  /// This saves space but makes encoding slightly slower. You should only turn
+  /// this off if you know you're going to be writing large numbers of
+  /// non-repeated strings.
   ///
   /// The default is `true`.
   final bool uniqueStrings;

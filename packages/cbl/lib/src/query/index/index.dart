@@ -8,8 +8,8 @@ import '../query.dart';
 /// {@category Query}
 abstract class Index {}
 
-/// A language which can be used to configure as the primary language for a
-/// full text index.
+/// A language which can be used to configure as the primary language for a full
+/// text index.
 ///
 /// {@category Query}
 enum FullTextLanguage {

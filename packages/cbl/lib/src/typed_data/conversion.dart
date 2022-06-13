@@ -36,8 +36,8 @@ abstract class NonPromotingDataConverter<T> extends DataConverter<T, T> {
 /// An object that converts between untyped data and instances of type [T],
 /// which must have value semantics.
 ///
-/// Objects returned from [fromData] must be immutable. [toData] must return
-/// a representation of the object, which recreates the object when given to
+/// Objects returned from [fromData] must be immutable. [toData] must return a
+/// representation of the object, which recreates the object when given to
 /// [fromData]. The data representation must only use:
 ///
 /// - `null` (except for the data representation itself),
@@ -67,6 +67,7 @@ abstract class ScalarConverter<T> {
 
 /// Exception thrown by [ScalarConverter.fromData] when the given value is not
 /// of the expected type.
+///
 /// {@category Typed Data}
 @experimental
 class UnexpectedTypeException implements Exception {

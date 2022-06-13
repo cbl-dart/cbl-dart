@@ -5,12 +5,12 @@ import 'utils.dart';
 
 /// A [Logger] that adds a Sentry [Breadcrumb] for each log message.
 ///
-/// This logger will add breadcrumbs of type `debug`, whose level corresponds
-/// to a Couchbase Lite [LogLevel].
+/// This logger will add breadcrumbs of type `debug`, whose level corresponds to
+/// a Couchbase Lite [LogLevel].
 ///
-/// The [LogDomain] is used to build the category of the breadcrumb by
-/// prefixing it with `cbl.`. For example, full category for a log message from
-/// the [LogDomain.database] domain is `cbl.database`.
+/// The [LogDomain] is used to build the category of the breadcrumb by prefixing
+/// it with `cbl.`. For example, full category for a log message from the
+/// [LogDomain.database] domain is `cbl.database`.
 class BreadcrumbLogger extends Logger {
   /// Creates a [Logger] that adds a Sentry [Breadcrumb] for each log message.
   BreadcrumbLogger({LogLevel? level, Hub? hub})

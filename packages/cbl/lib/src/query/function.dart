@@ -60,18 +60,18 @@ class Function_ {
   }) =>
       BinaryExpression('atan2()', y, x);
 
-  /// Creates a function expression which evaluates to the ceiling of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the ceiling of the given
+  /// numeric [expression].
   static ExpressionInterface ceil(ExpressionInterface expression) =>
       UnaryExpression('ceil()', expression);
 
-  /// Creates a function expression which evaluates to the cosine of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the cosine of the given
+  /// numeric [expression].
   static ExpressionInterface cos(ExpressionInterface expression) =>
       UnaryExpression('cos()', expression);
 
-  /// Creates a function expression which evaluates to the degree value of
-  /// the given radians numeric [expression].
+  /// Creates a function expression which evaluates to the degree value of the
+  /// given radians numeric [expression].
   static ExpressionInterface degrees(ExpressionInterface expression) =>
       UnaryExpression('degrees()', expression);
 
@@ -84,18 +84,18 @@ class Function_ {
   static ExpressionInterface exp(ExpressionInterface expression) =>
       UnaryExpression('exp()', expression);
 
-  /// Creates a function expression which evaluates to the floor of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the floor of the given
+  /// numeric [expression].
   static ExpressionInterface floor(ExpressionInterface expression) =>
       UnaryExpression('floor()', expression);
 
-  /// Creates a function expression which evaluates to the natural log of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the natural log of the
+  /// given numeric [expression].
   static ExpressionInterface ln(ExpressionInterface expression) =>
       UnaryExpression('ln()', expression);
 
-  /// Creates a function expression which evaluates to the base 10 log of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the base 10 log of the
+  /// given numeric [expression].
   static ExpressionInterface log(ExpressionInterface expression) =>
       UnaryExpression('log()', expression);
 
@@ -111,8 +111,8 @@ class Function_ {
   }) =>
       BinaryExpression('power()', base, exponent);
 
-  /// Creates a function expression which evaluates to the radians value of
-  /// the given degree numeric [expression].
+  /// Creates a function expression which evaluates to the radians value of the
+  /// given degree numeric [expression].
   static ExpressionInterface radians(ExpressionInterface expression) =>
       UnaryExpression('radians()', expression);
 
@@ -124,24 +124,23 @@ class Function_ {
   }) =>
       BinaryExpression('round()', expression, digits);
 
-  /// Creates a function expression which evaluates to the sing
-  /// (1: positive, -1: negative, 0: zero) of the given degree numeric
-  /// [expression].
+  /// Creates a function expression which evaluates to the sing (1: positive,
+  /// -1: negative, 0: zero) of the given degree numeric [expression].
   static ExpressionInterface sign(ExpressionInterface expression) =>
       UnaryExpression('sign()', expression);
 
-  /// Creates a function expression which evaluates to the sine of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the sine of the given
+  /// numeric [expression].
   static ExpressionInterface sin(ExpressionInterface expression) =>
       UnaryExpression('sin()', expression);
 
-  /// Creates a function expression which evaluates to the square root of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the square root of the
+  /// given numeric [expression].
   static ExpressionInterface sqrt(ExpressionInterface expression) =>
       UnaryExpression('sqrt()', expression);
 
-  /// Creates a function expression which evaluates to the tangent of
-  /// the given numeric [expression].
+  /// Creates a function expression which evaluates to the tangent of the given
+  /// numeric [expression].
   static ExpressionInterface tan(ExpressionInterface expression) =>
       UnaryExpression('tan()', expression);
 

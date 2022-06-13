@@ -127,8 +127,8 @@ abstract class MutableFragment
 
 /// Provides access to a [Document].
 ///
-/// [DocumentFragment] also provides subscript access by either key to
-/// the data values of the document which are wrapped by Fragment objects.
+/// [DocumentFragment] also provides subscript access by either key to the data
+/// values of the document which are wrapped by Fragment objects.
 ///
 /// {@category Document}
 abstract class DocumentFragment implements DictionaryFragment {

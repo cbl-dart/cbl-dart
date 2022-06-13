@@ -40,9 +40,9 @@ abstract class DictionaryInterface implements DictionaryFragment {
   /// Returns the value for the given [key] as an integer number.
   ///
   /// {@template cbl.DictionaryInterface.typedDefaultedGetter}
-  /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`)
-  /// if the value is not a of the expected typ, is `null` or does not exist
-  /// for the given [key].
+  /// Returns a default value (integer: `0`, double: `0.0`, boolean: `false`) if
+  /// the value is not a of the expected typ, is `null` or does not exist for
+  /// the given [key].
   /// {@endtemplate}
   int integer(String key);
 

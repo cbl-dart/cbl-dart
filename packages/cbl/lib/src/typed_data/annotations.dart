@@ -30,8 +30,8 @@ class TypedDocument {
   final TypeMatcher? typeMatcher;
 }
 
-/// Determines whether a given dictionary or document can be instantiated as
-/// a specific typed dictionary or document.
+/// Determines whether a given dictionary or document can be instantiated as a
+/// specific typed dictionary or document.
 ///
 /// {@category Typed Data}
 @experimental
@@ -41,8 +41,8 @@ abstract class TypeMatcher {
   const TypeMatcher();
 }
 
-/// A [TypeMatcher] that matches a dictionary or document if it contains a
-/// fixed [value] at a fixed [path].
+/// A [TypeMatcher] that matches a dictionary or document if it contains a fixed
+/// [value] at a fixed [path].
 ///
 /// {@category Typed Data}
 @experimental
@@ -60,6 +60,7 @@ class ValueTypeMatcher extends TypeMatcher {
   /// dictionaries and [int]s are interpreted as indexes in arrays.
   ///
   /// # Examples
+  ///
   /// | Description | Path                           |
   /// | :---------- | :----------------------------- |
   /// | Root        | `['type']`                     |
@@ -67,8 +68,7 @@ class ValueTypeMatcher extends TypeMatcher {
   /// | Array       | `['typeDescriptors', 0, 'id']` |
   final List<Object> path;
 
-  /// The value that the dictionary or document must contain at
-  /// [path] to match.
+  /// The value that the dictionary or document must contain at [path] to match.
   ///
   /// If this is `null`, the name of the class annotated with [TypedDictionary]
   /// or [TypedDocument] is used.

@@ -164,8 +164,8 @@ class _Utf8Encoder {
   /// Does not encode any trailing lead-surrogate. This must be done by the
   /// caller.
   ///
-  /// Returns the position in the string. The returned index points to the
-  /// first code unit that hasn't been encoded.
+  /// Returns the position in the string. The returned index points to the first
+  /// code unit that hasn't been encoded.
   int _fillBuffer(String str, int start, int end) {
     if (start != end && _isLeadSurrogate(str.codeUnitAt(end - 1))) {
       // Don't handle a trailing lead-surrogate in this loop. The caller has

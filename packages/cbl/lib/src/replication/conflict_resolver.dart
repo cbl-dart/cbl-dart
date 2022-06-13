@@ -30,8 +30,8 @@ abstract class ConflictResolver {
   ) =>
       _FunctionConflictResolver(resolve);
 
-  /// Resolves the [conflict] between the local and the remote version of
-  /// a [Document].
+  /// Resolves the [conflict] between the local and the remote version of a
+  /// [Document].
   ///
   /// {@template cbl.ConflictResolver.resolve}
   /// This method will be invoked when the [Replicator] finds a newer
@@ -45,8 +45,8 @@ abstract class ConflictResolver {
   /// Inside of [conflict] this method receives the id of the conflicted
   /// document, the local revision of the document in the database, or `null` if
   /// the local document has been deleted and the the remote revision of the
-  /// document found on the server or `null` if the document has been deleted
-  /// on the server.
+  /// document found on the server or `null` if the document has been deleted on
+  /// the server.
   ///
   /// Return the resolved document to save locally (and push, if the replicator
   /// is pushing.) This can be the same as [Conflict.localDocument] or
@@ -120,8 +120,8 @@ abstract class TypedConflictResolver {
   ) =>
       _FunctionTypedConflictResolver(resolve);
 
-  /// Resolves the [conflict] between the local and the remote version of
-  /// a document.
+  /// Resolves the [conflict] between the local and the remote version of a
+  /// document.
   ///
   /// {@macro cbl.ConflictResolver.resolve}
   FutureOr<TypedDocumentObject?> resolve(TypedConflict conflict);

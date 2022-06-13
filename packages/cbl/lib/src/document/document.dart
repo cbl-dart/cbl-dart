@@ -52,15 +52,15 @@ abstract class Document implements DictionaryInterface, Iterable<String> {
 ///
 /// {@category Document}
 abstract class MutableDocument implements Document, MutableDictionaryInterface {
-  /// Creates a new [MutableDocument] with a random UUID, optionally
-  /// initialized with [data].
+  /// Creates a new [MutableDocument] with a random UUID, optionally initialized
+  /// with [data].
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument([Map<String, Object?>? data]) =>
       MutableDelegateDocument(data);
 
-  /// Creates a new [MutableDocument] with a given [id], optionally
-  /// initialized with [data].
+  /// Creates a new [MutableDocument] with a given [id], optionally initialized
+  /// with [data].
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
   factory MutableDocument.withId(String id, [Map<String, Object?>? data]) =>

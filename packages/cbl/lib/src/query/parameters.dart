@@ -13,8 +13,8 @@ import '../query.dart';
 ///
 /// {@category Query}
 abstract class Parameters {
-  /// Creates new [Parameters], optionally initialized with parameters from
-  /// a plain map.
+  /// Creates new [Parameters], optionally initialized with parameters from a
+  /// plain map.
   factory Parameters([Map<String, Object?>? parameters]) =>
       ParametersImpl(parameters);
 
@@ -26,6 +26,7 @@ abstract class Parameters {
   /// {@template cbl.Parameters.parameterDefinition}
   /// In N1QL queries, a parameter is referenced by prefixing an identifier with
   /// `$`. For example, this query defines a parameter with the name `TYPE`:
+  ///
   /// ```sql
   /// SELECT * FROM _ WHERE type = $TYPE;
   /// ```
@@ -35,8 +36,7 @@ abstract class Parameters {
   /// {@endtemplate}
   void setValue(Object? value, {required String name});
 
-  /// Set a [String] to the query parameter referenced by the given
-  /// [name].
+  /// Set a [String] to the query parameter referenced by the given [name].
   ///
   /// {@macro cbl.Parameters.parameterDefinition}
   void setString(String? value, {required String name});
@@ -74,7 +74,7 @@ abstract class Parameters {
   /// {@macro cbl.Parameters.parameterDefinition}
   void setBlob(Blob? value, {required String name});
 
-  /// Set an [Array]  to the query parameter referenced by the given [name].
+  /// Set an [Array] to the query parameter referenced by the given [name].
   ///
   /// {@macro cbl.Parameters.parameterDefinition}
   void setArray(Array? value, {required String name});

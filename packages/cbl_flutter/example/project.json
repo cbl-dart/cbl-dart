@@ -3,8 +3,12 @@
   "projectType": "application",
   "targets": {
     "format": {
-      "executor": "@nx-dart/nx-dart:format",
-      "outputs": []
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "daco format .",
+        "cwd": "packages/cbl_flutter/example"
+      }
     },
     "analyze": {
       "executor": "@nx-dart/nx-dart:analyze",

@@ -13,8 +13,8 @@ import 'serialization/serialization_codec.dart';
 
 /// Interface that request objects for [Channel] endpoints have to implement.
 ///
-/// [Response] is the type of the type of the result of a call or the events
-/// of a stream initiated with such a request.
+/// [Response] is the type of the type of the result of a call or the events of
+/// a stream initiated with such a request.
 abstract class Request<Response> extends Serializable {}
 
 /// Handler which responds to requests to a call endpoint of a [Channel].
@@ -49,9 +49,9 @@ typedef MessageContextRestorer = void Function(
 /// Returns the remote [StackTrace] for an exception that was emitted by a
 /// [Channel].
 ///
-/// When a channel emits an exception, it has the stack trace of the point
-/// where the channel was used. This function returns the stack trace of the
-/// exception when it was thrown on the other end of the channel.
+/// When a channel emits an exception, it has the stack trace of the point where
+/// the channel was used. This function returns the stack trace of the exception
+/// when it was thrown on the other end of the channel.
 StackTrace? remoteStackTrace(Object exception) {
   if (!_isValidExpandoKey(exception)) {
     return null;
@@ -82,12 +82,12 @@ typedef _UntypedStreamHandler = Stream<Object?> Function(Object?);
 /// The methods [call] and [stream] both take the name of an endpoint at the
 /// other side of the channel and a request object for the endpoint handler. The
 /// request object has to be of a type which extends [Request]. The type
-/// argument of [Request] is the type of the result of a call or the events
-/// of a stream initiated with such a request.
+/// argument of [Request] is the type of the result of a call or the events of a
+/// stream initiated with such a request.
 ///
 /// See also:
 ///
-///  * [open] for controlling when a [Channel] starts to respond to requests.
+/// - [open] for controlling when a [Channel] starts to respond to requests.
 class Channel {
   /// Creates a new [Channel] with the given [transport] and [packetCodec].
   Channel({
@@ -232,8 +232,8 @@ class Channel {
 
   /// Opens this side of the channel.
   ///
-  /// By default a [Channel] is opened when it is created. Setting `autoOpen`
-  /// to `false` disables this behavior and the [Channel] must then be opened
+  /// By default a [Channel] is opened when it is created. Setting `autoOpen` to
+  /// `false` disables this behavior and the [Channel] must then be opened
   /// manually. This is useful if the other side of the channel is already
   /// making requests and the endpoints for those requests need to be added
   /// before opening the [Channel]. This is only necessary if the endpoints are

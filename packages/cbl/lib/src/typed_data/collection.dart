@@ -52,9 +52,9 @@ abstract class TypedDataList<T extends E, E> implements List<T> {
 
   /// Returns a string representation of this list.
   ///
-  /// Per default, the string representation is in a single line.
-  /// If [indent] is specified, the string representation is in multiple lines,
-  /// each element indented by [indent].
+  /// Per default, the string representation is in a single line. If [indent] is
+  /// specified, the string representation is in multiple lines, each element
+  /// indented by [indent].
   @override
   String toString({String? indent});
 }

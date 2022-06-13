@@ -45,8 +45,8 @@ TracedCallHandler onTracedCall = noopTracedCallHandler;
 
 /// Traces a function as a [TracedNativeCall].
 ///
-/// The given function is not be wrapped in a try-catch block and is
-/// expected to return normally.
+/// The given function is not be wrapped in a try-catch block and is expected to
+/// return normally.
 @pragma('vm:prefer-inline')
 T nativeCallTracePoint<T>(TracedNativeCall call, T Function() execute) {
   if (!cblIncludeTracePoints) {

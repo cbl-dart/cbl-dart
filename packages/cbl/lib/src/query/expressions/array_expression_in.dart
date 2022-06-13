@@ -8,12 +8,12 @@ import 'variable_expression.dart';
 /// {@category Query Builder}
 // ignore: one_member_abstracts
 abstract class ArrayExpressionIn {
-  /// Specifies the array or the [expression] evaluated as an array of a
-  /// range predicate.
+  /// Specifies the array or the [expression] evaluated as an array of a range
+  /// predicate.
   ///
   /// See also:
   ///
-  ///  * [ArrayExpression] for more information on range predicates.
+  /// - [ArrayExpression] for more information on range predicates.
   // ignore: non_constant_identifier_names
   ArrayExpressionSatisfies in_(ExpressionInterface expression);
 }

@@ -30,9 +30,8 @@ class CBLObject<T extends NativeType> extends NativeObject<T> {
   /// Creates a handle to a CouchbaseLite C API object.
   ///
   /// [adopt] should be `true` when an existing reference to the native object
-  /// is transferred to the created [CBLObject] or the native object
-  /// has just been created and the created [CBLObject] is the initial
-  /// reference holder.
+  /// is transferred to the created [CBLObject] or the native object has just
+  /// been created and the created [CBLObject] is the initial reference holder.
   CBLObject(
     Pointer<T> pointer, {
     bool adopt = true,
@@ -110,8 +109,8 @@ class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
   /// Creates a handle to a Fleece value.
   ///
   /// [adopt] should be `true` when an existing reference to the native object
-  /// is transferred to the created [FleeceValueObject] or the native object
-  /// has just been created and the created [FleeceValueObject] is the initial
+  /// is transferred to the created [FleeceValueObject] or the native object has
+  /// just been created and the created [FleeceValueObject] is the initial
   /// reference holder.
   FleeceValueObject(
     Pointer<T> pointer, {
@@ -131,8 +130,8 @@ class FleeceValueObject<T extends NativeType> extends NativeObject<T> {
     }
   }
 
-  /// Whether this object updates the ref count of the native object when
-  /// it is created and garbage collected.
+  /// Whether this object updates the ref count of the native object when it is
+  /// created and garbage collected.
   final bool isRefCounted;
 }
 

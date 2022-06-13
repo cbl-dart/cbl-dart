@@ -34,16 +34,15 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   /// The [DictKey]s that should be used when looking up properties in
   /// [Document]s that are stored in this database.
   ///
-  /// Note:
-  /// It is important to use the database specific [DictKey]s when accessing
-  /// Fleece data from this database because each database has its own set
-  /// of shared keys. [DictKey]s are optimized to make use of these keys and
+  /// Note: It is important to use the database specific [DictKey]s when
+  /// accessing Fleece data from this database because each database has its own
+  /// set of shared keys. [DictKey]s are optimized to make use of these keys and
   /// will lookup the wrong or no entries if used with the wrong set of shared
   /// keys.
   DictKeys get dictKeys;
 
-  /// The [SharedKeysTable] that should be used when iterating over
-  /// dictionaries in [Document]s that are stored in this database.
+  /// The [SharedKeysTable] that should be used when iterating over dictionaries
+  /// in [Document]s that are stored in this database.
   ///
   /// The same note as for [dictKeys] applies here.
   SharedKeysTable get sharedKeysTable;

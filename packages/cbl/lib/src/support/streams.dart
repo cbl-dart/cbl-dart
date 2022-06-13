@@ -35,8 +35,8 @@ class ResourceStreamTransformer<T> extends StreamTransformerBase<T, T> {
 ///
 /// Listening to the stream requires the [parent] resource to be open.
 ///
-/// When a stream is closed through [ClosableResource.close], the stream
-/// either blocks by waiting for the subscription to be canceled or the wrapped
+/// When a stream is closed through [ClosableResource.close], the stream either
+/// blocks by waiting for the subscription to be canceled or the wrapped
 /// [stream] sending the done event, or it cancels itself early.
 ///
 /// This behavior can be controlled through [blocking].
