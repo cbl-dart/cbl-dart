@@ -12,6 +12,7 @@ import '../typed_data/adapter.dart';
 import 'authenticator.dart';
 import 'conflict.dart';
 import 'conflict_resolver.dart';
+import 'document_replication.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
 

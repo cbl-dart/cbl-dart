@@ -1,3 +1,5 @@
+// ignore_for_file: unused_result
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -80,7 +82,6 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
   Document? conflictingDocument,
 );
 
-// ignore: unused_result
 /// The result of [Database.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
@@ -557,7 +558,6 @@ typedef SyncSaveConflictHandler = bool Function(
   Document? conflictingDocument,
 );
 
-// ignore: unused_result
 /// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
@@ -749,7 +749,6 @@ abstract class SyncDatabase implements Database {
   void deleteIndex(String name);
 }
 
-// ignore: unused_result
 /// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
