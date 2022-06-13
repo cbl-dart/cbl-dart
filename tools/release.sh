@@ -11,7 +11,7 @@ couchbaseLiteDartVersion="$(cat "$projectDir/native/couchbase-lite-dart/Couchbas
 # The only parameter is optional and is the preid, e.g. beta.1, in case this is a prerelease.
 #
 # The current branch must be main and the working directory must be clean.
-function createLibcblitedartRelease() {
+function libcblitedart() {
     local preid="$1"
 
     local release="$couchbaseLiteDartVersion"
@@ -42,6 +42,12 @@ function createLibcblitedartRelease() {
 
     echo "Created release with tag $tag"
     echo "To publish run: git push --follow-tags"
+}
+
+# Version Dart packages through melos except for the cbl_libcblite(dart)_api packages, which
+# are versioned separately.
+function packages() {
+    melos version --ignore 'cbl_libcblite*' "$@"
 }
 
 "$@"
