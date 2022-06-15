@@ -1,3 +1,7 @@
+## 2.0.0+0
+
+ - **DOCS**: add Lotum as sponsor. ([2b881cfa](https://github.com/cbl-dart/cbl-dart/commit/2b881cfaf8a526e55a854e3982f5f051fe05b4ef))
+
 ## 2.0.0
 
 > Note: This release has breaking changes.
