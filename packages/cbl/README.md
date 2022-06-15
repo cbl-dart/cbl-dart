@@ -28,6 +28,10 @@ issue][issues].
 👋 Do you you have a question or feedback? Let us know in a [GitHub
 discussion][discussions].
 
+## Proudly sponsored by
+
+[![Lotum](https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/packages/cbl/doc/img/lotum-logo.svg)](https://lotum.com/)
+
 ---
 
 **What are all these packages for?**
