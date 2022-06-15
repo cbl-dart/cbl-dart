@@ -4,7 +4,7 @@ set -e
 
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 dockerComposeFile="$scriptDir/docker-compose.yaml"
-syncGatewayVersion=3.0.0-beta02
+syncGatewayVersion=3.0.3
 
 function waitForService() {
     name="$1"

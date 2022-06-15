@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   sync-gateway:
-    image: couchbase/sync-gateway:3.0.0-beta02-community
+    image: couchbase/sync-gateway:3.0.3-community
     command:
       [
         '-disable_persistent_config',
