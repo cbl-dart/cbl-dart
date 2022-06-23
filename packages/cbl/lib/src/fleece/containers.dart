@@ -155,9 +155,8 @@ class Value implements Finalizable {
   /// data) has not been garbage collected.
   ///
   /// [adopt] should be `true` when an existing reference to the native object
-  /// is transferred to the created [Value] or the native object
-  /// has just been created and the created [Value] is the initial
-  /// reference holder.
+  /// is transferred to the created [Value] or the native object has just been
+  /// created and the created [Value] is the initial reference holder.
   Value.fromPointer(
     this.pointer, {
     this.isRefCounted = true,
@@ -175,8 +174,8 @@ class Value implements Finalizable {
 
   final Pointer<FLValue> pointer;
 
-  /// Whether this object updates the ref count of the native object when
-  /// it is created and garbage collected.
+  /// Whether this object updates the ref count of the native object when it is
+  /// created and garbage collected.
   final bool isRefCounted;
 
   /// Looks up the Doc containing the Value, or null if the Value was created
