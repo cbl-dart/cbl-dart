@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -13,22 +14,61 @@ import '../support/utils.dart';
 import 'blob_store.dart';
 import 'ffi_database.dart';
 
+class _FfiBlob implements Finalizable {
+  _FfiBlob.fromPointer(
+    this.pointer, {
+    bool adopt = false,
+    required String debugName,
+  }) {
+    bindCBLRefCountedToDartObject(
+      this,
+      pointer: pointer,
+      adopt: adopt,
+      debugName: debugName,
+    );
+  }
+
+  _FfiBlob.createWithData(
+    String contentType,
+    Data data, {
+    required String debugName,
+  }) : this.fromPointer(
+          _blobBindings.createWithData(contentType, data),
+          adopt: true,
+          debugName: debugName,
+        );
+
+  static final _blobBindings = cblBindings.blobs.blob;
+
+  final Pointer<CBLBlob> pointer;
+
+  Data content() =>
+      runWithErrorTranslation(() => _blobBindings.content(pointer));
+
+  Map<String, Object?> createBlobProperties() => {
+        cblObjectTypeProperty: cblObjectTypeBlob,
+        blobDigestProperty: _blobBindings.digest(pointer),
+        blobLengthProperty: _blobBindings.length(pointer),
+        blobContentTypeProperty: _blobBindings.contentType(pointer),
+      };
+}
+
 class FfiBlobStore implements BlobStore, SyncBlobStore {
   FfiBlobStore(this.database);
 
   static final _databaseBindings = cblBindings.database;
-  static final _blobBindings = cblBindings.blobs.blob;
 
   final FfiDatabase database;
 
   @override
   Map<String, Object?> saveBlobFromDataSync(String contentType, Data data) {
-    final blob = CBLObject(
-      _blobBindings.createWithData(contentType, data),
+    final blob = _FfiBlob.createWithData(
+      contentType,
+      data,
       debugName: 'NativeBlobStore.saveBlobFromDataSync()',
     );
     _saveBlob(blob);
-    return _createBlobProperties(blob);
+    return blob.createBlobProperties();
   }
 
   @override
@@ -45,7 +85,7 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
   ) async {
     final blob = await _createBlobFromStream(database, stream, contentType);
     _saveBlob(blob);
-    return _createBlobProperties(blob);
+    return blob.createBlobProperties();
   }
 
   @override
@@ -54,8 +94,6 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
     final cblBlob = runWithErrorTranslation(
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
-    cblReachabilityFence(database);
-    cblReachabilityFence(dict);
 
     if (cblBlob == null) {
       return false;
@@ -68,52 +106,35 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   @override
   Data? readBlobSync(Map<String, Object?> properties) =>
-      _getBlob(properties)?.let((it) {
-        final result =
-            runWithErrorTranslation(() => _blobBindings.content(it.pointer));
-        cblReachabilityFence(it);
-        return result;
-      });
+      _getBlob(properties)?.content();
 
   @override
   Stream<Data>? readBlob(Map<String, Object?> properties) =>
       _getBlob(properties)?.let((it) => _BlobReadStream(database, it));
 
-  void _saveBlob(CBLObject<CBLBlob> blob) {
+  void _saveBlob(_FfiBlob blob) {
     runWithErrorTranslation(
       () => _databaseBindings.saveBlob(database.pointer, blob.pointer),
     );
-    cblReachabilityFence(database);
-    cblReachabilityFence(blob);
   }
 
-  Map<String, Object?> _createBlobProperties(CBLObject<CBLBlob> blob) {
-    final result = <String, Object?>{
-      cblObjectTypeProperty: cblObjectTypeBlob,
-      blobDigestProperty: _blobBindings.digest(blob.pointer),
-      blobLengthProperty: _blobBindings.length(blob.pointer),
-      blobContentTypeProperty: _blobBindings.contentType(blob.pointer),
-    };
-    cblReachabilityFence(blob);
-    return result;
-  }
-
-  CBLObject<CBLBlob>? _getBlob(Map<String, Object?> properties) {
+  _FfiBlob? _getBlob(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final blobPointer = runWithErrorTranslation(
+    final pointer = runWithErrorTranslation(
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
-    cblReachabilityFence(database);
-    cblReachabilityFence(dict);
 
-    return blobPointer
-        ?.let((it) => CBLObject(it, debugName: 'NativeBlobStore._getBlob'));
+    return pointer?.let((pointer) => _FfiBlob.fromPointer(
+          pointer,
+          adopt: true,
+          debugName: 'NativeBlobStore._getBlob',
+        ));
   }
 }
 
 final _writeStreamBindings = cblBindings.blobs.writeStream;
 
-Future<CBLObject<CBLBlob>> _createBlobFromStream(
+Future<_FfiBlob> _createBlobFromStream(
   FfiDatabase database,
   Stream<Data> stream,
   String contentType,
@@ -121,14 +142,14 @@ Future<CBLObject<CBLBlob>> _createBlobFromStream(
   final writeStream = runWithErrorTranslation(
     () => _writeStreamBindings.create(database.pointer),
   );
-  cblReachabilityFence(database);
 
   try {
     await stream
         .forEach((data) => _writeStreamBindings.write(writeStream, data));
 
-    return CBLObject(
+    return _FfiBlob.fromPointer(
       _writeStreamBindings.createBlobWithStream(contentType, writeStream),
+      adopt: true,
       debugName: '_createBlobFromStream',
     );
     // ignore: avoid_catches_without_on_clauses
@@ -138,7 +159,7 @@ Future<CBLObject<CBLBlob>> _createBlobFromStream(
   }
 }
 
-class _BlobReadStream extends Stream<Data> {
+class _BlobReadStream extends Stream<Data> implements Finalizable {
   _BlobReadStream(this.parent, this.blob);
 
   /// Size of the chunks which a blob read stream emits.
@@ -147,7 +168,7 @@ class _BlobReadStream extends Stream<Data> {
   static final _readStreamBindings = cblBindings.blobs.readStream;
 
   final ClosableResourceMixin parent;
-  final CBLObject<CBLBlob> blob;
+  final _FfiBlob blob;
 
   late final _controller = StreamController<Data>(
     onListen: _start,
@@ -156,12 +177,10 @@ class _BlobReadStream extends Stream<Data> {
     onCancel: _pause,
   );
 
-  late final _stream = () {
-    final result = CBLBlobReadStreamObject(
-      _readStreamBindings.openContentStream(blob.pointer),
-    );
-    cblReachabilityFence(blob);
-    return result;
+  late final Pointer<CBLBlobReadStream> pointer = () {
+    final pointer = _readStreamBindings.openContentStream(blob.pointer);
+    _readStreamBindings.bindToDartObject(this, pointer);
+    return pointer;
   }();
 
   var _isPaused = false;
@@ -172,9 +191,8 @@ class _BlobReadStream extends Stream<Data> {
 
       while (!_isPaused) {
         final buffer = runWithErrorTranslation(
-          () => _readStreamBindings.read(_stream.pointer, _readStreamChunkSize),
+          () => _readStreamBindings.read(pointer, _readStreamChunkSize),
         );
-        cblReachabilityFence(_stream);
 
         // The read stream is done (EOF).
         if (buffer == null) {

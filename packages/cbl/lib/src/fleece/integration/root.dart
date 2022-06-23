@@ -3,7 +3,6 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../../support/native_object.dart';
 import '../containers.dart';
 import '../encoder.dart';
 import 'collection.dart';
@@ -56,8 +55,8 @@ extension on MContext {
     final data = this.data;
     if (data is Doc) {
       return data.root.pointer;
-    } else if (data is FleeceValueObject) {
-      return data.pointer.cast();
+    } else if (data is Value) {
+      return data.pointer;
     } else {
       throw UnsupportedError('Unsupported MContext.data value: $data');
     }

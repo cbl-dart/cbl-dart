@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:ffi';
 
 import 'base.dart';
@@ -104,10 +106,7 @@ class BlobBindings extends Bindings {
         contentType,
         (flContentType) {
           final sliceResult = content.toSliceResult();
-          final result =
-              _createWithData(flContentType, sliceResult.makeGlobal().ref);
-          cblReachabilityFence(sliceResult);
-          return result;
+          return _createWithData(flContentType, sliceResult.makeGlobal().ref);
         },
       );
 

@@ -6,6 +6,7 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
+import '../utils/fleece_coding.dart';
 
 final _decoderBinds = CBLBindings.instance.fleece.decoder;
 final _valueBinds = CBLBindings.instance.fleece.value;
@@ -48,15 +49,13 @@ void main() {
         expect(sharedStringsTable.hasString('..'), isTrue);
         expect(sharedStringsTable.hasString('...............'), isTrue);
         expect(sharedStringsTable.hasString('................'), isFalse);
-
-        cblReachabilityFence(sliceResult);
       },
     );
 
     group('FleeceDecoder', () {
       test('converts untrusted Fleece data to Dart object', () {
         final encoder = FleeceEncoder();
-        const decoder = FleeceDecoder();
+        final decoder = testFleeceDecoder();
         final data = encoder.convertJson('''
 [
   null, 41, 3.14, true, false, "a",
@@ -97,7 +96,7 @@ void main() {
 
       test('converts trusted Fleece data to Dart object', () {
         final encoder = FleeceEncoder();
-        const decoder = FleeceDecoder(trust: FLTrust.trusted);
+        final decoder = testFleeceDecoder(trust: FLTrust.trusted);
         final data = encoder.convertJson('''
 [
   null, 41, 3.14, true, false, "a",
@@ -139,7 +138,7 @@ void main() {
       test('throws when untrusted Fleece data is invalid', () {
         final data = Data.fromTypedList(Uint8List(0));
 
-        expect(() => const FleeceDecoder().convert(data), throwsArgumentError);
+        expect(() => testFleeceDecoder().convert(data), throwsArgumentError);
       });
     });
   });
@@ -147,7 +146,7 @@ void main() {
   group('Fleece Encoding', () {
     test('convert JSON to Fleece data', () {
       final encoder = FleeceEncoder();
-      const decoder = FleeceDecoder();
+      final decoder = testFleeceDecoder();
       final data = encoder.convertJson(
         '''
         {
@@ -172,7 +171,7 @@ void main() {
 
     group('FleeceEncoder', () {
       test('writeDartObject writes Dart object to encoder', () {
-        const decoder = FleeceDecoder();
+        final decoder = testFleeceDecoder();
         final encoder = FleeceEncoder()
           ..writeDartObject([
             null,
@@ -203,7 +202,7 @@ void main() {
       });
 
       test('write values', () {
-        const decoder = FleeceDecoder();
+        final decoder = testFleeceDecoder();
         final encoder = FleeceEncoder()
           ..beginArray(0)
           ..writeNull()

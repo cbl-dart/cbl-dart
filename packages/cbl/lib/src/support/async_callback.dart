@@ -1,11 +1,10 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:isolate';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
 import 'ffi.dart';
-import 'native_object.dart';
-import 'resource.dart';
 
 /// Handler which is invoked to respond to a [AsyncCallback].
 ///
@@ -28,7 +27,7 @@ int _generateId() {
 /// [AsyncCallback]s have to be [close]d to free allocated resources on the
 /// native side and close its [ReceivePort]. The isolate will not exist, as long
 /// as there is an open [ReceivePort].
-class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
+class AsyncCallback implements Finalizable {
   /// Creates a callback which can be asynchronously called from the native
   /// side.
   ///
@@ -42,12 +41,12 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
   }) {
     _receivePort = ReceivePort();
 
-    native = NativeObject(_bindings.create(
+    pointer = _bindings.create(
       _id,
       this,
       _receivePort.sendPort,
       debug: debug,
-    ));
+    );
 
     _receivePort.cast<List<Object?>>().listen(_messageHandler);
 
@@ -59,6 +58,8 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
   static const failureResult = '__ASYNC_CALLBACK_FAILED__';
 
   final _id = _generateId();
+
+  late final Pointer<CBLDartAsyncCallback> pointer;
 
   /// The handler which responds to calls to this callback.
   final AsyncCallbackHandler handler;
@@ -84,9 +85,6 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
 
   late final ReceivePort _receivePort;
 
-  @override
-  late final NativeObject<CBLDartAsyncCallback> native;
-
   var _closed = false;
 
   /// Close this callback to free resources on the native side and the Dart
@@ -96,8 +94,7 @@ class AsyncCallback implements NativeResource<CBLDartAsyncCallback> {
   void close() {
     _debugLog('closing');
     _closed = true;
-    _bindings.close(native.pointer);
-    cblReachabilityFence(this);
+    _bindings.close(pointer);
     _receivePort.close();
   }
 

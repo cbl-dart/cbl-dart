@@ -230,12 +230,10 @@ void _setupCallback() {
   );
 
   // Try to set callback as the current global callback.
-  final callbackNative = _callback!.native;
-  if (!_bindings.setCallback(callbackNative.pointer)) {
+  if (!_bindings.setCallback(_callback!.pointer)) {
     _cleanUpCallback();
     throw StateError('Another isolate has already set a custom Logger.');
   }
-  cblReachabilityFence(callbackNative);
 }
 
 void _cleanUpCallback() {

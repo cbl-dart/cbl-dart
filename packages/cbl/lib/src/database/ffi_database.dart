@@ -35,9 +35,9 @@ import 'ffi_blob_store.dart';
 
 final _bindings = cblBindings.database;
 
-class FfiDatabase extends CBLDatabaseObject
+class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
-    implements SyncDatabase, BlobStoreHolder {
+    implements SyncDatabase, BlobStoreHolder, Finalizable {
   factory FfiDatabase({
     required String name,
     DatabaseConfiguration? config,
@@ -62,14 +62,13 @@ class FfiDatabase extends CBLDatabaseObject
 
   FfiDatabase._({
     required DatabaseConfiguration config,
-    required Pointer<CBLDatabase> pointer,
+    required this.pointer,
     required this.typedDataAdapter,
     required String debugName,
-  })  : _config = config,
-        super(pointer, debugName: debugName) {
+  }) : _config = config {
+    bindCBLDatabaseToDartObject(this, pointer: pointer, debugName: debugName);
     name = _bindings.name(pointer);
     _path = _bindings.path(pointer);
-    cblReachabilityFence(this);
   }
 
   /// {@macro cbl.Database.removeSync}
@@ -93,6 +92,8 @@ class FfiDatabase extends CBLDatabaseObject
           config?.toCBLDatabaseConfiguration(),
         ),
       );
+
+  final Pointer<CBLDatabase> pointer;
 
   @override
   final TypedDataAdapter? typedDataAdapter;
@@ -120,11 +121,7 @@ class FfiDatabase extends CBLDatabaseObject
   String? _path;
 
   @override
-  int get count => useSync(() {
-        final result = _bindings.count(pointer);
-        cblReachabilityFence(this);
-        return result;
-      });
+  int get count => useSync(() => _bindings.count(pointer));
 
   @override
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
@@ -132,7 +129,6 @@ class FfiDatabase extends CBLDatabaseObject
   @override
   void beginTransaction() {
     runWithErrorTranslation(() => _bindings.beginTransaction(pointer));
-    cblReachabilityFence(this);
   }
 
   @override
@@ -140,7 +136,6 @@ class FfiDatabase extends CBLDatabaseObject
     runWithErrorTranslation(
       () => _bindings.endTransaction(pointer, commit: commit),
     );
-    cblReachabilityFence(this);
   }
 
   @override
@@ -151,7 +146,6 @@ class FfiDatabase extends CBLDatabaseObject
             final documentPointer = runWithErrorTranslation(
               () => _bindings.getDocument(pointer, id),
             );
-            cblReachabilityFence(this);
 
             if (documentPointer == null) {
               return null;
@@ -159,7 +153,8 @@ class FfiDatabase extends CBLDatabaseObject
 
             return DelegateDocument(
               FfiDocumentDelegate.fromPointer(
-                doc: documentPointer,
+                documentPointer,
+                adopt: true,
                 debugCreator: 'FfiDatabase.document()',
               ),
               database: this,
@@ -188,18 +183,15 @@ class FfiDatabase extends CBLDatabaseObject
               () => PrepareDocumentOp(document),
               () => prepareDocument(document) as FfiDocumentDelegate,
             );
-            final delegateNative = delegate.native;
 
             return _catchConflictException(() {
               runWithErrorTranslation(
                 () => _bindings.saveDocumentWithConcurrencyControl(
                   pointer,
-                  delegateNative.pointer.cast(),
+                  delegate.pointer.cast(),
                   concurrencyControl.toCBLConcurrencyControl(),
                 ),
               );
-              cblReachabilityFence(this);
-              cblReachabilityFence(delegateNative);
             });
           }),
         ),
@@ -226,7 +218,7 @@ class FfiDatabase extends CBLDatabaseObject
       syncOperationTracePoint(
         () => SaveDocumentOp(this, document),
         () => useSync(
-            // Because the conflict handler is sync the result of the maybe
+            // Because the conflict handler is sync the result of the possibly
             // async method is always sync.
             () => saveDocumentWithConflictHandlerHelper(
                   document,
@@ -255,18 +247,15 @@ class FfiDatabase extends CBLDatabaseObject
               () => prepareDocument(document, syncProperties: false)
                   as FfiDocumentDelegate,
             );
-            final delegateNative = delegate.native;
 
             return _catchConflictException(() {
               runWithErrorTranslation(
                 () => _bindings.deleteDocumentWithConcurrencyControl(
                   pointer,
-                  delegateNative.pointer.cast(),
+                  delegate.pointer.cast(),
                   concurrencyControl.toCBLConcurrencyControl(),
                 ),
               );
-              cblReachabilityFence(this);
-              cblReachabilityFence(delegateNative);
             });
           }),
         ),
@@ -302,7 +291,6 @@ class FfiDatabase extends CBLDatabaseObject
           runWithErrorTranslation(
             () => _bindings.purgeDocumentByID(pointer, id),
           );
-          cblReachabilityFence(this);
         }),
       );
 
@@ -335,17 +323,14 @@ class FfiDatabase extends CBLDatabaseObject
         runWithErrorTranslation(
           () => _bindings.setDocumentExpiration(pointer, id, expiration),
         );
-        cblReachabilityFence(this);
       });
 
   @override
-  DateTime? getDocumentExpiration(String id) => useSync(() {
-        final result = runWithErrorTranslation(
+  DateTime? getDocumentExpiration(String id) => useSync(
+        () => runWithErrorTranslation(
           () => _bindings.getDocumentExpiration(pointer, id),
-        );
-        cblReachabilityFence(this);
-        return result;
-      });
+        ),
+      );
 
   @override
   ListenerToken addChangeListener(DatabaseChangeListener listener) =>
@@ -362,12 +347,9 @@ class FfiDatabase extends CBLDatabaseObject
       debugName: 'FfiDatabase.addChangeListener',
     );
 
-    final callbackNative = callback.native;
     runWithErrorTranslation(
-      () => _bindings.addChangeListener(pointer, callbackNative.pointer),
+      () => _bindings.addChangeListener(pointer, callback.pointer),
     );
-    cblReachabilityFence(this);
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -393,16 +375,13 @@ class FfiDatabase extends CBLDatabaseObject
       debugName: 'FfiDatabase.addDocumentChangeListener',
     );
 
-    final callbackNative = callback.native;
     runWithErrorTranslation(
       () => _bindings.addDocumentChangeListener(
         pointer,
         id,
-        callbackNative.pointer,
+        callback.pointer,
       ),
     );
-    cblReachabilityFence(this);
-    cblReachabilityFence(callbackNative);
 
     return FfiListenerToken(callback);
   }
@@ -435,7 +414,6 @@ class FfiDatabase extends CBLDatabaseObject
         _bindings.close(pointer);
       }
     });
-    cblReachabilityFence(this);
   }
 
   @override
@@ -456,7 +434,6 @@ class FfiDatabase extends CBLDatabaseObject
             type.toCBLMaintenanceType(),
           ),
         );
-        cblReachabilityFence(this);
       });
 
   @override
@@ -467,16 +444,13 @@ class FfiDatabase extends CBLDatabaseObject
             (newKey as EncryptionKeyImpl?)?.cblKey,
           ),
         );
-        cblReachabilityFence(this);
       });
 
   @override
-  List<String> get indexes => useSync(() {
-        final array =
-            fl.Array.fromPointer(_bindings.indexNames(pointer), adopt: true);
-        cblReachabilityFence(this);
-        return array.toObject().cast<String>();
-      });
+  List<String> get indexes => useSync(() =>
+      fl.Array.fromPointer(_bindings.indexNames(pointer), adopt: true)
+          .toObject()
+          .cast<String>());
 
   @override
   void createIndex(String name, covariant IndexImplInterface index) =>
@@ -484,13 +458,11 @@ class FfiDatabase extends CBLDatabaseObject
         runWithErrorTranslation(
           () => _bindings.createIndex(pointer, name, index.toCBLIndexSpec()),
         );
-        cblReachabilityFence(this);
       });
 
   @override
   void deleteIndex(String name) => useSync(() {
         runWithErrorTranslation(() => _bindings.deleteIndex(pointer, name));
-        cblReachabilityFence(this);
       });
 
   @override

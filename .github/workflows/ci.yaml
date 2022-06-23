@@ -9,11 +9,11 @@ on:
       - main
 
 env:
-  flutter-version-stable: 3.0.0
+  flutter-version-stable: 3.0.3
   flutter-version-beta: beta
-  dart-version-stable: 2.17.0
+  dart-version-stable: 2.17.5
   dart-version-beta: beta
-  melos-version: "2.3.0"
+  melos-version: 2.5.0
 
 jobs:
   formatting-dart:
@@ -42,7 +42,7 @@ jobs:
       - name: Check formatting
         uses: jidicula/clang-format-action@v4.4.0
         with:
-          check-path: "native/couchbase-lite-dart"
+          check-path: 'native/couchbase-lite-dart'
 
   analyze-dart:
     name: Analyze Dart code
@@ -58,7 +58,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      - name:
+          Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v2
 
       - name: Install NodeJS dependencies

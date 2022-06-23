@@ -104,7 +104,6 @@ class MDict extends MCollection {
         final key = sharedKeysTable.decode(sharedStringsTable);
         _values[key] = MValue.empty();
       }
-      cblReachabilityFence(it);
       cblReachabilityFence(context);
     }
   }
@@ -190,7 +189,6 @@ class MDict extends MCollection {
 
     _valuesHasAllKeys = true;
 
-    cblReachabilityFence(it);
     cblReachabilityFence(context);
   }
 

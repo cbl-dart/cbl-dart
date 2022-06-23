@@ -1,4 +1,5 @@
-// ignore_for_file: cast_nullable_to_non_nullable
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: cast_nullable_to_non_nullable,avoid_redundant_argument_values
 
 import 'dart:convert';
 import 'dart:ffi';

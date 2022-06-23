@@ -31,13 +31,23 @@ final _bindings = cblBindings.replicator;
 
 class FfiReplicator
     with ClosableResourceMixin
-    implements SyncReplicator, NativeResource<CBLReplicator> {
-  FfiReplicator._(
-    this._config,
-    this._database,
-    this.native,
-    this._closeCallbacks,
-  );
+    implements SyncReplicator, Finalizable {
+  FfiReplicator._({
+    required ReplicatorConfiguration config,
+    required this.pointer,
+    required FfiDatabase database,
+    required void Function() closeCallbacks,
+    required String debugCreator,
+  })  : _config = config,
+        _database = database,
+        _closeCallbacks = closeCallbacks {
+    bindCBLReplicatorToDartObject(
+      this,
+      pointer: pointer,
+      debugName: 'Replicator(creator: $debugCreator)',
+    );
+    attachTo(_database);
+  }
 
   static Future<FfiReplicator> create(
     ReplicatorConfiguration config, {
@@ -62,18 +72,18 @@ class FfiReplicator
       );
     }
 
-    AsyncCallback Function(T) _makeCallback<T>(
+    AsyncCallback Function(T) makeCallback<T>(
       AsyncCallback Function(T, FfiDatabase, bool) callbackFactory,
     ) =>
         (callback) =>
             callbackFactory(callback, database, ignoreCallbackErrorsInDart);
 
     final pushFilterCallback =
-        config.combinedPushFilter?.let(_makeCallback(_wrapReplicationFilter));
+        config.combinedPushFilter?.let(makeCallback(_wrapReplicationFilter));
     final pullFilterCallback =
-        config.combinedPullFilter?.let(_makeCallback(_wrapReplicationFilter));
+        config.combinedPullFilter?.let(makeCallback(_wrapReplicationFilter));
     final conflictResolverCallback = config.combinedConflictResolver
-        ?.let(_makeCallback(_wrapConflictResolver));
+        ?.let(makeCallback(_wrapConflictResolver));
 
     void closeCallbacks() {
       pushFilterCallback?.close();
@@ -86,9 +96,6 @@ class FfiReplicator
     final headersDict = config.headers?.let(fl.MutableDict.new);
     final channelsArray = config.channels?.let(fl.MutableArray.new);
     final documentIDsArray = config.documentIds?.let(fl.MutableArray.new);
-    final pushFilterCallbackNative = pushFilterCallback?.native;
-    final pullFilterCallbackNative = pullFilterCallback?.native;
-    final conflictResolverCallbackNative = conflictResolverCallback?.native;
     final ffiConfig = CBLReplicatorConfiguration(
       database: database.pointer,
       endpoint: endpoint,
@@ -102,30 +109,23 @@ class FfiReplicator
       pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
       channels: channelsArray?.pointer.cast(),
       documentIDs: documentIDsArray?.pointer.cast(),
-      pushFilter: pushFilterCallbackNative?.pointer,
-      pullFilter: pullFilterCallbackNative?.pointer,
-      conflictResolver: conflictResolverCallbackNative?.pointer,
+      pushFilter: pushFilterCallback?.pointer,
+      pullFilter: pullFilterCallback?.pointer,
+      conflictResolver: conflictResolverCallback?.pointer,
       disableAutoPurge: !config.enableAutoPurge,
     );
 
     try {
-      final replicator =
+      final pointer =
           runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
-      cblReachabilityFence(database);
-      cblReachabilityFence(headersDict);
-      cblReachabilityFence(channelsArray);
-      cblReachabilityFence(documentIDsArray);
-      cblReachabilityFence(pushFilterCallbackNative);
-      cblReachabilityFence(pullFilterCallbackNative);
-      cblReachabilityFence(conflictResolverCallbackNative);
 
-      final native = CBLReplicatorObject(
-        replicator,
-        debugName: 'Replicator(creator: $debugCreator)',
+      return FfiReplicator._(
+        config: config,
+        pointer: pointer,
+        database: database,
+        closeCallbacks: closeCallbacks,
+        debugCreator: debugCreator,
       );
-
-      return FfiReplicator._(config, database, native, closeCallbacks)
-        ..attachTo(database);
 
       // ignore: avoid_catches_without_on_clauses
     } catch (e) {
@@ -147,8 +147,7 @@ class FfiReplicator
 
   final FfiDatabase _database;
 
-  @override
-  final NativeObject<CBLReplicator> native;
+  final Pointer<CBLReplicator> pointer;
 
   final void Function() _closeCallbacks;
 
@@ -162,11 +161,8 @@ class FfiReplicator
   @override
   ReplicatorStatus get status => useSync(() => _status);
 
-  ReplicatorStatus get _status {
-    final result = _bindings.status(native.pointer).toReplicatorStatus();
-    cblReachabilityFence(native);
-    return result;
-  }
+  ReplicatorStatus get _status =>
+      _bindings.status(pointer).toReplicatorStatus();
 
   @override
   void start({bool reset = false}) => useSync(() {
@@ -187,8 +183,7 @@ class FfiReplicator
           }
         });
 
-        _bindings.start(native.pointer, resetCheckpoint: reset);
-        cblReachabilityFence(native);
+        _bindings.start(pointer, resetCheckpoint: reset);
       });
 
   @override
@@ -219,8 +214,7 @@ class FfiReplicator
       break;
     }
 
-    _bindings.stop(native.pointer);
-    cblReachabilityFence(native);
+    _bindings.stop(pointer);
   }
 
   @override
@@ -240,10 +234,7 @@ class FfiReplicator
       debugName: 'FfiReplicator.addChangeListener',
     );
 
-    final callbackNative = callback.native;
-    _bindings.addChangeListener(native.pointer, callbackNative.pointer);
-    cblReachabilityFence(native);
-    cblReachabilityFence(callbackNative);
+    _bindings.addChangeListener(pointer, callback.pointer);
 
     return FfiListenerToken(callback);
   }
@@ -274,13 +265,7 @@ class FfiReplicator
       debugName: 'FfiReplicator.addDocumentReplicationListener',
     );
 
-    final callbackNative = callback.native;
-    _bindings.addDocumentReplicationListener(
-      native.pointer,
-      callbackNative.pointer,
-    );
-    cblReachabilityFence(native);
-    cblReachabilityFence(callbackNative);
+    _bindings.addDocumentReplicationListener(pointer, callback.pointer);
 
     return FfiListenerToken(callback);
   }
@@ -309,19 +294,15 @@ class FfiReplicator
   @override
   Set<String> get pendingDocumentIds => useSync(() {
         final dict = fl.Dict.fromPointer(
-          _bindings.pendingDocumentIDs(native.pointer),
+          _bindings.pendingDocumentIDs(pointer),
           adopt: true,
         );
-        cblReachabilityFence(native);
         return dict.keys.toSet();
       });
 
   @override
-  bool isDocumentPending(String documentId) => useSync(() {
-        final result = _bindings.isDocumentPending(native.pointer, documentId);
-        cblReachabilityFence(native);
-        return result;
-      });
+  bool isDocumentPending(String documentId) =>
+      useSync(() => _bindings.isDocumentPending(pointer, documentId));
 
   @override
   Future<void> performClose() async {
@@ -395,9 +376,7 @@ extension on ReplicatorConfiguration {
       );
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
-      final result = _bindings.createEndpointWithLocalDB(db.pointer);
-      cblReachabilityFence(db);
-      return result;
+      return _bindings.createEndpointWithLocalDB(db.pointer);
     } else {
       throw UnimplementedError('Endpoint type is not implemented: $target');
     }
@@ -438,8 +417,7 @@ AsyncCallback _wrapReplicationFilter(
             ReplicationFilterCallbackMessage.fromArguments(arguments);
         final doc = DelegateDocument(
           FfiDocumentDelegate.fromPointer(
-            doc: message.document,
-            adopt: false,
+            message.document,
             debugCreator: 'ReplicationFilter()',
           ),
           database: database,
@@ -465,33 +443,31 @@ AsyncCallback _wrapConflictResolver(
         final message =
             ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
-        final local = message.localDocument?.let((it) => DelegateDocument(
+        final local = message.localDocument?.let((pointer) => DelegateDocument(
               FfiDocumentDelegate.fromPointer(
-                doc: it,
-                adopt: false,
+                pointer,
                 debugCreator: 'ConflictResolver(local)',
               ),
               database: database,
             ));
 
-        final remote = message.remoteDocument?.let((it) => DelegateDocument(
-              FfiDocumentDelegate.fromPointer(
-                doc: it,
-                adopt: false,
-                debugCreator: 'ConflictResolver(remote)',
-              ),
-              database: database,
-            ));
+        final remote =
+            message.remoteDocument?.let((pointer) => DelegateDocument(
+                  FfiDocumentDelegate.fromPointer(
+                    pointer,
+                    debugCreator: 'ConflictResolver(remote)',
+                  ),
+                  database: database,
+                ));
 
         final conflict = ConflictImpl(message.documentId, local, remote);
         final resolved = await resolver.resolve(conflict) as DelegateDocument?;
 
-        NativeObject<CBLDocument>? resolvedDelegateNative;
+        FfiDocumentDelegate? resolvedDelegate;
         if (resolved != null) {
           if (resolved != local && resolved != remote) {
             final resolvedDelegate =
                 database.prepareDocument(resolved) as FfiDocumentDelegate;
-            resolvedDelegateNative = resolvedDelegate.native;
 
             // If the resolver returned a document other than `local` or
             // `remote`, the ref count of `resolved` needs to be incremented
@@ -500,17 +476,13 @@ AsyncCallback _wrapConflictResolver(
             // balances with a release. This must happen on the Dart side,
             // because `resolved` can be garbage collected before
             // `resolvedAddress` makes it back to the native side.
-            cblBindings.base
-                .retainRefCounted(resolvedDelegateNative.pointer.cast());
+            cblBindings.base.retainRefCounted(resolvedDelegate.pointer.cast());
           } else {
-            resolvedDelegateNative =
-                (resolved.delegate as FfiDocumentDelegate).native;
+            resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
           }
         }
 
-        final result = resolvedDelegateNative?.pointer.address;
-        cblReachabilityFence(resolvedDelegateNative);
-        return result;
+        return resolvedDelegate?.pointer.address;
       },
       ignoreErrorsInDart: ignoreErrorsInDart,
       debugName: 'ConflictResolver',

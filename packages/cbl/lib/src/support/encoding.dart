@@ -52,7 +52,6 @@ class EncodedData {
         final doc = Doc.fromResultData(data, FLTrust.trusted);
         final root = doc.root;
         encoder.writeValue(root.pointer);
-        cblReachabilityFence(root);
         return encoder.finish();
       case EncodingFormat.json:
         return data;

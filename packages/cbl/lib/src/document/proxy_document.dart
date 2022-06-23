@@ -6,7 +6,6 @@ import '../fleece/integration/root.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
-import '../support/native_object.dart';
 import 'document.dart';
 
 class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
@@ -55,15 +54,13 @@ class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
   MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
     final propertiesDict = _propertiesDict;
     if (propertiesDict != null) {
-      final result = MRoot.fromContext(
+      return MRoot.fromContext(
         DocumentMContext(
           document,
-          data: FleeceValueObject(propertiesDict.pointer),
+          data: Value.fromPointer(propertiesDict.pointer),
         ),
         isMutable: isMutable,
       );
-      cblReachabilityFence(propertiesDict);
-      return result;
     }
 
     return MRoot.fromContext(

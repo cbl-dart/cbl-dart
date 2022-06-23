@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:convert';
 import 'dart:ffi';
 
@@ -488,14 +490,12 @@ class DocBindings extends Bindings {
     Pointer<FLSharedKeys>? sharedKeys,
   ) {
     final sliceResult = data.toSliceResult();
-    final result = _fromResultData(
+    return _fromResultData(
       sliceResult.makeGlobalResult().ref,
       trust.toInt(),
       sharedKeys ?? nullptr,
       nullFLSlice.ref,
     );
-    cblReachabilityFence(sliceResult);
-    return result;
   }
 
   Pointer<FLDoc> fromJson(String json) => runWithSingleFLString(
@@ -711,11 +711,8 @@ class ValueBindings extends Bindings {
     _bindToDartObject(object, value, retain);
   }
 
-  Pointer<FLValue>? fromData(SliceResult data, FLTrust trust) {
-    final result = _fromData(data.makeGlobal().ref, trust.toInt()).toNullable();
-    cblReachabilityFence(data);
-    return result;
-  }
+  Pointer<FLValue>? fromData(SliceResult data, FLTrust trust) =>
+      _fromData(data.makeGlobal().ref, trust.toInt()).toNullable();
 
   Pointer<FLDoc>? findDoc(Pointer<FLValue> value) =>
       _findDoc(value).toNullable();
@@ -1946,7 +1943,6 @@ class FleeceEncoderBindings extends Bindings {
       encoder,
       _writeData(encoder, sliceResult.makeGlobal().ref),
     );
-    cblReachabilityFence(sliceResult);
   }
 
   void writeJSON(Pointer<FLEncoder> encoder, Data value) {
@@ -1958,7 +1954,6 @@ class FleeceEncoderBindings extends Bindings {
         sliceResult.makeGlobal().cast<FLString>().ref,
       ),
     );
-    cblReachabilityFence(sliceResult);
   }
 
   void beginArray(Pointer<FLEncoder> encoder, int reserveCount) {
