@@ -153,8 +153,8 @@ class CblServiceClient {
   void _callDocumentChangeListener(CallDocumentChangeListener request) =>
       _getDocumentChangeListenerById(request.listenerId)(request);
 
-  Stream<Data> _readBlobUpload(ReadBlobUpload request) =>
-      _takeBlobUploadById(request.uploadId);
+  Stream<MessageData> _readBlobUpload(ReadBlobUpload request) =>
+      _takeBlobUploadById(request.uploadId).map(MessageData.new);
 
   void _callQueryChangeListener(CallQueryChangeListener request) =>
       _getQueryChangeListenerById(request.listenerId)(request);
@@ -497,13 +497,16 @@ class CblService {
       .blobStore
       .blobExists(request.properties);
 
-  Stream<Data> _readBlob(ReadBlob request) =>
+  Stream<MessageData> _readBlob(ReadBlob request) =>
       _getDatabaseById(request.databaseId)
           .blobStore
-          .readBlob(request.properties)!;
+          .readBlob(request.properties)!
+          .map(MessageData.new);
 
   Future<SaveBlobResponse> _saveBlob(SaveBlob request) async {
-    final stream = channel.stream(ReadBlobUpload(uploadId: request.uploadId));
+    final stream = channel
+        .stream(ReadBlobUpload(uploadId: request.uploadId))
+        .map((event) => event.data);
     final properties = await _getDatabaseById(request.databaseId)
         .blobStore
         .saveBlobFromStream(request.contentType, stream);

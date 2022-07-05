@@ -1,4 +1,6 @@
 import 'dart:collection';
+import 'dart:ffi';
+import 'dart:isolate';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
@@ -17,11 +19,33 @@ enum SerializationTarget {
 /// A type which supports serialization.
 // ignore: one_member_abstracts
 abstract class Serializable {
+  /// Allow subclasses to have const constructors.
+  const Serializable();
+
   /// Serializes this object into a [StringMap].
   ///
   /// The given [context] should be used to serialize values owned by this
   /// object, unless they are primitives such as [String]s.
   StringMap serialize(SerializationContext context);
+
+  /// Called before this object is sent through a [SendPort].
+  ///
+  /// This allows an object to make itself sendable by replacing references
+  /// to objects that are not sendable, e.g. [Pointer], with sendable ones. The
+  /// received copy will have [didReceive] called on it, where it should restore
+  /// itself to the state of the original before [willSend] was called on it.
+  ///
+  /// If this object contains other [Serializable]s, it must call [willSend]
+  /// on them from this method.
+  void willSend() {}
+
+  /// Called after this object has been received from a [ReceivePort].
+  ///
+  /// See [willSend] for more information.
+  ///
+  /// If this object contains other [Serializable]s, it must call [didReceive]
+  /// on them from this method.
+  void didReceive() {}
 }
 
 /// Serializes a value of type [T] to a value which can be encoded as json.
@@ -55,7 +79,7 @@ typedef SerializableDeserializer<T extends Serializable> = T Function(
   SerializationContext context,
 );
 
-class SerializationError implements Serializable, Exception {
+class SerializationError extends Serializable implements Exception {
   SerializationError(this.message);
 
   final String message;
@@ -119,7 +143,7 @@ class SerializationContext {
     final type = registry.resolveRegisteredType(value);
     if (type == null) {
       throw SerializationError(
-        'No serializer registerd for type ${value.runtimeType}',
+        'No serializer registered for type ${value.runtimeType}',
       );
     }
 
@@ -153,7 +177,7 @@ class SerializationContext {
     final type = registry.getType(typeName);
     if (type == null) {
       throw SerializationError(
-        'No deserializer registerd for type $typeName',
+        'No deserializer registered for type $typeName',
       );
     }
 
@@ -217,14 +241,12 @@ class SerializationRegistry {
     String typeName, {
     required Serializer<R> serialize,
     required Deserializer<R> deserialize,
-    bool isIsolatePortSafe = true,
     bool handleSubTypes = false,
   }) {
     _addCodec<R>(
       typeName,
       (value, codec) => serialize(value as R, codec),
       deserialize,
-      isIsolatePortSafe,
       handleSubTypes,
     );
   }
@@ -233,14 +255,12 @@ class SerializationRegistry {
     String typeName, {
     required ObjectSerializer<R> serialize,
     required ObjectDeserializer<R> deserialize,
-    bool isIsolatePortSafe = true,
     bool handleSubTypes = false,
   }) {
     _addCodec<R>(
       typeName,
       (object, codec) => serialize(object as R, codec),
       (json, codec) => deserialize(json as StringMap, codec),
-      isIsolatePortSafe,
       handleSubTypes,
     );
   }
@@ -248,14 +268,12 @@ class SerializationRegistry {
   void addSerializableCodec<R extends Serializable>(
     String typeName,
     SerializableDeserializer<R> deserializer, {
-    bool isIsolatePortSafe = true,
     bool handleSubTypes = false,
   }) {
     _addCodec<R>(
       typeName,
       (object, codec) => (object as R).serialize(codec),
       (json, codec) => deserializer(json as StringMap, codec),
-      isIsolatePortSafe,
       handleSubTypes,
     );
   }
@@ -264,7 +282,6 @@ class SerializationRegistry {
     String typeName,
     _SerializationConverter serializer,
     _SerializationConverter deserializer,
-    bool isIsolatePortSafe,
     bool handleSubTypes,
   ) {
     if (_typeToName.containsKey(R) || _typeToName.containsValue(R)) {
@@ -280,31 +297,25 @@ class SerializationRegistry {
       _typeToInstanceOf[R] = _makeInstanceOf<R>();
     }
 
-    if (isIsolatePortSafe) {
-      final innerSerializer = serializer;
-      // ignore: parameter_assignments
-      serializer = (value, codec) {
-        if (codec.target == SerializationTarget.isolatePort) {
-          return value;
+    _serializers[R] = (value, codec) {
+      if (codec.target == SerializationTarget.isolatePort) {
+        if (value is Serializable) {
+          value.willSend();
         }
-        return innerSerializer(value, codec);
-      };
-    }
+        return value;
+      }
+      return serializer(value, codec);
+    };
 
-    _serializers[R] = serializer;
-
-    if (isIsolatePortSafe) {
-      final innerDeserializer = deserializer;
-      // ignore: parameter_assignments
-      deserializer = (value, codec) {
-        if (codec.target == SerializationTarget.isolatePort) {
-          return value;
+    _deserializers[R] = (value, codec) {
+      if (codec.target == SerializationTarget.isolatePort) {
+        if (value is Serializable) {
+          value.didReceive();
         }
-        return innerDeserializer(value, codec);
-      };
-    }
-
-    _deserializers[R] = deserializer;
+        return value;
+      }
+      return deserializer(value, codec);
+    };
   }
 
   SerializationRegistry merge(SerializationRegistry other) =>
@@ -385,18 +396,10 @@ SerializationRegistry _basicSerializationRegistry() =>
         serialize: (value, context) => value.inMicroseconds,
         deserialize: (value, context) => Duration(microseconds: value as int),
       )
-      ..addCodec<Data>(
-        '__Data__',
-        serialize: (value, context) => context.addData(value),
-        deserialize: (value, context) => context.getData(value as int),
-        handleSubTypes: true,
-        isIsolatePortSafe: false,
-      )
       ..addCodec<StackTrace>(
         '__StackTrace__',
         serialize: (value, context) => value.toString(),
         deserialize: (value, context) => StackTrace.fromString(value as String),
-        isIsolatePortSafe: false,
       )
       ..addSerializableCodec(
         'SerializationError',

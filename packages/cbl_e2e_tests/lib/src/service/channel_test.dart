@@ -14,8 +14,6 @@ import 'package:cbl/src/service/serialization/serialization_codec.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/utils.dart';
 import 'package:cbl_ffi/cbl_ffi.dart';
-import 'package:cbl_ffi/cbl_ffi.dart'
-    show Data, DataSliceResultExt, DataTypedListExt;
 import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -52,8 +50,8 @@ void main() {
 
       Future<void> expectData(Data input, Object output) => expectLater(
             channel
-                .call(DataRequest(input))
-                .then((value) => value.toTypedList()),
+                .call(DataRequest(MessageData(input)))
+                .then((value) => value.data.toTypedList()),
             completion(output),
           );
       final input = Uint8List.fromList([0, 1]).toData();
@@ -257,9 +255,9 @@ void registerTestHandlers(Channel channel) {
   channel
     ..addCallEndpoint((EchoRequest req) => 'Input: ${req.input}')
     ..addCallEndpoint((DataRequest req) {
-      final result = req.input.toTypedList();
+      final result = req.input.data.toTypedList();
       result[0] = 42;
-      return result.toData();
+      return MessageData(result.toData());
     })
     ..addCallEndpoint((ThrowTestError _) =>
         Future<void>.error(const TestError('Oops'), StackTrace.current))
@@ -308,12 +306,9 @@ PacketCodec packetCoded(SerializationTarget target) {
 }
 
 SerializationRegistry testSerializationRegistry() => SerializationRegistry()
-  ..addSerializableCodec('Echo', EchoRequest.deserialize)
-  ..addSerializableCodec(
-    'Blob',
-    DataRequest.deserialize,
-    isIsolatePortSafe: false,
-  )
+  ..addSerializableCodec('EchoRequest', EchoRequest.deserialize)
+  ..addSerializableCodec('DataRequest', DataRequest.deserialize)
+  ..addSerializableCodec('MessageData', MessageData.deserialize)
   ..addSerializableCodec('ThrowError', ThrowTestError.deserialize)
   ..addSerializableCodec('InfiniteStream', InfiniteStream.deserialize)
   ..addSerializableCodec('NonExistentEndpoint', NonExistentEndpoint.deserialize)
@@ -331,10 +326,10 @@ class EchoRequest extends Request<String> {
       EchoRequest(map['input']! as String);
 }
 
-class DataRequest extends Request<Data> {
+class DataRequest extends Request<MessageData> {
   DataRequest(this.input);
 
-  final Data input;
+  final MessageData input;
 
   @override
   StringMap serialize(SerializationContext context) =>
@@ -342,6 +337,43 @@ class DataRequest extends Request<Data> {
 
   static DataRequest deserialize(StringMap map, SerializationContext context) =>
       DataRequest(context.deserializeAs(map['input'])!);
+
+  @override
+  void willSend() => input.willSend();
+
+  @override
+  void didReceive() => input.didReceive();
+}
+
+class MessageData extends Serializable {
+  MessageData(Data data) : _data = data;
+
+  Data get data => _data!;
+  Data? _data;
+
+  TransferableData? _transferableData;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'data': context.addData(_data!)};
+
+  static MessageData deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      MessageData(context.getData(map['data']! as int));
+
+  @override
+  void willSend() {
+    _transferableData = TransferableData(_data!);
+    _data = null;
+  }
+
+  @override
+  void didReceive() {
+    _data = _transferableData!.materialize();
+    _transferableData = null;
+  }
 }
 
 class ThrowTestError extends Request<Null> {
@@ -374,7 +406,7 @@ class NonExistentEndpoint extends Request<Null> {
 }
 
 @immutable
-class TestError implements Exception, Serializable {
+class TestError extends Serializable implements Exception {
   const TestError(this.message);
 
   final String message;
