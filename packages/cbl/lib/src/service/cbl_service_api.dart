@@ -52,16 +52,8 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec('OpenDatabase', OpenDatabase.deserialize)
       ..addSerializableCodec('GetDatabaseState', GetDatabase.deserialize)
       ..addSerializableCodec('DeleteDatabase', DeleteDatabase.deserialize)
-      ..addSerializableCodec(
-        'GetDocument',
-        GetDocument.deserialize,
-        isIsolatePortSafe: false,
-      )
-      ..addSerializableCodec(
-        'SaveDocument',
-        SaveDocument.deserialize,
-        isIsolatePortSafe: false,
-      )
+      ..addSerializableCodec('GetDocument', GetDocument.deserialize)
+      ..addSerializableCodec('SaveDocument', SaveDocument.deserialize)
       ..addSerializableCodec('DeleteDocument', DeleteDocument.deserialize)
       ..addSerializableCodec('PurgeDocument', PurgeDocument.deserialize)
       ..addSerializableCodec(
@@ -114,7 +106,6 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec(
         'SetQueryParameters',
         SetQueryParameters.deserialize,
-        isIsolatePortSafe: false,
       )
       ..addSerializableCodec('ExplainQuery', ExplainQuery.deserialize)
       ..addSerializableCodec('ExecuteQuery', ExecuteQuery.deserialize)
@@ -130,20 +121,14 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         'CallQueryChangeListener',
         CallQueryChangeListener.deserialize,
       )
-      ..addSerializableCodec(
-        'CreateReplicator',
-        CreateReplicator.deserialize,
-        isIsolatePortSafe: false,
-      )
+      ..addSerializableCodec('CreateReplicator', CreateReplicator.deserialize)
       ..addSerializableCodec(
         'CallReplicationFilter',
         CallReplicationFilter.deserialize,
-        isIsolatePortSafe: false,
       )
       ..addSerializableCodec(
         'CallConflictResolver',
         CallConflictResolver.deserialize,
-        isIsolatePortSafe: false,
       )
       ..addSerializableCodec(
         'GetReplicatorStatus',
@@ -177,17 +162,9 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
 
       // CblService specific types
-      ..addSerializableCodec(
-        'TransferableValue',
-        TransferableValue.deserialize,
-        isIsolatePortSafe: false,
-      )
+      ..addSerializableCodec('TransferableValue', TransferableValue.deserialize)
       ..addSerializableCodec('DatabaseState', DatabaseState.deserialize)
-      ..addSerializableCodec(
-        'DocumentState',
-        DocumentState.deserialize,
-        isIsolatePortSafe: false,
-      )
+      ..addSerializableCodec('DocumentState', DocumentState.deserialize)
       ..addSerializableCodec('SaveBlobResponse', SaveBlobResponse.deserialize)
       ..addSerializableCodec('QueryState', QueryState.deserialize)
       ..addSerializableCodec(
@@ -214,17 +191,13 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         serialize: (value, context) => value.index,
         deserialize: (value, context) => EncodingFormat.values[value as int],
       )
-      ..addObjectCodec<EncodedData>(
-        'EncodedData',
-        serialize: (value, context) => {
-          'format': context.serialize(value.format),
-          'data': context.serialize(value.data),
-        },
-        deserialize: (map, context) => EncodedData(
-          context.deserializeAs(map['format'])!,
-          context.deserializeAs(map['data'])!,
-        ),
-        isIsolatePortSafe: false,
+      ..addSerializableCodec(
+        'TransferableData',
+        MessageData.deserialize,
+      )
+      ..addSerializableCodec(
+        'TransferableEncodedData',
+        _TransferableEncodedData.deserialize,
       )
 
       // Database types
@@ -550,7 +523,7 @@ class ReleaseObject extends Request<Null> {
       ReleaseObject(map.getAs('objectId'));
 }
 
-class RemoveChangeListener implements Request<Null> {
+class RemoveChangeListener extends Request<Null> {
   RemoveChangeListener({
     required this.targetId,
     required this.listenerId,
@@ -770,6 +743,12 @@ class SaveDocument extends Request<DocumentState?> {
         context.deserializeAs(map['state'])!,
         context.deserializeAs(map['concurrencyControl'])!,
       );
+
+  @override
+  void willSend() => state.willSend();
+
+  @override
+  void didReceive() => state.didReceive();
 }
 
 class DeleteDocument extends Request<DocumentState?> {
@@ -799,9 +778,15 @@ class DeleteDocument extends Request<DocumentState?> {
         context.deserializeAs(map['state'])!,
         context.deserializeAs(map['concurrencyControl'])!,
       );
+
+  @override
+  void willSend() => state.willSend();
+
+  @override
+  void didReceive() => state.didReceive();
 }
 
-class PurgeDocument implements Request<Null> {
+class PurgeDocument extends Request<Null> {
   PurgeDocument(this.databaseId, this.documentId);
 
   final int databaseId;
@@ -823,7 +808,7 @@ class PurgeDocument implements Request<Null> {
       );
 }
 
-class BeginDatabaseTransaction implements Request<Null> {
+class BeginDatabaseTransaction extends Request<Null> {
   BeginDatabaseTransaction({required this.databaseId});
 
   final int databaseId;
@@ -840,7 +825,7 @@ class BeginDatabaseTransaction implements Request<Null> {
       BeginDatabaseTransaction(databaseId: map.getAs('databaseId'));
 }
 
-class EndDatabaseTransaction implements Request<Null> {
+class EndDatabaseTransaction extends Request<Null> {
   EndDatabaseTransaction({required this.databaseId, required this.commit});
 
   final int databaseId;
@@ -862,7 +847,7 @@ class EndDatabaseTransaction implements Request<Null> {
       );
 }
 
-class SetDocumentExpiration implements Request<Null> {
+class SetDocumentExpiration extends Request<Null> {
   SetDocumentExpiration({
     required this.databaseId,
     required this.documentId,
@@ -891,7 +876,7 @@ class SetDocumentExpiration implements Request<Null> {
       );
 }
 
-class GetDocumentExpiration implements Request<DateTime?> {
+class GetDocumentExpiration extends Request<DateTime?> {
   GetDocumentExpiration({
     required this.databaseId,
     required this.documentId,
@@ -916,14 +901,13 @@ class GetDocumentExpiration implements Request<DateTime?> {
       );
 }
 
-class AddDatabaseChangeListener implements Request<Null> {
+class AddDatabaseChangeListener extends Request<Null> {
   AddDatabaseChangeListener({
     required this.databaseId,
     required this.listenerId,
   });
 
   final int databaseId;
-
   final int listenerId;
 
   @override
@@ -942,14 +926,13 @@ class AddDatabaseChangeListener implements Request<Null> {
       );
 }
 
-class CallDatabaseChangeListener implements Request<Null> {
+class CallDatabaseChangeListener extends Request<Null> {
   CallDatabaseChangeListener({
     required this.listenerId,
     required this.documentIds,
   });
 
   final int listenerId;
-
   final List<String> documentIds;
 
   @override
@@ -968,7 +951,7 @@ class CallDatabaseChangeListener implements Request<Null> {
       );
 }
 
-class AddDocumentChangeListener implements Request<Null> {
+class AddDocumentChangeListener extends Request<Null> {
   AddDocumentChangeListener({
     required this.databaseId,
     required this.documentId,
@@ -976,9 +959,7 @@ class AddDocumentChangeListener implements Request<Null> {
   });
 
   final int databaseId;
-
   final String documentId;
-
   final int listenerId;
 
   @override
@@ -999,7 +980,7 @@ class AddDocumentChangeListener implements Request<Null> {
       );
 }
 
-class CallDocumentChangeListener implements Request<Null> {
+class CallDocumentChangeListener extends Request<Null> {
   CallDocumentChangeListener({required this.listenerId});
 
   final int listenerId;
@@ -1015,7 +996,7 @@ class CallDocumentChangeListener implements Request<Null> {
       CallDocumentChangeListener(listenerId: map.getAs('listenerId'));
 }
 
-class PerformDatabaseMaintenance implements Request<Null> {
+class PerformDatabaseMaintenance extends Request<Null> {
   PerformDatabaseMaintenance({
     required this.databaseId,
     required this.type,
@@ -1040,7 +1021,7 @@ class PerformDatabaseMaintenance implements Request<Null> {
       );
 }
 
-class ChangeDatabaseEncryptionKey implements Request<Null> {
+class ChangeDatabaseEncryptionKey extends Request<Null> {
   ChangeDatabaseEncryptionKey({
     required this.databaseId,
     required this.encryptionKey,
@@ -1066,7 +1047,7 @@ class ChangeDatabaseEncryptionKey implements Request<Null> {
       );
 }
 
-class CreateIndex implements Request<Null> {
+class CreateIndex extends Request<Null> {
   CreateIndex({
     required this.databaseId,
     required this.name,
@@ -1095,7 +1076,7 @@ class CreateIndex implements Request<Null> {
       );
 }
 
-class DeleteIndex implements Request<Null> {
+class DeleteIndex extends Request<Null> {
   DeleteIndex({
     required this.databaseId,
     required this.name,
@@ -1120,7 +1101,7 @@ class DeleteIndex implements Request<Null> {
       );
 }
 
-class BlobExists implements Request<bool> {
+class BlobExists extends Request<bool> {
   BlobExists({
     required this.databaseId,
     required this.properties,
@@ -1145,7 +1126,7 @@ class BlobExists implements Request<bool> {
       );
 }
 
-class ReadBlob implements Request<Data> {
+class ReadBlob extends Request<MessageData> {
   ReadBlob({
     required this.databaseId,
     required this.properties,
@@ -1170,7 +1151,7 @@ class ReadBlob implements Request<Data> {
       );
 }
 
-class SaveBlob implements Request<SaveBlobResponse> {
+class SaveBlob extends Request<SaveBlobResponse> {
   SaveBlob({
     required this.databaseId,
     required this.contentType,
@@ -1199,7 +1180,7 @@ class SaveBlob implements Request<SaveBlobResponse> {
       );
 }
 
-class ReadBlobUpload implements Request<Data> {
+class ReadBlobUpload extends Request<MessageData> {
   ReadBlobUpload({
     required this.uploadId,
   });
@@ -1216,7 +1197,7 @@ class ReadBlobUpload implements Request<Data> {
       ReadBlobUpload(uploadId: map.getAs('uploadId'));
 }
 
-class CreateQuery implements Request<QueryState> {
+class CreateQuery extends Request<QueryState> {
   CreateQuery({
     required this.databaseId,
     required this.language,
@@ -1249,32 +1230,45 @@ class CreateQuery implements Request<QueryState> {
       );
 }
 
-class SetQueryParameters implements Request<Null> {
+class SetQueryParameters extends Request<Null> {
   SetQueryParameters({
     required this.queryId,
-    required this.parameters,
-  });
+    required EncodedData? parameters,
+  }) : _parameters = parameters?.let(_TransferableEncodedData.new);
+
+  SetQueryParameters._({
+    required this.queryId,
+    required _TransferableEncodedData? parameters,
+  }) : _parameters = parameters;
 
   final int queryId;
-  final EncodedData? parameters;
+
+  EncodedData? get parameters => _parameters?.encodedData;
+  final _TransferableEncodedData? _parameters;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'queryId': queryId,
-        'parameters': context.serialize(parameters),
+        'parameters': context.serialize(_parameters),
       };
 
   static SetQueryParameters deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      SetQueryParameters(
+      SetQueryParameters._(
         queryId: map.getAs('queryId'),
         parameters: context.deserializeAs(map['parameters']),
       );
+
+  @override
+  void willSend() => _parameters?.willSend();
+
+  @override
+  void didReceive() => _parameters?.didReceive();
 }
 
-class ExplainQuery implements Request<String> {
+class ExplainQuery extends Request<String> {
   ExplainQuery({
     required this.queryId,
   });
@@ -1291,7 +1285,7 @@ class ExplainQuery implements Request<String> {
       ExplainQuery(queryId: map.getAs('queryId'));
 }
 
-class ExecuteQuery implements Request<int> {
+class ExecuteQuery extends Request<int> {
   ExecuteQuery({
     required this.queryId,
   });
@@ -1308,7 +1302,7 @@ class ExecuteQuery implements Request<int> {
       ExecuteQuery(queryId: map.getAs('queryId'));
 }
 
-class GetQueryResultSet implements Request<TransferableValue> {
+class GetQueryResultSet extends Request<TransferableValue> {
   GetQueryResultSet({
     required this.queryId,
     required this.resultSetId,
@@ -1333,14 +1327,13 @@ class GetQueryResultSet implements Request<TransferableValue> {
       );
 }
 
-class AddQueryChangeListener implements Request<Null> {
+class AddQueryChangeListener extends Request<Null> {
   AddQueryChangeListener({
     required this.queryId,
     required this.listenerId,
   });
 
   final int queryId;
-
   final int listenerId;
 
   @override
@@ -1359,14 +1352,13 @@ class AddQueryChangeListener implements Request<Null> {
       );
 }
 
-class CallQueryChangeListener implements Request<Null> {
+class CallQueryChangeListener extends Request<Null> {
   CallQueryChangeListener({
     required this.listenerId,
     required this.resultSetId,
   });
 
   final int listenerId;
-
   final int resultSetId;
 
   @override
@@ -1385,7 +1377,7 @@ class CallQueryChangeListener implements Request<Null> {
       );
 }
 
-class ServiceDatabaseEndpoint extends Endpoint implements Serializable {
+class ServiceDatabaseEndpoint extends Serializable implements Endpoint {
   ServiceDatabaseEndpoint(this.databaseId);
 
   final int databaseId;
@@ -1409,7 +1401,7 @@ class CreateReplicator extends Request<int> {
     this.replicatorType = ReplicatorType.pushAndPull,
     this.continuous = false,
     this.authenticator,
-    this.pinnedServerCertificate,
+    Data? pinnedServerCertificate,
     this.headers,
     this.channels,
     this.documentIds,
@@ -1420,7 +1412,27 @@ class CreateReplicator extends Request<int> {
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
-  });
+  }) : _pinnedServerCertificate = pinnedServerCertificate?.let(MessageData.new);
+
+  CreateReplicator._({
+    required this.databaseId,
+    required this.propertiesFormat,
+    required this.target,
+    required this.replicatorType,
+    required this.continuous,
+    this.authenticator,
+    MessageData? pinnedServerCertificate,
+    this.headers,
+    this.channels,
+    this.documentIds,
+    this.pushFilterId,
+    this.pullFilterId,
+    this.conflictResolverId,
+    required this.enableAutoPurge,
+    this.heartbeat,
+    this.maxAttempts,
+    this.maxAttemptWaitTime,
+  }) : _pinnedServerCertificate = pinnedServerCertificate;
 
   final int databaseId;
   final EncodingFormat? propertiesFormat;
@@ -1428,7 +1440,8 @@ class CreateReplicator extends Request<int> {
   final ReplicatorType replicatorType;
   final bool continuous;
   final Authenticator? authenticator;
-  final Data? pinnedServerCertificate;
+  Data? get pinnedServerCertificate => _pinnedServerCertificate?.data;
+  final MessageData? _pinnedServerCertificate;
   final Map<String, String>? headers;
   final List<String>? channels;
   final List<String>? documentIds;
@@ -1448,7 +1461,7 @@ class CreateReplicator extends Request<int> {
         'replicatorType': context.serialize(replicatorType),
         'continuous': continuous,
         'authenticator': context.serializePolymorphic(authenticator),
-        'pinnedServerCertificate': context.serialize(pinnedServerCertificate),
+        'pinnedServerCertificate': context.serialize(_pinnedServerCertificate),
         'headers': headers,
         'channels': context.serialize(channels),
         'documentIds': context.serialize(documentIds),
@@ -1465,7 +1478,7 @@ class CreateReplicator extends Request<int> {
     StringMap map,
     SerializationContext context,
   ) =>
-      CreateReplicator(
+      CreateReplicator._(
         databaseId: map.getAs('databaseId'),
         propertiesFormat: context.deserializeAs(map['propertiesFormat']),
         target: context.deserializePolymorphic(map['target'])!,
@@ -1485,6 +1498,12 @@ class CreateReplicator extends Request<int> {
         maxAttempts: map.getAs('maxAttempts'),
         maxAttemptWaitTime: context.deserializeAs(map['maxAttemptWaitTime']),
       );
+
+  @override
+  void willSend() => _pinnedServerCertificate?.willSend();
+
+  @override
+  void didReceive() => _pinnedServerCertificate?.didReceive();
 }
 
 class CallReplicationFilter extends Request<bool> {
@@ -1517,6 +1536,12 @@ class CallReplicationFilter extends Request<bool> {
             .map((it) => context.deserializeAs<DocumentFlag>(it)!)
             .toSet(),
       );
+
+  @override
+  void willSend() => state.willSend();
+
+  @override
+  void didReceive() => state.didReceive();
 }
 
 class CallConflictResolver extends Request<DocumentState?> {
@@ -1546,6 +1571,18 @@ class CallConflictResolver extends Request<DocumentState?> {
         localState: context.deserializeAs(map['localState']),
         remoteState: context.deserializeAs(map['remoteState']),
       );
+
+  @override
+  void willSend() {
+    localState?.willSend();
+    remoteState?.willSend();
+  }
+
+  @override
+  void didReceive() {
+    localState?.didReceive();
+    remoteState?.didReceive();
+  }
 }
 
 class GetReplicatorStatus extends Request<ReplicatorStatus> {
@@ -1613,14 +1650,13 @@ class StopReplicator extends Request<Null> {
       );
 }
 
-class AddReplicatorChangeListener implements Request<Null> {
+class AddReplicatorChangeListener extends Request<Null> {
   AddReplicatorChangeListener({
     required this.replicatorId,
     required this.listenerId,
   });
 
   final int replicatorId;
-
   final int listenerId;
 
   @override
@@ -1639,14 +1675,13 @@ class AddReplicatorChangeListener implements Request<Null> {
       );
 }
 
-class CallReplicatorChangeListener implements Request<Null> {
+class CallReplicatorChangeListener extends Request<Null> {
   CallReplicatorChangeListener({
     required this.listenerId,
     required this.status,
   });
 
   final int listenerId;
-
   final ReplicatorStatus status;
 
   @override
@@ -1665,14 +1700,13 @@ class CallReplicatorChangeListener implements Request<Null> {
       );
 }
 
-class AddDocumentReplicationListener implements Request<Null> {
+class AddDocumentReplicationListener extends Request<Null> {
   AddDocumentReplicationListener({
     required this.replicatorId,
     required this.listenerId,
   });
 
   final int replicatorId;
-
   final int listenerId;
 
   @override
@@ -1691,12 +1725,13 @@ class AddDocumentReplicationListener implements Request<Null> {
       );
 }
 
-class CallDocumentReplicationListener implements Request<Null> {
-  CallDocumentReplicationListener(
-      {required this.listenerId, required this.event});
+class CallDocumentReplicationListener extends Request<Null> {
+  CallDocumentReplicationListener({
+    required this.listenerId,
+    required this.event,
+  });
 
   final int listenerId;
-
   final DocumentReplicationEvent event;
 
   @override
@@ -1713,6 +1748,12 @@ class CallDocumentReplicationListener implements Request<Null> {
         listenerId: map.getAs('listenerId'),
         event: context.deserializeAs(map['event'])!,
       );
+
+  @override
+  void willSend() => event.willSend();
+
+  @override
+  void didReceive() => event.didReceive();
 }
 
 class ReplicatorIsDocumentPending extends Request<bool> {
@@ -1763,34 +1804,110 @@ class ReplicatorPendingDocumentIds extends Request<List<String>> {
 
 // === Responses ===============================================================
 
-class TransferableValue implements Serializable {
-  TransferableValue._(this.encodedData, this.value) : _valueAddress = null;
+class MessageData extends Serializable {
+  MessageData(Data data) : _data = data;
 
-  TransferableValue.fromEncodedData(EncodedData this.encodedData)
-      : value = null,
-        _valueAddress = null;
+  Data get data => _data!;
+  Data? _data;
 
-  TransferableValue.fromValue(Value this.value)
-      : encodedData = null,
-        _valueAddress = value.pointer.address {
-    cblBindings.fleece.value.retain(value!.pointer);
+  TransferableData? _transferableData;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'data': context.addData(_data!)};
+
+  static MessageData deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      MessageData(context.getData(map['data']! as int));
+
+  @override
+  void willSend() {
+    _transferableData = TransferableData(_data!);
+    _data = null;
   }
 
-  final EncodedData? encodedData;
-  final Value? value;
-  final int? _valueAddress;
+  @override
+  void didReceive() {
+    _data = _transferableData!.materialize();
+    _transferableData = null;
+  }
+}
+
+class _TransferableEncodedData extends Serializable {
+  _TransferableEncodedData(EncodedData data)
+      : _format = data.format,
+        _data = MessageData(data.data);
+
+  _TransferableEncodedData._(this._format, this._data);
+
+  final EncodingFormat _format;
+  final MessageData _data;
+
+  EncodedData get encodedData => EncodedData(_format, _data.data);
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'encodedData': context.serialize(encodedData),
-        'valueAddress': _valueAddress,
+        'format': context.serialize(_format),
+        'data': context.serialize(_data),
       };
+
+  static _TransferableEncodedData deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      _TransferableEncodedData._(
+        context.deserializeAs(map['format'])!,
+        context.deserializeAs(map['data'])!,
+      );
+
+  @override
+  void willSend() => _data.willSend();
+
+  @override
+  void didReceive() => _data.didReceive();
+}
+
+class TransferableValue extends Serializable {
+  TransferableValue._(this._encodedData, this._value) : _valueAddress = null;
+
+  TransferableValue.fromEncodedData(EncodedData encodedData)
+      : _encodedData = _TransferableEncodedData(encodedData);
+
+  TransferableValue.fromValue(Value value)
+      : _encodedData = null,
+        _value = value;
+
+  EncodedData? get encodedData => _encodedData?.encodedData;
+  final _TransferableEncodedData? _encodedData;
+
+  Value? get value => _value;
+  Value? _value;
+
+  int? _valueAddress;
+
+  @override
+  StringMap serialize(SerializationContext context) {
+    final value = _value;
+    if (value != null) {
+      cblBindings.fleece.value.retain(value.pointer);
+      _valueAddress = value.pointer.address;
+      _value = null;
+    }
+
+    return {
+      'encodedData': context.serialize(_encodedData),
+      'valueAddress': _valueAddress,
+    };
+  }
 
   static TransferableValue deserialize(
     StringMap map,
     SerializationContext context,
   ) {
-    final encodedData = context.deserializeAs<EncodedData>(map['encodedData']);
+    final encodedData =
+        context.deserializeAs<_TransferableEncodedData>(map['encodedData']);
 
     Value? value;
     final valueAddress = map.getAs<int?>('valueAddress');
@@ -1800,9 +1917,33 @@ class TransferableValue implements Serializable {
 
     return TransferableValue._(encodedData, value);
   }
+
+  @override
+  void willSend() {
+    _encodedData?.willSend();
+
+    final value = _value;
+    if (value != null) {
+      cblBindings.fleece.value.retain(value.pointer);
+      _valueAddress = value.pointer.address;
+      _value = null;
+    }
+  }
+
+  @override
+  void didReceive() {
+    _encodedData?.didReceive();
+
+    final valueAddress = _valueAddress;
+    if (valueAddress != null) {
+      _value =
+          Value.fromPointer(Pointer.fromAddress(valueAddress), adopt: true);
+      _valueAddress = null;
+    }
+  }
 }
 
-class DatabaseState implements Serializable {
+class DatabaseState extends Serializable {
   DatabaseState({
     required this.id,
     required this.name,
@@ -1840,7 +1981,7 @@ class DatabaseState implements Serializable {
 }
 
 @immutable
-class DocumentState implements Serializable {
+class DocumentState extends Serializable {
   const DocumentState({
     this.id,
     this.sourceId,
@@ -1897,9 +2038,15 @@ class DocumentState implements Serializable {
         sequence: map.getAs('sequence'),
         properties: context.deserializeAs(map['properties']),
       );
+
+  @override
+  void willSend() => properties?.willSend();
+
+  @override
+  void didReceive() => properties?.didReceive();
 }
 
-class SaveBlobResponse implements Serializable {
+class SaveBlobResponse extends Serializable {
   SaveBlobResponse(this.properties);
 
   final StringMap properties;
@@ -1915,7 +2062,7 @@ class SaveBlobResponse implements Serializable {
       SaveBlobResponse(map.getAs('properties'));
 }
 
-class QueryState implements Serializable {
+class QueryState extends Serializable {
   QueryState({
     required this.id,
     required this.columnNames,
@@ -1940,7 +2087,7 @@ class QueryState implements Serializable {
       );
 }
 
-class DocumentReplicationEvent implements Serializable {
+class DocumentReplicationEvent extends Serializable {
   DocumentReplicationEvent({
     required this.isPush,
     required this.documents,
@@ -1970,7 +2117,7 @@ class DocumentReplicationEvent implements Serializable {
 
 // === Exceptions ==============================================================
 
-class NotFoundException implements Exception, Serializable {
+class NotFoundException extends Serializable implements Exception {
   NotFoundException(this.id, this.type)
       : message = 'Could not find object of type $type with id $id';
 

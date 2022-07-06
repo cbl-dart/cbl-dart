@@ -17,11 +17,12 @@ class ProxyBlobStore implements BlobStore {
       ));
 
   @override
-  Stream<Data>? readBlob(Map<String, Object?> properties) =>
-      database.channel.stream(ReadBlob(
+  Stream<Data>? readBlob(Map<String, Object?> properties) => database.channel
+      .stream(ReadBlob(
         databaseId: database.objectId,
         properties: properties,
-      ));
+      ))
+      .map((event) => event.data);
 
   @override
   Future<Map<String, Object?>> saveBlobFromData(

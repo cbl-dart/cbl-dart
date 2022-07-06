@@ -581,13 +581,11 @@ SerializationRegistry channelSerializationRegistry() => SerializationRegistry()
     'UnimplementedError',
     serialize: (value, _) => {'message': value.message},
     deserialize: (json, _) => UnimplementedError(json['message'] as String?),
-    isIsolatePortSafe: false,
   )
   ..addObjectCodec<ArgumentError>(
     'ArgumentError',
     serialize: (value, _) => {'message': value.toString()},
     deserialize: (map, _) => ArgumentError(map.getAs<String>('message')),
-    isIsolatePortSafe: false,
   )
 
   // Protocol messages
@@ -607,11 +605,11 @@ extension on SerializationRegistry {
     String typeName,
     SerializableDeserializer<T> deserialize,
   ) {
-    addSerializableCodec(typeName, deserialize, isIsolatePortSafe: false);
+    addSerializableCodec(typeName, deserialize);
   }
 }
 
-abstract class _Message implements Serializable {
+abstract class _Message extends Serializable {
   _Message(this.conversationId, this.context);
 
   _Message.deserialize(StringMap map)
@@ -636,16 +634,22 @@ abstract class _RequestMessage extends _Message {
   ) : super(conversationId, context);
 
   _RequestMessage.deserialize(super.map, SerializationContext context)
-      : request = context.deserializePolymorphic(map['request']),
+      : request = context.deserializePolymorphic(map['request'])!,
         super.deserialize();
 
-  final Object? request;
+  final Request request;
 
   @override
   StringMap serialize(SerializationContext context) => {
         ...super.serialize(context),
         'request': context.serializePolymorphic(request),
       };
+
+  @override
+  void willSend() => request.willSend();
+
+  @override
+  void didReceive() => request.didReceive();
 }
 
 abstract class _SuccessMessage extends _Message {
@@ -666,6 +670,22 @@ abstract class _SuccessMessage extends _Message {
         ...super.serialize(context),
         'data': context.serializePolymorphic(data),
       };
+
+  @override
+  void willSend() {
+    final data = this.data;
+    if (data is Serializable) {
+      data.willSend();
+    }
+  }
+
+  @override
+  void didReceive() {
+    final data = this.data;
+    if (data is Serializable) {
+      data.didReceive();
+    }
+  }
 }
 
 abstract class _ErrorMessage extends _Message {
@@ -698,6 +718,22 @@ abstract class _ErrorMessage extends _Message {
       'error': context.serializePolymorphic(error),
       'stackTrace': context.serialize(stackTrace),
     };
+  }
+
+  @override
+  void willSend() {
+    final error = this.error;
+    if (error is Serializable) {
+      error.willSend();
+    }
+  }
+
+  @override
+  void didReceive() {
+    final error = this.error;
+    if (error is Serializable) {
+      error.didReceive();
+    }
   }
 }
 
