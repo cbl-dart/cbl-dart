@@ -30,13 +30,13 @@ abstract class Serializable {
 
   /// Called before this object is sent through a [SendPort].
   ///
-  /// This allows an object to make itself sendable by replacing references
-  /// to objects that are not sendable, e.g. [Pointer], with sendable ones. The
+  /// This allows an object to make itself sendable by replacing references to
+  /// objects that are not sendable, e.g. [Pointer], with sendable ones. The
   /// received copy will have [didReceive] called on it, where it should restore
   /// itself to the state of the original before [willSend] was called on it.
   ///
-  /// If this object contains other [Serializable]s, it must call [willSend]
-  /// on them from this method.
+  /// If this object contains other [Serializable]s, it must call [willSend] on
+  /// them from this method.
   void willSend() {}
 
   /// Called after this object has been received from a [ReceivePort].
