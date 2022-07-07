@@ -1,3 +1,7 @@
+## 1.0.0
+
+ - **DOCS**: remove beta note. ([e8de504f](https://github.com/cbl-dart/cbl-dart/commit/e8de504fe7022a6682c0552168acd42177df3eda))
+
 ## 1.0.0-beta.4
 
 > Note: This release has breaking changes.
