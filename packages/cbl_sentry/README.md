@@ -130,7 +130,7 @@ Future<void> queryDatabase() => runAppOperation('queryDatabase', () async {
     });
 ```
 
-![Sentry Trace Example](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_sentry/doc/img/sentry-trace-example.png?raw=true))
+![Sentry Trace Example](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_sentry/doc/img/sentry-trace-example.png?raw=true)
 
 # 💡 Where to go next
 
