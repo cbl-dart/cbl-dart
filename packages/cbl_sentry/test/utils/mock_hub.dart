@@ -10,9 +10,8 @@ class MockHub implements Hub {
   SentryOptions get options => SentryOptions();
 
   @override
-  void addBreadcrumb(Breadcrumb crumb, {Object? hint}) {
-    breadcrumbs.add(crumb);
-  }
+  Future<void> addBreadcrumb(Breadcrumb crumb, {Object? hint}) async =>
+      breadcrumbs.add(crumb);
 
   @override
   void bindClient(SentryClient client) {}
@@ -54,7 +53,7 @@ class MockHub implements Hub {
   Future<void> captureUserFeedback(SentryUserFeedback userFeedback) async {}
 
   @override
-  Hub clone() => this;
+  Future<Hub> clone() async => this;
 
   @override
   Future<void> close() async {}
