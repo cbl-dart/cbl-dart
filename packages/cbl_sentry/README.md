@@ -19,9 +19,6 @@ and features you want to use:
 | [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.        | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
 | [cbl_generator]  | generate Dart code to access data trough a typed data model.          | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
 
-> This package is in beta. Use it with caution and [report any issues you
-> see][issues].
-
 ### Table of contents
 
 - [🤩 Features](#-features)
