@@ -1,6 +1,7 @@
 name: cbl_dart
 repository: https://github.com/cbl-dart/cbl-dart
 packages:
+  - .
   - packages/**
 ide:
   intellij: false
@@ -59,4 +60,6 @@ scripts:
     description:
       Pre-commit hook for the version command to update the `cbl_flutter_ce|ee`
       packages.
-    run: melos build:cbl_flutter_prebuilt && git add packages/cbl_flutter_ee packages/cbl_flutter_ce
+    run:
+      melos build:cbl_flutter_prebuilt && git add packages/cbl_flutter_ee
+      packages/cbl_flutter_ce
