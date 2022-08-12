@@ -62,6 +62,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install Android Native Toolchain
+        run: ./native/tools/android-sdk.sh installNativeToolchain
+
       - name: Download Couchbase Lite
         run: ./native/tools/download_prebuilt_binaries.sh android
 
