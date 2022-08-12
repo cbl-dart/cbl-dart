@@ -53,7 +53,7 @@ class MockHub implements Hub {
   Future<void> captureUserFeedback(SentryUserFeedback userFeedback) async {}
 
   @override
-  Future<Hub> clone() async => this;
+  Hub clone() => this;
 
   @override
   Future<void> close() async {}
