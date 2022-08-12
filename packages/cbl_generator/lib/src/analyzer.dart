@@ -78,6 +78,7 @@ class TypedDataAnalyzer {
       libraryUri: element.librarySource.uri,
       declaringClassName: element.displayName,
       types: [
+        // ignore: deprecated_member_use
         for (final type in types) await buildTypedDataClassModel(type.element!)
       ],
     );
@@ -550,7 +551,9 @@ class TypedDataAnalyzer {
 
 bool _isTypedDataObject(DartType type) {
   if (type is InterfaceType) {
+    // ignore: deprecated_member_use
     return _typedDictionaryType.hasAnnotationOfExact(type.element) ||
+        // ignore: deprecated_member_use
         _typedDocumentType.hasAnnotationOfExact(type.element);
   }
 
