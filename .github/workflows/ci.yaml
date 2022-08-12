@@ -166,6 +166,10 @@ jobs:
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
+      - name: Install Android Native Toolchain
+        if: ${{ matrix.os == 'Android' }}
+        run: ./native/tools/android-sdk.sh installNativeToolchain
+
       - name: Build native libraries
         shell: bash
         run: ./tools/ci-steps.sh buildNativeLibraries
