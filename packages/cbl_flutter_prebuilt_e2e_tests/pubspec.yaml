@@ -10,7 +10,7 @@ dependencies:
   cbl: ^2.0.0
   cbl_ffi: ^0.8.0
   cbl_flutter: ^2.0.0
-  cbl_flutter_ee: ^2.0.0
+  cbl_flutter_ee: ^2.1.0
   flutter:
     sdk: flutter
   flutter_test:
