@@ -138,7 +138,7 @@ class Package {
   });
 
   static const latestReleases = {
-    Library.libcblite: '3.0.1',
+    Library.libcblite: '3.0.2',
     Library.libcblitedart: '1.0.0',
   };
 

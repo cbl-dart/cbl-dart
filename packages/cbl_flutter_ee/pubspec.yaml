@@ -11,7 +11,7 @@ environment:
 
 dependencies:
   cbl_flutter_platform_interface: ^2.0.0
-  cbl_libcblite_api: 3.0.1
+  cbl_libcblite_api: 3.0.2
   cbl_libcblitedart_api: 2.0.0
   flutter:
     sdk: flutter
