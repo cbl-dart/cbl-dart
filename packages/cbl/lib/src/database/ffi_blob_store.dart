@@ -15,27 +15,18 @@ import 'blob_store.dart';
 import 'ffi_database.dart';
 
 class _FfiBlob implements Finalizable {
-  _FfiBlob.fromPointer(
-    this.pointer, {
-    bool adopt = false,
-    required String debugName,
-  }) {
+  _FfiBlob.fromPointer(this.pointer, {bool adopt = false}) {
     bindCBLRefCountedToDartObject(
       this,
       pointer: pointer,
       adopt: adopt,
-      debugName: debugName,
     );
   }
 
-  _FfiBlob.createWithData(
-    String contentType,
-    Data data, {
-    required String debugName,
-  }) : this.fromPointer(
+  _FfiBlob.createWithData(String contentType, Data data)
+      : this.fromPointer(
           _blobBindings.createWithData(contentType, data),
           adopt: true,
-          debugName: debugName,
         );
 
   static final _blobBindings = cblBindings.blobs.blob;
@@ -62,11 +53,7 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
 
   @override
   Map<String, Object?> saveBlobFromDataSync(String contentType, Data data) {
-    final blob = _FfiBlob.createWithData(
-      contentType,
-      data,
-      debugName: 'NativeBlobStore.saveBlobFromDataSync()',
-    );
+    final blob = _FfiBlob.createWithData(contentType, data);
     _saveBlob(blob);
     return blob.createBlobProperties();
   }
@@ -124,11 +111,8 @@ class FfiBlobStore implements BlobStore, SyncBlobStore {
       () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
     );
 
-    return pointer?.let((pointer) => _FfiBlob.fromPointer(
-          pointer,
-          adopt: true,
-          debugName: 'NativeBlobStore._getBlob',
-        ));
+    return pointer
+        ?.let((pointer) => _FfiBlob.fromPointer(pointer, adopt: true));
   }
 }
 
@@ -150,7 +134,6 @@ Future<_FfiBlob> _createBlobFromStream(
     return _FfiBlob.fromPointer(
       _writeStreamBindings.createBlobWithStream(contentType, writeStream),
       adopt: true,
-      debugName: '_createBlobFromStream',
     );
     // ignore: avoid_catches_without_on_clauses
   } catch (e) {

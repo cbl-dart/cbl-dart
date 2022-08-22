@@ -35,7 +35,6 @@ final _bindings = cblBindings.query;
 
 class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   FfiQuery({
-    required super.debugCreator,
     FfiDatabase? super.database,
     required super.language,
     super.definition,
@@ -75,7 +74,6 @@ class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
             runWithErrorTranslation(() => _bindings.execute(_pointer)),
             query: this,
             columnNames: _columnNames,
-            debugCreator: 'FfiQuery.execute()',
           ),
         ),
       );
@@ -103,7 +101,6 @@ class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
           _bindings.copyCurrentResults(_pointer, listenerToken),
           query: this,
           columnNames: _columnNames,
-          debugCreator: 'FfiQuery.changes()',
         );
 
         final change = QueryChange(this, results);
@@ -151,11 +148,7 @@ class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
         () => _bindings.create(database!.pointer, language, definition!),
       );
 
-      bindCBLRefCountedToDartObject(
-        this,
-        pointer: _pointer,
-        debugName: 'FfiQuery(creator: $debugCreator)',
-      );
+      bindCBLRefCountedToDartObject(this, pointer: _pointer);
 
       _columnNames = List.generate(
         _bindings.columnCount(_pointer),
@@ -188,13 +181,9 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
     Pointer<CBLResultSet> pointer, {
     required FfiQuery query,
     required List<String> columnNames,
-    required String debugCreator,
   })  : _database = query.database!,
         _columnNames = columnNames,
-        _iterator = ResultSetIterator.fromPointer(
-          pointer,
-          debugCreator: debugCreator,
-        ),
+        _iterator = ResultSetIterator.fromPointer(pointer),
         _context = createResultSetMContext(query.database!);
 
   final DatabaseBase _database;
@@ -250,16 +239,8 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
 class ResultSetIterator
     with IterableMixin<fl.Array>
     implements Iterator<fl.Array>, Finalizable {
-  ResultSetIterator.fromPointer(
-    this._pointer, {
-    this.encodeArray = false,
-    required String debugCreator,
-  }) {
-    bindCBLRefCountedToDartObject(
-      this,
-      pointer: _pointer,
-      debugName: 'ResultSetIterator(creator: $debugCreator)',
-    );
+  ResultSetIterator.fromPointer(this._pointer, {this.encodeArray = false}) {
+    bindCBLRefCountedToDartObject(this, pointer: _pointer);
   }
 
   static final _bindings = cblBindings.resultSet;
@@ -305,7 +286,6 @@ abstract class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
     ExpressionInterface? limit,
     ExpressionInterface? offset,
   }) : super(
-          debugCreator: 'SyncBuilderQuery()',
           database: (from as DataSourceImpl?)?.database as FfiDatabase? ??
               query?.database as FfiDatabase?,
           language: CBLQueryLanguage.json,

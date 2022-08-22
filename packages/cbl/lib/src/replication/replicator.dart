@@ -247,7 +247,7 @@ abstract class Replicator implements ClosableResource {
 abstract class SyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createSync}
   static Future<SyncReplicator> create(ReplicatorConfiguration config) =>
-      FfiReplicator.create(config, debugCreator: 'SyncReplicator()');
+      FfiReplicator.create(config);
 
   @override
   ReplicatorStatus get status;

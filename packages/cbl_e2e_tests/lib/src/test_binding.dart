@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl/src/support/debug.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as t;
 
@@ -112,7 +111,6 @@ abstract class CblE2eTestBinding {
 
       const consoleLogLevel = LogLevel.warning;
       const fileLogLevel = LogLevel.verbose;
-      debugRefCounted = false;
 
       Database.log.file
         ..config = LogFileConfiguration(

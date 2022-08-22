@@ -51,27 +51,6 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
 
 // === Couchbase Lite =========================================================
 
-// === Base
-
-/**
- * Binds a CBLRefCounted to a Dart objects lifetime.
- *
- * If \p retain is true the ref counted object will be retained. Otherwise
- * it will only be released once the Dart object is garbage collected.
- */
-CBLDART_EXPORT
-void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
-                                           CBLRefCounted *refCounted,
-                                           bool retain, char *debugName);
-
-/**
- * Sets whether information to debug CBLRefCounted is printed.
- *
- * This features is only functional in debug builds.
- */
-CBLDART_EXPORT
-void CBLDart_SetDebugRefCounted(bool enabled);
-
 // === Log
 
 CBLDART_EXPORT
@@ -98,8 +77,7 @@ CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
                                       CBLError *errorOut);
 
 CBLDART_EXPORT
-void CBLDart_BindDatabaseToDartObject(Dart_Handle object, CBLDatabase *database,
-                                      char *debugName);
+void CBLDart_CBLDatabase_Release(CBLDatabase *database);
 
 CBLDART_EXPORT
 bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
@@ -141,10 +119,6 @@ CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
 // === Blob
 
 CBLDART_EXPORT
-void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
-                                            CBLBlobReadStream *stream);
-
-CBLDART_EXPORT
 FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
                                          uint64_t bufferSize,
                                          CBLError *outError);
@@ -177,9 +151,7 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration *config, CBLError *errorOut);
 
 CBLDART_EXPORT
-void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
-                                        CBLReplicator *replicator,
-                                        char *debugName);
+void CBLDart_CBLReplicator_Release(CBLReplicator *replicator);
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,

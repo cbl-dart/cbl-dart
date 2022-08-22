@@ -42,7 +42,6 @@ class FfiDatabase
     required String name,
     DatabaseConfiguration? config,
     TypedDataAdapter? typedDataAdapter,
-    required String debugCreator,
   }) {
     config ??= DatabaseConfiguration();
 
@@ -56,7 +55,6 @@ class FfiDatabase
         () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
       ),
       typedDataAdapter: typedDataAdapter,
-      debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
   }
 
@@ -64,9 +62,8 @@ class FfiDatabase
     required DatabaseConfiguration config,
     required this.pointer,
     required this.typedDataAdapter,
-    required String debugName,
   }) : _config = config {
-    bindCBLDatabaseToDartObject(this, pointer: pointer, debugName: debugName);
+    bindCBLDatabaseToDartObject(this, pointer: pointer);
     name = _bindings.name(pointer);
     _path = _bindings.path(pointer);
   }
@@ -155,7 +152,6 @@ class FfiDatabase
               FfiDocumentDelegate.fromPointer(
                 documentPointer,
                 adopt: true,
-                debugCreator: 'FfiDatabase.document()',
               ),
               database: this,
             );

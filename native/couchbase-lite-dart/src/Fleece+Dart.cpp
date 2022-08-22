@@ -88,7 +88,7 @@ void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
 
 struct KnownSharedKeys {
   /**
-   * Marks the give key as known, if it wasent already.
+   * Marks the give key as known, if it wasn't already.
    *
    * Returns true if the key was previously unknown.
    */

@@ -4,7 +4,6 @@ import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import 'debug.dart';
 import 'ffi.dart';
 
 /// Binds the lifetime of a native CBL ref counted object to a Dart object.
@@ -13,42 +12,27 @@ import 'ffi.dart';
 /// transferred to the Dart [object] or the native object has just been created
 /// and the created Dart [object] is the initial reference holder.
 void bindCBLRefCountedToDartObject<T extends NativeType>(
-  Object object, {
+  Finalizable object, {
   required Pointer<T> pointer,
   bool adopt = true,
-  required String debugName,
 }) {
   cblBindings.base.bindCBLRefCountedToDartObject(
     object,
     refCounted: pointer.cast(),
     retain: !adopt,
-    debugName: _filterDebugRefCountedName(debugName),
   );
 }
 
 void bindCBLDatabaseToDartObject(
-  Object object, {
+  Finalizable object, {
   required Pointer<CBLDatabase> pointer,
-  required String debugName,
 }) {
-  cblBindings.database.bindToDartObject(
-    object,
-    pointer,
-    _filterDebugRefCountedName(debugName),
-  );
+  cblBindings.database.bindToDartObject(object, pointer);
 }
 
 void bindCBLReplicatorToDartObject(
-  Object object, {
+  Finalizable object, {
   required Pointer<CBLReplicator> pointer,
-  required String debugName,
 }) {
-  cblBindings.replicator.bindToDartObject(
-    object,
-    pointer,
-    _filterDebugRefCountedName(debugName),
-  );
+  cblBindings.replicator.bindToDartObject(object, pointer);
 }
-
-String? _filterDebugRefCountedName(String debugName) =>
-    debugRefCounted ? debugName : null;
