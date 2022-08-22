@@ -36,8 +36,11 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 typedef struct _CBLDart_AsyncCallback *CBLDart_AsyncCallback;
 
 CBLDART_EXPORT
-CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
-                                                Dart_Port sendPort, bool debug);
+CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Port sendPort,
+                                                bool debug);
+
+CBLDART_EXPORT
+void CBLDart_AsyncCallback_Delete(CBLDart_AsyncCallback callback);
 
 CBLDART_EXPORT
 void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback);

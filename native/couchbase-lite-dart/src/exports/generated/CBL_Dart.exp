@@ -3,6 +3,7 @@
 _CBLDart_Initialize
 _CBLDart_AsyncCallback_New
 _CBLDart_AsyncCallback_Close
+_CBLDart_AsyncCallback_Delete
 _CBLDart_AsyncCallback_CallForTest
 _CBLDart_BindCBLRefCountedToDartObject
 _CBLDart_SetDebugRefCounted

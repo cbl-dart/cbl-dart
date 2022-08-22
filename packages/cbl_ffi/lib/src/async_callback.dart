@@ -9,13 +9,11 @@ class CBLDartAsyncCallback extends Opaque {}
 
 typedef _CBLDart_AsyncCallback_New_C = Pointer<CBLDartAsyncCallback> Function(
   Uint32 id,
-  Handle dartCallback,
   Int64 sendPort,
   Bool debug,
 );
 typedef _CBLDart_AsyncCallback_New = Pointer<CBLDartAsyncCallback> Function(
   int id,
-  Object dartCallback,
   int sendPort,
   bool debug,
 );
@@ -24,6 +22,10 @@ typedef _CBLDart_AsyncCallback_Close_C = Void Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
 typedef _CBLDart_AsyncCallback_Close = void Function(
+  Pointer<CBLDartAsyncCallback> callback,
+);
+
+typedef _CBLDart_AsyncCallback_Delete_C = Void Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
 
@@ -42,10 +44,13 @@ class AsyncCallbackBindings extends Bindings {
         _CBLDart_AsyncCallback_New>(
       'CBLDart_AsyncCallback_New',
     );
+    _deletePtr =
+        libs.cblDart.lookup<NativeFunction<_CBLDart_AsyncCallback_Delete_C>>(
+      'CBLDart_AsyncCallback_Delete',
+    );
     _close = libs.cblDart.lookupFunction<_CBLDart_AsyncCallback_Close_C,
         _CBLDart_AsyncCallback_Close>(
       'CBLDart_AsyncCallback_Close',
-      isLeaf: useIsLeaf,
     );
     _callForTest = libs.cblDart.lookupFunction<
         _CBLDart_AsyncCallback_CallForTest_C,
@@ -56,16 +61,23 @@ class AsyncCallbackBindings extends Bindings {
   }
 
   late final _CBLDart_AsyncCallback_New _new;
+  late final Pointer<NativeFunction<_CBLDart_AsyncCallback_Delete_C>>
+      _deletePtr;
   late final _CBLDart_AsyncCallback_Close _close;
   late final _CBLDart_AsyncCallback_CallForTest _callForTest;
 
+  late final _finalizer = NativeFinalizer(_deletePtr.cast());
+
   Pointer<CBLDartAsyncCallback> create(
     int id,
-    Object dartCallback,
+    Finalizable callbackObject,
     SendPort sendPort, {
     required bool debug,
-  }) =>
-      _new(id, dartCallback, sendPort.nativePort, debug);
+  }) {
+    final result = _new(id, sendPort.nativePort, debug);
+    _finalizer.attach(callbackObject, result.cast());
+    return result;
+  }
 
   void close(Pointer<CBLDartAsyncCallback> callback) {
     _close(callback);

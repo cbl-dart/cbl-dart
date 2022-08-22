@@ -50,14 +50,14 @@ AsyncCallbackRegistry::AsyncCallbackRegistry() {}
 
 // === AsyncCallback ==========================================================
 
-AsyncCallback::AsyncCallback(uint32_t id, Dart_Handle dartCallback,
-                             Dart_Port sendport, bool debug)
-    : id_(id), debug_(debug), sendPort_(sendport) {
-  dartCallbackHandle_ = Dart_NewWeakPersistentHandle_DL(
-      dartCallback, this, sizeof(AsyncCallback), AsyncCallback::dartFinalizer);
-  assert(dartCallbackHandle_ != nullptr);
-
+AsyncCallback::AsyncCallback(uint32_t id, Dart_Port sendPort, bool debug)
+    : id_(id), debug_(debug), sendPort_(sendPort) {
   AsyncCallbackRegistry::instance.registerCallback(*this);
+}
+
+AsyncCallback::~AsyncCallback() {
+  close();
+  debugLog("deleted");
 }
 
 void AsyncCallback::setFinalizer(void *context, CallbackFinalizer finalizer) {
@@ -71,7 +71,9 @@ void AsyncCallback::setFinalizer(void *context, CallbackFinalizer finalizer) {
 void AsyncCallback::close() {
   {
     std::scoped_lock lock(mutex_);
-    assert(!closed_);
+    if (closed_) {
+      return;
+    }
 
     // After this point no new calls can be registered.
     closed_ = true;
@@ -81,11 +83,6 @@ void AsyncCallback::close() {
     finalizer_(finalizerContext_);
     finalizer_ = nullptr;
     finalizerContext_ = nullptr;
-  }
-
-  if (dartCallbackHandle_) {
-    Dart_DeleteWeakPersistentHandle_DL(dartCallbackHandle_);
-    dartCallbackHandle_ = nullptr;
   }
 
   {
@@ -103,14 +100,6 @@ void AsyncCallback::close() {
   AsyncCallbackRegistry::instance.unregisterCallback(*this);
 
   debugLog("closed");
-}
-
-void AsyncCallback::dartFinalizer(void *dart_callback_data, void *peer) {
-  auto callback = reinterpret_cast<AsyncCallback *>(peer);
-  callback->debugLog("closing from Dart finalizer");
-  callback->dartCallbackHandle_ = nullptr;
-  callback->close();
-  delete callback;
 }
 
 void AsyncCallback::registerCall(AsyncCallbackCall &call) {
@@ -134,8 +123,8 @@ void AsyncCallback::unregisterCall(AsyncCallbackCall &call) {
 }
 
 bool AsyncCallback::sendRequest(Dart_CObject *request) {
-  // If the send port and therefore the callack is closed before the request can
-  // be sent, this call retruns false. This allows us to avoid calling this
+  // If the send port and therefore the callback is closed before the request
+  // can be sent, this call returns false. This allows us to avoid calling this
   // function under a lock.
   return Dart_PostCObject_DL(sendPort_, request);
 }
@@ -284,7 +273,7 @@ void AsyncCallbackCall::close() {
     auto didTakeCall = AsyncCallbackRegistry::instance.takeBlockingCall(*this);
     if (!didTakeCall) {
       // If at this point we are not able to take the blocking call,
-      // `complete` already did and is just wainting for us to release
+      // `complete` already did and is just waiting for us to release
       // the lock on this call.
       debugLog("not completing call which will be completed with result");
       return;

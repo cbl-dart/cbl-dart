@@ -46,17 +46,17 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 #define ASYNC_CALLBACK_TO_C(callback) \
   reinterpret_cast<CBLDart_AsyncCallback>(callback)
 
-CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
-                                                Dart_Port sendPort,
+CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Port sendPort,
                                                 bool debug) {
-  return ASYNC_CALLBACK_TO_C(
-      new CBLDart::AsyncCallback(id, object, sendPort, debug));
+  return ASYNC_CALLBACK_TO_C(new CBLDart::AsyncCallback(id, sendPort, debug));
+}
+
+void CBLDart_AsyncCallback_Delete(CBLDart_AsyncCallback callback) {
+  delete ASYNC_CALLBACK_FROM_C(callback);
 }
 
 void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback) {
-  auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
-  callback_->close();
-  delete callback_;
+  ASYNC_CALLBACK_FROM_C(callback)->close();
 }
 
 void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
