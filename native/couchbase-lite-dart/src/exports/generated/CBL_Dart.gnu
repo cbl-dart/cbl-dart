@@ -22,22 +22,20 @@ CBL_Dart {
 		CBLDart_CBLReplicator_Release;
 		CBLDart_CBLReplicator_AddChangeListener;
 		CBLDart_CBLReplicator_AddDocumentReplicationListener;
-		CBLDart_FLSliceResult_BindToDartObject;
-		CBLDart_FLSliceResult_Retain;
-		CBLDart_FLSliceResult_Release;
-		CBLDart_FLSharedKeys_BindToDartObject;
-		CBLDart_FLDoc_BindToDartObject;
-		CBLDart_FLValue_BindToDartObject;
+		CBLDart_FLSliceResult_RetainByBuf;
+		CBLDart_FLSliceResult_ReleaseByBuf;
 		CBLDart_KnownSharedKeys_New;
+		CBLDart_KnownSharedKeys_Delete;
 		CBLDart_FLValue_FromData;
 		CBLDart_GetLoadedFLValue;
 		CBLDart_FLArray_GetLoadedFLValue;
 		CBLDart_FLDict_GetLoadedFLValue;
 		CBLDart_FLDictIterator_Begin;
+		CBLDart_FLDictIterator_Delete;
 		CBLDart_FLDictIterator_Next;
 		CBLDart_FLArrayIterator_Begin;
+		CBLDart_FLArrayIterator_Delete;
 		CBLDart_FLArrayIterator_Next;
-		CBLDart_FLEncoder_BindToDartObject;
 		CBLDart_FLEncoder_WriteArrayValue;
 	local:
 		*;

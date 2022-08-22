@@ -155,17 +155,10 @@ class SliceResult extends Slice {
   SliceResult._fromFLSliceResult(
     FLSliceResult slice, {
     bool retain = false,
-  }) : super._(slice.buf, slice.size) {
-    _sliceBindings.bindToDartObject(this, slice, retain: retain);
-  }
+  }) : this._(slice.buf, slice.size, retain: retain);
 
   SliceResult._(super.buf, super.size, {bool retain = false}) : super._() {
-    makeGlobalResult();
-    _sliceBindings.bindToDartObject(
-      this,
-      globalFLSliceResult.ref,
-      retain: retain,
-    );
+    _sliceBindings.bindToDartObject(this, buf: buf, retain: retain);
   }
 
   /// Returns a [SliceResult] which has the content and size of [list].
@@ -243,7 +236,7 @@ class TransferableSliceResult {
         _size = sliceResult.size {
     // Retain the slice now, in case `sliceResult` is garbage collected
     // before this transferable slice result is materialized.
-    _sliceBindings.retainSliceResult(sliceResult.makeGlobalResult().ref);
+    _sliceBindings.retainSliceResultByBuf(sliceResult.buf);
   }
 
   final int _bufAddress;

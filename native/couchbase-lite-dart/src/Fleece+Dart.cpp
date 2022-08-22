@@ -7,84 +7,17 @@
 
 // === Slice
 
-static void CBLDart_FLSliceResultFinalizer(void *dart_callback_data,
-                                           void *peer) {
-  auto slice = reinterpret_cast<FLSliceResult *>(peer);
-  FLSliceResult_Release(*slice);
-  delete slice;
+void CBLDart_FLSliceResult_RetainByBuf(void *buf) {
+  FLSliceResult_Retain({buf, 0});
 }
 
-void CBLDart_FLSliceResult_BindToDartObject(Dart_Handle object,
-                                            FLSliceResult slice, bool retain) {
-  auto _slice = new FLSliceResult;
-  *_slice = slice;
-
-  if (retain) {
-    FLSliceResult_Retain(*_slice);
-  }
-
-  Dart_NewFinalizableHandle_DL(object, _slice, slice.size,
-                               CBLDart_FLSliceResultFinalizer);
-}
-
-void CBLDart_FLSliceResult_Retain(FLSliceResult slice) {
-  FLSliceResult_Retain(slice);
-}
-
-void CBLDart_FLSliceResult_Release(FLSliceResult slice) {
-  FLSliceResult_Release(slice);
-}
-
-// === SharedKeys
-
-static void CBLDart_FLSharedKeysFinalizer(void *dart_callback_data,
-                                          void *peer) {
-  auto sharedKeys = reinterpret_cast<FLSharedKeys>(peer);
-  FLSharedKeys_Release(sharedKeys);
-}
-
-void CBLDart_FLSharedKeys_BindToDartObject(Dart_Handle object,
-                                           FLSharedKeys sharedKeys,
-                                           bool retain) {
-  if (retain) {
-    FLSharedKeys_Retain(sharedKeys);
-  }
-  Dart_NewFinalizableHandle_DL(object, sharedKeys,
-                               CBLDart_kFakeExternalAllocationSize,
-                               CBLDart_FLSharedKeysFinalizer);
-}
-
-// === Doc
-
-static void CBLDart_FLDocFinalizer(void *dart_callback_data, void *peer) {
-  auto doc = reinterpret_cast<FLDoc>(peer);
-  FLDoc_Release(doc);
-}
-
-void CBLDart_FLDoc_BindToDartObject(Dart_Handle object, FLDoc doc) {
-  auto allocedData = FLDoc_GetAllocedData(doc);
-  Dart_NewFinalizableHandle_DL(object, doc, allocedData.size,
-                               CBLDart_FLDocFinalizer);
-  FLSliceResult_Release(allocedData);
-}
-
-// === Value
-
-static void CBLDart_FLValueFinalizer(void *dart_callback_data, void *peer) {
-  auto value = reinterpret_cast<FLValue>(peer);
-  FLValue_Release(value);
-}
-
-void CBLDart_FLValue_BindToDartObject(Dart_Handle object, FLValue value,
-                                      bool retain) {
-  if (retain) FLValue_Retain(value);
-
-  Dart_NewFinalizableHandle_DL(object, (void *)value,
-                               CBLDart_kFakeExternalAllocationSize,
-                               CBLDart_FLValueFinalizer);
+void CBLDart_FLSliceResult_ReleaseByBuf(void *buf) {
+  FLSliceResult_Release({buf, 0});
 }
 
 // === Decoder ================================================================
+
+static const size_t kMaxSharedKeys = 2048;
 
 struct KnownSharedKeys {
   /**
@@ -101,21 +34,12 @@ struct KnownSharedKeys {
     }
   };
 
-  std::bitset<2048> _knownKeys;
+  std::bitset<kMaxSharedKeys> _knownKeys;
 };
 
-static void CBLDart_KnownSharedKeysFinalizer(void *dart_callback_data,
-                                             void *peer) {
-  auto keys = reinterpret_cast<KnownSharedKeys *>(peer);
-  delete keys;
-}
+KnownSharedKeys *CBLDart_KnownSharedKeys_New() { return new KnownSharedKeys; }
 
-KnownSharedKeys *CBLDart_KnownSharedKeys_New(Dart_Handle object) {
-  auto keys = new KnownSharedKeys;
-  Dart_NewFinalizableHandle_DL(object, keys, sizeof(KnownSharedKeys),
-                               CBLDart_KnownSharedKeysFinalizer);
-  return keys;
-}
+void CBLDart_KnownSharedKeys_Delete(KnownSharedKeys *keys) { delete keys; }
 
 static void CBLDart_GetLoadedDictKey(KnownSharedKeys *knownSharedKeys,
                                      FLDictIterator *iterator,
@@ -223,36 +147,28 @@ struct CBLDart_FLDictIterator {
   bool _preLoad;
   FLDictIterator _iterator;
   bool _isDone;
-  Dart_FinalizableHandle _objectHandle;
+  bool _deleteOnDone;
 };
 
-static void CBLDart_DictIteratorFinalizer(void *dart_callback_data,
-                                          void *peer) {
-  auto iterator = reinterpret_cast<CBLDart_FLDictIterator *>(peer);
-
-  if (!iterator->_isDone) FLDictIterator_End(&iterator->_iterator);
-
-  delete iterator;
-}
-
 CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
-    Dart_Handle object, FLDict dict, KnownSharedKeys *knownSharedKeys,
+    FLDict dict, KnownSharedKeys *knownSharedKeys,
     CBLDart_LoadedDictKey *keyOut, CBLDart_LoadedFLValue *valueOut,
-    bool finalize, bool preLoad) {
+    bool deleteOnDone, bool preLoad) {
   auto iterator = new CBLDart_FLDictIterator;
   iterator->_keyOut = keyOut;
   iterator->_valueOut = valueOut;
   iterator->_knownSharedKeys = knownSharedKeys;
   iterator->_preLoad = preLoad;
   iterator->_isDone = false;
-  iterator->_objectHandle = finalize ? Dart_NewFinalizableHandle_DL(
-                                           object, iterator, sizeof(iterator),
-                                           CBLDart_DictIteratorFinalizer)
-                                     : nullptr;
+  iterator->_deleteOnDone = deleteOnDone;
 
   FLDictIterator_Begin(dict, &iterator->_iterator);
 
   return iterator;
+}
+
+void CBLDart_FLDictIterator_Delete(CBLDart_FLDictIterator *iterator) {
+  delete iterator;
 }
 
 bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
@@ -280,7 +196,7 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
     return true;
   }
 
-  if (!iterator->_objectHandle) {
+  if (iterator->_deleteOnDone) {
     delete iterator;
   }
 
@@ -290,29 +206,22 @@ bool CBLDart_FLDictIterator_Next(CBLDart_FLDictIterator *iterator) {
 struct CBLDart_FLArrayIterator {
   CBLDart_LoadedFLValue *_valueOut;
   FLArrayIterator _iterator;
-  Dart_FinalizableHandle _objectHandle;
+  bool _deleteOnDone;
 };
 
-static void CBLDart_ArrayIteratorFinalizer(void *dart_callback_data,
-                                           void *peer) {
-  auto iterator = reinterpret_cast<CBLDart_FLArrayIterator *>(peer);
-
-  delete iterator;
-}
-
 CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
-    Dart_Handle object, FLArray array, CBLDart_LoadedFLValue *valueOut,
-    bool finalize) {
+    FLArray array, CBLDart_LoadedFLValue *valueOut, bool deleteOnDone) {
   auto iterator = new CBLDart_FLArrayIterator;
   iterator->_valueOut = valueOut;
-  iterator->_objectHandle = finalize ? Dart_NewFinalizableHandle_DL(
-                                           object, iterator, sizeof(iterator),
-                                           CBLDart_ArrayIteratorFinalizer)
-                                     : nullptr;
+  iterator->_deleteOnDone = deleteOnDone;
 
   FLArrayIterator_Begin(array, &iterator->_iterator);
 
   return iterator;
+}
+
+void CBLDart_FLArrayIterator_Delete(CBLDart_FLArrayIterator *iterator) {
+  delete iterator;
 }
 
 bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator) {
@@ -327,7 +236,7 @@ bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator) {
     return true;
   }
 
-  if (!iterator->_objectHandle) {
+  if (iterator->_deleteOnDone) {
     delete iterator;
   }
 
@@ -335,17 +244,6 @@ bool CBLDart_FLArrayIterator_Next(CBLDart_FLArrayIterator *iterator) {
 }
 
 // === Encoder ================================================================
-
-static void CBLDart_FLEncoderFinalizer(void *dart_callback_data, void *peer) {
-  auto encoder = reinterpret_cast<FLEncoder>(peer);
-  FLEncoder_Free(encoder);
-}
-
-void CBLDart_FLEncoder_BindToDartObject(Dart_Handle object, FLEncoder encoder) {
-  Dart_NewFinalizableHandle_DL(object, encoder,
-                               CBLDart_kFakeExternalAllocationSize,
-                               CBLDart_FLEncoderFinalizer);
-}
 
 bool CBLDart_FLEncoder_WriteArrayValue(FLEncoder encoder, FLArray array,
                                        uint32_t index) {
