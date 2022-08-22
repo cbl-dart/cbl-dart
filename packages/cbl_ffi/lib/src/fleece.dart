@@ -257,7 +257,7 @@ class SharedKeysBindings extends Bindings {
       'FLSharedKeys_Retain',
       isLeaf: useIsLeaf,
     );
-    _releasePtr = libs.cblDart.lookup('FLSharedKeys_Release');
+    _releasePtr = libs.cbl.lookup('FLSharedKeys_Release');
     _count =
         libs.cbl.lookupFunction<_FLSharedKeys_Count_C, _FLSharedKeys_Count>(
       'FLSharedKeys_Count',
