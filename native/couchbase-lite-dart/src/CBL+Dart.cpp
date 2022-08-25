@@ -46,17 +46,17 @@ bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
 #define ASYNC_CALLBACK_TO_C(callback) \
   reinterpret_cast<CBLDart_AsyncCallback>(callback)
 
-CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Handle object,
-                                                Dart_Port sendPort,
+CBLDart_AsyncCallback CBLDart_AsyncCallback_New(uint32_t id, Dart_Port sendPort,
                                                 bool debug) {
-  return ASYNC_CALLBACK_TO_C(
-      new CBLDart::AsyncCallback(id, object, sendPort, debug));
+  return ASYNC_CALLBACK_TO_C(new CBLDart::AsyncCallback(id, sendPort, debug));
+}
+
+void CBLDart_AsyncCallback_Delete(CBLDart_AsyncCallback callback) {
+  delete ASYNC_CALLBACK_FROM_C(callback);
 }
 
 void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback) {
-  auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
-  callback_->close();
-  delete callback_;
+  ASYNC_CALLBACK_FROM_C(callback)->close();
 }
 
 void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
@@ -84,75 +84,6 @@ static CBLDart::AsyncCallback *CBLDart_AsAsyncCallback(void *pointer) {
 // === Couchbase Lite =========================================================
 
 // === Base
-
-#ifdef DEBUG
-static bool cblRefCountedDebugEnabled = false;
-static std::map<CBLRefCounted *, std::string> cblRefCountedDebugNames;
-static std::mutex cblRefCountedDebugMutex;
-#endif
-
-inline void CBLDart_CBLRefCountedFinalizer_Impl(CBLRefCounted *refCounted) {
-#ifdef DEBUG
-  std::string debugName;
-  {
-    std::scoped_lock lock(cblRefCountedDebugMutex);
-    auto nh = cblRefCountedDebugNames.extract(refCounted);
-    if (!nh.empty()) {
-      debugName = nh.mapped();
-    }
-  }
-  if (!debugName.empty()) {
-    if (cblRefCountedDebugEnabled) {
-      printf("CBLRefCountedFinalizer: %p %s\n", refCounted, debugName.c_str());
-    }
-  }
-#endif
-
-  CBL_Release(refCounted);
-}
-
-inline void CBLDart_BindCBLRefCountedToDartObject_Impl(
-    Dart_Handle object, CBLRefCounted *refCounted, bool retain, char *debugName,
-    Dart_HandleFinalizer handleFinalizer) {
-#ifdef DEBUG
-  if (debugName) {
-    std::scoped_lock lock(cblRefCountedDebugMutex);
-    if (cblRefCountedDebugEnabled) {
-      cblRefCountedDebugNames[refCounted] = debugName;
-    }
-  }
-#endif
-
-  if (retain) CBL_Retain(refCounted);
-
-  Dart_NewFinalizableHandle_DL(
-      object, refCounted, CBLDart_kFakeExternalAllocationSize, handleFinalizer);
-}
-
-/**
- * Dart_HandleFinalizer for objects which are backed by a CBLRefCounted.
- */
-static void CBLDart_CBLRefCountedFinalizer(void *dart_callback_data,
-                                           void *peer) {
-  CBLDart_CBLRefCountedFinalizer_Impl(reinterpret_cast<CBLRefCounted *>(peer));
-}
-
-void CBLDart_BindCBLRefCountedToDartObject(Dart_Handle object,
-                                           CBLRefCounted *refCounted,
-                                           bool retain, char *debugName) {
-  CBLDart_BindCBLRefCountedToDartObject_Impl(
-      object, refCounted, retain, debugName, CBLDart_CBLRefCountedFinalizer);
-}
-
-void CBLDart_SetDebugRefCounted(bool enabled) {
-#ifdef DEBUG
-  std::scoped_lock lock(cblRefCountedDebugMutex);
-  cblRefCountedDebugEnabled = enabled;
-  if (!enabled) {
-    cblRefCountedDebugNames.clear();
-  }
-#endif
-}
 
 static void CBLDart_CBLListenerFinalizer(void *context) {
   auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
@@ -237,7 +168,7 @@ bool CBLDart_CBLLog_SetCallback(CBLDart_AsyncCallback callback) {
   auto callback_ = ASYNC_CALLBACK_FROM_C(callback);
 
   // Don't set the new callback if one has already been set. Another isolate,
-  // different from the one currenlty calling, has already set its callback.
+  // different from the one currently calling, has already set its callback.
   if (callback_ != nullptr && logCallback != nullptr) {
     return false;
   }
@@ -376,7 +307,7 @@ static void CBLDart_LogSentryBreadcrumb(CBLLogDomain domain, CBLLogLevel level,
 
 bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
   if (!CBLDart_InitSentryAPI()) {
-    // Setntry is not available, so we can't enable breadcrumbs logging.
+    // Sentry is not available, so we can't enable breadcrumbs logging.
     return false;
   }
 
@@ -413,7 +344,7 @@ bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
       return true;
     }
 
-    // Remove the database from the list of open databasea and close it.
+    // Remove the database from the list of open database and close it.
     openDatabases.erase(it);
   }
 
@@ -440,8 +371,7 @@ CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
   return database;
 }
 
-static void CBLDart_DatabaseFinalizer(void *dart_callback_data, void *peer) {
-  auto database = reinterpret_cast<CBLDatabase *>(peer);
+void CBLDart_CBLDatabase_Release(CBLDatabase *database) {
   CBLError error;
   if (!CBLDart_CBLDatabase_Close(database, false, &error)) {
     auto errorMessage = CBLError_Message(&error);
@@ -450,15 +380,7 @@ static void CBLDart_DatabaseFinalizer(void *dart_callback_data, void *peer) {
             static_cast<int>(errorMessage.size), (char *)errorMessage.buf);
     FLSliceResult_Release(errorMessage);
   }
-  CBLDart_CBLRefCountedFinalizer_Impl(
-      reinterpret_cast<CBLRefCounted *>(database));
-}
-
-void CBLDart_BindDatabaseToDartObject(Dart_Handle object, CBLDatabase *database,
-                                      char *debugName) {
-  CBLDart_BindCBLRefCountedToDartObject_Impl(
-      object, reinterpret_cast<CBLRefCounted *>(database), false, debugName,
-      CBLDart_DatabaseFinalizer);
+  CBLDatabase_Release(database);
 }
 
 static void CBLDart_DocumentChangeListenerWrapper(void *context,
@@ -564,18 +486,6 @@ CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
 
 // === Blob
 
-static void CBLDart_FinalizeCBLBlobReadStream(void *isolate_callback_data,
-                                              void *peer) {
-  CBLBlobReader_Close(reinterpret_cast<CBLBlobReadStream *>(peer));
-}
-
-void CBLDart_BindBlobReadStreamToDartObject(Dart_Handle object,
-                                            CBLBlobReadStream *stream) {
-  Dart_NewFinalizableHandle_DL(object, stream,
-                               CBLDart_kFakeExternalAllocationSize,
-                               CBLDart_FinalizeCBLBlobReadStream);
-}
-
 FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
                                          uint64_t bufferSize,
                                          CBLError *outError) {
@@ -625,15 +535,15 @@ static bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
   args.value.as_array.length = 2;
   args.value.as_array.values = argsValues;
 
-  bool descision;
+  bool decision;
 
   auto resultHandler = [&](Dart_CObject *result) {
-    descision = result->value.as_bool;
+    decision = result->value.as_bool;
   };
 
   CBLDart::AsyncCallbackCall(*callback, resultHandler).execute(args);
 
-  return descision;
+  return decision;
 }
 
 static bool CBLDart_ReplicatorPullFilterWrapper(void *context,
@@ -677,17 +587,17 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
 
-  const CBLDocument *descision;
+  const CBLDocument *decision;
   auto resolverThrewException = false;
 
   auto resultHandler = [&](Dart_CObject *result) {
     switch (result->type) {
       case Dart_CObject_kNull:
-        descision = nullptr;
+        decision = nullptr;
         break;
       case Dart_CObject_kInt32:
       case Dart_CObject_kInt64:
-        descision = reinterpret_cast<const CBLDocument *>(
+        decision = reinterpret_cast<const CBLDocument *>(
             CBLDart_CObject_getIntValueAsInt64(result));
         break;
 
@@ -714,7 +624,7 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
     throw std::runtime_error("Replicator conflict resolver threw an exception");
   }
 
-  return descision;
+  return decision;
 }
 
 CBLReplicator *CBLDart_CBLReplicator_Create(
@@ -775,10 +685,9 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   return replicator;
 }
 
-static void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
+static void CBLDart_CBLReplicator_Release_Internal(CBLReplicator *replicator) {
   // Release the replicator.
-  CBLDart_CBLRefCountedFinalizer_Impl(
-      reinterpret_cast<CBLRefCounted *>(replicator));
+  CBLReplicator_Release(replicator);
 
   // Clean up context for callback wrappers as the last step.
   std::scoped_lock lock(replicatorCallbackWrapperContextsMutex);
@@ -786,11 +695,9 @@ static void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
   delete nh.mapped();
 }
 
-static void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
-  auto replicator = reinterpret_cast<CBLReplicator *>(peer);
-
+void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
   if (CBLReplicator_Status(replicator).activity == kCBLReplicatorStopped) {
-    CBLDart_CBLReplicator_Release(replicator);
+    CBLDart_CBLReplicator_Release_Internal(replicator);
   } else {
     // Stop the replicator, since it is still running.
     CBLReplicator_Stop(replicator);
@@ -804,17 +711,9 @@ static void CBLDart_ReplicatorFinalizer(void *dart_callback_data, void *peer) {
       }
 
       // Now release the replicator.
-      CBLDart_CBLReplicator_Release(replicator);
+      CBLDart_CBLReplicator_Release_Internal(replicator);
     });
   }
-}
-
-void CBLDart_BindReplicatorToDartObject(Dart_Handle object,
-                                        CBLReplicator *replicator,
-                                        char *debugName) {
-  CBLDart_BindCBLRefCountedToDartObject_Impl(
-      object, reinterpret_cast<CBLRefCounted *>(replicator), false, debugName,
-      CBLDart_ReplicatorFinalizer);
 }
 
 class ReplicatorStatus_CObject_Helper {

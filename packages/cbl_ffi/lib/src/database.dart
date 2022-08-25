@@ -4,8 +4,6 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart';
-
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
@@ -128,15 +126,8 @@ typedef _CBLDart_CBLDatabase_Open = Pointer<CBLDatabase> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_BindDatabaseToDartObject_C = Void Function(
-  Handle object,
+typedef _CBLDart_CBLDatabase_Release_C = Void Function(
   Pointer<CBLDatabase> db,
-  Pointer<Utf8> debugName,
-);
-typedef _CBLDart_BindDatabaseToDartObject = void Function(
-  Object object,
-  Pointer<CBLDatabase> db,
-  Pointer<Utf8> debugName,
 );
 
 typedef _CBLDart_CBLDatabase_Close_C = Bool Function(
@@ -447,10 +438,7 @@ class DatabaseBindings extends Bindings {
       'CBLDart_CBLDatabase_Open',
       isLeaf: useIsLeaf,
     );
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_BindDatabaseToDartObject_C, _CBLDart_BindDatabaseToDartObject>(
-      'CBLDart_BindDatabaseToDartObject',
-    );
+    _releasePtr = libs.cblDart.lookup('CBLDart_CBLDatabase_Release');
     _close = libs.cblDart.lookupFunction<_CBLDart_CBLDatabase_Close_C,
         _CBLDart_CBLDatabase_Close>(
       'CBLDart_CBLDatabase_Close',
@@ -574,7 +562,8 @@ class DatabaseBindings extends Bindings {
   late final _CBL_DatabaseExists _databaseExists;
   late final _CBLDatabaseConfiguration_Default _defaultConfiguration;
   late final _CBLDart_CBLDatabase_Open _open;
-  late final _CBLDart_BindDatabaseToDartObject _bindToDartObject;
+  late final Pointer<NativeFunction<_CBLDart_CBLDatabase_Release_C>>
+      _releasePtr;
   late final _CBLDart_CBLDatabase_Close _close;
   late final _CBLDatabase_PerformMaintenance _performMaintenance;
   late final _CBLDatabase_BeginTransaction _beginTransaction;
@@ -600,6 +589,8 @@ class DatabaseBindings extends Bindings {
   late final _CBLDatabase_GetIndexNames _indexNames;
   late final _CBLDatabase_GetBlob _getBlob;
   late final _CBLDatabase_SaveBlob _saveBlob;
+
+  late final _finalizer = NativeFinalizer(_releasePtr.cast());
 
   CBLEncryptionKey encryptionKeyFromPassword(String password) =>
       withGlobalArena(() {
@@ -663,16 +654,8 @@ class DatabaseBindings extends Bindings {
         ).checkCBLError();
       });
 
-  void bindToDartObject(
-    Object object,
-    Pointer<CBLDatabase> db,
-    String? debugName,
-  ) {
-    _bindToDartObject(
-      object,
-      db,
-      debugName?.toNativeUtf8() ?? nullptr,
-    );
+  void bindToDartObject(Finalizable object, Pointer<CBLDatabase> db) {
+    _finalizer.attach(object, db.cast());
   }
 
   void close(Pointer<CBLDatabase> db) {

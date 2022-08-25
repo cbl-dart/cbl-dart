@@ -1,15 +1,13 @@
 import 'package:cbl/cbl.dart';
-import 'package:cbl_dart/cbl_dart.dart';
 import 'package:cbl_sentry/src/operation_debug_info.dart';
 import 'package:test/test.dart';
 
+import 'utils/cbl.dart';
 import 'utils/mock_database.dart';
 import 'utils/mock_query.dart';
 
 void main() {
-  setUpAll(() async {
-    await CouchbaseLiteDart.init(edition: Edition.community);
-  });
+  setUpAll(initCouchbaseLiteForTest);
 
   group('debugName', () {
     test('TracedOperations', () {

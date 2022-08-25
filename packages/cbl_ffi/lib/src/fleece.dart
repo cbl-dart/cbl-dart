@@ -123,7 +123,7 @@ extension FLStringResultExt on FLStringResult {
       allowMalformed: allowMalformed,
     );
 
-    CBLBindings.instance.fleece.slice.releaseStringResult(this);
+    CBLBindings.instance.fleece.slice.releaseSliceResultByBuf(buf);
 
     return result;
   }
@@ -141,25 +141,19 @@ typedef _FLSliceResult_New = FLSliceResult Function(int size);
 typedef _FLSlice_Copy_C = FLSliceResult Function(FLSlice slice);
 typedef _FLSlice_Copy = FLSliceResult Function(FLSlice slice);
 
-typedef _CBLDart_FLSliceResult_BindToDartObject_C = Void Function(
-  Handle object,
-  FLSliceResult slice,
-  Bool retain,
+typedef _CBLDart_FLSliceResult_RetainByBuf_C = Void Function(
+  Pointer<Uint8> buf,
 );
-typedef _CBLDart_FLSliceResult_BindToDartObject = void Function(
-  Object object,
-  FLSliceResult slice,
-  bool retain,
+typedef _CBLDart_FLSliceResult_RetainByBuf = void Function(
+  Pointer<Uint8> buf,
 );
 
-typedef _CBLDart_FLSliceResult_Retain_C = Void Function(FLSliceResult);
-typedef _CBLDart_FLSliceResult_Retain = void Function(FLSliceResult);
-
-typedef _CBLDart_FLSliceResult_Release_C = Void Function(FLSliceResult);
-typedef _CBLDart_FLSliceResult_Release = void Function(FLSliceResult);
-
-typedef _CBLDart_FLStringResult_Release_C = Void Function(FLStringResult);
-typedef _CBLDart_FLStringResult_Release = void Function(FLStringResult);
+typedef _CBLDart_FLSliceResult_ReleaseByBuf_C = Void Function(
+  Pointer<Uint8> buf,
+);
+typedef _CBLDart_FLSliceResult_ReleaseByBuf = void Function(
+  Pointer<Uint8> buf,
+);
 
 class SliceBindings extends Bindings {
   SliceBindings(super.parent) {
@@ -175,23 +169,15 @@ class SliceBindings extends Bindings {
     _copy = libs.cbl.lookupFunction<_FLSlice_Copy_C, _FLSlice_Copy>(
       'FLSlice_Copy',
     );
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_FLSliceResult_BindToDartObject_C,
-        _CBLDart_FLSliceResult_BindToDartObject>(
-      'CBLDart_FLSliceResult_BindToDartObject',
+    _retainSliceResultByBuf = libs.cblDart.lookupFunction<
+        _CBLDart_FLSliceResult_RetainByBuf_C,
+        _CBLDart_FLSliceResult_RetainByBuf>(
+      'CBLDart_FLSliceResult_RetainByBuf',
     );
-    _retainSliceResult = libs.cblDart.lookupFunction<
-        _CBLDart_FLSliceResult_Retain_C, _CBLDart_FLSliceResult_Retain>(
-      'CBLDart_FLSliceResult_Retain',
-    );
-    _releaseSliceResult = libs.cblDart.lookupFunction<
-        _CBLDart_FLSliceResult_Release_C, _CBLDart_FLSliceResult_Release>(
-      'CBLDart_FLSliceResult_Release',
-    );
-    _releaseStringResult = libs.cblDart.lookupFunction<
-        _CBLDart_FLStringResult_Release_C, _CBLDart_FLStringResult_Release>(
-      'CBLDart_FLSliceResult_Release',
-    );
+    _releaseSliceResultByBufPtr =
+        libs.cblDart.lookup('CBLDart_FLSliceResult_ReleaseByBuf');
+    _releaseSliceResultByBuf =
+        _releaseSliceResultByBufPtr.asFunction(isLeaf: useIsLeaf);
   }
 
   late final _FLSlice_Equal _equal;
@@ -199,10 +185,13 @@ class SliceBindings extends Bindings {
 
   late final _FLSliceResult_New _new;
   late final _FLSlice_Copy _copy;
-  late final _CBLDart_FLSliceResult_BindToDartObject _bindToDartObject;
-  late final _CBLDart_FLSliceResult_Retain _retainSliceResult;
-  late final _CBLDart_FLSliceResult_Release _releaseSliceResult;
-  late final _CBLDart_FLStringResult_Release _releaseStringResult;
+  late final _CBLDart_FLSliceResult_RetainByBuf _retainSliceResultByBuf;
+  late final Pointer<NativeFunction<_CBLDart_FLSliceResult_ReleaseByBuf_C>>
+      _releaseSliceResultByBufPtr;
+  late final _CBLDart_FLSliceResult_ReleaseByBuf _releaseSliceResultByBuf;
+
+  late final _sliceResultFinalizer =
+      NativeFinalizer(_releaseSliceResultByBufPtr.cast());
 
   bool equal(FLSlice a, FLSlice b) => _equal(a, b);
 
@@ -213,23 +202,23 @@ class SliceBindings extends Bindings {
   FLSliceResult copy(FLSlice slice) => _copy(slice);
 
   void bindToDartObject(
-    Object object,
-    FLSliceResult sliceResult, {
+    Finalizable object, {
+    required Pointer<Uint8> buf,
     required bool retain,
   }) {
-    _bindToDartObject(object, sliceResult, retain);
+    if (retain) {
+      _retainSliceResultByBuf(buf);
+    }
+
+    _sliceResultFinalizer.attach(object, buf.cast());
   }
 
-  void retainSliceResult(FLSliceResult result) {
-    _retainSliceResult(result);
+  void retainSliceResultByBuf(Pointer<Uint8> buf) {
+    _retainSliceResultByBuf(buf);
   }
 
-  void releaseSliceResult(FLSliceResult result) {
-    _releaseSliceResult(result);
-  }
-
-  void releaseStringResult(FLStringResult result) {
-    _releaseStringResult(result);
+  void releaseSliceResultByBuf(Pointer<Uint8> buf) {
+    _releaseSliceResultByBuf(buf);
   }
 }
 
@@ -239,15 +228,15 @@ class FLSharedKeys extends Opaque {}
 
 typedef _FLSharedKeys_New = Pointer<FLSharedKeys> Function();
 
-typedef _CBLDart_FLSharedKeys_BindToDartObject_C = Void Function(
-  Handle object,
+typedef _FLSharedKeys_Retain_C = Void Function(
   Pointer<FLSharedKeys> sharedKeys,
-  Bool retain,
 );
-typedef _CBLDart_FLSharedKeys_BindToDartObject = void Function(
-  Object object,
+typedef _FLSharedKeys_Retain = void Function(
   Pointer<FLSharedKeys> sharedKeys,
-  bool retain,
+);
+
+typedef _FLSharedKeys_Release_C = Void Function(
+  Pointer<FLSharedKeys> sharedKeys,
 );
 
 typedef _FLSharedKeys_Count_C = UnsignedInt Function(
@@ -261,30 +250,40 @@ class SharedKeysBindings extends Bindings {
   SharedKeysBindings(super.parent) {
     _new = libs.cbl.lookupFunction<_FLSharedKeys_New, _FLSharedKeys_New>(
       'FLSharedKeys_New',
+      isLeaf: useIsLeaf,
     );
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_FLSharedKeys_BindToDartObject_C,
-        _CBLDart_FLSharedKeys_BindToDartObject>(
-      'CBLDart_FLSharedKeys_BindToDartObject',
+    _retain =
+        libs.cbl.lookupFunction<_FLSharedKeys_Retain_C, _FLSharedKeys_Retain>(
+      'FLSharedKeys_Retain',
+      isLeaf: useIsLeaf,
     );
+    _releasePtr = libs.cbl.lookup('FLSharedKeys_Release');
     _count =
         libs.cbl.lookupFunction<_FLSharedKeys_Count_C, _FLSharedKeys_Count>(
       'FLSharedKeys_Count',
+      isLeaf: useIsLeaf,
     );
   }
 
   late final _FLSharedKeys_New _new;
-  late final _CBLDart_FLSharedKeys_BindToDartObject _bindToDartObject;
+  late final _FLSharedKeys_Retain _retain;
+  late final Pointer<NativeFunction<_FLSharedKeys_Release_C>> _releasePtr;
   late final _FLSharedKeys_Count _count;
+
+  late final _finalizer = NativeFinalizer(_releasePtr.cast());
 
   Pointer<FLSharedKeys> create() => _new();
 
   void bindToDartObject(
-    Object object,
+    Finalizable object,
     Pointer<FLSharedKeys> sharedKeys, {
     required bool retain,
   }) {
-    _bindToDartObject(object, sharedKeys, retain);
+    if (retain) {
+      _retain(sharedKeys);
+    }
+
+    _finalizer.attach(object, sharedKeys.cast());
   }
 
   int count(Pointer<FLSharedKeys> sharedKeys) => _count(sharedKeys);
@@ -429,14 +428,7 @@ typedef _FLDoc_FromJSON = Pointer<FLDoc> Function(
   Pointer<Uint32> errorOut,
 );
 
-typedef _CBLDart_FLDoc_BindToDartObject_C = Void Function(
-  Handle object,
-  Pointer<FLDoc> doc,
-);
-typedef _CBLDart_FLDoc_BindToDartObject = void Function(
-  Object object,
-  Pointer<FLDoc> doc,
-);
+typedef _FLDoc_Release_C = Void Function(Pointer<FLDoc> doc);
 
 typedef _FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
 
@@ -457,10 +449,7 @@ class DocBindings extends Bindings {
       'FLDoc_FromJSON',
       isLeaf: useIsLeaf,
     );
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_FLDoc_BindToDartObject_C, _CBLDart_FLDoc_BindToDartObject>(
-      'CBLDart_FLDoc_BindToDartObject',
-    );
+    _releasePtr = libs.cbl.lookup('FLDoc_Release');
     _getAllocedData =
         libs.cbl.lookupFunction<_FLDoc_GetAllocedData, _FLDoc_GetAllocedData>(
       'FLDoc_GetAllocedData',
@@ -479,10 +468,12 @@ class DocBindings extends Bindings {
 
   late final _FLDoc_FromResultData _fromResultData;
   late final _FLDoc_FromJSON _fromJSON;
-  late final _CBLDart_FLDoc_BindToDartObject _bindToDartObject;
+  late final Pointer<NativeFunction<_FLDoc_Release_C>> _releasePtr;
   late final _FLDoc_GetAllocedData _getAllocedData;
   late final _FLDoc_GetRoot _getRoot;
   late final _FLDoc_GetSharedKeys _getSharedKeys;
+
+  late final _finalizer = NativeFinalizer(_releasePtr.cast());
 
   Pointer<FLDoc> fromResultData(
     Data data,
@@ -503,8 +494,12 @@ class DocBindings extends Bindings {
         (flJson) => _fromJSON(flJson, globalFLErrorCode).checkFleeceError(),
       );
 
-  void bindToDartObject(Object object, Pointer<FLDoc> doc) {
-    _bindToDartObject(object, doc);
+  void bindToDartObject(Finalizable object, Pointer<FLDoc> doc) {
+    _finalizer.attach(
+      object,
+      doc.cast(),
+      externalSize: getAllocedData(doc).size,
+    );
   }
 
   FLSliceResult getAllocedData(Pointer<FLDoc> doc) => _getAllocedData(doc);
@@ -537,17 +532,6 @@ extension on int {
     return FLValueType.values[this + 1];
   }
 }
-
-typedef _CBLDart_FLValue_BindToDartObject_C = Void Function(
-  Handle object,
-  Pointer<FLValue> value,
-  Bool retain,
-);
-typedef _CBLDart_FLValue_BindToDartObject = void Function(
-  Object object,
-  Pointer<FLValue> value,
-  bool retain,
-);
 
 typedef _FLValue_FromData_C = Pointer<FLValue> Function(
   FLSlice data,
@@ -618,10 +602,6 @@ typedef _FLValue_ToJSONX = FLStringResult Function(
 
 class ValueBindings extends Bindings {
   ValueBindings(super.parent) {
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_FLValue_BindToDartObject_C, _CBLDart_FLValue_BindToDartObject>(
-      'CBLDart_FLValue_BindToDartObject',
-    );
     _fromData = libs.cbl.lookupFunction<_FLValue_FromData_C, _FLValue_FromData>(
       'FLValue_FromData',
       isLeaf: useIsLeaf,
@@ -676,17 +656,14 @@ class ValueBindings extends Bindings {
       'FLValue_Retain',
       isLeaf: useIsLeaf,
     );
-    _release = libs.cbl.lookupFunction<_FLValue_Release_C, _FLValue_Release>(
-      'FLValue_Release',
-      isLeaf: useIsLeaf,
-    );
+    _releasePtr = libs.cbl.lookup('FLValue_Release');
+    _release = _releasePtr.asFunction(isLeaf: useIsLeaf);
     _toJson = libs.cbl.lookupFunction<_FLValue_ToJSONX_C, _FLValue_ToJSONX>(
       'FLValue_ToJSONX',
       isLeaf: useIsLeaf,
     );
   }
 
-  late final _CBLDart_FLValue_BindToDartObject _bindToDartObject;
   late final _FLValue_FromData _fromData;
   late final _FLValue_FindDoc _findDoc;
   late final _FLValue_GetType _getType;
@@ -700,15 +677,21 @@ class ValueBindings extends Bindings {
   late final _FLValue_ToString _scalarToString;
   late final _FLValue_IsEqual _isEqual;
   late final _FLValue_Retain _retain;
+  late final Pointer<NativeFunction<_FLValue_Release_C>> _releasePtr;
   late final _FLValue_Release _release;
   late final _FLValue_ToJSONX _toJson;
 
+  late final _finalizer = NativeFinalizer(_releasePtr.cast());
+
   void bindToDartObject(
-    Object object, {
+    Finalizable object, {
     required Pointer<FLValue> value,
     required bool retain,
   }) {
-    _bindToDartObject(object, value, retain);
+    if (retain) {
+      _retain(value);
+    }
+    _finalizer.attach(object, value.cast());
   }
 
   Pointer<FLValue>? fromData(SliceResult data, FLTrust trust) =>
@@ -1285,11 +1268,10 @@ extension on FLTrust {
 
 class KnownSharedKeys extends Opaque {}
 
-typedef _CBLDart_KnownSharedKeys_New_C = Pointer<KnownSharedKeys> Function(
-  Handle object,
-);
-typedef _CBLDart_KnownSharedKeys_New = Pointer<KnownSharedKeys> Function(
-  Object object,
+typedef _CBLDart_KnownSharedKeys_New = Pointer<KnownSharedKeys> Function();
+
+typedef _CBLDart_KnownSharedKeys_Delete_C = Void Function(
+  Pointer<KnownSharedKeys> keys,
 );
 
 class CBLDart_LoadedDictKey extends Struct {
@@ -1382,23 +1364,25 @@ class CBLDart_FLDictIterator extends Opaque {}
 
 typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
     Function(
-  Handle object,
   Pointer<FLDict> dict,
   Pointer<KnownSharedKeys> knownSharedKeys,
   Pointer<CBLDart_LoadedDictKey> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
-  Bool finalize,
+  Bool deleteOnDone,
   Bool preLoad,
 );
 typedef _CBLDart_FLDictIterator_Begin = Pointer<CBLDart_FLDictIterator>
     Function(
-  Object? object,
   Pointer<FLDict> dict,
   Pointer<KnownSharedKeys> knownSharedKeys,
   Pointer<CBLDart_LoadedDictKey> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
-  bool finalize,
+  bool deleteOnDone,
   bool preLoad,
+);
+
+typedef _CBLDart_FLDictIterator_Delete_C = Void Function(
+  Pointer<CBLDart_FLDictIterator> iterator,
 );
 
 typedef _CBLDart_FLDictIterator_Next_C = Bool Function(
@@ -1412,17 +1396,19 @@ class CBLDart_FLArrayIterator extends Opaque {}
 
 typedef _CBLDart_FLArrayIterator_Begin_C = Pointer<CBLDart_FLArrayIterator>
     Function(
-  Handle object,
   Pointer<FLArray> array,
   Pointer<CBLDart_LoadedFLValue> valueOut,
-  Bool finalize,
+  Bool deleteOnDone,
 );
 typedef _CBLDart_FLArrayIterator_Begin = Pointer<CBLDart_FLArrayIterator>
     Function(
-  Object? object,
   Pointer<FLArray> array,
   Pointer<CBLDart_LoadedFLValue> valueOut,
-  bool finalize,
+  bool deleteOnDone,
+);
+
+typedef _CBLDart_FLArrayIterator_Delete_C = Void Function(
+  Pointer<CBLDart_FLArrayIterator> iterator,
 );
 
 typedef _CBLDart_FLArrayIterator_Next_C = Bool Function(
@@ -1439,9 +1425,11 @@ class FleeceDecoderBindings extends Bindings {
       isLeaf: useIsLeaf,
     );
     _knownSharedKeysNew = libs.cblDart.lookupFunction<
-        _CBLDart_KnownSharedKeys_New_C, _CBLDart_KnownSharedKeys_New>(
+        _CBLDart_KnownSharedKeys_New, _CBLDart_KnownSharedKeys_New>(
       'CBLDart_KnownSharedKeys_New',
     );
+    _knownSharedKeysDeletePtr =
+        libs.cblDart.lookup('CBLDart_KnownSharedKeys_Delete');
     _getLoadedFLValueFromData = libs.cblDart
         .lookupFunction<_CBLDart_FLValue_FromData_C, _CBLDart_FLValue_FromData>(
       'CBLDart_FLValue_FromData',
@@ -1467,6 +1455,8 @@ class FleeceDecoderBindings extends Bindings {
         _CBLDart_FLDictIterator_Begin_C, _CBLDart_FLDictIterator_Begin>(
       'CBLDart_FLDictIterator_Begin',
     );
+    _dictIteratorDeletePtr =
+        libs.cblDart.lookup('CBLDart_FLDictIterator_Delete');
     _dictIteratorNext = libs.cblDart.lookupFunction<
         _CBLDart_FLDictIterator_Next_C, _CBLDart_FLDictIterator_Next>(
       'CBLDart_FLDictIterator_Next',
@@ -1476,6 +1466,8 @@ class FleeceDecoderBindings extends Bindings {
         _CBLDart_FLArrayIterator_Begin_C, _CBLDart_FLArrayIterator_Begin>(
       'CBLDart_FLArrayIterator_Begin',
     );
+    _arrayIteratorDeletePtr =
+        libs.cblDart.lookup('CBLDart_FLArrayIterator_Delete');
     _arrayIteratorNext = libs.cblDart.lookupFunction<
         _CBLDart_FLArrayIterator_Next_C, _CBLDart_FLArrayIterator_Next>(
       'CBLDart_FLArrayIterator_Next',
@@ -1485,20 +1477,36 @@ class FleeceDecoderBindings extends Bindings {
 
   late final _FLData_Dump _dumpData;
   late final _CBLDart_KnownSharedKeys_New _knownSharedKeysNew;
+  late final Pointer<NativeFunction<_CBLDart_KnownSharedKeys_Delete_C>>
+      _knownSharedKeysDeletePtr;
   late final _CBLDart_FLValue_FromData _getLoadedFLValueFromData;
   late final _CBLDart_GetLoadedFLValue _getLoadedFLValue;
   late final _CBLDart_FLArray_GetLoadedFLValue _getLoadedFLValueFromArray;
   late final _CBLDart_FLDict_GetLoadedFLValue _getLoadedFLValueFromDict;
   late final _CBLDart_FLDictIterator_Begin _dictIteratorBegin;
+  late final Pointer<NativeFunction<_CBLDart_FLDictIterator_Delete_C>>
+      _dictIteratorDeletePtr;
   late final _CBLDart_FLDictIterator_Next _dictIteratorNext;
   late final _CBLDart_FLArrayIterator_Begin _arrayIteratorBegin;
+  late final Pointer<NativeFunction<_CBLDart_FLArrayIterator_Delete_C>>
+      _arrayIteratorDeletePtr;
   late final _CBLDart_FLArrayIterator_Next _arrayIteratorNext;
+
+  late final _knownSharedKeysFinalizer =
+      NativeFinalizer(_knownSharedKeysDeletePtr.cast());
+  late final _dictIteratorFinalizer =
+      NativeFinalizer(_dictIteratorDeletePtr.cast());
+  late final _arrayIteratorFinalizer =
+      NativeFinalizer(_arrayIteratorDeletePtr.cast());
 
   String dumpData(Data data) => _dumpData(data.toSliceResult().makeGlobal().ref)
       .toDartStringAndRelease()!;
 
-  Pointer<KnownSharedKeys> createKnownSharedKeys(Object object) =>
-      _knownSharedKeysNew(object);
+  Pointer<KnownSharedKeys> createKnownSharedKeys(Finalizable object) {
+    final result = _knownSharedKeysNew();
+    _knownSharedKeysFinalizer.attach(object, result.cast());
+    return result;
+  }
 
   void getLoadedFLValueFromData(Slice data, FLTrust trust) =>
       _getLoadedFLValueFromData(
@@ -1528,32 +1536,45 @@ class FleeceDecoderBindings extends Bindings {
   }
 
   Pointer<CBLDart_FLDictIterator> dictIteratorBegin(
-    Object? object,
+    Finalizable? object,
     Pointer<FLDict> dict,
     Pointer<KnownSharedKeys> knownSharedKeys,
     Pointer<CBLDart_LoadedDictKey> keyOut,
     Pointer<CBLDart_LoadedFLValue> valueOut, {
     required bool preLoad,
-  }) =>
-      _dictIteratorBegin(
-        object,
-        dict,
-        knownSharedKeys,
-        keyOut,
-        valueOut,
-        object != null,
-        preLoad,
-      );
+  }) {
+    final result = _dictIteratorBegin(
+      dict,
+      knownSharedKeys,
+      keyOut,
+      valueOut,
+      object == null,
+      preLoad,
+    );
+
+    if (object != null) {
+      _dictIteratorFinalizer.attach(object, result.cast());
+    }
+
+    return result;
+  }
 
   bool dictIteratorNext(Pointer<CBLDart_FLDictIterator> iterator) =>
       _dictIteratorNext(iterator);
 
   Pointer<CBLDart_FLArrayIterator> arrayIteratorBegin(
-    Object? object,
+    Finalizable? object,
     Pointer<FLArray> array,
     Pointer<CBLDart_LoadedFLValue> valueOut,
-  ) =>
-      _arrayIteratorBegin(object, array, valueOut, object != null);
+  ) {
+    final result = _arrayIteratorBegin(array, valueOut, object == null);
+
+    if (object != null) {
+      _arrayIteratorFinalizer.attach(object, result.cast());
+    }
+
+    return result;
+  }
 
   bool arrayIteratorNext(Pointer<CBLDart_FLArrayIterator> iterator) =>
       _arrayIteratorNext(iterator);
@@ -1573,15 +1594,6 @@ extension on FLEncoderFormat {
 
 class FLEncoder extends Opaque {}
 
-typedef _CBLDart_FLEncoder_BindToDartObject_C = Void Function(
-  Handle object,
-  Pointer<FLEncoder> encoder,
-);
-typedef _CBLDart_FLEncoder_BindToDartObject = void Function(
-  Object object,
-  Pointer<FLEncoder> encoder,
-);
-
 typedef _FLEncoder_NewWithOptions_C = Pointer<FLEncoder> Function(
   Uint8 format,
   Size reserveSize,
@@ -1592,6 +1604,8 @@ typedef _FLEncoder_NewWithOptions = Pointer<FLEncoder> Function(
   int reserveSize,
   bool uniqueStrings,
 );
+
+typedef _FLEncoder_Free_C = Void Function(Pointer<FLEncoder> encoder);
 
 typedef _FLEncoder_SetSharedKeys_C = Void Function(
   Pointer<FLEncoder> encoder,
@@ -1745,16 +1759,12 @@ typedef _FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
 
 class FleeceEncoderBindings extends Bindings {
   FleeceEncoderBindings(super.parent) {
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_FLEncoder_BindToDartObject_C,
-        _CBLDart_FLEncoder_BindToDartObject>(
-      'CBLDart_FLEncoder_BindToDartObject',
-    );
     _new = libs.cbl
         .lookupFunction<_FLEncoder_NewWithOptions_C, _FLEncoder_NewWithOptions>(
       'FLEncoder_NewWithOptions',
       isLeaf: useIsLeaf,
     );
+    _freePtr = libs.cbl.lookup('FLEncoder_Free');
     _setSharedKeys = libs.cbl
         .lookupFunction<_FLEncoder_SetSharedKeys_C, _FLEncoder_SetSharedKeys>(
       'FLEncoder_SetSharedKeys',
@@ -1856,8 +1866,8 @@ class FleeceEncoderBindings extends Bindings {
     );
   }
 
-  late final _CBLDart_FLEncoder_BindToDartObject _bindToDartObject;
   late final _FLEncoder_NewWithOptions _new;
+  late final Pointer<NativeFunction<_FLEncoder_Free_C>> _freePtr;
   late final _FLEncoder_SetSharedKeys _setSharedKeys;
   late final _FLEncoder_Reset _reset;
   late final _CBLDart_FLEncoder_WriteArrayValue _writeArrayValue;
@@ -1879,8 +1889,10 @@ class FleeceEncoderBindings extends Bindings {
   late final _FLEncoder_GetError __getError;
   late final _FLEncoder_GetErrorMessage __getErrorMessage;
 
-  void bindToDartObject(Object object, Pointer<FLEncoder> encoder) {
-    _bindToDartObject(object, encoder);
+  late final _finalizer = NativeFinalizer(_freePtr.cast());
+
+  void bindToDartObject(Finalizable object, Pointer<FLEncoder> encoder) {
+    _finalizer.attach(object, encoder.cast());
   }
 
   Pointer<FLEncoder> create({

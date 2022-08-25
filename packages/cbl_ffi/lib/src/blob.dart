@@ -142,15 +142,6 @@ typedef _CBLBlob_OpenContentStream = Pointer<CBLBlobReadStream> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_BindBlobReadStreamToDartObject_C = Void Function(
-  Handle object,
-  Pointer<CBLBlobReadStream> stream,
-);
-typedef _CBLDart_BindBlobReadStreamToDartObject = void Function(
-  Object object,
-  Pointer<CBLBlobReadStream> stream,
-);
-
 typedef _CBLDart_CBLBlobReader_Read_C = FLSliceResult Function(
   Pointer<CBLBlobReadStream> stream,
   Uint64 bufferSize,
@@ -165,9 +156,6 @@ typedef _CBLDart_CBLBlobReader_Read = FLSliceResult Function(
 typedef _CBLBlobReader_Close_C = Void Function(
   Pointer<CBLBlobReadStream> stream,
 );
-typedef _CBLBlobReader_Close = void Function(
-  Pointer<CBLBlobReadStream> stream,
-);
 
 class BlobReadStreamBindings extends Bindings {
   BlobReadStreamBindings(super.parent) {
@@ -176,37 +164,29 @@ class BlobReadStreamBindings extends Bindings {
       'CBLBlob_OpenContentStream',
       isLeaf: useIsLeaf,
     );
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_BindBlobReadStreamToDartObject_C,
-        _CBLDart_BindBlobReadStreamToDartObject>(
-      'CBLDart_BindBlobReadStreamToDartObject',
-    );
     _read = libs.cblDart.lookupFunction<_CBLDart_CBLBlobReader_Read_C,
         _CBLDart_CBLBlobReader_Read>(
       'CBLDart_CBLBlobReader_Read',
       isLeaf: useIsLeaf,
     );
-    _close =
-        libs.cbl.lookupFunction<_CBLBlobReader_Close_C, _CBLBlobReader_Close>(
-      'CBLBlobReader_Close',
-      isLeaf: useIsLeaf,
-    );
+    _closePtr = libs.cbl.lookup('CBLBlobReader_Close');
   }
 
   late final _CBLBlob_OpenContentStream _openContentStream;
-  late final _CBLDart_BindBlobReadStreamToDartObject _bindToDartObject;
   late final _CBLDart_CBLBlobReader_Read _read;
-  late final _CBLBlobReader_Close _close;
+  late final Pointer<NativeFunction<_CBLBlobReader_Close_C>> _closePtr;
 
-  void bindToDartObject(
-    Object object,
-    Pointer<CBLBlobReadStream> pointer,
-  ) {
-    _bindToDartObject(object, pointer);
-  }
+  late final _finalizer = NativeFinalizer(_closePtr.cast());
 
   Pointer<CBLBlobReadStream> openContentStream(Pointer<CBLBlob> blob) =>
       _openContentStream(blob, globalCBLError).checkCBLError();
+
+  void bindToDartObject(
+    Finalizable object,
+    Pointer<CBLBlobReadStream> pointer,
+  ) {
+    _finalizer.attach(object, pointer.cast());
+  }
 
   Data? read(Pointer<CBLBlobReadStream> stream, int bufferSize) {
     final buffer = _read(stream, bufferSize, globalCBLError);
@@ -220,10 +200,6 @@ class BlobReadStreamBindings extends Bindings {
     // create a SliceResult to ensure the the FLSliceResult is freed.
     final sliceResult = SliceResult.fromFLSliceResult(buffer)!;
     return sliceResult.size == 0 ? null : sliceResult.toData();
-  }
-
-  void close(Pointer<CBLBlobReadStream> stream) {
-    _close(stream);
   }
 }
 

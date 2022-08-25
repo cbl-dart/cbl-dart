@@ -15,31 +15,20 @@ final _documentBindings = cblBindings.document;
 final _mutableDocumentBindings = cblBindings.mutableDocument;
 
 class FfiDocumentDelegate extends DocumentDelegate implements Finalizable {
-  FfiDocumentDelegate.fromPointer(
-    this.pointer, {
-    bool adopt = false,
-    required String debugCreator,
-  }) {
-    bindCBLRefCountedToDartObject(
-      this,
-      pointer: pointer,
-      adopt: adopt,
-      debugName: 'FfiDocumentDelegate(creator: $debugCreator)',
-    );
+  FfiDocumentDelegate.fromPointer(this.pointer, {bool adopt = false}) {
+    bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
   FfiDocumentDelegate.create([String? id])
       : this.fromPointer(
           _mutableDocumentBindings.createWithID(id).cast(),
           adopt: true,
-          debugCreator: 'FfiDocumentDelegate.mutable()',
         );
 
   factory FfiDocumentDelegate.mutableCopy(FfiDocumentDelegate delegate) =>
       FfiDocumentDelegate.fromPointer(
         _mutableDocumentBindings.mutableCopy(delegate.pointer).cast(),
         adopt: true,
-        debugCreator: 'FfiDocumentDelegate.mutableCopy()',
       );
 
   final Pointer<CBLDocument> pointer;

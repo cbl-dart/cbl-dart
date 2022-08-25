@@ -39,7 +39,6 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
     required bool distinct,
   }) : super(
           typeName: 'SelectImpl',
-          debugCreator: 'SelectImpl()',
           language: CBLQueryLanguage.json,
         ) {
     initBuilderQuery(

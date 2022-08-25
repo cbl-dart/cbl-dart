@@ -518,7 +518,6 @@ class CblService {
       database: _getDatabaseById(request.databaseId),
       definition: request.queryDefinition,
       language: request.language,
-      debugCreator: 'CblService._createQuery()',
     );
     final id = _objectRegistry.addObject(_Query(query, request.resultEncoding));
     return QueryState(id: id, columnNames: query.columnNames);
@@ -586,7 +585,6 @@ class CblService {
     );
     final replicator = await FfiReplicator.create(
       config,
-      debugCreator: 'CblService._createReplicator()',
       // The isolate running this service should not be crashed by unhandled
       // errors in the callbacks registered by the client. The client is
       // responsible for reporting those errors as unhandled in its isolate.

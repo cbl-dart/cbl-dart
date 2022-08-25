@@ -42,8 +42,9 @@ typedef void (*CallbackFinalizer)(void *context);
 
 class AsyncCallback {
  public:
-  AsyncCallback(uint32_t id, Dart_Handle dartCallback, Dart_Port sendport,
-                bool debug);
+  AsyncCallback(uint32_t id, Dart_Port sendPort, bool debug);
+
+  ~AsyncCallback();
 
   uint32_t id() { return id_; };
 
@@ -52,8 +53,6 @@ class AsyncCallback {
 
  private:
   friend class AsyncCallbackCall;
-
-  void static dartFinalizer(void *dart_callback_data, void *peer);
 
   void registerCall(AsyncCallbackCall &call);
   void unregisterCall(AsyncCallbackCall &call);
@@ -68,7 +67,6 @@ class AsyncCallback {
   Dart_Port sendPort_ = ILLEGAL_PORT;
   void *finalizerContext_ = nullptr;
   CallbackFinalizer finalizer_ = nullptr;
-  Dart_WeakPersistentHandle dartCallbackHandle_ = nullptr;
   std::vector<AsyncCallbackCall *> activeCalls_;
 };
 

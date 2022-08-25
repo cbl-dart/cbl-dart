@@ -20,3 +20,8 @@ dependencies:
 
 dev_dependencies:
   test: ^1.21.1
+# For this package we check pubspec_overrides.yaml into git because
+# we want to override Melos, so that we use the last published versions
+# of the cbl_* packages. This is necessary because cbl_dart downloads
+# binaries that might have a different API than the binaries currently in
+# development.

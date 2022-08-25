@@ -625,7 +625,6 @@ abstract class SyncDatabase implements Database {
           name: name,
           config: config,
           typedDataAdapter: typedDataAdapter,
-          debugCreator: 'SyncDatabase.internal()',
         ),
       );
 

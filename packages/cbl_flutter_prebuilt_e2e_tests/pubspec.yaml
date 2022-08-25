@@ -17,3 +17,13 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+
+dependency_overrides:
+  # We use the latest published versions of the following packages.
+  # This is necessary because the current development version of cbl_ffi
+  # might depend on a newer version of the binaries. The other packages
+  # directly or indirectly depend on cbl_ffi.
+  cbl: any
+  cbl_ffi: any
+  cbl_flutter: any
+  cbl_flutter_platform_interface: any

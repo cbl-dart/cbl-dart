@@ -14,7 +14,6 @@ import '../support/edition.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
-import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
@@ -37,21 +36,15 @@ class FfiReplicator
     required this.pointer,
     required FfiDatabase database,
     required void Function() closeCallbacks,
-    required String debugCreator,
   })  : _config = config,
         _database = database,
         _closeCallbacks = closeCallbacks {
-    bindCBLReplicatorToDartObject(
-      this,
-      pointer: pointer,
-      debugName: 'Replicator(creator: $debugCreator)',
-    );
+    _bindings.bindToDartObject(this, pointer);
     attachTo(_database);
   }
 
   static Future<FfiReplicator> create(
     ReplicatorConfiguration config, {
-    required String debugCreator,
     bool ignoreCallbackErrorsInDart = false,
   }) async {
     // We make a copy of the configuration so that later modifications to the
@@ -124,7 +117,6 @@ class FfiReplicator
         pointer: pointer,
         database: database,
         closeCallbacks: closeCallbacks,
-        debugCreator: debugCreator,
       );
 
       // ignore: avoid_catches_without_on_clauses
@@ -416,10 +408,7 @@ AsyncCallback _wrapReplicationFilter(
         final message =
             ReplicationFilterCallbackMessage.fromArguments(arguments);
         final doc = DelegateDocument(
-          FfiDocumentDelegate.fromPointer(
-            message.document,
-            debugCreator: 'ReplicationFilter()',
-          ),
+          FfiDocumentDelegate.fromPointer(message.document),
           database: database,
         );
 
@@ -444,19 +433,13 @@ AsyncCallback _wrapConflictResolver(
             ReplicationConflictResolverCallbackMessage.fromArguments(arguments);
 
         final local = message.localDocument?.let((pointer) => DelegateDocument(
-              FfiDocumentDelegate.fromPointer(
-                pointer,
-                debugCreator: 'ConflictResolver(local)',
-              ),
+              FfiDocumentDelegate.fromPointer(pointer),
               database: database,
             ));
 
         final remote =
             message.remoteDocument?.let((pointer) => DelegateDocument(
-                  FfiDocumentDelegate.fromPointer(
-                    pointer,
-                    debugCreator: 'ConflictResolver(remote)',
-                  ),
+                  FfiDocumentDelegate.fromPointer(pointer),
                   database: database,
                 ));
 

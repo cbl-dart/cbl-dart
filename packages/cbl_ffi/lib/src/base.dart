@@ -288,22 +288,6 @@ extension CheckCBLErrorBoolExt on bool {
 
 class CBLRefCounted extends Opaque {}
 
-typedef _CBLDart_BindCBLRefCountedToDartObject_C = Void Function(
-  Handle object,
-  Pointer<CBLRefCounted> refCounted,
-  Bool retain,
-  Pointer<Utf8> debugName,
-);
-typedef _CBLDart_BindCBLRefCountedToDartObject = void Function(
-  Object object,
-  Pointer<CBLRefCounted> refCounted,
-  bool retain,
-  Pointer<Utf8> debugName,
-);
-
-typedef _CBLDart_SetDebugRefCounted_C = Void Function(Bool enabled);
-typedef _CBLDart_SetDebugRefCounted = void Function(bool enabled);
-
 typedef _CBL_Retain = Pointer<CBLRefCounted> Function(
   Pointer<CBLRefCounted> refCounted,
 );
@@ -333,24 +317,13 @@ class BaseBindings extends Bindings {
       isLeaf: useIsLeaf,
     );
 
-    _bindCBLRefCountedToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_BindCBLRefCountedToDartObject_C,
-        _CBLDart_BindCBLRefCountedToDartObject>(
-      'CBLDart_BindCBLRefCountedToDartObject',
-    );
-    _setDebugRefCounted = libs.cblDart.lookupFunction<
-        _CBLDart_SetDebugRefCounted_C, _CBLDart_SetDebugRefCounted>(
-      'CBLDart_SetDebugRefCounted',
-      isLeaf: useIsLeaf,
-    );
     _retainRefCounted = libs.cbl.lookupFunction<_CBL_Retain, _CBL_Retain>(
       'CBL_Retain',
       isLeaf: useIsLeaf,
     );
-    _releaseRefCounted = libs.cbl.lookupFunction<_CBL_Release, _CBL_Release>(
-      'CBL_Release',
-      isLeaf: useIsLeaf,
-    );
+    _releaseRefCountedPtr =
+        libs.cbl.lookup<NativeFunction<_CBL_Release>>('CBL_Release');
+    _releaseRefCounted = _releaseRefCountedPtr.asFunction(isLeaf: useIsLeaf);
     _getErrorMessage =
         libs.cbl.lookupFunction<_CBLError_Message, _CBLError_Message>(
       'CBLError_Message',
@@ -364,13 +337,14 @@ class BaseBindings extends Bindings {
   }
 
   late final _CBLDart_Initialize _initialize;
-  late final _CBLDart_BindCBLRefCountedToDartObject
-      _bindCBLRefCountedToDartObject;
-  late final _CBLDart_SetDebugRefCounted _setDebugRefCounted;
   late final _CBL_Retain _retainRefCounted;
+  late final Pointer<NativeFunction<_CBL_Release>> _releaseRefCountedPtr;
   late final _CBL_Release _releaseRefCounted;
   late final _CBLError_Message _getErrorMessage;
   late final _CBLListener_Remove _removeListener;
+
+  late final _refCountedFinalizer =
+      NativeFinalizer(_releaseRefCountedPtr.cast());
 
   void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
@@ -399,24 +373,11 @@ class BaseBindings extends Bindings {
   }
 
   void bindCBLRefCountedToDartObject(
-    Object handle, {
-    required Pointer<CBLRefCounted> refCounted,
-    required bool retain,
-    String? debugName,
-  }) {
-    final debugNameCStr = debugName?.toNativeUtf8() ?? nullptr;
-
-    _bindCBLRefCountedToDartObject(handle, refCounted, retain, debugNameCStr);
-
-    if (debugNameCStr != nullptr) {
-      malloc.free(debugNameCStr);
-    }
+    Finalizable object,
+    Pointer<CBLRefCounted> refCounted,
+  ) {
+    _refCountedFinalizer.attach(object, refCounted.cast());
   }
-
-  // coverage:ignore-start
-
-  // ignore: avoid_setters_without_getters
-  set debugRefCounted(bool enabled) => _setDebugRefCounted(enabled);
 
   void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
     _retainRefCounted(refCounted);
@@ -425,8 +386,6 @@ class BaseBindings extends Bindings {
   void releaseRefCounted(Pointer<CBLRefCounted> refCounted) {
     _releaseRefCounted(refCounted);
   }
-
-  // coverage:ignore-end
 
   String? getErrorMessage(Pointer<CBLError> error) =>
       _getErrorMessage(error).toDartStringAndRelease(allowMalformed: true);

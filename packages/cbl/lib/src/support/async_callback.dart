@@ -92,6 +92,9 @@ class AsyncCallback implements Finalizable {
   ///
   /// After calling this method the callback must not be used any more.
   void close() {
+    if (_closed) {
+      return;
+    }
     _debugLog('closing');
     _closed = true;
     _bindings.close(pointer);

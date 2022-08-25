@@ -191,7 +191,6 @@ abstract class SyncQuery implements Query {
         database: database as FfiDatabase,
         definition: query,
         language: CBLQueryLanguage.n1ql,
-        debugCreator: 'SyncQuery.fromN1ql()',
       )..prepare();
 
   /// {@macro cbl.Query.fromJsonRepresentationSync}
@@ -203,7 +202,6 @@ abstract class SyncQuery implements Query {
         database: database as FfiDatabase,
         definition: json,
         language: CBLQueryLanguage.json,
-        debugCreator: 'SyncQuery.fromJsonRepresentation()',
       )..prepare();
 
   @override
@@ -236,7 +234,6 @@ abstract class AsyncQuery implements Query {
   ) async {
     final q = ProxyQuery(
       database: database as ProxyDatabase,
-      debugCreator: 'AsyncQuery.fromN1ql()',
       language: CBLQueryLanguage.n1ql,
       definition: query,
     );
@@ -253,7 +250,6 @@ abstract class AsyncQuery implements Query {
   ) async {
     final q = ProxyQuery(
       database: database as ProxyDatabase,
-      debugCreator: 'AsyncQuery.fromJsonRepresentation()',
       language: CBLQueryLanguage.json,
       definition: json,
     );
@@ -285,14 +281,12 @@ abstract class AsyncQuery implements Query {
 abstract class QueryBase with ClosableResourceMixin implements Query {
   QueryBase({
     required this.typeName,
-    required this.debugCreator,
     this.database,
     required this.language,
     this.definition,
   });
 
   final String typeName;
-  final String debugCreator;
   final Database? database;
   final CBLQueryLanguage language;
   String? definition;

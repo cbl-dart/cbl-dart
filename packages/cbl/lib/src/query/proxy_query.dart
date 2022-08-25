@@ -29,7 +29,6 @@ import 'select_result.dart';
 
 class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   ProxyQuery({
-    required super.debugCreator,
     ProxyDatabase? super.database,
     required super.language,
     super.definition,
@@ -251,7 +250,6 @@ class AsyncBuilderQuery extends ProxyQuery with BuilderQueryMixin {
     ExpressionInterface? limit,
     ExpressionInterface? offset,
   }) : super(
-          debugCreator: 'AsyncBuilderQuery()',
           database: (from as DataSourceImpl?)?.database as ProxyDatabase? ??
               query?.database as ProxyDatabase?,
           language: CBLQueryLanguage.json,

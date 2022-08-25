@@ -1,0 +1,7 @@
+dependency_overrides:
+  cbl: any
+  cbl_dart:
+    path: ..
+  cbl_ffi: any
+  cbl_libcblite_api: any
+  cbl_libcblitedart_api: any

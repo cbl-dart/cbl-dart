@@ -5,8 +5,6 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart';
-
 import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
@@ -224,15 +222,8 @@ typedef _CBLDart_CBLReplicator_Create = Pointer<CBLReplicator> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLDart_BindReplicatorToDartObject_C = Void Function(
-  Handle object,
+typedef _CBLDart_CBLReplicator_Release_C = Void Function(
   Pointer<CBLReplicator> replicator,
-  Pointer<Utf8> debugName,
-);
-typedef _CBLDart_BindReplicatorToDartObject = void Function(
-  Object object,
-  Pointer<CBLReplicator> replicator,
-  Pointer<Utf8> debugName,
 );
 
 typedef _CBLReplicator_Start_C = Void Function(
@@ -497,11 +488,7 @@ class ReplicatorBindings extends Bindings {
       'CBLDart_CBLReplicator_Create',
       isLeaf: useIsLeaf,
     );
-    _bindToDartObject = libs.cblDart.lookupFunction<
-        _CBLDart_BindReplicatorToDartObject_C,
-        _CBLDart_BindReplicatorToDartObject>(
-      'CBLDart_BindReplicatorToDartObject',
-    );
+    _releasePtr = libs.cblDart.lookup('CBLDart_CBLReplicator_Release');
     _start =
         libs.cbl.lookupFunction<_CBLReplicator_Start_C, _CBLReplicator_Start>(
       'CBLReplicator_Start',
@@ -557,7 +544,8 @@ class ReplicatorBindings extends Bindings {
   late final _CBLAuth_CreateSession _authCreateSession;
   late final _CBLAuth_Free _authFree;
   late final _CBLDart_CBLReplicator_Create _create;
-  late final _CBLDart_BindReplicatorToDartObject _bindToDartObject;
+  late final Pointer<NativeFunction<_CBLDart_CBLReplicator_Release_C>>
+      _releasePtr;
   late final _CBLReplicator_Start _start;
   late final _CBLReplicator_Stop _stop;
   late final _CBLReplicator_SetHostReachable _setHostReachable;
@@ -568,6 +556,8 @@ class ReplicatorBindings extends Bindings {
   late final _CBLDart_CBLReplicator_AddChangeListener _addChangeListener;
   late final _CBLDart_CBLReplicator_AddDocumentReplicationListener
       _addDocumentReplicationListener;
+
+  late final _finalizer = NativeFinalizer(_releasePtr.cast());
 
   Pointer<CBLEndpoint> createEndpointWithUrl(String url) =>
       runWithSingleFLString(
@@ -613,16 +603,8 @@ class ReplicatorBindings extends Bindings {
             globalCBLError,
           ).checkCBLError());
 
-  void bindToDartObject(
-    Object object,
-    Pointer<CBLReplicator> replicator,
-    String? debugName,
-  ) {
-    _bindToDartObject(
-      object,
-      replicator,
-      debugName?.toNativeUtf8() ?? nullptr,
-    );
+  void bindToDartObject(Finalizable object, Pointer<CBLReplicator> replicator) {
+    _finalizer.attach(object, replicator.cast());
   }
 
   void start(

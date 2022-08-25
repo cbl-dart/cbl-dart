@@ -17,7 +17,6 @@ import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
-import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/tracing.dart';
@@ -42,7 +41,6 @@ class FfiDatabase
     required String name,
     DatabaseConfiguration? config,
     TypedDataAdapter? typedDataAdapter,
-    required String debugCreator,
   }) {
     config ??= DatabaseConfiguration();
 
@@ -56,7 +54,6 @@ class FfiDatabase
         () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
       ),
       typedDataAdapter: typedDataAdapter,
-      debugName: 'FfiDatabase($name, creator: $debugCreator)',
     );
   }
 
@@ -64,9 +61,8 @@ class FfiDatabase
     required DatabaseConfiguration config,
     required this.pointer,
     required this.typedDataAdapter,
-    required String debugName,
   }) : _config = config {
-    bindCBLDatabaseToDartObject(this, pointer: pointer, debugName: debugName);
+    _bindings.bindToDartObject(this, pointer);
     name = _bindings.name(pointer);
     _path = _bindings.path(pointer);
   }
@@ -155,7 +151,6 @@ class FfiDatabase
               FfiDocumentDelegate.fromPointer(
                 documentPointer,
                 adopt: true,
-                debugCreator: 'FfiDatabase.document()',
               ),
               database: this,
             );
