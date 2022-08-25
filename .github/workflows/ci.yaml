@@ -113,6 +113,13 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos ${{ env.melos-version }}
 
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Build native libraries
+        shell: bash
+        run: ./tools/ci-steps.sh buildNativeLibraries
+
       - name: Bootstrap Dart package
         run: ./tools/ci-steps.sh bootstrapPackage
 

@@ -17,11 +17,11 @@ import 'package.dart';
 /// - [setupDevelopmentLibraries]
 LibrariesConfiguration? _librariesOverride;
 
-/// Setup local development libraries that will be used instead of the
-/// published libraries.
+/// Setup local development libraries that will be used instead of the published
+/// libraries.
 ///
-/// This function must be called before [CouchbaseLiteDart.init] to have
-/// an effect.
+/// This function must be called before [CouchbaseLiteDart.init] to have an
+/// effect.
 Future<void> setupDevelopmentLibraries() async {
   final cblDartPackageEntryLibrary = (await Isolate.resolvePackageUri(
     Uri.parse('package:cbl_dart/cbl_dart.dart'),
@@ -29,7 +29,7 @@ Future<void> setupDevelopmentLibraries() async {
 
   final cblDartPackageDir = p.join(cblDartPackageEntryLibrary.path, '../..');
   assert(cblDartPackageDir.contains('packages/cbl_dart'));
-  final standaloneDartTestPackageDir = p.normalize(
+  final standaloneDartTestPackageDir = p.canonicalize(
     p.join(cblDartPackageDir, '..', 'cbl_e2e_tests_standalone_dart'),
   );
 

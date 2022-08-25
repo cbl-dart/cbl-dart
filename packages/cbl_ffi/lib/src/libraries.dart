@@ -155,7 +155,7 @@ Pointer<Void> _AddDllDirectory(String directory) {
   final result = _AddDllDirectoryFn(directoryNativeStr);
   malloc.free(directoryNativeStr);
   if (result == nullptr) {
-    throw StateError('Failed to add DLL directory');
+    throw StateError('Failed to add DLL directory: $directory');
   }
   return result;
 }
