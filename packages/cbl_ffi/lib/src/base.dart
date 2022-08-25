@@ -373,17 +373,11 @@ class BaseBindings extends Bindings {
   }
 
   void bindCBLRefCountedToDartObject(
-    Finalizable object, {
-    required Pointer<CBLRefCounted> refCounted,
-    required bool retain,
-  }) {
-    if (retain) {
-      _retainRefCounted(refCounted);
-    }
+    Finalizable object,
+    Pointer<CBLRefCounted> refCounted,
+  ) {
     _refCountedFinalizer.attach(object, refCounted.cast());
   }
-
-  // coverage:ignore-start
 
   void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
     _retainRefCounted(refCounted);
@@ -392,8 +386,6 @@ class BaseBindings extends Bindings {
   void releaseRefCounted(Pointer<CBLRefCounted> refCounted) {
     _releaseRefCounted(refCounted);
   }
-
-  // coverage:ignore-end
 
   String? getErrorMessage(Pointer<CBLError> error) =>
       _getErrorMessage(error).toDartStringAndRelease(allowMalformed: true);

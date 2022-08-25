@@ -14,7 +14,6 @@ import '../support/edition.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
-import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
@@ -40,10 +39,7 @@ class FfiReplicator
   })  : _config = config,
         _database = database,
         _closeCallbacks = closeCallbacks {
-    bindCBLReplicatorToDartObject(
-      this,
-      pointer: pointer,
-    );
+    _bindings.bindToDartObject(this, pointer);
     attachTo(_database);
   }
 

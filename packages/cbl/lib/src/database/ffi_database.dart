@@ -17,7 +17,6 @@ import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
 import '../support/listener_token.dart';
-import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/tracing.dart';
@@ -63,7 +62,7 @@ class FfiDatabase
     required this.pointer,
     required this.typedDataAdapter,
   }) : _config = config {
-    bindCBLDatabaseToDartObject(this, pointer: pointer);
+    _bindings.bindToDartObject(this, pointer);
     name = _bindings.name(pointer);
     _path = _bindings.path(pointer);
   }
