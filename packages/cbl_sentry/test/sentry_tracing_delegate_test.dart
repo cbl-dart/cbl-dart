@@ -1,21 +1,19 @@
 // ignore_for_file: cascade_invocations
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl_dart/cbl_dart.dart';
 import 'package:cbl_sentry/cbl_sentry.dart';
 import 'package:cbl_sentry/src/sentry_tracing_delegate.dart';
 import 'package:sentry/sentry.dart';
 import 'package:test/test.dart';
 
+import 'utils/cbl.dart';
 import 'utils/mock_database.dart';
 import 'utils/mock_hub.dart';
 import 'utils/mock_query.dart';
 import 'utils/mock_span.dart';
 
 void main() {
-  setUpAll(() async {
-    await CouchbaseLiteDart.init(edition: Edition.community);
-  });
+  setUpAll(initCouchbaseLiteForTest);
 
   late MockHub hub;
 
