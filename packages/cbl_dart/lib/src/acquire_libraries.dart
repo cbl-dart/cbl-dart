@@ -23,42 +23,28 @@ LibrariesConfiguration? _librariesOverride;
 /// This function must be called before [CouchbaseLiteDart.init] to have an
 /// effect.
 Future<void> setupDevelopmentLibraries() async {
-  final cblDartPackageEntryLibrary = (await Isolate.resolvePackageUri(
-    Uri.parse('package:cbl_dart/cbl_dart.dart'),
-  ))!;
-  print(cblDartPackageEntryLibrary);
-  print(cblDartPackageEntryLibrary.path);
-
-  final cblDartPackageDir = p.join(cblDartPackageEntryLibrary.path, '../..');
-  print(cblDartPackageDir);
-
-  assert(cblDartPackageDir.contains('packages/cbl_dart'));
-  final standaloneDartTestPackageDir = p.canonicalize(
-    p.join(cblDartPackageDir, '..', 'cbl_e2e_tests_standalone_dart'),
-  );
-  print(standaloneDartTestPackageDir);
-  print(p.normalize(
-    p.join(cblDartPackageDir, '..', 'cbl_e2e_tests_standalone_dart'),
-  ));
-
   const enterpriseEdition = true;
 
   String? directory;
   String cblLib;
   String cblDartLib;
 
-  final libDir = p.join(standaloneDartTestPackageDir, 'lib');
+  // TODO(blaugold): store development libraries in cbl_dart package
+  // The standalone Dart e2e test directory is where the development libraries
+  // have historically been located.
+  final standaloneDartE2eTestDir = await _resolveStandaloneDartE2eTestDir();
+  final libDir = p.join(standaloneDartE2eTestDir, 'lib');
   final isUnix = Platform.isLinux || Platform.isMacOS;
   if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
     directory = libDir;
     cblLib = 'libcblite';
     cblDartLib = 'libcblitedart';
   } else if (Platform.isMacOS) {
-    directory = p.join(standaloneDartTestPackageDir, 'Frameworks');
+    directory = p.join(standaloneDartE2eTestDir, 'Frameworks');
     cblLib = 'CouchbaseLite';
     cblDartLib = 'CouchbaseLiteDart';
   } else if (Platform.isWindows) {
-    directory = p.join(standaloneDartTestPackageDir, 'bin');
+    directory = p.join(standaloneDartE2eTestDir, 'bin');
     cblLib = 'cblite';
     cblDartLib = 'cblitedart';
   } else {
@@ -71,6 +57,18 @@ Future<void> setupDevelopmentLibraries() async {
     cbl: LibraryConfiguration.dynamic(cblLib),
     cblDart: LibraryConfiguration.dynamic(cblDartLib),
   );
+}
+
+Future<String> _resolveStandaloneDartE2eTestDir() async {
+  final cblDartPackageEntryLibrary = (await Isolate.resolvePackageUri(
+    Uri.parse('package:cbl_dart/cbl_dart.dart'),
+  ))!;
+  assert(cblDartPackageEntryLibrary.path.contains('packages/cbl_dart'));
+
+  final cblDartDir =
+      p.join(cblDartPackageEntryLibrary.toFilePath(), '..', '..');
+
+  return p.normalize(p.join(cblDartDir, '..', 'cbl_e2e_tests_standalone_dart'));
 }
 
 /// Ensures that the latest releases of the libraries are installed and returns
