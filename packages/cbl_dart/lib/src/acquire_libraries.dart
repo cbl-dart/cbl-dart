@@ -26,12 +26,20 @@ Future<void> setupDevelopmentLibraries() async {
   final cblDartPackageEntryLibrary = (await Isolate.resolvePackageUri(
     Uri.parse('package:cbl_dart/cbl_dart.dart'),
   ))!;
+  print(cblDartPackageEntryLibrary);
+  print(cblDartPackageEntryLibrary.path);
 
   final cblDartPackageDir = p.join(cblDartPackageEntryLibrary.path, '../..');
+  print(cblDartPackageDir);
+
   assert(cblDartPackageDir.contains('packages/cbl_dart'));
   final standaloneDartTestPackageDir = p.canonicalize(
     p.join(cblDartPackageDir, '..', 'cbl_e2e_tests_standalone_dart'),
   );
+  print(standaloneDartTestPackageDir);
+  print(p.normalize(
+    p.join(cblDartPackageDir, '..', 'cbl_e2e_tests_standalone_dart'),
+  ));
 
   const enterpriseEdition = true;
 
