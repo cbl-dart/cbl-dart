@@ -569,6 +569,7 @@ class CblService {
       continuous: request.continuous,
       authenticator: request.authenticator,
       pinnedServerCertificate: request.pinnedServerCertificate?.toTypedList(),
+      trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
       headers: request.headers,
       channels: request.channels,
       documentIds: request.documentIds,
