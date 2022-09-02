@@ -153,10 +153,11 @@ class ReplicatorConfiguration {
   /// The [Authenticator] to authenticate with a remote target.
   Authenticator? authenticator;
 
-  /// The remote target's SSL certificate.
+  /// The remote target's SSL certificate (PEM or DER).
   Uint8List? pinnedServerCertificate;
 
-  /// The remote target's root SSL certificate.
+  /// A set of trusted root certificates to use for verifying the SSL
+  /// certificate of the remote target (PEM).
   Uint8List? trustedRootCertificates;
 
   /// Extra HTTP headers to send in all requests to the remote target.

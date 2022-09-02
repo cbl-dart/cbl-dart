@@ -1413,8 +1413,10 @@ class CreateReplicator extends Request<int> {
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
-  }) : _pinnedServerCertificate = pinnedServerCertificate?.let(MessageData.new),
-        _trustedRootCertificates = trustedRootCertificates?.let(MessageData.new);
+  })  : _pinnedServerCertificate =
+            pinnedServerCertificate?.let(MessageData.new),
+        _trustedRootCertificates =
+            trustedRootCertificates?.let(MessageData.new);
 
   CreateReplicator._({
     required this.databaseId,
@@ -1435,9 +1437,8 @@ class CreateReplicator extends Request<int> {
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
-  }) : _pinnedServerCertificate = pinnedServerCertificate,
+  })  : _pinnedServerCertificate = pinnedServerCertificate,
         _trustedRootCertificates = trustedRootCertificates;
-
 
   final int databaseId;
   final EncodingFormat? propertiesFormat;
@@ -1515,14 +1516,11 @@ class CreateReplicator extends Request<int> {
     _trustedRootCertificates?.willSend();
   }
 
-
   @override
-  void didReceive()
-  {
+  void didReceive() {
     _pinnedServerCertificate?.didReceive();
     _trustedRootCertificates?.didReceive();
   }
-
 }
 
 class CallReplicationFilter extends Request<bool> {

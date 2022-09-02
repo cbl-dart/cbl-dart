@@ -17,8 +17,8 @@ version="$(cat "$versionFile")"
 productDir="$buildDir/libcblitedart-$version"
 cmakeBuildDir="$buildDir/cmake"
 archs=(arm64-v8a armeabi-v7a x86 x86_64)
-ndkVersion="25.1.8937393"
-cmakeVersion="3.22.1"
+ndkVersion="21.4.7075529"
+cmakeVersion="3.18.1"
 defaultSdkLocation=("$HOME/Android/Sdk" "$HOME/Library/Android/sdk")
 sdkHome="$ANDROID_HOME"
 
