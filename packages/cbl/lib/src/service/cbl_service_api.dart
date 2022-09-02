@@ -1402,6 +1402,7 @@ class CreateReplicator extends Request<int> {
     this.continuous = false,
     this.authenticator,
     Data? pinnedServerCertificate,
+    Data? trustedRootCertificates,
     this.headers,
     this.channels,
     this.documentIds,
@@ -1412,7 +1413,10 @@ class CreateReplicator extends Request<int> {
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
-  }) : _pinnedServerCertificate = pinnedServerCertificate?.let(MessageData.new);
+  })  : _pinnedServerCertificate =
+            pinnedServerCertificate?.let(MessageData.new),
+        _trustedRootCertificates =
+            trustedRootCertificates?.let(MessageData.new);
 
   CreateReplicator._({
     required this.databaseId,
@@ -1422,6 +1426,7 @@ class CreateReplicator extends Request<int> {
     required this.continuous,
     this.authenticator,
     MessageData? pinnedServerCertificate,
+    MessageData? trustedRootCertificates,
     this.headers,
     this.channels,
     this.documentIds,
@@ -1432,7 +1437,8 @@ class CreateReplicator extends Request<int> {
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
-  }) : _pinnedServerCertificate = pinnedServerCertificate;
+  })  : _pinnedServerCertificate = pinnedServerCertificate,
+        _trustedRootCertificates = trustedRootCertificates;
 
   final int databaseId;
   final EncodingFormat? propertiesFormat;
@@ -1442,6 +1448,8 @@ class CreateReplicator extends Request<int> {
   final Authenticator? authenticator;
   Data? get pinnedServerCertificate => _pinnedServerCertificate?.data;
   final MessageData? _pinnedServerCertificate;
+  Data? get trustedRootCertificates => _trustedRootCertificates?.data;
+  final MessageData? _trustedRootCertificates;
   final Map<String, String>? headers;
   final List<String>? channels;
   final List<String>? documentIds;
@@ -1462,6 +1470,7 @@ class CreateReplicator extends Request<int> {
         'continuous': continuous,
         'authenticator': context.serializePolymorphic(authenticator),
         'pinnedServerCertificate': context.serialize(_pinnedServerCertificate),
+        'trustedRootCertificates': context.serialize(_trustedRootCertificates),
         'headers': headers,
         'channels': context.serialize(channels),
         'documentIds': context.serialize(documentIds),
@@ -1487,6 +1496,8 @@ class CreateReplicator extends Request<int> {
         authenticator: context.deserializePolymorphic(map['authenticator']),
         pinnedServerCertificate:
             context.deserializeAs(map['pinnedServerCertificate']),
+        trustedRootCertificates:
+            context.deserializeAs(map['trustedRootCertificates']),
         headers: map.getAs<StringMap?>('headers')?.cast(),
         channels: context.deserializeAs(map['channels']),
         documentIds: context.deserializeAs(map['documentIds']),
@@ -1500,10 +1511,16 @@ class CreateReplicator extends Request<int> {
       );
 
   @override
-  void willSend() => _pinnedServerCertificate?.willSend();
+  void willSend() {
+    _pinnedServerCertificate?.willSend();
+    _trustedRootCertificates?.willSend();
+  }
 
   @override
-  void didReceive() => _pinnedServerCertificate?.didReceive();
+  void didReceive() {
+    _pinnedServerCertificate?.didReceive();
+    _trustedRootCertificates?.didReceive();
+  }
 }
 
 class CallReplicationFilter extends Request<bool> {

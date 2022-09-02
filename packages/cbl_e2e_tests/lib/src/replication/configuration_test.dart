@@ -24,6 +24,7 @@ void main() {
       expect(config.continuous, false);
       expect(config.authenticator, isNull);
       expect(config.pinnedServerCertificate, isNull);
+      expect(config.trustedRootCertificates, isNull);
       expect(config.headers, isNull);
       expect(config.channels, isNull);
       expect(config.documentIds, isNull);
@@ -73,6 +74,7 @@ void main() {
         continuous: true,
         authenticator: SessionAuthenticator(sessionId: 'sessionId'),
         pinnedServerCertificate: Uint8List(0),
+        trustedRootCertificates: Uint8List(0),
         headers: {'Client': 'cbl-dart', 'Authentication': 'AUTH'},
         channels: ['A'],
         documentIds: ['ID'],
@@ -96,6 +98,7 @@ void main() {
       expect(copy.continuous, source.continuous);
       expect(copy.authenticator, source.authenticator);
       expect(copy.pinnedServerCertificate, source.pinnedServerCertificate);
+      expect(copy.trustedRootCertificates, source.trustedRootCertificates);
       expect(copy.headers, source.headers);
       expect(copy.channels, source.channels);
       expect(copy.documentIds, source.documentIds);
@@ -135,6 +138,7 @@ void main() {
         continuous: true,
         authenticator: SessionAuthenticator(sessionId: 'sessionId'),
         pinnedServerCertificate: Uint8List(0),
+        trustedRootCertificates: Uint8List(0),
         headers: {'Client': 'cbl-dart', 'Authentication': 'AUTH'},
         channels: ['A'],
         documentIds: ['ID'],
@@ -160,6 +164,7 @@ void main() {
         'authenticator: SessionAuthenticator(sessionId: ******nId, '
         'cookieName: SyncGatewaySession), '
         'PINNED-SERVER-CERTIFICATE, '
+        'TRUSTED-ROOT-CERTIFICATES, '
         'headers: {Client: cbl-dart, Authentication: REDACTED}, '
         'channels: [A], '
         'documentIds: [ID], '

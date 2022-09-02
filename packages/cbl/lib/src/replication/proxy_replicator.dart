@@ -84,6 +84,7 @@ class ProxyReplicator extends ProxyObject
         continuous: config.continuous,
         authenticator: config.authenticator,
         pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
+        trustedRootCertificates: config.trustedRootCertificates?.toData(),
         headers: config.headers,
         channels: config.channels,
         documentIds: config.documentIds,

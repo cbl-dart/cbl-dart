@@ -100,6 +100,7 @@ class FfiReplicator
       authenticator: authenticator,
       headers: headersDict?.pointer.cast(),
       pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
+      trustedRootCertificates: config.trustedRootCertificates?.toData(),
       channels: channelsArray?.pointer.cast(),
       documentIDs: documentIDsArray?.pointer.cast(),
       pushFilter: pushFilterCallback?.pointer,

@@ -31,6 +31,7 @@ void main() {
         ),
         headers: {'Client': 'test'},
         pinnedServerCertificate: Uint8List(0),
+        trustedRootCertificates: Uint8List(0),
         channels: ['channel'],
         documentIds: ['id'],
         pullFilter: (document, isDeleted) => true,

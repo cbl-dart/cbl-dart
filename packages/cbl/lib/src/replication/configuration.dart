@@ -86,6 +86,7 @@ class ReplicatorConfiguration {
     this.continuous = false,
     this.authenticator,
     this.pinnedServerCertificate,
+    this.trustedRootCertificates,
     this.headers,
     this.channels,
     this.documentIds,
@@ -121,6 +122,7 @@ class ReplicatorConfiguration {
         continuous = config.continuous,
         authenticator = config.authenticator,
         pinnedServerCertificate = config.pinnedServerCertificate,
+        trustedRootCertificates = config.trustedRootCertificates,
         headers = config.headers,
         channels = config.channels,
         documentIds = config.documentIds,
@@ -151,8 +153,12 @@ class ReplicatorConfiguration {
   /// The [Authenticator] to authenticate with a remote target.
   Authenticator? authenticator;
 
-  /// The remote target's SSL certificate.
+  /// The remote target's SSL certificate (PEM or DER).
   Uint8List? pinnedServerCertificate;
+
+  /// A set of trusted root certificates to use for verifying the SSL
+  /// certificate of the remote target (PEM).
+  Uint8List? trustedRootCertificates;
 
   /// Extra HTTP headers to send in all requests to the remote target.
   Map<String, String>? headers;
@@ -314,6 +320,7 @@ class ReplicatorConfiguration {
         if (continuous) 'CONTINUOUS',
         if (authenticator != null) 'authenticator: $authenticator',
         if (pinnedServerCertificate != null) 'PINNED-SERVER-CERTIFICATE',
+        if (trustedRootCertificates != null) 'TRUSTED-ROOT-CERTIFICATES',
         if (headers != null) 'headers: $headers',
         if (channels != null) 'channels: $channels',
         if (documentIds != null) 'documentIds: $documentIds',
