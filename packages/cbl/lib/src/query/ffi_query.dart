@@ -91,7 +91,7 @@ class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
     QueryChangeListener<SyncResultSet> listener,
   ) {
     late Pointer<CBLListenerToken> listenerToken;
-
+    final database = this.database!;
     final callback = AsyncCallback(
       (_) {
         final results = FfiResultSet(
@@ -110,7 +110,11 @@ class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
       debugName: 'FfiQuery.addChangeListener',
     );
 
-    listenerToken = _bindings.addChangeListener(_pointer, callback.pointer);
+    listenerToken = _bindings.addChangeListener(
+      database.pointer,
+      _pointer,
+      callback.pointer,
+    );
 
     return FfiListenerToken(callback);
   }
