@@ -79,38 +79,96 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
 
 // === Couchbase Lite =========================================================
 
-// === Base
+// === Database level locking
 
+/**
+ * Database level locking is only required in certain scenarios.
+ *
+ * Any given database is only ever accessed by the same Dart isolate. Since
+ * Dart isolates are single threaded, we can safely use the CBL C API, which is
+ * generally not thread safe.
+ *
+ * An exception are native finalizers. These are called from the Dart VM during
+ * GC. Even though the Dart isolate will never execute while native finalizers
+ * are running, native code called through FFI from the Dart isolate can.
+ *
+ * According to the CBL C docs we need to serialize all access to a database
+ * instance and objects that belong to it. In reality, many operations of the
+ * CBL C API are thread safe. We only use locking for the operations where it
+ * turned out that it is necessary.
+ *
+ * Specifically we need to ensure that:
+ *
+ * - listeners are not finalized while the database is closing.
+ * - replicators are not stopped while the database is closing.
+ */
+
+/**
+ * Mapping of objects to the mutex that is used for database level locking of
+ * the database the objects belong to.
+ *
+ * Every object in this mapping owns a shared_ptr to the database level mutex.
+ *
+ * `CBLDart_CreateDatabaseLock`, `CBLDart_CloneDatabaseLock`,
+ * `CBLDart_AcquireDatabaseLock` and `CBLDart_ReleaseDatabaseLock` are used
+ * to create, clone and acquire and release (the shared_ptr, not the lock)
+ * database level locks.
+ *
+ * When a database is opened it uses `CBLDart_CreateDatabaseLock` to create the
+ * mutex that belongs to the database.
+ *
+ * Other objects that need to lock access to the database use
+ * `CBLDart_CloneDatabaseLock` to create a shared_ptr to the mutex of the
+ * database they belong to.
+ *
+ * Callers of `CBLDart_CloneDatabaseLock` must ensure that the database is
+ * still open when they call `CBLDart_CloneDatabaseLock`.
+ *
+ * These objects can then use `CBLDart_AcquireDatabaseLock` to acquire the
+ * database level lock by providing a pointer to themself.
+ *
+ * When an object that has cloned a lock is destroyed it must call
+ * `CBLDart_ReleaseDatabaseLock`.
+ */
 static std::map<void *, std::shared_ptr<std::mutex>> databaseMutexes;
 static std::mutex databaseMutexesMutex;
 
-void CBLDart_CreateDatabaseLock(CBLDatabase *database) {
+static void CBLDart_CreateDatabaseLock(CBLDatabase *database) {
   std::scoped_lock lock(databaseMutexesMutex);
   databaseMutexes[database] = std::make_shared<std::mutex>();
 }
 
-void CBLDart_CloneDatabaseLock(const CBLDatabase *database, void *owner) {
+static void CBLDart_CloneDatabaseLock(const CBLDatabase *database,
+                                      void *owner) {
   std::scoped_lock lock(databaseMutexesMutex);
+  assert(databaseMutexes.find(const_cast<CBLDatabase *>(database)) !=
+         databaseMutexes.end());
   databaseMutexes[owner] = databaseMutexes[const_cast<CBLDatabase *>(database)];
 }
 
-std::scoped_lock<std::mutex> CBLDart_DatabaseLock(void *owner) {
+static std::scoped_lock<std::mutex> CBLDart_AcquireDatabaseLock(void *owner) {
   std::scoped_lock lock(databaseMutexesMutex);
   return std::scoped_lock(*databaseMutexes[owner]);
 }
 
-void CBLDart_RemoveDatabaseLock(void *owner) {
+static void CBLDart_ReleaseDatabaseLock(void *owner) {
   std::scoped_lock lock(databaseMutexesMutex);
   databaseMutexes.erase(owner);
 }
 
+// === Base
+
+// Listeners that use this finalizer must use `CBLDart_CloneDatabaseLock`
+// to retain the database lock of the database they belong to.
 static void CBLDart_CBLListenerFinalizer(void *context) {
   auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
   {
-    auto databaseLock = CBLDart_DatabaseLock(listenerToken);
+    // We acquire the database lock here to ensure that the database is not
+    // closed while we are still executing.
+    auto databaseLock = CBLDart_AcquireDatabaseLock(listenerToken);
     CBLListener_Remove(listenerToken);
   }
-  CBLDart_RemoveDatabaseLock(listenerToken);
+  CBLDart_ReleaseDatabaseLock(listenerToken);
 }
 
 // === Log
@@ -377,7 +435,9 @@ bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
     return true;
   }
 
-  auto databaseLock = CBLDart_DatabaseLock(database);
+  // We close the database under a lock to ensure that certain finalizers are
+  // not running while the database is being closed.
+  auto databaseLock = CBLDart_AcquireDatabaseLock(database);
   if (andDelete) {
     return CBLDatabase_Delete(database, errorOut);
   } else {
@@ -411,7 +471,7 @@ void CBLDart_CBLDatabase_Release(CBLDatabase *database) {
             static_cast<int>(errorMessage.size), (char *)errorMessage.buf);
     FLSliceResult_Release(errorMessage);
   }
-  CBLDart_RemoveDatabaseLock(database);
+  CBLDart_ReleaseDatabaseLock(database);
   CBLDatabase_Release(database);
 }
 
@@ -734,7 +794,7 @@ static void CBLDart_CBLReplicator_Release_Internal(CBLReplicator *replicator) {
   auto nh = replicatorCallbackWrapperContexts.extract(replicator);
   delete nh.mapped();
 
-  CBLDart_RemoveDatabaseLock(replicator);
+  CBLDart_ReleaseDatabaseLock(replicator);
 }
 
 void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
@@ -743,7 +803,7 @@ void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
   } else {
     {
       // Stop the replicator, since it is still running.
-      auto databaseLock = CBLDart_DatabaseLock(replicator);
+      auto databaseLock = CBLDart_AcquireDatabaseLock(replicator);
       CBLReplicator_Stop(replicator);
     }
 
