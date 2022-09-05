@@ -114,7 +114,7 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
 
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
-    CBLQuery *query, CBLDart_AsyncCallback listener);
+    const CBLDatabase *db, CBLQuery *query, CBLDart_AsyncCallback listener);
 
 // === Blob
 
@@ -154,9 +154,11 @@ CBLDART_EXPORT
 void CBLDart_CBLReplicator_Release(CBLReplicator *replicator);
 
 CBLDART_EXPORT
-void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
+void CBLDart_CBLReplicator_AddChangeListener(const CBLDatabase *db,
+                                             CBLReplicator *replicator,
                                              CBLDart_AsyncCallback listenerId);
 
 CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, CBLDart_AsyncCallback listenerId);
+    const CBLDatabase *db, CBLReplicator *replicator,
+    CBLDart_AsyncCallback listenerId);

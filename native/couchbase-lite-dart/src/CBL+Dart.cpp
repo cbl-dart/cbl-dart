@@ -77,17 +77,40 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
   }).detach();
 }
 
-static CBLDart::AsyncCallback *CBLDart_AsAsyncCallback(void *pointer) {
-  return reinterpret_cast<CBLDart::AsyncCallback *>(pointer);
-}
-
 // === Couchbase Lite =========================================================
 
 // === Base
 
+static std::map<void *, std::shared_ptr<std::mutex>> databaseMutexes;
+static std::mutex databaseMutexesMutex;
+
+void CBLDart_CreateDatabaseLock(CBLDatabase *database) {
+  std::scoped_lock lock(databaseMutexesMutex);
+  databaseMutexes[database] = std::make_shared<std::mutex>();
+}
+
+void CBLDart_CloneDatabaseLock(const CBLDatabase *database, void *owner) {
+  std::scoped_lock lock(databaseMutexesMutex);
+  databaseMutexes[owner] = databaseMutexes[const_cast<CBLDatabase *>(database)];
+}
+
+std::scoped_lock<std::mutex> CBLDart_DatabaseLock(void *owner) {
+  std::scoped_lock lock(databaseMutexesMutex);
+  return std::scoped_lock(*databaseMutexes[owner]);
+}
+
+void CBLDart_RemoveDatabaseLock(void *owner) {
+  std::scoped_lock lock(databaseMutexesMutex);
+  databaseMutexes.erase(owner);
+}
+
 static void CBLDart_CBLListenerFinalizer(void *context) {
   auto listenerToken = reinterpret_cast<CBLListenerToken *>(context);
-  CBLListener_Remove(listenerToken);
+  {
+    auto databaseLock = CBLDart_DatabaseLock(listenerToken);
+    CBLListener_Remove(listenerToken);
+  }
+  CBLDart_RemoveDatabaseLock(listenerToken);
 }
 
 // === Log
@@ -333,21 +356,28 @@ static void CBLDart_RegisterOpenDatabase(CBLDatabase *database) {
   openDatabases.push_back(database);
 }
 
-bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
-                               CBLError *errorOut) {
-  {
-    std::scoped_lock lock(openDatabasesMutex);
-    // Check if the database is still open.
-    auto it = std::find(openDatabases.begin(), openDatabases.end(), database);
-    if (it == openDatabases.end()) {
-      // Return early since the database has already been closed.
-      return true;
-    }
-
-    // Remove the database from the list of open database and close it.
-    openDatabases.erase(it);
+static bool CBLDart_UnregisterOpenDatabase(CBLDatabase *database) {
+  std::scoped_lock lock(openDatabasesMutex);
+  // Check if the database is still open.
+  auto it = std::find(openDatabases.begin(), openDatabases.end(), database);
+  if (it == openDatabases.end()) {
+    // The database has already been closed.
+    return false;
   }
 
+  // Remove the database from the list of open database and close it.
+  openDatabases.erase(it);
+  return true;
+}
+
+bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
+                               CBLError *errorOut) {
+  if (!CBLDart_UnregisterOpenDatabase(database)) {
+    // Return early since the database has already been closed.
+    return true;
+  }
+
+  auto databaseLock = CBLDart_DatabaseLock(database);
   if (andDelete) {
     return CBLDatabase_Delete(database, errorOut);
   } else {
@@ -366,6 +396,7 @@ CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
 
   if (database) {
     CBLDart_RegisterOpenDatabase(database);
+    CBLDart_CreateDatabaseLock(database);
   }
 
   return database;
@@ -380,13 +411,14 @@ void CBLDart_CBLDatabase_Release(CBLDatabase *database) {
             static_cast<int>(errorMessage.size), (char *)errorMessage.buf);
     FLSliceResult_Release(errorMessage);
   }
+  CBLDart_RemoveDatabaseLock(database);
   CBLDatabase_Release(database);
 }
 
 static void CBLDart_DocumentChangeListenerWrapper(void *context,
                                                   const CBLDatabase *db,
                                                   FLString docID) {
-  auto callback = CBLDart_AsAsyncCallback(context);
+  auto callback = ASYNC_CALLBACK_FROM_C(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
@@ -400,6 +432,8 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(
   auto listenerToken = CBLDatabase_AddDocumentChangeListener(
       db, docID, CBLDart_DocumentChangeListenerWrapper, listener);
 
+  CBLDart_CloneDatabaseLock(db, listenerToken);
+
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);
 }
@@ -408,7 +442,7 @@ static void CBLDart_DatabaseChangeListenerWrapper(void *context,
                                                   const CBLDatabase *db,
                                                   unsigned numDocs,
                                                   FLString *docIDs) {
-  auto callback = CBLDart_AsAsyncCallback(context);
+  auto callback = ASYNC_CALLBACK_FROM_C(context);
 
   std::vector<Dart_CObject> docIdObjects(numDocs);
 
@@ -430,6 +464,8 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
                                            CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLDatabase_AddChangeListener(
       db, CBLDart_DatabaseChangeListenerWrapper, listener);
+
+  CBLDart_CloneDatabaseLock(db, listenerToken);
 
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);
@@ -465,7 +501,7 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
 
 static void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
                                                CBLListenerToken *token) {
-  auto callback = CBLDart_AsAsyncCallback(context);
+  auto callback = ASYNC_CALLBACK_FROM_C(context);
 
   Dart_CObject args;
   CBLDart_CObject_SetEmptyArray(&args);
@@ -474,9 +510,11 @@ static void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
 }
 
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
-    CBLQuery *query, CBLDart_AsyncCallback listener) {
+    const CBLDatabase *db, CBLQuery *query, CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLQuery_AddChangeListener(
       query, CBLDart_QueryChangeListenerWrapper, listener);
+
+  CBLDart_CloneDatabaseLock(db, listenerToken);
 
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);
@@ -678,6 +716,8 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
     // when the replicator is released.
     std::scoped_lock lock(replicatorCallbackWrapperContextsMutex);
     replicatorCallbackWrapperContexts[replicator] = context;
+
+    CBLDart_CloneDatabaseLock(config->database, replicator);
   } else {
     delete context;
   }
@@ -693,14 +733,19 @@ static void CBLDart_CBLReplicator_Release_Internal(CBLReplicator *replicator) {
   std::scoped_lock lock(replicatorCallbackWrapperContextsMutex);
   auto nh = replicatorCallbackWrapperContexts.extract(replicator);
   delete nh.mapped();
+
+  CBLDart_RemoveDatabaseLock(replicator);
 }
 
 void CBLDart_CBLReplicator_Release(CBLReplicator *replicator) {
   if (CBLReplicator_Status(replicator).activity == kCBLReplicatorStopped) {
     CBLDart_CBLReplicator_Release_Internal(replicator);
   } else {
-    // Stop the replicator, since it is still running.
-    CBLReplicator_Stop(replicator);
+    {
+      // Stop the replicator, since it is still running.
+      auto databaseLock = CBLDart_DatabaseLock(replicator);
+      CBLReplicator_Stop(replicator);
+    }
 
     // Get of the Dart finalizer thread.
     auto _ = std::async(std::launch::async, [=]() {
@@ -780,7 +825,7 @@ class ReplicatorStatus_CObject_Helper {
 static void CBLDart_Replicator_ChangeListenerWrapper(
     void *context, CBLReplicator *replicator,
     const CBLReplicatorStatus *status) {
-  auto callback = CBLDart_AsAsyncCallback(context);
+  auto callback = ASYNC_CALLBACK_FROM_C(context);
 
   ReplicatorStatus_CObject_Helper cObjectStatus;
   cObjectStatus.init(status);
@@ -795,10 +840,13 @@ static void CBLDart_Replicator_ChangeListenerWrapper(
   CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
-void CBLDart_CBLReplicator_AddChangeListener(CBLReplicator *replicator,
+void CBLDart_CBLReplicator_AddChangeListener(const CBLDatabase *db,
+                                             CBLReplicator *replicator,
                                              CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLReplicator_AddChangeListener(
       replicator, CBLDart_Replicator_ChangeListenerWrapper, listener);
+
+  CBLDart_CloneDatabaseLock(db, listenerToken);
 
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);
@@ -863,7 +911,7 @@ class ReplicatedDocument_CObject_Helper {
 static void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     void *context, CBLReplicator *replicator, bool isPush,
     unsigned numDocuments, const CBLReplicatedDocument *documents) {
-  auto callback = CBLDart_AsAsyncCallback(context);
+  auto callback = ASYNC_CALLBACK_FROM_C(context);
 
   Dart_CObject isPush_;
   isPush_.type = Dart_CObject_kBool;
@@ -895,10 +943,13 @@ static void CBLDart_Replicator_DocumentReplicationListenerWrapper(
 }
 
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
-    CBLReplicator *replicator, CBLDart_AsyncCallback listener) {
+    const CBLDatabase *db, CBLReplicator *replicator,
+    CBLDart_AsyncCallback listener) {
   auto listenerToken = CBLReplicator_AddDocumentReplicationListener(
       replicator, CBLDart_Replicator_DocumentReplicationListenerWrapper,
       (void *)listener);
+
+  CBLDart_CloneDatabaseLock(db, listenerToken);
 
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);

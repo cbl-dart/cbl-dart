@@ -215,6 +215,7 @@ class FfiReplicator
       useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
 
   AbstractListenerToken _addChangeListener(ReplicatorChangeListener listener) {
+    final database = _database;
     final callback = AsyncCallback(
       (arguments) {
         final message =
@@ -227,7 +228,7 @@ class FfiReplicator
       debugName: 'FfiReplicator.addChangeListener',
     );
 
-    _bindings.addChangeListener(pointer, callback.pointer);
+    _bindings.addChangeListener(database.pointer, pointer, callback.pointer);
 
     return FfiListenerToken(callback);
   }
@@ -242,6 +243,7 @@ class FfiReplicator
   AbstractListenerToken _addDocumentReplicationListener(
     DocumentReplicationListener listener,
   ) {
+    final database = _database;
     final callback = AsyncCallback(
       (arguments) {
         final message =
@@ -258,7 +260,11 @@ class FfiReplicator
       debugName: 'FfiReplicator.addDocumentReplicationListener',
     );
 
-    _bindings.addDocumentReplicationListener(pointer, callback.pointer);
+    _bindings.addDocumentReplicationListener(
+      database.pointer,
+      pointer,
+      callback.pointer,
+    );
 
     return FfiListenerToken(callback);
   }

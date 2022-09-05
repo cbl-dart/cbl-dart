@@ -76,11 +76,13 @@ typedef _CBLQuery_ColumnName = FLString Function(
 
 typedef _CBLDart_CBLQuery_AddChangeListener_C = Pointer<CBLListenerToken>
     Function(
+  Pointer<CBLDatabase> db,
   Pointer<CBLQuery> query,
   Pointer<CBLDartAsyncCallback> listener,
 );
 typedef _CBLDart_CBLQuery_AddChangeListener = Pointer<CBLListenerToken>
     Function(
+  Pointer<CBLDatabase> db,
   Pointer<CBLQuery> query,
   Pointer<CBLDartAsyncCallback> listener,
 );
@@ -189,10 +191,11 @@ class QueryBindings extends Bindings {
       _columnName(query, column).toDartString()!;
 
   Pointer<CBLListenerToken> addChangeListener(
+    Pointer<CBLDatabase> db,
     Pointer<CBLQuery> query,
     Pointer<CBLDartAsyncCallback> listener,
   ) =>
-      _addChangeListener(query, listener);
+      _addChangeListener(db, query, listener);
 
   Pointer<CBLResultSet> copyCurrentResults(
     Pointer<CBLQuery> query,

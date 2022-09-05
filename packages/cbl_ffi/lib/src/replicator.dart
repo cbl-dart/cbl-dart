@@ -344,10 +344,12 @@ typedef _CBLReplicator_IsDocumentPending = bool Function(
 );
 
 typedef _CBLDart_CBLReplicator_AddChangeListener_C = Void Function(
+  Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
   Pointer<CBLDartAsyncCallback> listener,
 );
 typedef _CBLDart_CBLReplicator_AddChangeListener = void Function(
+  Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
   Pointer<CBLDartAsyncCallback> listener,
 );
@@ -366,10 +368,12 @@ enum CBLReplicatedDocumentFlag implements Option {
 }
 
 typedef _CBLDart_CBLReplicator_AddDocumentReplicationListener_C = Void Function(
+  Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
   Pointer<CBLDartAsyncCallback> listener,
 );
 typedef _CBLDart_CBLReplicator_AddDocumentReplicationListener = void Function(
+  Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
   Pointer<CBLDartAsyncCallback> listener,
 );
@@ -649,17 +653,19 @@ class ReplicatorBindings extends Bindings {
       );
 
   void addChangeListener(
+    Pointer<CBLDatabase> db,
     Pointer<CBLReplicator> replicator,
     Pointer<CBLDartAsyncCallback> listener,
   ) {
-    _addChangeListener(replicator, listener);
+    _addChangeListener(db, replicator, listener);
   }
 
   void addDocumentReplicationListener(
+    Pointer<CBLDatabase> db,
     Pointer<CBLReplicator> replicator,
     Pointer<CBLDartAsyncCallback> listener,
   ) {
-    _addDocumentReplicationListener(replicator, listener);
+    _addDocumentReplicationListener(db, replicator, listener);
   }
 
   Pointer<_CBLDartReplicatorConfiguration> _createConfiguration(
