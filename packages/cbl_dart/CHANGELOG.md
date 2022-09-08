@@ -1,3 +1,7 @@
+## 2.1.1
+
+ - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
+
 ## 2.1.0
 
  - **FEAT**: distribute CBL C SDK 3.0.2. ([782dac53](https://github.com/cbl-dart/cbl-dart/commit/782dac536be7cbc61569f34224e615fcefe87a38))

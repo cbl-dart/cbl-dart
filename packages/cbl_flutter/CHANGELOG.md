@@ -1,3 +1,7 @@
+## 2.0.1
+
+ - **REFACTOR**: use `Finalizable` to ensure native resources stay alive ([#377](https://github.com/cbl-dart/cbl-dart/issues/377)). ([2b961411](https://github.com/cbl-dart/cbl-dart/commit/2b961411fecdce387b14acc9da737803d14fa5ab))
+
 ## 2.0.0
 
 > Note: This release has breaking changes.

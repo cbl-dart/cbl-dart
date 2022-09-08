@@ -7,10 +7,10 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl: ^2.0.0+0
-  cbl_ffi: ^0.8.0
-  cbl_flutter: ^2.0.0
-  cbl_flutter_ee: ^2.1.0
+  cbl: ^2.1.0
+  cbl_ffi: ^0.8.0+1
+  cbl_flutter: ^2.0.1
+  cbl_flutter_ee: ^2.1.1
   flutter:
     sdk: flutter
   flutter_test:
@@ -23,7 +23,7 @@ dependency_overrides:
   # This is necessary because the current development version of cbl_ffi
   # might depend on a newer version of the binaries. The other packages
   # directly or indirectly depend on cbl_ffi.
-  cbl: ^2.0.0+0
-  cbl_ffi: ^0.8.0
-  cbl_flutter: ^2.0.0
+  cbl: ^2.1.0
+  cbl_ffi: ^0.8.0+1
+  cbl_flutter: ^2.0.1
   cbl_flutter_platform_interface: any

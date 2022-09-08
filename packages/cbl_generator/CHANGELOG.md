@@ -1,3 +1,7 @@
+## 0.2.0+1
+
+ - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
+
 ## 0.2.0
 
 > Note: This release has breaking changes.

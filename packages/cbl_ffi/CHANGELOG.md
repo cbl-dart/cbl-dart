@@ -1,3 +1,9 @@
+## 0.8.0+1
+
+ - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
+ - **REFACTOR**: use `Finalizable` to ensure native resources stay alive ([#377](https://github.com/cbl-dart/cbl-dart/issues/377)). ([2b961411](https://github.com/cbl-dart/cbl-dart/commit/2b961411fecdce387b14acc9da737803d14fa5ab))
+ - **FIX**: add locking for a number of finalizers ([#412](https://github.com/cbl-dart/cbl-dart/issues/412)). ([55bc3a55](https://github.com/cbl-dart/cbl-dart/commit/55bc3a55798bedfa8f1fe803f8e34bff3068e7a5))
+
 ## 0.8.0
 
 > Note: This release has breaking changes.

@@ -1,3 +1,7 @@
+## 2.1.1
+
+ - Update a dependency to the latest release.
+
 ## 2.1.0
 
  - **FEAT**: distribute CBL C SDK 3.0.2. ([782dac53](https://github.com/cbl-dart/cbl-dart/commit/782dac536be7cbc61569f34224e615fcefe87a38))

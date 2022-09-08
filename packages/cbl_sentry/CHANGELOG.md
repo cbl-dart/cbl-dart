@@ -1,3 +1,8 @@
+## 1.0.1
+
+ - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
+ - **DOCS**: fix typo. ([5c4944b9](https://github.com/cbl-dart/cbl-dart/commit/5c4944b9e675bbcbc0d108629d08a0730bdf62e5))
+
 ## 1.0.0
 
  - **DOCS**: remove beta note. ([e8de504f](https://github.com/cbl-dart/cbl-dart/commit/e8de504fe7022a6682c0552168acd42177df3eda))

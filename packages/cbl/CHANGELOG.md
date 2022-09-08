@@ -1,3 +1,11 @@
+## 2.1.0
+
+ - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
+ - **REFACTOR**: use `Finalizable` to ensure native resources stay alive ([#377](https://github.com/cbl-dart/cbl-dart/issues/377)). ([2b961411](https://github.com/cbl-dart/cbl-dart/commit/2b961411fecdce387b14acc9da737803d14fa5ab))
+ - **PERF**: optimize sending `Channel` messages in isolates ([#389](https://github.com/cbl-dart/cbl-dart/issues/389)). ([e1ef25c9](https://github.com/cbl-dart/cbl-dart/commit/e1ef25c98719cd007fbf44ddf21aab8c65e88265))
+ - **FIX**: add locking for a number of finalizers ([#412](https://github.com/cbl-dart/cbl-dart/issues/412)). ([55bc3a55](https://github.com/cbl-dart/cbl-dart/commit/55bc3a55798bedfa8f1fe803f8e34bff3068e7a5))
+ - **FEAT**: add `ReplicatorConfiguration.trustedRootCertificates` ([#411](https://github.com/cbl-dart/cbl-dart/issues/411)). ([f58fa346](https://github.com/cbl-dart/cbl-dart/commit/f58fa346341a7ae737c782ee659c29277745a66f))
+
 ## 2.0.0+0
 
  - **DOCS**: add Lotum as sponsor. ([2b881cfa](https://github.com/cbl-dart/cbl-dart/commit/2b881cfaf8a526e55a854e3982f5f051fe05b4ef))
