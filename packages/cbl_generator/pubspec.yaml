@@ -14,7 +14,7 @@ dependencies:
   analyzer: ^4.0.0
   build: ^2.3.0
   build_config: ^1.0.0
-  cbl: ^2.0.0
+  cbl: ^2.0.0+0
   collection: ^1.15.0
   meta: ^1.7.0
   source_gen: ^1.2.2

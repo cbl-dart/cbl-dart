@@ -1,3 +1,7 @@
+## 3.0.0
+
+ - Bump "cbl_libcblitedart_api" to `3.0.0`.
+
 ## 2.0.0
 
 > Note: This release has breaking changes.
