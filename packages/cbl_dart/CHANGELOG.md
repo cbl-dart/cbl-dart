@@ -1,3 +1,7 @@
+## 2.1.2
+
+ - **FIX**: provide latest version of `libcblitedart`. ([12298c95](https://github.com/cbl-dart/cbl-dart/commit/12298c95fb0838fc33c9dc6c841f1932735b5065))
+
 ## 2.1.1
 
  - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
