@@ -28,11 +28,14 @@ jobs:
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
+      - name: Setup Melos
+        run: dart pub global activate melos ${{ env.melos-version }}
+
       - name: Install daco
         run: dart pub global activate daco
 
       - name: Check formatting
-        run: daco format --set-exit-if-changed .
+        run: melos formatting:check
 
   formatting-clang:
     name: Formatting - Clang

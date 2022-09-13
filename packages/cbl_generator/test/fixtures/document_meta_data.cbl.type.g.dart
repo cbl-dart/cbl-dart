@@ -292,8 +292,8 @@ class MutableDocWithOptionalIdAndField
   }
 }
 
-mixin _$DocWithIdGetter implements TypedDocumentObject<MutableDocWithIdGetter> {
-}
+mixin _$DocWithIdGetter
+    implements TypedDocumentObject<MutableDocWithIdGetter> {}
 
 abstract class _DocWithIdGetterImplBase<I extends Document>
     with _$DocWithIdGetter

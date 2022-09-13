@@ -14,8 +14,8 @@ import 'where.dart';
 /// A query component representing the `JOIN` clauses of a [Query].
 ///
 /// {@category Query Builder}
-abstract class Joins implements Query, WhereRouter, OrderByRouter, LimitRouter {
-}
+abstract class Joins
+    implements Query, WhereRouter, OrderByRouter, LimitRouter {}
 
 /// Version of [Joins] for building [SyncQuery]s.
 ///
