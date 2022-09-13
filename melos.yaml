@@ -22,11 +22,11 @@ scripts:
 
   formatting:apply:
     description: Formats all Dart files.
-    run: dart format .
+    run: daco format .
 
   formatting:check:
     description: Formats all Dart files. Fails when files were changed.
-    run: dart format --set-exit-if-changed .
+    run: daco format --set-exit-if-changed .
 
   analyze:
     description: Analyzes all Dart files.
