@@ -46,7 +46,10 @@ class MockHub implements Hub {
       const SentryId.empty();
 
   @override
-  Future<SentryId> captureTransaction(SentryTransaction transaction) async =>
+  Future<SentryId> captureTransaction(
+    SentryTransaction transaction, {
+    SentryTraceContextHeader? traceContext,
+  }) async =>
       const SentryId.empty();
 
   @override

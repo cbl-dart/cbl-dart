@@ -12,7 +12,7 @@ environment:
 
 dependencies:
   cbl: ^2.1.0
-  sentry: ^6.3.0
+  sentry: ^6.11.0
 
 dev_dependencies:
   cbl_dart: ^2.1.2
