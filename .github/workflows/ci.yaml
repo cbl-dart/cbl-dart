@@ -34,8 +34,8 @@ jobs:
       - name: Install daco
         run: dart pub global activate daco
 
-      - name: Bootstrap packages
-        run: melos bootstrap
+      - name: Get dependencies
+        run: dart pub get
 
       - name: Check formatting
         run: melos formatting:check
