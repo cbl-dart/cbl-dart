@@ -28,7 +28,6 @@ CMakeUserPresets.json
 .dart_tool/
 .packages
 build/
-# If you're building an application, you may want to check-in your pubspec.lock
 pubspec.lock
 
 # Directory created by dartdoc
@@ -54,10 +53,6 @@ doc/api/
 .pub/
 coverage/
 lib/generated_plugin_registrant.dart
-# For library packages, don’t commit the pubspec.lock file.
-# Regenerating the pubspec.lock file lets you test your package against the latest compatible versions of its dependencies.
-# See https://dart.dev/guides/libraries/private-files#pubspeclock
-#pubspec.lock
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -307,7 +302,9 @@ DerivedData/
 WIP.md
 coverage
 pubspec_overrides.yaml
-
+# The package at the root is used for development and we want all
+# contributors and the CI to use the same versions.
+!/pubspec.lock
 
 # Ignore rules added by nx-dart
 
@@ -319,9 +316,6 @@ node_modules/
 .dart_tool/
 build/
 doc/api/
-# We only ignore the pubspec.lock at the workspace root here.
-# Other lock files should be ignored at the package level.
-/pubspec.lock
 
 ## Flutter
 .flutter-plugins
