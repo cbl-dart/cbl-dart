@@ -79,7 +79,7 @@ class TypedDataAnalyzer {
       declaringClassName: element.displayName,
       types: [
         // ignore: deprecated_member_use
-        for (final type in types) await buildTypedDataClassModel(type.element!)
+        for (final type in types) await buildTypedDataClassModel(type.element2!)
       ],
     );
   }
@@ -552,9 +552,9 @@ class TypedDataAnalyzer {
 bool _isTypedDataObject(DartType type) {
   if (type is InterfaceType) {
     // ignore: deprecated_member_use
-    return _typedDictionaryType.hasAnnotationOfExact(type.element) ||
+    return _typedDictionaryType.hasAnnotationOfExact(type.element2) ||
         // ignore: deprecated_member_use
-        _typedDocumentType.hasAnnotationOfExact(type.element);
+        _typedDocumentType.hasAnnotationOfExact(type.element2);
   }
 
   return false;
