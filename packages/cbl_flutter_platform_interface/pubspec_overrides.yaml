@@ -1,0 +1,10 @@
+# melos_managed_dependency_overrides: cbl,cbl_ffi,cbl_libcblite_api,cbl_libcblitedart_api
+dependency_overrides:
+  cbl:
+    path: ../cbl
+  cbl_ffi:
+    path: ../cbl_ffi
+  cbl_libcblite_api:
+    path: ../cbl_libcblite_api
+  cbl_libcblitedart_api:
+    path: ../cbl_libcblitedart_api

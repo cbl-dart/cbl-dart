@@ -28,7 +28,6 @@ CMakeUserPresets.json
 .dart_tool/
 .packages
 build/
-pubspec.lock
 
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
@@ -301,10 +300,6 @@ DerivedData/
 *.iml
 WIP.md
 coverage
-pubspec_overrides.yaml
-# The package at the root is used for development and we want all
-# contributors and the CI to use the same versions.
-!/pubspec.lock
 
 # Ignore rules added by nx-dart
 
