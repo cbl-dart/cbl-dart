@@ -17,7 +17,6 @@ const _numType = TypeChecker.fromRuntime(num);
 const _boolType = TypeChecker.fromRuntime(bool);
 const _dateTimeType = TypeChecker.fromRuntime(DateTime);
 const _listType = TypeChecker.fromRuntime(List);
-const _enumType = TypeChecker.fromRuntime(Enum);
 
 // cbl annotation types
 const _typedDictionaryType = TypeChecker.fromRuntime(TypedDictionary);
@@ -79,7 +78,7 @@ class TypedDataAnalyzer {
       declaringClassName: element.displayName,
       types: [
         // ignore: deprecated_member_use
-        for (final type in types) await buildTypedDataClassModel(type.element!)
+        for (final type in types) await buildTypedDataClassModel(type.element2!)
       ],
     );
   }
@@ -492,7 +491,7 @@ class TypedDataAnalyzer {
           );
         }
 
-        if (_enumType.isAssignableFromType(type)) {
+        if (type.element2 is EnumElement) {
           return CustomScalarType(
             dartType: typeName,
             isNullable: isNullable,
@@ -552,9 +551,9 @@ class TypedDataAnalyzer {
 bool _isTypedDataObject(DartType type) {
   if (type is InterfaceType) {
     // ignore: deprecated_member_use
-    return _typedDictionaryType.hasAnnotationOfExact(type.element) ||
+    return _typedDictionaryType.hasAnnotationOfExact(type.element2) ||
         // ignore: deprecated_member_use
-        _typedDocumentType.hasAnnotationOfExact(type.element);
+        _typedDocumentType.hasAnnotationOfExact(type.element2);
   }
 
   return false;
