@@ -11,37 +11,37 @@ packages:
   cbl:
     dependency: "direct main"
     description:
-      path: "../../cbl"
-      relative: true
-    source: path
+      name: cbl
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "2.1.0"
   cbl_dart:
     dependency: "direct main"
     description:
-      path: "../../cbl_dart"
-      relative: true
-    source: path
+      name: cbl_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "2.1.2"
   cbl_ffi:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../cbl_ffi"
-      relative: true
-    source: path
+      name: cbl_ffi
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.8.0+1"
   cbl_libcblite_api:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../cbl_libcblite_api"
-      relative: true
-    source: path
+      name: cbl_libcblite_api
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "3.0.2"
   cbl_libcblitedart_api:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../cbl_libcblitedart_api"
-      relative: true
-    source: path
+      name: cbl_libcblitedart_api
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "3.0.0"
   cbl_sentry:
     dependency: "direct main"
@@ -140,7 +140,7 @@ packages:
       name: sentry
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.11.1"
+    version: "6.11.2"
   source_span:
     dependency: transitive
     description:
@@ -205,4 +205,4 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-  dart: ">=2.17.0 <3.0.0"
+  dart: ">=2.17.4 <3.0.0"
