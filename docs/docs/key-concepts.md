@@ -1,0 +1,137 @@
+# Key concepts
+
+## Synchronous and Asynchronous APIs
+
+The whole Couchbase Lite API comes in both a synchronous and asynchronous
+version. The synchronous version is more efficient and slightly more convenient
+to use, but has the downside that it blocks the current [isolate].
+
+In UI applications, such as Flutter apps, this is problematic. Blocking the UI
+isolate for too long causes janky animations, or worse, makes the app
+unresponsive. With only a synchronous API available, the solution would be to
+offload the work to a worker isolate. That is what the asynchronous API does in
+a transparent way.
+
+Unless you are noticing the performance impact of the overhead of the
+asynchronous API, use the asynchronous API.
+
+To support writing code that works with both synchronous and asynchronous APIs,
+synchronous and asynchronous APIs always extend from a common base class that
+uses `FutureOr` wherever a result could be synchronous or asynchronous.
+
+Take for example this simplified version of the `Query` API:
+
+```dart
+abstract class Query {
+  // The common base class leaves open whether the results are returned
+  // synchronously or asynchronously.
+  FutureOr<ResultSet> execute();
+}
+
+abstract class SyncQuery extends Query {
+  // The synchronous version of `Query` returns results directly.
+  ResultSet execute();
+}
+
+abstract class AsyncQuery extends Query {
+  // The asynchronous version of `Query` returns results in a `Future`.
+  Future<ResultSet> execute();
+}
+```
+
+`FutureOr` can be awaited just like a `Future`, so by programming against
+`Query` your code works with both the synchronous and asynchronous API:
+
+```dart
+/// Runs a query that returns a result set with one row and one column and
+/// returns its value.
+Future<int> runCountQuery(Query query) {
+  final resultSet = await query.execute();
+  final results = await resultSet.allResults();
+  // Returns the first column of the first row.
+  return result[0].integer(0);
+}
+```
+
+## Change listeners
+
+Certain objects allow you to register change listeners. In the case of
+synchronous APIs, all changes are delivered to the listeners as soon as they are
+registered.
+
+With asynchronous APIs, changes are only guaranteed to be delivered once the
+`Future` returned from the registration call is completed:
+
+```dart
+// Await the future returned from the registration call.
+await db.addChangeListener((change) {
+  print('Ids of changed documents: ${change.documentIds}'):
+});
+
+// The listener is guaranteed to be notified of this change.
+await db.saveDocument(MutableDocument.withId('Hey'));
+```
+
+To stop receiving notifications, call `removeChangeListener` with the token that
+was returned from the registration call. Regardless of the whether the API is
+synchronous or asynchronous, listeners will stop receiving notifications
+immediately:
+
+```dart
+final token = await db.addChangeListener((change) { });
+
+// Some time goes by...
+
+await db.removeChangeListener(token);
+```
+
+## Change streams
+
+Streams are a convenient alternative to listen for changes. Similarly to change
+listeners, change streams returned from synchronous APIs are receiving changes
+as soon as the stream is subscribed to.
+
+Streams returned from asynchronous APIs start to listen asynchronously.
+Unfortunately it's not possible to return a `Future` from `Stream.listen` to
+signal to subscribers the point in time after which the the stream will observe
+events. Instead, asynchronous APIs return
+[`AsyncListenStream`][asynclistenstream]s, which expose a `Future` in
+`AsyncListenStream.listening` that completes when the stream is fully listening:
+
+```dart
+final stream = db.changes();
+
+stream.listen((change) {
+  print('Ids of changed documents: ${change.documentIds}'):
+});
+
+// Await the Future exposed by the stream.
+await stream.listening;
+
+// The stream is guaranteed to be notified of this change.
+await db.saveDocument(MutableDocument.withId('Hey'));
+```
+
+If you only ever open the same database file once at any given time, you don't
+need to await the `listening` future. In this case the stream will always
+observe all subsequent events.
+
+To stop listening to changes just cancel the subscription, like with any other
+stream.
+
+## Closing resources
+
+Some types implement [`ClosableResource`][closableresource]. At the moment these
+are [`Database`][database] and [`Replicator`][replicator]. Once you are done
+with an instance of these types, call its `close` method. This will free
+resources used by the object, as well as remove listeners, close streams and
+close child resources. For example closing a database will also close any
+associated replicators.
+
+[isolate]: https://api.dart.dev/dart-isolate/Isolate-class.html
+[asynclistenstream]:
+  https://pub.dev/documentation/cbl/latest/cbl/AsyncListenStream-class.html
+[closableresource]:
+  https://pub.dev/documentation/cbl/latest/cbl/ClosableResource-class.html
+[database]: https://pub.dev/documentation/cbl/latest/cbl/Database-class.html
+[replicator]: https://pub.dev/documentation/cbl/latest/cbl/Replicator-class.html
