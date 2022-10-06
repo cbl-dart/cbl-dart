@@ -40,6 +40,9 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      colorMode: {
+        respectPrefersColorScheme: true,
+      },
       navbar: {
         title: 'Couchbase Lite Dart',
         items: [
@@ -59,11 +62,6 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
         additionalLanguages: ['dart'],
-      },
-      docs: {
-        sidebar: {
-          hideable: true,
-        },
       },
     }),
 }

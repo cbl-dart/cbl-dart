@@ -1,11 +1,7 @@
----
-slug: /
----
+# Install
 
-# Getting started
-
-Welcome to Couchbase Lite for Dart! This guide will help you install Couchbase
-Lite and verify that everything is working correctly.
+This guide will help you install Couchbase Lite and verify that everything is
+working correctly.
 
 :::info
 
@@ -15,13 +11,13 @@ versions, see [Supported platforms](supported-platforms.md).
 
 :::
 
-If you want to use Couchbase Lite in a standalone Dart app, such as a CLI, jump
-to [Standalone Dart](#standalone-dart).
+If you want to use Couchbase Lite in a standalone Dart app, such as a CLI or
+server, jump to [Standalone Dart](#standalone-dart).
 
 ## Flutter
 
-1. Run the following command to add the `cbl` and `cbl_flutter` packages to your
-   `pubspec.yaml` file:
+1. Run the following command to add the `cbl` and `cbl_flutter` packages as
+   dependencies:
 
    ```bash
    flutter pub add cbl cbl_flutter
@@ -34,24 +30,29 @@ to [Standalone Dart](#standalone-dart).
    The Community edition is free and open source. The Enterprise edition is free
    for development and testing, but requires a license for production use. To
    learn more about the differences between the Community and Enterprise
-   editions, see
-   [Couchbase Lite editions](https://www.couchbase.com/products/editions#cmobile).
+   editions, see [Couchbase Lite editions].
 
    :::
 
-   To use the **Community edition**, run the following command:
+   To use the **Community edition**, run the following command to add the
+   `cbl_flutter_ce` package as a dependency:
 
    ```bash
    flutter pub add cbl_flutter_ce
    ```
 
-   To use the **Enterprise edition**, run the following command:
+   To use the **Enterprise edition**, run the following command to add the
+   `cbl_flutter_ee` package as a dependency
 
    ```bash
    flutter pub add cbl_flutter_ee
    ```
 
-3. Initialize Couchbase Lite before using it:
+3. Make sure that you have set the required
+   [minimum target versions](supported-platforms.md) in the build systems of the
+   platforms you want to support.
+
+4. Initialize Couchbase Lite before using it:
 
    ```dart
    import 'package:cbl_flutter/cbl_flutter.dart';
@@ -62,9 +63,10 @@ to [Standalone Dart](#standalone-dart).
    }
    ```
 
-### Unit tests
+### Unit Tests
 
-If you want use Couchbase Lite in Flutter unit tests, follow the steps below.
+You can use Couchbase Lite in Flutter unit tests but you need to use `cbl_dart`
+in them. In integration tests, `cbl_flutter` works just fine.
 
 1. Add `cbl_dart` as a development dependency.
 
@@ -105,8 +107,8 @@ If you want use Couchbase Lite in Flutter unit tests, follow the steps below.
 
 ## Standalone Dart
 
-1. Run the following command to add the `cbl` and `cbl_dart` packages to your
-   `pubspec.yaml` file:
+1. Run the following command to add the `cbl` and `cbl_dart` packages as
+   dependencies:
 
    ```bash
    flutter pub add cbl cbl_dart
@@ -119,24 +121,30 @@ If you want use Couchbase Lite in Flutter unit tests, follow the steps below.
 
    Future<void> main() async {
      await CouchbaseLiteDart.init(edition: Edition.enterprise);
-     // ...
+     // Start using Couchbase Lite ...
    }
    ```
 
-   As part of initializing Couchbase Lite you need to select which edition to
-   use.
+   As part of initializing Couchbase Lite you need to select an edition.
 
    :::info
 
    The Community edition is free and open source. The Enterprise edition is free
    for development and testing, but requires a license for production use. To
    learn more about the differences between the Community and Enterprise
-   editions, see
-   [Couchbase Lite editions](https://www.couchbase.com/products/editions#cmobile).
+   editions, see [Couchbase Lite editions].
 
    :::
 
-## Verify installation
+   :::note
+
+   `CouchbaseLiteDart.init` downloads the needed native libraries if they have
+   not already been cached. See its [documentation][couchbaselitedart.init] for
+   for more information.
+
+   :::
+
+## Verify Installation
 
 To verify that Couchbase Lite is installed correctly, add the following code to
 your app and call `verify` after initializing Couchbase Lite:
@@ -190,3 +198,7 @@ Future<void> verify() async {
   print('Number of results: ${results.length}');
 }
 ```
+
+[couchbase lite editions]: https://www.couchbase.com/products/editions#cmobile
+[couchbaselitedart.init]:
+  https://pub.dev/documentation/cbl_dart/latest/cbl_dart/CouchbaseLiteDart/init.html
