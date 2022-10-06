@@ -1,4 +1,4 @@
-# Key concepts
+# Key Concepts
 
 ## Synchronous and Asynchronous APIs
 
@@ -53,7 +53,7 @@ Future<int> runCountQuery(Query query) {
 }
 ```
 
-## Change listeners
+## Change Listeners
 
 Certain objects allow you to register change listeners. In the case of
 synchronous APIs, all changes are delivered to the listeners as soon as they are
@@ -85,7 +85,7 @@ final token = await db.addChangeListener((change) { });
 await db.removeChangeListener(token);
 ```
 
-## Change streams
+## Change Streams
 
 Streams are a convenient alternative to listen for changes. Similarly to change
 listeners, change streams returned from synchronous APIs are receiving changes
@@ -119,7 +119,7 @@ observe all subsequent events.
 To stop listening to changes just cancel the subscription, like with any other
 stream.
 
-## Closing resources
+## Closing Resources
 
 Some types implement [`ClosableResource`][closableresource]. At the moment these
 are [`Database`][database] and [`Replicator`][replicator]. Once you are done
