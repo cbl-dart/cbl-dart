@@ -22,8 +22,15 @@ classes can be used with specialized APIs of [`Database`][database],
 
 ## Getting started
 
-1. Setup the [`cbl_generator`][cbl_generator] package.
-2. Create typed data classes and annotated them with `@TypedDocument` and
+1. Make sure your [app is setup](install.md) for using Couchbase Lite.
+
+1. Add `cbl_generator` and `build_runner` as development dependencies:
+
+   ```shell
+   flutter pub add --dev cbl_generator build_runner
+   ```
+
+1. Create typed data classes and annotated them with `@TypedDocument` and
    `@TypedDictionary`:
 
    ```dart
@@ -57,7 +64,7 @@ classes can be used with specialized APIs of [`Database`][database],
    }
    ```
 
-3. Create a typed database by annotating a class with `@TypedDatabase`:
+1. Create a typed database by annotating a class with `@TypedDatabase`:
 
    ```dart
    // app_database.dart
@@ -76,7 +83,15 @@ classes can be used with specialized APIs of [`Database`][database],
    abstract class $AppDatabase {}
    ```
 
-4. Open an instance of the typed database and use it:
+1. Run the build runner to invoke the generator:
+
+   ```shell
+   dart run build_runner build
+   # or
+   flutter run build_runner build
+   ```
+
+1. Open an instance of the typed database and use it:
 
    ```dart
    import 'app_database.cbl.database.g.dart';
@@ -92,7 +107,7 @@ classes can be used with specialized APIs of [`Database`][database],
      // an immutable instance, through the `toMutable` method.
      final user = MutableUser(
        name: PersonalName(first: 'Alice', last: 'Green'),
-       email: 'alice@belden.com',
+       email: 'alice@green.com',
        username: 'ali',
        createdAt: DateTime.now(),
      );

@@ -37,35 +37,47 @@ if and when Sentry supports this natively.
 
 ### Getting started
 
-To get started just add the `CouchbaseLiteIntegration` when configuring Sentry:
+1. Make sure your [app is setup](install.md) for using Couchbase Lite.
 
-```dart
-import 'package:cbl_sentry/cbl_sentry.dart';
-import 'package:sentry/sentry.dart';
+1. Add the `cbl_sentry` package as a dependency:
 
-void main() {
-  Sentry.init(
-    (options) {
-      options
-        ..dsn = ...
-        // While testing your Sentry configuration, make sure that all traces are sampled.
-        ..tracesSampleRate = 1
-        // Add the CBL Dart integration.
-        ..addIntegration(CouchbaseLiteIntegration());
-    },
-    appRunner: () async {
-      runApp(MyApp());
-    }
-  );
-}
-```
+   ```bash
+   flutter pub add cbl_sentry
+   ```
 
-To find out about configurable options, see the documentation of
-`CouchbaseLiteIntegration`.
+1. Add the `CouchbaseLiteIntegration` when configuring Sentry:
 
-**Note**: Make sure you don't install a `TracingDelegate` when using the
-`CouchbaseLiteIntegration`. The integration has to be able to install a
-`TracingDelegate` itself.
+   ```dart
+   import 'package:cbl_sentry/cbl_sentry.dart';
+   import 'package:sentry/sentry.dart';
+
+   void main() {
+     Sentry.init(
+       (options) {
+         options
+           ..dsn = ...
+           // While testing your Sentry configuration, make sure that all traces are sampled.
+           ..tracesSampleRate = 1
+           // Add the CBL Dart integration.
+           ..addIntegration(CouchbaseLiteIntegration());
+       },
+       appRunner: () async {
+         runApp(MyApp());
+       }
+     );
+   }
+   ```
+
+   To find out about configurable options, see the documentation of
+   `CouchbaseLiteIntegration`.
+
+   :::caution
+
+   Make sure you don't install a `TracingDelegate` when using the
+   `CouchbaseLiteIntegration`. The integration has to be able to install a
+   `TracingDelegate` itself.
+
+   :::
 
 ### Performance tracing
 

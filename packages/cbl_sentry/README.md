@@ -2,143 +2,43 @@
 [![CI](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml/badge.svg)](https://github.com/cbl-dart/cbl-dart/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cbl-dart/cbl-dart/branch/main/graph/badge.svg?token=XNUVBY3Y39)](https://codecov.io/gh/cbl-dart/cbl-dart)
 
-This package provides a Sentry integration for Couchbase Lite with support for
-recording breadcrumbs and performance tracing.
+Couchbase Lite is an embedded, NoSQL database:
 
-The Couchbase Lite API is provided by [`cbl`][cbl], which you always need, to
-use Couchbase Lite. Which other packages you need depends on the target platform
-and features you want to use:
+- **Multi-Platform** - Android, iOS, macOS, Windows, Linux
+- **Standalone Dart and Flutter** - No manual setup required, just add the
+  package.
+- **Fast and Compact** - Uses efficient persisted data structures.
 
-| Package          | Required when you want to:                                            | Pub                                          | Likes                                           | Points                                           | Popularity                                           |
-| ---------------- | --------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------- |
-| [cbl]            | use Couchbase Lite.                                                   | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)           | ![](https://badgen.net/pub/points/cbl)           | ![](https://badgen.net/pub/popularity/cbl)           |
-| [cbl_dart]       | use Couchbase Lite in a Dart app (e.g. CLI) or in Flutter unit tests. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)      | ![](https://badgen.net/pub/points/cbl_dart)      | ![](https://badgen.net/pub/popularity/cbl_dart)      |
-| [cbl_flutter]    | use Couchbase Lite in a Flutter app.                                  | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter)   | ![](https://badgen.net/pub/points/cbl_flutter)   | ![](https://badgen.net/pub/popularity/cbl_flutter)   |
-| [cbl_flutter_ce] | use the Community Edition in a Flutter app.                           | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                                 |                                                  |                                                      |
-| [cbl_flutter_ee] | use the Enterprise Edition in a Flutter app.                          | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                                 |                                                  |                                                      |
-| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.        | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
-| [cbl_generator]  | generate Dart code to access data trough a typed data model.          | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
+It is fully featured:
 
-### Table of contents
+- **JSON Style Documents** - No explicit schema and supports deep nesting.
+- **Expressive Queries** - [SQL++] (SQL for JSON), QueryBuilder, Full-Text
+  Search
+- **Observable** - Get notified of changes in database, queries and data sync.
+- **Data Sync** - Pull and push data from/to server with full control over
+  synced data.
 
-- [🤩 Features](#-features)
-- [⛔ Limitations](#-limitations)
-- [🔌 Getting started](#-getting-started)
-  - [Performance tracing](#performance-tracing)
-- [💡 Where to go next](#-where-to-go-next)
-- [🤝 Contributing](#-contributing)
-- [⚖️ Disclaimer](#️-disclaimer)
+---
 
-# 🤩 Features
+❤️ If you find this package useful, please ⭐ us on [pub.dev][cbl] and
+[GitHub][repository]. 🙏
 
-- Record log messages as Sentry breadcrumbs
-- Record CBL Dart API usage as Sentry breadcrumbs
-- Record CBL Dart operations as Sentry transaction spans
+🐛 & ✨ Did you find a bug or have a feature request? Please open a [GitHub
+issue][issues].
 
-# ⛔ Limitations
+👋 Do you you have a question or feedback? Let us know in a [GitHub
+discussion][discussions].
 
-Sentry currently does not support binding transaction spans to zones. This means
-there can only be one global transaction span that integrations can
-transparently access. To support more advanced use cases, this package provides
-a mechanism to bind transaction spans to zones. This mechanism will be removed
-if and when Sentry supports this natively.
+## Proudly sponsored by
 
-# 🔌 Getting started
+[![Lotum](https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/packages/cbl/doc/img/lotum-logo.svg)](https://lotum.com/)
 
-To get started just add the `CouchbaseLiteIntegration` when configuring Sentry:
+---
 
-```dart
-import 'package:cbl_sentry/cbl_sentry.dart';
-import 'package:sentry/sentry.dart';
+This package provides an **integration with Sentry** to supplement error reports
+with database related information and gather database performance metrics.
 
-void main() {
-  Sentry.init(
-    (options) {
-      options
-        ..dsn = ...
-        // While testing your Sentry configuration, make sure that all traces are sampled.
-        ..tracesSampleRate = 1
-        // Add the CBL Dart integration.
-        ..addIntegration(CouchbaseLiteIntegration());
-    },
-    appRunner: () async {
-      runApp(MyApp());
-    }
-  );
-}
-```
-
-To find out about configurable options, see the documentation of
-`CouchbaseLiteIntegration`.
-
-**Note**: Make sure you don't install a `TracingDelegate` when using the
-`CouchbaseLiteIntegration`. The integration has to be able to install a
-`TracingDelegate` itself.
-
-## Performance tracing
-
-This integration only records transaction spans when a transaction has been
-started and a child span of the transaction is available in the environment.
-
-To find a span, the integration uses `cblSentrySpan`. This is a getter that
-returns either a span that has been bound to the current zone or as a fallback
-the result of `Sentry.getSpan()`. To bind a span to a zone use
-`runWithCblSentrySpan`.
-
-The following code snippet shows functions that are useful to trace the
-performance of operations in an app:
-
-```dart
-Future<T> runAppTransaction<T>(String name, Future<T> Function() fn) =>
-    _runAppSpan(Sentry.startTransaction(name, 'task'), fn);
-
-Future<T> runAppOperation<T>(String name, Future<T> Function() fn) =>
-    _runAppSpan(cblSentrySpan!.startChild(name), fn);
-
-Future<T> _runAppSpan<T>(ISentrySpan span,Future<T> Function() fn) async {
-  try {
-    return await runWithCblSentrySpan(span, fn);
-    // ignore: avoid_catches_without_on_clauses
-  } catch (e) {
-    span
-      ..throwable = e
-      ..status = const SpanStatus.internalError();
-    rethrow;
-  } finally {
-    span.status ??= const SpanStatus.ok();
-    await span.finish();
-  }
-}
-```
-
-A app operation like the one below is traced as a transaction span, with CBL
-Dart operations as child spans:
-
-```dart
-Future<void> queryDatabase() => runAppOperation('queryDatabase', () async {
-      final query = await Query.fromN1ql(
-        db,
-        'SELECT * FROM example WHERE age >= 28 OR name LIKE "A%"',
-      );
-      final resultSet = await query.execute();
-      final results = await resultSet
-          .asStream()
-          .map((result) => result.toPlainMap())
-          .toList();
-
-      prettyPrintJson(results);
-    });
-```
-
-![Sentry Trace Example](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_sentry/doc/img/sentry-trace-example.png?raw=true)
-
-# 💡 Where to go next
-
-- [cbl]: Couchbase Lite Dart API
-- [cbl_dart]: Couchbase Lite for Dart apps
-- [cbl_flutter]: Couchbase Lite for Flutter apps
-- [sentry]: Sentry for Dart apps
-- [sentry_flutter]: Sentry for Flutter apps
+To get started, go to the [**documentation**][docs] for the Sentry integration.
 
 # 🤝 Contributing
 
@@ -153,22 +53,10 @@ Read [CONTRIBUTING] to get started developing.
 
 > ⚠️ This is not an official Couchbase product.
 
+[repository]: https://github.com/cbl-dart/cbl-dart
 [contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md
-[n1ql]: https://www.couchbase.com/products/n1ql
-[n1ql language reference]:
-  https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/index.html
-[couchbase lite swift docs]:
-  https://docs.couchbase.com/couchbase-lite/3.0/swift/quickstart.html
+[sql++]: https://www.couchbase.com/products/n1ql
 [cbl]: https://pub.dev/packages/cbl
-[cbl_dart]: https://pub.dev/packages/cbl_dart
-[cbl_flutter]: https://pub.dev/packages/cbl_flutter
-[cbl_flutter_ce]: https://pub.dev/packages/cbl_flutter_ce
-[cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
-[cbl_sentry]: https://pub.dev/packages/cbl_sentry
-[cbl_generator]: https://pub.dev/packages/cbl_generator
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
-[sync gateway]: https://www.couchbase.com/sync-gateway
-[sync gateway docs]:
-  https://docs.couchbase.com/sync-gateway/3.0/introduction.html
-[sentry]: https://pub.dev/packages/sentry
-[sentry_flutter]: https://pub.dev/packages/sentry_flutter
+[discussions]: https://github.com/cbl-dart/cbl-dart/discussions
+[docs]: https://cbl-dart.dev/instrumentation#sentry

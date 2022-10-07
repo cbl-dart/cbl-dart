@@ -12,7 +12,8 @@ Couchbase Lite is an embedded, NoSQL database:
 It is fully featured:
 
 - **JSON Style Documents** - No explicit schema and supports deep nesting.
-- **Expressive Queries** - N1QL (SQL for JSON), QueryBuilder, Full-Text Search
+- **Expressive Queries** - [SQL++] (SQL for JSON), QueryBuilder, Full-Text
+  Search
 - **Observable** - Get notified of changes in database, queries and data sync.
 - **Data Sync** - Pull and push data from/to server with full control over
   synced data.
@@ -28,66 +29,33 @@ issue][issues].
 👋 Do you you have a question or feedback? Let us know in a [GitHub
 discussion][discussions].
 
+## Proudly sponsored by
+
+[![Lotum](https://raw.githubusercontent.com/cbl-dart/cbl-dart/main/packages/cbl/doc/img/lotum-logo.svg)](https://lotum.com/)
+
 ---
 
-**What are all these packages for?**
+This package allows you to **generated code** for **typed data access**.
 
-Couchbase Lite can be used with **standalone Dart** or with **Flutter** apps and
-comes in two editions: **Community** and **Enterprise**.
+To get started, go to the [**documentation**][docs] for Typed Data.
 
-Regardless of the app platform and edition of Couchbase Lite you use, you always
-need the `cbl` package. All of the APIs of Couchbase Lite live in this package.
+# 🤝 Contributing
 
-What other packages you need depends on the app platform and the edition of
-Couchbase Lite you use.
+Pull requests are welcome. For major changes, please open an issue first to
+discuss what you would like to change.
 
-| Package          | Required when you want to:                                                                                 | Pub                                          | Likes                                           | Points                                           | Popularity                                           |
-| ---------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------- |
-| [cbl]            | use Couchbase Lite.                                                                                        | ![](https://badgen.net/pub/v/cbl)            | ![](https://badgen.net/pub/likes/cbl)           | ![](https://badgen.net/pub/points/cbl)           | ![](https://badgen.net/pub/popularity/cbl)           |
-| [cbl_dart]       | use the **Community** or **Enterprise Edition** in a **standalone Dart** app or in **Flutter unit tests**. | ![](https://badgen.net/pub/v/cbl_dart)       | ![](https://badgen.net/pub/likes/cbl_dart)      | ![](https://badgen.net/pub/points/cbl_dart)      | ![](https://badgen.net/pub/popularity/cbl_dart)      |
-| [cbl_flutter]    | use Couchbase Lite in a **Flutter app**.                                                                   | ![](https://badgen.net/pub/v/cbl_flutter)    | ![](https://badgen.net/pub/likes/cbl_flutter)   | ![](https://badgen.net/pub/points/cbl_flutter)   | ![](https://badgen.net/pub/popularity/cbl_flutter)   |
-| [cbl_flutter_ce] | use the **Community Edition** in a Flutter app.                                                            | ![](https://badgen.net/pub/v/cbl_flutter_ce) |                                                 |                                                  |                                                      |
-| [cbl_flutter_ee] | use the **Enterprise Edition** in a Flutter app.                                                           | ![](https://badgen.net/pub/v/cbl_flutter_ee) |                                                 |                                                  |                                                      |
-| [cbl_sentry]     | integrate Couchbase Lite with Sentry in a Dart or Flutter app.                                             | ![](https://badgen.net/pub/v/cbl_sentry)     | ![](https://badgen.net/pub/likes/cbl_sentry)    | ![](https://badgen.net/pub/points/cbl_sentry)    | ![](https://badgen.net/pub/popularity/cbl_sentry)    |
-| [cbl_generator]  | generate Dart code to access data trough a typed data model.                                               | ![](https://badgen.net/pub/v/cbl_generator)  | ![](https://badgen.net/pub/likes/cbl_generator) | ![](https://badgen.net/pub/points/cbl_generator) | ![](https://badgen.net/pub/popularity/cbl_generator) |
+Please make sure to update tests as appropriate.
 
-# 🔌 Getting Started
-
-1. After setting up your app for use with [`cbl`][cbl], add `cbl_generator` and
-   `build_runner` as development dependencies:
-
-   ```yaml
-   dev_dependencies:
-     cbl_generator: ...
-     build_runner: ...
-   ```
-
-2. Annotate Dart code with [typed data annotations][typed data docs].
-
-3. Run the build runner to invoke the generator:
-   ```shell
-   dart run build_runner build
-   # or
-   flutter run build_runner build
-   ```
-
-# 💡 Where to go next
-
-- Check out the example app in the **Example** tab.
-- Look at the usage examples for [`cbl`][cbl].
+Read [CONTRIBUTING] to get started developing.
 
 # ⚖️ Disclaimer
 
 > ⚠️ This is not an official Couchbase product.
 
 [repository]: https://github.com/cbl-dart/cbl-dart
+[contributing]: https://github.com/cbl-dart/cbl-dart/blob/main/CONTRIBUTING.md
+[sql++]: https://www.couchbase.com/products/n1ql
 [cbl]: https://pub.dev/packages/cbl
-[cbl_dart]: https://pub.dev/packages/cbl_dart
-[cbl_flutter]: https://pub.dev/packages/cbl_flutter
-[cbl_flutter_ce]: https://pub.dev/packages/cbl_flutter_ce
-[cbl_flutter_ee]: https://pub.dev/packages/cbl_flutter_ee
-[cbl_sentry]: https://pub.dev/packages/cbl_sentry
-[cbl_generator]: https://pub.dev/packages/cbl_generator
 [issues]: https://github.com/cbl-dart/cbl-dart/issues
 [discussions]: https://github.com/cbl-dart/cbl-dart/discussions
-[typed data docs]: https://pub.dev/packages/cbl#-typed-data
+[docs]: https://cbl-dart.dev/typed-data

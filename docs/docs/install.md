@@ -157,9 +157,7 @@ Future<void> verify() async {
   final database = await Database.openAsync('my-database');
 
   // Create a new document.
-  final mutableDocument = MutableDocument()
-    ..setString('SDK', key: 'type')
-    ..setInteger(2, key: 'majorVersion');
+  final mutableDocument = MutableDocument({'type': 'SDK', 'majorVersion': 2});
   await database.saveDocument(mutableDocument);
 
   print(
@@ -196,6 +194,9 @@ Future<void> verify() async {
   final result = await query.execute();
   final results = await result.allResults();
   print('Number of results: ${results.length}');
+
+  // Close the database.
+  await database.close();
 }
 ```
 
