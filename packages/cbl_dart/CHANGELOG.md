@@ -1,3 +1,7 @@
+## 2.1.3
+
+ - **DOCS**: link to new docs website from package READMEs. ([fae73bb2](https://github.com/cbl-dart/cbl-dart/commit/fae73bb2983cde0347091225fa245d2b066be13a))
+
 ## 2.1.2
 
  - **FIX**: provide latest version of `libcblitedart`. ([12298c95](https://github.com/cbl-dart/cbl-dart/commit/12298c95fb0838fc33c9dc6c841f1932735b5065))

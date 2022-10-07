@@ -1,3 +1,7 @@
+## 2.0.2
+
+ - **DOCS**: link to new docs website from package READMEs. ([fae73bb2](https://github.com/cbl-dart/cbl-dart/commit/fae73bb2983cde0347091225fa245d2b066be13a))
+
 ## 2.0.1
 
  - **REFACTOR**: use `Finalizable` to ensure native resources stay alive ([#377](https://github.com/cbl-dart/cbl-dart/issues/377)). ([2b961411](https://github.com/cbl-dart/cbl-dart/commit/2b961411fecdce387b14acc9da737803d14fa5ab))

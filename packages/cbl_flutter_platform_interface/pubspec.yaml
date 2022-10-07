@@ -1,6 +1,6 @@
 name: cbl_flutter_platform_interface
 description: Platform interface for the Couchbase Lite Flutter plugin.
-version: 2.0.1
+version: 2.0.2
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_platform_interface
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
@@ -10,7 +10,7 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl: ^2.1.0
+  cbl: ^2.1.1
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2

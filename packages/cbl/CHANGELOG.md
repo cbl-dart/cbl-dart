@@ -1,3 +1,7 @@
+## 2.1.1
+
+ - **DOCS**: link to new docs website from package READMEs. ([fae73bb2](https://github.com/cbl-dart/cbl-dart/commit/fae73bb2983cde0347091225fa245d2b066be13a))
+
 ## 2.1.0
 
  - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))

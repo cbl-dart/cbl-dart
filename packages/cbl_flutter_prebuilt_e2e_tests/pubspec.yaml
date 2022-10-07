@@ -7,9 +7,9 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl: ^2.1.0
+  cbl: ^2.1.1
   cbl_ffi: ^0.8.0+1
-  cbl_flutter: ^2.0.1
+  cbl_flutter: ^2.0.2
   cbl_flutter_ee:
     path: ../cbl_flutter_ee
   flutter:
@@ -24,9 +24,9 @@ dependency_overrides:
   # This is necessary because the current development version of cbl_ffi
   # might depend on a newer version of the binaries. The other packages
   # directly or indirectly depend on cbl_ffi.
-  cbl: any
+  cbl: ^2.1.1
   cbl_ffi: any
-  cbl_flutter: any
+  cbl_flutter: ^2.0.2
   cbl_flutter_platform_interface: any
   cbl_libcblite_api: any
   cbl_libcblitedart_api: any
