@@ -38,7 +38,7 @@ discussion][discussions].
 This package provides the Couchbase Lite API independent of whether you want to
 use Couchbase Lite in a standalone Dart app or in a Flutter app.
 
-To get started go, to the [**documentation**][docs].
+To get started, go to the [**documentation**][docs].
 
 Below is a sneak peak of what it's like to use Couchbase Lite.
 
