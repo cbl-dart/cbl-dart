@@ -175,3 +175,117 @@ With our document saved, we can now close our Couchbase Lite database.
 ```dart
 await database.close()
 ```
+
+## Working with Data
+
+### Checking a Document's Properties
+
+To check whether a given property exists in the document, you should use the document [contains(String key)](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/document/dictionary.dart#L84) method.
+
+If the property doesn't exist, the call will return the default for that that method(0 for getInt(), 0.0 for getFloat(), etc.).
+
+:::note
+Care should be taken when storing and recovering data in a document or converting that document to JSON and back.
+
+Data encoding (Fleece) can result in Long values being converted to Float instead of Double.  Interpreting data as boolean can also give inconsistent results.
+:::
+
+### Date accessors
+
+As a convenience Couchbase Lite offers Date accessors. Dates are a common data type, but JSON doesn’t natively support them, so the convention is to store them as strings in ISO-8601 format.
+
+###### Example 1 - Date Getter 
+
+```dart
+doc.setValue(DateTime.now(), key:'createdAt');
+var date = doc.getDate('createdAt');
+```
+
+
+### Using Dictionaries
+**API References**
+- [Dictionary](https://pub.dev/documentation/cbl/latest/cbl/Dictionary-class.html)
+- [MutableDictionary](https://pub.dev/documentation/cbl/latest/cbl/MutableDictionary-class.html)
+
+###### Example 2 - Read only 
+
+```dart showLineNumbers
+// NOTE: No error handling, for brevity
+var document = await db.document('doc1');
+
+// Getting a dictionary from the document's properties
+var dict = document?.dictionary('address')
+
+// Access a value with a key from the dictionary
+var street = dict?.string("street")
+
+// Iterate dictionary
+for (var key in dict!.keys) {
+	debugPrint("Key $key = ${dict.value(key).toString()}");
+}
+
+// Create a mutable copy
+var mutableDictionary = dict.toMutable();
+```
+
+###### Example 3- Mutable 
+
+```dart showLineNumbers
+// NOTE: No error handling, for brevity 
+
+// Create a new mutable dictionary and populate some keys/values
+var mutableDict = MutableDictionary();
+mutableDict.setString('1 Main Street', key:'street');
+mutableDict.setString('San Francisco', key:'city');
+
+// Add the dictionary to a document's properties and save the document
+var mutableDoc = MutableDocument.withId('doc1');
+mutableDoc.setDictionary(mutableDict, key:'address')
+await database.saveDocument(mutableDoc);
+
+```
+
+### Using Arrays 
+**API References**
+- [Array](https://pub.dev/documentation/cbl/latest/cbl/Array-class.html)
+- [MutableArray](https://pub.dev/documentation/cbl/latest/cbl/MutableArray-class.html)
+
+###### Example 4 - Read Only 
+
+```dart showLineNumbers
+// NOTE: No error handling, for brevity 
+var document = await database?.document('doc1');
+
+// Getting a phones array from the document's properties
+var array = document?.array('phones');
+
+// Get element count
+var count = array?.length;
+
+// Access an array element by index
+val phone = array?.getString(1);
+
+// Iterate array
+array?.forEach((item) {
+	debugPrint('Row {$item.toString}');
+});
+
+// Create a mutable copy
+var mutableArray = array.toMutable();
+````
+
+###### Example 5 - Mutable 
+
+```dart showLineNumbers
+// NOTE: No error handling, for brevity
+
+// Create a new mutable array and populate data into the array
+var mutableArray = MutableArray();
+mutableArray.addString('650-000-0000');
+mutableArray.addString('650-000-0001');
+
+// Set the array to document's properties and save the document
+var mutableDoc = MutableDocument.withId('doc1');
+mutableDoc.setArray(mutableArray, key: 'phones');
+await database?.saveDocument(mutableDoc);
+```

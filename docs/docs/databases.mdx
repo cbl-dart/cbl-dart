@@ -13,29 +13,20 @@ optionally a database configuration - see Example 1.
 <Tabs>
 <TabItem value="async" label="async" default>
 
-```dart
-try {
-  final databaseDirectory = await getApplicationDocumentsDirectory();
-  final cblDatabaseDirectory = databaseDirectory.subDirectory('databases');
-  var dbConfig =
-          DatabaseConfiguration(directory: cblDatabaseDirectory.path);
+```dart showLineNumbers
+final databaseDirectory = await getApplicationDocumentsDirectory();
+final cblDatabaseDirectory = databaseDirectory.subDirectory('databases');
+var dbConfig =
+  DatabaseConfiguration(directory: cblDatabaseDirectory.path);
 
-  database = await Database.openAsync('my-database', dbConfig);
-
-} catch(e){
-  debugPrint(e.toString());
-}
+database = await Database.openAsync('my-database', dbConfig);
 ```
 
 </TabItem>
 <TabItem value="sync" label="synchronous">
 
-```dart
-try {
-  database = Database.openSync('my-database');
-} catch(e){
-  debugPrint(e.toString());
-}
+```dart 
+database = Database.openSync('my-database');
 ```
 
 </TabItem>
