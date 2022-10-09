@@ -17,8 +17,8 @@ server, jump to [Standalone Dart](#standalone-dart).
 
 ## Flutter
 
-1. Run the following command to add the `cbl` and `cbl_flutter` packages as
-   dependencies:
+1. Run the following command to add the `api|cbl|pkg:` and
+   `api|cbl_flutter|pkg:` packages as dependencies:
 
    ```bash
    flutter pub add cbl cbl_flutter
@@ -36,14 +36,14 @@ server, jump to [Standalone Dart](#standalone-dart).
    :::
 
    To use the **Community edition**, run the following command to add the
-   `cbl_flutter_ce` package as a dependency:
+   `api|cbl_flutter_ce|pkg:` package as a dependency:
 
    ```bash
    flutter pub add cbl_flutter_ce
    ```
 
    To use the **Enterprise edition**, run the following command to add the
-   `cbl_flutter_ee` package as a dependency
+   `api|cbl_flutter_ee|pkg:` package as a dependency
 
    ```bash
    flutter pub add cbl_flutter_ee
@@ -66,17 +66,19 @@ server, jump to [Standalone Dart](#standalone-dart).
 
 ### Unit Tests
 
-You can use Couchbase Lite in Flutter unit tests but you need to use `cbl_dart`
-in them. In integration tests, `cbl_flutter` works just fine.
+You can use Couchbase Lite in Flutter unit tests but you need to use
+`api|cbl_dart|pkg:` in them. In integration tests, `api|cbl_flutter|pkg:` works
+just fine.
 
-1. Add `cbl_dart` as a development dependency.
+1. Add `api|cbl_dart|pkg:` as a development dependency.
 
    ```bash
    flutter pub add --dev cbl_dart
    ```
 
-2. In your unit tests initialize Couchbase Lite though `CouchbaseLiteDart.init`
-   instead of `CouchbaseLiteFlutter.init`:
+2. In your unit tests initialize Couchbase Lite through
+   `api|cbl_dart|CouchbaseLiteDart.init` instead of
+   `api|cbl_flutter|CouchbaseLiteFlutter.init`:
 
    ```dart
    import 'dart:io';
@@ -108,8 +110,8 @@ in them. In integration tests, `cbl_flutter` works just fine.
 
 ## Standalone Dart
 
-1. Run the following command to add the `cbl` and `cbl_dart` packages as
-   dependencies:
+1. Run the following command to add the `api|cbl|pkg:` and `api|cbl_dart|pkg:`
+   packages as dependencies:
 
    ```bash
    flutter pub add cbl cbl_dart
@@ -139,9 +141,9 @@ in them. In integration tests, `cbl_flutter` works just fine.
 
    :::note
 
-   `CouchbaseLiteDart.init` downloads the needed native libraries if they have
-   not already been cached. See its [documentation][couchbaselitedart.init] for
-   for more information.
+   `api|cbl_dart|CouchbaseLiteDart.init` downloads the needed native libraries
+   if they have not already been cached. See its
+   [documentation][couchbaselitedart.init] for for more information.
 
    :::
 
@@ -202,5 +204,3 @@ Future<void> verify() async {
 ```
 
 [couchbase lite editions]: https://www.couchbase.com/products/editions#cmobile
-[couchbaselitedart.init]:
-  https://pub.dev/documentation/cbl_dart/latest/cbl_dart/CouchbaseLiteDart/init.html

@@ -13,10 +13,9 @@
 ### Default database directory
 
 When opening a database without specifying a directory,
-[`path_provider`][path_provider]'s
-[`getApplicationSupportDirectory`][getapplicationsupportdirectory] is used to
-resolve it. See that function's documentation for the concrete locations on the
-various platforms.
+`api|path_provider|pkg:`'s `api|path_provider|fn:getApplicationSupportDirectory`
+is used to resolve it. See that function's documentation for the concrete
+locations on the various platforms.
 
 ## Standalone Dart
 
@@ -29,11 +28,5 @@ various platforms.
 ### Default database directory
 
 When opening a database without specifying a directory, the current working
-directory will be used. [`CouchbaseLiteDart.init`][couchbaselitedart.init]
-allows you to specify a different default directory.
-
-[path_provider]: https://pub.dev/packages/path_provider
-[getapplicationsupportdirectory]:
-  https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationSupportDirectory.html
-[couchbaselitedart.init]:
-  https://pub.dev/documentation/cbl_dart/latest/cbl_dart/CouchbaseLiteDart/init.html
+directory will be used. `api|cbl_dart|CouchbaseLiteDart.init` allows you to
+specify a different default directory.

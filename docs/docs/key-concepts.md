@@ -4,7 +4,8 @@
 
 The whole Couchbase Lite API comes in both a synchronous and asynchronous
 version. The synchronous version is more efficient and slightly more convenient
-to use, but has the downside that it blocks the current [isolate].
+to use, but has the downside that it blocks the current
+`api|dart:isolate|Isolate`.
 
 In UI applications, such as Flutter apps, this is problematic. Blocking the UI
 isolate for too long causes janky animations, or worse, makes the app
@@ -17,9 +18,10 @@ asynchronous API, use the asynchronous API.
 
 To support writing code that works with both synchronous and asynchronous APIs,
 synchronous and asynchronous APIs always extend from a common base class that
-uses `FutureOr` wherever a result could be synchronous or asynchronous.
+uses `api|dart:async|FutureOr` wherever a result could be synchronous or
+asynchronous.
 
-Take for example this simplified version of the `Query` API:
+Take for example this simplified version of the `api|Query` API:
 
 ```dart
 abstract class Query {
@@ -39,8 +41,9 @@ abstract class AsyncQuery extends Query {
 }
 ```
 
-`FutureOr` can be awaited just like a `Future`, so by programming against
-`Query` your code works with both the synchronous and asynchronous API:
+`api|dart:async|FutureOr` can be awaited just like a `api|dart:async|Future`, so
+by programming against `api|Query` your code works with both the synchronous and
+asynchronous API:
 
 ```dart
 /// Runs a query that returns a result set with one row and one column and
@@ -60,7 +63,7 @@ synchronous APIs, all changes are delivered to the listeners as soon as they are
 registered.
 
 With asynchronous APIs, changes are only guaranteed to be delivered once the
-`Future` returned from the registration call is completed:
+`api|dart:async|Future` returned from the registration call is completed:
 
 ```dart
 // Await the future returned from the registration call.
@@ -92,11 +95,12 @@ listeners, change streams returned from synchronous APIs are receiving changes
 as soon as the stream is subscribed to.
 
 Streams returned from asynchronous APIs start to listen asynchronously.
-Unfortunately it's not possible to return a `Future` from `Stream.listen` to
-signal to subscribers the point in time after which the the stream will observe
-events. Instead, asynchronous APIs return
-[`AsyncListenStream`][asynclistenstream]s, which expose a `Future` in
-`AsyncListenStream.listening` that completes when the stream is fully listening:
+Unfortunately it's not possible to return a `api|dart:async|Future` from
+`api|dart:async|Stream.listen` to signal to subscribers the point in time after
+which the the stream will observe events. Instead, asynchronous APIs return
+`api|AsyncListenStream`s, which expose a `api|dart:async|Future` in
+`api|AsyncListenStream.listening` that completes when the stream is fully
+listening:
 
 ```dart
 final stream = db.changes();
@@ -121,17 +125,9 @@ stream.
 
 ## Closing Resources
 
-Some types implement [`ClosableResource`][closableresource]. At the moment these
-are [`Database`][database] and [`Replicator`][replicator]. Once you are done
-with an instance of these types, call its `close` method. This will free
-resources used by the object, as well as remove listeners, close streams and
-close child resources. For example closing a database will also close any
-associated replicators.
-
-[isolate]: https://api.dart.dev/dart-isolate/Isolate-class.html
-[asynclistenstream]:
-  https://pub.dev/documentation/cbl/latest/cbl/AsyncListenStream-class.html
-[closableresource]:
-  https://pub.dev/documentation/cbl/latest/cbl/ClosableResource-class.html
-[database]: https://pub.dev/documentation/cbl/latest/cbl/Database-class.html
-[replicator]: https://pub.dev/documentation/cbl/latest/cbl/Replicator-class.html
+Some types implement `api|ClosableResource`. At the moment these are
+`api|Database` and `api|Replicator`. Once you are done with an instance of these
+types, call its `api|ClosableResource.close` method. This will free resources
+used by the object, as well as remove listeners, close streams and close child
+resources. For example closing a database will also close any associated
+replicators.
