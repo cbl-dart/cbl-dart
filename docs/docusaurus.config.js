@@ -1,7 +1,10 @@
 // @ts-check
 
+require('ts-node').register()
+
 const lightCodeTheme = require('prism-react-renderer/themes/github')
 const darkCodeTheme = require('prism-react-renderer/themes/dracula')
+const { exampleLinks } = require('./src/remark/example-links')
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -28,6 +31,7 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: '/',
           editUrl: 'https://github.com/cbl-dart/cbl-dart/tree/main/docs/',
+          remarkPlugins: [exampleLinks],
         },
         blog: false,
         theme: {
