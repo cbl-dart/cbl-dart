@@ -28,6 +28,14 @@ const sidebars = {
     },
     {
       type: 'doc',
+      id: 'prebuilt-database',
+    },
+    {
+      type: 'doc',
+      id: 'documents',
+    },
+    {
+      type: 'doc',
       id: 'usage-examples',
     },
     {

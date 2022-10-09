@@ -1,0 +1,178 @@
+# Documents
+> Description - Couchbase Lite concepts — Data model — Documents <br />
+> Related Content -  Databases | Blobs | Indexing
+
+## Overview
+
+### Document Structure
+
+In Couchbase Lite the term 'document' refers to an entry in the database; a record, or row in a table if you like.
+
+Each document has an ID (primary key in other databases) by which it can be located. This ID can be automatically generated (as a UUID) or specified programmatically; the only constraints are that it must be unique within the database, and it can’t be changed. The document also has a value which contains the actual application data. This value is stored as a dictionary collection of key-value (k-v) pairs where the values themselves may comprise different types of data such as numbers, strings, arrays or even nested objects.
+
+### Data Encoding
+The document body is stored in an internal, efficient, binary form ([Fleece](https://github.com/couchbase/fleece#readme)).
+This internal form is easily converted into a manageable native dictionary format for manipulation in applications.
+
+Fleece data is stored in the smallest format that will hold the value, whilst maintaining the integrity of the value.
+
+### Fleece data encoding
+
+When working with Dart, the Fleece encoding cycle can result in the Dart type information being lost. So, care should be taken when storing and recovering data in a document - or converting that document to JSON and back - using non-explicit functions such as toPlainMap().
+
+Always use explicit creation of the expected type, whenever the type of result is not itself explicit. For example:
+
+```dart
+var doc = await db.document(documentId).toMap();
+var testVal =  int.parse(doc['testInt']);
+```
+
+### Data Types
+
+The Document class offers a set of property accessors for various scalar types, including boolean, integers, floating-point and strings. These accessors take care of converting to/from JSON encoding, and make sure you get the type you’re expecting.
+
+So your document content may well comprise one or more supporting data types such as:
+
+- Boolean
+- Date
+- Double
+- Float
+
+In addition to these basic data types Couchbase Lite provides for the following:
+
+- Dictionary — represents a read-only key-value pair collection
+- MutableDictionary — represents a writeable key-value pair collection
+- Blob — represents an arbitrary piece of binary data
+- Array — represents a readonly ordered collection of objects
+- MutableArray — represents a writeable collection of objects
+
+### JSON
+
+Couchbase Lite also provides for the direct handling of JSON data implemented in most cases by the provision of a toJson() method on appropriate API classes (for example, on MutableDocument, Dictionary, Blob and Array).
+
+## Constructing a Document
+
+An individual document often represents a single instance of an object in application code. A document might be considered equivalent to a row in a relational table; with each of the document’s attributes being equivalent to a column.
+
+Documents can contain nested structures. This allows developers to express many-to-many relationships without requiring a reference or junction table; and is naturally expressive of hierarchical data.
+
+Most apps will work with one or more documents, persisting them to a local database and optionally syncing them, either centrally or to the cloud.
+
+In this section we provide an example of how you might create a hotel document, which provides basic contact details and price data.
+
+### Data model
+```
+hotel: {
+  documentType: string (value = `hotel`)
+  name: string
+  address: dictionary {
+    street: string
+    city: string
+    state: string
+    country: string
+    code: string
+  }
+  phones: array
+  rate: float 
+}
+```
+
+### Open a Database
+
+First we open your database. If the database does not already exist, Couchbase Lite will create it for us.
+
+```dart
+
+CouchbaseLiteFlutter.init();
+// Initialize the Couchbase Lite system
+final databaseDirectory = await getApplicationDocumentsDirectory();
+
+// Get the directory information of where the database will be stored/opened from 
+final cblDatabaseDirectory = databaseDirectory.subDirectory('databases');
+
+//Get the configuration for the database
+var dbConfig =
+          DatabaseConfiguration(directory: cblDatabaseDirectory.path);
+
+// Get the database (and create it if it doesn’t exist).
+var database = await Database.openAsync('getting-started', dbConfig);
+```
+
+### Create a Document 
+Now we create a new document to hold our application’s data.
+
+Because we will be adding data to the document we must use its mutable form.
+
+```dart
+var mutableDoc = MutableDocument.withId('hotel::1');
+```
+
+### Create a Dictionary 
+Here we create a dictionary (address). Because we want to add values into the dictionary, we must create it in mutable form.
+
+When the dictionary is retrieved, each element’s value is directly accessible via its own key.
+
+```dart
+// Create and populate mutable dictionary
+// Create a new mutable dictionary and populate some keys/values
+var address = MutableDictionary(); 
+address.setString('1 Main Street', key:'street');
+address.setString('San Francisco', key:'city');
+address.setString('CA.', key:'state');
+address.setString('USA', key:'country');
+address.setString('90210', key:'code');
+```
+
+### Create an Array
+
+Since our hotel may have multiple lines we provide an array (phones) to hold contact numbers. Again, because we want to add values into the array, we create it in mutable form.
+
+```dart
+var phones = MutableArray();
+phones.addString('555-555-0000');
+phones.addString('555-555-0001');
+```
+
+### Populate a Document
+
+Here we add our data to the mutable document we created earlier. Each data item is stored as a key-value pair.
+
+```dart
+// Initialize and populate the document
+
+// <1> Add document type to document properties
+mutableDoc.setString('hotel', key:'documentType');
+
+// <2> Add hotel name string to document properties
+mutableDoc.setString('Hotel Dart Mo', key:'name');
+
+// <3> Add float to document properties
+mutableDoc.setFloat(121.75, key:'room_rate');
+
+// <4> Add dictionary to document's properties
+mutableDoc.setDictionary(address, key:'address');
+
+// <5> Add array to document's properties
+mutableDoc.setString(phones, key:'phones');
+```
+1. Add hotel name (string)
+2. Add average room rate (float)
+3. Add document type (string). Couchbase recommend using a type attribute to define each logical document type. 
+4. Add address (dictionary) The address dictionary is added to the document and stored with the key address. We will use this to retrieve it when needed.
+5. Add phone numbers (array) The phones arrary is added to the document and stored with the key phones. We will use this to retrieve it when needed.
+
+### Save a Document 
+
+With the document now populated, we can persist to our Couchbase Lite database.
+
+```dart
+var result = await database.saveDocument(mutableDoc);
+```
+
+### Close the Database
+
+With our document saved, we can now close our Couchbase Lite database.
+
+```dart
+await database.close()
+```
