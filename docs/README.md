@@ -34,6 +34,22 @@ There are IDE plugins for Prettier that you can use to format code on save:
 - [IntelliJ](https://plugins.jetbrains.com/plugin/10456-prettier)
 - [VSCode](https://github.com/prettier/prettier-vscode)
 
+### Page Header
+
+Each page usually starts with a description of the content of the page and links
+to related content.
+
+This information has to be specified in the front-matter of the page:
+
+```
+---
+description: This is a description of the page.
+related_content:
+  - name: Related Content
+    url: /related/content
+---
+```
+
 ### Callouts
 
 For notes, warnings and other callouts, use
@@ -45,12 +61,7 @@ For notes, warnings and other callouts, use
 
 Code examples are titled code blocks with a unique ID.
 
-To use the `CodeExample` component, make sure it is imported at the top of the
-document:
-
-```
-import CodeExample from '@site/src/components/CodeExample'
-```
+The `CodeExample` component is available without importing it.
 
 Assign each code example a unique ID and give it a title:
 
