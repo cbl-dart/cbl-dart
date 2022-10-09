@@ -12,7 +12,7 @@ const { codeLinks } = require('./src/remark/code-links')
 const config = {
   title: 'Couchbase Lite Dart',
   tagline: 'Couchbase Lite for Dart & Flutter',
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://cbl-dart.dev',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -38,6 +38,9 @@ const config = {
         blog: false,
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
+        },
+        sitemap: {
+          changefreq: 'hourly',
         },
       }),
     ],
