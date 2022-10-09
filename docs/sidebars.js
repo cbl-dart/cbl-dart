@@ -24,6 +24,10 @@ const sidebars = {
     },
     {
       type: 'doc',
+      id: 'databases',
+    },
+    {
+      type: 'doc',
       id: 'usage-examples',
     },
     {
