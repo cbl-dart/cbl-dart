@@ -8,30 +8,31 @@ request.
 
 :::
 
-`cbl` allows dynamic access to data without a fixed data model, not requiring
-any code generation. This is useful when the data is very dynamic or code
-generation is undesirable.
+Couchbase Lite allows dynamic access to data without a fixed data model, not
+requiring any code generation. This is useful when the data is very dynamic or
+code generation is undesirable.
 
 Often though, the data is known to have a regular structure, and accessing it
 through a typed Dart API makes working with it easier and safer.
 
-With the help of the [`cbl_generator`][cbl_generator] package you can quickly
-create Dart classes that can be used to access data in a typed way. Theses
-classes can be used with specialized APIs of [`Database`][database],
-[`Query`][query] and [`Replicator`][replicator].
+With the help of the `api|cbl_generator|pkg:` package you can quickly create
+Dart classes that can be used to access data in a typed way. Theses classes can
+be used with specialized APIs of `api|Database`, `api|Query` and
+`api|Replicator`.
 
 ## Getting started
 
 1. Make sure your [app is setup](install.md) for using Couchbase Lite.
 
-1. Add `cbl_generator` and `build_runner` as development dependencies:
+1. Add `api|cbl_generator|pkg:` and `api|build_runner|pkg:` as development
+   dependencies:
 
    ```shell
    flutter pub add --dev cbl_generator build_runner
    ```
 
-1. Create typed data classes and annotated them with `@TypedDocument` and
-   `@TypedDictionary`:
+1. Create typed data classes and annotated them with `api|TypedDocument` and
+   `api|TypedDictionary`:
 
    ```dart
    // user.dart
@@ -64,7 +65,7 @@ classes can be used with specialized APIs of [`Database`][database],
    }
    ```
 
-1. Create a typed database by annotating a class with `@TypedDatabase`:
+1. Create a typed database by annotating a class with `api|TypedDatabase`:
 
    ```dart
    // app_database.dart
@@ -123,9 +124,3 @@ classes can be used with specialized APIs of [`Database`][database],
      final savedUser = await db.typedDocument<User>(user.id);
    }
    ```
-
-[cbl_generator]: https://pub.dev/packages/cbl_generator
-[issues]: https://github.com/cbl-dart/cbl-dart/issues
-[database]: https://pub.dev/documentation/cbl/latest/cbl/Database-class.html
-[replicator]: https://pub.dev/documentation/cbl/latest/cbl/Replicator-class.html
-[query]: https://pub.dev/documentation/cbl/latest/cbl/Query-class.html

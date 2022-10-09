@@ -4,13 +4,13 @@ The execution of certain operations can be traced through the tracing API. This
 is useful for debugging and performance profiling.
 
 CBL Dart has builtin trace points at which flow control is given to the
-currently installed `TracingDelegate`.
+currently installed `api|TracingDelegate`.
 
-Included in this package is the `DevToolsTracing` delegate, which records
+Included in this package is the `api|DevToolsTracing` delegate, which records
 timeline events that can be later visualized through the Dart DevTools
 Performance Page.
 
-You can install a delegate by calling `TracingDelegate.install`:
+You can install a delegate by calling `api|TracingDelegate.install`:
 
 ```dart
 await TracingDelegate.install(DevToolsTracing());
@@ -18,8 +18,8 @@ await TracingDelegate.install(DevToolsTracing());
 
 ## Sentry
 
-The Sentry integration provided by [`cbl_sentry`][cbl_sentry] installs a
-`TracingDelegate` to transparently record breadcrumbs and transaction spans.
+The Sentry integration provided by `api|cbl_sentry|pkg:` installs a
+`api|DevToolsTracing` to transparently record breadcrumbs and transaction spans.
 
 ### Features
 
@@ -39,13 +39,13 @@ if and when Sentry supports this natively.
 
 1. Make sure your [app is setup](install.md) for using Couchbase Lite.
 
-1. Add the `cbl_sentry` package as a dependency:
+1. Add the `api|cbl_sentry|pkg:` package as a dependency:
 
    ```bash
    flutter pub add cbl_sentry
    ```
 
-1. Add the `CouchbaseLiteIntegration` when configuring Sentry:
+1. Add the `api|cbl_sentry|CouchbaseLiteIntegration` when configuring Sentry:
 
    ```dart
    import 'package:cbl_sentry/cbl_sentry.dart';
@@ -69,13 +69,13 @@ if and when Sentry supports this natively.
    ```
 
    To find out about configurable options, see the documentation of
-   `CouchbaseLiteIntegration`.
+   `api|cbl_sentry|CouchbaseLiteIntegration`.
 
    :::caution
 
-   Make sure you don't install a `TracingDelegate` when using the
-   `CouchbaseLiteIntegration`. The integration has to be able to install a
-   `TracingDelegate` itself.
+   Make sure you don't install a `api|TracingDelegate` when using the
+   `api|cbl_sentry|CouchbaseLiteIntegration`. The integration has to be able to
+   install a `api|TracingDelegate` itself.
 
    :::
 
@@ -84,10 +84,10 @@ if and when Sentry supports this natively.
 This integration only records transaction spans when a transaction has been
 started and a child span of the transaction is available in the environment.
 
-To find a span, the integration uses `cblSentrySpan`. This is a getter that
-returns either a span that has been bound to the current zone or as a fallback
-the result of `Sentry.getSpan()`. To bind a span to a zone use
-`runWithCblSentrySpan`.
+To find a span, the integration uses `api|cbl_sentry|fn:cblSentrySpan`. This is
+a getter that returns either a span that has been bound to the current zone or
+as a fallback the result of `api|sentry:sentry_io|Sentry.getSpan`. To bind a
+span to a zone use `api|cbl_sentry|fn:runWithCblSentrySpan`.
 
 The following code snippet shows functions that are useful to trace the
 performance of operations in an app:
@@ -135,4 +135,3 @@ Future<void> queryDatabase() => runAppOperation('queryDatabase', () async {
 ```
 
 ![Sentry Trace Example](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl_sentry/doc/img/sentry-trace-example.png?raw=true)
-[cbl_sentry]: https://pub.dev/packages/cbl_sentry
