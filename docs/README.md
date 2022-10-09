@@ -22,7 +22,17 @@ Most changes are reflected live without having to restart the server.
 
 ### Formatting
 
-TODO
+This documentation uses [Prettier](https://prettier.io/) to format code. You can
+format your code by running:
+
+```shell
+npm run prettier:write
+```
+
+There are IDE plugins for Prettier that you can use to format code on save:
+
+- [IntelliJ](https://plugins.jetbrains.com/plugin/10456-prettier)
+- [VSCode](https://github.com/prettier/prettier-vscode)
 
 ### Callouts
 
