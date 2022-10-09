@@ -107,13 +107,13 @@ To reference a constructor, specify the `new` type before the type name:
 To reference elements other than classes and mixins, specify a type:
 
 ```
-A typedef             `api|td:foo`
-An extension          `api|ext:foo`
+A typedef             `api|td:Foo`
+An extension          `api|ext:Foo`
 A top-level function  `api|fn:foo`
 A top-level property  `api|prop:foo`
 A top-level const     `api|const:foo`
-An enum               `api|enum:foo`
-An enum-value         `api|enum-value:foo`
+An enum               `api|enum:Foo`
+An enum-value         `api|enum-value:Foo.bar`
 ```
 
 To link to the API reference of a package use the `pkg` type:
