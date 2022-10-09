@@ -21,8 +21,13 @@ The initial sync of any pre-built database will pull-in any content changes on t
 These steps should form part of your build and release process:
 
 1. Create a fresh Couchbase Lite database (every time).
-> **IMPORTANT** Always start with a fresh database for each app version; this ensures there are no [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) issues. <br /><br />
-> **Otherwise**: You will invalidate the cached [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) in the packaged database, and instead reuse the same database in your build process (for subsequent app versions).
+
+:::caution
+Always start with a fresh database for each app version; this ensures there are no [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) issues. <br /><br />
+
+**Otherwise**: You will invalidate the cached [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) in the packaged database, and instead reuse the same database in your build process (for subsequent app versions).
+
+:::
 
 2. Pull the data from Capella App Services or Sync Gateway into the new Couchbase Lite database.
 > **IMPORTANT** Ensure the replication used to populate Couchbase Lite database uses the exact same remote URL and replication config parameters (channels and filters) as those your app will use when it is running. <br /><br />
@@ -41,7 +46,11 @@ Put it in an appropriate place (for example, an assets or resource folder).
 Alternatively …​ rather than bundling the database within the app, the app could pull the database down from a CDN server on launch, but this add to the time it takes for your app to bootstrap.
 
 ## Database Encryption
-> **IMPORTANT** This is an Enterprise Edition feature. 
+:::note
+
+This is an Enterprise Edition feature. 
+
+:::
 
 If you are using en encrypted database, note that [Database.copy](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L224) does not change the encryption key. The encryption key specified in the config when opening the database is the encryption key used for both the original database and copied database.
 
@@ -53,7 +62,11 @@ If you copied an un-encrypted database and want to apply encryption to the copy,
 
 3.  Use [Database.changeEncryptionKey](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L523) on the database copy to set the required encryption key.
 
-**NOTE**: To remove encryption on the copy, provide a null encryption-key
+:::tip
+
+To remove encryption on the copy, provide a null encryption-key
+
+:::
 
 ## Using Pre-built Database on App Launch
 
@@ -65,8 +78,12 @@ During the application start-up logic, check if database exists in the required 
 
 Use the API’s [Database.copy](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L224) method — see: Example 1; this ensures that a UUID is generated for each copy
 
-> **IMPORTANT** Do not copy the database using any other method<br /><br />
+:::caution
+
+**IMPORTANT** Do not copy the database using any other method<br /><br />
 **Otherwise**: Each copy of the app will invalidate the other apps' [**checkpoints**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) because a new UUID was not generated.
+
+:::
 
 3. Open the database; you can now start querying the data and using it  
 
@@ -74,7 +91,9 @@ Use the API’s [Database.copy](https://github.com/cbl-dart/cbl-dart/blob/main/p
 
 The replicator uses the pre-built database’s [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) as the timestamp to sync from; only documents changed since then are synced.
 
-> **NOTE**: Start your normal application logic immediately, unless it is essential to have the absolute up-to-date data set to begin. That way the user is not kept hanging around watching a progress indicator. They can begin interacting with your app whilst any out-of-data data is being updated. 
+:::note
+Start your normal application logic immediately, unless it is essential to have the absolute up-to-date data set to begin. That way the user is not kept hanging around watching a progress indicator. They can begin interacting with your app whilst any out-of-data data is being updated. 
+:::
 
 ```dart
 final String assetsDatabaseFileName = "asset/database/startingDatabase.zip";

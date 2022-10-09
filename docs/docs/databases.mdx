@@ -49,8 +49,11 @@ You are advised to incorporate the closing of all open database into your applic
 
 Closing a database is simple, just call the close method on the database instance.  See Example 2.  
 
-> **NOTE**:  This also closes active replications, listenres, and-or live queries connected to the database.  Closing a database soon after starting a replication involving it can cause an exeption as the asynchronous replicator my not yet be connected.
+:::caution  
 
+This also closes active replications, listenres, and-or live queries connected to the database.  Closing a database soon after starting a replication involving it can cause an exeption as the asynchronous replicator my not yet be connected.
+
+:::
 ```dart
 try {
   await database.close();
@@ -62,7 +65,11 @@ try {
 ###### Example 2 - closing a database 
 
 ## Database Encryption
-> **IMPORTANT** -  This feature is only available in the Enterprise Edition of Couchbase Lite.  If you are using the Community Edition, this feature will not be available.
+:::note
+
+**IMPORTANT** -  This feature is only available in the Enterprise Edition of Couchbase Lite.  If you are using the Community Edition, this feature will not be available.
+
+:::
 
 Couchbase Lite Enterprise Edition includes the ability to encrypt Couchbase Lite databases.  This allows mobile applications to secure data at rest, when it is being stored on the device.  The algorithm used to encrypt the database is 256-bit AES.
 

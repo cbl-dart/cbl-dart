@@ -22,7 +22,7 @@ When working with Dart, the Fleece encoding cycle can result in the Dart type in
 
 Always use explicit creation of the expected type, whenever the type of result is not itself explicit. For example:
 
-```dart
+```dart showLineNumbers
 var doc = await db.document(documentId).toMap();
 var testVal =  int.parse(doc['testInt']);
 ```
@@ -81,8 +81,7 @@ hotel: {
 
 First we open your database. If the database does not already exist, Couchbase Lite will create it for us.
 
-```dart
-
+```dart showLineNumbers
 CouchbaseLiteFlutter.init();
 // Initialize the Couchbase Lite system
 final databaseDirectory = await getApplicationDocumentsDirectory();
@@ -95,9 +94,10 @@ var dbConfig =
           DatabaseConfiguration(directory: cblDatabaseDirectory.path);
 
 // Get the database (and create it if it doesn’t exist).
+// highlight-next-line
 var database = await Database.openAsync('getting-started', dbConfig);
 ```
-
+ 
 ### Create a Document 
 Now we create a new document to hold our application’s data.
 
@@ -112,7 +112,7 @@ Here we create a dictionary (address). Because we want to add values into the di
 
 When the dictionary is retrieved, each element’s value is directly accessible via its own key.
 
-```dart
+```dart showLineNumbers
 // Create and populate mutable dictionary
 // Create a new mutable dictionary and populate some keys/values
 var address = MutableDictionary(); 
@@ -137,9 +137,8 @@ phones.addString('555-555-0001');
 
 Here we add our data to the mutable document we created earlier. Each data item is stored as a key-value pair.
 
-```dart
+```dart showLineNumbers
 // Initialize and populate the document
-
 // <1> Add document type to document properties
 mutableDoc.setString('hotel', key:'documentType');
 
