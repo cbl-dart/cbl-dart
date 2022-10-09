@@ -1,7 +1,8 @@
-# Install
+---
+description: Installing Couchbase Lite for Dart
+---
 
-This guide will help you install Couchbase Lite and verify that everything is
-working correctly.
+# Install
 
 :::info
 
