@@ -69,6 +69,11 @@ const config = {
         ],
         hideOnScroll: true,
       },
+      docs: {
+        sidebar: {
+          autoCollapseCategories: false,
+        },
+      },
       footer: {
         style: 'dark',
         copyright: `Copyright © ${new Date().getFullYear()} Couchbase Lite for Dart`,

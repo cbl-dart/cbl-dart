@@ -36,6 +36,44 @@ const sidebars = {
     },
     {
       type: 'doc',
+      id: 'blobs',
+    },
+    {
+      type: 'category',
+      label: 'Queries',
+      items:[
+        {
+          type: 'doc',
+          id: 'querybuilder'
+        },
+        {
+          type: 'doc',
+          id:'sqlplusplus-mobile'
+        },
+        {
+          type: 'doc',
+          id:'sqlplusplus-server-differences'
+        },
+        {
+          type: 'doc',
+          id:'sqlplusplus-querybuilder-differences'
+        },
+        {
+          type: 'doc',
+          id:'query-resultsets'
+        },
+        {
+          type: 'doc',
+          id:'live-queries'
+        },
+        {
+          type: 'doc',
+          id:'query-troubleshooting'
+        },
+      ]
+    },
+    {
+      type: 'doc',
       id: 'usage-examples',
     },
     {
