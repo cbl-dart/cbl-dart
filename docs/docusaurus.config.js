@@ -16,6 +16,8 @@ const config = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
+  favicon: 'img/logo.png',
+
   organizationName: 'cbl-dart',
   projectName: 'cbl-dart',
 
@@ -53,7 +55,11 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'Couchbase Lite Dart',
+        title: 'Couchbase Lite for Dart',
+        logo: {
+          src: '/img/logo.png',
+          alt: 'Couchbase Logo',
+        },
         items: [
           {
             href: 'https://github.com/cbl-dart/cbl-dart',
@@ -65,7 +71,7 @@ const config = {
       },
       footer: {
         style: 'dark',
-        copyright: `Copyright © ${new Date().getFullYear()} Couchbase Lite Dart`,
+        copyright: `Copyright © ${new Date().getFullYear()} Couchbase Lite for Dart`,
       },
       prism: {
         theme: lightCodeTheme,

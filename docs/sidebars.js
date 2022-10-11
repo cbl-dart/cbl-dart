@@ -49,7 +49,7 @@ const sidebars = {
         pubDevDocsLink('cbl_sentry'),
         {
           type: 'link',
-          label: 'Couchbase Lite Swift Docs',
+          label: 'Couchbase Lite for Swift Docs',
           href: 'https://docs.couchbase.com/couchbase-lite/current/swift/quickstart.html',
         },
       ],
