@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, ReactNode } from 'react'
-import styles from './styles.module.css'
+import FigureBase from '../FigureBase'
 
 export interface CodeExampleProps extends PropsWithChildren {
   id: number
@@ -8,12 +8,5 @@ export interface CodeExampleProps extends PropsWithChildren {
 }
 
 export default function CodeExample(props: CodeExampleProps) {
-  return (
-    <figure className={styles.codeExample} id={`example-${props.id}`}>
-      <figcaption className={styles.caption}>
-        Example {props.id}. {props.title ?? props.richTitle}
-      </figcaption>
-      {props.children}
-    </figure>
-  )
+  return <FigureBase type="example" {...props}></FigureBase>
 }

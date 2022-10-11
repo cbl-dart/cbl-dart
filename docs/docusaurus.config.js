@@ -4,13 +4,13 @@ require('ts-node').register()
 
 const lightCodeTheme = require('prism-react-renderer/themes/github')
 const darkCodeTheme = require('prism-react-renderer/themes/dracula')
-const { exampleLinks } = require('./src/remark/example-links')
+const { figureLinks } = require('./src/remark/figure-links')
 const { metaHeader } = require('./src/remark/meta-header')
 const { codeLinks } = require('./src/remark/code-links')
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Couchbase Lite Dart',
+  title: 'Couchbase Lite for Dart',
   tagline: 'Couchbase Lite for Dart & Flutter',
   url: 'https://cbl-dart.dev',
   baseUrl: '/',
@@ -35,7 +35,7 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: '/',
           editUrl: 'https://github.com/cbl-dart/cbl-dart/tree/main/docs/',
-          remarkPlugins: [exampleLinks, metaHeader, codeLinks],
+          remarkPlugins: [figureLinks, metaHeader, codeLinks],
         },
         blog: false,
         theme: {
@@ -68,6 +68,11 @@ const config = {
           },
         ],
         hideOnScroll: true,
+      },
+      docs: {
+        sidebar: {
+          autoCollapseCategories: false,
+        },
       },
       footer: {
         style: 'dark',

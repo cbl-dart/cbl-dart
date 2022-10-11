@@ -1,0 +1,747 @@
+---
+description: Couchbase Lite Concepts — Data Model — Documents
+related_content:
+  - name: Databases
+    url: /databases
+  - name: Blobs
+    url: /blob
+  - name: Indexing
+    url: /indexing
+---
+
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
+
+# Documents
+
+## Overview
+
+### Document Structure
+
+In Couchbase Lite the term **document** refers to an entry in the database; a
+record, or row in a table if you like.
+
+Each document has an ID (primary key in other databases) by which it can be
+located. This ID can be automatically generated (as a UUID) or specified
+programmatically; the only constraints are that it must be unique within the
+database, and it can't be changed. The document also has a value which contains
+the actual application data. This value is stored as a dictionary collection of
+key-value (k-v) pairs where the values themselves may comprise different types
+of data such as numbers, strings, arrays or even nested objects.
+
+### Data Encoding
+
+The document body is stored in an internal, efficient, binary form
+([Fleece](https://github.com/couchbase/fleece#readme)). This internal form is
+easily converted into a manageable native dictionary format for manipulation in
+applications.
+
+Fleece data is stored in the smallest format that will hold the value, whilst
+maintaining the integrity of the value.
+
+### Fleece Data Encoding
+
+When working with Dart, the Fleece encoding cycle can result in the Dart type
+information being lost. Specifically, `api|dart:core|DateTime`s are stored as
+strings. So, care should be taken when storing and recovering data in a
+document - or converting that document to JSON and back - using non-explicit
+functions such as `api|DictionaryInterface.toPlainMap`.
+
+Always use explicit creation of the expected type, whenever the type of result
+is not itself explicit. For example:
+
+```dart
+final doc = (await database.document(documentId))!;
+final map = doc.toPlainMap();
+
+final createdAtFromTypedGetter = doc.date('createdAt');
+final createdAtFromMap = DateTime.parse(map['createdAt']! as String);
+```
+
+### Data Types
+
+The `api|Document` class offers a set of property accessors for various scalar
+types, including boolean, integers, floating-point and strings. These accessors
+take care of converting to/from JSON encoding, and make sure you get the type
+you're expecting.
+
+So your document content may well comprise one or more supporting data types
+such as:
+
+- Boolean
+- Date
+- Double
+- Float
+- Integer
+- String
+
+In addition to these basic data types Couchbase Lite provides for the following:
+
+- `api|Dictionary` — Represents a read-only key-value pair collection.
+- `api|MutableDictionary` — Represents a writeable key-value pair collection.
+- `api|Array` — Represents a readonly ordered collection of objects.
+- `api|MutableArray` — Represents a writeable collection of objects.
+- `api|Blob` — Represents an arbitrary piece of binary data.
+
+### JSON
+
+Couchbase Lite also provides for the direct handling of JSON data implemented in
+most cases by the provision of a `toJson()` method on appropriate API classes
+(for example, on `api|MutableDocument`, `api|Dictionary`, `api|Array` and
+`api|Blob`) — see [Working with JSON Data](##working-with-json-data).
+
+## Constructing a Document
+
+An individual document often represents a single instance of an object in
+application code. A document might be considered equivalent to a row in a
+relational table; with each of the document's attributes being equivalent to a
+column.
+
+Documents can contain nested structures. This allows developers to express
+many-to-many relationships without requiring a reference or junction table; and
+is naturally expressive of hierarchical data.
+
+Most apps will work with one or more documents, persisting them to a local
+database and optionally syncing them, either centrally or to the cloud.
+
+In this section we provide an example of how you might create a hotel document,
+which provides basic contact details and price data.
+
+### Data Model
+
+```
+hotel: {
+  type: string (value = `hotel`)
+  name: string
+  address: dictionary {
+    street: string
+    city: string
+    state: string
+    country: string
+    code: string
+  }
+  phones: array
+  rate: float
+}
+```
+
+### Open a Database
+
+First we open your database. If the database does not already exist, Couchbase
+Lite will create it for us.
+
+```dart
+// Get the database (and create it if it doesn't exist).
+final database = await Database.openAsync('hoteldb', dbConfig);
+```
+
+See: [Databases](/databases) for more information.
+
+### Create a Document
+
+Now we create a new document to hold our application's data.
+
+Because we will be adding data to the document we must use its mutable form.
+
+```dart
+// Create your new document.
+final mutableDoc = MutableDocument.withId('hotel::1');
+```
+
+For more on using **Documents**, see:
+[Document Initializers](#document-initializers) and [Mutability](#mutability).
+
+### Create a Dictionary
+
+Here we create a dictionary (`address`). Because we want to add values into the
+dictionary, we must create it in _mutable_ form.
+
+When the dictionary is retrieved, each element's value is directly accessible
+via its own key.
+
+```dart
+// Create and populate mutable dictionary.
+// Create a new mutable dictionary and populate some keys/values.
+final address = MutableDictionary()
+  ..setString('1 Main Street', key:'street')
+  ..setString('San Francisco', key:'city')
+  ..setString('CA.', key:'state')
+  ..setString('USA', key:'country')
+  ..setString('90210', key:'code');
+```
+
+For more on using **Dictionaries** see:
+[Using Dictionaries](#using-dictionaries).
+
+### Create an Array
+
+Since our hotel may have multiple lines we provide an array (`phones`) to hold
+contact numbers. Again, because we want to add values into the array, we create
+it in _mutable_ form.
+
+```dart
+// Create and populate mutable array.
+final phones = MutableArray()
+  ..addString('555-555-0000')
+  ..addString('555-555-0001');
+```
+
+For more on using **Arrays** see: [Using Arrays](#using-arrays).
+
+### Populate a Document
+
+Here we add our data to the mutable document we created earlier. Each data item
+is stored as a key-value pair.
+
+```dart
+// Initialize and populate the document
+
+mutableDoc
+  // <1> Add document type to document properties.
+  ..setString('hotel', key: 'type')
+
+  // <2> Add hotel name string to document properties.
+  ..setString('Hotel Dart Mo', key: 'name')
+
+  // <3> Add float to document properties.
+  ..setFloat(121.75, key: 'room_rate')
+
+  // <4> Add dictionary to document's properties.
+  ..setDictionary(address, key: 'address')
+
+  // <5> Add array to document's properties.
+  ..setString(phones, key: 'phones');
+```
+
+1. Add hotel name (string).
+2. Add average room rate (float).
+3. Add document type (string). <br/> Couchbase recommend using a `type`
+   attribute to define each logical document type.
+4. Add address (dictionary). <br/> The `address` dictionary is added to the
+   document and stored under the key `address`. We will use this to retrieve it
+   when needed.
+5. Add phone numbers (array). <br/> The phones arrary is added to the document
+   and stored under the key `phones`. We will use this to retrieve it when
+   needed.
+
+### Save a Document
+
+With the document now populated, we can persist to our Couchbase Lite database.
+
+```dart
+// Save the document to the database.
+await database.saveDocument(mutableDoc);
+```
+
+### Close the Database
+
+With our document saved, we can now close our Couchbase Lite database.
+
+```dart
+await database.close();
+```
+
+## Working with Data
+
+### Checking a Document's Properties
+
+To check whether a given property exists in the document, you should use the
+`api|DictionaryInterface.contains` method (`api|Document` implements
+`api|DictionaryInterface`).
+
+If the property doesn't exist, the call will return the default for that that
+method (`0` for `api|DictionaryInterface.integer`, `0.0` for
+`api|DictionaryInterface.float`, etc.).
+
+:::note
+
+Care should be taken when storing and recovering data in a document or
+converting that document to JSON and back.
+
+Data encoding (Fleece) can result in Long values being converted to Float
+instead of Double. Interpreting data as boolean can also give inconsistent
+results.
+
+:::
+
+### Date accessors
+
+As a convenience Couchbase Lite offers _Date accessors_. Dates are a common data
+type, but JSON doesn't natively support them, so the convention is to store them
+as strings in ISO-8601 format.
+
+<CodeExample id={1} title="Date Getter">
+
+This example sets the date on the `createdAt` property and reads it back using
+the `api|DictionaryInterface.date` accessor method.
+
+```dart
+mutableDoc.setValue(DateTime.now(), key: 'createdAt');
+final date = doc.date('createdAt');
+```
+
+</CodeExample>
+
+### Using Dictionaries {#using-dictionaries}
+
+**API References**
+
+- `api|Dictionary`
+- `api|MutableDictionary`
+
+<CodeExample id={2} title="Read Only">
+
+```dart
+final document = await database.document('hotel::1');
+
+// Get a dictionary from the document's properties.
+final dictionary = document?.dictionary('address')
+
+// Access a value with a key from the dictionary.
+final street = dictionary?.string("street")
+
+// Iterate the dictionary.
+for (final key in dictionary!) {
+  print("Key $key = ${dictionary.value(key)}");
+}
+
+// Create a mutable copy of the dictionary.
+final mutableDictionary = dictionary.toMutable();
+```
+
+</CodeExample>
+
+<CodeExample id={3} title="Mutable">
+
+```dart
+// Create a new mutable dictionary and populate some keys/values.
+final mutableDictionary = MutableDictionary()
+  ..setString('1 Main Street', key: 'street')
+  ..setString('San Francisco', key: 'city');
+
+// Add the dictionary to a document's properties and save the document.
+final mutableDocumemt = MutableDocument.withId('hotel::1')
+  ..setDictionary(mutableDictionary, key: 'address');
+await database.saveDocument(mutableDocumemt);
+```
+
+</CodeExample>
+
+### Using Arrays {#using-arrays}
+
+**API References**
+
+- `api|Array`
+- `api|MutableArray`
+
+<CodeExample id={4} title="Read Only">
+
+```dart
+final document = await database.document('hotel::1');
+
+// Get an array from the document's properties.
+final array = document?.array('phones');
+
+// Get the element count.
+final count = array?.length;
+
+// Access an array element by index.
+final phone = array?.string(1);
+
+// Iterate the array.
+for (final element in array!) {
+	print('Element $element');
+}
+
+// Create a mutable copy of the array.
+final mutableArray = array.toMutable();
+```
+
+</CodeExample>
+
+<CodeExample id={5} title="Mutable">
+
+```dart
+// Create a new mutable array and populate it with data.
+final mutableArray = MutableArray()
+  ..addString('650-000-0000')
+  ..addString('650-000-0001');
+
+// Set the array to document's properties and save the document.
+final mutableDocumemt = MutableDocument.withId('hotel::1')
+  ..setArray(mutableArray, key: 'phones');
+await database.saveDocument(mutableDocumemt);
+```
+
+</CodeExample>
+
+### Using Blobs
+
+For more on working with blobs — see [Blobs](./blobs.mdx).
+
+## Document Initializers {#document-initializers}
+
+The following methods/initializers can be used:
+
+The `api|new:MutableDocument` constructor can be used to create a new document
+where the document ID is randomly generated by the database.
+
+The `api|new:MutableDocument.withId` constructor can be used to create a new
+document with a specific document ID.
+
+The `api|Database.document` method can be used to get a document. If it doesn't
+exist in the database, it will return `null`. This method can be used to check
+if a document with a given ID already exists in the database.
+
+<CodeExample id={6} title="Persist a Document">
+
+The following code example creates a document and persists it to the database.
+
+```dart
+final document = MutableDocument()
+  ..setString('task', key: 'type')
+  ..setString('todo', key: 'owner')
+  ..setDate(DateTime.now(), key: 'createdAt');
+await database.saveDocument(document);
+```
+
+</CodeExample>
+
+## Mutability {#mutability}
+
+By default, when a document is read from the database it is immutable. The
+`api|Document.toMutable` method should be used to create an instance of the
+document which can be updated.
+
+<CodeExample id={7} title="Make a Mutable Document">
+
+Changes to the document are persisted to the database when the save method is
+called.
+
+```dart
+final document = await database.document('xyz');
+final mutableDocument = document!.toMutable()
+  ..setString('new value', key: 'key');
+await database.saveDocument(mutableDocument);
+```
+
+</CodeExample>
+
+:::note
+
+Any user change to the value of reserved keys (`_id`, `_rev` or `_deleted`) will
+be detected when a document is saved and will result in an exception
+(`api|enum-value:DatabaseErrorCode.corruptRevisionData`) — see also
+[Document Constraints](#document-constraints).
+
+:::
+
+## Document Conversion
+
+A Document can be converted to a plain dictionary type and-or to a JSON string.
+This can often be useful to pass the document contents as a plain object to
+another method.
+
+<CodeExample id={8} title="Convert Document">
+
+```dart
+/// Convert the document to a plain dictionary of type Map<String, Object?>.
+print(document.toPlainMap());
+
+/// Convert the document to a JSON string.
+print(document.toJson());
+```
+
+</CodeExample>
+
+## Batch operations
+
+If you're making multiple changes to a database at once, it's faster to group
+them together. The following example persists a few documents in batch.
+
+###### Example 8. Batch operations
+
+<CodeExample id={9} title="Batch Operations">
+
+```dart
+await database.inBatch(() async {
+  for (final i in Iterable.generate(10)) {
+    final document = MutableDocument()
+      ..setValue('user', key: 'type')
+      ..setValue('user $i' key: 'name')
+      ..setBoolean(false, key: 'admin');
+
+    await database.saveDocument(document);
+  }
+});
+```
+
+</CodeExample>
+
+At the local level this operation is still transactional: no other
+`api|Database` instances, including ones managed by the replicator can make
+changes during the execution of the block, and other instances will not see
+partial changes. Couchbase Mobile is a distributed system, and due to the way
+replication works, there's no guarantee that Capella App Services or Sync
+Gateway will receive your changes all at once.
+
+## Document change events
+
+It is possible to register for document changes. The following example registers
+for changes to the document with ID user.john and prints the verified_account
+property when a change is detected.
+
+<CodeExample id={10} title="Document Change Events">
+
+```dart
+final token = database.addDocumentChangeListener('user.john', (change) async {
+  final document = await database.document(change.documentId);
+  if (document != null){
+    print('Status: ${document.string('verified_account')}');
+  }
+});
+```
+
+</CodeExample>
+
+### Change Streams
+
+Streams are a convenient alternative to listen for changes.
+
+:::note
+
+When multiple databases are involed, making sure that a stream is able to
+observe all changes requires waiting for the stream to be ready. See
+[Key Concepts - Change Streams](./key-concepts.mdx#change-streams) for more
+information.
+
+:::
+
+<CodeExample id={11} title="Document Change Streams">
+
+<Tabs>
+<TabItem value="database" label="Database Changes" default>
+
+```dart
+final stream = database.changes();
+
+stream.listen((change) {
+  print('Ids of changed documents: ${change.documentIds}'):
+});
+```
+
+</TabItem>
+<TabItem value="documentChanges" label="Document Changes">
+
+```dart
+final stream = database.documentChanges('user.john');
+
+stream.listen((change) async {
+  final documemt = await database.document(change.documentId);
+  if (documemt != null) {
+    print('Status: ${documemt.string('verified_account')}');
+  }
+});
+```
+
+</TabItem>
+</Tabs>
+
+</CodeExample>
+
+To stop listening to changes just cancel the subscription, like with any other
+stream.
+
+## Document Expiration
+
+Document expiration allows users to set the expiration date for a document. When
+the document expires, it is purged from the database. The purge is not
+replicated to Capella App Services or Sync Gateway.
+
+<CodeExample id={12} title="Set Document Expiration">
+
+```dart
+// Purge the document one day from now.
+final ttl = DateTime.now().add(const Duration(days: 1));
+await database.setDocumentExpiration('hotel::1', ttl);
+
+// Reset the expiration.
+await database.setDocumentExpiration('hotel::1', null);
+
+// Query documents that will be expired in less than five minutes.
+final fiveMinutesFromNow = DateTime.now().add(const Duration(minutes: 5));
+final query = const QueryBuilder()
+  .select(SelectResult.expression(Meta.id))
+  .from(DataSource.database(database))
+  .where(Meta.expiration.lessThan(Expression.date(fiveMinutesFromNow)));
+```
+
+</CodeExample>
+
+## Document Constraints {#document-constraints}
+
+Couchbase Lite APIs do not explicitly disallow the use of attributes with the
+underscore prefix at the top level of document. This is to facilitate the
+creation of documents for use either in local only mode where documents are not
+synced.
+
+:::note
+
+`_id`, `_rev` and `_sequence` are reserved keywords and must not be used as
+top-level attributes — see [Figure 13](#).
+
+:::
+
+Users are cautioned that any attempt to sync such documents to Sync Gateway will
+result in an error. To be future proof, you are advised to avoid creating such
+documents. Use of these attributes for user-level data may result in undefined
+system behavior
+
+For more guidance — see: [Sync Gateway - Data Modeling
+Guidelines][sync gateway data modeling]
+
+<Figure id={13} title="Reserved Keys List">
+
+- `_attachments`
+- `_deleted`
+- `_id`
+- `_removed`
+- `_rev`
+- `_sequence`
+
+</Figure>
+
+## Working with JSON Data {#working-with-json-data}
+
+The `toJson` typed-accessor means you can easily work with JSON data, native and
+Couchbase Lite objects.
+
+### Documents
+
+Convert a `api|Document` to a JSON string using the `toJson` method — see
+[Example 14](#).
+
+<CodeExample id={14} title="Documents as JSON Strings">
+
+```dart
+final document = await database.document('hotel::1');
+if (document != null) {
+  final json = document.toJson();
+  print(json);
+}
+```
+
+</CodeExample>
+
+### Dictionaries
+
+Convert a `api|Dictionary` to a JSON string using the `toJson` method — see
+[Example 15](#).
+
+<CodeExample id={15} title="Dictionaries as JSON Strings">
+
+```dart
+final document = await database.document('hotel::1');
+if (document != null) {
+  final dictionary = document.dictionary('address');
+  if (dictionary != null) {
+    final json = dictionary.toJson();
+    print(json);
+  }
+}
+```
+
+</CodeExample>
+
+### Arrays
+
+Convert an `api|Array` to a JSON string using the `toJson` method — see
+[Example 16](#).
+
+<CodeExample id={16} title="Arrays as JSON Strings">
+
+```dart
+final document = await database.document('hotel::1');
+if (document != null) {
+  final array = document.array('phones');
+  if (array != null) {
+    final json = array.toJson();
+    print(json);
+  }
+}
+```
+
+</CodeExample>
+
+### Blobs
+
+Convert a `api|Blob` to JSON using the `toJson` method — see [Example 17](#).
+
+You can also check whether a given plain `Map` is a blob, or not, using
+`api|Blob.isBlob` — again, see [Example 17](#).
+
+:::note
+
+The blob object must first be saved to the database (generating required
+metadata) before you can use the `toJson` method.
+
+:::
+
+<CodeExample id={17} title="Blobs as JSON Strings">
+
+```dart
+final document = await database.document('user.john');
+if (document != null) {
+  final blob = document.blob('avatar');
+  if (blob != null) {
+    final json = blob.toJson();
+    print(json);
+    print(Blob.isBlob(document.dictionary('avatar')!.toPlainMap()));
+  }
+}
+```
+
+</CodeExample>
+
+### Query Results
+
+Convert a `api|Result` to JSON using its `toJson` method — see [Example 18](#).
+
+<CodeExample id={18} title="Results as JSON Strings">
+
+```dart
+final result = await query.execute();
+final results = await result.allResults();
+for (final result in results){
+	final json = result.toJson();
+	print(json);
+}
+```
+
+</CodeExample>
+
+#### JSON String format
+
+If your query selects ALL then the JSON format will be:
+
+```json
+{
+  <database-name>: {
+    "key1": "value1",
+    "keyx": "valuex"
+  }
+}
+```
+
+If your query selects a sub-set of available properties then the JSON format
+will be:
+
+```json
+{
+  "key1": "value1",
+  "keyx": "valuex"
+}
+```
+
+[sync gateway data modeling]:
+  https://docs.couchbase.com/sync-gateway/current/data-modeling.html

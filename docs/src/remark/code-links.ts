@@ -1,3 +1,5 @@
+const visitImport = import('unist-util-visit').then((m) => m.visit)
+
 const refRegexp =
   /(api\|)([^|]+\|)?((pkg|type|new|td|ext|fn|prop|const|enum|enum-value):)?([^.|]+)?(\.[^\(\)|]+)?(\(\))?/
 
@@ -11,7 +13,8 @@ const defaultPackage = 'cbl'
 export function codeLinks() {
   return async (ast: any) => {
     // Workaround for import ES6 modules.
-    const visit = (await import('unist-util-visit')).visit
+
+    const visit = await visitImport
 
     visit(ast, 'inlineCode', (node, index, parent) => {
       const value = (node as any).value as string

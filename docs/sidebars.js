@@ -24,11 +24,27 @@ const sidebars = {
     },
     {
       type: 'doc',
-      id: 'usage-examples',
+      id: 'databases',
+    },
+    {
+      type: 'doc',
+      id: 'prebuilt-database',
+    },
+    {
+      type: 'doc',
+      id: 'documents',
+    },
+    {
+      type: 'doc',
+      id: 'blobs',
     },
     {
       type: 'doc',
       id: 'typed-data',
+    },
+    {
+      type: 'doc',
+      id: 'usage-examples',
     },
     {
       type: 'doc',
@@ -47,11 +63,6 @@ const sidebars = {
         pubDevDocsLink('cbl_dart'),
         pubDevDocsLink('cbl_flutter'),
         pubDevDocsLink('cbl_sentry'),
-        {
-          type: 'link',
-          label: 'Couchbase Lite for Swift Docs',
-          href: 'https://docs.couchbase.com/couchbase-lite/current/swift/quickstart.html',
-        },
       ],
     },
   ],
