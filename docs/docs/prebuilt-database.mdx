@@ -1,137 +1,213 @@
+---
+description: How to handle pre-built Couchbase Lite databases in your app.
+abstract:
+  This content explains how to include a snapshot of a pre-built database in
+  your package to shorten initial sync time and reduce bandwidth use.
+---
+
 # Pre-built Database
-> Description - How to handle pre-built databases in your Couchbase Lite <br />
-> Abstract - This content explains how to include a snapshot of a pre-built database in your package to shorten initial sync time and reduce bandwidth use
 
 ## Overview
-Couchbase Lite's support for pre-built databases means you can pre-load your app with data instead of syncing it down from Sync Gateway during startup. This might benefit, for example, a mobile application developer striving to minimize consumer wait time (arising from data setup) on initial install and launch of the application.
 
-Avoiding an initial bulk sync will help reduce startup time and network transfer costs, leading to a better consumer experience. It is typically more efficient to download bulk data using the http/ftp stream employed during the application installation than to install a smaller application bundle and then have to use a replicator to pull-in the bulk data.
+Couchbase Lite's support for pre-built databases means you can pre-load your app
+with data instead of syncing it down from Sync Gateway during startup. This
+might benefit, for example, a mobile application developer striving to minimize
+consumer wait time (arising from data setup) on initial install and launch of
+the application.
 
-This prepackaging of the data typically applies to public/shared, non-user specific data that is mostly static. Even if the data is not static, you can still benefit from preloading it and only syncing the changed documents on startup
+Avoiding an initial bulk sync will help reduce startup time and network transfer
+costs, leading to a better consumer experience. It is typically more efficient
+to download bulk data using the HTTP/FTP stream employed during the application
+installation than to install a smaller application bundle and then have to use a
+replicator to pull-in the bulk data.
 
-The initial sync of any pre-built database will pull-in any content changes on the server that occurred after its incorporation into the app, quickly bringing the database up to date.
+This prepackaging of the data typically applies to public/shared, non-user
+specific data that is mostly static. Even if the data is not static, you can
+still benefit from preloading it and only syncing the changed documents on
+startup.
 
-## To use a prebuilt database
-- Create a new Couchbase Lite database with the required data set
-- Incorporate the pre-built database with your app bundle as an asset/resource.  For Flutter apps it's recommended you zip the prebuilt database and then extract it to keep the size of your mobile app down.
-- Adjust the start-up logic of your app to check for the presence of the required database.  If the database doesn’t already exist, create one using the bundled pre-built database. Then initiate a sync to update the data.
+The initial sync of any pre-built database will pull-in any content changes on
+the server that occurred after its incorporation into the app, quickly bringing
+the database up to date.
 
-## Creating Pre-built database
+## To use a Pre-built Database
+
+1. Create a new Couchbase Lite database with the required data set - see
+   [Creating Pre-built database](#creating-pre-built-database).
+2. Incorporate the pre-built database with your app bundle as an
+   asset/resource - see
+   [Bundle a Database with an Application](#bundle-database-with-application).
+   For Flutter apps it's recommended you zip the prebuilt database and then
+   extract it to keep the size of your mobile app down.
+3. Adjust the start-up logic of your app to check for the presence of the
+   required database. If the database doesn't already exist, create one using
+   the bundled pre-built database. Then initiate a sync to update the data - see
+   [Using Pre-built Database on App Launch](#using-pre-built-database-on-app-launch).
+
+## Creating Pre-built Database {#creating-pre-built-database}
 
 These steps should form part of your build and release process:
 
 1. Create a fresh Couchbase Lite database (every time).
 
-:::caution
-Always start with a fresh database for each app version; this ensures there are no [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) issues. <br /><br />
+   :::caution Important
 
-**Otherwise**: You will invalidate the cached [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) in the packaged database, and instead reuse the same database in your build process (for subsequent app versions).
+   **Always create a new pre-built database for each app version**. This ensures
+   that there will be no [**checkpoint**][checkpoint] missmatch between the
+   pre-built database and the replicator configuration that the app uses.
 
-:::
+   **Otherwise**: The cached [**checkpoint**][checkpoint] in the packaged
+   database might be invalidated on the first synchronization and the app will
+   attempt to pull the data down again.
 
-2. Pull the data from Capella App Services or Sync Gateway into the new Couchbase Lite database.
-> **IMPORTANT** Ensure the replication used to populate Couchbase Lite database uses the exact same remote URL and replication config parameters (channels and filters) as those your app will use when it is running. <br /><br />
-> **Otherwise**: there will be a [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) mismatch and the app will attempt to pull the data down again.<br /><br />
-> So don’t, for instance, create a pre-built database against a staging Capella App Services or Sync Gateway server and try to use that within a production app that syncs against a production Sync Gateway.
+   :::
 
-You can use the cblite tool (cblite cp) for this — see: [cblite cp (export, import, push, pull](https://github.com/couchbaselabs/couchbase-mobile-tools/blob/master/Documentation.md#cp-aka-export-import-push-pull) on GitHub. 
+2. Pull the data from Capella App Services or Sync Gateway into the new
+   Couchbase Lite database.
 
-3. Create the same indexes the app will use (wait for the replication to finish before doing this).
+   :::caution Important
 
-## Bundle a Database with an Application
-Copy the database into your app package.  It's recommended you compress the database using zip to keep the size of your mobile app down.
+   Ensure the replication used to populate Couchbase Lite database **uses the
+   exact same remote URL and replication config parameters (channels and
+   filters)** as those your app will use when it is running.
+
+   **Otherwise**: There will be a [**checkpoint**][checkpoint] mismatch and the
+   app will attempt to pull the data down again.
+
+   So don't, for instance, create a pre-built database against a staging Capella
+   App Services or Sync Gateway server and try to use that within a production
+   app that syncs against a production Sync Gateway.
+
+   :::
+
+   You can use the cblite tool (cblite cp) for this — see:
+   [cblite cp (export, import, push, pull)](https://github.com/couchbaselabs/couchbase-mobile-tools/blob/master/Documentation.md#cp-aka-export-import-push-pull)
+   on GitHub.
+
+3. Create the **same** indexes the app will use (wait for the replication to
+   finish before doing this).
+
+## Bundle a Database with an Application {#bundle-database-with-application}
+
+Copy the database into your app package. It's recommended you compress the
+database using zip to keep the size of your mobile app down.
 
 Put it in an appropriate place (for example, an assets or resource folder).
 
-Alternatively …​ rather than bundling the database within the app, the app could pull the database down from a CDN server on launch, but this add to the time it takes for your app to bootstrap.
+**Alternatively**: Rather than bundling the database within the app, the app
+could pull the database down from a CDN server on launch, but this add to the
+time it takes for your app to bootstrap.
 
 ## Database Encryption
-:::note
 
-This is an Enterprise Edition feature. 
+<EnterpriseFeatureCallout />
 
-:::
+If you are using en encrypted database, note that `api|Database.copy` does not
+change the encryption key. The encryption key specified in the config when
+opening the database is the encryption key used for both the original database
+and copied database.
 
-If you are using en encrypted database, note that [Database.copy](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L224) does not change the encryption key. The encryption key specified in the config when opening the database is the encryption key used for both the original database and copied database.
+If you copied an un-encrypted database and want to apply encryption to the copy,
+or if you want to change (or remove) the encryption key applied to the copy:
 
-If you copied an un-encrypted database and want to apply encryption to the copy, or if you want to change (or remove) the encryption key applied to the copy:
+1. Provide the original encryption-key (if any) in the database copy's
+   configuration using DatabaseConfiguration
+   `api|DatabaseConfiguration.encryptionKey`.
 
-1. Provide the original encryption-key (if any) in the database copy’s configuration using DatabaseConfiguration [encryptionKey](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database_configuration.dart#L18).
+2. Open the database copy.
 
-2.  Open the database copy.
+3. Use `api|Database.changeEncryptionKey` on the database copy to set the
+   required encryption key.
 
-3.  Use [Database.changeEncryptionKey](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L523) on the database copy to set the required encryption key.
+   :::tip
 
-:::tip
+   To remove encryption on the copy, provide a `null` encryption-key.
 
-To remove encryption on the copy, provide a null encryption-key
+   :::
 
-:::
+## Using Pre-built Database on App Launch {#using-pre-built-database-on-app-launch}
 
-## Using Pre-built Database on App Launch
+During the application start-up logic, check if database exists in the required
+location, and if not:
 
-During the application start-up logic, check if database exists in the required location, and if not:
+1.  Locate the pre-packaged database (for example, in the assets or other
+    resource folder).
 
-1.  Locate the pre-packaged database (for example, in the assets or other resource folder).
+2.  Copy the pre-packaged database to the required location.
 
-2. Copy the pre-packaged database to the required location
+    Use the API's `api|Database.copy` method — see: [Example 1](#). This ensures
+    that a unique UUID is generated for each copy.
 
-Use the API’s [Database.copy](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L224) method — see: Example 1; this ensures that a UUID is generated for each copy
+    :::caution IMPORTANT
 
-:::caution
+    Do not copy the database using any other method.
 
-**IMPORTANT** Do not copy the database using any other method<br /><br />
-**Otherwise**: Each copy of the app will invalidate the other apps' [**checkpoints**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) because a new UUID was not generated.
+    **Otherwise**: Each copy of the app will invalidate the other apps'
+    [**checkpoints**][checkpoint] because a new UUID was not generated.
 
-:::
+    :::
 
-3. Open the database; you can now start querying the data and using it  
+3.  Open the database; you can now start querying the data and using it.
 
-4. Start a pull replication, to sync any changes. 
+4.  Start a pull replication, to sync any changes.
 
-The replicator uses the pre-built database’s [**checkpoint**](https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint) as the timestamp to sync from; only documents changed since then are synced.
+    The replicator uses the pre-built database's [**checkpoint**][checkpoint] as
+    the timestamp to sync from; only documents changed since then are synced.
 
-:::note
-Start your normal application logic immediately, unless it is essential to have the absolute up-to-date data set to begin. That way the user is not kept hanging around watching a progress indicator. They can begin interacting with your app whilst any out-of-data data is being updated. 
-:::
+    :::note
+
+    Start your normal application logic immediately, unless it is essential to
+    have the absolute up-to-date data set to begin. That way the user is not
+    kept hanging around watching a progress indicator. They can begin
+    interacting with your app whilst any out-of-data data is being updated.
+
+    :::
+
+<CodeExample id={1} title="Decompress and Copy Database using API">
 
 ```dart
-final String assetsDatabaseFileName = "asset/database/startingDatabase.zip";
-final databaseFileName = 'my_database.cblite2';
-final databaseDirectory = await getApplicationDocumentsDirectory();
+const databaseName = 'my-database';
+const prebuiltDatabaseAssetFileName = 'asset/database/prebuiltDatabase.zip';
+final documentsDirectory = await getApplicationDocumentsDirectory();
+final databasesDirectory = '$documentsDirectory/databases';
+final prebuiltDatabaseFileName =
+    '$databasesDirectory/$databaseName-prebuilt.cblite2';
 
-final cblDatabaseDirectory = databaseDirectory.subDirectory('databases');
+// Create the database if it doesn't already exist.
+if (!Database.existsSync(databaseName, directory: databasesDirectory)) {
+  final prebuiltDatabaseZip =
+      await rootBundle.load(prebuiltDatabaseAssetFileName);
 
-var dbConfig = DatabaseConfiguration(
-	directory: cblDatabaseDirectory.path);
+  if (prebuiltDatabaseZip.lengthInBytes > 0) {
+    // Decompress the zip file into bytes and then convert them into a
+    // Uint8List, which is required by the Archive framework.
+    final archive =
+        ZipDecoder().decodeBytes(prebuiltDatabaseZip.buffer.asUint8List());
 
-// create the database if it doesn't already exist
-if (!File("$cblPreBuiltDatabasePath/$databaseFileName").existsSync()) {
- var pbdbZip = await rootBundle.load(assetsDatabaseFileName);
+    // Loop through directories and files in the zip file and create them.
+    for (final file in archive) {
+      final fileName = '$prebuiltDatabaseFileName/${file.name}';
+      if (file.isFile) {
+        final fileData = file.content as List<int>;
+        File(fileName)
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(fileData);
+      } else {
+        Directory(fileName).createSync(recursive: true);
+      }
+    }
 
- if (pbdbZip.lengthInBytes > 0) {
- //decompress the zip file into a bytes and then convert into a List which is required by the Archive framework
-  final archive =
-   ZipDecoder().decodeBytes(pbdbZip.buffer.asUint8List());
-
-  //loop through directory and files in the zip file and create them
-  for (final file in archive) {
-   final fileName = file.name;
-   if (file.isFile) {
-    final fileData = file.content as List<int>;
-     File('${cblDatabaseDirectory.path}/$fileName')
-       ..createSync(recursive: true)
-       ..writeAsBytesSync(fileData);
-   	} else {
-     Directory(cblDatabaseDirectory.path)
-	 	.createSync(recursive: true);
-   }
+    final config = DatabaseConfiguration(directory: databasesDirectory);
+    await Database.copy(
+      from: prebuiltDatabaseFileName,
+      name: databaseName,
+      config: config,
+    );
   }
- }
- await Database.copy(
-        from: cblPreBuiltDatabasePath,
-        name: 'my-prebuilt-database',
-        config: dbConfig);
 }
 ```
-###### Example 1 - Copy database using API
+
+</CodeExample>
+
+[checkpoint]:
+  https://docs.couchbase.com/couchbase-lite/current/swift/refer-glossary.html#checkpoint

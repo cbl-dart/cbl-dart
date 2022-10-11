@@ -8,7 +8,7 @@ description: Installing Couchbase Lite for Dart
 
 Couchbase Lite for Dart supports most platforms, including Android, iOS, macOS,
 Windows, and Linux. To learn more about supported platforms and supported
-versions, see [Supported platforms](supported-platforms.md).
+versions, see [Supported platforms](supported-platforms.mdx).
 
 :::
 
@@ -50,8 +50,8 @@ server, jump to [Standalone Dart](#standalone-dart).
    ```
 
 3. Make sure that you have set the required
-   [minimum target versions](supported-platforms.md) in the build systems of the
-   platforms you want to support.
+   [minimum target versions](supported-platforms.mdx) in the build systems of
+   the platforms you want to support.
 
 4. Initialize Couchbase Lite before using it:
 
@@ -94,7 +94,10 @@ just fine.
        // By specifying a `filesDir` here, we can ensure that the tests don't
        // create databases in the project directory.
        final tempFilesDir = await Directory.systemTemp.createTemp();
-       await CouchbaseLiteDart.init(edition: Edition.enterprise, filesDir: tempFilesDir.path);
+       await CouchbaseLiteDart.init(
+         edition: Edition.enterprise,
+         filesDir: tempFilesDir.path,
+       );
      });
    }
 
@@ -142,8 +145,7 @@ just fine.
    :::note
 
    `api|cbl_dart|CouchbaseLiteDart.init` downloads the needed native libraries
-   if they have not already been cached. See its
-   [documentation][couchbaselitedart.init] for for more information.
+   if they have not already been cached.
 
    :::
 

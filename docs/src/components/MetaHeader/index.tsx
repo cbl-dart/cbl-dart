@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useMDXContent } from '../context'
 import styles from './styles.module.css'
 
@@ -11,6 +11,7 @@ export default function MetaHeader() {
   const content = useMDXContent()
   const frontMatter = content.frontMatter
   const description = frontMatter.description
+  const abstract = frontMatter['abstract'] as string | undefined
   const relatedContent = frontMatter['related_content'] as
     | RelatedContentItem[]
     | undefined
@@ -26,15 +27,20 @@ export default function MetaHeader() {
           Description — <em>{description}</em>
         </div>
       )}
+      {abstract && (
+        <div>
+          Abstract — <em>{abstract}</em>
+        </div>
+      )}
       {relatedContent && (
         <div>
           Related Content —{' '}
           {relatedContent.map(({ name, url }, index) => {
             return (
-              <>
+              <Fragment key={index}>
                 <a href={url}>{name}</a>
                 {index < relatedContent.length - 1 && ' | '}
-              </>
+              </Fragment>
             )
           })}
         </div>

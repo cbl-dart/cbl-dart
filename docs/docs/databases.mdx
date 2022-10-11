@@ -1,130 +1,202 @@
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+---
+description: Working with Couchbase Lite databases with Dart.
+related_content:
+  - name: Blobs
+    url: /blob
+  - name: Documents
+    url: /documents
+  - name: Indexing
+    url: /indexing
+---
+
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
 
 # Databases
-> Description - Working with Couchbase Lite databases with Dart. <br />
-> Related Content -  Blobs | Documents | Indexing
 
 ## Create or Open Database
 
-You can create a new database and-or open an existing database, using the Database class.  The database class provides both synchronous and asynchronous methods for opening and closing databases.  Just pass in a database name and 
-optionally a database configuration - see Example 1.
+You can create a new database and-or open an existing database, using the
+`api|Database` class. The database class provides both synchronous and
+asynchronous methods for opening and closing databases (see
+[explanation for Synchronous and Asynchronous APIs](/key-concepts.mdx#sync-and-async-apis)).
+Just pass in a database name and optionally a `api|DatabaseConfiguration` - see
+[Example 1](#).
 
-<Tabs>
-<TabItem value="async" label="async" default>
+Things to watch for include:
 
-```dart showLineNumbers
-final databaseDirectory = await getApplicationDocumentsDirectory();
-final cblDatabaseDirectory = databaseDirectory.subDirectory('databases');
-var dbConfig =
-  DatabaseConfiguration(directory: cblDatabaseDirectory.path);
+- If the named database does not exist in the specified, or default, location
+  then a new one is created.
+- The database is created in a default location unless you specify a directory
+  for it — see: `api|DatabaseConfiguration.directory`.
 
-database = await Database.openAsync('my-database', dbConfig);
+  :::tip
+
+  Best Practice is to always specify the path to the database explicitly.
+
+  :::
+
+  See [Supported Platforms](./supported-platforms.mdx) for the default location
+  for each platform.
+
+<CodeExample id={1} title="Opening a Database">
+
+<APITabs>
+<APITab api="Async">
+
+```dart
+final database = await Database.openAsync('my-database');
 ```
 
-</TabItem>
-<TabItem value="sync" label="synchronous">
+</APITab>
+<APITab api="Sync">
 
-```dart 
-database = Database.openSync('my-database');
+```dart
+final database = Database.openSync('my-database');
 ```
 
-</TabItem>
-</Tabs>
+</APITab>
+</APITabs>
 
-###### Example 1 - opening a database
+</CodeExample>
 
 ## Close Database
 
-You are advised to incorporate the closing of all open database into your application workflow.  
+You are advised to incorporate the closing of all open database into your
+application workflow.
 
-Closing a database is simple, just call the close method on the database instance.  See Example 2.  
+Closing a database is simple, just call use `api|Database.close`. See
+[Example 2](#). This also closes active replications, listeners, and-or live
+queries connected to the database.
 
-:::caution  
+<CodeExample id={2} title="Closing a Database">
 
-This also closes active replications, listenres, and-or live queries connected to the database.  Closing a database soon after starting a replication involving it can cause an exeption as the asynchronous replicator my not yet be connected.
-
-:::
 ```dart
-try {
-  await database.close();
-} catch(e){
-  debugPrint(e.toString());
-}
+await database.close();
 ```
 
-###### Example 2 - closing a database 
+</CodeExample>
 
 ## Database Encryption
-:::note
 
-**IMPORTANT** -  This feature is only available in the Enterprise Edition of Couchbase Lite.  If you are using the Community Edition, this feature will not be available.
+<EnterpriseFeatureCallout />
 
-:::
-
-Couchbase Lite Enterprise Edition includes the ability to encrypt Couchbase Lite databases.  This allows mobile applications to secure data at rest, when it is being stored on the device.  The algorithm used to encrypt the database is 256-bit AES.
+Couchbase Lite includes the ability to encrypt Couchbase Lite databases. This
+allows mobile applications to secure data at rest, when it is being stored on
+the device. The algorithm used to encrypt the database is 256-bit AES.
 
 ### Enabling
 
-To enable database encryption, you must set the encryption key on the database configuration.  Provide this encryption key every time the database is opened - see Example 3.
+To enable encryption, use `api|DatabaseConfiguration.encryptionKey` to set the
+encryption key of your choice. Provide this encryption key every time the
+database is opened - see [Example 3](#).
+
+<CodeExample id={3} title="Opening an Encrypted Database">
 
 ```dart
-try {
-  final databaseDirectory = await getApplicationDocumentsDirectory();
-
-  final cblDatabaseDirectory = databaseDirectory
-                              .subDirectory('databases');
-  var key = await EncryptionKey
-                    .passwordAsync('this is my super secrete key');
-
-  var dbConfig = DatabaseConfiguration(
-            directory: cblDatabaseDirectory.path, 
-            encryptionKey: key);
-
-  database = await Database.openAsync('my-database', dbConfig);
-
-} catch(e){
-  debugPrint(e.toString());
-}
+final key = await EncryptionKey.passwordAsync('secret password');
+final config = DatabaseConfiguration(encryptionKey: key);
+final database = await Database.openAsync('my-database', config);
 ```
-###### Example 3 - opening an encrypted database 
+
+</CodeExample>
 
 ### Persiting
 
-Couchbase Lite does not persist the key. It is the application’s responsibility to manage the key and store it in a platform specific secure store.
+Couchbase Lite does not persist the key. It is the application's responsibility
+to manage the key and store it in a platform specific secure store such as
+Apple's
+[Keychain](https://developer.apple.com/documentation/security/keychain_services)
+or Android's
+[Keystore](https://developer.android.com/training/articles/keystore).
 
 ### Opening
-An encrypted database can only be opened with the same language SDK that was used to encrypt it in the first place. So a database encrypted using the Dart SDK, and then exported, is readable only by the Dart or C SDK.
+
+An encrypted database can only be opened with the same language SDK that was
+used to encrypt it in the first place. So a database encrypted using the Dart
+SDK, and then exported, is readable only by the Dart or C SDK.
 
 ### Changing
-To change an existing encryption key, open the database using its existing encryption-key and use [Database.changeEncryptionKey](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L523) to set the required new encryption-key value.
+
+To change an existing encryption key, open the database using its existing
+encryption-key and use `api|Database.changeEncryptionKey` to set the required
+new encryption-key value.
 
 ### Removing
-To remove encryption, open the database using its existing encryption-key and use [Database.changeEncryptionKey](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L523) with a null value as the encryption key.
+
+To remove encryption, open the database using its existing encryption-key and
+use `api|Database.changeEncryptionKey` with a `null` value as the encryption
+key.
 
 ## Database Maintenance
 
-From time to time it may be necessary to perform certain maintenance activities on your database, for example to compact the database file, removing unused documents and blobs no longer referenced by any documents.
+From time to time it may be necessary to perform certain maintenance activities
+on your database, for example to compact the database file, removing unused
+documents and blobs no longer referenced by any documents.
 
-Couchbase Lite’s API provides the [Database.performMaintenance](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L520) method. The available maintenance operations, including compact are as shown in the enum [MaintenanceType](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/database/database.dart#L39) to accomplish this.
+Couchbase Lite's API provides the `api|Database.performMaintenance` method. The
+available maintenance operations, including compact are as shown in the enum
+`api|enum:MaintenanceType` to accomplish this.
 
-This is a resource intensive operation and is not performed automatically. It should be run on-demand using the API. If in doubt, consult Couchbase support.
+This is a resource intensive operation and is not performed automatically. It
+should be run on-demand using the API. If in doubt, consult Couchbase support.
 
 ## Command Line Tool
-cblite is a command-line tool for inspecting and querying Couchbase Lite databases.
 
-You can download and build it from the couchbaselabs [GitHub repository](https://github.com/couchbaselabs/couchbase-mobile-tools/blob/master/README.cblite.md). Note that the cblite tool is not supported by the [Couchbase Support Policy](https://www.couchbase.com/support-policy).
+cblite is a command-line tool for inspecting and querying Couchbase Lite
+databases.
+
+You can download and build it from the couchbaselabs
+[GitHub repository](https://github.com/couchbaselabs/couchbase-mobile-tools/blob/master/README.cblite.md).
+Note that the cblite tool is not supported by the
+[Couchbase Support Policy](https://www.couchbase.com/support-policy).
 
 ## Couchbase Lite for VSCode
 
-Couchbase Lite for VSCode is a Visual Studio Code extension that provides a user interface for inspecting and querying Couchbase Lite databases.  You can find more information about this extension from it's [GitHub repository](https://github.com/couchbaselabs/vscode-cblite).
+Couchbase Lite for VSCode is a Visual Studio Code extension that provides a user
+interface for inspecting and querying Couchbase Lite databases. You can find
+more information about this extension from it's
+[GitHub repository](https://github.com/couchbaselabs/vscode-cblite).
 
 ## Troubleshooting
 
-You should use console logs as your first source of diagnostic information. If the information in the default logging level is insufficient you can focus it on database errors and generate more [verbose messages](https://github.com/cbl-dart/cbl-dart/blob/main/packages/cbl/lib/src/log/logger.dart#L24) — see: Example 4.
+You should use console logs as your first source of diagnostic information. If
+the information in the default logging level is insufficient you can focus it on
+database errors and generate more verbose messages (see `api|enum:LogLevel`)
+— see: [Example 4](#).
+
+<CodeExample id={4} title="Increase level of Database Log Messages">
+
+<EmbedderTabs>
+<EmbedderTab embedder="Dart">
 
 ```dart
- Database.log.custom!.level = LogLevel.debug
+Database.log.console.level = LogLevel.verbose;
 ```
 
-###### Example 4 - Increase level of Database Log Messages
+:::note
+
+On standalone Dart, logging is configured to directly log to stdandard output
+and does not go through Dart.
+
+:::
+
+</EmbedderTab>
+<EmbedderTab embedder="Flutter">
+
+```dart
+Database.log.custom!.level = LogLevel.verbose;
+```
+
+:::note
+
+On Flutter, logging is configured to use a custom logger that calls Dart's
+`api|dart:core|fn:print` function. Console logging is disabled. This is because
+not all Flutter platforms (e.g. Android) support console logging.
+
+:::
+
+</EmbedderTab>
+</EmbedderTabs>
+
+</CodeExample>

@@ -40,11 +40,11 @@ const sidebars = {
     },
     {
       type: 'doc',
-      id: 'usage-examples',
+      id: 'typed-data',
     },
     {
       type: 'doc',
-      id: 'typed-data',
+      id: 'usage-examples',
     },
     {
       type: 'doc',
@@ -63,11 +63,6 @@ const sidebars = {
         pubDevDocsLink('cbl_dart'),
         pubDevDocsLink('cbl_flutter'),
         pubDevDocsLink('cbl_sentry'),
-        {
-          type: 'link',
-          label: 'Couchbase Lite for Swift Docs',
-          href: 'https://docs.couchbase.com/couchbase-lite/current/swift/quickstart.html',
-        },
       ],
     },
   ],
