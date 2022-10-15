@@ -20,7 +20,7 @@ const sidebars = {
     },
     {
       type: 'doc',
-      id: 'key-concepts',
+      id: 'general-concepts',
     },
     {
       type: 'doc',
