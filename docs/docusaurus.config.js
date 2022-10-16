@@ -16,6 +16,7 @@ const config = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
+  trailingSlash: true,
   favicon: 'img/logo.png',
 
   organizationName: 'cbl-dart',
