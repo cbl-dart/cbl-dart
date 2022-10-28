@@ -84,6 +84,11 @@ const config = {
         darkTheme: darkCodeTheme,
         additionalLanguages: ['dart'],
       },
+      algolia: {
+        appId: 'T2JGR5IO20',
+        apiKey: 'af3e6f09aef0030c6ae7fc5c602e4cfa',
+        indexName: 'cbl-dart',
+      },
     }),
 }
 
