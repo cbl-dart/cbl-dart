@@ -31,14 +31,19 @@ Future<void> installMergedNativeLibraries(
     final tmpInstallDir = Directory.fromUri(tmpDir.uri.resolve('lib'));
     await tmpInstallDir.create(recursive: true);
 
-    await Future.wait(packages.map((package) => installNativeLibrary(
-          package,
-          installDir: tmpInstallDir.path,
-          tmpDir: tmpDir.path,
-        )));
+    for (final package in packages) {
+      // We need to install the native libraries one after the other to avoid
+      // a race condition which causes a deadlock.
+      await installNativeLibrary(
+        package,
+        installDir: tmpInstallDir.path,
+        tmpDir: tmpDir.path,
+      );
+    }
 
     final installDir = mergedNativeLibrariesInstallDir(packages, directory);
     await installDir.create(recursive: true);
+
     await copyDirectoryContents(
       tmpInstallDir.path,
       installDir.path,
