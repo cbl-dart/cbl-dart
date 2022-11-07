@@ -1,3 +1,7 @@
+## 2.1.4
+
+ - **FIX**: avoid deadlock when installing native libraries ([#433](https://github.com/cbl-dart/cbl-dart/issues/433)). ([c0032445](https://github.com/cbl-dart/cbl-dart/commit/c003244503a303ec03a5bfff8d985c059d614652))
+
 ## 2.1.3
 
  - **DOCS**: link to new docs website from package READMEs. ([fae73bb2](https://github.com/cbl-dart/cbl-dart/commit/fae73bb2983cde0347091225fa245d2b066be13a))

@@ -1,3 +1,7 @@
+## 2.1.2
+
+ - **DOCS**: fix typo. ([16d1eb3d](https://github.com/cbl-dart/cbl-dart/commit/16d1eb3da10e6228f5d55d2db08061e754e5c2d4))
+
 ## 2.1.1
 
  - **DOCS**: link to new docs website from package READMEs. ([fae73bb2](https://github.com/cbl-dart/cbl-dart/commit/fae73bb2983cde0347091225fa245d2b066be13a))
