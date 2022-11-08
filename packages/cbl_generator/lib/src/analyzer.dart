@@ -491,6 +491,8 @@ class TypedDataAnalyzer {
           );
         }
 
+        // TODO: Remove this ignore once the analyzer dependency is upgraded.
+        // ignore: deprecated_member_use
         if (type.element2 is EnumElement) {
           return CustomScalarType(
             dartType: typeName,
