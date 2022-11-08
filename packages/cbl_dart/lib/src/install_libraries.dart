@@ -25,6 +25,8 @@ Future<void> installMergedNativeLibraries(
   Iterable<Package> packages, {
   required String directory,
 }) async {
+  logger.fine('Installing native libraries into $directory');
+
   final tmpDir = await Directory.systemTemp.createTemp();
 
   try {
@@ -59,6 +61,8 @@ Future<void> installNativeLibrary(
   required String installDir,
   required String tmpDir,
 }) async {
+  logger.fine('Installing native library ${package.libraryName}');
+
   final archiveBasename =
       '${package.library.name}.${package.archiveFormat.ext}';
   final archiveFile = p.join(tmpDir, archiveBasename);

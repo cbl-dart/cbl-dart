@@ -5,9 +5,11 @@ import 'dart:io';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/tracing.dart';
+import 'package:logging/logging.dart';
 
 import 'src/acquire_libraries.dart';
 import 'src/package.dart';
+import 'src/utils.dart';
 
 export 'src/package.dart' show Edition;
 
@@ -37,6 +39,8 @@ class CouchbaseLiteDart {
     String? nativeLibrariesDir,
   }) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
+        _setupDebugLogging();
+
         final context = filesDir == null ? null : await _initContext(filesDir);
 
         final libraries = await acquireLibraries(
@@ -60,4 +64,13 @@ Future<InitContext> _initContext(String filesDir) async {
 
 void _setupLogging() {
   Database.log.console.level = LogLevel.warning;
+}
+
+void _setupDebugLogging() {
+  logger
+    ..level = Level.FINE
+    ..onRecord.listen((record) {
+      // ignore: avoid_print
+      print(record.message);
+    });
 }
