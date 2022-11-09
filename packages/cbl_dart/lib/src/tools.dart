@@ -1,117 +1,106 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+// ignore_for_file: avoid_catches_without_on_clauses
 
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:archive/archive_io.dart';
+import 'package:http/http.dart';
 import 'package:path/path.dart' as p;
 
+import 'package.dart';
 import 'utils.dart';
 
-/// Runs the given [executable] with the given [arguments].
-Future<void> execute(
-  String executable, {
-  List<String>? arguments,
-  Duration? timeout,
-}) async {
-  logger.fine('Executing command: $executable ${arguments?.join(' ')}');
-
-  var future = Process.run(
-    executable,
-    arguments ?? [],
-    stderrEncoding: utf8,
-    stdoutEncoding: utf8,
-  );
-
-  if (timeout != null) {
-    future = future.timeout(timeout, onTimeout: () {
-      final message = 'Command timed out after $timeout: '
-          '$executable ${arguments?.join(' ')}';
-      logger.fine(message);
-      throw TimeoutException(message);
-    });
-  }
-
-  final result = await future;
-
-  if (result.exitCode != 0) {
-    final message = 'Command failed: $executable ${arguments?.join(' ')} '
-        '(${result.exitCode})\n'
-        '${result.stdout}\n'
-        '${result.stderr}';
-    logger.fine(message);
-    throw Exception(message);
-  }
-
-  logger.fine('Command finished: $executable ${arguments?.join(' ')}');
-}
-
-/// Downloads the contents of [url] into [outputFile].
-Future<void> downloadFile(
-  String url,
-  String outputFile, {
+/// Downloads the contents of [url] into memory.
+Future<Uint8List> downloadUrl(
+  String url, {
   Duration timeout = const Duration(minutes: 5),
-}) async {
-  await execute(
-    'curl',
-    arguments: [
-      '-L',
-      '-o',
-      outputFile,
-      '-f',
-      '--retry',
-      '5',
-      '--retry-max-time',
-      '30',
-      url
-    ],
-    timeout: const Duration(minutes: 5),
-  );
-}
+}) =>
+    _retryWithExponentialBackoff(
+      timeout: timeout,
+      retryOn: (error) {
+        if (error is Response) {
+          return error.statusCode >= 500;
+        }
+        return false;
+      },
+      () async {
+        logger.fine('Downloading $url ...');
 
-/// Unpacks a zip or tar.gz [archiveFile] into [outputDir].
-Future<void> unpackArchive(
-  String archiveFile,
-  String outputDir, {
+        final response = await get(Uri.parse(url));
+        if (response.statusCode != 200) {
+          logger.fine(
+            'Download failed: $url (${response.statusCode})\n${response.body}',
+          );
+          // ignore: only_throw_errors
+          throw response;
+        }
+
+        logger.fine('Downloaded $url');
+
+        return response.bodyBytes;
+      },
+    );
+
+Future<T> _retryWithExponentialBackoff<T>(
+  Future<T> Function() fn, {
+  Duration delay = const Duration(seconds: 1),
+  int maxAttempts = 5,
   Duration timeout = const Duration(minutes: 5),
+  required bool Function(Object error) retryOn,
 }) async {
-  await Directory(outputDir).create(recursive: true);
+  final start = DateTime.now();
+  final random = Random();
+  var attempt = 0;
+  while (attempt < maxAttempts) {
+    final now = DateTime.now();
+    final duration = now.difference(start);
+    if (duration > timeout) {
+      throw TimeoutException(null, duration);
+    }
 
-  final extension = p.extension(archiveFile, 2);
-
-  switch (extension) {
-    case '.zip':
-      if (Platform.isWindows) {
-        await execute(
-          'powershell',
-          arguments: [
-            '-NoProfile',
-            '-NonInteractive',
-            '-NoLogo',
-            '-Command',
-            // ignore: no_adjacent_strings_in_list
-            'Expand-Archive '
-                '-LiteralPath $archiveFile '
-                '-DestinationPath $outputDir'
-          ],
-          timeout: timeout,
-        );
-      } else {
-        await execute(
-          'unzip',
-          arguments: [archiveFile, '-d', outputDir],
-          timeout: timeout,
-        );
+    try {
+      return await fn();
+    } catch (e) {
+      if (!retryOn(e)) {
+        rethrow;
       }
-      break;
-    case '.tar.gz':
-      await execute(
-        'tar',
-        arguments: ['-xzf', archiveFile, '-C', outputDir],
-        timeout: timeout,
-      );
-      break;
-    default:
-      throw Exception('Unknown archive extension: $extension');
+    }
+    await Future<void>.delayed(delay * random.nextDouble());
+    // ignore: parameter_assignments
+    delay *= 2;
+    attempt++;
   }
+  throw Exception('Stopping to retry after $maxAttempts failed attempts.');
+}
+
+void unpackArchive(
+  Uint8List archiveData, {
+  required ArchiveFormat format,
+  required String outputDir,
+}) {
+  logger.fine('Unpacking ${format.name} archive into $outputDir ...');
+
+  switch (format) {
+    case ArchiveFormat.zip:
+      _unpackZipArchive(archiveData, outputDir);
+      break;
+    case ArchiveFormat.tarGz:
+      _unpackTarGzArchive(archiveData, outputDir);
+      break;
+  }
+}
+
+void _unpackZipArchive(Uint8List archiveData, String outputDir) {
+  final archive = ZipDecoder().decodeBytes(archiveData, verify: true);
+  extractArchiveToDisk(archive, outputDir);
+}
+
+void _unpackTarGzArchive(Uint8List archiveData, String outputDir) {
+  final tarArchiveData = GZipDecoder().decodeBytes(archiveData, verify: true);
+  final archive = TarDecoder().decodeBytes(tarArchiveData, verify: true);
+  extractArchiveToDisk(archive, outputDir);
 }
 
 /// Copies the contents of [sourceDir] to [destinationDir].

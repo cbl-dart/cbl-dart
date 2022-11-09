@@ -31,11 +31,9 @@ Future<void> installMergedNativeLibraries(
 
   try {
     final tmpInstallDir = Directory.fromUri(tmpDir.uri.resolve('lib'));
-    await tmpInstallDir.create(recursive: true);
+    await tmpInstallDir.create();
 
     for (final package in packages) {
-      // We need to install the native libraries one after the other to avoid
-      // a race condition which causes a deadlock.
       await installNativeLibrary(
         package,
         installDir: tmpInstallDir.path,
@@ -63,15 +61,12 @@ Future<void> installNativeLibrary(
 }) async {
   logger.fine('Installing native library ${package.libraryName}');
 
-  final archiveBasename =
-      '${package.library.name}.${package.archiveFormat.ext}';
-  final archiveFile = p.join(tmpDir, archiveBasename);
   final packageRootDir =
       p.join(tmpDir, '${package.library.name}-${package.version}');
   final targetLibDir = p.join(packageRootDir, package.librariesDir);
 
-  await downloadFile(package.archiveUrl, archiveFile);
-  await unpackArchive(archiveFile, tmpDir);
+  final archiveData = await downloadUrl(package.archiveUrl);
+  unpackArchive(archiveData, format: package.archiveFormat, outputDir: tmpDir);
 
   // Copy contents of lib dir from archive to install dir.
   await copyDirectoryContents(targetLibDir, installDir);
