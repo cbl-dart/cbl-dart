@@ -2,7 +2,7 @@ name: cbl_libcblite_api
 description:
   Internal marker package for declaring a dependency on a version of the
   libcblite API.
-version: 3.0.2
+version: 3.0.6
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_libcblite_api
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
