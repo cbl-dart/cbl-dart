@@ -8,6 +8,7 @@ import 'package:cbl/src/support/tracing.dart';
 
 import 'src/acquire_libraries.dart';
 import 'src/package.dart';
+import 'src/utils.dart';
 
 export 'src/package.dart' show Edition;
 
@@ -37,6 +38,7 @@ class CouchbaseLiteDart {
     String? nativeLibrariesDir,
   }) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
+        debugLoggingEnabled = true;
         final context = filesDir == null ? null : await _initContext(filesDir);
 
         final libraries = await acquireLibraries(

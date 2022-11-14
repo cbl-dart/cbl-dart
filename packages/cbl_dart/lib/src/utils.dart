@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 /// Whether to enable logging to debug issues specific to `cbl_dart`.
-bool get enableDebugLogging => _debugLoggingSubscription != null;
+bool get debugLoggingEnabled => _debugLoggingSubscription != null;
 
 // ignore: avoid_positional_boolean_parameters
-set enableDebugLogging(bool value) {
-  if (enableDebugLogging == value) {
+set debugLoggingEnabled(bool value) {
+  if (debugLoggingEnabled == value) {
     return;
   }
   if (value) {
