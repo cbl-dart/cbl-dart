@@ -12,10 +12,7 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
-  archive:
-    git:
-      url: https://github.com/blaugold/archive.git
-      ref: e00b01d6f679d5ded87cbadbdcbbe0bdfd0730b4
+  archive: ^3.3.4
   cbl: ^2.1.2
   cbl_libcblite_api: 3.0.2
   cbl_libcblitedart_api: 3.0.0
