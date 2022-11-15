@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../cbl_dart.dart';
 import 'install_libraries.dart';
 import 'package.dart';
+import 'utils.dart';
 
 /// Libraries that should be used instead of downloading and installing them.
 ///
@@ -85,6 +86,8 @@ Future<LibrariesConfiguration> acquireLibraries({
   required Edition edition,
   String? mergedNativeLibrariesDir,
 }) async {
+  logger.fine('Acquiring libraries');
+
   if (_librariesOverride != null) {
     assert(mergedNativeLibrariesDir == null);
     assert((edition == Edition.enterprise) ==

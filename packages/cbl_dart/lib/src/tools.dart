@@ -1,61 +1,114 @@
-import 'dart:io';
+// ignore_for_file: avoid_catches_without_on_clauses
 
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:archive/archive_io.dart';
+import 'package:http/http.dart';
 import 'package:path/path.dart' as p;
 
-/// Runs the given [executable] with the given [arguments].
-Future<void> execute(String executable, [List<String>? arguments]) async {
-  final result = await Process.run(executable, arguments ?? []);
+import 'package.dart';
+import 'utils.dart';
 
-  if (result.exitCode != 0) {
-    throw Exception(
-      'Command failed: $executable ${arguments?.join(' ')}\n'
-      '${result.stdout}\n'
-      '${result.stderr}',
+/// Downloads the contents of [url] into memory.
+Future<Uint8List> downloadUrl(
+  String url, {
+  Duration timeout = const Duration(minutes: 5),
+}) =>
+    _retryWithExponentialBackoff(
+      timeout: timeout,
+      retryOn: (error) {
+        if (error is Response) {
+          return error.statusCode >= 500;
+        }
+        return false;
+      },
+      () async {
+        logger.fine('Downloading $url ...');
+
+        final response = await get(Uri.parse(url));
+        if (response.statusCode != 200) {
+          logger.fine(
+            'Download failed: $url (${response.statusCode})\n${response.body}',
+          );
+          // ignore: only_throw_errors
+          throw response;
+        }
+
+        logger.fine('Downloaded $url');
+
+        return response.bodyBytes;
+      },
     );
+
+Future<T> _retryWithExponentialBackoff<T>(
+  Future<T> Function() fn, {
+  Duration delay = const Duration(seconds: 1),
+  int maxAttempts = 5,
+  Duration timeout = const Duration(minutes: 5),
+  required bool Function(Object error) retryOn,
+}) async {
+  final start = DateTime.now();
+  final random = Random();
+  var attempt = 0;
+  while (attempt < maxAttempts) {
+    final now = DateTime.now();
+    final duration = now.difference(start);
+    if (duration > timeout) {
+      throw TimeoutException(null, duration);
+    }
+
+    try {
+      return await fn();
+    } catch (e) {
+      if (!retryOn(e)) {
+        rethrow;
+      }
+    }
+    await Future<void>.delayed(delay * random.nextDouble());
+    // ignore: parameter_assignments
+    delay *= 2;
+    attempt++;
+  }
+  throw Exception('Stopping to retry after $maxAttempts failed attempts.');
+}
+
+void unpackArchive(
+  Uint8List archiveData, {
+  required ArchiveFormat format,
+  required String outputDir,
+}) {
+  logger.fine('Unpacking ${format.name} archive into $outputDir ...');
+
+  switch (format) {
+    case ArchiveFormat.zip:
+      _unpackZipArchive(archiveData, outputDir);
+      break;
+    case ArchiveFormat.tarGz:
+      _unpackTarGzArchive(archiveData, outputDir);
+      break;
   }
 }
 
-/// Downloads the contents of [url] into [outputFile].
-Future<void> downloadFile(String url, String outputFile) => execute(
-      'curl',
-      [
-        '-L',
-        '-o',
-        outputFile,
-        '-f',
-        '--retry',
-        '5',
-        '--retry-max-time',
-        '30',
-        url
-      ],
-    );
+void _unpackZipArchive(Uint8List archiveData, String outputDir) {
+  final archive = ZipDecoder().decodeBytes(archiveData, verify: true);
 
-/// Unpacks a zip or tar.gz [archiveFile] into [outputDir].
-Future<void> unpackArchive(String archiveFile, String outputDir) async {
-  await Directory(outputDir).create(recursive: true);
-
-  final extension = p.extension(archiveFile, 2);
-  switch (extension) {
-    case '.zip':
-      if (Platform.isWindows) {
-        await execute('powershell', [
-          '-NoProfile',
-          '-NonInteractive',
-          '-NoLogo',
-          '-Command',
-          'Expand-Archive -LiteralPath $archiveFile -DestinationPath $outputDir'
-        ]);
-      } else {
-        await execute('unzip', [archiveFile, '-d', outputDir]);
-      }
-      break;
-    case '.tar.gz':
-      await execute('tar', ['-xzf', archiveFile, '-C', outputDir]);
-      break;
-    default:
-      throw Exception('Unknown archive extension: $extension');
+  // TODO(blaugold): Remove once archive package has published a fix
+  // Workaround for a bug in the archive package.
+  // https://github.com/brendan-duncan/archive/pull/223
+  for (final file in archive.files) {
+    file.content;
   }
+
+  extractArchiveToDisk(archive, outputDir);
+}
+
+void _unpackTarGzArchive(Uint8List archiveData, String outputDir) {
+  final tarArchiveData = GZipDecoder().decodeBytes(archiveData, verify: true);
+  final archive = TarDecoder().decodeBytes(tarArchiveData, verify: true);
+  extractArchiveToDisk(archive, outputDir);
 }
 
 /// Copies the contents of [sourceDir] to [destinationDir].
@@ -64,6 +117,8 @@ Future<void> copyDirectoryContents(
   String destinationDir, {
   bool Function(FileSystemEntity)? filter,
 }) async {
+  logger.fine('Copying directory contents: $sourceDir -> $destinationDir');
+
   final sourceDirPath = p.absolute(sourceDir);
   final destinationDirPath = p.absolute(destinationDir);
 
