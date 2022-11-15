@@ -94,6 +94,14 @@ void unpackArchive(
 
 void _unpackZipArchive(Uint8List archiveData, String outputDir) {
   final archive = ZipDecoder().decodeBytes(archiveData, verify: true);
+
+  // TODO(blaugold): Remove once archive package has published a fix
+  // Workaround for a bug in the archive package.
+  // https://github.com/brendan-duncan/archive/pull/223
+  for (final file in archive.files) {
+    file.content;
+  }
+
   extractArchiveToDisk(archive, outputDir);
 }
 
