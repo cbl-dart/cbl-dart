@@ -1,3 +1,7 @@
+## 2.1.5
+
+ - **FIX**: impement aquiring binaries in Dart ([#435](https://github.com/cbl-dart/cbl-dart/issues/435)). ([a792819f](https://github.com/cbl-dart/cbl-dart/commit/a792819fbf5f63c8780aa2246fa264e86b4554ef))
+
 ## 2.1.4
 
  - **FIX**: avoid deadlock when installing native libraries ([#433](https://github.com/cbl-dart/cbl-dart/issues/433)). ([c0032445](https://github.com/cbl-dart/cbl-dart/commit/c003244503a303ec03a5bfff8d985c059d614652))
