@@ -39,6 +39,20 @@ const sidebars = {
       id: 'blobs',
     },
     {
+      type: 'category',
+      label: 'Queries',
+      items: [
+        {
+          type: 'doc',
+          id: 'querybuilder',
+        }
+      ]
+    },
+    {
+      type: 'doc',
+      id: 'indexing'
+    },
+    {
       type: 'doc',
       id: 'typed-data',
     },

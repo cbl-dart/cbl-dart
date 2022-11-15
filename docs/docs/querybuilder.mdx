@@ -1,0 +1,90 @@
+---
+description: How to use QueryBuilder to build effective queries with Couchbase Lite on Dart 
+related_content:
+
+#todo replace database with live queries 
+
+  - name: Databases
+    url: /databases
+  - name: Indexes 
+    url: /indexing
+  # - name: Indexing
+  #   url: /indexing
+---
+
+# Query Builder 
+
+## Introduction 
+Couchbase Lite for Dart provides two ways to build and run database queries; the QueryBuilder API described in this topic and the SQL++ for Mobile.
+
+Database queries defined with the QueryBuilder API use query statements of the form shown in Example 1. The structure and semantics of the query format are based on that of Couchbase’s SQL++ query language.
+
+<CodeExample id={1} title="Query Format">
+
+```sql
+SELECT ____ 
+FROM 'database' 
+WHERE ____, 
+JOIN ____ 
+GROUP BY ____ 
+ORDER BY ____ 
+```
+
+</CodeExample>
+
+1. The SELECT clause specifies the data to be returned by the query.
+2. FROM specifies the database to query the documents from
+3. WHERE statement specifies the query criteria.
+The `SELECT`ed properties of documents matching this criteria will be returned in the result set
+4. 	JOIN statement specifies the criteria for joining multiple documents
+5. 	GROUP BY statement specifies the criteria used to group returned items in the result set
+6. ORDER BY statement specifies the criteria used to order the items in the result set
+
+
+## Indexing 
+
+:::tip
+See the [Indexing](/indexing) topic to learn more about indexing.
+:::
+
+Before we begin querying documents, let’s briefly mention the importance of having a query index. A query can only be fast if there’s a pre-existing database index it can search to narrow down the set of documents to examine — see: Example 2, which shows how to create an index, and also the Query Troubleshooting topic.
+
+However, every index has to be updated whenever a document is updated. So too many indexes can hurt performance.
+
+Good performance depends on designing and creating the right indexes to go along with your queries.
+
+<CodeExample id={2} title="Creating a New Index">
+
+This example creates a new index for the `type` and `name` properties in the Data Model.
+
+```dart
+final config = ValueIndexConfiguration(['type', 'name']);
+database.createIndex('TypeNameIndex', config);
+```
+
+**Data Model**
+
+```json
+[
+  { 
+    "id": "hotel123",
+    "type": "hotel",
+    "name": "Hotel Ghia"
+  },
+  { 
+    "id": "hotel456",
+    "type": "hotel",
+    "name": "Hotel Deluxe",
+  }
+]
+```
+</CodeExample>
+
+## SELECT statement
+
+Use the SELECT statement to specify which properties you want to return from the queried documents. You can opt to retrieve entire documents, or just the specific properties you need.
+
+
+### Return All Properties
+
+### Return Selected Properties
