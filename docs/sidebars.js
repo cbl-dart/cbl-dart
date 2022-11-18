@@ -49,6 +49,18 @@ const sidebars = {
         {
           type: 'doc',
           id: 'sqlplusplus-mobile',
+        },
+        {
+          type: 'doc',
+          id: 'sqlplusplus-server-diff',
+        },
+        {
+          type: 'doc',
+          id: 'sqlplusplus-querybuilder-diff',
+        },
+        {
+          type: 'doc',
+          id: 'query-resultset',
         }
       ]
     },

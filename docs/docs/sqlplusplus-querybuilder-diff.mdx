@@ -1,0 +1,31 @@
+---
+description: Differences between Couchbase Lite's QueryBuilder and SQL++ for Mobile
+related_content:
+#todo replace database with live queries 
+  - name: SQL++ 
+    url: /sqlplusplus-mobile
+  - name: QueryBuilder 
+    url: /querybuilder
+  - name: Indexes 
+    url: /indexing
+---
+
+# SQL++ Querybuilder Differences
+
+:::important
+N1QL is Couchbase's implementation of the developing SQL++ standard. As such the terms N1QL and SQL++ are used interchangeably in all Couchbase documentation unless explicitly stated otherwise.
+:::
+
+Couchbase Lite's SQL++ for Mobile supports all QueryBuilder features, except Index.
+See Table 1 for the features supported by SQL++ but not by QueryBuilder.
+
+** Table 1. QueryBuilder Differences **
+
+| Category| Components | 
+| ----| ---- | 
+| Conditional Operator | CASE(WHEN …​ THEN …​ ELSE ..) | 
+| Array Functions | ARRAY_AGG ARRAY_AVG ARRAY_COUNT ARRAY_IFNULL ARRAY_MAX ARRAY_MIN ARRAY_SUM | 
+| Conditional Functions | IFMISSING IFMISSINGORNULL IFNULL MISSINGIF NULLIF Match Functions DIV IDIV ROUND_EVEN | 
+| Pattern Matching Functions | REGEXP_CONTAINS REGEXP_LIKE REGEXP_POSITION REGEXP_REPLACE| 
+| Type Checking Functions | ISARRAY ISATOM ISBOOLEAN ISNUMBER ISOBJECT ISSTRING TYPE | 
+| Type Conversion Functions | TOARRAY TOATOM TOBOOLEAN TONUMBER TOOBJECT TOSTRING | 
