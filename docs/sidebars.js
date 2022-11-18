@@ -61,6 +61,14 @@ const sidebars = {
         {
           type: 'doc',
           id: 'query-resultset',
+        },
+        {
+          type: 'doc',
+          id: 'livequeries',
+        },
+        {
+          type: 'doc',
+          id: 'query-troubleshooting',
         }
       ]
     },
