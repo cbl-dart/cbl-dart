@@ -1,0 +1,1168 @@
+---
+description: How to use SQL++ Query Strings to build effective queries with Couchbase Lite on Dart 
+related_content:
+#todo replace database with live queries 
+  - name: QueryBuilder 
+    url: /querybuilder
+  - name: Indexes 
+    url: /indexing
+---
+
+# SQL++ for Mobile 
+
+:::important
+N1QL is Couchbase's implementation of the developing SQL++ standard. As such the terms N1QL and SQL++ are used interchangeably in all Couchbase documentation unless explicitly stated otherwise.
+:::
+
+## Introduction
+Developers using Couchbase Lite for Swift can provide SQL++ query strings using the SQL++ Query API. This API uses query statements of the form shown in Example 1.  The structure and semantics of the query format are based on that of Couchbase Server's SQL++ query language — see [SQL++ Reference Guide](https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/index.html) and [SQL++ Data Model](https://docs.couchbase.com/server/current/learn/data/n1ql-versus-sql.html).
+
+## Running
+
+Use the AsyncQuery class to define the SQL++ query string on the database to be queried. Then run the query using the`.execute()` method.
+
+<CodeExample id={1} title="Running a SQL++ Query">
+
+```dart
+final database = await Database.openAsync('hotels');
+final query = await AsyncQuery.fromN1ql(
+	database, 
+	"SELECT META().id AS thisId FROM _ WHERE type = 'hotel'");
+final results = await query.execute();
+```
+Here we are accessing th current database using the shorthand notation — see the FROM clause for more on data source selection and Query Parameters for more on parameterized queries.
+
+</CodeExample>
+
+## Query Format
+The API uses query statements of the form shown in Example 2.
+
+<CodeExample id={2} title="Query Format">
+
+```sql
+SELECT ____ 
+FROM 'database' 
+WHERE ____, 
+JOIN ____ 
+GROUP BY ____ 
+ORDER BY ____ 
+LIMIT  ____
+OFFSET ____
+```
+
+**Query Components**
+
+1. The `SELECT statement` clause specifies the data to be returned in the result set 
+2. `FROM` specifies the database to query the documents from
+3. `WHERE statement` specifies the query criteria.  The `SELECT`ed properties of documents matching this criteria will be returned in the result set
+4. `JOIN statement` specifies the criteria for joining multiple documents
+5. `GROUP BY statement` specifies the criteria used to group returned items in the result set
+6. `ORDER BY statement` specifies the criteria used to order the items in the result set
+7. `LIMIT statement` specifies the maximum number of results to be returned
+8. `OFFSET statement` specifies the number of results to be skipped before starting to return results
+
+</CodeExample>
+
+
+:::tip
+We recommend working through the [SQL++ Tutorials](https://query-tutorial.couchbase.com/tutorial/#1) as a good way to build your SQL++ skills.
+:::
+
+## SELECT statement
+
+### Purpose
+Projects the result returned by the query, identifying the columns it will contain.
+
+### Syntax
+
+<CodeExample id={3} title="SQL++ Select Syntax">
+
+```sql
+select = SELECT _ ( DISTINCT | ALL )? selectResult 
+
+selectResults = selectResult ( _ ',' _ selectResult )* 
+
+selectResult = expression ( _ (AS)? columnAlias )? 
+
+columnAlias = IDENTIFIER
+```
+</CodeExample>
+
+### Arguments
+
+1. 	The select clause begins with the `SELECT` keyword.
+	- The optional `ALL` argument is used to specify that the query should return `ALL` results (the default)
+	- The optional `DISTINCT` argument is used to specify that the query should return `DISTINCT` results
+2. `selectResults` is a list of columns projected in the query result. Each column is an expression which could be a property expression or any expressions or functions. You can use the wildcard * to select all columns. 
+3. Use the optional `AS` argument to provides an alias name for a property. Each property can be aliased by putting the `AS` `alias name` after the column name.
+
+#### SELECT Wildcard
+When using the SELECT * option the column name (key) of the SQL++ string is one of:
+
+	- The alias name if one was specified
+	- The data source name (or its alias if provided) as specified in the FROM clause.
+
+This behavior is inline with that of Couchbase Server SQL++ — see example in Table 1.
+
+** Table 1. Example Column Names for SELECT * **
+
+| Query | Column Name |
+| ----| ---- |
+| SELECT * AS data FROM _ | data |
+| SELECT * FROM _ | _ |
+| SELECT * FROM _default | _default |
+| SELECT * FROM db | db |
+| SELECT * FROM db as store | store |
+
+### Example
+
+<CodeExample id={4} title="SELECT properties">
+
+```sql
+SELECT * 
+
+SELECT db.* AS data 
+
+SELECT name fullName 
+
+SELECT db.name fullName 
+
+SELECT DISTINCT address.city 
+```
+
+1. Use the * wildcard to select all properties
+2. Select all properties from the db data source. Give the object an alias name of data
+3. Select pair of properties
+4. Select a specific property from the db data source.
+5. Select the property item city from its parent property address.
+
+</CodeExample>
+
+## FROM
+
+### Purpose
+Specifies the data source, or sources, and optionally applies an alias ( AS). It is mandatory.
+
+### Syntax
+<CodeExample id={5} title="FROM Syntax">
+
+```sql
+FROM dataSource  
+      (optional JOIN joinClause )  
+```
+
+ 1. Here dataSource is the database name against which the query is to run. Use AS to give the database an alias you can use within the query.  To use the current database, without specifying a name, use _ as the datasource.
+ 2. JOIN joinclause — use this optional argument to link datasources
+
+</CodeExample>
+
+### Example
+
+<CodeExample id={6} title="FROM clause">
+
+```sql
+SELECT name FROM db
+SELECT store.name FROM db AS store
+SELECT store.name FROM db store
+SELECT name FROM _
+SELECT store.name FROM _ AS store
+SELECT store.name FROM _ store
+```
+
+</CodeExample>
+
+## JOIN statement
+
+### Purpose
+The JOIN clause enables you to select data from multiple data sources linked by criteria specified in the JOIN statement.  Currently only self-joins are supported. For example to combine airline details with route details, linked by the airline id — see Example 7.
+
+### Syntax
+<CodeExample id={7} title="JOIN syntax">
+
+```sql
+joinClause = ( join )*
+
+join = joinOperator _ dataSource _  (constraint)? 
+
+joinOperator = ( LEFT (OUTER)? | INNER | CROSS )? JOIN 
+
+dataSource = databaseName ( ( AS | _ )? databaseAlias )?
+
+constraint ( ON expression )? 
+```
+</CodeExample>
+
+### Arguments
+1. The join clause starts with a JOIN operator followed by the data source.
+2. Five JOIN operators are supported:
+	- JOIN, LEFT JOIN, LEFT OUTER JOIN, INNER JOIN, and CROSS JOIN.
+	- Note: JOIN and INNER JOIN are the same, LEFT JOIN and LEFT OUTER JOIN are the same.
+3. The join constraint starts with the ON keyword followed by the expression that defines the joining constraints.
+
+### Example
+<CodeExample id={8} title="JOIN examples">
+
+```sql
+SELECT db.prop1, other.prop2 
+FROM db 
+JOIN db AS other ON db.key = other.key
+
+SELECT db.prop1, other.prop2 
+FROM db 
+LEFT JOIN db other ON db.key = other.key
+
+SELECT * 
+FROM travel-sample r 
+JOIN travel-sample a ON 
+  r.airlineid = a.meta.id WHERE a.country = "France"
+```
+</CodeExample>
+
+<CodeExample id={9} title="Using JOIN to Combine Document Details">
+This example JOINS the document of type route with documents of type airline using the document ID (id) on the _airline document and airlineid on the route document.
+
+```sql
+SELECT * 
+FROM travel-sample r 
+JOIN travel-sample a ON 
+  r.airlineid = a.meta.id 
+WHERE a.country = "France"
+```
+</CodeExample>
+
+## WHERE statement
+
+### Purpose
+Specifies the selecion criteria used to filter results.  As with SQL, use the `WHERE` statement to choose which documents are returned by your query.
+
+### Syntax
+<CodeExample id={10} title="JOIN syntax">
+
+```sql
+where = WHERE expression
+```
+</CodeExample>
+
+### Arguments
+1. WHERE evalates expression to a BOOLEAN value. You can chain any number of Expressions in order to implement sophisticated filtering capabilities.
+
+### Example
+<CodeExample id={11} title="WHERE examples">
+
+```sql
+SELECT name FROM db WHERE department = 'engineer' AND group = 'mobile'
+```
+</CodeExample>
+
+## GROUP BY statement
+
+### Purpose
+Use group by to arrange values in groups of one or more properties.
+
+### Syntax
+<CodeExample id={12} title="GROUP BY syntax">
+
+```sql
+groupBy = grouping _( having )? 
+
+grouping = GROUP BY expression( _ ',' _ expression )* 
+
+having = HAVING expression 
+```
+</CodeExample>
+
+### Arguments
+1. The group by clause starts with the GROUP BY keyword followed by one or more expressions.
+2. Grouping
+	- The group by clause is normally used together with the aggregate functions (e.g. COUNT, MAX, MIN, SUM, AVG)
+3. Having — allows you to filter the result based on aggregate functions — for example, HAVING count(empnum)>100
+
+### Example
+<CodeExample id={13} title="GROUP BY examples">
+
+```sql
+SELECT COUNT(empno), city FROM db GROUP BY city
+
+SELECT COUNT(empno), city FROM db GROUP BY city HAVING COUNT(empno) > 100
+
+SELECT COUNT(empno), city FROM db GROUP BY city HAVING COUNT(empno) > 100 WHERE state = 'CA'
+```
+</CodeExample>
+
+## ORDER BY statement
+
+### Purpose
+Sort query results based on a given expression result.
+
+### Syntax
+<CodeExample id={14} title="ORDER BY syntax">
+
+```sql
+orderBy = ORDER BY ordering ( _ ',' _ ordering )* 
+
+ordering = expression ( _ order )? 
+
+order = ( ASC / DESC ) 
+```
+</CodeExample>
+
+### Arguments
+1. orderBy — The order by clause starts with the ORDER BY keyword followed by the ordering clause.
+2. Ordering — The ordering clause specifies the properties or expressions to use for ordering the results.
+3. Order — In each ordering clause, the sorting direction is specified using the optional ASC (ascending) or DESC (descending) directives. Default is ASC.
+
+
+### Example
+<CodeExample id={15} title="ORDER BY examples">
+
+```sql
+SELECT name FROM db  ORDER BY name
+
+SELECT name FROM db  ORDER BY name DESC
+
+SELECT name, score FROM db  ORDER BY name ASC, score DESC
+```
+</CodeExample>
+
+## LIMIT statement
+
+### Purpose
+Specifies the maximum number of results to be returned by the query.
+
+### Syntax
+<CodeExample id={16} title="LIMIT syntax">
+
+```sql
+limit = LIMIT expression 
+```
+</CodeExample>
+
+### Arguments
+1. The LIMIT clause starts with the LIMIT keyword followed by an expression that will be evaluated as a number.
+
+### Example
+<CodeExample id={17} title="LIMIT examples">
+
+```sql
+SELECT name FROM db LIMIT 10 
+```
+</CodeExample>
+
+## OFFSET statement
+
+### Purpose
+Specifies the number of results to be skipped by the query.
+
+### Syntax
+<CodeExample id={18} title="OFFSET syntax">
+
+```sql
+offset = OFFSET expression
+```
+</CodeExample>
+
+### Arguments
+1. The offset clause starts with the OFFSET keyword followed by an expression that will be evaluated as a number that represents the number of results ignored before the query begins returning results.
+
+### Example
+<CodeExample id={19} title="OFFSET examples">
+
+```sql
+SELECT name FROM db OFFSET 10 
+
+SELECT name FROM db  LIMIT 10 OFFSET 10 
+```
+</CodeExample>
+
+## Expressions
+Expressions are references to identifiers that resolve to values. Categories of expression comprise the elements covered in this section (see above), together with Operators and Functions, which are covered in their own sections
+
+### Literals
+
+#### Boolean
+
+##### Purpose
+Represents a true or false value.
+
+##### Syntax
+<CodeExample id={20} title="Boolean syntax">
+
+```sql
+TRUE | FALSE
+```
+</CodeExample>
+
+##### Example
+<CodeExample id={21} title="Boolean examples">
+
+```sql
+SELECT value FROM db  WHERE value = true
+
+SELECT value FROM db  WHERE value = false
+```
+</CodeExample>
+
+#### Numeric
+
+##### Purpose
+Represents a numeric value. Numbers may be signed or unsigned digits. They have optional fractional and exponent components.
+
+##### Syntax
+<CodeExample id={22} title="Numeric syntax">
+
+```sql
+'-'? (('.' DIGIT+) | (DIGIT+ ('.' DIGIT*)?)) ( [Ee] [-+]? DIGIT+ )? WB
+
+DIGIT = [0-9]
+```
+</CodeExample>
+
+##### Example
+<CodeExample id={23} title="Numeric examples">
+
+```sql
+SELECT value FROM db  WHERE value = 10
+SELECT value FROM db  WHERE value = 0
+SELECT value FROM db WHERE value = -10
+SELECT value FROM db WHERE value = 10.25
+SELECT value FROM db WHERE value = 10.25e2
+SELECT value FROM db WHERE value = 10.25E2
+SELECT value FROM db WHERE value = 10.25E+2
+SELECT value FROM db WHERE value = 10.25E-2
+```
+</CodeExample>
+
+#### String
+
+##### Purpose
+The string literal represents a string or sequence of characters.
+
+##### Syntax
+<CodeExample id={24} title="String syntax">
+
+```sql
+“characters” |  'characters'
+```
+</CodeExample>
+
+:::note
+The string literal can be double-quoted as well as single-quoted.
+:::
+
+##### Example
+<CodeExample id={25} title="String examples">
+
+```sql
+SELECT firstName, lastName FROM db WHERE middleName = “middle”
+SELECT firstName, lastName FROM db WHERE middleName = ‘middle’
+```
+</CodeExample>
+
+#### NULL 
+
+##### Purpose
+The literal NULL represents an empty value.
+
+##### Syntax
+<CodeExample id={26} title="NULL syntax">
+
+```sql
+NULL
+```
+</CodeExample>
+
+##### Example
+<CodeExample id={27} title="NULL examples">
+
+```sql
+SELECT firstName, lastName FROM db WHERE middleName IS NULL
+```
+</CodeExample>
+
+#### MISSING 
+
+##### Purpose
+The MISSING literal represents a missing name-value pair in a document.
+
+##### Syntax
+<CodeExample id={28} title="MISSING syntax">
+
+```sql
+MISSING
+```
+</CodeExample>
+
+##### Example
+<CodeExample id={29} title="MISSING examples">
+
+```sql
+SELECT firstName, lastName FROM db WHERE middleName IS MISSING
+```
+</CodeExample>
+
+#### Array 
+
+##### Purpose
+Represents an Array
+
+##### Syntax
+<CodeExample id={30} title="ARRAY syntax">
+
+```sql
+arrayLiteral = '[' _ (expression ( _ ',' _ e2:expression )* )? ']'
+```
+</CodeExample>
+
+##### Example
+<CodeExample id={31} title="ARRAY examples">
+
+```sql
+SELECT [“a”, “b”, “c”] FROM _
+SELECT [ property1, property2, property3] FROM _
+```
+</CodeExample>
+
+#### Dictionary 
+
+##### Purpose
+Represents a dictionary literal
+
+##### Syntax
+<CodeExample id={32} title="Dictionary syntax">
+
+```sql
+dictionaryLiteral = '{' _ ( STRING_LITERAL ':' 
+ e:expression ( _ ',' _ STRING_LITERAL ':' _ expression )* )?  '}'
+```
+</CodeExample>
+
+##### Example
+<CodeExample id={33} title="Dictionary examples">
+
+```sql
+SELECT { 'name’: 'James', 'department': 10 } FROM db
+SELECT { 'name’: 'James', 'department': dept } FROM db
+SELECT { 'name’: 'James', 'phones': ['650-100-1000', '650-100-2000'] } FROM db
+```
+</CodeExample>
+
+### Identifiers
+
+#### Purpose
+Identifiers provide symbolic references. Use them for example to identify: column alias names, database names, database alias names, property names, parameter names, function names, and FTS index names.
+
+#### Syntax
+<CodeExample id={34} title="Identifiers syntax">
+
+```sql
+<[a-zA-Z_] [a-zA-Z0-9_$]*> _ | "`" ( [^`] | "``"   )* "`"  _
+```
+</CodeExample>
+
+:::tip
+To use other characters in the identifier, surround the identifier with the backticks ` character.
+:::
+
+#### Example
+<CodeExample id={35} title="Identifiers examples">
+
+```sql
+SELECT * FROM _
+SELECT * FROM `db-1` 
+SELECT key FROM db
+SELECT key$1 FROM db_1
+SELECT `key-1` FROM db
+```
+
+1. Use of backticks allows a hyphen as part of the identifier name.
+
+</CodeExample>
+
+### Property Expressions
+
+#### Purpose
+The property expression is used to reference a property in a document
+
+#### Syntax
+<CodeExample id={36} title="Property expressions syntax">
+
+```sql
+property = '*'| dataSourceName '.' _ '*'  | propertyPath 
+
+propertyPath = propertyName (
+    ('.' _ propertyName ) |  
+    ('[' _ INT_LITERAL _ ']' _  ) 
+    )* 
+
+propertyName = IDENTIFIER
+```
+
+1. Prefix the property expression with the data source name or alias to indicate its origin
+2. Use dot syntax to refer to nested properties in the propertyPath.
+3. Use bracket ([index]) syntax to refer to an item in an array.
+4. Use the asterisk (*) character to represents all properties. This can only be used in the result list of the SELECT clause.
+
+
+</CodeExample>
+
+#### Example
+<CodeExample id={37} title="Property expressions examples">
+
+```sql
+SELECT *
+  FROM db
+  WHERE contact.name = "daniel"
+
+SELECT db.*
+  FROM db
+  WHERE contact.name = "daniel"
+
+SELECT db.contact.address.city
+  FROM db
+  WHERE contact.name = "daniel"
+
+SELECT contact.address.city, contact.phones[0]
+  FROM db
+  WHERE contact.name = "daniel"
+```
+
+</CodeExample>
+
+### Any and Every Expressions
+
+#### Purpose
+Evaluates expressions over items in an array object.
+
+#### Syntax
+<CodeExample id={38} title="Any and Every Expressions syntax">
+
+```sql
+arrayExpression = 
+  anyEvery _ variableName 
+     _ IN  _ expression 
+       _ SATISFIES _ expression 
+    END 
+
+anyEvery = anyOrSome AND EVERY | anyOrSome | EVERY
+
+anyOrSome = ANY | SOME
+```
+
+1. The array expression starts with `ANY/SOME`, `EVERY`, or `ANY/SOME` AND `EVERY`, each of which has a different function as described below, and is terminated by END
+	- `ANY/SOME` : Returns `TRUE` if at least one item in the array satisfies the expression, otherwise returns `FALSE`.  NOTE: `ANY` and `SOME` are interchangeable
+	- `EVERY`: Returns `TRUE` if all items in the array satisfies the expression, otherwise return `FALSE`. If the array is empty, returns `TRUE`. 
+	- `ANY/SOME` AND `EVERY`: Same as `EVERY` but returns false if the array is empty.
+2. The variable name represents each item in the array.
+3. The `IN` keyword is used for specifying the array to be evaluated
+4. The `SATISFIES` keyword is used for evaluating each item in the array
+5. `END` terminates the array expression.
+
+</CodeExample>
+
+#### Example
+<CodeExample id={39} title="Any and Every Expressions examples">
+
+```sql
+SELECT name
+FROM db
+WHERE ANY v
+ IN contacts
+  SATISFIES v.city = ’San Mateo’
+ END
+```
+
+</CodeExample>
+
+### Parameter Expressions
+
+#### Purpose
+Parameter expressions specify a value to be assigned from the parameter map presented when executing the query.
+
+:::note
+If parameters are specified in the query string, but the parameter and value mapping is not specified in the query object, an error will be thrown when executing the query.
+:::
+
+#### Syntax
+<CodeExample id={40} title="Parameter Expressions syntax">
+
+```sql
+$IDENTIFIER
+```
+</CodeExample>
+
+#### Example
+<CodeExample id={41} title="Parameter Expression">
+
+```sql
+SELECT name
+FROM db
+WHERE department = $department
+```
+
+</CodeExample>
+
+<CodeExample id={42} title="Using a Parameter">
+
+```dart
+final query = await AsyncQuery.fromN1ql(db, 'SELECT name WHERE department = \$department');
+final parameters = Parameters();
+parameters.setValue('department', name: 'E001');
+final results = query.execute();
+```
+
+</CodeExample>
+
+### Parenthesis Expressions
+
+#### Purpose
+Use parentheses to group expressions together to make them more readable or to establish operator precedences.
+
+#### Syntax
+<CodeExample id={43} title="Parenthesis Expression">
+
+```sql
+SELECT (value1 + value2) * value 3 
+  FROM db
+
+SELECT *
+  FROM db
+  WHERE ((value1 + value2) * value3) + value4 = 10
+
+SELECT *
+  FROM db
+  WHERE (value1 = value2)
+     OR (value3 = value4) 
+```
+
+1. Establish the desired operator precedence; do the addition before the multiplication
+2. Clarify the conditional grouping
+
+</CodeExample>
+
+## Operators
+
+### Binary Operators
+
+#### Maths
+
+** Table 2. Maths Operators * **
+
+| Op | Description | Example |
+| ----| ---- | ---- | 
+| + | Add | WHERE v1 + v2 = 10 | 
+| - | Subtract | WHERE v1 - v2 = 10 | 
+| * | Multiply | WHERE v1 * v2 = 10 |
+| / | Divide - see 1 | WHERE v1 / v2 = 10 | 
+| % | Modulus | WHERE v1 % v2 = 0 |
+
+1. If both operands are integers, integer division is used, but if one is a floating number, then float division is used. This differs from Server N1QL, which performs float division regardless. Use DIV(x, y) to force float division in CBL N1QL
+
+#### Comparison Operators
+
+##### Purpose 
+The comparison operators are used in the WHERE statement to specify the condition on which to match documents.
+
+** Table 3. Comparison Operators * **
+
+| Op | Description | Example |
+| ----| ---- | ---- | 
+| = or == | Equals | WHERE v1 = v2<br /> WHERE v1 == v2 | 
+| != or &#60&#62 | Not Equal to | WHERE v1 != v2<br /> WHERE v1 &#60&#62 v2 | 
+| > | Greater than | WHERE v1 > v2 | 
+| >= | Greater than or equal to | WHERE v1 >= v2 |
+| < | Less than | WHERE v1 < v2 | 
+| <= | Less than or equal to | WHERE v1 <= v2 | 
+| IN | Returns TRUE if the value is in the list or array of values specified by the right hand side expression; Otherwise returns FALSE. | WHERE 'James' IN contactsList | 
+| LIKE | String wildcard pattern matching, comparison - see 2.  Two wildchards are supported:  <br /> • % Matches zero or more characters. <br /> • _ Matches a single character. | WHERE name LIKE 'a%' <br /> WHERE name LIKE '%a' <br /> WHERE name LIKE '%or%' <br /> WHERE name LIKE 'a%o%' <br /> WHERE name LIKE '%_r%' <br /> WHERE name LIKE '%a_%' <br /> WHERE name LIKE '%a__%' <br /> WHERE name LIKE 'aldo' <br /> | 
+| MATCH | String matching using FTS | WHERE v1-index MATCH "value" | 
+| BETWEEN | Logically equivalent to v1>=X and v1⇐X+z | WHERE v1 BETWEEN 10 and 100 | 
+| IS NULL - see 3 | Equal to null | WHERE v1 IS NULL | 
+| IS NOT NULL | Not equal to null | WHERE v1 IS NOT NULL | 
+| IS MISSING | Equal to MISSING | WHERE v1 IS MISSING | 
+| IS NOT MISSING | Not equal to MISSING | WHERE v1 IS NOT MISSING | 
+| IS VALUED | IS NOT NULL AND MISSING | WHERE v1 IS VALUED | 
+| IS NOT VALUED | IS NULL OR MISSING | WHERE v1 IS NOT VALUED | 
+
+2. Matching is case-insensitive for ASCII characters, case-sensitive for non-ASCII.
+3. Use of IS and IS NOT is limited to comparing NULL and MISSING values (this encompasses VALUED). This is different from QueryBuilder, in which they operate as equivalents of == and !=. 
+
+** Table 4. Comparing NULL and MISSING values using IS **
+
+| Op | NON-NULL Value | NULL | MISSING |
+| ----| ---- | ---- | ---- |
+| IS NULL | FALSE | TRUE | MISSING | 
+| IS NOT NULL | TRUE | FALSE | MISSING | 
+| IS MISSING | FALSE | FALSE | TRUE | 
+| IS NOT MISSING | TRUE | TRUE | FALSE | 
+| IS VALUED | TRUE | FALSE | FALSE | 
+| IS NOT VALUED | FALSE | TRUE | TRUE | 
+
+#### Logical Operators
+
+##### Purpose 
+Logical operators combine expressions using the following Boolean Logic Rules:
+- TRUE is TRUE, and FALSE is FALSE
+- Numbers 0 or 0.0 are FALSE
+- Arrays and dictionaries are FALSE
+- String and Blob are TRUE if the values are casted as a non-zero or FALSE if the values are casted as 0 or 0.0
+- NULL is FALSE
+- MISSING is MISSING
+
+:::note
+This is different from Server SQL++, where:
+
+- MISSING, NULL and FALSE are FALSE
+- Numbers 0 is FALSE
+- Empty strings, arrays, and objects are FALSE
+- All other values are TRUE
+:::
+
+:::tip
+Use TOBOOLEAN(expr) function to convert a value based on Server SQL++ boolean value rules.
+:::
+
+** Table 5. Logical Operators **
+
+| Op | Description | Example |
+| ----| ---- | ---- |
+| AND | Returns TRUE if the operand expressions evaluate to TRUE; otherwise FALSE.<br /><br />If an operand is MISSING and the other is TRUE returns MISSING, if the other operand is FALSE it returns FALSE.<br /><br />If an operand is NULL and the other is TRUE returns NULL, if the other operand is FALSE it returns FALSE.| WHERE city = 'San Francisco' AND status = true | 
+| OR | Returns TRUE if one of the operand expressions is evaluated to TRUE; otherwise returns FALSE<br /><br />If an operand is MISSING, the operation will result in MISSING if the other operand is FALSE or TRUE if the other operand is TRUE.<br /><br />If an operand is NULL, the operation will result in NULL if the other operand is FALSE or TRUE if the other operand is TRUE. | WHERE city = 'San Francisco' OR city = 'Santa Clara' | 
+
+** Table 6. Logical Operators Table **
+
+| a | b | a AND b | a OR b |
+| ----| ---- | ---- | ---- | 
+| TRUE | TRUE | TRUE | TRUE | 
+|  | FALSE | FALSE | TRUE | 
+|  | NULL | FALSE, see 5 | TRUE | 
+|  | MISSING | MISSING | TRUE | 
+| FALSE | TRUE | FALSE | TRUE | 
+|  | FALSE | FALSE | FALSE | 
+|  | NULL | FALSE | FALSE, see 5| 
+|  | MISSING | FALSE | MISSING | 
+| NULL | TRUE | FALSE, see 5 | TRUE | 
+|  | FALSE | FALSE | FALSE, see 5 | 
+|  | NULL | FALSE, see 5| FALSE, see 5| 
+|  | MISSING | FALSE, see 6 | MISSING, see 7 | 
+| MISSING | TRUE | MISSING | TRUE | 
+|  | FALSE | FALSE | MISSING | 
+|  | NULL | FALSE, see 6| FALSE, see 7| 
+|  | MISSING | MISSING | MISSING | 
+**This differs from Server SQL++ in the following instances:**
+5. Server will return: NULL instead of FALSE
+6. Server will return: MISSING instead of FALSE
+7. Server will return: NULL instead of MISSING
+
+#### String Operators
+
+##### Purpose 
+A single string operator is provided. It enables string concatenation.
+
+** Table 7. String Operators **
+
+| Op | Description | Example | 
+| ----| ---- | ---- |
+| &#124&#124 | Concatenating | SELECT firstnm || lastnm AS fullname FROM db | 
+
+### Unary Operators
+
+#### Purpose 
+Three unary operators are provided. They operate by modifying an expression, making it numerically positive or negative, or by logically negating its value (TRUE becomes FALSE).
+
+#### Syntax
+<CodeExample id={44} title="Unary Operators syntax">
+
+```sql
+// UNARY_OP _ expr
+```
+</CodeExample>
+
+** Table 8. Unary Operators **
+
+| Op | Description | Example | 
+| ----| ---- | ---- |
+| + | Positive value | WHERE v1 = +10 | 
+| - | Negative value | WHERE v1 = -10 | 
+| NOT | Logical Negate operator, see 8 | WHERE "James" NOT IN contactsList | 
+8. The NOT operator is often used in conjunction with operators such as IN, LIKE, MATCH, and BETWEEN operators.
+	- NOT operation on NULL value returns NULL. 
+	- NOT operation on MISSING value returns MISSING.
+
+** Table 9. NOT Operators TABLE **
+
+| a | NOT a | 
+| ----| ---- |
+| TRUE | FALSE | 
+| FALSE | TRUE | 
+| NULL | FALSE | 
+| MISSING | MISSING | 
+
+### COLLATE Operators
+
+#### Purpose 
+Collate operators specify how the string comparison is conducted.
+
+#### Usage 
+The collate operator is used in conjunction with string comparison expressions and ORDER BY clauses. It allows for one or more collations.  If multiple collations are used, the collations need to be specified in a parenthesis. When only one collation is used, the parenthesis is optional.
+
+:::note
+Collate is not supported by Server N1QL
+:::
+
+#### Syntax
+<CodeExample id={45} title="COLLATE Operators syntax">
+
+```sql
+collate = COLLATE collation | '(' collation (_ collation )* ')'
+
+collation = NO? (UNICODE | CASE | DIACRITICS) WB
+```
+</CodeExample>
+
+#### Arguments 
+1. The available collation options are:
+	- UNICODE: Conduct a Unicode comparison; the default is to do ASCII comparison.
+	- CASE: Conduct case-sensitive comparison
+	- DIACRITIC: Take account of accents and diacritics in the comparison; On by default.
+	- NO: This can be used as a prefix to the other collations, to disable thm (for example: NOCASE to enable case-insensitive comparison)
+
+#### Example 
+<CodeExample id={46} title="COLLATE Operators example">
+
+```sql
+SELECT department FROM db WHERE (name = "fred") COLLATE UNICODE
+
+SELECT department FROM db WHERE (name = "fred") COLLATE (UNICODE CASE)
+
+SELECT name FROM db ORDER BY name COLLATE (UNICODE DIACRITIC)
+```
+</CodeExample>
+
+### CONDITIONAL Operators
+
+#### Purpose 
+The Conditional (or CASE) operator evaluates conditional logic in a similar way to the IF/ELSE operator.
+
+#### Syntax
+<CodeExample id={47} title="CONDITIONAL Operators syntax">
+
+```sql
+CASE (expression) (WHEN expression THEN expression)+ (ELSE expression)? END 
+
+CASE (expression)? (!WHEN expression)?
+  (WHEN expression THEN expression)+ (ELSE expression)? END
+```
+
+Both Simple Case and Searched Case expressions are supported. The syntactic difference being that the Simple Case expression has an expression after the CASE keyword.
+
+1. Simple Case Expression
+	- If the CASE expression is equal to the first WHEN expression, the result is the THEN expression.
+	- Otherwise, any subsequent WHEN clauses are evaluated in the same way.
+	- If no match is found, the result of the CASE expression is the ELSE expression, NULL if no ELSE expression was provided.
+2. Searched Case Expression
+	- If the first WHEN expression is TRUE, the result of this expression is its THEN expression.
+	- Otherwise, subsequent WHEN clauses are evaluated in the same way. If no WHEN clause evaluate to TRUE, then the result of the expression is the ELSE expression, or NULL if no ELSE expression was provided.
+
+</CodeExample>
+
+#### Examples
+<CodeExample id={48} title="Simple Case">
+
+```sql
+SELECT CASE state WHEN 'CA' THEN 'Local' ELSE 'Non-Local' END FROM DB
+```
+</CodeExample>
+
+#### Examples
+<CodeExample id={49} title="Searched Case">
+
+```sql
+SELECT CASE WHEN shippedOn IS NOT NULL THEN 'SHIPPED' ELSE 'NOT-SHIPPED' END FROM db
+```
+</CodeExample>
+
+## Functions
+
+### Purpose
+Functions are also expressions.
+
+### Syntax
+<CodeExample id={50} title="Functions syntax">
+
+The function syntax is the same as Java’s method syntax. It starts with the function name, followed by optional arguments inside parentheses.
+
+```sql
+function = functionName parenExprs
+
+functionName  = IDENTIFIER
+
+parenExprs = '(' ( expression (_ ',' _ expression )* )? ')'
+```
+
+</CodeExample>
+
+### Aggregation Functions
+
+** Table 10. Aggregation Functions **
+
+| Function | Description | 
+| ----| ---- |
+| AVG(expr) | Returns average value of the number values in the group | 
+| COUNT(expr) | Returns a count of all values in the group | 
+| MIN(expr) | Returns the minimum value in the group| 
+| MAX(expr) | Returns the maximum value in the group | 
+| SUM(expr) | Returns the sum of all number values in the group | 
+
+### Conditional Functions
+
+** Table 11. Conditional Functions **
+
+| Function | Description | 
+| ----| ---- |
+| IFMISSING(expr1, expr2, …​) | Returns the first non-MISSING value, or NULL if all values are MISSING | 
+| IFMISSINGRONULL(expr1, expr2, …​) | Returns the first non-NULL and non-MISSING value, or NULL if all values are NULL or MISSING | 
+| IFNULL(expr1, expr2, …​) | Returns the first non-NULL, or NULL if all values are NULL| 
+| MISSINGIF(expr1, expr2) | Returns MISSING when expr1 = expr2; otherwise returns expr1. <br />Returns MISSING if either or both expressions are MISSING.<br /> Returns NULL if either or both expressions are NULL. | 
+| NULLF(expr1, expr2) | Returns NULL when expr1 = expr2; otherwise returns expr1. <br />Returns MISSING if either or both expressions are MISSING.<br /> Returns NULL if either or both expressions are NULL.+| 
+
+### Date and Time Functions
+
+** Table 12. Date and Time Functions **
+
+| Function | Description | 
+| ----| ---- |
+| STR_TO_MILLIS(expr) | Returns the number of milliseconds since the unix epoch of the given ISO 8601 date input string. | 
+| STR_TO_UTC(expr) | Returns the ISO 8601 UTC date time string of the given ISO 8601 date input string. | 
+| MILLIS_TO_STR(expr) | Returns a ISO 8601 date time string in device local timezone of the given number of milliseconds since the unix epoch expression. | 
+| MILLIS_TO_UTC(expr) | Returns the UTC ISO 8601 date time string of the given number of milliseconds since the unix epoch expression. | 
+
+### Full Text Search Functions
+
+** Table 13. FTS Functions **
+
+| Function | Description | Example |  
+| ----| ---- | ---- |
+| MATCH(indexName, term) | Returns TRUE if term expression matches the FTS indexed term. indexName identifies the FTS index, term expression to search for matching. | WHERE MATCH (description, 'couchbase') |
+| RANK(indexName) | Returns a numeric value indicating how well the current query result matches the full-text query when performing the MATCH. indexName is an IDENTIFIER for the FTS index. | WHERE MATCH (description, 'couchbase') ORDER BY RANK(description) | 
+
+### Maths Functions
+
+** Table 14. Maths Functions **
+
+| Function | Description |
+| ----| ---- |
+| ABS(expr)| Returns the absolute value of a number.|
+| ACOS(expr) | Returns the arc cosine in radians. |
+| ASIN(expr) | Returns the arcsine in radians. |
+| ATAN(expr) | Returns the arctangent in radians. |
+| ATAN2(expr1,expr2) | Returns the arctangent of expr1/expr2. |
+| CEIL(expr) | Returns the smallest integer not less than the number. |
+| COS(expr) | Returns the cosine value of the expression. |
+| DIV(expr1, expr2) | Returns float division of expr1 and expr2.  Both expr1 and expr2 are cast to a double number before division.  The returned result is always a double. |
+| DEGREES(expr) | Converts radians to degrees. |
+| E() | Returns base of natural logarithms. |
+| EXP(expr) | Returns expr value |
+| FLOOR(expr) | Returns largest integer not greater than the number. |
+| IDIV(expr1, expr2) | Returns integer division of expr1 and expr2. |
+| LN(expr) | Returns log base e value. |
+| LOG(expr) | Returns log base 10 value. |
+| PI() | Return PI value. |
+| POWER(expr1, expr2) | Returns expr1expr2 value. |
+| RADIANS(expr)| Returns degrees to radians. |
+| ROUND(expr (, digits_expr)?) | Returns the rounded value to the given number of integer digits to the right of the decimal point (left if digits is negative). Digits are 0 if not given.<br /><br /> The function uses Rounding Away From Zero convention to round midpoint values to the next number away from zero (so, for example, ROUND(1.75) returns 1.8 but ROUND(1.85) returns 1.9. * |
+| ROUND_EVEN(expr (, digits_expr)?) | Returns rounded value to the given number of integer digits to the right of the decimal point (left if digits is negative). Digits are 0 if not given.<br /><br /> The function uses Rounding to Nearest Even (Banker’s Rounding) convention which rounds midpoint values to the nearest even number (for example, both ROUND_EVEN(1.75) and ROUND_EVEN(1.85) return 1.8). |
+| SIGN(expr)| Returns -1 for negative, 0 for zero, and 1 for positive numbers. |
+| SIN(expr) | Returns sine value. |
+| SQRT(expr) | Returns square root value. |
+| TAN(expr) | Returns tangent value. |
+| TRUNC (expr (, digits, expr)?) | Returns a truncated number to the given number of integer digits to the right of the decimal point (left if digits is negative). Digits are 0 if not given. |
+
+:::note
+The behavior of the ROUND() function is different from Server SQL++ ROUND(), which rounds the midpoint values using Rounding to Nearest Even convention.
+:::
+
+### Pattern Searching Functions
+
+** Table 16. Pattern Searching Functions **
+
+| Function | Description | 
+| ----| ---- | 
+| REGEXP_CONTAINS(expr, pattern) | Returns TRUE if the string value contains any sequence that matches the regular expression pattern.| 
+| REGEXP_LIKE(expr, pattern) | Return TRUE if the string value exactly matches the regular expression pattern.| 
+| REGEXP_POSITION(expr, pattern) | Returns the first position of the occurrence of the regular expression pattern within the input string expression. Return -1 if no match is found. Position counting starts from zero.| 
+| REGEXP_REPLACE(expr, pattern, repl [, n]) | Returns new string with occurrences of pattern replaced with repl. If n is given, at the most n replacements are performed. If n is not given, all matching occurrences are replaced.| 
+
+### String Functions
+
+** Table 17. String Functions **
+
+| Function | Description | 
+| ----| ---- | 
+| CONTAINS(expr, substring_expr) | Returns true if the substring exists within the input string, otherwise returns false. |
+| LENGTH(expr) | Returns the length of a string. The length is defined as the number of characters within the string. |
+| LOWER(expr) | Returns the lowercase string of the input string. |
+| LTRIM(expr) | Returns the string with all leading whitespace characters removed. |
+| RTRIM(expr) | Returns the string with all trailing whitespace characters removed. |
+| TRIM(expr) | Returns the string with all leading and trailing whitespace characters removed. |
+| UPPER(expr) | Returns the uppercase string of the input string. |
+
+### Type Checking Functions
+
+** Table 18.  Type Checking Functions **
+
+| Function | Description | 
+| ----| ---- | 
+| ISARRAY(expr) | Returns TRUE if expression is an array, otherwise returns MISSING, NULL or FALSE. |
+| ISATOM(expr) | Returns TRUE if expression is a Boolean, number, or string, otherwise returns MISSING, NULL or FALSE. |
+| ISBOOLEAN(expr) | Returns TRUE if expression is a Boolean, otherwise returns MISSING, NULL or FALSE. |
+| ISNUMBER(expr) | Returns TRUE if expression is a number, otherwise returns MISSING, NULL or FALSE. |
+| ISOBJECT(expr) | Returns TRUE if expression is an object (dictionary), otherwise returns MISSING, NULL or FALSE. |
+| ISSTRING(expr) | Returns TRUE if expression is a string, otherwise returns MISSING, NULL or FALSE. |
+| TYPE(expr) | 	Returns one of the following strings, based on the value of expression:<br /><br />•“missing”<br /><br />"null"<br /><br />"boolean"<br /><br />"number"<br /><br />•“string”<br /><br />•“array”<br /><br />•“object”<br /><br />•“binary”<br /><br />  |
+
+### Type Conversion Functionsunctions
+
+** Table 19.  Type Conversion Functions **
+
+| Function | Description | 
+| ----| ---- | 
+| TOARRAY(expr) | Returns MISSING if the value is MISSING.<br/><br/>Returns NULL if the value is NULL.<br/><br/>Returns the array itself.Returns the array itself.<br/><br/>Returns all other values wrapped in an array. |
+| TOATOM(expr)| Returns MISSING if the value is MISSING.<br/><br/>Returns NULL if the value is NULL.<br/><br/>Returns an array of a single item if the value is an array.<br/><br/>Returns an object of a single key/value pair if the value is an object.<br/><br/>Returns boolean, numbers, or strings.<br /><br />Returns NULL for all other values.|
+| TOBOOLEAN(expr) | Returns MISSING if the value is MISSING.<br/><br/>Returns NULL if the value is NULL.<br/><br/>Returns FALSE if the value is FALSE.<br/><br/>Returns FALSE if the value is 0 or NaN.<br/><br/>Returns FALSE if the value is an empty string, array, and object.<br /><br />Return TRUE for all other values.|
+| TONUMBER(expr) | Returns MISSING if the value is MISSING.<br/><br/>Returns NULL if the value is NULL.<br/><br/>Returns 0 if the value is FALSE.<br/><br/>Returns 1 if the value is TRUE.<br/><br/>Returns NUMBER if the value is NUMBER.<br /><br />Returns NUMBER parsed from the string value.<br /><br />Returns NULL for all other values. |
+| TOOBJECT(expr) | Returns MISSING if the value is MISSING.<br/><br/>Returns NULL if the value is NULL.<br/><br/>Returns the object if the value is an object.<br/><br/>Returns an empty object for all other values. |
+| TOSTRING(expr) | Returns MISSING if the value is MISSING.<br/><br/>Returns NULL if the value is NULL.<br/><br/>Returns “false” if the value is FALSE.<br/><br/>Returns “true” if the value is TRUE.<br/><br/>Returns NUMBER in String if the value is NUMBER.<br/><br/>Returns the string value if the value is a string.<br/><br/>Returns NULL for all other values.|
+
+## QueryBuilder Differences
+Couchbase Lite SQL++ Query supports all QueryBuilder features, except Predictive Query and Index. See Table 20 for the features supported by SQL++ but not by QueryBuilder.
+
+** Table 20.  QueryBuilder Differences **
+
+| Category | Components | 
+| ----| ---- | 
+| Conditional Operator | CASE(WHEN …​ THEN …​ ELSE ..) |
+| Array Functions | ARRAY_AGG ARRAY_AVG ARRAY_COUNT ARRAY_IFNULL ARRAY_MAX ARRAY_MIN ARRAY_SUM|
+| Conditional Functions | IFMISSING IFMISSINGORNULL IFNULL MISSINGIF NULLIF Match Functions DIV IDIV ROUND_EVEN |
+| Pattern Matching Functions | REGEXP_CONTAINS REGEXP_LIKE REGEXP_POSITION REGEXP_REPLACE |
+| Type Checking Functions | ISARRAY ISATOM ISBOOLEAN ISNUMBER ISOBJECT ISSTRING TYPE |
+| Type Conversion Functions | TOARRAY TOATOM TOBOOLEAN TONUMBER TOOBJECT TOSTRING |
+
+## Query Parameters
+You can provide runtime parameters to your SQL++ query to make it more flexible.  To specify substitutable parameters within your query string prefix the name with $, $type — see: Example 51.
+
+
+<CodeExample id={51} title="Running a SQL++ Query">
+
+```dart
+final db = Database.openAsync('hotel');
+final query = await AsyncQuery.fromN1ql(db, 
+	'SELECT META().id AS thisId FROM _ WHERE type = \$type');
+final parameters = Parameters();
+parameters.setValue('type', name: 'hotel');
+final results = query.execute();
+```
+
+1. Define a parameter placeholder $type 
+2. Set the value of the $type parameter
+
+</CodeExample>

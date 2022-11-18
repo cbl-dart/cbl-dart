@@ -21,3 +21,7 @@
 [data-theme='dark'] {
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+table {
+  width: 100%;
+}

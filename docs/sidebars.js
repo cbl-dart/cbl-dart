@@ -45,6 +45,10 @@ const sidebars = {
         {
           type: 'doc',
           id: 'querybuilder',
+        },
+        {
+          type: 'doc',
+          id: 'sqlplusplus-mobile',
         }
       ]
     },
