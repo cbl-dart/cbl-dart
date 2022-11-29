@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -81,7 +80,7 @@ final class _DefaultCblConversions implements CblConversions {
 
 // ignore: one_member_abstracts
 abstract interface class FleeceEncodable {
-  FutureOr<void> encodeTo(FleeceEncoder encoder);
+  void encodeTo(FleeceEncoder encoder);
 }
 
 final class FleeceEncoderContext implements DictKeysProvider {
@@ -136,7 +135,7 @@ final class CblMDelegate extends MDelegate {
   }
 
   @override
-  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native) {
+  void encodeNative(FleeceEncoder encoder, Object? native) {
     if (native == null ||
         native is String ||
         native is num ||
@@ -146,7 +145,7 @@ final class CblMDelegate extends MDelegate {
     } else if (native is DateTime) {
       encoder.writeString(native.toIso8601String());
     } else if (native is FleeceEncodable) {
-      return native.encodeTo(encoder);
+      native.encodeTo(encoder);
     } else {
       throw ArgumentError.value(
         native,
