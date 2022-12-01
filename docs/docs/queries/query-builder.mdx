@@ -1,106 +1,140 @@
 ---
-description: How to use QueryBuilder to build effective queries with Couchbase Lite on Dart 
+description:
+  How to use QueryBuilder to build effective queries with Couchbase Lite for
+  Dart
 related_content:
-#todo replace database with live queries 
-  - name: Databases
-    url: /databases
-  - name: Indexes 
+  - name: Live Queries
+    url: /queries/live-queries
+  - name: Indexes
     url: /indexing
 ---
 
-# QueryBuilder 
+# QueryBuilder
 
-## Introduction 
-Couchbase Lite for Dart provides two ways to build and run database queries; the QueryBuilder API described in this topic and the SQL++ for Mobile.
+## Introduction
 
-Database queries defined with the QueryBuilder API use query statements of the form shown in Example 1. The structure and semantics of the query format are based on that of Couchbase's SQL++ query language.
+Couchbase Lite for Dart provides two ways to build and run database queries; the
+`api|QueryBuilder` API described in this topic and
+[SQL++ for Mobile](./sqlplusplus-mobile.mdx).
+
+Database queries defined with the `api|QueryBuilder` API use query statements of
+the form shown in [Example 1](#). The structure and semantics of the query
+format are based on that of Couchbase's SQL++ query language.
 
 <CodeExample id={1} title="Query Format">
 
 ```sql
-SELECT ____ 
-FROM 'database' 
-WHERE ____, 
-JOIN ____ 
-GROUP BY ____ 
-ORDER BY ____ 
+SELECT ____
+FROM 'database'
+WHERE ____,
+JOIN ____
+GROUP BY ____
+ORDER BY ____
 ```
 
 </CodeExample>
 
-1. The `SELECT` clause specifies the data to be returned by the query.
-2. `FROM` specifies the database to query the documents from
-3. `WHERE` statement specifies the query criteria.  The `SELECT`ed properties of documents matching this criteria will be returned in the result set
-4. `JOIN` statement specifies the criteria for joining multiple documents
-5. `GROUP` BY statement specifies the criteria used to group returned items in the result set
-6. `ORDER BY` statement specifies the criteria used to order the items in the result set
+1. The [`SELECT` clause](#select-clause) specifies the data to be returned by
+   the query.
+2. The `FROM` clause specifies the database to query the documents from.
+3. The [`WHERE` clause](#where-clause) specifies the query criteria. <br/> The
+   `SELECT`ed properties of documents matching this criteria will be returned in
+   the result set.
+4. The [`JOIN` clause](#join-clause) specifies the criteria for joining multiple
+   documents.
+5. The [`GROUP BY` clause](#group-by-clause) specifies the criteria used to
+   group returned items in the result set.
+6. The [`ORDER BY` clause](#order-by-clause) specifies the criteria used to
+   order the items in the result set.
 
-## Indexing 
+## Indexing
 
 :::tip
-See the [Indexing](/indexing) topic to learn more about indexing.
+
+See the [Indexing](../indexing.mdx) topic to learn more about indexing.
+
 :::
 
-Before we begin querying documents, let’s briefly mention the importance of having a query index. A query can only be fast if there’s a pre-existing database index it can search to narrow down the set of documents to examine — see: Example 2, which shows how to create an index, and also the Query Troubleshooting topic.
+Before we begin querying documents, let's briefly mention the importance of
+having a query index. A query can only be fast if there's a pre-existing
+database index it can search to narrow down the set of documents to examine
+— see: [Example 2](#), which shows how to create an index, and also the
+[Query Troubleshooting](./query-troubleshooting.mdx) topic.
 
 :::note
-Every index has to be updated whenever a document is updated. So many indexes could hurt write performance.  Good performance depends on designing and creating the right indexes to go along with your queries.
+
+Every index has to be updated whenever a document is updated. So many indexes
+could hurt write performance.
+
+Good performance depends on designing and creating the _right_ indexes to go
+along with your queries.
+
 :::
 
 <CodeExample id={2} title="Creating a New Index">
 
-This example creates a new index for the `type` and `name` properties in the Data Model.
+This example creates a new index for the `type` and `name` properties in the
+Data Model.
 
 ```dart
 final config = ValueIndexConfiguration(['type', 'name']);
-database.createIndex('TypeNameIndex', config);
+await database.createIndex('TypeNameIndex', config);
 ```
 
-**Data Model**
+<Figure id={1} title="Data Model">
 
 ```json
 [
-  { 
+  {
     "id": "hotel123",
     "type": "hotel",
     "name": "Hotel Ghia"
   },
-  { 
+  {
     "id": "hotel456",
     "type": "hotel",
-    "name": "Hotel Deluxe",
+    "name": "Hotel Deluxe"
   }
 ]
 ```
 
+</Figure>
+
 </CodeExample>
 
-## SELECT statement
+## SELECT clause {#select-clause}
 
-Use the SELECT statement to specify which properties you want to return from the queried documents. You can opt to retrieve entire documents, or just the specific properties you need.
+Use the `SELECT` clause to specify which properties you want to return from the
+queried documents. You can opt to retrieve entire documents, or just the
+specific properties you need.
 
 ### Return All Properties
 
-Use the SelectResults.all() method to return the properties of selected documents - see Example 3.
+Use the `api|SelectResult.all()` method to return the properties of selected
+documents - see [Example 3](#).
 
-<CodeExample id={3} title="Return All Properties">
+<CodeExample id={3} title="Using SELECT to Retrieve All Properties">
+
+This query shows how to retrieve all properties from all documents in your
+database.
 
 ```dart
-final query = QueryBuilder.createAsync() 
-              .select(SelectResult.all()) 
-			  .from(DataSource.database(database).as('item')); 
+final query = const QueryBuilder()
+    .select(SelectResult.all())
+    .from(DataSource.database(database).as('airline'));
 ```
 
 </CodeExample>
 
-The query.execute() statement returns the results as a Map<String, dynamic> where they key is the database name, or what ever value you pass as the alias in the as function.
+The `api|Query.execute()` method returns each result as dictionary where they
+key is the database name, or the alias provided to the as function.
 
 <CodeExample id={4} title="ResultSet format from SelectResult.all()">
 
 ```json
 [
   {
-    "item": { 
+    "airline": {
       "callsign": "MILE-AIR",
       "country": "United States",
       "iata": "Q5",
@@ -111,7 +145,7 @@ The query.execute() statement returns the results as a Map<String, dynamic> wher
     }
   },
   {
-    "item": { 
+    "airline": {
       "callsign": "ALASKAN-AIR",
       "country": "United States",
       "iata": "AA",
@@ -126,124 +160,139 @@ The query.execute() statement returns the results as a Map<String, dynamic> wher
 
 </CodeExample>
 
+See [Result Sets](./query-result-sets.mdx) for more on processing query results.
+
 ### Return Selected Properties
 
-To access only specific properties, specify a comma separated list of SelectResult expressions, one for each property, in the select statement of your query — see: Example 5
+To access only specific properties, specify a comma separated list of
+`api|SelectResult` expressions, one for each property, in the `SELECT` clause of
+your query — see: [Example 5](#).
 
 <CodeExample id={5} title="Using SELECT to Retrieve Specific Properties">
 
-In this query we retrieve and then print the _id, type and name properties of each document.
+In this query we retrieve and then print the `id`, `type`and`name` properties of
+each document.
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(
-    SelectResult.expression(Meta.id), 
-    SelectResult.property('type'), 
-    SelectResult.property('name'))
-  .from(DataSource.database(database).as('item')); 
+    SelectResult.expression(Meta.id),
+    SelectResult.property('type'),
+    SelectResult.property('name'),
+  )
+  .from(DataSource.database(database));
 
-final result = await query.execute();
-final results = await result.allResults();
+final resultSet = await query.execute();
 
-for (var r in results) {
-  final map = r.toPlainMap();
-  debugPrint('id: ${map['_id']}');
-  debugPrint('type: ${map['type']}');
-  debugPrint('name: ${map['name']}');
+await for (final result in resultSet.asStream()) {
+  print('id: ${result.string('id')}');
+  print('name: ${result.string('name')}');
 }
-
 ```
 
 </CodeExample>
 
-The query.execute statement returns one or more key-value pairs, one for each SelectResult expression, with the property-name as the key — see Example 6.
+The `api|Query.execute()` method returns each result as a dictionary with one or
+more key-value pairs, one for each `api|SelectResult` expression, with the
+property-name as the key — see [Example 6](#).
 
 <CodeExample id={6} title="Select Result Format">
 
 ```json
 [
-  { 
+  {
     "id": "hotel123",
     "type": "hotel",
     "name": "Hotel Ghia"
   },
-  { 
+  {
     "id": "hotel456",
     "type": "hotel",
-    "name": "Hotel Deluxe",
+    "name": "Hotel Deluxe"
   }
 ]
 ```
 
 </CodeExample>
 
-## WHERE statement 
+See [Result Sets](./query-result-sets.mdx) for more on processing query results.
 
-Like SQL, you can use the `WHERE` statement to choose which documents are returned by your query. The select statement takes in an `Expression`. You can chain any number of `Expressions` in order to implement sophisticated filtering capabilities.
+## WHERE clause {#where-clause}
+
+Like in SQL, you can use the `WHERE` clause to choose which documents are
+included by your query. The `WHERE` clause takes an `api|Expression`. You can
+chain any number of `api|Expression`s in order to implement sophisticated
+filtering capabilities.
 
 ### Comparison Operators
 
-The `Expression Comparators` can be used in the `WHERE` statement to specify on which property to match documents. In the example below, we use the equalTo operator to query documents where the type property equals "hotel".
+The expression comparators (see `api|ExpressionInterface`) can be used in the
+`WHERE` clause to specify on which property to match documents. In the example
+below, we use the `equalTo` operator to query documents where the type property
+equals "hotel".
 
 <CodeExample id={7} title="Using WHERE">
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database).as('item')) 
+  .from(DataSource.database(database))
   .where(Expression.property('type').equalTo(Expression.string('hotel')))
-  .limit(Expression.intValue(10));
+  .limit(Expression.integer(10));
 
-final result = await query.execute();
-final results = await result.allResults();
+final resultSet = await query.execute();
 
-for (var r in results) {
-  final map = r.toPlainMap();
-  debugPrint('name: ${map['name']}');
+await for (final result in resultSet.asStream()) {
+  print('name: ${result.string('name')}');
 }
 ```
 
 </CodeExample>
 
 ### Collection Operators
-Array Collection Operators are useful to check if a given value is present in an array.
 
-### CONTAINS Operator 
-The following example uses the ArrayFunction to find documents where the public_likes array property contains a value equal to "Armani Langworth".
+Array collection operators (see `api|ArrayExpression`) are useful to check if a
+given value is present in an array through the `any`, `every` and `anyAndEvery`
+operators.
 
-<CodeExample id={8} title="using ArrayFunction">
+### CONTAINS Operator
+
+The following example uses the `api|ArrayFunction` to find documents where the
+`public_likes` array property contains a value equal to "Armani Langworth".
+
+<CodeExample id={8} title="Using ArrayFunction.contains()">
 
 ```json
 {
-    "_id": "hotel123",
-    "name": "Apple Droid",
-    "public_likes": [
-      "Armani Langworth", 
-      "Elfrieda Gutkowski", 
-      "Maureen Ruecker"
-    ]
+  "_id": "hotel123",
+  "name": "Apple Droid",
+  "public_likes": ["Armani Langworth", "Elfrieda Gutkowski", "Maureen Ruecker"]
 }
 ```
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(
-    SelectResult.expression(Meta.id), 
-    SelectResult.property('name'), 
-    SelectResult.property('public_likes'))
-  .from(DataSource.database(database).as('item')) 
-  .where(Expression.property('type').equalTo(Expression.string('hotel'))
-    .and(ArrayFunction.contains(
-      Expression.property('public_likes'), 
-      value: Expression.string('Armani Langworth'))))
+    SelectResult.expression(Meta.id),
+    SelectResult.property('name'),
+    SelectResult.property('public_likes'),
+  )
+  .from(DataSource.database(database))
+  .where(
+    Expression.property('type').equalTo(Expression.string('hotel'))
+      .and(
+        ArrayFunction.contains(
+          Expression.property('public_likes'),
+          value: Expression.string('Armani Langworth'),
+        ),
+      ),
+  )
   .limit(Expression.integer(10));
 
 final result = await query.execute();
-final results = await result.allResults();
 
-for (var r in results) {
-  final map = r.toPlainMap();
-  debugPrint('name: ${map['name']}');
+await for (final result in resultSet.asStream()) {
+  print('name: ${result.string('name')}');
 }
 ```
 
@@ -251,153 +300,201 @@ for (var r in results) {
 
 ### IN Operator
 
-The IN operator is useful when you need to explicitly list out the values to test against. The following example looks for documents whose first, last or username property value equals "Armani".
+The `IN` operator is useful when you need to explicitly list out the values to
+test against. The following example looks for documents whose first, last or
+username property value equals "Armani".
 
 <CodeExample id={9} title="IN Operator">
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database).as('item')) 
+  .from(DataSource.database(database))
   .where(Expression.string('Armani').in_([
-    Expression.property('first'), 
-    Expression.property('last'), 
-    Expression.property('username')
+    Expression.property('first'),
+    Expression.property('last'),
+    Expression.property('username'),
   ]));
 ```
 
 </CodeExample>
 
-### Like Operator
+### LIKE Operator
 
 #### String matching
-The like() operator can be used for string matching — see Example 10 
+
+The `LIKE` operator can be used for string matching — see [Example 10](#).
 
 :::note
-The like operator performs case sensitive matches.
-To perform case insensitive matching, use `Function_.lower` or `Function_.upper` to ensure all comparators have the same case, thereby removing the case issue.
+
+The `LIKE` operator performs **case sensitive** matches. <br/> To perform case
+insensitive matching, use `api|Function_.lower` or `api|Function_.upper` to
+ensure all comparators have the same case, thereby removing the case issue.
+
 :::
+
+This query returns `landmark` type documents where the name matches the string
+"Royal Engineers Museum", regardless of how it is capitalized (so, it selects
+"royal engineers museum", "ROYAL ENGINEERS MUSEUM" and so on).
 
 <CodeExample id={10} title="Like with case-insensitive matching">
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(
-    SelectResult.expression(Meta.id), 
-    SelectResult.property('country'), 
-    SelectResult.property('name'))
-  .from(DataSource.database(database).as('item')) 
-  .where(Expression.property('type')
-    .equalTo(Expression.string('landmark'))
-    .and(Function_.lower(
-      Expression.property('name'))
-       .like(Expression.string('royal engineers museum'))))
+    SelectResult.expression(Meta.id),
+    SelectResult.property('country'),
+    SelectResult.property('name'),
+  )
+  .from(DataSource.database(database))
+  .where(
+    Expression.property('type').equalTo(Expression.string('landmark'))
+      .and(
+        Function_.lower(Expression.property('name'))
+          .like(Expression.string('royal engineers museum')),
+      ),
+  )
   .limit(Expression.integer(10));
 ```
 
 </CodeExample>
 
 :::note
-Note the use of Function_.lower to transform name values to the same case as the literal comparator.
+
+Note the use of `api|Function_.lower` to transform name values to the same case
+as the literal comparator.
+
 :::
 
-#### Wildcard Match 
+#### Wildcard Match
 
-We can use % sign within a like expression to do a wildcard match against zero or more characters. Using wildcards allows you to have some fuzziness in your search string.
+We can use `%` sign within a `LIKE` expression to do a wildcard match against
+zero or more characters. Using wildcards allows you to have some fuzziness in
+your search string.
 
-In Example 11 below, we are looking for documents of type "landmark" where the name property matches any string that begins with "eng" followed by zero or more characters, the letter "e", followed by zero or more characters. Once again, we are using Function.lower to make the search case insensitive.
+In [Example 11](#) below, we are looking for documents of `type` "landmark"
+where the `name` property matches any string that begins with "eng" followed by
+zero or more characters, the letter "e", followed by zero or more characters.
+Once again, we are using `api|Function_.lower` to make the search case
+insensitive.
 
-So "landmark" documents with names such as "Engineers", "engine", "english egg" and "England Eagle". Notice that the matches may span word boundaries.
+So, "landmark" documents with names such as "Engineers", "engine", "english egg"
+and "England Eagle" will match. Notice that the matches may span word
+boundaries.
 
 <CodeExample id={11} title="Wildcard Matches">
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(
-    SelectResult.expression(Meta.id), 
-    SelectResult.property('country'), 
-    SelectResult.property('name'))
-  .from(DataSource.database(database).as('item')) 
-  .where(Expression.property('type')
-    .equalTo(Expression.string('landmark'))
-    .and(Function_.lower(
-      Expression.property('name'))
-       .like(Expression.string('eng%e%'))))
+    SelectResult.expression(Meta.id),
+    SelectResult.property('country'),
+    SelectResult.property('name'),
+  )
+  .from(DataSource.database(database))
+  .where(
+    Expression.property('type').equalTo(Expression.string('landmark'))
+      .and(
+        Function_.lower(Expression.property('name'))
+          .like(Expression.string('eng%e%')),
+      ),
+  )
   .limit(Expression.integer(10));
 ```
 
 </CodeExample>
 
-#### Wildcard Character Match 
+#### Wildcard Character Match
 
-We can use an _ sign within a like expression to do a wildcard match against a single character.
+We can use an `_` sign within a `LIKE` expression to do a wildcard match against
+a single character.
 
-In Example 12 below, we are looking for documents of type "landmark" where the name property matches any string that begins with "eng" followed by exactly 4 wildcard characters and ending in the letter "r". The query returns "landmark" type documents with names such as "Engineer", "engineer" and so on.
+In [Example 12](#) below, we are looking for documents of `type` "landmark"
+where the `name` property matches any string that begins with "eng" followed by
+exactly 4 wildcard characters and ending in the letter "r". The query returns
+"landmark" type documents with names such as "Engineer", "engineer" and so on.
 
 <CodeExample id={12} title="Wildcard Character Matching">
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(
-    SelectResult.expression(Meta.id), 
-    SelectResult.property('country'), 
-    SelectResult.property('name'))
-  .from(DataSource.database(database).as('item')) 
-  .where(Expression.property('type')
-    .equalTo(Expression.string('landmark'))
-    .and(Function_.lower(
-      Expression.property('name'))
-       .like(Expression.string('eng___r'))))
+    SelectResult.expression(Meta.id),
+    SelectResult.property('country'),
+    SelectResult.property('name'),
+  )
+  .from(DataSource.database(database))
+  .where(
+    Expression.property('type').equalTo(Expression.string('landmark'))
+      .and(
+        Function_.lower(Expression.property('name'))
+          .like(Expression.string('eng___r')),
+      ),
+  )
   .limit(Expression.integer(10));
 ```
 
 </CodeExample>
 
-### RegEx Operator 
+### REGEX Operator
 
-Similar to the wildcards in like expressions, regex based pattern matching allow you to introduce an element of fuzziness in your search string — see the code shown in Example 13.
+Similar to the wildcards in `LIKE` expressions, `REGEX` based pattern matching
+allows you to introduce an element of fuzziness in your search string — see the
+code shown in [Example 13](#).
 
 :::note
-The regex operator is case sensitive, use upper or lower functions to mitigate this if required.
+
+The `REGEX` operator is case sensitive, use `api|Function_.upper` or
+`api|Function_.lower` functions to mitigate this if required.
+
 :::
 
 <CodeExample id={13} title="Using Regular Expressions">
 
-This example returns documents with a `type` of "landmark" and a `name` property that matches any string that begins with "eng" and ends in the letter "e".
+This example returns documents with a `type` of "landmark" and a `name` property
+that matches any string that begins with "eng" and ends in the letter "e".
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(
-    SelectResult.expression(Meta.id), 
-    SelectResult.property('country'), 
-    SelectResult.property('name'))
-  .from(DataSource.database(database).as('item')) 
-  .where(Expression.property('type')
-    .equalTo(Expression.string('landmark'))
-    .and(Function_.lower(
-      Expression.property('name'))
-       .regex(Expression.string('\\bEng.*e\\b'))))
+    SelectResult.expression(Meta.id),
+    SelectResult.property('country'),
+    SelectResult.property('name'),
+  )
+  .from(DataSource.database(database))
+  .where(
+    Expression.property('type').equalTo(Expression.string('landmark'))
+    .and(
+      Function_.lower(Expression.property('name'))
+        .regex(Expression.string('\\bEng.*e\\b')),
+    ),
+  )
   .limit(Expression.integer(10));
 ```
 
-1. The \b specifies that the match must occur on word boundaries.
+1. The `\b` specifies that the match must occur on word boundaries.
 
 </CodeExample>
 
 :::tip
-For more on the regex spec used by Couchbase Lite see [cplusplus regex](https://cplusplus.com/reference/regex/ECMAScript/) reference page
+
+For more on the regex spec used by Couchbase Lite see
+[cplusplus regex reference page](https://cplusplus.com/reference/regex/ECMAScript/).
+
 :::
 
 ### Deleted Document
 
-You can query documents that have been deleted (tombstones) as shown in Example 14.
+You can query documents that have been deleted (tombstones) as shown in
+[Example 14](#).
 
 <CodeExample id={14} title="Query to select Deleted Documents">
 
-This example shows how to query deleted documents in the database. It returns is an array of key-value pairs.
+This example shows how to query deleted documents in the database. It returns is
+an array of key-value pairs.
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = const QueryBuilder()
   .select(SelectResult.expression(Meta.id))
   .from(DataSource.database(database))
   .where(Meta.isDeleted);
@@ -405,23 +502,27 @@ final query = QueryBuilder.createAsync()
 
 </CodeExample>
 
-## JOIN statement
+## JOIN clause {#join-clause}
 
-The JOIN clause enables you to select data from multiple documents that have been linked by criteria specified in the JOIN statement. For example to combine airline details with route details, linked by the airline id — see Example 15.
+The JOIN clause enables you to select data from multiple documents that have
+been linked by criteria specified in the JOIN clause. For example to combine
+airline details with route details, linked by the airline id — see Example 15.
 
 <CodeExample id={15} title="Using JOIN to Combine Document Details">
 
-This example JOINS the document of type route with documents of type airline using the document ID (id) on the _airline document and airlineid on the route document.
+This example JOINS the document of type route with documents of type airline
+using the document ID (id) on the \_airline document and airlineid on the route
+document.
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(
-    SelectResult.expression(Expression.property('name').from('airline')), 
-    SelectResult.expression(Expression.property('callsign').from('airline')), 
-    SelectResult.expression(Expression.property('destinationairport').from('route')), 
-    SelectResult.expression(Expression.property('stops').from('route')), 
+    SelectResult.expression(Expression.property('name').from('airline')),
+    SelectResult.expression(Expression.property('callsign').from('airline')),
+    SelectResult.expression(Expression.property('destinationairport').from('route')),
+    SelectResult.expression(Expression.property('stops').from('route')),
     SelectResult.expression(Expression.property('airline').from('route')))
-  .from(DataSource.database(database).as('airline')) 
+  .from(DataSource.database(database).as('airline'))
   .join(Join.join(DataSource.database(database).as('route'))
     .on(Meta.id.from('airline').equalTo(Expression.property('airlineid').from('route'))))
   .where(Expression.property('type')
@@ -437,11 +538,13 @@ final query = QueryBuilder.createAsync()
 
 </CodeExample>
 
-## GROUP BY statement
+## GROUP BY clause {#group-by-clause}
 
-You can perform further processing on the data in your result set before the final projection is generated.
+You can perform further processing on the data in your result set before the
+final projection is generated.
 
-The following example looks for the number of airports at an altitude of 300 ft or higher and groups the results by country and timezone.
+The following example looks for the number of airports at an altitude of 300 ft
+or higher and groups the results by country and timezone.
 
 <CodeExample id={16} title="Query using GroupBy">
 
@@ -449,20 +552,21 @@ Data Model for Example
 
 ```json
 {
-    "_id": "airport123",
-    "type": "airport",
-    "country": "United States",
-    "geo": { "alt": 456 },
-    "tz": "America/Anchorage"
+  "_id": "airport123",
+  "type": "airport",
+  "country": "United States",
+  "geo": { "alt": 456 },
+  "tz": "America/Anchorage"
 }
 ```
 
-This example shows a query that selects all airports with an altitude above 300ft. The output (a count, $1) is grouped by country, within timezone.
+This example shows a query that selects all airports with an altitude above
+300ft. The output (a count, $1) is grouped by country, within timezone.
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(
-    SelectResult.expression(Function_.count(Expression.all())), 
+    SelectResult.expression(Function_.count(Expression.all())),
     SelectResult.expression(Expression.property('country')),
     SelectResult.expression(Expression.property('tz')))
   .from(DataSource.database(database))
@@ -485,18 +589,20 @@ for (var r in results) {
 
 </CodeExample>
 
-## ORDER BY statement
+## ORDER BY clause {#order-by-clause}
 
-It is possible to sort the results of a query based on a given expression result — see Example 17
+It is possible to sort the results of a query based on a given expression result
+— see Example 17
 
  <CodeExample id={17} title="Query using OrderBy">
 
-This example shows a query that returns documents of type equal to "hotel" sorted in ascending order by the value of the title property.
+This example shows a query that returns documents of type equal to "hotel"
+sorted in ascending order by the value of the title property.
 
 ```dart
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(
-    SelectResult.expression(Meta.id), 
+    SelectResult.expression(Meta.id),
     SelectResult.expression(Expression.property('title')))
   .from(DataSource.database(database))
   .where(Expression.property('type')
@@ -510,71 +616,105 @@ final query = QueryBuilder.createAsync()
 
 ## Date/Time Functions
 
-Couchbase Lite documents support a date type that internally stores dates in ISO 8601 with the GMT/UTC timezone.  Couchbase Lite’s Query Builder API includes four functions for date comparisons.
+Couchbase Lite documents support a date type that internally stores dates in ISO
+8601 with the GMT/UTC timezone. Couchbase Lite's Query Builder API includes four
+functions for date comparisons.
 
 - `api|Function_.stringToMillis`
-  - The input to this will be a validly formatted ISO 8601 date_time string. Valid date strings must start with a date in the form YYYY-MM-DD (time only string are not supported).  The end result will be an expression (with a numeric content) that can be further input into the query builder.
+
+  - The input to this will be a validly formatted ISO 8601 date_time string.
+    Valid date strings must start with a date in the form YYYY-MM-DD (time only
+    string are not supported). The end result will be an expression (with a
+    numeric content) that can be further input into the query builder.
 
 - `api|Function_.stringToUTC`
-  - The input to this will be a validly formatted ISO 8601 date_time string. Valid date strings must start with a date in the form YYYY-MM-DD (time only string are not supported).  The end result will be an expression (with string content) that can be further input into the query builder.
+
+  - The input to this will be a validly formatted ISO 8601 date_time string.
+    Valid date strings must start with a date in the form YYYY-MM-DD (time only
+    string are not supported). The end result will be an expression (with string
+    content) that can be further input into the query builder.
 
 - `api|Function_.millisToString`
-  - Creates a function expression which evaluates to the ISO 8601 date string in the device local timezone of the given milliseconds since the unix epoch expression.  The end result will be an expression (with string content) that can be further input into the query builder.
+
+  - Creates a function expression which evaluates to the ISO 8601 date string in
+    the device local timezone of the given milliseconds since the unix epoch
+    expression. The end result will be an expression (with string content) that
+    can be further input into the query builder.
 
 - `api|Function_.millisToUTC`
-  - Creates a function expression which evaluates to the UTC ISO 8601 date string of the given milliseconds since the unix epoch expression.  The end result will be an expression (with string content) that can be further input into the query builder.
+  - Creates a function expression which evaluates to the UTC ISO 8601 date
+    string of the given milliseconds since the unix epoch expression. The end
+    result will be an expression (with string content) that can be further input
+    into the query builder.
 
 ## Result Set
 
 ### Processing
-This section shows how to handle the returned result sets for different types of SELECT statements.
 
-The result set format and its handling varies slightly depending on the type of SelectResult statements used. The result set formats you may encounter include those generated by :
+This section shows how to handle the returned result sets for different types of
+SELECT statements.
 
-  - `api|SelectResult.all` — see: All Properties
+The result set format and its handling varies slightly depending on the type of
+SelectResult statements used. The result set formats you may encounter include
+those generated by :
 
-  - `api|SelectResult.expression`— see: Specific Properties
+- `api|SelectResult.all` — see: All Properties
 
-  - SelectResult.expression(Meta.id) — Metadata (such as the _id) — see: Document ID Only
+- `api|SelectResult.expression`— see: Specific Properties
 
-  - SelectResult.expression(Function.count(Expression.all())).as("mycount") —  see: Select Count-only
+- SelectResult.expression(Meta.id) — Metadata (such as the \_id) — see: Document
+  ID Only
 
-To process the results of a query, you first need to execute it using Query.execute.  The execution of a Couchbase Lite's database query typically returns an array of results, a result set.
+- SelectResult.expression(Function.count(Expression.all())).as("mycount") — 
+  see: Select Count-only
 
-  - The result set of an aggregate, count-only, query is a key-value pair — see Select Count-only — which you can access using the count name as its key.
+To process the results of a query, you first need to execute it using
+Query.execute. The execution of a Couchbase Lite's database query typically
+returns an array of results, a result set.
 
-  - The result set of a query returning document properties is an array.  Each array row represents the data from a document that matched your search criteria (the WHERE statements) The composition of each row is determined by the combination of SelectResult expressions provided in the SELECT statement. To unpack these result sets you need to iterate this array.
+- The result set of an aggregate, count-only, query is a key-value pair — see
+  Select Count-only — which you can access using the count name as its key.
+
+- The result set of a query returning document properties is an array. Each
+  array row represents the data from a document that matched your search
+  criteria (the WHERE clauses) The composition of each row is determined by the
+  combination of SelectResult expressions provided in the SELECT clause. To
+  unpack these result sets you need to iterate this array.
 
 ### Select All Properties
 
 #### Query
 
-The Select statement for this type of query, which returns all document properties for each document matching the query criteria, is fairly straightforward — see Example 18
+The Select statement for this type of query, which returns all document
+properties for each document matching the query criteria, is fairly
+straightforward — see Example 18
 
 <CodeExample id={18} title="Query selecting All Properties">
 
 ```dart
 final database = await Database.openAsync('hotels');
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(SelectResult.all())
   .from(DataSource.database(database));
 ```
 
 </CodeExample>
 
-
 #### Result Set Format
 
-The result set returned by queries using SelectResult.all is an array of dictionary objects — one for each document matching the query criteria.
+The result set returned by queries using SelectResult.all is an array of
+dictionary objects — one for each document matching the query criteria.
 
-For each result object, the key is the database name and the 'value' is a dictionary representing each document property as a key-value pair — see: Example 17.
+For each result object, the key is the database name and the 'value' is a
+dictionary representing each document property as a key-value pair — see:
+Example 17.
 
 <CodeExample id={19} title="Format of Result Set (All Properties)">
 
 ```json
 [
   {
-    "travel-sample": { 
+    "travel-sample": {
       "callsign": "MILE-AIR",
       "country": "United States",
       "iata": "Q5",
@@ -585,7 +725,7 @@ For each result object, the key is the database name and the 'value' is a dictio
     }
   },
   {
-    "travel-sample": { 
+    "travel-sample": {
       "callsign": "ALASKAN-AIR",
       "country": "United States",
       "iata": "AA",
@@ -602,7 +742,8 @@ For each result object, the key is the database name and the 'value' is a dictio
 
 #### Result Set Access
 
-In this case access the retrieved document properties by converting each row's value, in turn, to a dictionary — as shown in Example 20.
+In this case access the retrieved document properties by converting each row's
+value, in turn, to a dictionary — as shown in Example 20.
 
 <CodeExample id={20} title="Using Document Properties(All)">
 
@@ -626,13 +767,14 @@ for (var row in await results.allResults()) {
 
 #### Query
 
-Here we use SelectResult.expression to specify the document properties we want our query to return — see: Example 21.
+Here we use SelectResult.expression to specify the document properties we want
+our query to return — see: Example 21.
 
 <CodeExample id={21} title="Query selecting Specific Properties">
 
 ```dart
 final database = await Database.openAsync('hotels');
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(
     SelectResult.expression(Meta.id).as('metaId'),
     SelectResult.expression(Expression.property('id')),
@@ -645,23 +787,26 @@ final query = QueryBuilder.createAsync()
 </CodeExample>
 
 #### Result Set Format
-The result set returned when selecting only specific document properties is an array of dictionary objects — one for each document matching the query criteria.
 
-Each result object comprises a key-value pair for each selected document property — see Example 22
+The result set returned when selecting only specific document properties is an
+array of dictionary objects — one for each document matching the query criteria.
+
+Each result object comprises a key-value pair for each selected document
+property — see Example 22
 
 <CodeExample id={22} title="Format of Result Set (Specific Properties)">
 
 ```json
 [
-  { 
+  {
     "id": "hotel123",
     "type": "hotel",
     "name": "Hotel Ghia"
   },
-  { 
+  {
     "id": "hotel456",
     "type": "hotel",
-    "name": "Hotel Deluxe",
+    "name": "Hotel Deluxe"
   }
 ]
 ```
@@ -669,7 +814,9 @@ Each result object comprises a key-value pair for each selected document propert
 </CodeExample>
 
 #### Result Set Access
-Access the retrieved properties by converting each row into a dictionary — as shown in Example 23.
+
+Access the retrieved properties by converting each row into a dictionary — as
+shown in Example 23.
 
 <CodeExample id={23} title="Using Returned Document Properties (Specific Properties)">
 
@@ -678,8 +825,8 @@ final results = await query.execute();
 for (var row in await results.allResults()) {
   final docId = row.string('metaId');
   final id = row.string('id');
-  final hotel = Hotel(id); 
-  hotel.name = row.string('name'); 
+  final hotel = Hotel(id);
+  hotel.name = row.string('name');
   hotel.city = row.string('city');
   hotel.type = row.string('type');
   //do something with hotel ...
@@ -690,14 +837,17 @@ for (var row in await results.allResults()) {
 
 ### Select Document Id Only
 
-#### Query 
-You would typically use this type of query if retrieval of document properties directly would consume excessive amounts of memory and-or processing time — see: Example 24.
+#### Query
+
+You would typically use this type of query if retrieval of document properties
+directly would consume excessive amounts of memory and-or processing time — see:
+Example 24.
 
 <CodeExample id={24} title="Query selecting only Doc Id">
 
 ```dart
 final database = await Database.openAsync('hotels');
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(
     SelectResult.expression(Meta.id).as('metaId').as('metaId'))
   .from(DataSource.database(database));
@@ -705,10 +855,12 @@ final query = QueryBuilder.createAsync()
 
 </CodeExample>
 
-
 #### Result Set Format
 
-The result set returned by queries using a SelectResult expression of the form SelectResult.expression(Meta.id) is an array of dictionary objects — one for each document matching the query criteria. Each result object has id as the key and the ID value as its value — -see Example 25.
+The result set returned by queries using a SelectResult expression of the form
+SelectResult.expression(Meta.id) is an array of dictionary objects — one for
+each document matching the query criteria. Each result object has id as the key
+and the ID value as its value — -see Example 25.
 
 <CodeExample id={25} title="Format of Result Set (Doc Id only)">
 
@@ -719,14 +871,16 @@ The result set returned by queries using a SelectResult expression of the form S
   },
   {
     "id": "hotel456"
-  },
+  }
 ]
 ```
 
 </CodeExample>
 
 #### Result Set Access
-In this case, access the required document's properties by unpacking the id and using it to get the document from the database — see: Example 26.
+
+In this case, access the required document's properties by unpacking the id and
+using it to get the document from the database — see: Example 26.
 
 <CodeExample id={26} title="Using Returned Document Properties (Document Id)">
 
@@ -738,10 +892,10 @@ for (var row in await results.allResults()) {
   final doc = await database.document(docId);
   if (doc != null){
     final hotelId = doc.string('id');
-    final name = doc.string('name'); 
+    final name = doc.string('name');
     final city = doc.string('city');
     final type = doc.string('type');
-    //do something with variables 
+    //do something with variables
   }
 }
 ```
@@ -756,7 +910,7 @@ for (var row in await results.allResults()) {
 
 ```dart
 final database = await Database.openAsync('hotels');
-final query = QueryBuilder.createAsync() 
+final query = QueryBuilder.createAsync()
   .select(
     SelectResult.expression(Function_.count(Expression.all())).as('mycount'))
   .from(DataSource.database(database))
@@ -766,7 +920,11 @@ final query = QueryBuilder.createAsync()
 </CodeExample>
 
 #### Result Set Format
-The result set returned by a count such as Select.expression(Function_.count(Expression.all))) is a key-value pair. The key is the count name, as defined using SelectResult.as — see: Example 28 for the format and Example 27 for the query.
+
+The result set returned by a count such as
+Select.expression(Function\_.count(Expression.all))) is a key-value pair. The
+key is the count name, as defined using SelectResult.as — see: Example 28 for
+the format and Example 27 for the query.
 
 <CodeExample id={28} title="Format of Result Set (Count)">
 
@@ -778,8 +936,8 @@ The result set returned by a count such as Select.expression(Function_.count(Exp
 
 </CodeExample>
 
-
 #### Result Set Access
+
 Access the count using its alias name (mycount in this example) — see Example 29
 
 <CodeExample id={29} title="Using Returned Document Properties (Count)">
@@ -795,7 +953,10 @@ for (var row in await results.allResults()) {
 </CodeExample>
 
 ### Handling Pagination
-One way to handle pagination in high-volume queries is to retrieve the results in batches. Use the limit and offset feature, to return a defined number of results starting from a given offset — see: Example 30.
+
+One way to handle pagination in high-volume queries is to retrieve the results
+in batches. Use the limit and offset feature, to return a defined number of
+results starting from a given offset — see: Example 30.
 
 <CodeExample id={30} title="Query Pagination">
 
@@ -808,17 +969,24 @@ final query = QueryBuilder.createAsync()
  .select(
     SelectResult.all())
  .from(DataSource.database(database))
- .limit(Expression.integer(limit), 
+ .limit(Expression.integer(limit),
    offset: Expression.integer(offset));
 ```
 
 </CodeExample>
 
 ## JSON Result Sets
-Couchbase Lite for dart provides a convenience API to convert query results to JSON strings.  
 
-:::tip 
-In dart/flutter you can use code generators to auto generate the code for handing serialization.  See [Creating model classes the json serializable way](https://docs.flutter.dev/development/data-and-backend/json#serializing-json-using-code-generation-libraries) for more information.  The example below shows how this can be done using the class `Hotel` with methods generated from the code generators.  Also note when updating your model classes you will be required to run this command from the terminal to update your code generated classes:
+Couchbase Lite for dart provides a convenience API to convert query results to
+JSON strings.
+
+:::tip In dart/flutter you can use code generators to auto generate the code for
+handing serialization. See
+[Creating model classes the json serializable way](https://docs.flutter.dev/development/data-and-backend/json#serializing-json-using-code-generation-libraries)
+for more information. The example below shows how this can be done using the
+class `Hotel` with methods generated from the code generators. Also note when
+updating your model classes you will be required to run this command from the
+terminal to update your code generated classes:
 
 flutter pub run build_runner build --delete-conflicting-outputs
 
@@ -832,13 +1000,13 @@ flutter pub run build_runner build --delete-conflicting-outputs
 // part 'hotel.g.dart';
 // @JsonSerializable(explicitToJson: true)
 // class Hotel {
-//   String id; 
-//   String type; 
+//   String id;
+//   String type;
 //   String name;
-//   String city; 
+//   String city;
 //   String country;
-//   String? description; 
-//   String? text; 
+//   String? description;
+//   String? text;
 //   ... other class content
 //   Hotel(
 //    {required this.id,
@@ -876,8 +1044,8 @@ final query = QueryBuilder.createAsync()
 final results = await query.execute();
 final results = await result.allResults();
 for (var r in results) {
-  final map = r.toPlainMap(); 
-  final hotelDao = HotelDao.fromJson(map); 
+  final map = r.toPlainMap();
+  final hotelDao = HotelDao.fromJson(map);
   final hotel = hotelDao.hotel;
   //do something with hotel object
 }
@@ -903,7 +1071,8 @@ If your query selects ALL then the JSON format will be:
 
 </CodeExample>
 
-If your query selects a sub-set of available properties then the JSON format will be:
+If your query selects a sub-set of available properties then the JSON format
+will be:
 
 <CodeExample id={32} title="JSON format for Select All">
 
