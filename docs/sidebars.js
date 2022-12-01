@@ -44,37 +44,37 @@ const sidebars = {
       items: [
         {
           type: 'doc',
-          id: 'querybuilder',
+          id: 'queries/query-builder',
         },
         {
           type: 'doc',
-          id: 'sqlplusplus-mobile',
+          id: 'queries/sqlplusplus-mobile',
         },
         {
           type: 'doc',
-          id: 'sqlplusplus-server-diff',
+          id: 'queries/sqlplusplus-server-diff',
         },
         {
           type: 'doc',
-          id: 'sqlplusplus-querybuilder-diff',
+          id: 'queries/sqlplusplus-query-builder-diff',
         },
         {
           type: 'doc',
-          id: 'query-resultset',
+          id: 'queries/query-result-sets',
         },
         {
           type: 'doc',
-          id: 'livequeries',
+          id: 'queries/live-queries',
         },
         {
           type: 'doc',
-          id: 'query-troubleshooting',
-        }
-      ]
+          id: 'queries/query-troubleshooting',
+        },
+      ],
     },
     {
       type: 'doc',
-      id: 'indexing'
+      id: 'indexing',
     },
     {
       type: 'doc',
