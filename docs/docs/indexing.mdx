@@ -1,33 +1,41 @@
 ---
-description: Couchbase mobile database indexes and indexing concepts 
+description: Couchbase mobile database indexes and indexing concepts
 related_content:
-
-#todo replace with live queries and indexing in the future
   - name: Databases
     url: /databases
-  - name: Documents 
+  - name: Documents
     url: /documents
-  # - name: Indexing
-  #   url: /indexing
+  - name: Indexing
+    url: /indexing
 ---
 
 # Indexes
 
-## Introduction 
+## Introduction
 
-Before we begin querying documents, let’s briefly mention the importance of having an appropriate and balanced approach to indexes.
+Before we begin querying documents, let's briefly mention the importance of
+having an appropriate and balanced approach to indexes.
 
-Creating indexes can speed up the performance of queries. A query will typically return results more quickly if it can take advantage of an existing database index to search, narrowing down the set of documents to be examined.
+Creating indexes can speed up the performance of queries. A query will typically
+return results more quickly if it can take advantage of an existing database
+index to search, narrowing down the set of documents to be examined.
 
 :::note Constraints
 
-Couchbase Lite does not currently support partial value indexes; indexes with non-property expressions. You should only index with properties that you plan to use in the query.
+Couchbase Lite does not currently support partial value indexes; indexes with
+non-property expressions. You should only index with properties that you plan to
+use in the query.
 
 :::
 
-## Creating a new index 
+## Creating a new index
 
-You can use SQL++ or QueryBuilder syntaxes to create an index.  Example 1 creates a new index for the type and name properties, shown in this data model:
+You can use SQL++ or QueryBuilder syntaxes to create an index.
+
+[Example 2](#) creates a new index for the `type` and `name` properties, shown
+in this data model:
+
+<CodeExample id={1} title="Data Model">
 
 ```json
 {
@@ -39,22 +47,26 @@ You can use SQL++ or QueryBuilder syntaxes to create an index.  Example 1 create
 }
 ```
 
+</CodeExample>
+
 ### SQL++
 
-The code to create the index will look something like this: 
-<CodeExample id={1} title="Create index SQL++">
+The code to create the index will look something like this:
+
+<CodeExample id={2} title="Create index with SQL++">
 
 ```dart
 final config = ValueIndexConfiguration(['type', 'name']);
-database.createIndex('TypeNameIndex', config);
+await database.createIndex('TypeNameIndex', config);
 ```
 
 </CodeExample>
 
-### QueryBuilder 
+### QueryBuilder
 
-The code to create the index will look something like this: 
-<CodeExample id={2} title="Create index Query Builder">
+The code to create the index will look something like this:
+
+<CodeExample id={3} title="Create index QueryBuilder">
 
 ```dart
 final typeExpression = Expression.property('type');
@@ -64,6 +76,19 @@ final valueIndexItems = {
 	ValueIndexItem.expression(nameExpression),
 };
 final index = IndexBuilder.valueIndex(valueIndexItems);
-database.createIndex('TypeNameIndex', index);
+await database.createIndex('TypeNameIndex', index);
 ```
+
 </CodeExample>
+
+## Summary
+
+When planning the indexes you need for your database, remember that while
+indexes make queries faster, they may also:
+
+- Make writes slightly slower, because each index must be updated whenever a
+  document is updated.
+- Make your Couchbase Lite database slightly larger.
+
+So too many indexes may hurt performance. Optimal performance depends on
+designing and creating the _right_ indexes to go along with your queries.
