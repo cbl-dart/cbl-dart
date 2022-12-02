@@ -9,4 +9,96 @@ related_content:
 
 # Live Queries
 
-TODO
+## Activating a Live Query
+
+A live query is a query that, once activated, remains active and monitors the
+database for changes; refreshing the result set whenever a change occurs. As
+such, it is a great way to build reactive user interfaces — especially
+table/list views — that keep themselves up to date.
+
+**So, a simple use case may be**: A replicator running and pulling new data from
+a server, whilst a live-query-driven UI automatically updates to show the data
+without the user having to manually refresh. This helps your app feel quick and
+responsive.
+
+With Couchbase Lite for Dart, live queries can be watched through:
+
+- Listener callbacks: `api|Query.addChangeListener`
+- Streams: `api|Query.changes`
+
+Each time you start watching a live query, the query is executed and an initial
+change notification is dispatched. The query is then kept active and further
+change notifications are dispatched whenever a change occurs.
+
+## Watching with Change Listeners
+
+In the case of the synchronous API, all changes are delivered to the listeners
+as soon as they are registered.
+
+With the asynchronous API, changes are only guaranteed to be delivered once the
+`api|dart:async|Future` returned from the registration call is completed:
+
+<CodeExample id={1} title="Starting a Live Query - Change Listener">
+
+```dart
+// Await the future returned from the registration call.
+await query.addChangeListener((change) async {
+  final results = await change.results.allResults();
+	for (final result in results) {
+		// Do something with the result...
+	}
+});
+```
+
+</CodeExample>
+
+To stop receiving notifications, call `api|Query.removeChangeListener` with the
+token that was returned from the registration call. Regardless of the whether
+the API is synchronous or asynchronous, listeners will stop receiving
+notifications immediately:
+
+<CodeExample id={2} title="Stopping a Live Query - Change Listener">
+
+```dart
+final token = await query.addChangeListener((change) async { ... });
+
+// Some time goes by...
+
+await query.removeChangeListener(token);
+```
+
+</CodeExample>
+
+## Watching with Streams
+
+Streams are a convenient alternative to listen for changes. Similarly to change
+listeners, change streams returned from the synchronous API are receiving
+changes as soon as the stream is subscribed to.
+
+Streams returned from the asynchronous API start to listen asynchronously.
+Unfortunately it's not possible to return a Future from Stream.listen to signal
+to subscribers the point in time after which the the stream will observe events.
+Instead, the asynchronous API returns a `api|AsyncListenStreams`, which expose a
+`api|dart:async|Future` in `api|AsyncListenStream.listening` that completes when
+the stream is fully listening:
+
+<CodeExample id={3} title="Starting a Live Query - Stream">
+
+```dart
+final stream = query.changes();
+
+stream.listen((change) async {
+	final results = await change.results.allResults();
+	for (final result in results) {
+		// Do something with the result...
+	}
+});
+
+// Await the Future exposed by the stream.
+await stream.listening;
+```
+
+</CodeExample>
+
+To stop listening to changes just cancel the subscription, like with any other
+stream.
