@@ -1,17 +1,17 @@
 const visitImport = import('unist-util-visit').then((m) => m.visit)
 const isImport = import('unist-util-is').then((m) => m.is)
 
-const referenceRegex = /(Figure|Example) ([0-9]+)/
+const referenceRegex = /(Figure|Table|Example) ([0-9]+)/
 
 /**
  * Remark plugin that adds the URL for simple figure links.
  *
  * Figure references start with "Figure".
+ * Table references start with "Table".
+ * Code examples references start with "Example".
  *
- * Code examples reference with "Example".
- *
- * A link is simple if it has the form: [Figure 1](#) or [Example 1](#).
- * It will be transformed into: Figure 1](#figure-1) [Example 1](#example-1).
+ * A link is simple if it has the form: [Figure 1](#), [Table 1](#) or [Example 1](#).
+ * It will be transformed into: [Figure 1](#figure-1), [Table 1](#table-1) [Example 1](#example-1).
  */
 export function figureLinks() {
   return async (ast: any) => {

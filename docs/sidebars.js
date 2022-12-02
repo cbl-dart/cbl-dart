@@ -74,6 +74,10 @@ const sidebars = {
     },
     {
       type: 'doc',
+      id: 'full-text-search',
+    },
+    {
+      type: 'doc',
       id: 'indexing',
     },
     {
