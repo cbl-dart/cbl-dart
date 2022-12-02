@@ -464,10 +464,10 @@ final query = const QueryBuilder()
   .from(DataSource.database(database))
   .where(
     Expression.property('type').equalTo(Expression.string('landmark'))
-    .and(
-      Function_.lower(Expression.property('name'))
-        .regex(Expression.string('\\bEng.*e\\b')),
-    ),
+      .and(
+        Function_.lower(Expression.property('name'))
+          .regex(Expression.string('\\bEng.*e\\b')),
+      ),
   )
   .limit(Expression.integer(10));
 ```
@@ -504,36 +504,44 @@ final query = const QueryBuilder()
 
 ## JOIN clause {#join-clause}
 
-The JOIN clause enables you to select data from multiple documents that have
-been linked by criteria specified in the JOIN clause. For example to combine
-airline details with route details, linked by the airline id — see Example 15.
+The `JOIN` clause enables you to select data from multiple documents that have
+been linked by criteria specified in the `JOIN` clause. For example to combine
+airline details with route details, linked by the airline ID — see
+[Example 15](#).
 
 <CodeExample id={15} title="Using JOIN to Combine Document Details">
 
-This example JOINS the document of type route with documents of type airline
-using the document ID (id) on the \_airline document and airlineid on the route
-document.
+This example JOINS the document of type `route` with documents of type `airline`
+using the document ID (`id`) on the _airline_ document and `airlineid` on the
+_route_ document.
 
 ```dart
-final query = QueryBuilder.createAsync()
+final query = const QueryBuilder()
   .select(
     SelectResult.expression(Expression.property('name').from('airline')),
     SelectResult.expression(Expression.property('callsign').from('airline')),
     SelectResult.expression(Expression.property('destinationairport').from('route')),
     SelectResult.expression(Expression.property('stops').from('route')),
-    SelectResult.expression(Expression.property('airline').from('route')))
+    SelectResult.expression(Expression.property('airline').from('route')),
+  )
   .from(DataSource.database(database).as('airline'))
-  .join(Join.join(DataSource.database(database).as('route'))
-    .on(Meta.id.from('airline').equalTo(Expression.property('airlineid').from('route'))))
-  .where(Expression.property('type')
-    .from('route')
-    .equalTo(Expression.string('route'))
-   .and(Expression.property('type')
-    .from('airline')
-    .equalTo(Expression.string('airline')))
-   .and(Expression.property('sourceairport')
-    .from('route')
-    .equalTo(Expression.string('RIX'))));
+  .join(
+    Join.join(DataSource.database(database).as('route')).on(
+      Meta.id.from('airline')
+        .equalTo(Expression.property('airlineid').from('route')),
+    ),
+  )
+  .where(
+    Expression.property('type').from('route').equalTo(Expression.string('route'))
+      .and(
+        Expression.property('type').from('airline')
+          .equalTo(Expression.string('airline')),
+      )
+      .and(
+        Expression.property('sourceairport').from('route')
+          .equalTo(Expression.string('RIX')),
+      ),
+  );
 ```
 
 </CodeExample>
@@ -546,9 +554,7 @@ final projection is generated.
 The following example looks for the number of airports at an altitude of 300 ft
 or higher and groups the results by country and timezone.
 
-<CodeExample id={16} title="Query using GroupBy">
-
-Data Model for Example
+<Figure id={2} title="Data Model for Example">
 
 ```json
 {
@@ -560,30 +566,35 @@ Data Model for Example
 }
 ```
 
+</Figure>
+
+<CodeExample id={16} title="Using GROUP BY">
+
 This example shows a query that selects all airports with an altitude above
 300ft. The output (a count, $1) is grouped by country, within timezone.
 
 ```dart
-final query = QueryBuilder.createAsync()
+final query = const QueryBuilder()
   .select(
     SelectResult.expression(Function_.count(Expression.all())),
     SelectResult.expression(Expression.property('country')),
-    SelectResult.expression(Expression.property('tz')))
+    SelectResult.expression(Expression.property('tz')),
+  )
   .from(DataSource.database(database))
-  .where(Expression.property('type')
-    .equalTo(Expression.string('airport')))
-   .groupBy(
+  .where(Expression.property('type').equalTo(Expression.string('airport')))
+  .groupBy(
      Expression.property('country'),
-     Expression.property('tz'));
+     Expression.property('tz'),
+  );
 
-final result = await query.execute();
-final results = await result.allResults();
+final resultSet = await query.execute();
 
-for (var r in results) {
-  final map = r.toPlainMap();
-  debugPrint('Count: ${map['$1']}');
-  debugPrint('Timezone: ${map['tz']}');
-  debugPrint('Country: ${map['country']}');
+await for (final result in resultSet.asStream()) {
+  print(
+    'There are ${result.integer(r'$1')} airports on '
+    'the ${result.string('tz')} timezone located '
+    'in ${result.string('country')} and above 300 ft.',
+  );
 }
 ```
 
@@ -592,24 +603,23 @@ for (var r in results) {
 ## ORDER BY clause {#order-by-clause}
 
 It is possible to sort the results of a query based on a given expression result
-— see Example 17
+— see [Example 17](#).
 
- <CodeExample id={17} title="Query using OrderBy">
+ <CodeExample id={17} title="Using ORDER BY">
 
-This example shows a query that returns documents of type equal to "hotel"
-sorted in ascending order by the value of the title property.
+This example shows a query that returns documents of `type` equal to "hotel"
+sorted in ascending order by the value of the `title` property.
 
 ```dart
-final query = QueryBuilder.createAsync()
+final query = const QueryBuilder()
   .select(
     SelectResult.expression(Meta.id),
-    SelectResult.expression(Expression.property('title')))
+    SelectResult.expression(Expression.property('title')),
+  )
   .from(DataSource.database(database))
-  .where(Expression.property('type')
-    .equalTo(Expression.string('hotel')))
-  .orderBy(
-    Ordering.property('title').ascending())
-   .limit(Expression.integer(10));
+  .where(Expression.property('type').equalTo(Expression.string('hotel')))
+  .orderBy(Ordering.property('title').ascending())
+  .limit(Expression.integer(10));
 ```
 
 </CodeExample>
@@ -617,37 +627,40 @@ final query = QueryBuilder.createAsync()
 ## Date/Time Functions
 
 Couchbase Lite documents support a date type that internally stores dates in ISO
-8601 with the GMT/UTC timezone. Couchbase Lite's Query Builder API includes four
-functions for date comparisons.
+8601 with the GMT/UTC timezone.
+
+Couchbase Lite's `api|QueryBuilder` API includes four functions for date
+comparisons.
 
 - `api|Function_.stringToMillis`
 
-  - The input to this will be a validly formatted ISO 8601 date_time string.
-    Valid date strings must start with a date in the form YYYY-MM-DD (time only
-    string are not supported). The end result will be an expression (with a
-    numeric content) that can be further input into the query builder.
+  The input to this must be a validly formatted ISO 8601 date string. Valid date
+  strings must start with a date in the form YYYY-MM-DD (time only string are
+  not supported). The end result will be an expression (with a numeric content)
+  that can be further input into the query builder.
 
 - `api|Function_.stringToUTC`
 
-  - The input to this will be a validly formatted ISO 8601 date_time string.
-    Valid date strings must start with a date in the form YYYY-MM-DD (time only
-    string are not supported). The end result will be an expression (with string
-    content) that can be further input into the query builder.
+  The input to this must be a validly formatted ISO 8601 date string. Valid date
+  strings must start with a date in the form YYYY-MM-DD (time only string are
+  not supported). The end result will be an expression (with string content)
+  that can be further input into the query builder.
 
 - `api|Function_.millisToString`
 
-  - Creates a function expression which evaluates to the ISO 8601 date string in
-    the device local timezone of the given milliseconds since the unix epoch
-    expression. The end result will be an expression (with string content) that
-    can be further input into the query builder.
+  The input for this must be a numeric value representing milliseconds since the
+  Unix epoch. The end result will be an expression (with string content
+  representing the date and time as an ISO 8601 string in the device's timezone)
+  that can be further input into the query builder.
 
 - `api|Function_.millisToUTC`
-  - Creates a function expression which evaluates to the UTC ISO 8601 date
-    string of the given milliseconds since the unix epoch expression. The end
-    result will be an expression (with string content) that can be further input
-    into the query builder.
 
-## Result Set
+  The input for this must be a numeric value representing milliseconds since the
+  Unix epoch. The end result will be an expression (with string content
+  representing the date and time as a UTC ISO 8601 string) that can be further
+  input into the query builder.
+
+## Result Sets
 
 ### Processing
 
