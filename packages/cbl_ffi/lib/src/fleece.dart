@@ -76,7 +76,7 @@ class FLSlice extends Struct {
 
 extension FLSliceExt on FLSlice {
   bool get isNull => buf == nullptr;
-  Data? toData() => SliceResult.copyFLSlice(this)?.toData();
+  Data? toData() => SliceResult.fromFLSlice(this)?.toData();
 }
 
 class FLSliceResult extends Struct {
@@ -88,7 +88,8 @@ class FLSliceResult extends Struct {
 
 extension FLResultSliceExt on FLSliceResult {
   bool get isNull => buf == nullptr;
-  Data? toData() => SliceResult.copyFLSliceResult(this)?.toData();
+  Data? toData({bool retain = false}) =>
+      SliceResult.fromFLSliceResult(this, retain: retain)?.toData();
 }
 
 class FLString extends Struct {
@@ -498,11 +499,12 @@ class DocBindings extends Bindings {
     _finalizer.attach(
       object,
       doc.cast(),
-      externalSize: getAllocedData(doc).size,
+      externalSize: getAllocedData(doc)?.size,
     );
   }
 
-  FLSliceResult getAllocedData(Pointer<FLDoc> doc) => _getAllocedData(doc);
+  SliceResult? getAllocedData(Pointer<FLDoc> doc) =>
+      SliceResult.fromFLSliceResult(_getAllocedData(doc));
 
   Pointer<FLValue> getRoot(Pointer<FLDoc> doc) => _getRoot(doc);
 

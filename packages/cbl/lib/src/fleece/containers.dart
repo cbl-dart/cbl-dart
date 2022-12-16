@@ -89,8 +89,7 @@ class Doc implements Finalizable {
   final Pointer<FLDoc> pointer;
 
   /// Returns the data owned by the document, if any, else `null`.
-  SliceResult? get allocedData =>
-      SliceResult.fromFLSliceResult(_bindings.getAllocedData(pointer));
+  SliceResult? get allocedData => _bindings.getAllocedData(pointer);
 
   /// Returns the root value in the [Doc], usually an [Dict].
   Value get root => Value.fromPointer(_bindings.getRoot(pointer));
