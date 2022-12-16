@@ -96,7 +96,6 @@ class FfiDatabase
   /// This is currently required by the native implementation.
   ///
   /// https://github.com/cbl-dart/cbl-dart/issues/444
-  ///
   // TODO(blaugold): remove workaround once the CBL C SDK is fixed
   static String _formatCopyFromPath(String from) =>
       path_lib.normalize(from) + path_lib.separator;
