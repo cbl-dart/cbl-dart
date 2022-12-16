@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+// ignore: no_leading_underscores_for_library_prefixes
 import 'package:path/path.dart' as _path;
 
 import '../document/blob.dart';
