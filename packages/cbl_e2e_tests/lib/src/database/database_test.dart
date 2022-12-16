@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/support/utils.dart';
+import 'package:path/path.dart' as path;
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -46,6 +47,22 @@ void main() {
 
       await copyDatabase(
         from: source.path!,
+        name: 'copy',
+        config: DatabaseConfiguration(directory: directory),
+      );
+
+      expect(await databaseExists('copy', directory: directory), isTrue);
+    });
+
+    apiTest('copy without trailing path separator in from path', () async {
+      // https://github.com/cbl-dart/cbl-dart/issues/444
+      final source = await openTestDatabase();
+      final directory = databaseDirectoryForTest();
+
+      expect(source.path, endsWith(path.separator));
+
+      await copyDatabase(
+        from: source.path!.substring(0, source.path!.length - 1),
         name: 'copy',
         config: DatabaseConfiguration(directory: directory),
       );
