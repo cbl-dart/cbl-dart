@@ -171,6 +171,10 @@ class SliceResult extends Slice {
     return SliceResult(encoded.length)..asTypedList().setAll(0, encoded);
   }
 
+  /// Creates a [SliceResult] from a [FLSlice] by copying its content.
+  static SliceResult? fromFLSlice(FLSlice slice) =>
+      Slice.fromFLSlice(slice)?.let(SliceResult.fromSlice);
+
   /// Creates a [SliceResult] from [FLSliceResult].
   ///
   /// If the the slice should be retained, set [retain] to `true`. The slice
@@ -182,16 +186,6 @@ class SliceResult extends Slice {
       slice.buf == nullptr
           ? null
           : SliceResult._fromFLSliceResult(slice, retain: retain);
-
-  /// Creates a [SliceResult] from a [FLSlice] by copying its content.
-  static SliceResult? copyFLSlice(FLSlice slice) =>
-      Slice.fromFLSlice(slice)?.let(SliceResult.fromSlice);
-
-  /// Creates a [SliceResult] from a [FLSliceResult] by copying its content.
-  static SliceResult? copyFLSliceResult(FLSliceResult slice) =>
-      slice.buf == nullptr
-          ? null
-          : Slice._(slice.buf, slice.size).let(SliceResult.fromSlice);
 
   static final _keepAliveForTypedList = Expando<SliceResult>();
 
