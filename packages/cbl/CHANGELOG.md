@@ -1,3 +1,8 @@
+## 2.1.3
+
+ - **FIX**: don't require trailing path separator when copying databases ([#448](https://github.com/cbl-dart/cbl-dart/issues/448)). ([c027cc73](https://github.com/cbl-dart/cbl-dart/commit/c027cc73662bfdb48e6c78fd105ac75635cc7a08))
+ - **FIX**: memory leak in `DocBindings.bindToDartObject` ([#447](https://github.com/cbl-dart/cbl-dart/issues/447)). ([a306facd](https://github.com/cbl-dart/cbl-dart/commit/a306facd5724749bface634d53cef7bae502aab2))
+
 ## 2.1.2
 
  - **DOCS**: fix typo. ([16d1eb3d](https://github.com/cbl-dart/cbl-dart/commit/16d1eb3da10e6228f5d55d2db08061e754e5c2d4))

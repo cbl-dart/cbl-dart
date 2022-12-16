@@ -1,3 +1,7 @@
+## 0.8.0+2
+
+ - **FIX**: memory leak in `DocBindings.bindToDartObject` ([#447](https://github.com/cbl-dart/cbl-dart/issues/447)). ([a306facd](https://github.com/cbl-dart/cbl-dart/commit/a306facd5724749bface634d53cef7bae502aab2))
+
 ## 0.8.0+1
 
  - **REFACTOR**: use `NativeFinalizer` ([#406](https://github.com/cbl-dart/cbl-dart/issues/406)). ([e7a259ea](https://github.com/cbl-dart/cbl-dart/commit/e7a259ea5c18335f9efe98e415b04dab3d487917))
