@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as _path;
 
 import '../document/blob.dart';
 import '../document/document.dart';
@@ -233,7 +234,11 @@ abstract class Database implements ClosableResource {
     required String name,
     DatabaseConfiguration? config,
   }) =>
-      AsyncDatabase.copy(from: from, name: name, config: config);
+      AsyncDatabase.copy(
+        from: _formatCopyFromPath(from),
+        name: name,
+        config: config,
+      );
 
   /// {@template cbl.Database.copySync}
   /// Copies a canned database [from] the given path to a new database with the
@@ -247,7 +252,19 @@ abstract class Database implements ClosableResource {
     required String name,
     DatabaseConfiguration? config,
   }) =>
-      SyncDatabase.copy(from: from, name: name, config: config);
+      SyncDatabase.copy(
+        from: _formatCopyFromPath(from),
+        name: name,
+        config: config,
+      );
+
+  static String _formatCopyFromPath(String from) =>
+      // TODO(blaugold): remove workaround once the CBL C SDK is fixed
+      // Ensure that the path ends with a separator to signal that it is a
+      // directory.
+      // This is currently required by the native implementation.
+      // https://github.com/cbl-dart/cbl-dart/issues/444
+      Uri.parse(from).pathSegments.last.isEmpty ? from : _path.join(from, '');
 
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
