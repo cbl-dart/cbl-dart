@@ -265,7 +265,7 @@ abstract class Database implements ClosableResource {
       // directory.
       // This is currently required by the native implementation.
       // https://github.com/cbl-dart/cbl-dart/issues/444
-      Uri.parse(from).pathSegments.last.isEmpty ? from : _path.join(from, '');
+      _path.normalize(from) + _path.separator;
 
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
