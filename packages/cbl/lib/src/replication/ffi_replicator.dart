@@ -455,17 +455,16 @@ AsyncCallback _wrapConflictResolver(
 
         FfiDocumentDelegate? resolvedDelegate;
         if (resolved != null) {
-          if (resolved != local && resolved != remote) {
-            final resolvedDelegate =
-                database.prepareDocument(resolved) as FfiDocumentDelegate;
+          if (!identical(resolved, local) && !identical(resolved, remote)) {
+            resolvedDelegate = await database.prepareDocument(resolved);
 
             // If the resolver returned a document other than `local` or
-            // `remote`, the ref count of `resolved` needs to be incremented
-            // because the native conflict resolver callback is expected to
-            // returned a document with a ref count of +1, which the caller
-            // balances with a release. This must happen on the Dart side,
-            // because `resolved` can be garbage collected before
-            // `resolvedAddress` makes it back to the native side.
+            // `remote`, the ref count of the resolved document needs to be
+            // incremented because the native conflict resolver callback is
+            // expected to returned a document with a ref count of +1, which the
+            // caller balances with a release. This must happen on the Dart
+            // side, because `resolvedDelegate` can be garbage collected before
+            // the document pointer makes it back to the native side.
             cblBindings.base.retainRefCounted(resolvedDelegate.pointer.cast());
           } else {
             resolvedDelegate = resolved.delegate as FfiDocumentDelegate;

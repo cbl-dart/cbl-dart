@@ -7,7 +7,6 @@ import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
-import '../document/proxy_document.dart';
 import '../query/ffi_query.dart';
 import '../query/index/index.dart';
 import '../query/parameters.dart';
@@ -730,9 +729,9 @@ class CblService {
 
           return stateToExistingDocument[resolvedState] ??
               MutableDelegateDocument.fromDelegate(
-                ProxyDocumentDelegate.fromState(
-                  resolvedState,
-                  bindToProxiedDocument: false,
+                NewDocumentDelegate(
+                  resolvedState.docId,
+                  resolvedState.properties!.encodedData,
                 ),
               );
         }

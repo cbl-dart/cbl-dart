@@ -253,7 +253,8 @@ CblServiceConflictResolver _wrapConflictResolver(
       final result = await resolver.resolve(conflict) as DelegateDocument?;
 
       if (result != null) {
-        final includeProperties = result != local && result != remote;
+        final includeProperties =
+            !identical(result, local) && !identical(result, local);
         final delegate = await database.prepareDocument(
           result,
           syncProperties: includeProperties,

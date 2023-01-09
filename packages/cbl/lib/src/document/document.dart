@@ -102,7 +102,7 @@ abstract class DocumentDelegate {
 /// This way there is no need to have one type of document for each database
 /// implementation or have a factory create new documents.
 class NewDocumentDelegate extends DocumentDelegate {
-  NewDocumentDelegate([String? id]) : id = id ?? createUuid();
+  NewDocumentDelegate([String? id, this.properties]) : id = id ?? createUuid();
 
   NewDocumentDelegate.mutableCopy(NewDocumentDelegate delegate)
       : id = delegate.id,
