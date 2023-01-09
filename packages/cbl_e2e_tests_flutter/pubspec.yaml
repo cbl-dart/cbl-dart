@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   benchmark_harness: ^2.1.0
-  cbl: ^2.1.3
+  cbl: ^2.1.4
   cbl_e2e_tests:
     path: ../cbl_e2e_tests
   cbl_ffi: ^0.8.0+2

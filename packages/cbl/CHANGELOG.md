@@ -1,3 +1,7 @@
+## 2.1.4
+
+ - **FIX**: return merged document from conflict resolver ([#454](https://github.com/cbl-dart/cbl-dart/issues/454)). ([cb5deac8](https://github.com/cbl-dart/cbl-dart/commit/cb5deac875d7d507796f76a40d19debc35dd31de))
+
 ## 2.1.3
 
  - **FIX**: don't require trailing path separator when copying databases ([#448](https://github.com/cbl-dart/cbl-dart/issues/448)). ([c027cc73](https://github.com/cbl-dart/cbl-dart/commit/c027cc73662bfdb48e6c78fd105ac75635cc7a08))
