@@ -16,6 +16,8 @@ const cblIncludeTracePoints =
 enum TracedNativeCall {
   databaseOpen('CBLDart_CBLDatabase_Open'),
   databaseClose('CBLDart_CBLDatabase_Close'),
+  databaseBeginTransaction('CBLDatabase_BeginTransaction'),
+  databaseEndTransaction('CBLDatabase_EndTransaction'),
   databaseGetDocument('CBLDatabase_GetDocument'),
   databaseGetMutableDocument('CBLDatabase_GetMutableDocument'),
   databaseSaveDocument('CBLDatabase_SaveDocumentWithConcurrencyControl'),
