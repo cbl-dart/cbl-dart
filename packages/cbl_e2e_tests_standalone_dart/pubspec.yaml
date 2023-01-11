@@ -8,7 +8,7 @@ dependencies:
   benchmark_harness: ^2.1.0
   cbl: ^2.1.4
   cbl_dart: ^2.1.5
-  cbl_ffi: ^0.8.0+2
+  cbl_ffi: ^0.8.1
   collection: ^1.16.0
   crypto: ^3.0.1
   http: ^0.13.4

@@ -1,3 +1,7 @@
+## 0.8.1
+
+ - **FEAT**: trace native database transaction calls ([#455](https://github.com/cbl-dart/cbl-dart/issues/455)). ([8d6229a7](https://github.com/cbl-dart/cbl-dart/commit/8d6229a79f5983c9d9c812f027872cb5c0387f5a))
+
 ## 0.8.0+2
 
  - **FIX**: memory leak in `DocBindings.bindToDartObject` ([#447](https://github.com/cbl-dart/cbl-dart/issues/447)). ([a306facd](https://github.com/cbl-dart/cbl-dart/commit/a306facd5724749bface634d53cef7bae502aab2))
