@@ -674,11 +674,17 @@ class DatabaseBindings extends Bindings {
   }
 
   void beginTransaction(Pointer<CBLDatabase> db) {
-    _beginTransaction(db, globalCBLError).checkCBLError();
+    nativeCallTracePoint(
+      TracedNativeCall.databaseBeginTransaction,
+      () => _beginTransaction(db, globalCBLError).checkCBLError(),
+    );
   }
 
   void endTransaction(Pointer<CBLDatabase> db, {required bool commit}) {
-    _endTransaction(db, commit, globalCBLError).checkCBLError();
+    nativeCallTracePoint(
+      TracedNativeCall.databaseEndTransaction,
+      () => _endTransaction(db, commit, globalCBLError).checkCBLError(),
+    );
   }
 
   void changeEncryptionKey(Pointer<CBLDatabase> db, CBLEncryptionKey? key) {
