@@ -15,9 +15,9 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  flutter-version-stable: 3.3.3
+  flutter-version-stable: 3.7.1
   flutter-version-beta: beta
-  dart-version-stable: 2.18.2
+  dart-version-stable: 2.19.1
   dart-version-beta: beta
   melos-version: 3.0.0-dev.0
 
