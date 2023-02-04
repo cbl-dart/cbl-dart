@@ -313,7 +313,6 @@ class ResultImpl with IterableMixin<String> implements Result {
         }
         break;
       case EncodingFormat.json:
-        // ignore: invariant_booleans
         if (columnValuesData != null) {
           columnValues =
               fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted).root
