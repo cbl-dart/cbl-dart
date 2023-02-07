@@ -19,7 +19,7 @@ env:
   flutter-version-beta: beta
   dart-version-stable: 2.18.2
   dart-version-beta: beta
-  melos-version: 2.7.1
+  melos-version: 3.0.0-dev.0
 
 jobs:
   formatting-dart:
