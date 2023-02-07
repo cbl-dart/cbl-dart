@@ -1,16 +1,26 @@
 name: cbl_dart
 repository: https://github.com/cbl-dart/cbl-dart
 packages:
-  - .
-  - packages/**
+  - packages/*
+  - packages/*/example
+
 ide:
   intellij: false
+
 command:
   bootstrap:
-    usePubspecOverrides: true
     runPubGetInParallel: false
+
   version:
-    linkToCommits: true
+    hooks:
+      preCommit:
+        description:
+          Pre-commit hook for the version command to update the
+          `cbl_flutter_ce|ee` packages.
+        run: |
+          melos build:cbl_flutter_prebuilt && \
+          git add packages/cbl_flutter_ee packages/cbl_flutter_ce
+
 scripts:
   build:cbl_flutter_prebuilt:
     description: Builds the prebuild packages `cbl_flutter_ce|ee`.
@@ -30,36 +40,28 @@ scripts:
 
   analyze:
     description: Analyzes all Dart files.
-    run: melos exec -- dart analyze --fatal-infos
+    run: dart analyze --fatal-infos
 
   test:setupCouchbaseClusterDocker:
     description: Sets up Couchbase services for testing in docker.
-    run: melos exec -- "./couchbase-services.sh setupDocker"
-    select-package:
+    exec: ./couchbase-services.sh setupDocker
+    packageFilters:
       scope: cbl_e2e_tests
 
   test:teardownCouchbaseClusterDocker:
     description: Tears down Couchbase services for testing in docker.
-    run: melos exec -- "./couchbase-services.sh teardownDocker"
-    select-package:
+    exec: ./couchbase-services.sh teardownDocker
+    packageFilters:
       scope: cbl_e2e_tests
 
   test:startSyncGatewayMacOS:
     description: Starts Sync Gateway for testing on macOS.
-    run: melos exec -- "./couchbase-services.sh startSyncGatewayMacOS"
-    select-package:
+    exec: ./couchbase-services.sh startSyncGatewayMacOS
+    packageFilters:
       scope: cbl_e2e_tests
 
   test:waitForSyncGateway:
     description: Waits Sync Gateway for testing to become available.
-    run: melos exec -- "./couchbase-services.sh waitForSyncGateway"
-    select-package:
+    exec: ./couchbase-services.sh waitForSyncGateway
+    packageFilters:
       scope: cbl_e2e_tests
-
-  version:
-    description:
-      Pre-commit hook for the version command to update the `cbl_flutter_ce|ee`
-      packages.
-    run:
-      melos build:cbl_flutter_prebuilt && git add packages/cbl_flutter_ee
-      packages/cbl_flutter_ce
