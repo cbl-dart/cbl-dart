@@ -10,7 +10,7 @@ const { codeLinks } = require('./src/remark/code-links')
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Couchbase Lite for Dart',
+  title: 'Couchbase Lite for Dart & Flutter',
   tagline: 'Couchbase Lite for Dart & Flutter',
   url: 'https://cbl-dart.dev',
   baseUrl: '/',
