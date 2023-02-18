@@ -183,7 +183,7 @@ extension ReplicatorUtilsExtension on Replicator {
     // ignore: literal_only_boolean_expressions
     while (true) {
       yield await status;
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
     }
   }
 
