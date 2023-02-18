@@ -16,8 +16,7 @@ on:
 
 env:
   # Temporarily use a beta version of Flutter to work around a bug in the stable version.
-  flutter-version-stable: beta
-  flutter-version-beta: beta
+  flutter-channel: beta
   dart-version-stable: 2.19.1
   dart-version-beta: beta
   melos-version: 3.0.0-dev.0
@@ -81,7 +80,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version-stable }}
+          channel: ${{ env.flutter-channel }}
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -205,7 +204,7 @@ jobs:
         if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version-stable }}
+          channel: ${{ env.flutter-channel }}
 
       - name: Configure flutter
         if: matrix.embedder == 'flutter'
@@ -292,7 +291,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version-stable }}
+          channel: ${{ env.flutter-channel }}
 
       - name: Configure flutter
         shell: bash
