@@ -16,8 +16,7 @@
       "cwd": "packages/cbl_e2e_tests_flutter",
       "request": "launch",
       "type": "dart",
-      "program": "integration_test/e2e_test.dart",
-      "toolArgs": ["--no-pub"]
+      "program": "integration_test/e2e_test.dart"
     },
     {
       "name": "cbl_e2e_tests_standalone_dart (test)",
@@ -31,8 +30,7 @@
       "cwd": "packages/cbl_flutter_prebuilt_e2e_tests",
       "request": "launch",
       "type": "dart",
-      "program": "integration_test/e2e_test.dart",
-      "toolArgs": ["--no-pub"]
+      "program": "integration_test/e2e_test.dart"
     },
     {
       "name": "cbl_sentry (test)",
@@ -40,7 +38,7 @@
       "type": "dart",
       "request": "launch",
       "customTool": "${workspaceFolder}/tools/flutter-test-wrapper.sh",
-      "customToolReplacesArgs": 3,
+      "customToolReplacesArgs": 3
     }
   ]
 }
