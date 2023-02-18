@@ -12,28 +12,31 @@
 static std::mutex initializeMutex;
 static bool initialized = false;
 
-bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
-                        CBLError *errorOut) {
+CBLDartInitializeResult CBLDart_Initialize(void *dartInitializeDlData,
+                                           void *cblInitContext,
+                                           CBLError *errorOut) {
   std::scoped_lock lock(initializeMutex);
 
   if (initialized) {
     // Only initialize libraries once.
-    return true;
+    return CBLDartInitializeResult_kSuccess;
   }
 
 #ifdef __ANDROID__
   // Initialize the Couchbase Lite library.
   if (!CBL_Init(*reinterpret_cast<CBLInitContext *>(cblInitContext),
                 errorOut)) {
-    return false;
+    return CBLDartInitializeResult_kCBLInitError;
   }
 #endif
 
   // Initialize the Dart API for this dynamic library.
-  Dart_InitializeApiDL(dartInitializeDlData);
+  if (Dart_InitializeApiDL(dartInitializeDlData) != 0) {
+    return CBLDartInitializeResult_kIncompatibleDartVM;
+  }
 
   initialized = true;
-  return true;
+  return CBLDartInitializeResult_kSuccess;
 }
 
 // === Dart Native ============================================================
@@ -622,11 +625,11 @@ static bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
   Dart_CObject document_;
   CBLDart_CObject_SetPointer(&document_, document);
 
-  Dart_CObject isDeleted_;
-  isDeleted_.type = Dart_CObject_kInt32;
-  isDeleted_.value.as_int32 = flags;
+  Dart_CObject flags_;
+  flags_.type = Dart_CObject_kInt32;
+  flags_.value.as_int32 = flags;
 
-  Dart_CObject *argsValues[] = {&document_, &isDeleted_};
+  Dart_CObject *argsValues[] = {&document_, &flags_};
 
   Dart_CObject args;
   args.type = Dart_CObject_kArray;

@@ -48,12 +48,25 @@ class _CBLInitContext extends Struct {
   external Pointer<Utf8> tempDir;
 }
 
-typedef _CBLDart_Initialize_C = Bool Function(
+enum _CBLDartInitializeResult {
+  success,
+  incompatibleDartVM,
+  cblInitError,
+}
+
+extension on int {
+  _CBLDartInitializeResult toCBLDartInitializeResult() {
+    assert(this >= 0 || this <= 2);
+    return _CBLDartInitializeResult.values[this];
+  }
+}
+
+typedef _CBLDart_Initialize_C = Uint8 Function(
   Pointer<Void> dartInitializeDlData,
   Pointer<Void> cblInitContext,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDart_Initialize = bool Function(
+typedef _CBLDart_Initialize = int Function(
   Pointer<Void> dartInitializeDlData,
   Pointer<Void> cblInitContext,
   Pointer<CBLError> errorOut,
@@ -362,12 +375,23 @@ class BaseBindings extends Bindings {
       // initialization to be completed.
       final error = zoneArena<CBLError>();
 
-      if (!_initialize(
+      final initializeResult = _initialize(
         NativeApi.initializeApiDLData,
         contextStruct.cast(),
         error,
-      )) {
-        throw CBLErrorException.fromCBLError(error);
+      ).toCBLDartInitializeResult();
+
+      switch (initializeResult) {
+        case _CBLDartInitializeResult.success:
+          return;
+        case _CBLDartInitializeResult.incompatibleDartVM:
+          throw CBLErrorException(
+            CBLErrorDomain.couchbaseLite,
+            CBLErrorCode.unsupported,
+            'The current Dart VM is incompatible.',
+          );
+        case _CBLDartInitializeResult.cblInitError:
+          throw CBLErrorException.fromCBLError(error);
       }
     });
   }
