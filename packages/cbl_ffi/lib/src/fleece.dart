@@ -1,4 +1,5 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values, avoid_positional_boolean_parameters
 
 import 'dart:convert';
 import 'dart:ffi';

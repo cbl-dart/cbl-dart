@@ -507,7 +507,7 @@ void main() {
           );
 
           expect(doc.value('a'), 'c');
-          expect((db.document(doc.id))!.value('a'), 'c');
+          expect(db.document(doc.id)!.value('a'), 'c');
         });
       });
 

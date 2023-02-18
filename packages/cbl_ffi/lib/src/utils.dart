@@ -89,6 +89,7 @@ extension AddressPointerExt on int {
 
 extension NullableAddressPointerExt on int? {
   Pointer<T> toPointer<T extends NativeType>() =>
+      // ignore: unnecessary_parenthesis
       (this?.toPointer<T>()).elseNullptr();
 }
 
