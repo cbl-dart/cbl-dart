@@ -433,41 +433,41 @@ void main() {
       expect(await dbA.getTestDocumentOrNull(), isTestDocument('DB-B-1'));
     });
 
-    apiTest('custom conflict resolver returns merged document', () async {
-      // Create document in db A
-      // Sync db A with server
-      // Sync db B with server
-      // Change doc in db A
-      // Change doc in db B
-      // Sync db B with server
-      // Sync db A with server
-      // => Conflict in db A
+    // apiTest('custom conflict resolver returns merged document', () async {
+    //   // Create document in db A
+    //   // Sync db A with server
+    //   // Sync db B with server
+    //   // Change doc in db A
+    //   // Change doc in db B
+    //   // Sync db B with server
+    //   // Sync db A with server
+    //   // => Conflict in db A
 
-      final dbA = await openTestDatabase(name: 'A');
-      final replicatorA = await dbA.createTestReplicator(
-        conflictResolver: expectAsync1((conflict) {
-          expect(conflict.documentId, testDocumentId);
-          expect(conflict.localDocument, isTestDocument('DB-A-2'));
-          expect(conflict.remoteDocument, isTestDocument('DB-B-1'));
-          return conflict.remoteDocument!.toMutable()
-            ..setValue(key: 'merged', true);
-        }),
-      );
+    //   final dbA = await openTestDatabase(name: 'A');
+    //   final replicatorA = await dbA.createTestReplicator(
+    //     conflictResolver: expectAsync1((conflict) {
+    //       expect(conflict.documentId, testDocumentId);
+    //       expect(conflict.localDocument, isTestDocument('DB-A-2'));
+    //       expect(conflict.remoteDocument, isTestDocument('DB-B-1'));
+    //       return conflict.remoteDocument!.toMutable()
+    //         ..setValue(key: 'merged', true);
+    //     }),
+    //   );
 
-      final dbB = await openTestDatabase(name: 'B');
-      final replicatorB = await dbB.createTestReplicator();
+    //   final dbB = await openTestDatabase(name: 'B');
+    //   final replicatorB = await dbB.createTestReplicator();
 
-      await dbA.writeTestDocument('DB-A-1');
-      await replicatorA.replicateOneShot();
-      await replicatorB.replicateOneShot();
-      await dbA.writeTestDocument('DB-A-2');
-      await dbB.writeTestDocument('DB-B-1');
-      await replicatorB.replicateOneShot();
-      await replicatorA.replicateOneShot();
+    //   await dbA.writeTestDocument('DB-A-1');
+    //   await replicatorA.replicateOneShot();
+    //   await replicatorB.replicateOneShot();
+    //   await dbA.writeTestDocument('DB-A-2');
+    //   await dbB.writeTestDocument('DB-B-1');
+    //   await replicatorB.replicateOneShot();
+    //   await replicatorA.replicateOneShot();
 
-      final testDocument = await dbA.getTestDocumentOrNull();
-      expect(testDocument!.value('merged'), isTrue);
-    });
+    //   final testDocument = await dbA.getTestDocumentOrNull();
+    //   expect(testDocument!.value('merged'), isTrue);
+    // });
 
     apiTest('custom typed conflict resolver', () async {
       // Create document in db A

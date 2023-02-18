@@ -154,7 +154,13 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [standalone, flutter]
-        os: [iOS, macOS, Android, Ubuntu, Windows]
+        os:
+          - iOS
+          # TODO: Get macOS tests to launch again in CI
+          # - macOS
+          - Android
+          - Ubuntu
+          - Windows
         exclude:
           - embedder: standalone
             os: iOS
@@ -265,7 +271,13 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [flutter]
-        os: [iOS, macOS, Android, Ubuntu, Windows]
+        os:
+          - iOS
+          # TODO: Get macOS tests to launch again in CI
+          # - macOS
+          - Android
+          - Ubuntu
+          - Windows
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-11",
