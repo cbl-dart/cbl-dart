@@ -196,7 +196,6 @@ function runE2ETests() {
         # `flutter test` does, it does not support the `--keep-app-running`
         # flag, which we need to collect logs from devices.
         flutter drive \
-            --no-pub \
             -d "$device" \
             --dart-define enableTimeBomb=true \
             --keep-app-running \

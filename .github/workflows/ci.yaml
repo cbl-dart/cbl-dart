@@ -15,9 +15,9 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  flutter-version-stable: 3.3.3
-  flutter-version-beta: beta
-  dart-version-stable: 2.18.2
+  # Temporarily use a beta version of Flutter to work around a bug in the stable version.
+  flutter-channel: beta
+  dart-version-stable: 2.19.1
   dart-version-beta: beta
   melos-version: 3.0.0-dev.0
 
@@ -80,7 +80,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version-stable }}
+          channel: ${{ env.flutter-channel }}
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -154,12 +154,20 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [standalone, flutter]
-        os: [iOS, macOS, Android, Ubuntu, Windows]
+        os:
+          - iOS
+          - macOS
+          - Android
+          - Ubuntu
+          - Windows
         exclude:
           - embedder: standalone
             os: iOS
           - embedder: standalone
             os: Android
+          # TODO: Get macOS tests to launch again in CI
+          - embedder: flutter
+            os: macOS
     # Flutter + Ubuntu is flaky, likely because of a bug in CBL C, so we allow it to fail for now.
     continue-on-error:
       ${{ matrix.embedder == 'flutter' && matrix.os == 'Ubuntu' }}
@@ -204,7 +212,7 @@ jobs:
         if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version-stable }}
+          channel: ${{ env.flutter-channel }}
 
       - name: Configure flutter
         if: matrix.embedder == 'flutter'
@@ -265,7 +273,16 @@ jobs:
       fail-fast: false
       matrix:
         embedder: [flutter]
-        os: [iOS, macOS, Android, Ubuntu, Windows]
+        os:
+          - iOS
+          - macOS
+          - Android
+          - Ubuntu
+          - Windows
+        exclude:
+          # TODO: Get macOS tests to launch again in CI
+          - embedder: flutter
+            os: macOS
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-11",
@@ -291,7 +308,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.flutter-version-stable }}
+          channel: ${{ env.flutter-channel }}
 
       - name: Configure flutter
         shell: bash

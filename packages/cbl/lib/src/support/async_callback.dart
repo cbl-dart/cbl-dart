@@ -16,11 +16,7 @@ typedef AsyncCallbackHandler = FutureOr<Object?> Function(
 final _bindings = cblBindings.asyncCallback;
 
 var _nextId = 0;
-int _generateId() {
-  final id = _nextId;
-  _nextId += 1;
-  return id;
-}
+int _generateId() => _nextId++;
 
 /// A callback which can be asynchronously called from the native side.
 ///
@@ -170,7 +166,7 @@ class AsyncCallback implements Finalizable {
     assert(() {
       if (debug) {
         // ignore: avoid_print
-        print('AsyncCallback #$_id -> $message');
+        print('AsyncCallback #$_id (dart)   -> $message');
       }
       return true;
     }());

@@ -143,7 +143,6 @@ class _Equality extends Matcher {
       return failure(_EqualityFailure.actual);
     }
 
-    // ignore: invariant_booleans
     if (expected != actual) {
       return failure(_EqualityFailure.expected);
     }

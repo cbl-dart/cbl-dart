@@ -1,5 +1,5 @@
 // ignore: lines_longer_than_80_chars
-// ignore_for_file: cast_nullable_to_non_nullable,avoid_redundant_argument_values
+// ignore_for_file: cast_nullable_to_non_nullable,avoid_redundant_argument_values, avoid_positional_boolean_parameters
 
 import 'dart:convert';
 import 'dart:ffi';
@@ -418,7 +418,6 @@ class CBLReplicatedDocument {
 
 class DocumentReplicationsCallbackMessage {
   DocumentReplicationsCallbackMessage(
-    // ignore: avoid_positional_boolean_parameters
     this.isPush,
     this.documents,
   );

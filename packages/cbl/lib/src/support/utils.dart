@@ -130,37 +130,6 @@ extension FutureOrExt<T> on FutureOr<T> {
   Future<T> toFuture() => Future.value(this);
 }
 
-FutureOr<T> finallySyncOrAsync<T>(
-  void Function(bool didThrow) finallyFn,
-  FutureOr<T> Function() fn,
-) {
-  try {
-    final result = fn();
-    if (result is Future<T>) {
-      return result.then(
-        (result) {
-          finallyFn(false);
-          return result;
-        },
-        // ignore: avoid_types_on_closure_parameters
-        onError: (Object error) {
-          finallyFn(true);
-          // ignore: only_throw_errors
-          throw error;
-        },
-      );
-    }
-
-    finallyFn(false);
-    return result;
-  }
-  // ignore: avoid_catches_without_on_clauses
-  catch (e) {
-    finallyFn(true);
-    rethrow;
-  }
-}
-
 final _secureRandom = Random.secure();
 
 String createUuid() {

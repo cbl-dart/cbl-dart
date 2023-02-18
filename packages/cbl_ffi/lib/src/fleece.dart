@@ -1,4 +1,5 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values, avoid_positional_boolean_parameters
 
 import 'dart:convert';
 import 'dart:ffi';
@@ -379,7 +380,6 @@ class SlotBindings extends Bindings {
     _setNull(slot);
   }
 
-  // ignore: avoid_positional_boolean_parameters
   void setBool(Pointer<FLSlot> slot, bool value) {
     _setBool(slot, value);
   }
@@ -1932,7 +1932,6 @@ class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, _writeNull(encoder));
   }
 
-  // ignore: avoid_positional_boolean_parameters
   void writeBool(Pointer<FLEncoder> encoder, bool value) {
     _checkError(encoder, _writeBool(encoder, value));
   }

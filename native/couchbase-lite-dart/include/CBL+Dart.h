@@ -18,6 +18,12 @@
  * C API is integrated with the garbage collection of Dart objects.
  */
 
+enum CBLDartInitializeResult {
+  CBLDartInitializeResult_kSuccess,
+  CBLDartInitializeResult_kIncompatibleDartVM,
+  CBLDartInitializeResult_kCBLInitError,
+};
+
 /**
  * Initializes the native libraries.
  *
@@ -26,8 +32,9 @@
  * NOOPs.
  */
 CBLDART_EXPORT
-bool CBLDart_Initialize(void *dartInitializeDlData, void *cblInitContext,
-                        CBLError *errorOut);
+CBLDartInitializeResult CBLDart_Initialize(void *dartInitializeDlData,
+                                           void *cblInitContext,
+                                           CBLError *errorOut);
 
 // === Dart Native ============================================================
 

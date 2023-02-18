@@ -52,6 +52,7 @@ AsyncCallbackRegistry::AsyncCallbackRegistry() {}
 
 AsyncCallback::AsyncCallback(uint32_t id, Dart_Port sendPort, bool debug)
     : id_(id), debug_(debug), sendPort_(sendPort) {
+  assert(sendPort != ILLEGAL_PORT);
   AsyncCallbackRegistry::instance.registerCallback(*this);
 }
 
@@ -132,7 +133,7 @@ bool AsyncCallback::sendRequest(Dart_CObject *request) {
 inline void AsyncCallback::debugLog(const char *message) {
 #ifdef DEBUG
   if (debug_) {
-    printf("AsyncCallback #%d -> %s\n", id_, message);
+    printf("AsyncCallback #%d (native) -> %s\n", id_, message);
   }
 #endif
 }

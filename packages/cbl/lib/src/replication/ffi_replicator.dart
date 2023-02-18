@@ -66,10 +66,14 @@ class FfiReplicator
     }
 
     AsyncCallback Function(T) makeCallback<T>(
-      AsyncCallback Function(T, FfiDatabase, bool) callbackFactory,
+      AsyncCallback Function(T, FfiDatabase, {required bool ignoreErrorsInDart})
+          callbackFactory,
     ) =>
-        (callback) =>
-            callbackFactory(callback, database, ignoreCallbackErrorsInDart);
+        (callback) => callbackFactory(
+              callback,
+              database,
+              ignoreErrorsInDart: ignoreCallbackErrorsInDart,
+            );
 
     final pushFilterCallback =
         config.combinedPushFilter?.let(makeCallback(_wrapReplicationFilter));
@@ -407,9 +411,9 @@ extension on ReplicatorConfiguration {
 
 AsyncCallback _wrapReplicationFilter(
   ReplicationFilter filter,
-  FfiDatabase database,
-  bool ignoreErrorsInDart,
-) =>
+  FfiDatabase database, {
+  required bool ignoreErrorsInDart,
+}) =>
     AsyncCallback(
       (arguments) async {
         final message =
@@ -431,9 +435,9 @@ AsyncCallback _wrapReplicationFilter(
 
 AsyncCallback _wrapConflictResolver(
   ConflictResolver resolver,
-  FfiDatabase database,
-  bool ignoreErrorsInDart,
-) =>
+  FfiDatabase database, {
+  required bool ignoreErrorsInDart,
+}) =>
     AsyncCallback(
       (arguments) async {
         final message =

@@ -108,7 +108,7 @@ class LogMessageTile extends StatelessWidget {
           children: [
             Text(
               DateFormat.yMd().add_jm().format(logMessage.createdAt),
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: spacing / 4),
             Text(logMessage.message)
@@ -169,7 +169,7 @@ class _LogMessageFormState extends State<_LogMessageForm> {
                 controller: _messageController,
                 minLines: 1,
                 maxLines: 10,
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
                 textCapitalization: TextCapitalization.sentences,
               ),
             ),
