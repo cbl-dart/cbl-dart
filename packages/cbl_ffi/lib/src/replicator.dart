@@ -418,7 +418,6 @@ class CBLReplicatedDocument {
 
 class DocumentReplicationsCallbackMessage {
   DocumentReplicationsCallbackMessage(
-    // ignore: avoid_positional_boolean_parameters
     this.isPush,
     this.documents,
   );

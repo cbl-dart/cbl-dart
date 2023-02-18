@@ -15,7 +15,8 @@ on:
     - cron: '0 0 * * *'
 
 env:
-  flutter-version-stable: 3.7.1
+  # Temporarily use a beta version of Flutter to work around a bug in the stable version.
+  flutter-version-stable: beta
   flutter-version-beta: beta
   dart-version-stable: 2.19.1
   dart-version-beta: beta

@@ -380,7 +380,6 @@ class SlotBindings extends Bindings {
     _setNull(slot);
   }
 
-  // ignore: avoid_positional_boolean_parameters
   void setBool(Pointer<FLSlot> slot, bool value) {
     _setBool(slot, value);
   }
@@ -1933,7 +1932,6 @@ class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, _writeNull(encoder));
   }
 
-  // ignore: avoid_positional_boolean_parameters
   void writeBool(Pointer<FLEncoder> encoder, bool value) {
     _checkError(encoder, _writeBool(encoder, value));
   }
