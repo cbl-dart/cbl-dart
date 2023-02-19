@@ -15,7 +15,7 @@ dependencies:
   archive: ^3.3.4
   cbl: ^2.1.4
   cbl_libcblite_api: 3.0.2
-  cbl_libcblitedart_api: 3.0.0
+  cbl_libcblitedart_api: 4.0.0
   crypto: ^3.0.1
   http: ^0.13.5
   logging: ^1.1.0
