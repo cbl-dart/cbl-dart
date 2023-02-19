@@ -1,3 +1,7 @@
+## 0.8.1+1
+
+ - **FIX**: ensure compatibility with Dart 2.19 ([#457](https://github.com/cbl-dart/cbl-dart/issues/457)). ([caf9bc90](https://github.com/cbl-dart/cbl-dart/commit/caf9bc9050cef56fecc1231bbf18637dd17a4ae8))
+
 ## 0.8.1
 
  - **FEAT**: trace native database transaction calls ([#455](https://github.com/cbl-dart/cbl-dart/issues/455)). ([8d6229a7](https://github.com/cbl-dart/cbl-dart/commit/8d6229a79f5983c9d9c812f027872cb5c0387f5a))

@@ -1,3 +1,7 @@
+## 2.1.5
+
+ - **FIX**: ensure compatibility with Dart 2.19 ([#457](https://github.com/cbl-dart/cbl-dart/issues/457)). ([caf9bc90](https://github.com/cbl-dart/cbl-dart/commit/caf9bc9050cef56fecc1231bbf18637dd17a4ae8))
+
 ## 2.1.4
 
  - **FIX**: return merged document from conflict resolver ([#454](https://github.com/cbl-dart/cbl-dart/issues/454)). ([cb5deac8](https://github.com/cbl-dart/cbl-dart/commit/cb5deac875d7d507796f76a40d19debc35dd31de))

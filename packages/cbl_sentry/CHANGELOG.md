@@ -1,3 +1,7 @@
+## 1.0.3
+
+ - Update a dependency to the latest release.
+
 ## 1.0.2
 
  - **FIX**: use `parentSamplingDecision` ([#418](https://github.com/cbl-dart/cbl-dart/issues/418)). ([7b007d28](https://github.com/cbl-dart/cbl-dart/commit/7b007d2894c798d1e226a4957992b053edfb37ea))

@@ -1,3 +1,7 @@
+## 0.2.0+3
+
+ - Update a dependency to the latest release.
+
 ## 0.2.0+2
 
  - **DOCS**: link to new docs website from package READMEs. ([fae73bb2](https://github.com/cbl-dart/cbl-dart/commit/fae73bb2983cde0347091225fa245d2b066be13a))
