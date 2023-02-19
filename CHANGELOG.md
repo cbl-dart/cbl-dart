@@ -15,6 +15,49 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl` - `v2.1.6`](#cbl---v216)
+ - [`cbl_dart` - `v2.1.7`](#cbl_dart---v217)
+ - [`cbl_flutter` - `v2.0.4`](#cbl_flutter---v204)
+ - [`cbl_flutter_platform_interface` - `v2.0.4`](#cbl_flutter_platform_interface---v204)
+ - [`cbl_generator` - `v0.2.0+4`](#cbl_generator---v0204)
+ - [`cbl_sentry` - `v1.0.4`](#cbl_sentry---v104)
+ - [`cbl_flutter_ce` - `v2.1.4`](#cbl_flutter_ce---v214)
+ - [`cbl_flutter_ee` - `v2.1.4`](#cbl_flutter_ee---v214)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v2.0.4`
+ - `cbl_flutter_platform_interface` - `v2.0.4`
+ - `cbl_generator` - `v0.2.0+4`
+ - `cbl_sentry` - `v1.0.4`
+ - `cbl_flutter_ce` - `v2.1.4`
+ - `cbl_flutter_ee` - `v2.1.4`
+
+---
+
+#### `cbl` - `v2.1.6`
+
+ - **FIX**: use `runWithErrorTranslation` when calling `initializeNativeLibraries`. ([05499efe](https://github.com/cbl-dart/cbl-dart/commit/05499efebc4cf25747c5021780aa4808b52d86f5))
+
+#### `cbl_dart` - `v2.1.7`
+
+ - **FIX**: ship correct version of `libcblitedart` with `cbl_dart`. ([f4b92ba7](https://github.com/cbl-dart/cbl-dart/commit/f4b92ba7e8d6b46c9f4f20995b17e8a9028801c4))
+
+
+## 2023-02-19
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl` - `v2.1.5`](#cbl---v215)
  - [`cbl_ffi` - `v0.8.1+1`](#cbl_ffi---v0811)
  - [`cbl_flutter` - `v2.0.3`](#cbl_flutter---v203)

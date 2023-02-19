@@ -1,3 +1,7 @@
+## 2.1.7
+
+ - **FIX**: ship correct version of `libcblitedart` with `cbl_dart`. ([f4b92ba7](https://github.com/cbl-dart/cbl-dart/commit/f4b92ba7e8d6b46c9f4f20995b17e8a9028801c4))
+
 ## 2.1.6
 
  - Update a dependency to the latest release.
