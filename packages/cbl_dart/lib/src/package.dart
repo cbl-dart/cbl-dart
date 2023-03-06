@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import 'utils.dart';
+import 'version_info.dart' as version_info;
 
 /// An archive format, in which [Package]s are distributed.
 enum ArchiveFormat {
@@ -137,10 +138,7 @@ class Package {
     required this.target,
   });
 
-  static const latestReleases = {
-    Library.libcblite: '3.0.2',
-    Library.libcblitedart: '4.0.0',
-  };
+  static const latestReleases = version_info.latestReleases;
 
   static final _archiveUrlResolvers = <Library, String Function(Package)>{
     Library.libcblite: (package) => 'https://packages.couchbase.com/releases/'

@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/support/utils.dart';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -59,7 +59,7 @@ void main() {
       final source = await openTestDatabase();
       final directory = databaseDirectoryForTest();
 
-      expect(source.path, endsWith(path.separator));
+      expect(source.path, endsWith(p.separator));
 
       await copyDatabase(
         from: source.path!.substring(0, source.path!.length - 1),
