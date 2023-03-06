@@ -137,11 +137,6 @@ class Package {
     required this.target,
   });
 
-  static const latestReleases = {
-    Library.libcblite: '3.0.2',
-    Library.libcblitedart: '4.0.0',
-  };
-
   static final _archiveUrlResolvers = <Library, String Function(Package)>{
     Library.libcblite: (package) => 'https://packages.couchbase.com/releases/'
         'couchbase-lite-c/${package.release}/'

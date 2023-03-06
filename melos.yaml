@@ -19,12 +19,18 @@ command:
           `cbl_flutter_ce|ee` packages.
         run: |
           melos build:cbl_flutter_prebuilt && \
-          git add packages/cbl_flutter_ee packages/cbl_flutter_ce
+          git add packages/cbl_flutter_ee packages/cbl_flutter_ce && \
+          melos build:cbl_dart:version_info && \
+          git add packages/cbl_dart/lib/src/version_info.dart
 
 scripts:
   build:cbl_flutter_prebuilt:
     description: Builds the prebuild packages `cbl_flutter_ce|ee`.
     run: cd packages/cbl_flutter_prebuilt && dart run
+
+  build:cbl_dart:version_info:
+    description: Builds the version_info.dart file in `cbl_dart` .
+    run: cd packages/cbl_dart && dart run tool/generate_version_info.dart
 
   build:nativeLibraries:
     description: Builds the native libraries for the host target.
