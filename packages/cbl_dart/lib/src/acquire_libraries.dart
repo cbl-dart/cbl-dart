@@ -8,7 +8,6 @@ import '../cbl_dart.dart';
 import 'install_libraries.dart';
 import 'package.dart';
 import 'utils.dart';
-import 'version_info.dart';
 
 /// Libraries that should be used instead of downloading and installing them.
 ///
@@ -101,7 +100,7 @@ Future<LibrariesConfiguration> acquireLibraries({
 
   final packages = Library.values.map((library) => Package(
         library: library,
-        release: latestReleases[library]!,
+        release: Package.latestReleases[library]!,
         edition: edition,
         target: Target.host,
       ));

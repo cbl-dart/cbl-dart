@@ -1,17 +1,17 @@
 import 'dart:io';
 
 import 'package:cbl_dart/src/package.dart';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 void main() {
   final latestReleases = _readLatestReleasesFromPubspec();
-  File(path.absolute('lib/src/version_info.dart'))
+  File(p.absolute('lib/src/version_info.dart'))
       .writeAsStringSync(_generateVersionInfoFile(latestReleases));
 }
 
 Map<Library, String> _readLatestReleasesFromPubspec() {
-  final pubspecPath = path.absolute('pubspec.yaml');
+  final pubspecPath = p.absolute('pubspec.yaml');
   final pubspecContent = File(pubspecPath).readAsStringSync();
   final pubspecYaml = loadYamlDocument(
     pubspecContent,
