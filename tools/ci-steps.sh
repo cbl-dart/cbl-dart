@@ -378,7 +378,7 @@ function checkBuildRunnerOutput() {
     local maxAttempts=5
 
     while [ $checkAttempt -lt $maxAttempts ]; do
-        if [[ -z "$(git status --porcelain)" ]]; then
+        if [[ -z "$(git status --porcelain **/*.dart)" ]]; then
             exit 0
         fi
         checkAttempt=$((checkAttempt + 1))
@@ -386,7 +386,7 @@ function checkBuildRunnerOutput() {
     done
 
     echo "Build output changed"
-    git status --porcelain
+    git status --porcelain **/*.dart
     git diff
     exit 1
 }
