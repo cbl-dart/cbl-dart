@@ -86,7 +86,7 @@ void main() {
         '''
 SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 1 = 0)
 
-2|0|0| SCAN TABLE kv_default AS _
+2|0|0| SCAN _
 
 {"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}
 ''',
