@@ -19,7 +19,6 @@ env:
   flutter-channel: beta
   dart-version-stable: 2.19.1
   dart-version-beta: beta
-  melos-version: 3.0.0-dev.0
 
 jobs:
   formatting-dart:
@@ -27,13 +26,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos
 
       - name: Install daco
         run: dart pub global activate daco
@@ -49,10 +48,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Check formatting
-        uses: jidicula/clang-format-action@v4.4.0
+        uses: jidicula/clang-format-action@v4.11.0
         with:
           check-path: 'native/couchbase-lite-dart'
 
@@ -66,13 +65,13 @@ jobs:
     continue-on-error: ${{ matrix.dart != 'stable' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name:
           Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v2
+        uses: nrwl/nx-set-shas@v3
 
       - name: Install NodeJS dependencies
         run: npm ci
@@ -88,7 +87,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos
 
       - name: Bootstrap Dart packages
         run: ./tools/dev-tools.sh bootstrap
@@ -113,7 +112,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -121,7 +120,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -189,7 +188,7 @@ jobs:
         }')[matrix.embedder] }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -226,7 +225,7 @@ jobs:
           sdk: ${{ env.dart-version-stable }}
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos
 
       - name: Bootstrap Dart package
         shell: bash
@@ -252,7 +251,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.embedder }}
           path: test-results
@@ -297,7 +296,7 @@ jobs:
       TEST_PACKAGE: cbl_flutter_prebuilt_e2e_tests
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Fluter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu'
@@ -315,7 +314,7 @@ jobs:
         run: ./tools/ci-steps.sh configureFlutter
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos
 
       - name: Bootstrap Dart package
         shell: bash
@@ -336,7 +335,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-results-cbl_flutter_prebuilt-${{ matrix.os }}
           path: test-results
@@ -372,7 +371,7 @@ jobs:
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -380,7 +379,7 @@ jobs:
           sdk: ${{ env[format('dart-version-{0}', matrix.dart)] }}
 
       - name: Setup Melos
-        run: dart pub global activate melos ${{ env.melos-version }}
+        run: dart pub global activate melos
 
       - name: Bootstrap Dart package
         shell: bash
