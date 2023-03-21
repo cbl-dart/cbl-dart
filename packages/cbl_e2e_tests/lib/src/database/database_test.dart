@@ -145,7 +145,7 @@ void main() {
 
         await db.changeEncryptionKey(key);
 
-        expect(Future(openTestDatabase), throwsNotADatabaseFileError);
+        expect(Future(openTestDatabase), throwsNotADatabaseFile);
       });
 
       apiTest('changeEncryptionKey: decrypt database', () async {
@@ -159,7 +159,7 @@ void main() {
 
         await expectLater(
           Future(openTestDatabase),
-          throwsNotADatabaseFileError,
+          throwsNotADatabaseFile,
         );
 
         await db.changeEncryptionKey(null);
@@ -186,7 +186,7 @@ void main() {
                   encryptionKey: keyA,
                 ),
               )),
-          throwsNotADatabaseFileError,
+          throwsNotADatabaseFile,
         );
       });
 

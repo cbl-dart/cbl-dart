@@ -8,6 +8,7 @@ import '../database.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
+import '../errors.dart';
 import '../fleece/containers.dart' as fl;
 import '../support/async_callback.dart';
 import '../support/edition.dart';
@@ -159,6 +160,14 @@ class FfiReplicator
 
   @override
   void start({bool reset = false}) => useSync(() {
+        if (_database.ownsCurrentTransaction) {
+          throw DatabaseException(
+            'A replicator cannot be started from within a database '
+            'transaction.',
+            DatabaseErrorCode.transactionNotClosed,
+          );
+        }
+
         if (_isStarted) {
           return;
         }

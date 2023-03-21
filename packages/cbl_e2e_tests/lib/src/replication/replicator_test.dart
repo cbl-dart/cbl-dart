@@ -8,6 +8,7 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/api_variant.dart';
 import '../utils/database_utils.dart';
+import '../utils/matchers.dart';
 import '../utils/replicator_utils.dart';
 import '../utils/test_document.dart';
 
@@ -665,6 +666,62 @@ void main() {
               ))),
           throwsArgumentError,
         );
+      },
+    );
+
+    test(
+      'supports starting replicator while async document save',
+      () async {
+        Database.log.console.level = LogLevel.debug;
+        final db = await openAsyncTestDatabase();
+        final repl = await db.createTestReplicator();
+
+        final documentSave = db.saveDocument(MutableDocument());
+        final replStart = repl.start();
+
+        await documentSave;
+        await replStart;
+      },
+    );
+
+    test(
+      'supports starting replicator while async transaction is open',
+      () async {
+        final db = await openAsyncTestDatabase();
+        final repl = await db.createTestReplicator();
+
+        final transactionWork = Completer<void>();
+        final transaction = db.inBatch(() => transactionWork.future);
+        final replStart = repl.start();
+
+        transactionWork.complete();
+        await transaction;
+        await replStart;
+      },
+    );
+
+    apiTest(
+      'throws when starting a replicator from within a transaction',
+      () async {
+        final db = await openTestDatabase();
+        final repl = await db.createTestReplicator();
+
+        final exceptionMatcher = throwsA(isDatabaseException
+            .havingCode(DatabaseErrorCode.transactionNotClosed)
+            .havingMessage(
+              'A replicator cannot be started from within a database '
+              'transaction.',
+            ));
+
+        if (db is SyncDatabase) {
+          db.inBatchSync(() {
+            expect(repl.start, exceptionMatcher);
+          });
+        } else {
+          await db.inBatch(() async {
+            expect(repl.start, exceptionMatcher);
+          });
+        }
       },
     );
   });

@@ -47,7 +47,8 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   /// The same note as for [dictKeys] applies here.
   SharedKeysTable get sharedKeysTable;
 
-  final _asyncTransactionLock = Lock();
+  /// Lock under which asynchronous transactions are executed.
+  final asyncTransactionLock = Lock();
 
   /// Creates a [DocumentDelegate] from [oldDelegate] for a new document which
   /// is being used with this database for the first time.
@@ -192,6 +193,9 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
     });
   }
 
+  /// Whether the current transaction belongs to this database, if one exists.
+  bool get ownsCurrentTransaction => _Transaction.current?.database == this;
+
   /// Method to implement by by [Database] implementations to begin a new
   /// transaction.
   FutureOr<void> beginTransaction();
@@ -233,7 +237,7 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
     bool requiresNewTransaction = false,
     required bool async,
   }) {
-    final currentTransaction = Zone.current[#_transaction] as _Transaction?;
+    final currentTransaction = _Transaction.current;
     if (currentTransaction != null) {
       if (requiresNewTransaction) {
         throw DatabaseException(
@@ -251,7 +255,7 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
       return fn();
     }
 
-    if (!async && _asyncTransactionLock.locked) {
+    if (!async && asyncTransactionLock.locked) {
       throw DatabaseException(
         'Cannot start a new synchronous transaction while an asynchronous '
         'transaction is still active.',
@@ -261,50 +265,54 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 
     final transaction = _Transaction(this);
 
-    FutureOr<R> invokeFn() =>
-        runZoned(fn, zoneValues: {#_transaction: transaction});
-
-    return beginTransaction().then((_) {
-      if (async) {
-        return _asyncTransactionLock.synchronized(() async {
-          try {
-            final result = await invokeFn();
-            transaction.end();
-            await endTransaction(commit: true);
-            return result;
-            // ignore: avoid_catches_without_on_clauses
-          } catch (e) {
-            transaction.end();
-            await endTransaction(commit: false);
-            rethrow;
-          }
-        });
-      } else {
+    if (async) {
+      return asyncTransactionLock.synchronized(() async {
+        await beginTransaction();
         try {
-          final result = invokeFn();
+          final result = await transaction.runWith(fn);
           transaction.end();
-          final endTransactionResult = endTransaction(commit: true);
-          assert(endTransactionResult is! Future);
+          await endTransaction(commit: true);
           return result;
           // ignore: avoid_catches_without_on_clauses
         } catch (e) {
           transaction.end();
-          final endTransactionResult = endTransaction(commit: false);
-          assert(endTransactionResult is! Future);
+          await endTransaction(commit: false);
           rethrow;
         }
+      });
+    } else {
+      final startTransactionResult = beginTransaction();
+      assert(startTransactionResult is! Future);
+      try {
+        final result = transaction.runWith(fn);
+        transaction.end();
+        final endTransactionResult = endTransaction(commit: true);
+        assert(endTransactionResult is! Future);
+        return result;
+        // ignore: avoid_catches_without_on_clauses
+      } catch (e) {
+        transaction.end();
+        final endTransactionResult = endTransaction(commit: false);
+        assert(endTransactionResult is! Future);
+        rethrow;
       }
-    });
+    }
   }
 }
 
 class _Transaction {
   _Transaction(this.database);
 
+  static _Transaction? get current =>
+      Zone.current[#_transaction] as _Transaction?;
+
   final Database database;
 
   bool get isActive => _isActive;
   var _isActive = true;
+
+  T runWith<T>(T Function() fn) =>
+      runZoned(fn, zoneValues: {#_transaction: this});
 
   void end() {
     _isActive = false;

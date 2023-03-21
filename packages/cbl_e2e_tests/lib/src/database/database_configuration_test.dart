@@ -42,7 +42,7 @@ void main() {
         );
 
         // Open it again without key.
-        expect(openSyncTestDatabase, throwsNotADatabaseFileError);
+        expect(openSyncTestDatabase, throwsNotADatabaseFile);
       });
     });
 
@@ -68,7 +68,7 @@ void main() {
         );
 
         // Open it again without key.
-        expect(openSyncTestDatabase, throwsNotADatabaseFileError);
+        expect(openSyncTestDatabase, throwsNotADatabaseFile);
       });
     });
 
