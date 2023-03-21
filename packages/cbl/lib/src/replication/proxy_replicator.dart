@@ -6,6 +6,7 @@ import '../database.dart';
 import '../database/proxy_database.dart';
 import '../document/document.dart';
 import '../document/proxy_document.dart';
+import '../errors.dart';
 import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
@@ -27,14 +28,15 @@ class ProxyReplicator extends ProxyObject
     with ClosableResourceMixin
     implements AsyncReplicator {
   ProxyReplicator({
-    required this.database,
+    required ProxyDatabase database,
     required int objectId,
     required ReplicatorConfiguration config,
     required void Function() unregisterCallbacks,
-  })  : assert(database == config.database),
+  })  : _database = database,
+        assert(database == config.database),
         _config = ReplicatorConfiguration.from(config),
         super(database.channel, objectId, proxyFinalizer: unregisterCallbacks) {
-    attachTo(database);
+    attachTo(_database);
   }
 
   static Future<ProxyReplicator> create(
@@ -110,7 +112,7 @@ class ProxyReplicator extends ProxyObject
     }
   }
 
-  final ProxyDatabase database;
+  final ProxyDatabase _database;
 
   late final _listenerTokens = ListenerTokenRegistry(this);
 
@@ -125,11 +127,25 @@ class ProxyReplicator extends ProxyObject
           )));
 
   @override
-  Future<void> start({bool reset = false}) =>
-      use(() => channel.call(StartReplicator(
-            replicatorId: objectId,
-            reset: reset,
-          )));
+  // ignore: prefer_expression_function_bodies
+  Future<void> start({bool reset = false}) => use(() {
+        if (_database.ownsCurrentTransaction) {
+          throw DatabaseException(
+            'A replicator cannot be started from within a database '
+            'transaction.',
+            DatabaseErrorCode.transactionNotClosed,
+          );
+        }
+
+        // Starting a replicator while the database has an active transaction
+        // causes a deadlock. To avoid this, we synchronize the start call with
+        // the database's transaction lock.
+        return _database.asyncTransactionLock
+            .synchronized(() => channel.call(StartReplicator(
+                  replicatorId: objectId,
+                  reset: reset,
+                )));
+      });
 
   @override
   Future<void> stop() => use(_stop);
@@ -147,7 +163,7 @@ class ProxyReplicator extends ProxyObject
       ReplicatorChangeListener listener) async {
     late final ProxyListenerToken<ReplicatorChange> token;
     final listenerId =
-        database.client.registerReplicatorChangeListener((status) {
+        _database.client.registerReplicatorChangeListener((status) {
       token.callListener(ReplicatorChangeImpl(this, status));
     });
 
@@ -157,7 +173,7 @@ class ProxyReplicator extends ProxyObject
     ));
 
     return token =
-        ProxyListenerToken(database.client, this, listenerId, listener);
+        ProxyListenerToken(_database.client, this, listenerId, listener);
   }
 
   @override
@@ -174,7 +190,7 @@ class ProxyReplicator extends ProxyObject
   ) async {
     late final ProxyListenerToken<DocumentReplication> token;
     final listenerId =
-        database.client.registerDocumentReplicationListener((event) {
+        _database.client.registerDocumentReplicationListener((event) {
       token.callListener(DocumentReplicationImpl(
         this,
         event.isPush,
@@ -188,7 +204,7 @@ class ProxyReplicator extends ProxyObject
     ));
 
     return token =
-        ProxyListenerToken(database.client, this, listenerId, listener);
+        ProxyListenerToken(_database.client, this, listenerId, listener);
   }
 
   @override
@@ -227,7 +243,7 @@ class ProxyReplicator extends ProxyObject
   String toString() => [
         'ProxyReplicator(',
         [
-          'database: $database',
+          'database: $_database',
           'type: ${describeEnum(config.replicatorType)}',
           if (config.continuous) 'CONTINUOUS'
         ].join(', '),
