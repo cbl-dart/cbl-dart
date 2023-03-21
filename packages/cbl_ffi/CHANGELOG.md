@@ -1,3 +1,7 @@
+## 0.8.1+2
+
+ - Update a dependency to the latest release.
+
 ## 0.8.1+1
 
  - **FIX**: ensure compatibility with Dart 2.19 ([#457](https://github.com/cbl-dart/cbl-dart/issues/457)). ([caf9bc90](https://github.com/cbl-dart/cbl-dart/commit/caf9bc9050cef56fecc1231bbf18637dd17a4ae8))

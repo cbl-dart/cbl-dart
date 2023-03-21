@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-03-21
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_libcblite_api` - `v3.0.11`](#cbl_libcblite_api---v3011)
+ - [`cbl` - `v2.1.7`](#cbl---v217)
+ - [`cbl_flutter` - `v2.0.5`](#cbl_flutter---v205)
+ - [`cbl_flutter_ce` - `v2.1.5`](#cbl_flutter_ce---v215)
+ - [`cbl_dart` - `v2.1.8`](#cbl_dart---v218)
+ - [`cbl_flutter_ee` - `v2.1.5`](#cbl_flutter_ee---v215)
+ - [`cbl_ffi` - `v0.8.1+2`](#cbl_ffi---v0812)
+ - [`cbl_flutter_platform_interface` - `v2.0.5`](#cbl_flutter_platform_interface---v205)
+ - [`cbl_generator` - `v0.2.0+5`](#cbl_generator---v0205)
+ - [`cbl_sentry` - `v1.0.5`](#cbl_sentry---v105)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_ce` - `v2.1.5`
+ - `cbl_dart` - `v2.1.8`
+ - `cbl_flutter_ee` - `v2.1.5`
+ - `cbl_ffi` - `v0.8.1+2`
+ - `cbl_flutter_platform_interface` - `v2.0.5`
+ - `cbl_generator` - `v0.2.0+5`
+ - `cbl_sentry` - `v1.0.5`
+
+---
+
+#### `cbl_libcblite_api` - `v3.0.11`
+
+ - Bump "cbl_libcblite_api" to `3.0.11`.
+
+#### `cbl` - `v2.1.7`
+
+ - **FIX**: prevent deadlock when starting replicator during transaction ([#470](https://github.com/cbl-dart/cbl-dart/issues/470)). ([f1427529](https://github.com/cbl-dart/cbl-dart/commit/f1427529854dbe0065083629a76f3489369dc824))
+
+#### `cbl_flutter` - `v2.0.5`
+
+ - **FIX**: prevent deadlock when starting replicator during transaction ([#470](https://github.com/cbl-dart/cbl-dart/issues/470)). ([f1427529](https://github.com/cbl-dart/cbl-dart/commit/f1427529854dbe0065083629a76f3489369dc824))
+
+
 ## 2023-02-19
 
 ### Changes

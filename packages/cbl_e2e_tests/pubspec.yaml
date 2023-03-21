@@ -6,8 +6,8 @@ environment:
 
 dependencies:
   benchmark_harness: ^2.1.0
-  cbl: ^2.1.6
-  cbl_ffi: ^0.8.1+1
+  cbl: ^2.1.7
+  cbl_ffi: ^0.8.1+2
   collection: ^1.16.0
   crypto: ^3.0.1
   http: ^0.13.4

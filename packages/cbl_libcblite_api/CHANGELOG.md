@@ -1,3 +1,7 @@
+## 3.0.11
+
+ - Bump "cbl_libcblite_api" to `3.0.11`.
+
 ## 3.0.2
 
 > Note: This release has breaking changes.
