@@ -176,12 +176,18 @@ class _Equality extends Matcher {
 
 /// === Errors =================================================================
 
-final throwsNotADatabaseFileError = throwsA(
-  isA<DatabaseException>().having(
-    (it) => it.code,
-    'code',
-    DatabaseErrorCode.notADatabaseFile,
-  ),
+final isDatabaseException = isA<DatabaseException>();
+
+extension DatabaseExceptionMatcherExt on test.TypeMatcher<DatabaseException> {
+  test.TypeMatcher<DatabaseException> havingMessage(String message) =>
+      having((it) => it.message, 'message', message);
+
+  test.TypeMatcher<DatabaseException> havingCode(DatabaseErrorCode code) =>
+      having((it) => it.code, 'code', code);
+}
+
+final throwsNotADatabaseFile = throwsA(
+  isDatabaseException.havingCode(DatabaseErrorCode.notADatabaseFile),
 );
 
 final isTypedDataException = isA<TypedDataException>();
