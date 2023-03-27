@@ -16,8 +16,9 @@ on:
 
 env:
   # Temporarily use a beta version of Flutter to work around a bug in the stable version.
+  # https://github.com/flutter/flutter/issues/122957
   flutter-channel: beta
-  dart-version-stable: 2.19.1
+  dart-version-stable: stable
   dart-version-beta: beta
 
 jobs:
