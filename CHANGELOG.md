@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-03-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_libcblitedart_api` - `v5.0.0`](#cbl_libcblitedart_api---v500)
+ - [`cbl_flutter_ce` - `v2.1.6`](#cbl_flutter_ce---v216)
+ - [`cbl_dart` - `v2.1.9`](#cbl_dart---v219)
+ - [`cbl_flutter_ee` - `v2.1.6`](#cbl_flutter_ee---v216)
+ - [`cbl_ffi` - `v0.8.1+3`](#cbl_ffi---v0813)
+ - [`cbl` - `v2.1.8`](#cbl---v218)
+ - [`cbl_flutter` - `v2.0.6`](#cbl_flutter---v206)
+ - [`cbl_flutter_platform_interface` - `v2.0.6`](#cbl_flutter_platform_interface---v206)
+ - [`cbl_generator` - `v0.2.0+6`](#cbl_generator---v0206)
+ - [`cbl_sentry` - `v1.0.6`](#cbl_sentry---v106)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_ce` - `v2.1.6`
+ - `cbl_dart` - `v2.1.9`
+ - `cbl_flutter_ee` - `v2.1.6`
+ - `cbl_ffi` - `v0.8.1+3`
+ - `cbl` - `v2.1.8`
+ - `cbl_flutter` - `v2.0.6`
+ - `cbl_flutter_platform_interface` - `v2.0.6`
+ - `cbl_generator` - `v0.2.0+6`
+ - `cbl_sentry` - `v1.0.6`
+
+---
+
+#### `cbl_libcblitedart_api` - `v5.0.0`
+
+ - Bump "cbl_libcblitedart_api" to `5.0.0`.
+
+
 ## 2023-03-21
 
 ### Changes

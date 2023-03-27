@@ -1,3 +1,7 @@
+## 2.1.8
+
+ - Update a dependency to the latest release.
+
 ## 2.1.7
 
  - **FIX**: prevent deadlock when starting replicator during transaction ([#470](https://github.com/cbl-dart/cbl-dart/issues/470)). ([f1427529](https://github.com/cbl-dart/cbl-dart/commit/f1427529854dbe0065083629a76f3489369dc824))

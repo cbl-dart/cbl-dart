@@ -1,3 +1,7 @@
+## 5.0.0
+
+ - Bump "cbl_libcblitedart_api" to `5.0.0`.
+
 ## 4.0.0
 
  - Bump "cbl_libcblitedart_api" to `4.0.0`.
