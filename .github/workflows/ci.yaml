@@ -16,8 +16,8 @@ on:
 
 env:
   # Temporarily use a beta version of Flutter to work around a bug in the stable version.
-  flutter-channel: beta
-  dart-version-stable: 2.19.1
+  flutter-channel: stable
+  dart-version-stable: stable
   dart-version-beta: beta
 
 jobs:
