@@ -14,6 +14,10 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   flutter-channel: stable
   dart-version-stable: stable
