@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-04-15
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_sentry` - `v1.1.0`](#cbl_sentry---v110)
+
+---
+
+#### `cbl_sentry` - `v1.1.0`
+
+ - **FEAT**(cbl_sentry): support sentry `^7.0.0` ([#475](https://github.com/cbl-dart/cbl-dart/issues/475)). ([13969835](https://github.com/cbl-dart/cbl-dart/commit/13969835697da9ea4bac0b3510fb0d5f74e967fe))
+
+
 ## 2023-03-27
 
 ### Changes
