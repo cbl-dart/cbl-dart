@@ -11,7 +11,7 @@ dependencies:
   cbl_dart: ^2.1.9
   cbl_sentry:
     path: ..
-  sentry: ^6.2.2
+  sentry: ^7.4.2
 
 dev_dependencies:
   flutter_lints: ^2.0.1
