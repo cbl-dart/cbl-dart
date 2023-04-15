@@ -14,10 +14,12 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
-  # Temporarily use a beta version of Flutter to work around a bug in the stable version.
-  # https://github.com/flutter/flutter/issues/122957
-  flutter-channel: beta
+  flutter-channel: stable
   dart-version-stable: stable
   dart-version-beta: beta
 
@@ -165,9 +167,11 @@ jobs:
             os: iOS
           - embedder: standalone
             os: Android
-          # TODO: Get macOS tests to launch again in CI
+          # TODO: Get macOS and iOS tests to launch again in CI
           - embedder: flutter
             os: macOS
+          - embedder: flutter
+            os: iOS
     # Flutter + Ubuntu is flaky, likely because of a bug in CBL C, so we allow it to fail for now.
     continue-on-error:
       ${{ matrix.embedder == 'flutter' && matrix.os == 'Ubuntu' }}
@@ -280,9 +284,11 @@ jobs:
           - Ubuntu
           - Windows
         exclude:
-          # TODO: Get macOS tests to launch again in CI
+          # TODO: Get macOS and iOS tests to launch again in CI
           - embedder: flutter
             os: macOS
+          - embedder: flutter
+            os: iOS
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-11",
