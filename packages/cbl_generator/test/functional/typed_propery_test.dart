@@ -23,6 +23,7 @@ void main() {
 
   test('default value', () {
     expect(DefaultValueDict().value, isTrue);
+    // ignore: avoid_redundant_argument_values
     expect(DefaultValueDict(true).value, isTrue);
     expect(DefaultValueDict(false).value, isFalse);
   });
