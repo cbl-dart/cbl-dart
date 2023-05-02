@@ -1320,17 +1320,6 @@ extension CBLDart_LoadedFLValueExt on CBLDart_LoadedFLValue {
 typedef _FLData_Dump_C = FLStringResult Function(FLSlice slice);
 typedef _FLData_Dump = FLStringResult Function(FLSlice slice);
 
-typedef _CBLDart_FLValue_FromData_C = Void Function(
-  FLSlice data,
-  Uint8 trust,
-  Pointer<CBLDart_LoadedFLValue> out,
-);
-typedef _CBLDart_FLValue_FromData = void Function(
-  FLSlice data,
-  int trust,
-  Pointer<CBLDart_LoadedFLValue> out,
-);
-
 typedef _CBLDart_GetLoaded_FLValue_C = Void Function(
   Pointer<FLValue> value,
   Pointer<CBLDart_LoadedFLValue> out,
@@ -1432,11 +1421,6 @@ class FleeceDecoderBindings extends Bindings {
     );
     _knownSharedKeysDeletePtr =
         libs.cblDart.lookup('CBLDart_KnownSharedKeys_Delete');
-    _getLoadedFLValueFromData = libs.cblDart
-        .lookupFunction<_CBLDart_FLValue_FromData_C, _CBLDart_FLValue_FromData>(
-      'CBLDart_FLValue_FromData',
-      isLeaf: useIsLeaf,
-    );
     _getLoadedFLValue = libs.cblDart.lookupFunction<
         _CBLDart_GetLoaded_FLValue_C, _CBLDart_GetLoadedFLValue>(
       'CBLDart_GetLoadedFLValue',
@@ -1481,7 +1465,6 @@ class FleeceDecoderBindings extends Bindings {
   late final _CBLDart_KnownSharedKeys_New _knownSharedKeysNew;
   late final Pointer<NativeFunction<_CBLDart_KnownSharedKeys_Delete_C>>
       _knownSharedKeysDeletePtr;
-  late final _CBLDart_FLValue_FromData _getLoadedFLValueFromData;
   late final _CBLDart_GetLoadedFLValue _getLoadedFLValue;
   late final _CBLDart_FLArray_GetLoadedFLValue _getLoadedFLValueFromArray;
   late final _CBLDart_FLDict_GetLoadedFLValue _getLoadedFLValueFromDict;
@@ -1509,13 +1492,6 @@ class FleeceDecoderBindings extends Bindings {
     _knownSharedKeysFinalizer.attach(object, result.cast());
     return result;
   }
-
-  void getLoadedFLValueFromData(Slice data, FLTrust trust) =>
-      _getLoadedFLValueFromData(
-        data.makeGlobal().ref,
-        trust.toInt(),
-        globalLoadedFLValue,
-      );
 
   void getLoadedValue(Pointer<FLValue> value) {
     _getLoadedFLValue(value, globalLoadedFLValue);

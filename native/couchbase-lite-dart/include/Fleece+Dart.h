@@ -53,10 +53,6 @@ struct CBLDart_LoadedFLValue {
 };
 
 CBLDART_EXPORT
-void CBLDart_FLValue_FromData(FLSlice data, uint8_t trust,
-                              CBLDart_LoadedFLValue *out);
-
-CBLDART_EXPORT
 void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out);
 
 CBLDART_EXPORT

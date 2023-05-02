@@ -730,7 +730,7 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
 
 CBLReplicator *CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration *config, CBLError *errorOut) {
-  CBLReplicatorConfiguration config_;
+  CBLReplicatorConfiguration config_{};
   config_.database = config->database;
   config_.endpoint = config->endpoint;
   config_.replicatorType =
@@ -766,11 +766,6 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   context->pushFilter = ASYNC_CALLBACK_FROM_C(config->pushFilter);
   context->conflictResolver = ASYNC_CALLBACK_FROM_C(config->conflictResolver);
   config_.context = context;
-
-#ifdef COUCHBASE_ENTERPRISE
-  config_.propertyEncryptor = nullptr;
-  config_.propertyDecryptor = nullptr;
-#endif
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
 

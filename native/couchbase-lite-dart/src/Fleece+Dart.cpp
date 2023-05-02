@@ -71,12 +71,6 @@ static void CBLDart_GetLoadedDictKey(KnownSharedKeys *knownSharedKeys,
   out->stringSize = string.size;
 }
 
-void CBLDart_FLValue_FromData(FLSlice data, uint8_t trust,
-                              CBLDart_LoadedFLValue *out) {
-  auto value = FLValue_FromData(data, static_cast<FLTrust>(trust));
-  CBLDart_GetLoadedFLValue(value, out);
-}
-
 void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
   if (value) {
     out->exists = true;

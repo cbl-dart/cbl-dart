@@ -26,7 +26,6 @@ CBL_Dart {
 		CBLDart_FLSliceResult_ReleaseByBuf;
 		CBLDart_KnownSharedKeys_New;
 		CBLDart_KnownSharedKeys_Delete;
-		CBLDart_FLValue_FromData;
 		CBLDart_GetLoadedFLValue;
 		CBLDart_FLArray_GetLoadedFLValue;
 		CBLDart_FLDict_GetLoadedFLValue;
