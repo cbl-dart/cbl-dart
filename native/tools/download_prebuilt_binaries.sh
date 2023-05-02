@@ -33,15 +33,15 @@ binariesDir="$vendorDir/couchbase-lite-C-prebuilt"
 tmpDir="$binariesDir/tmp"
 couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
 editions=(community enterprise)
-targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
-targetsWithExternalSymbols=(macos ubuntu20.04-x86_64 windows-x86_64)
+targets=(android ios macos linux-x86_64 windows-x86_64)
+targetsWithExternalSymbols=(macos linux-x86_64 windows-x86_64)
 
 # Outputs the extension of the archives for the given target.
 function _archiveExt() {
     local target=$1
 
     case "$target" in
-    ubuntu*)
+    linux*)
         echo tar.gz
         ;;
     *)
@@ -112,7 +112,7 @@ function _downloadBinaries() {
         macos)
             mv "$installDir/libcblite-$release/libcblite.dylib.dSYM" "$installDir/libcblite-$release/lib"
             ;;
-        ubuntu*)
+        linux*)
             mv "$installDir/libcblite-$release/libcblite.so.sym" "$installDir/libcblite-$release/lib/"*-linux-gnu
             ;;
         windows*)

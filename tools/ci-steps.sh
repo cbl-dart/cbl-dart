@@ -50,7 +50,7 @@ function buildNativeLibraries() {
         target=android
         ;;
     Ubuntu)
-        target=ubuntu20.04-x86_64
+        target=linux-x86_64
         ;;
     Windows)
         target=windows-x86_64

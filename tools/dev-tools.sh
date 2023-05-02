@@ -13,7 +13,7 @@ esac
 
 editions=(community enterprise)
 buildModes=(debug release)
-targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
+targets=(android ios macos linux-x86_64 windows-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 nativeDir="$projectDir/native"
@@ -52,7 +52,7 @@ function prepareNativeLibraries() {
     if [[ -z "$target" ]]; then
         case "$(uname)" in
         Linux)
-            target="ubuntu20.04-x86_64"
+            target="linux-x86_64"
             ;;
         Darwin)
             target="macos"
@@ -116,7 +116,7 @@ function prepareNativeLibraries() {
         cp -a "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite.dylib.dSYM" "$cblFlutterLocalMacosLibrariesDir"
         cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
         ;;
-    ubuntu20.04-x86_64)
+    linux-x86_64)
         "$couchbaseLiteDartDir/tools/build_unix.sh" "$edition" "$buildMode"
 
         echo "Copying libraries to cbl_e2e_tests_standalone_dart"

@@ -27,7 +27,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android)
     set(CBL_TARGET android)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     # The only currently supported Linux target.
-    set(CBL_TARGET ubuntu20.04-x86_64)
+    set(CBL_TARGET linux-x86_64)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(CBL_TARGET windows-x86_64)
 endif()
