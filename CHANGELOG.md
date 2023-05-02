@@ -3,6 +3,67 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-05-02
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_libcblitedart_api` - `v6.0.0`](#cbl_libcblitedart_api---v600)
+ - [`cbl_libcblite_api` - `v3.1.0`](#cbl_libcblite_api---v310)
+ - [`cbl_dart` - `v2.2.0`](#cbl_dart---v220)
+ - [`cbl_ffi` - `v0.8.2`](#cbl_ffi---v082)
+ - [`cbl_flutter_ce` - `v2.2.0`](#cbl_flutter_ce---v220)
+ - [`cbl_flutter_ee` - `v2.2.0`](#cbl_flutter_ee---v220)
+ - [`cbl` - `v2.1.9`](#cbl---v219)
+ - [`cbl_flutter` - `v2.0.7`](#cbl_flutter---v207)
+ - [`cbl_flutter_platform_interface` - `v2.0.7`](#cbl_flutter_platform_interface---v207)
+ - [`cbl_generator` - `v0.2.0+7`](#cbl_generator---v0207)
+ - [`cbl_sentry` - `v1.1.1`](#cbl_sentry---v111)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl` - `v2.1.9`
+ - `cbl_flutter` - `v2.0.7`
+ - `cbl_flutter_platform_interface` - `v2.0.7`
+ - `cbl_generator` - `v0.2.0+7`
+ - `cbl_sentry` - `v1.1.1`
+
+---
+
+#### `cbl_libcblitedart_api` - `v6.0.0`
+
+ - Bump "cbl_libcblitedart_api" to `6.0.0`.
+
+#### `cbl_libcblite_api` - `v3.1.0`
+
+ - Bump "cbl_libcblite_api" to `3.1.0`.
+
+#### `cbl_dart` - `v2.2.0`
+
+ - **FEAT**: upgrade to CBL C SDK 3.1.0 ([#478](https://github.com/cbl-dart/cbl-dart/issues/478)). ([9031f585](https://github.com/cbl-dart/cbl-dart/commit/9031f58551dbcf035b10c8e0eef5bca25290c60c))
+
+#### `cbl_ffi` - `v0.8.2`
+
+ - **FEAT**: upgrade to CBL C SDK 3.1.0 ([#478](https://github.com/cbl-dart/cbl-dart/issues/478)). ([9031f585](https://github.com/cbl-dart/cbl-dart/commit/9031f58551dbcf035b10c8e0eef5bca25290c60c))
+
+#### `cbl_flutter_ce` - `v2.2.0`
+
+ - **FEAT**: upgrade to CBL C SDK 3.1.0 ([#478](https://github.com/cbl-dart/cbl-dart/issues/478)). ([9031f585](https://github.com/cbl-dart/cbl-dart/commit/9031f58551dbcf035b10c8e0eef5bca25290c60c))
+
+#### `cbl_flutter_ee` - `v2.2.0`
+
+ - **FEAT**: upgrade to CBL C SDK 3.1.0 ([#478](https://github.com/cbl-dart/cbl-dart/issues/478)). ([9031f585](https://github.com/cbl-dart/cbl-dart/commit/9031f58551dbcf035b10c8e0eef5bca25290c60c))
+
+
 ## 2023-04-15
 
 ### Changes

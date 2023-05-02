@@ -7,9 +7,9 @@ environment:
   sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
-  cbl: ^2.1.8
-  cbl_flutter: ^2.0.6
-  cbl_flutter_ce: ^2.1.6
+  cbl: ^2.1.9
+  cbl_flutter: ^2.0.7
+  cbl_flutter_ce: ^2.2.0
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
