@@ -708,7 +708,6 @@ void main() {
     test(
       'supports starting replicator while async document save',
       () async {
-        Database.log.console.level = LogLevel.debug;
         final db = await openAsyncTestDatabase();
         final repl = await db.createTestReplicator();
 
