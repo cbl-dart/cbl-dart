@@ -19,7 +19,7 @@ MINGW* | CYGWIN* | MSYS*)
     ;;
 esac
 
-targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
+targets=(android ios macos linux-x86_64 windows-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 packageDir="$(cd "$scriptDir/.." && pwd)"
 androidJniLibsDir="$packageDir/android/src/main/jniLibs"
@@ -43,7 +43,7 @@ function _installDir() {
     macos)
         echo "$macosLibrariesDir"
         ;;
-    ubuntu*)
+    linux*)
         echo "$linuxLibDir"
         ;;
     windows*)
@@ -67,7 +67,7 @@ function _archiveExt() {
     local target="$1"
 
     case "$target" in
-    ubuntu*)
+    linux*)
         echo tar.gz
         ;;
     *)
@@ -185,7 +185,7 @@ macos)
     cp -L "$tmpDir/libcblite-$COUCHBASE_LITE_C_VERSION/lib/libcblite."?".dylib" "$tmpInstallDir"
     cp -L "$tmpDir/libcblitedart-$COUCHBASE_LITE_DART_VERSION/lib/libcblitedart."?".dylib" "$tmpInstallDir"
     ;;
-ubuntu*)
+linux*)
     cp -a "$tmpDir/libcblite-$COUCHBASE_LITE_C_VERSION/lib/"*"/libcblite."* "$tmpInstallDir"
     cp -a "$tmpDir/libcblitedart-$COUCHBASE_LITE_DART_VERSION/lib/"*"/libcblitedart."* "$tmpInstallDir"
     ;;

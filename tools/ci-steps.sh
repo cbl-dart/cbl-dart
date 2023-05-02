@@ -50,7 +50,7 @@ function buildNativeLibraries() {
         target=android
         ;;
     Ubuntu)
-        target=ubuntu20.04-x86_64
+        target=linux-x86_64
         ;;
     Windows)
         target=windows-x86_64
@@ -293,6 +293,12 @@ function _collectCblLogsMacOS() {
     echo "Copied files"
 }
 
+function _collectCblLogsAndroid() {
+    ./tools/android-emulator.sh copyAppData
+    zip -r appData.zip appData
+    mv appData.zip "$testResultsDir"
+}
+
 function _collectCblLogsLinux() {
     echo "Collecting Couchbase Lite logs"
 
@@ -349,7 +355,7 @@ function collectTestResults() {
             ;;
         Android)
             _collectCrashReportsAndroid
-            # TODO(blaugold): get cbl logs from device
+            _collectCblLogsAndroid
             ;;
         Ubuntu)
             _collectCrashReportsLinuxFlutter

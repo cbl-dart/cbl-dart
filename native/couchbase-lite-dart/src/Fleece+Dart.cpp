@@ -71,12 +71,6 @@ static void CBLDart_GetLoadedDictKey(KnownSharedKeys *knownSharedKeys,
   out->stringSize = string.size;
 }
 
-void CBLDart_FLValue_FromData(FLSlice data, uint8_t trust,
-                              CBLDart_LoadedFLValue *out) {
-  auto value = FLValue_FromData(data, static_cast<FLTrust>(trust));
-  CBLDart_GetLoadedFLValue(value, out);
-}
-
 void CBLDart_GetLoadedFLValue(FLValue value, CBLDart_LoadedFLValue *out) {
   if (value) {
     out->exists = true;
@@ -154,7 +148,7 @@ CBLDart_FLDictIterator *CBLDart_FLDictIterator_Begin(
     FLDict dict, KnownSharedKeys *knownSharedKeys,
     CBLDart_LoadedDictKey *keyOut, CBLDart_LoadedFLValue *valueOut,
     bool deleteOnDone, bool preLoad) {
-  auto iterator = new CBLDart_FLDictIterator;
+  auto iterator = new CBLDart_FLDictIterator{};
   iterator->_keyOut = keyOut;
   iterator->_valueOut = valueOut;
   iterator->_knownSharedKeys = knownSharedKeys;
@@ -211,7 +205,7 @@ struct CBLDart_FLArrayIterator {
 
 CBLDart_FLArrayIterator *CBLDart_FLArrayIterator_Begin(
     FLArray array, CBLDart_LoadedFLValue *valueOut, bool deleteOnDone) {
-  auto iterator = new CBLDart_FLArrayIterator;
+  auto iterator = new CBLDart_FLArrayIterator{};
   iterator->_valueOut = valueOut;
   iterator->_deleteOnDone = deleteOnDone;
 

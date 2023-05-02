@@ -40,13 +40,13 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Download Couchbase Lite
-        run: ./native/tools/download_prebuilt_binaries.sh ubuntu20.04-x86_64
+        run: ./native/tools/download_prebuilt_binaries.sh linux-x86_64
 
       - name: Build release
         run: |
           ./native/couchbase-lite-dart/tools/build_release.sh \
             ${{ needs.create-release.outputs.release }} \
-            ubuntu20.04-x86_64
+            linux-x86_64
 
       - name: Upload archives
         uses: alexellis/upload-assets@0.2.2

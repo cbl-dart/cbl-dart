@@ -65,13 +65,13 @@ void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback) {
 void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
                                        int64_t argument) {
   std::thread([=]() {
-    Dart_CObject argument__;
+    Dart_CObject argument__{};
     argument__.type = Dart_CObject_kInt64;
     argument__.value.as_int64 = argument;
 
     Dart_CObject *argsValues[] = {&argument__};
 
-    Dart_CObject args;
+    Dart_CObject args{};
     args.type = Dart_CObject_kArray;
     args.value.as_array.length = 1;
     args.value.as_array.values = argsValues;
@@ -219,20 +219,20 @@ static void CBLDart_UpdateEffectiveLogCallbackLevel() {
 
 static void CBLDart_CallDartLogCallback(CBLLogDomain domain, CBLLogLevel level,
                                         FLString message) {
-  Dart_CObject domain_;
+  Dart_CObject domain_{};
   domain_.type = Dart_CObject_kInt32;
   domain_.value.as_int32 = static_cast<int32_t>(domain);
 
-  Dart_CObject level_;
+  Dart_CObject level_{};
   level_.type = Dart_CObject_kInt32;
   level_.value.as_int32 = static_cast<int32_t>(level);
 
-  Dart_CObject message_;
+  Dart_CObject message_{};
   CBLDart_CObject_SetFLString(&message_, message);
 
   Dart_CObject *argsValues[] = {&domain_, &level_, &message_};
 
-  Dart_CObject args;
+  Dart_CObject args{};
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
@@ -279,7 +279,7 @@ bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration *config,
   std::unique_lock lock(loggingMutex);
 
   if (!config) {
-    CBLLogFileConfiguration config_;
+    CBLLogFileConfiguration config_{};
     config_.level = kCBLLogNone;
     config_.directory = {nullptr, 0};
     config_.maxRotateCount = 0;
@@ -295,7 +295,7 @@ bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration *config,
     }
     return success;
   } else {
-    CBLLogFileConfiguration config_;
+    CBLLogFileConfiguration config_{};
     config_.level = config->level;
     config_.directory = config->directory;
     config_.maxRotateCount = config->maxRotateCount;
@@ -306,12 +306,12 @@ bool CBLDart_CBLLog_SetFileConfig(CBLLogFileConfiguration *config,
     if (success) {
       auto config_ = CBLLog_FileConfig();
       if (!logFileConfig) {
-        logFileConfig = new CBLLogFileConfiguration;
+        logFileConfig = new CBLLogFileConfiguration{};
       }
       logFileConfig->level = config_->level;
       logFileConfig->directory = config_->directory;
       logFileConfig->maxRotateCount = config_->maxRotateCount;
-      logFileConfig->maxSize = config->maxSize;
+      logFileConfig->maxSize = config_->maxSize;
       logFileConfig->usePlaintext = config_->usePlaintext;
     }
     return success;
@@ -483,7 +483,7 @@ static void CBLDart_DocumentChangeListenerWrapper(void *context,
                                                   FLString docID) {
   auto callback = ASYNC_CALLBACK_FROM_C(context);
 
-  Dart_CObject args;
+  Dart_CObject args{};
   CBLDart_CObject_SetEmptyArray(&args);
 
   CBLDart::AsyncCallbackCall(*callback).execute(args);
@@ -515,7 +515,7 @@ static void CBLDart_DatabaseChangeListenerWrapper(void *context,
 
   auto docIdObjectsArray = docIdObjects.data();
 
-  Dart_CObject args;
+  Dart_CObject args{};
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = numDocs;
   args.value.as_array.values = &docIdObjectsArray;
@@ -539,7 +539,7 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
                                      CBLError *errorOut) {
   switch (indexSpec.type) {
     case kCBLDart_IndexTypeValue: {
-      CBLValueIndexConfiguration config;
+      CBLValueIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
       config.expressions = indexSpec.expressions;
 
@@ -547,7 +547,7 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
     }
     case kCBLDart_IndexTypeFullText: {
     }
-      CBLFullTextIndexConfiguration config;
+      CBLFullTextIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
       config.expressions = indexSpec.expressions;
       config.ignoreAccents = static_cast<bool>(indexSpec.ignoreAccents);
@@ -566,7 +566,7 @@ static void CBLDart_QueryChangeListenerWrapper(void *context, CBLQuery *query,
                                                CBLListenerToken *token) {
   auto callback = ASYNC_CALLBACK_FROM_C(context);
 
-  Dart_CObject args;
+  Dart_CObject args{};
   CBLDart_CObject_SetEmptyArray(&args);
 
   CBLDart::AsyncCallbackCall(*callback).execute(args);
@@ -622,16 +622,16 @@ static std::mutex replicatorCallbackWrapperContextsMutex;
 static bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
                                             CBLDocument *document,
                                             CBLDocumentFlags flags) {
-  Dart_CObject document_;
+  Dart_CObject document_{};
   CBLDart_CObject_SetPointer(&document_, document);
 
-  Dart_CObject flags_;
+  Dart_CObject flags_{};
   flags_.type = Dart_CObject_kInt32;
   flags_.value.as_int32 = flags;
 
   Dart_CObject *argsValues[] = {&document_, &flags_};
 
-  Dart_CObject args;
+  Dart_CObject args{};
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = 2;
   args.value.as_array.values = argsValues;
@@ -672,18 +672,18 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
   auto callback = wrapperContext->conflictResolver;
 
-  Dart_CObject documentID_;
+  Dart_CObject documentID_{};
   CBLDart_CObject_SetFLString(&documentID_, documentID);
 
-  Dart_CObject local;
+  Dart_CObject local{};
   CBLDart_CObject_SetPointer(&local, localDocument);
 
-  Dart_CObject remote;
+  Dart_CObject remote{};
   CBLDart_CObject_SetPointer(&remote, remoteDocument);
 
   Dart_CObject *argsValues[] = {&documentID_, &local, &remote};
 
-  Dart_CObject args;
+  Dart_CObject args{};
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = 3;
   args.value.as_array.values = argsValues;
@@ -730,7 +730,7 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
 
 CBLReplicator *CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration *config, CBLError *errorOut) {
-  CBLReplicatorConfiguration config_;
+  CBLReplicatorConfiguration config_{};
   config_.database = config->database;
   config_.endpoint = config->endpoint;
   config_.replicatorType =
@@ -766,11 +766,6 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   context->pushFilter = ASYNC_CALLBACK_FROM_C(config->pushFilter);
   context->conflictResolver = ASYNC_CALLBACK_FROM_C(config->conflictResolver);
   config_.context = context;
-
-#ifdef COUCHBASE_ENTERPRISE
-  config_.propertyEncryptor = nullptr;
-  config_.propertyDecryptor = nullptr;
-#endif
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
 
@@ -873,14 +868,14 @@ class ReplicatorStatus_CObject_Helper {
   Dart_CObject *cObject() { return &object; }
 
  private:
-  Dart_CObject object;
+  Dart_CObject object{};
   Dart_CObject *objectValues[6];
-  Dart_CObject activity;
-  Dart_CObject progressComplete;
-  Dart_CObject progressDocumentCount;
-  Dart_CObject errorDomain;
-  Dart_CObject errorCode;
-  Dart_CObject errorMessage;
+  Dart_CObject activity{};
+  Dart_CObject progressComplete{};
+  Dart_CObject progressDocumentCount{};
+  Dart_CObject errorDomain{};
+  Dart_CObject errorCode{};
+  Dart_CObject errorMessage{};
 
   FLSliceResult errorMessageStr = {nullptr, 0};
 };
@@ -895,7 +890,7 @@ static void CBLDart_Replicator_ChangeListenerWrapper(
 
   Dart_CObject *argsValues[] = {cObjectStatus.cObject()};
 
-  Dart_CObject args;
+  Dart_CObject args{};
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = 1;
   args.value.as_array.values = argsValues;
@@ -960,13 +955,13 @@ class ReplicatedDocument_CObject_Helper {
   Dart_CObject *cObject() { return &object; }
 
  private:
-  Dart_CObject object;
+  Dart_CObject object{};
   Dart_CObject *objectValues[5];
-  Dart_CObject id;
-  Dart_CObject flags;
-  Dart_CObject errorDomain;
-  Dart_CObject errorCode;
-  Dart_CObject errorMessage;
+  Dart_CObject id{};
+  Dart_CObject flags{};
+  Dart_CObject errorDomain{};
+  Dart_CObject errorCode{};
+  Dart_CObject errorMessage{};
 
   FLSliceResult errorMessageStr = {nullptr, 0};
 };
@@ -976,7 +971,7 @@ static void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     unsigned numDocuments, const CBLReplicatedDocument *documents) {
   auto callback = ASYNC_CALLBACK_FROM_C(context);
 
-  Dart_CObject isPush_;
+  Dart_CObject isPush_{};
   isPush_.type = Dart_CObject_kBool;
   isPush_.value.as_bool = isPush;
 
@@ -990,14 +985,14 @@ static void CBLDart_Replicator_DocumentReplicationListenerWrapper(
     documentObjects[i] = helper->cObject();
   }
 
-  Dart_CObject cObjectDocumentsArray;
+  Dart_CObject cObjectDocumentsArray{};
   cObjectDocumentsArray.type = Dart_CObject_kArray;
   cObjectDocumentsArray.value.as_array.length = numDocuments;
   cObjectDocumentsArray.value.as_array.values = documentObjects.data();
 
   Dart_CObject *argsValues[] = {&isPush_, &cObjectDocumentsArray};
 
-  Dart_CObject args;
+  Dart_CObject args{};
   args.type = Dart_CObject_kArray;
   args.value.as_array.length = 2;
   args.value.as_array.values = argsValues;

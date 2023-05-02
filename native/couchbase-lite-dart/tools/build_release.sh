@@ -20,7 +20,7 @@ scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 buildDir="$projectDir/build/release"
 editions=(community enterprise)
-targets=(android ios macos ubuntu20.04-x86_64 windows-x86_64)
+targets=(android ios macos linux-x86_64 windows-x86_64)
 
 function _buildArchive() {
     local edition="$1"
@@ -47,7 +47,7 @@ function _buildArchive() {
         targetBuildDir="$projectDir/build/ios"
         productDirPrefix="CouchbaseLiteDart.xcframework"
         ;;
-    ubuntu20.04-x86_64)
+    linux-x86_64)
         ./tools/build_unix.sh "$edition" release
         targetBuildDir="$projectDir/build/unix"
         archiveExt=tar.gz

@@ -47,9 +47,6 @@ enum OS {
   windows,
 }
 
-/// A linux distribution.
-enum Distro { ubuntu }
-
 /// A target for which a specific [Package] is distributed.
 class Target {
   Target(this.os);
@@ -57,11 +54,10 @@ class Target {
   static final android = Target(OS.android);
   static final ios = Target(OS.ios);
   static final macos = Target(OS.macos);
-  static final ubuntu20_04_x86_64 =
-      LinuxTarget(OS.linux, Distro.ubuntu, '20.04', 'x86_64');
-  static final windows_x86_64 = WindowsTarget(OS.windows, 'x86_64');
+  static final linux_x86_64 = LinuxTarget('x86_64');
+  static final windows_x86_64 = WindowsTarget('x86_64');
 
-  static final all = [android, ios, macos, ubuntu20_04_x86_64, windows_x86_64];
+  static final all = [android, ios, macos, linux_x86_64, windows_x86_64];
 
   /// The target of the host machine.
   static Target get host {
@@ -70,9 +66,7 @@ class Target {
     }
 
     if (Platform.isLinux) {
-      // TODO(blaugold): detect distro and throw if not supported
-      // The only currently supported Linux target is Ubuntu 20.04 x86_64.
-      return ubuntu20_04_x86_64;
+      return linux_x86_64;
     }
 
     if (Platform.isWindows) {
@@ -96,14 +90,12 @@ class Target {
 
 /// A linux [Target].
 class LinuxTarget extends Target {
-  LinuxTarget(super.os, this.vendor, this.version, this.arch);
+  LinuxTarget(this.arch) : super(OS.linux);
 
-  final Distro vendor;
-  final String version;
   final String arch;
 
   @override
-  String get id => '${vendor.name}$version-$arch';
+  String get id => 'linux-$arch';
 
   @override
   ArchiveFormat get archiveFormat => ArchiveFormat.tarGz;
@@ -114,7 +106,7 @@ class LinuxTarget extends Target {
 
 /// A windows [Target].
 class WindowsTarget extends Target {
-  WindowsTarget(super.os, this.arch);
+  WindowsTarget(this.arch) : super(OS.windows);
 
   final String arch;
 

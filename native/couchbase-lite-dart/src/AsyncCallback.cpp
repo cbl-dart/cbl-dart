@@ -177,7 +177,7 @@ void AsyncCallbackCall::execute(Dart_CObject &arguments) {
 
   // The SendPort to signal the return of the callback.
   // Only necessary if the caller is interested in it.
-  Dart_CObject responsePort;
+  Dart_CObject responsePort{};
   if (isBlocking()) {
     responsePort.type = Dart_CObject_kSendPort;
     responsePort.value.as_send_port.id = receivePort_;
@@ -190,13 +190,13 @@ void AsyncCallbackCall::execute(Dart_CObject &arguments) {
   // response. This is how we get a reference to this call in the response
   // handler. Only necessary if the caller is waiting for the return of the
   // callback.
-  Dart_CObject callPointer;
+  Dart_CObject callPointer{};
   CBLDart_CObject_SetPointer(&callPointer, isBlocking() ? this : nullptr);
 
   // The request is sent as an array.
   Dart_CObject *requestValues[] = {&responsePort, &callPointer, &arguments};
 
-  Dart_CObject request;
+  Dart_CObject request{};
   request.type = Dart_CObject_kArray;
   request.value.as_array.length = 3;
   request.value.as_array.values = requestValues;
