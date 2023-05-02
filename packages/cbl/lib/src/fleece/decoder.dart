@@ -313,7 +313,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
   Object? convert(Data input) {
     final doc = Doc.fromResultData(input, trust, sharedKeys: sharedKeys);
     final root = doc.root;
-    if (root.type == FLValueType.undefined) {
+    if (root.type == ValueType.undefined) {
       throw ArgumentError('Invalid Fleece data');
     }
 
