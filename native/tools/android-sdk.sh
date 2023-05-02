@@ -4,7 +4,7 @@
 
 set -e
 
-ndkVersion="21.4.7075529"
+ndkVersion="23.1.7779620"
 cmakeVersion="3.18.1"
 defaultSdkLocation=("$HOME/Android/Sdk" "$HOME/Library/Android/sdk")
 sdkHome="$ANDROID_HOME"
@@ -23,7 +23,6 @@ if [ -z "$sdkHome" ]; then
         exit 1
     fi
 fi
-
 
 function installNativeToolchain() {
     $sdkHome/cmdline-tools/latest/bin/sdkmanager --install "ndk;$ndkVersion"
