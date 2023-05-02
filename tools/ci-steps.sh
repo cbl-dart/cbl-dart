@@ -293,6 +293,12 @@ function _collectCblLogsMacOS() {
     echo "Copied files"
 }
 
+function _collectCblLogsAndroid() {
+    ./tools/android-emulator.sh copyAppData
+    zip -r appData.zip appData
+    mv appData.zip "$testResultsDir"
+}
+
 function _collectCblLogsLinux() {
     echo "Collecting Couchbase Lite logs"
 
@@ -349,7 +355,7 @@ function collectTestResults() {
             ;;
         Android)
             _collectCrashReportsAndroid
-            # TODO(blaugold): get cbl logs from device
+            _collectCblLogsAndroid
             ;;
         Ubuntu)
             _collectCrashReportsLinuxFlutter

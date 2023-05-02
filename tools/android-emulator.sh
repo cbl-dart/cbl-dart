@@ -22,6 +22,7 @@ fi
 emulatorName="cbl-dart"
 emulatorPort=5554
 serialName="emulator-$emulatorPort"
+appBundleId="com.terwesten.gabriel.cbl_e2e_tests_flutter"
 
 # === Usage ===================================================================
 
@@ -148,6 +149,11 @@ function bugreport() {
     echo "Created bugreport"
 }
 
+function copyAppData() {
+    "$ANDROID_HOME/platform-tools/adb" shell "run-as $appBundleId cp -r /data/data/$appBundleId /mnt/sdcard"
+    "$ANDROID_HOME/platform-tools/adb" pull "/mnt/sdcard/$appBundleId" "appData"
+}
+
 # === Parse command ===========================================================
 
 if [[ $# -eq 0 ]]; then
@@ -158,6 +164,7 @@ commands=(
     createAndStart
     setupReversePort
     bugreport
+    copyAppData
 )
 
 if [[ ! " ${commands[*]} " =~ " $1 " ]]; then
