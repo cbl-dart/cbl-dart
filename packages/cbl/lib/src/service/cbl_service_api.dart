@@ -395,6 +395,28 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         serialize: (value, context) => value.index,
         deserialize: (value, context) => DatabaseErrorCode.values[value as int],
       )
+      ..addObjectCodec<PosixException>(
+        'PosixException',
+        serialize: (value, context) => {
+          'message': value.message,
+          'code': context.serialize(value.code),
+        },
+        deserialize: (map, context) => PosixException(
+          map.getAs('message'),
+          context.deserializeAs(map['code'])!,
+        ),
+      )
+      ..addObjectCodec<SQLiteException>(
+        'SQLiteException',
+        serialize: (value, context) => {
+          'message': value.message,
+          'code': context.serialize(value.code),
+        },
+        deserialize: (map, context) => SQLiteException(
+          map.getAs('message'),
+          context.deserializeAs(map['code'])!,
+        ),
+      )
       ..addObjectCodec<NetworkException>(
         'NetworkException',
         serialize: (value, context) => {
@@ -444,14 +466,12 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         deserialize: (value, context) =>
             WebSocketErrorCode.values[value as int],
       )
-      ..addObjectCodec<InvalidJsonException>(
-        'InvalidJsonException',
+      ..addObjectCodec<FleeceException>(
+        'FleeceException',
         serialize: (value, context) => {
           'message': value.message,
         },
-        deserialize: (map, context) => InvalidJsonException(
-          map.getAs('message'),
-        ),
+        deserialize: (map, context) => FleeceException(map.getAs('message')),
       );
 
 // === Requests ================================================================

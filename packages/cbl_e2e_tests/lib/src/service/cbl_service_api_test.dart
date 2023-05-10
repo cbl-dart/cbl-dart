@@ -25,6 +25,22 @@ void main() {
       roundTrip(exception);
     });
 
+    test('de/serialize PosixException', () {
+      final exception = PosixException('a', 42);
+      final result = roundTrip(exception);
+
+      expect(result.message, 'a');
+      expect(result.code, 42);
+    });
+
+    test('de/serialize SQLiteException', () {
+      final exception = SQLiteException('a', 42);
+      final result = roundTrip(exception);
+
+      expect(result.message, 'a');
+      expect(result.code, 42);
+    });
+
     test('de/serialize NetworkException', () {
       final exception = NetworkException('a', NetworkErrorCode.dnsFailure);
       final result = roundTrip(exception);
@@ -50,8 +66,8 @@ void main() {
       expect(result.code, WebSocketErrorCode.abnormalClose);
     });
 
-    test('de/serialize InvalidJsonException', () {
-      final exception = InvalidJsonException('a');
+    test('de/serialize FleeceException', () {
+      final exception = FleeceException('a');
       final result = roundTrip(exception);
 
       expect(result.message, 'a');
