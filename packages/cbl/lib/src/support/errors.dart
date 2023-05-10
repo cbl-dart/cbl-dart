@@ -74,17 +74,12 @@ CouchbaseLiteException _toCouchbaseLiteException(CBLErrorException exception) {
         queryString: exception.errorSource,
       );
     case CBLErrorDomain.posix:
-      return DatabaseException(
-        'errno ${exception.code}: ${exception.message}',
-        DatabaseErrorCode.unexpectedError,
-      );
+      return PosixException(exception.message, exception.code! as int);
     case CBLErrorDomain.sqLite:
-      return DatabaseException(
-        'SQLite error code ${exception.code}: ${exception.message}',
-        DatabaseErrorCode.unexpectedError,
-      );
+      return SQLiteException(exception.message, exception.code! as int);
     case CBLErrorDomain.fleece:
-      return InvalidJsonException(exception.message);
+      final code = exception.code! as FLErrorCode;
+      return FleeceException('${exception.message} (${code.name}))');
     case CBLErrorDomain.network:
       return NetworkException(
         exception.message,

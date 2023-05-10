@@ -111,6 +111,41 @@ class DatabaseException extends CouchbaseLiteException {
   String get _typeName => 'DatabaseException';
 }
 
+/// An exception that is thrown when a POSIX error code is received during
+/// operation.
+///
+/// The error [code] is dependent on the OS being run on and is defined in the
+/// `errno.h` header file.
+class PosixException extends CouchbaseLiteException {
+  PosixException(this.message, this.code);
+
+  @override
+  final String message;
+
+  @override
+  final int code;
+
+  @override
+  String get _typeName => 'PosixException';
+}
+
+/// An exception used to indicate a SQLite operation error.
+///
+/// The meaning of the error [code] is defined in the
+/// [SQLite documentation](https://www.sqlite.org/rescode.html).
+class SQLiteException extends CouchbaseLiteException {
+  SQLiteException(this.message, this.code);
+
+  @override
+  final String message;
+
+  @override
+  final int code;
+
+  @override
+  String get _typeName => 'SQLiteException';
+}
+
 /// A specification of the cause of a [NetworkException].
 enum NetworkErrorCode {
   dnsFailure,
@@ -240,7 +275,11 @@ class WebSocketException extends CouchbaseLiteException {
 }
 
 /// Exception thrown when JSON data is invalid.
+@Deprecated(
+  'Use FleeceException instead. This class will be removed in the future.',
+)
 class InvalidJsonException extends CouchbaseLiteException {
+  // ignore: deprecated_consistency
   /// Creates an exception which is thrown when JSON data is invalid.
   InvalidJsonException(this.message);
 
@@ -249,6 +288,18 @@ class InvalidJsonException extends CouchbaseLiteException {
 
   @override
   String get _typeName => 'InvalidJsonException';
+}
+
+/// An exception that is thrown when a Fleece error is detected.
+///
+/// Fleece is the library used to serialize and deserialize data. This type of
+/// exception should be reported.
+// ignore: deprecated_member_use_from_same_package
+class FleeceException extends InvalidJsonException {
+  FleeceException(super.message);
+
+  @override
+  String get _typeName => 'FleeceException';
 }
 
 /// A specification of the cause of a [TypedDataException].

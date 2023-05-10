@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:cbl/cbl.dart' show InvalidJsonException;
+import 'package:cbl/cbl.dart' show FleeceException;
 import 'package:cbl/src/fleece/containers.dart';
 
 import '../../test_binding_impl.dart';
@@ -20,7 +20,7 @@ void main() {
         });
 
         test('throw when given invalid json', () {
-          expect(() => Doc.fromJson('x'), throwsA(isA<InvalidJsonException>()));
+          expect(() => Doc.fromJson('x'), throwsA(isA<FleeceException>()));
         });
       });
 
