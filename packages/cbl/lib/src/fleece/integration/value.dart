@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-
 import '../../bindings.dart';
 import '../encoder.dart';
 import 'collection.dart';
