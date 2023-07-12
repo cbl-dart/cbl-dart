@@ -34,7 +34,7 @@ extension TestDocumentDatabaseExtension on Database {
     if (type != null) {
       doc.setValue(type, key: 'type');
     }
-    await saveDocument(doc);
+    await (await defaultCollection).saveDocument(doc);
     return doc;
   }
 
@@ -42,5 +42,6 @@ extension TestDocumentDatabaseExtension on Database {
   Future<MutableDocument?> getTestDocumentOrNull() async =>
       testDocumentId == null
           ? null
-          : (await document(testDocumentId!))?.toMutable();
+          : (await (await defaultCollection).document(testDocumentId!))
+              ?.toMutable();
 }

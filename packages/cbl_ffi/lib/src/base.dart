@@ -203,6 +203,10 @@ extension CBLErrorExt on CBLError {
     globalCBLError.ref._code = _code;
     globalCBLError.ref._internal_info = _internal_info;
   }
+
+  void reset() {
+    _code = 0;
+  }
 }
 
 class CBLErrorException implements Exception {

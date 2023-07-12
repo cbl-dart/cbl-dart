@@ -7,7 +7,7 @@ import 'package:sentry/sentry.dart';
 import 'package:test/test.dart';
 
 import 'utils/cbl.dart';
-import 'utils/mock_database.dart';
+import 'utils/mock_collection.dart';
 import 'utils/mock_hub.dart';
 import 'utils/mock_query.dart';
 import 'utils/mock_span.dart';
@@ -25,7 +25,7 @@ void main() {
     test('adds breadcrumb at start of sync operations', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       delegate.traceSyncOperation(
-        SaveDocumentOp(MockDatabase(name: 'a'), MutableDocument.withId('b')),
+        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument.withId('b')),
         () {
           expect(hub.breadcrumbs, hasLength(1));
         },
@@ -44,7 +44,7 @@ void main() {
     test('adds breadcrumb at start of async operations', () async {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
       await delegate.traceAsyncOperation(
-        SaveDocumentOp(MockDatabase(name: 'a'), MutableDocument.withId('b')),
+        SaveDocumentOp(MockCollection(name: 'a'), MutableDocument.withId('b')),
         () async {
           expect(hub.breadcrumbs, hasLength(1));
         },
@@ -157,7 +157,10 @@ void main() {
 
       runWithCblSentrySpan(root, () {
         delegate.traceSyncOperation(
-          SaveDocumentOp(MockDatabase(name: 'a'), MutableDocument.withId('b')),
+          SaveDocumentOp(
+            MockCollection(name: 'a'),
+            MutableDocument.withId('b'),
+          ),
           () {},
         );
       });
@@ -177,7 +180,10 @@ void main() {
 
       await runWithCblSentrySpan(root, () async {
         await delegate.traceAsyncOperation(
-          SaveDocumentOp(MockDatabase(name: 'a'), MutableDocument.withId('b')),
+          SaveDocumentOp(
+            MockCollection(name: 'a'),
+            MutableDocument.withId('b'),
+          ),
           () async {},
         );
       });

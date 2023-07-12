@@ -1,6 +1,7 @@
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
+import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
@@ -33,6 +34,7 @@ class CBLBindings extends Bindings {
     asyncCallback = AsyncCallbackBindings(this);
     logging = LoggingBindings(this);
     database = DatabaseBindings(this);
+    collection = CollectionBindings(this);
     document = DocumentBindings(this);
     mutableDocument = MutableDocumentBindings(this);
     query = QueryBindings(this);
@@ -72,6 +74,7 @@ class CBLBindings extends Bindings {
   late final AsyncCallbackBindings asyncCallback;
   late final LoggingBindings logging;
   late final DatabaseBindings database;
+  late final CollectionBindings collection;
   late final DocumentBindings document;
   late final MutableDocumentBindings mutableDocument;
   late final QueryBindings query;

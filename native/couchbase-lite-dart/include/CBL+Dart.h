@@ -90,14 +90,17 @@ CBLDART_EXPORT
 bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
                                CBLError *errorOut);
 
-CBLDART_EXPORT
-void CBLDart_CBLDatabase_AddDocumentChangeListener(
-    const CBLDatabase *db, const FLString docID,
-    CBLDart_AsyncCallback listener);
+// === Collection
 
 CBLDART_EXPORT
-void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           CBLDart_AsyncCallback listener);
+void CBLDart_CBLCollection_AddDocumentChangeListener(
+    const CBLDatabase *db, const CBLCollection *collection,
+    const FLString docID, CBLDart_AsyncCallback listener);
+
+CBLDART_EXPORT
+void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase *db,
+                                             const CBLCollection *collection,
+                                             CBLDart_AsyncCallback listener);
 
 typedef enum : uint8_t {
   kCBLDart_IndexTypeValue,
@@ -113,9 +116,9 @@ struct CBLDart_CBLIndexSpec {
 };
 
 CBLDART_EXPORT
-bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
-                                     CBLDart_CBLIndexSpec indexSpec,
-                                     CBLError *errorOut);
+bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
+                                       CBLDart_CBLIndexSpec indexSpec,
+                                       CBLError *errorOut);
 
 // === Query
 
@@ -132,6 +135,15 @@ FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
 
 // === Replicator
 
+struct CBLDart_ReplicationCollection {
+  CBLCollection *collection;
+  FLArray channels;
+  FLArray documentIDs;
+  CBLDart_AsyncCallback pushFilter;
+  CBLDart_AsyncCallback pullFilter;
+  CBLDart_AsyncCallback conflictResolver;
+};
+
 struct CBLDart_ReplicatorConfiguration {
   CBLDatabase *database;
   CBLEndpoint *endpoint;
@@ -146,11 +158,8 @@ struct CBLDart_ReplicatorConfiguration {
   FLDict headers;
   FLSlice *pinnedServerCertificate;
   FLSlice *trustedRootCertificates;
-  FLArray channels;
-  FLArray documentIDs;
-  CBLDart_AsyncCallback pushFilter;
-  CBLDart_AsyncCallback pullFilter;
-  CBLDart_AsyncCallback conflictResolver;
+  CBLDart_ReplicationCollection *collections;
+  size_t collectionsCount;
 };
 
 CBLDART_EXPORT

@@ -1,3 +1,6 @@
+// TODO(blaugold): Migrate to collection API.
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:math';
 
@@ -25,6 +28,8 @@ void main() {
 
     apiTest('from throws when data source has wrong type', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
+
       final query = await runWithApi(
         sync: () => const AsyncQueryBuilder(),
         async: () => const SyncQueryBuilder(),
@@ -34,10 +39,17 @@ void main() {
         () => query.select(SelectResult.all()).from(DataSource.database(db)),
         throwsA(isA<ArgumentError>()),
       );
+      expect(
+        () => query
+            .select(SelectResult.all())
+            .from(DataSource.collection(collection)),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     apiTest('routers', () async {
       final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
       final builder = await runWithApi(
         sync: QueryBuilder.createSync,
         async: QueryBuilder.createAsync,
@@ -59,15 +71,25 @@ void main() {
       ) {
         if (query is FromRouter) {
           final fromRouter = query as FromRouter;
-          return exploreBuilderQuery(
+          exploreBuilderQuery(
             fromRouter.from(DataSource.database(db)),
             {
               ...selectQuery,
               'FROM': [
-                {'COLLECTION': 'db'}
+                {'AS': 'db'}
               ],
             },
           );
+          exploreBuilderQuery(
+            fromRouter.from(DataSource.collection(collection)),
+            {
+              ...selectQuery,
+              'FROM': [
+                {'COLLECTION': '_default._default'}
+              ],
+            },
+          );
+          return;
         }
 
         expectBuilderQuery(query, selectQuery);
@@ -83,7 +105,7 @@ void main() {
               'FROM': <Object>[
                 ...selectQuery['FROM']! as List<Object>,
                 {
-                  'COLLECTION': 'db',
+                  'AS': 'db',
                   'JOIN': 'INNER',
                   'ON': ['.a']
                 }
@@ -99,7 +121,7 @@ void main() {
               'FROM': <Object>[
                 ...selectQuery['FROM']! as List<Object>,
                 {
-                  'COLLECTION': 'db',
+                  'AS': 'db',
                   'JOIN': 'INNER',
                   'ON': ['.a']
                 }

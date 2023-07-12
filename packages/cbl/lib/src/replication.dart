@@ -6,7 +6,8 @@ export 'replication/configuration.dart'
         DocumentFlag,
         ReplicatorType,
         ReplicationFilter,
-        TypedReplicationFilter;
+        TypedReplicationFilter,
+        CollectionConfiguration;
 export 'replication/conflict.dart' show Conflict, TypedConflict;
 export 'replication/conflict_resolver.dart'
     show

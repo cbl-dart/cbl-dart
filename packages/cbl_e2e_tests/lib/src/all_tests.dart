@@ -1,3 +1,4 @@
+import 'database/collection_test.dart' as database_collection;
 import 'database/database_change_test.dart' as database_database_change;
 import 'database/database_configuration_test.dart'
     as database_database_configuration;
@@ -46,6 +47,7 @@ import 'typed_data/helpers_test.dart' as typed_data_helpers;
 import 'typed_data/registry_test.dart' as typed_data_runtime_support;
 
 final tests = [
+  database_collection.main,
   database_database_change.main,
   database_database_configuration.main,
   database_database.main,

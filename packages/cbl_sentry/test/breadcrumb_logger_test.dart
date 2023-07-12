@@ -3,6 +3,7 @@ import 'package:cbl_sentry/src/operation_debug_info.dart';
 import 'package:test/test.dart';
 
 import 'utils/cbl.dart';
+import 'utils/mock_collection.dart';
 import 'utils/mock_database.dart';
 import 'utils/mock_query.dart';
 
@@ -43,13 +44,16 @@ void main() {
     });
 
     test('GetDocumentOp', () {
-      expect(GetDocumentOp(MockDatabase(name: 'a'), 'b').debugDescription, 'b');
+      expect(
+        GetDocumentOp(MockCollection(name: 'a'), 'b').debugDescription,
+        'b',
+      );
     });
 
     test('DocumentOperationOp', () {
       expect(
         SaveDocumentOp(
-          MockDatabase(name: 'a'),
+          MockCollection(name: 'a'),
           MutableDocument.withId('b'),
         ).debugDescription,
         'b',
@@ -78,17 +82,17 @@ void main() {
 
   group('debugDetails', () {
     test('SaveDocumentOp', () {
-      final database = MockDatabase(name: 'a');
+      final collection = MockCollection(name: 'a');
       final document = MutableDocument.withId('b');
       expect(
-        SaveDocumentOp(database, document).debugDetails,
+        SaveDocumentOp(collection, document).debugDetails,
         {
           'withConflictHandler': true,
         },
       );
       expect(
         SaveDocumentOp(
-          database,
+          collection,
           document,
           ConcurrencyControl.lastWriteWins,
         ).debugDetails,
@@ -99,7 +103,7 @@ void main() {
     });
 
     test('DeleteDocumentOp', () {
-      final database = MockDatabase(name: 'a');
+      final database = MockCollection(name: 'a');
       final document = MutableDocument.withId('b');
       expect(
         DeleteDocumentOp(

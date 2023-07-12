@@ -1,4 +1,5 @@
-import '../database/database.dart';
+import '../database.dart';
+import '../database/database_base.dart';
 import 'query.dart';
 
 /// A [Query] data source.
@@ -20,29 +21,44 @@ abstract class DataSourceAs extends DataSourceInterface {
 class DataSource {
   DataSource._();
 
-  /// Creates a data source from a [database].
+  /// Creates a data source from a [Database].
+  @Deprecated('Use DataSource.collection(database.defaultCollection) instead.')
   static DataSourceAs database(Database database) =>
-      DataSourceAsImpl(database: database);
+      DataSourceAsImpl(source: database);
+
+  /// Creates a data source from a [Collection].
+  static DataSourceAs collection(Collection collection) =>
+      DataSourceAsImpl(source: collection);
 }
 
 // === Impl ====================================================================
 
 class DataSourceImpl implements DataSourceInterface {
-  DataSourceImpl({required this.database, this.alias});
+  DataSourceImpl({required this.source, this.alias});
 
-  final Database database;
+  final Object source;
   final String? alias;
 
-  Map<String, Object?> toJson() => {
-        if (alias != null) 'AS': alias,
-        'COLLECTION': database.name,
+  Database get database => switch (source) {
+        final Database database => database,
+        CollectionBase(:final database) => database,
+        _ => throw UnimplementedError(),
+      };
+
+  Map<String, Object?> toJson() => switch (source) {
+        Database(:final name) => {'AS': alias ?? name},
+        CollectionBase(:final fullName) => {
+            if (alias != null) 'AS': alias,
+            'COLLECTION': fullName
+          },
+        _ => throw UnimplementedError(),
       };
 }
 
 class DataSourceAsImpl extends DataSourceImpl implements DataSourceAs {
-  DataSourceAsImpl({required super.database, super.alias});
+  DataSourceAsImpl({required super.source, super.alias});
 
   @override
   DataSourceInterface as(String alias) =>
-      DataSourceImpl(database: database, alias: alias);
+      DataSourceImpl(source: source, alias: alias);
 }

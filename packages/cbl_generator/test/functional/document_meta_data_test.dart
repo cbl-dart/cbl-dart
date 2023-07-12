@@ -25,19 +25,21 @@ void main() {
 
   test('sequence returns correct value', () async {
     final db = await openTestDatabase();
+    final collection = await db.defaultCollection;
     final doc = MutableDocWithSequenceGetter();
 
     expect(doc.sequence, 0);
-    await db.saveDocument(doc.internal);
+    await collection.saveDocument(doc.internal);
     expect(doc.sequence, 1);
   });
 
   test('revisionId returns correct value', () async {
     final db = await openTestDatabase();
+    final collection = await db.defaultCollection;
     final doc = MutableDocWithRevisionIdGetter();
 
     expect(doc.revisionId, isNull);
-    await db.saveDocument(doc.internal);
+    await collection.saveDocument(doc.internal);
     expect(doc.revisionId, isNot(isNull));
   });
 }

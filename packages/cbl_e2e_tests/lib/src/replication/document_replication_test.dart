@@ -10,14 +10,14 @@ void main() {
   group('DocumentReplication', () {
     test('toString', () async {
       final replicator = _Replicator();
-      final doc = ReplicatedDocumentImpl('id');
+      final doc = ReplicatedDocumentImpl('id', 'scope', 'collection');
       final docRep = DocumentReplicationImpl(replicator, true, [doc]);
       expect(
         docRep.toString(),
         'DocumentReplication('
         'replicator: _Replicator(), '
         // ignore: missing_whitespace_between_adjacent_strings
-        'PUSH, [ReplicatedDocument(id)]'
+        'PUSH, [ReplicatedDocument(id, collection: scope.collection)]'
         ')',
       );
     });
@@ -27,17 +27,34 @@ void main() {
     test('toString', () {
       ReplicatedDocumentImpl doc;
 
-      doc = ReplicatedDocumentImpl('id');
-      expect(doc.toString(), 'ReplicatedDocument(id)');
+      doc = ReplicatedDocumentImpl('id', 'scope', 'collection');
+      expect(
+        doc.toString(),
+        'ReplicatedDocument(id, collection: scope.collection)',
+      );
 
-      doc = ReplicatedDocumentImpl('id', {
+      doc = ReplicatedDocumentImpl('id', 'scope', 'collection', {
         DocumentFlag.deleted,
         DocumentFlag.accessRemoved,
       });
-      expect(doc.toString(), 'ReplicatedDocument(id, DELETED, ACCESS-REMOVED)');
+      expect(
+        doc.toString(),
+        'ReplicatedDocument(id, collection: scope.collection, '
+        'DELETED, ACCESS-REMOVED)',
+      );
 
-      doc = ReplicatedDocumentImpl('id', {}, StateError(''));
-      expect(doc.toString(), 'ReplicatedDocument(id, error: Bad state: )');
+      doc = ReplicatedDocumentImpl(
+        'id',
+        'scope',
+        'collection',
+        {},
+        StateError(''),
+      );
+      expect(
+        doc.toString(),
+        'ReplicatedDocument(id, collection: scope.collection, '
+        'error: Bad state: )',
+      );
     });
   });
 }

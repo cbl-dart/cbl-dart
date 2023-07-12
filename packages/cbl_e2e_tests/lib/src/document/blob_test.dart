@@ -1,3 +1,6 @@
+// TODO(blaugold): Migrate to collection API.
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert' hide json;
 import 'dart:math';
 import 'dart:typed_data';

@@ -1,8 +1,11 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:collection/collection.dart';
 
 import '../database.dart';
 import '../database/ffi_database.dart';
@@ -19,6 +22,7 @@ import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
 import 'authenticator.dart';
+import 'common.dart';
 import 'configuration.dart';
 import 'conflict.dart';
 import 'conflict_resolver.dart';
@@ -53,9 +57,8 @@ class FfiReplicator
     // ignore: parameter_assignments
     config = ReplicatorConfiguration.from(config);
 
-    final database =
-        assertArgumentType<SyncDatabase>(config.database, 'config.database')
-            as FfiDatabase;
+    final (database, collections) = await resolveReplicatorCollections<
+        SyncDatabase, SyncCollection, FfiDatabase, FfiCollection>(config);
 
     final target = config.target;
     if (target is DatabaseEndpoint) {
@@ -66,34 +69,63 @@ class FfiReplicator
       );
     }
 
-    AsyncCallback Function(T) makeCallback<T>(
-      AsyncCallback Function(T, FfiDatabase, {required bool ignoreErrorsInDart})
-          callbackFactory,
-    ) =>
-        (callback) => callbackFactory(
-              callback,
-              database,
-              ignoreErrorsInDart: ignoreCallbackErrorsInDart,
-            );
-
-    final pushFilterCallback =
-        config.combinedPushFilter?.let(makeCallback(_wrapReplicationFilter));
-    final pullFilterCallback =
-        config.combinedPullFilter?.let(makeCallback(_wrapReplicationFilter));
-    final conflictResolverCallback = config.combinedConflictResolver
-        ?.let(makeCallback(_wrapConflictResolver));
+    final fleeceContainers = <Object>[];
+    final callbacks = <AsyncCallback>[];
 
     void closeCallbacks() {
-      pushFilterCallback?.close();
-      pullFilterCallback?.close();
-      conflictResolverCallback?.close();
+      for (final callback in callbacks) {
+        callback.close();
+      }
     }
+
+    final replicationCollections = collections.entries.map((entry) {
+      final MapEntry(key: collection, value: config) = entry;
+
+      AsyncCallback createFilterCallback(ReplicationFilter filter) =>
+          _createReplicationFilterCallback(
+            filter,
+            collection,
+            ignoreErrorsInDart: ignoreCallbackErrorsInDart,
+          );
+      AsyncCallback createConflictResolverCallback(ConflictResolver resolver) =>
+          _createConflictResolverCallback(
+            resolver,
+            collection,
+            ignoreErrorsInDart: ignoreCallbackErrorsInDart,
+          );
+
+      final pushFilterCallback = config.pushFilter?.let(createFilterCallback);
+      final pullFilterCallback = config.pullFilter?.let(createFilterCallback);
+      final conflictResolverCallback =
+          config.conflictResolver?.let(createConflictResolverCallback);
+
+      callbacks.addAll([
+        pushFilterCallback,
+        pullFilterCallback,
+        conflictResolverCallback
+      ].whereNotNull());
+
+      final channelsArray = config.channels?.let(fl.MutableArray.new);
+      final documentIDsArray = config.documentIds?.let(fl.MutableArray.new);
+
+      // Make sure the Fleece containers are not garbage collected before the
+      // replicator is created.
+      fleeceContainers.addAll([channelsArray, documentIDsArray].whereNotNull());
+
+      return CBLReplicationCollection(
+        collection: collection.pointer,
+        channels: channelsArray?.pointer.cast(),
+        documentIDs: documentIDsArray?.pointer.cast(),
+        pushFilter: pushFilterCallback?.pointer,
+        pullFilter: pullFilterCallback?.pointer,
+        conflictResolver: conflictResolverCallback?.pointer,
+      );
+    }).toList();
 
     final endpoint = config.createEndpoint();
     final authenticator = config.createAuthenticator();
     final headersDict = config.headers?.let(fl.MutableDict.new);
-    final channelsArray = config.channels?.let(fl.MutableArray.new);
-    final documentIDsArray = config.documentIds?.let(fl.MutableArray.new);
+
     final ffiConfig = CBLReplicatorConfiguration(
       database: database.pointer,
       endpoint: endpoint,
@@ -106,17 +138,15 @@ class FfiReplicator
       headers: headersDict?.pointer.cast(),
       pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
       trustedRootCertificates: config.trustedRootCertificates?.toData(),
-      channels: channelsArray?.pointer.cast(),
-      documentIDs: documentIDsArray?.pointer.cast(),
-      pushFilter: pushFilterCallback?.pointer,
-      pullFilter: pullFilterCallback?.pointer,
-      conflictResolver: conflictResolverCallback?.pointer,
+      collections: replicationCollections,
       disableAutoPurge: !config.enableAutoPurge,
     );
 
     try {
       final pointer =
           runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
+
+      cblReachabilityFence(fleeceContainers);
 
       return FfiReplicator._(
         config: config,
@@ -304,17 +334,38 @@ class FfiReplicator
           ));
 
   @override
-  Set<String> get pendingDocumentIds => useSync(() {
+  Set<String> get pendingDocumentIds => pendingDocumentIdsInCollection(
+        _database.defaultCollection as FfiCollection,
+      );
+
+  @override
+  bool isDocumentPending(String documentId) => isDocumentPendingInCollection(
+        documentId,
+        _database.defaultCollection as FfiCollection,
+      );
+
+  @override
+  Set<String> pendingDocumentIdsInCollection(
+    covariant FfiCollection collection,
+  ) =>
+      useSync(() {
         final dict = fl.Dict.fromPointer(
-          _bindings.pendingDocumentIDs(pointer),
+          _bindings.pendingDocumentIDs(pointer, collection.pointer),
           adopt: true,
         );
         return dict.keys.toSet();
       });
 
   @override
-  bool isDocumentPending(String documentId) =>
-      useSync(() => _bindings.isDocumentPending(pointer, documentId));
+  bool isDocumentPendingInCollection(
+    String documentId,
+    covariant FfiCollection collection,
+  ) =>
+      useSync(() => _bindings.isDocumentPending(
+            pointer,
+            documentId,
+            collection.pointer,
+          ));
 
   @override
   Future<void> performClose() async {
@@ -374,6 +425,8 @@ extension on CBLReplicatorStatus {
 extension on CBLReplicatedDocument {
   ReplicatedDocument toReplicatedDocument() => ReplicatedDocumentImpl(
         id,
+        scope,
+        collection,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
         error?.toCouchbaseLiteException(),
       );
@@ -418,9 +471,9 @@ extension on ReplicatorConfiguration {
   }
 }
 
-AsyncCallback _wrapReplicationFilter(
+AsyncCallback _createReplicationFilterCallback(
   ReplicationFilter filter,
-  FfiDatabase database, {
+  FfiCollection collection, {
   required bool ignoreErrorsInDart,
 }) =>
     AsyncCallback(
@@ -429,7 +482,7 @@ AsyncCallback _wrapReplicationFilter(
             ReplicationFilterCallbackMessage.fromArguments(arguments);
         final doc = DelegateDocument(
           FfiDocumentDelegate.fromPointer(message.document),
-          database: database,
+          collection: collection,
         );
 
         return filter(
@@ -442,9 +495,9 @@ AsyncCallback _wrapReplicationFilter(
       debugName: 'ReplicationFilter',
     );
 
-AsyncCallback _wrapConflictResolver(
+AsyncCallback _createConflictResolverCallback(
   ConflictResolver resolver,
-  FfiDatabase database, {
+  FfiCollection collection, {
   required bool ignoreErrorsInDart,
 }) =>
     AsyncCallback(
@@ -454,13 +507,13 @@ AsyncCallback _wrapConflictResolver(
 
         final local = message.localDocument?.let((pointer) => DelegateDocument(
               FfiDocumentDelegate.fromPointer(pointer),
-              database: database,
+              collection: collection,
             ));
 
         final remote =
             message.remoteDocument?.let((pointer) => DelegateDocument(
                   FfiDocumentDelegate.fromPointer(pointer),
-                  database: database,
+                  collection: collection,
                 ));
 
         final conflict = ConflictImpl(message.documentId, local, remote);
@@ -469,7 +522,7 @@ AsyncCallback _wrapConflictResolver(
         FfiDocumentDelegate? resolvedDelegate;
         if (resolved != null) {
           if (!identical(resolved, local) && !identical(resolved, remote)) {
-            resolvedDelegate = await database.prepareDocument(resolved);
+            resolvedDelegate = await collection.prepareDocument(resolved);
 
             // If the resolver returned a document other than `local` or
             // `remote`, the ref count of the resolved document needs to be

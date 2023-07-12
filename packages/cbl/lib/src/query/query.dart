@@ -140,7 +140,7 @@ abstract class Query implements Resource {
   /// because the contents of the database have changed or this query's
   /// [parameters] have been changed through [setParameters].
   ///
-  /// {@macro cbl.Database.addChangeListener}
+  /// {@macro cbl.Collection.addChangeListener}
   ///
   /// See also:
   ///
@@ -148,7 +148,7 @@ abstract class Query implements Resource {
   /// - [removeChangeListener] for removing a previously added listener.
   FutureOr<ListenerToken> addChangeListener(QueryChangeListener listener);
 
-  /// {@macro cbl.Database.removeChangeListener}
+  /// {@macro cbl.Collection.removeChangeListener}
   ///
   /// See also:
   ///
@@ -160,7 +160,7 @@ abstract class Query implements Resource {
   ///
   /// This is an alternative stream based API for the [addChangeListener] API.
   ///
-  /// {@macro cbl.Database.AsyncListenStream}
+  /// {@macro cbl.Collection.AsyncListenStream}
   Stream<QueryChange> changes();
 
   /// The JSON representation of this query.

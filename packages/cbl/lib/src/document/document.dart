@@ -5,6 +5,7 @@ import 'dart:collection';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../database/collection.dart';
 import '../database/database_base.dart';
 import '../fleece/containers.dart' show Doc;
 import '../fleece/decoder.dart';
@@ -40,6 +41,11 @@ abstract class Document implements DictionaryInterface, Iterable<String> {
   /// been changed (on-disk); and if one document’s sequence is greater than
   /// another’s, that means it was changed more recently.
   int get sequence;
+
+  /// The [Collection] this document belongs to.
+  ///
+  /// Returns `null` if the document has not been saved yet.
+  Collection? get collection;
 
   /// Returns a mutable copy of the document.
   MutableDocument toMutable();
@@ -175,20 +181,32 @@ class DocumentMContext implements DatabaseMContext {
   final sharedStringsTable = SharedStringsTable();
 
   @override
-  DatabaseBase? get database => document._database;
+  DatabaseBase? get database => document.database;
 }
 
 class DelegateDocument with IterableMixin<String> implements Document {
   DelegateDocument(
     DocumentDelegate delegate, {
-    DatabaseBase? database,
+    CollectionBase? collection,
   })  : _delegate = delegate,
-        _database = database {
+        _collection = collection {
     _setupProperties();
   }
 
   DocumentDelegate get delegate => _delegate;
   DocumentDelegate _delegate;
+
+  @override
+  CollectionBase? get collection => _collection;
+  CollectionBase? _collection;
+
+  void setCollection(CollectionBase collection) {
+    if (assertMatchingDatabase(database, collection.database, 'Document')) {
+      _collection = collection;
+    }
+  }
+
+  DatabaseBase? get database => collection?.database;
 
   void setDelegate(
     DocumentDelegate delegate, {
@@ -202,15 +220,6 @@ class DelegateDocument with IterableMixin<String> implements Document {
 
     if (updateProperties) {
       _setupProperties();
-    }
-  }
-
-  DatabaseBase? get database => _database;
-  DatabaseBase? _database;
-
-  set database(DatabaseBase? database) {
-    if (assertMatchingDatabase(_database, database!, 'Document')) {
-      _database = database;
     }
   }
 
@@ -305,7 +314,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
   @override
   MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
         delegate.toMutable(),
-        database: _database,
+        collection: collection,
       );
 
   @override
@@ -318,14 +327,12 @@ class DelegateDocument with IterableMixin<String> implements Document {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is DelegateDocument &&
-          (_database == other._database ||
-              _database?.name == other._database?.name) &&
+          collection == other.collection &&
           id == other.id &&
           _properties == other._properties;
 
   @override
-  int get hashCode =>
-      (_database?.name).hashCode ^ id.hashCode ^ _properties.hashCode;
+  int get hashCode => collection.hashCode ^ id.hashCode ^ _properties.hashCode;
 
   @override
   String toString() => '$_typeName('
@@ -346,7 +353,7 @@ class MutableDelegateDocument extends DelegateDocument
 
   MutableDelegateDocument.fromDelegate(
     super.delegate, {
-    super.database,
+    super.collection,
     Map<String, Object?>? data,
   }) {
     if (data != null) {
@@ -427,7 +434,7 @@ class MutableDelegateDocument extends DelegateDocument
   @override
   MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
         delegate.toMutable(),
-        database: _database,
+        collection: collection,
         // We make a deep copy of the properties, to include modifications of
         // this document, which have not been synced with the delegate, in the
         // copy.

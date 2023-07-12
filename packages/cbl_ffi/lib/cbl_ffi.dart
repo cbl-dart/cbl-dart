@@ -13,8 +13,9 @@ export 'src/base.dart'
         CBLError;
 export 'src/bindings.dart';
 export 'src/blob.dart';
+export 'src/collection.dart';
 export 'src/data.dart';
-export 'src/database.dart';
+export 'src/database.dart' hide CBLConcurrencyControlExt;
 export 'src/document.dart';
 export 'src/fleece.dart'
     hide FLErrorCodeIntExt, FLResultSliceExt, FLStringResultExt;
