@@ -1,3 +1,7 @@
+## 2.2.1
+
+ - **FIX**: upgrade kotlin version used in Android plugin ([#503](https://github.com/cbl-dart/cbl-dart/issues/503)). ([aaac41e7](https://github.com/cbl-dart/cbl-dart/commit/aaac41e7d0f646bc61627bede5991deea7d585e1))
+
 ## 2.2.0
 
  - **FEAT**: upgrade to CBL C SDK 3.1.0 ([#478](https://github.com/cbl-dart/cbl-dart/issues/478)). ([9031f585](https://github.com/cbl-dart/cbl-dart/commit/9031f58551dbcf035b10c8e0eef5bca25290c60c))

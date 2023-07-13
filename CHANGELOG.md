@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-07-13
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v2.2.0`](#cbl---v220)
+ - [`cbl_flutter` - `v2.0.8`](#cbl_flutter---v208)
+ - [`cbl_flutter_ce` - `v2.2.1`](#cbl_flutter_ce---v221)
+ - [`cbl_flutter_ee` - `v2.2.1`](#cbl_flutter_ee---v221)
+ - [`cbl_flutter_platform_interface` - `v2.0.8`](#cbl_flutter_platform_interface---v208)
+ - [`cbl_dart` - `v2.2.1`](#cbl_dart---v221)
+ - [`cbl_sentry` - `v1.1.2`](#cbl_sentry---v112)
+ - [`cbl_generator` - `v0.2.0+8`](#cbl_generator---v0208)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_platform_interface` - `v2.0.8`
+ - `cbl_dart` - `v2.2.1`
+ - `cbl_sentry` - `v1.1.2`
+ - `cbl_generator` - `v0.2.0+8`
+
+---
+
+#### `cbl` - `v2.2.0`
+
+ - **FIX**: compare against correct enum type. ([7e06af5b](https://github.com/cbl-dart/cbl-dart/commit/7e06af5b980acb44a7298300bff3d3027ab97fb0))
+ - **FEAT**: add `PosixException`, `SQLiteException` and `FleeceException` ([#488](https://github.com/cbl-dart/cbl-dart/issues/488)). ([892db2ed](https://github.com/cbl-dart/cbl-dart/commit/892db2ed40b01bb7737da8f8c99f5a3e7e23f6fe))
+
+#### `cbl_flutter` - `v2.0.8`
+
+ - **FIX**: upgrade kotlin version used in Android plugin ([#503](https://github.com/cbl-dart/cbl-dart/issues/503)). ([aaac41e7](https://github.com/cbl-dart/cbl-dart/commit/aaac41e7d0f646bc61627bede5991deea7d585e1))
+
+#### `cbl_flutter_ce` - `v2.2.1`
+
+ - **FIX**: upgrade kotlin version used in Android plugin ([#503](https://github.com/cbl-dart/cbl-dart/issues/503)). ([aaac41e7](https://github.com/cbl-dart/cbl-dart/commit/aaac41e7d0f646bc61627bede5991deea7d585e1))
+
+#### `cbl_flutter_ee` - `v2.2.1`
+
+ - **FIX**: upgrade kotlin version used in Android plugin ([#503](https://github.com/cbl-dart/cbl-dart/issues/503)). ([aaac41e7](https://github.com/cbl-dart/cbl-dart/commit/aaac41e7d0f646bc61627bede5991deea7d585e1))
+
+
 ## 2023-05-02
 
 ### Changes
