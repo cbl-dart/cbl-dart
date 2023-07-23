@@ -1,3 +1,7 @@
+## 0.8.2+1
+
+ - Update a dependency to the latest release.
+
 ## 0.8.2
 
  - **FEAT**: upgrade to CBL C SDK 3.1.0 ([#478](https://github.com/cbl-dart/cbl-dart/issues/478)). ([9031f585](https://github.com/cbl-dart/cbl-dart/commit/9031f58551dbcf035b10c8e0eef5bca25290c60c))
