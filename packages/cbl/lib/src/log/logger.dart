@@ -4,7 +4,6 @@ import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../support/async_callback.dart';
 import '../support/ffi.dart';
-import '../support/utils.dart';
 import 'console_logger.dart';
 
 /// Subsystems that log information.
@@ -120,7 +119,7 @@ class DartConsoleLogger extends Logger {
   ) =>
       '${_logTimeStamp()}| '
       '[${_formatDomain(domain)}] '
-      '${describeEnum(level)}: $message';
+      '${level.name}: $message';
 
   static String _logTimeStamp() {
     final now = DateTime.now();

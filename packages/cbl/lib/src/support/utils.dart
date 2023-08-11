@@ -20,13 +20,7 @@ extension ValueExt<T> on T {
   }
 }
 
-String enumName(Object value) => value.toString().split('.').first;
-
-/// Returns the name of a enum value.
-///
-/// This is different from what the `toString` method of an enum value returns,
-/// in that it does not have the enum name as a prefix.
-String describeEnum(Object value) => value.toString().split('.')[1];
+String enumName(Enum value) => value.toString().split('.').first;
 
 Uint8List jointUint8Lists(List<Uint8List> lists) {
   final length = lists.fold<int>(0, (sum, it) => sum + it.lengthInBytes);

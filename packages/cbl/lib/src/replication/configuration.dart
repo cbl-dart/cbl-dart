@@ -316,7 +316,7 @@ class ReplicatorConfiguration {
       [
         'database: $database',
         'target: $target',
-        'replicatorType: ${describeEnum(replicatorType)}',
+        'replicatorType: ${replicatorType.name}',
         if (continuous) 'CONTINUOUS',
         if (authenticator != null) 'authenticator: $authenticator',
         if (pinnedServerCertificate != null) 'PINNED-SERVER-CERTIFICATE',

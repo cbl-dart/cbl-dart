@@ -140,6 +140,6 @@ class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
             .toList()
             .let(jsonEncode),
         ignoreAccents: _ignoreAccents,
-        language: _language?.let(describeEnum),
+        language: _language?.name,
       );
 }
