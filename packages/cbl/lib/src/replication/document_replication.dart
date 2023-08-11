@@ -74,7 +74,7 @@ class ReplicatedDocumentImpl implements ReplicatedDocument {
         'ReplicatedDocument(',
         [
           id,
-          for (var flag in flags)
+          for (final flag in flags)
             if (flag == DocumentFlag.accessRemoved)
               'ACCESS-REMOVED'
             else if (flag == DocumentFlag.deleted)
