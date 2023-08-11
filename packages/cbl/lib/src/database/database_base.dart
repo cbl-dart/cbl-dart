@@ -265,19 +265,18 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 
     final transaction = _Transaction(this);
 
+    var commit = false;
     if (async) {
       return asyncTransactionLock.synchronized(() async {
         await beginTransaction();
         try {
           final result = await transaction.runWith(fn);
-          transaction.end();
-          await endTransaction(commit: true);
+          commit = true;
           return result;
           // ignore: avoid_catches_without_on_clauses
-        } catch (e) {
+        } finally {
           transaction.end();
-          await endTransaction(commit: false);
-          rethrow;
+          await endTransaction(commit: commit);
         }
       });
     } else {
@@ -285,16 +284,13 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
       assert(startTransactionResult is! Future);
       try {
         final result = transaction.runWith(fn);
-        transaction.end();
-        final endTransactionResult = endTransaction(commit: true);
-        assert(endTransactionResult is! Future);
+        commit = true;
         return result;
         // ignore: avoid_catches_without_on_clauses
-      } catch (e) {
+      } finally {
         transaction.end();
-        final endTransactionResult = endTransaction(commit: false);
+        final endTransactionResult = endTransaction(commit: commit);
         assert(endTransactionResult is! Future);
-        rethrow;
       }
     }
   }
