@@ -132,8 +132,7 @@ class IsolateWorker {
   void _checkStatusIs(_WorkerStatus lifecycle) {
     if (_status != lifecycle) {
       throw StateError(
-        'Expected Worker to be ${lifecycle.name} but it was '
-        '${_status.name}.',
+        'Expected Worker to be ${lifecycle.name} but it was ${_status.name}.',
       );
     }
   }

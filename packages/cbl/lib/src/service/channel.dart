@@ -531,8 +531,7 @@ class Channel {
   void _checkStatusIs(ChannelStatus status) {
     if (_status != status) {
       throw StateError(
-        'Expected Channel to be ${status.name} but it was '
-        '${_status.name}.',
+        'Expected Channel to be ${status.name} but it was ${_status.name}.',
       );
     }
   }

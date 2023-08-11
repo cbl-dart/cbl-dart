@@ -94,8 +94,7 @@ class CblWorker {
   void _checkStatusIs(_WorkerStatus status) {
     if (_status != status) {
       throw StateError(
-        'Expected CblWorker to be ${status.name} but it was '
-        '${_status.name}.',
+        'Expected CblWorker to be ${status.name} but it was ${_status.name}.',
       );
     }
   }

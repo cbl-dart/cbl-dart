@@ -312,7 +312,7 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
   String? get n1ql => language == CBLQueryLanguage.n1ql ? definition : null;
 
   @override
-  String toString() => '$typeName(${language.name}: $definition';
+  String toString() => '$typeName(${language.name}: $definition)';
 
   @protected
   void attachToParentResource() {
