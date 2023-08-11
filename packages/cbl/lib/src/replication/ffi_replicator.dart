@@ -339,7 +339,7 @@ class FfiReplicator
         'FfiReplicator(',
         [
           'database: $_database',
-          'type: ${describeEnum(config.replicatorType)}',
+          'type: ${config.replicatorType.name}',
           if (config.continuous) 'CONTINUOUS'
         ].join(', '),
         ')'

@@ -5,7 +5,6 @@ import '../document/document.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
-import '../support/utils.dart';
 import 'configuration.dart';
 import 'document_replication.dart';
 import 'ffi_replicator.dart';
@@ -79,7 +78,7 @@ class ReplicatorStatus {
   String toString() => [
         'ReplicatorStatus(',
         [
-          describeEnum(activity),
+          activity.name,
           if (progress.completed != 0) 'progress: $progress',
           if (error != null) 'error: $error',
         ].join(', '),

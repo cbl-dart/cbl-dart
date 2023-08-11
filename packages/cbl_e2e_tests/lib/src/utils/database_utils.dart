@@ -171,7 +171,7 @@ Future<AsyncDatabase> getSharedAsyncTestDatabase({
   Isolate isolate = Isolate.worker,
 }) =>
     _sharedServiceDatabase ??= openAsyncTestDatabase(
-      name: 'shared-async-${describeEnum(isolate)}',
+      name: 'shared-async-${isolate.name}',
       tearDown: false,
       isolate: isolate,
     );

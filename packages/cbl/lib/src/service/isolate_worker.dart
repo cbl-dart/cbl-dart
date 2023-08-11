@@ -132,8 +132,7 @@ class IsolateWorker {
   void _checkStatusIs(_WorkerStatus lifecycle) {
     if (_status != lifecycle) {
       throw StateError(
-        'Expected Worker to be ${describeEnum(lifecycle)} but it was '
-        '${describeEnum(_status)}.',
+        'Expected Worker to be ${lifecycle.name} but it was ${_status.name}.',
       );
     }
   }

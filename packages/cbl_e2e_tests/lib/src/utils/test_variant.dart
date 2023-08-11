@@ -41,7 +41,7 @@ class TestVariant<T extends Object?> {
   String toString() => 'TestVariant($name)';
 }
 
-class EnumVariant<T extends Object> extends TestVariant<T> {
+class EnumVariant<T extends Enum> extends TestVariant<T> {
   EnumVariant(
     List<T> values, {
     String? name,
@@ -60,7 +60,7 @@ class EnumVariant<T extends Object> extends TestVariant<T> {
         );
 
   @override
-  String describeValue(T value) => describeEnum(value);
+  String describeValue(T value) => value.name;
 }
 
 @isTest

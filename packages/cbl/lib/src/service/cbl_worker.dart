@@ -6,7 +6,6 @@ import 'package:stream_channel/isolate_channel.dart';
 import '../errors.dart';
 import '../support/isolate.dart';
 import '../support/tracing.dart';
-import '../support/utils.dart';
 import 'cbl_service.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
@@ -95,8 +94,7 @@ class CblWorker {
   void _checkStatusIs(_WorkerStatus status) {
     if (_status != status) {
       throw StateError(
-        'Expected CblWorker to be ${describeEnum(status)} but it was '
-        '${describeEnum(_status)}.',
+        'Expected CblWorker to be ${status.name} but it was ${_status.name}.',
       );
     }
   }

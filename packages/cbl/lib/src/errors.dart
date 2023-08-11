@@ -22,14 +22,17 @@ abstract class CouchbaseLiteException implements Exception {
   String get _typeName;
 
   @override
-  String toString() => [
-        '$_typeName(',
-        [
-          message,
-          if (code != null) 'code: ${describeEnum(code!)}',
-        ].join(', '),
-        ')'
-      ].join();
+  String toString() {
+    final code = this.code;
+    return [
+      '$_typeName(',
+      [
+        message,
+        if (code != null) 'code: ${code is Enum ? code.name : code}',
+      ].join(', '),
+      ')'
+    ].join();
+  }
 }
 
 /// A specification of the cause of a [DatabaseException].

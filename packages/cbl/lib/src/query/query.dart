@@ -9,7 +9,6 @@ import '../database/database.dart';
 import '../database/ffi_database.dart';
 import '../database/proxy_database.dart';
 import '../support/resource.dart';
-import '../support/utils.dart';
 import 'ffi_query.dart';
 import 'parameters.dart';
 import 'proxy_query.dart';
@@ -313,7 +312,7 @@ abstract class QueryBase with ClosableResourceMixin implements Query {
   String? get n1ql => language == CBLQueryLanguage.n1ql ? definition : null;
 
   @override
-  String toString() => '$typeName(${describeEnum(language)}: $definition)';
+  String toString() => '$typeName(${language.name}: $definition)';
 
   @protected
   void attachToParentResource() {

@@ -3,7 +3,6 @@
 import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
-import '../../support/utils.dart';
 import 'index.dart';
 
 /// A specification of an [Index] through a list of N1QL [expressions].
@@ -127,7 +126,7 @@ class _FullTextIndexConfiguration extends _IndexConfiguration
         expressions: expressions.join(', '),
         type: CBLIndexType.fullText,
         ignoreAccents: ignoreAccents,
-        language: language?.let(describeEnum),
+        language: language?.name,
       );
 
   @override
@@ -150,7 +149,7 @@ class _FullTextIndexConfiguration extends _IndexConfiguration
   String toString() {
     final properties = [
       if (ignoreAccents) 'IGNORE-ACCENTS',
-      if (language != null) 'language: ${describeEnum(language!)}',
+      if (language != null) 'language: ${language!.name}',
     ];
 
     return [
