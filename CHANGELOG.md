@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-08-13
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v2.2.2`](#cbl---v222)
+ - [`cbl_flutter` - `v2.0.10`](#cbl_flutter---v2010)
+ - [`cbl_flutter_platform_interface` - `v2.0.10`](#cbl_flutter_platform_interface---v2010)
+ - [`cbl_dart` - `v2.2.3`](#cbl_dart---v223)
+ - [`cbl_generator` - `v0.2.0+10`](#cbl_generator---v02010)
+ - [`cbl_sentry` - `v1.1.4`](#cbl_sentry---v114)
+ - [`cbl_flutter_ce` - `v2.2.3`](#cbl_flutter_ce---v223)
+ - [`cbl_flutter_ee` - `v2.2.3`](#cbl_flutter_ee---v223)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v2.0.10`
+ - `cbl_flutter_platform_interface` - `v2.0.10`
+ - `cbl_dart` - `v2.2.3`
+ - `cbl_generator` - `v0.2.0+10`
+ - `cbl_sentry` - `v1.1.4`
+ - `cbl_flutter_ce` - `v2.2.3`
+ - `cbl_flutter_ee` - `v2.2.3`
+
+---
+
+#### `cbl` - `v2.2.2`
+
+ - **FIX**: don't assume `CouchbaseLiteException.code` is `Enum` in `toString` ([#513](https://github.com/cbl-dart/cbl-dart/issues/513)). ([61cef968](https://github.com/cbl-dart/cbl-dart/commit/61cef968d80b23aebdf84db2ecb5c040588e3c73))
+ - **FIX**: end transactions exactly once ([#514](https://github.com/cbl-dart/cbl-dart/issues/514)). ([f1f40792](https://github.com/cbl-dart/cbl-dart/commit/f1f40792f4dc59c59bd4dc7d02d81ea41263174d))
+
+
 ## 2023-07-23
 
 ### Changes
