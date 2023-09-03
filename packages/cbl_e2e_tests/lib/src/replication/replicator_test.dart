@@ -1,3 +1,6 @@
+// TODO(blaugold): Migrate to collection API.
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -35,11 +38,41 @@ void main() {
         trustedRootCertificates: Uint8List(0),
         channels: ['channel'],
         documentIds: ['id'],
-        pullFilter: (document, isDeleted) => true,
         pushFilter: (document, isDeleted) => true,
+        pullFilter: (document, isDeleted) => true,
         conflictResolver:
             ConflictResolver.from((conflict) => conflict.localDocument),
       ));
+
+      // Check that is possible to start the replicator with this configuration.
+      await repl.start();
+      await repl.close();
+    });
+
+    apiTest('create Replicator with collection smoke test', () async {
+      final db = await openTestDatabase();
+
+      final config = ReplicatorConfiguration(
+        target: UrlEndpoint(syncGatewayReplicationUrl),
+        authenticator: BasicAuthenticator(
+          username: 'user',
+          password: 'password',
+        ),
+        headers: {'Client': 'test'},
+        pinnedServerCertificate: Uint8List(0),
+        trustedRootCertificates: Uint8List(0),
+      )..addCollection(
+          await db.defaultCollection,
+          CollectionConfiguration(
+            channels: ['channel'],
+            documentIds: ['id'],
+            pushFilter: (document, isDeleted) => true,
+            pullFilter: (document, isDeleted) => true,
+            conflictResolver:
+                ConflictResolver.from((conflict) => conflict.localDocument),
+          ),
+        );
+      final repl = await Replicator.create(config);
 
       // Check that is possible to start the replicator with this configuration.
       await repl.start();
@@ -577,6 +610,11 @@ void main() {
         expect(change.replicator, replicator);
         expect(change.isPush, isTrue);
         expect(change.documents.map((it) => it.id), [doc.id]);
+        expect(change.documents.map((it) => it.scope), [Scope.defaultName]);
+        expect(
+          change.documents.map((it) => it.collection),
+          [Collection.defaultName],
+        );
         replicator.removeChangeListener(token);
       }));
 
@@ -615,6 +653,12 @@ void main() {
             .having((it) => it.documents, 'documents', [
           isA<ReplicatedDocument>()
               .having((it) => it.id, 'id', doc.id)
+              .having((it) => it.scope, 'scope', Scope.defaultName)
+              .having(
+                (it) => it.collection,
+                'collection',
+                Collection.defaultName,
+              )
               .having((it) => it.flags, 'flags', isEmpty)
               .having((it) => it.error, 'error', isNull)
         ])),
@@ -627,11 +671,15 @@ void main() {
       'pendingDocumentIds returns ids of documents waiting to be pushed',
       () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
         final doc = MutableDocument();
         await db.saveDocument(doc);
-        final pendingDocumentIds = await replicator.pendingDocumentIds;
-        expect(pendingDocumentIds, [doc.id]);
+        expect(await replicator.pendingDocumentIds, [doc.id]);
+        expect(
+          await replicator.pendingDocumentIdsInCollection(collection),
+          [doc.id],
+        );
       },
     );
 
@@ -639,10 +687,15 @@ void main() {
       'isDocumentPending returns whether a document is waiting to be pushed',
       () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final replicator = await db.createTestReplicator();
         final doc = MutableDocument();
         await db.saveDocument(doc);
         expect(await replicator.isDocumentPending(doc.id), isTrue);
+        expect(
+          await replicator.isDocumentPendingInCollection(doc.id, collection),
+          isTrue,
+        );
       },
     );
 

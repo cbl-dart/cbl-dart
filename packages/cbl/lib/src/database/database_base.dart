@@ -9,7 +9,9 @@ import '../fleece/dict_key.dart';
 import '../support/utils.dart';
 import '../typed_data.dart';
 import '../typed_data/adapter.dart';
+import 'collection.dart';
 import 'database.dart';
+import 'scope.dart';
 
 /// Base that is mixed into all implementations of [Database].
 mixin DatabaseBase<T extends DocumentDelegate> implements Database {
@@ -50,13 +52,6 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   /// Lock under which asynchronous transactions are executed.
   final asyncTransactionLock = Lock();
 
-  /// Creates a [DocumentDelegate] from [oldDelegate] for a new document which
-  /// is being used with this database for the first time.
-  ///
-  /// The returned delegate implementation usually is specific to this
-  /// implementation of [Database].
-  T createNewDocumentDelegate(DocumentDelegate oldDelegate);
-
   /// Prepares [document] for being used with this database.
   ///
   /// If [syncProperties] is `true`, the [document]s properties are synced with
@@ -64,101 +59,12 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   FutureOr<T> prepareDocument(
     DelegateDocument document, {
     bool syncProperties = true,
-  }) {
-    var delegate = document.delegate;
-    if (delegate is! NewDocumentDelegate && delegate is! T) {
-      throw ArgumentError.value(
-        document,
-        'document',
-        'has already been used with another incompatible database',
-      );
-    }
-
-    // Assign document to this database.
-    document.database = this;
-
-    // If document is new init delegate with database specific implementation.
-    if (delegate is NewDocumentDelegate) {
-      document.setDelegate(
-        createNewDocumentDelegate(delegate),
-        updateProperties: false,
-      );
-    }
-
-    delegate = document.delegate as T;
-
-    // If required, sync document properties with delegate.
-    if (syncProperties) {
-      return document.writePropertiesToDelegate().then((_) => delegate as T);
-    }
-
-    return delegate;
-  }
-
-  /// Implements the algorithm to save a document with a [SaveConflictHandler].
-  ///
-  /// If the [conflictHandler] is synchronous and this database is synchronous
-  /// the result is also synchronous.
-  FutureOr<bool> saveDocumentWithConflictHandlerHelper(
-    MutableDelegateDocument documentBeingSaved,
-    SaveConflictHandler conflictHandler,
-  ) {
-    // Implementing the conflict resolution in Dart, instead of using
-    // the C implementation, allows us to make the conflict handler
-    // asynchronous.
-
-    var success = false;
-
-    final done = syncOrAsync(() sync* {
-      var retry = false;
-
-      do {
-        late bool noConflict;
-
-        yield saveDocument(
-          documentBeingSaved,
-          ConcurrencyControl.failOnConflict,
-        ).then((value) => noConflict = value);
-
-        if (noConflict) {
-          success = true;
-          retry = false;
-        } else {
-          // Load the conflicting document.
-          late DelegateDocument? conflictingDocument;
-          yield document(documentBeingSaved.id).then(
-              (value) => conflictingDocument = value as DelegateDocument?);
-
-          // Call the conflict handler.
-          yield conflictHandler(
-            documentBeingSaved,
-            conflictingDocument,
-          ).then((value) => retry = value);
-
-          if (retry) {
-            // If the document was deleted it has to be recreated.
-            // ignore: parameter_assignments
-            conflictingDocument ??=
-                MutableDelegateDocument.withId(documentBeingSaved.id);
-
-            // Replace the delegate of documentBeingSaved with a copy of that of
-            // conflictingDocument. After this call, documentBeingSaved is at
-            // the same revision as conflictingDocument.
-            documentBeingSaved.setDelegate(
-              conflictingDocument!.delegate.toMutable(),
-              // The documentBeingSaved contains the resolved properties.
-              updateProperties: false,
-            );
-          }
-        }
-      } while (retry);
-    }());
-
-    if (done is Future<void>) {
-      return done.then((_) => success);
-    }
-    return success;
-  }
+  }) =>
+      defaultCollection
+          .then((value) => (value as CollectionBase<T>).prepareDocument(
+                document,
+                syncProperties: syncProperties,
+              ));
 
   @override
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) {
@@ -179,7 +85,9 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
       isDynamic = false;
     }
 
-    return document(id).then((doc) {
+    return defaultCollection
+        .then((collection) => collection.document(id))
+        .then((doc) {
       if (doc == null) {
         return null;
       }
@@ -354,10 +262,11 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) {
     database.typedDataAdapter!.willSaveDocument(document);
-    return database.saveDocument(
-      document.internal as MutableDelegateDocument,
-      concurrencyControl,
-    );
+    return database.defaultCollection
+        .then((collection) => collection.saveDocument(
+              document.internal as MutableDelegateDocument,
+              concurrencyControl,
+            ));
   }
 
   @override
@@ -365,15 +274,161 @@ abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
     TypedSaveConflictHandler<D, MD> conflictHandler,
   ) {
     database.typedDataAdapter!.willSaveDocument(document);
-    return database.saveDocumentWithConflictHandlerHelper(
-      document.internal as MutableDelegateDocument,
-      (documentBeingSaved, conflictingDocument) {
-        assert(identical(documentBeingSaved, document.internal));
-        return conflictHandler(
-          document as MD,
-          conflictingDocument?.let(_documentFactory),
-        );
-      },
-    );
+    return database.defaultCollection.then((collection) =>
+        (collection as CollectionBase).saveDocumentWithConflictHandlerHelper(
+          document.internal as MutableDelegateDocument,
+          (documentBeingSaved, conflictingDocument) {
+            assert(identical(documentBeingSaved, document.internal));
+            return conflictHandler(
+              document as MD,
+              conflictingDocument?.let(_documentFactory),
+            );
+          },
+        ));
   }
+}
+
+mixin ScopeBase implements Scope {
+  DatabaseBase get database;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScopeBase &&
+          runtimeType == other.runtimeType &&
+          database.path == other.database.path &&
+          name == other.name;
+
+  @override
+  int get hashCode => database.path.hashCode ^ name.hashCode;
+}
+
+mixin CollectionBase<T extends DocumentDelegate> implements Collection {
+  @override
+  ScopeBase get scope;
+
+  DatabaseBase get database => scope.database;
+
+  String get fullName => '${scope.name}.$name';
+
+  /// Creates a [DocumentDelegate] from [oldDelegate] for a new document which
+  /// is being used with this collection for the first time.
+  ///
+  /// The returned delegate implementation usually is specific to this
+  /// implementation of [Collection].
+  T createNewDocumentDelegate(DocumentDelegate oldDelegate);
+
+  /// Prepares [document] for being used with this collection.
+  ///
+  /// If [syncProperties] is `true`, the [document]s properties are synced with
+  /// its delegate.
+  FutureOr<T> prepareDocument(
+    DelegateDocument document, {
+    bool syncProperties = true,
+  }) {
+    var delegate = document.delegate;
+    if (delegate is! NewDocumentDelegate && delegate is! T) {
+      throw ArgumentError.value(
+        document,
+        'document',
+        'has already been used with another incompatible database',
+      );
+    }
+
+    // Assign document to this collection.
+    document.setCollection(this);
+
+    // If document is new init delegate with collection specific implementation.
+    if (delegate is NewDocumentDelegate) {
+      document.setDelegate(
+        createNewDocumentDelegate(delegate),
+        updateProperties: false,
+      );
+    }
+
+    delegate = document.delegate as T;
+
+    // If required, sync document properties with delegate.
+    if (syncProperties) {
+      return document.writePropertiesToDelegate().then((_) => delegate as T);
+    }
+
+    return delegate;
+  }
+
+  /// Implements the algorithm to save a document with a [SaveConflictHandler].
+  ///
+  /// If the [conflictHandler] is synchronous and this collection is synchronous
+  /// the result is also synchronous.
+  FutureOr<bool> saveDocumentWithConflictHandlerHelper(
+    MutableDelegateDocument documentBeingSaved,
+    SaveConflictHandler conflictHandler,
+  ) {
+    // Implementing the conflict resolution in Dart, instead of using
+    // the C implementation, allows us to make the conflict handler
+    // asynchronous.
+
+    var success = false;
+
+    final done = syncOrAsync(() sync* {
+      var retry = false;
+
+      do {
+        late bool noConflict;
+
+        yield saveDocument(
+          documentBeingSaved,
+          ConcurrencyControl.failOnConflict,
+        ).then((value) => noConflict = value);
+
+        if (noConflict) {
+          success = true;
+          retry = false;
+        } else {
+          // Load the conflicting document.
+          late DelegateDocument? conflictingDocument;
+          yield document(documentBeingSaved.id).then(
+              (value) => conflictingDocument = value as DelegateDocument?);
+
+          // Call the conflict handler.
+          yield conflictHandler(
+            documentBeingSaved,
+            conflictingDocument,
+          ).then((value) => retry = value);
+
+          if (retry) {
+            // If the document was deleted it has to be recreated.
+            // ignore: parameter_assignments
+            conflictingDocument ??=
+                MutableDelegateDocument.withId(documentBeingSaved.id);
+
+            // Replace the delegate of documentBeingSaved with a copy of that of
+            // conflictingDocument. After this call, documentBeingSaved is at
+            // the same revision as conflictingDocument.
+            documentBeingSaved.setDelegate(
+              conflictingDocument!.delegate.toMutable(),
+              // The documentBeingSaved contains the resolved properties.
+              updateProperties: false,
+            );
+          }
+        }
+      } while (retry);
+    }());
+
+    if (done is Future<void>) {
+      return done.then((_) => success);
+    }
+    return success;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CollectionBase &&
+          runtimeType == other.runtimeType &&
+          scope == other.scope &&
+          name == other.name;
+
+  @override
+  int get hashCode => scope.hashCode ^ name.hashCode;
 }

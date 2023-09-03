@@ -269,6 +269,16 @@ class CloseDatabaseOp extends DatabaseOperationOp {
   CloseDatabaseOp(Database database) : super(database, 'CloseDatabase');
 }
 
+/// Operation that involves a [Collection].
+///
+/// {@category Tracing}
+abstract class CollectionOperationOp extends TracedOperation {
+  CollectionOperationOp(this.collection, String name) : super(name);
+
+  /// The collection involved in this operation.
+  final Collection collection;
+}
+
 /// Operation that involves a [Document].
 ///
 /// {@category Tracing}
@@ -277,11 +287,12 @@ abstract class DocumentOperationOp implements TracedOperation {
   Document get document;
 }
 
-/// Operation that loads a [Document] from a [Database].
+/// Operation that loads a [Document] from a [Collection].
 ///
 /// {@category Tracing}
-class GetDocumentOp extends DatabaseOperationOp {
-  GetDocumentOp(Database database, this.id) : super(database, 'GetDocument');
+class GetDocumentOp extends CollectionOperationOp {
+  GetDocumentOp(Collection collection, this.id)
+      : super(collection, 'GetDocument');
 
   /// The id of the document to load.
   final String id;
@@ -298,13 +309,16 @@ class PrepareDocumentOp extends TracedOperation implements DocumentOperationOp {
   final Document document;
 }
 
-/// Operation that saves a [Document] to a [Database].
+/// Operation that saves a [Document] to a [Collection].
 ///
 /// {@category Tracing}
-class SaveDocumentOp extends DatabaseOperationOp
+class SaveDocumentOp extends CollectionOperationOp
     implements DocumentOperationOp {
-  SaveDocumentOp(Database database, this.document, [this.concurrencyControl])
-      : super(database, 'SaveDocument');
+  SaveDocumentOp(
+    Collection collection,
+    this.document, [
+    this.concurrencyControl,
+  ]) : super(collection, 'SaveDocument');
 
   /// The document to save.
   @override
@@ -320,13 +334,16 @@ class SaveDocumentOp extends DatabaseOperationOp
   bool get withConflictHandler => concurrencyControl == null;
 }
 
-/// Operation that deletes a [Document] from a [Database].
+/// Operation that deletes a [Document] from a [Collection].
 ///
 /// {@category Tracing}
-class DeleteDocumentOp extends DatabaseOperationOp
+class DeleteDocumentOp extends CollectionOperationOp
     implements DocumentOperationOp {
-  DeleteDocumentOp(Database database, this.document, this.concurrencyControl)
-      : super(database, 'DeleteDocument');
+  DeleteDocumentOp(
+    Collection collection,
+    this.document,
+    this.concurrencyControl,
+  ) : super(collection, 'DeleteDocument');
 
   /// The document to delete.
   @override

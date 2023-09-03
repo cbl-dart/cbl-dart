@@ -23,7 +23,7 @@ void main() {
     final db = StringDictDatabase.openSync('test');
     addTearDown(db.delete);
     final doc = MutableDocument({'value': 'a'});
-    db.saveDocument(doc);
+    db.defaultCollection.saveDocument(doc);
 
     final resultSet = Query.fromN1qlSync(db, 'SELECT value FROM _').execute();
     final typedResults = resultSet.allTypedResults<StringDict>();

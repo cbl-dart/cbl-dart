@@ -5,13 +5,8 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'async_callback.dart';
+import '../cbl_ffi.dart';
 import 'base.dart';
-import 'bindings.dart';
-import 'data.dart';
-import 'database.dart';
-import 'document.dart';
-import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
@@ -105,6 +100,15 @@ class CBLProxySettings {
   final String password;
 }
 
+final class _CBLDartReplicationCollection extends Struct {
+  external Pointer<CBLCollection> collection;
+  external Pointer<FLArray> channels;
+  external Pointer<FLArray> documentIDs;
+  external Pointer<CBLDartAsyncCallback> pushFilter;
+  external Pointer<CBLDartAsyncCallback> pullFilter;
+  external Pointer<CBLDartAsyncCallback> conflictResolver;
+}
+
 final class _CBLDartReplicatorConfiguration extends Struct {
   external Pointer<CBLDatabase> database;
   external Pointer<CBLEndpoint> endpoint;
@@ -126,16 +130,32 @@ final class _CBLDartReplicatorConfiguration extends Struct {
   external Pointer<FLDict> headers;
   external Pointer<FLSlice> pinnedServerCertificate;
   external Pointer<FLSlice> trustedRootCertificates;
-  external Pointer<FLArray> channels;
-  external Pointer<FLArray> documentIDs;
-  external Pointer<CBLDartAsyncCallback> pushFilter;
-  external Pointer<CBLDartAsyncCallback> pullFilter;
-  external Pointer<CBLDartAsyncCallback> conflictResolver;
+  external Pointer<_CBLDartReplicationCollection> collections;
+  @Size()
+  external int collectionsCount;
 }
 
 extension on _CBLDartReplicatorConfiguration {
   set replicatorType(CBLReplicatorType value) =>
       _replicatorType = value.toInt();
+}
+
+class CBLReplicationCollection {
+  CBLReplicationCollection({
+    required this.collection,
+    this.channels,
+    this.documentIDs,
+    this.pushFilter,
+    this.pullFilter,
+    this.conflictResolver,
+  });
+
+  final Pointer<CBLCollection> collection;
+  final Pointer<FLArray>? channels;
+  final Pointer<FLArray>? documentIDs;
+  final Pointer<CBLDartAsyncCallback>? pushFilter;
+  final Pointer<CBLDartAsyncCallback>? pullFilter;
+  final Pointer<CBLDartAsyncCallback>? conflictResolver;
 }
 
 class CBLReplicatorConfiguration {
@@ -153,11 +173,7 @@ class CBLReplicatorConfiguration {
     this.headers,
     this.pinnedServerCertificate,
     this.trustedRootCertificates,
-    this.channels,
-    this.documentIDs,
-    this.pushFilter,
-    this.pullFilter,
-    this.conflictResolver,
+    required this.collections,
   });
 
   final Pointer<CBLDatabase> database;
@@ -173,11 +189,7 @@ class CBLReplicatorConfiguration {
   final Pointer<FLDict>? headers;
   final Data? pinnedServerCertificate;
   final Data? trustedRootCertificates;
-  final Pointer<FLArray>? channels;
-  final Pointer<FLArray>? documentIDs;
-  final Pointer<CBLDartAsyncCallback>? pushFilter;
-  final Pointer<CBLDartAsyncCallback>? pullFilter;
-  final Pointer<CBLDartAsyncCallback>? conflictResolver;
+  final List<CBLReplicationCollection> collections;
 }
 
 class ReplicationFilterCallbackMessage {
@@ -327,19 +339,22 @@ typedef _CBLReplicator_Status = _CBLReplicatorStatus Function(
   Pointer<CBLReplicator> replicator,
 );
 
-typedef _CBLReplicator_PendingDocumentIDs = Pointer<FLDict> Function(
+typedef _CBLReplicator_PendingDocumentIDs2 = Pointer<FLDict> Function(
   Pointer<CBLReplicator> replicator,
+  Pointer<CBLCollection> collection,
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLReplicator_IsDocumentPending_C = Bool Function(
+typedef _CBLReplicator_IsDocumentPending2_C = Bool Function(
   Pointer<CBLReplicator> replicator,
   FLString docID,
+  Pointer<CBLCollection> collection,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLReplicator_IsDocumentPending = bool Function(
+typedef _CBLReplicator_IsDocumentPending2 = bool Function(
   Pointer<CBLReplicator> replicator,
   FLString docID,
+  Pointer<CBLCollection> collection,
   Pointer<CBLError> errorOut,
 );
 
@@ -408,11 +423,15 @@ class CBLReplicatedDocument {
   CBLReplicatedDocument(
     this.id,
     this.flags,
+    this.scope,
+    this.collection,
     this.error,
   );
 
   final String id;
   final Set<CBLReplicatedDocumentFlag> flags;
+  final String scope;
+  final String collection;
   final CBLErrorException? error;
 }
 
@@ -431,17 +450,19 @@ class DocumentReplicationsCallbackMessage {
   static List<CBLReplicatedDocument> parseDocuments(List<Object?> documents) =>
       documents.cast<List<Object?>>().map((document) {
         CBLErrorException? error;
-        if (document.length > 2) {
+        if (document.length > 4) {
           error = CBLErrorException(
-            (document[2] as int).toErrorDomain(),
-            document[3] as int,
-            utf8.decode(document[4] as Uint8List, allowMalformed: true),
+            (document[4] as int).toErrorDomain(),
+            document[5] as int,
+            utf8.decode(document[6] as Uint8List, allowMalformed: true),
           );
         }
 
         return CBLReplicatedDocument(
           utf8.decode(document[0] as Uint8List),
           CBLReplicatedDocumentFlag._parseCFlags(document[1] as int),
+          utf8.decode(document[2] as Uint8List),
+          utf8.decode(document[3] as Uint8List),
           error,
         );
       }).toList();
@@ -517,13 +538,13 @@ class ReplicatorBindings extends Bindings {
       isLeaf: useIsLeaf,
     );
     _pendingDocumentIDs = libs.cbl.lookupFunction<
-        _CBLReplicator_PendingDocumentIDs, _CBLReplicator_PendingDocumentIDs>(
-      'CBLReplicator_PendingDocumentIDs',
+        _CBLReplicator_PendingDocumentIDs2, _CBLReplicator_PendingDocumentIDs2>(
+      'CBLReplicator_PendingDocumentIDs2',
       isLeaf: useIsLeaf,
     );
     _isDocumentPending = libs.cbl.lookupFunction<
-        _CBLReplicator_IsDocumentPending_C, _CBLReplicator_IsDocumentPending>(
-      'CBLReplicator_IsDocumentPending',
+        _CBLReplicator_IsDocumentPending2_C, _CBLReplicator_IsDocumentPending2>(
+      'CBLReplicator_IsDocumentPending2',
       isLeaf: useIsLeaf,
     );
     _addChangeListener = libs.cblDart.lookupFunction<
@@ -554,8 +575,8 @@ class ReplicatorBindings extends Bindings {
   late final _CBLReplicator_SetHostReachable _setHostReachable;
   late final _CBLReplicator_SetSuspended _setSuspended;
   late final _CBLReplicator_Status _status;
-  late final _CBLReplicator_PendingDocumentIDs _pendingDocumentIDs;
-  late final _CBLReplicator_IsDocumentPending _isDocumentPending;
+  late final _CBLReplicator_PendingDocumentIDs2 _pendingDocumentIDs;
+  late final _CBLReplicator_IsDocumentPending2 _isDocumentPending;
   late final _CBLDart_CBLReplicator_AddChangeListener _addChangeListener;
   late final _CBLDart_CBLReplicator_AddDocumentReplicationListener
       _addDocumentReplicationListener;
@@ -602,7 +623,7 @@ class ReplicatorBindings extends Bindings {
 
   Pointer<CBLReplicator> createReplicator(CBLReplicatorConfiguration config) =>
       withGlobalArena(() => _create(
-            _createConfiguration(config),
+            _createConfigurationStruct(config),
             globalCBLError,
           ).checkCBLError());
 
@@ -638,17 +659,23 @@ class ReplicatorBindings extends Bindings {
   CBLReplicatorStatus status(Pointer<CBLReplicator> replicator) =>
       _status(replicator).toCBLReplicatorStatus();
 
-  Pointer<FLDict> pendingDocumentIDs(Pointer<CBLReplicator> replicator) =>
-      _pendingDocumentIDs(replicator, globalCBLError).checkCBLError();
+  Pointer<FLDict> pendingDocumentIDs(
+    Pointer<CBLReplicator> replicator,
+    Pointer<CBLCollection> collection,
+  ) =>
+      _pendingDocumentIDs(replicator, collection, globalCBLError)
+          .checkCBLError();
 
   bool isDocumentPending(
     Pointer<CBLReplicator> replicator,
     String docID,
+    Pointer<CBLCollection> collection,
   ) =>
       runWithSingleFLString(
         docID,
-        (flDocID) => _isDocumentPending(replicator, flDocID, globalCBLError)
-            .checkCBLError(),
+        (flDocID) =>
+            _isDocumentPending(replicator, flDocID, collection, globalCBLError)
+                .checkCBLError(),
       );
 
   void addChangeListener(
@@ -667,12 +694,12 @@ class ReplicatorBindings extends Bindings {
     _addDocumentReplicationListener(db, replicator, listener);
   }
 
-  Pointer<_CBLDartReplicatorConfiguration> _createConfiguration(
+  Pointer<_CBLDartReplicatorConfiguration> _createConfigurationStruct(
     CBLReplicatorConfiguration config,
   ) {
-    final result = globalArena<_CBLDartReplicatorConfiguration>();
+    final configStruct = globalArena<_CBLDartReplicatorConfiguration>();
 
-    result.ref
+    configStruct.ref
       ..database = config.database
       ..endpoint = config.endpoint
       ..replicatorType = config.replicatorType
@@ -682,7 +709,7 @@ class ReplicatorBindings extends Bindings {
       ..maxAttemptWaitTime = config.maxAttemptWaitTime ?? 0
       ..heartbeat = config.heartbeat ?? 0
       ..authenticator = config.authenticator ?? nullptr
-      ..proxy = _createProxySettings(config.proxy)
+      ..proxy = _createProxySettingsStruct(config.proxy)
       ..headers = config.headers ?? nullptr
       ..pinnedServerCertificate = config.pinnedServerCertificate
               ?.toSliceResult()
@@ -691,32 +718,44 @@ class ReplicatorBindings extends Bindings {
       ..trustedRootCertificates = config.trustedRootCertificates
               ?.toSliceResult()
               .flSlice(globalArena) ??
-          nullptr
-      ..channels = config.channels ?? nullptr
-      ..documentIDs = config.documentIDs ?? nullptr
-      ..pushFilter = config.pushFilter ?? nullptr
-      ..pullFilter = config.pullFilter ?? nullptr
-      ..conflictResolver = config.conflictResolver ?? nullptr;
+          nullptr;
 
-    return result;
+    final collectionStructs =
+        globalArena<_CBLDartReplicationCollection>(config.collections.length);
+
+    configStruct.ref
+      ..collections = collectionStructs
+      ..collectionsCount = config.collections.length;
+
+    for (final (i, collection) in config.collections.indexed) {
+      collectionStructs[i]
+        ..collection = collection.collection
+        ..channels = collection.channels ?? nullptr
+        ..documentIDs = collection.documentIDs ?? nullptr
+        ..pushFilter = collection.pushFilter ?? nullptr
+        ..pullFilter = collection.pullFilter ?? nullptr
+        ..conflictResolver = collection.conflictResolver ?? nullptr;
+    }
+
+    return configStruct;
   }
 
-  Pointer<_CBLProxySettings> _createProxySettings(
+  Pointer<_CBLProxySettings> _createProxySettingsStruct(
     CBLProxySettings? settings,
   ) {
     if (settings == null) {
       return nullptr;
     }
 
-    final result = globalArena<_CBLProxySettings>();
+    final settingsStruct = globalArena<_CBLProxySettings>();
 
-    result.ref
+    settingsStruct.ref
       ..type = settings.type
       ..hostname = settings.hostname.toFLString()
       ..port = settings.port
       ..username = settings.username.toFLString()
       ..password = settings.password.toFLString();
 
-    return result;
+    return settingsStruct;
   }
 }

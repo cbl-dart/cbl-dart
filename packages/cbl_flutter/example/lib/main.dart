@@ -234,9 +234,10 @@ extension DictionaryDocumentIdExt on DictionaryInterface {
 
 /// Repository for [LogMessage]s, which abstracts data storage access.
 class LogMessageRepository {
-  LogMessageRepository(this.database);
+  LogMessageRepository(this.database, this.collection);
 
-  Database database;
+  final Database database;
+  final Collection collection;
 
   Future<LogMessage> createLogMessage(String message) async {
     final doc = MutableDocument({
@@ -244,7 +245,7 @@ class LogMessageRepository {
       'createdAt': DateTime.now(),
       'message': message,
     });
-    await database.saveDocument(doc);
+    await collection.saveDocument(doc);
     return CblLogMessage(doc);
   }
 
@@ -255,7 +256,7 @@ class LogMessageRepository {
           SelectResult.property('createdAt'),
           SelectResult.property('message'),
         )
-        .from(DataSource.database(database))
+        .from(DataSource.collection(collection))
         .where(
           Expression.property('type').equalTo(Expression.value('logMessage')),
         )
@@ -276,6 +277,7 @@ class LogMessageRepository {
 // === App Setup ===============================================================
 
 late Database database;
+late Collection logMessages;
 late LogMessageRepository logMessageRepository;
 
 /// Initializes global app state.
@@ -290,10 +292,11 @@ Future<void> initApp() async {
   // await Database.remove('example');
 
   database = await Database.openAsync('example');
+  logMessages = await database.createCollection('logMessages');
 
   // This index speeds up queries, among others, that filter documents by an
   // exact `type` and sort by `createdAt`.
-  await database.createIndex(
+  await logMessages.createIndex(
     'type+createdAt',
     ValueIndex([
       ValueIndexItem.property('type'),
@@ -301,5 +304,5 @@ Future<void> initApp() async {
     ]),
   );
 
-  logMessageRepository = LogMessageRepository(database);
+  logMessageRepository = LogMessageRepository(database, logMessages);
 }

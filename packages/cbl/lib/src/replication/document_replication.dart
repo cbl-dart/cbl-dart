@@ -1,3 +1,4 @@
+import '../database.dart';
 import '../document.dart';
 import 'configuration.dart';
 import 'replicator.dart';
@@ -25,6 +26,12 @@ abstract class ReplicatedDocument {
 
   /// Flags describing the replicated [Document].
   Set<DocumentFlag> get flags;
+
+  /// The name of the [Scope] the [Document] belongs to.
+  String get scope;
+
+  /// The name of the [Collection] the [Document] belongs to.
+  String get collection;
 
   /// An error which occurred during replication of the [Document].
   ///
@@ -58,13 +65,25 @@ class DocumentReplicationImpl implements DocumentReplication {
 }
 
 class ReplicatedDocumentImpl implements ReplicatedDocument {
-  ReplicatedDocumentImpl(this.id, [this.flags = const {}, this.error]);
+  ReplicatedDocumentImpl(
+    this.id,
+    this.scope,
+    this.collection, [
+    this.flags = const {},
+    this.error,
+  ]);
 
   @override
   final String id;
 
   @override
   final Set<DocumentFlag> flags;
+
+  @override
+  final String scope;
+
+  @override
+  final String collection;
 
   @override
   final Object? error;
@@ -74,6 +93,7 @@ class ReplicatedDocumentImpl implements ReplicatedDocument {
         'ReplicatedDocument(',
         [
           id,
+          'collection: $scope.$collection',
           for (final flag in flags)
             if (flag == DocumentFlag.accessRemoved)
               'ACCESS-REMOVED'

@@ -191,10 +191,11 @@ void main() {
     group('e2e', () {
       apiTest('access column by name', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final doc = MutableDocument.withId('ResultSetColumnByName', {
           'a': {'b': true}
         });
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
         final q = await Query.fromN1ql(
           db,
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
@@ -211,8 +212,9 @@ void main() {
 
       apiTest('access column by index', () async {
         final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
         final doc = MutableDocument.withId('ResultSetColumnByIndex');
-        await db.saveDocument(doc);
+        await collection.saveDocument(doc);
 
         final q = await Query.fromN1ql(
           db,

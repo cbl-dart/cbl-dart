@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:collection/collection.dart';
 
 import '../database.dart';
 import '../database/proxy_database.dart';
@@ -16,6 +17,7 @@ import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/utils.dart';
+import 'common.dart';
 import 'configuration.dart';
 import 'conflict.dart';
 import 'conflict_resolver.dart';
@@ -33,7 +35,6 @@ class ProxyReplicator extends ProxyObject
     required ReplicatorConfiguration config,
     required void Function() unregisterCallbacks,
   })  : _database = database,
-        assert(database == config.database),
         _config = ReplicatorConfiguration.from(config),
         super(database.channel, objectId, proxyFinalizer: unregisterCallbacks) {
     attachTo(_database);
@@ -42,9 +43,8 @@ class ProxyReplicator extends ProxyObject
   static Future<ProxyReplicator> create(
     ReplicatorConfiguration config,
   ) async {
-    final database =
-        assertArgumentType<AsyncDatabase>(config.database, 'config.database')
-            as ProxyDatabase;
+    final (database, collections) = await resolveReplicatorCollections<
+        AsyncDatabase, AsyncCollection, ProxyDatabase, ProxyCollection>(config);
 
     var target = config.target;
     if (target is DatabaseEndpoint) {
@@ -59,27 +59,43 @@ class ProxyReplicator extends ProxyObject
 
     final client = database.client;
 
-    final pushFilterId = config.combinedPushFilter
-        ?.let((it) => _wrapReplicationFilter(it, database))
-        .let(client.registerReplicationFilter);
-    final pullFilterId = config.combinedPullFilter
-        ?.let((it) => _wrapReplicationFilter(it, database))
-        .let(client.registerReplicationFilter);
-    final conflictResolverId = config.combinedConflictResolver
-        ?.let((it) => _wrapConflictResolver(it, database))
-        .let(client.registerConflictResolver);
+    final callbacksIds = <int>[];
 
     void unregisterCallbacks() {
-      [
+      callbacksIds.whereNotNull().forEach(client.unregisterObject);
+    }
+
+    final createReplicatorCollections = collections.entries.map((entry) {
+      final MapEntry(key: collection, value: config) = entry;
+
+      final pushFilterId = config.pushFilter
+          ?.let((it) => _wrapReplicationFilter(it, collection))
+          .let(client.registerReplicationFilter);
+      final pullFilterId = config.pullFilter
+          ?.let((it) => _wrapReplicationFilter(it, collection))
+          .let(client.registerReplicationFilter);
+      final conflictResolverId = config.conflictResolver
+          ?.let((it) => _wrapConflictResolver(it, collection))
+          .let(client.registerConflictResolver);
+
+      callbacksIds.addAll([
         pushFilterId,
         pullFilterId,
         conflictResolverId,
-      ].whereType<int>().forEach(client.unregisterObject);
-    }
+      ].whereNotNull());
+
+      return CreateReplicatorCollection(
+        collectionId: collection.objectId,
+        channels: config.channels,
+        documentIds: config.documentIds,
+        pushFilterId: pushFilterId,
+        pullFilterId: pullFilterId,
+        conflictResolverId: conflictResolverId,
+      );
+    }).toList();
 
     try {
       final objectId = await database.channel.call(CreateReplicator(
-        databaseId: database.objectId,
         propertiesFormat: database.encodingFormat,
         target: target,
         replicatorType: config.replicatorType,
@@ -88,15 +104,11 @@ class ProxyReplicator extends ProxyObject
         pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
         trustedRootCertificates: config.trustedRootCertificates?.toData(),
         headers: config.headers,
-        channels: config.channels,
-        documentIds: config.documentIds,
-        pushFilterId: pushFilterId,
-        pullFilterId: pullFilterId,
-        conflictResolverId: conflictResolverId,
         enableAutoPurge: config.enableAutoPurge,
         heartbeat: config.heartbeat,
         maxAttempts: config.maxAttempts,
         maxAttemptWaitTime: config.maxAttemptWaitTime,
+        collections: createReplicatorCollections,
       ));
       return ProxyReplicator(
         database: database,
@@ -225,16 +237,39 @@ class ProxyReplicator extends ProxyObject
           ));
 
   @override
-  Future<bool> isDocumentPending(String documentId) =>
+  Future<Set<String>> get pendingDocumentIds async =>
+      pendingDocumentIdsInCollection(
+        (await _database.defaultCollection) as ProxyCollection,
+      );
+
+  @override
+  Future<bool> isDocumentPending(String documentId) async =>
+      isDocumentPendingInCollection(
+        documentId,
+        (await _database.defaultCollection) as ProxyCollection,
+      );
+
+  @override
+  Future<Set<String>> pendingDocumentIdsInCollection(
+    covariant ProxyCollection collection,
+  ) =>
+      use(() => channel
+          .call(ReplicatorPendingDocumentIds(
+            replicatorId: objectId,
+            collectionId: collection.objectId,
+          ))
+          .then((value) => value.toSet()));
+
+  @override
+  Future<bool> isDocumentPendingInCollection(
+    String documentId,
+    covariant ProxyCollection collection,
+  ) =>
       use(() => channel.call(ReplicatorIsDocumentPending(
             replicatorId: objectId,
             documentId: documentId,
+            collectionId: collection.objectId,
           )));
-
-  @override
-  Future<Set<String>> get pendingDocumentIds => use(() => channel
-      .call(ReplicatorPendingDocumentIds(replicatorId: objectId))
-      .then((value) => value.toSet()));
 
   @override
   FutureOr<void> performClose() => finalizeEarly();
@@ -253,17 +288,18 @@ class ProxyReplicator extends ProxyObject
 
 CblServiceReplicationFilter _wrapReplicationFilter(
   ReplicationFilter filter,
-  ProxyDatabase database,
+  ProxyCollection collection,
 ) =>
-    (state, flags) => filter(_documentStateToDocument(database)(state), flags);
+    (state, flags) =>
+        filter(_documentStateToDocument(collection)(state), flags);
 
 CblServiceConflictResolver _wrapConflictResolver(
   ConflictResolver resolver,
-  ProxyDatabase database,
+  ProxyCollection collection,
 ) =>
     (documentId, localState, remoteState) async {
-      final local = localState?.let(_documentStateToDocument(database));
-      final remote = remoteState?.let(_documentStateToDocument(database));
+      final local = localState?.let(_documentStateToDocument(collection));
+      final remote = remoteState?.let(_documentStateToDocument(collection));
       final conflict = ConflictImpl(documentId, local, remote);
 
       final result = await resolver.resolve(conflict) as DelegateDocument?;
@@ -271,7 +307,7 @@ CblServiceConflictResolver _wrapConflictResolver(
       if (result != null) {
         final includeProperties =
             !identical(result, local) && !identical(result, local);
-        final delegate = await database.prepareDocument(
+        final delegate = await collection.prepareDocument(
           result,
           syncProperties: includeProperties,
         );
@@ -281,9 +317,9 @@ CblServiceConflictResolver _wrapConflictResolver(
     };
 
 DelegateDocument Function(DocumentState) _documentStateToDocument(
-  ProxyDatabase database,
+  ProxyCollection collection,
 ) =>
     (state) => DelegateDocument(
-          ProxyDocumentDelegate.fromState(state, database: database),
-          database: database,
+          ProxyDocumentDelegate.fromState(state, database: collection.database),
+          collection: collection,
         );

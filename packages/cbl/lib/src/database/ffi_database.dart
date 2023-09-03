@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path_lib;
 
 import '../document/blob.dart';
@@ -26,12 +27,15 @@ import '../tracing.dart';
 import '../typed_data.dart';
 import '../typed_data/adapter.dart';
 import 'blob_store.dart';
+import 'collection.dart';
+import 'collection_change.dart';
 import 'database.dart';
 import 'database_base.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
 import 'ffi_blob_store.dart';
+import 'scope.dart';
 
 final _bindings = cblBindings.database;
 
@@ -68,15 +72,12 @@ class FfiDatabase
     _path = _bindings.path(pointer);
   }
 
-  /// {@macro cbl.Database.removeSync}
   static void remove(String name, {String? directory}) =>
       runWithErrorTranslation(() => _bindings.deleteDatabase(name, directory));
 
-  /// {@macro cbl.Database.existsSync}
   static bool exists(String name, {String? directory}) =>
       runWithErrorTranslation(() => _bindings.databaseExists(name, directory));
 
-  /// {@macro cbl.Database.copySync}
   static void copy({
     required String from,
     required String name,
@@ -114,8 +115,6 @@ class FfiDatabase
   @override
   late final SyncBlobStore blobStore = FfiBlobStore(this);
 
-  late final _listenerTokens = ListenerTokenRegistry(this);
-
   final DatabaseConfiguration _config;
 
   var _deleteOnClose = false;
@@ -128,10 +127,85 @@ class FfiDatabase
   String? _path;
 
   @override
-  int get count => useSync(() => _bindings.count(pointer));
+  int get count => defaultCollection.count;
 
   @override
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
+
+  @override
+  late final SyncScope defaultScope = scope(Scope.defaultName)!;
+
+  @override
+  List<SyncScope> get scopes => useSync(() {
+        final scopeNames =
+            runWithErrorTranslation(() => fl.MutableArray.fromPointer(
+                  _collectionBindings.databaseScopeNames(pointer),
+                  adopt: true,
+                ));
+        return scopeNames
+            .map((name) => scope(name.asString!))
+            .whereNotNull()
+            .toList();
+      });
+
+  @override
+  SyncScope? scope(String name) => useSync(() {
+        final scopePointer = runWithErrorTranslation(
+          () => _collectionBindings.databaseScope(pointer, name),
+        );
+
+        if (scopePointer == null) {
+          return null;
+        }
+
+        return FfiScope._(
+          name: name,
+          pointer: scopePointer,
+          database: this,
+        );
+      });
+
+  @override
+  late final SyncCollection defaultCollection =
+      defaultScope.collection(Collection.defaultName)!;
+
+  @override
+  SyncCollection? collection(String name, [String scope = Scope.defaultName]) =>
+      this.scope(scope)?.collection(name);
+
+  @override
+  List<SyncCollection> collections([String scope = Scope.defaultName]) =>
+      this.scope(scope)?.collections ?? [];
+
+  @override
+  SyncCollection createCollection(
+    String name, [
+    String scope = Scope.defaultName,
+  ]) =>
+      useSync(() {
+        final collectionPointer = runWithErrorTranslation(
+          () => _collectionBindings.databaseCreateCollection(
+            pointer,
+            name,
+            scope,
+          ),
+        );
+        return FfiCollection._(
+          name: name,
+          pointer: collectionPointer,
+          scope: this.scope(scope)! as FfiScope,
+        );
+      });
+
+  @override
+  void deleteCollection(String name, [String scope = Scope.defaultName]) {
+    useSync(() {
+      runWithErrorTranslation(
+        () =>
+            _collectionBindings.databaseDeleteCollection(pointer, name, scope),
+      );
+    });
+  }
 
   @override
   void beginTransaction() {
@@ -146,31 +220,10 @@ class FfiDatabase
   }
 
   @override
-  Document? document(String id) => syncOperationTracePoint(
-        () => GetDocumentOp(this, id),
-        () => useSync(
-          () {
-            final documentPointer = runWithErrorTranslation(
-              () => _bindings.getDocument(pointer, id),
-            );
-
-            if (documentPointer == null) {
-              return null;
-            }
-
-            return DelegateDocument(
-              FfiDocumentDelegate.fromPointer(
-                documentPointer,
-                adopt: true,
-              ),
-              database: this,
-            );
-          },
-        ),
-      );
+  Document? document(String id) => defaultCollection.document(id);
 
   @override
-  DocumentFragment operator [](String id) => DocumentFragmentImpl(document(id));
+  DocumentFragment operator [](String id) => defaultCollection[id];
 
   @override
   D? typedDocument<D extends TypedDocumentObject>(String id) =>
@@ -181,39 +234,16 @@ class FfiDatabase
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      syncOperationTracePoint(
-        () => SaveDocumentOp(this, document, concurrencyControl),
-        () => useSync(
-          () => runInTransactionSync(() {
-            final delegate = syncOperationTracePoint(
-              () => PrepareDocumentOp(document),
-              () => prepareDocument(document) as FfiDocumentDelegate,
-            );
-
-            return _catchConflictException(() {
-              runWithErrorTranslation(
-                () => _bindings.saveDocumentWithConcurrencyControl(
-                  pointer,
-                  delegate.pointer.cast(),
-                  concurrencyControl.toCBLConcurrencyControl(),
-                ),
-              );
-            });
-          }),
-        ),
-      );
+      defaultCollection.saveDocument(document, concurrencyControl);
 
   @override
-  Future<bool> saveDocumentWithConflictHandler(
+  FutureOr<bool> saveDocumentWithConflictHandler(
     covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) =>
-      asyncOperationTracePoint(
-        () => SaveDocumentOp(this, document),
-        () => use(() => saveDocumentWithConflictHandlerHelper(
-              document,
-              conflictHandler,
-            )),
+      defaultCollection.saveDocumentWithConflictHandler(
+        document,
+        conflictHandler,
       );
 
   @override
@@ -221,15 +251,9 @@ class FfiDatabase
     covariant MutableDelegateDocument document,
     SyncSaveConflictHandler conflictHandler,
   ) =>
-      syncOperationTracePoint(
-        () => SaveDocumentOp(this, document),
-        () => useSync(
-            // Because the conflict handler is sync the result of the possibly
-            // async method is always sync.
-            () => saveDocumentWithConflictHandlerHelper(
-                  document,
-                  conflictHandler,
-                ) as bool),
+      defaultCollection.saveDocumentWithConflictHandlerSync(
+        document,
+        conflictHandler,
       );
 
   @override
@@ -244,28 +268,7 @@ class FfiDatabase
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      syncOperationTracePoint(
-        () => DeleteDocumentOp(this, document, concurrencyControl),
-        () => useSync(
-          () => runInTransactionSync(() {
-            final delegate = syncOperationTracePoint(
-              () => PrepareDocumentOp(document),
-              () => prepareDocument(document, syncProperties: false)
-                  as FfiDocumentDelegate,
-            );
-
-            return _catchConflictException(() {
-              runWithErrorTranslation(
-                () => _bindings.deleteDocumentWithConcurrencyControl(
-                  pointer,
-                  delegate.pointer.cast(),
-                  concurrencyControl.toCBLConcurrencyControl(),
-                ),
-              );
-            });
-          }),
-        ),
-      );
+      defaultCollection.deleteDocument(document, concurrencyControl);
 
   @override
   bool deleteTypedDocument(
@@ -280,10 +283,8 @@ class FfiDatabase
   }
 
   @override
-  void purgeDocument(covariant DelegateDocument document) => useSync(() {
-        document.database = this;
-        purgeDocumentById(document.id);
-      });
+  void purgeDocument(covariant DelegateDocument document) =>
+      defaultCollection.purgeDocument(document);
 
   @override
   void purgeTypedDocument(TypedDocumentObject document) {
@@ -292,13 +293,7 @@ class FfiDatabase
   }
 
   @override
-  void purgeDocumentById(String id) => useSync(
-        () => runInTransactionSync(() {
-          runWithErrorTranslation(
-            () => _bindings.purgeDocumentByID(pointer, id),
-          );
-        }),
-      );
+  void purgeDocumentById(String id) => defaultCollection.purgeDocumentById(id);
 
   @override
   Future<void> saveBlob(covariant BlobImpl blob) =>
@@ -325,91 +320,36 @@ class FfiDatabase
       useSync(() => runInTransactionSync(fn, requiresNewTransaction: true));
 
   @override
-  void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
-        runWithErrorTranslation(
-          () => _bindings.setDocumentExpiration(pointer, id, expiration),
-        );
-      });
+  void setDocumentExpiration(String id, DateTime? expiration) =>
+      defaultCollection.setDocumentExpiration(id, expiration);
 
   @override
-  DateTime? getDocumentExpiration(String id) => useSync(
-        () => runWithErrorTranslation(
-          () => _bindings.getDocumentExpiration(pointer, id),
-        ),
-      );
+  DateTime? getDocumentExpiration(String id) =>
+      defaultCollection.getDocumentExpiration(id);
 
   @override
   ListenerToken addChangeListener(DatabaseChangeListener listener) =>
-      useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
-
-  AbstractListenerToken _addChangeListener(DatabaseChangeListener listener) {
-    final callback = AsyncCallback(
-      (arguments) {
-        final message = DatabaseChangeCallbackMessage.fromArguments(arguments);
-        final change = DatabaseChange(this, message.documentIds);
-        listener(change);
-        return null;
-      },
-      debugName: 'FfiDatabase.addChangeListener',
-    );
-
-    runWithErrorTranslation(
-      () => _bindings.addChangeListener(pointer, callback.pointer),
-    );
-
-    return FfiListenerToken(callback);
-  }
+      defaultCollection
+          .addChangeListener((change) => listener(change.toDatabaseChange()));
 
   @override
   ListenerToken addDocumentChangeListener(
     String id,
     DocumentChangeListener listener,
   ) =>
-      useSync(() =>
-          _addDocumentChangeListener(id, listener).also(_listenerTokens.add));
-
-  AbstractListenerToken _addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  ) {
-    final callback = AsyncCallback(
-      (_) {
-        final change = DocumentChange(this, id);
-        listener(change);
-        return null;
-      },
-      debugName: 'FfiDatabase.addDocumentChangeListener',
-    );
-
-    runWithErrorTranslation(
-      () => _bindings.addDocumentChangeListener(
-        pointer,
-        id,
-        callback.pointer,
-      ),
-    );
-
-    return FfiListenerToken(callback);
-  }
+      defaultCollection.addDocumentChangeListener(id, listener);
 
   @override
-  void removeChangeListener(ListenerToken token) => useSync(() {
-        final result = _listenerTokens.remove(token);
-        assert(result is! Future);
-      });
+  void removeChangeListener(ListenerToken token) =>
+      defaultCollection.removeChangeListener(token);
 
   @override
-  Stream<DatabaseChange> changes() => useSync(() => ListenerStream(
-        parent: this,
-        addListener: _addChangeListener,
-      ));
+  Stream<DatabaseChange> changes() =>
+      defaultCollection.changes().map((change) => change.toDatabaseChange());
 
   @override
   Stream<DocumentChange> documentChanges(String id) =>
-      useSync(() => ListenerStream(
-            parent: this,
-            addListener: (listener) => _addDocumentChangeListener(id, listener),
-          ));
+      defaultCollection.documentChanges(id);
 
   @override
   Future<void> performClose() async {
@@ -453,8 +393,253 @@ class FfiDatabase
       });
 
   @override
+  List<String> get indexes => defaultCollection.indexes;
+
+  @override
+  void createIndex(String name, covariant IndexImplInterface index) =>
+      defaultCollection.createIndex(name, index);
+
+  @override
+  void deleteIndex(String name) => defaultCollection.deleteIndex(name);
+
+  @override
+  String toString() => 'FfiDatabase($name)';
+}
+
+final _collectionBindings = cblBindings.collection;
+
+class FfiScope
+    with ScopeBase, ClosableResourceMixin
+    implements SyncScope, Finalizable {
+  FfiScope._({
+    required this.name,
+    required this.pointer,
+    required this.database,
+  }) {
+    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
+    needsToBeClosedByParent = false;
+    attachTo(database);
+  }
+
+  @override
+  final FfiDatabase database;
+
+  final Pointer<CBLScope> pointer;
+
+  @override
+  final String name;
+
+  @override
+  List<SyncCollection> get collections => useSync(() {
+        final collectionNames = runWithErrorTranslation(
+          () => fl.MutableArray.fromPointer(
+            _collectionBindings.scopeCollectionNames(pointer),
+            adopt: true,
+          ),
+        );
+        return collectionNames
+            .map((name) => collection(name.asString!))
+            .whereNotNull()
+            .toList();
+      });
+
+  @override
+  SyncCollection? collection(String name) => useSync(() {
+        final collectionPointer = runWithErrorTranslation(
+          () => _collectionBindings.scopeCollection(pointer, name),
+        );
+
+        if (collectionPointer == null) {
+          return null;
+        }
+
+        return FfiCollection._(
+          name: name,
+          pointer: collectionPointer,
+          scope: this,
+        );
+      });
+
+  @override
+  String toString() => 'FfiScope($name)';
+}
+
+class FfiCollection
+    with CollectionBase<FfiDocumentDelegate>, ClosableResourceMixin
+    implements SyncCollection, Finalizable {
+  FfiCollection._({
+    required this.name,
+    required this.pointer,
+    required this.scope,
+  }) {
+    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
+    needsToBeClosedByParent = false;
+    attachTo(scope);
+  }
+
+  final Pointer<CBLCollection> pointer;
+
+  late final _listenerTokens = ListenerTokenRegistry(this);
+
+  @override
+  final String name;
+
+  @override
+  final FfiScope scope;
+
+  @override
+  FfiDatabase get database => scope.database;
+
+  @override
+  int get count => useSync(() => _collectionBindings.count(pointer));
+
+  @override
+  Document? document(String id) => syncOperationTracePoint(
+        () => GetDocumentOp(this, id),
+        () => useSync(
+          () {
+            final documentPointer = runWithErrorTranslation(
+              () => _collectionBindings.getDocument(pointer, id),
+            );
+
+            if (documentPointer == null) {
+              return null;
+            }
+
+            return DelegateDocument(
+              FfiDocumentDelegate.fromPointer(
+                documentPointer,
+                adopt: true,
+              ),
+              collection: this,
+            );
+          },
+        ),
+      );
+
+  @override
+  DocumentFragment operator [](String id) => DocumentFragmentImpl(document(id));
+
+  @override
+  bool saveDocument(
+    covariant MutableDelegateDocument document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      syncOperationTracePoint(
+        () => SaveDocumentOp(this, document, concurrencyControl),
+        () => useSync(
+          () => database.runInTransactionSync(() {
+            final delegate = syncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () => prepareDocument(document) as FfiDocumentDelegate,
+            );
+
+            return _catchConflictException(() {
+              runWithErrorTranslation(
+                () => _collectionBindings.saveDocumentWithConcurrencyControl(
+                  pointer,
+                  delegate.pointer.cast(),
+                  concurrencyControl.toCBLConcurrencyControl(),
+                ),
+              );
+            });
+          }),
+        ),
+      );
+
+  @override
+  FutureOr<bool> saveDocumentWithConflictHandler(
+    covariant MutableDelegateDocument document,
+    SaveConflictHandler conflictHandler,
+  ) =>
+      asyncOperationTracePoint(
+        () => SaveDocumentOp(this, document),
+        () => use(() => saveDocumentWithConflictHandlerHelper(
+              document,
+              conflictHandler,
+            )),
+      );
+
+  @override
+  bool saveDocumentWithConflictHandlerSync(
+    covariant MutableDelegateDocument document,
+    SyncSaveConflictHandler conflictHandler,
+  ) =>
+      syncOperationTracePoint(
+        () => SaveDocumentOp(this, document),
+        () => useSync(
+            // Because the conflict handler is sync the result of the possibly
+            // async method is always sync.
+            () => saveDocumentWithConflictHandlerHelper(
+                  document,
+                  conflictHandler,
+                ) as bool),
+      );
+
+  @override
+  bool deleteDocument(
+    covariant DelegateDocument document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      syncOperationTracePoint(
+        () => DeleteDocumentOp(this, document, concurrencyControl),
+        () => useSync(
+          () => database.runInTransactionSync(() {
+            final delegate = syncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () => prepareDocument(document, syncProperties: false)
+                  as FfiDocumentDelegate,
+            );
+
+            return _catchConflictException(() {
+              runWithErrorTranslation(
+                () => _collectionBindings.deleteDocumentWithConcurrencyControl(
+                  pointer,
+                  delegate.pointer.cast(),
+                  concurrencyControl.toCBLConcurrencyControl(),
+                ),
+              );
+            });
+          }),
+        ),
+      );
+
+  @override
+  void purgeDocument(covariant DelegateDocument document) => useSync(() {
+        document.setCollection(this);
+        purgeDocumentById(document.id);
+      });
+
+  @override
+  void purgeDocumentById(String id) => useSync(
+        () => database.runInTransactionSync(() {
+          runWithErrorTranslation(
+            () => _collectionBindings.purgeDocumentByID(pointer, id),
+          );
+        }),
+      );
+
+  @override
+  void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
+        runWithErrorTranslation(
+          () => _collectionBindings.setDocumentExpiration(
+            pointer,
+            id,
+            expiration,
+          ),
+        );
+      });
+
+  @override
+  DateTime? getDocumentExpiration(String id) => useSync(
+        () => runWithErrorTranslation(
+          () => _collectionBindings.getDocumentExpiration(pointer, id),
+        ),
+      );
+
+  @override
   List<String> get indexes => useSync(() =>
-      fl.Array.fromPointer(_bindings.indexNames(pointer), adopt: true)
+      fl.Array.fromPointer(_collectionBindings.indexNames(pointer), adopt: true)
           .toObject()
           .cast<String>());
 
@@ -462,17 +647,101 @@ class FfiDatabase
   void createIndex(String name, covariant IndexImplInterface index) =>
       useSync(() {
         runWithErrorTranslation(
-          () => _bindings.createIndex(pointer, name, index.toCBLIndexSpec()),
+          () => _collectionBindings.createIndex(
+            pointer,
+            name,
+            index.toCBLIndexSpec(),
+          ),
         );
       });
 
   @override
   void deleteIndex(String name) => useSync(() {
-        runWithErrorTranslation(() => _bindings.deleteIndex(pointer, name));
+        runWithErrorTranslation(
+            () => _collectionBindings.deleteIndex(pointer, name));
       });
 
   @override
-  String toString() => 'FfiDatabase($name)';
+  ListenerToken addChangeListener(CollectionChangeListener listener) =>
+      useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
+
+  AbstractListenerToken _addChangeListener(CollectionChangeListener listener) {
+    final callback = AsyncCallback(
+      (arguments) {
+        final message =
+            CollectionChangeCallbackMessage.fromArguments(arguments);
+        final change = CollectionChange(this, message.documentIds);
+        listener(change);
+        return null;
+      },
+      debugName: 'FfiCollection.addChangeListener',
+    );
+
+    runWithErrorTranslation(
+      () => _collectionBindings.addChangeListener(
+        database.pointer,
+        pointer,
+        callback.pointer,
+      ),
+    );
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  ListenerToken addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) =>
+      useSync(() =>
+          _addDocumentChangeListener(id, listener).also(_listenerTokens.add));
+
+  AbstractListenerToken _addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) {
+    final callback = AsyncCallback(
+      (_) {
+        final change = DocumentChange(database, this, id);
+        listener(change);
+        return null;
+      },
+      debugName: 'FfiCollection.addDocumentChangeListener',
+    );
+
+    runWithErrorTranslation(
+      () => _collectionBindings.addDocumentChangeListener(
+        database.pointer,
+        pointer,
+        id,
+        callback.pointer,
+      ),
+    );
+
+    return FfiListenerToken(callback);
+  }
+
+  @override
+  void removeChangeListener(ListenerToken token) => useSync(() {
+        final result = _listenerTokens.remove(token);
+        assert(result is! Future);
+      });
+
+  @override
+  Stream<CollectionChange> changes() => useSync(() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      ));
+
+  @override
+  Stream<DocumentChange> documentChanges(String id) =>
+      useSync(() => ListenerStream(
+            parent: this,
+            addListener: (listener) => _addDocumentChangeListener(id, listener),
+          ));
+
+  @override
+  String toString() => 'FfiCollection($fullName)';
 
   @override
   FfiDocumentDelegate createNewDocumentDelegate(DocumentDelegate oldDelegate) =>

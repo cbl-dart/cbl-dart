@@ -17,7 +17,8 @@ Future<void> main() async {
   await Sentry.close();
 }
 
-late final AsyncDatabase db;
+late final Database db;
+late final Collection users;
 
 Future<void> runApp() async {
   await initApp();
@@ -31,7 +32,8 @@ Future<void> runApp() async {
 Future<void> initApp() => runAppTransaction('initApp', () async {
       await CouchbaseLiteDart.init(edition: Edition.community);
       await Database.remove('example');
-      db = await AsyncDatabase.open('example');
+      db = await Database.openAsync('example');
+      users = await db.createCollection('users');
     });
 
 Future<void> shutDownApp() => runAppTransaction('shutDownApp', () async {
@@ -45,15 +47,15 @@ Future<void> doStuff() => runAppTransaction('doStuff', () async {
     });
 
 Future<void> fillDatabase() => runAppOperation('fillDatabase', () async {
-      await db.saveDocument(MutableDocument({
+      await users.saveDocument(MutableDocument({
         'name': 'Alice',
         'age': 25,
       }));
-      await db.saveDocument(MutableDocument({
+      await users.saveDocument(MutableDocument({
         'name': 'Bob',
         'age': 57,
       }));
-      await db.saveDocument(MutableDocument({
+      await users.saveDocument(MutableDocument({
         'name': 'Sohla',
         'age': 36,
       }));
@@ -62,7 +64,7 @@ Future<void> fillDatabase() => runAppOperation('fillDatabase', () async {
 Future<void> queryDatabase() => runAppOperation('queryDatabase', () async {
       final query = await Query.fromN1ql(
         db,
-        'SELECT * FROM example WHERE age >= 28 OR name LIKE "A%"',
+        'SELECT * FROM users WHERE age >= 28 OR name LIKE "A%"',
       );
       final resultSet = await query.execute();
       final results = await resultSet

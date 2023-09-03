@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
+import '../database/collection.dart';
 import '../database/database.dart';
 import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
@@ -24,7 +25,7 @@ import 'cbl_service_api.dart';
 import 'channel.dart';
 import 'object_registry.dart';
 
-typedef CblServiceDatabaseChangeListener = void Function(
+typedef CblServiceCollectionChangeListener = void Function(
   List<String> documentIds,
 );
 
@@ -57,7 +58,7 @@ class CblServiceClient {
   }) {
     channel
       ..addCallEndpoint(_traceData)
-      ..addCallEndpoint(_callDatabaseChangeListener)
+      ..addCallEndpoint(_callCollectionChangeListener)
       ..addCallEndpoint(_callDocumentChangeListener)
       ..addStreamEndpoint(_readBlobUpload)
       ..addCallEndpoint(_callQueryChangeListener)
@@ -76,10 +77,10 @@ class CblServiceClient {
 
   void unregisterObject(int id) => _objectRegistry.removeObjectById(id);
 
-  int registerDatabaseChangeListener(
-    CblServiceDatabaseChangeListener listener,
+  int registerCollectionChangeListener(
+    CblServiceCollectionChangeListener listener,
   ) {
-    void handler(CallDatabaseChangeListener request) =>
+    void handler(CallCollectionChangeListener request) =>
         listener(request.documentIds);
 
     return _objectRegistry.addObject(_bindListenerToZone(handler));
@@ -146,8 +147,8 @@ class CblServiceClient {
     _onTraceData(request.data);
   }
 
-  void _callDatabaseChangeListener(CallDatabaseChangeListener request) =>
-      _getDatabaseChangeListenerById(request.listenerId)(request);
+  void _callCollectionChangeListener(CallCollectionChangeListener request) =>
+      _getCollectionChangeListenerById(request.listenerId)(request);
 
   void _callDocumentChangeListener(CallDocumentChangeListener request) =>
       _getDocumentChangeListenerById(request.listenerId)(request);
@@ -178,7 +179,7 @@ class CblServiceClient {
 
   final _objectRegistry = ObjectRegistry();
 
-  void Function(CallDatabaseChangeListener) _getDatabaseChangeListenerById(
+  void Function(CallCollectionChangeListener) _getCollectionChangeListenerById(
     int id,
   ) =>
       _objectRegistry.getObjectOrThrow(id);
@@ -268,8 +269,15 @@ class CblService {
       ..addCallEndpoint(_databaseExists)
       ..addCallEndpoint(_copyDatabase)
       ..addCallEndpoint(_openDatabase)
-      ..addCallEndpoint(_getDatabase)
       ..addCallEndpoint(_deleteDatabase)
+      ..addCallEndpoint(_getScope)
+      ..addCallEndpoint(_getScopes)
+      ..addCallEndpoint(_getCollection)
+      ..addCallEndpoint(_getCollections)
+      ..addCallEndpoint(_createCollection)
+      ..addCallEndpoint(_deleteCollection)
+      ..addCallEndpoint(_getCollectionCount)
+      ..addCallEndpoint(_getCollectionIndexes)
       ..addCallEndpoint(_getDocument)
       ..addCallEndpoint(_saveDocument)
       ..addCallEndpoint(_deleteDocument)
@@ -280,10 +288,10 @@ class CblService {
       ..addCallEndpoint(_getDocumentExpiration)
       ..addCallEndpoint(_performDatabaseMaintenance)
       ..addCallEndpoint(_changeDatabaseEncryptionKey)
-      ..addCallEndpoint(_addDatabaseChangeListener)
+      ..addCallEndpoint(_addCollectionChangeListener)
       ..addCallEndpoint(_addDocumentChangeListener)
-      ..addCallEndpoint(_deleteIndex)
       ..addCallEndpoint(_createIndex)
+      ..addCallEndpoint(_deleteIndex)
       ..addCallEndpoint(_blobExists)
       ..addStreamEndpoint(_readBlob)
       ..addCallEndpoint(_saveBlob)
@@ -339,7 +347,7 @@ class CblService {
     final token = _listenerIdsToTokens.remove(request.listenerId)!
         as AbstractListenerToken;
 
-    if (target is Database) {
+    if (target is Collection) {
       await target.removeChangeListener(token);
     } else if (target is _Query) {
       target.query.removeChangeListener(token);
@@ -376,14 +384,67 @@ class CblService {
     return _createDatabaseState(database);
   }
 
-  DatabaseState _getDatabase(GetDatabase request) =>
-      _createDatabaseState(_getDatabaseById(request.databaseId));
-
   Future<void> _deleteDatabase(DeleteDatabase request) =>
       _objectRegistry.removeObjectById<Database>(request.databaseId).delete();
 
+  Future<ScopeState?> _getScope(GetScope request) async {
+    final scope = _getDatabaseById(request.databaseId).scope(request.name);
+    if (scope == null) {
+      return null;
+    }
+    return ScopeState(id: _objectRegistry.addObject(scope), name: scope.name);
+  }
+
+  Future<List<ScopeState>> _getScopes(GetScopes request) async =>
+      _getDatabaseById(request.databaseId)
+          .scopes
+          .map((scope) => ScopeState(
+                id: _objectRegistry.addObject(scope),
+                name: scope.name,
+              ))
+          .toList();
+
+  Future<CollectionState?> _getCollection(GetCollection request) async {
+    final collection = _getScopeById(request.scopeId).collection(request.name);
+    if (collection == null) {
+      return null;
+    }
+    return CollectionState(
+      id: _objectRegistry.addObject(collection),
+      name: collection.name,
+    );
+  }
+
+  Future<List<CollectionState>> _getCollections(GetCollections request) async =>
+      _getScopeById(request.scopeId)
+          .collections
+          .map((collection) => CollectionState(
+                id: _objectRegistry.addObject(collection),
+                name: collection.name,
+              ))
+          .toList();
+
+  Future<CollectionState> _createCollection(CreateCollection request) async {
+    final collection = _getDatabaseById(request.databaseId)
+        .createCollection(request.collection, request.scope);
+    return CollectionState(
+      id: _objectRegistry.addObject(collection),
+      name: collection.name,
+    );
+  }
+
+  Future<void> _deleteCollection(DeleteCollection request) async =>
+      _getDatabaseById(request.databaseId)
+          .deleteCollection(request.collection, request.scope);
+
+  Future<int> _getCollectionCount(GetCollectionCount request) async =>
+      _getCollectionById(request.collectionId).count;
+
+  List<String> _getCollectionIndexes(GetCollectionIndexes request) =>
+      _getCollectionById(request.collectionId).indexes;
+
   Future<DocumentState?> _getDocument(GetDocument request) async {
-    final document = _getDatabaseById(request.databaseId)
+    final document = _getCollectionById(request.collectionId)
         .document(request.documentId) as DelegateDocument?;
 
     return document?.createState(
@@ -394,19 +455,20 @@ class CblService {
   }
 
   Future<DocumentState?> _saveDocument(SaveDocument request) async {
-    final database = _getDatabaseById(request.databaseId);
+    final collection = _getCollectionById(request.collectionId);
 
     final document = _getDocumentForUpdate<MutableDelegateDocument>(
-      database,
       request.state,
       concurrencyControl: request.concurrencyControl,
-    )?..setEncodedProperties(request.state.properties!.encodedData!);
+    );
 
     if (document == null) {
       return null;
     }
 
-    if (database.saveDocument(document, request.concurrencyControl)) {
+    document.setEncodedProperties(request.state.properties!.encodedData!);
+
+    if (collection.saveDocument(document, request.concurrencyControl)) {
       return document.createState(
         withProperties: false,
         objectRegistry: _objectRegistry,
@@ -417,10 +479,9 @@ class CblService {
   }
 
   Future<DocumentState?> _deleteDocument(DeleteDocument request) async {
-    final database = _getDatabaseById(request.databaseId);
+    final collection = _getCollectionById(request.collectionId);
 
     final document = _getDocumentForUpdate(
-      database,
       request.state,
       concurrencyControl: request.concurrencyControl,
     );
@@ -429,7 +490,7 @@ class CblService {
       return null;
     }
 
-    if (database.deleteDocument(document, request.concurrencyControl)) {
+    if (collection.deleteDocument(document, request.concurrencyControl)) {
       return document.createState(
         withProperties: false,
         objectRegistry: _objectRegistry,
@@ -440,7 +501,7 @@ class CblService {
   }
 
   void _purgeDocument(PurgeDocument request) =>
-      _getDatabaseById(request.databaseId)
+      _getCollectionById(request.collectionId)
           .purgeDocumentById(request.documentId);
 
   void _beginDatabaseTransaction(BeginDatabaseTransaction request) =>
@@ -451,11 +512,11 @@ class CblService {
           .endTransaction(commit: request.commit);
 
   void _setDocumentExpiration(SetDocumentExpiration request) =>
-      _getDatabaseById(request.databaseId)
+      _getCollectionById(request.collectionId)
           .setDocumentExpiration(request.documentId, request.expiration);
 
   DateTime? _getDocumentExpiration(GetDocumentExpiration request) =>
-      _getDatabaseById(request.databaseId)
+      _getCollectionById(request.collectionId)
           .getDocumentExpiration(request.documentId);
 
   void _performDatabaseMaintenance(PerformDatabaseMaintenance request) =>
@@ -465,10 +526,10 @@ class CblService {
       _getDatabaseById(request.databaseId)
           .changeEncryptionKey(request.encryptionKey);
 
-  void _addDatabaseChangeListener(AddDatabaseChangeListener request) {
+  void _addCollectionChangeListener(AddCollectionChangeListener request) {
     _listenerIdsToTokens[request.listenerId] =
-        _getDatabaseById(request.databaseId).addChangeListener((change) {
-      channel.call(CallDatabaseChangeListener(
+        _getCollectionById(request.collectionId).addChangeListener((change) {
+      channel.call(CallCollectionChangeListener(
         listenerId: request.listenerId,
         documentIds: change.documentIds,
       ));
@@ -477,20 +538,20 @@ class CblService {
 
   void _addDocumentChangeListener(AddDocumentChangeListener request) {
     _listenerIdsToTokens[request.listenerId] =
-        _getDatabaseById(request.databaseId)
+        _getCollectionById(request.collectionId)
             .addDocumentChangeListener(request.documentId, (_) {
       channel.call(CallDocumentChangeListener(listenerId: request.listenerId));
     });
   }
 
   void _createIndex(CreateIndex request) =>
-      _getDatabaseById(request.databaseId).createIndex(
+      _getCollectionById(request.collectionId).createIndex(
         request.name,
         _CBLIndexSpecIndex(request.spec),
       );
 
   void _deleteIndex(DeleteIndex request) =>
-      _getDatabaseById(request.databaseId).deleteIndex(request.name);
+      _getCollectionById(request.collectionId).deleteIndex(request.name);
 
   bool _blobExists(BlobExists request) => _getDatabaseById(request.databaseId)
       .blobStore
@@ -549,20 +610,24 @@ class CblService {
   }
 
   Future<int> _createReplicator(CreateReplicator request) async {
-    final db = _getDatabaseById(request.databaseId);
-
     var target = request.target;
     if (target is ServiceDatabaseEndpoint) {
       target = DatabaseEndpoint(_getDatabaseById(target.databaseId));
     }
 
-    T Function(int) createCallback<T>(
-      T Function(int, {required EncodingFormat? propertiesFormat}) fn,
-    ) =>
-        (id) => fn(id, propertiesFormat: request.propertiesFormat);
+    ReplicationFilter createReplicationFilter(int filterId) =>
+        _createReplicatorFilterForwarder(
+          filterId,
+          propertiesFormat: request.propertiesFormat,
+        );
+
+    ConflictResolver createConflictResolver(int resolverId) =>
+        _createConflictResolverForwarder(
+          resolverId,
+          propertiesFormat: request.propertiesFormat,
+        );
 
     final config = ReplicatorConfiguration(
-      database: db,
       target: target,
       replicatorType: request.replicatorType,
       continuous: request.continuous,
@@ -570,19 +635,24 @@ class CblService {
       pinnedServerCertificate: request.pinnedServerCertificate?.toTypedList(),
       trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
       headers: request.headers,
-      channels: request.channels,
-      documentIds: request.documentIds,
-      pushFilter:
-          request.pushFilterId?.let(createCallback(_createReplicatorFilter)),
-      pullFilter:
-          request.pullFilterId?.let(createCallback(_createReplicatorFilter)),
-      conflictResolver: request.conflictResolverId
-          ?.let(createCallback(_createConflictResolver)),
       enableAutoPurge: request.enableAutoPurge,
       heartbeat: request.heartbeat,
       maxAttempts: request.maxAttempts,
       maxAttemptWaitTime: request.maxAttemptWaitTime,
     );
+    for (final collection in request.collections) {
+      config.addCollection(
+        _getCollectionById(collection.collectionId),
+        CollectionConfiguration(
+          channels: collection.channels,
+          documentIds: collection.documentIds,
+          pushFilter: collection.pushFilterId?.let(createReplicationFilter),
+          pullFilter: collection.pullFilterId?.let(createReplicationFilter),
+          conflictResolver:
+              collection.conflictResolverId?.let(createConflictResolver),
+        ),
+      );
+    }
     final replicator = await FfiReplicator.create(
       config,
       // The isolate running this service should not be crashed by unhandled
@@ -629,13 +699,19 @@ class CblService {
   }
 
   bool _replicatorIsDocumentPending(ReplicatorIsDocumentPending request) =>
-      _getReplicatorById(request.replicatorId)
-          .isDocumentPending(request.documentId);
+      _getReplicatorById(request.replicatorId).isDocumentPendingInCollection(
+        request.documentId,
+        _getCollectionById(request.collectionId),
+      );
 
   List<String> _replicatorPendingDocumentIds(
     ReplicatorPendingDocumentIds request,
   ) =>
-      _getReplicatorById(request.replicatorId).pendingDocumentIds.toList();
+      _getReplicatorById(request.replicatorId)
+          .pendingDocumentIdsInCollection(
+            _getCollectionById(request.collectionId),
+          )
+          .toList();
 
   // === Misc ==================================================================
 
@@ -643,12 +719,9 @@ class CblService {
         id: _objectRegistry.getObjectId(database)!,
         name: database.name,
         path: database.path,
-        count: database.count,
-        indexes: database.indexes,
       );
 
   T? _getDocumentForUpdate<T extends DelegateDocument>(
-    SyncDatabase database,
     DocumentState state, {
     required ConcurrencyControl concurrencyControl,
   }) {
@@ -679,7 +752,7 @@ class CblService {
     }
   }
 
-  ReplicationFilter _createReplicatorFilter(
+  ReplicationFilter _createReplicatorFilterForwarder(
     int filterId, {
     required EncodingFormat? propertiesFormat,
   }) =>
@@ -697,7 +770,7 @@ class CblService {
         ));
       };
 
-  ConflictResolver _createConflictResolver(
+  ConflictResolver _createConflictResolverForwarder(
     int resolverId, {
     required EncodingFormat? propertiesFormat,
   }) =>
@@ -744,6 +817,11 @@ class CblService {
   final _objectRegistry = ObjectRegistry();
 
   FfiDatabase _getDatabaseById(int id) => _objectRegistry.getObjectOrThrow(id);
+
+  FfiScope _getScopeById(int id) => _objectRegistry.getObjectOrThrow(id);
+
+  FfiCollection _getCollectionById(int id) =>
+      _objectRegistry.getObjectOrThrow(id);
 
   _Query _getQueryById(int id) => _objectRegistry.getObjectOrThrow(id);
 

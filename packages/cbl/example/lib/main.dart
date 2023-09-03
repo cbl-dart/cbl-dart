@@ -12,7 +12,8 @@ Future<void> main() async {
   // Couchbase Lite needs to be initialized before it can be used.
   await CouchbaseLite.init(libraries: getLibraries());
 
-  final db = await Database.openAsync('chat-messages');
+  final db = await Database.openAsync('chat-app');
+  final messages = await db.createCollection('messages');
 
   final doc = MutableDocument({
     'type': 'message',
@@ -20,7 +21,7 @@ Future<void> main() async {
     'from': 'Alice',
   });
 
-  await db.saveDocument(doc);
+  await messages.saveDocument(doc);
 
   await db.close();
 }

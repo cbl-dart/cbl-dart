@@ -28,12 +28,15 @@ import '../tracing.dart';
 import '../typed_data.dart';
 import '../typed_data/adapter.dart';
 import 'blob_store.dart';
+import 'collection.dart';
+import 'collection_change.dart';
 import 'database.dart';
 import 'database_base.dart';
 import 'database_change.dart';
 import 'database_configuration.dart';
 import 'document_change.dart';
 import 'proxy_blob_store.dart';
+import 'scope.dart';
 
 class ProxyDatabase extends ProxyObject
     with DatabaseBase<ProxyDocumentDelegate>, ClosableResourceMixin
@@ -107,8 +110,6 @@ class ProxyDatabase extends ProxyObject
   @override
   late final BlobStore blobStore = ProxyBlobStore(this);
 
-  late final _listenerTokens = ListenerTokenRegistry(this);
-
   final _documentFinalizers = <Future<void> Function()>[];
 
   final DatabaseConfiguration _config;
@@ -122,13 +123,77 @@ class ProxyDatabase extends ProxyObject
   String? path;
 
   @override
-  Future<int> get count => use(() async {
-        await _refreshState();
-        return state.count;
-      });
+  Future<int> get count =>
+      defaultCollection.then((collection) => collection.count);
 
   @override
   DatabaseConfiguration get config => DatabaseConfiguration.from(_config);
+
+  @override
+  late final Future<AsyncScope> defaultScope =
+      scope(Scope.defaultName).then((scope) => scope!);
+
+  @override
+  Future<List<AsyncScope>> get scopes => use(() async {
+        final scopeStates = await channel.call(GetScopes(objectId));
+
+        return scopeStates
+            .map((state) =>
+                ProxyScope(client: client, state: state, database: this))
+            .toList();
+      });
+
+  @override
+  Future<AsyncScope?> scope(String name) => use(() async {
+        final scopeState = await channel.call(GetScope(objectId, name));
+
+        if (scopeState == null) {
+          return null;
+        }
+
+        return ProxyScope(client: client, state: scopeState, database: this);
+      });
+
+  @override
+  late final Future<AsyncCollection> defaultCollection = defaultScope
+      .then((scope) => scope.collection(Collection.defaultName))
+      .then((collection) => collection!);
+
+  @override
+  Future<AsyncCollection?> collection(
+    String name, [
+    String scope = Scope.defaultName,
+  ]) async =>
+      (await this.scope(scope))?.collection(name);
+
+  @override
+  Future<List<AsyncCollection>> collections([
+    String scope = Scope.defaultName,
+  ]) async =>
+      (await this.scope(scope))?.collections ?? Future.value([]);
+
+  @override
+  Future<AsyncCollection> createCollection(
+    String name, [
+    String scope = Scope.defaultName,
+  ]) =>
+      use(() async {
+        final state =
+            await channel.call(CreateCollection(objectId, scope, name));
+
+        return ProxyCollection(
+          client: client,
+          state: state,
+          scope: (await this.scope(scope))! as ProxyScope,
+        );
+      });
+
+  @override
+  Future<void> deleteCollection(
+    String name, [
+    String scope = Scope.defaultName,
+  ]) =>
+      use(() => channel.call(DeleteCollection(objectId, scope, name)));
 
   @override
   Future<void> beginTransaction() =>
@@ -139,26 +204,12 @@ class ProxyDatabase extends ProxyObject
       .call(EndDatabaseTransaction(databaseId: objectId, commit: commit));
 
   @override
-  Future<Document?> document(String id) => asyncOperationTracePoint(
-        () => GetDocumentOp(this, id),
-        () => use(() async {
-          final state =
-              await channel.call(GetDocument(objectId, id, encodingFormat));
-
-          if (state == null) {
-            return null;
-          }
-
-          return DelegateDocument(
-            ProxyDocumentDelegate.fromState(state, database: this),
-            database: this,
-          );
-        }),
-      );
+  Future<Document?> document(String id) =>
+      defaultCollection.then((collection) => collection.document(id));
 
   @override
   Future<DocumentFragment> operator [](String id) =>
-      use(() => document(id).then(DocumentFragmentImpl.new));
+      defaultCollection.then((collection) => collection[id]);
 
   @override
   Future<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
@@ -170,44 +221,16 @@ class ProxyDatabase extends ProxyObject
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      asyncOperationTracePoint(
-        () => SaveDocumentOp(this, document, concurrencyControl),
-        () => use(
-          () => runInTransactionAsync(() async {
-            final delegate = await asyncOperationTracePoint(
-              () => PrepareDocumentOp(document),
-              () async => prepareDocument(document),
-            );
-
-            final state = await channel.call(SaveDocument(
-              objectId,
-              delegate.getState(),
-              concurrencyControl,
-            ));
-
-            if (state == null) {
-              return false;
-            }
-
-            delegate.updateMetadata(state, database: this);
-
-            return true;
-          }),
-        ),
-      );
+      defaultCollection.then((collection) =>
+          collection.saveDocument(document, concurrencyControl));
 
   @override
   Future<bool> saveDocumentWithConflictHandler(
     covariant MutableDelegateDocument document,
     SaveConflictHandler conflictHandler,
   ) =>
-      asyncOperationTracePoint(
-        () => SaveDocumentOp(this, document),
-        () => use(() => saveDocumentWithConflictHandlerHelper(
-              document,
-              conflictHandler,
-            )),
-      );
+      defaultCollection.then((collection) => collection
+          .saveDocumentWithConflictHandler(document, conflictHandler));
 
   @override
   AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
@@ -221,31 +244,8 @@ class ProxyDatabase extends ProxyObject
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      asyncOperationTracePoint(
-        () => DeleteDocumentOp(this, document, concurrencyControl),
-        () => use(
-          () => runInTransactionAsync(() async {
-            final delegate = await asyncOperationTracePoint(
-              () => PrepareDocumentOp(document),
-              () async => prepareDocument(document, syncProperties: false),
-            );
-
-            final state = await channel.call(DeleteDocument(
-              objectId,
-              delegate.getState(withProperties: false),
-              concurrencyControl,
-            ));
-
-            if (state == null) {
-              return false;
-            }
-
-            delegate.updateMetadata(state, database: this);
-
-            return true;
-          }),
-        ),
-      );
+      defaultCollection.then((collection) =>
+          collection.deleteDocument(document, concurrencyControl));
 
   @override
   Future<bool> deleteTypedDocument(
@@ -260,13 +260,9 @@ class ProxyDatabase extends ProxyObject
   }
 
   @override
-  Future<void> purgeDocument(covariant DelegateDocument document) async {
-    await asyncOperationTracePoint(
-      () => PrepareDocumentOp(document),
-      () async => prepareDocument(document, syncProperties: false),
-    );
-    return purgeDocumentById(document.id);
-  }
+  Future<void> purgeDocument(covariant DelegateDocument document) =>
+      defaultCollection
+          .then((collection) => collection.purgeDocument(document));
 
   @override
   Future<void> purgeTypedDocument(TypedDocumentObject document) async {
@@ -275,11 +271,8 @@ class ProxyDatabase extends ProxyObject
   }
 
   @override
-  Future<void> purgeDocumentById(String id) => use(
-        () => runInTransactionAsync(
-          () => channel.call(PurgeDocument(objectId, id)),
-        ),
-      );
+  Future<void> purgeDocumentById(String id) =>
+      defaultCollection.then((collection) => collection.purgeDocumentById(id));
 
   @override
   Future<void> saveBlob(covariant BlobImpl blob) =>
@@ -300,82 +293,51 @@ class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> setDocumentExpiration(String id, DateTime? expiration) =>
-      use(() => channel.call(SetDocumentExpiration(
-            databaseId: objectId,
-            documentId: id,
-            expiration: expiration,
-          )));
+      defaultCollection.then(
+        (collection) => collection.setDocumentExpiration(id, expiration),
+      );
 
   @override
-  Future<DateTime?> getDocumentExpiration(String id) => use(() => channel
-      .call(GetDocumentExpiration(databaseId: objectId, documentId: id)));
+  Future<DateTime?> getDocumentExpiration(String id) => defaultCollection
+      .then((collection) => collection.getDocumentExpiration(id));
 
   @override
   Future<ListenerToken> addChangeListener(DatabaseChangeListener listener) =>
-      use(() async {
-        final token = await _addChangeListener(listener);
-        return token.also(_listenerTokens.add);
-      });
-
-  Future<AbstractListenerToken> _addChangeListener(
-    DatabaseChangeListener listener,
-  ) async {
-    late final ProxyListenerToken<DatabaseChange> token;
-    final listenerId = client.registerDatabaseChangeListener((documentIds) {
-      token.callListener(DatabaseChange(this, documentIds));
-    });
-
-    await channel.call(AddDatabaseChangeListener(
-      databaseId: objectId,
-      listenerId: listenerId,
-    ));
-
-    return token = ProxyListenerToken(client, this, listenerId, listener);
-  }
+      defaultCollection.then((collection) => collection
+          .addChangeListener((change) => listener(change.toDatabaseChange())));
 
   @override
   Future<ListenerToken> addDocumentChangeListener(
     String id,
     DocumentChangeListener listener,
   ) =>
-      use(() async {
-        final token = await _addDocumentChangeListener(id, listener);
-        return token.also(_listenerTokens.add);
-      });
-
-  Future<AbstractListenerToken> _addDocumentChangeListener(
-    String id,
-    DocumentChangeListener listener,
-  ) async {
-    late final ProxyListenerToken<DocumentChange> token;
-    final listenerId = client.registerDocumentChangeListener(() {
-      token.callListener(DocumentChange(this, id));
-    });
-
-    await channel.call(AddDocumentChangeListener(
-      databaseId: objectId,
-      documentId: id,
-      listenerId: listenerId,
-    ));
-
-    return token = ProxyListenerToken(client, this, listenerId, listener);
-  }
+      defaultCollection.then(
+          (collection) => collection.addDocumentChangeListener(id, listener));
 
   @override
   Future<void> removeChangeListener(ListenerToken token) async =>
-      use(() => _listenerTokens.remove(token));
+      defaultCollection
+          .then((collection) => collection.removeChangeListener(token));
 
   @override
   AsyncListenStream<DatabaseChange> changes() => useSync(() => ListenerStream(
         parent: this,
-        addListener: _addChangeListener,
+        addListener: (listener) async {
+          final collection = (await defaultCollection) as ProxyCollection;
+          return collection._addChangeListener(
+            (change) => listener(change.toDatabaseChange()),
+          );
+        },
       ));
 
   @override
   AsyncListenStream<DocumentChange> documentChanges(String id) =>
       useSync(() => ListenerStream(
             parent: this,
-            addListener: (listener) => _addDocumentChangeListener(id, listener),
+            addListener: (listener) async {
+              final collection = (await defaultCollection) as ProxyCollection;
+              return collection._addDocumentChangeListener(id, listener);
+            },
           ));
 
   @override
@@ -418,22 +380,17 @@ class ProxyDatabase extends ProxyObject
           )));
 
   @override
-  Future<List<String>> get indexes async {
-    await _refreshState();
-    return state.indexes;
-  }
+  Future<List<String>> get indexes =>
+      defaultCollection.then((collections) => collections.indexes);
 
   @override
   Future<void> createIndex(String name, covariant IndexImplInterface index) =>
-      use(() => channel.call(CreateIndex(
-            databaseId: objectId,
-            name: name,
-            spec: index.toCBLIndexSpec(),
-          )));
+      defaultCollection
+          .then((collections) => collections.createIndex(name, index));
 
   @override
   Future<void> deleteIndex(String name) =>
-      use(() => channel.call(DeleteIndex(databaseId: objectId, name: name)));
+      defaultCollection.then((collections) => collections.deleteIndex(name));
 
   @override
   String toString() => 'ProxyDatabase($name)';
@@ -446,16 +403,6 @@ class ProxyDatabase extends ProxyObject
   void unregisterDocumentFinalizer(Future<void> Function() finalizer) {
     _documentFinalizers.remove(finalizer);
   }
-
-  Future<void> _refreshState() async {
-    state = await channel.call(GetDatabase(objectId));
-  }
-
-  @override
-  ProxyDocumentDelegate createNewDocumentDelegate(
-    DocumentDelegate oldDelegate,
-  ) =>
-      ProxyDocumentDelegate.fromDelegate(oldDelegate);
 }
 
 class WorkerDatabase extends ProxyDatabase {
@@ -577,4 +524,300 @@ class _ProxySaveTypedDocument<D extends TypedDocumentObject,
     TypedSaveConflictHandler<D, MD> conflictHandler,
   ) =>
       super.withConflictHandler(conflictHandler) as Future<bool>;
+}
+
+class ProxyScope extends ProxyObject
+    with ScopeBase, ClosableResourceMixin
+    implements AsyncScope {
+  ProxyScope({
+    required this.client,
+    required ScopeState state,
+    required this.database,
+  })  : name = state.name,
+        super(client.channel, state.id) {
+    needsToBeClosedByParent = false;
+    attachTo(database);
+  }
+
+  @override
+  final ProxyDatabase database;
+
+  final CblServiceClient client;
+
+  @override
+  final String name;
+
+  @override
+  Future<List<AsyncCollection>> get collections => use(() async {
+        final states = await channel.call(GetCollections(objectId));
+        return states
+            .map((state) =>
+                ProxyCollection(client: client, state: state, scope: this))
+            .toList();
+      });
+
+  @override
+  Future<AsyncCollection?> collection(String name) => use(() async {
+        final state = await channel.call(GetCollection(objectId, name));
+
+        if (state == null) {
+          return null;
+        }
+
+        return ProxyCollection(client: client, state: state, scope: this);
+      });
+
+  @override
+  String toString() => 'ProxyScope($name)';
+}
+
+class ProxyCollection extends ProxyObject
+    with CollectionBase<ProxyDocumentDelegate>, ClosableResourceMixin
+    implements AsyncCollection {
+  ProxyCollection({
+    required this.client,
+    required CollectionState state,
+    required this.scope,
+  })  : name = state.name,
+        super(client.channel, state.id) {
+    needsToBeClosedByParent = false;
+    attachTo(scope);
+  }
+
+  final CblServiceClient client;
+
+  @override
+  final String name;
+
+  @override
+  final ProxyScope scope;
+
+  @override
+  ProxyDatabase get database => scope.database;
+
+  EncodingFormat? get encodingFormat => database.encodingFormat;
+
+  late final _listenerTokens = ListenerTokenRegistry(this);
+
+  @override
+  Future<int> get count =>
+      use(() => channel.call(GetCollectionCount(objectId)));
+
+  @override
+  Future<Document?> document(String id) => asyncOperationTracePoint(
+        () => GetDocumentOp(this, id),
+        () => use(() async {
+          final state =
+              await channel.call(GetDocument(objectId, id, encodingFormat));
+
+          if (state == null) {
+            return null;
+          }
+
+          return DelegateDocument(
+            ProxyDocumentDelegate.fromState(state, database: database),
+            collection: this,
+          );
+        }),
+      );
+
+  @override
+  Future<DocumentFragment> operator [](String id) async =>
+      DocumentFragmentImpl(await document(id));
+
+  @override
+  Future<bool> saveDocument(
+    covariant MutableDelegateDocument document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      asyncOperationTracePoint(
+        () => SaveDocumentOp(this, document, concurrencyControl),
+        () => use(
+          () => database.runInTransactionAsync(() async {
+            final delegate = await asyncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () async => prepareDocument(document),
+            );
+
+            final state = await channel.call(SaveDocument(
+              objectId,
+              delegate.getState(),
+              concurrencyControl,
+            ));
+
+            if (state == null) {
+              return false;
+            }
+
+            delegate.updateMetadata(state, database: database);
+
+            return true;
+          }),
+        ),
+      );
+
+  @override
+  Future<bool> saveDocumentWithConflictHandler(
+    covariant MutableDelegateDocument document,
+    SaveConflictHandler conflictHandler,
+  ) =>
+      asyncOperationTracePoint(
+        () => SaveDocumentOp(this, document),
+        () => use(() => saveDocumentWithConflictHandlerHelper(
+              document,
+              conflictHandler,
+            )),
+      );
+
+  @override
+  Future<bool> deleteDocument(
+    covariant DelegateDocument document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      asyncOperationTracePoint(
+        () => DeleteDocumentOp(this, document, concurrencyControl),
+        () => use(
+          () => database.runInTransactionAsync(() async {
+            final delegate = await asyncOperationTracePoint(
+              () => PrepareDocumentOp(document),
+              () async => prepareDocument(document, syncProperties: false),
+            );
+
+            final state = await channel.call(DeleteDocument(
+              objectId,
+              delegate.getState(withProperties: false),
+              concurrencyControl,
+            ));
+
+            if (state == null) {
+              return false;
+            }
+
+            delegate.updateMetadata(state, database: database);
+
+            return true;
+          }),
+        ),
+      );
+
+  @override
+  Future<void> purgeDocument(covariant DelegateDocument document) async {
+    await asyncOperationTracePoint(
+      () => PrepareDocumentOp(document),
+      () async => prepareDocument(document, syncProperties: false),
+    );
+    return purgeDocumentById(document.id);
+  }
+
+  @override
+  Future<void> purgeDocumentById(String id) => use(
+        () => database.runInTransactionAsync(
+          () => channel.call(PurgeDocument(objectId, id)),
+        ),
+      );
+
+  @override
+  Future<void> setDocumentExpiration(String id, DateTime? expiration) =>
+      use(() => channel.call(SetDocumentExpiration(
+            collectionId: objectId,
+            documentId: id,
+            expiration: expiration,
+          )));
+
+  @override
+  Future<DateTime?> getDocumentExpiration(String id) => use(() => channel
+      .call(GetDocumentExpiration(collectionId: objectId, documentId: id)));
+
+  @override
+  Future<List<String>> get indexes =>
+      use(() => channel.call(GetCollectionIndexes(objectId)));
+
+  @override
+  Future<void> createIndex(String name, covariant IndexImplInterface index) =>
+      use(() => channel.call(CreateIndex(
+            collectionId: objectId,
+            name: name,
+            spec: index.toCBLIndexSpec(),
+          )));
+
+  @override
+  Future<void> deleteIndex(String name) =>
+      use(() => channel.call(DeleteIndex(collectionId: objectId, name: name)));
+
+  @override
+  Future<ListenerToken> addChangeListener(CollectionChangeListener listener) =>
+      use(() async {
+        final token = await _addChangeListener(listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addChangeListener(
+    CollectionChangeListener listener,
+  ) async {
+    late final ProxyListenerToken<CollectionChange> token;
+    final listenerId = client.registerCollectionChangeListener((documentIds) {
+      token.callListener(CollectionChange(this, documentIds));
+    });
+
+    await channel.call(AddCollectionChangeListener(
+      collectionId: objectId,
+      listenerId: listenerId,
+    ));
+
+    return token = ProxyListenerToken(client, this, listenerId, listener);
+  }
+
+  @override
+  Future<ListenerToken> addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) =>
+      use(() async {
+        final token = await _addDocumentChangeListener(id, listener);
+        return token.also(_listenerTokens.add);
+      });
+
+  Future<AbstractListenerToken> _addDocumentChangeListener(
+    String id,
+    DocumentChangeListener listener,
+  ) async {
+    late final ProxyListenerToken<DocumentChange> token;
+    final listenerId = client.registerDocumentChangeListener(() {
+      token.callListener(DocumentChange(database, this, id));
+    });
+
+    await channel.call(AddDocumentChangeListener(
+      collectionId: objectId,
+      documentId: id,
+      listenerId: listenerId,
+    ));
+
+    return token = ProxyListenerToken(client, this, listenerId, listener);
+  }
+
+  @override
+  Future<void> removeChangeListener(ListenerToken token) async =>
+      use(() => _listenerTokens.remove(token));
+
+  @override
+  AsyncListenStream<CollectionChange> changes() => useSync(() => ListenerStream(
+        parent: this,
+        addListener: _addChangeListener,
+      ));
+
+  @override
+  AsyncListenStream<DocumentChange> documentChanges(String id) =>
+      useSync(() => ListenerStream(
+            parent: this,
+            addListener: (listener) => _addDocumentChangeListener(id, listener),
+          ));
+
+  @override
+  String toString() => 'ProxyCollection($fullName)';
+
+  @override
+  ProxyDocumentDelegate createNewDocumentDelegate(
+    DocumentDelegate oldDelegate,
+  ) =>
+      ProxyDocumentDelegate.fromDelegate(oldDelegate);
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -319,8 +321,8 @@ void main() {
         final dbB = await openTestDatabase();
 
         expect(
-          dbA.inBatch(() {
-            dbB.saveDocument(MutableDocument());
+          dbA.inBatch(() async {
+            await dbB.saveDocument(MutableDocument());
           }),
           throwsA(isA<DatabaseException>()),
         );
@@ -707,11 +709,12 @@ void main() {
         'document change stream emits event when the document changes',
         () async {
           final db = await openTestDatabase();
+          final collection = await db.defaultCollection;
           final doc = MutableDocument();
 
           expect(
             db.documentChanges(doc.id),
-            emitsInOrder(<dynamic>[DocumentChange(db, doc.id)]),
+            emitsInOrder(<dynamic>[DocumentChange(db, collection, doc.id)]),
           );
 
           await db.saveDocument(doc);

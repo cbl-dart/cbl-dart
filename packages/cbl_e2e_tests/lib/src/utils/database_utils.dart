@@ -279,9 +279,10 @@ extension AsyncDatabaseUtilsExtension on Database {
 
     await inBatch(() async {
       for (final id in await getAllIds()) {
-        final doc = await document(id);
+        final collection = await defaultCollection;
+        final doc = await collection.document(id);
         if (doc != null) {
-          await deleteDocument(doc);
+          await collection.deleteDocument(doc);
         }
         deletedAnyDocument = doc != null;
       }
@@ -293,12 +294,13 @@ extension AsyncDatabaseUtilsExtension on Database {
   FutureOr<void> saveAllDocuments(Iterable<MutableDocument> documents) =>
       // ignore: void_checks
       inBatch(() {
-        if (this is SyncDatabase) {
-          documents.forEach(saveDocument);
+        if (this case SyncDatabase(:final defaultCollection)) {
+          documents.forEach(defaultCollection.saveDocument);
         }
-        if (this is AsyncDatabase) {
+        if (this case AsyncDatabase(:final defaultCollection)) {
           return Future.wait(
-            documents.map((document) async => saveDocument(document)),
+            documents.map((document) async =>
+                (await defaultCollection).saveDocument(document)),
           );
         }
       });

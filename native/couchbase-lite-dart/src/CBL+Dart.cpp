@@ -478,9 +478,10 @@ void CBLDart_CBLDatabase_Release(CBLDatabase *database) {
   CBLDatabase_Release(database);
 }
 
-static void CBLDart_DocumentChangeListenerWrapper(void *context,
-                                                  const CBLDatabase *db,
-                                                  FLString docID) {
+// === Collection
+
+static void CBLDart_CollectionDocumentChangeListenerWrapper(
+    void *context, const CBLDocumentChange *change) {
   auto callback = ASYNC_CALLBACK_FROM_C(context);
 
   Dart_CObject args{};
@@ -489,11 +490,12 @@ static void CBLDart_DocumentChangeListenerWrapper(void *context,
   CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
-void CBLDart_CBLDatabase_AddDocumentChangeListener(
-    const CBLDatabase *db, const FLString docID,
-    CBLDart_AsyncCallback listener) {
-  auto listenerToken = CBLDatabase_AddDocumentChangeListener(
-      db, docID, CBLDart_DocumentChangeListenerWrapper, listener);
+void CBLDart_CBLCollection_AddDocumentChangeListener(
+    const CBLDatabase *db, const CBLCollection *collection,
+    const FLString docID, CBLDart_AsyncCallback listener) {
+  auto listenerToken = CBLCollection_AddDocumentChangeListener(
+      collection, docID, CBLDart_CollectionDocumentChangeListenerWrapper,
+      listener);
 
   CBLDart_CloneDatabaseLock(db, listenerToken);
 
@@ -501,11 +503,11 @@ void CBLDart_CBLDatabase_AddDocumentChangeListener(
                                                 CBLDart_CBLListenerFinalizer);
 }
 
-static void CBLDart_DatabaseChangeListenerWrapper(void *context,
-                                                  const CBLDatabase *db,
-                                                  unsigned numDocs,
-                                                  FLString *docIDs) {
+static void CBLDart_CollectionChangeListenerWrapper(
+    void *context, const CBLCollectionChange *change) {
   auto callback = ASYNC_CALLBACK_FROM_C(context);
+  auto numDocs = change->numDocs;
+  auto docIDs = change->docIDs;
 
   std::vector<Dart_CObject> docIdObjects(numDocs);
 
@@ -523,10 +525,11 @@ static void CBLDart_DatabaseChangeListenerWrapper(void *context,
   CBLDart::AsyncCallbackCall(*callback).execute(args);
 }
 
-void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
-                                           CBLDart_AsyncCallback listener) {
-  auto listenerToken = CBLDatabase_AddChangeListener(
-      db, CBLDart_DatabaseChangeListenerWrapper, listener);
+void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase *db,
+                                             const CBLCollection *collection,
+                                             CBLDart_AsyncCallback listener) {
+  auto listenerToken = CBLCollection_AddChangeListener(
+      collection, CBLDart_CollectionChangeListenerWrapper, listener);
 
   CBLDart_CloneDatabaseLock(db, listenerToken);
 
@@ -534,16 +537,16 @@ void CBLDart_CBLDatabase_AddChangeListener(const CBLDatabase *db,
                                                 CBLDart_CBLListenerFinalizer);
 }
 
-bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
-                                     CBLDart_CBLIndexSpec indexSpec,
-                                     CBLError *errorOut) {
+bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
+                                       CBLDart_CBLIndexSpec indexSpec,
+                                       CBLError *errorOut) {
   switch (indexSpec.type) {
     case kCBLDart_IndexTypeValue: {
       CBLValueIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
       config.expressions = indexSpec.expressions;
 
-      return CBLDatabase_CreateValueIndex(db, name, config, errorOut);
+      return CBLCollection_CreateValueIndex(collection, name, config, errorOut);
     }
     case kCBLDart_IndexTypeFullText: {
     }
@@ -553,7 +556,8 @@ bool CBLDart_CBLDatabase_CreateIndex(CBLDatabase *db, FLString name,
       config.ignoreAccents = static_cast<bool>(indexSpec.ignoreAccents);
       config.language = indexSpec.language;
 
-      return CBLDatabase_CreateFullTextIndex(db, name, config, errorOut);
+      return CBLCollection_CreateFullTextIndex(collection, name, config,
+                                               errorOut);
   }
 
   // Is never reached, but stops the compiler warnings.
@@ -609,10 +613,39 @@ FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
 
 // === Replicator
 
+typedef std::map<const CBLCollection *, CBLDart::AsyncCallback *>
+    ReplicatorCollectionCallbackMap;
+
 struct ReplicatorCallbackWrapperContext {
-  CBLDart::AsyncCallback *pullFilter;
-  CBLDart::AsyncCallback *pushFilter;
-  CBLDart::AsyncCallback *conflictResolver;
+  ReplicatorCollectionCallbackMap pushFilters;
+  ReplicatorCollectionCallbackMap pullFilters;
+  ReplicatorCollectionCallbackMap conflictResolvers;
+
+  void retainCollections() {
+    for (auto &pair : pushFilters) {
+      CBLCollection_Retain(pair.first);
+    }
+    for (auto &pair : pullFilters) {
+      CBLCollection_Retain(pair.first);
+    }
+    for (auto &pair : conflictResolvers) {
+      CBLCollection_Retain(pair.first);
+    }
+  }
+
+  void releaseCollections() {
+    for (auto &pair : pushFilters) {
+      CBLCollection_Release(pair.first);
+    }
+    for (auto &pair : pullFilters) {
+      CBLCollection_Release(pair.first);
+    }
+    for (auto &pair : conflictResolvers) {
+      CBLCollection_Release(pair.first);
+    }
+  }
+
+  ~ReplicatorCallbackWrapperContext() { releaseCollections(); }
 };
 
 static std::map<CBLReplicator *, ReplicatorCallbackWrapperContext *>
@@ -647,22 +680,24 @@ static bool CBLDart_ReplicatorFilterWrapper(CBLDart::AsyncCallback *callback,
   return decision;
 }
 
-static bool CBLDart_ReplicatorPullFilterWrapper(void *context,
-                                                CBLDocument *document,
-                                                CBLDocumentFlags flags) {
-  auto wrapperContext =
-      reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
-  return CBLDart_ReplicatorFilterWrapper(wrapperContext->pullFilter, document,
-                                         flags);
-}
-
 static bool CBLDart_ReplicatorPushFilterWrapper(void *context,
                                                 CBLDocument *document,
                                                 CBLDocumentFlags flags) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
-  return CBLDart_ReplicatorFilterWrapper(wrapperContext->pushFilter, document,
-                                         flags);
+  auto collection = CBLDocument_Collection(document);
+  return CBLDart_ReplicatorFilterWrapper(
+      wrapperContext->pushFilters[collection], document, flags);
+}
+
+static bool CBLDart_ReplicatorPullFilterWrapper(void *context,
+                                                CBLDocument *document,
+                                                CBLDocumentFlags flags) {
+  auto wrapperContext =
+      reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
+  auto collection = CBLDocument_Collection(document);
+  return CBLDart_ReplicatorFilterWrapper(
+      wrapperContext->pullFilters[collection], document, flags);
 }
 
 static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
@@ -670,7 +705,9 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
     const CBLDocument *remoteDocument) {
   auto wrapperContext =
       reinterpret_cast<ReplicatorCallbackWrapperContext *>(context);
-  auto callback = wrapperContext->conflictResolver;
+  auto collection =
+      CBLDocument_Collection(localDocument ? localDocument : remoteDocument);
+  auto callback = wrapperContext->conflictResolvers[collection];
 
   Dart_CObject documentID_{};
   CBLDart_CObject_SetFLString(&documentID_, documentID);
@@ -731,7 +768,6 @@ static const CBLDocument *CBLDart_ReplicatorConflictResolverWrapper(
 CBLReplicator *CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration *config, CBLError *errorOut) {
   CBLReplicatorConfiguration config_{};
-  config_.database = config->database;
   config_.endpoint = config->endpoint;
   config_.replicatorType =
       static_cast<CBLReplicatorType>(config->replicatorType);
@@ -749,23 +785,47 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   config_.trustedRootCertificates = config->trustedRootCertificates == nullptr
                                         ? kFLSliceNull
                                         : *config->trustedRootCertificates;
-  config_.channels = config->channels;
-  config_.documentIDs = config->documentIDs;
-  config_.pullFilter = config->pullFilter == nullptr
-                           ? nullptr
-                           : CBLDart_ReplicatorPullFilterWrapper;
-  config_.pushFilter = config->pushFilter == nullptr
-                           ? nullptr
-                           : CBLDart_ReplicatorPushFilterWrapper;
-  config_.conflictResolver = config->conflictResolver == nullptr
-                                 ? nullptr
-                                 : CBLDart_ReplicatorConflictResolverWrapper;
+
+  std::vector<CBLReplicationCollection> replicationCollections(
+      config->collectionsCount);
+  config_.collections = replicationCollections.data();
+  config_.collectionCount = config->collectionsCount;
 
   auto context = new ReplicatorCallbackWrapperContext;
-  context->pullFilter = ASYNC_CALLBACK_FROM_C(config->pullFilter);
-  context->pushFilter = ASYNC_CALLBACK_FROM_C(config->pushFilter);
-  context->conflictResolver = ASYNC_CALLBACK_FROM_C(config->conflictResolver);
   config_.context = context;
+
+  for (size_t i = 0; i < config->collectionsCount; i++) {
+    auto replicationCollection = config->collections[i];
+    auto collection = replicationCollection.collection;
+
+    replicationCollections[i] = {};
+    auto replicationCollection_ = &replicationCollections[i];
+
+    replicationCollection_->collection = collection;
+    replicationCollection_->channels = replicationCollection.channels;
+    replicationCollection_->documentIDs = replicationCollection.documentIDs;
+
+    if (replicationCollection.pushFilter) {
+      replicationCollection_->pushFilter = CBLDart_ReplicatorPushFilterWrapper;
+      context->pushFilters[collection] =
+          ASYNC_CALLBACK_FROM_C(replicationCollection.pushFilter);
+    }
+
+    if (replicationCollection.pullFilter) {
+      replicationCollection_->pullFilter = CBLDart_ReplicatorPullFilterWrapper;
+      context->pullFilters[collection] =
+          ASYNC_CALLBACK_FROM_C(replicationCollection.pullFilter);
+    }
+
+    if (replicationCollection.conflictResolver) {
+      replicationCollection_->conflictResolver =
+          CBLDart_ReplicatorConflictResolverWrapper;
+      context->conflictResolvers[collection] =
+          ASYNC_CALLBACK_FROM_C(replicationCollection.conflictResolver);
+    }
+  }
+
+  context->retainCollections();
 
   auto replicator = CBLReplicator_Create(&config_, errorOut);
 
@@ -923,7 +983,7 @@ class ReplicatedDocument_CObject_Helper {
 
     // Build CObject.
     object.type = Dart_CObject_kArray;
-    object.value.as_array.length = hasError ? 5 : 2;
+    object.value.as_array.length = hasError ? 7 : 4;
     object.value.as_array.values = objectValues;
 
     objectValues[0] = &id;
@@ -933,16 +993,22 @@ class ReplicatedDocument_CObject_Helper {
     flags.type = Dart_CObject_kInt32;
     flags.value.as_int32 = document->flags;
 
+    objectValues[2] = &scope;
+    CBLDart_CObject_SetFLString(&scope, document->scope);
+
+    objectValues[3] = &collection;
+    CBLDart_CObject_SetFLString(&collection, document->collection);
+
     if (hasError) {
-      objectValues[2] = &errorDomain;
+      objectValues[4] = &errorDomain;
       errorDomain.type = Dart_CObject_kInt32;
       errorDomain.value.as_int32 = document->error.domain;
 
-      objectValues[3] = &errorCode;
+      objectValues[5] = &errorCode;
       errorCode.type = Dart_CObject_kInt32;
       errorCode.value.as_int32 = document->error.code;
 
-      objectValues[4] = &errorMessage;
+      objectValues[6] = &errorMessage;
       CBLDart_CObject_SetFLString(&errorMessage,
                                   static_cast<FLString>(errorMessageStr));
     }
@@ -956,9 +1022,11 @@ class ReplicatedDocument_CObject_Helper {
 
  private:
   Dart_CObject object{};
-  Dart_CObject *objectValues[5];
+  Dart_CObject *objectValues[7];
   Dart_CObject id{};
   Dart_CObject flags{};
+  Dart_CObject scope{};
+  Dart_CObject collection{};
   Dart_CObject errorDomain{};
   Dart_CObject errorCode{};
   Dart_CObject errorMessage{};

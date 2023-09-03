@@ -48,6 +48,10 @@ jobs:
       - name: Check formatting
         run: melos formatting:check
 
+      - name: Print diff
+        if: failure()
+        run: git diff
+
   formatting-clang:
     name: Formatting - Clang
     runs-on: ubuntu-20.04

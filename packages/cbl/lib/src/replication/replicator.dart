@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../database/collection.dart';
 import '../database/database.dart';
 import '../document/document.dart';
 import '../support/listener_token.dart';
@@ -111,11 +112,19 @@ abstract class Replicator implements ClosableResource {
   /// Creates a replicator for replicating [Document]s between a local
   /// [Database] and a target database.
   static Future<Replicator> create(ReplicatorConfiguration config) {
-    if (config.database is AsyncDatabase) {
+    config.validate();
+
+    // ignore: deprecated_member_use_from_same_package
+    if (config.database is AsyncDatabase ||
+        config.collections.keys
+            .any((collection) => collection is AsyncCollection)) {
       return Replicator.createAsync(config);
     }
 
-    if (config.database is SyncDatabase) {
+    // ignore: deprecated_member_use_from_same_package
+    if (config.database is SyncDatabase ||
+        config.collections.keys
+            .any((collection) => collection is SyncCollection)) {
       return Replicator.createSync(config);
     }
 
@@ -164,7 +173,7 @@ abstract class Replicator implements ClosableResource {
   /// Adds a [listener] to be notified of changes to the [status] of this
   /// replicator.
   ///
-  /// {@macro cbl.Database.addChangeListener}
+  /// {@macro cbl.Collection.addChangeListener}
   ///
   /// See also:
   ///
@@ -185,7 +194,7 @@ abstract class Replicator implements ClosableResource {
   /// document replication events.
   /// {@endtemplate}
   ///
-  /// {@macro cbl.Database.addChangeListener}
+  /// {@macro cbl.Collection.addChangeListener}
   ///
   /// See also:
   ///
@@ -197,7 +206,7 @@ abstract class Replicator implements ClosableResource {
     DocumentReplicationListener listener,
   );
 
-  /// {@macro cbl.Database.removeChangeListener}
+  /// {@macro cbl.Collection.removeChangeListener}
   ///
   /// See also:
   ///
@@ -212,7 +221,7 @@ abstract class Replicator implements ClosableResource {
   ///
   /// This is an alternative stream based API for the [addChangeListener] API.
   ///
-  /// {@macro cbl.Database.AsyncListenStream}
+  /// {@macro cbl.Collection.AsyncListenStream}
   Stream<ReplicatorChange> changes();
 
   /// Returns a [Stream] to be notified of [DocumentReplication]s performed by
@@ -223,21 +232,41 @@ abstract class Replicator implements ClosableResource {
   ///
   /// {@macro cbl.Replicator.addDocumentReplicationListener.listening}
   ///
-  /// {@macro cbl.Database.AsyncListenStream}
+  /// {@macro cbl.Collection.AsyncListenStream}
   Stream<DocumentReplication> documentReplications();
 
-  /// Returns a [Set] of [Document] ids, who have revisions pending push.
+  /// Returns a [Set] of ids for [Document]s in the default collection, who have
+  /// revisions pending to be pushed.
   ///
   /// This API is a snapshot and results may change between the time the call
   /// was mad and the time the call returns.
+  @Deprecated('Use pendingDocumentIdsInCollection instead.')
   FutureOr<Set<String>> get pendingDocumentIds;
 
-  /// Returns whether the [Document] with the given [documentId] has revisions
-  /// pending push.
+  /// Returns whether the [Document] with the given [documentId], in the default
+  /// collection, has revisions pending to be pushed.
   ///
   /// This API is a snapshot and the result may change between the time the call
   /// was made and the time the call returns.
+  @Deprecated('Use isDocumentPendingInCollection instead.')
   FutureOr<bool> isDocumentPending(String documentId);
+
+  /// Returns a [Set] of ids for [Document]s in the given [collection], who have
+  /// revisions pending to be pushed.
+  ///
+  /// This API is a snapshot and results may change between the time the call
+  /// was mad and the time the call returns.
+  FutureOr<Set<String>> pendingDocumentIdsInCollection(Collection collection);
+
+  /// Returns whether the [Document] with the given [documentId], in the given
+  /// [collection], has revisions pending to be pushed.
+  ///
+  /// This API is a snapshot and the result may change between the time the call
+  /// was made and the time the call returns.
+  FutureOr<bool> isDocumentPendingInCollection(
+    String documentId,
+    Collection collection,
+  );
 }
 
 /// A [Replicator] with a primarily synchronous API.
@@ -268,11 +297,22 @@ abstract class SyncReplicator implements Replicator {
   @override
   void removeChangeListener(ListenerToken token);
 
+  @Deprecated('Use pendingDocumentIdsInCollection instead.')
   @override
   Set<String> get pendingDocumentIds;
 
+  @Deprecated('Use isDocumentPendingInCollection instead.')
   @override
   bool isDocumentPending(String documentId);
+
+  @override
+  Set<String> pendingDocumentIdsInCollection(Collection collection);
+
+  @override
+  bool isDocumentPendingInCollection(
+    String documentId,
+    Collection collection,
+  );
 }
 
 /// A [Replicator] with a primarily asynchronous API.
@@ -309,9 +349,20 @@ abstract class AsyncReplicator implements Replicator {
   @override
   AsyncListenStream<DocumentReplication> documentReplications();
 
+  @Deprecated('Use pendingDocumentIdsInCollection instead.')
   @override
   Future<Set<String>> get pendingDocumentIds;
 
+  @Deprecated('Use isDocumentPendingInCollection instead.')
   @override
   Future<bool> isDocumentPending(String documentId);
+
+  @override
+  Future<Set<String>> pendingDocumentIdsInCollection(Collection collection);
+
+  @override
+  Future<bool> isDocumentPendingInCollection(
+    String documentId,
+    Collection collection,
+  );
 }

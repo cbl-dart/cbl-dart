@@ -50,8 +50,21 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec('DatabaseExists', DatabaseExists.deserialize)
       ..addSerializableCodec('CopyDatabase', CopyDatabase.deserialize)
       ..addSerializableCodec('OpenDatabase', OpenDatabase.deserialize)
-      ..addSerializableCodec('GetDatabaseState', GetDatabase.deserialize)
       ..addSerializableCodec('DeleteDatabase', DeleteDatabase.deserialize)
+      ..addSerializableCodec('GetScope', GetScope.deserialize)
+      ..addSerializableCodec('GetScopes', GetScopes.deserialize)
+      ..addSerializableCodec('GetCollection', GetCollection.deserialize)
+      ..addSerializableCodec('GetCollections', GetCollections.deserialize)
+      ..addSerializableCodec('CreateCollection', CreateCollection.deserialize)
+      ..addSerializableCodec('DeleteCollection', DeleteCollection.deserialize)
+      ..addSerializableCodec(
+        'GetCollectionCount',
+        GetCollectionCount.deserialize,
+      )
+      ..addSerializableCodec(
+        'GetCollectionIndexes',
+        GetCollectionIndexes.deserialize,
+      )
       ..addSerializableCodec('GetDocument', GetDocument.deserialize)
       ..addSerializableCodec('SaveDocument', SaveDocument.deserialize)
       ..addSerializableCodec('DeleteDocument', DeleteDocument.deserialize)
@@ -73,12 +86,12 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         GetDocumentExpiration.deserialize,
       )
       ..addSerializableCodec(
-        'AddDatabaseChangeListener',
-        AddDatabaseChangeListener.deserialize,
+        'AddCollectionChangeListener',
+        AddCollectionChangeListener.deserialize,
       )
       ..addSerializableCodec(
-        'CallDatabaseChangeListener',
-        CallDatabaseChangeListener.deserialize,
+        'CallCollectionChangeListener',
+        CallCollectionChangeListener.deserialize,
       )
       ..addSerializableCodec(
         'AddDocumentChangeListener',
@@ -123,6 +136,18 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       )
       ..addSerializableCodec('CreateReplicator', CreateReplicator.deserialize)
       ..addSerializableCodec(
+        'CreateReplicatorCollection',
+        CreateReplicatorCollection.deserialize,
+      )
+      ..addCodec<List<CreateReplicatorCollection>>(
+        'List<CreateReplicatorCollection>',
+        serialize: (value, context) => value.map(context.serialize).toList(),
+        deserialize: (value, context) => (value as List<Object?>)
+            .map((element) =>
+                context.deserializeAs<CreateReplicatorCollection>(element)!)
+            .toList(),
+      )
+      ..addSerializableCodec(
         'CallReplicationFilter',
         CallReplicationFilter.deserialize,
       )
@@ -164,6 +189,22 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       // CblService specific types
       ..addSerializableCodec('TransferableValue', TransferableValue.deserialize)
       ..addSerializableCodec('DatabaseState', DatabaseState.deserialize)
+      ..addSerializableCodec('ScopeState', ScopeState.deserialize)
+      ..addSerializableCodec('CollectionState', CollectionState.deserialize)
+      ..addCodec<List<ScopeState>>(
+        'List<ScopeState>',
+        serialize: (value, context) => value.map(context.serialize).toList(),
+        deserialize: (value, context) => (value as List<Object?>)
+            .map((element) => context.deserializeAs<ScopeState>(element)!)
+            .toList(),
+      )
+      ..addCodec<List<CollectionState>>(
+        'List<CollectionState>',
+        serialize: (value, context) => value.map(context.serialize).toList(),
+        deserialize: (value, context) => (value as List<Object?>)
+            .map((element) => context.deserializeAs<CollectionState>(element)!)
+            .toList(),
+      )
       ..addSerializableCodec('DocumentState', DocumentState.deserialize)
       ..addSerializableCodec('SaveBlobResponse', SaveBlobResponse.deserialize)
       ..addSerializableCodec('QueryState', QueryState.deserialize)
@@ -357,11 +398,15 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         'ReplicatedDocument',
         serialize: (value, context) => {
           'id': value.id,
+          'scope': value.scope,
+          'collection': value.collection,
           'flags': value.flags.map(context.serialize).toList(),
           'error': context.serializePolymorphic(value.error),
         },
         deserialize: (map, context) => ReplicatedDocumentImpl(
           map.getAs('id'),
+          map.getAs('scope'),
+          map.getAs('collection'),
           map
               .getAs<List<Object?>>('flags')
               .map((value) => context.deserializeAs<DocumentFlag>(value)!)
@@ -684,22 +729,6 @@ class OpenDatabase extends Request<DatabaseState> {
       );
 }
 
-class GetDatabase extends Request<DatabaseState> {
-  GetDatabase(this.databaseId);
-
-  final int databaseId;
-
-  @override
-  StringMap serialize(SerializationContext context) =>
-      {'databaseId': databaseId};
-
-  static GetDatabase deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      GetDatabase(map.getAs('databaseId'));
-}
-
 class DeleteDatabase extends Request<Null> {
   DeleteDatabase(this.databaseId);
 
@@ -714,23 +743,174 @@ class DeleteDatabase extends Request<Null> {
       DeleteDatabase(map.getAs('databaseId'));
 }
 
-class GetDocument extends Request<DocumentState?> {
-  GetDocument(this.databaseId, this.documentId, this.propertiesFormat);
+class GetScope extends Request<ScopeState?> {
+  GetScope(this.databaseId, this.name);
 
   final int databaseId;
+  final String name;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'name': name,
+      };
+
+  static GetScope deserialize(StringMap map, SerializationContext context) =>
+      GetScope(
+        map.getAs('databaseId'),
+        map.getAs('name'),
+      );
+}
+
+class GetScopes extends Request<List<ScopeState>> {
+  GetScopes(this.databaseId);
+
+  final int databaseId;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'databaseId': databaseId};
+
+  static GetScopes deserialize(StringMap map, SerializationContext context) =>
+      GetScopes(map.getAs('databaseId'));
+}
+
+class GetCollection extends Request<CollectionState?> {
+  GetCollection(this.scopeId, this.name);
+
+  final int scopeId;
+  final String name;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'scopeId': scopeId,
+        'name': name,
+      };
+
+  static GetCollection deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      GetCollection(
+        map.getAs('scopeId'),
+        map.getAs('name'),
+      );
+}
+
+class GetCollections extends Request<List<CollectionState>> {
+  GetCollections(this.scopeId);
+
+  final int scopeId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {'scopeId': scopeId};
+
+  static GetCollections deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      GetCollections(map.getAs('scopeId'));
+}
+
+class CreateCollection extends Request<CollectionState> {
+  CreateCollection(this.databaseId, this.scope, this.collection);
+
+  final int databaseId;
+  final String scope;
+  final String collection;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'scope': scope,
+        'collection': collection,
+      };
+
+  static CreateCollection deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CreateCollection(
+        map.getAs('databaseId'),
+        map.getAs('scope'),
+        map.getAs('collection'),
+      );
+}
+
+class DeleteCollection extends Request<Null> {
+  DeleteCollection(this.databaseId, this.scope, this.collection);
+
+  final int databaseId;
+  final String scope;
+  final String collection;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'databaseId': databaseId,
+        'scope': scope,
+        'collection': collection,
+      };
+
+  static DeleteCollection deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      DeleteCollection(
+        map.getAs('databaseId'),
+        map.getAs('scope'),
+        map.getAs('collection'),
+      );
+}
+
+class GetCollectionCount extends Request<int> {
+  GetCollectionCount(this.collectionId);
+
+  final int collectionId;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'collectionId': collectionId};
+
+  static GetCollectionCount deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      GetCollectionCount(map.getAs('collectionId'));
+}
+
+class GetCollectionIndexes extends Request<List<String>> {
+  GetCollectionIndexes(this.collectionId);
+
+  final int collectionId;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'collectionId': collectionId};
+
+  static GetCollectionIndexes deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      GetCollectionIndexes(map.getAs('collectionId'));
+}
+
+class GetDocument extends Request<DocumentState?> {
+  GetDocument(this.collectionId, this.documentId, this.propertiesFormat);
+
+  final int collectionId;
   final String documentId;
   final EncodingFormat? propertiesFormat;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'documentId': documentId,
         'propertiesFormat': context.serialize(propertiesFormat),
       };
 
   static GetDocument deserialize(StringMap map, SerializationContext context) =>
       GetDocument(
-        map.getAs('databaseId'),
+        map.getAs('collectionId'),
         map.getAs('documentId'),
         context.deserializeAs(map['propertiesFormat']),
       );
@@ -738,18 +918,18 @@ class GetDocument extends Request<DocumentState?> {
 
 class SaveDocument extends Request<DocumentState?> {
   SaveDocument(
-    this.databaseId,
+    this.collectionId,
     this.state,
     this.concurrencyControl,
   );
 
-  final int databaseId;
+  final int collectionId;
   final DocumentState state;
   final ConcurrencyControl concurrencyControl;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'state': context.serialize(state),
         'concurrencyControl': context.serialize(concurrencyControl),
       };
@@ -759,7 +939,7 @@ class SaveDocument extends Request<DocumentState?> {
     SerializationContext context,
   ) =>
       SaveDocument(
-        map.getAs('databaseId'),
+        map.getAs('collectionId'),
         context.deserializeAs(map['state'])!,
         context.deserializeAs(map['concurrencyControl'])!,
       );
@@ -773,18 +953,18 @@ class SaveDocument extends Request<DocumentState?> {
 
 class DeleteDocument extends Request<DocumentState?> {
   DeleteDocument(
-    this.databaseId,
+    this.collectionId,
     this.state,
     this.concurrencyControl,
   );
 
-  final int databaseId;
+  final int collectionId;
   final DocumentState state;
   final ConcurrencyControl concurrencyControl;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'state': context.serialize(state),
         'concurrencyControl': context.serialize(concurrencyControl),
       };
@@ -794,7 +974,7 @@ class DeleteDocument extends Request<DocumentState?> {
     SerializationContext context,
   ) =>
       DeleteDocument(
-        map.getAs('databaseId'),
+        map.getAs('collectionId'),
         context.deserializeAs(map['state'])!,
         context.deserializeAs(map['concurrencyControl'])!,
       );
@@ -807,14 +987,14 @@ class DeleteDocument extends Request<DocumentState?> {
 }
 
 class PurgeDocument extends Request<Null> {
-  PurgeDocument(this.databaseId, this.documentId);
+  PurgeDocument(this.collectionId, this.documentId);
 
-  final int databaseId;
+  final int collectionId;
   final String documentId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'documentId': documentId,
       };
 
@@ -823,7 +1003,7 @@ class PurgeDocument extends Request<Null> {
     SerializationContext context,
   ) =>
       PurgeDocument(
-        map.getAs('databaseId'),
+        map.getAs('collectionId'),
         map.getAs('documentId'),
       );
 }
@@ -869,18 +1049,18 @@ class EndDatabaseTransaction extends Request<Null> {
 
 class SetDocumentExpiration extends Request<Null> {
   SetDocumentExpiration({
-    required this.databaseId,
+    required this.collectionId,
     required this.documentId,
     required this.expiration,
   });
 
-  final int databaseId;
+  final int collectionId;
   final String documentId;
   final DateTime? expiration;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'documentId': documentId,
         'expiration': context.serialize(expiration),
       };
@@ -890,7 +1070,7 @@ class SetDocumentExpiration extends Request<Null> {
     SerializationContext context,
   ) =>
       SetDocumentExpiration(
-        databaseId: map.getAs('databaseId'),
+        collectionId: map.getAs('collectionId'),
         documentId: map.getAs('documentId'),
         expiration: context.deserializeAs(map['expiration']),
       );
@@ -898,16 +1078,16 @@ class SetDocumentExpiration extends Request<Null> {
 
 class GetDocumentExpiration extends Request<DateTime?> {
   GetDocumentExpiration({
-    required this.databaseId,
+    required this.collectionId,
     required this.documentId,
   });
 
-  final int databaseId;
+  final int collectionId;
   final String documentId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'documentId': documentId,
       };
 
@@ -916,38 +1096,38 @@ class GetDocumentExpiration extends Request<DateTime?> {
     SerializationContext context,
   ) =>
       GetDocumentExpiration(
-        databaseId: map.getAs('databaseId'),
+        collectionId: map.getAs('collectionId'),
         documentId: map.getAs('documentId'),
       );
 }
 
-class AddDatabaseChangeListener extends Request<Null> {
-  AddDatabaseChangeListener({
-    required this.databaseId,
+class AddCollectionChangeListener extends Request<Null> {
+  AddCollectionChangeListener({
+    required this.collectionId,
     required this.listenerId,
   });
 
-  final int databaseId;
+  final int collectionId;
   final int listenerId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'listenerId': listenerId,
       };
 
-  static AddDatabaseChangeListener deserialize(
+  static AddCollectionChangeListener deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      AddDatabaseChangeListener(
-        databaseId: map.getAs('databaseId'),
+      AddCollectionChangeListener(
+        collectionId: map.getAs('collectionId'),
         listenerId: map.getAs('listenerId'),
       );
 }
 
-class CallDatabaseChangeListener extends Request<Null> {
-  CallDatabaseChangeListener({
+class CallCollectionChangeListener extends Request<Null> {
+  CallCollectionChangeListener({
     required this.listenerId,
     required this.documentIds,
   });
@@ -961,11 +1141,11 @@ class CallDatabaseChangeListener extends Request<Null> {
         'documentIds': context.serialize(documentIds),
       };
 
-  static CallDatabaseChangeListener deserialize(
+  static CallCollectionChangeListener deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      CallDatabaseChangeListener(
+      CallCollectionChangeListener(
         listenerId: map.getAs('listenerId'),
         documentIds: context.deserializeAs(map['documentIds'])!,
       );
@@ -973,18 +1153,18 @@ class CallDatabaseChangeListener extends Request<Null> {
 
 class AddDocumentChangeListener extends Request<Null> {
   AddDocumentChangeListener({
-    required this.databaseId,
+    required this.collectionId,
     required this.documentId,
     required this.listenerId,
   });
 
-  final int databaseId;
+  final int collectionId;
   final String documentId;
   final int listenerId;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'documentId': documentId,
         'listenerId': listenerId,
       };
@@ -994,7 +1174,7 @@ class AddDocumentChangeListener extends Request<Null> {
     SerializationContext context,
   ) =>
       AddDocumentChangeListener(
-        databaseId: map.getAs('databaseId'),
+        collectionId: map.getAs('collectionId'),
         documentId: map.getAs('documentId'),
         listenerId: map.getAs('listenerId'),
       );
@@ -1069,18 +1249,18 @@ class ChangeDatabaseEncryptionKey extends Request<Null> {
 
 class CreateIndex extends Request<Null> {
   CreateIndex({
-    required this.databaseId,
+    required this.collectionId,
     required this.name,
     required this.spec,
   });
 
-  final int databaseId;
+  final int collectionId;
   final String name;
   final CBLIndexSpec spec;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'name': name,
         'spec': context.serialize(spec),
       };
@@ -1090,7 +1270,7 @@ class CreateIndex extends Request<Null> {
     SerializationContext context,
   ) =>
       CreateIndex(
-        databaseId: map.getAs('databaseId'),
+        collectionId: map.getAs('collectionId'),
         name: map.getAs('name'),
         spec: context.deserializeAs(map['spec'])!,
       );
@@ -1098,16 +1278,16 @@ class CreateIndex extends Request<Null> {
 
 class DeleteIndex extends Request<Null> {
   DeleteIndex({
-    required this.databaseId,
+    required this.collectionId,
     required this.name,
   });
 
-  final int databaseId;
+  final int collectionId;
   final String name;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
+        'collectionId': collectionId,
         'name': name,
       };
 
@@ -1116,7 +1296,7 @@ class DeleteIndex extends Request<Null> {
     SerializationContext context,
   ) =>
       DeleteIndex(
-        databaseId: map.getAs('databaseId'),
+        collectionId: map.getAs('collectionId'),
         name: map.getAs('name'),
       );
 }
@@ -1415,7 +1595,6 @@ class ServiceDatabaseEndpoint extends Serializable implements Endpoint {
 
 class CreateReplicator extends Request<int> {
   CreateReplicator({
-    required this.databaseId,
     required this.propertiesFormat,
     required this.target,
     this.replicatorType = ReplicatorType.pushAndPull,
@@ -1424,22 +1603,17 @@ class CreateReplicator extends Request<int> {
     Data? pinnedServerCertificate,
     Data? trustedRootCertificates,
     this.headers,
-    this.channels,
-    this.documentIds,
-    this.pushFilterId,
-    this.pullFilterId,
-    this.conflictResolverId,
     this.enableAutoPurge = true,
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
+    required this.collections,
   })  : _pinnedServerCertificate =
             pinnedServerCertificate?.let(MessageData.new),
         _trustedRootCertificates =
             trustedRootCertificates?.let(MessageData.new);
 
   CreateReplicator._({
-    required this.databaseId,
     required this.propertiesFormat,
     required this.target,
     required this.replicatorType,
@@ -1448,19 +1622,14 @@ class CreateReplicator extends Request<int> {
     MessageData? pinnedServerCertificate,
     MessageData? trustedRootCertificates,
     this.headers,
-    this.channels,
-    this.documentIds,
-    this.pushFilterId,
-    this.pullFilterId,
-    this.conflictResolverId,
     required this.enableAutoPurge,
     this.heartbeat,
     this.maxAttempts,
     this.maxAttemptWaitTime,
+    required this.collections,
   })  : _pinnedServerCertificate = pinnedServerCertificate,
         _trustedRootCertificates = trustedRootCertificates;
 
-  final int databaseId;
   final EncodingFormat? propertiesFormat;
   final Endpoint target;
   final ReplicatorType replicatorType;
@@ -1471,19 +1640,14 @@ class CreateReplicator extends Request<int> {
   Data? get trustedRootCertificates => _trustedRootCertificates?.data;
   final MessageData? _trustedRootCertificates;
   final Map<String, String>? headers;
-  final List<String>? channels;
-  final List<String>? documentIds;
-  final int? pushFilterId;
-  final int? pullFilterId;
-  final int? conflictResolverId;
   final bool enableAutoPurge;
   final Duration? heartbeat;
   final int? maxAttempts;
   final Duration? maxAttemptWaitTime;
+  final List<CreateReplicatorCollection> collections;
 
   @override
   StringMap serialize(SerializationContext context) => {
-        'databaseId': databaseId,
         'propertiesFormat': context.serialize(propertiesFormat),
         'target': context.serializePolymorphic(target),
         'replicatorType': context.serialize(replicatorType),
@@ -1492,15 +1656,11 @@ class CreateReplicator extends Request<int> {
         'pinnedServerCertificate': context.serialize(_pinnedServerCertificate),
         'trustedRootCertificates': context.serialize(_trustedRootCertificates),
         'headers': headers,
-        'channels': context.serialize(channels),
-        'documentIds': context.serialize(documentIds),
-        'pushFilterId': pushFilterId,
-        'pullFilterId': pullFilterId,
-        'conflictResolverId': conflictResolverId,
         'enableAutoPurge': enableAutoPurge,
         'heartbeat': context.serialize(heartbeat),
         'maxAttempts': maxAttempts,
         'maxAttemptWaitTime': context.serialize(maxAttemptWaitTime),
+        'collections': context.serialize(collections),
       };
 
   static CreateReplicator deserialize(
@@ -1508,7 +1668,6 @@ class CreateReplicator extends Request<int> {
     SerializationContext context,
   ) =>
       CreateReplicator._(
-        databaseId: map.getAs('databaseId'),
         propertiesFormat: context.deserializeAs(map['propertiesFormat']),
         target: context.deserializePolymorphic(map['target'])!,
         replicatorType: context.deserializeAs(map['replicatorType'])!,
@@ -1519,15 +1678,11 @@ class CreateReplicator extends Request<int> {
         trustedRootCertificates:
             context.deserializeAs(map['trustedRootCertificates']),
         headers: map.getAs<StringMap?>('headers')?.cast(),
-        channels: context.deserializeAs(map['channels']),
-        documentIds: context.deserializeAs(map['documentIds']),
-        pushFilterId: map.getAs('pushFilterId'),
-        pullFilterId: map.getAs('pullFilterId'),
-        conflictResolverId: map.getAs('conflictResolverId'),
         enableAutoPurge: map.getAs('enableAutoPurge'),
         heartbeat: context.deserializeAs(map['heartbeat']),
         maxAttempts: map.getAs('maxAttempts'),
         maxAttemptWaitTime: context.deserializeAs(map['maxAttemptWaitTime']),
+        collections: context.deserializeAs(map['collections'])!,
       );
 
   @override
@@ -1541,6 +1696,47 @@ class CreateReplicator extends Request<int> {
     _pinnedServerCertificate?.didReceive();
     _trustedRootCertificates?.didReceive();
   }
+}
+
+class CreateReplicatorCollection extends Serializable {
+  CreateReplicatorCollection({
+    required this.collectionId,
+    this.channels,
+    this.documentIds,
+    this.pushFilterId,
+    this.pullFilterId,
+    this.conflictResolverId,
+  });
+
+  final int collectionId;
+  final List<String>? channels;
+  final List<String>? documentIds;
+  final int? pushFilterId;
+  final int? pullFilterId;
+  final int? conflictResolverId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'collectionId': collectionId,
+        'channels': context.serialize(channels),
+        'documentIds': context.serialize(documentIds),
+        'pushFilterId': pushFilterId,
+        'pullFilterId': pullFilterId,
+        'conflictResolverId': conflictResolverId,
+      };
+
+  static CreateReplicatorCollection deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CreateReplicatorCollection(
+        collectionId: map.getAs('collectionId'),
+        channels: context.deserializeAs(map['channels']),
+        documentIds: context.deserializeAs(map['documentIds']),
+        pushFilterId: map.getAs('pushFilterId'),
+        pullFilterId: map.getAs('pullFilterId'),
+        conflictResolverId: map.getAs('conflictResolverId'),
+      );
 }
 
 class CallReplicationFilter extends Request<bool> {
@@ -1797,15 +1993,18 @@ class ReplicatorIsDocumentPending extends Request<bool> {
   ReplicatorIsDocumentPending({
     required this.replicatorId,
     required this.documentId,
+    required this.collectionId,
   });
 
   final int replicatorId;
   final String documentId;
+  final int collectionId;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'replicatorId': replicatorId,
         'documentId': documentId,
+        'collectionId': collectionId,
       };
 
   static ReplicatorIsDocumentPending deserialize(
@@ -1815,19 +2014,23 @@ class ReplicatorIsDocumentPending extends Request<bool> {
       ReplicatorIsDocumentPending(
         replicatorId: map.getAs('replicatorId'),
         documentId: map.getAs('documentId'),
+        collectionId: map.getAs('collectionId'),
       );
 }
 
 class ReplicatorPendingDocumentIds extends Request<List<String>> {
   ReplicatorPendingDocumentIds({
     required this.replicatorId,
+    required this.collectionId,
   });
 
   final int replicatorId;
+  final int collectionId;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'replicatorId': replicatorId,
+        'collectionId': collectionId,
       };
 
   static ReplicatorPendingDocumentIds deserialize(
@@ -1836,6 +2039,7 @@ class ReplicatorPendingDocumentIds extends Request<List<String>> {
   ) =>
       ReplicatorPendingDocumentIds(
         replicatorId: map.getAs('replicatorId'),
+        collectionId: map.getAs('collectionId'),
       );
 }
 
@@ -1985,23 +2189,17 @@ class DatabaseState extends Serializable {
     required this.id,
     required this.name,
     required this.path,
-    required this.count,
-    required this.indexes,
   });
 
   final int id;
   final String name;
   final String? path;
-  final int count;
-  final List<String> indexes;
 
   @override
   StringMap serialize(SerializationContext context) => {
         'id': id,
         'name': name,
         'path': path,
-        'count': count,
-        'indexes': indexes,
       };
 
   static DatabaseState deserialize(
@@ -2012,8 +2210,56 @@ class DatabaseState extends Serializable {
         id: map.getAs('id'),
         name: map.getAs('name'),
         path: map.getAs('path'),
-        count: map.getAs('count'),
-        indexes: map.getAsList('indexes'),
+      );
+}
+
+class ScopeState extends Serializable {
+  ScopeState({
+    required this.id,
+    required this.name,
+  });
+
+  final int id;
+  final String name;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'id': id,
+        'name': name,
+      };
+
+  static ScopeState deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      ScopeState(
+        id: map.getAs('id'),
+        name: map.getAs('name'),
+      );
+}
+
+class CollectionState extends Serializable {
+  CollectionState({
+    required this.id,
+    required this.name,
+  });
+
+  final int id;
+  final String name;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'id': id,
+        'name': name,
+      };
+
+  static CollectionState deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      CollectionState(
+        id: map.getAs('id'),
+        name: map.getAs('name'),
       );
 }
 

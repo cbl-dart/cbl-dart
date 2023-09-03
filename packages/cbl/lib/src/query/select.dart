@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
-import '../database/database.dart';
+import '../database.dart';
 import '../support/listener_token.dart';
 import 'data_source.dart';
 import 'ffi_query.dart';
@@ -48,19 +48,16 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   }
 
   @override
-  From from(DataSourceInterface dataSource) {
-    final database = (dataSource as DataSourceImpl).database;
-
-    if (database is SyncDatabase) {
-      return SyncFromImpl(query: this, from: dataSource);
-    }
-
-    if (database is AsyncDatabase) {
-      return AsyncFromImpl(query: this, from: dataSource);
-    }
-
-    throw UnimplementedError();
-  }
+  From from(DataSourceInterface dataSource) =>
+      switch ((dataSource as DataSourceImpl).source) {
+        SyncDatabase() ||
+        SyncCollection() =>
+          SyncFromImpl(query: this, from: dataSource),
+        AsyncDatabase() ||
+        AsyncCollection() =>
+          AsyncFromImpl(query: this, from: dataSource),
+        _ => throw UnimplementedError(),
+      } as From;
 
   // All these methods will never execute their body because the `useSync`
   // method from `BuilderQueryMixin` throws because the query has not FROM
@@ -103,7 +100,11 @@ class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
 
   @override
   SyncFrom from(DataSourceInterface dataSource) {
-    _assertDataSourceDatabaseType<SyncDatabase>(dataSource, 'Sync', 'Async');
+    _assertDataSourceType<SyncDatabase, SyncCollection>(
+      dataSource,
+      'Sync',
+      'Async',
+    );
     return SyncFromImpl(query: this, from: dataSource);
   }
 }
@@ -116,20 +117,26 @@ class AsyncSelectImpl extends AsyncBuilderQuery implements AsyncSelect {
 
   @override
   AsyncFrom from(DataSourceInterface dataSource) {
-    _assertDataSourceDatabaseType<AsyncDatabase>(dataSource, 'Async', 'Sync');
+    _assertDataSourceType<AsyncDatabase, AsyncCollection>(
+      dataSource,
+      'Async',
+      'Sync',
+    );
     return AsyncFromImpl(query: this, from: dataSource);
   }
 }
 
-void _assertDataSourceDatabaseType<T>(
+void _assertDataSourceType<T, E>(
   DataSourceInterface dataSource,
   String expectedStyle,
   String actualStyle,
 ) {
-  if ((dataSource as DataSourceImpl).database is! T) {
+  final source = (dataSource as DataSourceImpl).source;
+  if (source is! T && source is! E) {
     throw ArgumentError(
       '${expectedStyle}QueryBuilder must be used with an '
-      '${expectedStyle}Database. To build a query for a ${actualStyle}Database '
+      '${expectedStyle}Database or ${expectedStyle}Collection. To build a '
+      'query for a ${actualStyle}Database or ${actualStyle}Collection '
       'use ${actualStyle}QueryBuilder.',
     );
   }
