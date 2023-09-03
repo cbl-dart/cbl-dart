@@ -68,7 +68,7 @@ extension _FleeceErrorExt<T> on T {
 
 // === Slice ===================================================================
 
-class FLSlice extends Struct {
+final class FLSlice extends Struct {
   external Pointer<Uint8> buf;
 
   @Size()
@@ -80,7 +80,7 @@ extension FLSliceExt on FLSlice {
   Data? toData() => SliceResult.fromFLSlice(this)?.toData();
 }
 
-class FLSliceResult extends Struct {
+final class FLSliceResult extends Struct {
   external Pointer<Uint8> buf;
 
   @Size()
@@ -93,7 +93,7 @@ extension FLResultSliceExt on FLSliceResult {
       SliceResult.fromFLSliceResult(this, retain: retain)?.toData();
 }
 
-class FLString extends Struct {
+final class FLString extends Struct {
   external Pointer<Uint8> buf;
 
   @Size()
@@ -106,7 +106,7 @@ extension FLStringExt on FLString {
       isNull ? null : buf.cast<Utf8>().toDartString(length: size);
 }
 
-class FLStringResult extends Struct {
+final class FLStringResult extends Struct {
   external Pointer<Uint8> buf;
 
   @Size()
@@ -226,7 +226,7 @@ class SliceBindings extends Bindings {
 
 // === SharedKeys ==============================================================
 
-class FLSharedKeys extends Opaque {}
+final class FLSharedKeys extends Opaque {}
 
 typedef _FLSharedKeys_New = Pointer<FLSharedKeys> Function();
 
@@ -293,7 +293,7 @@ class SharedKeysBindings extends Bindings {
 
 // === Slot ====================================================================
 
-class FLSlot extends Opaque {}
+final class FLSlot extends Opaque {}
 
 typedef _FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
 typedef _FLSlot_SetNull = void Function(Pointer<FLSlot> slot);
@@ -409,7 +409,7 @@ class SlotBindings extends Bindings {
 
 // === Doc =====================================================================
 
-class FLDoc extends Opaque {}
+final class FLDoc extends Opaque {}
 
 typedef _FLDoc_FromResultData_C = Pointer<FLDoc> Function(
   FLSliceResult data,
@@ -514,7 +514,7 @@ class DocBindings extends Bindings {
 
 // === Value ===================================================================
 
-class FLValue extends Opaque {}
+final class FLValue extends Opaque {}
 
 enum FLValueType {
   undefined,
@@ -738,7 +738,7 @@ class ValueBindings extends Bindings {
 
 // === Array ===================================================================
 
-class FLArray extends Opaque {}
+final class FLArray extends Opaque {}
 
 typedef _FLArray_Count_C = Uint32 Function(Pointer<FLArray> array);
 typedef _FLArray_Count = int Function(Pointer<FLArray> array);
@@ -797,7 +797,7 @@ class ArrayBindings extends Bindings {
 
 // === MutableArray ============================================================
 
-class FLMutableArray extends Opaque {}
+final class FLMutableArray extends Opaque {}
 
 typedef _FLArray_MutableCopy_C = Pointer<FLMutableArray> Function(
   Pointer<FLArray> array,
@@ -993,7 +993,7 @@ class MutableArrayBindings extends Bindings {
 
 // === Dict ====================================================================
 
-class FLDict extends Opaque {}
+final class FLDict extends Opaque {}
 
 typedef _FLDict_Count_C = Uint32 Function(Pointer<FLDict> dict);
 typedef _FLDict_Count = int Function(Pointer<FLDict> dict);
@@ -1049,7 +1049,7 @@ class DictBindings extends Bindings {
       _asMutable(dict).toNullable();
 }
 
-class FLDictKey extends Struct {
+final class FLDictKey extends Struct {
   // ignore: unused_field
   external FLSlice _private1;
   // ignore: unused_field
@@ -1104,7 +1104,7 @@ class DictKeyBindings extends Bindings {
 
 // === MutableDict =============================================================
 
-class FLMutableDict extends Opaque {}
+final class FLMutableDict extends Opaque {}
 
 typedef _FLDict_MutableCopy_C = Pointer<FLMutableDict> Function(
   Pointer<FLDict> source,
@@ -1268,7 +1268,7 @@ extension on FLTrust {
   int toInt() => index;
 }
 
-class KnownSharedKeys extends Opaque {}
+final class KnownSharedKeys extends Opaque {}
 
 typedef _CBLDart_KnownSharedKeys_New = Pointer<KnownSharedKeys> Function();
 
@@ -1276,7 +1276,7 @@ typedef _CBLDart_KnownSharedKeys_Delete_C = Void Function(
   Pointer<KnownSharedKeys> keys,
 );
 
-class CBLDart_LoadedDictKey extends Struct {
+final class CBLDart_LoadedDictKey extends Struct {
   @Bool()
   external bool isKnownSharedKey;
   @Int()
@@ -1288,7 +1288,7 @@ class CBLDart_LoadedDictKey extends Struct {
   external Pointer<FLValue> value;
 }
 
-class CBLDart_LoadedFLValue extends Struct {
+final class CBLDart_LoadedFLValue extends Struct {
   @Bool()
   external bool exists;
   @Int8()
@@ -1351,7 +1351,7 @@ typedef _CBLDart_FLDict_GetLoadedFLValue = void Function(
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
-class CBLDart_FLDictIterator extends Opaque {}
+final class CBLDart_FLDictIterator extends Opaque {}
 
 typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
     Function(
@@ -1383,7 +1383,7 @@ typedef _CBLDart_FLDictIterator_Next = bool Function(
   Pointer<CBLDart_FLDictIterator> iterator,
 );
 
-class CBLDart_FLArrayIterator extends Opaque {}
+final class CBLDart_FLArrayIterator extends Opaque {}
 
 typedef _CBLDart_FLArrayIterator_Begin_C = Pointer<CBLDart_FLArrayIterator>
     Function(
@@ -1570,7 +1570,7 @@ extension on FLEncoderFormat {
   int toInt() => index;
 }
 
-class FLEncoder extends Opaque {}
+final class FLEncoder extends Opaque {}
 
 typedef _FLEncoder_NewWithOptions_C = Pointer<FLEncoder> Function(
   Uint8 format,

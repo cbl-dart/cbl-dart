@@ -539,7 +539,7 @@ class _DictKeyIterable extends Iterable<String> {
 }
 
 /// Iterator which iterates over the keys of a [Dict].
-class _DictKeyIterator extends Iterator<String> {
+class _DictKeyIterator implements Iterator<String> {
   _DictKeyIterator(this.dict);
 
   final Dict dict;

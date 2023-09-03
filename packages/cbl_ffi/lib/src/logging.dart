@@ -86,7 +86,7 @@ typedef _CBLDart_CBLLog_SetCallback = bool Function(
   Pointer<CBLDartAsyncCallback> callback,
 );
 
-class _CBLLogFileConfiguration extends Struct {
+final class _CBLLogFileConfiguration extends Struct {
   @Uint8()
   external int level;
 

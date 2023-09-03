@@ -6,7 +6,7 @@ import 'dart:isolate';
 
 import 'bindings.dart';
 
-class CBLDartAsyncCallback extends Opaque {}
+final class CBLDartAsyncCallback extends Opaque {}
 
 typedef _CBLDart_AsyncCallback_New_C = Pointer<CBLDartAsyncCallback> Function(
   Uint32 id,

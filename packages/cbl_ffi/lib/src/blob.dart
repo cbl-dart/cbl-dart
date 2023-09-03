@@ -13,7 +13,7 @@ import 'utils.dart';
 
 // === CBLBlob =================================================================
 
-class CBLBlob extends Opaque {}
+final class CBLBlob extends Opaque {}
 
 typedef _CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
   FLString contentType,
@@ -135,7 +135,7 @@ class BlobBindings extends Bindings {
 
 // === CBLBlobReadStream =======================================================
 
-class CBLBlobReadStream extends Opaque {}
+final class CBLBlobReadStream extends Opaque {}
 
 typedef _CBLBlob_OpenContentStream = Pointer<CBLBlobReadStream> Function(
   Pointer<CBLBlob> blob,
@@ -205,7 +205,7 @@ class BlobReadStreamBindings extends Bindings {
 
 // === CBLBlobWriteStream ======================================================
 
-class CBLBlobWriteStream extends Opaque {}
+final class CBLBlobWriteStream extends Opaque {}
 
 typedef _CBLBlobWriter_Create = Pointer<CBLBlobWriteStream> Function(
   Pointer<CBLDatabase> db,
