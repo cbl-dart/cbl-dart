@@ -20,7 +20,9 @@ concurrency:
 
 env:
   flutter-channel: stable
-  dart-version-stable: stable
+  # Use 3.0 until bug in 3.1 is fixed.
+  # https://github.com/dart-lang/sdk/issues/53267
+  dart-version-stable: 3.0.7
   dart-version-beta: beta
 
 jobs:
