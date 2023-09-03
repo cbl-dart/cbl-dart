@@ -20,7 +20,7 @@ extension CBLQueryLanguageExt on CBLQueryLanguage {
   int toInt() => CBLQueryLanguage.values.indexOf(this);
 }
 
-class CBLQuery extends Opaque {}
+final class CBLQuery extends Opaque {}
 
 typedef _CBLDatabase_CreateQuery_C = Pointer<CBLQuery> Function(
   Pointer<CBLDatabase> db,
@@ -204,7 +204,7 @@ class QueryBindings extends Bindings {
       _copyCurrentResults(query, listenerToken, globalCBLError).checkCBLError();
 }
 
-class CBLResultSet extends Opaque {}
+final class CBLResultSet extends Opaque {}
 
 typedef _CBLResultSet_Next_C = Bool Function(Pointer<CBLResultSet> resultSet);
 typedef _CBLResultSet_Next = bool Function(Pointer<CBLResultSet> resultSet);

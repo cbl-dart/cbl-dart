@@ -91,7 +91,8 @@ class _Encoder extends Converter<Object?, Object?> {
       _ChunkConversionSinkTransformer(sink, convert);
 }
 
-class _ChunkConversionSinkTransformer<S, T> extends ChunkedConversionSink<S> {
+class _ChunkConversionSinkTransformer<S, T>
+    implements ChunkedConversionSink<S> {
   _ChunkConversionSinkTransformer(this.target, this.transform);
 
   final Sink<T> target;

@@ -176,7 +176,7 @@ class ResourceStream<T> extends Stream<T> with ClosableResourceMixin {
   }
 }
 
-class _ResourceStreamSubscription<T> extends StreamSubscription<T> {
+class _ResourceStreamSubscription<T> implements StreamSubscription<T> {
   _ResourceStreamSubscription(this.stream);
 
   final ResourceStream<T> stream;

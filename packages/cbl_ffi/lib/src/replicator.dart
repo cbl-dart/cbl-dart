@@ -17,7 +17,7 @@ import 'utils.dart';
 
 // === ReplicatorConfiguration =================================================
 
-class CBLEndpoint extends Opaque {}
+final class CBLEndpoint extends Opaque {}
 
 typedef _CBLEndpoint_CreateWithURL = Pointer<CBLEndpoint> Function(
   FLString url,
@@ -35,7 +35,7 @@ typedef _CBLEndpoint_Free = void Function(
   Pointer<CBLEndpoint> endpoint,
 );
 
-class CBLAuthenticator extends Opaque {}
+final class CBLAuthenticator extends Opaque {}
 
 typedef _CBLAuth_CreatePassword = Pointer<CBLAuthenticator> Function(
   FLString username,
@@ -73,7 +73,7 @@ extension on CBLProxyType {
   int toInt() => CBLProxyType.values.indexOf(this);
 }
 
-class _CBLProxySettings extends Struct {
+final class _CBLProxySettings extends Struct {
   @Uint8()
   // ignore: unused_field
   external int _type;
@@ -105,7 +105,7 @@ class CBLProxySettings {
   final String password;
 }
 
-class _CBLDartReplicatorConfiguration extends Struct {
+final class _CBLDartReplicatorConfiguration extends Struct {
   external Pointer<CBLDatabase> database;
   external Pointer<CBLEndpoint> endpoint;
   @Uint8()
@@ -215,7 +215,7 @@ class ReplicationConflictResolverCallbackMessage {
 
 // === Replicator ==============================================================
 
-class CBLReplicator extends Opaque {}
+final class CBLReplicator extends Opaque {}
 
 typedef _CBLDart_CBLReplicator_Create = Pointer<CBLReplicator> Function(
   Pointer<_CBLDartReplicatorConfiguration> config,
@@ -275,7 +275,7 @@ extension on int {
       CBLReplicatorActivityLevel.values[this];
 }
 
-class _CBLReplicatorProgress extends Struct {
+final class _CBLReplicatorProgress extends Struct {
   @Float()
   external double complete;
 
@@ -283,7 +283,7 @@ class _CBLReplicatorProgress extends Struct {
   external int documentCount;
 }
 
-class _CBLReplicatorStatus extends Struct {
+final class _CBLReplicatorStatus extends Struct {
   @Uint8()
   external int _activity;
 

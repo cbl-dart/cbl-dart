@@ -43,7 +43,7 @@ class CBLInitContext {
   final String tempDir;
 }
 
-class _CBLInitContext extends Struct {
+final class _CBLInitContext extends Struct {
   external Pointer<Utf8> filesDir;
   external Pointer<Utf8> tempDir;
 }
@@ -174,7 +174,7 @@ extension IntErrorCodeExt on int {
   }
 }
 
-class CBLError extends Struct {
+final class CBLError extends Struct {
   @Uint8()
   external int _domain;
 
@@ -299,7 +299,7 @@ extension CheckCBLErrorBoolExt on bool {
 
 // === CBLRefCounted ===========================================================
 
-class CBLRefCounted extends Opaque {}
+final class CBLRefCounted extends Opaque {}
 
 typedef _CBL_Retain = Pointer<CBLRefCounted> Function(
   Pointer<CBLRefCounted> refCounted,
@@ -311,7 +311,7 @@ typedef _CBL_Release = Pointer<CBLRefCounted> Function(
 
 // === CBLListener =============================================================
 
-class CBLListenerToken extends Opaque {}
+final class CBLListenerToken extends Opaque {}
 
 typedef _CBLListener_Remove_C = Void Function(
   Pointer<CBLListenerToken> listenerToken,

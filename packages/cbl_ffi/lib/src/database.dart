@@ -45,7 +45,7 @@ class CBLEncryptionKey {
   final Data bytes;
 }
 
-class _CBLEncryptionKey extends Struct {
+final class _CBLEncryptionKey extends Struct {
   @Uint32()
   external int algorithm;
 
@@ -71,7 +71,7 @@ extension on CBLConcurrencyControl {
   int toInt() => CBLConcurrencyControl.values.indexOf(this);
 }
 
-class CBLDatabase extends Opaque {}
+final class CBLDatabase extends Opaque {}
 
 class CBLDatabaseConfiguration {
   CBLDatabaseConfiguration({required this.directory, this.encryptionKey});
@@ -80,7 +80,7 @@ class CBLDatabaseConfiguration {
   final CBLEncryptionKey? encryptionKey;
 }
 
-class _CBLDatabaseConfiguration extends Struct {
+final class _CBLDatabaseConfiguration extends Struct {
   external FLString directory;
   external _CBLEncryptionKey encryptionKey;
 }
@@ -336,7 +336,7 @@ extension on CBLIndexType {
   int toInt() => CBLIndexType.values.indexOf(this);
 }
 
-class _CBLDart_CBLIndexSpec extends Struct {
+final class _CBLDart_CBLIndexSpec extends Struct {
   @Uint8()
   // ignore: unused_field
   external int _type;
