@@ -2,7 +2,7 @@ name: cbl_dart_repo
 publish_to: none
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: ^3.0.0
 
 dev_dependencies:
   daco: ^0.2.6
