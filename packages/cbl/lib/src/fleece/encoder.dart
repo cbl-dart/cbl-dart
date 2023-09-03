@@ -70,6 +70,8 @@ class FleeceEncoder implements Finalizable {
   /// Converts the [json] string to [format] and returns the result.
   Data convertJson(String json) {
     reset();
+    // TODO(blaugold): Remove ignore when Dart 3.2 is a minimum requirement.
+    // ignore: unnecessary_cast
     writeJson(Data.fromTypedList(utf8.encode(json) as Uint8List));
     return finish();
   }
