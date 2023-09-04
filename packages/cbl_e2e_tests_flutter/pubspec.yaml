@@ -8,11 +8,11 @@ environment:
 
 dependencies:
   benchmark_harness: ^2.1.0
-  cbl: ^2.2.1
+  cbl: ^3.0.0-dev.0
   cbl_e2e_tests:
     path: ../cbl_e2e_tests
-  cbl_ffi: ^0.8.2+1
-  cbl_flutter: ^2.0.9
+  cbl_ffi: ^0.9.0-dev.0
+  cbl_flutter: ^3.0.0-dev.0
   cbl_flutter_local:
     path: ../cbl_flutter_local
   collection: ^1.16.0

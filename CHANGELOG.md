@@ -11,6 +11,72 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 Packages with breaking changes:
 
+ - [`cbl` - `v3.0.0-dev.0`](#cbl---v300-dev0)
+ - [`cbl_dart` - `v3.0.0-dev.0`](#cbl_dart---v300-dev0)
+ - [`cbl_ffi` - `v0.9.0-dev.0`](#cbl_ffi---v090-dev0)
+ - [`cbl_flutter` - `v3.0.0-dev.0`](#cbl_flutter---v300-dev0)
+ - [`cbl_flutter_ce` - `v3.0.0-dev.0`](#cbl_flutter_ce---v300-dev0)
+ - [`cbl_flutter_ee` - `v3.0.0-dev.0`](#cbl_flutter_ee---v300-dev0)
+ - [`cbl_flutter_platform_interface` - `v3.0.0-dev.0`](#cbl_flutter_platform_interface---v300-dev0)
+ - [`cbl_generator` - `v0.3.0-dev.0`](#cbl_generator---v030-dev0)
+ - [`cbl_sentry` - `v2.0.0-dev.0`](#cbl_sentry---v200-dev0)
+
+Packages with other changes:
+
+ - There are no other changes in this release.
+
+---
+
+#### `cbl` - `v3.0.0-dev.0`
+
+ - **FEAT**: add support for collections ([#501](https://github.com/cbl-dart/cbl-dart/issues/501)). ([3f24f234](https://github.com/cbl-dart/cbl-dart/commit/3f24f234726ea248bc4d63808c26ebb7a4e7469b))
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_dart` - `v3.0.0-dev.0`
+
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_ffi` - `v0.9.0-dev.0`
+
+ - **FEAT**: add support for collections ([#501](https://github.com/cbl-dart/cbl-dart/issues/501)). ([3f24f234](https://github.com/cbl-dart/cbl-dart/commit/3f24f234726ea248bc4d63808c26ebb7a4e7469b))
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_flutter` - `v3.0.0-dev.0`
+
+ - **FEAT**: add support for collections ([#501](https://github.com/cbl-dart/cbl-dart/issues/501)). ([3f24f234](https://github.com/cbl-dart/cbl-dart/commit/3f24f234726ea248bc4d63808c26ebb7a4e7469b))
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_flutter_ce` - `v3.0.0-dev.0`
+
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_flutter_ee` - `v3.0.0-dev.0`
+
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_flutter_platform_interface` - `v3.0.0-dev.0`
+
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_generator` - `v0.3.0-dev.0`
+
+ - **FEAT**: add support for collections ([#501](https://github.com/cbl-dart/cbl-dart/issues/501)). ([3f24f234](https://github.com/cbl-dart/cbl-dart/commit/3f24f234726ea248bc4d63808c26ebb7a4e7469b))
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+#### `cbl_sentry` - `v2.0.0-dev.0`
+
+ - **FEAT**: add support for collections ([#501](https://github.com/cbl-dart/cbl-dart/issues/501)). ([3f24f234](https://github.com/cbl-dart/cbl-dart/commit/3f24f234726ea248bc4d63808c26ebb7a4e7469b))
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+
+## 2023-09-04
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
  - [`cbl_libcblitedart_api` - `v7.0.0`](#cbl_libcblitedart_api---v700)
 
 ---
