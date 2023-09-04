@@ -3,6 +3,8 @@ repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/*
   - packages/*/example
+ignore:
+  - packages/cbl_*_api
 
 ide:
   intellij: false
