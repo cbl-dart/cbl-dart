@@ -1,3 +1,9 @@
+## 7.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
 ## 6.0.0
 
  - Bump "cbl_libcblitedart_api" to `6.0.0`.

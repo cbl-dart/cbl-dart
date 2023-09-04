@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-09-04
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl_libcblitedart_api` - `v7.0.0`](#cbl_libcblitedart_api---v700)
+
+---
+
+#### `cbl_libcblitedart_api` - `v7.0.0`
+
+ - **BREAKING** **FEAT**: require Dart 3 ([#518](https://github.com/cbl-dart/cbl-dart/issues/518)). ([c653802d](https://github.com/cbl-dart/cbl-dart/commit/c653802dfb69ebbe769b08e9aaeb1cfb906c4dac))
+
+
 ## 2023-08-13
 
 ### Changes
