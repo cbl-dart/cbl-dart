@@ -10,10 +10,11 @@ void main() {
     await CouchbaseLiteFlutter.init();
 
     final db = await Database.openAsync('init-and-use-test');
+    final collection = await db.defaultCollection;
     expect(db.name, 'init-and-use-test');
 
     final doc = MutableDocument({'message': 'Hello Couchbase Lite!'});
-    await db.saveDocument(doc);
+    await collection.saveDocument(doc);
     expect(doc.revisionId, isNotNull);
   });
 }
