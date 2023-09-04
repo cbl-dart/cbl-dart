@@ -1,5 +1,5 @@
 name: 'cbl_sentry'
-version: 2.0.0-dev.0
+version: 2.0.0-dev.1
 description: >-
   Sentry integration for Couchbase Lite with support for recording breadcrumbs
   and performance tracing.
@@ -11,9 +11,9 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  cbl: ^3.0.0-dev.0
+  cbl: ^3.0.0-dev.1
   sentry: ^7.0.0
 
 dev_dependencies:
-  cbl_dart: ^3.0.0-dev.0
+  cbl_dart: ^3.0.0-dev.1
   test: ^1.21.1

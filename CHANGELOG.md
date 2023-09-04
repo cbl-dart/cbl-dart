@@ -11,6 +11,47 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 Packages with breaking changes:
 
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_ffi` - `v0.9.0-dev.1`](#cbl_ffi---v090-dev1)
+ - [`cbl_dart` - `v3.0.0-dev.1`](#cbl_dart---v300-dev1)
+ - [`cbl` - `v3.0.0-dev.1`](#cbl---v300-dev1)
+ - [`cbl_flutter` - `v3.0.0-dev.1`](#cbl_flutter---v300-dev1)
+ - [`cbl_flutter_platform_interface` - `v3.0.0-dev.1`](#cbl_flutter_platform_interface---v300-dev1)
+ - [`cbl_generator` - `v0.3.0-dev.1`](#cbl_generator---v030-dev1)
+ - [`cbl_sentry` - `v2.0.0-dev.1`](#cbl_sentry---v200-dev1)
+ - [`cbl_flutter_ce` - `v3.0.0-dev.1`](#cbl_flutter_ce---v300-dev1)
+ - [`cbl_flutter_ee` - `v3.0.0-dev.1`](#cbl_flutter_ee---v300-dev1)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl` - `v3.0.0-dev.1`
+ - `cbl_flutter` - `v3.0.0-dev.1`
+ - `cbl_flutter_platform_interface` - `v3.0.0-dev.1`
+ - `cbl_generator` - `v0.3.0-dev.1`
+ - `cbl_sentry` - `v2.0.0-dev.1`
+ - `cbl_flutter_ce` - `v3.0.0-dev.1`
+ - `cbl_flutter_ee` - `v3.0.0-dev.1`
+
+---
+
+#### `cbl_ffi` - `v0.9.0-dev.1`
+
+#### `cbl_dart` - `v3.0.0-dev.1`
+
+
+## 2023-09-04
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
  - [`cbl` - `v3.0.0-dev.0`](#cbl---v300-dev0)
  - [`cbl_dart` - `v3.0.0-dev.0`](#cbl_dart---v300-dev0)
  - [`cbl_ffi` - `v0.9.0-dev.0`](#cbl_ffi---v090-dev0)
