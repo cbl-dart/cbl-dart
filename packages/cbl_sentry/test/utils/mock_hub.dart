@@ -10,6 +10,9 @@ class MockHub implements Hub {
   SentryOptions get options => SentryOptions();
 
   @override
+  Scope get scope => throw UnimplementedError();
+
+  @override
   Future<void> addBreadcrumb(Breadcrumb crumb, {Object? hint}) async =>
       breadcrumbs.add(crumb);
 
