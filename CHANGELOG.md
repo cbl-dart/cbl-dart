@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-11-02
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_dart` - `v3.0.0-dev.2`](#cbl_dart---v300-dev2)
+ - [`cbl_sentry` - `v2.0.0-dev.2`](#cbl_sentry---v200-dev2)
+
+---
+
+#### `cbl_dart` - `v3.0.0-dev.2`
+
+ - **FEAT**: upgrade `http` to `^1.0.0` ([#538](https://github.com/cbl-dart/cbl-dart/issues/538)). ([711aeabc](https://github.com/cbl-dart/cbl-dart/commit/711aeabc4872e88d232cc53adf35f54dfb981ce3))
+
+#### `cbl_sentry` - `v2.0.0-dev.2`
+
+ - **FEAT**: upgrade `http` to `^1.0.0` ([#538](https://github.com/cbl-dart/cbl-dart/issues/538)). ([711aeabc](https://github.com/cbl-dart/cbl-dart/commit/711aeabc4872e88d232cc53adf35f54dfb981ce3))
+
+
 ## 2023-09-04
 
 ### Changes
