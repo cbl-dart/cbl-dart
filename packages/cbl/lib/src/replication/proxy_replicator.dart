@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../bindings.dart';
 import '../database.dart';
 import '../database/proxy_database.dart';
 import '../document/document.dart';

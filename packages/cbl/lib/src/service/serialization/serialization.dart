@@ -2,9 +2,9 @@ import 'dart:collection';
 import 'dart:ffi';
 import 'dart:isolate';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../../bindings.dart';
 import '../../support/utils.dart';
 
 /// The mechanism by which the the serialized value will be transported.

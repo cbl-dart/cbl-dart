@@ -3,8 +3,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../document.dart';
 import '../document/array.dart';
 import '../document/common.dart';

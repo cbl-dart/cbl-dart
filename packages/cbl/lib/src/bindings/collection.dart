@@ -1,5 +1,5 @@
 // ignore: lines_longer_than_80_chars
-// ignore_for_file: non_constant_identifier_names, avoid_redundant_argument_values
+// ignore_for_file: non_constant_identifier_names, avoid_redundant_argument_values, avoid_private_typedef_functions, camel_case_types
 
 import 'dart:convert';
 import 'dart:ffi';

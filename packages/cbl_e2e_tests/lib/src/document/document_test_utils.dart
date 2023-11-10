@@ -1,4 +1,5 @@
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/dictionary.dart';
 import 'package:cbl/src/fleece/containers.dart' show Doc;
@@ -6,7 +7,6 @@ import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/dict_key.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 
 MContext createTestMContext(Object data) => MContext(
       data: data,

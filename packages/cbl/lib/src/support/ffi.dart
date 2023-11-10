@@ -1,17 +1,16 @@
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart' as ffi;
-
+import '../bindings.dart' as bindings;
 import 'errors.dart';
 
 /// Convenience accessor for `CBLBindings.instance`, which throws an informative
 /// error when used before the bindings are initialized.
-final ffi.CBLBindings cblBindings = () {
-  final bindings = ffi.CBLBindings.maybeInstance;
-  if (bindings == null) {
+final bindings.CBLBindings cblBindings = () {
+  final result = bindings.CBLBindings.maybeInstance;
+  if (result == null) {
     throwNotInitializedError();
   }
-  return bindings;
+  return result;
 }();
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
@@ -90,7 +89,7 @@ class LibrariesConfiguration {
 }
 
 extension on LibraryConfiguration {
-  ffi.LibraryConfiguration _toCblFfi() => ffi.LibraryConfiguration(
+  bindings.LibraryConfiguration _toCblFfi() => bindings.LibraryConfiguration(
         process: process,
         name: name,
         appendExtension: appendExtension,
@@ -100,7 +99,7 @@ extension on LibraryConfiguration {
 }
 
 extension CblFfiLibraries on LibrariesConfiguration {
-  ffi.LibrariesConfiguration toCblFfi() => ffi.LibrariesConfiguration(
+  bindings.LibrariesConfiguration toCblFfi() => bindings.LibrariesConfiguration(
         enterpriseEdition: enterpriseEdition,
         directory: directory,
         cbl: cbl._toCblFfi(),

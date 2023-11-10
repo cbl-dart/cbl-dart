@@ -4,9 +4,9 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../bindings.dart';
 import '../database.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';

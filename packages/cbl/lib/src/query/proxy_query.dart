@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../bindings.dart';
 import '../database/proxy_database.dart';
 import '../fleece/encoder.dart';
 import '../service/cbl_service_api.dart';

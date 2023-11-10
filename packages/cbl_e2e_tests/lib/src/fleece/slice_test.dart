@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:cbl/src/bindings.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';

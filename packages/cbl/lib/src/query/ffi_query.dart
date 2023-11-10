@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../database/database_base.dart';
 import '../database/ffi_database.dart';
 import '../document/common.dart';

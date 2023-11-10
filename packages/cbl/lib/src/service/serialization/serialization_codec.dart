@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../../bindings.dart';
 import 'packet_codec_factory.dart'
     if (dart.library.io) 'isolate_packet_codec.dart'
     if (dart.library.html) 'json_packet_codec.dart';

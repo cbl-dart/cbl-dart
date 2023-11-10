@@ -1,7 +1,6 @@
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/containers.dart';
 import '../fleece/encoder.dart';

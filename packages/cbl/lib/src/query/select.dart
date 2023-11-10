@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../database.dart';
 import '../support/listener_token.dart';
 import 'data_source.dart';

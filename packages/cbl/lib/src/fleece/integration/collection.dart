@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
+import '../../bindings.dart';
 import '../../support/utils.dart';
 import '../encoder.dart';
 import 'context.dart';

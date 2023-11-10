@@ -3,9 +3,9 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../bindings.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import 'blob.dart';

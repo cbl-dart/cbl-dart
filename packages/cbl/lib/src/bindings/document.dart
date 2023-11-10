@@ -1,4 +1,5 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values, camel_case_types, avoid_private_typedef_functions
 
 import 'dart:ffi';
 

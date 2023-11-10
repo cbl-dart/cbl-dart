@@ -1,6 +1,0 @@
-include: ../../analysis_options.yaml
-
-linter:
-  rules:
-    camel_case_types: false
-    avoid_private_typedef_functions: false

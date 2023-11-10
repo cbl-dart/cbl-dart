@@ -1,6 +1,6 @@
+import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/encoder.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 
 // === Fleece De/Encoding Utils ================================================
 

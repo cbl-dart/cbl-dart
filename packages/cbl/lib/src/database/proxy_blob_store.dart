@@ -1,5 +1,4 @@
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../service/cbl_service_api.dart';
 import 'blob_store.dart';
 import 'proxy_database.dart';

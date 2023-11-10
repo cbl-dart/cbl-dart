@@ -3,13 +3,13 @@ import 'dart:developer';
 
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/fleece/containers.dart' as fl;
 import 'package:cbl/src/fleece/decoder.dart';
 import 'package:cbl/src/fleece/dict_key.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/context.dart';
 import 'package:cbl/src/fleece/integration/root.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
