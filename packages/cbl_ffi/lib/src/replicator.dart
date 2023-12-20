@@ -451,11 +451,11 @@ class DocumentReplicationsCallbackMessage {
       documents.cast<List<Object?>>().map((document) {
         CBLErrorException? error;
         if (document.length > 4) {
-          error = CBLErrorException(
-            (document[4] as int).toErrorDomain(),
-            document[5] as int,
-            utf8.decode(document[6] as Uint8List, allowMalformed: true),
-          );
+          final domain = (document[4] as int).toErrorDomain();
+          final code = (document[5] as int).toErrorCode(domain);
+          final message =
+              utf8.decode(document[6] as Uint8List, allowMalformed: true);
+          error = CBLErrorException(domain, code, message);
         }
 
         return CBLReplicatedDocument(
