@@ -1,3 +1,7 @@
+## 3.0.0-dev.2
+
+ - **FIX**: workaround Dart bug when destructuring record containing `Finalizable` ([#546](https://github.com/cbl-dart/cbl-dart/issues/546)). ([a68456e9](https://github.com/cbl-dart/cbl-dart/commit/a68456e95d970c9e9344f73b7c88815233750dfe))
+
 ## 3.0.0-dev.1
 
  - Update a dependency to the latest release.

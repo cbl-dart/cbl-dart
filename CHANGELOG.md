@@ -3,6 +3,51 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2023-12-20
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.0.0-dev.2`](#cbl---v300-dev2)
+ - [`cbl_ffi` - `v0.9.0-dev.2`](#cbl_ffi---v090-dev2)
+ - [`cbl_flutter` - `v3.0.0-dev.2`](#cbl_flutter---v300-dev2)
+ - [`cbl_dart` - `v3.0.0-dev.3`](#cbl_dart---v300-dev3)
+ - [`cbl_generator` - `v0.3.0-dev.2`](#cbl_generator---v030-dev2)
+ - [`cbl_flutter_platform_interface` - `v3.0.0-dev.2`](#cbl_flutter_platform_interface---v300-dev2)
+ - [`cbl_sentry` - `v2.0.0-dev.3`](#cbl_sentry---v200-dev3)
+ - [`cbl_flutter_ce` - `v3.0.0-dev.2`](#cbl_flutter_ce---v300-dev2)
+ - [`cbl_flutter_ee` - `v3.0.0-dev.2`](#cbl_flutter_ee---v300-dev2)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.0.0-dev.2`
+ - `cbl_dart` - `v3.0.0-dev.3`
+ - `cbl_generator` - `v0.3.0-dev.2`
+ - `cbl_flutter_platform_interface` - `v3.0.0-dev.2`
+ - `cbl_sentry` - `v2.0.0-dev.3`
+ - `cbl_flutter_ce` - `v3.0.0-dev.2`
+ - `cbl_flutter_ee` - `v3.0.0-dev.2`
+
+---
+
+#### `cbl` - `v3.0.0-dev.2`
+
+ - **FIX**: workaround Dart bug when destructuring record containing `Finalizable` ([#546](https://github.com/cbl-dart/cbl-dart/issues/546)). ([a68456e9](https://github.com/cbl-dart/cbl-dart/commit/a68456e95d970c9e9344f73b7c88815233750dfe))
+
+#### `cbl_ffi` - `v0.9.0-dev.2`
+
+ - **FIX**: decode error code for replicated documents ([#540](https://github.com/cbl-dart/cbl-dart/issues/540)). ([935c36ea](https://github.com/cbl-dart/cbl-dart/commit/935c36ea1b944bd34aab8148805be153a53ede0a))
+
+
 ## 2023-11-02
 
 ### Changes

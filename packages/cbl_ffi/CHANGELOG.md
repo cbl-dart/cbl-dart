@@ -1,3 +1,7 @@
+## 0.9.0-dev.2
+
+ - **FIX**: decode error code for replicated documents ([#540](https://github.com/cbl-dart/cbl-dart/issues/540)). ([935c36ea](https://github.com/cbl-dart/cbl-dart/commit/935c36ea1b944bd34aab8148805be153a53ede0a))
+
 ## 0.9.0-dev.1
 
 ## 0.9.0-dev.0

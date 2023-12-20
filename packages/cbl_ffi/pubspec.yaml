@@ -1,5 +1,5 @@
 name: cbl_ffi
-version: 0.9.0-dev.1
+version: 0.9.0-dev.2
 description:
   FFI bindings for the CouchbaseLite C API and the Dart support layer.
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_ffi

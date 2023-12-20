@@ -1,3 +1,7 @@
+## 2.0.0-dev.3
+
+ - Update a dependency to the latest release.
+
 ## 2.0.0-dev.2
 
  - **FEAT**: upgrade `http` to `^1.0.0` ([#538](https://github.com/cbl-dart/cbl-dart/issues/538)). ([711aeabc](https://github.com/cbl-dart/cbl-dart/commit/711aeabc4872e88d232cc53adf35f54dfb981ce3))
