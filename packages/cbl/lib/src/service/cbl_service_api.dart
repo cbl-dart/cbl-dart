@@ -294,7 +294,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
 
       // Query types
       ..addCodec<CBLQueryLanguage>(
-        'CBLIndexType',
+        'CBLQueryLanguage',
         serialize: (value, context) => value.index,
         deserialize: (value, context) => CBLQueryLanguage.values[value as int],
       )
