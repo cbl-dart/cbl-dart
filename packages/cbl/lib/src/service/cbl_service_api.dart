@@ -371,7 +371,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         deserialize: (value, context) => DocumentFlag.values[value as int],
       )
       ..addObjectCodec<ReplicatorProgress>(
-        'ReplicatorStatus',
+        'ReplicatorProgress',
         serialize: (value, context) => {
           'completed': value.completed,
           'progress': value.progress,
