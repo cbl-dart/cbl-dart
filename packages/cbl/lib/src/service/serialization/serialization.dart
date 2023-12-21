@@ -284,7 +284,7 @@ class SerializationRegistry {
     _SerializationConverter deserializer,
     bool handleSubTypes,
   ) {
-    if (_typeToName.containsKey(R) || _typeToName.containsValue(R)) {
+    if (_typeToName.containsKey(R) || _typeToName.containsValue(typeName)) {
       throw ArgumentError(
         'Codec for type $typeName with type $R has already been added.',
       );

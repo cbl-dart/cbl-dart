@@ -294,7 +294,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
 
       // Query types
       ..addCodec<CBLQueryLanguage>(
-        'CBLIndexType',
+        'CBLQueryLanguage',
         serialize: (value, context) => value.index,
         deserialize: (value, context) => CBLQueryLanguage.values[value as int],
       )
@@ -371,7 +371,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         deserialize: (value, context) => DocumentFlag.values[value as int],
       )
       ..addObjectCodec<ReplicatorProgress>(
-        'ReplicatorStatus',
+        'ReplicatorProgress',
         serialize: (value, context) => {
           'completed': value.completed,
           'progress': value.progress,
