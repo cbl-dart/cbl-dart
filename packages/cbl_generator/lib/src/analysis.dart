@@ -32,7 +32,7 @@ class _ClassHasRedirectingUnnamedConstructorVisitor
     }
     hasRedirectingConstructor = node.factoryKeyword != null &&
         // ignore: deprecated_member_use
-        node.redirectedConstructor?.type.name.name == targetConstructor;
+        node.redirectedConstructor?.type.name2.lexeme == targetConstructor;
   }
 }
 
@@ -52,7 +52,7 @@ class _ClassHasMixinVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitWithClause(WithClause node) {
     // ignore: deprecated_member_use
-    hasMixin = node.mixinTypes.any((mixin) => mixin.name.name == mixinName);
+    hasMixin = node.mixinTypes.any((mixin) => mixin.name2.lexeme == mixinName);
   }
 }
 
