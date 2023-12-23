@@ -60,8 +60,9 @@ bool isExactlyOneOfTypes(DartType type, Iterable<TypeChecker> typeCheckers) =>
     typeCheckers.any((typeChecker) => typeChecker.isExactlyType(type));
 
 extension ParameterElementExt on ParameterElement {
-  String? get documentationCommentValue =>
-      (session!.getParsedLibraryByElement(library!) as ParsedLibraryResult)
+  Future<String?> get documentationCommentValue async =>
+      (await session!.getResolvedLibraryByElement(library!)
+              as ResolvedLibraryResult)
           .getElementDeclaration(this)!
           .node
           .beginToken

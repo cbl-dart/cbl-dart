@@ -117,7 +117,8 @@ class TypedDataAnalyzer {
       kind,
     );
 
-    final fields = _resolveTypedDataFields(annotatedClass, kind, cblLibrary);
+    final fields =
+        await _resolveTypedDataFields(annotatedClass, kind, cblLibrary);
     final documentIdField = fields
         .whereType<TypedDataMetadataField>()
         .firstWhereOrNull((field) => field.kind == DocumentMetadataKind.id);
@@ -321,13 +322,13 @@ class TypedDataAnalyzer {
     return null;
   }
 
-  List<TypedDataObjectField> _resolveTypedDataFields(
+  Future<List<TypedDataObjectField>> _resolveTypedDataFields(
     ClassElement clazz,
     TypedDataObjectKind kind,
     LibraryElement cblLibrary,
-  ) =>
-      clazz.unnamedConstructor!.parameters.map(
-        (parameter) {
+  ) async =>
+      Future.wait(clazz.unnamedConstructor!.parameters.map(
+        (parameter) async {
           final annotations = parameter.metadata
               .map((annotation) => annotation.computeConstantValue())
               .map(ConstantReader.new);
@@ -375,7 +376,7 @@ class TypedDataAnalyzer {
             isPositional: parameter.isPositional,
             isRequired:
                 parameter.isRequiredNamed || parameter.isRequiredPositional,
-            documentationComment: parameter.documentationCommentValue,
+            documentationComment: await parameter.documentationCommentValue,
           );
 
           final isDocumentId = _isDocumentIdField(parameter, annotations, kind);
@@ -396,7 +397,7 @@ class TypedDataAnalyzer {
             defaultValueCode: defaultValueCode,
           );
         },
-      ).toList();
+      ));
 
   bool _isDocumentIdField(
     ParameterElement parameter,
