@@ -375,7 +375,7 @@ function checkBuildRunnerOutput() {
 
     cd "$testPackageDir"
 
-    dart run build_runner build --delete-conflicting-outputs
+    dart run build_runner build --delete-conflicting-outputs --verbose
 
     # Verify that the the build output did not change by checking if the repo is dirty.
     # This check is flaky in CI. We check multiple times on the hunch that there is some kind of
