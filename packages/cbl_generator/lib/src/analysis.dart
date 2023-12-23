@@ -1,9 +1,9 @@
-import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
@@ -60,14 +60,8 @@ bool isExactlyOneOfTypes(DartType type, Iterable<TypeChecker> typeCheckers) =>
     typeCheckers.any((typeChecker) => typeChecker.isExactlyType(type));
 
 extension ParameterElementExt on ParameterElement {
-  Future<String?> get documentationCommentValue async =>
-      (await session!.getResolvedLibraryByElement(library!)
-              as ResolvedLibraryResult)
-          .getElementDeclaration(this)!
-          .node
-          .beginToken
-          .precedingComments
-          ?.value();
+  Future<String?> documentationCommentValue(Resolver resolver) async =>
+      (await resolver.astNodeFor(this))!.beginToken.precedingComments?.value();
 }
 
 extension ConstantReaderExt on ConstantReader {

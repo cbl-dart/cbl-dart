@@ -376,7 +376,8 @@ class TypedDataAnalyzer {
             isPositional: parameter.isPositional,
             isRequired:
                 parameter.isRequiredNamed || parameter.isRequiredPositional,
-            documentationComment: await parameter.documentationCommentValue,
+            documentationComment:
+                await parameter.documentationCommentValue(resolver),
           );
 
           final isDocumentId = _isDocumentIdField(parameter, annotations, kind);
