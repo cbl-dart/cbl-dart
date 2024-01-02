@@ -37,9 +37,6 @@ class FlutterCblE2eTestBinding extends CblE2eTestBinding {
       .loadString('packages/cbl_e2e_tests/src/fixtures/1000people.json');
 
   @override
-  bool get useDartConsoleLogger => true;
-
-  @override
   final testFn = (description, body) =>
       ft.testWidgets(description, (tester) async => await body());
 
