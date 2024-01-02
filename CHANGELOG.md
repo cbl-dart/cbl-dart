@@ -3,6 +3,67 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-01-02
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v3.0.0-dev.3`](#cbl---v300-dev3)
+ - [`cbl_dart` - `v3.0.0-dev.4`](#cbl_dart---v300-dev4)
+ - [`cbl_flutter` - `v3.0.0-dev.3`](#cbl_flutter---v300-dev3)
+
+Packages with other changes:
+
+ - [`cbl_ffi` - `v0.9.0-dev.3`](#cbl_ffi---v090-dev3)
+ - [`cbl_flutter_ce` - `v3.0.0-dev.3`](#cbl_flutter_ce---v300-dev3)
+ - [`cbl_flutter_ee` - `v3.0.0-dev.3`](#cbl_flutter_ee---v300-dev3)
+ - [`cbl_generator` - `v0.3.0-dev.3`](#cbl_generator---v030-dev3)
+ - [`cbl_sentry` - `v2.0.0-dev.4`](#cbl_sentry---v200-dev4)
+ - [`cbl_flutter_platform_interface` - `v3.0.0-dev.3`](#cbl_flutter_platform_interface---v300-dev3)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_sentry` - `v2.0.0-dev.4`
+ - `cbl_flutter_platform_interface` - `v3.0.0-dev.3`
+
+---
+
+#### `cbl` - `v3.0.0-dev.3`
+
+ - **FIX**: check in `SerializationRegistry._addCodec` ([#547](https://github.com/cbl-dart/cbl-dart/issues/547)). ([414ef9ed](https://github.com/cbl-dart/cbl-dart/commit/414ef9ed706dfbfca1da06f1a371a095a0ef373e))
+ - **BREAKING** **FEAT**: remove `DartConsoleLogger` and stop initializing `Database.log.custom` with it ([#553](https://github.com/cbl-dart/cbl-dart/issues/553)). ([28350a28](https://github.com/cbl-dart/cbl-dart/commit/28350a2835ca14f8774e4e3282a7e0d2bcf7f389))
+
+#### `cbl_dart` - `v3.0.0-dev.4`
+
+ - **FEAT**: upgrade to CBL SDK `3.1.3`. ([74e1c35e](https://github.com/cbl-dart/cbl-dart/commit/74e1c35e9a7c30d700e289e7febbf7b324b55e7c))
+ - **BREAKING** **FEAT**: remove `DartConsoleLogger` and stop initializing `Database.log.custom` with it ([#553](https://github.com/cbl-dart/cbl-dart/issues/553)). ([28350a28](https://github.com/cbl-dart/cbl-dart/commit/28350a2835ca14f8774e4e3282a7e0d2bcf7f389))
+
+#### `cbl_flutter` - `v3.0.0-dev.3`
+
+ - **BREAKING** **FEAT**: remove `DartConsoleLogger` and stop initializing `Database.log.custom` with it ([#553](https://github.com/cbl-dart/cbl-dart/issues/553)). ([28350a28](https://github.com/cbl-dart/cbl-dart/commit/28350a2835ca14f8774e4e3282a7e0d2bcf7f389))
+
+#### `cbl_ffi` - `v0.9.0-dev.3`
+
+ - **FEAT**: upgrade to CBL SDK `3.1.3`. ([74e1c35e](https://github.com/cbl-dart/cbl-dart/commit/74e1c35e9a7c30d700e289e7febbf7b324b55e7c))
+
+#### `cbl_flutter_ce` - `v3.0.0-dev.3`
+
+ - **FEAT**: upgrade to CBL SDK `3.1.3`. ([74e1c35e](https://github.com/cbl-dart/cbl-dart/commit/74e1c35e9a7c30d700e289e7febbf7b324b55e7c))
+
+#### `cbl_flutter_ee` - `v3.0.0-dev.3`
+
+ - **FEAT**: upgrade to CBL SDK `3.1.3`. ([74e1c35e](https://github.com/cbl-dart/cbl-dart/commit/74e1c35e9a7c30d700e289e7febbf7b324b55e7c))
+
+#### `cbl_generator` - `v0.3.0-dev.3`
+
+ - **FEAT**(cbl_generator): upgrade to analyzer `6.0.0`. ([6a7832a4](https://github.com/cbl-dart/cbl-dart/commit/6a7832a4df4d13fe422ad363b349ccc3c9c48d32))
+
+
 ## 2023-12-20
 
 ### Changes

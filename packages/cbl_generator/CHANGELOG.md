@@ -1,3 +1,7 @@
+## 0.3.0-dev.3
+
+ - **FEAT**(cbl_generator): upgrade to analyzer `6.0.0`. ([6a7832a4](https://github.com/cbl-dart/cbl-dart/commit/6a7832a4df4d13fe422ad363b349ccc3c9c48d32))
+
 ## 0.3.0-dev.2
 
  - Update a dependency to the latest release.

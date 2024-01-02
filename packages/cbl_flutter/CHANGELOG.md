@@ -1,3 +1,9 @@
+## 3.0.0-dev.3
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: remove `DartConsoleLogger` and stop initializing `Database.log.custom` with it ([#553](https://github.com/cbl-dart/cbl-dart/issues/553)). ([28350a28](https://github.com/cbl-dart/cbl-dart/commit/28350a2835ca14f8774e4e3282a7e0d2bcf7f389))
+
 ## 3.0.0-dev.2
 
  - Update a dependency to the latest release.
