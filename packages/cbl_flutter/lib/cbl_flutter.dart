@@ -21,8 +21,6 @@ class CouchbaseLiteFlutter {
           libraries: CblFlutterPlatform.instance.libraries(),
           initContext: await _context(),
         ));
-
-        _setupLogging();
       });
 }
 
@@ -47,13 +45,4 @@ Future<InitContext> _context() async {
     filesDir: filesDir.path,
     tempDir: clbTempDir.path,
   );
-}
-
-void _setupLogging() {
-  Database.log
-    // stdout and stderr is not visible to Flutter developers, usually. That is
-    // why the console logger is disabled and a custom logger which logs to
-    // Dart's `print` functions is installed.
-    ..console.level = LogLevel.none
-    ..custom = DartConsoleLogger(LogLevel.warning);
 }

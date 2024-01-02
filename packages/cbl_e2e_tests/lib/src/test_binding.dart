@@ -68,8 +68,6 @@ abstract class CblE2eTestBinding {
 
   late final String largeJsonFixture;
 
-  bool get useDartConsoleLogger => false;
-
   TestFn get testFn => t.test;
 
   GroupFn get groupFn => t.group;
@@ -123,11 +121,7 @@ abstract class CblE2eTestBinding {
         )
         ..level = fileLogLevel;
 
-      if (useDartConsoleLogger) {
-        Database.log.custom = DartConsoleLogger(consoleLogLevel);
-      } else {
-        Database.log.console.level = consoleLogLevel;
-      }
+      Database.log.console.level = consoleLogLevel;
 
       largeJsonFixture = await loadLargeJsonFixture();
     });

@@ -167,36 +167,8 @@ database errors and generate more verbose messages (see `api|enum:LogLevel`)
 
 <CodeExample id={4} title="Increase level of Database Log Messages">
 
-<EmbedderTabs>
-<EmbedderTab embedder="Dart">
-
 ```dart
 Database.log.console.level = LogLevel.verbose;
 ```
-
-:::note
-
-On standalone Dart, logging is configured to directly log to stdandard output
-and does not go through Dart.
-
-:::
-
-</EmbedderTab>
-<EmbedderTab embedder="Flutter">
-
-```dart
-Database.log.custom!.level = LogLevel.verbose;
-```
-
-:::note
-
-On Flutter, logging is configured to use a custom logger that calls Dart's
-`api|dart:core|fn:print` function. Console logging is disabled. This is because
-not all Flutter platforms (e.g. Android) support console logging.
-
-:::
-
-</EmbedderTab>
-</EmbedderTabs>
 
 </CodeExample>

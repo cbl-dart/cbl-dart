@@ -48,16 +48,10 @@ class CouchbaseLiteDart {
           initContext: context,
           libraries: libraries,
         ));
-
-        _setupLogging();
       });
 }
 
 Future<InitContext> _initContext(String filesDir) async {
   await Directory(filesDir).create(recursive: true);
   return InitContext(filesDir: filesDir, tempDir: filesDir);
-}
-
-void _setupLogging() {
-  Database.log.console.level = LogLevel.warning;
 }
