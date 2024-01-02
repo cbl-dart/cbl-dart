@@ -51,7 +51,7 @@ void main() {
       cblLogMessage(LogDomain.network, LogLevel.error, 'A');
 
       // Logs are delivered asynchronously. If the logger is removed to early
-      // it nevers sees the message.
+      // it never sees the message.
       await receivedMessage.future;
 
       Database.log.custom = null;

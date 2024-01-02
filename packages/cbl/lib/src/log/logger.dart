@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:cbl_ffi/cbl_ffi.dart';
 
@@ -181,6 +182,7 @@ void _setupCallback() {
 }
 
 void _cleanUpCallback() {
+  _bindings.setCallback(nullptr);
   _callback?.close();
   _callback = null;
 }
