@@ -4,9 +4,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../bindings.dart';
 import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
 import '../support/edition.dart';

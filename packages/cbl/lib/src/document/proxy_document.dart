@@ -1,5 +1,4 @@
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../database/proxy_database.dart';
 import '../fleece/containers.dart';
 import '../fleece/integration/root.dart';

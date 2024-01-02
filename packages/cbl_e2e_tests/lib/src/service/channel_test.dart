@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/service/channel.dart';
 import 'package:cbl/src/service/serialization/isolate_packet_codec.dart';
 import 'package:cbl/src/service/serialization/json_packet_codec.dart';
@@ -13,7 +14,6 @@ import 'package:cbl/src/service/serialization/serialization.dart';
 import 'package:cbl/src/service/serialization/serialization_codec.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/utils.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';

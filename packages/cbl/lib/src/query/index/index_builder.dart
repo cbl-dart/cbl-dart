@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../../bindings.dart';
 import '../../support/utils.dart';
 import '../expressions/expression.dart';
 import 'index.dart';

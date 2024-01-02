@@ -3,8 +3,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../database/blob_store.dart';
 import '../database/database.dart';
 import '../errors.dart';

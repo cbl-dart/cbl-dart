@@ -3,9 +3,9 @@
 
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:meta/meta.dart';
 
+import '../bindings.dart';
 import '../database.dart';
 import '../database/database_configuration.dart';
 import '../errors.dart';

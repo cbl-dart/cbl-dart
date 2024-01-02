@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../../bindings.dart';
 import '../../support/ffi.dart';
 import '../../support/utils.dart';
 import '../encoder.dart';

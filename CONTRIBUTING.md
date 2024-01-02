@@ -18,7 +18,6 @@ All Dart code is organized into several [packages].
 | [cbl_e2e_tests]                  | E2E tests                                                                                                                                   |                                                                                                       |              |
 | [cbl_e2e_tests_flutter]          | E2E tests runner for Flutter                                                                                                                |                                                                                                       |              |
 | [cbl_e2e_tests_standalone_dart]  | E2E tests runner for standalone Dart                                                                                                        |                                                                                                       |              |
-| [cbl_ffi]                        | FFI bindings for `libcblite` and `libcblitedart`                                                                                            | [![](https://badgen.net/pub/v/cbl_ffi)](https://pub.dev/packages/cbl_ffi)                             | :red_circle: |
 | [cbl_libcblite_api]              | Marker package for API versions of `libcblite`                                                                                              | [![](https://badgen.net/pub/v/cbl_libcblite_api)](https://pub.dev/packages/cbl_libcblite_api)         | :red_circle: |
 | [cbl_libcblitedart_api]          | Marker package for API versions of `libcblitedart`                                                                                          | [![](https://badgen.net/pub/v/cbl_libcblitedart_api)](https://pub.dev/packages/cbl_libcblitedart_api) | :red_circle: |
 | [cbl_flutter]                    | Flutter plugin for Couchbase Lite (frontend)                                                                                                | [![](https://badgen.net/pub/v/cbl_flutter)](https://pub.dev/packages/cbl_flutter)                     |              |
@@ -128,7 +127,6 @@ through `flutter test` with a specific test file in `integration_test`. By using
   https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_e2e_tests_standalone_dart
 [cbl_e2e_tests_flutter]:
   https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_e2e_tests_flutter
-[cbl_ffi]: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_ffi
 [cbl_libcblite_api]:
   https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_libcblite_api
 [cbl_libcblitedart_api]:

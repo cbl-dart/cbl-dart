@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../support/async_callback.dart';
 import '../support/ffi.dart';
 

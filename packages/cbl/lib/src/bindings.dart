@@ -1,5 +1,5 @@
-export 'src/async_callback.dart';
-export 'src/base.dart'
+export 'bindings/async_callback.dart';
+export 'bindings/base.dart'
     hide
         OptionIterable,
         CBLErrorExt,
@@ -11,33 +11,33 @@ export 'src/base.dart'
         IntCBLErrorDomainExt,
         IntErrorCodeExt,
         CBLError;
-export 'src/bindings.dart';
-export 'src/blob.dart';
-export 'src/collection.dart';
-export 'src/data.dart';
-export 'src/database.dart' hide CBLConcurrencyControlExt;
-export 'src/document.dart';
-export 'src/fleece.dart'
+export 'bindings/bindings.dart';
+export 'bindings/blob.dart';
+export 'bindings/collection.dart';
+export 'bindings/data.dart';
+export 'bindings/database.dart' hide CBLConcurrencyControlExt;
+export 'bindings/document.dart';
+export 'bindings/fleece.dart'
     hide FLErrorCodeIntExt, FLResultSliceExt, FLStringResultExt;
-export 'src/global.dart'
+export 'bindings/global.dart'
     show
         globalLoadedDictKey,
         globalLoadedFLValue,
         globalFLSlice,
         globalFLString,
         globalFLSliceResult;
-export 'src/libraries.dart';
-export 'src/logging.dart';
-export 'src/native_utf8_string.dart'
+export 'bindings/libraries.dart';
+export 'bindings/logging.dart';
+export 'bindings/native_utf8_string.dart'
     show NativeUtf8String, NativeUtf8StringEncoder, nativeUtf8StringEncoder;
-export 'src/query.dart' hide CBLQueryLanguageExt;
-export 'src/replicator.dart';
-export 'src/slice.dart'
+export 'bindings/query.dart' hide CBLQueryLanguageExt;
+export 'bindings/replicator.dart';
+export 'bindings/slice.dart'
     hide
         cachedSliceResultAllocator,
         sliceResultAllocator,
         SingleSliceResultAllocator,
         SliceResultAllocator;
-export 'src/tracing.dart'
+export 'bindings/tracing.dart'
     show cblIncludeTracePoints, TracedNativeCall, TracedCallHandler;
-export 'src/utils.dart' show cblReachabilityFence;
+export 'bindings/utils.dart' show cblReachabilityFence;

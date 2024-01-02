@@ -3,8 +3,7 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../../bindings.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'delegate.dart';

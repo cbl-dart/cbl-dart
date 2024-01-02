@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../../bindings.dart';
 import 'serialization.dart';
 import 'serialization_codec.dart';
 

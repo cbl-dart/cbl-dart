@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../document/blob.dart';
 import '../fleece/containers.dart';
 import '../support/errors.dart';

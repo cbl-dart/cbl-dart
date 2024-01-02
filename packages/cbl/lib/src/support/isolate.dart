@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:cbl_ffi/cbl_ffi.dart' hide LibrariesConfiguration;
-
+import '../bindings.dart' hide LibrariesConfiguration;
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
 import 'errors.dart';

@@ -2,8 +2,7 @@
 
 import 'dart:io';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../support/ffi.dart';
 import 'logger.dart';
 

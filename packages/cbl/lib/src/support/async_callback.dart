@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:isolate';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import 'ffi.dart';
 
 /// Handler which is invoked to respond to a [AsyncCallback].

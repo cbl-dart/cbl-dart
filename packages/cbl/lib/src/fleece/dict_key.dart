@@ -2,8 +2,7 @@ import 'dart:collection';
 import 'dart:ffi';
 import 'dart:math';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../support/ffi.dart';
 import 'encoder.dart';
 

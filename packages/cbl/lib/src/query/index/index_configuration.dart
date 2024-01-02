@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 
+import '../../bindings.dart';
 import 'index.dart';
 
 /// A specification of an [Index] through a list of N1QL [expressions].

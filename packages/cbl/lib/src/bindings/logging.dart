@@ -1,5 +1,5 @@
 // ignore: lines_longer_than_80_chars
-// ignore_for_file: cast_nullable_to_non_nullable,avoid_redundant_argument_values, avoid_positional_boolean_parameters
+// ignore_for_file: cast_nullable_to_non_nullable,avoid_redundant_argument_values, avoid_positional_boolean_parameters, avoid_private_typedef_functions, camel_case_types
 
 import 'dart:convert';
 import 'dart:ffi';

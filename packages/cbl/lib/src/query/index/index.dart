@@ -1,5 +1,4 @@
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../../bindings.dart';
 import '../../database.dart';
 import '../query.dart';
 

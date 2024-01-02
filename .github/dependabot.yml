@@ -37,10 +37,6 @@ updates:
     directory: /packages/cbl_e2e_tests_standalone_dart
     schedule:
       interval: weekly
-  - package-ecosystem: pub
-    directory: /packages/cbl_ffi
-    schedule:
-      interval: weekly
     versioning-strategy: increase-if-necessary
   - package-ecosystem: pub
     directory: /packages/cbl_flutter

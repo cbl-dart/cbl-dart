@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/support/async_callback.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';

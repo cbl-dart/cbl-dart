@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl_ffi/cbl_ffi.dart';
+import 'package:cbl/src/bindings.dart';
 import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 import 'package:test/test.dart' as test;

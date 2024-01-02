@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
-
+import '../bindings.dart';
 import '../tracing.dart';
 
 /// The current tracing delegate.

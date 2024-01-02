@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:cbl_ffi/cbl_ffi.dart';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path_lib;
 
+import '../bindings.dart';
 import '../document/blob.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
