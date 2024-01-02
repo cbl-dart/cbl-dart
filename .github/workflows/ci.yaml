@@ -78,13 +78,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name:
-          Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v3
-
-      - name: Install NodeJS dependencies
-        run: npm ci
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -102,7 +95,7 @@ jobs:
         run: ./tools/dev-tools.sh bootstrap
 
       - name: Analyze Dart code
-        run: npx nx affected --target analyze
+        run: melos analyze
 
   test-dart-unit:
     name: Dart unit tests
