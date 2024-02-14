@@ -373,6 +373,9 @@ abstract class SyncCollection extends Collection {
   void deleteIndex(String name);
 
   @override
+  D? typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   ListenerToken addChangeListener(CollectionChangeListener listener);
 
   @override
@@ -439,6 +442,9 @@ abstract class AsyncCollection extends Collection {
 
   @override
   Future<void> deleteIndex(String name);
+
+  @override
+  Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
 
   @override
   Future<ListenerToken> addChangeListener(CollectionChangeListener listener);
