@@ -746,6 +746,38 @@ class FfiCollection
   @override
   FfiDocumentDelegate createNewDocumentDelegate(DocumentDelegate oldDelegate) =>
       FfiDocumentDelegate.create(oldDelegate.id);
+
+  @override
+  D? typedDocument<D extends TypedDocumentObject<Object>>(String id) {
+    final adapter = database.useWithTypedData();
+
+    // We resolve the factory before loading the actual document to check that
+    // D is a recognized type early.
+    final Factory<Document, D> factory;
+    final bool isDynamic;
+    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
+      final dynamicFactory = adapter.dynamicDocumentFactoryForType<D>(
+        allowUnmatchedDocument: false,
+      );
+      factory = (document) => dynamicFactory(document)!;
+      isDynamic = true;
+    } else {
+      factory = adapter.documentFactoryForType<D>();
+      isDynamic = false;
+    }
+
+    final doc = document(id);
+    if (doc == null) {
+      return null;
+    }
+
+    if (!isDynamic) {
+      // Check that the loaded document is of the correct type.
+      adapter.checkDocumentIsOfType<D>(doc);
+    }
+
+    return factory(doc);
+  }
 }
 
 extension on MaintenanceType {

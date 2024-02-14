@@ -7,6 +7,7 @@ import '../errors.dart';
 import '../query/index/index.dart';
 import '../support/listener_token.dart';
 import '../support/streams.dart';
+import '../typed_data/typed_object.dart';
 import 'collection_change.dart';
 import 'database.dart';
 import 'database_change.dart';
@@ -218,6 +219,10 @@ abstract class Collection {
 
   /// Deletes the [Index] of the given [name].
   FutureOr<void> deleteIndex(String name);
+
+  /// Get the typedDocument
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
 
   /// Adds a [listener] to be notified of all changes to [Document]s in this
   /// collection.

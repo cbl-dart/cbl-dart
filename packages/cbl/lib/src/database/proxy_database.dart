@@ -820,4 +820,38 @@ class ProxyCollection extends ProxyObject
     DocumentDelegate oldDelegate,
   ) =>
       ProxyDocumentDelegate.fromDelegate(oldDelegate);
+
+  @override
+  Future<D?> typedDocument<D extends TypedDocumentObject<Object>>(String id) {
+    final adapter = database.useWithTypedData();
+
+    // We resolve the factory before loading the actual document to check that
+    // D is a recognized type early.
+    final Factory<Document, D> factory;
+    final bool isDynamic;
+    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
+      final dynamicFactory = adapter.dynamicDocumentFactoryForType<D>(
+        allowUnmatchedDocument: false,
+      );
+      factory = (document) => dynamicFactory(document)!;
+      isDynamic = true;
+    } else {
+      factory = adapter.documentFactoryForType<D>();
+      isDynamic = false;
+    }
+
+    return document(id)
+        .then((doc) {
+      if (doc == null) {
+        return null;
+      }
+
+      if (!isDynamic) {
+        // Check that the loaded document is of the correct type.
+        adapter.checkDocumentIsOfType<D>(doc);
+      }
+
+      return factory(doc);
+    });
+  }
 }
