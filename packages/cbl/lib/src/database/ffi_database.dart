@@ -778,6 +778,12 @@ class FfiCollection
 
     return factory(doc);
   }
+
+  @override
+  SyncSaveTypedDocument<D, MD> saveTypedDocument
+    <D extends TypedDocumentObject<Object>, MD extends TypedMutableDocumentObject>
+      (TypedMutableDocumentObject<D, MD> document) =>
+      _FfiSaveTypedDocumentCollection(database, document, this);
 }
 
 extension on MaintenanceType {
@@ -825,5 +831,24 @@ class _FfiSaveTypedDocument<D extends TypedDocumentObject,
   bool withConflictHandlerSync(
     TypedSyncSaveConflictHandler<D, MD> conflictHandler,
   ) =>
+      withConflictHandler(conflictHandler) as bool;
+}
+
+class _FfiSaveTypedDocumentCollection<D extends TypedDocumentObject,
+MD extends TypedMutableDocumentObject>
+    extends SaveTypedDocumentCollectionBase<D, MD>
+    implements SyncSaveTypedDocument<D, MD> {
+  _FfiSaveTypedDocumentCollection(FfiDatabase super.database, super.document, super.collection);
+
+  @override
+  bool withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      super.withConcurrencyControl(concurrencyControl) as bool;
+
+  @override
+  bool withConflictHandlerSync(
+      TypedSyncSaveConflictHandler<D, MD> conflictHandler,
+      ) =>
       withConflictHandler(conflictHandler) as bool;
 }

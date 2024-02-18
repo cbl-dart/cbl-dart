@@ -526,6 +526,25 @@ class _ProxySaveTypedDocument<D extends TypedDocumentObject,
       super.withConflictHandler(conflictHandler) as Future<bool>;
 }
 
+class _ProxySaveTypedDocumentCollection<D extends TypedDocumentObject,
+MD extends TypedMutableDocumentObject>
+    extends SaveTypedDocumentCollectionBase<D, MD>
+    implements AsyncSaveTypedDocument<D, MD> {
+  _ProxySaveTypedDocumentCollection(ProxyDatabase super.database, super.document, super.collection);
+
+  @override
+  Future<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) =>
+      super.withConcurrencyControl(concurrencyControl) as Future<bool>;
+
+  @override
+  Future<bool> withConflictHandler(
+      TypedSaveConflictHandler<D, MD> conflictHandler,
+      ) =>
+      super.withConflictHandler(conflictHandler) as Future<bool>;
+}
+
 class ProxyScope extends ProxyObject
     with ScopeBase, ClosableResourceMixin
     implements AsyncScope {
@@ -854,4 +873,10 @@ class ProxyCollection extends ProxyObject
       return factory(doc);
     });
   }
+
+  @override
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument
+  <D extends TypedDocumentObject, MD extends TypedMutableDocumentObject>
+      (TypedMutableDocumentObject<D, MD> document) =>
+      _ProxySaveTypedDocumentCollection(database, document, this);
 }
