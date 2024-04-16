@@ -12,7 +12,7 @@ typedef VariantIsCompatible<T> = bool Function(
   Object? otherValue,
 );
 
-class TestVariant<T extends Object?> {
+final class TestVariant<T extends Object?> {
   const TestVariant(
     this.name, {
     required this.values,
@@ -41,7 +41,7 @@ class TestVariant<T extends Object?> {
   String toString() => 'TestVariant($name)';
 }
 
-class EnumVariant<T extends Enum> extends TestVariant<T> {
+final class EnumVariant<T extends Enum> extends TestVariant<T> {
   EnumVariant(
     List<T> values, {
     String? name,
@@ -88,7 +88,7 @@ Future<void> runVariantCombinations(
   }
 }
 
-class _VariantConfiguration {
+final class _VariantConfiguration {
   _VariantConfiguration(this.combination);
 
   final List<_VariantEntry> combination;
@@ -112,7 +112,7 @@ class _VariantConfiguration {
 _VariantConfiguration get _variantTestConfiguration =>
     Zone.current[#variantTestConfiguration]! as _VariantConfiguration;
 
-class _VariantEntry {
+final class _VariantEntry {
   const _VariantEntry(this.variant, this.value);
 
   static List<_VariantEntry> variantEntries(TestVariant variant) =>

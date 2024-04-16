@@ -11,10 +11,7 @@ enum Api { sync, async }
 
 final api = EnumVariant(Api.values);
 
-enum Isolate {
-  main,
-  worker,
-}
+enum Isolate { main, worker }
 
 final isolate = EnumVariant(
   Isolate.values,
