@@ -48,7 +48,7 @@ enum OS {
 }
 
 /// A target for which a specific [Package] is distributed.
-class Target {
+final class Target {
   Target(this.os);
 
   static final android = Target(OS.android);
@@ -89,7 +89,7 @@ class Target {
 }
 
 /// A linux [Target].
-class LinuxTarget extends Target {
+final class LinuxTarget extends Target {
   LinuxTarget(this.arch) : super(OS.linux);
 
   final String arch;
@@ -105,7 +105,7 @@ class LinuxTarget extends Target {
 }
 
 /// A windows [Target].
-class WindowsTarget extends Target {
+final class WindowsTarget extends Target {
   WindowsTarget(this.arch) : super(OS.windows);
 
   final String arch;
@@ -122,7 +122,7 @@ class WindowsTarget extends Target {
 }
 
 /// A package though which a release of a [Library] is distributed.
-class Package {
+final class Package {
   Package({
     required this.library,
     required this.release,
