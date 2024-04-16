@@ -45,7 +45,7 @@ import 'zone_span.dart';
 ///
 /// Whether or not internal operations are traced is controlled by the
 /// [traceInternalOperations] option (defaults to `false`).
-class CouchbaseLiteIntegration extends Integration {
+final class CouchbaseLiteIntegration extends Integration {
   /// Creates a Sentry [Integration] that integrates CBL Dart with Sentry.
   CouchbaseLiteIntegration({
     this.tracingEnabled,
