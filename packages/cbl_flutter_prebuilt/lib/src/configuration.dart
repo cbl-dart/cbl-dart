@@ -49,7 +49,7 @@ final packageConfigurations = [
 
 enum Edition { community, enterprise }
 
-class LibraryInfo {
+final class LibraryInfo {
   const LibraryInfo({
     required this.version,
     required this.release,
@@ -61,7 +61,7 @@ class LibraryInfo {
   final String apiPackageRelease;
 }
 
-class PackageConfiguration {
+final class PackageConfiguration {
   const PackageConfiguration({
     required this.name,
     required this.version,
