@@ -65,7 +65,7 @@ IsolateWorker _timeBombWorker(Duration timeout) => IsolateWorker(
       debugName: 'TimeBomb($timeout)',
     );
 
-class _TimeBombWorkerDelegate extends IsolateWorkerDelegate {
+final class _TimeBombWorkerDelegate extends IsolateWorkerDelegate {
   _TimeBombWorkerDelegate(this.timeout);
 
   final Duration timeout;

@@ -20,7 +20,7 @@ void setupTestBinding() {
   FlutterCblE2eTestBinding.ensureInitialized();
 }
 
-class FlutterCblE2eTestBinding extends CblE2eTestBinding {
+final class FlutterCblE2eTestBinding extends CblE2eTestBinding {
   static void ensureInitialized() {
     CblE2eTestBinding.ensureInitialized(FlutterCblE2eTestBinding.new);
   }
