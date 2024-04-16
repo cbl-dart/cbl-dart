@@ -39,7 +39,7 @@ const _builtinSupportedTypes = [
   _blobType,
 ];
 
-class TypedDataAnalyzer {
+final class TypedDataAnalyzer {
   TypedDataAnalyzer(this.resolver);
 
   final Resolver resolver;

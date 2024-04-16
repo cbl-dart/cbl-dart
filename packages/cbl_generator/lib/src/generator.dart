@@ -10,7 +10,7 @@ import 'model.dart';
 import 'typed_data_code_builder.dart';
 import 'typed_database_code_builder.dart';
 
-class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
+final class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
   _TypedDictionaryGeneratorBase(this.kind);
 
   final TypedDataObjectKind kind;
@@ -27,17 +27,17 @@ class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
   }
 }
 
-class TypedDictionaryGenerator
+final class TypedDictionaryGenerator
     extends _TypedDictionaryGeneratorBase<TypedDictionary> {
   TypedDictionaryGenerator() : super(TypedDataObjectKind.dictionary);
 }
 
-class TypedDocumentGenerator
+final class TypedDocumentGenerator
     extends _TypedDictionaryGeneratorBase<TypedDocument> {
   TypedDocumentGenerator() : super(TypedDataObjectKind.document);
 }
 
-class TypedDatabaseGenerator extends Generator {
+final class TypedDatabaseGenerator extends Generator {
   TypeChecker get typeChecker => const TypeChecker.fromRuntime(TypedDatabase);
 
   @override

@@ -4,7 +4,7 @@ import 'package:source_gen/source_gen.dart';
 
 import 'generator.dart';
 
-class TypedDataBuilder extends PartBuilder {
+final class TypedDataBuilder extends PartBuilder {
   TypedDataBuilder({BuilderOptions? options})
       : super(
           [
@@ -33,7 +33,7 @@ $defaultFileHeader
 ''';
 }
 
-class TypedDatabaseBuilder extends LibraryBuilder {
+final class TypedDatabaseBuilder extends LibraryBuilder {
   TypedDatabaseBuilder({BuilderOptions? options})
       : super(
           TypedDatabaseGenerator(),

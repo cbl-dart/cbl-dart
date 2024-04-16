@@ -17,7 +17,7 @@ bool classHasRedirectingUnnamedConstructor(
   return visitor.hasRedirectingConstructor;
 }
 
-class _ClassHasRedirectingUnnamedConstructorVisitor
+final class _ClassHasRedirectingUnnamedConstructorVisitor
     extends RecursiveAstVisitor<void> {
   _ClassHasRedirectingUnnamedConstructorVisitor(this.targetConstructor);
 
@@ -42,7 +42,7 @@ bool classHasMixin(AstNode clazz, String mixinName) {
   return visitor.hasMixin;
 }
 
-class _ClassHasMixinVisitor extends RecursiveAstVisitor<void> {
+final class _ClassHasMixinVisitor extends RecursiveAstVisitor<void> {
   _ClassHasMixinVisitor(this.mixinName);
 
   final String mixinName;

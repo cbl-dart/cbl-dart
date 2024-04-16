@@ -3,7 +3,7 @@ import 'package:source_helper/source_helper.dart';
 import 'model.dart';
 import 'utils.dart';
 
-class TypeDataCodeBuilder {
+final class TypeDataCodeBuilder {
   TypeDataCodeBuilder({
     required this.object,
   }) {
