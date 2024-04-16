@@ -4,7 +4,7 @@ import 'package:cbl_flutter_platform_interface/cbl_flutter_platform_interface.da
 import 'package:cbl_flutter_platform_interface/standard_cbl_flutter_platform.dart';
 
 /// Platform implementation of `cbl_flutter` for the Community Edition.
-class CblFlutterCe {
+abstract final class CblFlutterCe {
   /// Registers this platform implementation as the current implementation.
   static void registerWith() {
     CblFlutterPlatform.instance =
