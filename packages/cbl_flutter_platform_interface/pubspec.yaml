@@ -13,4 +13,3 @@ dependencies:
   cbl: ^3.0.0-dev.3
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
