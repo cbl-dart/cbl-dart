@@ -32,7 +32,7 @@ import 'cbl_flutter_platform_interface.dart';
 ///
 /// The libraries are expected to be located next to the app executable, with
 /// the names `cblite.dll` and `cblitedart.dll`.
-class StandardCblFlutterPlatform extends CblFlutterPlatform {
+final class StandardCblFlutterPlatform extends CblFlutterPlatform {
   StandardCblFlutterPlatform({required this.enterpriseEdition});
 
   /// Whether the provided [libraries] are the enterprise edition.
