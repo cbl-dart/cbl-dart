@@ -6,7 +6,7 @@ import 'package:sentry/sentry.dart';
 import 'operation_debug_info.dart';
 import 'zone_span.dart';
 
-class SentryTracingDelegate extends TracingDelegate {
+final class SentryTracingDelegate extends TracingDelegate {
   SentryTracingDelegate({
     required this.sentryDsn,
     this.tracingEnabled = true,
