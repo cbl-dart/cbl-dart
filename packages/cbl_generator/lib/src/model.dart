@@ -7,7 +7,7 @@ enum TypedDataObjectKind {
   dictionary,
 }
 
-class TypedDataObjectModel {
+final class TypedDataObjectModel {
   TypedDataObjectModel({
     required this.libraryUri,
     required this.kind,
@@ -39,7 +39,7 @@ class TypedDataObjectModel {
       metadataFields.firstWhereOrNull((field) => field.kind == kind);
 }
 
-class TypedDataObjectClassNames {
+final class TypedDataObjectClassNames {
   TypedDataObjectClassNames(this.declaringClassName);
 
   final String declaringClassName;
@@ -49,7 +49,7 @@ class TypedDataObjectClassNames {
   String get mutableClassName => 'Mutable$declaringClassName';
 }
 
-abstract class TypedDataObjectField {
+abstract final class TypedDataObjectField {
   TypedDataObjectField({
     required this.type,
     required this.name,
@@ -69,7 +69,7 @@ enum DocumentMetadataKind {
   revisionId,
 }
 
-class TypedDataMetadataField extends TypedDataObjectField {
+final class TypedDataMetadataField extends TypedDataObjectField {
   TypedDataMetadataField({
     required super.type,
     required super.name,
@@ -80,7 +80,7 @@ class TypedDataMetadataField extends TypedDataObjectField {
   final DocumentMetadataKind kind;
 }
 
-class TypedDataObjectProperty extends TypedDataObjectField {
+final class TypedDataObjectProperty extends TypedDataObjectField {
   TypedDataObjectProperty({
     required super.type,
     required super.name,
@@ -96,7 +96,7 @@ class TypedDataObjectProperty extends TypedDataObjectField {
   final String? defaultValueCode;
 }
 
-class ConstructorParameter {
+final class ConstructorParameter {
   ConstructorParameter({
     required this.type,
     required this.isPositional,
@@ -110,7 +110,7 @@ class ConstructorParameter {
   final String? documentationComment;
 }
 
-class TypedDatabaseModel {
+final class TypedDatabaseModel {
   TypedDatabaseModel({
     required this.libraryUri,
     required this.declaringClassName,
@@ -124,7 +124,7 @@ class TypedDatabaseModel {
   String get className => declaringClassName.replaceFirst(r'$', '');
 }
 
-abstract class TypedDataType {
+abstract final class TypedDataType {
   TypedDataType({
     required this.dartType,
     required this.mutableDartType,
@@ -148,7 +148,7 @@ abstract class TypedDataType {
       isNullable ? '$mutableDartType?' : mutableDartType;
 }
 
-class BuiltinScalarType extends TypedDataType {
+final class BuiltinScalarType extends TypedDataType {
   BuiltinScalarType({required super.dartType, super.isNullable = false})
       : super(mutableDartType: dartType, isCached: false);
 
@@ -159,7 +159,7 @@ class BuiltinScalarType extends TypedDataType {
       );
 }
 
-class CustomScalarType extends TypedDataType {
+final class CustomScalarType extends TypedDataType {
   CustomScalarType({
     required super.dartType,
     required super.isNullable,
@@ -169,21 +169,21 @@ class CustomScalarType extends TypedDataType {
   final ScalarConverterInfo converter;
 }
 
-class ScalarConverterInfo {
+final class ScalarConverterInfo {
   ScalarConverterInfo({required this.type, required this.code});
 
   final DartType type;
   final String code;
 }
 
-class TypedDataObjectType extends TypedDataType {
+final class TypedDataObjectType extends TypedDataType {
   TypedDataObjectType({required super.dartType, required super.isNullable})
       : super(mutableDartType: 'Mutable$dartType', isCached: true);
 
   late final classNames = TypedDataObjectClassNames(dartType);
 }
 
-class TypedDataListType extends TypedDataType {
+final class TypedDataListType extends TypedDataType {
   TypedDataListType({required super.isNullable, required this.elementType})
       : super(
           dartType: 'List<${elementType.dartType}>',

@@ -5,7 +5,7 @@ import 'package:source_helper/source_helper.dart';
 
 import 'model.dart';
 
-class TypeDataBaseCodeBuilder {
+final class TypeDataBaseCodeBuilder {
   TypeDataBaseCodeBuilder(this.model);
 
   final TypedDatabaseModel model;
