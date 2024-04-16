@@ -1,4 +1,7 @@
 import 'package:sentry/sentry.dart';
+import 'package:sentry/src/metrics/metric.dart';
+import 'package:sentry/src/metrics/metrics_aggregator.dart';
+import 'package:sentry/src/metrics/metrics_api.dart';
 import 'package:sentry/src/profiling.dart';
 
 import 'mock_span.dart';
@@ -82,6 +85,13 @@ class MockHub implements Hub {
   SentryId get lastEventId => throw UnimplementedError();
 
   @override
+  MetricsApi get metricsApi => throw UnimplementedError();
+
+  @override
+  // ignore: invalid_use_of_internal_member
+  MetricsAggregator? get metricsAggregator => throw UnimplementedError();
+
+  @override
   void setSpanContext(
     Object? throwable,
     ISentrySpan span,
@@ -135,4 +145,9 @@ class MockHub implements Hub {
     transactions.add(span);
     return span;
   }
+
+  @override
+  // ignore: invalid_use_of_internal_member
+  Future<SentryId> captureMetrics(Map<int, Iterable<Metric>> metricsBuckets) =>
+      throw UnimplementedError();
 }

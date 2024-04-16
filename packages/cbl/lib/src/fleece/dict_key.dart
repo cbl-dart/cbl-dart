@@ -38,9 +38,13 @@ class _OptimizedDictKey extends DictKey {
     final totalSize = _utf8StringStart + utf8StringSize;
     final memory = SliceResult(totalSize);
 
+    // TODO(blaugold): use + operator once we have min SDK 3.3
     final memoryBuffer = memory.buf;
+    // ignore: deprecated_member_use
     final flDictKey = memoryBuffer.elementAt(_flDictKeyStart).cast<FLDictKey>();
+    // ignore: deprecated_member_use
     final flString = memoryBuffer.elementAt(_flStringStart).cast<FLString>();
+    // ignore: deprecated_member_use
     final utf8String = memoryBuffer.elementAt(_utf8StringStart);
 
     final encodedString = nativeUtf8StringEncoder.encodeToBuffer(

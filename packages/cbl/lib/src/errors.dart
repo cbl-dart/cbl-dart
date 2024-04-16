@@ -284,6 +284,9 @@ class WebSocketException extends CouchbaseLiteException {
 class InvalidJsonException extends CouchbaseLiteException {
   // ignore: deprecated_consistency
   /// Creates an exception which is thrown when JSON data is invalid.
+  @Deprecated(
+    'Use FleeceException instead. This class will be removed in the future.',
+  )
   InvalidJsonException(this.message);
 
   @override
