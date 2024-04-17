@@ -23,6 +23,7 @@ abstract class Data {
   TransferableData _createTransferableData();
 }
 
+// ignore: one_member_abstracts
 abstract class TransferableData {
   factory TransferableData(Data data) => data._createTransferableData();
 
