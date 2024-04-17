@@ -48,7 +48,6 @@ class IsolateWorker {
         delegate: delegate,
       ),
       debugName: debugName,
-      errorsAreFatal: true,
       onError: _setupErrorHandler(),
       onExit: _setupOnExitHandler(),
     );

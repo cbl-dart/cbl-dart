@@ -19,6 +19,7 @@ typedef ConflictResolverFunction = FutureOr<Document?> Function(
 /// versions of a replicated [Document].
 ///
 /// {@category Replication}
+// ignore: one_member_abstracts
 abstract class ConflictResolver {
   /// Constructor to allow subclasses to extend [ConflictResolver].
   const ConflictResolver();
@@ -109,6 +110,7 @@ typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
 /// {@category Replication}
 /// {@category Typed Data}
 @experimental
+// ignore: one_member_abstracts
 abstract class TypedConflictResolver {
   /// Constructor to allow subclasses to extend [TypedConflictResolver].
   const TypedConflictResolver();
