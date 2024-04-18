@@ -1,3 +1,10 @@
+## 2.0.0-dev.5
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: fix analyzer issues. ([846cb48d](https://github.com/cbl-dart/cbl-dart/commit/846cb48d86f7309a7f8a65ecc6be0bb71b7d7254))
+ - **BREAKING** **FEAT**(cbl_sentry): add class modifiers ([#569](https://github.com/cbl-dart/cbl-dart/issues/569)). ([a61344c1](https://github.com/cbl-dart/cbl-dart/commit/a61344c1786cc8422d8cff626bedc7309273bf21))
+
 ## 2.0.0-dev.4
 
  - Update a dependency to the latest release.

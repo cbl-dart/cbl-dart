@@ -1,3 +1,9 @@
+## 3.0.0-dev.4
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(cbl_flutter_platform_interface): add class modifiers ([#567](https://github.com/cbl-dart/cbl-dart/issues/567)). ([01f67681](https://github.com/cbl-dart/cbl-dart/commit/01f67681e298f4fec3e39aaa89307417da58bd89))
+
 ## 3.0.0-dev.3
 
  - Update a dependency to the latest release.

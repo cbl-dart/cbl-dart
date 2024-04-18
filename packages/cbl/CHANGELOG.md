@@ -1,3 +1,11 @@
+## 3.0.0-dev.4
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**: fix analyzer issues. ([846cb48d](https://github.com/cbl-dart/cbl-dart/commit/846cb48d86f7309a7f8a65ecc6be0bb71b7d7254))
+ - **REFACTOR**: merge `cbl_ffi` into `cbl` ([#554](https://github.com/cbl-dart/cbl-dart/issues/554)). ([08039cff](https://github.com/cbl-dart/cbl-dart/commit/08039cff6e1328b88098af34884f4861f94cb7a5))
+ - **BREAKING** **FEAT**(cbl): add class modifiers ([#575](https://github.com/cbl-dart/cbl-dart/issues/575)). ([672df44c](https://github.com/cbl-dart/cbl-dart/commit/672df44c64374f1b3ad9ebd4d93272ea9a51d856))
+
 ## 3.0.0-dev.3
 
 > Note: This release has breaking changes.

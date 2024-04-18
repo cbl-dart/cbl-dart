@@ -1,3 +1,9 @@
+## 3.0.0-dev.4
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**(cbl_flutter): add class modifiers ([#571](https://github.com/cbl-dart/cbl-dart/issues/571)). ([ebdd104a](https://github.com/cbl-dart/cbl-dart/commit/ebdd104a179d9360d814d37afd6ef86ee810d71c))
+
 ## 3.0.0-dev.3
 
 > Note: This release has breaking changes.

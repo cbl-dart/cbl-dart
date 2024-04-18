@@ -1,3 +1,10 @@
+## 0.3.0-dev.4
+
+> Note: This release has breaking changes.
+
+ - **REFACTOR**(cbl_generator): add class modifiers ([#570](https://github.com/cbl-dart/cbl-dart/issues/570)). ([cb49b7e5](https://github.com/cbl-dart/cbl-dart/commit/cb49b7e548c8232db6668df5b8a8f1b0a6afb11d))
+ - **BREAKING** **FEAT**(cbl): add class modifiers ([#575](https://github.com/cbl-dart/cbl-dart/issues/575)). ([672df44c](https://github.com/cbl-dart/cbl-dart/commit/672df44c64374f1b3ad9ebd4d93272ea9a51d856))
+
 ## 0.3.0-dev.3
 
  - **FEAT**(cbl_generator): upgrade to analyzer `6.0.0`. ([6a7832a4](https://github.com/cbl-dart/cbl-dart/commit/6a7832a4df4d13fe422ad363b349ccc3c9c48d32))
