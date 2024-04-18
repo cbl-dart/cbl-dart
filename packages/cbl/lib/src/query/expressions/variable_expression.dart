@@ -4,11 +4,12 @@ import 'expression.dart';
 /// A variable in an [ArrayExpression].
 ///
 /// {@category Query Builder}
-abstract class VariableExpressionInterface extends ExpressionInterface {}
+abstract final class VariableExpressionInterface
+    implements ExpressionInterface {}
 
 // === Impl ====================================================================
 
-class VariableExpressionImpl extends ExpressionImpl
+final class VariableExpressionImpl extends ExpressionImpl
     implements VariableExpressionInterface {
   VariableExpressionImpl(this.propertyPath);
 

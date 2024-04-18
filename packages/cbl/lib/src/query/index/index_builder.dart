@@ -8,7 +8,7 @@ import 'index.dart';
 /// A value index for regular queries.
 ///
 /// {@category Query}
-class ValueIndex extends Index {
+final class ValueIndex implements Index {
   /// Creates a value index from the [ValueIndexItem]s to index.
   factory ValueIndex(Iterable<ValueIndexItem> items) => ValueIndexImpl(items);
 }
@@ -16,7 +16,7 @@ class ValueIndex extends Index {
 /// An item in a [ValueIndex].
 ///
 /// {@category Query}
-class ValueIndexItem {
+final class ValueIndexItem {
   /// Creates a value index item from a [propertyPath] to index.
   factory ValueIndexItem.property(String propertyPath) =>
       ValueIndexItem.expression(Expression.property(propertyPath));
@@ -32,7 +32,7 @@ class ValueIndexItem {
 /// operator.
 ///
 /// {@category Query}
-abstract class FullTextIndex extends Index {
+abstract final class FullTextIndex implements Index {
   /// Creates a full text index from the [FullTextIndexItem]s to index.
   factory FullTextIndex(Iterable<FullTextIndexItem> items) =>
       FullTextIndexImpl(items: items);
@@ -57,7 +57,7 @@ abstract class FullTextIndex extends Index {
 /// An item in a [FullTextIndexItem].
 ///
 /// {@category Query}
-class FullTextIndexItem {
+final class FullTextIndexItem {
   /// Creates a full-text index item from a [propertyPath] to index.
   FullTextIndexItem.property(String propertyPath)
       : _expression = Expression.property(propertyPath) as ExpressionImpl;
@@ -65,12 +65,11 @@ class FullTextIndexItem {
   final ExpressionImpl _expression;
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factor to create query indexes.
 ///
 /// {@category Query}
-class IndexBuilder {
-  IndexBuilder._();
-
+abstract final class IndexBuilder {
   /// Creates a value index with the given value index [items].
   ///
   /// The index items are a list of the properties or expression to be indexed.
@@ -87,7 +86,7 @@ class IndexBuilder {
 
 // === Impl ====================================================================
 
-class ValueIndexImpl implements IndexImplInterface, ValueIndex {
+final class ValueIndexImpl implements IndexImplInterface, ValueIndex {
   ValueIndexImpl(Iterable<ValueIndexItem> items) : _items = items.toList();
 
   final List<ValueIndexItem> _items;
@@ -103,7 +102,7 @@ class ValueIndexImpl implements IndexImplInterface, ValueIndex {
       );
 }
 
-class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
+final class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
   FullTextIndexImpl({
     required Iterable<FullTextIndexItem> items,
     bool ignoreAccents = false,

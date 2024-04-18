@@ -3,14 +3,15 @@ import 'expression.dart';
 /// A property expression.
 ///
 /// {@category Query Builder}
-abstract class PropertyExpressionInterface extends ExpressionInterface {
+abstract final class PropertyExpressionInterface
+    implements ExpressionInterface {
   /// Specifies the [alias] of the data source to query the data from.
   ExpressionInterface from(String alias);
 }
 
 // === Impl ====================================================================
 
-class PropertyExpressionImpl extends ExpressionImpl
+base class PropertyExpressionImpl extends ExpressionImpl
     implements PropertyExpressionInterface {
   PropertyExpressionImpl(String propertyPath, {String? from})
       : _propertyPath = propertyPath,

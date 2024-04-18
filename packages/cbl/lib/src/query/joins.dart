@@ -14,13 +14,13 @@ import 'where.dart';
 /// A query component representing the `JOIN` clauses of a [Query].
 ///
 /// {@category Query Builder}
-abstract class Joins
+abstract final class Joins
     implements Query, WhereRouter, OrderByRouter, LimitRouter {}
 
 /// Version of [Joins] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncJoins
+abstract final class SyncJoins
     implements
         Joins,
         SyncQuery,
@@ -31,7 +31,7 @@ abstract class SyncJoins
 /// Version of [Joins] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncJoins
+abstract final class AsyncJoins
     implements
         Joins,
         AsyncQuery,
@@ -41,7 +41,7 @@ abstract class AsyncJoins
 
 // === Impl ====================================================================
 
-class SyncJoinsImpl extends SyncBuilderQuery implements SyncJoins {
+final class SyncJoinsImpl extends SyncBuilderQuery implements SyncJoins {
   SyncJoinsImpl({
     required SyncBuilderQuery query,
     required Iterable<JoinInterface> joins,
@@ -86,7 +86,7 @@ class SyncJoinsImpl extends SyncBuilderQuery implements SyncJoins {
       SyncLimitImpl(query: this, limit: limit, offset: offset);
 }
 
-class AsyncJoinsImpl extends AsyncBuilderQuery implements AsyncJoins {
+final class AsyncJoinsImpl extends AsyncBuilderQuery implements AsyncJoins {
   AsyncJoinsImpl({
     required AsyncBuilderQuery query,
     required Iterable<JoinInterface> joins,

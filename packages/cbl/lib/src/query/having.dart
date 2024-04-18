@@ -11,23 +11,23 @@ import 'router/order_by_router.dart';
 /// A query component representing the `HAVING` clause of a [Query].
 ///
 /// {@category Query Builder}
-abstract class Having implements Query, OrderByRouter, LimitRouter {}
+abstract final class Having implements Query, OrderByRouter, LimitRouter {}
 
 /// Version of [Having] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncHaving
+abstract final class SyncHaving
     implements Having, SyncQuery, SyncOrderByRouter, SyncLimitRouter {}
 
 /// Version of [Having] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncHaving
+abstract final class AsyncHaving
     implements Having, AsyncQuery, AsyncOrderByRouter, AsyncLimitRouter {}
 
 // === Impl ====================================================================
 
-class SyncHavingImpl extends SyncBuilderQuery implements SyncHaving {
+final class SyncHavingImpl extends SyncBuilderQuery implements SyncHaving {
   SyncHavingImpl({
     required SyncBuilderQuery query,
     required ExpressionInterface expression,
@@ -68,7 +68,7 @@ class SyncHavingImpl extends SyncBuilderQuery implements SyncHaving {
       SyncLimitImpl(query: this, limit: limit, offset: offset);
 }
 
-class AsyncHavingImpl extends AsyncBuilderQuery implements AsyncHaving {
+final class AsyncHavingImpl extends AsyncBuilderQuery implements AsyncHaving {
   AsyncHavingImpl({
     required AsyncBuilderQuery query,
     required ExpressionInterface expression,

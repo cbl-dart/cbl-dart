@@ -5,7 +5,7 @@ import '../query.dart';
 /// A description of a [Database] index. Indexes improve [Query] performance.
 ///
 /// {@category Query}
-abstract class Index {}
+abstract interface class Index {}
 
 /// A language which can be used to configure as the primary language for a full
 /// text index.
@@ -32,7 +32,7 @@ enum FullTextLanguage {
 // === Impl ====================================================================
 
 /// Interface for classes wich implement [Index].
-abstract class IndexImplInterface extends Index {
+abstract interface class IndexImplInterface extends Index {
   /// Returns this index specified as a [CBLIndexSpec].
   CBLIndexSpec toCBLIndexSpec();
 }

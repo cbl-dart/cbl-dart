@@ -12,7 +12,7 @@ import '../query.dart';
 /// the query.
 ///
 /// {@category Query}
-abstract class Parameters {
+abstract final class Parameters {
   /// Creates new [Parameters], optionally initialized with parameters from a
   /// plain map.
   factory Parameters([Map<String, Object?>? parameters]) =>
@@ -85,7 +85,7 @@ abstract class Parameters {
   void setDictionary(Dictionary? value, {required String name});
 }
 
-class ParametersImpl implements Parameters, FleeceEncodable {
+final class ParametersImpl implements Parameters, FleeceEncodable {
   ParametersImpl([Map<String, Object?>? parameters]) : _readonly = false {
     if (parameters != null) {
       for (final entry in parameters.entries) {

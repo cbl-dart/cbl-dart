@@ -3,12 +3,12 @@ import 'expressions/expression.dart';
 /// Represents on of the expressions in the `ORDER BY` query clause.
 ///
 /// {@category Query Builder}
-abstract class OrderingInterface {}
+abstract final class OrderingInterface {}
 
 /// Allows the specification of the direction of an ordering expression.
 ///
 /// {@category Query Builder}
-abstract class SortOrder extends OrderingInterface {
+abstract final class SortOrder extends OrderingInterface {
   /// Specifies ascending sort order.
   OrderingInterface ascending();
 
@@ -16,12 +16,11 @@ abstract class SortOrder extends OrderingInterface {
   OrderingInterface descending();
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for ordering expressions of the `ORDER BY` clause of a query.
 ///
 /// {@category Query Builder}
-class Ordering {
-  Ordering._();
-
+abstract final class Ordering {
   /// Creates an ordering expression from the given [propertyPath].
   static SortOrder property(String propertyPath) =>
       expression(Expression.property(propertyPath));
@@ -38,7 +37,7 @@ enum Order {
   descending,
 }
 
-class OrderingImpl implements OrderingInterface {
+final class OrderingImpl implements OrderingInterface {
   OrderingImpl({
     required ExpressionInterface expression,
     bool? isAscending,
@@ -52,7 +51,7 @@ class OrderingImpl implements OrderingInterface {
       _isAscending ? _expression.toJson() : ['DESC', _expression.toJson()];
 }
 
-class SortOrderImpl extends OrderingImpl implements SortOrder {
+final class SortOrderImpl extends OrderingImpl implements SortOrder {
   SortOrderImpl({required super.expression, super.isAscending});
 
   @override

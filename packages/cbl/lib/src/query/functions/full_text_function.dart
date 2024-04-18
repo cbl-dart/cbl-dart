@@ -1,11 +1,10 @@
 import '../expressions/expression.dart';
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating full-text search function expressions.
 ///
 /// {@category Query Builder}
-class FullTextFunction {
-  FullTextFunction._();
-
+abstract final class FullTextFunction {
   /// Creates an expression which evaluates to the rank of a result when
   /// matching against the full-text index with given [indexName].
   ///

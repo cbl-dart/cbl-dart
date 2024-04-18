@@ -6,7 +6,7 @@ import '../query.dart';
 ///
 /// {@category Query Builder}
 // ignore: one_member_abstracts
-abstract class HavingRouter {
+abstract interface class HavingRouter {
   /// Creates and returns a `HAVING` clause query component with the given
   /// [expression].
   Having having(ExpressionInterface expression);
@@ -15,7 +15,7 @@ abstract class HavingRouter {
 /// Version of [HavingRouter] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncHavingRouter implements HavingRouter {
+abstract interface class SyncHavingRouter implements HavingRouter {
   @override
   SyncHaving having(ExpressionInterface expression);
 }
@@ -23,7 +23,7 @@ abstract class SyncHavingRouter implements HavingRouter {
 /// Version of [HavingRouter] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncHavingRouter implements HavingRouter {
+abstract interface class AsyncHavingRouter implements HavingRouter {
   @override
   AsyncHaving having(ExpressionInterface expression);
 }

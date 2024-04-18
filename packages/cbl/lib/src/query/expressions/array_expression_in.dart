@@ -7,7 +7,7 @@ import 'variable_expression.dart';
 ///
 /// {@category Query Builder}
 // ignore: one_member_abstracts
-abstract class ArrayExpressionIn {
+abstract final class ArrayExpressionIn {
   /// Specifies the array or the [expression] evaluated as an array of a range
   /// predicate.
   ///
@@ -20,7 +20,7 @@ abstract class ArrayExpressionIn {
 
 // === Impl ====================================================================
 
-class ArrayExpressionInImpl implements ArrayExpressionIn {
+final class ArrayExpressionInImpl implements ArrayExpressionIn {
   ArrayExpressionInImpl(
       Quantifier quantifier, VariableExpressionInterface variable)
       : _quantifier = quantifier,

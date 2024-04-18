@@ -20,7 +20,7 @@ import 'where.dart';
 /// A query component representing the `FROM` clause of a [Query].
 ///
 /// {@category Query Builder}
-abstract class From
+abstract final class From
     implements
         Query,
         JoinRouter,
@@ -32,7 +32,7 @@ abstract class From
 /// Version of [From] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncFrom
+abstract final class SyncFrom
     implements
         From,
         SyncQuery,
@@ -45,7 +45,7 @@ abstract class SyncFrom
 /// Version of [From] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncFrom
+abstract final class AsyncFrom
     implements
         From,
         AsyncQuery,
@@ -57,7 +57,7 @@ abstract class AsyncFrom
 
 // === Impl ====================================================================
 
-class SyncFromImpl extends SyncBuilderQuery implements SyncFrom {
+final class SyncFromImpl extends SyncBuilderQuery implements SyncFrom {
   SyncFromImpl({
     required BuilderQueryMixin query,
     required DataSourceInterface from,
@@ -162,7 +162,7 @@ class SyncFromImpl extends SyncBuilderQuery implements SyncFrom {
       SyncLimitImpl(query: this, limit: limit, offset: offset);
 }
 
-class AsyncFromImpl extends AsyncBuilderQuery implements AsyncFrom {
+final class AsyncFromImpl extends AsyncBuilderQuery implements AsyncFrom {
   AsyncFromImpl({
     required BuilderQueryMixin query,
     required DataSourceInterface from,

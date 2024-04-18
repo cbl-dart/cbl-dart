@@ -6,7 +6,7 @@ import 'variable_expression.dart';
 ///
 /// {@category Query Builder}
 // ignore: one_member_abstracts
-abstract class ArrayExpressionSatisfies {
+abstract final class ArrayExpressionSatisfies {
   /// Specifies the condition that array elements are matched against, in a
   /// range predicate.
   ///
@@ -18,7 +18,7 @@ abstract class ArrayExpressionSatisfies {
 
 // === Impl ====================================================================
 
-class ArrayExpressionSatisfiesImpl implements ArrayExpressionSatisfies {
+final class ArrayExpressionSatisfiesImpl implements ArrayExpressionSatisfies {
   ArrayExpressionSatisfiesImpl(
     Quantifier quantifier,
     VariableExpressionInterface variable,

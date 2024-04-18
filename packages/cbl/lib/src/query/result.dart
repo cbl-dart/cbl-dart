@@ -28,7 +28,7 @@ import 'result_set.dart';
 ///    columns and starts at `1`.
 ///
 /// {@category Query}
-abstract class Result
+abstract final class Result
     implements Iterable<String>, ArrayInterface, DictionaryInterface {
   /// The number of column in this result.
   @override
@@ -112,7 +112,7 @@ abstract class Result
   String toJson();
 }
 
-class ResultImpl with IterableMixin<String> implements Result {
+final class ResultImpl with IterableMixin<String> implements Result {
   factory ResultImpl.fromTransferableValue(
     TransferableValue value, {
     required DatabaseMContext context,

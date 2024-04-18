@@ -32,7 +32,7 @@ import 'select_result.dart';
 
 final _bindings = cblBindings.query;
 
-class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
+base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   FfiQuery({
     FfiDatabase? super.database,
     required super.language,
@@ -179,7 +179,7 @@ class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   }
 }
 
-class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
+final class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   FfiResultSet(
     Pointer<CBLResultSet> pointer, {
     required FfiQuery query,
@@ -239,7 +239,7 @@ class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   String toString() => 'FfiResultSet()';
 }
 
-class ResultSetIterator
+final class ResultSetIterator
     with IterableMixin<fl.Array>
     implements Iterator<fl.Array>, Finalizable {
   ResultSetIterator.fromPointer(this._pointer, {this.encodeArray = false}) {
@@ -275,7 +275,7 @@ class ResultSetIterator
   }
 }
 
-abstract class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
+abstract base class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
   SyncBuilderQuery({
     BuilderQueryMixin? query,
     Iterable<SelectResultInterface>? selects,

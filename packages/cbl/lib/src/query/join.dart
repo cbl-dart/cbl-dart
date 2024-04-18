@@ -5,23 +5,22 @@ import 'query.dart';
 /// Represent a `JOIN` clause in a [Query].
 ///
 /// {@category Query Builder}
-abstract class JoinInterface {}
+abstract final class JoinInterface {}
 
 /// Represents the `ON` clause of `JOIN` clause.
 ///
 /// {@category Query Builder}
 // ignore: one_member_abstracts
-abstract class JoinOnInterface {
+abstract final class JoinOnInterface {
   /// Specifies the given [expression] as the join condition.
   JoinInterface on(ExpressionInterface expression);
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating `JOIN` clauses.
 ///
 /// {@category Query Builder}
-class Join {
-  Join._();
-
+abstract final class Join {
   /// Creates a `JOIN` with the given [dataSource].
   ///
   /// This is the same as an `INNER JOIN`.
@@ -54,7 +53,7 @@ enum JoinType {
   inner,
 }
 
-class JoinOnImpl implements JoinOnInterface {
+final class JoinOnImpl implements JoinOnInterface {
   JoinOnImpl({
     JoinType? type,
     required DataSourceInterface dataSource,
@@ -69,7 +68,7 @@ class JoinOnImpl implements JoinOnInterface {
       JoinImpl(type: _type, dataSource: _dataSource, on: expression);
 }
 
-class JoinImpl implements JoinInterface {
+final class JoinImpl implements JoinInterface {
   JoinImpl({
     JoinType? type,
     required DataSourceInterface dataSource,
