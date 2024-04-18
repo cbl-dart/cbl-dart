@@ -7,7 +7,9 @@ import '../service/proxy_object.dart';
 import '../support/encoding.dart';
 import 'document.dart';
 
-class ProxyDocumentDelegate extends DocumentDelegate with ProxyObjectMixin {
+final class ProxyDocumentDelegate
+    with ProxyObjectMixin
+    implements DocumentDelegate {
   ProxyDocumentDelegate.fromState(
     DocumentState state, {
     ProxyDatabase? database,

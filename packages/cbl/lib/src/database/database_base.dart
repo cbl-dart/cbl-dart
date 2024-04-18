@@ -204,7 +204,7 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   }
 }
 
-class _Transaction {
+final class _Transaction {
   _Transaction(this.database);
 
   static _Transaction? get current =>
@@ -241,8 +241,8 @@ class _Transaction {
   }
 }
 
-abstract class SaveTypedDocumentBase<D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject> implements SaveTypedDocument<D, MD> {
   SaveTypedDocumentBase(this.database, this.document)
       :
         // This call ensures that the document type D is registered with the

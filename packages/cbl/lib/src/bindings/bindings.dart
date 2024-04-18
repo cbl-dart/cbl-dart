@@ -15,7 +15,7 @@ import 'tracing.dart';
 // ignore: do_not_use_environment
 const useIsLeaf = bool.fromEnvironment('cblFfiUseIsLeaf');
 
-abstract class Bindings {
+abstract base class Bindings {
   Bindings(Bindings parent) : libs = parent.libs {
     parent._children.add(this);
   }
@@ -27,7 +27,7 @@ abstract class Bindings {
   List<Bindings> get _children => [];
 }
 
-class CBLBindings extends Bindings {
+final class CBLBindings extends Bindings {
   CBLBindings(LibrariesConfiguration config)
       : super.root(DynamicLibraries.fromConfig(config)) {
     base = BaseBindings(this);

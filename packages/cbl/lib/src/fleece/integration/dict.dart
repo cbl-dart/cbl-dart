@@ -9,7 +9,7 @@ import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
 
-class MDict extends MCollection {
+final class MDict extends MCollection {
   MDict()
       : _dict = null,
         _values = {},
@@ -209,7 +209,7 @@ class MDict extends MCollection {
   }
 }
 
-class _MValueWithKey extends MValue {
+final class _MValueWithKey extends MValue {
   _MValueWithKey(this.key, Pointer<FLValue> value) : super.withValue(value);
 
   final Pointer<FLValue> key;

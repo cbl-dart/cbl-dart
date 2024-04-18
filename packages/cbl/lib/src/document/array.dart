@@ -16,7 +16,7 @@ import 'fragment.dart';
 /// Defines a set of methods for readonly accessing array data.
 ///
 /// {@category Document}
-abstract class ArrayInterface implements ArrayFragment {
+abstract interface class ArrayInterface implements ArrayFragment {
   /// The number of elements in this array.
   int get length;
 
@@ -105,7 +105,7 @@ abstract class ArrayInterface implements ArrayFragment {
 /// Provides readonly access to array data.
 ///
 /// {@category Document}
-abstract class Array implements ArrayInterface, Iterable<Object?> {
+abstract final class Array implements ArrayInterface, Iterable<Object?> {
   /// Returns a mutable copy of this array.
   MutableArray toMutable();
 
@@ -116,7 +116,7 @@ abstract class Array implements ArrayInterface, Iterable<Object?> {
 /// Defines a set of methods for getting and setting array data.
 ///
 /// {@category Document}
-abstract class MutableArrayInterface
+abstract interface class MutableArrayInterface
     implements ArrayInterface, MutableArrayFragment {
   // === Set ===================================================================
 
@@ -297,7 +297,7 @@ abstract class MutableArrayInterface
 /// Provides access to array data.
 ///
 /// {@category Document}
-abstract class MutableArray implements Array, MutableArrayInterface {
+abstract final class MutableArray implements Array, MutableArrayInterface {
   /// Creates a [MutableArray], optionally initialized with [data].
   ///
   /// {@template cbl.MutableArray.allowedValueTypes}
@@ -315,7 +315,7 @@ abstract class MutableArray implements Array, MutableArrayInterface {
   }
 }
 
-class ArrayImpl
+final class ArrayImpl
     with IterableMixin<Object?>
     implements Array, MCollectionWrapper, FleeceEncodable, CblConversions {
   ArrayImpl(this._array);
@@ -420,7 +420,7 @@ class ArrayImpl
   String toString() => toPlainList().toString();
 }
 
-class MutableArrayImpl extends ArrayImpl implements MutableArray {
+final class MutableArrayImpl extends ArrayImpl implements MutableArray {
   MutableArrayImpl(super.array);
 
   // === Set ===================================================================

@@ -81,7 +81,7 @@ void main() {
   });
 }
 
-class TestLogger extends Logger {
+final class TestLogger extends Logger {
   TestLogger(this.callback, {LogLevel level = LogLevel.info}) : super(level);
 
   void Function(LogLevel level, LogDomain domain, String message) callback;

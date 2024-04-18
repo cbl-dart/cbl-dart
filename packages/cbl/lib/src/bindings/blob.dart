@@ -49,7 +49,7 @@ typedef _FLSlot_SetBlob = void Function(
   Pointer<CBLBlob> blob,
 );
 
-class BlobBindings extends Bindings {
+final class BlobBindings extends Bindings {
   BlobBindings(super.parent) {
     _createWithData = libs.cbl
         .lookupFunction<_CBLBlob_CreateWithData, _CBLBlob_CreateWithData>(
@@ -158,7 +158,7 @@ typedef _CBLBlobReader_Close_C = Void Function(
   Pointer<CBLBlobReadStream> stream,
 );
 
-class BlobReadStreamBindings extends Bindings {
+final class BlobReadStreamBindings extends Bindings {
   BlobReadStreamBindings(super.parent) {
     _openContentStream = libs.cbl
         .lookupFunction<_CBLBlob_OpenContentStream, _CBLBlob_OpenContentStream>(
@@ -238,7 +238,7 @@ typedef _CBLBlob_CreateWithStream = Pointer<CBLBlob> Function(
   Pointer<CBLBlobWriteStream> stream,
 );
 
-class BlobWriteStreamBindings extends Bindings {
+final class BlobWriteStreamBindings extends Bindings {
   BlobWriteStreamBindings(super.parent) {
     _create =
         libs.cbl.lookupFunction<_CBLBlobWriter_Create, _CBLBlobWriter_Create>(
@@ -292,7 +292,7 @@ class BlobWriteStreamBindings extends Bindings {
 
 // === BlobsBindings ===========================================================
 
-class BlobsBindings extends Bindings {
+final class BlobsBindings extends Bindings {
   BlobsBindings(super.parent) {
     blob = BlobBindings(this);
     readStream = BlobReadStreamBindings(this);

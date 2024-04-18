@@ -3,7 +3,7 @@ import 'replicator.dart';
 /// Event which is emitted when the status of a [Replicator] changes.
 ///
 /// {@category Replication}
-abstract class ReplicatorChange {
+abstract final class ReplicatorChange {
   /// The source [Replicator].
   Replicator get replicator;
 
@@ -11,7 +11,7 @@ abstract class ReplicatorChange {
   ReplicatorStatus get status;
 }
 
-class ReplicatorChangeImpl implements ReplicatorChange {
+final class ReplicatorChangeImpl implements ReplicatorChange {
   ReplicatorChangeImpl(this.replicator, this.status);
 
   @override

@@ -157,7 +157,7 @@ typedef _CBLDart_FLSliceResult_ReleaseByBuf = void Function(
   Pointer<Uint8> buf,
 );
 
-class SliceBindings extends Bindings {
+final class SliceBindings extends Bindings {
   SliceBindings(super.parent) {
     _equal = libs.cbl.lookupFunction<_FLSlice_Equal_C, _FLSlice_Equal>(
       'FLSlice_Equal',
@@ -248,7 +248,7 @@ typedef _FLSharedKeys_Count = int Function(
   Pointer<FLSharedKeys> sharedKeys,
 );
 
-class SharedKeysBindings extends Bindings {
+final class SharedKeysBindings extends Bindings {
   SharedKeysBindings(super.parent) {
     _new = libs.cbl.lookupFunction<_FLSharedKeys_New, _FLSharedKeys_New>(
       'FLSharedKeys_New',
@@ -334,7 +334,7 @@ typedef _FLSlot_SetValue = void Function(
   Pointer<FLValue> value,
 );
 
-class SlotBindings extends Bindings {
+final class SlotBindings extends Bindings {
   SlotBindings(super.parent) {
     _setNull = libs.cbl.lookupFunction<_FLSlot_SetNull_C, _FLSlot_SetNull>(
       'FLSlot_SetNull',
@@ -439,7 +439,7 @@ typedef _FLDoc_GetSharedKeys = Pointer<FLSharedKeys> Function(
   Pointer<FLDoc> doc,
 );
 
-class DocBindings extends Bindings {
+final class DocBindings extends Bindings {
   DocBindings(super.parent) {
     _fromResultData =
         libs.cbl.lookupFunction<_FLDoc_FromResultData_C, _FLDoc_FromResultData>(
@@ -602,7 +602,7 @@ typedef _FLValue_ToJSONX = FLStringResult Function(
   bool canonicalForm,
 );
 
-class ValueBindings extends Bindings {
+final class ValueBindings extends Bindings {
   ValueBindings(super.parent) {
     _fromData = libs.cbl.lookupFunction<_FLValue_FromData_C, _FLValue_FromData>(
       'FLValue_FromData',
@@ -759,7 +759,7 @@ typedef _FLArray_Get = Pointer<FLValue> Function(
   int index,
 );
 
-class ArrayBindings extends Bindings {
+final class ArrayBindings extends Bindings {
   ArrayBindings(super.parent) {
     _count = libs.cbl.lookupFunction<_FLArray_Count_C, _FLArray_Count>(
       'FLArray_Count',
@@ -883,7 +883,7 @@ typedef _FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
   int index,
 );
 
-class MutableArrayBindings extends Bindings {
+final class MutableArrayBindings extends Bindings {
   MutableArrayBindings(super.parent) {
     _mutableCopy =
         libs.cbl.lookupFunction<_FLArray_MutableCopy_C, _FLArray_MutableCopy>(
@@ -1010,7 +1010,7 @@ typedef _FLDict_Get = Pointer<FLValue> Function(
   FLString key,
 );
 
-class DictBindings extends Bindings {
+final class DictBindings extends Bindings {
   DictBindings(super.parent) {
     _get = libs.cbl.lookupFunction<_FLDict_Get, _FLDict_Get>(
       'FLDict_Get',
@@ -1072,7 +1072,7 @@ typedef _FLDict_GetWithKey = Pointer<FLValue> Function(
   Pointer<FLDictKey> key,
 );
 
-class DictKeyBindings extends Bindings {
+final class DictKeyBindings extends Bindings {
   DictKeyBindings(super.parent) {
     _init = libs.cbl.lookupFunction<_FLDictKey_Init, _FLDictKey_Init>(
       'FLDictKey_Init',
@@ -1153,7 +1153,7 @@ typedef _FLMutableDict_GetMutableDict = Pointer<FLMutableDict> Function(
   FLString key,
 );
 
-class MutableDictBindings extends Bindings {
+final class MutableDictBindings extends Bindings {
   MutableDictBindings(super.parent) {
     _mutableCopy =
         libs.cbl.lookupFunction<_FLDict_MutableCopy_C, _FLDict_MutableCopy>(
@@ -1409,7 +1409,7 @@ typedef _CBLDart_FLArrayIterator_Next = bool Function(
   Pointer<CBLDart_FLArrayIterator> iterator,
 );
 
-class FleeceDecoderBindings extends Bindings {
+final class FleeceDecoderBindings extends Bindings {
   FleeceDecoderBindings(super.parent) {
     _dumpData = libs.cbl.lookupFunction<_FLData_Dump_C, _FLData_Dump>(
       'FLData_Dump',
@@ -1735,7 +1735,7 @@ typedef _FLEncoder_GetErrorMessage = Pointer<Utf8> Function(
   Pointer<FLEncoder> encoder,
 );
 
-class FleeceEncoderBindings extends Bindings {
+final class FleeceEncoderBindings extends Bindings {
   FleeceEncoderBindings(super.parent) {
     _new = libs.cbl
         .lookupFunction<_FLEncoder_NewWithOptions_C, _FLEncoder_NewWithOptions>(
@@ -2009,7 +2009,7 @@ class FleeceEncoderBindings extends Bindings {
 
 // === FleeceBindings ==========================================================
 
-class FleeceBindings extends Bindings {
+final class FleeceBindings extends Bindings {
   FleeceBindings(super.parent) {
     slice = SliceBindings(this);
     sharedKeys = SharedKeysBindings(this);

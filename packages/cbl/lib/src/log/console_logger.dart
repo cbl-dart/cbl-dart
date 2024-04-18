@@ -4,9 +4,7 @@ import 'logger.dart';
 /// Logger for writing log messages to the system console.
 ///
 /// {@category Logging}
-abstract class ConsoleLogger {
-  ConsoleLogger._();
-
+abstract final class ConsoleLogger {
   /// The minium [LogLevel] of the log messages to be logged.
   ///
   /// The default log level is [LogLevel.warning].
@@ -17,9 +15,7 @@ abstract class ConsoleLogger {
 
 final _bindings = cblBindings.logging;
 
-class ConsoleLoggerImpl extends ConsoleLogger {
-  ConsoleLoggerImpl() : super._();
-
+final class ConsoleLoggerImpl extends ConsoleLogger {
   @override
   LogLevel get level => _bindings.consoleLevel().toLogLevel();
 

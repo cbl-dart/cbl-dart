@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
-class LibraryConfiguration {
+final class LibraryConfiguration {
   LibraryConfiguration({
     this.process,
     this.name,
@@ -22,7 +22,7 @@ class LibraryConfiguration {
   final bool? isAppleFramework;
 }
 
-class LibrariesConfiguration {
+final class LibrariesConfiguration {
   LibrariesConfiguration({
     required this.cbl,
     required this.cblDart,
@@ -38,7 +38,7 @@ class LibrariesConfiguration {
   final String? directory;
 }
 
-class DynamicLibraries {
+final class DynamicLibraries {
   factory DynamicLibraries.fromConfig(LibrariesConfiguration config) =>
       DynamicLibraries._loadLibraries(
         config,

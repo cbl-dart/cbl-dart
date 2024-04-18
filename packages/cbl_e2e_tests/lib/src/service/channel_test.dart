@@ -314,7 +314,7 @@ SerializationRegistry testSerializationRegistry() => SerializationRegistry()
   ..addSerializableCodec('NonExistentEndpoint', NonExistentEndpoint.deserialize)
   ..addSerializableCodec('TestError', TestError.deserialize);
 
-class EchoRequest extends Request<String> {
+final class EchoRequest extends Request<String> {
   EchoRequest(this.input);
 
   final String input;
@@ -326,7 +326,7 @@ class EchoRequest extends Request<String> {
       EchoRequest(map['input']! as String);
 }
 
-class DataRequest extends Request<MessageData> {
+final class DataRequest extends Request<MessageData> {
   DataRequest(this.input);
 
   final MessageData input;
@@ -345,7 +345,7 @@ class DataRequest extends Request<MessageData> {
   void didReceive() => input.didReceive();
 }
 
-class MessageData extends Serializable {
+final class MessageData extends Serializable {
   MessageData(Data data) : _data = data;
 
   Data get data => _data!;
@@ -376,7 +376,7 @@ class MessageData extends Serializable {
   }
 }
 
-class ThrowTestError extends Request<Null> {
+final class ThrowTestError extends Request<Null> {
   @override
   StringMap serialize(SerializationContext context) => {};
 
@@ -385,7 +385,7 @@ class ThrowTestError extends Request<Null> {
       ThrowTestError();
 }
 
-class InfiniteStream extends Request<Null> {
+final class InfiniteStream extends Request<Null> {
   static const interval = Duration(milliseconds: 10);
 
   @override
@@ -396,7 +396,7 @@ class InfiniteStream extends Request<Null> {
       InfiniteStream();
 }
 
-class NonExistentEndpoint extends Request<Null> {
+final class NonExistentEndpoint extends Request<Null> {
   @override
   StringMap serialize(SerializationContext context) => {};
 
@@ -406,7 +406,7 @@ class NonExistentEndpoint extends Request<Null> {
 }
 
 @immutable
-class TestError extends Serializable implements Exception {
+final class TestError extends Serializable implements Exception {
   const TestError(this.message);
 
   final String message;

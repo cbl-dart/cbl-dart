@@ -13,7 +13,7 @@ import 'value.dart';
 
 final _decoderBinds = cblBindings.fleece.decoder;
 
-abstract class MDelegate {
+abstract base class MDelegate {
   static MDelegate? instance;
 
   MCollection? collectionFromNative(Object? native);
@@ -23,7 +23,7 @@ abstract class MDelegate {
   FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native);
 }
 
-class SimpleMDelegate extends MDelegate {
+final class SimpleMDelegate extends MDelegate {
   @override
   MCollection? collectionFromNative(Object? native) {
     if (native is MCollection) {

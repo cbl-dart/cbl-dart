@@ -401,7 +401,7 @@ A(
   });
 }
 
-class RenderStringTestDict extends TypedDictionaryObject {
+class RenderStringTestDict implements TypedDictionaryObject {
   @override
   dynamic noSuchMethod(Invocation invocation) {}
 

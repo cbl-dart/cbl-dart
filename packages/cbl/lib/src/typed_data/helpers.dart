@@ -10,7 +10,7 @@ import 'typed_object.dart';
 /// Helper functions for use by generated code.
 ///
 /// @nodoc
-class TypedDataHelpers {
+final class TypedDataHelpers {
   TypedDataHelpers._();
 
   @internal

@@ -5,9 +5,7 @@ import 'logger.dart';
 /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
 ///
 /// {@category Logging}
-abstract class Log {
-  Log._();
-
+abstract final class Log {
   /// Console logger writing messages to the system console.
   ConsoleLogger get console;
 
@@ -19,9 +17,7 @@ abstract class Log {
   set custom(Logger? value);
 }
 
-class LogImpl extends Log {
-  LogImpl() : super._();
-
+final class LogImpl extends Log {
   /// Console logger writing messages to the system console.
   @override
   final console = ConsoleLoggerImpl();

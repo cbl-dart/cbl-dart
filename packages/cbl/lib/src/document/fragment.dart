@@ -10,7 +10,7 @@ import 'document.dart';
 /// Readonly access to the data value wrapped by a [Fragment] object.
 ///
 /// {@category Document}
-abstract class FragmentInterface {
+abstract interface class FragmentInterface {
   /// The value of this fragment as a value of type [T].
   T? valueAs<T extends Object>();
 
@@ -51,7 +51,7 @@ abstract class FragmentInterface {
 /// Read and write access to the data value wrapped by a [Fragment] object.
 ///
 /// {@category Document}
-abstract class MutableFragmentInterface implements FragmentInterface {
+abstract interface class MutableFragmentInterface implements FragmentInterface {
   /// Sets the value of this fragment.
   ///
   /// {@macro cbl.MutableArray.allowedValueTypes}
@@ -70,7 +70,7 @@ abstract class MutableFragmentInterface implements FragmentInterface {
 /// Provides subscript access to [Fragment] objects by index.
 ///
 /// {@category Document}
-abstract class ArrayFragment {
+abstract interface class ArrayFragment {
   /// Returns a [Fragment] for the value at the given [index].
   Fragment operator [](int index);
 }
@@ -78,7 +78,7 @@ abstract class ArrayFragment {
 /// Provides subscript access to [MutableFragment] objects by index.
 ///
 /// {@category Document}
-abstract class MutableArrayFragment {
+abstract interface class MutableArrayFragment {
   /// Returns a [MutableFragment] for the value at the given [index].
   MutableFragment operator [](int index);
 }
@@ -86,7 +86,7 @@ abstract class MutableArrayFragment {
 /// Provides subscript access to [Fragment] objects by key.
 ///
 /// {@category Document}
-abstract class DictionaryFragment {
+abstract interface class DictionaryFragment {
   /// Returns a [Fragment] for the value at the given [key].
   Fragment operator [](String key);
 }
@@ -94,7 +94,7 @@ abstract class DictionaryFragment {
 /// Provides subscript access to [MutableFragment] objects by key.
 ///
 /// {@category Document}
-abstract class MutableDictionaryFragment {
+abstract interface class MutableDictionaryFragment {
   /// Returns a [MutableFragment] for the value at the given [key].
   MutableFragment operator [](String key);
 }
@@ -105,7 +105,7 @@ abstract class MutableDictionaryFragment {
 /// nested values which are wrapped by [Fragment] objects.
 ///
 /// {@category Document}
-abstract class Fragment
+abstract interface class Fragment
     implements FragmentInterface, ArrayFragment, DictionaryFragment {
   Fragment operator [](Object indexOrKey);
 }
@@ -116,7 +116,7 @@ abstract class Fragment
 /// the nested values which are wrapped by [MutableFragment] objects.
 ///
 /// {@category Document}
-abstract class MutableFragment
+abstract interface class MutableFragment
     implements
         Fragment,
         MutableFragmentInterface,
@@ -131,7 +131,7 @@ abstract class MutableFragment
 /// values of the document which are wrapped by Fragment objects.
 ///
 /// {@category Document}
-abstract class DocumentFragment implements DictionaryFragment {
+abstract interface class DocumentFragment implements DictionaryFragment {
   /// Whether the document exists in the database or not.
   bool get exists;
 
@@ -139,7 +139,7 @@ abstract class DocumentFragment implements DictionaryFragment {
   Document? get document;
 }
 
-class FragmentImpl implements Fragment {
+final class FragmentImpl implements Fragment {
   FragmentImpl._empty();
 
   FragmentImpl.fromArray(Array array, {required int index})
@@ -321,7 +321,8 @@ class FragmentImpl implements Fragment {
   }
 }
 
-class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
+final class MutableFragmentImpl extends FragmentImpl
+    implements MutableFragment {
   MutableFragmentImpl._empty() : super._empty();
 
   MutableFragmentImpl.fromArray(
@@ -460,7 +461,7 @@ class MutableFragmentImpl extends FragmentImpl implements MutableFragment {
   }
 }
 
-class DocumentFragmentImpl implements DocumentFragment {
+final class DocumentFragmentImpl implements DocumentFragment {
   DocumentFragmentImpl(this.document);
 
   @override

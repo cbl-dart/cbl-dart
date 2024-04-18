@@ -10,13 +10,15 @@ void main() {
 
   group('ReplicatorChange', () {
     test('toString', () {
-      final change = ReplicatorChangeImpl(_Replicator(), _ReplicatorStatus());
+      final status = ReplicatorStatus(
+          ReplicatorActivityLevel.idle, ReplicatorProgress(0, 0), 0);
+      final change = ReplicatorChangeImpl(_Replicator(), status);
       expect(
         change.toString(),
         'ReplicatorChange('
         'replicator: _Replicator(), '
         // ignore: missing_whitespace_between_adjacent_strings
-        'status: _ReplicatorStatus()'
+        'status: $status'
         ')',
       );
     });
@@ -29,12 +31,4 @@ class _Replicator implements Replicator {
 
   @override
   String toString() => '_Replicator()';
-}
-
-class _ReplicatorStatus implements ReplicatorStatus {
-  @override
-  void noSuchMethod(Invocation invocation) {}
-
-  @override
-  String toString() => '_ReplicatorStatus()';
 }

@@ -39,7 +39,7 @@ import 'scope.dart';
 
 final _bindings = cblBindings.database;
 
-class FfiDatabase
+final class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncDatabase, BlobStoreHolder, Finalizable {
   factory FfiDatabase({
@@ -408,7 +408,7 @@ class FfiDatabase
 
 final _collectionBindings = cblBindings.collection;
 
-class FfiScope
+final class FfiScope
     with ScopeBase, ClosableResourceMixin
     implements SyncScope, Finalizable {
   FfiScope._({
@@ -464,7 +464,7 @@ class FfiScope
   String toString() => 'FfiScope($name)';
 }
 
-class FfiCollection
+final class FfiCollection
     with CollectionBase<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncCollection, Finalizable {
   FfiCollection._({
@@ -777,7 +777,7 @@ bool _catchConflictException(void Function() fn) {
   }
 }
 
-class _FfiSaveTypedDocument<D extends TypedDocumentObject,
+final class _FfiSaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements SyncSaveTypedDocument<D, MD> {

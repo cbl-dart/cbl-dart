@@ -93,7 +93,7 @@ typedef _CBLQuery_CopyCurrentResults = Pointer<CBLResultSet> Function(
   Pointer<CBLError> errorOut,
 );
 
-class QueryBindings extends Bindings {
+final class QueryBindings extends Bindings {
   QueryBindings(super.parent) {
     _createQuery = libs.cbl
         .lookupFunction<_CBLDatabase_CreateQuery_C, _CBLDatabase_CreateQuery>(
@@ -236,7 +236,7 @@ typedef _CBLResultSet_GetQuery = Pointer<CBLQuery> Function(
   Pointer<CBLResultSet> resultSet,
 );
 
-class ResultSetBindings extends Bindings {
+final class ResultSetBindings extends Bindings {
   ResultSetBindings(super.parent) {
     _next = libs.cbl.lookupFunction<_CBLResultSet_Next_C, _CBLResultSet_Next>(
       'CBLResultSet_Next',

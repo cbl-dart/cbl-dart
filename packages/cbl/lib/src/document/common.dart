@@ -19,7 +19,7 @@ final _blobBindings = cblBindings.blobs.blob;
 final _valueBinds = cblBindings.fleece.value;
 final _decoderBinds = cblBindings.fleece.decoder;
 
-abstract class CblConversions {
+abstract interface class CblConversions {
   Object? toPlainObject();
   Object? toCblObject();
 
@@ -38,7 +38,7 @@ abstract class CblConversions {
   }
 }
 
-class _DefaultCblConversions implements CblConversions {
+final class _DefaultCblConversions implements CblConversions {
   const _DefaultCblConversions();
 
   @override
@@ -81,11 +81,11 @@ class _DefaultCblConversions implements CblConversions {
 }
 
 // ignore: one_member_abstracts
-abstract class FleeceEncodable {
+abstract interface class FleeceEncodable {
   FutureOr<void> encodeTo(FleeceEncoder encoder);
 }
 
-class FleeceEncoderContext implements DictKeysProvider {
+final class FleeceEncoderContext implements DictKeysProvider {
   FleeceEncoderContext({
     this.database,
     this.encodeQueryParameter = false,
@@ -102,7 +102,7 @@ class FleeceEncoderContext implements DictKeysProvider {
   DictKeys? get dictKeys => database?.dictKeys;
 }
 
-abstract class MCollectionWrapper {
+abstract interface class MCollectionWrapper {
   MCollection get mCollection;
 }
 
@@ -127,7 +127,7 @@ class DatabaseMContext extends MContext {
   final DatabaseBase? database;
 }
 
-class CblMDelegate extends MDelegate {
+final class CblMDelegate extends MDelegate {
   @override
   MCollection? collectionFromNative(Object? native) {
     if (native is MCollectionWrapper) {

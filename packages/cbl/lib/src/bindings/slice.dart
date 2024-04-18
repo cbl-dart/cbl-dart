@@ -21,7 +21,7 @@ final _sliceBindings = CBLBindings.instance.fleece.slice;
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class Slice implements Finalizable {
+final class Slice implements Finalizable {
   /// Private constructor to initialize slice.
   Slice._(this.buf, this.size) {
     if (buf == nullptr) {
@@ -144,7 +144,7 @@ class Slice implements Finalizable {
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
-class SliceResult extends Slice {
+final class SliceResult extends Slice {
   /// Creates an uninitialized [SliceResult] of [size].
   SliceResult(int size) : this._fromFLSliceResult(_sliceBindings.create(size));
 
@@ -224,7 +224,7 @@ class SliceResult extends Slice {
 ///
 /// If a [TransferableSliceResult] is never materialized the memory of the slice
 /// result is leaked.
-class TransferableSliceResult {
+final class TransferableSliceResult {
   TransferableSliceResult(SliceResult sliceResult)
       : _bufAddress = sliceResult.buf.address,
         _size = sliceResult.size {
@@ -247,7 +247,7 @@ final sliceResultAllocator = SliceResultAllocator();
 /// This allocator has the advantage that allocated memory is freed when the
 /// corresponding Dart [SliceResult] object is finalized, including when an
 /// isolate is destroyed.
-class SliceResultAllocator implements Allocator {
+final class SliceResultAllocator implements Allocator {
   final _slices = <SliceResult>[];
 
   @override
@@ -274,7 +274,7 @@ class SliceResultAllocator implements Allocator {
 ///
 /// If the [SliceResult] is already allocated, this allocator will use another
 /// delegate allocator to allocate the requested memory.
-class SingleSliceResultAllocator implements Allocator {
+final class SingleSliceResultAllocator implements Allocator {
   SingleSliceResultAllocator({
     required SliceResult sliceResult,
     Allocator delegate = calloc,

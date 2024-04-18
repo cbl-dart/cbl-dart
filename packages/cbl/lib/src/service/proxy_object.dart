@@ -7,7 +7,7 @@ import 'channel.dart';
 
 final _proxyObjectFinalizer = Finalizer<void Function()>((fn) => fn());
 
-abstract class ProxyObject with ProxyObjectMixin {
+abstract base class ProxyObject with ProxyObjectMixin {
   ProxyObject(
     Channel channel,
     int objectId, {

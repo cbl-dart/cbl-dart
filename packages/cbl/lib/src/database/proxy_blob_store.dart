@@ -3,7 +3,7 @@ import '../service/cbl_service_api.dart';
 import 'blob_store.dart';
 import 'proxy_database.dart';
 
-class ProxyBlobStore implements BlobStore {
+final class ProxyBlobStore implements BlobStore {
   ProxyBlobStore(this.database);
 
   final ProxyDatabase database;

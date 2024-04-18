@@ -13,7 +13,7 @@ import 'document.dart';
 final _documentBindings = cblBindings.document;
 final _mutableDocumentBindings = cblBindings.mutableDocument;
 
-class FfiDocumentDelegate extends DocumentDelegate implements Finalizable {
+final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   FfiDocumentDelegate.fromPointer(this.pointer, {bool adopt = false}) {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }

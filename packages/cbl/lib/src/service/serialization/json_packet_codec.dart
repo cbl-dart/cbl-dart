@@ -5,7 +5,7 @@ import '../../bindings.dart';
 import 'serialization.dart';
 import 'serialization_codec.dart';
 
-class JsonPacketCodec extends PacketCodec {
+final class JsonPacketCodec extends PacketCodec {
   final _jsonDecoder = const Utf8Decoder().fuse(const JsonDecoder());
   final _jsonUtf8Encoder = JsonUtf8Encoder();
 
