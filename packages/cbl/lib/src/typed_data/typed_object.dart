@@ -6,7 +6,7 @@ import 'package:meta/meta.dart' as meta;
 ///
 /// {@category Typed Data}
 @meta.experimental
-abstract class TypedDictionaryObject<MD extends Object> {
+abstract interface class TypedDictionaryObject<MD extends Object> {
   /// Internal field that end users should never access.
   ///
   /// @nodoc
@@ -32,7 +32,8 @@ abstract class TypedDictionaryObject<MD extends Object> {
 ///
 /// {@category Typed Data}
 @meta.experimental
-abstract class TypedMutableDictionaryObject<D extends TypedDictionaryObject,
+abstract interface class TypedMutableDictionaryObject<
+    D extends TypedDictionaryObject,
     MD extends TypedDictionaryObject> extends TypedDictionaryObject<MD> {}
 
 /// The type that is implemented by all typed documents.
@@ -41,7 +42,7 @@ abstract class TypedMutableDictionaryObject<D extends TypedDictionaryObject,
 ///
 /// {@category Typed Data}
 @meta.experimental
-abstract class TypedDocumentObject<MD extends Object>
+abstract interface class TypedDocumentObject<MD extends Object>
     implements TypedDictionaryObject<MD> {}
 
 /// The type that is implemented by all typed mutable documents.
@@ -51,6 +52,7 @@ abstract class TypedDocumentObject<MD extends Object>
 ///
 /// {@category Typed Data}
 @meta.experimental
-abstract class TypedMutableDocumentObject<D extends TypedDocumentObject,
+abstract interface class TypedMutableDocumentObject<
+        D extends TypedDocumentObject,
         MD extends TypedDocumentObject> extends TypedDocumentObject<MD>
     implements TypedMutableDictionaryObject<D, MD> {}

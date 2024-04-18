@@ -10,12 +10,12 @@ import '../support/utils.dart';
 import 'channel.dart';
 import 'serialization/serialization.dart';
 
-abstract class IsolateWorkerDelegate {
+abstract base class IsolateWorkerDelegate {
   FutureOr<void> initialize();
   FutureOr<void> dispose();
 }
 
-class IsolateWorker {
+final class IsolateWorker {
   IsolateWorker({
     this.debugName,
     required this.delegate,
@@ -164,7 +164,7 @@ enum _WorkerStatus {
   crashed,
 }
 
-class _WorkerConfiguration {
+final class _WorkerConfiguration {
   _WorkerConfiguration({
     required this.controlChannel,
     required this.delegate,
@@ -178,7 +178,7 @@ SerializationRegistry _workerSerializationRegistry() => SerializationRegistry()
   ..addSerializableCodec('Initialize', _InitializeDelegate.deserialize)
   ..addSerializableCodec('Dispose', _DisposeDelegate.deserialize);
 
-class _InitializeDelegate extends Request<Null> {
+final class _InitializeDelegate extends Request<Null> {
   @override
   StringMap serialize(SerializationContext context) => {};
 
@@ -189,7 +189,7 @@ class _InitializeDelegate extends Request<Null> {
       _InitializeDelegate();
 }
 
-class _DisposeDelegate extends Request<Null> {
+final class _DisposeDelegate extends Request<Null> {
   @override
   StringMap serialize(SerializationContext context) => {};
 

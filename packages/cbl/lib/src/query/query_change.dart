@@ -6,7 +6,7 @@ import '../query.dart';
 ///
 /// {@category Query}
 @immutable
-class QueryChange<R extends ResultSet> {
+final class QueryChange<R extends ResultSet> {
   /// Creates a [Query] change event.
   const QueryChange(this.query, this.results);
 

@@ -10,7 +10,7 @@ final _dictBinds = cblBindings.fleece.dict;
 final _dictKeyBinds = cblBindings.fleece.dictKey;
 
 /// A Fleece dictionary key for efficient decoding and encoding of dictionaries.
-abstract class DictKey {
+abstract final class DictKey {
   /// Returns the value associated with this key in the given dictionary.
   Pointer<FLValue>? getValue(Pointer<FLDict> dict);
 
@@ -18,7 +18,7 @@ abstract class DictKey {
   void encodeTo(FleeceEncoder encoder);
 }
 
-class _DartStringDictKey extends DictKey {
+final class _DartStringDictKey extends DictKey {
   _DartStringDictKey(this.key);
 
   final String key;
@@ -32,7 +32,7 @@ class _DartStringDictKey extends DictKey {
   }
 }
 
-class _OptimizedDictKey extends DictKey {
+final class _OptimizedDictKey extends DictKey {
   factory _OptimizedDictKey(String key) {
     final utf8StringSize = nativeUtf8StringEncoder.encodedAllocationSize(key);
     final totalSize = _utf8StringStart + utf8StringSize;
@@ -103,7 +103,7 @@ class _OptimizedDictKey extends DictKey {
 }
 
 /// An object which might be able to provide [DictKeys].
-abstract class DictKeysProvider {
+abstract interface class DictKeysProvider {
   /// The [DictKeys] associated with this object, if available.
   DictKeys? get dictKeys;
 }
@@ -113,7 +113,7 @@ abstract class DictKeysProvider {
 /// A [DictKeys] instance must only be used for Fleece data that shares the same
 /// set of shared keys.
 // ignore: one_member_abstracts
-abstract class DictKeys {
+abstract final class DictKeys {
   const DictKeys();
 
   /// Returns a [DictKey] for the given [key].
@@ -124,7 +124,7 @@ abstract class DictKeys {
 }
 
 /// A provider of [DictKey]s that does not use optimized keys.
-class UnoptimizingDictKeys extends DictKeys {
+final class UnoptimizingDictKeys extends DictKeys {
   const UnoptimizingDictKeys();
 
   @override
@@ -133,7 +133,7 @@ class UnoptimizingDictKeys extends DictKeys {
 
 /// A provider of [DictKey]s that uses optimized keys for keys that are
 /// requested multiple times.
-class OptimizingDictKeys extends DictKeys {
+final class OptimizingDictKeys extends DictKeys {
   /// The number of times a key needs to be requested before it is optimized.
   static const _optimizationThreshold = 3;
 

@@ -12,7 +12,7 @@ import 'select_result.dart';
 /// Entry point for building [Query]s through the query builder API.
 ///
 /// {@category Query Builder}
-class QueryBuilder {
+final class QueryBuilder {
   const QueryBuilder();
 
   /// {@template cbl.QueryBuilder.createAsync}
@@ -93,7 +93,7 @@ class QueryBuilder {
 /// The [QueryBuilder] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-class SyncQueryBuilder implements QueryBuilder {
+final class SyncQueryBuilder implements QueryBuilder {
   /// {@macro cbl.QueryBuilder.createSync}
   const SyncQueryBuilder();
 
@@ -161,7 +161,7 @@ class SyncQueryBuilder implements QueryBuilder {
 /// The [QueryBuilder] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-class AsyncQueryBuilder implements QueryBuilder {
+final class AsyncQueryBuilder implements QueryBuilder {
   /// {@macro cbl.QueryBuilder.createAsync}
   const AsyncQueryBuilder();
 
@@ -226,7 +226,7 @@ class AsyncQueryBuilder implements QueryBuilder {
       AsyncSelectImpl(results, distinct: true);
 }
 
-mixin BuilderQueryMixin on QueryBase {
+base mixin BuilderQueryMixin on QueryBase {
   late final List<SelectResultImpl>? _selects;
   late final bool? _distinct;
   late final DataSourceImpl? _from;

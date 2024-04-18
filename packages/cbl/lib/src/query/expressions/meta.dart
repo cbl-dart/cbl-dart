@@ -4,17 +4,16 @@ import 'property_expression.dart';
 /// A document metadata expression.
 ///
 /// {@category Query Builder}
-abstract class MetaExpressionInterface extends ExpressionInterface {
+abstract final class MetaExpressionInterface implements ExpressionInterface {
   /// Specifies the [alias] of the data source to query the metadata from.
   ExpressionInterface from(String alias);
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating expressions of metadata properties of a document.
 ///
 /// {@category Query Builder}
-class Meta {
-  Meta._();
-
+abstract final class Meta {
   /// Creates a metadata expression referring to the id of a document.
   static MetaExpressionInterface get id => MetaExpressionImpl('_id');
 
@@ -42,7 +41,7 @@ class Meta {
 
 // === Impl ====================================================================
 
-class MetaExpressionImpl extends PropertyExpressionImpl
+final class MetaExpressionImpl extends PropertyExpressionImpl
     implements MetaExpressionInterface {
   MetaExpressionImpl(super.propertyPath);
 }

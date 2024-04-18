@@ -3,7 +3,7 @@ import '../database/database.dart';
 /// The location of a database to replicate with.
 ///
 /// {@category Replication}
-abstract class Endpoint {}
+abstract interface class Endpoint {}
 
 /// An endpoint representing a server-based database at the given [url].
 ///
@@ -13,7 +13,7 @@ abstract class Endpoint {}
 /// example: `wss://example.org/dbname`
 ///
 /// {@category Replication}
-class UrlEndpoint extends Endpoint {
+final class UrlEndpoint extends Endpoint {
   /// Creates an endpoint representing a server-based database at the given
   /// [url].
   UrlEndpoint(this.url);
@@ -31,7 +31,7 @@ class UrlEndpoint extends Endpoint {
 ///
 /// {@category Replication}
 /// {@category Enterprise Edition}
-class DatabaseEndpoint extends Endpoint {
+final class DatabaseEndpoint extends Endpoint {
   /// Creates an endpoint representing a local [database] as the replication
   /// target.
   DatabaseEndpoint(this.database);

@@ -46,7 +46,7 @@ IsolateWorker testWorker() {
   return IsolateWorker(delegate: TestWorkerDelegate());
 }
 
-class TestWorkerDelegate extends IsolateWorkerDelegate {
+final class TestWorkerDelegate extends IsolateWorkerDelegate {
   @override
   FutureOr<void> dispose() {}
 

@@ -9,24 +9,24 @@ import 'typed_object.dart';
 
 // === API =====================================================================
 
-abstract class ToTyped<T> {
+abstract interface class ToTyped<T> {
   T toTyped(Object value);
 }
 
-abstract class ToUntyped<T> {
+abstract interface class ToUntyped<T> {
   Object toUntyped(T value);
 }
 
-abstract class Promoter<T extends E, E> {
+abstract interface class Promoter<T extends E, E> {
   T promote(E value);
 }
 
-abstract class DataConverter<T extends E, E>
+abstract base class DataConverter<T extends E, E>
     implements ToTyped<T>, ToUntyped<T>, Promoter<T, E> {
   const DataConverter();
 }
 
-abstract class NonPromotingDataConverter<T> extends DataConverter<T, T> {
+abstract base class NonPromotingDataConverter<T> extends DataConverter<T, T> {
   const NonPromotingDataConverter();
 
   @override
@@ -51,10 +51,7 @@ abstract class NonPromotingDataConverter<T> extends DataConverter<T, T> {
 ///
 /// {@category Typed Data}
 @experimental
-abstract class ScalarConverter<T> {
-  /// Const constructor to allow subclasses to be const.
-  const ScalarConverter();
-
+abstract interface class ScalarConverter<T> {
   /// Recreates an object from the given data representation.
   ///
   /// If the [value] is not of the expected type, this must throw an
@@ -70,7 +67,7 @@ abstract class ScalarConverter<T> {
 ///
 /// {@category Typed Data}
 @experimental
-class UnexpectedTypeException implements Exception {
+final class UnexpectedTypeException implements Exception {
   const UnexpectedTypeException({
     required this.value,
     required this.expectedTypes,
@@ -97,7 +94,8 @@ class UnexpectedTypeException implements Exception {
 
 /// === Implementations ========================================================
 
-class IdentityConverter<T extends Object> extends NonPromotingDataConverter<T> {
+final class IdentityConverter<T extends Object>
+    extends NonPromotingDataConverter<T> {
   const IdentityConverter();
 
   @override
@@ -109,7 +107,7 @@ class IdentityConverter<T extends Object> extends NonPromotingDataConverter<T> {
   Object toUntyped(T value) => value;
 }
 
-class DateTimeConverter extends NonPromotingDataConverter<DateTime> {
+final class DateTimeConverter extends NonPromotingDataConverter<DateTime> {
   const DateTimeConverter();
 
   @override
@@ -125,7 +123,7 @@ class DateTimeConverter extends NonPromotingDataConverter<DateTime> {
 }
 
 /// @nodoc
-class TypedDictionaryConverter<I extends Object, T extends E,
+final class TypedDictionaryConverter<I extends Object, T extends E,
     E extends TypedDictionaryObject<T>> extends DataConverter<T, E> {
   const TypedDictionaryConverter(this._factory);
 
@@ -149,7 +147,7 @@ class TypedDictionaryConverter<I extends Object, T extends E,
 }
 
 /// @nodoc
-class TypedListConverter<T extends E, E>
+final class TypedListConverter<T extends E, E>
     extends DataConverter<TypedDataList<T, E>, List<E>> {
   const TypedListConverter({
     required this.converter,
@@ -203,7 +201,7 @@ class TypedListConverter<T extends E, E>
 }
 
 /// @nodoc
-class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
+final class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
   const ScalarConverterAdapter(this.converter);
 
   final ScalarConverter<T> converter;
@@ -228,7 +226,7 @@ class ScalarConverterAdapter<T> extends NonPromotingDataConverter<T> {
 ///
 /// {@category Typed Data}
 @experimental
-class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
+final class EnumNameConverter<T extends Enum> implements ScalarConverter<T> {
   /// Creates a [ScalarConverter] that encodes [Enum] values by their name.
   const EnumNameConverter(this.values);
 
@@ -256,7 +254,7 @@ class EnumNameConverter<T extends Enum> extends ScalarConverter<T> {
 ///
 /// {@category Typed Data}
 @experimental
-class EnumIndexConverter<T extends Enum> extends ScalarConverter<T> {
+final class EnumIndexConverter<T extends Enum> implements ScalarConverter<T> {
   /// Creates a [ScalarConverter] that encodes [Enum] values by their index.
   const EnumIndexConverter(this.values);
 

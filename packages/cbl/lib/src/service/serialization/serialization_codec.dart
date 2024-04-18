@@ -6,7 +6,7 @@ import 'packet_codec_factory.dart'
     if (dart.library.html) 'json_packet_codec.dart';
 import 'serialization.dart';
 
-class Packet {
+final class Packet {
   Packet(this.value, this.data);
 
   /// The serialized value of this packet.
@@ -17,7 +17,7 @@ class Packet {
 }
 
 /// A codec for encoding and decoding [Packet]s for transport with a [target].
-abstract class PacketCodec {
+abstract base class PacketCodec {
   SerializationTarget get target;
 
   Packet decodePacket(Object? input);
@@ -27,7 +27,7 @@ abstract class PacketCodec {
 
 /// A [Codec] which uses a [PacketCodec] and a [SerializationRegistry] to encode
 /// and decode values.
-class SerializationCodec extends Codec<Object?, Object?> {
+final class SerializationCodec extends Codec<Object?, Object?> {
   /// Creates a [SerializationCodec] with the given [registry] and
   /// [packetCodec].
   ///
@@ -48,7 +48,7 @@ class SerializationCodec extends Codec<Object?, Object?> {
   late final encoder = _Encoder(registry, packetCodec);
 }
 
-class _Decoder extends Converter<Object?, Object?> {
+final class _Decoder extends Converter<Object?, Object?> {
   _Decoder(this.registry, this.codec);
 
   final SerializationRegistry registry;
@@ -70,7 +70,7 @@ class _Decoder extends Converter<Object?, Object?> {
       _ChunkConversionSinkTransformer(sink, convert);
 }
 
-class _Encoder extends Converter<Object?, Object?> {
+final class _Encoder extends Converter<Object?, Object?> {
   _Encoder(this.registry, this.codec);
 
   final SerializationRegistry registry;
@@ -90,7 +90,7 @@ class _Encoder extends Converter<Object?, Object?> {
       _ChunkConversionSinkTransformer(sink, convert);
 }
 
-class _ChunkConversionSinkTransformer<S, T>
+final class _ChunkConversionSinkTransformer<S, T>
     implements ChunkedConversionSink<S> {
   _ChunkConversionSinkTransformer(this.target, this.transform);
 

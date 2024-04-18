@@ -108,7 +108,7 @@ void main() {
   });
 }
 
-class TestDelegate extends TracingDelegate {
+final class TestDelegate extends TracingDelegate {
   TestWorkerDelegate workerDelegate = TestWorkerDelegate();
 
   @override
@@ -145,7 +145,7 @@ class TestDelegate extends TracingDelegate {
   }
 }
 
-class TestWorkerDelegate extends TracingDelegate {
+final class TestWorkerDelegate extends TracingDelegate {
   Object? initializeTraceData;
   Object? closeTraceData;
 

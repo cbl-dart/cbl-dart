@@ -41,7 +41,7 @@ import 'database.dart';
 ///
 /// {@category Database}
 /// {@category Enterprise Edition}
-abstract class EncryptionKey {
+abstract final class EncryptionKey {
   /// Creates an [EncryptionKey] from raw [bytes].
   ///
   /// If [bytes] is not exactly 32 bytes long, an [ArgumentError] is thrown.
@@ -75,7 +75,7 @@ abstract class EncryptionKey {
       EncryptionKeyImpl.passwordAsync(password);
 }
 
-class EncryptionKeyImpl implements EncryptionKey {
+final class EncryptionKeyImpl implements EncryptionKey {
   EncryptionKeyImpl(this.cblKey);
 
   // ignore: prefer_constructors_over_static_methods
@@ -134,7 +134,7 @@ class EncryptionKeyImpl implements EncryptionKey {
 /// Configuration for opening or copying a [Database].
 ///
 /// {@category Database}
-class DatabaseConfiguration {
+final class DatabaseConfiguration {
   /// Creates a configuration for opening or copying a [Database].
   DatabaseConfiguration({String? directory, this.encryptionKey})
       : directory = directory ?? _defaultDirectory();

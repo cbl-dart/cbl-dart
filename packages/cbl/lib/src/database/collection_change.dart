@@ -10,7 +10,7 @@ import 'database_change.dart';
 ///
 /// {@category Database}
 @immutable
-class CollectionChange {
+final class CollectionChange {
   /// Creates a [Collection] change event.
   const CollectionChange(this.collection, this.documentIds);
 

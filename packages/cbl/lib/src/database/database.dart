@@ -65,7 +65,7 @@ enum MaintenanceType {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract class SaveTypedDocument<D extends TypedDocumentObject,
+abstract interface class SaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> {
   /// Saves the document to the database, resolving conflicts through
   /// [ConcurrencyControl].
@@ -128,7 +128,7 @@ typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
 /// A Couchbase Lite database.
 ///
 /// {@category Database}
-abstract class Database implements ClosableResource {
+abstract interface class Database implements ClosableResource {
   /// {@template cbl.Database.openAsync}
   /// Opens a Couchbase Lite database with the given [name] and [config], which
   /// executes in a separate worker isolate.
@@ -537,7 +537,7 @@ abstract class Database implements ClosableResource {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
+abstract interface class SyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
   bool withConcurrencyControl([
@@ -580,7 +580,7 @@ typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
 /// A [Database] with a primarily synchronous API.
 ///
 /// {@category Database}
-abstract class SyncDatabase implements Database {
+abstract interface class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
       SyncDatabase.internal(name, config);
@@ -778,7 +778,7 @@ abstract class SyncDatabase implements Database {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
+abstract interface class AsyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
   Future<bool> withConcurrencyControl([
@@ -794,7 +794,7 @@ abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
 /// A [Database] with a primarily asynchronous API.
 ///
 /// {@category Database}
-abstract class AsyncDatabase implements Database {
+abstract interface class AsyncDatabase implements Database {
   /// {@macro cbl.Database.openAsync}
   static Future<AsyncDatabase> open(
     String name, [

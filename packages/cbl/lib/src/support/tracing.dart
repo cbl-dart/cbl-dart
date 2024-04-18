@@ -14,7 +14,7 @@ void _noopTraceDataHandler(Object? data) {}
 /// The current trace data handler.
 TraceDataHandler onTraceData = _noopTraceDataHandler;
 
-class NoopTracingDelegate extends TracingDelegate {
+final class NoopTracingDelegate extends TracingDelegate {
   const NoopTracingDelegate();
 }
 

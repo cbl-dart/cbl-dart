@@ -34,7 +34,7 @@ extension on Iterable<CopyFlag> {
 
 /// FLSharedKeys represents a mapping from short strings to small integers in
 /// the range [0...2047]
-class SharedKeys implements Finalizable {
+final class SharedKeys implements Finalizable {
   /// Creates new empty [SharedKeys].
   SharedKeys() : this.fromPointer(_bindings.create(), adopt: true);
 
@@ -58,7 +58,7 @@ class SharedKeys implements Finalizable {
 
 /// A [Doc] points to (and often owns) Fleece-encoded data and provides access
 /// to its Fleece values.
-class Doc implements Finalizable {
+final class Doc implements Finalizable {
   /// Creates a [Doc] by reading Fleece [data] as encoded by a [FleeceEncoder].
   factory Doc.fromResultData(
     Data data,
@@ -146,7 +146,7 @@ extension on FLValueType {
 ///   and Dict. To coerce an Value to a collection type, call [asArray] or
 ///   [asDict]. If the value is not of that type, null is returned. (Array and
 ///   Dict are documented fully in their own sections.)
-class Value implements Finalizable {
+final class Value implements Finalizable {
   /// Creates a [Value] based on a [pointer] to the the native value.
   ///
   /// Accessing immutable values is only allowed, while the enclosing container
@@ -308,7 +308,7 @@ class Value implements Finalizable {
 // === Array ===================================================================
 
 /// A Fleece array.
-class Array extends Value with ListMixin<Value> {
+final class Array extends Value with ListMixin<Value> {
   /// Creates an [Array] based on a [pointer] to the the native value.
   Array.fromPointer(
     Pointer<FLArray> pointer, {
@@ -355,7 +355,7 @@ class Array extends Value with ListMixin<Value> {
   int get hashCode => fold(0, (hashCode, value) => hashCode ^ value.hashCode);
 }
 
-class MutableArray extends Array {
+final class MutableArray extends Array {
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
     final result = MutableArray.fromPointer(
@@ -471,7 +471,7 @@ class MutableArray extends Array {
 // === Dict ====================================================================
 
 /// A Fleece dictionary.
-class Dict extends Value with MapMixin<String, Value> {
+final class Dict extends Value with MapMixin<String, Value> {
   /// Creates a [Dict] based on a [pointer] to the the native value.
   Dict.fromPointer(
     Pointer<FLDict> pointer, {
@@ -529,7 +529,7 @@ class Dict extends Value with MapMixin<String, Value> {
 }
 
 /// Iterable which iterates over the keys of a [Dict].
-class _DictKeyIterable extends Iterable<String> {
+final class _DictKeyIterable extends Iterable<String> {
   _DictKeyIterable(this.dict);
 
   final Dict dict;
@@ -539,7 +539,7 @@ class _DictKeyIterable extends Iterable<String> {
 }
 
 /// Iterator which iterates over the keys of a [Dict].
-class _DictKeyIterator implements Iterator<String> {
+final class _DictKeyIterator implements Iterator<String> {
   _DictKeyIterator(this.dict);
 
   final Dict dict;
@@ -563,7 +563,7 @@ class _DictKeyIterator implements Iterator<String> {
 }
 
 /// A mutable Fleece [Dict].
-class MutableDict extends Dict {
+final class MutableDict extends Dict {
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {
     final result = MutableDict.fromPointer(
@@ -661,7 +661,7 @@ class MutableDict extends Dict {
 
 // === SlotSetter ==============================================================
 
-abstract class SlotSetter {
+abstract final class SlotSetter {
   static final _instances = <SlotSetter>[_DefaultSlotSetter()];
 
   static void register(SlotSetter setter) {
@@ -689,7 +689,7 @@ abstract class SlotSetter {
   void setSlotValue(Pointer<FLSlot> slot, Object? value);
 }
 
-class _DefaultSlotSetter implements SlotSetter {
+final class _DefaultSlotSetter implements SlotSetter {
   late final _slotBindings = cblBindings.fleece.slot;
 
   @override

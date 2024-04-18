@@ -18,7 +18,7 @@ abstract class DefaultValueDict with _$DefaultValueDict {
   ]) = MutableDefaultValueDict;
 }
 
-class TestConverter extends ScalarConverter<Uri> {
+final class TestConverter implements ScalarConverter<Uri> {
   const TestConverter();
   @override
   Uri fromData(Object value) {

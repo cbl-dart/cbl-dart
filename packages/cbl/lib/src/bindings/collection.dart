@@ -193,7 +193,7 @@ typedef _CBLCollection_DeleteIndex = bool Function(
   Pointer<CBLError> errorOut,
 );
 
-class CBLIndexSpec {
+final class CBLIndexSpec {
   CBLIndexSpec({
     required this.type,
     required this.expressionLanguage,
@@ -266,7 +266,7 @@ typedef _CBLDart_CBLCollection_AddChangeListener = void Function(
   Pointer<CBLDartAsyncCallback> listener,
 );
 
-class CollectionChangeCallbackMessage {
+final class CollectionChangeCallbackMessage {
   CollectionChangeCallbackMessage(this.documentIds);
 
   CollectionChangeCallbackMessage.fromArguments(List<Object?> message)
@@ -275,7 +275,7 @@ class CollectionChangeCallbackMessage {
   final List<String> documentIds;
 }
 
-class CollectionBindings extends Bindings {
+final class CollectionBindings extends Bindings {
   CollectionBindings(super.parent) {
     _database_scopeNames = libs.cbl
         .lookupFunction<_CBLDatabase_ScopeNames_C, _CBLDatabase_ScopeNames>(

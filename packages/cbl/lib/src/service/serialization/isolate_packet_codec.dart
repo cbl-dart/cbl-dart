@@ -1,7 +1,7 @@
 import 'serialization.dart';
 import 'serialization_codec.dart';
 
-class IsolatePacketCodec extends PacketCodec {
+final class IsolatePacketCodec extends PacketCodec {
   @override
   final SerializationTarget target = SerializationTarget.isolatePort;
 

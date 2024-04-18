@@ -13,7 +13,7 @@ import '../support/utils.dart';
 import 'blob_store.dart';
 import 'ffi_database.dart';
 
-class _FfiBlob implements Finalizable {
+final class _FfiBlob implements Finalizable {
   _FfiBlob.fromPointer(this.pointer, {bool adopt = false}) {
     bindCBLRefCountedToDartObject(
       this,
@@ -43,7 +43,7 @@ class _FfiBlob implements Finalizable {
       };
 }
 
-class FfiBlobStore implements BlobStore, SyncBlobStore {
+final class FfiBlobStore implements BlobStore, SyncBlobStore {
   FfiBlobStore(this.database);
 
   static final _databaseBindings = cblBindings.database;
@@ -141,7 +141,7 @@ Future<_FfiBlob> _createBlobFromStream(
   }
 }
 
-class _BlobReadStream extends Stream<Data> implements Finalizable {
+final class _BlobReadStream extends Stream<Data> implements Finalizable {
   _BlobReadStream(this.parent, this.blob);
 
   /// Size of the chunks which a blob read stream emits.

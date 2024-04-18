@@ -6,7 +6,7 @@ import '../typed_data.dart';
 /// A conflict between changes in a local and remote [Document].
 ///
 /// {@category Replication}
-abstract class Conflict {
+abstract final class Conflict {
   /// The id of the conflicting [Document].
   String get documentId;
 
@@ -17,7 +17,7 @@ abstract class Conflict {
   Document? get remoteDocument;
 }
 
-class ConflictImpl implements Conflict {
+final class ConflictImpl implements Conflict {
   ConflictImpl(this.documentId, this.localDocument, this.remoteDocument);
 
   @override
@@ -43,7 +43,7 @@ class ConflictImpl implements Conflict {
 /// {@category Replication}
 /// {@category Typed Data}
 @experimental
-abstract class TypedConflict {
+abstract final class TypedConflict {
   /// The id of the conflicting [Document].
   String get documentId;
 
@@ -56,7 +56,7 @@ abstract class TypedConflict {
   TypedDocumentObject? get remoteDocument;
 }
 
-class TypedConflictImpl implements TypedConflict {
+final class TypedConflictImpl implements TypedConflict {
   TypedConflictImpl(this.documentId, this.localDocument, this.remoteDocument);
 
   @override

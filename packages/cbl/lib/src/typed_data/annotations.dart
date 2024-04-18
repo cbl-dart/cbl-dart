@@ -9,7 +9,7 @@ import 'conversion.dart';
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.classType})
-class TypedDictionary {
+final class TypedDictionary {
   /// Creates an annotation for a class that is a typed dictionary.
   /// [Dictionary].
   const TypedDictionary();
@@ -20,7 +20,7 @@ class TypedDictionary {
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.classType})
-class TypedDocument {
+final class TypedDocument {
   /// Creates an annotation for a class that is a typed document.
   const TypedDocument({
     this.typeMatcher = const ValueTypeMatcher(),
@@ -35,8 +35,7 @@ class TypedDocument {
 ///
 /// {@category Typed Data}
 @experimental
-@sealed
-abstract class TypeMatcher {
+sealed class TypeMatcher {
   /// Const constructor to allow subclasses to be const.
   const TypeMatcher();
 }
@@ -46,7 +45,7 @@ abstract class TypeMatcher {
 ///
 /// {@category Typed Data}
 @experimental
-class ValueTypeMatcher extends TypeMatcher {
+final class ValueTypeMatcher extends TypeMatcher {
   /// Creates a [TypeMatcher] that matches a dictionary or document if it
   /// contains a fixed [value] at a fixed [path].
   const ValueTypeMatcher({this.path = const ['type'], this.value});
@@ -80,7 +79,7 @@ class ValueTypeMatcher extends TypeMatcher {
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.parameter, TargetKind.getter})
-class DocumentId {
+final class DocumentId {
   /// Creates an annotation for the property of a typed document that is the
   /// document id.
   const DocumentId();
@@ -92,7 +91,7 @@ class DocumentId {
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.getter})
-class DocumentSequence {
+final class DocumentSequence {
   /// Creates an annotation for the property of a typed document that is the
   /// document sequence.
   const DocumentSequence();
@@ -104,7 +103,7 @@ class DocumentSequence {
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.getter})
-class DocumentRevisionId {
+final class DocumentRevisionId {
   /// Creates an annotation for the property of a typed document that is the
   /// document revision id.
   const DocumentRevisionId();
@@ -116,7 +115,7 @@ class DocumentRevisionId {
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.parameter})
-class TypedProperty {
+final class TypedProperty {
   /// Creates an annotation for the property of a typed dictionary or document
   /// that is a dictionary or document property.
   const TypedProperty({
@@ -143,7 +142,7 @@ class TypedProperty {
 /// {@category Typed Data}
 @experimental
 @Target({TargetKind.classType})
-class TypedDatabase {
+final class TypedDatabase {
   /// Creates an annotation for a class that is a typed database.
   const TypedDatabase({required this.types});
 

@@ -5,7 +5,7 @@ import '../query.dart';
 /// Interface for creating and chaining `ORDER BY` clauses.
 ///
 /// {@category Query Builder}
-abstract class OrderByRouter {
+abstract interface class OrderByRouter {
   /// Creates and returns a `ORDER BY` clause query component with the given
   /// orderings.
   OrderBy orderBy(
@@ -29,7 +29,7 @@ abstract class OrderByRouter {
 /// Version of [OrderByRouter] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncOrderByRouter implements OrderByRouter {
+abstract interface class SyncOrderByRouter implements OrderByRouter {
   @override
   SyncOrderBy orderBy(
     OrderingInterface ordering0, [
@@ -51,7 +51,7 @@ abstract class SyncOrderByRouter implements OrderByRouter {
 /// Version of [OrderByRouter] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncOrderByRouter implements OrderByRouter {
+abstract interface class AsyncOrderByRouter implements OrderByRouter {
   @override
   AsyncOrderBy orderBy(
     OrderingInterface ordering0, [

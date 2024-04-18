@@ -13,7 +13,7 @@ import 'result.dart';
 /// A set of [Result]s which is returned when executing a [Query].
 ///
 /// {@category Query}
-abstract class ResultSet {
+abstract interface class ResultSet {
   /// Returns a stream which consumes this result set and emits its results.
   ///
   /// A result set can only be consumed once and listening to the returned
@@ -42,7 +42,7 @@ abstract class ResultSet {
 /// A [ResultSet] which can be iterated synchronously as well asynchronously.
 ///
 /// {@category Query}
-abstract class SyncResultSet
+abstract interface class SyncResultSet
     implements ResultSet, Iterable<Result>, Iterator<Result> {
   /// Returns an iterable which consumes this result set and emits its results
   /// as typed dictionaries of type [D].
@@ -60,7 +60,7 @@ abstract class SyncResultSet
 /// A [ResultSet] which can be iterated asynchronously.
 ///
 /// {@category Query}
-abstract class AsyncResultSet extends ResultSet {
+abstract interface class AsyncResultSet extends ResultSet {
   @override
   Future<List<Result>> allResults();
 

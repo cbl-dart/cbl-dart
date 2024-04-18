@@ -8,7 +8,7 @@ import 'database.dart';
 ///
 /// {@category Database}
 @immutable
-class DatabaseChange {
+final class DatabaseChange {
   /// Creates a [Database] change event.
   const DatabaseChange(this.database, this.documentIds);
 

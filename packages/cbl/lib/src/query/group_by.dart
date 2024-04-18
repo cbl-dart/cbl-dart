@@ -13,13 +13,13 @@ import 'router/order_by_router.dart';
 /// A query component representing the `GROUP BY` clause of a [Query].
 ///
 /// {@category Query Builder}
-abstract class GroupBy
+abstract final class GroupBy
     implements Query, HavingRouter, OrderByRouter, LimitRouter {}
 
 /// Version of [GroupBy] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncGroupBy
+abstract final class SyncGroupBy
     implements
         GroupBy,
         SyncQuery,
@@ -30,7 +30,7 @@ abstract class SyncGroupBy
 /// Version of [GroupBy] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncGroupBy
+abstract final class AsyncGroupBy
     implements
         GroupBy,
         AsyncQuery,
@@ -40,7 +40,7 @@ abstract class AsyncGroupBy
 
 // === Impl ====================================================================
 
-class SyncGroupByImpl extends SyncBuilderQuery implements SyncGroupBy {
+final class SyncGroupByImpl extends SyncBuilderQuery implements SyncGroupBy {
   SyncGroupByImpl({
     required SyncBuilderQuery query,
     required Iterable<ExpressionInterface> expressions,
@@ -85,7 +85,7 @@ class SyncGroupByImpl extends SyncBuilderQuery implements SyncGroupBy {
       SyncLimitImpl(query: this, limit: limit, offset: offset);
 }
 
-class AsyncGroupByImpl extends AsyncBuilderQuery implements AsyncGroupBy {
+final class AsyncGroupByImpl extends AsyncBuilderQuery implements AsyncGroupBy {
   AsyncGroupByImpl({
     required AsyncBuilderQuery query,
     required Iterable<ExpressionInterface> expressions,

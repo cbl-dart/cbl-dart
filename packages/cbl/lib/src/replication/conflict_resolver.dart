@@ -20,7 +20,7 @@ typedef ConflictResolverFunction = FutureOr<Document?> Function(
 ///
 /// {@category Replication}
 // ignore: one_member_abstracts
-abstract class ConflictResolver {
+abstract base class ConflictResolver {
   /// Constructor to allow subclasses to extend [ConflictResolver].
   const ConflictResolver();
 
@@ -58,7 +58,7 @@ abstract class ConflictResolver {
   FutureOr<Document?> resolve(Conflict conflict);
 }
 
-class _FunctionConflictResolver implements ConflictResolver {
+final class _FunctionConflictResolver implements ConflictResolver {
   _FunctionConflictResolver(this._resolve);
 
   final ConflictResolverFunction _resolve;
@@ -73,7 +73,7 @@ class _FunctionConflictResolver implements ConflictResolver {
 /// default strategy for some documents and a custom strategy for others.
 ///
 /// {@category Replication}
-class DefaultConflictResolver implements ConflictResolver {
+final class DefaultConflictResolver implements ConflictResolver {
   const DefaultConflictResolver();
 
   @override
@@ -111,7 +111,7 @@ typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
 /// {@category Typed Data}
 @experimental
 // ignore: one_member_abstracts
-abstract class TypedConflictResolver {
+abstract base class TypedConflictResolver {
   /// Constructor to allow subclasses to extend [TypedConflictResolver].
   const TypedConflictResolver();
 
@@ -129,7 +129,7 @@ abstract class TypedConflictResolver {
   FutureOr<TypedDocumentObject?> resolve(TypedConflict conflict);
 }
 
-class _FunctionTypedConflictResolver implements TypedConflictResolver {
+final class _FunctionTypedConflictResolver implements TypedConflictResolver {
   _FunctionTypedConflictResolver(this._resolve);
 
   final TypedConflictResolverFunction _resolve;

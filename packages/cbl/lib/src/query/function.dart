@@ -1,12 +1,11 @@
 import 'expressions/expression.dart';
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating function expressions.
 ///
 /// {@category Query Builder}
 // ignore: camel_case_types
-class Function_ {
-  Function_._();
-
+abstract final class Function_ {
   /// Creates an aggregate function expression which averages the given values
   /// of the numeric [expression].
   static ExpressionInterface avg(ExpressionInterface expression) =>

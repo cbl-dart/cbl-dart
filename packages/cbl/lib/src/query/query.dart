@@ -26,7 +26,7 @@ typedef QueryChangeListener<T extends ResultSet> = void Function(
 /// A [Database] query.
 ///
 /// {@category Query}
-abstract class Query implements Resource {
+abstract interface class Query implements Resource {
   /// Creates an [Query] from a N1QL [query].
   static FutureOr<Query> fromN1ql(Database database, String query) {
     if (database is AsyncDatabase) {
@@ -184,7 +184,7 @@ abstract class Query implements Resource {
 /// A [Query] with a primarily synchronous API.
 ///
 /// {@category Query}
-abstract class SyncQuery implements Query {
+abstract interface class SyncQuery implements Query {
   /// {@macro cbl.Query.fromN1qlSync}
   factory SyncQuery.fromN1ql(SyncDatabase database, String query) => FfiQuery(
         database: database as FfiDatabase,
@@ -225,7 +225,7 @@ abstract class SyncQuery implements Query {
 /// A [Query] query with a primarily asynchronous API.
 ///
 /// {@category Query}
-abstract class AsyncQuery implements Query {
+abstract interface class AsyncQuery implements Query {
   /// {@macro cbl.Query.fromN1qlAsync}
   static Future<AsyncQuery> fromN1ql(
     AsyncDatabase database,
@@ -277,7 +277,7 @@ abstract class AsyncQuery implements Query {
   AsyncListenStream<QueryChange> changes();
 }
 
-abstract class QueryBase with ClosableResourceMixin implements Query {
+abstract base class QueryBase with ClosableResourceMixin implements Query {
   QueryBase({
     required this.typeName,
     this.database,

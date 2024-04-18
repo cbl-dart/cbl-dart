@@ -5,22 +5,21 @@ import 'query.dart';
 /// A [Query] data source.
 ///
 /// {@category Query Builder}
-abstract class DataSourceInterface {}
+abstract final class DataSourceInterface {}
 
 /// A [Query] data source, with the ability to assign it an alias.
 ///
 /// {@category Query Builder}
-abstract class DataSourceAs extends DataSourceInterface {
+abstract final class DataSourceAs extends DataSourceInterface {
   /// Specifies an [alias] for this data source.
   DataSourceInterface as(String alias);
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating data sources.
 ///
 /// {@category Query Builder}
-class DataSource {
-  DataSource._();
-
+abstract final class DataSource {
   /// Creates a data source from a [Database].
   @Deprecated('Use DataSource.collection(database.defaultCollection) instead.')
   static DataSourceAs database(Database database) =>
@@ -33,7 +32,7 @@ class DataSource {
 
 // === Impl ====================================================================
 
-class DataSourceImpl implements DataSourceInterface {
+final class DataSourceImpl implements DataSourceInterface {
   DataSourceImpl({required this.source, this.alias});
 
   final Object source;
@@ -55,7 +54,7 @@ class DataSourceImpl implements DataSourceInterface {
       };
 }
 
-class DataSourceAsImpl extends DataSourceImpl implements DataSourceAs {
+final class DataSourceAsImpl extends DataSourceImpl implements DataSourceAs {
   DataSourceAsImpl({required super.source, super.alias});
 
   @override

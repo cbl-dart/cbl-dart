@@ -37,7 +37,7 @@ const blobContentTypeProperty = 'content_type';
 /// explicitly, with [Database.saveBlob].
 ///
 /// {@category Document}
-abstract class Blob {
+abstract final class Blob {
   /// Creates a [Blob] with the given in-memory data.
   factory Blob.fromData(String contentType, Uint8List data) =>
       BlobImpl.fromData(contentType, data);
@@ -122,7 +122,7 @@ abstract class Blob {
 // The semantics of a Blob are that it is immutable but the implementation is
 // not.
 // ignore: must_be_immutable
-class BlobImpl implements Blob, FleeceEncodable, CblConversions {
+final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl.fromData(String contentType, Uint8List data)
       : _contentType = contentType,
         _length = data.length,

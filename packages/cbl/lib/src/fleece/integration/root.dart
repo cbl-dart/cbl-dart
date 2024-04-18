@@ -8,7 +8,7 @@ import 'collection.dart';
 import 'context.dart';
 import 'value.dart';
 
-class MRoot extends MCollection {
+final class MRoot extends MCollection {
   MRoot.fromContext(
     MContext context, {
     required super.isMutable,

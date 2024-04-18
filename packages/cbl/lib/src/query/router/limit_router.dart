@@ -6,7 +6,7 @@ import '../query.dart';
 ///
 /// {@category Query Builder}
 // ignore: one_member_abstracts
-abstract class LimitRouter {
+abstract interface class LimitRouter {
   /// Creates and returns a `LIMIT` clause query component with the given
   /// [limit] and [offset].
   Limit limit(
@@ -18,7 +18,7 @@ abstract class LimitRouter {
 /// Version of [LimitRouter] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncLimitRouter implements LimitRouter {
+abstract interface class SyncLimitRouter implements LimitRouter {
   @override
   SyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset});
 }
@@ -26,7 +26,7 @@ abstract class SyncLimitRouter implements LimitRouter {
 /// Version of [LimitRouter] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncLimitRouter implements LimitRouter {
+abstract interface class AsyncLimitRouter implements LimitRouter {
   @override
   AsyncLimit limit(ExpressionInterface limit, {ExpressionInterface? offset});
 }

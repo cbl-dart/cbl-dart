@@ -8,7 +8,7 @@ import 'adapter.dart';
 import 'annotations.dart';
 import 'typed_object.dart';
 
-abstract class TypedDataMetadata<I, MI, D, MD> {
+abstract final class TypedDataMetadata<I, MI, D, MD> {
   TypedDataMetadata({
     required this.dartName,
     required this.factory,
@@ -39,7 +39,7 @@ abstract class TypedDataMetadata<I, MI, D, MD> {
   }
 }
 
-class TypedDictionaryMetadata<D, MD>
+final class TypedDictionaryMetadata<D, MD>
     extends TypedDataMetadata<Dictionary, MutableDictionary, D, MD> {
   TypedDictionaryMetadata({
     required super.dartName,
@@ -49,7 +49,7 @@ class TypedDictionaryMetadata<D, MD>
   });
 }
 
-class TypedDocumentMetadata<D, MD>
+final class TypedDocumentMetadata<D, MD>
     extends TypedDataMetadata<Document, MutableDocument, D, MD> {
   TypedDocumentMetadata({
     required super.dartName,
@@ -59,7 +59,7 @@ class TypedDocumentMetadata<D, MD>
   });
 }
 
-class TypedDataRegistry extends TypedDataAdapter {
+final class TypedDataRegistry implements TypedDataAdapter {
   TypedDataRegistry({
     Iterable<TypedDataMetadata> types = const [],
   })  : _types = List.unmodifiable(types),

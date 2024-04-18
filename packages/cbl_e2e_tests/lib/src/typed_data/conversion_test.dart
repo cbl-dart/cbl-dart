@@ -336,7 +336,7 @@ extension on TypeMatcher<UnexpectedTypeException> {
 }
 
 class ConverterTestDict
-    extends TypedDictionaryObject<MutableConverterTestDict> {
+    implements TypedDictionaryObject<MutableConverterTestDict> {
   ConverterTestDict(this.internal);
 
   @override
@@ -362,7 +362,7 @@ class MutableConverterTestDict extends ConverterTestDict
   String toString({String? indent}) => 'MutableConverterTestDict';
 }
 
-class TestScalarConverter extends ScalarConverter<Object> {
+final class TestScalarConverter implements ScalarConverter<Object> {
   const TestScalarConverter();
 
   @override

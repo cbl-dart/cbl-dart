@@ -9,7 +9,7 @@ import 'logger.dart';
 /// The configuration for log files.
 ///
 /// {@category Logging}
-class LogFileConfiguration {
+final class LogFileConfiguration {
   /// Creates the configuration for log files.
   LogFileConfiguration({
     required this.directory,
@@ -105,9 +105,7 @@ class LogFileConfiguration {
 /// object ignores any changes you make to the configuration.
 ///
 /// {@category Logging}
-abstract class FileLogger {
-  FileLogger._();
-
+abstract final class FileLogger {
   /// The log file configuration the logger currently uses.
   ///
   /// This property is `null` by default. Setting it to `null` disables file
@@ -127,9 +125,7 @@ abstract class FileLogger {
 
 final _bindings = cblBindings.logging;
 
-class FileLoggerImpl extends FileLogger {
-  FileLoggerImpl() : super._();
-
+final class FileLoggerImpl extends FileLogger {
   @override
   LogFileConfiguration? get config =>
       _bindings.getLogFileConfiguration()?.toLogFileConfiguration();

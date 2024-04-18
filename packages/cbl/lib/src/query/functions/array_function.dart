@@ -1,11 +1,10 @@
 import '../expressions/expression.dart';
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating array function expressions.
 ///
 /// {@category Query Builder}
-class ArrayFunction {
-  ArrayFunction._();
-
+abstract final class ArrayFunction {
   /// Creates an expression which evaluates to whether the array [expression]
   /// contains the given [value].
   static ExpressionInterface contains(

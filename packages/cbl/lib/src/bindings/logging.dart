@@ -64,7 +64,7 @@ typedef _CBLLog_SetConsoleLevel = void Function(int logLevel);
 typedef _CBLDart_CBLLog_SetCallbackLevel_C = Void Function(Uint8 logLevel);
 typedef _CBLDart_CBLLog_SetCallbackLevel = void Function(int logLevel);
 
-class LogCallbackMessage {
+final class LogCallbackMessage {
   LogCallbackMessage(this.domain, this.level, this.message);
 
   LogCallbackMessage.fromArguments(List<Object?> arguments)
@@ -113,7 +113,7 @@ extension on _CBLLogFileConfiguration {
       );
 }
 
-class CBLLogFileConfiguration {
+final class CBLLogFileConfiguration {
   CBLLogFileConfiguration({
     required this.level,
     required this.directory,
@@ -171,7 +171,7 @@ typedef _CBLDart_CBLLog_GetFileConfig = Pointer<_CBLLogFileConfiguration>
 typedef _CBLDart_CBLLog_SetSentryBreadcrumbs_C = Bool Function(Bool enabled);
 typedef _CBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
-class LoggingBindings extends Bindings {
+final class LoggingBindings extends Bindings {
   LoggingBindings(super.parent) {
     _logMessage = libs.cbl.lookupFunction<_CBL_LogMessage_C, _CBL_LogMessage>(
       'CBL_LogMessage',

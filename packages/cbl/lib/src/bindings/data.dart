@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'slice.dart';
 
-abstract class Data {
+abstract final class Data {
   Data._();
 
   factory Data.fromTypedList(Uint8List list) => _TypedListData(list);
@@ -24,7 +24,7 @@ abstract class Data {
 }
 
 // ignore: one_member_abstracts
-abstract class TransferableData {
+abstract final class TransferableData {
   factory TransferableData(Data data) => data._createTransferableData();
 
   TransferableData._();
@@ -32,7 +32,7 @@ abstract class TransferableData {
   Data materialize();
 }
 
-class _TypedListData extends Data {
+final class _TypedListData extends Data {
   _TypedListData(this.list) : super._();
 
   final Uint8List list;
@@ -53,7 +53,7 @@ class _TypedListData extends Data {
       _TransferableTypedListData(list);
 }
 
-class _TransferableTypedListData extends TransferableData {
+final class _TransferableTypedListData extends TransferableData {
   _TransferableTypedListData(Uint8List list)
       : data = TransferableTypedData.fromList([list]),
         super._();
@@ -64,7 +64,7 @@ class _TransferableTypedListData extends TransferableData {
   Data materialize() => _TypedListData(data.materialize().asUint8List());
 }
 
-class _SliceResultData extends Data {
+final class _SliceResultData extends Data {
   _SliceResultData(this.slice) : super._();
 
   final SliceResult slice;
@@ -83,7 +83,7 @@ class _SliceResultData extends Data {
       _TransferableSliceResultData(slice);
 }
 
-class _TransferableSliceResultData extends TransferableData {
+final class _TransferableSliceResultData extends TransferableData {
   _TransferableSliceResultData(SliceResult slice)
       : data = TransferableSliceResult(slice),
         super._();

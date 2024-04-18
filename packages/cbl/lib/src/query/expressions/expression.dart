@@ -7,7 +7,7 @@ import 'variable_expression.dart';
 /// Represents an expression when building a [Query] through the [QueryBuilder].
 ///
 /// {@category Query Builder}
-abstract class ExpressionInterface {
+abstract interface class ExpressionInterface {
   /// Returns a new expression which multiplies this expression with the given
   /// [expression].
   ExpressionInterface multiply(ExpressionInterface expression);
@@ -106,13 +106,12 @@ abstract class ExpressionInterface {
   ExpressionInterface collate(CollationInterface collation);
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating expressions when building [Query]s through the
 /// [QueryBuilder].
 ///
 /// {@category Query Builder}
-class Expression {
-  Expression._();
-
+abstract final class Expression {
   /// Creates a property expression representing the value at the given
   /// [propertyPath].
   static PropertyExpressionInterface property(String propertyPath) =>
@@ -170,7 +169,7 @@ class Expression {
 
 // === Impl ====================================================================
 
-abstract class ExpressionImpl implements ExpressionInterface {
+abstract base class ExpressionImpl implements ExpressionInterface {
   static final missing = NullaryExpression('MISSING');
 
   @override
@@ -268,7 +267,7 @@ abstract class ExpressionImpl implements ExpressionInterface {
   Object? toJson();
 }
 
-class ValueExpression extends ExpressionImpl {
+final class ValueExpression extends ExpressionImpl {
   ValueExpression(Object? value) : _value = value;
 
   final Object? _value;
@@ -299,7 +298,7 @@ class ValueExpression extends ExpressionImpl {
       ['[]', ...iterable.map(_valueToJson)];
 }
 
-class NullaryExpression extends ExpressionImpl {
+final class NullaryExpression extends ExpressionImpl {
   NullaryExpression(String operator) : _operator = operator;
 
   final String _operator;
@@ -308,7 +307,7 @@ class NullaryExpression extends ExpressionImpl {
   Object? toJson() => [_operator];
 }
 
-class UnaryExpression extends ExpressionImpl {
+final class UnaryExpression extends ExpressionImpl {
   UnaryExpression(String operator, ExpressionInterface operand)
       : _operator = operator,
         _operand = operand as ExpressionImpl;
@@ -320,7 +319,7 @@ class UnaryExpression extends ExpressionImpl {
   Object? toJson() => [_operator, _operand.toJson()];
 }
 
-class BinaryExpression extends ExpressionImpl {
+final class BinaryExpression extends ExpressionImpl {
   BinaryExpression(
       String operator, ExpressionInterface left, ExpressionInterface? right)
       : _operator = operator,
@@ -336,7 +335,7 @@ class BinaryExpression extends ExpressionImpl {
       [_operator, _left.toJson(), if (_right != null) _right!.toJson()];
 }
 
-class TernaryExpression extends ExpressionImpl {
+final class TernaryExpression extends ExpressionImpl {
   TernaryExpression(
     String operator,
     ExpressionInterface operand0,
@@ -357,7 +356,7 @@ class TernaryExpression extends ExpressionImpl {
       [_operator, _operand0.toJson(), _operand1.toJson(), _operand2.toJson()];
 }
 
-class VariadicExpression extends ExpressionImpl {
+final class VariadicExpression extends ExpressionImpl {
   VariadicExpression(
     String operator,
     Iterable<ExpressionInterface> operands,
@@ -372,7 +371,7 @@ class VariadicExpression extends ExpressionImpl {
       [_operator, ..._operands.map((operand) => operand.toJson())];
 }
 
-class CollateExpression extends ExpressionImpl {
+final class CollateExpression extends ExpressionImpl {
   CollateExpression(
     CollationInterface collation,
     ExpressionInterface expression,
@@ -392,7 +391,7 @@ enum Quantifier {
   anyAndEvery,
 }
 
-class RangePredicateExpression extends ExpressionImpl {
+final class RangePredicateExpression extends ExpressionImpl {
   RangePredicateExpression(
     Quantifier quantifier,
     VariableExpressionInterface variable,

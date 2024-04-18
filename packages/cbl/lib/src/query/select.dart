@@ -18,21 +18,24 @@ import 'select_result.dart';
 /// A query component representing the `SELECT` clause of a [Query].
 ///
 /// {@category Query Builder}
-abstract class Select implements Query, FromRouter {}
+abstract final class Select implements Query, FromRouter {}
 
 /// Version of [Select] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncSelect implements Select, SyncQuery, SyncFromRouter {}
+abstract final class SyncSelect implements Select, SyncQuery, SyncFromRouter {}
 
 /// Version of [Select] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncSelect implements Select, AsyncQuery, AsyncFromRouter {}
+abstract final class AsyncSelect
+    implements Select, AsyncQuery, AsyncFromRouter {}
 
 // === Impl ====================================================================
 
-class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
+final class SelectImpl extends QueryBase
+    with BuilderQueryMixin
+    implements Select {
   SelectImpl(
     Iterable<SelectResultInterface> select, {
     required bool distinct,
@@ -91,7 +94,7 @@ class SelectImpl extends QueryBase with BuilderQueryMixin implements Select {
   // coverage:ignore-end
 }
 
-class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
+final class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
   SyncSelectImpl(
     Iterable<SelectResultInterface> select, {
     required bool distinct,
@@ -108,7 +111,7 @@ class SyncSelectImpl extends SyncBuilderQuery implements SyncSelect {
   }
 }
 
-class AsyncSelectImpl extends AsyncBuilderQuery implements AsyncSelect {
+final class AsyncSelectImpl extends AsyncBuilderQuery implements AsyncSelect {
   AsyncSelectImpl(
     Iterable<SelectResultInterface> select, {
     required bool distinct,

@@ -42,7 +42,7 @@ enum LogLevel {
 /// Abstract class that custom loggers have to extended.
 ///
 /// {@category Logging}
-abstract class Logger {
+abstract base class Logger {
   Logger([LogLevel? level]) : _level = level ?? LogLevel.info;
 
   void Function()? _levelChanged;
@@ -65,7 +65,7 @@ abstract class Logger {
 /// A log message.
 ///
 /// {@category Logging}
-class LogMessage {
+final class LogMessage {
   /// Creates a log message.
   LogMessage(this.level, this.domain, this.message);
 
@@ -79,11 +79,11 @@ class LogMessage {
   final String message;
 }
 
-/// A [Logger] which emits the received [LogMessage]s from a [stream].
+/// A [Logger] which emits the received [LogMessage]s into a [stream].
 ///
 /// {@category Logging}
-class StreamLogger extends Logger {
-  /// Creates a [Logger] which emits the received [LogMessage]s from a [stream].
+final class StreamLogger extends Logger {
+  /// Creates a [Logger] which emits the received [LogMessage]s into a [stream].
   StreamLogger([super.level]);
 
   final _controller = StreamController<LogMessage>.broadcast();

@@ -2,6 +2,7 @@ import 'array_expression_in.dart';
 import 'expression.dart';
 import 'variable_expression.dart';
 
+// ignore: avoid_classes_with_only_static_members
 /// Array expression.
 ///
 /// # Range predicates
@@ -47,9 +48,7 @@ import 'variable_expression.dart';
 /// ```
 ///
 /// {@category Query Builder}
-class ArrayExpression {
-  ArrayExpression._();
-
+abstract final class ArrayExpression {
   /// Creates a variable expression that is a placeholder for an element in an
   /// array.
   static VariableExpressionInterface variable(String propertyPath) =>

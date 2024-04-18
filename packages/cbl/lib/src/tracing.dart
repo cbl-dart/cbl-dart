@@ -66,7 +66,7 @@ TraceDataHandler get _onTraceData => onTraceData;
 /// data through a call to [onTraceData]. The data has to be JSON serializable.
 ///
 /// {@category Tracing}
-abstract class TracingDelegate {
+abstract base class TracingDelegate {
   /// Const constructor for subclasses.
   const TracingDelegate();
 
@@ -207,7 +207,7 @@ abstract class TracingDelegate {
 /// ([TracingDelegate.traceAsyncOperation]).
 ///
 /// {@category Tracing}
-abstract class TracedOperation {
+abstract final class TracedOperation {
   /// Constructor for subclasses.
   TracedOperation(this.name);
 
@@ -221,28 +221,28 @@ abstract class TracedOperation {
 /// A call to a native function.
 ///
 /// {@category Tracing}
-class NativeCallOp extends TracedOperation {
+final class NativeCallOp extends TracedOperation {
   NativeCallOp(super.name);
 }
 
 /// A call over a communication channel.
 ///
 /// {@category Tracing}
-class ChannelCallOp extends TracedOperation {
+final class ChannelCallOp extends TracedOperation {
   ChannelCallOp(super.name);
 }
 
 /// Operation that initializes CBL Dart.
 ///
 /// {@category Tracing}
-class InitializeOp extends TracedOperation {
+final class InitializeOp extends TracedOperation {
   InitializeOp() : super('Initialize');
 }
 
 /// Operation that opens a [Database].
 ///
 /// {@category Tracing}
-class OpenDatabaseOp extends TracedOperation {
+final class OpenDatabaseOp extends TracedOperation {
   OpenDatabaseOp(this.databaseName, this.config) : super('OpenDatabase');
 
   /// The name of the database to open.
@@ -255,7 +255,7 @@ class OpenDatabaseOp extends TracedOperation {
 /// Operation that involves a [Database].
 ///
 /// {@category Tracing}
-abstract class DatabaseOperationOp extends TracedOperation {
+abstract final class DatabaseOperationOp extends TracedOperation {
   DatabaseOperationOp(this.database, String name) : super(name);
 
   /// The database involved in this operation.
@@ -265,14 +265,14 @@ abstract class DatabaseOperationOp extends TracedOperation {
 /// Operation that closes a [Database].
 ///
 /// {@category Tracing}
-class CloseDatabaseOp extends DatabaseOperationOp {
+final class CloseDatabaseOp extends DatabaseOperationOp {
   CloseDatabaseOp(Database database) : super(database, 'CloseDatabase');
 }
 
 /// Operation that involves a [Collection].
 ///
 /// {@category Tracing}
-abstract class CollectionOperationOp extends TracedOperation {
+abstract final class CollectionOperationOp extends TracedOperation {
   CollectionOperationOp(this.collection, String name) : super(name);
 
   /// The collection involved in this operation.
@@ -282,7 +282,7 @@ abstract class CollectionOperationOp extends TracedOperation {
 /// Operation that involves a [Document].
 ///
 /// {@category Tracing}
-abstract class DocumentOperationOp implements TracedOperation {
+abstract final class DocumentOperationOp implements TracedOperation {
   /// The document involved in this operation.
   Document get document;
 }
@@ -290,7 +290,7 @@ abstract class DocumentOperationOp implements TracedOperation {
 /// Operation that loads a [Document] from a [Collection].
 ///
 /// {@category Tracing}
-class GetDocumentOp extends CollectionOperationOp {
+final class GetDocumentOp extends CollectionOperationOp {
   GetDocumentOp(Collection collection, this.id)
       : super(collection, 'GetDocument');
 
@@ -301,7 +301,8 @@ class GetDocumentOp extends CollectionOperationOp {
 /// Operation that prepares a [Document] to be saved or deleted.
 ///
 /// {@category Tracing}
-class PrepareDocumentOp extends TracedOperation implements DocumentOperationOp {
+final class PrepareDocumentOp extends TracedOperation
+    implements DocumentOperationOp {
   PrepareDocumentOp(this.document) : super('PrepareDocument');
 
   /// The document to prepare.
@@ -312,7 +313,7 @@ class PrepareDocumentOp extends TracedOperation implements DocumentOperationOp {
 /// Operation that saves a [Document] to a [Collection].
 ///
 /// {@category Tracing}
-class SaveDocumentOp extends CollectionOperationOp
+final class SaveDocumentOp extends CollectionOperationOp
     implements DocumentOperationOp {
   SaveDocumentOp(
     Collection collection,
@@ -337,7 +338,7 @@ class SaveDocumentOp extends CollectionOperationOp
 /// Operation that deletes a [Document] from a [Collection].
 ///
 /// {@category Tracing}
-class DeleteDocumentOp extends CollectionOperationOp
+final class DeleteDocumentOp extends CollectionOperationOp
     implements DocumentOperationOp {
   DeleteDocumentOp(
     Collection collection,
@@ -356,7 +357,7 @@ class DeleteDocumentOp extends CollectionOperationOp
 /// Operation that involves a [Query].
 ///
 /// {@category Tracing}
-abstract class QueryOperationOp extends TracedOperation {
+abstract final class QueryOperationOp extends TracedOperation {
   QueryOperationOp(this.query, String name) : super(name);
 
   /// The query involved in this operation.
@@ -366,14 +367,14 @@ abstract class QueryOperationOp extends TracedOperation {
 /// Operation that prepares a [Query] to be used.
 ///
 /// {@category Tracing}
-class PrepareQueryOp extends QueryOperationOp {
+final class PrepareQueryOp extends QueryOperationOp {
   PrepareQueryOp(Query query) : super(query, 'PrepareQuery');
 }
 
 /// Operation that executes a [Query].
 ///
 /// {@category Tracing}
-class ExecuteQueryOp extends QueryOperationOp {
+final class ExecuteQueryOp extends QueryOperationOp {
   ExecuteQueryOp(Query query) : super(query, 'ExecuteQuery');
 }
 
@@ -415,7 +416,7 @@ typedef OperationDetailsResolver = Map<String, Object?>? Function(
 /// DevTools Performance Page.
 ///
 /// {@category Tracing}
-class DevToolsTracing extends TracingDelegate {
+final class DevToolsTracing extends TracingDelegate {
   /// A tracing delegate that integrates CBL Dart with the dart developer tools.
   ///
   /// [operationFilter] is a filter that is used to determine whether an
