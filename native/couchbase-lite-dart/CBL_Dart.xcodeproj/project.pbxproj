@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		514C25E72BD149DA00A3D221 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 514C25E62BD149DA00A3D221 /* PrivacyInfo.xcprivacy */; };
 		C0132E08271C1E81005293A6 /* CouchbaseLite.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */; };
 		C09A4C4B271B7E3A0090EC68 /* Fleece+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C48271B7E3A0090EC68 /* Fleece+Dart.h */; };
 		C09A4C4C271B7E3A0090EC68 /* CBL+Dart.h in Headers */ = {isa = PBXBuildFile; fileRef = C09A4C49271B7E3A0090EC68 /* CBL+Dart.h */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		514C25E62BD149DA00A3D221 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C005BBA925CF27DB0086E1B3 /* CouchbaseLiteDart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CouchbaseLiteDart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0132E07271C1E80005293A6 /* CouchbaseLite.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = CouchbaseLite.xcframework; path = ./Xcode/CouchbaseLite.xcframework; sourceTree = "<group>"; };
 		C0971C0E25CF7745006EE2DC /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
@@ -61,6 +63,7 @@
 		C005BB9F25CF27DB0086E1B3 = {
 			isa = PBXGroup;
 			children = (
+				514C25E62BD149DA00A3D221 /* PrivacyInfo.xcprivacy */,
 				C09A4C47271B7E3A0090EC68 /* include */,
 				C0D8CC3025CF2DF8008B87C0 /* vendor */,
 				C0D8CBE225CF28F3008B87C0 /* src */,
@@ -239,6 +242,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				514C25E72BD149DA00A3D221 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
