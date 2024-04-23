@@ -47,11 +47,14 @@ import 'package:cbl/cbl.dart';
 
 Future<void> run() async {
   // Open the database (creating it if it doesn’t exist).
-  final database = await Database.openAsync('my-database');
+  final database = await Database.openAsync('database');
+
+  // Create a collection, or return it if it already exists.
+  final collection = await database.createCollection('components');
 
   // Create a new document.
   final mutableDocument = MutableDocument({'type': 'SDK', 'majorVersion': 2});
-  await database.saveDocument(mutableDocument);
+  await collection.saveDocument(mutableDocument);
 
   print(
     'Created document with id ${mutableDocument.id} and '
@@ -60,7 +63,7 @@ Future<void> run() async {
 
   // Update the document.
   mutableDocument.setString('Dart', key: 'language');
-  await database.saveDocument(mutableDocument);
+  await collection.saveDocument(mutableDocument);
 
   print(
     'Updated document with id ${mutableDocument.id}, '
@@ -68,7 +71,7 @@ Future<void> run() async {
   );
 
   // Read the document.
-  final document = (await database.document(mutableDocument.id))!;
+  final document = (await collection.document(mutableDocument.id))!;
 
   print(
     'Read document with id ${document.id}, '
@@ -79,7 +82,7 @@ Future<void> run() async {
   // Create a query to fetch documents of type SDK.
   print('Querying Documents of type=SDK.');
   final query = await Query.fromN1ql(database, '''
-    SELECT * FROM _
+    SELECT * FROM components
     WHERE type = 'SDK'
   ''');
 
