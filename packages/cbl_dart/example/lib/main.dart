@@ -6,6 +6,7 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl_dart/cbl_dart.dart';
 
 late final Database db;
+late final Collection collection;
 
 Future<void> main(List<String> args) async {
   if (args.contains('--help') ||
@@ -25,7 +26,8 @@ If no message is provided, all stored messages will be listed.
 
   await CouchbaseLiteDart.init(edition: Edition.community);
 
-  db = await Database.openAsync('messages');
+  db = await Database.openAsync('db');
+  collection = await db.createCollection('messages');
 
   final message = args.isEmpty ? null : args[0];
 
@@ -45,7 +47,7 @@ Future<void> storeMessage(String message) async {
     'body': message,
   });
 
-  await db.saveDocument(doc);
+  await collection.saveDocument(doc);
 
   print('Message ${doc.id} stored: ${doc.toJson()}');
 }
@@ -57,7 +59,7 @@ Future<void> listMessages() async {
         SelectResult.property('createdAt'),
         SelectResult.property('body'),
       )
-      .from(DataSource.database(db))
+      .from(DataSource.collection(collection))
       .where(Expression.property('type').equalTo(
         Expression.string('message'),
       ))

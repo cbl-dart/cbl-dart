@@ -1,5 +1,5 @@
 dependency_overrides:
-  cbl: any
+  cbl: ^3.0.0-dev.4
   cbl_dart:
     path: ..
   cbl_ffi: any
