@@ -2,7 +2,8 @@ name: 'cbl'
 version: 3.0.0-dev.4
 description: >-
   Couchbase Lite is an embedded, NoSQL JSON Document Style database, supporting
-  Blobs, Encryption, N1QL Queries, Live Queries, Full-Text Search and Data Sync.
+  Blobs, Encryption, SQL++ Queries, Live Queries, Full-Text Search and Data
+  Sync.
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues

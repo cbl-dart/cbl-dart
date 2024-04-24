@@ -35,15 +35,14 @@ and
 
 ## Running
 
-Use `api|Query.fromN1ql` to define a query through a SQL++ string. Then run the
-query using the `api|Query.execute()` method.
+Use `api|Database.createQuery` to define a query through a SQL++ string. Then
+run the query using the `api|Query.execute()` method.
 
 <CodeExample id={1} title="Running a SQL++ Query">
 
 ```dart
 final database = await Database.openAsync('hotels');
-final query = await AsyncQuery.fromN1ql(
-  database,
+final query = await database.createQuery(
   'SELECT META().id AS docId FROM _ WHERE type = "hotel"',
 );
 final resultSet = await query.execute();
@@ -923,8 +922,7 @@ WHERE department = $department;
 <CodeExample id={42} title="Using a Parameter">
 
 ```dart
-final query = await Query.fromN1ql(
-  db,
+final query = await db.createQuery(
   r'''
   SELECT name
   FROM employees
@@ -1514,8 +1512,7 @@ with `$` — see: [Example 51](#).
 
 ```dart
 final db = await Database.openAsync('hotel');
-final query = await Query.fromN1ql(
-  db,
+final query = await db.createQuery(
   r'''
   SELECT META().id AS docId
   FROM hotel

@@ -206,8 +206,7 @@ The query below is equivalent to query from the `api|QueryBuilder` example
 above:
 
 ```dart
-final query = await Query.fromN1ql(
-  db,
+final query = await db.createQuery(
   '''
   SELECT name, avg(age) AS avgAge
   FROM users

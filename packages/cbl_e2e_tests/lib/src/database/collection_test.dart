@@ -518,7 +518,7 @@ void main() {
 
         await collection.createIndex('a', ValueIndexConfiguration(['a']));
 
-        final q = await Query.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
+        final q = await db.createQuery('SELECT * FROM _ WHERE a = "a"');
 
         final explain = await q.explain();
 
@@ -533,10 +533,8 @@ void main() {
 
           await collection.createIndex('a', FullTextIndexConfiguration(['a']));
 
-          final q = await Query.fromN1ql(
-            db,
-            "SELECT * FROM _ WHERE MATCH(a, 'query')",
-          );
+          final q =
+              await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
 
           final explain = await q.explain();
 
@@ -553,7 +551,7 @@ void main() {
           IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
         );
 
-        final q = await Query.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
+        final q = await db.createQuery('SELECT * FROM _ WHERE a = "a"');
 
         final explain = await q.explain();
 
@@ -569,10 +567,8 @@ void main() {
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
-        final q = await Query.fromN1ql(
-          db,
-          "SELECT * FROM _ WHERE MATCH(a, 'query')",
-        );
+        final q =
+            await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
 
         final explain = await q.explain();
 

@@ -6,12 +6,8 @@ import '../bindings.dart';
 import '../couchbase_lite.dart';
 import '../database.dart';
 import '../database/database.dart';
-import '../database/ffi_database.dart';
-import '../database/proxy_database.dart';
 import '../support/resource.dart';
-import 'ffi_query.dart';
 import 'parameters.dart';
-import 'proxy_query.dart';
 import 'query_change.dart';
 import 'result.dart';
 import 'result_set.dart';
@@ -27,70 +23,6 @@ typedef QueryChangeListener<T extends ResultSet> = void Function(
 ///
 /// {@category Query}
 abstract interface class Query implements Resource {
-  /// Creates an [Query] from a N1QL [query].
-  static FutureOr<Query> fromN1ql(Database database, String query) {
-    if (database is AsyncDatabase) {
-      return Query.fromN1qlAsync(database, query);
-    }
-
-    if (database is SyncDatabase) {
-      return Query.fromN1qlSync(database, query);
-    }
-
-    throw UnimplementedError();
-  }
-
-  /// {@template cbl.Query.fromN1qlAsync}
-  /// Creates an [AsyncQuery] from a N1QL [query].
-  /// {@endtemplate}
-  static Future<AsyncQuery> fromN1qlAsync(
-    AsyncDatabase database,
-    String query,
-  ) =>
-      AsyncQuery.fromN1ql(database, query);
-
-  /// {@template cbl.Query.fromN1qlSync}
-  /// Creates a [SyncQuery] from a N1QL [query].
-  /// {@endtemplate}
-  // ignore: prefer_constructors_over_static_methods
-  static SyncQuery fromN1qlSync(SyncDatabase database, String query) =>
-      SyncQuery.fromN1ql(database, query);
-
-  /// Creates a [Query] from the [Query.jsonRepresentation] of a query.
-  static FutureOr<Query> fromJsonRepresentation(
-    Database database,
-    String jsonRepresentation,
-  ) {
-    if (database is AsyncDatabase) {
-      return Query.fromJsonRepresentationAsync(database, jsonRepresentation);
-    }
-
-    if (database is SyncDatabase) {
-      return Query.fromJsonRepresentationSync(database, jsonRepresentation);
-    }
-
-    throw UnimplementedError();
-  }
-
-  /// {@template cbl.Query.fromJsonRepresentationAsync}
-  /// Creates an [AsyncQuery] from the [Query.jsonRepresentation] of a query.
-  /// {@endtemplate}
-  static Future<AsyncQuery> fromJsonRepresentationAsync(
-    AsyncDatabase database,
-    String jsonRepresentation,
-  ) =>
-      AsyncQuery.fromJsonRepresentation(database, jsonRepresentation);
-
-  /// {@template cbl.Query.fromJsonRepresentationSync}
-  /// Creates an [SyncQuery] from the [Query.jsonRepresentation] of a query.
-  /// {@endtemplate}
-  // ignore: prefer_constructors_over_static_methods
-  static SyncQuery fromJsonRepresentationSync(
-    SyncDatabase database,
-    String jsonRepresentation,
-  ) =>
-      SyncQuery.fromJsonRepresentation(database, jsonRepresentation);
-
   /// The values with which to substitute the parameters defined in the query.
   ///
   /// All parameters defined in the query must be given values before running
@@ -130,7 +62,7 @@ abstract interface class Query implements Resource {
   ///   linear scan of the documents instead of using an index.
   /// - The third sections is this queries JSON representation. This is the data
   ///   structure that is built to describe this query, either by the the query
-  ///   builder or when a N1QL query is compiled.
+  ///   builder or when a SQL++ query is compiled.
   FutureOr<String> explain();
 
   /// Adds a [listener] to be notified of changes to the results of this query.
@@ -165,44 +97,25 @@ abstract interface class Query implements Resource {
 
   /// The JSON representation of this query.
   ///
-  /// This value can be used to recreate this query with
-  /// [SyncQuery.fromJsonRepresentation] or [AsyncQuery.fromJsonRepresentation].
+  /// This value can be used to recreate this query with [Database.createQuery]
+  /// and the parameter `json` set to `true`.
   ///
-  /// Is `null`, if this query was created from a N1QL query.
+  /// Is `null`, if this query was created from a SQL++ query.
   String? get jsonRepresentation;
 
-  /// The N1QL string of this query.
+  /// The SQL++ representation of this query.
   ///
-  /// This value can be used to recreate this query with [SyncQuery.fromN1ql] or
-  /// [AsyncQuery.fromN1ql].
+  /// This value can be used to recreate this query with [Database.createQuery].
   ///
   /// Is `null`, if this query was created through the builder API or from the
   /// JSON representation.
-  String? get n1ql;
+  String? get sqlRepresentation;
 }
 
 /// A [Query] with a primarily synchronous API.
 ///
 /// {@category Query}
 abstract interface class SyncQuery implements Query {
-  /// {@macro cbl.Query.fromN1qlSync}
-  factory SyncQuery.fromN1ql(SyncDatabase database, String query) => FfiQuery(
-        database: database as FfiDatabase,
-        definition: query,
-        language: CBLQueryLanguage.n1ql,
-      )..prepare();
-
-  /// {@macro cbl.Query.fromJsonRepresentationSync}
-  factory SyncQuery.fromJsonRepresentation(
-    SyncDatabase database,
-    String json,
-  ) =>
-      FfiQuery(
-        database: database as FfiDatabase,
-        definition: json,
-        language: CBLQueryLanguage.json,
-      )..prepare();
-
   @override
   void setParameters(Parameters? value);
 
@@ -226,38 +139,6 @@ abstract interface class SyncQuery implements Query {
 ///
 /// {@category Query}
 abstract interface class AsyncQuery implements Query {
-  /// {@macro cbl.Query.fromN1qlAsync}
-  static Future<AsyncQuery> fromN1ql(
-    AsyncDatabase database,
-    String query,
-  ) async {
-    final q = ProxyQuery(
-      database: database as ProxyDatabase,
-      language: CBLQueryLanguage.n1ql,
-      definition: query,
-    );
-
-    await q.prepare();
-
-    return q;
-  }
-
-  /// {@macro cbl.Query.fromJsonRepresentationAsync}
-  static Future<AsyncQuery> fromJsonRepresentation(
-    AsyncDatabase database,
-    String json,
-  ) async {
-    final q = ProxyQuery(
-      database: database as ProxyDatabase,
-      language: CBLQueryLanguage.json,
-      definition: json,
-    );
-
-    await q.prepare();
-
-    return q;
-  }
-
   @override
   Future<void> setParameters(Parameters? value);
 
@@ -309,10 +190,17 @@ abstract base class QueryBase with ClosableResourceMixin implements Query {
       language == CBLQueryLanguage.json ? definition : null;
 
   @override
-  String? get n1ql => language == CBLQueryLanguage.n1ql ? definition : null;
+  String? get sqlRepresentation =>
+      language == CBLQueryLanguage.n1ql ? definition : null;
 
   @override
-  String toString() => '$typeName(${language.name}: $definition)';
+  String toString() {
+    final languageName = switch (language) {
+      CBLQueryLanguage.json => 'JSON',
+      CBLQueryLanguage.n1ql => 'SQL++',
+    };
+    return '$typeName($languageName: $definition)';
+  }
 
   @protected
   void attachToParentResource() {

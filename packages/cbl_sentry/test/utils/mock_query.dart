@@ -1,10 +1,10 @@
 import 'package:cbl/cbl.dart';
 
 class MockQuery implements Query {
-  MockQuery({this.n1ql, this.jsonRepresentation});
+  MockQuery({this.sqlRepresentation, this.jsonRepresentation});
 
   @override
-  final String? n1ql;
+  final String? sqlRepresentation;
 
   @override
   final String? jsonRepresentation;

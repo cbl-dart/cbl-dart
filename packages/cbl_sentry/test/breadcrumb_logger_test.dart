@@ -70,7 +70,7 @@ void main() {
 
     test('QueryOperationOp', () {
       expect(
-        PrepareQueryOp(MockQuery(n1ql: 'a')).debugDescription,
+        PrepareQueryOp(MockQuery(sqlRepresentation: 'a')).debugDescription,
         'a',
       );
       expect(

@@ -524,8 +524,8 @@ final class DevToolsTracing extends TracingDelegate {
     }
 
     if (operation is QueryOperationOp) {
-      details['query'] =
-          operation.query.jsonRepresentation ?? operation.query.n1ql;
+      details['query'] = operation.query.jsonRepresentation ??
+          operation.query.sqlRepresentation;
     }
 
     return details.isEmpty ? null : details;

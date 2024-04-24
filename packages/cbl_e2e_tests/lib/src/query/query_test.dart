@@ -22,7 +22,7 @@ void main() {
       await db.saveDocument(MutableDocument({'a': 0}));
       await db.saveDocument(MutableDocument({'a': 1}));
 
-      final q = await Query.fromN1ql(db, 'SELECT a FROM _ ORDER BY a');
+      final q = await db.createQuery('SELECT a FROM _ ORDER BY a');
       final resultSet = await q.execute();
 
       expect(
@@ -47,10 +47,8 @@ void main() {
           .from(DataSource.database(db))
           .orderBy(Ordering.property('a'));
 
-      final query = await Query.fromJsonRepresentation(
-        db,
-        builderQuery.jsonRepresentation!,
-      );
+      final query =
+          await db.createQuery(builderQuery.jsonRepresentation!, json: true);
       final resultSet = await query.execute();
 
       expect(
@@ -68,7 +66,7 @@ void main() {
     apiTest('execute query with parameters', () async {
       final db = await openTestDatabase();
       final q =
-          await Query.fromN1ql(db, r'SELECT doc FROM _ WHERE META().id = $ID');
+          await db.createQuery(r'SELECT doc FROM _ WHERE META().id = $ID');
       await db.saveDocument(MutableDocument.withId('A'));
 
       await q.setParameters(Parameters({'ID': 'A'}));
@@ -82,7 +80,7 @@ void main() {
 
     apiTest('explain returns the query plan explanation', () async {
       final db = await openTestDatabase();
-      final q = await Query.fromN1ql(db, 'SELECT doc FROM _');
+      final q = await db.createQuery('SELECT doc FROM _');
 
       expect(
         await q.explain(),
@@ -99,7 +97,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
     apiTest('change listener is called with current results on registration',
         () async {
       final db = await openTestDatabase();
-      final query = await Query.fromN1ql(db, 'SELECT * FROM _');
+      final query = await db.createQuery('SELECT * FROM _');
 
       // First listener gets current results.
       await query.addChangeListener(expectAsync1((change) async {
@@ -116,7 +114,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
 
     apiTest('change listener is notified while listening', () async {
       final db = await openTestDatabase();
-      final query = await Query.fromN1ql(db, 'SELECT META().id FROM _');
+      final query = await db.createQuery('SELECT META().id FROM _');
       final doc = MutableDocument();
       var call = 0;
       final callsDone = Completer<void>();
@@ -153,10 +151,8 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
     apiTest('listeners receive change when parameters change', () async {
       final db = await openTestDatabase();
       await db.saveDocument(MutableDocument.withId('A'));
-      final query = await Query.fromN1ql(
-        db,
-        r'SELECT META().id FROM _ WHERE META().id = $ID',
-      );
+      final query = await db
+          .createQuery(r'SELECT META().id FROM _ WHERE META().id = $ID');
       await query.setParameters(Parameters({'ID': 'A'}));
 
       var changeIndex = 0;
@@ -182,7 +178,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
 
     apiTest('change stream emits when results change', () async {
       final db = await openTestDatabase();
-      final query = await Query.fromN1ql(db, 'SELECT META().id FROM _');
+      final query = await db.createQuery('SELECT META().id FROM _');
       final doc = MutableDocument();
 
       expect(
@@ -220,7 +216,7 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
     apiTest('bad query: error position highlighting', () async {
       final db = await openTestDatabase();
       expect(
-        () => Query.fromN1ql(db, 'SELECT foo()'),
+        () => db.createQuery('SELECT foo()'),
         throwsA(isA<DatabaseException>().having(
           (it) => it.toString(),
           'toString()',
@@ -233,29 +229,29 @@ SELECT foo()
       );
     });
 
-    test('get N1QL source string', () {
+    test('get SQL++ source string', () {
       final db = openSyncTestDatabase();
-      final n1qlQuery = SyncQuery.fromN1ql(db, 'SELECT * FROM _');
+      final sqlQuery = db.createQuery('SELECT * FROM _');
       final jsonQuery = const QueryBuilder()
           .select(SelectResult.all())
           .from(DataSource.database(db));
 
-      expect(n1qlQuery.n1ql, 'SELECT * FROM _');
-      expect(jsonQuery.n1ql, isNull);
+      expect(sqlQuery.sqlRepresentation, 'SELECT * FROM _');
+      expect(jsonQuery.sqlRepresentation, isNull);
     });
 
     apiTest('toString', () async {
       final db = await openTestDatabase();
       expect(
-        (await Query.fromN1ql(db, 'SELECT * FROM _')).toString(),
-        contains('Query(n1ql: SELECT * FROM _)'),
+        (await db.createQuery('SELECT * FROM _')).toString(),
+        contains('Query(SQL++: SELECT * FROM _)'),
       );
     });
 
     group('asTypedStream', () {
       apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
-        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
           () => resultSet.asTypedStream<TestTypedDict>(),
@@ -268,7 +264,7 @@ SELECT foo()
 
       apiTest('throws if dictionary type is not recognized', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
-        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
           () => resultSet.asTypedStream<TestTypedDict2>(),
@@ -282,7 +278,7 @@ SELECT foo()
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument();
         await db.saveDocument(doc);
-        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         final results = await resultSet.asTypedStream<TestTypedDict>().toList();
         expect(results, hasLength(1));
@@ -293,7 +289,7 @@ SELECT foo()
     group('allTypedResults', () {
       apiTest('throws if database does not support typed data', () async {
         final db = await openTestDatabase();
-        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
           () => resultSet.allTypedResults<TestTypedDict>(),
@@ -306,7 +302,7 @@ SELECT foo()
 
       apiTest('throws if dictionary type is not recognized', () async {
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
-        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         expect(
           () => resultSet.allTypedResults<TestTypedDict2>(),
@@ -320,7 +316,7 @@ SELECT foo()
         final db = await openTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument();
         await db.saveDocument(doc);
-        final query = await Query.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = await db.createQuery('SELECT Meta().id FROM _');
         final resultSet = await query.execute();
         final results = await resultSet.allTypedResults<TestTypedDict>();
         expect(results, hasLength(1));
@@ -331,7 +327,7 @@ SELECT foo()
     group('asTypedIterable', () {
       test('throws if database does not support typed data', () {
         final db = openSyncTestDatabase();
-        final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = db.createQuery('SELECT Meta().id FROM _');
         final resultSet = query.execute();
         expect(
           () => resultSet.asTypedIterable<TestTypedDict>(),
@@ -344,7 +340,7 @@ SELECT foo()
 
       test('throws if dictionary type is not recognized', () {
         final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
-        final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = db.createQuery('SELECT Meta().id FROM _');
         final resultSet = query.execute();
         expect(
           () => resultSet.asTypedIterable<TestTypedDict2>(),
@@ -358,7 +354,7 @@ SELECT foo()
         final db = openSyncTestDatabase(typedDataAdapter: testAdapter);
         final doc = MutableDocument();
         db.saveDocument(doc);
-        final query = SyncQuery.fromN1ql(db, 'SELECT Meta().id FROM _');
+        final query = db.createQuery('SELECT Meta().id FROM _');
         final resultSet = query.execute();
         final results = resultSet.asTypedIterable<TestTypedDict>().toList();
         expect(results, hasLength(1));
@@ -370,12 +366,12 @@ SELECT foo()
   group('QueryChange', () {
     test('toString', () {
       final db = openSyncTestDatabase();
-      final query = SyncQuery.fromN1ql(db, 'SELECT * FROM _');
+      final query = db.createQuery('SELECT * FROM _');
       final results = query.execute();
       final change = QueryChange(query, results);
       expect(
         change.toString(),
-        'QueryChange(query: FfiQuery(n1ql: SELECT * FROM _))',
+        'QueryChange(query: FfiQuery(SQL++: SELECT * FROM _))',
       );
     });
   });

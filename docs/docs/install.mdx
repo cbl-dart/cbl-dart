@@ -198,7 +198,7 @@ Future<void> run() async {
 
   // Create a query to fetch documents of type SDK.
   print('Querying Documents of type=SDK.');
-  final query = await Query.fromN1ql(database, '''
+  final query = await database.createQuery('''
     SELECT * FROM components
     WHERE type = 'SDK'
   ''');
