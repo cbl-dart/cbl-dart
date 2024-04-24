@@ -1,7 +1,7 @@
 name: cbl_flutter
 description: >-
   Flutter Plugin for Couchbase Lite, an embedded, NoSQL JSON Document Style
-  database, supporting Blobs, Encryption, N1QL Queries, Live Queries, Full-Text
+  database, supporting Blobs, Encryption, SQL++ Queries, Live Queries, Full-Text
   Search and Data Sync.
 version: 3.0.0-dev.4
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter

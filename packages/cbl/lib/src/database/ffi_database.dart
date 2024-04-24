@@ -14,7 +14,9 @@ import '../errors.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
+import '../query/ffi_query.dart';
 import '../query/index/index.dart';
+import '../query/query.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
@@ -401,6 +403,13 @@ final class FfiDatabase
 
   @override
   void deleteIndex(String name) => defaultCollection.deleteIndex(name);
+
+  @override
+  SyncQuery createQuery(String query, {bool json = false}) => FfiQuery(
+        database: this,
+        definition: query,
+        language: json ? CBLQueryLanguage.json : CBLQueryLanguage.n1ql,
+      )..prepare();
 
   @override
   String toString() => 'FfiDatabase($name)';

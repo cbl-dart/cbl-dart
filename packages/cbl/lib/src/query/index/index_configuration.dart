@@ -5,30 +5,31 @@ import 'package:collection/collection.dart';
 import '../../bindings.dart';
 import 'index.dart';
 
-/// A specification of an [Index] through a list of N1QL [expressions].
+/// A specification of an [Index] through a list of SQL++ [expressions].
 ///
 /// {@category Query}
 abstract final class IndexConfiguration implements Index {
-  /// The N1QL expressions to use to create the index.
+  /// The SQL++ expressions to use to create the index.
   List<String> get expressions;
   set expressions(List<String> value);
 }
 
-/// A specification of a value [Index] through a list of N1QL [expressions].
+/// A specification of a value [Index] through a list of SQL++ [expressions].
 ///
 /// {@category Query}
 abstract final class ValueIndexConfiguration implements IndexConfiguration {
-  /// Creates a specification of a value [Index] through a list of N1QL
+  /// Creates a specification of a value [Index] through a list of SQL++
   /// [expressions].
   factory ValueIndexConfiguration(List<String> expressions) =>
       _ValueIndexConfiguration(expressions);
 }
 
-/// A specification of a full text [Index] through a list of N1QL [expressions].
+/// A specification of a full text [Index] through a list of SQL++
+/// [expressions].
 ///
 /// {@category Query}
 abstract final class FullTextIndexConfiguration implements IndexConfiguration {
-  /// Creates a specification of a full text [Index] through a list of N1QL
+  /// Creates a specification of a full text [Index] through a list of SQL++
   /// [expressions].
   factory FullTextIndexConfiguration(
     List<String> expressions, {

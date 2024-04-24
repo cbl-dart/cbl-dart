@@ -25,7 +25,7 @@ void main() {
     final doc = MutableDocument({'value': 'a'});
     db.defaultCollection.saveDocument(doc);
 
-    final resultSet = Query.fromN1qlSync(db, 'SELECT value FROM _').execute();
+    final resultSet = db.createQuery('SELECT value FROM _').execute();
     final typedResults = resultSet.allTypedResults<StringDict>();
     expect(typedResults, hasLength(1));
     expect(typedResults.first.value, 'a');

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../bindings.dart';
 import '../document.dart';
 import '../document/blob.dart';
 import '../document/document.dart';
@@ -12,6 +13,8 @@ import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
+import '../query/proxy_query.dart';
+import '../query/query.dart';
 import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
@@ -391,6 +394,19 @@ final class ProxyDatabase extends ProxyObject
   @override
   Future<void> deleteIndex(String name) =>
       defaultCollection.then((collections) => collections.deleteIndex(name));
+
+  @override
+  Future<AsyncQuery> createQuery(String query, {bool json = false}) async {
+    final proxyQuery = ProxyQuery(
+      database: this,
+      language: json ? CBLQueryLanguage.json : CBLQueryLanguage.n1ql,
+      definition: query,
+    );
+
+    await proxyQuery.prepare();
+
+    return proxyQuery;
+  }
 
   @override
   String toString() => 'ProxyDatabase($name)';

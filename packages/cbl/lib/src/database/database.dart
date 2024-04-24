@@ -10,6 +10,7 @@ import '../document/fragment.dart';
 import '../log.dart';
 import '../log/log.dart';
 import '../query/index/index.dart';
+import '../query/query.dart';
 import '../replication.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
@@ -529,6 +530,12 @@ abstract interface class Database implements ClosableResource {
   /// Deletes the [Index] of the given [name].
   @Deprecated('Use defaultCollection.deleteIndex instead.')
   FutureOr<void> deleteIndex(String name);
+
+  /// Creates a [Query] from a query string.
+  ///
+  /// By default [query] is expected to be an SQL++ query. If [json] is `true`,
+  /// [query] is expected to be the [Query.jsonRepresentation] of a query.
+  FutureOr<Query> createQuery(String query, {bool json = false});
 }
 
 /// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
@@ -770,6 +777,9 @@ abstract interface class SyncDatabase implements Database {
   @Deprecated('Use defaultCollection.deleteIndex instead.')
   @override
   void deleteIndex(String name);
+
+  @override
+  SyncQuery createQuery(String query, {bool json = false});
 }
 
 /// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
@@ -984,4 +994,7 @@ abstract interface class AsyncDatabase implements Database {
   @Deprecated('Use defaultCollection.deleteIndex instead.')
   @override
   Future<void> deleteIndex(String name);
+
+  @override
+  Future<AsyncQuery> createQuery(String query, {bool json = false});
 }

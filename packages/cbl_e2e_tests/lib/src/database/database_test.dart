@@ -799,7 +799,7 @@ void main() {
         final db = await openTestDatabase();
         await db.createIndex('a', ValueIndexConfiguration(['a']));
 
-        final q = await Query.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
+        final q = await db.createQuery('SELECT * FROM _ WHERE a = "a"');
 
         final explain = await q.explain();
 
@@ -812,10 +812,8 @@ void main() {
           final db = await openTestDatabase();
           await db.createIndex('a', FullTextIndexConfiguration(['a']));
 
-          final q = await Query.fromN1ql(
-            db,
-            "SELECT * FROM _ WHERE MATCH(a, 'query')",
-          );
+          final q =
+              await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
 
           final explain = await q.explain();
 
@@ -830,7 +828,7 @@ void main() {
           IndexBuilder.valueIndex([ValueIndexItem.property('a')]),
         );
 
-        final q = await Query.fromN1ql(db, 'SELECT * FROM _ WHERE a = "a"');
+        final q = await db.createQuery('SELECT * FROM _ WHERE a = "a"');
 
         final explain = await q.explain();
 
@@ -844,10 +842,8 @@ void main() {
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
-        final q = await Query.fromN1ql(
-          db,
-          "SELECT * FROM _ WHERE MATCH(a, 'query')",
-        );
+        final q =
+            await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
 
         final explain = await q.explain();
 
@@ -941,7 +937,7 @@ void main() {
         await dbB.saveDocument(doc);
       });
 
-      apiTest('N1QL meal planner example', () async {
+      apiTest('SQL++ meal planner example', () async {
         final db = await openTestDatabase(name: 'A');
         await db.createIndex('date', ValueIndexConfiguration(['type']));
         await db.createIndex(
@@ -968,10 +964,9 @@ void main() {
           'date': '2021-01-15',
         }));
 
-        final q = await Query.fromN1ql(
-          db,
+        final q = await db.createQuery(
           '''
-          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal 
+          SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal
           FROM _ AS dish
           JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
           WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"

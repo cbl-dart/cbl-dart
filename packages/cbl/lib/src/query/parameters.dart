@@ -24,8 +24,9 @@ abstract final class Parameters {
   /// Set a value to the query parameter referenced by the given [name].
   ///
   /// {@template cbl.Parameters.parameterDefinition}
-  /// In N1QL queries, a parameter is referenced by prefixing an identifier with
-  /// `$`. For example, this query defines a parameter with the name `TYPE`:
+  /// In SQL++ queries, a parameter is referenced by prefixing an identifier
+  /// with `$`. For example, this query defines a parameter with the name
+  /// `TYPE`:
   ///
   /// ```sql
   /// SELECT * FROM _ WHERE type = $TYPE;
