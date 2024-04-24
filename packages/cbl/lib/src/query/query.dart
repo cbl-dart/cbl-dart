@@ -62,7 +62,7 @@ abstract interface class Query implements Resource {
   ///   linear scan of the documents instead of using an index.
   /// - The third sections is this queries JSON representation. This is the data
   ///   structure that is built to describe this query, either by the the query
-  ///   builder or when a SQL++ query is compiled.
+  ///   builder or when an SQL++ query is compiled.
   FutureOr<String> explain();
 
   /// Adds a [listener] to be notified of changes to the results of this query.
@@ -100,7 +100,7 @@ abstract interface class Query implements Resource {
   /// This value can be used to recreate this query with [Database.createQuery]
   /// and the parameter `json` set to `true`.
   ///
-  /// Is `null`, if this query was created from a SQL++ query.
+  /// Is `null`, if this query was created from an SQL++ query.
   String? get jsonRepresentation;
 
   /// The SQL++ representation of this query.

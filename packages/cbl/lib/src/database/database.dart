@@ -533,7 +533,7 @@ abstract interface class Database implements ClosableResource {
 
   /// Creates a [Query] from a query string.
   ///
-  /// By default [query] is expected to be a SQL++ query. If [json] is `true`,
+  /// By default [query] is expected to be an SQL++ query. If [json] is `true`,
   /// [query] is expected to be the [Query.jsonRepresentation] of a query.
   FutureOr<Query> createQuery(String query, {bool json = false});
 }

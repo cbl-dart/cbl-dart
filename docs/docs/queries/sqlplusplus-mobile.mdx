@@ -35,10 +35,10 @@ and
 
 ## Running
 
-Use `api|Database.createQuery` to define a query through a SQL++ string. Then
+Use `api|Database.createQuery` to define a query through an SQL++ string. Then
 run the query using the `api|Query.execute()` method.
 
-<CodeExample id={1} title="Running a SQL++ Query">
+<CodeExample id={1} title="Running an SQL++ Query">
 
 ```dart
 final database = await Database.openAsync('hotels');
@@ -1508,7 +1508,7 @@ You can provide runtime parameters to your SQL++ query to make it more flexible.
 To specify substitutable parameters within your query string prefix the name
 with `$` — see: [Example 51](#).
 
-<CodeExample id={51} title="Running a SQL++ Query">
+<CodeExample id={51} title="Running an SQL++ Query">
 
 ```dart
 final db = await Database.openAsync('hotel');

@@ -132,7 +132,7 @@ final class PosixException extends CouchbaseLiteException {
   String get _typeName => 'PosixException';
 }
 
-/// An exception used to indicate a SQLite operation error.
+/// An exception used to indicate an SQLite operation error.
 ///
 /// The meaning of the error [code] is defined in the
 /// [SQLite documentation](https://www.sqlite.org/rescode.html).
