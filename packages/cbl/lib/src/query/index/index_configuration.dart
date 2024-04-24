@@ -24,7 +24,8 @@ abstract final class ValueIndexConfiguration implements IndexConfiguration {
       _ValueIndexConfiguration(expressions);
 }
 
-/// A specification of a full text [Index] through a list of SQL++ [expressions].
+/// A specification of a full text [Index] through a list of SQL++
+/// [expressions].
 ///
 /// {@category Query}
 abstract final class FullTextIndexConfiguration implements IndexConfiguration {
