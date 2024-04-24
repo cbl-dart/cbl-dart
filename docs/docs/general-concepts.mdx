@@ -71,12 +71,12 @@ With asynchronous APIs, changes are only guaranteed to be delivered once the
 
 ```dart
 // Await the future returned from the registration call.
-await db.addChangeListener((change) {
+await database.addChangeListener((change) {
   print('Ids of changed documents: ${change.documentIds}'):
 });
 
 // The listener is guaranteed to be notified of this change.
-await db.saveDocument(MutableDocument.withId('Hey'));
+await database.saveDocument(MutableDocument.withId('Hey'));
 ```
 
 To stop receiving notifications, call `removeChangeListener` with the token that
@@ -85,11 +85,11 @@ synchronous or asynchronous, listeners will stop receiving notifications
 immediately:
 
 ```dart
-final token = await db.addChangeListener((change) { });
+final token = await database.addChangeListener((change) { });
 
 // Some time goes by...
 
-await db.removeChangeListener(token);
+await database.removeChangeListener(token);
 ```
 
 ## Change Streams
@@ -107,7 +107,7 @@ which the the stream will observe events. Instead, asynchronous APIs return
 listening:
 
 ```dart
-final stream = db.changes();
+final stream = database.changes();
 
 stream.listen((change) {
   print('Ids of changed documents: ${change.documentIds}'):
@@ -117,7 +117,7 @@ stream.listen((change) {
 await stream.listening;
 
 // The stream is guaranteed to be notified of this change.
-await db.saveDocument(MutableDocument.withId('Hey'));
+await database.saveDocument(MutableDocument.withId('Hey'));
 ```
 
 If you only ever open the same database file once at any given time, you don't

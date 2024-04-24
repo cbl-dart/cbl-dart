@@ -63,7 +63,7 @@ if (data == null) { return; }
 
 final blob = Blob.fromData('image/jpeg', data);
 doc.setBlob(blob, key: 'avatar');
-await database.saveDocument(doc);
+await collection.saveDocument(doc);
 
 final image = doc.blob('avatar');
 ```

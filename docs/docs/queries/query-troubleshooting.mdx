@@ -26,6 +26,8 @@ your query is working, either embed the call inside your app (see:
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(
     SelectResult.expression(Meta.id).as('docId'),
@@ -34,7 +36,7 @@ final query = const QueryBuilder()
     SelectResult.expression(Expression.property('city')),
     SelectResult.expression(Expression.property('type')),
   )
-  .from(DataSource.database(database));
+  .from(DataSource.collection(collection));
 
 print(await query.explain());
 ```
@@ -230,9 +232,11 @@ For more on indexes — see: [Indexing](../indexing.mdx).
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database).as('item'))
+  .from(DataSource.collection(collection).as('item'))
   .where(Expression.property('type').like(Expression.string('%hotel%')));
 
 print(await query.explain());
@@ -260,9 +264,11 @@ performance.
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database).as('item'))
+  .from(DataSource.collection(collection).as('item'))
   .where(Expression.property('type').like(Expression.string('hotel%'))
 	.and(Expression.property('name').like(Expression.string('%royal%'))));
 
@@ -295,9 +301,11 @@ For example, you can observe a similar situation to that shown in
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Function_.lower(Expression.property('type')).equalTo(Expression.string('hotel')));
 
 print(await query.explain());
@@ -321,9 +329,11 @@ But removing `api|Function_.lower()`, changes things:
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Expression.property('type').equalTo(Expression.string('hotel')));
 
 print(await query.explain());

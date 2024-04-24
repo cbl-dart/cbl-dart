@@ -49,8 +49,8 @@ final query = await AsyncQuery.fromN1ql(
 final resultSet = await query.execute();
 ```
 
-Here we are accessing the current database using the shorthand notation (`_`) —
-see the [FROM clause](#from-clause) for more on data source selection and
+Here we are accessing the default collection using the shorthand notation (`_`)
+— see the [FROM clause](#from-clause) for more on data source selection and
 [Query Parameters](#query-parameters) for more on parameterized queries.
 
 </CodeExample>
@@ -75,7 +75,7 @@ OFFSET ____
 ### Query Components
 
 1. The `SELECT` clause specifies the data to be returned in the result set.
-2. The `FROM` clause specifies the database to query the documents from.
+2. The `FROM` clause specifies the collection to query the documents from.
 3. The `JOIN` clause specifies the criteria for joining multiple documents.
 4. The `WHERE` clause specifies the query criteria. The `SELECT`ed properties of
    documents matching this criteria will be returned in the result set.
@@ -144,13 +144,13 @@ This behavior is inline with that of SQL++ for Server — see example in
 
 <Table id={1} title="Example Column Names for SELECT *">
 
-| Query                       | Column Name |
-| --------------------------- | ----------- |
-| `SELECT * AS data FROM _`   | `data`      |
-| `SELECT * FROM _`           | `_`         |
-| `SELECT * FROM _default`    | `_default`  |
-| `SELECT * FROM db`          | `db`        |
-| `SELECT * FROM db AS store` | `store`     |
+| Query                         | Column Name |
+| ----------------------------- | ----------- |
+| `SELECT * AS data FROM _`     | `data`      |
+| `SELECT * FROM _`             | `_`         |
+| `SELECT * FROM _default`      | `_default`  |
+| `SELECT * FROM users`         | `users`     |
+| `SELECT * FROM users AS user` | `user`      |
 
 </Table>
 
@@ -160,17 +160,17 @@ This behavior is inline with that of SQL++ for Server — see example in
 
 ```sql
 SELECT * ...;
-SELECT db.* AS data ...;
+SELECT user.* AS data ...;
 SELECT name fullName ...;
-SELECT db.name ...;
+SELECT user.name ...;
 SELECT DISTINCT address.city ...;
 ```
 
 1. Use the `*` expression to select all columns.
-2. Select all properties from the `db` data source. Give the object an alias of
-   `data`.
+2. Select all properties from the `user` data source. Give the object an alias
+   of `data`.
 3. Select a pair of properties.
-4. Select a specific property from the `db` data source.
+4. Select a specific property from the `user` data source.
 5. Select the property `city` from the `address` data source.
 
 </CodeExample>
@@ -187,15 +187,15 @@ mandatory.
 <CodeExample id={5} title="FROM Syntax">
 
 ```
-from           = FROM _ dataSource
-dataSource     = databaseName ( ( _ AS )? _ databaseAlias )?
-databaseName   = IDENTIFIER
-databaseAlias  = IDENTIFIER
+from             = FROM _ dataSource
+dataSource       = collectionName ( ( _ AS )? _ collectionAlias )?
+collectionName   = IDENTIFIER
+collectionAlias  = IDENTIFIER
 ```
 
-Here `dataSource` is the database name against which the query is to run. Use
-`AS` to give the database an alias you can use within the query. To use the
-current database, without specifying a name, use `_` as the datasource.
+Here `dataSource` is the collection name against which the query is to run. Use
+`AS` to give the collection an alias you can use within the query. To use the
+default collection, without specifying a name, use `_` as the data source.
 
 </CodeExample>
 
@@ -204,12 +204,12 @@ current database, without specifying a name, use `_` as the datasource.
 <CodeExample id={6} title="FROM Examples">
 
 ```sql
-SELECT name FROM db;
-SELECT store.name FROM db AS store;
-SELECT store.name FROM db store;
+SELECT name FROM user;
+SELECT user.name FROM users AS user;
+SELECT user.name FROM users user;
 SELECT name FROM _;
-SELECT store.name FROM _ AS store;
-SELECT store.name FROM _ store;
+SELECT user.name FROM _ AS user;
+SELECT user.name FROM _ user;
 ```
 
 </CodeExample>
@@ -228,12 +228,12 @@ the airline id — see [Example 7](#).
 <CodeExample id={7} title="JOIN Syntax">
 
 ```
-join          = joinOperator _ dataSource ( _ constraint )?
-joinOperator  = ( ( LEFT ( _ OUTER )? | INNER | CROSS ) _ )? JOIN
-dataSource    = databaseName ( ( _ AS )? _ databaseAlias )?
-constraint    = ON _ expression
-databaseName  = IDENTIFIER
-databaseAlias = IDENTIFIER
+join            = joinOperator _ dataSource ( _ constraint )?
+joinOperator    = ( ( LEFT ( _ OUTER )? | INNER | CROSS ) _ )? JOIN
+dataSource      = collectionName ( ( _ AS )? _ collectionAlias )?
+constraint      = ON _ expression
+collectionName  = IDENTIFIER
+collectionAlias = IDENTIFIER
 ```
 
 </CodeExample>
@@ -253,27 +253,27 @@ databaseAlias = IDENTIFIER
 <CodeExample id={8} title="JOIN Examples">
 
 ```sql
-SELECT db.prop1, other.prop2
-FROM db
-JOIN db AS other ON db.key = other.key;
+SELECT users.prop1, other.prop2
+FROM users
+JOIN users AS other ON users.key = other.key;
 
-SELECT db.prop1, other.prop2
-FROM db
-LEFT JOIN db AS other ON db.key = other.key;
+SELECT users.prop1, other.prop2
+FROM users
+LEFT JOIN users AS other ON users.key = other.key;
 ```
 
 </CodeExample>
 
 <CodeExample id={9} title="Using JOIN to Combine Document Details">
 
-This example joins the documents of type _route_ with documents of type
-_airline_ using the document ID (`id`) of the _airline_ document and the
-`airlineId` property of the _route_ document.
+This example joins the documents from the `routes` collections with documents
+from the `airlines` collection using the document ID (`id`) of the _airline_
+document and the `airlineId` property of the _route_ document.
 
 ```sql
 SELECT *
-FROM travel-sample r
-JOIN travel-sample a ON r.airlineId = META(a).id
+FROM routes r
+JOIN airlines a ON r.airlineId = META(a).id
 WHERE a.country = "France";
 ```
 
@@ -308,7 +308,7 @@ where = WHERE _ expression
 
 ```sql
 SELECT name
-FROM db
+FROM employees
 WHERE department = "engineer" AND group = "mobile";
 ```
 
@@ -348,16 +348,16 @@ having   = HAVING _ expression
 
 ```sql
 SELECT COUNT(airlineId), destination
-FROM route
+FROM routes
 GROUP BY destination;
 
 SELECT COUNT(airlineId), destination
-FROM route
+FROM routes
 GROUP BY destination
 HAVING COUNT(airlineId) > 100;
 
 SELECT COUNT(airlineId), destination
-FROM route
+FROM routes
 WHERE destinationState = "CA"
 GROUP BY destination
 HAVING COUNT(airlineId) > 100;
@@ -399,15 +399,15 @@ order    = ( ASC | DESC )
 
 ```sql
 SELECT name
-FROM db
+FROM users
 ORDER BY name;
 
 SELECT name
-FROM db
+FROM users
 ORDER BY name DESC;
 
 SELECT name, score
-FROM db
+FROM users
 ORDER BY name ASC, score DESC;
 ```
 
@@ -440,7 +440,7 @@ limit = LIMIT _ expression
 
 ```sql
 SELECT name
-FROM db
+FROM users
 LIMIT 10;
 ```
 
@@ -474,11 +474,11 @@ offset = OFFSET _ expression
 
 ```sql
 SELECT name
-FROM db
+FROM users
 OFFSET 10;
 
 SELECT name
-FROM db
+FROM users
 LIMIT 10
 OFFSET 10;
 ```
@@ -515,13 +515,13 @@ boolean = ( TRUE | FALSE )
 <CodeExample id={21} title="Boolean Examples">
 
 ```sql
-SELECT value
-FROM db
-WHERE value = true;
+SELECT fullTime
+FROM users
+WHERE fullTime = true;
 
-SELECT value
-FROM db
-WHERE value = false;
+SELECT fullTime
+FROM users
+WHERE fullTime = false;
 ```
 
 </CodeExample>
@@ -558,7 +558,7 @@ SELECT
   10.25E2,
   10.25E+2,
   10.25E-2
-FROM db;
+FROM _;
 ```
 
 </CodeExample>
@@ -595,7 +595,7 @@ The string literal can be double-quoted as well as single-quoted.
 
 ```sql
 SELECT firstName, lastName
-FROM db
+FROM users
 WHERE middleName = "middle" AND lastName = 'last';
 ```
 
@@ -623,7 +623,7 @@ null = NULL
 
 ```sql
 SELECT firstName, lastName
-FROM db
+FROM users
 WHERE middleName IS NULL;
 ```
 
@@ -651,7 +651,7 @@ missing = MISSING
 
 ```sql
 SELECT firstName, lastName
-FROM db
+FROM users
 WHERE middleName IS MISSING;
 ```
 
@@ -679,10 +679,10 @@ array = [ ( _? expression ( _? ',' _? expression )* _? )? ]
 
 ```sql
 SELECT ["a", "b", "c"]
-FROM db;
+FROM _;
 
 SELECT [property1, property2, property3]
-FROM db;
+FROM _;
 ```
 
 </CodeExample>
@@ -709,13 +709,13 @@ dictionary = { ( _? string _? : _? expression ( _? , _? string _? : _? expressio
 
 ```sql
 SELECT { 'name': 'James', 'department': 10 }
-FROM db;
+FROM _;
 
 SELECT { 'name': 'James', 'department': dept }
-FROM db;
+FROM _;
 
 SELECT { 'name': 'James', 'phones': ['650-100-1000', '650-100-2000'] }
-FROM db;
+FROM _;
 ```
 
 </CodeExample>
@@ -728,8 +728,8 @@ An identifier references an entity by its symbolic name. Use an identifier for
 example to identify:
 
 - Column alias names
-- Database names
-- Database alias names
+- Collection names
+- Collection alias names
 - Property names
 - Parameter names
 - Function names
@@ -764,16 +764,16 @@ SELECT *
 FROM _;
 
 SELECT *
-FROM `db-1`;
+FROM `users-1`;
 
 SELECT key
-FROM db;
+FROM users;
 
 SELECT key$1
-FROM db_1;
+FROM users_1;
 
 SELECT `key-1`
-FROM db;
+FROM users;
 ```
 
 </CodeExample>
@@ -809,19 +809,19 @@ propertyName = IDENTIFIER
 
 ```sql
 SELECT *
-FROM db
+FROM users
 WHERE contact.name = 'daniel';
 
-SELECT db.*
-FROM db
+SELECT users.*
+FROM users
 WHERE contact.name = 'daniel';
 
-SELECT db.contact.address.city
-FROM db
+SELECT users.contact.address.city
+FROM users
 WHERE contact.name = 'daniel';
 
 SELECT contact.address.city, contact.phones[0]
-FROM db
+FROM users
 WHERE contact.name = 'daniel';
 ```
 
@@ -875,7 +875,7 @@ variableName    = IDENTIFIER
 
 ```sql
 SELECT name
-FROM db
+FROM users
 WHERE
   ANY contact IN contacts
     SATISFIES contact.city = 'San Mateo'
@@ -914,7 +914,7 @@ parameter = $ IDENTIFIER
 
 ```sql
 SELECT name
-FROM db
+FROM epmolyees
 WHERE department = $department;
 ```
 
@@ -927,6 +927,7 @@ final query = await Query.fromN1ql(
   db,
   r'''
   SELECT name
+  FROM employees
   WHERE department = $department
   ''',
 );
@@ -949,14 +950,14 @@ establish operator precedence.
 
 ```sql
 SELECT (value1 + value2) * value 3
-FROM db;
+FROM _;
 
 SELECT *
-FROM db;
+FROM _
 WHERE ((value1 + value2) * value3) + value4 = 10;
 
 SELECT *
-FROM db
+FROM _
 WHERE (value1 = value2)
    OR (value3 = value4);
 ```
@@ -1210,15 +1211,15 @@ collation = NO? (UNICODE | CASE | DIACRITICS)
 
 ```sql
 SELECT department
-FROM db
+FROM employees
 WHERE name = "fred" COLLATE UNICODE;
 
 SELECT department
-FROM db
+FROM employees
 WHERE name = "fred" COLLATE (UNICODE CASE);
 
 SELECT name
-FROM db
+FROM employees
 ORDER BY name COLLATE (UNICODE DIACRITIC);
 ```
 
@@ -1272,7 +1273,7 @@ SELECT
       THEN 'Local'
     ELSE 'Non-Local'
   END
-FROM db;
+FROM user;
 ```
 
 </CodeExample>
@@ -1288,7 +1289,7 @@ SELECT
       THEN 'SHIPPED'
     ELSE 'NOT-SHIPPED'
   END
-FROM db;
+FROM orders;
 ```
 
 </CodeExample>
@@ -1517,15 +1518,15 @@ final query = await Query.fromN1ql(
   db,
   r'''
   SELECT META().id AS docId
-  FROM _
-  WHERE type = $type
+  FROM hotel
+  WHERE country = $country
   ''',
 );
-query.parameters = Parameters({'type': 'hotel'});
+query.parameters = Parameters({'country': 'France'});
 final resultSet = query.execute();
 ```
 
-1. Define a parameter placeholder `$type`.
-2. Set the value of the `type` parameter.
+1. Define a parameter placeholder `$country`.
+2. Set the value of the `country` parameter.
 
 </CodeExample>

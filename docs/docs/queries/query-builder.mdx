@@ -40,7 +40,7 @@ ORDER BY ____
 
 1. The [`SELECT` clause](#select-clause) specifies the data to be returned by
    the query.
-2. The `FROM` clause specifies the database to query the documents from.
+2. The `FROM` clause specifies the collection to query the documents from.
 3. The [`JOIN` clause](#join-clause) specifies the criteria for joining multiple
    documents.
 4. The [`WHERE` clause](#where-clause) specifies the query criteria. <br/> The
@@ -82,7 +82,7 @@ Data Model.
 
 ```dart
 final config = ValueIndexConfiguration(['type', 'name']);
-await database.createIndex('TypeNameIndex', config);
+await collection.createIndex('TypeNameIndex', config);
 ```
 
 <Figure id={1} title="Data Model">
@@ -125,13 +125,13 @@ database.
 ```dart
 final query = const QueryBuilder()
     .select(SelectResult.all())
-    .from(DataSource.database(database).as('airline'));
+    .from(DataSource.collection(collection).as('airline'));
 ```
 
 </CodeExample>
 
 The `api|Query.execute()` method returns each result as dictionary where they
-key is the database name, or the alias provided to the as function.
+key is the collection name, or the alias provided to the as function.
 
 <CodeExample id={4} title="ResultSet fFrmat From SelectResult.all()">
 
@@ -184,7 +184,7 @@ final query = const QueryBuilder()
     SelectResult.property('type'),
     SelectResult.property('name'),
   )
-  .from(DataSource.database(database));
+  .from(DataSource.collection(collection));
 
 final resultSet = await query.execute();
 
@@ -240,7 +240,7 @@ equals "hotel".
 ```dart
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Expression.property('type').equalTo(Expression.string('hotel')))
   .limit(Expression.integer(10));
 
@@ -281,7 +281,7 @@ final query = const QueryBuilder()
     SelectResult.property('name'),
     SelectResult.property('public_likes'),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(
     Expression.property('type').equalTo(Expression.string('hotel'))
       .and(
@@ -313,7 +313,7 @@ username property value equals "Armani".
 ```dart
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Expression.string('Armani').in_([
     Expression.property('first'),
     Expression.property('last'),
@@ -350,7 +350,7 @@ final query = const QueryBuilder()
     SelectResult.property('country'),
     SelectResult.property('name'),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(
     Expression.property('type').equalTo(Expression.string('landmark'))
       .and(
@@ -395,7 +395,7 @@ final query = const QueryBuilder()
     SelectResult.property('country'),
     SelectResult.property('name'),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(
     Expression.property('type').equalTo(Expression.string('landmark'))
       .and(
@@ -427,7 +427,7 @@ final query = const QueryBuilder()
     SelectResult.property('country'),
     SelectResult.property('name'),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(
     Expression.property('type').equalTo(Expression.string('landmark'))
       .and(
@@ -465,7 +465,7 @@ final query = const QueryBuilder()
     SelectResult.property('country'),
     SelectResult.property('name'),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(
     Expression.property('type').equalTo(Expression.string('landmark'))
       .and(
@@ -500,7 +500,7 @@ an array of key-value pairs.
 ```dart
 final query = const QueryBuilder()
   .select(SelectResult.expression(Meta.id))
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Meta.isDeleted);
 ```
 
@@ -515,11 +515,14 @@ airline details with route details, linked by the airline ID — see
 
 <CodeExample id={15} title="Using JOIN to Combine Document Details">
 
-This example JOINS the document of type `route` with documents of type `airline`
+This example JOINS documents from collection `routes` with documents from collection `airlines`
 using the document ID (`id`) on the _airline_ document and `airlineid` on the
 _route_ document.
 
 ```dart
+final airlines = (await database.collection('airlines'))!;
+final routes = (await database.collection('routes'))!;
+
 final query = const QueryBuilder()
   .select(
     SelectResult.expression(Expression.property('name').from('airline')),
@@ -528,23 +531,15 @@ final query = const QueryBuilder()
     SelectResult.expression(Expression.property('stops').from('route')),
     SelectResult.expression(Expression.property('airline').from('route')),
   )
-  .from(DataSource.database(database).as('airline'))
+  .from(DataSource.collection(airlines).as('airline'))
   .join(
-    Join.join(DataSource.database(database).as('route')).on(
+    Join.join(DataSource.collection(routes).as('route')).on(
       Meta.id.from('airline')
         .equalTo(Expression.property('airlineid').from('route')),
     ),
   )
   .where(
-    Expression.property('type').from('route').equalTo(Expression.string('route'))
-      .and(
-        Expression.property('type').from('airline')
-          .equalTo(Expression.string('airline')),
-      )
-      .and(
-        Expression.property('sourceairport').from('route')
-          .equalTo(Expression.string('RIX')),
-      ),
+    Expression.property('sourceairport').from('route').equalTo(Expression.string('RIX')),
   );
 ```
 
@@ -584,7 +579,7 @@ final query = const QueryBuilder()
     SelectResult.expression(Expression.property('country')),
     SelectResult.expression(Expression.property('tz')),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Expression.property('type').equalTo(Expression.string('airport')))
   .groupBy(
      Expression.property('country'),
@@ -620,7 +615,7 @@ final query = const QueryBuilder()
     SelectResult.expression(Meta.id),
     SelectResult.expression(Expression.property('title')),
   )
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Expression.property('type').equalTo(Expression.string('hotel')))
   .orderBy(Ordering.property('title').ascending())
   .limit(Expression.integer(10));

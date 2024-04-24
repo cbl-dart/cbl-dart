@@ -9,10 +9,50 @@ related_content:
     url: /indexing
 ---
 
-import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
+import Tabs from '@theme/Tabs'
 
 # Databases
+
+## Database Concepts
+
+Databases created on Couchbase Lite can share the same hierarchical structure as
+Capella databases. This makes it easier to sync data between mobile applications
+and applications built using Capella.
+
+Although the terminology is different, the structure can be mapped to relational
+database terms:
+
+<Table id={1} title="Relational Database → Couchbase">
+
+| Relational database | Couchbase  |
+| ------------------- | ---------- |
+| Database            | Database   |
+| Schema              | Scope      |
+| Table               | Collection |
+
+</Table>
+
+This structure gives you plenty of choices when it comes to partitioning your
+data. The most basic structure is to use the single default scope with a single
+default collection; or you could opt for a structure that allow you to split
+your collections into logical scopes.
+
+:::tip Storing local configuration
+
+You may not need to sync all the data related for a particular application. You
+can set up a scope that syncs data, and a second scope that doesn't.
+
+One reason for doing this is to store local configuration data (such as the
+preferred screen orientation or keyboard layout). Since this information only
+relates to a particular device, there is no need to sync it:
+
+| Data&nbsp;Scope | Description                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| local           | Contains information pertaining to the device.                                                                           |
+| syncing         | Contains information pertaining to the user, which can be synced back to the cloud for use on the web or another device. |
+
+:::
 
 ## Create or Open Database
 
@@ -28,7 +68,7 @@ Things to watch for include:
 - If the named database does not exist in the specified, or default, location
   then a new one is created.
 - The database is created in a default location unless you specify a directory
-  for it — see: `api|DatabaseConfiguration.directory`.
+  for it — see: `api|DatabaseConfiguration.directory`.
 
   :::tip
 

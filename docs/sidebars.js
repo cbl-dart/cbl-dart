@@ -32,6 +32,10 @@ const sidebars = {
     },
     {
       type: 'doc',
+      id: 'scopes-and-collections',
+    },
+    {
+      type: 'doc',
       id: 'documents',
     },
     {

@@ -57,7 +57,7 @@ The code to create the index will look something like this:
 
 ```dart
 final config = ValueIndexConfiguration(['type', 'name']);
-await database.createIndex('TypeNameIndex', config);
+await collection.createIndex('TypeNameIndex', config);
 ```
 
 </CodeExample>
@@ -76,7 +76,7 @@ final valueIndexItems = {
 	ValueIndexItem.expression(nameExpression),
 };
 final index = IndexBuilder.valueIndex(valueIndexItems);
-await database.createIndex('TypeNameIndex', index);
+await collection.createIndex('TypeNameIndex', index);
 ```
 
 </CodeExample>
