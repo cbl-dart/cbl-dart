@@ -1,3 +1,9 @@
+## 0.3.0-dev.5
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
 ## 0.3.0-dev.4
 
 > Note: This release has breaking changes.

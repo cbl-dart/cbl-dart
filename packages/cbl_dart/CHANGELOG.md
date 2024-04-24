@@ -1,3 +1,11 @@
+## 3.0.0-dev.6
+
+> Note: This release has breaking changes.
+
+ - **DOCS**(cbl_dart): use scopes and collections in example. ([ab4392d3](https://github.com/cbl-dart/cbl-dart/commit/ab4392d3a3ed0cce08c66726b2c67d2b3b50174e))
+ - **DOCS**: use collections in README code example. ([ba25ffe2](https://github.com/cbl-dart/cbl-dart/commit/ba25ffe2fc408859ce61db34a6e9bbe6737cbec6))
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
 ## 3.0.0-dev.5
 
 > Note: This release has breaking changes.
