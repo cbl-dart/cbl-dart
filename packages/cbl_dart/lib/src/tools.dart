@@ -75,24 +75,20 @@ Future<T> _retryWithExponentialBackoff<T>(
   throw Exception('Stopping to retry after $maxAttempts failed attempts.');
 }
 
-void unpackArchive(
+Future<void> unpackArchive(
   Uint8List archiveData, {
   required ArchiveFormat format,
   required String outputDir,
-}) {
+}) async {
   logger.fine('Unpacking ${format.name} archive into $outputDir ...');
 
-  switch (format) {
-    case ArchiveFormat.zip:
-      _unpackZipArchive(archiveData, outputDir);
-      break;
-    case ArchiveFormat.tarGz:
-      _unpackTarGzArchive(archiveData, outputDir);
-      break;
-  }
+  await switch (format) {
+    ArchiveFormat.zip => _unpackZipArchive(archiveData, outputDir),
+    ArchiveFormat.tarGz => _unpackTarGzArchive(archiveData, outputDir),
+  };
 }
 
-void _unpackZipArchive(Uint8List archiveData, String outputDir) {
+Future<void> _unpackZipArchive(Uint8List archiveData, String outputDir) async {
   final archive = ZipDecoder().decodeBytes(archiveData, verify: true);
 
   // TODO(blaugold): Remove once archive package has published a fix
@@ -102,13 +98,16 @@ void _unpackZipArchive(Uint8List archiveData, String outputDir) {
     file.content;
   }
 
-  extractArchiveToDisk(archive, outputDir);
+  await extractArchiveToDisk(archive, outputDir);
 }
 
-void _unpackTarGzArchive(Uint8List archiveData, String outputDir) {
+Future<void> _unpackTarGzArchive(
+  Uint8List archiveData,
+  String outputDir,
+) async {
   final tarArchiveData = GZipDecoder().decodeBytes(archiveData, verify: true);
   final archive = TarDecoder().decodeBytes(tarArchiveData, verify: true);
-  extractArchiveToDisk(archive, outputDir);
+  await extractArchiveToDisk(archive, outputDir);
 }
 
 /// Copies the contents of [sourceDir] to [destinationDir].
