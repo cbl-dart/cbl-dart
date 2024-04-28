@@ -12,7 +12,7 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  archive: ^3.3.4
+  archive: ^3.5.0
   cbl: ^3.0.0
   cbl_libcblite_api: 3.1.6
   cbl_libcblitedart_api: 7.1.0

@@ -66,7 +66,11 @@ Future<void> installNativeLibrary(
   final targetLibDir = p.join(packageRootDir, package.librariesDir);
 
   final archiveData = await downloadUrl(package.archiveUrl);
-  unpackArchive(archiveData, format: package.archiveFormat, outputDir: tmpDir);
+  await unpackArchive(
+    archiveData,
+    format: package.archiveFormat,
+    outputDir: tmpDir,
+  );
 
   // Copy contents of lib dir from archive to install dir.
   await copyDirectoryContents(targetLibDir, installDir);
