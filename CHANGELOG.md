@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-04-28
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_dart` - `v3.0.1`](#cbl_dart---v301)
+
+---
+
+#### `cbl_dart` - `v3.0.1`
+
+ - **FIX**(cbl_dart): adapt to `extractArchiveToDisk` in `package:archive` becoming async ([#581](https://github.com/cbl-dart/cbl-dart/issues/581)). ([9e38fd3b](https://github.com/cbl-dart/cbl-dart/commit/9e38fd3bdf416c224923d6bec2949d8698a9c57a))
+
+
 ## 2024-04-24
 
 ### Changes

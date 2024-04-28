@@ -15,5 +15,5 @@ dependencies:
   sentry: ^7.0.0
 
 dev_dependencies:
-  cbl_dart: ^3.0.0
+  cbl_dart: ^3.0.1
   test: ^1.21.1
