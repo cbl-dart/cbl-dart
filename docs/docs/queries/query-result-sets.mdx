@@ -52,9 +52,11 @@ straightforward — see [Example 1](#).
 
 ```dart
 final database = await Database.openAsync('travel-sample');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(SelectResult.all())
-  .from(DataSource.database(database));
+  .from(DataSource.collection(collection));
 ```
 
 </CodeExample>
@@ -132,6 +134,7 @@ our query to return — see: [Example 4](#).
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
 
 final query = const QueryBuilder()
   .select(
@@ -140,7 +143,7 @@ final query = const QueryBuilder()
     SelectResult.expression(Expression.property('type')),
     SelectResult.expression(Expression.property('name')),
   )
-  .from(DataSource.database(database));
+  .from(DataSource.collection(collection));
 ```
 
 </CodeExample>
@@ -209,9 +212,11 @@ directly would consume excessive amounts of memory and-or processing time — 
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = QueryBuilder.createAsync()
   .select(SelectResult.expression(Meta.id))
-  .from(DataSource.database(database));
+  .from(DataSource.collection(collection));
 ```
 
 </CodeExample>
@@ -270,9 +275,11 @@ await for (final result in resultSet.asStream()) {
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
   .select(SelectResult.expression(Function_.count(Expression.all())).as('count'))
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .groupBy(Expression.property('type'));
 ```
 
@@ -281,9 +288,9 @@ final query = const QueryBuilder()
 ### Result Set Format
 
 The result set returned by a count such as
-`SelectResult.expression(Function_.count(Expression.all))).as('count')` contains
-dictionaries with a key-value pair. The key is the count name, as defined using
-`api|SelectResultAs.as` — see: [Example 11](#) for the format and
+`SelectResult.expression(Function_.count(Expression.all())).as('count')`
+contains dictionaries with a key-value pair. The key is the count name, as
+defined using `api|SelectResultAs.as` — see: [Example 11](#) for the format and
 [Example 10](#) for the query.
 
 <CodeExample id={11} title="Format of Result Set (Count)">
@@ -326,9 +333,11 @@ const offset = 0;
 const limit = 20;
 
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
  .select(SelectResult.all())
- .from(DataSource.database(database))
+ .from(DataSource.collection(collection))
  .limit(
     Expression.integer(limit),
     offset: Expression.integer(offset),
@@ -402,9 +411,11 @@ class HotelDao {
 
 ```dart
 final database = await Database.openAsync('hotels');
+final collection = await database.defaultCollection;
+
 final query = const QueryBuilder()
  .select(SelectResult.all().as('hotel'))
- .from(DataSource.database(database));
+ .from(DataSource.collection(collection));
 
 final resultSet = await query.execute();
 
@@ -427,7 +438,7 @@ If your query selects all properties then the JSON format returned by
 
 ```json
 {
-  "database-name": {
+  "collection-name": {
     "key1": "value1",
     "keyx": "valuex"
   }

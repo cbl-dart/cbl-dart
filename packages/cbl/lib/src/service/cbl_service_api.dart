@@ -521,7 +521,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
 
 // === Requests ================================================================
 
-class PingRequest extends Request<DateTime> {
+final class PingRequest extends Request<DateTime> {
   @override
   StringMap serialize(SerializationContext context) => {};
 
@@ -529,7 +529,7 @@ class PingRequest extends Request<DateTime> {
       PingRequest();
 }
 
-class InstallTracingDelegate extends Request<void> {
+final class InstallTracingDelegate extends Request<void> {
   InstallTracingDelegate(this.delegate);
 
   final TracingDelegate delegate;
@@ -545,7 +545,7 @@ class InstallTracingDelegate extends Request<void> {
       throw UnsupportedError('TracingDelegate is not serializable');
 }
 
-class UninstallTracingDelegate extends Request<void> {
+final class UninstallTracingDelegate extends Request<void> {
   UninstallTracingDelegate();
 
   @override
@@ -558,7 +558,7 @@ class UninstallTracingDelegate extends Request<void> {
       UninstallTracingDelegate();
 }
 
-class TraceDataRequest extends Request<void> {
+final class TraceDataRequest extends Request<void> {
   TraceDataRequest(this.data);
 
   final Object? data;
@@ -573,7 +573,7 @@ class TraceDataRequest extends Request<void> {
       TraceDataRequest(map['data']);
 }
 
-class ReleaseObject extends Request<Null> {
+final class ReleaseObject extends Request<Null> {
   ReleaseObject(this.objectId);
 
   final int objectId;
@@ -588,7 +588,7 @@ class ReleaseObject extends Request<Null> {
       ReleaseObject(map.getAs('objectId'));
 }
 
-class RemoveChangeListener extends Request<Null> {
+final class RemoveChangeListener extends Request<Null> {
   RemoveChangeListener({
     required this.targetId,
     required this.listenerId,
@@ -614,7 +614,7 @@ class RemoveChangeListener extends Request<Null> {
       );
 }
 
-class EncryptionKeyFromPassword extends Request<EncryptionKeyImpl> {
+final class EncryptionKeyFromPassword extends Request<EncryptionKeyImpl> {
   EncryptionKeyFromPassword(this.password);
 
   final String password;
@@ -629,7 +629,7 @@ class EncryptionKeyFromPassword extends Request<EncryptionKeyImpl> {
       EncryptionKeyFromPassword(map.getAs('password'));
 }
 
-class RemoveDatabase extends Request<bool> {
+final class RemoveDatabase extends Request<bool> {
   RemoveDatabase(
     this.name,
     this.directory,
@@ -652,7 +652,7 @@ class RemoveDatabase extends Request<bool> {
       );
 }
 
-class DatabaseExists extends Request<bool> {
+final class DatabaseExists extends Request<bool> {
   DatabaseExists(
     this.name,
     this.directory,
@@ -675,7 +675,7 @@ class DatabaseExists extends Request<bool> {
       );
 }
 
-class CopyDatabase extends Request<bool> {
+final class CopyDatabase extends Request<bool> {
   CopyDatabase(
     this.from,
     this.name,
@@ -704,7 +704,7 @@ class CopyDatabase extends Request<bool> {
       );
 }
 
-class OpenDatabase extends Request<DatabaseState> {
+final class OpenDatabase extends Request<DatabaseState> {
   OpenDatabase(
     this.name,
     this.config,
@@ -729,7 +729,7 @@ class OpenDatabase extends Request<DatabaseState> {
       );
 }
 
-class DeleteDatabase extends Request<Null> {
+final class DeleteDatabase extends Request<Null> {
   DeleteDatabase(this.databaseId);
 
   final int databaseId;
@@ -743,7 +743,7 @@ class DeleteDatabase extends Request<Null> {
       DeleteDatabase(map.getAs('databaseId'));
 }
 
-class GetScope extends Request<ScopeState?> {
+final class GetScope extends Request<ScopeState?> {
   GetScope(this.databaseId, this.name);
 
   final int databaseId;
@@ -762,7 +762,7 @@ class GetScope extends Request<ScopeState?> {
       );
 }
 
-class GetScopes extends Request<List<ScopeState>> {
+final class GetScopes extends Request<List<ScopeState>> {
   GetScopes(this.databaseId);
 
   final int databaseId;
@@ -775,7 +775,7 @@ class GetScopes extends Request<List<ScopeState>> {
       GetScopes(map.getAs('databaseId'));
 }
 
-class GetCollection extends Request<CollectionState?> {
+final class GetCollection extends Request<CollectionState?> {
   GetCollection(this.scopeId, this.name);
 
   final int scopeId;
@@ -797,7 +797,7 @@ class GetCollection extends Request<CollectionState?> {
       );
 }
 
-class GetCollections extends Request<List<CollectionState>> {
+final class GetCollections extends Request<List<CollectionState>> {
   GetCollections(this.scopeId);
 
   final int scopeId;
@@ -812,7 +812,7 @@ class GetCollections extends Request<List<CollectionState>> {
       GetCollections(map.getAs('scopeId'));
 }
 
-class CreateCollection extends Request<CollectionState> {
+final class CreateCollection extends Request<CollectionState> {
   CreateCollection(this.databaseId, this.scope, this.collection);
 
   final int databaseId;
@@ -837,7 +837,7 @@ class CreateCollection extends Request<CollectionState> {
       );
 }
 
-class DeleteCollection extends Request<Null> {
+final class DeleteCollection extends Request<Null> {
   DeleteCollection(this.databaseId, this.scope, this.collection);
 
   final int databaseId;
@@ -862,7 +862,7 @@ class DeleteCollection extends Request<Null> {
       );
 }
 
-class GetCollectionCount extends Request<int> {
+final class GetCollectionCount extends Request<int> {
   GetCollectionCount(this.collectionId);
 
   final int collectionId;
@@ -878,7 +878,7 @@ class GetCollectionCount extends Request<int> {
       GetCollectionCount(map.getAs('collectionId'));
 }
 
-class GetCollectionIndexes extends Request<List<String>> {
+final class GetCollectionIndexes extends Request<List<String>> {
   GetCollectionIndexes(this.collectionId);
 
   final int collectionId;
@@ -894,7 +894,7 @@ class GetCollectionIndexes extends Request<List<String>> {
       GetCollectionIndexes(map.getAs('collectionId'));
 }
 
-class GetDocument extends Request<DocumentState?> {
+final class GetDocument extends Request<DocumentState?> {
   GetDocument(this.collectionId, this.documentId, this.propertiesFormat);
 
   final int collectionId;
@@ -916,7 +916,7 @@ class GetDocument extends Request<DocumentState?> {
       );
 }
 
-class SaveDocument extends Request<DocumentState?> {
+final class SaveDocument extends Request<DocumentState?> {
   SaveDocument(
     this.collectionId,
     this.state,
@@ -951,7 +951,7 @@ class SaveDocument extends Request<DocumentState?> {
   void didReceive() => state.didReceive();
 }
 
-class DeleteDocument extends Request<DocumentState?> {
+final class DeleteDocument extends Request<DocumentState?> {
   DeleteDocument(
     this.collectionId,
     this.state,
@@ -986,7 +986,7 @@ class DeleteDocument extends Request<DocumentState?> {
   void didReceive() => state.didReceive();
 }
 
-class PurgeDocument extends Request<Null> {
+final class PurgeDocument extends Request<Null> {
   PurgeDocument(this.collectionId, this.documentId);
 
   final int collectionId;
@@ -1008,7 +1008,7 @@ class PurgeDocument extends Request<Null> {
       );
 }
 
-class BeginDatabaseTransaction extends Request<Null> {
+final class BeginDatabaseTransaction extends Request<Null> {
   BeginDatabaseTransaction({required this.databaseId});
 
   final int databaseId;
@@ -1025,7 +1025,7 @@ class BeginDatabaseTransaction extends Request<Null> {
       BeginDatabaseTransaction(databaseId: map.getAs('databaseId'));
 }
 
-class EndDatabaseTransaction extends Request<Null> {
+final class EndDatabaseTransaction extends Request<Null> {
   EndDatabaseTransaction({required this.databaseId, required this.commit});
 
   final int databaseId;
@@ -1047,7 +1047,7 @@ class EndDatabaseTransaction extends Request<Null> {
       );
 }
 
-class SetDocumentExpiration extends Request<Null> {
+final class SetDocumentExpiration extends Request<Null> {
   SetDocumentExpiration({
     required this.collectionId,
     required this.documentId,
@@ -1076,7 +1076,7 @@ class SetDocumentExpiration extends Request<Null> {
       );
 }
 
-class GetDocumentExpiration extends Request<DateTime?> {
+final class GetDocumentExpiration extends Request<DateTime?> {
   GetDocumentExpiration({
     required this.collectionId,
     required this.documentId,
@@ -1101,7 +1101,7 @@ class GetDocumentExpiration extends Request<DateTime?> {
       );
 }
 
-class AddCollectionChangeListener extends Request<Null> {
+final class AddCollectionChangeListener extends Request<Null> {
   AddCollectionChangeListener({
     required this.collectionId,
     required this.listenerId,
@@ -1126,7 +1126,7 @@ class AddCollectionChangeListener extends Request<Null> {
       );
 }
 
-class CallCollectionChangeListener extends Request<Null> {
+final class CallCollectionChangeListener extends Request<Null> {
   CallCollectionChangeListener({
     required this.listenerId,
     required this.documentIds,
@@ -1151,7 +1151,7 @@ class CallCollectionChangeListener extends Request<Null> {
       );
 }
 
-class AddDocumentChangeListener extends Request<Null> {
+final class AddDocumentChangeListener extends Request<Null> {
   AddDocumentChangeListener({
     required this.collectionId,
     required this.documentId,
@@ -1180,7 +1180,7 @@ class AddDocumentChangeListener extends Request<Null> {
       );
 }
 
-class CallDocumentChangeListener extends Request<Null> {
+final class CallDocumentChangeListener extends Request<Null> {
   CallDocumentChangeListener({required this.listenerId});
 
   final int listenerId;
@@ -1196,7 +1196,7 @@ class CallDocumentChangeListener extends Request<Null> {
       CallDocumentChangeListener(listenerId: map.getAs('listenerId'));
 }
 
-class PerformDatabaseMaintenance extends Request<Null> {
+final class PerformDatabaseMaintenance extends Request<Null> {
   PerformDatabaseMaintenance({
     required this.databaseId,
     required this.type,
@@ -1221,7 +1221,7 @@ class PerformDatabaseMaintenance extends Request<Null> {
       );
 }
 
-class ChangeDatabaseEncryptionKey extends Request<Null> {
+final class ChangeDatabaseEncryptionKey extends Request<Null> {
   ChangeDatabaseEncryptionKey({
     required this.databaseId,
     required this.encryptionKey,
@@ -1247,7 +1247,7 @@ class ChangeDatabaseEncryptionKey extends Request<Null> {
       );
 }
 
-class CreateIndex extends Request<Null> {
+final class CreateIndex extends Request<Null> {
   CreateIndex({
     required this.collectionId,
     required this.name,
@@ -1276,7 +1276,7 @@ class CreateIndex extends Request<Null> {
       );
 }
 
-class DeleteIndex extends Request<Null> {
+final class DeleteIndex extends Request<Null> {
   DeleteIndex({
     required this.collectionId,
     required this.name,
@@ -1301,7 +1301,7 @@ class DeleteIndex extends Request<Null> {
       );
 }
 
-class BlobExists extends Request<bool> {
+final class BlobExists extends Request<bool> {
   BlobExists({
     required this.databaseId,
     required this.properties,
@@ -1326,7 +1326,7 @@ class BlobExists extends Request<bool> {
       );
 }
 
-class ReadBlob extends Request<MessageData> {
+final class ReadBlob extends Request<MessageData> {
   ReadBlob({
     required this.databaseId,
     required this.properties,
@@ -1351,7 +1351,7 @@ class ReadBlob extends Request<MessageData> {
       );
 }
 
-class SaveBlob extends Request<SaveBlobResponse> {
+final class SaveBlob extends Request<SaveBlobResponse> {
   SaveBlob({
     required this.databaseId,
     required this.contentType,
@@ -1380,7 +1380,7 @@ class SaveBlob extends Request<SaveBlobResponse> {
       );
 }
 
-class ReadBlobUpload extends Request<MessageData> {
+final class ReadBlobUpload extends Request<MessageData> {
   ReadBlobUpload({
     required this.uploadId,
   });
@@ -1397,7 +1397,7 @@ class ReadBlobUpload extends Request<MessageData> {
       ReadBlobUpload(uploadId: map.getAs('uploadId'));
 }
 
-class CreateQuery extends Request<QueryState> {
+final class CreateQuery extends Request<QueryState> {
   CreateQuery({
     required this.databaseId,
     required this.language,
@@ -1430,7 +1430,7 @@ class CreateQuery extends Request<QueryState> {
       );
 }
 
-class SetQueryParameters extends Request<Null> {
+final class SetQueryParameters extends Request<Null> {
   SetQueryParameters({
     required this.queryId,
     required EncodedData? parameters,
@@ -1468,7 +1468,7 @@ class SetQueryParameters extends Request<Null> {
   void didReceive() => _parameters?.didReceive();
 }
 
-class ExplainQuery extends Request<String> {
+final class ExplainQuery extends Request<String> {
   ExplainQuery({
     required this.queryId,
   });
@@ -1485,7 +1485,7 @@ class ExplainQuery extends Request<String> {
       ExplainQuery(queryId: map.getAs('queryId'));
 }
 
-class ExecuteQuery extends Request<int> {
+final class ExecuteQuery extends Request<int> {
   ExecuteQuery({
     required this.queryId,
   });
@@ -1502,7 +1502,7 @@ class ExecuteQuery extends Request<int> {
       ExecuteQuery(queryId: map.getAs('queryId'));
 }
 
-class GetQueryResultSet extends Request<TransferableValue> {
+final class GetQueryResultSet extends Request<TransferableValue> {
   GetQueryResultSet({
     required this.queryId,
     required this.resultSetId,
@@ -1527,7 +1527,7 @@ class GetQueryResultSet extends Request<TransferableValue> {
       );
 }
 
-class AddQueryChangeListener extends Request<Null> {
+final class AddQueryChangeListener extends Request<Null> {
   AddQueryChangeListener({
     required this.queryId,
     required this.listenerId,
@@ -1552,7 +1552,7 @@ class AddQueryChangeListener extends Request<Null> {
       );
 }
 
-class CallQueryChangeListener extends Request<Null> {
+final class CallQueryChangeListener extends Request<Null> {
   CallQueryChangeListener({
     required this.listenerId,
     required this.resultSetId,
@@ -1577,7 +1577,7 @@ class CallQueryChangeListener extends Request<Null> {
       );
 }
 
-class ServiceDatabaseEndpoint extends Serializable implements Endpoint {
+final class ServiceDatabaseEndpoint extends Serializable implements Endpoint {
   ServiceDatabaseEndpoint(this.databaseId);
 
   final int databaseId;
@@ -1593,7 +1593,7 @@ class ServiceDatabaseEndpoint extends Serializable implements Endpoint {
       ServiceDatabaseEndpoint(map.getAs('databaseId'));
 }
 
-class CreateReplicator extends Request<int> {
+final class CreateReplicator extends Request<int> {
   CreateReplicator({
     required this.propertiesFormat,
     required this.target,
@@ -1698,7 +1698,7 @@ class CreateReplicator extends Request<int> {
   }
 }
 
-class CreateReplicatorCollection extends Serializable {
+final class CreateReplicatorCollection extends Serializable {
   CreateReplicatorCollection({
     required this.collectionId,
     this.channels,
@@ -1739,7 +1739,7 @@ class CreateReplicatorCollection extends Serializable {
       );
 }
 
-class CallReplicationFilter extends Request<bool> {
+final class CallReplicationFilter extends Request<bool> {
   CallReplicationFilter({
     required this.filterId,
     required this.state,
@@ -1777,7 +1777,7 @@ class CallReplicationFilter extends Request<bool> {
   void didReceive() => state.didReceive();
 }
 
-class CallConflictResolver extends Request<DocumentState?> {
+final class CallConflictResolver extends Request<DocumentState?> {
   CallConflictResolver({
     required this.resolverId,
     required this.localState,
@@ -1818,7 +1818,7 @@ class CallConflictResolver extends Request<DocumentState?> {
   }
 }
 
-class GetReplicatorStatus extends Request<ReplicatorStatus> {
+final class GetReplicatorStatus extends Request<ReplicatorStatus> {
   GetReplicatorStatus({required this.replicatorId});
 
   final int replicatorId;
@@ -1837,7 +1837,7 @@ class GetReplicatorStatus extends Request<ReplicatorStatus> {
       );
 }
 
-class StartReplicator extends Request<Null> {
+final class StartReplicator extends Request<Null> {
   StartReplicator({
     required this.replicatorId,
     required this.reset,
@@ -1862,7 +1862,7 @@ class StartReplicator extends Request<Null> {
       );
 }
 
-class StopReplicator extends Request<Null> {
+final class StopReplicator extends Request<Null> {
   StopReplicator({
     required this.replicatorId,
   });
@@ -1883,7 +1883,7 @@ class StopReplicator extends Request<Null> {
       );
 }
 
-class AddReplicatorChangeListener extends Request<Null> {
+final class AddReplicatorChangeListener extends Request<Null> {
   AddReplicatorChangeListener({
     required this.replicatorId,
     required this.listenerId,
@@ -1908,7 +1908,7 @@ class AddReplicatorChangeListener extends Request<Null> {
       );
 }
 
-class CallReplicatorChangeListener extends Request<Null> {
+final class CallReplicatorChangeListener extends Request<Null> {
   CallReplicatorChangeListener({
     required this.listenerId,
     required this.status,
@@ -1933,7 +1933,7 @@ class CallReplicatorChangeListener extends Request<Null> {
       );
 }
 
-class AddDocumentReplicationListener extends Request<Null> {
+final class AddDocumentReplicationListener extends Request<Null> {
   AddDocumentReplicationListener({
     required this.replicatorId,
     required this.listenerId,
@@ -1958,7 +1958,7 @@ class AddDocumentReplicationListener extends Request<Null> {
       );
 }
 
-class CallDocumentReplicationListener extends Request<Null> {
+final class CallDocumentReplicationListener extends Request<Null> {
   CallDocumentReplicationListener({
     required this.listenerId,
     required this.event,
@@ -1989,7 +1989,7 @@ class CallDocumentReplicationListener extends Request<Null> {
   void didReceive() => event.didReceive();
 }
 
-class ReplicatorIsDocumentPending extends Request<bool> {
+final class ReplicatorIsDocumentPending extends Request<bool> {
   ReplicatorIsDocumentPending({
     required this.replicatorId,
     required this.documentId,
@@ -2018,7 +2018,7 @@ class ReplicatorIsDocumentPending extends Request<bool> {
       );
 }
 
-class ReplicatorPendingDocumentIds extends Request<List<String>> {
+final class ReplicatorPendingDocumentIds extends Request<List<String>> {
   ReplicatorPendingDocumentIds({
     required this.replicatorId,
     required this.collectionId,
@@ -2045,7 +2045,7 @@ class ReplicatorPendingDocumentIds extends Request<List<String>> {
 
 // === Responses ===============================================================
 
-class MessageData extends Serializable {
+final class MessageData extends Serializable {
   MessageData(Data data) : _data = data;
 
   Data get data => _data!;
@@ -2076,7 +2076,7 @@ class MessageData extends Serializable {
   }
 }
 
-class _TransferableEncodedData extends Serializable {
+final class _TransferableEncodedData extends Serializable {
   _TransferableEncodedData(EncodedData data)
       : _format = data.format,
         _data = MessageData(data.data);
@@ -2110,7 +2110,7 @@ class _TransferableEncodedData extends Serializable {
   void didReceive() => _data.didReceive();
 }
 
-class TransferableValue extends Serializable {
+final class TransferableValue extends Serializable {
   TransferableValue._(this._encodedData, this._value) : _valueAddress = null;
 
   TransferableValue.fromEncodedData(EncodedData encodedData)
@@ -2184,7 +2184,7 @@ class TransferableValue extends Serializable {
   }
 }
 
-class DatabaseState extends Serializable {
+final class DatabaseState extends Serializable {
   DatabaseState({
     required this.id,
     required this.name,
@@ -2213,7 +2213,7 @@ class DatabaseState extends Serializable {
       );
 }
 
-class ScopeState extends Serializable {
+final class ScopeState extends Serializable {
   ScopeState({
     required this.id,
     required this.name,
@@ -2238,7 +2238,7 @@ class ScopeState extends Serializable {
       );
 }
 
-class CollectionState extends Serializable {
+final class CollectionState extends Serializable {
   CollectionState({
     required this.id,
     required this.name,
@@ -2264,7 +2264,7 @@ class CollectionState extends Serializable {
 }
 
 @immutable
-class DocumentState extends Serializable {
+final class DocumentState extends Serializable {
   const DocumentState({
     this.id,
     this.sourceId,
@@ -2329,7 +2329,7 @@ class DocumentState extends Serializable {
   void didReceive() => properties?.didReceive();
 }
 
-class SaveBlobResponse extends Serializable {
+final class SaveBlobResponse extends Serializable {
   SaveBlobResponse(this.properties);
 
   final StringMap properties;
@@ -2345,7 +2345,7 @@ class SaveBlobResponse extends Serializable {
       SaveBlobResponse(map.getAs('properties'));
 }
 
-class QueryState extends Serializable {
+final class QueryState extends Serializable {
   QueryState({
     required this.id,
     required this.columnNames,
@@ -2370,7 +2370,7 @@ class QueryState extends Serializable {
       );
 }
 
-class DocumentReplicationEvent extends Serializable {
+final class DocumentReplicationEvent extends Serializable {
   DocumentReplicationEvent({
     required this.isPush,
     required this.documents,
@@ -2400,7 +2400,7 @@ class DocumentReplicationEvent extends Serializable {
 
 // === Exceptions ==============================================================
 
-class NotFoundException extends Serializable implements Exception {
+final class NotFoundException extends Serializable implements Exception {
   NotFoundException(this.id, this.type)
       : message = 'Could not find object of type $type with id $id';
 

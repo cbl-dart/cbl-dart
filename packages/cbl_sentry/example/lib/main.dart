@@ -62,8 +62,7 @@ Future<void> fillDatabase() => runAppOperation('fillDatabase', () async {
     });
 
 Future<void> queryDatabase() => runAppOperation('queryDatabase', () async {
-      final query = await Query.fromN1ql(
-        db,
+      final query = await db.createQuery(
         'SELECT * FROM users WHERE age >= 28 OR name LIKE "A%"',
       );
       final resultSet = await query.execute();

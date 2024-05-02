@@ -51,7 +51,7 @@ Always use explicit creation of the expected type, whenever the type of result
 is not itself explicit. For example:
 
 ```dart
-final doc = (await database.document(documentId))!;
+final doc = (await collection.document(documentId))!;
 final map = doc.toPlainMap();
 
 final createdAtFromTypedGetter = doc.date('createdAt');
@@ -130,9 +130,14 @@ hotel: {
 First we open your database. If the database does not already exist, Couchbase
 Lite will create it for us.
 
+Couchbase documents are assigned to a
+[Collection](/databases#database-concepts). All the CRUD examples in this
+document operate on a collection object (here, the Default Collection).
+
 ```dart
 // Get the database (and create it if it doesn't exist).
 final database = await Database.openAsync('hoteldb', dbConfig);
+final collection = await database.defaultCollection;
 ```
 
 See: [Databases](/databases) for more information.
@@ -230,7 +235,7 @@ With the document now populated, we can persist to our Couchbase Lite database.
 
 ```dart
 // Save the document to the database.
-await database.saveDocument(mutableDoc);
+await collection.saveDocument(mutableDoc);
 ```
 
 ### Close the Database
@@ -292,7 +297,7 @@ final date = doc.date('createdAt');
 <CodeExample id={2} title="Read Only">
 
 ```dart
-final document = await database.document('hotel::1');
+final document = await collection.document('hotel::1');
 
 // Get a dictionary from the document's properties.
 final dictionary = document?.dictionary('address')
@@ -322,7 +327,7 @@ final mutableDictionary = MutableDictionary()
 // Add the dictionary to a document's properties and save the document.
 final mutableDocumemt = MutableDocument.withId('hotel::1')
   ..setDictionary(mutableDictionary, key: 'address');
-await database.saveDocument(mutableDocumemt);
+await collection.saveDocument(mutableDocumemt);
 ```
 
 </CodeExample>
@@ -337,7 +342,7 @@ await database.saveDocument(mutableDocumemt);
 <CodeExample id={4} title="Read Only">
 
 ```dart
-final document = await database.document('hotel::1');
+final document = await collection.document('hotel::1');
 
 // Get an array from the document's properties.
 final array = document?.array('phones');
@@ -370,7 +375,7 @@ final mutableArray = MutableArray()
 // Set the array to document's properties and save the document.
 final mutableDocumemt = MutableDocument.withId('hotel::1')
   ..setArray(mutableArray, key: 'phones');
-await database.saveDocument(mutableDocumemt);
+await collection.saveDocument(mutableDocumemt);
 ```
 
 </CodeExample>
@@ -402,7 +407,7 @@ final document = MutableDocument()
   ..setString('task', key: 'type')
   ..setString('todo', key: 'owner')
   ..setDate(DateTime.now(), key: 'createdAt');
-await database.saveDocument(document);
+await collection.saveDocument(document);
 ```
 
 </CodeExample>
@@ -419,10 +424,10 @@ Changes to the document are persisted to the database when the save method is
 called.
 
 ```dart
-final document = await database.document('xyz');
+final document = await collection.document('xyz');
 final mutableDocument = document!.toMutable()
   ..setString('new value', key: 'key');
-await database.saveDocument(mutableDocument);
+await collection.saveDocument(mutableDocument);
 ```
 
 </CodeExample>
@@ -471,7 +476,7 @@ await database.inBatch(() async {
       ..setValue('user $i' key: 'name')
       ..setBoolean(false, key: 'admin');
 
-    await database.saveDocument(document);
+    await collection.saveDocument(document);
   }
 });
 ```
@@ -494,8 +499,8 @@ property when a change is detected.
 <CodeExample id={10} title="Document Change Events">
 
 ```dart
-final token = database.addDocumentChangeListener('user.john', (change) async {
-  final document = await database.document(change.documentId);
+final token = collection.addDocumentChangeListener('user.john', (change) async {
+  final document = await collection.document(change.documentId);
   if (document != null){
     print('Status: ${document.string('verified_account')}');
   }
@@ -523,7 +528,7 @@ more information.
 <TabItem value="database" label="Database Changes" default>
 
 ```dart
-final stream = database.changes();
+final stream = collection.changes();
 
 stream.listen((change) {
   print('Ids of changed documents: ${change.documentIds}'):
@@ -534,10 +539,10 @@ stream.listen((change) {
 <TabItem value="documentChanges" label="Document Changes">
 
 ```dart
-final stream = database.documentChanges('user.john');
+final stream = collection.documentChanges('user.john');
 
 stream.listen((change) async {
-  final documemt = await database.document(change.documentId);
+  final documemt = await collection.document(change.documentId);
   if (documemt != null) {
     print('Status: ${documemt.string('verified_account')}');
   }
@@ -563,16 +568,16 @@ replicated to Capella App Services or Sync Gateway.
 ```dart
 // Purge the document one day from now.
 final ttl = DateTime.now().add(const Duration(days: 1));
-await database.setDocumentExpiration('hotel::1', ttl);
+await collection.setDocumentExpiration('hotel::1', ttl);
 
 // Reset the expiration.
-await database.setDocumentExpiration('hotel::1', null);
+await collection.setDocumentExpiration('hotel::1', null);
 
 // Query documents that will be expired in less than five minutes.
 final fiveMinutesFromNow = DateTime.now().add(const Duration(minutes: 5));
 final query = const QueryBuilder()
   .select(SelectResult.expression(Meta.id))
-  .from(DataSource.database(database))
+  .from(DataSource.collection(collection))
   .where(Meta.expiration.lessThan(Expression.date(fiveMinutesFromNow)));
 ```
 
@@ -624,7 +629,7 @@ Convert a `api|Document` to a JSON string using the `toJson` method — see
 <CodeExample id={14} title="Documents as JSON Strings">
 
 ```dart
-final document = await database.document('hotel::1');
+final document = await collection.document('hotel::1');
 if (document != null) {
   final json = document.toJson();
   print(json);
@@ -641,7 +646,7 @@ Convert a `api|Dictionary` to a JSON string using the `toJson` method — see
 <CodeExample id={15} title="Dictionaries as JSON Strings">
 
 ```dart
-final document = await database.document('hotel::1');
+final document = await collection.document('hotel::1');
 if (document != null) {
   final dictionary = document.dictionary('address');
   if (dictionary != null) {
@@ -661,7 +666,7 @@ Convert an `api|Array` to a JSON string using the `toJson` method — see
 <CodeExample id={16} title="Arrays as JSON Strings">
 
 ```dart
-final document = await database.document('hotel::1');
+final document = await collection.document('hotel::1');
 if (document != null) {
   final array = document.array('phones');
   if (array != null) {
@@ -690,7 +695,7 @@ metadata) before you can use the `toJson` method.
 <CodeExample id={17} title="Blobs as JSON Strings">
 
 ```dart
-final document = await database.document('user.john');
+final document = await collection.document('user.john');
 if (document != null) {
   final blob = document.blob('avatar');
   if (blob != null) {
@@ -726,7 +731,7 @@ If your query selects ALL then the JSON format will be:
 
 ```json
 {
-  <database-name>: {
+  <collection-name>: {
     "key1": "value1",
     "keyx": "valuex"
   }

@@ -12,7 +12,7 @@ MDelegate get _delegate => MDelegate.instance!;
 
 final _emptyNative = Object();
 
-class MValue {
+base class MValue {
   MValue.empty()
       : _value = null,
         _native = _emptyNative;

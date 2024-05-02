@@ -13,13 +13,13 @@ import 'router/order_by_router.dart';
 /// A query component representing the `WHERE` clause of a [Query].
 ///
 /// {@category Query Builder}
-abstract class Where
+abstract final class Where
     implements Query, GroupByRouter, OrderByRouter, LimitRouter {}
 
 /// Version of [Where] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncWhere
+abstract final class SyncWhere
     implements
         Where,
         SyncQuery,
@@ -30,7 +30,7 @@ abstract class SyncWhere
 /// Version of [Where] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncWhere
+abstract final class AsyncWhere
     implements
         Where,
         AsyncQuery,
@@ -40,7 +40,7 @@ abstract class AsyncWhere
 
 // === Impl ====================================================================
 
-class SyncWhereImpl extends SyncBuilderQuery implements SyncWhere {
+final class SyncWhereImpl extends SyncBuilderQuery implements SyncWhere {
   SyncWhereImpl({
     required SyncBuilderQuery query,
     required ExpressionInterface expression,
@@ -111,7 +111,7 @@ class SyncWhereImpl extends SyncBuilderQuery implements SyncWhere {
       SyncLimitImpl(query: this, limit: limit, offset: offset);
 }
 
-class AsyncWhereImpl extends AsyncBuilderQuery implements AsyncWhere {
+final class AsyncWhereImpl extends AsyncBuilderQuery implements AsyncWhere {
   AsyncWhereImpl({
     required AsyncBuilderQuery query,
     required ExpressionInterface expression,

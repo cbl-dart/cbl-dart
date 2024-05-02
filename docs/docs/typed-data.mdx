@@ -121,11 +121,11 @@ be used with specialized APIs of `api|Database`, `api|Query` and
      // save plain documents. `saveTypedDocument` returns an object that has methods
      // for saving the document with conflict resolution through concurrency control or
      // a custom conflict handler.
-     await db.saveTypedDocument(user).withConcurrencyControl();
+     await database.saveTypedDocument(user).withConcurrencyControl();
 
      // To retrieve a typed document, use the `typedDocument` method and pass it the
      // type of the requested document through the type parameter.
-     final savedUser = await db.typedDocument<User>(user.id);
+     final savedUser = await database.typedDocument<User>(user.id);
    }
    ```
 

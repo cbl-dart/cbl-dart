@@ -27,7 +27,9 @@ import 'result.dart';
 import 'result_set.dart';
 import 'select_result.dart';
 
-class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
+base class ProxyQuery extends QueryBase
+    with ProxyObjectMixin
+    implements AsyncQuery {
   ProxyQuery({
     ProxyDatabase? super.database,
     required super.language,
@@ -177,7 +179,7 @@ class ProxyQuery extends QueryBase with ProxyObjectMixin implements AsyncQuery {
   FutureOr<void> performClose() => _earlyFinalizer?.close();
 }
 
-class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
+final class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
   _ProxyQueryEarlyFinalizer(ProxyDatabase database, this._finalizerEarly) {
     // We need to attach to the database and not to the query. Otherwise,
     // the query could never be garbage collected.
@@ -197,7 +199,7 @@ class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
   }
 }
 
-class ProxyResultSet extends AsyncResultSet {
+final class ProxyResultSet implements AsyncResultSet {
   ProxyResultSet({
     required ProxyQuery query,
     required Stream<TransferableValue> results,
@@ -236,7 +238,7 @@ class ProxyResultSet extends AsyncResultSet {
       asTypedStream<D>().toList();
 }
 
-class AsyncBuilderQuery extends ProxyQuery with BuilderQueryMixin {
+base class AsyncBuilderQuery extends ProxyQuery with BuilderQueryMixin {
   AsyncBuilderQuery({
     BuilderQueryMixin? query,
     Iterable<SelectResultInterface>? selects,

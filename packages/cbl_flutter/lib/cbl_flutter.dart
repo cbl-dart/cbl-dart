@@ -8,12 +8,10 @@ import 'package:cbl/src/support/tracing.dart';
 import 'package:cbl_flutter_platform_interface/cbl_flutter_platform_interface.dart';
 import 'package:path_provider/path_provider.dart';
 
+// ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
 /// logging, for usage of Couchbase Lite in Flutter apps.
-class CouchbaseLiteFlutter {
-  /// Private constructor to allow control over instance creation.
-  CouchbaseLiteFlutter._();
-
+abstract final class CouchbaseLiteFlutter {
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init() =>
       asyncOperationTracePoint(InitializeOp.new, () async {

@@ -25,7 +25,7 @@ import 'fragment.dart';
 /// The [Document] is immutable.
 ///
 /// {@category Document}
-abstract class Document implements DictionaryInterface, Iterable<String> {
+abstract final class Document implements DictionaryInterface, Iterable<String> {
   /// The document’s id.
   String get id;
 
@@ -56,7 +56,8 @@ abstract class Document implements DictionaryInterface, Iterable<String> {
 /// A mutable version of [Document].
 ///
 /// {@category Document}
-abstract class MutableDocument implements Document, MutableDictionaryInterface {
+abstract final class MutableDocument
+    implements Document, MutableDictionaryInterface {
   /// Creates a new [MutableDocument] with a random UUID, optionally initialized
   /// with [data].
   ///
@@ -74,7 +75,7 @@ abstract class MutableDocument implements Document, MutableDictionaryInterface {
 
 /// An interface to abstract over the differences between the documents of the
 /// different database implementations.
-abstract class DocumentDelegate {
+abstract interface class DocumentDelegate {
   /// The document's id.
   String get id;
 
@@ -106,7 +107,7 @@ abstract class DocumentDelegate {
 /// database it will be saved. Until that point this type of delegate is used.
 /// This way there is no need to have one type of document for each database
 /// implementation or have a factory create new documents.
-class NewDocumentDelegate extends DocumentDelegate {
+final class NewDocumentDelegate extends DocumentDelegate {
   NewDocumentDelegate([String? id, this.properties]) : id = id ?? createUuid();
 
   NewDocumentDelegate.mutableCopy(NewDocumentDelegate delegate)
@@ -155,7 +156,7 @@ class NewDocumentDelegate extends DocumentDelegate {
 }
 
 /// The context for [MCollection]s within a [DelegateDocument].
-class DocumentMContext implements DatabaseMContext {
+final class DocumentMContext implements DatabaseMContext {
   DocumentMContext(this.document, {this.data});
 
   /// The [DelegateDocument] to which [MCollection]s with this context belong
@@ -183,7 +184,7 @@ class DocumentMContext implements DatabaseMContext {
   DatabaseBase? get database => document.database;
 }
 
-class DelegateDocument with IterableMixin<String> implements Document {
+final class DelegateDocument with IterableMixin<String> implements Document {
   DelegateDocument(
     DocumentDelegate delegate, {
     CollectionBase? collection,
@@ -342,7 +343,7 @@ class DelegateDocument with IterableMixin<String> implements Document {
       ')';
 }
 
-class MutableDelegateDocument extends DelegateDocument
+final class MutableDelegateDocument extends DelegateDocument
     implements MutableDocument {
   MutableDelegateDocument([Map<String, Object?>? data])
       : this.fromDelegate(NewDocumentDelegate(), data: data);

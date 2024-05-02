@@ -84,7 +84,7 @@ extension on _CBLProxySettings {
   set type(CBLProxyType value) => _type = value.toInt();
 }
 
-class CBLProxySettings {
+final class CBLProxySettings {
   CBLProxySettings({
     required this.type,
     required this.hostname,
@@ -140,7 +140,7 @@ extension on _CBLDartReplicatorConfiguration {
       _replicatorType = value.toInt();
 }
 
-class CBLReplicationCollection {
+final class CBLReplicationCollection {
   CBLReplicationCollection({
     required this.collection,
     this.channels,
@@ -158,7 +158,7 @@ class CBLReplicationCollection {
   final Pointer<CBLDartAsyncCallback>? conflictResolver;
 }
 
-class CBLReplicatorConfiguration {
+final class CBLReplicatorConfiguration {
   CBLReplicatorConfiguration({
     required this.database,
     required this.endpoint,
@@ -192,7 +192,7 @@ class CBLReplicatorConfiguration {
   final List<CBLReplicationCollection> collections;
 }
 
-class ReplicationFilterCallbackMessage {
+final class ReplicationFilterCallbackMessage {
   ReplicationFilterCallbackMessage(this.document, this.flags);
 
   ReplicationFilterCallbackMessage.fromArguments(List<Object?> arguments)
@@ -205,7 +205,7 @@ class ReplicationFilterCallbackMessage {
   final Set<CBLReplicatedDocumentFlag> flags;
 }
 
-class ReplicationConflictResolverCallbackMessage {
+final class ReplicationConflictResolverCallbackMessage {
   ReplicationConflictResolverCallbackMessage(
     this.documentId,
     this.localDocument,
@@ -304,7 +304,7 @@ final class _CBLReplicatorStatus extends Struct {
   external CBLError _error;
 }
 
-class CBLReplicatorStatus {
+final class CBLReplicatorStatus {
   CBLReplicatorStatus(
     this.activity,
     this.progressComplete,
@@ -393,7 +393,7 @@ typedef _CBLDart_CBLReplicator_AddDocumentReplicationListener = void Function(
   Pointer<CBLDartAsyncCallback> listener,
 );
 
-class ReplicatorStatusCallbackMessage {
+final class ReplicatorStatusCallbackMessage {
   ReplicatorStatusCallbackMessage(this.status);
 
   ReplicatorStatusCallbackMessage.fromArguments(List<Object?> arguments)
@@ -419,7 +419,7 @@ class ReplicatorStatusCallbackMessage {
   final CBLReplicatorStatus status;
 }
 
-class CBLReplicatedDocument {
+final class CBLReplicatedDocument {
   CBLReplicatedDocument(
     this.id,
     this.flags,
@@ -435,7 +435,7 @@ class CBLReplicatedDocument {
   final CBLErrorException? error;
 }
 
-class DocumentReplicationsCallbackMessage {
+final class DocumentReplicationsCallbackMessage {
   DocumentReplicationsCallbackMessage(
     this.isPush,
     this.documents,
@@ -473,7 +473,7 @@ class DocumentReplicationsCallbackMessage {
 
 // === ReplicatorBindings ======================================================
 
-class ReplicatorBindings extends Bindings {
+final class ReplicatorBindings extends Bindings {
   ReplicatorBindings(super.parent) {
     _endpointCreateWithUrl = libs.cbl
         .lookupFunction<_CBLEndpoint_CreateWithURL, _CBLEndpoint_CreateWithURL>(

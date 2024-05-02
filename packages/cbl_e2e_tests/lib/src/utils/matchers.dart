@@ -42,7 +42,7 @@ class _IsDirectory extends Matcher {
 /// Dart objects.
 Matcher json(Object? expected) => _JsonMatcher(expected);
 
-class _JsonMatcher extends Matcher {
+final class _JsonMatcher extends Matcher {
   _JsonMatcher(this.expected);
 
   static const _actualDecodedKey = 'actualDecoded';
@@ -123,7 +123,7 @@ Matcher equality(Object? expected) => _Equality(expected);
 
 enum _EqualityFailure { expected, actual, hash }
 
-class _Equality extends Matcher {
+final class _Equality extends Matcher {
   _Equality(this.expected);
 
   final Object? expected;

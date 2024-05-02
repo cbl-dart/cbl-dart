@@ -18,7 +18,7 @@ enum SerializationTarget {
 
 /// A type which supports serialization.
 // ignore: one_member_abstracts
-abstract class Serializable {
+abstract base class Serializable {
   /// Allow subclasses to have const constructors.
   const Serializable();
 
@@ -79,7 +79,7 @@ typedef SerializableDeserializer<T extends Serializable> = T Function(
   SerializationContext context,
 );
 
-class SerializationError extends Serializable implements Exception {
+final class SerializationError extends Serializable implements Exception {
   SerializationError(this.message);
 
   final String message;

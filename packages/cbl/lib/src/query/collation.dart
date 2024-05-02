@@ -6,8 +6,9 @@
 /// query results.
 ///
 /// {@category Query Builder}
-abstract class CollationInterface {}
+abstract final class CollationInterface {}
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for creating collations.
 ///
 /// Couchbase Lite provides two types of collation: ASCII and Unicode. Without
@@ -15,9 +16,7 @@ abstract class CollationInterface {}
 /// ASCII collation.
 ///
 /// {@category Query Builder}
-class Collation {
-  Collation._();
-
+abstract final class Collation {
   /// Creates an ASCII collation that will compare strings by using binary
   /// comparison.
   static AsciiCollation ascii() => AsciiCollationImpl();
@@ -34,7 +33,7 @@ class Collation {
 /// ASCII collation compares two string by using binary comparison.
 ///
 /// {@category Query Builder}
-abstract class AsciiCollation extends CollationInterface {
+abstract final class AsciiCollation implements CollationInterface {
   /// Specifies whether the collation is case-sensitive or not.
   ///
   /// Case-sensitive collation will treat ASCII uppercase and lowercase letters
@@ -51,7 +50,7 @@ abstract class AsciiCollation extends CollationInterface {
 /// letter (This is implemented by using the "en_US" locale.).
 ///
 /// {@category Query Builder}
-abstract class UnicodeCollation extends CollationInterface {
+abstract final class UnicodeCollation implements CollationInterface {
   /// Specifies whether the collation is case-insensitive or not.
   ///
   /// Case-insensitive collation will treat uppercase and lowercase letters as
@@ -78,11 +77,11 @@ abstract class UnicodeCollation extends CollationInterface {
 
 // === Impl ====================================================================
 
-abstract class CollationImpl extends CollationInterface {
+abstract final class CollationImpl extends CollationInterface {
   Object? toJson();
 }
 
-class AsciiCollationImpl extends CollationImpl implements AsciiCollation {
+final class AsciiCollationImpl extends CollationImpl implements AsciiCollation {
   AsciiCollationImpl({bool ignoreCase = false}) : _ignoreCase = ignoreCase;
 
   final bool _ignoreCase;
@@ -98,7 +97,8 @@ class AsciiCollationImpl extends CollationImpl implements AsciiCollation {
       };
 }
 
-class UnicodeCollationImpl extends CollationImpl implements UnicodeCollation {
+final class UnicodeCollationImpl extends CollationImpl
+    implements UnicodeCollation {
   UnicodeCollationImpl({
     bool ignoreCase = false,
     bool ignoreAccents = false,

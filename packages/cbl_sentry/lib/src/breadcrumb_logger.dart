@@ -11,7 +11,7 @@ import 'utils.dart';
 /// The [LogDomain] is used to build the category of the breadcrumb by prefixing
 /// it with `cbl.`. For example, full category for a log message from the
 /// [LogDomain.database] domain is `cbl.database`.
-class BreadcrumbLogger extends Logger {
+final class BreadcrumbLogger extends Logger {
   /// Creates a [Logger] that adds a Sentry [Breadcrumb] for each log message.
   BreadcrumbLogger({LogLevel? level, Hub? hub})
       : _hub = hub ?? HubAdapter(),

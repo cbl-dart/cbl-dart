@@ -77,7 +77,7 @@ typedef TypedReplicationFilter = FutureOr<bool> Function(
 );
 
 /// The replication configuration for a [Collection].
-class CollectionConfiguration {
+final class CollectionConfiguration {
   /// Creates a replication configuration for a [Collection].
   CollectionConfiguration({
     this.channels,
@@ -145,7 +145,7 @@ class CollectionConfiguration {
 /// Configuration for a [Replicator].
 ///
 /// {@category Replication}
-class ReplicatorConfiguration {
+final class ReplicatorConfiguration {
   /// Creates a configuration for a [Replicator].
   ReplicatorConfiguration({
     @Deprecated(

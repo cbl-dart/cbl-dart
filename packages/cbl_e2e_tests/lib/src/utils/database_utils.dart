@@ -267,8 +267,7 @@ extension AsyncDatabaseUtilsExtension on Database {
       .asyncMap(
           (change) => change.results.asStream().map(_getIdFromResult).toList());
 
-  FutureOr<Query> _allIdsQuery() =>
-      Query.fromN1ql(this, 'SELECT META().id FROM _');
+  FutureOr<Query> _allIdsQuery() => createQuery('SELECT META().id FROM _');
 
   String _getIdFromResult(Result result) => result[0].string!;
 

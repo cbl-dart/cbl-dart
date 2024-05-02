@@ -6,7 +6,7 @@ description:
 
 # Usage Examples
 
-## Open a database
+## Open a Database
 
 Every `api|Database` has a name which is used to determine its filename. The
 full filename is the concatenation of the database name and the extension
@@ -37,7 +37,37 @@ When you are done with the database, you should close it by calling
 well as remove change listeners, close change streams and close associated
 replicators.
 
-## Create a document
+## Access a Collection
+
+Documents live in collections.
+
+Existing collections can be accessed through `api|Database.collection`:
+
+```dart
+final collectionInDefaultScope = await database.collection('my-collection');
+final collectionInCustomScope = await database.collection('my-collection', 'my-scope');
+```
+
+The default collection is always available and can be accessed through
+`api|Database.defaultCollection`:
+
+```dart
+final defaultCollection = await database.defaultCollection;
+```
+
+## Create a Collection
+
+To create a collection, call `api|Database.createCollection`:
+
+```dart
+final collectionInDefaultScope = await database.createCollection('my-collection');
+final collectionInCustomScope = await database.createCollection('my-collection', 'my-scope');
+```
+
+If the collection already exists, it will be returned. Otherwise a new
+collection will be created.
+
+## Create a Document
 
 The default constructor of `api|MutableDocument` creates a document with a
 randomly generated id and optionally initializes it with some properties:
@@ -48,7 +78,7 @@ final doc = MutableDocument({
   'age': 29,
 });
 
-await db.saveDocument(doc);
+await collection.saveDocument(doc);
 ```
 
 It's also possible to create a document with a specific id:
@@ -59,15 +89,15 @@ final doc = MutableDocument.withId('ali', {
   'age': 29,
 });
 
-await db.saveDocument(doc);
+await collection.saveDocument(doc);
 ```
 
-## Read a document
+## Read a Document
 
-To read a `api|Document` pass the document's id to `api|Database.document`:
+To read a `api|Document` pass the document's id to `api|Collection.document`:
 
 ```dart
-final doc = await db.document('ali');
+final doc = await collection.document('ali');
 
 // If the document exists, an immutable `Document` is returned.
 if (doc != null) {
@@ -76,13 +106,13 @@ if (doc != null) {
 }
 ```
 
-## Update a document
+## Update a Document
 
 To update a document, first read it, turn it into a `api|MutableDocument` and
-update its properties. Then save it again with `api|Database.saveDocument`:
+update its properties. Then save it again with `api|Collection.saveDocument`:
 
 ```dart
-final doc = await db.document('ali');
+final doc = await collection.document('ali');
 
 final mutableDoc = doc!.toMutable();
 
@@ -101,27 +131,27 @@ mutableDoc.setValue(['Dart'], key: 'languages');
 mutableDoc['languages'].value = ['Dart'];
 
 
-await db.saveDocument(mutableDoc);
+await collection.saveDocument(mutableDoc);
 ```
 
-Check out the documentation for `api|Database.saveDocument` to learn about how
+Check out the documentation for `api|Collection.saveDocument` to learn about how
 conflicts are handled.
 
-## Delete a document
+## Delete a Document
 
 To delete a document, you need to read it first and than pass it to
-`api|Database.deleteDocument`:
+`api|Collection.deleteDocument`:
 
 ```dart
-final doc = await db.document('ali');
+final doc = await collection.document('ali');
 
-await db.deleteDocument(doc);
+await collection.deleteDocument(doc);
 ```
 
-Check out the documentation for `api|Database.deleteDocument` to learn about how
-conflicts are handled.
+Check out the documentation for `api|Collection.deleteDocument` to learn about
+how conflicts are handled.
 
-## Build a `Query` with the `QueryBuilder` API
+## Build a `Query` With the `QueryBuilder` API
 
 A `api|Query` can be built in a type safe way through the `api|QueryBuilder`
 API.
@@ -136,7 +166,7 @@ final query = const QueryBuilder()
       Function_.avg(Expression.property('age'))
     ).as('avgAge'),
   )
-  .from(DataSource.database(db))
+  .from(DataSource.collection(collection))
   .groupBy(Expression.property('name'));
 
 final resultSet = await query.execute();
@@ -168,7 +198,7 @@ Given these documents:
 ]
 ```
 
-## Build a `Query` with SQL++
+## Build a `Query` With SQL++
 
 [SQL++] is an extension of SQL for querying JSON style data.
 
@@ -176,17 +206,16 @@ The query below is equivalent to query from the `api|QueryBuilder` example
 above:
 
 ```dart
-final query = await Query.fromN1ql(
-  db,
+final query = await db.createQuery(
   '''
   SELECT name, avg(age) AS avgAge
-  FROM _
+  FROM users
   GROUP BY name
   ''',
 );
 ```
 
-## Data sync with `Replicator` to Sync Gateway
+## Data Sync With `Replicator` To Sync Gateway
 
 This example synchronizes the database with a remote Sync Gateway instance,
 without authentication. This only works when Sync Gateway has been configured
@@ -194,7 +223,8 @@ with the `GUEST` user.
 
 A `api|ReplicatorConfiguration` with only default values creates a
 `api|Replicator` with `type` `api|enum-value:ReplicatorType.pushAndPull` that is
-not `continuous`.
+not `continuous`. You need add the `api|Collection`s that you want to replicate
+to the configuration.
 
 After starting this replicator, it will push changes from the local database to
 the remote database and pull changes from the remote database to the local
@@ -205,13 +235,12 @@ start/stop the replicator. The current status of the replicator is available in
 `api|ReplicatorStatus.activity`.
 
 ```dart
-final replicator = await Replicator.create(ReplicatorConfiguration(
-  database: db,
-  target: UrlEndpoint('http://localhost:4984/my-database'),
-));
+final config = ReplicatorConfiguration(target: UrlEndpoint('http://localhost:4984/my-database'))
+  ..addCollection(collection);
+final replicator = await Replicator.create(config);
 
 await replicator.addChangeListener((change) {
-    print('Replicator activity: ${change.status.activity}');
+  print('Replicator activity: ${change.status.activity}');
 });
 
 await replicator.start();

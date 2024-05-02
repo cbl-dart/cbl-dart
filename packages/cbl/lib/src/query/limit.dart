@@ -6,21 +6,21 @@ import 'query.dart';
 /// A query component representing the `LIMIT` clause of a [Query].
 ///
 /// {@category Query Builder}
-abstract class Limit implements Query {}
+abstract final class Limit implements Query {}
 
 /// Version of [Limit] for building [SyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class SyncLimit implements Limit, SyncQuery {}
+abstract final class SyncLimit implements Limit, SyncQuery {}
 
 /// Version of [Limit] for building [AsyncQuery]s.
 ///
 /// {@category Query Builder}
-abstract class AsyncLimit implements Limit, AsyncQuery {}
+abstract final class AsyncLimit implements Limit, AsyncQuery {}
 
 // === Impl ====================================================================
 
-class SyncLimitImpl extends SyncBuilderQuery implements SyncLimit {
+final class SyncLimitImpl extends SyncBuilderQuery implements SyncLimit {
   SyncLimitImpl({
     required SyncBuilderQuery super.query,
     required ExpressionInterface super.limit,
@@ -28,7 +28,7 @@ class SyncLimitImpl extends SyncBuilderQuery implements SyncLimit {
   });
 }
 
-class AsyncLimitImpl extends AsyncBuilderQuery implements AsyncLimit {
+final class AsyncLimitImpl extends AsyncBuilderQuery implements AsyncLimit {
   AsyncLimitImpl({
     required AsyncBuilderQuery super.query,
     required ExpressionInterface super.limit,

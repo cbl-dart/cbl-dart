@@ -38,7 +38,7 @@ enum ReplicatorActivityLevel {
 /// two will produce a fraction that can be used to draw a progress bar.
 ///
 /// {@category Replication}
-class ReplicatorProgress {
+final class ReplicatorProgress {
   ReplicatorProgress(this.completed, this.progress);
 
   /// The number of [Document]s processed so far.
@@ -63,7 +63,7 @@ class ReplicatorProgress {
 /// of a [Replicator].
 ///
 /// {@category Replication}
-class ReplicatorStatus {
+final class ReplicatorStatus {
   ReplicatorStatus(this.activity, this.progress, this.error);
 
   /// The current activity level of the [Replicator].
@@ -108,7 +108,7 @@ typedef DocumentReplicationListener = void Function(
 /// observe the [status] to be notified of progress.
 ///
 /// {@category Replication}
-abstract class Replicator implements ClosableResource {
+abstract interface class Replicator implements ClosableResource {
   /// Creates a replicator for replicating [Document]s between a local
   /// [Database] and a target database.
   static Future<Replicator> create(ReplicatorConfiguration config) {
@@ -272,7 +272,7 @@ abstract class Replicator implements ClosableResource {
 /// A [Replicator] with a primarily synchronous API.
 ///
 /// {@category Replication}
-abstract class SyncReplicator implements Replicator {
+abstract interface class SyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createSync}
   static Future<SyncReplicator> create(ReplicatorConfiguration config) =>
       FfiReplicator.create(config);
@@ -318,7 +318,7 @@ abstract class SyncReplicator implements Replicator {
 /// A [Replicator] with a primarily asynchronous API.
 ///
 /// {@category Replication}
-abstract class AsyncReplicator implements Replicator {
+abstract interface class AsyncReplicator implements Replicator {
   /// {@macro cbl.Replicator.createAsync}
   static Future<AsyncReplicator> create(ReplicatorConfiguration config) =>
       ProxyReplicator.create(config);

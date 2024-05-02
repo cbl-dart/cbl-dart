@@ -11,12 +11,10 @@ import 'src/package.dart';
 
 export 'src/package.dart' show Edition;
 
+// ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
 /// logging, for usage of Couchbase Lite in pure Dart apps.
-class CouchbaseLiteDart {
-  /// Private constructor to allow control over instance creation.
-  CouchbaseLiteDart._();
-
+abstract final class CouchbaseLiteDart {
   /// Initializes the `cbl` package, for the main isolate.
   ///
   /// If specified, [filesDir] is used to store files created by Couchbase Lite

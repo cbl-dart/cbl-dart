@@ -5,30 +5,31 @@ import 'package:collection/collection.dart';
 import '../../bindings.dart';
 import 'index.dart';
 
-/// A specification of an [Index] through a list of N1QL [expressions].
+/// A specification of an [Index] through a list of SQL++ [expressions].
 ///
 /// {@category Query}
-abstract class IndexConfiguration extends Index {
-  /// The N1QL expressions to use to create the index.
+abstract final class IndexConfiguration implements Index {
+  /// The SQL++ expressions to use to create the index.
   List<String> get expressions;
   set expressions(List<String> value);
 }
 
-/// A specification of a value [Index] through a list of N1QL [expressions].
+/// A specification of a value [Index] through a list of SQL++ [expressions].
 ///
 /// {@category Query}
-abstract class ValueIndexConfiguration extends IndexConfiguration {
-  /// Creates a specification of a value [Index] through a list of N1QL
+abstract final class ValueIndexConfiguration implements IndexConfiguration {
+  /// Creates a specification of a value [Index] through a list of SQL++
   /// [expressions].
   factory ValueIndexConfiguration(List<String> expressions) =>
       _ValueIndexConfiguration(expressions);
 }
 
-/// A specification of a full text [Index] through a list of N1QL [expressions].
+/// A specification of a full text [Index] through a list of SQL++
+/// [expressions].
 ///
 /// {@category Query}
-abstract class FullTextIndexConfiguration extends IndexConfiguration {
-  /// Creates a specification of a full text [Index] through a list of N1QL
+abstract final class FullTextIndexConfiguration implements IndexConfiguration {
+  /// Creates a specification of a full text [Index] through a list of SQL++
   /// [expressions].
   factory FullTextIndexConfiguration(
     List<String> expressions, {
@@ -57,7 +58,7 @@ abstract class FullTextIndexConfiguration extends IndexConfiguration {
 
 // === Impl ====================================================================
 
-abstract class _IndexConfiguration extends IndexConfiguration {
+abstract final class _IndexConfiguration implements IndexConfiguration {
   _IndexConfiguration(List<String> expressions) {
     this.expressions = expressions;
   }
@@ -80,7 +81,7 @@ abstract class _IndexConfiguration extends IndexConfiguration {
   }
 }
 
-class _ValueIndexConfiguration extends _IndexConfiguration
+final class _ValueIndexConfiguration extends _IndexConfiguration
     implements ValueIndexConfiguration, IndexImplInterface {
   _ValueIndexConfiguration(super.expressions);
 
@@ -105,7 +106,7 @@ class _ValueIndexConfiguration extends _IndexConfiguration
   String toString() => 'ValueIndexConfiguration(${expressions.join(', ')})';
 }
 
-class _FullTextIndexConfiguration extends _IndexConfiguration
+final class _FullTextIndexConfiguration extends _IndexConfiguration
     implements FullTextIndexConfiguration, IndexImplInterface {
   _FullTextIndexConfiguration(
     super.expressions,

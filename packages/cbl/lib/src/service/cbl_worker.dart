@@ -12,7 +12,7 @@ import 'channel.dart';
 import 'isolate_worker.dart';
 import 'serialization/serialization.dart';
 
-class CblWorker {
+final class CblWorker {
   CblWorker({
     this.serializationTarget = SerializationTarget.isolatePort,
     required this.debugName,
@@ -109,7 +109,7 @@ enum _WorkerStatus {
   crashed,
 }
 
-class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
+final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
   _ServiceWorkerDelegate({
     required this.context,
     required this.channel,

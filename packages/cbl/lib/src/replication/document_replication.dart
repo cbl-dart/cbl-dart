@@ -6,7 +6,7 @@ import 'replicator.dart';
 /// Event which is emitted when [Document]s have been replicated.
 ///
 /// {@category Replication}
-abstract class DocumentReplication {
+abstract final class DocumentReplication {
   /// The source [Replicator].
   Replicator get replicator;
 
@@ -20,7 +20,7 @@ abstract class DocumentReplication {
 /// Information about a [Document] that has been replicated.
 ///
 /// {@category Replication}
-abstract class ReplicatedDocument {
+abstract final class ReplicatedDocument {
   /// The id of the replicated [Document].
   String get id;
 
@@ -39,7 +39,7 @@ abstract class ReplicatedDocument {
   Object? get error;
 }
 
-class DocumentReplicationImpl implements DocumentReplication {
+final class DocumentReplicationImpl implements DocumentReplication {
   // ignore: avoid_positional_boolean_parameters
   DocumentReplicationImpl(this.replicator, this.isPush, this.documents);
 
@@ -64,7 +64,7 @@ class DocumentReplicationImpl implements DocumentReplication {
       ].join();
 }
 
-class ReplicatedDocumentImpl implements ReplicatedDocument {
+final class ReplicatedDocumentImpl implements ReplicatedDocument {
   ReplicatedDocumentImpl(
     this.id,
     this.scope,

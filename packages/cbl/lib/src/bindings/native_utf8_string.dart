@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 /// A UTF-8 encoded string in external memory.
-class NativeUtf8String {
+final class NativeUtf8String {
   NativeUtf8String(this.buffer, this.size, {this.allocator});
 
   final Pointer<Uint8> buffer;
@@ -46,7 +46,7 @@ const nativeUtf8StringEncoder = NativeUtf8StringEncoder();
 ///
 /// This is more efficient than encoding to Dart memory first and than copying
 /// to external memory.
-class NativeUtf8StringEncoder {
+final class NativeUtf8StringEncoder {
   /// Creates a UTF-8 encoder that directly writes to external memory.
   const NativeUtf8StringEncoder();
 
@@ -118,7 +118,7 @@ class NativeUtf8StringEncoder {
   }
 }
 
-class _Utf8Encoder {
+final class _Utf8Encoder {
   _Utf8Encoder(this._buffer);
 
   int _bufferIndex = 0;

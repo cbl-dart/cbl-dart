@@ -12,12 +12,10 @@ export 'support/listener_token.dart' show ListenerToken;
 export 'support/resource.dart' show Resource, ClosableResource;
 export 'support/streams.dart' show AsyncListenStream;
 
+// ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
 /// logging.
-class CouchbaseLite {
-  /// Private constructor to allow control over instance creation.
-  CouchbaseLite._();
-
+abstract final class CouchbaseLite {
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init({required LibrariesConfiguration libraries}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {

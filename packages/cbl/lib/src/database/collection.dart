@@ -170,7 +170,7 @@ MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
 /// exactly the way they used to, but collection-aware code should avoid them
 /// and use the new collection APIs instead. These legacy APIs are deprecated
 /// and will be removed eventually.
-abstract class Collection {
+abstract interface class Collection {
   /// The name of the default collection.
   static const defaultName = '_default';
 
@@ -373,7 +373,7 @@ abstract class Collection {
 /// A [Collection] with a primarily synchronous API.
 ///
 /// {@category Database}
-abstract class SyncCollection extends Collection {
+abstract interface class SyncCollection extends Collection {
   @override
   SyncScope get scope;
 
@@ -455,7 +455,7 @@ abstract class SyncCollection extends Collection {
 /// A [Collection] with a primarily asynchronous API.
 ///
 /// {@category Database}
-abstract class AsyncCollection extends Collection {
+abstract interface class AsyncCollection extends Collection {
   @override
   AsyncScope get scope;
 

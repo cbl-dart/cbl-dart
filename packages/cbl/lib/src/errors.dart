@@ -4,7 +4,7 @@ import 'service/channel.dart' as channel;
 import 'support/utils.dart';
 
 /// Base class for custom exceptions in the `cbl` package.
-abstract class CouchbaseLiteException implements Exception {
+abstract final class CouchbaseLiteException implements Exception {
   /// A description of this exception.
   String get message;
 
@@ -71,7 +71,7 @@ enum DatabaseErrorCode {
 
 /// Exception throw when there is a failure interacting with a Couchbase Lite
 /// database.
-class DatabaseException extends CouchbaseLiteException {
+final class DatabaseException extends CouchbaseLiteException {
   /// Creates an exception which is thrown when there is a failure interacting
   /// with a Couchbase Lite database.
   DatabaseException(
@@ -119,7 +119,7 @@ class DatabaseException extends CouchbaseLiteException {
 ///
 /// The error [code] is dependent on the OS being run on and is defined in the
 /// `errno.h` header file.
-class PosixException extends CouchbaseLiteException {
+final class PosixException extends CouchbaseLiteException {
   PosixException(this.message, this.code);
 
   @override
@@ -132,11 +132,11 @@ class PosixException extends CouchbaseLiteException {
   String get _typeName => 'PosixException';
 }
 
-/// An exception used to indicate a SQLite operation error.
+/// An exception used to indicate an SQLite operation error.
 ///
 /// The meaning of the error [code] is defined in the
 /// [SQLite documentation](https://www.sqlite.org/rescode.html).
-class SQLiteException extends CouchbaseLiteException {
+final class SQLiteException extends CouchbaseLiteException {
   SQLiteException(this.message, this.code);
 
   @override
@@ -169,7 +169,7 @@ enum NetworkErrorCode {
 }
 
 /// Exception thrown when there is a failure accessing the network.
-class NetworkException extends CouchbaseLiteException {
+final class NetworkException extends CouchbaseLiteException {
   /// Creates an exception which is thrown when there is a failure accessing the
   /// network.
   NetworkException(this.message, this.code);
@@ -218,7 +218,7 @@ enum HttpErrorCode {
 }
 
 /// Exception thrown when there is an HTTP error.
-class HttpException extends CouchbaseLiteException {
+final class HttpException extends CouchbaseLiteException {
   /// Creates an exception which is thrown when there is an HTTP error.
   HttpException(this.message, this.code);
 
@@ -263,7 +263,7 @@ enum WebSocketErrorCode {
 }
 
 /// Exception thrown when there is an WebSocket error.
-class WebSocketException extends CouchbaseLiteException {
+final class WebSocketException extends CouchbaseLiteException {
   /// Creates an exception which is thrown when there is an WebSocket error.
   WebSocketException(this.message, this.code);
 
@@ -281,9 +281,12 @@ class WebSocketException extends CouchbaseLiteException {
 @Deprecated(
   'Use FleeceException instead. This class will be removed in the future.',
 )
-class InvalidJsonException extends CouchbaseLiteException {
+final class InvalidJsonException extends CouchbaseLiteException {
   // ignore: deprecated_consistency
   /// Creates an exception which is thrown when JSON data is invalid.
+  @Deprecated(
+    'Use FleeceException instead. This class will be removed in the future.',
+  )
   InvalidJsonException(this.message);
 
   @override
@@ -298,7 +301,7 @@ class InvalidJsonException extends CouchbaseLiteException {
 /// Fleece is the library used to serialize and deserialize data. This type of
 /// exception should be reported.
 // ignore: deprecated_member_use_from_same_package
-class FleeceException extends InvalidJsonException {
+final class FleeceException extends InvalidJsonException {
   FleeceException(super.message);
 
   @override
@@ -330,7 +333,7 @@ enum TypedDataErrorCode {
 ///
 /// {@category Typed Data}
 @experimental
-class TypedDataException extends CouchbaseLiteException {
+final class TypedDataException extends CouchbaseLiteException {
   /// Creates an exception which is throw when there is a failure related to
   /// typed data.
   TypedDataException(this.message, this.code, [this.originalException]);

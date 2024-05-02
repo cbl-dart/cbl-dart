@@ -41,7 +41,7 @@ typedef TestHook = void Function(dynamic Function() body);
 /// Overriding these properties is useful to run tests with the
 /// `integration_test` package, which requires that all tests are declared
 /// through `widgetTest`.
-abstract class CblE2eTestBinding {
+abstract base class CblE2eTestBinding {
   static void ensureInitialized(CblE2eTestBinding Function() createBinding) {
     if (_instance != null) {
       return;

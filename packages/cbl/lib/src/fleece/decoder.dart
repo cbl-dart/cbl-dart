@@ -17,7 +17,7 @@ String dumpData(Data data) => _decoderBinds.dumpData(data);
 // === SharedKeysTable =========================================================
 
 /// A table which maps shared key ids to their corresponding Dart strings.
-abstract class SharedKeysTable {
+abstract final class SharedKeysTable {
   factory SharedKeysTable() => _SharedKeysTable();
 
   const SharedKeysTable._();
@@ -34,7 +34,7 @@ abstract class SharedKeysTable {
 
 /// A [SharedKeysTable] which does not handle shared keys specially and instead
 /// decodes all keys through the [SharedStringsTable].
-class NoopSharedKeysTable extends SharedKeysTable {
+final class NoopSharedKeysTable extends SharedKeysTable {
   const NoopSharedKeysTable() : super._();
 
   @override
@@ -45,7 +45,7 @@ class NoopSharedKeysTable extends SharedKeysTable {
       sharedStringsTable.decode(StringSource.dictKey);
 }
 
-class _SharedKeysTable extends SharedKeysTable implements Finalizable {
+final class _SharedKeysTable extends SharedKeysTable implements Finalizable {
   _SharedKeysTable() : super._() {
     _knownSharedKeys = _decoderBinds.createKnownSharedKeys(this);
   }
@@ -108,7 +108,7 @@ enum StringSource {
 /// A [SharedStringsTable] must only be used with a single instance of immutable
 /// Fleece data. It is safe to use a [NoopSharedStringsTable] with mutable
 /// Fleece data, though.
-abstract class SharedStringsTable {
+abstract final class SharedStringsTable {
   /// Creates a new empty [SharedStringsTable].
   factory SharedStringsTable() => _SharedStringsTable();
 
@@ -123,7 +123,7 @@ abstract class SharedStringsTable {
 
 /// A [SharedStringsTable] that does not try to cache shared strings and instead
 /// decodes a string every time it is requested.
-class NoopSharedStringsTable extends SharedStringsTable {
+final class NoopSharedStringsTable extends SharedStringsTable {
   const NoopSharedStringsTable() : super._();
 
   @override
@@ -147,7 +147,7 @@ class NoopSharedStringsTable extends SharedStringsTable {
   bool hasString(String string) => false;
 }
 
-class _SharedStringsTable extends SharedStringsTable {
+final class _SharedStringsTable extends SharedStringsTable {
   _SharedStringsTable() : super._();
 
   // These are the metrics which the Fleece encoder uses when considering
@@ -192,7 +192,7 @@ class _SharedStringsTable extends SharedStringsTable {
 // === Iterators ===============================================================
 
 // ignore: prefer_void_to_null
-class DictIterator implements Iterator<Null>, Finalizable {
+final class DictIterator implements Iterator<Null>, Finalizable {
   DictIterator(
     Pointer<FLDict> dict, {
     SharedKeysTable? sharedKeysTable,
@@ -223,7 +223,7 @@ class DictIterator implements Iterator<Null>, Finalizable {
 }
 
 // ignore: prefer_void_to_null
-class ArrayIterator implements Iterator<Null>, Finalizable {
+final class ArrayIterator implements Iterator<Null>, Finalizable {
   ArrayIterator(
     Pointer<FLArray> array, {
     Pointer<CBLDart_LoadedFLValue>? valueOut,
@@ -248,7 +248,7 @@ class ArrayIterator implements Iterator<Null>, Finalizable {
 // === Decoder =================================================================
 
 /// A decoder for converting Fleece data into Dart objects.
-class FleeceDecoder extends Converter<Data, Object?> {
+final class FleeceDecoder extends Converter<Data, Object?> {
   /// Creates a decoder for converting Fleece data into Dart objects.
   const FleeceDecoder({
     this.trust = FLTrust.untrusted,
@@ -364,7 +364,7 @@ Never _throwUndefinedDartRepresentation() =>
 
 /// An object that is notified of Fleece decoding events while a Fleece value is
 /// deeply decoded.
-abstract class _FleeceListener {
+abstract final class _FleeceListener {
   void handleString(String value) {}
   void handleData(Uint8List value) {}
   void handleNumber(num value) {}
@@ -383,7 +383,7 @@ abstract class _FleeceListener {
 
 /// A Fleece decoder which deeply decodes a value and notifies a
 /// [_FleeceListener] of decoding events.
-class _FleeceListenerDecoder {
+final class _FleeceListenerDecoder {
   _FleeceListenerDecoder(
     this._sharedKeysTable,
     this._sharedStringsTable,
@@ -473,7 +473,7 @@ class _FleeceListenerDecoder {
   }
 }
 
-abstract class _FleeceValueLoader {
+abstract final class _FleeceValueLoader {
   _FleeceValueLoader? parent;
 
   bool loadValue();
@@ -483,7 +483,7 @@ abstract class _FleeceValueLoader {
   void drain() {}
 }
 
-class _InitialValueLoader extends _FleeceValueLoader {
+final class _InitialValueLoader extends _FleeceValueLoader {
   var _loaded = false;
 
   @override
@@ -497,7 +497,7 @@ class _InitialValueLoader extends _FleeceValueLoader {
   }
 }
 
-class _ArrayIndexLoader extends _FleeceValueLoader {
+final class _ArrayIndexLoader extends _FleeceValueLoader {
   _ArrayIndexLoader(this._array, this._length, this._listener) {
     _listener.beginArray(_length);
   }
@@ -525,7 +525,7 @@ class _ArrayIndexLoader extends _FleeceValueLoader {
   }
 }
 
-class _DictIteratorLoader extends _FleeceValueLoader {
+final class _DictIteratorLoader extends _FleeceValueLoader {
   _DictIteratorLoader(
     Pointer<FLDict> dict,
     this._listener,
@@ -574,7 +574,7 @@ class _DictIteratorLoader extends _FleeceValueLoader {
 ///
 /// This is a simple stack-based object builder. It keeps the most recently seen
 /// value in a variable, and uses it depending on the following event.
-class _BuildDartObjectListener extends _FleeceListener {
+final class _BuildDartObjectListener extends _FleeceListener {
   /// Read out the final result of parsing a JSON string.
   Object? get result {
     assert(_currentContainer == null);

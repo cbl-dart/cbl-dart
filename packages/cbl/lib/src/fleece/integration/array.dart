@@ -12,7 +12,7 @@ import 'value.dart';
 
 final _arrayBindings = cblBindings.fleece.array;
 
-class MArray extends MCollection {
+final class MArray extends MCollection {
   MArray()
       : _array = null,
         _values = [];

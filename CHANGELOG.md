@@ -3,6 +3,190 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-04-28
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_dart` - `v3.0.1`](#cbl_dart---v301)
+
+---
+
+#### `cbl_dart` - `v3.0.1`
+
+ - **FIX**(cbl_dart): adapt to `extractArchiveToDisk` in `package:archive` becoming async ([#581](https://github.com/cbl-dart/cbl-dart/issues/581)). ([9e38fd3b](https://github.com/cbl-dart/cbl-dart/commit/9e38fd3bdf416c224923d6bec2949d8698a9c57a))
+
+
+## 2024-04-24
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v3.0.0`](#cbl---v300)
+ - [`cbl_dart` - `v3.0.0`](#cbl_dart---v300)
+ - [`cbl_flutter` - `v3.0.0`](#cbl_flutter---v300)
+ - [`cbl_flutter_ce` - `v3.0.0`](#cbl_flutter_ce---v300)
+ - [`cbl_flutter_ee` - `v3.0.0`](#cbl_flutter_ee---v300)
+ - [`cbl_flutter_platform_interface` - `v3.0.0`](#cbl_flutter_platform_interface---v300)
+ - [`cbl_sentry` - `v2.0.0`](#cbl_sentry---v200)
+
+Packages with other changes:
+
+ - [`cbl_generator` - `v0.3.0`](#cbl_generator---v030)
+
+Packages graduated to a stable release (see pre-releases prior to the stable version for changelog entries):
+
+ - `cbl` - `v3.0.0`
+ - `cbl_dart` - `v3.0.0`
+ - `cbl_flutter` - `v3.0.0`
+ - `cbl_flutter_ce` - `v3.0.0`
+ - `cbl_flutter_ee` - `v3.0.0`
+ - `cbl_flutter_platform_interface` - `v3.0.0`
+ - `cbl_generator` - `v0.3.0`
+ - `cbl_sentry` - `v2.0.0`
+
+---
+
+#### `cbl` - `v3.0.0`
+
+#### `cbl_dart` - `v3.0.0`
+
+#### `cbl_flutter` - `v3.0.0`
+
+#### `cbl_flutter_ce` - `v3.0.0`
+
+#### `cbl_flutter_ee` - `v3.0.0`
+
+#### `cbl_flutter_platform_interface` - `v3.0.0`
+
+#### `cbl_sentry` - `v2.0.0`
+
+#### `cbl_generator` - `v0.3.0`
+
+
+## 2024-04-24
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v3.0.0-dev.5`](#cbl---v300-dev5)
+ - [`cbl_dart` - `v3.0.0-dev.6`](#cbl_dart---v300-dev6)
+ - [`cbl_flutter` - `v3.0.0-dev.5`](#cbl_flutter---v300-dev5)
+ - [`cbl_generator` - `v0.3.0-dev.5`](#cbl_generator---v030-dev5)
+ - [`cbl_sentry` - `v2.0.0-dev.6`](#cbl_sentry---v200-dev6)
+
+Packages with other changes:
+
+ - [`cbl_flutter_platform_interface` - `v3.0.0-dev.5`](#cbl_flutter_platform_interface---v300-dev5)
+ - [`cbl_flutter_ce` - `v3.0.0-dev.5`](#cbl_flutter_ce---v300-dev5)
+ - [`cbl_flutter_ee` - `v3.0.0-dev.5`](#cbl_flutter_ee---v300-dev5)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_platform_interface` - `v3.0.0-dev.5`
+ - `cbl_flutter_ce` - `v3.0.0-dev.5`
+ - `cbl_flutter_ee` - `v3.0.0-dev.5`
+
+---
+
+#### `cbl` - `v3.0.0-dev.5`
+
+ - **DOCS**: use collections in README code example. ([ba25ffe2](https://github.com/cbl-dart/cbl-dart/commit/ba25ffe2fc408859ce61db34a6e9bbe6737cbec6))
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
+#### `cbl_dart` - `v3.0.0-dev.6`
+
+ - **DOCS**(cbl_dart): use scopes and collections in example. ([ab4392d3](https://github.com/cbl-dart/cbl-dart/commit/ab4392d3a3ed0cce08c66726b2c67d2b3b50174e))
+ - **DOCS**: use collections in README code example. ([ba25ffe2](https://github.com/cbl-dart/cbl-dart/commit/ba25ffe2fc408859ce61db34a6e9bbe6737cbec6))
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
+#### `cbl_flutter` - `v3.0.0-dev.5`
+
+ - **DOCS**: use collections in README code example. ([ba25ffe2](https://github.com/cbl-dart/cbl-dart/commit/ba25ffe2fc408859ce61db34a6e9bbe6737cbec6))
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
+#### `cbl_generator` - `v0.3.0-dev.5`
+
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
+#### `cbl_sentry` - `v2.0.0-dev.6`
+
+ - **BREAKING** **FEAT**: replace `Query.from*` with `Database.createQuery` ([#580](https://github.com/cbl-dart/cbl-dart/issues/580)). ([aa104e25](https://github.com/cbl-dart/cbl-dart/commit/aa104e251c74c8487ccbaaa99c2b6ef03e60c3d7))
+
+
+## 2024-04-18
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - [`cbl` - `v3.0.0-dev.4`](#cbl---v300-dev4)
+ - [`cbl_dart` - `v3.0.0-dev.5`](#cbl_dart---v300-dev5)
+ - [`cbl_flutter` - `v3.0.0-dev.4`](#cbl_flutter---v300-dev4)
+ - [`cbl_flutter_platform_interface` - `v3.0.0-dev.4`](#cbl_flutter_platform_interface---v300-dev4)
+ - [`cbl_generator` - `v0.3.0-dev.4`](#cbl_generator---v030-dev4)
+ - [`cbl_sentry` - `v2.0.0-dev.5`](#cbl_sentry---v200-dev5)
+
+Packages with other changes:
+
+ - [`cbl_flutter_ce` - `v3.0.0-dev.4`](#cbl_flutter_ce---v300-dev4)
+ - [`cbl_flutter_ee` - `v3.0.0-dev.4`](#cbl_flutter_ee---v300-dev4)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_ce` - `v3.0.0-dev.4`
+ - `cbl_flutter_ee` - `v3.0.0-dev.4`
+
+---
+
+#### `cbl` - `v3.0.0-dev.4`
+
+ - **REFACTOR**: fix analyzer issues. ([846cb48d](https://github.com/cbl-dart/cbl-dart/commit/846cb48d86f7309a7f8a65ecc6be0bb71b7d7254))
+ - **REFACTOR**: merge `cbl_ffi` into `cbl` ([#554](https://github.com/cbl-dart/cbl-dart/issues/554)). ([08039cff](https://github.com/cbl-dart/cbl-dart/commit/08039cff6e1328b88098af34884f4861f94cb7a5))
+ - **BREAKING** **FEAT**(cbl): add class modifiers ([#575](https://github.com/cbl-dart/cbl-dart/issues/575)). ([672df44c](https://github.com/cbl-dart/cbl-dart/commit/672df44c64374f1b3ad9ebd4d93272ea9a51d856))
+
+#### `cbl_dart` - `v3.0.0-dev.5`
+
+ - **BREAKING** **FEAT**(cbl_dart): add class modifiers ([#572](https://github.com/cbl-dart/cbl-dart/issues/572)). ([037b8da5](https://github.com/cbl-dart/cbl-dart/commit/037b8da5b814d740d8892f70c1acfb7b8ec13b1b))
+
+#### `cbl_flutter` - `v3.0.0-dev.4`
+
+ - **BREAKING** **FEAT**(cbl_flutter): add class modifiers ([#571](https://github.com/cbl-dart/cbl-dart/issues/571)). ([ebdd104a](https://github.com/cbl-dart/cbl-dart/commit/ebdd104a179d9360d814d37afd6ef86ee810d71c))
+
+#### `cbl_flutter_platform_interface` - `v3.0.0-dev.4`
+
+ - **BREAKING** **FEAT**(cbl_flutter_platform_interface): add class modifiers ([#567](https://github.com/cbl-dart/cbl-dart/issues/567)). ([01f67681](https://github.com/cbl-dart/cbl-dart/commit/01f67681e298f4fec3e39aaa89307417da58bd89))
+
+#### `cbl_generator` - `v0.3.0-dev.4`
+
+ - **REFACTOR**(cbl_generator): add class modifiers ([#570](https://github.com/cbl-dart/cbl-dart/issues/570)). ([cb49b7e5](https://github.com/cbl-dart/cbl-dart/commit/cb49b7e548c8232db6668df5b8a8f1b0a6afb11d))
+ - **BREAKING** **FEAT**(cbl): add class modifiers ([#575](https://github.com/cbl-dart/cbl-dart/issues/575)). ([672df44c](https://github.com/cbl-dart/cbl-dart/commit/672df44c64374f1b3ad9ebd4d93272ea9a51d856))
+
+#### `cbl_sentry` - `v2.0.0-dev.5`
+
+ - **REFACTOR**: fix analyzer issues. ([846cb48d](https://github.com/cbl-dart/cbl-dart/commit/846cb48d86f7309a7f8a65ecc6be0bb71b7d7254))
+ - **BREAKING** **FEAT**(cbl_sentry): add class modifiers ([#569](https://github.com/cbl-dart/cbl-dart/issues/569)). ([a61344c1](https://github.com/cbl-dart/cbl-dart/commit/a61344c1786cc8422d8cff626bedc7309273bf21))
+
+
 ## 2024-01-02
 
 ### Changes

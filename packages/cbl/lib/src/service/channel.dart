@@ -15,7 +15,7 @@ import 'serialization/serialization_codec.dart';
 ///
 /// [Response] is the type of the type of the result of a call or the events of
 /// a stream initiated with such a request.
-abstract class Request<Response> extends Serializable {}
+abstract base class Request<Response> extends Serializable {}
 
 /// Handler which responds to requests to a call endpoint of a [Channel].
 typedef CallHandler<T extends Request<R>, R> = FutureOr<R> Function(T);
@@ -88,7 +88,7 @@ typedef _UntypedStreamHandler = Stream<Object?> Function(Object?);
 /// See also:
 ///
 /// - [open] for controlling when a [Channel] starts to respond to requests.
-class Channel {
+final class Channel {
   /// Creates a new [Channel] with the given [transport] and [packetCodec].
   Channel({
     required StreamChannel<Object?> transport,
@@ -608,7 +608,7 @@ extension on SerializationRegistry {
   }
 }
 
-abstract class _Message extends Serializable {
+abstract final class _Message extends Serializable {
   _Message(this.conversationId, this.context);
 
   _Message.deserialize(StringMap map)
@@ -625,7 +625,7 @@ abstract class _Message extends Serializable {
       };
 }
 
-abstract class _RequestMessage extends _Message {
+abstract final class _RequestMessage extends _Message {
   _RequestMessage(
     int conversationId,
     this.request,
@@ -651,7 +651,7 @@ abstract class _RequestMessage extends _Message {
   void didReceive() => request.didReceive();
 }
 
-abstract class _SuccessMessage extends _Message {
+abstract final class _SuccessMessage extends _Message {
   _SuccessMessage(
     int conversationId,
     this.data,
@@ -687,7 +687,7 @@ abstract class _SuccessMessage extends _Message {
   }
 }
 
-abstract class _ErrorMessage extends _Message {
+abstract final class _ErrorMessage extends _Message {
   _ErrorMessage(
     int conversationId,
     this.error,
@@ -736,7 +736,7 @@ abstract class _ErrorMessage extends _Message {
   }
 }
 
-class _CallRequest extends _RequestMessage {
+final class _CallRequest extends _RequestMessage {
   _CallRequest(super.conversationId, super.request, super.context);
 
   _CallRequest._fromJson(super.map, super.context) : super.deserialize();
@@ -748,7 +748,7 @@ class _CallRequest extends _RequestMessage {
       _CallRequest._fromJson(map, context);
 }
 
-class _CallSuccess extends _SuccessMessage {
+final class _CallSuccess extends _SuccessMessage {
   _CallSuccess(super.conversationId, super.data, super.context);
 
   _CallSuccess._fromJson(super.map, super.context) : super.deserialize();
@@ -760,7 +760,7 @@ class _CallSuccess extends _SuccessMessage {
       _CallSuccess._fromJson(map, context);
 }
 
-class _CallError extends _ErrorMessage {
+final class _CallError extends _ErrorMessage {
   _CallError(
     super.conversationId,
     super.error,
@@ -774,7 +774,7 @@ class _CallError extends _ErrorMessage {
       _CallError._fromJson(map, context);
 }
 
-class _ListenToStream extends _RequestMessage {
+final class _ListenToStream extends _RequestMessage {
   _ListenToStream(super.conversationId, super.request, super.context);
 
   _ListenToStream._fromJson(super.map, super.context) : super.deserialize();
@@ -786,7 +786,7 @@ class _ListenToStream extends _RequestMessage {
       _ListenToStream._fromJson(map, context);
 }
 
-class _PauseStream extends _Message {
+final class _PauseStream extends _Message {
   _PauseStream(super.conversationId, super.context);
 
   _PauseStream._fromJson(super.map) : super.deserialize();
@@ -798,7 +798,7 @@ class _PauseStream extends _Message {
       _PauseStream._fromJson(map);
 }
 
-class _ResumeStream extends _Message {
+final class _ResumeStream extends _Message {
   _ResumeStream(super.conversationId, super.context);
 
   _ResumeStream._fromJson(super.map) : super.deserialize();
@@ -810,7 +810,7 @@ class _ResumeStream extends _Message {
       _ResumeStream._fromJson(map);
 }
 
-class _CancelStream extends _Message {
+final class _CancelStream extends _Message {
   _CancelStream(super.conversationId, super.context);
 
   _CancelStream._fromJson(super.map) : super.deserialize();
@@ -820,7 +820,7 @@ class _CancelStream extends _Message {
       _CancelStream._fromJson(map);
 }
 
-class _StreamData extends _SuccessMessage {
+final class _StreamData extends _SuccessMessage {
   _StreamData(super.conversationId, super.data, super.context);
 
   _StreamData._fromJson(super.map, super.context) : super.deserialize();
@@ -829,7 +829,7 @@ class _StreamData extends _SuccessMessage {
       _StreamData._fromJson(map, context);
 }
 
-class _StreamError extends _ErrorMessage {
+final class _StreamError extends _ErrorMessage {
   _StreamError(
     super.conversationId,
     super.error,
@@ -844,7 +844,7 @@ class _StreamError extends _ErrorMessage {
       _StreamError._fromJson(map, context);
 }
 
-class _StreamDone extends _Message {
+final class _StreamDone extends _Message {
   _StreamDone(super.conversationId, super.context);
 
   _StreamDone._fromJson(super.map) : super.deserialize();

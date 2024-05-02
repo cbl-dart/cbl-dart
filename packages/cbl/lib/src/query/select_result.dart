@@ -4,12 +4,12 @@ import 'result.dart';
 /// Represents a single return value of a `SELECT` statement.
 ///
 /// {@category Query Builder}
-abstract class SelectResultInterface {}
+abstract final class SelectResultInterface {}
 
 /// Allows the specification of an alias for a select result value.
 ///
 /// {@category Query Builder}
-abstract class SelectResultAs extends SelectResultInterface {
+abstract final class SelectResultAs extends SelectResultInterface {
   /// Specifies the [alias] of the select result value.
   SelectResultInterface as(String? alias);
 }
@@ -17,18 +17,17 @@ abstract class SelectResultAs extends SelectResultInterface {
 /// Allows the specification of the data source of a select result value.
 ///
 /// {@category Query Builder}
-abstract class SelectResultFrom extends SelectResultInterface {
+abstract final class SelectResultFrom extends SelectResultInterface {
   /// Specifies the [alias] of the data source to query for the select result
   /// value.
   SelectResultInterface from(String alias);
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Factory for select results.
 ///
 /// {@category Query Builder}
-class SelectResult {
-  SelectResult._();
-
+abstract final class SelectResult {
   /// Creates a select result from the given [propertyPath].
   static SelectResultAs property(String propertyPath) =>
       expression(Expression.property(propertyPath));
@@ -47,7 +46,7 @@ class SelectResult {
 
 // === Impl ====================================================================
 
-class SelectResultImpl implements SelectResultInterface {
+final class SelectResultImpl implements SelectResultInterface {
   SelectResultImpl({required ExpressionInterface expression, String? alias})
       : _expression = expression as ExpressionImpl,
         _alias = alias;
@@ -60,7 +59,8 @@ class SelectResultImpl implements SelectResultInterface {
       : ['AS', _expression.toJson(), _alias];
 }
 
-class SelectResultAsImpl extends SelectResultImpl implements SelectResultAs {
+final class SelectResultAsImpl extends SelectResultImpl
+    implements SelectResultAs {
   SelectResultAsImpl({required super.expression, super.alias});
 
   @override
@@ -68,7 +68,7 @@ class SelectResultAsImpl extends SelectResultImpl implements SelectResultAs {
       SelectResultImpl(expression: _expression, alias: alias);
 }
 
-class SelectResultFromImpl extends SelectResultImpl
+final class SelectResultFromImpl extends SelectResultImpl
     implements SelectResultFrom {
   SelectResultFromImpl({required super.expression, super.alias});
 

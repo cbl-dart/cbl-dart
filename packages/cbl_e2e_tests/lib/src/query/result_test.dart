@@ -196,8 +196,7 @@ void main() {
           'a': {'b': true}
         });
         await collection.saveDocument(doc);
-        final q = await Query.fromN1ql(
-          db,
+        final q = await db.createQuery(
           r'SELECT a AS alias, a.b, count() FROM _ WHERE META().id = $ID',
         );
         await q.setParameters(Parameters({'ID': doc.id}));
@@ -216,10 +215,8 @@ void main() {
         final doc = MutableDocument.withId('ResultSetColumnByIndex');
         await collection.saveDocument(doc);
 
-        final q = await Query.fromN1ql(
-          db,
-          r'SELECT META().id FROM _ WHERE META().id = $ID',
-        );
+        final q = await db
+            .createQuery(r'SELECT META().id FROM _ WHERE META().id = $ID');
         await q.setParameters(Parameters({'ID': doc.id}));
 
         final resultSet = await q.execute();

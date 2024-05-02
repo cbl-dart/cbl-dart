@@ -10,6 +10,7 @@ import '../document/fragment.dart';
 import '../log.dart';
 import '../log/log.dart';
 import '../query/index/index.dart';
+import '../query/query.dart';
 import '../replication.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
@@ -65,7 +66,7 @@ enum MaintenanceType {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract class SaveTypedDocument<D extends TypedDocumentObject,
+abstract interface class SaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> {
   /// Saves the document to the database, resolving conflicts through
   /// [ConcurrencyControl].
@@ -128,7 +129,7 @@ typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
 /// A Couchbase Lite database.
 ///
 /// {@category Database}
-abstract class Database implements ClosableResource {
+abstract interface class Database implements ClosableResource {
   /// {@template cbl.Database.openAsync}
   /// Opens a Couchbase Lite database with the given [name] and [config], which
   /// executes in a separate worker isolate.
@@ -529,6 +530,12 @@ abstract class Database implements ClosableResource {
   /// Deletes the [Index] of the given [name].
   @Deprecated('Use defaultCollection.deleteIndex instead.')
   FutureOr<void> deleteIndex(String name);
+
+  /// Creates a [Query] from a query string.
+  ///
+  /// By default [query] is expected to be an SQL++ query. If [json] is `true`,
+  /// [query] is expected to be the [Query.jsonRepresentation] of a query.
+  FutureOr<Query> createQuery(String query, {bool json = false});
 }
 
 /// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
@@ -537,7 +544,7 @@ abstract class Database implements ClosableResource {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract class SyncSaveTypedDocument<D extends TypedDocumentObject,
+abstract interface class SyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
   bool withConcurrencyControl([
@@ -580,7 +587,7 @@ typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
 /// A [Database] with a primarily synchronous API.
 ///
 /// {@category Database}
-abstract class SyncDatabase implements Database {
+abstract interface class SyncDatabase implements Database {
   /// {@macro cbl.Database.openSync}
   factory SyncDatabase(String name, [DatabaseConfiguration? config]) =>
       SyncDatabase.internal(name, config);
@@ -770,6 +777,9 @@ abstract class SyncDatabase implements Database {
   @Deprecated('Use defaultCollection.deleteIndex instead.')
   @override
   void deleteIndex(String name);
+
+  @override
+  SyncQuery createQuery(String query, {bool json = false});
 }
 
 /// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
@@ -778,7 +788,7 @@ abstract class SyncDatabase implements Database {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
+abstract interface class AsyncSaveTypedDocument<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
   @override
   Future<bool> withConcurrencyControl([
@@ -794,7 +804,7 @@ abstract class AsyncSaveTypedDocument<D extends TypedDocumentObject,
 /// A [Database] with a primarily asynchronous API.
 ///
 /// {@category Database}
-abstract class AsyncDatabase implements Database {
+abstract interface class AsyncDatabase implements Database {
   /// {@macro cbl.Database.openAsync}
   static Future<AsyncDatabase> open(
     String name, [
@@ -984,4 +994,7 @@ abstract class AsyncDatabase implements Database {
   @Deprecated('Use defaultCollection.deleteIndex instead.')
   @override
   Future<void> deleteIndex(String name);
+
+  @override
+  Future<AsyncQuery> createQuery(String query, {bool json = false});
 }

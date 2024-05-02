@@ -14,7 +14,9 @@ import '../errors.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
+import '../query/ffi_query.dart';
 import '../query/index/index.dart';
+import '../query/query.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
 import '../support/ffi.dart';
@@ -39,7 +41,7 @@ import 'scope.dart';
 
 final _bindings = cblBindings.database;
 
-class FfiDatabase
+final class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncDatabase, BlobStoreHolder, Finalizable {
   factory FfiDatabase({
@@ -403,12 +405,19 @@ class FfiDatabase
   void deleteIndex(String name) => defaultCollection.deleteIndex(name);
 
   @override
+  SyncQuery createQuery(String query, {bool json = false}) => FfiQuery(
+        database: this,
+        definition: query,
+        language: json ? CBLQueryLanguage.json : CBLQueryLanguage.n1ql,
+      )..prepare();
+
+  @override
   String toString() => 'FfiDatabase($name)';
 }
 
 final _collectionBindings = cblBindings.collection;
 
-class FfiScope
+final class FfiScope
     with ScopeBase, ClosableResourceMixin
     implements SyncScope, Finalizable {
   FfiScope._({
@@ -464,7 +473,7 @@ class FfiScope
   String toString() => 'FfiScope($name)';
 }
 
-class FfiCollection
+final class FfiCollection
     with CollectionBase<FfiDocumentDelegate>, ClosableResourceMixin
     implements SyncCollection, Finalizable {
   FfiCollection._({
@@ -815,7 +824,7 @@ bool _catchConflictException(void Function() fn) {
   }
 }
 
-class _FfiSaveTypedDocument<D extends TypedDocumentObject,
+final class _FfiSaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements SyncSaveTypedDocument<D, MD> {

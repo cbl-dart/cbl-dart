@@ -26,7 +26,7 @@ import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
 
-class ProxyReplicator extends ProxyObject
+final class ProxyReplicator extends ProxyObject
     with ClosableResourceMixin
     implements AsyncReplicator {
   ProxyReplicator({

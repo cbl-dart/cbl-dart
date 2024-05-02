@@ -17,7 +17,7 @@ final _encoderBinds = cblBindings.fleece.encoder;
 /// it. (Of course a value in a collection can itself be another collection.)
 /// When writing a dictionary, you have to call writeKey before writing each
 /// value.
-class FleeceEncoder implements Finalizable {
+final class FleeceEncoder implements Finalizable {
   /// Creates an encoder, which generates encoded Fleece or JSON data.
   FleeceEncoder({
     this.format = FLEncoderFormat.fleece,

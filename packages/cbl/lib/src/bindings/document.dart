@@ -26,7 +26,7 @@ typedef _CBLDocument_CreateJSON = FLStringResult Function(
   Pointer<CBLDocument> doc,
 );
 
-class DocumentBindings extends Bindings {
+final class DocumentBindings extends Bindings {
   DocumentBindings(super.parent) {
     _id = libs.cbl.lookupFunction<_CBLDocument_ID, _CBLDocument_ID>(
       'CBLDocument_ID',
@@ -107,7 +107,7 @@ typedef _CBLDocument_SetJSON = int Function(
   Pointer<CBLError> errorOut,
 );
 
-class MutableDocumentBindings extends Bindings {
+final class MutableDocumentBindings extends Bindings {
   MutableDocumentBindings(super.parent) {
     _createWithID = libs.cbl
         .lookupFunction<_CBLDocument_CreateWithID, _CBLDocument_CreateWithID>(

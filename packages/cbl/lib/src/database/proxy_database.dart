@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../bindings.dart';
 import '../document.dart';
 import '../document/blob.dart';
 import '../document/document.dart';
@@ -12,6 +13,8 @@ import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
+import '../query/proxy_query.dart';
+import '../query/query.dart';
 import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
@@ -38,7 +41,7 @@ import 'document_change.dart';
 import 'proxy_blob_store.dart';
 import 'scope.dart';
 
-class ProxyDatabase extends ProxyObject
+final class ProxyDatabase extends ProxyObject
     with DatabaseBase<ProxyDocumentDelegate>, ClosableResourceMixin
     implements AsyncDatabase, BlobStoreHolder {
   ProxyDatabase(
@@ -393,6 +396,19 @@ class ProxyDatabase extends ProxyObject
       defaultCollection.then((collections) => collections.deleteIndex(name));
 
   @override
+  Future<AsyncQuery> createQuery(String query, {bool json = false}) async {
+    final proxyQuery = ProxyQuery(
+      database: this,
+      language: json ? CBLQueryLanguage.json : CBLQueryLanguage.n1ql,
+      definition: query,
+    );
+
+    await proxyQuery.prepare();
+
+    return proxyQuery;
+  }
+
+  @override
   String toString() => 'ProxyDatabase($name)';
 
   void registerDocumentFinalizer(Future<void> Function() finalizer) {
@@ -405,7 +421,7 @@ class ProxyDatabase extends ProxyObject
   }
 }
 
-class WorkerDatabase extends ProxyDatabase {
+final class WorkerDatabase extends ProxyDatabase {
   WorkerDatabase._(
     this.worker,
     CblServiceClient client,
@@ -474,7 +490,7 @@ class WorkerDatabase extends ProxyDatabase {
   }
 }
 
-class RemoteDatabase extends ProxyDatabase {
+final class RemoteDatabase extends ProxyDatabase {
   RemoteDatabase._(
     CblServiceClient client,
     DatabaseConfiguration config,
@@ -507,7 +523,7 @@ class RemoteDatabase extends ProxyDatabase {
 
 String _databaseName(String path) => path.split(Platform.pathSeparator).last;
 
-class _ProxySaveTypedDocument<D extends TypedDocumentObject,
+final class _ProxySaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements AsyncSaveTypedDocument<D, MD> {
@@ -545,7 +561,8 @@ MD extends TypedMutableDocumentObject>
       super.withConflictHandler(conflictHandler) as Future<bool>;
 }
 
-class ProxyScope extends ProxyObject
+
+final class ProxyScope extends ProxyObject
     with ScopeBase, ClosableResourceMixin
     implements AsyncScope {
   ProxyScope({
@@ -590,7 +607,7 @@ class ProxyScope extends ProxyObject
   String toString() => 'ProxyScope($name)';
 }
 
-class ProxyCollection extends ProxyObject
+final class ProxyCollection extends ProxyObject
     with CollectionBase<ProxyDocumentDelegate>, ClosableResourceMixin
     implements AsyncCollection {
   ProxyCollection({

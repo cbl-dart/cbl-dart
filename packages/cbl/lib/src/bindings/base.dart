@@ -14,7 +14,7 @@ final _baseBinds = CBLBindings.instance.base;
 
 // === Option ==================================================================
 
-abstract class Option {
+abstract interface class Option {
   int get bit;
 }
 
@@ -37,7 +37,7 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 // === Init ====================================================================
 
-class CBLInitContext {
+final class CBLInitContext {
   CBLInitContext({required this.filesDir, required this.tempDir});
 
   final String filesDir;
@@ -210,7 +210,7 @@ extension CBLErrorExt on CBLError {
   }
 }
 
-class CBLErrorException implements Exception {
+final class CBLErrorException implements Exception {
   CBLErrorException(
     this.domain,
     this.code,
@@ -327,7 +327,7 @@ typedef _CBLListener_Remove = void Function(
 
 // === BaseBindings ============================================================
 
-class BaseBindings extends Bindings {
+final class BaseBindings extends Bindings {
   BaseBindings(super.parent) {
     _initialize =
         libs.cblDart.lookupFunction<_CBLDart_Initialize_C, _CBLDart_Initialize>(

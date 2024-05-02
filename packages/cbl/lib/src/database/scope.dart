@@ -15,7 +15,7 @@ import 'database.dart';
 /// deleted.
 ///
 /// {@category Database}
-abstract class Scope {
+abstract interface class Scope {
   /// The name of the default scope.
   static const defaultName = '_default';
 
@@ -34,7 +34,7 @@ abstract class Scope {
 /// A [Scope] with a primarily synchronous API.
 ///
 /// {@category Database}
-abstract class SyncScope extends Scope {
+abstract interface class SyncScope extends Scope {
   @override
   List<SyncCollection> get collections;
 
@@ -45,7 +45,7 @@ abstract class SyncScope extends Scope {
 /// A [Scope] with a primarily asynchronous API.
 ///
 /// {@category Database}
-abstract class AsyncScope extends Scope {
+abstract interface class AsyncScope extends Scope {
   @override
   Future<List<AsyncCollection>> get collections;
 

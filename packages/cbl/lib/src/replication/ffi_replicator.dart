@@ -33,7 +33,7 @@ import 'replicator_change.dart';
 
 final _bindings = cblBindings.replicator;
 
-class FfiReplicator
+final class FfiReplicator
     with ClosableResourceMixin
     implements SyncReplicator, Finalizable {
   FfiReplicator._({

@@ -38,7 +38,7 @@ extension OperationDebugInfoExt on TracedOperation {
       return self.database.name;
     }
     if (self is QueryOperationOp) {
-      return self.query.jsonRepresentation ?? self.query.n1ql;
+      return self.query.jsonRepresentation ?? self.query.sqlRepresentation;
     }
 
     return null;

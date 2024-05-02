@@ -1,3 +1,15 @@
+## 3.0.0
+
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
+## 3.0.0-dev.5
+
+ - Update a dependency to the latest release.
+
+## 3.0.0-dev.4
+
+ - Update a dependency to the latest release.
+
 ## 3.0.0-dev.3
 
  - **FEAT**: upgrade to CBL SDK `3.1.3`. ([74e1c35e](https://github.com/cbl-dart/cbl-dart/commit/74e1c35e9a7c30d700e289e7febbf7b324b55e7c))

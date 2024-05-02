@@ -39,7 +39,7 @@ typedef _CBLDart_AsyncCallback_CallForTest = void Function(
   int result,
 );
 
-class AsyncCallbackBindings extends Bindings {
+final class AsyncCallbackBindings extends Bindings {
   AsyncCallbackBindings(super.parent) {
     _new = libs.cblDart.lookupFunction<_CBLDart_AsyncCallback_New_C,
         _CBLDart_AsyncCallback_New>(

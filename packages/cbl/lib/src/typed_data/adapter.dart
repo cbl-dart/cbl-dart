@@ -5,7 +5,7 @@ typedef Factory<I, D> = D Function(I internal);
 
 /// The interface through which database, query and replicator implementations
 /// interact with typed data.
-abstract class TypedDataAdapter {
+abstract interface class TypedDataAdapter {
   /// Checks whether the given [document] is compatible with the typed document
   /// type [D], based on its properties.
   void checkDocumentIsOfType<D extends TypedDocumentObject>(Document document);

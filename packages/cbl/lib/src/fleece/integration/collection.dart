@@ -8,7 +8,7 @@ import '../encoder.dart';
 import 'context.dart';
 import 'value.dart';
 
-abstract class MCollection {
+abstract base class MCollection {
   MCollection({
     MContext? context,
     this.isMutable = true,

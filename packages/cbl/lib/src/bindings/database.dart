@@ -34,7 +34,7 @@ extension on CBLEncryptionAlgorithm {
   int toInt() => CBLEncryptionAlgorithm.values.indexOf(this) + 1;
 }
 
-class CBLEncryptionKey {
+final class CBLEncryptionKey {
   CBLEncryptionKey({required this.algorithm, required this.bytes});
 
   final CBLEncryptionAlgorithm algorithm;
@@ -69,7 +69,7 @@ extension CBLConcurrencyControlExt on CBLConcurrencyControl {
 
 final class CBLDatabase extends Opaque {}
 
-class CBLDatabaseConfiguration {
+final class CBLDatabaseConfiguration {
   CBLDatabaseConfiguration({required this.directory, this.encryptionKey});
 
   final String directory;
@@ -215,7 +215,7 @@ typedef _CBLDatabase_SaveBlob = bool Function(
   Pointer<CBLError> errorOut,
 );
 
-class DatabaseBindings extends Bindings {
+final class DatabaseBindings extends Bindings {
   DatabaseBindings(super.parent) {
     if (libs.enterpriseEdition) {
       _encryptionKeyFromPassword = libs.cbl.lookupFunction<

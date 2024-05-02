@@ -51,10 +51,8 @@ typedef CblServiceDocumentReplicationListener = void Function(
   DocumentReplicationEvent event,
 );
 
-class CblServiceClient {
-  CblServiceClient({
-    required this.channel,
-  }) {
+final class CblServiceClient {
+  CblServiceClient({required this.channel}) {
     channel
       ..addCallEndpoint(_traceData)
       ..addCallEndpoint(_callCollectionChangeListener)
@@ -253,10 +251,8 @@ void Function(T) _bindListenerToZone<T>(void Function(T) fn) {
       .onError((_, __) {});
 }
 
-class CblService {
-  CblService({
-    required this.channel,
-  }) {
+final class CblService {
+  CblService({required this.channel}) {
     channel
       ..addCallEndpoint(_ping)
       ..addCallEndpoint(_installTracingDelegate)
@@ -830,7 +826,7 @@ class CblService {
   final _listenerIdsToTokens = <int, ListenerToken>{};
 }
 
-class _CBLIndexSpecIndex implements IndexImplInterface {
+final class _CBLIndexSpecIndex implements IndexImplInterface {
   _CBLIndexSpecIndex(this.spec);
 
   final CBLIndexSpec spec;
@@ -839,7 +835,7 @@ class _CBLIndexSpecIndex implements IndexImplInterface {
   CBLIndexSpec toCBLIndexSpec() => spec;
 }
 
-class _Query {
+final class _Query {
   _Query(this.query, this.resultEncoding);
 
   final FfiQuery query;

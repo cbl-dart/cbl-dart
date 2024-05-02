@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../bindings.dart';
 
-abstract class BlobStore {
+abstract interface class BlobStore {
   Future<Map<String, Object?>> saveBlobFromData(String contentType, Data data);
 
   Future<Map<String, Object?>> saveBlobFromStream(
@@ -15,7 +15,7 @@ abstract class BlobStore {
   Stream<Data>? readBlob(Map<String, Object?> properties);
 }
 
-abstract class SyncBlobStore extends BlobStore {
+abstract interface class SyncBlobStore extends BlobStore {
   Map<String, Object?> saveBlobFromDataSync(String contentType, Data data);
 
   @override
@@ -24,6 +24,6 @@ abstract class SyncBlobStore extends BlobStore {
   Data? readBlobSync(Map<String, Object?> properties);
 }
 
-abstract class BlobStoreHolder {
+abstract interface class BlobStoreHolder {
   BlobStore get blobStore;
 }
