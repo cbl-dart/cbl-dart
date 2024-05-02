@@ -896,4 +896,17 @@ final class ProxyCollection extends ProxyObject
   <D extends TypedDocumentObject, MD extends TypedMutableDocumentObject>
       (TypedMutableDocumentObject<D, MD> document) =>
       _ProxySaveTypedDocumentCollection(database, document, this);
+
+  @override
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]) async {
+    database.useWithTypedData();
+    return deleteDocument(
+      document.internal as DelegateDocument,
+      concurrencyControl,
+    );
+  }
+
 }

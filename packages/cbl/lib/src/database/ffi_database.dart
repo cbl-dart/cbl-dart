@@ -793,6 +793,18 @@ final class FfiCollection
     <D extends TypedDocumentObject<Object>, MD extends TypedMutableDocumentObject>
       (TypedMutableDocumentObject<D, MD> document) =>
       _FfiSaveTypedDocumentCollection(database, document, this);
+
+  @override
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject<Object> document,
+      [ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins]
+    ) async {
+    database.useWithTypedData();
+    return deleteDocument(
+      document.internal as DelegateDocument,
+      concurrencyControl,
+    );
+  }
 }
 
 extension on MaintenanceType {

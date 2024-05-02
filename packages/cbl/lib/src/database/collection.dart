@@ -84,7 +84,7 @@ typedef DatabaseChangeListener = void Function(DatabaseChange change);
 typedef DocumentChangeListener = void Function(DocumentChange change);
 
 abstract class SaveTypedDocumentCollectionBase<D extends TypedDocumentObject,
-MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+MD extends TypedMutableDocumentObject> implements SaveTypedDocument<D, MD> {
   SaveTypedDocumentCollectionBase(this.database, this.document, this.collection)
       :
   // This call ensures that the document type D is registered with the
@@ -279,6 +279,12 @@ abstract interface class Collection {
       TypedMutableDocumentObject<D, MD> document,
       );
 
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]);
+
+
 
   /// Adds a [listener] to be notified of all changes to [Document]s in this
   /// collection.
@@ -440,6 +446,13 @@ abstract interface class SyncCollection extends Collection {
       );
 
   @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]);
+
+  @override
   ListenerToken addChangeListener(CollectionChangeListener listener);
 
   @override
@@ -517,6 +530,13 @@ abstract interface class AsyncCollection extends Collection {
   MD extends TypedMutableDocumentObject>(
       TypedMutableDocumentObject<D, MD> document,
       );
+
+  @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]);
 
   @override
   Future<ListenerToken> addChangeListener(CollectionChangeListener listener);
