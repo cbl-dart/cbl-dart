@@ -2,13 +2,19 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
+import '../bindings/utils.dart';
 import '../document.dart';
+import '../document/document.dart';
 import '../errors.dart';
 import '../query/index/index.dart';
 import '../support/listener_token.dart';
 import '../support/streams.dart';
+import '../typed_data/typed_object.dart';
 import 'collection_change.dart';
 import 'database.dart';
+import 'database_base.dart';
 import 'database_change.dart';
 import 'document_change.dart';
 import 'scope.dart';
@@ -76,6 +82,52 @@ typedef DatabaseChangeListener = void Function(DatabaseChange change);
 ///
 /// {@category Database}
 typedef DocumentChangeListener = void Function(DocumentChange change);
+
+abstract class SaveTypedDocumentCollectionBase<D extends TypedDocumentObject,
+MD extends TypedMutableDocumentObject> implements SaveTypedDocument<D, MD> {
+  SaveTypedDocumentCollectionBase(this.database, this.document, this.collection)
+      :
+  // This call ensures that the document type D is registered with the
+  // database. This is why we call it, even though we may never need to
+  // use the returned factory.
+  // By calling useWithTypedData we also assert that database supports
+  // typed data.
+        _documentFactory =
+        database.useWithTypedData().documentFactoryForType<D>();
+
+  final DatabaseBase database;
+  final CollectionBase collection;
+  final TypedMutableDocumentObject<D, MD> document;
+  final D Function(Document) _documentFactory;
+
+  @override
+  FutureOr<bool> withConcurrencyControl([
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) {
+    database.typedDataAdapter!.willSaveDocument(document);
+    return collection.saveDocument(
+      document.internal as MutableDelegateDocument,
+      concurrencyControl,
+    );
+  }
+
+  @override
+  FutureOr<bool> withConflictHandler(
+      TypedSaveConflictHandler<D, MD> conflictHandler,
+      ) {
+    database.typedDataAdapter!.willSaveDocument(document);
+    return collection.saveDocumentWithConflictHandlerHelper(
+      document.internal as MutableDelegateDocument,
+          (documentBeingSaved, conflictingDocument) {
+        assert(identical(documentBeingSaved, document.internal));
+        return conflictHandler(
+          document as MD,
+          conflictingDocument?.let(_documentFactory),
+        );
+      },
+    );
+  }
+}
 
 /// A container for [Document]s.
 ///
@@ -218,6 +270,21 @@ abstract interface class Collection {
 
   /// Deletes the [Index] of the given [name].
   FutureOr<void> deleteIndex(String name);
+
+  /// Get the typedDocument
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
+  FutureOr<SaveTypedDocument<D, MD>> saveTypedDocument<D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject>(
+      TypedMutableDocumentObject<D, MD> document,
+      );
+
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]);
+
+
 
   /// Adds a [listener] to be notified of all changes to [Document]s in this
   /// collection.
@@ -368,6 +435,24 @@ abstract interface class SyncCollection extends Collection {
   void deleteIndex(String name);
 
   @override
+  D? typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
+  @experimental
+  @useResult
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject>(
+      TypedMutableDocumentObject<D, MD> document,
+      );
+
+  @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]);
+
+  @override
   ListenerToken addChangeListener(CollectionChangeListener listener);
 
   @override
@@ -434,6 +519,24 @@ abstract interface class AsyncCollection extends Collection {
 
   @override
   Future<void> deleteIndex(String name);
+
+  @override
+  Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
+  @experimental
+  @useResult
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject>(
+      TypedMutableDocumentObject<D, MD> document,
+      );
+
+  @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+      TypedDocumentObject document, [
+        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+      ]);
 
   @override
   Future<ListenerToken> addChangeListener(CollectionChangeListener listener);
