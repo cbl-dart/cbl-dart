@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'base.dart';
 import 'bindings.dart';
 import 'blob.dart';
+import 'cblite.dart' as cblite;
 import 'data.dart';
 import 'fleece.dart';
 import 'global.dart';
@@ -67,7 +68,7 @@ extension CBLConcurrencyControlExt on CBLConcurrencyControl {
   int toInt() => CBLConcurrencyControl.values.indexOf(this);
 }
 
-final class CBLDatabase extends Opaque {}
+typedef CBLDatabase = cblite.CBLDatabase;
 
 final class CBLDatabaseConfiguration {
   CBLDatabaseConfiguration({required this.directory, this.encryptionKey});
