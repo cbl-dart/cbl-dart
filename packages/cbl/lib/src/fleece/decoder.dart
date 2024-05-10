@@ -194,7 +194,7 @@ final class _SharedStringsTable extends SharedStringsTable {
 // ignore: prefer_void_to_null
 final class DictIterator implements Iterator<Null>, Finalizable {
   DictIterator(
-    Pointer<FLDict> dict, {
+    FLDict dict, {
     SharedKeysTable? sharedKeysTable,
     Pointer<CBLDart_LoadedDictKey>? keyOut,
     Pointer<CBLDart_LoadedFLValue>? valueOut,
@@ -225,7 +225,7 @@ final class DictIterator implements Iterator<Null>, Finalizable {
 // ignore: prefer_void_to_null
 final class ArrayIterator implements Iterator<Null>, Finalizable {
   ArrayIterator(
-    Pointer<FLArray> array, {
+    FLArray array, {
     Pointer<CBLDart_LoadedFLValue>? valueOut,
     bool partiallyConsumable = true,
   }) {
@@ -337,7 +337,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       case FLValueType.data:
         return value.asData.toData()?.toTypedList();
       case FLValueType.array:
-        final array = Pointer<FLArray>.fromAddress(value.value);
+        final array = FLArray.fromAddress(value.value);
         return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
@@ -345,7 +345,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       case FLValueType.dict:
         final result = <String, Object?>{};
         final iterator = DictIterator(
-          Pointer<FLDict>.fromAddress(value.value),
+          FLDict.fromAddress(value.value),
           sharedKeysTable: sharedKeysTable,
           keyOut: globalLoadedDictKey,
           valueOut: globalLoadedFLValue,
@@ -442,14 +442,14 @@ final class _FleeceListenerDecoder {
             break;
           case FLValueType.array:
             _currentLoader = _ArrayIndexLoader(
-              Pointer<FLArray>.fromAddress(value.value),
+              FLArray.fromAddress(value.value),
               value.collectionSize,
               _listener,
             )..parent = _currentLoader;
             break;
           case FLValueType.dict:
             _currentLoader = _DictIteratorLoader(
-              Pointer<FLDict>.fromAddress(value.value),
+              FLDict.fromAddress(value.value),
               _listener,
               _sharedKeysTable,
               _sharedStringsTable,
@@ -502,7 +502,7 @@ final class _ArrayIndexLoader extends _FleeceValueLoader {
     _listener.beginArray(_length);
   }
 
-  final Pointer<FLArray> _array;
+  final FLArray _array;
   final int _length;
   final _FleeceListener _listener;
   var _i = 0;
@@ -527,7 +527,7 @@ final class _ArrayIndexLoader extends _FleeceValueLoader {
 
 final class _DictIteratorLoader extends _FleeceValueLoader {
   _DictIteratorLoader(
-    Pointer<FLDict> dict,
+    FLDict dict,
     this._listener,
     this._sharedKeysTable,
     this._sharedStringsTable,

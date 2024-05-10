@@ -103,8 +103,8 @@ final class CBLProxySettings {
 
 final class _CBLDartReplicationCollection extends Struct {
   external Pointer<CBLCollection> collection;
-  external Pointer<FLArray> channels;
-  external Pointer<FLArray> documentIDs;
+  external FLArray channels;
+  external FLArray documentIDs;
   external cblitedart.CBLDart_AsyncCallback pushFilter;
   external cblitedart.CBLDart_AsyncCallback pullFilter;
   external cblitedart.CBLDart_AsyncCallback conflictResolver;
@@ -128,7 +128,7 @@ final class _CBLDartReplicatorConfiguration extends Struct {
   external int heartbeat;
   external Pointer<CBLAuthenticator> authenticator;
   external Pointer<_CBLProxySettings> proxy;
-  external Pointer<FLDict> headers;
+  external FLDict headers;
   external Pointer<FLSlice> pinnedServerCertificate;
   external Pointer<FLSlice> trustedRootCertificates;
   external Pointer<_CBLDartReplicationCollection> collections;
@@ -152,8 +152,8 @@ final class CBLReplicationCollection {
   });
 
   final Pointer<CBLCollection> collection;
-  final Pointer<FLArray>? channels;
-  final Pointer<FLArray>? documentIDs;
+  final FLArray? channels;
+  final FLArray? documentIDs;
   final cblitedart.CBLDart_AsyncCallback? pushFilter;
   final cblitedart.CBLDart_AsyncCallback? pullFilter;
   final cblitedart.CBLDart_AsyncCallback? conflictResolver;
@@ -187,7 +187,7 @@ final class CBLReplicatorConfiguration {
   final int? heartbeat;
   final Pointer<CBLAuthenticator>? authenticator;
   final CBLProxySettings? proxy;
-  final Pointer<FLDict>? headers;
+  final FLDict? headers;
   final Data? pinnedServerCertificate;
   final Data? trustedRootCertificates;
   final List<CBLReplicationCollection> collections;
@@ -340,7 +340,7 @@ typedef _CBLReplicator_Status = _CBLReplicatorStatus Function(
   Pointer<CBLReplicator> replicator,
 );
 
-typedef _CBLReplicator_PendingDocumentIDs2 = Pointer<FLDict> Function(
+typedef _CBLReplicator_PendingDocumentIDs2 = FLDict Function(
   Pointer<CBLReplicator> replicator,
   Pointer<CBLCollection> collection,
   Pointer<CBLError> errorOut,
@@ -660,7 +660,7 @@ final class ReplicatorBindings extends Bindings {
   CBLReplicatorStatus status(Pointer<CBLReplicator> replicator) =>
       _status(replicator).toCBLReplicatorStatus();
 
-  Pointer<FLDict> pendingDocumentIDs(
+  FLDict pendingDocumentIDs(
     Pointer<CBLReplicator> replicator,
     Pointer<CBLCollection> collection,
   ) =>

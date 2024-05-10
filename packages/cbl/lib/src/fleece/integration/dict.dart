@@ -35,7 +35,7 @@ final class MDict extends MCollection {
           isMutable: isMutable ?? parent.hasMutableChildren,
         );
 
-  final Pointer<FLDict>? _dict;
+  final FLDict? _dict;
   final Map<String, MValue> _values;
   int _length;
 

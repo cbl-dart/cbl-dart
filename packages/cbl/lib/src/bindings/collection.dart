@@ -20,11 +20,11 @@ final class CBLScope extends Opaque {}
 
 final class CBLCollection extends Opaque {}
 
-typedef _CBLDatabase_ScopeNames_C = Pointer<FLMutableArray> Function(
+typedef _CBLDatabase_ScopeNames_C = FLMutableArray Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLDatabase_ScopeNames = Pointer<FLMutableArray> Function(
+typedef _CBLDatabase_ScopeNames = FLMutableArray Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLError> errorOut,
 );
@@ -40,11 +40,11 @@ typedef _CBLDatabase_Scope = Pointer<CBLScope> Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLScope_CollectionNames_C = Pointer<FLMutableArray> Function(
+typedef _CBLScope_CollectionNames_C = FLMutableArray Function(
   Pointer<CBLScope> scope,
   Pointer<CBLError> errorOut,
 );
-typedef _CBLScope_CollectionNames = Pointer<FLMutableArray> Function(
+typedef _CBLScope_CollectionNames = FLMutableArray Function(
   Pointer<CBLScope> scope,
   Pointer<CBLError> errorOut,
 );
@@ -165,7 +165,7 @@ typedef _CBLCollection_SetDocumentExpiration = bool Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLCollection_GetIndexNames = Pointer<FLArray> Function(
+typedef _CBLCollection_GetIndexNames = FLArray Function(
   Pointer<CBLCollection> collection,
 );
 
@@ -398,7 +398,7 @@ final class CollectionBindings extends Bindings {
       _addDocumentChangeListener;
   late final _CBLDart_CBLCollection_AddChangeListener _addChangeListener;
 
-  Pointer<FLMutableArray> databaseScopeNames(Pointer<CBLDatabase> db) =>
+  FLMutableArray databaseScopeNames(Pointer<CBLDatabase> db) =>
       _database_scopeNames(db, globalCBLError).checkCBLError();
 
   Pointer<CBLScope>? databaseScope(Pointer<CBLDatabase> db, String scopeName) =>
@@ -413,7 +413,7 @@ final class CollectionBindings extends Bindings {
         ).checkCBLError().toNullable(),
       );
 
-  Pointer<FLMutableArray> scopeCollectionNames(Pointer<CBLScope> scope) =>
+  FLMutableArray scopeCollectionNames(Pointer<CBLScope> scope) =>
       _scope_collectionNames(scope, globalCBLError).checkCBLError();
 
   Pointer<CBLCollection>? scopeCollection(
@@ -539,7 +539,7 @@ final class CollectionBindings extends Bindings {
         ).checkCBLError();
       });
 
-  Pointer<FLArray> indexNames(Pointer<CBLCollection> collection) =>
+  FLArray indexNames(Pointer<CBLCollection> collection) =>
       _indexNames(collection);
 
   void createIndex(

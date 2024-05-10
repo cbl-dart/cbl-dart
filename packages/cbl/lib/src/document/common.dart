@@ -193,7 +193,7 @@ final class CblMDelegate extends MDelegate {
           return ArrayImpl(array);
         }
       case FLValueType.dict:
-        final flDict = Pointer<FLDict>.fromAddress(flValue.value);
+        final flDict = FLDict.fromAddress(flValue.value);
 
         if (_blobBindings.isBlob(flDict)) {
           final context = parent.context;

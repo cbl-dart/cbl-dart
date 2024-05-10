@@ -39,8 +39,7 @@ void main() {
         final sharedStringsTable = SharedStringsTable();
 
         final flArray = _valueBindings
-            .fromData(sliceResult, FLTrust.trusted)!
-            .cast<FLArray>();
+            .asArray(_valueBindings.fromData(sliceResult, FLTrust.trusted)!)!;
         for (var i = 0; i < 4; i++) {
           _decoderBindings.getLoadedValueFromArray(flArray, i);
           sharedStringsTable.decode(StringSource.value);

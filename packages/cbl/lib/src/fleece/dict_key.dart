@@ -3,16 +3,15 @@ import 'dart:ffi';
 import 'dart:math';
 
 import '../bindings.dart';
-import '../support/ffi.dart';
 import 'encoder.dart';
 
-final _dictBinds = cblBindings.fleece.dict;
-final _dictKeyBinds = cblBindings.fleece.dictKey;
+const _dictBinds = DictBindings();
+const _dictKeyBinds = DictKeyBindings();
 
 /// A Fleece dictionary key for efficient decoding and encoding of dictionaries.
 abstract final class DictKey {
   /// Returns the value associated with this key in the given dictionary.
-  FLValue? getValue(Pointer<FLDict> dict);
+  FLValue? getValue(FLDict dict);
 
   /// Encodes this key into a Fleece dictionary.
   void encodeTo(FleeceEncoder encoder);
@@ -24,7 +23,7 @@ final class _DartStringDictKey extends DictKey {
   final String key;
 
   @override
-  FLValue? getValue(Pointer<FLDict> dict) => _dictBinds.get(dict, key);
+  FLValue? getValue(FLDict dict) => _dictBinds.get(dict, key);
 
   @override
   void encodeTo(FleeceEncoder encoder) {
@@ -58,7 +57,7 @@ final class _OptimizedDictKey extends DictKey {
       ..buf = utf8String.cast()
       ..size = encodedString.size;
 
-    _dictKeyBinds.init(flDictKey.ref, flStringRef);
+    flDictKey.ref = _dictKeyBinds.init(flStringRef);
 
     return _OptimizedDictKey._(memory, flDictKey, flStringRef);
   }
@@ -83,7 +82,7 @@ final class _OptimizedDictKey extends DictKey {
   final FLString _flString;
 
   @override
-  FLValue? getValue(Pointer<FLDict> dict) {
+  FLValue? getValue(FLDict dict) {
     // TODO(blaugold): Reenable use of `FLDictKey`s when we know how to safely
     // use them.
     // https://github.com/cbl-dart/cbl-dart/issues/329

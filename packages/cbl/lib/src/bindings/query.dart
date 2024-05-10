@@ -40,14 +40,14 @@ typedef _CBLDatabase_CreateQuery = Pointer<CBLQuery> Function(
 
 typedef _CBLQuery_SetParameters_C = Void Function(
   Pointer<CBLQuery> query,
-  Pointer<FLDict> parameters,
+  FLDict parameters,
 );
 typedef _CBLQuery_SetParameters = void Function(
   Pointer<CBLQuery> query,
-  Pointer<FLDict> parameters,
+  FLDict parameters,
 );
 
-typedef _CBLQuery_Parameters = Pointer<FLDict> Function(
+typedef _CBLQuery_Parameters = FLDict Function(
   Pointer<CBLQuery> query,
 );
 
@@ -171,11 +171,11 @@ final class QueryBindings extends Bindings {
         ).checkCBLError(errorSource: queryString);
       });
 
-  void setParameters(Pointer<CBLQuery> query, Pointer<FLDict> parameters) {
+  void setParameters(Pointer<CBLQuery> query, FLDict parameters) {
     _setParameters(query, parameters);
   }
 
-  Pointer<FLDict> parameters(Pointer<CBLQuery> query) => _parameters(query);
+  FLDict parameters(Pointer<CBLQuery> query) => _parameters(query);
 
   Pointer<CBLResultSet> execute(Pointer<CBLQuery> query) =>
       nativeCallTracePoint(
@@ -224,11 +224,11 @@ typedef _CBLResultSet_ValueForKey = FLValue Function(
   FLString key,
 );
 
-typedef _CBLResultSet_ResultArray = Pointer<FLArray> Function(
+typedef _CBLResultSet_ResultArray = FLArray Function(
   Pointer<CBLResultSet> resultSet,
 );
 
-typedef _CBLResultSet_ResultDict = Pointer<FLDict> Function(
+typedef _CBLResultSet_ResultDict = FLDict Function(
   Pointer<CBLResultSet> resultSet,
 );
 
@@ -287,11 +287,10 @@ final class ResultSetBindings extends Bindings {
   ) =>
       runWithSingleFLString(key, (flKey) => _valueForKey(resultSet, flKey));
 
-  Pointer<FLArray> resultArray(Pointer<CBLResultSet> resultSet) =>
+  FLArray resultArray(Pointer<CBLResultSet> resultSet) =>
       _resultArray(resultSet);
 
-  Pointer<FLDict> resultDict(Pointer<CBLResultSet> resultSet) =>
-      _resultDict(resultSet);
+  FLDict resultDict(Pointer<CBLResultSet> resultSet) => _resultDict(resultSet);
 
   Pointer<CBLQuery> getQuery(Pointer<CBLResultSet> resultSet) =>
       _getQuery(resultSet);

@@ -18,7 +18,7 @@ typedef _CBLDocument_RevisionID = FLString Function(Pointer<CBLDocument> doc);
 typedef _CBLDocument_Sequence_C = Uint64 Function(Pointer<CBLDocument> doc);
 typedef _CBLDocument_Sequence = int Function(Pointer<CBLDocument> doc);
 
-typedef _CBLDocument_Properties = Pointer<FLDict> Function(
+typedef _CBLDocument_Properties = FLDict Function(
   Pointer<CBLDocument> doc,
 );
 
@@ -67,7 +67,7 @@ final class DocumentBindings extends Bindings {
 
   int sequence(Pointer<CBLDocument> doc) => _sequence(doc);
 
-  Pointer<FLDict> properties(Pointer<CBLDocument> doc) => _properties(doc);
+  FLDict properties(Pointer<CBLDocument> doc) => _properties(doc);
 
   String createJSON(Pointer<CBLDocument> doc) =>
       _createJSON(doc).toDartStringAndRelease()!;
@@ -83,17 +83,17 @@ typedef _CBLDocument_MutableCopy = Pointer<CBLMutableDocument> Function(
   Pointer<CBLDocument> source,
 );
 
-typedef _CBLDocument_MutableProperties = Pointer<FLMutableDict> Function(
+typedef _CBLDocument_MutableProperties = FLMutableDict Function(
   Pointer<CBLMutableDocument> doc,
 );
 
 typedef _CBLDocument_SetProperties_C = Void Function(
   Pointer<CBLMutableDocument> doc,
-  Pointer<FLMutableDict> properties,
+  FLMutableDict properties,
 );
 typedef _CBLDocument_SetProperties = void Function(
   Pointer<CBLMutableDocument> doc,
-  Pointer<FLMutableDict> properties,
+  FLMutableDict properties,
 );
 
 typedef _CBLDocument_SetPropertiesAsJSON_C = Uint8 Function(
@@ -148,12 +148,12 @@ final class MutableDocumentBindings extends Bindings {
   Pointer<CBLMutableDocument> mutableCopy(Pointer<CBLDocument> source) =>
       _mutableCopy(source);
 
-  Pointer<FLMutableDict> mutableProperties(Pointer<CBLMutableDocument> doc) =>
+  FLMutableDict mutableProperties(Pointer<CBLMutableDocument> doc) =>
       _mutableProperties(doc);
 
   void setProperties(
     Pointer<CBLMutableDocument> doc,
-    Pointer<FLMutableDict> properties,
+    FLMutableDict properties,
   ) =>
       _setProperties(doc, properties);
 

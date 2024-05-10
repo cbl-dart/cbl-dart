@@ -116,9 +116,8 @@ final class FleeceEncoder implements Finalizable {
   }
 
   /// Writes the value at [index] in [array] to this encoder.
-  void writeArrayValue(Pointer<FLArray> array, int index) =>
-      runWithErrorTranslation(
-          () => _encoderBinds.writeArrayValue(_pointer, array, index));
+  void writeArrayValue(FLArray array, int index) => runWithErrorTranslation(
+      () => _encoderBinds.writeArrayValue(_pointer, array, index));
 
   /// Writes [value] this encoder.
   void writeValue(FLValue value) =>

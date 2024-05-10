@@ -9,8 +9,9 @@ import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 import '../utils/matchers.dart';
 
-final _arrayBinds = CBLBindings.instance.fleece.array;
-final _dictBinds = CBLBindings.instance.fleece.dict;
+const _valueBindings = ValueBindings();
+const _arrayBindings = ArrayBindings();
+const _dictBindings = DictBindings();
 
 void main() {
   setupTestBinding();
@@ -70,9 +71,10 @@ void main() {
       test('get value from existing array', () {
         final root = testMRoot([null]);
         final array = root.asNative as MArray;
-        final flArray = root.values.first.value!.cast<FLArray>();
 
-        expect(array.get(0), MValue.withValue(_arrayBinds.get(flArray, 0)));
+        final flArray = _valueBindings.asArray(root.values.first.value!)!;
+
+        expect(array.get(0), MValue.withValue(_arrayBindings.get(flArray, 0)));
         array.remove(0);
         expect(array.get(0), isNull);
         array.append(null);
@@ -102,13 +104,13 @@ void main() {
       test('set a value which shadows original value', () {
         final root = testMRoot([0, 1]);
         final array = root.asNative as MArray;
-        final flArray = root.values.first.value!.cast<FLArray>();
+        final flArray = _valueBindings.asArray(root.values.first.value!)!;
         final value = array.get(0)!;
 
         expect(root.isMutated, isFalse);
         expect(array.isMutated, isFalse);
         expect(value.isMutated, isFalse);
-        expect(value, MValue.withValue(_arrayBinds.get(flArray, 0)));
+        expect(value, MValue.withValue(_arrayBindings.get(flArray, 0)));
 
         array.set(0, 1);
 
@@ -198,9 +200,10 @@ void main() {
       test('get value from existing dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flDict = root.values.first.value!.cast<FLDict>();
+        final flDict = _valueBindings.asDict(root.values.first.value!)!;
 
-        expect(dict.get('a'), MValue.withValue(_dictBinds.get(flDict, 'a')!));
+        expect(
+            dict.get('a'), MValue.withValue(_dictBindings.get(flDict, 'a')!));
         dict.remove('a');
         expect(dict.get('a'), isNull);
         dict.set('a', null);
@@ -210,13 +213,13 @@ void main() {
       test('set a value which shadows original value', () {
         final root = testMRoot({'a': true, 'b': true});
         final dict = root.asNative as MDict;
-        final flDict = root.values.first.value!.cast<FLDict>();
+        final flDict = _valueBindings.asDict(root.values.first.value!)!;
         final value = dict.get('a');
 
         expect(root.isMutated, isFalse);
         expect(dict.isMutated, isFalse);
         expect(value!.isMutated, isFalse);
-        expect(value, MValue.withValue(_dictBinds.get(flDict, 'a')!));
+        expect(value, MValue.withValue(_dictBindings.get(flDict, 'a')!));
 
         dict.set('a', false);
 
@@ -256,24 +259,24 @@ void main() {
       test('iterable for non-mutated dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flDict = root.values.first.value!.cast<FLDict>();
+        final flDict = _valueBindings.asDict(root.values.first.value!)!;
 
         expect(
           Map.fromEntries(dict.iterable),
-          {'a': mValue(value: _dictBinds.get(flDict, 'a'))},
+          {'a': mValue(value: _dictBindings.get(flDict, 'a'))},
         );
       });
 
       test('iterable for mutated dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flDict = root.values.first.value!.cast<FLDict>();
+        final flDict = _valueBindings.asDict(root.values.first.value!)!;
         dict.set('b', true);
 
         expect(
           Map.fromEntries(dict.iterable),
           {
-            'a': mValue(value: _dictBinds.get(flDict, 'a')),
+            'a': mValue(value: _dictBindings.get(flDict, 'a')),
             'b': mValue(hasNative: true),
           },
         );

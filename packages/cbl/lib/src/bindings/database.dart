@@ -200,7 +200,7 @@ typedef _CBLDatabase_Path = FLStringResult Function(
 
 typedef _CBLDatabase_GetBlob = Pointer<CBLBlob> Function(
   Pointer<CBLDatabase> db,
-  Pointer<FLDict> properties,
+  FLDict properties,
   Pointer<CBLError> errorOut,
 );
 
@@ -426,7 +426,7 @@ final class DatabaseBindings extends Bindings {
 
   Pointer<CBLBlob>? getBlob(
     Pointer<CBLDatabase> db,
-    Pointer<FLDict> properties,
+    FLDict properties,
   ) =>
       nativeCallTracePoint(
         TracedNativeCall.databaseGetBlob,

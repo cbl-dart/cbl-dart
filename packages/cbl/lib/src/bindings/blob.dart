@@ -21,10 +21,10 @@ typedef _CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
   FLSlice contents,
 );
 
-typedef _FLDict_IsBlob_C = Bool Function(Pointer<FLDict> dict);
-typedef _FLDict_IsBlob = bool Function(Pointer<FLDict> dict);
+typedef _FLDict_IsBlob_C = Bool Function(FLDict dict);
+typedef _FLDict_IsBlob = bool Function(FLDict dict);
 
-typedef _FLDict_GetBlob = Pointer<CBLBlob> Function(Pointer<FLDict> dict);
+typedef _FLDict_GetBlob = Pointer<CBLBlob> Function(FLDict dict);
 
 typedef _CBLBlob_Length_C = Uint64 Function(Pointer<CBLBlob> blob);
 typedef _CBLBlob_Length = int Function(Pointer<CBLBlob> blob);
@@ -38,7 +38,7 @@ typedef _CBLBlob_Content = FLSliceResult Function(
   Pointer<CBLError> errorOut,
 );
 
-typedef _CBLBlob_Properties = Pointer<FLDict> Function(Pointer<CBLBlob> blob);
+typedef _CBLBlob_Properties = FLDict Function(Pointer<CBLBlob> blob);
 
 typedef _FLSlot_SetBlob_C = Void Function(
   FLSlot slot,
@@ -111,10 +111,9 @@ final class BlobBindings extends Bindings {
         },
       );
 
-  bool isBlob(Pointer<FLDict> dict) => _isBlob(dict);
+  bool isBlob(FLDict dict) => _isBlob(dict);
 
-  Pointer<CBLBlob>? getBlob(Pointer<FLDict> dict) =>
-      _getBlob(dict).toNullable();
+  Pointer<CBLBlob>? getBlob(FLDict dict) => _getBlob(dict).toNullable();
 
   void setBlob(FLSlot slot, Pointer<CBLBlob> blob) => _setBlob(slot, blob);
 
@@ -130,7 +129,7 @@ final class BlobBindings extends Bindings {
   String? contentType(Pointer<CBLBlob> blob) =>
       _contentType(blob).toDartString();
 
-  Pointer<FLDict> properties(Pointer<CBLBlob> blob) => _properties(blob);
+  FLDict properties(Pointer<CBLBlob> blob) => _properties(blob);
 }
 
 // === CBLBlobReadStream =======================================================

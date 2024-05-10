@@ -6,15 +6,13 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
+import '../bindings.dart';
 import 'base.dart';
-import 'bindings.dart';
 // ignore: unused_import
 import 'cblite.dart' as cblite;
 // ignore: unused_import
 import 'cblitedart.dart' as cblitedart;
-import 'data.dart';
 import 'global.dart';
-import 'slice.dart';
 import 'utils.dart';
 
 const _sliceBindings = SliceBindings();
@@ -344,6 +342,10 @@ final class ValueBindings {
   String? scalarToString(FLValue value) =>
       cblite.FLValue_ToString(value).toDartStringAndRelease();
 
+  FLArray? asArray(FLValue value) => cblite.FLValue_AsArray(value).toNullable();
+
+  FLDict? asDict(FLValue value) => cblite.FLValue_AsDict(value).toNullable();
+
   bool isEqual(FLValue a, FLValue b) => cblite.FLValue_IsEqual(a, b);
 
   void retain(FLValue value) => cblite.FLValue_Retain(value);
@@ -360,517 +362,156 @@ final class ValueBindings {
 
 // === Array ===================================================================
 
-final class FLArray extends Opaque {}
+typedef FLArray = cblite.FLArray;
 
-typedef _FLArray_Count_C = Uint32 Function(Pointer<FLArray> array);
-typedef _FLArray_Count = int Function(Pointer<FLArray> array);
+final class ArrayBindings {
+  const ArrayBindings();
 
-typedef _FLArray_IsEmpty_C = Bool Function(Pointer<FLArray> array);
-typedef _FLArray_IsEmpty = bool Function(Pointer<FLArray> array);
+  int count(FLArray array) => cblite.FLArray_Count(array);
 
-typedef _FLArray_AsMutable = Pointer<FLMutableArray> Function(
-  Pointer<FLArray> array,
-);
+  bool isEmpty(FLArray array) => cblite.FLArray_IsEmpty(array);
 
-typedef _FLArray_Get_C = FLValue Function(
-  Pointer<FLArray> array,
-  Uint32 index,
-);
-typedef _FLArray_Get = FLValue Function(
-  Pointer<FLArray> array,
-  int index,
-);
+  FLMutableArray? asMutable(FLArray array) =>
+      cblite.FLArray_AsMutable(array).toNullable();
 
-final class ArrayBindings extends Bindings {
-  ArrayBindings(super.parent) {
-    _count = libs.cbl.lookupFunction<_FLArray_Count_C, _FLArray_Count>(
-      'FLArray_Count',
-      isLeaf: useIsLeaf,
-    );
-    _isEmpty = libs.cbl.lookupFunction<_FLArray_IsEmpty_C, _FLArray_IsEmpty>(
-      'FLArray_IsEmpty',
-      isLeaf: useIsLeaf,
-    );
-    _asMutable =
-        libs.cbl.lookupFunction<_FLArray_AsMutable, _FLArray_AsMutable>(
-      'FLArray_AsMutable',
-      isLeaf: useIsLeaf,
-    );
-    _get = libs.cbl.lookupFunction<_FLArray_Get_C, _FLArray_Get>(
-      'FLArray_Get',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLArray_Count _count;
-  late final _FLArray_IsEmpty _isEmpty;
-  late final _FLArray_AsMutable _asMutable;
-  late final _FLArray_Get _get;
-
-  int count(Pointer<FLArray> array) => _count(array);
-
-  bool isEmpty(Pointer<FLArray> array) => _isEmpty(array);
-
-  Pointer<FLMutableArray>? asMutable(Pointer<FLArray> array) =>
-      _asMutable(array).toNullable();
-
-  FLValue get(Pointer<FLArray> array, int index) => _get(array, index);
+  FLValue get(FLArray array, int index) => cblite.FLArray_Get(array, index);
 }
 
 // === MutableArray ============================================================
 
-final class FLMutableArray extends Opaque {}
+typedef FLMutableArray = cblite.FLMutableArray;
 
-typedef _FLArray_MutableCopy_C = Pointer<FLMutableArray> Function(
-  Pointer<FLArray> array,
-  Uint32 flags,
-);
-typedef _FLArray_MutableCopy = Pointer<FLMutableArray> Function(
-  Pointer<FLArray> array,
-  int flags,
-);
+final class MutableArrayBindings {
+  const MutableArrayBindings();
 
-typedef _FLMutableArray_New = Pointer<FLMutableArray> Function();
-
-typedef _FLMutableArray_GetSource = Pointer<FLArray> Function(
-  Pointer<FLMutableArray> array,
-);
-
-typedef _FLMutableArray_IsChanged_C = Bool Function(
-  Pointer<FLMutableArray> array,
-);
-typedef _FLMutableArray_IsChanged = bool Function(
-  Pointer<FLMutableArray> array,
-);
-
-typedef _FLMutableArray_Set_C = FLSlot Function(
-  Pointer<FLMutableArray> array,
-  Uint32 index,
-);
-typedef _FLMutableArray_Set = FLSlot Function(
-  Pointer<FLMutableArray> array,
-  int index,
-);
-
-typedef _FLMutableArray_Append = FLSlot Function(
-  Pointer<FLMutableArray> array,
-);
-
-typedef _FLMutableArray_Insert_C = Void Function(
-  Pointer<FLMutableArray> array,
-  Uint32 firstIndex,
-  Uint32 count,
-);
-typedef _FLMutableArray_Insert = void Function(
-  Pointer<FLMutableArray> array,
-  int firstIndex,
-  int count,
-);
-
-typedef _FLMutableArray_Remove_C = Void Function(
-  Pointer<FLMutableArray> array,
-  Uint32 firstIndex,
-  Uint32 count,
-);
-typedef _FLMutableArray_Remove = void Function(
-  Pointer<FLMutableArray> array,
-  int firstIndex,
-  int count,
-);
-
-typedef _FLMutableArray_Resize_C = Void Function(
-  Pointer<FLMutableArray> array,
-  Uint32 size,
-);
-typedef _FLMutableArray_Resize = void Function(
-  Pointer<FLMutableArray> array,
-  int size,
-);
-
-typedef _FLMutableArray_GetMutableArray_C = Pointer<FLMutableArray> Function(
-  Pointer<FLMutableArray> array,
-  Uint32 index,
-);
-typedef _FLMutableArray_GetMutableArray = Pointer<FLMutableArray> Function(
-  Pointer<FLMutableArray> array,
-  int index,
-);
-
-typedef _FLMutableArray_GetMutableDict_C = Pointer<FLMutableDict> Function(
-  Pointer<FLMutableArray> array,
-  Uint32 index,
-);
-typedef _FLMutableArray_GetMutableDict = Pointer<FLMutableDict> Function(
-  Pointer<FLMutableArray> array,
-  int index,
-);
-
-final class MutableArrayBindings extends Bindings {
-  MutableArrayBindings(super.parent) {
-    _mutableCopy =
-        libs.cbl.lookupFunction<_FLArray_MutableCopy_C, _FLArray_MutableCopy>(
-      'FLArray_MutableCopy',
-      isLeaf: useIsLeaf,
-    );
-    _new = libs.cbl.lookupFunction<_FLMutableArray_New, _FLMutableArray_New>(
-      'FLMutableArray_New',
-      isLeaf: useIsLeaf,
-    );
-    _getSource = libs.cbl
-        .lookupFunction<_FLMutableArray_GetSource, _FLMutableArray_GetSource>(
-      'FLMutableArray_GetSource',
-      isLeaf: useIsLeaf,
-    );
-    _isChanged = libs.cbl
-        .lookupFunction<_FLMutableArray_IsChanged_C, _FLMutableArray_IsChanged>(
-      'FLMutableArray_IsChanged',
-      isLeaf: useIsLeaf,
-    );
-    _set = libs.cbl.lookupFunction<_FLMutableArray_Set_C, _FLMutableArray_Set>(
-      'FLMutableArray_Set',
-      isLeaf: useIsLeaf,
-    );
-    _append =
-        libs.cbl.lookupFunction<_FLMutableArray_Append, _FLMutableArray_Append>(
-      'FLMutableArray_Append',
-      isLeaf: useIsLeaf,
-    );
-    _insert = libs.cbl
-        .lookupFunction<_FLMutableArray_Insert_C, _FLMutableArray_Insert>(
-      'FLMutableArray_Insert',
-      isLeaf: useIsLeaf,
-    );
-    _remove = libs.cbl
-        .lookupFunction<_FLMutableArray_Remove_C, _FLMutableArray_Remove>(
-      'FLMutableArray_Remove',
-      isLeaf: useIsLeaf,
-    );
-    _resize = libs.cbl
-        .lookupFunction<_FLMutableArray_Resize_C, _FLMutableArray_Resize>(
-      'FLMutableArray_Resize',
-      isLeaf: useIsLeaf,
-    );
-    _getMutableArray = libs.cbl.lookupFunction<
-        _FLMutableArray_GetMutableArray_C, _FLMutableArray_GetMutableArray>(
-      'FLMutableArray_GetMutableArray',
-      isLeaf: useIsLeaf,
-    );
-    _getMutableDict = libs.cbl.lookupFunction<_FLMutableArray_GetMutableDict_C,
-        _FLMutableArray_GetMutableDict>(
-      'FLMutableArray_GetMutableDict',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLArray_MutableCopy _mutableCopy;
-  late final _FLMutableArray_New _new;
-  late final _FLMutableArray_GetSource _getSource;
-  late final _FLMutableArray_IsChanged _isChanged;
-  late final _FLMutableArray_Set _set;
-  late final _FLMutableArray_Append _append;
-  late final _FLMutableArray_Insert _insert;
-  late final _FLMutableArray_Remove _remove;
-  late final _FLMutableArray_Resize _resize;
-  late final _FLMutableArray_GetMutableArray _getMutableArray;
-  late final _FLMutableArray_GetMutableDict _getMutableDict;
-
-  Pointer<FLMutableArray> mutableCopy(
-    Pointer<FLArray> array,
+  FLMutableArray mutableCopy(
+    FLArray array,
     Set<FLCopyFlag> flags,
   ) =>
-      _mutableCopy(array, flags.toCFlags());
+      cblite.FLArray_MutableCopy(array, flags.toCFlags());
 
-  Pointer<FLMutableArray> create() => _new();
+  FLMutableArray create() => cblite.FLMutableArray_New();
 
-  Pointer<FLArray>? getSource(Pointer<FLMutableArray> array) =>
-      _getSource(array).toNullable();
+  FLArray? getSource(FLMutableArray array) =>
+      cblite.FLMutableArray_GetSource(array).toNullable();
 
-  bool isChanged(Pointer<FLMutableArray> array) => _isChanged(array);
+  bool isChanged(FLMutableArray array) =>
+      cblite.FLMutableArray_IsChanged(array);
 
-  FLSlot set(Pointer<FLMutableArray> array, int index) => _set(array, index);
+  FLSlot set(FLMutableArray array, int index) =>
+      cblite.FLMutableArray_Set(array, index);
 
-  FLSlot append(Pointer<FLMutableArray> array) => _append(array);
+  FLSlot append(FLMutableArray array) => cblite.FLMutableArray_Append(array);
 
-  void insert(Pointer<FLMutableArray> array, int index, int count) =>
-      _insert(array, index, count);
+  void insert(FLMutableArray array, int index, int count) =>
+      cblite.FLMutableArray_Insert(array, index, count);
 
-  void remove(Pointer<FLMutableArray> array, int firstIndex, int count) =>
-      _remove(array, firstIndex, count);
+  void remove(FLMutableArray array, int firstIndex, int count) =>
+      cblite.FLMutableArray_Remove(array, firstIndex, count);
 
-  void resize(Pointer<FLMutableArray> array, int size) => _resize(array, size);
+  void resize(FLMutableArray array, int size) =>
+      cblite.FLMutableArray_Resize(array, size);
 
-  Pointer<FLMutableArray>? getMutableArray(
-    Pointer<FLMutableArray> array,
+  FLMutableArray? getMutableArray(
+    FLMutableArray array,
     int index,
   ) =>
-      _getMutableArray(array, index).toNullable();
+      cblite.FLMutableArray_GetMutableArray(array, index).toNullable();
 
-  Pointer<FLMutableDict>? getMutableDict(
-    Pointer<FLMutableArray> array,
+  FLMutableDict? getMutableDict(
+    FLMutableArray array,
     int index,
   ) =>
-      _getMutableDict(array, index).toNullable();
+      cblite.FLMutableArray_GetMutableDict(array, index).toNullable();
 }
 
 // === Dict ====================================================================
 
-final class FLDict extends Opaque {}
+typedef FLDict = cblite.FLDict;
 
-typedef _FLDict_Count_C = Uint32 Function(Pointer<FLDict> dict);
-typedef _FLDict_Count = int Function(Pointer<FLDict> dict);
+final class DictBindings {
+  const DictBindings();
 
-typedef _FLDict_IsEmpty_C = Bool Function(Pointer<FLDict> dict);
-typedef _FLDict_IsEmpty = bool Function(Pointer<FLDict> dict);
+  FLValue? get(FLDict dict, String key) =>
+      runWithSingleFLString(key, (flKey) => cblite.FLDict_Get(dict, flKey))
+          .toNullable();
 
-typedef _FLDict_AsMutable = Pointer<FLMutableDict> Function(
-  Pointer<FLDict> dict,
-);
+  FLValue? getWithFLString(FLDict dict, FLString key) =>
+      cblite.FLDict_Get(dict, key).toNullable();
 
-typedef _FLDict_Get = FLValue Function(
-  Pointer<FLDict> dict,
-  FLString key,
-);
+  int count(FLDict dict) => cblite.FLDict_Count(dict);
 
-final class DictBindings extends Bindings {
-  DictBindings(super.parent) {
-    _get = libs.cbl.lookupFunction<_FLDict_Get, _FLDict_Get>(
-      'FLDict_Get',
-      isLeaf: useIsLeaf,
-    );
-    _count = libs.cbl.lookupFunction<_FLDict_Count_C, _FLDict_Count>(
-      'FLDict_Count',
-      isLeaf: useIsLeaf,
-    );
-    _isEmpty = libs.cbl.lookupFunction<_FLDict_IsEmpty_C, _FLDict_IsEmpty>(
-      'FLDict_IsEmpty',
-      isLeaf: useIsLeaf,
-    );
-    _asMutable = libs.cbl.lookupFunction<_FLDict_AsMutable, _FLDict_AsMutable>(
-      'FLDict_AsMutable',
-      isLeaf: useIsLeaf,
-    );
-  }
+  bool isEmpty(FLDict dict) => cblite.FLDict_IsEmpty(dict);
 
-  late final _FLDict_Get _get;
-  late final _FLDict_Count _count;
-  late final _FLDict_IsEmpty _isEmpty;
-  late final _FLDict_AsMutable _asMutable;
-
-  FLValue? get(Pointer<FLDict> dict, String key) =>
-      runWithSingleFLString(key, (flKey) => _get(dict, flKey)).toNullable();
-
-  FLValue? getWithFLString(Pointer<FLDict> dict, FLString key) =>
-      _get(dict, key).toNullable();
-
-  int count(Pointer<FLDict> dict) => _count(dict);
-
-  bool isEmpty(Pointer<FLDict> dict) => _isEmpty(dict);
-
-  Pointer<FLMutableDict>? asMutable(Pointer<FLDict> dict) =>
-      _asMutable(dict).toNullable();
+  FLMutableDict? asMutable(FLDict dict) =>
+      cblite.FLDict_AsMutable(dict).toNullable();
 }
 
-final class FLDictKey extends Struct {
-  // ignore: unused_field
-  external FLSlice _private1;
-  // ignore: unused_field
-  external Pointer<Void> _private2;
-  @Uint32()
-  // ignore: unused_field
-  external int _private3;
-  @Uint32()
-  // ignore: unused_field
-  external int _private4;
-  @Bool()
-  // ignore: unused_field
-  external bool _private5;
-}
+typedef FLDictKey = cblite.FLDictKey;
 
-typedef _FLDictKey_Init = FLDictKey Function(FLString key);
+final class DictKeyBindings {
+  const DictKeyBindings();
 
-typedef _FLDict_GetWithKey = FLValue Function(
-  Pointer<FLDict> dict,
-  Pointer<FLDictKey> key,
-);
+  FLDictKey init(FLString key) => cblite.FLDictKey_Init(key);
 
-final class DictKeyBindings extends Bindings {
-  DictKeyBindings(super.parent) {
-    _init = libs.cbl.lookupFunction<_FLDictKey_Init, _FLDictKey_Init>(
-      'FLDictKey_Init',
-      isLeaf: useIsLeaf,
-    );
-    _getWithKey =
-        libs.cbl.lookupFunction<_FLDict_GetWithKey, _FLDict_GetWithKey>(
-      'FLDict_GetWithKey',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLDictKey_Init _init;
-  late final _FLDict_GetWithKey _getWithKey;
-
-  void init(FLDictKey dictKey, FLString key) {
-    final state = _init(key);
-    dictKey
-      .._private1 = state._private1
-      .._private2 = state._private2
-      .._private3 = state._private3
-      .._private4 = state._private4
-      .._private5 = state._private5;
-  }
-
-  FLValue? getWithKey(Pointer<FLDict> dict, Pointer<FLDictKey> key) =>
-      _getWithKey(dict, key).toNullable();
+  FLValue? getWithKey(FLDict dict, Pointer<FLDictKey> key) =>
+      cblite.FLDict_GetWithKey(dict, key).toNullable();
 }
 
 // === MutableDict =============================================================
 
-final class FLMutableDict extends Opaque {}
+typedef FLMutableDict = cblite.FLMutableDict;
 
-typedef _FLDict_MutableCopy_C = Pointer<FLMutableDict> Function(
-  Pointer<FLDict> source,
-  Uint32 flags,
-);
-typedef _FLDict_MutableCopy = Pointer<FLMutableDict> Function(
-  Pointer<FLDict> source,
-  int flags,
-);
+final class MutableDictBindings {
+  const MutableDictBindings();
 
-typedef _FLMutableDict_New = Pointer<FLMutableDict> Function();
-
-typedef _FLMutableDict_GetSource = Pointer<FLDict> Function(
-  Pointer<FLMutableDict> dict,
-);
-
-typedef _FLMutableDict_IsChanged_C = Bool Function(
-  Pointer<FLMutableDict> dict,
-);
-typedef _FLMutableDict_IsChanged = bool Function(Pointer<FLMutableDict> dict);
-
-typedef _FLMutableDict_Set = FLSlot Function(
-  Pointer<FLMutableDict> dict,
-  FLString key,
-);
-
-typedef _FLMutableDict_Remove_C = Void Function(
-  Pointer<FLMutableDict> dict,
-  FLString key,
-);
-typedef _FLMutableDict_Remove = void Function(
-  Pointer<FLMutableDict> dict,
-  FLString key,
-);
-
-typedef _FLMutableDict_RemoveAll_C = Void Function(Pointer<FLMutableDict> dict);
-typedef _FLMutableDict_RemoveAll = void Function(Pointer<FLMutableDict> dict);
-
-typedef _FLMutableDict_GetMutableArray = Pointer<FLMutableArray> Function(
-  Pointer<FLMutableDict> dict,
-  FLString key,
-);
-
-typedef _FLMutableDict_GetMutableDict = Pointer<FLMutableDict> Function(
-  Pointer<FLMutableDict> dict,
-  FLString key,
-);
-
-final class MutableDictBindings extends Bindings {
-  MutableDictBindings(super.parent) {
-    _mutableCopy =
-        libs.cbl.lookupFunction<_FLDict_MutableCopy_C, _FLDict_MutableCopy>(
-      'FLDict_MutableCopy',
-      isLeaf: useIsLeaf,
-    );
-    _new = libs.cbl.lookupFunction<_FLMutableDict_New, _FLMutableDict_New>(
-      'FLMutableDict_New',
-      isLeaf: useIsLeaf,
-    );
-    _getSource = libs.cbl
-        .lookupFunction<_FLMutableDict_GetSource, _FLMutableDict_GetSource>(
-      'FLMutableDict_GetSource',
-      isLeaf: useIsLeaf,
-    );
-    _isChanged = libs.cbl
-        .lookupFunction<_FLMutableDict_IsChanged_C, _FLMutableDict_IsChanged>(
-      'FLMutableDict_IsChanged',
-      isLeaf: useIsLeaf,
-    );
-    _set = libs.cbl.lookupFunction<_FLMutableDict_Set, _FLMutableDict_Set>(
-      'FLMutableDict_Set',
-      isLeaf: useIsLeaf,
-    );
-    _remove =
-        libs.cbl.lookupFunction<_FLMutableDict_Remove_C, _FLMutableDict_Remove>(
-      'FLMutableDict_Remove',
-      isLeaf: useIsLeaf,
-    );
-    _removeAll = libs.cbl
-        .lookupFunction<_FLMutableDict_RemoveAll_C, _FLMutableDict_RemoveAll>(
-      'FLMutableDict_RemoveAll',
-      isLeaf: useIsLeaf,
-    );
-    _getMutableArray = libs.cbl.lookupFunction<_FLMutableDict_GetMutableArray,
-        _FLMutableDict_GetMutableArray>(
-      'FLMutableDict_GetMutableArray',
-      isLeaf: useIsLeaf,
-    );
-    _getMutableDict = libs.cbl.lookupFunction<_FLMutableDict_GetMutableDict,
-        _FLMutableDict_GetMutableDict>(
-      'FLMutableDict_GetMutableDict',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLDict_MutableCopy _mutableCopy;
-  late final _FLMutableDict_New _new;
-  late final _FLMutableDict_GetSource _getSource;
-  late final _FLMutableDict_IsChanged _isChanged;
-  late final _FLMutableDict_Set _set;
-  late final _FLMutableDict_Remove _remove;
-  late final _FLMutableDict_RemoveAll _removeAll;
-  late final _FLMutableDict_GetMutableArray _getMutableArray;
-  late final _FLMutableDict_GetMutableDict _getMutableDict;
-
-  Pointer<FLMutableDict> mutableCopy(
-    Pointer<FLDict> source,
+  FLMutableDict mutableCopy(
+    FLDict source,
     Set<FLCopyFlag> flags,
   ) =>
-      _mutableCopy(source, flags.toCFlags());
+      cblite.FLDict_MutableCopy(source, flags.toCFlags());
 
-  Pointer<FLMutableDict> create() => _new();
+  FLMutableDict create() => cblite.FLMutableDict_New();
 
-  Pointer<FLDict>? getSource(Pointer<FLMutableDict> dict) =>
-      _getSource(dict).toNullable();
+  FLDict? getSource(FLMutableDict dict) =>
+      cblite.FLMutableDict_GetSource(dict).toNullable();
 
-  bool isChanged(Pointer<FLMutableDict> dict) => _isChanged(dict);
+  bool isChanged(FLMutableDict dict) => cblite.FLMutableDict_IsChanged(dict);
 
-  FLSlot set(Pointer<FLMutableDict> dict, String key) =>
-      runWithSingleFLString(key, (flKey) => _set(dict, flKey));
-
-  void remove(Pointer<FLMutableDict> dict, String key) {
-    runWithSingleFLString(key, (flKey) => _remove(dict, flKey));
-  }
-
-  void removeAll(Pointer<FLMutableDict> dict) {
-    _removeAll(dict);
-  }
-
-  Pointer<FLMutableArray>? getMutableArray(
-    Pointer<FLMutableDict> array,
-    String key,
-  ) =>
-      runWithSingleFLString(
+  FLSlot set(FLMutableDict dict, String key) => runWithSingleFLString(
         key,
-        (flKey) => _getMutableArray(array, flKey).toNullable(),
+        (flKey) => cblite.FLMutableDict_Set(dict, flKey),
       );
 
-  Pointer<FLMutableDict>? getMutableDict(
-    Pointer<FLMutableDict> array,
+  void remove(FLMutableDict dict, String key) {
+    runWithSingleFLString(
+      key,
+      (flKey) => cblite.FLMutableDict_Remove(dict, flKey),
+    );
+  }
+
+  void removeAll(FLMutableDict dict) {
+    cblite.FLMutableDict_RemoveAll(dict);
+  }
+
+  FLMutableArray? getMutableArray(
+    FLMutableDict array,
     String key,
   ) =>
       runWithSingleFLString(
         key,
-        (flKey) => _getMutableDict(array, flKey).toNullable(),
+        (flKey) =>
+            cblite.FLMutableDict_GetMutableArray(array, flKey).toNullable(),
+      );
+
+  FLMutableDict? getMutableDict(
+    FLMutableDict array,
+    String key,
+  ) =>
+      runWithSingleFLString(
+        key,
+        (flKey) =>
+            cblite.FLMutableDict_GetMutableDict(array, flKey).toNullable(),
       );
 }
 
@@ -951,23 +592,23 @@ typedef _CBLDart_GetLoadedFLValue = void Function(
 );
 
 typedef _CBLDart_FLArray_GetLoaded_FLValue_C = Void Function(
-  Pointer<FLArray> array,
+  FLArray array,
   Uint32 index,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 typedef _CBLDart_FLArray_GetLoadedFLValue = void Function(
-  Pointer<FLArray> array,
+  FLArray array,
   int index,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
 typedef _CBLDart_FLDict_GetLoaded_FLValue_C = Void Function(
-  Pointer<FLDict> dict,
+  FLDict dict,
   FLString key,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 typedef _CBLDart_FLDict_GetLoadedFLValue = void Function(
-  Pointer<FLDict> dict,
+  FLDict dict,
   FLString key,
   Pointer<CBLDart_LoadedFLValue> out,
 );
@@ -976,7 +617,7 @@ final class CBLDart_FLDictIterator extends Opaque {}
 
 typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
     Function(
-  Pointer<FLDict> dict,
+  FLDict dict,
   Pointer<KnownSharedKeys> knownSharedKeys,
   Pointer<CBLDart_LoadedDictKey> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
@@ -985,7 +626,7 @@ typedef _CBLDart_FLDictIterator_Begin_C = Pointer<CBLDart_FLDictIterator>
 );
 typedef _CBLDart_FLDictIterator_Begin = Pointer<CBLDart_FLDictIterator>
     Function(
-  Pointer<FLDict> dict,
+  FLDict dict,
   Pointer<KnownSharedKeys> knownSharedKeys,
   Pointer<CBLDart_LoadedDictKey> keyOut,
   Pointer<CBLDart_LoadedFLValue> valueOut,
@@ -1008,13 +649,13 @@ final class CBLDart_FLArrayIterator extends Opaque {}
 
 typedef _CBLDart_FLArrayIterator_Begin_C = Pointer<CBLDart_FLArrayIterator>
     Function(
-  Pointer<FLArray> array,
+  FLArray array,
   Pointer<CBLDart_LoadedFLValue> valueOut,
   Bool deleteOnDone,
 );
 typedef _CBLDart_FLArrayIterator_Begin = Pointer<CBLDart_FLArrayIterator>
     Function(
-  Pointer<FLArray> array,
+  FLArray array,
   Pointer<CBLDart_LoadedFLValue> valueOut,
   bool deleteOnDone,
 );
@@ -1119,14 +760,14 @@ final class FleeceDecoderBindings extends Bindings {
   }
 
   void getLoadedValueFromArray(
-    Pointer<FLArray> array,
+    FLArray array,
     int index,
   ) {
     _getLoadedFLValueFromArray(array, index, globalLoadedFLValue);
   }
 
   void getLoadedValueFromDict(
-    Pointer<FLDict> array,
+    FLDict array,
     String key,
   ) {
     runWithSingleFLString(key, (flKey) {
@@ -1136,7 +777,7 @@ final class FleeceDecoderBindings extends Bindings {
 
   Pointer<CBLDart_FLDictIterator> dictIteratorBegin(
     Finalizable? object,
-    Pointer<FLDict> dict,
+    FLDict dict,
     Pointer<KnownSharedKeys> knownSharedKeys,
     Pointer<CBLDart_LoadedDictKey> keyOut,
     Pointer<CBLDart_LoadedFLValue> valueOut, {
@@ -1163,7 +804,7 @@ final class FleeceDecoderBindings extends Bindings {
 
   Pointer<CBLDart_FLArrayIterator> arrayIteratorBegin(
     Finalizable? object,
-    Pointer<FLArray> array,
+    FLArray array,
     Pointer<CBLDart_LoadedFLValue> valueOut,
   ) {
     final result = _arrayIteratorBegin(array, valueOut, object == null);
@@ -1220,12 +861,12 @@ typedef _FLEncoder_Reset = void Function(Pointer<FLEncoder> encoder);
 
 typedef _CBLDart_FLEncoder_WriteArrayValue_C = Bool Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLArray> array,
+  FLArray array,
   Uint32 index,
 );
 typedef _CBLDart_FLEncoder_WriteArrayValue = bool Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLArray> array,
+  FLArray array,
   int index,
 );
 
@@ -1511,7 +1152,7 @@ final class FleeceEncoderBindings extends Bindings {
 
   void writeArrayValue(
     Pointer<FLEncoder> encoder,
-    Pointer<FLArray> array,
+    FLArray array,
     int index,
   ) {
     _checkError(encoder, _writeArrayValue(encoder, array, index));
@@ -1632,20 +1273,10 @@ final class FleeceEncoderBindings extends Bindings {
 
 final class FleeceBindings extends Bindings {
   FleeceBindings(super.parent) {
-    array = ArrayBindings(this);
-    mutableArray = MutableArrayBindings(this);
-    dict = DictBindings(this);
-    dictKey = DictKeyBindings(this);
-    mutableDict = MutableDictBindings(this);
     decoder = FleeceDecoderBindings(this);
     encoder = FleeceEncoderBindings(this);
   }
 
-  late final ArrayBindings array;
-  late final MutableArrayBindings mutableArray;
-  late final DictBindings dict;
-  late final DictKeyBindings dictKey;
-  late final MutableDictBindings mutableDict;
   late final FleeceDecoderBindings decoder;
   late final FleeceEncoderBindings encoder;
 }
