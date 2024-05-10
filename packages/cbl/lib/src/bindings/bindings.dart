@@ -2,7 +2,6 @@ import 'blob.dart';
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
-import 'fleece.dart';
 import 'libraries.dart';
 import 'logging.dart';
 import 'query.dart';
@@ -37,7 +36,6 @@ final class CBLBindings extends Bindings {
     resultSet = ResultSetBindings(this);
     blobs = BlobsBindings(this);
     replicator = ReplicatorBindings(this);
-    fleece = FleeceBindings(this);
   }
 
   static CBLBindings? _instance;
@@ -75,7 +73,6 @@ final class CBLBindings extends Bindings {
   late final ResultSetBindings resultSet;
   late final BlobsBindings blobs;
   late final ReplicatorBindings replicator;
-  late final FleeceBindings fleece;
 }
 
 set _onTracedCall(TracedCallHandler value) => onTracedCall = value;

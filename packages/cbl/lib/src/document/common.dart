@@ -17,7 +17,7 @@ import 'dictionary.dart';
 
 final _blobBindings = cblBindings.blobs.blob;
 const _valueBindings = ValueBindings();
-final _decoderBindings = cblBindings.fleece.decoder;
+const _decoderBindings = FleeceDecoderBindings();
 
 abstract interface class CblConversions {
   Object? toPlainObject();
@@ -164,7 +164,7 @@ final class CblMDelegate extends MDelegate {
     _decoderBindings.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
-    switch (flValue.type) {
+    switch (flValue.dartType) {
       case FLValueType.undefined:
         // `undefined` is a somewhat unusual value to be found in a Fleece
         // collection, since it is not JSON. It cannot be encoded to Fleece or
@@ -193,7 +193,8 @@ final class CblMDelegate extends MDelegate {
           return ArrayImpl(array);
         }
       case FLValueType.dict:
-        final flDict = FLDict.fromAddress(flValue.value);
+        // ignore: omit_local_variable_types
+        final FLDict flDict = flValue.value.cast();
 
         if (_blobBindings.isBlob(flDict)) {
           final context = parent.context;

@@ -4,10 +4,9 @@ import 'dart:typed_data';
 
 import '../bindings.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import 'containers.dart';
 
-final _encoderBinds = cblBindings.fleece.encoder;
+const _encoderBinds = FleeceEncoderBindings();
 
 /// An encoder, which generates encoded Fleece or JSON data.
 ///
@@ -31,7 +30,7 @@ final class FleeceEncoder implements Finalizable {
     _encoderBinds.bindToDartObject(this, _pointer);
   }
 
-  final Pointer<FLEncoder> _pointer;
+  final FLEncoder _pointer;
 
   /// The output format to generate.
   ///

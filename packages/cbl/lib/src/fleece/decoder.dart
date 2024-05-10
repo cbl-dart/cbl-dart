@@ -4,10 +4,9 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../bindings.dart';
-import '../support/ffi.dart';
 import 'containers.dart';
 
-final _decoderBinds = cblBindings.fleece.decoder;
+const _decoderBinds = FleeceDecoderBindings();
 
 /// Returns a string which shows how values are encoded in the Fleece [data].
 ///
@@ -50,7 +49,7 @@ final class _SharedKeysTable extends SharedKeysTable implements Finalizable {
     _knownSharedKeys = _decoderBinds.createKnownSharedKeys(this);
   }
 
-  /// The value [CBLDart_LoadedDictKey.sharedKey] has when the key is not
+  /// The value `CBLDart_LoadedDictKey.sharedKey` has when the key is not
   /// shared.
   static const _notSharedKey = -1;
 
@@ -129,18 +128,18 @@ final class NoopSharedStringsTable extends SharedStringsTable {
   @override
   String decode(StringSource source) {
     final int size;
-    final int address;
+    final Pointer<Void> buf;
     switch (source) {
       case StringSource.dictKey:
         size = globalLoadedDictKey.ref.stringSize;
-        address = globalLoadedDictKey.ref.stringBuf;
+        buf = globalLoadedDictKey.ref.stringBuf;
         break;
       case StringSource.value:
         size = globalLoadedFLValue.ref.stringSize;
-        address = globalLoadedFLValue.ref.stringBuf;
+        buf = globalLoadedFLValue.ref.stringBuf;
         break;
     }
-    return decodeFLString(address, size);
+    return decodeFLString(buf, size);
   }
 
   @override
@@ -158,7 +157,7 @@ final class _SharedStringsTable extends SharedStringsTable {
   static const _minSharedStringSize = 2;
   static const _maxSharedStringSize = 15;
 
-  final _sharedStrings = HashMap<int, String>();
+  final _sharedStrings = HashMap<Pointer<Void>, String>();
 
   final _loadedKey = globalLoadedDictKey.ref;
   final _loadedValue = globalLoadedFLValue.ref;
@@ -166,23 +165,23 @@ final class _SharedStringsTable extends SharedStringsTable {
   @override
   String decode(StringSource source) {
     final int size;
-    final int address;
+    final Pointer<Void> buf;
     switch (source) {
       case StringSource.dictKey:
         size = _loadedKey.stringSize;
-        address = _loadedKey.stringBuf;
+        buf = _loadedKey.stringBuf;
         break;
       case StringSource.value:
         size = _loadedValue.stringSize;
-        address = _loadedValue.stringBuf;
+        buf = _loadedValue.stringBuf;
         break;
     }
 
     if (size < _minSharedStringSize || size > _maxSharedStringSize) {
-      return decodeFLString(address, size);
+      return decodeFLString(buf, size);
     }
 
-    return _sharedStrings[address] ??= decodeFLString(address, size);
+    return _sharedStrings[buf] ??= decodeFLString(buf, size);
   }
 
   @override
@@ -323,7 +322,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
 
   Object? _decodeGlobalLoadedValue(SharedStringsTable sharedStringsTable) {
     final value = globalLoadedFLValue.ref;
-    switch (value.type) {
+    switch (value.dartType) {
       case FLValueType.undefined:
         _throwUndefinedDartRepresentation();
       case FLValueType.null_:
@@ -337,7 +336,8 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       case FLValueType.data:
         return value.asData.toData()?.toTypedList();
       case FLValueType.array:
-        final array = FLArray.fromAddress(value.value);
+        // ignore: omit_local_variable_types
+        final FLArray array = value.value.cast();
         return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
@@ -345,7 +345,7 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       case FLValueType.dict:
         final result = <String, Object?>{};
         final iterator = DictIterator(
-          FLDict.fromAddress(value.value),
+          value.value.cast(),
           sharedKeysTable: sharedKeysTable,
           keyOut: globalLoadedDictKey,
           valueOut: globalLoadedFLValue,
@@ -412,7 +412,7 @@ final class _FleeceListenerDecoder {
           continue;
         }
 
-        switch (value.type) {
+        switch (value.dartType) {
           case FLValueType.undefined:
             _listener.handleUndefined();
             _currentLoader.handleValue();
@@ -442,14 +442,14 @@ final class _FleeceListenerDecoder {
             break;
           case FLValueType.array:
             _currentLoader = _ArrayIndexLoader(
-              FLArray.fromAddress(value.value),
+              (value.value.cast()),
               value.collectionSize,
               _listener,
             )..parent = _currentLoader;
             break;
           case FLValueType.dict:
             _currentLoader = _DictIteratorLoader(
-              FLDict.fromAddress(value.value),
+              value.value.cast(),
               _listener,
               _sharedKeysTable,
               _sharedStringsTable,

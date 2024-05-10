@@ -9,7 +9,6 @@ import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 import '../utils/matchers.dart';
 
-const _valueBindings = ValueBindings();
 const _arrayBindings = ArrayBindings();
 const _dictBindings = DictBindings();
 
@@ -72,7 +71,8 @@ void main() {
         final root = testMRoot([null]);
         final array = root.asNative as MArray;
 
-        final flArray = _valueBindings.asArray(root.values.first.value!)!;
+        // ignore: omit_local_variable_types
+        final FLArray flArray = root.values.first.value!.cast();
 
         expect(array.get(0), MValue.withValue(_arrayBindings.get(flArray, 0)));
         array.remove(0);
@@ -104,7 +104,8 @@ void main() {
       test('set a value which shadows original value', () {
         final root = testMRoot([0, 1]);
         final array = root.asNative as MArray;
-        final flArray = _valueBindings.asArray(root.values.first.value!)!;
+        // ignore: omit_local_variable_types
+        final FLArray flArray = root.values.first.value!.cast();
         final value = array.get(0)!;
 
         expect(root.isMutated, isFalse);
@@ -200,7 +201,8 @@ void main() {
       test('get value from existing dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flDict = _valueBindings.asDict(root.values.first.value!)!;
+        // ignore: omit_local_variable_types
+        final FLDict flDict = root.values.first.value!.cast();
 
         expect(
             dict.get('a'), MValue.withValue(_dictBindings.get(flDict, 'a')!));
@@ -213,7 +215,8 @@ void main() {
       test('set a value which shadows original value', () {
         final root = testMRoot({'a': true, 'b': true});
         final dict = root.asNative as MDict;
-        final flDict = _valueBindings.asDict(root.values.first.value!)!;
+        // ignore: omit_local_variable_types
+        final FLDict flDict = root.values.first.value!.cast();
         final value = dict.get('a');
 
         expect(root.isMutated, isFalse);
@@ -259,7 +262,8 @@ void main() {
       test('iterable for non-mutated dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flDict = _valueBindings.asDict(root.values.first.value!)!;
+       // ignore: omit_local_variable_types
+        final FLDict flDict = root.values.first.value!.cast();
 
         expect(
           Map.fromEntries(dict.iterable),
@@ -270,7 +274,8 @@ void main() {
       test('iterable for mutated dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flDict = _valueBindings.asDict(root.values.first.value!)!;
+       // ignore: omit_local_variable_types
+        final FLDict flDict = root.values.first.value!.cast();
         dict.set('b', true);
 
         expect(

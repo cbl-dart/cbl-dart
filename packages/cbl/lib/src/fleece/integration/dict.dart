@@ -181,7 +181,7 @@ final class MDict extends MCollection {
       // Cache the value to speed up lookups later.
       final value = _values[key] = _MValueWithKey(
         loadedKey.value,
-        FLValue.fromAddress(loadedValue.value),
+        loadedValue.value,
       );
       yield MapEntry(key, value);
     }
