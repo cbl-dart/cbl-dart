@@ -13,6 +13,8 @@ import '../support/utils.dart';
 import 'blob_store.dart';
 import 'ffi_database.dart';
 
+const _baseBindings = BaseBindings();
+
 final class _FfiBlob implements Finalizable {
   _FfiBlob.fromPointer(this.pointer, {bool adopt = false}) {
     bindCBLRefCountedToDartObject(
@@ -85,7 +87,7 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
       return false;
     }
 
-    cblBindings.base.releaseRefCounted(cblBlob.cast());
+    _baseBindings.releaseRefCounted(cblBlob.cast());
 
     return true;
   }

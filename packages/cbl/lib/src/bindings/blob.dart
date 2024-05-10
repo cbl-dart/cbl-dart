@@ -41,11 +41,11 @@ typedef _CBLBlob_Content = FLSliceResult Function(
 typedef _CBLBlob_Properties = Pointer<FLDict> Function(Pointer<CBLBlob> blob);
 
 typedef _FLSlot_SetBlob_C = Void Function(
-  Pointer<FLSlot> slot,
+  FLSlot slot,
   Pointer<CBLBlob> blob,
 );
 typedef _FLSlot_SetBlob = void Function(
-  Pointer<FLSlot> slot,
+  FLSlot slot,
   Pointer<CBLBlob> blob,
 );
 
@@ -116,8 +116,7 @@ final class BlobBindings extends Bindings {
   Pointer<CBLBlob>? getBlob(Pointer<FLDict> dict) =>
       _getBlob(dict).toNullable();
 
-  void setBlob(Pointer<FLSlot> slot, Pointer<CBLBlob> blob) =>
-      _setBlob(slot, blob);
+  void setBlob(FLSlot slot, Pointer<CBLBlob> blob) => _setBlob(slot, blob);
 
   int length(Pointer<CBLBlob> blob) => _length(blob);
 
@@ -276,7 +275,7 @@ final class BlobWriteStreamBindings extends Bindings {
 
   bool write(Pointer<CBLBlobWriteStream> stream, Data data) {
     final slice = data.toSliceResult();
-    return _write(stream, slice.buf, slice.size, globalCBLError)
+    return _write(stream, slice.buf.cast(), slice.size, globalCBLError)
         .checkCBLError();
   }
 

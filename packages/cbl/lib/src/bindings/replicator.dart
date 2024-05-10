@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import '../bindings.dart';
 import 'base.dart';
+import 'cblitedart.dart' as cblitedart;
 import 'global.dart';
 import 'utils.dart';
 
@@ -104,9 +105,9 @@ final class _CBLDartReplicationCollection extends Struct {
   external Pointer<CBLCollection> collection;
   external Pointer<FLArray> channels;
   external Pointer<FLArray> documentIDs;
-  external Pointer<CBLDartAsyncCallback> pushFilter;
-  external Pointer<CBLDartAsyncCallback> pullFilter;
-  external Pointer<CBLDartAsyncCallback> conflictResolver;
+  external cblitedart.CBLDart_AsyncCallback pushFilter;
+  external cblitedart.CBLDart_AsyncCallback pullFilter;
+  external cblitedart.CBLDart_AsyncCallback conflictResolver;
 }
 
 final class _CBLDartReplicatorConfiguration extends Struct {
@@ -153,9 +154,9 @@ final class CBLReplicationCollection {
   final Pointer<CBLCollection> collection;
   final Pointer<FLArray>? channels;
   final Pointer<FLArray>? documentIDs;
-  final Pointer<CBLDartAsyncCallback>? pushFilter;
-  final Pointer<CBLDartAsyncCallback>? pullFilter;
-  final Pointer<CBLDartAsyncCallback>? conflictResolver;
+  final cblitedart.CBLDart_AsyncCallback? pushFilter;
+  final cblitedart.CBLDart_AsyncCallback? pullFilter;
+  final cblitedart.CBLDart_AsyncCallback? conflictResolver;
 }
 
 final class CBLReplicatorConfiguration {
@@ -361,12 +362,12 @@ typedef _CBLReplicator_IsDocumentPending2 = bool Function(
 typedef _CBLDart_CBLReplicator_AddChangeListener_C = Void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 typedef _CBLDart_CBLReplicator_AddChangeListener = void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 
 enum CBLReplicatedDocumentFlag implements Option {
@@ -385,12 +386,12 @@ enum CBLReplicatedDocumentFlag implements Option {
 typedef _CBLDart_CBLReplicator_AddDocumentReplicationListener_C = Void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 typedef _CBLDart_CBLReplicator_AddDocumentReplicationListener = void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLReplicator> replicator,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 
 final class ReplicatorStatusCallbackMessage {
@@ -681,7 +682,7 @@ final class ReplicatorBindings extends Bindings {
   void addChangeListener(
     Pointer<CBLDatabase> db,
     Pointer<CBLReplicator> replicator,
-    Pointer<CBLDartAsyncCallback> listener,
+    cblitedart.CBLDart_AsyncCallback listener,
   ) {
     _addChangeListener(db, replicator, listener);
   }
@@ -689,7 +690,7 @@ final class ReplicatorBindings extends Bindings {
   void addDocumentReplicationListener(
     Pointer<CBLDatabase> db,
     Pointer<CBLReplicator> replicator,
-    Pointer<CBLDartAsyncCallback> listener,
+    cblitedart.CBLDart_AsyncCallback listener,
   ) {
     _addDocumentReplicationListener(db, replicator, listener);
   }

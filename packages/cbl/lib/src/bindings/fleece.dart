@@ -8,10 +8,16 @@ import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'bindings.dart';
+// ignore: unused_import
+import 'cblite.dart' as cblite;
+// ignore: unused_import
+import 'cblitedart.dart' as cblitedart;
 import 'data.dart';
 import 'global.dart';
 import 'slice.dart';
 import 'utils.dart';
+
+const _sliceBindings = SliceBindings();
 
 // === Common ==================================================================
 
@@ -68,53 +74,37 @@ extension _FleeceErrorExt<T> on T {
 
 // === Slice ===================================================================
 
-final class FLSlice extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
+typedef FLSlice = cblite.FLSlice;
 
 extension FLSliceExt on FLSlice {
   bool get isNull => buf == nullptr;
+
   Data? toData() => SliceResult.fromFLSlice(this)?.toData();
 }
 
-final class FLSliceResult extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
+typedef FLSliceResult = cblite.FLSliceResult;
 
 extension FLResultSliceExt on FLSliceResult {
   bool get isNull => buf == nullptr;
+
   Data? toData({bool retain = false}) =>
       SliceResult.fromFLSliceResult(this, retain: retain)?.toData();
 }
 
-final class FLString extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
+typedef FLString = cblite.FLString;
 
 extension FLStringExt on FLString {
   bool get isNull => buf == nullptr;
+
   String? toDartString() =>
       isNull ? null : buf.cast<Utf8>().toDartString(length: size);
 }
 
-final class FLStringResult extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
+typedef FLStringResult = cblite.FLStringResult;
 
 extension FLStringResultExt on FLStringResult {
   bool get isNull => buf == nullptr;
+
   String? toDartStringAndRelease({bool allowMalformed = false}) {
     if (isNull) {
       return null;
@@ -125,285 +115,114 @@ extension FLStringResultExt on FLStringResult {
       allowMalformed: allowMalformed,
     );
 
-    CBLBindings.instance.fleece.slice.releaseSliceResultByBuf(buf);
+    _sliceBindings.releaseSliceResultByBuf(buf);
 
     return result;
   }
 }
 
-typedef _FLSlice_Equal_C = Bool Function(FLSlice a, FLSlice b);
-typedef _FLSlice_Equal = bool Function(FLSlice a, FLSlice b);
+final class SliceBindings {
+  const SliceBindings();
 
-typedef _FLSlice_Compare_C = Int Function(FLSlice a, FLSlice b);
-typedef _FLSlice_Compare = int Function(FLSlice a, FLSlice b);
+  static final _sliceResultFinalizer = NativeFinalizer(Native.addressOf<
+              NativeFunction<
+                  cblitedart.NativeCBLDart_FLSliceResult_ReleaseByBuf>>(
+          cblitedart.CBLDart_FLSliceResult_ReleaseByBuf)
+      .cast());
 
-typedef _FLSliceResult_New_C = FLSliceResult Function(Size size);
-typedef _FLSliceResult_New = FLSliceResult Function(int size);
+  bool equal(FLSlice a, FLSlice b) => cblite.FLSlice_Equal(a, b);
 
-typedef _FLSlice_Copy_C = FLSliceResult Function(FLSlice slice);
-typedef _FLSlice_Copy = FLSliceResult Function(FLSlice slice);
+  int compare(FLSlice a, FLSlice b) => cblite.FLSlice_Compare(a, b);
 
-typedef _CBLDart_FLSliceResult_RetainByBuf_C = Void Function(
-  Pointer<Uint8> buf,
-);
-typedef _CBLDart_FLSliceResult_RetainByBuf = void Function(
-  Pointer<Uint8> buf,
-);
+  FLSliceResult create(int size) => cblite.FLSliceResult_New(size);
 
-typedef _CBLDart_FLSliceResult_ReleaseByBuf_C = Void Function(
-  Pointer<Uint8> buf,
-);
-typedef _CBLDart_FLSliceResult_ReleaseByBuf = void Function(
-  Pointer<Uint8> buf,
-);
-
-final class SliceBindings extends Bindings {
-  SliceBindings(super.parent) {
-    _equal = libs.cbl.lookupFunction<_FLSlice_Equal_C, _FLSlice_Equal>(
-      'FLSlice_Equal',
-    );
-    _compare = libs.cbl.lookupFunction<_FLSlice_Compare_C, _FLSlice_Compare>(
-      'FLSlice_Compare',
-    );
-    _new = libs.cbl.lookupFunction<_FLSliceResult_New_C, _FLSliceResult_New>(
-      'FLSliceResult_New',
-    );
-    _copy = libs.cbl.lookupFunction<_FLSlice_Copy_C, _FLSlice_Copy>(
-      'FLSlice_Copy',
-    );
-    _retainSliceResultByBuf = libs.cblDart.lookupFunction<
-        _CBLDart_FLSliceResult_RetainByBuf_C,
-        _CBLDart_FLSliceResult_RetainByBuf>(
-      'CBLDart_FLSliceResult_RetainByBuf',
-    );
-    _releaseSliceResultByBufPtr =
-        libs.cblDart.lookup('CBLDart_FLSliceResult_ReleaseByBuf');
-    _releaseSliceResultByBuf =
-        _releaseSliceResultByBufPtr.asFunction(isLeaf: useIsLeaf);
-  }
-
-  late final _FLSlice_Equal _equal;
-  late final _FLSlice_Compare _compare;
-
-  late final _FLSliceResult_New _new;
-  late final _FLSlice_Copy _copy;
-  late final _CBLDart_FLSliceResult_RetainByBuf _retainSliceResultByBuf;
-  late final Pointer<NativeFunction<_CBLDart_FLSliceResult_ReleaseByBuf_C>>
-      _releaseSliceResultByBufPtr;
-  late final _CBLDart_FLSliceResult_ReleaseByBuf _releaseSliceResultByBuf;
-
-  late final _sliceResultFinalizer =
-      NativeFinalizer(_releaseSliceResultByBufPtr.cast());
-
-  bool equal(FLSlice a, FLSlice b) => _equal(a, b);
-
-  int compare(FLSlice a, FLSlice b) => _compare(a, b);
-
-  FLSliceResult create(int size) => _new(size);
-
-  FLSliceResult copy(FLSlice slice) => _copy(slice);
+  FLSliceResult copy(FLSlice slice) => cblite.FLSlice_Copy(slice);
 
   void bindToDartObject(
     Finalizable object, {
-    required Pointer<Uint8> buf,
+    required Pointer<Void> buf,
     required bool retain,
   }) {
     if (retain) {
-      _retainSliceResultByBuf(buf);
+      retainSliceResultByBuf(buf);
     }
 
     _sliceResultFinalizer.attach(object, buf.cast());
   }
 
-  void retainSliceResultByBuf(Pointer<Uint8> buf) {
-    _retainSliceResultByBuf(buf);
+  void retainSliceResultByBuf(Pointer<Void> buf) {
+    cblitedart.CBLDart_FLSliceResult_RetainByBuf(buf);
   }
 
-  void releaseSliceResultByBuf(Pointer<Uint8> buf) {
-    _releaseSliceResultByBuf(buf);
+  void releaseSliceResultByBuf(Pointer<Void> buf) {
+    cblitedart.CBLDart_FLSliceResult_ReleaseByBuf(buf);
   }
 }
 
 // === SharedKeys ==============================================================
 
-final class FLSharedKeys extends Opaque {}
+typedef FLSharedKeys = cblite.FLSharedKeys;
 
-typedef _FLSharedKeys_New = Pointer<FLSharedKeys> Function();
+final class SharedKeysBindings {
+  const SharedKeysBindings();
 
-typedef _FLSharedKeys_Retain_C = Void Function(
-  Pointer<FLSharedKeys> sharedKeys,
-);
-typedef _FLSharedKeys_Retain = void Function(
-  Pointer<FLSharedKeys> sharedKeys,
-);
+  static final _finalizer = NativeFinalizer(
+      Native.addressOf<NativeFunction<cblite.NativeFLSharedKeys_Release>>(
+              cblite.FLSharedKeys_Release)
+          .cast());
 
-typedef _FLSharedKeys_Release_C = Void Function(
-  Pointer<FLSharedKeys> sharedKeys,
-);
-
-typedef _FLSharedKeys_Count_C = UnsignedInt Function(
-  Pointer<FLSharedKeys> sharedKeys,
-);
-typedef _FLSharedKeys_Count = int Function(
-  Pointer<FLSharedKeys> sharedKeys,
-);
-
-final class SharedKeysBindings extends Bindings {
-  SharedKeysBindings(super.parent) {
-    _new = libs.cbl.lookupFunction<_FLSharedKeys_New, _FLSharedKeys_New>(
-      'FLSharedKeys_New',
-      isLeaf: useIsLeaf,
-    );
-    _retain =
-        libs.cbl.lookupFunction<_FLSharedKeys_Retain_C, _FLSharedKeys_Retain>(
-      'FLSharedKeys_Retain',
-      isLeaf: useIsLeaf,
-    );
-    _releasePtr = libs.cbl.lookup('FLSharedKeys_Release');
-    _count =
-        libs.cbl.lookupFunction<_FLSharedKeys_Count_C, _FLSharedKeys_Count>(
-      'FLSharedKeys_Count',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLSharedKeys_New _new;
-  late final _FLSharedKeys_Retain _retain;
-  late final Pointer<NativeFunction<_FLSharedKeys_Release_C>> _releasePtr;
-  late final _FLSharedKeys_Count _count;
-
-  late final _finalizer = NativeFinalizer(_releasePtr.cast());
-
-  Pointer<FLSharedKeys> create() => _new();
+  FLSharedKeys create() => cblite.FLSharedKeys_New();
 
   void bindToDartObject(
     Finalizable object,
-    Pointer<FLSharedKeys> sharedKeys, {
+    FLSharedKeys sharedKeys, {
     required bool retain,
   }) {
     if (retain) {
-      _retain(sharedKeys);
+      cblite.FLSharedKeys_Retain(sharedKeys);
     }
 
     _finalizer.attach(object, sharedKeys.cast());
   }
 
-  int count(Pointer<FLSharedKeys> sharedKeys) => _count(sharedKeys);
+  int count(FLSharedKeys sharedKeys) => cblite.FLSharedKeys_Count(sharedKeys);
 }
 
 // === Slot ====================================================================
 
-final class FLSlot extends Opaque {}
+typedef FLSlot = cblite.FLSlot;
 
-typedef _FLSlot_SetNull_C = Void Function(Pointer<FLSlot> slot);
-typedef _FLSlot_SetNull = void Function(Pointer<FLSlot> slot);
+final class SlotBindings {
+  const SlotBindings();
 
-typedef _FLSlot_SetBool_C = Void Function(Pointer<FLSlot> slot, Bool value);
-typedef _FLSlot_SetBool = void Function(Pointer<FLSlot> slot, bool value);
-
-typedef _FLSlot_SetInt_C = Void Function(Pointer<FLSlot> slot, Int64 value);
-typedef _FLSlot_SetInt = void Function(Pointer<FLSlot> slot, int value);
-
-typedef _FLSlot_SetDouble_C = Void Function(Pointer<FLSlot> slot, Double value);
-typedef _FLSlot_SetDouble = void Function(Pointer<FLSlot> slot, double value);
-
-typedef _FLSlot_SetString_C = Void Function(
-  Pointer<FLSlot> slot,
-  FLString value,
-);
-typedef _FLSlot_SetString = void Function(
-  Pointer<FLSlot> slot,
-  FLString value,
-);
-
-typedef _FLSlot_SetData_C = Void Function(
-  Pointer<FLSlot> slot,
-  FLSlice value,
-);
-typedef _FLSlot_SetData = void Function(
-  Pointer<FLSlot> slot,
-  FLSlice value,
-);
-
-typedef _FLSlot_SetValue_C = Void Function(
-  Pointer<FLSlot> slot,
-  Pointer<FLValue> value,
-);
-typedef _FLSlot_SetValue = void Function(
-  Pointer<FLSlot> slot,
-  Pointer<FLValue> value,
-);
-
-final class SlotBindings extends Bindings {
-  SlotBindings(super.parent) {
-    _setNull = libs.cbl.lookupFunction<_FLSlot_SetNull_C, _FLSlot_SetNull>(
-      'FLSlot_SetNull',
-      isLeaf: useIsLeaf,
-    );
-    _setBool = libs.cbl.lookupFunction<_FLSlot_SetBool_C, _FLSlot_SetBool>(
-      'FLSlot_SetBool',
-      isLeaf: useIsLeaf,
-    );
-    _setInt = libs.cbl.lookupFunction<_FLSlot_SetInt_C, _FLSlot_SetInt>(
-      'FLSlot_SetInt',
-      isLeaf: useIsLeaf,
-    );
-    _setDouble =
-        libs.cbl.lookupFunction<_FLSlot_SetDouble_C, _FLSlot_SetDouble>(
-      'FLSlot_SetDouble',
-      isLeaf: useIsLeaf,
-    );
-    _setString =
-        libs.cbl.lookupFunction<_FLSlot_SetString_C, _FLSlot_SetString>(
-      'FLSlot_SetString',
-      isLeaf: useIsLeaf,
-    );
-    _setData = libs.cbl.lookupFunction<_FLSlot_SetData_C, _FLSlot_SetData>(
-      'FLSlot_SetData',
-      isLeaf: useIsLeaf,
-    );
-    _setValue = libs.cbl.lookupFunction<_FLSlot_SetValue_C, _FLSlot_SetValue>(
-      'FLSlot_SetValue',
-      isLeaf: useIsLeaf,
-    );
+  void setNull(FLSlot slot) {
+    cblite.FLSlot_SetNull(slot);
   }
 
-  late final _FLSlot_SetNull _setNull;
-  late final _FLSlot_SetBool _setBool;
-  late final _FLSlot_SetInt _setInt;
-  late final _FLSlot_SetDouble _setDouble;
-  late final _FLSlot_SetString _setString;
-  late final _FLSlot_SetData _setData;
-  late final _FLSlot_SetValue _setValue;
-
-  void setNull(Pointer<FLSlot> slot) {
-    _setNull(slot);
+  void setBool(FLSlot slot, bool value) {
+    cblite.FLSlot_SetBool(slot, value);
   }
 
-  void setBool(Pointer<FLSlot> slot, bool value) {
-    _setBool(slot, value);
+  void setInt(FLSlot slot, int value) {
+    cblite.FLSlot_SetInt(slot, value);
   }
 
-  void setInt(Pointer<FLSlot> slot, int value) {
-    _setInt(slot, value);
+  void setDouble(FLSlot slot, double value) {
+    cblite.FLSlot_SetDouble(slot, value);
   }
 
-  void setDouble(Pointer<FLSlot> slot, double value) {
-    _setDouble(slot, value);
-  }
-
-  void setString(Pointer<FLSlot> slot, String value) {
+  void setString(FLSlot slot, String value) {
     runWithSingleFLString(value, (flValue) {
-      _setString(slot, flValue);
+      cblite.FLSlot_SetString(slot, flValue);
     });
   }
 
-  void setData(Pointer<FLSlot> slot, Data value) {
-    _setData(slot, value.toSliceResult().makeGlobal().ref);
+  void setData(FLSlot slot, Data value) {
+    cblite.FLSlot_SetData(slot, value.toSliceResult().makeGlobal().ref);
   }
 
-  void setValue(Pointer<FLSlot> slot, Pointer<FLValue> value) {
-    _setValue(slot, value);
+  void setValue(FLSlot slot, FLValue value) {
+    cblite.FLSlot_SetValue(slot, value);
   }
 }
 
@@ -414,13 +233,13 @@ final class FLDoc extends Opaque {}
 typedef _FLDoc_FromResultData_C = Pointer<FLDoc> Function(
   FLSliceResult data,
   Uint8 trust,
-  Pointer<FLSharedKeys> sharedKeys,
+  FLSharedKeys sharedKeys,
   FLSlice externalData,
 );
 typedef _FLDoc_FromResultData = Pointer<FLDoc> Function(
   FLSliceResult data,
   int trust,
-  Pointer<FLSharedKeys> sharedKeys,
+  FLSharedKeys sharedKeys,
   FLSlice externalData,
 );
 
@@ -435,7 +254,7 @@ typedef _FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
 
 typedef _FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
 
-typedef _FLDoc_GetSharedKeys = Pointer<FLSharedKeys> Function(
+typedef _FLDoc_GetSharedKeys = FLSharedKeys Function(
   Pointer<FLDoc> doc,
 );
 
@@ -479,7 +298,7 @@ final class DocBindings extends Bindings {
   Pointer<FLDoc> fromResultData(
     Data data,
     FLTrust trust,
-    Pointer<FLSharedKeys>? sharedKeys,
+    FLSharedKeys? sharedKeys,
   ) {
     final sliceResult = data.toSliceResult();
     return _fromResultData(
@@ -508,7 +327,7 @@ final class DocBindings extends Bindings {
 
   Pointer<FLValue> getRoot(Pointer<FLDoc> doc) => _getRoot(doc);
 
-  Pointer<FLSharedKeys>? getSharedKeys(Pointer<FLDoc> doc) =>
+  FLSharedKeys? getSharedKeys(Pointer<FLDoc> doc) =>
       _getSharedKeys(doc).toNullable();
 }
 
@@ -821,16 +640,16 @@ typedef _FLMutableArray_IsChanged = bool Function(
   Pointer<FLMutableArray> array,
 );
 
-typedef _FLMutableArray_Set_C = Pointer<FLSlot> Function(
+typedef _FLMutableArray_Set_C = FLSlot Function(
   Pointer<FLMutableArray> array,
   Uint32 index,
 );
-typedef _FLMutableArray_Set = Pointer<FLSlot> Function(
+typedef _FLMutableArray_Set = FLSlot Function(
   Pointer<FLMutableArray> array,
   int index,
 );
 
-typedef _FLMutableArray_Append = Pointer<FLSlot> Function(
+typedef _FLMutableArray_Append = FLSlot Function(
   Pointer<FLMutableArray> array,
 );
 
@@ -965,10 +784,9 @@ final class MutableArrayBindings extends Bindings {
 
   bool isChanged(Pointer<FLMutableArray> array) => _isChanged(array);
 
-  Pointer<FLSlot> set(Pointer<FLMutableArray> array, int index) =>
-      _set(array, index);
+  FLSlot set(Pointer<FLMutableArray> array, int index) => _set(array, index);
 
-  Pointer<FLSlot> append(Pointer<FLMutableArray> array) => _append(array);
+  FLSlot append(Pointer<FLMutableArray> array) => _append(array);
 
   void insert(Pointer<FLMutableArray> array, int index, int count) =>
       _insert(array, index, count);
@@ -1126,7 +944,7 @@ typedef _FLMutableDict_IsChanged_C = Bool Function(
 );
 typedef _FLMutableDict_IsChanged = bool Function(Pointer<FLMutableDict> dict);
 
-typedef _FLMutableDict_Set = Pointer<FLSlot> Function(
+typedef _FLMutableDict_Set = FLSlot Function(
   Pointer<FLMutableDict> dict,
   FLString key,
 );
@@ -1223,7 +1041,7 @@ final class MutableDictBindings extends Bindings {
 
   bool isChanged(Pointer<FLMutableDict> dict) => _isChanged(dict);
 
-  Pointer<FLSlot> set(Pointer<FLMutableDict> dict, String key) =>
+  FLSlot set(Pointer<FLMutableDict> dict, String key) =>
       runWithSingleFLString(key, (flKey) => _set(dict, flKey));
 
   void remove(Pointer<FLMutableDict> dict, String key) {
@@ -1587,11 +1405,11 @@ typedef _FLEncoder_Free_C = Void Function(Pointer<FLEncoder> encoder);
 
 typedef _FLEncoder_SetSharedKeys_C = Void Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLSharedKeys> sharedKeys,
+  FLSharedKeys sharedKeys,
 );
 typedef _FLEncoder_SetSharedKeys = void Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLSharedKeys> sharedKeys,
+  FLSharedKeys sharedKeys,
 );
 
 typedef _FLEncoder_Reset_C = Void Function(Pointer<FLEncoder> encoder);
@@ -1880,7 +1698,7 @@ final class FleeceEncoderBindings extends Bindings {
   }) =>
       _new(format.toInt(), reserveSize, uniqueStrings);
 
-  void setSharedKeys(Pointer<FLEncoder> encoder, Pointer<FLSharedKeys> keys) {
+  void setSharedKeys(Pointer<FLEncoder> encoder, FLSharedKeys keys) {
     _setSharedKeys(encoder, keys);
   }
 
@@ -2011,9 +1829,6 @@ final class FleeceEncoderBindings extends Bindings {
 
 final class FleeceBindings extends Bindings {
   FleeceBindings(super.parent) {
-    slice = SliceBindings(this);
-    sharedKeys = SharedKeysBindings(this);
-    slot = SlotBindings(this);
     doc = DocBindings(this);
     value = ValueBindings(this);
     array = ArrayBindings(this);
@@ -2025,9 +1840,6 @@ final class FleeceBindings extends Bindings {
     encoder = FleeceEncoderBindings(this);
   }
 
-  late final SliceBindings slice;
-  late final SharedKeysBindings sharedKeys;
-  late final SlotBindings slot;
   late final DocBindings doc;
   late final ValueBindings value;
   late final ArrayBindings array;

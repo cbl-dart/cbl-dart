@@ -39,6 +39,7 @@ import 'document_change.dart';
 import 'ffi_blob_store.dart';
 import 'scope.dart';
 
+const _baseBindings = BaseBindings();
 final _bindings = cblBindings.database;
 
 final class FfiDatabase
@@ -425,7 +426,7 @@ final class FfiScope
     required this.pointer,
     required this.database,
   }) {
-    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
+    _baseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(database);
   }
@@ -481,7 +482,7 @@ final class FfiCollection
     required this.pointer,
     required this.scope,
   }) {
-    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
+    _baseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(scope);
   }

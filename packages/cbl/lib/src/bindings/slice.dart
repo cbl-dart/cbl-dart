@@ -6,12 +6,11 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import 'bindings.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
-final _sliceBindings = CBLBindings.instance.fleece.slice;
+const _sliceBindings = SliceBindings();
 
 /// A contiguous area of native memory, whose lifetime is tied to some other
 /// object.
@@ -48,7 +47,7 @@ final class Slice implements Finalizable {
       string.buf == nullptr ? null : Slice._(string.buf, string.size);
 
   /// The pointer to start of this slice in native memory.
-  final Pointer<Uint8> buf;
+  final Pointer<Void> buf;
 
   /// The size of this slice in bytes.
   final int size;
@@ -100,7 +99,7 @@ final class Slice implements Finalizable {
   /// is in use.
   ///
   /// For a less efficient but safer alternative, use [toTypedList].
-  Uint8List asTypedList() => buf.asTypedList(size);
+  Uint8List asTypedList() => buf.cast<Uint8>().asTypedList(size);
 
   /// Copies the contents of this [Slice] into a new [Uint8List] and returns it.
   Uint8List toTypedList() => Uint8List.fromList(asTypedList());

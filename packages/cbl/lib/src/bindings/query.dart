@@ -3,9 +3,9 @@
 
 import 'dart:ffi';
 
-import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'cblitedart.dart' as cblitedart;
 import 'database.dart';
 import 'fleece.dart';
 import 'global.dart';
@@ -79,13 +79,13 @@ typedef _CBLDart_CBLQuery_AddChangeListener_C = Pointer<CBLListenerToken>
     Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLQuery> query,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 typedef _CBLDart_CBLQuery_AddChangeListener = Pointer<CBLListenerToken>
     Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLQuery> query,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 typedef _CBLQuery_CopyCurrentResults = Pointer<CBLResultSet> Function(
   Pointer<CBLQuery> query,
@@ -194,7 +194,7 @@ final class QueryBindings extends Bindings {
   Pointer<CBLListenerToken> addChangeListener(
     Pointer<CBLDatabase> db,
     Pointer<CBLQuery> query,
-    Pointer<CBLDartAsyncCallback> listener,
+    cblitedart.CBLDart_AsyncCallback listener,
   ) =>
       _addChangeListener(db, query, listener);
 

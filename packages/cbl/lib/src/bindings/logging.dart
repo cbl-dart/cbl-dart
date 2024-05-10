@@ -5,9 +5,9 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
@@ -80,10 +80,10 @@ final class LogCallbackMessage {
 }
 
 typedef _CBLDart_CBLLog_SetCallback_C = Bool Function(
-  Pointer<CBLDartAsyncCallback> callback,
+  cblitedart.CBLDart_AsyncCallback callback,
 );
 typedef _CBLDart_CBLLog_SetCallback = bool Function(
-  Pointer<CBLDartAsyncCallback> callback,
+  cblitedart.CBLDart_AsyncCallback callback,
 );
 
 final class _CBLLogFileConfiguration extends Struct {
@@ -245,7 +245,7 @@ final class LoggingBindings extends Bindings {
     _setCallbackLevel(logLevel.toInt());
   }
 
-  bool setCallback(Pointer<CBLDartAsyncCallback> callback) =>
+  bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
       _setCallback(callback);
 
   void setFileLogConfiguration(CBLLogFileConfiguration? config) {

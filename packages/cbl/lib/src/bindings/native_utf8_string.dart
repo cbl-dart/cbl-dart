@@ -5,7 +5,7 @@ import 'dart:typed_data';
 final class NativeUtf8String {
   NativeUtf8String(this.buffer, this.size, {this.allocator});
 
-  final Pointer<Uint8> buffer;
+  final Pointer<Void> buffer;
   final int size;
   final Allocator? allocator;
 
@@ -72,7 +72,7 @@ final class NativeUtf8StringEncoder {
     }
 
     final allocationSize = encodedAllocationSize(string);
-    final buffer = allocator<Uint8>(allocationSize);
+    final buffer = allocator<Uint8>(allocationSize).cast<Void>();
 
     return encodeToBuffer(
       string,
@@ -90,7 +90,7 @@ final class NativeUtf8StringEncoder {
   /// [allocator] must be the allocator that was used to allocate [buffer].
   NativeUtf8String encodeToBuffer(
     String string,
-    Pointer<Uint8> buffer, {
+    Pointer<Void> buffer, {
     required int allocationSize,
     int start = 0,
     required int end,
@@ -101,7 +101,8 @@ final class NativeUtf8StringEncoder {
       return NativeUtf8String(buffer, 0, allocator: allocator);
     }
 
-    final encoder = _Utf8Encoder(buffer.asTypedList(allocationSize));
+    final encoder =
+        _Utf8Encoder(buffer.cast<Uint8>().asTypedList(allocationSize));
     final endPosition = encoder._fillBuffer(string, start, end);
     assert(endPosition >= end - 1);
     if (endPosition != end) {

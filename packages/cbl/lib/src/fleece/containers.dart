@@ -43,9 +43,9 @@ final class SharedKeys implements Finalizable {
     _bindings.bindToDartObject(this, pointer, retain: !adopt);
   }
 
-  static final _bindings = cblBindings.fleece.sharedKeys;
+  static const _bindings = SharedKeysBindings();
 
-  final Pointer<FLSharedKeys> pointer;
+  final FLSharedKeys pointer;
 
   /// The number of keys in the mapping.
   ///
@@ -686,11 +686,11 @@ abstract final class SlotSetter {
 
   bool canSetValue(Object? value);
 
-  void setSlotValue(Pointer<FLSlot> slot, Object? value);
+  void setSlotValue(FLSlot slot, Object? value);
 }
 
 final class _DefaultSlotSetter implements SlotSetter {
-  late final _slotBindings = cblBindings.fleece.slot;
+  static const _slotBindings = SlotBindings();
 
   @override
   bool canSetValue(Object? value) =>
@@ -705,7 +705,7 @@ final class _DefaultSlotSetter implements SlotSetter {
       value is Value;
 
   @override
-  void setSlotValue(Pointer<FLSlot> slot, Object? value) {
+  void setSlotValue(FLSlot slot, Object? value) {
     // ignore: parameter_assignments
     value = _recursivelyConvertCollectionsToFleece(value);
 
@@ -744,7 +744,7 @@ final class _DefaultSlotSetter implements SlotSetter {
   }
 }
 
-void _setSlotValue(Pointer<FLSlot> slot, Object? value) {
+void _setSlotValue(FLSlot slot, Object? value) {
   SlotSetter._findForValue(value).setSlotValue(slot, value);
 }
 

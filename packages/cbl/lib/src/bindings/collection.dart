@@ -5,9 +5,9 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
+import 'cblitedart.dart' as cblitedart;
 import 'database.dart';
 import 'document.dart';
 import 'fleece.dart';
@@ -246,24 +246,24 @@ typedef _CBLDart_CBLCollection_AddDocumentChangeListener_C = Void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLCollection> collection,
   FLString docId,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 typedef _CBLDart_CBLCollection_AddDocumentChangeListener = void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLCollection> collection,
   FLString docId,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 
 typedef _CBLDart_CBLCollection_AddChangeListener_C = Void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLCollection> collection,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 typedef _CBLDart_CBLCollection_AddChangeListener = void Function(
   Pointer<CBLDatabase> db,
   Pointer<CBLCollection> collection,
-  Pointer<CBLDartAsyncCallback> listener,
+  cblitedart.CBLDart_AsyncCallback listener,
 );
 
 final class CollectionChangeCallbackMessage {
@@ -580,7 +580,7 @@ final class CollectionBindings extends Bindings {
     Pointer<CBLDatabase> db,
     Pointer<CBLCollection> collection,
     String docId,
-    Pointer<CBLDartAsyncCallback> listener,
+    cblitedart.CBLDart_AsyncCallback listener,
   ) {
     runWithSingleFLString(docId, (flDocId) {
       _addDocumentChangeListener(db, collection, flDocId, listener);
@@ -590,7 +590,7 @@ final class CollectionBindings extends Bindings {
   void addChangeListener(
     Pointer<CBLDatabase> db,
     Pointer<CBLCollection> collection,
-    Pointer<CBLDartAsyncCallback> listener,
+    cblitedart.CBLDart_AsyncCallback listener,
   ) {
     _addChangeListener(db, collection, listener);
   }

@@ -2,7 +2,9 @@
 
 import 'dart:ffi';
 
-import 'ffi.dart';
+import '../bindings.dart';
+
+const _baseBindings = BaseBindings();
 
 /// Binds the lifetime of a native CBL ref counted object to a Dart object.
 ///
@@ -15,7 +17,7 @@ void bindCBLRefCountedToDartObject<T extends NativeType>(
   bool adopt = true,
 }) {
   if (!adopt) {
-    cblBindings.base.retainRefCounted(pointer.cast());
+    _baseBindings.retainRefCounted(pointer.cast());
   }
-  cblBindings.base.bindCBLRefCountedToDartObject(object, pointer.cast());
+  _baseBindings.bindCBLRefCountedToDartObject(object, pointer.cast());
 }

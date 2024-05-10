@@ -31,6 +31,7 @@ import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
 
+const _baseBindings = BaseBindings();
 final _bindings = cblBindings.replicator;
 
 final class FfiReplicator
@@ -535,7 +536,7 @@ AsyncCallback _createConflictResolverCallback(
             // caller balances with a release. This must happen on the Dart
             // side, because `resolvedDelegate` can be garbage collected before
             // the document pointer makes it back to the native side.
-            cblBindings.base.retainRefCounted(resolvedDelegate.pointer.cast());
+            _baseBindings.retainRefCounted(resolvedDelegate.pointer.cast());
           } else {
             resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
           }
