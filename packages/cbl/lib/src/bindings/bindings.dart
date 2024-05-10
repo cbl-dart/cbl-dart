@@ -3,7 +3,6 @@ import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
 import 'libraries.dart';
-import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
 import 'tracing.dart';
@@ -27,7 +26,6 @@ abstract base class Bindings {
 final class CBLBindings extends Bindings {
   CBLBindings(LibrariesConfiguration config)
       : super.root(DynamicLibraries.fromConfig(config)) {
-    logging = LoggingBindings(this);
     database = DatabaseBindings(this);
     collection = CollectionBindings(this);
     document = DocumentBindings(this);
@@ -64,7 +62,6 @@ final class CBLBindings extends Bindings {
     }
   }
 
-  late final LoggingBindings logging;
   late final DatabaseBindings database;
   late final CollectionBindings collection;
   late final DocumentBindings document;
