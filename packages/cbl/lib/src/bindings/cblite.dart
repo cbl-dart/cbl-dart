@@ -2924,6 +2924,311 @@ external void FLSlot_SetValue(
   FLValue arg1,
 );
 
+/// Returns JSON that encodes the changes to turn the value `old` into `nuu`.
+/// (The format is documented in Fleece.md, but you should treat it as a black box.)
+/// @param old  A value that's typically the old/original state of some data.
+/// @param nuu  A value that's typically the new/changed state of the `old` data.
+/// @return  JSON data representing the changes from `old` to `nuu`, or NULL on
+/// (extremely unlikely) failure.
+@ffi.Native<NativeFLCreateJSONDelta>()
+external FLSliceResult FLCreateJSONDelta(
+  FLValue old,
+  FLValue nuu,
+);
+
+/// Writes JSON that describes the changes to turn the value `old` into `nuu`.
+/// (The format is documented in Fleece.md, but you should treat it as a black box.)
+/// @param old  A value that's typically the old/original state of some data.
+/// @param nuu  A value that's typically the new/changed state of the `old` data.
+/// @param jsonEncoder  An encoder to write the JSON to. Must have been created using
+/// `FLEncoder_NewWithOptions`, with JSON or JSON5 format.
+/// @return  True on success, false on (extremely unlikely) failure.
+@ffi.Native<NativeFLEncodeJSONDelta>()
+external bool FLEncodeJSONDelta(
+  FLValue old,
+  FLValue nuu,
+  FLEncoder jsonEncoder,
+);
+
+/// Applies the JSON data created by `CreateJSONDelta` to the value `old`, which must be equal
+/// to the `old` value originally passed to `FLCreateJSONDelta`, and returns a Fleece document
+/// equal to the original `nuu` value.
+/// @param old  A value that's typically the old/original state of some data. This must be
+/// equal to the `old` value used when creating the `jsonDelta`.
+/// @param jsonDelta  A JSON-encoded delta created by `FLCreateJSONDelta` or `FLEncodeJSONDelta`.
+/// @param outError  On failure, error information will be stored where this points, if non-null.
+/// @return  The corresponding `nuu` value, encoded as Fleece, or null if an error occurred.
+@ffi.Native<NativeFLApplyJSONDelta>()
+external FLSliceResult FLApplyJSONDelta(
+  FLValue old,
+  FLSlice jsonDelta,
+  ffi.Pointer<ffi.Int32> outError,
+);
+
+/// Applies the (parsed) JSON data created by `CreateJSONDelta` to the value `old`, which must be
+/// equal to the `old` value originally passed to `FLCreateJSONDelta`, and writes the corresponding
+/// `nuu` value to the encoder.
+/// @param old  A value that's typically the old/original state of some data. This must be
+/// equal to the `old` value used when creating the `jsonDelta`.
+/// @param jsonDelta  A JSON-encoded delta created by `FLCreateJSONDelta` or `FLEncodeJSONDelta`.
+/// @param encoder  A Fleece encoder to write the decoded `nuu` value to. (JSON encoding is not
+/// supported.)
+/// @return  True on success, false on error; call `FLEncoder_GetError` for details.
+@ffi.Native<NativeFLEncodeApplyingJSONDelta>()
+external bool FLEncodeApplyingJSONDelta(
+  FLValue old,
+  FLSlice jsonDelta,
+  FLEncoder encoder,
+);
+
+/// Creates a new empty FLSharedKeys object, which must eventually be released.
+@ffi.Native<NativeFLSharedKeys_New>()
+external FLSharedKeys FLSharedKeys_New();
+
+@ffi.Native<NativeFLSharedKeys_NewWithRead>()
+external FLSharedKeys FLSharedKeys_NewWithRead(
+  FLSharedKeysReadCallback arg0,
+  ffi.Pointer<ffi.Void> context,
+);
+
+/// Returns a data blob containing the current state (all the keys and their integers.)
+@ffi.Native<NativeFLSharedKeys_GetStateData>()
+external FLSliceResult FLSharedKeys_GetStateData(
+  FLSharedKeys arg0,
+);
+
+/// Updates an FLSharedKeys with saved state data created by \ref FLSharedKeys_GetStateData.
+@ffi.Native<NativeFLSharedKeys_LoadStateData>()
+external bool FLSharedKeys_LoadStateData(
+  FLSharedKeys arg0,
+  FLSlice arg1,
+);
+
+/// Writes the current state to a Fleece encoder as a single value,
+/// which can later be decoded and passed to \ref FLSharedKeys_LoadState.
+@ffi.Native<NativeFLSharedKeys_WriteState>()
+external void FLSharedKeys_WriteState(
+  FLSharedKeys arg0,
+  FLEncoder arg1,
+);
+
+/// Updates an FLSharedKeys object with saved state, a Fleece value previously written by
+/// \ref FLSharedKeys_WriteState.
+@ffi.Native<NativeFLSharedKeys_LoadState>()
+external bool FLSharedKeys_LoadState(
+  FLSharedKeys arg0,
+  FLValue arg1,
+);
+
+/// Maps a key string to a number in the range [0...2047], or returns -1 if it isn't mapped.
+/// If the key doesn't already have a mapping, and the `add` flag is true,
+/// a new mapping is assigned and returned.
+/// However, the `add` flag has no effect if the key is unmappable (is longer than 16 bytes
+/// or contains non-identifier characters), or if all available integers have been assigned.
+@ffi.Native<NativeFLSharedKeys_Encode>()
+external int FLSharedKeys_Encode(
+  FLSharedKeys arg0,
+  FLString arg1,
+  bool add,
+);
+
+/// Returns the key string that maps to the given integer `key`, else NULL.
+@ffi.Native<NativeFLSharedKeys_Decode>()
+external FLString FLSharedKeys_Decode(
+  FLSharedKeys arg0,
+  int key,
+);
+
+/// Returns the number of keys in the mapping. This number increases whenever the mapping
+/// is changed, and never decreases.
+@ffi.Native<NativeFLSharedKeys_Count>()
+external int FLSharedKeys_Count(
+  FLSharedKeys arg0,
+);
+
+/// Reverts an FLSharedKeys by "forgetting" any keys added since it had the count `oldCount`.
+@ffi.Native<NativeFLSharedKeys_RevertToCount>()
+external void FLSharedKeys_RevertToCount(
+  FLSharedKeys arg0,
+  int oldCount,
+);
+
+/// Increments the reference count of an FLSharedKeys.
+@ffi.Native<NativeFLSharedKeys_Retain>()
+external FLSharedKeys FLSharedKeys_Retain(
+  FLSharedKeys arg0,
+);
+
+/// Decrements the reference count of an FLSharedKeys, freeing it when it reaches zero.
+@ffi.Native<NativeFLSharedKeys_Release>()
+external void FLSharedKeys_Release(
+  FLSharedKeys arg0,
+);
+
+/// Registers a range of memory containing Fleece data that uses the given shared keys.
+/// This allows Dict accessors to look up the values of shared keys.
+@ffi.Native<NativeFLSharedKeyScope_WithRange>()
+external FLSharedKeyScope FLSharedKeyScope_WithRange(
+  FLSlice range,
+  FLSharedKeys arg1,
+);
+
+/// Unregisters a scope created by \ref FLSharedKeyScope_WithRange.
+@ffi.Native<NativeFLSharedKeyScope_Free>()
+external void FLSharedKeyScope_Free(
+  FLSharedKeyScope arg0,
+);
+
+/// Returns a pointer to the root value in the encoded data, or NULL if validation failed.
+/// You should generally use an \ref FLDoc instead; it's safer. Here's why:
+///
+/// On the plus side, \ref FLValue_FromData is _extremely_ fast: it allocates no memory,
+/// only scans enough of the data to ensure it's valid (and if `trust` is set to `kFLTrusted`,
+/// it doesn't even do that.)
+///
+/// But it's potentially _very_ dangerous: the FLValue, and all values found through it, are
+/// only valid as long as the input `data` remains intact and unchanged. If you violate
+/// that, the values will be pointing to garbage and Bad Things will happen when you access
+/// them...
+@ffi.Native<NativeFLValue_FromData>()
+external FLValue FLValue_FromData(
+  FLSlice data,
+  int trust,
+);
+
+/// Converts valid JSON5 <https://json5.org> to JSON. Among other things, it converts single
+/// quotes to double, adds missing quotes around dictionary keys, removes trailing commas,
+/// and removes comments.
+/// @note If given invalid JSON5, it will _usually_ return an error, but may just ouput
+/// comparably invalid JSON, in which case the caller's subsequent JSON parsing will
+/// detect the error. The types of errors it overlooks tend to be subtleties of string
+/// or number encoding.
+/// @param json5  The JSON5 to parse
+/// @param outErrorMessage  On failure, the error message will be stored here (if not NULL.)
+/// As this is a \ref FLStringResult, you will be responsible for freeing it.
+/// @param outErrorPos  On a parse error, the byte offset in the input where the error occurred
+/// will be stored here (if it's not NULL.)
+/// @param outError  On failure, the error code will be stored here (if it's not NULL.)
+/// @return  The converted JSON.
+@ffi.Native<NativeFLJSON5_ToJSON>()
+external FLStringResult FLJSON5_ToJSON(
+  FLString json5,
+  ffi.Pointer<FLStringResult> outErrorMessage,
+  ffi.Pointer<ffi.Size> outErrorPos,
+  ffi.Pointer<ffi.Int32> outError,
+);
+
+/// Directly converts JSON data to Fleece-encoded data. Not commonly needed.
+/// Prefer \ref FLDoc_FromJSON instead.
+@ffi.Native<NativeFLData_ConvertJSON>()
+external FLSliceResult FLData_ConvertJSON(
+  FLSlice json,
+  ffi.Pointer<ffi.Int32> outError,
+);
+
+/// Tells the encoder to logically append to the given Fleece document, rather than making a
+/// standalone document. Any calls to FLEncoder_WriteValue() where the value points inside the
+/// base data will write a pointer back to the original value.
+/// The resulting data returned by FLEncoder_FinishDoc() will *NOT* be standalone; it can only
+/// be used by first appending it to the base data.
+/// @param e  The FLEncoder affected.
+/// @param base  The base document to create an amendment of.
+/// @param reuseStrings  If true, then writing a string that already exists in the base will
+/// just create a pointer back to the original. But the encoder has to scan the
+/// base for strings first.
+/// @param externPointers  If true, pointers into the base will be marked with the `extern`
+/// flag. This allows them to be resolved using the `FLResolver_Begin` function,
+/// so that when the delta is used the base document can be anywhere in memory,
+/// not just immediately preceding the delta document.
+@ffi.Native<NativeFLEncoder_Amend>()
+external void FLEncoder_Amend(
+  FLEncoder e,
+  FLSlice base,
+  bool reuseStrings,
+  bool externPointers,
+);
+
+/// Returns the `base` value passed to FLEncoder_Amend.
+@ffi.Native<NativeFLEncoder_GetBase>()
+external FLSlice FLEncoder_GetBase(
+  FLEncoder arg0,
+);
+
+/// Tells the encoder not to write the two-byte Fleece trailer at the end of the data.
+/// This is only useful for certain special purposes.
+@ffi.Native<NativeFLEncoder_SuppressTrailer>()
+external void FLEncoder_SuppressTrailer(
+  FLEncoder arg0,
+);
+
+/// Returns the byte offset in the encoded data where the next value will be written.
+/// (Due to internal buffering, this is not the same as FLEncoder_BytesWritten.)
+@ffi.Native<NativeFLEncoder_GetNextWritePos>()
+external int FLEncoder_GetNextWritePos(
+  FLEncoder arg0,
+);
+
+/// Returns an opaque reference to the last complete value written to the encoder, if possible.
+/// Fails (returning 0) if nothing has been written, or if the value is inline and can't be
+/// referenced this way -- that only happens with small scalars or empty collections.
+@ffi.Native<NativeFLEncoder_LastValueWritten>()
+external int FLEncoder_LastValueWritten(
+  FLEncoder arg0,
+);
+
+/// Writes another reference (a "pointer") to an already-written value, given a reference previously
+/// returned from \ref FLEncoder_LastValueWritten. The effect is exactly the same as if you wrote the
+/// entire value again, except that the size of the encoded data only grows by 4 bytes.
+@ffi.Native<NativeFLEncoder_WriteValueAgain>()
+external void FLEncoder_WriteValueAgain(
+  FLEncoder arg0,
+  int preWrittenValue,
+);
+
+/// Returns the data written so far as a standalone Fleece document, whose root is the last
+/// value written. You can continue writing, and the final output returned by \ref FLEncoder_Finish will
+/// consist of everything after this point. That second part can be used in the future by loading it
+/// as an `FLDoc` with the first part as its `extern` reference.
+@ffi.Native<NativeFLEncoder_Snip>()
+external FLSliceResult FLEncoder_Snip(
+  FLEncoder arg0,
+);
+
+/// Finishes encoding the current item, and returns its offset in the output data.
+@ffi.Native<NativeFLEncoder_FinishItem>()
+external int FLEncoder_FinishItem(
+  FLEncoder arg0,
+);
+
+/// In a JSON encoder, adds a newline ('\n') and prepares to start encoding another
+/// top-level object. The encoder MUST be not be within an array or dict.
+/// Has no effect in a Fleece encoder.
+@ffi.Native<NativeFLJSONEncoder_NextDocument>()
+external void FLJSONEncoder_NextDocument(
+  FLEncoder arg0,
+);
+
+/// Debugging function that returns a C string of JSON.
+/// Does not free the string's memory!
+@ffi.Native<NativeFLDump>()
+external ffi.Pointer<ffi.Char> FLDump(
+  FLValue arg0,
+);
+
+/// Debugging function that parses Fleece data and returns a C string of JSON.
+/// Does not free the string's memory!
+@ffi.Native<NativeFLDumpData>()
+external ffi.Pointer<ffi.Char> FLDumpData(
+  FLSlice data,
+);
+
+/// Produces a human-readable dump of Fleece-encoded data.
+/// This is only useful if you already know, or want to learn, the encoding format.
+@ffi.Native<NativeFLData_Dump>()
+external FLStringResult FLData_Dump(
+  FLSlice data,
+);
+
 /// A struct holding information about an error. It's declared on the stack by a caller, and
 /// its address is passed to an API function. If the function's return value indicates that
 /// there was an error (usually by returning NULL or false), then the CBLError will have been
@@ -5113,6 +5418,122 @@ typedef NativeFLSlot_SetData = ffi.Void Function(FLSlot arg0, FLSlice arg1);
 typedef DartFLSlot_SetData = void Function(FLSlot arg0, FLSlice arg1);
 typedef NativeFLSlot_SetValue = ffi.Void Function(FLSlot arg0, FLValue arg1);
 typedef DartFLSlot_SetValue = void Function(FLSlot arg0, FLValue arg1);
+typedef NativeFLCreateJSONDelta = FLSliceResult Function(
+    FLValue old, FLValue nuu);
+typedef DartFLCreateJSONDelta = FLSliceResult Function(
+    FLValue old, FLValue nuu);
+typedef NativeFLEncodeJSONDelta = ffi.Bool Function(
+    FLValue old, FLValue nuu, FLEncoder jsonEncoder);
+typedef DartFLEncodeJSONDelta = bool Function(
+    FLValue old, FLValue nuu, FLEncoder jsonEncoder);
+typedef NativeFLApplyJSONDelta = FLSliceResult Function(
+    FLValue old, FLSlice jsonDelta, ffi.Pointer<ffi.Int32> outError);
+typedef DartFLApplyJSONDelta = FLSliceResult Function(
+    FLValue old, FLSlice jsonDelta, ffi.Pointer<ffi.Int32> outError);
+typedef NativeFLEncodeApplyingJSONDelta = ffi.Bool Function(
+    FLValue old, FLSlice jsonDelta, FLEncoder encoder);
+typedef DartFLEncodeApplyingJSONDelta = bool Function(
+    FLValue old, FLSlice jsonDelta, FLEncoder encoder);
+typedef NativeFLSharedKeys_New = FLSharedKeys Function();
+typedef DartFLSharedKeys_New = FLSharedKeys Function();
+typedef FLSharedKeysReadCallback
+    = ffi.Pointer<ffi.NativeFunction<FLSharedKeysReadCallbackFunction>>;
+typedef FLSharedKeysReadCallbackFunction = ffi.Bool Function(
+    ffi.Pointer<ffi.Void>, FLSharedKeys);
+typedef DartFLSharedKeysReadCallbackFunction = bool Function(
+    ffi.Pointer<ffi.Void>, FLSharedKeys);
+typedef NativeFLSharedKeys_NewWithRead = FLSharedKeys Function(
+    FLSharedKeysReadCallback arg0, ffi.Pointer<ffi.Void> context);
+typedef DartFLSharedKeys_NewWithRead = FLSharedKeys Function(
+    FLSharedKeysReadCallback arg0, ffi.Pointer<ffi.Void> context);
+typedef NativeFLSharedKeys_GetStateData = FLSliceResult Function(
+    FLSharedKeys arg0);
+typedef DartFLSharedKeys_GetStateData = FLSliceResult Function(
+    FLSharedKeys arg0);
+typedef NativeFLSharedKeys_LoadStateData = ffi.Bool Function(
+    FLSharedKeys arg0, FLSlice arg1);
+typedef DartFLSharedKeys_LoadStateData = bool Function(
+    FLSharedKeys arg0, FLSlice arg1);
+typedef NativeFLSharedKeys_WriteState = ffi.Void Function(
+    FLSharedKeys arg0, FLEncoder arg1);
+typedef DartFLSharedKeys_WriteState = void Function(
+    FLSharedKeys arg0, FLEncoder arg1);
+typedef NativeFLSharedKeys_LoadState = ffi.Bool Function(
+    FLSharedKeys arg0, FLValue arg1);
+typedef DartFLSharedKeys_LoadState = bool Function(
+    FLSharedKeys arg0, FLValue arg1);
+typedef NativeFLSharedKeys_Encode = ffi.Int Function(
+    FLSharedKeys arg0, FLString arg1, ffi.Bool add);
+typedef DartFLSharedKeys_Encode = int Function(
+    FLSharedKeys arg0, FLString arg1, bool add);
+typedef NativeFLSharedKeys_Decode = FLString Function(
+    FLSharedKeys arg0, ffi.Int key);
+typedef DartFLSharedKeys_Decode = FLString Function(FLSharedKeys arg0, int key);
+typedef NativeFLSharedKeys_Count = ffi.UnsignedInt Function(FLSharedKeys arg0);
+typedef DartFLSharedKeys_Count = int Function(FLSharedKeys arg0);
+typedef NativeFLSharedKeys_RevertToCount = ffi.Void Function(
+    FLSharedKeys arg0, ffi.UnsignedInt oldCount);
+typedef DartFLSharedKeys_RevertToCount = void Function(
+    FLSharedKeys arg0, int oldCount);
+typedef NativeFLSharedKeys_Retain = FLSharedKeys Function(FLSharedKeys arg0);
+typedef DartFLSharedKeys_Retain = FLSharedKeys Function(FLSharedKeys arg0);
+typedef NativeFLSharedKeys_Release = ffi.Void Function(FLSharedKeys arg0);
+typedef DartFLSharedKeys_Release = void Function(FLSharedKeys arg0);
+
+final class _FLSharedKeyScope extends ffi.Opaque {}
+
+typedef FLSharedKeyScope = ffi.Pointer<_FLSharedKeyScope>;
+typedef NativeFLSharedKeyScope_WithRange = FLSharedKeyScope Function(
+    FLSlice range, FLSharedKeys arg1);
+typedef DartFLSharedKeyScope_WithRange = FLSharedKeyScope Function(
+    FLSlice range, FLSharedKeys arg1);
+typedef NativeFLSharedKeyScope_Free = ffi.Void Function(FLSharedKeyScope arg0);
+typedef DartFLSharedKeyScope_Free = void Function(FLSharedKeyScope arg0);
+typedef NativeFLValue_FromData = FLValue Function(
+    FLSlice data, ffi.Int32 trust);
+typedef DartFLValue_FromData = FLValue Function(FLSlice data, int trust);
+typedef NativeFLJSON5_ToJSON = FLStringResult Function(
+    FLString json5,
+    ffi.Pointer<FLStringResult> outErrorMessage,
+    ffi.Pointer<ffi.Size> outErrorPos,
+    ffi.Pointer<ffi.Int32> outError);
+typedef DartFLJSON5_ToJSON = FLStringResult Function(
+    FLString json5,
+    ffi.Pointer<FLStringResult> outErrorMessage,
+    ffi.Pointer<ffi.Size> outErrorPos,
+    ffi.Pointer<ffi.Int32> outError);
+typedef NativeFLData_ConvertJSON = FLSliceResult Function(
+    FLSlice json, ffi.Pointer<ffi.Int32> outError);
+typedef DartFLData_ConvertJSON = FLSliceResult Function(
+    FLSlice json, ffi.Pointer<ffi.Int32> outError);
+typedef NativeFLEncoder_Amend = ffi.Void Function(
+    FLEncoder e, FLSlice base, ffi.Bool reuseStrings, ffi.Bool externPointers);
+typedef DartFLEncoder_Amend = void Function(
+    FLEncoder e, FLSlice base, bool reuseStrings, bool externPointers);
+typedef NativeFLEncoder_GetBase = FLSlice Function(FLEncoder arg0);
+typedef DartFLEncoder_GetBase = FLSlice Function(FLEncoder arg0);
+typedef NativeFLEncoder_SuppressTrailer = ffi.Void Function(FLEncoder arg0);
+typedef DartFLEncoder_SuppressTrailer = void Function(FLEncoder arg0);
+typedef NativeFLEncoder_GetNextWritePos = ffi.Size Function(FLEncoder arg0);
+typedef DartFLEncoder_GetNextWritePos = int Function(FLEncoder arg0);
+typedef NativeFLEncoder_LastValueWritten = ffi.IntPtr Function(FLEncoder arg0);
+typedef DartFLEncoder_LastValueWritten = int Function(FLEncoder arg0);
+typedef NativeFLEncoder_WriteValueAgain = ffi.Void Function(
+    FLEncoder arg0, ffi.IntPtr preWrittenValue);
+typedef DartFLEncoder_WriteValueAgain = void Function(
+    FLEncoder arg0, int preWrittenValue);
+typedef NativeFLEncoder_Snip = FLSliceResult Function(FLEncoder arg0);
+typedef DartFLEncoder_Snip = FLSliceResult Function(FLEncoder arg0);
+typedef NativeFLEncoder_FinishItem = ffi.Size Function(FLEncoder arg0);
+typedef DartFLEncoder_FinishItem = int Function(FLEncoder arg0);
+typedef NativeFLJSONEncoder_NextDocument = ffi.Void Function(FLEncoder arg0);
+typedef DartFLJSONEncoder_NextDocument = void Function(FLEncoder arg0);
+typedef NativeFLDump = ffi.Pointer<ffi.Char> Function(FLValue arg0);
+typedef DartFLDump = ffi.Pointer<ffi.Char> Function(FLValue arg0);
+typedef NativeFLDumpData = ffi.Pointer<ffi.Char> Function(FLSlice data);
+typedef DartFLDumpData = ffi.Pointer<ffi.Char> Function(FLSlice data);
+typedef NativeFLData_Dump = FLStringResult Function(FLSlice data);
+typedef DartFLData_Dump = FLStringResult Function(FLSlice data);
 
 const int kCBLDomain = 1;
 

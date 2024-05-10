@@ -1,6 +1,6 @@
 format_version: 1.0.0
 files:
-  package:cbl_bundle_library/src/bindings/cblite.dart:
+  package:cbl/src/bindings/cblite.dart:
     used-config:
       ffi-native: true
     symbols:
@@ -28,6 +28,8 @@ files:
         name: CBLReplicationFilterFunction
       CBLReplicatorChangeListenerFunction:
         name: CBLReplicatorChangeListenerFunction
+      FLSharedKeysReadCallbackFunction:
+        name: FLSharedKeysReadCallbackFunction
       c:@CBLDefaultConflictResolver:
         name: CBLDefaultConflictResolver
       c:@EA@FLCopyFlags:
@@ -500,6 +502,8 @@ files:
         name: CBL_Release
       c:@F@CBL_Retain:
         name: CBL_Retain
+      c:@F@FLApplyJSONDelta:
+        name: FLApplyJSONDelta
       c:@F@FLArrayIterator_Begin:
         name: FLArrayIterator_Begin
       c:@F@FLArrayIterator_GetCount:
@@ -520,6 +524,12 @@ files:
         name: FLArray_IsEmpty
       c:@F@FLArray_MutableCopy:
         name: FLArray_MutableCopy
+      c:@F@FLCreateJSONDelta:
+        name: FLCreateJSONDelta
+      c:@F@FLData_ConvertJSON:
+        name: FLData_ConvertJSON
+      c:@F@FLData_Dump:
+        name: FLData_Dump
       c:@F@FLDeepIterator_Free:
         name: FLDeepIterator_Free
       c:@F@FLDeepIterator_GetDepth:
@@ -598,6 +608,16 @@ files:
         name: FLDoc_Retain
       c:@F@FLDoc_SetAssociated:
         name: FLDoc_SetAssociated
+      c:@F@FLDump:
+        name: FLDump
+      c:@F@FLDumpData:
+        name: FLDumpData
+      c:@F@FLEncodeApplyingJSONDelta:
+        name: FLEncodeApplyingJSONDelta
+      c:@F@FLEncodeJSONDelta:
+        name: FLEncodeJSONDelta
+      c:@F@FLEncoder_Amend:
+        name: FLEncoder_Amend
       c:@F@FLEncoder_BeginArray:
         name: FLEncoder_BeginArray
       c:@F@FLEncoder_BeginDict:
@@ -614,14 +634,22 @@ files:
         name: FLEncoder_Finish
       c:@F@FLEncoder_FinishDoc:
         name: FLEncoder_FinishDoc
+      c:@F@FLEncoder_FinishItem:
+        name: FLEncoder_FinishItem
       c:@F@FLEncoder_Free:
         name: FLEncoder_Free
+      c:@F@FLEncoder_GetBase:
+        name: FLEncoder_GetBase
       c:@F@FLEncoder_GetError:
         name: FLEncoder_GetError
       c:@F@FLEncoder_GetErrorMessage:
         name: FLEncoder_GetErrorMessage
       c:@F@FLEncoder_GetExtraInfo:
         name: FLEncoder_GetExtraInfo
+      c:@F@FLEncoder_GetNextWritePos:
+        name: FLEncoder_GetNextWritePos
+      c:@F@FLEncoder_LastValueWritten:
+        name: FLEncoder_LastValueWritten
       c:@F@FLEncoder_New:
         name: FLEncoder_New
       c:@F@FLEncoder_NewWithOptions:
@@ -634,6 +662,10 @@ files:
         name: FLEncoder_SetExtraInfo
       c:@F@FLEncoder_SetSharedKeys:
         name: FLEncoder_SetSharedKeys
+      c:@F@FLEncoder_Snip:
+        name: FLEncoder_Snip
+      c:@F@FLEncoder_SuppressTrailer:
+        name: FLEncoder_SuppressTrailer
       c:@F@FLEncoder_WriteBool:
         name: FLEncoder_WriteBool
       c:@F@FLEncoder_WriteData:
@@ -662,6 +694,12 @@ files:
         name: FLEncoder_WriteUndefined
       c:@F@FLEncoder_WriteValue:
         name: FLEncoder_WriteValue
+      c:@F@FLEncoder_WriteValueAgain:
+        name: FLEncoder_WriteValueAgain
+      c:@F@FLJSON5_ToJSON:
+        name: FLJSON5_ToJSON
+      c:@F@FLJSONEncoder_NextDocument:
+        name: FLJSONEncoder_NextDocument
       c:@F@FLKeyPath_Equals:
         name: FLKeyPath_Equals
       c:@F@FLKeyPath_Eval:
@@ -720,6 +758,34 @@ files:
         name: FLMutableDict_Set
       c:@F@FLMutableDict_SetChanged:
         name: FLMutableDict_SetChanged
+      c:@F@FLSharedKeyScope_Free:
+        name: FLSharedKeyScope_Free
+      c:@F@FLSharedKeyScope_WithRange:
+        name: FLSharedKeyScope_WithRange
+      c:@F@FLSharedKeys_Count:
+        name: FLSharedKeys_Count
+      c:@F@FLSharedKeys_Decode:
+        name: FLSharedKeys_Decode
+      c:@F@FLSharedKeys_Encode:
+        name: FLSharedKeys_Encode
+      c:@F@FLSharedKeys_GetStateData:
+        name: FLSharedKeys_GetStateData
+      c:@F@FLSharedKeys_LoadState:
+        name: FLSharedKeys_LoadState
+      c:@F@FLSharedKeys_LoadStateData:
+        name: FLSharedKeys_LoadStateData
+      c:@F@FLSharedKeys_New:
+        name: FLSharedKeys_New
+      c:@F@FLSharedKeys_NewWithRead:
+        name: FLSharedKeys_NewWithRead
+      c:@F@FLSharedKeys_Release:
+        name: FLSharedKeys_Release
+      c:@F@FLSharedKeys_Retain:
+        name: FLSharedKeys_Retain
+      c:@F@FLSharedKeys_RevertToCount:
+        name: FLSharedKeys_RevertToCount
+      c:@F@FLSharedKeys_WriteState:
+        name: FLSharedKeys_WriteState
       c:@F@FLSliceResult_New:
         name: FLSliceResult_New
       c:@F@FLSlice_Compare:
@@ -780,6 +846,8 @@ files:
         name: FLValue_AsUnsigned
       c:@F@FLValue_FindDoc:
         name: FLValue_FindDoc
+      c:@F@FLValue_FromData:
+        name: FLValue_FromData
       c:@F@FLValue_GetType:
         name: FLValue_GetType
       c:@F@FLValue_IsDouble:
@@ -858,6 +926,8 @@ files:
         name: _FLEncoder
       c:@S@_FLKeyPath:
         name: _FLKeyPath
+      c:@S@_FLSharedKeyScope:
+        name: _FLSharedKeyScope
       c:@S@_FLSharedKeys:
         name: _FLSharedKeys
       c:@S@_FLSlot:
@@ -1022,6 +1092,10 @@ files:
         name: FLValue
       c:FLDeepIterator.h@T@FLDeepIterator:
         name: FLDeepIterator
+      c:FLExpert.h@T@FLSharedKeyScope:
+        name: FLSharedKeyScope
+      c:FLExpert.h@T@FLSharedKeysReadCallback:
+        name: FLSharedKeysReadCallback
       c:FLKeyPath.h@T@FLKeyPath:
         name: FLKeyPath
       c:FLSlice.h@T@FLString:

@@ -11,6 +11,7 @@ headers:
   entry-points:
     - src/vendor/cblite/include/cbl/CouchbaseLite.h
     - src/vendor/cblite/include/fleece/Fleece.h
+    - src/vendor/cblite/include/fleece/FLExpert.h
     - src/vendor/cblite/include/fleece/FLSlice.h
   include-directives:
     - src/vendor/cblite/include/cbl/**
