@@ -16,8 +16,8 @@ import 'blob.dart';
 import 'dictionary.dart';
 
 final _blobBindings = cblBindings.blobs.blob;
-final _valueBinds = cblBindings.fleece.value;
-final _decoderBinds = cblBindings.fleece.decoder;
+const _valueBindings = ValueBindings();
+final _decoderBindings = cblBindings.fleece.decoder;
 
 abstract interface class CblConversions {
   Object? toPlainObject();
@@ -161,7 +161,7 @@ final class CblMDelegate extends MDelegate {
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt) {
     cacheIt();
 
-    _decoderBinds.getLoadedValue(value.value!);
+    _decoderBindings.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
     switch (flValue.type) {
@@ -236,7 +236,7 @@ bool valueWouldChange(
   // comparisons of large instances.
   final flValue = oldValue.value;
   if (flValue != null) {
-    final valueType = _valueBinds.getType(flValue);
+    final valueType = _valueBindings.getType(flValue);
     cblReachabilityFence(container.context);
     if (valueType == FLValueType.array || valueType == FLValueType.dict) {
       return true;

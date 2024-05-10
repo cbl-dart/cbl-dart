@@ -1,7 +1,5 @@
 // ignore_for_file: cast_nullable_to_non_nullable
 
-import 'dart:ffi';
-
 import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/fleece/containers.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
@@ -289,6 +287,6 @@ MRoot testMRoot(Object from) => MRoot.fromContext(
       isMutable: true,
     );
 
-Matcher mValue({Pointer<FLValue>? value, bool? hasNative}) => isA<MValue>()
+Matcher mValue({FLValue? value, bool? hasNative}) => isA<MValue>()
     .having((p0) => p0.value, 'value', value ?? anything)
     .having((p0) => p0.hasNative, 'hasNative', hasNative ?? anything);

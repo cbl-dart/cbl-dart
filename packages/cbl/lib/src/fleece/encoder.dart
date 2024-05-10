@@ -121,7 +121,7 @@ final class FleeceEncoder implements Finalizable {
           () => _encoderBinds.writeArrayValue(_pointer, array, index));
 
   /// Writes [value] this encoder.
-  void writeValue(Pointer<FLValue> value) =>
+  void writeValue(FLValue value) =>
       runWithErrorTranslation(() => _encoderBinds.writeValue(_pointer, value));
 
   /// Writes `null` to this encoder.
@@ -174,7 +174,7 @@ final class FleeceEncoder implements Finalizable {
       () => _encoderBinds.writeKeyFLString(_pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLValue].
-  void writeKeyValue(Pointer<FLValue> key) =>
+  void writeKeyValue(FLValue key) =>
       runWithErrorTranslation(() => _encoderBinds.writeKeyValue(_pointer, key));
 
   /// Ends a dict.

@@ -169,9 +169,9 @@ final class Value implements Finalizable {
     }
   }
 
-  static final _bindings = cblBindings.fleece.value;
+  static const _bindings = ValueBindings();
 
-  final Pointer<FLValue> pointer;
+  final FLValue pointer;
 
   /// Whether this object updates the ref count of the native object when it is
   /// created and garbage collected.

@@ -210,16 +210,16 @@ final class CBLResultSet extends Opaque {}
 typedef _CBLResultSet_Next_C = Bool Function(Pointer<CBLResultSet> resultSet);
 typedef _CBLResultSet_Next = bool Function(Pointer<CBLResultSet> resultSet);
 
-typedef _CBLResultSet_ValueAtIndex_C = Pointer<FLValue> Function(
+typedef _CBLResultSet_ValueAtIndex_C = FLValue Function(
   Pointer<CBLResultSet> resultSet,
   Uint32 index,
 );
-typedef _CBLResultSet_ValueAtIndex = Pointer<FLValue> Function(
+typedef _CBLResultSet_ValueAtIndex = FLValue Function(
   Pointer<CBLResultSet> resultSet,
   int index,
 );
 
-typedef _CBLResultSet_ValueForKey = Pointer<FLValue> Function(
+typedef _CBLResultSet_ValueForKey = FLValue Function(
   Pointer<CBLResultSet> resultSet,
   FLString key,
 );
@@ -278,10 +278,10 @@ final class ResultSetBindings extends Bindings {
 
   bool next(Pointer<CBLResultSet> resultSet) => _next(resultSet);
 
-  Pointer<FLValue> valueAtIndex(Pointer<CBLResultSet> resultSet, int index) =>
+  FLValue valueAtIndex(Pointer<CBLResultSet> resultSet, int index) =>
       _valueAtIndex(resultSet, index);
 
-  Pointer<FLValue> valueForKey(
+  FLValue valueForKey(
     Pointer<CBLResultSet> resultSet,
     String key,
   ) =>

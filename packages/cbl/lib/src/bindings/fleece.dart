@@ -277,7 +277,7 @@ final class DocBindings {
 
 // === Value ===================================================================
 
-final class FLValue extends Opaque {}
+typedef FLValue = cblite.FLValue;
 
 enum FLValueType {
   undefined,
@@ -298,204 +298,64 @@ extension on int {
   }
 }
 
-typedef _FLValue_FromData_C = Pointer<FLValue> Function(
-  FLSlice data,
-  Uint8 trust,
-);
-typedef _FLValue_FromData = Pointer<FLValue> Function(
-  FLSlice data,
-  int trust,
-);
+final class ValueBindings {
+  const ValueBindings();
 
-typedef _FLValue_FindDoc = FLDoc Function(Pointer<FLValue>);
-
-typedef _FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
-typedef _FLValue_GetType = int Function(Pointer<FLValue> value);
-
-typedef _FLValue_IsInteger_C = Bool Function(Pointer<FLValue> value);
-typedef _FLValue_IsInteger = bool Function(Pointer<FLValue> value);
-
-typedef _FLValue_IsDouble_C = Bool Function(Pointer<FLValue> value);
-typedef _FLValue_IsDouble = bool Function(Pointer<FLValue> value);
-
-typedef _FLValue_AsBool_C = Bool Function(Pointer<FLValue> value);
-typedef _FLValue_AsBool = bool Function(Pointer<FLValue> value);
-
-typedef _FLValue_AsInt_C = Int64 Function(Pointer<FLValue> value);
-typedef _FLValue_AsInt = int Function(Pointer<FLValue> value);
-
-typedef _FLValue_AsDouble_C = Double Function(Pointer<FLValue> value);
-typedef _FLValue_AsDouble = double Function(Pointer<FLValue> value);
-
-typedef _FLValue_AsString_C = FLString Function(Pointer<FLValue> value);
-typedef _FLValue_AsString = FLString Function(Pointer<FLValue> value);
-
-typedef _FLValue_AsData_C = FLSlice Function(Pointer<FLValue> value);
-typedef _FLValue_AsData = FLSlice Function(Pointer<FLValue> value);
-
-typedef _FLValue_ToString_C = FLStringResult Function(
-  Pointer<FLValue> value,
-);
-typedef _FLValue_ToString = FLStringResult Function(
-  Pointer<FLValue> value,
-);
-
-typedef _FLValue_IsEqual_C = Bool Function(
-  Pointer<FLValue> v1,
-  Pointer<FLValue> v2,
-);
-typedef _FLValue_IsEqual = bool Function(
-  Pointer<FLValue> v1,
-  Pointer<FLValue> v2,
-);
-
-typedef _FLValue_Retain = Pointer<FLValue> Function(Pointer<FLValue> value);
-
-typedef _FLValue_Release_C = Void Function(Pointer<FLValue> value);
-typedef _FLValue_Release = void Function(Pointer<FLValue> value);
-
-typedef _FLValue_ToJSONX_C = FLStringResult Function(
-  Pointer<FLValue> value,
-  Bool json5,
-  Bool canonicalForm,
-);
-typedef _FLValue_ToJSONX = FLStringResult Function(
-  Pointer<FLValue> value,
-  bool json5,
-  bool canonicalForm,
-);
-
-final class ValueBindings extends Bindings {
-  ValueBindings(super.parent) {
-    _fromData = libs.cbl.lookupFunction<_FLValue_FromData_C, _FLValue_FromData>(
-      'FLValue_FromData',
-      isLeaf: useIsLeaf,
-    );
-    _findDoc = libs.cbl.lookupFunction<_FLValue_FindDoc, _FLValue_FindDoc>(
-      'FLValue_FindDoc',
-      isLeaf: useIsLeaf,
-    );
-    _getType = libs.cbl.lookupFunction<_FLValue_GetType_C, _FLValue_GetType>(
-      'FLValue_GetType',
-      isLeaf: useIsLeaf,
-    );
-    _isInteger =
-        libs.cbl.lookupFunction<_FLValue_IsInteger_C, _FLValue_IsInteger>(
-      'FLValue_IsInteger',
-      isLeaf: useIsLeaf,
-    );
-    _isDouble = libs.cbl.lookupFunction<_FLValue_IsDouble_C, _FLValue_IsDouble>(
-      'FLValue_IsDouble',
-      isLeaf: useIsLeaf,
-    );
-    _asBool = libs.cbl.lookupFunction<_FLValue_AsBool_C, _FLValue_AsBool>(
-      'FLValue_AsBool',
-      isLeaf: useIsLeaf,
-    );
-    _asInt = libs.cbl.lookupFunction<_FLValue_AsInt_C, _FLValue_AsInt>(
-      'FLValue_AsInt',
-      isLeaf: useIsLeaf,
-    );
-    _asDouble = libs.cbl.lookupFunction<_FLValue_AsDouble_C, _FLValue_AsDouble>(
-      'FLValue_AsDouble',
-      isLeaf: useIsLeaf,
-    );
-    _asString = libs.cbl.lookupFunction<_FLValue_AsString_C, _FLValue_AsString>(
-      'FLValue_AsString',
-      isLeaf: useIsLeaf,
-    );
-    _asData = libs.cbl.lookupFunction<_FLValue_AsData_C, _FLValue_AsData>(
-      'FLValue_AsData',
-      isLeaf: useIsLeaf,
-    );
-    _scalarToString =
-        libs.cbl.lookupFunction<_FLValue_ToString_C, _FLValue_ToString>(
-      'FLValue_ToString',
-      isLeaf: useIsLeaf,
-    );
-    _isEqual = libs.cbl.lookupFunction<_FLValue_IsEqual_C, _FLValue_IsEqual>(
-      'FLValue_IsEqual',
-      isLeaf: useIsLeaf,
-    );
-    _retain = libs.cbl.lookupFunction<_FLValue_Retain, _FLValue_Retain>(
-      'FLValue_Retain',
-      isLeaf: useIsLeaf,
-    );
-    _releasePtr = libs.cbl.lookup('FLValue_Release');
-    _release = _releasePtr.asFunction(isLeaf: useIsLeaf);
-    _toJson = libs.cbl.lookupFunction<_FLValue_ToJSONX_C, _FLValue_ToJSONX>(
-      'FLValue_ToJSONX',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLValue_FromData _fromData;
-  late final _FLValue_FindDoc _findDoc;
-  late final _FLValue_GetType _getType;
-  late final _FLValue_IsInteger _isInteger;
-  late final _FLValue_IsDouble _isDouble;
-  late final _FLValue_AsBool _asBool;
-  late final _FLValue_AsInt _asInt;
-  late final _FLValue_AsDouble _asDouble;
-  late final _FLValue_AsString _asString;
-  late final _FLValue_AsData _asData;
-  late final _FLValue_ToString _scalarToString;
-  late final _FLValue_IsEqual _isEqual;
-  late final _FLValue_Retain _retain;
-  late final Pointer<NativeFunction<_FLValue_Release_C>> _releasePtr;
-  late final _FLValue_Release _release;
-  late final _FLValue_ToJSONX _toJson;
-
-  late final _finalizer = NativeFinalizer(_releasePtr.cast());
+  static final _finalizer = NativeFinalizer(
+      Native.addressOf<NativeFunction<cblite.NativeFLValue_Release>>(
+              cblite.FLValue_Release)
+          .cast());
 
   void bindToDartObject(
     Finalizable object, {
-    required Pointer<FLValue> value,
+    required FLValue value,
     required bool retain,
   }) {
     if (retain) {
-      _retain(value);
+      this.retain(value);
     }
     _finalizer.attach(object, value.cast());
   }
 
-  Pointer<FLValue>? fromData(SliceResult data, FLTrust trust) =>
-      _fromData(data.makeGlobal().ref, trust.toInt()).toNullable();
+  FLValue? fromData(SliceResult data, FLTrust trust) =>
+      cblite.FLValue_FromData(data.makeGlobal().ref, trust.toInt())
+          .toNullable();
 
-  FLDoc? findDoc(Pointer<FLValue> value) => _findDoc(value).toNullable();
+  FLDoc? findDoc(FLValue value) => cblite.FLValue_FindDoc(value).toNullable();
 
-  FLValueType getType(Pointer<FLValue> value) =>
-      _getType(value).toFLValueType();
+  FLValueType getType(FLValue value) =>
+      cblite.FLValue_GetType(value).toFLValueType();
 
-  bool isInteger(Pointer<FLValue> value) => _isInteger(value);
+  bool isInteger(FLValue value) => cblite.FLValue_IsInteger(value);
 
-  bool isDouble(Pointer<FLValue> value) => _isDouble(value);
+  bool isDouble(FLValue value) => cblite.FLValue_IsDouble(value);
 
-  bool asBool(Pointer<FLValue> value) => _asBool(value);
+  bool asBool(FLValue value) => cblite.FLValue_AsBool(value);
 
-  int asInt(Pointer<FLValue> value) => _asInt(value);
+  int asInt(FLValue value) => cblite.FLValue_AsInt(value);
 
-  double asDouble(Pointer<FLValue> value) => _asDouble(value);
+  double asDouble(FLValue value) => cblite.FLValue_AsDouble(value);
 
-  String? asString(Pointer<FLValue> value) => _asString(value).toDartString();
+  String? asString(FLValue value) =>
+      cblite.FLValue_AsString(value).toDartString();
 
-  Data? asData(Pointer<FLValue> value) => _asData(value).toData();
+  Data? asData(FLValue value) => cblite.FLValue_AsData(value).toData();
 
-  String? scalarToString(Pointer<FLValue> value) =>
-      _scalarToString(value).toDartStringAndRelease();
+  String? scalarToString(FLValue value) =>
+      cblite.FLValue_ToString(value).toDartStringAndRelease();
 
-  bool isEqual(Pointer<FLValue> a, Pointer<FLValue> b) => _isEqual(a, b);
+  bool isEqual(FLValue a, FLValue b) => cblite.FLValue_IsEqual(a, b);
 
-  void retain(Pointer<FLValue> value) => _retain(value);
+  void retain(FLValue value) => cblite.FLValue_Retain(value);
 
-  void release(Pointer<FLValue> value) => _release(value);
+  void release(FLValue value) => cblite.FLValue_Release(value);
 
   String toJSONX(
-    Pointer<FLValue> value, {
+    FLValue value, {
     required bool json5,
     required bool canonical,
   }) =>
-      _toJson(value, json5, canonical).toDartStringAndRelease()!;
+      cblite.FLValue_ToJSONX(value, json5, canonical).toDartStringAndRelease()!;
 }
 
 // === Array ===================================================================
@@ -512,11 +372,11 @@ typedef _FLArray_AsMutable = Pointer<FLMutableArray> Function(
   Pointer<FLArray> array,
 );
 
-typedef _FLArray_Get_C = Pointer<FLValue> Function(
+typedef _FLArray_Get_C = FLValue Function(
   Pointer<FLArray> array,
   Uint32 index,
 );
-typedef _FLArray_Get = Pointer<FLValue> Function(
+typedef _FLArray_Get = FLValue Function(
   Pointer<FLArray> array,
   int index,
 );
@@ -554,7 +414,7 @@ final class ArrayBindings extends Bindings {
   Pointer<FLMutableArray>? asMutable(Pointer<FLArray> array) =>
       _asMutable(array).toNullable();
 
-  Pointer<FLValue> get(Pointer<FLArray> array, int index) => _get(array, index);
+  FLValue get(Pointer<FLArray> array, int index) => _get(array, index);
 }
 
 // === MutableArray ============================================================
@@ -766,7 +626,7 @@ typedef _FLDict_AsMutable = Pointer<FLMutableDict> Function(
   Pointer<FLDict> dict,
 );
 
-typedef _FLDict_Get = Pointer<FLValue> Function(
+typedef _FLDict_Get = FLValue Function(
   Pointer<FLDict> dict,
   FLString key,
 );
@@ -796,10 +656,10 @@ final class DictBindings extends Bindings {
   late final _FLDict_IsEmpty _isEmpty;
   late final _FLDict_AsMutable _asMutable;
 
-  Pointer<FLValue>? get(Pointer<FLDict> dict, String key) =>
+  FLValue? get(Pointer<FLDict> dict, String key) =>
       runWithSingleFLString(key, (flKey) => _get(dict, flKey)).toNullable();
 
-  Pointer<FLValue>? getWithFLString(Pointer<FLDict> dict, FLString key) =>
+  FLValue? getWithFLString(Pointer<FLDict> dict, FLString key) =>
       _get(dict, key).toNullable();
 
   int count(Pointer<FLDict> dict) => _count(dict);
@@ -828,7 +688,7 @@ final class FLDictKey extends Struct {
 
 typedef _FLDictKey_Init = FLDictKey Function(FLString key);
 
-typedef _FLDict_GetWithKey = Pointer<FLValue> Function(
+typedef _FLDict_GetWithKey = FLValue Function(
   Pointer<FLDict> dict,
   Pointer<FLDictKey> key,
 );
@@ -859,7 +719,7 @@ final class DictKeyBindings extends Bindings {
       .._private5 = state._private5;
   }
 
-  Pointer<FLValue>? getWithKey(Pointer<FLDict> dict, Pointer<FLDictKey> key) =>
+  FLValue? getWithKey(Pointer<FLDict> dict, Pointer<FLDictKey> key) =>
       _getWithKey(dict, key).toNullable();
 }
 
@@ -1046,7 +906,7 @@ final class CBLDart_LoadedDictKey extends Struct {
   external int stringBuf;
   @Size()
   external int stringSize;
-  external Pointer<FLValue> value;
+  external FLValue value;
 }
 
 final class CBLDart_LoadedFLValue extends Struct {
@@ -1082,11 +942,11 @@ typedef _FLData_Dump_C = FLStringResult Function(FLSlice slice);
 typedef _FLData_Dump = FLStringResult Function(FLSlice slice);
 
 typedef _CBLDart_GetLoaded_FLValue_C = Void Function(
-  Pointer<FLValue> value,
+  FLValue value,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 typedef _CBLDart_GetLoadedFLValue = void Function(
-  Pointer<FLValue> value,
+  FLValue value,
   Pointer<CBLDart_LoadedFLValue> out,
 );
 
@@ -1254,7 +1114,7 @@ final class FleeceDecoderBindings extends Bindings {
     return result;
   }
 
-  void getLoadedValue(Pointer<FLValue> value) {
+  void getLoadedValue(FLValue value) {
     _getLoadedFLValue(value, globalLoadedFLValue);
   }
 
@@ -1371,11 +1231,11 @@ typedef _CBLDart_FLEncoder_WriteArrayValue = bool Function(
 
 typedef _FLEncoder_WriteValue_C = Bool Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLValue> value,
+  FLValue value,
 );
 typedef _FLEncoder_WriteValue = bool Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLValue> value,
+  FLValue value,
 );
 
 typedef _FLEncoder_WriteNull_C = Bool Function(Pointer<FLEncoder> encoder);
@@ -1467,11 +1327,11 @@ typedef _FLEncoder_WriteKey = bool Function(
 
 typedef _FLEncoder_WriteKeyValue_C = Bool Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLValue> key,
+  FLValue key,
 );
 typedef _FLEncoder_WriteKeyValue = bool Function(
   Pointer<FLEncoder> encoder,
-  Pointer<FLValue> key,
+  FLValue key,
 );
 
 typedef _FLEncoder_EndDict_C = Bool Function(Pointer<FLEncoder> encoder);
@@ -1657,7 +1517,7 @@ final class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, _writeArrayValue(encoder, array, index));
   }
 
-  void writeValue(Pointer<FLEncoder> encoder, Pointer<FLValue> value) {
+  void writeValue(Pointer<FLEncoder> encoder, FLValue value) {
     if (value == nullptr) {
       throw ArgumentError.value(value, 'value', 'must not be `nullptr`');
     }
@@ -1728,7 +1588,7 @@ final class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, _writeKey(encoder, key));
   }
 
-  void writeKeyValue(Pointer<FLEncoder> encoder, Pointer<FLValue> key) {
+  void writeKeyValue(Pointer<FLEncoder> encoder, FLValue key) {
     _checkError(encoder, _writeKeyValue(encoder, key));
   }
 
@@ -1772,7 +1632,6 @@ final class FleeceEncoderBindings extends Bindings {
 
 final class FleeceBindings extends Bindings {
   FleeceBindings(super.parent) {
-    value = ValueBindings(this);
     array = ArrayBindings(this);
     mutableArray = MutableArrayBindings(this);
     dict = DictBindings(this);
@@ -1782,7 +1641,6 @@ final class FleeceBindings extends Bindings {
     encoder = FleeceEncoderBindings(this);
   }
 
-  late final ValueBindings value;
   late final ArrayBindings array;
   late final MutableArrayBindings mutableArray;
   late final DictBindings dict;
