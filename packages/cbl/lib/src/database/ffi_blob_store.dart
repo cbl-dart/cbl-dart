@@ -30,7 +30,7 @@ final class _FfiBlob implements Finalizable {
           adopt: true,
         );
 
-  static final _blobBindings = cblBindings.blobs.blob;
+  static const _blobBindings = BlobBindings();
 
   final Pointer<CBLBlob> pointer;
 
@@ -117,7 +117,7 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
   }
 }
 
-final _writeStreamBindings = cblBindings.blobs.writeStream;
+const _writeStreamBindings = BlobWriteStreamBindings();
 
 Future<_FfiBlob> _createBlobFromStream(
   FfiDatabase database,
@@ -149,7 +149,7 @@ final class _BlobReadStream extends Stream<Data> implements Finalizable {
   /// Size of the chunks which a blob read stream emits.
   static const _readStreamChunkSize = 8 * 1024;
 
-  static final _readStreamBindings = cblBindings.blobs.readStream;
+  static const _readStreamBindings = BlobReadStreamBindings();
 
   final ClosableResourceMixin parent;
   final _FfiBlob blob;

@@ -1,4 +1,3 @@
-import 'blob.dart';
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -32,7 +31,6 @@ final class CBLBindings extends Bindings {
     mutableDocument = MutableDocumentBindings(this);
     query = QueryBindings(this);
     resultSet = ResultSetBindings(this);
-    blobs = BlobsBindings(this);
     replicator = ReplicatorBindings(this);
   }
 
@@ -68,7 +66,6 @@ final class CBLBindings extends Bindings {
   late final MutableDocumentBindings mutableDocument;
   late final QueryBindings query;
   late final ResultSetBindings resultSet;
-  late final BlobsBindings blobs;
   late final ReplicatorBindings replicator;
 }
 

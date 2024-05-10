@@ -10,12 +10,11 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
-import '../support/ffi.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
 
-final _blobBindings = cblBindings.blobs.blob;
+const _blobBindings = BlobBindings();
 const _valueBindings = ValueBindings();
 const _decoderBindings = FleeceDecoderBindings();
 
