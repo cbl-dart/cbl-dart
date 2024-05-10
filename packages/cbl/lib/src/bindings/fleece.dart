@@ -228,80 +228,23 @@ final class SlotBindings {
 
 // === Doc =====================================================================
 
-final class FLDoc extends Opaque {}
+typedef FLDoc = cblite.FLDoc;
 
-typedef _FLDoc_FromResultData_C = Pointer<FLDoc> Function(
-  FLSliceResult data,
-  Uint8 trust,
-  FLSharedKeys sharedKeys,
-  FLSlice externalData,
-);
-typedef _FLDoc_FromResultData = Pointer<FLDoc> Function(
-  FLSliceResult data,
-  int trust,
-  FLSharedKeys sharedKeys,
-  FLSlice externalData,
-);
+final class DocBindings {
+  const DocBindings();
 
-typedef _FLDoc_FromJSON = Pointer<FLDoc> Function(
-  FLString json,
-  Pointer<Uint32> errorOut,
-);
+  static final _finalizer = NativeFinalizer(
+      Native.addressOf<NativeFunction<cblite.NativeFLDoc_Release>>(
+              cblite.FLDoc_Release)
+          .cast());
 
-typedef _FLDoc_Release_C = Void Function(Pointer<FLDoc> doc);
-
-typedef _FLDoc_GetAllocedData = FLSliceResult Function(Pointer<FLDoc> doc);
-
-typedef _FLDoc_GetRoot = Pointer<FLValue> Function(Pointer<FLDoc> doc);
-
-typedef _FLDoc_GetSharedKeys = FLSharedKeys Function(
-  Pointer<FLDoc> doc,
-);
-
-final class DocBindings extends Bindings {
-  DocBindings(super.parent) {
-    _fromResultData =
-        libs.cbl.lookupFunction<_FLDoc_FromResultData_C, _FLDoc_FromResultData>(
-      'FLDoc_FromResultData',
-      isLeaf: useIsLeaf,
-    );
-    _fromJSON = libs.cbl.lookupFunction<_FLDoc_FromJSON, _FLDoc_FromJSON>(
-      'FLDoc_FromJSON',
-      isLeaf: useIsLeaf,
-    );
-    _releasePtr = libs.cbl.lookup('FLDoc_Release');
-    _getAllocedData =
-        libs.cbl.lookupFunction<_FLDoc_GetAllocedData, _FLDoc_GetAllocedData>(
-      'FLDoc_GetAllocedData',
-      isLeaf: useIsLeaf,
-    );
-    _getRoot = libs.cbl.lookupFunction<_FLDoc_GetRoot, _FLDoc_GetRoot>(
-      'FLDoc_GetRoot',
-      isLeaf: useIsLeaf,
-    );
-    _getSharedKeys =
-        libs.cbl.lookupFunction<_FLDoc_GetSharedKeys, _FLDoc_GetSharedKeys>(
-      'FLDoc_GetSharedKeys',
-      isLeaf: useIsLeaf,
-    );
-  }
-
-  late final _FLDoc_FromResultData _fromResultData;
-  late final _FLDoc_FromJSON _fromJSON;
-  late final Pointer<NativeFunction<_FLDoc_Release_C>> _releasePtr;
-  late final _FLDoc_GetAllocedData _getAllocedData;
-  late final _FLDoc_GetRoot _getRoot;
-  late final _FLDoc_GetSharedKeys _getSharedKeys;
-
-  late final _finalizer = NativeFinalizer(_releasePtr.cast());
-
-  Pointer<FLDoc> fromResultData(
+  FLDoc fromResultData(
     Data data,
     FLTrust trust,
     FLSharedKeys? sharedKeys,
   ) {
     final sliceResult = data.toSliceResult();
-    return _fromResultData(
+    return cblite.FLDoc_FromResultData(
       sliceResult.makeGlobalResult().ref,
       trust.toInt(),
       sharedKeys ?? nullptr,
@@ -309,12 +252,13 @@ final class DocBindings extends Bindings {
     );
   }
 
-  Pointer<FLDoc> fromJson(String json) => runWithSingleFLString(
+  FLDoc fromJson(String json) => runWithSingleFLString(
         json,
-        (flJson) => _fromJSON(flJson, globalFLErrorCode).checkFleeceError(),
+        (flJson) =>
+            cblite.FLDoc_FromJSON(flJson, globalFLErrorCode).checkFleeceError(),
       );
 
-  void bindToDartObject(Finalizable object, Pointer<FLDoc> doc) {
+  void bindToDartObject(Finalizable object, FLDoc doc) {
     _finalizer.attach(
       object,
       doc.cast(),
@@ -322,13 +266,13 @@ final class DocBindings extends Bindings {
     );
   }
 
-  SliceResult? getAllocedData(Pointer<FLDoc> doc) =>
-      SliceResult.fromFLSliceResult(_getAllocedData(doc));
+  SliceResult? getAllocedData(FLDoc doc) =>
+      SliceResult.fromFLSliceResult(cblite.FLDoc_GetAllocedData(doc));
 
-  Pointer<FLValue> getRoot(Pointer<FLDoc> doc) => _getRoot(doc);
+  FLValue getRoot(FLDoc doc) => cblite.FLDoc_GetRoot(doc);
 
-  FLSharedKeys? getSharedKeys(Pointer<FLDoc> doc) =>
-      _getSharedKeys(doc).toNullable();
+  FLSharedKeys? getSharedKeys(FLDoc doc) =>
+      cblite.FLDoc_GetSharedKeys(doc).toNullable();
 }
 
 // === Value ===================================================================
@@ -363,7 +307,7 @@ typedef _FLValue_FromData = Pointer<FLValue> Function(
   int trust,
 );
 
-typedef _FLValue_FindDoc = Pointer<FLDoc> Function(Pointer<FLValue>);
+typedef _FLValue_FindDoc = FLDoc Function(Pointer<FLValue>);
 
 typedef _FLValue_GetType_C = Int8 Function(Pointer<FLValue> value);
 typedef _FLValue_GetType = int Function(Pointer<FLValue> value);
@@ -518,8 +462,7 @@ final class ValueBindings extends Bindings {
   Pointer<FLValue>? fromData(SliceResult data, FLTrust trust) =>
       _fromData(data.makeGlobal().ref, trust.toInt()).toNullable();
 
-  Pointer<FLDoc>? findDoc(Pointer<FLValue> value) =>
-      _findDoc(value).toNullable();
+  FLDoc? findDoc(Pointer<FLValue> value) => _findDoc(value).toNullable();
 
   FLValueType getType(Pointer<FLValue> value) =>
       _getType(value).toFLValueType();
@@ -1536,11 +1479,11 @@ typedef _FLEncoder_EndDict = bool Function(Pointer<FLEncoder> encoder);
 
 typedef _FLEncoder_Finish_C = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
-  Pointer<Uint32> errorOut,
+  Pointer<Int32> errorOut,
 );
 typedef _FLEncoder_Finish = FLSliceResult Function(
   Pointer<FLEncoder> encoder,
-  Pointer<Uint32> errorOut,
+  Pointer<Int32> errorOut,
 );
 
 typedef _FLEncoder_GetError_C = Uint32 Function(Pointer<FLEncoder> encoder);
@@ -1829,7 +1772,6 @@ final class FleeceEncoderBindings extends Bindings {
 
 final class FleeceBindings extends Bindings {
   FleeceBindings(super.parent) {
-    doc = DocBindings(this);
     value = ValueBindings(this);
     array = ArrayBindings(this);
     mutableArray = MutableArrayBindings(this);
@@ -1840,7 +1782,6 @@ final class FleeceBindings extends Bindings {
     encoder = FleeceEncoderBindings(this);
   }
 
-  late final DocBindings doc;
   late final ValueBindings value;
   late final ArrayBindings array;
   late final MutableArrayBindings mutableArray;

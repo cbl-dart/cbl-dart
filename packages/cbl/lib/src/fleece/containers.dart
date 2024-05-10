@@ -84,9 +84,9 @@ final class Doc implements Finalizable {
     _bindings.bindToDartObject(this, pointer);
   }
 
-  static final _bindings = cblBindings.fleece.doc;
+  static const _bindings = DocBindings();
 
-  final Pointer<FLDoc> pointer;
+  final FLDoc pointer;
 
   /// Returns the data owned by the document, if any, else `null`.
   SliceResult? get allocedData => _bindings.getAllocedData(pointer);
