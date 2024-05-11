@@ -1,4 +1,3 @@
-import 'document.dart';
 import 'libraries.dart';
 import 'query.dart';
 import 'replicator.dart';
@@ -23,8 +22,6 @@ abstract base class Bindings {
 final class CBLBindings extends Bindings {
   CBLBindings(LibrariesConfiguration config)
       : super.root(DynamicLibraries.fromConfig(config)) {
-    document = DocumentBindings(this);
-    mutableDocument = MutableDocumentBindings(this);
     query = QueryBindings(this);
     resultSet = ResultSetBindings(this);
     replicator = ReplicatorBindings(this);
@@ -56,8 +53,6 @@ final class CBLBindings extends Bindings {
     }
   }
 
-  late final DocumentBindings document;
-  late final MutableDocumentBindings mutableDocument;
   late final QueryBindings query;
   late final ResultSetBindings resultSet;
   late final ReplicatorBindings replicator;
