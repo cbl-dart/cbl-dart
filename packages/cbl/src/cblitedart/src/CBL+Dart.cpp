@@ -694,6 +694,15 @@ FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
 
 // === Replicator
 
+CBLEndpoint *CBLDart_CBLEndpoint_CreateWithLocalDB(CBLDatabase *database) {
+#ifdef COUCHBASE_ENTERPRISE
+  return CBLEndpoint_CreateWithLocalDB(database);
+#else
+  CBLDart_RequireEnterpriseEdition();
+  return nullptr;
+#endif
+}
+
 typedef std::map<const CBLCollection *, CBLDart::AsyncCallback *>
     ReplicatorCollectionCallbackMap;
 

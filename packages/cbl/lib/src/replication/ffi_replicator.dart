@@ -16,7 +16,6 @@ import '../fleece/containers.dart' as fl;
 import '../support/async_callback.dart';
 import '../support/edition.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -32,7 +31,7 @@ import 'replicator.dart';
 import 'replicator_change.dart';
 
 const _baseBindings = BaseBindings();
-final _bindings = cblBindings.replicator;
+const _bindings = ReplicatorBindings();
 
 final class FfiReplicator
     with ClosableResourceMixin

@@ -196,6 +196,9 @@ typedef struct CBLDart_ReplicatorConfiguration {
 } CBLDart_ReplicatorConfiguration;
 
 CBLDART_EXPORT
+CBLEndpoint *CBLDart_CBLEndpoint_CreateWithLocalDB(CBLDatabase *database);
+
+CBLDART_EXPORT
 CBLReplicator *CBLDart_CBLReplicator_Create(
     CBLDart_ReplicatorConfiguration *config, CBLError *errorOut);
 

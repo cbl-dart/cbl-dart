@@ -1,10 +1,5 @@
 import 'libraries.dart';
-import 'replicator.dart';
 import 'tracing.dart';
-
-/// Wether to use the `isLeaf` flag when looking up native functions.
-// ignore: do_not_use_environment
-const useIsLeaf = bool.fromEnvironment('cblFfiUseIsLeaf');
 
 abstract base class Bindings {
   Bindings(Bindings parent) : libs = parent.libs {
@@ -20,9 +15,7 @@ abstract base class Bindings {
 
 final class CBLBindings extends Bindings {
   CBLBindings(LibrariesConfiguration config)
-      : super.root(DynamicLibraries.fromConfig(config)) {
-    replicator = ReplicatorBindings(this);
-  }
+      : super.root(DynamicLibraries.fromConfig(config));
 
   static CBLBindings? _instance;
 
@@ -49,8 +42,6 @@ final class CBLBindings extends Bindings {
       _onTracedCall = onTracedCall;
     }
   }
-
-  late final ReplicatorBindings replicator;
 }
 
 set _onTracedCall(TracedCallHandler value) => onTracedCall = value;
