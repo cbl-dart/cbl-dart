@@ -5,11 +5,12 @@ import 'dart:ffi';
 
 import 'base.dart';
 import 'bindings.dart';
+import 'cblite.dart' as cblite;
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
-final class CBLDocument extends Opaque {}
+typedef CBLDocument = cblite.CBLDocument;
 
 typedef _CBLDocument_ID = FLString Function(Pointer<CBLDocument> doc);
 
@@ -73,7 +74,7 @@ final class DocumentBindings extends Bindings {
       _createJSON(doc).toDartStringAndRelease()!;
 }
 
-final class CBLMutableDocument extends Opaque {}
+typedef CBLMutableDocument = CBLDocument;
 
 typedef _CBLDocument_CreateWithID = Pointer<CBLMutableDocument> Function(
   FLString id,

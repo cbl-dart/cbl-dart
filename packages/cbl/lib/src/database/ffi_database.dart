@@ -19,7 +19,6 @@ import '../query/index/index.dart';
 import '../query/query.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -416,7 +415,7 @@ final class FfiDatabase
   String toString() => 'FfiDatabase($name)';
 }
 
-final _collectionBindings = cblBindings.collection;
+const _collectionBindings = CollectionBindings();
 
 final class FfiScope
     with ScopeBase, ClosableResourceMixin
