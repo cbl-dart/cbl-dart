@@ -1,5 +1,4 @@
 import 'libraries.dart';
-import 'query.dart';
 import 'replicator.dart';
 import 'tracing.dart';
 
@@ -22,8 +21,6 @@ abstract base class Bindings {
 final class CBLBindings extends Bindings {
   CBLBindings(LibrariesConfiguration config)
       : super.root(DynamicLibraries.fromConfig(config)) {
-    query = QueryBindings(this);
-    resultSet = ResultSetBindings(this);
     replicator = ReplicatorBindings(this);
   }
 
@@ -53,8 +50,6 @@ final class CBLBindings extends Bindings {
     }
   }
 
-  late final QueryBindings query;
-  late final ResultSetBindings resultSet;
   late final ReplicatorBindings replicator;
 }
 
