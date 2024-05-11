@@ -1,5 +1,7 @@
+import 'dart:ffi';
 import 'dart:isolate';
 
+import 'bindings/cblite.dart' as cblite;
 import 'database/database.dart';
 import 'log.dart';
 import 'support/isolate.dart';
@@ -17,6 +19,11 @@ abstract final class CouchbaseLite {
   /// Initializes the `cbl` package, for the main isolate.
   static Future<void> init() =>
       asyncOperationTracePoint(InitializeOp.new, () async {
+        // Hack to make cblite resolvable when loading cblitedart.
+        // Native assets don't explicitly support libraries depending on each
+        // other.
+        cblite.CBL_Release(nullptr);
+
         await initPrimaryIsolate(IsolateContext());
 
         _setupLogging();
