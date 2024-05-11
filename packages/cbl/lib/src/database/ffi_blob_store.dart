@@ -5,7 +5,6 @@ import '../bindings.dart';
 import '../document/blob.dart';
 import '../fleece/containers.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -48,7 +47,7 @@ final class _FfiBlob implements Finalizable {
 final class FfiBlobStore implements BlobStore, SyncBlobStore {
   FfiBlobStore(this.database);
 
-  static final _databaseBindings = cblBindings.database;
+  static const _databaseBindings = DatabaseBindings();
 
   final FfiDatabase database;
 

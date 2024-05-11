@@ -18,8 +18,7 @@
  * C API is integrated with the garbage collection of Dart objects.
  */
 
-typedef enum CBLDartInitializeResult
-{
+typedef enum CBLDartInitializeResult {
   CBLDartInitializeResult_kSuccess,
   CBLDartInitializeResult_kIncompatibleDartVM,
   CBLDartInitializeResult_kCBLInitError,
@@ -79,9 +78,37 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
 // === Database
 
+typedef CBL_ENUM(uint32_t, CBLDartEncryptionAlgorithm){
+    kCBLDartEncryptionNone = 0, kCBLDartEncryptionAES256};
+
+typedef CBL_ENUM(uint64_t, CBLDartEncryptionKeySize){
+    kCBLDartEncryptionKeySizeAES256 = 32,
+};
+
+typedef struct {
+  CBLDartEncryptionAlgorithm algorithm;
+  uint8_t bytes[32];
+} CBLDartEncryptionKey;
+
+typedef struct {
+  FLString directory;
+  CBLDartEncryptionKey encryptionKey;
+} CBLDartDatabaseConfiguration;
+
+CBLDART_EXPORT bool CBLDart_CBLEncryptionKey_FromPassword(
+    CBLDartEncryptionKey *key, FLString password);
+
+CBLDART_EXPORT
+CBLDartDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default();
+
+CBLDART_EXPORT
+bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
+                              const CBLDartDatabaseConfiguration *config,
+                              CBLError *_cbl_nullable outError);
+
 CBLDART_EXPORT
 CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
-                                      CBLDatabaseConfiguration *config,
+                                      CBLDartDatabaseConfiguration *config,
                                       CBLError *errorOut);
 
 CBLDART_EXPORT
@@ -90,6 +117,11 @@ void CBLDart_CBLDatabase_Release(CBLDatabase *database);
 CBLDART_EXPORT
 bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
                                CBLError *errorOut);
+
+CBLDART_EXPORT
+bool CBLDart_CBLDatabase_ChangeEncryptionKey(CBLDatabase *database,
+                                             const CBLDartEncryptionKey *newKey,
+                                             CBLError *outError);
 
 // === Collection
 
@@ -103,14 +135,12 @@ void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase *db,
                                              const CBLCollection *collection,
                                              CBLDart_AsyncCallback listener);
 
-typedef enum : uint8_t
-{
+typedef enum : uint8_t {
   kCBLDart_IndexTypeValue,
   kCBLDart_IndexTypeFullText,
 } CBLDart_IndexType;
 
-typedef struct CBLDart_CBLIndexSpec
-{
+typedef struct CBLDart_CBLIndexSpec {
   CBLDart_IndexType type;
   CBLQueryLanguage expressionLanguage;
   FLString expressions;
@@ -138,8 +168,7 @@ FLSliceResult CBLDart_CBLBlobReader_Read(CBLBlobReadStream *stream,
 
 // === Replicator
 
-typedef struct CBLDart_ReplicationCollection
-{
+typedef struct CBLDart_ReplicationCollection {
   CBLCollection *collection;
   FLArray channels;
   FLArray documentIDs;
@@ -148,8 +177,7 @@ typedef struct CBLDart_ReplicationCollection
   CBLDart_AsyncCallback conflictResolver;
 } CBLDart_ReplicationCollection;
 
-typedef struct CBLDart_ReplicatorConfiguration
-{
+typedef struct CBLDart_ReplicatorConfiguration {
   CBLDatabase *database;
   CBLEndpoint *endpoint;
   CBLReplicatorType replicatorType;

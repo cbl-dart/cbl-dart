@@ -1,5 +1,4 @@
 import 'collection.dart';
-import 'database.dart';
 import 'document.dart';
 import 'libraries.dart';
 import 'query.dart';
@@ -25,7 +24,6 @@ abstract base class Bindings {
 final class CBLBindings extends Bindings {
   CBLBindings(LibrariesConfiguration config)
       : super.root(DynamicLibraries.fromConfig(config)) {
-    database = DatabaseBindings(this);
     collection = CollectionBindings(this);
     document = DocumentBindings(this);
     mutableDocument = MutableDocumentBindings(this);
@@ -60,7 +58,6 @@ final class CBLBindings extends Bindings {
     }
   }
 
-  late final DatabaseBindings database;
   late final CollectionBindings collection;
   late final DocumentBindings document;
   late final MutableDocumentBindings mutableDocument;

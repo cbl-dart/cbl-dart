@@ -40,7 +40,7 @@ import 'ffi_blob_store.dart';
 import 'scope.dart';
 
 const _baseBindings = BaseBindings();
-final _bindings = cblBindings.database;
+const _bindings = DatabaseBindings();
 
 final class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin

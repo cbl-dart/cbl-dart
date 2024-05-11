@@ -404,6 +404,22 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
 
 // === Database
 
+bool CBLDart_CBLEncryptionKey_FromPassword(CBLDartEncryptionKey *key,
+                                           FLString password) {
+#ifdef COUCHBASE_ENTERPRISE
+  CBLEncryptionKey key_ = {};
+  if (CBLEncryptionKey_FromPassword(&key_, password)) {
+    key->algorithm = key_.algorithm;
+    key->bytes = key_.bytes;
+    return true;
+  }
+  { return false; }
+#else
+  CBLDart_RequireEnterpriseEdition();
+  return false;
+#endif
+}
+
 /**
  * A list of all the currently open database.
  *
@@ -431,6 +447,55 @@ static bool CBLDart_UnregisterOpenDatabase(CBLDatabase *database) {
   return true;
 }
 
+#ifdef COUCHBASE_ENTERPRISE
+static CBLEncryptionKey CBLDartEncryptionKey_ToCBL(CBLDartEncryptionKey key) {
+  CBLEncryptionKey key_ = {};
+  key_.algorithm = key.algorithm;
+  key_.bytes = key.bytes;
+  return key_;
+}
+
+static CBLDartEncryptionKey CBLDartEncryptionKey_FromCBL(CBLEncryptionKey key) {
+  CBLDartEncryptionKey key_ = {};
+  key_.algorithm = key.algorithm;
+  key_.bytes = key.bytes;
+  return key_;
+}
+#endif
+
+static CBLDatabaseConfiguration CBLDartDatabaseConfiguration_ToCBL(
+    CBLDartDatabaseConfiguration config) {
+  CBLDatabaseConfiguration config_ = {};
+  config_.directory = config.directory;
+#ifdef COUCHBASE_ENTERPRISE
+  config_.encryptionKey = CBLDartEncryptionKey_ToCBL(config.encryptionKey);
+#endif
+  return config_;
+}
+
+static CBLDartDatabaseConfiguration CBLDartDatabaseConfiguration_FromCBL(
+    CBLDatabaseConfiguration config) {
+  CBLDartDatabaseConfiguration config_ = {};
+  config_.directory = config.directory;
+#ifdef COUCHBASE_ENTERPRISE
+  config_.encryptionKey = CBLDartEncryptionKey_FromCBL(config.encryptionKey);
+#endif
+  return config_;
+}
+
+CBLDartDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
+  return CBLDartDatabaseConfiguration_FromCBL(
+      CBLDatabaseConfiguration_Default());
+}
+
+bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
+                              const CBLDartDatabaseConfiguration *config,
+                              CBLError *_cbl_nullable outError) {
+  CBLDatabaseConfiguration config_ =
+      CBLDartDatabaseConfiguration_ToCBL(*config);
+  return CBL_CopyDatabase(fromPath, toName, &config_, outError);
+}
+
 bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
                                CBLError *errorOut) {
   if (!CBLDart_UnregisterOpenDatabase(database)) {
@@ -449,11 +514,16 @@ bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
 }
 
 CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
-                                      CBLDatabaseConfiguration *config,
+                                      CBLDartDatabaseConfiguration *config,
                                       CBLError *errorOut) {
   CBLDart_CheckFileLogging();
 
-  auto config_ = config ? *config : CBLDatabaseConfiguration_Default();
+  CBLDatabaseConfiguration config_{};
+  if (config) {
+    config_ = CBLDartDatabaseConfiguration_ToCBL(*config);
+  } else {
+    config_ = CBLDatabaseConfiguration_Default();
+  }
 
   auto database = CBLDatabase_Open(name, &config_, errorOut);
 
@@ -476,6 +546,17 @@ void CBLDart_CBLDatabase_Release(CBLDatabase *database) {
   }
   CBLDart_ReleaseDatabaseLock(database);
   CBLDatabase_Release(database);
+}
+
+bool CBLDart_CBLDatabase_ChangeEncryptionKey(CBLDatabase *database,
+                                             const CBLEncryptionKey *newKey,
+                                             CBLError *outError) {
+#ifdef COUCHBASE_ENTERPRISE
+  auto newKey_ = CBLDartEncryptionKey_ToCBL(*newKey);
+  return CBLDart_CBLDatabase_ChangeEncryptionKey(database, &newKey_, outError);
+#else
+  CBLDart_RequireEnterpriseEdition();
+#endif
 }
 
 // === Collection

@@ -16,6 +16,8 @@
  */
 #define CBLDart_kFakeExternalAllocationSize 64
 
+void CBLDart_RequireEnterpriseEdition();
+
 // === Dart Native ============================================================
 
 /**

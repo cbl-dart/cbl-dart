@@ -64,10 +64,28 @@ external bool CBLDart_CBLLog_SetSentryBreadcrumbs(
   bool enabled,
 );
 
+@ffi.Native<NativeCBLDart_CBLEncryptionKey_FromPassword>()
+external bool CBLDart_CBLEncryptionKey_FromPassword(
+  ffi.Pointer<CBLDartEncryptionKey> key,
+  imp1.FLString password,
+);
+
+@ffi.Native<NativeCBLDart_CBLDatabaseConfiguration_Default>()
+external CBLDartDatabaseConfiguration
+    CBLDart_CBLDatabaseConfiguration_Default();
+
+@ffi.Native<NativeCBLDart_CBL_CopyDatabase>()
+external bool CBLDart_CBL_CopyDatabase(
+  imp1.FLString fromPath,
+  imp1.FLString toName,
+  ffi.Pointer<CBLDartDatabaseConfiguration> config,
+  ffi.Pointer<CBLError> outError,
+);
+
 @ffi.Native<NativeCBLDart_CBLDatabase_Open>()
 external ffi.Pointer<CBLDatabase> CBLDart_CBLDatabase_Open(
   imp1.FLString name,
-  ffi.Pointer<CBLDatabaseConfiguration> config,
+  ffi.Pointer<CBLDartDatabaseConfiguration> config,
   ffi.Pointer<CBLError> errorOut,
 );
 
@@ -81,6 +99,13 @@ external bool CBLDart_CBLDatabase_Close(
   ffi.Pointer<CBLDatabase> database,
   bool andDelete,
   ffi.Pointer<CBLError> errorOut,
+);
+
+@ffi.Native<NativeCBLDart_CBLDatabase_ChangeEncryptionKey>()
+external bool CBLDart_CBLDatabase_ChangeEncryptionKey(
+  ffi.Pointer<CBLDatabase> database,
+  ffi.Pointer<CBLDartEncryptionKey> newKey,
+  ffi.Pointer<CBLError> outError,
 );
 
 @ffi.Native<NativeCBLDart_CBLCollection_AddDocumentChangeListener>()
@@ -302,20 +327,53 @@ typedef NativeCBLDart_CBLLog_SetSentryBreadcrumbs = ffi.Bool Function(
     ffi.Bool enabled);
 typedef DartCBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
+final class CBLDartEncryptionKey extends ffi.Struct {
+  @CBLDartEncryptionAlgorithm()
+  external int algorithm;
+
+  @ffi.Array.multi([32])
+  external ffi.Array<ffi.Uint8> bytes;
+}
+
+typedef CBLDartEncryptionAlgorithm = ffi.Uint32;
+typedef DartCBLDartEncryptionAlgorithm = int;
+
+final class CBLDartDatabaseConfiguration extends ffi.Struct {
+  external imp1.FLString directory;
+
+  external CBLDartEncryptionKey encryptionKey;
+}
+
+typedef NativeCBLDart_CBLEncryptionKey_FromPassword = ffi.Bool Function(
+    ffi.Pointer<CBLDartEncryptionKey> key, imp1.FLString password);
+typedef DartCBLDart_CBLEncryptionKey_FromPassword = bool Function(
+    ffi.Pointer<CBLDartEncryptionKey> key, imp1.FLString password);
+typedef NativeCBLDart_CBLDatabaseConfiguration_Default
+    = CBLDartDatabaseConfiguration Function();
+typedef DartCBLDart_CBLDatabaseConfiguration_Default
+    = CBLDartDatabaseConfiguration Function();
+typedef NativeCBLDart_CBL_CopyDatabase = ffi.Bool Function(
+    imp1.FLString fromPath,
+    imp1.FLString toName,
+    ffi.Pointer<CBLDartDatabaseConfiguration> config,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLDart_CBL_CopyDatabase = bool Function(
+    imp1.FLString fromPath,
+    imp1.FLString toName,
+    ffi.Pointer<CBLDartDatabaseConfiguration> config,
+    ffi.Pointer<CBLError> outError);
+
 /// \defgroup database  Database
 /// @{ */
 /// /** A connection to an open database.
 typedef CBLDatabase = imp1.CBLDatabase;
-
-/// Database configuration options.
-typedef CBLDatabaseConfiguration = imp1.CBLDatabaseConfiguration;
 typedef NativeCBLDart_CBLDatabase_Open = ffi.Pointer<CBLDatabase> Function(
     imp1.FLString name,
-    ffi.Pointer<CBLDatabaseConfiguration> config,
+    ffi.Pointer<CBLDartDatabaseConfiguration> config,
     ffi.Pointer<CBLError> errorOut);
 typedef DartCBLDart_CBLDatabase_Open = ffi.Pointer<CBLDatabase> Function(
     imp1.FLString name,
-    ffi.Pointer<CBLDatabaseConfiguration> config,
+    ffi.Pointer<CBLDartDatabaseConfiguration> config,
     ffi.Pointer<CBLError> errorOut);
 typedef NativeCBLDart_CBLDatabase_Release = ffi.Void Function(
     ffi.Pointer<CBLDatabase> database);
@@ -329,6 +387,14 @@ typedef DartCBLDart_CBLDatabase_Close = bool Function(
     ffi.Pointer<CBLDatabase> database,
     bool andDelete,
     ffi.Pointer<CBLError> errorOut);
+typedef NativeCBLDart_CBLDatabase_ChangeEncryptionKey = ffi.Bool Function(
+    ffi.Pointer<CBLDatabase> database,
+    ffi.Pointer<CBLDartEncryptionKey> newKey,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLDart_CBLDatabase_ChangeEncryptionKey = bool Function(
+    ffi.Pointer<CBLDatabase> database,
+    ffi.Pointer<CBLDartEncryptionKey> newKey,
+    ffi.Pointer<CBLError> outError);
 
 /// \defgroup collection  Collection
 /// @{ */
@@ -651,3 +717,9 @@ typedef NativeCBLDart_FLEncoder_WriteArrayValue = ffi.Bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, ffi.Uint32 index);
 typedef DartCBLDart_FLEncoder_WriteArrayValue = bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, int index);
+
+const int kCBLDartEncryptionNone = 0;
+
+const int kCBLDartEncryptionAES256 = 1;
+
+const int kCBLDartEncryptionKeySizeAES256 = 32;

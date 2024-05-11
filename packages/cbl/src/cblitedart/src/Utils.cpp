@@ -1,5 +1,13 @@
 #include "Utils.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
+void CBLDart_RequireEnterpriseEdition() {
+  printf("Couchbase Lite Enterprise edition is required for this feature.\n");
+  abort();
+}
+
 // === Dart Native ============================================================
 
 int64_t CBLDart_CObject_getIntValueAsInt64(Dart_CObject* object) {
