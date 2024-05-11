@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  sync-gateway:
+    image: couchbase/sync-gateway:3.0.3-community
+    command:
+      [
+        '-disable_persistent_config',
+        '-api.admin_interface_authentication=false',
+        '/etc/sync-gateway-config.json',
+      ]
+    ports:
+      - 4984:4984
+      - 4985:4985
+    volumes:
+      - ./sync-gateway-config.json:/etc/sync-gateway-config.json:ro
+    restart: on-failure

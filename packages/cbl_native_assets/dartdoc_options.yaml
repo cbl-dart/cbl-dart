@@ -1,0 +1,31 @@
+dartdoc:
+  categories:
+    'Enterprise Edition':
+      markdown: 'doc/enterprise-edition.md'
+    'Document':
+      markdown: 'doc/document.md'
+    'Database':
+      markdown: 'doc/database.md'
+    'Query':
+      markdown: 'doc/query.md'
+    'Query Builder':
+      markdown: 'doc/query-builder.md'
+    'Replication':
+      markdown: 'doc/replication.md'
+    'Logging':
+      markdown: 'doc/logging.md'
+    'Tracing':
+      markdown: 'doc/tracing.md'
+    'Typed Data':
+      markdown: 'doc/typed-data.md'
+  categoryOrder:
+    - 'Document'
+    - 'Database'
+    - 'Query'
+    - 'Query Builder'
+    - 'Replication'
+    - 'Logging'
+    - 'Tracing'
+    - 'Enterprise Edition'
+    - 'Typed Data'
+  showUndocumentedCategories: true

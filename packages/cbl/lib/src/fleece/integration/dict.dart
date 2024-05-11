@@ -35,7 +35,7 @@ final class MDict extends MCollection {
           isMutable: isMutable ?? parent.hasMutableChildren,
         );
 
-  final FLDict? _dict;
+  final Pointer<FLDict>? _dict;
   final Map<String, MValue> _values;
   int _length;
 
@@ -181,7 +181,7 @@ final class MDict extends MCollection {
       // Cache the value to speed up lookups later.
       final value = _values[key] = _MValueWithKey(
         loadedKey.value,
-        loadedValue.value,
+        Pointer<FLValue>.fromAddress(loadedValue.value),
       );
       yield MapEntry(key, value);
     }
@@ -210,7 +210,7 @@ final class MDict extends MCollection {
 }
 
 final class _MValueWithKey extends MValue {
-  _MValueWithKey(this.key, FLValue value) : super.withValue(value);
+  _MValueWithKey(this.key, Pointer<FLValue> value) : super.withValue(value);
 
-  final FLValue key;
+  final Pointer<FLValue> key;
 }

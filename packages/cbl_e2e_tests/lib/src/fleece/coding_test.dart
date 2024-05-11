@@ -8,8 +8,8 @@ import '../../test_binding_impl.dart';
 import '../test_binding.dart';
 import '../utils/fleece_coding.dart';
 
-const _decoderBindings = FleeceDecoderBindings();
-const _valueBindings = ValueBindings();
+final _decoderBinds = CBLBindings.instance.fleece.decoder;
+final _valueBinds = CBLBindings.instance.fleece.value;
 
 void main() {
   setupTestBinding();
@@ -38,11 +38,10 @@ void main() {
         final sliceResult = data.toSliceResult();
         final sharedStringsTable = SharedStringsTable();
 
-        // ignore: omit_local_variable_types
-        final FLArray flArray =
-            _valueBindings.fromData(sliceResult, FLTrust.trusted)!.cast();
+        final flArray =
+            _valueBinds.fromData(sliceResult, FLTrust.trusted)!.cast<FLArray>();
         for (var i = 0; i < 4; i++) {
-          _decoderBindings.getLoadedValueFromArray(flArray, i);
+          _decoderBinds.getLoadedValueFromArray(flArray, i);
           sharedStringsTable.decode(StringSource.value);
         }
 

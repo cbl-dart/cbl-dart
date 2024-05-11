@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import '../bindings.dart';
+import '../support/ffi.dart';
 import 'logger.dart';
 
 /// The configuration for log files.
@@ -122,7 +123,7 @@ abstract final class FileLogger {
 
 // === Impl ====================================================================
 
-const _bindings = LoggingBindings();
+final _bindings = cblBindings.logging;
 
 final class FileLoggerImpl extends FileLogger {
   @override

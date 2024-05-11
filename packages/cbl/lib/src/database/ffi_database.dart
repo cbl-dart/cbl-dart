@@ -19,6 +19,7 @@ import '../query/index/index.dart';
 import '../query/query.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
+import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -38,8 +39,7 @@ import 'document_change.dart';
 import 'ffi_blob_store.dart';
 import 'scope.dart';
 
-const _baseBindings = BaseBindings();
-const _bindings = DatabaseBindings();
+final _bindings = cblBindings.database;
 
 final class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
@@ -415,7 +415,7 @@ final class FfiDatabase
   String toString() => 'FfiDatabase($name)';
 }
 
-const _collectionBindings = CollectionBindings();
+final _collectionBindings = cblBindings.collection;
 
 final class FfiScope
     with ScopeBase, ClosableResourceMixin
@@ -425,7 +425,7 @@ final class FfiScope
     required this.pointer,
     required this.database,
   }) {
-    _baseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
+    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(database);
   }
@@ -481,7 +481,7 @@ final class FfiCollection
     required this.pointer,
     required this.scope,
   }) {
-    _baseBindings.bindCBLRefCountedToDartObject(this, pointer.cast());
+    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(scope);
   }

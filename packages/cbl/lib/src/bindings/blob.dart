@@ -4,8 +4,7 @@
 import 'dart:ffi';
 
 import 'base.dart';
-import 'cblite.dart' as cblite;
-import 'cblitedart.dart' as cblitedart;
+import 'bindings.dart';
 import 'data.dart';
 import 'database.dart';
 import 'fleece.dart';
@@ -15,60 +14,173 @@ import 'utils.dart';
 
 // === CBLBlob =================================================================
 
-typedef CBLBlob = cblite.CBLBlob;
+final class CBLBlob extends Opaque {}
 
-final class BlobBindings {
-  const BlobBindings();
+typedef _CBLBlob_CreateWithData = Pointer<CBLBlob> Function(
+  FLString contentType,
+  FLSlice contents,
+);
+
+typedef _FLDict_IsBlob_C = Bool Function(Pointer<FLDict> dict);
+typedef _FLDict_IsBlob = bool Function(Pointer<FLDict> dict);
+
+typedef _FLDict_GetBlob = Pointer<CBLBlob> Function(Pointer<FLDict> dict);
+
+typedef _CBLBlob_Length_C = Uint64 Function(Pointer<CBLBlob> blob);
+typedef _CBLBlob_Length = int Function(Pointer<CBLBlob> blob);
+
+typedef _CBLBlob_Digest = FLString Function(Pointer<CBLBlob> blob);
+
+typedef _CBLBlob_ContentType = FLString Function(Pointer<CBLBlob> blob);
+
+typedef _CBLBlob_Content = FLSliceResult Function(
+  Pointer<CBLBlob> blob,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLBlob_Properties = Pointer<FLDict> Function(Pointer<CBLBlob> blob);
+
+typedef _FLSlot_SetBlob_C = Void Function(
+  Pointer<FLSlot> slot,
+  Pointer<CBLBlob> blob,
+);
+typedef _FLSlot_SetBlob = void Function(
+  Pointer<FLSlot> slot,
+  Pointer<CBLBlob> blob,
+);
+
+final class BlobBindings extends Bindings {
+  BlobBindings(super.parent) {
+    _createWithData = libs.cbl
+        .lookupFunction<_CBLBlob_CreateWithData, _CBLBlob_CreateWithData>(
+      'CBLBlob_CreateWithData',
+      isLeaf: useIsLeaf,
+    );
+    _isBlob = libs.cbl.lookupFunction<_FLDict_IsBlob_C, _FLDict_IsBlob>(
+      'FLDict_IsBlob',
+      isLeaf: useIsLeaf,
+    );
+    _getBlob = libs.cbl.lookupFunction<_FLDict_GetBlob, _FLDict_GetBlob>(
+      'FLDict_GetBlob',
+      isLeaf: useIsLeaf,
+    );
+    _length = libs.cbl.lookupFunction<_CBLBlob_Length_C, _CBLBlob_Length>(
+      'CBLBlob_Length',
+      isLeaf: useIsLeaf,
+    );
+    _digest = libs.cbl.lookupFunction<_CBLBlob_Digest, _CBLBlob_Digest>(
+      'CBLBlob_Digest',
+      isLeaf: useIsLeaf,
+    );
+    _contentType =
+        libs.cbl.lookupFunction<_CBLBlob_ContentType, _CBLBlob_ContentType>(
+      'CBLBlob_ContentType',
+      isLeaf: useIsLeaf,
+    );
+    _content = libs.cbl.lookupFunction<_CBLBlob_Content, _CBLBlob_Content>(
+      'CBLBlob_Content',
+      isLeaf: useIsLeaf,
+    );
+    _properties =
+        libs.cbl.lookupFunction<_CBLBlob_Properties, _CBLBlob_Properties>(
+      'CBLBlob_Properties',
+      isLeaf: useIsLeaf,
+    );
+    _setBlob = libs.cbl.lookupFunction<_FLSlot_SetBlob_C, _FLSlot_SetBlob>(
+      'FLSlot_SetBlob',
+      isLeaf: useIsLeaf,
+    );
+  }
+
+  late final _CBLBlob_CreateWithData _createWithData;
+  late final _FLDict_IsBlob _isBlob;
+  late final _FLDict_GetBlob _getBlob;
+  late final _FLSlot_SetBlob _setBlob;
+  late final _CBLBlob_Length _length;
+  late final _CBLBlob_Digest _digest;
+  late final _CBLBlob_Content _content;
+  late final _CBLBlob_ContentType _contentType;
+  late final _CBLBlob_Properties _properties;
 
   Pointer<CBLBlob> createWithData(String? contentType, Data content) =>
       runWithSingleFLString(
         contentType,
         (flContentType) {
           final sliceResult = content.toSliceResult();
-          return cblite.CBLBlob_CreateWithData(
-              flContentType, sliceResult.makeGlobal().ref);
+          return _createWithData(flContentType, sliceResult.makeGlobal().ref);
         },
       );
 
-  bool isBlob(FLDict dict) => cblite.FLDict_IsBlob(dict);
+  bool isBlob(Pointer<FLDict> dict) => _isBlob(dict);
 
-  Pointer<CBLBlob>? getBlob(FLDict dict) =>
-      cblite.FLDict_GetBlob(dict).toNullable();
+  Pointer<CBLBlob>? getBlob(Pointer<FLDict> dict) =>
+      _getBlob(dict).toNullable();
 
-  void setBlob(FLSlot slot, Pointer<CBLBlob> blob) =>
-      cblite.FLSlot_SetBlob(slot, blob);
+  void setBlob(Pointer<FLSlot> slot, Pointer<CBLBlob> blob) =>
+      _setBlob(slot, blob);
 
-  int length(Pointer<CBLBlob> blob) => cblite.CBLBlob_Length(blob);
+  int length(Pointer<CBLBlob> blob) => _length(blob);
 
-  String digest(Pointer<CBLBlob> blob) =>
-      cblite.CBLBlob_Digest(blob).toDartString()!;
+  String digest(Pointer<CBLBlob> blob) => _digest(blob).toDartString()!;
 
-  Data content(Pointer<CBLBlob> blob) =>
-      cblite.CBLBlob_Content(blob, globalCBLError)
-          .checkCBLError()
-          .let(SliceResult.fromFLSliceResult)!
-          .toData();
+  Data content(Pointer<CBLBlob> blob) => _content(blob, globalCBLError)
+      .checkCBLError()
+      .let(SliceResult.fromFLSliceResult)!
+      .toData();
 
   String? contentType(Pointer<CBLBlob> blob) =>
-      cblite.CBLBlob_ContentType(blob).toDartString();
+      _contentType(blob).toDartString();
 
-  FLDict properties(Pointer<CBLBlob> blob) => cblite.CBLBlob_Properties(blob);
+  Pointer<FLDict> properties(Pointer<CBLBlob> blob) => _properties(blob);
 }
 
 // === CBLBlobReadStream =======================================================
 
-typedef CBLBlobReadStream = cblite.CBLBlobReadStream;
+final class CBLBlobReadStream extends Opaque {}
 
-final class BlobReadStreamBindings {
-  const BlobReadStreamBindings();
+typedef _CBLBlob_OpenContentStream = Pointer<CBLBlobReadStream> Function(
+  Pointer<CBLBlob> blob,
+  Pointer<CBLError> errorOut,
+);
 
-  static final _finalizer = NativeFinalizer(
-      Native.addressOf<NativeFunction<cblite.NativeCBLBlobReader_Close>>(
-              cblite.CBLBlobReader_Close)
-          .cast());
+typedef _CBLDart_CBLBlobReader_Read_C = FLSliceResult Function(
+  Pointer<CBLBlobReadStream> stream,
+  Uint64 bufferSize,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLDart_CBLBlobReader_Read = FLSliceResult Function(
+  Pointer<CBLBlobReadStream> stream,
+  int bufferSize,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLBlobReader_Close_C = Void Function(
+  Pointer<CBLBlobReadStream> stream,
+);
+
+final class BlobReadStreamBindings extends Bindings {
+  BlobReadStreamBindings(super.parent) {
+    _openContentStream = libs.cbl
+        .lookupFunction<_CBLBlob_OpenContentStream, _CBLBlob_OpenContentStream>(
+      'CBLBlob_OpenContentStream',
+      isLeaf: useIsLeaf,
+    );
+    _read = libs.cblDart.lookupFunction<_CBLDart_CBLBlobReader_Read_C,
+        _CBLDart_CBLBlobReader_Read>(
+      'CBLDart_CBLBlobReader_Read',
+      isLeaf: useIsLeaf,
+    );
+    _closePtr = libs.cbl.lookup('CBLBlobReader_Close');
+  }
+
+  late final _CBLBlob_OpenContentStream _openContentStream;
+  late final _CBLDart_CBLBlobReader_Read _read;
+  late final Pointer<NativeFunction<_CBLBlobReader_Close_C>> _closePtr;
+
+  late final _finalizer = NativeFinalizer(_closePtr.cast());
 
   Pointer<CBLBlobReadStream> openContentStream(Pointer<CBLBlob> blob) =>
-      cblite.CBLBlob_OpenContentStream(blob, globalCBLError).checkCBLError();
+      _openContentStream(blob, globalCBLError).checkCBLError();
 
   void bindToDartObject(
     Finalizable object,
@@ -78,8 +190,7 @@ final class BlobReadStreamBindings {
   }
 
   Data? read(Pointer<CBLBlobReadStream> stream, int bufferSize) {
-    final buffer = cblitedart.CBLDart_CBLBlobReader_Read(
-        stream, bufferSize, globalCBLError);
+    final buffer = _read(stream, bufferSize, globalCBLError);
 
     // A null slice signals an error.
     if (buffer.buf == nullptr) {
@@ -95,22 +206,77 @@ final class BlobReadStreamBindings {
 
 // === CBLBlobWriteStream ======================================================
 
-typedef CBLBlobWriteStream = cblite.CBLBlobWriteStream;
+final class CBLBlobWriteStream extends Opaque {}
 
-final class BlobWriteStreamBindings {
-  const BlobWriteStreamBindings();
+typedef _CBLBlobWriter_Create = Pointer<CBLBlobWriteStream> Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLBlobWriter_Close_C = Void Function(
+  Pointer<CBLBlobWriteStream> stream,
+);
+typedef _CBLBlobWriter_Close = void Function(
+  Pointer<CBLBlobWriteStream> stream,
+);
+
+typedef _CBLBlobWriter_Write_C = Bool Function(
+  Pointer<CBLBlobWriteStream> stream,
+  Pointer<Uint8> buf,
+  Size bufSize,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLBlobWriter_Write = bool Function(
+  Pointer<CBLBlobWriteStream> stream,
+  Pointer<Uint8> buf,
+  int bufSize,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLBlob_CreateWithStream = Pointer<CBLBlob> Function(
+  FLString contentType,
+  Pointer<CBLBlobWriteStream> stream,
+);
+
+final class BlobWriteStreamBindings extends Bindings {
+  BlobWriteStreamBindings(super.parent) {
+    _create =
+        libs.cbl.lookupFunction<_CBLBlobWriter_Create, _CBLBlobWriter_Create>(
+      'CBLBlobWriter_Create',
+      isLeaf: useIsLeaf,
+    );
+    _close =
+        libs.cbl.lookupFunction<_CBLBlobWriter_Close_C, _CBLBlobWriter_Close>(
+      'CBLBlobWriter_Close',
+      isLeaf: useIsLeaf,
+    );
+    _write =
+        libs.cbl.lookupFunction<_CBLBlobWriter_Write_C, _CBLBlobWriter_Write>(
+      'CBLBlobWriter_Write',
+      isLeaf: useIsLeaf,
+    );
+    _createBlobWithStream = libs.cbl
+        .lookupFunction<_CBLBlob_CreateWithStream, _CBLBlob_CreateWithStream>(
+      'CBLBlob_CreateWithStream',
+      isLeaf: useIsLeaf,
+    );
+  }
+
+  late final _CBLBlobWriter_Create _create;
+  late final _CBLBlobWriter_Close _close;
+  late final _CBLBlobWriter_Write _write;
+  late final _CBLBlob_CreateWithStream _createBlobWithStream;
 
   Pointer<CBLBlobWriteStream> create(Pointer<CBLDatabase> db) =>
-      cblite.CBLBlobWriter_Create(db, globalCBLError).checkCBLError();
+      _create(db, globalCBLError).checkCBLError();
 
   void close(Pointer<CBLBlobWriteStream> stream) {
-    cblite.CBLBlobWriter_Close(stream);
+    _close(stream);
   }
 
   bool write(Pointer<CBLBlobWriteStream> stream, Data data) {
     final slice = data.toSliceResult();
-    return cblite.CBLBlobWriter_Write(
-            stream, slice.buf.cast(), slice.size, globalCBLError)
+    return _write(stream, slice.buf, slice.size, globalCBLError)
         .checkCBLError();
   }
 
@@ -120,7 +286,20 @@ final class BlobWriteStreamBindings {
   ) =>
       runWithSingleFLString(
         contentType,
-        (flContentType) =>
-            cblite.CBLBlob_CreateWithStream(flContentType, stream),
+        (flContentType) => _createBlobWithStream(flContentType, stream),
       );
+}
+
+// === BlobsBindings ===========================================================
+
+final class BlobsBindings extends Bindings {
+  BlobsBindings(super.parent) {
+    blob = BlobBindings(this);
+    readStream = BlobReadStreamBindings(this);
+    writeStream = BlobWriteStreamBindings(this);
+  }
+
+  late final BlobBindings blob;
+  late final BlobReadStreamBindings readStream;
+  late final BlobWriteStreamBindings writeStream;
 }

@@ -1,0 +1,9 @@
+name: cbl_native_assets_example
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  cbl_native_assets:
+    path: ..

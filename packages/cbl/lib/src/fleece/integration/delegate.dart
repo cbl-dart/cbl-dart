@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../../bindings.dart';
+import '../../support/ffi.dart';
 import '../decoder.dart';
 import '../encoder.dart';
 import 'array.dart';
@@ -10,7 +11,7 @@ import 'collection.dart';
 import 'dict.dart';
 import 'value.dart';
 
-const _decoderBinds = FleeceDecoderBindings();
+final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract base class MDelegate {
   static MDelegate? instance;
@@ -55,7 +56,7 @@ final class SimpleMDelegate extends MDelegate {
     _decoderBinds.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
-    switch (flValue.dartType) {
+    switch (flValue.type) {
       case FLValueType.undefined:
       case FLValueType.null_:
         return null;

@@ -1,0 +1,30 @@
+{
+  "logging": {
+    "console": {
+      "enabled": true,
+      "log_level": "info",
+      "log_keys": ["*"],
+      "color_enabled": true
+    }
+  },
+
+  "adminInterface": ":4985",
+
+  "databases": {
+    "db": {
+      "server": "walrus:",
+      "users": {
+        "Jane": {
+          "password": "Jane",
+          "disabled": false,
+          "admin_channels": ["*"]
+        },
+        "Alice": {
+          "password": "Alice",
+          "disabled": false,
+          "admin_channels": ["Alice"]
+        }
+      }
+    }
+  }
+}

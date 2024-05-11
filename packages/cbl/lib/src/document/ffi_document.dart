@@ -6,11 +6,12 @@ import '../fleece/containers.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
+import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'document.dart';
 
-const _documentBindings = DocumentBindings();
-const _mutableDocumentBindings = MutableDocumentBindings();
+final _documentBindings = cblBindings.document;
+final _mutableDocumentBindings = cblBindings.mutableDocument;
 
 final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   FfiDocumentDelegate.fromPointer(this.pointer, {bool adopt = false}) {

@@ -1,4 +1,4 @@
-import '../bindings.dart';
+import '../support/ffi.dart';
 import 'logger.dart';
 
 /// Logger for writing log messages to the system console.
@@ -13,7 +13,7 @@ abstract final class ConsoleLogger {
   set level(LogLevel value);
 }
 
-const _bindings = LoggingBindings();
+final _bindings = cblBindings.logging;
 
 final class ConsoleLoggerImpl extends ConsoleLogger {
   @override

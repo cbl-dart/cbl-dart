@@ -7,8 +7,6 @@ import 'errors.dart';
 import 'ffi.dart';
 import 'tracing.dart';
 
-const _baseBindings = BaseBindings();
-
 class InitContext {
   InitContext({required this.filesDir, required this.tempDir});
 
@@ -53,7 +51,7 @@ class IsolateContext {
 Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
   runWithErrorTranslation(() {
-    _baseBindings.initializeNativeLibraries(context.initContext?.toCbl());
+    cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
   });
   await _runPostIsolateInitTasks();
 }

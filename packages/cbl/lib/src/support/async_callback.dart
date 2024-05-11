@@ -3,7 +3,7 @@ import 'dart:ffi';
 import 'dart:isolate';
 
 import '../bindings.dart';
-import '../bindings/cblitedart.dart' as cblitedart;
+import 'ffi.dart';
 
 /// Handler which is invoked to respond to a [AsyncCallback].
 ///
@@ -12,7 +12,7 @@ typedef AsyncCallbackHandler = FutureOr<Object?> Function(
   List<Object?> arguments,
 );
 
-const _bindings = AsyncCallbackBindings();
+final _bindings = cblBindings.asyncCallback;
 
 var _nextId = 0;
 int _generateId() => _nextId++;
@@ -54,7 +54,7 @@ class AsyncCallback implements Finalizable {
 
   final _id = _generateId();
 
-  late final cblitedart.CBLDart_AsyncCallback pointer;
+  late final Pointer<CBLDartAsyncCallback> pointer;
 
   /// The handler which responds to calls to this callback.
   final AsyncCallbackHandler handler;

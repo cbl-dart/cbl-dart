@@ -10,13 +10,14 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
+import '../support/ffi.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
 
-const _blobBindings = BlobBindings();
-const _valueBindings = ValueBindings();
-const _decoderBindings = FleeceDecoderBindings();
+final _blobBindings = cblBindings.blobs.blob;
+final _valueBinds = cblBindings.fleece.value;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract interface class CblConversions {
   Object? toPlainObject();
@@ -160,10 +161,10 @@ final class CblMDelegate extends MDelegate {
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt) {
     cacheIt();
 
-    _decoderBindings.getLoadedValue(value.value!);
+    _decoderBinds.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
-    switch (flValue.dartType) {
+    switch (flValue.type) {
       case FLValueType.undefined:
         // `undefined` is a somewhat unusual value to be found in a Fleece
         // collection, since it is not JSON. It cannot be encoded to Fleece or
@@ -192,8 +193,7 @@ final class CblMDelegate extends MDelegate {
           return ArrayImpl(array);
         }
       case FLValueType.dict:
-        // ignore: omit_local_variable_types
-        final FLDict flDict = flValue.value.cast();
+        final flDict = Pointer<FLDict>.fromAddress(flValue.value);
 
         if (_blobBindings.isBlob(flDict)) {
           final context = parent.context;
@@ -236,7 +236,7 @@ bool valueWouldChange(
   // comparisons of large instances.
   final flValue = oldValue.value;
   if (flValue != null) {
-    final valueType = _valueBindings.getType(flValue);
+    final valueType = _valueBinds.getType(flValue);
     cblReachabilityFence(container.context);
     if (valueType == FLValueType.array || valueType == FLValueType.dict) {
       return true;
