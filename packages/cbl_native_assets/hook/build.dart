@@ -6,7 +6,7 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 import 'cblite_builder.dart';
 
-const _edition = Edition.community;
+const _edition = Edition.enterprise;
 
 final _logger = Logger('')
   ..level = Level.ALL

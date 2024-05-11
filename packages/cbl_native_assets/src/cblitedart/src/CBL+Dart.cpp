@@ -412,16 +412,32 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled) {
 
 // === Database
 
+#ifdef COUCHBASE_ENTERPRISE
+static CBLEncryptionKey CBLDartEncryptionKey_ToCBL(CBLDartEncryptionKey key) {
+  CBLEncryptionKey key_ = {};
+  key_.algorithm = (CBLEncryptionAlgorithm)key.algorithm;
+  memcpy(key_.bytes, key.bytes, sizeof(key.bytes));
+  return key_;
+}
+
+static CBLDartEncryptionKey CBLDartEncryptionKey_FromCBL(CBLEncryptionKey key) {
+  CBLDartEncryptionKey key_ = {};
+  key_.algorithm = (CBLDartEncryptionAlgorithm)key.algorithm;
+  memcpy(key_.bytes, key.bytes, sizeof(key_.bytes));
+  return key_;
+}
+#endif
+
 bool CBLDart_CBLEncryptionKey_FromPassword(CBLDartEncryptionKey *key,
                                            FLString password) {
 #ifdef COUCHBASE_ENTERPRISE
   CBLEncryptionKey key_ = {};
   if (CBLEncryptionKey_FromPassword(&key_, password)) {
-    key->algorithm = key_.algorithm;
-    key->bytes = key_.bytes;
+    *key = CBLDartEncryptionKey_FromCBL(key_);
     return true;
+  } else {
+    return false;
   }
-  { return false; }
 #else
   CBLDart_RequireEnterpriseEdition();
   return false;
@@ -454,22 +470,6 @@ static bool CBLDart_UnregisterOpenDatabase(CBLDatabase *database) {
   openDatabases.erase(it);
   return true;
 }
-
-#ifdef COUCHBASE_ENTERPRISE
-static CBLEncryptionKey CBLDartEncryptionKey_ToCBL(CBLDartEncryptionKey key) {
-  CBLEncryptionKey key_ = {};
-  key_.algorithm = key.algorithm;
-  key_.bytes = key.bytes;
-  return key_;
-}
-
-static CBLDartEncryptionKey CBLDartEncryptionKey_FromCBL(CBLEncryptionKey key) {
-  CBLDartEncryptionKey key_ = {};
-  key_.algorithm = key.algorithm;
-  key_.bytes = key.bytes;
-  return key_;
-}
-#endif
 
 static CBLDatabaseConfiguration CBLDartDatabaseConfiguration_ToCBL(
     CBLDartDatabaseConfiguration config) {
