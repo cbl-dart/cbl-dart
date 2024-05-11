@@ -1,3 +1,4 @@
+import 'package:cbl_native_assets/src/support/edition.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 
@@ -7,7 +8,7 @@ class CbliteBuilder {
   const CbliteBuilder({required this.version, required this.edition});
 
   final String version;
-  final CbliteEdition edition;
+  final Edition edition;
 
   Future<void> run({
     required BuildConfig buildConfig,

@@ -1,6 +1,6 @@
 format_version: 1.0.0
 files:
-  package:cbl/src/bindings/cblite.dart:
+  package:cbl_native_assets/src/bindings/cblite.dart:
     used-config:
       ffi-native: true
     symbols:

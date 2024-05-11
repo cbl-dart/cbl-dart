@@ -2,15 +2,9 @@
 
 import 'package:cbl_native_assets/cbl.dart';
 
-/// You need to specify how to access the native libraries, on top of which
-/// `cbl` is implemented.
-LibrariesConfiguration getLibraries() {
-  throw UnimplementedError('TODO');
-}
-
 Future<void> main() async {
   // Couchbase Lite needs to be initialized before it can be used.
-  await CouchbaseLite.init(libraries: getLibraries());
+  await CouchbaseLite.init();
 
   final db = await Database.openAsync('chat-app');
   final messages = await db.createCollection('messages');

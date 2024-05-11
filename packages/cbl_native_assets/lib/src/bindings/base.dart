@@ -333,6 +333,8 @@ final class BaseBindings {
     });
   }
 
+  bool get isEnterpriseEdition => cblitedart.CBLDart_IsEnterpriseEdition();
+
   void bindCBLRefCountedToDartObject(
     Finalizable object,
     Pointer<CBLRefCounted> refCounted,

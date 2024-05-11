@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cbl_native_assets/src/support/edition.dart';
 import 'package:cbl_native_assets/src/version.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:test/test.dart';
@@ -21,7 +22,7 @@ void main() {
 
   group('CblitePackage', () {
     for (final os in OS.values) {
-      for (final edition in CbliteEdition.values) {
+      for (final edition in Edition.values) {
         final packages = CblitePackage.forOS(
           os,
           version: cbliteVersion,

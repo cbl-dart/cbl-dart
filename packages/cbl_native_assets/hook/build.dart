@@ -1,12 +1,12 @@
+import 'package:cbl_native_assets/src/support/edition.dart';
 import 'package:cbl_native_assets/src/version.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 import 'cblite_builder.dart';
-import 'cblite_package.dart';
 
-const _edition = CbliteEdition.community;
+const _edition = Edition.community;
 
 final _logger = Logger('')
   ..level = Level.ALL
@@ -44,7 +44,7 @@ void main(List<String> arguments) async {
       std: 'c++17',
       cppLinkStdLib: config.targetOS == OS.android ? 'c++_static' : null,
       defines: {
-        if (_edition == CbliteEdition.enterprise) 'COUCHBASE_ENTERPRISE': '1',
+        if (_edition == Edition.enterprise) 'COUCHBASE_ENTERPRISE': '1',
       },
       flags: [
         if (cbliteLibraryUri != null)

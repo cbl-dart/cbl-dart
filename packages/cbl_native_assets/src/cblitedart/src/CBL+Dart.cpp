@@ -9,6 +9,14 @@
 #include "Sentry.h"
 #include "Utils.h"
 
+bool CBLDart_IsEnterpriseEdition() {
+#ifdef COUCHBASE_ENTERPRISE
+  return true;
+#else
+  return false;
+#endif
+}
+
 static std::mutex initializeMutex;
 static bool initialized = false;
 
@@ -549,11 +557,11 @@ void CBLDart_CBLDatabase_Release(CBLDatabase *database) {
 }
 
 bool CBLDart_CBLDatabase_ChangeEncryptionKey(CBLDatabase *database,
-                                             const CBLEncryptionKey *newKey,
+                                             const CBLDartEncryptionKey *newKey,
                                              CBLError *outError) {
 #ifdef COUCHBASE_ENTERPRISE
   auto newKey_ = CBLDartEncryptionKey_ToCBL(*newKey);
-  return CBLDart_CBLDatabase_ChangeEncryptionKey(database, &newKey_, outError);
+  return CBLDatabase_ChangeEncryptionKey(database, &newKey_, outError);
 #else
   CBLDart_RequireEnterpriseEdition();
 #endif

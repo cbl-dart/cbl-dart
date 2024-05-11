@@ -1,3 +1,4 @@
+import 'package:cbl_native_assets/src/support/edition.dart';
 import 'package:cbl_native_assets/src/version.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
@@ -8,7 +9,7 @@ void main() async {
   final package = CblitePackage.forOS(
     OS.macOS,
     version: cbliteVersion,
-    edition: CbliteEdition.community,
+    edition: Edition.community,
   ).single;
 
   await package.installHeaders(

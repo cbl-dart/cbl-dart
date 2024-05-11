@@ -11,7 +11,6 @@ export 'bindings/base.dart'
         IntCBLErrorDomainExt,
         IntErrorCodeExt,
         CBLError;
-export 'bindings/bindings.dart';
 export 'bindings/blob.dart';
 export 'bindings/collection.dart';
 export 'bindings/data.dart';
@@ -26,7 +25,6 @@ export 'bindings/global.dart'
         globalFLSlice,
         globalFLString,
         globalFLSliceResult;
-export 'bindings/libraries.dart';
 export 'bindings/logging.dart';
 export 'bindings/native_utf8_string.dart'
     show NativeUtf8String, NativeUtf8StringEncoder, nativeUtf8StringEncoder;

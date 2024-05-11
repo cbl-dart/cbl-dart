@@ -1,14 +1,10 @@
 import 'dart:io';
 
+import 'package:cbl_native_assets/src/support/edition.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 
 import 'tools.dart';
-
-enum CbliteEdition {
-  community,
-  enterprise,
-}
 
 class CblitePackage {
   const CblitePackage._({
@@ -26,7 +22,7 @@ class CblitePackage {
   static List<CblitePackage> forOS(
     OS os, {
     required String version,
-    required CbliteEdition edition,
+    required Edition edition,
   }) =>
       switch (os) {
         OS.android => [
@@ -95,7 +91,7 @@ class CblitePackage {
       };
 
   final String version;
-  final CbliteEdition edition;
+  final Edition edition;
   final OS os;
   final IOSSdk? iosSdk;
   final List<Architecture> architectures;
