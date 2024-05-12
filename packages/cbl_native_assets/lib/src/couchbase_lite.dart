@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'bindings/cblite.dart' as cblite;
@@ -24,7 +25,17 @@ abstract final class CouchbaseLite {
         // other.
         cblite.CBL_Release(nullptr);
 
-        await initPrimaryIsolate(IsolateContext());
+        await initPrimaryIsolate(
+          IsolateContext(
+            // TODO(blaugold): Resolve paths properly and consistently on all
+            // platforms.
+            initContext: Platform.isAndroid
+                ? InitContext(
+                    filesDir: Directory.current.path,
+                    tempDir: Directory.systemTemp.createTempSync('').path)
+                : null,
+          ),
+        );
 
         _setupLogging();
       });
