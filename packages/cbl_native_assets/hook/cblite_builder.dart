@@ -34,29 +34,22 @@ class CbliteBuilder {
       );
     }
 
-    buildOutput
-      ..addDependencies([
-        buildConfig.packageRoot.resolve('hook/sdk_builder.dart'),
-        buildConfig.packageRoot.resolve('hook/sdk_package.dart'),
-        buildConfig.packageRoot.resolve('hook/tools.dart'),
-        buildConfig.packageRoot.resolve('hook/utils.dart'),
-      ])
-      ..addAssets([
-        for (final package in assetPackages)
-          for (final architecture in package.architectures)
-            if (buildConfig.dryRun ||
-                architecture == buildConfig.targetArchitecture!)
-              NativeCodeAsset(
-                package: buildConfig.packageName,
-                name: 'src/bindings/cblite.dart',
-                linkMode: DynamicLoadingBundled(),
-                os: buildConfig.targetOS,
-                architecture: architecture,
-                file: package.resolveLibraryUri(
-                  buildConfig.outputDirectory,
-                  architecture,
-                ),
-              )
-      ]);
+    buildOutput.addAssets([
+      for (final package in assetPackages)
+        for (final architecture in package.architectures)
+          if (buildConfig.dryRun ||
+              architecture == buildConfig.targetArchitecture!)
+            NativeCodeAsset(
+              package: buildConfig.packageName,
+              name: 'src/bindings/cblite.dart',
+              linkMode: DynamicLoadingBundled(),
+              os: buildConfig.targetOS,
+              architecture: architecture,
+              file: package.resolveLibraryUri(
+                buildConfig.outputDirectory,
+                architecture,
+              ),
+            )
+    ]);
   }
 }

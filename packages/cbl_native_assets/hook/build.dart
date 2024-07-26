@@ -39,7 +39,6 @@ void main(List<String> arguments) async {
     final cblitedartBuilder = CBuilder.library(
       name: 'cblitedart',
       assetName: 'src/bindings/cblitedart.dart',
-      dartBuildFiles: ['hook/build.dart'],
       language: Language.cpp,
       std: 'c++17',
       cppLinkStdLib: config.targetOS == OS.android ? 'c++_static' : null,
@@ -77,8 +76,8 @@ void main(List<String> arguments) async {
       ],
     );
     await cblitedartBuilder.run(
-      buildConfig: config,
-      buildOutput: output,
+      config: config,
+      output: output,
       logger: _logger,
     );
   });
