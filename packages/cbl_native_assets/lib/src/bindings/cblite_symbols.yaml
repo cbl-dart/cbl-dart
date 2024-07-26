@@ -262,16 +262,22 @@ files:
         name: CBLCollection_CreateFullTextIndex
       c:@F@CBLCollection_CreateValueIndex:
         name: CBLCollection_CreateValueIndex
+      c:@F@CBLCollection_Database:
+        name: CBLCollection_Database
       c:@F@CBLCollection_DeleteDocument:
         name: CBLCollection_DeleteDocument
       c:@F@CBLCollection_DeleteDocumentWithConcurrencyControl:
         name: CBLCollection_DeleteDocumentWithConcurrencyControl
       c:@F@CBLCollection_DeleteIndex:
         name: CBLCollection_DeleteIndex
+      c:@F@CBLCollection_FullName:
+        name: CBLCollection_FullName
       c:@F@CBLCollection_GetDocument:
         name: CBLCollection_GetDocument
       c:@F@CBLCollection_GetDocumentExpiration:
         name: CBLCollection_GetDocumentExpiration
+      c:@F@CBLCollection_GetIndex:
+        name: CBLCollection_GetIndex
       c:@F@CBLCollection_GetIndexNames:
         name: CBLCollection_GetIndexNames
       c:@F@CBLCollection_GetMutableDocument:
@@ -422,6 +428,10 @@ files:
         name: CBLLog_SetConsoleLevel
       c:@F@CBLLog_SetFileConfig:
         name: CBLLog_SetFileConfig
+      c:@F@CBLQueryIndex_Collection:
+        name: CBLQueryIndex_Collection
+      c:@F@CBLQueryIndex_Name:
+        name: CBLQueryIndex_Name
       c:@F@CBLQuery_AddChangeListener:
         name: CBLQuery_AddChangeListener
       c:@F@CBLQuery_ColumnCount:
@@ -480,6 +490,8 @@ files:
         name: CBLScope_Collection
       c:@F@CBLScope_CollectionNames:
         name: CBLScope_CollectionNames
+      c:@F@CBLScope_Database:
+        name: CBLScope_Database
       c:@F@CBLScope_Name:
         name: CBLScope_Name
       c:@F@CBL_CopyDatabase:
@@ -766,6 +778,8 @@ files:
         name: FLSharedKeys_Count
       c:@F@FLSharedKeys_Decode:
         name: FLSharedKeys_Decode
+      c:@F@FLSharedKeys_DisableCaching:
+        name: FLSharedKeys_DisableCaching
       c:@F@FLSharedKeys_Encode:
         name: FLSharedKeys_Encode
       c:@F@FLSharedKeys_GetStateData:
@@ -902,6 +916,8 @@ files:
         name: CBLListenerToken
       c:@S@CBLQuery:
         name: CBLQuery
+      c:@S@CBLQueryIndex:
+        name: CBLQueryIndex
       c:@S@CBLRefCounted:
         name: CBLRefCounted
       c:@S@CBLReplicator:
@@ -994,6 +1010,8 @@ files:
         name: kCBLDefaultLogFileMaxSize
       c:@kCBLDefaultLogFileUsePlainText:
         name: kCBLDefaultLogFileUsePlainText
+      c:@kCBLDefaultLogFileUsePlaintext:
+        name: kCBLDefaultLogFileUsePlaintext
       c:@kCBLDefaultReplicatorAcceptParentCookies:
         name: kCBLDefaultReplicatorAcceptParentCookies
       c:@kCBLDefaultReplicatorContinuous:
@@ -1008,6 +1026,8 @@ files:
         name: kCBLDefaultReplicatorMaxAttemptsContinuous
       c:@kCBLDefaultReplicatorMaxAttemptsSingleShot:
         name: kCBLDefaultReplicatorMaxAttemptsSingleShot
+      c:@kCBLDefaultReplicatorMaxAttemptsWaitTime:
+        name: kCBLDefaultReplicatorMaxAttemptsWaitTime
       c:@kCBLDefaultReplicatorType:
         name: kCBLDefaultReplicatorType
       c:@kCBLDefaultScopeName:
@@ -1052,7 +1072,7 @@ files:
         name: CBLLogLevel
       c:CBLQuery.h@T@CBLQueryChangeListener:
         name: CBLQueryChangeListener
-      c:CBLQuery.h@T@CBLQueryLanguage:
+      c:CBLQueryTypes.h@T@CBLQueryLanguage:
         name: CBLQueryLanguage
       c:CBLReplicator.h@T@CBLConflictResolver:
         name: CBLConflictResolver

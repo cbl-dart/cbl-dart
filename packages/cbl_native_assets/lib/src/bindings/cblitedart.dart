@@ -467,7 +467,7 @@ typedef DartCBLDart_CBLCollection_CreateIndex = bool Function(
 /// calling \ref CBLListener_Remove.
 typedef CBLListenerToken = imp1.CBLListenerToken;
 
-/// \defgroup queries  Queries
+/// \defgroup query  Query
 /// @{ */
 /// /** A compiled database query.
 typedef CBLQuery = imp1.CBLQuery;
@@ -477,14 +477,6 @@ typedef NativeCBLDart_CBLQuery_AddChangeListener
 typedef DartCBLDart_CBLQuery_AddChangeListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLDatabase> db,
         ffi.Pointer<CBLQuery> query, CBLDart_AsyncCallback listener);
-
-/// A heap-allocated block of memory returned from an API call.
-/// The caller takes ownership, and must call \ref FLSliceResult_Release when done with it.
-/// \warning The contents of the block must not be modified, since others may be using it.
-/// \note This is equivalent to the C++ class `alloc_slice`. In C++ the easiest way to deal with
-/// a `FLSliceResult` return value is to construct an `alloc_slice` from it, which will
-/// adopt the reference, and release it in its destructor. For example:
-/// `alloc_slice foo( CopyFoo() );`
 typedef FLSliceResult = imp1.FLSliceResult;
 
 /// A stream for reading a blob's content.
