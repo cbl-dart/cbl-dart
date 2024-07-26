@@ -1,12 +1,35 @@
 import 'package:cbl_native_assets/src/support/edition.dart';
-import 'package:cbl_native_assets/src/version.dart';
 import 'package:logging/logging.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 import 'cblite_builder.dart';
+import 'cblite_package.dart';
 
+const remoteDatabaseArchiveLoader =
+    RemoteDatabaseArchiveLoader(version: '3.1.6');
+
+final localDatabaseArchiveLoader = LocalDatabaseArchiveLoader(
+  archiveDirectoryUri:
+      Uri.file('/Users/terwesten/Downloads/couchbase-lite-c-3.2.0-RC2'),
+  build: 63,
+  version: '3.2.0',
+);
+
+final localVectorSearchArchiveLoader = LocalVectorSearchArchiveLoader(
+  archiveDirectoryUri: Uri.file(
+    '/Users/terwesten/Downloads/couchbase-lite-vector-search-1.0.0-RC2',
+  ),
+  build: 58,
+  version: '1.0.0',
+);
+
+// TODO(blaugold): make build time options configurable
 const _edition = Edition.enterprise;
+const _vectorSearch = _edition == Edition.enterprise;
+final _databaseArchiveLoader = localDatabaseArchiveLoader;
+final _vectorSearchArchiveLoader =
+    _vectorSearch ? localVectorSearchArchiveLoader : null;
 
 final _logger = Logger('')
   ..level = Level.ALL
@@ -20,9 +43,10 @@ void main(List<String> arguments) async {
       config.packageRoot.resolve('lib/src/version.dart'),
     ]);
 
-    const cbliteBuilder = CbliteBuilder(
-      version: cbliteVersion,
+    final cbliteBuilder = CbliteBuilder(
       edition: _edition,
+      databaseArchiveLoader: _databaseArchiveLoader,
+      vectorSearchArchiveLoader: _vectorSearchArchiveLoader,
     );
 
     await cbliteBuilder.run(
@@ -33,6 +57,7 @@ void main(List<String> arguments) async {
 
     final cbliteLibraryUri = output.assets
         .whereType<NativeCodeAsset>()
+        .where((asset) => asset.id.endsWith('cblite.dart'))
         .map((asset) => asset.file)
         .singleOrNull;
 

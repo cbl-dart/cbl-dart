@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:cbl_native_assets/src/support/edition.dart';
-import 'package:cbl_native_assets/src/version.dart';
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:test/test.dart';
 
+import '../hook/build.dart';
 import '../hook/cblite_package.dart';
 import 'helpers.dart';
 
@@ -21,18 +21,58 @@ void main() {
   });
 
   group('CblitePackage', () {
-    for (final os in OS.values) {
-      for (final edition in Edition.values) {
-        final packages = CblitePackage.forOS(
-          os,
-          version: cbliteVersion,
-          edition: edition,
+    group('database', () {
+      for (final os in OS.values) {
+        for (final edition in [Edition.enterprise]) {
+          for (final loader in [
+            remoteDatabaseArchiveLoader,
+            localDatabaseArchiveLoader,
+          ]) {
+            if (edition == Edition.community &&
+                loader is LocalDatabaseArchiveLoader) {
+              continue;
+            }
+
+            final packages = CblitePackage.database(
+              edition: edition,
+              os: os,
+              loader: loader,
+            );
+
+            group('${loader.runtimeType}', () {
+              for (final package in packages) {
+                for (final architecture in package.architectures) {
+                  test(
+                    'installPackage ($os, $architecture, ${edition.name})',
+                    () async {
+                      final tmpDir = testDataDirectory.createTempSync();
+                      await package.installPackage(
+                          tmpDir.uri, architecture, logger);
+                      final libraryUri =
+                          package.resolveLibraryUri(tmpDir.uri, architecture);
+                      final libraryFile = File.fromUri(libraryUri);
+                      expect(libraryFile.existsSync(), isTrue);
+                    },
+                  );
+                }
+              }
+            });
+          }
+        }
+      }
+    });
+
+    group('vectorSearchExtension', () {
+      for (final os in OS.values) {
+        final packages = CblitePackage.vectorSearchExtension(
+          os: os,
+          loader: localVectorSearchArchiveLoader,
         );
 
         for (final package in packages) {
           for (final architecture in package.architectures) {
             test(
-              'installPackage ($os, $architecture, ${edition.name})',
+              'installPackage ($os, $architecture)',
               () async {
                 final tmpDir = testDataDirectory.createTempSync();
                 await package.installPackage(tmpDir.uri, architecture, logger);
@@ -45,6 +85,6 @@ void main() {
           }
         }
       }
-    }
+    });
   });
 }
