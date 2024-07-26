@@ -403,6 +403,7 @@ namespace cbl {
         }
 
         /** Starts a replicator, asynchronously. Does nothing if it's already started.
+            @note Replicators cannot be started from within a database's transaction.
             @param resetCheckpoint  If true, the persistent saved state ("checkpoint") for this replication
                                    will be discarded, causing it to re-scan all documents. This significantly
                                    increases time and bandwidth (redundant docs are not transferred, but their

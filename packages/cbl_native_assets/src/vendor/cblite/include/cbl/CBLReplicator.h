@@ -343,7 +343,7 @@ typedef struct {
     unsigned maxAttempts;
     
     /** Max wait time between retry attempts in seconds.
-        The default value \ref kCBLDefaultReplicatorMaxAttemptWaitTime. */
+        The default value \ref kCBLDefaultReplicatorMaxAttemptsWaitTime. */
     unsigned maxAttemptWaitTime;
     
     //-- WebSocket:
@@ -418,8 +418,11 @@ typedef struct {
         @warning  <b>Deprecated :</b> Use documentPropertyDecryptor instead. */
     CBLPropertyDecryptor _cbl_nullable propertyDecryptor;
     
-    CBLDocumentPropertyEncryptor _cbl_nullable documentPropertyEncryptor;     ///< Optional callback to encrypt \ref CBLEncryptable values.
-    CBLDocumentPropertyDecryptor _cbl_nullable documentPropertyDecryptor;     ///< Optional callback to decrypt encrypted \ref CBLEncryptable values.
+    /** Optional callback to encrypt \ref CBLEncryptable values. */
+    CBLDocumentPropertyEncryptor _cbl_nullable documentPropertyEncryptor;
+    
+    /** Optional callback to decrypt encrypted \ref CBLEncryptable values. */
+    CBLDocumentPropertyDecryptor _cbl_nullable documentPropertyDecryptor;
 #endif
     
     /** The collections to replicate with the target's endpoint (Required if the database is not set). */
@@ -459,6 +462,7 @@ CBLReplicator* _cbl_nullable CBLReplicator_Create(const CBLReplicatorConfigurati
 const CBLReplicatorConfiguration* CBLReplicator_Config(CBLReplicator*) CBLAPI;
 
 /** Starts a replicator, asynchronously. Does nothing if it's already started.
+    @note Replicators cannot be started from within a database's transaction.
     @param replicator  The replicator instance.
     @param resetCheckpoint  If true, the persistent saved state ("checkpoint") for this replication
                         will be discarded, causing it to re-scan all documents. This significantly

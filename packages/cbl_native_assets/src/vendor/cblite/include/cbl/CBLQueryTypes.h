@@ -1,7 +1,7 @@
 //
-// CBL_Edition.h
+//  CBLQueryTypes.h
 //
-// Copyright (c) 2018 Couchbase, Inc All rights reserved.
+// Copyright (c) 2024 Couchbase, Inc All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,20 @@
 // limitations under the License.
 //
 
-#ifndef COUCHBASE_ENTERPRISE
-/* #undef COUCHBASE_ENTERPRISE */
-#endif
+#pragma once
+#include "CBLBase.h"
 
-#define CBLITE_VERSION "3.2.0"
-#define CBLITE_VERSION_NUMBER 3002000
-#define CBLITE_BUILD_NUMBER 63
-#define CBLITE_SOURCE_ID "42c42c4+bc179d9"
-#define CBLITE_BUILD_TIMESTAMP "2024-07-20T02:48:21Z"
+CBL_CAPI_BEGIN
+
+/** \defgroup queries   Queries
+    @{ */
+
+/** Supported Query languages */
+typedef CBL_ENUM(uint32_t, CBLQueryLanguage) {
+    kCBLJSONLanguage,       ///< [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
+    kCBLN1QLLanguage        ///< [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
+};
+
+/** @} */
+
+CBL_CAPI_END

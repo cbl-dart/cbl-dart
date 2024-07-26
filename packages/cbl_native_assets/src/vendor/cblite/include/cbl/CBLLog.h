@@ -128,7 +128,7 @@ typedef struct {
     size_t maxSize;
     
     /** Whether or not to log in plaintext (as opposed to binary.) Plaintext logging is slower and bigger.
-        The default is \ref kCBLDefaultLogFileUsePlainText. */
+        The default is \ref kCBLDefaultLogFileUsePlaintext. */
     bool usePlaintext;
 } CBLLogFileConfiguration;
 

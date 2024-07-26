@@ -19,7 +19,8 @@
 #pragma once
 #include "CBLBase.h"
 #include "CBLDocument.h"
-#include "CBLQuery.h"
+#include "CBLQueryIndexTypes.h"
+#include "CBLQueryTypes.h"
 
 CBL_CAPI_BEGIN
 
@@ -73,8 +74,8 @@ CBL_PUBLIC extern const FLString kCBLDefaultCollectionName;
 
 /** Returns the names of all existing scopes in the database.
     The scope exists when there is at least one collection created under the scope.
-    The default scope is exceptional in that it will always exists even there are no collections under it.
-    @note  You are responsible for releasing the returned array.
+    @note The default scope will always exist, containing at least the default collection.
+    @note You are responsible for releasing the returned array.
     @param db  The database.
     @param outError  On failure, the error will be written here.
     @return  The names of all existing scopes in the database, or NULL if an error occurred. */
@@ -93,8 +94,8 @@ FLMutableArray _cbl_nullable CBLDatabase_CollectionNames(const CBLDatabase* db,
 
 /** Returns an existing scope with the given name.
     The scope exists when there is at least one collection created under the scope.
-    The default scope is exception in that it will always exists even there are no collections under it.
-    @note  You are responsible for releasing the returned scope.
+    @note The default scope will always exist, containing at least the default collection.
+    @note You are responsible for releasing the returned scope.
     @param db  The database.
     @param scopeName  The name of the scope.
     @param outError  On failure, the error will be written here.
@@ -146,7 +147,6 @@ bool CBLDatabase_DeleteCollection(CBLDatabase* db,
                                   CBLError* _cbl_nullable outError) CBLAPI;
 
 /** Returns the default scope.
-    @note  The default scope always exist even there are no collections under it.
     @note  You are responsible for releasing the returned scope.
     @param db  The database.
     @param outError  On failure, the error will be written here.
@@ -155,12 +155,10 @@ CBLScope* CBLDatabase_DefaultScope(const CBLDatabase* db,
                                    CBLError* _cbl_nullable outError) CBLAPI;
 
 /** Returns the default collection.
-    @note  The default collection may not exist if it was deleted.
-           Also, the default collection cannot be recreated after being deleted.
     @note  You are responsible for releasing the returned collection.
     @param db  The database.
     @param outError  On failure, the error will be written here.
-    @return  A \ref CBLCollection instance, or NULL if the default collection doesn't exist or an error occurred. */
+    @return  A \ref CBLCollection instance, or NULL if an error occurred. */
 CBLCollection* _cbl_nullable CBLDatabase_DefaultCollection(const CBLDatabase* db,
                                                            CBLError* _cbl_nullable outError) CBLAPI;
 
@@ -171,16 +169,27 @@ CBLCollection* _cbl_nullable CBLDatabase_DefaultCollection(const CBLDatabase* db
     Getting information about a collection.
  */
 
-/** Returns the scope of the collection.
+/** Returns the collection's scope.
     @note You are responsible for releasing the returned scope.
     @param collection  The collection.
-    @return A \ref CBLScope instance. */
+    @return The scope of the collection. */
 CBLScope* CBLCollection_Scope(const CBLCollection* collection) CBLAPI;
 
-/** Returns the collection name.
+/** Returns the collection's name.
     @param collection  The collection.
     @return The name of the collection. */
 FLString CBLCollection_Name(const CBLCollection* collection) CBLAPI;
+
+/** Returns the collection's fully qualified name in the '<scope-name>.<collection-name>' format.
+    @param collection  The collection.
+    @return The fully qualified name of the collection. */
+FLString CBLCollection_FullName(const CBLCollection* collection) CBLAPI;
+
+/** Returns the collection's database.
+    @note The database object is owned by the collection object; you do not need to release it.
+    @param collection  The collection.
+    @return The database of the collection. */
+CBLDatabase* CBLCollection_Database(const CBLCollection* collection) CBLAPI;
 
 /** Returns the number of documents in the collection.
     @param collection  The collection.
@@ -372,6 +381,20 @@ bool CBLCollection_CreateFullTextIndex(CBLCollection *collection,
                                        CBLFullTextIndexConfiguration config,
                                        CBLError* _cbl_nullable outError) CBLAPI;
 
+#ifdef COUCHBASE_ENTERPRISE
+/** ENTERPRISE EDITION ONLY
+ 
+    Creatres a vector index in the collection.
+    If an identical index with that name already exists, nothing happens (and no error is returned.)
+    If a non-identical index with that name already exists, it is deleted and re-created.
+ */
+bool CBLCollection_CreateVectorIndex(CBLCollection *collection,
+                                     FLString name,
+                                     CBLVectorIndexConfiguration config,
+                                     CBLError* _cbl_nullable outError) CBLAPI;
+
+#endif
+
 /** Deletes an index in the collection by name.
     @param collection  The collection.
     @param name  The name of the index.
@@ -389,6 +412,17 @@ bool CBLCollection_DeleteIndex(CBLCollection *collection,
 _cbl_warn_unused
 FLMutableArray _cbl_nullable CBLCollection_GetIndexNames(CBLCollection *collection,
                                                          CBLError* _cbl_nullable outError) CBLAPI;
+
+/** Returns an index object representing an existing index in the collection.
+    @note You are responsible for releasing the returned index object.
+    @param collection The collection.
+    @param name  The name of the index.
+    @param outError  On failure, an error is written here.
+    @return A \ref CBLQueryIndex instance if the index exists, or NULL if the index doesn't exist or an error occurred.  */
+_cbl_warn_unused
+CBLQueryIndex* _cbl_nullable CBLCollection_GetIndex(CBLCollection* collection,
+                                                    FLString name,
+                                                    CBLError* _cbl_nullable outError) CBLAPI;
 
 /** @} */
 

@@ -58,6 +58,12 @@ CBL_PUBLIC extern const FLString kCBLDefaultScopeName;
     @return  The name of the scope. */
 FLString CBLScope_Name(const CBLScope* scope) CBLAPI;
 
+/** Returns the scope's database.
+    @note The database object is owned by the scope object; you do not need to release it.
+    @param scope  The scope.
+    @return The database of the scope. */
+CBLDatabase* CBLScope_Database(const CBLScope* scope) CBLAPI;
+
 /** @} */
 
 /** \name  Collections

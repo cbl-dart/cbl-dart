@@ -91,6 +91,7 @@ namespace cbl {
 
         CBLRefCounted* _cbl_nullable _ref;
 
+        friend class Extension;
         friend class Transaction;
     };
 
