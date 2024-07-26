@@ -3,13 +3,16 @@
 
 import 'dart:ffi';
 import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
 import 'cblite.dart' as cblite;
+import 'cblite_vector_search.dart';
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
+import 'utils.dart';
 
 const _bindings = BaseBindings();
 
@@ -296,6 +299,9 @@ final class BaseBindings {
               cblite.CBL_Release)
           .cast());
 
+  bool get isEnterpriseEdition => cblitedart.CBLDart_IsEnterpriseEdition();
+  bool get hasVectorSearch => cblitedart.CBLDart_HasVectorSearch();
+
   void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
 
@@ -333,7 +339,19 @@ final class BaseBindings {
     });
   }
 
-  bool get isEnterpriseEdition => cblitedart.CBLDart_IsEnterpriseEdition();
+  void enableVectorSearch() {
+    if (!hasVectorSearch) {
+      return;
+    }
+
+    final vectorSearchExtensionFile = File(vectorSearchExtensionPath);
+    final vectorSearchExtensionDirectory = vectorSearchExtensionFile.parent;
+
+    runWithSingleFLString(vectorSearchExtensionDirectory.path, (path) {
+      cblitedart.CBLDart_EnableVectorSearch(path, globalCBLError)
+          .checkCBLError();
+    });
+  }
 
   void bindCBLRefCountedToDartObject(
     Finalizable object,

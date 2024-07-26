@@ -17,6 +17,14 @@ bool CBLDart_IsEnterpriseEdition() {
 #endif
 }
 
+bool CBLDart_HasVectorSearch() {
+#ifdef COUCHBASE_VECTOR_SEARCH
+  return true;
+#else
+  return false;
+#endif
+}
+
 static std::mutex initializeMutex;
 static bool initialized = false;
 
@@ -45,6 +53,15 @@ CBLDartInitializeResult CBLDart_Initialize(void *dartInitializeDlData,
 
   initialized = true;
   return CBLDartInitializeResult_kSuccess;
+}
+
+bool CBLDart_EnableVectorSearch(FLString path, CBLError *outError) {
+#ifdef COUCHBASE_ENTERPRISE
+  return CBL_EnableVectorSearch(path, outError);
+#else
+  CBLDart_RequireEnterpriseEdition();
+  return false;
+#endif
 }
 
 // === Dart Native ============================================================

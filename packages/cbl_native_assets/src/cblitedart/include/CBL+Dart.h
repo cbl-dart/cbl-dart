@@ -13,6 +13,9 @@
 CBLDART_EXPORT
 bool CBLDart_IsEnterpriseEdition();
 
+CBLDART_EXPORT
+bool CBLDart_HasVectorSearch();
+
 /**
  * This is a compatibility layer to allow Dart code to use the Couchbase Lite C
  * API. Some method signatures are incompatible with Dart's FFI capabilities.
@@ -38,6 +41,9 @@ CBLDART_EXPORT
 CBLDartInitializeResult CBLDart_Initialize(void *dartInitializeDlData,
                                            void *cblInitContext,
                                            CBLError *errorOut);
+
+CBLDART_EXPORT
+bool CBLDart_EnableVectorSearch(FLString path, CBLError *outError);
 
 // === Dart Native ============================================================
 

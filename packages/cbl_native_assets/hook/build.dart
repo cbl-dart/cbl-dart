@@ -69,6 +69,7 @@ void main(List<String> arguments) async {
       cppLinkStdLib: config.targetOS == OS.android ? 'c++_static' : null,
       defines: {
         if (_edition == Edition.enterprise) 'COUCHBASE_ENTERPRISE': '1',
+        if (_vectorSearch) 'COUCHBASE_VECTOR_SEARCH': '1',
       },
       flags: [
         if (cbliteLibraryUri != null)
