@@ -269,7 +269,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
+          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
 
   test-e2e-cbl_flutter_prebuilt:
     name: cbl_flutter_prebuilt E2E tests
