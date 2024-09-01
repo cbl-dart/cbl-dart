@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
-
 import '../bindings.dart';
 import '../database.dart';
 import '../database/proxy_database.dart';
@@ -62,7 +60,7 @@ final class ProxyReplicator extends ProxyObject
     final callbacksIds = <int>[];
 
     void unregisterCallbacks() {
-      callbacksIds.whereNotNull().forEach(client.unregisterObject);
+      callbacksIds.nonNulls.forEach(client.unregisterObject);
     }
 
     final createReplicatorCollections = collections.entries.map((entry) {
@@ -82,7 +80,7 @@ final class ProxyReplicator extends ProxyObject
         pushFilterId,
         pullFilterId,
         conflictResolverId,
-      ].whereNotNull());
+      ].nonNulls);
 
       return CreateReplicatorCollection(
         collectionId: collection.objectId,

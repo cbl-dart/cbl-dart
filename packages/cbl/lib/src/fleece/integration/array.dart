@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
 
-import 'package:collection/collection.dart';
-
 import '../../bindings.dart';
 import '../../support/ffi.dart';
 import '../../support/utils.dart';
@@ -149,7 +147,7 @@ final class MArray extends MCollection {
   }
 
   @override
-  Iterable<MValue> get values => _values.whereNotNull();
+  Iterable<MValue> get values => _values.nonNulls;
 
   Iterable<MValue> get iterable sync* {
     final length = _values.length;
