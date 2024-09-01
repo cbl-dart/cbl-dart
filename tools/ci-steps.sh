@@ -435,8 +435,8 @@ function uploadCoverageData() {
 
     # Upload coverage data
     ./codecov \
-        upload-process \
         --verbose \
+        upload-process \
         --fail-on-error \
         --flag "$flags" \
         --file "$testPackageDir/coverage/lcov.info" \
