@@ -16,8 +16,8 @@ import 'zone_span.dart';
 /// breadcrumbs. [LogLevel.none] disables all recording of logging breadcrumbs.
 /// The default is [LogLevel.warning].
 ///
-/// This integration configures [Database.log.custom] to use a
-/// [BreadcrumbLogger], which can also be used by itself.
+/// This integration configures [Log.custom] to use a [BreadcrumbLogger], which
+/// can also be used by itself.
 ///
 /// # Operations
 ///
