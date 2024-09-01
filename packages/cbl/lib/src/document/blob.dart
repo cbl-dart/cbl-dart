@@ -209,7 +209,6 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
               byteBuilder.add(data);
             }
             sink.add(data.asUnmodifiableView());
-
           },
           handleDone: (sink) {
             _content ??= byteBuilder.toBytes();
