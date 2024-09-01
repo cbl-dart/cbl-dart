@@ -20,7 +20,7 @@ concurrency:
 
 env:
   flutter-channel: stable
-  dart-version-stable: 3.3.0
+  dart-version-stable: stable
   dart-version-beta: beta
 
 jobs:
