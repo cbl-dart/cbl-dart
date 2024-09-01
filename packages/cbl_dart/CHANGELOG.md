@@ -1,3 +1,7 @@
+## 3.0.2
+
+ - Update a dependency to the latest release.
+
 ## 3.0.1
 
  - **FIX**(cbl_dart): adapt to `extractArchiveToDisk` in `package:archive` becoming async ([#581](https://github.com/cbl-dart/cbl-dart/issues/581)). ([9e38fd3b](https://github.com/cbl-dart/cbl-dart/commit/9e38fd3bdf416c224923d6bec2949d8698a9c57a))
