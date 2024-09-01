@@ -98,7 +98,7 @@ final class JoinImpl implements JoinInterface {
     return {
       ..._dataSource.toJson(),
       'JOIN': join,
-      if (_on != null) 'ON': _on!.toJson(),
+      if (_on != null) 'ON': _on.toJson(),
     };
   }
 }

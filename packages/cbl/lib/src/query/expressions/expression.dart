@@ -332,7 +332,7 @@ final class BinaryExpression extends ExpressionImpl {
 
   @override
   Object? toJson() =>
-      [_operator, _left.toJson(), if (_right != null) _right!.toJson()];
+      [_operator, _left.toJson(), if (_right != null) _right.toJson()];
 }
 
 final class TernaryExpression extends ExpressionImpl {
