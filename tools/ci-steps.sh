@@ -421,23 +421,26 @@ function uploadCoverageData() {
     # Install codecove uploader
     case "$OSTYPE" in
     linux*)
-        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        curl -Os https://cli.codecov.io/latest/linux/codecov
         chmod +x codecov
         ;;
     darwin*)
-        curl -Os https://uploader.codecov.io/latest/macos/codecov
+        curl -Os https://cli.codecov.io/latest/macos/codecov
         chmod +x codecov
         ;;
     mingw* | msys* | cygwin*)
-        curl -Os https://uploader.codecov.io/latest/windows/codecov.exe
+        curl -Os https://cli.codecov.io/latest/windows/codecov.exe
         ;;
     esac
 
     # Upload coverage data
-    ./codecov* \
-        -F "$flags" \
-        -f "$testPackageDir/coverage/lcov.info" \
-        -C "$GITHUB_SHA"
+    ./codecov \
+        upload-process \
+        --verbose \
+        --fail-on-error \
+        --flag "$flags" \
+        --file "$testPackageDir/coverage/lcov.info" \
+        --commit-sha "$GITHUB_SHA"
 }
 
 "$@"
