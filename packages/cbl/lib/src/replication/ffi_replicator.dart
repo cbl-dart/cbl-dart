@@ -4,8 +4,6 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-
 import '../bindings.dart';
 import '../database.dart';
 import '../database/ffi_database.dart';
@@ -107,14 +105,14 @@ final class FfiReplicator
         pushFilterCallback,
         pullFilterCallback,
         conflictResolverCallback
-      ].whereNotNull());
+      ].nonNulls);
 
       final channelsArray = config.channels?.let(fl.MutableArray.new);
       final documentIDsArray = config.documentIds?.let(fl.MutableArray.new);
 
       // Make sure the Fleece containers are not garbage collected before the
       // replicator is created.
-      fleeceContainers.addAll([channelsArray, documentIDsArray].whereNotNull());
+      fleeceContainers.addAll([channelsArray, documentIDsArray].nonNulls);
 
       return CBLReplicationCollection(
         collection: collection.pointer,

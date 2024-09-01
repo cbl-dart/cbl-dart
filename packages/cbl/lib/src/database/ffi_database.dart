@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path_lib;
 
 import '../bindings.dart';
@@ -146,7 +145,7 @@ final class FfiDatabase
                 ));
         return scopeNames
             .map((name) => scope(name.asString!))
-            .whereNotNull()
+            .nonNulls
             .toList();
       });
 
@@ -448,7 +447,7 @@ final class FfiScope
         );
         return collectionNames
             .map((name) => collection(name.asString!))
-            .whereNotNull()
+            .nonNulls
             .toList();
       });
 
