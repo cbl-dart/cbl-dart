@@ -11,4 +11,4 @@ dependencies:
   cbl_dart: ^3.0.2
   cbl_sentry:
     path: ..
-  sentry: ^7.4.2
+  sentry: ^8.0.2
