@@ -9,7 +9,7 @@ repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.3.0
 
 dependencies:
   cbl_libcblite_api: ^3.1.3
