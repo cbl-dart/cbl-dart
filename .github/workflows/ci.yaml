@@ -69,7 +69,10 @@ jobs:
       fail-fast: false
       matrix:
         dart: [stable, beta]
-    continue-on-error: ${{ matrix.dart != 'stable' }}
+    # continue-on-error: ${{ matrix.dart != 'stable' }}
+    # TODO: Require analysis to pass for stable once Dart SDK issue is fixed
+    # https://github.com/dart-lang/sdk/issues/56561
+    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
