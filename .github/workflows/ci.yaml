@@ -198,9 +198,9 @@ jobs:
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      - name: Select Java 11
+      - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
@@ -309,9 +309,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Select Java 11
+      - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
       - name: Install Fluter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu'

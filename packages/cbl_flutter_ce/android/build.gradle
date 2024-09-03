@@ -1,20 +1,12 @@
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
+}
+
 import org.apache.tools.ant.taskdefs.condition.Os
 
 group 'com.terwesten.gabriel.cbl_flutter_ce'
 version '1.0-SNAPSHOT'
-
-buildscript {
-    ext.kotlin_version = '1.7.21'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
 
 rootProject.allprojects {
     repositories {
@@ -23,11 +15,9 @@ rootProject.allprojects {
     }
 }
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-
 android {
-    compileSdkVersion 30
+    namespace 'com.terwesten.gabriel.cbl_flutter_ce'
+    compileSdk 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -43,12 +33,11 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 22
+        minSdk 22
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 task installLibraries(type: Exec) {
