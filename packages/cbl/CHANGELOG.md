@@ -1,3 +1,7 @@
+## 3.1.1
+
+ - **REFACTOR**: use `nonNulls` instead of `whereNotNull` ([#607](https://github.com/cbl-dart/cbl-dart/issues/607)). ([d1f87210](https://github.com/cbl-dart/cbl-dart/commit/d1f872106ba32f62772d91734a8bab1e3a6b7e0e))
+
 ## 3.1.0
 
  - **FEAT**: use `asUnmodifiableView` instead of `UnmodifiableUint8ListView` ([#599](https://github.com/cbl-dart/cbl-dart/issues/599)). ([3ca65118](https://github.com/cbl-dart/cbl-dart/commit/3ca65118d803966004eca6d37faded9221d6dfe1))

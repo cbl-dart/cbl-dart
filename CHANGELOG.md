@@ -3,6 +3,58 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-09-03
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.1.1`](#cbl---v311)
+ - [`cbl_flutter` - `v3.1.0`](#cbl_flutter---v310)
+ - [`cbl_flutter_ce` - `v3.1.0`](#cbl_flutter_ce---v310)
+ - [`cbl_flutter_ee` - `v3.1.0`](#cbl_flutter_ee---v310)
+ - [`cbl_generator` - `v0.3.0+2`](#cbl_generator---v0302)
+ - [`cbl_flutter_platform_interface` - `v3.0.2`](#cbl_flutter_platform_interface---v302)
+ - [`cbl_dart` - `v3.0.3`](#cbl_dart---v303)
+ - [`cbl_sentry` - `v2.1.1`](#cbl_sentry---v211)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_platform_interface` - `v3.0.2`
+ - `cbl_dart` - `v3.0.3`
+ - `cbl_sentry` - `v2.1.1`
+
+---
+
+#### `cbl` - `v3.1.1`
+
+ - **REFACTOR**: use `nonNulls` instead of `whereNotNull` ([#607](https://github.com/cbl-dart/cbl-dart/issues/607)). ([d1f87210](https://github.com/cbl-dart/cbl-dart/commit/d1f872106ba32f62772d91734a8bab1e3a6b7e0e))
+
+#### `cbl_flutter` - `v3.1.0`
+
+ - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
+
+#### `cbl_flutter_ce` - `v3.1.0`
+
+ - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
+
+#### `cbl_flutter_ee` - `v3.1.0`
+
+ - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
+
+#### `cbl_generator` - `v0.3.0+2`
+
+ - **REFACTOR**: don't use `getDisplayString` with `withNullability` ([#608](https://github.com/cbl-dart/cbl-dart/issues/608)). ([aa840e04](https://github.com/cbl-dart/cbl-dart/commit/aa840e044fa863de21cb76a4145656425c145d2a))
+
+
 ## 2024-09-01
 
 ### Changes

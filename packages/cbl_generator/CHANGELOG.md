@@ -1,3 +1,7 @@
+## 0.3.0+2
+
+ - **REFACTOR**: don't use `getDisplayString` with `withNullability` ([#608](https://github.com/cbl-dart/cbl-dart/issues/608)). ([aa840e04](https://github.com/cbl-dart/cbl-dart/commit/aa840e044fa863de21cb76a4145656425c145d2a))
+
 ## 0.3.0+1
 
  - Update a dependency to the latest release.
