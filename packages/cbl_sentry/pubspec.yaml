@@ -11,7 +11,7 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  cbl: ^3.1.1
+  cbl: ^3.2.0
   sentry: ^8.0.0
 
 dev_dependencies:
