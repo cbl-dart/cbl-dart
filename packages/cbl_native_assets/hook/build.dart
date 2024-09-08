@@ -38,11 +38,6 @@ final _logger = Logger('')
 
 void main(List<String> arguments) async {
   await build(arguments, (config, output) async {
-    output.addDependencies([
-      config.packageRoot.resolve('hook/build.dart'),
-      config.packageRoot.resolve('lib/src/version.dart'),
-    ]);
-
     final cbliteBuilder = CbliteBuilder(
       edition: _edition,
       databaseArchiveLoader: _databaseArchiveLoader,
