@@ -1,7 +1,5 @@
-import 'package:cbl_dart/cbl_dart.dart';
-import 'package:cbl_dart/src/acquire_libraries.dart';
+import 'package:cbl/cbl.dart';
 
 Future<void> initCouchbaseLiteForTest() async {
-  await setupDevelopmentLibraries();
-  await CouchbaseLiteDart.init(edition: Edition.enterprise);
+  await CouchbaseLite.init();
 }
