@@ -60,7 +60,7 @@ jobs:
       - name: Check formatting
         uses: jidicula/clang-format-action@v4.11.0
         with:
-          check-path: 'native/couchbase-lite-dart'
+          check-path: packages/cbl/src/cblitedart
 
   analyze-dart:
     name: Analyze Dart code
