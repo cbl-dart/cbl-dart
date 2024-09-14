@@ -120,7 +120,7 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test --coverage coverage/dart -r expanded -j 1"
+        testCommand="dart --enable-experiment=native-assets test --coverage coverage/dart -r expanded -j 1"
 
         case "$targetOs" in
         macOS)
@@ -352,7 +352,7 @@ function checkBuildRunnerOutput() {
 
     cd "$testPackageDir"
 
-    dart run build_runner build --delete-conflicting-outputs --verbose
+    dart --enable-experiment=native-assets run build_runner build --delete-conflicting-outputs --verbose
 
     # Verify that the the build output did not change by checking if the repo is dirty.
     # This check is flaky in CI. We check multiple times on the hunch that there is some kind of
