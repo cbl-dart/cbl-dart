@@ -41,16 +41,14 @@
 #else
 
     // Suppresses "unused function" warnings
-    #if __has_attribute(unused)
-    #  define LITECORE_UNUSED __attribute__((unused))
+    #ifdef __APPLE__
+    #define LITECORE_UNUSED __unused
+    #else
+    #define LITECORE_UNUSED __attribute__((unused))
     #endif
 
     // Disables inlining a function. Use when the space savings are worth more than speed.
-    #if __has_attribute(noinline)
-    #  define NOINLINE                      __attribute((noinline))
-    #else
-    #  define NOINLINE
-    #endif
+    #define NOINLINE                        __attribute((noinline))
 
     // Forces function to be inlined. Use with care for speed-critical code.
     #if __has_attribute(always_inline)
@@ -71,9 +69,8 @@
 
     // Declares this function takes a printf-like format string, and the subsequent args should
     // be type-checked against it.
-    #if __has_attribute(__format__) && !defined(__printflike)
-    #  define __printflike(fmtarg, firstvararg) \
-                            __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
+    #ifndef __printflike
+    #define __printflike(fmtarg, firstvararg) __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
     #endif
 
     // Windows has underscore prefixes before these function names, so define a common name

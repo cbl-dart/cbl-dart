@@ -99,61 +99,9 @@ class LocalDatabaseArchiveLoader implements CbliteArchiveLoader {
       File.fromUri(_archiveFileUri(package)).readAsBytes();
 }
 
-class LocalVectorSearchArchiveLoader implements CbliteArchiveLoader {
-  const LocalVectorSearchArchiveLoader({
-    required this.archiveDirectoryUri,
-    required this.version,
-    required this.build,
-  });
-
-  final Uri archiveDirectoryUri;
-  @override
-  final String version;
-  final int build;
-
-  Uri _archiveFileUri(CblitePackage package) {
-    assert(package.binary == CbliteBinary.vectorSearchExtension);
-
-    final CblitePackage(
-      :os,
-      :isSingleArchitectureBundle,
-      :architectures,
-      :archiveFormat
-    ) = package;
-
-    return Uri(
-      scheme: 'file',
-      pathSegments: [
-        ...archiveDirectoryUri.pathSegments,
-        if (os == OS.iOS)
-          'couchbase-lite-vector-search_xcframework_'
-              '$version-$build.${archiveFormat.ext}'
-        else
-          '${[
-            'couchbase-lite-vector-search',
-            version,
-            build,
-            os.sdkName,
-            if (isSingleArchitectureBundle)
-              if (os == OS.android &&
-                  architectures.single == Architecture.arm64)
-                'arm64-v8a'
-              else
-                architectures.single.sdkName
-          ].join('-')}.${archiveFormat.ext}'
-      ],
-    );
-  }
-
-  @override
-  Future<Uint8List> loadArchiveData(CblitePackage package, Logger logger) =>
-      File.fromUri(_archiveFileUri(package)).readAsBytes();
-}
-
 enum CbliteBinary {
   databaseCommunity,
-  databaseEnterprise,
-  vectorSearchExtension;
+  databaseEnterprise;
 
   factory CbliteBinary.fromEdition(Edition edition) => switch (edition) {
         Edition.community => databaseCommunity,
@@ -163,7 +111,6 @@ enum CbliteBinary {
   Edition? get edition => switch (this) {
         databaseCommunity => Edition.community,
         databaseEnterprise => Edition.enterprise,
-        vectorSearchExtension => null
       };
 }
 
@@ -241,72 +188,6 @@ class CblitePackage {
             for (final architecture in [Architecture.x64, Architecture.arm64])
               CblitePackage._(
                 binary: CbliteBinary.fromEdition(edition),
-                os: os,
-                loader: loader,
-                architectures: [architecture],
-                archiveFormat: ArchiveFormat.zip,
-              ),
-          ],
-        _ => [],
-      };
-
-  static List<CblitePackage> vectorSearchExtension({
-    required OS os,
-    required CbliteArchiveLoader loader,
-  }) =>
-      switch (os) {
-        OS.android => [
-            for (final architecture in [Architecture.arm64, Architecture.x64])
-              CblitePackage._(
-                binary: CbliteBinary.vectorSearchExtension,
-                os: os,
-                loader: loader,
-                architectures: [architecture],
-                archiveFormat: ArchiveFormat.zip,
-              ),
-          ],
-        OS.iOS => [
-            CblitePackage._(
-              binary: CbliteBinary.vectorSearchExtension,
-              os: os,
-              loader: loader,
-              iosSdk: IOSSdk.iPhoneOS,
-              architectures: [Architecture.arm64],
-              archiveFormat: ArchiveFormat.zip,
-              isSingleArchitectureBundle: false,
-            ),
-            CblitePackage._(
-              binary: CbliteBinary.vectorSearchExtension,
-              os: os,
-              loader: loader,
-              iosSdk: IOSSdk.iPhoneSimulator,
-              architectures: [Architecture.arm64, Architecture.x64],
-              archiveFormat: ArchiveFormat.zip,
-            ),
-          ],
-        OS.macOS => [
-            CblitePackage._(
-              binary: CbliteBinary.vectorSearchExtension,
-              os: os,
-              loader: loader,
-              architectures: [Architecture.arm64, Architecture.x64],
-              archiveFormat: ArchiveFormat.zip,
-            ),
-          ],
-        OS.linux => [
-            for (final architecture in [Architecture.arm64, Architecture.x64])
-              CblitePackage._(
-                binary: CbliteBinary.vectorSearchExtension,
-                os: os,
-                loader: loader,
-                architectures: [architecture],
-                archiveFormat: ArchiveFormat.zip,
-              ),
-          ],
-        OS.windows => [
-            for (final architecture in [Architecture.x64, Architecture.arm64])
-              CblitePackage._(
-                binary: CbliteBinary.vectorSearchExtension,
                 os: os,
                 loader: loader,
                 architectures: [architecture],
@@ -395,7 +276,6 @@ class CblitePackage {
         CbliteBinary.databaseCommunity ||
         CbliteBinary.databaseEnterprise =>
           'CouchbaseLite/',
-        CbliteBinary.vectorSearchExtension => 'CouchbaseLiteVectorSearch/',
       });
 
   Uri _resolveLibraryUriInArchive(
@@ -417,15 +297,6 @@ class CblitePackage {
           OS.linux =>
             'libcblite-$version/lib/${architecture.linuxTripple}/libcblite.so.$fileNameVersion',
           OS.windows => 'libcblite-$version/bin/cblite.dll',
-          _ => throw UnimplementedError(),
-        },
-      CbliteBinary.vectorSearchExtension => switch (os) {
-          OS.android => 'lib/libCouchbaseLiteVectorSearch.so',
-          OS.iOS =>
-            'CouchbaseLiteVectorSearch.xcframework/${iosSdk!.iosFrameworkDirectory}/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-          OS.macOS => 'CouchbaseLiteVectorSearch.dylib',
-          OS.linux => 'lib/CouchbaseLiteVectorSearch.so',
-          OS.windows => 'bin/CouchbaseLiteVectorSearch.dll',
           _ => throw UnimplementedError(),
         },
     };

@@ -8,9 +8,6 @@ import 'package:cbl/src/bindings/cblite.dart' as imp1;
 @ffi.Native<NativeCBLDart_IsEnterpriseEdition>()
 external bool CBLDart_IsEnterpriseEdition();
 
-@ffi.Native<NativeCBLDart_HasVectorSearch>()
-external bool CBLDart_HasVectorSearch();
-
 /// Initializes the native libraries.
 ///
 /// This function can be called multiple times and is thread save. The
@@ -21,12 +18,6 @@ external int CBLDart_Initialize(
   ffi.Pointer<ffi.Void> dartInitializeDlData,
   ffi.Pointer<ffi.Void> cblInitContext,
   ffi.Pointer<CBLError> errorOut,
-);
-
-@ffi.Native<NativeCBLDart_EnableVectorSearch>()
-external bool CBLDart_EnableVectorSearch(
-  imp1.FLString path,
-  ffi.Pointer<CBLError> outError,
 );
 
 @ffi.Native<NativeCBLDart_AsyncCallback_New>()
@@ -271,8 +262,6 @@ external bool CBLDart_FLEncoder_WriteArrayValue(
 
 typedef NativeCBLDart_IsEnterpriseEdition = ffi.Bool Function();
 typedef DartCBLDart_IsEnterpriseEdition = bool Function();
-typedef NativeCBLDart_HasVectorSearch = ffi.Bool Function();
-typedef DartCBLDart_HasVectorSearch = bool Function();
 
 /// This is a compatibility layer to allow Dart code to use the Couchbase Lite C
 /// API. Some method signatures are incompatible with Dart's FFI capabilities.
@@ -298,10 +287,6 @@ typedef DartCBLDart_Initialize = int Function(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
     ffi.Pointer<ffi.Void> cblInitContext,
     ffi.Pointer<CBLError> errorOut);
-typedef NativeCBLDart_EnableVectorSearch = ffi.Bool Function(
-    imp1.FLString path, ffi.Pointer<CBLError> outError);
-typedef DartCBLDart_EnableVectorSearch = bool Function(
-    imp1.FLString path, ffi.Pointer<CBLError> outError);
 
 final class _CBLDart_AsyncCallback extends ffi.Opaque {}
 
@@ -482,7 +467,7 @@ typedef DartCBLDart_CBLCollection_CreateIndex = bool Function(
 /// calling \ref CBLListener_Remove.
 typedef CBLListenerToken = imp1.CBLListenerToken;
 
-/// \defgroup query  Query
+/// \defgroup queries  Queries
 /// @{ */
 /// /** A compiled database query.
 typedef CBLQuery = imp1.CBLQuery;
@@ -492,6 +477,14 @@ typedef NativeCBLDart_CBLQuery_AddChangeListener
 typedef DartCBLDart_CBLQuery_AddChangeListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLDatabase> db,
         ffi.Pointer<CBLQuery> query, CBLDart_AsyncCallback listener);
+
+/// A heap-allocated block of memory returned from an API call.
+/// The caller takes ownership, and must call \ref FLSliceResult_Release when done with it.
+/// \warning The contents of the block must not be modified, since others may be using it.
+/// \note This is equivalent to the C++ class `alloc_slice`. In C++ the easiest way to deal with
+/// a `FLSliceResult` return value is to construct an `alloc_slice` from it, which will
+/// adopt the reference, and release it in its destructor. For example:
+/// `alloc_slice foo( CopyFoo() );`
 typedef FLSliceResult = imp1.FLSliceResult;
 
 /// A stream for reading a blob's content.

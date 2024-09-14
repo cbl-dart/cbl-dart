@@ -8,12 +8,10 @@ class CbliteBuilder {
   const CbliteBuilder({
     required this.edition,
     required this.databaseArchiveLoader,
-    required this.vectorSearchArchiveLoader,
   });
 
   final Edition edition;
   final CbliteArchiveLoader databaseArchiveLoader;
-  final CbliteArchiveLoader? vectorSearchArchiveLoader;
 
   Future<void> run({
     required BuildConfig buildConfig,
@@ -26,22 +24,9 @@ class CbliteBuilder {
       loader: databaseArchiveLoader,
     );
 
-    final vectorSearchPackages = vectorSearchArchiveLoader != null
-        ? CblitePackage.vectorSearchExtension(
-            os: buildConfig.targetOS,
-            loader: vectorSearchArchiveLoader!,
-          )
-        : <CblitePackage>[];
-
     final databaseAssetPackages = buildConfig.dryRun
         ? databasePackages
         : databasePackages
-            .where((package) => package.matchesBuildConfig(buildConfig))
-            .toList();
-
-    final vectorSearchAssetPackages = buildConfig.dryRun
-        ? vectorSearchPackages
-        : vectorSearchPackages
             .where((package) => package.matchesBuildConfig(buildConfig))
             .toList();
 
@@ -51,14 +36,6 @@ class CbliteBuilder {
         buildConfig.targetArchitecture!,
         logger,
       );
-
-      if (vectorSearchArchiveLoader != null) {
-        await vectorSearchAssetPackages.single.installPackage(
-          buildConfig.outputDirectory,
-          buildConfig.targetArchitecture!,
-          logger,
-        );
-      }
     }
 
     buildOutput.addAssets([
@@ -77,21 +54,6 @@ class CbliteBuilder {
                 architecture,
               ),
             ),
-      for (final package in vectorSearchAssetPackages)
-        for (final architecture in package.architectures)
-          if (buildConfig.dryRun ||
-              architecture == buildConfig.targetArchitecture!)
-            NativeCodeAsset(
-              package: buildConfig.packageName,
-              name: 'src/bindings/cblite_vector_search.dart',
-              linkMode: DynamicLoadingBundled(),
-              os: buildConfig.targetOS,
-              architecture: architecture,
-              file: package.resolveLibraryUri(
-                buildConfig.outputDirectory,
-                architecture,
-              ),
-            )
     ]);
   }
 }

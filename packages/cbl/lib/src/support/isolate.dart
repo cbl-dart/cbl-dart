@@ -49,9 +49,7 @@ class IsolateContext {
 Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
   runWithErrorTranslation(() {
-    _baseBindings
-      ..initializeNativeLibraries(context.initContext?.toCbl())
-      ..enableVectorSearch();
+    _baseBindings.initializeNativeLibraries(context.initContext?.toCbl());
   });
   await _runPostIsolateInitTasks();
 }

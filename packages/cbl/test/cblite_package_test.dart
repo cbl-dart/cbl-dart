@@ -24,10 +24,7 @@ void main() {
     group('database', () {
       for (final os in OS.values) {
         for (final edition in [Edition.enterprise]) {
-          for (final loader in [
-            remoteDatabaseArchiveLoader,
-            localDatabaseArchiveLoader,
-          ]) {
+          for (final loader in [remoteDatabaseArchiveLoader]) {
             if (edition == Edition.community &&
                 loader is LocalDatabaseArchiveLoader) {
               continue;
@@ -57,31 +54,6 @@ void main() {
                 }
               }
             });
-          }
-        }
-      }
-    });
-
-    group('vectorSearchExtension', () {
-      for (final os in OS.values) {
-        final packages = CblitePackage.vectorSearchExtension(
-          os: os,
-          loader: localVectorSearchArchiveLoader,
-        );
-
-        for (final package in packages) {
-          for (final architecture in package.architectures) {
-            test(
-              'installPackage ($os, $architecture)',
-              () async {
-                final tmpDir = testDataDirectory.createTempSync();
-                await package.installPackage(tmpDir.uri, architecture, logger);
-                final libraryUri =
-                    package.resolveLibraryUri(tmpDir.uri, architecture);
-                final libraryFile = File.fromUri(libraryUri);
-                expect(libraryFile.existsSync(), isTrue);
-              },
-            );
           }
         }
       }

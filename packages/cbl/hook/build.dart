@@ -9,27 +9,8 @@ import 'cblite_package.dart';
 const remoteDatabaseArchiveLoader =
     RemoteDatabaseArchiveLoader(version: '3.1.6');
 
-final localDatabaseArchiveLoader = LocalDatabaseArchiveLoader(
-  archiveDirectoryUri:
-      Uri.file('/Users/terwesten/Downloads/couchbase-lite-c-3.2.0-RC2'),
-  build: 63,
-  version: '3.2.0',
-);
-
-final localVectorSearchArchiveLoader = LocalVectorSearchArchiveLoader(
-  archiveDirectoryUri: Uri.file(
-    '/Users/terwesten/Downloads/couchbase-lite-vector-search-1.0.0-RC2',
-  ),
-  build: 58,
-  version: '1.0.0',
-);
-
 // TODO(blaugold): make build time options configurable
 const _edition = Edition.enterprise;
-const _vectorSearch = _edition == Edition.enterprise;
-final _databaseArchiveLoader = localDatabaseArchiveLoader;
-final _vectorSearchArchiveLoader =
-    _vectorSearch ? localVectorSearchArchiveLoader : null;
 
 final _logger = Logger('')
   ..level = Level.ALL
@@ -38,10 +19,9 @@ final _logger = Logger('')
 
 void main(List<String> arguments) async {
   await build(arguments, (config, output) async {
-    final cbliteBuilder = CbliteBuilder(
+    const cbliteBuilder = CbliteBuilder(
       edition: _edition,
-      databaseArchiveLoader: _databaseArchiveLoader,
-      vectorSearchArchiveLoader: _vectorSearchArchiveLoader,
+      databaseArchiveLoader: remoteDatabaseArchiveLoader,
     );
 
     await cbliteBuilder.run(
@@ -64,7 +44,6 @@ void main(List<String> arguments) async {
       cppLinkStdLib: config.targetOS == OS.android ? 'c++_static' : null,
       defines: {
         if (_edition == Edition.enterprise) 'COUCHBASE_ENTERPRISE': '1',
-        if (_vectorSearch) 'COUCHBASE_VECTOR_SEARCH': '1',
       },
       flags: [
         if (cbliteLibraryUri != null)

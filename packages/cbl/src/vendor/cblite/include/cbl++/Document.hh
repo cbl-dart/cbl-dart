@@ -71,10 +71,6 @@ namespace cbl {
         inline MutableDocument mutableCopy() const;
 
     protected:
-        friend class Collection;
-        friend class Database;
-        friend class Replicator;
-        
         Document(CBLRefCounted* r)                  :RefCounted(r) { }
 
         static Document adopt(const CBLDocument* _cbl_nullable d, CBLError *error) {
@@ -93,7 +89,11 @@ namespace cbl {
             else
                 throw error;
         }
-        
+
+        friend class Collection;
+        friend class Database;
+        friend class Replicator;
+
         CBL_REFCOUNTED_BOILERPLATE(Document, RefCounted, const CBLDocument)
     };
 
