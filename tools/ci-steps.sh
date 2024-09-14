@@ -102,7 +102,7 @@ function runUnitTests() {
 
     case "$embedder" in
     standalone)
-        dart test --coverage coverage/dart -r expanded -j 1
+        dart --enable-experiment=native-assets test --coverage coverage/dart -r expanded -j 1
         ;;
     flutter)
         flutter test --coverage coverage -r expanded
