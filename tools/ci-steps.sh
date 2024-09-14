@@ -15,7 +15,7 @@ function requireEnvVar() {
 
 testResultsDir="test-results"
 embedder="$EMBEDDER"
-targetOs="$TARGET_OS"
+targetOs="$CBL_TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
@@ -36,7 +36,7 @@ esac
 # === Steps ===================================================================
 
 function configureFlutter() {
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
 
     flutter config --enable-native-assets
 
@@ -76,7 +76,7 @@ function startCouchbaseServices() {
 }
 
 function startVirtualDevices() {
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
 
     case "$targetOs" in
     iOS)
@@ -112,7 +112,7 @@ function runUnitTests() {
 
 function runE2ETests() {
     requireEnvVar EMBEDDER
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
     requireEnvVar TEST_PACKAGE
 
     case "$embedder" in
@@ -293,7 +293,7 @@ function _collectCblLogsLinux() {
 
 function collectTestResults() {
     requireEnvVar EMBEDDER
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
     requireEnvVar TEST_PACKAGE
 
     mkdir "$testResultsDir"

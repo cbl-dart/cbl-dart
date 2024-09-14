@@ -109,7 +109,7 @@ jobs:
         os: [Ubuntu]
     env:
       EMBEDDER: ${{ matrix.embedder }}
-      TARGET_OS: ${{ matrix.os }}
+      CBL_TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: ubuntu-20.04
@@ -178,7 +178,7 @@ jobs:
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
-      TARGET_OS: ${{ matrix.os }}
+      CBL_TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: >-
         ${{ fromJSON('{
           "standalone":"cbl_e2e_tests_standalone_dart",
