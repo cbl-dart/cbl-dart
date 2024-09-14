@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
@@ -103,4 +104,54 @@ extension PointerExt<T extends NativeType> on Pointer<T> {
 
 extension NullablePointerExt<T extends NativeType> on Pointer<T>? {
   Pointer<T> elseNullptr() => this == null ? nullptr : this!;
+}
+
+// === Dynamic Library Loading =================================================
+
+String resolveLibraryPathFromAddress(Pointer<Void> address) {
+  if (Platform.isAndroid ||
+      Platform.isIOS ||
+      Platform.isLinux ||
+      Platform.isMacOS) {
+    return _resolveLibraryPathFromAddressUnix(address);
+  } else {
+    // TODO(blaugold): implement windows support
+    throw UnimplementedError(
+      'resolveLibraryPathFromAddress on ${Platform.operatingSystem}',
+    );
+  }
+}
+
+String _resolveLibraryPathFromAddressUnix(Pointer<Void> address) {
+  final info = malloc<_DL_info>();
+  try {
+    if (_dladdr(address, info) == 0) {
+      return throw ArgumentError.value(
+        address,
+        'address',
+        'unable to associate with library',
+      );
+    }
+    return info.ref.dli_fname.cast<Utf8>().toDartString();
+  } finally {
+    malloc.free(info);
+  }
+}
+
+final _process = DynamicLibrary.process();
+
+final _dladdr = _process.lookupFunction<
+    Int Function(Pointer<Void>, Pointer<_DL_info>),
+    int Function(Pointer<Void>, Pointer<_DL_info>)>('dladdr');
+
+// ignore: camel_case_types
+final class _DL_info extends Struct {
+  // ignore: non_constant_identifier_names
+  external Pointer<Char> dli_fname;
+  // ignore: non_constant_identifier_names
+  external Pointer<Void> dli_fbase;
+  // ignore: non_constant_identifier_names
+  external Pointer<Char> dli_sname;
+  // ignore: non_constant_identifier_names
+  external Pointer<Void> dli_saddr;
 }

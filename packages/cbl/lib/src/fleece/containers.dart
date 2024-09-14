@@ -8,7 +8,6 @@ import 'package:collection/collection.dart';
 
 import '../bindings.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/utils.dart';
 import 'decoder.dart';
 import 'encoder.dart';
@@ -43,9 +42,9 @@ final class SharedKeys implements Finalizable {
     _bindings.bindToDartObject(this, pointer, retain: !adopt);
   }
 
-  static final _bindings = cblBindings.fleece.sharedKeys;
+  static const _bindings = SharedKeysBindings();
 
-  final Pointer<FLSharedKeys> pointer;
+  final FLSharedKeys pointer;
 
   /// The number of keys in the mapping.
   ///
@@ -84,9 +83,9 @@ final class Doc implements Finalizable {
     _bindings.bindToDartObject(this, pointer);
   }
 
-  static final _bindings = cblBindings.fleece.doc;
+  static const _bindings = DocBindings();
 
-  final Pointer<FLDoc> pointer;
+  final FLDoc pointer;
 
   /// Returns the data owned by the document, if any, else `null`.
   SliceResult? get allocedData => _bindings.getAllocedData(pointer);
@@ -169,9 +168,9 @@ final class Value implements Finalizable {
     }
   }
 
-  static final _bindings = cblBindings.fleece.value;
+  static const _bindings = ValueBindings();
 
-  final Pointer<FLValue> pointer;
+  final FLValue pointer;
 
   /// Whether this object updates the ref count of the native object when it is
   /// created and garbage collected.
@@ -311,12 +310,12 @@ final class Value implements Finalizable {
 final class Array extends Value with ListMixin<Value> {
   /// Creates an [Array] based on a [pointer] to the the native value.
   Array.fromPointer(
-    Pointer<FLArray> pointer, {
+    FLArray pointer, {
     super.isRefCounted,
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
-  static final _bindings = cblBindings.fleece.array;
+  static const _bindings = ArrayBindings();
 
   @override
   int get length => _bindings.count(pointer.cast());
@@ -371,7 +370,7 @@ final class MutableArray extends Array {
   }
 
   /// Creates a [MutableArray] based on a [pointer] to the the native value.
-  MutableArray.fromPointer(Pointer<FLMutableArray> pointer, {super.adopt})
+  MutableArray.fromPointer(FLMutableArray pointer, {super.adopt})
       : super.fromPointer(pointer.cast(), isRefCounted: true);
 
   /// Creates a new [MutableArray] that's a copy of the source [Array].
@@ -392,7 +391,7 @@ final class MutableArray extends Array {
         adopt: true,
       );
 
-  static final _bindings = cblBindings.fleece.mutableArray;
+  static const _bindings = MutableArrayBindings();
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
@@ -474,12 +473,12 @@ final class MutableArray extends Array {
 final class Dict extends Value with MapMixin<String, Value> {
   /// Creates a [Dict] based on a [pointer] to the the native value.
   Dict.fromPointer(
-    Pointer<FLDict> pointer, {
+    FLDict pointer, {
     super.isRefCounted,
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
-  static final _bindings = cblBindings.fleece.dict;
+  static const _bindings = DictBindings();
 
   /// Returns the number of items in a dictionary.
   @override
@@ -580,7 +579,7 @@ final class MutableDict extends Dict {
 
   /// Creates a [MutableDict] based on a [pointer] to the the native value.
   MutableDict.fromPointer(
-    Pointer<FLMutableDict> pointer, {
+    FLMutableDict pointer, {
     super.isRefCounted,
     super.adopt,
   }) : super.fromPointer(pointer.cast());
@@ -602,7 +601,7 @@ final class MutableDict extends Dict {
         adopt: true,
       );
 
-  static final _bindings = cblBindings.fleece.mutableDict;
+  static const _bindings = MutableDictBindings();
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
@@ -686,11 +685,11 @@ abstract final class SlotSetter {
 
   bool canSetValue(Object? value);
 
-  void setSlotValue(Pointer<FLSlot> slot, Object? value);
+  void setSlotValue(FLSlot slot, Object? value);
 }
 
 final class _DefaultSlotSetter implements SlotSetter {
-  late final _slotBindings = cblBindings.fleece.slot;
+  static const _slotBindings = SlotBindings();
 
   @override
   bool canSetValue(Object? value) =>
@@ -705,7 +704,7 @@ final class _DefaultSlotSetter implements SlotSetter {
       value is Value;
 
   @override
-  void setSlotValue(Pointer<FLSlot> slot, Object? value) {
+  void setSlotValue(FLSlot slot, Object? value) {
     // ignore: parameter_assignments
     value = _recursivelyConvertCollectionsToFleece(value);
 
@@ -744,7 +743,7 @@ final class _DefaultSlotSetter implements SlotSetter {
   }
 }
 
-void _setSlotValue(Pointer<FLSlot> slot, Object? value) {
+void _setSlotValue(FLSlot slot, Object? value) {
   SlotSetter._findForValue(value).setSlotValue(slot, value);
 }
 

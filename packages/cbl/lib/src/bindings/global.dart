@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'base.dart';
+import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'slice.dart';
 
@@ -16,7 +17,7 @@ T withGlobalArena<T>(T Function() f) {
   }
 }
 
-final globalFLErrorCode = sliceResultAllocator<Uint32>();
+final globalFLErrorCode = sliceResultAllocator<Int32>();
 
 final nullFLSlice = sliceResultAllocator<FLSlice>()
   ..ref.buf = nullptr
@@ -29,8 +30,10 @@ final globalFLSliceResult = sliceResultAllocator<FLSliceResult>();
 final nullFLString = nullFLSlice.cast<FLString>();
 final globalFLString = sliceResultAllocator<FLString>();
 
-final globalLoadedDictKey = sliceResultAllocator<CBLDart_LoadedDictKey>();
-final globalLoadedFLValue = sliceResultAllocator<CBLDart_LoadedFLValue>();
+final globalLoadedDictKey =
+    sliceResultAllocator<cblitedart.CBLDart_LoadedDictKey>();
+final globalLoadedFLValue =
+    sliceResultAllocator<cblitedart.CBLDart_LoadedFLValue>();
 
 final globalCBLError = sliceResultAllocator<CBLError>();
 final globalErrorPosition = sliceResultAllocator<Int>();

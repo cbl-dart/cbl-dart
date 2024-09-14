@@ -1,11 +1,13 @@
 import 'dart:async';
 
-import '../bindings.dart' hide LibrariesConfiguration;
+import '../bindings.dart';
+import '../bindings/tracing.dart';
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
 import 'errors.dart';
-import 'ffi.dart';
 import 'tracing.dart';
+
+const _baseBindings = BaseBindings();
 
 class InitContext {
   InitContext({required this.filesDir, required this.tempDir});
@@ -18,10 +20,7 @@ class InitContext {
 }
 
 class IsolateContext {
-  IsolateContext({
-    required this.libraries,
-    this.initContext,
-  });
+  IsolateContext({this.initContext});
 
   static IsolateContext? _instance;
 
@@ -42,7 +41,6 @@ class IsolateContext {
     return config;
   }
 
-  final LibrariesConfiguration libraries;
   final InitContext? initContext;
 }
 
@@ -51,7 +49,9 @@ class IsolateContext {
 Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
   runWithErrorTranslation(() {
-    cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
+    _baseBindings
+      ..initializeNativeLibraries(context.initContext?.toCbl())
+      ..enableVectorSearch();
   });
   await _runPostIsolateInitTasks();
 }
@@ -65,12 +65,7 @@ Future<void> initSecondaryIsolate(IsolateContext context) async {
 
 Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
-
-  CBLBindings.init(
-    context.libraries.toCblFfi(),
-    onTracedCall: tracingDelegateTracedNativeCallHandler,
-  );
-
+  onTracedCall = tracingDelegateTracedNativeCallHandler;
   MDelegate.instance = CblMDelegate();
 }
 

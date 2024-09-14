@@ -3,8 +3,6 @@ repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/*
   - packages/*/example
-ignore:
-  - packages/cbl_*_api
 
 ide:
   intellij: false
@@ -13,31 +11,7 @@ command:
   bootstrap:
     runPubGetInParallel: false
 
-  version:
-    hooks:
-      preCommit:
-        description:
-          Pre-commit hook for the version command to update the
-          `cbl_flutter_ce|ee` packages.
-        run: |
-          melos build:cbl_flutter_prebuilt && \
-          git add packages/cbl_flutter_ee packages/cbl_flutter_ce && \
-          melos build:cbl_dart:version_info && \
-          git add packages/cbl_dart/lib/src/version_info.dart
-
 scripts:
-  build:cbl_flutter_prebuilt:
-    description: Builds the prebuild packages `cbl_flutter_ce|ee`.
-    run: cd packages/cbl_flutter_prebuilt && dart run
-
-  build:cbl_dart:version_info:
-    description: Builds the version_info.dart file in `cbl_dart` .
-    run: cd packages/cbl_dart && dart run tool/generate_version_info.dart
-
-  build:nativeLibraries:
-    description: Builds the native libraries for the host target.
-    run: ./tools/dev-tools.sh prepareNativeLibraries
-
   formatting:apply:
     description: Formats all Dart files.
     run: daco format .

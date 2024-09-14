@@ -1,17 +1,15 @@
-// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
-
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:meta/meta.dart';
 
-import 'bindings.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
-final _sliceBindings = CBLBindings.instance.fleece.slice;
+const _sliceBindings = SliceBindings();
 
 /// A contiguous area of native memory, whose lifetime is tied to some other
 /// object.
@@ -21,6 +19,7 @@ final _sliceBindings = CBLBindings.instance.fleece.slice;
 /// On the nativ side, results which are typed as a slice and may have no value,
 /// represent this with the _null slice_. In Dart, these results are typed as
 /// nullable and are represented with `null`.
+@immutable
 final class Slice implements Finalizable {
   /// Private constructor to initialize slice.
   Slice._(this.buf, this.size) {
@@ -48,7 +47,7 @@ final class Slice implements Finalizable {
       string.buf == nullptr ? null : Slice._(string.buf, string.size);
 
   /// The pointer to start of this slice in native memory.
-  final Pointer<Uint8> buf;
+  final Pointer<Void> buf;
 
   /// The size of this slice in bytes.
   final int size;
@@ -100,7 +99,7 @@ final class Slice implements Finalizable {
   /// is in use.
   ///
   /// For a less efficient but safer alternative, use [toTypedList].
-  Uint8List asTypedList() => buf.asTypedList(size);
+  Uint8List asTypedList() => buf.cast<Uint8>().asTypedList(size);
 
   /// Copies the contents of this [Slice] into a new [Uint8List] and returns it.
   Uint8List toTypedList() => Uint8List.fromList(asTypedList());

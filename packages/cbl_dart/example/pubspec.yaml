@@ -1,9 +1,0 @@
-name: cbl_dart_example
-publish_to: none
-
-environment:
-  sdk: ^3.0.0
-
-dependencies:
-  cbl: ^3.2.0
-  cbl_dart: ^3.0.3
