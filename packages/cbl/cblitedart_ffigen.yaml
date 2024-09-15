@@ -1,0 +1,29 @@
+name: cblitedart
+description: Bindings for Couchbase Lite Dart Support API
+output:
+  bindings: lib/src/bindings/cblitedart.dart
+import:
+  symbol-files:
+    - package:cbl/src/bindings/cblite_symbols.yaml
+headers:
+  entry-points:
+    - src/cblitedart/include/CBL+Dart.h
+    - src/cblitedart/include/CBLDart_Export.h
+    - src/cblitedart/include/Fleece+Dart.h
+  include-directives:
+    - 'src/cblitedart/include/*'
+functions:
+  expose-typedefs:
+    include:
+      - '.*'
+compiler-opts:
+  - '-Isrc/cblitedart/include'
+  - '-Isrc/vendor/cblite/include'
+  - '-Isrc/vendor/dart/include'
+  # CBL uses a macro to define enums which is called CBL_ENUM.
+  # On Apple systems the CBL aliases CF_ENUM to CBL_ENUM which seems to be a
+  # problem for ffigen.
+  # As a workaround we define __APPLE__ to 0 to avoid the aliasing.
+  - '-D__APPLE__=0'
+ffi-native:
+ignore-source-errors: true

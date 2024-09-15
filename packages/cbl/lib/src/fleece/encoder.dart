@@ -4,10 +4,9 @@ import 'dart:typed_data';
 
 import '../bindings.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import 'containers.dart';
 
-final _encoderBinds = cblBindings.fleece.encoder;
+const _encoderBinds = FleeceEncoderBindings();
 
 /// An encoder, which generates encoded Fleece or JSON data.
 ///
@@ -31,7 +30,7 @@ final class FleeceEncoder implements Finalizable {
     _encoderBinds.bindToDartObject(this, _pointer);
   }
 
-  final Pointer<FLEncoder> _pointer;
+  final FLEncoder _pointer;
 
   /// The output format to generate.
   ///
@@ -116,12 +115,11 @@ final class FleeceEncoder implements Finalizable {
   }
 
   /// Writes the value at [index] in [array] to this encoder.
-  void writeArrayValue(Pointer<FLArray> array, int index) =>
-      runWithErrorTranslation(
-          () => _encoderBinds.writeArrayValue(_pointer, array, index));
+  void writeArrayValue(FLArray array, int index) => runWithErrorTranslation(
+      () => _encoderBinds.writeArrayValue(_pointer, array, index));
 
   /// Writes [value] this encoder.
-  void writeValue(Pointer<FLValue> value) =>
+  void writeValue(FLValue value) =>
       runWithErrorTranslation(() => _encoderBinds.writeValue(_pointer, value));
 
   /// Writes `null` to this encoder.
@@ -174,7 +172,7 @@ final class FleeceEncoder implements Finalizable {
       () => _encoderBinds.writeKeyFLString(_pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLValue].
-  void writeKeyValue(Pointer<FLValue> key) =>
+  void writeKeyValue(FLValue key) =>
       runWithErrorTranslation(() => _encoderBinds.writeKeyValue(_pointer, key));
 
   /// Ends a dict.

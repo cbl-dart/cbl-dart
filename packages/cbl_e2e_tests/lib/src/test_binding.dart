@@ -56,15 +56,15 @@ abstract base class CblE2eTestBinding {
   /// The global instance of [CblE2eTestBinding] by which is used by tests.
   static CblE2eTestBinding get instance => _instance!;
 
-  FutureOr<void> initCouchbaseLite();
+  Future<void> initCouchbaseLite() => CouchbaseLite.init();
 
   /// Temporary directory for files created during tests, such as databases.
-  FutureOr<String> resolveTmpDir();
+  Future<String> resolveTmpDir();
 
   /// Temporary directory for tests.
   late final String tmpDir;
 
-  FutureOr<String> loadLargeJsonFixture();
+  Future<String> loadLargeJsonFixture();
 
   late final String largeJsonFixture;
 

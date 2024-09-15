@@ -14,9 +14,8 @@ function requireEnvVar() {
 # === Constants ===============================================================
 
 testResultsDir="test-results"
-cblFlutterPrebuiltPackage="cbl_flutter_prebuilt"
 embedder="$EMBEDDER"
-targetOs="$TARGET_OS"
+targetOs="$CBL_TARGET_OS"
 testPackage="$TEST_PACKAGE"
 testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
@@ -36,32 +35,10 @@ esac
 
 # === Steps ===================================================================
 
-function buildNativeLibraries() {
-    local target=
-
-    case "$targetOs" in
-    iOS)
-        target=ios
-        ;;
-    macOS)
-        target=macos
-        ;;
-    Android)
-        target=android
-        ;;
-    Ubuntu)
-        target=linux-x86_64
-        ;;
-    Windows)
-        target=windows-x86_64
-        ;;
-    esac
-
-    ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
-}
-
 function configureFlutter() {
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
+
+    flutter config --enable-native-assets
 
     case "$targetOs" in
     macOS)
@@ -99,7 +76,7 @@ function startCouchbaseServices() {
 }
 
 function startVirtualDevices() {
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
 
     case "$targetOs" in
     iOS)
@@ -125,7 +102,7 @@ function runUnitTests() {
 
     case "$embedder" in
     standalone)
-        dart test --coverage coverage/dart -r expanded -j 1
+        dart --enable-experiment=native-assets test --coverage coverage/dart -r expanded -j 1
         ;;
     flutter)
         flutter test --coverage coverage -r expanded
@@ -135,7 +112,7 @@ function runUnitTests() {
 
 function runE2ETests() {
     requireEnvVar EMBEDDER
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
     requireEnvVar TEST_PACKAGE
 
     case "$embedder" in
@@ -143,7 +120,7 @@ function runE2ETests() {
         cd "$testPackageDir"
 
         export ENABLE_TIME_BOMB=true
-        testCommand="dart test --coverage coverage/dart -r expanded -j 1"
+        testCommand="dart --enable-experiment=native-assets test --coverage coverage/dart -r expanded -j 1"
 
         case "$targetOs" in
         macOS)
@@ -316,7 +293,7 @@ function _collectCblLogsLinux() {
 
 function collectTestResults() {
     requireEnvVar EMBEDDER
-    requireEnvVar TARGET_OS
+    requireEnvVar CBL_TARGET_OS
     requireEnvVar TEST_PACKAGE
 
     mkdir "$testResultsDir"
@@ -375,7 +352,7 @@ function checkBuildRunnerOutput() {
 
     cd "$testPackageDir"
 
-    dart run build_runner build --delete-conflicting-outputs --verbose
+    dart --enable-experiment=native-assets run build_runner build --delete-conflicting-outputs --verbose
 
     # Verify that the the build output did not change by checking if the repo is dirty.
     # This check is flaky in CI. We check multiple times on the hunch that there is some kind of

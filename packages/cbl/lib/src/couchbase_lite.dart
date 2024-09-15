@@ -1,13 +1,12 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'database/database.dart';
 import 'log.dart';
-import 'support/ffi.dart';
 import 'support/isolate.dart';
 import 'support/tracing.dart';
 import 'tracing.dart';
 
-export 'support/ffi.dart' show LibrariesConfiguration, LibraryConfiguration;
 export 'support/listener_token.dart' show ListenerToken;
 export 'support/resource.dart' show Resource, ClosableResource;
 export 'support/streams.dart' show AsyncListenStream;
@@ -17,9 +16,19 @@ export 'support/streams.dart' show AsyncListenStream;
 /// logging.
 abstract final class CouchbaseLite {
   /// Initializes the `cbl` package, for the main isolate.
-  static Future<void> init({required LibrariesConfiguration libraries}) =>
+  static Future<void> init() =>
       asyncOperationTracePoint(InitializeOp.new, () async {
-        await initPrimaryIsolate(IsolateContext(libraries: libraries));
+        await initPrimaryIsolate(
+          IsolateContext(
+            // TODO(blaugold): Resolve paths properly and consistently on all
+            // platforms.
+            initContext: Platform.isAndroid
+                ? InitContext(
+                    filesDir: Directory.current.path,
+                    tempDir: Directory.systemTemp.createTempSync('').path)
+                : null,
+          ),
+        );
 
         _setupLogging();
       });

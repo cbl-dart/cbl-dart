@@ -10,9 +10,10 @@ import '../bindings.dart';
 import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
 import '../support/edition.dart';
-import '../support/ffi.dart';
 import '../support/isolate.dart';
 import 'database.dart';
+
+const _databaseBindings = DatabaseBindings();
 
 // ignore: avoid_classes_with_only_static_members
 /// A key used to encrypt a [Database].
@@ -100,7 +101,7 @@ final class EncryptionKeyImpl implements EncryptionKey {
   // ignore: prefer_constructors_over_static_methods
   static EncryptionKeyImpl passwordSync(String password) {
     useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
-    final key = cblBindings.database.encryptionKeyFromPassword(password);
+    final key = _databaseBindings.encryptionKeyFromPassword(password);
     return EncryptionKeyImpl(key);
   }
 

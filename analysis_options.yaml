@@ -1,8 +1,6 @@
 include: all_lint_rules.yaml
 
 analyzer:
-  exclude:
-    - node_modules/**
   language:
     strict-casts: true
     strict-inference: true

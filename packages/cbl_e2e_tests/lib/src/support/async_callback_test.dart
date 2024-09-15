@@ -10,7 +10,7 @@ void main() {
   setupTestBinding();
 
   group('AsyncCallback', () {
-    late final bindings = CBLBindings.instance.asyncCallback;
+    const bindings = AsyncCallbackBindings();
 
     test('propagates error to Zone in which it was created', () {
       final callback = runZonedGuarded(

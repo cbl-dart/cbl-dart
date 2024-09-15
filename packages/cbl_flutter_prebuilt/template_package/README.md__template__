@@ -1,8 +1,0 @@
-Companion package to [`cbl_flutter`](https://pub.dev/packages/cbl_flutter),
-which provides the Couchbase Lite {{#capitalize}}{{edition}}{{/capitalize}} Edition.
-
-Add this package as a dependency to use the
-Couchbase Lite {{#capitalize}}{{edition}}{{/capitalize}} Edition, in addition to `cbl_flutter`.
-
-> ⚖️ Before using this package, ensure you are complying with the license for the
-Couchbase Lite {{#capitalize}}{{edition}}{{/capitalize}} Edition.

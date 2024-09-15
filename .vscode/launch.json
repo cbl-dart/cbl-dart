@@ -5,6 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Dart Tests",
+      "request": "launch",
+      "type": "dart",
+      "templateFor": "test",
+      "vmAdditionalArgs": ["--enable-experiment=native-assets"]
+    },
+    {
       "name": "cbl (test)",
       "cwd": "packages/cbl",
       "request": "launch",

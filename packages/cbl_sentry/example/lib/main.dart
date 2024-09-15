@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-import 'package:cbl_dart/cbl_dart.dart';
 import 'package:cbl_sentry/cbl_sentry.dart';
 import 'package:sentry/sentry.dart';
 
@@ -30,7 +29,7 @@ Future<void> runApp() async {
 }
 
 Future<void> initApp() => runAppTransaction('initApp', () async {
-      await CouchbaseLiteDart.init(edition: Edition.community);
+      await CouchbaseLite.init();
       await Database.remove('example');
       db = await Database.openAsync('example');
       users = await db.createCollection('users');

@@ -10,7 +10,6 @@ import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/streams.dart';
@@ -30,14 +29,14 @@ import 'result.dart';
 import 'result_set.dart';
 import 'select_result.dart';
 
-final _bindings = cblBindings.query;
-
 base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   FfiQuery({
     FfiDatabase? super.database,
     required super.language,
     super.definition,
   }) : super(typeName: 'FfiQuery');
+
+  static const _bindings = QueryBindings();
 
   var _isPrepared = false;
 
@@ -246,7 +245,7 @@ final class ResultSetIterator
     bindCBLRefCountedToDartObject(this, pointer: _pointer);
   }
 
-  static final _bindings = cblBindings.resultSet;
+  static const _bindings = ResultSetBindings();
 
   final bool encodeArray;
   final Pointer<CBLResultSet> _pointer;
