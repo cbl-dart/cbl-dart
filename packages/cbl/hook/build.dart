@@ -58,7 +58,7 @@ void main(List<String> arguments) async {
                 '-lcblite',
               ],
             OS.android || OS.linux => [
-                r'-Wl,-rpath="$ORIGIN"',
+                r'-Wl,-rpath=$ORIGIN',
                 '-L${cbliteLibraryUri.resolve('./').toFilePath()}',
                 '-lcblite',
               ],
