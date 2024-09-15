@@ -53,10 +53,19 @@ void main(List<String> arguments) async {
                 '-framework',
                 'CouchbaseLite',
               ],
-            _ => [
+            OS.macOS => [
                 '-L${cbliteLibraryUri.resolve('./').toFilePath()}',
                 '-lcblite',
-              ]
+              ],
+            OS.android || OS.linux => [
+                r'-Wl,-rpath="$ORIGIN"',
+                '-L${cbliteLibraryUri.resolve('./').toFilePath()}',
+                '-lcblite',
+              ],
+            OS.windows => [
+                cbliteLibraryUri.resolve('./cblite.lib').toFilePath(),
+              ],
+            _ => throw UnsupportedError('Unsupported OS: ${config.targetOS}'),
           },
         if (config.targetOS == OS.iOS) '-miphoneos-version-min=12.0',
         if (config.targetOS == OS.android) ...['-lc++abi']
