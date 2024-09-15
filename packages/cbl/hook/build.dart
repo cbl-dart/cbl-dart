@@ -63,7 +63,7 @@ void main(List<String> arguments) async {
                 '-lcblite',
               ],
             OS.windows => [
-                cbliteLibraryUri.resolve('./cblite.lib').toFilePath(),
+                cbliteLibraryUri.resolve('../lib/cblite.lib').toFilePath(),
               ],
             _ => throw UnsupportedError('Unsupported OS: ${config.targetOS}'),
           },
