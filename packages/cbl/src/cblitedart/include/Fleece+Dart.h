@@ -28,19 +28,17 @@ KnownSharedKeys *CBLDart_KnownSharedKeys_New();
 CBLDART_EXPORT
 void CBLDart_KnownSharedKeys_Delete(KnownSharedKeys *keys);
 
-typedef struct CBLDart_LoadedDictKey
-{
-  bool isKnownSharedKey; // Whether the key has been seen before. For shared
-                         // keys, stringBuf and stringSize are only set the
-                         // first time the key is seen.
-  int sharedKey;         // The id of the shared key or -1 if the key is not shared.
-  const void *stringBuf; // The pointer to the start of the key string.
-  size_t stringSize;     // The length of the key string.
-  FLValue value;         // The Fleece value of the key.
+typedef struct CBLDart_LoadedDictKey {
+  bool isKnownSharedKey;  // Whether the key has been seen before. For shared
+                          // keys, stringBuf and stringSize are only set the
+                          // first time the key is seen.
+  int sharedKey;  // The id of the shared key or -1 if the key is not shared.
+  const void *stringBuf;  // The pointer to the start of the key string.
+  size_t stringSize;      // The length of the key string.
+  FLValue value;          // The Fleece value of the key.
 } CBLDart_LoadedDictKey;
 
-typedef struct CBLDart_LoadedFLValue
-{
+typedef struct CBLDart_LoadedFLValue {
   bool exists;
   int8_t type;
   bool isInteger;
