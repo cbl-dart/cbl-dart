@@ -1,3 +1,7 @@
+## 3.1.0
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
 ## 3.0.3
 
  - Update a dependency to the latest release.

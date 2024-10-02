@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-10-02
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_dart` - `v3.1.0`](#cbl_dart---v310)
+ - [`cbl_flutter_ce` - `v3.2.0`](#cbl_flutter_ce---v320)
+ - [`cbl_flutter_ee` - `v3.2.0`](#cbl_flutter_ee---v320)
+
+---
+
+#### `cbl_dart` - `v3.1.0`
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
+#### `cbl_flutter_ce` - `v3.2.0`
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
+#### `cbl_flutter_ee` - `v3.2.0`
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
+
 ## 2024-09-05
 
 ### Changes

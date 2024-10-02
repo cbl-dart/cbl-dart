@@ -1,6 +1,6 @@
 name: cbl_flutter_ce
 description: Provides the Couchbase Lite Community Edition for Flutter apps.
-version: 3.1.0
+version: 3.2.0
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_ce
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues

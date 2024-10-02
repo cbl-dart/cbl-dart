@@ -1,3 +1,7 @@
+## 3.2.0
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
 ## 3.1.0
 
  - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
