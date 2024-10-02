@@ -122,6 +122,7 @@ curl "$(
         "$COUCHBASE_LITE_C_RELEASE" \
         "$target"
 )" \
+    -k \
     --silent \
     --fail \
     --retry 5 \
@@ -134,6 +135,7 @@ curl "$(
         "$COUCHBASE_LITE_DART_RELEASE" \
         "$target"
 )" \
+    -k \
     --location \
     --silent \
     --fail \
