@@ -2,6 +2,6 @@
 import 'package.dart';
 
 const latestReleases = {
-  Library.libcblite: '3.1.6',
+  Library.libcblite: '3.2.0',
   Library.libcblitedart: '7.1.0',
 };
