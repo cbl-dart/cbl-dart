@@ -128,7 +128,7 @@ void main() {
       final errorFileContents = await logDir
           .findAndReadFile((file) => file.path.contains('cbl_error'));
 
-      expect(errorFileContents, contains('[WS] ERROR: $logMessage'));
+      expect(errorFileContents, contains('WS ERROR $logMessage'));
     });
   });
 }
