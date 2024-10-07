@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   cbl: ^3.2.0
-  cbl_flutter: ^3.1.0
+  cbl_flutter: ^3.1.1
   cbl_flutter_ee:
     path: ../cbl_flutter_ee
   flutter:
@@ -21,7 +21,7 @@ dependencies:
 dependency_overrides:
   # We use the latest published versions of the following packages.
   cbl: ^3.2.0
-  cbl_flutter: ^3.1.0
+  cbl_flutter: ^3.1.1
   cbl_flutter_platform_interface: any
   cbl_libcblite_api: any
   cbl_libcblitedart_api: any

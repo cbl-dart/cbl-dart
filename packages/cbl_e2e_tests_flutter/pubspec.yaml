@@ -11,7 +11,7 @@ dependencies:
   cbl: ^3.2.0
   cbl_e2e_tests:
     path: ../cbl_e2e_tests
-  cbl_flutter: ^3.1.0
+  cbl_flutter: ^3.1.1
   cbl_flutter_local:
     path: ../cbl_flutter_local
   collection: ^1.16.0

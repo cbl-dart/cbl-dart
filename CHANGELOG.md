@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-10-07
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_flutter` - `v3.1.1`](#cbl_flutter---v311)
+
+---
+
+#### `cbl_flutter` - `v3.1.1`
+
+ - **FIX**: create CBLTemp directory recursively ([#620](https://github.com/cbl-dart/cbl-dart/issues/620)). ([687068a0](https://github.com/cbl-dart/cbl-dart/commit/687068a08cdb87c405b8369c4ccdf7830ae8eb25))
+
+
 ## 2024-10-02
 
 ### Changes
