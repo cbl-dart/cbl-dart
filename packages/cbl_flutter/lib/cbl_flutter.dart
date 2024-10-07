@@ -37,7 +37,7 @@ Future<InitContext> _context() async {
   // and fallback to the application support directory, if it's not available.
   final tempDir = directories[1] ?? filesDir;
   final clbTempDir = Directory.fromUri(tempDir.uri.resolve('CBLTemp'));
-  await clbTempDir.create();
+  await clbTempDir.create(recursive: true);
 
   return InitContext(
     filesDir: filesDir.path,
