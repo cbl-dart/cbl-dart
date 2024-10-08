@@ -18,7 +18,6 @@ dependencies:
 
 flutter:
   plugin:
-    implements: cbl_flutter
     platforms:
       android:
         package: com.terwesten.gabriel.cbl_flutter_ee

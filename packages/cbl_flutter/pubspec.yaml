@@ -18,3 +18,10 @@ dependencies:
   flutter:
     sdk: flutter
   path_provider: ^2.0.1
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.terwesten.gabriel.cbl_flutter
+        pluginClass: CblFlutterPlugin
