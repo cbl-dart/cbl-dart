@@ -1,3 +1,7 @@
+## 3.2.1
+
+ - **FIX**: add workaround for loading native libraries on older versions of Android ([#624](https://github.com/cbl-dart/cbl-dart/issues/624)). ([72b004ab](https://github.com/cbl-dart/cbl-dart/commit/72b004abb206afd72984bcd6f7689667f4215f3b))
+
 ## 3.2.0
 
  - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))

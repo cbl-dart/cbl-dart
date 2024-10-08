@@ -1,3 +1,7 @@
+## 3.2.1
+
+ - **FIX**: translate errors when setting file logging config ([#623](https://github.com/cbl-dart/cbl-dart/issues/623)). ([1b646e3f](https://github.com/cbl-dart/cbl-dart/commit/1b646e3f31bfe2f719bef811bc690f2b17e2f195))
+
 ## 3.2.0
 
  - **FEAT**: loosen version constraint for `web_socket_channel` to allow `>=2.1.0 <4.0.0` ([#616](https://github.com/cbl-dart/cbl-dart/issues/616)). ([de572588](https://github.com/cbl-dart/cbl-dart/commit/de5725889e5c057bfa729635f886fa403254dcc4))

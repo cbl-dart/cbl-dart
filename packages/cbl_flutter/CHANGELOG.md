@@ -1,3 +1,7 @@
+## 3.1.2
+
+ - **FIX**: add workaround for loading native libraries on older versions of Android ([#624](https://github.com/cbl-dart/cbl-dart/issues/624)). ([72b004ab](https://github.com/cbl-dart/cbl-dart/commit/72b004abb206afd72984bcd6f7689667f4215f3b))
+
 ## 3.1.1
 
  - **FIX**: create CBLTemp directory recursively ([#620](https://github.com/cbl-dart/cbl-dart/issues/620)). ([687068a0](https://github.com/cbl-dart/cbl-dart/commit/687068a08cdb87c405b8369c4ccdf7830ae8eb25))
