@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import '../bindings.dart';
+import '../support/errors.dart';
 import '../support/ffi.dart';
 import 'logger.dart';
 
@@ -165,7 +166,9 @@ final class FileLoggerImpl extends FileLogger {
     }
 
     if (oldConfig != newConfig) {
-      _bindings.setFileLogConfiguration(newConfig);
+      runWithErrorTranslation(() {
+        _bindings.setFileLogConfiguration(newConfig);
+      });
     }
   }
 }
