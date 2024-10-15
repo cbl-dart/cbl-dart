@@ -30,20 +30,8 @@ abstract final class CouchbaseLiteFlutter {
 }
 
 Future<InitContext> _context() async {
-  final directories = await Future.wait([
-    getApplicationSupportDirectory(),
-    if (Platform.isAndroid)
-      getExternalStorageDirectory()
-    else
-      Future<Directory?>.value()
-  ]);
-
-  final filesDir = directories[0]!;
-
-  // For temporary files, we try to use the apps external storage directory
-  // and fallback to the application support directory, if it's not available.
-  final tempDir = directories[1] ?? filesDir;
-  final clbTempDir = Directory.fromUri(tempDir.uri.resolve('CBLTemp'));
+  final filesDir = await getApplicationSupportDirectory();
+  final clbTempDir = Directory.fromUri(filesDir.uri.resolve('CBLTemp'));
   await clbTempDir.create(recursive: true);
 
   return InitContext(
