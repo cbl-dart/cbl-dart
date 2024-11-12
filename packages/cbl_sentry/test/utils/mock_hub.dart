@@ -67,6 +67,14 @@ class MockHub implements Hub {
   Future<void> captureUserFeedback(SentryUserFeedback userFeedback) async {}
 
   @override
+  Future<SentryId> captureFeedback(
+    SentryFeedback feedback, {
+    Hint? hint,
+    ScopeCallback? withScope,
+  }) =>
+      throw UnimplementedError();
+
+  @override
   Hub clone() => this;
 
   @override
