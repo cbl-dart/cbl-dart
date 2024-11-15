@@ -6821,6 +6821,14 @@ class _SymbolAddresses {
   _SymbolAddresses(this._library);
   ffi.Pointer<ffi.NativeFunction<NativeCBL_Release>> get CBL_Release =>
       _library._CBL_ReleasePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeFLDoc_Release>> get FLDoc_Release =>
+      _library._FLDoc_ReleasePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeFLEncoder_Free>> get FLEncoder_Free =>
+      _library._FLEncoder_FreePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeFLValue_Release>> get FLValue_Release =>
+      _library._FLValue_ReleasePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeFLSharedKeys_Release>>
+      get FLSharedKeys_Release => _library._FLSharedKeys_ReleasePtr;
 }
 
 /// Error domains, serving as namespaces for numeric error codes.
@@ -8799,12 +8807,12 @@ typedef DartFLDictIterator_End = void Function(
 /// Be aware that the lookup operations that use these will write into the struct to store
 /// "hints" that speed up future searches.
 final class FLDictKey extends ffi.Struct {
-  external FLSlice _private1;
+  external FLSlice private1;
 
-  external ffi.Pointer<ffi.Void> _private2;
+  external ffi.Pointer<ffi.Void> private2;
 
   @ffi.Uint32()
-  external int _private3;
+  external int private3;
 
   @ffi.Uint32()
   external int private4;

@@ -26,6 +26,16 @@ functions:
   symbol-address:
     include:
       - CBL_Release
+      - FLSharedKeys_Release
+      - FLDoc_Release
+      - FLValue_Release
+      - FLEncoder_Free
+structs:
+  member-rename:
+    FLDictKey:
+      _private1: private1
+      _private2: private2
+      _private3: private3
 compiler-opts:
   - '-I../../native/vendor/cblite/include'
   # CBL uses a macro to define enums which is called CBL_ENUM.

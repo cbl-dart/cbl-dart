@@ -16,7 +16,7 @@ T withGlobalArena<T>(T Function() f) {
   }
 }
 
-final globalFLErrorCode = sliceResultAllocator<Uint32>();
+final globalFLErrorCode = sliceResultAllocator<UnsignedInt>();
 
 final nullFLSlice = sliceResultAllocator<cblite.FLSlice>()
   ..ref.buf = nullptr

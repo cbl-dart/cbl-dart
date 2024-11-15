@@ -19,6 +19,9 @@ functions:
     include:
       - CBLDart_AsyncCallback_Delete
       - CBLDart_FLSliceResult_ReleaseByBuf
+      - CBLDart_KnownSharedKeys_Delete
+      - CBLDart_FLDictIterator_Delete
+      - CBLDart_FLArrayIterator_Delete
 compiler-opts:
   - '-I../../native/couchbase-lite-dart/include'
   - '-I../../native/vendor/cblite/include'
