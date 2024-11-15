@@ -1,0 +1,1190 @@
+format_version: 1.0.0
+files:
+  package:cbl/src/bindings/cblite.dart:
+    used-config:
+      ffi-native: false
+    symbols:
+      CBLCollectionChangeListenerFunction:
+        name: CBLCollectionChangeListenerFunction
+      CBLCollectionDocumentChangeListenerFunction:
+        name: CBLCollectionDocumentChangeListenerFunction
+      CBLConflictHandlerFunction:
+        name: CBLConflictHandlerFunction
+      CBLConflictResolverFunction:
+        name: CBLConflictResolverFunction
+      CBLDatabaseChangeListenerFunction:
+        name: CBLDatabaseChangeListenerFunction
+      CBLDocumentChangeListenerFunction:
+        name: CBLDocumentChangeListenerFunction
+      CBLDocumentPropertyDecryptorFunction:
+        name: CBLDocumentPropertyDecryptorFunction
+      CBLDocumentPropertyEncryptorFunction:
+        name: CBLDocumentPropertyEncryptorFunction
+      CBLDocumentReplicationListenerFunction:
+        name: CBLDocumentReplicationListenerFunction
+      CBLLogCallbackFunction:
+        name: CBLLogCallbackFunction
+      CBLNotificationsReadyCallbackFunction:
+        name: CBLNotificationsReadyCallbackFunction
+      CBLPropertyDecryptorFunction:
+        name: CBLPropertyDecryptorFunction
+      CBLPropertyEncryptorFunction:
+        name: CBLPropertyEncryptorFunction
+      CBLQueryChangeListenerFunction:
+        name: CBLQueryChangeListenerFunction
+      CBLReplicationFilterFunction:
+        name: CBLReplicationFilterFunction
+      CBLReplicatorChangeListenerFunction:
+        name: CBLReplicatorChangeListenerFunction
+      FLSharedKeysReadCallbackFunction:
+        name: FLSharedKeysReadCallbackFunction
+      c:@CBLDefaultConflictResolver:
+        name: CBLDefaultConflictResolver
+      c:@EA@FLCopyFlags:
+        name: FLCopyFlags
+      c:@EA@FLEncoderFormat:
+        name: FLEncoderFormat
+      c:@EA@FLError:
+        name: FLError
+      c:@EA@FLTrust:
+        name: FLTrust
+      c:@EA@FLValueType:
+        name: FLValueType
+      c:@Ea@kCBLConcurrencyControlLastWriteWins@kCBLConcurrencyControlFailOnConflict:
+        name: kCBLConcurrencyControlFailOnConflict
+      c:@Ea@kCBLConcurrencyControlLastWriteWins@kCBLConcurrencyControlLastWriteWins:
+        name: kCBLConcurrencyControlLastWriteWins
+      c:@Ea@kCBLDocumentFlagsDeleted@kCBLDocumentFlagsAccessRemoved:
+        name: kCBLDocumentFlagsAccessRemoved
+      c:@Ea@kCBLDocumentFlagsDeleted@kCBLDocumentFlagsDeleted:
+        name: kCBLDocumentFlagsDeleted
+      c:@Ea@kCBLDomain@kCBLDomain:
+        name: kCBLDomain
+      c:@Ea@kCBLDomain@kCBLFleeceDomain:
+        name: kCBLFleeceDomain
+      c:@Ea@kCBLDomain@kCBLNetworkDomain:
+        name: kCBLNetworkDomain
+      c:@Ea@kCBLDomain@kCBLPOSIXDomain:
+        name: kCBLPOSIXDomain
+      c:@Ea@kCBLDomain@kCBLSQLiteDomain:
+        name: kCBLSQLiteDomain
+      c:@Ea@kCBLDomain@kCBLWebSocketDomain:
+        name: kCBLWebSocketDomain
+      c:@Ea@kCBLEncryptionKeySizeAES256@kCBLEncryptionKeySizeAES256:
+        name: kCBLEncryptionKeySizeAES256
+      c:@Ea@kCBLEncryptionNone@kCBLEncryptionAES256:
+        name: kCBLEncryptionAES256
+      c:@Ea@kCBLEncryptionNone@kCBLEncryptionNone:
+        name: kCBLEncryptionNone
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorAssertionFailed:
+        name: kCBLErrorAssertionFailed
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorBadDocID:
+        name: kCBLErrorBadDocID
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorBadRevisionID:
+        name: kCBLErrorBadRevisionID
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorBusy:
+        name: kCBLErrorBusy
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCantOpenFile:
+        name: kCBLErrorCantOpenFile
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCantUpgradeDatabase:
+        name: kCBLErrorCantUpgradeDatabase
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorConflict:
+        name: kCBLErrorConflict
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCorruptData:
+        name: kCBLErrorCorruptData
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCorruptRevisionData:
+        name: kCBLErrorCorruptRevisionData
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCrypto:
+        name: kCBLErrorCrypto
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorDatabaseTooNew:
+        name: kCBLErrorDatabaseTooNew
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorDatabaseTooOld:
+        name: kCBLErrorDatabaseTooOld
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorIOError:
+        name: kCBLErrorIOError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorInvalidParameter:
+        name: kCBLErrorInvalidParameter
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorInvalidQuery:
+        name: kCBLErrorInvalidQuery
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorInvalidQueryParam:
+        name: kCBLErrorInvalidQueryParam
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorMemoryError:
+        name: kCBLErrorMemoryError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorMissingIndex:
+        name: kCBLErrorMissingIndex
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotADatabaseFile:
+        name: kCBLErrorNotADatabaseFile
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotFound:
+        name: kCBLErrorNotFound
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotInTransaction:
+        name: kCBLErrorNotInTransaction
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotOpen:
+        name: kCBLErrorNotOpen
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotWriteable:
+        name: kCBLErrorNotWriteable
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorRemoteError:
+        name: kCBLErrorRemoteError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorTransactionNotClosed:
+        name: kCBLErrorTransactionNotClosed
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnexpectedError:
+        name: kCBLErrorUnexpectedError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnimplemented:
+        name: kCBLErrorUnimplemented
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnsupported:
+        name: kCBLErrorUnsupported
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnsupportedEncryption:
+        name: kCBLErrorUnsupportedEncryption
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorWrongFormat:
+        name: kCBLErrorWrongFormat
+      c:@Ea@kCBLJSONLanguage@kCBLJSONLanguage:
+        name: kCBLJSONLanguage
+      c:@Ea@kCBLJSONLanguage@kCBLN1QLLanguage:
+        name: kCBLN1QLLanguage
+      c:@Ea@kCBLLogDebug@kCBLLogDebug:
+        name: kCBLLogDebug
+      c:@Ea@kCBLLogDebug@kCBLLogError:
+        name: kCBLLogError
+      c:@Ea@kCBLLogDebug@kCBLLogInfo:
+        name: kCBLLogInfo
+      c:@Ea@kCBLLogDebug@kCBLLogNone:
+        name: kCBLLogNone
+      c:@Ea@kCBLLogDebug@kCBLLogVerbose:
+        name: kCBLLogVerbose
+      c:@Ea@kCBLLogDebug@kCBLLogWarning:
+        name: kCBLLogWarning
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainDatabase:
+        name: kCBLLogDomainDatabase
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainNetwork:
+        name: kCBLLogDomainNetwork
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainQuery:
+        name: kCBLLogDomainQuery
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainReplicator:
+        name: kCBLLogDomainReplicator
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeCompact:
+        name: kCBLMaintenanceTypeCompact
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeFullOptimize:
+        name: kCBLMaintenanceTypeFullOptimize
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeIntegrityCheck:
+        name: kCBLMaintenanceTypeIntegrityCheck
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeOptimize:
+        name: kCBLMaintenanceTypeOptimize
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeReindex:
+        name: kCBLMaintenanceTypeReindex
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrDNSFailure:
+        name: kCBLNetErrDNSFailure
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrInvalidRedirect:
+        name: kCBLNetErrInvalidRedirect
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrInvalidURL:
+        name: kCBLNetErrInvalidURL
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertExpired:
+        name: kCBLNetErrTLSCertExpired
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertNameMismatch:
+        name: kCBLNetErrTLSCertNameMismatch
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertRevoked:
+        name: kCBLNetErrTLSCertRevoked
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertUnknownRoot:
+        name: kCBLNetErrTLSCertUnknownRoot
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertUntrusted:
+        name: kCBLNetErrTLSCertUntrusted
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSClientCertRejected:
+        name: kCBLNetErrTLSClientCertRejected
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSClientCertRequired:
+        name: kCBLNetErrTLSClientCertRequired
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSHandshakeFailed:
+        name: kCBLNetErrTLSHandshakeFailed
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTimeout:
+        name: kCBLNetErrTimeout
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTooManyRedirects:
+        name: kCBLNetErrTooManyRedirects
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrUnknown:
+        name: kCBLNetErrUnknown
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrUnknownHost:
+        name: kCBLNetErrUnknownHost
+      c:@Ea@kCBLProxyHTTP@kCBLProxyHTTP:
+        name: kCBLProxyHTTP
+      c:@Ea@kCBLProxyHTTP@kCBLProxyHTTPS:
+        name: kCBLProxyHTTPS
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorBusy:
+        name: kCBLReplicatorBusy
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorConnecting:
+        name: kCBLReplicatorConnecting
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorIdle:
+        name: kCBLReplicatorIdle
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorOffline:
+        name: kCBLReplicatorOffline
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorStopped:
+        name: kCBLReplicatorStopped
+      c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePull:
+        name: kCBLReplicatorTypePull
+      c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePush:
+        name: kCBLReplicatorTypePush
+      c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePushAndPull:
+        name: kCBLReplicatorTypePushAndPull
+      c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeFromEnd:
+        name: kCBLSeekModeFromEnd
+      c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeFromStart:
+        name: kCBLSeekModeFromStart
+      c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeRelative:
+        name: kCBLSeekModeRelative
+      c:@F@CBLAuth_CreatePassword:
+        name: CBLAuth_CreatePassword
+      c:@F@CBLAuth_CreateSession:
+        name: CBLAuth_CreateSession
+      c:@F@CBLAuth_Free:
+        name: CBLAuth_Free
+      c:@F@CBLBlobReader_Close:
+        name: CBLBlobReader_Close
+      c:@F@CBLBlobReader_Position:
+        name: CBLBlobReader_Position
+      c:@F@CBLBlobReader_Read:
+        name: CBLBlobReader_Read
+      c:@F@CBLBlobReader_Seek:
+        name: CBLBlobReader_Seek
+      c:@F@CBLBlobWriter_Close:
+        name: CBLBlobWriter_Close
+      c:@F@CBLBlobWriter_Create:
+        name: CBLBlobWriter_Create
+      c:@F@CBLBlobWriter_Write:
+        name: CBLBlobWriter_Write
+      c:@F@CBLBlob_Content:
+        name: CBLBlob_Content
+      c:@F@CBLBlob_ContentType:
+        name: CBLBlob_ContentType
+      c:@F@CBLBlob_CreateJSON:
+        name: CBLBlob_CreateJSON
+      c:@F@CBLBlob_CreateWithData:
+        name: CBLBlob_CreateWithData
+      c:@F@CBLBlob_CreateWithStream:
+        name: CBLBlob_CreateWithStream
+      c:@F@CBLBlob_Digest:
+        name: CBLBlob_Digest
+      c:@F@CBLBlob_Equals:
+        name: CBLBlob_Equals
+      c:@F@CBLBlob_Length:
+        name: CBLBlob_Length
+      c:@F@CBLBlob_OpenContentStream:
+        name: CBLBlob_OpenContentStream
+      c:@F@CBLBlob_Properties:
+        name: CBLBlob_Properties
+      c:@F@CBLCollection_AddChangeListener:
+        name: CBLCollection_AddChangeListener
+      c:@F@CBLCollection_AddDocumentChangeListener:
+        name: CBLCollection_AddDocumentChangeListener
+      c:@F@CBLCollection_Count:
+        name: CBLCollection_Count
+      c:@F@CBLCollection_CreateFullTextIndex:
+        name: CBLCollection_CreateFullTextIndex
+      c:@F@CBLCollection_CreateValueIndex:
+        name: CBLCollection_CreateValueIndex
+      c:@F@CBLCollection_DeleteDocument:
+        name: CBLCollection_DeleteDocument
+      c:@F@CBLCollection_DeleteDocumentWithConcurrencyControl:
+        name: CBLCollection_DeleteDocumentWithConcurrencyControl
+      c:@F@CBLCollection_DeleteIndex:
+        name: CBLCollection_DeleteIndex
+      c:@F@CBLCollection_GetDocument:
+        name: CBLCollection_GetDocument
+      c:@F@CBLCollection_GetDocumentExpiration:
+        name: CBLCollection_GetDocumentExpiration
+      c:@F@CBLCollection_GetIndexNames:
+        name: CBLCollection_GetIndexNames
+      c:@F@CBLCollection_GetMutableDocument:
+        name: CBLCollection_GetMutableDocument
+      c:@F@CBLCollection_Name:
+        name: CBLCollection_Name
+      c:@F@CBLCollection_PurgeDocument:
+        name: CBLCollection_PurgeDocument
+      c:@F@CBLCollection_PurgeDocumentByID:
+        name: CBLCollection_PurgeDocumentByID
+      c:@F@CBLCollection_SaveDocument:
+        name: CBLCollection_SaveDocument
+      c:@F@CBLCollection_SaveDocumentWithConcurrencyControl:
+        name: CBLCollection_SaveDocumentWithConcurrencyControl
+      c:@F@CBLCollection_SaveDocumentWithConflictHandler:
+        name: CBLCollection_SaveDocumentWithConflictHandler
+      c:@F@CBLCollection_Scope:
+        name: CBLCollection_Scope
+      c:@F@CBLCollection_SetDocumentExpiration:
+        name: CBLCollection_SetDocumentExpiration
+      c:@F@CBLDatabaseConfiguration_Default:
+        name: CBLDatabaseConfiguration_Default
+      c:@F@CBLDatabase_AddChangeListener:
+        name: CBLDatabase_AddChangeListener
+      c:@F@CBLDatabase_AddDocumentChangeListener:
+        name: CBLDatabase_AddDocumentChangeListener
+      c:@F@CBLDatabase_BeginTransaction:
+        name: CBLDatabase_BeginTransaction
+      c:@F@CBLDatabase_BufferNotifications:
+        name: CBLDatabase_BufferNotifications
+      c:@F@CBLDatabase_ChangeEncryptionKey:
+        name: CBLDatabase_ChangeEncryptionKey
+      c:@F@CBLDatabase_Close:
+        name: CBLDatabase_Close
+      c:@F@CBLDatabase_Collection:
+        name: CBLDatabase_Collection
+      c:@F@CBLDatabase_CollectionNames:
+        name: CBLDatabase_CollectionNames
+      c:@F@CBLDatabase_Config:
+        name: CBLDatabase_Config
+      c:@F@CBLDatabase_Count:
+        name: CBLDatabase_Count
+      c:@F@CBLDatabase_CreateCollection:
+        name: CBLDatabase_CreateCollection
+      c:@F@CBLDatabase_CreateFullTextIndex:
+        name: CBLDatabase_CreateFullTextIndex
+      c:@F@CBLDatabase_CreateQuery:
+        name: CBLDatabase_CreateQuery
+      c:@F@CBLDatabase_CreateValueIndex:
+        name: CBLDatabase_CreateValueIndex
+      c:@F@CBLDatabase_DefaultCollection:
+        name: CBLDatabase_DefaultCollection
+      c:@F@CBLDatabase_DefaultScope:
+        name: CBLDatabase_DefaultScope
+      c:@F@CBLDatabase_Delete:
+        name: CBLDatabase_Delete
+      c:@F@CBLDatabase_DeleteCollection:
+        name: CBLDatabase_DeleteCollection
+      c:@F@CBLDatabase_DeleteDocument:
+        name: CBLDatabase_DeleteDocument
+      c:@F@CBLDatabase_DeleteDocumentWithConcurrencyControl:
+        name: CBLDatabase_DeleteDocumentWithConcurrencyControl
+      c:@F@CBLDatabase_DeleteIndex:
+        name: CBLDatabase_DeleteIndex
+      c:@F@CBLDatabase_EndTransaction:
+        name: CBLDatabase_EndTransaction
+      c:@F@CBLDatabase_GetBlob:
+        name: CBLDatabase_GetBlob
+      c:@F@CBLDatabase_GetDocument:
+        name: CBLDatabase_GetDocument
+      c:@F@CBLDatabase_GetDocumentExpiration:
+        name: CBLDatabase_GetDocumentExpiration
+      c:@F@CBLDatabase_GetIndexNames:
+        name: CBLDatabase_GetIndexNames
+      c:@F@CBLDatabase_GetMutableDocument:
+        name: CBLDatabase_GetMutableDocument
+      c:@F@CBLDatabase_Name:
+        name: CBLDatabase_Name
+      c:@F@CBLDatabase_Open:
+        name: CBLDatabase_Open
+      c:@F@CBLDatabase_Path:
+        name: CBLDatabase_Path
+      c:@F@CBLDatabase_PerformMaintenance:
+        name: CBLDatabase_PerformMaintenance
+      c:@F@CBLDatabase_PurgeDocument:
+        name: CBLDatabase_PurgeDocument
+      c:@F@CBLDatabase_PurgeDocumentByID:
+        name: CBLDatabase_PurgeDocumentByID
+      c:@F@CBLDatabase_SaveBlob:
+        name: CBLDatabase_SaveBlob
+      c:@F@CBLDatabase_SaveDocument:
+        name: CBLDatabase_SaveDocument
+      c:@F@CBLDatabase_SaveDocumentWithConcurrencyControl:
+        name: CBLDatabase_SaveDocumentWithConcurrencyControl
+      c:@F@CBLDatabase_SaveDocumentWithConflictHandler:
+        name: CBLDatabase_SaveDocumentWithConflictHandler
+      c:@F@CBLDatabase_Scope:
+        name: CBLDatabase_Scope
+      c:@F@CBLDatabase_ScopeNames:
+        name: CBLDatabase_ScopeNames
+      c:@F@CBLDatabase_SendNotifications:
+        name: CBLDatabase_SendNotifications
+      c:@F@CBLDatabase_SetDocumentExpiration:
+        name: CBLDatabase_SetDocumentExpiration
+      c:@F@CBLDocument_Collection:
+        name: CBLDocument_Collection
+      c:@F@CBLDocument_Create:
+        name: CBLDocument_Create
+      c:@F@CBLDocument_CreateJSON:
+        name: CBLDocument_CreateJSON
+      c:@F@CBLDocument_CreateWithID:
+        name: CBLDocument_CreateWithID
+      c:@F@CBLDocument_ID:
+        name: CBLDocument_ID
+      c:@F@CBLDocument_MutableCopy:
+        name: CBLDocument_MutableCopy
+      c:@F@CBLDocument_MutableProperties:
+        name: CBLDocument_MutableProperties
+      c:@F@CBLDocument_Properties:
+        name: CBLDocument_Properties
+      c:@F@CBLDocument_RevisionID:
+        name: CBLDocument_RevisionID
+      c:@F@CBLDocument_Sequence:
+        name: CBLDocument_Sequence
+      c:@F@CBLDocument_SetJSON:
+        name: CBLDocument_SetJSON
+      c:@F@CBLDocument_SetProperties:
+        name: CBLDocument_SetProperties
+      c:@F@CBLEncryptable_CreateWithArray:
+        name: CBLEncryptable_CreateWithArray
+      c:@F@CBLEncryptable_CreateWithBool:
+        name: CBLEncryptable_CreateWithBool
+      c:@F@CBLEncryptable_CreateWithDict:
+        name: CBLEncryptable_CreateWithDict
+      c:@F@CBLEncryptable_CreateWithDouble:
+        name: CBLEncryptable_CreateWithDouble
+      c:@F@CBLEncryptable_CreateWithFloat:
+        name: CBLEncryptable_CreateWithFloat
+      c:@F@CBLEncryptable_CreateWithInt:
+        name: CBLEncryptable_CreateWithInt
+      c:@F@CBLEncryptable_CreateWithNull:
+        name: CBLEncryptable_CreateWithNull
+      c:@F@CBLEncryptable_CreateWithString:
+        name: CBLEncryptable_CreateWithString
+      c:@F@CBLEncryptable_CreateWithUInt:
+        name: CBLEncryptable_CreateWithUInt
+      c:@F@CBLEncryptable_CreateWithValue:
+        name: CBLEncryptable_CreateWithValue
+      c:@F@CBLEncryptable_Properties:
+        name: CBLEncryptable_Properties
+      c:@F@CBLEncryptable_Value:
+        name: CBLEncryptable_Value
+      c:@F@CBLEncryptionKey_FromPassword:
+        name: CBLEncryptionKey_FromPassword
+      c:@F@CBLEncryptionKey_FromPasswordOld:
+        name: CBLEncryptionKey_FromPasswordOld
+      c:@F@CBLEndpoint_CreateWithLocalDB:
+        name: CBLEndpoint_CreateWithLocalDB
+      c:@F@CBLEndpoint_CreateWithURL:
+        name: CBLEndpoint_CreateWithURL
+      c:@F@CBLEndpoint_Free:
+        name: CBLEndpoint_Free
+      c:@F@CBLError_Message:
+        name: CBLError_Message
+      c:@F@CBLListener_Remove:
+        name: CBLListener_Remove
+      c:@F@CBLLog_Callback:
+        name: CBLLog_Callback
+      c:@F@CBLLog_CallbackLevel:
+        name: CBLLog_CallbackLevel
+      c:@F@CBLLog_ConsoleLevel:
+        name: CBLLog_ConsoleLevel
+      c:@F@CBLLog_FileConfig:
+        name: CBLLog_FileConfig
+      c:@F@CBLLog_SetCallback:
+        name: CBLLog_SetCallback
+      c:@F@CBLLog_SetCallbackLevel:
+        name: CBLLog_SetCallbackLevel
+      c:@F@CBLLog_SetConsoleLevel:
+        name: CBLLog_SetConsoleLevel
+      c:@F@CBLLog_SetFileConfig:
+        name: CBLLog_SetFileConfig
+      c:@F@CBLQuery_AddChangeListener:
+        name: CBLQuery_AddChangeListener
+      c:@F@CBLQuery_ColumnCount:
+        name: CBLQuery_ColumnCount
+      c:@F@CBLQuery_ColumnName:
+        name: CBLQuery_ColumnName
+      c:@F@CBLQuery_CopyCurrentResults:
+        name: CBLQuery_CopyCurrentResults
+      c:@F@CBLQuery_Execute:
+        name: CBLQuery_Execute
+      c:@F@CBLQuery_Explain:
+        name: CBLQuery_Explain
+      c:@F@CBLQuery_Parameters:
+        name: CBLQuery_Parameters
+      c:@F@CBLQuery_SetParameters:
+        name: CBLQuery_SetParameters
+      c:@F@CBLReplicator_AddChangeListener:
+        name: CBLReplicator_AddChangeListener
+      c:@F@CBLReplicator_AddDocumentReplicationListener:
+        name: CBLReplicator_AddDocumentReplicationListener
+      c:@F@CBLReplicator_Config:
+        name: CBLReplicator_Config
+      c:@F@CBLReplicator_Create:
+        name: CBLReplicator_Create
+      c:@F@CBLReplicator_IsDocumentPending:
+        name: CBLReplicator_IsDocumentPending
+      c:@F@CBLReplicator_IsDocumentPending2:
+        name: CBLReplicator_IsDocumentPending2
+      c:@F@CBLReplicator_PendingDocumentIDs:
+        name: CBLReplicator_PendingDocumentIDs
+      c:@F@CBLReplicator_PendingDocumentIDs2:
+        name: CBLReplicator_PendingDocumentIDs2
+      c:@F@CBLReplicator_SetHostReachable:
+        name: CBLReplicator_SetHostReachable
+      c:@F@CBLReplicator_SetSuspended:
+        name: CBLReplicator_SetSuspended
+      c:@F@CBLReplicator_Start:
+        name: CBLReplicator_Start
+      c:@F@CBLReplicator_Status:
+        name: CBLReplicator_Status
+      c:@F@CBLReplicator_Stop:
+        name: CBLReplicator_Stop
+      c:@F@CBLResultSet_GetQuery:
+        name: CBLResultSet_GetQuery
+      c:@F@CBLResultSet_Next:
+        name: CBLResultSet_Next
+      c:@F@CBLResultSet_ResultArray:
+        name: CBLResultSet_ResultArray
+      c:@F@CBLResultSet_ResultDict:
+        name: CBLResultSet_ResultDict
+      c:@F@CBLResultSet_ValueAtIndex:
+        name: CBLResultSet_ValueAtIndex
+      c:@F@CBLResultSet_ValueForKey:
+        name: CBLResultSet_ValueForKey
+      c:@F@CBLScope_Collection:
+        name: CBLScope_Collection
+      c:@F@CBLScope_CollectionNames:
+        name: CBLScope_CollectionNames
+      c:@F@CBLScope_Name:
+        name: CBLScope_Name
+      c:@F@CBL_CopyDatabase:
+        name: CBL_CopyDatabase
+      c:@F@CBL_DatabaseExists:
+        name: CBL_DatabaseExists
+      c:@F@CBL_DeleteDatabase:
+        name: CBL_DeleteDatabase
+      c:@F@CBL_DumpInstances:
+        name: CBL_DumpInstances
+      c:@F@CBL_InstanceCount:
+        name: CBL_InstanceCount
+      c:@F@CBL_Log:
+        name: CBL_Log
+      c:@F@CBL_LogMessage:
+        name: CBL_LogMessage
+      c:@F@CBL_Now:
+        name: CBL_Now
+      c:@F@CBL_Release:
+        name: CBL_Release
+      c:@F@CBL_Retain:
+        name: CBL_Retain
+      c:@F@FLApplyJSONDelta:
+        name: FLApplyJSONDelta
+      c:@F@FLArrayIterator_Begin:
+        name: FLArrayIterator_Begin
+      c:@F@FLArrayIterator_GetCount:
+        name: FLArrayIterator_GetCount
+      c:@F@FLArrayIterator_GetValue:
+        name: FLArrayIterator_GetValue
+      c:@F@FLArrayIterator_GetValueAt:
+        name: FLArrayIterator_GetValueAt
+      c:@F@FLArrayIterator_Next:
+        name: FLArrayIterator_Next
+      c:@F@FLArray_AsMutable:
+        name: FLArray_AsMutable
+      c:@F@FLArray_Count:
+        name: FLArray_Count
+      c:@F@FLArray_Get:
+        name: FLArray_Get
+      c:@F@FLArray_IsEmpty:
+        name: FLArray_IsEmpty
+      c:@F@FLArray_MutableCopy:
+        name: FLArray_MutableCopy
+      c:@F@FLCreateJSONDelta:
+        name: FLCreateJSONDelta
+      c:@F@FLData_ConvertJSON:
+        name: FLData_ConvertJSON
+      c:@F@FLData_Dump:
+        name: FLData_Dump
+      c:@F@FLDeepIterator_Free:
+        name: FLDeepIterator_Free
+      c:@F@FLDeepIterator_GetDepth:
+        name: FLDeepIterator_GetDepth
+      c:@F@FLDeepIterator_GetIndex:
+        name: FLDeepIterator_GetIndex
+      c:@F@FLDeepIterator_GetJSONPointer:
+        name: FLDeepIterator_GetJSONPointer
+      c:@F@FLDeepIterator_GetKey:
+        name: FLDeepIterator_GetKey
+      c:@F@FLDeepIterator_GetParent:
+        name: FLDeepIterator_GetParent
+      c:@F@FLDeepIterator_GetPath:
+        name: FLDeepIterator_GetPath
+      c:@F@FLDeepIterator_GetPathString:
+        name: FLDeepIterator_GetPathString
+      c:@F@FLDeepIterator_GetValue:
+        name: FLDeepIterator_GetValue
+      c:@F@FLDeepIterator_New:
+        name: FLDeepIterator_New
+      c:@F@FLDeepIterator_Next:
+        name: FLDeepIterator_Next
+      c:@F@FLDeepIterator_SkipChildren:
+        name: FLDeepIterator_SkipChildren
+      c:@F@FLDictIterator_Begin:
+        name: FLDictIterator_Begin
+      c:@F@FLDictIterator_End:
+        name: FLDictIterator_End
+      c:@F@FLDictIterator_GetCount:
+        name: FLDictIterator_GetCount
+      c:@F@FLDictIterator_GetKey:
+        name: FLDictIterator_GetKey
+      c:@F@FLDictIterator_GetKeyString:
+        name: FLDictIterator_GetKeyString
+      c:@F@FLDictIterator_GetValue:
+        name: FLDictIterator_GetValue
+      c:@F@FLDictIterator_Next:
+        name: FLDictIterator_Next
+      c:@F@FLDictKey_GetString:
+        name: FLDictKey_GetString
+      c:@F@FLDictKey_Init:
+        name: FLDictKey_Init
+      c:@F@FLDict_AsMutable:
+        name: FLDict_AsMutable
+      c:@F@FLDict_Count:
+        name: FLDict_Count
+      c:@F@FLDict_Get:
+        name: FLDict_Get
+      c:@F@FLDict_GetBlob:
+        name: FLDict_GetBlob
+      c:@F@FLDict_GetEncryptableValue:
+        name: FLDict_GetEncryptableValue
+      c:@F@FLDict_GetWithKey:
+        name: FLDict_GetWithKey
+      c:@F@FLDict_IsBlob:
+        name: FLDict_IsBlob
+      c:@F@FLDict_IsEmpty:
+        name: FLDict_IsEmpty
+      c:@F@FLDict_IsEncryptableValue:
+        name: FLDict_IsEncryptableValue
+      c:@F@FLDict_MutableCopy:
+        name: FLDict_MutableCopy
+      c:@F@FLDoc_FromJSON:
+        name: FLDoc_FromJSON
+      c:@F@FLDoc_FromResultData:
+        name: FLDoc_FromResultData
+      c:@F@FLDoc_GetAllocedData:
+        name: FLDoc_GetAllocedData
+      c:@F@FLDoc_GetAssociated:
+        name: FLDoc_GetAssociated
+      c:@F@FLDoc_GetData:
+        name: FLDoc_GetData
+      c:@F@FLDoc_GetRoot:
+        name: FLDoc_GetRoot
+      c:@F@FLDoc_GetSharedKeys:
+        name: FLDoc_GetSharedKeys
+      c:@F@FLDoc_Release:
+        name: FLDoc_Release
+      c:@F@FLDoc_Retain:
+        name: FLDoc_Retain
+      c:@F@FLDoc_SetAssociated:
+        name: FLDoc_SetAssociated
+      c:@F@FLDump:
+        name: FLDump
+      c:@F@FLDumpData:
+        name: FLDumpData
+      c:@F@FLEncodeApplyingJSONDelta:
+        name: FLEncodeApplyingJSONDelta
+      c:@F@FLEncodeJSONDelta:
+        name: FLEncodeJSONDelta
+      c:@F@FLEncoder_Amend:
+        name: FLEncoder_Amend
+      c:@F@FLEncoder_BeginArray:
+        name: FLEncoder_BeginArray
+      c:@F@FLEncoder_BeginDict:
+        name: FLEncoder_BeginDict
+      c:@F@FLEncoder_BytesWritten:
+        name: FLEncoder_BytesWritten
+      c:@F@FLEncoder_ConvertJSON:
+        name: FLEncoder_ConvertJSON
+      c:@F@FLEncoder_EndArray:
+        name: FLEncoder_EndArray
+      c:@F@FLEncoder_EndDict:
+        name: FLEncoder_EndDict
+      c:@F@FLEncoder_Finish:
+        name: FLEncoder_Finish
+      c:@F@FLEncoder_FinishDoc:
+        name: FLEncoder_FinishDoc
+      c:@F@FLEncoder_FinishItem:
+        name: FLEncoder_FinishItem
+      c:@F@FLEncoder_Free:
+        name: FLEncoder_Free
+      c:@F@FLEncoder_GetBase:
+        name: FLEncoder_GetBase
+      c:@F@FLEncoder_GetError:
+        name: FLEncoder_GetError
+      c:@F@FLEncoder_GetErrorMessage:
+        name: FLEncoder_GetErrorMessage
+      c:@F@FLEncoder_GetExtraInfo:
+        name: FLEncoder_GetExtraInfo
+      c:@F@FLEncoder_GetNextWritePos:
+        name: FLEncoder_GetNextWritePos
+      c:@F@FLEncoder_LastValueWritten:
+        name: FLEncoder_LastValueWritten
+      c:@F@FLEncoder_New:
+        name: FLEncoder_New
+      c:@F@FLEncoder_NewWithOptions:
+        name: FLEncoder_NewWithOptions
+      c:@F@FLEncoder_NewWritingToFile:
+        name: FLEncoder_NewWritingToFile
+      c:@F@FLEncoder_Reset:
+        name: FLEncoder_Reset
+      c:@F@FLEncoder_SetExtraInfo:
+        name: FLEncoder_SetExtraInfo
+      c:@F@FLEncoder_SetSharedKeys:
+        name: FLEncoder_SetSharedKeys
+      c:@F@FLEncoder_Snip:
+        name: FLEncoder_Snip
+      c:@F@FLEncoder_SuppressTrailer:
+        name: FLEncoder_SuppressTrailer
+      c:@F@FLEncoder_WriteBool:
+        name: FLEncoder_WriteBool
+      c:@F@FLEncoder_WriteData:
+        name: FLEncoder_WriteData
+      c:@F@FLEncoder_WriteDateString:
+        name: FLEncoder_WriteDateString
+      c:@F@FLEncoder_WriteDouble:
+        name: FLEncoder_WriteDouble
+      c:@F@FLEncoder_WriteFloat:
+        name: FLEncoder_WriteFloat
+      c:@F@FLEncoder_WriteInt:
+        name: FLEncoder_WriteInt
+      c:@F@FLEncoder_WriteKey:
+        name: FLEncoder_WriteKey
+      c:@F@FLEncoder_WriteKeyValue:
+        name: FLEncoder_WriteKeyValue
+      c:@F@FLEncoder_WriteNull:
+        name: FLEncoder_WriteNull
+      c:@F@FLEncoder_WriteRaw:
+        name: FLEncoder_WriteRaw
+      c:@F@FLEncoder_WriteString:
+        name: FLEncoder_WriteString
+      c:@F@FLEncoder_WriteUInt:
+        name: FLEncoder_WriteUInt
+      c:@F@FLEncoder_WriteUndefined:
+        name: FLEncoder_WriteUndefined
+      c:@F@FLEncoder_WriteValue:
+        name: FLEncoder_WriteValue
+      c:@F@FLEncoder_WriteValueAgain:
+        name: FLEncoder_WriteValueAgain
+      c:@F@FLJSON5_ToJSON:
+        name: FLJSON5_ToJSON
+      c:@F@FLJSONEncoder_NextDocument:
+        name: FLJSONEncoder_NextDocument
+      c:@F@FLKeyPath_Equals:
+        name: FLKeyPath_Equals
+      c:@F@FLKeyPath_Eval:
+        name: FLKeyPath_Eval
+      c:@F@FLKeyPath_EvalOnce:
+        name: FLKeyPath_EvalOnce
+      c:@F@FLKeyPath_Free:
+        name: FLKeyPath_Free
+      c:@F@FLKeyPath_GetElement:
+        name: FLKeyPath_GetElement
+      c:@F@FLKeyPath_New:
+        name: FLKeyPath_New
+      c:@F@FLKeyPath_ToString:
+        name: FLKeyPath_ToString
+      c:@F@FLMutableArray_Append:
+        name: FLMutableArray_Append
+      c:@F@FLMutableArray_GetMutableArray:
+        name: FLMutableArray_GetMutableArray
+      c:@F@FLMutableArray_GetMutableDict:
+        name: FLMutableArray_GetMutableDict
+      c:@F@FLMutableArray_GetSource:
+        name: FLMutableArray_GetSource
+      c:@F@FLMutableArray_Insert:
+        name: FLMutableArray_Insert
+      c:@F@FLMutableArray_IsChanged:
+        name: FLMutableArray_IsChanged
+      c:@F@FLMutableArray_New:
+        name: FLMutableArray_New
+      c:@F@FLMutableArray_NewFromJSON:
+        name: FLMutableArray_NewFromJSON
+      c:@F@FLMutableArray_Remove:
+        name: FLMutableArray_Remove
+      c:@F@FLMutableArray_Resize:
+        name: FLMutableArray_Resize
+      c:@F@FLMutableArray_Set:
+        name: FLMutableArray_Set
+      c:@F@FLMutableArray_SetChanged:
+        name: FLMutableArray_SetChanged
+      c:@F@FLMutableDict_GetMutableArray:
+        name: FLMutableDict_GetMutableArray
+      c:@F@FLMutableDict_GetMutableDict:
+        name: FLMutableDict_GetMutableDict
+      c:@F@FLMutableDict_GetSource:
+        name: FLMutableDict_GetSource
+      c:@F@FLMutableDict_IsChanged:
+        name: FLMutableDict_IsChanged
+      c:@F@FLMutableDict_New:
+        name: FLMutableDict_New
+      c:@F@FLMutableDict_NewFromJSON:
+        name: FLMutableDict_NewFromJSON
+      c:@F@FLMutableDict_Remove:
+        name: FLMutableDict_Remove
+      c:@F@FLMutableDict_RemoveAll:
+        name: FLMutableDict_RemoveAll
+      c:@F@FLMutableDict_Set:
+        name: FLMutableDict_Set
+      c:@F@FLMutableDict_SetChanged:
+        name: FLMutableDict_SetChanged
+      c:@F@FLSharedKeyScope_Free:
+        name: FLSharedKeyScope_Free
+      c:@F@FLSharedKeyScope_WithRange:
+        name: FLSharedKeyScope_WithRange
+      c:@F@FLSharedKeys_Count:
+        name: FLSharedKeys_Count
+      c:@F@FLSharedKeys_Decode:
+        name: FLSharedKeys_Decode
+      c:@F@FLSharedKeys_Encode:
+        name: FLSharedKeys_Encode
+      c:@F@FLSharedKeys_GetStateData:
+        name: FLSharedKeys_GetStateData
+      c:@F@FLSharedKeys_LoadState:
+        name: FLSharedKeys_LoadState
+      c:@F@FLSharedKeys_LoadStateData:
+        name: FLSharedKeys_LoadStateData
+      c:@F@FLSharedKeys_New:
+        name: FLSharedKeys_New
+      c:@F@FLSharedKeys_NewWithRead:
+        name: FLSharedKeys_NewWithRead
+      c:@F@FLSharedKeys_Release:
+        name: FLSharedKeys_Release
+      c:@F@FLSharedKeys_Retain:
+        name: FLSharedKeys_Retain
+      c:@F@FLSharedKeys_RevertToCount:
+        name: FLSharedKeys_RevertToCount
+      c:@F@FLSharedKeys_WriteState:
+        name: FLSharedKeys_WriteState
+      c:@F@FLSliceResult_New:
+        name: FLSliceResult_New
+      c:@F@FLSlice_Compare:
+        name: FLSlice_Compare
+      c:@F@FLSlice_Copy:
+        name: FLSlice_Copy
+      c:@F@FLSlice_Equal:
+        name: FLSlice_Equal
+      c:@F@FLSlice_Hash:
+        name: FLSlice_Hash
+      c:@F@FLSlice_ToCString:
+        name: FLSlice_ToCString
+      c:@F@FLSlot_SetBlob:
+        name: FLSlot_SetBlob
+      c:@F@FLSlot_SetBool:
+        name: FLSlot_SetBool
+      c:@F@FLSlot_SetData:
+        name: FLSlot_SetData
+      c:@F@FLSlot_SetDouble:
+        name: FLSlot_SetDouble
+      c:@F@FLSlot_SetEncryptableValue:
+        name: FLSlot_SetEncryptableValue
+      c:@F@FLSlot_SetFloat:
+        name: FLSlot_SetFloat
+      c:@F@FLSlot_SetInt:
+        name: FLSlot_SetInt
+      c:@F@FLSlot_SetNull:
+        name: FLSlot_SetNull
+      c:@F@FLSlot_SetString:
+        name: FLSlot_SetString
+      c:@F@FLSlot_SetUInt:
+        name: FLSlot_SetUInt
+      c:@F@FLSlot_SetValue:
+        name: FLSlot_SetValue
+      c:@F@FLTimestamp_FromString:
+        name: FLTimestamp_FromString
+      c:@F@FLTimestamp_Now:
+        name: FLTimestamp_Now
+      c:@F@FLTimestamp_ToString:
+        name: FLTimestamp_ToString
+      c:@F@FLValue_AsArray:
+        name: FLValue_AsArray
+      c:@F@FLValue_AsBool:
+        name: FLValue_AsBool
+      c:@F@FLValue_AsData:
+        name: FLValue_AsData
+      c:@F@FLValue_AsDict:
+        name: FLValue_AsDict
+      c:@F@FLValue_AsDouble:
+        name: FLValue_AsDouble
+      c:@F@FLValue_AsFloat:
+        name: FLValue_AsFloat
+      c:@F@FLValue_AsInt:
+        name: FLValue_AsInt
+      c:@F@FLValue_AsString:
+        name: FLValue_AsString
+      c:@F@FLValue_AsTimestamp:
+        name: FLValue_AsTimestamp
+      c:@F@FLValue_AsUnsigned:
+        name: FLValue_AsUnsigned
+      c:@F@FLValue_FindDoc:
+        name: FLValue_FindDoc
+      c:@F@FLValue_FromData:
+        name: FLValue_FromData
+      c:@F@FLValue_GetType:
+        name: FLValue_GetType
+      c:@F@FLValue_IsDouble:
+        name: FLValue_IsDouble
+      c:@F@FLValue_IsEqual:
+        name: FLValue_IsEqual
+      c:@F@FLValue_IsInteger:
+        name: FLValue_IsInteger
+      c:@F@FLValue_IsMutable:
+        name: FLValue_IsMutable
+      c:@F@FLValue_IsUnsigned:
+        name: FLValue_IsUnsigned
+      c:@F@FLValue_NewData:
+        name: FLValue_NewData
+      c:@F@FLValue_NewString:
+        name: FLValue_NewString
+      c:@F@FLValue_Release:
+        name: FLValue_Release
+      c:@F@FLValue_Retain:
+        name: FLValue_Retain
+      c:@F@FLValue_ToJSON:
+        name: FLValue_ToJSON
+      c:@F@FLValue_ToJSON5:
+        name: FLValue_ToJSON5
+      c:@F@FLValue_ToJSONX:
+        name: FLValue_ToJSONX
+      c:@F@FLValue_ToString:
+        name: FLValue_ToString
+      c:@F@FL_WipeMemory:
+        name: FL_WipeMemory
+      c:@F@_FLBuf_Release:
+        name: FLBuf_Release
+      c:@F@_FLBuf_Retain:
+        name: FLBuf_Retain
+      c:@S@CBLAuthenticator:
+        name: CBLAuthenticator
+      c:@S@CBLBlob:
+        name: CBLBlob
+      c:@S@CBLBlobReadStream:
+        name: CBLBlobReadStream
+      c:@S@CBLBlobWriteStream:
+        name: CBLBlobWriteStream
+      c:@S@CBLCollection:
+        name: CBLCollection
+      c:@S@CBLDatabase:
+        name: CBLDatabase
+      c:@S@CBLDocument:
+        name: CBLDocument
+      c:@S@CBLEncryptable:
+        name: CBLEncryptable
+      c:@S@CBLEndpoint:
+        name: CBLEndpoint
+      c:@S@CBLListenerToken:
+        name: CBLListenerToken
+      c:@S@CBLQuery:
+        name: CBLQuery
+      c:@S@CBLRefCounted:
+        name: CBLRefCounted
+      c:@S@CBLReplicator:
+        name: CBLReplicator
+      c:@S@CBLResultSet:
+        name: CBLResultSet
+      c:@S@CBLScope:
+        name: CBLScope
+      c:@S@FLSlice:
+        name: FLSlice
+      c:@S@FLSliceResult:
+        name: FLSliceResult
+      c:@S@_FLArray:
+        name: _FLArray
+      c:@S@_FLDeepIterator:
+        name: _FLDeepIterator
+      c:@S@_FLDict:
+        name: _FLDict
+      c:@S@_FLDoc:
+        name: _FLDoc
+      c:@S@_FLEncoder:
+        name: _FLEncoder
+      c:@S@_FLKeyPath:
+        name: _FLKeyPath
+      c:@S@_FLSharedKeyScope:
+        name: _FLSharedKeyScope
+      c:@S@_FLSharedKeys:
+        name: _FLSharedKeys
+      c:@S@_FLSlot:
+        name: _FLSlot
+      c:@S@_FLValue:
+        name: _FLValue
+      c:@S@__sFILE:
+        name: __sFILE
+      c:@S@__sFILEX:
+        name: __sFILEX
+      c:@S@__sbuf:
+        name: __sbuf
+      c:@SA@CBLCollectionChange:
+        name: CBLCollectionChange
+      c:@SA@CBLDatabaseConfiguration:
+        name: CBLDatabaseConfiguration
+      c:@SA@CBLDocumentChange:
+        name: CBLDocumentChange
+      c:@SA@CBLEncryptionKey:
+        name: CBLEncryptionKey
+      c:@SA@CBLError:
+        name: CBLError
+      c:@SA@CBLFullTextIndexConfiguration:
+        name: CBLFullTextIndexConfiguration
+      c:@SA@CBLLogFileConfiguration:
+        name: CBLLogFileConfiguration
+      c:@SA@CBLProxySettings:
+        name: CBLProxySettings
+      c:@SA@CBLReplicatedDocument:
+        name: CBLReplicatedDocument
+      c:@SA@CBLReplicationCollection:
+        name: CBLReplicationCollection
+      c:@SA@CBLReplicatorConfiguration:
+        name: CBLReplicatorConfiguration
+      c:@SA@CBLReplicatorProgress:
+        name: CBLReplicatorProgress
+      c:@SA@CBLReplicatorStatus:
+        name: CBLReplicatorStatus
+      c:@SA@CBLValueIndexConfiguration:
+        name: CBLValueIndexConfiguration
+      c:@SA@FLArrayIterator:
+        name: FLArrayIterator
+      c:@SA@FLDictIterator:
+        name: FLDictIterator
+      c:@SA@FLDictKey:
+        name: FLDictKey
+      c:@SA@FLPathComponent:
+        name: FLPathComponent
+      c:@kCBLAuthDefaultCookieName:
+        name: kCBLAuthDefaultCookieName
+      c:@kCBLBlobContentTypeProperty:
+        name: kCBLBlobContentTypeProperty
+      c:@kCBLBlobDigestProperty:
+        name: kCBLBlobDigestProperty
+      c:@kCBLBlobLengthProperty:
+        name: kCBLBlobLengthProperty
+      c:@kCBLBlobType:
+        name: kCBLBlobType
+      c:@kCBLDefaultCollectionName:
+        name: kCBLDefaultCollectionName
+      c:@kCBLDefaultFullTextIndexIgnoreAccents:
+        name: kCBLDefaultFullTextIndexIgnoreAccents
+      c:@kCBLDefaultLogFileMaxRotateCount:
+        name: kCBLDefaultLogFileMaxRotateCount
+      c:@kCBLDefaultLogFileMaxSize:
+        name: kCBLDefaultLogFileMaxSize
+      c:@kCBLDefaultLogFileUsePlainText:
+        name: kCBLDefaultLogFileUsePlainText
+      c:@kCBLDefaultReplicatorAcceptParentCookies:
+        name: kCBLDefaultReplicatorAcceptParentCookies
+      c:@kCBLDefaultReplicatorContinuous:
+        name: kCBLDefaultReplicatorContinuous
+      c:@kCBLDefaultReplicatorDisableAutoPurge:
+        name: kCBLDefaultReplicatorDisableAutoPurge
+      c:@kCBLDefaultReplicatorHeartbeat:
+        name: kCBLDefaultReplicatorHeartbeat
+      c:@kCBLDefaultReplicatorMaxAttemptWaitTime:
+        name: kCBLDefaultReplicatorMaxAttemptWaitTime
+      c:@kCBLDefaultReplicatorMaxAttemptsContinuous:
+        name: kCBLDefaultReplicatorMaxAttemptsContinuous
+      c:@kCBLDefaultReplicatorMaxAttemptsSingleShot:
+        name: kCBLDefaultReplicatorMaxAttemptsSingleShot
+      c:@kCBLDefaultReplicatorType:
+        name: kCBLDefaultReplicatorType
+      c:@kCBLDefaultScopeName:
+        name: kCBLDefaultScopeName
+      c:@kCBLEncryptableType:
+        name: kCBLEncryptableType
+      c:@kCBLEncryptableValueProperty:
+        name: kCBLEncryptableValueProperty
+      c:@kCBLTypeProperty:
+        name: kCBLTypeProperty
+      c:@kFLEmptyArray:
+        name: kFLEmptyArray
+      c:@kFLEmptyDict:
+        name: kFLEmptyDict
+      c:@kFLNullValue:
+        name: kFLNullValue
+      c:@kFLUndefinedValue:
+        name: kFLUndefinedValue
+      c:CBLBase.h@T@CBLErrorCode:
+        name: CBLErrorCode
+      c:CBLBase.h@T@CBLErrorDomain:
+        name: CBLErrorDomain
+      c:CBLBase.h@T@CBLNetworkErrorCode:
+        name: CBLNetworkErrorCode
+      c:CBLBase.h@T@CBLTimestamp:
+        name: CBLTimestamp
+      c:CBLBlob.h@T@CBLSeekBase:
+        name: CBLSeekBase
+      c:CBLCollection.h@T@CBLCollectionChangeListener:
+        name: CBLCollectionChangeListener
+      c:CBLCollection.h@T@CBLCollectionDocumentChangeListener:
+        name: CBLCollectionDocumentChangeListener
+      c:CBLDatabase.h@T@CBLDatabaseChangeListener:
+        name: CBLDatabaseChangeListener
+      c:CBLDatabase.h@T@CBLEncryptionAlgorithm:
+        name: CBLEncryptionAlgorithm
+      c:CBLDatabase.h@T@CBLEncryptionKeySize:
+        name: CBLEncryptionKeySize
+      c:CBLDatabase.h@T@CBLMaintenanceType:
+        name: CBLMaintenanceType
+      c:CBLDatabase.h@T@CBLNotificationsReadyCallback:
+        name: CBLNotificationsReadyCallback
+      c:CBLDocument.h@T@CBLConcurrencyControl:
+        name: CBLConcurrencyControl
+      c:CBLDocument.h@T@CBLConflictHandler:
+        name: CBLConflictHandler
+      c:CBLDocument.h@T@CBLDocumentChangeListener:
+        name: CBLDocumentChangeListener
+      c:CBLLog.h@T@CBLLogCallback:
+        name: CBLLogCallback
+      c:CBLLog.h@T@CBLLogDomain:
+        name: CBLLogDomain
+      c:CBLLog.h@T@CBLLogLevel:
+        name: CBLLogLevel
+      c:CBLQuery.h@T@CBLQueryChangeListener:
+        name: CBLQueryChangeListener
+      c:CBLQuery.h@T@CBLQueryLanguage:
+        name: CBLQueryLanguage
+      c:CBLReplicator.h@T@CBLConflictResolver:
+        name: CBLConflictResolver
+      c:CBLReplicator.h@T@CBLDocumentFlags:
+        name: CBLDocumentFlags
+      c:CBLReplicator.h@T@CBLDocumentPropertyDecryptor:
+        name: CBLDocumentPropertyDecryptor
+      c:CBLReplicator.h@T@CBLDocumentPropertyEncryptor:
+        name: CBLDocumentPropertyEncryptor
+      c:CBLReplicator.h@T@CBLDocumentReplicationListener:
+        name: CBLDocumentReplicationListener
+      c:CBLReplicator.h@T@CBLPropertyDecryptor:
+        name: CBLPropertyDecryptor
+      c:CBLReplicator.h@T@CBLPropertyEncryptor:
+        name: CBLPropertyEncryptor
+      c:CBLReplicator.h@T@CBLProxyType:
+        name: CBLProxyType
+      c:CBLReplicator.h@T@CBLReplicationFilter:
+        name: CBLReplicationFilter
+      c:CBLReplicator.h@T@CBLReplicatorActivityLevel:
+        name: CBLReplicatorActivityLevel
+      c:CBLReplicator.h@T@CBLReplicatorChangeListener:
+        name: CBLReplicatorChangeListener
+      c:CBLReplicator.h@T@CBLReplicatorType:
+        name: CBLReplicatorType
+      c:FLBase.h@T@FLArray:
+        name: FLArray
+      c:FLBase.h@T@FLDict:
+        name: FLDict
+      c:FLBase.h@T@FLDoc:
+        name: FLDoc
+      c:FLBase.h@T@FLEncoder:
+        name: FLEncoder
+      c:FLBase.h@T@FLMutableArray:
+        name: FLMutableArray
+      c:FLBase.h@T@FLMutableDict:
+        name: FLMutableDict
+      c:FLBase.h@T@FLSharedKeys:
+        name: FLSharedKeys
+      c:FLBase.h@T@FLSlot:
+        name: FLSlot
+      c:FLBase.h@T@FLTimestamp:
+        name: FLTimestamp
+      c:FLBase.h@T@FLValue:
+        name: FLValue
+      c:FLDeepIterator.h@T@FLDeepIterator:
+        name: FLDeepIterator
+      c:FLExpert.h@T@FLSharedKeyScope:
+        name: FLSharedKeyScope
+      c:FLExpert.h@T@FLSharedKeysReadCallback:
+        name: FLSharedKeysReadCallback
+      c:FLKeyPath.h@T@FLKeyPath:
+        name: FLKeyPath
+      c:FLSlice.h@T@FLHeapSlice:
+        name: FLHeapSlice
+      c:FLSlice.h@T@FLString:
+        name: FLString
+      c:FLSlice.h@T@FLStringResult:
+        name: FLStringResult
+      c:_stdio.h@T@FILE:
+        name: FILE
+      c:_stdio.h@T@fpos_t:
+        name: fpos_t
+      c:_types.h@T@__darwin_off_t:
+        name: __darwin_off_t
+      c:_types.h@T@__int64_t:
+        name: __int64_t
