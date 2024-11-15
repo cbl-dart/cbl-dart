@@ -8,6 +8,7 @@ import 'package:ffi/ffi.dart';
 
 import 'base.dart';
 import 'bindings.dart';
+import 'cblite.dart' as cblite;
 import 'data.dart';
 import 'global.dart';
 import 'slice.dart';
@@ -113,8 +114,9 @@ final class FLStringResult extends Struct {
   external int size;
 }
 
-extension FLStringResultExt on FLStringResult {
+extension FLStringResultExt on cblite.FLStringResult {
   bool get isNull => buf == nullptr;
+
   String? toDartStringAndRelease({bool allowMalformed = false}) {
     if (isNull) {
       return null;
@@ -219,7 +221,7 @@ final class SliceBindings extends Bindings {
     _retainSliceResultByBuf(buf);
   }
 
-  void releaseSliceResultByBuf(Pointer<Uint8> buf) {
+  void releaseSliceResultByBuf(Pointer<Void> buf) {
     _releaseSliceResultByBuf(buf);
   }
 }

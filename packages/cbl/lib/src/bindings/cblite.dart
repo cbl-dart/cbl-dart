@@ -6812,6 +6812,15 @@ class cblite {
   late final _FLData_DumpPtr =
       _lookup<ffi.NativeFunction<NativeFLData_Dump>>('FLData_Dump');
   late final _FLData_Dump = _FLData_DumpPtr.asFunction<DartFLData_Dump>();
+
+  late final addresses = _SymbolAddresses(this);
+}
+
+class _SymbolAddresses {
+  final cblite _library;
+  _SymbolAddresses(this._library);
+  ffi.Pointer<ffi.NativeFunction<NativeCBL_Release>> get CBL_Release =>
+      _library._CBL_ReleasePtr;
 }
 
 /// Error domains, serving as namespaces for numeric error codes.

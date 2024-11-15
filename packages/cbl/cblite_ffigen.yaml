@@ -23,6 +23,9 @@ functions:
   expose-typedefs:
     include:
       - '.*'
+  symbol-address:
+    include:
+      - CBL_Release
 compiler-opts:
   - '-I../../native/vendor/cblite/include'
   # CBL uses a macro to define enums which is called CBL_ENUM.
