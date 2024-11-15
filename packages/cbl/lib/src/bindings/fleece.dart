@@ -60,7 +60,7 @@ void _checkFleeceError() {
 extension _FleeceErrorExt<T> on T {
   T checkFleeceError() {
     final self = this;
-    if (this == nullptr || self is FLSliceResult && self.buf == nullptr) {
+    if (this == nullptr || self is cblite.FLSliceResult && self.buf == nullptr) {
       _checkFleeceError();
     }
     return this;
@@ -69,49 +69,21 @@ extension _FleeceErrorExt<T> on T {
 
 // === Slice ===================================================================
 
-final class FLSlice extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
-
-extension FLSliceExt on FLSlice {
+extension FLSliceExt on cblite.FLSlice {
   bool get isNull => buf == nullptr;
   Data? toData() => SliceResult.fromFLSlice(this)?.toData();
 }
 
-final class FLSliceResult extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
-
-extension FLResultSliceExt on FLSliceResult {
+extension FLResultSliceExt on cblite.FLSliceResult {
   bool get isNull => buf == nullptr;
   Data? toData({bool retain = false}) =>
       SliceResult.fromFLSliceResult(this, retain: retain)?.toData();
 }
 
-final class FLString extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
-}
-
-extension FLStringExt on FLString {
+extension FLStringExt on cblite.FLString {
   bool get isNull => buf == nullptr;
   String? toDartString() =>
       isNull ? null : buf.cast<Utf8>().toDartString(length: size);
-}
-
-final class FLStringResult extends Struct {
-  external Pointer<Uint8> buf;
-
-  @Size()
-  external int size;
 }
 
 extension FLStringResultExt on cblite.FLStringResult {
@@ -133,96 +105,39 @@ extension FLStringResultExt on cblite.FLStringResult {
   }
 }
 
-typedef _FLSlice_Equal_C = Bool Function(FLSlice a, FLSlice b);
-typedef _FLSlice_Equal = bool Function(FLSlice a, FLSlice b);
-
-typedef _FLSlice_Compare_C = Int Function(FLSlice a, FLSlice b);
-typedef _FLSlice_Compare = int Function(FLSlice a, FLSlice b);
-
-typedef _FLSliceResult_New_C = FLSliceResult Function(Size size);
-typedef _FLSliceResult_New = FLSliceResult Function(int size);
-
-typedef _FLSlice_Copy_C = FLSliceResult Function(FLSlice slice);
-typedef _FLSlice_Copy = FLSliceResult Function(FLSlice slice);
-
-typedef _CBLDart_FLSliceResult_RetainByBuf_C = Void Function(
-  Pointer<Uint8> buf,
-);
-typedef _CBLDart_FLSliceResult_RetainByBuf = void Function(
-  Pointer<Uint8> buf,
-);
-
-typedef _CBLDart_FLSliceResult_ReleaseByBuf_C = Void Function(
-  Pointer<Uint8> buf,
-);
-typedef _CBLDart_FLSliceResult_ReleaseByBuf = void Function(
-  Pointer<Uint8> buf,
-);
-
 final class SliceBindings extends Bindings {
-  SliceBindings(super.parent) {
-    _equal = libs.cbl.lookupFunction<_FLSlice_Equal_C, _FLSlice_Equal>(
-      'FLSlice_Equal',
-    );
-    _compare = libs.cbl.lookupFunction<_FLSlice_Compare_C, _FLSlice_Compare>(
-      'FLSlice_Compare',
-    );
-    _new = libs.cbl.lookupFunction<_FLSliceResult_New_C, _FLSliceResult_New>(
-      'FLSliceResult_New',
-    );
-    _copy = libs.cbl.lookupFunction<_FLSlice_Copy_C, _FLSlice_Copy>(
-      'FLSlice_Copy',
-    );
-    _retainSliceResultByBuf = libs.cblDart.lookupFunction<
-        _CBLDart_FLSliceResult_RetainByBuf_C,
-        _CBLDart_FLSliceResult_RetainByBuf>(
-      'CBLDart_FLSliceResult_RetainByBuf',
-    );
-    _releaseSliceResultByBufPtr =
-        libs.cblDart.lookup('CBLDart_FLSliceResult_ReleaseByBuf');
-    _releaseSliceResultByBuf =
-        _releaseSliceResultByBufPtr.asFunction(isLeaf: useIsLeaf);
-  }
+  SliceBindings(super.parent);
 
-  late final _FLSlice_Equal _equal;
-  late final _FLSlice_Compare _compare;
+  late final _sliceResultFinalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_FLSliceResult_ReleaseByBuf.cast(),
+  );
 
-  late final _FLSliceResult_New _new;
-  late final _FLSlice_Copy _copy;
-  late final _CBLDart_FLSliceResult_RetainByBuf _retainSliceResultByBuf;
-  late final Pointer<NativeFunction<_CBLDart_FLSliceResult_ReleaseByBuf_C>>
-      _releaseSliceResultByBufPtr;
-  late final _CBLDart_FLSliceResult_ReleaseByBuf _releaseSliceResultByBuf;
+  bool equal(cblite.FLSlice a, cblite.FLSlice b) => cbl.FLSlice_Equal(a, b);
 
-  late final _sliceResultFinalizer =
-      NativeFinalizer(_releaseSliceResultByBufPtr.cast());
+  int compare(cblite.FLSlice a, cblite.FLSlice b) => cbl.FLSlice_Compare(a, b);
 
-  bool equal(FLSlice a, FLSlice b) => _equal(a, b);
+  cblite.FLSliceResult create(int size) => cbl.FLSliceResult_New(size);
 
-  int compare(FLSlice a, FLSlice b) => _compare(a, b);
-
-  FLSliceResult create(int size) => _new(size);
-
-  FLSliceResult copy(FLSlice slice) => _copy(slice);
+  cblite.FLSliceResult copy(cblite.FLSlice slice) => cbl.FLSlice_Copy(slice);
 
   void bindToDartObject(
     Finalizable object, {
-    required Pointer<Uint8> buf,
+    required Pointer<Void> buf,
     required bool retain,
   }) {
     if (retain) {
-      _retainSliceResultByBuf(buf);
+      cblDart.CBLDart_FLSliceResult_RetainByBuf(buf);
     }
 
     _sliceResultFinalizer.attach(object, buf.cast());
   }
 
-  void retainSliceResultByBuf(Pointer<Uint8> buf) {
-    _retainSliceResultByBuf(buf);
+  void retainSliceResultByBuf(Pointer<Void> buf) {
+    cblDart.CBLDart_FLSliceResult_RetainByBuf(buf);
   }
 
   void releaseSliceResultByBuf(Pointer<Void> buf) {
-    _releaseSliceResultByBuf(buf);
+    cblDart.CBLDart_FLSliceResult_ReleaseByBuf(buf);
   }
 }
 

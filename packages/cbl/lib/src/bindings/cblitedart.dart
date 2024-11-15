@@ -628,6 +628,9 @@ class cblitedart {
 class _SymbolAddresses {
   final cblitedart _library;
   _SymbolAddresses(this._library);
+  ffi.Pointer<ffi.NativeFunction<NativeCBLDart_FLSliceResult_ReleaseByBuf>>
+      get CBLDart_FLSliceResult_ReleaseByBuf =>
+          _library._CBLDart_FLSliceResult_ReleaseByBufPtr;
   ffi.Pointer<ffi.NativeFunction<NativeCBLDart_AsyncCallback_Delete>>
       get CBLDart_AsyncCallback_Delete =>
           _library._CBLDart_AsyncCallback_DeletePtr;
