@@ -56,24 +56,24 @@ final class SimpleMDelegate extends MDelegate {
     _decoderBinds.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
-    switch (flValue.type) {
-      case FLValueType.undefined:
-      case FLValueType.null_:
+    switch (FLValueType.fromValue(flValue.type)) {
+      case FLValueType.kFLUndefined:
+      case FLValueType.kFLNull:
         return null;
-      case FLValueType.boolean:
+      case FLValueType.kFLBoolean:
         return flValue.asBool;
-      case FLValueType.number:
+      case FLValueType.kFLNumber:
         return flValue.isInteger ? flValue.asInt : flValue.asDouble;
-      case FLValueType.string:
+      case FLValueType.kFLString:
         cacheIt();
         return parent.context.sharedStringsTable.decode(StringSource.value);
-      case FLValueType.data:
+      case FLValueType.kFLData:
         cacheIt();
         return flValue.asData.toData()?.toTypedList();
-      case FLValueType.array:
+      case FLValueType.kFLArray:
         cacheIt();
         return MArray.asChild(value, parent, flValue.collectionSize);
-      case FLValueType.dict:
+      case FLValueType.kFLDict:
         cacheIt();
         return MDict.asChild(value, parent, flValue.collectionSize);
     }

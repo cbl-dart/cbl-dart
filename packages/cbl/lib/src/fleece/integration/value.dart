@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'dart:async';
-import 'dart:ffi';
 
 import '../../bindings.dart';
 import '../encoder.dart';
@@ -17,7 +16,7 @@ base class MValue {
       : _value = null,
         _native = _emptyNative;
 
-  MValue.withValue(Pointer<FLValue> value)
+  MValue.withValue(FLValue value)
       : _value = value,
         _native = _emptyNative;
 
@@ -25,11 +24,11 @@ base class MValue {
       : _value = null,
         _native = native;
 
-  MValue._(Pointer<FLValue>? value, Object? native)
+  MValue._(FLValue? value, Object? native)
       : _value = value,
         _native = native;
 
-  Pointer<FLValue>? _value;
+  FLValue? _value;
   Object? _native;
 
   bool get isEmpty => !hasValue && !hasNative;
@@ -40,7 +39,7 @@ base class MValue {
 
   bool get hasValue => _value != null;
 
-  Pointer<FLValue>? get value => _value;
+  FLValue? get value => _value;
 
   bool get hasNative => !identical(_native, _emptyNative);
 

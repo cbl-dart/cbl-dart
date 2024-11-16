@@ -386,7 +386,7 @@ final class ArrayImpl
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+    final encoder = FleeceEncoder(format: FLEncoderFormat.kFLEncodeJSON);
     final done = encodeTo(encoder);
     assert(done is! Future);
     return encoder.finish().toDartString();

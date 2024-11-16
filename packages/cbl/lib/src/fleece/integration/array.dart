@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import '../../bindings.dart';
 import '../../support/ffi.dart';
@@ -33,7 +32,7 @@ final class MArray extends MCollection {
           isMutable: isMutable ?? parent.hasMutableChildren,
         );
 
-  final Pointer<FLArray>? _array;
+  final FLArray? _array;
   final List<MValue?> _values;
 
   int get length => _values.length;
