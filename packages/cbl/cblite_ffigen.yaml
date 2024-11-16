@@ -30,6 +30,7 @@ functions:
       - FLDoc_Release
       - FLValue_Release
       - FLEncoder_Free
+      - CBLBlobReader_Close
 structs:
   member-rename:
     FLDictKey:

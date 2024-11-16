@@ -6821,6 +6821,8 @@ class _SymbolAddresses {
   _SymbolAddresses(this._library);
   ffi.Pointer<ffi.NativeFunction<NativeCBL_Release>> get CBL_Release =>
       _library._CBL_ReleasePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeCBLBlobReader_Close>>
+      get CBLBlobReader_Close => _library._CBLBlobReader_ClosePtr;
   ffi.Pointer<ffi.NativeFunction<NativeFLDoc_Release>> get FLDoc_Release =>
       _library._FLDoc_ReleasePtr;
   ffi.Pointer<ffi.NativeFunction<NativeFLEncoder_Free>> get FLEncoder_Free =>
