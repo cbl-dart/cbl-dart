@@ -1,6 +1,3 @@
-// ignore: lines_longer_than_80_chars
-// ignore_for_file: avoid_redundant_argument_values, camel_case_types, avoid_private_typedef_functions
-
 import 'dart:ffi';
 import 'dart:io' as io;
 
@@ -11,6 +8,8 @@ import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
+
+export 'cblite.dart' show CBLListenerToken;
 
 final _baseBinds = CBLBindings.instance.base;
 
@@ -184,7 +183,7 @@ final class CBLErrorException implements Exception {
   CBLErrorException.fromCBLError(Pointer<cblite.CBLError> error)
       : this(
           error.ref.domainEnum,
-          error.ref.code,
+          error.ref.codeEnum,
           _baseBinds.getErrorMessage(globalCBLError)!,
         );
 
@@ -194,7 +193,7 @@ final class CBLErrorException implements Exception {
     required int errorPosition,
   }) : this(
           error.ref.domainEnum,
-          error.ref.code,
+          error.ref.codeEnum,
           _baseBinds.getErrorMessage(globalCBLError)!,
           errorSource: errorSource,
           errorPosition: errorPosition == -1 ? null : errorPosition,

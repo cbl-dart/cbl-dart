@@ -7,6 +7,8 @@ import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
+export 'cblite.dart' show CBLDocument;
+
 final class DocumentBindings extends Bindings {
   DocumentBindings(super.parent);
 

@@ -12,6 +12,8 @@ import 'query.dart';
 import 'tracing.dart';
 import 'utils.dart';
 
+export 'cblite.dart' show CBLScope, CBLCollection;
+
 final class CBLIndexSpec {
   CBLIndexSpec({
     required this.type,

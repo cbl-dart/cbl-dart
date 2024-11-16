@@ -20,7 +20,7 @@ final _encoderBinds = cblBindings.fleece.encoder;
 final class FleeceEncoder implements Finalizable {
   /// Creates an encoder, which generates encoded Fleece or JSON data.
   FleeceEncoder({
-    this.format = FLEncoderFormat.fleece,
+    this.format = FLEncoderFormat.kFLEncodeFleece,
     this.reserveSize = 256,
     this.uniqueStrings = true,
   }) : _pointer = _encoderBinds.create(
@@ -31,11 +31,11 @@ final class FleeceEncoder implements Finalizable {
     _encoderBinds.bindToDartObject(this, _pointer);
   }
 
-  final Pointer<FLEncoder> _pointer;
+  final FLEncoder _pointer;
 
   /// The output format to generate.
   ///
-  /// The default is [FLEncoderFormat.fleece]
+  /// The default is [FLEncoderFormat.kFLEncodeFleece]
   final FLEncoderFormat format;
 
   /// The number of bytes to preallocate for the output.
@@ -116,12 +116,11 @@ final class FleeceEncoder implements Finalizable {
   }
 
   /// Writes the value at [index] in [array] to this encoder.
-  void writeArrayValue(Pointer<FLArray> array, int index) =>
-      runWithErrorTranslation(
-          () => _encoderBinds.writeArrayValue(_pointer, array, index));
+  void writeArrayValue(FLArray array, int index) => runWithErrorTranslation(
+      () => _encoderBinds.writeArrayValue(_pointer, array, index));
 
   /// Writes [value] this encoder.
-  void writeValue(Pointer<FLValue> value) =>
+  void writeValue(FLValue value) =>
       runWithErrorTranslation(() => _encoderBinds.writeValue(_pointer, value));
 
   /// Writes `null` to this encoder.
@@ -174,7 +173,7 @@ final class FleeceEncoder implements Finalizable {
       () => _encoderBinds.writeKeyFLString(_pointer, key));
 
   /// Writes a [key] for the next entry in a dict, from a [FLValue].
-  void writeKeyValue(Pointer<FLValue> key) =>
+  void writeKeyValue(FLValue key) =>
       runWithErrorTranslation(() => _encoderBinds.writeKeyValue(_pointer, key));
 
   /// Ends a dict.

@@ -9,6 +9,8 @@ import 'global.dart';
 import 'slice.dart';
 import 'utils.dart';
 
+export 'cblite.dart' show CBLBlob, CBLBlobReadStream;
+
 // === CBLBlob =================================================================
 
 final class BlobBindings extends Bindings {

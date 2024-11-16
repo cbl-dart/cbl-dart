@@ -54,7 +54,7 @@ class AsyncCallback implements Finalizable {
 
   final _id = _generateId();
 
-  late final Pointer<CBLDartAsyncCallback> pointer;
+  late final CBLDart_AsyncCallback pointer;
 
   /// The handler which responds to calls to this callback.
   final AsyncCallbackHandler handler;

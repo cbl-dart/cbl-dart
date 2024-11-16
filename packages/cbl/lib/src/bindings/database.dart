@@ -10,6 +10,8 @@ import 'global.dart';
 import 'tracing.dart';
 import 'utils.dart';
 
+export 'cblite.dart' show CBLDatabase;
+
 enum CBLEncryptionAlgorithm {
   aes256,
 }

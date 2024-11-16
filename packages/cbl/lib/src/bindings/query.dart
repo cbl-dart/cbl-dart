@@ -9,6 +9,8 @@ import 'global.dart';
 import 'tracing.dart';
 import 'utils.dart';
 
+export 'cblite.dart' show CBLQuery, CBLResultSet;
+
 enum CBLQueryLanguage {
   json,
   n1ql,

@@ -12,6 +12,33 @@ import 'global.dart';
 import 'slice.dart';
 import 'utils.dart';
 
+export 'cblite.dart'
+    show
+        FLArray,
+        FLCopyFlags,
+        FLDict,
+        FLDictKey,
+        FLDoc,
+        FLEncoder,
+        FLEncoderFormat,
+        FLMutableArray,
+        FLMutableDict,
+        FLSharedKeys,
+        FLSliceResult,
+        FLSlot,
+        FLString,
+        FLStringResult,
+        FLTrust,
+        FLValue,
+        FLValueType;
+export 'cblitedart.dart'
+    show
+        KnownSharedKeys,
+        CBLDart_LoadedFLValue,
+        CBLDart_LoadedDictKey,
+        CBLDart_FLDictIterator,
+        CBLDart_FLArrayIterator;
+
 // === Error ===================================================================
 
 extension FLErrorCodeIntExt on int {
@@ -434,8 +461,8 @@ final class MutableDictBindings extends Bindings {
 // === Decoder =================================================================
 
 @pragma('vm:prefer-inline')
-String decodeFLString(int address, int size) =>
-    utf8.decode(Pointer<Uint8>.fromAddress(address).asTypedList(size));
+String decodeFLString(Pointer<Void> buf, int size) =>
+    utf8.decode(buf.cast<Uint8>().asTypedList(size));
 
 // ignore: camel_case_extensions
 extension CBLDart_LoadedFLValueExt on cblitedart.CBLDart_LoadedFLValue {

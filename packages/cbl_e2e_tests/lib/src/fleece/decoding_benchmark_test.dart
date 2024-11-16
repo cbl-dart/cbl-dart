@@ -44,7 +44,7 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
   void run() {
     // ignore: deprecated_member_use
     RecursiveFleeceDecoder(
-      trust: FLTrust.trusted,
+      trust: FLTrust.kFLTrusted,
       sharedKeys: sharedKeys,
       sharedKeysTable: sharedKeysTable,
     ).convert(data);
@@ -62,7 +62,7 @@ class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
   @override
   void run() {
     FleeceDecoder(
-      trust: FLTrust.trusted,
+      trust: FLTrust.kFLTrusted,
       sharedKeys: sharedKeys,
       sharedKeysTable: sharedKeysTable,
     ).convert(data);
@@ -81,7 +81,7 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
   @override
   void run() {
     final doc =
-        fl.Doc.fromResultData(data, FLTrust.trusted, sharedKeys: sharedKeys);
+        fl.Doc.fromResultData(data, FLTrust.kFLTrusted, sharedKeys: sharedKeys);
     final root = MRoot.fromContext(
       MContext(
         data: doc,
