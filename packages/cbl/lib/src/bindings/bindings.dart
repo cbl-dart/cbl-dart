@@ -16,16 +16,19 @@ import 'tracing.dart';
 abstract base class Bindings {
   Bindings(Bindings parent)
       : cbl = parent.cbl,
-        cblDart = parent.cblDart {
+        cblDart = parent.cblDart,
+        enterpriseEdition = parent.enterpriseEdition {
     parent._children.add(this);
   }
 
   Bindings.root(DynamicLibraries libs)
       : cbl = cblite(libs.cbl),
-        cblDart = cblitedart(libs.cblDart);
+        cblDart = cblitedart(libs.cblDart),
+        enterpriseEdition = libs.enterpriseEdition;
 
   final cblite cbl;
   final cblitedart cblDart;
+  final bool enterpriseEdition;
 
   List<Bindings> get _children => [];
 }

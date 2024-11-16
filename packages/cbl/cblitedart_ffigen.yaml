@@ -22,6 +22,7 @@ functions:
       - CBLDart_KnownSharedKeys_Delete
       - CBLDart_FLDictIterator_Delete
       - CBLDart_FLArrayIterator_Delete
+      - CBLDart_CBLDatabase_Release
 compiler-opts:
   - '-I../../native/couchbase-lite-dart/include'
   - '-I../../native/vendor/cblite/include'
