@@ -64,6 +64,7 @@ class MockHub implements Hub {
       const SentryId.empty();
 
   @override
+  // ignore: deprecated_member_use
   Future<void> captureUserFeedback(SentryUserFeedback userFeedback) async {}
 
   @override
