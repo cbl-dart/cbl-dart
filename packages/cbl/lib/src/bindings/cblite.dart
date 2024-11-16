@@ -21,8 +21,8 @@ class cblite {
           lookup)
       : _lookup = lookup;
 
-  /// Returns a message describing an error.
-  /// @note  You are responsible for releasing the result by calling \ref FLSliceResult_Release.
+  /// Returns a message describing an error. @note You are responsible for
+  /// releasing the result by calling \ref FLSliceResult_Release.
   FLSliceResult CBLError_Message(
     ffi.Pointer<CBLError> outError,
   ) {
@@ -45,9 +45,9 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeCBL_Now>>('CBL_Now');
   late final _CBL_Now = _CBL_NowPtr.asFunction<DartCBL_Now>();
 
-  /// Increments an object's reference-count.
-  /// Usually you'll call one of the type-safe synonyms specific to the object type,
-  /// like \ref CBLDatabase_Retain`
+  /// Increments an object's reference-count. Usually you'll call one of the
+  /// type-safe synonyms specific to the object type, like \ref
+  /// CBLDatabase_Retain`
   ffi.Pointer<CBLRefCounted> CBL_Retain(
     ffi.Pointer<CBLRefCounted> arg0,
   ) {
@@ -60,9 +60,9 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeCBL_Retain>>('CBL_Retain');
   late final _CBL_Retain = _CBL_RetainPtr.asFunction<DartCBL_Retain>();
 
-  /// Decrements an object's reference-count, freeing the object if the count hits zero.
-  /// Usually you'll call one of the type-safe synonyms specific to the object type,
-  /// like \ref CBLDatabase_Release.
+  /// Decrements an object's reference-count, freeing the object if the count
+  /// hits zero. Usually you'll call one of the type-safe synonyms specific to
+  /// the object type, like \ref CBLDatabase_Release.
   void CBL_Release(
     ffi.Pointer<CBLRefCounted> arg0,
   ) {
@@ -75,7 +75,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeCBL_Release>>('CBL_Release');
   late final _CBL_Release = _CBL_ReleasePtr.asFunction<DartCBL_Release>();
 
-  /// Returns the total number of Couchbase Lite objects. Useful for leak checking.
+  /// Returns the total number of Couchbase Lite objects. Useful for leak
+  /// checking.
   int CBL_InstanceCount() {
     return _CBL_InstanceCount();
   }
@@ -85,8 +86,8 @@ class cblite {
   late final _CBL_InstanceCount =
       _CBL_InstanceCountPtr.asFunction<DartCBL_InstanceCount>();
 
-  /// Logs the class and address of each Couchbase Lite object. Useful for leak checking.
-  /// @note  May only be functional in debug builds of Couchbase Lite.
+  /// Logs the class and address of each Couchbase Lite object. Useful for leak
+  /// checking. @note May only be functional in debug builds of Couchbase Lite.
   void CBL_DumpInstances() {
     return _CBL_DumpInstances();
   }
@@ -96,7 +97,8 @@ class cblite {
   late final _CBL_DumpInstances =
       _CBL_DumpInstancesPtr.asFunction<DartCBL_DumpInstances>();
 
-  /// Removes a listener callback, given the token that was returned when it was added.
+  /// Removes a listener callback, given the token that was returned when it was
+  /// added.
   void CBLListener_Remove(
     ffi.Pointer<CBLListenerToken> arg0,
   ) {
@@ -135,10 +137,9 @@ class cblite {
 
   FLSlice get kCBLBlobContentTypeProperty => _kCBLBlobContentTypeProperty.ref;
 
-  /// Returns true if a dictionary in a document is a blob reference.
-  /// If so, you can call \ref FLDict_GetBlob to access it.
-  /// @note This function tests whether the dictionary has a `@type` property,
-  /// whose value is `"blob"`.
+  /// Returns true if a dictionary in a document is a blob reference. If so, you
+  /// can call \ref FLDict_GetBlob to access it. @note This function tests
+  /// whether the dictionary has a `@type` property, whose value is `"blob"`.
   bool FLDict_IsBlob(
     FLDict arg0,
   ) {
@@ -152,8 +153,8 @@ class cblite {
   late final _FLDict_IsBlob = _FLDict_IsBlobPtr.asFunction<DartFLDict_IsBlob>();
 
   /// Returns a CBLBlob object corresponding to a blob dictionary in a document.
-  /// @param blobDict  A dictionary in a document.
-  /// @return  A CBLBlob instance for this blob, or NULL if the dictionary is not a blob.
+  /// @param blobDict A dictionary in a document. @return A CBLBlob instance for
+  /// this blob, or NULL if the dictionary is not a blob.
   ffi.Pointer<CBLBlob> FLDict_GetBlob(
     FLDict blobDict,
   ) {
@@ -167,7 +168,8 @@ class cblite {
   late final _FLDict_GetBlob =
       _FLDict_GetBlobPtr.asFunction<DartFLDict_GetBlob>();
 
-  /// Returns the length in bytes of a blob's content (from its `length` property).
+  /// Returns the length in bytes of a blob's content (from its `length`
+  /// property).
   int CBLBlob_Length(
     ffi.Pointer<CBLBlob> arg0,
   ) {
@@ -196,7 +198,8 @@ class cblite {
   late final _CBLBlob_ContentType =
       _CBLBlob_ContentTypePtr.asFunction<DartCBLBlob_ContentType>();
 
-  /// Returns the cryptographic digest of a blob's content (from its `digest` property).
+  /// Returns the cryptographic digest of a blob's content (from its `digest`
+  /// property).
   FLString CBLBlob_Digest(
     ffi.Pointer<CBLBlob> arg0,
   ) {
@@ -210,8 +213,9 @@ class cblite {
   late final _CBLBlob_Digest =
       _CBLBlob_DigestPtr.asFunction<DartCBLBlob_Digest>();
 
-  /// Returns a blob's metadata. This includes the `digest`, `length`, `content_type`,
-  /// and `@type` properties, as well as any custom ones that may have been added.
+  /// Returns a blob's metadata. This includes the `digest`, `length`,
+  /// `content_type`, and `@type` properties, as well as any custom ones that
+  /// may have been added.
   FLDict CBLBlob_Properties(
     ffi.Pointer<CBLBlob> arg0,
   ) {
@@ -241,8 +245,9 @@ class cblite {
   late final _CBLBlob_CreateJSON =
       _CBLBlob_CreateJSONPtr.asFunction<DartCBLBlob_CreateJSON>();
 
-  /// Reads the blob's content into memory and returns them.
-  /// @note  You are responsible for releasing the result by calling \ref FLSliceResult_Release.
+  /// Reads the blob's content into memory and returns them. @note You are
+  /// responsible for releasing the result by calling \ref
+  /// FLSliceResult_Release.
   FLSliceResult CBLBlob_Content(
     ffi.Pointer<CBLBlob> blob,
     ffi.Pointer<CBLError> outError,
@@ -275,12 +280,11 @@ class cblite {
   late final _CBLBlob_OpenContentStream =
       _CBLBlob_OpenContentStreamPtr.asFunction<DartCBLBlob_OpenContentStream>();
 
-  /// Reads data from a blob.
-  /// @param stream  The stream to read from.
-  /// @param dst  The address to copy the read data to.
-  /// @param maxLength  The maximum number of bytes to read.
-  /// @param outError  On failure, an error will be stored here if non-NULL.
-  /// @return  The actual number of bytes read; 0 if at EOF, -1 on error.
+  /// Reads data from a blob. @param stream The stream to read from. @param dst
+  /// The address to copy the read data to. @param maxLength The maximum number
+  /// of bytes to read. @param outError On failure, an error will be stored here
+  /// if non-NULL. @return The actual number of bytes read; 0 if at EOF, -1 on
+  /// error.
   int CBLBlobReader_Read(
     ffi.Pointer<CBLBlobReadStream> stream,
     ffi.Pointer<ffi.Void> dst,
@@ -301,12 +305,11 @@ class cblite {
   late final _CBLBlobReader_Read =
       _CBLBlobReader_ReadPtr.asFunction<DartCBLBlobReader_Read>();
 
-  /// Sets the position of a CBLBlobReadStream.
-  /// @param stream  The stream to reposition.
-  /// @param offset  The byte offset in the stream (relative to the `mode`).
-  /// @param base    The base position from which the offset is calculated.
-  /// @param outError  On failure, an error will be stored here if non-NULL.
-  /// @return  The new absolute position, or -1 on failure.
+  /// Sets the position of a CBLBlobReadStream. @param stream The stream to
+  /// reposition. @param offset The byte offset in the stream (relative to the
+  /// `mode`). @param base The base position from which the offset is
+  /// calculated. @param outError On failure, an error will be stored here if
+  /// non-NULL. @return The new absolute position, or -1 on failure.
   int CBLBlobReader_Seek(
     ffi.Pointer<CBLBlobReadStream> stream,
     int offset,
@@ -373,12 +376,11 @@ class cblite {
   late final _CBLBlob_Equals =
       _CBLBlob_EqualsPtr.asFunction<DartCBLBlob_Equals>();
 
-  /// Creates a new blob given its contents as a single block of data.
-  /// @note  You are responsible for releasing the \ref CBLBlob, but not until after its document
-  /// has been saved.
-  /// @param contentType  The MIME type (optional).
-  /// @param contents  The data's address and length.
-  /// @return  A new CBLBlob instance.
+  /// Creates a new blob given its contents as a single block of data. @note You
+  /// are responsible for releasing the \ref CBLBlob, but not until after its
+  /// document has been saved. @param contentType The MIME type (optional).
+  /// @param contents The data's address and length. @return A new CBLBlob
+  /// instance.
   ffi.Pointer<CBLBlob> CBLBlob_CreateWithData(
     FLString contentType,
     FLSlice contents,
@@ -395,9 +397,9 @@ class cblite {
   late final _CBLBlob_CreateWithData =
       _CBLBlob_CreateWithDataPtr.asFunction<DartCBLBlob_CreateWithData>();
 
-  /// Opens a stream for writing a new blob.
-  /// You should next call \ref CBLBlobWriter_Write one or more times to write the data,
-  /// then \ref CBLBlob_CreateWithStream to create the blob.
+  /// Opens a stream for writing a new blob. You should next call \ref
+  /// CBLBlobWriter_Write one or more times to write the data, then \ref
+  /// CBLBlob_CreateWithStream to create the blob.
   ///
   /// If for some reason you need to abort, just call \ref CBLBlobWriter_Close.
   ffi.Pointer<CBLBlobWriteStream> CBLBlobWriter_Create(
@@ -416,7 +418,8 @@ class cblite {
   late final _CBLBlobWriter_Create =
       _CBLBlobWriter_CreatePtr.asFunction<DartCBLBlobWriter_Create>();
 
-  /// Closes a blob-writing stream, if you need to give up without creating a \ref CBLBlob.
+  /// Closes a blob-writing stream, if you need to give up without creating a
+  /// \ref CBLBlob.
   void CBLBlobWriter_Close(
     ffi.Pointer<CBLBlobWriteStream> arg0,
   ) {
@@ -431,12 +434,10 @@ class cblite {
   late final _CBLBlobWriter_Close =
       _CBLBlobWriter_ClosePtr.asFunction<DartCBLBlobWriter_Close>();
 
-  /// Writes data to a new blob.
-  /// @param writer  The stream to write to.
-  /// @param data  The address of the data to write.
-  /// @param length  The length of the data to write.
-  /// @param outError  On failure, error info will be written here.
-  /// @return  True on success, false on failure.
+  /// Writes data to a new blob. @param writer The stream to write to. @param
+  /// data The address of the data to write. @param length The length of the
+  /// data to write. @param outError On failure, error info will be written
+  /// here. @return True on success, false on failure.
   bool CBLBlobWriter_Write(
     ffi.Pointer<CBLBlobWriteStream> writer,
     ffi.Pointer<ffi.Void> data,
@@ -457,14 +458,13 @@ class cblite {
   late final _CBLBlobWriter_Write =
       _CBLBlobWriter_WritePtr.asFunction<DartCBLBlobWriter_Write>();
 
-  /// Creates a new blob after its data has been written to a \ref CBLBlobWriteStream.
-  /// You should then add the blob to a mutable document as a property -- see
-  /// \ref FLSlot_SetBlob.
-  /// @note  You are responsible for releasing the CBLBlob reference.
-  /// @note  Do not free the stream; the blob will do that.
-  /// @param contentType  The MIME type (optional).
-  /// @param writer  The blob-writing stream the data was written to.
-  /// @return  A new CBLBlob instance.
+  /// Creates a new blob after its data has been written to a \ref
+  /// CBLBlobWriteStream. You should then add the blob to a mutable document as
+  /// a property -- see \ref FLSlot_SetBlob. @note You are responsible for
+  /// releasing the CBLBlob reference. @note Do not free the stream; the blob
+  /// will do that. @param contentType The MIME type (optional). @param writer
+  /// The blob-writing stream the data was written to. @return A new CBLBlob
+  /// instance.
   ffi.Pointer<CBLBlob> CBLBlob_CreateWithStream(
     FLString contentType,
     ffi.Pointer<CBLBlobWriteStream> writer,
@@ -496,20 +496,22 @@ class cblite {
   late final _FLSlot_SetBlob =
       _FLSlot_SetBlobPtr.asFunction<DartFLSlot_SetBlob>();
 
-  /// Get a \ref CBLBlob object from the database using the \ref CBLBlob properties.
+  /// Get a \ref CBLBlob object from the database using the \ref CBLBlob
+  /// properties.
   ///
-  /// The \ref CBLBlob properties is a blob's metadata containing two required fields
-  /// which are a special marker property `"@type":"blob"`, and property `digest` whose value
-  /// is a hex SHA-1 digest of the blob's data. The other optional properties are `length` and
-  /// `content_type`. To obtain the \ref CBLBlob properties from a \ref CBLBlob,
-  /// call \ref CBLBlob_Properties function.
+  /// The \ref CBLBlob properties is a blob's metadata containing two required
+  /// fields which are a special marker property `"@type":"blob"`, and property
+  /// `digest` whose value is a hex SHA-1 digest of the blob's data. The other
+  /// optional properties are `length` and `content_type`. To obtain the \ref
+  /// CBLBlob properties from a \ref CBLBlob, call \ref CBLBlob_Properties
+  /// function.
   ///
-  /// @note   You must release the \ref CBLBlob when you're finished with it.
-  /// @param db   The database.
-  /// @param properties   The properties for getting the \ref CBLBlob object.
-  /// @param outError On failure, error info will be written here if specified. A nonexistent blob
-  /// is not considered a failure; in that event the error code will be zero.
-  /// @return A \ref CBLBlob instance, or NULL if the doc doesn't exist or an error occurred.
+  /// @note You must release the \ref CBLBlob when you're finished with it.
+  /// @param db The database. @param properties The properties for getting the
+  /// \ref CBLBlob object. @param outError On failure, error info will be
+  /// written here if specified. A nonexistent blob is not considered a failure;
+  /// in that event the error code will be zero. @return A \ref CBLBlob
+  /// instance, or NULL if the doc doesn't exist or an error occurred.
   ffi.Pointer<CBLBlob> CBLDatabase_GetBlob(
     ffi.Pointer<CBLDatabase> db,
     FLDict properties,
@@ -528,20 +530,19 @@ class cblite {
   late final _CBLDatabase_GetBlob =
       _CBLDatabase_GetBlobPtr.asFunction<DartCBLDatabase_GetBlob>();
 
-  /// Save a new \ref CBLBlob object into the database without associating it with
-  /// any documents. The properties of the saved \ref CBLBlob object will include
-  /// information necessary for referencing the \ref CBLBlob object in the properties
-  /// of the document to be saved into the database.
+  /// Save a new \ref CBLBlob object into the database without associating it
+  /// with any documents. The properties of the saved \ref CBLBlob object will
+  /// include information necessary for referencing the \ref CBLBlob object in
+  /// the properties of the document to be saved into the database.
   ///
-  /// Normally you do not need to use this function unless you are in the situation
-  /// (e.g. developing javascript binding) that you cannot retain the \ref CBLBlob
-  /// object until the document containing the \ref CBLBlob object is successfully
-  /// saved into the database.
-  /// \note The saved \ref CBLBlob objects that are not associated with any documents
-  /// will be removed from the database when compacting the database.
-  /// @param db   The database.
-  /// @param blob The The CBLBlob to save.
-  /// @param outError On failure, error info will be written here.
+  /// Normally you do not need to use this function unless you are in the
+  /// situation (e.g. developing javascript binding) that you cannot retain the
+  /// \ref CBLBlob object until the document containing the \ref CBLBlob object
+  /// is successfully saved into the database. \note The saved \ref CBLBlob
+  /// objects that are not associated with any documents will be removed from
+  /// the database when compacting the database. @param db The database. @param
+  /// blob The The CBLBlob to save. @param outError On failure, error info will
+  /// be written here.
   bool CBLDatabase_SaveBlob(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLBlob> blob,
@@ -566,16 +567,16 @@ class cblite {
 
   FLSlice get kCBLTypeProperty => _kCBLTypeProperty.ref;
 
-  /// Reads a document from the default collection in an immutable form.
-  /// Each call to this function creates a new object (which must later be released.)
-  /// @note  If you are reading the document in order to make changes to it, call
-  /// \ref CBLDatabase_GetMutableDocument instead.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_GetDocument on the default collection instead.
-  /// @param database  The database.
-  /// @param docID  The ID of the document.
-  /// @param outError  On failure, the error will be written here. (A nonexistent document is not
-  /// considered a failure; in that event the error code will be zero.)
-  /// @return  A new \ref CBLDocument instance, or NULL if the doc doesn't exist or an error occurred.
+  /// Reads a document from the default collection in an immutable form. Each
+  /// call to this function creates a new object (which must later be released.)
+  /// @note If you are reading the document in order to make changes to it, call
+  /// \ref CBLDatabase_GetMutableDocument instead. @warning <b>Deprecated :</b>
+  /// Use CBLCollection_GetDocument on the default collection instead. @param
+  /// database The database. @param docID The ID of the document. @param
+  /// outError On failure, the error will be written here. (A nonexistent
+  /// document is not considered a failure; in that event the error code will be
+  /// zero.) @return A new \ref CBLDocument instance, or NULL if the doc doesn't
+  /// exist or an error occurred.
   ffi.Pointer<CBLDocument> CBLDatabase_GetDocument(
     ffi.Pointer<CBLDatabase> database,
     FLString docID,
@@ -594,16 +595,15 @@ class cblite {
   late final _CBLDatabase_GetDocument =
       _CBLDatabase_GetDocumentPtr.asFunction<DartCBLDatabase_GetDocument>();
 
-  /// Saves a (mutable) document to the default collection.
-  /// @warning If a newer revision has been saved since \p doc was loaded, it will be overwritten by
-  /// this one. This can lead to data loss! To avoid this, call
-  /// \ref CBLDatabase_SaveDocumentWithConcurrencyControl or
-  /// \ref CBLDatabase_SaveDocumentWithConflictHandler instead.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_SaveDocument on the default collection instead.
-  /// @param db  The database.
-  /// @param doc  The mutable document to save.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True on success, false on failure.
+  /// Saves a (mutable) document to the default collection. @warning If a newer
+  /// revision has been saved since \p doc was loaded, it will be overwritten by
+  /// this one. This can lead to data loss! To avoid this, call \ref
+  /// CBLDatabase_SaveDocumentWithConcurrencyControl or \ref
+  /// CBLDatabase_SaveDocumentWithConflictHandler instead. @warning
+  /// <b>Deprecated :</b> Use CBLCollection_SaveDocument on the default
+  /// collection instead. @param db The database. @param doc The mutable
+  /// document to save. @param outError On failure, the error will be written
+  /// here. @return True on success, false on failure.
   bool CBLDatabase_SaveDocument(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> doc,
@@ -622,17 +622,17 @@ class cblite {
   late final _CBLDatabase_SaveDocument =
       _CBLDatabase_SaveDocumentPtr.asFunction<DartCBLDatabase_SaveDocument>();
 
-  /// Saves a (mutable) document to the default collection.
-  /// If a conflicting revision has been saved since \p doc was loaded, the \p concurrency
-  /// parameter specifies whether the save should fail, or the conflicting revision should
-  /// be overwritten with the revision being saved.
-  /// If you need finer-grained control, call \ref CBLDatabase_SaveDocumentWithConflictHandler instead.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_SaveDocumentWithConcurrencyControl on the default collection instead.
-  /// @param db  The database.
-  /// @param doc  The mutable document to save.
-  /// @param concurrency  Conflict-handling strategy (fail or overwrite).
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True on success, false on failure.
+  /// Saves a (mutable) document to the default collection. If a conflicting
+  /// revision has been saved since \p doc was loaded, the \p concurrency
+  /// parameter specifies whether the save should fail, or the conflicting
+  /// revision should be overwritten with the revision being saved. If you need
+  /// finer-grained control, call \ref
+  /// CBLDatabase_SaveDocumentWithConflictHandler instead. @warning
+  /// <b>Deprecated :</b> Use CBLCollection_SaveDocumentWithConcurrencyControl
+  /// on the default collection instead. @param db The database. @param doc The
+  /// mutable document to save. @param concurrency Conflict-handling strategy
+  /// (fail or overwrite). @param outError On failure, the error will be written
+  /// here. @return True on success, false on failure.
   bool CBLDatabase_SaveDocumentWithConcurrencyControl(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> doc,
@@ -655,15 +655,15 @@ class cblite {
       _CBLDatabase_SaveDocumentWithConcurrencyControlPtr.asFunction<
           DartCBLDatabase_SaveDocumentWithConcurrencyControl>();
 
-  /// Saves a (mutable) document to the default collection, allowing for custom conflict handling in the event
-  /// that the document has been updated since \p doc was loaded.
-  /// @warning <b>Deprecated :</b> Use CBLCollection_SaveDocumentWithConflictHandler on the default collection instead.
-  /// @param db  The database.
-  /// @param doc  The mutable document to save.
-  /// @param conflictHandler  The callback to be invoked if there is a conflict.
-  /// @param context  An arbitrary value to be passed to the \p conflictHandler.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True on success, false on failure.
+  /// Saves a (mutable) document to the default collection, allowing for custom
+  /// conflict handling in the event that the document has been updated since \p
+  /// doc was loaded. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_SaveDocumentWithConflictHandler on the default collection
+  /// instead. @param db The database. @param doc The mutable document to save.
+  /// @param conflictHandler The callback to be invoked if there is a conflict.
+  /// @param context An arbitrary value to be passed to the \p conflictHandler.
+  /// @param outError On failure, the error will be written here. @return True
+  /// on success, false on failure.
   bool CBLDatabase_SaveDocumentWithConflictHandler(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> doc,
@@ -689,12 +689,11 @@ class cblite {
           DartCBLDatabase_SaveDocumentWithConflictHandler>();
 
   /// Deletes a document from the default collection. Deletions are replicated.
-  /// @warning  You are still responsible for releasing the CBLDocument.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_DeleteDocument on the default collection instead.
-  /// @param db  The database.
-  /// @param document  The document to delete.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was deleted, false if an error occurred.
+  /// @warning You are still responsible for releasing the CBLDocument. @warning
+  /// <b>Deprecated :</b> Use CBLCollection_DeleteDocument on the default
+  /// collection instead. @param db The database. @param document The document
+  /// to delete. @param outError On failure, the error will be written here.
+  /// @return True if the document was deleted, false if an error occurred.
   bool CBLDatabase_DeleteDocument(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> document,
@@ -714,13 +713,12 @@ class cblite {
       .asFunction<DartCBLDatabase_DeleteDocument>();
 
   /// Deletes a document from the default collection. Deletions are replicated.
-  /// @warning  You are still responsible for releasing the CBLDocument.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_DeleteDocumentWithConcurrencyControl on the default collection instead.
-  /// @param db  The database.
-  /// @param document  The document to delete.
-  /// @param concurrency  Conflict-handling strategy.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was deleted, false if an error occurred.
+  /// @warning You are still responsible for releasing the CBLDocument. @warning
+  /// <b>Deprecated :</b> Use CBLCollection_DeleteDocumentWithConcurrencyControl
+  /// on the default collection instead. @param db The database. @param document
+  /// The document to delete. @param concurrency Conflict-handling strategy.
+  /// @param outError On failure, the error will be written here. @return True
+  /// if the document was deleted, false if an error occurred.
   bool CBLDatabase_DeleteDocumentWithConcurrencyControl(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> document,
@@ -743,17 +741,16 @@ class cblite {
       _CBLDatabase_DeleteDocumentWithConcurrencyControlPtr.asFunction<
           DartCBLDatabase_DeleteDocumentWithConcurrencyControl>();
 
-  /// Purges a document from the default collection. This removes all traces of the document.
-  /// Purges are _not_ replicated. If the document is changed on a server, it will be re-created
-  /// when pulled.
-  /// @warning  You are still responsible for releasing the \ref CBLDocument reference.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_PurgeDocument on the default collection instead.
-  /// @note If you don't have the document in memory already, \ref CBLDatabase_PurgeDocumentByID is a
-  /// simpler shortcut.
-  /// @param db  The database.
-  /// @param document  The document to purge.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was purged, false if it doesn't exist or the purge failed.
+  /// Purges a document from the default collection. This removes all traces of
+  /// the document. Purges are _not_ replicated. If the document is changed on a
+  /// server, it will be re-created when pulled. @warning You are still
+  /// responsible for releasing the \ref CBLDocument reference. @warning
+  /// <b>Deprecated :</b> Use CBLCollection_PurgeDocument on the default
+  /// collection instead. @note If you don't have the document in memory
+  /// already, \ref CBLDatabase_PurgeDocumentByID is a simpler shortcut. @param
+  /// db The database. @param document The document to purge. @param outError On
+  /// failure, the error will be written here. @return True if the document was
+  /// purged, false if it doesn't exist or the purge failed.
   bool CBLDatabase_PurgeDocument(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> document,
@@ -772,14 +769,13 @@ class cblite {
   late final _CBLDatabase_PurgeDocument =
       _CBLDatabase_PurgeDocumentPtr.asFunction<DartCBLDatabase_PurgeDocument>();
 
-  /// Purges a document by its ID from the default collection.
-  /// @note  If no document with that ID exists, this function will return false but the error
-  /// code will be zero.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_PurgeDocumentByID on the default collection instead.
-  /// @param database  The database.
-  /// @param docID  The document ID to purge.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was purged, false if it doesn't exist or the purge failed.
+  /// Purges a document by its ID from the default collection. @note If no
+  /// document with that ID exists, this function will return false but the
+  /// error code will be zero. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_PurgeDocumentByID on the default collection instead. @param
+  /// database The database. @param docID The document ID to purge. @param
+  /// outError On failure, the error will be written here. @return True if the
+  /// document was purged, false if it doesn't exist or the purge failed.
   bool CBLDatabase_PurgeDocumentByID(
     ffi.Pointer<CBLDatabase> database,
     FLString docID,
@@ -798,15 +794,16 @@ class cblite {
   late final _CBLDatabase_PurgeDocumentByID = _CBLDatabase_PurgeDocumentByIDPtr
       .asFunction<DartCBLDatabase_PurgeDocumentByID>();
 
-  /// Reads a document from the default collection in mutable form that can be updated and saved.
-  /// (This function is otherwise identical to \ref CBLDatabase_GetDocument.)
-  /// @note  You must release the document when you're done with it.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_GetMutableDocument on the default collection instead.
-  /// @param database  The database.
-  /// @param docID  The ID of the document.
-  /// @param outError  On failure, the error will be written here. (A nonexistent document is not
-  /// considered a failure; in that event the error code will be zero.)
-  /// @return  A new \ref CBLDocument instance, or NULL if the doc doesn't exist or an error occurred.
+  /// Reads a document from the default collection in mutable form that can be
+  /// updated and saved. (This function is otherwise identical to \ref
+  /// CBLDatabase_GetDocument.) @note You must release the document when you're
+  /// done with it. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_GetMutableDocument on the default collection instead. @param
+  /// database The database. @param docID The ID of the document. @param
+  /// outError On failure, the error will be written here. (A nonexistent
+  /// document is not considered a failure; in that event the error code will be
+  /// zero.) @return A new \ref CBLDocument instance, or NULL if the doc doesn't
+  /// exist or an error occurred.
   ffi.Pointer<CBLDocument> CBLDatabase_GetMutableDocument(
     ffi.Pointer<CBLDatabase> database,
     FLString docID,
@@ -826,9 +823,9 @@ class cblite {
       _CBLDatabase_GetMutableDocumentPtr.asFunction<
           DartCBLDatabase_GetMutableDocument>();
 
-  /// Creates a new, empty document in memory, with a randomly-generated unique ID.
-  /// It will not be added to a database until saved.
-  /// @return  The new mutable document instance.
+  /// Creates a new, empty document in memory, with a randomly-generated unique
+  /// ID. It will not be added to a database until saved. @return The new
+  /// mutable document instance.
   ffi.Pointer<CBLDocument> CBLDocument_Create() {
     return _CBLDocument_Create();
   }
@@ -839,13 +836,13 @@ class cblite {
   late final _CBLDocument_Create =
       _CBLDocument_CreatePtr.asFunction<DartCBLDocument_Create>();
 
-  /// Creates a new, empty document in memory, with the given ID.
-  /// It will not be added to a database until saved.
-  /// @note  If the given ID conflicts with a document already in the database, that will not
-  /// be apparent until this document is saved. At that time, the result depends on the
-  /// conflict handling mode used when saving; see the save functions for details.
-  /// @param docID  The ID of the new document, or NULL to assign a new unique ID.
-  /// @return  The new mutable document instance.
+  /// Creates a new, empty document in memory, with the given ID. It will not be
+  /// added to a database until saved. @note If the given ID conflicts with a
+  /// document already in the database, that will not be apparent until this
+  /// document is saved. At that time, the result depends on the conflict
+  /// handling mode used when saving; see the save functions for details. @param
+  /// docID The ID of the new document, or NULL to assign a new unique ID.
+  /// @return The new mutable document instance.
   ffi.Pointer<CBLDocument> CBLDocument_CreateWithID(
     FLString docID,
   ) {
@@ -860,11 +857,12 @@ class cblite {
   late final _CBLDocument_CreateWithID =
       _CBLDocument_CreateWithIDPtr.asFunction<DartCBLDocument_CreateWithID>();
 
-  /// Creates a new mutable CBLDocument instance that refers to the same document as the original.
-  /// If the original document has unsaved changes, the new one will also start out with the same
-  /// changes; but mutating one document thereafter will not affect the other.
-  /// @note  You must release the new reference when you're done with it. Similarly, the original
-  /// document still exists and must also be released when you're done with it.
+  /// Creates a new mutable CBLDocument instance that refers to the same
+  /// document as the original. If the original document has unsaved changes,
+  /// the new one will also start out with the same changes; but mutating one
+  /// document thereafter will not affect the other. @note You must release the
+  /// new reference when you're done with it. Similarly, the original document
+  /// still exists and must also be released when you're done with it.
   ffi.Pointer<CBLDocument> CBLDocument_MutableCopy(
     ffi.Pointer<CBLDocument> original,
   ) {
@@ -893,9 +891,9 @@ class cblite {
   late final _CBLDocument_ID =
       _CBLDocument_IDPtr.asFunction<DartCBLDocument_ID>();
 
-  /// Returns a document's revision ID, which is a short opaque string that's guaranteed to be
-  /// unique to every change made to the document.
-  /// If the document doesn't exist yet, this function returns NULL.
+  /// Returns a document's revision ID, which is a short opaque string that's
+  /// guaranteed to be unique to every change made to the document. If the
+  /// document doesn't exist yet, this function returns NULL.
   FLString CBLDocument_RevisionID(
     ffi.Pointer<CBLDocument> arg0,
   ) {
@@ -910,10 +908,11 @@ class cblite {
   late final _CBLDocument_RevisionID =
       _CBLDocument_RevisionIDPtr.asFunction<DartCBLDocument_RevisionID>();
 
-  /// Returns a document's current sequence in the local database.
-  /// This number increases every time the document is saved, and a more recently saved document
-  /// will have a greater sequence number than one saved earlier, so sequences may be used as an
-  /// abstract 'clock' to tell relative modification times.
+  /// Returns a document's current sequence in the local database. This number
+  /// increases every time the document is saved, and a more recently saved
+  /// document will have a greater sequence number than one saved earlier, so
+  /// sequences may be used as an abstract 'clock' to tell relative modification
+  /// times.
   int CBLDocument_Sequence(
     ffi.Pointer<CBLDocument> arg0,
   ) {
@@ -928,7 +927,8 @@ class cblite {
   late final _CBLDocument_Sequence =
       _CBLDocument_SequencePtr.asFunction<DartCBLDocument_Sequence>();
 
-  /// Returns a document's collection or NULL for the new document that hasn't been saved.
+  /// Returns a document's collection or NULL for the new document that hasn't
+  /// been saved.
   ffi.Pointer<CBLCollection> CBLDocument_Collection(
     ffi.Pointer<CBLDocument> arg0,
   ) {
@@ -943,15 +943,16 @@ class cblite {
   late final _CBLDocument_Collection =
       _CBLDocument_CollectionPtr.asFunction<DartCBLDocument_Collection>();
 
-  /// Returns a document's properties as a dictionary.
-  /// @note  The dictionary object is owned by the document; you do not need to release it.
-  /// @warning  When the document is released, this reference to the properties becomes invalid.
-  /// If you need to use any properties after releasing the document, you must retain them
-  /// by calling \ref FLValue_Retain (and of course later release them.)
-  /// @warning  This dictionary _reference_ is immutable, but if the document is mutable the
-  /// underlying dictionary itself is mutable and could be modified through a mutable
-  /// reference obtained via \ref CBLDocument_MutableProperties. If you need to preserve the
-  /// properties, call \ref FLDict_MutableCopy to make a deep copy.
+  /// Returns a document's properties as a dictionary. @note The dictionary
+  /// object is owned by the document; you do not need to release it. @warning
+  /// When the document is released, this reference to the properties becomes
+  /// invalid. If you need to use any properties after releasing the document,
+  /// you must retain them by calling \ref FLValue*Retain (and of course later
+  /// release them.) @warning This dictionary \_reference* is immutable, but if
+  /// the document is mutable the underlying dictionary itself is mutable and
+  /// could be modified through a mutable reference obtained via \ref
+  /// CBLDocument_MutableProperties. If you need to preserve the properties,
+  /// call \ref FLDict_MutableCopy to make a deep copy.
   FLDict CBLDocument_Properties(
     ffi.Pointer<CBLDocument> arg0,
   ) {
@@ -966,16 +967,18 @@ class cblite {
   late final _CBLDocument_Properties =
       _CBLDocument_PropertiesPtr.asFunction<DartCBLDocument_Properties>();
 
-  /// Returns a mutable document's properties as a mutable dictionary.
-  /// You may modify this dictionary and then call \ref CBLDatabase_SaveDocument to persist the changes.
-  /// @note  The dictionary object is owned by the document; you do not need to release it.
-  /// @note  Every call to this function returns the same mutable collection. This is the
-  /// same collection returned by \ref CBLDocument_Properties.
-  /// @note  When accessing nested collections inside the properties as a mutable collection
-  /// for modification, use \ref FLMutableDict_GetMutableDict or \ref FLMutableDict_GetMutableArray.
-  /// @warning  When the document is released, this reference to the properties becomes invalid.
-  /// If you need to use any properties after releasing the document, you must retain them
-  /// by calling \ref FLValue_Retain (and of course later release them.)
+  /// Returns a mutable document's properties as a mutable dictionary. You may
+  /// modify this dictionary and then call \ref CBLDatabase_SaveDocument to
+  /// persist the changes. @note The dictionary object is owned by the document;
+  /// you do not need to release it. @note Every call to this function returns
+  /// the same mutable collection. This is the same collection returned by \ref
+  /// CBLDocument_Properties. @note When accessing nested collections inside the
+  /// properties as a mutable collection for modification, use \ref
+  /// FLMutableDict_GetMutableDict or \ref FLMutableDict_GetMutableArray.
+  /// @warning When the document is released, this reference to the properties
+  /// becomes invalid. If you need to use any properties after releasing the
+  /// document, you must retain them by calling \ref FLValue_Retain (and of
+  /// course later release them.)
   FLMutableDict CBLDocument_MutableProperties(
     ffi.Pointer<CBLDocument> arg0,
   ) {
@@ -990,10 +993,10 @@ class cblite {
   late final _CBLDocument_MutableProperties = _CBLDocument_MutablePropertiesPtr
       .asFunction<DartCBLDocument_MutableProperties>();
 
-  /// Sets a mutable document's properties.
-  /// Call \ref CBLDatabase_SaveDocument to persist the changes.
-  /// @note  The dictionary object will be retained by the document. You are responsible for
-  /// releasing any retained reference(s) you have to it.
+  /// Sets a mutable document's properties. Call \ref CBLDatabase_SaveDocument
+  /// to persist the changes. @note The dictionary object will be retained by
+  /// the document. You are responsible for releasing any retained reference(s)
+  /// you have to it.
   void CBLDocument_SetProperties(
     ffi.Pointer<CBLDocument> arg0,
     FLMutableDict properties,
@@ -1010,8 +1013,8 @@ class cblite {
   late final _CBLDocument_SetProperties =
       _CBLDocument_SetPropertiesPtr.asFunction<DartCBLDocument_SetProperties>();
 
-  /// Returns a document's properties as JSON.
-  /// @note  You are responsible for releasing the result by calling \ref FLSliceResult_Release.
+  /// Returns a document's properties as JSON. @note You are responsible for
+  /// releasing the result by calling \ref FLSliceResult_Release.
   FLSliceResult CBLDocument_CreateJSON(
     ffi.Pointer<CBLDocument> arg0,
   ) {
@@ -1045,16 +1048,14 @@ class cblite {
   late final _CBLDocument_SetJSON =
       _CBLDocument_SetJSONPtr.asFunction<DartCBLDocument_SetJSON>();
 
-  /// Returns the time, if any, at which a given document will expire and be purged.
-  /// Documents don't normally expire; you have to call \ref CBLDatabase_SetDocumentExpiration
-  /// to set a document's expiration time.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_GetDocumentExpiration instead.
-  /// @param db  The database.
-  /// @param docID  The ID of the document.
-  /// @param outError  On failure, an error is written here.
-  /// @return  The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-  /// or 0 if the document does not have an expiration,
-  /// or -1 if the call failed.
+  /// Returns the time, if any, at which a given document will expire and be
+  /// purged. Documents don't normally expire; you have to call \ref
+  /// CBLDatabase_SetDocumentExpiration to set a document's expiration time.
+  /// @warning <b>Deprecated :</b> Use CBLCollection_GetDocumentExpiration
+  /// instead. @param db The database. @param docID The ID of the document.
+  /// @param outError On failure, an error is written here. @return The
+  /// expiration time as a CBLTimestamp (milliseconds since Unix epoch), or 0 if
+  /// the document does not have an expiration, or -1 if the call failed.
   int CBLDatabase_GetDocumentExpiration(
     ffi.Pointer<CBLDatabase> db,
     FLSlice docID,
@@ -1074,14 +1075,12 @@ class cblite {
       _CBLDatabase_GetDocumentExpirationPtr.asFunction<
           DartCBLDatabase_GetDocumentExpiration>();
 
-  /// Sets or clears the expiration time of a document.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_SetDocumentExpiration instead.
-  /// @param db  The database.
-  /// @param docID  The ID of the document.
-  /// @param expiration  The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-  /// or 0 if the document should never expire.
-  /// @param outError  On failure, an error is written here.
-  /// @return  True on success, false on failure.
+  /// Sets or clears the expiration time of a document. @warning <b>Deprecated
+  /// :</b> Use CBLCollection_SetDocumentExpiration instead. @param db The
+  /// database. @param docID The ID of the document. @param expiration The
+  /// expiration time as a CBLTimestamp (milliseconds since Unix epoch), or 0 if
+  /// the document should never expire. @param outError On failure, an error is
+  /// written here. @return True on success, false on failure.
   bool CBLDatabase_SetDocumentExpiration(
     ffi.Pointer<CBLDatabase> db,
     FLSlice docID,
@@ -1103,14 +1102,13 @@ class cblite {
       _CBLDatabase_SetDocumentExpirationPtr.asFunction<
           DartCBLDatabase_SetDocumentExpiration>();
 
-  /// Registers a document change listener callback. It will be called after a specific document
-  /// is changed on disk.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_AddDocumentChangeListener on the default collection instead.
-  /// @param db  The database to observe.
-  /// @param docID  The ID of the document to observe.
-  /// @param listener  The callback to be invoked.
-  /// @param context  An opaque value that will be passed to the callback.
-  /// @return  A token to be passed to \ref CBLListener_Remove when it's time to remove the listener.
+  /// Registers a document change listener callback. It will be called after a
+  /// specific document is changed on disk. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_AddDocumentChangeListener on the default collection instead.
+  /// @param db The database to observe. @param docID The ID of the document to
+  /// observe. @param listener The callback to be invoked. @param context An
+  /// opaque value that will be passed to the callback. @return A token to be
+  /// passed to \ref CBLListener_Remove when it's time to remove the listener.
   ffi.Pointer<CBLListenerToken> CBLDatabase_AddDocumentChangeListener(
     ffi.Pointer<CBLDatabase> db,
     FLString docID,
@@ -1132,21 +1130,21 @@ class cblite {
       _CBLDatabase_AddDocumentChangeListenerPtr.asFunction<
           DartCBLDatabase_AddDocumentChangeListener>();
 
-  /// Creates a new query by compiling the input string.
-  /// This is fast, but not instantaneous. If you need to run the same query many times, keep the
-  /// \ref CBLQuery around instead of compiling it each time. If you need to run related queries
-  /// with only some values different, create one query with placeholder parameter(s), and substitute
-  /// the desired value(s) with \ref CBLQuery_SetParameters each time you run the query.
-  /// @note  You must release the \ref CBLQuery when you're finished with it.
-  /// @param db  The database to query.
-  /// @param language  The query language,
-  /// [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema) or
+  /// Creates a new query by compiling the input string. This is fast, but not
+  /// instantaneous. If you need to run the same query many times, keep the \ref
+  /// CBLQuery around instead of compiling it each time. If you need to run
+  /// related queries with only some values different, create one query with
+  /// placeholder parameter(s), and substitute the desired value(s) with \ref
+  /// CBLQuery_SetParameters each time you run the query. @note You must release
+  /// the \ref CBLQuery when you're finished with it. @param db The database to
+  /// query. @param language The query language,
+  /// [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
+  /// or
   /// [N1QL](https://docs.couchbase.com/server/4.0/n1ql/n1ql-language-reference/index.html).
-  /// @param queryString  The query string.
-  /// @param outErrorPos  If non-NULL, then on a parse error the approximate byte offset in the
-  /// input expression will be stored here (or -1 if not known/applicable.)
-  /// @param outError  On failure, the error will be written here.
-  /// @return  The new query object.
+  /// @param queryString The query string. @param outErrorPos If non-NULL, then
+  /// on a parse error the approximate byte offset in the input expression will
+  /// be stored here (or -1 if not known/applicable.) @param outError On
+  /// failure, the error will be written here. @return The new query object.
   ffi.Pointer<CBLQuery> CBLDatabase_CreateQuery(
     ffi.Pointer<CBLDatabase> db,
     int language,
@@ -1169,17 +1167,17 @@ class cblite {
   late final _CBLDatabase_CreateQuery =
       _CBLDatabase_CreateQueryPtr.asFunction<DartCBLDatabase_CreateQuery>();
 
-  /// Assigns values to the query's parameters.
-  /// These values will be substited for those parameters whenever the query is executed,
-  /// until they are next assigned.
+  /// Assigns values to the query's parameters. These values will be substited
+  /// for those parameters whenever the query is executed, until they are next
+  /// assigned.
   ///
-  /// Parameters are specified in the query source as
-  /// e.g. `$PARAM` (N1QL) or `["$PARAM"]` (JSON). In this example, the `parameters` dictionary
-  /// to this call should have a key `PARAM` that maps to the value of the parameter.
-  /// @param query  The query.
-  /// @param parameters  The parameters in the form of a Fleece \ref FLDict "dictionary" whose
-  /// keys are the parameter names. (It's easiest to construct this by using the mutable
-  /// API, i.e. calling \ref FLMutableDict_New and adding keys/values.)
+  /// Parameters are specified in the query source as e.g. `$PARAM` (N1QL) or
+  /// `["$PARAM"]` (JSON). In this example, the `parameters` dictionary to this
+  /// call should have a key `PARAM` that maps to the value of the parameter.
+  /// @param query The query. @param parameters The parameters in the form of a
+  /// Fleece \ref FLDict "dictionary" whose keys are the parameter names. (It's
+  /// easiest to construct this by using the mutable API, i.e. calling \ref
+  /// FLMutableDict_New and adding keys/values.)
   void CBLQuery_SetParameters(
     ffi.Pointer<CBLQuery> query,
     FLDict parameters,
@@ -1211,10 +1209,10 @@ class cblite {
   late final _CBLQuery_Parameters =
       _CBLQuery_ParametersPtr.asFunction<DartCBLQuery_Parameters>();
 
-  /// Runs the query, returning the results.
-  /// To obtain the results you'll typically call \ref CBLResultSet_Next in a `while` loop,
-  /// examining the values in the \ref CBLResultSet each time around.
-  /// @note  You must release the result set when you're finished with it.
+  /// Runs the query, returning the results. To obtain the results you'll
+  /// typically call \ref CBLResultSet_Next in a `while` loop, examining the
+  /// values in the \ref CBLResultSet each time around. @note You must release
+  /// the result set when you're finished with it.
   ffi.Pointer<CBLResultSet> CBLQuery_Execute(
     ffi.Pointer<CBLQuery> arg0,
     ffi.Pointer<CBLError> outError,
@@ -1230,11 +1228,12 @@ class cblite {
   late final _CBLQuery_Execute =
       _CBLQuery_ExecutePtr.asFunction<DartCBLQuery_Execute>();
 
-  /// Returns information about the query, including the translated SQLite form, and the search
-  /// strategy. You can use this to help optimize the query: the word `SCAN` in the strategy
-  /// indicates a linear scan of the entire database, which should be avoided by adding an index.
-  /// The strategy will also show which index(es), if any, are used.
-  /// @note  You are responsible for releasing the result by calling \ref FLSliceResult_Release.
+  /// Returns information about the query, including the translated SQLite form,
+  /// and the search strategy. You can use this to help optimize the query: the
+  /// word `SCAN` in the strategy indicates a linear scan of the entire
+  /// database, which should be avoided by adding an index. The strategy will
+  /// also show which index(es), if any, are used. @note You are responsible for
+  /// releasing the result by calling \ref FLSliceResult_Release.
   FLSliceResult CBLQuery_Explain(
     ffi.Pointer<CBLQuery> arg0,
   ) {
@@ -1263,12 +1262,13 @@ class cblite {
   late final _CBLQuery_ColumnCount =
       _CBLQuery_ColumnCountPtr.asFunction<DartCBLQuery_ColumnCount>();
 
-  /// Returns the name of a column in the result.
-  /// The column name is based on its expression in the `SELECT...` or `WHAT:` section of the
-  /// query. A column that returns a property or property path will be named after that property.
-  /// A column that returns an expression will have an automatically-generated name like `$1`.
-  /// To give a column a custom name, use the `AS` syntax in the query.
-  /// Every column is guaranteed to have a unique name.
+  /// Returns the name of a column in the result. The column name is based on
+  /// its expression in the `SELECT...` or `WHAT:` section of the query. A
+  /// column that returns a property or property path will be named after that
+  /// property. A column that returns an expression will have an
+  /// automatically-generated name like `$1`. To give a column a custom name,
+  /// use the `AS` syntax in the query. Every column is guaranteed to have a
+  /// unique name.
   FLSlice CBLQuery_ColumnName(
     ffi.Pointer<CBLQuery> arg0,
     int columnIndex,
@@ -1285,9 +1285,9 @@ class cblite {
   late final _CBLQuery_ColumnName =
       _CBLQuery_ColumnNamePtr.asFunction<DartCBLQuery_ColumnName>();
 
-  /// Moves the result-set iterator to the next result.
-  /// Returns false if there are no more results.
-  /// @warning This must be called _before_ examining the first result.
+  /// Moves the result-set iterator to the next result. Returns false if there
+  /// are no more results. @warning This must be called _before_ examining the
+  /// first result.
   bool CBLResultSet_Next(
     ffi.Pointer<CBLResultSet> arg0,
   ) {
@@ -1301,9 +1301,10 @@ class cblite {
   late final _CBLResultSet_Next =
       _CBLResultSet_NextPtr.asFunction<DartCBLResultSet_Next>();
 
-  /// Returns the value of a column of the current result, given its (zero-based) numeric index.
-  /// This may return a NULL pointer, indicating `MISSING`, if the value doesn't exist, e.g. if
-  /// the column is a property that doesn't exist in the document.
+  /// Returns the value of a column of the current result, given its
+  /// (zero-based) numeric index. This may return a NULL pointer, indicating
+  /// `MISSING`, if the value doesn't exist, e.g. if the column is a property
+  /// that doesn't exist in the document.
   FLValue CBLResultSet_ValueAtIndex(
     ffi.Pointer<CBLResultSet> arg0,
     int index,
@@ -1320,11 +1321,11 @@ class cblite {
   late final _CBLResultSet_ValueAtIndex =
       _CBLResultSet_ValueAtIndexPtr.asFunction<DartCBLResultSet_ValueAtIndex>();
 
-  /// Returns the value of a column of the current result, given its name.
-  /// This may return a NULL pointer, indicating `MISSING`, if the value doesn't exist, e.g. if
-  /// the column is a property that doesn't exist in the document. (Or, of course, if the key
-  /// is not a column name in this query.)
-  /// @note  See \ref CBLQuery_ColumnName for a discussion of column names.
+  /// Returns the value of a column of the current result, given its name. This
+  /// may return a NULL pointer, indicating `MISSING`, if the value doesn't
+  /// exist, e.g. if the column is a property that doesn't exist in the
+  /// document. (Or, of course, if the key is not a column name in this query.)
+  /// @note See \ref CBLQuery_ColumnName for a discussion of column names.
   FLValue CBLResultSet_ValueForKey(
     ffi.Pointer<CBLResultSet> arg0,
     FLString key,
@@ -1341,9 +1342,10 @@ class cblite {
   late final _CBLResultSet_ValueForKey =
       _CBLResultSet_ValueForKeyPtr.asFunction<DartCBLResultSet_ValueForKey>();
 
-  /// Returns the current result as an array of column values.
-  /// @warning The array reference is only valid until the result-set is advanced or released.
-  /// If you want to keep it for longer, call \ref FLArray_Retain (and release it when done.)
+  /// Returns the current result as an array of column values. @warning The
+  /// array reference is only valid until the result-set is advanced or
+  /// released. If you want to keep it for longer, call \ref FLArray_Retain (and
+  /// release it when done.)
   FLArray CBLResultSet_ResultArray(
     ffi.Pointer<CBLResultSet> arg0,
   ) {
@@ -1359,8 +1361,9 @@ class cblite {
       _CBLResultSet_ResultArrayPtr.asFunction<DartCBLResultSet_ResultArray>();
 
   /// Returns the current result as a dictionary mapping column names to values.
-  /// @warning The dict reference is only valid until the result-set is advanced or released.
-  /// If you want to keep it for longer, call \ref FLDict_Retain (and release it when done.)
+  /// @warning The dict reference is only valid until the result-set is advanced
+  /// or released. If you want to keep it for longer, call \ref FLDict_Retain
+  /// (and release it when done.)
   FLDict CBLResultSet_ResultDict(
     ffi.Pointer<CBLResultSet> arg0,
   ) {
@@ -1390,17 +1393,16 @@ class cblite {
   late final _CBLResultSet_GetQuery =
       _CBLResultSet_GetQueryPtr.asFunction<DartCBLResultSet_GetQuery>();
 
-  /// Registers a change listener callback with a query, turning it into a "live query" until
-  /// the listener is removed (via \ref CBLListener_Remove).
+  /// Registers a change listener callback with a query, turning it into a "live
+  /// query" until the listener is removed (via \ref CBLListener_Remove).
   ///
-  /// When the first change listener is added, the query will run (in the background) and notify
-  /// the listener(s) of the results when ready. After that, it will run in the background after
-  /// the database changes, and only notify the listeners when the result set changes.
-  /// @param query  The query to observe.
-  /// @param listener  The callback to be invoked.
-  /// @param context  An opaque value that will be passed to the callback.
-  /// @return  A token to be passed to \ref CBLListener_Remove when it's time to remove the
-  /// listener.
+  /// When the first change listener is added, the query will run (in the
+  /// background) and notify the listener(s) of the results when ready. After
+  /// that, it will run in the background after the database changes, and only
+  /// notify the listeners when the result set changes. @param query The query
+  /// to observe. @param listener The callback to be invoked. @param context An
+  /// opaque value that will be passed to the callback. @return A token to be
+  /// passed to \ref CBLListener_Remove when it's time to remove the listener.
   ffi.Pointer<CBLListenerToken> CBLQuery_AddChangeListener(
     ffi.Pointer<CBLQuery> query,
     CBLQueryChangeListener listener,
@@ -1419,13 +1421,13 @@ class cblite {
   late final _CBLQuery_AddChangeListener = _CBLQuery_AddChangeListenerPtr
       .asFunction<DartCBLQuery_AddChangeListener>();
 
-  /// Returns the query's _entire_ current result set, after it's been announced via a call to the
-  /// listener's callback.
-  /// @note  You must release the result set when you're finished with it.
-  /// @param query  The query being listened to.
-  /// @param listener  The query listener that was notified.
-  /// @param outError  If the query failed to run, the error will be stored here.
-  /// @return  A new object containing the query's current results, or NULL if the query failed to run.
+  /// Returns the query's _entire_ current result set, after it's been announced
+  /// via a call to the listener's callback. @note You must release the result
+  /// set when you're finished with it. @param query The query being listened
+  /// to. @param listener The query listener that was notified. @param outError
+  /// If the query failed to run, the error will be stored here. @return A new
+  /// object containing the query's current results, or NULL if the query failed
+  /// to run.
   ffi.Pointer<CBLResultSet> CBLQuery_CopyCurrentResults(
     ffi.Pointer<CBLQuery> query,
     ffi.Pointer<CBLListenerToken> listener,
@@ -1444,11 +1446,11 @@ class cblite {
   late final _CBLQuery_CopyCurrentResults = _CBLQuery_CopyCurrentResultsPtr
       .asFunction<DartCBLQuery_CopyCurrentResults>();
 
-  /// Creates a value index.
-  /// Indexes are persistent.
-  /// If an identical index with that name already exists, nothing happens (and no error is returned.)
-  /// If a non-identical index with that name already exists, it is deleted and re-created.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_CreateValueIndex on the default collection instead.
+  /// Creates a value index. Indexes are persistent. If an identical index with
+  /// that name already exists, nothing happens (and no error is returned.) If a
+  /// non-identical index with that name already exists, it is deleted and
+  /// re-created. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_CreateValueIndex on the default collection instead.
   bool CBLDatabase_CreateValueIndex(
     ffi.Pointer<CBLDatabase> db,
     FLString name,
@@ -1469,11 +1471,11 @@ class cblite {
   late final _CBLDatabase_CreateValueIndex = _CBLDatabase_CreateValueIndexPtr
       .asFunction<DartCBLDatabase_CreateValueIndex>();
 
-  /// Creates a full-text index.
-  /// Indexes are persistent.
-  /// If an identical index with that name already exists, nothing happens (and no error is returned.)
-  /// If a non-identical index with that name already exists, it is deleted and re-created.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_CreateFullTextIndex on the default collection instead.
+  /// Creates a full-text index. Indexes are persistent. If an identical index
+  /// with that name already exists, nothing happens (and no error is returned.)
+  /// If a non-identical index with that name already exists, it is deleted and
+  /// re-created. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_CreateFullTextIndex on the default collection instead.
   bool CBLDatabase_CreateFullTextIndex(
     ffi.Pointer<CBLDatabase> db,
     FLString name,
@@ -1495,8 +1497,8 @@ class cblite {
       _CBLDatabase_CreateFullTextIndexPtr.asFunction<
           DartCBLDatabase_CreateFullTextIndex>();
 
-  /// Deletes an index given its name.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_DeleteIndex on the default collection instead.
+  /// Deletes an index given its name. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_DeleteIndex on the default collection instead.
   bool CBLDatabase_DeleteIndex(
     ffi.Pointer<CBLDatabase> db,
     FLString name,
@@ -1515,9 +1517,10 @@ class cblite {
   late final _CBLDatabase_DeleteIndex =
       _CBLDatabase_DeleteIndexPtr.asFunction<DartCBLDatabase_DeleteIndex>();
 
-  /// Returns the names of the indexes on this database, as a Fleece array of strings.
-  /// @note  You are responsible for releasing the returned Fleece array.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_GetIndexNames on the default collection instead.
+  /// Returns the names of the indexes on this database, as a Fleece array of
+  /// strings. @note You are responsible for releasing the returned Fleece
+  /// array. @warning <b>Deprecated :</b> Use CBLCollection_GetIndexNames on the
+  /// default collection instead.
   FLArray CBLDatabase_GetIndexNames(
     ffi.Pointer<CBLDatabase> db,
   ) {
@@ -1538,13 +1541,13 @@ class cblite {
 
   FLString get kCBLDefaultCollectionName => _kCBLDefaultCollectionName.ref;
 
-  /// Returns the names of all existing scopes in the database.
-  /// The scope exists when there is at least one collection created under the scope.
-  /// The default scope is exceptional in that it will always exists even there are no collections under it.
-  /// @note  You are responsible for releasing the returned array.
-  /// @param db  The database.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  The names of all existing scopes in the database, or NULL if an error occurred.
+  /// Returns the names of all existing scopes in the database. The scope exists
+  /// when there is at least one collection created under the scope. The default
+  /// scope is exceptional in that it will always exists even there are no
+  /// collections under it. @note You are responsible for releasing the returned
+  /// array. @param db The database. @param outError On failure, the error will
+  /// be written here. @return The names of all existing scopes in the database,
+  /// or NULL if an error occurred.
   FLMutableArray CBLDatabase_ScopeNames(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLError> outError,
@@ -1561,12 +1564,11 @@ class cblite {
   late final _CBLDatabase_ScopeNames =
       _CBLDatabase_ScopeNamesPtr.asFunction<DartCBLDatabase_ScopeNames>();
 
-  /// Returns the names of all collections in the scope.
-  /// @note  You are responsible for releasing the returned array.
-  /// @param db  The database.
-  /// @param scopeName  The name of the scope.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  The names of all collections in the scope, or NULL if an error occurred.
+  /// Returns the names of all collections in the scope. @note You are
+  /// responsible for releasing the returned array. @param db The database.
+  /// @param scopeName The name of the scope. @param outError On failure, the
+  /// error will be written here. @return The names of all collections in the
+  /// scope, or NULL if an error occurred.
   FLMutableArray CBLDatabase_CollectionNames(
     ffi.Pointer<CBLDatabase> db,
     FLString scopeName,
@@ -1585,14 +1587,14 @@ class cblite {
   late final _CBLDatabase_CollectionNames = _CBLDatabase_CollectionNamesPtr
       .asFunction<DartCBLDatabase_CollectionNames>();
 
-  /// Returns an existing scope with the given name.
-  /// The scope exists when there is at least one collection created under the scope.
-  /// The default scope is exception in that it will always exists even there are no collections under it.
-  /// @note  You are responsible for releasing the returned scope.
-  /// @param db  The database.
-  /// @param scopeName  The name of the scope.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  A \ref CBLScope instance, or NULL if the scope doesn't exist or an error occurred.
+  /// Returns an existing scope with the given name. The scope exists when there
+  /// is at least one collection created under the scope. The default scope is
+  /// exception in that it will always exists even there are no collections
+  /// under it. @note You are responsible for releasing the returned scope.
+  /// @param db The database. @param scopeName The name of the scope. @param
+  /// outError On failure, the error will be written here. @return A \ref
+  /// CBLScope instance, or NULL if the scope doesn't exist or an error
+  /// occurred.
   ffi.Pointer<CBLScope> CBLDatabase_Scope(
     ffi.Pointer<CBLDatabase> db,
     FLString scopeName,
@@ -1610,13 +1612,12 @@ class cblite {
   late final _CBLDatabase_Scope =
       _CBLDatabase_ScopePtr.asFunction<DartCBLDatabase_Scope>();
 
-  /// Returns the existing collection with the given name and scope.
-  /// @note  You are responsible for releasing the returned collection.
-  /// @param db  The database.
-  /// @param collectionName  The name of the collection.
-  /// @param scopeName  The name of the scope.
-  /// @param outError  On failure, the error will be written here.
-  /// @return A \ref CBLCollection instance, or NULL if the collection doesn't exist or an error occurred.
+  /// Returns the existing collection with the given name and scope. @note You
+  /// are responsible for releasing the returned collection. @param db The
+  /// database. @param collectionName The name of the collection. @param
+  /// scopeName The name of the scope. @param outError On failure, the error
+  /// will be written here. @return A \ref CBLCollection instance, or NULL if
+  /// the collection doesn't exist or an error occurred.
   ffi.Pointer<CBLCollection> CBLDatabase_Collection(
     ffi.Pointer<CBLDatabase> db,
     FLString collectionName,
@@ -1637,19 +1638,20 @@ class cblite {
   late final _CBLDatabase_Collection =
       _CBLDatabase_CollectionPtr.asFunction<DartCBLDatabase_Collection>();
 
-  /// Create a new collection.
-  /// The naming rules of the collections and scopes are as follows:
+  /// Create a new collection. The naming rules of the collections and scopes
+  /// are as follows:
+  ///
   /// - Must be between 1 and 251 characters in length.
-  /// - Can only contain the characters A-Z, a-z, 0-9, and the symbols _, -, and %.
-  /// - Cannot start with _ or %.
-  /// - Both scope and collection names are case sensitive.
-  /// @note  If the collection already exists, the existing collection will be returned.
-  /// @note  You are responsible for releasing the returned collection.
-  /// @param db  The database.
-  /// @param collectionName  The name of the collection.
-  /// @param scopeName  The name of the scope.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  A \ref CBLCollection instance, or NULL if an error occurred.
+  /// - Can only contain the characters A-Z, a-z, 0-9, and the symbols \_, -,
+  ///   and %.
+  /// - Cannot start with \_ or %.
+  /// - Both scope and collection names are case sensitive. @note If the
+  ///   collection already exists, the existing collection will be returned.
+  ///   @note You are responsible for releasing the returned collection. @param
+  ///   db The database. @param collectionName The name of the collection.
+  ///   @param scopeName The name of the scope. @param outError On failure, the
+  ///   error will be written here. @return A \ref CBLCollection instance, or
+  ///   NULL if an error occurred.
   ffi.Pointer<CBLCollection> CBLDatabase_CreateCollection(
     ffi.Pointer<CBLDatabase> db,
     FLString collectionName,
@@ -1670,13 +1672,11 @@ class cblite {
   late final _CBLDatabase_CreateCollection = _CBLDatabase_CreateCollectionPtr
       .asFunction<DartCBLDatabase_CreateCollection>();
 
-  /// Delete an existing collection.
-  /// @note  The default collection cannot be deleted.
-  /// @param db  The database.
-  /// @param collectionName  The name of the collection.
-  /// @param scopeName  The name of the scope.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if success, or False if an error occurred.
+  /// Delete an existing collection. @note The default collection cannot be
+  /// deleted. @param db The database. @param collectionName The name of the
+  /// collection. @param scopeName The name of the scope. @param outError On
+  /// failure, the error will be written here. @return True if success, or False
+  /// if an error occurred.
   bool CBLDatabase_DeleteCollection(
     ffi.Pointer<CBLDatabase> db,
     FLString collectionName,
@@ -1697,12 +1697,11 @@ class cblite {
   late final _CBLDatabase_DeleteCollection = _CBLDatabase_DeleteCollectionPtr
       .asFunction<DartCBLDatabase_DeleteCollection>();
 
-  /// Returns the default scope.
-  /// @note  The default scope always exist even there are no collections under it.
-  /// @note  You are responsible for releasing the returned scope.
-  /// @param db  The database.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  A \ref CBLScope instance, or NULL if an error occurred.
+  /// Returns the default scope. @note The default scope always exist even there
+  /// are no collections under it. @note You are responsible for releasing the
+  /// returned scope. @param db The database. @param outError On failure, the
+  /// error will be written here. @return A \ref CBLScope instance, or NULL if
+  /// an error occurred.
   ffi.Pointer<CBLScope> CBLDatabase_DefaultScope(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLError> outError,
@@ -1719,13 +1718,12 @@ class cblite {
   late final _CBLDatabase_DefaultScope =
       _CBLDatabase_DefaultScopePtr.asFunction<DartCBLDatabase_DefaultScope>();
 
-  /// Returns the default collection.
-  /// @note  The default collection may not exist if it was deleted.
-  /// Also, the default collection cannot be recreated after being deleted.
-  /// @note  You are responsible for releasing the returned collection.
-  /// @param db  The database.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  A \ref CBLCollection instance, or NULL if the default collection doesn't exist or an error occurred.
+  /// Returns the default collection. @note The default collection may not exist
+  /// if it was deleted. Also, the default collection cannot be recreated after
+  /// being deleted. @note You are responsible for releasing the returned
+  /// collection. @param db The database. @param outError On failure, the error
+  /// will be written here. @return A \ref CBLCollection instance, or NULL if
+  /// the default collection doesn't exist or an error occurred.
   ffi.Pointer<CBLCollection> CBLDatabase_DefaultCollection(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLError> outError,
@@ -1742,10 +1740,9 @@ class cblite {
   late final _CBLDatabase_DefaultCollection = _CBLDatabase_DefaultCollectionPtr
       .asFunction<DartCBLDatabase_DefaultCollection>();
 
-  /// Returns the scope of the collection.
-  /// @note You are responsible for releasing the returned scope.
-  /// @param collection  The collection.
-  /// @return A \ref CBLScope instance.
+  /// Returns the scope of the collection. @note You are responsible for
+  /// releasing the returned scope. @param collection The collection. @return A
+  /// \ref CBLScope instance.
   ffi.Pointer<CBLScope> CBLCollection_Scope(
     ffi.Pointer<CBLCollection> collection,
   ) {
@@ -1760,9 +1757,8 @@ class cblite {
   late final _CBLCollection_Scope =
       _CBLCollection_ScopePtr.asFunction<DartCBLCollection_Scope>();
 
-  /// Returns the collection name.
-  /// @param collection  The collection.
-  /// @return The name of the collection.
+  /// Returns the collection name. @param collection The collection. @return The
+  /// name of the collection.
   FLString CBLCollection_Name(
     ffi.Pointer<CBLCollection> collection,
   ) {
@@ -1777,9 +1773,8 @@ class cblite {
   late final _CBLCollection_Name =
       _CBLCollection_NamePtr.asFunction<DartCBLCollection_Name>();
 
-  /// Returns the number of documents in the collection.
-  /// @param collection  The collection.
-  /// @return  the number of documents in the collection.
+  /// Returns the number of documents in the collection. @param collection The
+  /// collection. @return the number of documents in the collection.
   int CBLCollection_Count(
     ffi.Pointer<CBLCollection> collection,
   ) {
@@ -1794,15 +1789,15 @@ class cblite {
   late final _CBLCollection_Count =
       _CBLCollection_CountPtr.asFunction<DartCBLCollection_Count>();
 
-  /// Reads a document from the collection, creating a new (immutable) \ref CBLDocument object.
-  /// Each call to this function creates a new object (which must later be released.)
-  /// @note  If you are reading the document in order to make changes to it, call
-  /// CBLCollection_GetMutableDocument instead.
-  /// @param collection  The collection.
-  /// @param docID  The ID of the document.
-  /// @param outError  On failure, the error will be written here. (A nonexistent document is not
-  /// considered a failure; in that event the error code will be zero.)
-  /// @return  A new \ref CBLDocument instance, or NULL if the doc doesn't exist or an error occurred.
+  /// Reads a document from the collection, creating a new (immutable) \ref
+  /// CBLDocument object. Each call to this function creates a new object (which
+  /// must later be released.) @note If you are reading the document in order to
+  /// make changes to it, call CBLCollection_GetMutableDocument instead. @param
+  /// collection The collection. @param docID The ID of the document. @param
+  /// outError On failure, the error will be written here. (A nonexistent
+  /// document is not considered a failure; in that event the error code will be
+  /// zero.) @return A new \ref CBLDocument instance, or NULL if the doc doesn't
+  /// exist or an error occurred.
   ffi.Pointer<CBLDocument> CBLCollection_GetDocument(
     ffi.Pointer<CBLCollection> collection,
     FLString docID,
@@ -1821,15 +1816,14 @@ class cblite {
   late final _CBLCollection_GetDocument =
       _CBLCollection_GetDocumentPtr.asFunction<DartCBLCollection_GetDocument>();
 
-  /// Saves a (mutable) document to the collection.
-  /// @warning  If a newer revision has been saved since the doc was loaded, it will be
-  /// overwritten by this one. This can lead to data loss! To avoid this, call
-  /// \ref CBLCollection_SaveDocumentWithConcurrencyControl or
-  /// \ref CBLCollection_SaveDocumentWithConflictHandler instead.
-  /// @param collection  The collection to save to.
-  /// @param doc  The mutable document to save.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True on success, false on failure.
+  /// Saves a (mutable) document to the collection. @warning If a newer revision
+  /// has been saved since the doc was loaded, it will be overwritten by this
+  /// one. This can lead to data loss! To avoid this, call \ref
+  /// CBLCollection_SaveDocumentWithConcurrencyControl or \ref
+  /// CBLCollection_SaveDocumentWithConflictHandler instead. @param collection
+  /// The collection to save to. @param doc The mutable document to save. @param
+  /// outError On failure, the error will be written here. @return True on
+  /// success, false on failure.
   bool CBLCollection_SaveDocument(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> doc,
@@ -1848,16 +1842,15 @@ class cblite {
   late final _CBLCollection_SaveDocument = _CBLCollection_SaveDocumentPtr
       .asFunction<DartCBLCollection_SaveDocument>();
 
-  /// Saves a (mutable) document to the collection.
-  /// If a conflicting revision has been saved since \p doc was loaded, the \p concurrency
-  /// parameter specifies whether the save should fail, or the conflicting revision should
-  /// be overwritten with the revision being saved.
-  /// If you need finer-grained control, call \ref CBLCollection_SaveDocumentWithConflictHandler instead.
-  /// @param collection  The collection to save to.
-  /// @param doc  The mutable document to save.
-  /// @param concurrency  Conflict-handling strategy (fail or overwrite).
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True on success, false on failure.
+  /// Saves a (mutable) document to the collection. If a conflicting revision
+  /// has been saved since \p doc was loaded, the \p concurrency parameter
+  /// specifies whether the save should fail, or the conflicting revision should
+  /// be overwritten with the revision being saved. If you need finer-grained
+  /// control, call \ref CBLCollection_SaveDocumentWithConflictHandler instead.
+  /// @param collection The collection to save to. @param doc The mutable
+  /// document to save. @param concurrency Conflict-handling strategy (fail or
+  /// overwrite). @param outError On failure, the error will be written here.
+  /// @return True on success, false on failure.
   bool CBLCollection_SaveDocumentWithConcurrencyControl(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> doc,
@@ -1880,14 +1873,13 @@ class cblite {
       _CBLCollection_SaveDocumentWithConcurrencyControlPtr.asFunction<
           DartCBLCollection_SaveDocumentWithConcurrencyControl>();
 
-  /// Saves a (mutable) document to the collection, allowing for custom conflict handling in the event
-  /// that the document has been updated since \p doc was loaded.
-  /// @param collection  The collection to save to.
-  /// @param doc  The mutable document to save.
-  /// @param conflictHandler  The callback to be invoked if there is a conflict.
-  /// @param context  An arbitrary value to be passed to the \p conflictHandler.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True on success, false on failure.
+  /// Saves a (mutable) document to the collection, allowing for custom conflict
+  /// handling in the event that the document has been updated since \p doc was
+  /// loaded. @param collection The collection to save to. @param doc The
+  /// mutable document to save. @param conflictHandler The callback to be
+  /// invoked if there is a conflict. @param context An arbitrary value to be
+  /// passed to the \p conflictHandler. @param outError On failure, the error
+  /// will be written here. @return True on success, false on failure.
   bool CBLCollection_SaveDocumentWithConflictHandler(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> doc,
@@ -1912,12 +1904,11 @@ class cblite {
       _CBLCollection_SaveDocumentWithConflictHandlerPtr.asFunction<
           DartCBLCollection_SaveDocumentWithConflictHandler>();
 
-  /// Deletes a document from the collection. Deletions are replicated.
-  /// @warning  You are still responsible for releasing the CBLDocument.
-  /// @param collection  The collection containing the document.
-  /// @param document  The document to delete.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was deleted, false if an error occurred.
+  /// Deletes a document from the collection. Deletions are replicated. @warning
+  /// You are still responsible for releasing the CBLDocument. @param collection
+  /// The collection containing the document. @param document The document to
+  /// delete. @param outError On failure, the error will be written here.
+  /// @return True if the document was deleted, false if an error occurred.
   bool CBLCollection_DeleteDocument(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> document,
@@ -1936,13 +1927,12 @@ class cblite {
   late final _CBLCollection_DeleteDocument = _CBLCollection_DeleteDocumentPtr
       .asFunction<DartCBLCollection_DeleteDocument>();
 
-  /// Deletes a document from the collection. Deletions are replicated.
-  /// @warning You are still responsible for releasing the CBLDocument.
-  /// @param collection  The collection containing the document.
-  /// @param document  The document to delete.
-  /// @param concurrency  Conflict-handling strategy.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was deleted, false if an error occurred.
+  /// Deletes a document from the collection. Deletions are replicated. @warning
+  /// You are still responsible for releasing the CBLDocument. @param collection
+  /// The collection containing the document. @param document The document to
+  /// delete. @param concurrency Conflict-handling strategy. @param outError On
+  /// failure, the error will be written here. @return True if the document was
+  /// deleted, false if an error occurred.
   bool CBLCollection_DeleteDocumentWithConcurrencyControl(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> document,
@@ -1965,16 +1955,16 @@ class cblite {
       _CBLCollection_DeleteDocumentWithConcurrencyControlPtr.asFunction<
           DartCBLCollection_DeleteDocumentWithConcurrencyControl>();
 
-  /// Purges a document. This removes all traces of the document from the collection.
-  /// Purges are _not_ replicated. If the document is changed on a server, it will be re-created
-  /// when pulled.
-  /// @warning  You are still responsible for releasing the \ref CBLDocument reference.
-  /// @note  If you don't have the document in memory already, \ref CBLCollection_PurgeDocumentByID is a
-  /// simpler shortcut.
-  /// @param collection  The collection containing the document.
-  /// @param document  The document to delete.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was purged, false if it doesn't exist or the purge failed.
+  /// Purges a document. This removes all traces of the document from the
+  /// collection. Purges are _not_ replicated. If the document is changed on a
+  /// server, it will be re-created when pulled. @warning You are still
+  /// responsible for releasing the \ref CBLDocument reference. @note If you
+  /// don't have the document in memory already, \ref
+  /// CBLCollection_PurgeDocumentByID is a simpler shortcut. @param collection
+  /// The collection containing the document. @param document The document to
+  /// delete. @param outError On failure, the error will be written here.
+  /// @return True if the document was purged, false if it doesn't exist or the
+  /// purge failed.
   bool CBLCollection_PurgeDocument(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> document,
@@ -1993,12 +1983,11 @@ class cblite {
   late final _CBLCollection_PurgeDocument = _CBLCollection_PurgeDocumentPtr
       .asFunction<DartCBLCollection_PurgeDocument>();
 
-  /// Purges a document, given only its ID.
-  /// @note  If no document with that ID exists, this function will return false but the error code will be zero.
-  /// @param collection  The collection.
-  /// @param docID  The document ID to purge.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  True if the document was purged, false if it doesn't exist or the purge failed.
+  /// Purges a document, given only its ID. @note If no document with that ID
+  /// exists, this function will return false but the error code will be zero.
+  /// @param collection The collection. @param docID The document ID to purge.
+  /// @param outError On failure, the error will be written here. @return True
+  /// if the document was purged, false if it doesn't exist or the purge failed.
   bool CBLCollection_PurgeDocumentByID(
     ffi.Pointer<CBLCollection> collection,
     FLString docID,
@@ -2018,15 +2007,13 @@ class cblite {
       _CBLCollection_PurgeDocumentByIDPtr.asFunction<
           DartCBLCollection_PurgeDocumentByID>();
 
-  /// Returns the time, if any, at which a given document will expire and be purged.
-  /// Documents don't normally expire; you have to call \ref CBLCollection_SetDocumentExpiration
-  /// to set a document's expiration time.
-  /// @param collection  The collection.
-  /// @param docID  The ID of the document.
-  /// @param outError  On failure, an error is written here.
-  /// @return  The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-  /// or 0 if the document does not have an expiration,
-  /// or -1 if the call failed.
+  /// Returns the time, if any, at which a given document will expire and be
+  /// purged. Documents don't normally expire; you have to call \ref
+  /// CBLCollection_SetDocumentExpiration to set a document's expiration time.
+  /// @param collection The collection. @param docID The ID of the document.
+  /// @param outError On failure, an error is written here. @return The
+  /// expiration time as a CBLTimestamp (milliseconds since Unix epoch), or 0 if
+  /// the document does not have an expiration, or -1 if the call failed.
   int CBLCollection_GetDocumentExpiration(
     ffi.Pointer<CBLCollection> collection,
     FLSlice docID,
@@ -2046,13 +2033,11 @@ class cblite {
       _CBLCollection_GetDocumentExpirationPtr.asFunction<
           DartCBLCollection_GetDocumentExpiration>();
 
-  /// Sets or clears the expiration time of a document.
-  /// @param collection  The collection.
-  /// @param docID  The ID of the document.
-  /// @param expiration  The expiration time as a CBLTimestamp (milliseconds since Unix epoch),
-  /// or 0 if the document should never expire.
-  /// @param outError  On failure, an error is written here.
-  /// @return  True on success, false on failure.
+  /// Sets or clears the expiration time of a document. @param collection The
+  /// collection. @param docID The ID of the document. @param expiration The
+  /// expiration time as a CBLTimestamp (milliseconds since Unix epoch), or 0 if
+  /// the document should never expire. @param outError On failure, an error is
+  /// written here. @return True on success, false on failure.
   bool CBLCollection_SetDocumentExpiration(
     ffi.Pointer<CBLCollection> collection,
     FLSlice docID,
@@ -2074,14 +2059,14 @@ class cblite {
       _CBLCollection_SetDocumentExpirationPtr.asFunction<
           DartCBLCollection_SetDocumentExpiration>();
 
-  /// Reads a document from the collection, in mutable form that can be updated and saved.
-  /// (This function is otherwise identical to \ref CBLCollection_GetDocument.)
-  /// @note  You must release the document when you're done with it.
-  /// @param collection  The collection.
-  /// @param docID  The ID of the document.
-  /// @param outError  On failure, the error will be written here. (A nonexistent document is not
-  /// considered a failure; in that event the error code will be zero.)
-  /// @return  A new \ref CBLDocument instance, or NULL if the doc doesn't exist or an error occurred.
+  /// Reads a document from the collection, in mutable form that can be updated
+  /// and saved. (This function is otherwise identical to \ref
+  /// CBLCollection_GetDocument.) @note You must release the document when
+  /// you're done with it. @param collection The collection. @param docID The ID
+  /// of the document. @param outError On failure, the error will be written
+  /// here. (A nonexistent document is not considered a failure; in that event
+  /// the error code will be zero.) @return A new \ref CBLDocument instance, or
+  /// NULL if the doc doesn't exist or an error occurred.
   ffi.Pointer<CBLDocument> CBLCollection_GetMutableDocument(
     ffi.Pointer<CBLCollection> collection,
     FLString docID,
@@ -2101,14 +2086,12 @@ class cblite {
       _CBLCollection_GetMutableDocumentPtr.asFunction<
           DartCBLCollection_GetMutableDocument>();
 
-  /// Creates a value index in the collection.
-  /// If an identical index with that name already exists, nothing happens (and no error is returned.)
-  /// If a non-identical index with that name already exists, it is deleted and re-created.
-  /// @param collection  The collection.
-  /// @param name  The name of the index.
-  /// @param config  The index configuration.
-  /// @param outError  On failure, an error is written here.
-  /// @return  True on success, false on failure.
+  /// Creates a value index in the collection. If an identical index with that
+  /// name already exists, nothing happens (and no error is returned.) If a
+  /// non-identical index with that name already exists, it is deleted and
+  /// re-created. @param collection The collection. @param name The name of the
+  /// index. @param config The index configuration. @param outError On failure,
+  /// an error is written here. @return True on success, false on failure.
   bool CBLCollection_CreateValueIndex(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -2130,14 +2113,12 @@ class cblite {
       _CBLCollection_CreateValueIndexPtr.asFunction<
           DartCBLCollection_CreateValueIndex>();
 
-  /// Creates a full-text index in the collection.
-  /// If an identical index with that name already exists, nothing happens (and no error is returned.)
-  /// If a non-identical index with that name already exists, it is deleted and re-created.
-  /// @param collection  The collection.
-  /// @param name  The name of the index.
-  /// @param config  The index configuration.
-  /// @param outError  On failure, an error is written here.
-  /// @return  True on success, false on failure.
+  /// Creates a full-text index in the collection. If an identical index with
+  /// that name already exists, nothing happens (and no error is returned.) If a
+  /// non-identical index with that name already exists, it is deleted and
+  /// re-created. @param collection The collection. @param name The name of the
+  /// index. @param config The index configuration. @param outError On failure,
+  /// an error is written here. @return True on success, false on failure.
   bool CBLCollection_CreateFullTextIndex(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -2159,11 +2140,9 @@ class cblite {
       _CBLCollection_CreateFullTextIndexPtr.asFunction<
           DartCBLCollection_CreateFullTextIndex>();
 
-  /// Deletes an index in the collection by name.
-  /// @param collection  The collection.
-  /// @param name  The name of the index.
-  /// @param outError  On failure, an error is written here.
-  /// @return  True on success, false on failure.
+  /// Deletes an index in the collection by name. @param collection The
+  /// collection. @param name The name of the index. @param outError On failure,
+  /// an error is written here. @return True on success, false on failure.
   bool CBLCollection_DeleteIndex(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -2182,11 +2161,11 @@ class cblite {
   late final _CBLCollection_DeleteIndex =
       _CBLCollection_DeleteIndexPtr.asFunction<DartCBLCollection_DeleteIndex>();
 
-  /// Returns the names of the indexes in the collection, as a Fleece array of strings.
-  /// @note  You are responsible for releasing the returned Fleece array.
-  /// @param collection  The collection.
-  /// @param outError  On failure, an error is written here.
-  /// @return  The index names in the collection, or NULL if an error occurred.
+  /// Returns the names of the indexes in the collection, as a Fleece array of
+  /// strings. @note You are responsible for releasing the returned Fleece
+  /// array. @param collection The collection. @param outError On failure, an
+  /// error is written here. @return The index names in the collection, or NULL
+  /// if an error occurred.
   FLMutableArray CBLCollection_GetIndexNames(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLError> outError,
@@ -2203,11 +2182,12 @@ class cblite {
   late final _CBLCollection_GetIndexNames = _CBLCollection_GetIndexNamesPtr
       .asFunction<DartCBLCollection_GetIndexNames>();
 
-  /// Registers a collection change listener callback. It will be called after one or more documents are changed on disk.
-  /// @param collection  The collection to observe.
-  /// @param listener  The callback to be invoked.
-  /// @param context  An opaque value that will be passed to the callback.
-  /// @return  A token to be passed to \ref CBLListener_Remove when it's time to remove the listener.
+  /// Registers a collection change listener callback. It will be called after
+  /// one or more documents are changed on disk. @param collection The
+  /// collection to observe. @param listener The callback to be invoked. @param
+  /// context An opaque value that will be passed to the callback. @return A
+  /// token to be passed to \ref CBLListener_Remove when it's time to remove the
+  /// listener.
   ffi.Pointer<CBLListenerToken> CBLCollection_AddChangeListener(
     ffi.Pointer<CBLCollection> collection,
     CBLCollectionChangeListener listener,
@@ -2227,12 +2207,12 @@ class cblite {
       _CBLCollection_AddChangeListenerPtr.asFunction<
           DartCBLCollection_AddChangeListener>();
 
-  /// Registers a document change listener callback. It will be called after a specific document is changed on disk.
-  /// @param collection  The collection to observe.
-  /// @param docID  The ID of the document to observe.
-  /// @param listener  The callback to be invoked.
-  /// @param context  An opaque value that will be passed to the callback.
-  /// @return  A token to be passed to \ref CBLListener_Remove when it's time to remove the listener.
+  /// Registers a document change listener callback. It will be called after a
+  /// specific document is changed on disk. @param collection The collection to
+  /// observe. @param docID The ID of the document to observe. @param listener
+  /// The callback to be invoked. @param context An opaque value that will be
+  /// passed to the callback. @return A token to be passed to \ref
+  /// CBLListener_Remove when it's time to remove the listener.
   ffi.Pointer<CBLListenerToken> CBLCollection_AddDocumentChangeListener(
     ffi.Pointer<CBLCollection> collection,
     FLString docID,
@@ -2266,12 +2246,12 @@ class cblite {
       _CBLDatabaseConfiguration_DefaultPtr.asFunction<
           DartCBLDatabaseConfiguration_Default>();
 
-  /// Derives an encryption key from a password. If your UI uses passwords, call this function to
-  /// create the key used to encrypt the database. It is designed for security, and deliberately
-  /// runs slowly to make brute-force attacks impractical.
-  /// @param key  The derived AES key will be stored here.
-  /// @param password  The input password, which can be any data.
-  /// @return  True on success, false if there was a problem deriving the key.
+  /// Derives an encryption key from a password. If your UI uses passwords, call
+  /// this function to create the key used to encrypt the database. It is
+  /// designed for security, and deliberately runs slowly to make brute-force
+  /// attacks impractical. @param key The derived AES key will be stored here.
+  /// @param password The input password, which can be any data. @return True on
+  /// success, false if there was a problem deriving the key.
   bool CBLEncryptionKey_FromPassword(
     ffi.Pointer<CBLEncryptionKey> key,
     FLString password,
@@ -2289,11 +2269,11 @@ class cblite {
       .asFunction<DartCBLEncryptionKey_FromPassword>();
 
   /// VOLATILE API: Derives an encryption key from a password in a way that is
-  /// compatible with certain variants of Couchbase Lite in which a slightly different
-  /// hashing algorithm is used.  The same notes apply as in CBLEncryptionKey_FromPassword
-  /// @param key  The derived AES key will be stored here.
-  /// @param password  The input password, which can be any data.
-  /// @return  True on success, false if there was a problem deriving the key.
+  /// compatible with certain variants of Couchbase Lite in which a slightly
+  /// different hashing algorithm is used. The same notes apply as in
+  /// CBLEncryptionKey_FromPassword @param key The derived AES key will be
+  /// stored here. @param password The input password, which can be any data.
+  /// @return True on success, false if there was a problem deriving the key.
   bool CBLEncryptionKey_FromPasswordOld(
     ffi.Pointer<CBLEncryptionKey> key,
     FLString password,
@@ -2311,10 +2291,10 @@ class cblite {
       _CBLEncryptionKey_FromPasswordOldPtr.asFunction<
           DartCBLEncryptionKey_FromPasswordOld>();
 
-  /// Returns true if a database with the given name exists in the given directory.
-  /// @param name  The database name (without the ".cblite2" extension.)
-  /// @param inDirectory  The directory containing the database. If NULL, `name` must be an
-  /// absolute or relative path to the database.
+  /// Returns true if a database with the given name exists in the given
+  /// directory. @param name The database name (without the ".cblite2"
+  /// extension.) @param inDirectory The directory containing the database. If
+  /// NULL, `name` must be an absolute or relative path to the database.
   bool CBL_DatabaseExists(
     FLString name,
     FLString inDirectory,
@@ -2331,13 +2311,16 @@ class cblite {
   late final _CBL_DatabaseExists =
       _CBL_DatabaseExistsPtr.asFunction<DartCBL_DatabaseExists>();
 
-  /// Copies a database file to a new location, and assigns it a new internal UUID to distinguish
-  /// it from the original database when replicating.
-  /// @param fromPath  The full filesystem path to the original database (including extension).
-  /// @param toName  The new database name (without the ".cblite2" extension.)
-  /// @param config  The database configuration (directory and encryption option.)
-  /// @param outError  On return, will be set to the error that occurred, if applicable.
-  /// @note While a database is open, one or more of its files may be in use.  Attempting to copy a file, while it is in use, will fail.  We recommend that you close a database before attempting to copy it.
+  /// Copies a database file to a new location, and assigns it a new internal
+  /// UUID to distinguish it from the original database when replicating. @param
+  /// fromPath The full filesystem path to the original database (including
+  /// extension). @param toName The new database name (without the ".cblite2"
+  /// extension.) @param config The database configuration (directory and
+  /// encryption option.) @param outError On return, will be set to the error
+  /// that occurred, if applicable. @note While a database is open, one or more
+  /// of its files may be in use. Attempting to copy a file, while it is in use,
+  /// will fail. We recommend that you close a database before attempting to
+  /// copy it.
   bool CBL_CopyDatabase(
     FLString fromPath,
     FLString toName,
@@ -2357,13 +2340,14 @@ class cblite {
   late final _CBL_CopyDatabase =
       _CBL_CopyDatabasePtr.asFunction<DartCBL_CopyDatabase>();
 
-  /// Deletes a database file. If the database file is open, an error is returned.
-  /// @param name  The database name (without the ".cblite2" extension.)
-  /// @param inDirectory  The directory containing the database. If NULL, `name` must be an
-  /// absolute or relative path to the database.
-  /// @param outError  On return, will be set to the error that occurred, or a 0 code if no error.
-  /// @return  True if the database was deleted, false if it doesn't exist or deletion failed.
-  /// (You can tell the last two cases apart by looking at \p outError.)
+  /// Deletes a database file. If the database file is open, an error is
+  /// returned. @param name The database name (without the ".cblite2"
+  /// extension.) @param inDirectory The directory containing the database. If
+  /// NULL, `name` must be an absolute or relative path to the database. @param
+  /// outError On return, will be set to the error that occurred, or a 0 code if
+  /// no error. @return True if the database was deleted, false if it doesn't
+  /// exist or deletion failed. (You can tell the last two cases apart by
+  /// looking at \p outError.)
   bool CBL_DeleteDatabase(
     FLString name,
     FLString inDirectory,
@@ -2382,14 +2366,14 @@ class cblite {
   late final _CBL_DeleteDatabase =
       _CBL_DeleteDatabasePtr.asFunction<DartCBL_DeleteDatabase>();
 
-  /// Opens a database, or creates it if it doesn't exist yet, returning a new \ref CBLDatabase
-  /// instance.
-  /// It's OK to open the same database file multiple times. Each \ref CBLDatabase instance is
-  /// independent of the others (and must be separately closed and released.)
-  /// @param name  The database name (without the ".cblite2" extension.)
-  /// @param config  The database configuration (directory and encryption option.)
-  /// @param outError  On failure, the error will be written here.
-  /// @return  The new database object, or NULL on failure.
+  /// Opens a database, or creates it if it doesn't exist yet, returning a new
+  /// \ref CBLDatabase instance. It's OK to open the same database file multiple
+  /// times. Each \ref CBLDatabase instance is independent of the others (and
+  /// must be separately closed and released.) @param name The database name
+  /// (without the ".cblite2" extension.) @param config The database
+  /// configuration (directory and encryption option.) @param outError On
+  /// failure, the error will be written here. @return The new database object,
+  /// or NULL on failure.
   ffi.Pointer<CBLDatabase> CBLDatabase_Open(
     FLSlice name,
     ffi.Pointer<CBLDatabaseConfiguration> config,
@@ -2423,8 +2407,8 @@ class cblite {
   late final _CBLDatabase_Close =
       _CBLDatabase_ClosePtr.asFunction<DartCBLDatabase_Close>();
 
-  /// Closes and deletes a database. If there are any other connections to the database,
-  /// an error is returned.
+  /// Closes and deletes a database. If there are any other connections to the
+  /// database, an error is returned.
   bool CBLDatabase_Delete(
     ffi.Pointer<CBLDatabase> arg0,
     ffi.Pointer<CBLError> outError,
@@ -2442,11 +2426,11 @@ class cblite {
       _CBLDatabase_DeletePtr.asFunction<DartCBLDatabase_Delete>();
 
   /// Begins a transaction. You **must** later call \ref
-  /// CBLDatabase_EndTransaction to commit or abort the transaction.
-  /// @note  Multiple writes are much faster when grouped in a transaction.
-  /// @note  Changes will not be visible to other CBLDatabase instances on the same database until
-  /// the transaction ends.
-  /// @note  Transactions can nest. Changes are not committed until the outer transaction ends.
+  /// CBLDatabase_EndTransaction to commit or abort the transaction. @note
+  /// Multiple writes are much faster when grouped in a transaction. @note
+  /// Changes will not be visible to other CBLDatabase instances on the same
+  /// database until the transaction ends. @note Transactions can nest. Changes
+  /// are not committed until the outer transaction ends.
   bool CBLDatabase_BeginTransaction(
     ffi.Pointer<CBLDatabase> arg0,
     ffi.Pointer<CBLError> outError,
@@ -2484,9 +2468,10 @@ class cblite {
 
   /// Encrypts or decrypts a database, or changes its encryption key.
   ///
-  /// If \p newKey is NULL, or its \p algorithm is \ref kCBLEncryptionNone, the database will be decrypted.
-  /// Otherwise the database will be encrypted with that key; if it was already encrypted, it will be
-  /// re-encrypted with the new key.
+  /// If \p newKey is NULL, or its \p algorithm is \ref kCBLEncryptionNone, the
+  /// database will be decrypted. Otherwise the database will be encrypted with
+  /// that key; if it was already encrypted, it will be re-encrypted with the
+  /// new key.
   bool CBLDatabase_ChangeEncryptionKey(
     ffi.Pointer<CBLDatabase> arg0,
     ffi.Pointer<CBLEncryptionKey> newKey,
@@ -2540,7 +2525,8 @@ class cblite {
   late final _CBLDatabase_Name =
       _CBLDatabase_NamePtr.asFunction<DartCBLDatabase_Name>();
 
-  /// Returns the database's full filesystem path, or null slice if the database is closed or deleted.
+  /// Returns the database's full filesystem path, or null slice if the database
+  /// is closed or deleted.
   FLStringResult CBLDatabase_Path(
     ffi.Pointer<CBLDatabase> arg0,
   ) {
@@ -2554,8 +2540,9 @@ class cblite {
   late final _CBLDatabase_Path =
       _CBLDatabase_PathPtr.asFunction<DartCBLDatabase_Path>();
 
-  /// Returns the number of documents in the database, or zero if the database is closed or deleted.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_Count on the default collection instead.
+  /// Returns the number of documents in the database, or zero if the database
+  /// is closed or deleted. @warning <b>Deprecated :</b> Use CBLCollection_Count
+  /// on the default collection instead.
   int CBLDatabase_Count(
     ffi.Pointer<CBLDatabase> arg0,
   ) {
@@ -2584,13 +2571,13 @@ class cblite {
   late final _CBLDatabase_Config =
       _CBLDatabase_ConfigPtr.asFunction<DartCBLDatabase_Config>();
 
-  /// Registers a default collection change listener callback. It will be called after one or more
-  /// documents are changed on disk.
-  /// @warning  <b>Deprecated :</b> Use CBLCollection_AddChangeListener on the default collection instead.
-  /// @param db  The database to observe.
-  /// @param listener  The callback to be invoked.
-  /// @param context  An opaque value that will be passed to the callback.
-  /// @return  A token to be passed to \ref CBLListener_Remove when it's time to remove the listener.
+  /// Registers a default collection change listener callback. It will be called
+  /// after one or more documents are changed on disk. @warning <b>Deprecated
+  /// :</b> Use CBLCollection_AddChangeListener on the default collection
+  /// instead. @param db The database to observe. @param listener The callback
+  /// to be invoked. @param context An opaque value that will be passed to the
+  /// callback. @return A token to be passed to \ref CBLListener_Remove when
+  /// it's time to remove the listener.
   ffi.Pointer<CBLListenerToken> CBLDatabase_AddChangeListener(
     ffi.Pointer<CBLDatabase> db,
     CBLDatabaseChangeListener listener,
@@ -2609,12 +2596,13 @@ class cblite {
   late final _CBLDatabase_AddChangeListener = _CBLDatabase_AddChangeListenerPtr
       .asFunction<DartCBLDatabase_AddChangeListener>();
 
-  /// Switches the database to buffered-notification mode. Notifications for objects belonging
-  /// to this database (documents, queries, replicators, and of course the database) will not be
-  /// called immediately; your \ref CBLNotificationsReadyCallback will be called instead.
-  /// @param db  The database whose notifications are to be buffered.
-  /// @param callback  The function to be called when a notification is available.
-  /// @param context  An arbitrary value that will be passed to the callback.
+  /// Switches the database to buffered-notification mode. Notifications for
+  /// objects belonging to this database (documents, queries, replicators, and
+  /// of course the database) will not be called immediately; your \ref
+  /// CBLNotificationsReadyCallback will be called instead. @param db The
+  /// database whose notifications are to be buffered. @param callback The
+  /// function to be called when a notification is available. @param context An
+  /// arbitrary value that will be passed to the callback.
   void CBLDatabase_BufferNotifications(
     ffi.Pointer<CBLDatabase> db,
     CBLNotificationsReadyCallback callback,
@@ -2634,8 +2622,8 @@ class cblite {
       _CBLDatabase_BufferNotificationsPtr.asFunction<
           DartCBLDatabase_BufferNotifications>();
 
-  /// Immediately issues all pending notifications for this database, by calling their listener
-  /// callbacks.
+  /// Immediately issues all pending notifications for this database, by calling
+  /// their listener callbacks.
   void CBLDatabase_SendNotifications(
     ffi.Pointer<CBLDatabase> db,
   ) {
@@ -2656,12 +2644,13 @@ class cblite {
 
   FLString get kCBLAuthDefaultCookieName => _kCBLAuthDefaultCookieName.ref;
 
-  /// Creates a new endpoint representing a server-based database at the given URL.
-  /// The URL's scheme must be `ws` or `wss`, it must of course have a valid hostname,
-  /// and its path must be the name of the database on that server.
+  /// Creates a new endpoint representing a server-based database at the given
+  /// URL. The URL's scheme must be `ws` or `wss`, it must of course have a
+  /// valid hostname, and its path must be the name of the database on that
+  /// server.
   ///
-  /// The port can be omitted; it defaults to 80 for `ws` and 443 for `wss`.
-  /// For example: `wss://example.org/dbname`.
+  /// The port can be omitted; it defaults to 80 for `ws` and 443 for `wss`. For
+  /// example: `wss://example.org/dbname`.
   ///
   /// If an invalid endpoint URL is specified, an error will be returned.
   ffi.Pointer<CBLEndpoint> CBLEndpoint_CreateWithURL(
@@ -2680,7 +2669,8 @@ class cblite {
   late final _CBLEndpoint_CreateWithURL =
       _CBLEndpoint_CreateWithURLPtr.asFunction<DartCBLEndpoint_CreateWithURL>();
 
-  /// Creates a new endpoint representing another local database. (Enterprise Edition only.)
+  /// Creates a new endpoint representing another local database. (Enterprise
+  /// Edition only.)
   ffi.Pointer<CBLEndpoint> CBLEndpoint_CreateWithLocalDB(
     ffi.Pointer<CBLDatabase> arg0,
   ) {
@@ -2726,8 +2716,8 @@ class cblite {
   late final _CBLAuth_CreatePassword =
       _CBLAuth_CreatePasswordPtr.asFunction<DartCBLAuth_CreatePassword>();
 
-  /// Creates an authenticator using a Couchbase Sync Gateway login session identifier,
-  /// and optionally a cookie name (pass NULL for the default.)
+  /// Creates an authenticator using a Couchbase Sync Gateway login session
+  /// identifier, and optionally a cookie name (pass NULL for the default.)
   ffi.Pointer<CBLAuthenticator> CBLAuth_CreateSession(
     FLString sessionID,
     FLString cookieName,
@@ -2800,12 +2790,12 @@ class cblite {
       _CBLReplicator_ConfigPtr.asFunction<DartCBLReplicator_Config>();
 
   /// Starts a replicator, asynchronously. Does nothing if it's already started.
-  /// @param replicator  The replicator instance.
-  /// @param resetCheckpoint  If true, the persistent saved state ("checkpoint") for this replication
-  /// will be discarded, causing it to re-scan all documents. This significantly
-  /// increases time and bandwidth (redundant docs are not transferred, but their
-  /// IDs are) but can resolve unexpected problems with missing documents if one
-  /// side or the other has gotten out of sync.
+  /// @param replicator The replicator instance. @param resetCheckpoint If true,
+  /// the persistent saved state ("checkpoint") for this replication will be
+  /// discarded, causing it to re-scan all documents. This significantly
+  /// increases time and bandwidth (redundant docs are not transferred, but
+  /// their IDs are) but can resolve unexpected problems with missing documents
+  /// if one side or the other has gotten out of sync.
   void CBLReplicator_Start(
     ffi.Pointer<CBLReplicator> replicator,
     bool resetCheckpoint,
@@ -2822,9 +2812,11 @@ class cblite {
   late final _CBLReplicator_Start =
       _CBLReplicator_StartPtr.asFunction<DartCBLReplicator_Start>();
 
-  /// Stops a running replicator, asynchronously. Does nothing if it's not already started.
-  /// The replicator will call your \ref CBLReplicatorChangeListener with an activity level of
-  /// \ref kCBLReplicatorStopped after it stops. Until then, consider it still active.
+  /// Stops a running replicator, asynchronously. Does nothing if it's not
+  /// already started. The replicator will call your \ref
+  /// CBLReplicatorChangeListener with an activity level of \ref
+  /// kCBLReplicatorStopped after it stops. Until then, consider it still
+  /// active.
   void CBLReplicator_Stop(
     ffi.Pointer<CBLReplicator> arg0,
   ) {
@@ -2839,11 +2831,12 @@ class cblite {
   late final _CBLReplicator_Stop =
       _CBLReplicator_StopPtr.asFunction<DartCBLReplicator_Stop>();
 
-  /// Informs the replicator whether it's considered possible to reach the remote host with
-  /// the current network configuration. The default value is true. This only affects the
-  /// replicator's behavior while it's in the Offline state:
-  /// Setting it to false will cancel any pending retry and prevent future automatic retries.
-  /// Setting it back to true will initiate an immediate retry.
+  /// Informs the replicator whether it's considered possible to reach the
+  /// remote host with the current network configuration. The default value is
+  /// true. This only affects the replicator's behavior while it's in the
+  /// Offline state: Setting it to false will cancel any pending retry and
+  /// prevent future automatic retries. Setting it back to true will initiate an
+  /// immediate retry.
   void CBLReplicator_SetHostReachable(
     ffi.Pointer<CBLReplicator> arg0,
     bool reachable,
@@ -2862,10 +2855,10 @@ class cblite {
           DartCBLReplicator_SetHostReachable>();
 
   /// Puts the replicator in or out of "suspended" state. The default is false.
-  /// Setting suspended=true causes the replicator to disconnect and enter Offline state;
-  /// it will not attempt to reconnect while it's suspended.
-  /// Setting suspended=false causes the replicator to attempt to reconnect, _if_ it was
-  /// connected when suspended, and is still in Offline state.
+  /// Setting suspended=true causes the replicator to disconnect and enter
+  /// Offline state; it will not attempt to reconnect while it's suspended.
+  /// Setting suspended=false causes the replicator to attempt to reconnect,
+  /// _if_ it was connected when suspended, and is still in Offline state.
   void CBLReplicator_SetSuspended(
     ffi.Pointer<CBLReplicator> repl,
     bool suspended,
@@ -2897,22 +2890,22 @@ class cblite {
   late final _CBLReplicator_Status =
       _CBLReplicator_StatusPtr.asFunction<DartCBLReplicator_Status>();
 
-  /// Indicates which documents in the default collection have local changes that have not yet
-  /// been pushed to the server by this replicator. This is of course a snapshot, that will
-  /// go out of date as the replicator makes progress and/or documents are saved locally.
+  /// Indicates which documents in the default collection have local changes
+  /// that have not yet been pushed to the server by this replicator. This is of
+  /// course a snapshot, that will go out of date as the replicator makes
+  /// progress and/or documents are saved locally.
   ///
-  /// The result is, effectively, a set of document IDs: a dictionary whose keys are the IDs and
-  /// values are `true`.
-  /// If there are no pending documents, the dictionary is empty.
-  /// On error, NULL is returned.
+  /// The result is, effectively, a set of document IDs: a dictionary whose keys
+  /// are the IDs and values are `true`. If there are no pending documents, the
+  /// dictionary is empty. On error, NULL is returned.
   ///
-  /// @note  This function can be called on a stopped or un-started replicator.
-  /// @note  Documents that would never be pushed by this replicator, due to its configuration's
-  /// `pushFilter` or `docIDs`, are ignored.
-  /// @warning  You are responsible for releasing the returned array via \ref FLValue_Release.
-  /// @warning  If the default collection is not part of the replication, a NULL with an error
-  /// will be returned.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicator_PendingDocumentIDs2 instead.
+  /// @note This function can be called on a stopped or un-started replicator.
+  /// @note Documents that would never be pushed by this replicator, due to its
+  /// configuration's `pushFilter` or `docIDs`, are ignored. @warning You are
+  /// responsible for releasing the returned array via \ref FLValue_Release.
+  /// @warning If the default collection is not part of the replication, a NULL
+  /// with an error will be returned. @warning <b>Deprecated :</b> Use
+  /// CBLReplicator_PendingDocumentIDs2 instead.
   FLDict CBLReplicator_PendingDocumentIDs(
     ffi.Pointer<CBLReplicator> arg0,
     ffi.Pointer<CBLError> outError,
@@ -2930,16 +2923,18 @@ class cblite {
       _CBLReplicator_PendingDocumentIDsPtr.asFunction<
           DartCBLReplicator_PendingDocumentIDs>();
 
-  /// Indicates whether the document in the default collection with the given ID has local changes that
-  /// have not yet been pushed to the server by this replicator.
+  /// Indicates whether the document in the default collection with the given ID
+  /// has local changes that have not yet been pushed to the server by this
+  /// replicator.
   ///
-  /// This is equivalent to, but faster than, calling \ref CBLReplicator_PendingDocumentIDs and
-  /// checking whether the result contains \p docID. See that function's documentation for details.
-  /// @note  A `false` result means the document is not pending, _or_ there was an error.
-  /// To tell the difference, compare the error code to zero.
-  /// @warning  If the default collection is not part of the replication, a NULL with an error
-  /// will be returned.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicator_IsDocumentPending2 instead.
+  /// This is equivalent to, but faster than, calling \ref
+  /// CBLReplicator*PendingDocumentIDs and checking whether the result contains
+  /// \p docID. See that function's documentation for details. @note A `false`
+  /// result means the document is not pending, \_or* there was an error. To
+  /// tell the difference, compare the error code to zero. @warning If the
+  /// default collection is not part of the replication, a NULL with an error
+  /// will be returned. @warning <b>Deprecated :</b> Use
+  /// CBLReplicator_IsDocumentPending2 instead.
   bool CBLReplicator_IsDocumentPending(
     ffi.Pointer<CBLReplicator> repl,
     FLString docID,
@@ -2959,15 +2954,16 @@ class cblite {
       _CBLReplicator_IsDocumentPendingPtr.asFunction<
           DartCBLReplicator_IsDocumentPending>();
 
-  /// Indicates which documents in the given collection have local changes that have not yet been
-  /// pushed to the server by this replicator. This is of course a snapshot, that will go out of date
-  /// as the replicator makes progress and/or documents are saved locally.
+  /// Indicates which documents in the given collection have local changes that
+  /// have not yet been pushed to the server by this replicator. This is of
+  /// course a snapshot, that will go out of date as the replicator makes
+  /// progress and/or documents are saved locally.
   ///
-  /// The result is, effectively, a set of document IDs: a dictionary whose keys are the IDs and
-  /// values are `true`.
-  /// If there are no pending documents, the dictionary is empty.
-  /// On error, NULL is returned.
-  /// @warning If the given collection is not part of the replication, a NULL with an error will be returned.
+  /// The result is, effectively, a set of document IDs: a dictionary whose keys
+  /// are the IDs and values are `true`. If there are no pending documents, the
+  /// dictionary is empty. On error, NULL is returned. @warning If the given
+  /// collection is not part of the replication, a NULL with an error will be
+  /// returned.
   FLDict CBLReplicator_PendingDocumentIDs2(
     ffi.Pointer<CBLReplicator> arg0,
     ffi.Pointer<CBLCollection> collection,
@@ -2987,14 +2983,17 @@ class cblite {
       _CBLReplicator_PendingDocumentIDs2Ptr.asFunction<
           DartCBLReplicator_PendingDocumentIDs2>();
 
-  /// Indicates whether the document with the given ID in the given collection has local changes
-  /// that have not yet been pushed to the server by this replicator.
+  /// Indicates whether the document with the given ID in the given collection
+  /// has local changes that have not yet been pushed to the server by this
+  /// replicator.
   ///
-  /// This is equivalent to, but faster than, calling \ref CBLReplicator_PendingDocumentIDs2 and
-  /// checking whether the result contains \p docID. See that function's documentation for details.
-  /// @note  A `false` result means the document is not pending, _or_ there was an error.
-  /// To tell the difference, compare the error code to zero.
-  /// @warning  If the given collection is not part of the replication, a NULL with an error will be returned.
+  /// This is equivalent to, but faster than, calling \ref
+  /// CBLReplicator*PendingDocumentIDs2 and checking whether the result contains
+  /// \p docID. See that function's documentation for details. @note A `false`
+  /// result means the document is not pending, \_or* there was an error. To
+  /// tell the difference, compare the error code to zero. @warning If the given
+  /// collection is not part of the replication, a NULL with an error will be
+  /// returned.
   bool CBLReplicator_IsDocumentPending2(
     ffi.Pointer<CBLReplicator> repl,
     FLString docID,
@@ -3016,7 +3015,8 @@ class cblite {
       _CBLReplicator_IsDocumentPending2Ptr.asFunction<
           DartCBLReplicator_IsDocumentPending2>();
 
-  /// Registers a listener that will be called when the replicator's status changes.
+  /// Registers a listener that will be called when the replicator's status
+  /// changes.
   ffi.Pointer<CBLListenerToken> CBLReplicator_AddChangeListener(
     ffi.Pointer<CBLReplicator> arg0,
     CBLReplicatorChangeListener arg1,
@@ -3057,7 +3057,8 @@ class cblite {
       _CBLReplicator_AddDocumentReplicationListenerPtr.asFunction<
           DartCBLReplicator_AddDocumentReplicationListener>();
 
-  /// [false] Plaintext is not used, and instead binary encoding is used in log files
+  /// [false] Plaintext is not used, and instead binary encoding is used in log
+  /// files
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultLogFileUsePlainText =
       _lookup<ffi.Bool>('kCBLDefaultLogFileUsePlainText');
 
@@ -3070,14 +3071,16 @@ class cblite {
 
   int get kCBLDefaultLogFileMaxSize => _kCBLDefaultLogFileMaxSize.value;
 
-  /// [1] 1 rotated file present (2 total, including the currently active log file)
+  /// [1] 1 rotated file present (2 total, including the currently active log
+  /// file)
   late final ffi.Pointer<ffi.Uint32> _kCBLDefaultLogFileMaxRotateCount =
       _lookup<ffi.Uint32>('kCBLDefaultLogFileMaxRotateCount');
 
   int get kCBLDefaultLogFileMaxRotateCount =>
       _kCBLDefaultLogFileMaxRotateCount.value;
 
-  /// [false] Accents and ligatures are not ignored when indexing via full text search
+  /// [false] Accents and ligatures are not ignored when indexing via full text
+  /// search
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultFullTextIndexIgnoreAccents =
       _lookup<ffi.Bool>('kCBLDefaultFullTextIndexIgnoreAccents');
 
@@ -3091,21 +3094,24 @@ class cblite {
   DartCBLReplicatorType get kCBLDefaultReplicatorType =>
       _kCBLDefaultReplicatorType.value;
 
-  /// [false] One-shot replication is used, and will stop once all initial changes are processed
+  /// [false] One-shot replication is used, and will stop once all initial
+  /// changes are processed
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultReplicatorContinuous =
       _lookup<ffi.Bool>('kCBLDefaultReplicatorContinuous');
 
   bool get kCBLDefaultReplicatorContinuous =>
       _kCBLDefaultReplicatorContinuous.value;
 
-  /// [300] A heartbeat messages is sent every 300 seconds to keep the connection alive
+  /// [300] A heartbeat messages is sent every 300 seconds to keep the
+  /// connection alive
   late final ffi.Pointer<ffi.UnsignedInt> _kCBLDefaultReplicatorHeartbeat =
       _lookup<ffi.UnsignedInt>('kCBLDefaultReplicatorHeartbeat');
 
   int get kCBLDefaultReplicatorHeartbeat =>
       _kCBLDefaultReplicatorHeartbeat.value;
 
-  /// [10] When replicator is not continuous, after 10 failed attempts give up on the replication
+  /// [10] When replicator is not continuous, after 10 failed attempts give up
+  /// on the replication
   late final ffi.Pointer<ffi.UnsignedInt>
       _kCBLDefaultReplicatorMaxAttemptsSingleShot =
       _lookup<ffi.UnsignedInt>('kCBLDefaultReplicatorMaxAttemptsSingleShot');
@@ -3113,7 +3119,8 @@ class cblite {
   int get kCBLDefaultReplicatorMaxAttemptsSingleShot =>
       _kCBLDefaultReplicatorMaxAttemptsSingleShot.value;
 
-  /// [UINT_MAX] When replicator is continuous, never give up unless explicitly stopped
+  /// [UINT_MAX] When replicator is continuous, never give up unless explicitly
+  /// stopped
   late final ffi.Pointer<ffi.UnsignedInt>
       _kCBLDefaultReplicatorMaxAttemptsContinuous =
       _lookup<ffi.UnsignedInt>('kCBLDefaultReplicatorMaxAttemptsContinuous');
@@ -3136,7 +3143,8 @@ class cblite {
   bool get kCBLDefaultReplicatorDisableAutoPurge =>
       _kCBLDefaultReplicatorDisableAutoPurge.value;
 
-  /// [false] Whether or not a replicator only accepts cookies for the sender's parent domains
+  /// [false] Whether or not a replicator only accepts cookies for the sender's
+  /// parent domains
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultReplicatorAcceptParentCookies =
       _lookup<ffi.Bool>('kCBLDefaultReplicatorAcceptParentCookies');
 
@@ -3351,9 +3359,10 @@ class cblite {
   late final _FLDict_IsEncryptableValue =
       _FLDict_IsEncryptableValuePtr.asFunction<DartFLDict_IsEncryptableValue>();
 
-  /// Returns a \ref CBLEncryptable object corresponding to the given encryptable dictionary
-  /// in a document or NULL if the dictionary is not a \ref CBLEncryptable.
-  /// \note  The returned CBLEncryptable object will be released when its document is released.
+  /// Returns a \ref CBLEncryptable object corresponding to the given
+  /// encryptable dictionary in a document or NULL if the dictionary is not a
+  /// \ref CBLEncryptable. \note The returned CBLEncryptable object will be
+  /// released when its document is released.
   ffi.Pointer<CBLEncryptable> FLDict_GetEncryptableValue(
     FLDict encryptableDict,
   ) {
@@ -3385,17 +3394,20 @@ class cblite {
   late final _FLSlot_SetEncryptableValue = _FLSlot_SetEncryptableValuePtr
       .asFunction<DartFLSlot_SetEncryptableValue>();
 
-  /// Formats and writes a message to the log, in the given domain at the given level.
-  /// \warning This function takes a `printf`-style format string, with extra parameters to match the format placeholders, and has the same security vulnerabilities as other `printf`-style functions.
+  /// Formats and writes a message to the log, in the given domain at the given
+  /// level. \warning This function takes a `printf`-style format string, with
+  /// extra parameters to match the format placeholders, and has the same
+  /// security vulnerabilities as other `printf`-style functions.
   ///
-  /// If you are logging a fixed string, call \ref CBL_LogMessage instead, otherwise any `%`
-  /// characters in the `format` string will be misinterpreted as placeholders and the dreaded
-  /// Undefined Behavior will result, possibly including crashes or overwriting the stack.
-  /// @param domain  The log domain to associate this message with.
-  /// @param level  The severity of the message. If this is lower than the current minimum level for the domain
-  /// (as set by \ref CBLLog_SetConsoleLevel), nothing is logged.
-  /// @param format  A `printf`-style format string. `%` characters in this string introduce parameters,
-  /// and corresponding arguments must follow.
+  /// If you are logging a fixed string, call \ref CBL_LogMessage instead,
+  /// otherwise any `%` characters in the `format` string will be misinterpreted
+  /// as placeholders and the dreaded Undefined Behavior will result, possibly
+  /// including crashes or overwriting the stack. @param domain The log domain
+  /// to associate this message with. @param level The severity of the message.
+  /// If this is lower than the current minimum level for the domain (as set by
+  /// \ref CBLLog_SetConsoleLevel), nothing is logged. @param format A
+  /// `printf`-style format string. `%` characters in this string introduce
+  /// parameters, and corresponding arguments must follow.
   void CBL_Log(
     int domain,
     int level,
@@ -3412,11 +3424,11 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeCBL_Log>>('CBL_Log');
   late final _CBL_Log = _CBL_LogPtr.asFunction<DartCBL_Log>();
 
-  /// Writes a pre-formatted message to the log, exactly as given.
-  /// @param domain  The log domain to associate this message with.
-  /// @param level  The severity of the message. If this is lower than the current minimum level for the domain
-  /// (as set by \ref CBLLog_SetConsoleLevel), nothing is logged.
-  /// @param message  The exact message to write to the log.
+  /// Writes a pre-formatted message to the log, exactly as given. @param domain
+  /// The log domain to associate this message with. @param level The severity
+  /// of the message. If this is lower than the current minimum level for the
+  /// domain (as set by \ref CBLLog_SetConsoleLevel), nothing is logged. @param
+  /// message The exact message to write to the log.
   void CBL_LogMessage(
     int domain,
     int level,
@@ -3434,8 +3446,8 @@ class cblite {
   late final _CBL_LogMessage =
       _CBL_LogMessagePtr.asFunction<DartCBL_LogMessage>();
 
-  /// Gets the current log level for debug console logging.
-  /// Only messages at this level or higher will be logged to the console.
+  /// Gets the current log level for debug console logging. Only messages at
+  /// this level or higher will be logged to the console.
   int CBLLog_ConsoleLevel() {
     return _CBLLog_ConsoleLevel();
   }
@@ -3446,8 +3458,8 @@ class cblite {
   late final _CBLLog_ConsoleLevel =
       _CBLLog_ConsoleLevelPtr.asFunction<DartCBLLog_ConsoleLevel>();
 
-  /// Sets the detail level of logging.
-  /// Only messages whose level is ≥ the given level will be logged to the console.
+  /// Sets the detail level of logging. Only messages whose level is ≥ the given
+  /// level will be logged to the console.
   void CBLLog_SetConsoleLevel(
     int arg0,
   ) {
@@ -3462,8 +3474,8 @@ class cblite {
   late final _CBLLog_SetConsoleLevel =
       _CBLLog_SetConsoleLevelPtr.asFunction<DartCBLLog_SetConsoleLevel>();
 
-  /// Gets the current log level for debug console logging.
-  /// Only messages at this level or higher will be logged to the callback.
+  /// Gets the current log level for debug console logging. Only messages at
+  /// this level or higher will be logged to the callback.
   int CBLLog_CallbackLevel() {
     return _CBLLog_CallbackLevel();
   }
@@ -3474,8 +3486,8 @@ class cblite {
   late final _CBLLog_CallbackLevel =
       _CBLLog_CallbackLevelPtr.asFunction<DartCBLLog_CallbackLevel>();
 
-  /// Sets the detail level of logging.
-  /// Only messages whose level is ≥ the given level will be logged to the callback.
+  /// Sets the detail level of logging. Only messages whose level is ≥ the given
+  /// level will be logged to the callback.
   void CBLLog_SetCallbackLevel(
     int arg0,
   ) {
@@ -3500,7 +3512,8 @@ class cblite {
   late final _CBLLog_Callback =
       _CBLLog_CallbackPtr.asFunction<DartCBLLog_Callback>();
 
-  /// Sets the callback for receiving log messages. If set to NULL, no messages are logged to the console.
+  /// Sets the callback for receiving log messages. If set to NULL, no messages
+  /// are logged to the console.
   void CBLLog_SetCallback(
     CBLLogCallback callback,
   ) {
@@ -3515,7 +3528,8 @@ class cblite {
   late final _CBLLog_SetCallback =
       _CBLLog_SetCallbackPtr.asFunction<DartCBLLog_SetCallback>();
 
-  /// Gets the current file logging configuration, or NULL if none is configured.
+  /// Gets the current file logging configuration, or NULL if none is
+  /// configured.
   ffi.Pointer<CBLLogFileConfiguration> CBLLog_FileConfig() {
     return _CBLLog_FileConfig();
   }
@@ -3548,9 +3562,8 @@ class cblite {
 
   FLString get kCBLDefaultScopeName => _kCBLDefaultScopeName.ref;
 
-  /// Returns the name of the scope.
-  /// @param scope  The scope.
-  /// @return  The name of the scope.
+  /// Returns the name of the scope. @param scope The scope. @return The name of
+  /// the scope.
   FLString CBLScope_Name(
     ffi.Pointer<CBLScope> scope,
   ) {
@@ -3563,11 +3576,10 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeCBLScope_Name>>('CBLScope_Name');
   late final _CBLScope_Name = _CBLScope_NamePtr.asFunction<DartCBLScope_Name>();
 
-  /// Returns the names of all collections in the scope.
-  /// @note  You are responsible for releasing the returned array.
-  /// @param scope  The scope.
-  /// @param outError  On failure, the error will be written here.
-  /// @return  The names of all collections in the scope, or NULL if an error occurred.
+  /// Returns the names of all collections in the scope. @note You are
+  /// responsible for releasing the returned array. @param scope The scope.
+  /// @param outError On failure, the error will be written here. @return The
+  /// names of all collections in the scope, or NULL if an error occurred.
   FLMutableArray CBLScope_CollectionNames(
     ffi.Pointer<CBLScope> scope,
     ffi.Pointer<CBLError> outError,
@@ -3584,12 +3596,11 @@ class cblite {
   late final _CBLScope_CollectionNames =
       _CBLScope_CollectionNamesPtr.asFunction<DartCBLScope_CollectionNames>();
 
-  /// Returns an existing collection in the scope with the given name.
-  /// @note  You are responsible for releasing the returned collection.
-  /// @param scope  The scope.
-  /// @param collectionName  The name of the collection.
-  /// @param outError  On failure, the error will be written here.
-  /// @return A \ref CBLCollection instance, or NULL if the collection doesn't exist or an error occurred.
+  /// Returns an existing collection in the scope with the given name. @note You
+  /// are responsible for releasing the returned collection. @param scope The
+  /// scope. @param collectionName The name of the collection. @param outError
+  /// On failure, the error will be written here. @return A \ref CBLCollection
+  /// instance, or NULL if the collection doesn't exist or an error occurred.
   ffi.Pointer<CBLCollection> CBLScope_Collection(
     ffi.Pointer<CBLScope> scope,
     FLString collectionName,
@@ -3623,8 +3634,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLSlice_Equal>>('FLSlice_Equal');
   late final _FLSlice_Equal = _FLSlice_EqualPtr.asFunction<DartFLSlice_Equal>();
 
-  /// Lexicographic comparison of two slices; basically like memcmp(), but taking into account
-  /// differences in length.
+  /// Lexicographic comparison of two slices; basically like memcmp(), but
+  /// taking into account differences in length.
   int FLSlice_Compare(
     FLSlice arg0,
     FLSlice arg1,
@@ -3653,13 +3664,13 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLSlice_Hash>>('FLSlice_Hash');
   late final _FLSlice_Hash = _FLSlice_HashPtr.asFunction<DartFLSlice_Hash>();
 
-  /// Copies a slice to a buffer, adding a trailing zero byte to make it a valid C string.
-  /// If there is not enough capacity the slice will be truncated, but the trailing zero byte is
-  /// always written.
-  /// @param s  The FLSlice to copy.
-  /// @param buffer  Where to copy the bytes. At least `capacity` bytes must be available.
-  /// @param capacity  The maximum number of bytes to copy (including the trailing 0.)
-  /// @return  True if the entire slice was copied, false if it was truncated.
+  /// Copies a slice to a buffer, adding a trailing zero byte to make it a valid
+  /// C string. If there is not enough capacity the slice will be truncated, but
+  /// the trailing zero byte is always written. @param s The FLSlice to copy.
+  /// @param buffer Where to copy the bytes. At least `capacity` bytes must be
+  /// available. @param capacity The maximum number of bytes to copy (including
+  /// the trailing 0.) @return True if the entire slice was copied, false if it
+  /// was truncated.
   bool FLSlice_ToCString(
     FLSlice s,
     ffi.Pointer<ffi.Char> buffer,
@@ -3677,7 +3688,8 @@ class cblite {
   late final _FLSlice_ToCString =
       _FLSlice_ToCStringPtr.asFunction<DartFLSlice_ToCString>();
 
-  /// Allocates an FLSliceResult of the given size, without initializing the buffer.
+  /// Allocates an FLSliceResult of the given size, without initializing the
+  /// buffer.
   FLSliceResult FLSliceResult_New(
     int arg0,
   ) {
@@ -3728,9 +3740,9 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLBuf_Release>>('_FLBuf_Release');
   late final _FLBuf_Release = _FLBuf_ReleasePtr.asFunction<DartFLBuf_Release>();
 
-  /// Writes zeroes to `size` bytes of memory starting at `dst`.
-  /// Unlike a call to `memset`, these writes cannot be optimized away by the compiler.
-  /// This is useful for securely removing traces of passwords or encryption keys.
+  /// Writes zeroes to `size` bytes of memory starting at `dst`. Unlike a call
+  /// to `memset`, these writes cannot be optimized away by the compiler. This
+  /// is useful for securely removing traces of passwords or encryption keys.
   void FL_WipeMemory(
     ffi.Pointer<ffi.Void> dst,
     int size,
@@ -3755,12 +3767,12 @@ class cblite {
   late final _FLTimestamp_Now =
       _FLTimestamp_NowPtr.asFunction<DartFLTimestamp_Now>();
 
-  /// Formats a timestamp as a date-time string in ISO-8601 format.
-  /// @note  See also \ref FLEncoder_WriteDateString, which writes a timestamp to an `FLEncoder`.
-  /// @param timestamp  A time, given as milliseconds since the Unix epoch (1/1/1970 00:00 UTC.)
-  /// @param asUTC  If true, the timestamp will be given in universal time; if false, in the
-  /// local timezone.
-  /// @return  A heap-allocated string, which you are responsible for releasing.
+  /// Formats a timestamp as a date-time string in ISO-8601 format. @note See
+  /// also \ref FLEncoder_WriteDateString, which writes a timestamp to an
+  /// `FLEncoder`. @param timestamp A time, given as milliseconds since the Unix
+  /// epoch (1/1/1970 00:00 UTC.) @param asUTC If true, the timestamp will be
+  /// given in universal time; if false, in the local timezone. @return A
+  /// heap-allocated string, which you are responsible for releasing.
   FLStringResult FLTimestamp_ToString(
     int timestamp,
     bool asUTC,
@@ -3777,9 +3789,9 @@ class cblite {
   late final _FLTimestamp_ToString =
       _FLTimestamp_ToStringPtr.asFunction<DartFLTimestamp_ToString>();
 
-  /// Parses an ISO-8601 date-time string to a timestamp. On failure returns `FLTimestampNone`.
-  /// @note  See also \ref FLValue_AsTimestamp, which takes an `FLValue` and interprets numeric
-  /// representations as well as strings.
+  /// Parses an ISO-8601 date-time string to a timestamp. On failure returns
+  /// `FLTimestampNone`. @note See also \ref FLValue_AsTimestamp, which takes an
+  /// `FLValue` and interprets numeric representations as well as strings.
   int FLTimestamp_FromString(
     FLString str,
   ) {
@@ -3815,8 +3827,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLArray_Count>>('FLArray_Count');
   late final _FLArray_Count = _FLArray_CountPtr.asFunction<DartFLArray_Count>();
 
-  /// Returns true if an array is empty (or NULL). Depending on the array's representation,
-  /// this can be faster than `FLArray_Count(a) == 0`
+  /// Returns true if an array is empty (or NULL). Depending on the array's
+  /// representation, this can be faster than `FLArray_Count(a) == 0`
   bool FLArray_IsEmpty(
     FLArray arg0,
   ) {
@@ -3859,8 +3871,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLArray_Get>>('FLArray_Get');
   late final _FLArray_Get = _FLArray_GetPtr.asFunction<DartFLArray_Get>();
 
-  /// Initializes a FLArrayIterator struct to iterate over an array.
-  /// Call FLArrayIteratorGetValue to get the first item, then FLArrayIteratorNext.
+  /// Initializes a FLArrayIterator struct to iterate over an array. Call
+  /// FLArrayIteratorGetValue to get the first item, then FLArrayIteratorNext.
   void FLArrayIterator_Begin(
     FLArray arg0,
     ffi.Pointer<FLArrayIterator> arg1,
@@ -3909,7 +3921,8 @@ class cblite {
   late final _FLArrayIterator_GetValueAt = _FLArrayIterator_GetValueAtPtr
       .asFunction<DartFLArrayIterator_GetValueAt>();
 
-  /// Returns the number of items remaining to be iterated, including the current one.
+  /// Returns the number of items remaining to be iterated, including the
+  /// current one.
   int FLArrayIterator_GetCount(
     ffi.Pointer<FLArrayIterator> arg0,
   ) {
@@ -3960,8 +3973,9 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLDict_Count>>('FLDict_Count');
   late final _FLDict_Count = _FLDict_CountPtr.asFunction<DartFLDict_Count>();
 
-  /// Returns true if a dictionary is empty (or NULL). Depending on the dictionary's
-  /// representation, this can be faster than `FLDict_Count(a) == 0`
+  /// Returns true if a dictionary is empty (or NULL). Depending on the
+  /// dictionary's representation, this can be faster than
+  /// `FLDict_Count(a) == 0`
   bool FLDict_IsEmpty(
     FLDict arg0,
   ) {
@@ -3989,8 +4003,8 @@ class cblite {
   late final _FLDict_AsMutable =
       _FLDict_AsMutablePtr.asFunction<DartFLDict_AsMutable>();
 
-  /// Looks up a key in a dictionary, returning its value.
-  /// Returns NULL if the value is not found or if the dictionary is NULL.
+  /// Looks up a key in a dictionary, returning its value. Returns NULL if the
+  /// value is not found or if the dictionary is NULL.
   FLValue FLDict_Get(
     FLDict arg0,
     FLSlice keyString,
@@ -4005,8 +4019,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLDict_Get>>('FLDict_Get');
   late final _FLDict_Get = _FLDict_GetPtr.asFunction<DartFLDict_Get>();
 
-  /// Initializes a FLDictIterator struct to iterate over a dictionary.
-  /// Call FLDictIterator_GetKey and FLDictIterator_GetValue to get the first item,
+  /// Initializes a FLDictIterator struct to iterate over a dictionary. Call
+  /// FLDictIterator_GetKey and FLDictIterator_GetValue to get the first item,
   /// then FLDictIterator_Next.
   void FLDictIterator_Begin(
     FLDict arg0,
@@ -4024,7 +4038,8 @@ class cblite {
   late final _FLDictIterator_Begin =
       _FLDictIterator_BeginPtr.asFunction<DartFLDictIterator_Begin>();
 
-  /// Returns the current key being iterated over. This Value will be a string or an integer.
+  /// Returns the current key being iterated over. This Value will be a string
+  /// or an integer.
   FLValue FLDictIterator_GetKey(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -4069,7 +4084,8 @@ class cblite {
   late final _FLDictIterator_GetValue =
       _FLDictIterator_GetValuePtr.asFunction<DartFLDictIterator_GetValue>();
 
-  /// Returns the number of items remaining to be iterated, including the current one.
+  /// Returns the number of items remaining to be iterated, including the
+  /// current one.
   int FLDictIterator_GetCount(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -4099,8 +4115,9 @@ class cblite {
   late final _FLDictIterator_Next =
       _FLDictIterator_NextPtr.asFunction<DartFLDictIterator_Next>();
 
-  /// Cleans up after an iterator. Only needed if (a) the dictionary is a delta, and
-  /// (b) you stop iterating before the end (i.e. before FLDictIterator_Next returns false.)
+  /// Cleans up after an iterator. Only needed if (a) the dictionary is a delta,
+  /// and (b) you stop iterating before the end (i.e. before FLDictIterator_Next
+  /// returns false.)
   void FLDictIterator_End(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -4115,11 +4132,11 @@ class cblite {
   late final _FLDictIterator_End =
       _FLDictIterator_EndPtr.asFunction<DartFLDictIterator_End>();
 
-  /// Initializes an FLDictKey struct with a key string.
-  /// @warning  The input string's memory MUST remain valid for as long as the FLDictKey is in
-  /// use! (The FLDictKey stores a pointer to the string, but does not copy it.)
-  /// @param string  The key string (UTF-8).
-  /// @return  An initialized FLDictKey struct.
+  /// Initializes an FLDictKey struct with a key string. @warning The input
+  /// string's memory MUST remain valid for as long as the FLDictKey is in use!
+  /// (The FLDictKey stores a pointer to the string, but does not copy it.)
+  /// @param string The key string (UTF-8). @return An initialized FLDictKey
+  /// struct.
   FLDictKey FLDictKey_Init(
     FLSlice string,
   ) {
@@ -4148,8 +4165,9 @@ class cblite {
   late final _FLDictKey_GetString =
       _FLDictKey_GetStringPtr.asFunction<DartFLDictKey_GetString>();
 
-  /// Looks up a key in a dictionary using an FLDictKey. If the key is found, "hint" data will
-  /// be stored inside the FLDictKey that will speed up subsequent lookups.
+  /// Looks up a key in a dictionary using an FLDictKey. If the key is found,
+  /// "hint" data will be stored inside the FLDictKey that will speed up
+  /// subsequent lookups.
   FLValue FLDict_GetWithKey(
     FLDict arg0,
     ffi.Pointer<FLDictKey> arg1,
@@ -4165,8 +4183,8 @@ class cblite {
   late final _FLDict_GetWithKey =
       _FLDict_GetWithKeyPtr.asFunction<DartFLDict_GetWithKey>();
 
-  /// Creates a FLDeepIterator to iterate over a dictionary.
-  /// Call FLDeepIterator_GetKey and FLDeepIterator_GetValue to get the first item,
+  /// Creates a FLDeepIterator to iterate over a dictionary. Call
+  /// FLDeepIterator_GetKey and FLDeepIterator_GetValue to get the first item,
   /// then FLDeepIterator_Next.
   FLDeepIterator FLDeepIterator_New(
     FLValue arg0,
@@ -4196,7 +4214,8 @@ class cblite {
   late final _FLDeepIterator_Free =
       _FLDeepIterator_FreePtr.asFunction<DartFLDeepIterator_Free>();
 
-  /// Returns the current value being iterated over. or NULL at the end of iteration.
+  /// Returns the current value being iterated over. or NULL at the end of
+  /// iteration.
   FLValue FLDeepIterator_GetValue(
     FLDeepIterator arg0,
   ) {
@@ -4211,7 +4230,8 @@ class cblite {
   late final _FLDeepIterator_GetValue =
       _FLDeepIterator_GetValuePtr.asFunction<DartFLDeepIterator_GetValue>();
 
-  /// Returns the parent/container of the current value, or NULL at the end of iteration.
+  /// Returns the parent/container of the current value, or NULL at the end of
+  /// iteration.
   FLValue FLDeepIterator_GetParent(
     FLDeepIterator arg0,
   ) {
@@ -4226,7 +4246,8 @@ class cblite {
   late final _FLDeepIterator_GetParent =
       _FLDeepIterator_GetParentPtr.asFunction<DartFLDeepIterator_GetParent>();
 
-  /// Returns the key of the current value in its parent, or an empty slice if not in a dictionary.
+  /// Returns the key of the current value in its parent, or an empty slice if
+  /// not in a dictionary.
   FLSlice FLDeepIterator_GetKey(
     FLDeepIterator arg0,
   ) {
@@ -4241,7 +4262,8 @@ class cblite {
   late final _FLDeepIterator_GetKey =
       _FLDeepIterator_GetKeyPtr.asFunction<DartFLDeepIterator_GetKey>();
 
-  /// Returns the array index of the current value in its parent, or 0 if not in an array.
+  /// Returns the array index of the current value in its parent, or 0 if not in
+  /// an array.
   int FLDeepIterator_GetIndex(
     FLDeepIterator arg0,
   ) {
@@ -4256,7 +4278,8 @@ class cblite {
   late final _FLDeepIterator_GetIndex =
       _FLDeepIterator_GetIndexPtr.asFunction<DartFLDeepIterator_GetIndex>();
 
-  /// Returns the current depth in the hierarchy, starting at 1 for the top-level children.
+  /// Returns the current depth in the hierarchy, starting at 1 for the
+  /// top-level children.
   int FLDeepIterator_GetDepth(
     FLDeepIterator arg0,
   ) {
@@ -4350,9 +4373,9 @@ class cblite {
   late final _FLDeepIterator_GetJSONPointer = _FLDeepIterator_GetJSONPointerPtr
       .asFunction<DartFLDeepIterator_GetJSONPointer>();
 
-  /// Creates an FLDoc from Fleece-encoded data that's been returned as a result from
-  /// FLSlice_Copy or other API. The resulting document retains the data, so you don't need to
-  /// worry about it remaining valid.
+  /// Creates an FLDoc from Fleece-encoded data that's been returned as a result
+  /// from FLSlice_Copy or other API. The resulting document retains the data,
+  /// so you don't need to worry about it remaining valid.
   FLDoc FLDoc_FromResultData(
     FLSliceResult data,
     FLTrust arg1,
@@ -4373,7 +4396,8 @@ class cblite {
   late final _FLDoc_FromResultData =
       _FLDoc_FromResultDataPtr.asFunction<DartFLDoc_FromResultData>();
 
-  /// Releases a reference to an FLDoc. This must be called once to free an FLDoc you created.
+  /// Releases a reference to an FLDoc. This must be called once to free an
+  /// FLDoc you created.
   void FLDoc_Release(
     FLDoc arg0,
   ) {
@@ -4386,8 +4410,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLDoc_Release>>('FLDoc_Release');
   late final _FLDoc_Release = _FLDoc_ReleasePtr.asFunction<DartFLDoc_Release>();
 
-  /// Adds a reference to an FLDoc. This extends its lifespan until at least such time as you
-  /// call FLRelease to remove the reference.
+  /// Adds a reference to an FLDoc. This extends its lifespan until at least
+  /// such time as you call FLRelease to remove the reference.
   FLDoc FLDoc_Retain(
     FLDoc arg0,
   ) {
@@ -4413,7 +4437,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLDoc_GetData>>('FLDoc_GetData');
   late final _FLDoc_GetData = _FLDoc_GetDataPtr.asFunction<DartFLDoc_GetData>();
 
-  /// Returns the FLSliceResult data owned by the document, if any, else a null slice.
+  /// Returns the FLSliceResult data owned by the document, if any, else a null
+  /// slice.
   FLSliceResult FLDoc_GetAllocedData(
     FLDoc arg0,
   ) {
@@ -4441,7 +4466,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLDoc_GetRoot>>('FLDoc_GetRoot');
   late final _FLDoc_GetRoot = _FLDoc_GetRootPtr.asFunction<DartFLDoc_GetRoot>();
 
-  /// Returns the FLSharedKeys used by this FLDoc, as specified when it was created.
+  /// Returns the FLSharedKeys used by this FLDoc, as specified when it was
+  /// created.
   FLSharedKeys FLDoc_GetSharedKeys(
     FLDoc arg0,
   ) {
@@ -4456,8 +4482,8 @@ class cblite {
   late final _FLDoc_GetSharedKeys =
       _FLDoc_GetSharedKeysPtr.asFunction<DartFLDoc_GetSharedKeys>();
 
-  /// Looks up the Doc containing the Value, or NULL if there is none.
-  /// @note Caller must release the FLDoc reference!!
+  /// Looks up the Doc containing the Value, or NULL if there is none. @note
+  /// Caller must release the FLDoc reference!!
   FLDoc FLValue_FindDoc(
     FLValue arg0,
   ) {
@@ -4471,20 +4497,20 @@ class cblite {
   late final _FLValue_FindDoc =
       _FLValue_FindDocPtr.asFunction<DartFLValue_FindDoc>();
 
-  /// Associates an arbitrary pointer value with a document, and thus its contained values.
-  /// Allows client code to associate its own pointer with this FLDoc and its Values,
-  /// which can later be retrieved with \ref FLDoc_GetAssociated.
-  /// For example, this could be a pointer to an `app::Document` object, of which this Doc's
-  /// root FLDict is its properties. You would store it by calling
-  /// `FLDoc_SetAssociated(doc, myDoc, "app::Document");`.
-  /// @param doc  The FLDoc to store a pointer in.
-  /// @param pointer  The pointer to store in the FLDoc.
-  /// @param type  A C string literal identifying the type. This is used to avoid collisions
-  /// with unrelated code that might try to store a different type of value.
-  /// @return  True if the pointer was stored, false if a pointer of a different type is
-  /// already stored.
-  /// @warning  Be sure to clear this before the associated object is freed/invalidated!
-  /// @warning  This function is not thread-safe. Do not concurrently get & set objects.
+  /// Associates an arbitrary pointer value with a document, and thus its
+  /// contained values. Allows client code to associate its own pointer with
+  /// this FLDoc and its Values, which can later be retrieved with \ref
+  /// FLDoc_GetAssociated. For example, this could be a pointer to an
+  /// `app::Document` object, of which this Doc's root FLDict is its properties.
+  /// You would store it by calling
+  /// `FLDoc_SetAssociated(doc, myDoc, "app::Document");`. @param doc The FLDoc
+  /// to store a pointer in. @param pointer The pointer to store in the FLDoc.
+  /// @param type A C string literal identifying the type. This is used to avoid
+  /// collisions with unrelated code that might try to store a different type of
+  /// value. @return True if the pointer was stored, false if a pointer of a
+  /// different type is already stored. @warning Be sure to clear this before
+  /// the associated object is freed/invalidated! @warning This function is not
+  /// thread-safe. Do not concurrently get & set objects.
   bool FLDoc_SetAssociated(
     FLDoc doc,
     ffi.Pointer<ffi.Void> pointer,
@@ -4503,14 +4529,13 @@ class cblite {
   late final _FLDoc_SetAssociated =
       _FLDoc_SetAssociatedPtr.asFunction<DartFLDoc_SetAssociated>();
 
-  /// Returns the pointer associated with the document. You can use this together with
-  /// \ref FLValue_FindDoc to associate your own object with Fleece values, for instance to find
-  /// your object that "owns" a value:
+  /// Returns the pointer associated with the document. You can use this
+  /// together with \ref FLValue_FindDoc to associate your own object with
+  /// Fleece values, for instance to find your object that "owns" a value:
   /// `myDoc = (app::Document*)FLDoc_GetAssociated(FLValue_FindDoc(val), "app::Document");`.
-  /// @param doc  The FLDoc to get a pointer from.
-  /// @param type  The type of object expected, i.e. the same string literal passed to
-  /// \ref FLDoc_SetAssociated.
-  /// @return  The associated pointer of that type, if any.
+  /// @param doc The FLDoc to get a pointer from. @param type The type of object
+  /// expected, i.e. the same string literal passed to \ref FLDoc_SetAssociated.
+  /// @return The associated pointer of that type, if any.
   ffi.Pointer<ffi.Void> FLDoc_GetAssociated(
     FLDoc doc,
     ffi.Pointer<ffi.Char> type,
@@ -4527,7 +4552,8 @@ class cblite {
   late final _FLDoc_GetAssociated =
       _FLDoc_GetAssociatedPtr.asFunction<DartFLDoc_GetAssociated>();
 
-  /// Creates a new encoder, for generating Fleece data. Call FLEncoder_Free when done.
+  /// Creates a new encoder, for generating Fleece data. Call FLEncoder_Free
+  /// when done.
   FLEncoder FLEncoder_New() {
     return _FLEncoder_New();
   }
@@ -4536,13 +4562,14 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLEncoder_New>>('FLEncoder_New');
   late final _FLEncoder_New = _FLEncoder_NewPtr.asFunction<DartFLEncoder_New>();
 
-  /// Creates a new encoder, allowing some options to be customized.
-  /// @param format  The output format to generate (Fleece, JSON, or JSON5.)
-  /// @param reserveSize  The number of bytes to preallocate for the output. (Default is 256)
-  /// @param uniqueStrings  (Fleece only) If true, string values that appear multiple times will be written
-  /// as a single shared value. This saves space but makes encoding slightly slower.
-  /// You should only turn this off if you know you're going to be writing large numbers
-  /// of non-repeated strings. (Default is true)
+  /// Creates a new encoder, allowing some options to be customized. @param
+  /// format The output format to generate (Fleece, JSON, or JSON5.) @param
+  /// reserveSize The number of bytes to preallocate for the output. (Default
+  /// is 256) @param uniqueStrings (Fleece only) If true, string values that
+  /// appear multiple times will be written as a single shared value. This saves
+  /// space but makes encoding slightly slower. You should only turn this off if
+  /// you know you're going to be writing large numbers of non-repeated strings.
+  /// (Default is true)
   FLEncoder FLEncoder_NewWithOptions(
     FLEncoderFormat format,
     int reserveSize,
@@ -4592,7 +4619,8 @@ class cblite {
   late final _FLEncoder_Free =
       _FLEncoder_FreePtr.asFunction<DartFLEncoder_Free>();
 
-  /// Tells the encoder to use a shared-keys mapping when encoding dictionary keys.
+  /// Tells the encoder to use a shared-keys mapping when encoding dictionary
+  /// keys.
   void FLEncoder_SetSharedKeys(
     FLEncoder arg0,
     FLSharedKeys arg1,
@@ -4626,7 +4654,8 @@ class cblite {
   late final _FLEncoder_SetExtraInfo =
       _FLEncoder_SetExtraInfoPtr.asFunction<DartFLEncoder_SetExtraInfo>();
 
-  /// Returns the user-defined value associated with the encoder; NULL by default.
+  /// Returns the user-defined value associated with the encoder; NULL by
+  /// default.
   ffi.Pointer<ffi.Void> FLEncoder_GetExtraInfo(
     FLEncoder arg0,
   ) {
@@ -4641,8 +4670,8 @@ class cblite {
   late final _FLEncoder_GetExtraInfo =
       _FLEncoder_GetExtraInfoPtr.asFunction<DartFLEncoder_GetExtraInfo>();
 
-  /// Resets the state of an encoder without freeing it. It can then be reused to encode
-  /// another value.
+  /// Resets the state of an encoder without freeing it. It can then be reused
+  /// to encode another value.
   void FLEncoder_Reset(
     FLEncoder arg0,
   ) {
@@ -4671,8 +4700,9 @@ class cblite {
   late final _FLEncoder_BytesWritten =
       _FLEncoder_BytesWrittenPtr.asFunction<DartFLEncoder_BytesWritten>();
 
-  /// Writes a `null` value to an encoder. (This is an explicitly-stored null, like the JSON
-  /// `null`, not the "undefined" value represented by a NULL FLValue pointer.)
+  /// Writes a `null` value to an encoder. (This is an explicitly-stored null,
+  /// like the JSON `null`, not the "undefined" value represented by a NULL
+  /// FLValue pointer.)
   bool FLEncoder_WriteNull(
     FLEncoder arg0,
   ) {
@@ -4687,10 +4717,11 @@ class cblite {
   late final _FLEncoder_WriteNull =
       _FLEncoder_WriteNullPtr.asFunction<DartFLEncoder_WriteNull>();
 
-  /// Writes an `undefined` value to an encoder. (Its value when read will not be a `NULL`
-  /// pointer, but it can be recognized by `FLValue_GetType` returning `kFLUndefined`.)
-  /// @note The only real use for writing undefined values is to represent "holes" in an array.
-  /// An undefined dictionary value should be written simply by skipping the key and value.
+  /// Writes an `undefined` value to an encoder. (Its value when read will not
+  /// be a `NULL` pointer, but it can be recognized by `FLValue_GetType`
+  /// returning `kFLUndefined`.) @note The only real use for writing undefined
+  /// values is to represent "holes" in an array. An undefined dictionary value
+  /// should be written simply by skipping the key and value.
   bool FLEncoder_WriteUndefined(
     FLEncoder arg0,
   ) {
@@ -4722,9 +4753,10 @@ class cblite {
   late final _FLEncoder_WriteBool =
       _FLEncoder_WriteBoolPtr.asFunction<DartFLEncoder_WriteBool>();
 
-  /// Writes an integer to an encoder. The parameter is typed as `int64_t` but you can pass any
-  /// integral type (signed or unsigned) except for huge `uint64_t`s.
-  /// The number will be written in a compact form that uses only as many bytes as necessary.
+  /// Writes an integer to an encoder. The parameter is typed as `int64_t` but
+  /// you can pass any integral type (signed or unsigned) except for huge
+  /// `uint64_t`s. The number will be written in a compact form that uses only
+  /// as many bytes as necessary.
   bool FLEncoder_WriteInt(
     FLEncoder arg0,
     int arg1,
@@ -4741,9 +4773,9 @@ class cblite {
   late final _FLEncoder_WriteInt =
       _FLEncoder_WriteIntPtr.asFunction<DartFLEncoder_WriteInt>();
 
-  /// Writes an unsigned integer to an encoder.
-  /// @note This function is only really necessary for huge
-  /// 64-bit integers greater than or equal to 2^63, which can't be represented as int64_t.
+  /// Writes an unsigned integer to an encoder. @note This function is only
+  /// really necessary for huge 64-bit integers greater than or equal to 2^63,
+  /// which can't be represented as int64_t.
   bool FLEncoder_WriteUInt(
     FLEncoder arg0,
     int arg1,
@@ -4760,11 +4792,11 @@ class cblite {
   late final _FLEncoder_WriteUInt =
       _FLEncoder_WriteUIntPtr.asFunction<DartFLEncoder_WriteUInt>();
 
-  /// Writes a 32-bit floating point number to an encoder.
-  /// @note As an implementation detail, if the number has no fractional part and can be
-  /// represented exactly as an integer, it'll be encoded as an integer to save space. This is
-  /// transparent to the reader, since if it requests the value as a float it'll be returned
-  /// as floating-point.
+  /// Writes a 32-bit floating point number to an encoder. @note As an
+  /// implementation detail, if the number has no fractional part and can be
+  /// represented exactly as an integer, it'll be encoded as an integer to save
+  /// space. This is transparent to the reader, since if it requests the value
+  /// as a float it'll be returned as floating-point.
   bool FLEncoder_WriteFloat(
     FLEncoder arg0,
     double arg1,
@@ -4781,10 +4813,10 @@ class cblite {
   late final _FLEncoder_WriteFloat =
       _FLEncoder_WriteFloatPtr.asFunction<DartFLEncoder_WriteFloat>();
 
-  /// Writes a 64-bit floating point number to an encoder.
-  /// @note As an implementation detail, the number may be encoded as a 32-bit float or even
-  /// as an integer, if this can be done without losing precision. For example, 123.0 will be
-  /// written as an integer, and 123.75 as a float.)
+  /// Writes a 64-bit floating point number to an encoder. @note As an
+  /// implementation detail, the number may be encoded as a 32-bit float or even
+  /// as an integer, if this can be done without losing precision. For example,
+  /// 123.0 will be written as an integer, and 123.75 as a float.)
   bool FLEncoder_WriteDouble(
     FLEncoder arg0,
     double arg1,
@@ -4801,9 +4833,9 @@ class cblite {
   late final _FLEncoder_WriteDouble =
       _FLEncoder_WriteDoublePtr.asFunction<DartFLEncoder_WriteDouble>();
 
-  /// Writes a string to an encoder. The string must be UTF-8-encoded and must not contain any
-  /// zero bytes.
-  /// @warning Do _not_ use this to write a dictionary key; use FLEncoder_WriteKey instead.
+  /// Writes a string to an encoder. The string must be UTF-8-encoded and must
+  /// not contain any zero bytes. @warning Do _not_ use this to write a
+  /// dictionary key; use FLEncoder_WriteKey instead.
   bool FLEncoder_WriteString(
     FLEncoder arg0,
     FLString arg1,
@@ -4820,13 +4852,13 @@ class cblite {
   late final _FLEncoder_WriteString =
       _FLEncoder_WriteStringPtr.asFunction<DartFLEncoder_WriteString>();
 
-  /// Writes a timestamp to an encoder, as an ISO-8601 date string.
-  /// @note Since neither Fleece nor JSON have a 'Date' type, the encoded string has no
-  /// metadata that distinguishes it as a date. It's just a string.)
-  /// @param encoder  The encoder to write to.
-  /// @param ts  The timestamp (milliseconds since Unix epoch 1-1-1970).
-  /// @param asUTC  If true, date is written in UTC (GMT); if false, with the local timezone.
-  /// @return  True on success, false on error.
+  /// Writes a timestamp to an encoder, as an ISO-8601 date string. @note Since
+  /// neither Fleece nor JSON have a 'Date' type, the encoded string has no
+  /// metadata that distinguishes it as a date. It's just a string.) @param
+  /// encoder The encoder to write to. @param ts The timestamp (milliseconds
+  /// since Unix epoch 1-1-1970). @param asUTC If true, date is written in UTC
+  /// (GMT); if false, with the local timezone. @return True on success, false
+  /// on error.
   bool FLEncoder_WriteDateString(
     FLEncoder encoder,
     int ts,
@@ -4845,9 +4877,9 @@ class cblite {
   late final _FLEncoder_WriteDateString =
       _FLEncoder_WriteDateStringPtr.asFunction<DartFLEncoder_WriteDateString>();
 
-  /// Writes a binary data value (a blob) to an encoder. This can contain absolutely anything
-  /// including null bytes.
-  /// If the encoder is generating JSON, the blob will be written as a base64-encoded string.
+  /// Writes a binary data value (a blob) to an encoder. This can contain
+  /// absolutely anything including null bytes. If the encoder is generating
+  /// JSON, the blob will be written as a base64-encoded string.
   bool FLEncoder_WriteData(
     FLEncoder arg0,
     FLSlice arg1,
@@ -4881,11 +4913,11 @@ class cblite {
   late final _FLEncoder_WriteValue =
       _FLEncoder_WriteValuePtr.asFunction<DartFLEncoder_WriteValue>();
 
-  /// Begins writing an array value to an encoder. This pushes a new state where each
-  /// subsequent value written becomes an array item, until FLEncoder_EndArray is called.
-  /// @param reserveCount  Number of array elements to reserve space for. If you know the size
-  /// of the array, providing it here speeds up encoding slightly. If you don't know,
-  /// just use zero.
+  /// Begins writing an array value to an encoder. This pushes a new state where
+  /// each subsequent value written becomes an array item, until
+  /// FLEncoder_EndArray is called. @param reserveCount Number of array elements
+  /// to reserve space for. If you know the size of the array, providing it here
+  /// speeds up encoding slightly. If you don't know, just use zero.
   bool FLEncoder_BeginArray(
     FLEncoder arg0,
     int reserveCount,
@@ -4917,14 +4949,13 @@ class cblite {
   late final _FLEncoder_EndArray =
       _FLEncoder_EndArrayPtr.asFunction<DartFLEncoder_EndArray>();
 
-  /// Begins writing a dictionary value to an encoder. This pushes a new state where each
-  /// subsequent key and value written are added to the dictionary, until FLEncoder_EndDict is
-  /// called.
-  /// Before adding each value, you must call FLEncoder_WriteKey (_not_ FLEncoder_WriteString!),
-  /// to write the dictionary key.
-  /// @param reserveCount  Number of dictionary items to reserve space for. If you know the size
-  /// of the dictionary, providing it here speeds up encoding slightly. If you don't know,
-  /// just use zero.
+  /// Begins writing a dictionary value to an encoder. This pushes a new state
+  /// where each subsequent key and value written are added to the dictionary,
+  /// until FLEncoder*EndDict is called. Before adding each value, you must call
+  /// FLEncoder_WriteKey (\_not* FLEncoder_WriteString!), to write the
+  /// dictionary key. @param reserveCount Number of dictionary items to reserve
+  /// space for. If you know the size of the dictionary, providing it here
+  /// speeds up encoding slightly. If you don't know, just use zero.
   bool FLEncoder_BeginDict(
     FLEncoder arg0,
     int reserveCount,
@@ -4941,7 +4972,8 @@ class cblite {
   late final _FLEncoder_BeginDict =
       _FLEncoder_BeginDictPtr.asFunction<DartFLEncoder_BeginDict>();
 
-  /// Specifies the key for the next value to be written to the current dictionary.
+  /// Specifies the key for the next value to be written to the current
+  /// dictionary.
   bool FLEncoder_WriteKey(
     FLEncoder arg0,
     FLString arg1,
@@ -4958,8 +4990,9 @@ class cblite {
   late final _FLEncoder_WriteKey =
       _FLEncoder_WriteKeyPtr.asFunction<DartFLEncoder_WriteKey>();
 
-  /// Specifies the key for the next value to be written to the current dictionary.
-  /// The key is given as a Value, which must be a string or integer.
+  /// Specifies the key for the next value to be written to the current
+  /// dictionary. The key is given as a Value, which must be a string or
+  /// integer.
   bool FLEncoder_WriteKeyValue(
     FLEncoder arg0,
     FLValue arg1,
@@ -4990,10 +5023,10 @@ class cblite {
   late final _FLEncoder_EndDict =
       _FLEncoder_EndDictPtr.asFunction<DartFLEncoder_EndDict>();
 
-  /// Writes raw data directly to the encoded output.
-  /// (This is not the same as \ref FLEncoder_WriteData, which safely encodes a blob.)
-  /// @warning **Do not call this** unless you really know what you're doing ...
-  /// it's quite unsafe, and only used for certain advanced purposes.
+  /// Writes raw data directly to the encoded output. (This is not the same as
+  /// \ref FLEncoder_WriteData, which safely encodes a blob.) @warning **Do not
+  /// call this** unless you really know what you're doing ... it's quite
+  /// unsafe, and only used for certain advanced purposes.
   bool FLEncoder_WriteRaw(
     FLEncoder arg0,
     FLSlice arg1,
@@ -5010,9 +5043,10 @@ class cblite {
   late final _FLEncoder_WriteRaw =
       _FLEncoder_WriteRawPtr.asFunction<DartFLEncoder_WriteRaw>();
 
-  /// Ends encoding; if there has been no error, it returns the encoded Fleece data packaged in
-  /// an FLDoc. (This function does not support JSON encoding.)
-  /// This does not free the FLEncoder; call FLEncoder_Free (or FLEncoder_Reset) next.
+  /// Ends encoding; if there has been no error, it returns the encoded Fleece
+  /// data packaged in an FLDoc. (This function does not support JSON encoding.)
+  /// This does not free the FLEncoder; call FLEncoder_Free (or FLEncoder_Reset)
+  /// next.
   FLDoc FLEncoder_FinishDoc(
     FLEncoder arg0,
     ffi.Pointer<ffi.UnsignedInt> outError,
@@ -5029,8 +5063,9 @@ class cblite {
   late final _FLEncoder_FinishDoc =
       _FLEncoder_FinishDocPtr.asFunction<DartFLEncoder_FinishDoc>();
 
-  /// Ends encoding; if there has been no error, it returns the encoded data, else null.
-  /// This does not free the FLEncoder; call FLEncoder_Free (or FLEncoder_Reset) next.
+  /// Ends encoding; if there has been no error, it returns the encoded data,
+  /// else null. This does not free the FLEncoder; call FLEncoder_Free (or
+  /// FLEncoder_Reset) next.
   FLSliceResult FLEncoder_Finish(
     FLEncoder arg0,
     ffi.Pointer<ffi.UnsignedInt> outError,
@@ -5076,8 +5111,8 @@ class cblite {
   late final _FLEncoder_GetErrorMessage =
       _FLEncoder_GetErrorMessagePtr.asFunction<DartFLEncoder_GetErrorMessage>();
 
-  /// Encodes a Fleece value as JSON (or a JSON fragment.)
-  /// @note Any Data values will be encoded as base64-encoded strings.
+  /// Encodes a Fleece value as JSON (or a JSON fragment.) @note Any Data values
+  /// will be encoded as base64-encoded strings.
   FLStringResult FLValue_ToJSON(
     FLValue arg0,
   ) {
@@ -5091,9 +5126,10 @@ class cblite {
   late final _FLValue_ToJSON =
       _FLValue_ToJSONPtr.asFunction<DartFLValue_ToJSON>();
 
-  /// Encodes a Fleece value as JSON5, a more lenient variant of JSON that allows dictionary
-  /// keys to be unquoted if they're alphanumeric. This tends to be more readable.
-  /// @note Any Data values will be encoded as base64-encoded strings.
+  /// Encodes a Fleece value as JSON5, a more lenient variant of JSON that
+  /// allows dictionary keys to be unquoted if they're alphanumeric. This tends
+  /// to be more readable. @note Any Data values will be encoded as
+  /// base64-encoded strings.
   FLStringResult FLValue_ToJSON5(
     FLValue arg0,
   ) {
@@ -5107,12 +5143,11 @@ class cblite {
   late final _FLValue_ToJSON5 =
       _FLValue_ToJSON5Ptr.asFunction<DartFLValue_ToJSON5>();
 
-  /// Most general Fleece to JSON converter.
-  /// @param v  The Fleece value to encode
-  /// @param json5  If true, outputs JSON5, like \ref FLValue_ToJSON5
-  /// @param canonicalForm  If true, outputs the JSON in a consistent "canonical" form. All
-  /// equivalent values should produce byte-for-byte identical canonical JSON.
-  /// This is useful for creating digital signatures, for example.
+  /// Most general Fleece to JSON converter. @param v The Fleece value to encode
+  /// @param json5 If true, outputs JSON5, like \ref FLValue_ToJSON5 @param
+  /// canonicalForm If true, outputs the JSON in a consistent "canonical" form.
+  /// All equivalent values should produce byte-for-byte identical canonical
+  /// JSON. This is useful for creating digital signatures, for example.
   FLStringResult FLValue_ToJSONX(
     FLValue v,
     bool json5,
@@ -5130,9 +5165,9 @@ class cblite {
   late final _FLValue_ToJSONX =
       _FLValue_ToJSONXPtr.asFunction<DartFLValue_ToJSONX>();
 
-  /// Creates an FLDoc from JSON-encoded data. The data is first encoded into Fleece, and the
-  /// Fleece data is kept by the doc; the input JSON data is no longer needed after this
-  /// function returns.
+  /// Creates an FLDoc from JSON-encoded data. The data is first encoded into
+  /// Fleece, and the Fleece data is kept by the doc; the input JSON data is no
+  /// longer needed after this function returns.
   FLDoc FLDoc_FromJSON(
     FLSlice json,
     ffi.Pointer<ffi.UnsignedInt> outError,
@@ -5148,8 +5183,9 @@ class cblite {
   late final _FLDoc_FromJSON =
       _FLDoc_FromJSONPtr.asFunction<DartFLDoc_FromJSON>();
 
-  /// Creates a new mutable Array from JSON. It is an error if the JSON is not an array.
-  /// Its initial ref-count is 1, so a call to FLMutableArray_Release will free it.
+  /// Creates a new mutable Array from JSON. It is an error if the JSON is not
+  /// an array. Its initial ref-count is 1, so a call to FLMutableArray_Release
+  /// will free it.
   FLMutableArray FLMutableArray_NewFromJSON(
     FLString json,
     ffi.Pointer<ffi.UnsignedInt> outError,
@@ -5166,8 +5202,9 @@ class cblite {
   late final _FLMutableArray_NewFromJSON = _FLMutableArray_NewFromJSONPtr
       .asFunction<DartFLMutableArray_NewFromJSON>();
 
-  /// Creates a new mutable Dict from json. It is an error if the JSON is not a dictionary/object.
-  /// Its initial ref-count is 1, so a call to FLMutableDict_Release will free it.
+  /// Creates a new mutable Dict from json. It is an error if the JSON is not a
+  /// dictionary/object. Its initial ref-count is 1, so a call to
+  /// FLMutableDict_Release will free it.
   FLMutableDict FLMutableDict_NewFromJSON(
     FLString json,
     ffi.Pointer<ffi.UnsignedInt> outError,
@@ -5184,9 +5221,9 @@ class cblite {
   late final _FLMutableDict_NewFromJSON =
       _FLMutableDict_NewFromJSONPtr.asFunction<DartFLMutableDict_NewFromJSON>();
 
-  /// Parses JSON data and writes the value(s) to the encoder as their Fleece equivalents.
-  /// (This acts as a single write, like WriteInt; it's just that the value written is likely to
-  /// be an entire dictionary or array.)
+  /// Parses JSON data and writes the value(s) to the encoder as their Fleece
+  /// equivalents. (This acts as a single write, like WriteInt; it's just that
+  /// the value written is likely to be an entire dictionary or array.)
   bool FLEncoder_ConvertJSON(
     FLEncoder arg0,
     FLSlice json,
@@ -5248,9 +5285,9 @@ class cblite {
   late final _FLKeyPath_Eval =
       _FLKeyPath_EvalPtr.asFunction<DartFLKeyPath_Eval>();
 
-  /// Evaluates a key-path from a specifier string, for a given Fleece root object.
-  /// If you only need to evaluate the path once, this is a bit faster than creating an
-  /// FLKeyPath object, evaluating, then freeing it.
+  /// Evaluates a key-path from a specifier string, for a given Fleece root
+  /// object. If you only need to evaluate the path once, this is a bit faster
+  /// than creating an FLKeyPath object, evaluating, then freeing it.
   FLValue FLKeyPath_EvalOnce(
     FLSlice specifier,
     FLValue root,
@@ -5329,9 +5366,10 @@ class cblite {
 
   set kFLNullValue(FLValue value) => _kFLNullValue.value = value;
 
-  /// A constant undefined value. This is not a NULL pointer, but its type is \ref kFLUndefined.
-  /// It can be stored in an \ref FLMutableArray or \ref FLMutableDict if you really, really
-  /// need to store an undefined/empty value, not just a JSON `null`.
+  /// A constant undefined value. This is not a NULL pointer, but its type is
+  /// \ref kFLUndefined. It can be stored in an \ref FLMutableArray or \ref
+  /// FLMutableDict if you really, really need to store an undefined/empty
+  /// value, not just a JSON `null`.
   late final ffi.Pointer<FLValue> _kFLUndefinedValue =
       _lookup<FLValue>('kFLUndefinedValue');
 
@@ -5339,8 +5377,8 @@ class cblite {
 
   set kFLUndefinedValue(FLValue value) => _kFLUndefinedValue.value = value;
 
-  /// Returns the data type of an arbitrary value.
-  /// If the parameter is a NULL pointer, returns `kFLUndefined`.
+  /// Returns the data type of an arbitrary value. If the parameter is a NULL
+  /// pointer, returns `kFLUndefined`.
   FLValueType FLValue_GetType(
     FLValue arg0,
   ) {
@@ -5368,10 +5406,10 @@ class cblite {
   late final _FLValue_IsInteger =
       _FLValue_IsIntegerPtr.asFunction<DartFLValue_IsInteger>();
 
-  /// Returns true if the value is non-NULL and represents an integer >= 2^63. Such a value can't
-  /// be represented in C as an `int64_t`, only a `uint64_t`, so you should access it by calling
-  /// `FLValueAsUnsigned`, _not_ FLValueAsInt, which would return  an incorrect (negative)
-  /// value.
+  /// Returns true if the value is non-NULL and represents an integer >= 2^63.
+  /// Such a value can't be represented in C as an `int64_t`, only a `uint64_t`,
+  /// so you should access it by calling `FLValueAsUnsigned`, _not_
+  /// FLValueAsInt, which would return an incorrect (negative) value.
   bool FLValue_IsUnsigned(
     FLValue arg0,
   ) {
@@ -5386,7 +5424,8 @@ class cblite {
   late final _FLValue_IsUnsigned =
       _FLValue_IsUnsignedPtr.asFunction<DartFLValue_IsUnsigned>();
 
-  /// Returns true if the value is non-NULL and represents a 64-bit floating-point number.
+  /// Returns true if the value is non-NULL and represents a 64-bit
+  /// floating-point number.
   bool FLValue_IsDouble(
     FLValue arg0,
   ) {
@@ -5400,8 +5439,8 @@ class cblite {
   late final _FLValue_IsDouble =
       _FLValue_IsDoublePtr.asFunction<DartFLValue_IsDouble>();
 
-  /// Returns a value coerced to boolean. This will be true unless the value is NULL (undefined),
-  /// null, false, or zero.
+  /// Returns a value coerced to boolean. This will be true unless the value is
+  /// NULL (undefined), null, false, or zero.
   bool FLValue_AsBool(
     FLValue arg0,
   ) {
@@ -5415,10 +5454,11 @@ class cblite {
   late final _FLValue_AsBool =
       _FLValue_AsBoolPtr.asFunction<DartFLValue_AsBool>();
 
-  /// Returns a value coerced to an integer. True and false are returned as 1 and 0, and
-  /// floating-point numbers are rounded. All other types are returned as 0.
-  /// @warning  Large 64-bit unsigned integers (2^63 and above) will come out wrong. You can
-  /// check for these by calling `FLValueIsUnsigned`.
+  /// Returns a value coerced to an integer. True and false are returned as 1
+  /// and 0, and floating-point numbers are rounded. All other types are
+  /// returned as 0. @warning Large 64-bit unsigned integers (2^63 and above)
+  /// will come out wrong. You can check for these by calling
+  /// `FLValueIsUnsigned`.
   int FLValue_AsInt(
     FLValue arg0,
   ) {
@@ -5431,9 +5471,9 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLValue_AsInt>>('FLValue_AsInt');
   late final _FLValue_AsInt = _FLValue_AsIntPtr.asFunction<DartFLValue_AsInt>();
 
-  /// Returns a value coerced to an unsigned integer.
-  /// This is the same as `FLValueAsInt` except that it _can't_ handle negative numbers, but
-  /// does correctly return large `uint64_t` values of 2^63 and up.
+  /// Returns a value coerced to an unsigned integer. This is the same as
+  /// `FLValueAsInt` except that it _can't_ handle negative numbers, but does
+  /// correctly return large `uint64_t` values of 2^63 and up.
   int FLValue_AsUnsigned(
     FLValue arg0,
   ) {
@@ -5448,11 +5488,11 @@ class cblite {
   late final _FLValue_AsUnsigned =
       _FLValue_AsUnsignedPtr.asFunction<DartFLValue_AsUnsigned>();
 
-  /// Returns a value coerced to a 32-bit floating point number.
-  /// True and false are returned as 1.0 and 0.0, and integers are converted to float. All other
-  /// types are returned as 0.0.
-  /// @warning  Large integers (outside approximately +/- 2^23) will lose precision due to the
-  /// limitations of IEEE 32-bit float format.
+  /// Returns a value coerced to a 32-bit floating point number. True and false
+  /// are returned as 1.0 and 0.0, and integers are converted to float. All
+  /// other types are returned as 0.0. @warning Large integers (outside
+  /// approximately +/- 2^23) will lose precision due to the limitations of IEEE
+  /// 32-bit float format.
   double FLValue_AsFloat(
     FLValue arg0,
   ) {
@@ -5466,11 +5506,11 @@ class cblite {
   late final _FLValue_AsFloat =
       _FLValue_AsFloatPtr.asFunction<DartFLValue_AsFloat>();
 
-  /// Returns a value coerced to a 32-bit floating point number.
-  /// True and false are returned as 1.0 and 0.0, and integers are converted to float. All other
-  /// types are returned as 0.0.
-  /// @warning  Very large integers (outside approximately +/- 2^50) will lose precision due to
-  /// the limitations of IEEE 32-bit float format.
+  /// Returns a value coerced to a 32-bit floating point number. True and false
+  /// are returned as 1.0 and 0.0, and integers are converted to float. All
+  /// other types are returned as 0.0. @warning Very large integers (outside
+  /// approximately +/- 2^50) will lose precision due to the limitations of IEEE
+  /// 32-bit float format.
   double FLValue_AsDouble(
     FLValue arg0,
   ) {
@@ -5498,7 +5538,9 @@ class cblite {
   late final _FLValue_AsString =
       _FLValue_AsStringPtr.asFunction<DartFLValue_AsString>();
 
-  /// Converts a value to a timestamp, in milliseconds since Unix epoch, or INT64_MIN on failure.
+  /// Converts a value to a timestamp, in milliseconds since Unix epoch, or
+  /// INT64_MIN on failure.
+  ///
   /// - A string is parsed as ISO-8601 (standard JSON date format).
   /// - A number is interpreted as a timestamp and returned as-is.
   int FLValue_AsTimestamp(
@@ -5557,8 +5599,9 @@ class cblite {
   late final _FLValue_AsDict =
       _FLValue_AsDictPtr.asFunction<DartFLValue_AsDict>();
 
-  /// Returns a string representation of any scalar value. Data values are returned in raw form.
-  /// Arrays and dictionaries don't have a representation and will return NULL.
+  /// Returns a string representation of any scalar value. Data values are
+  /// returned in raw form. Arrays and dictionaries don't have a representation
+  /// and will return NULL.
   FLStringResult FLValue_ToString(
     FLValue arg0,
   ) {
@@ -5602,8 +5645,9 @@ class cblite {
   late final _FLValue_IsMutable =
       _FLValue_IsMutablePtr.asFunction<DartFLValue_IsMutable>();
 
-  /// Increments the ref-count of a mutable value, or of an immutable value's \ref FLDoc.
-  /// @warning It is illegal to call this on a value obtained from \ref FLValue_FromData.
+  /// Increments the ref-count of a mutable value, or of an immutable value's
+  /// \ref FLDoc. @warning It is illegal to call this on a value obtained from
+  /// \ref FLValue_FromData.
   FLValue FLValue_Retain(
     FLValue arg0,
   ) {
@@ -5617,9 +5661,10 @@ class cblite {
   late final _FLValue_Retain =
       _FLValue_RetainPtr.asFunction<DartFLValue_Retain>();
 
-  /// Decrements the ref-count of a mutable value, or of an immutable value's \ref FLDoc.
-  /// If the ref-count reaches zero the corresponding object is freed.
-  /// @warning It is illegal to call this on a value obtained from \ref FLValue_FromData.
+  /// Decrements the ref-count of a mutable value, or of an immutable value's
+  /// \ref FLDoc. If the ref-count reaches zero the corresponding object is
+  /// freed. @warning It is illegal to call this on a value obtained from \ref
+  /// FLValue_FromData.
   void FLValue_Release(
     FLValue arg0,
   ) {
@@ -5633,15 +5678,16 @@ class cblite {
   late final _FLValue_Release =
       _FLValue_ReleasePtr.asFunction<DartFLValue_Release>();
 
-  /// Creates a new mutable Array that's a copy of the source Array.
-  /// Its initial ref-count is 1, so a call to \ref FLMutableArray_Release will free it.
+  /// Creates a new mutable Array that's a copy of the source Array. Its initial
+  /// ref-count is 1, so a call to \ref FLMutableArray_Release will free it.
   ///
-  /// Copying an immutable Array is very cheap (only one small allocation) unless the flag
-  /// \ref kFLCopyImmutables is set.
+  /// Copying an immutable Array is very cheap (only one small allocation)
+  /// unless the flag \ref kFLCopyImmutables is set.
   ///
-  /// Copying a mutable Array is cheap if it's a shallow copy; but if \ref kFLDeepCopy is set,
-  /// nested mutable Arrays and Dicts are also copied, recursively; if \ref kFLCopyImmutables is
-  /// also set, immutable values are also copied, recursively.
+  /// Copying a mutable Array is cheap if it's a shallow copy; but if \ref
+  /// kFLDeepCopy is set, nested mutable Arrays and Dicts are also copied,
+  /// recursively; if \ref kFLCopyImmutables is also set, immutable values are
+  /// also copied, recursively.
   ///
   /// If the source Array is NULL, then NULL is returned.
   FLMutableArray FLArray_MutableCopy(
@@ -5660,8 +5706,8 @@ class cblite {
   late final _FLArray_MutableCopy =
       _FLArray_MutableCopyPtr.asFunction<DartFLArray_MutableCopy>();
 
-  /// Creates a new empty mutable Array.
-  /// Its initial ref-count is 1, so a call to FLMutableArray_Release will free it.
+  /// Creates a new empty mutable Array. Its initial ref-count is 1, so a call
+  /// to FLMutableArray_Release will free it.
   FLMutableArray FLMutableArray_New() {
     return _FLMutableArray_New();
   }
@@ -5672,7 +5718,8 @@ class cblite {
   late final _FLMutableArray_New =
       _FLMutableArray_NewPtr.asFunction<DartFLMutableArray_New>();
 
-  /// If the Array was created by FLArray_MutableCopy, returns the original source Array.
+  /// If the Array was created by FLArray_MutableCopy, returns the original
+  /// source Array.
   FLArray FLMutableArray_GetSource(
     FLMutableArray arg0,
   ) {
@@ -5687,7 +5734,8 @@ class cblite {
   late final _FLMutableArray_GetSource =
       _FLMutableArray_GetSourcePtr.asFunction<DartFLMutableArray_GetSource>();
 
-  /// Returns true if the Array has been changed from the source it was copied from.
+  /// Returns true if the Array has been changed from the source it was copied
+  /// from.
   bool FLMutableArray_IsChanged(
     FLMutableArray arg0,
   ) {
@@ -5719,10 +5767,10 @@ class cblite {
   late final _FLMutableArray_SetChanged =
       _FLMutableArray_SetChangedPtr.asFunction<DartFLMutableArray_SetChanged>();
 
-  /// Inserts a contiguous range of JSON `null` values into the array.
-  /// @param array  The array to operate on.
-  /// @param firstIndex  The zero-based index of the first value to be inserted.
-  /// @param count  The number of items to insert.
+  /// Inserts a contiguous range of JSON `null` values into the array. @param
+  /// array The array to operate on. @param firstIndex The zero-based index of
+  /// the first value to be inserted. @param count The number of items to
+  /// insert.
   void FLMutableArray_Insert(
     FLMutableArray array,
     int firstIndex,
@@ -5741,10 +5789,9 @@ class cblite {
   late final _FLMutableArray_Insert =
       _FLMutableArray_InsertPtr.asFunction<DartFLMutableArray_Insert>();
 
-  /// Removes contiguous items from the array.
-  /// @param array  The array to operate on.
-  /// @param firstIndex  The zero-based index of the first item to remove.
-  /// @param count  The number of items to remove.
+  /// Removes contiguous items from the array. @param array The array to operate
+  /// on. @param firstIndex The zero-based index of the first item to remove.
+  /// @param count The number of items to remove.
   void FLMutableArray_Remove(
     FLMutableArray array,
     int firstIndex,
@@ -5763,9 +5810,9 @@ class cblite {
   late final _FLMutableArray_Remove =
       _FLMutableArray_RemovePtr.asFunction<DartFLMutableArray_Remove>();
 
-  /// Changes the size of an array.
-  /// If the new size is larger, the array is padded with JSON `null` values.
-  /// If it's smaller, values are removed from the end.
+  /// Changes the size of an array. If the new size is larger, the array is
+  /// padded with JSON `null` values. If it's smaller, values are removed from
+  /// the end.
   void FLMutableArray_Resize(
     FLMutableArray array,
     int size,
@@ -5783,10 +5830,11 @@ class cblite {
       _FLMutableArray_ResizePtr.asFunction<DartFLMutableArray_Resize>();
 
   /// Convenience function for getting an array-valued property in mutable form.
+  ///
   /// - If the value for the key is not an array, returns NULL.
   /// - If the value is a mutable array, returns it.
-  /// - If the value is an immutable array, this function makes a mutable copy, assigns the
-  /// copy as the property value, and returns the copy.
+  /// - If the value is an immutable array, this function makes a mutable copy,
+  ///   assigns the copy as the property value, and returns the copy.
   FLMutableArray FLMutableArray_GetMutableArray(
     FLMutableArray arg0,
     int index,
@@ -5805,10 +5853,11 @@ class cblite {
           DartFLMutableArray_GetMutableArray>();
 
   /// Convenience function for getting an array-valued property in mutable form.
+  ///
   /// - If the value for the key is not an array, returns NULL.
   /// - If the value is a mutable array, returns it.
-  /// - If the value is an immutable array, this function makes a mutable copy, assigns the
-  /// copy as the property value, and returns the copy.
+  /// - If the value is an immutable array, this function makes a mutable copy,
+  ///   assigns the copy as the property value, and returns the copy.
   FLMutableDict FLMutableArray_GetMutableDict(
     FLMutableArray arg0,
     int index,
@@ -5825,14 +5874,14 @@ class cblite {
   late final _FLMutableArray_GetMutableDict = _FLMutableArray_GetMutableDictPtr
       .asFunction<DartFLMutableArray_GetMutableDict>();
 
-  /// Creates a new mutable Dict that's a copy of the source Dict.
-  /// Its initial ref-count is 1, so a call to FLMutableDict_Release will free it.
+  /// Creates a new mutable Dict that's a copy of the source Dict. Its initial
+  /// ref-count is 1, so a call to FLMutableDict_Release will free it.
   ///
-  /// Copying an immutable Dict is very cheap (only one small allocation.) The `deepCopy` flag
-  /// is ignored.
+  /// Copying an immutable Dict is very cheap (only one small allocation.) The
+  /// `deepCopy` flag is ignored.
   ///
-  /// Copying a mutable Dict is cheap if it's a shallow copy, but if `deepCopy` is true,
-  /// nested mutable Dicts and Arrays are also copied, recursively.
+  /// Copying a mutable Dict is cheap if it's a shallow copy, but if `deepCopy`
+  /// is true, nested mutable Dicts and Arrays are also copied, recursively.
   ///
   /// If the source dict is NULL, then NULL is returned.
   FLMutableDict FLDict_MutableCopy(
@@ -5851,8 +5900,8 @@ class cblite {
   late final _FLDict_MutableCopy =
       _FLDict_MutableCopyPtr.asFunction<DartFLDict_MutableCopy>();
 
-  /// Creates a new empty mutable Dict.
-  /// Its initial ref-count is 1, so a call to FLMutableDict_Release will free it.
+  /// Creates a new empty mutable Dict. Its initial ref-count is 1, so a call to
+  /// FLMutableDict_Release will free it.
   FLMutableDict FLMutableDict_New() {
     return _FLMutableDict_New();
   }
@@ -5862,7 +5911,8 @@ class cblite {
   late final _FLMutableDict_New =
       _FLMutableDict_NewPtr.asFunction<DartFLMutableDict_New>();
 
-  /// If the Dict was created by FLDict_MutableCopy, returns the original source Dict.
+  /// If the Dict was created by FLDict_MutableCopy, returns the original source
+  /// Dict.
   FLDict FLMutableDict_GetSource(
     FLMutableDict arg0,
   ) {
@@ -5877,7 +5927,8 @@ class cblite {
   late final _FLMutableDict_GetSource =
       _FLMutableDict_GetSourcePtr.asFunction<DartFLMutableDict_GetSource>();
 
-  /// Returns true if the Dict has been changed from the source it was copied from.
+  /// Returns true if the Dict has been changed from the source it was copied
+  /// from.
   bool FLMutableDict_IsChanged(
     FLMutableDict arg0,
   ) {
@@ -5942,10 +5993,11 @@ class cblite {
       _FLMutableDict_RemoveAllPtr.asFunction<DartFLMutableDict_RemoveAll>();
 
   /// Convenience function for getting an array-valued property in mutable form.
+  ///
   /// - If the value for the key is not an array, returns NULL.
   /// - If the value is a mutable array, returns it.
-  /// - If the value is an immutable array, this function makes a mutable copy, assigns the
-  /// copy as the property value, and returns the copy.
+  /// - If the value is an immutable array, this function makes a mutable copy,
+  ///   assigns the copy as the property value, and returns the copy.
   FLMutableArray FLMutableDict_GetMutableArray(
     FLMutableDict arg0,
     FLString key,
@@ -5963,10 +6015,11 @@ class cblite {
       .asFunction<DartFLMutableDict_GetMutableArray>();
 
   /// Convenience function for getting a dict-valued property in mutable form.
+  ///
   /// - If the value for the key is not a dict, returns NULL.
   /// - If the value is a mutable dict, returns it.
-  /// - If the value is an immutable dict, this function makes a mutable copy, assigns the
-  /// copy as the property value, and returns the copy.
+  /// - If the value is an immutable dict, this function makes a mutable copy,
+  ///   assigns the copy as the property value, and returns the copy.
   FLMutableDict FLMutableDict_GetMutableDict(
     FLMutableDict arg0,
     FLString key,
@@ -5983,9 +6036,9 @@ class cblite {
   late final _FLMutableDict_GetMutableDict = _FLMutableDict_GetMutableDictPtr
       .asFunction<DartFLMutableDict_GetMutableDict>();
 
-  /// Allocates a string value on the heap. This is rarely needed -- usually you'd just add a string
-  /// to a mutable Array or Dict directly using one of their "...SetString" or "...AppendString"
-  /// methods.
+  /// Allocates a string value on the heap. This is rarely needed -- usually
+  /// you'd just add a string to a mutable Array or Dict directly using one of
+  /// their "...SetString" or "...AppendString" methods.
   FLValue FLValue_NewString(
     FLString arg0,
   ) {
@@ -5999,9 +6052,9 @@ class cblite {
   late final _FLValue_NewString =
       _FLValue_NewStringPtr.asFunction<DartFLValue_NewString>();
 
-  /// Allocates a data/blob value on the heap. This is rarely needed -- usually you'd just add data
-  /// to a mutable Array or Dict directly using one of their "...SetData or "...AppendData"
-  /// methods.
+  /// Allocates a data/blob value on the heap. This is rarely needed -- usually
+  /// you'd just add data to a mutable Array or Dict directly using one of their
+  /// "...SetData or "...AppendData" methods.
   FLValue FLValue_NewData(
     FLSlice arg0,
   ) {
@@ -6016,9 +6069,9 @@ class cblite {
       _FLValue_NewDataPtr.asFunction<DartFLValue_NewData>();
 
   /// Returns an \ref FLSlot that refers to the given index of the given array.
-  /// You store a value to it by calling one of the nine `FLSlot_Set...` functions.
-  /// \warning You should immediately store a value into the `FLSlot`. Do not keep it around;
-  /// any changes to the array invalidate it.
+  /// You store a value to it by calling one of the nine `FLSlot_Set...`
+  /// functions. \warning You should immediately store a value into the
+  /// `FLSlot`. Do not keep it around; any changes to the array invalidate it.
   FLSlot FLMutableArray_Set(
     FLMutableArray arg0,
     int index,
@@ -6035,10 +6088,11 @@ class cblite {
   late final _FLMutableArray_Set =
       _FLMutableArray_SetPtr.asFunction<DartFLMutableArray_Set>();
 
-  /// Appends a null value to the array and returns an \ref FLSlot that refers to that position.
-  /// You store a value to it by calling one of the nine `FLSlot_Set...` functions.
-  /// \warning You should immediately store a value into the `FLSlot`. Do not keep it around;
-  /// any changes to the array invalidate it.
+  /// Appends a null value to the array and returns an \ref FLSlot that refers
+  /// to that position. You store a value to it by calling one of the nine
+  /// `FLSlot_Set...` functions. \warning You should immediately store a value
+  /// into the `FLSlot`. Do not keep it around; any changes to the array
+  /// invalidate it.
   FLSlot FLMutableArray_Append(
     FLMutableArray arg0,
   ) {
@@ -6053,10 +6107,11 @@ class cblite {
   late final _FLMutableArray_Append =
       _FLMutableArray_AppendPtr.asFunction<DartFLMutableArray_Append>();
 
-  /// Returns an \ref FLSlot that refers to the given key/value pair of the given dictionary.
-  /// You store a value to it by calling one of the nine `FLSlot_Set...` functions.
-  /// \warning You should immediately store a value into the `FLSlot`. Do not keep it around;
-  /// any changes to the dictionary invalidate it.
+  /// Returns an \ref FLSlot that refers to the given key/value pair of the
+  /// given dictionary. You store a value to it by calling one of the nine
+  /// `FLSlot_Set...` functions. \warning You should immediately store a value
+  /// into the `FLSlot`. Do not keep it around; any changes to the dictionary
+  /// invalidate it.
   FLSlot FLMutableDict_Set(
     FLMutableDict arg0,
     FLString key,
@@ -6205,11 +6260,11 @@ class cblite {
       _FLSlot_SetValuePtr.asFunction<DartFLSlot_SetValue>();
 
   /// Returns JSON that encodes the changes to turn the value `old` into `nuu`.
-  /// (The format is documented in Fleece.md, but you should treat it as a black box.)
-  /// @param old  A value that's typically the old/original state of some data.
-  /// @param nuu  A value that's typically the new/changed state of the `old` data.
-  /// @return  JSON data representing the changes from `old` to `nuu`, or NULL on
-  /// (extremely unlikely) failure.
+  /// (The format is documented in Fleece.md, but you should treat it as a black
+  /// box.) @param old A value that's typically the old/original state of some
+  /// data. @param nuu A value that's typically the new/changed state of the
+  /// `old` data. @return JSON data representing the changes from `old` to
+  /// `nuu`, or NULL on (extremely unlikely) failure.
   FLSliceResult FLCreateJSONDelta(
     FLValue old,
     FLValue nuu,
@@ -6226,12 +6281,12 @@ class cblite {
       _FLCreateJSONDeltaPtr.asFunction<DartFLCreateJSONDelta>();
 
   /// Writes JSON that describes the changes to turn the value `old` into `nuu`.
-  /// (The format is documented in Fleece.md, but you should treat it as a black box.)
-  /// @param old  A value that's typically the old/original state of some data.
-  /// @param nuu  A value that's typically the new/changed state of the `old` data.
-  /// @param jsonEncoder  An encoder to write the JSON to. Must have been created using
-  /// `FLEncoder_NewWithOptions`, with JSON or JSON5 format.
-  /// @return  True on success, false on (extremely unlikely) failure.
+  /// (The format is documented in Fleece.md, but you should treat it as a black
+  /// box.) @param old A value that's typically the old/original state of some
+  /// data. @param nuu A value that's typically the new/changed state of the
+  /// `old` data. @param jsonEncoder An encoder to write the JSON to. Must have
+  /// been created using `FLEncoder_NewWithOptions`, with JSON or JSON5 format.
+  /// @return True on success, false on (extremely unlikely) failure.
   bool FLEncodeJSONDelta(
     FLValue old,
     FLValue nuu,
@@ -6249,14 +6304,16 @@ class cblite {
   late final _FLEncodeJSONDelta =
       _FLEncodeJSONDeltaPtr.asFunction<DartFLEncodeJSONDelta>();
 
-  /// Applies the JSON data created by `CreateJSONDelta` to the value `old`, which must be equal
-  /// to the `old` value originally passed to `FLCreateJSONDelta`, and returns a Fleece document
-  /// equal to the original `nuu` value.
-  /// @param old  A value that's typically the old/original state of some data. This must be
-  /// equal to the `old` value used when creating the `jsonDelta`.
-  /// @param jsonDelta  A JSON-encoded delta created by `FLCreateJSONDelta` or `FLEncodeJSONDelta`.
-  /// @param outError  On failure, error information will be stored where this points, if non-null.
-  /// @return  The corresponding `nuu` value, encoded as Fleece, or null if an error occurred.
+  /// Applies the JSON data created by `CreateJSONDelta` to the value `old`,
+  /// which must be equal to the `old` value originally passed to
+  /// `FLCreateJSONDelta`, and returns a Fleece document equal to the original
+  /// `nuu` value. @param old A value that's typically the old/original state of
+  /// some data. This must be equal to the `old` value used when creating the
+  /// `jsonDelta`. @param jsonDelta A JSON-encoded delta created by
+  /// `FLCreateJSONDelta` or `FLEncodeJSONDelta`. @param outError On failure,
+  /// error information will be stored where this points, if non-null. @return
+  /// The corresponding `nuu` value, encoded as Fleece, or null if an error
+  /// occurred.
   FLSliceResult FLApplyJSONDelta(
     FLValue old,
     FLSlice jsonDelta,
@@ -6274,15 +6331,16 @@ class cblite {
   late final _FLApplyJSONDelta =
       _FLApplyJSONDeltaPtr.asFunction<DartFLApplyJSONDelta>();
 
-  /// Applies the (parsed) JSON data created by `CreateJSONDelta` to the value `old`, which must be
-  /// equal to the `old` value originally passed to `FLCreateJSONDelta`, and writes the corresponding
-  /// `nuu` value to the encoder.
-  /// @param old  A value that's typically the old/original state of some data. This must be
-  /// equal to the `old` value used when creating the `jsonDelta`.
-  /// @param jsonDelta  A JSON-encoded delta created by `FLCreateJSONDelta` or `FLEncodeJSONDelta`.
-  /// @param encoder  A Fleece encoder to write the decoded `nuu` value to. (JSON encoding is not
-  /// supported.)
-  /// @return  True on success, false on error; call `FLEncoder_GetError` for details.
+  /// Applies the (parsed) JSON data created by `CreateJSONDelta` to the value
+  /// `old`, which must be equal to the `old` value originally passed to
+  /// `FLCreateJSONDelta`, and writes the corresponding `nuu` value to the
+  /// encoder. @param old A value that's typically the old/original state of
+  /// some data. This must be equal to the `old` value used when creating the
+  /// `jsonDelta`. @param jsonDelta A JSON-encoded delta created by
+  /// `FLCreateJSONDelta` or `FLEncodeJSONDelta`. @param encoder A Fleece
+  /// encoder to write the decoded `nuu` value to. (JSON encoding is not
+  /// supported.) @return True on success, false on error; call
+  /// `FLEncoder_GetError` for details.
   bool FLEncodeApplyingJSONDelta(
     FLValue old,
     FLSlice jsonDelta,
@@ -6301,7 +6359,8 @@ class cblite {
   late final _FLEncodeApplyingJSONDelta =
       _FLEncodeApplyingJSONDeltaPtr.asFunction<DartFLEncodeApplyingJSONDelta>();
 
-  /// Creates a new empty FLSharedKeys object, which must eventually be released.
+  /// Creates a new empty FLSharedKeys object, which must eventually be
+  /// released.
   FLSharedKeys FLSharedKeys_New() {
     return _FLSharedKeys_New();
   }
@@ -6327,7 +6386,8 @@ class cblite {
   late final _FLSharedKeys_NewWithRead =
       _FLSharedKeys_NewWithReadPtr.asFunction<DartFLSharedKeys_NewWithRead>();
 
-  /// Returns a data blob containing the current state (all the keys and their integers.)
+  /// Returns a data blob containing the current state (all the keys and their
+  /// integers.)
   FLSliceResult FLSharedKeys_GetStateData(
     FLSharedKeys arg0,
   ) {
@@ -6342,7 +6402,8 @@ class cblite {
   late final _FLSharedKeys_GetStateData =
       _FLSharedKeys_GetStateDataPtr.asFunction<DartFLSharedKeys_GetStateData>();
 
-  /// Updates an FLSharedKeys with saved state data created by \ref FLSharedKeys_GetStateData.
+  /// Updates an FLSharedKeys with saved state data created by \ref
+  /// FLSharedKeys_GetStateData.
   bool FLSharedKeys_LoadStateData(
     FLSharedKeys arg0,
     FLSlice arg1,
@@ -6359,8 +6420,8 @@ class cblite {
   late final _FLSharedKeys_LoadStateData = _FLSharedKeys_LoadStateDataPtr
       .asFunction<DartFLSharedKeys_LoadStateData>();
 
-  /// Writes the current state to a Fleece encoder as a single value,
-  /// which can later be decoded and passed to \ref FLSharedKeys_LoadState.
+  /// Writes the current state to a Fleece encoder as a single value, which can
+  /// later be decoded and passed to \ref FLSharedKeys_LoadState.
   void FLSharedKeys_WriteState(
     FLSharedKeys arg0,
     FLEncoder arg1,
@@ -6377,8 +6438,8 @@ class cblite {
   late final _FLSharedKeys_WriteState =
       _FLSharedKeys_WriteStatePtr.asFunction<DartFLSharedKeys_WriteState>();
 
-  /// Updates an FLSharedKeys object with saved state, a Fleece value previously written by
-  /// \ref FLSharedKeys_WriteState.
+  /// Updates an FLSharedKeys object with saved state, a Fleece value previously
+  /// written by \ref FLSharedKeys_WriteState.
   bool FLSharedKeys_LoadState(
     FLSharedKeys arg0,
     FLValue arg1,
@@ -6395,11 +6456,12 @@ class cblite {
   late final _FLSharedKeys_LoadState =
       _FLSharedKeys_LoadStatePtr.asFunction<DartFLSharedKeys_LoadState>();
 
-  /// Maps a key string to a number in the range [0...2047], or returns -1 if it isn't mapped.
-  /// If the key doesn't already have a mapping, and the `add` flag is true,
-  /// a new mapping is assigned and returned.
-  /// However, the `add` flag has no effect if the key is unmappable (is longer than 16 bytes
-  /// or contains non-identifier characters), or if all available integers have been assigned.
+  /// Maps a key string to a number in the range [0...2047], or returns -1 if it
+  /// isn't mapped. If the key doesn't already have a mapping, and the `add`
+  /// flag is true, a new mapping is assigned and returned. However, the `add`
+  /// flag has no effect if the key is unmappable (is longer than 16 bytes or
+  /// contains non-identifier characters), or if all available integers have
+  /// been assigned.
   int FLSharedKeys_Encode(
     FLSharedKeys arg0,
     FLString arg1,
@@ -6435,8 +6497,8 @@ class cblite {
   late final _FLSharedKeys_Decode =
       _FLSharedKeys_DecodePtr.asFunction<DartFLSharedKeys_Decode>();
 
-  /// Returns the number of keys in the mapping. This number increases whenever the mapping
-  /// is changed, and never decreases.
+  /// Returns the number of keys in the mapping. This number increases whenever
+  /// the mapping is changed, and never decreases.
   int FLSharedKeys_Count(
     FLSharedKeys arg0,
   ) {
@@ -6451,7 +6513,8 @@ class cblite {
   late final _FLSharedKeys_Count =
       _FLSharedKeys_CountPtr.asFunction<DartFLSharedKeys_Count>();
 
-  /// Reverts an FLSharedKeys by "forgetting" any keys added since it had the count `oldCount`.
+  /// Reverts an FLSharedKeys by "forgetting" any keys added since it had the
+  /// count `oldCount`.
   void FLSharedKeys_RevertToCount(
     FLSharedKeys arg0,
     int oldCount,
@@ -6483,7 +6546,8 @@ class cblite {
   late final _FLSharedKeys_Retain =
       _FLSharedKeys_RetainPtr.asFunction<DartFLSharedKeys_Retain>();
 
-  /// Decrements the reference count of an FLSharedKeys, freeing it when it reaches zero.
+  /// Decrements the reference count of an FLSharedKeys, freeing it when it
+  /// reaches zero.
   void FLSharedKeys_Release(
     FLSharedKeys arg0,
   ) {
@@ -6498,8 +6562,9 @@ class cblite {
   late final _FLSharedKeys_Release =
       _FLSharedKeys_ReleasePtr.asFunction<DartFLSharedKeys_Release>();
 
-  /// Registers a range of memory containing Fleece data that uses the given shared keys.
-  /// This allows Dict accessors to look up the values of shared keys.
+  /// Registers a range of memory containing Fleece data that uses the given
+  /// shared keys. This allows Dict accessors to look up the values of shared
+  /// keys.
   FLSharedKeyScope FLSharedKeyScope_WithRange(
     FLSlice range,
     FLSharedKeys arg1,
@@ -6531,17 +6596,18 @@ class cblite {
   late final _FLSharedKeyScope_Free =
       _FLSharedKeyScope_FreePtr.asFunction<DartFLSharedKeyScope_Free>();
 
-  /// Returns a pointer to the root value in the encoded data, or NULL if validation failed.
-  /// You should generally use an \ref FLDoc instead; it's safer. Here's why:
+  /// Returns a pointer to the root value in the encoded data, or NULL if
+  /// validation failed. You should generally use an \ref FLDoc instead; it's
+  /// safer. Here's why:
   ///
-  /// On the plus side, \ref FLValue_FromData is _extremely_ fast: it allocates no memory,
-  /// only scans enough of the data to ensure it's valid (and if `trust` is set to `kFLTrusted`,
-  /// it doesn't even do that.)
+  /// On the plus side, \ref FLValue*FromData is \_extremely* fast: it allocates
+  /// no memory, only scans enough of the data to ensure it's valid (and if
+  /// `trust` is set to `kFLTrusted`, it doesn't even do that.)
   ///
-  /// But it's potentially _very_ dangerous: the FLValue, and all values found through it, are
-  /// only valid as long as the input `data` remains intact and unchanged. If you violate
-  /// that, the values will be pointing to garbage and Bad Things will happen when you access
-  /// them...
+  /// But it's potentially _very_ dangerous: the FLValue, and all values found
+  /// through it, are only valid as long as the input `data` remains intact and
+  /// unchanged. If you violate that, the values will be pointing to garbage and
+  /// Bad Things will happen when you access them...
   FLValue FLValue_FromData(
     FLSlice data,
     FLTrust trust,
@@ -6557,20 +6623,19 @@ class cblite {
   late final _FLValue_FromData =
       _FLValue_FromDataPtr.asFunction<DartFLValue_FromData>();
 
-  /// Converts valid JSON5 <https://json5.org> to JSON. Among other things, it converts single
-  /// quotes to double, adds missing quotes around dictionary keys, removes trailing commas,
-  /// and removes comments.
-  /// @note If given invalid JSON5, it will _usually_ return an error, but may just ouput
-  /// comparably invalid JSON, in which case the caller's subsequent JSON parsing will
-  /// detect the error. The types of errors it overlooks tend to be subtleties of string
-  /// or number encoding.
-  /// @param json5  The JSON5 to parse
-  /// @param outErrorMessage  On failure, the error message will be stored here (if not NULL.)
-  /// As this is a \ref FLStringResult, you will be responsible for freeing it.
-  /// @param outErrorPos  On a parse error, the byte offset in the input where the error occurred
-  /// will be stored here (if it's not NULL.)
-  /// @param outError  On failure, the error code will be stored here (if it's not NULL.)
-  /// @return  The converted JSON.
+  /// Converts valid JSON5 <https://json5.org> to JSON. Among other things, it
+  /// converts single quotes to double, adds missing quotes around dictionary
+  /// keys, removes trailing commas, and removes comments. @note If given
+  /// invalid JSON5, it will _usually_ return an error, but may just ouput
+  /// comparably invalid JSON, in which case the caller's subsequent JSON
+  /// parsing will detect the error. The types of errors it overlooks tend to be
+  /// subtleties of string or number encoding. @param json5 The JSON5 to parse
+  /// @param outErrorMessage On failure, the error message will be stored here
+  /// (if not NULL.) As this is a \ref FLStringResult, you will be responsible
+  /// for freeing it. @param outErrorPos On a parse error, the byte offset in
+  /// the input where the error occurred will be stored here (if it's not NULL.)
+  /// @param outError On failure, the error code will be stored here (if it's
+  /// not NULL.) @return The converted JSON.
   FLStringResult FLJSON5_ToJSON(
     FLString json5,
     ffi.Pointer<FLStringResult> outErrorMessage,
@@ -6608,20 +6673,20 @@ class cblite {
   late final _FLData_ConvertJSON =
       _FLData_ConvertJSONPtr.asFunction<DartFLData_ConvertJSON>();
 
-  /// Tells the encoder to logically append to the given Fleece document, rather than making a
-  /// standalone document. Any calls to FLEncoder_WriteValue() where the value points inside the
-  /// base data will write a pointer back to the original value.
-  /// The resulting data returned by FLEncoder_FinishDoc() will *NOT* be standalone; it can only
-  /// be used by first appending it to the base data.
-  /// @param e  The FLEncoder affected.
-  /// @param base  The base document to create an amendment of.
-  /// @param reuseStrings  If true, then writing a string that already exists in the base will
-  /// just create a pointer back to the original. But the encoder has to scan the
-  /// base for strings first.
-  /// @param externPointers  If true, pointers into the base will be marked with the `extern`
-  /// flag. This allows them to be resolved using the `FLResolver_Begin` function,
-  /// so that when the delta is used the base document can be anywhere in memory,
-  /// not just immediately preceding the delta document.
+  /// Tells the encoder to logically append to the given Fleece document, rather
+  /// than making a standalone document. Any calls to FLEncoder_WriteValue()
+  /// where the value points inside the base data will write a pointer back to
+  /// the original value. The resulting data returned by FLEncoder_FinishDoc()
+  /// will _NOT_ be standalone; it can only be used by first appending it to the
+  /// base data. @param e The FLEncoder affected. @param base The base document
+  /// to create an amendment of. @param reuseStrings If true, then writing a
+  /// string that already exists in the base will just create a pointer back to
+  /// the original. But the encoder has to scan the base for strings first.
+  /// @param externPointers If true, pointers into the base will be marked with
+  /// the `extern` flag. This allows them to be resolved using the
+  /// `FLResolver_Begin` function, so that when the delta is used the base
+  /// document can be anywhere in memory, not just immediately preceding the
+  /// delta document.
   void FLEncoder_Amend(
     FLEncoder e,
     FLSlice base,
@@ -6655,8 +6720,8 @@ class cblite {
   late final _FLEncoder_GetBase =
       _FLEncoder_GetBasePtr.asFunction<DartFLEncoder_GetBase>();
 
-  /// Tells the encoder not to write the two-byte Fleece trailer at the end of the data.
-  /// This is only useful for certain special purposes.
+  /// Tells the encoder not to write the two-byte Fleece trailer at the end of
+  /// the data. This is only useful for certain special purposes.
   void FLEncoder_SuppressTrailer(
     FLEncoder arg0,
   ) {
@@ -6671,8 +6736,9 @@ class cblite {
   late final _FLEncoder_SuppressTrailer =
       _FLEncoder_SuppressTrailerPtr.asFunction<DartFLEncoder_SuppressTrailer>();
 
-  /// Returns the byte offset in the encoded data where the next value will be written.
-  /// (Due to internal buffering, this is not the same as FLEncoder_BytesWritten.)
+  /// Returns the byte offset in the encoded data where the next value will be
+  /// written. (Due to internal buffering, this is not the same as
+  /// FLEncoder_BytesWritten.)
   int FLEncoder_GetNextWritePos(
     FLEncoder arg0,
   ) {
@@ -6687,9 +6753,10 @@ class cblite {
   late final _FLEncoder_GetNextWritePos =
       _FLEncoder_GetNextWritePosPtr.asFunction<DartFLEncoder_GetNextWritePos>();
 
-  /// Returns an opaque reference to the last complete value written to the encoder, if possible.
-  /// Fails (returning 0) if nothing has been written, or if the value is inline and can't be
-  /// referenced this way -- that only happens with small scalars or empty collections.
+  /// Returns an opaque reference to the last complete value written to the
+  /// encoder, if possible. Fails (returning 0) if nothing has been written, or
+  /// if the value is inline and can't be referenced this way -- that only
+  /// happens with small scalars or empty collections.
   int FLEncoder_LastValueWritten(
     FLEncoder arg0,
   ) {
@@ -6704,9 +6771,10 @@ class cblite {
   late final _FLEncoder_LastValueWritten = _FLEncoder_LastValueWrittenPtr
       .asFunction<DartFLEncoder_LastValueWritten>();
 
-  /// Writes another reference (a "pointer") to an already-written value, given a reference previously
-  /// returned from \ref FLEncoder_LastValueWritten. The effect is exactly the same as if you wrote the
-  /// entire value again, except that the size of the encoded data only grows by 4 bytes.
+  /// Writes another reference (a "pointer") to an already-written value, given
+  /// a reference previously returned from \ref FLEncoder_LastValueWritten. The
+  /// effect is exactly the same as if you wrote the entire value again, except
+  /// that the size of the encoded data only grows by 4 bytes.
   void FLEncoder_WriteValueAgain(
     FLEncoder arg0,
     int preWrittenValue,
@@ -6723,10 +6791,11 @@ class cblite {
   late final _FLEncoder_WriteValueAgain =
       _FLEncoder_WriteValueAgainPtr.asFunction<DartFLEncoder_WriteValueAgain>();
 
-  /// Returns the data written so far as a standalone Fleece document, whose root is the last
-  /// value written. You can continue writing, and the final output returned by \ref FLEncoder_Finish will
-  /// consist of everything after this point. That second part can be used in the future by loading it
-  /// as an `FLDoc` with the first part as its `extern` reference.
+  /// Returns the data written so far as a standalone Fleece document, whose
+  /// root is the last value written. You can continue writing, and the final
+  /// output returned by \ref FLEncoder_Finish will consist of everything after
+  /// this point. That second part can be used in the future by loading it as an
+  /// `FLDoc` with the first part as its `extern` reference.
   FLSliceResult FLEncoder_Snip(
     FLEncoder arg0,
   ) {
@@ -6740,7 +6809,8 @@ class cblite {
   late final _FLEncoder_Snip =
       _FLEncoder_SnipPtr.asFunction<DartFLEncoder_Snip>();
 
-  /// Finishes encoding the current item, and returns its offset in the output data.
+  /// Finishes encoding the current item, and returns its offset in the output
+  /// data.
   int FLEncoder_FinishItem(
     FLEncoder arg0,
   ) {
@@ -6755,9 +6825,9 @@ class cblite {
   late final _FLEncoder_FinishItem =
       _FLEncoder_FinishItemPtr.asFunction<DartFLEncoder_FinishItem>();
 
-  /// In a JSON encoder, adds a newline ('\n') and prepares to start encoding another
-  /// top-level object. The encoder MUST be not be within an array or dict.
-  /// Has no effect in a Fleece encoder.
+  /// In a JSON encoder, adds a newline ('\n') and prepares to start encoding
+  /// another top-level object. The encoder MUST be not be within an array or
+  /// dict. Has no effect in a Fleece encoder.
   void FLJSONEncoder_NextDocument(
     FLEncoder arg0,
   ) {
@@ -6772,8 +6842,8 @@ class cblite {
   late final _FLJSONEncoder_NextDocument = _FLJSONEncoder_NextDocumentPtr
       .asFunction<DartFLJSONEncoder_NextDocument>();
 
-  /// Debugging function that returns a C string of JSON.
-  /// Does not free the string's memory!
+  /// Debugging function that returns a C string of JSON. Does not free the
+  /// string's memory!
   ffi.Pointer<ffi.Char> FLDump(
     FLValue arg0,
   ) {
@@ -6799,8 +6869,8 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLDumpData>>('FLDumpData');
   late final _FLDumpData = _FLDumpDataPtr.asFunction<DartFLDumpData>();
 
-  /// Produces a human-readable dump of Fleece-encoded data.
-  /// This is only useful if you already know, or want to learn, the encoding format.
+  /// Produces a human-readable dump of Fleece-encoded data. This is only useful
+  /// if you already know, or want to learn, the encoding format.
   FLStringResult FLData_Dump(
     FLSlice data,
   ) {
@@ -6845,10 +6915,10 @@ typedef DartCBLErrorCode = int;
 typedef CBLNetworkErrorCode = ffi.Int32;
 typedef DartCBLNetworkErrorCode = int;
 
-/// A struct holding information about an error. It's declared on the stack by a caller, and
-/// its address is passed to an API function. If the function's return value indicates that
-/// there was an error (usually by returning NULL or false), then the CBLError will have been
-/// filled in with the details.
+/// A struct holding information about an error. It's declared on the stack by a
+/// caller, and its address is passed to an API function. If the function's
+/// return value indicates that there was an error (usually by returning NULL or
+/// false), then the CBLError will have been filled in with the details.
 final class CBLError extends ffi.Struct {
   /// < Domain of errors; a namespace for the `code`.
   @CBLErrorDomain()
@@ -6862,13 +6932,13 @@ final class CBLError extends ffi.Struct {
   external int internal_info;
 }
 
-/// A heap-allocated block of memory returned from an API call.
-/// The caller takes ownership, and must call \ref FLSliceResult_Release when done with it.
-/// \warning The contents of the block must not be modified, since others may be using it.
-/// \note This is equivalent to the C++ class `alloc_slice`. In C++ the easiest way to deal with
-/// a `FLSliceResult` return value is to construct an `alloc_slice` from it, which will
-/// adopt the reference, and release it in its destructor. For example:
-/// `alloc_slice foo( CopyFoo() );`
+/// A heap-allocated block of memory returned from an API call. The caller takes
+/// ownership, and must call \ref FLSliceResult_Release when done with it.
+/// \warning The contents of the block must not be modified, since others may be
+/// using it. \note This is equivalent to the C++ class `alloc_slice`. In C++
+/// the easiest way to deal with a `FLSliceResult` return value is to construct
+/// an `alloc_slice` from it, which will adopt the reference, and release it in
+/// its destructor. For example: `alloc_slice foo( CopyFoo() );`
 final class FLSliceResult extends ffi.Struct {
   external ffi.Pointer<ffi.Void> buf;
 
@@ -6881,8 +6951,9 @@ typedef NativeCBLError_Message = FLSliceResult Function(
 typedef DartCBLError_Message = FLSliceResult Function(
     ffi.Pointer<CBLError> outError);
 
-/// A date/time representation used for document expiration (and in date/time queries.)
-/// Measured in milliseconds since the Unix epoch (1/1/1970, midnight UTC.)
+/// A date/time representation used for document expiration (and in date/time
+/// queries.) Measured in milliseconds since the Unix epoch (1/1/1970, midnight
+/// UTC.)
 typedef CBLTimestamp = ffi.Int64;
 typedef DartCBLTimestamp = int;
 typedef NativeCBL_Now = CBLTimestamp Function();
@@ -6926,8 +6997,8 @@ typedef NativeCBLListener_Remove = ffi.Void Function(
 typedef DartCBLListener_Remove = void Function(
     ffi.Pointer<CBLListenerToken> arg0);
 
-/// A simple reference to a block of memory. Does not imply ownership.
-/// (This is equivalent to the C++ class `slice`.)
+/// A simple reference to a block of memory. Does not imply ownership. (This is
+/// equivalent to the C++ class `slice`.)
 final class FLSlice extends ffi.Struct {
   external ffi.Pointer<ffi.Void> buf;
 
@@ -7068,19 +7139,19 @@ typedef DartCBLConflictHandlerFunction = bool Function(
     ffi.Pointer<CBLDocument> documentBeingSaved,
     ffi.Pointer<CBLDocument> conflictingDocument);
 
-/// Custom conflict handler for use when saving or deleting a document. This handler is called
-/// if the save would cause a conflict, i.e. if the document in the database has been updated
-/// (probably by a pull replicator, or by application code on another thread)
-/// since it was loaded into the CBLDocument being saved.
-/// @param context  The value of the \p context parameter you passed to
-/// \ref CBLDatabase_SaveDocumentWithConflictHandler.
-/// @param documentBeingSaved  The document being saved (same as the parameter you passed to
-/// \ref CBLDatabase_SaveDocumentWithConflictHandler.) The callback may modify
-/// this document's properties as necessary to resolve the conflict.
-/// @param conflictingDocument  The revision of the document currently in the database,
-/// which has been changed since \p documentBeingSaved was loaded.
-/// May be NULL, meaning that the document has been deleted.
-/// @return  True to save the document, false to abort the save.
+/// Custom conflict handler for use when saving or deleting a document. This
+/// handler is called if the save would cause a conflict, i.e. if the document
+/// in the database has been updated (probably by a pull replicator, or by
+/// application code on another thread) since it was loaded into the CBLDocument
+/// being saved. @param context The value of the \p context parameter you passed
+/// to \ref CBLDatabase_SaveDocumentWithConflictHandler. @param
+/// documentBeingSaved The document being saved (same as the parameter you
+/// passed to \ref CBLDatabase_SaveDocumentWithConflictHandler.) The callback
+/// may modify this document's properties as necessary to resolve the conflict.
+/// @param conflictingDocument The revision of the document currently in the
+/// database, which has been changed since \p documentBeingSaved was loaded. May
+/// be NULL, meaning that the document has been deleted. @return True to save
+/// the document, false to abort the save.
 typedef CBLConflictHandler
     = ffi.Pointer<ffi.NativeFunction<CBLConflictHandlerFunction>>;
 typedef NativeCBLDatabase_GetDocument = ffi.Pointer<CBLDocument> Function(
@@ -7229,14 +7300,14 @@ typedef CBLDocumentChangeListenerFunction = ffi.Void Function(
 typedef DartCBLDocumentChangeListenerFunction = void Function(
     ffi.Pointer<ffi.Void> context, ffi.Pointer<CBLDatabase> db, FLString docID);
 
-/// A document change listener callback, invoked after a specific document is changed on disk.
-/// @warning  By default, this listener may be called on arbitrary threads. If your code isn't
-/// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-/// so that listeners will be called in a safe context.
-/// @warning  <b>Deprecated :</b> Use CBLCollectionChangeListener instead.
-/// @param context  An arbitrary value given when the callback was registered.
-/// @param db  The database containing the document.
-/// @param docID  The document's ID.
+/// A document change listener callback, invoked after a specific document is
+/// changed on disk. @warning By default, this listener may be called on
+/// arbitrary threads. If your code isn't prepared for that, you may want to use
+/// \ref CBLDatabase_BufferNotifications so that listeners will be called in a
+/// safe context. @warning <b>Deprecated :</b> Use CBLCollectionChangeListener
+/// instead. @param context An arbitrary value given when the callback was
+/// registered. @param db The database containing the document. @param docID The
+/// document's ID.
 typedef CBLDocumentChangeListener
     = ffi.Pointer<ffi.NativeFunction<CBLDocumentChangeListenerFunction>>;
 typedef NativeCBLDatabase_AddDocumentChangeListener
@@ -7329,15 +7400,15 @@ typedef DartCBLQueryChangeListenerFunction = void Function(
     ffi.Pointer<CBLQuery> query,
     ffi.Pointer<CBLListenerToken> token);
 
-/// A callback to be invoked after the query's results have changed.
-/// The actual result set can be obtained by calling \ref CBLQuery_CopyCurrentResults, either during
-/// the callback or at any time thereafter.
-/// @warning  By default, this listener may be called on arbitrary threads. If your code isn't
+/// A callback to be invoked after the query's results have changed. The actual
+/// result set can be obtained by calling \ref CBLQuery_CopyCurrentResults,
+/// either during the callback or at any time thereafter. @warning By default,
+/// this listener may be called on arbitrary threads. If your code isn't
 /// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-/// so that listeners will be called in a safe context.
-/// @param context  The same `context` value that you passed when adding the listener.
-/// @param query  The query that triggered the listener.
-/// @param token  The token for obtaining the query results by calling \ref CBLQuery_CopyCurrentResults.
+/// so that listeners will be called in a safe context. @param context The same
+/// `context` value that you passed when adding the listener. @param query The
+/// query that triggered the listener. @param token The token for obtaining the
+/// query results by calling \ref CBLQuery_CopyCurrentResults.
 typedef CBLQueryChangeListener
     = ffi.Pointer<ffi.NativeFunction<CBLQueryChangeListenerFunction>>;
 typedef NativeCBLQuery_AddChangeListener
@@ -7362,8 +7433,9 @@ final class CBLValueIndexConfiguration extends ffi.Struct {
   @CBLQueryLanguage()
   external int expressionLanguage;
 
-  /// The expressions describing each coloumn of the index. The expressions could be specified
-  /// in a JSON Array or in N1QL syntax using comma delimiter.
+  /// The expressions describing each coloumn of the index. The expressions
+  /// could be specified in a JSON Array or in N1QL syntax using comma
+  /// delimiter.
   external FLString expressions;
 }
 
@@ -7384,27 +7456,29 @@ final class CBLFullTextIndexConfiguration extends ffi.Struct {
   @CBLQueryLanguage()
   external int expressionLanguage;
 
-  /// The expressions describing each coloumn of the index. The expressions could be specified
-  /// in a JSON Array or in N1QL syntax using comma delimiter. (Required)
+  /// The expressions describing each coloumn of the index. The expressions
+  /// could be specified in a JSON Array or in N1QL syntax using comma
+  /// delimiter. (Required)
   external FLString expressions;
 
-  /// Should diacritical marks (accents) be ignored?
-  /// Defaults to  \ref kCBLDefaultFullTextIndexIgnoreAccents.
-  /// Generally this should be left `false` for non-English text.
+  /// Should diacritical marks (accents) be ignored? Defaults to \ref
+  /// kCBLDefaultFullTextIndexIgnoreAccents. Generally this should be left
+  /// `false` for non-English text.
   @ffi.Bool()
   external bool ignoreAccents;
 
-  /// The dominant language. Setting this enables word stemming, i.e.
-  /// matching different cases of the same word ("big" and "bigger", for instance) and ignoring
-  /// common "stop-words" ("the", "a", "of", etc.)
+  /// The dominant language. Setting this enables word stemming, i.e. matching
+  /// different cases of the same word ("big" and "bigger", for instance) and
+  /// ignoring common "stop-words" ("the", "a", "of", etc.)
   ///
-  /// Can be an ISO-639 language code or a lowercase (English) language name; supported
-  /// languages are: da/danish, nl/dutch, en/english, fi/finnish, fr/french, de/german,
-  /// hu/hungarian, it/italian, no/norwegian, pt/portuguese, ro/romanian, ru/russian,
-  /// es/spanish, sv/swedish, tr/turkish.
+  /// Can be an ISO-639 language code or a lowercase (English) language name;
+  /// supported languages are: da/danish, nl/dutch, en/english, fi/finnish,
+  /// fr/french, de/german, hu/hungarian, it/italian, no/norwegian,
+  /// pt/portuguese, ro/romanian, ru/russian, es/spanish, sv/swedish,
+  /// tr/turkish.
   ///
-  /// If left null,  or set to an unrecognized language, no language-specific behaviors
-  /// such as stemming and stop-word removal occur.
+  /// If left null, or set to an unrecognized language, no language-specific
+  /// behaviors such as stemming and stop-word removal occur.
   external FLString language;
 }
 
@@ -7629,13 +7703,13 @@ typedef NativeCBLCollection_GetIndexNames = FLMutableArray Function(
 typedef DartCBLCollection_GetIndexNames = FLMutableArray Function(
     ffi.Pointer<CBLCollection> collection, ffi.Pointer<CBLError> outError);
 
-/// \name  Change Listeners
-/// @{
-/// A collection change listener lets you detect changes made to all documents in a collection.
-/// (If you want to observe specific documents, use a \ref CBLCollectionDocumentChangeListener instead.)
-/// @note  If there are multiple \ref CBLCollection instances on the same database file, each one's
-/// listeners will be notified of changes made by other collection instances.
-/// @warning  Changes made to the database file by other processes will _not_ be notified.
+/// \name Change Listeners @{ A collection change listener lets you detect
+/// changes made to all documents in a collection. (If you want to observe
+/// specific documents, use a \ref CBLCollectionDocumentChangeListener instead.)
+/// @note If there are multiple \ref CBLCollection instances on the same
+/// database file, each one's listeners will be notified of changes made by
+/// other collection instances. @warning Changes made to the database file by
+/// other processes will _not_ be notified.
 final class CBLCollectionChange extends ffi.Struct {
   /// <The collection that changed.
   external ffi.Pointer<CBLCollection> collection;
@@ -7653,12 +7727,12 @@ typedef CBLCollectionChangeListenerFunction = ffi.Void Function(
 typedef DartCBLCollectionChangeListenerFunction = void Function(
     ffi.Pointer<ffi.Void> context, ffi.Pointer<CBLCollectionChange> change);
 
-/// A collection change listener callback, invoked after one or more documents are changed on disk.
-/// @warning  By default, this listener may be called on arbitrary threads. If your code isn't
-/// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-/// so that listeners will be called in a safe context.
-/// @param context  An arbitrary value given when the callback was registered.
-/// @param change  The collection change information.
+/// A collection change listener callback, invoked after one or more documents
+/// are changed on disk. @warning By default, this listener may be called on
+/// arbitrary threads. If your code isn't prepared for that, you may want to use
+/// \ref CBLDatabase_BufferNotifications so that listeners will be called in a
+/// safe context. @param context An arbitrary value given when the callback was
+/// registered. @param change The collection change information.
 typedef CBLCollectionChangeListener
     = ffi.Pointer<ffi.NativeFunction<CBLCollectionChangeListenerFunction>>;
 typedef NativeCBLCollection_AddChangeListener
@@ -7672,13 +7746,11 @@ typedef DartCBLCollection_AddChangeListener
         CBLCollectionChangeListener listener,
         ffi.Pointer<ffi.Void> context);
 
-/// \name  Document listeners
-/// @{
-/// A document change listener lets you detect changes made to a specific document after
-/// they are persisted to the collection.
-/// @note If there are multiple CBLCollection instances on the same database file,
-/// each one's document listeners will be notified of changes made by other
-/// collection instances.
+/// \name Document listeners @{ A document change listener lets you detect
+/// changes made to a specific document after they are persisted to the
+/// collection. @note If there are multiple CBLCollection instances on the same
+/// database file, each one's document listeners will be notified of changes
+/// made by other collection instances.
 final class CBLDocumentChange extends ffi.Struct {
   /// < The collection that changed.
   external ffi.Pointer<CBLCollection> collection;
@@ -7692,12 +7764,12 @@ typedef CBLCollectionDocumentChangeListenerFunction = ffi.Void Function(
 typedef DartCBLCollectionDocumentChangeListenerFunction = void Function(
     ffi.Pointer<ffi.Void> context, ffi.Pointer<CBLDocumentChange> change);
 
-/// A document change listener callback, invoked after a specific document is changed on disk.
-/// @warning  By default, this listener may be called on arbitrary threads. If your code isn't
-/// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-/// so that listeners will be called in a safe context.
-/// @param context  An arbitrary value given when the callback was registered.
-/// @param change  The document change info.
+/// A document change listener callback, invoked after a specific document is
+/// changed on disk. @warning By default, this listener may be called on
+/// arbitrary threads. If your code isn't prepared for that, you may want to use
+/// \ref CBLDatabase_BufferNotifications so that listeners will be called in a
+/// safe context. @param context An arbitrary value given when the callback was
+/// registered. @param change The document change info.
 typedef CBLCollectionDocumentChangeListener = ffi
     .Pointer<ffi.NativeFunction<CBLCollectionDocumentChangeListenerFunction>>;
 typedef NativeCBLCollection_AddDocumentChangeListener
@@ -7840,15 +7912,16 @@ typedef DartCBLDatabaseChangeListenerFunction = void Function(
     int numDocs,
     ffi.Pointer<FLString> docIDs);
 
-/// A default collection change listener callback, invoked after one or more documents in the default collection are changed on disk.
-/// @warning  By default, this listener may be called on arbitrary threads. If your code isn't
-/// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-/// so that listeners will be called in a safe context.
-/// @warning  <b>Deprecated :</b> CBLCollectionChangeListener instead.
-/// @param context  An arbitrary value given when the callback was registered.
-/// @param db  The database that changed.
-/// @param numDocs  The number of documents that changed (size of the `docIDs` array)
-/// @param docIDs  The IDs of the documents that changed, as a C array of `numDocs` C strings.
+/// A default collection change listener callback, invoked after one or more
+/// documents in the default collection are changed on disk. @warning By
+/// default, this listener may be called on arbitrary threads. If your code
+/// isn't prepared for that, you may want to use \ref
+/// CBLDatabase_BufferNotifications so that listeners will be called in a safe
+/// context. @warning <b>Deprecated :</b> CBLCollectionChangeListener instead.
+/// @param context An arbitrary value given when the callback was registered.
+/// @param db The database that changed. @param numDocs The number of documents
+/// that changed (size of the `docIDs` array) @param docIDs The IDs of the
+/// documents that changed, as a C array of `numDocs` C strings.
 typedef CBLDatabaseChangeListener
     = ffi.Pointer<ffi.NativeFunction<CBLDatabaseChangeListenerFunction>>;
 typedef NativeCBLDatabase_AddChangeListener
@@ -7862,14 +7935,15 @@ typedef CBLNotificationsReadyCallbackFunction = ffi.Void Function(
 typedef DartCBLNotificationsReadyCallbackFunction = void Function(
     ffi.Pointer<ffi.Void> context, ffi.Pointer<CBLDatabase> db);
 
-/// Callback indicating that the database (or an object belonging to it) is ready to call one
-/// or more listeners. You should call \ref CBLDatabase_SendNotifications at your earliest
-/// convenience, in the context (thread, dispatch queue, etc.) you want them to run.
-/// @note  This callback is called _only once_ until the next time \ref CBLDatabase_SendNotifications
+/// Callback indicating that the database (or an object belonging to it) is
+/// ready to call one or more listeners. You should call \ref
+/// CBLDatabase*SendNotifications at your earliest convenience, in the context
+/// (thread, dispatch queue, etc.) you want them to run. @note This callback is
+/// called \_only once* until the next time \ref CBLDatabase_SendNotifications
 /// is called. If you don't respond by (sooner or later) calling that function,
-/// you will not be informed that any listeners are ready.
-/// @warning  This can be called from arbitrary threads. It should do as little work as
-/// possible, just scheduling a future call to \ref CBLDatabase_SendNotifications.
+/// you will not be informed that any listeners are ready. @warning This can be
+/// called from arbitrary threads. It should do as little work as possible, just
+/// scheduling a future call to \ref CBLDatabase_SendNotifications.
 typedef CBLNotificationsReadyCallback
     = ffi.Pointer<ffi.NativeFunction<CBLNotificationsReadyCallbackFunction>>;
 typedef NativeCBLDatabase_BufferNotifications = ffi.Void Function(
@@ -7929,14 +8003,14 @@ typedef DartCBLReplicationFilterFunction = bool Function(
     ffi.Pointer<CBLDocument> document,
     DartCBLDocumentFlags flags);
 
-/// A callback that can decide whether a particular document should be pushed or pulled.
-/// @warning  This callback will be called on a background thread managed by the replicator.
-/// It must pay attention to thread-safety. It should not take a long time to return,
-/// or it will slow down the replicator.
-/// @param context  The `context` field of the \ref CBLReplicatorConfiguration.
-/// @param document  The document in question.
-/// @param flags  Indicates whether the document was deleted or removed.
-/// @return  True if the document should be replicated, false to skip it.
+/// A callback that can decide whether a particular document should be pushed or
+/// pulled. @warning This callback will be called on a background thread managed
+/// by the replicator. It must pay attention to thread-safety. It should not
+/// take a long time to return, or it will slow down the replicator. @param
+/// context The `context` field of the \ref CBLReplicatorConfiguration. @param
+/// document The document in question. @param flags Indicates whether the
+/// document was deleted or removed. @return True if the document should be
+/// replicated, false to skip it.
 typedef CBLReplicationFilter
     = ffi.Pointer<ffi.NativeFunction<CBLReplicationFilterFunction>>;
 typedef CBLConflictResolverFunction = ffi.Pointer<CBLDocument> Function(
@@ -7945,28 +8019,27 @@ typedef CBLConflictResolverFunction = ffi.Pointer<CBLDocument> Function(
     ffi.Pointer<CBLDocument> localDocument,
     ffi.Pointer<CBLDocument> remoteDocument);
 
-/// Conflict-resolution callback for use in replications. This callback will be invoked
-/// when the replicator finds a newer server-side revision of a document that also has local
-/// changes. The local and remote changes must be resolved before the document can be pushed
-/// to the server.
-/// @note  Any new CBLBlob objects set to the resolved document returned by the callback must
-/// not be released. They need to be retained for installation while the resolved document
-/// is being saved into the database, and the replicator will be responsible for
-/// releasing them after they are installed.
-/// @warning  This callback will be called on a background thread managed by the replicator.
-/// It must pay attention to thread-safety. However, unlike a filter callback,
-/// it does not need to return quickly. If it needs to prompt for user input,
-/// that's OK.
-/// @param context  The `context` field of the \ref CBLReplicatorConfiguration.
-/// @param documentID  The ID of the conflicted document.
-/// @param localDocument  The current revision of the document in the local database,
-/// or NULL if the local document has been deleted.
-/// @param remoteDocument  The revision of the document found on the server,
-/// or NULL if the document has been deleted on the server.
-/// @return  The resolved document to save locally (and push, if the replicator is pushing.)
-/// This can be the same as \p localDocument or \p remoteDocument, or you can create
-/// a mutable copy of either one and modify it appropriately.
-/// Or return NULL if the resolution is to delete the document.
+/// Conflict-resolution callback for use in replications. This callback will be
+/// invoked when the replicator finds a newer server-side revision of a document
+/// that also has local changes. The local and remote changes must be resolved
+/// before the document can be pushed to the server. @note Any new CBLBlob
+/// objects set to the resolved document returned by the callback must not be
+/// released. They need to be retained for installation while the resolved
+/// document is being saved into the database, and the replicator will be
+/// responsible for releasing them after they are installed. @warning This
+/// callback will be called on a background thread managed by the replicator. It
+/// must pay attention to thread-safety. However, unlike a filter callback, it
+/// does not need to return quickly. If it needs to prompt for user input,
+/// that's OK. @param context The `context` field of the \ref
+/// CBLReplicatorConfiguration. @param documentID The ID of the conflicted
+/// document. @param localDocument The current revision of the document in the
+/// local database, or NULL if the local document has been deleted. @param
+/// remoteDocument The revision of the document found on the server, or NULL if
+/// the document has been deleted on the server. @return The resolved document
+/// to save locally (and push, if the replicator is pushing.) This can be the
+/// same as \p localDocument or \p remoteDocument, or you can create a mutable
+/// copy of either one and modify it appropriately. Or return NULL if the
+/// resolution is to delete the document.
 typedef CBLConflictResolver
     = ffi.Pointer<ffi.NativeFunction<CBLConflictResolverFunction>>;
 
@@ -8004,28 +8077,33 @@ typedef CBLPropertyEncryptorFunction = FLSliceResult Function(
     ffi.Pointer<FLStringResult> kid,
     ffi.Pointer<CBLError> error);
 
-/// Callback that encrypts \ref CBLEncryptable properties in the documents of the default collection
-/// pushed by the replicator. The callback returns encrypted data as a FLSliceResult object,
-/// and the replicator will responsible for releasing the returned FLSliceResult object.
+/// Callback that encrypts \ref CBLEncryptable properties in the documents of
+/// the default collection pushed by the replicator. The callback returns
+/// encrypted data as a FLSliceResult object, and the replicator will
+/// responsible for releasing the returned FLSliceResult object.
 ///
-/// If an error occurred during encryption, return a null \ref FLSliceResult with an error set to the
-/// out error parameter of the callback. There are two errors that are supported by the callback :
+/// If an error occurred during encryption, return a null \ref FLSliceResult
+/// with an error set to the out error parameter of the callback. There are two
+/// errors that are supported by the callback :
 ///
-/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is set, the document
-/// will fail to replicate, and the document will not be synced again unless the document is updated,
-/// or the replicator is reset.
+/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is
+///    set, the document will fail to replicate, and the document will not be
+///    synced again unless the document is updated, or the replicator is reset.
 ///
-/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for mostly for a case
-/// such as when a crypto service is temporarily unavailable during encryption. When this error
-/// is set, the replicator will go into the offline state and will retry again according to the replicator
-/// retry logic. As a result, the document will be retried to replicate again, and the encryption callback
-/// will be called again to encrypt the properties of the document.
+/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for
+///    mostly for a case such as when a crypto service is temporarily
+///    unavailable during encryption. When this error is set, the replicator
+///    will go into the offline state and will retry again according to the
+///    replicator retry logic. As a result, the document will be retried to
+///    replicate again, and the encryption callback will be called again to
+///    encrypt the properties of the document.
 ///
-/// @note If an error besides the two errors above is set to the out error parameter of the callback,
-/// or only a null \ref FLSliceResult object is returned without setting an error, the document
-/// will be failed to replicate as the kCBLDomain / kCBLErrorCrypto error is sepecified.
-/// @note A null \ref FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr, 0).
-/// @warning  <b>Deprecated :</b> Use CBLDocumentPropertyEncryptor instead.
+/// @note If an error besides the two errors above is set to the out error
+/// parameter of the callback, or only a null \ref FLSliceResult object is
+/// returned without setting an error, the document will be failed to replicate
+/// as the kCBLDomain / kCBLErrorCrypto error is sepecified. @note A null \ref
+/// FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr,
+/// 0). @warning <b>Deprecated :</b> Use CBLDocumentPropertyEncryptor instead.
 typedef CBLPropertyEncryptor
     = ffi.Pointer<ffi.NativeFunction<CBLPropertyEncryptorFunction>>;
 typedef CBLPropertyDecryptorFunction = FLSliceResult Function(
@@ -8038,30 +8116,36 @@ typedef CBLPropertyDecryptorFunction = FLSliceResult Function(
     FLString kid,
     ffi.Pointer<CBLError> error);
 
-/// Callback that decrypts encrypted \ref CBLEncryptable properties in documents of the default collection
-/// pulled by the replicator. The callback returns decrypted data as a FLSliceResult object,
-/// and the replicator will responsible for releasing the returned FLSliceResult object.
+/// Callback that decrypts encrypted \ref CBLEncryptable properties in documents
+/// of the default collection pulled by the replicator. The callback returns
+/// decrypted data as a FLSliceResult object, and the replicator will
+/// responsible for releasing the returned FLSliceResult object.
 ///
-/// If an error occurred during decryption, return a null \ref FLSliceResult with an error set to the
-/// out error parameter of the callback. There are two errors that are supported by the callback :
+/// If an error occurred during decryption, return a null \ref FLSliceResult
+/// with an error set to the out error parameter of the callback. There are two
+/// errors that are supported by the callback :
 ///
-/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is set, the document
-/// will fail to replicate, and the document will not be synced again unless the document is updated,
-/// or the replicator is reset.
+/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is
+///    set, the document will fail to replicate, and the document will not be
+///    synced again unless the document is updated, or the replicator is reset.
 ///
-/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for mostly for a case
-/// such as when a crypto service is temporarily unavailable during decryption. When this error
-/// is set, the replicator will go into the offline state and will retry again according to the replicator
-/// retry logic. As a result, the document will be retried to replicate again, and the decryption callback
-/// will be called again to decrypt the properties of the document.
+/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for
+///    mostly for a case such as when a crypto service is temporarily
+///    unavailable during decryption. When this error is set, the replicator
+///    will go into the offline state and will retry again according to the
+///    replicator retry logic. As a result, the document will be retried to
+///    replicate again, and the decryption callback will be called again to
+///    decrypt the properties of the document.
 ///
-/// If the decryption should be skipped to retain the encrypted data as-is, return a null \ref FLSliceResult
-/// object without setting an error set to the out error parameter.
+/// If the decryption should be skipped to retain the encrypted data as-is,
+/// return a null \ref FLSliceResult object without setting an error set to the
+/// out error parameter.
 ///
-/// @note If an error besides the two errors above is set to the out error parameter of the callback,
-/// the document will be failed to replicate as getting the kCBLDomain / kCBLErrorCrypto error.
-/// @note A null \ref FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr, 0).
-/// @warning <b>Deprecated :</b> Use CBLDocumentPropertyDecryptor instead.
+/// @note If an error besides the two errors above is set to the out error
+/// parameter of the callback, the document will be failed to replicate as
+/// getting the kCBLDomain / kCBLErrorCrypto error. @note A null \ref
+/// FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr,
+/// 0). @warning <b>Deprecated :</b> Use CBLDocumentPropertyDecryptor instead.
 typedef CBLPropertyDecryptor
     = ffi.Pointer<ffi.NativeFunction<CBLPropertyDecryptorFunction>>;
 typedef CBLDocumentPropertyEncryptorFunction = FLSliceResult Function(
@@ -8076,27 +8160,33 @@ typedef CBLDocumentPropertyEncryptorFunction = FLSliceResult Function(
     ffi.Pointer<FLStringResult> kid,
     ffi.Pointer<CBLError> error);
 
-/// Callback that encrypts \ref CBLEncryptable properties in the documents pushed by the replicator.
-/// The callback returns encrypted data as a FLSliceResult object, and the replicator will responsible
-/// for releasing the returned FLSliceResult object.
+/// Callback that encrypts \ref CBLEncryptable properties in the documents
+/// pushed by the replicator. The callback returns encrypted data as a
+/// FLSliceResult object, and the replicator will responsible for releasing the
+/// returned FLSliceResult object.
 ///
-/// If an error occurred during encryption, return a null \ref FLSliceResult with an error set to the
-/// out error parameter of the callback. There are two errors that are supported by the callback :
+/// If an error occurred during encryption, return a null \ref FLSliceResult
+/// with an error set to the out error parameter of the callback. There are two
+/// errors that are supported by the callback :
 ///
-/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is set, the document
-/// will fail to replicate, and the document will not be synced again unless the document is updated,
-/// or the replicator is reset.
+/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is
+///    set, the document will fail to replicate, and the document will not be
+///    synced again unless the document is updated, or the replicator is reset.
 ///
-/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for mostly for a case
-/// such as when a crypto service is temporarily unavailable during encryption. When this error
-/// is set, the replicator will go into the offline state and will retry again according to the replicator
-/// retry logic. As a result, the document will be retried to replicate again, and the encryption callback
-/// will be called again to encrypt the properties of the document.
+/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for
+///    mostly for a case such as when a crypto service is temporarily
+///    unavailable during encryption. When this error is set, the replicator
+///    will go into the offline state and will retry again according to the
+///    replicator retry logic. As a result, the document will be retried to
+///    replicate again, and the encryption callback will be called again to
+///    encrypt the properties of the document.
 ///
-/// @note If an error besides the two errors above is set to the out error parameter of the callback,
-/// or only a null \ref FLSliceResult object is returned without setting an error, the document
-/// will be failed to replicate as the kCBLDomain / kCBLErrorCrypto error is sepecified.
-/// @note A null \ref FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr, 0).
+/// @note If an error besides the two errors above is set to the out error
+/// parameter of the callback, or only a null \ref FLSliceResult object is
+/// returned without setting an error, the document will be failed to replicate
+/// as the kCBLDomain / kCBLErrorCrypto error is sepecified. @note A null \ref
+/// FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr,
+/// 0).
 typedef CBLDocumentPropertyEncryptor
     = ffi.Pointer<ffi.NativeFunction<CBLDocumentPropertyEncryptorFunction>>;
 typedef CBLDocumentPropertyDecryptorFunction = FLSliceResult Function(
@@ -8111,33 +8201,41 @@ typedef CBLDocumentPropertyDecryptorFunction = FLSliceResult Function(
     FLString kid,
     ffi.Pointer<CBLError> error);
 
-/// Callback that decrypts encrypted \ref CBLEncryptable properties in documents pulled by the replicator.
-/// The callback returns decrypted data as a FLSliceResult object, and the replicator will responsible
-/// for releasing the returned FLSliceResult object.
+/// Callback that decrypts encrypted \ref CBLEncryptable properties in documents
+/// pulled by the replicator. The callback returns decrypted data as a
+/// FLSliceResult object, and the replicator will responsible for releasing the
+/// returned FLSliceResult object.
 ///
-/// If an error occurred during decryption, return a null \ref FLSliceResult with an error set to the
-/// out error parameter of the callback. There are two errors that are supported by the callback :
+/// If an error occurred during decryption, return a null \ref FLSliceResult
+/// with an error set to the out error parameter of the callback. There are two
+/// errors that are supported by the callback :
 ///
-/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is set, the document
-/// will fail to replicate, and the document will not be synced again unless the document is updated,
-/// or the replicator is reset.
+/// 1. kCBLDomain / kCBLErrorCrypto : Permanent Crypto Error. When this error is
+///    set, the document will fail to replicate, and the document will not be
+///    synced again unless the document is updated, or the replicator is reset.
 ///
-/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for mostly for a case
-/// such as when a crypto service is temporarily unavailable during decryption. When this error
-/// is set, the replicator will go into the offline state and will retry again according to the replicator
-/// retry logic. As a result, the document will be retried to replicate again, and the decryption callback
-/// will be called again to decrypt the properties of the document.
+/// 2. kCBLWebSocketDomain / 503 : Service Unavailable Error. This error is for
+///    mostly for a case such as when a crypto service is temporarily
+///    unavailable during decryption. When this error is set, the replicator
+///    will go into the offline state and will retry again according to the
+///    replicator retry logic. As a result, the document will be retried to
+///    replicate again, and the decryption callback will be called again to
+///    decrypt the properties of the document.
 ///
-/// If the decryption should be skipped to retain the encrypted data as-is, return a null \ref FLSliceResult
-/// object without setting an error set to the out error parameter.
+/// If the decryption should be skipped to retain the encrypted data as-is,
+/// return a null \ref FLSliceResult object without setting an error set to the
+/// out error parameter.
 ///
-/// @note If an error besides the two errors above is set to the out error parameter of the callback,
-/// the document will be failed to replicate as getting the kCBLDomain / kCBLErrorCrypto error.
-/// @note A null \ref FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr, 0).
+/// @note If an error besides the two errors above is set to the out error
+/// parameter of the callback, the document will be failed to replicate as
+/// getting the kCBLDomain / kCBLErrorCrypto error. @note A null \ref
+/// FLSliceResult can be created by calling FLSliceResult_CreateWith(nullptr,
+/// 0).
 typedef CBLDocumentPropertyDecryptor
     = ffi.Pointer<ffi.NativeFunction<CBLDocumentPropertyDecryptorFunction>>;
 
-/// The collection and the configuration that can be configured specifically for the replication.
+/// The collection and the configuration that can be configured specifically for
+/// the replication.
 final class CBLReplicationCollection extends ffi.Struct {
   /// < The collection.
   external ffi.Pointer<CBLCollection> collection;
@@ -8151,8 +8249,8 @@ final class CBLReplicationCollection extends ffi.Struct {
   /// < Optional callback to validate incoming docs.
   external CBLReplicationFilter pullFilter;
 
-  /// Optional set of channels to pull from.
-  /// @note Channels are not supported in Peer-to-Peer and Database-to-Database replication.
+  /// Optional set of channels to pull from. @note Channels are not supported in
+  /// Peer-to-Peer and Database-to-Database replication.
   external FLArray channels;
 
   /// < Optional set of document IDs to replicate
@@ -8161,9 +8259,9 @@ final class CBLReplicationCollection extends ffi.Struct {
 
 /// The configuration of a replicator.
 final class CBLReplicatorConfiguration extends ffi.Struct {
-  /// The database to replicate. When setting the database, ONLY the default collection will be used for replication.
-  /// (Required if collections is not set)
-  /// @warning  <b>Deprecated :</b> Use collections instead.
+  /// The database to replicate. When setting the database, ONLY the default
+  /// collection will be used for replication. (Required if collections is not
+  /// set) @warning <b>Deprecated :</b> Use collections instead.
   external ffi.Pointer<CBLDatabase> database;
 
   /// <
@@ -8173,34 +8271,39 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
   @CBLReplicatorType()
   external int replicatorType;
 
-  /// Continuous replication?. The default value is \ref kCBLDefaultReplicatorContinuous.
+  /// Continuous replication?. The default value is \ref
+  /// kCBLDefaultReplicatorContinuous.
   @ffi.Bool()
   external bool continuous;
 
-  /// If auto purge is active, then the library will automatically purge any documents that
-  /// the replicating user loses access to via the Sync Function on Sync Gateway.
-  /// If disableAutoPurge is true, this behavior is disabled and an access removed
-  /// event will be sent to any document listeners that are active on the replicator.
-  /// The default value is \ref kCBLDefaultReplicatorDisableAutoPurge.
+  /// If auto purge is active, then the library will automatically purge any
+  /// documents that the replicating user loses access to via the Sync Function
+  /// on Sync Gateway. If disableAutoPurge is true, this behavior is disabled
+  /// and an access removed event will be sent to any document listeners that
+  /// are active on the replicator. The default value is \ref
+  /// kCBLDefaultReplicatorDisableAutoPurge.
   ///
-  /// \note Auto Purge will not be performed when documentIDs filter is specified.
+  /// \note Auto Purge will not be performed when documentIDs filter is
+  /// specified.
   @ffi.Bool()
   external bool disableAutoPurge;
 
-  /// Max retry attempts where the initial connect to replicate counts toward the given value.
-  /// The default value is  \ref kCBLDefaultReplicatorMaxAttemptsSingleShot for a one-shot replicator
-  /// and \ref kCBLDefaultReplicatorMaxAttemptsContinuous for a continuous replicator.
-  /// Specify 1 means there will be no retry after the first attempt.
+  /// Max retry attempts where the initial connect to replicate counts toward
+  /// the given value. The default value is \ref
+  /// kCBLDefaultReplicatorMaxAttemptsSingleShot for a one-shot replicator and
+  /// \ref kCBLDefaultReplicatorMaxAttemptsContinuous for a continuous
+  /// replicator. Specify 1 means there will be no retry after the first
+  /// attempt.
   @ffi.UnsignedInt()
   external int maxAttempts;
 
-  /// Max wait time between retry attempts in seconds.
-  /// The default value \ref kCBLDefaultReplicatorMaxAttemptWaitTime.
+  /// Max wait time between retry attempts in seconds. The default value \ref
+  /// kCBLDefaultReplicatorMaxAttemptWaitTime.
   @ffi.UnsignedInt()
   external int maxAttemptWaitTime;
 
-  /// The heartbeat interval in seconds.
-  /// The default value is \ref kCBLDefaultReplicatorHeartbeat.
+  /// The heartbeat interval in seconds. The default value is \ref
+  /// kCBLDefaultReplicatorHeartbeat.
   @ffi.UnsignedInt()
   external int heartbeat;
 
@@ -8213,50 +8316,58 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
   /// < Extra HTTP headers to add to the WebSocket request
   external FLDict headers;
 
-  /// An X.509 cert (PEM or DER) to "pin" for TLS connections. The pinned cert will be evaluated against any certs
-  /// in a cert chain, and the cert chain will be valid only if the cert chain contains the pinned cert.
+  /// An X.509 cert (PEM or DER) to "pin" for TLS connections. The pinned cert
+  /// will be evaluated against any certs in a cert chain, and the cert chain
+  /// will be valid only if the cert chain contains the pinned cert.
   external FLSlice pinnedServerCertificate;
 
   /// < Set of anchor certs (PEM format)
   external FLSlice trustedRootCertificates;
 
-  /// Optional set of channels to pull from when replicating with the default collection.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @note Channels are not supported in Peer-to-Peer and Database-to-Database replication.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicationCollection.channels instead.
+  /// Optional set of channels to pull from when replicating with the default
+  /// collection. @note This property can only be used when setting the config
+  /// object with the database instead of collections. @note Channels are not
+  /// supported in Peer-to-Peer and Database-to-Database replication. @warning
+  /// <b>Deprecated :</b> Use CBLReplicationCollection.channels instead.
   external FLArray channels;
 
-  /// Optional set of document IDs to replicate when replicating with the default collection.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicationCollection.documentIDs instead.
+  /// Optional set of document IDs to replicate when replicating with the
+  /// default collection. @note This property can only be used when setting the
+  /// config object with the database instead of collections. @warning
+  /// <b>Deprecated :</b> Use CBLReplicationCollection.documentIDs instead.
   external FLArray documentIDs;
 
-  /// Optional callback to filter which docs are pushed when replicating with the default collection.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicationCollection.pushFilter instead.
+  /// Optional callback to filter which docs are pushed when replicating with
+  /// the default collection. @note This property can only be used when setting
+  /// the config object with the database instead of collections. @warning
+  /// <b>Deprecated :</b> Use CBLReplicationCollection.pushFilter instead.
   external CBLReplicationFilter pushFilter;
 
-  /// Optional callback to validate incoming docs when replicating with the default collection.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicationCollection.pullFilter instead.
+  /// Optional callback to validate incoming docs when replicating with the
+  /// default collection. @note This property can only be used when setting the
+  /// config object with the database instead of collections. @warning
+  /// <b>Deprecated :</b> Use CBLReplicationCollection.pullFilter instead.
   external CBLReplicationFilter pullFilter;
 
-  /// Optional conflict-resolver callback.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @warning  <b>Deprecated :</b> Use CBLReplicationCollection.conflictResolver instead.
+  /// Optional conflict-resolver callback. @note This property can only be used
+  /// when setting the config object with the database instead of collections.
+  /// @warning <b>Deprecated :</b> Use CBLReplicationCollection.conflictResolver
+  /// instead.
   external CBLConflictResolver conflictResolver;
 
   /// < Arbitrary value that will be passed to callbacks
   external ffi.Pointer<ffi.Void> context;
 
-  /// Optional callback to encrypt \ref CBLEncryptable values of the documents in the default collection.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @warning  <b>Deprecated :</b> Use documentPropertyEncryptor instead.
+  /// Optional callback to encrypt \ref CBLEncryptable values of the documents
+  /// in the default collection. @note This property can only be used when
+  /// setting the config object with the database instead of collections.
+  /// @warning <b>Deprecated :</b> Use documentPropertyEncryptor instead.
   external CBLPropertyEncryptor propertyEncryptor;
 
-  /// Optional callback to decrypt encrypted \ref CBLEncryptable values of the documents in the default collection.
-  /// @note This property can only be used when setting the config object with the database instead of collections.
-  /// @warning  <b>Deprecated :</b> Use documentPropertyDecryptor instead.
+  /// Optional callback to decrypt encrypted \ref CBLEncryptable values of the
+  /// documents in the default collection. @note This property can only be used
+  /// when setting the config object with the database instead of collections.
+  /// @warning <b>Deprecated :</b> Use documentPropertyDecryptor instead.
   external CBLPropertyDecryptor propertyDecryptor;
 
   /// < Optional callback to encrypt \ref CBLEncryptable values.
@@ -8265,21 +8376,24 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
   /// < Optional callback to decrypt encrypted \ref CBLEncryptable values.
   external CBLDocumentPropertyDecryptor documentPropertyDecryptor;
 
-  /// The collections to replicate with the target's endpoint (Required if the database is not set).
+  /// The collections to replicate with the target's endpoint (Required if the
+  /// database is not set).
   external ffi.Pointer<CBLReplicationCollection> collections;
 
   /// The number of collections (Required if the database is not set
   @ffi.Size()
   external int collectionCount;
 
-  /// The option to remove the restriction that does not allow the replicator to save the parent-domain
-  /// cookies, the cookies whose domains are the parent domain of the remote host, from the HTTP
-  /// response. For example, when the option is set to true, the cookies whose domain are “.foo.com”
-  /// returned by “bar.foo.com” host will be permitted to save. This is only recommended if the host
-  /// issuing the cookie is well trusted.
+  /// The option to remove the restriction that does not allow the replicator to
+  /// save the parent-domain cookies, the cookies whose domains are the parent
+  /// domain of the remote host, from the HTTP response. For example, when the
+  /// option is set to true, the cookies whose domain are “.foo.com” returned by
+  /// “bar.foo.com” host will be permitted to save. This is only recommended if
+  /// the host issuing the cookie is well trusted.
   ///
-  /// This option is disabled by default (see \ref kCBLDefaultReplicatorAcceptParentCookies) which means
-  /// that the parent-domain cookies are not permitted to save by default.
+  /// This option is disabled by default (see \ref
+  /// kCBLDefaultReplicatorAcceptParentCookies) which means that the
+  /// parent-domain cookies are not permitted to save by default.
   @ffi.Bool()
   external bool acceptParentDomainCookies;
 }
@@ -8314,10 +8428,11 @@ typedef DartCBLReplicator_SetSuspended = void Function(
 typedef CBLReplicatorActivityLevel = ffi.Uint8;
 typedef DartCBLReplicatorActivityLevel = int;
 
-/// A fractional progress value, ranging from 0.0 to 1.0 as replication progresses.
-/// The value is very approximate and may bounce around during replication; making it more
-/// accurate would require slowing down the replicator and incurring more load on the server.
-/// It's fine to use in a progress bar, though.
+/// A fractional progress value, ranging from 0.0 to 1.0 as replication
+/// progresses. The value is very approximate and may bounce around during
+/// replication; making it more accurate would require slowing down the
+/// replicator and incurring more load on the server. It's fine to use in a
+/// progress bar, though.
 final class CBLReplicatorProgress extends ffi.Struct {
   /// <Very-approximate fractional completion, from 0.0 to 1.0
   @ffi.Float()
@@ -8384,13 +8499,12 @@ typedef DartCBLReplicatorChangeListenerFunction = void Function(
     ffi.Pointer<CBLReplicator> replicator,
     ffi.Pointer<CBLReplicatorStatus> status);
 
-/// A callback that notifies you when the replicator's status changes.
-/// @note This callback will be called on a background thread managed by the replicator.
-/// It must pay attention to thread-safety. It should not take a long time to return,
-/// or it will slow down the replicator.
-/// @param context  The value given when the listener was added.
-/// @param replicator  The replicator.
-/// @param status  The replicator's status.
+/// A callback that notifies you when the replicator's status changes. @note
+/// This callback will be called on a background thread managed by the
+/// replicator. It must pay attention to thread-safety. It should not take a
+/// long time to return, or it will slow down the replicator. @param context The
+/// value given when the listener was added. @param replicator The replicator.
+/// @param status The replicator's status.
 typedef CBLReplicatorChangeListener
     = ffi.Pointer<ffi.NativeFunction<CBLReplicatorChangeListenerFunction>>;
 typedef NativeCBLReplicator_AddChangeListener
@@ -8432,15 +8546,14 @@ typedef DartCBLDocumentReplicationListenerFunction = void Function(
     int numDocuments,
     ffi.Pointer<CBLReplicatedDocument> documents);
 
-/// A callback that notifies you when documents are replicated.
-/// @note This callback will be called on a background thread managed by the replicator.
-/// It must pay attention to thread-safety. It should not take a long time to return,
-/// or it will slow down the replicator.
-/// @param context  The value given when the listener was added.
-/// @param replicator  The replicator.
-/// @param isPush  True if the document(s) were pushed, false if pulled.
-/// @param numDocuments  The number of documents reported by this callback.
-/// @param documents  An array with information about each document.
+/// A callback that notifies you when documents are replicated. @note This
+/// callback will be called on a background thread managed by the replicator. It
+/// must pay attention to thread-safety. It should not take a long time to
+/// return, or it will slow down the replicator. @param context The value given
+/// when the listener was added. @param replicator The replicator. @param isPush
+/// True if the document(s) were pushed, false if pulled. @param numDocuments
+/// The number of documents reported by this callback. @param documents An array
+/// with information about each document.
 typedef CBLDocumentReplicationListener
     = ffi.Pointer<ffi.NativeFunction<CBLDocumentReplicationListenerFunction>>;
 typedef NativeCBLReplicator_AddDocumentReplicationListener
@@ -8512,7 +8625,8 @@ typedef DartFLSlot_SetEncryptableValue = void Function(
 typedef CBLLogDomain = ffi.Uint8;
 typedef DartCBLLogDomain = int;
 
-/// Levels of log messages. Higher values are more important/severe. Each level includes the lower ones.
+/// Levels of log messages. Higher values are more important/severe. Each level
+/// includes the lower ones.
 typedef CBLLogLevel = ffi.Uint8;
 typedef DartCBLLogLevel = int;
 typedef NativeCBL_Log = ffi.Void Function(
@@ -8528,10 +8642,9 @@ typedef CBLLogCallbackFunction = ffi.Void Function(
 typedef DartCBLLogCallbackFunction = void Function(
     DartCBLLogDomain domain, DartCBLLogLevel level, FLString message);
 
-/// A logging callback that the application can register.
-/// @param domain  The domain of the message
-/// @param level  The severity level of the message.
-/// @param message  The actual formatted message.
+/// A logging callback that the application can register. @param domain The
+/// domain of the message @param level The severity level of the message. @param
+/// message The actual formatted message.
 typedef CBLLogCallback
     = ffi.Pointer<ffi.NativeFunction<CBLLogCallbackFunction>>;
 typedef NativeCBLLog_ConsoleLevel = CBLLogLevel Function();
@@ -8547,8 +8660,8 @@ typedef DartCBLLog_Callback = CBLLogCallback Function();
 typedef NativeCBLLog_SetCallback = ffi.Void Function(CBLLogCallback callback);
 typedef DartCBLLog_SetCallback = void Function(CBLLogCallback callback);
 
-/// The properties for configuring logging to files.
-/// @warning `usePlaintext` results in significantly larger log files and higher CPU usage that may slow
+/// The properties for configuring logging to files. @warning `usePlaintext`
+/// results in significantly larger log files and higher CPU usage that may slow
 /// down your app; we recommend turning it off in production.
 final class CBLLogFileConfiguration extends ffi.Struct {
   /// < The minimum level of message to write (Required).
@@ -8558,18 +8671,19 @@ final class CBLLogFileConfiguration extends ffi.Struct {
   /// < The directory where log files will be created (Required).
   external FLString directory;
 
-  /// Max number of older log files to keep (in addition to current one.)
-  /// The default is \ref kCBLDefaultLogFileMaxRotateCount.
+  /// Max number of older log files to keep (in addition to current one.) The
+  /// default is \ref kCBLDefaultLogFileMaxRotateCount.
   @ffi.Uint32()
   external int maxRotateCount;
 
-  /// The size in bytes at which a file will be rotated out (best effort).
-  /// The default is \ref kCBLDefaultLogFileMaxSize.
+  /// The size in bytes at which a file will be rotated out (best effort). The
+  /// default is \ref kCBLDefaultLogFileMaxSize.
   @ffi.Size()
   external int maxSize;
 
-  /// Whether or not to log in plaintext (as opposed to binary.) Plaintext logging is slower and bigger.
-  /// The default is \ref kCBLDefaultLogFileUsePlainText.
+  /// Whether or not to log in plaintext (as opposed to binary.) Plaintext
+  /// logging is slower and bigger. The default is \ref
+  /// kCBLDefaultLogFileUsePlainText.
   @ffi.Bool()
   external bool usePlaintext;
 }
@@ -8667,16 +8781,17 @@ enum FLError {
 
 /// Specifies whether not input data is trusted to be 100% valid Fleece.
 enum FLTrust {
-  /// Input data is not trusted to be valid, and will be fully validated by the API call.
+  /// Input data is not trusted to be valid, and will be fully validated by the
+  /// API call.
   kFLUntrusted(0),
 
-  /// Input data is trusted to be valid. The API will perform only minimal validation when
-  /// reading it. This is faster than kFLUntrusted, but should only be used if
-  /// the data was generated by a trusted encoder and has not been altered or corrupted. For
-  /// example, this can be used to parse Fleece data previously stored by your code in local
-  /// storage.
-  /// If invalid data is read by this call, subsequent calls to Value accessor functions can
-  /// crash or return bogus results (including data from arbitrary memory locations.)
+  /// Input data is trusted to be valid. The API will perform only minimal
+  /// validation when reading it. This is faster than kFLUntrusted, but should
+  /// only be used if the data was generated by a trusted encoder and has not
+  /// been altered or corrupted. For example, this can be used to parse Fleece
+  /// data previously stored by your code in local storage. If invalid data is
+  /// read by this call, subsequent calls to Value accessor functions can crash
+  /// or return bogus results (including data from arbitrary memory locations.)
   kFLTrusted(1);
 
   final int value;
@@ -8689,7 +8804,8 @@ enum FLTrust {
       };
 }
 
-/// A point in time, expressed as milliseconds since the Unix epoch (1-1-1970 midnight UTC.)
+/// A point in time, expressed as milliseconds since the Unix epoch (1-1-1970
+/// midnight UTC.)
 typedef FLTimestamp = ffi.Int64;
 typedef DartFLTimestamp = int;
 typedef NativeFLTimestamp_Now = FLTimestamp Function();
@@ -8752,8 +8868,8 @@ typedef DartFLDict_AsMutable = FLMutableDict Function(FLDict arg0);
 typedef NativeFLDict_Get = FLValue Function(FLDict arg0, FLSlice keyString);
 typedef DartFLDict_Get = FLValue Function(FLDict arg0, FLSlice keyString);
 
-/// Opaque dictionary iterator. Declare one on the stack, and pass its address to
-/// FLDictIterator_Begin.
+/// Opaque dictionary iterator. Declare one on the stack, and pass its address
+/// to FLDictIterator_Begin.
 final class FLDictIterator extends ffi.Struct {
   external ffi.Pointer<ffi.Void> _private1;
 
@@ -8804,10 +8920,10 @@ typedef NativeFLDictIterator_End = ffi.Void Function(
 typedef DartFLDictIterator_End = void Function(
     ffi.Pointer<FLDictIterator> arg0);
 
-/// Opaque key for a dictionary. You are responsible for creating space for these; they can
-/// go on the stack, on the heap, inside other objects, anywhere.
-/// Be aware that the lookup operations that use these will write into the struct to store
-/// "hints" that speed up future searches.
+/// Opaque key for a dictionary. You are responsible for creating space for
+/// these; they can go on the stack, on the heap, inside other objects,
+/// anywhere. Be aware that the lookup operations that use these will write into
+/// the struct to store "hints" that speed up future searches.
 final class FLDictKey extends ffi.Struct {
   external FLSlice private1;
 
@@ -8918,7 +9034,8 @@ enum FLEncoderFormat {
   /// < JSON encoding
   kFLEncodeJSON(1),
 
-  /// < [JSON5](http://json5.org), an extension of JSON with a more readable syntax
+  /// < [JSON5](http://json5.org), an extension of JSON with a more readable
+  /// syntax
   kFLEncodeJSON5(2);
 
   final int value;
@@ -9159,11 +9276,12 @@ typedef NativeFLKeyPath_GetElement = ffi.Bool Function(
 typedef DartFLKeyPath_GetElement = bool Function(FLKeyPath arg0, int i,
     ffi.Pointer<FLSlice> outDictKey, ffi.Pointer<ffi.Int32> outArrayIndex);
 
-/// Types of Fleece values. Basically JSON, with the addition of Data (raw blob).
+/// Types of Fleece values. Basically JSON, with the addition of Data (raw
+/// blob).
 enum FLValueType {
-  /// < Type of a NULL pointer, i.e. no such value, like JSON `undefined`.
-  /// Also the type of \ref kFLUndefinedValue, and of a value created by
-  /// \ref FLEncoder_WriteUndefined().
+  /// < Type of a NULL pointer, i.e. no such value, like JSON `undefined`. Also
+  /// the type of \ref kFLUndefinedValue, and of a value created by \ref
+  /// FLEncoder_WriteUndefined().
   kFLUndefined(-1),
 
   /// < Equivalent to a JSON 'null'
