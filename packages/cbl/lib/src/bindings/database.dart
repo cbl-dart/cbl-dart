@@ -132,7 +132,11 @@ final class DatabaseBindings extends Bindings {
         final cblConfig = _createConfig(config);
         return nativeCallTracePoint(
           TracedNativeCall.databaseOpen,
-          () => cbl.CBLDatabase_Open(nameFlStr, cblConfig, globalCBLError),
+          () => cblDart.CBLDart_CBLDatabase_Open(
+            nameFlStr,
+            cblConfig,
+            globalCBLError,
+          ),
         ).checkCBLError();
       });
 

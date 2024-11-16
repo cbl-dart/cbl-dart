@@ -337,18 +337,23 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
       case FLValueType.kFLData:
         return value.asData.toData()?.toTypedList();
       case FLValueType.kFLArray:
+        // ignore: omit_local_variable_types
+        final FLArray array = value.value.cast();
         return List<Object?>.generate(value.collectionSize, (index) {
-          _decoderBinds.getLoadedValueFromArray(value.value.cast(), index);
+          _decoderBinds.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
         });
       case FLValueType.kFLDict:
-        final result = <String, Object?>{};
+        // ignore: omit_local_variable_types
+        final FLDict dict = value.value.cast();
         final iterator = DictIterator(
-          value.value.cast(),
+          dict,
           sharedKeysTable: sharedKeysTable,
           keyOut: globalLoadedDictKey,
           valueOut: globalLoadedFLValue,
         );
+
+        final result = <String, Object?>{};
         while (iterator.moveNext()) {
           final key = sharedKeysTable.decode(sharedStringsTable);
           result[key] = _decodeGlobalLoadedValue(sharedStringsTable);
