@@ -26,11 +26,11 @@ functions:
   symbol-address:
     include:
       - CBL_Release
-      - FLSharedKeys_Release
-      - FLDoc_Release
-      - FLValue_Release
-      - FLEncoder_Free
       - CBLBlobReader_Close
+      - FLDoc_Release
+      - FLEncoder_Free
+      - FLSharedKeys_Release
+      - FLValue_Release
 structs:
   member-rename:
     FLDictKey:

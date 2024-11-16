@@ -18,11 +18,12 @@ functions:
   symbol-address:
     include:
       - CBLDart_AsyncCallback_Delete
+      - CBLDart_CBLDatabase_Release
+      - CBLDart_CBLReplicator_Release
+      - CBLDart_FLArrayIterator_Delete
+      - CBLDart_FLDictIterator_Delete
       - CBLDart_FLSliceResult_ReleaseByBuf
       - CBLDart_KnownSharedKeys_Delete
-      - CBLDart_FLDictIterator_Delete
-      - CBLDart_FLArrayIterator_Delete
-      - CBLDart_CBLDatabase_Release
 compiler-opts:
   - '-I../../native/couchbase-lite-dart/include'
   - '-I../../native/vendor/cblite/include'
