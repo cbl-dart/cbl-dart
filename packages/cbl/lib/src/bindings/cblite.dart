@@ -6674,17 +6674,17 @@ class cblite {
       _FLData_ConvertJSONPtr.asFunction<DartFLData_ConvertJSON>();
 
   /// Tells the encoder to logically append to the given Fleece document, rather
-  /// than making a standalone document. Any calls to FLEncoder_WriteValue()
+  /// than making a standalone document. Any calls to FLEncoder*WriteValue()
   /// where the value points inside the base data will write a pointer back to
   /// the original value. The resulting data returned by FLEncoder_FinishDoc()
-  /// will _NOT_ be standalone; it can only be used by first appending it to the
-  /// base data. @param e The FLEncoder affected. @param base The base document
-  /// to create an amendment of. @param reuseStrings If true, then writing a
-  /// string that already exists in the base will just create a pointer back to
-  /// the original. But the encoder has to scan the base for strings first.
-  /// @param externPointers If true, pointers into the base will be marked with
-  /// the `extern` flag. This allows them to be resolved using the
-  /// `FLResolver_Begin` function, so that when the delta is used the base
+  /// will \_NOT* be standalone; it can only be used by first appending it to
+  /// the base data. @param e The FLEncoder affected. @param base The base
+  /// document to create an amendment of. @param reuseStrings If true, then
+  /// writing a string that already exists in the base will just create a
+  /// pointer back to the original. But the encoder has to scan the base for
+  /// strings first. @param externPointers If true, pointers into the base will
+  /// be marked with the `extern` flag. This allows them to be resolved using
+  /// the `FLResolver_Begin` function, so that when the delta is used the base
   /// document can be anywhere in memory, not just immediately preceding the
   /// delta document.
   void FLEncoder_Amend(
