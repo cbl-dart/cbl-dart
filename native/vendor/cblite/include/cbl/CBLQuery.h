@@ -18,32 +18,25 @@
 
 #pragma once
 #include "CBLBase.h"
+#include "CBLQueryTypes.h"
 
 CBL_CAPI_BEGIN
 
-
-/** \defgroup queries   Queries
+/** \defgroup query   Query
     @{
     A CBLQuery represents a compiled database query. The query language is a large subset of
     the [N1QL](https://www.couchbase.com/products/n1ql) language from Couchbase Server, which
     you can think of as "SQL for JSON" or "SQL++".
 
-    Queries may be given either in
-    [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html),
-    or in JSON using a
-    [schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
-    that resembles a parse tree of N1QL. The JSON syntax is harder for humans, but much more
+    Supported Query languages:
+    [N1QL](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
+ 
+    [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
+ 
+    JSON language resembles a parse tree of N1QL. The JSON syntax is harder for humans, but much more
     amenable to machine generation, if you need to create queries programmatically or translate
     them from some other form.
  */
-
-
-/** Query languages */
-typedef CBL_ENUM(uint32_t, CBLQueryLanguage) {
-    kCBLJSONLanguage,       ///< [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
-    kCBLN1QLLanguage        ///< [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
-};
-
 
 /** \name  Query objects
     @{ */
@@ -150,16 +143,16 @@ bool CBLResultSet_Next(CBLResultSet*) CBLAPI;
 /** Returns the value of a column of the current result, given its (zero-based) numeric index.
     This may return a NULL pointer, indicating `MISSING`, if the value doesn't exist, e.g. if
     the column is a property that doesn't exist in the document. */
-FLValue CBLResultSet_ValueAtIndex(const CBLResultSet*,
-                                  unsigned index) CBLAPI;
+FLValue _cbl_nullable CBLResultSet_ValueAtIndex(const CBLResultSet*,
+                                                unsigned index) CBLAPI;
 
 /** Returns the value of a column of the current result, given its name.
     This may return a NULL pointer, indicating `MISSING`, if the value doesn't exist, e.g. if
     the column is a property that doesn't exist in the document. (Or, of course, if the key
     is not a column name in this query.)
     @note  See \ref CBLQuery_ColumnName for a discussion of column names. */
-FLValue CBLResultSet_ValueForKey(const CBLResultSet*,
-                                 FLString key) CBLAPI;
+FLValue _cbl_nullable CBLResultSet_ValueForKey(const CBLResultSet*,
+                                               FLString key) CBLAPI;
 
 /** Returns the current result as an array of column values.
     @warning The array reference is only valid until the result-set is advanced or released.
@@ -177,7 +170,6 @@ CBLQuery* CBLResultSet_GetQuery(const CBLResultSet *rs) CBLAPI;
 CBL_REFCOUNTED(CBLResultSet*, ResultSet);
 
 /** @} */
-
 
 
 /** \name  Change listener
@@ -233,106 +225,6 @@ CBLResultSet* _cbl_nullable CBLQuery_CopyCurrentResults(const CBLQuery* query,
 
 /** @} */
 
-
-
-/** \name  Database Indexes
-    @{
-    Indexes are used to speed up queries by allowing fast -- O(log n) -- lookup of documents
-    that have specific values or ranges of values. The values may be properties, or expressions
-    based on properties.
-
-    An index will speed up queries that use the expression it indexes, but it takes up space in
-    the database file, and it slows down document saves slightly because it needs to be kept up
-    to date when documents change.
-
-    Tuning a database with indexes can be a tricky task. Fortunately, a lot has been written about
-    it in the relational-database (SQL) realm, and much of that advice holds for Couchbase Lite.
-    You may find SQLite's documentation particularly helpful since Couchbase Lite's querying is
-    based on SQLite.
-
-    Two types of indexes are currently supported:
-        * Value indexes speed up queries by making it possible to look up property (or expression)
-          values without scanning every document. They're just like regular indexes in SQL or N1QL.
-          Multiple expressions are supported; the first is the primary key, second is secondary.
-          Expressions must evaluate to scalar types (boolean, number, string).
-        * Full-Text Search (FTS) indexes enable fast search of natural-language words or phrases
-          by using the `MATCH` operator in a query. A FTS index is **required** for full-text
-          search: a query with a `MATCH` operator will fail to compile unless there is already a
-          FTS index for the property/expression being matched. Only a single expression is
-          currently allowed, and it must evaluate to a string. */
-
-/** Value Index Configuration. */
-typedef struct {
-    /** The language used in the expressions. */
-    CBLQueryLanguage expressionLanguage;
-    
-    /** The expressions describing each coloumn of the index. The expressions could be specified
-        in a JSON Array or in N1QL syntax using comma delimiter. */
-    FLString expressions;
-} CBLValueIndexConfiguration;
-
-/** Creates a value index.
-    Indexes are persistent.
-    If an identical index with that name already exists, nothing happens (and no error is returned.)
-    If a non-identical index with that name already exists, it is deleted and re-created.
-    @warning  <b>Deprecated :</b> Use CBLCollection_CreateValueIndex on the default collection instead. */
-bool CBLDatabase_CreateValueIndex(CBLDatabase *db,
-                                  FLString name,
-                                  CBLValueIndexConfiguration config,
-                                  CBLError* _cbl_nullable outError) CBLAPI;
-
-
-/** Full-Text Index Configuration. */
-typedef struct {
-    /** The language used in the expressions (Required). */
-    CBLQueryLanguage expressionLanguage;
-    
-    /** The expressions describing each coloumn of the index. The expressions could be specified
-        in a JSON Array or in N1QL syntax using comma delimiter. (Required) */
-    FLString expressions;
-    
-    /** Should diacritical marks (accents) be ignored?
-        Defaults to  \ref kCBLDefaultFullTextIndexIgnoreAccents.
-        Generally this should be left `false` for non-English text. */
-    bool ignoreAccents;
-    
-    /** The dominant language. Setting this enables word stemming, i.e.
-        matching different cases of the same word ("big" and "bigger", for instance) and ignoring
-        common "stop-words" ("the", "a", "of", etc.)
-
-        Can be an ISO-639 language code or a lowercase (English) language name; supported
-        languages are: da/danish, nl/dutch, en/english, fi/finnish, fr/french, de/german,
-        hu/hungarian, it/italian, no/norwegian, pt/portuguese, ro/romanian, ru/russian,
-        es/spanish, sv/swedish, tr/turkish.
-     
-        If left null,  or set to an unrecognized language, no language-specific behaviors
-        such as stemming and stop-word removal occur. */
-    FLString language;
-} CBLFullTextIndexConfiguration;
-
-/** Creates a full-text index.
-    Indexes are persistent.
-    If an identical index with that name already exists, nothing happens (and no error is returned.)
-    If a non-identical index with that name already exists, it is deleted and re-created.
-    @warning  <b>Deprecated :</b> Use CBLCollection_CreateFullTextIndex on the default collection instead. */
-bool CBLDatabase_CreateFullTextIndex(CBLDatabase *db,
-                                     FLString name,
-                                     CBLFullTextIndexConfiguration config,
-                                     CBLError* _cbl_nullable outError) CBLAPI;
-
-/** Deletes an index given its name.
-    @warning  <b>Deprecated :</b> Use CBLCollection_DeleteIndex on the default collection instead. */
-bool CBLDatabase_DeleteIndex(CBLDatabase *db,
-                             FLString name,
-                             CBLError* _cbl_nullable outError) CBLAPI;
-
-/** Returns the names of the indexes on this database, as a Fleece array of strings.
-    @note  You are responsible for releasing the returned Fleece array.
-    @warning  <b>Deprecated :</b> Use CBLCollection_GetIndexNames on the default collection instead. */
-_cbl_warn_unused
-FLArray CBLDatabase_GetIndexNames(CBLDatabase *db) CBLAPI;
-
-/** @} */
 /** @} */
 
 CBL_CAPI_END

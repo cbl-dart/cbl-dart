@@ -1,7 +1,7 @@
 //
-//  CouchbaseLite.h
+//  CBLQueryTypes.h
 //
-// Copyright (c) 2018 Couchbase, Inc All rights reserved.
+// Copyright (c) 2024 Couchbase, Inc All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@
 
 #pragma once
 #include "CBLBase.h"
-#include "CBLBlob.h"
-#include "CBLCollection.h"
-#include "CBLDatabase.h"
-#include "CBLDefaults.h"
-#include "CBLDocument.h"
-#include "CBLEncryptable.h"
-#include "CBLLog.h"
-#include "CBLPlatform.h"
-#include "CBLPrediction.h"
-#include "CBLQuery.h"
-#include "CBLQueryIndex.h"
-#include "CBLQueryIndexTypes.h"
-#include "CBLQueryTypes.h"
-#include "CBLReplicator.h"
-#include "CBLScope.h"
+
+CBL_CAPI_BEGIN
+
+/** \defgroup queries   Queries
+    @{ */
+
+/** Supported Query languages */
+typedef CBL_ENUM(uint32_t, CBLQueryLanguage) {
+    kCBLJSONLanguage,       ///< [JSON query schema](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
+    kCBLN1QLLanguage        ///< [N1QL syntax](https://docs.couchbase.com/server/6.0/n1ql/n1ql-language-reference/index.html)
+};
+
+/** @} */
+
+CBL_CAPI_END
