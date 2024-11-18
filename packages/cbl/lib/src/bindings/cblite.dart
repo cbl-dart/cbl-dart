@@ -1130,410 +1130,72 @@ class cblite {
       _CBLDatabase_AddDocumentChangeListenerPtr.asFunction<
           DartCBLDatabase_AddDocumentChangeListener>();
 
-  /// Creates a new query by compiling the input string. This is fast, but not
-  /// instantaneous. If you need to run the same query many times, keep the \ref
-  /// CBLQuery around instead of compiling it each time. If you need to run
-  /// related queries with only some values different, create one query with
-  /// placeholder parameter(s), and substitute the desired value(s) with \ref
-  /// CBLQuery_SetParameters each time you run the query. @note You must release
-  /// the \ref CBLQuery when you're finished with it. @param db The database to
-  /// query. @param language The query language,
-  /// [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
-  /// or
-  /// [N1QL](https://docs.couchbase.com/server/4.0/n1ql/n1ql-language-reference/index.html).
-  /// @param queryString The query string. @param outErrorPos If non-NULL, then
-  /// on a parse error the approximate byte offset in the input expression will
-  /// be stored here (or -1 if not known/applicable.) @param outError On
-  /// failure, the error will be written here. @return The new query object.
-  ffi.Pointer<CBLQuery> CBLDatabase_CreateQuery(
-    ffi.Pointer<CBLDatabase> db,
-    int language,
-    FLString queryString,
-    ffi.Pointer<ffi.Int> outErrorPos,
-    ffi.Pointer<CBLError> outError,
+  /// Creates a no-encoding type to use in CBLVectorIndexConfiguration; 4 bytes
+  /// per dimension, no data loss. @return A None encoding object.
+  ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateNone() {
+    return _CBLVectorEncoding_CreateNone();
+  }
+
+  late final _CBLVectorEncoding_CreateNonePtr =
+      _lookup<ffi.NativeFunction<NativeCBLVectorEncoding_CreateNone>>(
+          'CBLVectorEncoding_CreateNone');
+  late final _CBLVectorEncoding_CreateNone = _CBLVectorEncoding_CreateNonePtr
+      .asFunction<DartCBLVectorEncoding_CreateNone>();
+
+  /// Creates a Scalar Quantizer encoding to use in CBLVectorIndexConfiguration.
+  /// @param type Scalar Quantizer Type. @return A Scalar Quantizer encoding
+  /// object.
+  ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateScalarQuantizer(
+    int type,
   ) {
-    return _CBLDatabase_CreateQuery(
-      db,
-      language,
-      queryString,
-      outErrorPos,
-      outError,
+    return _CBLVectorEncoding_CreateScalarQuantizer(
+      type,
     );
   }
 
-  late final _CBLDatabase_CreateQueryPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateQuery>>(
-          'CBLDatabase_CreateQuery');
-  late final _CBLDatabase_CreateQuery =
-      _CBLDatabase_CreateQueryPtr.asFunction<DartCBLDatabase_CreateQuery>();
+  late final _CBLVectorEncoding_CreateScalarQuantizerPtr = _lookup<
+          ffi.NativeFunction<NativeCBLVectorEncoding_CreateScalarQuantizer>>(
+      'CBLVectorEncoding_CreateScalarQuantizer');
+  late final _CBLVectorEncoding_CreateScalarQuantizer =
+      _CBLVectorEncoding_CreateScalarQuantizerPtr.asFunction<
+          DartCBLVectorEncoding_CreateScalarQuantizer>();
 
-  /// Assigns values to the query's parameters. These values will be substited
-  /// for those parameters whenever the query is executed, until they are next
-  /// assigned.
-  ///
-  /// Parameters are specified in the query source as e.g. `$PARAM` (N1QL) or
-  /// `["$PARAM"]` (JSON). In this example, the `parameters` dictionary to this
-  /// call should have a key `PARAM` that maps to the value of the parameter.
-  /// @param query The query. @param parameters The parameters in the form of a
-  /// Fleece \ref FLDict "dictionary" whose keys are the parameter names. (It's
-  /// easiest to construct this by using the mutable API, i.e. calling \ref
-  /// FLMutableDict_New and adding keys/values.)
-  void CBLQuery_SetParameters(
-    ffi.Pointer<CBLQuery> query,
-    FLDict parameters,
+  /// Creates a Product Quantizer encoding to use in
+  /// CBLVectorIndexConfiguration. @param subquantizers Number of subquantizers.
+  /// Must be > 1 and a factor of vector dimensions. @param bits Number of bits.
+  /// Must be >= 4 and <= 12. @return A Product Quantizer encoding object.
+  ffi.Pointer<CBLVectorEncoding> CBLVectorEncoding_CreateProductQuantizer(
+    int subquantizers,
+    int bits,
   ) {
-    return _CBLQuery_SetParameters(
-      query,
-      parameters,
+    return _CBLVectorEncoding_CreateProductQuantizer(
+      subquantizers,
+      bits,
     );
   }
 
-  late final _CBLQuery_SetParametersPtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_SetParameters>>(
-          'CBLQuery_SetParameters');
-  late final _CBLQuery_SetParameters =
-      _CBLQuery_SetParametersPtr.asFunction<DartCBLQuery_SetParameters>();
+  late final _CBLVectorEncoding_CreateProductQuantizerPtr = _lookup<
+          ffi.NativeFunction<NativeCBLVectorEncoding_CreateProductQuantizer>>(
+      'CBLVectorEncoding_CreateProductQuantizer');
+  late final _CBLVectorEncoding_CreateProductQuantizer =
+      _CBLVectorEncoding_CreateProductQuantizerPtr.asFunction<
+          DartCBLVectorEncoding_CreateProductQuantizer>();
 
-  /// Returns the query's current parameter bindings, if any.
-  FLDict CBLQuery_Parameters(
-    ffi.Pointer<CBLQuery> query,
+  /// Frees a CBLVectorEncoding object. The encoding object can be freed after
+  /// the index is created.
+  void CBLVectorEncoding_Free(
+    ffi.Pointer<CBLVectorEncoding> arg0,
   ) {
-    return _CBLQuery_Parameters(
-      query,
-    );
-  }
-
-  late final _CBLQuery_ParametersPtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_Parameters>>(
-          'CBLQuery_Parameters');
-  late final _CBLQuery_Parameters =
-      _CBLQuery_ParametersPtr.asFunction<DartCBLQuery_Parameters>();
-
-  /// Runs the query, returning the results. To obtain the results you'll
-  /// typically call \ref CBLResultSet_Next in a `while` loop, examining the
-  /// values in the \ref CBLResultSet each time around. @note You must release
-  /// the result set when you're finished with it.
-  ffi.Pointer<CBLResultSet> CBLQuery_Execute(
-    ffi.Pointer<CBLQuery> arg0,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLQuery_Execute(
-      arg0,
-      outError,
-    );
-  }
-
-  late final _CBLQuery_ExecutePtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_Execute>>('CBLQuery_Execute');
-  late final _CBLQuery_Execute =
-      _CBLQuery_ExecutePtr.asFunction<DartCBLQuery_Execute>();
-
-  /// Returns information about the query, including the translated SQLite form,
-  /// and the search strategy. You can use this to help optimize the query: the
-  /// word `SCAN` in the strategy indicates a linear scan of the entire
-  /// database, which should be avoided by adding an index. The strategy will
-  /// also show which index(es), if any, are used. @note You are responsible for
-  /// releasing the result by calling \ref FLSliceResult_Release.
-  FLSliceResult CBLQuery_Explain(
-    ffi.Pointer<CBLQuery> arg0,
-  ) {
-    return _CBLQuery_Explain(
+    return _CBLVectorEncoding_Free(
       arg0,
     );
   }
 
-  late final _CBLQuery_ExplainPtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_Explain>>('CBLQuery_Explain');
-  late final _CBLQuery_Explain =
-      _CBLQuery_ExplainPtr.asFunction<DartCBLQuery_Explain>();
-
-  /// Returns the number of columns in each result.
-  int CBLQuery_ColumnCount(
-    ffi.Pointer<CBLQuery> arg0,
-  ) {
-    return _CBLQuery_ColumnCount(
-      arg0,
-    );
-  }
-
-  late final _CBLQuery_ColumnCountPtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_ColumnCount>>(
-          'CBLQuery_ColumnCount');
-  late final _CBLQuery_ColumnCount =
-      _CBLQuery_ColumnCountPtr.asFunction<DartCBLQuery_ColumnCount>();
-
-  /// Returns the name of a column in the result. The column name is based on
-  /// its expression in the `SELECT...` or `WHAT:` section of the query. A
-  /// column that returns a property or property path will be named after that
-  /// property. A column that returns an expression will have an
-  /// automatically-generated name like `$1`. To give a column a custom name,
-  /// use the `AS` syntax in the query. Every column is guaranteed to have a
-  /// unique name.
-  FLSlice CBLQuery_ColumnName(
-    ffi.Pointer<CBLQuery> arg0,
-    int columnIndex,
-  ) {
-    return _CBLQuery_ColumnName(
-      arg0,
-      columnIndex,
-    );
-  }
-
-  late final _CBLQuery_ColumnNamePtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_ColumnName>>(
-          'CBLQuery_ColumnName');
-  late final _CBLQuery_ColumnName =
-      _CBLQuery_ColumnNamePtr.asFunction<DartCBLQuery_ColumnName>();
-
-  /// Moves the result-set iterator to the next result. Returns false if there
-  /// are no more results. @warning This must be called _before_ examining the
-  /// first result.
-  bool CBLResultSet_Next(
-    ffi.Pointer<CBLResultSet> arg0,
-  ) {
-    return _CBLResultSet_Next(
-      arg0,
-    );
-  }
-
-  late final _CBLResultSet_NextPtr =
-      _lookup<ffi.NativeFunction<NativeCBLResultSet_Next>>('CBLResultSet_Next');
-  late final _CBLResultSet_Next =
-      _CBLResultSet_NextPtr.asFunction<DartCBLResultSet_Next>();
-
-  /// Returns the value of a column of the current result, given its
-  /// (zero-based) numeric index. This may return a NULL pointer, indicating
-  /// `MISSING`, if the value doesn't exist, e.g. if the column is a property
-  /// that doesn't exist in the document.
-  FLValue CBLResultSet_ValueAtIndex(
-    ffi.Pointer<CBLResultSet> arg0,
-    int index,
-  ) {
-    return _CBLResultSet_ValueAtIndex(
-      arg0,
-      index,
-    );
-  }
-
-  late final _CBLResultSet_ValueAtIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLResultSet_ValueAtIndex>>(
-          'CBLResultSet_ValueAtIndex');
-  late final _CBLResultSet_ValueAtIndex =
-      _CBLResultSet_ValueAtIndexPtr.asFunction<DartCBLResultSet_ValueAtIndex>();
-
-  /// Returns the value of a column of the current result, given its name. This
-  /// may return a NULL pointer, indicating `MISSING`, if the value doesn't
-  /// exist, e.g. if the column is a property that doesn't exist in the
-  /// document. (Or, of course, if the key is not a column name in this query.)
-  /// @note See \ref CBLQuery_ColumnName for a discussion of column names.
-  FLValue CBLResultSet_ValueForKey(
-    ffi.Pointer<CBLResultSet> arg0,
-    FLString key,
-  ) {
-    return _CBLResultSet_ValueForKey(
-      arg0,
-      key,
-    );
-  }
-
-  late final _CBLResultSet_ValueForKeyPtr =
-      _lookup<ffi.NativeFunction<NativeCBLResultSet_ValueForKey>>(
-          'CBLResultSet_ValueForKey');
-  late final _CBLResultSet_ValueForKey =
-      _CBLResultSet_ValueForKeyPtr.asFunction<DartCBLResultSet_ValueForKey>();
-
-  /// Returns the current result as an array of column values. @warning The
-  /// array reference is only valid until the result-set is advanced or
-  /// released. If you want to keep it for longer, call \ref FLArray_Retain (and
-  /// release it when done.)
-  FLArray CBLResultSet_ResultArray(
-    ffi.Pointer<CBLResultSet> arg0,
-  ) {
-    return _CBLResultSet_ResultArray(
-      arg0,
-    );
-  }
-
-  late final _CBLResultSet_ResultArrayPtr =
-      _lookup<ffi.NativeFunction<NativeCBLResultSet_ResultArray>>(
-          'CBLResultSet_ResultArray');
-  late final _CBLResultSet_ResultArray =
-      _CBLResultSet_ResultArrayPtr.asFunction<DartCBLResultSet_ResultArray>();
-
-  /// Returns the current result as a dictionary mapping column names to values.
-  /// @warning The dict reference is only valid until the result-set is advanced
-  /// or released. If you want to keep it for longer, call \ref FLDict_Retain
-  /// (and release it when done.)
-  FLDict CBLResultSet_ResultDict(
-    ffi.Pointer<CBLResultSet> arg0,
-  ) {
-    return _CBLResultSet_ResultDict(
-      arg0,
-    );
-  }
-
-  late final _CBLResultSet_ResultDictPtr =
-      _lookup<ffi.NativeFunction<NativeCBLResultSet_ResultDict>>(
-          'CBLResultSet_ResultDict');
-  late final _CBLResultSet_ResultDict =
-      _CBLResultSet_ResultDictPtr.asFunction<DartCBLResultSet_ResultDict>();
-
-  /// Returns the Query that created this ResultSet.
-  ffi.Pointer<CBLQuery> CBLResultSet_GetQuery(
-    ffi.Pointer<CBLResultSet> rs,
-  ) {
-    return _CBLResultSet_GetQuery(
-      rs,
-    );
-  }
-
-  late final _CBLResultSet_GetQueryPtr =
-      _lookup<ffi.NativeFunction<NativeCBLResultSet_GetQuery>>(
-          'CBLResultSet_GetQuery');
-  late final _CBLResultSet_GetQuery =
-      _CBLResultSet_GetQueryPtr.asFunction<DartCBLResultSet_GetQuery>();
-
-  /// Registers a change listener callback with a query, turning it into a "live
-  /// query" until the listener is removed (via \ref CBLListener_Remove).
-  ///
-  /// When the first change listener is added, the query will run (in the
-  /// background) and notify the listener(s) of the results when ready. After
-  /// that, it will run in the background after the database changes, and only
-  /// notify the listeners when the result set changes. @param query The query
-  /// to observe. @param listener The callback to be invoked. @param context An
-  /// opaque value that will be passed to the callback. @return A token to be
-  /// passed to \ref CBLListener_Remove when it's time to remove the listener.
-  ffi.Pointer<CBLListenerToken> CBLQuery_AddChangeListener(
-    ffi.Pointer<CBLQuery> query,
-    CBLQueryChangeListener listener,
-    ffi.Pointer<ffi.Void> context,
-  ) {
-    return _CBLQuery_AddChangeListener(
-      query,
-      listener,
-      context,
-    );
-  }
-
-  late final _CBLQuery_AddChangeListenerPtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_AddChangeListener>>(
-          'CBLQuery_AddChangeListener');
-  late final _CBLQuery_AddChangeListener = _CBLQuery_AddChangeListenerPtr
-      .asFunction<DartCBLQuery_AddChangeListener>();
-
-  /// Returns the query's _entire_ current result set, after it's been announced
-  /// via a call to the listener's callback. @note You must release the result
-  /// set when you're finished with it. @param query The query being listened
-  /// to. @param listener The query listener that was notified. @param outError
-  /// If the query failed to run, the error will be stored here. @return A new
-  /// object containing the query's current results, or NULL if the query failed
-  /// to run.
-  ffi.Pointer<CBLResultSet> CBLQuery_CopyCurrentResults(
-    ffi.Pointer<CBLQuery> query,
-    ffi.Pointer<CBLListenerToken> listener,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLQuery_CopyCurrentResults(
-      query,
-      listener,
-      outError,
-    );
-  }
-
-  late final _CBLQuery_CopyCurrentResultsPtr =
-      _lookup<ffi.NativeFunction<NativeCBLQuery_CopyCurrentResults>>(
-          'CBLQuery_CopyCurrentResults');
-  late final _CBLQuery_CopyCurrentResults = _CBLQuery_CopyCurrentResultsPtr
-      .asFunction<DartCBLQuery_CopyCurrentResults>();
-
-  /// Creates a value index. Indexes are persistent. If an identical index with
-  /// that name already exists, nothing happens (and no error is returned.) If a
-  /// non-identical index with that name already exists, it is deleted and
-  /// re-created. @warning <b>Deprecated :</b> Use
-  /// CBLCollection_CreateValueIndex on the default collection instead.
-  bool CBLDatabase_CreateValueIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLValueIndexConfiguration config,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_CreateValueIndex(
-      db,
-      name,
-      config,
-      outError,
-    );
-  }
-
-  late final _CBLDatabase_CreateValueIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateValueIndex>>(
-          'CBLDatabase_CreateValueIndex');
-  late final _CBLDatabase_CreateValueIndex = _CBLDatabase_CreateValueIndexPtr
-      .asFunction<DartCBLDatabase_CreateValueIndex>();
-
-  /// Creates a full-text index. Indexes are persistent. If an identical index
-  /// with that name already exists, nothing happens (and no error is returned.)
-  /// If a non-identical index with that name already exists, it is deleted and
-  /// re-created. @warning <b>Deprecated :</b> Use
-  /// CBLCollection_CreateFullTextIndex on the default collection instead.
-  bool CBLDatabase_CreateFullTextIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLFullTextIndexConfiguration config,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_CreateFullTextIndex(
-      db,
-      name,
-      config,
-      outError,
-    );
-  }
-
-  late final _CBLDatabase_CreateFullTextIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateFullTextIndex>>(
-          'CBLDatabase_CreateFullTextIndex');
-  late final _CBLDatabase_CreateFullTextIndex =
-      _CBLDatabase_CreateFullTextIndexPtr.asFunction<
-          DartCBLDatabase_CreateFullTextIndex>();
-
-  /// Deletes an index given its name. @warning <b>Deprecated :</b> Use
-  /// CBLCollection_DeleteIndex on the default collection instead.
-  bool CBLDatabase_DeleteIndex(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDatabase_DeleteIndex(
-      db,
-      name,
-      outError,
-    );
-  }
-
-  late final _CBLDatabase_DeleteIndexPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_DeleteIndex>>(
-          'CBLDatabase_DeleteIndex');
-  late final _CBLDatabase_DeleteIndex =
-      _CBLDatabase_DeleteIndexPtr.asFunction<DartCBLDatabase_DeleteIndex>();
-
-  /// Returns the names of the indexes on this database, as a Fleece array of
-  /// strings. @note You are responsible for releasing the returned Fleece
-  /// array. @warning <b>Deprecated :</b> Use CBLCollection_GetIndexNames on the
-  /// default collection instead.
-  FLArray CBLDatabase_GetIndexNames(
-    ffi.Pointer<CBLDatabase> db,
-  ) {
-    return _CBLDatabase_GetIndexNames(
-      db,
-    );
-  }
-
-  late final _CBLDatabase_GetIndexNamesPtr =
-      _lookup<ffi.NativeFunction<NativeCBLDatabase_GetIndexNames>>(
-          'CBLDatabase_GetIndexNames');
-  late final _CBLDatabase_GetIndexNames =
-      _CBLDatabase_GetIndexNamesPtr.asFunction<DartCBLDatabase_GetIndexNames>();
+  late final _CBLVectorEncoding_FreePtr =
+      _lookup<ffi.NativeFunction<NativeCBLVectorEncoding_Free>>(
+          'CBLVectorEncoding_Free');
+  late final _CBLVectorEncoding_Free =
+      _CBLVectorEncoding_FreePtr.asFunction<DartCBLVectorEncoding_Free>();
 
   /// The default collection's name.
   late final ffi.Pointer<FLString> _kCBLDefaultCollectionName =
@@ -1542,12 +1204,12 @@ class cblite {
   FLString get kCBLDefaultCollectionName => _kCBLDefaultCollectionName.ref;
 
   /// Returns the names of all existing scopes in the database. The scope exists
-  /// when there is at least one collection created under the scope. The default
-  /// scope is exceptional in that it will always exists even there are no
-  /// collections under it. @note You are responsible for releasing the returned
-  /// array. @param db The database. @param outError On failure, the error will
-  /// be written here. @return The names of all existing scopes in the database,
-  /// or NULL if an error occurred.
+  /// when there is at least one collection created under the scope. @note The
+  /// default scope will always exist, containing at least the default
+  /// collection. @note You are responsible for releasing the returned array.
+  /// @param db The database. @param outError On failure, the error will be
+  /// written here. @return The names of all existing scopes in the database, or
+  /// NULL if an error occurred.
   FLMutableArray CBLDatabase_ScopeNames(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLError> outError,
@@ -1588,13 +1250,12 @@ class cblite {
       .asFunction<DartCBLDatabase_CollectionNames>();
 
   /// Returns an existing scope with the given name. The scope exists when there
-  /// is at least one collection created under the scope. The default scope is
-  /// exception in that it will always exists even there are no collections
-  /// under it. @note You are responsible for releasing the returned scope.
-  /// @param db The database. @param scopeName The name of the scope. @param
-  /// outError On failure, the error will be written here. @return A \ref
-  /// CBLScope instance, or NULL if the scope doesn't exist or an error
-  /// occurred.
+  /// is at least one collection created under the scope. @note The default
+  /// scope will always exist, containing at least the default collection. @note
+  /// You are responsible for releasing the returned scope. @param db The
+  /// database. @param scopeName The name of the scope. @param outError On
+  /// failure, the error will be written here. @return A \ref CBLScope instance,
+  /// or NULL if the scope doesn't exist or an error occurred.
   ffi.Pointer<CBLScope> CBLDatabase_Scope(
     ffi.Pointer<CBLDatabase> db,
     FLString scopeName,
@@ -1697,8 +1358,7 @@ class cblite {
   late final _CBLDatabase_DeleteCollection = _CBLDatabase_DeleteCollectionPtr
       .asFunction<DartCBLDatabase_DeleteCollection>();
 
-  /// Returns the default scope. @note The default scope always exist even there
-  /// are no collections under it. @note You are responsible for releasing the
+  /// Returns the default scope. @note You are responsible for releasing the
   /// returned scope. @param db The database. @param outError On failure, the
   /// error will be written here. @return A \ref CBLScope instance, or NULL if
   /// an error occurred.
@@ -1718,12 +1378,10 @@ class cblite {
   late final _CBLDatabase_DefaultScope =
       _CBLDatabase_DefaultScopePtr.asFunction<DartCBLDatabase_DefaultScope>();
 
-  /// Returns the default collection. @note The default collection may not exist
-  /// if it was deleted. Also, the default collection cannot be recreated after
-  /// being deleted. @note You are responsible for releasing the returned
-  /// collection. @param db The database. @param outError On failure, the error
-  /// will be written here. @return A \ref CBLCollection instance, or NULL if
-  /// the default collection doesn't exist or an error occurred.
+  /// Returns the default collection. @note You are responsible for releasing
+  /// the returned collection. @param db The database. @param outError On
+  /// failure, the error will be written here. @return A \ref CBLCollection
+  /// instance, or NULL if an error occurred.
   ffi.Pointer<CBLCollection> CBLDatabase_DefaultCollection(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLError> outError,
@@ -1740,9 +1398,9 @@ class cblite {
   late final _CBLDatabase_DefaultCollection = _CBLDatabase_DefaultCollectionPtr
       .asFunction<DartCBLDatabase_DefaultCollection>();
 
-  /// Returns the scope of the collection. @note You are responsible for
-  /// releasing the returned scope. @param collection The collection. @return A
-  /// \ref CBLScope instance.
+  /// Returns the collection's scope. @note You are responsible for releasing
+  /// the returned scope. @param collection The collection. @return The scope of
+  /// the collection.
   ffi.Pointer<CBLScope> CBLCollection_Scope(
     ffi.Pointer<CBLCollection> collection,
   ) {
@@ -1757,8 +1415,8 @@ class cblite {
   late final _CBLCollection_Scope =
       _CBLCollection_ScopePtr.asFunction<DartCBLCollection_Scope>();
 
-  /// Returns the collection name. @param collection The collection. @return The
-  /// name of the collection.
+  /// Returns the collection's name. @param collection The collection. @return
+  /// The name of the collection.
   FLString CBLCollection_Name(
     ffi.Pointer<CBLCollection> collection,
   ) {
@@ -1772,6 +1430,40 @@ class cblite {
           'CBLCollection_Name');
   late final _CBLCollection_Name =
       _CBLCollection_NamePtr.asFunction<DartCBLCollection_Name>();
+
+  /// Returns the collection's fully qualified name in the
+  /// '<scope-name>.<collection-name>' format. @param collection The collection.
+  /// @return The fully qualified name of the collection.
+  FLString CBLCollection_FullName(
+    ffi.Pointer<CBLCollection> collection,
+  ) {
+    return _CBLCollection_FullName(
+      collection,
+    );
+  }
+
+  late final _CBLCollection_FullNamePtr =
+      _lookup<ffi.NativeFunction<NativeCBLCollection_FullName>>(
+          'CBLCollection_FullName');
+  late final _CBLCollection_FullName =
+      _CBLCollection_FullNamePtr.asFunction<DartCBLCollection_FullName>();
+
+  /// Returns the collection's database. @note The database object is owned by
+  /// the collection object; you do not need to release it. @param collection
+  /// The collection. @return The database of the collection.
+  ffi.Pointer<CBLDatabase> CBLCollection_Database(
+    ffi.Pointer<CBLCollection> collection,
+  ) {
+    return _CBLCollection_Database(
+      collection,
+    );
+  }
+
+  late final _CBLCollection_DatabasePtr =
+      _lookup<ffi.NativeFunction<NativeCBLCollection_Database>>(
+          'CBLCollection_Database');
+  late final _CBLCollection_Database =
+      _CBLCollection_DatabasePtr.asFunction<DartCBLCollection_Database>();
 
   /// Returns the number of documents in the collection. @param collection The
   /// collection. @return the number of documents in the collection.
@@ -2140,6 +1832,33 @@ class cblite {
       _CBLCollection_CreateFullTextIndexPtr.asFunction<
           DartCBLCollection_CreateFullTextIndex>();
 
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Creatres a vector index in the collection. If an identical index with that
+  /// name already exists, nothing happens (and no error is returned.) If a
+  /// non-identical index with that name already exists, it is deleted and
+  /// re-created.
+  bool CBLCollection_CreateVectorIndex(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLVectorIndexConfiguration config,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLCollection_CreateVectorIndex(
+      collection,
+      name,
+      config,
+      outError,
+    );
+  }
+
+  late final _CBLCollection_CreateVectorIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCollection_CreateVectorIndex>>(
+          'CBLCollection_CreateVectorIndex');
+  late final _CBLCollection_CreateVectorIndex =
+      _CBLCollection_CreateVectorIndexPtr.asFunction<
+          DartCBLCollection_CreateVectorIndex>();
+
   /// Deletes an index in the collection by name. @param collection The
   /// collection. @param name The name of the index. @param outError On failure,
   /// an error is written here. @return True on success, false on failure.
@@ -2181,6 +1900,30 @@ class cblite {
           'CBLCollection_GetIndexNames');
   late final _CBLCollection_GetIndexNames = _CBLCollection_GetIndexNamesPtr
       .asFunction<DartCBLCollection_GetIndexNames>();
+
+  /// Returns an index object representing an existing index in the collection.
+  /// @note You are responsible for releasing the returned index object. @param
+  /// collection The collection. @param name The name of the index. @param
+  /// outError On failure, an error is written here. @return A \ref
+  /// CBLQueryIndex instance if the index exists, or NULL if the index doesn't
+  /// exist or an error occurred.
+  ffi.Pointer<CBLQueryIndex> CBLCollection_GetIndex(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLCollection_GetIndex(
+      collection,
+      name,
+      outError,
+    );
+  }
+
+  late final _CBLCollection_GetIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCollection_GetIndex>>(
+          'CBLCollection_GetIndex');
+  late final _CBLCollection_GetIndex =
+      _CBLCollection_GetIndexPtr.asFunction<DartCBLCollection_GetIndex>();
 
   /// Registers a collection change listener callback. It will be called after
   /// one or more documents are changed on disk. @param collection The
@@ -2233,6 +1976,32 @@ class cblite {
   late final _CBLCollection_AddDocumentChangeListener =
       _CBLCollection_AddDocumentChangeListenerPtr.asFunction<
           DartCBLCollection_AddDocumentChangeListener>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Enables Vector Search extension by specifying the extension path to search
+  /// for the Vector Search extension library. This function must be called
+  /// before opening a database that intends to use the vector search extension.
+  /// @param path The file system path of the directory that contains the Vector
+  /// Search extension library. @param outError On return, will be set to the
+  /// error that occurred. @return True on success, false if there was an error.
+  /// @note Must be called before opening a database that intends to use the
+  /// vector search extension.
+  bool CBL_EnableVectorSearch(
+    FLString path,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBL_EnableVectorSearch(
+      path,
+      outError,
+    );
+  }
+
+  late final _CBL_EnableVectorSearchPtr =
+      _lookup<ffi.NativeFunction<NativeCBL_EnableVectorSearch>>(
+          'CBL_EnableVectorSearch');
+  late final _CBL_EnableVectorSearch =
+      _CBL_EnableVectorSearchPtr.asFunction<DartCBL_EnableVectorSearch>();
 
   /// Returns the default database configuration.
   CBLDatabaseConfiguration CBLDatabaseConfiguration_Default() {
@@ -2571,6 +2340,95 @@ class cblite {
   late final _CBLDatabase_Config =
       _CBLDatabase_ConfigPtr.asFunction<DartCBLDatabase_Config>();
 
+  /// Creates a value index. Indexes are persistent. If an identical index with
+  /// that name already exists, nothing happens (and no error is returned.) If a
+  /// non-identical index with that name already exists, it is deleted and
+  /// re-created. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_CreateValueIndex on the default collection instead.
+  bool CBLDatabase_CreateValueIndex(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    CBLValueIndexConfiguration config,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLDatabase_CreateValueIndex(
+      db,
+      name,
+      config,
+      outError,
+    );
+  }
+
+  late final _CBLDatabase_CreateValueIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateValueIndex>>(
+          'CBLDatabase_CreateValueIndex');
+  late final _CBLDatabase_CreateValueIndex = _CBLDatabase_CreateValueIndexPtr
+      .asFunction<DartCBLDatabase_CreateValueIndex>();
+
+  /// Creates a full-text index. Indexes are persistent. If an identical index
+  /// with that name already exists, nothing happens (and no error is returned.)
+  /// If a non-identical index with that name already exists, it is deleted and
+  /// re-created. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_CreateFullTextIndex on the default collection instead.
+  bool CBLDatabase_CreateFullTextIndex(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    CBLFullTextIndexConfiguration config,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLDatabase_CreateFullTextIndex(
+      db,
+      name,
+      config,
+      outError,
+    );
+  }
+
+  late final _CBLDatabase_CreateFullTextIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateFullTextIndex>>(
+          'CBLDatabase_CreateFullTextIndex');
+  late final _CBLDatabase_CreateFullTextIndex =
+      _CBLDatabase_CreateFullTextIndexPtr.asFunction<
+          DartCBLDatabase_CreateFullTextIndex>();
+
+  /// Deletes an index given its name. @warning <b>Deprecated :</b> Use
+  /// CBLCollection_DeleteIndex on the default collection instead.
+  bool CBLDatabase_DeleteIndex(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLDatabase_DeleteIndex(
+      db,
+      name,
+      outError,
+    );
+  }
+
+  late final _CBLDatabase_DeleteIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDatabase_DeleteIndex>>(
+          'CBLDatabase_DeleteIndex');
+  late final _CBLDatabase_DeleteIndex =
+      _CBLDatabase_DeleteIndexPtr.asFunction<DartCBLDatabase_DeleteIndex>();
+
+  /// Returns the names of the indexes on this database, as a Fleece array of
+  /// strings. @note You are responsible for releasing the returned Fleece
+  /// array. @warning <b>Deprecated :</b> Use CBLCollection_GetIndexNames on the
+  /// default collection instead.
+  FLArray CBLDatabase_GetIndexNames(
+    ffi.Pointer<CBLDatabase> db,
+  ) {
+    return _CBLDatabase_GetIndexNames(
+      db,
+    );
+  }
+
+  late final _CBLDatabase_GetIndexNamesPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDatabase_GetIndexNames>>(
+          'CBLDatabase_GetIndexNames');
+  late final _CBLDatabase_GetIndexNames =
+      _CBLDatabase_GetIndexNamesPtr.asFunction<DartCBLDatabase_GetIndexNames>();
+
   /// Registers a default collection change listener callback. It will be called
   /// after one or more documents are changed on disk. @warning <b>Deprecated
   /// :</b> Use CBLCollection_AddChangeListener on the default collection
@@ -2790,6 +2648,7 @@ class cblite {
       _CBLReplicator_ConfigPtr.asFunction<DartCBLReplicator_Config>();
 
   /// Starts a replicator, asynchronously. Does nothing if it's already started.
+  /// @note Replicators cannot be started from within a database's transaction.
   /// @param replicator The replicator instance. @param resetCheckpoint If true,
   /// the persistent saved state ("checkpoint") for this replication will be
   /// discarded, causing it to re-scan all documents. This significantly
@@ -3059,6 +2918,15 @@ class cblite {
 
   /// [false] Plaintext is not used, and instead binary encoding is used in log
   /// files
+  late final ffi.Pointer<ffi.Bool> _kCBLDefaultLogFileUsePlaintext =
+      _lookup<ffi.Bool>('kCBLDefaultLogFileUsePlaintext');
+
+  bool get kCBLDefaultLogFileUsePlaintext =>
+      _kCBLDefaultLogFileUsePlaintext.value;
+
+  /// [false] Plaintext is not used, and instead binary encoding is used in log
+  /// files @warning <b>Deprecated :</b> Use kCBLDefaultLogFileUsePlaintext
+  /// instead.
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultLogFileUsePlainText =
       _lookup<ffi.Bool>('kCBLDefaultLogFileUsePlainText');
 
@@ -3130,6 +2998,15 @@ class cblite {
 
   /// [300] Max wait time between retry attempts in seconds
   late final ffi.Pointer<ffi.UnsignedInt>
+      _kCBLDefaultReplicatorMaxAttemptsWaitTime =
+      _lookup<ffi.UnsignedInt>('kCBLDefaultReplicatorMaxAttemptsWaitTime');
+
+  int get kCBLDefaultReplicatorMaxAttemptsWaitTime =>
+      _kCBLDefaultReplicatorMaxAttemptsWaitTime.value;
+
+  /// [300] Max wait time between retry attempts in seconds @warning
+  /// <b>Deprecated :</b> Use kCBLDefaultReplicatorMaxAttemptsWaitTime instead.
+  late final ffi.Pointer<ffi.UnsignedInt>
       _kCBLDefaultReplicatorMaxAttemptWaitTime =
       _lookup<ffi.UnsignedInt>('kCBLDefaultReplicatorMaxAttemptWaitTime');
 
@@ -3150,6 +3027,47 @@ class cblite {
 
   bool get kCBLDefaultReplicatorAcceptParentCookies =>
       _kCBLDefaultReplicatorAcceptParentCookies.value;
+
+  /// [false] Vectors are not lazily indexed, by default
+  late final ffi.Pointer<ffi.Bool> _kCBLDefaultVectorIndexLazy =
+      _lookup<ffi.Bool>('kCBLDefaultVectorIndexLazy');
+
+  bool get kCBLDefaultVectorIndexLazy => _kCBLDefaultVectorIndexLazy.value;
+
+  /// [kCBLDistanceMetricEuclideanSquared] By default, vectors are compared
+  /// using Squared Euclidean metric.
+  late final ffi.Pointer<CBLDistanceMetric>
+      _kCBLDefaultVectorIndexDistanceMetric =
+      _lookup<CBLDistanceMetric>('kCBLDefaultVectorIndexDistanceMetric');
+
+  DartCBLDistanceMetric get kCBLDefaultVectorIndexDistanceMetric =>
+      _kCBLDefaultVectorIndexDistanceMetric.value;
+
+  /// [0] By default, the value will be determined based on the number of
+  /// centroids, encoding types, and the encoding parameters.
+  late final ffi.Pointer<ffi.UnsignedInt>
+      _kCBLDefaultVectorIndexMinTrainingSize =
+      _lookup<ffi.UnsignedInt>('kCBLDefaultVectorIndexMinTrainingSize');
+
+  int get kCBLDefaultVectorIndexMinTrainingSize =>
+      _kCBLDefaultVectorIndexMinTrainingSize.value;
+
+  /// [0] By default, the value will be determined based on the number of
+  /// centroids, encoding types, and the encoding parameters
+  late final ffi.Pointer<ffi.UnsignedInt>
+      _kCBLDefaultVectorIndexMaxTrainingSize =
+      _lookup<ffi.UnsignedInt>('kCBLDefaultVectorIndexMaxTrainingSize');
+
+  int get kCBLDefaultVectorIndexMaxTrainingSize =>
+      _kCBLDefaultVectorIndexMaxTrainingSize.value;
+
+  /// [0] By default, the value will be determined based on the number of
+  /// centroids.
+  late final ffi.Pointer<ffi.UnsignedInt> _kCBLDefaultVectorIndexNumProbes =
+      _lookup<ffi.UnsignedInt>('kCBLDefaultVectorIndexNumProbes');
+
+  int get kCBLDefaultVectorIndexNumProbes =>
+      _kCBLDefaultVectorIndexNumProbes.value;
 
   /// < `"encryptable"`
   late final ffi.Pointer<FLSlice> _kCBLEncryptableType =
@@ -3556,6 +3474,540 @@ class cblite {
   late final _CBLLog_SetFileConfig =
       _CBLLog_SetFileConfigPtr.asFunction<DartCBLLog_SetFileConfig>();
 
+  /// Registers a predictive model. @param name The name. @param model The
+  /// predictive model.
+  void CBL_RegisterPredictiveModel(
+    FLString name,
+    CBLPredictiveModel model,
+  ) {
+    return _CBL_RegisterPredictiveModel(
+      name,
+      model,
+    );
+  }
+
+  late final _CBL_RegisterPredictiveModelPtr =
+      _lookup<ffi.NativeFunction<NativeCBL_RegisterPredictiveModel>>(
+          'CBL_RegisterPredictiveModel');
+  late final _CBL_RegisterPredictiveModel = _CBL_RegisterPredictiveModelPtr
+      .asFunction<DartCBL_RegisterPredictiveModel>();
+
+  /// Unregisters the predictive model. @param name The name of the registered
+  /// predictive model.
+  void CBL_UnregisterPredictiveModel(
+    FLString name,
+  ) {
+    return _CBL_UnregisterPredictiveModel(
+      name,
+    );
+  }
+
+  late final _CBL_UnregisterPredictiveModelPtr =
+      _lookup<ffi.NativeFunction<NativeCBL_UnregisterPredictiveModel>>(
+          'CBL_UnregisterPredictiveModel');
+  late final _CBL_UnregisterPredictiveModel = _CBL_UnregisterPredictiveModelPtr
+      .asFunction<DartCBL_UnregisterPredictiveModel>();
+
+  /// Creates a new query by compiling the input string. This is fast, but not
+  /// instantaneous. If you need to run the same query many times, keep the \ref
+  /// CBLQuery around instead of compiling it each time. If you need to run
+  /// related queries with only some values different, create one query with
+  /// placeholder parameter(s), and substitute the desired value(s) with \ref
+  /// CBLQuery_SetParameters each time you run the query. @note You must release
+  /// the \ref CBLQuery when you're finished with it. @param db The database to
+  /// query. @param language The query language,
+  /// [JSON](https://github.com/couchbase/couchbase-lite-core/wiki/JSON-Query-Schema)
+  /// or
+  /// [N1QL](https://docs.couchbase.com/server/4.0/n1ql/n1ql-language-reference/index.html).
+  /// @param queryString The query string. @param outErrorPos If non-NULL, then
+  /// on a parse error the approximate byte offset in the input expression will
+  /// be stored here (or -1 if not known/applicable.) @param outError On
+  /// failure, the error will be written here. @return The new query object.
+  ffi.Pointer<CBLQuery> CBLDatabase_CreateQuery(
+    ffi.Pointer<CBLDatabase> db,
+    int language,
+    FLString queryString,
+    ffi.Pointer<ffi.Int> outErrorPos,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLDatabase_CreateQuery(
+      db,
+      language,
+      queryString,
+      outErrorPos,
+      outError,
+    );
+  }
+
+  late final _CBLDatabase_CreateQueryPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDatabase_CreateQuery>>(
+          'CBLDatabase_CreateQuery');
+  late final _CBLDatabase_CreateQuery =
+      _CBLDatabase_CreateQueryPtr.asFunction<DartCBLDatabase_CreateQuery>();
+
+  /// Assigns values to the query's parameters. These values will be substited
+  /// for those parameters whenever the query is executed, until they are next
+  /// assigned.
+  ///
+  /// Parameters are specified in the query source as e.g. `$PARAM` (N1QL) or
+  /// `["$PARAM"]` (JSON). In this example, the `parameters` dictionary to this
+  /// call should have a key `PARAM` that maps to the value of the parameter.
+  /// @param query The query. @param parameters The parameters in the form of a
+  /// Fleece \ref FLDict "dictionary" whose keys are the parameter names. (It's
+  /// easiest to construct this by using the mutable API, i.e. calling \ref
+  /// FLMutableDict_New and adding keys/values.)
+  void CBLQuery_SetParameters(
+    ffi.Pointer<CBLQuery> query,
+    FLDict parameters,
+  ) {
+    return _CBLQuery_SetParameters(
+      query,
+      parameters,
+    );
+  }
+
+  late final _CBLQuery_SetParametersPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_SetParameters>>(
+          'CBLQuery_SetParameters');
+  late final _CBLQuery_SetParameters =
+      _CBLQuery_SetParametersPtr.asFunction<DartCBLQuery_SetParameters>();
+
+  /// Returns the query's current parameter bindings, if any.
+  FLDict CBLQuery_Parameters(
+    ffi.Pointer<CBLQuery> query,
+  ) {
+    return _CBLQuery_Parameters(
+      query,
+    );
+  }
+
+  late final _CBLQuery_ParametersPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_Parameters>>(
+          'CBLQuery_Parameters');
+  late final _CBLQuery_Parameters =
+      _CBLQuery_ParametersPtr.asFunction<DartCBLQuery_Parameters>();
+
+  /// Runs the query, returning the results. To obtain the results you'll
+  /// typically call \ref CBLResultSet_Next in a `while` loop, examining the
+  /// values in the \ref CBLResultSet each time around. @note You must release
+  /// the result set when you're finished with it.
+  ffi.Pointer<CBLResultSet> CBLQuery_Execute(
+    ffi.Pointer<CBLQuery> arg0,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLQuery_Execute(
+      arg0,
+      outError,
+    );
+  }
+
+  late final _CBLQuery_ExecutePtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_Execute>>('CBLQuery_Execute');
+  late final _CBLQuery_Execute =
+      _CBLQuery_ExecutePtr.asFunction<DartCBLQuery_Execute>();
+
+  /// Returns information about the query, including the translated SQLite form,
+  /// and the search strategy. You can use this to help optimize the query: the
+  /// word `SCAN` in the strategy indicates a linear scan of the entire
+  /// database, which should be avoided by adding an index. The strategy will
+  /// also show which index(es), if any, are used. @note You are responsible for
+  /// releasing the result by calling \ref FLSliceResult_Release.
+  FLSliceResult CBLQuery_Explain(
+    ffi.Pointer<CBLQuery> arg0,
+  ) {
+    return _CBLQuery_Explain(
+      arg0,
+    );
+  }
+
+  late final _CBLQuery_ExplainPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_Explain>>('CBLQuery_Explain');
+  late final _CBLQuery_Explain =
+      _CBLQuery_ExplainPtr.asFunction<DartCBLQuery_Explain>();
+
+  /// Returns the number of columns in each result.
+  int CBLQuery_ColumnCount(
+    ffi.Pointer<CBLQuery> arg0,
+  ) {
+    return _CBLQuery_ColumnCount(
+      arg0,
+    );
+  }
+
+  late final _CBLQuery_ColumnCountPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_ColumnCount>>(
+          'CBLQuery_ColumnCount');
+  late final _CBLQuery_ColumnCount =
+      _CBLQuery_ColumnCountPtr.asFunction<DartCBLQuery_ColumnCount>();
+
+  /// Returns the name of a column in the result. The column name is based on
+  /// its expression in the `SELECT...` or `WHAT:` section of the query. A
+  /// column that returns a property or property path will be named after that
+  /// property. A column that returns an expression will have an
+  /// automatically-generated name like `$1`. To give a column a custom name,
+  /// use the `AS` syntax in the query. Every column is guaranteed to have a
+  /// unique name.
+  FLSlice CBLQuery_ColumnName(
+    ffi.Pointer<CBLQuery> arg0,
+    int columnIndex,
+  ) {
+    return _CBLQuery_ColumnName(
+      arg0,
+      columnIndex,
+    );
+  }
+
+  late final _CBLQuery_ColumnNamePtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_ColumnName>>(
+          'CBLQuery_ColumnName');
+  late final _CBLQuery_ColumnName =
+      _CBLQuery_ColumnNamePtr.asFunction<DartCBLQuery_ColumnName>();
+
+  /// Moves the result-set iterator to the next result. Returns false if there
+  /// are no more results. @warning This must be called _before_ examining the
+  /// first result.
+  bool CBLResultSet_Next(
+    ffi.Pointer<CBLResultSet> arg0,
+  ) {
+    return _CBLResultSet_Next(
+      arg0,
+    );
+  }
+
+  late final _CBLResultSet_NextPtr =
+      _lookup<ffi.NativeFunction<NativeCBLResultSet_Next>>('CBLResultSet_Next');
+  late final _CBLResultSet_Next =
+      _CBLResultSet_NextPtr.asFunction<DartCBLResultSet_Next>();
+
+  /// Returns the value of a column of the current result, given its
+  /// (zero-based) numeric index. This may return a NULL pointer, indicating
+  /// `MISSING`, if the value doesn't exist, e.g. if the column is a property
+  /// that doesn't exist in the document.
+  FLValue CBLResultSet_ValueAtIndex(
+    ffi.Pointer<CBLResultSet> arg0,
+    int index,
+  ) {
+    return _CBLResultSet_ValueAtIndex(
+      arg0,
+      index,
+    );
+  }
+
+  late final _CBLResultSet_ValueAtIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLResultSet_ValueAtIndex>>(
+          'CBLResultSet_ValueAtIndex');
+  late final _CBLResultSet_ValueAtIndex =
+      _CBLResultSet_ValueAtIndexPtr.asFunction<DartCBLResultSet_ValueAtIndex>();
+
+  /// Returns the value of a column of the current result, given its name. This
+  /// may return a NULL pointer, indicating `MISSING`, if the value doesn't
+  /// exist, e.g. if the column is a property that doesn't exist in the
+  /// document. (Or, of course, if the key is not a column name in this query.)
+  /// @note See \ref CBLQuery_ColumnName for a discussion of column names.
+  FLValue CBLResultSet_ValueForKey(
+    ffi.Pointer<CBLResultSet> arg0,
+    FLString key,
+  ) {
+    return _CBLResultSet_ValueForKey(
+      arg0,
+      key,
+    );
+  }
+
+  late final _CBLResultSet_ValueForKeyPtr =
+      _lookup<ffi.NativeFunction<NativeCBLResultSet_ValueForKey>>(
+          'CBLResultSet_ValueForKey');
+  late final _CBLResultSet_ValueForKey =
+      _CBLResultSet_ValueForKeyPtr.asFunction<DartCBLResultSet_ValueForKey>();
+
+  /// Returns the current result as an array of column values. @warning The
+  /// array reference is only valid until the result-set is advanced or
+  /// released. If you want to keep it for longer, call \ref FLArray_Retain (and
+  /// release it when done.)
+  FLArray CBLResultSet_ResultArray(
+    ffi.Pointer<CBLResultSet> arg0,
+  ) {
+    return _CBLResultSet_ResultArray(
+      arg0,
+    );
+  }
+
+  late final _CBLResultSet_ResultArrayPtr =
+      _lookup<ffi.NativeFunction<NativeCBLResultSet_ResultArray>>(
+          'CBLResultSet_ResultArray');
+  late final _CBLResultSet_ResultArray =
+      _CBLResultSet_ResultArrayPtr.asFunction<DartCBLResultSet_ResultArray>();
+
+  /// Returns the current result as a dictionary mapping column names to values.
+  /// @warning The dict reference is only valid until the result-set is advanced
+  /// or released. If you want to keep it for longer, call \ref FLDict_Retain
+  /// (and release it when done.)
+  FLDict CBLResultSet_ResultDict(
+    ffi.Pointer<CBLResultSet> arg0,
+  ) {
+    return _CBLResultSet_ResultDict(
+      arg0,
+    );
+  }
+
+  late final _CBLResultSet_ResultDictPtr =
+      _lookup<ffi.NativeFunction<NativeCBLResultSet_ResultDict>>(
+          'CBLResultSet_ResultDict');
+  late final _CBLResultSet_ResultDict =
+      _CBLResultSet_ResultDictPtr.asFunction<DartCBLResultSet_ResultDict>();
+
+  /// Returns the Query that created this ResultSet.
+  ffi.Pointer<CBLQuery> CBLResultSet_GetQuery(
+    ffi.Pointer<CBLResultSet> rs,
+  ) {
+    return _CBLResultSet_GetQuery(
+      rs,
+    );
+  }
+
+  late final _CBLResultSet_GetQueryPtr =
+      _lookup<ffi.NativeFunction<NativeCBLResultSet_GetQuery>>(
+          'CBLResultSet_GetQuery');
+  late final _CBLResultSet_GetQuery =
+      _CBLResultSet_GetQueryPtr.asFunction<DartCBLResultSet_GetQuery>();
+
+  /// Registers a change listener callback with a query, turning it into a "live
+  /// query" until the listener is removed (via \ref CBLListener_Remove).
+  ///
+  /// When the first change listener is added, the query will run (in the
+  /// background) and notify the listener(s) of the results when ready. After
+  /// that, it will run in the background after the database changes, and only
+  /// notify the listeners when the result set changes. @param query The query
+  /// to observe. @param listener The callback to be invoked. @param context An
+  /// opaque value that will be passed to the callback. @return A token to be
+  /// passed to \ref CBLListener_Remove when it's time to remove the listener.
+  ffi.Pointer<CBLListenerToken> CBLQuery_AddChangeListener(
+    ffi.Pointer<CBLQuery> query,
+    CBLQueryChangeListener listener,
+    ffi.Pointer<ffi.Void> context,
+  ) {
+    return _CBLQuery_AddChangeListener(
+      query,
+      listener,
+      context,
+    );
+  }
+
+  late final _CBLQuery_AddChangeListenerPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_AddChangeListener>>(
+          'CBLQuery_AddChangeListener');
+  late final _CBLQuery_AddChangeListener = _CBLQuery_AddChangeListenerPtr
+      .asFunction<DartCBLQuery_AddChangeListener>();
+
+  /// Returns the query's _entire_ current result set, after it's been announced
+  /// via a call to the listener's callback. @note You must release the result
+  /// set when you're finished with it. @param query The query being listened
+  /// to. @param listener The query listener that was notified. @param outError
+  /// If the query failed to run, the error will be stored here. @return A new
+  /// object containing the query's current results, or NULL if the query failed
+  /// to run.
+  ffi.Pointer<CBLResultSet> CBLQuery_CopyCurrentResults(
+    ffi.Pointer<CBLQuery> query,
+    ffi.Pointer<CBLListenerToken> listener,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLQuery_CopyCurrentResults(
+      query,
+      listener,
+      outError,
+    );
+  }
+
+  late final _CBLQuery_CopyCurrentResultsPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQuery_CopyCurrentResults>>(
+          'CBLQuery_CopyCurrentResults');
+  late final _CBLQuery_CopyCurrentResults = _CBLQuery_CopyCurrentResultsPtr
+      .asFunction<DartCBLQuery_CopyCurrentResults>();
+
+  /// Returns the index's name. @param index The index. @return The name of the
+  /// index.
+  FLString CBLQueryIndex_Name(
+    ffi.Pointer<CBLQueryIndex> index,
+  ) {
+    return _CBLQueryIndex_Name(
+      index,
+    );
+  }
+
+  late final _CBLQueryIndex_NamePtr =
+      _lookup<ffi.NativeFunction<NativeCBLQueryIndex_Name>>(
+          'CBLQueryIndex_Name');
+  late final _CBLQueryIndex_Name =
+      _CBLQueryIndex_NamePtr.asFunction<DartCBLQueryIndex_Name>();
+
+  /// Returns the collection that the index belongs to. @param index The index.
+  /// @return A \ref CBLCollection instance that the index belongs to.
+  ffi.Pointer<CBLCollection> CBLQueryIndex_Collection(
+    ffi.Pointer<CBLQueryIndex> index,
+  ) {
+    return _CBLQueryIndex_Collection(
+      index,
+    );
+  }
+
+  late final _CBLQueryIndex_CollectionPtr =
+      _lookup<ffi.NativeFunction<NativeCBLQueryIndex_Collection>>(
+          'CBLQueryIndex_Collection');
+  late final _CBLQueryIndex_Collection =
+      _CBLQueryIndex_CollectionPtr.asFunction<DartCBLQueryIndex_Collection>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Finds new or updated documents for which vectors need to be (re)computed
+  /// and returns an \ref CBLIndexUpdater object for setting the computed
+  /// vectors to update the index. If the index is not lazy, an error will be
+  /// returned. @note For updating lazy vector indexes only. @note You are
+  /// responsible for releasing the returned A \ref CBLIndexUpdater object.
+  /// @param index The index. @param limit The maximum number of vectors to be
+  /// computed. @param outError On failure, an error is written here. @return A
+  /// \ref CBLIndexUpdater object for setting the computed vectors to update the
+  /// index, or NULL if the index is up-to-date or an error occurred.
+  ffi.Pointer<CBLIndexUpdater> CBLQueryIndex_BeginUpdate(
+    ffi.Pointer<CBLQueryIndex> index,
+    int limit,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLQueryIndex_BeginUpdate(
+      index,
+      limit,
+      outError,
+    );
+  }
+
+  late final _CBLQueryIndex_BeginUpdatePtr =
+      _lookup<ffi.NativeFunction<NativeCBLQueryIndex_BeginUpdate>>(
+          'CBLQueryIndex_BeginUpdate');
+  late final _CBLQueryIndex_BeginUpdate =
+      _CBLQueryIndex_BeginUpdatePtr.asFunction<DartCBLQueryIndex_BeginUpdate>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Returns the total number of vectors to compute and set for updating the
+  /// index. @param updater The index updater. @return The total number of
+  /// vectors to compute and set for updating the index.
+  int CBLIndexUpdater_Count(
+    ffi.Pointer<CBLIndexUpdater> updater,
+  ) {
+    return _CBLIndexUpdater_Count(
+      updater,
+    );
+  }
+
+  late final _CBLIndexUpdater_CountPtr =
+      _lookup<ffi.NativeFunction<NativeCBLIndexUpdater_Count>>(
+          'CBLIndexUpdater_Count');
+  late final _CBLIndexUpdater_Count =
+      _CBLIndexUpdater_CountPtr.asFunction<DartCBLIndexUpdater_Count>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Returns the valut at the given index to compute a vector from. @note The
+  /// returned Fleece value is valid unilt its \ref CBLIndexUpdater is released.
+  /// If you want to keep it longer, retain it with `FLRetain`. @param updater
+  /// The index updater. @param index The zero-based index. @return A Fleece
+  /// value of the index's evaluated expression at the given index.
+  FLValue CBLIndexUpdater_Value(
+    ffi.Pointer<CBLIndexUpdater> updater,
+    int index,
+  ) {
+    return _CBLIndexUpdater_Value(
+      updater,
+      index,
+    );
+  }
+
+  late final _CBLIndexUpdater_ValuePtr =
+      _lookup<ffi.NativeFunction<NativeCBLIndexUpdater_Value>>(
+          'CBLIndexUpdater_Value');
+  late final _CBLIndexUpdater_Value =
+      _CBLIndexUpdater_ValuePtr.asFunction<DartCBLIndexUpdater_Value>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Sets the vector for the value corresponding to the given index. Setting
+  /// null vector means that there is no vector for the value, and any existing
+  /// vector will be removed when the `CBLIndexUpdater_Finish` is called. @param
+  /// updater The index updater. @param index The zero-based index. @param
+  /// vector A pointer to the vector which is an array of floats, or NULL if
+  /// there is no vector. @param dimension The dimension of `vector`. Must be
+  /// equal to the dimension value set in the vector index config. @param
+  /// outError On failure, an error is written here. @return True if success, or
+  /// False if an error occurred.
+  bool CBLIndexUpdater_SetVector(
+    ffi.Pointer<CBLIndexUpdater> updater,
+    int index,
+    ffi.Pointer<ffi.Float> vector,
+    int dimension,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLIndexUpdater_SetVector(
+      updater,
+      index,
+      vector,
+      dimension,
+      outError,
+    );
+  }
+
+  late final _CBLIndexUpdater_SetVectorPtr =
+      _lookup<ffi.NativeFunction<NativeCBLIndexUpdater_SetVector>>(
+          'CBLIndexUpdater_SetVector');
+  late final _CBLIndexUpdater_SetVector =
+      _CBLIndexUpdater_SetVectorPtr.asFunction<DartCBLIndexUpdater_SetVector>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Skip setting the vector for the value corresponding to the index. The
+  /// vector will be required to compute and set again when the
+  /// `CBLQueryIndex_BeginUpdate` is later called. @param updater The index
+  /// updater. @param index The zero-based index.
+  void CBLIndexUpdater_SkipVector(
+    ffi.Pointer<CBLIndexUpdater> updater,
+    int index,
+  ) {
+    return _CBLIndexUpdater_SkipVector(
+      updater,
+      index,
+    );
+  }
+
+  late final _CBLIndexUpdater_SkipVectorPtr =
+      _lookup<ffi.NativeFunction<NativeCBLIndexUpdater_SkipVector>>(
+          'CBLIndexUpdater_SkipVector');
+  late final _CBLIndexUpdater_SkipVector = _CBLIndexUpdater_SkipVectorPtr
+      .asFunction<DartCBLIndexUpdater_SkipVector>();
+
+  /// ENTERPRISE EDITION ONLY
+  ///
+  /// Updates the index with the computed vectors and removes any index rows for
+  /// which null vector was given. If there are any indexes that do not have
+  /// their vector value set or are skipped, a error will be returned. @note
+  /// Before calling `CBLIndexUpdater_Finish`, the set vectors are kept in the
+  /// memory. @warning The index updater cannot be used after calling
+  /// `CBLIndexUpdater_Finish`. @param updater The index updater. @param
+  /// outError On failure, an error is written here. @return True if success, or
+  /// False if an error occurred.
+  bool CBLIndexUpdater_Finish(
+    ffi.Pointer<CBLIndexUpdater> updater,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLIndexUpdater_Finish(
+      updater,
+      outError,
+    );
+  }
+
+  late final _CBLIndexUpdater_FinishPtr =
+      _lookup<ffi.NativeFunction<NativeCBLIndexUpdater_Finish>>(
+          'CBLIndexUpdater_Finish');
+  late final _CBLIndexUpdater_Finish =
+      _CBLIndexUpdater_FinishPtr.asFunction<DartCBLIndexUpdater_Finish>();
+
   /// The default scope's name.
   late final ffi.Pointer<FLString> _kCBLDefaultScopeName =
       _lookup<FLString>('kCBLDefaultScopeName');
@@ -3575,6 +4027,22 @@ class cblite {
   late final _CBLScope_NamePtr =
       _lookup<ffi.NativeFunction<NativeCBLScope_Name>>('CBLScope_Name');
   late final _CBLScope_Name = _CBLScope_NamePtr.asFunction<DartCBLScope_Name>();
+
+  /// Returns the scope's database. @note The database object is owned by the
+  /// scope object; you do not need to release it. @param scope The scope.
+  /// @return The database of the scope.
+  ffi.Pointer<CBLDatabase> CBLScope_Database(
+    ffi.Pointer<CBLScope> scope,
+  ) {
+    return _CBLScope_Database(
+      scope,
+    );
+  }
+
+  late final _CBLScope_DatabasePtr =
+      _lookup<ffi.NativeFunction<NativeCBLScope_Database>>('CBLScope_Database');
+  late final _CBLScope_Database =
+      _CBLScope_DatabasePtr.asFunction<DartCBLScope_Database>();
 
   /// Returns the names of all collections in the scope. @note You are
   /// responsible for releasing the returned array. @param scope The scope.
@@ -3872,7 +4340,8 @@ class cblite {
   late final _FLArray_Get = _FLArray_GetPtr.asFunction<DartFLArray_Get>();
 
   /// Initializes a FLArrayIterator struct to iterate over an array. Call
-  /// FLArrayIteratorGetValue to get the first item, then FLArrayIteratorNext.
+  /// FLArrayIteratorGetValue to get the first item, then as long as the item is
+  /// not NULL, call FLArrayIterator_Next to advance.
   void FLArrayIterator_Begin(
     FLArray arg0,
     ffi.Pointer<FLArrayIterator> arg1,
@@ -3889,7 +4358,7 @@ class cblite {
   late final _FLArrayIterator_Begin =
       _FLArrayIterator_BeginPtr.asFunction<DartFLArrayIterator_Begin>();
 
-  /// Returns the current value being iterated over.
+  /// Returns the current value being iterated over, or NULL at the end.
   FLValue FLArrayIterator_GetValue(
     ffi.Pointer<FLArrayIterator> arg0,
   ) {
@@ -3937,7 +4406,9 @@ class cblite {
   late final _FLArrayIterator_GetCount =
       _FLArrayIterator_GetCountPtr.asFunction<DartFLArrayIterator_GetCount>();
 
-  /// Advances the iterator to the next value, or returns false if at the end.
+  /// Advances the iterator to the next value. @warning It is illegal to call
+  /// this when the iterator is already at the end. In particular, calling this
+  /// when the array is empty is always illegal.
   bool FLArrayIterator_Next(
     ffi.Pointer<FLArrayIterator> arg0,
   ) {
@@ -4021,7 +4492,7 @@ class cblite {
 
   /// Initializes a FLDictIterator struct to iterate over a dictionary. Call
   /// FLDictIterator_GetKey and FLDictIterator_GetValue to get the first item,
-  /// then FLDictIterator_Next.
+  /// then as long as the item is not NULL, call FLDictIterator_Next to advance.
   void FLDictIterator_Begin(
     FLDict arg0,
     ffi.Pointer<FLDictIterator> arg1,
@@ -4039,7 +4510,7 @@ class cblite {
       _FLDictIterator_BeginPtr.asFunction<DartFLDictIterator_Begin>();
 
   /// Returns the current key being iterated over. This Value will be a string
-  /// or an integer.
+  /// or an integer, or NULL when there are no more keys.
   FLValue FLDictIterator_GetKey(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -4054,7 +4525,8 @@ class cblite {
   late final _FLDictIterator_GetKey =
       _FLDictIterator_GetKeyPtr.asFunction<DartFLDictIterator_GetKey>();
 
-  /// Returns the current key's string value.
+  /// Returns the current key's string value, or NULL when there are no more
+  /// keys.
   FLString FLDictIterator_GetKeyString(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -4069,7 +4541,8 @@ class cblite {
   late final _FLDictIterator_GetKeyString = _FLDictIterator_GetKeyStringPtr
       .asFunction<DartFLDictIterator_GetKeyString>();
 
-  /// Returns the current value being iterated over.
+  /// Returns the current value being iterated over. Returns NULL when there are
+  /// no more values.
   FLValue FLDictIterator_GetValue(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -4100,7 +4573,9 @@ class cblite {
   late final _FLDictIterator_GetCount =
       _FLDictIterator_GetCountPtr.asFunction<DartFLDictIterator_GetCount>();
 
-  /// Advances the iterator to the next value, or returns false if at the end.
+  /// Advances the iterator to the next value. @warning It is illegal to call
+  /// this when the iterator is already at the end. In particular, calling this
+  /// when the dict is empty is always illegal.
   bool FLDictIterator_Next(
     ffi.Pointer<FLDictIterator> arg0,
   ) {
@@ -6403,7 +6878,8 @@ class cblite {
       _FLSharedKeys_GetStateDataPtr.asFunction<DartFLSharedKeys_GetStateData>();
 
   /// Updates an FLSharedKeys with saved state data created by \ref
-  /// FLSharedKeys_GetStateData.
+  /// FLSharedKeys_GetStateData. Returns true if new keys were added, false if
+  /// not.
   bool FLSharedKeys_LoadStateData(
     FLSharedKeys arg0,
     FLSlice arg1,
@@ -6530,6 +7006,21 @@ class cblite {
           'FLSharedKeys_RevertToCount');
   late final _FLSharedKeys_RevertToCount = _FLSharedKeys_RevertToCountPtr
       .asFunction<DartFLSharedKeys_RevertToCount>();
+
+  /// Disable caching of the SharedKeys..
+  void FLSharedKeys_DisableCaching(
+    FLSharedKeys arg0,
+  ) {
+    return _FLSharedKeys_DisableCaching(
+      arg0,
+    );
+  }
+
+  late final _FLSharedKeys_DisableCachingPtr =
+      _lookup<ffi.NativeFunction<NativeFLSharedKeys_DisableCaching>>(
+          'FLSharedKeys_DisableCaching');
+  late final _FLSharedKeys_DisableCaching = _FLSharedKeys_DisableCachingPtr
+      .asFunction<DartFLSharedKeys_DisableCaching>();
 
   /// Increments the reference count of an FLSharedKeys.
   FLSharedKeys FLSharedKeys_Retain(
@@ -6754,9 +7245,9 @@ class cblite {
       _FLEncoder_GetNextWritePosPtr.asFunction<DartFLEncoder_GetNextWritePos>();
 
   /// Returns an opaque reference to the last complete value written to the
-  /// encoder, if possible. Fails (returning 0) if nothing has been written, or
-  /// if the value is inline and can't be referenced this way -- that only
-  /// happens with small scalars or empty collections.
+  /// encoder, if possible. Fails (returning kFLNoWrittenValue) if nothing has
+  /// been written, or if the value is inline and can't be referenced this way
+  /// -- that only happens with small scalars or empty collections.
   int FLEncoder_LastValueWritten(
     FLEncoder arg0,
   ) {
@@ -6774,8 +7265,9 @@ class cblite {
   /// Writes another reference (a "pointer") to an already-written value, given
   /// a reference previously returned from \ref FLEncoder_LastValueWritten. The
   /// effect is exactly the same as if you wrote the entire value again, except
-  /// that the size of the encoded data only grows by 4 bytes.
-  void FLEncoder_WriteValueAgain(
+  /// that the size of the encoded data only grows by 4 bytes. Returns false if
+  /// the reference couldn't be written.
+  bool FLEncoder_WriteValueAgain(
     FLEncoder arg0,
     int preWrittenValue,
   ) {
@@ -6985,6 +7477,10 @@ final class CBLBlob extends ffi.Opaque {}
 final class CBLQuery extends ffi.Opaque {}
 
 final class CBLResultSet extends ffi.Opaque {}
+
+final class CBLQueryIndex extends ffi.Opaque {}
+
+final class CBLIndexUpdater extends ffi.Opaque {}
 
 final class CBLReplicator extends ffi.Opaque {}
 
@@ -7323,109 +7819,9 @@ typedef DartCBLDatabase_AddDocumentChangeListener
         CBLDocumentChangeListener listener,
         ffi.Pointer<ffi.Void> context);
 
-/// Query languages
+/// Supported Query languages
 typedef CBLQueryLanguage = ffi.Uint32;
 typedef DartCBLQueryLanguage = int;
-typedef NativeCBLDatabase_CreateQuery = ffi.Pointer<CBLQuery> Function(
-    ffi.Pointer<CBLDatabase> db,
-    CBLQueryLanguage language,
-    FLString queryString,
-    ffi.Pointer<ffi.Int> outErrorPos,
-    ffi.Pointer<CBLError> outError);
-typedef DartCBLDatabase_CreateQuery = ffi.Pointer<CBLQuery> Function(
-    ffi.Pointer<CBLDatabase> db,
-    int language,
-    FLString queryString,
-    ffi.Pointer<ffi.Int> outErrorPos,
-    ffi.Pointer<CBLError> outError);
-typedef NativeCBLQuery_SetParameters = ffi.Void Function(
-    ffi.Pointer<CBLQuery> query, FLDict parameters);
-typedef DartCBLQuery_SetParameters = void Function(
-    ffi.Pointer<CBLQuery> query, FLDict parameters);
-typedef NativeCBLQuery_Parameters = FLDict Function(
-    ffi.Pointer<CBLQuery> query);
-typedef DartCBLQuery_Parameters = FLDict Function(ffi.Pointer<CBLQuery> query);
-typedef NativeCBLQuery_Execute = ffi.Pointer<CBLResultSet> Function(
-    ffi.Pointer<CBLQuery> arg0, ffi.Pointer<CBLError> outError);
-typedef DartCBLQuery_Execute = ffi.Pointer<CBLResultSet> Function(
-    ffi.Pointer<CBLQuery> arg0, ffi.Pointer<CBLError> outError);
-typedef NativeCBLQuery_Explain = FLSliceResult Function(
-    ffi.Pointer<CBLQuery> arg0);
-typedef DartCBLQuery_Explain = FLSliceResult Function(
-    ffi.Pointer<CBLQuery> arg0);
-typedef NativeCBLQuery_ColumnCount = ffi.UnsignedInt Function(
-    ffi.Pointer<CBLQuery> arg0);
-typedef DartCBLQuery_ColumnCount = int Function(ffi.Pointer<CBLQuery> arg0);
-typedef NativeCBLQuery_ColumnName = FLSlice Function(
-    ffi.Pointer<CBLQuery> arg0, ffi.UnsignedInt columnIndex);
-typedef DartCBLQuery_ColumnName = FLSlice Function(
-    ffi.Pointer<CBLQuery> arg0, int columnIndex);
-typedef NativeCBLResultSet_Next = ffi.Bool Function(
-    ffi.Pointer<CBLResultSet> arg0);
-typedef DartCBLResultSet_Next = bool Function(ffi.Pointer<CBLResultSet> arg0);
-
-final class _FLValue extends ffi.Opaque {}
-
-typedef FLValue = ffi.Pointer<_FLValue>;
-typedef NativeCBLResultSet_ValueAtIndex = FLValue Function(
-    ffi.Pointer<CBLResultSet> arg0, ffi.UnsignedInt index);
-typedef DartCBLResultSet_ValueAtIndex = FLValue Function(
-    ffi.Pointer<CBLResultSet> arg0, int index);
-typedef NativeCBLResultSet_ValueForKey = FLValue Function(
-    ffi.Pointer<CBLResultSet> arg0, FLString key);
-typedef DartCBLResultSet_ValueForKey = FLValue Function(
-    ffi.Pointer<CBLResultSet> arg0, FLString key);
-
-final class _FLArray extends ffi.Opaque {}
-
-typedef FLArray = ffi.Pointer<_FLArray>;
-typedef NativeCBLResultSet_ResultArray = FLArray Function(
-    ffi.Pointer<CBLResultSet> arg0);
-typedef DartCBLResultSet_ResultArray = FLArray Function(
-    ffi.Pointer<CBLResultSet> arg0);
-typedef NativeCBLResultSet_ResultDict = FLDict Function(
-    ffi.Pointer<CBLResultSet> arg0);
-typedef DartCBLResultSet_ResultDict = FLDict Function(
-    ffi.Pointer<CBLResultSet> arg0);
-typedef NativeCBLResultSet_GetQuery = ffi.Pointer<CBLQuery> Function(
-    ffi.Pointer<CBLResultSet> rs);
-typedef DartCBLResultSet_GetQuery = ffi.Pointer<CBLQuery> Function(
-    ffi.Pointer<CBLResultSet> rs);
-typedef CBLQueryChangeListenerFunction = ffi.Void Function(
-    ffi.Pointer<ffi.Void> context,
-    ffi.Pointer<CBLQuery> query,
-    ffi.Pointer<CBLListenerToken> token);
-typedef DartCBLQueryChangeListenerFunction = void Function(
-    ffi.Pointer<ffi.Void> context,
-    ffi.Pointer<CBLQuery> query,
-    ffi.Pointer<CBLListenerToken> token);
-
-/// A callback to be invoked after the query's results have changed. The actual
-/// result set can be obtained by calling \ref CBLQuery_CopyCurrentResults,
-/// either during the callback or at any time thereafter. @warning By default,
-/// this listener may be called on arbitrary threads. If your code isn't
-/// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
-/// so that listeners will be called in a safe context. @param context The same
-/// `context` value that you passed when adding the listener. @param query The
-/// query that triggered the listener. @param token The token for obtaining the
-/// query results by calling \ref CBLQuery_CopyCurrentResults.
-typedef CBLQueryChangeListener
-    = ffi.Pointer<ffi.NativeFunction<CBLQueryChangeListenerFunction>>;
-typedef NativeCBLQuery_AddChangeListener
-    = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLQuery> query,
-        CBLQueryChangeListener listener, ffi.Pointer<ffi.Void> context);
-typedef DartCBLQuery_AddChangeListener = ffi.Pointer<CBLListenerToken> Function(
-    ffi.Pointer<CBLQuery> query,
-    CBLQueryChangeListener listener,
-    ffi.Pointer<ffi.Void> context);
-typedef NativeCBLQuery_CopyCurrentResults = ffi.Pointer<CBLResultSet> Function(
-    ffi.Pointer<CBLQuery> query,
-    ffi.Pointer<CBLListenerToken> listener,
-    ffi.Pointer<CBLError> outError);
-typedef DartCBLQuery_CopyCurrentResults = ffi.Pointer<CBLResultSet> Function(
-    ffi.Pointer<CBLQuery> query,
-    ffi.Pointer<CBLListenerToken> listener,
-    ffi.Pointer<CBLError> outError);
 
 /// Value Index Configuration.
 final class CBLValueIndexConfiguration extends ffi.Struct {
@@ -7438,17 +7834,6 @@ final class CBLValueIndexConfiguration extends ffi.Struct {
   /// delimiter.
   external FLString expressions;
 }
-
-typedef NativeCBLDatabase_CreateValueIndex = ffi.Bool Function(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLValueIndexConfiguration config,
-    ffi.Pointer<CBLError> outError);
-typedef DartCBLDatabase_CreateValueIndex = bool Function(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLValueIndexConfiguration config,
-    ffi.Pointer<CBLError> outError);
 
 /// Full-Text Index Configuration.
 final class CBLFullTextIndexConfiguration extends ffi.Struct {
@@ -7482,24 +7867,120 @@ final class CBLFullTextIndexConfiguration extends ffi.Struct {
   external FLString language;
 }
 
-typedef NativeCBLDatabase_CreateFullTextIndex = ffi.Bool Function(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLFullTextIndexConfiguration config,
-    ffi.Pointer<CBLError> outError);
-typedef DartCBLDatabase_CreateFullTextIndex = bool Function(
-    ffi.Pointer<CBLDatabase> db,
-    FLString name,
-    CBLFullTextIndexConfiguration config,
-    ffi.Pointer<CBLError> outError);
-typedef NativeCBLDatabase_DeleteIndex = ffi.Bool Function(
-    ffi.Pointer<CBLDatabase> db, FLString name, ffi.Pointer<CBLError> outError);
-typedef DartCBLDatabase_DeleteIndex = bool Function(
-    ffi.Pointer<CBLDatabase> db, FLString name, ffi.Pointer<CBLError> outError);
-typedef NativeCBLDatabase_GetIndexNames = FLArray Function(
-    ffi.Pointer<CBLDatabase> db);
-typedef DartCBLDatabase_GetIndexNames = FLArray Function(
-    ffi.Pointer<CBLDatabase> db);
+final class CBLVectorEncoding extends ffi.Opaque {}
+
+typedef NativeCBLVectorEncoding_CreateNone = ffi.Pointer<CBLVectorEncoding>
+    Function();
+typedef DartCBLVectorEncoding_CreateNone = ffi.Pointer<CBLVectorEncoding>
+    Function();
+
+/// Scalar Quantizer encoding type
+typedef CBLScalarQuantizerType = ffi.Uint32;
+typedef DartCBLScalarQuantizerType = int;
+typedef NativeCBLVectorEncoding_CreateScalarQuantizer
+    = ffi.Pointer<CBLVectorEncoding> Function(CBLScalarQuantizerType type);
+typedef DartCBLVectorEncoding_CreateScalarQuantizer
+    = ffi.Pointer<CBLVectorEncoding> Function(int type);
+typedef NativeCBLVectorEncoding_CreateProductQuantizer
+    = ffi.Pointer<CBLVectorEncoding> Function(
+        ffi.UnsignedInt subquantizers, ffi.UnsignedInt bits);
+typedef DartCBLVectorEncoding_CreateProductQuantizer
+    = ffi.Pointer<CBLVectorEncoding> Function(int subquantizers, int bits);
+typedef NativeCBLVectorEncoding_Free = ffi.Void Function(
+    ffi.Pointer<CBLVectorEncoding> arg0);
+typedef DartCBLVectorEncoding_Free = void Function(
+    ffi.Pointer<CBLVectorEncoding> arg0);
+
+/// Distance metric to use in CBLVectorIndexConfiguration.
+typedef CBLDistanceMetric = ffi.Uint32;
+typedef DartCBLDistanceMetric = int;
+
+/// ENTERPRISE EDITION ONLY
+///
+/// Vector Index Configuration.
+final class CBLVectorIndexConfiguration extends ffi.Struct {
+  /// The language used in the expressions (Required).
+  @CBLQueryLanguage()
+  external int expressionLanguage;
+
+  /// The expression could be specified in a JSON Array or in N1QL syntax
+  /// depending on the expressionLanguage. (Required)
+  ///
+  /// For non-lazy indexes, an expression returning either a vector, which is an
+  /// array of 32-bit floating-point numbers, or a Base64 string representing an
+  /// array of 32-bit floating-point numbers in little-endian order.
+  ///
+  /// For lazy indexex, an expression returning a value for computing a vector
+  /// lazily when using \ref CBLIndexUpdater to add or update the vector into
+  /// the index.
+  external FLString expression;
+
+  /// The number of vector dimensions. (Required) @note The maximum number of
+  /// vector dimensions supported is 4096.
+  @ffi.UnsignedInt()
+  external int dimensions;
+
+  /// The number of centroids which is the number buckets to partition the
+  /// vectors in the index. (Required) @note The recommended number of centroids
+  /// is the square root of the number of vectors to be indexed, and the maximum
+  /// number of centroids supported is 64,000.
+  @ffi.UnsignedInt()
+  external int centroids;
+
+  /// The boolean flag indicating that index is lazy or not. The default value
+  /// is false.
+  ///
+  /// If the index is lazy, it will not be automatically updated when the
+  /// documents in the collection are changed, except when the documents are
+  /// deleted or purged.
+  ///
+  /// When configuring the index to be lazy, the expression set to the config is
+  /// the expression that returns a value used for computing the vector.
+  ///
+  /// To update the lazy index, use a CBLIndexUpdater object, which can be
+  /// obtained from a CBLQueryIndex object. To get a CBLQueryIndex object, call
+  /// CBLCollection_GetIndex.
+  @ffi.Bool()
+  external bool isLazy;
+
+  /// Vector encoding type. The default value is 8-bits Scalar Quantizer.
+  external ffi.Pointer<CBLVectorEncoding> encoding;
+
+  /// Distance Metric type. The default value is euclidean distance.
+  @CBLDistanceMetric()
+  external int metric;
+
+  /// The minimum number of vectors for training the index. The default value is
+  /// zero, meaning that minTrainingSize will be determined based on the number
+  /// of centroids, encoding types, and the encoding parameters.
+  ///
+  /// @note The training will occur at or before the APPROX_VECTOR_DISANCE query
+  /// is executed, provided there is enough data at that time, and consequently,
+  /// if training is triggered during a query, the query may take longer to
+  /// return results.
+  ///
+  /// @note If a query is executed against the index before it is trained, a
+  /// full scan of the vectors will be performed. If there are insufficient
+  /// vectors in the database for training, a warning message will be logged,
+  /// indicating the required number of vectors.
+  @ffi.UnsignedInt()
+  external int minTrainingSize;
+
+  /// The maximum number of vectors used for training the index. The default
+  /// value is zero, meaning that the maxTrainingSize will be determined based
+  /// on the number of centroids, encoding types, and encoding parameters.
+  @ffi.UnsignedInt()
+  external int maxTrainingSize;
+
+  /// The number of centroids that will be scanned during a query. The default
+  /// value is zero, meaning that the numProbes will be determined based on the
+  /// number of centroids.
+  @ffi.UnsignedInt()
+  external int numProbes;
+}
+
+final class _FLArray extends ffi.Opaque {}
+
 typedef FLMutableArray = ffi.Pointer<_FLArray>;
 typedef NativeCBLDatabase_ScopeNames = FLMutableArray Function(
     ffi.Pointer<CBLDatabase> db, ffi.Pointer<CBLError> outError);
@@ -7567,6 +8048,14 @@ typedef DartCBLCollection_Scope = ffi.Pointer<CBLScope> Function(
 typedef NativeCBLCollection_Name = FLString Function(
     ffi.Pointer<CBLCollection> collection);
 typedef DartCBLCollection_Name = FLString Function(
+    ffi.Pointer<CBLCollection> collection);
+typedef NativeCBLCollection_FullName = FLString Function(
+    ffi.Pointer<CBLCollection> collection);
+typedef DartCBLCollection_FullName = FLString Function(
+    ffi.Pointer<CBLCollection> collection);
+typedef NativeCBLCollection_Database = ffi.Pointer<CBLDatabase> Function(
+    ffi.Pointer<CBLCollection> collection);
+typedef DartCBLCollection_Database = ffi.Pointer<CBLDatabase> Function(
     ffi.Pointer<CBLCollection> collection);
 typedef NativeCBLCollection_Count = ffi.Uint64 Function(
     ffi.Pointer<CBLCollection> collection);
@@ -7690,6 +8179,16 @@ typedef DartCBLCollection_CreateFullTextIndex = bool Function(
     FLString name,
     CBLFullTextIndexConfiguration config,
     ffi.Pointer<CBLError> outError);
+typedef NativeCBLCollection_CreateVectorIndex = ffi.Bool Function(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLVectorIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLCollection_CreateVectorIndex = bool Function(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLVectorIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_DeleteIndex = ffi.Bool Function(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -7702,6 +8201,14 @@ typedef NativeCBLCollection_GetIndexNames = FLMutableArray Function(
     ffi.Pointer<CBLCollection> collection, ffi.Pointer<CBLError> outError);
 typedef DartCBLCollection_GetIndexNames = FLMutableArray Function(
     ffi.Pointer<CBLCollection> collection, ffi.Pointer<CBLError> outError);
+typedef NativeCBLCollection_GetIndex = ffi.Pointer<CBLQueryIndex> Function(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLCollection_GetIndex = ffi.Pointer<CBLQueryIndex> Function(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    ffi.Pointer<CBLError> outError);
 
 /// \name Change Listeners @{ A collection change listener lets you detect
 /// changes made to all documents in a collection. (If you want to observe
@@ -7784,6 +8291,10 @@ typedef DartCBLCollection_AddDocumentChangeListener
         FLString docID,
         CBLCollectionDocumentChangeListener listener,
         ffi.Pointer<ffi.Void> context);
+typedef NativeCBL_EnableVectorSearch = ffi.Bool Function(
+    FLString path, ffi.Pointer<CBLError> outError);
+typedef DartCBL_EnableVectorSearch = bool Function(
+    FLString path, ffi.Pointer<CBLError> outError);
 
 /// Database encryption algorithms (available only in the Enterprise Edition).
 typedef CBLEncryptionAlgorithm = ffi.Uint32;
@@ -7811,6 +8322,18 @@ final class CBLDatabaseConfiguration extends ffi.Struct {
 
   /// < The database's encryption key (if any)
   external CBLEncryptionKey encryptionKey;
+
+  /// As Couchbase Lite normally configures its databases, There is a very small
+  /// (though non-zero) chance that a power failure at just the wrong time could
+  /// cause the most recently committed transaction's changes to be lost. This
+  /// would cause the database to appear as it did immediately before that
+  /// transaction.
+  ///
+  /// Setting this mode true ensures that an operating system crash or power
+  /// failure will not cause the loss of any data. FULL synchronous is very safe
+  /// but it is also dramatically slower.
+  @ffi.Bool()
+  external bool fullSync;
 }
 
 typedef NativeCBLDatabaseConfiguration_Default = CBLDatabaseConfiguration
@@ -7901,6 +8424,35 @@ typedef NativeCBLDatabase_Config = CBLDatabaseConfiguration Function(
     ffi.Pointer<CBLDatabase> arg0);
 typedef DartCBLDatabase_Config = CBLDatabaseConfiguration Function(
     ffi.Pointer<CBLDatabase> arg0);
+typedef NativeCBLDatabase_CreateValueIndex = ffi.Bool Function(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    CBLValueIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLDatabase_CreateValueIndex = bool Function(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    CBLValueIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLDatabase_CreateFullTextIndex = ffi.Bool Function(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    CBLFullTextIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLDatabase_CreateFullTextIndex = bool Function(
+    ffi.Pointer<CBLDatabase> db,
+    FLString name,
+    CBLFullTextIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLDatabase_DeleteIndex = ffi.Bool Function(
+    ffi.Pointer<CBLDatabase> db, FLString name, ffi.Pointer<CBLError> outError);
+typedef DartCBLDatabase_DeleteIndex = bool Function(
+    ffi.Pointer<CBLDatabase> db, FLString name, ffi.Pointer<CBLError> outError);
+typedef FLArray = ffi.Pointer<_FLArray>;
+typedef NativeCBLDatabase_GetIndexNames = FLArray Function(
+    ffi.Pointer<CBLDatabase> db);
+typedef DartCBLDatabase_GetIndexNames = FLArray Function(
+    ffi.Pointer<CBLDatabase> db);
 typedef CBLDatabaseChangeListenerFunction = ffi.Void Function(
     ffi.Pointer<ffi.Void> context,
     ffi.Pointer<CBLDatabase> db,
@@ -8298,7 +8850,7 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
   external int maxAttempts;
 
   /// Max wait time between retry attempts in seconds. The default value \ref
-  /// kCBLDefaultReplicatorMaxAttemptWaitTime.
+  /// kCBLDefaultReplicatorMaxAttemptsWaitTime.
   @ffi.UnsignedInt()
   external int maxAttemptWaitTime;
 
@@ -8370,10 +8922,10 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
   /// @warning <b>Deprecated :</b> Use documentPropertyDecryptor instead.
   external CBLPropertyDecryptor propertyDecryptor;
 
-  /// < Optional callback to encrypt \ref CBLEncryptable values.
+  /// Optional callback to encrypt \ref CBLEncryptable values.
   external CBLDocumentPropertyEncryptor documentPropertyEncryptor;
 
-  /// < Optional callback to decrypt encrypted \ref CBLEncryptable values.
+  /// Optional callback to decrypt encrypted \ref CBLEncryptable values.
   external CBLDocumentPropertyDecryptor documentPropertyDecryptor;
 
   /// The collections to replicate with the target's endpoint (Required if the
@@ -8590,6 +9142,10 @@ typedef NativeCBLEncryptable_CreateWithString = ffi.Pointer<CBLEncryptable>
     Function(FLString value);
 typedef DartCBLEncryptable_CreateWithString = ffi.Pointer<CBLEncryptable>
     Function(FLString value);
+
+final class _FLValue extends ffi.Opaque {}
+
+typedef FLValue = ffi.Pointer<_FLValue>;
 typedef NativeCBLEncryptable_CreateWithValue = ffi.Pointer<CBLEncryptable>
     Function(FLValue value);
 typedef DartCBLEncryptable_CreateWithValue = ffi.Pointer<CBLEncryptable>
@@ -8683,7 +9239,7 @@ final class CBLLogFileConfiguration extends ffi.Struct {
 
   /// Whether or not to log in plaintext (as opposed to binary.) Plaintext
   /// logging is slower and bigger. The default is \ref
-  /// kCBLDefaultLogFileUsePlainText.
+  /// kCBLDefaultLogFileUsePlaintext.
   @ffi.Bool()
   external bool usePlaintext;
 }
@@ -8695,8 +9251,183 @@ typedef NativeCBLLog_SetFileConfig = ffi.Bool Function(
     CBLLogFileConfiguration arg0, ffi.Pointer<CBLError> outError);
 typedef DartCBLLog_SetFileConfig = bool Function(
     CBLLogFileConfiguration arg0, ffi.Pointer<CBLError> outError);
+
+/// Predictive Model
+final class CBLPredictiveModel extends ffi.Struct {
+  /// A pointer to any external data needed by the `prediction` callback, which
+  /// will receive this as its first parameter.
+  external ffi.Pointer<ffi.Void> context;
+
+  /// Prediction callback, called from within a query (or document indexing) to
+  /// run the prediction. @param context The value of the CBLPredictiveModel's
+  /// `context` field. @param input The input dictionary from the query. @return
+  /// The output of the prediction function as an FLMutableDict, or NULL if
+  /// there is no output. @note The output FLMutableDict will be automatically
+  /// released after the prediction callback is called. @warning This function
+  /// must be "pure": given the same input parameters it must always produce the
+  /// same output (otherwise indexes or queries may be messed up). It MUST NOT
+  /// alter the database or any documents, nor run a query: either of those are
+  /// very likely to cause a crash.
+  external ffi.Pointer<
+      ffi.NativeFunction<
+          FLMutableDict Function(
+              ffi.Pointer<ffi.Void> context, FLDict input)>> prediction;
+
+  /// Unregistered callback, called if the model is unregistered, so it can
+  /// release resources.
+  external ffi.Pointer<
+          ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void> context)>>
+      unregistered;
+}
+
+typedef NativeCBL_RegisterPredictiveModel = ffi.Void Function(
+    FLString name, CBLPredictiveModel model);
+typedef DartCBL_RegisterPredictiveModel = void Function(
+    FLString name, CBLPredictiveModel model);
+typedef NativeCBL_UnregisterPredictiveModel = ffi.Void Function(FLString name);
+typedef DartCBL_UnregisterPredictiveModel = void Function(FLString name);
+typedef NativeCBLDatabase_CreateQuery = ffi.Pointer<CBLQuery> Function(
+    ffi.Pointer<CBLDatabase> db,
+    CBLQueryLanguage language,
+    FLString queryString,
+    ffi.Pointer<ffi.Int> outErrorPos,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLDatabase_CreateQuery = ffi.Pointer<CBLQuery> Function(
+    ffi.Pointer<CBLDatabase> db,
+    int language,
+    FLString queryString,
+    ffi.Pointer<ffi.Int> outErrorPos,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLQuery_SetParameters = ffi.Void Function(
+    ffi.Pointer<CBLQuery> query, FLDict parameters);
+typedef DartCBLQuery_SetParameters = void Function(
+    ffi.Pointer<CBLQuery> query, FLDict parameters);
+typedef NativeCBLQuery_Parameters = FLDict Function(
+    ffi.Pointer<CBLQuery> query);
+typedef DartCBLQuery_Parameters = FLDict Function(ffi.Pointer<CBLQuery> query);
+typedef NativeCBLQuery_Execute = ffi.Pointer<CBLResultSet> Function(
+    ffi.Pointer<CBLQuery> arg0, ffi.Pointer<CBLError> outError);
+typedef DartCBLQuery_Execute = ffi.Pointer<CBLResultSet> Function(
+    ffi.Pointer<CBLQuery> arg0, ffi.Pointer<CBLError> outError);
+typedef NativeCBLQuery_Explain = FLSliceResult Function(
+    ffi.Pointer<CBLQuery> arg0);
+typedef DartCBLQuery_Explain = FLSliceResult Function(
+    ffi.Pointer<CBLQuery> arg0);
+typedef NativeCBLQuery_ColumnCount = ffi.UnsignedInt Function(
+    ffi.Pointer<CBLQuery> arg0);
+typedef DartCBLQuery_ColumnCount = int Function(ffi.Pointer<CBLQuery> arg0);
+typedef NativeCBLQuery_ColumnName = FLSlice Function(
+    ffi.Pointer<CBLQuery> arg0, ffi.UnsignedInt columnIndex);
+typedef DartCBLQuery_ColumnName = FLSlice Function(
+    ffi.Pointer<CBLQuery> arg0, int columnIndex);
+typedef NativeCBLResultSet_Next = ffi.Bool Function(
+    ffi.Pointer<CBLResultSet> arg0);
+typedef DartCBLResultSet_Next = bool Function(ffi.Pointer<CBLResultSet> arg0);
+typedef NativeCBLResultSet_ValueAtIndex = FLValue Function(
+    ffi.Pointer<CBLResultSet> arg0, ffi.UnsignedInt index);
+typedef DartCBLResultSet_ValueAtIndex = FLValue Function(
+    ffi.Pointer<CBLResultSet> arg0, int index);
+typedef NativeCBLResultSet_ValueForKey = FLValue Function(
+    ffi.Pointer<CBLResultSet> arg0, FLString key);
+typedef DartCBLResultSet_ValueForKey = FLValue Function(
+    ffi.Pointer<CBLResultSet> arg0, FLString key);
+typedef NativeCBLResultSet_ResultArray = FLArray Function(
+    ffi.Pointer<CBLResultSet> arg0);
+typedef DartCBLResultSet_ResultArray = FLArray Function(
+    ffi.Pointer<CBLResultSet> arg0);
+typedef NativeCBLResultSet_ResultDict = FLDict Function(
+    ffi.Pointer<CBLResultSet> arg0);
+typedef DartCBLResultSet_ResultDict = FLDict Function(
+    ffi.Pointer<CBLResultSet> arg0);
+typedef NativeCBLResultSet_GetQuery = ffi.Pointer<CBLQuery> Function(
+    ffi.Pointer<CBLResultSet> rs);
+typedef DartCBLResultSet_GetQuery = ffi.Pointer<CBLQuery> Function(
+    ffi.Pointer<CBLResultSet> rs);
+typedef CBLQueryChangeListenerFunction = ffi.Void Function(
+    ffi.Pointer<ffi.Void> context,
+    ffi.Pointer<CBLQuery> query,
+    ffi.Pointer<CBLListenerToken> token);
+typedef DartCBLQueryChangeListenerFunction = void Function(
+    ffi.Pointer<ffi.Void> context,
+    ffi.Pointer<CBLQuery> query,
+    ffi.Pointer<CBLListenerToken> token);
+
+/// A callback to be invoked after the query's results have changed. The actual
+/// result set can be obtained by calling \ref CBLQuery_CopyCurrentResults,
+/// either during the callback or at any time thereafter. @warning By default,
+/// this listener may be called on arbitrary threads. If your code isn't
+/// prepared for that, you may want to use \ref CBLDatabase_BufferNotifications
+/// so that listeners will be called in a safe context. @param context The same
+/// `context` value that you passed when adding the listener. @param query The
+/// query that triggered the listener. @param token The token for obtaining the
+/// query results by calling \ref CBLQuery_CopyCurrentResults.
+typedef CBLQueryChangeListener
+    = ffi.Pointer<ffi.NativeFunction<CBLQueryChangeListenerFunction>>;
+typedef NativeCBLQuery_AddChangeListener
+    = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLQuery> query,
+        CBLQueryChangeListener listener, ffi.Pointer<ffi.Void> context);
+typedef DartCBLQuery_AddChangeListener = ffi.Pointer<CBLListenerToken> Function(
+    ffi.Pointer<CBLQuery> query,
+    CBLQueryChangeListener listener,
+    ffi.Pointer<ffi.Void> context);
+typedef NativeCBLQuery_CopyCurrentResults = ffi.Pointer<CBLResultSet> Function(
+    ffi.Pointer<CBLQuery> query,
+    ffi.Pointer<CBLListenerToken> listener,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLQuery_CopyCurrentResults = ffi.Pointer<CBLResultSet> Function(
+    ffi.Pointer<CBLQuery> query,
+    ffi.Pointer<CBLListenerToken> listener,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLQueryIndex_Name = FLString Function(
+    ffi.Pointer<CBLQueryIndex> index);
+typedef DartCBLQueryIndex_Name = FLString Function(
+    ffi.Pointer<CBLQueryIndex> index);
+typedef NativeCBLQueryIndex_Collection = ffi.Pointer<CBLCollection> Function(
+    ffi.Pointer<CBLQueryIndex> index);
+typedef DartCBLQueryIndex_Collection = ffi.Pointer<CBLCollection> Function(
+    ffi.Pointer<CBLQueryIndex> index);
+typedef NativeCBLQueryIndex_BeginUpdate = ffi.Pointer<CBLIndexUpdater> Function(
+    ffi.Pointer<CBLQueryIndex> index,
+    ffi.Size limit,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLQueryIndex_BeginUpdate = ffi.Pointer<CBLIndexUpdater> Function(
+    ffi.Pointer<CBLQueryIndex> index,
+    int limit,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLIndexUpdater_Count = ffi.Size Function(
+    ffi.Pointer<CBLIndexUpdater> updater);
+typedef DartCBLIndexUpdater_Count = int Function(
+    ffi.Pointer<CBLIndexUpdater> updater);
+typedef NativeCBLIndexUpdater_Value = FLValue Function(
+    ffi.Pointer<CBLIndexUpdater> updater, ffi.Size index);
+typedef DartCBLIndexUpdater_Value = FLValue Function(
+    ffi.Pointer<CBLIndexUpdater> updater, int index);
+typedef NativeCBLIndexUpdater_SetVector = ffi.Bool Function(
+    ffi.Pointer<CBLIndexUpdater> updater,
+    ffi.Size index,
+    ffi.Pointer<ffi.Float> vector,
+    ffi.Size dimension,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLIndexUpdater_SetVector = bool Function(
+    ffi.Pointer<CBLIndexUpdater> updater,
+    int index,
+    ffi.Pointer<ffi.Float> vector,
+    int dimension,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLIndexUpdater_SkipVector = ffi.Void Function(
+    ffi.Pointer<CBLIndexUpdater> updater, ffi.Size index);
+typedef DartCBLIndexUpdater_SkipVector = void Function(
+    ffi.Pointer<CBLIndexUpdater> updater, int index);
+typedef NativeCBLIndexUpdater_Finish = ffi.Bool Function(
+    ffi.Pointer<CBLIndexUpdater> updater, ffi.Pointer<CBLError> outError);
+typedef DartCBLIndexUpdater_Finish = bool Function(
+    ffi.Pointer<CBLIndexUpdater> updater, ffi.Pointer<CBLError> outError);
 typedef NativeCBLScope_Name = FLString Function(ffi.Pointer<CBLScope> scope);
 typedef DartCBLScope_Name = FLString Function(ffi.Pointer<CBLScope> scope);
+typedef NativeCBLScope_Database = ffi.Pointer<CBLDatabase> Function(
+    ffi.Pointer<CBLScope> scope);
+typedef DartCBLScope_Database = ffi.Pointer<CBLDatabase> Function(
+    ffi.Pointer<CBLScope> scope);
 typedef NativeCBLScope_CollectionNames = FLMutableArray Function(
     ffi.Pointer<CBLScope> scope, ffi.Pointer<CBLError> outError);
 typedef DartCBLScope_CollectionNames = FLMutableArray Function(
@@ -9538,6 +10269,9 @@ typedef NativeFLSharedKeys_RevertToCount = ffi.Void Function(
     FLSharedKeys arg0, ffi.UnsignedInt oldCount);
 typedef DartFLSharedKeys_RevertToCount = void Function(
     FLSharedKeys arg0, int oldCount);
+typedef NativeFLSharedKeys_DisableCaching = ffi.Void Function(
+    FLSharedKeys arg0);
+typedef DartFLSharedKeys_DisableCaching = void Function(FLSharedKeys arg0);
 typedef NativeFLSharedKeys_Retain = FLSharedKeys Function(FLSharedKeys arg0);
 typedef DartFLSharedKeys_Retain = FLSharedKeys Function(FLSharedKeys arg0);
 typedef NativeFLSharedKeys_Release = ffi.Void Function(FLSharedKeys arg0);
@@ -9581,9 +10315,9 @@ typedef NativeFLEncoder_GetNextWritePos = ffi.Size Function(FLEncoder arg0);
 typedef DartFLEncoder_GetNextWritePos = int Function(FLEncoder arg0);
 typedef NativeFLEncoder_LastValueWritten = ffi.IntPtr Function(FLEncoder arg0);
 typedef DartFLEncoder_LastValueWritten = int Function(FLEncoder arg0);
-typedef NativeFLEncoder_WriteValueAgain = ffi.Void Function(
+typedef NativeFLEncoder_WriteValueAgain = ffi.Bool Function(
     FLEncoder arg0, ffi.IntPtr preWrittenValue);
-typedef DartFLEncoder_WriteValueAgain = void Function(
+typedef DartFLEncoder_WriteValueAgain = bool Function(
     FLEncoder arg0, int preWrittenValue);
 typedef NativeFLEncoder_Snip = FLSliceResult Function(FLEncoder arg0);
 typedef DartFLEncoder_Snip = FLSliceResult Function(FLEncoder arg0);
@@ -9714,6 +10448,20 @@ const int kCBLJSONLanguage = 0;
 
 const int kCBLN1QLLanguage = 1;
 
+const int kCBLSQ4 = 4;
+
+const int kCBLSQ6 = 6;
+
+const int kCBLSQ8 = 8;
+
+const int kCBLDistanceMetricEuclideanSquared = 1;
+
+const int kCBLDistanceMetricCosine = 2;
+
+const int kCBLDistanceMetricEuclidean = 3;
+
+const int kCBLDistanceMetricDot = 4;
+
 const int kCBLEncryptionNone = 0;
 
 const int kCBLEncryptionAES256 = 1;
@@ -9774,18 +10522,22 @@ const int kCBLLogError = 4;
 
 const int kCBLLogNone = 5;
 
-const String CBLITE_VERSION = '3.1.6';
+const String CBLITE_VERSION = '3.2.0';
 
-const int CBLITE_VERSION_NUMBER = 3001006;
+const int CBLITE_VERSION_NUMBER = 3002000;
 
-const int CBLITE_BUILD_NUMBER = 6;
+const int CBLITE_BUILD_NUMBER = 71;
 
-const String CBLITE_SOURCE_ID = '093eaca';
+const String CBLITE_SOURCE_ID = '42c42c4+1b8799a';
 
-const String CBLITE_BUILD_TIMESTAMP = '2024-02-28T23:03:08Z';
+const String CBLITE_BUILD_TIMESTAMP = '2024-08-29T06:45:08Z';
 
 const String HOTLEVEL = 'Ofast';
 
 const String COLDLEVEL = 'Oz';
 
 const int FLTimestampNone = -9223372036854775808;
+
+const int kFLTrustedDontParse = 4294967295;
+
+const int kFLNoWrittenValue = -9223372036854775808;

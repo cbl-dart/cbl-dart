@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'base.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite;
+import 'cblitedart.dart' as cblitedart;
 import 'data.dart';
 import 'fleece.dart';
 import 'global.dart';
@@ -50,10 +51,15 @@ extension CBLConcurrencyControlExt on CBLConcurrencyControl {
 }
 
 final class CBLDatabaseConfiguration {
-  CBLDatabaseConfiguration({required this.directory, this.encryptionKey});
+  CBLDatabaseConfiguration({
+    required this.directory,
+    this.encryptionKey,
+    required this.fullSync,
+  });
 
   final String directory;
   final CBLEncryptionKey? encryptionKey;
+  final bool fullSync;
 }
 
 enum CBLMaintenanceType {
@@ -96,7 +102,7 @@ final class DatabaseBindings extends Bindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) =>
-      withGlobalArena(() => cbl.CBL_CopyDatabase(
+      withGlobalArena(() => cblDart.CBLDart_CBL_CopyDatabase(
             from.toFLString(),
             name.toFLString(),
             _createConfig(config),
@@ -117,9 +123,10 @@ final class DatabaseBindings extends Bindings {
           ));
 
   CBLDatabaseConfiguration defaultConfiguration() {
-    final config = cbl.CBLDatabaseConfiguration_Default();
+    final config = cblDart.CBLDart_CBLDatabaseConfiguration_Default();
     return CBLDatabaseConfiguration(
       directory: config.directory.toDartString()!,
+      fullSync: config.fullSync,
     );
   }
 
@@ -237,19 +244,24 @@ final class DatabaseBindings extends Bindings {
     );
   }
 
-  Pointer<cblite.CBLDatabaseConfiguration> _createConfig(
+  Pointer<cblitedart.CBLDart_CBLDatabaseConfiguration> _createConfig(
     CBLDatabaseConfiguration? config,
   ) {
     if (config == null) {
       return nullptr;
     }
 
-    final result = globalArena<cblite.CBLDatabaseConfiguration>();
+    final result = globalArena<cblitedart.CBLDart_CBLDatabaseConfiguration>();
 
     result.ref.directory = config.directory.toFLString();
 
     if (enterpriseEdition) {
-      _writeEncryptionKey(result.ref.encryptionKey, from: config.encryptionKey);
+      final key = globalArena<cblitedart.CBLDart_CBLEncryptionKey>();
+      _writeEncryptionKey(
+        key.cast<cblite.CBLEncryptionKey>().ref,
+        from: config.encryptionKey,
+      );
+      result.ref.encryptionKey = key.ref;
     }
 
     return result;

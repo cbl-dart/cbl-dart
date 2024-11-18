@@ -85,6 +85,15 @@ void main() {
       expect(db.path, startsWith(defaultConfig.directory));
     });
 
+    apiTest('open with fullSync', () async {
+      final config = DatabaseConfiguration(
+        directory: databaseDirectoryForTest(),
+        fullSync: true,
+      );
+      final db = await openTestDatabase(config: config);
+      await (await db.defaultCollection).saveDocument(MutableDocument());
+    });
+
     group('Database', () {
       apiTest('config', () async {
         final config =

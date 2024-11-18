@@ -2,7 +2,7 @@
 //  CBLDefaults.h
 //  CouchbaseLite
 //
-//  Copyright (c) 2023-present Couchbase, Inc All rights reserved.
+//  Copyright (c) 2024-present Couchbase, Inc All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #pragma once
 #include "CBL_Compat.h"
 #include "CBLReplicator.h"
+#include "CBLQueryIndexTypes.h"
 
 CBL_CAPI_BEGIN
 
@@ -38,6 +39,10 @@ CBL_CAPI_BEGIN
 */
 
 /** [false] Plaintext is not used, and instead binary encoding is used in log files */
+CBL_PUBLIC extern const bool kCBLDefaultLogFileUsePlaintext;
+
+/** [false] Plaintext is not used, and instead binary encoding is used in log files
+    @warning <b>Deprecated :</b> Use kCBLDefaultLogFileUsePlaintext instead. */
 CBL_PUBLIC extern const bool kCBLDefaultLogFileUsePlainText;
 
 /** [524288] 512 KiB for the size of a log file */
@@ -45,7 +50,6 @@ CBL_PUBLIC extern const size_t kCBLDefaultLogFileMaxSize;
 
 /** [1] 1 rotated file present (2 total, including the currently active log file) */
 CBL_PUBLIC extern const uint32_t kCBLDefaultLogFileMaxRotateCount;
-
 
 /** @} */
 
@@ -55,7 +59,6 @@ CBL_PUBLIC extern const uint32_t kCBLDefaultLogFileMaxRotateCount;
 
 /** [false] Accents and ligatures are not ignored when indexing via full text search */
 CBL_PUBLIC extern const bool kCBLDefaultFullTextIndexIgnoreAccents;
-
 
 /** @} */
 
@@ -79,6 +82,10 @@ CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptsSingleShot;
 CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptsContinuous;
 
 /** [300] Max wait time between retry attempts in seconds */
+CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptsWaitTime;
+
+/** [300] Max wait time between retry attempts in seconds 
+    @warning <b>Deprecated :</b> Use kCBLDefaultReplicatorMaxAttemptsWaitTime instead. */
 CBL_PUBLIC extern const unsigned kCBLDefaultReplicatorMaxAttemptWaitTime;
 
 /** [false] Purge documents when a user loses access */
@@ -88,6 +95,31 @@ CBL_PUBLIC extern const bool kCBLDefaultReplicatorDisableAutoPurge;
 CBL_PUBLIC extern const bool kCBLDefaultReplicatorAcceptParentCookies;
 
 /** @} */
+
+#ifdef COUCHBASE_ENTERPRISE
+
+/** \name CBLVectorIndexConfiguration
+    @{
+*/
+
+/** [false] Vectors are not lazily indexed, by default */
+CBL_PUBLIC extern const bool kCBLDefaultVectorIndexLazy;
+
+/** [kCBLDistanceMetricEuclideanSquared] By default, vectors are compared using Squared Euclidean metric. */
+CBL_PUBLIC extern const CBLDistanceMetric kCBLDefaultVectorIndexDistanceMetric;
+
+/** [0] By default, the value will be determined based on the number of centroids, encoding types, and the encoding parameters. */
+CBL_PUBLIC extern const unsigned kCBLDefaultVectorIndexMinTrainingSize;
+
+/** [0] By default, the value will be determined based on the number of centroids, encoding types, and the encoding parameters */
+CBL_PUBLIC extern const unsigned kCBLDefaultVectorIndexMaxTrainingSize;
+
+/** [0] By default, the value will be determined based on the number of centroids. */
+CBL_PUBLIC extern const unsigned kCBLDefaultVectorIndexNumProbes;
+
+/** @} */
+
+#endif
 
 /** @} */
 

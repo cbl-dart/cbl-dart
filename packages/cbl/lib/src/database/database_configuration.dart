@@ -136,8 +136,11 @@ final class EncryptionKeyImpl implements EncryptionKey {
 /// {@category Database}
 final class DatabaseConfiguration {
   /// Creates a configuration for opening or copying a [Database].
-  DatabaseConfiguration({String? directory, this.encryptionKey})
-      : directory = directory ?? _defaultDirectory();
+  DatabaseConfiguration({
+    String? directory,
+    this.encryptionKey,
+    this.fullSync = false,
+  }) : directory = directory ?? _defaultDirectory();
 
   /// Creates a configuration from another [config], by copying its properties.
   ///
@@ -154,16 +157,31 @@ final class DatabaseConfiguration {
   /// {@macro cbl.EncryptionKey.enterpriseFeature}
   EncryptionKey? encryptionKey;
 
+  /// Whether to enable fully synchronous writes.
+  ///
+  /// As Couchbase Lite normally configures its databases, there is a very small
+  /// (though non-zero) chance that a power failure at just the wrong time could
+  /// cause the most recently committed transaction’s changes to be lost. This
+  /// would cause the database to appear as it did immediately before that
+  /// transaction.
+  ///
+  /// Setting this mode true ensures that an operating system crash or power
+  /// failure will not cause the loss of any data. FULL synchronous is very safe
+  /// but it is also dramatically slower.
+  bool fullSync;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is DatabaseConfiguration &&
           runtimeType == other.runtimeType &&
           directory == other.directory &&
-          encryptionKey == other.encryptionKey;
+          encryptionKey == other.encryptionKey &&
+          fullSync == other.fullSync;
 
   @override
-  int get hashCode => directory.hashCode ^ encryptionKey.hashCode;
+  int get hashCode =>
+      directory.hashCode ^ encryptionKey.hashCode ^ fullSync.hashCode;
 
   @override
   String toString() => [
@@ -171,6 +189,7 @@ final class DatabaseConfiguration {
         [
           'directory: $directory',
           if (encryptionKey != null) 'ENCRYPTION-KEY',
+          if (fullSync) 'FULL-SYNC',
         ].join(', '),
         ')',
       ].join();
