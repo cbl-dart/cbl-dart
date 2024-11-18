@@ -457,21 +457,21 @@ static CBLEncryptionKey CBLEncryptionKey_FromCBLDart(
 
 static CBLDatabaseConfiguration CBLDatabaseConfiguration_FromCBLDart(
     CBLDart_CBLDatabaseConfiguration config) {
-  return {
-      .directory = config.directory,
+  auto result = CBLDatabaseConfiguration{};
+  result.directory = config.directory;
 #ifdef COUCHBASE_ENTERPRISE
-      .encryptionKey = CBLEncryptionKey_FromCBLDart(config.encryptionKey),
+  result.encryptionKey = CBLEncryptionKey_FromCBLDart(config.encryptionKey);
 #endif
-      .fullSync = config.fullSync,
-  };
+  result.fullSync = config.fullSync;
+  return result;
 }
 
 CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
   auto config = CBLDatabaseConfiguration_Default();
-  return {
-      .directory = config.directory,
-      .fullSync = config.fullSync,
-  };
+  auto result = CBLDart_CBLDatabaseConfiguration{};
+  result.directory = config.directory;
+  result.fullSync = config.fullSync;
+  return result;
 }
 
 bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
