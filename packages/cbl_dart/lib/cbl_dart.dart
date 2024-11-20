@@ -3,13 +3,13 @@
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
+import 'package:cbl/src/install.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/tracing.dart';
 
 import 'src/acquire_libraries.dart';
-import 'src/package.dart';
 
-export 'src/package.dart' show Edition;
+export 'package:cbl/src/install.dart' show Edition;
 
 // ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as

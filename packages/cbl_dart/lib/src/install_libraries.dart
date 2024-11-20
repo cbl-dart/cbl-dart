@@ -1,17 +1,35 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
+// ignore: implementation_imports
+import 'package:cbl/src/install.dart';
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
-import 'package.dart';
-import 'tools.dart';
-import 'utils.dart';
+import 'logging.dart';
+
+extension PackageMerging on Package {
+  static String signature(Iterable<Package> packages) {
+    final signatures =
+        packages.map((package) => package.signatureContent).toList()..sort();
+
+    return md5
+        .convert(utf8.encode(signatures.join()))
+        .bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join();
+  }
+
+  String get signatureContent =>
+      [library.name, release, edition.name, target.id].join();
+}
 
 Directory mergedNativeLibrariesInstallDir(
   Iterable<Package> packages,
   String directory,
 ) {
-  final signature = Package.mergedSignature(packages);
+  final signature = PackageMerging.signature(packages);
   return Directory(p.join(directory, signature));
 }
 
@@ -61,19 +79,10 @@ Future<void> installNativeLibrary(
 }) async {
   logger.fine('Installing native library ${package.libraryName}');
 
-  final packageRootDir =
-      p.join(tmpDir, '${package.library.name}-${package.version}');
-  final targetLibDir = p.join(packageRootDir, package.librariesDir);
-
-  final archiveData = await downloadUrl(package.archiveUrl);
-  await unpackArchive(
-    archiveData,
-    format: package.archiveFormat,
-    outputDir: tmpDir,
-  );
+  await package.acquire();
 
   // Copy contents of lib dir from archive to install dir.
-  await copyDirectoryContents(targetLibDir, installDir);
+  await copyDirectoryContents(package.libDir, installDir);
 }
 
 LibrariesConfiguration mergedNativeLibrariesConfigurations(

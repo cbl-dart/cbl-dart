@@ -12,6 +12,9 @@ environment:
   sdk: ^3.0.0
   flutter: '>=3.0.0'
 
+executables:
+  install:
+
 dependencies:
   cbl: ^3.2.1
   cbl_flutter_platform_interface: ^3.0.2
