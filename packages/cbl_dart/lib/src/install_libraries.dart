@@ -45,44 +45,17 @@ Future<void> installMergedNativeLibraries(
 }) async {
   logger.fine('Installing native libraries into $directory');
 
-  final tmpDir = await Directory.systemTemp.createTemp();
+  final installDir = mergedNativeLibrariesInstallDir(packages, directory);
+  await installDir.create(recursive: true);
 
-  try {
-    final tmpInstallDir = Directory.fromUri(tmpDir.uri.resolve('lib'));
-    await tmpInstallDir.create();
-
-    for (final package in packages) {
-      await installNativeLibrary(
-        package,
-        installDir: tmpInstallDir.path,
-        tmpDir: tmpDir.path,
-      );
-    }
-
-    final installDir = mergedNativeLibrariesInstallDir(packages, directory);
-    await installDir.create(recursive: true);
-
+  for (final package in packages) {
+    await package.acquire();
     await copyDirectoryContents(
-      tmpInstallDir.path,
+      package.libDir,
       installDir.path,
       filter: (entity) => !entity.path.contains('cmake'),
     );
-  } finally {
-    await tmpDir.delete(recursive: true);
   }
-}
-
-Future<void> installNativeLibrary(
-  Package package, {
-  required String installDir,
-  required String tmpDir,
-}) async {
-  logger.fine('Installing native library ${package.libraryName}');
-
-  await package.acquire();
-
-  // Copy contents of lib dir from archive to install dir.
-  await copyDirectoryContents(package.libDir, installDir);
 }
 
 LibrariesConfiguration mergedNativeLibrariesConfigurations(

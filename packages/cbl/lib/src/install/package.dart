@@ -168,23 +168,26 @@ final class Package {
   String get packageDir => p.join(archiveDir, '${library.name}-$version');
 
   Future<void> acquire() async {
-    if (Directory(archiveDir).existsSync()) {
+    final archiveDirectory = Directory(archiveDir);
+    if (archiveDirectory.existsSync()) {
       return;
     }
 
-    final tmpDir = await Directory.systemTemp.createTemp();
+    final tempDirectory = await Directory.systemTemp.createTemp();
     try {
       final archiveData = await downloadUrl(_archiveUrl);
       await unpackArchive(
         archiveData,
         format: _archiveFormat,
-        outputDir: tmpDir.path,
+        outputDir: tempDirectory.path,
       );
-      Directory(archiveDir).createSync(recursive: true);
-      await tmpDir.rename(archiveDir);
-    } catch (e) {
-      await tmpDir.delete(recursive: true);
-      rethrow;
+      try {
+        await moveDirectory(tempDirectory, archiveDirectory);
+      } on PathExistsException {
+        // Another process has already downloaded the archive.
+      }
+    } finally {
+      await tempDirectory.delete(recursive: true);
     }
   }
 }

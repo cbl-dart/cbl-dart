@@ -163,3 +163,8 @@ Future<void> copyDirectoryContents(
     }
   }
 }
+
+Future<void> moveDirectory(Directory from, Directory to) async {
+  await to.parent.create(recursive: true);
+  await from.rename(to.path);
+}
