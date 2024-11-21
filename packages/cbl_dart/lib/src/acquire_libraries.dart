@@ -108,12 +108,12 @@ Future<LibrariesConfiguration> acquireLibraries({
   mergedNativeLibrariesDir ??= sharedMergedNativesLibrariesDir;
   await Directory(mergedNativeLibrariesDir).create(recursive: true);
 
-  final packages = Library.values.map((library) => Package(
-        library: library,
-        release: latestReleases[library]!,
-        edition: edition,
-        target: Target.host,
-      ));
+  final loader = RemotePackageLoader();
+  final packageConfigs = DatabasePackageConfig.all(
+    releases: latestReleases,
+    edition: edition,
+  ).where((config) => config.os == OS.current);
+  final packages = await Future.wait(packageConfigs.map(loader.load));
 
   if (!areMergedNativeLibrariesInstalled(
     packages,

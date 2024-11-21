@@ -18,22 +18,12 @@ JsonMap createTemplateContext({
       'capitalize': capitalize,
     };
 
-extension on LibraryVersionInfo {
-  JsonMap templateContext() => {
-        'version': version,
-        'release': release,
-      };
-}
-
 extension on PrebuiltPackageConfiguration {
   JsonMap templateContext() => {
         'name': name,
-        'version': version,
         'edition': edition.name,
         'enterpriseEdition': edition == Edition.enterprise,
         'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',
-        'couchbaseLiteC': couchbaseLiteC.templateContext(),
-        'couchbaseLiteDart': couchbaseLiteDart.templateContext(),
       };
 }
 
