@@ -187,7 +187,9 @@ final class Package {
         // Another process has already downloaded the archive.
       }
     } finally {
-      await tempDirectory.delete(recursive: true);
+      if (tempDirectory.existsSync()) {
+        await tempDirectory.delete(recursive: true);
+      }
     }
   }
 }
