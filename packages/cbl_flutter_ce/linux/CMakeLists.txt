@@ -19,7 +19,8 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
 execute_process(
-  COMMAND "${PROJECT_SOURCE_DIR}/../tool/install_libraries.sh" linux-x86_64
+  COMMAND dart run cbl_flutter:install linux-x86_64
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/..
   RESULT_VARIABLE INSTALL_LIBRARIES_RESULT
   OUTPUT_VARIABLE INSTALL_LIBRARIES_OUTPUT
   ERROR_VARIABLE INSTALL_LIBRARIES_ERROR

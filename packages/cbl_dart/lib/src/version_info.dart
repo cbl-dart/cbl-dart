@@ -1,5 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-import 'package.dart';
+// ignore: implementation_imports
+import 'package:cbl/src/install.dart';
 
 const latestReleases = {
   Library.libcblite: '3.2.0',

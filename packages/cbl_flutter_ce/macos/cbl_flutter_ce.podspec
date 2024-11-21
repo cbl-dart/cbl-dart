@@ -1,5 +1,7 @@
 # Install libraries if they have not been installed yet.
-`../tool/install_libraries.sh macos`
+Dir.chdir("#{Dir.pwd}/..") do
+  `dart run cbl_flutter:install macos`
+end
 
 Pod::Spec.new do |s|
   s.name                = 'cbl_flutter_ce'

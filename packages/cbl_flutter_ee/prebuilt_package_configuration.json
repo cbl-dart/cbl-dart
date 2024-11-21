@@ -1,0 +1,13 @@
+{
+  "name": "cbl_flutter_ee",
+  "version": "3.2.1",
+  "edition": "enterprise",
+  "couchbaseLiteC": {
+    "version": "3.2.0",
+    "release": "3.2.0"
+  },
+  "couchbaseLiteDart": {
+    "version": "7.1.0",
+    "release": "7.1.0"
+  }
+}
