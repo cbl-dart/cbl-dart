@@ -50,8 +50,10 @@ void main(List<String> arguments) async {
 
   try {
     for (final package in packages) {
-      switch (package) {
-        case AndroidPackage(config: PackageConfig(:final architectures)):
+      switch (package.config.os) {
+        case OS.android:
+          final AndroidPackage(config: PackageConfig(:architectures)) =
+              package as AndroidPackage;
           for (final architecture in architectures) {
             await copyDirectoryContents(
               package.sharedLibrariesDir(architecture),
@@ -59,29 +61,24 @@ void main(List<String> arguments) async {
               filter: (entity) => !entity.path.contains('cmake'),
             );
           }
-        case StandardPackage(
-            :final baseDir,
-            :final sharedLibrariesDir,
-          ):
-          switch (os) {
-            case OS.ios:
-              // Copy the XCFramework, that is already in the correct structure.
-              await copyDirectoryContents(
-                baseDir,
-                tmpInstallDir.path,
-                // Don't copy LICENSE files.
-                filter: (entity) => entity.path.contains('.xcframework'),
-              );
-            case OS.macos || OS.linux || OS.windows:
-              await copyDirectoryContents(
-                sharedLibrariesDir,
-                tmpInstallDir.path,
-                dereferenceLinks: os == OS.macos,
-                filter: (entity) => !entity.path.contains('cmake'),
-              );
-            case OS.android:
-              throw StateError('Android is handled separately');
-          }
+        case OS.ios:
+          final StandardPackage(:baseDir) = package as StandardPackage;
+          // Copy the XCFramework, that is already in the correct structure.
+          await copyDirectoryContents(
+            baseDir,
+            tmpInstallDir.path,
+            // Don't copy LICENSE files.
+            filter: (entity) => entity.path.contains('.xcframework'),
+          );
+        case OS.macos || OS.linux || OS.windows:
+          final StandardPackage(:sharedLibrariesDir) =
+              package as StandardPackage;
+          await copyDirectoryContents(
+            sharedLibrariesDir,
+            tmpInstallDir.path,
+            dereferenceLinks: os == OS.macos,
+            filter: (entity) => !entity.path.contains('cmake'),
+          );
       }
     }
     tmpInstallDir.renameSync(installDir.path);
