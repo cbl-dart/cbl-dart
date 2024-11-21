@@ -1,3 +1,15 @@
 export 'install/package.dart'
-    show Edition, Target, ArchiveFormat, Package, Library, OS;
+    show
+        AndroidPackage,
+        Architecture,
+        ArchiveFormat,
+        DatabasePackageConfig,
+        Edition,
+        Library,
+        OS,
+        PackageConfig,
+        Package,
+        PackageLoader,
+        RemotePackageLoader,
+        StandardPackage;
 export 'install/utils.dart' show copyDirectoryContents, userCachesDir;

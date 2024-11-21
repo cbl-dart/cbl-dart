@@ -135,6 +135,7 @@ Future<void> copyDirectoryContents(
 }) async {
   final sourceDirPath = p.absolute(sourceDir);
   final destinationDirPath = p.absolute(destinationDir);
+  await Directory(destinationDirPath).create(recursive: true);
 
   final entities = Directory(sourceDirPath).list(
     recursive: true,
