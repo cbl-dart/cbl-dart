@@ -60,28 +60,6 @@ function buildNativeLibraries() {
     ./tools/dev-tools.sh prepareNativeLibraries enterprise debug "$target"
 }
 
-function configureFlutter() {
-    requireEnvVar TARGET_OS
-
-    case "$targetOs" in
-    macOS)
-        flutter config --enable-macos-desktop
-        ;;
-    Ubuntu)
-        flutter config --enable-linux-desktop
-        ;;
-    Windows)
-        flutter config --enable-windows-desktop
-        ;;
-    esac
-}
-
-function bootstrapPackage() {
-    requireEnvVar TEST_PACKAGE
-
-    ./tools/dev-tools.sh bootstrapPackage "$testPackage"
-}
-
 function startCouchbaseServices() {
     case "$(uname)" in
     Darwin)

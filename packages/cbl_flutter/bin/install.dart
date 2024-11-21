@@ -21,8 +21,8 @@ void main(List<String> arguments) async {
 
   final installDir = Directory(switch (os) {
     OS.android => androidJniLibsDir,
-    OS.ios => iosFrameworksDir,
-    OS.macos => macosLibrariesDir,
+    OS.iOS => iosFrameworksDir,
+    OS.macOS => macosLibrariesDir,
     OS.linux => linuxLibDir,
     OS.windows => windowsBinDir,
   });
@@ -38,22 +38,36 @@ void main(List<String> arguments) async {
 
   final tmpInstallDir = Directory.systemTemp.createTempSync();
 
-  final loader = RemotePackageLoader();
-  final packageConfigs = DatabasePackageConfig.all(
-    releases: {
-      for (final library in config.libraries) //
-        library.library: library.release,
-    },
-    edition: config.edition,
-  ).where((config) => config.os == os);
-  final packages = await Future.wait(packageConfigs.map(loader.load));
-
   try {
+    final loader = RemotePackageLoader();
+
+    final packageConfigs = <PackageConfig>[];
+
+    // ignore: cascade_invocations
+    packageConfigs.addAll(
+      DatabasePackageConfig.all(
+        releases: {
+          for (final library in config.libraries) //
+            library.library: library.release,
+        },
+        edition: config.edition,
+      ).where((config) => config.os == os),
+    );
+
+    if (config.edition == Edition.enterprise) {
+      packageConfigs.addAll(
+        VectorSearchPackageConfig.all(release: '1.0.0')
+            .where((config) => config.os == os),
+      );
+    }
+
+    final packages = await Future.wait(packageConfigs.map(loader.load));
+
     for (final package in packages) {
-      switch (package.config.os) {
-        case OS.android:
-          final AndroidPackage(config: PackageConfig(:architectures)) =
-              package as AndroidPackage;
+      switch (package) {
+        case DatabaseAndroidPackage(
+            config: PackageConfig(:final architectures)
+          ):
           for (final architecture in architectures) {
             await copyDirectoryContents(
               package.sharedLibrariesDir(architecture),
@@ -61,26 +75,61 @@ void main(List<String> arguments) async {
               filter: (entity) => !entity.path.contains('cmake'),
             );
           }
-        case OS.ios:
-          final StandardPackage(:baseDir) = package as StandardPackage;
+        case DatabaseStandardPackage(
+            config: PackageConfig(os: OS.iOS),
+            :final packageDir,
+          ):
           // Copy the XCFramework, that is already in the correct structure.
           await copyDirectoryContents(
-            baseDir,
+            packageDir,
             tmpInstallDir.path,
             // Don't copy LICENSE files.
             filter: (entity) => entity.path.contains('.xcframework'),
           );
-        case OS.macos || OS.linux || OS.windows:
-          final StandardPackage(:sharedLibrariesDir) =
-              package as StandardPackage;
+        case DatabaseStandardPackage(
+            config: PackageConfig(os: OS.macOS || OS.linux || OS.windows),
+            :final sharedLibrariesDir
+          ):
           await copyDirectoryContents(
             sharedLibrariesDir,
             tmpInstallDir.path,
-            dereferenceLinks: os == OS.macos,
+            dereferenceLinks: os == OS.macOS,
             filter: (entity) => !entity.path.contains('cmake'),
           );
+        case VectorSearchPackage(
+            config: PackageConfig(os: OS.android, :final architectures)
+          ):
+          await copyDirectoryContents(
+            package.sharedLibrariesDir!,
+            '${tmpInstallDir.path}/${architectures.single.androidLibDir}',
+            filter: (entity) => !entity.path.contains('cmake'),
+          );
+        case VectorSearchPackage(
+            config: PackageConfig(os: OS.iOS),
+            :final packageDir,
+          ):
+          // Copy the XCFramework, that is already in the correct structure.
+          await copyDirectoryContents(
+            packageDir,
+            tmpInstallDir.path,
+            // Don't copy LICENSE files.
+            filter: (entity) => entity.path.contains('.xcframework'),
+          );
+        case VectorSearchPackage(
+            config: PackageConfig(os: OS.macOS || OS.linux || OS.windows),
+            :final sharedLibrariesDir,
+          ):
+          await copyDirectoryContents(
+            sharedLibrariesDir!,
+            tmpInstallDir.path,
+            dereferenceLinks: os == OS.macOS,
+            filter: (entity) => !entity.path.contains('cmake'),
+          );
+        default:
+          throw UnimplementedError();
       }
     }
+
     tmpInstallDir.renameSync(installDir.path);
   } catch (e) {
     tmpInstallDir.deleteSync(recursive: true);
@@ -92,7 +141,7 @@ extension on Architecture {
   String get androidLibDir => switch (this) {
         Architecture.arm => 'armeabi-v7a',
         Architecture.arm64 => 'arm64-v8a',
-        Architecture.x86 => 'x86',
-        Architecture.x86_64 => 'x86_64',
+        Architecture.ia32 => 'x86',
+        Architecture.x64 => 'x86_64',
       };
 }

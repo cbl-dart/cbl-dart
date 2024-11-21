@@ -43,18 +43,22 @@ final class StandardCblFlutterPlatform extends CblFlutterPlatform {
     String? directory;
     final LibraryConfiguration cbl;
     final LibraryConfiguration cblDart;
+    final LibraryConfiguration vectorSearch;
 
     if (Platform.isIOS || Platform.isMacOS) {
-      cbl = cblDart = LibraryConfiguration.process();
+      cbl = cblDart = vectorSearch = LibraryConfiguration.process();
     } else if (Platform.isAndroid || Platform.isLinux) {
       if (Platform.isLinux) {
         directory = _joinPaths(_dirname(Platform.resolvedExecutable), 'lib');
       }
       cbl = LibraryConfiguration.dynamic('libcblite');
       cblDart = LibraryConfiguration.dynamic('libcblitedart');
+      vectorSearch =
+          LibraryConfiguration.dynamic('libCouchbaseLiteVectorSearch');
     } else if (Platform.isWindows) {
       cbl = LibraryConfiguration.dynamic('cblite');
       cblDart = LibraryConfiguration.dynamic('cblitedart');
+      vectorSearch = LibraryConfiguration.dynamic('CouchbaseLiteVectorSearch');
     } else {
       throw UnsupportedError('This platform is not supported.');
     }
@@ -64,6 +68,7 @@ final class StandardCblFlutterPlatform extends CblFlutterPlatform {
       directory: directory,
       cbl: cbl,
       cblDart: cblDart,
+      vectorSearch: vectorSearch,
     );
   }
 }

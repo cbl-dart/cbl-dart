@@ -31,6 +31,7 @@ Future<void> setupDevelopmentLibraries() async {
   String? directory;
   String cblLib;
   String cblDartLib;
+  String vectorSearchLib;
 
   // TODO(blaugold): store development libraries in cbl_dart package
   // The standalone Dart e2e test directory is where the development libraries
@@ -42,14 +43,17 @@ Future<void> setupDevelopmentLibraries() async {
     directory = libDir;
     cblLib = 'libcblite';
     cblDartLib = 'libcblitedart';
+    vectorSearchLib = 'CouchbaseLiteVectorSearch';
   } else if (Platform.isMacOS) {
     directory = p.join(standaloneDartE2eTestDir, 'Frameworks');
     cblLib = 'CouchbaseLite';
     cblDartLib = 'CouchbaseLiteDart';
+    vectorSearchLib = 'CouchbaseLiteVectorSearch';
   } else if (Platform.isWindows) {
     directory = p.join(standaloneDartE2eTestDir, 'bin');
     cblLib = 'cblite';
     cblDartLib = 'cblitedart';
+    vectorSearchLib = 'CouchbaseLiteVectorSearch';
   } else {
     throw StateError('Could not find libraries for current platform');
   }
@@ -59,6 +63,7 @@ Future<void> setupDevelopmentLibraries() async {
     directory: directory,
     cbl: LibraryConfiguration.dynamic(cblLib),
     cblDart: LibraryConfiguration.dynamic(cblDartLib),
+    vectorSearch: LibraryConfiguration.dynamic(vectorSearchLib),
   );
 }
 
@@ -109,10 +114,23 @@ Future<LibrariesConfiguration> acquireLibraries({
   await Directory(mergedNativeLibrariesDir).create(recursive: true);
 
   final loader = RemotePackageLoader();
-  final packageConfigs = DatabasePackageConfig.all(
-    releases: latestReleases,
-    edition: edition,
-  ).where((config) => config.os == OS.current);
+  final packageConfigs = <PackageConfig>[];
+
+  // ignore: cascade_invocations
+  packageConfigs.addAll(
+    DatabasePackageConfig.all(
+      releases: latestReleases,
+      edition: edition,
+    ).where((config) => config.os == OS.current),
+  );
+
+  if (edition == Edition.enterprise) {
+    packageConfigs.addAll(
+      VectorSearchPackageConfig.all(release: '1.0.0')
+          .where((config) => config.os == OS.current),
+    );
+  }
+
   final packages = await Future.wait(packageConfigs.map(loader.load));
 
   if (!areMergedNativeLibrariesInstalled(
@@ -128,5 +146,6 @@ Future<LibrariesConfiguration> acquireLibraries({
   return mergedNativeLibrariesConfigurations(
     packages,
     directory: mergedNativeLibrariesDir,
+    enterpriseEdition: edition == Edition.enterprise,
   );
 }

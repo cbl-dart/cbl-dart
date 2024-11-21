@@ -19,8 +19,8 @@ Map<Library, String> _readLatestReleasesFromPubspec() {
   ).contents as YamlMap;
   final dependencies = pubspecYaml['dependencies'] as YamlMap;
   return {
-    Library.libcblite: dependencies['cbl_libcblite_api']! as String,
-    Library.libcblitedart: dependencies['cbl_libcblitedart_api']! as String,
+    Library.cblite: dependencies['cbl_libcblite_api']! as String,
+    Library.cblitedart: dependencies['cbl_libcblitedart_api']! as String,
   };
 }
 

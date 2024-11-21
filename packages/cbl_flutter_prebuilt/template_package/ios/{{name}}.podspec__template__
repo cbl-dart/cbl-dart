@@ -1,6 +1,6 @@
 # Install libraries if they have not been installed yet.
 Dir.chdir("#{Dir.pwd}/..") do
-  `dart run cbl_flutter:install ios`
+  `dart run cbl_flutter:install iOS`
 end
 
 Pod::Spec.new do |s|

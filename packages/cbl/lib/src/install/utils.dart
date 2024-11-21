@@ -53,8 +53,9 @@ Future<Uint8List> downloadUrl(
       () async {
         final response = await get(Uri.parse(url));
         if (response.statusCode != 200) {
-          // ignore: only_throw_errors
-          throw response;
+          throw StateError(
+            'Failed to download $url: ${response.statusCode} ${response.body}',
+          );
         }
 
         return response.bodyBytes;

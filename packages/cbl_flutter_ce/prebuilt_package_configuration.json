@@ -4,12 +4,12 @@
   "edition": "community",
   "libraries": [
     {
-      "library": "libcblite",
+      "library": "cblite",
       "version": "3.2.0",
       "release": "3.2.0"
     },
     {
-      "library": "libcblitedart",
+      "library": "cblitedart",
       "version": "7.1.0",
       "release": "7.1.0"
     }
