@@ -1,13 +1,13 @@
 import 'dart:isolate';
 
+import 'bindings.dart';
 import 'database/database.dart';
 import 'log.dart';
-import 'support/ffi.dart';
 import 'support/isolate.dart';
 import 'support/tracing.dart';
 import 'tracing.dart';
 
-export 'support/ffi.dart' show LibrariesConfiguration, LibraryConfiguration;
+export 'bindings.dart' show LibrariesConfiguration, LibraryConfiguration;
 export 'support/listener_token.dart' show ListenerToken;
 export 'support/resource.dart' show Resource, ClosableResource;
 export 'support/streams.dart' show AsyncListenStream;

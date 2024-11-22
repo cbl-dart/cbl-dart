@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings.dart';
-import 'package:cbl/src/support/ffi.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/tracing.dart';
 import 'package:cbl_flutter_platform_interface/cbl_flutter_platform_interface.dart';
@@ -43,7 +42,7 @@ Future<InitContext> _context() async {
 /// Preloads the native libraries for Android and implements a workaround for
 /// loading of libraries on older Android versions.
 Future<void> _preloadLibrariesForAndroid() async {
-  final libraries = CblFlutterPlatform.instance.libraries().toCblFfi();
+  final libraries = CblFlutterPlatform.instance.libraries();
 
   try {
     DynamicLibraries.fromConfig(libraries);
