@@ -14,7 +14,6 @@ import '../fleece/containers.dart' as fl;
 import '../support/async_callback.dart';
 import '../support/edition.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -29,7 +28,7 @@ import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
 
-final _bindings = cblBindings.replicator;
+final _bindings = CBLBindings.instance.replicator;
 
 final class FfiReplicator
     with ClosableResourceMixin
@@ -533,7 +532,8 @@ AsyncCallback _createConflictResolverCallback(
             // caller balances with a release. This must happen on the Dart
             // side, because `resolvedDelegate` can be garbage collected before
             // the document pointer makes it back to the native side.
-            cblBindings.base.retainRefCounted(resolvedDelegate.pointer.cast());
+            CBLBindings.instance.base
+                .retainRefCounted(resolvedDelegate.pointer.cast());
           } else {
             resolvedDelegate = resolved.delegate as FfiDocumentDelegate;
           }

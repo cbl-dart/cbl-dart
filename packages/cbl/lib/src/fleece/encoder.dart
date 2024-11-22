@@ -4,10 +4,9 @@ import 'dart:typed_data';
 
 import '../bindings.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import 'containers.dart';
 
-final _encoderBinds = cblBindings.fleece.encoder;
+final _encoderBinds = CBLBindings.instance.fleece.encoder;
 
 /// An encoder, which generates encoded Fleece or JSON data.
 ///

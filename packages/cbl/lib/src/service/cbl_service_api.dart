@@ -16,7 +16,6 @@ import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../support/encoding.dart';
-import '../support/ffi.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -2134,7 +2133,7 @@ final class TransferableValue extends Serializable {
   StringMap serialize(SerializationContext context) {
     final value = _value;
     if (value != null) {
-      cblBindings.fleece.value.retain(value.pointer);
+      CBLBindings.instance.fleece.value.retain(value.pointer);
       _valueAddress = value.pointer.address;
       _value = null;
     }
@@ -2167,7 +2166,7 @@ final class TransferableValue extends Serializable {
 
     final value = _value;
     if (value != null) {
-      cblBindings.fleece.value.retain(value.pointer);
+      CBLBindings.instance.fleece.value.retain(value.pointer);
       _valueAddress = value.pointer.address;
       _value = null;
     }
