@@ -1,3 +1,4 @@
+import '../support/errors.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
@@ -55,13 +56,11 @@ final class CBLBindings extends Bindings {
   static CBLBindings get instance {
     final instance = _instance;
     if (instance == null) {
-      throw StateError('CBLBindings have not been initialized.');
+      throwNotInitializedError();
     }
 
     return instance;
   }
-
-  static CBLBindings? get maybeInstance => _instance;
 
   static void init(
     LibrariesConfiguration libraries, {
