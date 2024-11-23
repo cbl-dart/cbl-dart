@@ -1,6 +1,9 @@
+import '../support/errors.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
+import 'cblite.dart';
+import 'cblitedart.dart';
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -11,18 +14,22 @@ import 'query.dart';
 import 'replicator.dart';
 import 'tracing.dart';
 
-/// Wether to use the `isLeaf` flag when looking up native functions.
-// ignore: do_not_use_environment
-const useIsLeaf = bool.fromEnvironment('cblFfiUseIsLeaf');
-
 abstract base class Bindings {
-  Bindings(Bindings parent) : libs = parent.libs {
+  Bindings(Bindings parent)
+      : cbl = parent.cbl,
+        cblDart = parent.cblDart,
+        enterpriseEdition = parent.enterpriseEdition {
     parent._children.add(this);
   }
 
-  Bindings.root(this.libs);
+  Bindings.root(DynamicLibraries libs)
+      : cbl = cblite(libs.cbl),
+        cblDart = cblitedart(libs.cblDart),
+        enterpriseEdition = libs.enterpriseEdition;
 
-  final DynamicLibraries libs;
+  final cblite cbl;
+  final cblitedart cblDart;
+  final bool enterpriseEdition;
 
   List<Bindings> get _children => [];
 }
@@ -49,13 +56,11 @@ final class CBLBindings extends Bindings {
   static CBLBindings get instance {
     final instance = _instance;
     if (instance == null) {
-      throw StateError('CBLBindings have not been initialized.');
+      throwNotInitializedError();
     }
 
     return instance;
   }
-
-  static CBLBindings? get maybeInstance => _instance;
 
   static void init(
     LibrariesConfiguration libraries, {

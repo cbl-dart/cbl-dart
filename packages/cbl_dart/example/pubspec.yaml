@@ -5,5 +5,5 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  cbl: ^3.0.0
-  cbl_dart: ^3.0.1
+  cbl: ^3.2.1
+  cbl_dart: ^3.1.0

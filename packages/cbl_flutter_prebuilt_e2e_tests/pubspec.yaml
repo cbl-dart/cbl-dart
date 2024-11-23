@@ -7,25 +7,12 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl: ^3.0.0
-  cbl_flutter: ^3.0.0
-  cbl_flutter_ee:
-    path: ../cbl_flutter_ee
+  cbl: ^3.2.1
+  cbl_flutter: ^3.1.3
+  cbl_flutter_ee: ^3.2.1
   flutter:
     sdk: flutter
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-
-dependency_overrides:
-  # We use the latest published versions of the following packages.
-  # This is necessary because the current development version of cbl_ffi
-  # might depend on a newer version of the binaries. The other packages
-  # directly or indirectly depend on cbl_ffi.
-  cbl: ^3.0.0
-  cbl_ffi: ^0.9.0-dev.3
-  cbl_flutter: ^3.0.0
-  cbl_flutter_platform_interface: any
-  cbl_libcblite_api: any
-  cbl_libcblitedart_api: any

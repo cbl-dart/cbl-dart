@@ -95,7 +95,7 @@ function startDockerService {
     id="$1"
     name="$2"
     echo "::group::Start $name"
-    docker-compose -f "$dockerComposeFile" up -d "$id"
+    docker compose -f "$dockerComposeFile" up -d "$id"
     echo "::endgroup::"
 }
 
@@ -105,7 +105,7 @@ function setupDocker() {
 }
 
 function teardownDocker() {
-    docker-compose -f "$dockerComposeFile" down
+    docker compose -f "$dockerComposeFile" down
 }
 
 "$@"

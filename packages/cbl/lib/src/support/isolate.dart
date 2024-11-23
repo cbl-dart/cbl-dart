@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import '../bindings.dart' hide LibrariesConfiguration;
+import '../bindings.dart';
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
 import 'errors.dart';
-import 'ffi.dart';
 import 'tracing.dart';
 
 class InitContext {
@@ -51,7 +50,8 @@ class IsolateContext {
 Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
   runWithErrorTranslation(() {
-    cblBindings.base.initializeNativeLibraries(context.initContext?.toCbl());
+    CBLBindings.instance.base
+        .initializeNativeLibraries(context.initContext?.toCbl());
   });
   await _runPostIsolateInitTasks();
 }
@@ -67,7 +67,7 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    context.libraries.toCblFfi(),
+    context.libraries,
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
 

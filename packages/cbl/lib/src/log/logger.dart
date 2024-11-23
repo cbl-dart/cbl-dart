@@ -3,7 +3,6 @@ import 'dart:ffi';
 
 import '../bindings.dart';
 import '../support/async_callback.dart';
-import '../support/ffi.dart';
 
 /// Subsystems that log information.
 ///
@@ -114,7 +113,7 @@ extension LogLevelExt on LogLevel {
   CBLLogLevel toCBLLogLevel() => CBLLogLevel.values[index];
 }
 
-final _bindings = cblBindings.logging;
+final _bindings = CBLBindings.instance.logging;
 
 Logger? _logger;
 void Function(List<Object?>)? _loggerCallback;

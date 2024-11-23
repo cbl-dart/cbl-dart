@@ -1,3 +1,11 @@
+## 2.1.1
+
+ - Update a dependency to the latest release.
+
+## 2.1.0
+
+ - **FEAT**: use `asUnmodifiableView` instead of `UnmodifiableUint8ListView` ([#599](https://github.com/cbl-dart/cbl-dart/issues/599)). ([3ca65118](https://github.com/cbl-dart/cbl-dart/commit/3ca65118d803966004eca6d37faded9221d6dfe1))
+
 ## 2.0.0
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.

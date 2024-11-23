@@ -3,6 +3,263 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-10-15
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_flutter` - `v3.1.3`](#cbl_flutter---v313)
+
+---
+
+#### `cbl_flutter` - `v3.1.3`
+
+ - **FIX**: put `CBLTemp` directory in application support directory ([#625](https://github.com/cbl-dart/cbl-dart/issues/625)). ([6404d1e6](https://github.com/cbl-dart/cbl-dart/commit/6404d1e6ce8eafd5e120fc44033a67ace25e2de0))
+
+
+## 2024-10-08
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.2.1`](#cbl---v321)
+ - [`cbl_flutter` - `v3.1.2`](#cbl_flutter---v312)
+ - [`cbl_flutter_ce` - `v3.2.1`](#cbl_flutter_ce---v321)
+ - [`cbl_flutter_ee` - `v3.2.1`](#cbl_flutter_ee---v321)
+ - [`cbl_flutter_platform_interface` - `v3.0.3`](#cbl_flutter_platform_interface---v303)
+ - [`cbl_dart` - `v3.1.1`](#cbl_dart---v311)
+ - [`cbl_sentry` - `v2.1.2`](#cbl_sentry---v212)
+ - [`cbl_generator` - `v0.3.0+3`](#cbl_generator---v0303)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_platform_interface` - `v3.0.3`
+ - `cbl_dart` - `v3.1.1`
+ - `cbl_sentry` - `v2.1.2`
+ - `cbl_generator` - `v0.3.0+3`
+
+---
+
+#### `cbl` - `v3.2.1`
+
+ - **FIX**: translate errors when setting file logging config ([#623](https://github.com/cbl-dart/cbl-dart/issues/623)). ([1b646e3f](https://github.com/cbl-dart/cbl-dart/commit/1b646e3f31bfe2f719bef811bc690f2b17e2f195))
+
+#### `cbl_flutter` - `v3.1.2`
+
+ - **FIX**: add workaround for loading native libraries on older versions of Android ([#624](https://github.com/cbl-dart/cbl-dart/issues/624)). ([72b004ab](https://github.com/cbl-dart/cbl-dart/commit/72b004abb206afd72984bcd6f7689667f4215f3b))
+
+#### `cbl_flutter_ce` - `v3.2.1`
+
+ - **FIX**: add workaround for loading native libraries on older versions of Android ([#624](https://github.com/cbl-dart/cbl-dart/issues/624)). ([72b004ab](https://github.com/cbl-dart/cbl-dart/commit/72b004abb206afd72984bcd6f7689667f4215f3b))
+
+#### `cbl_flutter_ee` - `v3.2.1`
+
+ - **FIX**: add workaround for loading native libraries on older versions of Android ([#624](https://github.com/cbl-dart/cbl-dart/issues/624)). ([72b004ab](https://github.com/cbl-dart/cbl-dart/commit/72b004abb206afd72984bcd6f7689667f4215f3b))
+
+
+## 2024-10-07
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_flutter` - `v3.1.1`](#cbl_flutter---v311)
+
+---
+
+#### `cbl_flutter` - `v3.1.1`
+
+ - **FIX**: create CBLTemp directory recursively ([#620](https://github.com/cbl-dart/cbl-dart/issues/620)). ([687068a0](https://github.com/cbl-dart/cbl-dart/commit/687068a08cdb87c405b8369c4ccdf7830ae8eb25))
+
+
+## 2024-10-02
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_dart` - `v3.1.0`](#cbl_dart---v310)
+ - [`cbl_flutter_ce` - `v3.2.0`](#cbl_flutter_ce---v320)
+ - [`cbl_flutter_ee` - `v3.2.0`](#cbl_flutter_ee---v320)
+
+---
+
+#### `cbl_dart` - `v3.1.0`
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
+#### `cbl_flutter_ce` - `v3.2.0`
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
+#### `cbl_flutter_ee` - `v3.2.0`
+
+ - **FEAT**: provide libcblite `3.2.0`. ([b0e2a1cc](https://github.com/cbl-dart/cbl-dart/commit/b0e2a1ccbd20f2b3c866ef39ce7824991c90f836))
+
+
+## 2024-09-05
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.2.0`](#cbl---v320)
+ - [`cbl_flutter` - `v3.1.1`](#cbl_flutter---v311)
+ - [`cbl_flutter_platform_interface` - `v3.0.3`](#cbl_flutter_platform_interface---v303)
+ - [`cbl_dart` - `v3.0.4`](#cbl_dart---v304)
+ - [`cbl_generator` - `v0.3.0+3`](#cbl_generator---v0303)
+ - [`cbl_sentry` - `v2.1.2`](#cbl_sentry---v212)
+ - [`cbl_flutter_ce` - `v3.1.1`](#cbl_flutter_ce---v311)
+ - [`cbl_flutter_ee` - `v3.1.1`](#cbl_flutter_ee---v311)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.1.1`
+ - `cbl_flutter_platform_interface` - `v3.0.3`
+ - `cbl_dart` - `v3.0.4`
+ - `cbl_generator` - `v0.3.0+3`
+ - `cbl_sentry` - `v2.1.2`
+ - `cbl_flutter_ce` - `v3.1.1`
+ - `cbl_flutter_ee` - `v3.1.1`
+
+---
+
+#### `cbl` - `v3.2.0`
+
+ - **FEAT**: loosen version constraint for `web_socket_channel` to allow `>=2.1.0 <4.0.0` ([#616](https://github.com/cbl-dart/cbl-dart/issues/616)). ([de572588](https://github.com/cbl-dart/cbl-dart/commit/de5725889e5c057bfa729635f886fa403254dcc4))
+
+
+## 2024-09-03
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.1.1`](#cbl---v311)
+ - [`cbl_flutter` - `v3.1.0`](#cbl_flutter---v310)
+ - [`cbl_flutter_ce` - `v3.1.0`](#cbl_flutter_ce---v310)
+ - [`cbl_flutter_ee` - `v3.1.0`](#cbl_flutter_ee---v310)
+ - [`cbl_generator` - `v0.3.0+2`](#cbl_generator---v0302)
+ - [`cbl_flutter_platform_interface` - `v3.0.2`](#cbl_flutter_platform_interface---v302)
+ - [`cbl_dart` - `v3.0.3`](#cbl_dart---v303)
+ - [`cbl_sentry` - `v2.1.1`](#cbl_sentry---v211)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_platform_interface` - `v3.0.2`
+ - `cbl_dart` - `v3.0.3`
+ - `cbl_sentry` - `v2.1.1`
+
+---
+
+#### `cbl` - `v3.1.1`
+
+ - **REFACTOR**: use `nonNulls` instead of `whereNotNull` ([#607](https://github.com/cbl-dart/cbl-dart/issues/607)). ([d1f87210](https://github.com/cbl-dart/cbl-dart/commit/d1f872106ba32f62772d91734a8bab1e3a6b7e0e))
+
+#### `cbl_flutter` - `v3.1.0`
+
+ - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
+
+#### `cbl_flutter_ce` - `v3.1.0`
+
+ - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
+
+#### `cbl_flutter_ee` - `v3.1.0`
+
+ - **FEAT**: support Android Gradle Plugin 8 ([#615](https://github.com/cbl-dart/cbl-dart/issues/615)). ([b0e5bf21](https://github.com/cbl-dart/cbl-dart/commit/b0e5bf21cbb3eb216ff9541a99c5d3c72c56387b))
+
+#### `cbl_generator` - `v0.3.0+2`
+
+ - **REFACTOR**: don't use `getDisplayString` with `withNullability` ([#608](https://github.com/cbl-dart/cbl-dart/issues/608)). ([aa840e04](https://github.com/cbl-dart/cbl-dart/commit/aa840e044fa863de21cb76a4145656425c145d2a))
+
+
+## 2024-09-01
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.1.0`](#cbl---v310)
+ - [`cbl_sentry` - `v2.1.0`](#cbl_sentry---v210)
+ - [`cbl_flutter` - `v3.0.1`](#cbl_flutter---v301)
+ - [`cbl_flutter_platform_interface` - `v3.0.1`](#cbl_flutter_platform_interface---v301)
+ - [`cbl_dart` - `v3.0.2`](#cbl_dart---v302)
+ - [`cbl_generator` - `v0.3.0+1`](#cbl_generator---v0301)
+ - [`cbl_flutter_ce` - `v3.0.1`](#cbl_flutter_ce---v301)
+ - [`cbl_flutter_ee` - `v3.0.1`](#cbl_flutter_ee---v301)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.0.1`
+ - `cbl_flutter_platform_interface` - `v3.0.1`
+ - `cbl_dart` - `v3.0.2`
+ - `cbl_generator` - `v0.3.0+1`
+ - `cbl_flutter_ce` - `v3.0.1`
+ - `cbl_flutter_ee` - `v3.0.1`
+
+---
+
+#### `cbl` - `v3.1.0`
+
+ - **FEAT**: use `asUnmodifiableView` instead of `UnmodifiableUint8ListView` ([#599](https://github.com/cbl-dart/cbl-dart/issues/599)). ([3ca65118](https://github.com/cbl-dart/cbl-dart/commit/3ca65118d803966004eca6d37faded9221d6dfe1))
+
+#### `cbl_sentry` - `v2.1.0`
+
+ - **FEAT**: use `asUnmodifiableView` instead of `UnmodifiableUint8ListView` ([#599](https://github.com/cbl-dart/cbl-dart/issues/599)). ([3ca65118](https://github.com/cbl-dart/cbl-dart/commit/3ca65118d803966004eca6d37faded9221d6dfe1))
+
+
 ## 2024-04-28
 
 ### Changes

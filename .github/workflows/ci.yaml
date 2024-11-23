@@ -20,9 +20,7 @@ concurrency:
 
 env:
   flutter-channel: stable
-  # Use 3.0 until bug in 3.1 is fixed.
-  # https://github.com/dart-lang/sdk/issues/53267
-  dart-version-stable: 3.0.7
+  dart-version-stable: stable
   dart-version-beta: beta
 
 jobs:
@@ -71,7 +69,10 @@ jobs:
       fail-fast: false
       matrix:
         dart: [stable, beta]
-    continue-on-error: ${{ matrix.dart != 'stable' }}
+    # continue-on-error: ${{ matrix.dart != 'stable' }}
+    # TODO: Require analysis to pass for stable once Dart SDK issue is fixed
+    # https://github.com/dart-lang/sdk/issues/56561
+    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -197,9 +198,9 @@ jobs:
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      - name: Select Java 11
+      - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
       - name: Install Android Native Toolchain
         if: ${{ matrix.os == 'Android' }}
@@ -271,7 +272,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         shell: bash
         run: |
-          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl"
+          ./tools/ci-steps.sh uploadCoverageData "e2e.cbl.${{ matrix.embedder }}.${{ matrix.os }}"
 
   test-e2e-cbl_flutter_prebuilt:
     name: cbl_flutter_prebuilt E2E tests
@@ -308,9 +309,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Select Java 11
+      - name: Select Java 17
         if: ${{ matrix.os == 'Android' }}
-        run: echo "JAVA_HOME=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
       - name: Install Fluter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu'
@@ -330,9 +331,8 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart package
-        shell: bash
-        run: ./tools/ci-steps.sh bootstrapPackage
+      - name: Bootstrap Dart packages
+        run: ./tools/dev-tools.sh bootstrap
 
       - name: Start virtual devices
         shell: bash

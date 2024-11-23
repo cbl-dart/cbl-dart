@@ -1,4 +1,0 @@
-dependency_overrides:
-  cbl: 3.0.0
-  cbl_libcblite_api: 3.1.6
-  cbl_libcblitedart_api: 7.1.0

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:cbl_dart/src/package.dart';
+import 'package:cbl/src/install.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
@@ -26,7 +26,8 @@ Map<Library, String> _readLatestReleasesFromPubspec() {
 
 String _generateVersionInfoFile(Map<Library, String> latestReleases) => '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
-import 'package.dart';
+// ignore: implementation_imports
+import 'package:cbl/src/install.dart';
 
 const latestReleases = {
   ${latestReleases.entries.map((entry) => "${entry.key}: '${entry.value}',").join('\n  ')}

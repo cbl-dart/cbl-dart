@@ -7,13 +7,12 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl_flutter_platform_interface: ^3.0.0
+  cbl_flutter_platform_interface: ^3.0.2
   flutter:
     sdk: flutter
 
 flutter:
   plugin:
-    implements: cbl_flutter
     platforms:
       android:
         dartPluginClass: CblFlutterLocal

@@ -16,7 +16,6 @@ import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
 import '../support/encoding.dart';
-import '../support/ffi.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -272,12 +271,14 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         serialize: (value, context) => {
           'directory': value.directory,
           'encryptionKey':
-              context.serialize(value.encryptionKey as EncryptionKeyImpl?)
+              context.serialize(value.encryptionKey as EncryptionKeyImpl?),
+          'fullSync': value.fullSync,
         },
         deserialize: (map, context) => DatabaseConfiguration(
           directory: map.getAs('directory'),
           encryptionKey:
               context.deserializeAs<EncryptionKeyImpl>(map['encryptionKey']),
+          fullSync: map.getAs('fullSync'),
         ),
       )
       ..addCodec<ConcurrencyControl>(
@@ -2132,7 +2133,7 @@ final class TransferableValue extends Serializable {
   StringMap serialize(SerializationContext context) {
     final value = _value;
     if (value != null) {
-      cblBindings.fleece.value.retain(value.pointer);
+      CBLBindings.instance.fleece.value.retain(value.pointer);
       _valueAddress = value.pointer.address;
       _value = null;
     }
@@ -2165,7 +2166,7 @@ final class TransferableValue extends Serializable {
 
     final value = _value;
     if (value != null) {
-      cblBindings.fleece.value.retain(value.pointer);
+      CBLBindings.instance.fleece.value.retain(value.pointer);
       _valueAddress = value.pointer.address;
       _value = null;
     }

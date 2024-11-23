@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path_lib;
 
 import '../bindings.dart';
@@ -19,7 +18,6 @@ import '../query/index/index.dart';
 import '../query/query.dart';
 import '../support/async_callback.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -39,7 +37,7 @@ import 'document_change.dart';
 import 'ffi_blob_store.dart';
 import 'scope.dart';
 
-final _bindings = cblBindings.database;
+final _bindings = CBLBindings.instance.database;
 
 final class FfiDatabase
     with DatabaseBase<FfiDocumentDelegate>, ClosableResourceMixin
@@ -146,7 +144,7 @@ final class FfiDatabase
                 ));
         return scopeNames
             .map((name) => scope(name.asString!))
-            .whereNotNull()
+            .nonNulls
             .toList();
       });
 
@@ -415,7 +413,7 @@ final class FfiDatabase
   String toString() => 'FfiDatabase($name)';
 }
 
-final _collectionBindings = cblBindings.collection;
+final _collectionBindings = CBLBindings.instance.collection;
 
 final class FfiScope
     with ScopeBase, ClosableResourceMixin
@@ -425,7 +423,8 @@ final class FfiScope
     required this.pointer,
     required this.database,
   }) {
-    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
+    CBLBindings.instance.base
+        .bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(database);
   }
@@ -448,7 +447,7 @@ final class FfiScope
         );
         return collectionNames
             .map((name) => collection(name.asString!))
-            .whereNotNull()
+            .nonNulls
             .toList();
       });
 
@@ -481,7 +480,8 @@ final class FfiCollection
     required this.pointer,
     required this.scope,
   }) {
-    cblBindings.base.bindCBLRefCountedToDartObject(this, pointer.cast());
+    CBLBindings.instance.base
+        .bindCBLRefCountedToDartObject(this, pointer.cast());
     needsToBeClosedByParent = false;
     attachTo(scope);
   }
@@ -821,6 +821,7 @@ extension on DatabaseConfiguration {
       CBLDatabaseConfiguration(
         directory: directory,
         encryptionKey: (encryptionKey as EncryptionKeyImpl?)?.cblKey,
+        fullSync: fullSync,
       );
 }
 
