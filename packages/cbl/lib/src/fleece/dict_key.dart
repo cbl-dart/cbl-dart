@@ -3,10 +3,11 @@ import 'dart:ffi';
 import 'dart:math';
 
 import '../bindings.dart';
+import '../support/ffi.dart';
 import 'encoder.dart';
 
-final _dictBinds = CBLBindings.instance.fleece.dict;
-final _dictKeyBinds = CBLBindings.instance.fleece.dictKey;
+final _dictBinds = cblBindings.fleece.dict;
+final _dictKeyBinds = cblBindings.fleece.dictKey;
 
 /// A Fleece dictionary key for efficient decoding and encoding of dictionaries.
 abstract final class DictKey {

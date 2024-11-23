@@ -4,9 +4,10 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../bindings.dart';
+import '../support/ffi.dart';
 import 'containers.dart';
 
-final _decoderBinds = CBLBindings.instance.fleece.decoder;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 /// Returns a string which shows how values are encoded in the Fleece [data].
 ///

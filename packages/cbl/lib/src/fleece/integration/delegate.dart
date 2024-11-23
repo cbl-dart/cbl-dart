@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import '../../bindings.dart';
+import '../../support/ffi.dart';
 import '../decoder.dart';
 import '../encoder.dart';
 import 'array.dart';
@@ -10,7 +11,7 @@ import 'collection.dart';
 import 'dict.dart';
 import 'value.dart';
 
-final _decoderBinds = CBLBindings.instance.fleece.decoder;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract base class MDelegate {
   static MDelegate? instance;

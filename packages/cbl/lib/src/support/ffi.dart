@@ -1,6 +1,17 @@
 import 'dart:ffi';
 
 import '../bindings.dart' as bindings;
+import 'errors.dart';
+
+/// Convenience accessor for `CBLBindings.instance`, which throws an informative
+/// error when used before the bindings are initialized.
+final bindings.CBLBindings cblBindings = () {
+  final result = bindings.CBLBindings.maybeInstance;
+  if (result == null) {
+    throwNotInitializedError();
+  }
+  return result;
+}();
 
 /// Configuration of a [DynamicLibrary], which can be used to load the
 /// `DynamicLibrary` at a later time.

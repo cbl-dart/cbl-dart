@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 
 import '../bindings.dart';
 import '../support/errors.dart';
+import '../support/ffi.dart';
 import '../support/utils.dart';
 import 'decoder.dart';
 import 'encoder.dart';
@@ -27,7 +28,7 @@ final class SharedKeys implements Finalizable {
     _bindings.bindToDartObject(this, pointer, retain: !adopt);
   }
 
-  static final _bindings = CBLBindings.instance.fleece.sharedKeys;
+  static final _bindings = cblBindings.fleece.sharedKeys;
 
   final FLSharedKeys pointer;
 
@@ -68,7 +69,7 @@ final class Doc implements Finalizable {
     _bindings.bindToDartObject(this, pointer);
   }
 
-  static final _bindings = CBLBindings.instance.fleece.doc;
+  static final _bindings = cblBindings.fleece.doc;
 
   final FLDoc pointer;
 
@@ -153,7 +154,7 @@ final class Value implements Finalizable {
     }
   }
 
-  static final _bindings = CBLBindings.instance.fleece.value;
+  static final _bindings = cblBindings.fleece.value;
 
   final FLValue pointer;
 
@@ -300,7 +301,7 @@ final class Array extends Value with ListMixin<Value> {
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
-  static final _bindings = CBLBindings.instance.fleece.array;
+  static final _bindings = cblBindings.fleece.array;
 
   @override
   int get length => _bindings.count(pointer.cast());
@@ -376,7 +377,7 @@ final class MutableArray extends Array {
         adopt: true,
       );
 
-  static final _bindings = CBLBindings.instance.fleece.mutableArray;
+  static final _bindings = cblBindings.fleece.mutableArray;
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
@@ -463,7 +464,7 @@ final class Dict extends Value with MapMixin<String, Value> {
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
-  static final _bindings = CBLBindings.instance.fleece.dict;
+  static final _bindings = cblBindings.fleece.dict;
 
   /// Returns the number of items in a dictionary.
   @override
@@ -587,7 +588,7 @@ final class MutableDict extends Dict {
         adopt: true,
       );
 
-  static final _bindings = CBLBindings.instance.fleece.mutableDict;
+  static final _bindings = cblBindings.fleece.mutableDict;
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
@@ -675,7 +676,7 @@ abstract final class SlotSetter {
 }
 
 final class _DefaultSlotSetter implements SlotSetter {
-  late final _slotBindings = CBLBindings.instance.fleece.slot;
+  late final _slotBindings = cblBindings.fleece.slot;
 
   @override
   bool canSetValue(Object? value) =>

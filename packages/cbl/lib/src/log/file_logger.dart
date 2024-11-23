@@ -4,6 +4,7 @@ import 'dart:io';
 
 import '../bindings.dart';
 import '../support/errors.dart';
+import '../support/ffi.dart';
 import 'logger.dart';
 
 /// The configuration for log files.
@@ -123,7 +124,7 @@ abstract final class FileLogger {
 
 // === Impl ====================================================================
 
-final _bindings = CBLBindings.instance.logging;
+final _bindings = cblBindings.logging;
 
 final class FileLoggerImpl extends FileLogger {
   @override

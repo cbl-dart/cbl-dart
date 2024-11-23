@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import '../../bindings.dart';
+import '../../support/ffi.dart';
 import '../../support/utils.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
 
-final _arrayBindings = CBLBindings.instance.fleece.array;
+final _arrayBindings = cblBindings.fleece.array;
 
 final class MArray extends MCollection {
   MArray()

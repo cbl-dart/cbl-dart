@@ -1,4 +1,4 @@
-import '../bindings.dart';
+import 'ffi.dart';
 
 enum Edition {
   community,
@@ -13,9 +13,7 @@ enum EnterpriseFeature {
 
 Edition get activeEdition =>
     _activeEditionOverride ??
-    (CBLBindings.instance.enterpriseEdition
-        ? Edition.enterprise
-        : Edition.community);
+    (cblBindings.enterpriseEdition ? Edition.enterprise : Edition.community);
 
 Edition? _activeEditionOverride;
 

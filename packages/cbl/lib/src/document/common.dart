@@ -10,13 +10,14 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
+import '../support/ffi.dart';
 import 'array.dart';
 import 'blob.dart';
 import 'dictionary.dart';
 
-final _blobBindings = CBLBindings.instance.blobs.blob;
-final _valueBinds = CBLBindings.instance.fleece.value;
-final _decoderBinds = CBLBindings.instance.fleece.decoder;
+final _blobBindings = cblBindings.blobs.blob;
+final _valueBinds = cblBindings.fleece.value;
+final _decoderBinds = cblBindings.fleece.decoder;
 
 abstract interface class CblConversions {
   Object? toPlainObject();

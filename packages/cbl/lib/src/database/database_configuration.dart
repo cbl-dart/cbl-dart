@@ -10,6 +10,7 @@ import '../bindings.dart';
 import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
 import '../support/edition.dart';
+import '../support/ffi.dart';
 import '../support/isolate.dart';
 import 'database.dart';
 
@@ -99,8 +100,7 @@ final class EncryptionKeyImpl implements EncryptionKey {
   // ignore: prefer_constructors_over_static_methods
   static EncryptionKeyImpl passwordSync(String password) {
     useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
-    final key =
-        CBLBindings.instance.database.encryptionKeyFromPassword(password);
+    final key = cblBindings.database.encryptionKeyFromPassword(password);
     return EncryptionKeyImpl(key);
   }
 
