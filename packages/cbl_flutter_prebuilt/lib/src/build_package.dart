@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-// ignore: implementation_imports
-import 'package:cbl_flutter/src/install.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as p;
 
@@ -10,7 +8,7 @@ import 'configuration.dart';
 import 'template_context.dart';
 import 'utils.dart';
 
-Future<void> buildPackage(PrebuiltPackageConfiguration configuration) async {
+Future<void> buildPackage(PackageConfiguration configuration) async {
   void log(String message) {
     // ignore: avoid_print
     print('${configuration.name}: $message');

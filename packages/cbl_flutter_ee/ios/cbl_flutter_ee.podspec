@@ -1,7 +1,5 @@
 # Install libraries if they have not been installed yet.
-Dir.chdir("#{Dir.pwd}/..") do
-  `dart run cbl_flutter:install ios`
-end
+`../tool/install_libraries.sh ios`
 
 Pod::Spec.new do |s|
   s.name                = 'cbl_flutter_ee'

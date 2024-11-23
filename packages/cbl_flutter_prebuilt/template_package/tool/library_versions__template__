@@ -1,0 +1,5 @@
+COUCHBASE_EDITION="{{edition}}"
+COUCHBASE_LITE_C_VERSION="{{couchbaseLiteC.version}}"
+COUCHBASE_LITE_C_RELEASE="{{couchbaseLiteC.release}}"
+COUCHBASE_LITE_DART_VERSION="{{couchbaseLiteDart.version}}"
+COUCHBASE_LITE_DART_RELEASE="{{couchbaseLiteDart.release}}"

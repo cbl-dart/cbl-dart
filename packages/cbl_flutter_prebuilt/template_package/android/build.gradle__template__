@@ -41,8 +41,13 @@ dependencies {
 }
 
 task installLibraries(type: Exec) {
-    workingDir "$projectDir/.."
-    commandLine 'dart', 'run', 'cbl_flutter:install', 'android'
+    workingDir file("$projectDir/..")
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        commandLine 'C:/Program Files/Git/bin/bash', './tool/install_libraries.sh', 'android'
+    } else {
+        commandLine './tool/install_libraries.sh', 'android'
+    }
 }
 
 tasks.preBuild.dependsOn(installLibraries)

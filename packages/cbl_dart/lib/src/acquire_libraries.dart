@@ -2,14 +2,12 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:cbl/cbl.dart';
-// ignore: implementation_imports
-import 'package:cbl/src/install.dart';
 import 'package:path/path.dart' as p;
 
 import '../cbl_dart.dart';
 import 'install_libraries.dart';
-import 'logging.dart';
-import 'version_info.dart';
+import 'package.dart';
+import 'utils.dart';
 
 /// Libraries that should be used instead of downloading and installing them.
 ///
@@ -74,18 +72,10 @@ Future<String> _resolveStandaloneDartE2eTestDir() async {
   return p.normalize(p.join(cblDartDir, '..', 'cbl_e2e_tests_standalone_dart'));
 }
 
-String? cblDartSharedCacheDirOverride;
-
-String get cblDartSharedCacheDir =>
-    cblDartSharedCacheDirOverride ?? p.join(userCachesDir, 'cbl_dart');
-
-String get sharedMergedNativesLibrariesDir =>
-    p.join(cblDartSharedCacheDir, 'merged_native_libraries');
-
 /// Ensures that the latest releases of the libraries are installed and returns
 /// the corresponding [LibrariesConfiguration] configuration.
 ///
-/// See [latestReleases] for the releases installed by this function.
+/// See [Package.latestReleases] for the releases installed by this function.
 ///
 /// [edition] is the edition of Couchbase Lite to install.
 ///
@@ -105,12 +95,12 @@ Future<LibrariesConfiguration> acquireLibraries({
     return _librariesOverride!;
   }
 
-  mergedNativeLibrariesDir ??= sharedMergedNativesLibrariesDir;
+  mergedNativeLibrariesDir ??= _sharedMergedNativesLibrariesDir();
   await Directory(mergedNativeLibrariesDir).create(recursive: true);
 
   final packages = Library.values.map((library) => Package(
         library: library,
-        release: latestReleases[library]!,
+        release: Package.latestReleases[library]!,
         edition: edition,
         target: Target.host,
       ));
@@ -130,3 +120,40 @@ Future<LibrariesConfiguration> acquireLibraries({
     directory: mergedNativeLibrariesDir,
   );
 }
+
+String get _homeDir {
+  if (Platform.isMacOS || Platform.isLinux) {
+    return Platform.environment['HOME']!;
+  }
+
+  if (Platform.isWindows) {
+    return Platform.environment['USERPROFILE']!;
+  }
+
+  throw UnsupportedError('Not supported on this platform.');
+}
+
+String? sharedCacheDirOverride;
+
+String _sharedCacheDir() {
+  if (sharedCacheDirOverride != null) {
+    return sharedCacheDirOverride!;
+  }
+
+  if (Platform.isMacOS) {
+    return '$_homeDir/Library/Caches/cbl_dart';
+  }
+
+  if (Platform.isLinux) {
+    return '$_homeDir/.cache/cbl_dart';
+  }
+
+  if (Platform.isWindows) {
+    return '$_homeDir/AppData/Local/cbl_dart';
+  }
+
+  throw UnsupportedError('Unsupported platform.');
+}
+
+String _sharedMergedNativesLibrariesDir() =>
+    p.join(_sharedCacheDir(), 'merged_native_libraries');

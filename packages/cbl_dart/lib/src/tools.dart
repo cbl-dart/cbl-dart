@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_catches_without_on_clauses
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -8,34 +10,7 @@ import 'package:http/http.dart';
 import 'package:path/path.dart' as p;
 
 import 'package.dart';
-
-String get homeDir {
-  if (Platform.isMacOS || Platform.isLinux) {
-    return Platform.environment['HOME']!;
-  }
-
-  if (Platform.isWindows) {
-    return Platform.environment['USERPROFILE']!;
-  }
-
-  throw UnsupportedError('Unsupported platform.');
-}
-
-String get userCachesDir {
-  if (Platform.isMacOS) {
-    return p.join(homeDir, 'Library', 'Caches');
-  }
-
-  if (Platform.isLinux) {
-    return p.join(homeDir, '.cache');
-  }
-
-  if (Platform.isWindows) {
-    return p.join(homeDir, 'AppData', 'Local');
-  }
-
-  throw UnsupportedError('Unsupported platform.');
-}
+import 'utils.dart';
 
 /// Downloads the contents of [url] into memory.
 Future<Uint8List> downloadUrl(
@@ -51,11 +26,18 @@ Future<Uint8List> downloadUrl(
         return false;
       },
       () async {
+        logger.fine('Downloading $url ...');
+
         final response = await get(Uri.parse(url));
         if (response.statusCode != 200) {
+          logger.fine(
+            'Download failed: $url (${response.statusCode})\n${response.body}',
+          );
           // ignore: only_throw_errors
           throw response;
         }
+
+        logger.fine('Downloaded $url');
 
         return response.bodyBytes;
       },
@@ -98,6 +80,8 @@ Future<void> unpackArchive(
   required ArchiveFormat format,
   required String outputDir,
 }) async {
+  logger.fine('Unpacking ${format.name} archive into $outputDir ...');
+
   await switch (format) {
     ArchiveFormat.zip => _unpackZipArchive(archiveData, outputDir),
     ArchiveFormat.tarGz => _unpackTarGzArchive(archiveData, outputDir),
@@ -130,9 +114,10 @@ Future<void> _unpackTarGzArchive(
 Future<void> copyDirectoryContents(
   String sourceDir,
   String destinationDir, {
-  bool dereferenceLinks = false,
   bool Function(FileSystemEntity)? filter,
 }) async {
+  logger.fine('Copying directory contents: $sourceDir -> $destinationDir');
+
   final sourceDirPath = p.absolute(sourceDir);
   final destinationDirPath = p.absolute(destinationDir);
 
@@ -150,21 +135,11 @@ Future<void> copyDirectoryContents(
     final destPath = p.join(destinationDirPath, relativePath);
 
     if (entity is Link) {
-      if (dereferenceLinks) {
-        await File(destPath).create(recursive: true);
-        await File(entity.resolveSymbolicLinksSync()).copy(destPath);
-      } else {
-        await Link(destPath).create(await entity.target());
-      }
+      await Link(destPath).create(await entity.target());
     } else if (entity is File) {
       await entity.copy(destPath);
     } else if (entity is Directory) {
       await Directory(destPath).create(recursive: true);
     }
   }
-}
-
-Future<void> moveDirectory(Directory from, Directory to) async {
-  await to.parent.create(recursive: true);
-  await from.rename(to.path);
 }

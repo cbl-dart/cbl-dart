@@ -1,35 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
-// ignore: implementation_imports
-import 'package:cbl/src/install.dart';
-import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
-import 'logging.dart';
-
-extension PackageMerging on Package {
-  static String signature(Iterable<Package> packages) {
-    final signatures =
-        packages.map((package) => package.signatureContent).toList()..sort();
-
-    return md5
-        .convert(utf8.encode(signatures.join()))
-        .bytes
-        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-        .join();
-  }
-
-  String get signatureContent =>
-      [library.name, release, edition.name, target.id].join();
-}
+import 'package.dart';
+import 'tools.dart';
+import 'utils.dart';
 
 Directory mergedNativeLibrariesInstallDir(
   Iterable<Package> packages,
   String directory,
 ) {
-  final signature = PackageMerging.signature(packages);
+  final signature = Package.mergedSignature(packages);
   return Directory(p.join(directory, signature));
 }
 
@@ -45,17 +27,53 @@ Future<void> installMergedNativeLibraries(
 }) async {
   logger.fine('Installing native libraries into $directory');
 
-  final installDir = mergedNativeLibrariesInstallDir(packages, directory);
-  await installDir.create(recursive: true);
+  final tmpDir = await Directory.systemTemp.createTemp();
 
-  for (final package in packages) {
-    await package.acquire();
+  try {
+    final tmpInstallDir = Directory.fromUri(tmpDir.uri.resolve('lib'));
+    await tmpInstallDir.create();
+
+    for (final package in packages) {
+      await installNativeLibrary(
+        package,
+        installDir: tmpInstallDir.path,
+        tmpDir: tmpDir.path,
+      );
+    }
+
+    final installDir = mergedNativeLibrariesInstallDir(packages, directory);
+    await installDir.create(recursive: true);
+
     await copyDirectoryContents(
-      package.libDir,
+      tmpInstallDir.path,
       installDir.path,
       filter: (entity) => !entity.path.contains('cmake'),
     );
+  } finally {
+    await tmpDir.delete(recursive: true);
   }
+}
+
+Future<void> installNativeLibrary(
+  Package package, {
+  required String installDir,
+  required String tmpDir,
+}) async {
+  logger.fine('Installing native library ${package.libraryName}');
+
+  final packageRootDir =
+      p.join(tmpDir, '${package.library.name}-${package.version}');
+  final targetLibDir = p.join(packageRootDir, package.librariesDir);
+
+  final archiveData = await downloadUrl(package.archiveUrl);
+  await unpackArchive(
+    archiveData,
+    format: package.archiveFormat,
+    outputDir: tmpDir,
+  );
+
+  // Copy contents of lib dir from archive to install dir.
+  await copyDirectoryContents(targetLibDir, installDir);
 }
 
 LibrariesConfiguration mergedNativeLibrariesConfigurations(

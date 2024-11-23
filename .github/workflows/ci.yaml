@@ -331,8 +331,9 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart packages
-        run: ./tools/dev-tools.sh bootstrap
+      - name: Bootstrap Dart package
+        shell: bash
+        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Start virtual devices
         shell: bash

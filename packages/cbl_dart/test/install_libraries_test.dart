@@ -1,8 +1,7 @@
 import 'dart:io';
 
-import 'package:cbl/src/install/package.dart';
 import 'package:cbl_dart/src/install_libraries.dart';
-import 'package:cbl_dart/src/version_info.dart';
+import 'package:cbl_dart/src/package.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -12,7 +11,7 @@ void main() {
 
     final packages = Library.values.map((library) => Package(
           library: library,
-          release: latestReleases[library]!,
+          release: Package.latestReleases[library]!,
           edition: Edition.enterprise,
           target: Target.host,
         ));
@@ -23,7 +22,7 @@ void main() {
     expect(installDirEntries, hasLength(1));
 
     final libDir = installDirEntries.first as Directory;
-    expect(p.basename(libDir.path), PackageMerging.signature(packages));
+    expect(p.basename(libDir.path), Package.mergedSignature(packages));
 
     final libDirEntries = libDir.listSync();
     final libDirBasenames =
