@@ -63,7 +63,7 @@ class LibraryConfiguration {
       }
 
       if (isAppleFramework ?? false) {
-        name = '$name.framework/Versions/A/$name';
+        name = '$name.framework/Versions/A/${this.name}';
       } else if (appendExtension ?? false) {
         name += _dynamicLibraryExtension(version: version);
       }

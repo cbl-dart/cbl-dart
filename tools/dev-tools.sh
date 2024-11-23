@@ -34,6 +34,7 @@ cblFlutterLocalDir="$packagesDir/cbl_flutter_local"
 cblFlutterLocalAndroidJniLibsDir="$cblFlutterLocalDir/android/src/main/jniLibs"
 cblFlutterLocalIosFrameworksDir="$cblFlutterLocalDir/ios/Frameworks"
 cblFlutterLocalMacosLibrariesDir="$cblFlutterLocalDir/macos/Libraries"
+cblFlutterLocalMacosFrameworksDir="$cblFlutterLocalDir/macos/Frameworks"
 cblFlutterLocalLinuxLibDir="$cblFlutterLocalDir/linux/lib"
 cblFlutterLocalWindowsBinDir="$cblFlutterLocalDir/windows/bin"
 
@@ -150,7 +151,7 @@ function prepareNativeLibraries() {
         mkdir -p "$cblFlutterLocalMacosLibrariesDir"
         cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
         cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
-        cp -L "$couchbaseLiteVectorSearchArchiveDir/"* "$cblFlutterLocalMacosLibrariesDir"
+        cp -a "$couchbaseLiteVectorSearchArchiveDir/"* "$cblFlutterLocalMacosFrameworksDir"
         ;;
     linux-x86_64)
         "$couchbaseLiteDartDir/tools/build_unix.sh" "$edition" "$buildMode"

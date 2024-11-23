@@ -53,16 +53,18 @@ Future<void> installMergedNativeLibraries(
   await installDir.create(recursive: true);
 
   for (final package in packages) {
-    await copyDirectoryContents(
-      switch (package) {
-        DatabaseStandardPackage(:final sharedLibrariesDir) =>
-          sharedLibrariesDir,
-        VectorSearchPackage(:final sharedLibrariesDir) => sharedLibrariesDir!,
-        _ => throw UnimplementedError('$package'),
-      },
-      installDir.path,
-      filter: (entity) => !entity.path.contains('cmake'),
-    );
+    if (package.isAppleFramework) {
+      await copyDirectoryContents(
+        package.appleFrameworkDir!,
+        '${installDir.path}/${package.appleFrameworkName!}',
+      );
+    } else {
+      await copyDirectoryContents(
+        package.singleSharedLibrariesDir!,
+        installDir.path,
+        filter: (entity) => !entity.path.contains('cmake'),
+      );
+    }
   }
 }
 
@@ -92,32 +94,17 @@ LibrariesConfiguration mergedNativeLibrariesConfigurations(
   );
 }
 
-LibraryConfiguration _nativeLibraryConfiguration(Package package) {
-  final libraryName = switch (package) {
-    DatabaseStandardPackage(:final libraryName) ||
-    VectorSearchPackage(:final libraryName) =>
-      libraryName,
-    _ => throw UnimplementedError('$package'),
-  };
-
-  if (Platform.isMacOS || Platform.isLinux) {
-    return LibraryConfiguration.dynamic(
-      libraryName,
-      version: switch (package) {
-        // Specifying an exact version should not be necessary, but is because
-        // the beta of libcblite does not distribute properly symlinked
-        // libraries for macos. We need to use the libcblite.x.dylib because
-        // that is what libcblitedart is linking against.
-        DatabaseStandardPackage(:final config) =>
-          config.version.split('.').first,
-        _ => null,
-      },
+LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
+    LibraryConfiguration.dynamic(
+      package.libraryName,
+      // Specifying an exact version should not be necessary, but is
+      // because the beta of libcblite does not distribute properly
+      // symlinked libraries for macos. We need to use the
+      // libcblite.x.dylib because that is what libcblitedart is linking
+      // against.
+      version:
+          package.os == OS.macOS && package.config.library.isDatabaseLibrary
+              ? package.config.version.split('.').first
+              : null,
+      isAppleFramework: package.isNormalAppleFramework,
     );
-  }
-
-  if (Platform.isWindows) {
-    return LibraryConfiguration.dynamic(libraryName);
-  }
-
-  throw UnsupportedError('Unsupported platform.');
-}

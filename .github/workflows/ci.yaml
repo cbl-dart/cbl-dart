@@ -306,6 +306,11 @@ jobs:
             os: macOS
           - embedder: flutter
             os: iOS
+          # Dependency overrides for cbl_flutter_[ee,ce] don't work on Windows
+          # because of how symlinks work there (in regards to
+          # windows/ephemeral/.symlinks/plugins), so we exclude Windows for now.
+          - embedder: flutter
+            os: Windows
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-12",

@@ -1,10 +1,9 @@
 export 'install/package.dart'
     show
+        AppleFrameworkType,
         Architecture,
         ArchiveFormat,
-        DatabaseAndroidPackage,
         DatabasePackageConfig,
-        DatabaseStandardPackage,
         Edition,
         Library,
         OS,
@@ -12,6 +11,5 @@ export 'install/package.dart'
         PackageConfig,
         PackageLoader,
         RemotePackageLoader,
-        VectorSearchPackage,
         VectorSearchPackageConfig;
 export 'install/utils.dart' show copyDirectoryContents, userCachesDir;

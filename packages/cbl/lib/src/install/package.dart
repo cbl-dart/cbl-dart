@@ -6,38 +6,93 @@ import 'package:path/path.dart' as p;
 
 import 'utils.dart';
 
-/// An archive format.
-enum ArchiveFormat {
-  zip,
-  tarGz;
-
-  String get extension => switch (this) {
-        ArchiveFormat.zip => 'zip',
-        ArchiveFormat.tarGz => 'tar.gz'
-      };
-}
-
 /// A library that is distributed as part of cbl-dart.
 enum Library {
-  cblite._('cblite'),
-  cblitedart._('cblitedart'),
-  vectorSearch._('CouchbaseLiteVectorSearch');
-
-  const Library._(this.libraryName);
+  cblite,
+  cblitedart,
+  vectorSearch;
 
   static const databaseLibraries = [cblite, cblitedart];
 
-  final String libraryName;
-
-  String get libLibraryName => 'lib$libraryName';
-
   bool get isDatabaseLibrary => databaseLibraries.contains(this);
+
+  String? packageRootDir(OS os, String version) => switch (this) {
+        cblite => switch (os) {
+            OS.android ||
+            OS.linux ||
+            OS.macOS ||
+            OS.windows =>
+              'libcblite-$version',
+            OS.iOS => null
+          },
+        cblitedart => switch (os) {
+            OS.android ||
+            OS.linux ||
+            OS.macOS ||
+            OS.windows =>
+              'libcblitedart-$version',
+            OS.iOS => null
+          },
+        vectorSearch => null,
+      };
+
+  AppleFrameworkType? appleFrameworkType(OS os) => switch (this) {
+        cblite ||
+        cblitedart =>
+          os == OS.iOS ? AppleFrameworkType.xcframework : null,
+        vectorSearch => switch (os) {
+            OS.iOS => AppleFrameworkType.xcframework,
+            OS.macOS => AppleFrameworkType.framework,
+            OS.android || OS.linux || OS.windows => null,
+          },
+      };
+
+  String? sharedLibrariesDir(OS os, Architecture architecture) =>
+      switch (this) {
+        cblite || cblitedart => switch (os) {
+            OS.android => p.join('lib', architecture.androidTriple),
+            OS.macOS => 'lib',
+            OS.linux => p.join('lib', architecture.linuxTripple),
+            OS.windows => 'bin',
+            OS.iOS => null,
+          },
+        vectorSearch => switch (os) {
+            OS.linux || OS.android => 'lib',
+            OS.windows => 'bin',
+            OS.iOS || OS.macOS => null,
+          }
+      };
+
+  String libraryName(OS os) => switch (this) {
+        cblite => switch (os) {
+            OS.linux || OS.android || OS.macOS => 'libcblite',
+            OS.windows => 'cblite',
+            OS.iOS => 'CouchbaseLite',
+          },
+        cblitedart => switch (os) {
+            OS.linux || OS.android || OS.macOS => 'libcblitedart',
+            OS.windows => 'cblitedart',
+            OS.iOS => 'CouchbaseLiteDart',
+          },
+        vectorSearch => switch (os) {
+            OS.linux || OS.android => 'libCouchbaseLiteVectorSearch',
+            OS.windows || OS.macOS || OS.iOS => 'CouchbaseLiteVectorSearch',
+          },
+      };
 }
 
 /// A Couchbase Lite edition.
 enum Edition {
   community,
   enterprise,
+}
+
+/// An archive format.
+enum ArchiveFormat {
+  zip,
+  tarGz;
+
+  String get extension => switch (this) { zip => 'zip', tarGz => 'tar.gz' };
 }
 
 /// An operating system.
@@ -81,6 +136,121 @@ enum Architecture {
   arm64,
 }
 
+enum AppleFrameworkType {
+  xcframework,
+  framework;
+
+  String get extension => switch (this) {
+        xcframework => 'xcframework',
+        framework => 'framework',
+      };
+}
+
+abstract final class PackageConfig {
+  PackageConfig({
+    required this.library,
+    required this.os,
+    required this.architectures,
+    required this.release,
+    required this.archiveFormat,
+  });
+
+  final Library library;
+  final OS os;
+  final List<Architecture> architectures;
+  final String release;
+  final ArchiveFormat archiveFormat;
+
+  bool get isMultiArchitecture => architectures.length > 1;
+
+  String get targetId => isMultiArchitecture
+      ? os.couchbaseSdkName
+      : '${os.couchbaseSdkName}-${architectures.single.couchbaseSdkName}';
+
+  String get version => release.split('-').first;
+
+  String get _archiveUrl;
+
+  Package _package(String packageDir) =>
+      Package(config: this, packageDir: packageDir);
+
+  Future<void> _postProcess(String packageDir) async {}
+}
+
+final class Package {
+  Package({
+    required this.config,
+    required this.packageDir,
+  });
+
+  final PackageConfig config;
+  final String packageDir;
+
+  OS get os => config.os;
+
+  Library get library => config.library;
+
+  String get rootDir => p.join(
+        packageDir,
+        config.library.packageRootDir(config.os, config.version),
+      );
+
+  String get libraryName => config.library.libraryName(config.os);
+
+  AppleFrameworkType? get appleFrameworkType =>
+      config.library.appleFrameworkType(os);
+
+  bool get isNormalAppleFramework =>
+      appleFrameworkType == AppleFrameworkType.framework;
+
+  bool get isAppleFramework => appleFrameworkType != null;
+
+  String? get appleFrameworkName {
+    if (appleFrameworkType case final frameworkType?) {
+      return '$libraryName.${frameworkType.extension}';
+    } else {
+      return null;
+    }
+  }
+
+  String? get appleFrameworkDir {
+    if (appleFrameworkName case final frameworkName?) {
+      return p.join(rootDir, frameworkName);
+    } else {
+      return null;
+    }
+  }
+
+  String? get singleSharedLibrariesDir {
+    final sharedLibrariesDirectories =
+        config.architectures.map(sharedLibrariesDir).toSet();
+    if (sharedLibrariesDirectories.length == 1) {
+      return sharedLibrariesDirectories.single;
+    } else {
+      throw StateError(
+        'Multiple shared libraries directories: $sharedLibrariesDirectories',
+      );
+    }
+  }
+
+  String? sharedLibrariesDir(Architecture architecture) {
+    if (!config.architectures.contains(architecture)) {
+      throw ArgumentError.value(
+        architecture,
+        'architecture',
+        'must be in ${config.architectures}',
+      );
+    }
+
+    if (config.library.sharedLibrariesDir(config.os, architecture)
+        case final librariesDir?) {
+      return p.join(rootDir, librariesDir);
+    } else {
+      return null;
+    }
+  }
+}
+
 abstract class PackageLoader {
   Future<Package> load(PackageConfig config) async =>
       config._package(await _packageDir(config));
@@ -117,6 +287,7 @@ final class RemotePackageLoader extends PackageLoader {
         format: config.archiveFormat,
         outputDir: tempDirectory.path,
       );
+      await config._postProcess(tempDirectory.path);
       try {
         await moveDirectory(tempDirectory, packageDirectory);
       } on PathExistsException {
@@ -130,32 +301,6 @@ final class RemotePackageLoader extends PackageLoader {
 
     return packageDir;
   }
-}
-
-abstract final class PackageConfig {
-  PackageConfig({
-    required this.library,
-    required this.os,
-    required this.architectures,
-    required this.release,
-    required this.archiveFormat,
-  });
-
-  final Library library;
-  final OS os;
-  final List<Architecture> architectures;
-  final String release;
-  final ArchiveFormat archiveFormat;
-
-  bool get isMultiArchitecture => architectures.length > 1;
-  String get targetId => isMultiArchitecture
-      ? os.sdkName
-      : '${os.sdkName}-${architectures.single.sdkName}';
-  String get version => release.split('-').first;
-
-  String get _archiveUrl;
-
-  Package _package(String packageDir);
 }
 
 final class DatabasePackageConfig extends PackageConfig {
@@ -274,13 +419,6 @@ final class DatabasePackageConfig extends PackageConfig {
           ).toString(),
         _ => throw UnsupportedError('$library'),
       };
-
-  @override
-  Package _package(String packageDir) => switch (os) {
-        OS.android =>
-          DatabaseAndroidPackage(config: this, packageDir: packageDir),
-        _ => DatabaseStandardPackage(config: this, packageDir: packageDir),
-      };
 }
 
 final class VectorSearchPackageConfig extends PackageConfig {
@@ -350,95 +488,44 @@ final class VectorSearchPackageConfig extends PackageConfig {
             '${[
               'couchbase-lite-vector-search',
               release,
-              os.sdkName,
+              os.couchbaseSdkName,
               if (!isMultiArchitecture)
                 if (os == OS.android &&
                     architectures.single == Architecture.arm64)
                   'arm64-v8a'
                 else
-                  architectures.single.sdkName
+                  architectures.single.couchbaseSdkName
             ].join('-')}.${archiveFormat.extension}'
         ],
       ).toString();
 
   @override
-  Package _package(String packageDir) =>
-      VectorSearchPackage(config: this, packageDir: packageDir);
-}
-
-sealed class Package {
-  Package({
-    required this.config,
-    required this.packageDir,
-  });
-
-  final PackageConfig config;
-  final String packageDir;
-}
-
-final class DatabaseAndroidPackage extends Package {
-  DatabaseAndroidPackage({required super.config, required super.packageDir})
-      : assert(config.os == OS.android);
-
-  String get baseDir =>
-      p.join(packageDir, '${config.library.libLibraryName}-${config.version}');
-
-  String sharedLibrariesDir(Architecture architecture) =>
-      p.join(baseDir, p.join('lib', architecture.androidTriple));
-}
-
-final class DatabaseStandardPackage extends Package {
-  DatabaseStandardPackage({required super.config, required super.packageDir});
-
-  String get baseDir =>
-      p.join(packageDir, '${config.library.libLibraryName}-${config.version}');
-
-  String get includeDir => p.join(baseDir, 'include');
-
-  String get sharedLibrariesDir => p.join(
-        baseDir,
-        switch (config.os) {
-          OS.macOS => 'lib',
-          OS.linux => p.join('lib', config.architectures.single.linuxTripple),
-          OS.windows => 'bin',
-          _ => throw UnsupportedError('${config.os}'),
-        },
-      );
-
-  String get libraryName => switch (config.os) {
-        OS.linux || OS.macOS => config.library.libLibraryName,
-        OS.windows => config.library.libraryName,
-        _ => throw UnsupportedError('${config.os}'),
-      };
-}
-
-final class VectorSearchPackage extends Package {
-  VectorSearchPackage({required super.config, required super.packageDir});
-
-  String? get sharedLibrariesDir {
-    final directory = switch (config.os) {
-      OS.macOS => packageDir,
-      OS.linux || OS.android => 'lib',
-      OS.windows => 'bin',
-      OS.iOS => null,
-    };
-
-    if (directory == null) {
-      return null;
+  Future<void> _postProcess(String packageDir) async {
+    if (os == OS.macOS) {
+      // It seems like the shared library was taken out of a framework, but for
+      // linking during the build process for a macOS App and loading of the
+      // extension to work, it needs to be in a framework.
+      // So we place the shared library back into a framework.
+      final libraryFile =
+          File(p.join(packageDir, 'CouchbaseLiteVectorSearch.dylib'));
+      final frameworkDirectory = Directory(p.join(
+        packageDir,
+        'CouchbaseLiteVectorSearch.framework',
+      ));
+      final versionedLibraryPath =
+          p.join('Versions', 'A', 'CouchbaseLiteVectorSearch');
+      final versionedLibraryFile =
+          File(p.join(frameworkDirectory.path, versionedLibraryPath));
+      await versionedLibraryFile.parent.create(recursive: true);
+      await libraryFile.rename(versionedLibraryFile.path);
+      await Link(p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'))
+          .create(versionedLibraryPath);
     }
-
-    return p.join(packageDir, directory);
   }
-
-  String get libraryName => switch (config.os) {
-        OS.linux => config.library.libLibraryName,
-        OS.windows || OS.macOS => config.library.libraryName,
-        _ => throw UnsupportedError('${config.os}'),
-      };
 }
 
 extension on OS {
-  String get sdkName => switch (this) {
+  String get couchbaseSdkName => switch (this) {
         OS.android => 'android',
         OS.iOS => 'ios',
         OS.linux => 'linux',
@@ -448,7 +535,7 @@ extension on OS {
 }
 
 extension on Architecture {
-  String get sdkName => switch (this) {
+  String get couchbaseSdkName => switch (this) {
         Architecture.arm => 'arm',
         Architecture.arm64 => 'arm64',
         Architecture.ia32 => 'i686',

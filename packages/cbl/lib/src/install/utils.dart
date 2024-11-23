@@ -127,7 +127,7 @@ Future<void> _unpackTarGzArchive(
   await extractArchiveToDisk(archive, outputDir);
 }
 
-/// Copies the contents of [sourceDir] to [destinationDir].
+/// Copies [sourceDir] to [destinationDir].
 Future<void> copyDirectoryContents(
   String sourceDir,
   String destinationDir, {

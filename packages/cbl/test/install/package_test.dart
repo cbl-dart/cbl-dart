@@ -19,13 +19,16 @@ void main() {
       final packageConfigs = VectorSearchPackageConfig.all(release: '1.0.0');
 
       for (final packageConfig in packageConfigs) {
-        final package = await loader.load(packageConfig) as VectorSearchPackage;
-        if (package.sharedLibrariesDir case final sharedLibrariesDir?) {
-          expect(
-            Directory(sharedLibrariesDir).existsSync(),
-            isTrue,
-            reason: 'Missing: $sharedLibrariesDir',
-          );
+        final package = await loader.load(packageConfig);
+        for (final architecture in package.config.architectures) {
+          if (package.sharedLibrariesDir(architecture)
+              case final sharedLibrariesDir?) {
+            expect(
+              Directory(sharedLibrariesDir).existsSync(),
+              isTrue,
+              reason: 'Missing: $sharedLibrariesDir',
+            );
+          }
         }
       }
     });

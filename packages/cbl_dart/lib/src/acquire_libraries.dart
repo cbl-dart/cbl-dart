@@ -63,7 +63,10 @@ Future<void> setupDevelopmentLibraries() async {
     directory: directory,
     cbl: LibraryConfiguration.dynamic(cblLib),
     cblDart: LibraryConfiguration.dynamic(cblDartLib),
-    vectorSearch: LibraryConfiguration.dynamic(vectorSearchLib),
+    vectorSearch: LibraryConfiguration.dynamic(
+      vectorSearchLib,
+      isAppleFramework: Platform.isMacOS,
+    ),
   );
 }
 
