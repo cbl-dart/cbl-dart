@@ -2,11 +2,12 @@
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
 import 'utils.dart';
 
-/// An archive format.
+/// An archive format, in which [Package]s are distributed.
 enum ArchiveFormat {
   zip,
   tarGz;
@@ -35,73 +36,153 @@ enum OS {
   ios,
   macos,
   linux,
-  windows;
+  windows,
+}
 
-  static OS get current {
-    if (Platform.isAndroid) {
-      return android;
-    }
+/// A target for which a specific [Package] is distributed.
+final class Target {
+  Target._(this.os);
 
-    if (Platform.isIOS) {
-      return ios;
-    }
+  static final android = Target._(OS.android);
+  static final ios = Target._(OS.ios);
+  static final macos = Target._(OS.macos);
+  static final linux_x86_64 = _LinuxTarget('x86_64');
+  static final windows_x86_64 = _WindowsTarget('x86_64');
 
+  static final all = [android, ios, macos, linux_x86_64, windows_x86_64];
+
+  static Target byId(String id) =>
+      all.firstWhereOrNull((target) => target.id == id) ??
+      (throw ArgumentError.value(id, 'id', 'Unknown target'));
+
+  /// The target of the host machine.
+  static Target get host {
     if (Platform.isMacOS) {
       return macos;
     }
 
     if (Platform.isLinux) {
-      return linux;
+      return linux_x86_64;
     }
 
     if (Platform.isWindows) {
-      return windows;
+      return windows_x86_64;
     }
 
-    throw UnsupportedError('Unsupported platform');
+    throw UnsupportedError('Unsupported host platform');
   }
-}
 
-/// A CPU architecture.
-enum Architecture {
-  x86,
-  x86_64,
-  arm,
-  arm64,
-}
+  final OS os;
 
-abstract class PackageLoader {
-  Future<Package> load(PackageConfig config) async =>
-      config._package(await _packageDir(config));
+  /// The identifier for this target, as used in the package file names.
+  String get id => os.name;
 
-  Future<String> _packageDir(PackageConfig config);
-}
+  ArchiveFormat get _archiveFormat => ArchiveFormat.zip;
 
-final class RemotePackageLoader extends PackageLoader {
-  static String get _cacheDir => p.join(userCachesDir, 'cbl_native_package');
+  String get _libDir => 'lib';
+
+  String _libraryName(Package package) => package.library.name;
 
   @override
-  Future<String> _packageDir(PackageConfig config) async {
-    final archiveBaseName =
-        p.basenameWithoutExtension(Uri.parse(config._archiveUrl).path);
+  String toString() => id;
+}
 
-    final packageDir = p.join(_cacheDir, archiveBaseName);
+/// A linux [Target].
+final class _LinuxTarget extends Target {
+  _LinuxTarget(this.arch) : super._(OS.linux);
 
-    final packageDirectory = Directory(packageDir);
-    if (packageDirectory.existsSync()) {
-      return packageDir;
+  final String arch;
+
+  @override
+  String get id => 'linux-$arch';
+
+  @override
+  ArchiveFormat get _archiveFormat => ArchiveFormat.tarGz;
+
+  @override
+  String get _libDir => p.join('lib', '$arch-linux-gnu');
+}
+
+/// A windows [Target].
+final class _WindowsTarget extends Target {
+  _WindowsTarget(this.arch) : super._(OS.windows);
+
+  final String arch;
+
+  @override
+  String get id => 'windows-$arch';
+
+  @override
+  String get _libDir => 'bin';
+
+  @override
+  String _libraryName(Package package) =>
+      package.library.name.replaceAll('lib', '');
+}
+
+/// A package though which a release of a [Library] is distributed.
+final class Package {
+  Package({
+    required this.library,
+    required this.release,
+    required this.edition,
+    required this.target,
+  });
+
+  static final _cacheDir = p.join(userCachesDir, 'cbl_native_package');
+
+  static final _archiveUrlResolvers = <Library, String Function(Package)>{
+    Library.libcblite: (package) => 'https://packages.couchbase.com/releases/'
+        'couchbase-lite-c/${package.release}/'
+        'couchbase-lite-c-${package.edition.name}-${package.release}-'
+        '${package.target.id}.${package._archiveFormat._ext}',
+    Library.libcblitedart: (package) =>
+        'https://github.com/cbl-dart/cbl-dart/releases/download/'
+        'libcblitedart-v${package.release}/'
+        'couchbase-lite-dart-${package.release}-${package.edition.name}-'
+        '${package.target.id}.${package._archiveFormat._ext}'
+  };
+
+  final Library library;
+  final String release;
+  final Edition edition;
+  final Target target;
+
+  String get version => release.split('-').first;
+
+  String get includeDir => p.join(packageDir, 'include');
+
+  String get libDir => p.join(packageDir, target._libDir);
+
+  String get libraryName => target._libraryName(this);
+
+  ArchiveFormat get _archiveFormat => target._archiveFormat;
+
+  String get _archiveUrl => _archiveUrlResolvers[library]!(this);
+
+  String get _archiveBaseName =>
+      p.basenameWithoutExtension(Uri.parse(_archiveUrl).path);
+
+  String get archiveDir => p.join(_cacheDir, _archiveBaseName);
+
+  String get packageDir => p.join(archiveDir, '${library.name}-$version');
+
+  Future<void> acquire() async {
+    final archiveDirectory = Directory(archiveDir);
+    if (archiveDirectory.existsSync()) {
+      return;
     }
 
     final tempDirectory = await Directory.systemTemp.createTemp();
     try {
-      final archiveData = await downloadUrl(config._archiveUrl);
+      final archiveData = await downloadUrl(_archiveUrl);
       await unpackArchive(
         archiveData,
-        format: config.archiveFormat,
+        format: _archiveFormat,
         outputDir: tempDirectory.path,
       );
       try {
-        await moveDirectory(tempDirectory, packageDirectory);
+        await moveDirectory(tempDirectory, archiveDirectory);
       } on PathExistsException {
         // Another process has already downloaded the archive.
       }
@@ -110,181 +191,5 @@ final class RemotePackageLoader extends PackageLoader {
         await tempDirectory.delete(recursive: true);
       }
     }
-
-    return packageDir;
   }
-}
-
-abstract final class PackageConfig {
-  PackageConfig({
-    required this.library,
-    required this.os,
-    required this.architectures,
-    required this.release,
-    required this.archiveFormat,
-  });
-
-  final Library library;
-  final OS os;
-  final List<Architecture> architectures;
-  final String release;
-  final ArchiveFormat archiveFormat;
-
-  bool get isMultiArchitecture => architectures.length > 1;
-  String get targetId =>
-      isMultiArchitecture ? os.name : '${os.name}-${architectures.single.name}';
-  String get version => release.split('-').first;
-
-  String get _archiveUrl;
-
-  Package _package(String packageDir);
-}
-
-final class DatabasePackageConfig extends PackageConfig {
-  DatabasePackageConfig({
-    required super.library,
-    required super.os,
-    required super.architectures,
-    required super.release,
-    required super.archiveFormat,
-    required this.edition,
-  });
-
-  static List<DatabasePackageConfig> all({
-    required Map<Library, String> releases,
-    required Edition edition,
-  }) =>
-      [
-        for (final library in [Library.libcblite, Library.libcblitedart]) ...[
-          DatabasePackageConfig(
-            library: library,
-            os: OS.android,
-            architectures: [
-              Architecture.arm,
-              Architecture.arm64,
-              Architecture.x86,
-              Architecture.x86_64,
-            ],
-            release: releases[library]!,
-            archiveFormat: ArchiveFormat.zip,
-            edition: edition,
-          ),
-          DatabasePackageConfig(
-            library: library,
-            os: OS.ios,
-            architectures: [
-              Architecture.arm64,
-              Architecture.x86_64,
-            ],
-            release: releases[library]!,
-            archiveFormat: ArchiveFormat.zip,
-            edition: edition,
-          ),
-          DatabasePackageConfig(
-            library: library,
-            os: OS.macos,
-            architectures: [
-              Architecture.arm64,
-              Architecture.x86_64,
-            ],
-            release: releases[library]!,
-            archiveFormat: ArchiveFormat.zip,
-            edition: edition,
-          ),
-          DatabasePackageConfig(
-            library: library,
-            os: OS.linux,
-            architectures: [Architecture.x86_64],
-            release: releases[library]!,
-            archiveFormat: ArchiveFormat.tarGz,
-            edition: edition,
-          ),
-          DatabasePackageConfig(
-            library: library,
-            os: OS.windows,
-            architectures: [Architecture.x86_64],
-            release: releases[library]!,
-            archiveFormat: ArchiveFormat.zip,
-            edition: edition,
-          ),
-        ]
-      ];
-
-  final Edition edition;
-
-  @override
-  String get _archiveUrl => switch (library) {
-        Library.libcblite => 'https://packages.couchbase.com/releases/'
-            'couchbase-lite-c/$release/'
-            'couchbase-lite-c-${edition.name}-$release-'
-            '$targetId.${archiveFormat._ext}',
-        Library.libcblitedart =>
-          'https://github.com/cbl-dart/cbl-dart/releases/download/'
-              'libcblitedart-v$release/'
-              'couchbase-lite-dart-$release-${edition.name}-'
-              '$targetId.${archiveFormat._ext}'
-      };
-
-  @override
-  Package _package(String packageDir) => switch (os) {
-        OS.android => AndroidPackage(config: this, packageDir: packageDir),
-        _ => StandardPackage(config: this, packageDir: packageDir),
-      };
-}
-
-sealed class Package {
-  Package({
-    required this.config,
-    required this.packageDir,
-  });
-
-  final PackageConfig config;
-  final String packageDir;
-}
-
-final class AndroidPackage extends Package {
-  AndroidPackage({required super.config, required super.packageDir})
-      : assert(config.os == OS.android);
-
-  String get baseDir =>
-      p.join(packageDir, '${config.library.name}-${config.version}');
-
-  String sharedLibrariesDir(Architecture architecture) => p.join(
-        baseDir,
-        p.join(
-          'lib',
-          switch (architecture) {
-            Architecture.x86 => 'i686-linux-android',
-            Architecture.x86_64 => 'x86_64-linux-android',
-            Architecture.arm => 'arm-linux-androideabi',
-            Architecture.arm64 => 'aarch64-linux-android',
-          },
-        ),
-      );
-}
-
-final class StandardPackage extends Package {
-  StandardPackage({required super.config, required super.packageDir});
-
-  String get baseDir =>
-      p.join(packageDir, '${config.library.name}-${config.version}');
-
-  String get includeDir => p.join(baseDir, 'include');
-
-  String get sharedLibrariesDir => p.join(
-        baseDir,
-        switch (config.os) {
-          OS.macos => 'lib',
-          OS.linux =>
-            p.join('lib', '${config.architectures.single.name}-linux-gnu'),
-          OS.windows => 'bin',
-          _ => throw UnsupportedError('${config.os}'),
-        },
-      );
-
-  String get libraryName => switch (config.os) {
-        OS.linux || OS.macos => config.library.name,
-        OS.windows => config.library.name.replaceAll('lib', ''),
-        _ => throw UnsupportedError('${config.os}'),
-      };
 }

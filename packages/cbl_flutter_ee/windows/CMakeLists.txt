@@ -18,7 +18,7 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 execute_process(
-  COMMAND dart run cbl_flutter:install windows
+  COMMAND dart run cbl_flutter:install windows-x86_64
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/..
   RESULT_VARIABLE INSTALL_LIBRARIES_RESULT
   OUTPUT_VARIABLE INSTALL_LIBRARIES_OUTPUT

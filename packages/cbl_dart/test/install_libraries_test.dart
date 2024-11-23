@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:cbl/src/install.dart';
+import 'package:cbl/src/install/package.dart';
 import 'package:cbl_dart/src/install_libraries.dart';
 import 'package:cbl_dart/src/version_info.dart';
 import 'package:path/path.dart' as p;
@@ -10,17 +10,14 @@ void main() {
   test('install merged native libraries', () async {
     final installDir = await Directory.systemTemp.createTemp();
 
-    final loader = RemotePackageLoader();
-    final packageConfigs = DatabasePackageConfig.all(
-      releases: latestReleases,
-      edition: Edition.enterprise,
-    ).where((config) => config.os == OS.current);
-    final packages = await Future.wait(packageConfigs.map(loader.load));
+    final packages = Library.values.map((library) => Package(
+          library: library,
+          release: latestReleases[library]!,
+          edition: Edition.enterprise,
+          target: Target.host,
+        ));
 
-    await installMergedNativeLibraries(
-      packages,
-      directory: installDir.path,
-    );
+    await installMergedNativeLibraries(packages, directory: installDir.path);
 
     final installDirEntries = installDir.listSync();
     expect(installDirEntries, hasLength(1));

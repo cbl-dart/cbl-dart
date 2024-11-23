@@ -34,20 +34,16 @@ PrebuiltPackageConfiguration _loadPackageConfiguration(Edition edition) {
     name: name,
     version: version,
     edition: edition,
-    libraries: [
-      LibraryVersionInfo(
-        library: Library.libcblite,
-        version: couchbaseLiteCVersion,
-        release: _couchbaseLiteCReleaseOverrides[couchbaseLiteCVersion] ??
-            couchbaseLiteCVersion,
-      ),
-      LibraryVersionInfo(
-        library: Library.libcblitedart,
-        version: couchbaseLiteDartVersion,
-        release: _couchbaseLiteDartReleaseOverrides[couchbaseLiteDartVersion] ??
-            couchbaseLiteDartVersion,
-      )
-    ],
+    couchbaseLiteC: LibraryVersionInfo(
+      version: couchbaseLiteCVersion,
+      release: _couchbaseLiteCReleaseOverrides[couchbaseLiteCVersion] ??
+          couchbaseLiteCVersion,
+    ),
+    couchbaseLiteDart: LibraryVersionInfo(
+      version: couchbaseLiteDartVersion,
+      release: _couchbaseLiteDartReleaseOverrides[couchbaseLiteDartVersion] ??
+          couchbaseLiteDartVersion,
+    ),
   );
 }
 

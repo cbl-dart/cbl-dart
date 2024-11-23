@@ -21,12 +21,8 @@ extension PackageMerging on Package {
         .join();
   }
 
-  String get signatureContent => [
-        config.library.name,
-        config.release,
-        if (config case DatabasePackageConfig(:final edition)) edition.name,
-        config.targetId
-      ].join();
+  String get signatureContent =>
+      [library.name, release, edition.name, target.id].join();
 }
 
 Directory mergedNativeLibrariesInstallDir(
@@ -53,8 +49,9 @@ Future<void> installMergedNativeLibraries(
   await installDir.create(recursive: true);
 
   for (final package in packages) {
+    await package.acquire();
     await copyDirectoryContents(
-      (package as StandardPackage).sharedLibrariesDir,
+      package.libDir,
       installDir.path,
       filter: (entity) => !entity.path.contains('cmake'),
     );
@@ -68,34 +65,30 @@ LibrariesConfiguration mergedNativeLibrariesConfigurations(
   final libraryDir = mergedNativeLibrariesInstallDir(packages, directory);
 
   Package packageFor(Library library) =>
-      packages.firstWhere((package) => package.config.library == library);
+      packages.firstWhere((package) => package.library == library);
 
   return LibrariesConfiguration(
     directory: libraryDir.path,
-    enterpriseEdition:
-        (packages.first.config as DatabasePackageConfig).edition ==
-            Edition.enterprise,
+    enterpriseEdition: packages.first.edition == Edition.enterprise,
     cbl: _nativeLibraryConfiguration(packageFor(Library.libcblite)),
     cblDart: _nativeLibraryConfiguration(packageFor(Library.libcblitedart)),
   );
 }
 
 LibraryConfiguration _nativeLibraryConfiguration(Package package) {
-  final libraryName = (package as StandardPackage).libraryName;
-
   if (Platform.isMacOS || Platform.isLinux) {
     return LibraryConfiguration.dynamic(
-      libraryName,
+      package.libraryName,
       // Specifying an exact version should not be necessary, but is because
       // the beta of libcblite does not distribute properly symlinked libraries
       // for macos. We need to use the libcblite.x.dylib because that is what
       // libcblitedart is linking against.
-      version: package.config.version.split('.').first,
+      version: package.version.split('.').first,
     );
   }
 
   if (Platform.isWindows) {
-    return LibraryConfiguration.dynamic(libraryName);
+    return LibraryConfiguration.dynamic(package.libraryName);
   }
 
   throw UnsupportedError('Unsupported platform.');
