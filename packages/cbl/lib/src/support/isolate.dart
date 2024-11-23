@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import '../bindings.dart';
+import '../bindings.dart' hide LibrariesConfiguration;
 import '../document/common.dart';
 import '../fleece/integration/integration.dart';
 import 'errors.dart';
+import 'ffi.dart';
 import 'tracing.dart';
 
 class InitContext {
@@ -67,7 +68,7 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    context.libraries,
+    context.libraries.toCblFfi(),
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
 
