@@ -12,7 +12,7 @@ final _dictKeyBinds = cblBindings.fleece.dictKey;
 /// A Fleece dictionary key for efficient decoding and encoding of dictionaries.
 abstract final class DictKey {
   /// Returns the value associated with this key in the given dictionary.
-  FLValue? getValue(FLDict dict);
+  Pointer<FLValue>? getValue(Pointer<FLDict> dict);
 
   /// Encodes this key into a Fleece dictionary.
   void encodeTo(FleeceEncoder encoder);
@@ -24,7 +24,7 @@ final class _DartStringDictKey extends DictKey {
   final String key;
 
   @override
-  FLValue? getValue(FLDict dict) => _dictBinds.get(dict, key);
+  Pointer<FLValue>? getValue(Pointer<FLDict> dict) => _dictBinds.get(dict, key);
 
   @override
   void encodeTo(FleeceEncoder encoder) {
@@ -39,7 +39,7 @@ final class _OptimizedDictKey extends DictKey {
     final memory = SliceResult(totalSize);
 
     // TODO(blaugold): use + operator once we have min SDK 3.3
-    final memoryBuffer = memory.buf.cast<Uint8>();
+    final memoryBuffer = memory.buf;
     // ignore: deprecated_member_use
     final flDictKey = memoryBuffer.elementAt(_flDictKeyStart).cast<FLDictKey>();
     // ignore: deprecated_member_use
@@ -55,7 +55,7 @@ final class _OptimizedDictKey extends DictKey {
     );
 
     final flStringRef = flString.ref
-      ..buf = utf8String.cast()
+      ..buf = utf8String
       ..size = encodedString.size;
 
     _dictKeyBinds.init(flDictKey.ref, flStringRef);
@@ -83,7 +83,7 @@ final class _OptimizedDictKey extends DictKey {
   final FLString _flString;
 
   @override
-  FLValue? getValue(FLDict dict) {
+  Pointer<FLValue>? getValue(Pointer<FLDict> dict) {
     // TODO(blaugold): Reenable use of `FLDictKey`s when we know how to safely
     // use them.
     // https://github.com/cbl-dart/cbl-dart/issues/329

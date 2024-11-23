@@ -1,5 +1,7 @@
 // ignore_for_file: cast_nullable_to_non_nullable
 
+import 'dart:ffi';
+
 import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/fleece/containers.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
@@ -70,12 +72,9 @@ void main() {
       test('get value from existing array', () {
         final root = testMRoot([null]);
         final array = root.asNative as MArray;
-        final flValue = root.values.first.value!;
+        final flArray = root.values.first.value!.cast<FLArray>();
 
-        expect(
-          array.get(0),
-          MValue.withValue(_arrayBinds.get(flValue.cast(), 0)),
-        );
+        expect(array.get(0), MValue.withValue(_arrayBinds.get(flArray, 0)));
         array.remove(0);
         expect(array.get(0), isNull);
         array.append(null);
@@ -105,13 +104,13 @@ void main() {
       test('set a value which shadows original value', () {
         final root = testMRoot([0, 1]);
         final array = root.asNative as MArray;
-        final flValue = root.values.first.value!;
+        final flArray = root.values.first.value!.cast<FLArray>();
         final value = array.get(0)!;
 
         expect(root.isMutated, isFalse);
         expect(array.isMutated, isFalse);
         expect(value.isMutated, isFalse);
-        expect(value, MValue.withValue(_arrayBinds.get(flValue.cast(), 0)));
+        expect(value, MValue.withValue(_arrayBinds.get(flArray, 0)));
 
         array.set(0, 1);
 
@@ -201,12 +200,9 @@ void main() {
       test('get value from existing dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flValue = root.values.first.value!;
+        final flDict = root.values.first.value!.cast<FLDict>();
 
-        expect(
-          dict.get('a'),
-          MValue.withValue(_dictBinds.get(flValue.cast(), 'a')!),
-        );
+        expect(dict.get('a'), MValue.withValue(_dictBinds.get(flDict, 'a')!));
         dict.remove('a');
         expect(dict.get('a'), isNull);
         dict.set('a', null);
@@ -216,13 +212,13 @@ void main() {
       test('set a value which shadows original value', () {
         final root = testMRoot({'a': true, 'b': true});
         final dict = root.asNative as MDict;
-        final flValue = root.values.first.value!;
+        final flDict = root.values.first.value!.cast<FLDict>();
         final value = dict.get('a');
 
         expect(root.isMutated, isFalse);
         expect(dict.isMutated, isFalse);
         expect(value!.isMutated, isFalse);
-        expect(value, MValue.withValue(_dictBinds.get(flValue.cast(), 'a')!));
+        expect(value, MValue.withValue(_dictBinds.get(flDict, 'a')!));
 
         dict.set('a', false);
 
@@ -262,24 +258,24 @@ void main() {
       test('iterable for non-mutated dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flValue = root.values.first.value!;
+        final flDict = root.values.first.value!.cast<FLDict>();
 
         expect(
           Map.fromEntries(dict.iterable),
-          {'a': mValue(value: _dictBinds.get(flValue.cast(), 'a'))},
+          {'a': mValue(value: _dictBinds.get(flDict, 'a'))},
         );
       });
 
       test('iterable for mutated dict', () {
         final root = testMRoot({'a': null});
         final dict = root.asNative as MDict;
-        final flValue = root.values.first.value!;
+        final flDict = root.values.first.value!.cast<FLDict>();
         dict.set('b', true);
 
         expect(
           Map.fromEntries(dict.iterable),
           {
-            'a': mValue(value: _dictBinds.get(flValue.cast(), 'a')),
+            'a': mValue(value: _dictBinds.get(flDict, 'a')),
             'b': mValue(hasNative: true),
           },
         );
@@ -289,12 +285,10 @@ void main() {
 }
 
 MRoot testMRoot(Object from) => MRoot.fromContext(
-      MContext(
-        data: Doc.fromResultData(fleeceEncode(from), FLTrust.kFLTrusted),
-      ),
+      MContext(data: Doc.fromResultData(fleeceEncode(from), FLTrust.trusted)),
       isMutable: true,
     );
 
-Matcher mValue({FLValue? value, bool? hasNative}) => isA<MValue>()
+Matcher mValue({Pointer<FLValue>? value, bool? hasNative}) => isA<MValue>()
     .having((p0) => p0.value, 'value', value ?? anything)
     .having((p0) => p0.hasNative, 'hasNative', hasNative ?? anything);

@@ -1,15 +1,14 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values, camel_case_types, avoid_private_typedef_functions
+
 import 'dart:ffi';
 import 'dart:io' as io;
 
 import 'package:ffi/ffi.dart';
 
 import 'bindings.dart';
-import 'cblite.dart' as cblite;
-import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
-
-export 'cblite.dart' show CBLListenerToken;
 
 final _baseBinds = CBLBindings.instance.base;
 
@@ -49,6 +48,30 @@ final class _CBLInitContext extends Struct {
   external Pointer<Utf8> filesDir;
   external Pointer<Utf8> tempDir;
 }
+
+enum _CBLDartInitializeResult {
+  success,
+  incompatibleDartVM,
+  cblInitError,
+}
+
+extension on int {
+  _CBLDartInitializeResult toCBLDartInitializeResult() {
+    assert(this >= 0 || this <= 2);
+    return _CBLDartInitializeResult.values[this];
+  }
+}
+
+typedef _CBLDart_Initialize_C = Uint8 Function(
+  Pointer<Void> dartInitializeDlData,
+  Pointer<Void> cblInitContext,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLDart_Initialize = int Function(
+  Pointer<Void> dartInitializeDlData,
+  Pointer<Void> cblInitContext,
+  Pointer<CBLError> errorOut,
+);
 
 // === CBLError ================================================================
 
@@ -152,22 +175,38 @@ extension IntErrorCodeExt on int {
   }
 }
 
-extension CBLErrorExt on cblite.CBLError {
-  CBLErrorDomain get domainEnum => domain.toErrorDomain();
+final class CBLError extends Struct {
+  @Uint8()
+  external int _domain;
 
-  Object get codeEnum => code.toErrorCode(domainEnum);
+  @Int32()
+  external int _code;
 
-  /// `true` if there is no error stored in this [cblite.CBLError].
-  bool get isOk => code == 0;
+  @Uint32()
+  // ignore: unused_field, non_constant_identifier_names
+  external int _internal_info;
+}
+
+typedef _CBLError_Message = FLStringResult Function(
+  Pointer<CBLError> error,
+);
+
+extension CBLErrorExt on CBLError {
+  CBLErrorDomain get domain => _domain.toErrorDomain();
+
+  Object get code => _code.toErrorCode(domain);
+
+  /// `true` if there is no error stored in this [CBLError].
+  bool get isOk => _code == 0;
 
   void copyToGlobal() {
-    globalCBLError.ref.domain = domain;
-    globalCBLError.ref.code = code;
-    globalCBLError.ref.internal_info = internal_info;
+    globalCBLError.ref._domain = _domain;
+    globalCBLError.ref._code = _code;
+    globalCBLError.ref._internal_info = _internal_info;
   }
 
   void reset() {
-    code = 0;
+    _code = 0;
   }
 }
 
@@ -180,20 +219,20 @@ final class CBLErrorException implements Exception {
     this.errorSource,
   });
 
-  CBLErrorException.fromCBLError(Pointer<cblite.CBLError> error)
+  CBLErrorException.fromCBLError(Pointer<CBLError> error)
       : this(
-          error.ref.domainEnum,
-          error.ref.codeEnum,
+          error.ref.domain,
+          error.ref.code,
           _baseBinds.getErrorMessage(globalCBLError)!,
         );
 
   CBLErrorException.fromCBLErrorWithSource(
-    Pointer<cblite.CBLError> error, {
+    Pointer<CBLError> error, {
     required String errorSource,
     required int errorPosition,
   }) : this(
-          error.ref.domainEnum,
-          error.ref.codeEnum,
+          error.ref.domain,
+          error.ref.code,
           _baseBinds.getErrorMessage(globalCBLError)!,
           errorSource: errorSource,
           errorPosition: errorPosition == -1 ? null : errorPosition,
@@ -235,8 +274,8 @@ extension CheckCBLErrorPointerExt<T extends Pointer> on T {
   }
 }
 
-extension CheckCBLErrorFLSliceResultExt on cblite.FLSliceResult {
-  cblite.FLSliceResult checkCBLError({String? errorSource}) {
+extension CheckCBLErrorFLSliceResultExt on FLSliceResult {
+  FLSliceResult checkCBLError({String? errorSource}) {
     if (buf == nullptr) {
       _checkCBLError(errorSource: errorSource);
     }
@@ -263,13 +302,67 @@ extension CheckCBLErrorBoolExt on bool {
   }
 }
 
+// === CBLRefCounted ===========================================================
+
+final class CBLRefCounted extends Opaque {}
+
+typedef _CBL_Retain = Pointer<CBLRefCounted> Function(
+  Pointer<CBLRefCounted> refCounted,
+);
+
+typedef _CBL_Release = Pointer<CBLRefCounted> Function(
+  Pointer<CBLRefCounted> refCounted,
+);
+
+// === CBLListener =============================================================
+
+final class CBLListenerToken extends Opaque {}
+
+typedef _CBLListener_Remove_C = Void Function(
+  Pointer<CBLListenerToken> listenerToken,
+);
+typedef _CBLListener_Remove = void Function(
+  Pointer<CBLListenerToken> listenerToken,
+);
+
 // === BaseBindings ============================================================
 
 final class BaseBindings extends Bindings {
-  BaseBindings(super.parent);
+  BaseBindings(super.parent) {
+    _initialize =
+        libs.cblDart.lookupFunction<_CBLDart_Initialize_C, _CBLDart_Initialize>(
+      'CBLDart_Initialize',
+      isLeaf: useIsLeaf,
+    );
+
+    _retainRefCounted = libs.cbl.lookupFunction<_CBL_Retain, _CBL_Retain>(
+      'CBL_Retain',
+      isLeaf: useIsLeaf,
+    );
+    _releaseRefCountedPtr =
+        libs.cbl.lookup<NativeFunction<_CBL_Release>>('CBL_Release');
+    _releaseRefCounted = _releaseRefCountedPtr.asFunction(isLeaf: useIsLeaf);
+    _getErrorMessage =
+        libs.cbl.lookupFunction<_CBLError_Message, _CBLError_Message>(
+      'CBLError_Message',
+      isLeaf: useIsLeaf,
+    );
+    _removeListener =
+        libs.cbl.lookupFunction<_CBLListener_Remove_C, _CBLListener_Remove>(
+      'CBLListener_Remove',
+      isLeaf: useIsLeaf,
+    );
+  }
+
+  late final _CBLDart_Initialize _initialize;
+  late final _CBL_Retain _retainRefCounted;
+  late final Pointer<NativeFunction<_CBL_Release>> _releaseRefCountedPtr;
+  late final _CBL_Release _releaseRefCounted;
+  late final _CBLError_Message _getErrorMessage;
+  late final _CBLListener_Remove _removeListener;
 
   late final _refCountedFinalizer =
-      NativeFinalizer(cbl.addresses.CBL_Release.cast());
+      NativeFinalizer(_releaseRefCountedPtr.cast());
 
   void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
@@ -285,27 +378,24 @@ final class BaseBindings extends Bindings {
 
       // The `globalCBLError` cannot be used at this point because it requires
       // initialization to be completed.
-      final error = zoneArena<cblite.CBLError>();
+      final error = zoneArena<CBLError>();
 
-      final initializeResult = cblDart.CBLDart_Initialize(
+      final initializeResult = _initialize(
         NativeApi.initializeApiDLData,
         contextStruct.cast(),
         error,
-      );
+      ).toCBLDartInitializeResult();
 
       switch (initializeResult) {
-        case cblitedart
-              .CBLDartInitializeResult.CBLDartInitializeResult_kSuccess:
+        case _CBLDartInitializeResult.success:
           return;
-        case cblitedart.CBLDartInitializeResult
-              .CBLDartInitializeResult_kIncompatibleDartVM:
+        case _CBLDartInitializeResult.incompatibleDartVM:
           throw CBLErrorException(
             CBLErrorDomain.couchbaseLite,
             CBLErrorCode.unsupported,
             'The current Dart VM is incompatible.',
           );
-        case cblitedart
-              .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError:
+        case _CBLDartInitializeResult.cblInitError:
           throw CBLErrorException.fromCBLError(error);
       }
     });
@@ -313,23 +403,23 @@ final class BaseBindings extends Bindings {
 
   void bindCBLRefCountedToDartObject(
     Finalizable object,
-    Pointer<cblite.CBLRefCounted> refCounted,
+    Pointer<CBLRefCounted> refCounted,
   ) {
     _refCountedFinalizer.attach(object, refCounted.cast());
   }
 
-  void retainRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
-    cbl.CBL_Retain(refCounted);
+  void retainRefCounted(Pointer<CBLRefCounted> refCounted) {
+    _retainRefCounted(refCounted);
   }
 
-  void releaseRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
-    cbl.CBL_Release(refCounted);
+  void releaseRefCounted(Pointer<CBLRefCounted> refCounted) {
+    _releaseRefCounted(refCounted);
   }
 
-  String? getErrorMessage(Pointer<cblite.CBLError> error) =>
-      cbl.CBLError_Message(error).toDartStringAndRelease(allowMalformed: true);
+  String? getErrorMessage(Pointer<CBLError> error) =>
+      _getErrorMessage(error).toDartStringAndRelease(allowMalformed: true);
 
-  void removeListener(Pointer<cblite.CBLListenerToken> token) {
-    cbl.CBLListener_Remove(token);
+  void removeListener(Pointer<CBLListenerToken> token) {
+    _removeListener(token);
   }
 }

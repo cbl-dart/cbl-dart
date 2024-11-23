@@ -1,8 +1,6 @@
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
-import 'cblite.dart';
-import 'cblitedart.dart';
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -13,22 +11,18 @@ import 'query.dart';
 import 'replicator.dart';
 import 'tracing.dart';
 
+/// Wether to use the `isLeaf` flag when looking up native functions.
+// ignore: do_not_use_environment
+const useIsLeaf = bool.fromEnvironment('cblFfiUseIsLeaf');
+
 abstract base class Bindings {
-  Bindings(Bindings parent)
-      : cbl = parent.cbl,
-        cblDart = parent.cblDart,
-        enterpriseEdition = parent.enterpriseEdition {
+  Bindings(Bindings parent) : libs = parent.libs {
     parent._children.add(this);
   }
 
-  Bindings.root(DynamicLibraries libs)
-      : cbl = cblite(libs.cbl),
-        cblDart = cblitedart(libs.cblDart),
-        enterpriseEdition = libs.enterpriseEdition;
+  Bindings.root(this.libs);
 
-  final cblite cbl;
-  final cblitedart cblDart;
-  final bool enterpriseEdition;
+  final DynamicLibraries libs;
 
   List<Bindings> get _children => [];
 }

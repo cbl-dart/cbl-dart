@@ -406,7 +406,7 @@ void main() {
         final doc = Doc.fromJson('{"a": "b"}');
         final dict = MutableDict.mutableCopy(
           doc.root.asDict!,
-          flags: FLCopyFlags.kFLDeepCopy,
+          flags: {CopyFlag.deepCopy},
         );
         expect(dict.length, equals(1));
       });

@@ -13,7 +13,9 @@ enum EnterpriseFeature {
 
 Edition get activeEdition =>
     _activeEditionOverride ??
-    (cblBindings.enterpriseEdition ? Edition.enterprise : Edition.community);
+    (cblBindings.libs.enterpriseEdition
+        ? Edition.enterprise
+        : Edition.community);
 
 Edition? _activeEditionOverride;
 

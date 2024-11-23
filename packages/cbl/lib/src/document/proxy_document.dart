@@ -1,3 +1,4 @@
+import '../bindings.dart';
 import '../database/proxy_database.dart';
 import '../fleece/containers.dart';
 import '../fleece/integration/root.dart';
@@ -66,7 +67,7 @@ final class ProxyDocumentDelegate
     return MRoot.fromContext(
       DocumentMContext(
         document,
-        data: Doc.fromResultData(properties!.toFleece(), FLTrust.kFLTrusted),
+        data: Doc.fromResultData(properties!.toFleece(), FLTrust.trusted),
       ),
       isMutable: isMutable,
     );

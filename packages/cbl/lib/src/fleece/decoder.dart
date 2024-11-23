@@ -129,18 +129,18 @@ final class NoopSharedStringsTable extends SharedStringsTable {
   @override
   String decode(StringSource source) {
     final int size;
-    final Pointer<Void> buf;
+    final int address;
     switch (source) {
       case StringSource.dictKey:
         size = globalLoadedDictKey.ref.stringSize;
-        buf = globalLoadedDictKey.ref.stringBuf;
+        address = globalLoadedDictKey.ref.stringBuf;
         break;
       case StringSource.value:
         size = globalLoadedFLValue.ref.stringSize;
-        buf = globalLoadedFLValue.ref.stringBuf;
+        address = globalLoadedFLValue.ref.stringBuf;
         break;
     }
-    return decodeFLString(buf, size);
+    return decodeFLString(address, size);
   }
 
   @override
@@ -166,23 +166,23 @@ final class _SharedStringsTable extends SharedStringsTable {
   @override
   String decode(StringSource source) {
     final int size;
-    final Pointer<Void> buf;
+    final int address;
     switch (source) {
       case StringSource.dictKey:
         size = _loadedKey.stringSize;
-        buf = _loadedKey.stringBuf;
+        address = _loadedKey.stringBuf;
         break;
       case StringSource.value:
         size = _loadedValue.stringSize;
-        buf = _loadedValue.stringBuf;
+        address = _loadedValue.stringBuf;
         break;
     }
 
     if (size < _minSharedStringSize || size > _maxSharedStringSize) {
-      return decodeFLString(buf, size);
+      return decodeFLString(address, size);
     }
 
-    return _sharedStrings[buf.address] ??= decodeFLString(buf, size);
+    return _sharedStrings[address] ??= decodeFLString(address, size);
   }
 
   @override
@@ -194,7 +194,7 @@ final class _SharedStringsTable extends SharedStringsTable {
 // ignore: prefer_void_to_null
 final class DictIterator implements Iterator<Null>, Finalizable {
   DictIterator(
-    FLDict dict, {
+    Pointer<FLDict> dict, {
     SharedKeysTable? sharedKeysTable,
     Pointer<CBLDart_LoadedDictKey>? keyOut,
     Pointer<CBLDart_LoadedFLValue>? valueOut,
@@ -225,7 +225,7 @@ final class DictIterator implements Iterator<Null>, Finalizable {
 // ignore: prefer_void_to_null
 final class ArrayIterator implements Iterator<Null>, Finalizable {
   ArrayIterator(
-    FLArray array, {
+    Pointer<FLArray> array, {
     Pointer<CBLDart_LoadedFLValue>? valueOut,
     bool partiallyConsumable = true,
   }) {
@@ -251,7 +251,7 @@ final class ArrayIterator implements Iterator<Null>, Finalizable {
 final class FleeceDecoder extends Converter<Data, Object?> {
   /// Creates a decoder for converting Fleece data into Dart objects.
   const FleeceDecoder({
-    this.trust = FLTrust.kFLUntrusted,
+    this.trust = FLTrust.untrusted,
     this.sharedKeys,
     this.sharedKeysTable,
     this.sharedStringsTable,
@@ -294,7 +294,7 @@ final class FleeceDecoder extends Converter<Data, Object?> {
 class RecursiveFleeceDecoder extends Converter<Data, Object?> {
   @Deprecated('Use FleeceDecoder instead.')
   RecursiveFleeceDecoder({
-    this.trust = FLTrust.kFLUntrusted,
+    this.trust = FLTrust.untrusted,
     this.sharedKeys,
     SharedKeysTable? sharedKeysTable,
     this.sharedStringsTable,
@@ -323,37 +323,33 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
 
   Object? _decodeGlobalLoadedValue(SharedStringsTable sharedStringsTable) {
     final value = globalLoadedFLValue.ref;
-    switch (FLValueType.fromValue(value.type)) {
-      case FLValueType.kFLUndefined:
+    switch (value.type) {
+      case FLValueType.undefined:
         _throwUndefinedDartRepresentation();
-      case FLValueType.kFLNull:
+      case FLValueType.null_:
         return null;
-      case FLValueType.kFLBoolean:
+      case FLValueType.boolean:
         return value.asBool;
-      case FLValueType.kFLNumber:
+      case FLValueType.number:
         return value.isInteger ? value.asInt : value.asDouble;
-      case FLValueType.kFLString:
+      case FLValueType.string:
         return sharedStringsTable.decode(StringSource.value);
-      case FLValueType.kFLData:
+      case FLValueType.data:
         return value.asData.toData()?.toTypedList();
-      case FLValueType.kFLArray:
-        // ignore: omit_local_variable_types
-        final FLArray array = value.value.cast();
+      case FLValueType.array:
+        final array = Pointer<FLArray>.fromAddress(value.value);
         return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
         });
-      case FLValueType.kFLDict:
-        // ignore: omit_local_variable_types
-        final FLDict dict = value.value.cast();
+      case FLValueType.dict:
+        final result = <String, Object?>{};
         final iterator = DictIterator(
-          dict,
+          Pointer<FLDict>.fromAddress(value.value),
           sharedKeysTable: sharedKeysTable,
           keyOut: globalLoadedDictKey,
           valueOut: globalLoadedFLValue,
         );
-
-        final result = <String, Object?>{};
         while (iterator.moveNext()) {
           final key = sharedKeysTable.decode(sharedStringsTable);
           result[key] = _decodeGlobalLoadedValue(sharedStringsTable);
@@ -416,44 +412,44 @@ final class _FleeceListenerDecoder {
           continue;
         }
 
-        switch (FLValueType.fromValue(value.type)) {
-          case FLValueType.kFLUndefined:
+        switch (value.type) {
+          case FLValueType.undefined:
             _listener.handleUndefined();
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLNull:
+          case FLValueType.null_:
             _listener.handleNull();
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLBoolean:
+          case FLValueType.boolean:
             _listener.handleBool(value.asBool);
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLNumber:
+          case FLValueType.number:
             _listener
                 .handleNumber(value.isInteger ? value.asInt : value.asDouble);
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLString:
+          case FLValueType.string:
             _listener.handleString(
               _sharedStringsTable.decode(StringSource.value),
             );
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLData:
+          case FLValueType.data:
             _listener.handleData(value.asData.toData()!.toTypedList());
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLArray:
+          case FLValueType.array:
             _currentLoader = _ArrayIndexLoader(
-              value.value.cast(),
+              Pointer<FLArray>.fromAddress(value.value),
               value.collectionSize,
               _listener,
             )..parent = _currentLoader;
             break;
-          case FLValueType.kFLDict:
+          case FLValueType.dict:
             _currentLoader = _DictIteratorLoader(
-              value.value.cast(),
+              Pointer<FLDict>.fromAddress(value.value),
               _listener,
               _sharedKeysTable,
               _sharedStringsTable,
@@ -506,7 +502,7 @@ final class _ArrayIndexLoader extends _FleeceValueLoader {
     _listener.beginArray(_length);
   }
 
-  final FLArray _array;
+  final Pointer<FLArray> _array;
   final int _length;
   final _FleeceListener _listener;
   var _i = 0;
@@ -531,7 +527,7 @@ final class _ArrayIndexLoader extends _FleeceValueLoader {
 
 final class _DictIteratorLoader extends _FleeceValueLoader {
   _DictIteratorLoader(
-    FLDict dict,
+    Pointer<FLDict> dict,
     this._listener,
     this._sharedKeysTable,
     this._sharedStringsTable,

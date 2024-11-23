@@ -164,8 +164,8 @@ final class CblMDelegate extends MDelegate {
     _decoderBinds.getLoadedValue(value.value!);
 
     final flValue = globalLoadedFLValue.ref;
-    switch (FLValueType.fromValue(flValue.type)) {
-      case FLValueType.kFLUndefined:
+    switch (flValue.type) {
+      case FLValueType.undefined:
         // `undefined` is a somewhat unusual value to be found in a Fleece
         // collection, since it is not JSON. It cannot be encoded to Fleece or
         // JSON, but is used by some APIs to signal a special condition.
@@ -175,26 +175,25 @@ final class CblMDelegate extends MDelegate {
         // would be a breaking change to start returning something other than
         // `null`.
         return null;
-      case FLValueType.kFLNull:
+      case FLValueType.null_:
         return null;
-      case FLValueType.kFLBoolean:
+      case FLValueType.boolean:
         return flValue.asBool;
-      case FLValueType.kFLNumber:
+      case FLValueType.number:
         return flValue.isInteger ? flValue.asInt : flValue.asDouble;
-      case FLValueType.kFLString:
+      case FLValueType.string:
         return parent.context.sharedStringsTable.decode(StringSource.value);
-      case FLValueType.kFLData:
+      case FLValueType.data:
         return flValue.asData.toData()?.toTypedList();
-      case FLValueType.kFLArray:
+      case FLValueType.array:
         final array = MArray.asChild(value, parent, flValue.collectionSize);
         if (parent.hasMutableChildren) {
           return MutableArrayImpl(array);
         } else {
           return ArrayImpl(array);
         }
-      case FLValueType.kFLDict:
-        // ignore: omit_local_variable_types
-        final FLDict flDict = flValue.value.cast();
+      case FLValueType.dict:
+        final flDict = Pointer<FLDict>.fromAddress(flValue.value);
 
         if (_blobBindings.isBlob(flDict)) {
           final context = parent.context;
@@ -239,7 +238,7 @@ bool valueWouldChange(
   if (flValue != null) {
     final valueType = _valueBinds.getType(flValue);
     cblReachabilityFence(container.context);
-    if (valueType == FLValueType.kFLArray || valueType == FLValueType.kFLDict) {
+    if (valueType == FLValueType.array || valueType == FLValueType.dict) {
       return true;
     }
   }

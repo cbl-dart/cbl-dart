@@ -1,15 +1,16 @@
+// ignore: lines_longer_than_80_chars
+// ignore_for_file: avoid_redundant_argument_values, avoid_private_typedef_functions, camel_case_types
+
 import 'dart:ffi';
 
+import 'async_callback.dart';
 import 'base.dart';
 import 'bindings.dart';
-import 'cblite.dart' as cblite;
-import 'cblitedart.dart' as cblitedart;
+import 'database.dart';
 import 'fleece.dart';
 import 'global.dart';
 import 'tracing.dart';
 import 'utils.dart';
-
-export 'cblite.dart' show CBLQuery, CBLResultSet;
 
 enum CBLQueryLanguage {
   json,
@@ -20,11 +21,138 @@ extension CBLQueryLanguageExt on CBLQueryLanguage {
   int toInt() => CBLQueryLanguage.values.indexOf(this);
 }
 
-final class QueryBindings extends Bindings {
-  QueryBindings(super.parent);
+final class CBLQuery extends Opaque {}
 
-  Pointer<cblite.CBLQuery> create(
-    Pointer<cblite.CBLDatabase> db,
+typedef _CBLDatabase_CreateQuery_C = Pointer<CBLQuery> Function(
+  Pointer<CBLDatabase> db,
+  Uint32 language,
+  FLString queryString,
+  Pointer<Int> errorPosOut,
+  Pointer<CBLError> errorOut,
+);
+typedef _CBLDatabase_CreateQuery = Pointer<CBLQuery> Function(
+  Pointer<CBLDatabase> db,
+  int language,
+  FLString queryString,
+  Pointer<Int> errorPosOut,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLQuery_SetParameters_C = Void Function(
+  Pointer<CBLQuery> query,
+  Pointer<FLDict> parameters,
+);
+typedef _CBLQuery_SetParameters = void Function(
+  Pointer<CBLQuery> query,
+  Pointer<FLDict> parameters,
+);
+
+typedef _CBLQuery_Parameters = Pointer<FLDict> Function(
+  Pointer<CBLQuery> query,
+);
+
+typedef _CBLQuery_Execute = Pointer<CBLResultSet> Function(
+  Pointer<CBLQuery> query,
+  Pointer<CBLError> errorOut,
+);
+
+typedef _CBLQuery_Explain_C = FLStringResult Function(
+  Pointer<CBLQuery> query,
+);
+typedef _CBLQuery_Explain = FLStringResult Function(
+  Pointer<CBLQuery> query,
+);
+
+typedef _CBLQuery_ColumnCount_C = Uint32 Function(Pointer<CBLQuery> query);
+typedef _CBLQuery_ColumnCount = int Function(Pointer<CBLQuery> query);
+
+typedef _CBLQuery_ColumnName_C = FLString Function(
+  Pointer<CBLQuery> query,
+  UnsignedInt columnIndex,
+);
+typedef _CBLQuery_ColumnName = FLString Function(
+  Pointer<CBLQuery> query,
+  int columnIndex,
+);
+
+typedef _CBLDart_CBLQuery_AddChangeListener_C = Pointer<CBLListenerToken>
+    Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLQuery> query,
+  Pointer<CBLDartAsyncCallback> listener,
+);
+typedef _CBLDart_CBLQuery_AddChangeListener = Pointer<CBLListenerToken>
+    Function(
+  Pointer<CBLDatabase> db,
+  Pointer<CBLQuery> query,
+  Pointer<CBLDartAsyncCallback> listener,
+);
+typedef _CBLQuery_CopyCurrentResults = Pointer<CBLResultSet> Function(
+  Pointer<CBLQuery> query,
+  Pointer<CBLListenerToken> listenerToken,
+  Pointer<CBLError> errorOut,
+);
+
+final class QueryBindings extends Bindings {
+  QueryBindings(super.parent) {
+    _createQuery = libs.cbl
+        .lookupFunction<_CBLDatabase_CreateQuery_C, _CBLDatabase_CreateQuery>(
+      'CBLDatabase_CreateQuery',
+      isLeaf: useIsLeaf,
+    );
+    _setParameters = libs.cbl
+        .lookupFunction<_CBLQuery_SetParameters_C, _CBLQuery_SetParameters>(
+      'CBLQuery_SetParameters',
+      isLeaf: useIsLeaf,
+    );
+    _parameters =
+        libs.cbl.lookupFunction<_CBLQuery_Parameters, _CBLQuery_Parameters>(
+      'CBLQuery_Parameters',
+      isLeaf: useIsLeaf,
+    );
+    _execute = libs.cbl.lookupFunction<_CBLQuery_Execute, _CBLQuery_Execute>(
+      'CBLQuery_Execute',
+      isLeaf: useIsLeaf,
+    );
+    _explain = libs.cbl.lookupFunction<_CBLQuery_Explain_C, _CBLQuery_Explain>(
+      'CBLQuery_Explain',
+      isLeaf: useIsLeaf,
+    );
+    _columnCount =
+        libs.cbl.lookupFunction<_CBLQuery_ColumnCount_C, _CBLQuery_ColumnCount>(
+      'CBLQuery_ColumnCount',
+      isLeaf: useIsLeaf,
+    );
+    _columnName =
+        libs.cbl.lookupFunction<_CBLQuery_ColumnName_C, _CBLQuery_ColumnName>(
+      'CBLQuery_ColumnName',
+      isLeaf: useIsLeaf,
+    );
+    _addChangeListener = libs.cblDart.lookupFunction<
+        _CBLDart_CBLQuery_AddChangeListener_C,
+        _CBLDart_CBLQuery_AddChangeListener>(
+      'CBLDart_CBLQuery_AddChangeListener',
+      isLeaf: useIsLeaf,
+    );
+    _copyCurrentResults = libs.cbl.lookupFunction<_CBLQuery_CopyCurrentResults,
+        _CBLQuery_CopyCurrentResults>(
+      'CBLQuery_CopyCurrentResults',
+      isLeaf: useIsLeaf,
+    );
+  }
+
+  late final _CBLDatabase_CreateQuery _createQuery;
+  late final _CBLQuery_SetParameters _setParameters;
+  late final _CBLQuery_Parameters _parameters;
+  late final _CBLQuery_Execute _execute;
+  late final _CBLQuery_Explain _explain;
+  late final _CBLQuery_ColumnCount _columnCount;
+  late final _CBLQuery_ColumnName _columnName;
+  late final _CBLDart_CBLQuery_AddChangeListener _addChangeListener;
+  late final _CBLQuery_CopyCurrentResults _copyCurrentResults;
+
+  Pointer<CBLQuery> create(
+    Pointer<CBLDatabase> db,
     CBLQueryLanguage language,
     String queryString,
   ) =>
@@ -33,7 +161,7 @@ final class QueryBindings extends Bindings {
         final languageInt = language.toInt();
         return nativeCallTracePoint(
           TracedNativeCall.queryCreate,
-          () => cbl.CBLDatabase_CreateQuery(
+          () => _createQuery(
             db,
             languageInt,
             flQueryString,
@@ -43,66 +171,128 @@ final class QueryBindings extends Bindings {
         ).checkCBLError(errorSource: queryString);
       });
 
-  void setParameters(Pointer<cblite.CBLQuery> query, cblite.FLDict parameters) {
-    cbl.CBLQuery_SetParameters(query, parameters);
+  void setParameters(Pointer<CBLQuery> query, Pointer<FLDict> parameters) {
+    _setParameters(query, parameters);
   }
 
-  cblite.FLDict parameters(Pointer<cblite.CBLQuery> query) =>
-      cbl.CBLQuery_Parameters(query);
+  Pointer<FLDict> parameters(Pointer<CBLQuery> query) => _parameters(query);
 
-  Pointer<cblite.CBLResultSet> execute(Pointer<cblite.CBLQuery> query) =>
+  Pointer<CBLResultSet> execute(Pointer<CBLQuery> query) =>
       nativeCallTracePoint(
         TracedNativeCall.queryExecute,
-        () => cbl.CBLQuery_Execute(query, globalCBLError),
+        () => _execute(query, globalCBLError),
       ).checkCBLError();
 
-  String explain(Pointer<cblite.CBLQuery> query) =>
-      cbl.CBLQuery_Explain(query).toDartStringAndRelease()!;
+  String explain(Pointer<CBLQuery> query) =>
+      _explain(query).toDartStringAndRelease()!;
 
-  int columnCount(Pointer<cblite.CBLQuery> query) =>
-      cbl.CBLQuery_ColumnCount(query);
+  int columnCount(Pointer<CBLQuery> query) => _columnCount(query);
 
-  String columnName(Pointer<cblite.CBLQuery> query, int column) =>
-      cbl.CBLQuery_ColumnName(query, column).toDartString()!;
+  String columnName(Pointer<CBLQuery> query, int column) =>
+      _columnName(query, column).toDartString()!;
 
-  Pointer<cblite.CBLListenerToken> addChangeListener(
-    Pointer<cblite.CBLDatabase> db,
-    Pointer<cblite.CBLQuery> query,
-    cblitedart.CBLDart_AsyncCallback listener,
+  Pointer<CBLListenerToken> addChangeListener(
+    Pointer<CBLDatabase> db,
+    Pointer<CBLQuery> query,
+    Pointer<CBLDartAsyncCallback> listener,
   ) =>
-      cblDart.CBLDart_CBLQuery_AddChangeListener(db, query, listener);
+      _addChangeListener(db, query, listener);
 
-  Pointer<cblite.CBLResultSet> copyCurrentResults(
-    Pointer<cblite.CBLQuery> query,
-    Pointer<cblite.CBLListenerToken> listenerToken,
+  Pointer<CBLResultSet> copyCurrentResults(
+    Pointer<CBLQuery> query,
+    Pointer<CBLListenerToken> listenerToken,
   ) =>
-      cbl.CBLQuery_CopyCurrentResults(query, listenerToken, globalCBLError)
-          .checkCBLError();
+      _copyCurrentResults(query, listenerToken, globalCBLError).checkCBLError();
 }
 
+final class CBLResultSet extends Opaque {}
+
+typedef _CBLResultSet_Next_C = Bool Function(Pointer<CBLResultSet> resultSet);
+typedef _CBLResultSet_Next = bool Function(Pointer<CBLResultSet> resultSet);
+
+typedef _CBLResultSet_ValueAtIndex_C = Pointer<FLValue> Function(
+  Pointer<CBLResultSet> resultSet,
+  Uint32 index,
+);
+typedef _CBLResultSet_ValueAtIndex = Pointer<FLValue> Function(
+  Pointer<CBLResultSet> resultSet,
+  int index,
+);
+
+typedef _CBLResultSet_ValueForKey = Pointer<FLValue> Function(
+  Pointer<CBLResultSet> resultSet,
+  FLString key,
+);
+
+typedef _CBLResultSet_ResultArray = Pointer<FLArray> Function(
+  Pointer<CBLResultSet> resultSet,
+);
+
+typedef _CBLResultSet_ResultDict = Pointer<FLDict> Function(
+  Pointer<CBLResultSet> resultSet,
+);
+
+typedef _CBLResultSet_GetQuery = Pointer<CBLQuery> Function(
+  Pointer<CBLResultSet> resultSet,
+);
+
 final class ResultSetBindings extends Bindings {
-  ResultSetBindings(super.parent);
+  ResultSetBindings(super.parent) {
+    _next = libs.cbl.lookupFunction<_CBLResultSet_Next_C, _CBLResultSet_Next>(
+      'CBLResultSet_Next',
+      isLeaf: useIsLeaf,
+    );
+    _valueAtIndex = libs.cbl.lookupFunction<_CBLResultSet_ValueAtIndex_C,
+        _CBLResultSet_ValueAtIndex>(
+      'CBLResultSet_ValueAtIndex',
+      isLeaf: useIsLeaf,
+    );
+    _valueForKey = libs.cbl
+        .lookupFunction<_CBLResultSet_ValueForKey, _CBLResultSet_ValueForKey>(
+      'CBLResultSet_ValueForKey',
+      isLeaf: useIsLeaf,
+    );
+    _resultArray = libs.cbl
+        .lookupFunction<_CBLResultSet_ResultArray, _CBLResultSet_ResultArray>(
+      'CBLResultSet_ResultArray',
+      isLeaf: useIsLeaf,
+    );
+    _resultDict = libs.cbl
+        .lookupFunction<_CBLResultSet_ResultDict, _CBLResultSet_ResultDict>(
+      'CBLResultSet_ResultDict',
+      isLeaf: useIsLeaf,
+    );
+    _getQuery =
+        libs.cbl.lookupFunction<_CBLResultSet_GetQuery, _CBLResultSet_GetQuery>(
+      'CBLResultSet_GetQuery',
+      isLeaf: useIsLeaf,
+    );
+  }
 
-  bool next(Pointer<cblite.CBLResultSet> resultSet) =>
-      cbl.CBLResultSet_Next(resultSet);
+  late final _CBLResultSet_Next _next;
+  late final _CBLResultSet_ValueAtIndex _valueAtIndex;
+  late final _CBLResultSet_ValueForKey _valueForKey;
+  late final _CBLResultSet_ResultArray _resultArray;
+  late final _CBLResultSet_ResultDict _resultDict;
+  late final _CBLResultSet_GetQuery _getQuery;
 
-  cblite.FLValue valueAtIndex(
-          Pointer<cblite.CBLResultSet> resultSet, int index) =>
-      cbl.CBLResultSet_ValueAtIndex(resultSet, index);
+  bool next(Pointer<CBLResultSet> resultSet) => _next(resultSet);
 
-  cblite.FLValue valueForKey(
-    Pointer<cblite.CBLResultSet> resultSet,
+  Pointer<FLValue> valueAtIndex(Pointer<CBLResultSet> resultSet, int index) =>
+      _valueAtIndex(resultSet, index);
+
+  Pointer<FLValue> valueForKey(
+    Pointer<CBLResultSet> resultSet,
     String key,
   ) =>
-      runWithSingleFLString(
-          key, (flKey) => cbl.CBLResultSet_ValueForKey(resultSet, flKey));
+      runWithSingleFLString(key, (flKey) => _valueForKey(resultSet, flKey));
 
-  cblite.FLArray resultArray(Pointer<cblite.CBLResultSet> resultSet) =>
-      cbl.CBLResultSet_ResultArray(resultSet);
+  Pointer<FLArray> resultArray(Pointer<CBLResultSet> resultSet) =>
+      _resultArray(resultSet);
 
-  cblite.FLDict resultDict(Pointer<cblite.CBLResultSet> resultSet) =>
-      cbl.CBLResultSet_ResultDict(resultSet);
+  Pointer<FLDict> resultDict(Pointer<CBLResultSet> resultSet) =>
+      _resultDict(resultSet);
 
-  Pointer<cblite.CBLQuery> getQuery(Pointer<cblite.CBLResultSet> resultSet) =>
-      cbl.CBLResultSet_GetQuery(resultSet);
+  Pointer<CBLQuery> getQuery(Pointer<CBLResultSet> resultSet) =>
+      _getQuery(resultSet);
 }

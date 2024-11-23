@@ -173,7 +173,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
         ..endDict();
     }
     final data = encoder.finish();
-    final doc = fl.Doc.fromResultData(data, FLTrust.kFLTrusted);
+    final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
     final dict = doc.root.asDict!;
     _bindings.setParameters(_pointer, dict.pointer.cast());
   }

@@ -50,7 +50,7 @@ final class MRoot extends MCollection {
 }
 
 extension on MContext {
-  FLValue get flValue {
+  Pointer<FLValue> get flValue {
     final data = this.data;
     if (data is Doc) {
       return data.root.pointer;
