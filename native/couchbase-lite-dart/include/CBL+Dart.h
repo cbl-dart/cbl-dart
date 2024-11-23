@@ -78,28 +78,9 @@ bool CBLDart_CBLLog_SetSentryBreadcrumbs(bool enabled);
 
 // === Database
 
-typedef struct CBLDart_CBLEncryptionKey {
-  uint32_t algorithm;
-  uint8_t bytes[32];
-} CBLDart_CBLEncryptionKey;
-
-typedef struct {
-  FLString directory;
-  CBLDart_CBLEncryptionKey encryptionKey;
-  bool fullSync;
-} CBLDart_CBLDatabaseConfiguration;
-
-CBLDART_EXPORT
-CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default();
-
-CBLDART_EXPORT
-bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
-                              const CBLDart_CBLDatabaseConfiguration *config,
-                              CBLError *outError);
-
 CBLDART_EXPORT
 CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
-                                      CBLDart_CBLDatabaseConfiguration *config,
+                                      CBLDatabaseConfiguration *config,
                                       CBLError *errorOut);
 
 CBLDART_EXPORT

@@ -404,40 +404,9 @@ class cblitedart {
       _CBLDart_CBLLog_SetSentryBreadcrumbsPtr.asFunction<
           DartCBLDart_CBLLog_SetSentryBreadcrumbs>();
 
-  CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
-    return _CBLDart_CBLDatabaseConfiguration_Default();
-  }
-
-  late final _CBLDart_CBLDatabaseConfiguration_DefaultPtr = _lookup<
-          ffi.NativeFunction<NativeCBLDart_CBLDatabaseConfiguration_Default>>(
-      'CBLDart_CBLDatabaseConfiguration_Default');
-  late final _CBLDart_CBLDatabaseConfiguration_Default =
-      _CBLDart_CBLDatabaseConfiguration_DefaultPtr.asFunction<
-          DartCBLDart_CBLDatabaseConfiguration_Default>();
-
-  bool CBLDart_CBL_CopyDatabase(
-    imp1.FLString fromPath,
-    imp1.FLString toName,
-    ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
-    ffi.Pointer<CBLError> outError,
-  ) {
-    return _CBLDart_CBL_CopyDatabase(
-      fromPath,
-      toName,
-      config,
-      outError,
-    );
-  }
-
-  late final _CBLDart_CBL_CopyDatabasePtr =
-      _lookup<ffi.NativeFunction<NativeCBLDart_CBL_CopyDatabase>>(
-          'CBLDart_CBL_CopyDatabase');
-  late final _CBLDart_CBL_CopyDatabase =
-      _CBLDart_CBL_CopyDatabasePtr.asFunction<DartCBLDart_CBL_CopyDatabase>();
-
   ffi.Pointer<CBLDatabase> CBLDart_CBLDatabase_Open(
     imp1.FLString name,
-    ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
+    ffi.Pointer<CBLDatabaseConfiguration> config,
     ffi.Pointer<CBLError> errorOut,
   ) {
     return _CBLDart_CBLDatabase_Open(
@@ -903,47 +872,18 @@ typedef NativeCBLDart_CBLLog_SetSentryBreadcrumbs = ffi.Bool Function(
     ffi.Bool enabled);
 typedef DartCBLDart_CBLLog_SetSentryBreadcrumbs = bool Function(bool enabled);
 
-final class CBLDart_CBLEncryptionKey extends ffi.Struct {
-  @ffi.Uint32()
-  external int algorithm;
-
-  @ffi.Array.multi([32])
-  external ffi.Array<ffi.Uint8> bytes;
-}
-
-final class CBLDart_CBLDatabaseConfiguration extends ffi.Struct {
-  external imp1.FLString directory;
-
-  external CBLDart_CBLEncryptionKey encryptionKey;
-
-  @ffi.Bool()
-  external bool fullSync;
-}
-
-typedef NativeCBLDart_CBLDatabaseConfiguration_Default
-    = CBLDart_CBLDatabaseConfiguration Function();
-typedef DartCBLDart_CBLDatabaseConfiguration_Default
-    = CBLDart_CBLDatabaseConfiguration Function();
-typedef NativeCBLDart_CBL_CopyDatabase = ffi.Bool Function(
-    imp1.FLString fromPath,
-    imp1.FLString toName,
-    ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
-    ffi.Pointer<CBLError> outError);
-typedef DartCBLDart_CBL_CopyDatabase = bool Function(
-    imp1.FLString fromPath,
-    imp1.FLString toName,
-    ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
-    ffi.Pointer<CBLError> outError);
-
 /// \defgroup database Database @{ \*/ /\*\* A connection to an open database.
 typedef CBLDatabase = imp1.CBLDatabase;
+
+/// Database configuration options.
+typedef CBLDatabaseConfiguration = imp1.CBLDatabaseConfiguration;
 typedef NativeCBLDart_CBLDatabase_Open = ffi.Pointer<CBLDatabase> Function(
     imp1.FLString name,
-    ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
+    ffi.Pointer<CBLDatabaseConfiguration> config,
     ffi.Pointer<CBLError> errorOut);
 typedef DartCBLDart_CBLDatabase_Open = ffi.Pointer<CBLDatabase> Function(
     imp1.FLString name,
-    ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
+    ffi.Pointer<CBLDatabaseConfiguration> config,
     ffi.Pointer<CBLError> errorOut);
 typedef NativeCBLDart_CBLDatabase_Release = ffi.Void Function(
     ffi.Pointer<CBLDatabase> database);
@@ -1028,7 +968,7 @@ typedef DartCBLDart_CBLCollection_CreateIndex = bool Function(
 /// listener by calling \ref CBLListener_Remove.
 typedef CBLListenerToken = imp1.CBLListenerToken;
 
-/// \defgroup query Query @{ \*/ /\*\* A compiled database query.
+/// \defgroup queries Queries @{ \*/ /\*\* A compiled database query.
 typedef CBLQuery = imp1.CBLQuery;
 typedef NativeCBLDart_CBLQuery_AddChangeListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLDatabase> db,
@@ -1036,6 +976,14 @@ typedef NativeCBLDart_CBLQuery_AddChangeListener
 typedef DartCBLDart_CBLQuery_AddChangeListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLDatabase> db,
         ffi.Pointer<CBLQuery> query, CBLDart_AsyncCallback listener);
+
+/// A heap-allocated block of memory returned from an API call. The caller takes
+/// ownership, and must call \ref FLSliceResult_Release when done with it.
+/// \warning The contents of the block must not be modified, since others may be
+/// using it. \note This is equivalent to the C++ class `alloc_slice`. In C++
+/// the easiest way to deal with a `FLSliceResult` return value is to construct
+/// an `alloc_slice` from it, which will adopt the reference, and release it in
+/// its destructor. For example: `alloc_slice foo( CopyFoo() );`
 typedef FLSliceResult = imp1.FLSliceResult;
 
 /// A stream for reading a blob's content.

@@ -60,7 +60,7 @@ typedef struct FLSlice {
         a `FLSliceResult` return value is to construct an `alloc_slice` from it, which will
         adopt the reference, and release it in its destructor. For example:
         `alloc_slice foo( CopyFoo() );` */
-struct NODISCARD FLSliceResult {
+typedef struct FLSliceResult {
     const void* FL_NULLABLE buf;
     size_t size;
 
@@ -69,8 +69,7 @@ struct NODISCARD FLSliceResult {
     explicit operator FLSlice () const              {return {buf, size};}
     inline explicit operator std::string() const;
 #endif
-};
-typedef struct FLSliceResult FLSliceResult;
+} FLSliceResult;
 
 
 /** A heap-allocated, reference-counted slice. This type is really just a hint in an API

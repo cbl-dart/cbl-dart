@@ -54,14 +54,6 @@ files:
         name: kCBLConcurrencyControlFailOnConflict
       c:@Ea@kCBLConcurrencyControlLastWriteWins@kCBLConcurrencyControlLastWriteWins:
         name: kCBLConcurrencyControlLastWriteWins
-      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricCosine:
-        name: kCBLDistanceMetricCosine
-      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricDot:
-        name: kCBLDistanceMetricDot
-      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricEuclidean:
-        name: kCBLDistanceMetricEuclidean
-      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricEuclideanSquared:
-        name: kCBLDistanceMetricEuclideanSquared
       c:@Ea@kCBLDocumentFlagsDeleted@kCBLDocumentFlagsAccessRemoved:
         name: kCBLDocumentFlagsAccessRemoved
       c:@Ea@kCBLDocumentFlagsDeleted@kCBLDocumentFlagsDeleted:
@@ -228,12 +220,6 @@ files:
         name: kCBLReplicatorTypePush
       c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePushAndPull:
         name: kCBLReplicatorTypePushAndPull
-      c:@Ea@kCBLSQ4@kCBLSQ4:
-        name: kCBLSQ4
-      c:@Ea@kCBLSQ4@kCBLSQ6:
-        name: kCBLSQ6
-      c:@Ea@kCBLSQ4@kCBLSQ8:
-        name: kCBLSQ8
       c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeFromEnd:
         name: kCBLSeekModeFromEnd
       c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeFromStart:
@@ -290,24 +276,16 @@ files:
         name: CBLCollection_CreateFullTextIndex
       c:@F@CBLCollection_CreateValueIndex:
         name: CBLCollection_CreateValueIndex
-      c:@F@CBLCollection_CreateVectorIndex:
-        name: CBLCollection_CreateVectorIndex
-      c:@F@CBLCollection_Database:
-        name: CBLCollection_Database
       c:@F@CBLCollection_DeleteDocument:
         name: CBLCollection_DeleteDocument
       c:@F@CBLCollection_DeleteDocumentWithConcurrencyControl:
         name: CBLCollection_DeleteDocumentWithConcurrencyControl
       c:@F@CBLCollection_DeleteIndex:
         name: CBLCollection_DeleteIndex
-      c:@F@CBLCollection_FullName:
-        name: CBLCollection_FullName
       c:@F@CBLCollection_GetDocument:
         name: CBLCollection_GetDocument
       c:@F@CBLCollection_GetDocumentExpiration:
         name: CBLCollection_GetDocumentExpiration
-      c:@F@CBLCollection_GetIndex:
-        name: CBLCollection_GetIndex
       c:@F@CBLCollection_GetIndexNames:
         name: CBLCollection_GetIndexNames
       c:@F@CBLCollection_GetMutableDocument:
@@ -472,16 +450,6 @@ files:
         name: CBLEndpoint_Free
       c:@F@CBLError_Message:
         name: CBLError_Message
-      c:@F@CBLIndexUpdater_Count:
-        name: CBLIndexUpdater_Count
-      c:@F@CBLIndexUpdater_Finish:
-        name: CBLIndexUpdater_Finish
-      c:@F@CBLIndexUpdater_SetVector:
-        name: CBLIndexUpdater_SetVector
-      c:@F@CBLIndexUpdater_SkipVector:
-        name: CBLIndexUpdater_SkipVector
-      c:@F@CBLIndexUpdater_Value:
-        name: CBLIndexUpdater_Value
       c:@F@CBLListener_Remove:
         name: CBLListener_Remove
       c:@F@CBLLog_Callback:
@@ -500,12 +468,6 @@ files:
         name: CBLLog_SetConsoleLevel
       c:@F@CBLLog_SetFileConfig:
         name: CBLLog_SetFileConfig
-      c:@F@CBLQueryIndex_BeginUpdate:
-        name: CBLQueryIndex_BeginUpdate
-      c:@F@CBLQueryIndex_Collection:
-        name: CBLQueryIndex_Collection
-      c:@F@CBLQueryIndex_Name:
-        name: CBLQueryIndex_Name
       c:@F@CBLQuery_AddChangeListener:
         name: CBLQuery_AddChangeListener
       c:@F@CBLQuery_ColumnCount:
@@ -564,18 +526,8 @@ files:
         name: CBLScope_Collection
       c:@F@CBLScope_CollectionNames:
         name: CBLScope_CollectionNames
-      c:@F@CBLScope_Database:
-        name: CBLScope_Database
       c:@F@CBLScope_Name:
         name: CBLScope_Name
-      c:@F@CBLVectorEncoding_CreateNone:
-        name: CBLVectorEncoding_CreateNone
-      c:@F@CBLVectorEncoding_CreateProductQuantizer:
-        name: CBLVectorEncoding_CreateProductQuantizer
-      c:@F@CBLVectorEncoding_CreateScalarQuantizer:
-        name: CBLVectorEncoding_CreateScalarQuantizer
-      c:@F@CBLVectorEncoding_Free:
-        name: CBLVectorEncoding_Free
       c:@F@CBL_CopyDatabase:
         name: CBL_CopyDatabase
       c:@F@CBL_DatabaseExists:
@@ -584,8 +536,6 @@ files:
         name: CBL_DeleteDatabase
       c:@F@CBL_DumpInstances:
         name: CBL_DumpInstances
-      c:@F@CBL_EnableVectorSearch:
-        name: CBL_EnableVectorSearch
       c:@F@CBL_InstanceCount:
         name: CBL_InstanceCount
       c:@F@CBL_Log:
@@ -594,14 +544,10 @@ files:
         name: CBL_LogMessage
       c:@F@CBL_Now:
         name: CBL_Now
-      c:@F@CBL_RegisterPredictiveModel:
-        name: CBL_RegisterPredictiveModel
       c:@F@CBL_Release:
         name: CBL_Release
       c:@F@CBL_Retain:
         name: CBL_Retain
-      c:@F@CBL_UnregisterPredictiveModel:
-        name: CBL_UnregisterPredictiveModel
       c:@F@FLApplyJSONDelta:
         name: FLApplyJSONDelta
       c:@F@FLArrayIterator_Begin:
@@ -870,8 +816,6 @@ files:
         name: FLSharedKeys_Count
       c:@F@FLSharedKeys_Decode:
         name: FLSharedKeys_Decode
-      c:@F@FLSharedKeys_DisableCaching:
-        name: FLSharedKeys_DisableCaching
       c:@F@FLSharedKeys_Encode:
         name: FLSharedKeys_Encode
       c:@F@FLSharedKeys_GetStateData:
@@ -1008,14 +952,10 @@ files:
         name: CBLEncryptable
       c:@S@CBLEndpoint:
         name: CBLEndpoint
-      c:@S@CBLIndexUpdater:
-        name: CBLIndexUpdater
       c:@S@CBLListenerToken:
         name: CBLListenerToken
       c:@S@CBLQuery:
         name: CBLQuery
-      c:@S@CBLQueryIndex:
-        name: CBLQueryIndex
       c:@S@CBLRefCounted:
         name: CBLRefCounted
       c:@S@CBLReplicator:
@@ -1024,8 +964,6 @@ files:
         name: CBLResultSet
       c:@S@CBLScope:
         name: CBLScope
-      c:@S@CBLVectorEncoding:
-        name: CBLVectorEncoding
       c:@S@FLSlice:
         name: FLSlice
       c:@S@FLSliceResult:
@@ -1070,8 +1008,6 @@ files:
         name: CBLFullTextIndexConfiguration
       c:@SA@CBLLogFileConfiguration:
         name: CBLLogFileConfiguration
-      c:@SA@CBLPredictiveModel:
-        name: CBLPredictiveModel
       c:@SA@CBLProxySettings:
         name: CBLProxySettings
       c:@SA@CBLReplicatedDocument:
@@ -1086,8 +1022,6 @@ files:
         name: CBLReplicatorStatus
       c:@SA@CBLValueIndexConfiguration:
         name: CBLValueIndexConfiguration
-      c:@SA@CBLVectorIndexConfiguration:
-        name: CBLVectorIndexConfiguration
       c:@SA@FLArrayIterator:
         name: FLArrayIterator
       c:@SA@FLDictIterator:
@@ -1116,8 +1050,6 @@ files:
         name: kCBLDefaultLogFileMaxSize
       c:@kCBLDefaultLogFileUsePlainText:
         name: kCBLDefaultLogFileUsePlainText
-      c:@kCBLDefaultLogFileUsePlaintext:
-        name: kCBLDefaultLogFileUsePlaintext
       c:@kCBLDefaultReplicatorAcceptParentCookies:
         name: kCBLDefaultReplicatorAcceptParentCookies
       c:@kCBLDefaultReplicatorContinuous:
@@ -1132,22 +1064,10 @@ files:
         name: kCBLDefaultReplicatorMaxAttemptsContinuous
       c:@kCBLDefaultReplicatorMaxAttemptsSingleShot:
         name: kCBLDefaultReplicatorMaxAttemptsSingleShot
-      c:@kCBLDefaultReplicatorMaxAttemptsWaitTime:
-        name: kCBLDefaultReplicatorMaxAttemptsWaitTime
       c:@kCBLDefaultReplicatorType:
         name: kCBLDefaultReplicatorType
       c:@kCBLDefaultScopeName:
         name: kCBLDefaultScopeName
-      c:@kCBLDefaultVectorIndexDistanceMetric:
-        name: kCBLDefaultVectorIndexDistanceMetric
-      c:@kCBLDefaultVectorIndexLazy:
-        name: kCBLDefaultVectorIndexLazy
-      c:@kCBLDefaultVectorIndexMaxTrainingSize:
-        name: kCBLDefaultVectorIndexMaxTrainingSize
-      c:@kCBLDefaultVectorIndexMinTrainingSize:
-        name: kCBLDefaultVectorIndexMinTrainingSize
-      c:@kCBLDefaultVectorIndexNumProbes:
-        name: kCBLDefaultVectorIndexNumProbes
       c:@kCBLEncryptableType:
         name: kCBLEncryptableType
       c:@kCBLEncryptableValueProperty:
@@ -1200,11 +1120,7 @@ files:
         name: CBLLogLevel
       c:CBLQuery.h@T@CBLQueryChangeListener:
         name: CBLQueryChangeListener
-      c:CBLQueryIndexTypes.h@T@CBLDistanceMetric:
-        name: CBLDistanceMetric
-      c:CBLQueryIndexTypes.h@T@CBLScalarQuantizerType:
-        name: CBLScalarQuantizerType
-      c:CBLQueryTypes.h@T@CBLQueryLanguage:
+      c:CBLQuery.h@T@CBLQueryLanguage:
         name: CBLQueryLanguage
       c:CBLReplicator.h@T@CBLConflictResolver:
         name: CBLConflictResolver

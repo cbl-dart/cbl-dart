@@ -11,10 +11,6 @@ CBLDart_CBLLog_SetFileConfig
 CBLDart_CBLLog_GetFileConfig
 CBLDart_CBLLog_SetSentryBreadcrumbs
 
-CBLDart_CBLDatabaseConfiguration_Default
-
-CBLDart_CBL_CopyDatabase
-
 CBLDart_CBLDatabase_Open
 CBLDart_CBLDatabase_Release
 CBLDart_CBLDatabase_Close

@@ -18,7 +18,6 @@
 
 #pragma once
 #include "cbl++/Base.hh"
-#include "cbl++/Database.hh"
 #include "cbl/CBLCollection.h"
 #include "cbl/CBLScope.h"
 #include "fleece/Mutable.hh"
@@ -36,8 +35,6 @@ namespace cbl {
     class MutableDocument;
     class CollectionChange;
     class DocumentChange;
-    class QueryIndex;
-    class VectorIndexConfiguration;
 
     /** Conflict handler used when saving a document. */
     using CollectionConflictHandler = std::function<bool(MutableDocument documentBeingSaved,
@@ -64,13 +61,10 @@ namespace cbl {
     public:
         // Accessors:
         
-        /** The collection's name. */
-        std::string name() const                        {return asString(CBLCollection_Name(ref()));}
+        /** The collection name. */
+        std::string name() const                    {return asString(CBLCollection_Name(ref()));}
         
-        /** The collection's fully qualified name in the '<scope-name>.<collection-name>' format. */
-        std::string fullName() const                    {return asString(CBLCollection_FullName(ref()));}
-        
-        /** The scope's name. */
+        /** The scope name. */
         std::string scopeName() const {
             auto scope = CBLCollection_Scope(ref());
             auto scopeName = asString(CBLScope_Name(scope));
@@ -78,11 +72,8 @@ namespace cbl {
             return scopeName;
         }
         
-        /** The collection's database.  */
-        Database database() const                       {return Database(CBLCollection_Database(ref()));}
-        
         /** The number of documents in the collection. */
-        uint64_t count() const                          {return CBLCollection_Count(ref());}
+        uint64_t count() const                      {return CBLCollection_Count(ref());}
         
         // Documents:
         
@@ -199,17 +190,6 @@ namespace cbl {
             CBLError error;
             check(CBLCollection_CreateFullTextIndex(ref(), name, config, &error), error);
         }
-        
-#ifdef COUCHBASE_ENTERPRISE
-        /** ENTERPRISE EDITION ONLY
-         
-            Creatres a vector index in the collection.
-            If an identical index with that name already exists, nothing happens (and no error is returned.)
-            If a non-identical index with that name already exists, it is deleted and re-created.
-            @param name  The index name.
-            @param config  The vector index config. */
-        inline void createVectorIndex(slice name, const VectorIndexConfiguration &config);
-#endif
 
         /** Deletes an index given its name from the collection. */
         void deleteIndex(slice name) {
@@ -226,9 +206,6 @@ namespace cbl {
             FLArray_Release(flNames);
             return names;
         }
-        
-        /** Get an index by name. If the index doesn't exist, the NULL QueryIndex object will be returned. */
-        inline QueryIndex getIndex(slice name);
         
         // Listeners:
         
@@ -273,7 +250,6 @@ namespace cbl {
         
         friend class Database;
         friend class Document;
-        friend class QueryIndex;
         
         CBL_REFCOUNTED_BOILERPLATE(Collection, RefCounted, CBLCollection);
     
@@ -335,23 +311,6 @@ namespace cbl {
         Collection _collection;
         slice _docID;
     };
-
-    // Database method bodies:
-
-    inline Collection Database::getCollection(slice collectionName, slice scopeName) const {
-        CBLError error {};
-        return Collection::adopt(CBLDatabase_Collection(ref(), collectionName, scopeName, &error), &error) ;
-    }
-
-    inline Collection Database::createCollection(slice collectionName, slice scopeName) {
-        CBLError error {};
-        return Collection::adopt(CBLDatabase_CreateCollection(ref(), collectionName, scopeName, &error), &error) ;
-    }
-
-    inline Collection Database::getDefaultCollection() const {
-        CBLError error {};
-        return Collection::adopt(CBLDatabase_DefaultCollection(ref(), &error), &error) ;
-    }
 }
 
 /** Hash function for Collection. */

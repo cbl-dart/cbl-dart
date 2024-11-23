@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'base.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite;
-import 'cblitedart.dart' as cblitedart;
 import 'data.dart';
 import 'fleece.dart';
 import 'global.dart';
@@ -51,15 +50,10 @@ extension CBLConcurrencyControlExt on CBLConcurrencyControl {
 }
 
 final class CBLDatabaseConfiguration {
-  CBLDatabaseConfiguration({
-    required this.directory,
-    this.encryptionKey,
-    required this.fullSync,
-  });
+  CBLDatabaseConfiguration({required this.directory, this.encryptionKey});
 
   final String directory;
   final CBLEncryptionKey? encryptionKey;
-  final bool fullSync;
 }
 
 enum CBLMaintenanceType {
@@ -102,7 +96,7 @@ final class DatabaseBindings extends Bindings {
     String name,
     CBLDatabaseConfiguration? config,
   ) =>
-      withGlobalArena(() => cblDart.CBLDart_CBL_CopyDatabase(
+      withGlobalArena(() => cbl.CBL_CopyDatabase(
             from.toFLString(),
             name.toFLString(),
             _createConfig(config),
@@ -123,10 +117,9 @@ final class DatabaseBindings extends Bindings {
           ));
 
   CBLDatabaseConfiguration defaultConfiguration() {
-    final config = cblDart.CBLDart_CBLDatabaseConfiguration_Default();
+    final config = cbl.CBLDatabaseConfiguration_Default();
     return CBLDatabaseConfiguration(
       directory: config.directory.toDartString()!,
-      fullSync: config.fullSync,
     );
   }
 
@@ -244,24 +237,19 @@ final class DatabaseBindings extends Bindings {
     );
   }
 
-  Pointer<cblitedart.CBLDart_CBLDatabaseConfiguration> _createConfig(
+  Pointer<cblite.CBLDatabaseConfiguration> _createConfig(
     CBLDatabaseConfiguration? config,
   ) {
     if (config == null) {
       return nullptr;
     }
 
-    final result = globalArena<cblitedart.CBLDart_CBLDatabaseConfiguration>();
+    final result = globalArena<cblite.CBLDatabaseConfiguration>();
 
     result.ref.directory = config.directory.toFLString();
 
     if (enterpriseEdition) {
-      final key = globalArena<cblitedart.CBLDart_CBLEncryptionKey>();
-      _writeEncryptionKey(
-        key.cast<cblite.CBLEncryptionKey>().ref,
-        from: config.encryptionKey,
-      );
-      result.ref.encryptionKey = key.ref;
+      _writeEncryptionKey(result.ref.encryptionKey, from: config.encryptionKey);
     }
 
     return result;

@@ -448,48 +448,12 @@ bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
   }
 }
 
-static CBLEncryptionKey CBLEncryptionKey_FromCBLDart(
-    CBLDart_CBLEncryptionKey key) {
-  auto result = CBLEncryptionKey{};
-  memcpy(&result, &key, sizeof(CBLEncryptionKey));
-  return result;
-}
-
-static CBLDatabaseConfiguration CBLDatabaseConfiguration_FromCBLDart(
-    CBLDart_CBLDatabaseConfiguration config) {
-  auto result = CBLDatabaseConfiguration{};
-  result.directory = config.directory;
-#ifdef COUCHBASE_ENTERPRISE
-  result.encryptionKey = CBLEncryptionKey_FromCBLDart(config.encryptionKey);
-#endif
-  result.fullSync = config.fullSync;
-  return result;
-}
-
-CBLDart_CBLDatabaseConfiguration CBLDart_CBLDatabaseConfiguration_Default() {
-  auto config = CBLDatabaseConfiguration_Default();
-  auto result = CBLDart_CBLDatabaseConfiguration{};
-  result.directory = config.directory;
-  result.fullSync = config.fullSync;
-  return result;
-}
-
-bool CBLDart_CBL_CopyDatabase(FLString fromPath, FLString toName,
-                              const CBLDart_CBLDatabaseConfiguration *config,
-                              CBLError *outError) {
-  auto config_ = config ? CBLDatabaseConfiguration_FromCBLDart(*config)
-                        : CBLDatabaseConfiguration_Default();
-
-  return CBL_CopyDatabase(fromPath, toName, &config_, outError);
-}
-
 CBLDatabase *CBLDart_CBLDatabase_Open(FLString name,
-                                      CBLDart_CBLDatabaseConfiguration *config,
+                                      CBLDatabaseConfiguration *config,
                                       CBLError *errorOut) {
   CBLDart_CheckFileLogging();
 
-  auto config_ = config ? CBLDatabaseConfiguration_FromCBLDart(*config)
-                        : CBLDatabaseConfiguration_Default();
+  auto config_ = config ? *config : CBLDatabaseConfiguration_Default();
 
   auto database = CBLDatabase_Open(name, &config_, errorOut);
 

@@ -820,7 +820,6 @@ extension on DatabaseConfiguration {
       CBLDatabaseConfiguration(
         directory: directory,
         encryptionKey: (encryptionKey as EncryptionKeyImpl?)?.cblKey,
-        fullSync: fullSync,
       );
 }
 

@@ -272,14 +272,12 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         serialize: (value, context) => {
           'directory': value.directory,
           'encryptionKey':
-              context.serialize(value.encryptionKey as EncryptionKeyImpl?),
-          'fullSync': value.fullSync,
+              context.serialize(value.encryptionKey as EncryptionKeyImpl?)
         },
         deserialize: (map, context) => DatabaseConfiguration(
           directory: map.getAs('directory'),
           encryptionKey:
               context.deserializeAs<EncryptionKeyImpl>(map['encryptionKey']),
-          fullSync: map.getAs('fullSync'),
         ),
       )
       ..addCodec<ConcurrencyControl>(
