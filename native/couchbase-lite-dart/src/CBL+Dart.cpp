@@ -80,6 +80,56 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
   }).detach();
 }
 
+// === Completer
+
+namespace CBLDart {
+
+class Completer {
+ public:
+  Completer() : future(promise.get_future()) {}
+
+  void complete(void *result) { promise.set_value(result); }
+  void *wait() { return future.get(); }
+
+ private:
+  std::promise<void *> promise;
+  std::future<void *> future;
+};
+
+}  // namespace CBLDart
+
+#define COMPLETER_FROM_C(completer) \
+  reinterpret_cast<CBLDart::Completer *>(completer)
+
+#define COMPLETER_TO_C(completer) reinterpret_cast<CBLDart_Completer>(completer)
+
+void CBLDart_Completer_Complete(CBLDart_Completer completer, void *result) {
+  COMPLETER_FROM_C(completer)->complete(result);
+}
+
+// === Isolate ID
+
+static std::atomic<CBLDart_IsolateId> nextIsolateId{kCBLDartInvalidIsolateId +
+                                                    1};
+static thread_local CBLDart_IsolateId currentIsolateId =
+    kCBLDartInvalidIsolateId;
+
+CBLDart_IsolateId CBLDart_AllocateIsolateId() { return nextIsolateId++; }
+
+void CBLDart_SetCurrentIsolateId(CBLDart_IsolateId isolateId) {
+  if (isolateId != kCBLDartInvalidIsolateId &&
+      currentIsolateId != kCBLDartInvalidIsolateId) {
+    CBL_Log(kCBLLogDomainDatabase, kCBLLogError,
+            "Isolate ID already set to %d, cannot set to %d", currentIsolateId,
+            isolateId);
+    abort();
+  }
+
+  currentIsolateId = isolateId;
+}
+
+CBLDart_IsolateId CBLDart_GetCurrentIsolateId() { return currentIsolateId; }
+
 // === Couchbase Lite =========================================================
 
 // === Database level locking
@@ -626,6 +676,123 @@ CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
 
   return listenerToken;
 }
+
+// === Prediction
+
+#ifdef COUCHBASE_ENTERPRISE
+
+namespace CBLDart {
+
+struct PredictiveModel {
+ public:
+  PredictiveModel(FLString name, CBLDart_IsolateId isolateId,
+                  CBLDart_PredictiveModel_PredictionSync predictionSync,
+                  CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+                  CBLDart_PredictiveModel_Unregistered unregistered);
+
+  ~PredictiveModel();
+
+ private:
+  FLMutableDict prediction(FLDict input);
+  void unregistered();
+
+  FLStringResult name;
+  CBLDart_IsolateId isolateId;
+  CBLDart_PredictiveModel_PredictionSync predictionSync;
+  CBLDart_PredictiveModel_PredictionAsync predictionAsync;
+  CBLDart_PredictiveModel_Unregistered unregistered_;
+  std::mutex unregisteredMutex;
+};
+
+}  // namespace CBLDart
+
+#define PREDICTIVE_MODEL_FROM_C(model) \
+  reinterpret_cast<CBLDart::PredictiveModel *>(model)
+
+#define PREDICTIVE_MODEL_TO_C(model) \
+  reinterpret_cast<CBLDart_PredictiveModel>(model)
+
+namespace CBLDart {
+
+PredictiveModel::PredictiveModel(
+    FLString name, CBLDart_IsolateId isolateId,
+    CBLDart_PredictiveModel_PredictionSync predictionSync,
+    CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    CBLDart_PredictiveModel_Unregistered unregistered)
+    : name(FLSlice_Copy(name)),
+      isolateId(isolateId),
+      predictionSync(predictionSync),
+      predictionAsync(predictionAsync),
+      unregistered_(unregistered) {
+  CBLPredictiveModel model{};
+  model.context = this;
+  model.prediction = [](void *context, FLDict input) {
+    return PREDICTIVE_MODEL_FROM_C(context)->prediction(input);
+  };
+  model.unregistered = [](void *context) {
+    PREDICTIVE_MODEL_FROM_C(context)->unregistered();
+  };
+  CBL_RegisterPredictiveModel((FLString)name, model);
+}
+
+PredictiveModel::~PredictiveModel() {
+  bool wasUnregistered = true;
+  {
+    std::scoped_lock lock(unregisteredMutex);
+    wasUnregistered = unregistered_ == nullptr;
+    unregistered_ = nullptr;
+  }
+
+  if (!wasUnregistered) {
+    CBL_UnregisterPredictiveModel((FLString)name);
+  }
+
+  FLSliceResult_Release(name);
+}
+
+FLMutableDict PredictiveModel::prediction(FLDict input) {
+  if (isolateId == CBLDart_GetCurrentIsolateId()) {
+    // Use the synchronous prediction function since we are on the same
+    // thread as the isolate where the model was registered.
+    return predictionSync(input);
+  } else {
+    // Use the asynchronous prediction function since we are on a different
+    // thread as the isolate where the model was registered.
+    auto completer = CBLDart::Completer();
+    predictionAsync(input, COMPLETER_TO_C(&completer));
+    return static_cast<FLMutableDict>(completer.wait());
+  }
+}
+
+void PredictiveModel::unregistered() {
+  CBLDart_PredictiveModel_Unregistered unregistered;
+  {
+    std::scoped_lock lock(unregisteredMutex);
+    unregistered = unregistered_;
+    unregistered_ = nullptr;
+  }
+
+  if (unregistered) {
+    unregistered();
+  }
+}
+
+}  // namespace CBLDart
+
+CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
+    FLString name, CBLDart_IsolateId isolateId,
+    CBLDart_PredictiveModel_PredictionSync predictionSync,
+    CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    CBLDart_PredictiveModel_Unregistered unregistered) {
+  return PREDICTIVE_MODEL_TO_C(new CBLDart::PredictiveModel(
+      name, isolateId, predictionSync, predictionAsync, unregistered));
+}
+
+void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model) {
+  delete PREDICTIVE_MODEL_FROM_C(model);
+}
+
+#endif
 
 // === Blob
 

@@ -7,6 +7,7 @@
 #else
 #include "cbl/CouchbaseLite.h"
 #endif
+
 #include "CBLDart_Export.h"
 #include "dart/dart_api_dl.h"
 
@@ -55,6 +56,28 @@ void CBLDart_AsyncCallback_Close(CBLDart_AsyncCallback callback);
 CBLDART_EXPORT
 void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
                                        int64_t argument);
+
+// === Completer
+
+typedef struct _CBLDart_Completer *CBLDart_Completer;
+
+CBLDART_EXPORT
+void CBLDart_Completer_Complete(CBLDart_Completer completer, void *result);
+
+// === Isolate ID
+
+#define kCBLDartInvalidIsolateId -1
+
+typedef int CBLDart_IsolateId;
+
+CBLDART_EXPORT
+CBLDart_IsolateId CBLDart_AllocateIsolateId();
+
+CBLDART_EXPORT
+void CBLDart_SetCurrentIsolateId(CBLDart_IsolateId isolateId);
+
+CBLDART_EXPORT
+CBLDart_IsolateId CBLDart_GetCurrentIsolateId();
 
 // === Couchbase Lite =========================================================
 
@@ -144,6 +167,25 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
 CBLDART_EXPORT
 CBLListenerToken *CBLDart_CBLQuery_AddChangeListener(
     const CBLDatabase *db, CBLQuery *query, CBLDart_AsyncCallback listener);
+
+// === Prediction
+
+typedef FLMutableDict (*CBLDart_PredictiveModel_PredictionSync)(FLDict input);
+typedef void (*CBLDart_PredictiveModel_PredictionAsync)(
+    FLDict input, CBLDart_Completer completer);
+typedef void (*CBLDart_PredictiveModel_Unregistered)(void);
+
+typedef struct _CBLDart_PredictiveModel *CBLDart_PredictiveModel;
+
+CBLDART_EXPORT
+CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
+    FLString name, CBLDart_IsolateId isolateId,
+    CBLDart_PredictiveModel_PredictionSync predictionSync,
+    CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    CBLDart_PredictiveModel_Unregistered unregistered);
+
+CBLDART_EXPORT
+void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model);
 
 // === Blob
 

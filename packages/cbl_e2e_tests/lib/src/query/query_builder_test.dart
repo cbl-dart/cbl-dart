@@ -1044,6 +1044,34 @@ void main() {
           '1970-01-01T00:00:00Z',
         );
       });
+
+      apiTest('prediction', () async {
+        Database.prediction.registerModel('uppercase', UppercaseModel());
+        addTearDown(() => Database.prediction.unregisterModel('uppercase'));
+        expect(
+          await evalExpr(
+            Function_.prediction(
+              'uppercase',
+              Expression.dictionary({
+                'in': 'a',
+              }),
+            ),
+          ),
+          {'out': 'A'},
+        );
+
+        expect(
+          await evalExpr(
+            Function_.prediction(
+              'uppercase',
+              Expression.dictionary({
+                'in': 'a',
+              }),
+            ).property('out'),
+          ),
+          'A',
+        );
+      });
     });
 
     group('ArrayFunction', () {
@@ -1304,3 +1332,9 @@ extension on Database {
 /// slightly between different platforms, usually only in the leas significant
 /// decimal point. We just want to confirm we are using the right function.
 Matcher closeEnough(num value) => closeTo(value, .00000000001);
+
+class UppercaseModel implements PredictiveModel {
+  @override
+  Dictionary? predict(Dictionary input) =>
+      MutableDictionary({'out': input.string('in')!.toUpperCase()});
+}

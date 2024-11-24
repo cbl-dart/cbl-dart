@@ -10,6 +10,7 @@ import '../document/fragment.dart';
 import '../log.dart';
 import '../log/log.dart';
 import '../query/index/index.dart';
+import '../query/prediction.dart';
 import '../query/query.dart';
 import '../replication.dart';
 import '../support/listener_token.dart';
@@ -211,6 +212,9 @@ abstract interface class Database implements ClosableResource {
 
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
+
+  /// Manager for registering and unregistering [PredictiveModel]s.
+  static final Prediction prediction = PredictionImpl();
 
   /// The name of this database.
   String get name;

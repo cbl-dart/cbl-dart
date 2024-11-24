@@ -9,6 +9,14 @@ enum EnterpriseFeature {
   localDbReplication,
   databaseEncryption,
   propertyEncryption,
+  prediction;
+
+  String get description => switch (this) {
+        localDbReplication => 'Local database replication',
+        databaseEncryption => 'Database encryption',
+        propertyEncryption => 'Property encryption',
+        prediction => 'Prediction',
+      };
 }
 
 Edition get activeEdition =>
@@ -25,20 +33,8 @@ set activeEditionOverride(Edition? edition) {
 
 void useEnterpriseFeature(EnterpriseFeature feature) {
   if (activeEdition != Edition.enterprise) {
-    String featureDescription;
-    switch (feature) {
-      case EnterpriseFeature.localDbReplication:
-        featureDescription = 'Local database replication';
-        break;
-      case EnterpriseFeature.databaseEncryption:
-        featureDescription = 'Database encryption';
-        break;
-      case EnterpriseFeature.propertyEncryption:
-        featureDescription = 'Property encryption';
-        break;
-    }
     throw StateError(
-      '$featureDescription is only available in the Enterprise Edition.',
+      '${feature.description} is only available in the Enterprise Edition.',
     );
   }
 }

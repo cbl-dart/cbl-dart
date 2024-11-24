@@ -5,6 +5,10 @@ CBL_Dart {
 		CBLDart_AsyncCallback_Close;
 		CBLDart_AsyncCallback_Delete;
 		CBLDart_AsyncCallback_CallForTest;
+		CBLDart_Completer_Complete;
+		CBLDart_AllocateIsolateId;
+		CBLDart_SetCurrentIsolateId;
+		CBLDart_GetCurrentIsolateId;
 		CBLDart_CBLLog_SetCallback;
 		CBLDart_CBLLog_SetCallbackLevel;
 		CBLDart_CBLLog_SetFileConfig;
@@ -19,6 +23,8 @@ CBL_Dart {
 		CBLDart_CBLCollection_AddChangeListener;
 		CBLDart_CBLCollection_CreateIndex;
 		CBLDart_CBLQuery_AddChangeListener;
+		CBLDart_PredictiveModel_New;
+		CBLDart_PredictiveModel_Delete;
 		CBLDart_CBLBlobReader_Read;
 		CBLDart_CBLReplicator_Create;
 		CBLDart_CBLReplicator_Release;
