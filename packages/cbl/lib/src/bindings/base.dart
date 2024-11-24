@@ -2,12 +2,14 @@ import 'dart:ffi';
 import 'dart:io' as io;
 
 import 'package:ffi/ffi.dart';
+import 'package:path/path.dart' as p;
 
 import 'bindings.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
+import 'utils.dart';
 
 export 'cblite.dart' show CBLListenerToken;
 
@@ -296,7 +298,7 @@ final class BaseBindings extends Bindings {
       switch (initializeResult) {
         case cblitedart
               .CBLDartInitializeResult.CBLDartInitializeResult_kSuccess:
-          return;
+          break;
         case cblitedart.CBLDartInitializeResult
               .CBLDartInitializeResult_kIncompatibleDartVM:
           throw CBLErrorException(
@@ -307,6 +309,14 @@ final class BaseBindings extends Bindings {
         case cblitedart
               .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError:
           throw CBLErrorException.fromCBLError(error);
+      }
+
+      if (libraries.vectorSearchLibraryPath case final libraryPath?) {
+        final libraryDirectory = p.dirname(libraryPath);
+        runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
+          cbl.CBL_EnableVectorSearch(flLibraryDirectory, globalCBLError)
+              .checkCBLError();
+        });
       }
     });
   }

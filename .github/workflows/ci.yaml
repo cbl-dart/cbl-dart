@@ -37,6 +37,9 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
+      - name: Setup cbd
+        run: melos activate:cbd
+
       - name: Install daco
         run: dart pub global activate daco
 
@@ -92,7 +95,11 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
+      - name: Setup cbd
+        run: melos activate:cbd
+
       - name: Bootstrap Dart packages
+        shell: bash
         run: ./tools/dev-tools.sh bootstrap
 
       - name: Analyze Dart code
@@ -117,6 +124,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.flutter-channel }}
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
@@ -125,15 +137,19 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
+      - name: Bootstrap Dart packages
+        shell: bash
+        run: ./tools/dev-tools.sh bootstrap
+
+      - name: Setup cbd
+        run: melos activate:cbd
+
       - name: Setup CMake and Ninja
         uses: lukka/get-cmake@latest
 
       - name: Build native libraries
         shell: bash
         run: ./tools/ci-steps.sh buildNativeLibraries
-
-      - name: Bootstrap Dart package
-        run: ./tools/ci-steps.sh bootstrapPackage
 
       - name: Run build_runner
         if: ${{ matrix.package == 'cbl_generator' }}
@@ -206,10 +222,6 @@ jobs:
         if: ${{ matrix.os == 'Android' }}
         run: ./native/tools/android-sdk.sh installNativeToolchain
 
-      - name: Build native libraries
-        shell: bash
-        run: ./tools/ci-steps.sh buildNativeLibraries
-
       - name: Install Fluter Linux Desktop dependencies
         if: matrix.os == 'Ubuntu' && matrix.embedder == 'flutter'
         run: |
@@ -217,15 +229,9 @@ jobs:
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
 
       - name: Setup Flutter
-        if: matrix.embedder == 'flutter'
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.flutter-channel }}
-
-      - name: Configure flutter
-        if: matrix.embedder == 'flutter'
-        shell: bash
-        run: ./tools/ci-steps.sh configureFlutter
 
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
@@ -236,9 +242,16 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart package
+      - name: Bootstrap Dart packages
         shell: bash
-        run: ./tools/ci-steps.sh bootstrapPackage
+        run: ./tools/dev-tools.sh bootstrap
+
+      - name: Setup cbd
+        run: melos activate:cbd
+
+      - name: Build native libraries
+        shell: bash
+        run: ./tools/ci-steps.sh buildNativeLibraries
 
       - name: Start Couchbase services
         shell: bash
@@ -293,6 +306,11 @@ jobs:
             os: macOS
           - embedder: flutter
             os: iOS
+          # Dependency overrides for cbl_flutter_[ee,ce] don't work on Windows
+          # because of how symlinks work there (in regards to
+          # windows/ephemeral/.symlinks/plugins), so we exclude Windows for now.
+          - embedder: flutter
+            os: Windows
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-12",
@@ -324,14 +342,14 @@ jobs:
         with:
           channel: ${{ env.flutter-channel }}
 
-      - name: Configure flutter
-        shell: bash
-        run: ./tools/ci-steps.sh configureFlutter
-
       - name: Setup Melos
         run: dart pub global activate melos
 
+      - name: Setup cbd
+        run: melos activate:cbd
+
       - name: Bootstrap Dart packages
+        shell: bash
         run: ./tools/dev-tools.sh bootstrap
 
       - name: Start virtual devices
@@ -387,6 +405,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.flutter-channel }}
+
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
         with:
@@ -395,9 +418,12 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart package
+      - name: Bootstrap Dart packages
         shell: bash
-        run: ./tools/ci-steps.sh bootstrapPackage
+        run: ./tools/dev-tools.sh bootstrap
+
+      - name: Setup cbd
+        run: melos activate:cbd
 
       - name: Run tests
         shell: bash

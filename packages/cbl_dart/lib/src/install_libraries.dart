@@ -53,50 +53,58 @@ Future<void> installMergedNativeLibraries(
   await installDir.create(recursive: true);
 
   for (final package in packages) {
-    await copyDirectoryContents(
-      (package as StandardPackage).sharedLibrariesDir,
-      installDir.path,
-      filter: (entity) => !entity.path.contains('cmake'),
-    );
+    if (package.isAppleFramework) {
+      await copyDirectoryContents(
+        package.appleFrameworkDir!,
+        '${installDir.path}/${package.appleFrameworkName!}',
+      );
+    } else {
+      await copyDirectoryContents(
+        package.singleSharedLibrariesDir!,
+        installDir.path,
+        filter: (entity) => !entity.path.contains('cmake'),
+      );
+    }
   }
 }
 
 LibrariesConfiguration mergedNativeLibrariesConfigurations(
   Iterable<Package> packages, {
   required String directory,
+  required bool enterpriseEdition,
 }) {
   final libraryDir = mergedNativeLibrariesInstallDir(packages, directory);
 
-  Package packageFor(Library library) =>
-      packages.firstWhere((package) => package.config.library == library);
+  Package? packageFor(Library library) => packages
+      .where((package) => package.config.library == library)
+      .firstOrNull;
+
+  final cblPackage = packageFor(Library.cblite)!;
+  final cblDartPackage = packageFor(Library.cblitedart)!;
+  final vectorSearchPackage = packageFor(Library.vectorSearch);
 
   return LibrariesConfiguration(
     directory: libraryDir.path,
-    enterpriseEdition:
-        (packages.first.config as DatabasePackageConfig).edition ==
-            Edition.enterprise,
-    cbl: _nativeLibraryConfiguration(packageFor(Library.libcblite)),
-    cblDart: _nativeLibraryConfiguration(packageFor(Library.libcblitedart)),
+    enterpriseEdition: enterpriseEdition,
+    cbl: _nativeLibraryConfiguration(cblPackage),
+    cblDart: _nativeLibraryConfiguration(cblDartPackage),
+    vectorSearch: vectorSearchPackage != null
+        ? _nativeLibraryConfiguration(vectorSearchPackage)
+        : null,
   );
 }
 
-LibraryConfiguration _nativeLibraryConfiguration(Package package) {
-  final libraryName = (package as StandardPackage).libraryName;
-
-  if (Platform.isMacOS || Platform.isLinux) {
-    return LibraryConfiguration.dynamic(
-      libraryName,
-      // Specifying an exact version should not be necessary, but is because
-      // the beta of libcblite does not distribute properly symlinked libraries
-      // for macos. We need to use the libcblite.x.dylib because that is what
-      // libcblitedart is linking against.
-      version: package.config.version.split('.').first,
+LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
+    LibraryConfiguration.dynamic(
+      package.libraryName,
+      // Specifying an exact version should not be necessary, but is
+      // because the beta of libcblite does not distribute properly
+      // symlinked libraries for macos. We need to use the
+      // libcblite.x.dylib because that is what libcblitedart is linking
+      // against.
+      version:
+          package.os == OS.macOS && package.config.library.isDatabaseLibrary
+              ? package.config.version.split('.').first
+              : null,
+      isAppleFramework: package.isNormalAppleFramework,
     );
-  }
-
-  if (Platform.isWindows) {
-    return LibraryConfiguration.dynamic(libraryName);
-  }
-
-  throw UnsupportedError('Unsupported platform.');
-}

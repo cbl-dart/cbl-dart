@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,6 +7,7 @@ import 'package:cbl_flutter/src/install.dart';
 const androidJniLibsDir = 'android/src/main/jniLibs';
 const iosFrameworksDir = 'ios/Frameworks';
 const macosLibrariesDir = 'macos/Libraries';
+const macosFrameworksDir = 'macos/Frameworks';
 const linuxLibDir = 'linux/lib';
 const windowsBinDir = 'windows/bin';
 
@@ -19,72 +18,63 @@ void main(List<String> arguments) async {
       jsonDecode(configFile.readAsStringSync()) as Map<String, Object?>;
   final config = PrebuiltPackageConfiguration.fromJson(configJson);
 
-  final installDir = Directory(switch (os) {
-    OS.android => androidJniLibsDir,
-    OS.ios => iosFrameworksDir,
-    OS.macos => macosLibrariesDir,
-    OS.linux => linuxLibDir,
-    OS.windows => windowsBinDir,
-  });
+  final loader = RemotePackageLoader();
 
-  if (installDir.existsSync()) {
-    print(
-      'Native libraries for Couchbase Lite for $os are already installed',
+  final packageConfigs = <PackageConfig>[];
+
+  // ignore: cascade_invocations
+  packageConfigs.addAll(
+    DatabasePackageConfig.all(
+      releases: {
+        for (final library in config.libraries) //
+          library.library: library.release,
+      },
+      edition: config.edition,
+    ).where((config) => config.os == os),
+  );
+
+  if (config.edition == Edition.enterprise) {
+    packageConfigs.addAll(
+      VectorSearchPackageConfig.all(release: '1.0.0')
+          .where((config) => config.os == os),
     );
-    return;
   }
 
-  print('Installing native libraries for Couchbase Lite for $os');
-
-  final tmpInstallDir = Directory.systemTemp.createTempSync();
-
-  final loader = RemotePackageLoader();
-  final packageConfigs = DatabasePackageConfig.all(
-    releases: {
-      for (final library in config.libraries) //
-        library.library: library.release,
-    },
-    edition: config.edition,
-  ).where((config) => config.os == os);
   final packages = await Future.wait(packageConfigs.map(loader.load));
 
-  try {
-    for (final package in packages) {
-      switch (package.config.os) {
-        case OS.android:
-          final AndroidPackage(config: PackageConfig(:architectures)) =
-              package as AndroidPackage;
-          for (final architecture in architectures) {
-            await copyDirectoryContents(
-              package.sharedLibrariesDir(architecture),
-              '${tmpInstallDir.path}/${architecture.androidLibDir}',
-              filter: (entity) => !entity.path.contains('cmake'),
-            );
-          }
-        case OS.ios:
-          final StandardPackage(:baseDir) = package as StandardPackage;
-          // Copy the XCFramework, that is already in the correct structure.
-          await copyDirectoryContents(
-            baseDir,
-            tmpInstallDir.path,
-            // Don't copy LICENSE files.
-            filter: (entity) => entity.path.contains('.xcframework'),
-          );
-        case OS.macos || OS.linux || OS.windows:
-          final StandardPackage(:sharedLibrariesDir) =
-              package as StandardPackage;
-          await copyDirectoryContents(
-            sharedLibrariesDir,
-            tmpInstallDir.path,
-            dereferenceLinks: os == OS.macos,
-            filter: (entity) => !entity.path.contains('cmake'),
-          );
+  for (final package in packages) {
+    if (package.isAppleFramework) {
+      final frameworksDir = switch (os) {
+        OS.iOS => iosFrameworksDir,
+        OS.macOS => macosFrameworksDir,
+        _ => throw UnimplementedError(),
+      };
+      await copyDirectoryContents(
+        package.appleFrameworkDir!,
+        '$frameworksDir/${package.appleFrameworkName!}',
+      );
+    } else if (package.os == OS.android) {
+      for (final architecture in package.config.architectures) {
+        await copyDirectoryContents(
+          package.sharedLibrariesDir(architecture)!,
+          '$androidJniLibsDir/${architecture.androidLibDir}',
+          filter: (entity) => !entity.path.contains('cmake'),
+        );
       }
+    } else {
+      await copyDirectoryContents(
+        package.singleSharedLibrariesDir!,
+        switch (os) {
+          OS.macOS => macosLibrariesDir,
+          OS.linux => linuxLibDir,
+          OS.windows => windowsBinDir,
+          _ => throw UnimplementedError(),
+        },
+        dereferenceLinks: package.library.isDatabaseLibrary && os == OS.macOS,
+        // Don't copy CMake files.
+        filter: (entity) => !entity.path.contains('cmake'),
+      );
     }
-    tmpInstallDir.renameSync(installDir.path);
-  } catch (e) {
-    tmpInstallDir.deleteSync(recursive: true);
-    rethrow;
   }
 }
 
@@ -92,7 +82,7 @@ extension on Architecture {
   String get androidLibDir => switch (this) {
         Architecture.arm => 'armeabi-v7a',
         Architecture.arm64 => 'arm64-v8a',
-        Architecture.x86 => 'x86',
-        Architecture.x86_64 => 'x86_64',
+        Architecture.ia32 => 'x86',
+        Architecture.x64 => 'x86_64',
       };
 }

@@ -21,4 +21,5 @@ A new flutter plugin project.
   s.swift_version = '5.0'
 
   s.vendored_libraries = 'Libraries/*'
+  s.vendored_frameworks = 'Frameworks/*'
 end

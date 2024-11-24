@@ -1,6 +1,6 @@
 # Install libraries if they have not been installed yet.
 Dir.chdir("#{Dir.pwd}/..") do
-  `dart run cbl_flutter:install macos`
+  `dart run cbl_flutter:install macOS`
 end
 
 Pod::Spec.new do |s|
@@ -15,6 +15,7 @@ Pod::Spec.new do |s|
   s.source              = { :path => '.' }
   s.source_files        = 'Classes/**/*'
   s.vendored_libraries  = 'Libraries/*'
+  s.vendored_frameworks = 'Frameworks/*'
   s.dependency 'FlutterMacOS'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }

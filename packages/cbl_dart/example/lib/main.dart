@@ -24,7 +24,7 @@ If no message is provided, all stored messages will be listed.
     exit(1);
   }
 
-  await CouchbaseLiteDart.init(edition: Edition.community);
+  await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
   db = await Database.openAsync('db');
   collection = await db.createCollection('messages');
