@@ -231,21 +231,25 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
   @override
   FutureOr<bool> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) {
-    database.typedDataAdapter!.willSaveDocument(document);
-    return collection.then((collection) => collection.saveDocument(
+  ]) =>
+      collection.then((collection) {
+        database.typedDataAdapter!.willSaveDocument(document);
+
+        return collection.saveDocument(
           document.internal as MutableDelegateDocument,
           concurrencyControl,
-        ));
-  }
+        );
+      });
 
   @override
   FutureOr<bool> withConflictHandler(
     TypedSaveConflictHandler<D, MD> conflictHandler,
-  ) {
-    database.typedDataAdapter!.willSaveDocument(document);
-    return collection.then((collection) =>
-        (collection as CollectionBase).saveDocumentWithConflictHandlerHelper(
+  ) =>
+      collection.then((collection) {
+        database.typedDataAdapter!.willSaveDocument(document);
+
+        return (collection as CollectionBase)
+            .saveDocumentWithConflictHandlerHelper(
           document.internal as MutableDelegateDocument,
           (documentBeingSaved, conflictingDocument) {
             assert(identical(documentBeingSaved, document.internal));
@@ -254,8 +258,8 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
               conflictingDocument?.let(_documentFactory),
             );
           },
-        ));
-  }
+        );
+      });
 }
 
 mixin ScopeBase implements Scope {
