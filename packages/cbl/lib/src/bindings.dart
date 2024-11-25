@@ -9,8 +9,7 @@ export 'bindings/base.dart'
         checkCBLError,
         throwCBLError,
         IntCBLErrorDomainExt,
-        IntErrorCodeExt,
-        CBLError;
+        IntErrorCodeExt;
 export 'bindings/bindings.dart';
 export 'bindings/blob.dart';
 export 'bindings/collection.dart';

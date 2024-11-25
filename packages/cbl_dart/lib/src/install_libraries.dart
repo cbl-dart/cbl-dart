@@ -1,17 +1,39 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/cbl.dart';
+// ignore: implementation_imports
+import 'package:cbl/src/install.dart';
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
-import 'package.dart';
-import 'tools.dart';
-import 'utils.dart';
+import 'logging.dart';
+
+extension PackageMerging on Package {
+  static String signature(Iterable<Package> packages) {
+    final signatures =
+        packages.map((package) => package.signatureContent).toList()..sort();
+
+    return md5
+        .convert(utf8.encode(signatures.join()))
+        .bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join();
+  }
+
+  String get signatureContent => [
+        config.library.name,
+        config.release,
+        if (config case DatabasePackageConfig(:final edition)) edition.name,
+        config.targetId
+      ].join();
+}
 
 Directory mergedNativeLibrariesInstallDir(
   Iterable<Package> packages,
   String directory,
 ) {
-  final signature = Package.mergedSignature(packages);
+  final signature = PackageMerging.signature(packages);
   return Directory(p.join(directory, signature));
 }
 
@@ -27,87 +49,62 @@ Future<void> installMergedNativeLibraries(
 }) async {
   logger.fine('Installing native libraries into $directory');
 
-  final tmpDir = await Directory.systemTemp.createTemp();
+  final installDir = mergedNativeLibrariesInstallDir(packages, directory);
+  await installDir.create(recursive: true);
 
-  try {
-    final tmpInstallDir = Directory.fromUri(tmpDir.uri.resolve('lib'));
-    await tmpInstallDir.create();
-
-    for (final package in packages) {
-      await installNativeLibrary(
-        package,
-        installDir: tmpInstallDir.path,
-        tmpDir: tmpDir.path,
+  for (final package in packages) {
+    if (package.isAppleFramework) {
+      await copyDirectoryContents(
+        package.appleFrameworkDir!,
+        '${installDir.path}/${package.appleFrameworkName!}',
+      );
+    } else {
+      await copyDirectoryContents(
+        package.singleSharedLibrariesDir!,
+        installDir.path,
+        filter: (entity) => !entity.path.contains('cmake'),
       );
     }
-
-    final installDir = mergedNativeLibrariesInstallDir(packages, directory);
-    await installDir.create(recursive: true);
-
-    await copyDirectoryContents(
-      tmpInstallDir.path,
-      installDir.path,
-      filter: (entity) => !entity.path.contains('cmake'),
-    );
-  } finally {
-    await tmpDir.delete(recursive: true);
   }
-}
-
-Future<void> installNativeLibrary(
-  Package package, {
-  required String installDir,
-  required String tmpDir,
-}) async {
-  logger.fine('Installing native library ${package.libraryName}');
-
-  final packageRootDir =
-      p.join(tmpDir, '${package.library.name}-${package.version}');
-  final targetLibDir = p.join(packageRootDir, package.librariesDir);
-
-  final archiveData = await downloadUrl(package.archiveUrl);
-  await unpackArchive(
-    archiveData,
-    format: package.archiveFormat,
-    outputDir: tmpDir,
-  );
-
-  // Copy contents of lib dir from archive to install dir.
-  await copyDirectoryContents(targetLibDir, installDir);
 }
 
 LibrariesConfiguration mergedNativeLibrariesConfigurations(
   Iterable<Package> packages, {
   required String directory,
+  required bool enterpriseEdition,
 }) {
   final libraryDir = mergedNativeLibrariesInstallDir(packages, directory);
 
-  Package packageFor(Library library) =>
-      packages.firstWhere((package) => package.library == library);
+  Package? packageFor(Library library) => packages
+      .where((package) => package.config.library == library)
+      .firstOrNull;
+
+  final cblPackage = packageFor(Library.cblite)!;
+  final cblDartPackage = packageFor(Library.cblitedart)!;
+  final vectorSearchPackage = packageFor(Library.vectorSearch);
 
   return LibrariesConfiguration(
     directory: libraryDir.path,
-    enterpriseEdition: packages.first.edition == Edition.enterprise,
-    cbl: _nativeLibraryConfiguration(packageFor(Library.libcblite)),
-    cblDart: _nativeLibraryConfiguration(packageFor(Library.libcblitedart)),
+    enterpriseEdition: enterpriseEdition,
+    cbl: _nativeLibraryConfiguration(cblPackage),
+    cblDart: _nativeLibraryConfiguration(cblDartPackage),
+    vectorSearch: vectorSearchPackage != null
+        ? _nativeLibraryConfiguration(vectorSearchPackage)
+        : null,
   );
 }
 
-LibraryConfiguration _nativeLibraryConfiguration(Package package) {
-  if (Platform.isMacOS || Platform.isLinux) {
-    return LibraryConfiguration.dynamic(
+LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
+    LibraryConfiguration.dynamic(
       package.libraryName,
-      // Specifying an exact version should not be necessary, but is because
-      // the beta of libcblite does not distribute properly symlinked libraries
-      // for macos. We need to use the libcblite.x.dylib because that is what
-      // libcblitedart is linking against.
-      version: package.version.split('.').first,
+      // Specifying an exact version should not be necessary, but is
+      // because the beta of libcblite does not distribute properly
+      // symlinked libraries for macos. We need to use the
+      // libcblite.x.dylib because that is what libcblitedart is linking
+      // against.
+      version:
+          package.os == OS.macOS && package.config.library.isDatabaseLibrary
+              ? package.config.version.split('.').first
+              : null,
+      isAppleFramework: package.isNormalAppleFramework,
     );
-  }
-
-  if (Platform.isWindows) {
-    return LibraryConfiguration.dynamic(package.libraryName);
-  }
-
-  throw UnsupportedError('Unsupported platform.');
-}

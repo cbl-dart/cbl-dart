@@ -1,31 +1,29 @@
+import 'dart:convert';
+
+// ignore: implementation_imports
+import 'package:cbl/src/install.dart';
+// ignore: implementation_imports
+import 'package:cbl_flutter/src/install.dart';
 import 'package:mustache_template/mustache.dart';
 
-import 'configuration.dart';
 import 'utils.dart';
 
-JsonMap createTemplateContext({required PackageConfiguration configuration}) =>
+JsonMap createTemplateContext({
+  required PrebuiltPackageConfiguration configuration,
+}) =>
     {
       ...configuration.templateContext(),
+      'prebuiltPackageConfigurationJson':
+          const JsonEncoder.withIndent('  ').convert(configuration.toJson()),
       'capitalize': capitalize,
     };
 
-extension on LibraryInfo {
-  JsonMap templateContext() => {
-        'version': version,
-        'release': release,
-        'apiPackageRelease': apiPackageRelease,
-      };
-}
-
-extension on PackageConfiguration {
+extension on PrebuiltPackageConfiguration {
   JsonMap templateContext() => {
         'name': name,
-        'version': version,
         'edition': edition.name,
         'enterpriseEdition': edition == Edition.enterprise,
         'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',
-        'couchbaseLiteC': couchbaseLiteC.templateContext(),
-        'couchbaseLiteDart': couchbaseLiteDart.templateContext(),
       };
 }
 

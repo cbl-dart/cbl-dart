@@ -208,8 +208,7 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
             if (_content == null) {
               byteBuilder.add(data);
             }
-            // ignore: deprecated_member_use
-            sink.add(UnmodifiableUint8ListView(data));
+            sink.add(data.asUnmodifiableView());
           },
           handleDone: (sink) {
             _content ??= byteBuilder.toBytes();
@@ -237,7 +236,7 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+    final encoder = FleeceEncoder(format: FLEncoderFormat.kFLEncodeJSON);
     final done = encodeTo(encoder);
     assert(done is! Future);
     return encoder.finish().toDartString();

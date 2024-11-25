@@ -5,6 +5,12 @@ environment:
   sdk: ^3.0.0
 
 dev_dependencies:
-  daco: ^0.2.6
+  cbd:
+    path: tool
+  daco: ^0.3.0
   melos: ^3.4.0
   path: ^1.9.0
+
+dependency_overrides:
+  cbl:
+    path: packages/cbl

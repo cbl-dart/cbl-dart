@@ -38,10 +38,9 @@ void main() {
         final sliceResult = data.toSliceResult();
         final sharedStringsTable = SharedStringsTable();
 
-        final flArray =
-            _valueBinds.fromData(sliceResult, FLTrust.trusted)!.cast<FLArray>();
+        final flValue = _valueBinds.fromData(sliceResult, FLTrust.kFLTrusted)!;
         for (var i = 0; i < 4; i++) {
-          _decoderBinds.getLoadedValueFromArray(flArray, i);
+          _decoderBinds.getLoadedValueFromArray(flValue.cast(), i);
           sharedStringsTable.decode(StringSource.value);
         }
 
@@ -96,7 +95,7 @@ void main() {
 
       test('converts trusted Fleece data to Dart object', () {
         final encoder = FleeceEncoder();
-        final decoder = testFleeceDecoder(trust: FLTrust.trusted);
+        final decoder = testFleeceDecoder(trust: FLTrust.kFLTrusted);
         final data = encoder.convertJson('''
 [
   null, 41, 3.14, true, false, "a",

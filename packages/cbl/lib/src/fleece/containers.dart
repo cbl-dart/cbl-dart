@@ -8,27 +8,11 @@ import 'package:collection/collection.dart';
 
 import '../bindings.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/utils.dart';
 import 'decoder.dart';
 import 'encoder.dart';
 
-/// Options for how values are copied.
-enum CopyFlag {
-  /// Make a deep copy instead of a shallow copy, by recursively copying values.
-  deepCopy,
-
-  /// Copy immutables instead of referencing them.
-  copyImmutables,
-}
-
-extension on CopyFlag {
-  FLCopyFlag toFLCopyFlag() => FLCopyFlag.values[index];
-}
-
-extension on Iterable<CopyFlag> {
-  Set<FLCopyFlag> toFLCopyFlags() => map((flag) => flag.toFLCopyFlag()).toSet();
-}
+export '../bindings.dart' show FLCopyFlags, FLTrust;
 
 // === SharedKeys ==============================================================
 
@@ -43,9 +27,9 @@ final class SharedKeys implements Finalizable {
     _bindings.bindToDartObject(this, pointer, retain: !adopt);
   }
 
-  static final _bindings = cblBindings.fleece.sharedKeys;
+  static final _bindings = CBLBindings.instance.fleece.sharedKeys;
 
-  final Pointer<FLSharedKeys> pointer;
+  final FLSharedKeys pointer;
 
   /// The number of keys in the mapping.
   ///
@@ -84,9 +68,9 @@ final class Doc implements Finalizable {
     _bindings.bindToDartObject(this, pointer);
   }
 
-  static final _bindings = cblBindings.fleece.doc;
+  static final _bindings = CBLBindings.instance.fleece.doc;
 
-  final Pointer<FLDoc> pointer;
+  final FLDoc pointer;
 
   /// Returns the data owned by the document, if any, else `null`.
   SliceResult? get allocedData => _bindings.getAllocedData(pointer);
@@ -169,9 +153,9 @@ final class Value implements Finalizable {
     }
   }
 
-  static final _bindings = cblBindings.fleece.value;
+  static final _bindings = CBLBindings.instance.fleece.value;
 
-  final Pointer<FLValue> pointer;
+  final FLValue pointer;
 
   /// Whether this object updates the ref count of the native object when it is
   /// created and garbage collected.
@@ -311,12 +295,12 @@ final class Value implements Finalizable {
 final class Array extends Value with ListMixin<Value> {
   /// Creates an [Array] based on a [pointer] to the the native value.
   Array.fromPointer(
-    Pointer<FLArray> pointer, {
+    FLArray pointer, {
     super.isRefCounted,
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
-  static final _bindings = cblBindings.fleece.array;
+  static final _bindings = CBLBindings.instance.fleece.array;
 
   @override
   int get length => _bindings.count(pointer.cast());
@@ -371,28 +355,28 @@ final class MutableArray extends Array {
   }
 
   /// Creates a [MutableArray] based on a [pointer] to the the native value.
-  MutableArray.fromPointer(Pointer<FLMutableArray> pointer, {super.adopt})
+  MutableArray.fromPointer(FLMutableArray pointer, {super.adopt})
       : super.fromPointer(pointer.cast(), isRefCounted: true);
 
   /// Creates a new [MutableArray] that's a copy of the source [Array].
   ///
   /// Copying an immutable Array is very cheap (only one small allocation)
-  /// unless the [CopyFlag.copyImmutables] is set.
+  /// unless the [FLCopyFlags.kFLCopyImmutables] is set.
   ///
   /// Copying a mutable Array is cheap if it's a shallow copy, but if
-  /// [CopyFlag.deepCopy] is true, nested mutable Arrays and [Dict]s are also
-  /// copied, recursively; if [CopyFlag.copyImmutables] is also set, immutable
-  /// values are also copied.
+  /// [FLCopyFlags.kFLDeepCopy] is true, nested mutable Arrays and [Dict]s are
+  /// also copied, recursively; if [FLCopyFlags.kFLDeepCopyImmutables] is set,
+  /// immutable values are also copied.
   factory MutableArray.mutableCopy(
     Array source, {
-    Set<CopyFlag> flags = const {},
+    FLCopyFlags flags = FLCopyFlags.kFLDefaultCopy,
   }) =>
       MutableArray.fromPointer(
-        _bindings.mutableCopy(source.pointer.cast(), flags.toFLCopyFlags()),
+        _bindings.mutableCopy(source.pointer.cast(), flags),
         adopt: true,
       );
 
-  static final _bindings = cblBindings.fleece.mutableArray;
+  static final _bindings = CBLBindings.instance.fleece.mutableArray;
 
   /// If the Array was created by [MutableArray.mutableCopy], returns the
   /// original source Array.
@@ -474,12 +458,12 @@ final class MutableArray extends Array {
 final class Dict extends Value with MapMixin<String, Value> {
   /// Creates a [Dict] based on a [pointer] to the the native value.
   Dict.fromPointer(
-    Pointer<FLDict> pointer, {
+    FLDict pointer, {
     super.isRefCounted,
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
-  static final _bindings = cblBindings.fleece.dict;
+  static final _bindings = CBLBindings.instance.fleece.dict;
 
   /// Returns the number of items in a dictionary.
   @override
@@ -580,29 +564,30 @@ final class MutableDict extends Dict {
 
   /// Creates a [MutableDict] based on a [pointer] to the the native value.
   MutableDict.fromPointer(
-    Pointer<FLMutableDict> pointer, {
+    FLMutableDict pointer, {
     super.isRefCounted,
     super.adopt,
   }) : super.fromPointer(pointer.cast());
 
   /// Creates a new [MutableDict] that's a copy of the source [Dict].
   ///
-  /// Copying an immutable [Dict] is very cheap (only one small allocation.) The
-  /// [CopyFlag.deepCopy] is ignored.
+  /// Copying an immutable Array is very cheap (only one small allocation)
+  /// unless the [FLCopyFlags.kFLCopyImmutables] is set.
   ///
-  /// Copying a [MutableDict] is cheap if it's a shallow copy, but if [flags]
-  /// contains [CopyFlag.deepCopy], nested mutable Dicts and [Array]s are also
-  /// copied, recursively.
+  /// Copying a mutable Array is cheap if it's a shallow copy, but if
+  /// [FLCopyFlags.kFLDeepCopy] is true, nested mutable Arrays and [Dict]s are
+  /// also copied, recursively; if [FLCopyFlags.kFLDeepCopyImmutables] is set,
+  /// immutable values are also copied.
   factory MutableDict.mutableCopy(
     Dict source, {
-    Set<CopyFlag> flags = const {},
+    FLCopyFlags flags = FLCopyFlags.kFLDefaultCopy,
   }) =>
       MutableDict.fromPointer(
-        _bindings.mutableCopy(source.pointer.cast(), flags.toFLCopyFlags()),
+        _bindings.mutableCopy(source.pointer.cast(), flags),
         adopt: true,
       );
 
-  static final _bindings = cblBindings.fleece.mutableDict;
+  static final _bindings = CBLBindings.instance.fleece.mutableDict;
 
   /// If the Dict was created by [MutableDict.mutableCopy], returns the original
   /// source Dict.
@@ -686,11 +671,11 @@ abstract final class SlotSetter {
 
   bool canSetValue(Object? value);
 
-  void setSlotValue(Pointer<FLSlot> slot, Object? value);
+  void setSlotValue(FLSlot slot, Object? value);
 }
 
 final class _DefaultSlotSetter implements SlotSetter {
-  late final _slotBindings = cblBindings.fleece.slot;
+  late final _slotBindings = CBLBindings.instance.fleece.slot;
 
   @override
   bool canSetValue(Object? value) =>
@@ -705,7 +690,7 @@ final class _DefaultSlotSetter implements SlotSetter {
       value is Value;
 
   @override
-  void setSlotValue(Pointer<FLSlot> slot, Object? value) {
+  void setSlotValue(FLSlot slot, Object? value) {
     // ignore: parameter_assignments
     value = _recursivelyConvertCollectionsToFleece(value);
 
@@ -744,7 +729,7 @@ final class _DefaultSlotSetter implements SlotSetter {
   }
 }
 
-void _setSlotValue(Pointer<FLSlot> slot, Object? value) {
+void _setSlotValue(FLSlot slot, Object? value) {
   SlotSetter._findForValue(value).setSlotValue(slot, value);
 }
 

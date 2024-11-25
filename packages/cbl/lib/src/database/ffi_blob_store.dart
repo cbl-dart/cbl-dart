@@ -5,7 +5,6 @@ import '../bindings.dart';
 import '../document/blob.dart';
 import '../fleece/containers.dart';
 import '../support/errors.dart';
-import '../support/ffi.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -28,7 +27,7 @@ final class _FfiBlob implements Finalizable {
           adopt: true,
         );
 
-  static final _blobBindings = cblBindings.blobs.blob;
+  static final _blobBindings = CBLBindings.instance.blobs.blob;
 
   final Pointer<CBLBlob> pointer;
 
@@ -46,7 +45,7 @@ final class _FfiBlob implements Finalizable {
 final class FfiBlobStore implements BlobStore, SyncBlobStore {
   FfiBlobStore(this.database);
 
-  static final _databaseBindings = cblBindings.database;
+  static final _databaseBindings = CBLBindings.instance.database;
 
   final FfiDatabase database;
 
@@ -85,7 +84,7 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
       return false;
     }
 
-    cblBindings.base.releaseRefCounted(cblBlob.cast());
+    CBLBindings.instance.base.releaseRefCounted(cblBlob.cast());
 
     return true;
   }
@@ -115,7 +114,7 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
   }
 }
 
-final _writeStreamBindings = cblBindings.blobs.writeStream;
+final _writeStreamBindings = CBLBindings.instance.blobs.writeStream;
 
 Future<_FfiBlob> _createBlobFromStream(
   FfiDatabase database,
@@ -147,7 +146,7 @@ final class _BlobReadStream extends Stream<Data> implements Finalizable {
   /// Size of the chunks which a blob read stream emits.
   static const _readStreamChunkSize = 8 * 1024;
 
-  static final _readStreamBindings = cblBindings.blobs.readStream;
+  static final _readStreamBindings = CBLBindings.instance.blobs.readStream;
 
   final ClosableResourceMixin parent;
   final _FfiBlob blob;

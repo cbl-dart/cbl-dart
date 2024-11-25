@@ -473,7 +473,11 @@ final class TypedDataAnalyzer {
     ScalarConverterInfo? propertyConverter,
   }) {
     TypedDataType? resolve(DartType type) {
-      final typeName = type.getDisplayString(withNullability: false);
+      final typeName = type.element?.name;
+      if (typeName == null) {
+        return null;
+      }
+
       final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
 
       if (propertyConverter != null) {
@@ -536,7 +540,7 @@ final class TypedDataAnalyzer {
       return resolvedType;
     }
 
-    final typeName = type.getDisplayString(withNullability: false);
+    final typeName = type.getDisplayString();
 
     if (propertyConverter != null) {
       throw InvalidGenerationSourceError(

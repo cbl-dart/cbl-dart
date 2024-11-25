@@ -6,12 +6,11 @@ import '../fleece/containers.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import '../support/encoding.dart';
-import '../support/ffi.dart';
 import '../support/native_object.dart';
 import 'document.dart';
 
-final _documentBindings = cblBindings.document;
-final _mutableDocumentBindings = cblBindings.mutableDocument;
+final _documentBindings = CBLBindings.instance.document;
+final _mutableDocumentBindings = CBLBindings.instance.mutableDocument;
 
 final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   FfiDocumentDelegate.fromPointer(this.pointer, {bool adopt = false}) {
@@ -71,7 +70,7 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   }
 
   void _writeEncodedProperties(EncodedData value) {
-    final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.trusted);
+    final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.kFLTrusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
     _mutableDocumentBindings.setProperties(pointer.cast(), dict.pointer.cast());
   }

@@ -3,6 +3,7 @@ repository: https://github.com/cbl-dart/cbl-dart
 packages:
   - packages/*
   - packages/*/example
+  - tool
 ignore:
   - packages/cbl_*_api
 
@@ -26,6 +27,10 @@ command:
           git add packages/cbl_dart/lib/src/version_info.dart
 
 scripts:
+  activate:cbd:
+    description: Activates CBL Dart project dev tools CLI.
+    run: cd tool && dart pub global activate --source path .
+
   build:cbl_flutter_prebuilt:
     description: Builds the prebuild packages `cbl_flutter_ce|ee`.
     run: cd packages/cbl_flutter_prebuilt && dart run

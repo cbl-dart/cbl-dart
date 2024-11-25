@@ -1,0 +1,17 @@
+{
+  "name": "cbl_flutter_ce",
+  "version": "3.2.1",
+  "edition": "community",
+  "libraries": [
+    {
+      "library": "cblite",
+      "version": "3.2.0",
+      "release": "3.2.0"
+    },
+    {
+      "library": "cblitedart",
+      "version": "7.1.0",
+      "release": "7.1.0"
+    }
+  ]
+}

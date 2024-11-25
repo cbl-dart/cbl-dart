@@ -79,7 +79,7 @@ extension ConstantReaderExt on ConstantReader {
     } else if (isSymbol) {
       return symbolValue.toString();
     } else if (isType) {
-      return typeValue.getDisplayString(withNullability: true);
+      return typeValue.getDisplayString();
     } else if (isList) {
       final elements = listValue.map((it) => '${it.code},').join();
       return 'const [$elements]';

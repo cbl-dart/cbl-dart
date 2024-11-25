@@ -273,21 +273,21 @@ base mixin BuilderQueryMixin on QueryBase {
         'SELECT',
         {
           if (_selects != null)
-            'WHAT': _selects!.map((select) => select.toJson()).toList(),
+            'WHAT': _selects.map((select) => select.toJson()).toList(),
           if (_distinct != null) 'DISTINCT': _distinct,
           if (_from != null || _joins != null)
             'FROM': [
-              if (_from != null) _from!.toJson(),
-              if (_joins != null) ..._joins!.map((join) => join.toJson())
+              if (_from != null) _from.toJson(),
+              if (_joins != null) ..._joins.map((join) => join.toJson())
             ],
-          if (_where != null) 'WHERE': _where!.toJson(),
-          if (_having != null) 'HAVING': _having!.toJson(),
+          if (_where != null) 'WHERE': _where.toJson(),
+          if (_having != null) 'HAVING': _having.toJson(),
           if (_groupBys != null)
-            'GROUP_BY': _groupBys!.map((groupBy) => groupBy.toJson()).toList(),
+            'GROUP_BY': _groupBys.map((groupBy) => groupBy.toJson()).toList(),
           if (_orderings != null)
-            'ORDER_BY': _orderings!.map((e) => e.toJson()).toList(),
-          if (_limit != null) 'LIMIT': _limit!.toJson(),
-          if (_offset != null) 'OFFSET': _offset!.toJson()
+            'ORDER_BY': _orderings.map((e) => e.toJson()).toList(),
+          if (_limit != null) 'LIMIT': _limit.toJson(),
+          if (_offset != null) 'OFFSET': _offset.toJson()
         }
       ];
 

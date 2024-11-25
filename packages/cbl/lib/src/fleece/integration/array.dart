@@ -1,16 +1,12 @@
 import 'dart:async';
-import 'dart:ffi';
-
-import 'package:collection/collection.dart';
 
 import '../../bindings.dart';
-import '../../support/ffi.dart';
 import '../../support/utils.dart';
 import '../encoder.dart';
 import 'collection.dart';
 import 'value.dart';
 
-final _arrayBindings = cblBindings.fleece.array;
+final _arrayBindings = CBLBindings.instance.fleece.array;
 
 final class MArray extends MCollection {
   MArray()
@@ -35,7 +31,7 @@ final class MArray extends MCollection {
           isMutable: isMutable ?? parent.hasMutableChildren,
         );
 
-  final Pointer<FLArray>? _array;
+  final FLArray? _array;
   final List<MValue?> _values;
 
   int get length => _values.length;
@@ -149,7 +145,7 @@ final class MArray extends MCollection {
   }
 
   @override
-  Iterable<MValue> get values => _values.whereNotNull();
+  Iterable<MValue> get values => _values.nonNulls;
 
   Iterable<MValue> get iterable sync* {
     final length = _values.length;
