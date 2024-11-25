@@ -224,7 +224,7 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
             database.useWithTypedData().documentFactoryForType<D>();
 
   final DatabaseBase database;
-  final FutureOr<Collection> collection;
+  final FutureOr<Collection> Function() collection;
   final TypedMutableDocumentObject<D, MD> document;
   final D Function(Document) _documentFactory;
 
@@ -232,7 +232,7 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
   FutureOr<bool> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) =>
-      collection.then((collection) {
+      collection().then((collection) {
         database.typedDataAdapter!.willSaveDocument(document);
 
         return collection.saveDocument(
@@ -245,7 +245,7 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
   FutureOr<bool> withConflictHandler(
     TypedSaveConflictHandler<D, MD> conflictHandler,
   ) =>
-      collection.then((collection) {
+      collection().then((collection) {
         database.typedDataAdapter!.willSaveDocument(document);
 
         return (collection as CollectionBase)

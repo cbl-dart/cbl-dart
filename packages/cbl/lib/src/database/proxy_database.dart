@@ -240,7 +240,7 @@ final class ProxyDatabase extends ProxyObject
           MD extends TypedMutableDocumentObject>(
     TypedMutableDocumentObject<D, MD> document,
   ) =>
-      _ProxySaveTypedDocument(this, defaultCollection, document);
+      _ProxySaveTypedDocument(this, () => defaultCollection, document);
 
   @override
   Future<bool> deleteDocument(
@@ -699,7 +699,7 @@ final class ProxyCollection extends ProxyObject
           MD extends TypedMutableDocumentObject>(
     TypedMutableDocumentObject<D, MD> document,
   ) =>
-      _ProxySaveTypedDocument(database, this, document);
+      _ProxySaveTypedDocument(database, () => this, document);
 
   @override
   Future<bool> deleteDocument(

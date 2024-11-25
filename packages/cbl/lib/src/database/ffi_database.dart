@@ -261,7 +261,7 @@ final class FfiDatabase
           MD extends TypedMutableDocumentObject>(
     TypedMutableDocumentObject<D, MD> document,
   ) =>
-      _FfiSaveTypedDocument(this, defaultCollection, document);
+      _FfiSaveTypedDocument(this, () => defaultCollection, document);
 
   @override
   bool deleteDocument(
@@ -595,7 +595,7 @@ final class FfiCollection
           MD extends TypedMutableDocumentObject>(
     TypedMutableDocumentObject<D, MD> document,
   ) =>
-      _FfiSaveTypedDocument(database, this, document);
+      _FfiSaveTypedDocument(database, () => this, document);
 
   @override
   bool deleteDocument(

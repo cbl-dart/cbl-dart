@@ -53,15 +53,15 @@ enum MaintenanceType {
   integrityCheck,
 }
 
-/// The result of [Database.saveTypedDocument], which needs to be used to
+/// The result of [Collection.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// See also:
 ///
 /// - [SyncSaveTypedDocument] for the synchronous version of this class, which
-///   is returned from [SyncDatabase.saveTypedDocument].
+///   is returned from [SyncCollection.saveTypedDocument].
 /// - [AsyncSaveTypedDocument] for the asynchronous version of this class, which
-///   is returned from [AsyncDatabase.saveTypedDocument].
+///   is returned from [AsyncCollection.saveTypedDocument].
 ///
 /// {@category Database}
 /// {@category Typed Data}
@@ -542,7 +542,7 @@ abstract interface class Database implements ClosableResource {
   FutureOr<Query> createQuery(String query, {bool json = false});
 }
 
-/// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
+/// The result of [SyncCollection.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// {@category Database}
@@ -790,7 +790,7 @@ abstract interface class SyncDatabase implements Database {
   SyncQuery createQuery(String query, {bool json = false});
 }
 
-/// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
+/// The result of [AsyncCollection.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// {@category Database}
