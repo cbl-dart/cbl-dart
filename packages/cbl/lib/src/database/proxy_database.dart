@@ -240,7 +240,7 @@ final class ProxyDatabase extends ProxyObject
           MD extends TypedMutableDocumentObject>(
     TypedMutableDocumentObject<D, MD> document,
   ) =>
-      _ProxySaveTypedDocument(this, document);
+      _ProxySaveTypedDocument(this, defaultCollection, document);
 
   @override
   Future<bool> deleteDocument(
@@ -527,7 +527,11 @@ final class _ProxySaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements AsyncSaveTypedDocument<D, MD> {
-  _ProxySaveTypedDocument(ProxyDatabase super.database, super.document);
+  _ProxySaveTypedDocument(
+    ProxyDatabase super.database,
+    super.collection,
+    super.document,
+  );
 
   @override
   Future<bool> withConcurrencyControl([
@@ -541,26 +545,6 @@ final class _ProxySaveTypedDocument<D extends TypedDocumentObject,
   ) =>
       super.withConflictHandler(conflictHandler) as Future<bool>;
 }
-
-class _ProxySaveTypedDocumentCollection<D extends TypedDocumentObject,
-MD extends TypedMutableDocumentObject>
-    extends SaveTypedDocumentCollectionBase<D, MD>
-    implements AsyncSaveTypedDocument<D, MD> {
-  _ProxySaveTypedDocumentCollection(ProxyDatabase super.database, super.document, super.collection);
-
-  @override
-  Future<bool> withConcurrencyControl([
-    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) =>
-      super.withConcurrencyControl(concurrencyControl) as Future<bool>;
-
-  @override
-  Future<bool> withConflictHandler(
-      TypedSaveConflictHandler<D, MD> conflictHandler,
-      ) =>
-      super.withConflictHandler(conflictHandler) as Future<bool>;
-}
-
 
 final class ProxyScope extends ProxyObject
     with ScopeBase, ClosableResourceMixin
@@ -662,6 +646,11 @@ final class ProxyCollection extends ProxyObject
       DocumentFragmentImpl(await document(id));
 
   @override
+  Future<D?> typedDocument<D extends TypedDocumentObject<Object>>(String id) =>
+      // ignore: cast_nullable_to_non_nullable
+      super.typedDocument<D>(id)! as Future<D?>;
+
+  @override
   Future<bool> saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -706,6 +695,13 @@ final class ProxyCollection extends ProxyObject
       );
 
   @override
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+          MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  ) =>
+      _ProxySaveTypedDocument(database, this, document);
+
+  @override
   Future<bool> deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -737,12 +733,30 @@ final class ProxyCollection extends ProxyObject
       );
 
   @override
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) async {
+    database.useWithTypedData();
+    return deleteDocument(
+      document.internal as DelegateDocument,
+      concurrencyControl,
+    );
+  }
+
+  @override
   Future<void> purgeDocument(covariant DelegateDocument document) async {
     await asyncOperationTracePoint(
       () => PrepareDocumentOp(document),
       () async => prepareDocument(document, syncProperties: false),
     );
     return purgeDocumentById(document.id);
+  }
+
+  @override
+  Future<void> purgeTypedDocument(TypedDocumentObject document) async {
+    database.useWithTypedData();
+    await purgeDocument(document.internal as DelegateDocument);
   }
 
   @override
@@ -856,57 +870,4 @@ final class ProxyCollection extends ProxyObject
     DocumentDelegate oldDelegate,
   ) =>
       ProxyDocumentDelegate.fromDelegate(oldDelegate);
-
-  @override
-  Future<D?> typedDocument<D extends TypedDocumentObject<Object>>(String id) {
-    final adapter = database.useWithTypedData();
-
-    // We resolve the factory before loading the actual document to check that
-    // D is a recognized type early.
-    final Factory<Document, D> factory;
-    final bool isDynamic;
-    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
-      final dynamicFactory = adapter.dynamicDocumentFactoryForType<D>(
-        allowUnmatchedDocument: false,
-      );
-      factory = (document) => dynamicFactory(document)!;
-      isDynamic = true;
-    } else {
-      factory = adapter.documentFactoryForType<D>();
-      isDynamic = false;
-    }
-
-    return document(id)
-        .then((doc) {
-      if (doc == null) {
-        return null;
-      }
-
-      if (!isDynamic) {
-        // Check that the loaded document is of the correct type.
-        adapter.checkDocumentIsOfType<D>(doc);
-      }
-
-      return factory(doc);
-    });
-  }
-
-  @override
-  AsyncSaveTypedDocument<D, MD> saveTypedDocument
-  <D extends TypedDocumentObject, MD extends TypedMutableDocumentObject>
-      (TypedMutableDocumentObject<D, MD> document) =>
-      _ProxySaveTypedDocumentCollection(database, document, this);
-
-  @override
-  Future<bool> deleteTypedDocument(
-      TypedDocumentObject document, [
-        ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-      ]) async {
-    database.useWithTypedData();
-    return deleteDocument(
-      document.internal as DelegateDocument,
-      concurrencyControl,
-    );
-  }
-
 }

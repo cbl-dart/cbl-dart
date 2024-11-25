@@ -60,46 +60,16 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
     DelegateDocument document, {
     bool syncProperties = true,
   }) =>
-      defaultCollection
-          .then((value) => (value as CollectionBase<T>).prepareDocument(
+      defaultCollection.then(
+          (collection) => (collection as CollectionBase<T>).prepareDocument(
                 document,
                 syncProperties: syncProperties,
               ));
 
   @override
-  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) {
-    final adapter = useWithTypedData();
-
-    // We resolve the factory before loading the actual document to check that
-    // D is a recognized type early.
-    final Factory<Document, D> factory;
-    final bool isDynamic;
-    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
-      final dynamicFactory = adapter.dynamicDocumentFactoryForType<D>(
-        allowUnmatchedDocument: false,
-      );
-      factory = (document) => dynamicFactory(document)!;
-      isDynamic = true;
-    } else {
-      factory = adapter.documentFactoryForType<D>();
-      isDynamic = false;
-    }
-
-    return defaultCollection
-        .then((collection) => collection.document(id))
-        .then((doc) {
-      if (doc == null) {
-        return null;
-      }
-
-      if (!isDynamic) {
-        // Check that the loaded document is of the correct type.
-        adapter.checkDocumentIsOfType<D>(doc);
-      }
-
-      return factory(doc);
-    });
-  }
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
+      defaultCollection.then((collection) =>
+          (collection as CollectionBase<T>).typedDocument<D>(id));
 
   /// Whether the current transaction belongs to this database, if one exists.
   bool get ownsCurrentTransaction => _Transaction.current?.database == this;
@@ -243,7 +213,7 @@ final class _Transaction {
 
 abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
     MD extends TypedMutableDocumentObject> implements SaveTypedDocument<D, MD> {
-  SaveTypedDocumentBase(this.database, this.document)
+  SaveTypedDocumentBase(this.database, this.collection, this.document)
       :
         // This call ensures that the document type D is registered with the
         // database. This is why we call it, even though we may never need to
@@ -254,6 +224,7 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
             database.useWithTypedData().documentFactoryForType<D>();
 
   final DatabaseBase database;
+  final FutureOr<Collection> collection;
   final TypedMutableDocumentObject<D, MD> document;
   final D Function(Document) _documentFactory;
 
@@ -262,11 +233,10 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]) {
     database.typedDataAdapter!.willSaveDocument(document);
-    return database.defaultCollection
-        .then((collection) => collection.saveDocument(
-              document.internal as MutableDelegateDocument,
-              concurrencyControl,
-            ));
+    return collection.then((collection) => collection.saveDocument(
+          document.internal as MutableDelegateDocument,
+          concurrencyControl,
+        ));
   }
 
   @override
@@ -274,7 +244,7 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
     TypedSaveConflictHandler<D, MD> conflictHandler,
   ) {
     database.typedDataAdapter!.willSaveDocument(document);
-    return database.defaultCollection.then((collection) =>
+    return collection.then((collection) =>
         (collection as CollectionBase).saveDocumentWithConflictHandlerHelper(
           document.internal as MutableDelegateDocument,
           (documentBeingSaved, conflictingDocument) {
@@ -419,6 +389,39 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
       return done.then((_) => success);
     }
     return success;
+  }
+
+  @override
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) {
+    final adapter = database.useWithTypedData();
+
+    // We resolve the factory before loading the actual document to check that
+    // D is a recognized type early.
+    final Factory<Document, D> factory;
+    final bool isDynamic;
+    if (D == TypedDocumentObject || D == TypedMutableDocumentObject) {
+      final dynamicFactory = adapter.dynamicDocumentFactoryForType<D>(
+        allowUnmatchedDocument: false,
+      );
+      factory = (document) => dynamicFactory(document)!;
+      isDynamic = true;
+    } else {
+      factory = adapter.documentFactoryForType<D>();
+      isDynamic = false;
+    }
+
+    return document(id).then((doc) {
+      if (doc == null) {
+        return null;
+      }
+
+      if (!isDynamic) {
+        // Check that the loaded document is of the correct type.
+        adapter.checkDocumentIsOfType<D>(doc);
+      }
+
+      return factory(doc);
+    });
   }
 
   @override
