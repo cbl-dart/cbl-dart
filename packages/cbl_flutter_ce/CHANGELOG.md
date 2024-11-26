@@ -1,3 +1,9 @@
+## 3.3.0-dev.0
+
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+
 ## 3.2.1
 
  - **FIX**: add workaround for loading native libraries on older versions of Android ([#624](https://github.com/cbl-dart/cbl-dart/issues/624)). ([72b004ab](https://github.com/cbl-dart/cbl-dart/commit/72b004abb206afd72984bcd6f7689667f4215f3b))

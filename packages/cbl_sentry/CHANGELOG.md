@@ -1,3 +1,7 @@
+## 2.1.2-dev.0
+
+ - **REFACTOR**: use ffigen to generate bindings ([#633](https://github.com/cbl-dart/cbl-dart/issues/633)). ([900bd3ca](https://github.com/cbl-dart/cbl-dart/commit/900bd3cadeb3b9e059f91ce717bc7e9afd7c871a))
+
 ## 2.1.1
 
  - Update a dependency to the latest release.

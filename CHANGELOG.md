@@ -3,6 +3,78 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-11-26
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.3.0-dev.0`](#cbl---v330-dev0)
+ - [`cbl_dart` - `v3.2.0-dev.0`](#cbl_dart---v320-dev0)
+ - [`cbl_flutter` - `v3.2.0-dev.0`](#cbl_flutter---v320-dev0)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.0`](#cbl_flutter_ce---v330-dev0)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.0`](#cbl_flutter_ee---v330-dev0)
+ - [`cbl_flutter_platform_interface` - `v3.1.0-dev.0`](#cbl_flutter_platform_interface---v310-dev0)
+ - [`cbl_generator` - `v0.3.1-dev.0`](#cbl_generator---v031-dev0)
+ - [`cbl_sentry` - `v2.1.2-dev.0`](#cbl_sentry---v212-dev0)
+
+---
+
+#### `cbl` - `v3.3.0-dev.0`
+
+ - **REFACTOR**: remove duplication of Librarie(s)Configuration classes ([#642](https://github.com/cbl-dart/cbl-dart/issues/642)). ([9be1b59e](https://github.com/cbl-dart/cbl-dart/commit/9be1b59e9f105797b79082e79d46f4801e9dcbc9))
+ - **REFACTOR**: remove cblBindings in favor of CBLBindings.instance ([#641](https://github.com/cbl-dart/cbl-dart/issues/641)). ([776eb700](https://github.com/cbl-dart/cbl-dart/commit/776eb700c122b3c12d4573a91106170027dd0ca2))
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **REFACTOR**: use ffigen to generate bindings ([#633](https://github.com/cbl-dart/cbl-dart/issues/633)). ([900bd3ca](https://github.com/cbl-dart/cbl-dart/commit/900bd3cadeb3b9e059f91ce717bc7e9afd7c871a))
+ - **FEAT**: support typed documents in collections ([#650](https://github.com/cbl-dart/cbl-dart/issues/650)). ([d6a20e52](https://github.com/cbl-dart/cbl-dart/commit/d6a20e5235493c9e841dfea395d6f7863c0c6ea1))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+ - **FEAT**: add `DatabaseConfiguration.fullSync` ([#637](https://github.com/cbl-dart/cbl-dart/issues/637)). ([7f5341b1](https://github.com/cbl-dart/cbl-dart/commit/7f5341b1e3330d7c42082f6f0890c34ed9090180))
+
+#### `cbl_dart` - `v3.2.0-dev.0`
+
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+
+#### `cbl_flutter` - `v3.2.0-dev.0`
+
+ - **REFACTOR**: remove duplication of Librarie(s)Configuration classes ([#642](https://github.com/cbl-dart/cbl-dart/issues/642)). ([9be1b59e](https://github.com/cbl-dart/cbl-dart/commit/9be1b59e9f105797b79082e79d46f4801e9dcbc9))
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+
+#### `cbl_flutter_ce` - `v3.3.0-dev.0`
+
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+
+#### `cbl_flutter_ee` - `v3.3.0-dev.0`
+
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+
+#### `cbl_flutter_platform_interface` - `v3.1.0-dev.0`
+
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+
+#### `cbl_generator` - `v0.3.1-dev.0`
+
+ - **FEAT**: support typed documents in collections ([#650](https://github.com/cbl-dart/cbl-dart/issues/650)). ([d6a20e52](https://github.com/cbl-dart/cbl-dart/commit/d6a20e5235493c9e841dfea395d6f7863c0c6ea1))
+
+#### `cbl_sentry` - `v2.1.2-dev.0`
+
+ - **REFACTOR**: use ffigen to generate bindings ([#633](https://github.com/cbl-dart/cbl-dart/issues/633)). ([900bd3ca](https://github.com/cbl-dart/cbl-dart/commit/900bd3cadeb3b9e059f91ce717bc7e9afd7c871a))
+
+
 ## 2024-10-15
 
 ### Changes

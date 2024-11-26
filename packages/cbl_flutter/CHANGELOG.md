@@ -1,3 +1,10 @@
+## 3.2.0-dev.0
+
+ - **REFACTOR**: remove duplication of Librarie(s)Configuration classes ([#642](https://github.com/cbl-dart/cbl-dart/issues/642)). ([9be1b59e](https://github.com/cbl-dart/cbl-dart/commit/9be1b59e9f105797b79082e79d46f4801e9dcbc9))
+ - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
+ - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))
+ - **FEAT**: use Dart for native libraries install script ([#639](https://github.com/cbl-dart/cbl-dart/issues/639)). ([40c70c71](https://github.com/cbl-dart/cbl-dart/commit/40c70c716361368481537c718c5459ef983136f6))
+
 ## 3.1.3
 
  - **FIX**: put `CBLTemp` directory in application support directory ([#625](https://github.com/cbl-dart/cbl-dart/issues/625)). ([6404d1e6](https://github.com/cbl-dart/cbl-dart/commit/6404d1e6ce8eafd5e120fc44033a67ace25e2de0))

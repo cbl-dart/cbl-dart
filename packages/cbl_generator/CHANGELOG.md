@@ -1,3 +1,7 @@
+## 0.3.1-dev.0
+
+ - **FEAT**: support typed documents in collections ([#650](https://github.com/cbl-dart/cbl-dart/issues/650)). ([d6a20e52](https://github.com/cbl-dart/cbl-dart/commit/d6a20e5235493c9e841dfea395d6f7863c0c6ea1))
+
 ## 0.3.0+2
 
  - **REFACTOR**: don't use `getDisplayString` with `withNullability` ([#608](https://github.com/cbl-dart/cbl-dart/issues/608)). ([aa840e04](https://github.com/cbl-dart/cbl-dart/commit/aa840e044fa863de21cb76a4145656425c145d2a))
