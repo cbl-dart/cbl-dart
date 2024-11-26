@@ -261,7 +261,7 @@ final class FfiDatabase
           MD extends TypedMutableDocumentObject>(
     TypedMutableDocumentObject<D, MD> document,
   ) =>
-      _FfiSaveTypedDocument(this, document);
+      _FfiSaveTypedDocument(this, () => defaultCollection, document);
 
   @override
   bool deleteDocument(
@@ -530,6 +530,10 @@ final class FfiCollection
   DocumentFragment operator [](String id) => DocumentFragmentImpl(document(id));
 
   @override
+  D? typedDocument<D extends TypedDocumentObject<Object>>(String id) =>
+      super.typedDocument<D>(id) as D?;
+
+  @override
   bool saveDocument(
     covariant MutableDelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -586,6 +590,14 @@ final class FfiCollection
       );
 
   @override
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<
+          D extends TypedDocumentObject<Object>,
+          MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  ) =>
+      _FfiSaveTypedDocument(database, () => this, document);
+
+  @override
   bool deleteDocument(
     covariant DelegateDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -614,10 +626,28 @@ final class FfiCollection
       );
 
   @override
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject<Object> document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]) async {
+    database.useWithTypedData();
+    return deleteDocument(
+      document.internal as DelegateDocument,
+      concurrencyControl,
+    );
+  }
+
+  @override
   void purgeDocument(covariant DelegateDocument document) => useSync(() {
         document.setCollection(this);
         purgeDocumentById(document.id);
       });
+
+  @override
+  void purgeTypedDocument(TypedDocumentObject document) {
+    database.useWithTypedData();
+    purgeDocument(document.internal as DelegateDocument);
+  }
 
   @override
   void purgeDocumentById(String id) => useSync(
@@ -791,7 +821,11 @@ final class _FfiSaveTypedDocument<D extends TypedDocumentObject,
         MD extends TypedMutableDocumentObject>
     extends SaveTypedDocumentBase<D, MD>
     implements SyncSaveTypedDocument<D, MD> {
-  _FfiSaveTypedDocument(FfiDatabase super.database, super.document);
+  _FfiSaveTypedDocument(
+    FfiDatabase super.database,
+    super.collection,
+    super.document,
+  );
 
   @override
   bool withConcurrencyControl([

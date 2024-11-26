@@ -2,11 +2,14 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../document.dart';
 import '../errors.dart';
 import '../query/index/index.dart';
 import '../support/listener_token.dart';
 import '../support/streams.dart';
+import '../typed_data/typed_object.dart';
 import 'collection_change.dart';
 import 'database.dart';
 import 'database_change.dart';
@@ -137,6 +140,11 @@ abstract interface class Collection {
   /// Returns the [DocumentFragment] for the [Document] with the given [id].
   FutureOr<DocumentFragment> operator [](String id);
 
+  /// Returns the typed document, with type [D] and the given [id], if it
+  /// exists.
+  @experimental
+  FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
   /// Saves a [document] to this collection, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -168,6 +176,22 @@ abstract interface class Collection {
     SaveConflictHandler conflictHandler,
   );
 
+  /// Creates and returns an object, which can be used to save a typed
+  /// [document] to this collection.
+  ///
+  /// A call to this method will not save the document to the database. Call one
+  /// of the methods of the returned object to finally save the [document].
+  ///
+  /// See also:
+  ///
+  /// - [SaveTypedDocument] for the object used to save typed documents.
+  @experimental
+  @useResult
+  SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
   /// Deletes a [document] from this collection, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -182,11 +206,33 @@ abstract interface class Collection {
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
+  /// Deletes a typed [document] from this collection, resolving conflicts
+  /// through [ConcurrencyControl].
+  ///
+  /// When write operations are executed concurrently, the last writer will win
+  /// by default. In this case the result is always `true`.
+  ///
+  /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
+  /// [concurrencyControl]. In this case, if the document could not be deleted
+  /// the result is `false`. On success it is `true`.
+  @experimental
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
   /// Purges a [document] from this collection.
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
   /// The purge will **not** be replicated to other databases.
   FutureOr<void> purgeDocument(Document document);
+
+  /// Purges a typed [document] from this collection.
+  ///
+  /// This is more drastic than deletion: It removes all traces of the document.
+  /// The purge will **not** be replicated to other databases.
+  @experimental
+  FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
 
   /// Purges a [Document] from this collection by its [id].
   ///
@@ -326,6 +372,9 @@ abstract interface class SyncCollection extends Collection {
   DocumentFragment operator [](String id);
 
   @override
+  D? typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   bool saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -341,13 +390,31 @@ abstract interface class SyncCollection extends Collection {
   );
 
   @override
+  @experimental
+  @useResult
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
+  @override
   bool deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
   @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
   void purgeDocument(Document document);
+
+  @override
+  void purgeTypedDocument(TypedDocumentObject document);
 
   @override
   void purgeDocumentById(String id);
@@ -397,6 +464,9 @@ abstract interface class AsyncCollection extends Collection {
   Future<DocumentFragment> operator [](String id);
 
   @override
+  Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
+
+  @override
   Future<bool> saveDocument(
     MutableDocument document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -409,13 +479,31 @@ abstract interface class AsyncCollection extends Collection {
   );
 
   @override
+  @experimental
+  @useResult
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
+      MD extends TypedMutableDocumentObject>(
+    TypedMutableDocumentObject<D, MD> document,
+  );
+
+  @override
   Future<bool> deleteDocument(
     Document document, [
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
   @override
+  @experimental
+  Future<bool> deleteTypedDocument(
+    TypedDocumentObject document, [
+    ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
+  ]);
+
+  @override
   Future<void> purgeDocument(Document document);
+
+  @override
+  Future<void> purgeTypedDocument(TypedDocumentObject document);
 
   @override
   Future<void> purgeDocumentById(String id);

@@ -11,12 +11,13 @@ void main() {
 
   test('load document', () {
     final db = DocWithIdDatabase.openSync('test');
+    final collection = db.defaultCollection;
     addTearDown(db.delete);
     final doc = MutableDocWithId('a');
-    db.saveTypedDocument(doc).withConcurrencyControl();
-    expect(db.typedDocument<DocWithId>('b'), isNull);
-    expect(db.typedDocument<DocWithId>('a'), isNotNull);
-    expect(db.typedDocument<MutableDocWithId>('a'), isNotNull);
+    collection.saveTypedDocument(doc).withConcurrencyControl();
+    expect(collection.typedDocument<DocWithId>('b'), isNull);
+    expect(collection.typedDocument<DocWithId>('a'), isNotNull);
+    expect(collection.typedDocument<MutableDocWithId>('a'), isNotNull);
   });
 
   test('run typed query', () {

@@ -53,15 +53,15 @@ enum MaintenanceType {
   integrityCheck,
 }
 
-/// The result of [Database.saveTypedDocument], which needs to be used to
+/// The result of [Collection.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// See also:
 ///
 /// - [SyncSaveTypedDocument] for the synchronous version of this class, which
-///   is returned from [SyncDatabase.saveTypedDocument].
+///   is returned from [SyncCollection.saveTypedDocument].
 /// - [AsyncSaveTypedDocument] for the asynchronous version of this class, which
-///   is returned from [AsyncDatabase.saveTypedDocument].
+///   is returned from [AsyncCollection.saveTypedDocument].
 ///
 /// {@category Database}
 /// {@category Typed Data}
@@ -279,6 +279,7 @@ abstract interface class Database implements ClosableResource {
 
   /// Returns the typed document, with type [D] and the given [id], if it
   /// exists.
+  @Deprecated('Use defaultCollection.typedDocument instead.')
   @experimental
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id);
 
@@ -324,6 +325,7 @@ abstract interface class Database implements ClosableResource {
   /// See also:
   ///
   /// - [SaveTypedDocument] for the object used to save typed documents.
+  @Deprecated('Use defaultCollection.saveTypedDocument instead.')
   @experimental
   @useResult
   SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
@@ -355,6 +357,7 @@ abstract interface class Database implements ClosableResource {
   /// To fail on conflict instead, pass [ConcurrencyControl.failOnConflict] to
   /// [concurrencyControl]. In this case, if the document could not be deleted
   /// the result is `false`. On success it is `true`.
+  @Deprecated('Use defaultCollection.deleteTypedDocument instead.')
   @experimental
   FutureOr<bool> deleteTypedDocument(
     TypedDocumentObject document, [
@@ -372,6 +375,7 @@ abstract interface class Database implements ClosableResource {
   ///
   /// This is more drastic than deletion: It removes all traces of the document.
   /// The purge will **not** be replicated to other databases.
+  @Deprecated('Use defaultCollection.purgeTypedDocument instead.')
   @experimental
   FutureOr<void> purgeTypedDocument(TypedDocumentObject document);
 
@@ -538,7 +542,7 @@ abstract interface class Database implements ClosableResource {
   FutureOr<Query> createQuery(String query, {bool json = false});
 }
 
-/// The result of [SyncDatabase.saveTypedDocument], which needs to be used to
+/// The result of [SyncCollection.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// {@category Database}
@@ -669,6 +673,7 @@ abstract interface class SyncDatabase implements Database {
   @override
   DocumentFragment operator [](String id);
 
+  @Deprecated('Use defaultCollection.typedDocument instead.')
   @override
   @experimental
   D? typedDocument<D extends TypedDocumentObject>(String id);
@@ -692,6 +697,7 @@ abstract interface class SyncDatabase implements Database {
     SyncSaveConflictHandler conflictHandler,
   );
 
+  @Deprecated('Use defaultCollection.saveTypedDocument instead.')
   @override
   @experimental
   @useResult
@@ -707,6 +713,7 @@ abstract interface class SyncDatabase implements Database {
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
+  @Deprecated('Use defaultCollection.deleteTypedDocument instead.')
   @override
   @experimental
   bool deleteTypedDocument(
@@ -718,6 +725,7 @@ abstract interface class SyncDatabase implements Database {
   @override
   void purgeDocument(Document document);
 
+  @Deprecated('Use defaultCollection.purgeTypedDocument instead.')
   @override
   @experimental
   void purgeTypedDocument(TypedDocumentObject document);
@@ -782,7 +790,7 @@ abstract interface class SyncDatabase implements Database {
   SyncQuery createQuery(String query, {bool json = false});
 }
 
-/// The result of [AsyncDatabase.saveTypedDocument], which needs to be used to
+/// The result of [AsyncCollection.saveTypedDocument], which needs to be used to
 /// actually save the document.
 ///
 /// {@category Database}
@@ -885,6 +893,7 @@ abstract interface class AsyncDatabase implements Database {
   @override
   Future<DocumentFragment> operator [](String id);
 
+  @Deprecated('Use defaultCollection.typedDocument instead.')
   @override
   @experimental
   Future<D?> typedDocument<D extends TypedDocumentObject>(String id);
@@ -903,6 +912,7 @@ abstract interface class AsyncDatabase implements Database {
     SaveConflictHandler conflictHandler,
   );
 
+  @Deprecated('Use defaultCollection.saveTypedDocument instead.')
   @override
   @experimental
   @useResult
@@ -918,6 +928,7 @@ abstract interface class AsyncDatabase implements Database {
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
   ]);
 
+  @Deprecated('Use defaultCollection.deleteTypedDocument instead.')
   @override
   @experimental
   Future<bool> deleteTypedDocument(
@@ -929,6 +940,7 @@ abstract interface class AsyncDatabase implements Database {
   @override
   Future<void> purgeDocument(Document document);
 
+  @Deprecated('Use defaultCollection.purgeTypedDocument instead.')
   @override
   @experimental
   Future<void> purgeTypedDocument(TypedDocumentObject document);
