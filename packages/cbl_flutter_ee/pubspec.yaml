@@ -10,7 +10,7 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl_flutter: ^3.2.0-dev.1
+  cbl_flutter_install: 0.1.0-dev.0
   cbl_flutter_platform_interface: ^3.1.0-dev.0
   cbl_libcblite_api: 3.2.0
   cbl_libcblitedart_api: 7.1.0

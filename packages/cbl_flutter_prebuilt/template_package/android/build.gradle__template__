@@ -41,7 +41,7 @@ dependencies {
 }
 
 task activateCblFlutter(type: Exec) {
-    commandLine 'dart', 'pub', 'global', 'activate', 'cbl_flutter', '{{cblFlutterVersion}}'
+    commandLine 'dart', 'pub', 'global', 'activate', 'cbl_flutter_install', '{{cblFlutterInstallVersion}}'
 
     standardOutput = new ByteArrayOutputStream()
     errorOutput = new ByteArrayOutputStream()
@@ -50,7 +50,7 @@ task activateCblFlutter(type: Exec) {
     doLast {
         if (executionResult.get().exitValue != 0) {
             throw new GradleException(
-                "Failed to activate cbl_flutter:\n" +
+                "Failed to activate cbl_flutter_install:\n" +
                 "${standardOutput.toString().trim()}\n" +
                 "${errorOutput.toString().trim()}"
             )

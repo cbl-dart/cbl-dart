@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cbl/src/install.dart';
-import 'package:cbl_flutter/src/install.dart';
+import 'package:cbl_flutter_install/cbl_flutter_install.dart';
 
 const androidJniLibsDir = 'android/src/main/jniLibs';
 const iosFrameworksDir = 'ios/Frameworks';

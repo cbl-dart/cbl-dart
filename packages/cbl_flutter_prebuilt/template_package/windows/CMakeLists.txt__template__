@@ -18,14 +18,14 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 execute_process(
-  COMMAND dart pub global activate cbl_flutter {{cblFlutterVersion}}
-  RESULT_VARIABLE ACTIVATE_CBL_FLUTTER_RESULT
-  OUTPUT_VARIABLE ACTIVATE_CBL_FLUTTER_OUTPUT
-  ERROR_VARIABLE ACTIVATE_CBL_FLUTTER_ERROR
+  COMMAND dart pub global activate cbl_flutter_install {{cblFlutterInstallVersion}}
+  RESULT_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_RESULT
+  OUTPUT_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_OUTPUT
+  ERROR_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_ERROR
 )
 
-if(NOT ${ACTIVATE_CBL_FLUTTER_RESULT} EQUAL 0)
-  message(FATAL_ERROR "Failed to activate cbl_flutter:\n${ACTIVATE_CBL_FLUTTER_OUTPUT}\n${ACTIVATE_CBL_FLUTTER_ERROR}")
+if(NOT ${ACTIVATE_CBL_FLUTTER_INSTALL_RESULT} EQUAL 0)
+  message(FATAL_ERROR "Failed to activate cbl_flutter_install:\n${ACTIVATE_CBL_FLUTTER_INSTALL_OUTPUT}\n${ACTIVATE_CBL_FLUTTER_INSTALL_ERROR}")
 endif()
 
 execute_process(

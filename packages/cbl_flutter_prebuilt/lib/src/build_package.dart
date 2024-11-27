@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-// ignore: implementation_imports
-import 'package:cbl_flutter/src/install.dart';
+import 'package:cbl_flutter_install/cbl_flutter_install.dart';
 import 'package:mustache_template/mustache.dart';
 import 'package:path/path.dart' as p;
 

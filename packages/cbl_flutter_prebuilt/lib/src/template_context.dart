@@ -2,8 +2,7 @@ import 'dart:convert';
 
 // ignore: implementation_imports
 import 'package:cbl/src/install.dart';
-// ignore: implementation_imports
-import 'package:cbl_flutter/src/install.dart';
+import 'package:cbl_flutter_install/cbl_flutter_install.dart';
 import 'package:mustache_template/mustache.dart';
 
 import 'utils.dart';
@@ -21,7 +20,7 @@ JsonMap createTemplateContext({
 extension on PrebuiltPackageConfiguration {
   JsonMap templateContext() => {
         'name': name,
-        'cblFlutterVersion': cblFlutterVersion,
+        'cblFlutterInstallVersion': cblFlutterInstallVersion,
         'edition': edition.name,
         'enterpriseEdition': edition == Edition.enterprise,
         'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',

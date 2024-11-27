@@ -5,7 +5,7 @@ final class PrebuiltPackageConfiguration {
   const PrebuiltPackageConfiguration({
     required this.name,
     required this.version,
-    required this.cblFlutterVersion,
+    required this.cblFlutterInstallVersion,
     required this.edition,
     required this.libraries,
   });
@@ -14,7 +14,7 @@ final class PrebuiltPackageConfiguration {
       PrebuiltPackageConfiguration(
         name: json['name']! as String,
         version: json['version']! as String,
-        cblFlutterVersion: json['cblFlutterVersion']! as String,
+        cblFlutterInstallVersion: json['cblFlutterInstallVersion']! as String,
         edition: Edition.values.byName(json['edition']! as String),
         libraries: [
           for (final library in json['libraries']! as List<Object?>)
@@ -24,14 +24,14 @@ final class PrebuiltPackageConfiguration {
 
   final String name;
   final String version;
-  final String cblFlutterVersion;
+  final String cblFlutterInstallVersion;
   final Edition edition;
   final List<LibraryVersionInfo> libraries;
 
   Map<String, Object?> toJson() => {
         'name': name,
         'version': version,
-        'cblFlutterVersion': cblFlutterVersion,
+        'cblFlutterInstallVersion': cblFlutterInstallVersion,
         'edition': edition.name,
         'libraries': libraries.map((library) => library.toJson()).toList(),
       };
