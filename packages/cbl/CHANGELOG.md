@@ -1,3 +1,7 @@
+## 3.3.0-dev.1
+
+ - **FIX**: invoking `cbl_flutter_install` on Windows ([#656](https://github.com/cbl-dart/cbl-dart/issues/656)). ([d9eaca2b](https://github.com/cbl-dart/cbl-dart/commit/d9eaca2be3b69eee525d9896e31ace19ff1a90ca))
+
 ## 3.3.0-dev.0
 
  - **REFACTOR**: remove duplication of Librarie(s)Configuration classes ([#642](https://github.com/cbl-dart/cbl-dart/issues/642)). ([9be1b59e](https://github.com/cbl-dart/cbl-dart/commit/9be1b59e9f105797b79082e79d46f4801e9dcbc9))

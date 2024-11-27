@@ -15,6 +15,62 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl` - `v3.3.0-dev.1`](#cbl---v330-dev1)
+ - [`cbl_flutter` - `v3.2.0-dev.2`](#cbl_flutter---v320-dev2)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.3`](#cbl_flutter_ce---v330-dev3)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.3`](#cbl_flutter_ee---v330-dev3)
+ - [`cbl_flutter_install` - `v0.1.0-dev.1`](#cbl_flutter_install---v010-dev1)
+ - [`cbl_sentry` - `v2.1.2-dev.1`](#cbl_sentry---v212-dev1)
+ - [`cbl_flutter_platform_interface` - `v3.1.0-dev.1`](#cbl_flutter_platform_interface---v310-dev1)
+ - [`cbl_generator` - `v0.3.1-dev.1`](#cbl_generator---v031-dev1)
+ - [`cbl_dart` - `v3.2.0-dev.1`](#cbl_dart---v320-dev1)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_install` - `v0.1.0-dev.1`
+ - `cbl_sentry` - `v2.1.2-dev.1`
+ - `cbl_flutter_platform_interface` - `v3.1.0-dev.1`
+ - `cbl_generator` - `v0.3.1-dev.1`
+ - `cbl_dart` - `v3.2.0-dev.1`
+
+---
+
+#### `cbl` - `v3.3.0-dev.1`
+
+ - **FIX**: invoking `cbl_flutter_install` on Windows ([#656](https://github.com/cbl-dart/cbl-dart/issues/656)). ([d9eaca2b](https://github.com/cbl-dart/cbl-dart/commit/d9eaca2be3b69eee525d9896e31ace19ff1a90ca))
+
+#### `cbl_flutter` - `v3.2.0-dev.2`
+
+ - **FIX**: move functionality to install native libraries to own package. ([d4faef33](https://github.com/cbl-dart/cbl-dart/commit/d4faef33bf654ac5365f11c874bfe422bbe89858))
+ - **FIX**: upgrade to Gradle Kotlin plugin `1.9.25` ([#654](https://github.com/cbl-dart/cbl-dart/issues/654)). ([1d105d3d](https://github.com/cbl-dart/cbl-dart/commit/1d105d3d33316326760c5fba26c858d8afc0ea6c))
+
+#### `cbl_flutter_ce` - `v3.3.0-dev.3`
+
+ - **FIX**: invoking `cbl_flutter_install` on Windows ([#656](https://github.com/cbl-dart/cbl-dart/issues/656)). ([d9eaca2b](https://github.com/cbl-dart/cbl-dart/commit/d9eaca2be3b69eee525d9896e31ace19ff1a90ca))
+ - **FIX**: move functionality to install native libraries to own package. ([d4faef33](https://github.com/cbl-dart/cbl-dart/commit/d4faef33bf654ac5365f11c874bfe422bbe89858))
+ - **FIX**: upgrade to Gradle Kotlin plugin `1.9.25` ([#654](https://github.com/cbl-dart/cbl-dart/issues/654)). ([1d105d3d](https://github.com/cbl-dart/cbl-dart/commit/1d105d3d33316326760c5fba26c858d8afc0ea6c))
+
+#### `cbl_flutter_ee` - `v3.3.0-dev.3`
+
+ - **FIX**: invoking `cbl_flutter_install` on Windows ([#656](https://github.com/cbl-dart/cbl-dart/issues/656)). ([d9eaca2b](https://github.com/cbl-dart/cbl-dart/commit/d9eaca2be3b69eee525d9896e31ace19ff1a90ca))
+ - **FIX**: move functionality to install native libraries to own package. ([d4faef33](https://github.com/cbl-dart/cbl-dart/commit/d4faef33bf654ac5365f11c874bfe422bbe89858))
+ - **FIX**: upgrade to Gradle Kotlin plugin `1.9.25` ([#654](https://github.com/cbl-dart/cbl-dart/issues/654)). ([1d105d3d](https://github.com/cbl-dart/cbl-dart/commit/1d105d3d33316326760c5fba26c858d8afc0ea6c))
+
+
+## 2024-11-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl_flutter_install` - `v0.1.0-dev.0`](#cbl_flutter_install---v010-dev0)
  - [`cbl_flutter_ce` - `v3.3.0-dev.3`](#cbl_flutter_ce---v330-dev3)
  - [`cbl_flutter_ee` - `v3.3.0-dev.3`](#cbl_flutter_ee---v330-dev3)

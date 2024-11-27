@@ -1,3 +1,8 @@
+## 3.2.0-dev.2
+
+ - **FIX**: move functionality to install native libraries to own package. ([d4faef33](https://github.com/cbl-dart/cbl-dart/commit/d4faef33bf654ac5365f11c874bfe422bbe89858))
+ - **FIX**: upgrade to Gradle Kotlin plugin `1.9.25` ([#654](https://github.com/cbl-dart/cbl-dart/issues/654)). ([1d105d3d](https://github.com/cbl-dart/cbl-dart/commit/1d105d3d33316326760c5fba26c858d8afc0ea6c))
+
 ## 3.2.0-dev.1
 
  - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))

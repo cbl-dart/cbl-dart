@@ -1,3 +1,7 @@
+## 3.1.0-dev.1
+
+ - Update a dependency to the latest release.
+
 ## 3.1.0-dev.0
 
  - **FEAT**: enable vector search extension for enterprise edition ([#644](https://github.com/cbl-dart/cbl-dart/issues/644)). ([2949651b](https://github.com/cbl-dart/cbl-dart/commit/2949651b2d7aed8663e2fbf7768d889acce05e4a))

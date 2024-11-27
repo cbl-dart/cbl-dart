@@ -1,3 +1,7 @@
+## 0.3.1-dev.1
+
+ - Update a dependency to the latest release.
+
 ## 0.3.1-dev.0
 
  - **FEAT**: support typed documents in collections ([#650](https://github.com/cbl-dart/cbl-dart/issues/650)). ([d6a20e52](https://github.com/cbl-dart/cbl-dart/commit/d6a20e5235493c9e841dfea395d6f7863c0c6ea1))

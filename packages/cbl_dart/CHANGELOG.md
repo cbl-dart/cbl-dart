@@ -1,3 +1,7 @@
+## 3.2.0-dev.1
+
+ - Update a dependency to the latest release.
+
 ## 3.2.0-dev.0
 
  - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))
