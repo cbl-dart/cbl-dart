@@ -1,3 +1,7 @@
+## 3.3.0-dev.1
+
+ - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))
+
 ## 3.3.0-dev.0
 
  - **REFACTOR**: make native library install code more flexible ([#640](https://github.com/cbl-dart/cbl-dart/issues/640)). ([7c54b0dc](https://github.com/cbl-dart/cbl-dart/commit/7c54b0dca40f42adc224da23406b21eabba32e12))

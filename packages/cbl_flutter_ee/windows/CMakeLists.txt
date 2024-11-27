@@ -18,7 +18,7 @@ target_include_directories(${PLUGIN_NAME} INTERFACE
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 execute_process(
-  COMMAND dart pub global activate cbl_flutter_install ^3.2.0-dev.0
+  COMMAND dart pub global activate cbl_flutter_install ^3.2.0-dev.1
   RESULT_VARIABLE ACTIVATE_CBL_FLUTTER_RESULT
   OUTPUT_VARIABLE ACTIVATE_CBL_FLUTTER_OUTPUT
   ERROR_VARIABLE ACTIVATE_CBL_FLUTTER_ERROR

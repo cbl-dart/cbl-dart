@@ -1,3 +1,7 @@
+## 3.2.0-dev.1
+
+ - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))
+
 ## 3.2.0-dev.0
 
  - **REFACTOR**: remove duplication of Librarie(s)Configuration classes ([#642](https://github.com/cbl-dart/cbl-dart/issues/642)). ([9be1b59e](https://github.com/cbl-dart/cbl-dart/commit/9be1b59e9f105797b79082e79d46f4801e9dcbc9))

@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-11-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl_flutter` - `v3.2.0-dev.1`](#cbl_flutter---v320-dev1)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.1`](#cbl_flutter_ce---v330-dev1)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.1`](#cbl_flutter_ee---v330-dev1)
+
+---
+
+#### `cbl_flutter` - `v3.2.0-dev.1`
+
+ - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))
+
+#### `cbl_flutter_ce` - `v3.3.0-dev.1`
+
+ - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))
+
+#### `cbl_flutter_ee` - `v3.3.0-dev.1`
+
+ - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))
+
+
 ## 2024-11-26
 
 ### Changes
