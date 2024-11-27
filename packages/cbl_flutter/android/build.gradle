@@ -1,18 +1,10 @@
-group = "com.terwesten.gabriel.cbl_flutter"
-version = "1.0-SNAPSHOT"
-
-buildscript {
-    ext.kotlin_version = "1.8.22"
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.1.0")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    }
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
 }
+
+group "com.terwesten.gabriel.cbl_flutter"
+version "1.0-SNAPSHOT"
 
 allprojects {
     repositories {
@@ -20,9 +12,6 @@ allprojects {
         mavenCentral()
     }
 }
-
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
