@@ -15,6 +15,36 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl_flutter_install` - `v0.1.0-dev.0`](#cbl_flutter_install---v010-dev0)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.3`](#cbl_flutter_ce---v330-dev3)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.3`](#cbl_flutter_ee---v330-dev3)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_ce` - `v3.3.0-dev.3`
+ - `cbl_flutter_ee` - `v3.3.0-dev.3`
+
+---
+
+#### `cbl_flutter_install` - `v0.1.0-dev.0`
+
+ - **FIX**: move functionality to install native libraries to own package. ([d4faef33](https://github.com/cbl-dart/cbl-dart/commit/d4faef33bf654ac5365f11c874bfe422bbe89858))
+
+
+## 2024-11-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl_flutter_ce` - `v3.3.0-dev.2`](#cbl_flutter_ce---v330-dev2)
  - [`cbl_flutter_ee` - `v3.3.0-dev.2`](#cbl_flutter_ee---v330-dev2)
 
