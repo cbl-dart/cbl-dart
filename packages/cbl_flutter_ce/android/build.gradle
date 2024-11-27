@@ -40,9 +40,28 @@ android {
 dependencies {
 }
 
-task installLibraries(type: Exec) {
-    workingDir "$projectDir/.."
-    commandLine 'dart', 'run', 'cbl_flutter:install', 'android'
+task activateCblFlutter(type: Exec) {
+    commandLine 'dart', 'pub', 'global', 'activate', 'cbl_flutter', '^3.2.0-dev.0'
+
+    standardOutput = new ByteArrayOutputStream()
+    errorOutput = new ByteArrayOutputStream()
+    ignoreExitValue = true
+
+    doLast {
+        if (executionResult.get().exitValue != 0) {
+            throw new GradleException(
+                "Failed to activate cbl_flutter:\n" +
+                "${standardOutput.toString().trim()}\n" +
+                "${errorOutput.toString().trim()}"
+            )
+        }
+    }
 }
 
+task installLibraries(type: Exec) {
+    workingDir "$projectDir/.."
+    commandLine 'cbl_flutter_install', 'android'
+}
+
+tasks.installLibraries.dependsOn(activateCblFlutter)
 tasks.preBuild.dependsOn(installLibraries)

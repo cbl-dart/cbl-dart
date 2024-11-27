@@ -19,7 +19,18 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
 execute_process(
-  COMMAND dart run cbl_flutter:install linux
+  COMMAND dart pub global activate cbl_flutter_install ^3.2.0-dev.0
+  RESULT_VARIABLE ACTIVATE_CBL_FLUTTER_RESULT
+  OUTPUT_VARIABLE ACTIVATE_CBL_FLUTTER_OUTPUT
+  ERROR_VARIABLE ACTIVATE_CBL_FLUTTER_ERROR
+)
+
+if(NOT ${ACTIVATE_CBL_FLUTTER_RESULT} EQUAL 0)
+  message(FATAL_ERROR "Failed to activate cbl_flutter:\n${ACTIVATE_CBL_FLUTTER_OUTPUT}\n${ACTIVATE_CBL_FLUTTER_ERROR}")
+endif()
+
+execute_process(
+  COMMAND cbl_flutter_install linux
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/..
   RESULT_VARIABLE INSTALL_LIBRARIES_RESULT
   OUTPUT_VARIABLE INSTALL_LIBRARIES_OUTPUT

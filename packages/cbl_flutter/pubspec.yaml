@@ -13,7 +13,7 @@ environment:
   flutter: '>=3.0.0'
 
 executables:
-  install:
+  cbl_flutter_install: install
 
 dependencies:
   cbl: ^3.3.0-dev.0

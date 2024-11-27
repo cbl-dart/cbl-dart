@@ -1,6 +1,7 @@
 {
   "name": "cbl_flutter_ce",
   "version": "3.3.0-dev.0",
+  "cblFlutterVersion": "^3.2.0-dev.0",
   "edition": "community",
   "libraries": [
     {

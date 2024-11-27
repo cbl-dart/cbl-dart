@@ -21,6 +21,7 @@ JsonMap createTemplateContext({
 extension on PrebuiltPackageConfiguration {
   JsonMap templateContext() => {
         'name': name,
+        'cblFlutterVersion': cblFlutterVersion,
         'edition': edition.name,
         'enterpriseEdition': edition == Edition.enterprise,
         'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',

@@ -26,6 +26,7 @@ PrebuiltPackageConfiguration _loadPackageConfiguration(Edition edition) {
   final pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
   final version = pubspec['version']! as String;
   final dependencies = pubspec['dependencies']! as YamlMap;
+  final cblFlutterVersion = dependencies['cbl_flutter']! as String;
   final couchbaseLiteCVersion = dependencies['cbl_libcblite_api']! as String;
   final couchbaseLiteDartVersion =
       dependencies['cbl_libcblitedart_api']! as String;
@@ -33,6 +34,7 @@ PrebuiltPackageConfiguration _loadPackageConfiguration(Edition edition) {
   return PrebuiltPackageConfiguration(
     name: name,
     version: version,
+    cblFlutterVersion: cblFlutterVersion,
     edition: edition,
     libraries: [
       LibraryVersionInfo(
