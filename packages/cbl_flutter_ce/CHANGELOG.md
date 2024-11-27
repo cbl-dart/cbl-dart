@@ -1,3 +1,7 @@
+## 3.3.0-dev.4
+
+ - **FIX**: use `dart pub global run` to invoke `cbl_flutter_install` ([#658](https://github.com/cbl-dart/cbl-dart/issues/658)). ([d2f0d356](https://github.com/cbl-dart/cbl-dart/commit/d2f0d356cb1e69dabdf3530b7b8ab65fb73c3aa5))
+
 ## 3.3.0-dev.3
 
  - **FIX**: invoking `cbl_flutter_install` on Windows ([#656](https://github.com/cbl-dart/cbl-dart/issues/656)). ([d9eaca2b](https://github.com/cbl-dart/cbl-dart/commit/d9eaca2be3b69eee525d9896e31ace19ff1a90ca))

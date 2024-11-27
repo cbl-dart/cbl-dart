@@ -9,7 +9,7 @@ environment:
 dependencies:
   cbl: ^3.3.0-dev.1
   cbl_flutter: ^3.2.0-dev.2
-  cbl_flutter_ee: ^3.3.0-dev.3
+  cbl_flutter_ee: ^3.3.0-dev.4
   flutter:
     sdk: flutter
   flutter_test:

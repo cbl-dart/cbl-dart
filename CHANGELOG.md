@@ -15,6 +15,32 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl_flutter_ce` - `v3.3.0-dev.4`](#cbl_flutter_ce---v330-dev4)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.4`](#cbl_flutter_ee---v330-dev4)
+
+---
+
+#### `cbl_flutter_ce` - `v3.3.0-dev.4`
+
+ - **FIX**: use `dart pub global run` to invoke `cbl_flutter_install` ([#658](https://github.com/cbl-dart/cbl-dart/issues/658)). ([d2f0d356](https://github.com/cbl-dart/cbl-dart/commit/d2f0d356cb1e69dabdf3530b7b8ab65fb73c3aa5))
+
+#### `cbl_flutter_ee` - `v3.3.0-dev.4`
+
+ - **FIX**: use `dart pub global run` to invoke `cbl_flutter_install` ([#658](https://github.com/cbl-dart/cbl-dart/issues/658)). ([d2f0d356](https://github.com/cbl-dart/cbl-dart/commit/d2f0d356cb1e69dabdf3530b7b8ab65fb73c3aa5))
+
+
+## 2024-11-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl` - `v3.3.0-dev.1`](#cbl---v330-dev1)
  - [`cbl_flutter` - `v3.2.0-dev.2`](#cbl_flutter---v320-dev2)
  - [`cbl_flutter_ce` - `v3.3.0-dev.3`](#cbl_flutter_ce---v330-dev3)
