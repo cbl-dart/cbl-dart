@@ -1,6 +1,6 @@
 name: cbl_flutter_ee
 description: Provides the Couchbase Lite Enterprise Edition for Flutter apps.
-version: 3.3.0-dev.1
+version: 3.3.0-dev.2
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_ee
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues

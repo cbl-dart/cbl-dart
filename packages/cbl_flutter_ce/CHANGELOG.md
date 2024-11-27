@@ -1,3 +1,7 @@
+## 3.3.0-dev.2
+
+ - **FIX**: global activation of cbl_flutter for Windows and Linux. ([935cc837](https://github.com/cbl-dart/cbl-dart/commit/935cc837b213615a27697c1e9dd59168b591902b))
+
 ## 3.3.0-dev.1
 
  - **FIX**: globally activate cbl_flutter during install. ([ebefdd16](https://github.com/cbl-dart/cbl-dart/commit/ebefdd16555bca83a622f5ba9d9186f40dbdab31))

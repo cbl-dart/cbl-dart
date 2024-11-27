@@ -15,6 +15,32 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl_flutter_ce` - `v3.3.0-dev.2`](#cbl_flutter_ce---v330-dev2)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.2`](#cbl_flutter_ee---v330-dev2)
+
+---
+
+#### `cbl_flutter_ce` - `v3.3.0-dev.2`
+
+ - **FIX**: global activation of cbl_flutter for Windows and Linux. ([935cc837](https://github.com/cbl-dart/cbl-dart/commit/935cc837b213615a27697c1e9dd59168b591902b))
+
+#### `cbl_flutter_ee` - `v3.3.0-dev.2`
+
+ - **FIX**: global activation of cbl_flutter for Windows and Linux. ([935cc837](https://github.com/cbl-dart/cbl-dart/commit/935cc837b213615a27697c1e9dd59168b591902b))
+
+
+## 2024-11-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl_flutter` - `v3.2.0-dev.1`](#cbl_flutter---v320-dev1)
  - [`cbl_flutter_ce` - `v3.3.0-dev.1`](#cbl_flutter_ce---v330-dev1)
  - [`cbl_flutter_ee` - `v3.3.0-dev.1`](#cbl_flutter_ee---v330-dev1)

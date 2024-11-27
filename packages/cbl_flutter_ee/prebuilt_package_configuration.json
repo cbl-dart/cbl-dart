@@ -1,6 +1,6 @@
 {
   "name": "cbl_flutter_ee",
-  "version": "3.3.0-dev.1",
+  "version": "3.3.0-dev.2",
   "cblFlutterVersion": "^3.2.0-dev.1",
   "edition": "enterprise",
   "libraries": [
