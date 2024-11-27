@@ -184,10 +184,14 @@ final class DynamicLibraries {
       enterpriseEdition: config.enterpriseEdition,
       cbl: config.cbl._load(directory: config.directory),
       cblDart: config.cblDart._load(directory: config.directory),
-      vectorSearchLibraryPath: config.vectorSearch?._tryResolvePath(
-        directory: config.directory,
-        symbol: 'couchbaselitevectorsearch_version',
-      ),
+      vectorSearchLibraryPath: switch (Abi.current()) {
+        // TODO(blaugold): https://github.com/cbl-dart/cbl-dart/issues/657
+        Abi.windowsArm64 => null,
+        _ => config.vectorSearch?._tryResolvePath(
+            directory: config.directory,
+            symbol: 'couchbaselitevectorsearch_version',
+          ),
+      },
     );
 
     if (dllDirectoryCookie != null) {

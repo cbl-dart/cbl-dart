@@ -26,7 +26,7 @@ execute_process(
 )
 
 if(NOT ${ACTIVATE_CBL_FLUTTER_INSTALL_RESULT} EQUAL 0)
-  message(FATAL_ERROR "Failed to activate cbl_flutter_install:\n${ACTIVATE_CBL_FLUTTER_INSTALL_OUTPUT}\n${ACTIVATE_CBL_FLUTTER_INSTALL_ERROR}")
+  message(FATAL_ERROR "Failed to activate cbl_flutter_install:\${ACTIVATE_CBL_FLUTTER_INSTALL_RESULT}\n${ACTIVATE_CBL_FLUTTER_INSTALL_OUTPUT}\n${ACTIVATE_CBL_FLUTTER_INSTALL_ERROR}")
 endif()
 
 execute_process(
@@ -38,7 +38,7 @@ execute_process(
 )
 
 if(NOT ${INSTALL_LIBRARIES_RESULT} EQUAL 0)
-  message(FATAL_ERROR "Could not install Couchbase Lite native libraries:\n${INSTALL_LIBRARIES_OUTPUT}\n${INSTALL_LIBRARIES_ERROR}")
+  message(FATAL_ERROR "Could not install Couchbase Lite native libraries:\n${INSTALL_LIBRARIES_RESULT}\n${INSTALL_LIBRARIES_OUTPUT}\n${INSTALL_LIBRARIES_ERROR}")
 endif()
 
 file(GLOB cbl_flutter_ce_cbl_libraries "lib/*")
