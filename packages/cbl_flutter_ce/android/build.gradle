@@ -60,7 +60,7 @@ task activateCblFlutter(type: Exec) {
 
 task installLibraries(type: Exec) {
     workingDir "$projectDir/.."
-    commandLine 'cbl_flutter_install', 'android'
+    commandLine 'dart', 'pub', 'global', 'run', 'cbl_flutter_install', 'android'
 }
 
 tasks.installLibraries.dependsOn(activateCblFlutter)
