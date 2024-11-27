@@ -30,7 +30,7 @@ if(NOT ${ACTIVATE_CBL_FLUTTER_INSTALL_RESULT} EQUAL 0)
 endif()
 
 execute_process(
-  COMMAND cbl_flutter_install linux
+  COMMAND dart pub global run cbl_flutter_install linux
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/..
   RESULT_VARIABLE INSTALL_LIBRARIES_RESULT
   OUTPUT_VARIABLE INSTALL_LIBRARIES_OUTPUT
