@@ -21,18 +21,43 @@ final class CBLIndexSpec {
     required this.expressions,
     this.ignoreAccents,
     this.language,
+    this.dimensions,
+    this.centroids,
+    this.lazy,
+    this.scalarQuantizerType,
+    this.productQuantizerSubQuantizers,
+    this.productQuantizerBits,
+    this.metric,
+    this.minTrainingSize,
+    this.maxTrainingSize,
+    this.numProbes,
   });
 
   final CBLIndexType type;
   final CBLQueryLanguage expressionLanguage;
   final String expressions;
+
+  // Full text index
   final bool? ignoreAccents;
   final String? language;
+
+  // Vector index
+  final int? dimensions;
+  final int? centroids;
+  final bool? lazy;
+  final cblite.DartCBLScalarQuantizerType? scalarQuantizerType;
+  final int? productQuantizerSubQuantizers;
+  final int? productQuantizerBits;
+  final cblite.DartCBLDistanceMetric? metric;
+  final int? minTrainingSize;
+  final int? maxTrainingSize;
+  final int? numProbes;
 }
 
 enum CBLIndexType {
   value,
   fullText,
+  vector,
 }
 
 extension on CBLIndexType {
@@ -224,13 +249,43 @@ final class CollectionBindings extends Bindings {
 
   Pointer<cblitedart.CBLDart_CBLIndexSpec> _createIndexSpec(CBLIndexSpec spec) {
     final result = globalArena<cblitedart.CBLDart_CBLIndexSpec>();
-
-    result.ref
+    final ref = result.ref
       ..typeAsInt = spec.type.toInt()
       ..expressionLanguage = spec.expressionLanguage.toInt()
-      ..expressions = spec.expressions.toFLString()
-      ..ignoreAccents = spec.ignoreAccents ?? false
-      ..language = spec.language.toFLString();
+      ..expressions = spec.expressions.toFLString();
+
+    switch (spec.type) {
+      case CBLIndexType.value:
+        break;
+      case CBLIndexType.fullText:
+        ref
+          ..ignoreAccents = spec.ignoreAccents!
+          ..language = spec.language.toFLString();
+      case CBLIndexType.vector:
+        final encoding = switch (spec) {
+          CBLIndexSpec(:final scalarQuantizerType?) =>
+            cbl.CBLVectorEncoding_CreateScalarQuantizer(scalarQuantizerType),
+          CBLIndexSpec(
+            :final productQuantizerSubQuantizers?,
+            :final productQuantizerBits?
+          ) =>
+            cbl.CBLVectorEncoding_CreateProductQuantizer(
+                productQuantizerSubQuantizers, productQuantizerBits),
+          _ => cbl.CBLVectorEncoding_CreateNone(),
+        };
+
+        globalArena.onReleaseAll(() => cbl.CBLVectorEncoding_Free(encoding));
+
+        ref
+          ..dimensions = spec.dimensions!
+          ..centroids = spec.centroids!
+          ..isLazy = spec.lazy!
+          ..encoding = encoding.cast()
+          ..metric = spec.metric!
+          ..minTrainingSize = spec.minTrainingSize ?? 0
+          ..maxTrainingSize = spec.maxTrainingSize ?? 0
+          ..numProbes = spec.numProbes ?? 0;
+    }
 
     return result;
   }

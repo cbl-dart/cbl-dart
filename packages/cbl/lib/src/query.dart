@@ -28,9 +28,13 @@ export 'query/index/index_builder.dart'
         ValueIndexItem;
 export 'query/index/index_configuration.dart'
     show
+        DistanceMetric,
         FullTextIndexConfiguration,
         IndexConfiguration,
-        ValueIndexConfiguration;
+        ScalarQuantizerType,
+        ValueIndexConfiguration,
+        VectorEncoding,
+        VectorIndexConfiguration;
 export 'query/join.dart' show Join, JoinInterface, JoinOnInterface;
 export 'query/joins.dart' show SyncJoins, Joins, AsyncJoins;
 export 'query/limit.dart' show SyncLimit, Limit, AsyncLimit;

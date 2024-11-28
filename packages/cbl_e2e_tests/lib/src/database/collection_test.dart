@@ -542,6 +542,61 @@ void main() {
         },
       );
 
+      apiTest(
+        'createIndex should work with VectorIndexConfiguration',
+        () async {
+          final db = await openTestDatabase();
+          final collection = await db.defaultCollection;
+
+          final documents = [
+            for (final i in List.generate(10, (index) => index))
+              MutableDocument({
+                'a': [1, i + 1]
+              }),
+          ];
+
+          await Future.wait<void>(
+            (List.of(documents)..shuffle())
+                .map((document) async => collection.saveDocument(document)),
+          );
+
+          await collection.createIndex(
+            'a',
+            VectorIndexConfiguration(
+              'a',
+              dimensions: 2,
+              centroids: 1,
+              encoding: VectorEncoding.none(),
+              metric: DistanceMetric.euclidean,
+              minTrainingSize: 1,
+              maxTrainingSize: 1,
+              numProbes: 1,
+            ),
+          );
+
+          final q = await db.createQuery(
+            '''
+            SELECT Meta().id
+            FROM _
+            ORDER BY APPROX_VECTOR_DISTANCE(a, [1, 1])
+            LIMIT 10
+            ''',
+          );
+
+          final explain = await q.explain();
+
+          expect(explain, contains('kv_default:vector:a VIRTUAL TABLE INDEX'));
+
+          final results = await q.execute();
+          final ids = await results
+              .asStream()
+              .map((result) => result.string(0))
+              .toList();
+
+          expect(ids, documents.map((doc) => doc.id));
+        },
+      );
+
       apiTest('createIndex should work with ValueIndex', () async {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;

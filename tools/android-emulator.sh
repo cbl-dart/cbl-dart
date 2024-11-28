@@ -86,25 +86,47 @@ function createAndStart() {
     requireOption -a API-LEVEL "$apiLevel"
     requireOption -d DEVICE "$device"
 
+    echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger --name-match=kvm
+
+    sudo apt-get install libpulse0
+
+    yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+
+    # Install emulator.
+    echo "Installing emulator..."
+    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" emulator
+
     # Install system image.
-    systemImage="system-images;android-$apiLevel;google_apis;x86"
+    systemImage="system-images;android-$apiLevel;default;x86_64"
     echo "Installing system image '$systemImage' ..."
     "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$systemImage"
+
+    # Install platform tools.
+    echo "Installing platform tools..."
+    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" platform-tools
 
     # Create emulator.
     echo "Creating emulator..."
     "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
-        -n "$emulatorName" \
-        -k "$systemImage" \
-        -d "$device"
+        --name "$emulatorName" \
+        --package "$systemImage" \
+        --device "$device"
 
     # Start emulator.
     echo "Staring emulator..."
     "$ANDROID_HOME/emulator/emulator" \
         -avd "$emulatorName" \
         -port "$emulatorPort" \
-        -partition-size 2048 \
-        >/dev/null 2>&1 &
+        -no-window \
+        -no-audio \
+        -no-boot-anim \
+        -partition-size 4096 \
+        >./emulator-logs.txt 2>&1 &
+
+    sleep 10
+    cat ./emulator-logs.txt
 
     # Wait for emulator to become ready.
     echo "Waiting for emulator to become ready..."
