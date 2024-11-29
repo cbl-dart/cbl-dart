@@ -32,6 +32,7 @@ void apiTest(
   String description,
   FutureOr<void> Function() body, {
   List<TestVariant>? variants,
+  Object? skip,
 }) {
   variantTest(
     description,
@@ -41,6 +42,7 @@ void apiTest(
       isolate,
       if (variants != null) ...variants,
     ],
+    skip: skip,
   );
 }
 

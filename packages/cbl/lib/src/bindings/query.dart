@@ -117,7 +117,9 @@ final class ResultSetBindings extends Bindings {
       cbl.CBLResultSet_Next(resultSet);
 
   cblite.FLValue valueAtIndex(
-          Pointer<cblite.CBLResultSet> resultSet, int index) =>
+    Pointer<cblite.CBLResultSet> resultSet,
+    int index,
+  ) =>
       cbl.CBLResultSet_ValueAtIndex(resultSet, index);
 
   cblite.FLValue valueForKey(
@@ -135,4 +137,55 @@ final class ResultSetBindings extends Bindings {
 
   Pointer<cblite.CBLQuery> getQuery(Pointer<cblite.CBLResultSet> resultSet) =>
       cbl.CBLResultSet_GetQuery(resultSet);
+}
+
+final class QueryIndexBindings extends Bindings {
+  QueryIndexBindings(super.parent);
+
+  Pointer<cblite.CBLIndexUpdater>? beginUpdate(
+    Pointer<cblite.CBLQueryIndex> index,
+    int limit,
+  ) =>
+      cbl.CBLQueryIndex_BeginUpdate(index, limit, globalCBLError)
+          .checkCBLError()
+          .toNullable();
+}
+
+final class IndexUpdaterBindings extends Bindings {
+  IndexUpdaterBindings(super.parent);
+
+  cblite.FLValue value(Pointer<cblite.CBLIndexUpdater> updater, int index) =>
+      cbl.CBLIndexUpdater_Value(updater, index);
+
+  int count(Pointer<cblite.CBLIndexUpdater> updater) =>
+      cbl.CBLIndexUpdater_Count(updater);
+
+  void setVector(
+    Pointer<cblite.CBLIndexUpdater> updater,
+    int index,
+    List<double>? vector,
+  ) {
+    withGlobalArena(() {
+      cbl.CBLIndexUpdater_SetVector(
+        updater,
+        index,
+        switch (vector) {
+          final vector? => globalArena<Float>(vector.length)
+            ..asTypedList(vector.length).setAll(0, vector),
+          null => nullptr,
+        },
+        vector?.length ?? 0,
+        globalCBLError,
+      ).checkCBLError();
+    });
+  }
+
+  void skipVector(
+    Pointer<cblite.CBLIndexUpdater> updater,
+    int index,
+  ) =>
+      cbl.CBLIndexUpdater_SkipVector(updater, index);
+
+  void finish(Pointer<cblite.CBLIndexUpdater> updater) =>
+      cbl.CBLIndexUpdater_Finish(updater, globalCBLError).checkCBLError();
 }

@@ -37,8 +37,11 @@ final class FlutterCblE2eTestBinding extends CblE2eTestBinding {
       .loadString('packages/cbl_e2e_tests/src/fixtures/1000people.json');
 
   @override
-  final testFn = (description, body) =>
-      ft.testWidgets(description, (tester) async => await body());
+  final testFn = (description, body, {Object? skip}) => ft.testWidgets(
+        description,
+        (tester) async => await body(),
+        skip: skip != null,
+      );
 
   @override
   final groupFn = ft.group;

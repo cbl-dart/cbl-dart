@@ -656,6 +656,25 @@ void main() {
           expect(await collection.indexes, ['a']);
         },
       );
+
+      apiTest(
+        'index should return existing index',
+        () async {
+          final db = await openTestDatabase();
+          final collection = await db.defaultCollection;
+
+          expect(await collection.index('a'), isNull);
+
+          await collection.createIndex('a', ValueIndexConfiguration(['a']));
+
+          expect(
+            await collection.index('a'),
+            isA<QueryIndex>()
+                .having((index) => index.name, 'name', 'a')
+                .having((index) => index.collection, 'collection', collection),
+          );
+        },
+      );
     });
   });
 }

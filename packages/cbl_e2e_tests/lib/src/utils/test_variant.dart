@@ -68,12 +68,14 @@ void variantTest(
   String description,
   FutureOr<void> Function() body, {
   required List<TestVariant> variants,
+  Object? skip,
 }) {
   for (final combination in _VariantEntry.combinations(variants)) {
     final config = _VariantConfiguration(combination);
     test(
       '$description (variant: ${config.describeVariants()})',
       () => _runWithVariants(body, config: config),
+      skip: skip,
     );
   }
 }

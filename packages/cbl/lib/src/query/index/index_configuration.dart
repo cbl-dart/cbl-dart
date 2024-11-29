@@ -4,6 +4,8 @@ import 'package:collection/collection.dart';
 
 import '../../bindings.dart';
 import '../../bindings/cblite.dart' as cblite;
+import '../../database.dart';
+import '../../query.dart';
 import 'index.dart';
 
 /// A specification of an [Index] from a list of SQL++ [expressions].
@@ -274,6 +276,10 @@ abstract final class VectorIndexConfiguration implements IndexConfiguration {
   ///
   /// When configuring the index to be lazy, the configured [expression] is
   /// evaluated to obtain the value used for computing the vector.
+  ///
+  /// To begin updating a lazy index, use [Collection.index] to get it and call
+  /// its [QueryIndex.beginUpdate] method. This will return an [IndexUpdater] if
+  /// the index needs to be updated. See [IndexUpdater] for more information.
   abstract bool lazy;
 
   /// The vector encoding type to use for the index.

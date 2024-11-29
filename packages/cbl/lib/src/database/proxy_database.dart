@@ -14,6 +14,8 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
 import '../query/index/index_configuration.dart';
+import '../query/index/proxy_query_index.dart';
+import '../query/index/query_index.dart';
 import '../query/proxy_query.dart';
 import '../query/query.dart';
 import '../service/cbl_service.dart';
@@ -782,7 +784,24 @@ final class ProxyCollection extends ProxyObject
 
   @override
   Future<List<String>> get indexes =>
-      use(() => channel.call(GetCollectionIndexes(objectId)));
+      use(() => channel.call(GetCollectionIndexNames(objectId)));
+
+  @override
+  Future<QueryIndex?> index(String name) => use(() async {
+        final indexId = await channel
+            .call(GetCollectionIndex(collectionId: objectId, name: name));
+
+        if (indexId == null) {
+          return null;
+        }
+
+        return ProxyQueryIndex(
+          client: client,
+          objectId: indexId,
+          collection: this,
+          name: name,
+        );
+      });
 
   @override
   Future<void> createIndex(String name, covariant IndexImplInterface index) {

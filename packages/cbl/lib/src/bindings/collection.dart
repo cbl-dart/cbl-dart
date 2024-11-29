@@ -225,6 +225,18 @@ final class CollectionBindings extends Bindings {
       cbl.CBLCollection_GetIndexNames(collection, globalCBLError)
           .checkCBLError();
 
+  Pointer<cblite.CBLQueryIndex>? index(
+    Pointer<cblite.CBLCollection> collection,
+    String name,
+  ) =>
+      runWithSingleFLString(
+        name,
+        (flName) =>
+            cbl.CBLCollection_GetIndex(collection, flName, globalCBLError)
+                .checkCBLError()
+                .toNullable(),
+      );
+
   void createIndex(
     Pointer<cblite.CBLCollection> collection,
     String name,
