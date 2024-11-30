@@ -15,6 +15,53 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl` - `v3.3.0-dev.3`](#cbl---v330-dev3)
+ - [`cbl_flutter_platform_interface` - `v3.1.0-dev.3`](#cbl_flutter_platform_interface---v310-dev3)
+ - [`cbl_flutter_install` - `v0.1.0-dev.3`](#cbl_flutter_install---v010-dev3)
+ - [`cbl_generator` - `v0.3.1-dev.3`](#cbl_generator---v031-dev3)
+ - [`cbl_sentry` - `v2.1.2-dev.3`](#cbl_sentry---v212-dev3)
+ - [`cbl_flutter` - `v3.2.0-dev.4`](#cbl_flutter---v320-dev4)
+ - [`cbl_dart` - `v3.2.0-dev.3`](#cbl_dart---v320-dev3)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.6`](#cbl_flutter_ce---v330-dev6)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.6`](#cbl_flutter_ee---v330-dev6)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_install` - `v0.1.0-dev.3`
+ - `cbl_generator` - `v0.3.1-dev.3`
+ - `cbl_sentry` - `v2.1.2-dev.3`
+ - `cbl_flutter` - `v3.2.0-dev.4`
+ - `cbl_dart` - `v3.2.0-dev.3`
+ - `cbl_flutter_ce` - `v3.3.0-dev.6`
+ - `cbl_flutter_ee` - `v3.3.0-dev.6`
+
+---
+
+#### `cbl` - `v3.3.0-dev.3`
+
+ - **FEAT**: support updating lazy vector indexes ([#661](https://github.com/cbl-dart/cbl-dart/issues/661)). ([909a21ee](https://github.com/cbl-dart/cbl-dart/commit/909a21eed6648a6fc31eac41494e153f543ce78b))
+ - **FEAT**: support creating vector indexs ([#660](https://github.com/cbl-dart/cbl-dart/issues/660)). ([3bb84324](https://github.com/cbl-dart/cbl-dart/commit/3bb84324718bc54e55837d5e85f7771381850cf3))
+ - **FEAT**: add support for predictive models ([#645](https://github.com/cbl-dart/cbl-dart/issues/645)). ([1be1949a](https://github.com/cbl-dart/cbl-dart/commit/1be1949a95e317f17044b89680b9de59c75937f0))
+
+#### `cbl_flutter_platform_interface` - `v3.1.0-dev.3`
+
+ - **FEAT**: support creating vector indexs ([#660](https://github.com/cbl-dart/cbl-dart/issues/660)). ([3bb84324](https://github.com/cbl-dart/cbl-dart/commit/3bb84324718bc54e55837d5e85f7771381850cf3))
+
+
+## 2024-11-30
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl` - `v3.3.0-dev.2`](#cbl---v330-dev2)
  - [`cbl_flutter_install` - `v0.1.0-dev.2`](#cbl_flutter_install---v010-dev2)
  - [`cbl_sentry` - `v2.1.2-dev.2`](#cbl_sentry---v212-dev2)

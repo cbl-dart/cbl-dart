@@ -1,3 +1,7 @@
+## 3.2.0-dev.4
+
+ - Update a dependency to the latest release.
+
 ## 3.2.0-dev.3
 
  - Update a dependency to the latest release.

@@ -1,3 +1,9 @@
+## 3.3.0-dev.3
+
+ - **FEAT**: support updating lazy vector indexes ([#661](https://github.com/cbl-dart/cbl-dart/issues/661)). ([909a21ee](https://github.com/cbl-dart/cbl-dart/commit/909a21eed6648a6fc31eac41494e153f543ce78b))
+ - **FEAT**: support creating vector indexs ([#660](https://github.com/cbl-dart/cbl-dart/issues/660)). ([3bb84324](https://github.com/cbl-dart/cbl-dart/commit/3bb84324718bc54e55837d5e85f7771381850cf3))
+ - **FEAT**: add support for predictive models ([#645](https://github.com/cbl-dart/cbl-dart/issues/645)). ([1be1949a](https://github.com/cbl-dart/cbl-dart/commit/1be1949a95e317f17044b89680b9de59c75937f0))
+
 ## 3.3.0-dev.2
 
  - **FIX**: for installing native packages use temp dir on same volume ([#659](https://github.com/cbl-dart/cbl-dart/issues/659)). ([ebc9be0c](https://github.com/cbl-dart/cbl-dart/commit/ebc9be0c5c0bc11f76b946f01459582345db1ca4))
