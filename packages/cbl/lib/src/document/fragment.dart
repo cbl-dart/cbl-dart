@@ -142,12 +142,14 @@ abstract interface class DocumentFragment implements DictionaryFragment {
 final class FragmentImpl implements Fragment {
   FragmentImpl._empty();
 
-  FragmentImpl.fromArray(Array array, {required int index})
+  FragmentImpl.fromArray(ArrayInterface array, {required int index})
       : _parent = array,
         _index = index;
 
-  FragmentImpl.fromDictionary(Dictionary dictionary, {required String key})
-      : _parent = dictionary,
+  FragmentImpl.fromDictionary(
+    DictionaryInterface dictionary, {
+    required String key,
+  })  : _parent = dictionary,
         _key = key;
 
   static final Fragment _emptyInstance = FragmentImpl._empty();
@@ -159,9 +161,9 @@ final class FragmentImpl implements Fragment {
   @override
   T? valueAs<T extends Object>() {
     if (_key != null) {
-      return (_parent as Dictionary?)?.value(_key!);
+      return (_parent as DictionaryInterface?)?.value(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.value(_index);
+      return (_parent as ArrayInterface?)?.value(_index);
     }
     return null;
   }
@@ -169,9 +171,9 @@ final class FragmentImpl implements Fragment {
   @override
   Object? get value {
     if (_key != null) {
-      return (_parent as Dictionary?)?.value(_key!);
+      return (_parent as DictionaryInterface?)?.value(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.value(_index);
+      return (_parent as ArrayInterface?)?.value(_index);
     }
     return null;
   }
@@ -179,9 +181,9 @@ final class FragmentImpl implements Fragment {
   @override
   String? get string {
     if (_key != null) {
-      return (_parent as Dictionary?)?.string(_key!);
+      return (_parent as DictionaryInterface?)?.string(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.string(_index);
+      return (_parent as ArrayInterface?)?.string(_index);
     }
     return null;
   }
@@ -190,9 +192,9 @@ final class FragmentImpl implements Fragment {
   int get integer {
     int? result;
     if (_key != null) {
-      result = (_parent as Dictionary?)?.integer(_key!);
+      result = (_parent as DictionaryInterface?)?.integer(_key!);
     } else if (_isValidIndex()) {
-      result = (_parent as Array?)?.integer(_index);
+      result = (_parent as ArrayInterface?)?.integer(_index);
     }
     return result ?? 0;
   }
@@ -201,9 +203,9 @@ final class FragmentImpl implements Fragment {
   double get float {
     double? result;
     if (_key != null) {
-      result = (_parent as Dictionary?)?.float(_key!);
+      result = (_parent as DictionaryInterface?)?.float(_key!);
     } else if (_isValidIndex()) {
-      result = (_parent as Array?)?.float(_index);
+      result = (_parent as ArrayInterface?)?.float(_index);
     }
     return result ?? 0;
   }
@@ -211,9 +213,9 @@ final class FragmentImpl implements Fragment {
   @override
   num? get number {
     if (_key != null) {
-      return (_parent as Dictionary?)?.number(_key!);
+      return (_parent as DictionaryInterface?)?.number(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.number(_index);
+      return (_parent as ArrayInterface?)?.number(_index);
     }
     return null;
   }
@@ -222,9 +224,9 @@ final class FragmentImpl implements Fragment {
   bool get boolean {
     bool? result;
     if (_key != null) {
-      result = (_parent as Dictionary?)?.boolean(_key!);
+      result = (_parent as DictionaryInterface?)?.boolean(_key!);
     } else if (_isValidIndex()) {
-      result = (_parent as Array?)?.boolean(_index);
+      result = (_parent as ArrayInterface?)?.boolean(_index);
     }
     return result ?? false;
   }
@@ -232,9 +234,9 @@ final class FragmentImpl implements Fragment {
   @override
   DateTime? get date {
     if (_key != null) {
-      return (_parent as Dictionary?)?.date(_key!);
+      return (_parent as DictionaryInterface?)?.date(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.date(_index);
+      return (_parent as ArrayInterface?)?.date(_index);
     }
     return null;
   }
@@ -242,9 +244,9 @@ final class FragmentImpl implements Fragment {
   @override
   Blob? get blob {
     if (_key != null) {
-      return (_parent as Dictionary?)?.blob(_key!);
+      return (_parent as DictionaryInterface?)?.blob(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.blob(_index);
+      return (_parent as ArrayInterface?)?.blob(_index);
     }
     return null;
   }
@@ -252,9 +254,9 @@ final class FragmentImpl implements Fragment {
   @override
   Array? get array {
     if (_key != null) {
-      return (_parent as Dictionary?)?.array(_key!);
+      return (_parent as DictionaryInterface?)?.array(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.array(_index);
+      return (_parent as ArrayInterface?)?.array(_index);
     }
     return null;
   }
@@ -262,9 +264,9 @@ final class FragmentImpl implements Fragment {
   @override
   Dictionary? get dictionary {
     if (_key != null) {
-      return (_parent as Dictionary?)?.dictionary(_key!);
+      return (_parent as DictionaryInterface?)?.dictionary(_key!);
     } else if (_isValidIndex()) {
-      return (_parent as Array?)?.dictionary(_index);
+      return (_parent as ArrayInterface?)?.dictionary(_index);
     }
     return null;
   }
@@ -277,9 +279,9 @@ final class FragmentImpl implements Fragment {
     }
 
     if (_key != null) {
-      return (_parent as Dictionary).contains(_key);
+      return (_parent as DictionaryInterface).contains(_key!);
     } else {
-      return (_parent as Array).length > _index;
+      return (_parent as ArrayInterface).length > _index;
     }
   }
 
@@ -292,7 +294,7 @@ final class FragmentImpl implements Fragment {
 
     final value = this.value;
 
-    if (value is Array && indexOrKey is int) {
+    if (value is ArrayInterface && indexOrKey is int) {
       if (indexOrKey >= value.length) {
         return false;
       }
@@ -302,7 +304,7 @@ final class FragmentImpl implements Fragment {
       return true;
     }
 
-    if (value is Dictionary && indexOrKey is String) {
+    if (value is DictionaryInterface && indexOrKey is String) {
       _parent = value;
       _key = indexOrKey;
       return true;

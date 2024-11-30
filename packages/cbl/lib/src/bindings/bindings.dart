@@ -45,6 +45,8 @@ final class CBLBindings extends Bindings {
     mutableDocument = MutableDocumentBindings(this);
     query = QueryBindings(this);
     resultSet = ResultSetBindings(this);
+    queryIndex = QueryIndexBindings(this);
+    indexUpdater = IndexUpdaterBindings(this);
     blobs = BlobsBindings(this);
     replicator = ReplicatorBindings(this);
     fleece = FleeceBindings(this);
@@ -83,6 +85,8 @@ final class CBLBindings extends Bindings {
   late final MutableDocumentBindings mutableDocument;
   late final QueryBindings query;
   late final ResultSetBindings resultSet;
+  late final QueryIndexBindings queryIndex;
+  late final IndexUpdaterBindings indexUpdater;
   late final BlobsBindings blobs;
   late final ReplicatorBindings replicator;
   late final FleeceBindings fleece;

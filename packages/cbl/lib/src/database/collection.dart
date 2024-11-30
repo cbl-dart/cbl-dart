@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../document.dart';
 import '../errors.dart';
-import '../query/index/index.dart';
+import '../query.dart';
 import '../support/listener_token.dart';
 import '../support/streams.dart';
 import '../typed_data/typed_object.dart';
@@ -254,8 +254,11 @@ abstract interface class Collection {
   /// The names of all existing indexes for this collection.
   FutureOr<List<String>> get indexes;
 
-  /// Creates a value or full-text search [index] with the given [name] for the
-  /// documents in this collection.
+  /// Returns the [QueryIndex] with the given [name], if it exists.
+  FutureOr<QueryIndex?> index(String name);
+
+  /// Creates a value, full-text or index search [index] with the given [name]
+  /// for the documents in this collection.
   ///
   /// The name can be used for deleting the index. Creating a new different
   /// index with an existing index name will replace the old index; creating the
@@ -429,6 +432,9 @@ abstract interface class SyncCollection extends Collection {
   List<String> get indexes;
 
   @override
+  QueryIndex? index(String name);
+
+  @override
   void createIndex(String name, Index index);
 
   @override
@@ -516,6 +522,9 @@ abstract interface class AsyncCollection extends Collection {
 
   @override
   Future<List<String>> get indexes;
+
+  @override
+  Future<QueryIndex?> index(String name);
 
   @override
   Future<void> createIndex(String name, Index index);

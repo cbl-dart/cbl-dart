@@ -61,8 +61,12 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         GetCollectionCount.deserialize,
       )
       ..addSerializableCodec(
-        'GetCollectionIndexes',
-        GetCollectionIndexes.deserialize,
+        'GetCollectionIndexNames',
+        GetCollectionIndexNames.deserialize,
+      )
+      ..addSerializableCodec(
+        'GetCollectionIndex',
+        GetCollectionIndex.deserialize,
       )
       ..addSerializableCodec('GetDocument', GetDocument.deserialize)
       ..addSerializableCodec('SaveDocument', SaveDocument.deserialize)
@@ -132,6 +136,26 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec(
         'CallQueryChangeListener',
         CallQueryChangeListener.deserialize,
+      )
+      ..addSerializableCodec(
+        'BeginQueryIndexUpdate',
+        BeginQueryIndexUpdate.deserialize,
+      )
+      ..addSerializableCodec(
+        'IndexUpdaterGetValue',
+        IndexUpdaterGetValue.deserialize,
+      )
+      ..addSerializableCodec(
+        'IndexUpdaterSetVector',
+        IndexUpdaterSetVector.deserialize,
+      )
+      ..addSerializableCodec(
+        'IndexUpdaterSkipVector',
+        IndexUpdaterSkipVector.deserialize,
+      )
+      ..addSerializableCodec(
+        'IndexUpdaterFinish',
+        IndexUpdaterFinish.deserialize,
       )
       ..addSerializableCodec('CreateReplicator', CreateReplicator.deserialize)
       ..addSerializableCodec(
@@ -207,6 +231,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
       ..addSerializableCodec('DocumentState', DocumentState.deserialize)
       ..addSerializableCodec('SaveBlobResponse', SaveBlobResponse.deserialize)
       ..addSerializableCodec('QueryState', QueryState.deserialize)
+      ..addSerializableCodec('IndexUpdaterState', IndexUpdaterState.deserialize)
       ..addSerializableCodec(
         'DocumentReplicationEvent',
         DocumentReplicationEvent.deserialize,
@@ -221,6 +246,14 @@ SerializationRegistry cblServiceSerializationRegistry() =>
             .toList(),
         handleSubTypes: true,
       )
+      ..addCodec<List<double>>(
+        'List<double>',
+        serialize: (value, context) => value.map(context.serialize).toList(),
+        deserialize: (value, context) => (value as List<Object?>)
+            .map((element) => element! as double)
+            .toList(),
+        handleSubTypes: true,
+      )
       ..addCodec<Uri>(
         'Uri',
         serialize: (value, context) => value.toString(),
@@ -232,7 +265,7 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         deserialize: (value, context) => EncodingFormat.values[value as int],
       )
       ..addSerializableCodec(
-        'TransferableData',
+        'MessageData',
         MessageData.deserialize,
       )
       ..addSerializableCodec(
@@ -900,8 +933,8 @@ final class GetCollectionCount extends Request<int> {
       GetCollectionCount(map.getAs('collectionId'));
 }
 
-final class GetCollectionIndexes extends Request<List<String>> {
-  GetCollectionIndexes(this.collectionId);
+final class GetCollectionIndexNames extends Request<List<String>> {
+  GetCollectionIndexNames(this.collectionId);
 
   final int collectionId;
 
@@ -909,11 +942,34 @@ final class GetCollectionIndexes extends Request<List<String>> {
   StringMap serialize(SerializationContext context) =>
       {'collectionId': collectionId};
 
-  static GetCollectionIndexes deserialize(
+  static GetCollectionIndexNames deserialize(
     StringMap map,
     SerializationContext context,
   ) =>
-      GetCollectionIndexes(map.getAs('collectionId'));
+      GetCollectionIndexNames(map.getAs('collectionId'));
+}
+
+final class GetCollectionIndex extends Request<int?> {
+  GetCollectionIndex({
+    required this.collectionId,
+    required this.name,
+  });
+
+  final int collectionId;
+  final String name;
+
+  @override
+  StringMap serialize(SerializationContext context) =>
+      {'collectionId': collectionId, 'name': name};
+
+  static GetCollectionIndex deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      GetCollectionIndex(
+        collectionId: map.getAs('collectionId'),
+        name: map.getAs('name'),
+      );
 }
 
 final class GetDocument extends Request<DocumentState?> {
@@ -1596,6 +1652,135 @@ final class CallQueryChangeListener extends Request<Null> {
       CallQueryChangeListener(
         listenerId: map.getAs('listenerId'),
         resultSetId: map.getAs('resultSetId'),
+      );
+}
+
+final class BeginQueryIndexUpdate extends Request<IndexUpdaterState?> {
+  BeginQueryIndexUpdate({
+    required this.indexId,
+    required this.limit,
+  });
+
+  final int indexId;
+  final int limit;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'indexId': indexId,
+        'limit': limit,
+      };
+
+  static BeginQueryIndexUpdate deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      BeginQueryIndexUpdate(
+        indexId: map.getAs('indexId'),
+        limit: map.getAs('limit'),
+      );
+}
+
+final class IndexUpdaterGetValue extends Request<TransferableValue> {
+  IndexUpdaterGetValue({
+    required this.updaterId,
+    required this.index,
+    this.resultEncoding,
+  });
+
+  final int updaterId;
+  final int index;
+  final EncodingFormat? resultEncoding;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'updaterId': updaterId,
+        'index': index,
+        'resultEncoding': context.serialize(resultEncoding),
+      };
+
+  static IndexUpdaterGetValue deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      IndexUpdaterGetValue(
+        updaterId: map.getAs('updaterId'),
+        index: map.getAs('index'),
+        resultEncoding: context.deserializeAs(map['resultEncoding']),
+      );
+}
+
+final class IndexUpdaterSetVector extends Request<Null> {
+  IndexUpdaterSetVector({
+    required this.updaterId,
+    required this.index,
+    required this.vector,
+  });
+
+  final int updaterId;
+  final int index;
+  final List<double>? vector;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'updaterId': updaterId,
+        'index': index,
+        'vector': context.serialize(vector),
+      };
+
+  static IndexUpdaterSetVector deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      IndexUpdaterSetVector(
+        updaterId: map.getAs('updaterId'),
+        index: map.getAs('index'),
+        vector: context.deserializeAs(map['vector']),
+      );
+}
+
+final class IndexUpdaterSkipVector extends Request<Null> {
+  IndexUpdaterSkipVector({
+    required this.updaterId,
+    required this.index,
+  });
+
+  final int updaterId;
+  final int index;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'updaterId': updaterId,
+        'index': index,
+      };
+
+  static IndexUpdaterSkipVector deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      IndexUpdaterSkipVector(
+        updaterId: map.getAs('updaterId'),
+        index: map.getAs('index'),
+      );
+}
+
+final class IndexUpdaterFinish extends Request<Null> {
+  IndexUpdaterFinish({
+    required this.updaterId,
+  });
+
+  final int updaterId;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'updaterId': updaterId,
+      };
+
+  static IndexUpdaterFinish deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      IndexUpdaterFinish(
+        updaterId: map.getAs('updaterId'),
       );
 }
 
@@ -2389,6 +2574,31 @@ final class QueryState extends Serializable {
       QueryState(
         id: map.getAs('id'),
         columnNames: context.deserializeAs(map['columnNames'])!,
+      );
+}
+
+final class IndexUpdaterState extends Serializable {
+  IndexUpdaterState({
+    required this.id,
+    required this.length,
+  });
+
+  final int id;
+  final int length;
+
+  @override
+  StringMap serialize(SerializationContext context) => {
+        'id': id,
+        'length': length,
+      };
+
+  static IndexUpdaterState deserialize(
+    StringMap map,
+    SerializationContext context,
+  ) =>
+      IndexUpdaterState(
+        id: map.getAs('id'),
+        length: map.getAs('length'),
       );
 }
 

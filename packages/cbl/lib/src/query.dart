@@ -35,6 +35,10 @@ export 'query/index/index_configuration.dart'
         ValueIndexConfiguration,
         VectorEncoding,
         VectorIndexConfiguration;
+export 'query/index/index_updater.dart'
+    show AsyncIndexUpdater, IndexUpdater, SyncIndexUpdater;
+export 'query/index/query_index.dart'
+    show AsyncQueryIndex, QueryIndex, SyncQueryIndex;
 export 'query/join.dart' show Join, JoinInterface, JoinOnInterface;
 export 'query/joins.dart' show SyncJoins, Joins, AsyncJoins;
 export 'query/limit.dart' show SyncLimit, Limit, AsyncLimit;

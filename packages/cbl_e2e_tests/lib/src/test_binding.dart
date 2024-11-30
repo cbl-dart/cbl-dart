@@ -24,8 +24,9 @@ export 'package:test/test.dart'
 
 typedef TestFn = void Function(
   String description,
-  FutureOr<void> Function() body,
-);
+  FutureOr<void> Function() body, {
+  Object? skip,
+});
 
 typedef GroupFn = void Function(
   String description,
@@ -84,7 +85,11 @@ abstract base class CblE2eTestBinding {
 
   final _groupDescriptions = <String>[];
 
-  void _test(String description, FutureOr<void> Function() body) {
+  void _test(
+    String description,
+    FutureOr<void> Function() body, {
+    Object? skip,
+  }) {
     final testDescriptions = [..._groupDescriptions, description];
     testFn(
       description,
@@ -92,6 +97,7 @@ abstract base class CblE2eTestBinding {
         #testId: md5OfString(testDescriptions.join()),
         #testDescriptions: testDescriptions,
       }),
+      skip: skip,
     );
   }
 
@@ -163,8 +169,12 @@ List<String>? get testDescriptions =>
     Zone.current[#testDescriptions] as List<String>?;
 
 @isTest
-void test(String description, FutureOr<void> Function() body) =>
-    CblE2eTestBinding.instance._test(description, body);
+void test(
+  String description,
+  FutureOr<void> Function() body, {
+  Object? skip,
+}) =>
+    CblE2eTestBinding.instance._test(description, body, skip: skip);
 
 @isTestGroup
 void group(String description, void Function() body) =>

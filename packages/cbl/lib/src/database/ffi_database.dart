@@ -15,6 +15,7 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query.dart';
 import '../query/ffi_query.dart';
+import '../query/index/ffi_query_index.dart';
 import '../query/index/index.dart';
 import '../support/async_callback.dart';
 import '../support/edition.dart';
@@ -682,6 +683,14 @@ final class FfiCollection
       fl.Array.fromPointer(_collectionBindings.indexNames(pointer), adopt: true)
           .toObject()
           .cast<String>());
+
+  @override
+  QueryIndex? index(String name) => useSync(
+        () => runWithErrorTranslation(
+          () => _collectionBindings.index(pointer, name),
+        )?.let((pointer) =>
+            FfiQueryIndex.fromPointer(pointer, collection: this, name: name)),
+      );
 
   @override
   void createIndex(String name, covariant IndexImplInterface index) {

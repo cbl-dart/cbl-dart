@@ -7,7 +7,10 @@ import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
+import '../fleece/encoder.dart';
 import '../query/ffi_query.dart';
+import '../query/index/ffi_index_updater.dart';
+import '../query/index/ffi_query_index.dart';
 import '../query/index/index.dart';
 import '../query/parameters.dart';
 import '../query/result.dart';
@@ -272,7 +275,8 @@ final class CblService {
       ..addCallEndpoint(_createCollection)
       ..addCallEndpoint(_deleteCollection)
       ..addCallEndpoint(_getCollectionCount)
-      ..addCallEndpoint(_getCollectionIndexes)
+      ..addCallEndpoint(_getCollectionIndexNames)
+      ..addCallEndpoint(_getCollectionIndex)
       ..addCallEndpoint(_getDocument)
       ..addCallEndpoint(_saveDocument)
       ..addCallEndpoint(_deleteDocument)
@@ -296,6 +300,11 @@ final class CblService {
       ..addCallEndpoint(_executeQuery)
       ..addStreamEndpoint(_getQueryResultSet)
       ..addCallEndpoint(_addQueryChangeListener)
+      ..addCallEndpoint(_beginQueryIndexUpdate)
+      ..addCallEndpoint(_indexUpdaterGetValue)
+      ..addCallEndpoint(_indexUpdaterSetVector)
+      ..addCallEndpoint(_indexUpdaterSkipVector)
+      ..addCallEndpoint(_indexUpdaterFinish)
       ..addCallEndpoint(_createReplicator)
       ..addCallEndpoint(_getReplicatorStatus)
       ..addCallEndpoint(_startReplicator)
@@ -435,8 +444,16 @@ final class CblService {
   Future<int> _getCollectionCount(GetCollectionCount request) async =>
       _getCollectionById(request.collectionId).count;
 
-  List<String> _getCollectionIndexes(GetCollectionIndexes request) =>
+  List<String> _getCollectionIndexNames(GetCollectionIndexNames request) =>
       _getCollectionById(request.collectionId).indexes;
+
+  int? _getCollectionIndex(GetCollectionIndex request) {
+    final index = _getCollectionById(request.collectionId).index(request.name);
+    if (index == null) {
+      return null;
+    }
+    return _objectRegistry.addObject(index);
+  }
 
   Future<DocumentState?> _getDocument(GetDocument request) async {
     final document = _getCollectionById(request.collectionId)
@@ -603,6 +620,49 @@ final class CblService {
       ));
     });
   }
+
+  IndexUpdaterState? _beginQueryIndexUpdate(BeginQueryIndexUpdate request) {
+    final index =
+        _objectRegistry.getObjectOrThrow<FfiQueryIndex>(request.indexId);
+    final updater = index.beginUpdate(limit: request.limit);
+
+    if (updater == null) {
+      return null;
+    }
+
+    return IndexUpdaterState(
+      id: _objectRegistry.addObject(updater),
+      length: updater.length,
+    );
+  }
+
+  TransferableValue _indexUpdaterGetValue(IndexUpdaterGetValue request) {
+    final value = _objectRegistry
+        .getObjectOrThrow<FfiIndexUpdater>(request.updaterId)
+        .flValue(request.index);
+
+    if (request.resultEncoding case final encoding?) {
+      final encoder = FleeceEncoder(format: encoding.toFLEncoderFormat())
+        ..writeValue(value.pointer);
+      final encodedData = EncodedData(encoding, encoder.finish());
+      return TransferableValue.fromEncodedData(encodedData);
+    } else {
+      return TransferableValue.fromValue(value);
+    }
+  }
+
+  void _indexUpdaterSetVector(IndexUpdaterSetVector request) => _objectRegistry
+      .getObjectOrThrow<FfiIndexUpdater>(request.updaterId)
+      .setVector(request.index, request.vector);
+
+  void _indexUpdaterSkipVector(IndexUpdaterSkipVector request) =>
+      _objectRegistry
+          .getObjectOrThrow<FfiIndexUpdater>(request.updaterId)
+          .skipVector(request.index);
+
+  void _indexUpdaterFinish(IndexUpdaterFinish request) => _objectRegistry
+      .getObjectOrThrow<FfiIndexUpdater>(request.updaterId)
+      .finish();
 
   Future<int> _createReplicator(CreateReplicator request) async {
     var target = request.target;

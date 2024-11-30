@@ -315,8 +315,60 @@ abstract final class MutableArray implements Array, MutableArrayInterface {
   }
 }
 
+mixin ArrayInterfaceMixin implements ArrayInterface {
+  Object? cblValue(int index);
+
+  Iterable<Object?> get cblValues => Iterable.generate(length, cblValue);
+
+  @pragma('vm:prefer-inline')
+  T? _valueAs<T>(int index, {bool coerceNull = false}) =>
+      coerceObject(cblValue(index), coerceNull: coerceNull);
+
+  @pragma('vm:prefer-inline')
+  T _valueAsWithDefault<T>(int index, T defaultValue) =>
+      _valueAs(index, coerceNull: true) ?? defaultValue;
+
+  @override
+  T? value<T extends Object>(int index) => _valueAs(index);
+
+  @override
+  String? string(int index) => _valueAs(index);
+
+  @override
+  int integer(int index) => _valueAsWithDefault(index, 0);
+
+  @override
+  double float(int index) => _valueAsWithDefault(index, 0);
+
+  @override
+  num? number(int index) => _valueAs(index);
+
+  @override
+  bool boolean(int index) => _valueAsWithDefault(index, false);
+
+  @override
+  DateTime? date(int index) => _valueAs(index);
+
+  @override
+  Blob? blob(int index) => _valueAs(index);
+
+  @override
+  Array? array(int index) => _valueAs(index);
+
+  @override
+  Dictionary? dictionary(int index) => _valueAs(index);
+
+  @override
+  Fragment operator [](int index) => FragmentImpl.fromArray(this, index: index);
+
+  @override
+  List<Object?> toPlainList({bool growable = true}) => cblValues
+      .map(CblConversions.convertToPlainObject)
+      .toList(growable: growable);
+}
+
 final class ArrayImpl
-    with IterableMixin<Object?>
+    with IterableMixin<Object?>, ArrayInterfaceMixin
     implements Array, MCollectionWrapper, FleeceEncodable, CblConversions {
   ArrayImpl(this._array);
 
@@ -333,49 +385,12 @@ final class ArrayImpl
     return value;
   }
 
-  @pragma('vm:prefer-inline')
-  T? _getAs<T>(int index, {bool coerceNull = false}) =>
-      coerceObject(_get(index).asNative(_array), coerceNull: coerceNull);
-
-  @pragma('vm:prefer-inline')
-  T _getAsWithDefault<T>(int index, T defaultValue) =>
-      _getAs(index, coerceNull: true) ?? defaultValue;
+  @override
+  Object? cblValue(int index) => _get(index).asNative(_array);
 
   @override
-  T? value<T extends Object>(int index) => _getAs(index);
-
-  @override
-  String? string(int index) => _getAs(index);
-
-  @override
-  int integer(int index) => _getAsWithDefault(index, 0);
-
-  @override
-  double float(int index) => _getAsWithDefault(index, 0);
-
-  @override
-  num? number(int index) => _getAs(index);
-
-  @override
-  bool boolean(int index) => _getAsWithDefault(index, false);
-
-  @override
-  DateTime? date(int index) => _getAs(index);
-
-  @override
-  Blob? blob(int index) => _getAs(index);
-
-  @override
-  Array? array(int index) => _getAs(index);
-
-  @override
-  Dictionary? dictionary(int index) => _getAs(index);
-
-  @override
-  List<Object?> toPlainList({bool growable = true}) => _array.iterable
-      .map((value) =>
-          CblConversions.convertToPlainObject(value.asNative(_array)))
-      .toList();
+  Iterable<Object?> get cblValues =>
+      _array.iterable.map((value) => value.asNative(_array));
 
   @override
   Fragment operator [](int index) => FragmentImpl.fromArray(this, index: index);
