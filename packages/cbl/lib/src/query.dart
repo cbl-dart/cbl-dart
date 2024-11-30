@@ -13,7 +13,7 @@ export 'query/expressions/property_expression.dart'
 export 'query/expressions/variable_expression.dart'
     show VariableExpressionInterface;
 export 'query/from.dart' show SyncFrom, From, AsyncFrom;
-export 'query/function.dart' show Function_;
+export 'query/function.dart' show Function_, PredictionFunction;
 export 'query/functions/array_function.dart' show ArrayFunction;
 export 'query/functions/full_text_function.dart' show FullTextFunction;
 export 'query/group_by.dart' show SyncGroupBy, GroupBy, AsyncGroupBy;
@@ -37,6 +37,7 @@ export 'query/limit.dart' show SyncLimit, Limit, AsyncLimit;
 export 'query/order_by.dart' show SyncOrderBy, OrderBy, AsyncOrderBy;
 export 'query/ordering.dart' show Ordering, OrderingInterface, SortOrder;
 export 'query/parameters.dart' show Parameters;
+export 'query/prediction.dart' show Prediction, PredictiveModel;
 export 'query/query.dart' show Query, SyncQuery, AsyncQuery;
 export 'query/query_builder.dart'
     show SyncQueryBuilder, QueryBuilder, AsyncQueryBuilder;

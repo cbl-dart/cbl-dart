@@ -29,6 +29,7 @@ import 'result.dart';
 import 'result_set.dart';
 import 'select_result.dart';
 
+final _baseBindings = CBLBindings.instance.base;
 final _bindings = CBLBindings.instance.query;
 
 base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
@@ -69,7 +70,8 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
         () => ExecuteQueryOp(this),
         () => useSync(
           () => FfiResultSet(
-            runWithErrorTranslation(() => _bindings.execute(_pointer)),
+            runWithErrorTranslation(() => _baseBindings
+                .runWithIsolateId(() => _bindings.execute(_pointer))),
             query: this,
             columnNames: _columnNames,
           ),

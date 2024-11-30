@@ -23,6 +23,10 @@ extension CBLQueryLanguageExt on CBLQueryLanguage {
 final class QueryBindings extends Bindings {
   QueryBindings(super.parent);
 
+  late final _predictiveModelFinalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_PredictiveModel_Delete.cast(),
+  );
+
   Pointer<cblite.CBLQuery> create(
     Pointer<cblite.CBLDatabase> db,
     CBLQueryLanguage language,
@@ -78,6 +82,32 @@ final class QueryBindings extends Bindings {
   ) =>
       cbl.CBLQuery_CopyCurrentResults(query, listenerToken, globalCBLError)
           .checkCBLError();
+
+  cblitedart.CBLDart_PredictiveModel createPredictiveModel(
+    String name,
+    cblitedart.CBLDart_PredictiveModel_PredictionSync predictionSync,
+    cblitedart.CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    cblitedart.CBLDart_PredictiveModel_Unregistered unregistered,
+  ) =>
+      runWithSingleFLString(
+        name,
+        (flName) => cblDart.CBLDart_PredictiveModel_New(
+          flName,
+          CBLBindings.instance.base.isolateId,
+          predictionSync,
+          predictionAsync,
+          unregistered,
+        ),
+      );
+
+  void bindCBLDartPredictiveModelToDartObject(
+    Finalizable object,
+    cblitedart.CBLDart_PredictiveModel model,
+  ) =>
+      _predictiveModelFinalizer.attach(object, model.cast());
+
+  void unregisterPredictiveModel(String name) =>
+      runWithSingleFLString(name, cbl.CBL_UnregisterPredictiveModel);
 }
 
 final class ResultSetBindings extends Bindings {

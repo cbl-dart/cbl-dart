@@ -334,6 +334,56 @@ class cblitedart {
       _CBLDart_AsyncCallback_CallForTestPtr.asFunction<
           DartCBLDart_AsyncCallback_CallForTest>();
 
+  void CBLDart_Completer_Complete(
+    CBLDart_Completer completer,
+    ffi.Pointer<ffi.Void> result,
+  ) {
+    return _CBLDart_Completer_Complete(
+      completer,
+      result,
+    );
+  }
+
+  late final _CBLDart_Completer_CompletePtr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_Completer_Complete>>(
+          'CBLDart_Completer_Complete');
+  late final _CBLDart_Completer_Complete = _CBLDart_Completer_CompletePtr
+      .asFunction<DartCBLDart_Completer_Complete>();
+
+  int CBLDart_AllocateIsolateId() {
+    return _CBLDart_AllocateIsolateId();
+  }
+
+  late final _CBLDart_AllocateIsolateIdPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_AllocateIsolateId>>(
+          'CBLDart_AllocateIsolateId');
+  late final _CBLDart_AllocateIsolateId =
+      _CBLDart_AllocateIsolateIdPtr.asFunction<DartCBLDart_AllocateIsolateId>();
+
+  void CBLDart_SetCurrentIsolateId(
+    int isolateId,
+  ) {
+    return _CBLDart_SetCurrentIsolateId(
+      isolateId,
+    );
+  }
+
+  late final _CBLDart_SetCurrentIsolateIdPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_SetCurrentIsolateId>>(
+          'CBLDart_SetCurrentIsolateId');
+  late final _CBLDart_SetCurrentIsolateId = _CBLDart_SetCurrentIsolateIdPtr
+      .asFunction<DartCBLDart_SetCurrentIsolateId>();
+
+  int CBLDart_GetCurrentIsolateId() {
+    return _CBLDart_GetCurrentIsolateId();
+  }
+
+  late final _CBLDart_GetCurrentIsolateIdPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_GetCurrentIsolateId>>(
+          'CBLDart_GetCurrentIsolateId');
+  late final _CBLDart_GetCurrentIsolateId = _CBLDart_GetCurrentIsolateIdPtr
+      .asFunction<DartCBLDart_GetCurrentIsolateId>();
+
   bool CBLDart_CBLLog_SetCallback(
     CBLDart_AsyncCallback callback,
   ) {
@@ -566,6 +616,43 @@ class cblitedart {
       _CBLDart_CBLQuery_AddChangeListenerPtr.asFunction<
           DartCBLDart_CBLQuery_AddChangeListener>();
 
+  CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
+    imp1.FLString name,
+    int isolateId,
+    CBLDart_PredictiveModel_PredictionSync predictionSync,
+    CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    CBLDart_PredictiveModel_Unregistered unregistered,
+  ) {
+    return _CBLDart_PredictiveModel_New(
+      name,
+      isolateId,
+      predictionSync,
+      predictionAsync,
+      unregistered,
+    );
+  }
+
+  late final _CBLDart_PredictiveModel_NewPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_PredictiveModel_New>>(
+          'CBLDart_PredictiveModel_New');
+  late final _CBLDart_PredictiveModel_New = _CBLDart_PredictiveModel_NewPtr
+      .asFunction<DartCBLDart_PredictiveModel_New>();
+
+  void CBLDart_PredictiveModel_Delete(
+    CBLDart_PredictiveModel model,
+  ) {
+    return _CBLDart_PredictiveModel_Delete(
+      model,
+    );
+  }
+
+  late final _CBLDart_PredictiveModel_DeletePtr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_PredictiveModel_Delete>>(
+          'CBLDart_PredictiveModel_Delete');
+  late final _CBLDart_PredictiveModel_Delete =
+      _CBLDart_PredictiveModel_DeletePtr.asFunction<
+          DartCBLDart_PredictiveModel_Delete>();
+
   FLSliceResult CBLDart_CBLBlobReader_Read(
     ffi.Pointer<CBLBlobReadStream> stream,
     int bufferSize,
@@ -677,6 +764,9 @@ class _SymbolAddresses {
   ffi.Pointer<ffi.NativeFunction<NativeCBLDart_CBLDatabase_Release>>
       get CBLDart_CBLDatabase_Release =>
           _library._CBLDart_CBLDatabase_ReleasePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeCBLDart_PredictiveModel_Delete>>
+      get CBLDart_PredictiveModel_Delete =>
+          _library._CBLDart_PredictiveModel_DeletePtr;
   ffi.Pointer<ffi.NativeFunction<NativeCBLDart_CBLReplicator_Release>>
       get CBLDart_CBLReplicator_Release =>
           _library._CBLDart_CBLReplicator_ReleasePtr;
@@ -877,6 +967,23 @@ typedef NativeCBLDart_AsyncCallback_CallForTest = ffi.Void Function(
     CBLDart_AsyncCallback callback, ffi.Int64 argument);
 typedef DartCBLDart_AsyncCallback_CallForTest = void Function(
     CBLDart_AsyncCallback callback, int argument);
+
+final class _CBLDart_Completer extends ffi.Opaque {}
+
+typedef CBLDart_Completer = ffi.Pointer<_CBLDart_Completer>;
+typedef NativeCBLDart_Completer_Complete = ffi.Void Function(
+    CBLDart_Completer completer, ffi.Pointer<ffi.Void> result);
+typedef DartCBLDart_Completer_Complete = void Function(
+    CBLDart_Completer completer, ffi.Pointer<ffi.Void> result);
+typedef CBLDart_IsolateId = ffi.Int;
+typedef DartCBLDart_IsolateId = int;
+typedef NativeCBLDart_AllocateIsolateId = CBLDart_IsolateId Function();
+typedef DartCBLDart_AllocateIsolateId = int Function();
+typedef NativeCBLDart_SetCurrentIsolateId = ffi.Void Function(
+    CBLDart_IsolateId isolateId);
+typedef DartCBLDart_SetCurrentIsolateId = void Function(int isolateId);
+typedef NativeCBLDart_GetCurrentIsolateId = CBLDart_IsolateId Function();
+typedef DartCBLDart_GetCurrentIsolateId = int Function();
 typedef NativeCBLDart_CBLLog_SetCallback = ffi.Bool Function(
     CBLDart_AsyncCallback callback);
 typedef DartCBLDart_CBLLog_SetCallback = bool Function(
@@ -1036,6 +1143,40 @@ typedef NativeCBLDart_CBLQuery_AddChangeListener
 typedef DartCBLDart_CBLQuery_AddChangeListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLDatabase> db,
         ffi.Pointer<CBLQuery> query, CBLDart_AsyncCallback listener);
+typedef CBLDart_PredictiveModel_PredictionSyncFunction = imp1.FLMutableDict
+    Function(imp1.FLDict input);
+typedef CBLDart_PredictiveModel_PredictionSync = ffi.Pointer<
+    ffi.NativeFunction<CBLDart_PredictiveModel_PredictionSyncFunction>>;
+typedef CBLDart_PredictiveModel_PredictionAsyncFunction = ffi.Void Function(
+    imp1.FLDict input, CBLDart_Completer completer);
+typedef DartCBLDart_PredictiveModel_PredictionAsyncFunction = void Function(
+    imp1.FLDict input, CBLDart_Completer completer);
+typedef CBLDart_PredictiveModel_PredictionAsync = ffi.Pointer<
+    ffi.NativeFunction<CBLDart_PredictiveModel_PredictionAsyncFunction>>;
+typedef CBLDart_PredictiveModel_UnregisteredFunction = ffi.Void Function();
+typedef DartCBLDart_PredictiveModel_UnregisteredFunction = void Function();
+typedef CBLDart_PredictiveModel_Unregistered = ffi
+    .Pointer<ffi.NativeFunction<CBLDart_PredictiveModel_UnregisteredFunction>>;
+
+final class _CBLDart_PredictiveModel extends ffi.Opaque {}
+
+typedef CBLDart_PredictiveModel = ffi.Pointer<_CBLDart_PredictiveModel>;
+typedef NativeCBLDart_PredictiveModel_New = CBLDart_PredictiveModel Function(
+    imp1.FLString name,
+    CBLDart_IsolateId isolateId,
+    CBLDart_PredictiveModel_PredictionSync predictionSync,
+    CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    CBLDart_PredictiveModel_Unregistered unregistered);
+typedef DartCBLDart_PredictiveModel_New = CBLDart_PredictiveModel Function(
+    imp1.FLString name,
+    int isolateId,
+    CBLDart_PredictiveModel_PredictionSync predictionSync,
+    CBLDart_PredictiveModel_PredictionAsync predictionAsync,
+    CBLDart_PredictiveModel_Unregistered unregistered);
+typedef NativeCBLDart_PredictiveModel_Delete = ffi.Void Function(
+    CBLDart_PredictiveModel model);
+typedef DartCBLDart_PredictiveModel_Delete = void Function(
+    CBLDart_PredictiveModel model);
 typedef FLSliceResult = imp1.FLSliceResult;
 
 /// A stream for reading a blob's content.
@@ -1144,3 +1285,5 @@ typedef DartCBLDart_CBLReplicator_AddDocumentReplicationListener
         ffi.Pointer<CBLDatabase> db,
         ffi.Pointer<CBLReplicator> replicator,
         CBLDart_AsyncCallback listenerId);
+
+const int kCBLDartInvalidIsolateId = -1;

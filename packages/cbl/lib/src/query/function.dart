@@ -1,4 +1,5 @@
 import 'expressions/expression.dart';
+import 'prediction.dart';
 
 // ignore: avoid_classes_with_only_static_members
 /// Factory for creating function expressions.
@@ -180,7 +181,7 @@ abstract final class Function_ {
       UnaryExpression('rtrim()', expression);
 
   /// Creates a function expression which evaluates to the given string
-  /// [expression] with the whitespace on the bose sides removed.
+  /// [expression] with the whitespace on both sides removed.
   static ExpressionInterface trim(ExpressionInterface expression) =>
       UnaryExpression('trim()', expression);
 
@@ -236,4 +237,62 @@ abstract final class Function_ {
   /// string of the given milliseconds since the unix epoch [expression].
   static ExpressionInterface millisToUTC(ExpressionInterface expression) =>
       UnaryExpression('millis_to_utc()', expression);
+
+  /// Creates a prediction function expression with the given [model] and
+  /// [input].
+  ///
+  /// {@macro cbl.EncryptionKey.enterpriseFeature}
+  ///
+  /// When running a query with the prediction function, the corresponding
+  /// registered [PredictiveModel] will be called with the given [input] to
+  /// compute the result.
+  ///
+  /// The result returned by the predictive model will be in the form of a
+  /// dictionary. To create an expression that refers to a property in the
+  /// result, [PredictionFunction.property] can be used.
+  static PredictionFunction prediction(
+    String model,
+    ExpressionInterface input,
+  ) =>
+      PredictionFunctionImpl(model, input);
+}
+
+/// A prediction function expression, which represents a call to a
+/// [PredictiveModel].
+///
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
+/// See [Function_.prediction] for creating instances of this class.
+///
+/// {@category Query Builder}
+/// {@category Enterprise Edition}
+abstract class PredictionFunction implements ExpressionInterface {
+  /// Creates a property expression that refers to a property in the prediction
+  /// result dictionary.
+  ExpressionInterface property(String name);
+}
+
+final class PredictionFunctionImpl extends ExpressionImpl
+    implements PredictionFunction {
+  PredictionFunctionImpl(
+    this.model,
+    ExpressionInterface input, [
+    this.outputProperty,
+  ]) : input = input as ExpressionImpl;
+
+  final String model;
+  final ExpressionImpl input;
+  final String? outputProperty;
+
+  @override
+  ExpressionInterface property(String name) =>
+      PredictionFunctionImpl(model, input, name);
+
+  @override
+  Object? toJson() => [
+        'prediction()',
+        model,
+        input,
+        if (outputProperty != null) outputProperty
+      ];
 }

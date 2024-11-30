@@ -270,6 +270,8 @@ extension CheckCBLErrorBoolExt on bool {
 final class BaseBindings extends Bindings {
   BaseBindings(super.parent);
 
+  late final isolateId = cblDart.CBLDart_AllocateIsolateId();
+
   late final _refCountedFinalizer =
       NativeFinalizer(cbl.addresses.CBL_Release.cast());
 
@@ -342,4 +344,19 @@ final class BaseBindings extends Bindings {
   void removeListener(Pointer<cblite.CBLListenerToken> token) {
     cbl.CBLListener_Remove(token);
   }
+
+  T runWithIsolateId<T>(T Function() body) {
+    cblDart.CBLDart_SetCurrentIsolateId(isolateId);
+    try {
+      return body();
+    } finally {
+      cblDart.CBLDart_SetCurrentIsolateId(cblitedart.kCBLDartInvalidIsolateId);
+    }
+  }
+
+  void completeCompleter(
+    cblitedart.CBLDart_Completer completer,
+    Pointer<Void> result,
+  ) =>
+      cblDart.CBLDart_Completer_Complete(completer, result);
 }
