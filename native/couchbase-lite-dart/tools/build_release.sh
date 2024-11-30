@@ -7,12 +7,15 @@
 
 set -e
 
-TAR=tar
-
-case "$(uname -s)" in
+case "$(uname)" in
 MINGW* | CYGWIN* | MSYS*)
+    cbdBin="cbd.bat"
     # Use bsd tar, which comes with Windows 10 and not gnu tar from git-bash.
     TAR="$SYSTEMROOT\system32\tar.exe"
+    ;;
+*)
+    cbdBin="cbd"
+    TAR="tar"
     ;;
 esac
 
@@ -21,6 +24,7 @@ projectDir="$(cd "$scriptDir/.." && pwd)"
 buildDir="$projectDir/build/release"
 editions=(community enterprise)
 targets=(android ios macos linux-x86_64 windows-x86_64)
+couchbaseLiteCRelease="$(cat "$projectDir/../CouchbaseLiteC.release")"
 
 function _buildArchive() {
     local edition="$1"
@@ -99,6 +103,31 @@ if [[ ! " ${targets[*]} " =~ " $target " ]]; then
     echo "Invalid target: $target"
     exit 1
 fi
+
+echo "Downloading Couchbase Lite C SDK release $couchbaseLiteCRelease"
+
+case "$target" in
+android)
+    os="android"
+    ;;
+ios)
+    os="iOS"
+    ;;
+macos)
+    os="macOS"
+    ;;
+linux*)
+    os="linux"
+    ;;
+windows*)
+    os="windows"
+    ;;
+esac
+
+"$cbdBin" install-packages \
+    --library cblite \
+    --release "$couchbaseLiteCRelease" \
+    --os "$os"
 
 echo "Building Couchbase Lite Dart release $release for $target"
 

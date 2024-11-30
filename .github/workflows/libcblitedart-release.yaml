@@ -39,8 +39,14 @@ jobs:
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
 
-      - name: Download Couchbase Lite
-        run: ./native/tools/download_prebuilt_binaries.sh linux-x86_64
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Setup CBL Dart dev tools
+        run: melos run activate:cbd
 
       - name: Build release
         run: |
@@ -62,11 +68,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Setup CBL Dart dev tools
+        run: melos run activate:cbd
+
       - name: Install Android Native Toolchain
         run: ./native/tools/android-sdk.sh installNativeToolchain
-
-      - name: Download Couchbase Lite
-        run: ./native/tools/download_prebuilt_binaries.sh android
 
       - name: Build release
         run: |
@@ -88,8 +100,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Download Couchbase Lite
-        run: ./native/tools/download_prebuilt_binaries.sh ios
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Setup CBL Dart dev tools
+        run: melos run activate:cbd
 
       - name: Build release
         run: |
@@ -111,11 +129,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Setup CBL Dart dev tools
+        run: melos run activate:cbd
+
       - name: Get CMake and Ninja
         uses: lukka/get-cmake@latest
-
-      - name: Download Couchbase Lite
-        run: ./native/tools/download_prebuilt_binaries.sh macos
 
       - name: Build release
         run: |
@@ -137,12 +161,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Setup CBL Dart dev tools
+        run: melos run activate:cbd
+
       - name: Get CMake
         uses: lukka/get-cmake@latest
-
-      - name: Download Couchbase Lite
-        shell: bash
-        run: ./native/tools/download_prebuilt_binaries.sh windows-x86_64
 
       - name: Build release
         shell: bash
