@@ -279,7 +279,10 @@ final class RemotePackageLoader extends PackageLoader {
       return packageDir;
     }
 
-    final tempDirectory = await Directory.systemTemp.createTemp();
+    final cacheTempDir = Directory(p.join(cacheDir, '.temp'));
+    await cacheTempDir.create(recursive: true);
+
+    final tempDirectory = await cacheTempDir.createTemp();
     try {
       final archiveData = await downloadUrl(config._archiveUrl);
       await unpackArchive(
