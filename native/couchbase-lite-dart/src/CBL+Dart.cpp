@@ -2,6 +2,7 @@
 #include <map>
 #include <mutex>
 #include <shared_mutex>
+#include <stdexcept>
 #include <thread>
 
 #include "AsyncCallback.h"
@@ -646,8 +647,8 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
       return CBLCollection_CreateFullTextIndex(collection, name, config,
                                                errorOut);
     }
-#ifdef COUCHBASE_ENTERPRISE
     case kCBLDart_IndexTypeVector: {
+#ifdef COUCHBASE_ENTERPRISE
       CBLVectorIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
       config.expression = indexSpec.expressions;
@@ -661,8 +662,8 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
       config.numProbes = indexSpec.numProbes;
       return CBLCollection_CreateVectorIndex(collection, name, config,
                                              errorOut);
-    }
 #endif
+    }
   }
 
   // Is never reached, but stops the compiler warnings.
@@ -796,20 +797,28 @@ void PredictiveModel::unregistered() {
 
 }  // namespace CBLDart
 
+#endif
+
 CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
     FLString name, CBLDart_IsolateId isolateId,
     CBLDart_PredictiveModel_PredictionSync predictionSync,
     CBLDart_PredictiveModel_PredictionAsync predictionAsync,
     CBLDart_PredictiveModel_Unregistered unregistered) {
+#ifdef COUCHBASE_ENTERPRISE
   return PREDICTIVE_MODEL_TO_C(new CBLDart::PredictiveModel(
       name, isolateId, predictionSync, predictionAsync, unregistered));
+#else
+  throw std::runtime_error("This code should be unreachable.");
+#endif
 }
 
 void CBLDart_PredictiveModel_Delete(CBLDart_PredictiveModel model) {
+#ifdef COUCHBASE_ENTERPRISE
   delete PREDICTIVE_MODEL_FROM_C(model);
-}
-
+#else
+  throw std::runtime_error("This code should be unreachable.");
 #endif
+}
 
 // === Blob
 
