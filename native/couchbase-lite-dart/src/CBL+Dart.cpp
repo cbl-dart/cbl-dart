@@ -448,12 +448,14 @@ bool CBLDart_CBLDatabase_Close(CBLDatabase *database, bool andDelete,
   }
 }
 
+#ifdef COUCHBASE_ENTERPRISE
 static CBLEncryptionKey CBLEncryptionKey_FromCBLDart(
     CBLDart_CBLEncryptionKey key) {
   auto result = CBLEncryptionKey{};
   memcpy(&result, &key, sizeof(CBLEncryptionKey));
   return result;
 }
+#endif
 
 static CBLDatabaseConfiguration CBLDatabaseConfiguration_FromCBLDart(
     CBLDart_CBLDatabaseConfiguration config) {
