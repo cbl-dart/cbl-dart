@@ -19,7 +19,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
 execute_process(
-  COMMAND dart pub global activate cbl_flutter_install 0.1.0-dev.1
+  COMMAND dart pub global activate cbl_flutter_install 0.1.0-dev.2
   RESULT_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_RESULT
   OUTPUT_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_OUTPUT
   ERROR_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_ERROR

@@ -1,7 +1,7 @@
 require 'open3'
 
 # Globally activate the cbl_flutter_install package so we can use the `cbl_flutter_install` command.
-stdout, stderr, status = Open3.capture3("dart pub global activate cbl_flutter_install 0.1.0-dev.1")
+stdout, stderr, status = Open3.capture3("dart pub global activate cbl_flutter_install 0.1.0-dev.2")
 
 unless status.success?
   puts "Failed to activate cbl_flutter_install:\n#{stdout}\n#{stderr}"

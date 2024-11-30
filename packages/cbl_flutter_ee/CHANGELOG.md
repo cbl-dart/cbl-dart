@@ -1,3 +1,7 @@
+## 3.3.0-dev.5
+
+ - Update a dependency to the latest release.
+
 ## 3.3.0-dev.4
 
  - **FIX**: use `dart pub global run` to invoke `cbl_flutter_install` ([#658](https://github.com/cbl-dart/cbl-dart/issues/658)). ([d2f0d356](https://github.com/cbl-dart/cbl-dart/commit/d2f0d356cb1e69dabdf3530b7b8ab65fb73c3aa5))

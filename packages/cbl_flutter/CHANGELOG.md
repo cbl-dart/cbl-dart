@@ -1,3 +1,7 @@
+## 3.2.0-dev.3
+
+ - Update a dependency to the latest release.
+
 ## 3.2.0-dev.2
 
  - **FIX**: move functionality to install native libraries to own package. ([d4faef33](https://github.com/cbl-dart/cbl-dart/commit/d4faef33bf654ac5365f11c874bfe422bbe89858))

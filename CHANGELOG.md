@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-11-30
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.3.0-dev.2`](#cbl---v330-dev2)
+ - [`cbl_flutter_install` - `v0.1.0-dev.2`](#cbl_flutter_install---v010-dev2)
+ - [`cbl_sentry` - `v2.1.2-dev.2`](#cbl_sentry---v212-dev2)
+ - [`cbl_flutter_platform_interface` - `v3.1.0-dev.2`](#cbl_flutter_platform_interface---v310-dev2)
+ - [`cbl_flutter` - `v3.2.0-dev.3`](#cbl_flutter---v320-dev3)
+ - [`cbl_dart` - `v3.2.0-dev.2`](#cbl_dart---v320-dev2)
+ - [`cbl_generator` - `v0.3.1-dev.2`](#cbl_generator---v031-dev2)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.5`](#cbl_flutter_ce---v330-dev5)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.5`](#cbl_flutter_ee---v330-dev5)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_install` - `v0.1.0-dev.2`
+ - `cbl_sentry` - `v2.1.2-dev.2`
+ - `cbl_flutter_platform_interface` - `v3.1.0-dev.2`
+ - `cbl_flutter` - `v3.2.0-dev.3`
+ - `cbl_dart` - `v3.2.0-dev.2`
+ - `cbl_generator` - `v0.3.1-dev.2`
+ - `cbl_flutter_ce` - `v3.3.0-dev.5`
+ - `cbl_flutter_ee` - `v3.3.0-dev.5`
+
+---
+
+#### `cbl` - `v3.3.0-dev.2`
+
+ - **FIX**: for installing native packages use temp dir on same volume ([#659](https://github.com/cbl-dart/cbl-dart/issues/659)). ([ebc9be0c](https://github.com/cbl-dart/cbl-dart/commit/ebc9be0c5c0bc11f76b946f01459582345db1ca4))
+
+
 ## 2024-11-27
 
 ### Changes

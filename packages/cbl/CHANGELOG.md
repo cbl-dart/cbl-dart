@@ -1,3 +1,7 @@
+## 3.3.0-dev.2
+
+ - **FIX**: for installing native packages use temp dir on same volume ([#659](https://github.com/cbl-dart/cbl-dart/issues/659)). ([ebc9be0c](https://github.com/cbl-dart/cbl-dart/commit/ebc9be0c5c0bc11f76b946f01459582345db1ca4))
+
 ## 3.3.0-dev.1
 
  - **FIX**: invoking `cbl_flutter_install` on Windows ([#656](https://github.com/cbl-dart/cbl-dart/issues/656)). ([d9eaca2b](https://github.com/cbl-dart/cbl-dart/commit/d9eaca2be3b69eee525d9896e31ace19ff1a90ca))
