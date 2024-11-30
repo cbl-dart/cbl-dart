@@ -1090,7 +1090,8 @@ typedef DartCBLDart_CBLCollection_AddChangeListener = void Function(
 
 enum CBLDart_IndexType {
   kCBLDart_IndexTypeValue(0),
-  kCBLDart_IndexTypeFullText(1);
+  kCBLDart_IndexTypeFullText(1),
+  kCBLDart_IndexTypeVector(2);
 
   final int value;
   const CBLDart_IndexType(this.value);
@@ -1098,6 +1099,7 @@ enum CBLDart_IndexType {
   static CBLDart_IndexType fromValue(int value) => switch (value) {
         0 => kCBLDart_IndexTypeValue,
         1 => kCBLDart_IndexTypeFullText,
+        2 => kCBLDart_IndexTypeVector,
         _ => throw ArgumentError("Unknown value for CBLDart_IndexType: $value"),
       };
 }
@@ -1117,6 +1119,29 @@ final class CBLDart_CBLIndexSpec extends ffi.Struct {
   external bool ignoreAccents;
 
   external imp1.FLString language;
+
+  @ffi.UnsignedInt()
+  external int dimensions;
+
+  @ffi.UnsignedInt()
+  external int centroids;
+
+  @ffi.Bool()
+  external bool isLazy;
+
+  external ffi.Pointer<ffi.Void> encoding;
+
+  @ffi.Uint32()
+  external int metric;
+
+  @ffi.UnsignedInt()
+  external int minTrainingSize;
+
+  @ffi.UnsignedInt()
+  external int maxTrainingSize;
+
+  @ffi.UnsignedInt()
+  external int numProbes;
 }
 
 typedef NativeCBLDart_CBLCollection_CreateIndex = ffi.Bool Function(

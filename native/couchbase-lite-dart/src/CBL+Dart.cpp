@@ -637,7 +637,6 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
       return CBLCollection_CreateValueIndex(collection, name, config, errorOut);
     }
     case kCBLDart_IndexTypeFullText: {
-    }
       CBLFullTextIndexConfiguration config{};
       config.expressionLanguage = indexSpec.expressionLanguage;
       config.expressions = indexSpec.expressions;
@@ -646,6 +645,24 @@ bool CBLDart_CBLCollection_CreateIndex(CBLCollection *collection, FLString name,
 
       return CBLCollection_CreateFullTextIndex(collection, name, config,
                                                errorOut);
+    }
+#ifdef COUCHBASE_ENTERPRISE
+    case kCBLDart_IndexTypeVector: {
+      CBLVectorIndexConfiguration config{};
+      config.expressionLanguage = indexSpec.expressionLanguage;
+      config.expression = indexSpec.expressions;
+      config.dimensions = indexSpec.dimensions;
+      config.centroids = indexSpec.centroids;
+      config.isLazy = indexSpec.isLazy;
+      config.encoding = static_cast<CBLVectorEncoding *>(indexSpec.encoding);
+      config.metric = static_cast<CBLDistanceMetric>(indexSpec.metric);
+      config.minTrainingSize = indexSpec.minTrainingSize;
+      config.maxTrainingSize = indexSpec.maxTrainingSize;
+      config.numProbes = indexSpec.numProbes;
+      return CBLCollection_CreateVectorIndex(collection, name, config,
+                                             errorOut);
+    }
+#endif
   }
 
   // Is never reached, but stops the compiler warnings.

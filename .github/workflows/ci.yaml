@@ -193,7 +193,7 @@ jobs:
       ${{ fromJSON('{
         "iOS":"macos-12",
         "macOS":"macos-12",
-        "Android":"macos-12",
+        "Android":"ubuntu-latest",
         "Ubuntu":"ubuntu-20.04",
         "Windows":"windows-2019"
       }')[matrix.os] }}
@@ -308,7 +308,7 @@ jobs:
       ${{ fromJSON('{
         "iOS":"macos-12",
         "macOS":"macos-12",
-        "Android":"macos-12",
+        "Android":"ubuntu-latest",
         "Ubuntu":"ubuntu-20.04",
          "Windows":"windows-2019"
       }')[matrix.os] }}

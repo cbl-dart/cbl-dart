@@ -13,10 +13,11 @@ import '../errors.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
+import '../query.dart';
 import '../query/ffi_query.dart';
 import '../query/index/index.dart';
-import '../query/query.dart';
 import '../support/async_callback.dart';
+import '../support/edition.dart';
 import '../support/errors.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
@@ -683,16 +684,21 @@ final class FfiCollection
           .cast<String>());
 
   @override
-  void createIndex(String name, covariant IndexImplInterface index) =>
-      useSync(() {
-        runWithErrorTranslation(
-          () => _collectionBindings.createIndex(
-            pointer,
-            name,
-            index.toCBLIndexSpec(),
-          ),
-        );
-      });
+  void createIndex(String name, covariant IndexImplInterface index) {
+    if (index is VectorIndexConfiguration) {
+      useEnterpriseFeature(EnterpriseFeature.vectorIndex);
+    }
+
+    useSync(() {
+      runWithErrorTranslation(
+        () => _collectionBindings.createIndex(
+          pointer,
+          name,
+          index.toCBLIndexSpec(),
+        ),
+      );
+    });
+  }
 
   @override
   void deleteIndex(String name) => useSync(() {

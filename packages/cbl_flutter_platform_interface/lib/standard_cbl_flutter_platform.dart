@@ -53,8 +53,11 @@ final class StandardCblFlutterPlatform extends CblFlutterPlatform {
       }
       cbl = LibraryConfiguration.dynamic('libcblite');
       cblDart = LibraryConfiguration.dynamic('libcblitedart');
-      vectorSearch =
-          LibraryConfiguration.dynamic('libCouchbaseLiteVectorSearch');
+      vectorSearch = LibraryConfiguration.dynamic(
+        Platform.isAndroid
+            ? 'libCouchbaseLiteVectorSearch'
+            : 'CouchbaseLiteVectorSearch',
+      );
     } else if (Platform.isWindows) {
       cbl = LibraryConfiguration.dynamic('cblite');
       cblDart = LibraryConfiguration.dynamic('cblitedart');

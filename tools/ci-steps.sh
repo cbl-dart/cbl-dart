@@ -22,7 +22,7 @@ testPackageDir="packages/$testPackage"
 testAppBundleId="com.terwesten.gabriel.cblE2eTestsFlutter"
 iosVersion="15-2"
 iosDevice="iPhone 13"
-androidVersion="22"
+androidVersion="27"
 androidDevice="pixel_4"
 
 case "$(uname)" in
@@ -156,7 +156,7 @@ function runE2ETests() {
             device="macOS"
             ;;
         Android)
-            device="Android"
+            device="emulator"
             ;;
         Ubuntu)
             # Enable core dumps.

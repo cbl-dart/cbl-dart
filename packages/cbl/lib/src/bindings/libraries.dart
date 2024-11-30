@@ -261,7 +261,7 @@ final class _Dl_info extends Struct {
 }
 
 final _dladdr = _process.lookupFunction<
-    Int32 Function(Pointer<Void>, Pointer<_Dl_info>),
+    Int Function(Pointer<Void>, Pointer<_Dl_info>),
     int Function(Pointer<Void>, Pointer<_Dl_info>)>('dladdr');
 
 // === Windows Dynamic Linking =================================================
@@ -293,7 +293,7 @@ void _RemoveDllDirectory(Pointer<Void> cookie) {
 }
 
 final _GetModuleHandleExA = _kernel32.lookupFunction<
-    Int32 Function(Uint32, Pointer<Utf8>, Pointer<Pointer<Void>>),
+    Int Function(Uint32, Pointer<Utf8>, Pointer<Pointer<Void>>),
     int Function(
         int, Pointer<Utf8>, Pointer<Pointer<Void>>)>('GetModuleHandleExA');
 
@@ -301,5 +301,5 @@ const _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 const _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT = 0x00000002;
 
 final _GetModuleFileNameA = _kernel32.lookupFunction<
-    Uint32 Function(Pointer<Void>, Pointer<Utf8>, Uint32),
+    UnsignedLong Function(Pointer<Void>, Pointer<Utf8>, Uint32),
     int Function(Pointer<Void>, Pointer<Utf8>, int)>('GetModuleFileNameA');

@@ -13,6 +13,7 @@ import '../errors.dart';
 import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../query/index/index.dart';
+import '../query/index/index_configuration.dart';
 import '../query/proxy_query.dart';
 import '../query/query.dart';
 import '../service/cbl_service.dart';
@@ -21,6 +22,7 @@ import '../service/cbl_worker.dart';
 import '../service/channel.dart';
 import '../service/proxy_object.dart';
 import '../service/serialization/json_packet_codec.dart';
+import '../support/edition.dart';
 import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
@@ -783,12 +785,17 @@ final class ProxyCollection extends ProxyObject
       use(() => channel.call(GetCollectionIndexes(objectId)));
 
   @override
-  Future<void> createIndex(String name, covariant IndexImplInterface index) =>
-      use(() => channel.call(CreateIndex(
-            collectionId: objectId,
-            name: name,
-            spec: index.toCBLIndexSpec(),
-          )));
+  Future<void> createIndex(String name, covariant IndexImplInterface index) {
+    if (index is VectorIndexConfiguration) {
+      useEnterpriseFeature(EnterpriseFeature.vectorIndex);
+    }
+
+    return use(() => channel.call(CreateIndex(
+          collectionId: objectId,
+          name: name,
+          spec: index.toCBLIndexSpec(),
+        )));
+  }
 
   @override
   Future<void> deleteIndex(String name) =>

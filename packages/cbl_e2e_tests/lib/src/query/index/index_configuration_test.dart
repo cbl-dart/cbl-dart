@@ -158,4 +158,148 @@ void main() {
       );
     });
   });
+
+  group('VectorEncoding', () {
+    test('==', () {
+      expect(VectorEncoding.none(), VectorEncoding.none());
+      expect(
+        VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit),
+        VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit),
+      );
+      expect(
+        VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1),
+        VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1),
+      );
+
+      expect(
+        VectorEncoding.none(),
+        isNot(VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit)),
+      );
+      expect(
+        VectorEncoding.none(),
+        isNot(VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1)),
+      );
+    });
+
+    test('hashCode', () {
+      expect(VectorEncoding.none().hashCode, VectorEncoding.none().hashCode);
+      expect(
+        VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit).hashCode,
+        VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit).hashCode,
+      );
+      expect(
+        VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1).hashCode,
+        VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1).hashCode,
+      );
+
+      expect(
+        VectorEncoding.none().hashCode,
+        isNot(VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit)
+            .hashCode),
+      );
+      expect(
+        VectorEncoding.none().hashCode,
+        isNot(VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1)
+            .hashCode),
+      );
+    });
+
+    test('toString', () {
+      expect(VectorEncoding.none().toString(), 'VectorEncoding.none()');
+      expect(
+        VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit).toString(),
+        'VectorEncoding.scalarQuantizer(eightBit)',
+      );
+      expect(
+        VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1).toString(),
+        'VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1)',
+      );
+    });
+  });
+
+  group('VectorIndexConfiguration', () {
+    test('default values', () {
+      final index = VectorIndexConfiguration('a', dimensions: 2, centroids: 3);
+      expect(index.lazy, isFalse);
+      expect(
+        index.encoding,
+        VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit),
+      );
+      expect(index.metric, DistanceMetric.euclideanSquared);
+      expect(index.minTrainingSize, isNull);
+      expect(index.maxTrainingSize, isNull);
+      expect(index.numProbes, isNull);
+    });
+
+    test('update', () {
+      final index = VectorIndexConfiguration('a', dimensions: 2, centroids: 3);
+      expect(index.expression, 'a');
+      expect(index.expressions, ['a']);
+      index.expressions = ['b'];
+      expect(index.expression, 'b');
+      expect(index.expressions, ['b']);
+    });
+
+    test('==', () {
+      VectorIndexConfiguration a;
+      VectorIndexConfiguration b;
+
+      a = VectorIndexConfiguration('a', dimensions: 2, centroids: 3);
+      expect(a, a);
+
+      b = VectorIndexConfiguration('a', dimensions: 2, centroids: 3);
+      expect(a, b);
+
+      b = VectorIndexConfiguration('b', dimensions: 2, centroids: 3);
+      expect(a, isNot(b));
+    });
+
+    test('hashCode', () {
+      VectorIndexConfiguration a;
+      VectorIndexConfiguration b;
+
+      a = VectorIndexConfiguration('a', dimensions: 2, centroids: 3);
+      expect(a.hashCode, a.hashCode);
+
+      b = VectorIndexConfiguration('a', dimensions: 2, centroids: 3);
+      expect(a.hashCode, b.hashCode);
+
+      b = VectorIndexConfiguration('b', dimensions: 2, centroids: 3);
+      expect(a.hashCode, isNot(b.hashCode));
+    });
+
+    test('toString', () {
+      expect(
+        VectorIndexConfiguration('a', dimensions: 2, centroids: 3).toString(),
+        'VectorIndexConfiguration(a | '
+        'dimensions: 2, '
+        'centroids: 3, '
+        'encoding: VectorEncoding.scalarQuantizer(eightBit), '
+        'metric: euclideanSquared)',
+      );
+
+      expect(
+        VectorIndexConfiguration(
+          'a',
+          dimensions: 2,
+          centroids: 3,
+          lazy: true,
+          encoding: VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1),
+          metric: DistanceMetric.euclidean,
+          minTrainingSize: 4,
+          maxTrainingSize: 5,
+          numProbes: 6,
+        ).toString(),
+        'VectorIndexConfiguration(a | '
+        'dimensions: 2, '
+        'centroids: 3, '
+        'LAZY, '
+        'encoding: VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1), '
+        'metric: euclidean, '
+        'minTrainingSize: 4, '
+        'maxTrainingSize: 5, '
+        'numProbes: 6)',
+      );
+    });
+  });
 }

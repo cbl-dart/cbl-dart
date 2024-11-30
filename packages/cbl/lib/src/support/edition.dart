@@ -9,13 +9,15 @@ enum EnterpriseFeature {
   localDbReplication,
   databaseEncryption,
   propertyEncryption,
-  prediction;
+  prediction,
+  vectorIndex;
 
   String get description => switch (this) {
         localDbReplication => 'Local database replication',
         databaseEncryption => 'Database encryption',
         propertyEncryption => 'Property encryption',
         prediction => 'Prediction',
+        vectorIndex => 'Vector index',
       };
 }
 

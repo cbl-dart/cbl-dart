@@ -147,14 +147,27 @@ void CBLDart_CBLCollection_AddChangeListener(const CBLDatabase *db,
 typedef enum : uint8_t {
   kCBLDart_IndexTypeValue,
   kCBLDart_IndexTypeFullText,
+  kCBLDart_IndexTypeVector,
 } CBLDart_IndexType;
 
 struct CBLDart_CBLIndexSpec {
   CBLDart_IndexType type;
   CBLQueryLanguage expressionLanguage;
   FLString expressions;
+
+  // Full text index configuration
   bool ignoreAccents;
   FLString language;
+
+  // Vector index configuration
+  unsigned dimensions;
+  unsigned centroids;
+  bool isLazy;
+  void *encoding;
+  uint32_t metric;
+  unsigned minTrainingSize;
+  unsigned maxTrainingSize;
+  unsigned numProbes;
 };
 
 CBLDART_EXPORT
