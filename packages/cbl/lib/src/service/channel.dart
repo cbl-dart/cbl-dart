@@ -130,35 +130,39 @@ final class Channel {
 
   final _callHandlers = HashMap<Type, _UntypedCallHandler>.identity();
   final _callCompleter = HashMap<int, Completer<_Message>>();
+  final _callRequestNames = HashMap<int, String>();
 
   final _streamHandlers = HashMap<Type, _UntypedStreamHandler>.identity();
   final _streamControllers = HashMap<int, StreamController<_Message>>();
   final _streamSubscriptions = HashMap<int, StreamSubscription>();
 
   /// Makes a call to an endpoint at other side of the channel.
-  Future<R> call<R>(Request<R> request) async => asyncOperationTracePoint(
-        () {
-          final name = _serializationRegistry.getTypeName(request.runtimeType)!;
-          return ChannelCallOp(name);
-        },
-        () async {
-          _checkIsOpen();
-          final id = _generateConversationId();
-          final completer = _callCompleter[id] = Completer<_Message>();
-          _sendMessage(_CallRequest(id, request, _captureMessageContext()));
+  Future<R> call<R>(Request<R> request) async {
+    final requestName =
+        _serializationRegistry.getTypeName(request.runtimeType)!;
 
-          final message = await completer.future;
-          if (message is _CallSuccess) {
-            return message.data as R;
-          }
-          if (message is _CallError) {
-            // ignore: only_throw_errors
-            throw message.error;
-          }
+    return asyncOperationTracePoint(
+      () => ChannelCallOp(requestName),
+      () async {
+        _checkIsOpen();
+        final id = _generateConversationId();
+        _callRequestNames[id] = requestName;
+        final completer = _callCompleter[id] = Completer<_Message>();
+        _sendMessage(_CallRequest(id, request, _captureMessageContext()));
 
-          throw StateError('Unexpected message: $message');
-        },
-      );
+        final message = await completer.future;
+        if (message is _CallSuccess) {
+          return message.data as R;
+        }
+        if (message is _CallError) {
+          // ignore: only_throw_errors
+          throw message.error;
+        }
+
+        throw StateError('Unexpected message: $message');
+      },
+    );
+  }
 
   /// Returns a stream for an endpoint at the other side of the channel.
   Stream<R> stream<R>(Request<R> request) {
@@ -424,6 +428,7 @@ final class Channel {
   }
 
   Completer<Object?>? _takeCallCompleter(_Message message) {
+    _callRequestNames.remove(message.conversationId);
     final completer = _callCompleter.remove(message.conversationId);
     assert(
       completer != null,
@@ -548,18 +553,14 @@ final class Channel {
 
   void _checkHasNotPendingCallsOrStreams(Object? error) {
     if (error == null && _callCompleter.isNotEmpty) {
-      throw ArgumentError.value(
-        error,
-        'error',
-        'must not be null if there are pending calls',
+      throw ArgumentError(
+        'error must not be null if there are pending calls: $_callRequestNames',
       );
     }
 
     if (error == null && _streamControllers.isNotEmpty) {
-      throw ArgumentError.value(
-        error,
-        'error',
-        'must not be null if there are pending streams',
+      throw ArgumentError(
+        'error must not be null if there are pending streams',
       );
     }
   }
