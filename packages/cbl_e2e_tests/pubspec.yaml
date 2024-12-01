@@ -1,8 +1,10 @@
 name: cbl_e2e_tests
 publish_to: none
 
+resolution: workspace
+
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
 
 dependencies:
   benchmark_harness: ^2.1.0

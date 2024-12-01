@@ -2,8 +2,10 @@ name: cbl_flutter_local
 version: 0.0.1
 publish_to: none
 
+resolution: workspace
+
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
   flutter: '>=3.0.0'
 
 dependencies:

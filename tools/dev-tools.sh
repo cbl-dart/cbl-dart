@@ -190,8 +190,4 @@ function prepareNativeLibraries() {
     esac
 }
 
-function bootstrap() {
-    $melosBin bootstrap
-}
-
 "$@"

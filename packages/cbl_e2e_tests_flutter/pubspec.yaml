@@ -2,8 +2,10 @@ name: cbl_e2e_tests_flutter
 publish_to: 'none'
 version: 1.0.0+1
 
+resolution: workspace
+
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
   flutter: '>=3.0.0'
 
 dependencies:
