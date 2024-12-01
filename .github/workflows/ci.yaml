@@ -191,8 +191,8 @@ jobs:
       ${{ matrix.embedder == 'flutter' && matrix.os == 'Ubuntu' }}
     runs-on: >-
       ${{ fromJSON('{
-        "iOS":"macos-12",
-        "macOS":"macos-12",
+        "iOS":"macos-14",
+        "macOS":"macos-14",
         "Android":"ubuntu-latest",
         "Ubuntu":"ubuntu-20.04",
         "Windows":"windows-2019"
@@ -306,8 +306,8 @@ jobs:
             os: iOS
     runs-on: >-
       ${{ fromJSON('{
-        "iOS":"macos-12",
-        "macOS":"macos-12",
+        "iOS":"macos-14",
+        "macOS":"macos-14",
         "Android":"ubuntu-latest",
         "Ubuntu":"ubuntu-20.04",
          "Windows":"windows-2019"
@@ -390,7 +390,7 @@ jobs:
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: >-
       ${{ fromJSON('{
-        "macOS":"macos-12",
+        "macOS":"macos-14",
         "Ubuntu":"ubuntu-20.04",
         "Windows":"windows-2019"
       }')[matrix.os] }}
