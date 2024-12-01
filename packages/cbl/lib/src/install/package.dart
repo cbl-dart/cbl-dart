@@ -523,6 +523,24 @@ final class VectorSearchPackageConfig extends PackageConfig {
       await libraryFile.rename(versionedLibraryFile.path);
       await Link(p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'))
           .create(versionedLibraryPath);
+
+      // The library needs to be code signed for it to be included in the
+      // release build of a macOS App. It is shipped without any code signing.
+      final codesignResult = await Process.run('codesign', [
+        '--force',
+        '--sign',
+        '-',
+        '--timestamp=none',
+        versionedLibraryFile.path,
+      ]);
+      if (codesignResult.exitCode != 0) {
+        throw Exception(
+          'Failed to code sign the CouchbaseLiteVectorSearch library '
+          '(${codesignResult.exitCode}):\n'
+          '${codesignResult.stdout}\n'
+          '${codesignResult.stderr}',
+        );
+      }
     }
   }
 }
