@@ -5,8 +5,10 @@ homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_pl
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
 
+resolution: workspace
+
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
   flutter: '>=3.0.0'
 
 dependencies:

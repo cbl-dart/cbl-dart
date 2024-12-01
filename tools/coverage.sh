@@ -11,6 +11,9 @@ MINGW* | CYGWIN* | MSYS*)
 ;;
 esac
 
+scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+rootDir="$(cd "$scriptDir/.." && pwd)"
+
 # Converts the dart coverage output for a package to lcov.
 #
 # The first and only parameter is the packages directory.
@@ -23,7 +26,7 @@ function dartToLcov() {
     local coverageDir="coverage"
     local input="$coverageDir/dart"
     local output="$coverageDir/lcov.info"
-    local packagesFile=".dart_tool/package_config.json"
+    local packagesFile="$rootDir/.dart_tool/package_config.json"
 
     dart pub global activate coverage
 

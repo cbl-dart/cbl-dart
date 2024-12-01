@@ -2,8 +2,7 @@ name: cbd
 description: CBL Dart project dev tools CLI
 publish_to: 'none'
 
-executables:
-  cbd:
+resolution: workspace
 
 environment:
   sdk: ^3.5.0
@@ -12,5 +11,5 @@ dependencies:
   args: ^2.6.0
   cbl: ^3.3.0-dev.4
   cli_launcher: ^0.3.1
-  meta: ^1.16.0
-  path: ^1.9.1
+  meta: ^1.15.0
+  path: ^1.9.0

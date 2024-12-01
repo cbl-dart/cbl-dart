@@ -85,11 +85,6 @@ Two native libraries are required to enable Couchbase Lite for Dart.
    ```shell
    melos run build:nativeLibraries
    ```
-4. Bootstrap the Dart [packages] so they depend on the local versions of their
-   siblings:
-   ```shell
-   melos bootstrap
-   ```
 
 ## Running tests
 
