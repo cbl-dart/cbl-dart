@@ -78,7 +78,7 @@ packages:
       path: "packages/cbl"
       relative: true
     source: path
-    version: "3.3.0-dev.2"
+    version: "3.3.0-dev.4"
   cbl_libcblite_api:
     dependency: transitive
     description:
@@ -91,10 +91,10 @@ packages:
     dependency: transitive
     description:
       name: cbl_libcblitedart_api
-      sha256: "6477244c23464cde3dce752aa39ba054fac4047c398f539b77bfbb0aaf55bd17"
+      sha256: "5c8fc8126736dd382ecbf7944347dc40903bb0c076fa4bb3bf8a86d91d68c98e"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.0"
+    version: "8.0.0"
   characters:
     dependency: transitive
     description:
@@ -135,14 +135,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.2"
+  clock:
+    dependency: transitive
+    description:
+      name: clock
+      sha256: fddb70d9b5277016c77a80201021d40a2247104d9f4aa7bab7157b7e3f05b84b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   collection:
     dependency: transitive
     description:
       name: collection
-      sha256: f092b211a4319e98e5ff58223576de6c2803db36221657b46c82574721240687
+      sha256: "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76"
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.2"
+    version: "1.19.1"
   conventional_commit:
     dependency: transitive
     description:
@@ -195,10 +203,10 @@ packages:
     dependency: transitive
     description:
       name: file
-      sha256: "1b92bec4fc2a72f59a8e15af5f52cd441e4a7860b49499d69dfa817af20e925d"
+      sha256: a3b4f84adafef897088c160faf7dfffb7696046cb13ae90b508c2cbc95d3b8d4
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.4"
+    version: "7.0.1"
   glob:
     dependency: transitive
     description:
@@ -231,6 +239,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   io:
     dependency: transitive
     description:
@@ -259,10 +275,10 @@ packages:
     dependency: "direct dev"
     description:
       name: melos
-      sha256: "96e64bbade5712c3f010137e195bca9f1b351fac34ab1f322af492ae34032067"
+      sha256: a62abfa8c7826cec927f8585572bb9adf591be152150494d879ca2c75118809d
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.0"
+    version: "6.2.0"
   meta:
     dependency: transitive
     description:
@@ -299,10 +315,10 @@ packages:
     dependency: transitive
     description:
       name: platform
-      sha256: "4a451831508d7d6ca779f7ac6e212b4023dd5a7d08a27a63da33756410e32b76"
+      sha256: "5d6b1b0036a5f331ebc77c850ebc8506cbc1e9416c27e59b439f917a902a4984"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.6"
   pool:
     dependency: transitive
     description:
@@ -315,10 +331,10 @@ packages:
     dependency: transitive
     description:
       name: process
-      sha256: "53fd8db9cec1d37b0574e12f07520d582019cb6c44abf5479a01505099a34a09"
+      sha256: "107d8be718f120bbba9dcd1e95e3bd325b1b4a4f07db64154635ba03f2567a0d"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.4"
+    version: "5.0.3"
   prompts:
     dependency: transitive
     description:
@@ -339,10 +355,10 @@ packages:
     dependency: transitive
     description:
       name: pub_updater
-      sha256: b06600619c8c219065a548f8f7c192b3e080beff95488ed692780f48f69c0625
+      sha256: "54e8dc865349059ebe7f163d6acce7c89eb958b8047e6d6e80ce93b13d7c9e60"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "0.4.0"
   pubspec:
     dependency: transitive
     description:
