@@ -7,7 +7,7 @@ on:
 
 jobs:
   create-release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       upload-url: ${{ steps.create-release.outputs.upload_url }}
       tag: ${{ steps.set-outputs.outputs.tag }}
@@ -32,7 +32,7 @@ jobs:
   linux:
     needs: create-release
     name: Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
@@ -64,7 +64,7 @@ jobs:
   android:
     needs: create-release
     name: Android
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
