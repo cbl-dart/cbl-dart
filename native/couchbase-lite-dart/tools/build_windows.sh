@@ -37,7 +37,8 @@ function _build() {
 
     cmake \
         -B "$cmakeBuildDir" \
-        -G "Visual Studio 16 2019" \
+        -G "Visual Studio 17 2022" \
+        -A x64 \
         -DCBL_EDITION="$edition" \
         "$projectDir"
 
