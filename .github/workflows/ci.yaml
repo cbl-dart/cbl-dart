@@ -24,7 +24,7 @@ env:
 jobs:
   formatting-dart:
     name: Formatting - Dart
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -53,7 +53,7 @@ jobs:
 
   formatting-clang:
     name: Formatting - Clang
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -65,7 +65,7 @@ jobs:
 
   analyze-dart:
     name: Analyze Dart code
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -117,7 +117,7 @@ jobs:
       TARGET_OS: ${{ matrix.os }}
       TEST_PACKAGE: ${{ matrix.package }}
     continue-on-error: ${{ matrix.dart != 'stable' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -194,7 +194,7 @@ jobs:
         "iOS":"macos-14",
         "macOS":"macos-14",
         "Android":"ubuntu-latest",
-        "Ubuntu":"ubuntu-20.04",
+        "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2019"
       }')[matrix.os] }}
     env:
@@ -309,7 +309,7 @@ jobs:
         "iOS":"macos-14",
         "macOS":"macos-14",
         "Android":"ubuntu-latest",
-        "Ubuntu":"ubuntu-20.04",
+        "Ubuntu":"ubuntu-22.04",
          "Windows":"windows-2019"
       }')[matrix.os] }}
     env:
@@ -391,7 +391,7 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "macOS":"macos-14",
-        "Ubuntu":"ubuntu-20.04",
+        "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2019"
       }')[matrix.os] }}
     steps:
