@@ -8,25 +8,26 @@ import 'base_command.dart';
 
 final class InstallPackages extends BaseCommand {
   InstallPackages() {
-    argParser.addOption(
-      'library',
-      abbr: 'l',
-      help: 'The library to install packages for.',
-      allowed: Library.values.map((value) => value.name),
-      mandatory: true,
-    );
-    argParser.addOption(
-      'release',
-      abbr: 'r',
-      help: 'The release version of the packages to install.',
-      mandatory: true,
-    );
-    argParser.addOption(
-      'os',
-      help: 'Optionally only install the package for the given OS. If not '
-          'provided, the packages for all supported OSes will be installed.',
-      allowed: OS.values.map((value) => value.name),
-    );
+    argParser
+      ..addOption(
+        'library',
+        abbr: 'l',
+        help: 'The library to install packages for.',
+        allowed: Library.values.map((value) => value.name),
+        mandatory: true,
+      )
+      ..addOption(
+        'release',
+        abbr: 'r',
+        help: 'The release version of the packages to install.',
+        mandatory: true,
+      )
+      ..addOption(
+        'os',
+        help: 'Optionally only install the package for the given OS. If not '
+            'provided, the packages for all supported OSes will be installed.',
+        allowed: OS.values.map((value) => value.name),
+      );
   }
 
   @override
