@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2024-12-01
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.3.0-dev.4`](#cbl---v330-dev4)
+ - [`cbl_flutter` - `v3.2.0-dev.5`](#cbl_flutter---v320-dev5)
+ - [`cbl_flutter_install` - `v0.1.0-dev.4`](#cbl_flutter_install---v010-dev4)
+ - [`cbl_flutter_platform_interface` - `v3.1.0-dev.4`](#cbl_flutter_platform_interface---v310-dev4)
+ - [`cbl_dart` - `v3.2.0-dev.4`](#cbl_dart---v320-dev4)
+ - [`cbl_generator` - `v0.3.1-dev.4`](#cbl_generator---v031-dev4)
+ - [`cbl_sentry` - `v2.1.2-dev.4`](#cbl_sentry---v212-dev4)
+ - [`cbl_flutter_ce` - `v3.3.0-dev.7`](#cbl_flutter_ce---v330-dev7)
+ - [`cbl_flutter_ee` - `v3.3.0-dev.7`](#cbl_flutter_ee---v330-dev7)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.2.0-dev.5`
+ - `cbl_flutter_install` - `v0.1.0-dev.4`
+ - `cbl_flutter_platform_interface` - `v3.1.0-dev.4`
+ - `cbl_dart` - `v3.2.0-dev.4`
+ - `cbl_generator` - `v0.3.1-dev.4`
+ - `cbl_sentry` - `v2.1.2-dev.4`
+ - `cbl_flutter_ce` - `v3.3.0-dev.7`
+ - `cbl_flutter_ee` - `v3.3.0-dev.7`
+
+---
+
+#### `cbl` - `v3.3.0-dev.4`
+
+ - **FIX**: code sign vector serach library for macOS ([#663](https://github.com/cbl-dart/cbl-dart/issues/663)). ([b3d0c58b](https://github.com/cbl-dart/cbl-dart/commit/b3d0c58bb16daaa9ff4129ebda950058214f6235))
+
+
 ## 2024-11-30
 
 ### Changes

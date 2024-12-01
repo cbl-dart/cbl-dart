@@ -1,3 +1,7 @@
+## 3.3.0-dev.4
+
+ - **FIX**: code sign vector serach library for macOS ([#663](https://github.com/cbl-dart/cbl-dart/issues/663)). ([b3d0c58b](https://github.com/cbl-dart/cbl-dart/commit/b3d0c58bb16daaa9ff4129ebda950058214f6235))
+
 ## 3.3.0-dev.3
 
  - **FEAT**: support updating lazy vector indexes ([#661](https://github.com/cbl-dart/cbl-dart/issues/661)). ([909a21ee](https://github.com/cbl-dart/cbl-dart/commit/909a21eed6648a6fc31eac41494e153f543ce78b))

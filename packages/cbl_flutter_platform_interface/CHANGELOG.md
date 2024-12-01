@@ -1,3 +1,7 @@
+## 3.1.0-dev.4
+
+ - Update a dependency to the latest release.
+
 ## 3.1.0-dev.3
 
  - **FEAT**: support creating vector indexs ([#660](https://github.com/cbl-dart/cbl-dart/issues/660)). ([3bb84324](https://github.com/cbl-dart/cbl-dart/commit/3bb84324718bc54e55837d5e85f7771381850cf3))
