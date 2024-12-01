@@ -96,7 +96,7 @@ jobs:
   ios:
     needs: create-release
     name: iOS
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v3
 
@@ -125,7 +125,7 @@ jobs:
   macos:
     needs: create-release
     name: macOS
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v3
 
