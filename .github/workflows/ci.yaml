@@ -193,9 +193,9 @@ jobs:
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-14",
-        "Android":"ubuntu-latest",
+        "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2019"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -308,9 +308,9 @@ jobs:
       ${{ fromJSON('{
         "iOS":"macos-14",
         "macOS":"macos-14",
-        "Android":"ubuntu-latest",
+        "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
-         "Windows":"windows-2019"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     env:
       EMBEDDER: ${{ matrix.embedder }}
@@ -392,7 +392,7 @@ jobs:
       ${{ fromJSON('{
         "macOS":"macos-14",
         "Ubuntu":"ubuntu-22.04",
-        "Windows":"windows-2019"
+        "Windows":"windows-2022"
       }')[matrix.os] }}
     steps:
       - name: Checkout repository
