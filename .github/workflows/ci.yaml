@@ -101,7 +101,7 @@ jobs:
         run: ./tools/dev-tools.sh bootstrap
 
       - name: Analyze Dart code
-        run: melos analyze
+        run: melos analyze --fatal-infos
 
   test-dart-unit:
     name: Dart unit tests
