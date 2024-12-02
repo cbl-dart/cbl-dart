@@ -13,35 +13,45 @@ import 'global.dart';
 import 'utils.dart';
 
 enum CBLLogDomain {
-  database,
-  query,
-  replicator,
-  network,
-}
+  database(cblite.kCBLLogDomainDatabase),
+  query(cblite.kCBLLogDomainQuery),
+  replicator(cblite.kCBLLogDomainReplicator),
+  network(cblite.kCBLLogDomainNetwork);
 
-extension on CBLLogDomain {
-  int toInt() => CBLLogDomain.values.indexOf(this);
-}
+  const CBLLogDomain(this.value);
 
-extension on int {
-  CBLLogDomain toLogDomain() => CBLLogDomain.values[this];
+  factory CBLLogDomain.fromValue(int value) => switch (value) {
+        cblite.kCBLLogDomainDatabase => database,
+        cblite.kCBLLogDomainQuery => query,
+        cblite.kCBLLogDomainReplicator => replicator,
+        cblite.kCBLLogDomainNetwork => network,
+        _ => throw ArgumentError('Unknown log domain: $value'),
+      };
+
+  final int value;
 }
 
 enum CBLLogLevel {
-  debug,
-  verbose,
-  info,
-  warning,
-  error,
-  none,
-}
+  debug(cblite.kCBLLogDebug),
+  verbose(cblite.kCBLLogVerbose),
+  info(cblite.kCBLLogInfo),
+  warning(cblite.kCBLLogWarning),
+  error(cblite.kCBLLogError),
+  none(cblite.kCBLLogNone);
 
-extension on CBLLogLevel {
-  int toInt() => CBLLogLevel.values.indexOf(this);
-}
+  const CBLLogLevel(this.value);
 
-extension on int {
-  CBLLogLevel toLogLevel() => CBLLogLevel.values[this];
+  factory CBLLogLevel.fromValue(int value) => switch (value) {
+        cblite.kCBLLogDebug => debug,
+        cblite.kCBLLogVerbose => verbose,
+        cblite.kCBLLogInfo => info,
+        cblite.kCBLLogWarning => warning,
+        cblite.kCBLLogError => error,
+        cblite.kCBLLogNone => none,
+        _ => throw ArgumentError('Unknown log level: $value'),
+      };
+
+  final int value;
 }
 
 final class LogCallbackMessage {
@@ -49,8 +59,8 @@ final class LogCallbackMessage {
 
   LogCallbackMessage.fromArguments(List<Object?> arguments)
       : this(
-          (arguments[0]! as int).toLogDomain(),
-          (arguments[1]! as int).toLogLevel(),
+          CBLLogDomain.fromValue(arguments[0]! as int),
+          CBLLogLevel.fromValue(arguments[1]! as int),
           utf8.decode(arguments[2]! as Uint8List, allowMalformed: true),
         );
 
@@ -62,7 +72,7 @@ final class LogCallbackMessage {
 extension on cblite.CBLLogFileConfiguration {
   CBLLogFileConfiguration toCBLLogFileConfiguration() =>
       CBLLogFileConfiguration(
-        level: level.toLogLevel(),
+        level: CBLLogLevel.fromValue(level),
         directory: directory.toDartString()!,
         maxRotateCount: maxRotateCount,
         maxSize: maxSize,
@@ -132,21 +142,22 @@ final class LoggingBindings extends Bindings {
     runWithSingleFLString(
       message,
       (flMessage) => cbl.CBL_LogMessage(
-        domain.toInt(),
-        level.toInt(),
+        domain.value,
+        level.value,
         flMessage,
       ),
     );
   }
 
-  CBLLogLevel consoleLevel() => cbl.CBLLog_ConsoleLevel().toLogLevel();
+  CBLLogLevel consoleLevel() =>
+      CBLLogLevel.fromValue(cbl.CBLLog_ConsoleLevel());
 
   void setConsoleLevel(CBLLogLevel logLevel) {
-    cbl.CBLLog_SetConsoleLevel(logLevel.toInt());
+    cbl.CBLLog_SetConsoleLevel(logLevel.value);
   }
 
   void setCallbackLevel(CBLLogLevel logLevel) {
-    cblDart.CBLDart_CBLLog_SetCallbackLevel(logLevel.toInt());
+    cblDart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
   }
 
   bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
@@ -180,7 +191,7 @@ final class LoggingBindings extends Bindings {
     final result = globalArena<cblite.CBLLogFileConfiguration>();
 
     result.ref
-      ..level = config.level.toInt()
+      ..level = config.level.value
       ..directory = config.directory.toFLString()
       ..maxRotateCount = config.maxRotateCount
       ..maxSize = config.maxSize

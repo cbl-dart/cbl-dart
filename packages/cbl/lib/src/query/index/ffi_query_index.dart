@@ -1,7 +1,6 @@
 import 'dart:ffi';
 
 import '../../bindings.dart';
-import '../../bindings/cblite.dart' as cblite;
 import '../../database/ffi_database.dart';
 import '../../query.dart';
 import '../../support/errors.dart';
@@ -25,7 +24,7 @@ final class FfiQueryIndex
     attachTo(collection);
   }
 
-  final Pointer<cblite.CBLQueryIndex> pointer;
+  final Pointer<CBLQueryIndex> pointer;
 
   @override
   final FfiCollection collection;

@@ -94,7 +94,7 @@ final class ValueIndexImpl implements IndexImplInterface, ValueIndex {
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
         expressionLanguage: CBLQueryLanguage.json,
-        type: CBLIndexType.value,
+        type: CBLDart_IndexType.kCBLDart_IndexTypeValue,
         expressions: _items
             .map((item) => item._expression.toJson())
             .toList()
@@ -132,7 +132,7 @@ final class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
         expressionLanguage: CBLQueryLanguage.json,
-        type: CBLIndexType.fullText,
+        type: CBLDart_IndexType.kCBLDart_IndexTypeFullText,
         expressions: _items
             .map((item) => item._expression.toJson())
             .toList()

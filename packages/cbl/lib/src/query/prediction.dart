@@ -3,8 +3,6 @@ import 'dart:isolate';
 
 import '../../cbl.dart';
 import '../bindings.dart';
-import '../bindings/cblite.dart' as cblite;
-import '../bindings/cblitedart.dart' as cblitedart;
 import '../document/dictionary.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
@@ -141,13 +139,13 @@ final class PredictionImpl implements Prediction {
 }
 
 // ignore: avoid_private_typedef_functions
-typedef _CBLPredictionFunctionSync = cblite.FLMutableDict Function(
-  cblite.FLDict input,
+typedef _CBLPredictionFunctionSync = FLMutableDict Function(
+  FLDict input,
 );
 // ignore: avoid_private_typedef_functions
 typedef _CBLPredictionFunctionAsync = Void Function(
-  cblite.FLDict input,
-  cblitedart.CBLDart_Completer completer,
+  FLDict input,
+  CBLDart_Completer completer,
 );
 
 class _FfiPredictiveModel implements Finalizable {
@@ -170,7 +168,7 @@ class _FfiPredictiveModel implements Finalizable {
   late final NativeCallable<Void Function()> _unregisteredCallable =
       NativeCallable.listener(_unregistered);
 
-  cblite.FLMutableDict _predictionSync(cblite.FLDict input) {
+  FLMutableDict _predictionSync(FLDict input) {
     try {
       final inputRoot = MRoot.fromContext(
         MContext(data: fl.Dict.fromPointer(input, isRefCounted: false)),
@@ -187,8 +185,7 @@ class _FfiPredictiveModel implements Finalizable {
       (outputDict as DictionaryImpl).encodeTo(encoder);
       final outputData = encoder.finish();
 
-      final outputDoc =
-          fl.Doc.fromResultData(outputData, cblite.FLTrust.kFLTrusted);
+      final outputDoc = fl.Doc.fromResultData(outputData, FLTrust.kFLTrusted);
       final outputMutableDict =
           fl.MutableDict.mutableCopy(outputDoc.root.asDict!);
 
@@ -211,8 +208,8 @@ class _FfiPredictiveModel implements Finalizable {
   }
 
   void _predictionAsync(
-    cblite.FLDict input,
-    cblitedart.CBLDart_Completer completer,
+    FLDict input,
+    CBLDart_Completer completer,
   ) {
     final result = _predictionSync(input);
     CBLBindings.instance.base.completeCompleter(completer, result.cast());

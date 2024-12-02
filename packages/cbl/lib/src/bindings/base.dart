@@ -12,6 +12,7 @@ import 'global.dart';
 import 'utils.dart';
 
 export 'cblite.dart' show CBLListenerToken;
+export 'cblitedart.dart' show CBLDart_Completer;
 
 final _baseBinds = CBLBindings.instance.base;
 
@@ -55,107 +56,151 @@ final class _CBLInitContext extends Struct {
 // === CBLError ================================================================
 
 enum CBLErrorDomain {
-  couchbaseLite,
-  posix,
-  sqLite,
-  fleece,
-  network,
-  webSocket,
-}
+  couchbaseLite(cblite.kCBLDomain),
+  posix(cblite.kCBLPOSIXDomain),
+  sqLite(cblite.kCBLSQLiteDomain),
+  fleece(cblite.kCBLFleeceDomain),
+  network(cblite.kCBLNetworkDomain),
+  webSocket(cblite.kCBLWebSocketDomain);
 
-extension IntCBLErrorDomainExt on int {
-  CBLErrorDomain toErrorDomain() {
-    assert(this >= 1 || this <= 6);
-    return CBLErrorDomain.values[this - 1];
-  }
+  const CBLErrorDomain(this.value);
+
+  factory CBLErrorDomain.fromValue(int value) => switch (value) {
+        cblite.kCBLDomain => couchbaseLite,
+        cblite.kCBLPOSIXDomain => posix,
+        cblite.kCBLSQLiteDomain => sqLite,
+        cblite.kCBLFleeceDomain => fleece,
+        cblite.kCBLNetworkDomain => network,
+        cblite.kCBLWebSocketDomain => webSocket,
+        _ => throw ArgumentError('Unknown error domain: $value'),
+      };
+
+  final int value;
 }
 
 enum CBLErrorCode {
-  assertionFailed,
-  unimplemented,
-  unsupportedEncryption,
-  badRevisionId,
-  corruptRevisionData,
-  notOpen,
-  notFound,
-  conflict,
-  invalidParameter,
-  unexpectedError,
-  cantOpenFile,
-  iOError,
-  memoryError,
-  notWriteable,
-  corruptData,
-  busy,
-  notInTransaction,
-  transactionNotClosed,
-  unsupported,
-  notADatabaseFile,
-  wrongFormat,
-  crypto,
-  invalidQuery,
-  missingIndex,
-  invalidQueryParam,
-  remoteError,
-  databaseTooOld,
-  databaseTooNew,
-  badDocId,
-  cantUpgradeDatabase,
-}
+  assertionFailed(cblite.kCBLErrorAssertionFailed),
+  unimplemented(cblite.kCBLErrorUnimplemented),
+  unsupportedEncryption(cblite.kCBLErrorUnsupportedEncryption),
+  badRevisionId(cblite.kCBLErrorBadRevisionID),
+  corruptRevisionData(cblite.kCBLErrorCorruptRevisionData),
+  notOpen(cblite.kCBLErrorNotOpen),
+  notFound(cblite.kCBLErrorNotFound),
+  conflict(cblite.kCBLErrorConflict),
+  invalidParameter(cblite.kCBLErrorInvalidParameter),
+  unexpectedError(cblite.kCBLErrorUnexpectedError),
+  cantOpenFile(cblite.kCBLErrorCantOpenFile),
+  iOError(cblite.kCBLErrorIOError),
+  memoryError(cblite.kCBLErrorMemoryError),
+  notWriteable(cblite.kCBLErrorNotWriteable),
+  corruptData(cblite.kCBLErrorCorruptData),
+  busy(cblite.kCBLErrorBusy),
+  notInTransaction(cblite.kCBLErrorNotInTransaction),
+  transactionNotClosed(cblite.kCBLErrorTransactionNotClosed),
+  unsupported(cblite.kCBLErrorUnsupported),
+  notADatabaseFile(cblite.kCBLErrorNotADatabaseFile),
+  wrongFormat(cblite.kCBLErrorWrongFormat),
+  crypto(cblite.kCBLErrorCrypto),
+  invalidQuery(cblite.kCBLErrorInvalidQuery),
+  missingIndex(cblite.kCBLErrorMissingIndex),
+  invalidQueryParam(cblite.kCBLErrorInvalidQueryParam),
+  remoteError(cblite.kCBLErrorRemoteError),
+  databaseTooOld(cblite.kCBLErrorDatabaseTooOld),
+  databaseTooNew(cblite.kCBLErrorDatabaseTooNew),
+  badDocId(cblite.kCBLErrorBadDocID),
+  cantUpgradeDatabase(cblite.kCBLErrorCantUpgradeDatabase);
 
-extension on int {
-  CBLErrorCode toCouchbaseLiteErrorCode() {
-    assert(this >= 1 || this <= 30);
-    return CBLErrorCode.values[this - 1];
-  }
+  const CBLErrorCode(this.value);
+
+  factory CBLErrorCode.fromValue(int value) => switch (value) {
+        cblite.kCBLErrorAssertionFailed => assertionFailed,
+        cblite.kCBLErrorUnimplemented => unimplemented,
+        cblite.kCBLErrorUnsupportedEncryption => unsupportedEncryption,
+        cblite.kCBLErrorBadRevisionID => badRevisionId,
+        cblite.kCBLErrorCorruptRevisionData => corruptRevisionData,
+        cblite.kCBLErrorNotOpen => notOpen,
+        cblite.kCBLErrorNotFound => notFound,
+        cblite.kCBLErrorConflict => conflict,
+        cblite.kCBLErrorInvalidParameter => invalidParameter,
+        cblite.kCBLErrorUnexpectedError => unexpectedError,
+        cblite.kCBLErrorCantOpenFile => cantOpenFile,
+        cblite.kCBLErrorIOError => iOError,
+        cblite.kCBLErrorMemoryError => memoryError,
+        cblite.kCBLErrorNotWriteable => notWriteable,
+        cblite.kCBLErrorCorruptData => corruptData,
+        cblite.kCBLErrorBusy => busy,
+        cblite.kCBLErrorNotInTransaction => notInTransaction,
+        cblite.kCBLErrorTransactionNotClosed => transactionNotClosed,
+        cblite.kCBLErrorUnsupported => unsupported,
+        cblite.kCBLErrorNotADatabaseFile => notADatabaseFile,
+        cblite.kCBLErrorWrongFormat => wrongFormat,
+        cblite.kCBLErrorCrypto => crypto,
+        cblite.kCBLErrorInvalidQuery => invalidQuery,
+        cblite.kCBLErrorMissingIndex => missingIndex,
+        cblite.kCBLErrorInvalidQueryParam => invalidQueryParam,
+        cblite.kCBLErrorRemoteError => remoteError,
+        cblite.kCBLErrorDatabaseTooOld => databaseTooOld,
+        cblite.kCBLErrorDatabaseTooNew => databaseTooNew,
+        cblite.kCBLErrorBadDocID => badDocId,
+        cblite.kCBLErrorCantUpgradeDatabase => cantUpgradeDatabase,
+        _ => throw ArgumentError('Unknown error code: $value'),
+      };
+
+  final int value;
 }
 
 enum CBLNetworkErrorCode {
-  dnsFailure,
-  unknownHost,
-  timeout,
-  invalidURL,
-  tooManyRedirects,
-  tlsHandshakeFailed,
-  tlsCertExpired,
-  tlsCertUntrusted,
-  tlsClientCertRequired,
-  tlsClientCertRejected,
-  tlsCertUnknownRoot,
-  invalidRedirect,
-  unknown,
-  tlsCertRevoked,
-  tlsCertNameMismatch,
-}
+  dnsFailure(cblite.kCBLNetErrDNSFailure),
+  unknownHost(cblite.kCBLNetErrUnknownHost),
+  timeout(cblite.kCBLNetErrTimeout),
+  invalidURL(cblite.kCBLNetErrInvalidURL),
+  tooManyRedirects(cblite.kCBLNetErrTooManyRedirects),
+  tlsCertExpired(cblite.kCBLNetErrTLSCertExpired),
+  tlsCertUntrusted(cblite.kCBLNetErrTLSCertUntrusted),
+  tlsClientCertRequired(cblite.kCBLNetErrTLSClientCertRequired),
+  tlsClientCertRejected(cblite.kCBLNetErrTLSClientCertRejected),
+  tlsCertUnknownRoot(cblite.kCBLNetErrTLSCertUnknownRoot),
+  invalidRedirect(cblite.kCBLNetErrInvalidRedirect),
+  unknown(cblite.kCBLNetErrUnknown),
+  tlsCertRevoked(cblite.kCBLNetErrTLSCertRevoked),
+  tlsCertNameMismatch(cblite.kCBLNetErrTLSCertNameMismatch);
 
-extension on int {
-  CBLNetworkErrorCode toNetworkErrorCode() {
-    assert(this >= 1 || this <= 15);
-    return CBLNetworkErrorCode.values[this - 1];
-  }
+  const CBLNetworkErrorCode(this.value);
+
+  factory CBLNetworkErrorCode.fromValue(int value) => switch (value) {
+        cblite.kCBLNetErrDNSFailure => dnsFailure,
+        cblite.kCBLNetErrUnknownHost => unknownHost,
+        cblite.kCBLNetErrTimeout => timeout,
+        cblite.kCBLNetErrInvalidURL => invalidURL,
+        cblite.kCBLNetErrTooManyRedirects => tooManyRedirects,
+        cblite.kCBLNetErrTLSCertExpired => tlsCertExpired,
+        cblite.kCBLNetErrTLSCertUntrusted => tlsCertUntrusted,
+        cblite.kCBLNetErrTLSClientCertRequired => tlsClientCertRequired,
+        cblite.kCBLNetErrTLSClientCertRejected => tlsClientCertRejected,
+        cblite.kCBLNetErrTLSCertUnknownRoot => tlsCertUnknownRoot,
+        cblite.kCBLNetErrInvalidRedirect => invalidRedirect,
+        cblite.kCBLNetErrUnknown => unknown,
+        cblite.kCBLNetErrTLSCertRevoked => tlsCertRevoked,
+        cblite.kCBLNetErrTLSCertNameMismatch => tlsCertNameMismatch,
+        _ => throw ArgumentError('Unknown network error code: $value'),
+      };
+
+  final int value;
 }
 
 extension IntErrorCodeExt on int {
-  Object toErrorCode(CBLErrorDomain domain) {
-    switch (domain) {
-      case CBLErrorDomain.couchbaseLite:
-        return toCouchbaseLiteErrorCode();
-      case CBLErrorDomain.posix:
-        return this;
-      case CBLErrorDomain.sqLite:
-        return this;
-      case CBLErrorDomain.fleece:
-        return toFleeceErrorCode();
-      case CBLErrorDomain.network:
-        return toNetworkErrorCode();
-      case CBLErrorDomain.webSocket:
-        return this;
-    }
-  }
+  Object toErrorCode(CBLErrorDomain domain) => switch (domain) {
+        CBLErrorDomain.couchbaseLite => CBLErrorCode.fromValue(this),
+        CBLErrorDomain.posix => this,
+        CBLErrorDomain.sqLite => this,
+        CBLErrorDomain.fleece => cblite.FLError.fromValue(this),
+        CBLErrorDomain.network => CBLNetworkErrorCode.fromValue(this),
+        CBLErrorDomain.webSocket => this
+      };
 }
 
 extension CBLErrorExt on cblite.CBLError {
-  CBLErrorDomain get domainEnum => domain.toErrorDomain();
+  CBLErrorDomain get domainEnum => CBLErrorDomain.fromValue(domain);
 
   Object get codeEnum => code.toErrorCode(domainEnum);
 
