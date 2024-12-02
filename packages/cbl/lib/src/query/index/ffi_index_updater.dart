@@ -1,7 +1,6 @@
 import 'dart:ffi';
 
 import '../../bindings.dart';
-import '../../bindings/cblite.dart' as cblite;
 import '../../document/array.dart';
 import '../../fleece/containers.dart';
 import '../../fleece/integration/integration.dart';
@@ -25,7 +24,7 @@ final class FfiIndexUpdater
     attachTo(index);
   }
 
-  final Pointer<cblite.CBLIndexUpdater> pointer;
+  final Pointer<CBLIndexUpdater> pointer;
 
   Value flValue(int index) =>
       Value.fromPointer(_bindings.value(pointer, index));

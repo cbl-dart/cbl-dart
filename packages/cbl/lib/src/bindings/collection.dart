@@ -33,7 +33,7 @@ final class CBLIndexSpec {
     this.numProbes,
   });
 
-  final CBLIndexType type;
+  final cblitedart.CBLDart_IndexType type;
   final CBLQueryLanguage expressionLanguage;
   final String expressions;
 
@@ -52,16 +52,6 @@ final class CBLIndexSpec {
   final int? minTrainingSize;
   final int? maxTrainingSize;
   final int? numProbes;
-}
-
-enum CBLIndexType {
-  value,
-  fullText,
-  vector,
-}
-
-extension on CBLIndexType {
-  int toInt() => CBLIndexType.values.indexOf(this);
 }
 
 final class CollectionChangeCallbackMessage {
@@ -155,13 +145,12 @@ final class CollectionBindings extends Bindings {
     Pointer<cblite.CBLDocument> doc,
     CBLConcurrencyControl concurrencyControl,
   ) {
-    final concurrencyControlInt = concurrencyControl.toInt();
     nativeCallTracePoint(
       TracedNativeCall.collectionSaveDocument,
       () => cbl.CBLCollection_SaveDocumentWithConcurrencyControl(
         collection,
         doc,
-        concurrencyControlInt,
+        concurrencyControl.value,
         globalCBLError,
       ),
     ).checkCBLError();
@@ -171,18 +160,16 @@ final class CollectionBindings extends Bindings {
     Pointer<cblite.CBLCollection> collection,
     Pointer<cblite.CBLDocument> document,
     CBLConcurrencyControl concurrencyControl,
-  ) {
-    final concurrencyControlInt = concurrencyControl.toInt();
-    return nativeCallTracePoint(
-      TracedNativeCall.collectionDeleteDocument,
-      () => cbl.CBLCollection_DeleteDocumentWithConcurrencyControl(
-        collection,
-        document,
-        concurrencyControlInt,
-        globalCBLError,
-      ),
-    ).checkCBLError();
-  }
+  ) =>
+      nativeCallTracePoint(
+        TracedNativeCall.collectionDeleteDocument,
+        () => cbl.CBLCollection_DeleteDocumentWithConcurrencyControl(
+          collection,
+          document,
+          concurrencyControl.value,
+          globalCBLError,
+        ),
+      ).checkCBLError();
 
   bool purgeDocumentByID(Pointer<cblite.CBLCollection> db, String docId) =>
       runWithSingleFLString(
@@ -262,18 +249,18 @@ final class CollectionBindings extends Bindings {
   Pointer<cblitedart.CBLDart_CBLIndexSpec> _createIndexSpec(CBLIndexSpec spec) {
     final result = globalArena<cblitedart.CBLDart_CBLIndexSpec>();
     final ref = result.ref
-      ..typeAsInt = spec.type.toInt()
-      ..expressionLanguage = spec.expressionLanguage.toInt()
+      ..typeAsInt = spec.type.value
+      ..expressionLanguage = spec.expressionLanguage.value
       ..expressions = spec.expressions.toFLString();
 
     switch (spec.type) {
-      case CBLIndexType.value:
+      case cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeValue:
         break;
-      case CBLIndexType.fullText:
+      case cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeFullText:
         ref
           ..ignoreAccents = spec.ignoreAccents!
           ..language = spec.language.toFLString();
-      case CBLIndexType.vector:
+      case cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeVector:
         final encoding = switch (spec) {
           CBLIndexSpec(:final scalarQuantizerType?) =>
             cbl.CBLVectorEncoding_CreateScalarQuantizer(scalarQuantizerType),

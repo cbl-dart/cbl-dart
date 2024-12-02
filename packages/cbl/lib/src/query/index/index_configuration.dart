@@ -3,7 +3,6 @@
 import 'package:collection/collection.dart';
 
 import '../../bindings.dart';
-import '../../bindings/cblite.dart' as cblite;
 import '../../database.dart';
 import '../../query.dart';
 import 'index.dart';
@@ -70,10 +69,10 @@ enum ScalarQuantizerType {
   /// Use 8 bits per dimension.
   eightBit;
 
-  cblite.DartCBLScalarQuantizerType _toCBL() => switch (this) {
-        fourBit => cblite.kCBLSQ4,
-        sixBit => cblite.kCBLSQ6,
-        eightBit => cblite.kCBLSQ8,
+  DartCBLScalarQuantizerType _toCBL() => switch (this) {
+        fourBit => kCBLSQ4,
+        sixBit => kCBLSQ6,
+        eightBit => kCBLSQ8,
       };
 }
 
@@ -178,11 +177,11 @@ enum DistanceMetric {
   /// items.
   dot;
 
-  cblite.DartCBLDistanceMetric _toCBL() => switch (this) {
-        euclideanSquared => cblite.kCBLDistanceMetricEuclideanSquared,
-        cosine => cblite.kCBLDistanceMetricCosine,
-        euclidean => cblite.kCBLDistanceMetricEuclidean,
-        dot => cblite.kCBLDistanceMetricDot,
+  DartCBLDistanceMetric _toCBL() => switch (this) {
+        euclideanSquared => kCBLDistanceMetricEuclideanSquared,
+        cosine => kCBLDistanceMetricCosine,
+        euclidean => kCBLDistanceMetricEuclidean,
+        dot => kCBLDistanceMetricDot,
       };
 }
 
@@ -345,7 +344,7 @@ final class _ValueIndexConfiguration extends _IndexConfiguration
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
         expressionLanguage: CBLQueryLanguage.n1ql,
         expressions: expressions.join(', '),
-        type: CBLIndexType.value,
+        type: CBLDart_IndexType.kCBLDart_IndexTypeValue,
       );
 
   @override
@@ -380,7 +379,7 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
         expressionLanguage: CBLQueryLanguage.n1ql,
         expressions: expressions.join(', '),
-        type: CBLIndexType.fullText,
+        type: CBLDart_IndexType.kCBLDart_IndexTypeFullText,
         ignoreAccents: ignoreAccents,
         language: language?.name,
       );
@@ -529,7 +528,7 @@ final class _VectorIndexConfiguration extends _IndexConfiguration
     return CBLIndexSpec(
       expressionLanguage: CBLQueryLanguage.n1ql,
       expressions: expressions.join(', '),
-      type: CBLIndexType.vector,
+      type: CBLDart_IndexType.kCBLDart_IndexTypeVector,
       dimensions: dimensions,
       centroids: centroids,
       lazy: lazy,

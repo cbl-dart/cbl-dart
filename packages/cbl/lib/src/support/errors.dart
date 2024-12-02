@@ -1,5 +1,4 @@
 import '../bindings.dart';
-import '../bindings/cblite.dart' as cblite;
 import '../database/database.dart';
 import '../errors.dart';
 
@@ -78,7 +77,7 @@ CouchbaseLiteException _toCouchbaseLiteException(CBLErrorException exception) {
     case CBLErrorDomain.sqLite:
       return SQLiteException(exception.message, exception.code! as int);
     case CBLErrorDomain.fleece:
-      final code = exception.code! as cblite.FLError;
+      final code = exception.code! as FLError;
       return FleeceException('${exception.message} (${code.name}))');
     case CBLErrorDomain.network:
       return NetworkException(

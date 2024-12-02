@@ -21,6 +21,7 @@ export 'cblite.dart'
         FLDoc,
         FLEncoder,
         FLEncoderFormat,
+        FLError,
         FLMutableArray,
         FLMutableDict,
         FLSharedKeys,
@@ -41,12 +42,8 @@ export 'cblitedart.dart'
 
 // === Error ===================================================================
 
-extension FLErrorCodeIntExt on int {
-  cblite.FLError toFleeceErrorCode() => cblite.FLError.fromValue(this);
-}
-
 void _checkFleeceError() {
-  final code = globalFLErrorCode.value.toFleeceErrorCode();
+  final code = cblite.FLError.fromValue(globalFLErrorCode.value);
   if (code != cblite.FLError.kFLNoError) {
     throw CBLErrorException(CBLErrorDomain.fleece, code, 'Fleece error');
   }

@@ -9,15 +9,30 @@ import 'global.dart';
 import 'tracing.dart';
 import 'utils.dart';
 
-export 'cblite.dart' show CBLQuery, CBLResultSet;
+export 'cblite.dart'
+    show
+        CBLIndexUpdater,
+        CBLQuery,
+        CBLQueryIndex,
+        CBLResultSet,
+        DartCBLDistanceMetric,
+        DartCBLScalarQuantizerType,
+        kCBLDistanceMetricCosine,
+        kCBLDistanceMetricDot,
+        kCBLDistanceMetricEuclidean,
+        kCBLDistanceMetricEuclideanSquared,
+        kCBLSQ4,
+        kCBLSQ6,
+        kCBLSQ8;
+export 'cblitedart.dart' show CBLDart_IndexType;
 
 enum CBLQueryLanguage {
-  json,
-  n1ql,
-}
+  json(cblite.kCBLJSONLanguage),
+  n1ql(cblite.kCBLN1QLLanguage);
 
-extension CBLQueryLanguageExt on CBLQueryLanguage {
-  int toInt() => CBLQueryLanguage.values.indexOf(this);
+  const CBLQueryLanguage(this.value);
+
+  final int value;
 }
 
 final class QueryBindings extends Bindings {
@@ -32,20 +47,18 @@ final class QueryBindings extends Bindings {
     CBLQueryLanguage language,
     String queryString,
   ) =>
-      withGlobalArena(() {
-        final flQueryString = queryString.makeGlobalFLString();
-        final languageInt = language.toInt();
-        return nativeCallTracePoint(
+      withGlobalArena(
+        () => nativeCallTracePoint(
           TracedNativeCall.queryCreate,
           () => cbl.CBLDatabase_CreateQuery(
             db,
-            languageInt,
-            flQueryString,
+            language.value,
+            queryString.makeGlobalFLString(),
             globalErrorPosition,
             globalCBLError,
           ),
-        ).checkCBLError(errorSource: queryString);
-      });
+        ).checkCBLError(errorSource: queryString),
+      );
 
   void setParameters(Pointer<cblite.CBLQuery> query, cblite.FLDict parameters) {
     cbl.CBLQuery_SetParameters(query, parameters);

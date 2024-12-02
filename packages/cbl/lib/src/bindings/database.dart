@@ -14,24 +14,20 @@ import 'utils.dart';
 export 'cblite.dart' show CBLDatabase;
 
 enum CBLEncryptionAlgorithm {
-  aes256,
-}
+  aes256(cblite.kCBLEncryptionAES256);
 
-const _encryptionKeySizes = {
-  CBLEncryptionAlgorithm.aes256: 32,
-};
+  const CBLEncryptionAlgorithm(this.value);
 
-extension EncryptionKeySizesExt on CBLEncryptionAlgorithm {
-  int get keySize => _encryptionKeySizes[this]!;
-}
+  factory CBLEncryptionAlgorithm.fromValue(int value) => switch (value) {
+        cblite.kCBLEncryptionAES256 => aes256,
+        _ => throw ArgumentError('Unknown encryption algorithm: $value'),
+      };
 
-extension on int {
-  CBLEncryptionAlgorithm toCBLEncryptionAlgorithm() =>
-      CBLEncryptionAlgorithm.values[this - 1];
-}
+  final int value;
 
-extension on CBLEncryptionAlgorithm {
-  int toInt() => CBLEncryptionAlgorithm.values.indexOf(this) + 1;
+  int get keySize => switch (this) {
+        CBLEncryptionAlgorithm.aes256 => cblite.kCBLEncryptionKeySizeAES256,
+      };
 }
 
 final class CBLEncryptionKey {
@@ -42,12 +38,12 @@ final class CBLEncryptionKey {
 }
 
 enum CBLConcurrencyControl {
-  lastWriteWins,
-  failOnConflict,
-}
+  lastWriteWins(cblite.kCBLConcurrencyControlLastWriteWins),
+  failOnConflict(cblite.kCBLConcurrencyControlFailOnConflict);
 
-extension CBLConcurrencyControlExt on CBLConcurrencyControl {
-  int toInt() => CBLConcurrencyControl.values.indexOf(this);
+  const CBLConcurrencyControl(this.value);
+
+  final int value;
 }
 
 final class CBLDatabaseConfiguration {
@@ -63,15 +59,15 @@ final class CBLDatabaseConfiguration {
 }
 
 enum CBLMaintenanceType {
-  compact,
-  reindex,
-  integrityCheck,
-  optimize,
-  fullOptimize
-}
+  compact(cblite.kCBLMaintenanceTypeCompact),
+  reindex(cblite.kCBLMaintenanceTypeReindex),
+  integrityCheck(cblite.kCBLMaintenanceTypeIntegrityCheck),
+  optimize(cblite.kCBLMaintenanceTypeOptimize),
+  fullOptimize(cblite.kCBLMaintenanceTypeFullOptimize);
 
-extension on CBLMaintenanceType {
-  int toInt() => CBLMaintenanceType.values.indexOf(this);
+  const CBLMaintenanceType(this.value);
+
+  final int value;
 }
 
 final class DatabaseBindings extends Bindings {
@@ -164,7 +160,7 @@ final class DatabaseBindings extends Bindings {
 
   void performMaintenance(
       Pointer<cblite.CBLDatabase> db, CBLMaintenanceType type) {
-    cbl.CBLDatabase_PerformMaintenance(db, type.toInt(), globalCBLError)
+    cbl.CBLDatabase_PerformMaintenance(db, type.value, globalCBLError)
         .checkCBLError();
   }
 
@@ -225,7 +221,7 @@ final class DatabaseBindings extends Bindings {
       return;
     }
 
-    to.algorithm = from.algorithm.toInt();
+    to.algorithm = from.algorithm.value;
     final bytes = from.bytes.toTypedList();
     for (var i = 0; i < from.algorithm.keySize; i++) {
       to.bytes[i] = bytes[i];
@@ -233,7 +229,7 @@ final class DatabaseBindings extends Bindings {
   }
 
   CBLEncryptionKey _readEncryptionKey(cblite.CBLEncryptionKey key) {
-    final algorithm = key.algorithm.toCBLEncryptionAlgorithm();
+    final algorithm = CBLEncryptionAlgorithm.fromValue(key.algorithm);
     final bytes = Uint8List(algorithm.keySize);
     for (var i = 0; i < algorithm.keySize; i++) {
       bytes[i] = key.bytes[i];

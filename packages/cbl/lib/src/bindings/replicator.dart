@@ -15,22 +15,22 @@ export 'cblite.dart' show CBLReplicator, CBLEndpoint, CBLAuthenticator;
 // === ReplicatorConfiguration =================================================
 
 enum CBLReplicatorType {
-  pushAndPull,
-  push,
-  pull,
-}
+  pushAndPull(cblite.kCBLReplicatorTypePushAndPull),
+  push(cblite.kCBLReplicatorTypePush),
+  pull(cblite.kCBLReplicatorTypePull);
 
-extension on CBLReplicatorType {
-  int toInt() => CBLReplicatorType.values.indexOf(this);
+  const CBLReplicatorType(this.value);
+
+  final int value;
 }
 
 enum CBLProxyType {
-  http,
-  https,
-}
+  http(cblite.kCBLProxyHTTP),
+  https(cblite.kCBLProxyHTTPS);
 
-extension on CBLProxyType {
-  int toInt() => CBLProxyType.values.indexOf(this);
+  const CBLProxyType(this.value);
+
+  final int value;
 }
 
 final class CBLProxySettings {
@@ -141,12 +141,16 @@ enum CBLReplicatorActivityLevel {
   offline,
   connecting,
   idle,
-  busy,
-}
+  busy;
 
-extension on int {
-  CBLReplicatorActivityLevel toReplicatorActivityLevel() =>
-      CBLReplicatorActivityLevel.values[this];
+  factory CBLReplicatorActivityLevel.fromValue(int value) => switch (value) {
+        cblite.kCBLReplicatorStopped => stopped,
+        cblite.kCBLReplicatorOffline => offline,
+        cblite.kCBLReplicatorConnecting => connecting,
+        cblite.kCBLReplicatorIdle => idle,
+        cblite.kCBLReplicatorBusy => busy,
+        _ => throw ArgumentError('Unknown replicator activity level: $value'),
+      };
 }
 
 final class CBLReplicatorStatus {
@@ -173,7 +177,7 @@ extension on cblite.CBLReplicatorStatus {
   }
 
   CBLReplicatorStatus toCBLReplicatorStatus() => CBLReplicatorStatus(
-        activity.toReplicatorActivityLevel(),
+        CBLReplicatorActivityLevel.fromValue(activity),
         progress.complete,
         progress.documentCount,
         exception,
@@ -202,7 +206,7 @@ final class ReplicatorStatusCallbackMessage {
   static CBLReplicatorStatus parseArguments(List<Object?> status) {
     CBLErrorException? error;
     if (status.length > 3) {
-      final domain = (status[3]! as int).toErrorDomain();
+      final domain = CBLErrorDomain.fromValue(status[3]! as int);
       final errorCode = (status[4]! as int).toErrorCode(domain);
       final message =
           utf8.decode(status[5]! as Uint8List, allowMalformed: true);
@@ -210,7 +214,7 @@ final class ReplicatorStatusCallbackMessage {
     }
 
     return CBLReplicatorStatus(
-      (status[0]! as int).toReplicatorActivityLevel(),
+      CBLReplicatorActivityLevel.fromValue(status[0]! as int),
       status[1]! as double,
       status[2]! as int,
       error,
@@ -253,7 +257,7 @@ final class DocumentReplicationsCallbackMessage {
       documents.cast<List<Object?>>().map((document) {
         CBLErrorException? error;
         if (document.length > 4) {
-          final domain = (document[4]! as int).toErrorDomain();
+          final domain = CBLErrorDomain.fromValue(document[4]! as int);
           final code = (document[5]! as int).toErrorCode(domain);
           final message =
               utf8.decode(document[6]! as Uint8List, allowMalformed: true);
@@ -411,7 +415,7 @@ final class ReplicatorBindings extends Bindings {
     configStruct.ref
       ..database = config.database
       ..endpoint = config.endpoint
-      ..replicatorType = config.replicatorType.toInt()
+      ..replicatorType = config.replicatorType.value
       ..continuous = config.continuous
       ..disableAutoPurge = config.disableAutoPurge ?? false
       ..maxAttempts = config.maxAttempts ?? 0
@@ -460,7 +464,7 @@ final class ReplicatorBindings extends Bindings {
     final settingsStruct = globalArena<cblite.CBLProxySettings>();
 
     settingsStruct.ref
-      ..type = settings.type.toInt()
+      ..type = settings.type.value
       ..hostname = settings.hostname.toFLString()
       ..port = settings.port
       ..username = settings.username.toFLString()
