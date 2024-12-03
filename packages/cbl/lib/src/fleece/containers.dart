@@ -59,7 +59,7 @@ final class Doc implements Finalizable {
   /// The data is first encoded into Fleece, and the Fleece data is kept by the
   /// doc.
   factory Doc.fromJson(String json) =>
-      runWithErrorTranslation(() => Doc.fromPointer(_bindings.fromJson(json)));
+      Doc.fromPointer(_bindings.fromJson(json));
 
   /// Creates an [Doc] based on a [pointer] to the the native value.
   ///

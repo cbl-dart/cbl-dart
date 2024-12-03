@@ -57,7 +57,7 @@ final class QueryBindings extends Bindings {
             globalErrorPosition,
             globalCBLError,
           ),
-        ).checkCBLError(errorSource: queryString),
+        ).checkError(errorSource: queryString),
       );
 
   void setParameters(Pointer<cblite.CBLQuery> query, cblite.FLDict parameters) {
@@ -71,7 +71,7 @@ final class QueryBindings extends Bindings {
       nativeCallTracePoint(
         TracedNativeCall.queryExecute,
         () => cbl.CBLQuery_Execute(query, globalCBLError),
-      ).checkCBLError();
+      ).checkError();
 
   String explain(Pointer<cblite.CBLQuery> query) =>
       cbl.CBLQuery_Explain(query).toDartStringAndRelease()!;
@@ -94,7 +94,7 @@ final class QueryBindings extends Bindings {
     Pointer<cblite.CBLListenerToken> listenerToken,
   ) =>
       cbl.CBLQuery_CopyCurrentResults(query, listenerToken, globalCBLError)
-          .checkCBLError();
+          .checkError();
 
   cblitedart.CBLDart_PredictiveModel createPredictiveModel(
     String name,
@@ -160,7 +160,7 @@ final class QueryIndexBindings extends Bindings {
     int limit,
   ) =>
       cbl.CBLQueryIndex_BeginUpdate(index, limit, globalCBLError)
-          .checkCBLError()
+          .checkError()
           .toNullable();
 }
 
@@ -189,7 +189,7 @@ final class IndexUpdaterBindings extends Bindings {
         },
         vector?.length ?? 0,
         globalCBLError,
-      ).checkCBLError();
+      ).checkError();
     });
   }
 
@@ -200,5 +200,5 @@ final class IndexUpdaterBindings extends Bindings {
       cbl.CBLIndexUpdater_SkipVector(updater, index);
 
   void finish(Pointer<cblite.CBLIndexUpdater> updater) =>
-      cbl.CBLIndexUpdater_Finish(updater, globalCBLError).checkCBLError();
+      cbl.CBLIndexUpdater_Finish(updater, globalCBLError).checkError();
 }

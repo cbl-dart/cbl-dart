@@ -5,7 +5,6 @@ import '../../document/array.dart';
 import '../../fleece/containers.dart';
 import '../../fleece/integration/integration.dart';
 import '../../query.dart';
-import '../../support/errors.dart';
 import '../../support/resource.dart';
 import 'ffi_query_index.dart';
 
@@ -38,30 +37,16 @@ final class FfiIndexUpdater
       );
 
   @override
-  int get length => useSync(
-        () => runWithErrorTranslation(
-          () => _bindings.count(pointer),
-        ),
-      );
+  int get length => useSync(() => _bindings.count(pointer));
 
   @override
-  void setVector(int index, List<double>? vector) => useSync(
-        () => runWithErrorTranslation(
-          () => _bindings.setVector(pointer, index, vector),
-        ),
-      );
+  void setVector(int index, List<double>? vector) =>
+      useSync(() => _bindings.setVector(pointer, index, vector));
 
   @override
-  void skipVector(int index) => useSync(
-        () => runWithErrorTranslation(
-          () => _bindings.skipVector(pointer, index),
-        ),
-      );
+  void skipVector(int index) =>
+      useSync(() => _bindings.skipVector(pointer, index));
 
   @override
-  void finish() => useSync(
-        () => runWithErrorTranslation(
-          () => _bindings.finish(pointer),
-        ),
-      );
+  void finish() => useSync(() => _bindings.finish(pointer));
 }

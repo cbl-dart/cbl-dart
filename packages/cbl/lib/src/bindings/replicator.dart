@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import '../errors.dart';
 import 'base.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite;
@@ -164,14 +165,14 @@ final class CBLReplicatorStatus {
   final CBLReplicatorActivityLevel activity;
   final double progressComplete;
   final int progressDocumentCount;
-  final CBLErrorException? error;
+  final CouchbaseLiteException? error;
 }
 
 extension on cblite.CBLReplicatorStatus {
-  CBLErrorException? get exception {
+  CouchbaseLiteException? get exception {
     if (!error.isOk) {
       error.copyToGlobal();
-      return CBLErrorException.fromCBLError(globalCBLError);
+      return globalCBLError.toCouchbaseLiteException();
     }
     return null;
   }
@@ -204,13 +205,17 @@ final class ReplicatorStatusCallbackMessage {
       : this(parseArguments(arguments[0]! as List<Object?>));
 
   static CBLReplicatorStatus parseArguments(List<Object?> status) {
-    CBLErrorException? error;
+    CouchbaseLiteException? error;
     if (status.length > 3) {
       final domain = CBLErrorDomain.fromValue(status[3]! as int);
-      final errorCode = (status[4]! as int).toErrorCode(domain);
+      final code = (status[4]! as int).toErrorCode(domain);
       final message =
           utf8.decode(status[5]! as Uint8List, allowMalformed: true);
-      error = CBLErrorException(domain, errorCode, message);
+      error = createCouchbaseLiteException(
+        domain: domain,
+        code: code,
+        message: message,
+      );
     }
 
     return CBLReplicatorStatus(
@@ -237,7 +242,7 @@ final class CBLReplicatedDocument {
   final Set<CBLReplicatedDocumentFlag> flags;
   final String scope;
   final String collection;
-  final CBLErrorException? error;
+  final CouchbaseLiteException? error;
 }
 
 final class DocumentReplicationsCallbackMessage {
@@ -255,13 +260,17 @@ final class DocumentReplicationsCallbackMessage {
 
   static List<CBLReplicatedDocument> parseDocuments(List<Object?> documents) =>
       documents.cast<List<Object?>>().map((document) {
-        CBLErrorException? error;
+        CouchbaseLiteException? error;
         if (document.length > 4) {
           final domain = CBLErrorDomain.fromValue(document[4]! as int);
           final code = (document[5]! as int).toErrorCode(domain);
           final message =
               utf8.decode(document[6]! as Uint8List, allowMalformed: true);
-          error = CBLErrorException(domain, code, message);
+          error = createCouchbaseLiteException(
+            domain: domain,
+            code: code,
+            message: message,
+          );
         }
 
         return CBLReplicatedDocument(
@@ -288,8 +297,8 @@ final class ReplicatorBindings extends Bindings {
   Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) =>
       runWithSingleFLString(
         url,
-        (flUrl) => cbl.CBLEndpoint_CreateWithURL(flUrl, globalCBLError)
-            .checkCBLError(),
+        (flUrl) =>
+            cbl.CBLEndpoint_CreateWithURL(flUrl, globalCBLError).checkError(),
       );
 
   Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
@@ -324,11 +333,12 @@ final class ReplicatorBindings extends Bindings {
   }
 
   Pointer<cblite.CBLReplicator> createReplicator(
-          CBLReplicatorConfiguration config) =>
+    CBLReplicatorConfiguration config,
+  ) =>
       withGlobalArena(() => cblDart.CBLDart_CBLReplicator_Create(
             _createConfigurationStruct(config),
             globalCBLError,
-          ).checkCBLError());
+          ).checkError());
 
   void bindToDartObject(
     Finalizable object,
@@ -370,8 +380,10 @@ final class ReplicatorBindings extends Bindings {
     Pointer<cblite.CBLCollection> collection,
   ) =>
       cbl.CBLReplicator_PendingDocumentIDs2(
-              replicator, collection, globalCBLError)
-          .checkCBLError();
+        replicator,
+        collection,
+        globalCBLError,
+      ).checkError();
 
   bool isDocumentPending(
     Pointer<cblite.CBLReplicator> replicator,
@@ -381,8 +393,11 @@ final class ReplicatorBindings extends Bindings {
       runWithSingleFLString(
         docID,
         (flDocID) => cbl.CBLReplicator_IsDocumentPending2(
-                replicator, flDocID, collection, globalCBLError)
-            .checkCBLError(),
+          replicator,
+          flDocID,
+          collection,
+          globalCBLError,
+        ).checkError(),
       );
 
   void addChangeListener(

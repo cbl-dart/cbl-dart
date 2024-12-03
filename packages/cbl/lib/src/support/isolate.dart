@@ -49,10 +49,8 @@ class IsolateContext {
 /// native libraries.
 Future<void> initPrimaryIsolate(IsolateContext context) async {
   await _initIsolate(context);
-  runWithErrorTranslation(() {
-    CBLBindings.instance.base
-        .initializeNativeLibraries(context.initContext?.toCbl());
-  });
+  CBLBindings.instance.base
+      .initializeNativeLibraries(context.initContext?.toCbl());
   await _runPostIsolateInitTasks();
 }
 

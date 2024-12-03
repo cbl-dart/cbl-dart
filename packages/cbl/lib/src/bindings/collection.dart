@@ -67,7 +67,7 @@ final class CollectionBindings extends Bindings {
   CollectionBindings(super.parent);
 
   cblite.FLMutableArray databaseScopeNames(Pointer<cblite.CBLDatabase> db) =>
-      cbl.CBLDatabase_ScopeNames(db, globalCBLError).checkCBLError();
+      cbl.CBLDatabase_ScopeNames(db, globalCBLError).checkError();
 
   Pointer<cblite.CBLScope>? databaseScope(
           Pointer<cblite.CBLDatabase> db, String scopeName) =>
@@ -79,11 +79,11 @@ final class CollectionBindings extends Bindings {
           // TODO(blaugold): Remove reset once bug is fixed.
           // https://github.com/couchbase/couchbase-lite-C/issues/499
           globalCBLError..ref.reset(),
-        ).checkCBLError().toNullable(),
+        ).checkError().toNullable(),
       );
 
   cblite.FLMutableArray scopeCollectionNames(Pointer<cblite.CBLScope> scope) =>
-      cbl.CBLScope_CollectionNames(scope, globalCBLError).checkCBLError();
+      cbl.CBLScope_CollectionNames(scope, globalCBLError).checkError();
 
   Pointer<cblite.CBLCollection>? scopeCollection(
     Pointer<cblite.CBLScope> scope,
@@ -97,7 +97,7 @@ final class CollectionBindings extends Bindings {
           // TODO(blaugold): Remove reset once bug is fixed.
           // https://github.com/couchbase/couchbase-lite-C/issues/499
           globalCBLError..ref.reset(),
-        ).checkCBLError().toNullable(),
+        ).checkError().toNullable(),
       );
 
   Pointer<cblite.CBLCollection> databaseCreateCollection(
@@ -110,7 +110,7 @@ final class CollectionBindings extends Bindings {
             collectionName.toFLString(),
             scopeName.toFLString(),
             globalCBLError,
-          ).checkCBLError());
+          ).checkError());
 
   void databaseDeleteCollection(
     Pointer<cblite.CBLDatabase> db,
@@ -122,7 +122,7 @@ final class CollectionBindings extends Bindings {
             collectionName.toFLString(),
             scopeName.toFLString(),
             globalCBLError,
-          ).checkCBLError());
+          ).checkError());
 
   int count(Pointer<cblite.CBLCollection> collection) =>
       cbl.CBLCollection_Count(collection);
@@ -137,7 +137,7 @@ final class CollectionBindings extends Bindings {
           TracedNativeCall.collectionGetDocument,
           () => cbl.CBLCollection_GetDocument(
               collection, flDocId, globalCBLError),
-        ).checkCBLError().toNullable(),
+        ).checkError().toNullable(),
       );
 
   void saveDocumentWithConcurrencyControl(
@@ -153,7 +153,7 @@ final class CollectionBindings extends Bindings {
         concurrencyControl.value,
         globalCBLError,
       ),
-    ).checkCBLError();
+    ).checkError();
   }
 
   bool deleteDocumentWithConcurrencyControl(
@@ -169,14 +169,14 @@ final class CollectionBindings extends Bindings {
           concurrencyControl.value,
           globalCBLError,
         ),
-      ).checkCBLError();
+      ).checkError();
 
   bool purgeDocumentByID(Pointer<cblite.CBLCollection> db, String docId) =>
       runWithSingleFLString(
         docId,
         (flDocId) =>
             cbl.CBLCollection_PurgeDocumentByID(db, flDocId, globalCBLError)
-                .checkCBLError(),
+                .checkError(),
       );
 
   DateTime? getDocumentExpiration(
@@ -185,10 +185,13 @@ final class CollectionBindings extends Bindings {
   ) =>
       runWithSingleFLString(docId, (flDocId) {
         final result = cbl.CBLCollection_GetDocumentExpiration(
-            collection, flDocId, globalCBLError);
+          collection,
+          flDocId,
+          globalCBLError,
+        );
 
         if (result == -1) {
-          checkCBLError();
+          checkError();
         }
 
         return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
@@ -205,12 +208,11 @@ final class CollectionBindings extends Bindings {
           flDocId,
           expiration?.millisecondsSinceEpoch ?? 0,
           globalCBLError,
-        ).checkCBLError();
+        ).checkError();
       });
 
   cblite.FLArray indexNames(Pointer<cblite.CBLCollection> collection) =>
-      cbl.CBLCollection_GetIndexNames(collection, globalCBLError)
-          .checkCBLError();
+      cbl.CBLCollection_GetIndexNames(collection, globalCBLError).checkError();
 
   Pointer<cblite.CBLQueryIndex>? index(
     Pointer<cblite.CBLCollection> collection,
@@ -220,7 +222,7 @@ final class CollectionBindings extends Bindings {
         name,
         (flName) =>
             cbl.CBLCollection_GetIndex(collection, flName, globalCBLError)
-                .checkCBLError()
+                .checkError()
                 .toNullable(),
       );
 
@@ -235,14 +237,14 @@ final class CollectionBindings extends Bindings {
         name.toFLString(),
         _createIndexSpec(spec).ref,
         globalCBLError,
-      ).checkCBLError();
+      ).checkError();
     });
   }
 
   void deleteIndex(Pointer<cblite.CBLCollection> collection, String name) {
     runWithSingleFLString(name, (flName) {
       cbl.CBLCollection_DeleteIndex(collection, flName, globalCBLError)
-          .checkCBLError();
+          .checkError();
     });
   }
 

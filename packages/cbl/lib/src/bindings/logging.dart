@@ -168,7 +168,7 @@ final class LoggingBindings extends Bindings {
       cblDart.CBLDart_CBLLog_SetFileConfig(
         _logFileConfig(config),
         globalCBLError,
-      ).checkCBLError();
+      ).checkError();
     });
   }
 

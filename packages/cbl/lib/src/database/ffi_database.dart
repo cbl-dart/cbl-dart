@@ -19,7 +19,6 @@ import '../query/index/ffi_query_index.dart';
 import '../query/index/index.dart';
 import '../support/async_callback.dart';
 import '../support/edition.dart';
-import '../support/errors.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -57,9 +56,7 @@ final class FfiDatabase
     return FfiDatabase._(
       // Make a copy of the configuration, since its mutable.
       config: DatabaseConfiguration.from(config),
-      pointer: runWithErrorTranslation(
-        () => _bindings.open(name, config!.toCBLDatabaseConfiguration()),
-      ),
+      pointer: _bindings.open(name, config.toCBLDatabaseConfiguration()),
       typedDataAdapter: typedDataAdapter,
     );
   }
@@ -75,22 +72,20 @@ final class FfiDatabase
   }
 
   static void remove(String name, {String? directory}) =>
-      runWithErrorTranslation(() => _bindings.deleteDatabase(name, directory));
+      _bindings.deleteDatabase(name, directory);
 
   static bool exists(String name, {String? directory}) =>
-      runWithErrorTranslation(() => _bindings.databaseExists(name, directory));
+      _bindings.databaseExists(name, directory);
 
   static void copy({
     required String from,
     required String name,
     DatabaseConfiguration? config,
   }) =>
-      runWithErrorTranslation(
-        () => _bindings.copyDatabase(
-          _formatCopyFromPath(from),
-          name,
-          config?.toCBLDatabaseConfiguration(),
-        ),
+      _bindings.copyDatabase(
+        _formatCopyFromPath(from),
+        name,
+        config?.toCBLDatabaseConfiguration(),
       );
 
   /// Ensures that the path ends with a separator to signal that it is a
@@ -139,11 +134,10 @@ final class FfiDatabase
 
   @override
   List<SyncScope> get scopes => useSync(() {
-        final scopeNames =
-            runWithErrorTranslation(() => fl.MutableArray.fromPointer(
-                  _collectionBindings.databaseScopeNames(pointer),
-                  adopt: true,
-                ));
+        final scopeNames = fl.MutableArray.fromPointer(
+          _collectionBindings.databaseScopeNames(pointer),
+          adopt: true,
+        );
         return scopeNames
             .map((name) => scope(name.asString!))
             .nonNulls
@@ -152,9 +146,7 @@ final class FfiDatabase
 
   @override
   SyncScope? scope(String name) => useSync(() {
-        final scopePointer = runWithErrorTranslation(
-          () => _collectionBindings.databaseScope(pointer, name),
-        );
+        final scopePointer = _collectionBindings.databaseScope(pointer, name);
 
         if (scopePointer == null) {
           return null;
@@ -185,12 +177,10 @@ final class FfiDatabase
     String scope = Scope.defaultName,
   ]) =>
       useSync(() {
-        final collectionPointer = runWithErrorTranslation(
-          () => _collectionBindings.databaseCreateCollection(
-            pointer,
-            name,
-            scope,
-          ),
+        final collectionPointer = _collectionBindings.databaseCreateCollection(
+          pointer,
+          name,
+          scope,
         );
         return FfiCollection._(
           name: name,
@@ -200,26 +190,16 @@ final class FfiDatabase
       });
 
   @override
-  void deleteCollection(String name, [String scope = Scope.defaultName]) {
-    useSync(() {
-      runWithErrorTranslation(
-        () =>
-            _collectionBindings.databaseDeleteCollection(pointer, name, scope),
-      );
-    });
-  }
+  void deleteCollection(String name, [String scope = Scope.defaultName]) =>
+      useSync(() =>
+          _collectionBindings.databaseDeleteCollection(pointer, name, scope));
 
   @override
-  void beginTransaction() {
-    runWithErrorTranslation(() => _bindings.beginTransaction(pointer));
-  }
+  void beginTransaction() => _bindings.beginTransaction(pointer);
 
   @override
-  void endTransaction({required bool commit}) {
-    runWithErrorTranslation(
-      () => _bindings.endTransaction(pointer, commit: commit),
-    );
-  }
+  void endTransaction({required bool commit}) =>
+      _bindings.endTransaction(pointer, commit: commit);
 
   @override
   Document? document(String id) => defaultCollection.document(id);
@@ -355,13 +335,11 @@ final class FfiDatabase
 
   @override
   Future<void> performClose() async {
-    runWithErrorTranslation(() {
-      if (_deleteOnClose) {
-        _bindings.delete(pointer);
-      } else {
-        _bindings.close(pointer);
-      }
-    });
+    if (_deleteOnClose) {
+      _bindings.delete(pointer);
+    } else {
+      _bindings.close(pointer);
+    }
   }
 
   @override
@@ -376,21 +354,14 @@ final class FfiDatabase
 
   @override
   void performMaintenance(MaintenanceType type) => useSync(() {
-        runWithErrorTranslation(
-          () => _bindings.performMaintenance(
-            pointer,
-            type.toCBLMaintenanceType(),
-          ),
-        );
+        _bindings.performMaintenance(pointer, type.toCBLMaintenanceType());
       });
 
   @override
   void changeEncryptionKey(EncryptionKey? newKey) => useSync(() {
-        runWithErrorTranslation(
-          () => _bindings.changeEncryptionKey(
-            pointer,
-            (newKey as EncryptionKeyImpl?)?.cblKey,
-          ),
+        _bindings.changeEncryptionKey(
+          pointer,
+          (newKey as EncryptionKeyImpl?)?.cblKey,
         );
       });
 
@@ -441,11 +412,9 @@ final class FfiScope
 
   @override
   List<SyncCollection> get collections => useSync(() {
-        final collectionNames = runWithErrorTranslation(
-          () => fl.MutableArray.fromPointer(
-            _collectionBindings.scopeCollectionNames(pointer),
-            adopt: true,
-          ),
+        final collectionNames = fl.MutableArray.fromPointer(
+          _collectionBindings.scopeCollectionNames(pointer),
+          adopt: true,
         );
         return collectionNames
             .map((name) => collection(name.asString!))
@@ -455,9 +424,8 @@ final class FfiScope
 
   @override
   SyncCollection? collection(String name) => useSync(() {
-        final collectionPointer = runWithErrorTranslation(
-          () => _collectionBindings.scopeCollection(pointer, name),
-        );
+        final collectionPointer =
+            _collectionBindings.scopeCollection(pointer, name);
 
         if (collectionPointer == null) {
           return null;
@@ -509,9 +477,8 @@ final class FfiCollection
         () => GetDocumentOp(this, id),
         () => useSync(
           () {
-            final documentPointer = runWithErrorTranslation(
-              () => _collectionBindings.getDocument(pointer, id),
-            );
+            final documentPointer =
+                _collectionBindings.getDocument(pointer, id);
 
             if (documentPointer == null) {
               return null;
@@ -550,12 +517,10 @@ final class FfiCollection
             );
 
             return _catchConflictException(() {
-              runWithErrorTranslation(
-                () => _collectionBindings.saveDocumentWithConcurrencyControl(
-                  pointer,
-                  delegate.pointer.cast(),
-                  concurrencyControl.toCBLConcurrencyControl(),
-                ),
+              _collectionBindings.saveDocumentWithConcurrencyControl(
+                pointer,
+                delegate.pointer.cast(),
+                concurrencyControl.toCBLConcurrencyControl(),
               );
             });
           }),
@@ -615,12 +580,10 @@ final class FfiCollection
             );
 
             return _catchConflictException(() {
-              runWithErrorTranslation(
-                () => _collectionBindings.deleteDocumentWithConcurrencyControl(
-                  pointer,
-                  delegate.pointer.cast(),
-                  concurrencyControl.toCBLConcurrencyControl(),
-                ),
+              _collectionBindings.deleteDocumentWithConcurrencyControl(
+                pointer,
+                delegate.pointer.cast(),
+                concurrencyControl.toCBLConcurrencyControl(),
               );
             });
           }),
@@ -654,29 +617,18 @@ final class FfiCollection
   @override
   void purgeDocumentById(String id) => useSync(
         () => database.runInTransactionSync(() {
-          runWithErrorTranslation(
-            () => _collectionBindings.purgeDocumentByID(pointer, id),
-          );
+          _collectionBindings.purgeDocumentByID(pointer, id);
         }),
       );
 
   @override
   void setDocumentExpiration(String id, DateTime? expiration) => useSync(() {
-        runWithErrorTranslation(
-          () => _collectionBindings.setDocumentExpiration(
-            pointer,
-            id,
-            expiration,
-          ),
-        );
+        _collectionBindings.setDocumentExpiration(pointer, id, expiration);
       });
 
   @override
-  DateTime? getDocumentExpiration(String id) => useSync(
-        () => runWithErrorTranslation(
-          () => _collectionBindings.getDocumentExpiration(pointer, id),
-        ),
-      );
+  DateTime? getDocumentExpiration(String id) =>
+      useSync(() => _collectionBindings.getDocumentExpiration(pointer, id));
 
   @override
   List<String> get indexes => useSync(() =>
@@ -685,12 +637,9 @@ final class FfiCollection
           .cast<String>());
 
   @override
-  QueryIndex? index(String name) => useSync(
-        () => runWithErrorTranslation(
-          () => _collectionBindings.index(pointer, name),
-        )?.let((pointer) =>
-            FfiQueryIndex.fromPointer(pointer, collection: this, name: name)),
-      );
+  QueryIndex? index(String name) =>
+      useSync(() => _collectionBindings.index(pointer, name)?.let((pointer) =>
+          FfiQueryIndex.fromPointer(pointer, collection: this, name: name)));
 
   @override
   void createIndex(String name, covariant IndexImplInterface index) {
@@ -699,21 +648,13 @@ final class FfiCollection
     }
 
     useSync(() {
-      runWithErrorTranslation(
-        () => _collectionBindings.createIndex(
-          pointer,
-          name,
-          index.toCBLIndexSpec(),
-        ),
-      );
+      _collectionBindings.createIndex(pointer, name, index.toCBLIndexSpec());
     });
   }
 
   @override
-  void deleteIndex(String name) => useSync(() {
-        runWithErrorTranslation(
-            () => _collectionBindings.deleteIndex(pointer, name));
-      });
+  void deleteIndex(String name) =>
+      useSync(() => _collectionBindings.deleteIndex(pointer, name));
 
   @override
   ListenerToken addChangeListener(CollectionChangeListener listener) =>
@@ -731,12 +672,10 @@ final class FfiCollection
       debugName: 'FfiCollection.addChangeListener',
     );
 
-    runWithErrorTranslation(
-      () => _collectionBindings.addChangeListener(
-        database.pointer,
-        pointer,
-        callback.pointer,
-      ),
+    _collectionBindings.addChangeListener(
+      database.pointer,
+      pointer,
+      callback.pointer,
     );
 
     return FfiListenerToken(callback);
@@ -763,13 +702,11 @@ final class FfiCollection
       debugName: 'FfiCollection.addDocumentChangeListener',
     );
 
-    runWithErrorTranslation(
-      () => _collectionBindings.addDocumentChangeListener(
-        database.pointer,
-        pointer,
-        id,
-        callback.pointer,
-      ),
+    _collectionBindings.addDocumentChangeListener(
+      database.pointer,
+      pointer,
+      id,
+      callback.pointer,
     );
 
     return FfiListenerToken(callback);

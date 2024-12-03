@@ -4,7 +4,6 @@ import 'dart:ffi';
 import '../bindings.dart';
 import '../document/blob.dart';
 import '../fleece/containers.dart';
-import '../support/errors.dart';
 import '../support/native_object.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -31,8 +30,7 @@ final class _FfiBlob implements Finalizable {
 
   final Pointer<CBLBlob> pointer;
 
-  Data content() =>
-      runWithErrorTranslation(() => _blobBindings.content(pointer));
+  Data content() => _blobBindings.content(pointer);
 
   Map<String, Object?> createBlobProperties() => {
         cblObjectTypeProperty: cblObjectTypeBlob,
@@ -76,9 +74,8 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
   @override
   bool blobExists(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final cblBlob = runWithErrorTranslation(
-      () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
-    );
+    final cblBlob =
+        _databaseBindings.getBlob(database.pointer, dict.pointer.cast());
 
     if (cblBlob == null) {
       return false;
@@ -97,19 +94,14 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
   Stream<Data>? readBlob(Map<String, Object?> properties) =>
       _getBlob(properties)?.let((it) => _BlobReadStream(database, it));
 
-  void _saveBlob(_FfiBlob blob) {
-    runWithErrorTranslation(
-      () => _databaseBindings.saveBlob(database.pointer, blob.pointer),
-    );
-  }
+  void _saveBlob(_FfiBlob blob) =>
+      _databaseBindings.saveBlob(database.pointer, blob.pointer);
 
   _FfiBlob? _getBlob(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final pointer = runWithErrorTranslation(
-      () => _databaseBindings.getBlob(database.pointer, dict.pointer.cast()),
-    );
 
-    return pointer
+    return _databaseBindings
+        .getBlob(database.pointer, dict.pointer.cast())
         ?.let((pointer) => _FfiBlob.fromPointer(pointer, adopt: true));
   }
 }
@@ -121,9 +113,7 @@ Future<_FfiBlob> _createBlobFromStream(
   Stream<Data> stream,
   String contentType,
 ) async {
-  final writeStream = runWithErrorTranslation(
-    () => _writeStreamBindings.create(database.pointer),
-  );
+  final writeStream = _writeStreamBindings.create(database.pointer);
 
   try {
     await stream
@@ -171,9 +161,7 @@ final class _BlobReadStream extends Stream<Data> implements Finalizable {
       _isPaused = false;
 
       while (!_isPaused) {
-        final buffer = runWithErrorTranslation(
-          () => _readStreamBindings.read(pointer, _readStreamChunkSize),
-        );
+        final buffer = _readStreamBindings.read(pointer, _readStreamChunkSize);
 
         // The read stream is done (EOF).
         if (buffer == null) {
