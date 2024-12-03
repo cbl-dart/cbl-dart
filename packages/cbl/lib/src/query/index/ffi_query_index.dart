@@ -3,7 +3,6 @@ import 'dart:ffi';
 import '../../bindings.dart';
 import '../../database/ffi_database.dart';
 import '../../query.dart';
-import '../../support/errors.dart';
 import '../../support/resource.dart';
 import '../../support/utils.dart';
 import 'ffi_index_updater.dart';
@@ -33,11 +32,7 @@ final class FfiQueryIndex
   final String name;
 
   @override
-  SyncIndexUpdater? beginUpdate({required int limit}) => useSync(
-        () => runWithErrorTranslation(
-          () => _bindings.beginUpdate(pointer, limit)?.let(
-                (updater) => FfiIndexUpdater.fromPointer(updater, index: this),
-              ),
-        ),
-      );
+  SyncIndexUpdater? beginUpdate({required int limit}) => useSync(() => _bindings
+      .beginUpdate(pointer, limit)
+      ?.let((updater) => FfiIndexUpdater.fromPointer(updater, index: this)));
 }

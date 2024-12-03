@@ -9,7 +9,6 @@ import '../document/common.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../support/async_callback.dart';
-import '../support/errors.dart';
 import '../support/listener_token.dart';
 import '../support/native_object.dart';
 import '../support/streams.dart';
@@ -70,8 +69,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
         () => ExecuteQueryOp(this),
         () => useSync(
           () => FfiResultSet(
-            runWithErrorTranslation(() => _baseBindings
-                .runWithIsolateId(() => _bindings.execute(_pointer))),
+            _baseBindings.runWithIsolateId(() => _bindings.execute(_pointer)),
             query: this,
             columnNames: _columnNames,
           ),
@@ -148,9 +146,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
 
   void _performPrepare() {
     syncOperationTracePoint(() => PrepareQueryOp(this), () {
-      _pointer = runWithErrorTranslation(
-        () => _bindings.create(database!.pointer, language, definition!),
-      );
+      _pointer = _bindings.create(database!.pointer, language, definition!);
 
       bindCBLRefCountedToDartObject(this, pointer: _pointer);
 

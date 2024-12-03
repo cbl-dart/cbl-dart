@@ -43,7 +43,7 @@ final class BlobBindings extends Bindings {
 
   Data content(Pointer<cblite.CBLBlob> blob) =>
       cbl.CBLBlob_Content(blob, globalCBLError)
-          .checkCBLError()
+          .checkError()
           .let(SliceResult.fromFLSliceResult)!
           .toData();
 
@@ -63,8 +63,9 @@ final class BlobReadStreamBindings extends Bindings {
       NativeFinalizer(cbl.addresses.CBLBlobReader_Close.cast());
 
   Pointer<cblite.CBLBlobReadStream> openContentStream(
-          Pointer<cblite.CBLBlob> blob) =>
-      cbl.CBLBlob_OpenContentStream(blob, globalCBLError).checkCBLError();
+    Pointer<cblite.CBLBlob> blob,
+  ) =>
+      cbl.CBLBlob_OpenContentStream(blob, globalCBLError).checkError();
 
   void bindToDartObject(
     Finalizable object,
@@ -79,7 +80,7 @@ final class BlobReadStreamBindings extends Bindings {
 
     // A null slice signals an error.
     if (buffer.buf == nullptr) {
-      throwCBLError();
+      throwError();
     }
 
     // Empty buffer means stream has been fully read, but its important to
@@ -95,7 +96,7 @@ final class BlobWriteStreamBindings extends Bindings {
   BlobWriteStreamBindings(super.parent);
 
   Pointer<cblite.CBLBlobWriteStream> create(Pointer<cblite.CBLDatabase> db) =>
-      cbl.CBLBlobWriter_Create(db, globalCBLError).checkCBLError();
+      cbl.CBLBlobWriter_Create(db, globalCBLError).checkError();
 
   void close(Pointer<cblite.CBLBlobWriteStream> stream) {
     cbl.CBLBlobWriter_Close(stream);
@@ -104,8 +105,11 @@ final class BlobWriteStreamBindings extends Bindings {
   bool write(Pointer<cblite.CBLBlobWriteStream> stream, Data data) {
     final slice = data.toSliceResult();
     return cbl.CBLBlobWriter_Write(
-            stream, slice.buf, slice.size, globalCBLError)
-        .checkCBLError();
+      stream,
+      slice.buf,
+      slice.size,
+      globalCBLError,
+    ).checkError();
   }
 
   Pointer<cblite.CBLBlob> createBlobWithStream(

@@ -45,7 +45,11 @@ export 'cblitedart.dart'
 void _checkFleeceError() {
   final code = cblite.FLError.fromValue(globalFLErrorCode.value);
   if (code != cblite.FLError.kFLNoError) {
-    throw CBLErrorException(CBLErrorDomain.fleece, code, 'Fleece error');
+    throw createCouchbaseLiteException(
+      domain: CBLErrorDomain.fleece,
+      code: code,
+      message: 'Fleece error',
+    );
   }
 }
 
@@ -695,10 +699,10 @@ final class FleeceEncoderBindings extends Bindings {
         return result;
       }
 
-      throw CBLErrorException(
-        CBLErrorDomain.fleece,
-        errorCode,
-        _getErrorMessage(encoder),
+      throw createCouchbaseLiteException(
+        domain: CBLErrorDomain.fleece,
+        code: errorCode,
+        message: _getErrorMessage(encoder),
       );
     }
 

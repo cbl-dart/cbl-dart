@@ -3,11 +3,11 @@ export 'bindings/base.dart'
     hide
         OptionIterable,
         CBLErrorExt,
-        CheckCBLErrorFLSliceResultExt,
-        CheckCBLErrorIntExt,
-        CheckCBLErrorPointerExt,
-        checkCBLError,
-        throwCBLError,
+        CheckErrorFLSliceResultExt,
+        CheckErrorIntExt,
+        CheckErrorPointerExt,
+        checkError,
+        throwError,
         IntErrorCodeExt;
 export 'bindings/bindings.dart';
 export 'bindings/blob.dart';

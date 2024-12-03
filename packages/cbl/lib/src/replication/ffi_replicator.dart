@@ -144,8 +144,7 @@ final class FfiReplicator
     );
 
     try {
-      final pointer =
-          runWithErrorTranslation(() => _bindings.createReplicator(ffiConfig));
+      final pointer = _bindings.createReplicator(ffiConfig);
 
       cblReachabilityFence(fleeceContainers);
 
@@ -419,7 +418,7 @@ extension on CBLReplicatorStatus {
           progressDocumentCount,
           progressComplete,
         ),
-        error?.toCouchbaseLiteException(),
+        error,
       );
 }
 
@@ -429,7 +428,7 @@ extension on CBLReplicatedDocument {
         scope,
         collection,
         flags.map((flag) => flag.toReplicatedDocumentFlag()).toSet(),
-        error?.toCouchbaseLiteException(),
+        error,
       );
 }
 
@@ -437,9 +436,7 @@ extension on ReplicatorConfiguration {
   Pointer<CBLEndpoint> createEndpoint() {
     final target = this.target;
     if (target is UrlEndpoint) {
-      return runWithErrorTranslation(
-        () => _bindings.createEndpointWithUrl(target.url.toString()),
-      );
+      return _bindings.createEndpointWithUrl(target.url.toString());
     } else if (target is DatabaseEndpoint) {
       final db = target.database as FfiDatabase;
       return _bindings.createEndpointWithLocalDB(db.pointer);

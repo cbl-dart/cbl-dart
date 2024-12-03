@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart' as p;
 
+import '../errors.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite;
 import 'cblitedart.dart' as cblitedart;
@@ -147,6 +148,39 @@ enum CBLErrorCode {
       };
 
   final int value;
+
+  DatabaseErrorCode get databaseErrorCode => switch (this) {
+        assertionFailed => DatabaseErrorCode.assertionFailed,
+        unimplemented => DatabaseErrorCode.unimplemented,
+        unsupportedEncryption => DatabaseErrorCode.unsupportedEncryption,
+        badRevisionId => DatabaseErrorCode.badRevisionId,
+        corruptRevisionData => DatabaseErrorCode.corruptRevisionData,
+        notOpen => DatabaseErrorCode.notOpen,
+        notFound => DatabaseErrorCode.notFound,
+        conflict => DatabaseErrorCode.conflict,
+        invalidParameter => DatabaseErrorCode.invalidParameter,
+        unexpectedError => DatabaseErrorCode.unexpectedError,
+        cantOpenFile => DatabaseErrorCode.cantOpenFile,
+        iOError => DatabaseErrorCode.iOError,
+        memoryError => DatabaseErrorCode.memoryError,
+        notWriteable => DatabaseErrorCode.notWriteable,
+        corruptData => DatabaseErrorCode.corruptData,
+        busy => DatabaseErrorCode.busy,
+        notInTransaction => DatabaseErrorCode.notInTransaction,
+        transactionNotClosed => DatabaseErrorCode.transactionNotClosed,
+        unsupported => DatabaseErrorCode.unsupported,
+        notADatabaseFile => DatabaseErrorCode.notADatabaseFile,
+        wrongFormat => DatabaseErrorCode.wrongFormat,
+        crypto => DatabaseErrorCode.crypto,
+        invalidQuery => DatabaseErrorCode.invalidQuery,
+        missingIndex => DatabaseErrorCode.missingIndex,
+        invalidQueryParam => DatabaseErrorCode.invalidQueryParam,
+        remoteError => DatabaseErrorCode.remoteError,
+        databaseTooOld => DatabaseErrorCode.databaseTooOld,
+        databaseTooNew => DatabaseErrorCode.databaseTooNew,
+        badDocId => DatabaseErrorCode.badDocId,
+        cantUpgradeDatabase => DatabaseErrorCode.cantUpgradeDatabase,
+      };
 }
 
 enum CBLNetworkErrorCode {
@@ -186,6 +220,23 @@ enum CBLNetworkErrorCode {
       };
 
   final int value;
+
+  NetworkErrorCode get networkErrorCode => switch (this) {
+        dnsFailure => NetworkErrorCode.dnsFailure,
+        unknownHost => NetworkErrorCode.unknownHost,
+        timeout => NetworkErrorCode.timeout,
+        invalidURL => NetworkErrorCode.invalidURL,
+        tooManyRedirects => NetworkErrorCode.tooManyRedirects,
+        tlsCertExpired => NetworkErrorCode.tlsCertExpired,
+        tlsCertUntrusted => NetworkErrorCode.tlsCertUntrusted,
+        tlsClientCertRequired => NetworkErrorCode.tlsClientCertRequired,
+        tlsClientCertRejected => NetworkErrorCode.tlsClientCertRejected,
+        tlsCertUnknownRoot => NetworkErrorCode.tlsCertUnknownRoot,
+        invalidRedirect => NetworkErrorCode.invalidRedirect,
+        unknown => NetworkErrorCode.unknown,
+        tlsCertRevoked => NetworkErrorCode.tlsCertRevoked,
+        tlsCertNameMismatch => NetworkErrorCode.tlsCertNameMismatch,
+      };
 }
 
 extension IntErrorCodeExt on int {
@@ -200,10 +251,6 @@ extension IntErrorCodeExt on int {
 }
 
 extension CBLErrorExt on cblite.CBLError {
-  CBLErrorDomain get domainEnum => CBLErrorDomain.fromValue(domain);
-
-  Object get codeEnum => code.toErrorCode(domainEnum);
-
   /// `true` if there is no error stored in this [cblite.CBLError].
   bool get isOk => code == 0;
 
@@ -218,93 +265,139 @@ extension CBLErrorExt on cblite.CBLError {
   }
 }
 
-final class CBLErrorException implements Exception {
-  CBLErrorException(
-    this.domain,
-    this.code,
-    this.message, {
-    this.errorPosition,
-    this.errorSource,
-  });
-
-  CBLErrorException.fromCBLError(Pointer<cblite.CBLError> error)
-      : this(
-          error.ref.domainEnum,
-          error.ref.codeEnum,
-          _baseBinds.getErrorMessage(globalCBLError)!,
-        );
-
-  CBLErrorException.fromCBLErrorWithSource(
-    Pointer<cblite.CBLError> error, {
-    required String errorSource,
-    required int errorPosition,
-  }) : this(
-          error.ref.domainEnum,
-          error.ref.codeEnum,
-          _baseBinds.getErrorMessage(globalCBLError)!,
-          errorSource: errorSource,
-          errorPosition: errorPosition == -1 ? null : errorPosition,
-        );
-
-  final String message;
-  final CBLErrorDomain domain;
-  final Object? code;
-  final String? errorSource;
-  final int? errorPosition;
-}
-
-void checkCBLError({String? errorSource}) {
-  if (!globalCBLError.ref.isOk) {
-    throwCBLError(errorSource: errorSource);
-  }
-}
-
-Never throwCBLError({String? errorSource}) {
-  if (errorSource == null) {
-    throw CBLErrorException.fromCBLError(globalCBLError);
-  } else {
-    throw CBLErrorException.fromCBLErrorWithSource(
-      globalCBLError,
+extension CBLErrorPointerExt on Pointer<cblite.CBLError> {
+  CouchbaseLiteException toCouchbaseLiteException({
+    String? errorSource,
+    int? errorPosition,
+  }) {
+    final domain = CBLErrorDomain.fromValue(ref.domain);
+    final code = ref.code.toErrorCode(domain);
+    final message = _baseBinds.getErrorMessage(this)!;
+    return createCouchbaseLiteException(
+      domain: domain,
+      code: code,
+      message: message,
       errorSource: errorSource,
-      errorPosition: globalErrorPosition.value,
+      errorPosition: errorPosition,
     );
   }
 }
 
-const _checkCBLError = checkCBLError;
+CouchbaseLiteException createCouchbaseLiteException({
+  required CBLErrorDomain domain,
+  required Object code,
+  required String message,
+  String? errorSource,
+  int? errorPosition,
+}) {
+  assert((errorSource == null) == (errorPosition == null));
 
-extension CheckCBLErrorPointerExt<T extends Pointer> on T {
-  T checkCBLError({String? errorSource}) {
+  switch (domain) {
+    case CBLErrorDomain.couchbaseLite:
+      return DatabaseException(
+        message,
+        (code as CBLErrorCode).databaseErrorCode,
+        errorPosition: errorPosition,
+        queryString: errorSource,
+      );
+    case CBLErrorDomain.posix:
+      return PosixException(message, code as int);
+    case CBLErrorDomain.sqLite:
+      return SQLiteException(message, code as int);
+    case CBLErrorDomain.fleece:
+      return FleeceException('$message (${(code as FLError).name}))');
+    case CBLErrorDomain.network:
+      return NetworkException(
+        message,
+        (code as CBLNetworkErrorCode).networkErrorCode,
+      );
+    case CBLErrorDomain.webSocket:
+      String formatMessage(Object? enumCode) =>
+          enumCode != null ? message : '$message ($code)';
+
+      final statusCode = code as int;
+      if (statusCode < 1000) {
+        final code = _httpErrorCodeMap[statusCode];
+        return HttpException(formatMessage(code), code);
+      } else {
+        final code = _webSocketErrorCodeMap[statusCode];
+        return WebSocketException(formatMessage(code), code);
+      }
+  }
+}
+
+const _httpErrorCodeMap = {
+  401: HttpErrorCode.authRequired,
+  403: HttpErrorCode.forbidden,
+  404: HttpErrorCode.notFound,
+  409: HttpErrorCode.conflict,
+  407: HttpErrorCode.proxyAuthRequired,
+  413: HttpErrorCode.entityTooLarge,
+  418: HttpErrorCode.imATeapot,
+  500: HttpErrorCode.internalServerError,
+  501: HttpErrorCode.notFound,
+  503: HttpErrorCode.serviceUnavailable,
+};
+
+const _webSocketErrorCodeMap = {
+  1001: WebSocketErrorCode.goingAway,
+  1002: WebSocketErrorCode.protocolError,
+  1003: WebSocketErrorCode.dataError,
+  1006: WebSocketErrorCode.abnormalClose,
+  1007: WebSocketErrorCode.badMessageFormat,
+  1008: WebSocketErrorCode.policyError,
+  1009: WebSocketErrorCode.messageTooBig,
+  1010: WebSocketErrorCode.missingExtension,
+  1011: WebSocketErrorCode.cantFulfill,
+};
+
+void checkError({String? errorSource}) {
+  if (!globalCBLError.ref.isOk) {
+    throwError(errorSource: errorSource);
+  }
+}
+
+Never throwError({String? errorSource}) {
+  throw globalCBLError.toCouchbaseLiteException(
+    errorSource: errorSource,
+    errorPosition: errorSource != null ? globalErrorPosition.value : null,
+  );
+}
+
+const _checkError = checkError;
+
+extension CheckErrorPointerExt<T extends Pointer> on T {
+  T checkError({String? errorSource}) {
     if (this == nullptr) {
-      _checkCBLError(errorSource: errorSource);
+      _checkError(errorSource: errorSource);
     }
     return this;
   }
 }
 
-extension CheckCBLErrorFLSliceResultExt on cblite.FLSliceResult {
-  cblite.FLSliceResult checkCBLError({String? errorSource}) {
+extension CheckErrorFLSliceResultExt on cblite.FLSliceResult {
+  cblite.FLSliceResult checkError({String? errorSource}) {
     if (buf == nullptr) {
-      _checkCBLError(errorSource: errorSource);
+      _checkError(errorSource: errorSource);
     }
     return this;
   }
 }
 
-extension CheckCBLErrorIntExt on int {
-  int checkCBLError({String? errorSource}) {
+extension CheckErrorIntExt on int {
+  int checkError({String? errorSource}) {
     assert(this == 0 || this == 1);
     if (this == 0) {
-      _checkCBLError(errorSource: errorSource);
+      _checkError(errorSource: errorSource);
     }
     return this;
   }
 }
 
-extension CheckCBLErrorBoolExt on bool {
-  bool checkCBLError({String? errorSource}) {
+extension CheckErrorBoolExt on bool {
+  bool checkError({String? errorSource}) {
     if (!this) {
-      _checkCBLError(errorSource: errorSource);
+      _checkError(errorSource: errorSource);
     }
     return this;
   }
@@ -348,21 +441,21 @@ final class BaseBindings extends Bindings {
           break;
         case cblitedart.CBLDartInitializeResult
               .CBLDartInitializeResult_kIncompatibleDartVM:
-          throw CBLErrorException(
-            CBLErrorDomain.couchbaseLite,
-            CBLErrorCode.unsupported,
-            'The current Dart VM is incompatible.',
+          throw createCouchbaseLiteException(
+            domain: CBLErrorDomain.couchbaseLite,
+            code: CBLErrorCode.unsupported,
+            message: 'The current Dart VM is incompatible.',
           );
         case cblitedart
               .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError:
-          throw CBLErrorException.fromCBLError(error);
+          throw error.toCouchbaseLiteException();
       }
 
       if (libraries.vectorSearchLibraryPath case final libraryPath?) {
         final libraryDirectory = p.dirname(libraryPath);
         runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
           cbl.CBL_EnableVectorSearch(flLibraryDirectory, globalCBLError)
-              .checkCBLError();
+              .checkError();
         });
       }
     });
