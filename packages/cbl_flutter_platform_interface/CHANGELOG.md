@@ -1,3 +1,7 @@
+## 3.1.0
+
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
 ## 3.1.0-dev.4
 
  - Update a dependency to the latest release.

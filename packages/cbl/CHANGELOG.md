@@ -1,3 +1,7 @@
+## 3.3.0
+
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
 ## 3.3.0-dev.5
 
  - **REFACTOR**: remove `CBLErrorException` ([#681](https://github.com/cbl-dart/cbl-dart/issues/681)). ([41e932dd](https://github.com/cbl-dart/cbl-dart/commit/41e932ddd8b5c50b5a2334e8166423c32abf90a1))

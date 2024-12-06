@@ -11,6 +11,60 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 Packages with breaking changes:
 
+ - [`cbl_generator` - `v0.3.1`](#cbl_generator---v031)
+ - [`cbl_sentry` - `v2.1.2`](#cbl_sentry---v212)
+
+Packages with other changes:
+
+ - [`cbl` - `v3.3.0`](#cbl---v330)
+ - [`cbl_dart` - `v3.2.0`](#cbl_dart---v320)
+ - [`cbl_flutter` - `v3.2.0`](#cbl_flutter---v320)
+ - [`cbl_flutter_ce` - `v3.3.0`](#cbl_flutter_ce---v330)
+ - [`cbl_flutter_ee` - `v3.3.0`](#cbl_flutter_ee---v330)
+ - [`cbl_flutter_install` - `v0.1.0`](#cbl_flutter_install---v010)
+ - [`cbl_flutter_platform_interface` - `v3.1.0`](#cbl_flutter_platform_interface---v310)
+
+Packages graduated to a stable release (see pre-releases prior to the stable version for changelog entries):
+
+ - `cbl` - `v3.3.0`
+ - `cbl_dart` - `v3.2.0`
+ - `cbl_flutter` - `v3.2.0`
+ - `cbl_flutter_ce` - `v3.3.0`
+ - `cbl_flutter_ee` - `v3.3.0`
+ - `cbl_flutter_install` - `v0.1.0`
+ - `cbl_flutter_platform_interface` - `v3.1.0`
+ - `cbl_generator` - `v0.3.1`
+ - `cbl_sentry` - `v2.1.2`
+
+---
+
+#### `cbl_generator` - `v0.3.1`
+
+#### `cbl_sentry` - `v2.1.2`
+
+#### `cbl` - `v3.3.0`
+
+#### `cbl_dart` - `v3.2.0`
+
+#### `cbl_flutter` - `v3.2.0`
+
+#### `cbl_flutter_ce` - `v3.3.0`
+
+#### `cbl_flutter_ee` - `v3.3.0`
+
+#### `cbl_flutter_install` - `v0.1.0`
+
+#### `cbl_flutter_platform_interface` - `v3.1.0`
+
+
+## 2024-12-06
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
  - There are no breaking changes in this release.
 
 Packages with other changes:
