@@ -5,6 +5,7 @@ output:
 import:
   symbol-files:
     - package:cbl/src/bindings/cblite_symbols.yaml
+comments: false
 headers:
   entry-points:
     - ../../native/couchbase-lite-dart/include/CBL+Dart.h
