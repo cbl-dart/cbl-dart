@@ -33,7 +33,7 @@ final class CBLIndexSpec {
     this.numProbes,
   });
 
-  final cblitedart.CBLDart_IndexType type;
+  final CBLDartIndexType type;
   final CBLQueryLanguage expressionLanguage;
   final String expressions;
 
@@ -251,18 +251,18 @@ final class CollectionBindings extends Bindings {
   Pointer<cblitedart.CBLDart_CBLIndexSpec> _createIndexSpec(CBLIndexSpec spec) {
     final result = globalArena<cblitedart.CBLDart_CBLIndexSpec>();
     final ref = result.ref
-      ..typeAsInt = spec.type.value
+      ..type = spec.type.value
       ..expressionLanguage = spec.expressionLanguage.value
       ..expressions = spec.expressions.toFLString();
 
     switch (spec.type) {
-      case cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeValue:
+      case CBLDartIndexType.value$:
         break;
-      case cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeFullText:
+      case CBLDartIndexType.fullText:
         ref
           ..ignoreAccents = spec.ignoreAccents!
           ..language = spec.language.toFLString();
-      case cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeVector:
+      case CBLDartIndexType.vector:
         final encoding = switch (spec) {
           CBLIndexSpec(:final scalarQuantizerType?) =>
             cbl.CBLVectorEncoding_CreateScalarQuantizer(scalarQuantizerType),

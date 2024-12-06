@@ -3846,13 +3846,13 @@ class cblite {
 
   FLDoc FLDoc_FromResultData(
     FLSliceResult data,
-    FLTrust arg1,
+    int arg1,
     FLSharedKeys arg2,
     FLSlice externData,
   ) {
     return _FLDoc_FromResultData(
       data,
-      arg1.value,
+      arg1,
       arg2,
       externData,
     );
@@ -3996,12 +3996,12 @@ class cblite {
   late final _FLEncoder_New = _FLEncoder_NewPtr.asFunction<DartFLEncoder_New>();
 
   FLEncoder FLEncoder_NewWithOptions(
-    FLEncoderFormat format,
+    int format,
     int reserveSize,
     bool uniqueStrings,
   ) {
     return _FLEncoder_NewWithOptions(
-      format.value,
+      format,
       reserveSize,
       uniqueStrings,
     );
@@ -4427,12 +4427,12 @@ class cblite {
   late final _FLEncoder_Finish =
       _FLEncoder_FinishPtr.asFunction<DartFLEncoder_Finish>();
 
-  FLError FLEncoder_GetError(
+  int FLEncoder_GetError(
     FLEncoder arg0,
   ) {
-    return FLError.fromValue(_FLEncoder_GetError(
+    return _FLEncoder_GetError(
       arg0,
-    ));
+    );
   }
 
   late final _FLEncoder_GetErrorPtr =
@@ -4684,12 +4684,12 @@ class cblite {
 
   set kFLUndefinedValue(FLValue value) => _kFLUndefinedValue.value = value;
 
-  FLValueType FLValue_GetType(
+  int FLValue_GetType(
     FLValue arg0,
   ) {
-    return FLValueType.fromValue(_FLValue_GetType(
+    return _FLValue_GetType(
       arg0,
-    ));
+    );
   }
 
   late final _FLValue_GetTypePtr =
@@ -4937,11 +4937,11 @@ class cblite {
 
   FLMutableArray FLArray_MutableCopy(
     FLArray arg0,
-    FLCopyFlags arg1,
+    int arg1,
   ) {
     return _FLArray_MutableCopy(
       arg0,
-      arg1.value,
+      arg1,
     );
   }
 
@@ -5092,11 +5092,11 @@ class cblite {
 
   FLMutableDict FLDict_MutableCopy(
     FLDict source,
-    FLCopyFlags arg1,
+    int arg1,
   ) {
     return _FLDict_MutableCopy(
       source,
-      arg1.value,
+      arg1,
     );
   }
 
@@ -5716,11 +5716,11 @@ class cblite {
 
   FLValue FLValue_FromData(
     FLSlice data,
-    FLTrust trust,
+    int trust,
   ) {
     return _FLValue_FromData(
       data,
-      trust.value,
+      trust,
     );
   }
 
@@ -7491,52 +7491,24 @@ final class _FLSharedKeys extends ffi.Opaque {}
 
 typedef FLSharedKeys = ffi.Pointer<_FLSharedKeys>;
 
-enum FLError {
-  kFLNoError(0),
-  kFLMemoryError(1),
-  kFLOutOfRange(2),
-  kFLInvalidData(3),
-  kFLEncodeError(4),
-  kFLJSONError(5),
-  kFLUnknownValue(6),
-  kFLInternalError(7),
-  kFLNotFound(8),
-  kFLSharedKeysStateError(9),
-  kFLPOSIXError(10),
-  kFLUnsupported(11);
-
-  final int value;
-  const FLError(this.value);
-
-  static FLError fromValue(int value) => switch (value) {
-        0 => kFLNoError,
-        1 => kFLMemoryError,
-        2 => kFLOutOfRange,
-        3 => kFLInvalidData,
-        4 => kFLEncodeError,
-        5 => kFLJSONError,
-        6 => kFLUnknownValue,
-        7 => kFLInternalError,
-        8 => kFLNotFound,
-        9 => kFLSharedKeysStateError,
-        10 => kFLPOSIXError,
-        11 => kFLUnsupported,
-        _ => throw ArgumentError("Unknown value for FLError: $value"),
-      };
+sealed class FLError {
+  static const kFLNoError = 0;
+  static const kFLMemoryError = 1;
+  static const kFLOutOfRange = 2;
+  static const kFLInvalidData = 3;
+  static const kFLEncodeError = 4;
+  static const kFLJSONError = 5;
+  static const kFLUnknownValue = 6;
+  static const kFLInternalError = 7;
+  static const kFLNotFound = 8;
+  static const kFLSharedKeysStateError = 9;
+  static const kFLPOSIXError = 10;
+  static const kFLUnsupported = 11;
 }
 
-enum FLTrust {
-  kFLUntrusted(0),
-  kFLTrusted(1);
-
-  final int value;
-  const FLTrust(this.value);
-
-  static FLTrust fromValue(int value) => switch (value) {
-        0 => kFLUntrusted,
-        1 => kFLTrusted,
-        _ => throw ArgumentError("Unknown value for FLTrust: $value"),
-      };
+sealed class FLTrust {
+  static const kFLUntrusted = 0;
+  static const kFLTrusted = 1;
 }
 
 typedef FLTimestamp = ffi.Int64;
@@ -7749,20 +7721,10 @@ typedef NativeFLDoc_GetAssociated = ffi.Pointer<ffi.Void> Function(
 typedef DartFLDoc_GetAssociated = ffi.Pointer<ffi.Void> Function(
     FLDoc doc, ffi.Pointer<ffi.Char> type);
 
-enum FLEncoderFormat {
-  kFLEncodeFleece(0),
-  kFLEncodeJSON(1),
-  kFLEncodeJSON5(2);
-
-  final int value;
-  const FLEncoderFormat(this.value);
-
-  static FLEncoderFormat fromValue(int value) => switch (value) {
-        0 => kFLEncodeFleece,
-        1 => kFLEncodeJSON,
-        2 => kFLEncodeJSON5,
-        _ => throw ArgumentError("Unknown value for FLEncoderFormat: $value"),
-      };
+sealed class FLEncoderFormat {
+  static const kFLEncodeFleece = 0;
+  static const kFLEncodeJSON = 1;
+  static const kFLEncodeJSON5 = 2;
 }
 
 typedef NativeFLEncoder_New = FLEncoder Function();
@@ -7992,30 +7954,15 @@ typedef NativeFLKeyPath_GetElement = ffi.Bool Function(
 typedef DartFLKeyPath_GetElement = bool Function(FLKeyPath arg0, int i,
     ffi.Pointer<FLSlice> outDictKey, ffi.Pointer<ffi.Int32> outArrayIndex);
 
-enum FLValueType {
-  kFLUndefined(-1),
-  kFLNull(0),
-  kFLBoolean(1),
-  kFLNumber(2),
-  kFLString(3),
-  kFLData(4),
-  kFLArray(5),
-  kFLDict(6);
-
-  final int value;
-  const FLValueType(this.value);
-
-  static FLValueType fromValue(int value) => switch (value) {
-        -1 => kFLUndefined,
-        0 => kFLNull,
-        1 => kFLBoolean,
-        2 => kFLNumber,
-        3 => kFLString,
-        4 => kFLData,
-        5 => kFLArray,
-        6 => kFLDict,
-        _ => throw ArgumentError("Unknown value for FLValueType: $value"),
-      };
+sealed class FLValueType {
+  static const kFLUndefined = -1;
+  static const kFLNull = 0;
+  static const kFLBoolean = 1;
+  static const kFLNumber = 2;
+  static const kFLString = 3;
+  static const kFLData = 4;
+  static const kFLArray = 5;
+  static const kFLDict = 6;
 }
 
 typedef NativeFLValue_GetType = ffi.Int Function(FLValue arg0);
@@ -8057,22 +8004,11 @@ typedef DartFLValue_Retain = FLValue Function(FLValue arg0);
 typedef NativeFLValue_Release = ffi.Void Function(FLValue arg0);
 typedef DartFLValue_Release = void Function(FLValue arg0);
 
-enum FLCopyFlags {
-  kFLDefaultCopy(0),
-  kFLDeepCopy(1),
-  kFLCopyImmutables(2),
-  kFLDeepCopyImmutables(3);
-
-  final int value;
-  const FLCopyFlags(this.value);
-
-  static FLCopyFlags fromValue(int value) => switch (value) {
-        0 => kFLDefaultCopy,
-        1 => kFLDeepCopy,
-        2 => kFLCopyImmutables,
-        3 => kFLDeepCopyImmutables,
-        _ => throw ArgumentError("Unknown value for FLCopyFlags: $value"),
-      };
+sealed class FLCopyFlags {
+  static const kFLDefaultCopy = 0;
+  static const kFLDeepCopy = 1;
+  static const kFLCopyImmutables = 2;
+  static const kFLDeepCopyImmutables = 3;
 }
 
 typedef NativeFLArray_MutableCopy = FLMutableArray Function(

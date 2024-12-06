@@ -21,7 +21,7 @@ Array immutableArray([List<Object?>? data]) {
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromContext(
-    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.kFLTrusted)),
+    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.trusted)),
     isMutable: false,
   );
   // ignore: cast_nullable_to_non_nullable
@@ -34,7 +34,7 @@ Dictionary immutableDictionary([Map<String, Object?>? data]) {
   array.encodeTo(encoder);
   final fleeceData = encoder.finish();
   final root = MRoot.fromContext(
-    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.kFLTrusted)),
+    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.trusted)),
     isMutable: false,
   );
   // ignore: cast_nullable_to_non_nullable

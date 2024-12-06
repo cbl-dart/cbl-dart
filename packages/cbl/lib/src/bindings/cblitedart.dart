@@ -248,16 +248,16 @@ class cblitedart {
       _CBLDart_FLEncoder_WriteArrayValuePtr.asFunction<
           DartCBLDart_FLEncoder_WriteArrayValue>();
 
-  CBLDartInitializeResult CBLDart_Initialize(
+  int CBLDart_Initialize(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
     ffi.Pointer<ffi.Void> cblInitContext,
     ffi.Pointer<CBLError> errorOut,
   ) {
-    return CBLDartInitializeResult.fromValue(_CBLDart_Initialize(
+    return _CBLDart_Initialize(
       dartInitializeDlData,
       cblInitContext,
       errorOut,
-    ));
+    );
   }
 
   late final _CBLDart_InitializePtr =
@@ -901,21 +901,10 @@ typedef NativeCBLDart_FLEncoder_WriteArrayValue = ffi.Bool Function(
 typedef DartCBLDart_FLEncoder_WriteArrayValue = bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, int index);
 
-enum CBLDartInitializeResult {
-  CBLDartInitializeResult_kSuccess(0),
-  CBLDartInitializeResult_kIncompatibleDartVM(1),
-  CBLDartInitializeResult_kCBLInitError(2);
-
-  final int value;
-  const CBLDartInitializeResult(this.value);
-
-  static CBLDartInitializeResult fromValue(int value) => switch (value) {
-        0 => CBLDartInitializeResult_kSuccess,
-        1 => CBLDartInitializeResult_kIncompatibleDartVM,
-        2 => CBLDartInitializeResult_kCBLInitError,
-        _ => throw ArgumentError(
-            "Unknown value for CBLDartInitializeResult: $value"),
-      };
+sealed class CBLDartInitializeResult {
+  static const CBLDartInitializeResult_kSuccess = 0;
+  static const CBLDartInitializeResult_kIncompatibleDartVM = 1;
+  static const CBLDartInitializeResult_kCBLInitError = 2;
 }
 
 typedef CBLError = imp1.CBLError;
@@ -1061,27 +1050,15 @@ typedef DartCBLDart_CBLCollection_AddChangeListener = void Function(
     ffi.Pointer<CBLCollection> collection,
     CBLDart_AsyncCallback listener);
 
-enum CBLDart_IndexType {
-  kCBLDart_IndexTypeValue(0),
-  kCBLDart_IndexTypeFullText(1),
-  kCBLDart_IndexTypeVector(2);
-
-  final int value;
-  const CBLDart_IndexType(this.value);
-
-  static CBLDart_IndexType fromValue(int value) => switch (value) {
-        0 => kCBLDart_IndexTypeValue,
-        1 => kCBLDart_IndexTypeFullText,
-        2 => kCBLDart_IndexTypeVector,
-        _ => throw ArgumentError("Unknown value for CBLDart_IndexType: $value"),
-      };
+sealed class CBLDart_IndexType {
+  static const kCBLDart_IndexTypeValue = 0;
+  static const kCBLDart_IndexTypeFullText = 1;
+  static const kCBLDart_IndexTypeVector = 2;
 }
 
 final class CBLDart_CBLIndexSpec extends ffi.Struct {
   @ffi.Uint8()
-  external int typeAsInt;
-
-  CBLDart_IndexType get type => CBLDart_IndexType.fromValue(typeAsInt);
+  external int type;
 
   @imp1.CBLQueryLanguage()
   external int expressionLanguage;

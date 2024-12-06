@@ -293,7 +293,7 @@ final class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.kFLEncodeJSON);
+    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
     final encodeResult = _dictionary.encodeTo(encoder);
     assert(encodeResult is! Future);
     final sliceResult = encoder.finish().toSliceResult();
@@ -314,7 +314,7 @@ final class ResultImpl with IterableMixin<String> implements Result {
       case EncodingFormat.json:
         if (columnValuesData != null) {
           columnValues =
-              fl.Doc.fromResultData(columnValuesData!, FLTrust.kFLTrusted).root
+              fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted).root
                   as fl.Array;
         } else {
           columnValues = columnValuesArray!;
@@ -341,7 +341,7 @@ final class ResultImpl with IterableMixin<String> implements Result {
       root = MRoot.fromContext(
         DatabaseMContext.from(
           _context,
-          data: fl.Doc.fromResultData(columnValuesData!, FLTrust.kFLTrusted),
+          data: fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted),
         ),
         isMutable: false,
       );

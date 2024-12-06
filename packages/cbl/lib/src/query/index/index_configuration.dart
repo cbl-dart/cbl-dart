@@ -344,7 +344,7 @@ final class _ValueIndexConfiguration extends _IndexConfiguration
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
         expressionLanguage: CBLQueryLanguage.n1ql,
         expressions: expressions.join(', '),
-        type: CBLDart_IndexType.kCBLDart_IndexTypeValue,
+        type: CBLDartIndexType.value$,
       );
 
   @override
@@ -379,7 +379,7 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
         expressionLanguage: CBLQueryLanguage.n1ql,
         expressions: expressions.join(', '),
-        type: CBLDart_IndexType.kCBLDart_IndexTypeFullText,
+        type: CBLDartIndexType.fullText,
         ignoreAccents: ignoreAccents,
         language: language?.name,
       );
@@ -528,7 +528,7 @@ final class _VectorIndexConfiguration extends _IndexConfiguration
     return CBLIndexSpec(
       expressionLanguage: CBLQueryLanguage.n1ql,
       expressions: expressions.join(', '),
-      type: CBLDart_IndexType.kCBLDart_IndexTypeVector,
+      type: CBLDartIndexType.vector,
       dimensions: dimensions,
       centroids: centroids,
       lazy: lazy,

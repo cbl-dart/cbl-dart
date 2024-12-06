@@ -35,6 +35,23 @@ enum CBLQueryLanguage {
   final int value;
 }
 
+enum CBLDartIndexType {
+  value$(cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeValue),
+  fullText(cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeFullText),
+  vector(cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeVector);
+
+  const CBLDartIndexType(this.value);
+
+  static CBLDartIndexType fromValue(int value) => switch (value) {
+        cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeValue => value$,
+        cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeFullText => fullText,
+        cblitedart.CBLDart_IndexType.kCBLDart_IndexTypeVector => vector,
+        _ => throw ArgumentError('Unknown value for CBLDart_IndexType: $value'),
+      };
+
+  final int value;
+}
+
 final class QueryBindings extends Bindings {
   QueryBindings(super.parent);
 

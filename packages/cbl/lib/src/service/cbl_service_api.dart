@@ -332,10 +332,10 @@ SerializationRegistry cblServiceSerializationRegistry() =>
         serialize: (value, context) => value.index,
         deserialize: (value, context) => CBLQueryLanguage.values[value as int],
       )
-      ..addCodec<CBLDart_IndexType>(
-        'CBLIndexType',
+      ..addCodec<CBLDartIndexType>(
+        'CBLDartIndexType',
         serialize: (value, context) => value.index,
-        deserialize: (value, context) => CBLDart_IndexType.values[value as int],
+        deserialize: (value, context) => CBLDartIndexType.values[value as int],
       )
       ..addObjectCodec<CBLIndexSpec>(
         'CBLIndexSpec',

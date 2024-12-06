@@ -18,7 +18,7 @@ final _bindings = CBLBindings.instance.fleece.encoder;
 final class FleeceEncoder implements Finalizable {
   /// Creates an encoder, which generates encoded Fleece or JSON data.
   FleeceEncoder({
-    this.format = FLEncoderFormat.kFLEncodeFleece,
+    this.format = FLEncoderFormat.fleece,
     this.reserveSize = 256,
     this.uniqueStrings = true,
   }) : _pointer = _bindings.create(
@@ -33,7 +33,7 @@ final class FleeceEncoder implements Finalizable {
 
   /// The output format to generate.
   ///
-  /// The default is [FLEncoderFormat.kFLEncodeFleece]
+  /// The default is [FLEncoderFormat.fleece]
   final FLEncoderFormat format;
 
   /// The number of bytes to preallocate for the output.

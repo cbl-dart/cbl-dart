@@ -17,5 +17,5 @@ Data fleeceEncode(Object? value) {
 
 Object? fleeceDecode(Data data) => testFleeceDecoder().convert(data);
 
-FleeceDecoder testFleeceDecoder({FLTrust trust = FLTrust.kFLUntrusted}) =>
+FleeceDecoder testFleeceDecoder({FLTrust trust = FLTrust.untrusted}) =>
     FleeceDecoder(trust: trust);

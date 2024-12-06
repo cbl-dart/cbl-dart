@@ -66,7 +66,7 @@ final class ProxyDocumentDelegate
     return MRoot.fromContext(
       DocumentMContext(
         document,
-        data: Doc.fromResultData(properties!.toFleece(), FLTrust.kFLTrusted),
+        data: Doc.fromResultData(properties!.toFleece(), FLTrust.trusted),
       ),
       isMutable: isMutable,
     );
