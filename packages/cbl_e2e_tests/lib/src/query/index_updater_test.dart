@@ -55,42 +55,38 @@ void main() {
       }
     });
 
-    apiTest(
-      'finish without setting or skipping all values',
-      skip: 'TODO: fix bug in CBL C',
-      () async {
-        final db = await openTestDatabase();
-        final collection = await db.defaultCollection;
-        await collection.createIndex(
+    apiTest('finish without setting or skipping all values', () async {
+      final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
+      await collection.createIndex(
+        'a',
+        VectorIndexConfiguration(
           'a',
-          VectorIndexConfiguration(
-            'a',
-            dimensions: 2,
-            centroids: 1,
-            lazy: true,
-          ),
-        );
+          dimensions: 2,
+          centroids: 1,
+          lazy: true,
+        ),
+      );
 
-        final index = (await collection.index('a'))!;
+      final index = (await collection.index('a'))!;
 
-        await collection.saveDocument(MutableDocument({'a': 'x'}));
+      await collection.saveDocument(MutableDocument({'a': 'x'}));
 
-        {
-          final updater = (await index.beginUpdate(limit: 10))!;
-          expect(updater.length, 1);
-          expect(await updater.value(0), 'x');
+      {
+        final updater = (await index.beginUpdate(limit: 10))!;
+        expect(updater.length, 1);
+        expect(await updater.value(0), 'x');
 
-          await expectLater(updater.finish, throwsException);
+        await expectLater(updater.finish, throwsException);
 
-          await updater.setVector(0, [1, 2]);
-          await updater.finish();
-        }
+        await updater.setVector(0, [1, 2]);
+        await updater.finish();
+      }
 
-        {
-          final updater = await index.beginUpdate(limit: 10);
-          expect(updater, isNull);
-        }
-      },
-    );
+      {
+        final updater = await index.beginUpdate(limit: 10);
+        expect(updater, isNull);
+      }
+    });
   });
 }

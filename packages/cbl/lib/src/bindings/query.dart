@@ -159,9 +159,13 @@ final class QueryIndexBindings extends Bindings {
     Pointer<cblite.CBLQueryIndex> index,
     int limit,
   ) =>
-      cbl.CBLQueryIndex_BeginUpdate(index, limit, globalCBLError)
-          .checkError()
-          .toNullable();
+      cbl.CBLQueryIndex_BeginUpdate(
+        index,
+        limit,
+        // TODO(blaugold): Remove reset once bug is fixed.
+        // https://github.com/couchbase/couchbase-lite-C/issues/499
+        globalCBLError..ref.reset(),
+      ).checkError().toNullable();
 }
 
 final class IndexUpdaterBindings extends Bindings {
