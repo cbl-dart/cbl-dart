@@ -1,3 +1,10 @@
+## 3.3.0-dev.5
+
+ - **REFACTOR**: remove `CBLErrorException` ([#681](https://github.com/cbl-dart/cbl-dart/issues/681)). ([41e932dd](https://github.com/cbl-dart/cbl-dart/commit/41e932ddd8b5c50b5a2334e8166423c32abf90a1))
+ - **REFACTOR**: represent hand written native enums same as ffigen ([#679](https://github.com/cbl-dart/cbl-dart/issues/679)). ([d9464435](https://github.com/cbl-dart/cbl-dart/commit/d9464435a74bac80a154f9d3d736202904c4174f))
+ - **FIX**: error handling for `QueryIndex.beginUpdate` ([#683](https://github.com/cbl-dart/cbl-dart/issues/683)). ([c00da16b](https://github.com/cbl-dart/cbl-dart/commit/c00da16bc8230ed09536d173c49c87e0eedcb210))
+ - **FIX**: don't close channel with pending calls ([#677](https://github.com/cbl-dart/cbl-dart/issues/677)). ([1d957d7d](https://github.com/cbl-dart/cbl-dart/commit/1d957d7d3461a2cd47787c5b062e13d4af25e48c))
+
 ## 3.3.0-dev.4
 
  - **FIX**: code sign vector serach library for macOS ([#663](https://github.com/cbl-dart/cbl-dart/issues/663)). ([b3d0c58b](https://github.com/cbl-dart/cbl-dart/commit/b3d0c58bb16daaa9ff4129ebda950058214f6235))
