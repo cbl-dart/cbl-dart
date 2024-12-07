@@ -5,6 +5,7 @@ output:
 import:
   symbol-files:
     - package:cbl/src/bindings/cblite_symbols.yaml
+comments: false
 headers:
   entry-points:
     - ../../native/couchbase-lite-dart/include/CBL+Dart.h
@@ -25,6 +26,10 @@ functions:
       - CBLDart_FLSliceResult_ReleaseByBuf
       - CBLDart_KnownSharedKeys_Delete
       - CBLDart_PredictiveModel_Delete
+enums:
+  as-int:
+    include:
+      - '.*'
 compiler-opts:
   - '-I../../native/couchbase-lite-dart/include'
   - '-I../../native/vendor/cblite/include'

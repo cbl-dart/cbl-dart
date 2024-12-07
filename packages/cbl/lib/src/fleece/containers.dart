@@ -361,15 +361,15 @@ final class MutableArray extends Array {
   /// Creates a new [MutableArray] that's a copy of the source [Array].
   ///
   /// Copying an immutable Array is very cheap (only one small allocation)
-  /// unless the [FLCopyFlags.kFLCopyImmutables] is set.
+  /// unless the [FLCopyFlags.copyImmutables] is set.
   ///
   /// Copying a mutable Array is cheap if it's a shallow copy, but if
-  /// [FLCopyFlags.kFLDeepCopy] is true, nested mutable Arrays and [Dict]s are
-  /// also copied, recursively; if [FLCopyFlags.kFLDeepCopyImmutables] is set,
-  /// immutable values are also copied.
+  /// [FLCopyFlags.deepCopy] is true, nested mutable Arrays and [Dict]s are also
+  /// copied, recursively; if [FLCopyFlags.deepCopyImmutables] is set, immutable
+  /// values are also copied.
   factory MutableArray.mutableCopy(
     Array source, {
-    FLCopyFlags flags = FLCopyFlags.kFLDefaultCopy,
+    FLCopyFlags flags = FLCopyFlags.defaultCopy,
   }) =>
       MutableArray.fromPointer(
         _bindings.mutableCopy(source.pointer.cast(), flags),
@@ -572,15 +572,15 @@ final class MutableDict extends Dict {
   /// Creates a new [MutableDict] that's a copy of the source [Dict].
   ///
   /// Copying an immutable Array is very cheap (only one small allocation)
-  /// unless the [FLCopyFlags.kFLCopyImmutables] is set.
+  /// unless the [FLCopyFlags.copyImmutables] is set.
   ///
   /// Copying a mutable Array is cheap if it's a shallow copy, but if
-  /// [FLCopyFlags.kFLDeepCopy] is true, nested mutable Arrays and [Dict]s are
-  /// also copied, recursively; if [FLCopyFlags.kFLDeepCopyImmutables] is set,
-  /// immutable values are also copied.
+  /// [FLCopyFlags.deepCopy] is true, nested mutable Arrays and [Dict]s are also
+  /// copied, recursively; if [FLCopyFlags.deepCopyImmutables] is set, immutable
+  /// values are also copied.
   factory MutableDict.mutableCopy(
     Dict source, {
-    FLCopyFlags flags = FLCopyFlags.kFLDefaultCopy,
+    FLCopyFlags flags = FLCopyFlags.defaultCopy,
   }) =>
       MutableDict.fromPointer(
         _bindings.mutableCopy(source.pointer.cast(), flags),

@@ -42,6 +42,32 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 // === Init ====================================================================
 
+enum CBLDartInitializeResult {
+  success(
+      cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError),
+  incompatibleDartVM(cblitedart
+      .CBLDartInitializeResult.CBLDartInitializeResult_kIncompatibleDartVM),
+  cblInitError(
+      cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError);
+
+  const CBLDartInitializeResult(this.value);
+
+  static CBLDartInitializeResult fromValue(int value) => switch (value) {
+        cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kSuccess =>
+          success,
+        cblitedart.CBLDartInitializeResult
+              .CBLDartInitializeResult_kIncompatibleDartVM =>
+          incompatibleDartVM,
+        cblitedart
+              .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError =>
+          cblInitError,
+        _ => throw ArgumentError(
+            'Unknown value for CBLDartInitializeResult: $value'),
+      };
+
+  final int value;
+}
+
 final class CBLInitContext {
   CBLInitContext({required this.filesDir, required this.tempDir});
 
@@ -244,7 +270,7 @@ extension IntErrorCodeExt on int {
         CBLErrorDomain.couchbaseLite => CBLErrorCode.fromValue(this),
         CBLErrorDomain.posix => this,
         CBLErrorDomain.sqLite => this,
-        CBLErrorDomain.fleece => cblite.FLError.fromValue(this),
+        CBLErrorDomain.fleece => FLError.fromValue(this),
         CBLErrorDomain.network => CBLNetworkErrorCode.fromValue(this),
         CBLErrorDomain.webSocket => this
       };

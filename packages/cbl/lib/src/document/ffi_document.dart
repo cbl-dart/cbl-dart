@@ -70,7 +70,7 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   }
 
   void _writeEncodedProperties(EncodedData value) {
-    final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.kFLTrusted);
+    final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
     _mutableDocumentBindings.setProperties(pointer.cast(), dict.pointer.cast());
   }

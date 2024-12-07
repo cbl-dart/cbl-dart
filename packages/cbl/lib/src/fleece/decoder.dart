@@ -250,7 +250,7 @@ final class ArrayIterator implements Iterator<Null>, Finalizable {
 final class FleeceDecoder extends Converter<Data, Object?> {
   /// Creates a decoder for converting Fleece data into Dart objects.
   const FleeceDecoder({
-    this.trust = FLTrust.kFLUntrusted,
+    this.trust = FLTrust.untrusted,
     this.sharedKeys,
     this.sharedKeysTable,
     this.sharedStringsTable,
@@ -293,7 +293,7 @@ final class FleeceDecoder extends Converter<Data, Object?> {
 class RecursiveFleeceDecoder extends Converter<Data, Object?> {
   @Deprecated('Use FleeceDecoder instead.')
   RecursiveFleeceDecoder({
-    this.trust = FLTrust.kFLUntrusted,
+    this.trust = FLTrust.untrusted,
     this.sharedKeys,
     SharedKeysTable? sharedKeysTable,
     this.sharedStringsTable,
@@ -323,26 +323,26 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
   Object? _decodeGlobalLoadedValue(SharedStringsTable sharedStringsTable) {
     final value = globalLoadedFLValue.ref;
     switch (FLValueType.fromValue(value.type)) {
-      case FLValueType.kFLUndefined:
+      case FLValueType.undefined:
         _throwUndefinedDartRepresentation();
-      case FLValueType.kFLNull:
+      case FLValueType.null$:
         return null;
-      case FLValueType.kFLBoolean:
+      case FLValueType.boolean:
         return value.asBool;
-      case FLValueType.kFLNumber:
+      case FLValueType.number:
         return value.isInteger ? value.asInt : value.asDouble;
-      case FLValueType.kFLString:
+      case FLValueType.string:
         return sharedStringsTable.decode(StringSource.value);
-      case FLValueType.kFLData:
+      case FLValueType.data:
         return value.asData.toData()?.toTypedList();
-      case FLValueType.kFLArray:
+      case FLValueType.array:
         // ignore: omit_local_variable_types
         final FLArray array = value.value.cast();
         return List<Object?>.generate(value.collectionSize, (index) {
           _decoderBinds.getLoadedValueFromArray(array, index);
           return _decodeGlobalLoadedValue(sharedStringsTable);
         });
-      case FLValueType.kFLDict:
+      case FLValueType.dict:
         // ignore: omit_local_variable_types
         final FLDict dict = value.value.cast();
         final iterator = DictIterator(
@@ -416,41 +416,41 @@ final class _FleeceListenerDecoder {
         }
 
         switch (FLValueType.fromValue(value.type)) {
-          case FLValueType.kFLUndefined:
+          case FLValueType.undefined:
             _listener.handleUndefined();
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLNull:
+          case FLValueType.null$:
             _listener.handleNull();
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLBoolean:
+          case FLValueType.boolean:
             _listener.handleBool(value.asBool);
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLNumber:
+          case FLValueType.number:
             _listener
                 .handleNumber(value.isInteger ? value.asInt : value.asDouble);
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLString:
+          case FLValueType.string:
             _listener.handleString(
               _sharedStringsTable.decode(StringSource.value),
             );
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLData:
+          case FLValueType.data:
             _listener.handleData(value.asData.toData()!.toTypedList());
             _currentLoader.handleValue();
             break;
-          case FLValueType.kFLArray:
+          case FLValueType.array:
             _currentLoader = _ArrayIndexLoader(
               value.value.cast(),
               value.collectionSize,
               _listener,
             )..parent = _currentLoader;
             break;
-          case FLValueType.kFLDict:
+          case FLValueType.dict:
             _currentLoader = _DictIteratorLoader(
               value.value.cast(),
               _listener,

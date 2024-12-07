@@ -40,7 +40,7 @@ final class ProxyIndexUpdater extends ProxyObject
             data: switch (transferableValue) {
               TransferableValue(:final encodedData?) => fl.Doc.fromResultData(
                   encodedData.toFleece(),
-                  FLTrust.kFLTrusted,
+                  FLTrust.trusted,
                 ),
               TransferableValue(:final value) => value,
             },

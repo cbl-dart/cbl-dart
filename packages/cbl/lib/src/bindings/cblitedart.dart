@@ -248,21 +248,16 @@ class cblitedart {
       _CBLDart_FLEncoder_WriteArrayValuePtr.asFunction<
           DartCBLDart_FLEncoder_WriteArrayValue>();
 
-  /// Initializes the native libraries.
-  ///
-  /// This function can be called multiple times and is thread save. The
-  /// libraries are only initialized by the first call and subsequent calls are
-  /// NOOPs.
-  CBLDartInitializeResult CBLDart_Initialize(
+  int CBLDart_Initialize(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
     ffi.Pointer<ffi.Void> cblInitContext,
     ffi.Pointer<CBLError> errorOut,
   ) {
-    return CBLDartInitializeResult.fromValue(_CBLDart_Initialize(
+    return _CBLDart_Initialize(
       dartInitializeDlData,
       cblInitContext,
       errorOut,
-    ));
+    );
   }
 
   late final _CBLDart_InitializePtr =
@@ -807,8 +802,6 @@ final class CBLDart_LoadedDictKey extends ffi.Struct {
   external imp1.FLValue value;
 }
 
-/// A simple reference to a block of memory. Does not imply ownership. (This is
-/// equivalent to the C++ class `slice`.)
 typedef FLSlice = imp1.FLSlice;
 
 final class CBLDart_LoadedFLValue extends ffi.Struct {
@@ -908,32 +901,12 @@ typedef NativeCBLDart_FLEncoder_WriteArrayValue = ffi.Bool Function(
 typedef DartCBLDart_FLEncoder_WriteArrayValue = bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, int index);
 
-/// This is a compatibility layer to allow Dart code to use the Couchbase Lite C
-/// API. Some method signatures are incompatible with Dart's FFI capabilities.
-///
-/// This layer is also where memory management of objects from the Couchbase
-/// Lite C API is integrated with the garbage collection of Dart objects.
-enum CBLDartInitializeResult {
-  CBLDartInitializeResult_kSuccess(0),
-  CBLDartInitializeResult_kIncompatibleDartVM(1),
-  CBLDartInitializeResult_kCBLInitError(2);
-
-  final int value;
-  const CBLDartInitializeResult(this.value);
-
-  static CBLDartInitializeResult fromValue(int value) => switch (value) {
-        0 => CBLDartInitializeResult_kSuccess,
-        1 => CBLDartInitializeResult_kIncompatibleDartVM,
-        2 => CBLDartInitializeResult_kCBLInitError,
-        _ => throw ArgumentError(
-            "Unknown value for CBLDartInitializeResult: $value"),
-      };
+sealed class CBLDartInitializeResult {
+  static const CBLDartInitializeResult_kSuccess = 0;
+  static const CBLDartInitializeResult_kIncompatibleDartVM = 1;
+  static const CBLDartInitializeResult_kCBLInitError = 2;
 }
 
-/// A struct holding information about an error. It's declared on the stack by a
-/// caller, and its address is passed to an API function. If the function's
-/// return value indicates that there was an error (usually by returning NULL or
-/// false), then the CBLError will have been filled in with the details.
 typedef CBLError = imp1.CBLError;
 typedef NativeCBLDart_Initialize = ffi.UnsignedInt Function(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
@@ -947,8 +920,6 @@ typedef DartCBLDart_Initialize = int Function(
 final class _CBLDart_AsyncCallback extends ffi.Opaque {}
 
 typedef CBLDart_AsyncCallback = ffi.Pointer<_CBLDart_AsyncCallback>;
-
-/// A port is used to send or receive inter-isolate messages
 typedef Dart_Port = ffi.Int64;
 typedef DartDart_Port = int;
 typedef NativeCBLDart_AsyncCallback_New = CBLDart_AsyncCallback Function(
@@ -991,10 +962,6 @@ typedef DartCBLDart_CBLLog_SetCallback = bool Function(
 typedef NativeCBLDart_CBLLog_SetCallbackLevel = ffi.Void Function(
     imp1.CBLLogLevel level);
 typedef DartCBLDart_CBLLog_SetCallbackLevel = void Function(int level);
-
-/// The properties for configuring logging to files. @warning `usePlaintext`
-/// results in significantly larger log files and higher CPU usage that may slow
-/// down your app; we recommend turning it off in production.
 typedef CBLLogFileConfiguration = imp1.CBLLogFileConfiguration;
 typedef NativeCBLDart_CBLLog_SetFileConfig = ffi.Bool Function(
     ffi.Pointer<CBLLogFileConfiguration> config,
@@ -1041,8 +1008,6 @@ typedef DartCBLDart_CBL_CopyDatabase = bool Function(
     imp1.FLString toName,
     ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
     ffi.Pointer<CBLError> outError);
-
-/// \defgroup database Database @{ \*/ /\*\* A connection to an open database.
 typedef CBLDatabase = imp1.CBLDatabase;
 typedef NativeCBLDart_CBLDatabase_Open = ffi.Pointer<CBLDatabase> Function(
     imp1.FLString name,
@@ -1064,9 +1029,6 @@ typedef DartCBLDart_CBLDatabase_Close = bool Function(
     ffi.Pointer<CBLDatabase> database,
     bool andDelete,
     ffi.Pointer<CBLError> errorOut);
-
-/// \defgroup collection Collection @{ \*/ /\*\* A collection, a document
-/// container.
 typedef CBLCollection = imp1.CBLCollection;
 typedef NativeCBLDart_CBLCollection_AddDocumentChangeListener
     = ffi.Void Function(
@@ -1088,27 +1050,15 @@ typedef DartCBLDart_CBLCollection_AddChangeListener = void Function(
     ffi.Pointer<CBLCollection> collection,
     CBLDart_AsyncCallback listener);
 
-enum CBLDart_IndexType {
-  kCBLDart_IndexTypeValue(0),
-  kCBLDart_IndexTypeFullText(1),
-  kCBLDart_IndexTypeVector(2);
-
-  final int value;
-  const CBLDart_IndexType(this.value);
-
-  static CBLDart_IndexType fromValue(int value) => switch (value) {
-        0 => kCBLDart_IndexTypeValue,
-        1 => kCBLDart_IndexTypeFullText,
-        2 => kCBLDart_IndexTypeVector,
-        _ => throw ArgumentError("Unknown value for CBLDart_IndexType: $value"),
-      };
+sealed class CBLDart_IndexType {
+  static const kCBLDart_IndexTypeValue = 0;
+  static const kCBLDart_IndexTypeFullText = 1;
+  static const kCBLDart_IndexTypeVector = 2;
 }
 
 final class CBLDart_CBLIndexSpec extends ffi.Struct {
   @ffi.Uint8()
-  external int typeAsInt;
-
-  CBLDart_IndexType get type => CBLDart_IndexType.fromValue(typeAsInt);
+  external int type;
 
   @imp1.CBLQueryLanguage()
   external int expressionLanguage;
@@ -1154,13 +1104,7 @@ typedef DartCBLDart_CBLCollection_CreateIndex = bool Function(
     imp1.FLString name,
     CBLDart_CBLIndexSpec indexSpec,
     ffi.Pointer<CBLError> errorOut);
-
-/// An opaque 'cookie' representing a registered listener callback. It's
-/// returned from functions that register listeners, and used to remove a
-/// listener by calling \ref CBLListener_Remove.
 typedef CBLListenerToken = imp1.CBLListenerToken;
-
-/// \defgroup query Query @{ \*/ /\*\* A compiled database query.
 typedef CBLQuery = imp1.CBLQuery;
 typedef NativeCBLDart_CBLQuery_AddChangeListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLDatabase> db,
@@ -1203,8 +1147,6 @@ typedef NativeCBLDart_PredictiveModel_Delete = ffi.Void Function(
 typedef DartCBLDart_PredictiveModel_Delete = void Function(
     CBLDart_PredictiveModel model);
 typedef FLSliceResult = imp1.FLSliceResult;
-
-/// A stream for reading a blob's content.
 typedef CBLBlobReadStream = imp1.CBLBlobReadStream;
 typedef NativeCBLDart_CBLBlobReader_Read = FLSliceResult Function(
     ffi.Pointer<CBLBlobReadStream> stream,
@@ -1229,14 +1171,8 @@ final class CBLDart_ReplicationCollection extends ffi.Struct {
   external CBLDart_AsyncCallback conflictResolver;
 }
 
-/// An opaque object representing the location of a database to replicate with.
 typedef CBLEndpoint = imp1.CBLEndpoint;
-
-/// An opaque object representing authentication credentials for a remote
-/// server.
 typedef CBLAuthenticator = imp1.CBLAuthenticator;
-
-/// Proxy settings for the replicator.
 typedef CBLProxySettings = imp1.CBLProxySettings;
 
 final class CBLDart_ReplicatorConfiguration extends ffi.Struct {
@@ -1278,8 +1214,6 @@ final class CBLDart_ReplicatorConfiguration extends ffi.Struct {
   external int collectionsCount;
 }
 
-/// \defgroup replication Replication @{ \*/ /\*\* A background task that syncs
-/// a \ref CBLDatabase with a remote server or peer.
 typedef CBLReplicator = imp1.CBLReplicator;
 typedef NativeCBLDart_CBLReplicator_Create
     = ffi.Pointer<CBLReplicator> Function(

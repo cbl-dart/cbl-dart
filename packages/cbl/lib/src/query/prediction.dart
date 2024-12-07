@@ -185,7 +185,7 @@ class _FfiPredictiveModel implements Finalizable {
       (outputDict as DictionaryImpl).encodeTo(encoder);
       final outputData = encoder.finish();
 
-      final outputDoc = fl.Doc.fromResultData(outputData, FLTrust.kFLTrusted);
+      final outputDoc = fl.Doc.fromResultData(outputData, FLTrust.trusted);
       final outputMutableDict =
           fl.MutableDict.mutableCopy(outputDoc.root.asDict!);
 

@@ -290,7 +290,7 @@ void main() {
 
 MRoot testMRoot(Object from) => MRoot.fromContext(
       MContext(
-        data: Doc.fromResultData(fleeceEncode(from), FLTrust.kFLTrusted),
+        data: Doc.fromResultData(fleeceEncode(from), FLTrust.trusted),
       ),
       isMutable: true,
     );

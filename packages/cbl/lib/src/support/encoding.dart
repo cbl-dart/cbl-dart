@@ -11,14 +11,10 @@ enum EncodingFormat {
 }
 
 extension EncodingFormatExt on EncodingFormat {
-  FLEncoderFormat toFLEncoderFormat() {
-    switch (this) {
-      case EncodingFormat.fleece:
-        return FLEncoderFormat.kFLEncodeFleece;
-      case EncodingFormat.json:
-        return FLEncoderFormat.kFLEncodeJSON;
-    }
-  }
+  FLEncoderFormat toFLEncoderFormat() => switch (this) {
+        EncodingFormat.fleece => FLEncoderFormat.fleece,
+        EncodingFormat.json => FLEncoderFormat.json,
+      };
 }
 
 class EncodedData {
@@ -29,7 +25,7 @@ class EncodedData {
   EncodedData.json(this.data) : format = EncodingFormat.json;
 
   static final _jsonDecoder = const Utf8Decoder().fuse(const JsonDecoder());
-  static const _fleeceDecoder = FleeceDecoder(trust: FLTrust.kFLTrusted);
+  static const _fleeceDecoder = FleeceDecoder(trust: FLTrust.trusted);
 
   final EncodingFormat format;
 
@@ -47,8 +43,8 @@ class EncodedData {
   Data toJson() {
     switch (format) {
       case EncodingFormat.fleece:
-        final encoder = FleeceEncoder(format: FLEncoderFormat.kFLEncodeJSON);
-        final doc = Doc.fromResultData(data, FLTrust.kFLTrusted);
+        final encoder = FleeceEncoder(format: FLEncoderFormat.json);
+        final doc = Doc.fromResultData(data, FLTrust.trusted);
         final root = doc.root;
         encoder.writeValue(root.pointer);
         return encoder.finish();
