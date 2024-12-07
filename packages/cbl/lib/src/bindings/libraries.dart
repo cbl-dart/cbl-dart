@@ -15,6 +15,7 @@ class LibraryConfiguration {
   /// for dynamic libraries on the current platform is appended to [name].
   LibraryConfiguration.dynamic(
     this.name, {
+    this.prependPrefix = true,
     this.appendExtension = true,
     this.version,
     this.isAppleFramework = false,
@@ -25,6 +26,7 @@ class LibraryConfiguration {
   LibraryConfiguration.process()
       : process = true,
         name = null,
+        prependPrefix = null,
         appendExtension = null,
         version = null,
         isAppleFramework = null;
@@ -34,6 +36,7 @@ class LibraryConfiguration {
   LibraryConfiguration.executable()
       : process = false,
         name = null,
+        prependPrefix = null,
         appendExtension = null,
         version = null,
         isAppleFramework = null;
@@ -44,6 +47,9 @@ class LibraryConfiguration {
 
   /// The name of the library.
   final String? name;
+
+  /// Whether to prepend the platform dependent file prefix to [name].
+  final bool? prependPrefix;
 
   /// Whether to append the platform dependent file extension to [name].
   final bool? appendExtension;
@@ -58,14 +64,21 @@ class LibraryConfiguration {
     if (name != null) {
       var name = this.name!;
 
+      if (!(isAppleFramework ?? false)) {
+        if (prependPrefix ?? false) {
+          name = '${_dynamicLibraryPrefix()}$name';
+        }
+        if (appendExtension ?? false) {
+          name = '$name.${_dynamicLibraryExtension(version: version)}';
+        }
+      }
+
       if (directory != null) {
         name = [directory, name].join(Platform.pathSeparator);
       }
 
       if (isAppleFramework ?? false) {
         name = '$name.framework/Versions/A/${this.name}';
-      } else if (appendExtension ?? false) {
-        name += _dynamicLibraryExtension(version: version);
       }
 
       return DynamicLibrary.open(name);
@@ -223,21 +236,31 @@ final _isUnix = Platform.isIOS ||
     Platform.isLinux ||
     Platform.isFuchsia;
 
+String _dynamicLibraryPrefix() {
+  if (_isUnix) {
+    return 'lib';
+  } else if (Platform.isWindows) {
+    return '';
+  } else {
+    throw UnimplementedError();
+  }
+}
+
 String _dynamicLibraryExtension({String? version}) {
   String extension;
   if (_isApple) {
-    extension = '.dylib';
+    extension = 'dylib';
   } else if (_isUnix) {
-    extension = '.so';
+    extension = 'so';
   } else if (Platform.isWindows) {
-    extension = '.dll';
+    extension = 'dll';
   } else {
     throw UnimplementedError();
   }
 
   if (version != null) {
     if (_isApple) {
-      extension = '.$version$extension';
+      extension = '$version.$extension';
     } else if (_isUnix) {
       extension = '$extension.$version';
     } else {

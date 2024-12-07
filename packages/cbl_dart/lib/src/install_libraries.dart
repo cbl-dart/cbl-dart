@@ -89,12 +89,15 @@ LibrariesConfiguration mergedNativeLibrariesConfigurations(
     cbl: _nativeLibraryConfiguration(cblPackage),
     cblDart: _nativeLibraryConfiguration(cblDartPackage),
     vectorSearch: vectorSearchPackage != null
-        ? _nativeLibraryConfiguration(vectorSearchPackage)
+        ? _nativeLibraryConfiguration(vectorSearchPackage, prependPrefix: false)
         : null,
   );
 }
 
-LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
+LibraryConfiguration _nativeLibraryConfiguration(
+  Package package, {
+  bool prependPrefix = true,
+}) =>
     LibraryConfiguration.dynamic(
       package.libraryName,
       // Specifying an exact version should not be necessary, but is
@@ -107,4 +110,5 @@ LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
               ? package.config.version.split('.').first
               : null,
       isAppleFramework: package.isNormalAppleFramework,
+      prependPrefix: prependPrefix,
     );

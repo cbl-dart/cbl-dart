@@ -65,18 +65,20 @@ enum Library {
 
   String libraryName(OS os) => switch (this) {
         cblite => switch (os) {
-            OS.linux || OS.android || OS.macOS => 'libcblite',
-            OS.windows => 'cblite',
+            OS.linux || OS.android || OS.macOS || OS.windows => 'cblite',
             OS.iOS => 'CouchbaseLite',
           },
         cblitedart => switch (os) {
-            OS.linux || OS.android || OS.macOS => 'libcblitedart',
-            OS.windows => 'cblitedart',
+            OS.linux || OS.android || OS.macOS || OS.windows => 'cblitedart',
             OS.iOS => 'CouchbaseLiteDart',
           },
         vectorSearch => switch (os) {
-            OS.linux || OS.android => 'libCouchbaseLiteVectorSearch',
-            OS.windows || OS.macOS || OS.iOS => 'CouchbaseLiteVectorSearch',
+            OS.linux ||
+            OS.android ||
+            OS.windows ||
+            OS.macOS ||
+            OS.iOS =>
+              'CouchbaseLiteVectorSearch',
           },
       };
 }
