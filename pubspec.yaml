@@ -1,16 +1,37 @@
 name: cbl_dart_repo
 publish_to: none
 
-environment:
-  sdk: ^3.0.0
-
-dev_dependencies:
+executables:
   cbd:
-    path: tool
-  daco: ^0.3.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  cbd: any
+  daco: ^0.3.0+1
   melos: ^6.2.0
   path: ^1.9.0
 
-dependency_overrides:
-  cbl:
-    path: packages/cbl
+workspace:
+  - packages/cbl
+  - packages/cbl_dart
+  - packages/cbl_dart/example
+  - packages/cbl_e2e_tests
+  - packages/cbl_e2e_tests_flutter
+  - packages/cbl_e2e_tests_standalone_dart
+  - packages/cbl_flutter
+  - packages/cbl_flutter_ce
+  - packages/cbl_flutter_ee
+  - packages/cbl_flutter_local
+  - packages/cbl_flutter_platform_interface
+  - packages/cbl_flutter_prebuilt
+  - packages/cbl_flutter_prebuilt_e2e_tests
+  - packages/cbl_flutter/example
+  - packages/cbl_generator
+  - packages/cbl_libcblite_api
+  - packages/cbl_libcblitedart_api
+  - packages/cbl_sentry
+  - packages/cbl_sentry/example
+  - packages/cbl/example
+  - tool

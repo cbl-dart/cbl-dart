@@ -11,9 +11,6 @@ ide:
   intellij: false
 
 command:
-  bootstrap:
-    runPubGetInParallel: false
-
   version:
     hooks:
       preCommit:
@@ -29,7 +26,7 @@ command:
 scripts:
   activate:cbd:
     description: Activates CBL Dart project dev tools CLI.
-    run: cd tool && dart pub global activate --source path .
+    run: dart pub global activate --source path . --overwrite
 
   build:cbl_flutter_prebuilt:
     description: Builds the prebuild packages `cbl_flutter_ce|ee`.

@@ -14,7 +14,17 @@ final class CbdRunner extends CommandRunner<void> {
 
   final String projectDir;
 
-  static Future<void> launch(
+  static Future<void> launch(List<String> args) async {
+    launchExecutable(
+      args,
+      LaunchConfig(
+        name: ExecutableName('cbd', package: 'cbl_dart_repo'),
+        entrypoint: _launch,
+      ),
+    );
+  }
+
+  static Future<void> _launch(
     List<String> args,
     LaunchContext context,
   ) async {

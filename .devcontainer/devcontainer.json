@@ -10,6 +10,5 @@
       "extensions": ["Dart-Code.dart-code"]
     }
   },
-  "onCreateCommand": "melos bootstrap",
   "remoteUser": "vscode"
 }
