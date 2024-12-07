@@ -735,12 +735,12 @@ class cblitedart {
       _CBLDart_CBLReplicator_AddDocumentReplicationListenerPtr.asFunction<
           DartCBLDart_CBLReplicator_AddDocumentReplicationListener>();
 
-  late final addresses = _SymbolAddresses(this);
+  late final addresses = SymbolAddresses(this);
 }
 
-class _SymbolAddresses {
+class SymbolAddresses {
   final cblitedart _library;
-  _SymbolAddresses(this._library);
+  SymbolAddresses(this._library);
   ffi.Pointer<ffi.NativeFunction<NativeCBLDart_FLSliceResult_ReleaseByBuf>>
       get CBLDart_FLSliceResult_ReleaseByBuf =>
           _library._CBLDart_FLSliceResult_ReleaseByBufPtr;

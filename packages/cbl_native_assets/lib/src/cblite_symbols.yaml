@@ -1,0 +1,456 @@
+format_version: 1.0.0
+files:
+  package:cbl/src/bindings/cblite.dart:
+    used-config:
+      ffi-native: false
+    symbols:
+      CBLCollectionChangeListenerFunction:
+        name: CBLCollectionChangeListenerFunction
+      CBLCollectionDocumentChangeListenerFunction:
+        name: CBLCollectionDocumentChangeListenerFunction
+      CBLConflictHandlerFunction:
+        name: CBLConflictHandlerFunction
+      CBLConflictResolverFunction:
+        name: CBLConflictResolverFunction
+      CBLDatabaseChangeListenerFunction:
+        name: CBLDatabaseChangeListenerFunction
+      CBLDocumentChangeListenerFunction:
+        name: CBLDocumentChangeListenerFunction
+      CBLDocumentPropertyDecryptorFunction:
+        name: CBLDocumentPropertyDecryptorFunction
+      CBLDocumentPropertyEncryptorFunction:
+        name: CBLDocumentPropertyEncryptorFunction
+      CBLDocumentReplicationListenerFunction:
+        name: CBLDocumentReplicationListenerFunction
+      CBLLogCallbackFunction:
+        name: CBLLogCallbackFunction
+      CBLNotificationsReadyCallbackFunction:
+        name: CBLNotificationsReadyCallbackFunction
+      CBLPropertyDecryptorFunction:
+        name: CBLPropertyDecryptorFunction
+      CBLPropertyEncryptorFunction:
+        name: CBLPropertyEncryptorFunction
+      CBLQueryChangeListenerFunction:
+        name: CBLQueryChangeListenerFunction
+      CBLReplicationFilterFunction:
+        name: CBLReplicationFilterFunction
+      CBLReplicatorChangeListenerFunction:
+        name: CBLReplicatorChangeListenerFunction
+      FLSharedKeysReadCallbackFunction:
+        name: FLSharedKeysReadCallbackFunction
+      c:@EA@FLCopyFlags:
+        name: FLCopyFlags
+      c:@EA@FLEncoderFormat:
+        name: FLEncoderFormat
+      c:@EA@FLError:
+        name: FLError
+      c:@EA@FLTrust:
+        name: FLTrust
+      c:@EA@FLValueType:
+        name: FLValueType
+      c:@Ea@kCBLConcurrencyControlLastWriteWins@kCBLConcurrencyControlFailOnConflict:
+        name: kCBLConcurrencyControlFailOnConflict
+      c:@Ea@kCBLConcurrencyControlLastWriteWins@kCBLConcurrencyControlLastWriteWins:
+        name: kCBLConcurrencyControlLastWriteWins
+      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricCosine:
+        name: kCBLDistanceMetricCosine
+      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricDot:
+        name: kCBLDistanceMetricDot
+      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricEuclidean:
+        name: kCBLDistanceMetricEuclidean
+      c:@Ea@kCBLDistanceMetricEuclideanSquared@kCBLDistanceMetricEuclideanSquared:
+        name: kCBLDistanceMetricEuclideanSquared
+      c:@Ea@kCBLDocumentFlagsDeleted@kCBLDocumentFlagsAccessRemoved:
+        name: kCBLDocumentFlagsAccessRemoved
+      c:@Ea@kCBLDocumentFlagsDeleted@kCBLDocumentFlagsDeleted:
+        name: kCBLDocumentFlagsDeleted
+      c:@Ea@kCBLDomain@kCBLDomain:
+        name: kCBLDomain
+      c:@Ea@kCBLDomain@kCBLFleeceDomain:
+        name: kCBLFleeceDomain
+      c:@Ea@kCBLDomain@kCBLNetworkDomain:
+        name: kCBLNetworkDomain
+      c:@Ea@kCBLDomain@kCBLPOSIXDomain:
+        name: kCBLPOSIXDomain
+      c:@Ea@kCBLDomain@kCBLSQLiteDomain:
+        name: kCBLSQLiteDomain
+      c:@Ea@kCBLDomain@kCBLWebSocketDomain:
+        name: kCBLWebSocketDomain
+      c:@Ea@kCBLEncryptionKeySizeAES256@kCBLEncryptionKeySizeAES256:
+        name: kCBLEncryptionKeySizeAES256
+      c:@Ea@kCBLEncryptionNone@kCBLEncryptionAES256:
+        name: kCBLEncryptionAES256
+      c:@Ea@kCBLEncryptionNone@kCBLEncryptionNone:
+        name: kCBLEncryptionNone
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorAssertionFailed:
+        name: kCBLErrorAssertionFailed
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorBadDocID:
+        name: kCBLErrorBadDocID
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorBadRevisionID:
+        name: kCBLErrorBadRevisionID
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorBusy:
+        name: kCBLErrorBusy
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCantOpenFile:
+        name: kCBLErrorCantOpenFile
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCantUpgradeDatabase:
+        name: kCBLErrorCantUpgradeDatabase
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorConflict:
+        name: kCBLErrorConflict
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCorruptData:
+        name: kCBLErrorCorruptData
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCorruptRevisionData:
+        name: kCBLErrorCorruptRevisionData
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorCrypto:
+        name: kCBLErrorCrypto
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorDatabaseTooNew:
+        name: kCBLErrorDatabaseTooNew
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorDatabaseTooOld:
+        name: kCBLErrorDatabaseTooOld
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorIOError:
+        name: kCBLErrorIOError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorInvalidParameter:
+        name: kCBLErrorInvalidParameter
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorInvalidQuery:
+        name: kCBLErrorInvalidQuery
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorInvalidQueryParam:
+        name: kCBLErrorInvalidQueryParam
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorMemoryError:
+        name: kCBLErrorMemoryError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorMissingIndex:
+        name: kCBLErrorMissingIndex
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotADatabaseFile:
+        name: kCBLErrorNotADatabaseFile
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotFound:
+        name: kCBLErrorNotFound
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotInTransaction:
+        name: kCBLErrorNotInTransaction
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotOpen:
+        name: kCBLErrorNotOpen
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorNotWriteable:
+        name: kCBLErrorNotWriteable
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorRemoteError:
+        name: kCBLErrorRemoteError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorTransactionNotClosed:
+        name: kCBLErrorTransactionNotClosed
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnexpectedError:
+        name: kCBLErrorUnexpectedError
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnimplemented:
+        name: kCBLErrorUnimplemented
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnsupported:
+        name: kCBLErrorUnsupported
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorUnsupportedEncryption:
+        name: kCBLErrorUnsupportedEncryption
+      c:@Ea@kCBLErrorAssertionFailed@kCBLErrorWrongFormat:
+        name: kCBLErrorWrongFormat
+      c:@Ea@kCBLJSONLanguage@kCBLJSONLanguage:
+        name: kCBLJSONLanguage
+      c:@Ea@kCBLJSONLanguage@kCBLN1QLLanguage:
+        name: kCBLN1QLLanguage
+      c:@Ea@kCBLLogDebug@kCBLLogDebug:
+        name: kCBLLogDebug
+      c:@Ea@kCBLLogDebug@kCBLLogError:
+        name: kCBLLogError
+      c:@Ea@kCBLLogDebug@kCBLLogInfo:
+        name: kCBLLogInfo
+      c:@Ea@kCBLLogDebug@kCBLLogNone:
+        name: kCBLLogNone
+      c:@Ea@kCBLLogDebug@kCBLLogVerbose:
+        name: kCBLLogVerbose
+      c:@Ea@kCBLLogDebug@kCBLLogWarning:
+        name: kCBLLogWarning
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainDatabase:
+        name: kCBLLogDomainDatabase
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainNetwork:
+        name: kCBLLogDomainNetwork
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainQuery:
+        name: kCBLLogDomainQuery
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainReplicator:
+        name: kCBLLogDomainReplicator
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeCompact:
+        name: kCBLMaintenanceTypeCompact
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeFullOptimize:
+        name: kCBLMaintenanceTypeFullOptimize
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeIntegrityCheck:
+        name: kCBLMaintenanceTypeIntegrityCheck
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeOptimize:
+        name: kCBLMaintenanceTypeOptimize
+      c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeReindex:
+        name: kCBLMaintenanceTypeReindex
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrDNSFailure:
+        name: kCBLNetErrDNSFailure
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrInvalidRedirect:
+        name: kCBLNetErrInvalidRedirect
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrInvalidURL:
+        name: kCBLNetErrInvalidURL
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertExpired:
+        name: kCBLNetErrTLSCertExpired
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertNameMismatch:
+        name: kCBLNetErrTLSCertNameMismatch
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertRevoked:
+        name: kCBLNetErrTLSCertRevoked
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertUnknownRoot:
+        name: kCBLNetErrTLSCertUnknownRoot
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSCertUntrusted:
+        name: kCBLNetErrTLSCertUntrusted
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSClientCertRejected:
+        name: kCBLNetErrTLSClientCertRejected
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSClientCertRequired:
+        name: kCBLNetErrTLSClientCertRequired
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTLSHandshakeFailed:
+        name: kCBLNetErrTLSHandshakeFailed
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTimeout:
+        name: kCBLNetErrTimeout
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrTooManyRedirects:
+        name: kCBLNetErrTooManyRedirects
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrUnknown:
+        name: kCBLNetErrUnknown
+      c:@Ea@kCBLNetErrDNSFailure@kCBLNetErrUnknownHost:
+        name: kCBLNetErrUnknownHost
+      c:@Ea@kCBLProxyHTTP@kCBLProxyHTTP:
+        name: kCBLProxyHTTP
+      c:@Ea@kCBLProxyHTTP@kCBLProxyHTTPS:
+        name: kCBLProxyHTTPS
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorBusy:
+        name: kCBLReplicatorBusy
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorConnecting:
+        name: kCBLReplicatorConnecting
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorIdle:
+        name: kCBLReplicatorIdle
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorOffline:
+        name: kCBLReplicatorOffline
+      c:@Ea@kCBLReplicatorStopped@kCBLReplicatorStopped:
+        name: kCBLReplicatorStopped
+      c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePull:
+        name: kCBLReplicatorTypePull
+      c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePush:
+        name: kCBLReplicatorTypePush
+      c:@Ea@kCBLReplicatorTypePushAndPull@kCBLReplicatorTypePushAndPull:
+        name: kCBLReplicatorTypePushAndPull
+      c:@Ea@kCBLSQ4@kCBLSQ4:
+        name: kCBLSQ4
+      c:@Ea@kCBLSQ4@kCBLSQ6:
+        name: kCBLSQ6
+      c:@Ea@kCBLSQ4@kCBLSQ8:
+        name: kCBLSQ8
+      c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeFromEnd:
+        name: kCBLSeekModeFromEnd
+      c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeFromStart:
+        name: kCBLSeekModeFromStart
+      c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeRelative:
+        name: kCBLSeekModeRelative
+      c:@S@CBLAuthenticator:
+        name: CBLAuthenticator
+      c:@S@CBLBlob:
+        name: CBLBlob
+      c:@S@CBLBlobReadStream:
+        name: CBLBlobReadStream
+      c:@S@CBLBlobWriteStream:
+        name: CBLBlobWriteStream
+      c:@S@CBLCollection:
+        name: CBLCollection
+      c:@S@CBLDatabase:
+        name: CBLDatabase
+      c:@S@CBLDocument:
+        name: CBLDocument
+      c:@S@CBLEncryptable:
+        name: CBLEncryptable
+      c:@S@CBLEndpoint:
+        name: CBLEndpoint
+      c:@S@CBLIndexUpdater:
+        name: CBLIndexUpdater
+      c:@S@CBLListenerToken:
+        name: CBLListenerToken
+      c:@S@CBLQuery:
+        name: CBLQuery
+      c:@S@CBLQueryIndex:
+        name: CBLQueryIndex
+      c:@S@CBLRefCounted:
+        name: CBLRefCounted
+      c:@S@CBLReplicator:
+        name: CBLReplicator
+      c:@S@CBLResultSet:
+        name: CBLResultSet
+      c:@S@CBLScope:
+        name: CBLScope
+      c:@S@CBLVectorEncoding:
+        name: CBLVectorEncoding
+      c:@S@FLSlice:
+        name: FLSlice
+      c:@S@FLSliceResult:
+        name: FLSliceResult
+      c:@S@_FLArray:
+        name: _FLArray
+      c:@S@_FLDeepIterator:
+        name: _FLDeepIterator
+      c:@S@_FLDict:
+        name: _FLDict
+      c:@S@_FLDoc:
+        name: _FLDoc
+      c:@S@_FLEncoder:
+        name: _FLEncoder
+      c:@S@_FLKeyPath:
+        name: _FLKeyPath
+      c:@S@_FLSharedKeyScope:
+        name: _FLSharedKeyScope
+      c:@S@_FLSharedKeys:
+        name: _FLSharedKeys
+      c:@S@_FLSlot:
+        name: _FLSlot
+      c:@S@_FLValue:
+        name: _FLValue
+      c:@S@__sFILE:
+        name: __sFILE
+      c:@S@__sFILEX:
+        name: __sFILEX
+      c:@S@__sbuf:
+        name: __sbuf
+      c:@SA@CBLCollectionChange:
+        name: CBLCollectionChange
+      c:@SA@CBLDatabaseConfiguration:
+        name: CBLDatabaseConfiguration
+      c:@SA@CBLDocumentChange:
+        name: CBLDocumentChange
+      c:@SA@CBLEncryptionKey:
+        name: CBLEncryptionKey
+      c:@SA@CBLError:
+        name: CBLError
+      c:@SA@CBLFullTextIndexConfiguration:
+        name: CBLFullTextIndexConfiguration
+      c:@SA@CBLLogFileConfiguration:
+        name: CBLLogFileConfiguration
+      c:@SA@CBLPredictiveModel:
+        name: CBLPredictiveModel
+      c:@SA@CBLProxySettings:
+        name: CBLProxySettings
+      c:@SA@CBLReplicatedDocument:
+        name: CBLReplicatedDocument
+      c:@SA@CBLReplicationCollection:
+        name: CBLReplicationCollection
+      c:@SA@CBLReplicatorConfiguration:
+        name: CBLReplicatorConfiguration
+      c:@SA@CBLReplicatorProgress:
+        name: CBLReplicatorProgress
+      c:@SA@CBLReplicatorStatus:
+        name: CBLReplicatorStatus
+      c:@SA@CBLValueIndexConfiguration:
+        name: CBLValueIndexConfiguration
+      c:@SA@CBLVectorIndexConfiguration:
+        name: CBLVectorIndexConfiguration
+      c:@SA@FLArrayIterator:
+        name: FLArrayIterator
+      c:@SA@FLDictIterator:
+        name: FLDictIterator
+      c:@SA@FLDictKey:
+        name: FLDictKey
+      c:@SA@FLPathComponent:
+        name: FLPathComponent
+      c:CBLBase.h@T@CBLErrorCode:
+        name: CBLErrorCode
+      c:CBLBase.h@T@CBLErrorDomain:
+        name: CBLErrorDomain
+      c:CBLBase.h@T@CBLNetworkErrorCode:
+        name: CBLNetworkErrorCode
+      c:CBLBase.h@T@CBLTimestamp:
+        name: CBLTimestamp
+      c:CBLBlob.h@T@CBLSeekBase:
+        name: CBLSeekBase
+      c:CBLCollection.h@T@CBLCollectionChangeListener:
+        name: CBLCollectionChangeListener
+      c:CBLCollection.h@T@CBLCollectionDocumentChangeListener:
+        name: CBLCollectionDocumentChangeListener
+      c:CBLDatabase.h@T@CBLDatabaseChangeListener:
+        name: CBLDatabaseChangeListener
+      c:CBLDatabase.h@T@CBLEncryptionAlgorithm:
+        name: CBLEncryptionAlgorithm
+      c:CBLDatabase.h@T@CBLEncryptionKeySize:
+        name: CBLEncryptionKeySize
+      c:CBLDatabase.h@T@CBLMaintenanceType:
+        name: CBLMaintenanceType
+      c:CBLDatabase.h@T@CBLNotificationsReadyCallback:
+        name: CBLNotificationsReadyCallback
+      c:CBLDocument.h@T@CBLConcurrencyControl:
+        name: CBLConcurrencyControl
+      c:CBLDocument.h@T@CBLConflictHandler:
+        name: CBLConflictHandler
+      c:CBLDocument.h@T@CBLDocumentChangeListener:
+        name: CBLDocumentChangeListener
+      c:CBLLog.h@T@CBLLogCallback:
+        name: CBLLogCallback
+      c:CBLLog.h@T@CBLLogDomain:
+        name: CBLLogDomain
+      c:CBLLog.h@T@CBLLogLevel:
+        name: CBLLogLevel
+      c:CBLQuery.h@T@CBLQueryChangeListener:
+        name: CBLQueryChangeListener
+      c:CBLQueryIndexTypes.h@T@CBLDistanceMetric:
+        name: CBLDistanceMetric
+      c:CBLQueryIndexTypes.h@T@CBLScalarQuantizerType:
+        name: CBLScalarQuantizerType
+      c:CBLQueryTypes.h@T@CBLQueryLanguage:
+        name: CBLQueryLanguage
+      c:CBLReplicator.h@T@CBLConflictResolver:
+        name: CBLConflictResolver
+      c:CBLReplicator.h@T@CBLDocumentFlags:
+        name: CBLDocumentFlags
+      c:CBLReplicator.h@T@CBLDocumentPropertyDecryptor:
+        name: CBLDocumentPropertyDecryptor
+      c:CBLReplicator.h@T@CBLDocumentPropertyEncryptor:
+        name: CBLDocumentPropertyEncryptor
+      c:CBLReplicator.h@T@CBLDocumentReplicationListener:
+        name: CBLDocumentReplicationListener
+      c:CBLReplicator.h@T@CBLPropertyDecryptor:
+        name: CBLPropertyDecryptor
+      c:CBLReplicator.h@T@CBLPropertyEncryptor:
+        name: CBLPropertyEncryptor
+      c:CBLReplicator.h@T@CBLProxyType:
+        name: CBLProxyType
+      c:CBLReplicator.h@T@CBLReplicationFilter:
+        name: CBLReplicationFilter
+      c:CBLReplicator.h@T@CBLReplicatorActivityLevel:
+        name: CBLReplicatorActivityLevel
+      c:CBLReplicator.h@T@CBLReplicatorChangeListener:
+        name: CBLReplicatorChangeListener
+      c:CBLReplicator.h@T@CBLReplicatorType:
+        name: CBLReplicatorType
+      c:FLBase.h@T@FLArray:
+        name: FLArray
+      c:FLBase.h@T@FLDict:
+        name: FLDict
+      c:FLBase.h@T@FLDoc:
+        name: FLDoc
+      c:FLBase.h@T@FLEncoder:
+        name: FLEncoder
+      c:FLBase.h@T@FLMutableArray:
+        name: FLMutableArray
+      c:FLBase.h@T@FLMutableDict:
+        name: FLMutableDict
+      c:FLBase.h@T@FLSharedKeys:
+        name: FLSharedKeys
+      c:FLBase.h@T@FLSlot:
+        name: FLSlot
+      c:FLBase.h@T@FLTimestamp:
+        name: FLTimestamp
+      c:FLBase.h@T@FLValue:
+        name: FLValue
+      c:FLDeepIterator.h@T@FLDeepIterator:
+        name: FLDeepIterator
+      c:FLExpert.h@T@FLSharedKeyScope:
+        name: FLSharedKeyScope
+      c:FLExpert.h@T@FLSharedKeysReadCallback:
+        name: FLSharedKeysReadCallback
+      c:FLKeyPath.h@T@FLKeyPath:
+        name: FLKeyPath
+      c:FLSlice.h@T@FLHeapSlice:
+        name: FLHeapSlice
+      c:FLSlice.h@T@FLString:
+        name: FLString
+      c:FLSlice.h@T@FLStringResult:
+        name: FLStringResult
+      c:_stdio.h@T@FILE:
+        name: FILE
+      c:_stdio.h@T@fpos_t:
+        name: fpos_t
+      c:_types.h@T@__darwin_off_t:
+        name: __darwin_off_t
+      c:_types.h@T@__int64_t:
+        name: __int64_t

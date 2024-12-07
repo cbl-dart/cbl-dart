@@ -477,7 +477,7 @@ final class BaseBindings extends Bindings {
           throw error.toCouchbaseLiteException();
       }
 
-      if (libraries.vectorSearchLibraryPath case final libraryPath?) {
+      if (vectorSearchLibraryPath case final libraryPath?) {
         final libraryDirectory = p.dirname(libraryPath);
         runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
           cbl.CBL_EnableVectorSearch(flLibraryDirectory, globalCBLError)
