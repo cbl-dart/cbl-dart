@@ -1,0 +1,54 @@
+name: cblite
+description: Bindings for Couchbase Lite C API
+output:
+  bindings: lib/src/cblite.dart
+import:
+  symbol-files:
+    - package:cbl_native_assets/src/cblite_symbols.yaml
+ffi-native:
+comments: false
+preamble: |
+  // ignore_for_file: unused_field
+headers:
+  entry-points:
+    - ../../native/vendor/cblite/include/cbl/CouchbaseLite.h
+    - ../../native/vendor/cblite/include/fleece/Fleece.h
+    - ../../native/vendor/cblite/include/fleece/FLExpert.h
+    - ../../native/vendor/cblite/include/fleece/FLSlice.h
+  include-directives:
+    - ../../native/vendor/cblite/include/cbl/**
+    - ../../native/vendor/cblite/include/fleece/**
+functions:
+  rename:
+    _FLBuf_Release: FLBuf_Release
+    _FLBuf_Retain: FLBuf_Retain
+  expose-typedefs:
+    include:
+      - '.*'
+  symbol-address:
+    include:
+      - CBL_Release
+      - CBLBlobReader_Close
+      - FLDoc_Release
+      - FLEncoder_Free
+      - FLSharedKeys_Release
+      - FLValue_Release
+structs:
+  member-rename:
+    FLDictKey:
+      _private1: private1
+      _private2: private2
+      _private3: private3
+enums:
+  as-int:
+    include:
+      - '.*'
+compiler-opts:
+  - '-I../../native/vendor/cblite/include'
+  # CBL uses a macro to define enums which is called CBL_ENUM.
+  # On Apple systems the CBL aliases CF_ENUM to CBL_ENUM which seems to be a
+  # problem for ffigen.
+  # As a workaround we define __APPLE__ to 0 to avoid the aliasing.
+  - '-D__APPLE__=0'
+  - '-DCOUCHBASE_ENTERPRISE=0'
+ignore-source-errors: true

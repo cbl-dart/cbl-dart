@@ -5930,12 +5930,12 @@ class cblite {
       _lookup<ffi.NativeFunction<NativeFLData_Dump>>('FLData_Dump');
   late final _FLData_Dump = _FLData_DumpPtr.asFunction<DartFLData_Dump>();
 
-  late final addresses = _SymbolAddresses(this);
+  late final addresses = SymbolAddresses(this);
 }
 
-class _SymbolAddresses {
+class SymbolAddresses {
   final cblite _library;
-  _SymbolAddresses(this._library);
+  SymbolAddresses(this._library);
   ffi.Pointer<ffi.NativeFunction<NativeCBL_Release>> get CBL_Release =>
       _library._CBL_ReleasePtr;
   ffi.Pointer<ffi.NativeFunction<NativeCBLBlobReader_Close>>

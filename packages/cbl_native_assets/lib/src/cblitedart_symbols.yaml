@@ -1,0 +1,84 @@
+format_version: 1.0.0
+files:
+  package:cbl/src/bindings/cblitedart.dart:
+    used-config:
+      ffi-native: false
+    symbols:
+      CBLDart_PredictiveModel_PredictionAsyncFunction:
+        name: CBLDart_PredictiveModel_PredictionAsyncFunction
+      CBLDart_PredictiveModel_PredictionSyncFunction:
+        name: CBLDart_PredictiveModel_PredictionSyncFunction
+      CBLDart_PredictiveModel_UnregisteredFunction:
+        name: CBLDart_PredictiveModel_UnregisteredFunction
+      c:@E@CBLDartInitializeResult:
+        name: CBLDartInitializeResult
+      c:@EA@CBLDart_IndexType:
+        name: CBLDart_IndexType
+      c:@S@CBLDart_CBLEncryptionKey:
+        name: CBLDart_CBLEncryptionKey
+      c:@S@CBLDart_CBLIndexSpec:
+        name: CBLDart_CBLIndexSpec
+      c:@S@CBLDart_FLArrayIterator:
+        name: CBLDart_FLArrayIterator
+      c:@S@CBLDart_FLDictIterator:
+        name: CBLDart_FLDictIterator
+      c:@S@CBLDart_LoadedDictKey:
+        name: CBLDart_LoadedDictKey
+      c:@S@CBLDart_LoadedFLValue:
+        name: CBLDart_LoadedFLValue
+      c:@S@CBLDart_ReplicationCollection:
+        name: CBLDart_ReplicationCollection
+      c:@S@CBLDart_ReplicatorConfiguration:
+        name: CBLDart_ReplicatorConfiguration
+      c:@S@KnownSharedKeys:
+        name: KnownSharedKeys
+      c:@S@_CBLDart_AsyncCallback:
+        name: _CBLDart_AsyncCallback
+      c:@S@_CBLDart_Completer:
+        name: _CBLDart_Completer
+      c:@S@_CBLDart_PredictiveModel:
+        name: _CBLDart_PredictiveModel
+      c:@SA@CBLDart_CBLDatabaseConfiguration:
+        name: CBLDart_CBLDatabaseConfiguration
+      c:@T@CBLError:
+        name: CBLError
+      c:@T@CBLLogFileConfiguration:
+        name: CBLLogFileConfiguration
+      c:@T@CBLProxySettings:
+        name: CBLProxySettings
+      c:CBL+Dart.h@T@CBLDart_AsyncCallback:
+        name: CBLDart_AsyncCallback
+      c:CBL+Dart.h@T@CBLDart_Completer:
+        name: CBLDart_Completer
+      c:CBL+Dart.h@T@CBLDart_IsolateId:
+        name: CBLDart_IsolateId
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel:
+        name: CBLDart_PredictiveModel
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel_PredictionAsync:
+        name: CBLDart_PredictiveModel_PredictionAsync
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel_PredictionSync:
+        name: CBLDart_PredictiveModel_PredictionSync
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel_Unregistered:
+        name: CBLDart_PredictiveModel_Unregistered
+      c:CBLBase.h@T@CBLCollection:
+        name: CBLCollection
+      c:CBLBase.h@T@CBLDatabase:
+        name: CBLDatabase
+      c:CBLBase.h@T@CBLListenerToken:
+        name: CBLListenerToken
+      c:CBLBase.h@T@CBLQuery:
+        name: CBLQuery
+      c:CBLBase.h@T@CBLReplicator:
+        name: CBLReplicator
+      c:CBLBlob.h@T@CBLBlobReadStream:
+        name: CBLBlobReadStream
+      c:CBLReplicator.h@T@CBLAuthenticator:
+        name: CBLAuthenticator
+      c:CBLReplicator.h@T@CBLEndpoint:
+        name: CBLEndpoint
+      c:FLSlice.h@T@FLSlice:
+        name: FLSlice
+      c:FLSlice.h@T@FLSliceResult:
+        name: FLSliceResult
+      c:dart_api.h@T@Dart_Port:
+        name: Dart_Port

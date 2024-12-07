@@ -7,7 +7,10 @@ import 'errors.dart';
 import 'tracing.dart';
 
 class InitContext {
-  InitContext({required this.filesDir, required this.tempDir});
+  InitContext({
+    required this.filesDir,
+    required this.tempDir,
+  });
 
   final String filesDir;
   final String tempDir;
@@ -18,7 +21,8 @@ class InitContext {
 
 class IsolateContext {
   IsolateContext({
-    required this.libraries,
+    this.libraries,
+    this.bindings,
     this.initContext,
   });
 
@@ -41,7 +45,9 @@ class IsolateContext {
     return config;
   }
 
-  final LibrariesConfiguration libraries;
+  final LibrariesConfiguration? libraries;
+  final CBLBindings? bindings;
+
   final InitContext? initContext;
 }
 
@@ -65,7 +71,8 @@ Future<void> _initIsolate(IsolateContext context) async {
   IsolateContext.instance = context;
 
   CBLBindings.init(
-    context.libraries,
+    instance: context.bindings,
+    libraries: context.libraries,
     onTracedCall: tracingDelegateTracedNativeCallHandler,
   );
 

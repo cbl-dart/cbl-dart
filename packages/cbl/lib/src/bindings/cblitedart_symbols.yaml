@@ -1,0 +1,172 @@
+format_version: 1.0.0
+files:
+  package:cbl/src/bindings/cblitedart.dart:
+    used-config:
+      ffi-native: false
+    symbols:
+      CBLDart_PredictiveModel_PredictionAsyncFunction:
+        name: CBLDart_PredictiveModel_PredictionAsyncFunction
+      CBLDart_PredictiveModel_PredictionSyncFunction:
+        name: CBLDart_PredictiveModel_PredictionSyncFunction
+      CBLDart_PredictiveModel_UnregisteredFunction:
+        name: CBLDart_PredictiveModel_UnregisteredFunction
+      c:@E@CBLDartInitializeResult:
+        name: CBLDartInitializeResult
+      c:@EA@CBLDart_IndexType:
+        name: CBLDart_IndexType
+      c:@F@CBLDart_AllocateIsolateId:
+        name: CBLDart_AllocateIsolateId
+      c:@F@CBLDart_AsyncCallback_CallForTest:
+        name: CBLDart_AsyncCallback_CallForTest
+      c:@F@CBLDart_AsyncCallback_Close:
+        name: CBLDart_AsyncCallback_Close
+      c:@F@CBLDart_AsyncCallback_Delete:
+        name: CBLDart_AsyncCallback_Delete
+      c:@F@CBLDart_AsyncCallback_New:
+        name: CBLDart_AsyncCallback_New
+      c:@F@CBLDart_CBLBlobReader_Read:
+        name: CBLDart_CBLBlobReader_Read
+      c:@F@CBLDart_CBLCollection_AddChangeListener:
+        name: CBLDart_CBLCollection_AddChangeListener
+      c:@F@CBLDart_CBLCollection_AddDocumentChangeListener:
+        name: CBLDart_CBLCollection_AddDocumentChangeListener
+      c:@F@CBLDart_CBLCollection_CreateIndex:
+        name: CBLDart_CBLCollection_CreateIndex
+      c:@F@CBLDart_CBLDatabaseConfiguration_Default:
+        name: CBLDart_CBLDatabaseConfiguration_Default
+      c:@F@CBLDart_CBLDatabase_Close:
+        name: CBLDart_CBLDatabase_Close
+      c:@F@CBLDart_CBLDatabase_Open:
+        name: CBLDart_CBLDatabase_Open
+      c:@F@CBLDart_CBLDatabase_Release:
+        name: CBLDart_CBLDatabase_Release
+      c:@F@CBLDart_CBLLog_GetFileConfig:
+        name: CBLDart_CBLLog_GetFileConfig
+      c:@F@CBLDart_CBLLog_SetCallback:
+        name: CBLDart_CBLLog_SetCallback
+      c:@F@CBLDart_CBLLog_SetCallbackLevel:
+        name: CBLDart_CBLLog_SetCallbackLevel
+      c:@F@CBLDart_CBLLog_SetFileConfig:
+        name: CBLDart_CBLLog_SetFileConfig
+      c:@F@CBLDart_CBLLog_SetSentryBreadcrumbs:
+        name: CBLDart_CBLLog_SetSentryBreadcrumbs
+      c:@F@CBLDart_CBLQuery_AddChangeListener:
+        name: CBLDart_CBLQuery_AddChangeListener
+      c:@F@CBLDart_CBLReplicator_AddChangeListener:
+        name: CBLDart_CBLReplicator_AddChangeListener
+      c:@F@CBLDart_CBLReplicator_AddDocumentReplicationListener:
+        name: CBLDart_CBLReplicator_AddDocumentReplicationListener
+      c:@F@CBLDart_CBLReplicator_Create:
+        name: CBLDart_CBLReplicator_Create
+      c:@F@CBLDart_CBLReplicator_Release:
+        name: CBLDart_CBLReplicator_Release
+      c:@F@CBLDart_CBL_CopyDatabase:
+        name: CBLDart_CBL_CopyDatabase
+      c:@F@CBLDart_Completer_Complete:
+        name: CBLDart_Completer_Complete
+      c:@F@CBLDart_FLArrayIterator_Begin:
+        name: CBLDart_FLArrayIterator_Begin
+      c:@F@CBLDart_FLArrayIterator_Delete:
+        name: CBLDart_FLArrayIterator_Delete
+      c:@F@CBLDart_FLArrayIterator_Next:
+        name: CBLDart_FLArrayIterator_Next
+      c:@F@CBLDart_FLArray_GetLoadedFLValue:
+        name: CBLDart_FLArray_GetLoadedFLValue
+      c:@F@CBLDart_FLDictIterator_Begin:
+        name: CBLDart_FLDictIterator_Begin
+      c:@F@CBLDart_FLDictIterator_Delete:
+        name: CBLDart_FLDictIterator_Delete
+      c:@F@CBLDart_FLDictIterator_Next:
+        name: CBLDart_FLDictIterator_Next
+      c:@F@CBLDart_FLDict_GetLoadedFLValue:
+        name: CBLDart_FLDict_GetLoadedFLValue
+      c:@F@CBLDart_FLEncoder_WriteArrayValue:
+        name: CBLDart_FLEncoder_WriteArrayValue
+      c:@F@CBLDart_FLSliceResult_ReleaseByBuf:
+        name: CBLDart_FLSliceResult_ReleaseByBuf
+      c:@F@CBLDart_FLSliceResult_RetainByBuf:
+        name: CBLDart_FLSliceResult_RetainByBuf
+      c:@F@CBLDart_GetCurrentIsolateId:
+        name: CBLDart_GetCurrentIsolateId
+      c:@F@CBLDart_GetLoadedFLValue:
+        name: CBLDart_GetLoadedFLValue
+      c:@F@CBLDart_Initialize:
+        name: CBLDart_Initialize
+      c:@F@CBLDart_KnownSharedKeys_Delete:
+        name: CBLDart_KnownSharedKeys_Delete
+      c:@F@CBLDart_KnownSharedKeys_New:
+        name: CBLDart_KnownSharedKeys_New
+      c:@F@CBLDart_PredictiveModel_Delete:
+        name: CBLDart_PredictiveModel_Delete
+      c:@F@CBLDart_PredictiveModel_New:
+        name: CBLDart_PredictiveModel_New
+      c:@F@CBLDart_SetCurrentIsolateId:
+        name: CBLDart_SetCurrentIsolateId
+      c:@S@CBLDart_CBLEncryptionKey:
+        name: CBLDart_CBLEncryptionKey
+      c:@S@CBLDart_CBLIndexSpec:
+        name: CBLDart_CBLIndexSpec
+      c:@S@CBLDart_FLArrayIterator:
+        name: CBLDart_FLArrayIterator
+      c:@S@CBLDart_FLDictIterator:
+        name: CBLDart_FLDictIterator
+      c:@S@CBLDart_LoadedDictKey:
+        name: CBLDart_LoadedDictKey
+      c:@S@CBLDart_LoadedFLValue:
+        name: CBLDart_LoadedFLValue
+      c:@S@CBLDart_ReplicationCollection:
+        name: CBLDart_ReplicationCollection
+      c:@S@CBLDart_ReplicatorConfiguration:
+        name: CBLDart_ReplicatorConfiguration
+      c:@S@KnownSharedKeys:
+        name: KnownSharedKeys
+      c:@S@_CBLDart_AsyncCallback:
+        name: _CBLDart_AsyncCallback
+      c:@S@_CBLDart_Completer:
+        name: _CBLDart_Completer
+      c:@S@_CBLDart_PredictiveModel:
+        name: _CBLDart_PredictiveModel
+      c:@SA@CBLDart_CBLDatabaseConfiguration:
+        name: CBLDart_CBLDatabaseConfiguration
+      c:@T@CBLError:
+        name: CBLError
+      c:@T@CBLLogFileConfiguration:
+        name: CBLLogFileConfiguration
+      c:@T@CBLProxySettings:
+        name: CBLProxySettings
+      c:CBL+Dart.h@T@CBLDart_AsyncCallback:
+        name: CBLDart_AsyncCallback
+      c:CBL+Dart.h@T@CBLDart_Completer:
+        name: CBLDart_Completer
+      c:CBL+Dart.h@T@CBLDart_IsolateId:
+        name: CBLDart_IsolateId
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel:
+        name: CBLDart_PredictiveModel
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel_PredictionAsync:
+        name: CBLDart_PredictiveModel_PredictionAsync
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel_PredictionSync:
+        name: CBLDart_PredictiveModel_PredictionSync
+      c:CBL+Dart.h@T@CBLDart_PredictiveModel_Unregistered:
+        name: CBLDart_PredictiveModel_Unregistered
+      c:CBLBase.h@T@CBLCollection:
+        name: CBLCollection
+      c:CBLBase.h@T@CBLDatabase:
+        name: CBLDatabase
+      c:CBLBase.h@T@CBLListenerToken:
+        name: CBLListenerToken
+      c:CBLBase.h@T@CBLQuery:
+        name: CBLQuery
+      c:CBLBase.h@T@CBLReplicator:
+        name: CBLReplicator
+      c:CBLBlob.h@T@CBLBlobReadStream:
+        name: CBLBlobReadStream
+      c:CBLReplicator.h@T@CBLAuthenticator:
+        name: CBLAuthenticator
+      c:CBLReplicator.h@T@CBLEndpoint:
+        name: CBLEndpoint
+      c:FLSlice.h@T@FLSlice:
+        name: FLSlice
+      c:FLSlice.h@T@FLSliceResult:
+        name: FLSliceResult
+      c:dart_api.h@T@Dart_Port:
+        name: Dart_Port

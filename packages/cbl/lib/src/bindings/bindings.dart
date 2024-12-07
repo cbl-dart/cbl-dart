@@ -16,26 +16,35 @@ import 'tracing.dart';
 
 abstract base class Bindings {
   Bindings(Bindings parent)
-      : libraries = parent.libraries,
+      : enterpriseEdition = parent.enterpriseEdition,
         cbl = parent.cbl,
-        cblDart = parent.cblDart {
+        cblDart = parent.cblDart,
+        vectorSearchLibraryPath = parent.vectorSearchLibraryPath {
     parent._children.add(this);
   }
 
-  Bindings.root(this.libraries)
-      : cbl = cblite(libraries.cbl),
-        cblDart = cblitedart(libraries.cblDart);
+  Bindings.root({
+    required this.enterpriseEdition,
+    required this.cbl,
+    required this.cblDart,
+    required this.vectorSearchLibraryPath,
+  });
 
-  final DynamicLibraries libraries;
+  final bool enterpriseEdition;
   final cblite cbl;
   final cblitedart cblDart;
+  final String? vectorSearchLibraryPath;
 
   List<Bindings> get _children => [];
 }
 
 final class CBLBindings extends Bindings {
-  CBLBindings(LibrariesConfiguration config)
-      : super.root(DynamicLibraries.fromConfig(config)) {
+  CBLBindings({
+    required super.enterpriseEdition,
+    required super.cbl,
+    required super.cblDart,
+    super.vectorSearchLibraryPath,
+  }) : super.root() {
     base = BaseBindings(this);
     asyncCallback = AsyncCallbackBindings(this);
     logging = LoggingBindings(this);
@@ -52,6 +61,16 @@ final class CBLBindings extends Bindings {
     fleece = FleeceBindings(this);
   }
 
+  factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) {
+    final dynamicLibraries = DynamicLibraries.fromConfig(libraries);
+    return CBLBindings(
+      enterpriseEdition: libraries.enterpriseEdition,
+      cbl: cblite(dynamicLibraries.cbl),
+      cblDart: cblitedart(dynamicLibraries.cblDart),
+      vectorSearchLibraryPath: dynamicLibraries.vectorSearchLibraryPath,
+    );
+  }
+
   static CBLBindings? _instance;
 
   static CBLBindings get instance {
@@ -63,13 +82,14 @@ final class CBLBindings extends Bindings {
     return instance;
   }
 
-  static void init(
-    LibrariesConfiguration libraries, {
+  static void init({
+    CBLBindings? instance,
+    LibrariesConfiguration? libraries,
     TracedCallHandler? onTracedCall,
   }) {
     assert(_instance == null, 'CBLBindings have already been initialized.');
 
-    _instance = CBLBindings(libraries);
+    _instance = instance ?? CBLBindings.fromLibraries(libraries!);
 
     if (onTracedCall != null) {
       _onTracedCall = onTracedCall;

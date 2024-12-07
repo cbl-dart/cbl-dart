@@ -8,6 +8,7 @@ final class ProjectLayout {
   final String rootDir;
 
   late final native = NativeLayout(p.join(rootDir, 'native'));
+  late final packages = PackagesLayout(p.join(rootDir, 'packages'));
 }
 
 final class NativeLayout {
@@ -39,4 +40,20 @@ final class NativeVendorLayout {
 
     return '${libraryPackagesDir(config.library)}/$packageDir';
   }
+}
+
+final class PackagesLayout {
+  PackagesLayout(this.rootDir);
+
+  final String rootDir;
+
+  late final cbl = PackageLayout(p.join(rootDir, 'cbl'));
+  late final cblNativeAssets =
+      PackageLayout(p.join(rootDir, 'cbl_native_assets'));
+}
+
+final class PackageLayout {
+  PackageLayout(this.rootDir);
+
+  final String rootDir;
 }

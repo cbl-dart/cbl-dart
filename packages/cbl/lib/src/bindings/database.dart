@@ -254,7 +254,7 @@ final class DatabaseBindings extends Bindings {
 
     result.ref.directory = config.directory.toFLString();
 
-    if (libraries.enterpriseEdition) {
+    if (enterpriseEdition) {
       final key = globalArena<cblitedart.CBLDart_CBLEncryptionKey>();
       _writeEncryptionKey(
         key.cast<cblite.CBLEncryptionKey>().ref,
