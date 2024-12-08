@@ -429,3 +429,51 @@ jobs:
         shell: bash
         run: |
           ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"
+
+  test-cbl_native_assets:
+    name: cbl_native_assets unit tests
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [cbl_native_assets]
+        embedder: [standalone]
+        os: [macOS, Ubuntu, Windows]
+    env:
+      EMBEDDER: ${{ matrix.embedder }}
+      TARGET_OS: ${{ matrix.os }}
+      TEST_PACKAGE: ${{ matrix.package }}
+    runs-on: >-
+      ${{ fromJSON('{
+        "macOS":"macos-14",
+        "Ubuntu":"ubuntu-22.04",
+        "Windows":"windows-2022"
+      }')[matrix.os] }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: main
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Bootstrap Dart packages
+        shell: bash
+        run: ./tools/dev-tools.sh bootstrap
+
+      - name: Setup cbd
+        run: melos activate:cbd
+
+      - name: Run tests
+        shell: bash
+        run: ./tools/ci-steps.sh runUnitTests
+
+      - name: Upload coverage data
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        shell: bash
+        run: |
+          ./tools/ci-steps.sh uploadCoverageData "unit.${{ matrix.package }}"

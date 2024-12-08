@@ -41,8 +41,8 @@ Future<void> setupDevelopmentLibraries() async {
   final isUnix = Platform.isLinux || Platform.isMacOS;
   if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
     directory = libDir;
-    cblLib = 'libcblite';
-    cblDartLib = 'libcblitedart';
+    cblLib = 'cblite';
+    cblDartLib = 'cblitedart';
     vectorSearchLib = 'CouchbaseLiteVectorSearch';
   } else if (Platform.isMacOS) {
     directory = p.join(standaloneDartE2eTestDir, 'Frameworks');
@@ -66,6 +66,7 @@ Future<void> setupDevelopmentLibraries() async {
     vectorSearch: LibraryConfiguration.dynamic(
       vectorSearchLib,
       isAppleFramework: Platform.isMacOS,
+      prependPrefix: false,
     ),
   );
 }

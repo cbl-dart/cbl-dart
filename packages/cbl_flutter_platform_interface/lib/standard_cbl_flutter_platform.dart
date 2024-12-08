@@ -51,12 +51,11 @@ final class StandardCblFlutterPlatform extends CblFlutterPlatform {
       if (Platform.isLinux) {
         directory = _joinPaths(_dirname(Platform.resolvedExecutable), 'lib');
       }
-      cbl = LibraryConfiguration.dynamic('libcblite');
-      cblDart = LibraryConfiguration.dynamic('libcblitedart');
+      cbl = LibraryConfiguration.dynamic('cblite');
+      cblDart = LibraryConfiguration.dynamic('cblitedart');
       vectorSearch = LibraryConfiguration.dynamic(
-        Platform.isAndroid
-            ? 'libCouchbaseLiteVectorSearch'
-            : 'CouchbaseLiteVectorSearch',
+        'CouchbaseLiteVectorSearch',
+        prependPrefix: Platform.isAndroid,
       );
     } else if (Platform.isWindows) {
       cbl = LibraryConfiguration.dynamic('cblite');
