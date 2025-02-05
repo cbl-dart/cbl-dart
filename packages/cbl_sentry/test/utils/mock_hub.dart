@@ -1,7 +1,4 @@
 import 'package:sentry/sentry.dart';
-import 'package:sentry/src/metrics/metric.dart';
-import 'package:sentry/src/metrics/metrics_aggregator.dart';
-import 'package:sentry/src/metrics/metrics_api.dart';
 import 'package:sentry/src/profiling.dart';
 
 import 'mock_span.dart';
@@ -11,10 +8,10 @@ class MockHub implements Hub {
   final transactions = <MockSpan>[];
 
   @override
-  SentryOptions get options => SentryOptions();
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 
   @override
-  Scope get scope => throw UnimplementedError();
+  SentryOptions get options => SentryOptions();
 
   @override
   // ignore: invalid_use_of_internal_member
@@ -68,14 +65,6 @@ class MockHub implements Hub {
   Future<void> captureUserFeedback(SentryUserFeedback userFeedback) async {}
 
   @override
-  Future<SentryId> captureFeedback(
-    SentryFeedback feedback, {
-    Hint? hint,
-    ScopeCallback? withScope,
-  }) =>
-      throw UnimplementedError();
-
-  @override
   Hub clone() => this;
 
   @override
@@ -86,19 +75,6 @@ class MockHub implements Hub {
 
   @override
   ISentrySpan? getSpan() => null;
-
-  @override
-  bool get isEnabled => throw UnimplementedError();
-
-  @override
-  SentryId get lastEventId => throw UnimplementedError();
-
-  @override
-  MetricsApi get metricsApi => throw UnimplementedError();
-
-  @override
-  // ignore: invalid_use_of_internal_member
-  MetricsAggregator? get metricsAggregator => throw UnimplementedError();
 
   @override
   void setSpanContext(
@@ -154,9 +130,4 @@ class MockHub implements Hub {
     transactions.add(span);
     return span;
   }
-
-  @override
-  // ignore: invalid_use_of_internal_member
-  Future<SentryId> captureMetrics(Map<int, Iterable<Metric>> metricsBuckets) =>
-      throw UnimplementedError();
 }
