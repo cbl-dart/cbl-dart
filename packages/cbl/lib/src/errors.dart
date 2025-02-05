@@ -99,7 +99,7 @@ final class DatabaseException extends CouchbaseLiteException {
     var result = super.toString();
 
     if (queryString != null) {
-      if (errorPosition != null) {
+      if (errorPosition != null && errorPosition! >= 0) {
         result +=
             '\n${highlightPosition(queryString!, offset: errorPosition!)}';
       } else {
