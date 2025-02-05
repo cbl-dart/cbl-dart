@@ -149,6 +149,7 @@ function prepareNativeLibraries() {
         echo "Copying libraries to cbl_flutter_local"
         rm -rf "$cblFlutterLocalMacosLibrariesDir"
         mkdir -p "$cblFlutterLocalMacosLibrariesDir"
+        mkdir -p "$cblFlutterLocalMacosFrameworksDir"
         cp -L "$couchbaseLiteCArchiveDir/libcblite-"*"/lib/libcblite."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
         cp -L "$couchbaseLiteDartBuildDir/unix/libcblitedart-"*"/lib/libcblitedart."?".dylib" "$cblFlutterLocalMacosLibrariesDir"
         cp -a "$couchbaseLiteVectorSearchArchiveDir/"* "$cblFlutterLocalMacosFrameworksDir"
