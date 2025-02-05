@@ -75,8 +75,12 @@ enum Library {
             OS.iOS => 'CouchbaseLiteDart',
           },
         vectorSearch => switch (os) {
-            OS.linux || OS.android => 'libCouchbaseLiteVectorSearch',
-            OS.windows || OS.macOS || OS.iOS => 'CouchbaseLiteVectorSearch',
+            OS.android => 'libCouchbaseLiteVectorSearch',
+            OS.linux ||
+            OS.windows ||
+            OS.macOS ||
+            OS.iOS =>
+              'CouchbaseLiteVectorSearch',
           },
       };
 }
