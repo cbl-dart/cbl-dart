@@ -11,6 +11,7 @@ import 'document/dictionary_test.dart' as document_dictionary_test;
 import 'document/document_benchmark_test.dart' as document_benchmark_test;
 import 'document/document_test.dart' as document_document_test;
 import 'document/fragment_test.dart' as document_fragment_test;
+import 'errors_test.dart' as errors;
 import 'fleece/coding_test.dart' as fleece_coding;
 import 'fleece/containers_test.dart' as fleece_containers;
 import 'fleece/decoding_benchmark_test.dart' as decoding_benchmark;
@@ -52,25 +53,25 @@ final tests = [
   database_database_configuration.main,
   database_database.main,
   database_document_change.main,
-  typed_database.main,
+  decoding_benchmark.main,
   document_array_test.main,
+  document_benchmark_test.main,
   document_blob_test.main,
   document_dictionary_test.main,
-  document_benchmark_test.main,
   document_document_test.main,
   document_fragment_test.main,
+  encoding_benchmark.main,
+  errors.main,
   fleece_coding.main,
   fleece_containers.main,
-  decoding_benchmark.main,
-  encoding_benchmark.main,
   fleece_integration.main,
   fleece_slice.main,
   log_console_logger.main,
   log_file_logger.main,
   log_logger.main,
+  query_builder.main,
   query_index_index_configuration.main,
   query_parameters.main,
-  query_builder.main,
   query_query.main,
   query_result.main,
   replication_authenticator.main,
@@ -82,14 +83,15 @@ final tests = [
   replication_replicator.main,
   service_cbl_service_api.main,
   service_cbl_worker.main,
-  service_isolate_worker.main,
   service_channel.main,
+  service_isolate_worker.main,
   support_async_callback.main,
   tracing.main,
   typed_data_collection.main,
   typed_data_conversion.main,
   typed_data_helpers.main,
   typed_data_runtime_support.main,
+  typed_database.main,
 ];
 
 void main() {
