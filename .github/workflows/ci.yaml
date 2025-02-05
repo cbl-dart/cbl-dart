@@ -181,9 +181,7 @@ jobs:
             os: iOS
           - embedder: standalone
             os: Android
-          # TODO: Get macOS and iOS tests to launch again in CI
-          - embedder: flutter
-            os: macOS
+          # TODO: Get iOS tests to launch again in CI
           - embedder: flutter
             os: iOS
     # Flutter + Ubuntu is flaky, likely because of a bug in CBL C, so we allow it to fail for now.
@@ -192,7 +190,7 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
-        "macOS":"macos-14",
+        "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"
@@ -299,15 +297,13 @@ jobs:
           - Ubuntu
           - Windows
         exclude:
-          # TODO: Get macOS and iOS tests to launch again in CI
-          - embedder: flutter
-            os: macOS
+          # TODO: Get iOS tests to launch again in CI
           - embedder: flutter
             os: iOS
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
-        "macOS":"macos-14",
+        "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"
@@ -390,7 +386,7 @@ jobs:
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: >-
       ${{ fromJSON('{
-        "macOS":"macos-14",
+        "macOS":"macos-15",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"
       }')[matrix.os] }}
