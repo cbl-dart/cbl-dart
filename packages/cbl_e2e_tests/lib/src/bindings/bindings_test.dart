@@ -6,7 +6,7 @@ import '../test_binding.dart';
 void main() {
   setupTestBinding();
 
-  group('DynamicLibraries', () {
+  group('CBLBindings', () {
     test('find vector search library', () {
       expect(CBLBindings.instance.vectorSearchLibraryPath, isNotNull);
     });
