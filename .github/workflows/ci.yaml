@@ -192,7 +192,7 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
-        "macOS":"macos-14",
+        "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"
@@ -307,7 +307,7 @@ jobs:
     runs-on: >-
       ${{ fromJSON('{
         "iOS":"macos-14",
-        "macOS":"macos-14",
+        "macOS":"macos-15",
         "Android":"ubuntu-22.04",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"
@@ -390,7 +390,7 @@ jobs:
     continue-on-error: ${{ matrix.dart != 'stable' }}
     runs-on: >-
       ${{ fromJSON('{
-        "macOS":"macos-14",
+        "macOS":"macos-15",
         "Ubuntu":"ubuntu-22.04",
         "Windows":"windows-2022"
       }')[matrix.os] }}
