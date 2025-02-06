@@ -51,7 +51,6 @@ Future<Uint8List> downloadUrl(
         return false;
       },
       () async {
-        throw Exception('DO NOT DOWNLOAD!!!!!!');
         final response = await get(Uri.parse(url));
         if (response.statusCode != 200) {
           throw StateError(

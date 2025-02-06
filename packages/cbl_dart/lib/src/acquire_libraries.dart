@@ -106,48 +106,76 @@ Future<LibrariesConfiguration> acquireLibraries({
 }) async {
   logger.fine('Acquiring libraries');
 
+  // Strategy, take our cache folders + files  ->>> mirror what cbl is expecting:)
   if (Platform.isWindows) {
     String uuid = 'c2ddf39c36bd6ab58d86b27ddc102286';
 
     // I need to create the following because this is super WONKY....
     Directory cblDirectory =
         Directory('$nativePackage\\couchbase-lite-c-enterprise-3.2.0-windows-x86_64\\libcblite-3.2.0\\bin');
+    Directory cblMergedDirectory = Directory(
+        '$sharedMergedNativesLibrariesDir\\couchbase-lite-c-enterprise-3.2.0-windows-x86_64\\libcblite-3.2.0\\bin');
     if (cblDirectory.existsSync()) {
       await cblDirectory.delete(recursive: true);
     }
+    if (cblMergedDirectory.existsSync()) {
+      await cblMergedDirectory.delete(recursive: true);
+    }
     await cblDirectory.create(recursive: true);
+    await cblMergedDirectory.create(recursive: true);
     // copy our dynamic libs into here...
     for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
       if (entity.path.contains('cblite.')) {
         File cacheFile = await File('${cblDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
         await File(entity.path).copy(cacheFile.path);
+        File mergedFile =
+            await File('${cblMergedDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        await File(entity.path).copy(mergedFile.path);
       }
     }
 
     Directory cblDartDirectory =
         Directory('$nativePackage\\couchbase-lite-dart-8.0.0-enterprise-windows-x86_64\\libcblitedart-8.0.0\\bin');
+    Directory cblDartMergedDirectory = Directory(
+        '$sharedMergedNativesLibrariesDir\\couchbase-lite-dart-8.0.0-enterprise-windows-x86_64\\libcblitedart-8.0.0\\bin');
     if (cblDartDirectory.existsSync()) {
       await cblDartDirectory.delete(recursive: true);
     }
+    if (cblDartMergedDirectory.existsSync()) {
+      await cblDartMergedDirectory.delete(recursive: true);
+    }
     await cblDartDirectory.create(recursive: true);
+    await cblDartMergedDirectory.create(recursive: true);
     // copy our dynamic libs into here...
     for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
       if (entity.path.contains('cblitedart.')) {
         File cacheFile = await File('${cblDartDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
         await File(entity.path).copy(cacheFile.path);
+        File mergedFile =
+            await File('${cblDartMergedDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        await File(entity.path).copy(mergedFile.path);
       }
     }
 
     Directory vectorDirectory = Directory(
         '$nativePackage\\couchbase-lite-vector-search-1.0.0-windows-x86_64\\CouchbaseLiteVectorSearch.framework\\bin');
+    Directory vectorMergedDirectory = Directory(
+        '$sharedMergedNativesLibrariesDir\\couchbase-lite-vector-search-1.0.0-windows-x86_64\\CouchbaseLiteVectorSearch.framework\\bin');
     if (vectorDirectory.existsSync()) {
       await vectorDirectory.delete(recursive: true);
     }
+    if (vectorMergedDirectory.existsSync()) {
+      await vectorMergedDirectory.delete(recursive: true);
+    }
     await vectorDirectory.create(recursive: true);
+    await vectorMergedDirectory.create(recursive: true);
     for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
       if (entity.path.contains('CouchbaseLiteVectorSearch.') || entity.path.contains('libomp140')) {
         File cacheFile = await File('${vectorDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
         await File(entity.path).copy(cacheFile.path);
+        File mergedFile =
+            await File('${vectorMergedDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        await File(entity.path).copy(mergedFile.path);
       }
     }
   } else if (Platform.isMacOS) {
