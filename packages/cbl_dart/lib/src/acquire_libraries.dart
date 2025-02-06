@@ -88,6 +88,7 @@ String? cblDartSharedCacheDirOverride;
 String get cblDartSharedCacheDir => cblDartSharedCacheDirOverride ?? p.join(userCachesDir, 'cbl_dart');
 
 String sharedMergedNativesLibrariesDir = p.join(cblDartSharedCacheDir, 'merged_native_libraries');
+String nativePackage = p.join(cblDartSharedCacheDir, 'cbl_native_package');
 
 /// Ensures that the latest releases of the libraries are installed and returns
 /// the corresponding [LibrariesConfiguration] configuration.
@@ -135,8 +136,7 @@ Future<LibrariesConfiguration> acquireLibraries({
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // I need to create the following because this is super WONKY....
-    Directory cblDirectory =
-        Directory('$sharedMergedNativesLibrariesDir/$uuid/couchbase-lite-c-enterprise-3.2.0-macos/libcblite-3.2.0/lib');
+    Directory cblDirectory = Directory('$nativePackage/couchbase-lite-c-enterprise-3.2.0-macos/libcblite-3.2.0/lib');
     if (!cblDirectory.existsSync()) {
       await cblDirectory.create(recursive: true);
       // copy our dynamic libs into here...
@@ -148,8 +148,8 @@ Future<LibrariesConfiguration> acquireLibraries({
         }
       }
     }
-    Directory cblDartDirectory = Directory(
-        '$sharedMergedNativesLibrariesDir/$uuid/couchbase-lite-dart-8.0.0-enterprise-macos/libcblitedart-8.0.0/lib');
+    Directory cblDartDirectory =
+        Directory('$nativePackage/couchbase-lite-dart-8.0.0-enterprise-macos/libcblitedart-8.0.0/lib');
     if (!cblDartDirectory.existsSync()) {
       await cblDartDirectory.create(recursive: true);
       // copy our dynamic libs into here...
@@ -160,8 +160,8 @@ Future<LibrariesConfiguration> acquireLibraries({
         }
       }
     }
-    Directory vectorDirectory = Directory(
-        '$sharedMergedNativesLibrariesDir/$uuid/couchbase-lite-vector-search-1.0.0-macos/CouchbaseLiteVectorSearch.framework');
+    Directory vectorDirectory =
+        Directory('$nativePackage/couchbase-lite-vector-search-1.0.0-macos/CouchbaseLiteVectorSearch.framework');
     if (!vectorDirectory.existsSync()) {
       await vectorDirectory.create(recursive: true);
       // copy our dynamic libs into here...
@@ -186,8 +186,6 @@ Future<LibrariesConfiguration> acquireLibraries({
     // libcblitedart.8.dylib
     // libcblitedart.dylib
 
-    // NOTE: before we return adjust our uuid of our cache.
-    sharedMergedNativesLibrariesDir = '$sharedMergedNativesLibrariesDir/$uuid';
     return LibrariesConfiguration(
       enterpriseEdition: edition == Edition.enterprise,
       directory: mergedNativeLibrariesDir,
