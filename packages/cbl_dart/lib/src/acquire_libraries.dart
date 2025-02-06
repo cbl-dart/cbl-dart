@@ -106,6 +106,11 @@ Future<LibrariesConfiguration> acquireLibraries({
   logger.fine('Acquiring libraries');
   print('what is this path??? ${sharedMergedNativesLibrariesDir}');
 
+  if (mergedNativeLibrariesDir != null && !Directory(sharedMergedNativesLibrariesDir).existsSync()) {
+    // then lets copy our files to this location
+    await copyDirectoryContents(mergedNativeLibrariesDir, sharedMergedNativesLibrariesDir);
+  }
+
   if (mergedNativeLibrariesDir != null) sharedMergedNativesLibrariesDir = mergedNativeLibrariesDir;
 
   if (Platform.isWindows) {
@@ -167,7 +172,8 @@ Future<LibrariesConfiguration> acquireLibraries({
   mergedNativeLibrariesDir ??= sharedMergedNativesLibrariesDir;
   await Directory(mergedNativeLibrariesDir).create(recursive: true);
 
-  final loader = RemotePackageLoader();
+  // NOTE: we need to pass this in here...
+  final loader = RemotePackageLoader(cacheDir: sharedMergedNativesLibrariesDir);
   final packageConfigs = <PackageConfig>[];
 
   // ignore: cascade_invocations
@@ -186,15 +192,15 @@ Future<LibrariesConfiguration> acquireLibraries({
 
   final packages = await Future.wait(packageConfigs.map(loader.load));
 
-  // if (!areMergedNativeLibrariesInstalled(
-  //   packages,
-  //   directory: mergedNativeLibrariesDir,
-  // )) {
-  //   await installMergedNativeLibraries(
-  //     packages,
-  //     directory: mergedNativeLibrariesDir,
-  //   );
-  // }
+  if (!areMergedNativeLibrariesInstalled(
+    packages,
+    directory: mergedNativeLibrariesDir,
+  )) {
+    await installMergedNativeLibraries(
+      packages,
+      directory: mergedNativeLibrariesDir,
+    );
+  }
 
   return mergedNativeLibrariesConfigurations(
     packages,
