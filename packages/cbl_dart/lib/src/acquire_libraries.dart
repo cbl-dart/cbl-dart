@@ -135,11 +135,17 @@ Future<LibrariesConfiguration> acquireLibraries({
     // await libraryFile.rename(versionedLibraryFile.path);
     // await Link(p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'))
     //     .create(versionedLibraryPath);
+    // libcblite.3.2.0.dylib
+    // libcblite.3.dylib
+    // libcblite.dylib
+    // libcblitedart.8.0.0.dylib
+    // libcblitedart.8.dylib
+    // libcblitedart.dylib
     return LibrariesConfiguration(
       enterpriseEdition: edition == Edition.enterprise,
       directory: mergedNativeLibrariesDir,
-      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLite'),
-      cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteDart'),
+      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite'),
+      cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
       vectorSearch: LibraryConfiguration.dynamic(
         'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
         isAppleFramework: false,
