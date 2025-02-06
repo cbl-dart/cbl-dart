@@ -126,13 +126,13 @@ Future<LibrariesConfiguration> acquireLibraries({
   } else if (Platform.isMacOS) {
     String uuid = 'c4f61c9bde1085be63f32dd54ca8829e';
 
-    // todo do this for windows
-    if (mergedNativeLibrariesDir != null && !Directory('$sharedMergedNativesLibrariesDir/$uuid').existsSync()) {
-      await Directory('$sharedMergedNativesLibrariesDir/$uuid').create(recursive: true);
-      // then lets copy our files to this location
-      print('here is our inc path... $mergedNativeLibrariesDir/$uuid');
-      await copyDirectoryContents('$mergedNativeLibrariesDir/$uuid', '$sharedMergedNativesLibrariesDir/$uuid');
-    }
+    // // todo do this for windows
+    // if (mergedNativeLibrariesDir != null && !Directory('$sharedMergedNativesLibrariesDir/$uuid').existsSync()) {
+    //   await Directory('$sharedMergedNativesLibrariesDir/$uuid').create(recursive: true);
+    //   // then lets copy our files to this location
+    //   print('here is our inc path... $mergedNativeLibrariesDir/$uuid');
+    //   await copyDirectoryContents('$mergedNativeLibrariesDir/$uuid', '$sharedMergedNativesLibrariesDir/$uuid');
+    // }
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // I need to create the following because this is super WONKY....
@@ -186,17 +186,17 @@ Future<LibrariesConfiguration> acquireLibraries({
     // libcblitedart.8.dylib
     // libcblitedart.dylib
 
-    return LibrariesConfiguration(
-      enterpriseEdition: edition == Edition.enterprise,
-      directory: mergedNativeLibrariesDir,
-      cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
-      cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
-      vectorSearch: LibraryConfiguration.dynamic(
-        // '$uuid/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-        '$uuid/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
-        isAppleFramework: true,
-      ),
-    );
+    // return LibrariesConfiguration(
+    //   enterpriseEdition: edition == Edition.enterprise,
+    //   directory: mergedNativeLibrariesDir,
+    //   cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
+    //   cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
+    //   vectorSearch: LibraryConfiguration.dynamic(
+    //     // '$uuid/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
+    //     '$uuid/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
+    //     isAppleFramework: true,
+    //   ),
+    // );
   }
 
   if (_librariesOverride != null) {
