@@ -108,6 +108,45 @@ Future<LibrariesConfiguration> acquireLibraries({
 }) async {
   logger.fine('Acquiring libraries');
 
+  if (Platform.isWindows) {
+    return LibrariesConfiguration(
+      enterpriseEdition: edition == Edition.enterprise,
+      directory: mergedNativeLibrariesDir,
+      //  cblLib = 'cblite';
+      //  cblDartLib = 'cblitedart';
+      //  vectorSearchLib = 'CouchbaseLiteVectorSearch';
+      cbl: LibraryConfiguration.dynamic('c2ddf39c36bd6ab58d86b27ddc102286\\cblite'),
+      cblDart: LibraryConfiguration.dynamic('c2ddf39c36bd6ab58d86b27ddc102286\\cblitedart'),
+      vectorSearch: LibraryConfiguration.dynamic(
+        'c2ddf39c36bd6ab58d86b27ddc102286\\CouchbaseLiteVectorSearch',
+        isAppleFramework: false,
+      ),
+    );
+  } else if (Platform.isMacos) {
+    // cblLib = 'CouchbaseLite';
+    // cblDartLib = 'CouchbaseLiteDart';
+    // vectorSearchLib = 'CouchbaseLiteVectorSearch';
+
+    // final versionedLibraryPath =
+    // p.join('Versions', 'A', 'CouchbaseLiteVectorSearch');
+    // final versionedLibraryFile =
+    // File(p.join(frameworkDirectory.path, versionedLibraryPath));
+    // await versionedLibraryFile.parent.create(recursive: true);
+    // await libraryFile.rename(versionedLibraryFile.path);
+    // await Link(p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'))
+    //     .create(versionedLibraryPath);
+    return LibrariesConfiguration(
+      enterpriseEdition: edition == Edition.enterprise,
+      directory: mergedNativeLibrariesDir,
+      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLite'),
+      cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteDart'),
+      vectorSearch: LibraryConfiguration.dynamic(
+        'c4f61c9bde1085be63f32dd54ca8829e/Versions/A/CouchbaseLiteVectorSearch',
+        isAppleFramework: false,
+      ),
+    );
+  }
+
   if (_librariesOverride != null) {
     assert(mergedNativeLibrariesDir == null);
     assert((edition == Edition.enterprise) ==
