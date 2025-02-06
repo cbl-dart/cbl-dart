@@ -88,7 +88,7 @@ String? cblDartSharedCacheDirOverride;
 String get cblDartSharedCacheDir => cblDartSharedCacheDirOverride ?? p.join(userCachesDir, 'cbl_dart');
 
 String sharedMergedNativesLibrariesDir = p.join(cblDartSharedCacheDir, 'merged_native_libraries');
-String nativePackage = p.join(cblDartSharedCacheDir, 'cbl_native_package');
+String nativePackage = cblDartSharedCacheDirOverride ?? p.join(userCachesDir, 'cbl_native_package');
 
 /// Ensures that the latest releases of the libraries are installed and returns
 /// the corresponding [LibrariesConfiguration] configuration.
