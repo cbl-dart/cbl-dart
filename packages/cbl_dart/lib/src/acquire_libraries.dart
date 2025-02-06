@@ -105,24 +105,51 @@ Future<LibrariesConfiguration> acquireLibraries({
   String? mergedNativeLibrariesDir,
 }) async {
   logger.fine('Acquiring libraries');
-  print('what is this path??? ${sharedMergedNativesLibrariesDir}');
-
-  // if (mergedNativeLibrariesDir != null) sharedMergedNativesLibrariesDir = mergedNativeLibrariesDir;
 
   if (Platform.isWindows) {
-    return LibrariesConfiguration(
-      enterpriseEdition: edition == Edition.enterprise,
-      directory: mergedNativeLibrariesDir,
-      //  cblLib = 'cblite';
-      //  cblDartLib = 'cblitedart';
-      //  vectorSearchLib = 'CouchbaseLiteVectorSearch';
-      cbl: LibraryConfiguration.dynamic('c2ddf39c36bd6ab58d86b27ddc102286\\cblite'),
-      cblDart: LibraryConfiguration.dynamic('c2ddf39c36bd6ab58d86b27ddc102286\\cblitedart'),
-      vectorSearch: LibraryConfiguration.dynamic(
-        'c2ddf39c36bd6ab58d86b27ddc102286\\CouchbaseLiteVectorSearch',
-        isAppleFramework: false,
-      ),
-    );
+    String uuid = 'c2ddf39c36bd6ab58d86b27ddc102286';
+
+    // I need to create the following because this is super WONKY....
+    Directory cblDirectory =
+        Directory('$nativePackage\\couchbase-lite-c-enterprise-3.2.0-windows-x86_64\\libcblite-3.2.0\\bin');
+    if (cblDirectory.existsSync()) {
+      await cblDirectory.delete(recursive: true);
+    }
+    await cblDirectory.create(recursive: true);
+    // copy our dynamic libs into here...
+    for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
+      if (entity.path.contains('cblite.')) {
+        File cacheFile = await File('${cblDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        await File(entity.path).copy(cacheFile.path);
+      }
+    }
+
+    Directory cblDartDirectory =
+        Directory('$nativePackage\\couchbase-lite-dart-8.0.0-enterprise-windows-x86_64\\libcblitedart-8.0.0\\bin');
+    if (cblDartDirectory.existsSync()) {
+      await cblDartDirectory.delete(recursive: true);
+    }
+    await cblDartDirectory.create(recursive: true);
+    // copy our dynamic libs into here...
+    for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
+      if (entity.path.contains('cblitedart.')) {
+        File cacheFile = await File('${cblDartDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        await File(entity.path).copy(cacheFile.path);
+      }
+    }
+
+    Directory vectorDirectory = Directory(
+        '$nativePackage\\couchbase-lite-vector-search-1.0.0-windows-x86_64\\CouchbaseLiteVectorSearch.framework\\bin');
+    if (vectorDirectory.existsSync()) {
+      await vectorDirectory.delete(recursive: true);
+    }
+    await vectorDirectory.create(recursive: true);
+    for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
+      if (entity.path.contains('CouchbaseLiteVectorSearch.') || entity.path.contains('libomp140')) {
+        File cacheFile = await File('${vectorDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        await File(entity.path).copy(cacheFile.path);
+      }
+    }
   } else if (Platform.isMacOS) {
     String uuid = 'c4f61c9bde1085be63f32dd54ca8829e';
 
@@ -194,33 +221,6 @@ Future<LibrariesConfiguration> acquireLibraries({
         '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorMergedDirectory.path);
     print('copy success full for vector');
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
-
-    // final versionedLibraryPath =
-    // p.join('Versions', 'A', 'CouchbaseLiteVectorSearch');
-    // final versionedLibraryFile =
-    // File(p.join(frameworkDirectory.path, versionedLibraryPath));
-    // await versionedLibraryFile.parent.create(recursive: true);
-    // await libraryFile.rename(versionedLibraryFile.path);
-    // await Link(p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'))
-    //     .create(versionedLibraryPath);
-    // libcblite.3.2.0.dylib
-    // libcblite.3.dylib
-    // libcblite.dylib
-    // libcblitedart.8.0.0.dylib
-    // libcblitedart.8.dylib
-    // libcblitedart.dylib
-
-    // return LibrariesConfiguration(
-    //   enterpriseEdition: edition == Edition.enterprise,
-    //   directory: mergedNativeLibrariesDir,
-    //   cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
-    //   cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
-    //   vectorSearch: LibraryConfiguration.dynamic(
-    //     // '$uuid/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-    //     '$uuid/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
-    //     isAppleFramework: true,
-    //   ),
-    // );
   }
 
   if (_librariesOverride != null) {
@@ -233,7 +233,7 @@ Future<LibrariesConfiguration> acquireLibraries({
   await Directory(mergedNativeLibrariesDir).create(recursive: true);
 
   // NOTE: we need to pass this in here...
-  final loader = RemotePackageLoader(cacheDir: sharedMergedNativesLibrariesDir);
+  final loader = RemotePackageLoader();
   final packageConfigs = <PackageConfig>[];
 
   // ignore: cascade_invocations
