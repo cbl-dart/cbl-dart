@@ -104,6 +104,7 @@ Future<LibrariesConfiguration> acquireLibraries({
   String? mergedNativeLibrariesDir,
 }) async {
   logger.fine('Acquiring libraries');
+  print('what is this path??? ${sharedMergedNativesLibrariesDir}');
 
   if (mergedNativeLibrariesDir != null) sharedMergedNativesLibrariesDir = mergedNativeLibrariesDir;
 
@@ -144,17 +145,17 @@ Future<LibrariesConfiguration> acquireLibraries({
     // libcblitedart.8.0.0.dylib
     // libcblitedart.8.dylib
     // libcblitedart.dylib
-    return LibrariesConfiguration(
-      enterpriseEdition: edition == Edition.enterprise,
-      directory: mergedNativeLibrariesDir,
-      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite.3'),
-      cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
-      vectorSearch: LibraryConfiguration.dynamic(
-        // 'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-        'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
-        isAppleFramework: true,
-      ),
-    );
+    // return LibrariesConfiguration(
+    //   enterpriseEdition: edition == Edition.enterprise,
+    //   directory: mergedNativeLibrariesDir,
+    //   cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite.3'),
+    //   cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
+    //   vectorSearch: LibraryConfiguration.dynamic(
+    //     // 'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
+    //     'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
+    //     isAppleFramework: true,
+    //   ),
+    // );
   }
 
   if (_librariesOverride != null) {
