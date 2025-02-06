@@ -129,7 +129,7 @@ Future<LibrariesConfiguration> acquireLibraries({
     if (mergedNativeLibrariesDir != null && !Directory('$sharedMergedNativesLibrariesDir/$uuid').existsSync()) {
       await Directory('$sharedMergedNativesLibrariesDir/$uuid').create(recursive: true);
       // then lets copy our files to this location
-      await copyDirectoryContents(mergedNativeLibrariesDir, sharedMergedNativesLibrariesDir);
+      await copyDirectoryContents('mergedNativeLibrariesDir/$uuid', sharedMergedNativesLibrariesDir);
     }
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
