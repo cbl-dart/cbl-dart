@@ -147,8 +147,8 @@ Future<LibrariesConfiguration> acquireLibraries({
       cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite.3'),
       cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
       vectorSearch: LibraryConfiguration.dynamic(
-        'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-        // 'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
+        // 'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
+        'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
         isAppleFramework: true,
       ),
     );
