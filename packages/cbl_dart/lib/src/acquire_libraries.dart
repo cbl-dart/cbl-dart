@@ -185,6 +185,9 @@ Future<LibrariesConfiguration> acquireLibraries({
     // libcblitedart.8.0.0.dylib
     // libcblitedart.8.dylib
     // libcblitedart.dylib
+
+    // NOTE: before we return adjust our uuid of our cache.
+    sharedMergedNativesLibrariesDir = '$sharedMergedNativesLibrariesDir/$uuid';
     return LibrariesConfiguration(
       enterpriseEdition: edition == Edition.enterprise,
       directory: mergedNativeLibrariesDir,
