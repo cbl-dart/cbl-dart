@@ -124,12 +124,15 @@ Future<LibrariesConfiguration> acquireLibraries({
     await cblDirectory.create(recursive: true);
     await cblMergedDirectory.create(recursive: true);
     // copy our dynamic libs into here...
-    for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
+    for (var entity in Directory('$mergedNativeLibrariesDir${Platform.pathSeparator}$uuid').listSync()) {
       if (entity.path.contains('cblite.')) {
-        File cacheFile = await File('${cblDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        File cacheFile =
+            await File('${cblDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+                .create(recursive: true);
         await File(entity.path).copy(cacheFile.path);
-        File mergedFile =
-            await File('${cblMergedDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        File mergedFile = await File(
+                '${cblMergedDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+            .create(recursive: true);
         await File(entity.path).copy(mergedFile.path);
       }
     }
@@ -147,12 +150,15 @@ Future<LibrariesConfiguration> acquireLibraries({
     await cblDartDirectory.create(recursive: true);
     await cblDartMergedDirectory.create(recursive: true);
     // copy our dynamic libs into here...
-    for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
+    for (var entity in Directory('$mergedNativeLibrariesDir${Platform.pathSeparator}$uuid').listSync()) {
       if (entity.path.contains('cblitedart.')) {
-        File cacheFile = await File('${cblDartDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        File cacheFile = await File(
+                '${cblDartDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+            .create(recursive: true);
         await File(entity.path).copy(cacheFile.path);
-        File mergedFile =
-            await File('${cblDartMergedDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        File mergedFile = await File(
+                '${cblDartMergedDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+            .create(recursive: true);
         await File(entity.path).copy(mergedFile.path);
       }
     }
@@ -169,12 +175,15 @@ Future<LibrariesConfiguration> acquireLibraries({
     }
     await vectorDirectory.create(recursive: true);
     await vectorMergedDirectory.create(recursive: true);
-    for (var entity in Directory('$mergedNativeLibrariesDir/$uuid').listSync()) {
+    for (var entity in Directory('$mergedNativeLibrariesDir${Platform.pathSeparator}$uuid').listSync()) {
       if (entity.path.contains('CouchbaseLiteVectorSearch.') || entity.path.contains('libomp140')) {
-        File cacheFile = await File('${vectorDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        File cacheFile = await File(
+                '${vectorDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+            .create(recursive: true);
         await File(entity.path).copy(cacheFile.path);
-        File mergedFile =
-            await File('${vectorMergedDirectory.path}/${entity.path.split('/').last}').create(recursive: true);
+        File mergedFile = await File(
+                '${vectorMergedDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+            .create(recursive: true);
         await File(entity.path).copy(mergedFile.path);
       }
     }
