@@ -106,11 +106,6 @@ Future<LibrariesConfiguration> acquireLibraries({
   logger.fine('Acquiring libraries');
   print('what is this path??? ${sharedMergedNativesLibrariesDir}');
 
-  if (mergedNativeLibrariesDir != null && !Directory(sharedMergedNativesLibrariesDir).existsSync()) {
-    // then lets copy our files to this location
-    await copyDirectoryContents(mergedNativeLibrariesDir, sharedMergedNativesLibrariesDir);
-  }
-
   // if (mergedNativeLibrariesDir != null) sharedMergedNativesLibrariesDir = mergedNativeLibrariesDir;
 
   if (Platform.isWindows) {
@@ -129,6 +124,13 @@ Future<LibrariesConfiguration> acquireLibraries({
     );
   } else if (Platform.isMacOS) {
     String uuid = 'c4f61c9bde1085be63f32dd54ca8829e';
+
+    // todo do this for windows
+    if (mergedNativeLibrariesDir != null && !Directory('$sharedMergedNativesLibrariesDir/$uuid').existsSync()) {
+      await Directory('$sharedMergedNativesLibrariesDir/$uuid').create(recursive: true);
+      // then lets copy our files to this location
+      await copyDirectoryContents(mergedNativeLibrariesDir, sharedMergedNativesLibrariesDir);
+    }
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // I need to create the following because this is super WONKY....
