@@ -128,13 +128,42 @@ Future<LibrariesConfiguration> acquireLibraries({
       ),
     );
   } else if (Platform.isMacOS) {
-    // print('areMergedNativeLibrariesInstalled: ${areMergedNativeLibrariesInstalled(
-    //   packages,
-    //   directory: mergedNativeLibrariesDir,
-    // )}');
-    // cblLib = 'CouchbaseLite';
-    // cblDartLib = 'CouchbaseLiteDart';
-    // vectorSearchLib = 'CouchbaseLiteVectorSearch';
+    // before we continue rolling here we also need to copy these files to a different dir structure as well.
+
+    // I need to create the following because this is super WONKY....
+    Directory cblDirectory =
+        Directory('$sharedMergedNativesLibrariesDir/couchbase-lite-c-enterprise-3.2.0-macos/libcblite-3.2.0/lib');
+    if (!cblDirectory.existsSync()) {
+      await cblDirectory.create(recursive: true);
+      // copy our dynamic libs into here...
+      // copy our dynamic libs into here...
+      for (var entity in Directory(mergedNativeLibrariesDir!).listSync()) {
+        if (entity.path.contains('libcblite.')) {
+          await File(entity.path).copy(cblDirectory.path);
+        }
+      }
+    }
+    Directory cblDartDirectory = Directory(
+        '$sharedMergedNativesLibrariesDir/couchbase-lite-dart-8.0.0-enterprise-macos/libcblitedart-8.0.0/lib');
+    if (!cblDartDirectory.existsSync()) {
+      await cblDartDirectory.create(recursive: true);
+      // copy our dynamic libs into here...
+      for (var entity in Directory(mergedNativeLibrariesDir!).listSync()) {
+        if (entity.path.contains('libcblitedart')) {
+          await File(entity.path).copy(cblDartDirectory.path);
+        }
+      }
+    }
+    Directory vectorDirectory = Directory(
+        '$sharedMergedNativesLibrariesDir/couchbase-lite-vector-search-1.0.0-macos/CouchbaseLiteVectorSearch.framework');
+    if (!vectorDirectory.existsSync()) {
+      await vectorDirectory.create(recursive: true);
+      // copy our dynamic libs into here...
+      await copyDirectoryContents(
+          '$mergedNativeLibrariesDir/CouchbaseLiteVectorSearch.framework', vectorDirectory.path);
+      print('copy success full for vector');
+    }
+    // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // final versionedLibraryPath =
     // p.join('Versions', 'A', 'CouchbaseLiteVectorSearch');
@@ -150,17 +179,17 @@ Future<LibrariesConfiguration> acquireLibraries({
     // libcblitedart.8.0.0.dylib
     // libcblitedart.8.dylib
     // libcblitedart.dylib
-    // return LibrariesConfiguration(
-    //   enterpriseEdition: edition == Edition.enterprise,
-    //   directory: mergedNativeLibrariesDir,
-    //   cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite.3'),
-    //   cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
-    //   vectorSearch: LibraryConfiguration.dynamic(
-    //     // 'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-    //     'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
-    //     isAppleFramework: true,
-    //   ),
-    // );
+    return LibrariesConfiguration(
+      enterpriseEdition: edition == Edition.enterprise,
+      directory: mergedNativeLibrariesDir,
+      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite.3'),
+      cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
+      vectorSearch: LibraryConfiguration.dynamic(
+        // 'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
+        'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
+        isAppleFramework: true,
+      ),
+    );
   }
 
   if (_librariesOverride != null) {
