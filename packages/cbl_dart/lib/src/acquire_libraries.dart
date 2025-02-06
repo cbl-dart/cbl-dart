@@ -144,7 +144,7 @@ Future<LibrariesConfiguration> acquireLibraries({
     return LibrariesConfiguration(
       enterpriseEdition: edition == Edition.enterprise,
       directory: mergedNativeLibrariesDir,
-      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite'),
+      cbl: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblite.3'),
       cblDart: LibraryConfiguration.dynamic('c4f61c9bde1085be63f32dd54ca8829e/libcblitedart'),
       vectorSearch: LibraryConfiguration.dynamic(
         'c4f61c9bde1085be63f32dd54ca8829e/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
