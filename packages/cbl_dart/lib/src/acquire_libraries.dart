@@ -122,7 +122,7 @@ Future<LibrariesConfiguration> acquireLibraries({
         isAppleFramework: false,
       ),
     );
-  } else if (Platform.isMacos) {
+  } else if (Platform.isMacOS) {
     // cblLib = 'CouchbaseLite';
     // cblDartLib = 'CouchbaseLiteDart';
     // vectorSearchLib = 'CouchbaseLiteVectorSearch';
