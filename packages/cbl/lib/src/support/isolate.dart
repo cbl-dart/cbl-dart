@@ -18,8 +18,7 @@ class InitContext {
   final String filesDir;
   final String tempDir;
 
-  CBLInitContext toCbl() =>
-      CBLInitContext(filesDir: filesDir, tempDir: tempDir);
+  CBLInitContext toCbl() => CBLInitContext(filesDir: filesDir, tempDir: tempDir);
 }
 
 class IsolateContext {
@@ -34,9 +33,9 @@ class IsolateContext {
   static bool get isInitialized => _instance != null;
 
   static set instance(IsolateContext value) {
-    if (_instance != null) {
-      throwAlreadyInitializedError();
-    }
+    // if (_instance != null) {
+    //   throwAlreadyInitializedError();
+    // }
     _instance = value;
   }
 
@@ -106,8 +105,7 @@ Future<void> addPostIsolateInitTask(PostIsolateInitTask task) async {
 
 Future<void> removePostIsolateInitTask(PostIsolateInitTask task) async {
   if (_postIsolateInitTasks.isNotEmpty) {
-    if (_currentPostIsolateInitTask != null &&
-        _postIsolateInitTasks[0] == task) {
+    if (_currentPostIsolateInitTask != null && _postIsolateInitTasks[0] == task) {
       await _currentPostIsolateInitTask;
     } else {
       _postIsolateInitTasks.remove(task);
