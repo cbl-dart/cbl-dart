@@ -78,7 +78,7 @@ class LibraryConfiguration {
     return DynamicLibrary.executable();
   }
 
-  String? tryResolvePath({String? directory, required String symbol}) {
+  String? _tryResolvePath({String? directory, required String symbol}) {
     final DynamicLibrary library;
     try {
       library = _load(directory: directory);
