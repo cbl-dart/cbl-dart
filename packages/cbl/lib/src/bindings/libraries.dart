@@ -78,7 +78,7 @@ class LibraryConfiguration {
     return DynamicLibrary.executable();
   }
 
-  String? _tryResolvePath({String? directory, required String symbol}) {
+  String? tryResolvePath({String? directory, required String symbol}) {
     final DynamicLibrary library;
     try {
       library = _load(directory: directory);
@@ -91,10 +91,10 @@ class LibraryConfiguration {
       return null;
     }
 
-    return _tryResolvePathFromSymbol(library.lookup(symbol));
+    return tryResolvePathFromSymbol(library.lookup(symbol));
   }
 
-  String? _tryResolvePathFromSymbol(Pointer<Void> address) {
+  String? tryResolvePathFromSymbol(Pointer<Void> address) {
     if (Platform.isAndroid || Platform.isLinux || Platform.isMacOS || Platform.isIOS) {
       final info = calloc<_Dl_info>();
       try {
@@ -169,7 +169,7 @@ class LibrariesConfiguration {
   final LibraryConfiguration? vectorSearch;
 }
 
-final class DynamicLibraries {
+class DynamicLibraries {
   factory DynamicLibraries.fromConfig(LibrariesConfiguration config) {
     final directory = config.directory;
     final dllDirectoryCookie = directory != null && Platform.isWindows ? _AddDllDirectory(directory) : null;
@@ -181,7 +181,7 @@ final class DynamicLibraries {
       vectorSearchLibraryPath: switch (Abi.current()) {
         // TODO(blaugold): https://github.com/cbl-dart/cbl-dart/issues/657
         Abi.windowsArm64 => null,
-        _ => config.vectorSearch?._tryResolvePath(
+        _ => config.vectorSearch?.tryResolvePath(
             directory: config.directory,
             symbol: 'couchbaselitevectorsearch_version',
           ),
