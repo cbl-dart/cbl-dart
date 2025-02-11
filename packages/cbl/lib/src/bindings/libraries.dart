@@ -78,7 +78,7 @@ class LibraryConfiguration {
     return DynamicLibrary.executable();
   }
 
-  String? _tryResolvePath({String? directory, required String symbol}) {
+  String? tryResolvePath({String? directory, required String symbol}) {
     final DynamicLibrary library;
     try {
       library = _load(directory: directory);
@@ -95,10 +95,7 @@ class LibraryConfiguration {
   }
 
   String? _tryResolvePathFromSymbol(Pointer<Void> address) {
-    if (Platform.isAndroid ||
-        Platform.isLinux ||
-        Platform.isMacOS ||
-        Platform.isIOS) {
+    if (Platform.isAndroid || Platform.isLinux || Platform.isMacOS || Platform.isIOS) {
       final info = calloc<_Dl_info>();
       try {
         if (_dladdr(address, info) == 0) {
@@ -115,8 +112,7 @@ class LibraryConfiguration {
       final hModule = calloc<Pointer<Void>>();
       try {
         if (_GetModuleHandleExA(
-              _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                  _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+              _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
               address.cast(),
               hModule,
             ) ==
@@ -176,9 +172,7 @@ class LibrariesConfiguration {
 final class DynamicLibraries {
   factory DynamicLibraries.fromConfig(LibrariesConfiguration config) {
     final directory = config.directory;
-    final dllDirectoryCookie = directory != null && Platform.isWindows
-        ? _AddDllDirectory(directory)
-        : null;
+    final dllDirectoryCookie = directory != null && Platform.isWindows ? _AddDllDirectory(directory) : null;
 
     final libraries = DynamicLibraries._(
       enterpriseEdition: config.enterpriseEdition,
@@ -217,11 +211,7 @@ final class DynamicLibraries {
 // === Library extensions ======================================================
 
 final _isApple = Platform.isIOS || Platform.isMacOS;
-final _isUnix = Platform.isIOS ||
-    Platform.isMacOS ||
-    Platform.isAndroid ||
-    Platform.isLinux ||
-    Platform.isFuchsia;
+final _isUnix = Platform.isIOS || Platform.isMacOS || Platform.isAndroid || Platform.isLinux || Platform.isFuchsia;
 
 String _dynamicLibraryExtension({String? version}) {
   String extension;
@@ -260,21 +250,18 @@ final class _Dl_info extends Struct {
   external Pointer<Utf8> dli_saddr;
 }
 
-final _dladdr = _process.lookupFunction<
-    Int Function(Pointer<Void>, Pointer<_Dl_info>),
+final _dladdr = _process.lookupFunction<Int Function(Pointer<Void>, Pointer<_Dl_info>),
     int Function(Pointer<Void>, Pointer<_Dl_info>)>('dladdr');
 
 // === Windows Dynamic Linking =================================================
 
 final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-final _AddDllDirectoryFn = _kernel32.lookupFunction<
-    Pointer<Void> Function(Pointer<Utf16>),
-    Pointer<Void> Function(Pointer<Utf16>)>('AddDllDirectory');
+final _AddDllDirectoryFn = _kernel32
+    .lookupFunction<Pointer<Void> Function(Pointer<Utf16>), Pointer<Void> Function(Pointer<Utf16>)>('AddDllDirectory');
 
-final _RemoveDllDirectoryFn = _kernel32.lookupFunction<
-    Bool Function(Pointer<Void>),
-    bool Function(Pointer<Void>)>('RemoveDllDirectory');
+final _RemoveDllDirectoryFn =
+    _kernel32.lookupFunction<Bool Function(Pointer<Void>), bool Function(Pointer<Void>)>('RemoveDllDirectory');
 
 Pointer<Void> _AddDllDirectory(String directory) {
   final directoryNativeStr = directory.toNativeUtf16();
@@ -292,14 +279,11 @@ void _RemoveDllDirectory(Pointer<Void> cookie) {
   }
 }
 
-final _GetModuleHandleExA = _kernel32.lookupFunction<
-    Int Function(Uint32, Pointer<Utf8>, Pointer<Pointer<Void>>),
-    int Function(
-        int, Pointer<Utf8>, Pointer<Pointer<Void>>)>('GetModuleHandleExA');
+final _GetModuleHandleExA = _kernel32.lookupFunction<Int Function(Uint32, Pointer<Utf8>, Pointer<Pointer<Void>>),
+    int Function(int, Pointer<Utf8>, Pointer<Pointer<Void>>)>('GetModuleHandleExA');
 
 const _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 const _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT = 0x00000002;
 
-final _GetModuleFileNameA = _kernel32.lookupFunction<
-    UnsignedLong Function(Pointer<Void>, Pointer<Utf8>, Uint32),
+final _GetModuleFileNameA = _kernel32.lookupFunction<UnsignedLong Function(Pointer<Void>, Pointer<Utf8>, Uint32),
     int Function(Pointer<Void>, Pointer<Utf8>, int)>('GetModuleFileNameA');

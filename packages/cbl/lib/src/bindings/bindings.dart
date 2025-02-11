@@ -87,7 +87,7 @@ final class CBLBindings extends Bindings {
     LibrariesConfiguration? libraries,
     TracedCallHandler? onTracedCall,
   }) {
-    // assert(_instance == null, 'CBLBindings have already been initialized.');
+    assert(_instance == null, 'CBLBindings have already been initialized.');
 
     _instance = instance ?? CBLBindings.fromLibraries(libraries!);
 

@@ -190,8 +190,6 @@ Future<LibrariesConfiguration> acquireLibraries({
   } else if (Platform.isMacOS) {
     String uuid = 'c4f61c9bde1085be63f32dd54ca8829e';
 
-    // TODO remove and rewrite everytime
-
     // I need to create the following because this is super WONKY....
     Directory cblDirectory = Directory('$nativePackage/couchbase-lite-c-enterprise-3.2.0-macos/libcblite-3.2.0/lib');
     Directory cblMergedDirectory =
