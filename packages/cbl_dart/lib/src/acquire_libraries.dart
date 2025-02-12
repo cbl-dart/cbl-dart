@@ -322,9 +322,9 @@ Future<LibrariesConfiguration> acquireLibraries({
   }
 
   final packages = await Future.wait(packageConfigs.map(loader.load));
-  // for (var package in packages) {
-  //   print('b4: ${package.libraryName}');
-  // }
+  for (var package in packages) {
+    print('b4: ${package.libraryName}');
+  }
   //
   // if ((skipVectorSearch ?? false) == true) {
   //   // NOTE: same name on windows/and macos.
