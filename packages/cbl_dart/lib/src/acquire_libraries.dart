@@ -279,15 +279,15 @@ Future<LibrariesConfiguration> acquireLibraries({
 
     // return our libraries
 
-    // if (skipVectorSearch ?? false == true) {
-    //   // return LibrariesConfiguration(
-    //   //   enterpriseEdition: edition == Edition.enterprise,
-    //   //   directory: mergedNativeLibrariesDir,
-    //   //   cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
-    //   //   cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
-    //   //   vectorSearch: null,
-    //   // );
-    // }
+    if (skipVectorSearch ?? false == true) {
+      return LibrariesConfiguration(
+        enterpriseEdition: edition == Edition.enterprise,
+        directory: mergedNativeLibrariesDir,
+        cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
+        cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
+        vectorSearch: null,
+      );
+    }
   }
 
   if (_librariesOverride != null) {
