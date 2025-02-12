@@ -103,7 +103,7 @@ String nativePackage = cblDartSharedCacheDirOverride ?? p.join(userCachesDir, 'c
 Future<LibrariesConfiguration> acquireLibraries({
   required Edition edition,
   String? mergedNativeLibrariesDir,
-  bool? skipVectorSearch,
+  required bool? skipVectorSearch,
 }) async {
   logger.fine('Acquiring libraries');
 
