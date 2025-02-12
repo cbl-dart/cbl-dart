@@ -315,25 +315,26 @@ Future<LibrariesConfiguration> acquireLibraries({
   );
 
   if (edition == Edition.enterprise && !(skipVectorSearch ?? false)) {
+    print('add our vector search package??');
     packageConfigs.addAll(
       VectorSearchPackageConfig.all(release: '1.0.0').where((config) => config.os == OS.current),
     );
   }
 
   final packages = await Future.wait(packageConfigs.map(loader.load));
-  for (var package in packages) {
-    print('b4: ${package.libraryName}');
-  }
-
-  if ((skipVectorSearch ?? false) == true) {
-    // NOTE: same name on windows/and macos.
-    packages.removeWhere((package) => package.libraryName.contains('CouchbaseLiteVectorSearch'));
-  }
-  print('should we skip vectorSearch?? $skipVectorSearch');
-
-  for (var package in packages) {
-    print('aftr: ${package.libraryName}');
-  }
+  // for (var package in packages) {
+  //   print('b4: ${package.libraryName}');
+  // }
+  //
+  // if ((skipVectorSearch ?? false) == true) {
+  //   // NOTE: same name on windows/and macos.
+  //   packages.removeWhere((package) => package.libraryName.contains('CouchbaseLiteVectorSearch'));
+  // }
+  // print('should we skip vectorSearch?? $skipVectorSearch');
+  //
+  // for (var package in packages) {
+  //   print('aftr: ${package.libraryName}');
+  // }
 
   if (!areMergedNativeLibrariesInstalled(
     packages,
