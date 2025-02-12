@@ -272,22 +272,21 @@ Future<LibrariesConfiguration> acquireLibraries({
           '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorDirectory.path);
       await copyDirectoryContents(
           '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorMergedDirectory.path);
-      print('copy success full for vector');
     }
 
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // return our libraries
 
-    if (skipVectorSearch ?? false == true) {
-      return LibrariesConfiguration(
-        enterpriseEdition: edition == Edition.enterprise,
-        directory: mergedNativeLibrariesDir,
-        cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
-        cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
-        vectorSearch: null,
-      );
-    }
+    // if (skipVectorSearch ?? false == true) {
+    //   return LibrariesConfiguration(
+    //     enterpriseEdition: edition == Edition.enterprise,
+    //     directory: mergedNativeLibrariesDir,
+    //     cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
+    //     cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
+    //     vectorSearch: null,
+    //   );
+    // }
   }
 
   if (_librariesOverride != null) {
