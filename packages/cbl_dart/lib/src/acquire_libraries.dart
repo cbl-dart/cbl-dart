@@ -174,18 +174,22 @@ Future<LibrariesConfiguration> acquireLibraries({
     if (vectorMergedDirectory.existsSync()) {
       await vectorMergedDirectory.delete(recursive: true);
     }
-    await vectorDirectory.create(recursive: true);
-    await vectorMergedDirectory.create(recursive: true);
-    for (var entity in Directory('$mergedNativeLibrariesDir${Platform.pathSeparator}$uuid').listSync()) {
-      if (entity.path.contains('CouchbaseLiteVectorSearch.') || entity.path.contains('libomp140')) {
-        File cacheFile = await File(
-                '${vectorDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
-            .create(recursive: true);
-        await File(entity.path).copy(cacheFile.path);
-        File mergedFile = await File(
-                '${vectorMergedDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
-            .create(recursive: true);
-        await File(entity.path).copy(mergedFile.path);
+
+    // if we are using vectorSearch ensure that we create our cache directories.
+    if (!(skipVectorSearch ?? false)) {
+      await vectorDirectory.create(recursive: true);
+      await vectorMergedDirectory.create(recursive: true);
+      for (var entity in Directory('$mergedNativeLibrariesDir${Platform.pathSeparator}$uuid').listSync()) {
+        if (entity.path.contains('CouchbaseLiteVectorSearch.') || entity.path.contains('libomp140')) {
+          File cacheFile = await File(
+                  '${vectorDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+              .create(recursive: true);
+          await File(entity.path).copy(cacheFile.path);
+          File mergedFile = await File(
+                  '${vectorMergedDirectory.path}${Platform.pathSeparator}${entity.path.split(Platform.pathSeparator).last}')
+              .create(recursive: true);
+          await File(entity.path).copy(mergedFile.path);
+        }
       }
     }
 
@@ -258,14 +262,19 @@ Future<LibrariesConfiguration> acquireLibraries({
     if (vectorMergedDirectory.existsSync()) {
       await vectorMergedDirectory.delete(recursive: true);
     }
-    await vectorDirectory.create(recursive: true);
-    await vectorMergedDirectory.create(recursive: true);
-    // copy our dynamic libs into here...
-    await copyDirectoryContents(
-        '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorDirectory.path);
-    await copyDirectoryContents(
-        '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorMergedDirectory.path);
-    print('copy success full for vector');
+
+    // if we are using vectorSearch ensure that we create our cache directories.
+    if (!(skipVectorSearch ?? false)) {
+      await vectorDirectory.create(recursive: true);
+      await vectorMergedDirectory.create(recursive: true);
+      // copy our dynamic libs into here...
+      await copyDirectoryContents(
+          '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorDirectory.path);
+      await copyDirectoryContents(
+          '$mergedNativeLibrariesDir/$uuid/CouchbaseLiteVectorSearch.framework', vectorMergedDirectory.path);
+      print('copy success full for vector');
+    }
+
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // return our libraries
