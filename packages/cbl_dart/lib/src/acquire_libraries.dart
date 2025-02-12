@@ -279,15 +279,15 @@ Future<LibrariesConfiguration> acquireLibraries({
 
     // return our libraries
 
-    if (skipVectorSearch ?? false == true) {
-      return LibrariesConfiguration(
-        enterpriseEdition: edition == Edition.enterprise,
-        directory: mergedNativeLibrariesDir,
-        cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
-        cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
-        vectorSearch: null,
-      );
-    }
+    // if (skipVectorSearch ?? false == true) {
+    //   // return LibrariesConfiguration(
+    //   //   enterpriseEdition: edition == Edition.enterprise,
+    //   //   directory: mergedNativeLibrariesDir,
+    //   //   cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
+    //   //   cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
+    //   //   vectorSearch: null,
+    //   // );
+    // }
   }
 
   if (_librariesOverride != null) {
@@ -311,7 +311,7 @@ Future<LibrariesConfiguration> acquireLibraries({
     ).where((config) => config.os == OS.current),
   );
 
-  if (edition == Edition.enterprise) {
+  if (edition == Edition.enterprise && !(skipVectorSearch ?? false)) {
     packageConfigs.addAll(
       VectorSearchPackageConfig.all(release: '1.0.0').where((config) => config.os == OS.current),
     );
