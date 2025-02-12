@@ -11,8 +11,7 @@ import 'logging.dart';
 
 extension PackageMerging on Package {
   static String signature(Iterable<Package> packages) {
-    final signatures =
-        packages.map((package) => package.signatureContent).toList()..sort();
+    final signatures = packages.map((package) => package.signatureContent).toList()..sort();
 
     return md5
         .convert(utf8.encode(signatures.join()))
@@ -72,39 +71,34 @@ LibrariesConfiguration mergedNativeLibrariesConfigurations(
   Iterable<Package> packages, {
   required String directory,
   required bool enterpriseEdition,
+  required bool? skipVectorSearch,
 }) {
   final libraryDir = mergedNativeLibrariesInstallDir(packages, directory);
 
-  Package? packageFor(Library library) => packages
-      .where((package) => package.config.library == library)
-      .firstOrNull;
+  Package? packageFor(Library library) => packages.where((package) => package.config.library == library).firstOrNull;
 
   final cblPackage = packageFor(Library.cblite)!;
   final cblDartPackage = packageFor(Library.cblitedart)!;
-  final vectorSearchPackage = packageFor(Library.vectorSearch);
+  final vectorSearchPackage = (skipVectorSearch ?? false) == true ? null : packageFor(Library.vectorSearch);
 
   return LibrariesConfiguration(
     directory: libraryDir.path,
     enterpriseEdition: enterpriseEdition,
     cbl: _nativeLibraryConfiguration(cblPackage),
     cblDart: _nativeLibraryConfiguration(cblDartPackage),
-    vectorSearch: vectorSearchPackage != null
-        ? _nativeLibraryConfiguration(vectorSearchPackage)
-        : null,
+    vectorSearch: vectorSearchPackage != null ? _nativeLibraryConfiguration(vectorSearchPackage) : null,
   );
 }
 
-LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
-    LibraryConfiguration.dynamic(
+LibraryConfiguration _nativeLibraryConfiguration(Package package) => LibraryConfiguration.dynamic(
       package.libraryName,
       // Specifying an exact version should not be necessary, but is
       // because the beta of libcblite does not distribute properly
       // symlinked libraries for macos. We need to use the
       // libcblite.x.dylib because that is what libcblitedart is linking
       // against.
-      version:
-          package.os == OS.macOS && package.config.library.isDatabaseLibrary
-              ? package.config.version.split('.').first
-              : null,
+      version: package.os == OS.macOS && package.config.library.isDatabaseLibrary
+          ? package.config.version.split('.').first
+          : null,
       isAppleFramework: package.isNormalAppleFramework,
     );

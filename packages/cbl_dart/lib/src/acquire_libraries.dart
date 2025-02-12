@@ -318,6 +318,9 @@ Future<LibrariesConfiguration> acquireLibraries({
   }
 
   final packages = await Future.wait(packageConfigs.map(loader.load));
+  for (var package in packages) {
+    print(package.libraryName);
+  }
 
   if (!areMergedNativeLibrariesInstalled(
     packages,
@@ -333,5 +336,6 @@ Future<LibrariesConfiguration> acquireLibraries({
     packages,
     directory: mergedNativeLibrariesDir,
     enterpriseEdition: edition == Edition.enterprise,
+    skipVectorSearch: skipVectorSearch,
   );
 }
