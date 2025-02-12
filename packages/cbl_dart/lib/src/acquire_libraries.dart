@@ -314,14 +314,15 @@ Future<LibrariesConfiguration> acquireLibraries({
     }),
   );
 
+  print('what is this??? ${skipVectorSearch}');
+  print('what is this -- 2??? ${!(skipVectorSearch ?? false)}');
+  print('what is this -- 3??? ${edition == Edition.enterprise && !(skipVectorSearch ?? false)}');
   if (edition == Edition.enterprise && !(skipVectorSearch ?? false)) {
     print('add our vector search package??');
     packageConfigs.addAll(
       VectorSearchPackageConfig.all(release: '1.0.0').where((config) => config.os == OS.current),
     );
   }
-  print('what is this??? ${skipVectorSearch}');
-  print('what is this -- 2??? ${!(skipVectorSearch ?? false)}');
 
   final packages = await Future.wait(packageConfigs.map(loader.load));
   for (var package in packages) {
