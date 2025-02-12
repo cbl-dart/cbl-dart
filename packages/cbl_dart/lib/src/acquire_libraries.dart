@@ -323,8 +323,10 @@ Future<LibrariesConfiguration> acquireLibraries({
   }
 
   if ((skipVectorSearch ?? false) == true) {
+    // NOTE: same name on windows/and macos.
     packages.removeWhere((package) => package.libraryName.contains('CouchbaseLiteVectorSearch'));
   }
+  print('should we skip vectorSearch?? $skipVectorSearch');
 
   for (var package in packages) {
     print('aftr: ${package.libraryName}');
