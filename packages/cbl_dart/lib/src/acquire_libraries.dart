@@ -319,7 +319,15 @@ Future<LibrariesConfiguration> acquireLibraries({
 
   final packages = await Future.wait(packageConfigs.map(loader.load));
   for (var package in packages) {
-    print(package.libraryName);
+    print('b4: ${package.libraryName}');
+  }
+
+  if ((skipVectorSearch ?? false) == true) {
+    packages.removeWhere((package) => package.libraryName.contains('CouchbaseLiteVectorSearch'));
+  }
+
+  for (var package in packages) {
+    print('aftr: ${package.libraryName}');
   }
 
   if (!areMergedNativeLibrariesInstalled(
