@@ -32,8 +32,18 @@ Directory mergedNativeLibrariesInstallDir(
   Iterable<Package> packages,
   String directory,
 ) {
-  final signature = PackageMerging.signature(packages);
-  return Directory(p.join(directory, signature));
+  // final signature = PackageMerging.signature(packages);
+
+  String hardcodedHash = '';
+  if (Platform.isMacOS) {
+    hardcodedHash = 'c4f61c9bde1085be63f32dd54ca8829e';
+  } else if (Platform.isWindows) {
+    hardcodedHash = 'c2ddf39c36bd6ab58d86b27ddc102286';
+  } else if (Platform.isLinux) {
+    hardcodedHash = '6af4f73a0a0e59cb7e1a272a9fa0828a';
+  }
+
+  return Directory(p.join(directory, hardcodedHash));
 }
 
 bool areMergedNativeLibrariesInstalled(
