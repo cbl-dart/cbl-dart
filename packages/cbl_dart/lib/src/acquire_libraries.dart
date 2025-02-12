@@ -282,8 +282,8 @@ Future<LibrariesConfiguration> acquireLibraries({
           : LibraryConfiguration.dynamic(
               // '$uuid/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
               '$uuid/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
-              // isAppleFramework: false,
-              isAppleFramework: true,
+              isAppleFramework: false,
+              // isAppleFramework: true,
             ),
     );
   }
