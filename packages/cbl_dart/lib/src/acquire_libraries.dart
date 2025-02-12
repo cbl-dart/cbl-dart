@@ -189,18 +189,15 @@ Future<LibrariesConfiguration> acquireLibraries({
       }
     }
 
-    return LibrariesConfiguration(
-      enterpriseEdition: edition == Edition.enterprise,
-      directory: mergedNativeLibrariesDir,
-      cbl: LibraryConfiguration.dynamic('$uuid\\cblite'),
-      cblDart: LibraryConfiguration.dynamic('$uuid\\cblitedart'),
-      vectorSearch: (skipVectorSearch ?? false) == true
-          ? null
-          : LibraryConfiguration.dynamic(
-              '$uuid\\CouchbaseLiteVectorSearch',
-              isAppleFramework: false,
-            ),
-    );
+    if (skipVectorSearch ?? false == true) {
+      return LibrariesConfiguration(
+        enterpriseEdition: edition == Edition.enterprise,
+        directory: mergedNativeLibrariesDir,
+        cbl: LibraryConfiguration.dynamic('$uuid\\cblite'),
+        cblDart: LibraryConfiguration.dynamic('$uuid\\cblitedart'),
+        vectorSearch: null,
+      );
+    }
   } else if (Platform.isMacOS) {
     String uuid = 'c4f61c9bde1085be63f32dd54ca8829e';
 
@@ -272,20 +269,16 @@ Future<LibrariesConfiguration> acquireLibraries({
     // before we continue rolling here we also need to copy these files to a different dir structure as well.
 
     // return our libraries
-    return LibrariesConfiguration(
-      enterpriseEdition: edition == Edition.enterprise,
-      directory: mergedNativeLibrariesDir,
-      cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
-      cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
-      vectorSearch: (skipVectorSearch ?? false) == true
-          ? null
-          : LibraryConfiguration.dynamic(
-              // '$uuid/CouchbaseLiteVectorSearch.framework/CouchbaseLiteVectorSearch',
-              '$uuid/CouchbaseLiteVectorSearch.framework/Versions/A/CouchbaseLiteVectorSearch',
-              isAppleFramework: false,
-              // isAppleFramework: true,
-            ),
-    );
+
+    if (skipVectorSearch ?? false == true) {
+      return LibrariesConfiguration(
+        enterpriseEdition: edition == Edition.enterprise,
+        directory: mergedNativeLibrariesDir,
+        cbl: LibraryConfiguration.dynamic('$uuid/libcblite.3'),
+        cblDart: LibraryConfiguration.dynamic('$uuid/libcblitedart'),
+        vectorSearch: null,
+      );
+    }
   }
 
   if (_librariesOverride != null) {
