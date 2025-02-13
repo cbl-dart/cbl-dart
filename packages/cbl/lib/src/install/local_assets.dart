@@ -157,7 +157,7 @@ class LocalAssetsConfiguration {
     for (final config in libraryConfigs) {
       final path = _resolveLibraryPath(config);
       if (!File(path).existsSync()) {
-        throw StateError('Required library not found at: $path');
+        throw PathNotFoundException(path, OSError('Required library not found at: $path', 2));
       }
     }
   }
