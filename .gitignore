@@ -320,3 +320,4 @@ doc/api/
 ## Flutter
 .flutter-plugins
 .flutter-plugins-dependencies
+/assets
