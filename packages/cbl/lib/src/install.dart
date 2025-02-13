@@ -13,3 +13,4 @@ export 'install/package.dart'
         RemotePackageLoader,
         VectorSearchPackageConfig;
 export 'install/utils.dart' show copyDirectoryContents, userCachesDir;
+export 'install/local_assets.dart' show LocalAssetsConfiguration;

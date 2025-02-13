@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# Get destination directory from first argument or use default
+BASE_DIR="${1:-assets}"
+
 # Common variables
 CBL_VERSION="3.2.0"
 VECTOR_SEARCH_VERSION="1.0.0"
 EDITION="enterprise"
-BASE_DIR="assets"
+
 # Create base directories
 mkdir -p "${BASE_DIR}"/linux "${BASE_DIR}"/macos "${BASE_DIR}"/windows
 

@@ -57,6 +57,37 @@ abstract final class CouchbaseLiteDart {
           autoEnableVectorSearch: autoEnableVectorSearch,
         );
       });
+
+  /// Initializes the `cbl` package using pre-bundled libraries from local assets.
+  ///
+  /// This initialization method expects libraries to be pre-bundled at [binaryDependencies]
+  /// in a platform-specific directory structure.
+  ///
+  /// If specified, [databaseLocation] is used to store files created by Couchbase Lite
+  /// by default. For example if a [Database] is opened or copied without
+  /// specifying a [DatabaseConfiguration.directory], a subdirectory in the
+  /// directory specified here will be used. If no [databaseLocation] directory is
+  /// provided, the working directory is used when opening and copying databases.
+  static Future<void> initWithLocalBinaryDependencies({
+    required Directory binaryDependencies,
+    required Edition edition,
+    Directory? databaseLocation,
+    bool skipVectorSearch = false,
+  }) =>
+      asyncOperationTracePoint(InitializeOp.new, () async {
+        final context = databaseLocation == null ? null : await _initContext(databaseLocation.path);
+
+        final config = LocalAssetsConfiguration(
+          binaryDependencies: binaryDependencies,
+          edition: edition,
+          skipVectorSearch: skipVectorSearch,
+        )..verifyLibrariesExist();
+
+        await initPrimaryIsolate(IsolateContext(
+          initContext: context,
+          libraries: config.toLibrariesConfiguration(),
+        ));
+      });
 }
 
 Future<InitContext> _initContext(String filesDir) async {

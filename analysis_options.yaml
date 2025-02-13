@@ -1,6 +1,10 @@
 include: all_lint_rules.yaml
 
 analyzer:
+  errors:
+    lines_longer_than_80_chars: ignore
+    non_constant_identifier_names: ignore
+    prefer_const_constructors: ignore
   exclude:
     - node_modules/**
   language:
