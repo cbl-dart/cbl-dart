@@ -110,10 +110,10 @@ void main() {
         .where(Expression.property('DOCUMENT_TYPE')
             .equalTo(Expression.string('article'))
             .and(Expression.property('DOCUMENT_NAME').like(Expression.string('%Article%'))));
-    
+
     final explain = await metadata_query.explain();
     expect(explain.toLowerCase(), contains('using index'));
-    
+
     final metadata_results = await metadata_query.execute();
     final metadata_docs = await metadata_results.allResults();
     expect(metadata_docs.length, equals(2)); // Should find both article documents
@@ -141,14 +141,13 @@ void main() {
     // Add more detailed debug logging
     print('\nPublished documents count: ${published.length}');
     for (final result in published) {
-      print('\nDocument raw data:');
-      print(result.toPlainMap()); // First let's see what we're getting
-
-      final doc = result.toPlainMap();
+      final raw_data = result.toPlainMap();
+      final doc = raw_data['_default'] as Map<String, dynamic>;
       print('\nDocument:');
       print('  Type: ${doc['DOCUMENT_TYPE']}');
       print('  Name: ${doc['DOCUMENT_NAME']}');
       print('  Published: ${doc['PUBLISHED']}');
+      print('  Content: ${doc['CONTENT']}');
     }
 
     expect(published.length, equals(2));
