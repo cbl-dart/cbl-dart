@@ -62,7 +62,15 @@ class LocalAssetsConfiguration {
       };
 
   /// Full path to the directory containing the platform-specific libraries
-  String get librariesPath => join(binaryDependencies.path, _platformDir, _platformHash);
+  String get librariesPath {
+    final platform_path = join(binaryDependencies.path, _platformDir, _platformHash);
+    final direct_path = join(binaryDependencies.path, _platformHash);
+
+    if (Directory(platform_path).existsSync()) {
+      return platform_path;
+    }
+    return direct_path;
+  }
 
   /// Converts this configuration into a [LibrariesConfiguration] for library loading.
   ///
