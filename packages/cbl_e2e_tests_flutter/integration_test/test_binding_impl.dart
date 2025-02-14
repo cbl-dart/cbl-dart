@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cbl/cbl.dart';
 import 'package:cbl_flutter/cbl_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' as ft;
@@ -26,7 +27,10 @@ final class FlutterCblE2eTestBinding extends CblE2eTestBinding {
   }
 
   @override
-  FutureOr<void> initCouchbaseLite() => CouchbaseLiteFlutter.init();
+  FutureOr<void> initCouchbaseLite() async {
+    await CouchbaseLiteFlutter.init(autoEnableVectorSearch: false);
+    Extension.enableVectorSearch();
+  }
 
   @override
   Future<String> resolveTmpDir() => getTemporaryDirectory()
