@@ -17,9 +17,9 @@ abstract final class Extension {
   ///
   /// The various `init` methods implicitly call this function if vector search
   /// is available and supported on the current system. This behavior can be
-  /// disabled by setting the `autoEnableVectorSearch` parameter to `false`.
-  /// In the future the `autoEnableVectorSearch` parameter will be removed and
-  /// this function will have to be called explicitly.
+  /// disabled by setting the `autoEnableVectorSearch` parameter to `false`. In
+  /// the future the `autoEnableVectorSearch` parameter will be removed and this
+  /// function will have to be called explicitly.
   static void enableVectorSearch() {
     if (!_binding.vectorSearchLibraryAvailable) {
       throw DatabaseException(
