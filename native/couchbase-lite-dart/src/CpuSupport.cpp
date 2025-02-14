@@ -42,4 +42,4 @@ bool CpuSupportsAVX2() {
 #endif
 }
 
-}
+}  // namespace CBLDart
