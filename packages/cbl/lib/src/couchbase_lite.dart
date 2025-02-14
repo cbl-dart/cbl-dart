@@ -17,9 +17,15 @@ export 'support/streams.dart' show AsyncListenStream;
 /// logging.
 abstract final class CouchbaseLite {
   /// Initializes the `cbl` package, for the main isolate.
-  static Future<void> init({required LibrariesConfiguration libraries}) =>
+  static Future<void> init({
+    required LibrariesConfiguration libraries,
+    bool autoEnableVectorSearch = true,
+  }) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
-        await initPrimaryIsolate(IsolateContext(libraries: libraries));
+        await initPrimaryIsolate(
+          IsolateContext(libraries: libraries),
+          autoEnableVectorSearch: autoEnableVectorSearch,
+        );
 
         _setupLogging();
       });

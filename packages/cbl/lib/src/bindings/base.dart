@@ -442,6 +442,27 @@ final class BaseBindings extends Bindings {
   late final _refCountedFinalizer =
       NativeFinalizer(cbl.addresses.CBL_Release.cast());
 
+  bool get vectorSearchLibraryAvailable => vectorSearchLibraryPath != null;
+
+  bool get systemSupportsVectorSearch => switch (Abi.current()) {
+        Abi.androidArm ||
+        Abi.androidArm64 ||
+        Abi.iosArm ||
+        Abi.iosArm64 ||
+        Abi.linuxArm ||
+        Abi.linuxArm64 ||
+        Abi.macosArm64 ||
+        Abi.windowsArm64 =>
+          true,
+        Abi.linuxX64 ||
+        Abi.windowsX64 ||
+        Abi.iosX64 ||
+        Abi.macosX64 ||
+        Abi.androidX64 =>
+          cblDart.CBLDart_CpuSupportsAVX2(),
+        _ => false,
+      };
+
   void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
 
@@ -479,15 +500,18 @@ final class BaseBindings extends Bindings {
               .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError:
           throw error.toCouchbaseLiteException();
       }
-
-      if (vectorSearchLibraryPath case final libraryPath?) {
-        final libraryDirectory = p.dirname(libraryPath);
-        runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
-          cbl.CBL_EnableVectorSearch(flLibraryDirectory, globalCBLError)
-              .checkError();
-        });
-      }
     });
+  }
+
+  void enableVectorSearch() {
+    if (vectorSearchLibraryPath case final libraryPath?
+        when systemSupportsVectorSearch) {
+      final libraryDirectory = p.dirname(libraryPath);
+      runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
+        cbl.CBL_EnableVectorSearch(flLibraryDirectory, globalCBLError)
+            .checkError();
+      });
+    }
   }
 
   void bindCBLRefCountedToDartObject(

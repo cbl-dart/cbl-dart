@@ -15,16 +15,19 @@ import 'package:path_provider/path_provider.dart';
 /// logging, for usage of Couchbase Lite in Flutter apps.
 abstract final class CouchbaseLiteFlutter {
   /// Initializes the `cbl` package, for the main isolate.
-  static Future<void> init() =>
+  static Future<void> init({bool autoEnableVectorSearch = true}) =>
       asyncOperationTracePoint(InitializeOp.new, () async {
         if (Platform.isAndroid) {
           await _preloadLibrariesForAndroid();
         }
 
-        await initPrimaryIsolate(IsolateContext(
-          libraries: CblFlutterPlatform.instance.libraries(),
-          initContext: await _context(),
-        ));
+        await initPrimaryIsolate(
+          IsolateContext(
+            libraries: CblFlutterPlatform.instance.libraries(),
+            initContext: await _context(),
+          ),
+          autoEnableVectorSearch: autoEnableVectorSearch,
+        );
       });
 }
 

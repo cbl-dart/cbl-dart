@@ -26,14 +26,17 @@ abstract final class CouchbaseLiteNativeAssets {
       asyncOperationTracePoint(InitializeOp.new, () async {
         final context = filesDir == null ? null : await _initContext(filesDir);
 
-        await initPrimaryIsolate(IsolateContext(
-          initContext: context,
-          bindings: CBLBindings(
-            enterpriseEdition: true,
-            cbl: const cbliteNative(),
-            cblDart: const cblitedartNative(),
+        await initPrimaryIsolate(
+          IsolateContext(
+            initContext: context,
+            bindings: CBLBindings(
+              enterpriseEdition: true,
+              cbl: const cbliteNative(),
+              cblDart: const cblitedartNative(),
+            ),
           ),
-        ));
+          autoEnableVectorSearch: false,
+        );
       });
 }
 

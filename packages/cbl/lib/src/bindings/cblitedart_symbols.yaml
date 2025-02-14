@@ -64,6 +64,8 @@ files:
         name: CBLDart_CBL_CopyDatabase
       c:@F@CBLDart_Completer_Complete:
         name: CBLDart_Completer_Complete
+      c:@F@CBLDart_CpuSupportsAVX2:
+        name: CBLDart_CpuSupportsAVX2
       c:@F@CBLDart_FLArrayIterator_Begin:
         name: CBLDart_FLArrayIterator_Begin
       c:@F@CBLDart_FLArrayIterator_Delete:

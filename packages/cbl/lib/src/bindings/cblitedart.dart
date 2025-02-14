@@ -248,6 +248,16 @@ class cblitedart {
       _CBLDart_FLEncoder_WriteArrayValuePtr.asFunction<
           DartCBLDart_FLEncoder_WriteArrayValue>();
 
+  bool CBLDart_CpuSupportsAVX2() {
+    return _CBLDart_CpuSupportsAVX2();
+  }
+
+  late final _CBLDart_CpuSupportsAVX2Ptr =
+      _lookup<ffi.NativeFunction<NativeCBLDart_CpuSupportsAVX2>>(
+          'CBLDart_CpuSupportsAVX2');
+  late final _CBLDart_CpuSupportsAVX2 =
+      _CBLDart_CpuSupportsAVX2Ptr.asFunction<DartCBLDart_CpuSupportsAVX2>();
+
   int CBLDart_Initialize(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
     ffi.Pointer<ffi.Void> cblInitContext,
@@ -900,6 +910,8 @@ typedef NativeCBLDart_FLEncoder_WriteArrayValue = ffi.Bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, ffi.Uint32 index);
 typedef DartCBLDart_FLEncoder_WriteArrayValue = bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, int index);
+typedef NativeCBLDart_CpuSupportsAVX2 = ffi.Bool Function();
+typedef DartCBLDart_CpuSupportsAVX2 = bool Function();
 
 sealed class CBLDartInitializeResult {
   static const CBLDartInitializeResult_kSuccess = 0;

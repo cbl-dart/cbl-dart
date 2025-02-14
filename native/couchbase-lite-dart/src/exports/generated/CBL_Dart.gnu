@@ -1,5 +1,6 @@
 CBL_Dart {
 	global:
+		CBLDart_CpuSupportsAVX2;
 		CBLDart_Initialize;
 		CBLDart_AsyncCallback_New;
 		CBLDart_AsyncCallback_Close;
