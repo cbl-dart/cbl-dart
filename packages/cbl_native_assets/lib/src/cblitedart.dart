@@ -90,6 +90,9 @@ external bool CBLDart_FLEncoder_WriteArrayValue(
   int index,
 );
 
+@ffi.Native<NativeCBLDart_CpuSupportsAVX2>()
+external bool CBLDart_CpuSupportsAVX2();
+
 @ffi.Native<NativeCBLDart_Initialize>()
 external int CBLDart_Initialize(
   ffi.Pointer<ffi.Void> dartInitializeDlData,
@@ -375,6 +378,8 @@ typedef NativeCBLDart_FLEncoder_WriteArrayValue = ffi.Bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, ffi.Uint32 index);
 typedef DartCBLDart_FLEncoder_WriteArrayValue = bool Function(
     imp1.FLEncoder encoder, imp1.FLArray array, int index);
+typedef NativeCBLDart_CpuSupportsAVX2 = ffi.Bool Function();
+typedef DartCBLDart_CpuSupportsAVX2 = bool Function();
 
 sealed class CBLDartInitializeResult {
   static const CBLDartInitializeResult_kSuccess = 0;

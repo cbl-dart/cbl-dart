@@ -1,3 +1,4 @@
+CBLDart_CpuSupportsAVX2
 CBLDart_Initialize
 
 CBLDart_AsyncCallback_New

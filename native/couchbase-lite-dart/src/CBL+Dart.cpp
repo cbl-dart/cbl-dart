@@ -7,8 +7,11 @@
 
 #include "AsyncCallback.h"
 #include "CBL+Dart.h"
+#include "CpuSupport.h"
 #include "Sentry.h"
 #include "Utils.h"
+
+bool CBLDart_CpuSupportsAVX2() { return CBLDart::CpuSupportsAVX2(); }
 
 static std::mutex initializeMutex;
 static bool initialized = false;

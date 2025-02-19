@@ -150,6 +150,9 @@ class cblitedartNative implements cblitedart {
       );
 
   @override
+  bool CBLDart_CpuSupportsAVX2() => native.CBLDart_CpuSupportsAVX2();
+
+  @override
   int CBLDart_Initialize(
     ffi.Pointer<ffi.Void> dartInitializeDlData,
     ffi.Pointer<ffi.Void> cblInitContext,

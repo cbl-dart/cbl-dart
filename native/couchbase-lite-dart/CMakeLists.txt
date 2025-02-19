@@ -63,6 +63,7 @@ add_library(cblitedart
     SHARED
     src/AsyncCallback.cpp
     src/CBL+Dart.cpp
+    src/CpuSupport.cpp
     src/Fleece+Dart.cpp
     src/Sentry.cpp
     src/Utils.cpp

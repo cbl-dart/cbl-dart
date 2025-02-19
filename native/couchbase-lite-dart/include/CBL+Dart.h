@@ -11,6 +11,9 @@
 #include "CBLDart_Export.h"
 #include "dart/dart_api_dl.h"
 
+CBLDART_EXPORT
+bool CBLDart_CpuSupportsAVX2();
+
 /**
  * This is a compatibility layer to allow Dart code to use the Couchbase Lite C
  * API. Some method signatures are incompatible with Dart's FFI capabilities.
