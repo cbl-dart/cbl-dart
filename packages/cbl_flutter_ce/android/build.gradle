@@ -41,7 +41,7 @@ dependencies {
 }
 
 task activateCblFlutter(type: Exec) {
-    commandLine 'dart', 'pub', 'global', 'activate', 'cbl_flutter_install', '0.1.0'
+    commandLine 'dart', 'pub', 'global', 'activate', 'cbl_flutter_install', '0.1.0+1'
 
     standardOutput = new ByteArrayOutputStream()
     errorOutput = new ByteArrayOutputStream()

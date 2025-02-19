@@ -1,3 +1,11 @@
+## 3.4.0
+
+ - **REFACTOR**: disable comments and Dart enums for FFI bindings ([#685](https://github.com/cbl-dart/cbl-dart/issues/685)). ([da30961e](https://github.com/cbl-dart/cbl-dart/commit/da30961eef1c19aaf4c58a31416ad28a3d5721f0))
+ - **FIX**: vector search extension library name on Linux ([#703](https://github.com/cbl-dart/cbl-dart/issues/703)). ([81f7d74a](https://github.com/cbl-dart/cbl-dart/commit/81f7d74a076488a956a167f12631bfb91b58bc07))
+ - **FIX**: handle negative `DatabaseException.errorPosition` in `toString` ([#700](https://github.com/cbl-dart/cbl-dart/issues/700)). ([6e893d45](https://github.com/cbl-dart/cbl-dart/commit/6e893d45e0564ec2ca7e133869171be166317b0f))
+ - **FIX**: handle `kCBLNetErrTLSHandshakeFailed` network error code ([#701](https://github.com/cbl-dart/cbl-dart/issues/701)). ([d6ffaf71](https://github.com/cbl-dart/cbl-dart/commit/d6ffaf710a0c27399718bda39675f97b894dc9d7))
+ - **FEAT**: add `Extension.enableVectorSearch` ([#711](https://github.com/cbl-dart/cbl-dart/issues/711)). ([ad14951e](https://github.com/cbl-dart/cbl-dart/commit/ad14951e1ff69afff7d0617a7f442bd2199adaed))
+
 ## 3.3.0
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.

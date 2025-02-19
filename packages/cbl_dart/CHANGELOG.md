@@ -1,3 +1,8 @@
+## 3.3.0
+
+ - **FIX**: vector search extension library name on Linux ([#703](https://github.com/cbl-dart/cbl-dart/issues/703)). ([81f7d74a](https://github.com/cbl-dart/cbl-dart/commit/81f7d74a076488a956a167f12631bfb91b58bc07))
+ - **FEAT**: add `Extension.enableVectorSearch` ([#711](https://github.com/cbl-dart/cbl-dart/issues/711)). ([ad14951e](https://github.com/cbl-dart/cbl-dart/commit/ad14951e1ff69afff7d0617a7f442bd2199adaed))
+
 ## 3.2.0
 
  - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.

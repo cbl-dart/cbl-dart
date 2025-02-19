@@ -3,6 +3,59 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-02-19
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.4.0`](#cbl---v340)
+ - [`cbl_dart` - `v3.3.0`](#cbl_dart---v330)
+ - [`cbl_flutter` - `v3.3.0`](#cbl_flutter---v330)
+ - [`cbl_flutter_install` - `v0.1.0+1`](#cbl_flutter_install---v0101)
+ - [`cbl_flutter_platform_interface` - `v3.1.1`](#cbl_flutter_platform_interface---v311)
+ - [`cbl_sentry` - `v2.1.3`](#cbl_sentry---v213)
+ - [`cbl_generator` - `v0.3.1+1`](#cbl_generator---v0311)
+ - [`cbl_flutter_ce` - `v3.3.1`](#cbl_flutter_ce---v331)
+ - [`cbl_flutter_ee` - `v3.3.1`](#cbl_flutter_ee---v331)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter_install` - `v0.1.0+1`
+ - `cbl_flutter_platform_interface` - `v3.1.1`
+ - `cbl_sentry` - `v2.1.3`
+ - `cbl_generator` - `v0.3.1+1`
+ - `cbl_flutter_ce` - `v3.3.1`
+ - `cbl_flutter_ee` - `v3.3.1`
+
+---
+
+#### `cbl` - `v3.4.0`
+
+ - **REFACTOR**: disable comments and Dart enums for FFI bindings ([#685](https://github.com/cbl-dart/cbl-dart/issues/685)). ([da30961e](https://github.com/cbl-dart/cbl-dart/commit/da30961eef1c19aaf4c58a31416ad28a3d5721f0))
+ - **FIX**: vector search extension library name on Linux ([#703](https://github.com/cbl-dart/cbl-dart/issues/703)). ([81f7d74a](https://github.com/cbl-dart/cbl-dart/commit/81f7d74a076488a956a167f12631bfb91b58bc07))
+ - **FIX**: handle negative `DatabaseException.errorPosition` in `toString` ([#700](https://github.com/cbl-dart/cbl-dart/issues/700)). ([6e893d45](https://github.com/cbl-dart/cbl-dart/commit/6e893d45e0564ec2ca7e133869171be166317b0f))
+ - **FIX**: handle `kCBLNetErrTLSHandshakeFailed` network error code ([#701](https://github.com/cbl-dart/cbl-dart/issues/701)). ([d6ffaf71](https://github.com/cbl-dart/cbl-dart/commit/d6ffaf710a0c27399718bda39675f97b894dc9d7))
+ - **FEAT**: add `Extension.enableVectorSearch` ([#711](https://github.com/cbl-dart/cbl-dart/issues/711)). ([ad14951e](https://github.com/cbl-dart/cbl-dart/commit/ad14951e1ff69afff7d0617a7f442bd2199adaed))
+
+#### `cbl_dart` - `v3.3.0`
+
+ - **FIX**: vector search extension library name on Linux ([#703](https://github.com/cbl-dart/cbl-dart/issues/703)). ([81f7d74a](https://github.com/cbl-dart/cbl-dart/commit/81f7d74a076488a956a167f12631bfb91b58bc07))
+ - **FEAT**: add `Extension.enableVectorSearch` ([#711](https://github.com/cbl-dart/cbl-dart/issues/711)). ([ad14951e](https://github.com/cbl-dart/cbl-dart/commit/ad14951e1ff69afff7d0617a7f442bd2199adaed))
+
+#### `cbl_flutter` - `v3.3.0`
+
+ - **FEAT**: add `Extension.enableVectorSearch` ([#711](https://github.com/cbl-dart/cbl-dart/issues/711)). ([ad14951e](https://github.com/cbl-dart/cbl-dart/commit/ad14951e1ff69afff7d0617a7f442bd2199adaed))
+
+
 ## 2024-12-06
 
 ### Changes
