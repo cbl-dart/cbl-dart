@@ -273,6 +273,7 @@ final class RemotePackageLoader extends PackageLoader {
 
   @override
   Future<String> _packageDir(PackageConfig config) async {
+    print(config._archiveUrl);
     final archiveBaseName =
         p.basenameWithoutExtension(Uri.parse(config._archiveUrl).path);
 
