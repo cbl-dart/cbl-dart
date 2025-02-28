@@ -8,6 +8,15 @@ import org.apache.tools.ant.taskdefs.condition.Os
 group 'com.terwesten.gabriel.{{name}}'
 version '1.0-SNAPSHOT'
 
+def flutterRoot = System.getenv("FLUTTER_ROOT")
+if (flutterRoot == null) {
+    throw new GradleException("FLUTTER_ROOT environment variable not set")
+}
+
+def dartExecutable = "${flutterRoot}/bin/cache/dart-sdk/bin/dart"
+    // Ensure the path is cross-platform.
+    .replace("/", File.separator)
+
 rootProject.allprojects {
     repositories {
         google()
@@ -41,7 +50,7 @@ dependencies {
 }
 
 task activateCblFlutter(type: Exec) {
-    commandLine 'dart', 'pub', 'global', 'activate', 'cbl_flutter_install', '{{cblFlutterInstallVersion}}'
+    commandLine dartExecutable, 'pub', 'global', 'activate', 'cbl_flutter_install', '{{cblFlutterInstallVersion}}'
 
     standardOutput = new ByteArrayOutputStream()
     errorOutput = new ByteArrayOutputStream()
@@ -60,7 +69,7 @@ task activateCblFlutter(type: Exec) {
 
 task installLibraries(type: Exec) {
     workingDir "$projectDir/.."
-    commandLine 'dart', 'pub', 'global', 'run', 'cbl_flutter_install', 'android'
+    commandLine dartExecutable, 'pub', 'global', 'run', 'cbl_flutter_install', 'android'
 }
 
 tasks.installLibraries.dependsOn(activateCblFlutter)
