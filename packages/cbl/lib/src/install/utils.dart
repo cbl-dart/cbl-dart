@@ -156,7 +156,13 @@ Future<void> copyDirectoryContents(
         await File(destPath).create(recursive: true);
         await File(entity.resolveSymbolicLinksSync()).copy(destPath);
       } else {
-        await Link(destPath).create(await entity.target());
+        try {
+          await Link(destPath).create(await entity.target());
+        } on PathExistsException {
+          // Links can't be overwritten on some platforms.
+          await Link(destPath).delete();
+          await Link(destPath).create(await entity.target());
+        }
       }
     } else if (entity is File) {
       await entity.copy(destPath);
