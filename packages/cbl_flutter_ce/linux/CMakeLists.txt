@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "cbl_flutter_ce")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
+# Resolve absolute path to the Dart executable.
+if(NOT DEFINED ENV{FLUTTER_ROOT})
+  message(FATAL_ERROR "FLUTTER_ROOT environment variable not set.")
+endif()
+
+set(DART_EXECUTABLE "$ENV{FLUTTER_ROOT}/bin/cache/dart-sdk/bin/dart")
+
 # This value is used when generating builds using this plugin, so it must
 # not be changed
 set(PLUGIN_NAME "cbl_flutter_ce_plugin")
@@ -19,7 +26,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
 execute_process(
-  COMMAND dart pub global activate cbl_flutter_install 0.1.0+1
+  COMMAND ${DART_EXECUTABLE} pub global activate cbl_flutter_install 0.1.0+1
   RESULT_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_RESULT
   OUTPUT_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_OUTPUT
   ERROR_VARIABLE ACTIVATE_CBL_FLUTTER_INSTALL_ERROR
@@ -30,7 +37,7 @@ if(NOT ${ACTIVATE_CBL_FLUTTER_INSTALL_RESULT} EQUAL 0)
 endif()
 
 execute_process(
-  COMMAND dart pub global run cbl_flutter_install linux
+  COMMAND ${DART_EXECUTABLE} pub global run cbl_flutter_install linux
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/..
   RESULT_VARIABLE INSTALL_LIBRARIES_RESULT
   OUTPUT_VARIABLE INSTALL_LIBRARIES_OUTPUT

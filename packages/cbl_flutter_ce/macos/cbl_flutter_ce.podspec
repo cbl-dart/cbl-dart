@@ -1,7 +1,16 @@
 require 'open3'
 
+# Resolve absolute path to the Dart executable.
+flutter_root = ENV['FLUTTER_ROOT']
+if flutter_root.nil?
+  puts "FLUTTER_ROOT environment variable not set."
+  exit(1)
+end
+
+dart_executable = "#{flutter_root}/bin/cache/dart-sdk/bin/dart"
+
 # Globally activate the cbl_flutter_install package so we can use the `cbl_flutter_install` command.
-stdout, stderr, status = Open3.capture3("dart pub global activate cbl_flutter_install 0.1.0+1")
+stdout, stderr, status = Open3.capture3("#{dart_executable} pub global activate cbl_flutter_install 0.1.0+1")
 
 unless status.success?
   puts "Failed to activate cbl_flutter_install:\n#{stdout}\n#{stderr}"
@@ -10,7 +19,7 @@ end
 
 # Install libraries if they have not been installed yet.
 Dir.chdir("#{Dir.pwd}/..") do
-  `dart pub global run cbl_flutter_install macOS`
+  `#{dart_executable} pub global run cbl_flutter_install macOS`
 end
 
 Pod::Spec.new do |s|
