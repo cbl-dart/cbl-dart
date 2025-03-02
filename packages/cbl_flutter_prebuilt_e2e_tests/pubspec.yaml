@@ -7,9 +7,9 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  cbl: ^3.4.0
-  cbl_flutter: ^3.3.0
-  cbl_flutter_ee: ^3.3.1
+  cbl: ^3.4.1
+  cbl_flutter: ^3.3.1
+  cbl_flutter_ee: ^3.3.2
   flutter:
     sdk: flutter
   flutter_test:

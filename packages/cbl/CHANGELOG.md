@@ -1,3 +1,7 @@
+## 3.4.1
+
+ - **FIX**: ensure `copyDirectoryContents` can overwrite links on all platforms ([#721](https://github.com/cbl-dart/cbl-dart/issues/721)). ([d0127459](https://github.com/cbl-dart/cbl-dart/commit/d0127459e3d5c44da265736367bb6fa45b99f90e))
+
 ## 3.4.0
 
  - **REFACTOR**: disable comments and Dart enums for FFI bindings ([#685](https://github.com/cbl-dart/cbl-dart/issues/685)). ([da30961e](https://github.com/cbl-dart/cbl-dart/commit/da30961eef1c19aaf4c58a31416ad28a3d5721f0))

@@ -1,6 +1,6 @@
 name: cbl_flutter_install
 description: Internal package to install native libraries for the cbl_flutter plugin.
-version: 0.1.0+1
+version: 0.1.0+2
 homepage: https://github.com/cbl-dart/cbl-dart/tree/main/packages/cbl_flutter_install
 repository: https://github.com/cbl-dart/cbl-dart
 issue_tracker: https://github.com/cbl-dart/cbl-dart/issues
@@ -12,4 +12,4 @@ executables:
   cbl_flutter_install:
 
 dependencies:
-  cbl: ^3.4.0
+  cbl: ^3.4.1

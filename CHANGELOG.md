@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-03-02
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.4.1`](#cbl---v341)
+ - [`cbl_flutter_ce` - `v3.3.2`](#cbl_flutter_ce---v332)
+ - [`cbl_flutter_ee` - `v3.3.2`](#cbl_flutter_ee---v332)
+ - [`cbl_flutter` - `v3.3.1`](#cbl_flutter---v331)
+ - [`cbl_flutter_install` - `v0.1.0+2`](#cbl_flutter_install---v0102)
+ - [`cbl_dart` - `v3.3.1`](#cbl_dart---v331)
+ - [`cbl_flutter_platform_interface` - `v3.1.2`](#cbl_flutter_platform_interface---v312)
+ - [`cbl_generator` - `v0.3.1+2`](#cbl_generator---v0312)
+ - [`cbl_sentry` - `v2.1.4`](#cbl_sentry---v214)
+
+Packages with dependency updates only:
+
+> Packages listed below depend on other packages in this workspace that have had changes. Their versions have been incremented to bump the minimum dependency versions of the packages they depend upon in this project.
+
+ - `cbl_flutter` - `v3.3.1`
+ - `cbl_flutter_install` - `v0.1.0+2`
+ - `cbl_dart` - `v3.3.1`
+ - `cbl_flutter_platform_interface` - `v3.1.2`
+ - `cbl_generator` - `v0.3.1+2`
+ - `cbl_sentry` - `v2.1.4`
+
+---
+
+#### `cbl` - `v3.4.1`
+
+ - **FIX**: ensure `copyDirectoryContents` can overwrite links on all platforms ([#721](https://github.com/cbl-dart/cbl-dart/issues/721)). ([d0127459](https://github.com/cbl-dart/cbl-dart/commit/d0127459e3d5c44da265736367bb6fa45b99f90e))
+
+#### `cbl_flutter_ce` - `v3.3.2`
+
+ - **FIX**: resolve absolute path to dart executable Flutter plugin ([#722](https://github.com/cbl-dart/cbl-dart/issues/722)). ([81d78764](https://github.com/cbl-dart/cbl-dart/commit/81d78764fdafb5d8c9e5cdb7961b006130e3922b))
+
+#### `cbl_flutter_ee` - `v3.3.2`
+
+ - **FIX**: resolve absolute path to dart executable Flutter plugin ([#722](https://github.com/cbl-dart/cbl-dart/issues/722)). ([81d78764](https://github.com/cbl-dart/cbl-dart/commit/81d78764fdafb5d8c9e5cdb7961b006130e3922b))
+
+
 ## 2025-02-19
 
 ### Changes
