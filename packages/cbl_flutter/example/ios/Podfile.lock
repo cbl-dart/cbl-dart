@@ -2,21 +2,28 @@ PODS:
   - cbl_flutter_ce (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - cbl_flutter_ce (from `.symlinks/plugins/cbl_flutter_ce/ios`)
   - Flutter (from `Flutter`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
 
 EXTERNAL SOURCES:
   cbl_flutter_ce:
     :path: ".symlinks/plugins/cbl_flutter_ce/ios"
   Flutter:
     :path: Flutter
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
 
 SPEC CHECKSUMS:
-  cbl_flutter_ce: b5cea5b595e5673db642f46284530594b910cce0
+  cbl_flutter_ce: 710bdfce27a45295705f53da76ffec476f4784b7
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
 
 PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
