@@ -20,7 +20,7 @@ final class ProxyDocumentDelegate
         properties = state.properties?.encodedData,
         _propertiesDict = state.properties?.value?.asDict {
     if (bindToProxiedDocument) {
-      _bindToProxiedDocument(database!, state.id!);
+      _bindToProxiedDocument(database!, state);
     }
   }
 
@@ -87,7 +87,7 @@ final class ProxyDocumentDelegate
     assert(state.docId == id);
 
     if (objectId == null) {
-      _bindToProxiedDocument(database!, state.id!);
+      _bindToProxiedDocument(database!, state);
       _source = null;
     }
 
@@ -106,30 +106,6 @@ final class ProxyDocumentDelegate
             : null,
       );
 
-  void _bindToProxiedDocument(ProxyDatabase database, int docObjectId) {
-    // documentFinalizer is called when the database to which the document
-    // belongs is closed. This ensures that the our DartFinalizerRegistry
-    // implementation does not keep the Dart process running in case not all
-    // documents have been garbage collected.
-    //
-    // It is important that documentFinalizer and proxyFinalizer don't capture
-    // any references to this object.
-
-    late final Future<void> Function() documentFinalizer;
-
-    void proxyFinalizer() =>
-        // If the document gets garbage collected, we need don't need to
-        // finalize it when the database closes and we can unregister the
-        // finalizer.
-        () => database.unregisterDocumentFinalizer(documentFinalizer);
-
-    bindToTargetObject(
-      database.channel,
-      docObjectId,
-      proxyFinalizer: proxyFinalizer,
-    );
-
-    documentFinalizer = finalizeEarly;
-    database.registerDocumentFinalizer(documentFinalizer);
-  }
+  void _bindToProxiedDocument(ProxyDatabase database, DocumentState state) =>
+      bindToTargetObject(database.channel, state.id!);
 }
