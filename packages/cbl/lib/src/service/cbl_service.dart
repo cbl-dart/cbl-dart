@@ -338,16 +338,21 @@ final class CblService {
       TracingDelegate.uninstall(currentTracingDelegate);
 
   FutureOr<void> _releaseObject(ReleaseObject request) {
-    final object = _objectRegistry.removeObjectById(request.objectId);
+    final object = _objectRegistry.getObjectOrThrow<Object>(
+      request.objectId,
+      type: '<releasable>',
+    );
+    _objectRegistry.removeObject(object);
     if (object is ClosableResource) {
       return object.close();
     }
   }
 
-  Future<void> _removeChangeListener(
-    RemoveChangeListener request,
-  ) async {
-    final target = _objectRegistry.getObjectOrThrow<Object>(request.targetId);
+  Future<void> _removeChangeListener(RemoveChangeListener request) async {
+    final target = _objectRegistry.getObjectOrThrow<Object>(
+      request.targetId,
+      type: '<listenable>',
+    );
     final token = _listenerIdsToTokens.remove(request.listenerId)!
         as AbstractListenerToken;
 
@@ -388,8 +393,11 @@ final class CblService {
     return _createDatabaseState(database);
   }
 
-  Future<void> _deleteDatabase(DeleteDatabase request) =>
-      _objectRegistry.removeObjectById<Database>(request.databaseId).delete();
+  Future<void> _deleteDatabase(DeleteDatabase request) async {
+    final database = _getDatabaseById(request.databaseId);
+    _objectRegistry.removeObject(database);
+    await database.delete();
+  }
 
   Future<ScopeState?> _getScope(GetScope request) async {
     final scope = _getDatabaseById(request.databaseId).scope(request.name);
@@ -935,10 +943,10 @@ final class _Query {
 }
 
 extension on ObjectRegistry {
-  T getObjectOrThrow<T>(int id) {
+  T getObjectOrThrow<T>(int id, {String? type}) {
     final object = getObject<T>(id);
     if (object == null) {
-      throw NotFoundException(id, T.toString());
+      throw NotFoundException(id, type ?? T.toString());
     }
     return object;
   }
