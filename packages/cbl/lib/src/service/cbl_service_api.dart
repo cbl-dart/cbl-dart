@@ -2634,7 +2634,7 @@ final class DocumentReplicationEvent extends Serializable {
 
 final class NotFoundException extends Serializable implements Exception {
   NotFoundException(this.id, this.type)
-      : message = 'Could not find object of type $type with id $id';
+      : message = 'Could not find $type with id $id';
 
   final String message;
   final String type;
