@@ -117,8 +117,6 @@ final class ProxyDatabase extends ProxyObject
   @override
   late final BlobStore blobStore = ProxyBlobStore(this);
 
-  final _documentFinalizers = <Future<void> Function()>[];
-
   final DatabaseConfiguration _config;
 
   DatabaseState state;
@@ -349,11 +347,6 @@ final class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> performClose() async {
-    await Future.wait<void>(
-      _documentFinalizers.map((finalizer) => finalizer()),
-    );
-    _documentFinalizers.clear();
-
     if (_deleteOnClose) {
       await channel.call(DeleteDatabase(objectId));
     } else {
@@ -414,15 +407,6 @@ final class ProxyDatabase extends ProxyObject
 
   @override
   String toString() => 'ProxyDatabase($name)';
-
-  void registerDocumentFinalizer(Future<void> Function() finalizer) {
-    assert(!isClosed);
-    _documentFinalizers.add(finalizer);
-  }
-
-  void unregisterDocumentFinalizer(Future<void> Function() finalizer) {
-    _documentFinalizers.remove(finalizer);
-  }
 }
 
 final class WorkerDatabase extends ProxyDatabase {
