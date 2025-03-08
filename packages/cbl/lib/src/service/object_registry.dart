@@ -42,6 +42,7 @@ final class ObjectRegistry {
       throw ArgumentError.value(object, 'object', 'is not registered');
     }
 
+    _objectToId.remove(object);
     _idToObject.remove(id);
   }
 
@@ -57,6 +58,7 @@ final class ObjectRegistry {
     }
 
     _objectToId.remove(object);
+    _idToObject.remove(id);
     return object;
   }
 
