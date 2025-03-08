@@ -81,7 +81,7 @@ void main() {
       expect(result.type, 'a');
       expect(
         result.toString(),
-        'NotFound: Could not find object of type a with id 0',
+        'NotFound: Could not find a with id 0',
       );
     });
   });

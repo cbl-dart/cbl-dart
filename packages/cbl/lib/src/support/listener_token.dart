@@ -76,7 +76,7 @@ class ListenerTokenRegistry with ClosableResourceMixin {
   @override
   Future<void> performClose() async {
     await Future.wait<void>(
-      _tokens.map((token) => Future.value(token.removeListener())),
+      _tokens.map((token) async => token.removeListener()),
     );
     _tokens.clear();
   }
