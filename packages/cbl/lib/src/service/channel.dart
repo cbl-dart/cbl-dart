@@ -69,6 +69,10 @@ enum ChannelStatus {
   closed,
 }
 
+/// Exception that pending calls or streams are complete with when a [Channel]
+/// is closed.
+final class ChannelClosedException implements Exception {}
+
 typedef _UntypedCallHandler = FutureOr<Object?> Function(Object?);
 typedef _UntypedStreamHandler = Stream<Object?> Function(Object?);
 
@@ -295,10 +299,23 @@ final class Channel {
   /// and open streams are closed.
   ///
   /// If there are pending calls or open streams, which originated from this
-  /// side, [error] must not be `null` and is used to complete those.
+  /// side, and [error] is not provided, the calls and streams are completed
+  /// with a [ChannelClosedException]
   Future<void> close([Object? error, StackTrace? stackTrace]) async {
     _checkIsOpen();
-    _checkHasNotPendingCallsOrStreams(error);
+
+    if (error == null && stackTrace != null) {
+      throw ArgumentError.value(
+        stackTrace,
+        'stackTrace',
+        'must not be provided without an error',
+      );
+    }
+
+    if (error == null) {
+      error = ChannelClosedException();
+      stackTrace = StackTrace.current;
+    }
 
     // No new requests are accepted after this point.
     _status = ChannelStatus.closing;
@@ -323,13 +340,13 @@ final class Channel {
 
     // Complete pending calls from this side.
     for (final completer in _callCompleter.values) {
-      completer.completeError(error!, stackTrace);
+      completer.completeError(error, stackTrace);
     }
     _callCompleter.clear();
 
     // Close streams listening from this side.
     for (final controllers in _streamControllers.values) {
-      controllers.addError(error!, stackTrace);
+      controllers.addError(error, stackTrace);
       await controllers.close();
     }
     _streamControllers.clear();
@@ -550,20 +567,6 @@ final class Channel {
   }
 
   void _checkIsOpen() => _checkStatusIs(ChannelStatus.open);
-
-  void _checkHasNotPendingCallsOrStreams(Object? error) {
-    if (error == null && _callCompleter.isNotEmpty) {
-      throw ArgumentError(
-        'error must not be null if there are pending calls: $_callRequestNames',
-      );
-    }
-
-    if (error == null && _streamControllers.isNotEmpty) {
-      throw ArgumentError(
-        'error must not be null if there are pending streams',
-      );
-    }
-  }
 
   T _checkType<T>(Object? value) {
     if (value is! T) {
