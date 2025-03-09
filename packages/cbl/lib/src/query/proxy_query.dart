@@ -9,7 +9,6 @@ import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
 import '../support/encoding.dart';
 import '../support/listener_token.dart';
-import '../support/resource.dart';
 import '../support/streams.dart';
 import '../support/tracing.dart';
 import '../support/utils.dart';
@@ -40,7 +39,6 @@ base class ProxyQuery extends QueryBase
   late final _lock = Lock();
   late final _listenerTokens = ListenerTokenRegistry(this);
   late List<String> _columnNames;
-  _ProxyQueryEarlyFinalizer? _earlyFinalizer;
 
   @override
   ProxyDatabase? get database => super.database as ProxyDatabase?;
@@ -145,19 +143,7 @@ base class ProxyQuery extends QueryBase
 
         _columnNames = state.columnNames;
 
-        // We need this so we don't capture `this` in the closure of
-        // proxyFinalizer.
-        late final _ProxyQueryEarlyFinalizer earlyFinalizer;
-
-        bindToTargetObject(
-          channel,
-          state.id,
-          // ignore: unnecessary_lambdas
-          proxyFinalizer: () => earlyFinalizer.deactivate(),
-        );
-
-        _earlyFinalizer =
-            earlyFinalizer = _ProxyQueryEarlyFinalizer(database, finalizeEarly);
+        bindToTargetObject(channel, state.id);
       });
 
   Future<void> _applyParameters(Parameters? parameters) {
@@ -176,27 +162,7 @@ base class ProxyQuery extends QueryBase
   }
 
   @override
-  FutureOr<void> performClose() => _earlyFinalizer?.close();
-}
-
-final class _ProxyQueryEarlyFinalizer with ClosableResourceMixin {
-  _ProxyQueryEarlyFinalizer(ProxyDatabase database, this._finalizerEarly) {
-    // We need to attach to the database and not to the query. Otherwise,
-    // the query could never be garbage collected.
-    attachTo(database);
-  }
-
-  final Future<void> Function() _finalizerEarly;
-
-  @override
-  FutureOr<void> performClose() => _finalizerEarly();
-
-  /// Deactivates this finalizer if it has not been closed yet.
-  void deactivate() {
-    if (!isClosed) {
-      needsToBeClosedByParent = false;
-    }
-  }
+  FutureOr<void> performClose() => isBoundToTarget ? finalizeEarly() : null;
 }
 
 final class ProxyResultSet implements AsyncResultSet {
