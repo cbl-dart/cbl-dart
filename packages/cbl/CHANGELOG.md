@@ -1,3 +1,12 @@
+## 3.4.2
+
+ - **REFACTOR**: consistently use `getObjectOrThrow` to find objects in `ObjectRegistry` ([#728](https://github.com/cbl-dart/cbl-dart/issues/728)). ([93048046](https://github.com/cbl-dart/cbl-dart/commit/930480466af2431bba88c25dfd4d0e8eb42159bf))
+ - **REFACTOR**: remove `_ProxyQueryEarlyFinalizer` ([#731](https://github.com/cbl-dart/cbl-dart/issues/731)). ([1430486b](https://github.com/cbl-dart/cbl-dart/commit/1430486b815f955bf9f3a93978a517985dd6ab6f))
+ - **REFACTOR**: stop registering documents with `ProxyDatabase` for clean up ([#729](https://github.com/cbl-dart/cbl-dart/issues/729)). ([22db7f69](https://github.com/cbl-dart/cbl-dart/commit/22db7f69f96f29411416b3c43e0a72fd3755161b))
+ - **FIX**: memory leak in `ObjectRegistry` ([#726](https://github.com/cbl-dart/cbl-dart/issues/726)). ([77471b94](https://github.com/cbl-dart/cbl-dart/commit/77471b9460f0879e1af179146c7e5f9c4a868e63))
+ - **FIX**: don't finalize deleted `ProxyDatabase` ([#733](https://github.com/cbl-dart/cbl-dart/issues/733)). ([a05868ad](https://github.com/cbl-dart/cbl-dart/commit/a05868ad411d1b762bad1823e9d7ca9f353880fc))
+ - **FIX**: don't require completion of release request for proxied object after `Channel` closure ([#732](https://github.com/cbl-dart/cbl-dart/issues/732)). ([566ff3ca](https://github.com/cbl-dart/cbl-dart/commit/566ff3ca1e2354e72c87164e7fda737fd770ad8c))
+
 ## 3.4.1
 
  - **FIX**: ensure `copyDirectoryContents` can overwrite links on all platforms ([#721](https://github.com/cbl-dart/cbl-dart/issues/721)). ([d0127459](https://github.com/cbl-dart/cbl-dart/commit/d0127459e3d5c44da265736367bb6fa45b99f90e))
