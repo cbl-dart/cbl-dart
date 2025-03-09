@@ -347,11 +347,7 @@ final class ProxyDatabase extends ProxyObject
 
   @override
   Future<void> performClose() async {
-    if (_deleteOnClose) {
-      await channel.call(DeleteDatabase(objectId));
-    } else {
-      await finalizeEarly();
-    }
+    await finalizeEarly(_deleteOnClose ? DeleteDatabase(objectId) : null);
     path = null;
   }
 

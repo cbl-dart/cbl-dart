@@ -62,7 +62,7 @@ mixin ProxyObjectMixin {
     );
   }
 
-  Future<void> Function() get finalizeEarly {
+  Future<void> Function([Request? finalizeRequest]) get finalizeEarly {
     assert(isBoundToTarget);
 
     // Don't capture `this` in the closure of the returned function.
@@ -70,9 +70,9 @@ mixin ProxyObjectMixin {
     final objectId = this.objectId!;
     final channel = this.channel!;
 
-    return () {
+    return ([Request? finalizeRequest]) {
       _proxyObjectFinalizer.detach(finalizerToken);
-      return channel.call(ReleaseObject(objectId));
+      return channel.call(finalizeRequest ?? ReleaseObject(objectId));
     };
   }
 }
