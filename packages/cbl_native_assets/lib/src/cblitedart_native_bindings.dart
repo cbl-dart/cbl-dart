@@ -4,7 +4,7 @@
 import 'dart:ffi' as ffi;
 
 import 'package:cbl/src/bindings/cblitedart.dart';
-import 'package:cbl/src/bindings/cblite.dart' as imp1;
+import 'package:cbl/src/bindings/cblite.dart' as imp$1;
 import './cblitedart.dart' as native;
 
 class cblitedartNative implements cblitedart {
@@ -43,7 +43,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   void CBLDart_GetLoadedFLValue(
-    imp1.FLValue value,
+    imp$1.FLValue value,
     ffi.Pointer<CBLDart_LoadedFLValue> out,
   ) =>
       native.CBLDart_GetLoadedFLValue(
@@ -53,7 +53,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   void CBLDart_FLArray_GetLoadedFLValue(
-    imp1.FLArray array,
+    imp$1.FLArray array,
     int index,
     ffi.Pointer<CBLDart_LoadedFLValue> out,
   ) =>
@@ -65,8 +65,8 @@ class cblitedartNative implements cblitedart {
 
   @override
   void CBLDart_FLDict_GetLoadedFLValue(
-    imp1.FLDict dict,
-    imp1.FLString key,
+    imp$1.FLDict dict,
+    imp$1.FLString key,
     ffi.Pointer<CBLDart_LoadedFLValue> out,
   ) =>
       native.CBLDart_FLDict_GetLoadedFLValue(
@@ -77,7 +77,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   ffi.Pointer<CBLDart_FLDictIterator> CBLDart_FLDictIterator_Begin(
-    imp1.FLDict dict,
+    imp$1.FLDict dict,
     ffi.Pointer<KnownSharedKeys> knownSharedKeys,
     ffi.Pointer<CBLDart_LoadedDictKey> keyOut,
     ffi.Pointer<CBLDart_LoadedFLValue> valueOut,
@@ -111,7 +111,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   ffi.Pointer<CBLDart_FLArrayIterator> CBLDart_FLArrayIterator_Begin(
-    imp1.FLArray array,
+    imp$1.FLArray array,
     ffi.Pointer<CBLDart_LoadedFLValue> valueOut,
     bool deleteOnDone,
   ) =>
@@ -139,8 +139,8 @@ class cblitedartNative implements cblitedart {
 
   @override
   bool CBLDart_FLEncoder_WriteArrayValue(
-    imp1.FLEncoder encoder,
-    imp1.FLArray array,
+    imp$1.FLEncoder encoder,
+    imp$1.FLArray array,
     int index,
   ) =>
       native.CBLDart_FLEncoder_WriteArrayValue(
@@ -236,7 +236,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   void CBLDart_CBLLog_SetCallbackLevel(
-    int level,
+    imp$1.DartCBLLogLevel level,
   ) =>
       native.CBLDart_CBLLog_SetCallbackLevel(
         level,
@@ -270,8 +270,8 @@ class cblitedartNative implements cblitedart {
 
   @override
   bool CBLDart_CBL_CopyDatabase(
-    imp1.FLString fromPath,
-    imp1.FLString toName,
+    imp$1.FLString fromPath,
+    imp$1.FLString toName,
     ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
     ffi.Pointer<CBLError> outError,
   ) =>
@@ -284,7 +284,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   ffi.Pointer<CBLDatabase> CBLDart_CBLDatabase_Open(
-    imp1.FLString name,
+    imp$1.FLString name,
     ffi.Pointer<CBLDart_CBLDatabaseConfiguration> config,
     ffi.Pointer<CBLError> errorOut,
   ) =>
@@ -318,7 +318,7 @@ class cblitedartNative implements cblitedart {
   void CBLDart_CBLCollection_AddDocumentChangeListener(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLCollection> collection,
-    imp1.FLString docID,
+    imp$1.FLString docID,
     CBLDart_AsyncCallback listener,
   ) =>
       native.CBLDart_CBLCollection_AddDocumentChangeListener(
@@ -343,7 +343,7 @@ class cblitedartNative implements cblitedart {
   @override
   bool CBLDart_CBLCollection_CreateIndex(
     ffi.Pointer<CBLCollection> collection,
-    imp1.FLString name,
+    imp$1.FLString name,
     CBLDart_CBLIndexSpec indexSpec,
     ffi.Pointer<CBLError> errorOut,
   ) =>
@@ -368,7 +368,7 @@ class cblitedartNative implements cblitedart {
 
   @override
   CBLDart_PredictiveModel CBLDart_PredictiveModel_New(
-    imp1.FLString name,
+    imp$1.FLString name,
     int isolateId,
     CBLDart_PredictiveModel_PredictionSync predictionSync,
     CBLDart_PredictiveModel_PredictionAsync predictionAsync,

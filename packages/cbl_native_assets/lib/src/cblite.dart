@@ -2286,7 +2286,7 @@ typedef NativeCBLError_Message = FLSliceResult Function(
 typedef DartCBLError_Message = FLSliceResult Function(
     ffi.Pointer<CBLError> outError);
 typedef NativeCBL_Now = imp1.CBLTimestamp Function();
-typedef DartCBL_Now = imp1.CBLTimestamp Function();
+typedef DartCBL_Now = imp1.DartCBLTimestamp Function();
 typedef CBLRefCounted = imp1.CBLRefCounted;
 typedef NativeCBL_Retain = ffi.Pointer<CBLRefCounted> Function(
     ffi.Pointer<CBLRefCounted> arg0);
@@ -2365,7 +2365,7 @@ typedef NativeCBLBlobReader_Seek = ffi.Int64 Function(
 typedef DartCBLBlobReader_Seek = int Function(
     ffi.Pointer<CBLBlobReadStream> stream,
     int offset,
-    imp1.CBLSeekBase base,
+    imp1.DartCBLSeekBase base,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLBlobReader_Position = ffi.Uint64 Function(
     ffi.Pointer<CBLBlobReadStream> stream);
@@ -2449,7 +2449,7 @@ typedef NativeCBLDatabase_SaveDocumentWithConcurrencyControl
 typedef DartCBLDatabase_SaveDocumentWithConcurrencyControl = bool Function(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> doc,
-    imp1.CBLConcurrencyControl concurrency,
+    imp1.DartCBLConcurrencyControl concurrency,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLDatabase_SaveDocumentWithConflictHandler = ffi.Bool Function(
     ffi.Pointer<CBLDatabase> db,
@@ -2480,7 +2480,7 @@ typedef NativeCBLDatabase_DeleteDocumentWithConcurrencyControl
 typedef DartCBLDatabase_DeleteDocumentWithConcurrencyControl = bool Function(
     ffi.Pointer<CBLDatabase> db,
     ffi.Pointer<CBLDocument> document,
-    imp1.CBLConcurrencyControl concurrency,
+    imp1.DartCBLConcurrencyControl concurrency,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLDatabase_PurgeDocument = ffi.Bool Function(
     ffi.Pointer<CBLDatabase> db,
@@ -2554,7 +2554,7 @@ typedef DartCBLDocument_SetJSON = bool Function(ffi.Pointer<CBLDocument> arg0,
     FLSlice json, ffi.Pointer<CBLError> outError);
 typedef NativeCBLDatabase_GetDocumentExpiration = imp1.CBLTimestamp Function(
     ffi.Pointer<CBLDatabase> db, FLSlice docID, ffi.Pointer<CBLError> outError);
-typedef DartCBLDatabase_GetDocumentExpiration = imp1.CBLTimestamp Function(
+typedef DartCBLDatabase_GetDocumentExpiration = imp1.DartCBLTimestamp Function(
     ffi.Pointer<CBLDatabase> db, FLSlice docID, ffi.Pointer<CBLError> outError);
 typedef NativeCBLDatabase_SetDocumentExpiration = ffi.Bool Function(
     ffi.Pointer<CBLDatabase> db,
@@ -2564,7 +2564,7 @@ typedef NativeCBLDatabase_SetDocumentExpiration = ffi.Bool Function(
 typedef DartCBLDatabase_SetDocumentExpiration = bool Function(
     ffi.Pointer<CBLDatabase> db,
     FLSlice docID,
-    imp1.CBLTimestamp expiration,
+    imp1.DartCBLTimestamp expiration,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLDatabase_AddDocumentChangeListener
     = ffi.Pointer<CBLListenerToken> Function(
@@ -2588,7 +2588,8 @@ typedef DartCBLVectorEncoding_CreateNone = ffi.Pointer<CBLVectorEncoding>
 typedef NativeCBLVectorEncoding_CreateScalarQuantizer
     = ffi.Pointer<CBLVectorEncoding> Function(imp1.CBLScalarQuantizerType type);
 typedef DartCBLVectorEncoding_CreateScalarQuantizer
-    = ffi.Pointer<CBLVectorEncoding> Function(imp1.CBLScalarQuantizerType type);
+    = ffi.Pointer<CBLVectorEncoding> Function(
+        imp1.DartCBLScalarQuantizerType type);
 typedef NativeCBLVectorEncoding_CreateProductQuantizer
     = ffi.Pointer<CBLVectorEncoding> Function(
         ffi.UnsignedInt subquantizers, ffi.UnsignedInt bits);
@@ -2703,7 +2704,7 @@ typedef NativeCBLCollection_SaveDocumentWithConcurrencyControl
 typedef DartCBLCollection_SaveDocumentWithConcurrencyControl = bool Function(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> doc,
-    imp1.CBLConcurrencyControl concurrency,
+    imp1.DartCBLConcurrencyControl concurrency,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_SaveDocumentWithConflictHandler = ffi.Bool Function(
     ffi.Pointer<CBLCollection> collection,
@@ -2734,7 +2735,7 @@ typedef NativeCBLCollection_DeleteDocumentWithConcurrencyControl
 typedef DartCBLCollection_DeleteDocumentWithConcurrencyControl = bool Function(
     ffi.Pointer<CBLCollection> collection,
     ffi.Pointer<CBLDocument> document,
-    imp1.CBLConcurrencyControl concurrency,
+    imp1.DartCBLConcurrencyControl concurrency,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_PurgeDocument = ffi.Bool Function(
     ffi.Pointer<CBLCollection> collection,
@@ -2756,10 +2757,9 @@ typedef NativeCBLCollection_GetDocumentExpiration = imp1.CBLTimestamp Function(
     ffi.Pointer<CBLCollection> collection,
     FLSlice docID,
     ffi.Pointer<CBLError> outError);
-typedef DartCBLCollection_GetDocumentExpiration = imp1.CBLTimestamp Function(
-    ffi.Pointer<CBLCollection> collection,
-    FLSlice docID,
-    ffi.Pointer<CBLError> outError);
+typedef DartCBLCollection_GetDocumentExpiration
+    = imp1.DartCBLTimestamp Function(ffi.Pointer<CBLCollection> collection,
+        FLSlice docID, ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_SetDocumentExpiration = ffi.Bool Function(
     ffi.Pointer<CBLCollection> collection,
     FLSlice docID,
@@ -2768,7 +2768,7 @@ typedef NativeCBLCollection_SetDocumentExpiration = ffi.Bool Function(
 typedef DartCBLCollection_SetDocumentExpiration = bool Function(
     ffi.Pointer<CBLCollection> collection,
     FLSlice docID,
-    imp1.CBLTimestamp expiration,
+    imp1.DartCBLTimestamp expiration,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_GetMutableDocument
     = ffi.Pointer<CBLDocument> Function(ffi.Pointer<CBLCollection> collection,
@@ -2926,7 +2926,7 @@ typedef NativeCBLDatabase_PerformMaintenance = ffi.Bool Function(
     ffi.Pointer<CBLError> outError);
 typedef DartCBLDatabase_PerformMaintenance = bool Function(
     ffi.Pointer<CBLDatabase> db,
-    imp1.CBLMaintenanceType type,
+    imp1.DartCBLMaintenanceType type,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLDatabase_Name = imp1.FLString Function(
     ffi.Pointer<CBLDatabase> arg0);
@@ -3156,21 +3156,21 @@ typedef DartFLSlot_SetEncryptableValue = void Function(
     imp1.FLSlot slot, ffi.Pointer<CBLEncryptable> encryptable);
 typedef NativeCBL_Log = ffi.Void Function(imp1.CBLLogDomain domain,
     imp1.CBLLogLevel level, ffi.Pointer<ffi.Char> format);
-typedef DartCBL_Log = void Function(imp1.CBLLogDomain domain,
-    imp1.CBLLogLevel level, ffi.Pointer<ffi.Char> format);
+typedef DartCBL_Log = void Function(imp1.DartCBLLogDomain domain,
+    imp1.DartCBLLogLevel level, ffi.Pointer<ffi.Char> format);
 typedef NativeCBL_LogMessage = ffi.Void Function(
     imp1.CBLLogDomain domain, imp1.CBLLogLevel level, FLSlice message);
 typedef DartCBL_LogMessage = void Function(
-    imp1.CBLLogDomain domain, imp1.CBLLogLevel level, FLSlice message);
+    imp1.DartCBLLogDomain domain, imp1.DartCBLLogLevel level, FLSlice message);
 typedef NativeCBLLog_ConsoleLevel = imp1.CBLLogLevel Function();
-typedef DartCBLLog_ConsoleLevel = imp1.CBLLogLevel Function();
+typedef DartCBLLog_ConsoleLevel = imp1.DartCBLLogLevel Function();
 typedef NativeCBLLog_SetConsoleLevel = ffi.Void Function(imp1.CBLLogLevel arg0);
-typedef DartCBLLog_SetConsoleLevel = void Function(imp1.CBLLogLevel arg0);
+typedef DartCBLLog_SetConsoleLevel = void Function(imp1.DartCBLLogLevel arg0);
 typedef NativeCBLLog_CallbackLevel = imp1.CBLLogLevel Function();
-typedef DartCBLLog_CallbackLevel = imp1.CBLLogLevel Function();
+typedef DartCBLLog_CallbackLevel = imp1.DartCBLLogLevel Function();
 typedef NativeCBLLog_SetCallbackLevel = ffi.Void Function(
     imp1.CBLLogLevel arg0);
-typedef DartCBLLog_SetCallbackLevel = void Function(imp1.CBLLogLevel arg0);
+typedef DartCBLLog_SetCallbackLevel = void Function(imp1.DartCBLLogLevel arg0);
 typedef NativeCBLLog_Callback = imp1.CBLLogCallback Function();
 typedef DartCBLLog_Callback = imp1.CBLLogCallback Function();
 typedef NativeCBLLog_SetCallback = ffi.Void Function(
@@ -3200,7 +3200,7 @@ typedef NativeCBLDatabase_CreateQuery = ffi.Pointer<CBLQuery> Function(
     ffi.Pointer<CBLError> outError);
 typedef DartCBLDatabase_CreateQuery = ffi.Pointer<CBLQuery> Function(
     ffi.Pointer<CBLDatabase> db,
-    imp1.CBLQueryLanguage language,
+    imp1.DartCBLQueryLanguage language,
     imp1.FLString queryString,
     ffi.Pointer<ffi.Int> outErrorPos,
     ffi.Pointer<CBLError> outError);
@@ -3371,14 +3371,14 @@ sealed class FLTrust {
 }
 
 typedef NativeFLTimestamp_Now = imp1.FLTimestamp Function();
-typedef DartFLTimestamp_Now = imp1.FLTimestamp Function();
+typedef DartFLTimestamp_Now = imp1.DartFLTimestamp Function();
 typedef NativeFLTimestamp_ToString = imp1.FLStringResult Function(
     imp1.FLTimestamp timestamp, ffi.Bool asUTC);
 typedef DartFLTimestamp_ToString = imp1.FLStringResult Function(
-    imp1.FLTimestamp timestamp, bool asUTC);
+    imp1.DartFLTimestamp timestamp, bool asUTC);
 typedef NativeFLTimestamp_FromString = imp1.FLTimestamp Function(
     imp1.FLString str);
-typedef DartFLTimestamp_FromString = imp1.FLTimestamp Function(
+typedef DartFLTimestamp_FromString = imp1.DartFLTimestamp Function(
     imp1.FLString str);
 typedef NativeFLArray_Count = ffi.Uint32 Function(imp1.FLArray arg0);
 typedef DartFLArray_Count = int Function(imp1.FLArray arg0);
@@ -3596,7 +3596,7 @@ typedef DartFLEncoder_WriteString = bool Function(
 typedef NativeFLEncoder_WriteDateString = ffi.Bool Function(
     imp1.FLEncoder encoder, imp1.FLTimestamp ts, ffi.Bool asUTC);
 typedef DartFLEncoder_WriteDateString = bool Function(
-    imp1.FLEncoder encoder, imp1.FLTimestamp ts, bool asUTC);
+    imp1.FLEncoder encoder, imp1.DartFLTimestamp ts, bool asUTC);
 typedef NativeFLEncoder_WriteData = ffi.Bool Function(
     imp1.FLEncoder arg0, FLSlice arg1);
 typedef DartFLEncoder_WriteData = bool Function(
@@ -3731,7 +3731,8 @@ typedef NativeFLValue_AsString = imp1.FLString Function(imp1.FLValue arg0);
 typedef DartFLValue_AsString = imp1.FLString Function(imp1.FLValue arg0);
 typedef NativeFLValue_AsTimestamp = imp1.FLTimestamp Function(
     imp1.FLValue arg0);
-typedef DartFLValue_AsTimestamp = imp1.FLTimestamp Function(imp1.FLValue arg0);
+typedef DartFLValue_AsTimestamp = imp1.DartFLTimestamp Function(
+    imp1.FLValue arg0);
 typedef NativeFLValue_AsData = FLSlice Function(imp1.FLValue arg0);
 typedef DartFLValue_AsData = FLSlice Function(imp1.FLValue arg0);
 typedef NativeFLValue_AsArray = imp1.FLArray Function(imp1.FLValue arg0);

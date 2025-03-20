@@ -6,38 +6,50 @@ files:
     symbols:
       CBLCollectionChangeListenerFunction:
         name: CBLCollectionChangeListenerFunction
+        dart-name: DartCBLCollectionChangeListenerFunction
       CBLCollectionDocumentChangeListenerFunction:
         name: CBLCollectionDocumentChangeListenerFunction
+        dart-name: DartCBLCollectionDocumentChangeListenerFunction
       CBLConflictHandlerFunction:
         name: CBLConflictHandlerFunction
+        dart-name: DartCBLConflictHandlerFunction
       CBLConflictResolverFunction:
         name: CBLConflictResolverFunction
       CBLDatabaseChangeListenerFunction:
         name: CBLDatabaseChangeListenerFunction
+        dart-name: DartCBLDatabaseChangeListenerFunction
       CBLDocumentChangeListenerFunction:
         name: CBLDocumentChangeListenerFunction
+        dart-name: DartCBLDocumentChangeListenerFunction
       CBLDocumentPropertyDecryptorFunction:
         name: CBLDocumentPropertyDecryptorFunction
       CBLDocumentPropertyEncryptorFunction:
         name: CBLDocumentPropertyEncryptorFunction
       CBLDocumentReplicationListenerFunction:
         name: CBLDocumentReplicationListenerFunction
+        dart-name: DartCBLDocumentReplicationListenerFunction
       CBLLogCallbackFunction:
         name: CBLLogCallbackFunction
+        dart-name: DartCBLLogCallbackFunction
       CBLNotificationsReadyCallbackFunction:
         name: CBLNotificationsReadyCallbackFunction
+        dart-name: DartCBLNotificationsReadyCallbackFunction
       CBLPropertyDecryptorFunction:
         name: CBLPropertyDecryptorFunction
       CBLPropertyEncryptorFunction:
         name: CBLPropertyEncryptorFunction
       CBLQueryChangeListenerFunction:
         name: CBLQueryChangeListenerFunction
+        dart-name: DartCBLQueryChangeListenerFunction
       CBLReplicationFilterFunction:
         name: CBLReplicationFilterFunction
+        dart-name: DartCBLReplicationFilterFunction
       CBLReplicatorChangeListenerFunction:
         name: CBLReplicatorChangeListenerFunction
+        dart-name: DartCBLReplicatorChangeListenerFunction
       FLSharedKeysReadCallbackFunction:
         name: FLSharedKeysReadCallbackFunction
+        dart-name: DartFLSharedKeysReadCallbackFunction
       c:@EA@FLCopyFlags:
         name: FLCopyFlags
       c:@EA@FLEncoderFormat:
@@ -346,14 +358,19 @@ files:
         name: FLPathComponent
       c:CBLBase.h@T@CBLErrorCode:
         name: CBLErrorCode
+        dart-name: DartCBLErrorCode
       c:CBLBase.h@T@CBLErrorDomain:
         name: CBLErrorDomain
+        dart-name: DartCBLErrorDomain
       c:CBLBase.h@T@CBLNetworkErrorCode:
         name: CBLNetworkErrorCode
+        dart-name: DartCBLNetworkErrorCode
       c:CBLBase.h@T@CBLTimestamp:
         name: CBLTimestamp
+        dart-name: DartCBLTimestamp
       c:CBLBlob.h@T@CBLSeekBase:
         name: CBLSeekBase
+        dart-name: DartCBLSeekBase
       c:CBLCollection.h@T@CBLCollectionChangeListener:
         name: CBLCollectionChangeListener
       c:CBLCollection.h@T@CBLCollectionDocumentChangeListener:
@@ -362,14 +379,18 @@ files:
         name: CBLDatabaseChangeListener
       c:CBLDatabase.h@T@CBLEncryptionAlgorithm:
         name: CBLEncryptionAlgorithm
+        dart-name: DartCBLEncryptionAlgorithm
       c:CBLDatabase.h@T@CBLEncryptionKeySize:
         name: CBLEncryptionKeySize
+        dart-name: DartCBLEncryptionKeySize
       c:CBLDatabase.h@T@CBLMaintenanceType:
         name: CBLMaintenanceType
+        dart-name: DartCBLMaintenanceType
       c:CBLDatabase.h@T@CBLNotificationsReadyCallback:
         name: CBLNotificationsReadyCallback
       c:CBLDocument.h@T@CBLConcurrencyControl:
         name: CBLConcurrencyControl
+        dart-name: DartCBLConcurrencyControl
       c:CBLDocument.h@T@CBLConflictHandler:
         name: CBLConflictHandler
       c:CBLDocument.h@T@CBLDocumentChangeListener:
@@ -378,20 +399,26 @@ files:
         name: CBLLogCallback
       c:CBLLog.h@T@CBLLogDomain:
         name: CBLLogDomain
+        dart-name: DartCBLLogDomain
       c:CBLLog.h@T@CBLLogLevel:
         name: CBLLogLevel
+        dart-name: DartCBLLogLevel
       c:CBLQuery.h@T@CBLQueryChangeListener:
         name: CBLQueryChangeListener
       c:CBLQueryIndexTypes.h@T@CBLDistanceMetric:
         name: CBLDistanceMetric
+        dart-name: DartCBLDistanceMetric
       c:CBLQueryIndexTypes.h@T@CBLScalarQuantizerType:
         name: CBLScalarQuantizerType
+        dart-name: DartCBLScalarQuantizerType
       c:CBLQueryTypes.h@T@CBLQueryLanguage:
         name: CBLQueryLanguage
+        dart-name: DartCBLQueryLanguage
       c:CBLReplicator.h@T@CBLConflictResolver:
         name: CBLConflictResolver
       c:CBLReplicator.h@T@CBLDocumentFlags:
         name: CBLDocumentFlags
+        dart-name: DartCBLDocumentFlags
       c:CBLReplicator.h@T@CBLDocumentPropertyDecryptor:
         name: CBLDocumentPropertyDecryptor
       c:CBLReplicator.h@T@CBLDocumentPropertyEncryptor:
@@ -404,14 +431,17 @@ files:
         name: CBLPropertyEncryptor
       c:CBLReplicator.h@T@CBLProxyType:
         name: CBLProxyType
+        dart-name: DartCBLProxyType
       c:CBLReplicator.h@T@CBLReplicationFilter:
         name: CBLReplicationFilter
       c:CBLReplicator.h@T@CBLReplicatorActivityLevel:
         name: CBLReplicatorActivityLevel
+        dart-name: DartCBLReplicatorActivityLevel
       c:CBLReplicator.h@T@CBLReplicatorChangeListener:
         name: CBLReplicatorChangeListener
       c:CBLReplicator.h@T@CBLReplicatorType:
         name: CBLReplicatorType
+        dart-name: DartCBLReplicatorType
       c:FLBase.h@T@FLArray:
         name: FLArray
       c:FLBase.h@T@FLDict:
@@ -430,6 +460,7 @@ files:
         name: FLSlot
       c:FLBase.h@T@FLTimestamp:
         name: FLTimestamp
+        dart-name: DartFLTimestamp
       c:FLBase.h@T@FLValue:
         name: FLValue
       c:FLDeepIterator.h@T@FLDeepIterator:
@@ -450,7 +481,10 @@ files:
         name: FILE
       c:_stdio.h@T@fpos_t:
         name: fpos_t
+        dart-name: Dart__int64_t
       c:_types.h@T@__darwin_off_t:
         name: __darwin_off_t
+        dart-name: Dart__int64_t
       c:_types.h@T@__int64_t:
         name: __int64_t
+        dart-name: Dart__int64_t

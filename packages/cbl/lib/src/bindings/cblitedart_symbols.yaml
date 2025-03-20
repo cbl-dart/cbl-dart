@@ -6,10 +6,12 @@ files:
     symbols:
       CBLDart_PredictiveModel_PredictionAsyncFunction:
         name: CBLDart_PredictiveModel_PredictionAsyncFunction
+        dart-name: DartCBLDart_PredictiveModel_PredictionAsyncFunction
       CBLDart_PredictiveModel_PredictionSyncFunction:
         name: CBLDart_PredictiveModel_PredictionSyncFunction
       CBLDart_PredictiveModel_UnregisteredFunction:
         name: CBLDart_PredictiveModel_UnregisteredFunction
+        dart-name: DartCBLDart_PredictiveModel_UnregisteredFunction
       c:@E@CBLDartInitializeResult:
         name: CBLDartInitializeResult
       c:@EA@CBLDart_IndexType:
@@ -142,6 +144,7 @@ files:
         name: CBLDart_Completer
       c:CBL+Dart.h@T@CBLDart_IsolateId:
         name: CBLDart_IsolateId
+        dart-name: DartCBLDart_IsolateId
       c:CBL+Dart.h@T@CBLDart_PredictiveModel:
         name: CBLDart_PredictiveModel
       c:CBL+Dart.h@T@CBLDart_PredictiveModel_PredictionAsync:
@@ -172,3 +175,4 @@ files:
         name: FLSliceResult
       c:dart_api.h@T@Dart_Port:
         name: Dart_Port
+        dart-name: DartDart_Port
