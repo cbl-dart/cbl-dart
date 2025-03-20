@@ -96,11 +96,8 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
   MutableA toMutable() => MutableA.internal(internal.toMutable());
 
   @override
-  String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'A',
-        fields: {},
-      );
+  String toString({String? indent}) =>
+      TypedDataHelpers.renderString(indent: indent, className: 'A', fields: {});
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -167,23 +164,21 @@ abstract class _AImplBase<I extends Dictionary> with _$A implements A {
 
   @override
   String get b => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'b',
-        key: 'b',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableA toMutable() => MutableA.internal(internal.toMutable());
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'A',
-        fields: {
-          'b': b,
-        },
-      );
+    indent: indent,
+    className: 'A',
+    fields: {'b': b},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -206,9 +201,7 @@ class ImmutableA extends _AImplBase {
 class MutableA extends _AImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<A, MutableA> {
   /// Creates a new mutable [A].
-  MutableA(
-    String b,
-  ) : super(MutableDictionary()) {
+  MutableA(String b) : super(MutableDictionary()) {
     this.b = b;
   }
 
@@ -361,6 +354,7 @@ ${TypedDataBuilder.header}
 part of '$_testLibFileName';''';
 
 String _typedDictionaryGeneratorContent(String content) => '''
+// dart format width=80
 $_genPartHeader
 
 // **************************************************************************
