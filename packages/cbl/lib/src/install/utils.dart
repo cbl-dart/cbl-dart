@@ -122,6 +122,9 @@ Future<void> _unpackTarGzArchive(
   Uint8List archiveData,
   String outputDir,
 ) async {
+  // Don't use const constructor to allow for backwards compatibility with
+  // older version of the archive package.
+  // ignore: prefer_const_constructors
   final tarArchiveData = GZipDecoder().decodeBytes(archiveData, verify: true);
   final archive = TarDecoder().decodeBytes(tarArchiveData, verify: true);
   await extractArchiveToDisk(archive, outputDir);
