@@ -40,25 +40,6 @@ final class GenerateBindings extends BaseCommand {
       logger: logger,
       findAndReplaceInBindings: {
         '_$_symbolAddressesClassName': _symbolAddressesClassName,
-        '''
-void CBLDart_CBLLog_SetCallbackLevel(
-    imp1.CBLLogLevel level,
-  )''': '''
-void CBLDart_CBLLog_SetCallbackLevel(
-    int level,
-  )''',
-        '''
-typedef DartCBLDart_CBLLog_SetCallbackLevel = void Function(
-    imp1.CBLLogLevel level);''': '''
-typedef DartCBLDart_CBLLog_SetCallbackLevel = void Function(int level);''',
-        '''
-  external imp1.CBLQueryLanguage expressionLanguage;''': '''
-  @imp1.CBLQueryLanguage()
-  external int expressionLanguage;''',
-        '''
-  external imp1.CBLReplicatorType replicatorType;''': '''
-  @imp1.CBLReplicatorType()
-  external int replicatorType;''',
       },
     );
     final cbliteNativeAssetsGenerator = _BindingsGenerator(
@@ -342,7 +323,7 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
       ..writeln("import 'dart:ffi' as ffi;")
       ..writeln()
       ..writeln("import '$legacyBindingsLibraryPath';")
-      ..writeln("import 'package:cbl/src/bindings/cblite.dart' as imp1;")
+      ..writeln(r"import 'package:cbl/src/bindings/cblite.dart' as imp$1;")
       ..writeln(
           "import './$bindingsClassName.dart' as $_nativeAssetLibraryAlias;")
       ..writeln();

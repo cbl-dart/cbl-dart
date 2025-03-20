@@ -398,7 +398,7 @@ typedef DartCBLDart_Initialize = int Function(
 typedef NativeCBLDart_AsyncCallback_New = imp2.CBLDart_AsyncCallback Function(
     ffi.Uint32 id, imp2.Dart_Port sendPort, ffi.Bool debug);
 typedef DartCBLDart_AsyncCallback_New = imp2.CBLDart_AsyncCallback Function(
-    int id, imp2.Dart_Port sendPort, bool debug);
+    int id, imp2.DartDart_Port sendPort, bool debug);
 typedef NativeCBLDart_AsyncCallback_Delete = ffi.Void Function(
     imp2.CBLDart_AsyncCallback callback);
 typedef DartCBLDart_AsyncCallback_Delete = void Function(
@@ -416,13 +416,13 @@ typedef NativeCBLDart_Completer_Complete = ffi.Void Function(
 typedef DartCBLDart_Completer_Complete = void Function(
     imp2.CBLDart_Completer completer, ffi.Pointer<ffi.Void> result);
 typedef NativeCBLDart_AllocateIsolateId = imp2.CBLDart_IsolateId Function();
-typedef DartCBLDart_AllocateIsolateId = imp2.CBLDart_IsolateId Function();
+typedef DartCBLDart_AllocateIsolateId = imp2.DartCBLDart_IsolateId Function();
 typedef NativeCBLDart_SetCurrentIsolateId = ffi.Void Function(
     imp2.CBLDart_IsolateId isolateId);
 typedef DartCBLDart_SetCurrentIsolateId = void Function(
-    imp2.CBLDart_IsolateId isolateId);
+    imp2.DartCBLDart_IsolateId isolateId);
 typedef NativeCBLDart_GetCurrentIsolateId = imp2.CBLDart_IsolateId Function();
-typedef DartCBLDart_GetCurrentIsolateId = imp2.CBLDart_IsolateId Function();
+typedef DartCBLDart_GetCurrentIsolateId = imp2.DartCBLDart_IsolateId Function();
 typedef NativeCBLDart_CBLLog_SetCallback = ffi.Bool Function(
     imp2.CBLDart_AsyncCallback callback);
 typedef DartCBLDart_CBLLog_SetCallback = bool Function(
@@ -430,7 +430,7 @@ typedef DartCBLDart_CBLLog_SetCallback = bool Function(
 typedef NativeCBLDart_CBLLog_SetCallbackLevel = ffi.Void Function(
     imp1.CBLLogLevel level);
 typedef DartCBLDart_CBLLog_SetCallbackLevel = void Function(
-    imp1.CBLLogLevel level);
+    imp1.DartCBLLogLevel level);
 typedef NativeCBLDart_CBLLog_SetFileConfig = ffi.Bool Function(
     ffi.Pointer<imp2.CBLLogFileConfiguration> config,
     ffi.Pointer<imp2.CBLError> errorOut);
@@ -529,7 +529,7 @@ typedef NativeCBLDart_PredictiveModel_New
         imp2.CBLDart_PredictiveModel_Unregistered unregistered);
 typedef DartCBLDart_PredictiveModel_New = imp2.CBLDart_PredictiveModel Function(
     imp1.FLString name,
-    imp2.CBLDart_IsolateId isolateId,
+    imp2.DartCBLDart_IsolateId isolateId,
     imp2.CBLDart_PredictiveModel_PredictionSync predictionSync,
     imp2.CBLDart_PredictiveModel_PredictionAsync predictionAsync,
     imp2.CBLDart_PredictiveModel_Unregistered unregistered);

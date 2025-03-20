@@ -4,7 +4,7 @@
 import 'dart:ffi' as ffi;
 
 import 'package:cbl/src/bindings/cblite.dart';
-import 'package:cbl/src/bindings/cblite.dart' as imp1;
+import 'package:cbl/src/bindings/cblite.dart' as imp$1;
 import './cblite.dart' as native;
 
 class cbliteNative implements cblite {
