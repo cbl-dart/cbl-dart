@@ -15,6 +15,25 @@ Packages with breaking changes:
 
 Packages with other changes:
 
+ - [`cbl_generator` - `v0.3.1+3`](#cbl_generator---v0313)
+
+---
+
+#### `cbl_generator` - `v0.3.1+3`
+
+
+## 2025-03-22
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
  - [`cbl` - `v3.4.2+0`](#cbl---v3420)
 
 ---
