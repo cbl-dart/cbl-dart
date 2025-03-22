@@ -1,3 +1,5 @@
+## 3.4.2+0
+
 ## 3.4.2
 
  - **REFACTOR**: consistently use `getObjectOrThrow` to find objects in `ObjectRegistry` ([#728](https://github.com/cbl-dart/cbl-dart/issues/728)). ([93048046](https://github.com/cbl-dart/cbl-dart/commit/930480466af2431bba88c25dfd4d0e8eb42159bf))

@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-03-22
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`cbl` - `v3.4.2+0`](#cbl---v3420)
+
+---
+
+#### `cbl` - `v3.4.2+0`
+
+
 ## 2025-03-09
 
 ### Changes
