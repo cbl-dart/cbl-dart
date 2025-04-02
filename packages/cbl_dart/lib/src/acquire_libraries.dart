@@ -25,7 +25,9 @@ LibrariesConfiguration? _librariesOverride;
 ///
 /// This function must be called before [CouchbaseLiteDart.init] to have an
 /// effect.
-Future<void> setupDevelopmentLibraries() async {
+Future<void> setupDevelopmentLibraries({
+  String? standaloneDartE2eTestDir,
+}) async {
   const enterpriseEdition = true;
 
   String? directory;
@@ -36,7 +38,7 @@ Future<void> setupDevelopmentLibraries() async {
   // TODO(blaugold): store development libraries in cbl_dart package
   // The standalone Dart e2e test directory is where the development libraries
   // have historically been located.
-  final standaloneDartE2eTestDir = await _resolveStandaloneDartE2eTestDir();
+  standaloneDartE2eTestDir ??= await _resolveStandaloneDartE2eTestDir();
   final libDir = p.join(standaloneDartE2eTestDir, 'lib');
   final isUnix = Platform.isLinux || Platform.isMacOS;
   if (isUnix && FileSystemEntity.isDirectorySync(libDir)) {
