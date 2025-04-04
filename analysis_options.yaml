@@ -15,3 +15,4 @@ linter:
     prefer_asserts_with_message: false
     public_member_api_docs: false
     require_trailing_commas: false
+    avoid_redundant_argument_values: false
