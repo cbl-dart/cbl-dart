@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,6 +37,9 @@ jobs:
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.2
+          cache: true
 
       - name: Setup Melos
         run: dart pub global activate melos
