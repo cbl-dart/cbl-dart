@@ -1,0 +1,115 @@
+name: Benchmark
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - closed
+
+jobs:
+  run-benchmarks:
+    # Fork PRs don't have access to the secrets, so we don't run the job for them.
+    if:
+      (github.event_name == 'pull_request' && github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository) ||
+      github.event_name == 'push'
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Bencher
+        uses: bencherdev/bencher@main
+
+      - name: Setup CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Setup Melos
+        run: dart pub global activate melos
+
+      - name: Bootstrap Dart packages
+        shell: bash
+        run: ./tools/dev-tools.sh bootstrap
+
+      - name: Setup cbd
+        run: melos activate:cbd
+
+      - name: Build native libraries
+        shell: bash
+        run: ./tools/ci-steps.sh buildNativeLibraries
+
+      - name: Run benchmarks
+        working-directory: packages/benchmark
+        run: dart run bin/runner.dart
+
+      - name: Upload benchmark results for main branch
+        if: github.event_name == 'push'
+        working-directory: packages/benchmark
+        run: |
+          bencher run \
+            --project cbl-dart \
+            --token '${{ secrets.BENCHER_API_TOKEN }}' \
+            --branch main \
+            --testbed ubuntu-latest \
+            --threshold-measure latency \
+            --threshold-test t_test \
+            --threshold-max-sample-size 64 \
+            --threshold-upper-boundary 0.99 \
+            --thresholds-reset \
+            --err \
+            --adapter json \
+            --file results.json \
+            --github-actions '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Upload benchmark results for PR branch
+        if:
+          github.event_name == 'pull_request' && github.event.action != 'closed'
+        working-directory: packages/benchmark
+        run: |
+          bencher run \
+            --project cbl-dart \
+            --token '${{ secrets.BENCHER_API_TOKEN }}' \
+            --branch "$GITHUB_HEAD_REF" \
+            --start-point "$GITHUB_BASE_REF" \
+            --start-point-hash '${{ github.event.pull_request.base.sha }}' \
+            --start-point-clone-thresholds \
+            --start-point-reset \
+            --testbed ubuntu-latest \
+            --err \
+            --adapter json \
+            --file results.json \
+            --github-actions '${{ secrets.GITHUB_TOKEN }}'
+
+  archive-closed-pr:
+    # Fork PRs don't have access to the secrets, so we don't run the job for them.
+    if:
+      github.event_name == 'pull_request' && github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bencher
+        uses: bencherdev/bencher@main
+
+      - name: Archive closed PR branch
+        run: |
+          bencher archive \
+            --project cbl-dart \
+            --token '${{ secrets.BENCHER_API_TOKEN }}' \
+            --branch "$GITHUB_HEAD_REF"
