@@ -67,7 +67,7 @@ jobs:
             --project cbl-dart \
             --token '${{ secrets.BENCHER_API_TOKEN }}' \
             --branch main \
-            --testbed ubuntu-latest \
+            --testbed ubuntu \
             --threshold-measure latency \
             --threshold-test t_test \
             --threshold-max-sample-size 64 \
@@ -91,7 +91,7 @@ jobs:
             --start-point-hash '${{ github.event.pull_request.base.sha }}' \
             --start-point-clone-thresholds \
             --start-point-reset \
-            --testbed ubuntu-latest \
+            --testbed ubuntu \
             --err \
             --adapter json \
             --file results.json \
