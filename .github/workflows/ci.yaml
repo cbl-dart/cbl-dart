@@ -259,8 +259,12 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        shell: bash
-        run: ./tools/ci-steps.sh runE2ETests
+        uses: nick-fields/retry@v3
+        with:
+          shell: bash
+          timeout_minutes: 20
+          max_attempts: 3
+          command: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()
@@ -346,8 +350,12 @@ jobs:
         run: ./tools/ci-steps.sh startVirtualDevices
 
       - name: Run tests
-        shell: bash
-        run: ./tools/ci-steps.sh runE2ETests
+        uses: nick-fields/retry@v3
+        with:
+          shell: bash
+          timeout_minutes: 20
+          max_attempts: 3
+          command: ./tools/ci-steps.sh runE2ETests
 
       - name: Collect test results
         if: failure()

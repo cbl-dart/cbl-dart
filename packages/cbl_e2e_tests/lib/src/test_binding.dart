@@ -65,10 +65,6 @@ abstract base class CblE2eTestBinding {
   /// Temporary directory for tests.
   late final String tmpDir;
 
-  FutureOr<String> loadLargeJsonFixture();
-
-  late final String largeJsonFixture;
-
   TestFn get testFn => t.test;
 
   GroupFn get groupFn => t.group;
@@ -128,8 +124,6 @@ abstract base class CblE2eTestBinding {
         ..level = fileLogLevel;
 
       Database.log.console.level = consoleLogLevel;
-
-      largeJsonFixture = await loadLargeJsonFixture();
     });
 
     setupTestTimeBomb();
@@ -160,8 +154,6 @@ abstract base class CblE2eTestBinding {
 
 /// Alias of [CblE2eTestBinding.tmpDir].
 final tmpDir = CblE2eTestBinding.instance.tmpDir;
-
-final largeJsonFixture = CblE2eTestBinding.instance.largeJsonFixture;
 
 String? get testId => Zone.current[#testId] as String?;
 

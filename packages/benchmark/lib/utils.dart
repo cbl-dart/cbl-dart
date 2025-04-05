@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cbl_dart/cbl_dart.dart';
@@ -15,6 +16,11 @@ Future<void> initCouchbaseLite() async {
 
 String jsonEncodePretty(Map<String, Object?> json) =>
     const JsonEncoder.withIndent('  ').convert(json);
+
+String loadFixtureAsString(String name) =>
+    File('fixture/$name.json').readAsStringSync();
+
+Object? loadFixtureAsJson(String name) => jsonDecode(loadFixtureAsString(name));
 
 enum ExecutionMode {
   jit,
@@ -86,7 +92,7 @@ class BenchmarkResult {
 }
 
 class BenchmarkResults {
-  BenchmarkResults({required this.results});
+  BenchmarkResults([this.results = const {}]);
 
   BenchmarkResults.fromJson(Map<String, Object?> json)
       : results = json.map((key, value) => MapEntry(
@@ -96,12 +102,17 @@ class BenchmarkResults {
 
   final Map<String, BenchmarkResult> results;
 
+  BenchmarkResults merge(BenchmarkResults other) => BenchmarkResults({
+        ...results,
+        ...other.results,
+      });
+
   Map<String, Object?> toJson() => {
         for (final entry in results.entries) entry.key: entry.value.toJson(),
       };
 }
 
-abstract class BenchmarkBase {
+abstract class DatabaseBenchmarkBase {
   static final _apiType =
       // ignore: do_not_use_environment
       ApiType.values.byName(const String.fromEnvironment('API'));

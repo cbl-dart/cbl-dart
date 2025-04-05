@@ -1,6 +1,5 @@
 // ignore_for_file: do_not_use_environment
 
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -9,7 +8,7 @@ import 'package:cbl/cbl.dart';
 
 void main() => _Benchmark().report();
 
-class _Benchmark extends BenchmarkBase {
+class _Benchmark extends DatabaseBenchmarkBase {
   var _databaseId = 0;
 
   late final Directory _tempDirectory;
@@ -26,10 +25,8 @@ class _Benchmark extends BenchmarkBase {
     const batchSize = int.fromEnvironment('BATCH_SIZE');
     const fixture = String.fromEnvironment('FIXTURE');
 
-    final fixtureFile = File('fixture/$fixture.json');
-    final benchmarkData = List<Map<String, Object?>>.from(
-      jsonDecode(fixtureFile.readAsStringSync()) as List,
-    );
+    final benchmarkData =
+        List<Map<String, Object?>>.from(loadFixtureAsJson(fixture)! as List);
     final operationsData = List.generate(
       operationCount,
       (index) => benchmarkData[index % benchmarkData.length],

@@ -4,6 +4,7 @@ environment:
   sdk: ^3.4.0
 
 dependencies:
+  benchmark_harness: ^2.3.1
   cbl: ^3.4.2+0
   cbl_dart: ^3.3.1
   meta: ^1.16.0

@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
 
+import 'package:benchmark/utils.dart';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings.dart';
@@ -11,18 +11,14 @@ import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/context.dart';
 import 'package:cbl/src/fleece/integration/root.dart';
 
-import '../../test_binding_impl.dart';
-import '../test_binding.dart';
-import '../utils/benchmark.dart';
-
 abstract class DecodingBenchmark extends BenchmarkBase {
-  DecodingBenchmark(String description) : super('Decoding: $description');
+  DecodingBenchmark(super.description);
 
-  final jsonString = largeJsonFixture;
+  final jsonString = loadFixtureAsString('1000people');
 }
 
-class JsonInDartDecodingBenchmark extends DecodingBenchmark {
-  JsonInDartDecodingBenchmark() : super('JSON (in Dart)');
+class JsonDartDecodingBenchmark extends DecodingBenchmark {
+  JsonDartDecodingBenchmark() : super('json_dart');
 
   late final utf8String = utf8.encode(jsonString);
 
@@ -33,7 +29,7 @@ class JsonInDartDecodingBenchmark extends DecodingBenchmark {
 }
 
 class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
-  FleeceRecursiveDecodingBenchmark() : super('Fleece (recursive)');
+  FleeceRecursiveDecodingBenchmark() : super('fleece_recursive');
 
   final sharedKeys = fl.SharedKeys();
   final sharedKeysTable = SharedKeysTable();
@@ -52,7 +48,7 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
 }
 
 class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
-  FleeceListenerDecodingBenchmark() : super('Fleece (listener)');
+  FleeceListenerDecodingBenchmark() : super('fleece_listener');
 
   final sharedKeys = fl.SharedKeys();
   final sharedKeysTable = SharedKeysTable();
@@ -70,7 +66,7 @@ class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
 }
 
 class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
-  FleeceWrapperDecodingBenchmark() : super('Fleece (wrapper)');
+  FleeceWrapperDecodingBenchmark() : super('fleece_wrapper');
 
   final dictKeys = OptimizingDictKeys();
   final sharedKeys = fl.SharedKeys();
@@ -96,28 +92,16 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
 }
 
 Future<void> main() async {
-  setupTestBinding();
+  await initCouchbaseLite();
 
-  void run() {
-    runBenchmarks([
-      JsonInDartDecodingBenchmark(),
-      FleeceRecursiveDecodingBenchmark(),
-      FleeceListenerDecodingBenchmark(),
-      FleeceWrapperDecodingBenchmark(),
-    ]);
+  final benchmarks = [
+    JsonDartDecodingBenchmark(),
+    FleeceRecursiveDecodingBenchmark(),
+    FleeceListenerDecodingBenchmark(),
+    FleeceWrapperDecodingBenchmark(),
+  ];
+
+  for (final benchmark in benchmarks) {
+    benchmark.report();
   }
-
-  // ignore: unused_element
-  void profile() {
-    debugger();
-    runBenchmarks([
-      JsonInDartDecodingBenchmark(),
-      FleeceRecursiveDecodingBenchmark(),
-      FleeceListenerDecodingBenchmark(),
-      FleeceWrapperDecodingBenchmark(),
-    ]);
-    debugger();
-  }
-
-  test('Decoding Benchmark', run);
 }
