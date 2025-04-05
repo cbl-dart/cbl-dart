@@ -83,7 +83,7 @@ packages:
       path: "packages/cbl"
       relative: true
     source: path
-    version: "3.4.2"
+    version: "3.4.2+0"
   cbl_libcblite_api:
     dependency: transitive
     description:
