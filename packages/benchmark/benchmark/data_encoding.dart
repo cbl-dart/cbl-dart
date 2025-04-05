@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:benchmark/utils.dart';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/document/array.dart';
@@ -7,18 +8,14 @@ import 'package:cbl/src/fleece/dict_key.dart';
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
-import '../../test_binding_impl.dart';
-import '../test_binding.dart';
-import '../utils/benchmark.dart';
-
 abstract class EncodingBenchmark extends BenchmarkBase {
-  EncodingBenchmark(String description) : super('Encoding: $description');
+  EncodingBenchmark(super.description);
 
-  final jsonValue = jsonDecode(largeJsonFixture) as List<Object?>;
+  final jsonValue = loadFixtureAsJson('1000people')! as List<Object?>;
 }
 
 class JsonInDartEncodingBenchmark extends EncodingBenchmark {
-  JsonInDartEncodingBenchmark() : super('JSON (in Dart)');
+  JsonInDartEncodingBenchmark() : super('json_dart');
 
   @override
   void run() {
@@ -26,8 +23,8 @@ class JsonInDartEncodingBenchmark extends EncodingBenchmark {
   }
 }
 
-class FleeceEncodingBenchmark extends EncodingBenchmark {
-  FleeceEncodingBenchmark() : super('Fleece');
+class FleeceEncoderEncodingBenchmark extends EncodingBenchmark {
+  FleeceEncoderEncodingBenchmark() : super('fleece_encoder');
 
   @override
   void run() {
@@ -36,7 +33,7 @@ class FleeceEncodingBenchmark extends EncodingBenchmark {
 }
 
 class FleeceWrapperEncodingBenchmark extends EncodingBenchmark {
-  FleeceWrapperEncodingBenchmark() : super('Fleece (wrapper)');
+  FleeceWrapperEncodingBenchmark() : super('fleece_wrapper');
 
   final dictKeys = OptimizingDictKeys();
   late final context = MContext(
@@ -58,13 +55,15 @@ class FleeceWrapperEncodingBenchmark extends EncodingBenchmark {
 }
 
 Future<void> main() async {
-  setupTestBinding();
+  await initCouchbaseLite();
 
-  test('Encoding Benchmark', () {
-    runBenchmarks([
-      JsonInDartEncodingBenchmark(),
-      FleeceEncodingBenchmark(),
-      FleeceWrapperEncodingBenchmark(),
-    ]);
-  });
+  final benchmarks = [
+    JsonInDartEncodingBenchmark(),
+    FleeceEncoderEncodingBenchmark(),
+    FleeceWrapperEncodingBenchmark(),
+  ];
+
+  for (final benchmark in benchmarks) {
+    benchmark.report();
+  }
 }

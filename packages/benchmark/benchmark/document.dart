@@ -1,18 +1,17 @@
+import 'dart:io';
+
+import 'package:benchmark/utils.dart';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:cbl/cbl.dart';
-
-import '../../test_binding_impl.dart';
-import '../test_binding.dart';
-import '../utils/benchmark.dart';
-import '../utils/database_utils.dart';
 
 /// Benchmark that measures the performance of looking up properties in a
 /// document.
 class DocumentPropertyLookup extends BenchmarkBase {
-  DocumentPropertyLookup() : super('Document property lookup');
+  DocumentPropertyLookup() : super('property_lookup');
 
   static const properties = 100;
 
+  late final Directory tempDir;
   late final SyncDatabase db;
   late final SyncCollection collection;
   late final String id;
@@ -22,7 +21,9 @@ class DocumentPropertyLookup extends BenchmarkBase {
 
   @override
   void setup() {
-    db = openSyncTestDatabase();
+    tempDir = Directory.systemTemp.createTempSync();
+    db =
+        Database.openSync('db', DatabaseConfiguration(directory: tempDir.path));
     collection = db.defaultCollection;
     final doc = MutableDocument(data);
     id = doc.id;
@@ -32,6 +33,7 @@ class DocumentPropertyLookup extends BenchmarkBase {
   @override
   void teardown() {
     db.close();
+    tempDir.deleteSync(recursive: true);
   }
 
   @override
@@ -47,10 +49,11 @@ class DocumentPropertyLookup extends BenchmarkBase {
 }
 
 class DocumentToPlainMap extends BenchmarkBase {
-  DocumentToPlainMap() : super('Document toPlainMap');
+  DocumentToPlainMap() : super('toPlainMap');
 
   static const properties = 100;
 
+  late final Directory tempDir;
   late final SyncDatabase db;
   late final SyncCollection collection;
   late final String id;
@@ -60,7 +63,9 @@ class DocumentToPlainMap extends BenchmarkBase {
 
   @override
   void setup() {
-    db = openSyncTestDatabase();
+    tempDir = Directory.systemTemp.createTempSync();
+    db =
+        Database.openSync('db', DatabaseConfiguration(directory: tempDir.path));
     collection = db.defaultCollection;
     final doc = MutableDocument(data);
     id = doc.id;
@@ -70,6 +75,7 @@ class DocumentToPlainMap extends BenchmarkBase {
   @override
   void teardown() {
     db.close();
+    tempDir.deleteSync(recursive: true);
   }
 
   @override
@@ -78,13 +84,15 @@ class DocumentToPlainMap extends BenchmarkBase {
   }
 }
 
-void main() {
-  setupTestBinding();
+void main() async {
+  await initCouchbaseLite();
 
-  test('Document benchmark', () {
-    runBenchmarks([
-      DocumentPropertyLookup(),
-      DocumentToPlainMap(),
-    ]);
-  });
+  final benchmarks = [
+    DocumentPropertyLookup(),
+    DocumentToPlainMap(),
+  ];
+
+  for (final benchmark in benchmarks) {
+    benchmark.report();
+  }
 }

@@ -9,14 +9,11 @@ import 'database/typed_database_test.dart' as typed_database;
 import 'document/array_test.dart' as document_array_test;
 import 'document/blob_test.dart' as document_blob_test;
 import 'document/dictionary_test.dart' as document_dictionary_test;
-import 'document/document_benchmark_test.dart' as document_benchmark_test;
 import 'document/document_test.dart' as document_document_test;
 import 'document/fragment_test.dart' as document_fragment_test;
 import 'errors_test.dart' as errors;
 import 'fleece/coding_test.dart' as fleece_coding;
 import 'fleece/containers_test.dart' as fleece_containers;
-import 'fleece/decoding_benchmark_test.dart' as decoding_benchmark;
-import 'fleece/encoding_benchmark_test.dart' as encoding_benchmark;
 import 'fleece/integration_test.dart' as fleece_integration;
 import 'fleece/slice_test.dart' as fleece_slice;
 import 'log/consoler_logger_test.dart' as log_console_logger;
@@ -55,14 +52,11 @@ final tests = [
   database_database_configuration.main,
   database_database.main,
   database_document_change.main,
-  decoding_benchmark.main,
   document_array_test.main,
-  document_benchmark_test.main,
   document_blob_test.main,
   document_dictionary_test.main,
   document_document_test.main,
   document_fragment_test.main,
-  encoding_benchmark.main,
   errors.main,
   fleece_coding.main,
   fleece_containers.main,
