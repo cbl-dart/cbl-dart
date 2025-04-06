@@ -3,37 +3,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:benchmark/utils.dart';
-
-void main() async {
-  final benchmarks = [
-    // Micro benchmarks
-    for (final file in ['document', 'data_encoding', 'data_decoding'])
-      for (final mode in ExecutionMode.values)
-        MicroBenchmarkRunner(executionMode: mode, file: file),
-
-    // Database benchmarks
-    for (final mode in ExecutionMode.values)
-      for (final api in ApiType.values)
-        for (final batchSize in [1, 10, 100])
-          DatabaseBenchmarkRunner(
-            executionMode: mode,
-            apiType: api,
-            database: 'cbl',
-            operation: 'insert',
-            fixture: 'users',
-            operationCount: 1000,
-            batchSize: batchSize,
-          ),
-  ];
-
-  var results = BenchmarkResults();
-  for (final benchmark in benchmarks) {
-    results = results.merge(await benchmark.run());
-  }
-
-  File('results.json').writeAsStringSync(jsonEncodePretty(results.toJson()));
-}
+import 'parameter.dart';
+import 'result.dart';
+import 'utils.dart';
 
 abstract class BenchmarkRunnerBase {
   BenchmarkRunnerBase({
@@ -46,15 +18,14 @@ abstract class BenchmarkRunnerBase {
 
   String get file;
 
-  Map<String, String> get dartDefines => {
-        'EXECUTION_MODE': executionMode.name,
-      };
+  List<DartDefine> get dartDefines => [
+        executionModeParameter.dartDefine(executionMode),
+      ];
 
   BenchmarkResults parseResults(String stdout);
 
   Future<BenchmarkResults> run() async {
-    final dartDefineOptions = dartDefines.entries
-        .map((entry) => '--define=${entry.key}=${entry.value}');
+    final dartDefineOptions = DartDefine.commandLineOptions(dartDefines);
 
     if (executionMode == ExecutionMode.aot) {
       print('Compiling $description ...');
@@ -167,13 +138,13 @@ class DatabaseBenchmarkRunner extends BenchmarkRunnerBase {
   String get description => _benchmarkName;
 
   @override
-  Map<String, String> get dartDefines => {
+  List<DartDefine> get dartDefines => [
         ...super.dartDefines,
-        'OPERATION_COUNT': operationCount.toString(),
-        'BATCH_SIZE': batchSize.toString(),
-        'FIXTURE': fixture,
-        'API': apiType.name,
-      };
+        operationCountParameter.dartDefine(operationCount),
+        batchSizeParameter.dartDefine(batchSize),
+        fixtureParameter.dartDefine(fixture),
+        apiTypeParameter.dartDefine(apiType),
+      ];
 
   String get _benchmarkName => [
         executionMode.name,

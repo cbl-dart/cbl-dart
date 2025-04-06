@@ -14,8 +14,8 @@ abstract class EncodingBenchmark extends BenchmarkBase {
   final jsonValue = loadFixtureAsJson('1000people')! as List<Object?>;
 }
 
-class JsonInDartEncodingBenchmark extends EncodingBenchmark {
-  JsonInDartEncodingBenchmark() : super('json_dart');
+class JsonDartEncodingBenchmark extends EncodingBenchmark {
+  JsonDartEncodingBenchmark() : super('json_dart');
 
   @override
   void run() {
@@ -58,7 +58,7 @@ Future<void> main() async {
   await initCouchbaseLite();
 
   final benchmarks = [
-    JsonInDartEncodingBenchmark(),
+    JsonDartEncodingBenchmark(),
     FleeceEncoderEncodingBenchmark(),
     FleeceWrapperEncodingBenchmark(),
   ];
