@@ -58,7 +58,7 @@ jobs:
 
       - name: Run benchmarks
         working-directory: packages/benchmark
-        run: dart run bin/runner.dart
+        run: dart run
 
       - name: Upload benchmark results for main branch
         if: github.event_name == 'push'
