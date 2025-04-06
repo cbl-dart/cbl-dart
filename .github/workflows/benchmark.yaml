@@ -1,6 +1,10 @@
 name: Benchmark
 
 on:
+  workflow_dispatch:
+  schedule:
+    # Every day at midnight UTC.
+    - cron: 0 0 * * *
   push:
     branches:
       - main
@@ -16,9 +20,8 @@ jobs:
   run-benchmarks:
     # Fork PRs don't have access to the secrets, so we don't run the job for them.
     if:
-      (github.event_name == 'pull_request' && github.event.action != 'closed' &&
-      github.event.pull_request.head.repo.full_name == github.repository) ||
-      github.event_name == 'push'
+      github.event_name != 'pull_request' || (github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       pull-requests: write
@@ -61,7 +64,7 @@ jobs:
         run: dart run
 
       - name: Upload benchmark results for main branch
-        if: github.event_name == 'push'
+        if: github.ref == 'refs/heads/main'
         working-directory: packages/benchmark
         run: |
           bencher run \
@@ -86,8 +89,7 @@ jobs:
             --github-actions '${{ secrets.GITHUB_TOKEN }}'
 
       - name: Upload benchmark results for PR branch
-        if:
-          github.event_name == 'pull_request' && github.event.action != 'closed'
+        if: github.ref != 'refs/heads/main'
         working-directory: packages/benchmark
         run: |
           bencher run \
