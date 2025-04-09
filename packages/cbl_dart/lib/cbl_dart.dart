@@ -45,7 +45,7 @@ abstract final class CouchbaseLiteDart {
           skipVectorSearch: skipVectorSearch,
         );
 
-        if(skipVectorSearch == true) {
+        if (skipVectorSearch == true) {
           autoEnableVectorSearch == false;
         }
 
@@ -83,10 +83,14 @@ abstract final class CouchbaseLiteDart {
           skipVectorSearch: skipVectorSearch,
         )..verifyLibrariesExist();
 
-        await initPrimaryIsolate(IsolateContext(
-          initContext: context,
-          libraries: config.toLibrariesConfiguration(),
-        ));
+        await initPrimaryIsolate(
+          IsolateContext(
+            initContext: context,
+            libraries: config.toLibrariesConfiguration(),
+          ),
+          // note: we will only want to enable vectorSearch if vector search is available
+          autoEnableVectorSearch: !skipVectorSearch,
+        );
       });
 }
 
