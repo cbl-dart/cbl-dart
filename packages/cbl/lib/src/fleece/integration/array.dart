@@ -58,8 +58,8 @@ final class MArray extends MCollection {
       return false;
     }
 
-    mutate();
-    (_values[index] ??= MValue.empty()).setNative(native);
+    markMutated();
+    (_values[index] ??= MValue.empty()).setNative(native, this);
 
     return true;
   }
@@ -75,8 +75,8 @@ final class MArray extends MCollection {
       _populateValues();
     }
 
-    mutate();
-    _values.insert(index, MValue.empty()..setNative(native));
+    markMutated();
+    _values.insert(index, MValue.empty()..setNative(native, this));
 
     return true;
   }
@@ -101,7 +101,7 @@ final class MArray extends MCollection {
       _populateValues();
     }
 
-    mutate();
+    markMutated();
     _values.getRange(index, end).forEach((value) => value?.removeFromParent());
     _values.removeRange(index, end);
 
@@ -115,7 +115,7 @@ final class MArray extends MCollection {
       return;
     }
 
-    mutate();
+    markMutated();
     _values
       ..forEach((value) => value?.removeFromParent())
       ..clear();
