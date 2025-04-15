@@ -371,6 +371,8 @@ final class ArrayImpl
     implements Array, MCollectionWrapper, FleeceEncodable, CblConversions {
   ArrayImpl(this._array);
 
+  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
+
   final MArray _array;
 
   @override
@@ -400,9 +402,9 @@ final class ArrayImpl
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    encodeTo(encoder);
-    return encoder.finish().toDartString();
+    _jsonEncoder.reset();
+    encodeTo(_jsonEncoder);
+    return _jsonEncoder.finish().toDartString();
   }
 
   @override

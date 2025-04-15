@@ -156,6 +156,8 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   /// Max size of data that will be cached in memory with the [Blob].
   static const _maxCachedContentLength = 8 * 1024;
 
+  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
+
   Database? _database;
   BlobStore? get _blobStore => (_database as BlobStoreHolder?)?.blobStore;
 
@@ -236,9 +238,9 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    encodeTo(encoder);
-    return encoder.finish().toDartString();
+    _jsonEncoder.reset();
+    encodeTo(_jsonEncoder);
+    return _jsonEncoder.finish().toDartString();
   }
 
   @override

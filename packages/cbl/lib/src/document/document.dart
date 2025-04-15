@@ -193,6 +193,11 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     _setupProperties();
   }
 
+  static final _encoders = {
+    for (final format in EncodingFormat.values)
+      format: FleeceEncoder(format: format.toFLEncoderFormat())
+  };
+
   DocumentDelegate get delegate => _delegate;
   DocumentDelegate _delegate;
 
@@ -236,7 +241,7 @@ final class DelegateDocument with IterableMixin<String> implements Document {
         saveExternalData ? _root.saveExternalData(database!) : null;
 
     return externalDataSaved.then((_) {
-      final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
+      final encoder = _encoders[format]!
         ..reset()
         ..extraInfo = FleeceEncoderContext(
           database: database,
