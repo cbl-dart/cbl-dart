@@ -52,12 +52,12 @@ final class MDict extends MCollection {
   void set(String key, Object? native) {
     assert(isMutable);
 
-    mutate();
+    markMutated();
     final value = _getValue(key);
     if (value.isEmpty) {
       _length++;
     }
-    value.setNative(native);
+    value.setNative(native, this);
   }
 
   void remove(String key) {
@@ -65,8 +65,8 @@ final class MDict extends MCollection {
 
     final value = _getValue(key);
     if (value.isNotEmpty) {
-      mutate();
-      value.setEmpty(this);
+      markMutated();
+      value.setEmpty();
       _length--;
     }
   }
@@ -79,7 +79,7 @@ final class MDict extends MCollection {
     }
 
     // Clear out all entires.
-    mutate();
+    markMutated();
     for (final value in _values.values) {
       value.removeFromParent();
     }

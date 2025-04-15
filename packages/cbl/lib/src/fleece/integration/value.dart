@@ -62,32 +62,32 @@ base class MValue {
     }
   }
 
-  void setNative(Object? native) {
-    _setNative(native, hasNative: true);
+  void setNative(Object? native, MCollection parent) {
+    _setNative(native, parent, hasNative: true);
     _value = null;
+
+    if (_delegate.isExternalData(native)) {
+      parent.markNeedsToSaveExternalData();
+    }
   }
 
-  void setEmpty(MCollection parent) {
+  void setEmpty() {
     if (isEmpty) {
       return;
     }
-    _setNative(null, hasNative: false);
+    _setNative(null, null, hasNative: false);
     _value = null;
   }
 
-  void mutate() {
+  void markMutated() {
     _value = null;
   }
 
-  void updateParent(MCollection parent) => _nativeChangeSlot(this);
+  void updateParent(MCollection parent) => _nativeChangeSlot(this, parent);
 
-  void removeFromParent() => _nativeChangeSlot(null);
+  void removeFromParent() => _nativeChangeSlot(null, null);
 
   FutureOr<void> saveExternalData(Object context) {
-    // ignore: flutter_style_todos
-    // TODO: Keep track of unsaved external data in collections to cut off
-    // descending into the tree unnecessarily.
-
     if (hasNative && isMutated) {
       final native = _native;
 
@@ -114,7 +114,11 @@ base class MValue {
 
   MValue clone() => MValue._(_value, _native);
 
-  void _setNative(Object? native, {required bool hasNative}) {
+  void _setNative(
+    Object? native,
+    MCollection? parent, {
+    required bool hasNative,
+  }) {
     assert(
       hasNative || native == null,
       'native must be null when hasNative is false',
@@ -122,21 +126,21 @@ base class MValue {
 
     if (hasNative) {
       if (_native != native) {
-        _nativeChangeSlot(null);
+        _nativeChangeSlot(null, null);
         _native = native;
-        _nativeChangeSlot(this);
+        _nativeChangeSlot(this, parent);
       }
     } else if (this.hasNative) {
-      _nativeChangeSlot(null);
+      _nativeChangeSlot(null, null);
       _native = _emptyNative;
     }
   }
 
-  void _nativeChangeSlot(MValue? slot) {
+  void _nativeChangeSlot(MValue? slot, MCollection? parent) {
     if (!hasNative) {
       return;
     }
-    _delegate.collectionFromNative(_native)?.setSlot(slot, this);
+    _delegate.collectionFromNative(_native)?.setSlot(slot, this, parent);
   }
 
   @override
