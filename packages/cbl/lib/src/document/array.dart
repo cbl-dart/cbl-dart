@@ -561,7 +561,9 @@ final class MutableArrayImpl extends ArrayImpl implements MutableArray {
   @override
   void setData(Iterable<Object?> data) {
     _array.clear();
-    data.map(CblConversions.convertToCblObject).forEach(_array.append);
+    for (final value in data) {
+      _array.append(CblConversions.convertToCblObject(value));
+    }
   }
 
   // === Remove ================================================================

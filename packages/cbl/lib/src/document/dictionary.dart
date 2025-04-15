@@ -354,9 +354,9 @@ final class MutableDictionaryImpl extends DictionaryImpl
   @override
   void setData(Map<String, Object?> data) {
     _dict.clear();
-    for (final entry in data.entries) {
-      _dict.set(entry.key, CblConversions.convertToCblObject(entry.value));
-    }
+    data.forEach((key, value) {
+      _dict.set(key, CblConversions.convertToCblObject(value));
+    });
   }
 
   // === Remove ================================================================
