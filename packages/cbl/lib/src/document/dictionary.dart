@@ -183,6 +183,8 @@ final class DictionaryImpl
     implements Dictionary, MCollectionWrapper, FleeceEncodable, CblConversions {
   DictionaryImpl(this._dict);
 
+  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
+
   final MDict _dict;
 
   @override
@@ -246,9 +248,9 @@ final class DictionaryImpl
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    encodeTo(encoder);
-    return encoder.finish().toDartString();
+    _jsonEncoder.reset();
+    encodeTo(_jsonEncoder);
+    return _jsonEncoder.finish().toDartString();
   }
 
   @override
