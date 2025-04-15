@@ -249,7 +249,7 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
     void writeProperties(Map<String, Object?> properties) {
       final blobProperties = _blobProperties(
-        mayIncludeData: context?.encodeQueryParameter ?? false,
+        mayIncludeData: context?.encodeUnsavedBlobWithData ?? false,
       );
 
       if (blobProperties[blobDigestProperty] == null &&
