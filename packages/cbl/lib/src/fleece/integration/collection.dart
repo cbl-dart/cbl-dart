@@ -13,13 +13,15 @@ abstract base class MCollection {
     MContext? context,
     this.isMutable = true,
   })  : context = context ?? const MContext(),
-        _isMutated = true;
+        _isMutated = true,
+        _needsToSaveExternalData = false;
 
   MCollection.asCopy(
     MCollection original, {
     required this.isMutable,
   })  : context = original.context,
-        _isMutated = true;
+        _isMutated = true,
+        _needsToSaveExternalData = original._needsToSaveExternalData;
 
   MCollection.asChild(
     MValue slot,
@@ -28,12 +30,14 @@ abstract base class MCollection {
   })  : context = parent.context,
         _slot = slot,
         _parent = parent,
-        _isMutated = slot.isMutated;
+        _isMutated = slot.isMutated,
+        _needsToSaveExternalData = false;
 
   MValue? _slot;
   MCollection? _parent;
   final bool isMutable;
   bool _isMutated;
+  bool _needsToSaveExternalData;
 
   /// The context which this collection uses when reading Fleece data.
   ///
@@ -50,6 +54,10 @@ abstract base class MCollection {
   Iterable<MValue> get values;
 
   FutureOr<void> saveExternalData(Object context) {
+    if (!_needsToSaveExternalData) {
+      return null;
+    }
+
     FutureOr<void>? result;
 
     for (final value in values) {
@@ -69,20 +77,45 @@ abstract base class MCollection {
   void performEncodeTo(FleeceEncoder encoder);
 
   @protected
-  void mutate() {
+  void markMutated() {
     if (!_isMutated) {
       _isMutated = true;
-      _slot?.mutate();
-      _parent?.mutate();
+      _slot?.markMutated();
+      _parent?.markMutated();
     }
   }
 
-  void setSlot(MValue? newSlot, MValue? oldSlot) {
+  void markNeedsToSaveExternalData() {
+    if (!_needsToSaveExternalData) {
+      _needsToSaveExternalData = true;
+      _parent?.markNeedsToSaveExternalData();
+    }
+  }
+
+  void setSlot(MValue? newSlot, MValue? oldSlot, MCollection? newParent) {
     if (_slot == oldSlot) {
       _slot = newSlot;
       if (newSlot == null) {
         _parent = null;
+      } else {
+        _parent = newParent;
+
+        // If this collection needs to save external data, and is added
+        // to another collection, the new parent needs to be marked as needing
+        // to save external data, too.
+        if (_needsToSaveExternalData) {
+          _parent!.markNeedsToSaveExternalData();
+        }
       }
+    } else if (newSlot != null) {
+      // The collection is being added to another collection, in addition to
+      // the current one. This is an edge case. Instead of keeping track of
+      // multiple parents, we mark the additional parent as needing to
+      // save external data, because this collection does not keep a reference
+      // to the additional parent, so it cannot mark it as needing to save
+      // external data dynamically, when external data is inserted.
+      assert(_parent != newParent);
+      newParent!.markNeedsToSaveExternalData();
     }
   }
 }
