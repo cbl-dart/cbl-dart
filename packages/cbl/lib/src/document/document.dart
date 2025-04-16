@@ -232,16 +232,19 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     EncodingFormat format = EncodingFormat.fleece,
     bool saveExternalData = false,
   }) {
-    final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
-      ..extraInfo = FleeceEncoderContext(
-        database: database,
-        encodeUnsavedBlobWithData: true,
-        saveExternalData: saveExternalData,
-      );
+    final externalDataSaved =
+        saveExternalData ? _root.saveExternalData(database!) : null;
 
-    return _root
-        .encodeTo(encoder)
-        .then((_) => EncodedData(format, encoder.finish()));
+    return externalDataSaved.then((_) {
+      final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
+        ..reset()
+        ..extraInfo = FleeceEncoderContext(
+          database: database,
+          encodeUnsavedBlobWithData: true,
+        );
+      _root.encodeTo(encoder);
+      return EncodedData(format, encoder.finish());
+    });
   }
 
   FutureOr<void> writePropertiesToDelegate() =>
