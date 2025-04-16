@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ffi';
 
 import '../../bindings.dart';
@@ -36,15 +35,13 @@ final class MRoot extends MCollection {
   Iterable<MValue> get values => [_slot];
 
   @override
-  FutureOr<void> performEncodeTo(FleeceEncoder encoder) =>
-      _slot.encodeTo(encoder);
+  void performEncodeTo(FleeceEncoder encoder) => _slot.encodeTo(encoder);
 
   Object? get asNative => _slot.asNative(this);
 
   Data encode() {
     final encoder = FleeceEncoder();
-    final result = encodeTo(encoder);
-    assert(result is! Future);
+    encodeTo(encoder);
     return encoder.finish();
   }
 }

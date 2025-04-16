@@ -1,5 +1,4 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
-
 import 'dart:async';
 
 import '../../bindings.dart';
@@ -84,14 +83,32 @@ base class MValue {
 
   void removeFromParent() => _nativeChangeSlot(null);
 
-  FutureOr<void> encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> saveExternalData(Object context) {
+    // ignore: flutter_style_todos
+    // TODO: Keep track of unsaved external data in collections to cut off
+    // descending into the tree unnecessarily.
+
+    if (hasNative && isMutated) {
+      final native = _native;
+
+      if (_delegate.collectionFromNative(native) case final collection?) {
+        return collection.saveExternalData(context);
+      }
+
+      if (_delegate.isExternalData(native)) {
+        return _delegate.saveExternalData(native, context);
+      }
+    }
+  }
+
+  void encodeTo(FleeceEncoder encoder) {
     assert(!isEmpty);
 
     final value = _value;
     if (value != null) {
       encoder.writeValue(value);
     } else {
-      return _delegate.encodeNative(encoder, _native);
+      _delegate.encodeNative(encoder, _native);
     }
   }
 

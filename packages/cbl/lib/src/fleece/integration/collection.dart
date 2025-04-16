@@ -49,14 +49,24 @@ abstract base class MCollection {
 
   Iterable<MValue> get values;
 
-  FutureOr<void> encodeTo(FleeceEncoder encoder) =>
-      performEncodeTo(encoder).then((_) {
-        // We keep the context alive until the end of encoding, so that
-        // MCollections can safely use Fleece data during encoding.
-        cblReachabilityFence(context);
-      });
+  FutureOr<void> saveExternalData(Object context) {
+    FutureOr<void>? result;
 
-  FutureOr<void> performEncodeTo(FleeceEncoder encoder);
+    for (final value in values) {
+      result = result.then((_) => value.saveExternalData(context));
+    }
+
+    return result;
+  }
+
+  void encodeTo(FleeceEncoder encoder) {
+    performEncodeTo(encoder);
+    // We keep the context alive until the end of encoding, so that
+    // MCollections can safely use Fleece data during encoding.
+    cblReachabilityFence(context);
+  }
+
+  void performEncodeTo(FleeceEncoder encoder);
 
   @protected
   void mutate() {

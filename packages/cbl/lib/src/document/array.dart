@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
@@ -402,8 +401,7 @@ final class ArrayImpl
   @override
   String toJson() {
     final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    final done = encodeTo(encoder);
-    assert(done is! Future);
+    encodeTo(encoder);
     return encoder.finish().toDartString();
   }
 
@@ -411,7 +409,7 @@ final class ArrayImpl
   MCollection get mCollection => _array;
 
   @override
-  FutureOr<void> encodeTo(FleeceEncoder encoder) => _array.encodeTo(encoder);
+  void encodeTo(FleeceEncoder encoder) => _array.encodeTo(encoder);
 
   @override
   Object? toCblObject() => toMutable();
