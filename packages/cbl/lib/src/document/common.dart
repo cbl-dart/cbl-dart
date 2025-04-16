@@ -87,13 +87,13 @@ abstract interface class FleeceEncodable {
 final class FleeceEncoderContext implements DictKeysProvider {
   FleeceEncoderContext({
     this.database,
-    this.encodeQueryParameter = false,
+    this.encodeUnsavedBlobWithData = false,
     this.saveExternalData = false,
   });
 
   final DatabaseBase? database;
 
-  final bool encodeQueryParameter;
+  final bool encodeUnsavedBlobWithData;
 
   final bool saveExternalData;
 

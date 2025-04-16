@@ -159,7 +159,7 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
 
   void _applyParameters() {
     final encoder = FleeceEncoder()
-      ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+      ..extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
     final parameters = _parameters;
     if (parameters != null) {
       final result = parameters.encodeTo(encoder);

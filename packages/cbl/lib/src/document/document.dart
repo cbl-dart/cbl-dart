@@ -235,7 +235,7 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
       ..extraInfo = FleeceEncoderContext(
         database: database,
-        encodeQueryParameter: true,
+        encodeUnsavedBlobWithData: true,
         saveExternalData: saveExternalData,
       );
 

@@ -231,7 +231,7 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final values = MutableArray(columnValues) as MutableArrayImpl;
   final encoder = FleeceEncoder()
     // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-    ..extraInfo = FleeceEncoderContext(encodeQueryParameter: true);
+    ..extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
 
   final encodingResult = values.encodeTo(encoder);
   assert(encodingResult is! Future);
