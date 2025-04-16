@@ -294,8 +294,7 @@ final class ResultImpl with IterableMixin<String> implements Result {
   @override
   String toJson() {
     final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    final encodeResult = _dictionary.encodeTo(encoder);
-    assert(encodeResult is! Future);
+    _dictionary.encodeTo(encoder);
     final sliceResult = encoder.finish().toSliceResult();
     return utf8.decode(sliceResult.asTypedList());
   }

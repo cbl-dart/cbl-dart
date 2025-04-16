@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'dart:async';
-
 import '../document.dart';
 import '../document/common.dart';
 import '../document/dictionary.dart';
@@ -151,7 +149,7 @@ final class ParametersImpl implements Parameters, FleeceEncodable {
       setValue(value, name: name);
 
   @override
-  FutureOr<void> encodeTo(FleeceEncoder encoder) => _data.encodeTo(encoder);
+  void encodeTo(FleeceEncoder encoder) => _data.encodeTo(encoder);
 
   void _checkReadonly() {
     if (_readonly) {
