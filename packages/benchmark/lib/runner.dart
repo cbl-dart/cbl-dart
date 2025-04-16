@@ -22,11 +22,15 @@ abstract class BenchmarkRunnerBase {
         executionModeParameter.dartDefine(executionMode),
       ];
 
+  List<String> get _dartDefineOptions =>
+      DartDefine.commandLineOptions(dartDefines);
+
+  String get _aotFileName =>
+      description.replaceAll(RegExp('[^a-zA-Z0-9]'), '_');
+
   BenchmarkResults parseResults(String stdout);
 
-  Future<BenchmarkResults> run() async {
-    final dartDefineOptions = DartDefine.commandLineOptions(dartDefines);
-
+  Future<void> setupAllRuns() async {
     if (executionMode == ExecutionMode.aot) {
       print('Compiling $description ...');
 
@@ -36,7 +40,8 @@ abstract class BenchmarkRunnerBase {
           'compile',
           'exe',
           'benchmark/$file.dart',
-          ...dartDefineOptions,
+          ..._dartDefineOptions,
+          '--output=benchmark/$_aotFileName.exe',
         ],
       );
 
@@ -46,19 +51,21 @@ abstract class BenchmarkRunnerBase {
         );
       }
     }
+  }
 
+  Future<BenchmarkResults> run() async {
     print('Running $description ...');
 
     final runResult = switch (executionMode) {
       ExecutionMode.jit => await Process.run(
           'dart',
           [
-            ...dartDefineOptions,
+            ..._dartDefineOptions,
             'run',
             'benchmark/$file.dart',
           ],
         ),
-      ExecutionMode.aot => await Process.run('benchmark/$file.exe', []),
+      ExecutionMode.aot => await Process.run('benchmark/$_aotFileName.exe', []),
     };
 
     if (runResult.exitCode != 0) {

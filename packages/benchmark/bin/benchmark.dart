@@ -6,6 +6,7 @@ import 'package:benchmark/parameter.dart';
 import 'package:benchmark/result.dart';
 import 'package:benchmark/runner.dart';
 import 'package:benchmark/utils.dart';
+import 'package:pool/pool.dart';
 
 void main() async {
   final benchmarks = [
@@ -17,22 +18,38 @@ void main() async {
     // Database benchmarks
     for (final mode in ExecutionMode.values)
       for (final api in ApiType.values)
-        for (final batchSize in [1, 10, 100])
-          DatabaseBenchmarkRunner(
-            executionMode: mode,
-            apiType: api,
-            database: 'cbl',
-            operation: 'insert',
-            fixture: 'users',
-            operationCount: 1000,
-            batchSize: batchSize,
-          ),
+        for (final operationCount in [1000, 10000])
+          for (final batchSize in [1, 10, 100, 1000])
+            DatabaseBenchmarkRunner(
+              executionMode: mode,
+              apiType: api,
+              database: 'cbl',
+              operation: 'insert',
+              fixture: 'users',
+              operationCount: operationCount,
+              batchSize: batchSize,
+            ),
   ];
 
-  var results = BenchmarkResults();
-  for (final benchmark in benchmarks) {
-    results = results.merge(await benchmark.run());
+  await Pool(Platform.numberOfProcessors)
+      .forEach(benchmarks, (benchmark) => benchmark.setupAllRuns())
+      .drain<void>();
+
+  const runs = 3;
+
+  final runResults = <BenchmarkResults>[];
+
+  for (var i = 0; i < runs; i++) {
+    print('Run ${i + 1} of $runs ...');
+
+    var results = BenchmarkResults();
+    for (final benchmark in benchmarks) {
+      results = results.merge(await benchmark.run());
+    }
+    runResults.add(results);
   }
+
+  final results = BenchmarkResults.combine(runResults, statistic: average);
 
   File('results.json').writeAsStringSync(jsonEncodePretty(results.toJson()));
 }
