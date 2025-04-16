@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
@@ -184,6 +183,8 @@ final class DictionaryImpl
     implements Dictionary, MCollectionWrapper, FleeceEncodable, CblConversions {
   DictionaryImpl(this._dict);
 
+  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
+
   final MDict _dict;
 
   @override
@@ -247,17 +248,16 @@ final class DictionaryImpl
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    final done = encodeTo(encoder);
-    assert(done is! Future);
-    return encoder.finish().toDartString();
+    _jsonEncoder.reset();
+    encodeTo(_jsonEncoder);
+    return _jsonEncoder.finish().toDartString();
   }
 
   @override
   MCollection get mCollection => _dict;
 
   @override
-  FutureOr<void> encodeTo(FleeceEncoder encoder) => _dict.encodeTo(encoder);
+  void encodeTo(FleeceEncoder encoder) => _dict.encodeTo(encoder);
 
   @override
   Object? toCblObject() => toMutable();

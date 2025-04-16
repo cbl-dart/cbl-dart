@@ -1,5 +1,4 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
-
 import 'dart:async';
 
 import '../../bindings.dart';
@@ -63,41 +62,63 @@ base class MValue {
     }
   }
 
-  void setNative(Object? native) {
-    _setNative(native, hasNative: true);
+  void setNative(Object? native, MCollection parent) {
+    _setNative(native, parent, hasNative: true);
     _value = null;
+
+    if (_delegate.isExternalData(native)) {
+      parent.markNeedsToSaveExternalData();
+    }
   }
 
-  void setEmpty(MCollection parent) {
+  void setEmpty() {
     if (isEmpty) {
       return;
     }
-    _setNative(null, hasNative: false);
+    _setNative(null, null, hasNative: false);
     _value = null;
   }
 
-  void mutate() {
+  void markMutated() {
     _value = null;
   }
 
-  void updateParent(MCollection parent) => _nativeChangeSlot(this);
+  void updateParent(MCollection parent) => _nativeChangeSlot(this, parent);
 
-  void removeFromParent() => _nativeChangeSlot(null);
+  void removeFromParent() => _nativeChangeSlot(null, null);
 
-  FutureOr<void> encodeTo(FleeceEncoder encoder) {
+  FutureOr<void> saveExternalData(Object context) {
+    if (hasNative && isMutated) {
+      final native = _native;
+
+      if (_delegate.collectionFromNative(native) case final collection?) {
+        return collection.saveExternalData(context);
+      }
+
+      if (_delegate.isExternalData(native)) {
+        return _delegate.saveExternalData(native, context);
+      }
+    }
+  }
+
+  void encodeTo(FleeceEncoder encoder) {
     assert(!isEmpty);
 
     final value = _value;
     if (value != null) {
       encoder.writeValue(value);
     } else {
-      return _delegate.encodeNative(encoder, _native);
+      _delegate.encodeNative(encoder, _native);
     }
   }
 
   MValue clone() => MValue._(_value, _native);
 
-  void _setNative(Object? native, {required bool hasNative}) {
+  void _setNative(
+    Object? native,
+    MCollection? parent, {
+    required bool hasNative,
+  }) {
     assert(
       hasNative || native == null,
       'native must be null when hasNative is false',
@@ -105,21 +126,21 @@ base class MValue {
 
     if (hasNative) {
       if (_native != native) {
-        _nativeChangeSlot(null);
+        _nativeChangeSlot(null, null);
         _native = native;
-        _nativeChangeSlot(this);
+        _nativeChangeSlot(this, parent);
       }
     } else if (this.hasNative) {
-      _nativeChangeSlot(null);
+      _nativeChangeSlot(null, null);
       _native = _emptyNative;
     }
   }
 
-  void _nativeChangeSlot(MValue? slot) {
+  void _nativeChangeSlot(MValue? slot, MCollection? parent) {
     if (!hasNative) {
       return;
     }
-    _delegate.collectionFromNative(_native)?.setSlot(slot, this);
+    _delegate.collectionFromNative(_native)?.setSlot(slot, this, parent);
   }
 
   @override

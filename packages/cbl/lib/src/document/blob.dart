@@ -156,6 +156,8 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   /// Max size of data that will be cached in memory with the [Blob].
   static const _maxCachedContentLength = 8 * 1024;
 
+  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
+
   Database? _database;
   BlobStore? get _blobStore => (_database as BlobStoreHolder?)?.blobStore;
 
@@ -236,39 +238,26 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
   @override
   String toJson() {
-    final encoder = FleeceEncoder(format: FLEncoderFormat.json);
-    final done = encodeTo(encoder);
-    assert(done is! Future);
-    return encoder.finish().toDartString();
+    _jsonEncoder.reset();
+    encodeTo(_jsonEncoder);
+    return _jsonEncoder.finish().toDartString();
   }
 
   @override
-  FutureOr<void> encodeTo(FleeceEncoder encoder) {
+  void encodeTo(FleeceEncoder encoder) {
     final extraInfo = encoder.extraInfo;
     final context = (extraInfo is FleeceEncoderContext) ? extraInfo : null;
 
-    void writeProperties(Map<String, Object?> properties) {
-      final blobProperties = _blobProperties(
-        mayIncludeData: context?.encodeUnsavedBlobWithData ?? false,
-      );
+    final blobProperties = _blobProperties(
+      mayIncludeData: context?.encodeUnsavedBlobWithData ?? false,
+    );
 
-      if (blobProperties[blobDigestProperty] == null &&
-          blobProperties[blobDataProperty] == null) {
-        _throwNotSavedError('Cannot serialize unsaved blob.');
-      }
-
-      encoder.writeDartObject(blobProperties);
+    if (blobProperties[blobDigestProperty] == null &&
+        blobProperties[blobDataProperty] == null) {
+      _throwNotSavedError('Cannot serialize unsaved blob.');
     }
 
-    if (context != null && context.saveExternalData) {
-      final database = context.database;
-
-      if (database != null) {
-        return ensureIsInstalled(database).then(writeProperties);
-      }
-    }
-
-    writeProperties(_blobProperties());
+    encoder.writeDartObject(blobProperties);
   }
 
   /// Ensures that this Blob is installed in [database] and returns the Blobs
@@ -279,7 +268,7 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   /// If [allowFromStreamForSyncDatabase] is `true` and this Blob was created
   /// from a [Stream] and the database is a [SyncDatabase] it will be installed
   /// and the result will be a Future. Otherwise a [StateError] is thrown.
-  FutureOr<Map<String, Object?>> ensureIsInstalled(
+  FutureOr<void> ensureIsInstalled(
     Database database, {
     bool allowFromStreamForSyncDatabase = false,
   }) {
@@ -322,8 +311,6 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
             .then(updateProperties);
       }
     }
-
-    return _blobProperties();
   }
 
   @override

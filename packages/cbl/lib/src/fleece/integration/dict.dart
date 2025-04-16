@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:ffi';
 
 import '../../bindings.dart';
-import '../../support/utils.dart';
 import '../decoder.dart';
 import '../dict_key.dart';
 import '../encoder.dart';
@@ -54,12 +52,12 @@ final class MDict extends MCollection {
   void set(String key, Object? native) {
     assert(isMutable);
 
-    mutate();
+    markMutated();
     final value = _getValue(key);
     if (value.isEmpty) {
       _length++;
     }
-    value.setNative(native);
+    value.setNative(native, this);
   }
 
   void remove(String key) {
@@ -67,8 +65,8 @@ final class MDict extends MCollection {
 
     final value = _getValue(key);
     if (value.isNotEmpty) {
-      mutate();
-      value.setEmpty(this);
+      markMutated();
+      value.setEmpty();
       _length--;
     }
   }
@@ -81,7 +79,7 @@ final class MDict extends MCollection {
     }
 
     // Clear out all entires.
-    mutate();
+    markMutated();
     for (final value in _values.values) {
       value.removeFromParent();
     }
@@ -108,35 +106,32 @@ final class MDict extends MCollection {
   }
 
   @override
-  FutureOr<void> performEncodeTo(FleeceEncoder encoder) {
+  void performEncodeTo(FleeceEncoder encoder) {
     if (!isMutated) {
       encoder.writeValue(_dict!.cast());
     } else {
-      return syncOrAsync(() sync* {
-        final extraInfo = encoder.extraInfo;
-        final dictKeys =
-            extraInfo is DictKeysProvider ? extraInfo.dictKeys : null;
-        // ignore: omit_local_variable_types
-        final void Function(String) writeKey = dictKeys != null
-            ? (key) => dictKeys.getKey(key).encodeTo(encoder)
-            : encoder.writeKey;
+      final extraInfo = encoder.extraInfo;
+      final dictKeys =
+          extraInfo is DictKeysProvider ? extraInfo.dictKeys : null;
+      // ignore: omit_local_variable_types
+      final void Function(String) writeKey = dictKeys != null
+          ? (key) => dictKeys.getKey(key).encodeTo(encoder)
+          : encoder.writeKey;
 
-        encoder.beginDict(length);
-        for (final entry in iterable) {
-          final value = entry.value;
-          if (value is _MValueWithKey) {
-            encoder.writeKeyValue(value.key);
-          } else {
-            writeKey(entry.key);
-          }
-          if (value.hasValue) {
-            encoder.writeValue(value.value!);
-          } else {
-            yield value.encodeTo(encoder);
-          }
+      encoder.beginDict(length);
+      _forEach((key, value) {
+        if (value is _MValueWithKey) {
+          encoder.writeKeyValue(value.key);
+        } else {
+          writeKey(key);
         }
-        encoder.endDict();
-      }());
+        if (value.hasValue) {
+          encoder.writeValue(value.value!);
+        } else {
+          value.encodeTo(encoder);
+        }
+      });
+      encoder.endDict();
     }
   }
 
@@ -184,6 +179,53 @@ final class MDict extends MCollection {
         loadedValue.value.cast(),
       );
       yield MapEntry(key, value);
+    }
+
+    _valuesHasAllKeys = true;
+
+    cblReachabilityFence(context);
+  }
+
+  @pragma('vm:prefer-inline')
+  void _forEach(void Function(String key, MValue value) action) {
+    // Iterate over entries in _values.
+    _values.forEach((key, value) {
+      // Empty MValues represent that the entry was removed.
+      if (value.isNotEmpty) {
+        action(key, value);
+      }
+    });
+
+    // _values shadows all keys in _dict so there is no use in iterating _dict.
+    if (_valuesHasAllKeys) {
+      return;
+    }
+
+    // Iterate over entries in _dict.
+    final sharedKeysTable = context.sharedKeysTable;
+    final sharedStringsTable = context.sharedStringsTable;
+    final it = DictIterator(
+      _dict!,
+      sharedKeysTable: sharedKeysTable,
+      keyOut: globalLoadedDictKey,
+      valueOut: globalLoadedFLValue,
+      preLoad: false,
+      partiallyConsumable: false,
+    );
+    final loadedKey = globalLoadedDictKey.ref;
+    final loadedValue = globalLoadedFLValue.ref;
+    while (it.moveNext()) {
+      final key = sharedKeysTable.decode(sharedStringsTable);
+
+      // Skip over entries which are shadowed by _values
+      if (_values.containsKey(key)) {
+        continue;
+      }
+
+      // Cache the value to speed up lookups later.
+      final value =
+          _values[key] = _MValueWithKey(loadedKey.value, loadedValue.value);
+      action(key, value);
     }
 
     _valuesHasAllKeys = true;

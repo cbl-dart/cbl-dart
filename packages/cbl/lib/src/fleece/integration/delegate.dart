@@ -19,7 +19,11 @@ abstract base class MDelegate {
 
   Object? toNative(MValue value, MCollection parent, void Function() cacheIt);
 
-  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native);
+  bool isExternalData(Object? native);
+
+  FutureOr<void> saveExternalData(Object? native, Object? context);
+
+  void encodeNative(FleeceEncoder encoder, Object? native);
 }
 
 final class SimpleMDelegate extends MDelegate {
@@ -29,25 +33,6 @@ final class SimpleMDelegate extends MDelegate {
       return native;
     }
     return null;
-  }
-
-  @override
-  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native) {
-    if (native == null ||
-        native is String ||
-        native is num ||
-        native is bool ||
-        native is TypedData) {
-      encoder.writeDartObject(native);
-    } else if (native is MCollection) {
-      return native.encodeTo(encoder);
-    } else {
-      throw ArgumentError.value(
-        native,
-        'native',
-        'is not a value of a recognized native type',
-      );
-    }
   }
 
   @override
@@ -75,6 +60,31 @@ final class SimpleMDelegate extends MDelegate {
       case FLValueType.dict:
         cacheIt();
         return MDict.asChild(value, parent, flValue.collectionSize);
+    }
+  }
+
+  @override
+  bool isExternalData(Object? native) => false;
+
+  @override
+  FutureOr<void> saveExternalData(Object? native, Object? context) {}
+
+  @override
+  void encodeNative(FleeceEncoder encoder, Object? native) {
+    if (native == null ||
+        native is String ||
+        native is num ||
+        native is bool ||
+        native is TypedData) {
+      encoder.writeDartObject(native);
+    } else if (native is MCollection) {
+      native.encodeTo(encoder);
+    } else {
+      throw ArgumentError.value(
+        native,
+        'native',
+        'is not a value of a recognized native type',
+      );
     }
   }
 }

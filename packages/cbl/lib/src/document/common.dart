@@ -81,21 +81,17 @@ final class _DefaultCblConversions implements CblConversions {
 
 // ignore: one_member_abstracts
 abstract interface class FleeceEncodable {
-  FutureOr<void> encodeTo(FleeceEncoder encoder);
+  void encodeTo(FleeceEncoder encoder);
 }
 
 final class FleeceEncoderContext implements DictKeysProvider {
   FleeceEncoderContext({
     this.database,
     this.encodeUnsavedBlobWithData = false,
-    this.saveExternalData = false,
   });
 
   final DatabaseBase? database;
-
   final bool encodeUnsavedBlobWithData;
-
-  final bool saveExternalData;
 
   @override
   DictKeys? get dictKeys => database?.dictKeys;
@@ -133,27 +129,6 @@ final class CblMDelegate extends MDelegate {
       return native.mCollection;
     }
     return null;
-  }
-
-  @override
-  FutureOr<void> encodeNative(FleeceEncoder encoder, Object? native) {
-    if (native == null ||
-        native is String ||
-        native is num ||
-        native is bool ||
-        native is Uint8List) {
-      encoder.writeDartObject(native);
-    } else if (native is DateTime) {
-      encoder.writeString(native.toIso8601String());
-    } else if (native is FleeceEncodable) {
-      return native.encodeTo(encoder);
-    } else {
-      throw ArgumentError.value(
-        native,
-        'native',
-        'is not a value of a recognized native type',
-      );
-    }
   }
 
   @override
@@ -218,6 +193,37 @@ final class CblMDelegate extends MDelegate {
         } else {
           return DictionaryImpl(dictionary);
         }
+    }
+  }
+
+  @override
+  bool isExternalData(Object? native) => native is BlobImpl;
+
+  @override
+  FutureOr<void> saveExternalData(
+    covariant BlobImpl native,
+    covariant Database context,
+  ) =>
+      native.ensureIsInstalled(context);
+
+  @override
+  void encodeNative(FleeceEncoder encoder, Object? native) {
+    if (native == null ||
+        native is String ||
+        native is num ||
+        native is bool ||
+        native is Uint8List) {
+      encoder.writeDartObject(native);
+    } else if (native is DateTime) {
+      encoder.writeString(native.toIso8601String());
+    } else if (native is FleeceEncodable) {
+      native.encodeTo(encoder);
+    } else {
+      throw ArgumentError.value(
+        native,
+        'native',
+        'is not a value of a recognized native type',
+      );
     }
   }
 }
