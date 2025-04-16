@@ -9,11 +9,8 @@ import 'utils.dart';
 
 /// Base class for database benchmarks.
 abstract class DatabaseBenchmarkBase {
-  /// Durations of all measured operations in nanoseconds.
-  final _operationDurations = <double>[];
-
-  /// Stopwatch used to measure the total time of the benchmark.
-  final _benchmarkStopwatch = Stopwatch();
+  final _operationDurations = <Duration>[];
+  final _totalDurationStopwatch = Stopwatch();
 
   /// Runs the benchmark and prints the results to stdout.
   Future<void> report() async {
@@ -26,19 +23,14 @@ abstract class DatabaseBenchmarkBase {
       }
 
       _operationDurations.clear();
-      _benchmarkStopwatch.reset();
+      _totalDurationStopwatch.reset();
 
       await _run();
 
-      final throughput = _operationDurations.length /
-          (_benchmarkStopwatch.elapsedMicroseconds /
-              Duration.microsecondsPerSecond);
-
-      final result = BenchmarkResult(
-        measures: [
-          Measure.median(name: 'latency', values: _operationDurations),
-          Measure(name: 'throughput', value: throughput),
-        ],
+      final result = BenchmarkResult.workload(
+        latencies: _operationDurations,
+        latencyStatistic: median,
+        totalDuration: _totalDurationStopwatch.elapsed,
       );
 
       // ignore: avoid_print
@@ -93,18 +85,18 @@ abstract class DatabaseBenchmarkBase {
   /// workload.
   @protected
   void measureSync(void Function() fn) {
-    _benchmarkStopwatch.start();
+    _totalDurationStopwatch.start();
     fn();
-    _benchmarkStopwatch.stop();
+    _totalDurationStopwatch.stop();
   }
 
   /// Measure the total time it takes to complete the asynchronous benchmarked
   /// workload.
   @protected
   Future<void> measureAsync(Future<void> Function() fn) async {
-    _benchmarkStopwatch.start();
+    _totalDurationStopwatch.start();
     await fn();
-    _benchmarkStopwatch.stop();
+    _totalDurationStopwatch.stop();
   }
 
   /// Measure the time it takes to complete a single synchronous operation
@@ -117,7 +109,7 @@ abstract class DatabaseBenchmarkBase {
     final stopwatch = Stopwatch()..start();
     fn();
     stopwatch.stop();
-    _operationDurations.add(stopwatch.elapsedMicroseconds * 1000);
+    _operationDurations.add(stopwatch.elapsed);
   }
 
   /// Measure the time it takes to complete a single asynchronous operation
@@ -129,7 +121,7 @@ abstract class DatabaseBenchmarkBase {
     final stopwatch = Stopwatch()..start();
     await fn();
     stopwatch.stop();
-    _operationDurations.add(stopwatch.elapsedMicroseconds * 1000);
+    _operationDurations.add(stopwatch.elapsed);
   }
 }
 
