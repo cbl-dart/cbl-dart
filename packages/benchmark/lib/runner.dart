@@ -7,41 +7,66 @@ import 'parameter.dart';
 import 'result.dart';
 import 'utils.dart';
 
+final _dartaotruntime =
+    File(Platform.executable).parent.uri.resolve('dartaotruntime').toFilePath();
+
 abstract class BenchmarkRunnerBase {
   BenchmarkRunnerBase({
     required this.executionMode,
   });
 
+  static const _aotDirectory = '.dart_tool/benchmark-aot';
+  static const _dartDirectory = 'benchmark';
+
   final ExecutionMode executionMode;
 
-  String get description;
+  /// Name of the benchmark.
+  ///
+  /// The Dart file implementing the benchmark must be named located at
+  /// `benchmark/$name.dart`.
+  String get benchmark;
 
-  String get file;
+  /// Unique identifier for the benchmark invocation.
+  ///
+  /// This distinguishes between invocations with different [executionMode]s and
+  /// [parameters].
+  String get invocationId => [
+        executionMode.name,
+        benchmark,
+        ...parameters.map((parameter) => parameter.value)
+      ].join('_');
 
-  List<DartDefine> get dartDefines => [
+  /// Parameters to invoke the benchmark with.
+  List<DartDefine> get parameters => [];
+
+  List<String> get _dartDefineOptions => DartDefine.commandLineOptions([
         executionModeParameter.dartDefine(executionMode),
-      ];
+        ...parameters,
+      ]);
 
-  List<String> get _dartDefineOptions =>
-      DartDefine.commandLineOptions(dartDefines);
+  String get _dartFile => '$_dartDirectory/$benchmark.dart';
 
-  String get _aotFileName =>
-      description.replaceAll(RegExp('[^a-zA-Z0-9]'), '_');
+  String get _aotFile {
+    final fileName = invocationId.replaceAll(RegExp('[^a-zA-Z0-9]'), '_');
+    return '$_aotDirectory/$fileName.aot';
+  }
 
   BenchmarkResults parseResults(String stdout);
 
   Future<void> setupAllRuns() async {
     if (executionMode == ExecutionMode.aot) {
-      print('Compiling $description ...');
+      print('Compiling $invocationId ...');
+
+      await Directory(_aotDirectory).create(recursive: true);
 
       final compileResult = await Process.run(
         'dart',
         [
           'compile',
-          'exe',
-          'benchmark/$file.dart',
+          'aot-snapshot',
+          _dartFile,
           ..._dartDefineOptions,
-          '--output=benchmark/$_aotFileName.exe',
+          '--output=$_aotFile',
         ],
       );
 
@@ -54,7 +79,7 @@ abstract class BenchmarkRunnerBase {
   }
 
   Future<BenchmarkResults> run() async {
-    print('Running $description ...');
+    print('Running $invocationId ...');
 
     final runResult = switch (executionMode) {
       ExecutionMode.jit => await Process.run(
@@ -62,10 +87,10 @@ abstract class BenchmarkRunnerBase {
           [
             ..._dartDefineOptions,
             'run',
-            'benchmark/$file.dart',
+            _dartFile,
           ],
         ),
-      ExecutionMode.aot => await Process.run('benchmark/$_aotFileName.exe', []),
+      ExecutionMode.aot => await Process.run(_dartaotruntime, [_aotFile]),
     };
 
     if (runResult.exitCode != 0) {
@@ -74,7 +99,7 @@ abstract class BenchmarkRunnerBase {
 
     final benchmarkResult = parseResults(runResult.stdout as String);
 
-    print('Completed $description');
+    print('Completed $invocationId');
     print(jsonEncodePretty(benchmarkResult.toJson()));
 
     return benchmarkResult;
@@ -84,14 +109,11 @@ abstract class BenchmarkRunnerBase {
 class MicroBenchmarkRunner extends BenchmarkRunnerBase {
   MicroBenchmarkRunner({
     required super.executionMode,
-    required this.file,
+    required this.benchmark,
   });
 
   @override
-  final String file;
-
-  @override
-  String get description => 'micro benchmark: $file (${executionMode.name})';
+  final String benchmark;
 
   @override
   BenchmarkResults parseResults(String stdout) {
@@ -111,7 +133,7 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
 
     return BenchmarkResults({
       for (final MapEntry(key: name, value: latency) in latencies.entries)
-        '${executionMode.name}_${file}_$name': BenchmarkResult(
+        '${invocationId}_$name': BenchmarkResult(
           measures: [
             Measure(name: 'latency', value: latency),
           ],
@@ -139,32 +161,28 @@ class DatabaseBenchmarkRunner extends BenchmarkRunnerBase {
   final int batchSize;
 
   @override
-  String get file => '${database}_$operation';
+  String get benchmark => '${database}_$operation';
 
   @override
-  String get description => _benchmarkName;
-
-  @override
-  List<DartDefine> get dartDefines => [
-        ...super.dartDefines,
-        operationCountParameter.dartDefine(operationCount),
-        batchSizeParameter.dartDefine(batchSize),
-        fixtureParameter.dartDefine(fixture),
-        apiTypeParameter.dartDefine(apiType),
-      ];
-
-  String get _benchmarkName => [
+  String get invocationId => [
         executionMode.name,
         apiType.name,
-        database,
-        operation,
+        benchmark,
         fixture,
         '$operationCount/$batchSize',
       ].join('_');
 
   @override
+  List<DartDefine> get parameters => [
+        apiTypeParameter.dartDefine(apiType),
+        fixtureParameter.dartDefine(fixture),
+        operationCountParameter.dartDefine(operationCount),
+        batchSizeParameter.dartDefine(batchSize),
+      ];
+
+  @override
   BenchmarkResults parseResults(String stdout) => BenchmarkResults({
-        _benchmarkName: BenchmarkResult.fromJson(
+        invocationId: BenchmarkResult.fromJson(
           jsonDecode(stdout) as Map<String, Object?>,
         ),
       });
