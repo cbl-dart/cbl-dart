@@ -1,2 +1,4 @@
 benchmark/*.exe
+benchmark/*.aot
+benchmark/*.il
 results.json

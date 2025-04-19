@@ -7,6 +7,9 @@ import 'parameter.dart';
 import 'result.dart';
 import 'utils.dart';
 
+final _dartaotruntime =
+    File(Platform.executable).parent.uri.resolve('dartaotruntime').toFilePath();
+
 abstract class BenchmarkRunnerBase {
   BenchmarkRunnerBase({
     required this.executionMode,
@@ -38,10 +41,10 @@ abstract class BenchmarkRunnerBase {
         'dart',
         [
           'compile',
-          'exe',
+          'aot-snapshot',
           'benchmark/$file.dart',
           ..._dartDefineOptions,
-          '--output=benchmark/$_aotFileName.exe',
+          '--output=benchmark/$_aotFileName.aot',
         ],
       );
 
@@ -65,7 +68,8 @@ abstract class BenchmarkRunnerBase {
             'benchmark/$file.dart',
           ],
         ),
-      ExecutionMode.aot => await Process.run('benchmark/$_aotFileName.exe', []),
+      ExecutionMode.aot =>
+        await Process.run(_dartaotruntime, ['benchmark/$_aotFileName.aot']),
     };
 
     if (runResult.exitCode != 0) {
