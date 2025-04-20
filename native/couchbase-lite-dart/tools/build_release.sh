@@ -126,6 +126,7 @@ esac
 
 "$cbdBin" install-packages \
     --library cblite \
+    --edition "$edition" \
     --release "$couchbaseLiteCRelease" \
     --os "$os"
 

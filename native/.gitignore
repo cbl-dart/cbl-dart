@@ -1,4 +1,4 @@
 vendor/couchbase-lite-C-prebuilt
 vendor/couchbase-lite-Dart-prebuilt
 vendor/couchbase-lite-vector-search-prebuilt
-
+vendor/packages.couchbase.com
