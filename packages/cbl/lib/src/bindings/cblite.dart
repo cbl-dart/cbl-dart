@@ -1404,6 +1404,27 @@ class cblite {
       _CBLCollection_CreateFullTextIndexPtr.asFunction<
           DartCBLCollection_CreateFullTextIndex>();
 
+  bool CBLCollection_CreateArrayIndex(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLArrayIndexConfiguration config,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLCollection_CreateArrayIndex(
+      collection,
+      name,
+      config,
+      outError,
+    );
+  }
+
+  late final _CBLCollection_CreateArrayIndexPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCollection_CreateArrayIndex>>(
+          'CBLCollection_CreateArrayIndex');
+  late final _CBLCollection_CreateArrayIndex =
+      _CBLCollection_CreateArrayIndexPtr.asFunction<
+          DartCBLCollection_CreateArrayIndex>();
+
   bool CBLCollection_CreateVectorIndex(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -2250,6 +2271,17 @@ class cblite {
       _CBLReplicator_AddDocumentReplicationListenerPtr.asFunction<
           DartCBLReplicator_AddDocumentReplicationListener>();
 
+  late final ffi.Pointer<ffi.Bool> _kCBLDefaultDatabaseFullSync =
+      _lookup<ffi.Bool>('kCBLDefaultDatabaseFullSync');
+
+  bool get kCBLDefaultDatabaseFullSync => _kCBLDefaultDatabaseFullSync.value;
+
+  late final ffi.Pointer<ffi.Bool> _kCBLDefaultDatabaseMmapDisabled =
+      _lookup<ffi.Bool>('kCBLDefaultDatabaseMmapDisabled');
+
+  bool get kCBLDefaultDatabaseMmapDisabled =>
+      _kCBLDefaultDatabaseMmapDisabled.value;
+
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultLogFileUsePlaintext =
       _lookup<ffi.Bool>('kCBLDefaultLogFileUsePlaintext');
 
@@ -2272,6 +2304,23 @@ class cblite {
 
   int get kCBLDefaultLogFileMaxRotateCount =>
       _kCBLDefaultLogFileMaxRotateCount.value;
+
+  late final ffi.Pointer<ffi.Bool> _kCBLDefaultFileLogSinkUsePlaintext =
+      _lookup<ffi.Bool>('kCBLDefaultFileLogSinkUsePlaintext');
+
+  bool get kCBLDefaultFileLogSinkUsePlaintext =>
+      _kCBLDefaultFileLogSinkUsePlaintext.value;
+
+  late final ffi.Pointer<ffi.Size> _kCBLDefaultFileLogSinkMaxSize =
+      _lookup<ffi.Size>('kCBLDefaultFileLogSinkMaxSize');
+
+  int get kCBLDefaultFileLogSinkMaxSize => _kCBLDefaultFileLogSinkMaxSize.value;
+
+  late final ffi.Pointer<ffi.Uint32> _kCBLDefaultFileLogSinkMaxKeptFiles =
+      _lookup<ffi.Uint32>('kCBLDefaultFileLogSinkMaxKeptFiles');
+
+  int get kCBLDefaultFileLogSinkMaxKeptFiles =>
+      _kCBLDefaultFileLogSinkMaxKeptFiles.value;
 
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultFullTextIndexIgnoreAccents =
       _lookup<ffi.Bool>('kCBLDefaultFullTextIndexIgnoreAccents');
@@ -2591,6 +2640,77 @@ class cblite {
           'FLSlot_SetEncryptableValue');
   late final _FLSlot_SetEncryptableValue = _FLSlot_SetEncryptableValuePtr
       .asFunction<DartFLSlot_SetEncryptableValue>();
+
+  void CBLLogSinks_SetConsole(
+    CBLConsoleLogSink sink,
+  ) {
+    return _CBLLogSinks_SetConsole(
+      sink,
+    );
+  }
+
+  late final _CBLLogSinks_SetConsolePtr =
+      _lookup<ffi.NativeFunction<NativeCBLLogSinks_SetConsole>>(
+          'CBLLogSinks_SetConsole');
+  late final _CBLLogSinks_SetConsole =
+      _CBLLogSinks_SetConsolePtr.asFunction<DartCBLLogSinks_SetConsole>();
+
+  CBLConsoleLogSink CBLLogSinks_Console() {
+    return _CBLLogSinks_Console();
+  }
+
+  late final _CBLLogSinks_ConsolePtr =
+      _lookup<ffi.NativeFunction<NativeCBLLogSinks_Console>>(
+          'CBLLogSinks_Console');
+  late final _CBLLogSinks_Console =
+      _CBLLogSinks_ConsolePtr.asFunction<DartCBLLogSinks_Console>();
+
+  void CBLLogSinks_SetCustom(
+    CBLCustomLogSink sink,
+  ) {
+    return _CBLLogSinks_SetCustom(
+      sink,
+    );
+  }
+
+  late final _CBLLogSinks_SetCustomPtr =
+      _lookup<ffi.NativeFunction<NativeCBLLogSinks_SetCustom>>(
+          'CBLLogSinks_SetCustom');
+  late final _CBLLogSinks_SetCustom =
+      _CBLLogSinks_SetCustomPtr.asFunction<DartCBLLogSinks_SetCustom>();
+
+  CBLCustomLogSink CBLLogSinks_CustomSink() {
+    return _CBLLogSinks_CustomSink();
+  }
+
+  late final _CBLLogSinks_CustomSinkPtr =
+      _lookup<ffi.NativeFunction<NativeCBLLogSinks_CustomSink>>(
+          'CBLLogSinks_CustomSink');
+  late final _CBLLogSinks_CustomSink =
+      _CBLLogSinks_CustomSinkPtr.asFunction<DartCBLLogSinks_CustomSink>();
+
+  void CBLLogSinks_SetFile(
+    CBLFileLogSink sink,
+  ) {
+    return _CBLLogSinks_SetFile(
+      sink,
+    );
+  }
+
+  late final _CBLLogSinks_SetFilePtr =
+      _lookup<ffi.NativeFunction<NativeCBLLogSinks_SetFile>>(
+          'CBLLogSinks_SetFile');
+  late final _CBLLogSinks_SetFile =
+      _CBLLogSinks_SetFilePtr.asFunction<DartCBLLogSinks_SetFile>();
+
+  CBLFileLogSink CBLLogSinks_File() {
+    return _CBLLogSinks_File();
+  }
+
+  late final _CBLLogSinks_FilePtr =
+      _lookup<ffi.NativeFunction<NativeCBLLogSinks_File>>('CBLLogSinks_File');
+  late final _CBLLogSinks_File =
+      _CBLLogSinks_FilePtr.asFunction<DartCBLLogSinks_File>();
 
   void CBL_Log(
     int domain,
@@ -6330,6 +6450,8 @@ final class CBLValueIndexConfiguration extends ffi.Struct {
   external int expressionLanguage;
 
   external FLString expressions;
+
+  external FLString where;
 }
 
 final class CBLFullTextIndexConfiguration extends ffi.Struct {
@@ -6342,6 +6464,17 @@ final class CBLFullTextIndexConfiguration extends ffi.Struct {
   external bool ignoreAccents;
 
   external FLString language;
+
+  external FLString where;
+}
+
+final class CBLArrayIndexConfiguration extends ffi.Struct {
+  @CBLQueryLanguage()
+  external int expressionLanguage;
+
+  external FLString path;
+
+  external FLString expressions;
 }
 
 final class CBLVectorEncoding extends ffi.Opaque {}
@@ -6598,6 +6731,16 @@ typedef DartCBLCollection_CreateFullTextIndex = bool Function(
     FLString name,
     CBLFullTextIndexConfiguration config,
     ffi.Pointer<CBLError> outError);
+typedef NativeCBLCollection_CreateArrayIndex = ffi.Bool Function(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLArrayIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLCollection_CreateArrayIndex = bool Function(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLArrayIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_CreateVectorIndex = ffi.Bool Function(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -6703,6 +6846,9 @@ final class CBLDatabaseConfiguration extends ffi.Struct {
 
   @ffi.Bool()
   external bool fullSync;
+
+  @ffi.Bool()
+  external bool mmapDisabled;
 }
 
 typedef NativeCBLDatabaseConfiguration_Default = CBLDatabaseConfiguration
@@ -7238,10 +7384,66 @@ typedef NativeFLSlot_SetEncryptableValue = ffi.Void Function(
     FLSlot slot, ffi.Pointer<CBLEncryptable> encryptable);
 typedef DartFLSlot_SetEncryptableValue = void Function(
     FLSlot slot, ffi.Pointer<CBLEncryptable> encryptable);
-typedef CBLLogDomain = ffi.Uint8;
-typedef DartCBLLogDomain = int;
 typedef CBLLogLevel = ffi.Uint8;
 typedef DartCBLLogLevel = int;
+typedef CBLLogDomain = ffi.Uint8;
+typedef DartCBLLogDomain = int;
+typedef CBLLogDomainMask = ffi.Uint16;
+typedef DartCBLLogDomainMask = int;
+typedef CBLLogSinkCallbackFunction = ffi.Void Function(
+    CBLLogDomain domain, CBLLogLevel level, FLString message);
+typedef DartCBLLogSinkCallbackFunction = void Function(
+    DartCBLLogDomain domain, DartCBLLogLevel level, FLString message);
+typedef CBLLogSinkCallback
+    = ffi.Pointer<ffi.NativeFunction<CBLLogSinkCallbackFunction>>;
+
+final class CBLConsoleLogSink extends ffi.Struct {
+  @CBLLogLevel()
+  external int level;
+
+  @CBLLogDomainMask()
+  external int domains;
+}
+
+final class CBLCustomLogSink extends ffi.Struct {
+  @CBLLogLevel()
+  external int level;
+
+  external CBLLogSinkCallback callback;
+
+  @CBLLogDomainMask()
+  external int domains;
+}
+
+final class CBLFileLogSink extends ffi.Struct {
+  @CBLLogLevel()
+  external int level;
+
+  external FLString directory;
+
+  @ffi.Uint32()
+  external int maxKeptFiles;
+
+  @ffi.Size()
+  external int maxSize;
+
+  @ffi.Bool()
+  external bool usePlaintext;
+}
+
+typedef NativeCBLLogSinks_SetConsole = ffi.Void Function(
+    CBLConsoleLogSink sink);
+typedef DartCBLLogSinks_SetConsole = void Function(CBLConsoleLogSink sink);
+typedef NativeCBLLogSinks_Console = CBLConsoleLogSink Function();
+typedef DartCBLLogSinks_Console = CBLConsoleLogSink Function();
+typedef NativeCBLLogSinks_SetCustom = ffi.Void Function(CBLCustomLogSink sink);
+typedef DartCBLLogSinks_SetCustom = void Function(CBLCustomLogSink sink);
+typedef NativeCBLLogSinks_CustomSink = CBLCustomLogSink Function();
+typedef DartCBLLogSinks_CustomSink = CBLCustomLogSink Function();
+typedef NativeCBLLogSinks_SetFile = ffi.Void Function(CBLFileLogSink sink);
+typedef DartCBLLogSinks_SetFile = void Function(CBLFileLogSink sink);
+typedef NativeCBLLogSinks_File = CBLFileLogSink Function();
+typedef DartCBLLogSinks_File = CBLFileLogSink Function();
 typedef NativeCBL_Log = ffi.Void Function(
     CBLLogDomain domain, CBLLogLevel level, ffi.Pointer<ffi.Char> format);
 typedef DartCBL_Log = void Function(
@@ -7250,12 +7452,7 @@ typedef NativeCBL_LogMessage = ffi.Void Function(
     CBLLogDomain domain, CBLLogLevel level, FLSlice message);
 typedef DartCBL_LogMessage = void Function(
     int domain, int level, FLSlice message);
-typedef CBLLogCallbackFunction = ffi.Void Function(
-    CBLLogDomain domain, CBLLogLevel level, FLString message);
-typedef DartCBLLogCallbackFunction = void Function(
-    DartCBLLogDomain domain, DartCBLLogLevel level, FLString message);
-typedef CBLLogCallback
-    = ffi.Pointer<ffi.NativeFunction<CBLLogCallbackFunction>>;
+typedef CBLLogCallback = CBLLogSinkCallback;
 typedef NativeCBLLog_ConsoleLevel = CBLLogLevel Function();
 typedef DartCBLLog_ConsoleLevel = int Function();
 typedef NativeCBLLog_SetConsoleLevel = ffi.Void Function(CBLLogLevel arg0);
@@ -8396,14 +8593,6 @@ const int kCBLReplicatorIdle = 3;
 
 const int kCBLReplicatorBusy = 4;
 
-const int kCBLLogDomainDatabase = 0;
-
-const int kCBLLogDomainQuery = 1;
-
-const int kCBLLogDomainReplicator = 2;
-
-const int kCBLLogDomainNetwork = 3;
-
 const int kCBLLogDebug = 0;
 
 const int kCBLLogVerbose = 1;
@@ -8416,15 +8605,33 @@ const int kCBLLogError = 4;
 
 const int kCBLLogNone = 5;
 
-const String CBLITE_VERSION = '3.2.0';
+const int kCBLLogDomainDatabase = 0;
 
-const int CBLITE_VERSION_NUMBER = 3002000;
+const int kCBLLogDomainQuery = 1;
 
-const int CBLITE_BUILD_NUMBER = 71;
+const int kCBLLogDomainReplicator = 2;
 
-const String CBLITE_SOURCE_ID = '42c42c4+1b8799a';
+const int kCBLLogDomainNetwork = 3;
 
-const String CBLITE_BUILD_TIMESTAMP = '2024-08-29T06:45:08Z';
+const int kCBLLogDomainMaskDatabase = 1;
+
+const int kCBLLogDomainMaskQuery = 2;
+
+const int kCBLLogDomainMaskReplicator = 4;
+
+const int kCBLLogDomainMaskNetwork = 8;
+
+const int kCBLLogDomainMaskAll = 255;
+
+const String CBLITE_VERSION = '3.2.2';
+
+const int CBLITE_VERSION_NUMBER = 3002002;
+
+const int CBLITE_BUILD_NUMBER = 9;
+
+const String CBLITE_SOURCE_ID = '6728898+92f79e8';
+
+const String CBLITE_BUILD_TIMESTAMP = '2025-02-24T20:13:54Z';
 
 const String HOTLEVEL = 'Ofast';
 

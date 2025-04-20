@@ -24,6 +24,7 @@
 #include "Collection.hh"
 #include "Database.hh"
 #include "Document.hh"
+#include "LogSinks.hh"
 #include "Prediction.hh"
 #include "Query.hh"
 #include "QueryIndex.hh"

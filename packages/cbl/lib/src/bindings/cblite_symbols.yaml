@@ -28,9 +28,9 @@ files:
       CBLDocumentReplicationListenerFunction:
         name: CBLDocumentReplicationListenerFunction
         dart-name: DartCBLDocumentReplicationListenerFunction
-      CBLLogCallbackFunction:
-        name: CBLLogCallbackFunction
-        dart-name: DartCBLLogCallbackFunction
+      CBLLogSinkCallbackFunction:
+        name: CBLLogSinkCallbackFunction
+        dart-name: DartCBLLogSinkCallbackFunction
       CBLNotificationsReadyCallbackFunction:
         name: CBLNotificationsReadyCallbackFunction
         dart-name: DartCBLNotificationsReadyCallbackFunction
@@ -180,6 +180,16 @@ files:
         name: kCBLLogDomainQuery
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainReplicator:
         name: kCBLLogDomainReplicator
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskAll:
+        name: kCBLLogDomainMaskAll
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskDatabase:
+        name: kCBLLogDomainMaskDatabase
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskNetwork:
+        name: kCBLLogDomainMaskNetwork
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskQuery:
+        name: kCBLLogDomainMaskQuery
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskReplicator:
+        name: kCBLLogDomainMaskReplicator
       c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeCompact:
         name: kCBLMaintenanceTypeCompact
       c:@Ea@kCBLMaintenanceTypeCompact@kCBLMaintenanceTypeFullOptimize:
@@ -298,6 +308,8 @@ files:
         name: CBLCollection_AddDocumentChangeListener
       c:@F@CBLCollection_Count:
         name: CBLCollection_Count
+      c:@F@CBLCollection_CreateArrayIndex:
+        name: CBLCollection_CreateArrayIndex
       c:@F@CBLCollection_CreateFullTextIndex:
         name: CBLCollection_CreateFullTextIndex
       c:@F@CBLCollection_CreateValueIndex:
@@ -496,6 +508,18 @@ files:
         name: CBLIndexUpdater_Value
       c:@F@CBLListener_Remove:
         name: CBLListener_Remove
+      c:@F@CBLLogSinks_Console:
+        name: CBLLogSinks_Console
+      c:@F@CBLLogSinks_CustomSink:
+        name: CBLLogSinks_CustomSink
+      c:@F@CBLLogSinks_File:
+        name: CBLLogSinks_File
+      c:@F@CBLLogSinks_SetConsole:
+        name: CBLLogSinks_SetConsole
+      c:@F@CBLLogSinks_SetCustom:
+        name: CBLLogSinks_SetCustom
+      c:@F@CBLLogSinks_SetFile:
+        name: CBLLogSinks_SetFile
       c:@F@CBLLog_Callback:
         name: CBLLog_Callback
       c:@F@CBLLog_CallbackLevel:
@@ -1068,8 +1092,14 @@ files:
         name: __sFILEX
       c:@S@__sbuf:
         name: __sbuf
+      c:@SA@CBLArrayIndexConfiguration:
+        name: CBLArrayIndexConfiguration
       c:@SA@CBLCollectionChange:
         name: CBLCollectionChange
+      c:@SA@CBLConsoleLogSink:
+        name: CBLConsoleLogSink
+      c:@SA@CBLCustomLogSink:
+        name: CBLCustomLogSink
       c:@SA@CBLDatabaseConfiguration:
         name: CBLDatabaseConfiguration
       c:@SA@CBLDocumentChange:
@@ -1078,6 +1108,8 @@ files:
         name: CBLEncryptionKey
       c:@SA@CBLError:
         name: CBLError
+      c:@SA@CBLFileLogSink:
+        name: CBLFileLogSink
       c:@SA@CBLFullTextIndexConfiguration:
         name: CBLFullTextIndexConfiguration
       c:@SA@CBLLogFileConfiguration:
@@ -1120,6 +1152,16 @@ files:
         name: kCBLBlobType
       c:@kCBLDefaultCollectionName:
         name: kCBLDefaultCollectionName
+      c:@kCBLDefaultDatabaseFullSync:
+        name: kCBLDefaultDatabaseFullSync
+      c:@kCBLDefaultDatabaseMmapDisabled:
+        name: kCBLDefaultDatabaseMmapDisabled
+      c:@kCBLDefaultFileLogSinkMaxKeptFiles:
+        name: kCBLDefaultFileLogSinkMaxKeptFiles
+      c:@kCBLDefaultFileLogSinkMaxSize:
+        name: kCBLDefaultFileLogSinkMaxSize
+      c:@kCBLDefaultFileLogSinkUsePlaintext:
+        name: kCBLDefaultFileLogSinkUsePlaintext
       c:@kCBLDefaultFullTextIndexIgnoreAccents:
         name: kCBLDefaultFullTextIndexIgnoreAccents
       c:@kCBLDefaultLogFileMaxRotateCount:
@@ -1215,12 +1257,17 @@ files:
         name: CBLDocumentChangeListener
       c:CBLLog.h@T@CBLLogCallback:
         name: CBLLogCallback
-      c:CBLLog.h@T@CBLLogDomain:
+      c:CBLLogSinks.h@T@CBLLogDomain:
         name: CBLLogDomain
         dart-name: DartCBLLogDomain
-      c:CBLLog.h@T@CBLLogLevel:
+      c:CBLLogSinks.h@T@CBLLogDomainMask:
+        name: CBLLogDomainMask
+        dart-name: DartCBLLogDomainMask
+      c:CBLLogSinks.h@T@CBLLogLevel:
         name: CBLLogLevel
         dart-name: DartCBLLogLevel
+      c:CBLLogSinks.h@T@CBLLogSinkCallback:
+        name: CBLLogSinkCallback
       c:CBLQuery.h@T@CBLQueryChangeListener:
         name: CBLQueryChangeListener
       c:CBLQueryIndexTypes.h@T@CBLDistanceMetric:

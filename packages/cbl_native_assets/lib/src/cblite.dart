@@ -535,6 +535,14 @@ external bool CBLCollection_CreateFullTextIndex(
   ffi.Pointer<CBLError> outError,
 );
 
+@ffi.Native<NativeCBLCollection_CreateArrayIndex>()
+external bool CBLCollection_CreateArrayIndex(
+  ffi.Pointer<CBLCollection> collection,
+  imp1.FLString name,
+  CBLArrayIndexConfiguration config,
+  ffi.Pointer<CBLError> outError,
+);
+
 @ffi.Native<NativeCBLCollection_CreateVectorIndex>()
 external bool CBLCollection_CreateVectorIndex(
   ffi.Pointer<CBLCollection> collection,
@@ -855,6 +863,12 @@ external ffi.Pointer<CBLListenerToken>
 );
 
 @ffi.Native<ffi.Bool>()
+external final bool kCBLDefaultDatabaseFullSync;
+
+@ffi.Native<ffi.Bool>()
+external final bool kCBLDefaultDatabaseMmapDisabled;
+
+@ffi.Native<ffi.Bool>()
 external final bool kCBLDefaultLogFileUsePlaintext;
 
 @ffi.Native<ffi.Bool>()
@@ -865,6 +879,15 @@ external final int kCBLDefaultLogFileMaxSize;
 
 @ffi.Native<ffi.Uint32>()
 external final int kCBLDefaultLogFileMaxRotateCount;
+
+@ffi.Native<ffi.Bool>()
+external final bool kCBLDefaultFileLogSinkUsePlaintext;
+
+@ffi.Native<ffi.Size>()
+external final int kCBLDefaultFileLogSinkMaxSize;
+
+@ffi.Native<ffi.Uint32>()
+external final int kCBLDefaultFileLogSinkMaxKeptFiles;
 
 @ffi.Native<ffi.Bool>()
 external final bool kCBLDefaultFullTextIndexIgnoreAccents;
@@ -990,6 +1013,30 @@ external void FLSlot_SetEncryptableValue(
   imp1.FLSlot slot,
   ffi.Pointer<CBLEncryptable> encryptable,
 );
+
+@ffi.Native<NativeCBLLogSinks_SetConsole>()
+external void CBLLogSinks_SetConsole(
+  CBLConsoleLogSink sink,
+);
+
+@ffi.Native<NativeCBLLogSinks_Console>()
+external CBLConsoleLogSink CBLLogSinks_Console();
+
+@ffi.Native<NativeCBLLogSinks_SetCustom>()
+external void CBLLogSinks_SetCustom(
+  CBLCustomLogSink sink,
+);
+
+@ffi.Native<NativeCBLLogSinks_CustomSink>()
+external CBLCustomLogSink CBLLogSinks_CustomSink();
+
+@ffi.Native<NativeCBLLogSinks_SetFile>()
+external void CBLLogSinks_SetFile(
+  CBLFileLogSink sink,
+);
+
+@ffi.Native<NativeCBLLogSinks_File>()
+external CBLFileLogSink CBLLogSinks_File();
 
 @ffi.Native<NativeCBL_Log>()
 external void CBL_Log(
@@ -2580,6 +2627,7 @@ typedef DartCBLDatabase_AddDocumentChangeListener
         ffi.Pointer<ffi.Void> context);
 typedef CBLValueIndexConfiguration = imp1.CBLValueIndexConfiguration;
 typedef CBLFullTextIndexConfiguration = imp1.CBLFullTextIndexConfiguration;
+typedef CBLArrayIndexConfiguration = imp1.CBLArrayIndexConfiguration;
 typedef CBLVectorEncoding = imp1.CBLVectorEncoding;
 typedef NativeCBLVectorEncoding_CreateNone = ffi.Pointer<CBLVectorEncoding>
     Function();
@@ -2795,6 +2843,16 @@ typedef DartCBLCollection_CreateFullTextIndex = bool Function(
     ffi.Pointer<CBLCollection> collection,
     imp1.FLString name,
     CBLFullTextIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLCollection_CreateArrayIndex = ffi.Bool Function(
+    ffi.Pointer<CBLCollection> collection,
+    imp1.FLString name,
+    CBLArrayIndexConfiguration config,
+    ffi.Pointer<CBLError> outError);
+typedef DartCBLCollection_CreateArrayIndex = bool Function(
+    ffi.Pointer<CBLCollection> collection,
+    imp1.FLString name,
+    CBLArrayIndexConfiguration config,
     ffi.Pointer<CBLError> outError);
 typedef NativeCBLCollection_CreateVectorIndex = ffi.Bool Function(
     ffi.Pointer<CBLCollection> collection,
@@ -3154,6 +3212,22 @@ typedef NativeFLSlot_SetEncryptableValue = ffi.Void Function(
     imp1.FLSlot slot, ffi.Pointer<CBLEncryptable> encryptable);
 typedef DartFLSlot_SetEncryptableValue = void Function(
     imp1.FLSlot slot, ffi.Pointer<CBLEncryptable> encryptable);
+typedef CBLConsoleLogSink = imp1.CBLConsoleLogSink;
+typedef CBLCustomLogSink = imp1.CBLCustomLogSink;
+typedef CBLFileLogSink = imp1.CBLFileLogSink;
+typedef NativeCBLLogSinks_SetConsole = ffi.Void Function(
+    CBLConsoleLogSink sink);
+typedef DartCBLLogSinks_SetConsole = void Function(CBLConsoleLogSink sink);
+typedef NativeCBLLogSinks_Console = CBLConsoleLogSink Function();
+typedef DartCBLLogSinks_Console = CBLConsoleLogSink Function();
+typedef NativeCBLLogSinks_SetCustom = ffi.Void Function(CBLCustomLogSink sink);
+typedef DartCBLLogSinks_SetCustom = void Function(CBLCustomLogSink sink);
+typedef NativeCBLLogSinks_CustomSink = CBLCustomLogSink Function();
+typedef DartCBLLogSinks_CustomSink = CBLCustomLogSink Function();
+typedef NativeCBLLogSinks_SetFile = ffi.Void Function(CBLFileLogSink sink);
+typedef DartCBLLogSinks_SetFile = void Function(CBLFileLogSink sink);
+typedef NativeCBLLogSinks_File = CBLFileLogSink Function();
+typedef DartCBLLogSinks_File = CBLFileLogSink Function();
 typedef NativeCBL_Log = ffi.Void Function(imp1.CBLLogDomain domain,
     imp1.CBLLogLevel level, ffi.Pointer<ffi.Char> format);
 typedef DartCBL_Log = void Function(imp1.DartCBLLogDomain domain,
@@ -3991,15 +4065,15 @@ typedef DartFLDumpData = ffi.Pointer<ffi.Char> Function(FLSlice data);
 typedef NativeFLData_Dump = imp1.FLStringResult Function(FLSlice data);
 typedef DartFLData_Dump = imp1.FLStringResult Function(FLSlice data);
 
-const String CBLITE_VERSION = '3.2.0';
+const String CBLITE_VERSION = '3.2.2';
 
-const int CBLITE_VERSION_NUMBER = 3002000;
+const int CBLITE_VERSION_NUMBER = 3002002;
 
-const int CBLITE_BUILD_NUMBER = 71;
+const int CBLITE_BUILD_NUMBER = 9;
 
-const String CBLITE_SOURCE_ID = '42c42c4+1b8799a';
+const String CBLITE_SOURCE_ID = '6728898+92f79e8';
 
-const String CBLITE_BUILD_TIMESTAMP = '2024-08-29T06:45:08Z';
+const String CBLITE_BUILD_TIMESTAMP = '2025-02-24T20:13:54Z';
 
 const String HOTLEVEL = 'Ofast';
 
