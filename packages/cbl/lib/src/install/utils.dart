@@ -37,6 +37,54 @@ String get userCachesDir {
   throw UnsupportedError('Unsupported platform.');
 }
 
+/// The root of the CBL Dart project, if the current working directory is inside
+/// the CBL Dart project.
+final _cblDartProjectRoot = () {
+  const repoName = 'cbl-dart';
+  final currentPath = Directory.current.path;
+  final repoNameIndex = currentPath.lastIndexOf(repoName);
+  if (repoNameIndex == -1) {
+    return null;
+  }
+
+  return currentPath.substring(0, repoNameIndex + repoName.length);
+}();
+
+/// The native vendor directory, if the current working directory is inside the
+/// CBL Dart project.
+final _nativeVendorDirectory = _cblDartProjectRoot != null
+    ? p.join(_cblDartProjectRoot!, 'native', 'vendor')
+    : null;
+
+/// Tries to load the file at [uri] from the native vendor directory.
+///
+/// The file is expected to be in the native vendor directory, in a directory
+/// named after the host of the URI, and in a subdirectory named after the path
+/// of the URI.
+Future<Uint8List?> _loadFileFromNativeVendorDirectory(Uri uri) async {
+  final nativeVendorDirectory = _nativeVendorDirectory;
+  if (nativeVendorDirectory == null) {
+    return null;
+  }
+
+  final localUri = uri.replace(
+    scheme: 'file',
+    host: '',
+    pathSegments: [
+      ...p.split(nativeVendorDirectory).sublist(1),
+      uri.host,
+      ...uri.pathSegments
+    ],
+  );
+
+  final localFile = File.fromUri(localUri);
+  if (localFile.existsSync()) {
+    return localFile.readAsBytes();
+  }
+
+  return null;
+}
+
 /// Downloads the contents of [url] into memory.
 Future<Uint8List> downloadUrl(
   String url, {
@@ -51,7 +99,15 @@ Future<Uint8List> downloadUrl(
         return false;
       },
       () async {
-        final response = await get(Uri.parse(url));
+        final uri = Uri.parse(url);
+        final response = await get(uri);
+
+        if (response.statusCode case 404 || 403) {
+          if (await _loadFileFromNativeVendorDirectory(uri) case final data?) {
+            return data;
+          }
+        }
+
         if (response.statusCode != 200) {
           throw StateError(
             'Failed to download $url: ${response.statusCode} ${response.body}',

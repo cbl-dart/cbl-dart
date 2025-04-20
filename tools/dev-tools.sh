@@ -98,11 +98,13 @@ function prepareNativeLibraries() {
 
     "$cbdBin" install-packages \
         --library cblite \
+        --edition "$edition" \
         --release "$couchbaseLiteCRelease" \
         --os "$os"
 
     "$cbdBin" install-packages \
         --library vectorSearch \
+        --edition enterprise \
         --release "$couchbaseLiteVectorSearchRelease" \
         --os "$os"
 

@@ -17,6 +17,13 @@ final class InstallPackages extends BaseCommand {
         mandatory: true,
       )
       ..addOption(
+        'edition',
+        abbr: 'e',
+        help: 'The Couchbase Lite edition to install packages for.',
+        allowed: Edition.values.map((value) => value.name),
+        mandatory: true,
+      )
+      ..addOption(
         'release',
         abbr: 'r',
         help: 'The release version of the packages to install.',
@@ -38,6 +45,8 @@ final class InstallPackages extends BaseCommand {
 
   Library get _library => Library.values.byName(arg('library'));
 
+  Edition get _edition => Edition.values.byName(arg('edition'));
+
   String get _release => arg('release');
 
   OS? get _os {
@@ -55,13 +64,17 @@ final class InstallPackages extends BaseCommand {
     switch (_library) {
       case Library.cblite || Library.cblitedart:
         packageConfigs = [
-          for (final edition in Edition.values)
-            ...DatabasePackageConfig.all(
-              releases: {_library: _release},
-              edition: edition,
-            )
+          ...DatabasePackageConfig.all(
+            releases: {_library: _release},
+            edition: _edition,
+          )
         ];
       case Library.vectorSearch:
+        if (_edition != Edition.enterprise) {
+          throw Exception(
+            'Vector Search is only available for the Enterprise edition.',
+          );
+        }
         packageConfigs = VectorSearchPackageConfig.all(release: _release);
     }
 
