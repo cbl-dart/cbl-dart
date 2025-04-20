@@ -381,6 +381,19 @@ bool CBLCollection_CreateFullTextIndex(CBLCollection *collection,
                                        CBLFullTextIndexConfiguration config,
                                        CBLError* _cbl_nullable outError) CBLAPI;
 
+/** Creates an array index for use with UNNEST queries in the collection.
+    If an identical index with that name already exists, nothing happens (and no error is returned.)
+    If a non-identical index with that name already exists, it is deleted and re-created.
+    @param collection  The collection.
+    @param name  The name of the index.
+    @param config  The index configuration.
+    @param outError  On failure, an error is written here.
+    @return  True on success, false on failure. */
+bool CBLCollection_CreateArrayIndex(CBLCollection *collection,
+                                    FLString name,
+                                    CBLArrayIndexConfiguration config,
+                                    CBLError* _cbl_nullable outError) CBLAPI;
+
 #ifdef COUCHBASE_ENTERPRISE
 /** ENTERPRISE EDITION ONLY
  

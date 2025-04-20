@@ -34,6 +34,18 @@ CBL_CAPI_BEGIN
 
     Constants for default configuration values. */
 
+/** \name CBLDatabaseConfiguration
+    @{
+*/
+
+/** [false] Full sync is off by default because the performance hit is seldom worth the benefit */
+CBL_PUBLIC extern const bool kCBLDefaultDatabaseFullSync;
+
+/** [false] Memory mapped database files are enabled by default */
+CBL_PUBLIC extern const bool kCBLDefaultDatabaseMmapDisabled;
+
+/** @} */
+
 /** \name CBLLogFileConfiguration
     @{
 */
@@ -50,6 +62,21 @@ CBL_PUBLIC extern const size_t kCBLDefaultLogFileMaxSize;
 
 /** [1] 1 rotated file present (2 total, including the currently active log file) */
 CBL_PUBLIC extern const uint32_t kCBLDefaultLogFileMaxRotateCount;
+
+/** @} */
+
+/** \name CBLFileLogSink
+    @{
+*/
+
+/** [false] Plaintext is not used, and instead binary encoding is used in log files */
+CBL_PUBLIC extern const bool kCBLDefaultFileLogSinkUsePlaintext;
+
+/** [524288] 512 KiB for the size of a log file */
+CBL_PUBLIC extern const size_t kCBLDefaultFileLogSinkMaxSize;
+
+/** [2] 2 files preserved during each log rotation */
+CBL_PUBLIC extern const uint32_t kCBLDefaultFileLogSinkMaxKeptFiles;
 
 /** @} */
 

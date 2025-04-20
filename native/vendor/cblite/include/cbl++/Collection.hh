@@ -200,6 +200,17 @@ namespace cbl {
             check(CBLCollection_CreateFullTextIndex(ref(), name, config, &error), error);
         }
         
+        /** Creates an array index for use with UNNEST queries in the collection.
+            Indexes are persistent.
+            If an identical index with that name already exists, nothing happens (and no error is returned.)
+            If a non-identical index with that name already exists, it is deleted and re-created.
+            @param name  The index name.
+            @param config  The array index config. */
+        void createArrayIndex(slice name, CBLArrayIndexConfiguration config) {
+            CBLError error;
+            check(CBLCollection_CreateArrayIndex(ref(), name, config, &error), error);
+        }
+        
 #ifdef COUCHBASE_ENTERPRISE
         /** ENTERPRISE EDITION ONLY
          

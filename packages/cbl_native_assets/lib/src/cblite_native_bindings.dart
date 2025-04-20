@@ -878,6 +878,20 @@ class cbliteNative implements cblite {
       );
 
   @override
+  bool CBLCollection_CreateArrayIndex(
+    ffi.Pointer<CBLCollection> collection,
+    FLString name,
+    CBLArrayIndexConfiguration config,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLCollection_CreateArrayIndex(
+        collection,
+        name,
+        config,
+        outError,
+      );
+
+  @override
   bool CBLCollection_CreateVectorIndex(
     ffi.Pointer<CBLCollection> collection,
     FLString name,
@@ -1415,6 +1429,13 @@ class cbliteNative implements cblite {
       );
 
   @override
+  bool get kCBLDefaultDatabaseFullSync => native.kCBLDefaultDatabaseFullSync;
+
+  @override
+  bool get kCBLDefaultDatabaseMmapDisabled =>
+      native.kCBLDefaultDatabaseMmapDisabled;
+
+  @override
   bool get kCBLDefaultLogFileUsePlaintext =>
       native.kCBLDefaultLogFileUsePlaintext;
 
@@ -1428,6 +1449,17 @@ class cbliteNative implements cblite {
   @override
   int get kCBLDefaultLogFileMaxRotateCount =>
       native.kCBLDefaultLogFileMaxRotateCount;
+
+  @override
+  bool get kCBLDefaultFileLogSinkUsePlaintext =>
+      native.kCBLDefaultFileLogSinkUsePlaintext;
+
+  @override
+  int get kCBLDefaultFileLogSinkMaxSize => native.kCBLDefaultFileLogSinkMaxSize;
+
+  @override
+  int get kCBLDefaultFileLogSinkMaxKeptFiles =>
+      native.kCBLDefaultFileLogSinkMaxKeptFiles;
 
   @override
   bool get kCBLDefaultFullTextIndexIgnoreAccents =>
@@ -1612,6 +1644,39 @@ class cbliteNative implements cblite {
         slot,
         encryptable,
       );
+
+  @override
+  void CBLLogSinks_SetConsole(
+    CBLConsoleLogSink sink,
+  ) =>
+      native.CBLLogSinks_SetConsole(
+        sink,
+      );
+
+  @override
+  CBLConsoleLogSink CBLLogSinks_Console() => native.CBLLogSinks_Console();
+
+  @override
+  void CBLLogSinks_SetCustom(
+    CBLCustomLogSink sink,
+  ) =>
+      native.CBLLogSinks_SetCustom(
+        sink,
+      );
+
+  @override
+  CBLCustomLogSink CBLLogSinks_CustomSink() => native.CBLLogSinks_CustomSink();
+
+  @override
+  void CBLLogSinks_SetFile(
+    CBLFileLogSink sink,
+  ) =>
+      native.CBLLogSinks_SetFile(
+        sink,
+      );
+
+  @override
+  CBLFileLogSink CBLLogSinks_File() => native.CBLLogSinks_File();
 
   @override
   void CBL_Log(
