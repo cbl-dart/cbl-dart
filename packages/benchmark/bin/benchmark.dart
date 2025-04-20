@@ -11,9 +11,9 @@ import 'package:pool/pool.dart';
 void main() async {
   final benchmarks = [
     // Micro benchmarks
-    for (final file in ['document', 'data_encoding', 'data_decoding'])
+    for (final benchmark in ['document', 'data_encoding', 'data_decoding'])
       for (final mode in ExecutionMode.values)
-        MicroBenchmarkRunner(executionMode: mode, file: file),
+        MicroBenchmarkRunner(executionMode: mode, benchmark: benchmark),
 
     // Database benchmarks
     for (final mode in ExecutionMode.values)
