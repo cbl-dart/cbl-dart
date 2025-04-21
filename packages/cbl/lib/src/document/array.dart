@@ -4,7 +4,6 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 
-import '../bindings.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import 'blob.dart';
@@ -371,8 +370,6 @@ final class ArrayImpl
     implements Array, MCollectionWrapper, FleeceEncodable, CblConversions {
   ArrayImpl(this._array);
 
-  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
-
   final MArray _array;
 
   @override
@@ -401,11 +398,7 @@ final class ArrayImpl
       MutableArrayImpl(MArray.asCopy(_array, isMutable: true));
 
   @override
-  String toJson() {
-    _jsonEncoder.reset();
-    encodeTo(_jsonEncoder);
-    return _jsonEncoder.finish().toDartString();
-  }
+  String toJson() => FleeceEncoder.json.encodeWith(encodeTo).toDartString();
 
   @override
   MCollection get mCollection => _array;

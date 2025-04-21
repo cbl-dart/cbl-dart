@@ -124,10 +124,9 @@ final class Channel {
     MessageContextCapturer? captureMessageContext,
     MessageContextRestorer? restoreMessageContext,
     this.debug = false,
-  })  : _captureMessageContext = captureMessageContext ?? (() => null),
+  })  : _transport = transport.cast<_Message>(),
+        _captureMessageContext = captureMessageContext ?? (() => null),
         _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()) {
-    _transport = transport.cast<_Message>();
-
     if (autoOpen) {
       open();
     }
@@ -135,10 +134,10 @@ final class Channel {
 
   final bool debug;
 
+  final StreamChannel<_Message> _transport;
   final MessageContextCapturer _captureMessageContext;
   final MessageContextRestorer _restoreMessageContext;
 
-  late final StreamChannel<_Message> _transport;
   int _nextConversationId = 0;
 
   var _status = ChannelStatus.initial;

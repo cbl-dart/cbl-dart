@@ -16,8 +16,7 @@ void main() {
 
   group('Fleece Decoding', () {
     test('dumpData shows the internal structure of Fleece data', () {
-      final encoder = FleeceEncoder();
-      final data = encoder.convertJson('{"a": true}');
+      final data = fleeceEncodeJson('{"a": true}');
 
       expect(
         dumpData(data),
@@ -33,8 +32,9 @@ void main() {
     test(
       'SharedStringsTable should only cache strings encoded as shared strings',
       () {
-        final data = FleeceEncoder()
-            .convertJson('[".", "..", "...............", "................"]');
+        final data = fleeceEncodeJson(
+          '[".", "..", "...............", "................"]',
+        );
         final sliceResult = data.toSliceResult();
         final sharedStringsTable = SharedStringsTable();
 
@@ -53,9 +53,8 @@ void main() {
 
     group('FleeceDecoder', () {
       test('converts untrusted Fleece data to Dart object', () {
-        final encoder = FleeceEncoder();
         final decoder = testFleeceDecoder();
-        final data = encoder.convertJson('''
+        final data = fleeceEncodeJson('''
 [
   null, 41, 3.14, true, false, "a",
   {
@@ -94,9 +93,8 @@ void main() {
       });
 
       test('converts trusted Fleece data to Dart object', () {
-        final encoder = FleeceEncoder();
         final decoder = testFleeceDecoder(trust: FLTrust.trusted);
-        final data = encoder.convertJson('''
+        final data = fleeceEncodeJson('''
 [
   null, 41, 3.14, true, false, "a",
   {
@@ -144,9 +142,8 @@ void main() {
 
   group('Fleece Encoding', () {
     test('convert JSON to Fleece data', () {
-      final encoder = FleeceEncoder();
       final decoder = testFleeceDecoder();
-      final data = encoder.convertJson(
+      final data = fleeceEncodeJson(
         '''
         {
           "a": true,
@@ -171,20 +168,18 @@ void main() {
     group('FleeceEncoder', () {
       test('writeDartObject writes Dart object to encoder', () {
         final decoder = testFleeceDecoder();
-        final encoder = FleeceEncoder()
-          ..writeDartObject([
-            null,
-            true,
-            false,
-            41,
-            3.14,
-            'a',
-            Uint8List.fromList([42]),
-            [true],
-            {'a': true},
-            {true}
-          ]);
-        final data = encoder.finish();
+        final data = fleeceEncode([
+          null,
+          true,
+          false,
+          41,
+          3.14,
+          'a',
+          Uint8List.fromList([42]),
+          [true],
+          {'a': true},
+          {true}
+        ]);
 
         expect(decoder.convert(data), [
           null,
@@ -202,23 +197,24 @@ void main() {
 
       test('write values', () {
         final decoder = testFleeceDecoder();
-        final encoder = FleeceEncoder()
-          ..beginArray(0)
-          ..writeNull()
-          ..writeBool(true)
-          ..writeBool(false)
-          ..writeInt(41)
-          ..writeDouble(3.14)
-          ..writeString('a')
-          ..writeData(Data.fromTypedList(Uint8List.fromList([42])))
-          ..beginArray(0)
-          ..endArray()
-          ..beginDict(0)
-          ..writeKey('a')
-          ..writeBool(true)
-          ..endDict()
-          ..endArray();
-        final data = encoder.finish();
+        final data = FleeceEncoder.fleece.encodeWith((encoder) {
+          encoder
+            ..beginArray(0)
+            ..writeNull()
+            ..writeBool(true)
+            ..writeBool(false)
+            ..writeInt(41)
+            ..writeDouble(3.14)
+            ..writeString('a')
+            ..writeData(Data.fromTypedList(Uint8List.fromList([42])))
+            ..beginArray(0)
+            ..endArray()
+            ..beginDict(0)
+            ..writeKey('a')
+            ..writeBool(true)
+            ..endDict()
+            ..endArray();
+        });
 
         expect(
           decoder.convert(data),

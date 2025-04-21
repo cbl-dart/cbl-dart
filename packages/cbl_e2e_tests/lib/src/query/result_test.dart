@@ -230,17 +230,16 @@ void main() {
 
 Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final values = MutableArray(columnValues) as MutableArrayImpl;
-  final encoder = FleeceEncoder()
+  final encodedValues = FleeceEncoder.fleece.encodeWith((encoder) {
     // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-    ..extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
-
-  values.encodeTo(encoder);
+    encoder.extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
+    values.encodeTo(encoder);
+  });
   return ResultImpl(
     context: createResultSetMContext(MockDatabase()),
     columnNames: columnNames,
-    columnValues: fl.Doc.fromResultData(encoder.finish(), fl.FLTrust.trusted)
-        .root
-        .asArray!,
+    columnValues:
+        fl.Doc.fromResultData(encodedValues, fl.FLTrust.trusted).root.asArray!,
   );
 }
 

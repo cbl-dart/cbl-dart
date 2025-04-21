@@ -4,7 +4,6 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 
-import '../bindings.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
 import 'array.dart';
@@ -183,8 +182,6 @@ final class DictionaryImpl
     implements Dictionary, MCollectionWrapper, FleeceEncodable, CblConversions {
   DictionaryImpl(this._dict);
 
-  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
-
   final MDict _dict;
 
   @override
@@ -247,11 +244,7 @@ final class DictionaryImpl
       MutableDictionaryImpl(MDict.asCopy(_dict, isMutable: true));
 
   @override
-  String toJson() {
-    _jsonEncoder.reset();
-    encodeTo(_jsonEncoder);
-    return _jsonEncoder.finish().toDartString();
-  }
+  String toJson() => FleeceEncoder.json.encodeWith(encodeTo).toDartString();
 
   @override
   MCollection get mCollection => _dict;

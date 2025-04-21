@@ -148,9 +148,9 @@ base class ProxyQuery extends QueryBase
     Data? encodedParameters;
 
     if (parameters != null) {
-      final encoder = FleeceEncoder();
-      (parameters as ParametersImpl).encodeTo(encoder);
-      encodedParameters = encoder.finish();
+      final parametersImpl = parameters as ParametersImpl;
+      encodedParameters =
+          FleeceEncoder.fleece.encodeWith(parametersImpl.encodeTo);
     }
 
     return channel!.call(SetQueryParameters(

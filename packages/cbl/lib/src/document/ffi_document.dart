@@ -63,11 +63,9 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
         isMutable: isMutable,
       );
 
-  Data _readEncodedProperties() {
-    final encoder = FleeceEncoder()
-      ..writeValue(_documentBindings.properties(pointer).cast());
-    return encoder.finish();
-  }
+  Data _readEncodedProperties() => FleeceEncoder.fleece.encodeWith((encoder) {
+        encoder.writeValue(_documentBindings.properties(pointer).cast());
+      });
 
   void _writeEncodedProperties(Data value) {
     final doc = fl.Doc.fromResultData(value, FLTrust.trusted);

@@ -4,16 +4,10 @@ import 'package:cbl/src/fleece/encoder.dart';
 
 // === Fleece De/Encoding Utils ================================================
 
-final fleeceEncoder = FleeceEncoder();
+Data fleeceEncodeJson(String json) => FleeceEncoder.fleece.convertJson(json);
 
-Data fleeceEncodeJson(String json) => fleeceEncoder.convertJson(json);
-
-Data fleeceEncode(Object? value) {
-  fleeceEncoder
-    ..reset()
-    ..writeDartObject(value);
-  return fleeceEncoder.finish();
-}
+Data fleeceEncode(Object? value) =>
+    FleeceEncoder.fleece.convertDartObject(value);
 
 Object? fleeceDecode(Data data) => testFleeceDecoder().convert(data);
 

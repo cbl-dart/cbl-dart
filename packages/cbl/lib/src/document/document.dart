@@ -192,8 +192,6 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     _setupProperties();
   }
 
-  static final _fleeceEncoder = FleeceEncoder(format: FLEncoderFormat.fleece);
-
   DocumentDelegate get delegate => _delegate;
   DocumentDelegate _delegate;
 
@@ -235,16 +233,14 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     final externalDataSaved =
         saveExternalData ? _root.saveExternalData(database!) : null;
 
-    return externalDataSaved.then((_) {
-      final encoder = _fleeceEncoder
-        ..reset()
-        ..extraInfo = FleeceEncoderContext(
-          database: database,
-          encodeUnsavedBlobWithData: true,
-        );
-      _root.encodeTo(encoder);
-      return _fleeceEncoder.finish();
-    });
+    return externalDataSaved
+        .then((_) => FleeceEncoder.fleece.encodeWith((encoder) {
+              encoder.extraInfo = FleeceEncoderContext(
+                database: database,
+                encodeUnsavedBlobWithData: true,
+              );
+              _root.encodeTo(encoder);
+            }));
   }
 
   FutureOr<void> updateEncodedProperties() =>

@@ -1,9 +1,7 @@
 // ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
 
 import 'dart:collection';
-import 'dart:convert';
 
-import '../bindings.dart';
 import '../document.dart';
 import '../document/array.dart';
 import '../document/common.dart';
@@ -121,8 +119,6 @@ final class ResultImpl with IterableMixin<String> implements Result {
     required this.columnValues,
   })  : _context = context,
         _columnNames = columnNames;
-
-  static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
 
   final DatabaseMContext _context;
   final List<String> _columnNames;
@@ -255,12 +251,8 @@ final class ResultImpl with IterableMixin<String> implements Result {
   Map<String, Object?> toPlainMap() => _dictionary.toPlainMap();
 
   @override
-  String toJson() {
-    _jsonEncoder.reset();
-    _dictionary.encodeTo(_jsonEncoder);
-    final sliceResult = _jsonEncoder.finish().toSliceResult();
-    return utf8.decode(sliceResult.asTypedList());
-  }
+  String toJson() =>
+      FleeceEncoder.json.encodeWith(_dictionary.encodeTo).toDartString();
 
   ArrayImpl _createArray() {
     final root = MRoot.fromContext(
