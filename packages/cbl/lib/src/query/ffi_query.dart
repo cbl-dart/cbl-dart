@@ -217,12 +217,12 @@ final class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   Iterator<Result> get iterator => this;
 
   @override
-  Result get current => _current ??= ResultImpl.fromValuesArray(
-        _iterator.current,
+  Result get current => _current ??= ResultImpl(
         // Results from the same result set can share the same context, because
         // in CBL C, a result set is encoded in a single Fleece doc.
         context: _context,
         columnNames: _columnNames,
+        columnValues: _iterator.current,
       );
 
   @override

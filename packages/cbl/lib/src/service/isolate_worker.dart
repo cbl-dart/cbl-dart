@@ -6,9 +6,7 @@ import 'dart:isolate';
 
 import 'package:stream_channel/isolate_channel.dart';
 
-import '../support/utils.dart';
 import 'channel.dart';
-import 'serialization/serialization.dart';
 
 abstract base class IsolateWorkerDelegate {
   FutureOr<void> initialize();
@@ -84,10 +82,8 @@ final class IsolateWorker {
   SendPort _setupControlChannel() {
     final receivePort = ReceivePort();
 
-    _controlChannel = Channel(
-      transport: IsolateChannel.connectReceive(receivePort),
-      serializationRegistry: _workerSerializationRegistry(),
-    );
+    _controlChannel =
+        Channel(transport: IsolateChannel.connectReceive(receivePort));
 
     onError.onError(_close);
 
@@ -138,10 +134,8 @@ final class IsolateWorker {
 
   static void _main(_WorkerConfiguration config) {
     final delegate = config.delegate;
-    final controlChannel = Channel(
-      transport: IsolateChannel.connectSend(config.controlChannel),
-      serializationRegistry: _workerSerializationRegistry(),
-    );
+    final controlChannel =
+        Channel(transport: IsolateChannel.connectSend(config.controlChannel));
 
     controlChannel
       ..addCallEndpoint((_InitializeDelegate _) => delegate.initialize())
@@ -174,28 +168,6 @@ final class _WorkerConfiguration {
   final IsolateWorkerDelegate delegate;
 }
 
-SerializationRegistry _workerSerializationRegistry() => SerializationRegistry()
-  ..addSerializableCodec('Initialize', _InitializeDelegate.deserialize)
-  ..addSerializableCodec('Dispose', _DisposeDelegate.deserialize);
+final class _InitializeDelegate extends Request<Null> {}
 
-final class _InitializeDelegate extends Request<Null> {
-  @override
-  StringMap serialize(SerializationContext context) => {};
-
-  static _InitializeDelegate deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _InitializeDelegate();
-}
-
-final class _DisposeDelegate extends Request<Null> {
-  @override
-  StringMap serialize(SerializationContext context) => {};
-
-  static _DisposeDelegate deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _DisposeDelegate();
-}
+final class _DisposeDelegate extends Request<Null> {}

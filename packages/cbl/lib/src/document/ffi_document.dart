@@ -5,7 +5,6 @@ import '../fleece/containers.dart' as fl;
 import '../fleece/containers.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
-import '../support/encoding.dart';
 import '../support/native_object.dart';
 import 'document.dart';
 
@@ -41,16 +40,17 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   int get sequence => _documentBindings.sequence(pointer);
 
   @override
-  EncodedData? get properties => _properties ??= _readEncodedProperties();
-  EncodedData? _properties;
+  Data? get encodedProperties =>
+      _encodedProperties ??= _readEncodedProperties();
+  Data? _encodedProperties;
 
   fl.Dict get propertiesDict =>
       fl.Dict.fromPointer(_documentBindings.properties(pointer));
 
   @override
-  set properties(EncodedData? value) {
+  set encodedProperties(Data? value) {
     _writeEncodedProperties(value!);
-    _properties = value;
+    _encodedProperties = value;
   }
 
   @override
@@ -63,14 +63,14 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
         isMutable: isMutable,
       );
 
-  EncodedData _readEncodedProperties() {
+  Data _readEncodedProperties() {
     final encoder = FleeceEncoder()
       ..writeValue(_documentBindings.properties(pointer).cast());
-    return EncodedData.fleece(encoder.finish());
+    return encoder.finish();
   }
 
-  void _writeEncodedProperties(EncodedData value) {
-    final doc = fl.Doc.fromResultData(value.toFleece(), FLTrust.trusted);
+  void _writeEncodedProperties(Data value) {
+    final doc = fl.Doc.fromResultData(value, FLTrust.trusted);
     final dict = fl.MutableDict.mutableCopy(doc.root.asDict!);
     _mutableDocumentBindings.setProperties(pointer.cast(), dict.pointer.cast());
   }

@@ -94,7 +94,6 @@ final class ProxyReplicator extends ProxyObject
 
     try {
       final objectId = await database.channel.call(CreateReplicator(
-        propertiesFormat: database.encodingFormat,
         target: target,
         replicatorType: config.replicatorType,
         continuous: config.continuous,
@@ -303,13 +302,13 @@ CblServiceConflictResolver _wrapConflictResolver(
       final result = await resolver.resolve(conflict) as DelegateDocument?;
 
       if (result != null) {
-        final includeProperties =
-            !identical(result, local) && !identical(result, local);
+        final resultIsNewDocument =
+            !identical(result, local) && !identical(result, remote);
         final delegate = await collection.prepareDocument(
           result,
-          syncProperties: includeProperties,
+          updateEncodedProperties: resultIsNewDocument,
         );
-        return delegate.getState(withProperties: includeProperties);
+        return delegate.getState(withProperties: resultIsNewDocument);
       }
       return null;
     };

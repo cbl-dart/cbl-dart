@@ -575,7 +575,7 @@ final class FfiCollection
           () => database.runInTransactionSync(() {
             final delegate = syncOperationTracePoint(
               () => PrepareDocumentOp(document),
-              () => prepareDocument(document, syncProperties: false)
+              () => prepareDocument(document, updateEncodedProperties: false)
                   as FfiDocumentDelegate,
             );
 

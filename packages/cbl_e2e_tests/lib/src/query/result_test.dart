@@ -2,6 +2,7 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl/src/database/database_base.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/common.dart';
+import 'package:cbl/src/fleece/containers.dart' as fl;
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/query/result.dart';
 import 'package:cbl/src/query/result_set.dart';
@@ -234,10 +235,12 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
     ..extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
 
   values.encodeTo(encoder);
-  return ResultImpl.fromValuesData(
-    encoder.finish(),
+  return ResultImpl(
     context: createResultSetMContext(MockDatabase()),
     columnNames: columnNames,
+    columnValues: fl.Doc.fromResultData(encoder.finish(), fl.FLTrust.trusted)
+        .root
+        .asArray!,
   );
 }
 

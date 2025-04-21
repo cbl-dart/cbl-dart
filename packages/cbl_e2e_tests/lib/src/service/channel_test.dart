@@ -2,22 +2,15 @@
 // ignore_for_file: avoid_types_on_closure_parameters,prefer_constructors_over_static_methods,prefer_void_to_null
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:cbl/src/bindings.dart';
 import 'package:cbl/src/service/channel.dart';
-import 'package:cbl/src/service/serialization/isolate_packet_codec.dart';
-import 'package:cbl/src/service/serialization/json_packet_codec.dart';
-import 'package:cbl/src/service/serialization/serialization.dart';
-import 'package:cbl/src/service/serialization/serialization_codec.dart';
 import 'package:cbl/src/support/isolate.dart';
-import 'package:cbl/src/support/utils.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:web_socket_channel/io.dart';
 
 import '../../test_binding_impl.dart';
 import '../test_binding.dart';
@@ -50,7 +43,7 @@ void main() {
 
       Future<void> expectData(Data input, Object output) => expectLater(
             channel
-                .call(DataRequest(MessageData(input)))
+                .call(DataRequest(SendableData(input)))
                 .then((value) => value.data.toTypedList()),
             completion(output),
           );
@@ -166,33 +159,16 @@ void main() {
 
 @isTest
 void channelTest(String description, Future Function() body) {
-  variantTest(description, body, variants: [
-    channelTransport,
-    serializationTarget,
-  ]);
+  variantTest(description, body, variants: [channelTransport]);
 }
 
 enum ChannelTransport {
   isolatePort,
-  webSocket,
   controller,
 }
 
-final channelTransport = EnumVariant<ChannelTransport>(
-  ChannelTransport.values,
-  isCompatible: (value, other, otherValue) {
-    if (value == ChannelTransport.webSocket) {
-      if (other == serializationTarget) {
-        return otherValue == SerializationTarget.json;
-      }
-    }
-
-    return true;
-  },
-  order: 100,
-);
-
-final serializationTarget = EnumVariant(SerializationTarget.values, order: 90);
+final channelTransport =
+    EnumVariant<ChannelTransport>(ChannelTransport.values, order: 100);
 
 Future<Channel> openTestChannel() async {
   StreamChannel<Object?> localTransport;
@@ -201,14 +177,9 @@ Future<Channel> openTestChannel() async {
     case ChannelTransport.controller:
       final controller = StreamChannelController<Object?>();
       localTransport = controller.local;
-      final remote = Channel(
-        transport: controller.foreign,
-        packetCodec: packetCoded(serializationTarget.value),
-        serializationRegistry: testSerializationRegistry(),
-      );
+      final remote = Channel(transport: controller.foreign);
       addTearDown(remote.close);
       registerTestHandlers(remote);
-      break;
     case ChannelTransport.isolatePort:
       final receivePort = ReceivePort();
       localTransport = IsolateChannel.connectReceive(receivePort);
@@ -217,35 +188,12 @@ Future<Channel> openTestChannel() async {
         TestIsolateConfig(
           IsolateContext.instance,
           receivePort.sendPort,
-          serializationTarget.value,
         ),
       );
       addTearDown(isolate.kill);
-      break;
-    case ChannelTransport.webSocket:
-      final httpServer = await HttpServer.bind('127.0.0.1', 0);
-      addTearDown(() => httpServer.close(force: true));
-
-      httpServer.transform(WebSocketTransformer()).listen((webSocket) {
-        final remote = Channel(
-          transport: IOWebSocketChannel(webSocket),
-          packetCodec: packetCoded(serializationTarget.value),
-          serializationRegistry: testSerializationRegistry(),
-        );
-
-        registerTestHandlers(remote);
-      });
-
-      localTransport =
-          IOWebSocketChannel.connect('ws://127.0.0.1:${httpServer.port}');
-      break;
   }
 
-  final local = Channel(
-    transport: localTransport,
-    packetCodec: packetCoded(serializationTarget.value),
-    serializationRegistry: testSerializationRegistry(),
-  );
+  final local = Channel(transport: localTransport);
   addTearDown(local.close);
 
   return local;
@@ -257,7 +205,7 @@ void registerTestHandlers(Channel channel) {
     ..addCallEndpoint((DataRequest req) {
       final result = req.input.data.toTypedList();
       result[0] = 42;
-      return MessageData(result.toData());
+      return SendableData(result.toData());
     })
     ..addCallEndpoint((ThrowTestError _) =>
         Future<void>.error(const TestError('Oops'), StackTrace.current))
@@ -273,12 +221,10 @@ class TestIsolateConfig {
   TestIsolateConfig(
     this.context,
     this.sendPort,
-    this.target,
   );
 
   final IsolateContext context;
   final SendPort? sendPort;
-  final SerializationTarget target;
 }
 
 void testIsolateMain(TestIsolateConfig config) {
@@ -287,8 +233,6 @@ void testIsolateMain(TestIsolateConfig config) {
   final remote = Channel(
     transport: IsolateChannel.connectSend(config.sendPort!),
     autoOpen: false,
-    packetCodec: packetCoded(config.target),
-    serializationRegistry: testSerializationRegistry(),
   );
 
   registerTestHandlers(remote);
@@ -296,47 +240,16 @@ void testIsolateMain(TestIsolateConfig config) {
   remote.open();
 }
 
-PacketCodec packetCoded(SerializationTarget target) {
-  switch (target) {
-    case SerializationTarget.isolatePort:
-      return IsolatePacketCodec();
-    case SerializationTarget.json:
-      return JsonPacketCodec();
-  }
-}
-
-SerializationRegistry testSerializationRegistry() => SerializationRegistry()
-  ..addSerializableCodec('EchoRequest', EchoRequest.deserialize)
-  ..addSerializableCodec('DataRequest', DataRequest.deserialize)
-  ..addSerializableCodec('MessageData', MessageData.deserialize)
-  ..addSerializableCodec('ThrowError', ThrowTestError.deserialize)
-  ..addSerializableCodec('InfiniteStream', InfiniteStream.deserialize)
-  ..addSerializableCodec('NonExistentEndpoint', NonExistentEndpoint.deserialize)
-  ..addSerializableCodec('TestError', TestError.deserialize);
-
 final class EchoRequest extends Request<String> {
   EchoRequest(this.input);
 
   final String input;
-
-  @override
-  StringMap serialize(SerializationContext context) => {'input': input};
-
-  static EchoRequest deserialize(StringMap map, SerializationContext context) =>
-      EchoRequest(map['input']! as String);
 }
 
-final class DataRequest extends Request<MessageData> {
+final class DataRequest extends Request<SendableData> implements SendAware {
   DataRequest(this.input);
 
-  final MessageData input;
-
-  @override
-  StringMap serialize(SerializationContext context) =>
-      {'input': context.serialize(input)};
-
-  static DataRequest deserialize(StringMap map, SerializationContext context) =>
-      DataRequest(context.deserializeAs(map['input'])!);
+  final SendableData input;
 
   @override
   void willSend() => input.willSend();
@@ -345,23 +258,13 @@ final class DataRequest extends Request<MessageData> {
   void didReceive() => input.didReceive();
 }
 
-final class MessageData extends Serializable {
-  MessageData(Data data) : _data = data;
+final class SendableData implements SendAware {
+  SendableData(Data data) : _data = data;
 
   Data get data => _data!;
   Data? _data;
 
   TransferableData? _transferableData;
-
-  @override
-  StringMap serialize(SerializationContext context) =>
-      {'data': context.addData(_data!)};
-
-  static MessageData deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      MessageData(context.getData(map['data']! as int));
 
   @override
   void willSend() {
@@ -376,37 +279,16 @@ final class MessageData extends Serializable {
   }
 }
 
-final class ThrowTestError extends Request<Null> {
-  @override
-  StringMap serialize(SerializationContext context) => {};
-
-  static ThrowTestError deserialize(
-          StringMap map, SerializationContext context) =>
-      ThrowTestError();
-}
+final class ThrowTestError extends Request<Null> {}
 
 final class InfiniteStream extends Request<Null> {
   static const interval = Duration(milliseconds: 10);
-
-  @override
-  StringMap serialize(SerializationContext context) => {};
-
-  static InfiniteStream deserialize(
-          StringMap map, SerializationContext context) =>
-      InfiniteStream();
 }
 
-final class NonExistentEndpoint extends Request<Null> {
-  @override
-  StringMap serialize(SerializationContext context) => {};
-
-  static NonExistentEndpoint deserialize(
-          StringMap map, SerializationContext context) =>
-      NonExistentEndpoint();
-}
+final class NonExistentEndpoint extends Request<Null> {}
 
 @immutable
-final class TestError extends Serializable implements Exception {
+final class TestError implements Exception {
   const TestError(this.message);
 
   final String message;
@@ -423,10 +305,4 @@ final class TestError extends Serializable implements Exception {
 
   @override
   String toString() => 'TestError: $message';
-
-  @override
-  StringMap serialize(SerializationContext context) => {'message': message};
-
-  static TestError deserialize(StringMap map, SerializationContext context) =>
-      TestError(map.getAs('message'));
 }

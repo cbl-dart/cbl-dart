@@ -11,7 +11,6 @@ import '../fleece/decoder.dart';
 import '../fleece/dict_key.dart';
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
-import '../support/encoding.dart';
 import '../support/errors.dart';
 import '../support/utils.dart';
 import 'array.dart';
@@ -86,9 +85,9 @@ abstract interface class DocumentDelegate {
   int get sequence;
 
   /// The document's encoded properties.
-  EncodedData? get properties;
+  Data? get encodedProperties;
 
-  set properties(EncodedData? value);
+  set encodedProperties(Data? value);
 
   /// Creates a new [MRoot] which contains the documents properties, based on
   /// the current state of this delegate.
@@ -108,11 +107,12 @@ abstract interface class DocumentDelegate {
 /// This way there is no need to have one type of document for each database
 /// implementation or have a factory create new documents.
 final class NewDocumentDelegate extends DocumentDelegate {
-  NewDocumentDelegate([String? id, this.properties]) : id = id ?? createUuid();
+  NewDocumentDelegate([String? id, this.encodedProperties])
+      : id = id ?? createUuid();
 
   NewDocumentDelegate.mutableCopy(NewDocumentDelegate delegate)
       : id = delegate.id,
-        properties = delegate.properties;
+        encodedProperties = delegate.encodedProperties;
 
   @override
   final String id;
@@ -124,21 +124,20 @@ final class NewDocumentDelegate extends DocumentDelegate {
   int get sequence => 0;
 
   @override
-  EncodedData? properties;
+  Data? encodedProperties;
 
   @override
   MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
     assert(isMutable);
 
-    final properties = this.properties;
-    if (properties != null) {
+    if (encodedProperties case final properties?) {
       // Usually a new document doesn't have properties, unless it is being
       // used to insert a document that was created remotely (meaning another
       // isolate or even process).
       return MRoot.fromContext(
         DocumentMContext(
           document,
-          data: Doc.fromResultData(properties.toFleece(), FLTrust.trusted),
+          data: Doc.fromResultData(properties, FLTrust.trusted),
         ),
         isMutable: isMutable,
       );
@@ -193,10 +192,7 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     _setupProperties();
   }
 
-  static final _encoders = {
-    for (final format in EncodingFormat.values)
-      format: FleeceEncoder(format: format.toFLEncoderFormat())
-  };
+  static final _fleeceEncoder = FleeceEncoder(format: FLEncoderFormat.fleece);
 
   DocumentDelegate get delegate => _delegate;
   DocumentDelegate _delegate;
@@ -228,33 +224,32 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     }
   }
 
-  void setEncodedProperties(EncodedData properties) {
-    delegate.properties = properties;
+  void setEncodedProperties(Data value) {
+    delegate.encodedProperties = value;
     _setupProperties();
   }
 
-  FutureOr<EncodedData> encodeProperties({
-    EncodingFormat format = EncodingFormat.fleece,
+  FutureOr<Data> encodeProperties({
     bool saveExternalData = false,
   }) {
     final externalDataSaved =
         saveExternalData ? _root.saveExternalData(database!) : null;
 
     return externalDataSaved.then((_) {
-      final encoder = _encoders[format]!
+      final encoder = _fleeceEncoder
         ..reset()
         ..extraInfo = FleeceEncoderContext(
           database: database,
           encodeUnsavedBlobWithData: true,
         );
       _root.encodeTo(encoder);
-      return EncodedData(format, encoder.finish());
+      return _fleeceEncoder.finish();
     });
   }
 
-  FutureOr<void> writePropertiesToDelegate() =>
+  FutureOr<void> updateEncodedProperties() =>
       encodeProperties(saveExternalData: true)
-          .then((properties) => delegate.properties = properties);
+          .then((properties) => delegate.encodedProperties = properties);
 
   bool get _isMutable => false;
   String get _typeName => 'Document';

@@ -7,7 +7,6 @@ import '../database/proxy_database.dart';
 import '../fleece/encoder.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
-import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/streams.dart';
 import '../support/tracing.dart';
@@ -138,7 +137,6 @@ base class ProxyQuery extends QueryBase
           databaseId: database.objectId,
           language: language,
           queryDefinition: definition!,
-          resultEncoding: database.encodingFormat,
         ));
 
         _columnNames = state.columnNames;
@@ -147,12 +145,12 @@ base class ProxyQuery extends QueryBase
       });
 
   Future<void> _applyParameters(Parameters? parameters) {
-    EncodedData? encodedParameters;
+    Data? encodedParameters;
 
     if (parameters != null) {
       final encoder = FleeceEncoder();
       (parameters as ParametersImpl).encodeTo(encoder);
-      encodedParameters = EncodedData.fleece(encoder.finish());
+      encodedParameters = encoder.finish();
     }
 
     return channel!.call(SetQueryParameters(
@@ -168,20 +166,20 @@ base class ProxyQuery extends QueryBase
 final class ProxyResultSet implements AsyncResultSet {
   ProxyResultSet({
     required ProxyQuery query,
-    required Stream<TransferableValue> results,
+    required Stream<SendableValue> results,
   })  : _query = query,
         _results = results;
 
   final ProxyQuery _query;
-  final Stream<TransferableValue> _results;
+  final Stream<SendableValue> _results;
 
   Stream<ResultImpl> _asStream() => _results
-      .map((event) => ResultImpl.fromTransferableValue(
-            event,
+      .map((event) => ResultImpl(
             // Every result needs its own context, because each result is
             // encoded independently.
             context: createResultSetMContext(_query.database!),
             columnNames: _query._columnNames,
+            columnValues: event.value.asArray!,
           ))
       .transform(ResourceStreamTransformer(parent: _query, blocking: true));
 

@@ -11,8 +11,6 @@ import '../document/dictionary.dart';
 import '../fleece/containers.dart' as fl;
 import '../fleece/encoder.dart';
 import '../fleece/integration/integration.dart';
-import '../service/cbl_service_api.dart';
-import '../support/encoding.dart';
 import 'result_set.dart';
 
 /// A single row in a [ResultSet].
@@ -113,59 +111,22 @@ abstract final class Result
 }
 
 final class ResultImpl with IterableMixin<String> implements Result {
-  factory ResultImpl.fromTransferableValue(
-    TransferableValue value, {
-    required DatabaseMContext context,
-    required List<String> columnNames,
-  }) {
-    final encodedData = value.encodedData;
-    if (encodedData != null) {
-      return ResultImpl.fromValuesData(
-        encodedData.toFleece(),
-        context: context,
-        columnNames: columnNames,
-      );
-    }
-
-    return ResultImpl.fromValuesArray(
-      value.value!.asArray!,
-      context: context,
-      columnNames: columnNames,
-    );
-  }
-
-  /// Creates a result from an array of the column values, encoded in a chunk of
-  /// Fleece [data].
-  ///
-  /// The [context] must not be shared with other [Result]s.
-  ResultImpl.fromValuesData(
-    Data data, {
-    required DatabaseMContext context,
-    required List<String> columnNames,
-  })  : _context = context,
-        _columnNames = columnNames,
-        columnValuesArray = null,
-        columnValuesData = data;
-
   /// Creates a result from a fleece [array] fo the column values.
   ///
   /// The [context] can be shared with other [Result]s, if it is guaranteed that
   /// all results are from the same chunk of encoded Fleece data.
-  ResultImpl.fromValuesArray(
-    fl.Array array, {
+  ResultImpl({
     required DatabaseMContext context,
     required List<String> columnNames,
+    required this.columnValues,
   })  : _context = context,
-        _columnNames = columnNames,
-        columnValuesArray = array,
-        columnValuesData = null;
+        _columnNames = columnNames;
 
   static final _jsonEncoder = FleeceEncoder(format: FLEncoderFormat.json);
 
   final DatabaseMContext _context;
   final List<String> _columnNames;
-  final Data? columnValuesData;
-  final fl.Array? columnValuesArray;
+  final fl.Array columnValues;
 
   late final ArrayImpl _array = _createArray();
   late final DictionaryImpl _dictionary = _createDictionary();
@@ -301,52 +262,14 @@ final class ResultImpl with IterableMixin<String> implements Result {
     return utf8.decode(sliceResult.asTypedList());
   }
 
-  EncodedData encodeColumnValues(EncodingFormat format) {
-    fl.Array columnValues;
-
-    switch (format) {
-      case EncodingFormat.fleece:
-        if (columnValuesData != null) {
-          return EncodedData.fleece(columnValuesData!);
-        } else {
-          columnValues = columnValuesArray!;
-        }
-        break;
-      case EncodingFormat.json:
-        if (columnValuesData != null) {
-          columnValues =
-              fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted).root
-                  as fl.Array;
-        } else {
-          columnValues = columnValuesArray!;
-        }
-        break;
-    }
-
-    final encoder = FleeceEncoder(format: format.toFLEncoderFormat())
-      ..writeValue(columnValues.pointer);
-    return EncodedData(format, encoder.finish());
-  }
-
   ArrayImpl _createArray() {
-    MRoot root;
-    if (columnValuesArray != null) {
-      root = MRoot.fromContext(
-        DatabaseMContext.from(
-          _context,
-          data: fl.Value.fromPointer(columnValuesArray!.pointer),
-        ),
-        isMutable: false,
-      );
-    } else {
-      root = MRoot.fromContext(
-        DatabaseMContext.from(
-          _context,
-          data: fl.Doc.fromResultData(columnValuesData!, FLTrust.trusted),
-        ),
-        isMutable: false,
-      );
-    }
+    final root = MRoot.fromContext(
+      DatabaseMContext.from(
+        _context,
+        data: fl.Value.fromPointer(columnValues.pointer),
+      ),
+      isMutable: false,
+    );
 
     // ignore: cast_nullable_to_non_nullable
     return root.asNative as ArrayImpl;

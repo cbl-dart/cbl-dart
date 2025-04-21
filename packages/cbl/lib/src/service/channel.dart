@@ -2,20 +2,44 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:ffi';
+import 'dart:isolate';
 
 import 'package:stream_channel/stream_channel.dart';
 
 import '../support/tracing.dart';
-import '../support/utils.dart';
 import '../tracing.dart';
-import 'serialization/serialization.dart';
-import 'serialization/serialization_codec.dart';
+
+/// A type which is aware of being sent between isolates.
+abstract interface class SendAware {
+  /// Allow subclasses to have const constructors.
+  const SendAware();
+
+  /// Called before this object is sent through a [SendPort].
+  ///
+  /// This allows an object to make itself sendable by replacing references to
+  /// objects that are not sendable, e.g. [Pointer], with sendable ones. The
+  /// received copy will have [didReceive] called on it, where it should restore
+  /// itself to the state of the original before [willSend] was called on it.
+  ///
+  /// If this object contains other [SendAware]s, it must call [willSend] on
+  /// them from this method.
+  void willSend() {}
+
+  /// Called after this object has been received from a [ReceivePort].
+  ///
+  /// See [willSend] for more information.
+  ///
+  /// If this object contains other [SendAware]s, it must call [didReceive] on
+  /// them from this method.
+  void didReceive() {}
+}
 
 /// Interface that request objects for [Channel] endpoints have to implement.
 ///
 /// [Response] is the type of the type of the result of a call or the events of
 /// a stream initiated with such a request.
-abstract base class Request<Response> extends Serializable {}
+abstract base class Request<Response> {}
 
 /// Handler which responds to requests to a call endpoint of a [Channel].
 typedef CallHandler<T extends Request<R>, R> = FutureOr<R> Function(T);
@@ -93,26 +117,16 @@ typedef _UntypedStreamHandler = Stream<Object?> Function(Object?);
 ///
 /// - [open] for controlling when a [Channel] starts to respond to requests.
 final class Channel {
-  /// Creates a new [Channel] with the given [transport] and [packetCodec].
+  /// Creates a new [Channel] with the given [transport].
   Channel({
     required StreamChannel<Object?> transport,
-    PacketCodec? packetCodec,
-    SerializationRegistry? serializationRegistry,
     bool autoOpen = true,
     MessageContextCapturer? captureMessageContext,
     MessageContextRestorer? restoreMessageContext,
     this.debug = false,
   })  : _captureMessageContext = captureMessageContext ?? (() => null),
-        _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()),
-        _serializationRegistry =
-            serializationRegistry?.merge(channelSerializationRegistry()) ??
-                channelSerializationRegistry() {
-    final codec =
-        SerializationCodec(_serializationRegistry, packetCodec: packetCodec);
-
-    _transport = transport
-        .transform(StreamChannelTransformer.fromCodec(codec))
-        .cast<_Message>();
+        _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()) {
+    _transport = transport.cast<_Message>();
 
     if (autoOpen) {
       open();
@@ -123,8 +137,6 @@ final class Channel {
 
   final MessageContextCapturer _captureMessageContext;
   final MessageContextRestorer _restoreMessageContext;
-
-  final SerializationRegistry _serializationRegistry;
 
   late final StreamChannel<_Message> _transport;
   int _nextConversationId = 0;
@@ -142,8 +154,7 @@ final class Channel {
 
   /// Makes a call to an endpoint at other side of the channel.
   Future<R> call<R>(Request<R> request) async {
-    final requestName =
-        _serializationRegistry.getTypeName(request.runtimeType)!;
+    late final requestName = request.runtimeType.toString();
 
     return asyncOperationTracePoint(
       () => ChannelCallOp(requestName),
@@ -255,6 +266,8 @@ final class Channel {
         // The channel is closing and does not accept new requests.
         return;
       }
+
+      message.didReceive();
 
       _restoreMessageContext(message.context, () {
         // Associate the remote stack trace with the returned error.
@@ -500,6 +513,8 @@ final class Channel {
       }
     }
 
+    message.willSend();
+
     _transport.sink.add(message);
   }
 
@@ -576,57 +591,13 @@ final class Channel {
   }
 }
 
-// === Channel SerializationRegistry ===========================================
+// === Messages ===========================================
 
-SerializationRegistry channelSerializationRegistry() => SerializationRegistry()
-  // Errors
-  ..addObjectCodec<UnimplementedError>(
-    'UnimplementedError',
-    serialize: (value, _) => {'message': value.message},
-    deserialize: (json, _) => UnimplementedError(json['message'] as String?),
-  )
-  ..addObjectCodec<ArgumentError>(
-    'ArgumentError',
-    serialize: (value, _) => {'message': value.toString()},
-    deserialize: (map, _) => ArgumentError(map.getAs<String>('message')),
-  )
-
-  // Protocol messages
-  .._addProtocolMessage('CallRequest', _CallRequest.deserialize)
-  .._addProtocolMessage('CallSuccess', _CallSuccess.deserialize)
-  .._addProtocolMessage('CallError', _CallError.deserialize)
-  .._addProtocolMessage('ListenToStream', _ListenToStream.deserialize)
-  .._addProtocolMessage('PauseStream', _PauseStream.deserialize)
-  .._addProtocolMessage('ResumeStream', _ResumeStream.deserialize)
-  .._addProtocolMessage('CancelStream', _CancelStream.deserialize)
-  .._addProtocolMessage('StreamData', _StreamData.deserialize)
-  .._addProtocolMessage('StreamError', _StreamError.deserialize)
-  .._addProtocolMessage('StreamDone', _StreamDone.deserialize);
-
-extension on SerializationRegistry {
-  void _addProtocolMessage<T extends _Message>(
-    String typeName,
-    SerializableDeserializer<T> deserialize,
-  ) {
-    addSerializableCodec(typeName, deserialize);
-  }
-}
-
-abstract final class _Message extends Serializable {
+abstract final class _Message extends SendAware {
   _Message(this.conversationId, this.context);
-
-  _Message.deserialize(StringMap map)
-      : conversationId = map.getAs('conversationId'),
-        context = map['context'];
 
   final int conversationId;
   final Object? context;
-
-  @override
-  StringMap serialize(SerializationContext context) => {
-        'conversationId': conversationId,
-        if (this.context != null) 'context': this.context,
-      };
 }
 
 abstract final class _RequestMessage extends _Message {
@@ -636,23 +607,21 @@ abstract final class _RequestMessage extends _Message {
     Object? context,
   ) : super(conversationId, context);
 
-  _RequestMessage.deserialize(super.map, SerializationContext context)
-      : request = context.deserializePolymorphic(map['request'])!,
-        super.deserialize();
-
   final Request request;
 
   @override
-  StringMap serialize(SerializationContext context) => {
-        ...super.serialize(context),
-        'request': context.serializePolymorphic(request),
-      };
+  void willSend() {
+    if (request case final SendAware sendAware) {
+      sendAware.willSend();
+    }
+  }
 
   @override
-  void willSend() => request.willSend();
-
-  @override
-  void didReceive() => request.didReceive();
+  void didReceive() {
+    if (request case final SendAware sendAware) {
+      sendAware.didReceive();
+    }
+  }
 }
 
 abstract final class _SuccessMessage extends _Message {
@@ -662,31 +631,19 @@ abstract final class _SuccessMessage extends _Message {
     Object? context,
   ) : super(conversationId, context);
 
-  _SuccessMessage.deserialize(super.map, SerializationContext context)
-      : data = context.deserializePolymorphic(map['data']),
-        super.deserialize();
-
   final Object? data;
 
   @override
-  StringMap serialize(SerializationContext context) => {
-        ...super.serialize(context),
-        'data': context.serializePolymorphic(data),
-      };
-
-  @override
   void willSend() {
-    final data = this.data;
-    if (data is Serializable) {
-      data.willSend();
+    if (data case final SendAware sendAware) {
+      sendAware.willSend();
     }
   }
 
   @override
   void didReceive() {
-    final data = this.data;
-    if (data is Serializable) {
-      data.didReceive();
+    if (data case final SendAware sendAware) {
+      sendAware.didReceive();
     }
   }
 }
@@ -699,69 +656,30 @@ abstract final class _ErrorMessage extends _Message {
     Object? context,
   ) : super(conversationId, context);
 
-  _ErrorMessage.deserialize(super.map, SerializationContext context)
-      : error = context.deserializePolymorphic(map['error'])!,
-        stackTrace = context.deserializeAs(map['stackTrace']),
-        super.deserialize();
-
   final Object error;
   final StackTrace? stackTrace;
 
   @override
-  StringMap serialize(SerializationContext context) {
-    Object? error = this.error;
-    if (!context.canSerialize(error)) {
-      error = SerializationError(
-        'No serializer registered for error:\n$error\n$stackTrace',
-      );
-    }
-
-    return {
-      ...super.serialize(context),
-      'error': context.serializePolymorphic(error),
-      'stackTrace': context.serialize(stackTrace),
-    };
-  }
-
-  @override
   void willSend() {
-    final error = this.error;
-    if (error is Serializable) {
-      error.willSend();
+    if (error case final SendAware sendAware) {
+      sendAware.willSend();
     }
   }
 
   @override
   void didReceive() {
-    final error = this.error;
-    if (error is Serializable) {
-      error.didReceive();
+    if (error case final SendAware sendAware) {
+      sendAware.didReceive();
     }
   }
 }
 
 final class _CallRequest extends _RequestMessage {
   _CallRequest(super.conversationId, super.request, super.context);
-
-  _CallRequest._fromJson(super.map, super.context) : super.deserialize();
-
-  static _CallRequest deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _CallRequest._fromJson(map, context);
 }
 
 final class _CallSuccess extends _SuccessMessage {
   _CallSuccess(super.conversationId, super.data, super.context);
-
-  _CallSuccess._fromJson(super.map, super.context) : super.deserialize();
-
-  static _CallSuccess deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _CallSuccess._fromJson(map, context);
 }
 
 final class _CallError extends _ErrorMessage {
@@ -771,66 +689,26 @@ final class _CallError extends _ErrorMessage {
     super.stackTrace,
     super.context,
   );
-
-  _CallError._fromJson(super.map, super.context) : super.deserialize();
-
-  static _CallError deserialize(StringMap map, SerializationContext context) =>
-      _CallError._fromJson(map, context);
 }
 
 final class _ListenToStream extends _RequestMessage {
   _ListenToStream(super.conversationId, super.request, super.context);
-
-  _ListenToStream._fromJson(super.map, super.context) : super.deserialize();
-
-  static _ListenToStream deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _ListenToStream._fromJson(map, context);
 }
 
 final class _PauseStream extends _Message {
   _PauseStream(super.conversationId, super.context);
-
-  _PauseStream._fromJson(super.map) : super.deserialize();
-
-  static _PauseStream deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _PauseStream._fromJson(map);
 }
 
 final class _ResumeStream extends _Message {
   _ResumeStream(super.conversationId, super.context);
-
-  _ResumeStream._fromJson(super.map) : super.deserialize();
-
-  static _ResumeStream deserialize(
-    StringMap map,
-    SerializationContext context,
-  ) =>
-      _ResumeStream._fromJson(map);
 }
 
 final class _CancelStream extends _Message {
   _CancelStream(super.conversationId, super.context);
-
-  _CancelStream._fromJson(super.map) : super.deserialize();
-
-  static _CancelStream deserialize(
-          StringMap map, SerializationContext context) =>
-      _CancelStream._fromJson(map);
 }
 
 final class _StreamData extends _SuccessMessage {
   _StreamData(super.conversationId, super.data, super.context);
-
-  _StreamData._fromJson(super.map, super.context) : super.deserialize();
-
-  static _StreamData deserialize(StringMap map, SerializationContext context) =>
-      _StreamData._fromJson(map, context);
 }
 
 final class _StreamError extends _ErrorMessage {
@@ -840,21 +718,10 @@ final class _StreamError extends _ErrorMessage {
     super.stackTrace,
     super.context,
   );
-
-  _StreamError._fromJson(super.map, super.context) : super.deserialize();
-
-  static _StreamError deserialize(
-          StringMap map, SerializationContext context) =>
-      _StreamError._fromJson(map, context);
 }
 
 final class _StreamDone extends _Message {
   _StreamDone(super.conversationId, super.context);
-
-  _StreamDone._fromJson(super.map) : super.deserialize();
-
-  static _StreamDone deserialize(StringMap map, SerializationContext context) =>
-      _StreamDone._fromJson(map);
 }
 
 bool _isValidExpandoKey(Object? value) {

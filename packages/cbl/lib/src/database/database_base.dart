@@ -52,20 +52,6 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
   /// Lock under which asynchronous transactions are executed.
   final asyncTransactionLock = Lock();
 
-  /// Prepares [document] for being used with this database.
-  ///
-  /// If [syncProperties] is `true`, the [document]s properties are synced with
-  /// its delegate.
-  FutureOr<T> prepareDocument(
-    DelegateDocument document, {
-    bool syncProperties = true,
-  }) =>
-      defaultCollection.then(
-          (collection) => (collection as CollectionBase<T>).prepareDocument(
-                document,
-                syncProperties: syncProperties,
-              ));
-
   @override
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
       defaultCollection.then((collection) =>
@@ -294,11 +280,11 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
 
   /// Prepares [document] for being used with this collection.
   ///
-  /// If [syncProperties] is `true`, the [document]s properties are synced with
-  /// its delegate.
+  /// If [updateEncodedProperties] is `true`, the [document]s properties are
+  /// encoded and applied to its [DocumentDelegate].
   FutureOr<T> prepareDocument(
     DelegateDocument document, {
-    bool syncProperties = true,
+    bool updateEncodedProperties = true,
   }) {
     var delegate = document.delegate;
     if (delegate is! NewDocumentDelegate && delegate is! T) {
@@ -323,8 +309,8 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
     delegate = document.delegate as T;
 
     // If required, sync document properties with delegate.
-    if (syncProperties) {
-      return document.writePropertiesToDelegate().then((_) => delegate as T);
+    if (updateEncodedProperties) {
+      return document.updateEncodedProperties().then((_) => delegate as T);
     }
 
     return delegate;
