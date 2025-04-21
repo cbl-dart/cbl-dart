@@ -158,17 +158,16 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   }
 
   void _applyParameters() {
-    final encoder = FleeceEncoder()
-      ..extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
-    final parameters = _parameters;
-    if (parameters != null) {
-      parameters.encodeTo(encoder);
-    } else {
-      encoder
-        ..beginDict(0)
-        ..endDict();
-    }
-    final data = encoder.finish();
+    final data = FleeceEncoder.fleece.encodeWith((encoder) {
+      encoder.extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
+      if (_parameters case final parameters?) {
+        parameters.encodeTo(encoder);
+      } else {
+        encoder
+          ..beginDict(0)
+          ..endDict();
+      }
+    });
     final doc = fl.Doc.fromResultData(data, FLTrust.trusted);
     final dict = doc.root.asDict!;
     _bindings.setParameters(_pointer, dict.pointer.cast());
@@ -217,12 +216,12 @@ final class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   Iterator<Result> get iterator => this;
 
   @override
-  Result get current => _current ??= ResultImpl.fromValuesArray(
-        _iterator.current,
+  Result get current => _current ??= ResultImpl(
         // Results from the same result set can share the same context, because
         // in CBL C, a result set is encoded in a single Fleece doc.
         context: _context,
         columnNames: _columnNames,
+        columnValues: _iterator.current,
       );
 
   @override

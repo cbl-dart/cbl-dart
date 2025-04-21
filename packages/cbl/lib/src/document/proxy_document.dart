@@ -1,9 +1,9 @@
+import '../bindings.dart';
 import '../database/proxy_database.dart';
 import '../fleece/containers.dart';
 import '../fleece/integration/root.dart';
 import '../service/cbl_service_api.dart';
 import '../service/proxy_object.dart';
-import '../support/encoding.dart';
 import 'document.dart';
 
 final class ProxyDocumentDelegate
@@ -17,8 +17,8 @@ final class ProxyDocumentDelegate
         id = state.docId,
         _revisionId = state.revisionId,
         _sequence = state.sequence,
-        properties = state.properties?.encodedData,
-        _propertiesDict = state.properties?.value?.asDict {
+        encodedProperties = state.properties?.encodedValue,
+        _propertiesDict = state.properties?.value.asDict {
     if (bindToProxiedDocument) {
       _bindToProxiedDocument(database!, state);
     }
@@ -28,7 +28,7 @@ final class ProxyDocumentDelegate
       : id = delegate.id,
         _revisionId = delegate.revisionId,
         _sequence = delegate.sequence,
-        properties = delegate.properties,
+        encodedProperties = delegate.encodedProperties,
         _propertiesDict =
             delegate is ProxyDocumentDelegate ? delegate._propertiesDict : null;
 
@@ -46,18 +46,17 @@ final class ProxyDocumentDelegate
   int _sequence;
 
   @override
-  EncodedData? properties;
+  Data? encodedProperties;
 
   final Dict? _propertiesDict;
 
   @override
   MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
-    final propertiesDict = _propertiesDict;
-    if (propertiesDict != null) {
+    if (_propertiesDict case final dict?) {
       return MRoot.fromContext(
         DocumentMContext(
           document,
-          data: Value.fromPointer(propertiesDict.pointer),
+          data: Value.fromPointer(dict.pointer),
         ),
         isMutable: isMutable,
       );
@@ -66,7 +65,7 @@ final class ProxyDocumentDelegate
     return MRoot.fromContext(
       DocumentMContext(
         document,
-        data: Doc.fromResultData(properties!.toFleece(), FLTrust.trusted),
+        data: Doc.fromResultData(encodedProperties!, FLTrust.trusted),
       ),
       isMutable: isMutable,
     );
@@ -102,7 +101,7 @@ final class ProxyDocumentDelegate
         revisionId: revisionId,
         sequence: sequence,
         properties: withProperties
-            ? TransferableValue.fromEncodedData(properties!)
+            ? SendableValue.fromEncodedValue(encodedProperties!)
             : null,
       );
 

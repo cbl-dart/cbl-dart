@@ -10,13 +10,9 @@ import 'cbl_service.dart';
 import 'cbl_service_api.dart';
 import 'channel.dart';
 import 'isolate_worker.dart';
-import 'serialization/serialization.dart';
 
 final class CblWorker {
-  CblWorker({
-    this.serializationTarget = SerializationTarget.isolatePort,
-    required this.debugName,
-  });
+  CblWorker({required this.debugName});
 
   static Future<T> executeCall<T>(
     Request<T> request, {
@@ -34,7 +30,6 @@ final class CblWorker {
     }
   }
 
-  final SerializationTarget serializationTarget;
   final String debugName;
 
   var _status = _WorkerStatus.initial;
@@ -56,7 +51,6 @@ final class CblWorker {
 
     _channel = Channel(
       transport: IsolateChannel.connectReceive(receivePort),
-      serializationRegistry: cblServiceSerializationRegistry(),
       captureMessageContext: () =>
           currentTracingDelegate.captureTracingContext(),
     );
@@ -65,7 +59,6 @@ final class CblWorker {
       debugName: 'CblWorker($debugName)',
       delegate: _ServiceWorkerDelegate(
         context: IsolateContext.instance,
-        serializationType: serializationTarget,
         channel: receivePort.sendPort,
       ),
     )
@@ -113,12 +106,10 @@ final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
   _ServiceWorkerDelegate({
     required this.context,
     required this.channel,
-    required this.serializationType,
   });
 
   final IsolateContext context;
   final SendPort channel;
-  final SerializationTarget serializationType;
 
   late final Channel _serviceChannel;
   late final CblService _service;
@@ -127,7 +118,6 @@ final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
   FutureOr<void> initialize() async {
     _serviceChannel = Channel(
       transport: IsolateChannel.connectSend(channel),
-      serializationRegistry: cblServiceSerializationRegistry(),
       restoreMessageContext: (context, restore) =>
           currentTracingDelegate.restoreTracingContext(context, restore),
     );

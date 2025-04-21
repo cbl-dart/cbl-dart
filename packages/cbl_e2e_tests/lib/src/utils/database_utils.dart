@@ -6,11 +6,8 @@ import 'dart:io';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/database/proxy_database.dart';
 import 'package:cbl/src/service/cbl_service.dart';
-import 'package:cbl/src/service/cbl_service_api.dart';
 import 'package:cbl/src/service/cbl_worker.dart';
 import 'package:cbl/src/service/channel.dart';
-import 'package:cbl/src/service/serialization/json_packet_codec.dart';
-import 'package:cbl/src/support/encoding.dart';
 import 'package:cbl/src/support/utils.dart';
 import 'package:cbl/src/typed_data_internal.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -129,10 +126,6 @@ Future<AsyncDatabase> openAsyncTestDatabase({
       config: config,
       typedDataAdapter: typedDataAdapter,
       client: _sharedIsolateClient(isolate),
-      encodingFormat:
-          // To cover both transferring encoded data and Fleece values we use
-          // different encoding formats for the two worker isolate targets.
-          isolate == Isolate.worker ? EncodingFormat.fleece : null,
     );
   }
 
@@ -197,20 +190,8 @@ void setupSharedTestMainIsolateClient() {
   setUpAll(() {
     transportChannels = _streamControllerChannelPair();
 
-    // We are using the `JsonPacketCodec` here to maximize code coverage.
-    // The shared test worker already covers the `IsolatePacketCodec`.
-    final packetCodec = JsonPacketCodec();
-
-    final serviceChannel = Channel(
-      transport: transportChannels[0],
-      serializationRegistry: cblServiceSerializationRegistry(),
-      packetCodec: packetCodec,
-    );
-    final clientChannel = Channel(
-      transport: transportChannels[1],
-      serializationRegistry: cblServiceSerializationRegistry(),
-      packetCodec: packetCodec,
-    );
+    final serviceChannel = Channel(transport: transportChannels[0]);
+    final clientChannel = Channel(transport: transportChannels[1]);
 
     service = CblService(channel: serviceChannel);
     sharedMainIsolateClient = CblServiceClient(channel: clientChannel);

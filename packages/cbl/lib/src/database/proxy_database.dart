@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:web_socket_channel/web_socket_channel.dart';
-
 import '../bindings.dart';
 import '../document.dart';
 import '../document/blob.dart';
@@ -21,11 +19,8 @@ import '../query/query.dart';
 import '../service/cbl_service.dart';
 import '../service/cbl_service_api.dart';
 import '../service/cbl_worker.dart';
-import '../service/channel.dart';
 import '../service/proxy_object.dart';
-import '../service/serialization/json_packet_codec.dart';
 import '../support/edition.dart';
-import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/streams.dart';
@@ -53,7 +48,6 @@ final class ProxyDatabase extends ProxyObject
     DatabaseConfiguration config,
     this.typedDataAdapter,
     this.state,
-    this.encodingFormat,
   )   : name = state.name,
         path = state.path,
         // Make a copy of config, since it is mutable.
@@ -87,7 +81,6 @@ final class ProxyDatabase extends ProxyObject
     required DatabaseConfiguration config,
     required CblServiceClient client,
     TypedDataAdapter? typedDataAdapter,
-    required EncodingFormat? encodingFormat,
   }) async {
     final state = await client.channel.call(OpenDatabase(name, config));
     return ProxyDatabase(
@@ -95,7 +88,6 @@ final class ProxyDatabase extends ProxyObject
       config,
       typedDataAdapter,
       state,
-      encodingFormat,
     );
   }
 
@@ -111,8 +103,6 @@ final class ProxyDatabase extends ProxyObject
   var _deleteOnClose = false;
 
   final CblServiceClient client;
-
-  final EncodingFormat? encodingFormat;
 
   @override
   late final BlobStore blobStore = ProxyBlobStore(this);
@@ -412,7 +402,7 @@ final class WorkerDatabase extends ProxyDatabase {
     DatabaseConfiguration config,
     TypedDataAdapter? typedDataAdapter,
     DatabaseState state,
-  ) : super(client, config, typedDataAdapter, state, null);
+  ) : super(client, config, typedDataAdapter, state);
 
   static Future<WorkerDatabase> open(
     String name, [
@@ -471,37 +461,6 @@ final class WorkerDatabase extends ProxyDatabase {
     await super.performClose();
     await client.channel.call(UninstallTracingDelegate());
     await worker.stop();
-  }
-}
-
-final class RemoteDatabase extends ProxyDatabase {
-  RemoteDatabase._(
-    CblServiceClient client,
-    DatabaseConfiguration config,
-    TypedDataAdapter? typedDataAdapter,
-    DatabaseState state,
-  ) : super(client, config, typedDataAdapter, state, EncodingFormat.fleece);
-
-  static Future<RemoteDatabase> open(
-    Uri uri,
-    String name,
-    DatabaseConfiguration config, [
-    TypedDataAdapter? typedDataAdapter,
-  ]) async {
-    final channel = Channel(
-      transport: WebSocketChannel.connect(uri),
-      packetCodec: JsonPacketCodec(),
-      serializationRegistry: cblServiceSerializationRegistry(),
-    );
-    final client = CblServiceClient(channel: channel);
-    final state = await channel.call(OpenDatabase(name, config));
-    return RemoteDatabase._(client, config, typedDataAdapter, state);
-  }
-
-  @override
-  Future<void> performClose() async {
-    await super.performClose();
-    await channel.close();
   }
 }
 
@@ -599,8 +558,6 @@ final class ProxyCollection extends ProxyObject
   @override
   ProxyDatabase get database => scope.database;
 
-  EncodingFormat? get encodingFormat => database.encodingFormat;
-
   late final _listenerTokens = ListenerTokenRegistry(this);
 
   @override
@@ -611,8 +568,7 @@ final class ProxyCollection extends ProxyObject
   Future<Document?> document(String id) => asyncOperationTracePoint(
         () => GetDocumentOp(this, id),
         () => use(() async {
-          final state =
-              await channel.call(GetDocument(objectId, id, encodingFormat));
+          final state = await channel.call(GetDocument(objectId, id));
 
           if (state == null) {
             return null;
@@ -696,7 +652,8 @@ final class ProxyCollection extends ProxyObject
           () => database.runInTransactionAsync(() async {
             final delegate = await asyncOperationTracePoint(
               () => PrepareDocumentOp(document),
-              () async => prepareDocument(document, syncProperties: false),
+              () async =>
+                  prepareDocument(document, updateEncodedProperties: false),
             );
 
             final state = await channel.call(DeleteDocument(
@@ -732,7 +689,7 @@ final class ProxyCollection extends ProxyObject
   Future<void> purgeDocument(covariant DelegateDocument document) async {
     await asyncOperationTracePoint(
       () => PrepareDocumentOp(document),
-      () async => prepareDocument(document, syncProperties: false),
+      () async => prepareDocument(document, updateEncodedProperties: false),
     );
     return purgeDocumentById(document.id);
   }

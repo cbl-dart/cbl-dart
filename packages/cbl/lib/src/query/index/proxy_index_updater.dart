@@ -1,6 +1,4 @@
-import '../../bindings.dart';
 import '../../document/common.dart';
-import '../../fleece/containers.dart' as fl;
 import '../../fleece/integration/integration.dart';
 import '../../query.dart';
 import '../../service/cbl_service.dart';
@@ -29,22 +27,11 @@ final class ProxyIndexUpdater extends ProxyObject
 
   @override
   Future<T?> value<T extends Object>(int index) => use(() async {
-        final transferableValue = await channel.call(IndexUpdaterGetValue(
-          updaterId: objectId,
-          index: index,
-          resultEncoding: this.index.collection.database.encodingFormat,
-        ));
+        final sendableValue = await channel
+            .call(IndexUpdaterGetValue(updaterId: objectId, index: index));
 
         final value = MRoot.fromContext(
-          MContext(
-            data: switch (transferableValue) {
-              TransferableValue(:final encodedData?) => fl.Doc.fromResultData(
-                  encodedData.toFleece(),
-                  FLTrust.trusted,
-                ),
-              TransferableValue(:final value) => value,
-            },
-          ),
+          MContext(data: sendableValue.value),
           isMutable: false,
         ).asNative;
 

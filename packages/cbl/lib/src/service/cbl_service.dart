@@ -7,7 +7,7 @@ import '../database/database_configuration.dart';
 import '../database/ffi_database.dart';
 import '../document/document.dart';
 import '../document/ffi_document.dart';
-import '../fleece/encoder.dart';
+import '../fleece/decoder.dart';
 import '../query/ffi_query.dart';
 import '../query/index/ffi_index_updater.dart';
 import '../query/index/ffi_query_index.dart';
@@ -17,7 +17,6 @@ import '../query/result.dart';
 import '../query/result_set.dart';
 import '../replication.dart';
 import '../replication/ffi_replicator.dart';
-import '../support/encoding.dart';
 import '../support/listener_token.dart';
 import '../support/resource.dart';
 import '../support/tracing.dart';
@@ -153,8 +152,8 @@ final class CblServiceClient {
   void _callDocumentChangeListener(CallDocumentChangeListener request) =>
       _getDocumentChangeListenerById(request.listenerId)(request);
 
-  Stream<MessageData> _readBlobUpload(ReadBlobUpload request) =>
-      _takeBlobUploadById(request.uploadId).map(MessageData.new);
+  Stream<SendableData> _readBlobUpload(ReadBlobUpload request) =>
+      _takeBlobUploadById(request.uploadId).map(SendableData.new);
 
   void _callQueryChangeListener(CallQueryChangeListener request) =>
       _getQueryChangeListenerById(request.listenerId)(request);
@@ -469,7 +468,6 @@ final class CblService {
 
     return document?.createState(
       withProperties: true,
-      propertiesFormat: request.propertiesFormat,
       objectRegistry: _objectRegistry,
     );
   }
@@ -486,7 +484,7 @@ final class CblService {
       return null;
     }
 
-    document.setEncodedProperties(request.state.properties!.encodedData!);
+    document.setEncodedProperties(request.state.properties!.encodedValue!);
 
     if (collection.saveDocument(document, request.concurrencyControl)) {
       return document.createState(
@@ -577,11 +575,11 @@ final class CblService {
       .blobStore
       .blobExists(request.properties);
 
-  Stream<MessageData> _readBlob(ReadBlob request) =>
+  Stream<SendableData> _readBlob(ReadBlob request) =>
       _getDatabaseById(request.databaseId)
           .blobStore
           .readBlob(request.properties)!
-          .map(MessageData.new);
+          .map(SendableData.new);
 
   Future<SaveBlobResponse> _saveBlob(SaveBlob request) async {
     final stream = channel
@@ -599,13 +597,15 @@ final class CblService {
       definition: request.queryDefinition,
       language: request.language,
     );
-    final id = _objectRegistry.addObject(_Query(query, request.resultEncoding));
+    final id = _objectRegistry.addObject(_Query(query));
     return QueryState(id: id, columnNames: query.columnNames);
   }
 
   void _setQueryParameters(SetQueryParameters request) {
     _getQueryById(request.queryId).query.setParameters(
-          (request.parameters?.toPlainObject() as StringMap?)
+          request.parameters
+              ?.let((data) => const FleeceDecoder(trust: FLTrust.trusted)
+                  .convert(data) as StringMap?)
               ?.let(Parameters.new),
         );
   }
@@ -616,7 +616,7 @@ final class CblService {
   int _executeQuery(ExecuteQuery request) =>
       _getQueryById(request.queryId).execute();
 
-  Stream<TransferableValue> _getQueryResultSet(GetQueryResultSet request) =>
+  Stream<SendableValue> _getQueryResultSet(GetQueryResultSet request) =>
       _getQueryById(request.queryId).takeResultSet(request.resultSetId);
 
   void _addQueryChangeListener(AddQueryChangeListener request) {
@@ -644,19 +644,11 @@ final class CblService {
     );
   }
 
-  TransferableValue _indexUpdaterGetValue(IndexUpdaterGetValue request) {
+  SendableValue _indexUpdaterGetValue(IndexUpdaterGetValue request) {
     final value = _objectRegistry
         .getObjectOrThrow<FfiIndexUpdater>(request.updaterId)
         .flValue(request.index);
-
-    if (request.resultEncoding case final encoding?) {
-      final encoder = FleeceEncoder(format: encoding.toFLEncoderFormat())
-        ..writeValue(value.pointer);
-      final encodedData = EncodedData(encoding, encoder.finish());
-      return TransferableValue.fromEncodedData(encodedData);
-    } else {
-      return TransferableValue.fromValue(value);
-    }
+    return SendableValue.fromValue(value);
   }
 
   void _indexUpdaterSetVector(IndexUpdaterSetVector request) => _objectRegistry
@@ -678,18 +670,6 @@ final class CblService {
       target = DatabaseEndpoint(_getDatabaseById(target.databaseId));
     }
 
-    ReplicationFilter createReplicationFilter(int filterId) =>
-        _createReplicatorFilterForwarder(
-          filterId,
-          propertiesFormat: request.propertiesFormat,
-        );
-
-    ConflictResolver createConflictResolver(int resolverId) =>
-        _createConflictResolverForwarder(
-          resolverId,
-          propertiesFormat: request.propertiesFormat,
-        );
-
     final config = ReplicatorConfiguration(
       target: target,
       replicatorType: request.replicatorType,
@@ -709,10 +689,12 @@ final class CblService {
         CollectionConfiguration(
           channels: collection.channels,
           documentIds: collection.documentIds,
-          pushFilter: collection.pushFilterId?.let(createReplicationFilter),
-          pullFilter: collection.pullFilterId?.let(createReplicationFilter),
-          conflictResolver:
-              collection.conflictResolverId?.let(createConflictResolver),
+          pushFilter:
+              collection.pushFilterId?.let(_createReplicatorFilterForwarder),
+          pullFilter:
+              collection.pullFilterId?.let(_createReplicatorFilterForwarder),
+          conflictResolver: collection.conflictResolverId
+              ?.let(_createConflictResolverForwarder),
         ),
       );
     }
@@ -815,14 +797,10 @@ final class CblService {
     }
   }
 
-  ReplicationFilter _createReplicatorFilterForwarder(
-    int filterId, {
-    required EncodingFormat? propertiesFormat,
-  }) =>
+  ReplicationFilter _createReplicatorFilterForwarder(int filterId) =>
       (document, flags) async {
         final state = await (document as DelegateDocument).createState(
           withProperties: true,
-          propertiesFormat: propertiesFormat,
           objectRegistry: _objectRegistry,
         );
 
@@ -833,21 +811,16 @@ final class CblService {
         ));
       };
 
-  ConflictResolver _createConflictResolverForwarder(
-    int resolverId, {
-    required EncodingFormat? propertiesFormat,
-  }) =>
+  ConflictResolver _createConflictResolverForwarder(int resolverId) =>
       ConflictResolver.from((conflict) async {
         final localDocument = conflict.localDocument as DelegateDocument?;
         final remoteDocument = conflict.remoteDocument as DelegateDocument?;
         final localState = await localDocument?.createState(
           withProperties: true,
-          propertiesFormat: propertiesFormat,
           objectRegistry: _objectRegistry,
         );
         final remoteState = await remoteDocument?.createState(
           withProperties: true,
-          propertiesFormat: propertiesFormat,
           objectRegistry: _objectRegistry,
         );
 
@@ -867,7 +840,7 @@ final class CblService {
               MutableDelegateDocument.fromDelegate(
                 NewDocumentDelegate(
                   resolvedState.docId,
-                  resolvedState.properties!.encodedData,
+                  resolvedState.properties!.encodedValue,
                 ),
               );
         }
@@ -904,10 +877,9 @@ final class _CBLIndexSpecIndex implements IndexImplInterface {
 }
 
 final class _Query {
-  _Query(this.query, this.resultEncoding);
+  _Query(this.query);
 
   final FfiQuery query;
-  final EncodingFormat? resultEncoding;
 
   int _nextResultSetId = 0;
   final _resultSets = <int, ResultSet>{};
@@ -920,20 +892,13 @@ final class _Query {
     return id;
   }
 
-  Stream<TransferableValue> takeResultSet(int id) =>
+  Stream<SendableValue> takeResultSet(int id) =>
       _resultSetStream(_resultSets.remove(id)!);
 
-  Stream<TransferableValue> _resultSetStream(ResultSet resultSet) =>
+  Stream<SendableValue> _resultSetStream(ResultSet resultSet) =>
       resultSet.asStream().map((result) {
         final resultImpl = result as ResultImpl;
-        final resultEncoding = this.resultEncoding;
-        if (resultEncoding != null) {
-          return TransferableValue.fromEncodedData(
-            resultImpl.encodeColumnValues(resultEncoding),
-          );
-        } else {
-          return TransferableValue.fromValue(resultImpl.columnValuesArray!);
-        }
+        return SendableValue.fromValue(resultImpl.columnValues);
       });
 
   ListenerToken addChangeListener(void Function(int resultSetId) listener) =>
@@ -955,20 +920,12 @@ extension on ObjectRegistry {
 extension on DelegateDocument {
   Future<DocumentState> createState({
     required bool withProperties,
-    EncodingFormat? propertiesFormat,
     required ObjectRegistry objectRegistry,
   }) async {
-    TransferableValue? properties;
+    SendableValue? properties;
     if (withProperties) {
-      if (propertiesFormat != null) {
-        properties = TransferableValue.fromEncodedData(
-          await encodeProperties(format: propertiesFormat),
-        );
-      } else {
-        properties = TransferableValue.fromValue(
-          (delegate as FfiDocumentDelegate).propertiesDict,
-        );
-      }
+      final propertiesDict = (delegate as FfiDocumentDelegate).propertiesDict;
+      properties = SendableValue.fromValue(propertiesDict);
     }
 
     return DocumentState(

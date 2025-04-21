@@ -26,8 +26,6 @@ final class MRoot extends MCollection {
     _slot.updateParent(this);
   }
 
-  static final _encoder = FleeceEncoder();
-
   final MValue _slot;
 
   @override
@@ -41,11 +39,7 @@ final class MRoot extends MCollection {
 
   Object? get asNative => _slot.asNative(this);
 
-  Data encode() {
-    _encoder.reset();
-    encodeTo(_encoder);
-    return _encoder.finish();
-  }
+  Data encode() => FleeceEncoder.fleece.encodeWith(encodeTo);
 }
 
 extension on MContext {

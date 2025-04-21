@@ -29,7 +29,12 @@ final class FleeceEncoder implements Finalizable {
     _bindings.bindToDartObject(this, _pointer);
   }
 
+  static final fleece = FleeceEncoder(format: FLEncoderFormat.fleece);
+  static final json = FleeceEncoder(format: FLEncoderFormat.json);
+
   final FLEncoder _pointer;
+
+  var _hasSharedKeys = false;
 
   /// The output format to generate.
   ///
@@ -53,8 +58,10 @@ final class FleeceEncoder implements Finalizable {
 
   /// Tells the encoder to use a shared-keys mapping when encoding dictionary
   /// keys.
-  void setSharedKeys(SharedKeys? sharedKeys) =>
-      _bindings.setSharedKeys(_pointer, sharedKeys?.pointer ?? nullptr);
+  void setSharedKeys(SharedKeys? sharedKeys) {
+    _bindings.setSharedKeys(_pointer, sharedKeys?.pointer ?? nullptr);
+    _hasSharedKeys = sharedKeys != null;
+  }
 
   /// Arbitrary information which needs to be available to code that is using
   /// this encoder.
@@ -63,14 +70,30 @@ final class FleeceEncoder implements Finalizable {
   /// hierarchies to let objects encode them self.
   Object? extraInfo;
 
-  /// Converts the [json] string to [format] and returns the result.
-  Data convertJson(String json) {
+  /// Calls the given function with this encoder as the argument and returns the
+  /// result.
+  ///
+  /// Before calling [encode], the encoder is [reset], [extraInfo] is set to
+  /// `null` and if the encoder has shared keys, they are removed.
+  Data encodeWith(void Function(FleeceEncoder encoder) encode) {
+    if (_hasSharedKeys) {
+      setSharedKeys(null);
+    }
+    extraInfo = null;
     reset();
-    // TODO(blaugold): Remove ignore when Dart 3.2 is a minimum requirement.
-    // ignore: unnecessary_cast
-    writeJson(Data.fromTypedList(utf8.encode(json) as Uint8List));
+    encode(this);
     return finish();
   }
+
+  /// Converts the [json] string to [format] and returns the result.
+  Data convertJson(String json) => encodeWith((encoder) {
+        encoder.writeJson(Data.fromTypedList(utf8.encode(json)));
+      });
+
+  /// Converts the Dart [value] to [format] and returns the result.
+  Data convertDartObject(Object? value) => encodeWith((encoder) {
+        encoder.writeDartObject(value);
+      });
 
   /// Writes a Dart object to this encoder.
   ///

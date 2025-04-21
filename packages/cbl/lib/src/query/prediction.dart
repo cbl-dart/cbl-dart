@@ -175,15 +175,14 @@ class _FfiPredictiveModel implements Finalizable {
         isMutable: false,
       );
 
-      final outputDict = _model.predict(inputRoot.asNative! as Dictionary);
+      final outputDict =
+          _model.predict(inputRoot.asNative! as Dictionary) as DictionaryImpl?;
 
       if (outputDict == null) {
         return nullptr;
       }
 
-      final encoder = FleeceEncoder();
-      (outputDict as DictionaryImpl).encodeTo(encoder);
-      final outputData = encoder.finish();
+      final outputData = FleeceEncoder.fleece.encodeWith(outputDict.encodeTo);
 
       final outputDoc = fl.Doc.fromResultData(outputData, FLTrust.trusted);
       final outputMutableDict =

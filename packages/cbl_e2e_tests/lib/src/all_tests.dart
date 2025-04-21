@@ -34,7 +34,6 @@ import 'replication/endpoint_test.dart' as replication_endpoint;
 import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
-import 'service/cbl_service_api_test.dart' as service_cbl_service_api;
 import 'service/cbl_worker_test.dart' as service_cbl_worker;
 import 'service/channel_test.dart' as service_channel;
 import 'service/isolate_worker_test.dart' as service_isolate_worker;
@@ -77,7 +76,6 @@ final tests = [
   replication_endpoint.main,
   replication_replicator_change.main,
   replication_replicator.main,
-  service_cbl_service_api.main,
   service_cbl_worker.main,
   service_channel.main,
   service_isolate_worker.main,

@@ -17,11 +17,9 @@ MContext createTestMContext(Object data) => MContext(
 
 Array immutableArray([List<Object?>? data]) {
   final array = MutableArray(data) as MutableArrayImpl;
-  final encoder = FleeceEncoder();
-  array.encodeTo(encoder);
-  final fleeceData = encoder.finish();
+  final encodedArray = FleeceEncoder.fleece.encodeWith(array.encodeTo);
   final root = MRoot.fromContext(
-    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.trusted)),
+    createTestMContext(Doc.fromResultData(encodedArray, FLTrust.trusted)),
     isMutable: false,
   );
   // ignore: cast_nullable_to_non_nullable
@@ -29,12 +27,11 @@ Array immutableArray([List<Object?>? data]) {
 }
 
 Dictionary immutableDictionary([Map<String, Object?>? data]) {
-  final array = MutableDictionary(data) as MutableDictionaryImpl;
-  final encoder = FleeceEncoder();
-  array.encodeTo(encoder);
-  final fleeceData = encoder.finish();
+  final dictionary = MutableDictionary(data) as MutableDictionaryImpl;
+  final encodedDictionary =
+      FleeceEncoder.fleece.encodeWith(dictionary.encodeTo);
   final root = MRoot.fromContext(
-    createTestMContext(Doc.fromResultData(fleeceData, FLTrust.trusted)),
+    createTestMContext(Doc.fromResultData(encodedDictionary, FLTrust.trusted)),
     isMutable: false,
   );
   // ignore: cast_nullable_to_non_nullable

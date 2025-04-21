@@ -2,6 +2,7 @@ import 'package:cbl/cbl.dart';
 import 'package:cbl/src/database/database_base.dart';
 import 'package:cbl/src/document/array.dart';
 import 'package:cbl/src/document/common.dart';
+import 'package:cbl/src/fleece/containers.dart' as fl;
 import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/query/result.dart';
 import 'package:cbl/src/query/result_set.dart';
@@ -229,15 +230,16 @@ void main() {
 
 Result testResult(List<String> columnNames, List<Object?> columnValues) {
   final values = MutableArray(columnValues) as MutableArrayImpl;
-  final encoder = FleeceEncoder()
+  final encodedValues = FleeceEncoder.fleece.encodeWith((encoder) {
     // FleeceEncoderContext is needed to compare unsaved Blobs in test.
-    ..extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
-
-  values.encodeTo(encoder);
-  return ResultImpl.fromValuesData(
-    encoder.finish(),
+    encoder.extraInfo = FleeceEncoderContext(encodeUnsavedBlobWithData: true);
+    values.encodeTo(encoder);
+  });
+  return ResultImpl(
     context: createResultSetMContext(MockDatabase()),
     columnNames: columnNames,
+    columnValues:
+        fl.Doc.fromResultData(encodedValues, fl.FLTrust.trusted).root.asArray!,
   );
 }
 
