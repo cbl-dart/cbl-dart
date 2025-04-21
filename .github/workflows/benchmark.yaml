@@ -2,6 +2,15 @@ name: Benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      runner:
+        description: 'Runner to use for the benchmark'
+        required: true
+        default: 'ubuntu-22.04'
+        type: choice
+        options:
+          - ubuntu-22.04
+          - Gabriels-MacBook-Pro
   schedule:
     # Every day at midnight UTC.
     - cron: 0 0 * * *
@@ -26,8 +35,25 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
-    runs-on: ubuntu-22.04
+    runs-on: ${{inputs.runner || 'ubuntu-22.04'}}
     steps:
+      - name: Resolve testbed
+        run: |
+          RUNNER="${{inputs.runner || 'ubuntu-22.04'}}"
+          case "$RUNNER" in
+            ubuntu-22.04)
+              TESTBED="ubuntu"
+              ;;
+            Gabriels-MacBook-Pro)
+              TESTBED="gabriels-macbook-pro"
+              ;;
+            *)
+              echo "Unknown runner: $RUNNER"
+              exit 1
+              ;;
+          esac
+          echo "TESTBED=${TESTBED}" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -71,7 +97,7 @@ jobs:
             --project cbl-dart \
             --token '${{ secrets.BENCHER_API_TOKEN }}' \
             --branch main \
-            --testbed ubuntu \
+            --testbed "${TESTBED}" \
             --threshold-measure latency \
             --threshold-test t_test \
             --threshold-max-sample-size 64 \
@@ -100,7 +126,7 @@ jobs:
             --start-point-hash '${{ github.event.pull_request.base.sha }}' \
             --start-point-clone-thresholds \
             --start-point-reset \
-            --testbed ubuntu \
+            --testbed "${TESTBED}" \
             --err \
             --adapter json \
             --file results.json \
