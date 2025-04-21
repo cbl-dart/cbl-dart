@@ -2,15 +2,6 @@ name: Benchmark
 
 on:
   workflow_dispatch:
-    inputs:
-      runner:
-        description: 'Runner to use for the benchmark'
-        required: true
-        default: 'ubuntu-22.04'
-        type: choice
-        options:
-          - ubuntu-22.04
-          - Gabriels-MacBook-Pro
   schedule:
     # Every day at midnight UTC.
     - cron: 0 0 * * *
@@ -27,6 +18,10 @@ on:
 
 jobs:
   run-benchmarks:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-22.04, Gabriels-MacBook-Pro]
     # Fork PRs don't have access to the secrets, so we don't run the job for them.
     if:
       github.event_name != 'pull_request' || (github.event.action != 'closed' &&
@@ -35,11 +30,11 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
-    runs-on: ${{inputs.runner || 'ubuntu-22.04'}}
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Resolve testbed
         run: |
-          RUNNER="${{inputs.runner || 'ubuntu-22.04'}}"
+          RUNNER="${{ matrix.runner }}"
           case "$RUNNER" in
             ubuntu-22.04)
               TESTBED="ubuntu"
@@ -69,7 +64,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.29.2
-          cache: true
+          cache: ${{ matrix.runner != 'Gabriels-MacBook-Pro'}}
 
       - name: Setup Melos
         run: dart pub global activate melos
