@@ -77,9 +77,21 @@ const sidebars = {
       ],
     },
     {
-      type: 'doc',
-      id: 'full-text-search',
+      type: 'category',
+      label: 'Search',
+      items: [
+        {
+          type: 'doc',
+          id: 'full-text-search',
+          label: 'Full Text Search',
+        },
+        {
+          type: 'doc',
+          id: 'vector-search',
+        },
+      ],
     },
+
     {
       type: 'doc',
       id: 'indexing',
