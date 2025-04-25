@@ -20,7 +20,7 @@ export function APITabs(props: APITabsProps) {
       {React.Children.map(props.children, (child) => {
         if (!isValidAPITab(child)) {
           throw new Error(
-            'Every APITab must have an api property set to "Async" or "Sync".'
+            'Every APITab must have an api property set to "Async" or "Sync".',
           )
         }
 
@@ -37,5 +37,5 @@ export function APITabs(props: APITabsProps) {
 }
 
 function isValidAPITab(child: React.ReactElement) {
-  return !!child.props.api
+  return !!(child.props as any).api
 }

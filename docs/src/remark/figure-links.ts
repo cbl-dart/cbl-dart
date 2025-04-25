@@ -1,5 +1,6 @@
-const visitImport = import('unist-util-visit').then((m) => m.visit)
-const isImport = import('unist-util-is').then((m) => m.is)
+import { Plugin } from 'unified'
+import { is } from 'unist-util-is'
+import { visit } from 'unist-util-visit'
 
 const referenceRegex = /(Figure|Table|Example) ([0-9]+)/
 
@@ -13,12 +14,8 @@ const referenceRegex = /(Figure|Table|Example) ([0-9]+)/
  * A link is simple if it has the form: [Figure 1](#), [Table 1](#) or [Example 1](#).
  * It will be transformed into: [Figure 1](#figure-1), [Table 1](#table-1) [Example 1](#example-1).
  */
-export function figureLinks() {
+export const figureLinks: Plugin = function () {
   return async (ast: any) => {
-    // Workaround for import ES6 modules.
-    const is = await isImport
-    const visit = await visitImport
-
     visit(ast, 'link', (node) => {
       if (node.url == '#' && is(node.children[0], 'text')) {
         const value = (node.children[0] as any).value

@@ -1,4 +1,5 @@
-const visitImport = import('unist-util-visit').then((m) => m.visit)
+import { Plugin } from 'unified'
+import { visit } from 'unist-util-visit'
 
 const refRegexp =
   /(api\|)([^|]+\|)?((pkg|type|new|td|ext|fn|prop|const|enum|enum-value):)?([^.|]+)?(\.[^\(\)|]+)?(\(\))?/
@@ -10,11 +11,9 @@ const defaultPackage = 'cbl'
  *
  * The code must be formatting a specific way.
  */
-export function codeLinks() {
+export const codeLinks: Plugin = function () {
   return async (ast: any) => {
     // Workaround for import ES6 modules.
-
-    const visit = await visitImport
 
     visit(ast, 'inlineCode', (node, index, parent) => {
       const value = (node as any).value as string
@@ -133,7 +132,7 @@ function codeRefUrl(codeRef: CodeRef): string {
 
 function packageDocsUrlBase(
   { pkg, library }: CodeRef,
-  { pkgRoot }: { pkgRoot?: boolean } = {}
+  { pkgRoot }: { pkgRoot?: boolean } = {},
 ) {
   if (pkg.startsWith('dart')) {
     return `https://api.dart.dev/${pkg}-${library}`

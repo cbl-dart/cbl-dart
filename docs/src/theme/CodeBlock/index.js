@@ -31,8 +31,8 @@ export default function CodeBlock({ children: rawChildren, ...props }) {
     props.showLineNumbers !== undefined
       ? Boolean(props.showLineNumbers)
       : isSingleLine
-      ? false
-      : true
+        ? false
+        : true
 
   const CodeBlockComp =
     typeof children === 'string' ? StringContent : ElementContent

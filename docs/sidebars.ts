@@ -1,14 +1,13 @@
-// @ts-check
+import type { SidebarsConfig } from '@docusaurus/plugin-content-docs'
+import { SidebarItemLink } from '@docusaurus/plugin-content-docs/src/sidebars/types.js'
 
-const pubDevDocsLink = (packageName) =>
-  /** @type any */ ({
-    type: 'link',
-    label: `${packageName} API`,
-    href: `https://pub.dev/documentation/${packageName}/latest/${packageName}/${packageName}-library.html`,
-  })
+const pubDevDocsLink = (packageName: string): SidebarItemLink => ({
+  type: 'link',
+  label: `${packageName} API`,
+  href: `https://pub.dev/documentation/${packageName}/latest/${packageName}/${packageName}-library.html`,
+})
 
-/** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
-const sidebars = {
+export default {
   sidebar: [
     {
       type: 'doc',
@@ -115,6 +114,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'References',
+      collapsed: true,
       collapsible: false,
       items: [
         pubDevDocsLink('cbl'),
@@ -124,6 +124,4 @@ const sidebars = {
       ],
     },
   ],
-}
-
-module.exports = sidebars
+} satisfies SidebarsConfig

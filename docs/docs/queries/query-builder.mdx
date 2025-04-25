@@ -106,7 +106,7 @@ await collection.createIndex('TypeNameIndex', config);
 
 </CodeExample>
 
-## SELECT Clause {#select-clause}
+## SELECT Clause \{#select-clause}
 
 Use the `SELECT` clause to specify which properties you want to return from the
 queried documents. You can opt to retrieve entire documents, or just the
@@ -221,7 +221,7 @@ property-name as the key — see [Example 6](#).
 
 See [Result Sets](./query-result-sets.mdx) for more on processing query results.
 
-## WHERE Clause {#where-clause}
+## WHERE Clause \{#where-clause}
 
 Like in SQL, you can use the `WHERE` clause to choose which documents are
 included by your query. The `WHERE` clause takes an `api|Expression`. You can
@@ -506,7 +506,7 @@ final query = const QueryBuilder()
 
 </CodeExample>
 
-## JOIN Clause {#join-clause}
+## JOIN Clause \{#join-clause}
 
 The `JOIN` clause enables you to select data from multiple documents that have
 been linked by criteria specified in the `JOIN` clause. For example to combine
@@ -545,7 +545,7 @@ final query = const QueryBuilder()
 
 </CodeExample>
 
-## GROUP BY Clause {#group-by-clause}
+## GROUP BY Clause \{#group-by-clause}
 
 You can perform further processing on the data in your result set before the
 final projection is generated.
@@ -599,7 +599,7 @@ await for (final result in resultSet.asStream()) {
 
 </CodeExample>
 
-## ORDER BY Clause {#order-by-clause}
+## ORDER BY Clause \{#order-by-clause}
 
 It is possible to sort the results of a query based on a given expression result
 — see [Example 17](#).
