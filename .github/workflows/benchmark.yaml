@@ -15,13 +15,11 @@ on:
       - edited
       - synchronize
       - closed
+    paths-ignore:
+      - docs/**
 
 jobs:
   run-benchmarks:
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [ubuntu-22.04, Gabriels-MacBook-Pro]
     # Fork PRs don't have access to the secrets, so we don't run the job for them.
     if:
       github.event_name != 'pull_request' || (github.event.action != 'closed' &&
@@ -30,25 +28,14 @@ jobs:
       contents: read
       pull-requests: write
       checks: write
-    runs-on: ${{ matrix.runner }}
+    runs-on:
+      - runs-on=${{ github.run_id }}
+      - runner=2cpu-linux-x64
+      - image=ubuntu22-full-x64
+      - family=m7a
+      - extras=s3-cache
     steps:
-      - name: Resolve testbed
-        run: |
-          RUNNER="${{ matrix.runner }}"
-          case "$RUNNER" in
-            ubuntu-22.04)
-              TESTBED="ubuntu"
-              ;;
-            Gabriels-MacBook-Pro)
-              TESTBED="gabriels-macbook-pro"
-              ;;
-            *)
-              echo "Unknown runner: $RUNNER"
-              exit 1
-              ;;
-          esac
-          echo "TESTBED=${TESTBED}" >> $GITHUB_ENV
-
+      - uses: runs-on/action@v1
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -64,7 +51,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.29.2
-          cache: ${{ matrix.runner != 'Gabriels-MacBook-Pro'}}
+          cache: true
 
       - name: Setup Melos
         run: dart pub global activate melos
@@ -92,7 +79,7 @@ jobs:
             --project cbl-dart \
             --token '${{ secrets.BENCHER_API_TOKEN }}' \
             --branch main \
-            --testbed "${TESTBED}" \
+            --testbed ubuntu \
             --threshold-measure latency \
             --threshold-test t_test \
             --threshold-max-sample-size 64 \
@@ -121,7 +108,7 @@ jobs:
             --start-point-hash '${{ github.event.pull_request.base.sha }}' \
             --start-point-clone-thresholds \
             --start-point-reset \
-            --testbed "${TESTBED}" \
+            --testbed ubuntu \
             --err \
             --adapter json \
             --file results.json \
