@@ -20,7 +20,7 @@ export function EmbedderTabs(props: EmbedderTabsProps) {
       {React.Children.map(props.children, function (child) {
         if (!isValidEmbedderTab(child)) {
           throw new Error(
-            'Every EmbedderTab must have an embedder property set to "Dart" or "Flutter".'
+            'Every EmbedderTab must have an embedder property set to "Dart" or "Flutter".',
           )
         }
 
