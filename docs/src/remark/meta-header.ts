@@ -1,22 +1,21 @@
-const isImport = import('unist-util-is').then((m) => m.is)
-const flatMapImport = import('unist-util-flatmap').then((m) => m.default)
+import { Plugin } from 'unified'
+import * as flatMap from 'unist-util-flatmap'
+import { is } from 'unist-util-is'
 
 /**
  * Remark plugin that inserts the meta header under each level 1 heading.
  */
-export function metaHeader() {
+export const metaHeader: Plugin = function () {
   return async (ast: any) => {
-    // Workaround for import ES6 modules.
-    const is = await isImport
-    const flatMap = await flatMapImport
-
-    flatMap(ast, (node) => {
+    flatMap.default(ast, (node) => {
       if (is(node, 'heading') && (node as any).depth == 1) {
         return [
           node,
           {
-            type: 'html',
-            value: '<MetaHeader />',
+            type: 'mdxJsxFlowElement',
+            name: 'MetaHeader',
+            attributes: [],
+            children: [],
           },
         ]
       } else {

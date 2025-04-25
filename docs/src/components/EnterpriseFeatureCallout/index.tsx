@@ -1,5 +1,4 @@
 import Admonition from '@theme-original/Admonition'
-import React from 'react'
 
 export default function EnterpriseFeatureCallout() {
   return (

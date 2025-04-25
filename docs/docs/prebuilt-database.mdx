@@ -44,13 +44,13 @@ the database up to date.
    the bundled pre-built database. Then initiate a sync to update the data - see
    [Using Pre-built Database on App Launch](#using-pre-built-database-on-app-launch).
 
-## Creating Pre-built Database {#creating-pre-built-database}
+## Creating Pre-built Database \{#creating-pre-built-database}
 
 These steps should form part of your build and release process:
 
 1. Create a fresh Couchbase Lite database (every time).
 
-   :::caution Important
+   :::caution[Important]
 
    **Always create a new pre-built database for each app version**. This ensures
    that there will be no [**checkpoint**][checkpoint] missmatch between the
@@ -65,7 +65,7 @@ These steps should form part of your build and release process:
 2. Pull the data from Capella App Services or Sync Gateway into the new
    Couchbase Lite database.
 
-   :::caution Important
+   :::caution[Important]
 
    Ensure the replication used to populate Couchbase Lite database **uses the
    exact same remote URL and replication config parameters (channels and
@@ -87,7 +87,7 @@ These steps should form part of your build and release process:
 3. Create the **same** indexes the app will use (wait for the replication to
    finish before doing this).
 
-## Bundle a Database with an Application {#bundle-database-with-application}
+## Bundle a Database with an Application \{#bundle-database-with-application}
 
 Copy the database into your app package. It's recommended you compress the
 database using zip to keep the size of your mobile app down.
@@ -125,7 +125,7 @@ or if you want to change (or remove) the encryption key applied to the copy:
 
    :::
 
-## Using Pre-built Database on App Launch {#using-pre-built-database-on-app-launch}
+## Using Pre-built Database on App Launch \{#using-pre-built-database-on-app-launch}
 
 During the application start-up logic, check if database exists in the required
 location, and if not:
@@ -138,7 +138,7 @@ location, and if not:
     Use the API's `api|Database.copy` method — see: [Example 1](#). This ensures
     that a unique UUID is generated for each copy.
 
-    :::caution IMPORTANT
+    :::caution[Important]
 
     Do not copy the database using any other method.
 

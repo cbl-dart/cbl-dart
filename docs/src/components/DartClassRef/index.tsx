@@ -1,5 +1,3 @@
-import React from 'react'
-
 export interface DartClassRefProps {
   package?: string
   name: string

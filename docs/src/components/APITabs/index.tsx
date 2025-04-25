@@ -37,5 +37,5 @@ export function APITabs(props: APITabsProps) {
 }
 
 function isValidAPITab(child: React.ReactElement) {
-  return !!child.props.api
+  return !!(child.props as any).api
 }

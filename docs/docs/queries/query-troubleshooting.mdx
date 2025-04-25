@@ -120,7 +120,7 @@ purposes. For more on SQLite's Explain Query Plan — see:
 
 </CodeExample>
 
-### Retrieval Method {#retrieval-method}
+### Retrieval Method \{#retrieval-method}
 
 The query optimizer will attempt to retrieve the requested data items as
 efficiently as possible, which generally will be by using one or more of the
@@ -146,7 +146,7 @@ When looking to optimize a query's retrieval method, consider whether:
 - You could reduce the data set being requested to minimize the query's
   footprint on the database.
 
-### Order and Group {#order-and-group}
+### Order and Group \{#order-and-group}
 
 The `USE TEMP B-TREE FOR` lines in the example indicate that the query requires
 sorting to cater for grouping and then sorting again to present the output
@@ -207,7 +207,7 @@ improvements in optimization. They may not, in themselves, resolve the issue
 entirely; but they can provide a uesful guide toward further optimizing changes
 you could make.
 
-## Wildcard and Like-based Queries {#wildcard-queries}
+## Wildcard and Like-based Queries \{#wildcard-queries}
 
 Like-based searches can use the index(es) only if:
 

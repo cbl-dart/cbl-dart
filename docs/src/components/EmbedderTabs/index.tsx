@@ -37,5 +37,5 @@ export function EmbedderTabs(props: EmbedderTabsProps) {
 }
 
 function isValidEmbedderTab(child: React.ReactElement) {
-  return !!child.props.embedder
+  return !!(child.props as any).embedder
 }

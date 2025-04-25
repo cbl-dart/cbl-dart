@@ -9,13 +9,13 @@ import MDXComponents from '@theme-original/MDXComponents'
 
 export default {
   ...MDXComponents,
-  CodeExample: CodeExample,
-  Figure: Figure,
-  Table: Table,
-  metaheader: MetaHeader,
-  EnterpriseFeatureCallout: EnterpriseFeatureCallout,
-  APITab: APITab,
-  APITabs: APITabs,
-  EmbedderTab: EmbedderTab,
-  EmbedderTabs: EmbedderTabs,
+  CodeExample,
+  Figure,
+  Table,
+  MetaHeader,
+  EnterpriseFeatureCallout,
+  APITab,
+  APITabs,
+  EmbedderTab,
+  EmbedderTabs,
 }
