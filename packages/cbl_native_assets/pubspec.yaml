@@ -13,5 +13,5 @@ dependencies:
   cbl: ^3.4.2+0
 
 dev_dependencies:
-  ffigen: ^16.0.0
+  ffigen: ^18.0.0
   test: ^1.21.1
