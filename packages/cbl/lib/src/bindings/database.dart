@@ -71,7 +71,7 @@ enum CBLMaintenanceType {
 }
 
 final class DatabaseBindings extends Bindings {
-  DatabaseBindings(super.parent);
+  DatabaseBindings(super.libraries);
 
   late final _finalizer =
       NativeFinalizer(cblDart.addresses.CBLDart_CBLDatabase_Release.cast());
@@ -254,7 +254,7 @@ final class DatabaseBindings extends Bindings {
 
     result.ref.directory = config.directory.toFLString();
 
-    if (enterpriseEdition) {
+    if (libraries.enterpriseEdition) {
       final key = globalArena<cblitedart.CBLDart_CBLEncryptionKey>();
       _writeEncryptionKey(
         key.cast<cblite.CBLEncryptionKey>().ref,

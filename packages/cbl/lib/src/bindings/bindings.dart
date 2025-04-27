@@ -14,62 +14,59 @@ import 'query.dart';
 import 'replicator.dart';
 import 'tracing.dart';
 
-abstract base class Bindings {
-  Bindings(Bindings parent)
-      : enterpriseEdition = parent.enterpriseEdition,
-        cbl = parent.cbl,
-        cblDart = parent.cblDart,
-        vectorSearchLibraryPath = parent.vectorSearchLibraryPath {
-    parent._children.add(this);
-  }
-
-  Bindings.root({
+class BindingsLibraries {
+  BindingsLibraries({
     required this.enterpriseEdition,
+    this.vectorSearchLibraryPath,
     required this.cbl,
     required this.cblDart,
-    required this.vectorSearchLibraryPath,
   });
 
+  BindingsLibraries.fromDynamicLibraries(DynamicLibraries dynamicLibraries)
+      : enterpriseEdition = dynamicLibraries.enterpriseEdition,
+        vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
+        cbl = cblite(dynamicLibraries.cbl),
+        cblDart = cblitedart(dynamicLibraries.cblDart);
+
   final bool enterpriseEdition;
+  final String? vectorSearchLibraryPath;
   final cblite cbl;
   final cblitedart cblDart;
-  final String? vectorSearchLibraryPath;
+}
 
-  List<Bindings> get _children => [];
+abstract base class Bindings {
+  Bindings(this.libraries)
+      : cbl = libraries.cbl,
+        cblDart = libraries.cblDart;
+
+  final BindingsLibraries libraries;
+  final cblite cbl;
+  final cblitedart cblDart;
 }
 
 final class CBLBindings extends Bindings {
-  CBLBindings({
-    required super.enterpriseEdition,
-    required super.cbl,
-    required super.cblDart,
-    super.vectorSearchLibraryPath,
-  }) : super.root() {
-    base = BaseBindings(this);
-    asyncCallback = AsyncCallbackBindings(this);
-    logging = LoggingBindings(this);
-    database = DatabaseBindings(this);
-    collection = CollectionBindings(this);
-    document = DocumentBindings(this);
-    mutableDocument = MutableDocumentBindings(this);
-    query = QueryBindings(this);
-    resultSet = ResultSetBindings(this);
-    queryIndex = QueryIndexBindings(this);
-    indexUpdater = IndexUpdaterBindings(this);
-    blobs = BlobsBindings(this);
-    replicator = ReplicatorBindings(this);
-    fleece = FleeceBindings(this);
-  }
+  CBLBindings(super.libraries)
+      : base = BaseBindings(libraries),
+        asyncCallback = AsyncCallbackBindings(libraries),
+        logging = LoggingBindings(libraries),
+        database = DatabaseBindings(libraries),
+        collection = CollectionBindings(libraries),
+        document = DocumentBindings(libraries),
+        mutableDocument = MutableDocumentBindings(libraries),
+        query = QueryBindings(libraries),
+        resultSet = ResultSetBindings(libraries),
+        queryIndex = QueryIndexBindings(libraries),
+        indexUpdater = IndexUpdaterBindings(libraries),
+        blobs = BlobsBindings(libraries),
+        replicator = ReplicatorBindings(libraries),
+        fleece = FleeceBindings(libraries);
 
-  factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) {
-    final dynamicLibraries = DynamicLibraries.fromConfig(libraries);
-    return CBLBindings(
-      enterpriseEdition: libraries.enterpriseEdition,
-      cbl: cblite(dynamicLibraries.cbl),
-      cblDart: cblitedart(dynamicLibraries.cblDart),
-      vectorSearchLibraryPath: dynamicLibraries.vectorSearchLibraryPath,
-    );
-  }
+  factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) =>
+      CBLBindings(
+        BindingsLibraries.fromDynamicLibraries(
+          DynamicLibraries.fromConfig(libraries),
+        ),
+      );
 
   static CBLBindings? _instance;
 
@@ -96,20 +93,20 @@ final class CBLBindings extends Bindings {
     }
   }
 
-  late final BaseBindings base;
-  late final AsyncCallbackBindings asyncCallback;
-  late final LoggingBindings logging;
-  late final DatabaseBindings database;
-  late final CollectionBindings collection;
-  late final DocumentBindings document;
-  late final MutableDocumentBindings mutableDocument;
-  late final QueryBindings query;
-  late final ResultSetBindings resultSet;
-  late final QueryIndexBindings queryIndex;
-  late final IndexUpdaterBindings indexUpdater;
-  late final BlobsBindings blobs;
-  late final ReplicatorBindings replicator;
-  late final FleeceBindings fleece;
+  final BaseBindings base;
+  final AsyncCallbackBindings asyncCallback;
+  final LoggingBindings logging;
+  final DatabaseBindings database;
+  final CollectionBindings collection;
+  final DocumentBindings document;
+  final MutableDocumentBindings mutableDocument;
+  final QueryBindings query;
+  final ResultSetBindings resultSet;
+  final QueryIndexBindings queryIndex;
+  final IndexUpdaterBindings indexUpdater;
+  final BlobsBindings blobs;
+  final ReplicatorBindings replicator;
+  final FleeceBindings fleece;
 }
 
 set _onTracedCall(TracedCallHandler value) => onTracedCall = value;

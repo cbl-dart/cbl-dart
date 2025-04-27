@@ -289,7 +289,7 @@ final class DocumentReplicationsCallbackMessage {
 // === ReplicatorBindings ======================================================
 
 final class ReplicatorBindings extends Bindings {
-  ReplicatorBindings(super.parent);
+  ReplicatorBindings(super.libraries);
 
   late final _finalizer =
       NativeFinalizer(cblDart.addresses.CBLDart_CBLReplicator_Release.cast());

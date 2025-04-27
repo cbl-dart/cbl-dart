@@ -15,7 +15,7 @@ void main() async {
   });
 
   test('find vector search library', () async {
-    expect(CBLBindings.instance.vectorSearchLibraryPath, isNotNull);
+    expect(CBLBindings.instance.libraries.vectorSearchLibraryPath, isNotNull);
   });
 
   test('create vector search index', () async {

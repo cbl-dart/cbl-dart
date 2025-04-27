@@ -8,7 +8,7 @@ void main() {
 
   group('CBLBindings', () {
     test('find vector search library', () {
-      expect(CBLBindings.instance.vectorSearchLibraryPath, isNotNull);
+      expect(CBLBindings.instance.libraries.vectorSearchLibraryPath, isNotNull);
     });
   });
 }

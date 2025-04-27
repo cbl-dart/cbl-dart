@@ -64,7 +64,7 @@ final class CollectionChangeCallbackMessage {
 }
 
 final class CollectionBindings extends Bindings {
-  CollectionBindings(super.parent);
+  CollectionBindings(super.libraries);
 
   cblite.FLMutableArray databaseScopeNames(Pointer<cblite.CBLDatabase> db) =>
       cbl.CBLDatabase_ScopeNames(db, globalCBLError).checkError();

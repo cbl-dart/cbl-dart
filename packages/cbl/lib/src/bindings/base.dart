@@ -435,14 +435,15 @@ extension CheckErrorBoolExt on bool {
 // === BaseBindings ============================================================
 
 final class BaseBindings extends Bindings {
-  BaseBindings(super.parent);
+  BaseBindings(super.libraries);
 
   late final isolateId = cblDart.CBLDart_AllocateIsolateId();
 
   late final _refCountedFinalizer =
       NativeFinalizer(cbl.addresses.CBL_Release.cast());
 
-  bool get vectorSearchLibraryAvailable => vectorSearchLibraryPath != null;
+  bool get vectorSearchLibraryAvailable =>
+      libraries.vectorSearchLibraryPath != null;
 
   bool get systemSupportsVectorSearch => switch (Abi.current()) {
         Abi.androidArm ||
@@ -504,7 +505,7 @@ final class BaseBindings extends Bindings {
   }
 
   void enableVectorSearch() {
-    if (vectorSearchLibraryPath case final libraryPath?
+    if (libraries.vectorSearchLibraryPath case final libraryPath?
         when systemSupportsVectorSearch) {
       final libraryDirectory = p.dirname(libraryPath);
       runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {

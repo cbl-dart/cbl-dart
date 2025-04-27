@@ -132,7 +132,7 @@ final class CBLLogFileConfiguration {
 }
 
 final class LoggingBindings extends Bindings {
-  LoggingBindings(super.parent);
+  LoggingBindings(super.libraries);
 
   void logMessage(
     CBLLogDomain domain,

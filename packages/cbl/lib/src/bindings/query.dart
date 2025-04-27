@@ -53,7 +53,7 @@ enum CBLDartIndexType {
 }
 
 final class QueryBindings extends Bindings {
-  QueryBindings(super.parent);
+  QueryBindings(super.libraries);
 
   late final _predictiveModelFinalizer = NativeFinalizer(
     cblDart.addresses.CBLDart_PredictiveModel_Delete.cast(),
@@ -141,7 +141,7 @@ final class QueryBindings extends Bindings {
 }
 
 final class ResultSetBindings extends Bindings {
-  ResultSetBindings(super.parent);
+  ResultSetBindings(super.libraries);
 
   bool next(Pointer<cblite.CBLResultSet> resultSet) =>
       cbl.CBLResultSet_Next(resultSet);
@@ -170,7 +170,7 @@ final class ResultSetBindings extends Bindings {
 }
 
 final class QueryIndexBindings extends Bindings {
-  QueryIndexBindings(super.parent);
+  QueryIndexBindings(super.libraries);
 
   Pointer<cblite.CBLIndexUpdater>? beginUpdate(
     Pointer<cblite.CBLQueryIndex> index,
@@ -186,7 +186,7 @@ final class QueryIndexBindings extends Bindings {
 }
 
 final class IndexUpdaterBindings extends Bindings {
-  IndexUpdaterBindings(super.parent);
+  IndexUpdaterBindings(super.libraries);
 
   cblite.FLValue value(Pointer<cblite.CBLIndexUpdater> updater, int index) =>
       cbl.CBLIndexUpdater_Value(updater, index);

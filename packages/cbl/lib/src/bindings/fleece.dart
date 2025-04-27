@@ -135,7 +135,7 @@ extension FLStringResultExt on cblite.FLStringResult {
 }
 
 final class SliceBindings extends Bindings {
-  SliceBindings(super.parent);
+  SliceBindings(super.libraries);
 
   late final _sliceResultFinalizer = NativeFinalizer(
     cblDart.addresses.CBLDart_FLSliceResult_ReleaseByBuf.cast(),
@@ -173,7 +173,7 @@ final class SliceBindings extends Bindings {
 // === SharedKeys ==============================================================
 
 final class SharedKeysBindings extends Bindings {
-  SharedKeysBindings(super.parent);
+  SharedKeysBindings(super.libraries);
 
   late final _finalizer =
       NativeFinalizer(cbl.addresses.FLSharedKeys_Release.cast());
@@ -199,7 +199,7 @@ final class SharedKeysBindings extends Bindings {
 // === Slot ====================================================================
 
 final class SlotBindings extends Bindings {
-  SlotBindings(super.parent);
+  SlotBindings(super.libraries);
 
   void setNull(cblite.FLSlot slot) {
     cbl.FLSlot_SetNull(slot);
@@ -251,7 +251,7 @@ enum FLTrust {
 }
 
 final class DocBindings extends Bindings {
-  DocBindings(super.parent);
+  DocBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(cbl.addresses.FLDoc_Release.cast());
 
@@ -322,7 +322,7 @@ enum FLValueType {
 }
 
 final class ValueBindings extends Bindings {
-  ValueBindings(super.parent);
+  ValueBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(cbl.addresses.FLValue_Release.cast());
 
@@ -381,7 +381,7 @@ final class ValueBindings extends Bindings {
 // === Array ===================================================================
 
 final class ArrayBindings extends Bindings {
-  ArrayBindings(super.parent);
+  ArrayBindings(super.libraries);
 
   int count(cblite.FLArray array) => cbl.FLArray_Count(array);
 
@@ -416,7 +416,7 @@ enum FLCopyFlags {
 }
 
 final class MutableArrayBindings extends Bindings {
-  MutableArrayBindings(super.parent);
+  MutableArrayBindings(super.libraries);
 
   cblite.FLMutableArray mutableCopy(
     cblite.FLArray array,
@@ -463,7 +463,7 @@ final class MutableArrayBindings extends Bindings {
 // === Dict ====================================================================
 
 final class DictBindings extends Bindings {
-  DictBindings(super.parent);
+  DictBindings(super.libraries);
 
   cblite.FLValue? get(cblite.FLDict dict, String key) =>
       runWithSingleFLString(key, (flKey) => cbl.FLDict_Get(dict, flKey))
@@ -481,7 +481,7 @@ final class DictBindings extends Bindings {
 }
 
 final class DictKeyBindings extends Bindings {
-  DictKeyBindings(super.parent);
+  DictKeyBindings(super.libraries);
 
   void init(cblite.FLDictKey dictKey, cblite.FLString key) {
     final state = cbl.FLDictKey_Init(key);
@@ -503,7 +503,7 @@ final class DictKeyBindings extends Bindings {
 // === MutableDict =============================================================
 
 final class MutableDictBindings extends Bindings {
-  MutableDictBindings(super.parent);
+  MutableDictBindings(super.libraries);
 
   cblite.FLMutableDict mutableCopy(
     cblite.FLDict source,
@@ -564,7 +564,7 @@ extension CBLDart_LoadedFLValueExt on cblitedart.CBLDart_LoadedFLValue {
 }
 
 final class FleeceDecoderBindings extends Bindings {
-  FleeceDecoderBindings(super.parent);
+  FleeceDecoderBindings(super.libraries);
 
   late final _knownSharedKeysFinalizer =
       NativeFinalizer(cblDart.addresses.CBLDart_KnownSharedKeys_Delete.cast());
@@ -673,7 +673,7 @@ enum FLEncoderFormat {
 }
 
 final class FleeceEncoderBindings extends Bindings {
-  FleeceEncoderBindings(super.parent);
+  FleeceEncoderBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(cbl.addresses.FLEncoder_Free.cast());
 
@@ -823,31 +823,30 @@ final class FleeceEncoderBindings extends Bindings {
 // === FleeceBindings ==========================================================
 
 final class FleeceBindings extends Bindings {
-  FleeceBindings(super.parent) {
-    slice = SliceBindings(this);
-    sharedKeys = SharedKeysBindings(this);
-    slot = SlotBindings(this);
-    doc = DocBindings(this);
-    value = ValueBindings(this);
-    array = ArrayBindings(this);
-    mutableArray = MutableArrayBindings(this);
-    dict = DictBindings(this);
-    dictKey = DictKeyBindings(this);
-    mutableDict = MutableDictBindings(this);
-    decoder = FleeceDecoderBindings(this);
-    encoder = FleeceEncoderBindings(this);
-  }
+  FleeceBindings(super.libraries)
+      : slice = SliceBindings(libraries),
+        sharedKeys = SharedKeysBindings(libraries),
+        slot = SlotBindings(libraries),
+        doc = DocBindings(libraries),
+        value = ValueBindings(libraries),
+        array = ArrayBindings(libraries),
+        mutableArray = MutableArrayBindings(libraries),
+        dict = DictBindings(libraries),
+        dictKey = DictKeyBindings(libraries),
+        mutableDict = MutableDictBindings(libraries),
+        decoder = FleeceDecoderBindings(libraries),
+        encoder = FleeceEncoderBindings(libraries);
 
-  late final SliceBindings slice;
-  late final SharedKeysBindings sharedKeys;
-  late final SlotBindings slot;
-  late final DocBindings doc;
-  late final ValueBindings value;
-  late final ArrayBindings array;
-  late final MutableArrayBindings mutableArray;
-  late final DictBindings dict;
-  late final DictKeyBindings dictKey;
-  late final MutableDictBindings mutableDict;
-  late final FleeceDecoderBindings decoder;
-  late final FleeceEncoderBindings encoder;
+  final SliceBindings slice;
+  final SharedKeysBindings sharedKeys;
+  final SlotBindings slot;
+  final DocBindings doc;
+  final ValueBindings value;
+  final ArrayBindings array;
+  final MutableArrayBindings mutableArray;
+  final DictBindings dict;
+  final DictKeyBindings dictKey;
+  final MutableDictBindings mutableDict;
+  final FleeceDecoderBindings decoder;
+  final FleeceEncoderBindings encoder;
 }

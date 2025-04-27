@@ -23,7 +23,7 @@ enum EnterpriseFeature {
 
 Edition get activeEdition =>
     _activeEditionOverride ??
-    (CBLBindings.instance.enterpriseEdition
+    (CBLBindings.instance.libraries.enterpriseEdition
         ? Edition.enterprise
         : Edition.community);
 

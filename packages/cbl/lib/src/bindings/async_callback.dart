@@ -7,7 +7,7 @@ import 'cblitedart.dart';
 export 'cblitedart.dart' show CBLDart_AsyncCallback;
 
 final class AsyncCallbackBindings extends Bindings {
-  AsyncCallbackBindings(super.parent);
+  AsyncCallbackBindings(super.libraries);
 
   late final _finalizer =
       NativeFinalizer(cblDart.addresses.CBLDart_AsyncCallback_Delete.cast());

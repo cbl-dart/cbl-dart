@@ -14,7 +14,7 @@ export 'cblite.dart' show CBLBlob, CBLBlobReadStream;
 // === CBLBlob =================================================================
 
 final class BlobBindings extends Bindings {
-  BlobBindings(super.parent);
+  BlobBindings(super.libraries);
 
   Pointer<cblite.CBLBlob> createWithData(String? contentType, Data content) =>
       runWithSingleFLString(
@@ -57,7 +57,7 @@ final class BlobBindings extends Bindings {
 // === CBLBlobReadStream =======================================================
 
 final class BlobReadStreamBindings extends Bindings {
-  BlobReadStreamBindings(super.parent);
+  BlobReadStreamBindings(super.libraries);
 
   late final _finalizer =
       NativeFinalizer(cbl.addresses.CBLBlobReader_Close.cast());
@@ -93,7 +93,7 @@ final class BlobReadStreamBindings extends Bindings {
 // === CBLBlobWriteStream ======================================================
 
 final class BlobWriteStreamBindings extends Bindings {
-  BlobWriteStreamBindings(super.parent);
+  BlobWriteStreamBindings(super.libraries);
 
   Pointer<cblite.CBLBlobWriteStream> create(Pointer<cblite.CBLDatabase> db) =>
       cbl.CBLBlobWriter_Create(db, globalCBLError).checkError();
@@ -125,13 +125,12 @@ final class BlobWriteStreamBindings extends Bindings {
 // === BlobsBindings ===========================================================
 
 final class BlobsBindings extends Bindings {
-  BlobsBindings(super.parent) {
-    blob = BlobBindings(this);
-    readStream = BlobReadStreamBindings(this);
-    writeStream = BlobWriteStreamBindings(this);
-  }
+  BlobsBindings(super.libraries)
+      : blob = BlobBindings(libraries),
+        readStream = BlobReadStreamBindings(libraries),
+        writeStream = BlobWriteStreamBindings(libraries);
 
-  late final BlobBindings blob;
-  late final BlobReadStreamBindings readStream;
-  late final BlobWriteStreamBindings writeStream;
+  final BlobBindings blob;
+  final BlobReadStreamBindings readStream;
+  final BlobWriteStreamBindings writeStream;
 }

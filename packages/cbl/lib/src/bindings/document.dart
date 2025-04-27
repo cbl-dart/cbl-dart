@@ -10,7 +10,7 @@ import 'utils.dart';
 export 'cblite.dart' show CBLDocument;
 
 final class DocumentBindings extends Bindings {
-  DocumentBindings(super.parent);
+  DocumentBindings(super.libraries);
 
   String id(Pointer<cblite.CBLDocument> doc) =>
       cbl.CBLDocument_ID(doc).toDartString()!;
@@ -29,7 +29,7 @@ final class DocumentBindings extends Bindings {
 }
 
 final class MutableDocumentBindings extends Bindings {
-  MutableDocumentBindings(super.parent);
+  MutableDocumentBindings(super.libraries);
 
   Pointer<cblite.CBLDocument> createWithID([String? id]) =>
       runWithSingleFLString(id, cbl.CBLDocument_CreateWithID);
