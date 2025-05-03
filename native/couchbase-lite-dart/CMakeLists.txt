@@ -14,7 +14,7 @@ set(CBL_DART_LIB_VERSION ${CouchbaseLite_Dart_VERSION})
 set(CBL_DART_API_VERSION ${CouchbaseLite_Dart_VERSION_MAJOR})
 
 if(NOT DEFINED CBL_EDITION)
-    set(CBL_EDITION community)
+    set(CBL_EDITION enterprise)
 endif()
 
 if(NOT DEFINED CBL_RELEASE)
@@ -108,3 +108,27 @@ install(TARGETS cblitedart
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     install(FILES $<TARGET_PDB_FILE:cblitedart> DESTINATION bin)
 endif()
+
+add_library(p2p_issue
+    SHARED
+    src/p2p_issue.mm
+)
+
+target_include_directories(p2p_issue
+    PUBLIC
+    include
+    PRIVATE
+    src
+)
+
+target_link_libraries(p2p_issue
+    cblite
+)
+
+add_executable(main
+    src/main.cpp
+)
+
+target_link_libraries(main
+    p2p_issue
+)

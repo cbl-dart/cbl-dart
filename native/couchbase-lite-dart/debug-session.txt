@@ -1,0 +1,58 @@
+➜  couchbase-lite-dart git:(04-27-feat_peer-to-peer_sync) ✗ lldb ./build/main
+(lldb) target create "./build/main"
+Current executable set to '/Users/terwesten/dev/cbl-dart/cbl-dart/native/couchbase-lite-dart/build/main' (arm64).
+(lldb) run
+Process 59432 launched: '/Users/terwesten/dev/cbl-dart/cbl-dart/native/couchbase-lite-dart/build/main' (arm64)
+2025-05-03T17:54:11.538137 Network Info Loading a certificate chain with the id 'test' from the Keychain
+2025-05-03T17:54:11.631086 Network Verbose SecTrustEvaluateWithError failed: Error Domain=NSOSStatusErrorDomain Code=-67843 "“test” certificate is not trusted" UserInfo={NSLocalizedDescription=“test” certificate is not trusted, NSUnderlyingError=0x151907d30 {Error Domain=NSOSStatusErrorDomain Code=-67843 "Certificate 0 “test” has errors: Certificate is not temporally valid, Root is not trusted;" UserInfo={NSLocalizedDescription=Certificate 0 “test” has errors: Certificate is not temporally valid, Root is not trusted;}}}
+2025-05-03T17:54:11.634047 Network Info Deleting a certificate chain with the id 'test' from the Keychain
+2025-05-03T17:54:11.635224 Network Verbose SecTrustEvaluateWithError failed: Error Domain=NSOSStatusErrorDomain Code=-67843 "“test” certificate is not trusted" UserInfo={NSLocalizedDescription=“test” certificate is not trusted, NSUnderlyingError=0x15060f0f0 {Error Domain=NSOSStatusErrorDomain Code=-67843 "Certificate 0 “test” has errors: Certificate is not temporally valid, Root is not trusted;" UserInfo={NSLocalizedDescription=Certificate 0 “test” has errors: Certificate is not temporally valid, Root is not trusted;}}}
+2025-05-03T17:54:17.425317 Replicator Verbose Deleted Identity test
+Identity deleted successfully
+2025-05-03T17:54:17.425939 Network Info Loading a certificate chain with the id 'test' from the Keychain
+2025-05-03T17:54:17.427288 Network Info Generating 2048-bit RSA key-pair in Keychain
+2025-05-03 17:54:17.427509+0200 main[59432:28777646] [logging-persist] cannot open file at line 49448 of [1b37c146ee]
+2025-05-03 17:54:17.427669+0200 main[59432:28777646] [logging-persist] os_unix.c:49448: (2) open(/private/var/db/DetachedSignatures) - No such file or directory
+2025-05-03T17:54:18.024586 Network Info Creating X.509 cert request for 'CN=test'
+2025-05-03T17:54:18.024623 Database Info Seeding the mbedTLS random number generator...
+2025-05-03T17:54:18.026794 Network Info Signing using Keychain private key
+2025-05-03T17:54:18.044028 Network Info Signing X.509 cert for 'CN=test', as issuer 'CN=test'
+2025-05-03T17:54:18.044972 Network Info Signing using Keychain private key
+2025-05-03T17:54:18.062485 Network Info Adding a certificate chain with the id 'test' to the Keychain for 'CN=test'
+2025-05-03T17:54:18.087413 Listener Verbose Created a self-signed identity with label=test, usages=64, expiry=1000, attr={"CN":"test"}
+Identity created successfully
+Identity released successfully
+2025-05-03T17:54:18.104787 Network Info Loading a certificate chain with the id 'test' from the Keychain
+2025-05-03T17:54:18.488794 Network Verbose SecTrustEvaluateWithError failed: Error Domain=NSOSStatusErrorDomain Code=-67843 "“test” certificate is not trusted" UserInfo={NSLocalizedDescription=“test” certificate is not trusted, NSUnderlyingError=0x150735c50 {Error Domain=NSOSStatusErrorDomain Code=-67843 "Certificate 0 “test” has errors: Root is not trusted;" UserInfo={NSLocalizedDescription=Certificate 0 “test” has errors: Root is not trusted;}}}
+2025-05-03T17:54:18.497665 Network Info Deleting a certificate chain with the id 'test' from the Keychain
+2025-05-03T17:54:18.500924 Network Verbose SecTrustEvaluateWithError failed: Error Domain=NSOSStatusErrorDomain Code=-67843 "“test” certificate is not trusted" UserInfo={NSLocalizedDescription=“test” certificate is not trusted, NSUnderlyingError=0x150715850 {Error Domain=NSOSStatusErrorDomain Code=-67843 "Certificate 0 “test” has errors: Root is not trusted;" UserInfo={NSLocalizedDescription=Certificate 0 “test” has errors: Root is not trusted;}}}
+2025-05-03T17:54:18.522073 Replicator Verbose Deleted Identity test
+Identity deleted successfully
+2025-05-03T17:54:18.529479 Network Info Loading a certificate chain with the id 'test' from the Keychain
+2025-05-03T17:54:18.542237 Network Info Generating 2048-bit RSA key-pair in Keychain
+2025-05-03T17:54:18.939963 Network Info Creating X.509 cert request for 'CN=test'
+2025-05-03T17:54:18.942345 Network Info Signing using Keychain private key
+2025-05-03T17:54:18.960775 Network Info Signing X.509 cert for 'CN=test', as issuer 'CN=test'
+2025-05-03T17:54:18.961549 Network Info Signing using Keychain private key
+2025-05-03T17:54:18.979048 Network Info Adding a certificate chain with the id 'test' to the Keychain for 'CN=test'
+2025-05-03T17:54:19.007114 Listener Verbose Created a self-signed identity with label=test, usages=64, expiry=1000, attr={"CN":"test"}
+Identity created successfully
+Identity released successfully
+Process 59432 stopped
+* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS (code=1, address=0x20)
+    frame #0: 0x000000019eb50008 libobjc.A.dylib`objc_release + 16
+libobjc.A.dylib`objc_release:
+->  0x19eb50008 <+16>: ldr    x17, [x2, #0x20]
+    0x19eb5000c <+20>: tbz    w17, #0x2, 0x19eb50070 ; <+120>
+    0x19eb50010 <+24>: tbz    w16, #0x0, 0x19eb50094 ; <+156>
+    0x19eb50014 <+28>: lsr    x17, x16, #55
+Target 0: (main) stopped.
+(lldb) bt
+* thread #1, queue = 'com.apple.main-thread', stop reason = EXC_BAD_ACCESS (code=1, address=0x20)
+  * frame #0: 0x000000019eb50008 libobjc.A.dylib`objc_release + 16
+    frame #1: 0x000000019eb57c34 libobjc.A.dylib`AutoreleasePoolPage::releaseUntil(objc_object**) + 204
+    frame #2: 0x000000019eb54060 libobjc.A.dylib`objc_autoreleasePoolPop + 244
+    frame #3: 0x000000010002b7a8 libp2p_issue.dylib`CreatePersistedIdentityInAutoReleasePool at p2p_issue.mm:48:3
+    frame #4: 0x0000000100003138 main`main at main.cpp:6:3
+    frame #5: 0x000000019eba2b4c dyld`start + 6000
+(lldb)
