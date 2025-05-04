@@ -3,6 +3,6 @@
 import 'package:cbl/src/install.dart';
 
 const latestReleases = {
-  Library.cblite: '3.2.2',
+  Library.cblite: '3.2.3',
   Library.cblitedart: '8.1.1',
 };

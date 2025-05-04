@@ -1948,6 +1948,419 @@ class cblite {
   late final _CBLDatabase_SendNotifications = _CBLDatabase_SendNotificationsPtr
       .asFunction<DartCBLDatabase_SendNotifications>();
 
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyCommonName =
+      _lookup<FLString>('kCBLCertAttrKeyCommonName');
+
+  FLString get kCBLCertAttrKeyCommonName => _kCBLCertAttrKeyCommonName.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyPseudonym =
+      _lookup<FLString>('kCBLCertAttrKeyPseudonym');
+
+  FLString get kCBLCertAttrKeyPseudonym => _kCBLCertAttrKeyPseudonym.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyGivenName =
+      _lookup<FLString>('kCBLCertAttrKeyGivenName');
+
+  FLString get kCBLCertAttrKeyGivenName => _kCBLCertAttrKeyGivenName.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeySurname =
+      _lookup<FLString>('kCBLCertAttrKeySurname');
+
+  FLString get kCBLCertAttrKeySurname => _kCBLCertAttrKeySurname.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyOrganization =
+      _lookup<FLString>('kCBLCertAttrKeyOrganization');
+
+  FLString get kCBLCertAttrKeyOrganization => _kCBLCertAttrKeyOrganization.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyOrganizationUnit =
+      _lookup<FLString>('kCBLCertAttrKeyOrganizationUnit');
+
+  FLString get kCBLCertAttrKeyOrganizationUnit =>
+      _kCBLCertAttrKeyOrganizationUnit.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyPostalAddress =
+      _lookup<FLString>('kCBLCertAttrKeyPostalAddress');
+
+  FLString get kCBLCertAttrKeyPostalAddress =>
+      _kCBLCertAttrKeyPostalAddress.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyLocality =
+      _lookup<FLString>('kCBLCertAttrKeyLocality');
+
+  FLString get kCBLCertAttrKeyLocality => _kCBLCertAttrKeyLocality.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyPostalCode =
+      _lookup<FLString>('kCBLCertAttrKeyPostalCode');
+
+  FLString get kCBLCertAttrKeyPostalCode => _kCBLCertAttrKeyPostalCode.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyStateOrProvince =
+      _lookup<FLString>('kCBLCertAttrKeyStateOrProvince');
+
+  FLString get kCBLCertAttrKeyStateOrProvince =>
+      _kCBLCertAttrKeyStateOrProvince.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyCountry =
+      _lookup<FLString>('kCBLCertAttrKeyCountry');
+
+  FLString get kCBLCertAttrKeyCountry => _kCBLCertAttrKeyCountry.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyEmailAddress =
+      _lookup<FLString>('kCBLCertAttrKeyEmailAddress');
+
+  FLString get kCBLCertAttrKeyEmailAddress => _kCBLCertAttrKeyEmailAddress.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyHostname =
+      _lookup<FLString>('kCBLCertAttrKeyHostname');
+
+  FLString get kCBLCertAttrKeyHostname => _kCBLCertAttrKeyHostname.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyURL =
+      _lookup<FLString>('kCBLCertAttrKeyURL');
+
+  FLString get kCBLCertAttrKeyURL => _kCBLCertAttrKeyURL.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyIPAddress =
+      _lookup<FLString>('kCBLCertAttrKeyIPAddress');
+
+  FLString get kCBLCertAttrKeyIPAddress => _kCBLCertAttrKeyIPAddress.ref;
+
+  late final ffi.Pointer<FLString> _kCBLCertAttrKeyRegisteredID =
+      _lookup<FLString>('kCBLCertAttrKeyRegisteredID');
+
+  FLString get kCBLCertAttrKeyRegisteredID => _kCBLCertAttrKeyRegisteredID.ref;
+
+  ffi.Pointer<CBLCert> CBLCert_CreateWithData(
+    FLSlice certData,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLCert_CreateWithData(
+      certData,
+      outError,
+    );
+  }
+
+  late final _CBLCert_CreateWithDataPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_CreateWithData>>(
+          'CBLCert_CreateWithData');
+  late final _CBLCert_CreateWithData =
+      _CBLCert_CreateWithDataPtr.asFunction<DartCBLCert_CreateWithData>();
+
+  ffi.Pointer<CBLCert> CBLCert_CertNextInChain(
+    ffi.Pointer<CBLCert> cert,
+  ) {
+    return _CBLCert_CertNextInChain(
+      cert,
+    );
+  }
+
+  late final _CBLCert_CertNextInChainPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_CertNextInChain>>(
+          'CBLCert_CertNextInChain');
+  late final _CBLCert_CertNextInChain =
+      _CBLCert_CertNextInChainPtr.asFunction<DartCBLCert_CertNextInChain>();
+
+  FLSliceResult CBLCert_Data(
+    ffi.Pointer<CBLCert> cert,
+    bool pemEncoded,
+  ) {
+    return _CBLCert_Data(
+      cert,
+      pemEncoded,
+    );
+  }
+
+  late final _CBLCert_DataPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_Data>>('CBLCert_Data');
+  late final _CBLCert_Data = _CBLCert_DataPtr.asFunction<DartCBLCert_Data>();
+
+  FLSliceResult CBLCert_SubjectName(
+    ffi.Pointer<CBLCert> cert,
+  ) {
+    return _CBLCert_SubjectName(
+      cert,
+    );
+  }
+
+  late final _CBLCert_SubjectNamePtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_SubjectName>>(
+          'CBLCert_SubjectName');
+  late final _CBLCert_SubjectName =
+      _CBLCert_SubjectNamePtr.asFunction<DartCBLCert_SubjectName>();
+
+  FLSliceResult CBLCert_SubjectNameComponent(
+    ffi.Pointer<CBLCert> cert,
+    FLString attributeKey,
+  ) {
+    return _CBLCert_SubjectNameComponent(
+      cert,
+      attributeKey,
+    );
+  }
+
+  late final _CBLCert_SubjectNameComponentPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_SubjectNameComponent>>(
+          'CBLCert_SubjectNameComponent');
+  late final _CBLCert_SubjectNameComponent = _CBLCert_SubjectNameComponentPtr
+      .asFunction<DartCBLCert_SubjectNameComponent>();
+
+  void CBLCert_ValidTimespan(
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLTimestamp> outCreated,
+    ffi.Pointer<CBLTimestamp> outExpires,
+  ) {
+    return _CBLCert_ValidTimespan(
+      cert,
+      outCreated,
+      outExpires,
+    );
+  }
+
+  late final _CBLCert_ValidTimespanPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_ValidTimespan>>(
+          'CBLCert_ValidTimespan');
+  late final _CBLCert_ValidTimespan =
+      _CBLCert_ValidTimespanPtr.asFunction<DartCBLCert_ValidTimespan>();
+
+  ffi.Pointer<CBLKeyPair> CBLCert_PublicKey(
+    ffi.Pointer<CBLCert> arg0,
+  ) {
+    return _CBLCert_PublicKey(
+      arg0,
+    );
+  }
+
+  late final _CBLCert_PublicKeyPtr =
+      _lookup<ffi.NativeFunction<NativeCBLCert_PublicKey>>('CBLCert_PublicKey');
+  late final _CBLCert_PublicKey =
+      _CBLCert_PublicKeyPtr.asFunction<DartCBLCert_PublicKey>();
+
+  ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithExternalKey(
+    int keySizeInBits,
+    ffi.Pointer<ffi.Void> externalKey,
+    CBLExternalKeyCallbacks callbacks,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLKeyPair_CreateWithExternalKey(
+      keySizeInBits,
+      externalKey,
+      callbacks,
+      outError,
+    );
+  }
+
+  late final _CBLKeyPair_CreateWithExternalKeyPtr =
+      _lookup<ffi.NativeFunction<NativeCBLKeyPair_CreateWithExternalKey>>(
+          'CBLKeyPair_CreateWithExternalKey');
+  late final _CBLKeyPair_CreateWithExternalKey =
+      _CBLKeyPair_CreateWithExternalKeyPtr.asFunction<
+          DartCBLKeyPair_CreateWithExternalKey>();
+
+  ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithPrivateKeyData(
+    FLSlice privateKeyData,
+    FLSlice passwordOrNull,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLKeyPair_CreateWithPrivateKeyData(
+      privateKeyData,
+      passwordOrNull,
+      outError,
+    );
+  }
+
+  late final _CBLKeyPair_CreateWithPrivateKeyDataPtr =
+      _lookup<ffi.NativeFunction<NativeCBLKeyPair_CreateWithPrivateKeyData>>(
+          'CBLKeyPair_CreateWithPrivateKeyData');
+  late final _CBLKeyPair_CreateWithPrivateKeyData =
+      _CBLKeyPair_CreateWithPrivateKeyDataPtr.asFunction<
+          DartCBLKeyPair_CreateWithPrivateKeyData>();
+
+  FLSliceResult CBLKeyPair_PublicKeyDigest(
+    ffi.Pointer<CBLKeyPair> keyPair,
+  ) {
+    return _CBLKeyPair_PublicKeyDigest(
+      keyPair,
+    );
+  }
+
+  late final _CBLKeyPair_PublicKeyDigestPtr =
+      _lookup<ffi.NativeFunction<NativeCBLKeyPair_PublicKeyDigest>>(
+          'CBLKeyPair_PublicKeyDigest');
+  late final _CBLKeyPair_PublicKeyDigest = _CBLKeyPair_PublicKeyDigestPtr
+      .asFunction<DartCBLKeyPair_PublicKeyDigest>();
+
+  FLSliceResult CBLKeyPair_PublicKeyData(
+    ffi.Pointer<CBLKeyPair> keyPair,
+  ) {
+    return _CBLKeyPair_PublicKeyData(
+      keyPair,
+    );
+  }
+
+  late final _CBLKeyPair_PublicKeyDataPtr =
+      _lookup<ffi.NativeFunction<NativeCBLKeyPair_PublicKeyData>>(
+          'CBLKeyPair_PublicKeyData');
+  late final _CBLKeyPair_PublicKeyData =
+      _CBLKeyPair_PublicKeyDataPtr.asFunction<DartCBLKeyPair_PublicKeyData>();
+
+  FLSliceResult CBLKeyPair_PrivateKeyData(
+    ffi.Pointer<CBLKeyPair> keyPair,
+  ) {
+    return _CBLKeyPair_PrivateKeyData(
+      keyPair,
+    );
+  }
+
+  late final _CBLKeyPair_PrivateKeyDataPtr =
+      _lookup<ffi.NativeFunction<NativeCBLKeyPair_PrivateKeyData>>(
+          'CBLKeyPair_PrivateKeyData');
+  late final _CBLKeyPair_PrivateKeyData =
+      _CBLKeyPair_PrivateKeyDataPtr.asFunction<DartCBLKeyPair_PrivateKeyData>();
+
+  ffi.Pointer<CBLCert> CBLTLSIdentity_Certificates(
+    ffi.Pointer<CBLTLSIdentity> identity,
+  ) {
+    return _CBLTLSIdentity_Certificates(
+      identity,
+    );
+  }
+
+  late final _CBLTLSIdentity_CertificatesPtr =
+      _lookup<ffi.NativeFunction<NativeCBLTLSIdentity_Certificates>>(
+          'CBLTLSIdentity_Certificates');
+  late final _CBLTLSIdentity_Certificates = _CBLTLSIdentity_CertificatesPtr
+      .asFunction<DartCBLTLSIdentity_Certificates>();
+
+  int CBLTLSIdentity_Expiration(
+    ffi.Pointer<CBLTLSIdentity> identity,
+  ) {
+    return _CBLTLSIdentity_Expiration(
+      identity,
+    );
+  }
+
+  late final _CBLTLSIdentity_ExpirationPtr =
+      _lookup<ffi.NativeFunction<NativeCBLTLSIdentity_Expiration>>(
+          'CBLTLSIdentity_Expiration');
+  late final _CBLTLSIdentity_Expiration =
+      _CBLTLSIdentity_ExpirationPtr.asFunction<DartCBLTLSIdentity_Expiration>();
+
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
+    int keyUsages,
+    FLDict attributes,
+    int expiration,
+    FLString label,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLTLSIdentity_CreateIdentity(
+      keyUsages,
+      attributes,
+      expiration,
+      label,
+      outError,
+    );
+  }
+
+  late final _CBLTLSIdentity_CreateIdentityPtr =
+      _lookup<ffi.NativeFunction<NativeCBLTLSIdentity_CreateIdentity>>(
+          'CBLTLSIdentity_CreateIdentity');
+  late final _CBLTLSIdentity_CreateIdentity = _CBLTLSIdentity_CreateIdentityPtr
+      .asFunction<DartCBLTLSIdentity_CreateIdentity>();
+
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentityWithKeyPair(
+    int keyUsages,
+    ffi.Pointer<CBLKeyPair> keypair,
+    FLDict attributes,
+    int expiration,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLTLSIdentity_CreateIdentityWithKeyPair(
+      keyUsages,
+      keypair,
+      attributes,
+      expiration,
+      outError,
+    );
+  }
+
+  late final _CBLTLSIdentity_CreateIdentityWithKeyPairPtr = _lookup<
+          ffi.NativeFunction<NativeCBLTLSIdentity_CreateIdentityWithKeyPair>>(
+      'CBLTLSIdentity_CreateIdentityWithKeyPair');
+  late final _CBLTLSIdentity_CreateIdentityWithKeyPair =
+      _CBLTLSIdentity_CreateIdentityWithKeyPairPtr.asFunction<
+          DartCBLTLSIdentity_CreateIdentityWithKeyPair>();
+
+  bool CBLTLSIdentity_DeleteIdentityWithLabel(
+    FLString label,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLTLSIdentity_DeleteIdentityWithLabel(
+      label,
+      outError,
+    );
+  }
+
+  late final _CBLTLSIdentity_DeleteIdentityWithLabelPtr =
+      _lookup<ffi.NativeFunction<NativeCBLTLSIdentity_DeleteIdentityWithLabel>>(
+          'CBLTLSIdentity_DeleteIdentityWithLabel');
+  late final _CBLTLSIdentity_DeleteIdentityWithLabel =
+      _CBLTLSIdentity_DeleteIdentityWithLabelPtr.asFunction<
+          DartCBLTLSIdentity_DeleteIdentityWithLabel>();
+
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithLabel(
+    FLString label,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLTLSIdentity_IdentityWithLabel(
+      label,
+      outError,
+    );
+  }
+
+  late final _CBLTLSIdentity_IdentityWithLabelPtr =
+      _lookup<ffi.NativeFunction<NativeCBLTLSIdentity_IdentityWithLabel>>(
+          'CBLTLSIdentity_IdentityWithLabel');
+  late final _CBLTLSIdentity_IdentityWithLabel =
+      _CBLTLSIdentity_IdentityWithLabelPtr.asFunction<
+          DartCBLTLSIdentity_IdentityWithLabel>();
+
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+    ffi.Pointer<CBLKeyPair> keypair,
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+      keypair,
+      cert,
+      outError,
+    );
+  }
+
+  late final _CBLTLSIdentity_IdentityWithKeyPairAndCertsPtr = _lookup<
+          ffi.NativeFunction<NativeCBLTLSIdentity_IdentityWithKeyPairAndCerts>>(
+      'CBLTLSIdentity_IdentityWithKeyPairAndCerts');
+  late final _CBLTLSIdentity_IdentityWithKeyPairAndCerts =
+      _CBLTLSIdentity_IdentityWithKeyPairAndCertsPtr.asFunction<
+          DartCBLTLSIdentity_IdentityWithKeyPairAndCerts>();
+
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithCerts(
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLTLSIdentity_IdentityWithCerts(
+      cert,
+      outError,
+    );
+  }
+
+  late final _CBLTLSIdentity_IdentityWithCertsPtr =
+      _lookup<ffi.NativeFunction<NativeCBLTLSIdentity_IdentityWithCerts>>(
+          'CBLTLSIdentity_IdentityWithCerts');
+  late final _CBLTLSIdentity_IdentityWithCerts =
+      _CBLTLSIdentity_IdentityWithCertsPtr.asFunction<
+          DartCBLTLSIdentity_IdentityWithCerts>();
+
   late final ffi.Pointer<FLString> _kCBLAuthDefaultCookieName =
       _lookup<FLString>('kCBLAuthDefaultCookieName');
 
@@ -2027,6 +2440,20 @@ class cblite {
           'CBLAuth_CreateSession');
   late final _CBLAuth_CreateSession =
       _CBLAuth_CreateSessionPtr.asFunction<DartCBLAuth_CreateSession>();
+
+  ffi.Pointer<CBLAuthenticator> CBLAuth_CreateCertificate(
+    ffi.Pointer<CBLTLSIdentity> identity,
+  ) {
+    return _CBLAuth_CreateCertificate(
+      identity,
+    );
+  }
+
+  late final _CBLAuth_CreateCertificatePtr =
+      _lookup<ffi.NativeFunction<NativeCBLAuth_CreateCertificate>>(
+          'CBLAuth_CreateCertificate');
+  late final _CBLAuth_CreateCertificate =
+      _CBLAuth_CreateCertificatePtr.asFunction<DartCBLAuth_CreateCertificate>();
 
   void CBLAuth_Free(
     ffi.Pointer<CBLAuthenticator> arg0,
@@ -2270,6 +2697,21 @@ class cblite {
   late final _CBLReplicator_AddDocumentReplicationListener =
       _CBLReplicator_AddDocumentReplicationListenerPtr.asFunction<
           DartCBLReplicator_AddDocumentReplicationListener>();
+
+  ffi.Pointer<CBLCert> CBLReplicator_ServerCertificate(
+    ffi.Pointer<CBLReplicator> arg0,
+  ) {
+    return _CBLReplicator_ServerCertificate(
+      arg0,
+    );
+  }
+
+  late final _CBLReplicator_ServerCertificatePtr =
+      _lookup<ffi.NativeFunction<NativeCBLReplicator_ServerCertificate>>(
+          'CBLReplicator_ServerCertificate');
+  late final _CBLReplicator_ServerCertificate =
+      _CBLReplicator_ServerCertificatePtr.asFunction<
+          DartCBLReplicator_ServerCertificate>();
 
   late final ffi.Pointer<ffi.Bool> _kCBLDefaultDatabaseFullSync =
       _lookup<ffi.Bool>('kCBLDefaultDatabaseFullSync');
@@ -3297,6 +3739,174 @@ class cblite {
           'CBLScope_Collection');
   late final _CBLScope_Collection =
       _CBLScope_CollectionPtr.asFunction<DartCBLScope_Collection>();
+
+  ffi.Pointer<CBLListenerAuthenticator> CBLListenerAuth_CreatePassword(
+    CBLListenerPasswordAuthCallback auth,
+    ffi.Pointer<ffi.Void> context,
+  ) {
+    return _CBLListenerAuth_CreatePassword(
+      auth,
+      context,
+    );
+  }
+
+  late final _CBLListenerAuth_CreatePasswordPtr =
+      _lookup<ffi.NativeFunction<NativeCBLListenerAuth_CreatePassword>>(
+          'CBLListenerAuth_CreatePassword');
+  late final _CBLListenerAuth_CreatePassword =
+      _CBLListenerAuth_CreatePasswordPtr.asFunction<
+          DartCBLListenerAuth_CreatePassword>();
+
+  ffi.Pointer<CBLListenerAuthenticator> CBLListenerAuth_CreateCertificate(
+    CBLListenerCertAuthCallback auth,
+    ffi.Pointer<ffi.Void> context,
+  ) {
+    return _CBLListenerAuth_CreateCertificate(
+      auth,
+      context,
+    );
+  }
+
+  late final _CBLListenerAuth_CreateCertificatePtr =
+      _lookup<ffi.NativeFunction<NativeCBLListenerAuth_CreateCertificate>>(
+          'CBLListenerAuth_CreateCertificate');
+  late final _CBLListenerAuth_CreateCertificate =
+      _CBLListenerAuth_CreateCertificatePtr.asFunction<
+          DartCBLListenerAuth_CreateCertificate>();
+
+  ffi.Pointer<CBLListenerAuthenticator>
+      CBLListenerAuth_CreateCertificateWithRootCerts(
+    ffi.Pointer<CBLCert> rootCerts,
+  ) {
+    return _CBLListenerAuth_CreateCertificateWithRootCerts(
+      rootCerts,
+    );
+  }
+
+  late final _CBLListenerAuth_CreateCertificateWithRootCertsPtr = _lookup<
+          ffi.NativeFunction<
+              NativeCBLListenerAuth_CreateCertificateWithRootCerts>>(
+      'CBLListenerAuth_CreateCertificateWithRootCerts');
+  late final _CBLListenerAuth_CreateCertificateWithRootCerts =
+      _CBLListenerAuth_CreateCertificateWithRootCertsPtr.asFunction<
+          DartCBLListenerAuth_CreateCertificateWithRootCerts>();
+
+  void CBLListenerAuth_Free(
+    ffi.Pointer<CBLListenerAuthenticator> arg0,
+  ) {
+    return _CBLListenerAuth_Free(
+      arg0,
+    );
+  }
+
+  late final _CBLListenerAuth_FreePtr =
+      _lookup<ffi.NativeFunction<NativeCBLListenerAuth_Free>>(
+          'CBLListenerAuth_Free');
+  late final _CBLListenerAuth_Free =
+      _CBLListenerAuth_FreePtr.asFunction<DartCBLListenerAuth_Free>();
+
+  ffi.Pointer<CBLURLEndpointListener> CBLURLEndpointListener_Create(
+    ffi.Pointer<CBLURLEndpointListenerConfiguration> arg0,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLURLEndpointListener_Create(
+      arg0,
+      outError,
+    );
+  }
+
+  late final _CBLURLEndpointListener_CreatePtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Create>>(
+          'CBLURLEndpointListener_Create');
+  late final _CBLURLEndpointListener_Create = _CBLURLEndpointListener_CreatePtr
+      .asFunction<DartCBLURLEndpointListener_Create>();
+
+  ffi.Pointer<CBLURLEndpointListenerConfiguration>
+      CBLURLEndpointListener_Config(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) {
+    return _CBLURLEndpointListener_Config(
+      arg0,
+    );
+  }
+
+  late final _CBLURLEndpointListener_ConfigPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Config>>(
+          'CBLURLEndpointListener_Config');
+  late final _CBLURLEndpointListener_Config = _CBLURLEndpointListener_ConfigPtr
+      .asFunction<DartCBLURLEndpointListener_Config>();
+
+  int CBLURLEndpointListener_Port(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) {
+    return _CBLURLEndpointListener_Port(
+      arg0,
+    );
+  }
+
+  late final _CBLURLEndpointListener_PortPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Port>>(
+          'CBLURLEndpointListener_Port');
+  late final _CBLURLEndpointListener_Port = _CBLURLEndpointListener_PortPtr
+      .asFunction<DartCBLURLEndpointListener_Port>();
+
+  FLMutableArray CBLURLEndpointListener_Urls(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) {
+    return _CBLURLEndpointListener_Urls(
+      arg0,
+    );
+  }
+
+  late final _CBLURLEndpointListener_UrlsPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Urls>>(
+          'CBLURLEndpointListener_Urls');
+  late final _CBLURLEndpointListener_Urls = _CBLURLEndpointListener_UrlsPtr
+      .asFunction<DartCBLURLEndpointListener_Urls>();
+
+  CBLConnectionStatus CBLURLEndpointListener_Status(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) {
+    return _CBLURLEndpointListener_Status(
+      arg0,
+    );
+  }
+
+  late final _CBLURLEndpointListener_StatusPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Status>>(
+          'CBLURLEndpointListener_Status');
+  late final _CBLURLEndpointListener_Status = _CBLURLEndpointListener_StatusPtr
+      .asFunction<DartCBLURLEndpointListener_Status>();
+
+  bool CBLURLEndpointListener_Start(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLURLEndpointListener_Start(
+      arg0,
+      outError,
+    );
+  }
+
+  late final _CBLURLEndpointListener_StartPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Start>>(
+          'CBLURLEndpointListener_Start');
+  late final _CBLURLEndpointListener_Start = _CBLURLEndpointListener_StartPtr
+      .asFunction<DartCBLURLEndpointListener_Start>();
+
+  void CBLURLEndpointListener_Stop(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) {
+    return _CBLURLEndpointListener_Stop(
+      arg0,
+    );
+  }
+
+  late final _CBLURLEndpointListener_StopPtr =
+      _lookup<ffi.NativeFunction<NativeCBLURLEndpointListener_Stop>>(
+          'CBLURLEndpointListener_Stop');
+  late final _CBLURLEndpointListener_Stop = _CBLURLEndpointListener_StopPtr
+      .asFunction<DartCBLURLEndpointListener_Stop>();
 
   bool FLSlice_Equal(
     FLSlice a,
@@ -6139,6 +6749,8 @@ final class CBLReplicator extends ffi.Opaque {}
 
 final class CBLEncryptable extends ffi.Opaque {}
 
+final class CBLCert extends ffi.Opaque {}
+
 final class CBLListenerToken extends ffi.Opaque {}
 
 typedef NativeCBLListener_Remove = ffi.Void Function(
@@ -7003,6 +7615,158 @@ typedef NativeCBLDatabase_SendNotifications = ffi.Void Function(
 typedef DartCBLDatabase_SendNotifications = void Function(
     ffi.Pointer<CBLDatabase> db);
 
+final class CBLKeyPair extends ffi.Opaque {}
+
+typedef NativeCBLCert_CreateWithData = ffi.Pointer<CBLCert> Function(
+    FLSlice certData, ffi.Pointer<CBLError> outError);
+typedef DartCBLCert_CreateWithData = ffi.Pointer<CBLCert> Function(
+    FLSlice certData, ffi.Pointer<CBLError> outError);
+typedef NativeCBLCert_CertNextInChain = ffi.Pointer<CBLCert> Function(
+    ffi.Pointer<CBLCert> cert);
+typedef DartCBLCert_CertNextInChain = ffi.Pointer<CBLCert> Function(
+    ffi.Pointer<CBLCert> cert);
+typedef NativeCBLCert_Data = FLSliceResult Function(
+    ffi.Pointer<CBLCert> cert, ffi.Bool pemEncoded);
+typedef DartCBLCert_Data = FLSliceResult Function(
+    ffi.Pointer<CBLCert> cert, bool pemEncoded);
+typedef NativeCBLCert_SubjectName = FLSliceResult Function(
+    ffi.Pointer<CBLCert> cert);
+typedef DartCBLCert_SubjectName = FLSliceResult Function(
+    ffi.Pointer<CBLCert> cert);
+typedef NativeCBLCert_SubjectNameComponent = FLSliceResult Function(
+    ffi.Pointer<CBLCert> cert, FLString attributeKey);
+typedef DartCBLCert_SubjectNameComponent = FLSliceResult Function(
+    ffi.Pointer<CBLCert> cert, FLString attributeKey);
+typedef NativeCBLCert_ValidTimespan = ffi.Void Function(
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLTimestamp> outCreated,
+    ffi.Pointer<CBLTimestamp> outExpires);
+typedef DartCBLCert_ValidTimespan = void Function(ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLTimestamp> outCreated, ffi.Pointer<CBLTimestamp> outExpires);
+typedef NativeCBLCert_PublicKey = ffi.Pointer<CBLKeyPair> Function(
+    ffi.Pointer<CBLCert> arg0);
+typedef DartCBLCert_PublicKey = ffi.Pointer<CBLKeyPair> Function(
+    ffi.Pointer<CBLCert> arg0);
+typedef CBLSignatureDigestAlgorithm = ffi.Int;
+typedef DartCBLSignatureDigestAlgorithm = int;
+
+final class CBLExternalKeyCallbacks extends ffi.Struct {
+  external ffi.Pointer<
+      ffi.NativeFunction<
+          ffi.Bool Function(
+              ffi.Pointer<ffi.Void> externalKey,
+              ffi.Pointer<ffi.Void> output,
+              ffi.Size outputMaxLen,
+              ffi.Pointer<ffi.Size> outputLen)>> publicKeyData;
+
+  external ffi.Pointer<
+      ffi.NativeFunction<
+          ffi.Bool Function(
+              ffi.Pointer<ffi.Void> externalKey,
+              FLSlice input,
+              ffi.Pointer<ffi.Void> output,
+              ffi.Size outputMaxLen,
+              ffi.Pointer<ffi.Size> outputLen)>> decrypt;
+
+  external ffi.Pointer<
+      ffi.NativeFunction<
+          ffi.Bool Function(
+              ffi.Pointer<ffi.Void> externalKey,
+              CBLSignatureDigestAlgorithm digestAlgorithm,
+              FLSlice inputData,
+              ffi.Pointer<ffi.Void> outSignature)>> sign;
+
+  external ffi.Pointer<
+          ffi
+          .NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void> externalKey)>>
+      free;
+}
+
+typedef NativeCBLKeyPair_CreateWithExternalKey
+    = ffi.Pointer<CBLKeyPair> Function(
+        ffi.Size keySizeInBits,
+        ffi.Pointer<ffi.Void> externalKey,
+        CBLExternalKeyCallbacks callbacks,
+        ffi.Pointer<CBLError> outError);
+typedef DartCBLKeyPair_CreateWithExternalKey = ffi.Pointer<CBLKeyPair> Function(
+    int keySizeInBits,
+    ffi.Pointer<ffi.Void> externalKey,
+    CBLExternalKeyCallbacks callbacks,
+    ffi.Pointer<CBLError> outError);
+typedef NativeCBLKeyPair_CreateWithPrivateKeyData
+    = ffi.Pointer<CBLKeyPair> Function(FLSlice privateKeyData,
+        FLSlice passwordOrNull, ffi.Pointer<CBLError> outError);
+typedef DartCBLKeyPair_CreateWithPrivateKeyData
+    = ffi.Pointer<CBLKeyPair> Function(FLSlice privateKeyData,
+        FLSlice passwordOrNull, ffi.Pointer<CBLError> outError);
+typedef NativeCBLKeyPair_PublicKeyDigest = FLSliceResult Function(
+    ffi.Pointer<CBLKeyPair> keyPair);
+typedef DartCBLKeyPair_PublicKeyDigest = FLSliceResult Function(
+    ffi.Pointer<CBLKeyPair> keyPair);
+typedef NativeCBLKeyPair_PublicKeyData = FLSliceResult Function(
+    ffi.Pointer<CBLKeyPair> keyPair);
+typedef DartCBLKeyPair_PublicKeyData = FLSliceResult Function(
+    ffi.Pointer<CBLKeyPair> keyPair);
+typedef NativeCBLKeyPair_PrivateKeyData = FLSliceResult Function(
+    ffi.Pointer<CBLKeyPair> keyPair);
+typedef DartCBLKeyPair_PrivateKeyData = FLSliceResult Function(
+    ffi.Pointer<CBLKeyPair> keyPair);
+
+final class CBLTLSIdentity extends ffi.Opaque {}
+
+typedef NativeCBLTLSIdentity_Certificates = ffi.Pointer<CBLCert> Function(
+    ffi.Pointer<CBLTLSIdentity> identity);
+typedef DartCBLTLSIdentity_Certificates = ffi.Pointer<CBLCert> Function(
+    ffi.Pointer<CBLTLSIdentity> identity);
+typedef NativeCBLTLSIdentity_Expiration = CBLTimestamp Function(
+    ffi.Pointer<CBLTLSIdentity> identity);
+typedef DartCBLTLSIdentity_Expiration = int Function(
+    ffi.Pointer<CBLTLSIdentity> identity);
+typedef CBLKeyUsages = ffi.Uint16;
+typedef DartCBLKeyUsages = int;
+typedef NativeCBLTLSIdentity_CreateIdentity
+    = ffi.Pointer<CBLTLSIdentity> Function(
+        CBLKeyUsages keyUsages,
+        FLDict attributes,
+        CBLTimestamp expiration,
+        FLString label,
+        ffi.Pointer<CBLError> outError);
+typedef DartCBLTLSIdentity_CreateIdentity
+    = ffi.Pointer<CBLTLSIdentity> Function(int keyUsages, FLDict attributes,
+        int expiration, FLString label, ffi.Pointer<CBLError> outError);
+typedef NativeCBLTLSIdentity_CreateIdentityWithKeyPair
+    = ffi.Pointer<CBLTLSIdentity> Function(
+        CBLKeyUsages keyUsages,
+        ffi.Pointer<CBLKeyPair> keypair,
+        FLDict attributes,
+        CBLTimestamp expiration,
+        ffi.Pointer<CBLError> outError);
+typedef DartCBLTLSIdentity_CreateIdentityWithKeyPair
+    = ffi.Pointer<CBLTLSIdentity> Function(
+        int keyUsages,
+        ffi.Pointer<CBLKeyPair> keypair,
+        FLDict attributes,
+        int expiration,
+        ffi.Pointer<CBLError> outError);
+typedef NativeCBLTLSIdentity_DeleteIdentityWithLabel = ffi.Bool Function(
+    FLString label, ffi.Pointer<CBLError> outError);
+typedef DartCBLTLSIdentity_DeleteIdentityWithLabel = bool Function(
+    FLString label, ffi.Pointer<CBLError> outError);
+typedef NativeCBLTLSIdentity_IdentityWithLabel = ffi.Pointer<CBLTLSIdentity>
+    Function(FLString label, ffi.Pointer<CBLError> outError);
+typedef DartCBLTLSIdentity_IdentityWithLabel = ffi.Pointer<CBLTLSIdentity>
+    Function(FLString label, ffi.Pointer<CBLError> outError);
+typedef NativeCBLTLSIdentity_IdentityWithKeyPairAndCerts
+    = ffi.Pointer<CBLTLSIdentity> Function(ffi.Pointer<CBLKeyPair> keypair,
+        ffi.Pointer<CBLCert> cert, ffi.Pointer<CBLError> outError);
+typedef DartCBLTLSIdentity_IdentityWithKeyPairAndCerts
+    = ffi.Pointer<CBLTLSIdentity> Function(ffi.Pointer<CBLKeyPair> keypair,
+        ffi.Pointer<CBLCert> cert, ffi.Pointer<CBLError> outError);
+typedef NativeCBLTLSIdentity_IdentityWithCerts = ffi.Pointer<CBLTLSIdentity>
+    Function(ffi.Pointer<CBLCert> cert, ffi.Pointer<CBLError> outError);
+typedef DartCBLTLSIdentity_IdentityWithCerts = ffi.Pointer<CBLTLSIdentity>
+    Function(ffi.Pointer<CBLCert> cert, ffi.Pointer<CBLError> outError);
+
 final class CBLEndpoint extends ffi.Opaque {}
 
 typedef NativeCBLEndpoint_CreateWithURL = ffi.Pointer<CBLEndpoint> Function(
@@ -7027,6 +7791,10 @@ typedef NativeCBLAuth_CreateSession = ffi.Pointer<CBLAuthenticator> Function(
     FLString sessionID, FLString cookieName);
 typedef DartCBLAuth_CreateSession = ffi.Pointer<CBLAuthenticator> Function(
     FLString sessionID, FLString cookieName);
+typedef NativeCBLAuth_CreateCertificate = ffi.Pointer<CBLAuthenticator>
+    Function(ffi.Pointer<CBLTLSIdentity> identity);
+typedef DartCBLAuth_CreateCertificate = ffi.Pointer<CBLAuthenticator> Function(
+    ffi.Pointer<CBLTLSIdentity> identity);
 typedef NativeCBLAuth_Free = ffi.Void Function(
     ffi.Pointer<CBLAuthenticator> arg0);
 typedef DartCBLAuth_Free = void Function(ffi.Pointer<CBLAuthenticator> arg0);
@@ -7191,6 +7959,9 @@ final class CBLReplicatorConfiguration extends ffi.Struct {
 
   @ffi.Bool()
   external bool acceptParentDomainCookies;
+
+  @ffi.Bool()
+  external bool acceptOnlySelfSignedServerCertificate;
 }
 
 typedef NativeCBLReplicator_Create = ffi.Pointer<CBLReplicator> Function(
@@ -7322,6 +8093,10 @@ typedef NativeCBLReplicator_AddDocumentReplicationListener
 typedef DartCBLReplicator_AddDocumentReplicationListener
     = ffi.Pointer<CBLListenerToken> Function(ffi.Pointer<CBLReplicator> arg0,
         CBLDocumentReplicationListener arg1, ffi.Pointer<ffi.Void> context);
+typedef NativeCBLReplicator_ServerCertificate = ffi.Pointer<CBLCert> Function(
+    ffi.Pointer<CBLReplicator> arg0);
+typedef DartCBLReplicator_ServerCertificate = ffi.Pointer<CBLCert> Function(
+    ffi.Pointer<CBLReplicator> arg0);
 typedef NativeCBLEncryptable_CreateWithNull = ffi.Pointer<CBLEncryptable>
     Function();
 typedef DartCBLEncryptable_CreateWithNull = ffi.Pointer<CBLEncryptable>
@@ -7653,6 +8428,114 @@ typedef DartCBLScope_Collection = ffi.Pointer<CBLCollection> Function(
     ffi.Pointer<CBLScope> scope,
     FLString collectionName,
     ffi.Pointer<CBLError> outError);
+
+final class CBLListenerAuthenticator extends ffi.Opaque {}
+
+typedef CBLListenerPasswordAuthCallbackFunction = ffi.Bool Function(
+    ffi.Pointer<ffi.Void> context, FLString username, FLString password);
+typedef DartCBLListenerPasswordAuthCallbackFunction = bool Function(
+    ffi.Pointer<ffi.Void> context, FLString username, FLString password);
+typedef CBLListenerPasswordAuthCallback
+    = ffi.Pointer<ffi.NativeFunction<CBLListenerPasswordAuthCallbackFunction>>;
+typedef NativeCBLListenerAuth_CreatePassword
+    = ffi.Pointer<CBLListenerAuthenticator> Function(
+        CBLListenerPasswordAuthCallback auth, ffi.Pointer<ffi.Void> context);
+typedef DartCBLListenerAuth_CreatePassword
+    = ffi.Pointer<CBLListenerAuthenticator> Function(
+        CBLListenerPasswordAuthCallback auth, ffi.Pointer<ffi.Void> context);
+typedef CBLListenerCertAuthCallbackFunction = ffi.Bool Function(
+    ffi.Pointer<ffi.Void> context, ffi.Pointer<CBLCert> cert);
+typedef DartCBLListenerCertAuthCallbackFunction = bool Function(
+    ffi.Pointer<ffi.Void> context, ffi.Pointer<CBLCert> cert);
+typedef CBLListenerCertAuthCallback
+    = ffi.Pointer<ffi.NativeFunction<CBLListenerCertAuthCallbackFunction>>;
+typedef NativeCBLListenerAuth_CreateCertificate
+    = ffi.Pointer<CBLListenerAuthenticator> Function(
+        CBLListenerCertAuthCallback auth, ffi.Pointer<ffi.Void> context);
+typedef DartCBLListenerAuth_CreateCertificate
+    = ffi.Pointer<CBLListenerAuthenticator> Function(
+        CBLListenerCertAuthCallback auth, ffi.Pointer<ffi.Void> context);
+typedef NativeCBLListenerAuth_CreateCertificateWithRootCerts
+    = ffi.Pointer<CBLListenerAuthenticator> Function(
+        ffi.Pointer<CBLCert> rootCerts);
+typedef DartCBLListenerAuth_CreateCertificateWithRootCerts
+    = ffi.Pointer<CBLListenerAuthenticator> Function(
+        ffi.Pointer<CBLCert> rootCerts);
+typedef NativeCBLListenerAuth_Free = ffi.Void Function(
+    ffi.Pointer<CBLListenerAuthenticator> arg0);
+typedef DartCBLListenerAuth_Free = void Function(
+    ffi.Pointer<CBLListenerAuthenticator> arg0);
+
+final class CBLURLEndpointListenerConfiguration extends ffi.Struct {
+  external ffi.Pointer<ffi.Pointer<CBLCollection>> collections;
+
+  @ffi.Size()
+  external int collectionCount;
+
+  @ffi.Uint16()
+  external int port;
+
+  external FLString networkInterface;
+
+  @ffi.Bool()
+  external bool disableTLS;
+
+  external ffi.Pointer<CBLTLSIdentity> tlsIdentity;
+
+  external ffi.Pointer<CBLListenerAuthenticator> authenticator;
+
+  @ffi.Bool()
+  external bool enableDeltaSync;
+
+  @ffi.Bool()
+  external bool readOnly;
+}
+
+final class CBLURLEndpointListener extends ffi.Opaque {}
+
+typedef NativeCBLURLEndpointListener_Create
+    = ffi.Pointer<CBLURLEndpointListener> Function(
+        ffi.Pointer<CBLURLEndpointListenerConfiguration> arg0,
+        ffi.Pointer<CBLError> outError);
+typedef DartCBLURLEndpointListener_Create
+    = ffi.Pointer<CBLURLEndpointListener> Function(
+        ffi.Pointer<CBLURLEndpointListenerConfiguration> arg0,
+        ffi.Pointer<CBLError> outError);
+typedef NativeCBLURLEndpointListener_Config
+    = ffi.Pointer<CBLURLEndpointListenerConfiguration> Function(
+        ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef DartCBLURLEndpointListener_Config
+    = ffi.Pointer<CBLURLEndpointListenerConfiguration> Function(
+        ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef NativeCBLURLEndpointListener_Port = ffi.Uint16 Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef DartCBLURLEndpointListener_Port = int Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef NativeCBLURLEndpointListener_Urls = FLMutableArray Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef DartCBLURLEndpointListener_Urls = FLMutableArray Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+
+final class CBLConnectionStatus extends ffi.Struct {
+  @ffi.Uint64()
+  external int connectionCount;
+
+  @ffi.Uint64()
+  external int activeConnectionCount;
+}
+
+typedef NativeCBLURLEndpointListener_Status = CBLConnectionStatus Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef DartCBLURLEndpointListener_Status = CBLConnectionStatus Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef NativeCBLURLEndpointListener_Start = ffi.Bool Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0, ffi.Pointer<CBLError> outError);
+typedef DartCBLURLEndpointListener_Start = bool Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0, ffi.Pointer<CBLError> outError);
+typedef NativeCBLURLEndpointListener_Stop = ffi.Void Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
+typedef DartCBLURLEndpointListener_Stop = void Function(
+    ffi.Pointer<CBLURLEndpointListener> arg0);
 typedef FLHeapSlice = FLSlice;
 typedef NativeFLSlice_Equal = ffi.Bool Function(FLSlice a, FLSlice b);
 typedef DartFLSlice_Equal = bool Function(FLSlice a, FLSlice b);
@@ -8569,6 +9452,24 @@ const int kCBLMaintenanceTypeOptimize = 3;
 
 const int kCBLMaintenanceTypeFullOptimize = 4;
 
+const int kCBLSignatureDigestNone = 0;
+
+const int kCBLSignatureDigestSHA1 = 4;
+
+const int kCBLSignatureDigestSHA224 = 5;
+
+const int kCBLSignatureDigestSHA256 = 6;
+
+const int kCBLSignatureDigestSHA384 = 7;
+
+const int kCBLSignatureDigestSHA512 = 8;
+
+const int kCBLSignatureDigestRIPEMD160 = 9;
+
+const int kCBLKeyUsagesClientAuth = 128;
+
+const int kCBLKeyUsagesServerAuth = 64;
+
 const int kCBLReplicatorTypePushAndPull = 0;
 
 const int kCBLReplicatorTypePush = 1;
@@ -8613,6 +9514,8 @@ const int kCBLLogDomainReplicator = 2;
 
 const int kCBLLogDomainNetwork = 3;
 
+const int kCBLLogDomainListener = 4;
+
 const int kCBLLogDomainMaskDatabase = 1;
 
 const int kCBLLogDomainMaskQuery = 2;
@@ -8621,17 +9524,19 @@ const int kCBLLogDomainMaskReplicator = 4;
 
 const int kCBLLogDomainMaskNetwork = 8;
 
+const int kCBLLogDomainMaskListener = 16;
+
 const int kCBLLogDomainMaskAll = 255;
 
-const String CBLITE_VERSION = '3.2.2';
+const String CBLITE_VERSION = '3.2.3';
 
-const int CBLITE_VERSION_NUMBER = 3002002;
+const int CBLITE_VERSION_NUMBER = 3002003;
 
-const int CBLITE_BUILD_NUMBER = 9;
+const int CBLITE_BUILD_NUMBER = 30;
 
-const String CBLITE_SOURCE_ID = '6728898+92f79e8';
+const String CBLITE_SOURCE_ID = 'f1d63ea+b3b6dc0';
 
-const String CBLITE_BUILD_TIMESTAMP = '2025-02-24T20:13:54Z';
+const String CBLITE_BUILD_TIMESTAMP = '2025-04-29T06:37:13Z';
 
 const String HOTLEVEL = 'Ofast';
 

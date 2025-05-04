@@ -216,11 +216,17 @@ class _BindingsGenerator {
         var inExternalBlock = false;
         while (bindingsLinesIterator.moveNext()) {
           var line = bindingsLinesIterator.current;
+          var isPointerParameter = false;
+
           if (line.startsWith('external')) {
             inExternalBlock = true;
           }
 
-          if (inExternalBlock) {
+          if (line.contains('ffi.Pointer')) {
+            isPointerParameter = true;
+          }
+
+          if (inExternalBlock && !isPointerParameter) {
             for (final symbol in symbols) {
               line = line.replaceAll('imp1.$symbol', 'imp1.Dart$symbol');
               line = line.replaceAll('imp2.$symbol', 'imp2.Dart$symbol');

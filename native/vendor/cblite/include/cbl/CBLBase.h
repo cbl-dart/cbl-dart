@@ -244,6 +244,8 @@ typedef struct CBLReplicator CBLReplicator;
     property decryptor callback when the document is pulled from the remote server. */
 typedef struct CBLEncryptable CBLEncryptable;
 /** @} */
+
+typedef struct CBLCert CBLCert;
 #endif
 
 /** \defgroup listeners   Listeners

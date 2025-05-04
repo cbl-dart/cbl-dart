@@ -96,7 +96,9 @@ jobs:
       - name: Setup cbd
         run: melos activate:cbd
 
-      - name: Bootstrap Dart packages
+      - name: Bootstrap repository
+        env:
+          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
         run: ./tools/dev-tools.sh bootstrap
 
@@ -135,7 +137,9 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart packages
+      - name: Bootstrap repository
+        env:
+          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
         run: ./tools/dev-tools.sh bootstrap
 
@@ -238,7 +242,9 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart packages
+      - name: Bootstrap repository
+        env:
+          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
         run: ./tools/dev-tools.sh bootstrap
 
@@ -341,7 +347,9 @@ jobs:
       - name: Setup cbd
         run: melos activate:cbd
 
-      - name: Bootstrap Dart packages
+      - name: Bootstrap repository
+        env:
+          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
         run: ./tools/dev-tools.sh bootstrap
 
@@ -415,7 +423,9 @@ jobs:
       - name: Setup Melos
         run: dart pub global activate melos
 
-      - name: Bootstrap Dart packages
+      - name: Bootstrap repository
+        env:
+          PREFETCHED_PACKAGES_PASSWORD: ${{ secrets.PREFETCHED_PACKAGES_PASSWORD }}
         shell: bash
         run: ./tools/dev-tools.sh bootstrap
 

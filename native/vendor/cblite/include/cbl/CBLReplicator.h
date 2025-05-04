@@ -18,6 +18,7 @@
 
 #pragma once
 #include "CBLBase.h"
+#include "CBLTLSIdentity.h"
 
 CBL_CAPI_BEGIN
 
@@ -66,9 +67,19 @@ _cbl_warn_unused
 CBLAuthenticator* CBLAuth_CreatePassword(FLString username, FLString password) CBLAPI;
 
 /** Creates an authenticator using a Couchbase Sync Gateway login session identifier,
-    and optionally a cookie name (pass NULL for the default.) */
+    and optionally a cookie name (pass NULL for the default.)
+@note You are responsible for freeing the returned reference. */
 _cbl_warn_unused
 CBLAuthenticator* CBLAuth_CreateSession(FLString sessionID, FLString cookieName) CBLAPI;
+
+#ifdef COUCHBASE_ENTERPRISE
+
+/** Creates an authenticator that presents a client certificate to the server during the initial SSL/TLS
+    handshake. This is currently used for authenticating with CBLURLEndpointListener only.*/
+_cbl_warn_unused
+CBLAuthenticator* CBLAuth_CreateCertificate(CBLTLSIdentity* identity) CBLAPI;
+
+#endif
 
 /** Frees a CBLAuthenticator object. */
 void CBLAuth_Free(CBLAuthenticator* _cbl_nullable) CBLAPI;
@@ -442,6 +453,12 @@ typedef struct {
         This option is disabled by default (see \ref kCBLDefaultReplicatorAcceptParentCookies) which means
         that the parent-domain cookies are not permitted to save by default. */
     bool acceptParentDomainCookies;
+
+#ifdef COUCHBASE_ENTERPRISE
+    /** Specify the replicator to accept only self-signed certs. Any non-self-signed certs will be rejected
+        to avoid accidentally using this mode with the non-self-signed certs in production. */
+    bool acceptOnlySelfSignedServerCertificate;
+#endif
 } CBLReplicatorConfiguration;
 
 
@@ -633,6 +650,16 @@ _cbl_warn_unused
 CBLListenerToken* CBLReplicator_AddDocumentReplicationListener(CBLReplicator*,
                                                                CBLDocumentReplicationListener,
                                                                void* _cbl_nullable context) CBLAPI;
+
+#ifdef COUCHBASE_ENTERPRISE
+
+/** Gets the TLS certificate received when connecting to the server.
+    @note You are responsible for releasing the returned key reference. */
+_cbl_warn_unused
+CBLCert* _cbl_nullable CBLReplicator_ServerCertificate(CBLReplicator*) CBLAPI;
+
+
+#endif
 
 /** @} */
 /** @} */

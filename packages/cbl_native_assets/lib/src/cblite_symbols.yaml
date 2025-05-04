@@ -28,6 +28,12 @@ files:
       CBLDocumentReplicationListenerFunction:
         name: CBLDocumentReplicationListenerFunction
         dart-name: DartCBLDocumentReplicationListenerFunction
+      CBLListenerCertAuthCallbackFunction:
+        name: CBLListenerCertAuthCallbackFunction
+        dart-name: DartCBLListenerCertAuthCallbackFunction
+      CBLListenerPasswordAuthCallbackFunction:
+        name: CBLListenerPasswordAuthCallbackFunction
+        dart-name: DartCBLListenerPasswordAuthCallbackFunction
       CBLLogSinkCallbackFunction:
         name: CBLLogSinkCallbackFunction
         dart-name: DartCBLLogSinkCallbackFunction
@@ -158,6 +164,10 @@ files:
         name: kCBLJSONLanguage
       c:@Ea@kCBLJSONLanguage@kCBLN1QLLanguage:
         name: kCBLN1QLLanguage
+      c:@Ea@kCBLKeyUsagesClientAuth@kCBLKeyUsagesClientAuth:
+        name: kCBLKeyUsagesClientAuth
+      c:@Ea@kCBLKeyUsagesClientAuth@kCBLKeyUsagesServerAuth:
+        name: kCBLKeyUsagesServerAuth
       c:@Ea@kCBLLogDebug@kCBLLogDebug:
         name: kCBLLogDebug
       c:@Ea@kCBLLogDebug@kCBLLogError:
@@ -172,6 +182,8 @@ files:
         name: kCBLLogWarning
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainDatabase:
         name: kCBLLogDomainDatabase
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainListener:
+        name: kCBLLogDomainListener
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainNetwork:
         name: kCBLLogDomainNetwork
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainQuery:
@@ -182,6 +194,8 @@ files:
         name: kCBLLogDomainMaskAll
       c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskDatabase:
         name: kCBLLogDomainMaskDatabase
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskListener:
+        name: kCBLLogDomainMaskListener
       c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskNetwork:
         name: kCBLLogDomainMaskNetwork
       c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskQuery:
@@ -260,6 +274,20 @@ files:
         name: kCBLSeekModeFromStart
       c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeRelative:
         name: kCBLSeekModeRelative
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestNone:
+        name: kCBLSignatureDigestNone
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestRIPEMD160:
+        name: kCBLSignatureDigestRIPEMD160
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA1:
+        name: kCBLSignatureDigestSHA1
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA224:
+        name: kCBLSignatureDigestSHA224
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA256:
+        name: kCBLSignatureDigestSHA256
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA384:
+        name: kCBLSignatureDigestSHA384
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA512:
+        name: kCBLSignatureDigestSHA512
       c:@S@CBLAuthenticator:
         name: CBLAuthenticator
       c:@S@CBLBlob:
@@ -268,6 +296,8 @@ files:
         name: CBLBlobReadStream
       c:@S@CBLBlobWriteStream:
         name: CBLBlobWriteStream
+      c:@S@CBLCert:
+        name: CBLCert
       c:@S@CBLCollection:
         name: CBLCollection
       c:@S@CBLDatabase:
@@ -278,8 +308,14 @@ files:
         name: CBLEncryptable
       c:@S@CBLEndpoint:
         name: CBLEndpoint
+      c:@S@CBLExternalKeyCallbacks:
+        name: CBLExternalKeyCallbacks
       c:@S@CBLIndexUpdater:
         name: CBLIndexUpdater
+      c:@S@CBLKeyPair:
+        name: CBLKeyPair
+      c:@S@CBLListenerAuthenticator:
+        name: CBLListenerAuthenticator
       c:@S@CBLListenerToken:
         name: CBLListenerToken
       c:@S@CBLQuery:
@@ -294,6 +330,10 @@ files:
         name: CBLResultSet
       c:@S@CBLScope:
         name: CBLScope
+      c:@S@CBLTLSIdentity:
+        name: CBLTLSIdentity
+      c:@S@CBLURLEndpointListener:
+        name: CBLURLEndpointListener
       c:@S@CBLVectorEncoding:
         name: CBLVectorEncoding
       c:@S@FLSlice:
@@ -330,6 +370,8 @@ files:
         name: CBLArrayIndexConfiguration
       c:@SA@CBLCollectionChange:
         name: CBLCollectionChange
+      c:@SA@CBLConnectionStatus:
+        name: CBLConnectionStatus
       c:@SA@CBLConsoleLogSink:
         name: CBLConsoleLogSink
       c:@SA@CBLCustomLogSink:
@@ -362,6 +404,8 @@ files:
         name: CBLReplicatorProgress
       c:@SA@CBLReplicatorStatus:
         name: CBLReplicatorStatus
+      c:@SA@CBLURLEndpointListenerConfiguration:
+        name: CBLURLEndpointListenerConfiguration
       c:@SA@CBLValueIndexConfiguration:
         name: CBLValueIndexConfiguration
       c:@SA@CBLVectorIndexConfiguration:
@@ -465,6 +509,16 @@ files:
       c:CBLReplicator.h@T@CBLReplicatorType:
         name: CBLReplicatorType
         dart-name: DartCBLReplicatorType
+      c:CBLTLSIdentity.h@T@CBLKeyUsages:
+        name: CBLKeyUsages
+        dart-name: DartCBLKeyUsages
+      c:CBLTLSIdentity.h@T@CBLSignatureDigestAlgorithm:
+        name: CBLSignatureDigestAlgorithm
+        dart-name: DartCBLSignatureDigestAlgorithm
+      c:CBLURLEndpointListener.h@T@CBLListenerCertAuthCallback:
+        name: CBLListenerCertAuthCallback
+      c:CBLURLEndpointListener.h@T@CBLListenerPasswordAuthCallback:
+        name: CBLListenerPasswordAuthCallback
       c:FLBase.h@T@FLArray:
         name: FLArray
       c:FLBase.h@T@FLDict:

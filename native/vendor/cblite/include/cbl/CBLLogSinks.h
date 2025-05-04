@@ -44,7 +44,8 @@ typedef CBL_ENUM(uint8_t, CBLLogDomain) {
     kCBLLogDomainDatabase,      ///< Logging domain for the database subsystem.
     kCBLLogDomainQuery,         ///< Logging domain for the query subsystem.
     kCBLLogDomainReplicator,    ///< Logging domain for the replicator subsystem.
-    kCBLLogDomainNetwork        ///< Logging domain for the network subsystem.
+    kCBLLogDomainNetwork,       ///< Logging domain for the network subsystem.
+    kCBLLogDomainListener       ///< Logging domain for the listener subsystem.
 };
 
 /** A bitmask representing a set of logging domains.
@@ -57,6 +58,7 @@ typedef CBL_OPTIONS(uint16_t, CBLLogDomainMask) {
     kCBLLogDomainMaskQuery      = 1 << kCBLLogDomainQuery,
     kCBLLogDomainMaskReplicator = 1 << kCBLLogDomainReplicator,
     kCBLLogDomainMaskNetwork    = 1 << kCBLLogDomainNetwork,
+    kCBLLogDomainMaskListener   = 1 << kCBLLogDomainListener,
     kCBLLogDomainMaskAll        = 0xFF
 };
 

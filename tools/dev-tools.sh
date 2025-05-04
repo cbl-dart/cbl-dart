@@ -19,6 +19,9 @@ targets=(android ios macos linux-x86_64 windows-x86_64)
 scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 projectDir="$(cd "$scriptDir/.." && pwd)"
 nativeDir="$projectDir/native"
+vendorDir="$nativeDir/vendor"
+prefetchedPackagesDir="$vendorDir/packages.couchbase.com"
+prefetchedPackagesPasswordFile="PREFETCHED_PACKAGES_PASSWORD.txt"
 packagesDir="$projectDir/packages"
 couchbaseLiteCPrebuiltDir="$nativeDir/vendor/couchbase-lite-C-prebuilt"
 couchbaseLiteCRelease="$(cat "$nativeDir/CouchbaseLiteC.release")"
@@ -194,6 +197,19 @@ function prepareNativeLibraries() {
 }
 
 function bootstrap() {
+    # Unpack pre-fetched packages.
+    if [[ -f "$prefetchedPackagesDir.zip.enc" && -n "$PREFETCHED_PACKAGES_PASSWORD" && ! -d "$prefetchedPackagesDir" ]]; then
+        echo "Unpacking pre-fetched packages"
+        echo "$PREFETCHED_PACKAGES_PASSWORD" >"$prefetchedPackagesPasswordFile"
+        openssl enc -aes-256-cbc -pbkdf2 -d -pass "file:$prefetchedPackagesPasswordFile" \
+            -in "$prefetchedPackagesDir.zip.enc" \
+            -out "$prefetchedPackagesDir.zip"
+        rm "$prefetchedPackagesPasswordFile"
+        unzip "$prefetchedPackagesDir.zip" -d "$vendorDir"
+        rm "$prefetchedPackagesDir.zip"
+        rm "$prefetchedPackagesDir.zip.enc"
+    fi
+
     $melosBin bootstrap
 }
 

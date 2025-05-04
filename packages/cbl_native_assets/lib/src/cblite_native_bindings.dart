@@ -1226,6 +1226,266 @@ class cbliteNative implements cblite {
       );
 
   @override
+  FLString get kCBLCertAttrKeyCommonName => native.kCBLCertAttrKeyCommonName;
+
+  @override
+  FLString get kCBLCertAttrKeyPseudonym => native.kCBLCertAttrKeyPseudonym;
+
+  @override
+  FLString get kCBLCertAttrKeyGivenName => native.kCBLCertAttrKeyGivenName;
+
+  @override
+  FLString get kCBLCertAttrKeySurname => native.kCBLCertAttrKeySurname;
+
+  @override
+  FLString get kCBLCertAttrKeyOrganization =>
+      native.kCBLCertAttrKeyOrganization;
+
+  @override
+  FLString get kCBLCertAttrKeyOrganizationUnit =>
+      native.kCBLCertAttrKeyOrganizationUnit;
+
+  @override
+  FLString get kCBLCertAttrKeyPostalAddress =>
+      native.kCBLCertAttrKeyPostalAddress;
+
+  @override
+  FLString get kCBLCertAttrKeyLocality => native.kCBLCertAttrKeyLocality;
+
+  @override
+  FLString get kCBLCertAttrKeyPostalCode => native.kCBLCertAttrKeyPostalCode;
+
+  @override
+  FLString get kCBLCertAttrKeyStateOrProvince =>
+      native.kCBLCertAttrKeyStateOrProvince;
+
+  @override
+  FLString get kCBLCertAttrKeyCountry => native.kCBLCertAttrKeyCountry;
+
+  @override
+  FLString get kCBLCertAttrKeyEmailAddress =>
+      native.kCBLCertAttrKeyEmailAddress;
+
+  @override
+  FLString get kCBLCertAttrKeyHostname => native.kCBLCertAttrKeyHostname;
+
+  @override
+  FLString get kCBLCertAttrKeyURL => native.kCBLCertAttrKeyURL;
+
+  @override
+  FLString get kCBLCertAttrKeyIPAddress => native.kCBLCertAttrKeyIPAddress;
+
+  @override
+  FLString get kCBLCertAttrKeyRegisteredID =>
+      native.kCBLCertAttrKeyRegisteredID;
+
+  @override
+  ffi.Pointer<CBLCert> CBLCert_CreateWithData(
+    FLSlice certData,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLCert_CreateWithData(
+        certData,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLCert> CBLCert_CertNextInChain(
+    ffi.Pointer<CBLCert> cert,
+  ) =>
+      native.CBLCert_CertNextInChain(
+        cert,
+      );
+
+  @override
+  FLSliceResult CBLCert_Data(
+    ffi.Pointer<CBLCert> cert,
+    bool pemEncoded,
+  ) =>
+      native.CBLCert_Data(
+        cert,
+        pemEncoded,
+      );
+
+  @override
+  FLSliceResult CBLCert_SubjectName(
+    ffi.Pointer<CBLCert> cert,
+  ) =>
+      native.CBLCert_SubjectName(
+        cert,
+      );
+
+  @override
+  FLSliceResult CBLCert_SubjectNameComponent(
+    ffi.Pointer<CBLCert> cert,
+    FLString attributeKey,
+  ) =>
+      native.CBLCert_SubjectNameComponent(
+        cert,
+        attributeKey,
+      );
+
+  @override
+  void CBLCert_ValidTimespan(
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLTimestamp> outCreated,
+    ffi.Pointer<CBLTimestamp> outExpires,
+  ) =>
+      native.CBLCert_ValidTimespan(
+        cert,
+        outCreated,
+        outExpires,
+      );
+
+  @override
+  ffi.Pointer<CBLKeyPair> CBLCert_PublicKey(
+    ffi.Pointer<CBLCert> arg0,
+  ) =>
+      native.CBLCert_PublicKey(
+        arg0,
+      );
+
+  @override
+  ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithExternalKey(
+    int keySizeInBits,
+    ffi.Pointer<ffi.Void> externalKey,
+    CBLExternalKeyCallbacks callbacks,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLKeyPair_CreateWithExternalKey(
+        keySizeInBits,
+        externalKey,
+        callbacks,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLKeyPair> CBLKeyPair_CreateWithPrivateKeyData(
+    FLSlice privateKeyData,
+    FLSlice passwordOrNull,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLKeyPair_CreateWithPrivateKeyData(
+        privateKeyData,
+        passwordOrNull,
+        outError,
+      );
+
+  @override
+  FLSliceResult CBLKeyPair_PublicKeyDigest(
+    ffi.Pointer<CBLKeyPair> keyPair,
+  ) =>
+      native.CBLKeyPair_PublicKeyDigest(
+        keyPair,
+      );
+
+  @override
+  FLSliceResult CBLKeyPair_PublicKeyData(
+    ffi.Pointer<CBLKeyPair> keyPair,
+  ) =>
+      native.CBLKeyPair_PublicKeyData(
+        keyPair,
+      );
+
+  @override
+  FLSliceResult CBLKeyPair_PrivateKeyData(
+    ffi.Pointer<CBLKeyPair> keyPair,
+  ) =>
+      native.CBLKeyPair_PrivateKeyData(
+        keyPair,
+      );
+
+  @override
+  ffi.Pointer<CBLCert> CBLTLSIdentity_Certificates(
+    ffi.Pointer<CBLTLSIdentity> identity,
+  ) =>
+      native.CBLTLSIdentity_Certificates(
+        identity,
+      );
+
+  @override
+  int CBLTLSIdentity_Expiration(
+    ffi.Pointer<CBLTLSIdentity> identity,
+  ) =>
+      native.CBLTLSIdentity_Expiration(
+        identity,
+      );
+
+  @override
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentity(
+    int keyUsages,
+    FLDict attributes,
+    int expiration,
+    FLString label,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLTLSIdentity_CreateIdentity(
+        keyUsages,
+        attributes,
+        expiration,
+        label,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_CreateIdentityWithKeyPair(
+    int keyUsages,
+    ffi.Pointer<CBLKeyPair> keypair,
+    FLDict attributes,
+    int expiration,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLTLSIdentity_CreateIdentityWithKeyPair(
+        keyUsages,
+        keypair,
+        attributes,
+        expiration,
+        outError,
+      );
+
+  @override
+  bool CBLTLSIdentity_DeleteIdentityWithLabel(
+    FLString label,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLTLSIdentity_DeleteIdentityWithLabel(
+        label,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithLabel(
+    FLString label,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLTLSIdentity_IdentityWithLabel(
+        label,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+    ffi.Pointer<CBLKeyPair> keypair,
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+        keypair,
+        cert,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLTLSIdentity> CBLTLSIdentity_IdentityWithCerts(
+    ffi.Pointer<CBLCert> cert,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLTLSIdentity_IdentityWithCerts(
+        cert,
+        outError,
+      );
+
+  @override
   FLString get kCBLAuthDefaultCookieName => native.kCBLAuthDefaultCookieName;
 
   @override
@@ -1272,6 +1532,14 @@ class cbliteNative implements cblite {
       native.CBLAuth_CreateSession(
         sessionID,
         cookieName,
+      );
+
+  @override
+  ffi.Pointer<CBLAuthenticator> CBLAuth_CreateCertificate(
+    ffi.Pointer<CBLTLSIdentity> identity,
+  ) =>
+      native.CBLAuth_CreateCertificate(
+        identity,
       );
 
   @override
@@ -1426,6 +1694,14 @@ class cbliteNative implements cblite {
         arg0,
         arg1,
         context,
+      );
+
+  @override
+  ffi.Pointer<CBLCert> CBLReplicator_ServerCertificate(
+    ffi.Pointer<CBLReplicator> arg0,
+  ) =>
+      native.CBLReplicator_ServerCertificate(
+        arg0,
       );
 
   @override
@@ -2034,6 +2310,104 @@ class cbliteNative implements cblite {
         scope,
         collectionName,
         outError,
+      );
+
+  @override
+  ffi.Pointer<CBLListenerAuthenticator> CBLListenerAuth_CreatePassword(
+    CBLListenerPasswordAuthCallback auth,
+    ffi.Pointer<ffi.Void> context,
+  ) =>
+      native.CBLListenerAuth_CreatePassword(
+        auth,
+        context,
+      );
+
+  @override
+  ffi.Pointer<CBLListenerAuthenticator> CBLListenerAuth_CreateCertificate(
+    CBLListenerCertAuthCallback auth,
+    ffi.Pointer<ffi.Void> context,
+  ) =>
+      native.CBLListenerAuth_CreateCertificate(
+        auth,
+        context,
+      );
+
+  @override
+  ffi.Pointer<CBLListenerAuthenticator>
+      CBLListenerAuth_CreateCertificateWithRootCerts(
+    ffi.Pointer<CBLCert> rootCerts,
+  ) =>
+          native.CBLListenerAuth_CreateCertificateWithRootCerts(
+            rootCerts,
+          );
+
+  @override
+  void CBLListenerAuth_Free(
+    ffi.Pointer<CBLListenerAuthenticator> arg0,
+  ) =>
+      native.CBLListenerAuth_Free(
+        arg0,
+      );
+
+  @override
+  ffi.Pointer<CBLURLEndpointListener> CBLURLEndpointListener_Create(
+    ffi.Pointer<CBLURLEndpointListenerConfiguration> arg0,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLURLEndpointListener_Create(
+        arg0,
+        outError,
+      );
+
+  @override
+  ffi.Pointer<CBLURLEndpointListenerConfiguration>
+      CBLURLEndpointListener_Config(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) =>
+          native.CBLURLEndpointListener_Config(
+            arg0,
+          );
+
+  @override
+  int CBLURLEndpointListener_Port(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) =>
+      native.CBLURLEndpointListener_Port(
+        arg0,
+      );
+
+  @override
+  FLMutableArray CBLURLEndpointListener_Urls(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) =>
+      native.CBLURLEndpointListener_Urls(
+        arg0,
+      );
+
+  @override
+  CBLConnectionStatus CBLURLEndpointListener_Status(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) =>
+      native.CBLURLEndpointListener_Status(
+        arg0,
+      );
+
+  @override
+  bool CBLURLEndpointListener_Start(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLURLEndpointListener_Start(
+        arg0,
+        outError,
+      );
+
+  @override
+  void CBLURLEndpointListener_Stop(
+    ffi.Pointer<CBLURLEndpointListener> arg0,
+  ) =>
+      native.CBLURLEndpointListener_Stop(
+        arg0,
       );
 
   @override

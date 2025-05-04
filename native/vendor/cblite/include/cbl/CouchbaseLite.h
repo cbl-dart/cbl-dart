@@ -32,5 +32,7 @@
 #include "CBLQueryIndex.h"
 #include "CBLQueryIndexTypes.h"
 #include "CBLQueryTypes.h"
+#include "CBLTLSIdentity.h"
 #include "CBLReplicator.h"
 #include "CBLScope.h"
+#include "CBLURLEndpointListener.h"

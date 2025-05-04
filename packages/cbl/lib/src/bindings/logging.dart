@@ -16,7 +16,8 @@ enum CBLLogDomain {
   database(cblite.kCBLLogDomainDatabase),
   query(cblite.kCBLLogDomainQuery),
   replicator(cblite.kCBLLogDomainReplicator),
-  network(cblite.kCBLLogDomainNetwork);
+  network(cblite.kCBLLogDomainNetwork),
+  listener(cblite.kCBLLogDomainListener);
 
   const CBLLogDomain(this.value);
 
@@ -25,6 +26,7 @@ enum CBLLogDomain {
         cblite.kCBLLogDomainQuery => query,
         cblite.kCBLLogDomainReplicator => replicator,
         cblite.kCBLLogDomainNetwork => network,
+        cblite.kCBLLogDomainListener => listener,
         _ => throw ArgumentError('Unknown log domain: $value'),
       };
 

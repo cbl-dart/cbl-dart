@@ -80,10 +80,10 @@ packages:
     dependency: transitive
     description:
       name: cbl_libcblite_api
-      sha256: d4afc9002f96879a27f5995856696bf3a2c2085bccf3854b6fe167d5b7ac8e3b
+      sha256: a447f887fc9e239007fa8793b05169921564903abcf574018d41b45c5869ccf4
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.2"
+    version: "3.2.3"
   cbl_libcblitedart_api:
     dependency: transitive
     description:

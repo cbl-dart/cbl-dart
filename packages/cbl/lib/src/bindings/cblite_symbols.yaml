@@ -28,6 +28,12 @@ files:
       CBLDocumentReplicationListenerFunction:
         name: CBLDocumentReplicationListenerFunction
         dart-name: DartCBLDocumentReplicationListenerFunction
+      CBLListenerCertAuthCallbackFunction:
+        name: CBLListenerCertAuthCallbackFunction
+        dart-name: DartCBLListenerCertAuthCallbackFunction
+      CBLListenerPasswordAuthCallbackFunction:
+        name: CBLListenerPasswordAuthCallbackFunction
+        dart-name: DartCBLListenerPasswordAuthCallbackFunction
       CBLLogSinkCallbackFunction:
         name: CBLLogSinkCallbackFunction
         dart-name: DartCBLLogSinkCallbackFunction
@@ -160,6 +166,10 @@ files:
         name: kCBLJSONLanguage
       c:@Ea@kCBLJSONLanguage@kCBLN1QLLanguage:
         name: kCBLN1QLLanguage
+      c:@Ea@kCBLKeyUsagesClientAuth@kCBLKeyUsagesClientAuth:
+        name: kCBLKeyUsagesClientAuth
+      c:@Ea@kCBLKeyUsagesClientAuth@kCBLKeyUsagesServerAuth:
+        name: kCBLKeyUsagesServerAuth
       c:@Ea@kCBLLogDebug@kCBLLogDebug:
         name: kCBLLogDebug
       c:@Ea@kCBLLogDebug@kCBLLogError:
@@ -174,6 +184,8 @@ files:
         name: kCBLLogWarning
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainDatabase:
         name: kCBLLogDomainDatabase
+      c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainListener:
+        name: kCBLLogDomainListener
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainNetwork:
         name: kCBLLogDomainNetwork
       c:@Ea@kCBLLogDomainDatabase@kCBLLogDomainQuery:
@@ -184,6 +196,8 @@ files:
         name: kCBLLogDomainMaskAll
       c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskDatabase:
         name: kCBLLogDomainMaskDatabase
+      c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskListener:
+        name: kCBLLogDomainMaskListener
       c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskNetwork:
         name: kCBLLogDomainMaskNetwork
       c:@Ea@kCBLLogDomainMaskDatabase@kCBLLogDomainMaskQuery:
@@ -262,6 +276,22 @@ files:
         name: kCBLSeekModeFromStart
       c:@Ea@kCBLSeekModeFromStart@kCBLSeekModeRelative:
         name: kCBLSeekModeRelative
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestNone:
+        name: kCBLSignatureDigestNone
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestRIPEMD160:
+        name: kCBLSignatureDigestRIPEMD160
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA1:
+        name: kCBLSignatureDigestSHA1
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA224:
+        name: kCBLSignatureDigestSHA224
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA256:
+        name: kCBLSignatureDigestSHA256
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA384:
+        name: kCBLSignatureDigestSHA384
+      c:@Ea@kCBLSignatureDigestNone@kCBLSignatureDigestSHA512:
+        name: kCBLSignatureDigestSHA512
+      c:@F@CBLAuth_CreateCertificate:
+        name: CBLAuth_CreateCertificate
       c:@F@CBLAuth_CreatePassword:
         name: CBLAuth_CreatePassword
       c:@F@CBLAuth_CreateSession:
@@ -302,6 +332,20 @@ files:
         name: CBLBlob_OpenContentStream
       c:@F@CBLBlob_Properties:
         name: CBLBlob_Properties
+      c:@F@CBLCert_CertNextInChain:
+        name: CBLCert_CertNextInChain
+      c:@F@CBLCert_CreateWithData:
+        name: CBLCert_CreateWithData
+      c:@F@CBLCert_Data:
+        name: CBLCert_Data
+      c:@F@CBLCert_PublicKey:
+        name: CBLCert_PublicKey
+      c:@F@CBLCert_SubjectName:
+        name: CBLCert_SubjectName
+      c:@F@CBLCert_SubjectNameComponent:
+        name: CBLCert_SubjectNameComponent
+      c:@F@CBLCert_ValidTimespan:
+        name: CBLCert_ValidTimespan
       c:@F@CBLCollection_AddChangeListener:
         name: CBLCollection_AddChangeListener
       c:@F@CBLCollection_AddDocumentChangeListener:
@@ -506,6 +550,24 @@ files:
         name: CBLIndexUpdater_SkipVector
       c:@F@CBLIndexUpdater_Value:
         name: CBLIndexUpdater_Value
+      c:@F@CBLKeyPair_CreateWithExternalKey:
+        name: CBLKeyPair_CreateWithExternalKey
+      c:@F@CBLKeyPair_CreateWithPrivateKeyData:
+        name: CBLKeyPair_CreateWithPrivateKeyData
+      c:@F@CBLKeyPair_PrivateKeyData:
+        name: CBLKeyPair_PrivateKeyData
+      c:@F@CBLKeyPair_PublicKeyData:
+        name: CBLKeyPair_PublicKeyData
+      c:@F@CBLKeyPair_PublicKeyDigest:
+        name: CBLKeyPair_PublicKeyDigest
+      c:@F@CBLListenerAuth_CreateCertificate:
+        name: CBLListenerAuth_CreateCertificate
+      c:@F@CBLListenerAuth_CreateCertificateWithRootCerts:
+        name: CBLListenerAuth_CreateCertificateWithRootCerts
+      c:@F@CBLListenerAuth_CreatePassword:
+        name: CBLListenerAuth_CreatePassword
+      c:@F@CBLListenerAuth_Free:
+        name: CBLListenerAuth_Free
       c:@F@CBLListener_Remove:
         name: CBLListener_Remove
       c:@F@CBLLogSinks_Console:
@@ -574,6 +636,8 @@ files:
         name: CBLReplicator_PendingDocumentIDs
       c:@F@CBLReplicator_PendingDocumentIDs2:
         name: CBLReplicator_PendingDocumentIDs2
+      c:@F@CBLReplicator_ServerCertificate:
+        name: CBLReplicator_ServerCertificate
       c:@F@CBLReplicator_SetHostReachable:
         name: CBLReplicator_SetHostReachable
       c:@F@CBLReplicator_SetSuspended:
@@ -604,6 +668,36 @@ files:
         name: CBLScope_Database
       c:@F@CBLScope_Name:
         name: CBLScope_Name
+      c:@F@CBLTLSIdentity_Certificates:
+        name: CBLTLSIdentity_Certificates
+      c:@F@CBLTLSIdentity_CreateIdentity:
+        name: CBLTLSIdentity_CreateIdentity
+      c:@F@CBLTLSIdentity_CreateIdentityWithKeyPair:
+        name: CBLTLSIdentity_CreateIdentityWithKeyPair
+      c:@F@CBLTLSIdentity_DeleteIdentityWithLabel:
+        name: CBLTLSIdentity_DeleteIdentityWithLabel
+      c:@F@CBLTLSIdentity_Expiration:
+        name: CBLTLSIdentity_Expiration
+      c:@F@CBLTLSIdentity_IdentityWithCerts:
+        name: CBLTLSIdentity_IdentityWithCerts
+      c:@F@CBLTLSIdentity_IdentityWithKeyPairAndCerts:
+        name: CBLTLSIdentity_IdentityWithKeyPairAndCerts
+      c:@F@CBLTLSIdentity_IdentityWithLabel:
+        name: CBLTLSIdentity_IdentityWithLabel
+      c:@F@CBLURLEndpointListener_Config:
+        name: CBLURLEndpointListener_Config
+      c:@F@CBLURLEndpointListener_Create:
+        name: CBLURLEndpointListener_Create
+      c:@F@CBLURLEndpointListener_Port:
+        name: CBLURLEndpointListener_Port
+      c:@F@CBLURLEndpointListener_Start:
+        name: CBLURLEndpointListener_Start
+      c:@F@CBLURLEndpointListener_Status:
+        name: CBLURLEndpointListener_Status
+      c:@F@CBLURLEndpointListener_Stop:
+        name: CBLURLEndpointListener_Stop
+      c:@F@CBLURLEndpointListener_Urls:
+        name: CBLURLEndpointListener_Urls
       c:@F@CBLVectorEncoding_CreateNone:
         name: CBLVectorEncoding_CreateNone
       c:@F@CBLVectorEncoding_CreateProductQuantizer:
@@ -1034,6 +1128,8 @@ files:
         name: CBLBlobReadStream
       c:@S@CBLBlobWriteStream:
         name: CBLBlobWriteStream
+      c:@S@CBLCert:
+        name: CBLCert
       c:@S@CBLCollection:
         name: CBLCollection
       c:@S@CBLDatabase:
@@ -1044,8 +1140,14 @@ files:
         name: CBLEncryptable
       c:@S@CBLEndpoint:
         name: CBLEndpoint
+      c:@S@CBLExternalKeyCallbacks:
+        name: CBLExternalKeyCallbacks
       c:@S@CBLIndexUpdater:
         name: CBLIndexUpdater
+      c:@S@CBLKeyPair:
+        name: CBLKeyPair
+      c:@S@CBLListenerAuthenticator:
+        name: CBLListenerAuthenticator
       c:@S@CBLListenerToken:
         name: CBLListenerToken
       c:@S@CBLQuery:
@@ -1060,6 +1162,10 @@ files:
         name: CBLResultSet
       c:@S@CBLScope:
         name: CBLScope
+      c:@S@CBLTLSIdentity:
+        name: CBLTLSIdentity
+      c:@S@CBLURLEndpointListener:
+        name: CBLURLEndpointListener
       c:@S@CBLVectorEncoding:
         name: CBLVectorEncoding
       c:@S@FLSlice:
@@ -1096,6 +1202,8 @@ files:
         name: CBLArrayIndexConfiguration
       c:@SA@CBLCollectionChange:
         name: CBLCollectionChange
+      c:@SA@CBLConnectionStatus:
+        name: CBLConnectionStatus
       c:@SA@CBLConsoleLogSink:
         name: CBLConsoleLogSink
       c:@SA@CBLCustomLogSink:
@@ -1128,6 +1236,8 @@ files:
         name: CBLReplicatorProgress
       c:@SA@CBLReplicatorStatus:
         name: CBLReplicatorStatus
+      c:@SA@CBLURLEndpointListenerConfiguration:
+        name: CBLURLEndpointListenerConfiguration
       c:@SA@CBLValueIndexConfiguration:
         name: CBLValueIndexConfiguration
       c:@SA@CBLVectorIndexConfiguration:
@@ -1150,6 +1260,38 @@ files:
         name: kCBLBlobLengthProperty
       c:@kCBLBlobType:
         name: kCBLBlobType
+      c:@kCBLCertAttrKeyCommonName:
+        name: kCBLCertAttrKeyCommonName
+      c:@kCBLCertAttrKeyCountry:
+        name: kCBLCertAttrKeyCountry
+      c:@kCBLCertAttrKeyEmailAddress:
+        name: kCBLCertAttrKeyEmailAddress
+      c:@kCBLCertAttrKeyGivenName:
+        name: kCBLCertAttrKeyGivenName
+      c:@kCBLCertAttrKeyHostname:
+        name: kCBLCertAttrKeyHostname
+      c:@kCBLCertAttrKeyIPAddress:
+        name: kCBLCertAttrKeyIPAddress
+      c:@kCBLCertAttrKeyLocality:
+        name: kCBLCertAttrKeyLocality
+      c:@kCBLCertAttrKeyOrganization:
+        name: kCBLCertAttrKeyOrganization
+      c:@kCBLCertAttrKeyOrganizationUnit:
+        name: kCBLCertAttrKeyOrganizationUnit
+      c:@kCBLCertAttrKeyPostalAddress:
+        name: kCBLCertAttrKeyPostalAddress
+      c:@kCBLCertAttrKeyPostalCode:
+        name: kCBLCertAttrKeyPostalCode
+      c:@kCBLCertAttrKeyPseudonym:
+        name: kCBLCertAttrKeyPseudonym
+      c:@kCBLCertAttrKeyRegisteredID:
+        name: kCBLCertAttrKeyRegisteredID
+      c:@kCBLCertAttrKeyStateOrProvince:
+        name: kCBLCertAttrKeyStateOrProvince
+      c:@kCBLCertAttrKeySurname:
+        name: kCBLCertAttrKeySurname
+      c:@kCBLCertAttrKeyURL:
+        name: kCBLCertAttrKeyURL
       c:@kCBLDefaultCollectionName:
         name: kCBLDefaultCollectionName
       c:@kCBLDefaultDatabaseFullSync:
@@ -1307,6 +1449,16 @@ files:
       c:CBLReplicator.h@T@CBLReplicatorType:
         name: CBLReplicatorType
         dart-name: DartCBLReplicatorType
+      c:CBLTLSIdentity.h@T@CBLKeyUsages:
+        name: CBLKeyUsages
+        dart-name: DartCBLKeyUsages
+      c:CBLTLSIdentity.h@T@CBLSignatureDigestAlgorithm:
+        name: CBLSignatureDigestAlgorithm
+        dart-name: DartCBLSignatureDigestAlgorithm
+      c:CBLURLEndpointListener.h@T@CBLListenerCertAuthCallback:
+        name: CBLListenerCertAuthCallback
+      c:CBLURLEndpointListener.h@T@CBLListenerPasswordAuthCallback:
+        name: CBLListenerPasswordAuthCallback
       c:FLBase.h@T@FLArray:
         name: FLArray
       c:FLBase.h@T@FLDict:

@@ -12,6 +12,7 @@ enum LogDomain {
   query,
   replicator,
   network,
+  listener,
 }
 
 /// Levels of log messages. Higher values are more important/severe. Each level
