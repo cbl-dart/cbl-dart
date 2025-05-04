@@ -320,3 +320,9 @@ doc/api/
 ## Flutter
 .flutter-plugins
 .flutter-plugins-dependencies
+
+
+# Ignore assets that are downloaded from the init_from_local_assets_test.dart
+assets/linux/
+assets/macos/
+assets/windows/
