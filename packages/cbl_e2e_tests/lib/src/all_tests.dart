@@ -35,6 +35,7 @@ import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
 import 'replication/tls_identity_test.dart' as tls_identity;
+import 'replication/url_endpoint_listener_test.dart' as url_endpoint_listener;
 import 'service/cbl_worker_test.dart' as service_cbl_worker;
 import 'service/channel_test.dart' as service_channel;
 import 'service/isolate_worker_test.dart' as service_isolate_worker;
@@ -88,6 +89,7 @@ final tests = [
   typed_data_helpers.main,
   typed_data_runtime_support.main,
   typed_database.main,
+  url_endpoint_listener.main,
 ];
 
 void main() {

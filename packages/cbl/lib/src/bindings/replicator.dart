@@ -81,6 +81,7 @@ final class CBLReplicatorConfiguration {
     this.authenticator,
     this.proxy,
     this.headers,
+    required this.acceptOnlySelfSignedServerCertificate,
     this.pinnedServerCertificate,
     this.trustedRootCertificates,
     required this.collections,
@@ -97,6 +98,7 @@ final class CBLReplicatorConfiguration {
   final Pointer<cblite.CBLAuthenticator>? authenticator;
   final CBLProxySettings? proxy;
   final cblite.FLDict? headers;
+  final bool acceptOnlySelfSignedServerCertificate;
   final Data? pinnedServerCertificate;
   final Data? trustedRootCertificates;
   final List<CBLReplicationCollection> collections;
@@ -328,6 +330,11 @@ final class ReplicatorBindings extends Bindings {
             cookieName.toFLString(),
           ));
 
+  Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
+    Pointer<cblite.CBLTLSIdentity> pointer,
+  ) =>
+      cbl.CBLAuth_CreateCertificate(pointer);
+
   void freeAuthenticator(Pointer<cblite.CBLAuthenticator> authenticator) {
     cbl.CBLAuth_Free(authenticator);
   }
@@ -439,6 +446,8 @@ final class ReplicatorBindings extends Bindings {
       ..authenticator = config.authenticator ?? nullptr
       ..proxy = _createProxySettingsStruct(config.proxy)
       ..headers = config.headers ?? nullptr
+      ..acceptOnlySelfSignedServerCertificate =
+          config.acceptOnlySelfSignedServerCertificate
       ..pinnedServerCertificate = config.pinnedServerCertificate
               ?.toSliceResult()
               .flSlice(globalArena) ??

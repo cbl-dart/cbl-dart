@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import '../database.dart';
 import '../database/database_base.dart';
 import '../document.dart';
+import '../support/edition.dart';
 import '../support/utils.dart';
 import '../typed_data.dart';
 import '../typed_data/adapter.dart';
@@ -156,6 +157,7 @@ final class ReplicatorConfiguration {
     this.replicatorType = ReplicatorType.pushAndPull,
     this.continuous = false,
     this.authenticator,
+    bool acceptOnlySelfSignedServerCertificate = false,
     this.pinnedServerCertificate,
     this.trustedRootCertificates,
     this.headers,
@@ -177,6 +179,8 @@ final class ReplicatorConfiguration {
     Duration? maxAttemptWaitTime,
   }) : _collections = {} {
     this
+      ..acceptOnlySelfSignedServerCertificate =
+          acceptOnlySelfSignedServerCertificate
       ..heartbeat = heartbeat
       ..maxAttempts = maxAttempts
       ..maxAttemptWaitTime = maxAttemptWaitTime;
@@ -197,6 +201,8 @@ final class ReplicatorConfiguration {
         replicatorType = config.replicatorType,
         continuous = config.continuous,
         authenticator = config.authenticator,
+        _acceptOnlySelfSignedServerCertificate =
+            config.acceptOnlySelfSignedServerCertificate,
         pinnedServerCertificate = config.pinnedServerCertificate,
         trustedRootCertificates = config.trustedRootCertificates,
         headers = config.headers,
@@ -233,6 +239,25 @@ final class ReplicatorConfiguration {
 
   /// The [Authenticator] to authenticate with a remote target.
   Authenticator? authenticator;
+
+  /// Whether the replicator accepts any and only self-signed certificates.
+  ///
+  /// {@macro cbl.EncryptionKey.enterpriseFeature}
+  ///
+  /// Default value is `false`.
+  ///
+  /// Any non-self-signed certificates will be rejected to avoid accidentally
+  /// using this mode with non-self-signed certificates in production.
+  bool get acceptOnlySelfSignedServerCertificate =>
+      _acceptOnlySelfSignedServerCertificate;
+  bool _acceptOnlySelfSignedServerCertificate = false;
+
+  set acceptOnlySelfSignedServerCertificate(bool value) {
+    if (value) {
+      useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+    }
+    _acceptOnlySelfSignedServerCertificate = value;
+  }
 
   /// The remote target's SSL certificate (PEM or DER).
   Uint8List? pinnedServerCertificate;
@@ -462,6 +487,8 @@ final class ReplicatorConfiguration {
         'replicatorType: ${replicatorType.name}',
         if (continuous) 'CONTINUOUS',
         if (authenticator != null) 'authenticator: $authenticator',
+        if (acceptOnlySelfSignedServerCertificate)
+          'ACCEPT-ONLY-SELF-SIGNED-SERVER-CERTIFICATE',
         if (pinnedServerCertificate != null) 'PINNED-SERVER-CERTIFICATE',
         if (trustedRootCertificates != null) 'TRUSTED-ROOT-CERTIFICATES',
         if (headers != null) 'headers: $headers',

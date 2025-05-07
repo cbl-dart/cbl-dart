@@ -1013,6 +1013,10 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   config_.authenticator = config->authenticator;
   config_.proxy = config->proxy;
   config_.headers = config->headers;
+#ifdef COUCHBASE_ENTERPRISE
+  config_.acceptOnlySelfSignedServerCertificate =
+      config->acceptOnlySelfSignedServerCertificate;
+#endif
   config_.pinnedServerCertificate = config->pinnedServerCertificate == nullptr
                                         ? kFLSliceNull
                                         : *config->pinnedServerCertificate;

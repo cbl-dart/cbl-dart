@@ -124,7 +124,10 @@ class OID {
 
 /// The issuer and Subject Alternative Name (SAN) attributes of a [Certificate].
 ///
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
 /// {@category Replication}
+/// {@category Enterprise Edition}
 @immutable
 abstract final class CertificateAttributes {
   /// Creates a new instance of [CertificateAttributes] with the given
@@ -536,7 +539,10 @@ final class DerData implements CryptoData {
 
 /// A X.509 certificate.
 ///
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
 /// {@category Replication}
+/// {@category Enterprise Edition}
 abstract final class Certificate {
   /// Decodes a [Certificate] from the given [data].
   ///
@@ -544,14 +550,13 @@ abstract final class Certificate {
   /// containing multiple certificates, use [decodeMultiple].
   ///
   /// [DerData] can only contain a single certificate.
-  static Future<Certificate> decode(CryptoData data) =>
-      FfiCertificate.decode(data);
+  static Certificate decode(CryptoData data) => FfiCertificate.decode(data);
 
   /// Decodes one or more [Certificate]s from the given [data].
   ///
   /// Since [DerData] cannot contain multiple certificates, the provided data
   /// must be [PemData].
-  static Future<List<Certificate>> decodeMultiple(PemData data) =>
+  static List<Certificate> decodeMultiple(PemData data) =>
       FfiCertificate.decodeMultiple(data);
 
   /// A [KeyPair] only containing the public key of this certificate.
@@ -579,16 +584,15 @@ final class FfiCertificate implements Certificate, Finalizable {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
-  static Future<FfiCertificate> _decode(CryptoData data) async {
-    final pointer = await runInSecondaryIsolate(
-      () => _bindings.certCreateWithData(data._data),
-    );
-    return FfiCertificate.fromPointer(pointer, adopt: true);
-  }
+  // ignore: prefer_constructors_over_static_methods
+  static FfiCertificate _decode(CryptoData data) => FfiCertificate.fromPointer(
+        _bindings.certCreateWithData(data._data),
+        adopt: true,
+      );
 
-  static Future<FfiCertificate> combined(
+  static FfiCertificate combined(
     Iterable<FfiCertificate> certificates,
-  ) async {
+  ) {
     if (certificates.isEmpty) {
       throw ArgumentError.value(
         certificates,
@@ -604,7 +608,7 @@ final class FfiCertificate implements Certificate, Finalizable {
     return _decode(PemData.combined(certificates.map((cert) => cert.toPem())));
   }
 
-  static Future<FfiCertificate> decode(CryptoData data) async {
+  static FfiCertificate decode(CryptoData data) {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
     if (data is PemData && data.blocks.length > 1) {
@@ -615,16 +619,16 @@ final class FfiCertificate implements Certificate, Finalizable {
       );
     }
 
-    final certificate = await _decode(data);
+    final certificate = _decode(data);
 
     assert(certificate._nextInChain == null);
 
     return certificate;
   }
 
-  static Future<List<FfiCertificate>> decodeMultiple(PemData data) {
+  static List<FfiCertificate> decodeMultiple(PemData data) {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
-    return Future.wait(data.blocks.map(decode));
+    return data.blocks.map(decode).toList();
   }
 
   final Pointer<CBLCert> pointer;
@@ -657,13 +661,25 @@ final class FfiCertificate implements Certificate, Finalizable {
   String? attribute(String key) =>
       _bindings.certSubjectNameComponent(pointer, key);
 
-  Future<List<FfiCertificate>> toList() async {
+  List<FfiCertificate> toList() {
     if (_nextInChain == null) {
       return [this];
     }
 
     return decodeMultiple(toPem());
   }
+
+  @override
+  String toString() => [
+        'Certificate(',
+        [
+          'created: $created',
+          'expires: $expires',
+          'publicKey: $publicKey',
+          'attributes: $attributes',
+        ].join(', '),
+        ')'
+      ].join('');
 }
 
 /// Digest algorithms to be used when generating signatures with a private key.
@@ -695,7 +711,10 @@ enum SignatureDigestAlgorithm {
 /// A [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem) public-key
 /// cryptography key pair.
 ///
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
 /// {@category Replication}
+/// {@category Enterprise Edition}
 abstract final class KeyPair {
   /// Creates a [KeyPair] from an existing encoded [privateKey].
   ///
@@ -705,11 +724,11 @@ abstract final class KeyPair {
   /// An encrypted [privateKey] must be in PKCS#1 format. This can be achieved
   /// by using the `-traditional` option with the
   /// [`openssl rsa`](https://docs.openssl.org/3.5/man1/openssl-rsa/) command.
-  static Future<KeyPair> withPrivateKey(
+  static Future<KeyPair> fromPrivateKey(
     CryptoData privateKey, {
     String? password,
   }) =>
-      FfiKeyPair.withPrivateKey(
+      FfiKeyPair.fromPrivateKey(
         privateKey,
         password: password,
       );
@@ -729,7 +748,7 @@ final class FfiKeyPair implements KeyPair, Finalizable {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
-  static Future<KeyPair> withPrivateKey(
+  static Future<FfiKeyPair> fromPrivateKey(
     CryptoData privateKey, {
     String? password,
   }) async {
@@ -755,6 +774,16 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   @override
   DerData? get privateKey =>
       _bindings.keyPairPrivateKeyData(pointer)?.let(DerData.new);
+
+  @override
+  String toString() => [
+        'KeyPair(',
+        [
+          'publicKeyDigest: $publicKeyDigest',
+          if (privateKey != null) 'PRIVATE-KEY-AVAILABLE',
+        ].join(', '),
+        ')',
+      ].join();
 }
 
 /// Purpose for which a certified public key may be used.
@@ -776,14 +805,17 @@ enum KeyUsage {
 /// TLS identity including a [KeyPair] and X.509 [Certificate] chain used for
 /// configuring TLS communication for replication.
 ///
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
 /// {@category Replication}
+/// {@category Enterprise Edition}
 abstract class TlsIdentity {
   /// Creates a [TlsIdentity] from an existing identity using the provided RSA
   /// [keyPair] and chain of [certificates].
   ///
   /// Certificates will not be resigned with the [keyPair]. They will be used as
   /// is.
-  static Future<TlsIdentity> from({
+  factory TlsIdentity.from({
     required KeyPair keyPair,
     required List<Certificate> certificates,
   }) =>
@@ -873,15 +905,15 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
-  static Future<TlsIdentity> fromPointer(
+  factory FfiTlsIdentity.fromPointer(
     Pointer<CBLTLSIdentity> pointer, {
     bool adopt = false,
-  }) async {
+  }) {
     final certificateChain = FfiCertificate.fromPointer(
       _bindings.identityCertificates(pointer),
       adopt: false,
     );
-    final certificates = await certificateChain.toList();
+    final certificates = certificateChain.toList();
     return FfiTlsIdentity._fromPointer(
       pointer,
       certificates: certificates,
@@ -889,28 +921,26 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     );
   }
 
-  static Future<TlsIdentity> from({
+  factory FfiTlsIdentity.from({
     required KeyPair keyPair,
     required List<FfiCertificate> certificates,
-  }) async {
+  }) {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
     final keyPairPointer = (keyPair as FfiKeyPair).pointer;
     final certificateChainPointer =
-        (await FfiCertificate.combined(certificates)).pointer;
+        FfiCertificate.combined(certificates).pointer;
 
     return FfiTlsIdentity.fromPointer(
-      await runInSecondaryIsolate(
-        () => _bindings.withKeyPairAndCerts(
-          keyPairPointer,
-          certificateChainPointer,
-        ),
+      _bindings.withKeyPairAndCerts(
+        keyPairPointer,
+        certificateChainPointer,
       ),
       adopt: true,
     );
   }
 
-  static Future<TlsIdentity> createIdentity({
+  static Future<FfiTlsIdentity> createIdentity({
     required Set<KeyUsage> keyUsages,
     required CertificateAttributes attributes,
     required DateTime expiration,
@@ -956,7 +986,7 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     );
   }
 
-  static Future<TlsIdentity?> identity(String label) async {
+  static Future<FfiTlsIdentity?> identity(String label) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
     _checkPersistedIdentitySupport();
 
@@ -969,14 +999,13 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     return FfiTlsIdentity.fromPointer(pointer, adopt: true);
   }
 
-  static Future<TlsIdentity> identityWithCertificates(
+  static Future<FfiTlsIdentity> identityWithCertificates(
     List<FfiCertificate> certificates,
   ) async {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
     _checkPersistedIdentitySupport();
 
-    final certificatePointer =
-        (await FfiCertificate.combined(certificates)).pointer;
+    final certificatePointer = FfiCertificate.combined(certificates).pointer;
     return FfiTlsIdentity.fromPointer(
       await runInSecondaryIsolate(
         () => _bindings.withCerts(certificatePointer),
@@ -1007,4 +1036,14 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
 
   @override
   DateTime get expires => _bindings.identityExpiration(pointer);
+
+  @override
+  String toString() => [
+        'TlsIdentity(',
+        [
+          'expires: $expires',
+          'certificates: $certificates',
+        ].join(', '),
+        ')'
+      ].join('');
 }

@@ -233,6 +233,7 @@ struct CBLDart_ReplicatorConfiguration {
   CBLAuthenticator *authenticator;
   CBLProxySettings *proxy;
   FLDict headers;
+  bool acceptOnlySelfSignedServerCertificate;
   FLSlice *pinnedServerCertificate;
   FLSlice *trustedRootCertificates;
   CBLDart_ReplicationCollection *collections;

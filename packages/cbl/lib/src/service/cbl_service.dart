@@ -422,6 +422,7 @@ final class CblService {
     }
     return CollectionState(
       id: _objectRegistry.addObject(collection),
+      pointer: (collection as FfiCollection).pointer,
       name: collection.name,
     );
   }
@@ -431,6 +432,7 @@ final class CblService {
           .collections
           .map((collection) => CollectionState(
                 id: _objectRegistry.addObject(collection),
+                pointer: (collection as FfiCollection).pointer,
                 name: collection.name,
               ))
           .toList();
@@ -440,6 +442,7 @@ final class CblService {
         .createCollection(request.collection, request.scope);
     return CollectionState(
       id: _objectRegistry.addObject(collection),
+      pointer: (collection as FfiCollection).pointer,
       name: collection.name,
     );
   }
@@ -675,6 +678,8 @@ final class CblService {
       replicatorType: request.replicatorType,
       continuous: request.continuous,
       authenticator: request.authenticator,
+      acceptOnlySelfSignedServerCertificate:
+          request.acceptOnlySelfSignedServerCertificate,
       pinnedServerCertificate: request.pinnedServerCertificate?.toTypedList(),
       trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
       headers: request.headers,

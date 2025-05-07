@@ -17,7 +17,7 @@ import 'database.dart';
 /// A key used to encrypt a [Database].
 ///
 /// {@template cbl.EncryptionKey.enterpriseFeature}
-/// This feature is only available in the **Enterprise Edition**.
+/// This API is only available in the **Enterprise Edition**.
 /// {@endtemplate}
 ///
 /// This is an AES-256 key, which is 32 bytes long.

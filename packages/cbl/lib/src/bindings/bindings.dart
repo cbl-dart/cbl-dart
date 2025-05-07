@@ -14,6 +14,7 @@ import 'query.dart';
 import 'replicator.dart';
 import 'tls_identity.dart';
 import 'tracing.dart';
+import 'url_endpoint_listener.dart';
 
 class BindingsLibraries {
   BindingsLibraries({
@@ -61,6 +62,7 @@ final class CBLBindings extends Bindings {
         blobs = BlobsBindings(libraries),
         replicator = ReplicatorBindings(libraries),
         tlsIdentity = TlsIdentityBindings(libraries),
+        urlEndpointListener = UrlEndpointListenerBindings(libraries),
         fleece = FleeceBindings(libraries);
 
   factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) =>
@@ -109,6 +111,7 @@ final class CBLBindings extends Bindings {
   final BlobsBindings blobs;
   final ReplicatorBindings replicator;
   final TlsIdentityBindings tlsIdentity;
+  final UrlEndpointListenerBindings urlEndpointListener;
   final FleeceBindings fleece;
 }
 

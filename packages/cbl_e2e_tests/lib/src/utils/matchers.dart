@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings.dart';
 import 'package:collection/collection.dart';
-import 'package:test/test.dart';
 import 'package:test/test.dart' as test;
+import 'package:test/test.dart';
 
 import 'fleece_coding.dart';
 
@@ -197,5 +197,15 @@ extension TypedDataExceptionMatcherExt on test.TypeMatcher<TypedDataException> {
       having((it) => it.message, 'message', message);
 
   test.TypeMatcher<TypedDataException> havingCode(TypedDataErrorCode code) =>
+      having((it) => it.code, 'code', code);
+}
+
+final isNetworkException = isA<NetworkException>();
+
+extension NetworkExceptionMatcherExt on test.TypeMatcher<NetworkException> {
+  test.TypeMatcher<NetworkException> havingMessage(String message) =>
+      having((it) => it.message, 'message', message);
+
+  test.TypeMatcher<NetworkException> havingCode(NetworkErrorCode code) =>
       having((it) => it.code, 'code', code);
 }
