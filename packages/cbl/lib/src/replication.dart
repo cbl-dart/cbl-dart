@@ -27,3 +27,15 @@ export 'replication/replicator.dart'
         SyncReplicator,
         AsyncReplicator;
 export 'replication/replicator_change.dart' show ReplicatorChange;
+export 'replication/tls_identity.dart'
+    show
+        CertificateAttributes,
+        TlsIdentity,
+        Certificate,
+        KeyPair,
+        KeyUsage,
+        SignatureDigestAlgorithm,
+        OID,
+        CryptoData,
+        PemData,
+        DerData;

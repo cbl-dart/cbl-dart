@@ -10,7 +10,8 @@ enum EnterpriseFeature {
   databaseEncryption,
   propertyEncryption,
   prediction,
-  vectorIndex;
+  vectorIndex,
+  peerToPeerSync;
 
   String get description => switch (this) {
         localDbReplication => 'Local database replication',
@@ -18,6 +19,7 @@ enum EnterpriseFeature {
         propertyEncryption => 'Property encryption',
         prediction => 'Prediction',
         vectorIndex => 'Vector index',
+        peerToPeerSync => 'Peer-to-peer sync',
       };
 }
 

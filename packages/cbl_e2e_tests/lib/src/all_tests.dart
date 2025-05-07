@@ -34,6 +34,7 @@ import 'replication/endpoint_test.dart' as replication_endpoint;
 import 'replication/replicator_change_test.dart'
     as replication_replicator_change;
 import 'replication/replicator_test.dart' as replication_replicator;
+import 'replication/tls_identity_test.dart' as tls_identity;
 import 'service/cbl_worker_test.dart' as service_cbl_worker;
 import 'service/channel_test.dart' as service_channel;
 import 'service/isolate_worker_test.dart' as service_isolate_worker;
@@ -80,6 +81,7 @@ final tests = [
   service_channel.main,
   service_isolate_worker.main,
   support_async_callback.main,
+  tls_identity.main,
   tracing.main,
   typed_data_collection.main,
   typed_data_conversion.main,

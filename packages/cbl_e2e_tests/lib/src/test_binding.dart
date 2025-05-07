@@ -106,6 +106,9 @@ abstract base class CblE2eTestBinding {
   void _setupTestLifecycleHooks() {
     setUpAllFn(() async {
       tmpDir = await resolveTmpDir();
+      // ignore: avoid_print
+      print('Using temporary directory: $tmpDir');
+
       await _cleanTestTmpDir();
       await initCouchbaseLite();
 

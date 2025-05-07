@@ -12,6 +12,7 @@ import 'libraries.dart';
 import 'logging.dart';
 import 'query.dart';
 import 'replicator.dart';
+import 'tls_identity.dart';
 import 'tracing.dart';
 
 class BindingsLibraries {
@@ -59,6 +60,7 @@ final class CBLBindings extends Bindings {
         indexUpdater = IndexUpdaterBindings(libraries),
         blobs = BlobsBindings(libraries),
         replicator = ReplicatorBindings(libraries),
+        tlsIdentity = TlsIdentityBindings(libraries),
         fleece = FleeceBindings(libraries);
 
   factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) =>
@@ -106,6 +108,7 @@ final class CBLBindings extends Bindings {
   final IndexUpdaterBindings indexUpdater;
   final BlobsBindings blobs;
   final ReplicatorBindings replicator;
+  final TlsIdentityBindings tlsIdentity;
   final FleeceBindings fleece;
 }
 

@@ -315,12 +315,12 @@ Blob blobFromDataWithLength([int length = 0]) =>
 Uint8List randomTestContent({bool large = false}) =>
     randomBytes(large ? 8 * 1024 * 2 : 16);
 
-final random = Random(0);
+final fixedRandom = Random(0);
 
-Uint8List randomBytes(int size) {
+Uint8List randomBytes(int size, {Random? random}) {
   final data = Uint32List(size ~/ 4);
   for (var i = 0; i < data.length; i++) {
-    data[i] = random.nextInt(1 << 32);
+    data[i] = (random ?? fixedRandom).nextInt(1 << 32);
   }
   return data.buffer.asUint8List(0, size);
 }

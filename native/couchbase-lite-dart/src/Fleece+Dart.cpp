@@ -8,11 +8,11 @@
 // === Slice
 
 void CBLDart_FLSliceResult_RetainByBuf(void *buf) {
-  FLSliceResult_Retain({buf, 0});
+  (void)FLSliceResult_Retain({buf, 0});
 }
 
 void CBLDart_FLSliceResult_ReleaseByBuf(void *buf) {
-  FLSliceResult_Release({buf, 0});
+  (void)FLSliceResult_Release({buf, 0});
 }
 
 // === Decoder ================================================================

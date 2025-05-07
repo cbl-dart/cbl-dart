@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import '../bindings.dart';
 import '../document/common.dart';
@@ -122,4 +123,12 @@ Future<void> _runPostIsolateInitTasks() async {
     _currentPostIsolateInitTask = null;
     _postIsolateInitTasks.removeAt(0);
   }
+}
+
+Future<T> runInSecondaryIsolate<T>(FutureOr<T> Function() fn) async {
+  final context = IsolateContext.instance;
+  return Isolate.run(() async {
+    await initSecondaryIsolate(context);
+    return fn();
+  });
 }

@@ -53,7 +53,7 @@ function _linkCouchbaseLiteFramework() {
     echo "Setting up to build against Couchbase Lite C $edition edition"
 
     cd "$projectDir/Xcode"
-    ln -F -s "$frameworkPath"
+    ln -F -s "$frameworkPath" CouchbaseLite.xcframework
 }
 
 function _buildFramework() {
