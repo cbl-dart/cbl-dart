@@ -651,6 +651,13 @@ final class GetReplicatorStatus extends Request<ReplicatorStatus> {
   final int replicatorId;
 }
 
+final class GetReplicatorServerCertificate
+    extends Request<SendableCertificate?> {
+  GetReplicatorServerCertificate({required this.replicatorId});
+
+  final int replicatorId;
+}
+
 final class StartReplicator extends Request<Null> {
   StartReplicator({
     required this.replicatorId,
@@ -909,6 +916,27 @@ final class DocumentReplicationEvent {
 
   final bool isPush;
   final List<ReplicatedDocument> documents;
+}
+
+final class SendableCertificate implements SendAware {
+  SendableCertificate(this._certificate);
+
+  Certificate get certificate => _certificate!;
+  Certificate? _certificate;
+  Pointer<cblite.CBLCert>? _pointer;
+
+  @override
+  void willSend() {
+    _pointer = (_certificate! as FfiCertificate).pointer;
+    CBLBindings.instance.base.retainRefCounted(_pointer!.cast());
+    _certificate = null;
+  }
+
+  @override
+  void didReceive() {
+    _certificate = FfiCertificate.fromPointer(_pointer!, adopt: true);
+    _pointer = null;
+  }
 }
 
 // === Exceptions ==============================================================

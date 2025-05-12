@@ -139,8 +139,12 @@ final class ProxyReplicator extends ProxyObject
           )));
 
   @override
-  Future<Certificate?> get serverCertificate async =>
-      throw UnimplementedError();
+  Future<Certificate?> get serverCertificate async => use(() async {
+        final response = await channel.call(GetReplicatorServerCertificate(
+          replicatorId: objectId,
+        ));
+        return response?.certificate;
+      });
 
   @override
   // ignore: prefer_expression_function_bodies

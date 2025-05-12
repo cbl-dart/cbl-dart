@@ -382,6 +382,11 @@ final class ReplicatorBindings extends Bindings {
   CBLReplicatorStatus status(Pointer<cblite.CBLReplicator> replicator) =>
       cbl.CBLReplicator_Status(replicator).toCBLReplicatorStatus();
 
+  Pointer<cblite.CBLCert>? serverCertificate(
+    Pointer<cblite.CBLReplicator> replicator,
+  ) =>
+      cbl.CBLReplicator_ServerCertificate(replicator).toNullable();
+
   cblite.FLDict pendingDocumentIDs(
     Pointer<cblite.CBLReplicator> replicator,
     Pointer<cblite.CBLCollection> collection,

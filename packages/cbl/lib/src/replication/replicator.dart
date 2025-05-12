@@ -155,7 +155,7 @@ abstract interface class Replicator implements ClosableResource {
 
   /// The TLS [Certificate] received when connecting to the server.
   ///
-  /// {@macro cbl.EncryptionKey.enterpriseFeature}}
+  /// {@macro cbl.EncryptionKey.enterpriseFeature}
   FutureOr<Certificate?> get serverCertificate;
 
   /// Starts this replicator with an option to [reset] the local checkpoint of

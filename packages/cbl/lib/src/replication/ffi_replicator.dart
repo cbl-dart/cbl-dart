@@ -196,7 +196,11 @@ final class FfiReplicator
       _bindings.status(pointer).toReplicatorStatus();
 
   @override
-  Certificate? get serverCertificate => throw UnimplementedError();
+  Certificate? get serverCertificate => useSync(() {
+        useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+        return _bindings.serverCertificate(pointer)?.let(
+            (pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
+      });
 
   @override
   void start({bool reset = false}) => useSync(() {

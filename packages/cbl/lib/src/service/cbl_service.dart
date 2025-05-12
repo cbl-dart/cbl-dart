@@ -306,6 +306,7 @@ final class CblService {
       ..addCallEndpoint(_indexUpdaterFinish)
       ..addCallEndpoint(_createReplicator)
       ..addCallEndpoint(_getReplicatorStatus)
+      ..addCallEndpoint(_getReplicatorServerCertificate)
       ..addCallEndpoint(_startReplicator)
       ..addCallEndpoint(_stopReplicator)
       ..addCallEndpoint(_addReplicatorChangeListener)
@@ -715,6 +716,13 @@ final class CblService {
 
   ReplicatorStatus _getReplicatorStatus(GetReplicatorStatus request) =>
       _getReplicatorById(request.replicatorId).status;
+
+  SendableCertificate? _getReplicatorServerCertificate(
+    GetReplicatorServerCertificate request,
+  ) =>
+      _getReplicatorById(request.replicatorId)
+          .serverCertificate
+          ?.let(SendableCertificate.new);
 
   void _startReplicator(StartReplicator request) =>
       _getReplicatorById(request.replicatorId).start(reset: request.reset);
