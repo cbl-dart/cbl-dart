@@ -410,6 +410,9 @@ final class ConnectionStatus {
 /// Once the listener is [start]ed, peer [Replicator]s can connect to the
 /// listener by using an [UrlEndpoint].
 ///
+/// A started listener will keep the current isolate from exiting until the
+/// listener is stopped.
+///
 /// {@category Replication}
 /// {@category Enterprise Edition}
 abstract final class UrlEndpointListener {
