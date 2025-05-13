@@ -27,6 +27,8 @@ functions:
       - CBLDart_FLDictIterator_Delete
       - CBLDart_FLSliceResult_ReleaseByBuf
       - CBLDart_KnownSharedKeys_Delete
+      - CBLDart_ListenerCertAuthCallbackTrampoline
+      - CBLDart_ListenerPasswordAuthCallbackTrampoline
       - CBLDart_PredictiveModel_Delete
 enums:
   as-int:

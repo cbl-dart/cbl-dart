@@ -4,11 +4,26 @@ import '../bindings.dart';
 import '../fleece/containers.dart';
 import 'base.dart';
 import 'cblite.dart';
+import 'cblitedart.dart' hide CBLCert, CBLCollection;
 import 'global.dart';
 import 'utils.dart';
 
 final class UrlEndpointListenerBindings extends Bindings {
   UrlEndpointListenerBindings(super.libraries);
+
+  Pointer<CBLListenerAuthenticator> createPasswordAuthenticator(
+          CBLDartListenerPasswordAuthCallback handler) =>
+      cbl.CBLListenerAuth_CreatePassword(
+        cblDart.addresses.CBLDart_ListenerPasswordAuthCallbackTrampoline,
+        handler.cast(),
+      );
+
+  Pointer<CBLListenerAuthenticator> createCertificateAuthenticator(
+          CBLDartListenerCertAuthCallback handler) =>
+      cbl.CBLListenerAuth_CreateCertificate(
+        cblDart.addresses.CBLDart_ListenerCertAuthCallbackTrampoline,
+        handler.cast(),
+      );
 
   Pointer<CBLListenerAuthenticator> createCertificateAuthenticatorWithRoots(
     Pointer<CBLCert> roots,

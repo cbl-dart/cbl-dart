@@ -4,6 +4,12 @@ files:
     used-config:
       ffi-native: false
     symbols:
+      CBLDartListenerCertAuthCallbackFunction:
+        name: CBLDartListenerCertAuthCallbackFunction
+        dart-name: DartCBLDartListenerCertAuthCallbackFunction
+      CBLDartListenerPasswordAuthCallbackFunction:
+        name: CBLDartListenerPasswordAuthCallbackFunction
+        dart-name: DartCBLDartListenerPasswordAuthCallbackFunction
       CBLDart_PredictiveModel_PredictionAsyncFunction:
         name: CBLDart_PredictiveModel_PredictionAsyncFunction
         dart-name: DartCBLDart_PredictiveModel_PredictionAsyncFunction
@@ -100,6 +106,10 @@ files:
         name: CBLDart_KnownSharedKeys_Delete
       c:@F@CBLDart_KnownSharedKeys_New:
         name: CBLDart_KnownSharedKeys_New
+      c:@F@CBLDart_ListenerCertAuthCallbackTrampoline:
+        name: CBLDart_ListenerCertAuthCallbackTrampoline
+      c:@F@CBLDart_ListenerPasswordAuthCallbackTrampoline:
+        name: CBLDart_ListenerPasswordAuthCallbackTrampoline
       c:@F@CBLDart_PredictiveModel_Delete:
         name: CBLDart_PredictiveModel_Delete
       c:@F@CBLDart_PredictiveModel_New:
@@ -138,6 +148,10 @@ files:
         name: CBLLogFileConfiguration
       c:@T@CBLProxySettings:
         name: CBLProxySettings
+      c:CBL+Dart.h@T@CBLDartListenerCertAuthCallback:
+        name: CBLDartListenerCertAuthCallback
+      c:CBL+Dart.h@T@CBLDartListenerPasswordAuthCallback:
+        name: CBLDartListenerPasswordAuthCallback
       c:CBL+Dart.h@T@CBLDart_AsyncCallback:
         name: CBLDart_AsyncCallback
       c:CBL+Dart.h@T@CBLDart_Completer:
@@ -153,6 +167,8 @@ files:
         name: CBLDart_PredictiveModel_PredictionSync
       c:CBL+Dart.h@T@CBLDart_PredictiveModel_Unregistered:
         name: CBLDart_PredictiveModel_Unregistered
+      c:CBLBase.h@T@CBLCert:
+        name: CBLCert
       c:CBLBase.h@T@CBLCollection:
         name: CBLCollection
       c:CBLBase.h@T@CBLDatabase:

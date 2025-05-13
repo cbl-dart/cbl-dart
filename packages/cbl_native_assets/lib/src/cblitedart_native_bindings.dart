@@ -3,8 +3,9 @@
 // ignore_for_file: type=lint, unused_import
 import 'dart:ffi' as ffi;
 
-import 'package:cbl/src/bindings/cblitedart.dart';
 import 'package:cbl/src/bindings/cblite.dart' as imp$1;
+import 'package:cbl/src/bindings/cblitedart.dart';
+
 import './cblitedart.dart' as native;
 
 class cblitedartNative implements cblitedart {
@@ -205,7 +206,7 @@ class cblitedartNative implements cblitedart {
   @override
   void CBLDart_Completer_Complete(
     CBLDart_Completer completer,
-    ffi.Pointer<ffi.Void> result,
+    int result,
   ) =>
       native.CBLDart_Completer_Complete(
         completer,
@@ -443,6 +444,28 @@ class cblitedartNative implements cblitedart {
         replicator,
         listenerId,
       );
+
+  @override
+  bool CBLDart_ListenerPasswordAuthCallbackTrampoline(
+    ffi.Pointer<ffi.Void> context,
+    imp$1.FLString username,
+    imp$1.FLString password,
+  ) =>
+      native.CBLDart_ListenerPasswordAuthCallbackTrampoline(
+        context,
+        username,
+        password,
+      );
+
+  @override
+  bool CBLDart_ListenerCertAuthCallbackTrampoline(
+    ffi.Pointer<ffi.Void> context,
+    ffi.Pointer<CBLCert> cert,
+  ) =>
+      native.CBLDart_ListenerCertAuthCallbackTrampoline(
+        context,
+        cert,
+      );
 }
 
 class SymbolAddressesNative implements SymbolAddresses {
@@ -487,4 +510,17 @@ class SymbolAddressesNative implements SymbolAddresses {
   ffi.Pointer<ffi.NativeFunction<NativeCBLDart_CBLReplicator_Release>>
       get CBLDart_CBLReplicator_Release =>
           native.addresses.CBLDart_CBLReplicator_Release;
+
+  @override
+  ffi.Pointer<
+          ffi
+          .NativeFunction<NativeCBLDart_ListenerPasswordAuthCallbackTrampoline>>
+      get CBLDart_ListenerPasswordAuthCallbackTrampoline =>
+          native.addresses.CBLDart_ListenerPasswordAuthCallbackTrampoline;
+
+  @override
+  ffi.Pointer<
+          ffi.NativeFunction<NativeCBLDart_ListenerCertAuthCallbackTrampoline>>
+      get CBLDart_ListenerCertAuthCallbackTrampoline =>
+          native.addresses.CBLDart_ListenerCertAuthCallbackTrampoline;
 }

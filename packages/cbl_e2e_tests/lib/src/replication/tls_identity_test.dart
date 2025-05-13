@@ -15,6 +15,42 @@ final futureExpiration = DateTime.utc(2100);
 void main() {
   setupTestBinding();
 
+  group('PemData', () {
+    test('toString', () {
+      expect(privateKeyPem.toString(), 'PemData(length: 1704)');
+    });
+
+    test('==', () {
+      expect(privateKeyPem, isNot(privateKeyEncryptedPem));
+      expect(privateKeyPem, isNot(privateKeyDer));
+      expect(privateKeyPem, privateKeyPem);
+    });
+
+    test('hashCode', () {
+      expect(privateKeyPem.hashCode, isNot(privateKeyEncryptedPem.hashCode));
+      expect(privateKeyPem.hashCode, isNot(privateKeyDer.hashCode));
+      expect(privateKeyPem.hashCode, privateKeyPem.hashCode);
+    });
+  });
+
+  group('DerData', () {
+    test('toString', () {
+      expect(privateKeyDer.toString(), 'DerData(length: 1218)');
+    });
+
+    test('==', () {
+      expect(privateKeyDer, isNot(privateKeyPem));
+      expect(privateKeyDer, isNot(privateKeyEncryptedPem));
+      expect(privateKeyDer, privateKeyDer);
+    });
+
+    test('hashCode', () {
+      expect(privateKeyDer.hashCode, isNot(privateKeyPem.hashCode));
+      expect(privateKeyDer.hashCode, isNot(privateKeyEncryptedPem.hashCode));
+      expect(privateKeyDer.hashCode, privateKeyDer.hashCode);
+    });
+  });
+
   group('OID', () {
     test('fromString', () {
       expect(OID.parse('1.2.3.4.5'), OID(const [1, 2, 3, 4, 5]));

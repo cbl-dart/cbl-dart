@@ -47,7 +47,7 @@ export 'replication/url_endpoint_listener.dart'
     show
         ListenerAuthenticator,
         ListenerPasswordAuthenticator,
-        CertificateAuthenticatorFunction,
+        ListenerCertificateAuthenticatorFunction,
         ListenerPasswordAuthenticatorFunction,
         ListenerCertificateAuthenticator,
         UrlEndpointListenerConfiguration,

@@ -18,6 +18,117 @@ import '../support/utils.dart';
 
 final _bindings = CBLBindings.instance.tlsIdentity;
 
+/// Encoded cryptographic data, such as certificates and keys.
+///
+/// Cryptographic data can be encoded either as [PemData] or [DerData].
+///
+/// {@category Replication}
+abstract final class CryptoData {
+  Uint8List get _data;
+}
+
+/// [PEM-encoded](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail)
+/// cryptographic data.
+///
+/// PEM data can contain multiple objects in multiple [blocks].
+///
+/// {@category Replication}
+@immutable
+final class PemData implements CryptoData {
+  /// Creates a new instance of [PemData] with the given PEM [data].
+  const PemData(this.data);
+
+  /// Creates a new instance of [PemData] by concatenating the given [blocks] of
+  /// PEM data.
+  factory PemData.combined(Iterable<PemData> blocks) =>
+      PemData(blocks.map((block) => block.data).join('\n'));
+
+  /// The PEM data as a string.
+  final String data;
+
+  /// The individual PEM blocks contained in this data.
+  ///
+  /// Each returned [PemData] object contains a single PEM block.
+  List<PemData> get blocks {
+    final lines = data.split('\n');
+    final blocks = <PemData>[];
+    final currentBlock = <String>[];
+
+    for (final line in lines) {
+      if (line.trim().isEmpty) {
+        continue;
+      }
+      if (line.startsWith('-----BEGIN')) {
+        if (currentBlock.isNotEmpty) {
+          throw FormatException(
+            'New PEM block found before previous block was closed:\n'
+            '${currentBlock.join('\n')}',
+            null,
+            null,
+          );
+        }
+        currentBlock.add(line);
+      } else if (line.startsWith('-----END')) {
+        currentBlock.add(line);
+        blocks.add(PemData(currentBlock.join('\n')));
+        currentBlock.clear();
+      } else {
+        currentBlock.add(line);
+      }
+    }
+
+    if (currentBlock.isNotEmpty) {
+      throw FormatException(
+        'PEM data ended without closing PEM block:\n'
+        '${currentBlock.join('\n')}',
+        null,
+        null,
+      );
+    }
+
+    return blocks;
+  }
+
+  @override
+  Uint8List get _data => utf8.encode(data);
+
+  @override
+  bool operator ==(Object other) => other is PemData && data == other.data;
+
+  @override
+  int get hashCode => data.hashCode;
+
+  @override
+  String toString() => 'PemData(length: ${data.length})';
+}
+
+/// [DER-encoded](https://en.wikipedia.org/wiki/X.690#DER_encoding)
+/// cryptographic data.
+///
+/// {@category Replication}
+@immutable
+final class DerData implements CryptoData {
+  /// Creates a new instance of [DerData] with the given DER [data].
+  const DerData(this.data);
+
+  /// The DER data as a byte array.
+  final Uint8List data;
+
+  @override
+  Uint8List get _data => data;
+
+  @override
+  bool operator ==(Object other) =>
+      other is DerData &&
+      const DeepCollectionEquality().equals(data, other.data);
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(data);
+
+  @override
+  String toString() => 'DerData(length: ${data.length})';
+}
+
 /// An [object identifier](https://en.wikipedia.org/wiki/Object_identifier)
 /// (OID) for use in X.509 [Certificate]s.
 ///
@@ -446,95 +557,6 @@ extension type _InternetAddressString(String string) {
 
   InternetAddress get address =>
       InternetAddress.fromRawAddress(Uint8List.fromList(string.codeUnits));
-}
-
-/// Encoded cryptographic data, such as certificates and keys.
-///
-/// Cryptographic data can be encoded either as [PemData] or [DerData].
-///
-/// {@category Replication}
-abstract final class CryptoData {
-  Uint8List get _data;
-}
-
-/// [PEM-encoded](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail)
-/// cryptographic data.
-///
-/// PEM data can contain multiple objects in multiple [blocks].
-///
-/// {@category Replication}
-final class PemData implements CryptoData {
-  /// Creates a new instance of [PemData] with the given PEM [data].
-  const PemData(this.data);
-
-  /// Creates a new instance of [PemData] by concatenating the given [blocks] of
-  /// PEM data.
-  factory PemData.combined(Iterable<PemData> blocks) =>
-      PemData(blocks.map((block) => block.data).join('\n'));
-
-  /// The PEM data as a string.
-  final String data;
-
-  /// The individual PEM blocks contained in this data.
-  ///
-  /// Each returned [PemData] object contains a single PEM block.
-  List<PemData> get blocks {
-    final lines = data.split('\n');
-    final blocks = <PemData>[];
-    final currentBlock = <String>[];
-
-    for (final line in lines) {
-      if (line.trim().isEmpty) {
-        continue;
-      }
-      if (line.startsWith('-----BEGIN')) {
-        if (currentBlock.isNotEmpty) {
-          throw FormatException(
-            'New PEM block found before previous block was closed:\n'
-            '${currentBlock.join('\n')}',
-            null,
-            null,
-          );
-        }
-        currentBlock.add(line);
-      } else if (line.startsWith('-----END')) {
-        currentBlock.add(line);
-        blocks.add(PemData(currentBlock.join('\n')));
-        currentBlock.clear();
-      } else {
-        currentBlock.add(line);
-      }
-    }
-
-    if (currentBlock.isNotEmpty) {
-      throw FormatException(
-        'PEM data ended without closing PEM block:\n'
-        '${currentBlock.join('\n')}',
-        null,
-        null,
-      );
-    }
-
-    return blocks;
-  }
-
-  @override
-  Uint8List get _data => utf8.encode(data);
-}
-
-/// [DER-encoded](https://en.wikipedia.org/wiki/X.690#DER_encoding)
-/// cryptographic data.
-///
-/// {@category Replication}
-final class DerData implements CryptoData {
-  /// Creates a new instance of [DerData] with the given DER [data].
-  const DerData(this.data);
-
-  /// The DER data as a byte array.
-  final Uint8List data;
-
-  @override
-  Uint8List get _data => data;
 }
 
 /// A X.509 certificate.

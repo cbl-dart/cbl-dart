@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:ffi';
 
 import '../bindings.dart';
-import '../bindings/cblite.dart';
+import '../bindings/cblite.dart' hide CBLLogDomain, CBLLogLevel;
+import '../bindings/cblitedart.dart' hide FLSlice, CBLCert, CBLCollection;
 import '../database.dart';
 import '../database/ffi_database.dart';
 import '../database/proxy_database.dart';
@@ -34,12 +35,31 @@ final class FfiListenAuthenticator
     implements ListenerAuthenticator, Finalizable {
   FfiListenAuthenticator.fromPointer(
     this.pointer, {
+    NativeCallable? callable,
     required bool adopt,
-  }) {
+  }) : _callable = callable {
+    _callable?.keepIsolateAlive = false;
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
   final Pointer<CBLListenerAuthenticator> pointer;
+  final NativeCallable? _callable;
+
+  int _activeListeners = 0;
+
+  void _onListenerStarted() {
+    _activeListeners++;
+    if (_activeListeners == 0) {
+      _callable?.keepIsolateAlive = true;
+    }
+  }
+
+  void _onListenerStopped() {
+    _activeListeners--;
+    if (_activeListeners == 0) {
+      _callable?.keepIsolateAlive = false;
+    }
+  }
 }
 
 /// Function that is called to authenticate a client connecting to a
@@ -66,9 +86,62 @@ typedef ListenerPasswordAuthenticatorFunction = FutureOr<bool> Function(
 final class ListenerPasswordAuthenticator implements ListenerAuthenticator {
   /// Creates a new [ListenerPasswordAuthenticator] that uses the given
   /// [handler] to authenticate clients.
-  ListenerPasswordAuthenticator(
+  factory ListenerPasswordAuthenticator(
     ListenerPasswordAuthenticatorFunction handler,
-  );
+  ) = _ListenerPasswordAuthenticator;
+}
+
+final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
+    implements ListenerPasswordAuthenticator {
+  factory _ListenerPasswordAuthenticator(
+    ListenerPasswordAuthenticatorFunction handler,
+  ) {
+    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+
+    Future<void> trampoline(
+      CBLDart_Completer completer,
+      FLSlice username,
+      FLSlice password,
+    ) async {
+      var result = false;
+
+      try {
+        result = await handler(
+          username.toDartString()!,
+          password.toDartString()!,
+        );
+        // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) {
+        CBLBindings.instance.logging.logMessage(
+          CBLLogDomain.listener,
+          CBLLogLevel.error,
+          'Uncaught exception in ListenerPasswordAuthenticator:\n'
+          '$error\n'
+          '$stackTrace',
+        );
+        rethrow;
+      } finally {
+        CBLBindings.instance.base.completeCompleterWithBool(completer, result);
+      }
+    }
+
+    final callable =
+        NativeCallable<CBLDartListenerPasswordAuthCallbackFunction>.listener(
+      trampoline,
+    );
+
+    return _ListenerPasswordAuthenticator.fromPointer(
+      _bindings.createPasswordAuthenticator(callable.nativeFunction),
+      callable: callable,
+      adopt: true,
+    );
+  }
+
+  _ListenerPasswordAuthenticator.fromPointer(
+    super.pointer, {
+    super.callable,
+    required super.adopt,
+  }) : super.fromPointer();
 
   @override
   String toString() => 'ListenerPasswordAuthenticator()';
@@ -84,7 +157,7 @@ final class ListenerPasswordAuthenticator implements ListenerAuthenticator {
 ///
 /// {@category Replication}
 /// {@category Enterprise Edition}
-typedef CertificateAuthenticatorFunction = FutureOr<bool> Function(
+typedef ListenerCertificateAuthenticatorFunction = FutureOr<bool> Function(
   Certificate certificate,
 );
 
@@ -102,9 +175,9 @@ typedef CertificateAuthenticatorFunction = FutureOr<bool> Function(
 final class ListenerCertificateAuthenticator implements ListenerAuthenticator {
   /// Creates a new [ListenerCertificateAuthenticator] that uses the given
   /// [handler] to authenticate clients.
-  ListenerCertificateAuthenticator(
-    CertificateAuthenticatorFunction handler,
-  );
+  factory ListenerCertificateAuthenticator(
+    ListenerCertificateAuthenticatorFunction handler,
+  ) = _ListenerCertificateAuthenticator;
 
   /// Creates a new [ListenerCertificateAuthenticator] that trusts the given
   /// root [certificates] when authenticating clients.
@@ -113,22 +186,86 @@ final class ListenerCertificateAuthenticator implements ListenerAuthenticator {
   ) = _ListenerCertificateAuthenticatorFromRoots;
 }
 
+final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
+    implements ListenerCertificateAuthenticator {
+  factory _ListenerCertificateAuthenticator(
+    ListenerCertificateAuthenticatorFunction handler,
+  ) {
+    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+
+    Future<void> trampoline(
+      CBLDart_Completer completer,
+      Pointer<CBLCert> certificate,
+    ) async {
+      var result = false;
+
+      try {
+        result = await handler(FfiCertificate.fromPointer(certificate));
+        // ignore: avoid_catches_without_on_clauses
+      } catch (error, stackTrace) {
+        CBLBindings.instance.logging.logMessage(
+          CBLLogDomain.listener,
+          CBLLogLevel.error,
+          'Uncaught exception in ListenerCertificateAuthenticator:\n'
+          '$error\n'
+          '$stackTrace',
+        );
+        rethrow;
+      } finally {
+        CBLBindings.instance.base.completeCompleterWithBool(completer, result);
+      }
+    }
+
+    final callable =
+        NativeCallable<CBLDartListenerCertAuthCallbackFunction>.listener(
+      trampoline,
+    );
+
+    return _ListenerCertificateAuthenticator.fromPointer(
+      _bindings.createCertificateAuthenticator(callable.nativeFunction),
+      callable: callable,
+      adopt: true,
+    );
+  }
+
+  _ListenerCertificateAuthenticator.fromPointer(
+    super.pointer, {
+    super.callable,
+    required super.adopt,
+  }) : super.fromPointer();
+
+  @override
+  String toString() => 'ListenerCertificateAuthenticator()';
+}
+
 final class _ListenerCertificateAuthenticatorFromRoots
     extends FfiListenAuthenticator implements ListenerCertificateAuthenticator {
-  _ListenerCertificateAuthenticatorFromRoots(List<Certificate> certificates)
-      : _certificates = certificates,
-        super.fromPointer(
-          adopt: true,
-          _bindings.createCertificateAuthenticatorWithRoots(
-            FfiCertificate.combined(certificates.cast()).pointer,
-          ),
-        );
+  factory _ListenerCertificateAuthenticatorFromRoots(
+    List<Certificate> certificates,
+  ) {
+    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+
+    return _ListenerCertificateAuthenticatorFromRoots.fromPointer(
+      _bindings.createCertificateAuthenticatorWithRoots(
+        FfiCertificate.combined(certificates.cast()).pointer,
+      ),
+      certificates: certificates,
+      adopt: true,
+    );
+  }
+
+  _ListenerCertificateAuthenticatorFromRoots.fromPointer(
+    super.pointer, {
+    required List<Certificate> certificates,
+    required super.adopt,
+  })  : _certificates = certificates,
+        super.fromPointer();
 
   final List<Certificate> _certificates;
 
   @override
   String toString() =>
-      'ListenerCertificateAuthenticator.fromRoots($_certificates}';
+      'ListenerCertificateAuthenticator.fromRoots($_certificates)';
 }
 
 /// The configuration for an [UrlEndpointListener].
@@ -396,6 +533,9 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   @override
   final TlsIdentity? tlsIdentity;
 
+  FfiListenAuthenticator? get _authenticator =>
+      _config.authenticator as FfiListenAuthenticator?;
+
   @override
   UrlEndpointListenerConfiguration get config =>
       UrlEndpointListenerConfiguration.from(_config);
@@ -416,15 +556,17 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
   }
 
   @override
-  Future<void> start() {
+  Future<void> start() async {
     final pointer = _pointer;
-    return runInSecondaryIsolate(() => _bindings.start(pointer));
+    await runInSecondaryIsolate(() => _bindings.start(pointer));
+    _authenticator?._onListenerStarted();
   }
 
   @override
-  Future<void> stop() {
+  Future<void> stop() async {
     final pointer = _pointer;
-    return runInSecondaryIsolate(() => _bindings.stop(pointer));
+    await runInSecondaryIsolate(() => _bindings.stop(pointer));
+    _authenticator?._onListenerStopped();
   }
 
   @override
