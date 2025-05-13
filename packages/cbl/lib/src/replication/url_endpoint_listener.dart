@@ -36,10 +36,9 @@ final class FfiListenAuthenticator
   FfiListenAuthenticator.fromPointer(
     this.pointer, {
     NativeCallable? callable,
-    required bool adopt,
   }) : _callable = callable {
     _callable?.keepIsolateAlive = false;
-    bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
+    _bindings.bindAuthenticatorToDartObject(this, pointer);
   }
 
   final Pointer<CBLListenerAuthenticator> pointer;
@@ -133,14 +132,12 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
     return _ListenerPasswordAuthenticator.fromPointer(
       _bindings.createPasswordAuthenticator(callable.nativeFunction),
       callable: callable,
-      adopt: true,
     );
   }
 
   _ListenerPasswordAuthenticator.fromPointer(
     super.pointer, {
     super.callable,
-    required super.adopt,
   }) : super.fromPointer();
 
   @override
@@ -224,14 +221,12 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
     return _ListenerCertificateAuthenticator.fromPointer(
       _bindings.createCertificateAuthenticator(callable.nativeFunction),
       callable: callable,
-      adopt: true,
     );
   }
 
   _ListenerCertificateAuthenticator.fromPointer(
     super.pointer, {
     super.callable,
-    required super.adopt,
   }) : super.fromPointer();
 
   @override
@@ -250,14 +245,12 @@ final class _ListenerCertificateAuthenticatorFromRoots
         FfiCertificate.combined(certificates.cast()).pointer,
       ),
       certificates: certificates,
-      adopt: true,
     );
   }
 
   _ListenerCertificateAuthenticatorFromRoots.fromPointer(
     super.pointer, {
     required List<Certificate> certificates,
-    required super.adopt,
   })  : _certificates = certificates,
         super.fromPointer();
 

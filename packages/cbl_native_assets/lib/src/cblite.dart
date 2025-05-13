@@ -2560,6 +2560,9 @@ class _SymbolAddresses {
       ffi.Native.addressOf(self.CBL_Release);
   ffi.Pointer<ffi.NativeFunction<NativeCBLBlobReader_Close>>
       get CBLBlobReader_Close => ffi.Native.addressOf(self.CBLBlobReader_Close);
+  ffi.Pointer<ffi.NativeFunction<NativeCBLListenerAuth_Free>>
+      get CBLListenerAuth_Free =>
+          ffi.Native.addressOf(self.CBLListenerAuth_Free);
   ffi.Pointer<ffi.NativeFunction<NativeFLDoc_Release>> get FLDoc_Release =>
       ffi.Native.addressOf(self.FLDoc_Release);
   ffi.Pointer<ffi.NativeFunction<NativeFLEncoder_Free>> get FLEncoder_Free =>

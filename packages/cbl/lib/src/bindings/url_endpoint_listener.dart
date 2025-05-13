@@ -11,6 +11,16 @@ import 'utils.dart';
 final class UrlEndpointListenerBindings extends Bindings {
   UrlEndpointListenerBindings(super.libraries);
 
+  late final _authenticatorFinalizer =
+      NativeFinalizer(cbl.addresses.CBLListenerAuth_Free.cast());
+
+  void bindAuthenticatorToDartObject(
+    Finalizable object,
+    Pointer<CBLListenerAuthenticator> pointer,
+  ) {
+    _authenticatorFinalizer.attach(object, pointer.cast());
+  }
+
   Pointer<CBLListenerAuthenticator> createPasswordAuthenticator(
           CBLDartListenerPasswordAuthCallback handler) =>
       cbl.CBLListenerAuth_CreatePassword(

@@ -6670,6 +6670,8 @@ class SymbolAddresses {
       _library._CBL_ReleasePtr;
   ffi.Pointer<ffi.NativeFunction<NativeCBLBlobReader_Close>>
       get CBLBlobReader_Close => _library._CBLBlobReader_ClosePtr;
+  ffi.Pointer<ffi.NativeFunction<NativeCBLListenerAuth_Free>>
+      get CBLListenerAuth_Free => _library._CBLListenerAuth_FreePtr;
   ffi.Pointer<ffi.NativeFunction<NativeFLDoc_Release>> get FLDoc_Release =>
       _library._FLDoc_ReleasePtr;
   ffi.Pointer<ffi.NativeFunction<NativeFLEncoder_Free>> get FLEncoder_Free =>
