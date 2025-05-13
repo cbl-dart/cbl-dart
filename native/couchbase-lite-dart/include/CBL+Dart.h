@@ -261,6 +261,8 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
 
 // === UrlEndpointListener
 
+#ifdef COUCHBASE_ENTERPRISE
+
 typedef void (*CBLDartListenerPasswordAuthCallback)(CBLDart_Completer completer,
                                                     FLString username,
                                                     FLString password);
@@ -273,3 +275,13 @@ typedef void (*CBLDartListenerCertAuthCallback)(CBLDart_Completer completer,
 
 CBLDART_EXPORT bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context,
                                                                CBLCert *cert);
+#else
+
+// With these stubs the same symbol export files can be used for both
+// enterprise and community edition. They are not never accessed when
+// using the community edition.
+
+CBLDART_EXPORT void CBLDart_ListenerPasswordAuthCallbackTrampoline();
+CBLDART_EXPORT void CBLDart_ListenerCertAuthCallbackTrampoline();
+
+#endif

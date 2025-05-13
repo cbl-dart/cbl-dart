@@ -1321,6 +1321,8 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
 
 // === UrlEndpointListener
 
+#ifdef COUCHBASE_ENTERPRISE
+
 bool CBLDart_ListenerPasswordAuthCallbackTrampoline(void *context,
                                                     FLString username,
                                                     FLString password) {
@@ -1336,3 +1338,10 @@ bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context, CBLCert *cert) {
   callback(COMPLETER_TO_C(&completer), cert);
   return (bool)completer.wait();
 }
+
+#else
+
+void CBLDart_ListenerPasswordAuthCallbackTrampoline() {}
+void CBLDart_ListenerCertAuthCallbackTrampoline() {}
+
+#endif
