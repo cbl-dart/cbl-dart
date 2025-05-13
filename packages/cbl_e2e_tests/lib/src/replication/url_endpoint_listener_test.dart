@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cbl/cbl.dart';
 
 import '../../test_binding_impl.dart';
@@ -211,8 +213,10 @@ void main() {
       await listener.start();
       addTearDown(listener.stop);
 
+      final urlEndpoint = UrlEndpoint(await findConnectableUrl(listener.urls!));
+
       final replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       final replicator = await Replicator.create(replicatorConfig);
@@ -269,9 +273,11 @@ void main() {
     await listener.start();
     addTearDown(listener.stop);
 
+    final urlEndpoint = UrlEndpoint(await findConnectableUrl(listener.urls!));
+
     // Connect to listener without client certificate.
     var replicatorConfig = ReplicatorConfiguration(
-      target: UrlEndpoint(listener.urls!.first),
+      target: urlEndpoint,
       acceptOnlySelfSignedServerCertificate: true,
     )..addCollection(await clientDb.defaultCollection);
     var replicator = await Replicator.create(replicatorConfig);
@@ -284,7 +290,7 @@ void main() {
 
     // Connect to listener with untrusted client certificate.
     replicatorConfig = ReplicatorConfiguration(
-      target: UrlEndpoint(listener.urls!.first),
+      target: urlEndpoint,
       authenticator: clientAuthenticatorA,
       acceptOnlySelfSignedServerCertificate: true,
     )..addCollection(await clientDb.defaultCollection);
@@ -298,7 +304,7 @@ void main() {
 
     // Connect to listener with trusted client certificate.
     replicatorConfig = ReplicatorConfiguration(
-      target: UrlEndpoint(listener.urls!.first),
+      target: urlEndpoint,
       authenticator: clientAuthenticatorB,
       acceptOnlySelfSignedServerCertificate: true,
     )..addCollection(await clientDb.defaultCollection);
@@ -353,9 +359,11 @@ void main() {
       await listener.start();
       addTearDown(listener.stop);
 
+      final urlEndpoint = UrlEndpoint(await findConnectableUrl(listener.urls!));
+
       // Connect to listener without client certificate.
       var replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       var replicator = await Replicator.create(replicatorConfig);
@@ -368,7 +376,7 @@ void main() {
 
       // Connect to listener with untrusted client certificate.
       replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         authenticator: clientAuthenticatorA,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
@@ -382,7 +390,7 @@ void main() {
 
       // Connect to listener with trusted client certificate.
       replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         authenticator: clientAuthenticatorB,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
@@ -420,9 +428,11 @@ void main() {
       await listener.start();
       addTearDown(listener.stop);
 
+      final urlEndpoint = UrlEndpoint(await findConnectableUrl(listener.urls!));
+
       // Connect to listener without client certificate.
       var replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
       var replicator = await Replicator.create(replicatorConfig);
@@ -435,7 +445,7 @@ void main() {
 
       // Connect to listener with untrusted client certificate.
       replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         authenticator: clientAuthenticatorA,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
@@ -449,7 +459,7 @@ void main() {
 
       // Connect to listener with trusted client certificate.
       replicatorConfig = ReplicatorConfiguration(
-        target: UrlEndpoint(listener.urls!.first),
+        target: urlEndpoint,
         authenticator: clientAuthenticatorB,
         acceptOnlySelfSignedServerCertificate: true,
       )..addCollection(await clientDb.defaultCollection);
@@ -459,4 +469,25 @@ void main() {
       expect(replicatorStatus.error, isNull);
     });
   });
+}
+
+Future<Uri> findConnectableUrl(List<Uri> urls) async {
+  // ignore: parameter_assignments
+  urls = {
+    ...urls,
+    // Resolving the hosts in the urls returned from the listener does not work
+    // on GitHub Actions macOS runners.
+    ...urls.map((url) => url.replace(host: 'localhost')),
+  }.toList();
+  for (final url in urls) {
+    try {
+      final socket = await Socket.connect(url.host, url.port);
+      socket.destroy();
+      return url;
+    } on SocketException catch (error) {
+      // ignore: avoid_print
+      print('Unable to connect to $url: $error');
+    }
+  }
+  throw Exception('No connectable URL found');
 }
