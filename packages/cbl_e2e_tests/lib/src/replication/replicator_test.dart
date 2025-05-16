@@ -597,6 +597,46 @@ void main() {
       await replicator.replicateOneShot();
     });
 
+    apiTest(
+      'serverCertificate returns server certificate',
+      skip: 'CBLReplicator_ServerCertificate is not implemented',
+      () async {
+        final serverIdentity = await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.serverAuth},
+          attributes: const CertificateAttributes(commonName: 'test'),
+          expiration: DateTime(2100),
+        );
+        final serverCertificate = serverIdentity.certificates.single;
+        final listenerDb = await openTestDatabase();
+        final listenerCollection = await listenerDb.defaultCollection;
+        final listenerConfig = UrlEndpointListenerConfiguration(
+          collections: [listenerCollection],
+          tlsIdentity: serverIdentity,
+        );
+        final listener = await UrlEndpointListener.create(listenerConfig);
+        await listener.start();
+        addTearDown(listener.stop);
+
+        final clientDb = await openTestDatabase();
+        final clientCollection = await clientDb.defaultCollection;
+        final clientConfig = ReplicatorConfiguration(
+          target: UrlEndpoint(listener.urls!.first),
+          acceptOnlySelfSignedServerCertificate: true,
+        )..addCollection(clientCollection);
+        final clientRepl = await Replicator.create(clientConfig);
+        await clientRepl.replicateOneShot();
+        final receivedCertificate = await clientRepl.serverCertificate;
+        expect(
+          receivedCertificate!.attributes,
+          serverCertificate.attributes,
+        );
+        expect(
+          receivedCertificate.publicKey.publicKeyDigest,
+          serverCertificate.publicKey.publicKeyDigest,
+        );
+      },
+    );
+
     apiTest('document replication listener is notified while listening',
         () async {
       final db = await openTestDatabase();

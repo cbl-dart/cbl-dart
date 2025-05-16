@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "Fleece+Dart.h"
 #ifdef CBL_FRAMEWORK_HEADERS
 #include <CouchbaseLite/CouchbaseLite.h>
@@ -65,7 +67,7 @@ void CBLDart_AsyncCallback_CallForTest(CBLDart_AsyncCallback callback,
 typedef struct _CBLDart_Completer *CBLDart_Completer;
 
 CBLDART_EXPORT
-void CBLDart_Completer_Complete(CBLDart_Completer completer, void *result);
+void CBLDart_Completer_Complete(CBLDart_Completer completer, uint64_t result);
 
 // === Isolate ID
 
@@ -233,6 +235,7 @@ struct CBLDart_ReplicatorConfiguration {
   CBLAuthenticator *authenticator;
   CBLProxySettings *proxy;
   FLDict headers;
+  bool acceptOnlySelfSignedServerCertificate;
   FLSlice *pinnedServerCertificate;
   FLSlice *trustedRootCertificates;
   CBLDart_ReplicationCollection *collections;
@@ -255,3 +258,30 @@ CBLDART_EXPORT
 void CBLDart_CBLReplicator_AddDocumentReplicationListener(
     const CBLDatabase *db, CBLReplicator *replicator,
     CBLDart_AsyncCallback listenerId);
+
+// === UrlEndpointListener
+
+#ifdef COUCHBASE_ENTERPRISE
+
+typedef void (*CBLDartListenerPasswordAuthCallback)(CBLDart_Completer completer,
+                                                    FLString username,
+                                                    FLString password);
+
+CBLDART_EXPORT bool CBLDart_ListenerPasswordAuthCallbackTrampoline(
+    void *context, FLString username, FLString password);
+
+typedef void (*CBLDartListenerCertAuthCallback)(CBLDart_Completer completer,
+                                                CBLCert *cert);
+
+CBLDART_EXPORT bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context,
+                                                               CBLCert *cert);
+#else
+
+// With these stubs the same symbol export files can be used for both
+// enterprise and community edition. They are never accessed when using
+// the community edition.
+
+CBLDART_EXPORT void CBLDart_ListenerPasswordAuthCallbackTrampoline();
+CBLDART_EXPORT void CBLDart_ListenerCertAuthCallbackTrampoline();
+
+#endif

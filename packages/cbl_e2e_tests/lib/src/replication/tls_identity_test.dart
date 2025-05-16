@@ -15,6 +15,42 @@ final futureExpiration = DateTime.utc(2100);
 void main() {
   setupTestBinding();
 
+  group('PemData', () {
+    test('toString', () {
+      expect(privateKeyPem.toString(), 'PemData(length: 1704)');
+    });
+
+    test('==', () {
+      expect(privateKeyPem, isNot(privateKeyEncryptedPem));
+      expect(privateKeyPem, isNot(privateKeyDer));
+      expect(privateKeyPem, privateKeyPem);
+    });
+
+    test('hashCode', () {
+      expect(privateKeyPem.hashCode, isNot(privateKeyEncryptedPem.hashCode));
+      expect(privateKeyPem.hashCode, isNot(privateKeyDer.hashCode));
+      expect(privateKeyPem.hashCode, privateKeyPem.hashCode);
+    });
+  });
+
+  group('DerData', () {
+    test('toString', () {
+      expect(privateKeyDer.toString(), 'DerData(length: 1218)');
+    });
+
+    test('==', () {
+      expect(privateKeyDer, isNot(privateKeyPem));
+      expect(privateKeyDer, isNot(privateKeyEncryptedPem));
+      expect(privateKeyDer, privateKeyDer);
+    });
+
+    test('hashCode', () {
+      expect(privateKeyDer.hashCode, isNot(privateKeyPem.hashCode));
+      expect(privateKeyDer.hashCode, isNot(privateKeyEncryptedPem.hashCode));
+      expect(privateKeyDer.hashCode, privateKeyDer.hashCode);
+    });
+  });
+
   group('OID', () {
     test('fromString', () {
       expect(OID.parse('1.2.3.4.5'), OID(const [1, 2, 3, 4, 5]));
@@ -233,7 +269,7 @@ void main() {
         expiration: futureExpiration,
       );
       final certificate = identity.certificates.single;
-      final decodedCertificate = await Certificate.decode(certificate.toPem());
+      final decodedCertificate = Certificate.decode(certificate.toPem());
       expect(decodedCertificate.created, certificate.created);
       expect(decodedCertificate.expires, certificate.expires);
       expect(decodedCertificate.attributes, certificate.attributes);
@@ -246,7 +282,7 @@ void main() {
         expiration: futureExpiration,
       );
       final certificate = identity.certificates.single;
-      final decodedCertificate = await Certificate.decode(certificate.toDer());
+      final decodedCertificate = Certificate.decode(certificate.toDer());
       expect(decodedCertificate.created, certificate.created);
       expect(decodedCertificate.expires, certificate.expires);
       expect(decodedCertificate.attributes, certificate.attributes);
@@ -269,7 +305,7 @@ void main() {
       ]);
 
       final [certificateA, certificateB] =
-          await Certificate.decodeMultiple(combinedPem);
+          Certificate.decodeMultiple(combinedPem);
       expect(certificateA.attributes, identityA.certificates.single.attributes);
       expect(certificateB.attributes, identityB.certificates.single.attributes);
     });
@@ -320,18 +356,55 @@ void main() {
         ]),
       );
     });
+
+    test('toString', () {
+      const certificatePem = PemData('''
+-----BEGIN CERTIFICATE-----
+MIIDEDCCAfigAwIBAgIGAZa6V3hoMA0GCSqGSIb3DQEBCwUAMA8xDTALBgNVBAMM
+BFRlc3QwIBcNMjUwNTEwMTMxNTU2WhgPMjA5OTEyMzEyMzU5NTlaMA8xDTALBgNV
+BAMMBFRlc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCwWf2yIGaA
+K90Wwfram5dm75+7VSH4Nn6fZPUa3yTHDZpzU5jb5x02gjH+N2PoYW+OCuNGveYD
+5jJLpD+D0IXsFISVz3ti2/dMyCRt5QNnXAcmRJ+U32tgQY8hc1oeGGgqBDA0gMBu
+wxbQSomlyGDslDSI/UU0WD0QLAFvDysta3YBObaFAG/qwfYxValdY9zkEljetAya
+skVFPFQltJk2Pw9WtOPi74dYgPlDCZ1iZaiK58hBJ86HYlfScmOm/2z7aGBboVLO
+IPCMm6BOV/BdD4QuAh+hJTBDb+TvQCtYp7vuVwb2toBnJOPriUs2cODMYMrP43oB
+eVB1vuj+20a3AgMBAAGjcDBuMAkGA1UdEwQCMAAwHQYDVR0OBBYEFI8TYFMS9ZZ7
+f0ayjJNGoeS5vmtpMB8GA1UdIwQYMBaAFI8TYFMS9ZZ7f0ayjJNGoeS5vmtpMBEG
+CWCGSAGG+EIBAQQEAwIGQDAOBgNVHQ8BAf8EBAMCBaAwDQYJKoZIhvcNAQELBQAD
+ggEBAJog+tqqlFkX+UzfMvNvDK5LM0pYvu0aJzeqKIdokHhz7azknW9wJu+NJoQv
+M7KAQUCWEgogVRQUBnuP+BxFOrOWhoHo4z7J7fjWoM+nQ+bQVaOVqBoz1/bsC4DR
+cCciQIRXSp4KCz+CdZyO2r4fiSGoC5SGjv7agJ2Yhvpykz0VTsjyBTlKrh5gEFmL
+MP9LxugRswSk1F1QZjLhQKM3rwl1LIrnYsRpOCanSMUu/yyl6TP+jkf9d68wRT/U
+b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
+9S9NZbVqfTwblAIiGKg5gvZ5VjY=
+-----END CERTIFICATE-----
+
+''');
+      final certificate = Certificate.decode(certificatePem);
+      expect(
+        certificate.toString(),
+        'Certificate('
+        'created: 2025-05-10 13:15:56.000Z, '
+        'expires: 2099-12-31 23:59:59.000Z, '
+        // ignore: lines_longer_than_80_chars
+        'publicKey: KeyPair(publicKeyDigest: 8f13605312f5967b7f46b28c9346a1e4b9be6b69), '
+        // ignore: missing_whitespace_between_adjacent_strings
+        'attributes: CertificateAttributes(commonName: Test)'
+        ')',
+      );
+    });
   });
 
   group('KeyPair', () {
-    test('withPrivateKey PEM', () async {
-      final keyPair = await KeyPair.withPrivateKey(privateKeyPem);
+    test('fromPrivateKey PEM', () async {
+      final keyPair = await KeyPair.fromPrivateKey(privateKeyPem);
       expect(keyPair.privateKey, isNotNull);
       expect(keyPair.publicKey, isNotNull);
       expect(keyPair.publicKeyDigest, isNotEmpty);
     });
 
-    test('withPrivateKey PEM with password', () async {
-      final keyPair = await KeyPair.withPrivateKey(
+    test('fromPrivateKey PEM with password', () async {
+      final keyPair = await KeyPair.fromPrivateKey(
         privateKeyEncryptedPem,
         password: privateKeyPassword,
       );
@@ -340,15 +413,15 @@ void main() {
       expect(keyPair.publicKeyDigest, isNotEmpty);
     });
 
-    test('withPrivateKey DER', () async {
-      final keyPair = await KeyPair.withPrivateKey(privateKeyDer);
+    test('fromPrivateKey DER', () async {
+      final keyPair = await KeyPair.fromPrivateKey(privateKeyDer);
       expect(keyPair.privateKey, isNotNull);
       expect(keyPair.publicKey, isNotNull);
       expect(keyPair.publicKeyDigest, isNotEmpty);
     });
 
-    test('withPrivateKey DER with password', () async {
-      final keyPair = await KeyPair.withPrivateKey(
+    test('fromPrivateKey DER with password', () async {
+      final keyPair = await KeyPair.fromPrivateKey(
         privateKeyEncryptedDer,
         password: privateKeyPassword,
       );
@@ -356,11 +429,22 @@ void main() {
       expect(keyPair.publicKey, isNotNull);
       expect(keyPair.publicKeyDigest, isNotEmpty);
     });
+
+    test('toString', () async {
+      final keyPair = await KeyPair.fromPrivateKey(privateKeyPem);
+      expect(
+        keyPair.toString(),
+        'KeyPair('
+        'publicKeyDigest: ${keyPair.publicKeyDigest}, '
+        'PRIVATE-KEY-AVAILABLE'
+        ')',
+      );
+    });
   });
 
   group('TlsIdentity', () {
     test('from', () async {
-      final keyPair = await KeyPair.withPrivateKey(privateKeyPem);
+      final keyPair = await KeyPair.fromPrivateKey(privateKeyPem);
       final identity = await TlsIdentity.createIdentity(
         keyUsages: {KeyUsage.serverAuth},
         attributes: const CertificateAttributes(commonName: 'Test'),
@@ -369,7 +453,7 @@ void main() {
       );
       final certificate = identity.certificates.single;
       final restoredIdentify =
-          await TlsIdentity.from(keyPair: keyPair, certificates: [certificate]);
+          TlsIdentity.from(keyPair: keyPair, certificates: [certificate]);
       final restoredCertificate = restoredIdentify.certificates.single;
       expect(restoredCertificate.attributes, certificate.attributes);
       expect(

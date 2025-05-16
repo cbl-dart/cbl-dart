@@ -23,6 +23,7 @@ import 'document_replication.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
+import 'tls_identity.dart';
 
 final class ProxyReplicator extends ProxyObject
     with ClosableResourceMixin
@@ -98,6 +99,8 @@ final class ProxyReplicator extends ProxyObject
         replicatorType: config.replicatorType,
         continuous: config.continuous,
         authenticator: config.authenticator,
+        acceptOnlySelfSignedServerCertificate:
+            config.acceptOnlySelfSignedServerCertificate,
         pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
         trustedRootCertificates: config.trustedRootCertificates?.toData(),
         headers: config.headers,
@@ -134,6 +137,14 @@ final class ProxyReplicator extends ProxyObject
       use(() => channel.call(GetReplicatorStatus(
             replicatorId: objectId,
           )));
+
+  @override
+  Future<Certificate?> get serverCertificate async => use(() async {
+        final response = await channel.call(GetReplicatorServerCertificate(
+          replicatorId: objectId,
+        ));
+        return response?.certificate;
+      });
 
   @override
   // ignore: prefer_expression_function_bodies

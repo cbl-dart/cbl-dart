@@ -546,9 +546,17 @@ final class BaseBindings extends Bindings {
     }
   }
 
-  void completeCompleter(
+  void completeCompleterWithPointer(
     cblitedart.CBLDart_Completer completer,
     Pointer<Void> result,
   ) =>
-      cblDart.CBLDart_Completer_Complete(completer, result);
+      cblDart.CBLDart_Completer_Complete(completer, result.address);
+
+  void completeCompleterWithBool(
+    cblitedart.CBLDart_Completer completer,
+    // ignore: avoid_positional_boolean_parameters
+    bool result,
+  ) {
+    cblDart.CBLDart_Completer_Complete(completer, result ? 1 : 0);
+  }
 }

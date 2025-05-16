@@ -26,6 +26,7 @@ void main() {
       expect(config.replicatorType, ReplicatorType.pushAndPull);
       expect(config.continuous, false);
       expect(config.authenticator, isNull);
+      expect(config.acceptOnlySelfSignedServerCertificate, isFalse);
       expect(config.pinnedServerCertificate, isNull);
       expect(config.trustedRootCertificates, isNull);
       expect(config.headers, isNull);
@@ -91,6 +92,7 @@ void main() {
         heartbeat: const Duration(seconds: 1),
         maxAttempts: 1,
         maxAttemptWaitTime: const Duration(seconds: 1),
+        acceptOnlySelfSignedServerCertificate: true,
       );
 
       final copy = ReplicatorConfiguration.from(source);
@@ -100,6 +102,10 @@ void main() {
       expect(copy.replicatorType, source.replicatorType);
       expect(copy.continuous, source.continuous);
       expect(copy.authenticator, source.authenticator);
+      expect(
+        copy.acceptOnlySelfSignedServerCertificate,
+        source.acceptOnlySelfSignedServerCertificate,
+      );
       expect(copy.pinnedServerCertificate, source.pinnedServerCertificate);
       expect(copy.trustedRootCertificates, source.trustedRootCertificates);
       expect(copy.headers, source.headers);
@@ -140,6 +146,7 @@ void main() {
         replicatorType: ReplicatorType.pull,
         continuous: true,
         authenticator: SessionAuthenticator(sessionId: 'sessionId'),
+        acceptOnlySelfSignedServerCertificate: true,
         pinnedServerCertificate: Uint8List(0),
         trustedRootCertificates: Uint8List(0),
         headers: {'Client': 'cbl-dart', 'Authentication': 'AUTH'},
@@ -166,6 +173,7 @@ void main() {
         'CONTINUOUS, '
         'authenticator: SessionAuthenticator(sessionId: ******nId, '
         'cookieName: SyncGatewaySession), '
+        'ACCEPT-ONLY-SELF-SIGNED-SERVER-CERTIFICATE, '
         'PINNED-SERVER-CERTIFICATE, '
         'TRUSTED-ROOT-CERTIFICATES, '
         'headers: {Client: cbl-dart, Authentication: REDACTED}, '

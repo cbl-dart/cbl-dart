@@ -112,7 +112,7 @@ abstract base class CblE2eTestBinding {
       await _cleanTestTmpDir();
       await initCouchbaseLite();
 
-      const consoleLogLevel = LogLevel.warning;
+      const consoleLogLevel = LogLevel.verbose;
       const fileLogLevel = LogLevel.verbose;
 
       Database.log.file

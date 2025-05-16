@@ -1,9 +1,12 @@
 // ignore: lines_longer_than_80_chars
 // ignore_for_file: prefer_constructors_over_static_methods,prefer_void_to_null
 
+import 'dart:ffi';
+
 import 'package:meta/meta.dart';
 
 import '../bindings.dart';
+import '../bindings/cblite.dart' as cblite;
 import '../database.dart';
 import '../database/database_configuration.dart';
 import '../fleece/containers.dart';
@@ -12,6 +15,7 @@ import '../replication/configuration.dart';
 import '../replication/document_replication.dart';
 import '../replication/endpoint.dart';
 import '../replication/replicator.dart';
+import '../replication/tls_identity.dart';
 import '../support/utils.dart';
 import '../tracing.dart';
 import 'channel.dart';
@@ -514,7 +518,8 @@ final class CreateReplicator extends Request<int> implements SendAware {
     required this.target,
     this.replicatorType = ReplicatorType.pushAndPull,
     this.continuous = false,
-    this.authenticator,
+    Authenticator? authenticator,
+    required this.acceptOnlySelfSignedServerCertificate,
     Data? pinnedServerCertificate,
     Data? trustedRootCertificates,
     this.headers,
@@ -523,7 +528,8 @@ final class CreateReplicator extends Request<int> implements SendAware {
     this.maxAttempts,
     this.maxAttemptWaitTime,
     required this.collections,
-  })  : _pinnedServerCertificate =
+  })  : _authenticator = authenticator,
+        _pinnedServerCertificate =
             pinnedServerCertificate?.let(SendableData.new),
         _trustedRootCertificates =
             trustedRootCertificates?.let(SendableData.new);
@@ -531,10 +537,17 @@ final class CreateReplicator extends Request<int> implements SendAware {
   final Endpoint target;
   final ReplicatorType replicatorType;
   final bool continuous;
-  final Authenticator? authenticator;
+
+  Authenticator? get authenticator => _authenticator;
+  Authenticator? _authenticator;
+  Pointer<cblite.CBLTLSIdentity>? _certificateAuthenticatorIdentityPointer;
+
+  final bool acceptOnlySelfSignedServerCertificate;
   Data? get pinnedServerCertificate => _pinnedServerCertificate?.data;
+
   final SendableData? _pinnedServerCertificate;
   Data? get trustedRootCertificates => _trustedRootCertificates?.data;
+
   final SendableData? _trustedRootCertificates;
   final Map<String, String>? headers;
   final bool enableAutoPurge;
@@ -545,12 +558,27 @@ final class CreateReplicator extends Request<int> implements SendAware {
 
   @override
   void willSend() {
+    if (_authenticator
+        case final ClientCertificateAuthenticator authenticator) {
+      final identity = authenticator.identity as FfiTlsIdentity;
+      _certificateAuthenticatorIdentityPointer = identity.pointer;
+      CBLBindings.instance.base
+          .retainRefCounted(_certificateAuthenticatorIdentityPointer!.cast());
+      _authenticator = null;
+    }
+
     _pinnedServerCertificate?.willSend();
     _trustedRootCertificates?.willSend();
   }
 
   @override
   void didReceive() {
+    if (_certificateAuthenticatorIdentityPointer case final pointer?) {
+      final identity = FfiTlsIdentity.fromPointer(pointer, adopt: true);
+      _authenticator = ClientCertificateAuthenticator(identity);
+      _certificateAuthenticatorIdentityPointer = null;
+    }
+
     _pinnedServerCertificate?.didReceive();
     _trustedRootCertificates?.didReceive();
   }
@@ -619,6 +647,13 @@ final class CallConflictResolver extends Request<DocumentState?>
 
 final class GetReplicatorStatus extends Request<ReplicatorStatus> {
   GetReplicatorStatus({required this.replicatorId});
+
+  final int replicatorId;
+}
+
+final class GetReplicatorServerCertificate
+    extends Request<SendableCertificate?> {
+  GetReplicatorServerCertificate({required this.replicatorId});
 
   final int replicatorId;
 }
@@ -795,10 +830,12 @@ final class ScopeState {
 final class CollectionState {
   CollectionState({
     required this.id,
+    required this.pointer,
     required this.name,
   });
 
   final int id;
+  final Pointer<CBLCollection> pointer;
   final String name;
 }
 
@@ -879,6 +916,27 @@ final class DocumentReplicationEvent {
 
   final bool isPush;
   final List<ReplicatedDocument> documents;
+}
+
+final class SendableCertificate implements SendAware {
+  SendableCertificate(this._certificate);
+
+  Certificate get certificate => _certificate!;
+  Certificate? _certificate;
+  Pointer<cblite.CBLCert>? _pointer;
+
+  @override
+  void willSend() {
+    _pointer = (_certificate! as FfiCertificate).pointer;
+    CBLBindings.instance.base.retainRefCounted(_pointer!.cast());
+    _certificate = null;
+  }
+
+  @override
+  void didReceive() {
+    _certificate = FfiCertificate.fromPointer(_pointer!, adopt: true);
+    _pointer = null;
+  }
 }
 
 // === Exceptions ==============================================================
