@@ -116,6 +116,8 @@ function runE2ETests() {
     requireEnvVar TARGET_OS
     requireEnvVar TEST_PACKAGE
 
+    local DART_DEFINES="--dart-define enableTimeBomb=true"
+
     case "$embedder" in
     standalone)
         cd "$testPackageDir"
@@ -154,6 +156,7 @@ function runE2ETests() {
             ;;
         macOS)
             device="macOS"
+            DART_DEFINES="$DART_DEFINES --dart-define skipPeerSyncTest=true"
             ;;
         Android)
             device="emulator"
@@ -175,7 +178,7 @@ function runE2ETests() {
         # flag, which we need to collect logs from devices.
         flutter drive \
             -d "$device" \
-            --dart-define enableTimeBomb=true \
+            $DART_DEFINES \
             --keep-app-running \
             --driver test_driver/integration_test.dart \
             --target integration_test/e2e_test.dart

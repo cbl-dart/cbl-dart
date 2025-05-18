@@ -28,6 +28,7 @@ functions:
     include:
       - CBL_Release
       - CBLBlobReader_Close
+      - CBLListenerAuth_Free
       - FLDoc_Release
       - FLEncoder_Free
       - FLSharedKeys_Release

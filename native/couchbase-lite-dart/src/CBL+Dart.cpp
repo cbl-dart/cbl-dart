@@ -92,12 +92,12 @@ class Completer {
  public:
   Completer() : future(promise.get_future()) {}
 
-  void complete(void *result) { promise.set_value(result); }
-  void *wait() { return future.get(); }
+  void complete(uint64_t result) { promise.set_value(result); }
+  uint64_t wait() { return future.get(); }
 
  private:
-  std::promise<void *> promise;
-  std::future<void *> future;
+  std::promise<uint64_t> promise;
+  std::future<uint64_t> future;
 };
 
 }  // namespace CBLDart
@@ -107,7 +107,7 @@ class Completer {
 
 #define COMPLETER_TO_C(completer) reinterpret_cast<CBLDart_Completer>(completer)
 
-void CBLDart_Completer_Complete(CBLDart_Completer completer, void *result) {
+void CBLDart_Completer_Complete(CBLDart_Completer completer, uint64_t result) {
   COMPLETER_FROM_C(completer)->complete(result);
 }
 
@@ -781,7 +781,7 @@ FLMutableDict PredictiveModel::prediction(FLDict input) {
     // thread as the isolate where the model was registered.
     auto completer = CBLDart::Completer();
     predictionAsync(input, COMPLETER_TO_C(&completer));
-    return static_cast<FLMutableDict>(completer.wait());
+    return (FLMutableDict)completer.wait();
   }
 }
 
@@ -1013,6 +1013,10 @@ CBLReplicator *CBLDart_CBLReplicator_Create(
   config_.authenticator = config->authenticator;
   config_.proxy = config->proxy;
   config_.headers = config->headers;
+#ifdef COUCHBASE_ENTERPRISE
+  config_.acceptOnlySelfSignedServerCertificate =
+      config->acceptOnlySelfSignedServerCertificate;
+#endif
   config_.pinnedServerCertificate = config->pinnedServerCertificate == nullptr
                                         ? kFLSliceNull
                                         : *config->pinnedServerCertificate;
@@ -1314,3 +1318,30 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
   ASYNC_CALLBACK_FROM_C(listener)->setFinalizer(listenerToken,
                                                 CBLDart_CBLListenerFinalizer);
 }
+
+// === UrlEndpointListener
+
+#ifdef COUCHBASE_ENTERPRISE
+
+bool CBLDart_ListenerPasswordAuthCallbackTrampoline(void *context,
+                                                    FLString username,
+                                                    FLString password) {
+  auto callback = (CBLDartListenerPasswordAuthCallback)context;
+  auto completer = CBLDart::Completer();
+  callback(COMPLETER_TO_C(&completer), username, password);
+  return (bool)completer.wait();
+}
+
+bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context, CBLCert *cert) {
+  auto callback = (CBLDartListenerCertAuthCallback)context;
+  auto completer = CBLDart::Completer();
+  callback(COMPLETER_TO_C(&completer), cert);
+  return (bool)completer.wait();
+}
+
+#else
+
+void CBLDart_ListenerPasswordAuthCallbackTrampoline() {}
+void CBLDart_ListenerCertAuthCallbackTrampoline() {}
+
+#endif

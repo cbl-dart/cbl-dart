@@ -33,5 +33,20 @@ void main() {
         );
       });
     });
+
+    group('ClientCertificateAuthenticator', () {
+      test('toString', () async {
+        final identity = await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.clientAuth},
+          attributes: const CertificateAttributes(commonName: 'test'),
+          expiration: DateTime(2100),
+        );
+        final authenticator = ClientCertificateAuthenticator(identity);
+        expect(
+          authenticator.toString(),
+          'ClientCertificateAuthenticator(identity: $identity)',
+        );
+      });
+    });
   });
 }

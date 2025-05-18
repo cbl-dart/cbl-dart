@@ -1,5 +1,9 @@
 export 'replication/authenticator.dart'
-    show Authenticator, BasicAuthenticator, SessionAuthenticator;
+    show
+        Authenticator,
+        BasicAuthenticator,
+        SessionAuthenticator,
+        ClientCertificateAuthenticator;
 export 'replication/configuration.dart'
     show
         ReplicatorConfiguration,
@@ -39,3 +43,13 @@ export 'replication/tls_identity.dart'
         CryptoData,
         PemData,
         DerData;
+export 'replication/url_endpoint_listener.dart'
+    show
+        ListenerAuthenticator,
+        ListenerPasswordAuthenticator,
+        ListenerCertificateAuthenticatorFunction,
+        ListenerPasswordAuthenticatorFunction,
+        ListenerCertificateAuthenticator,
+        UrlEndpointListenerConfiguration,
+        ConnectionStatus,
+        UrlEndpointListener;

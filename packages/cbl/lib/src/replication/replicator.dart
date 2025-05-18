@@ -11,6 +11,7 @@ import 'document_replication.dart';
 import 'ffi_replicator.dart';
 import 'proxy_replicator.dart';
 import 'replicator_change.dart';
+import 'tls_identity.dart';
 
 /// The states a [Replicator] can be in during its lifecycle.
 ///
@@ -152,6 +153,11 @@ abstract interface class Replicator implements ClosableResource {
   /// Returns this replicator's status.
   FutureOr<ReplicatorStatus> get status;
 
+  /// The TLS [Certificate] received when connecting to the server.
+  ///
+  /// {@macro cbl.EncryptionKey.enterpriseFeature}
+  FutureOr<Certificate?> get serverCertificate;
+
   /// Starts this replicator with an option to [reset] the local checkpoint of
   /// the replicator.
   ///
@@ -281,6 +287,9 @@ abstract interface class SyncReplicator implements Replicator {
   ReplicatorStatus get status;
 
   @override
+  Certificate? get serverCertificate;
+
+  @override
   void start({bool reset = false});
 
   @override
@@ -325,6 +334,9 @@ abstract interface class AsyncReplicator implements Replicator {
 
   @override
   Future<ReplicatorStatus> get status;
+
+  @override
+  Future<Certificate?> get serverCertificate;
 
   @override
   Future<void> start({bool reset = false});

@@ -3,8 +3,9 @@
 // ignore_for_file: type=lint, unused_import
 import 'dart:ffi' as ffi;
 
-import 'package:cbl/src/bindings/cblite.dart';
 import 'package:cbl/src/bindings/cblite.dart' as imp$1;
+import 'package:cbl/src/bindings/cblite.dart';
+
 import './cblite.dart' as native;
 
 class cbliteNative implements cblite {
@@ -4148,6 +4149,10 @@ class SymbolAddressesNative implements SymbolAddresses {
   @override
   ffi.Pointer<ffi.NativeFunction<NativeCBLBlobReader_Close>>
       get CBLBlobReader_Close => native.addresses.CBLBlobReader_Close;
+
+  @override
+  ffi.Pointer<ffi.NativeFunction<NativeCBLListenerAuth_Free>>
+      get CBLListenerAuth_Free => native.addresses.CBLListenerAuth_Free;
 
   @override
   ffi.Pointer<ffi.NativeFunction<NativeFLDoc_Release>> get FLDoc_Release =>

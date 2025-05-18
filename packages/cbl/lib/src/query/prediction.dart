@@ -211,7 +211,8 @@ class _FfiPredictiveModel implements Finalizable {
     CBLDart_Completer completer,
   ) {
     final result = _predictionSync(input);
-    CBLBindings.instance.base.completeCompleter(completer, result.cast());
+    CBLBindings.instance.base
+        .completeCompleterWithPointer(completer, result.cast());
   }
 
   void _unregistered() {

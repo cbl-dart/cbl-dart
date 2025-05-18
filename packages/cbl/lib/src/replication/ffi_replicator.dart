@@ -27,6 +27,7 @@ import 'document_replication.dart';
 import 'endpoint.dart';
 import 'replicator.dart';
 import 'replicator_change.dart';
+import 'tls_identity.dart';
 
 final _bindings = CBLBindings.instance.replicator;
 
@@ -137,6 +138,8 @@ final class FfiReplicator
       maxAttemptWaitTime: config.maxAttemptWaitTime?.inSeconds,
       authenticator: authenticator,
       headers: headersDict?.pointer.cast(),
+      acceptOnlySelfSignedServerCertificate:
+          config.acceptOnlySelfSignedServerCertificate,
       pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
       trustedRootCertificates: config.trustedRootCertificates?.toData(),
       collections: replicationCollections,
@@ -191,6 +194,13 @@ final class FfiReplicator
 
   ReplicatorStatus get _status =>
       _bindings.status(pointer).toReplicatorStatus();
+
+  @override
+  Certificate? get serverCertificate => useSync(() {
+        useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+        return _bindings.serverCertificate(pointer)?.let(
+            (pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
+      });
 
   @override
   void start({bool reset = false}) => useSync(() {
@@ -460,6 +470,10 @@ extension on ReplicatorConfiguration {
       return _bindings.createSessionAuthenticator(
         authenticator.sessionId,
         authenticator.cookieName,
+      );
+    } else if (authenticator is ClientCertificateAuthenticator) {
+      return _bindings.createClientCertificateAuthenticator(
+        (authenticator.identity as FfiTlsIdentity).pointer,
       );
     } else {
       throw UnimplementedError(

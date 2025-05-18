@@ -539,21 +539,21 @@ final class ProxyCollection extends ProxyObject
     implements AsyncCollection {
   ProxyCollection({
     required this.client,
-    required CollectionState state,
+    required this.state,
     required this.scope,
-  })  : name = state.name,
-        super(client.channel, state.id) {
+  }) : super(client.channel, state.id) {
     needsToBeClosedByParent = false;
     attachTo(scope);
   }
 
   final CblServiceClient client;
-
-  @override
-  final String name;
+  final CollectionState state;
 
   @override
   final ProxyScope scope;
+
+  @override
+  String get name => state.name;
 
   @override
   ProxyDatabase get database => scope.database;

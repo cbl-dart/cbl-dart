@@ -1,4 +1,6 @@
 import '../support/utils.dart';
+import 'tls_identity.dart';
+import 'url_endpoint_listener.dart';
 
 /// The authentication credentials for a remote server.
 ///
@@ -52,4 +54,30 @@ final class SessionAuthenticator extends Authenticator {
       // ignore: missing_whitespace_between_adjacent_strings
       'cookieName: $cookieName'
       ')';
+}
+
+/// An [Authenticator] that presents a client certificate to the server during
+/// the initial SSL/TLS handshake.
+///
+/// {@macro cbl.EncryptionKey.enterpriseFeature}
+///
+/// This is currently only supported for authenticating with an
+/// [UrlEndpointListener].
+///
+/// See also:
+///
+/// - [ListenerCertificateAuthenticator] for a [ListenerAuthenticator] that
+///   authenticates clients using a [Certificate].
+final class ClientCertificateAuthenticator extends Authenticator {
+  /// Creates a new [ClientCertificateAuthenticator] that uses the [Certificate]
+  /// and [KeyPair] of the given [identity] to authenticate the client to the
+  /// server.
+  ClientCertificateAuthenticator(this.identity);
+
+  /// The [TlsIdentity] that contains the [Certificate] and [KeyPair] to use for
+  /// authentication with the server.
+  final TlsIdentity identity;
+
+  @override
+  String toString() => 'ClientCertificateAuthenticator(identity: $identity)';
 }

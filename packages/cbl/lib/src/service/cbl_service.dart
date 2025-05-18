@@ -306,6 +306,7 @@ final class CblService {
       ..addCallEndpoint(_indexUpdaterFinish)
       ..addCallEndpoint(_createReplicator)
       ..addCallEndpoint(_getReplicatorStatus)
+      ..addCallEndpoint(_getReplicatorServerCertificate)
       ..addCallEndpoint(_startReplicator)
       ..addCallEndpoint(_stopReplicator)
       ..addCallEndpoint(_addReplicatorChangeListener)
@@ -422,6 +423,7 @@ final class CblService {
     }
     return CollectionState(
       id: _objectRegistry.addObject(collection),
+      pointer: (collection as FfiCollection).pointer,
       name: collection.name,
     );
   }
@@ -431,6 +433,7 @@ final class CblService {
           .collections
           .map((collection) => CollectionState(
                 id: _objectRegistry.addObject(collection),
+                pointer: (collection as FfiCollection).pointer,
                 name: collection.name,
               ))
           .toList();
@@ -440,6 +443,7 @@ final class CblService {
         .createCollection(request.collection, request.scope);
     return CollectionState(
       id: _objectRegistry.addObject(collection),
+      pointer: (collection as FfiCollection).pointer,
       name: collection.name,
     );
   }
@@ -675,6 +679,8 @@ final class CblService {
       replicatorType: request.replicatorType,
       continuous: request.continuous,
       authenticator: request.authenticator,
+      acceptOnlySelfSignedServerCertificate:
+          request.acceptOnlySelfSignedServerCertificate,
       pinnedServerCertificate: request.pinnedServerCertificate?.toTypedList(),
       trustedRootCertificates: request.trustedRootCertificates?.toTypedList(),
       headers: request.headers,
@@ -710,6 +716,13 @@ final class CblService {
 
   ReplicatorStatus _getReplicatorStatus(GetReplicatorStatus request) =>
       _getReplicatorById(request.replicatorId).status;
+
+  SendableCertificate? _getReplicatorServerCertificate(
+    GetReplicatorServerCertificate request,
+  ) =>
+      _getReplicatorById(request.replicatorId)
+          .serverCertificate
+          ?.let(SendableCertificate.new);
 
   void _startReplicator(StartReplicator request) =>
       _getReplicatorById(request.replicatorId).start(reset: request.reset);

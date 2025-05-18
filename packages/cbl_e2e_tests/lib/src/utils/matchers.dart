@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings.dart';
 import 'package:collection/collection.dart';
-import 'package:test/test.dart';
 import 'package:test/test.dart' as test;
+import 'package:test/test.dart';
 
 import 'fleece_coding.dart';
 
@@ -176,15 +176,18 @@ final class _Equality extends Matcher {
 
 /// === Errors =================================================================
 
-final isDatabaseException = isA<DatabaseException>();
-
-extension DatabaseExceptionMatcherExt on test.TypeMatcher<DatabaseException> {
-  test.TypeMatcher<DatabaseException> havingMessage(String message) =>
+extension CouchbaseLiteExceptionMatcherExt
+    on test.TypeMatcher<CouchbaseLiteException> {
+  test.TypeMatcher<CouchbaseLiteException> havingMessage(String message) =>
       having((it) => it.message, 'message', message);
 
-  test.TypeMatcher<DatabaseException> havingCode(DatabaseErrorCode code) =>
+  test.TypeMatcher<CouchbaseLiteException> havingCode(Object code) =>
       having((it) => it.code, 'code', code);
 }
+
+final isCouchbaseLiteException = isA<CouchbaseLiteException>();
+
+final isDatabaseException = isA<DatabaseException>();
 
 final throwsNotADatabaseFile = throwsA(
   isDatabaseException.havingCode(DatabaseErrorCode.notADatabaseFile),
@@ -192,10 +195,6 @@ final throwsNotADatabaseFile = throwsA(
 
 final isTypedDataException = isA<TypedDataException>();
 
-extension TypedDataExceptionMatcherExt on test.TypeMatcher<TypedDataException> {
-  test.TypeMatcher<TypedDataException> havingMessage(String message) =>
-      having((it) => it.message, 'message', message);
+final isNetworkException = isA<NetworkException>();
 
-  test.TypeMatcher<TypedDataException> havingCode(TypedDataErrorCode code) =>
-      having((it) => it.code, 'code', code);
-}
+final isHttpException = isA<HttpException>();
