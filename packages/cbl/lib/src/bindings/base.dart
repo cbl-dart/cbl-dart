@@ -88,7 +88,8 @@ enum CBLErrorDomain {
   sqLite(cblite.kCBLSQLiteDomain),
   fleece(cblite.kCBLFleeceDomain),
   network(cblite.kCBLNetworkDomain),
-  webSocket(cblite.kCBLWebSocketDomain);
+  webSocket(cblite.kCBLWebSocketDomain),
+  mbedTls(cblite.kCBLWebSocketDomain);
 
   const CBLErrorDomain(this.value);
 
@@ -99,6 +100,8 @@ enum CBLErrorDomain {
         cblite.kCBLFleeceDomain => fleece,
         cblite.kCBLNetworkDomain => network,
         cblite.kCBLWebSocketDomain => webSocket,
+        // TODO(blaugold): use constant from library once fixed in CBL C SDK
+        7 => mbedTls,
         _ => throw ArgumentError('Unknown error domain: $value'),
       };
 
@@ -275,7 +278,8 @@ extension IntErrorCodeExt on int {
         CBLErrorDomain.sqLite => this,
         CBLErrorDomain.fleece => FLError.fromValue(this),
         CBLErrorDomain.network => CBLNetworkErrorCode.fromValue(this),
-        CBLErrorDomain.webSocket => this
+        CBLErrorDomain.webSocket => this,
+        CBLErrorDomain.mbedTls => this,
       };
 }
 
@@ -352,6 +356,8 @@ CouchbaseLiteException createCouchbaseLiteException({
         final code = _webSocketErrorCodeMap[statusCode];
         return WebSocketException(formatMessage(code), code);
       }
+    case CBLErrorDomain.mbedTls:
+      return MbedTlsException(message, code as int);
   }
 }
 

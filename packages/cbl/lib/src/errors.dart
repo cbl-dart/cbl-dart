@@ -277,6 +277,22 @@ final class WebSocketException extends CouchbaseLiteException {
   String get _typeName => 'WebSocketException';
 }
 
+/// Exception thrown when there is an Mbed TLS error.
+final class MbedTlsException extends CouchbaseLiteException {
+  /// Creates an exception which is thrown when there is an Mbed TLS error.
+  MbedTlsException(this.message, this.code);
+
+  @override
+  final String message;
+
+  /// Error code as defined in `mbedtls/error.h`.
+  @override
+  final int code;
+
+  @override
+  String get _typeName => 'MbedTlsException';
+}
+
 /// Exception thrown when JSON data is invalid.
 @Deprecated(
   'Use FleeceException instead. This class will be removed in the future.',
