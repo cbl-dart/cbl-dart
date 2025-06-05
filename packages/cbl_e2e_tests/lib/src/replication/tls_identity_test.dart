@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cbl/cbl.dart';
+import 'package:pointycastle/asn1.dart';
+import 'package:pointycastle/export.dart';
+import 'package:pointycastle/src/platform_check/platform_check.dart'
+    as platform_check;
 
 import '../../test_binding_impl.dart';
 import '../document/blob_test.dart';
 import '../test_binding.dart';
+import '../utils/database_utils.dart';
 import '../utils/matchers.dart';
+import '../utils/replicator_utils.dart';
 import 'private_keys.dart';
+import 'url_endpoint_listener_test.dart';
 
 final futureExpiration = DateTime.utc(2100);
 
@@ -317,10 +325,10 @@ void main() {
         expiration: futureExpiration,
       );
       final certificate = identity.certificates.single;
-      final publicKey = certificate.publicKey;
-      expect(publicKey.publicKeyDigest, isNotEmpty);
-      expect(publicKey.publicKey, isNotNull);
-      expect(publicKey.privateKey, isNull);
+      final publicKey = await certificate.publicKey;
+      expect(publicKey.publicKeyDigest, completion(isNotEmpty));
+      expect(publicKey.publicKeyData, completion(isNotNull));
+      expect(publicKey.privateKeyData, completion(isNull));
     });
 
     test('created', () async {
@@ -386,8 +394,6 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
         'Certificate('
         'created: 2025-05-10 13:15:56.000Z, '
         'expires: 2099-12-31 23:59:59.000Z, '
-        // ignore: lines_longer_than_80_chars
-        'publicKey: KeyPair(publicKeyDigest: 8f13605312f5967b7f46b28c9346a1e4b9be6b69), '
         // ignore: missing_whitespace_between_adjacent_strings
         'attributes: CertificateAttributes(commonName: Test)'
         ')',
@@ -396,48 +402,119 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
   });
 
   group('KeyPair', () {
-    test('fromPrivateKey PEM', () async {
-      final keyPair = await KeyPair.fromPrivateKey(privateKeyPem);
-      expect(keyPair.privateKey, isNotNull);
-      expect(keyPair.publicKey, isNotNull);
-      expect(keyPair.publicKeyDigest, isNotEmpty);
+    group('fromExternal', () {
+      group('failures', () {
+        test('public key unavailable', skip: true, () async {
+          final keyPair =
+              await KeyPair.fromExternal(ExceptionExternalKeyPairDelegate());
+          expect(await keyPair.publicKeyDigest, isNull);
+          expect(await keyPair.publicKeyData, isNull);
+        });
+      });
+
+      test('publicKeyDigest', () async {
+        final delegate = PointycastleExternalKeyPairDelegate();
+        final keyPair = await KeyPair.fromExternal(delegate);
+        expect(await keyPair.publicKeyDigest, isNotEmpty);
+      });
+
+      test('publicKey', () async {
+        final delegate = PointycastleExternalKeyPairDelegate();
+        final keyPair = await KeyPair.fromExternal(delegate);
+        expect(
+          (await keyPair.publicKeyData)!.data,
+          (await delegate.publicKeyData())!.data,
+        );
+      });
+
+      test('create self-signed identity', () async {
+        final keyPair =
+            await KeyPair.fromExternal(PointycastleExternalKeyPairDelegate());
+        final identity = await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.serverAuth},
+          attributes: const CertificateAttributes(commonName: 'Test'),
+          expiration: futureExpiration,
+          keyPair: keyPair,
+        );
+        final certificate = identity.certificates.single;
+        expect(
+          (await (await certificate.publicKey).publicKeyData)!.data,
+          (await keyPair.publicKeyData)!.data,
+        );
+      });
+
+      test('establish encrypted connection', skip: skipPeerSyncTest, () async {
+        final listenerDb = await openAsyncTestDatabase(name: 'listener');
+        final clientDb = await openAsyncTestDatabase(name: 'client');
+
+        final keyPair =
+            await KeyPair.fromExternal(PointycastleExternalKeyPairDelegate());
+        final identity = await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.serverAuth},
+          attributes: const CertificateAttributes(commonName: 'Test'),
+          expiration: futureExpiration,
+          keyPair: keyPair,
+        );
+        final listenerConfig = UrlEndpointListenerConfiguration(
+          collections: [await listenerDb.defaultCollection],
+          tlsIdentity: identity,
+        );
+        final listener = await UrlEndpointListener.create(listenerConfig);
+        await listener.start();
+        addTearDown(listener.stop);
+
+        final replicatorConfig = ReplicatorConfiguration(
+          target: UrlEndpoint(listener.urls!.first),
+          acceptOnlySelfSignedServerCertificate: true,
+        )..addCollection(await clientDb.defaultCollection);
+        final replicator = await Replicator.create(replicatorConfig);
+
+        await replicator.replicateOneShot();
+        expect((await replicator.status).error, isNull);
+      });
     });
 
-    test('fromPrivateKey PEM with password', () async {
-      final keyPair = await KeyPair.fromPrivateKey(
-        privateKeyEncryptedPem,
-        password: privateKeyPassword,
-      );
-      expect(keyPair.privateKey, isNotNull);
-      expect(keyPair.publicKey, isNotNull);
-      expect(keyPair.publicKeyDigest, isNotEmpty);
-    });
+    group('fromPrivateKey', () {
+      test('PEM', () async {
+        final keyPair = await KeyPair.fromPrivateKey(privateKeyPem);
+        expect(keyPair.privateKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyDigest, completion(isNotEmpty));
+      });
 
-    test('fromPrivateKey DER', () async {
-      final keyPair = await KeyPair.fromPrivateKey(privateKeyDer);
-      expect(keyPair.privateKey, isNotNull);
-      expect(keyPair.publicKey, isNotNull);
-      expect(keyPair.publicKeyDigest, isNotEmpty);
-    });
+      test('PEM with password', () async {
+        final keyPair = await KeyPair.fromPrivateKey(
+          privateKeyEncryptedPem,
+          password: privateKeyPassword,
+        );
+        expect(keyPair.privateKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyDigest, completion(isNotEmpty));
+      });
 
-    test('fromPrivateKey DER with password', () async {
-      final keyPair = await KeyPair.fromPrivateKey(
-        privateKeyEncryptedDer,
-        password: privateKeyPassword,
-      );
-      expect(keyPair.privateKey, isNotNull);
-      expect(keyPair.publicKey, isNotNull);
-      expect(keyPair.publicKeyDigest, isNotEmpty);
+      test('DER', () async {
+        final keyPair = await KeyPair.fromPrivateKey(privateKeyDer);
+        expect(keyPair.privateKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyDigest, completion(isNotEmpty));
+      });
+
+      test('DER with password', () async {
+        final keyPair = await KeyPair.fromPrivateKey(
+          privateKeyEncryptedDer,
+          password: privateKeyPassword,
+        );
+        expect(keyPair.privateKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyData, completion(isNotNull));
+        expect(keyPair.publicKeyDigest, completion(isNotEmpty));
+      });
     });
 
     test('toString', () async {
       final keyPair = await KeyPair.fromPrivateKey(privateKeyPem);
       expect(
         keyPair.toString(),
-        'KeyPair('
-        'publicKeyDigest: ${keyPair.publicKeyDigest}, '
-        'PRIVATE-KEY-AVAILABLE'
-        ')',
+        'KeyPair(publicKeyDigest: ${await keyPair.publicKeyDigest})',
       );
     });
   });
@@ -457,8 +534,8 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
       final restoredCertificate = restoredIdentify.certificates.single;
       expect(restoredCertificate.attributes, certificate.attributes);
       expect(
-        restoredCertificate.publicKey.publicKey.data,
-        certificate.publicKey.publicKey.data,
+        (await (await restoredCertificate.publicKey).publicKeyData)?.data,
+        (await (await certificate.publicKey).publicKeyData)?.data,
       );
     });
 
@@ -589,4 +666,131 @@ Future<bool> expectPersistedIdentityUnsupported(Future<void> future) async {
   }
 
   return false;
+}
+
+final class ExceptionExternalKeyPairDelegate extends ExternalKeyPairDelegate {
+  @override
+  int get keySizeInBits => 1024;
+
+  @override
+  Future<DerData?> publicKeyData() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List?> decrypt(Uint8List data) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Uint8List?> sign(SignatureDigestAlgorithm? algorithm, Uint8List data) {
+    throw UnimplementedError();
+  }
+}
+
+final class PointycastleExternalKeyPairDelegate
+    extends ExternalKeyPairDelegate {
+  PointycastleExternalKeyPairDelegate() {
+    final keyGenerator = RSAKeyGenerator()
+      ..init(ParametersWithRandom(
+        RSAKeyGeneratorParameters(
+          // Fermat prime that is often used for RSA keys.
+          BigInt.from(65537),
+          keySizeInBits,
+          64,
+        ),
+        FortunaRandom()
+          ..seed(
+            KeyParameter(platform_check.Platform.instance
+                .platformEntropySource()
+                .getBytes(32)),
+          ),
+      ));
+    _keyPair = keyGenerator.generateKeyPair();
+  }
+
+  @override
+  int get keySizeInBits => 2048;
+
+  late final AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> _keyPair;
+
+  @override
+  Future<DerData?> publicKeyData() async {
+    final publicKey = _keyPair.publicKey;
+    final info = ASN1SubjectPublicKeyInfo(
+      ASN1AlgorithmIdentifier.fromName('rsaEncryption'),
+      ASN1BitString(
+        stringValues: (ASN1Sequence()
+              ..add(ASN1Integer(publicKey.modulus))
+              ..add(ASN1Integer(publicKey.exponent)))
+            .encode(),
+      ),
+    );
+    return DerData(info.encode());
+  }
+
+  @override
+  Future<Uint8List?> decrypt(Uint8List data) async {
+    final cypher = PKCS1Encoding(RSAEngine())
+      ..init(false, PrivateKeyParameter(_keyPair.privateKey));
+    return cypher.process(data);
+  }
+
+  @override
+  Future<Uint8List?> sign(
+    SignatureDigestAlgorithm? algorithm,
+    Uint8List data,
+  ) async {
+    if (algorithm == null) {
+      final AsymmetricBlockCipher cypher = PKCS1Encoding(RSAEngine())
+        ..init(true, PrivateKeyParameter<RSAPrivateKey>(_keyPair.privateKey));
+      return cypher.process(data);
+    }
+
+    final signer = RSASigner(
+      _PassThroughDigest(data),
+      switch (algorithm) {
+        SignatureDigestAlgorithm.sha1 => '06052b0e03021a',
+        SignatureDigestAlgorithm.sha224 => '0609608648016503040204',
+        SignatureDigestAlgorithm.sha256 => '0609608648016503040201',
+        SignatureDigestAlgorithm.sha384 => '0609608648016503040202',
+        SignatureDigestAlgorithm.sha512 => '0609608648016503040203',
+        SignatureDigestAlgorithm.ripemd160 => '06052b24030201',
+      },
+    )..init(true, PrivateKeyParameter<RSAPrivateKey>(_keyPair.privateKey));
+    return signer.generateSignature(data).bytes;
+  }
+}
+
+class _PassThroughDigest implements Digest {
+  _PassThroughDigest(this._data);
+
+  final Uint8List _data;
+
+  @override
+  String get algorithmName => 'PassThroughDigest';
+
+  @override
+  int get byteLength => _data.length;
+
+  @override
+  int get digestSize => _data.length;
+
+  @override
+  int doFinal(Uint8List out, int outOff) {
+    out.setRange(outOff, outOff + _data.length, _data);
+    return _data.length;
+  }
+
+  @override
+  Uint8List process(Uint8List data) => _data;
+
+  @override
+  void reset() {}
+
+  @override
+  void update(Uint8List inp, int inpOff, int len) {}
+
+  @override
+  void updateByte(int inp) {}
 }

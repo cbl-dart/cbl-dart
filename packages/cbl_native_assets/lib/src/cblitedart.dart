@@ -274,6 +274,16 @@ external void CBLDart_CBLReplicator_AddDocumentReplicationListener(
   imp$2.CBLDart_AsyncCallback listenerId,
 );
 
+@ffi.Native<NativeCBLDartKeyPair_CreateWithExternalKey>()
+external ffi.Pointer<imp$2.CBLKeyPair> CBLDartKeyPair_CreateWithExternalKey(
+  int keySizeInBits,
+  Object delegate,
+  imp$2.CBLDartExternalKeyPublicKeyData publicKeyData,
+  imp$2.CBLDartExternalKeyDecrypt decrypt,
+  imp$2.CBLDartExternalKeySign sign,
+  ffi.Pointer<imp$2.CBLError> outError,
+);
+
 @ffi.Native<NativeCBLDart_ListenerPasswordAuthCallbackTrampoline>()
 external bool CBLDart_ListenerPasswordAuthCallbackTrampoline(
   ffi.Pointer<ffi.Void> context,
@@ -605,6 +615,22 @@ typedef DartCBLDart_CBLReplicator_AddDocumentReplicationListener
         ffi.Pointer<imp$2.CBLDatabase> db,
         ffi.Pointer<imp$2.CBLReplicator> replicator,
         imp$2.CBLDart_AsyncCallback listenerId);
+typedef NativeCBLDartKeyPair_CreateWithExternalKey
+    = ffi.Pointer<imp$2.CBLKeyPair> Function(
+        ffi.Size keySizeInBits,
+        ffi.Handle delegate,
+        imp$2.CBLDartExternalKeyPublicKeyData publicKeyData,
+        imp$2.CBLDartExternalKeyDecrypt decrypt,
+        imp$2.CBLDartExternalKeySign sign,
+        ffi.Pointer<imp$2.CBLError> outError);
+typedef DartCBLDartKeyPair_CreateWithExternalKey
+    = ffi.Pointer<imp$2.CBLKeyPair> Function(
+        int keySizeInBits,
+        Object delegate,
+        imp$2.CBLDartExternalKeyPublicKeyData publicKeyData,
+        imp$2.CBLDartExternalKeyDecrypt decrypt,
+        imp$2.CBLDartExternalKeySign sign,
+        ffi.Pointer<imp$2.CBLError> outError);
 typedef NativeCBLDart_ListenerPasswordAuthCallbackTrampoline
     = ffi.Bool Function(ffi.Pointer<ffi.Void> context, imp$1.FLString username,
         imp$1.FLString password);

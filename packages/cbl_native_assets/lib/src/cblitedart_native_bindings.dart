@@ -446,6 +446,24 @@ class cblitedartNative implements cblitedart {
       );
 
   @override
+  ffi.Pointer<CBLKeyPair> CBLDartKeyPair_CreateWithExternalKey(
+    int keySizeInBits,
+    Object delegate,
+    CBLDartExternalKeyPublicKeyData publicKeyData,
+    CBLDartExternalKeyDecrypt decrypt,
+    CBLDartExternalKeySign sign,
+    ffi.Pointer<CBLError> outError,
+  ) =>
+      native.CBLDartKeyPair_CreateWithExternalKey(
+        keySizeInBits,
+        delegate,
+        publicKeyData,
+        decrypt,
+        sign,
+        outError,
+      );
+
+  @override
   bool CBLDart_ListenerPasswordAuthCallbackTrampoline(
     ffi.Pointer<ffi.Void> context,
     imp$1.FLString username,

@@ -746,6 +746,31 @@ class cblitedart {
       _CBLDart_CBLReplicator_AddDocumentReplicationListenerPtr.asFunction<
           DartCBLDart_CBLReplicator_AddDocumentReplicationListener>();
 
+  ffi.Pointer<CBLKeyPair> CBLDartKeyPair_CreateWithExternalKey(
+    int keySizeInBits,
+    Object delegate,
+    CBLDartExternalKeyPublicKeyData publicKeyData,
+    CBLDartExternalKeyDecrypt decrypt,
+    CBLDartExternalKeySign sign,
+    ffi.Pointer<CBLError> outError,
+  ) {
+    return _CBLDartKeyPair_CreateWithExternalKey(
+      keySizeInBits,
+      delegate,
+      publicKeyData,
+      decrypt,
+      sign,
+      outError,
+    );
+  }
+
+  late final _CBLDartKeyPair_CreateWithExternalKeyPtr =
+      _lookup<ffi.NativeFunction<NativeCBLDartKeyPair_CreateWithExternalKey>>(
+          'CBLDartKeyPair_CreateWithExternalKey');
+  late final _CBLDartKeyPair_CreateWithExternalKey =
+      _CBLDartKeyPair_CreateWithExternalKeyPtr.asFunction<
+          DartCBLDartKeyPair_CreateWithExternalKey>();
+
   bool CBLDart_ListenerPasswordAuthCallbackTrampoline(
     ffi.Pointer<ffi.Void> context,
     imp$1.FLString username,
@@ -1307,6 +1332,61 @@ typedef DartCBLDart_CBLReplicator_AddDocumentReplicationListener
         ffi.Pointer<CBLDatabase> db,
         ffi.Pointer<CBLReplicator> replicator,
         CBLDart_AsyncCallback listenerId);
+typedef CBLDartExternalKeyPublicKeyDataFunction = ffi.Void Function(
+    CBLDart_Completer completer,
+    ffi.Pointer<ffi.Void> output,
+    ffi.Size outputMaxLen,
+    ffi.Pointer<ffi.Size> outputLen);
+typedef DartCBLDartExternalKeyPublicKeyDataFunction = void Function(
+    CBLDart_Completer completer,
+    ffi.Pointer<ffi.Void> output,
+    int outputMaxLen,
+    ffi.Pointer<ffi.Size> outputLen);
+typedef CBLDartExternalKeyPublicKeyData
+    = ffi.Pointer<ffi.NativeFunction<CBLDartExternalKeyPublicKeyDataFunction>>;
+typedef CBLDartExternalKeyDecryptFunction = ffi.Void Function(
+    CBLDart_Completer completer,
+    FLSlice input,
+    ffi.Pointer<ffi.Void> output,
+    ffi.Size outputMaxLen,
+    ffi.Pointer<ffi.Size> outputLen);
+typedef DartCBLDartExternalKeyDecryptFunction = void Function(
+    CBLDart_Completer completer,
+    FLSlice input,
+    ffi.Pointer<ffi.Void> output,
+    int outputMaxLen,
+    ffi.Pointer<ffi.Size> outputLen);
+typedef CBLDartExternalKeyDecrypt
+    = ffi.Pointer<ffi.NativeFunction<CBLDartExternalKeyDecryptFunction>>;
+typedef CBLDartExternalKeySignFunction = ffi.Void Function(
+    CBLDart_Completer completer,
+    imp$1.CBLSignatureDigestAlgorithm digestAlgorithm,
+    FLSlice inputData,
+    ffi.Pointer<ffi.Void> outSignature);
+typedef DartCBLDartExternalKeySignFunction = void Function(
+    CBLDart_Completer completer,
+    imp$1.DartCBLSignatureDigestAlgorithm digestAlgorithm,
+    FLSlice inputData,
+    ffi.Pointer<ffi.Void> outSignature);
+typedef CBLDartExternalKeySign
+    = ffi.Pointer<ffi.NativeFunction<CBLDartExternalKeySignFunction>>;
+typedef CBLKeyPair = imp$1.CBLKeyPair;
+typedef NativeCBLDartKeyPair_CreateWithExternalKey
+    = ffi.Pointer<CBLKeyPair> Function(
+        ffi.Size keySizeInBits,
+        ffi.Handle delegate,
+        CBLDartExternalKeyPublicKeyData publicKeyData,
+        CBLDartExternalKeyDecrypt decrypt,
+        CBLDartExternalKeySign sign,
+        ffi.Pointer<CBLError> outError);
+typedef DartCBLDartKeyPair_CreateWithExternalKey
+    = ffi.Pointer<CBLKeyPair> Function(
+        int keySizeInBits,
+        Object delegate,
+        CBLDartExternalKeyPublicKeyData publicKeyData,
+        CBLDartExternalKeyDecrypt decrypt,
+        CBLDartExternalKeySign sign,
+        ffi.Pointer<CBLError> outError);
 typedef CBLDartListenerPasswordAuthCallbackFunction = ffi.Void Function(
     CBLDart_Completer completer,
     imp$1.FLString username,

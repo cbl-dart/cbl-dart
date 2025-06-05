@@ -114,7 +114,7 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
         CBLBindings.instance.logging.logMessage(
           CBLLogDomain.listener,
           CBLLogLevel.error,
-          'Uncaught exception in ListenerPasswordAuthenticator:\n'
+          'Exception in ListenerPasswordAuthenticator:\n'
           '$error\n'
           '$stackTrace',
         );
@@ -203,7 +203,7 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
         CBLBindings.instance.logging.logMessage(
           CBLLogDomain.listener,
           CBLLogLevel.error,
-          'Uncaught exception in ListenerCertificateAuthenticator:\n'
+          'Exception in ListenerCertificateAuthenticator:\n'
           '$error\n'
           '$stackTrace',
         );

@@ -5,6 +5,7 @@ import '../bindings.dart';
 import '../fleece/containers.dart';
 import 'base.dart';
 import 'cblite.dart';
+import 'cblitedart.dart' hide CBLCert, CBLKeyPair;
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
@@ -19,6 +20,31 @@ enum CBLKeyUsages {
         kCBLKeyUsagesClientAuth => clientAuth,
         kCBLKeyUsagesServerAuth => serverAuth,
         _ => throw ArgumentError('Unknown key usage: $value'),
+      };
+
+  final int value;
+}
+
+enum CBLSignatureDigestAlgorithm {
+  none(kCBLSignatureDigestNone),
+  sha1(kCBLSignatureDigestSHA1),
+  sha224(kCBLSignatureDigestSHA224),
+  sha256(kCBLSignatureDigestSHA256),
+  sha384(kCBLSignatureDigestSHA384),
+  sha512(kCBLSignatureDigestSHA512),
+  ripemd160(kCBLSignatureDigestRIPEMD160);
+
+  const CBLSignatureDigestAlgorithm(this.value);
+
+  factory CBLSignatureDigestAlgorithm.fromValue(int value) => switch (value) {
+        kCBLSignatureDigestNone => none,
+        kCBLSignatureDigestSHA1 => sha1,
+        kCBLSignatureDigestSHA224 => sha224,
+        kCBLSignatureDigestSHA256 => sha256,
+        kCBLSignatureDigestSHA384 => sha384,
+        kCBLSignatureDigestSHA512 => sha512,
+        kCBLSignatureDigestRIPEMD160 => ripemd160,
+        _ => throw ArgumentError('Unknown signature digest algorithm: $value'),
       };
 
   final int value;
@@ -104,6 +130,22 @@ final class TlsIdentityBindings extends Bindings {
   Pointer<CBLKeyPair> certPublicKey(Pointer<CBLCert> pointer) =>
       cbl.CBLCert_PublicKey(pointer);
 
+  Pointer<CBLKeyPair> keyPairCreateWithExternalKey({
+    required int keySizeInBits,
+    required Object delegate,
+    required CBLDartExternalKeyPublicKeyData publicKeyData,
+    required CBLDartExternalKeyDecrypt decrypt,
+    required CBLDartExternalKeySign sign,
+  }) =>
+      cblDart.CBLDartKeyPair_CreateWithExternalKey(
+        keySizeInBits,
+        delegate,
+        publicKeyData,
+        decrypt,
+        sign,
+        globalCBLError,
+      ).checkError();
+
   Pointer<CBLKeyPair> keyPairCreateWithPrivateKey(
     Uint8List privateKey, {
     String? password,
@@ -117,16 +159,18 @@ final class TlsIdentityBindings extends Bindings {
         ).checkError(),
       );
 
-  String keyPairPublicKeyDigest(Pointer<CBLKeyPair> pointer) =>
-      cbl.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease()!;
+  String? keyPairPublicKeyDigest(Pointer<CBLKeyPair> pointer) =>
+      cbl.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
 
-  Uint8List keyPairPublicKeyData(Pointer<CBLKeyPair> pointer) =>
-      SliceResult.fromFLSliceResult(cbl.CBLKeyPair_PublicKeyData(pointer))!
-          .asTypedList();
+  Uint8List? keyPairPublicKeyData(Pointer<CBLKeyPair> pointer) =>
+      SliceResult.fromFLSliceResult(cbl.CBLKeyPair_PublicKeyData(pointer))
+          ?.asTypedList()
+          .let(Uint8List.fromList);
 
   Uint8List? keyPairPrivateKeyData(Pointer<CBLKeyPair> pointer) =>
       SliceResult.fromFLSliceResult(cbl.CBLKeyPair_PrivateKeyData(pointer))
-          ?.asTypedList();
+          ?.asTypedList()
+          .let(Uint8List.fromList);
 
   Pointer<CBLTLSIdentity> withKeyPairAndCerts(
     Pointer<CBLKeyPair> keyPair,

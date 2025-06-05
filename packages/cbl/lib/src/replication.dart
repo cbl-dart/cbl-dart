@@ -42,7 +42,8 @@ export 'replication/tls_identity.dart'
         OID,
         CryptoData,
         PemData,
-        DerData;
+        DerData,
+        ExternalKeyPairDelegate;
 export 'replication/url_endpoint_listener.dart'
     show
         ListenerAuthenticator,

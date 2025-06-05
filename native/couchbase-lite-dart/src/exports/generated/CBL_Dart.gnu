@@ -31,6 +31,7 @@ CBL_Dart {
 		CBLDart_CBLReplicator_Release;
 		CBLDart_CBLReplicator_AddChangeListener;
 		CBLDart_CBLReplicator_AddDocumentReplicationListener;
+		CBLDartKeyPair_CreateWithExternalKey;
 		CBLDart_ListenerPasswordAuthCallbackTrampoline;
 		CBLDart_ListenerCertAuthCallbackTrampoline;
 		CBLDart_FLSliceResult_RetainByBuf;

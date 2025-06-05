@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi' as ffi;
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,7 +9,9 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../bindings.dart';
-import '../bindings/cblite.dart' hide CBLKeyUsages;
+import '../bindings/cblite.dart'
+    hide CBLKeyUsages, CBLLogDomain, CBLLogLevel, CBLSignatureDigestAlgorithm;
+import '../bindings/cblitedart.dart' hide FLSlice, CBLCert, CBLKeyPair;
 import '../bindings/tls_identity.dart';
 import '../errors.dart';
 import '../support/edition.dart';
@@ -582,7 +585,7 @@ abstract final class Certificate {
       FfiCertificate.decodeMultiple(data);
 
   /// A [KeyPair] only containing the public key of this certificate.
-  KeyPair get publicKey;
+  Future<KeyPair> get publicKey;
 
   /// The date when this certificate was created.
   DateTime get created;
@@ -660,7 +663,7 @@ final class FfiCertificate implements Certificate, Finalizable {
       ?.let((pointer) => FfiCertificate.fromPointer(pointer, adopt: true));
 
   @override
-  KeyPair get publicKey =>
+  Future<KeyPair> get publicKey =>
       FfiKeyPair.fromPointer(_bindings.certPublicKey(pointer), adopt: true);
 
   @override
@@ -697,20 +700,16 @@ final class FfiCertificate implements Certificate, Finalizable {
         [
           'created: $created',
           'expires: $expires',
-          'publicKey: $publicKey',
           'attributes: $attributes',
         ].join(', '),
         ')'
       ].join('');
 }
 
-/// Digest algorithms to be used when generating signatures with a private key.
+/// Digest algorithm of a RSA signature.
 ///
 /// {@category Replication}
 enum SignatureDigestAlgorithm {
-  /// No digest, just direct signature of input data.
-  none,
-
   /// SHA-1 message digest.
   sha1,
 
@@ -727,7 +726,214 @@ enum SignatureDigestAlgorithm {
   sha512,
 
   /// RIPEMD-160 message digest.
-  ripemd160,
+  ripemd160;
+
+  static SignatureDigestAlgorithm? _fromCbl(
+    CBLSignatureDigestAlgorithm value,
+  ) =>
+      switch (value) {
+        CBLSignatureDigestAlgorithm.none => null,
+        CBLSignatureDigestAlgorithm.sha1 => SignatureDigestAlgorithm.sha1,
+        CBLSignatureDigestAlgorithm.sha224 => SignatureDigestAlgorithm.sha224,
+        CBLSignatureDigestAlgorithm.sha256 => SignatureDigestAlgorithm.sha256,
+        CBLSignatureDigestAlgorithm.sha384 => SignatureDigestAlgorithm.sha384,
+        CBLSignatureDigestAlgorithm.sha512 => SignatureDigestAlgorithm.sha512,
+        CBLSignatureDigestAlgorithm.ripemd160 =>
+          SignatureDigestAlgorithm.ripemd160,
+      };
+}
+
+/// [KeyPair] delegate that implements cryptographic operations without having
+/// to expose the underlying private key.
+///
+/// See also:
+///
+/// - [KeyPair.fromExternal] for creating a [KeyPair] that uses this delegate.
+///
+/// {@category Replication}
+/// {@category Enterprise Edition}
+abstract base class ExternalKeyPairDelegate {
+  late final _publicKeyDataCallable =
+      NativeCallable<CBLDartExternalKeyPublicKeyDataFunction>.listener(
+          _publicKeyData)
+        ..keepIsolateAlive = false;
+  late final _decryptCallable =
+      NativeCallable<CBLDartExternalKeyDecryptFunction>.listener(_decrypt)
+        ..keepIsolateAlive = false;
+  late final _signCallable =
+      NativeCallable<CBLDartExternalKeySignFunction>.listener(_sign)
+        ..keepIsolateAlive = false;
+
+  /// The size of this key in bits (e.g. 2048 or 4096).
+  int get keySizeInBits;
+
+  /// The size of this key in bytes, derived from [keySizeInBits].
+  int get keySizeInBytes => _keySizeInBytes;
+
+  int get _keySizeInBytes => (keySizeInBits / 8).ceil();
+
+  /// Must return the public key in ASN.1 DER
+  /// [`SubjectPublicKeyInfo`](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1)
+  /// structure.
+  ///
+  /// If the public key is not available, return `null`.
+  Future<DerData?> publicKeyData();
+
+  /// Must decrypt the input data using the private key, applying the RSA
+  /// algorithm with PKCS#1 v1.5 padding.
+  ///
+  /// If the operation cannot be performed, return `null`.
+  ///
+  /// Depending on the selected key exchange method, this method may not be
+  /// invoked during a TLS handshake.
+  Future<Uint8List?> decrypt(Uint8List data);
+
+  /// Must generate a signature for the input data using the private key,
+  /// applying the RSA algorithm with PKCS#1 v1.5 padding.
+  ///
+  /// If the operation cannot be performed, return `null`.
+  ///
+  /// If [algorithm] is `null`, the input [data] must directly be encrypted
+  /// using the private key.
+  ///
+  /// If [algorithm] is _not_ `null`, the input [data] has already been hashed
+  /// with the provided digest [algorithm].
+  ///
+  /// In this case, the input [data] together with the [algorithm] needs to be
+  /// encoded as an ASN.1 DER
+  /// [`DigestInfo`](https://www.rfc-editor.org/rfc/rfc3447#appendix-A.2.4)
+  /// structure before encrypting it with the private key.
+  Future<Uint8List?> sign(SignatureDigestAlgorithm? algorithm, Uint8List data);
+
+  Future<void> _publicKeyData(
+    CBLDart_Completer completer,
+    ffi.Pointer<ffi.Void> output,
+    int outputMaxLen,
+    ffi.Pointer<ffi.Size> outputLen,
+  ) async {
+    var success = false;
+    try {
+      final result = await publicKeyData();
+
+      if (result == null) {
+        return;
+      }
+
+      final data = result.data;
+
+      if (data.length > outputMaxLen) {
+        throw ArgumentError.value(
+          result,
+          'result',
+          'must not exceed $outputMaxLen bytes',
+        );
+      }
+
+      output.cast<Uint8>().asTypedList(outputMaxLen).setAll(0, data);
+      outputLen.value = data.length;
+      success = true;
+    } catch (error, stackTrace) {
+      CBLBindings.instance.logging.logMessage(
+        CBLLogDomain.listener,
+        CBLLogLevel.error,
+        'Exception in ExternalKeyPairDelegate.publicKeyData:\n'
+        '$error\n'
+        '$stackTrace',
+      );
+
+      rethrow;
+    } finally {
+      CBLBindings.instance.base.completeCompleterWithBool(completer, success);
+    }
+  }
+
+  Future<void> _decrypt(
+    CBLDart_Completer completer,
+    FLSlice input,
+    ffi.Pointer<ffi.Void> output,
+    int outputMaxLen,
+    ffi.Pointer<ffi.Size> outputLen,
+  ) async {
+    var success = false;
+    try {
+      final result =
+          await decrypt(input.buf.cast<Uint8>().asTypedList(input.size));
+
+      if (result == null) {
+        return;
+      }
+
+      if (result.length > outputMaxLen) {
+        throw ArgumentError.value(
+          result,
+          'result',
+          'must not exceed $outputMaxLen bytes',
+        );
+      }
+
+      output.cast<Uint8>().asTypedList(outputMaxLen).setAll(0, result);
+      outputLen.value = result.length;
+
+      success = true;
+    } catch (error, stackTrace) {
+      CBLBindings.instance.logging.logMessage(
+        CBLLogDomain.listener,
+        CBLLogLevel.error,
+        'Exception in ExternalKeyPairDelegate.decrypt:\n'
+        '$error\n'
+        '$stackTrace',
+      );
+
+      rethrow;
+    } finally {
+      CBLBindings.instance.base.completeCompleterWithBool(completer, success);
+    }
+  }
+
+  Future<void> _sign(
+    CBLDart_Completer completer,
+    int digestAlgorithm,
+    FLSlice inputData,
+    ffi.Pointer<ffi.Void> outSignature,
+  ) async {
+    var success = false;
+    try {
+      final result = await sign(
+        SignatureDigestAlgorithm._fromCbl(
+          CBLSignatureDigestAlgorithm.fromValue(digestAlgorithm),
+        ),
+        inputData.buf.cast<Uint8>().asTypedList(inputData.size),
+      );
+
+      if (result == null) {
+        return;
+      }
+
+      if (result.length != _keySizeInBytes) {
+        throw ArgumentError.value(
+          result,
+          'result',
+          'must not exceed $_keySizeInBytes bytes',
+        );
+      }
+
+      outSignature.cast<Uint8>().asTypedList(_keySizeInBytes).setAll(0, result);
+
+      success = true;
+    } catch (error, stackTrace) {
+      CBLBindings.instance.logging.logMessage(
+        CBLLogDomain.listener,
+        CBLLogLevel.error,
+        'Exception in ExternalKeyPairDelegate.sign:\n'
+        '$error\n'
+        '$stackTrace',
+      );
+
+      rethrow;
+    } finally {
+      CBLBindings.instance.base.completeCompleterWithBool(completer, success);
+    }
+  }
 }
 
 /// A [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem) public-key
@@ -738,6 +944,14 @@ enum SignatureDigestAlgorithm {
 /// {@category Replication}
 /// {@category Enterprise Edition}
 abstract final class KeyPair {
+  /// Creates a [KeyPair] that does not require exposing the private key.
+  ///
+  /// The provided [delegate] must implement the required cryptographic
+  /// operations, but can do so, using a private key, that is managed by a
+  /// secure key store.
+  static Future<KeyPair> fromExternal(ExternalKeyPairDelegate delegate) =>
+      FfiKeyPair.fromExternal(delegate);
+
   /// Creates a [KeyPair] from an existing encoded [privateKey].
   ///
   /// If the [privateKey] is encrypted, a [password] must be provided to decrypt
@@ -755,19 +969,48 @@ abstract final class KeyPair {
         password: password,
       );
 
-  /// A hex-encoded digest of the public key.
-  String get publicKeyDigest;
+  /// A hex-encoded digest of the public key, if available.
+  Future<String?> get publicKeyDigest;
 
-  /// The DER-encoded public key.
-  DerData get publicKey;
+  /// The DER-encoded public key, if available.
+  Future<DerData?> get publicKeyData;
 
   /// The DER-encoded private key, if it is known and accessible.
-  DerData? get privateKey;
+  Future<DerData?> get privateKeyData;
 }
 
 final class FfiKeyPair implements KeyPair, Finalizable {
-  FfiKeyPair.fromPointer(this.pointer, {bool adopt = false}) {
+  FfiKeyPair._(this.pointer, {bool adopt = false}) {
     bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
+  }
+
+  static Future<FfiKeyPair> fromPointer(
+    Pointer<CBLKeyPair> pointer, {
+    bool adopt = false,
+  }) async {
+    final keyPair = FfiKeyPair._(pointer, adopt: adopt);
+
+    // Cache the public key digest immediately to ensure it is available for
+    // toString.
+    await keyPair.publicKeyDigest;
+
+    return keyPair;
+  }
+
+  static Future<FfiKeyPair> fromExternal(
+    ExternalKeyPairDelegate delegate,
+  ) async {
+    useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
+
+    final pointer = _bindings.keyPairCreateWithExternalKey(
+      keySizeInBits: delegate.keySizeInBits,
+      delegate: delegate,
+      publicKeyData: delegate._publicKeyDataCallable.nativeFunction,
+      decrypt: delegate._decryptCallable.nativeFunction,
+      sign: delegate._signCallable.nativeFunction,
+    );
+
+    return FfiKeyPair.fromPointer(pointer, adopt: true);
   }
 
   static Future<FfiKeyPair> fromPrivateKey(
@@ -787,25 +1030,34 @@ final class FfiKeyPair implements KeyPair, Finalizable {
 
   final Pointer<CBLKeyPair> pointer;
 
-  @override
-  String get publicKeyDigest => _bindings.keyPairPublicKeyDigest(pointer);
+  String? _publicKeyDigest;
 
   @override
-  DerData get publicKey => DerData(_bindings.keyPairPublicKeyData(pointer));
+  Future<String?> get publicKeyDigest async {
+    final pointer = this.pointer;
+    return _publicKeyDigest = await runInSecondaryIsolate(
+        () => _bindings.keyPairPublicKeyDigest(pointer));
+  }
 
   @override
-  DerData? get privateKey =>
-      _bindings.keyPairPrivateKeyData(pointer)?.let(DerData.new);
+  Future<DerData?> get publicKeyData async {
+    final pointer = this.pointer;
+    final data = await runInSecondaryIsolate(
+        () => _bindings.keyPairPublicKeyData(pointer));
+    return data?.let(DerData.new);
+  }
 
   @override
-  String toString() => [
-        'KeyPair(',
-        [
-          'publicKeyDigest: $publicKeyDigest',
-          if (privateKey != null) 'PRIVATE-KEY-AVAILABLE',
-        ].join(', '),
-        ')',
-      ].join();
+  Future<DerData?> get privateKeyData async {
+    final pointer = this.pointer;
+    final data = await runInSecondaryIsolate(
+        () => _bindings.keyPairPrivateKeyData(pointer));
+    return data?.let(DerData.new);
+  }
+
+  @override
+  String toString() =>
+      'KeyPair(publicKeyDigest: ${_publicKeyDigest ?? '<unknown>'})';
 }
 
 /// Purpose for which a certified public key may be used.

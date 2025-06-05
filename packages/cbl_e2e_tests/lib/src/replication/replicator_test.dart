@@ -631,8 +631,8 @@ void main() {
           serverCertificate.attributes,
         );
         expect(
-          receivedCertificate.publicKey.publicKeyDigest,
-          serverCertificate.publicKey.publicKeyDigest,
+          (await receivedCertificate.publicKey).publicKeyDigest,
+          (await serverCertificate.publicKey).publicKeyDigest,
         );
       },
     );

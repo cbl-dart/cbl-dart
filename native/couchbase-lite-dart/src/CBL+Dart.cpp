@@ -10,6 +10,8 @@
 #include "CpuSupport.h"
 #include "Sentry.h"
 #include "Utils.h"
+#include "cbl/CBLTLSIdentity.h"
+#include "dart/dart_api.h"
 
 bool CBLDart_CpuSupportsAVX2() { return CBLDart::CpuSupportsAVX2(); }
 
@@ -1323,6 +1325,82 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
 
 #ifdef COUCHBASE_ENTERPRISE
 
+struct CBLDartExternalKeyCallbacks {
+ public:
+  CBLDartExternalKeyCallbacks(Dart_Handle delegate,
+                              CBLDartExternalKeyPublicKeyData publicKeyData,
+                              CBLDartExternalKeyDecrypt decrypt,
+                              CBLDartExternalKeySign sign)
+      : delegate(Dart_NewPersistentHandle_DL(delegate)),
+        _publicKeyData(publicKeyData),
+        _decrypt(decrypt),
+        _sign(sign) {}
+
+  ~CBLDartExternalKeyCallbacks() { Dart_DeletePersistentHandle_DL(delegate); }
+
+  static bool publicKeyData(void *externalKey, void *output,
+                            size_t outputMaxLen, size_t *outputLen) {
+    auto self = reinterpret_cast<CBLDartExternalKeyCallbacks *>(externalKey);
+    auto completer = CBLDart::Completer();
+    self->_publicKeyData(COMPLETER_TO_C(&completer), output, outputMaxLen,
+                         outputLen);
+    return (bool)completer.wait();
+  }
+
+  static bool decrypt(void *externalKey, FLSlice input, void *output,
+                      size_t outputMaxLen, size_t *outputLen) {
+    auto self = reinterpret_cast<CBLDartExternalKeyCallbacks *>(externalKey);
+    auto completer = CBLDart::Completer();
+    self->_decrypt(COMPLETER_TO_C(&completer), input, output, outputMaxLen,
+                   outputLen);
+    return (bool)completer.wait();
+  }
+
+  static bool sign(void *externalKey,
+                   CBLSignatureDigestAlgorithm digestAlgorithm,
+                   FLSlice inputData, void *outSignature) {
+    auto self = reinterpret_cast<CBLDartExternalKeyCallbacks *>(externalKey);
+    auto completer = CBLDart::Completer();
+    self->_sign(COMPLETER_TO_C(&completer), digestAlgorithm, inputData,
+                outSignature);
+    return (bool)completer.wait();
+  }
+
+  static void free(void *externalKey) {
+    auto self = reinterpret_cast<CBLDartExternalKeyCallbacks *>(externalKey);
+    delete self;
+  }
+
+ private:
+  Dart_PersistentHandle delegate;
+  CBLDartExternalKeyPublicKeyData _publicKeyData;
+  CBLDartExternalKeyDecrypt _decrypt;
+  CBLDartExternalKeySign _sign;
+};
+
+CBLKeyPair *CBLDartKeyPair_CreateWithExternalKey(
+    size_t keySizeInBits, Dart_Handle delegate,
+    CBLDartExternalKeyPublicKeyData publicKeyData,
+    CBLDartExternalKeyDecrypt decrypt, CBLDartExternalKeySign sign,
+    CBLError *outError) {
+  auto callbacks =
+      new CBLDartExternalKeyCallbacks(delegate, publicKeyData, decrypt, sign);
+
+  CBLExternalKeyCallbacks cblCallbacks{};
+  cblCallbacks.publicKeyData = CBLDartExternalKeyCallbacks::publicKeyData;
+  cblCallbacks.decrypt = CBLDartExternalKeyCallbacks::decrypt;
+  cblCallbacks.sign = CBLDartExternalKeyCallbacks::sign;
+  cblCallbacks.free = CBLDartExternalKeyCallbacks::free;
+
+  auto externalKey = CBLKeyPair_CreateWithExternalKey(keySizeInBits, callbacks,
+                                                      cblCallbacks, outError);
+  if (!externalKey) {
+    delete callbacks;
+  }
+
+  return externalKey;
+}
+
 bool CBLDart_ListenerPasswordAuthCallbackTrampoline(void *context,
                                                     FLString username,
                                                     FLString password) {
@@ -1341,6 +1419,7 @@ bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context, CBLCert *cert) {
 
 #else
 
+void CBLDartKeyPair_CreateWithExternalKey() {}
 void CBLDart_ListenerPasswordAuthCallbackTrampoline() {}
 void CBLDart_ListenerCertAuthCallbackTrampoline() {}
 

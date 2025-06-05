@@ -263,6 +263,26 @@ void CBLDart_CBLReplicator_AddDocumentReplicationListener(
 
 #ifdef COUCHBASE_ENTERPRISE
 
+typedef void (*CBLDartExternalKeyPublicKeyData)(CBLDart_Completer completer,
+                                                void *output,
+                                                size_t outputMaxLen,
+                                                size_t *outputLen);
+
+typedef void (*CBLDartExternalKeyDecrypt)(CBLDart_Completer completer,
+                                          FLSlice input, void *output,
+                                          size_t outputMaxLen,
+                                          size_t *outputLen);
+
+typedef void (*CBLDartExternalKeySign)(
+    CBLDart_Completer completer, CBLSignatureDigestAlgorithm digestAlgorithm,
+    FLSlice inputData, void *outSignature);
+
+CBLDART_EXPORT CBLKeyPair *CBLDartKeyPair_CreateWithExternalKey(
+    size_t keySizeInBits, Dart_Handle delegate,
+    CBLDartExternalKeyPublicKeyData publicKeyData,
+    CBLDartExternalKeyDecrypt decrypt, CBLDartExternalKeySign sign,
+    CBLError *outError);
+
 typedef void (*CBLDartListenerPasswordAuthCallback)(CBLDart_Completer completer,
                                                     FLString username,
                                                     FLString password);
@@ -281,6 +301,7 @@ CBLDART_EXPORT bool CBLDart_ListenerCertAuthCallbackTrampoline(void *context,
 // enterprise and community edition. They are never accessed when using
 // the community edition.
 
+CBLDART_EXPORT bool CBLDartKeyPair_CreateWithExternalKey();
 CBLDART_EXPORT void CBLDart_ListenerPasswordAuthCallbackTrampoline();
 CBLDART_EXPORT void CBLDart_ListenerCertAuthCallbackTrampoline();
 

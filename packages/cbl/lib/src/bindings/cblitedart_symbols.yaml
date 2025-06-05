@@ -4,6 +4,15 @@ files:
     used-config:
       ffi-native: false
     symbols:
+      CBLDartExternalKeyDecryptFunction:
+        name: CBLDartExternalKeyDecryptFunction
+        dart-name: DartCBLDartExternalKeyDecryptFunction
+      CBLDartExternalKeyPublicKeyDataFunction:
+        name: CBLDartExternalKeyPublicKeyDataFunction
+        dart-name: DartCBLDartExternalKeyPublicKeyDataFunction
+      CBLDartExternalKeySignFunction:
+        name: CBLDartExternalKeySignFunction
+        dart-name: DartCBLDartExternalKeySignFunction
       CBLDartListenerCertAuthCallbackFunction:
         name: CBLDartListenerCertAuthCallbackFunction
         dart-name: DartCBLDartListenerCertAuthCallbackFunction
@@ -22,6 +31,8 @@ files:
         name: CBLDartInitializeResult
       c:@EA@CBLDart_IndexType:
         name: CBLDart_IndexType
+      c:@F@CBLDartKeyPair_CreateWithExternalKey:
+        name: CBLDartKeyPair_CreateWithExternalKey
       c:@F@CBLDart_AllocateIsolateId:
         name: CBLDart_AllocateIsolateId
       c:@F@CBLDart_AsyncCallback_CallForTest:
@@ -148,6 +159,12 @@ files:
         name: CBLLogFileConfiguration
       c:@T@CBLProxySettings:
         name: CBLProxySettings
+      c:CBL+Dart.h@T@CBLDartExternalKeyDecrypt:
+        name: CBLDartExternalKeyDecrypt
+      c:CBL+Dart.h@T@CBLDartExternalKeyPublicKeyData:
+        name: CBLDartExternalKeyPublicKeyData
+      c:CBL+Dart.h@T@CBLDartExternalKeySign:
+        name: CBLDartExternalKeySign
       c:CBL+Dart.h@T@CBLDartListenerCertAuthCallback:
         name: CBLDartListenerCertAuthCallback
       c:CBL+Dart.h@T@CBLDartListenerPasswordAuthCallback:
@@ -185,6 +202,8 @@ files:
         name: CBLAuthenticator
       c:CBLReplicator.h@T@CBLEndpoint:
         name: CBLEndpoint
+      c:CBLTLSIdentity.h@T@CBLKeyPair:
+        name: CBLKeyPair
       c:FLSlice.h@T@FLSlice:
         name: FLSlice
       c:FLSlice.h@T@FLSliceResult:
