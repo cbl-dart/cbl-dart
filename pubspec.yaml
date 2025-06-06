@@ -8,7 +8,7 @@ dev_dependencies:
   cbd:
     path: tool
   daco: ^0.4.0
-  melos: ^6.3.2
+  melos: ^6.3.3
   path: ^1.9.1
 
 dependency_overrides:
