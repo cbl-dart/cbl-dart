@@ -14,19 +14,21 @@ import 'utils.dart';
 final class BreadcrumbLogger extends Logger {
   /// Creates a [Logger] that adds a Sentry [Breadcrumb] for each log message.
   BreadcrumbLogger({LogLevel? level, Hub? hub})
-      : _hub = hub ?? HubAdapter(),
-        super(level);
+    : _hub = hub ?? HubAdapter(),
+      super(level);
 
   final Hub _hub;
 
   @override
   void log(LogLevel level, LogDomain domain, String message) {
-    _hub.addBreadcrumb(Breadcrumb(
-      message: message,
-      type: 'debug',
-      category: 'cbl.${domain.name}',
-      level: level.toSentryLevel(),
-    ));
+    _hub.addBreadcrumb(
+      Breadcrumb(
+        message: message,
+        type: 'debug',
+        category: 'cbl.${domain.name}',
+        level: level.toSentryLevel(),
+      ),
+    );
   }
 }
 

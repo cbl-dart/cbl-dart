@@ -7,10 +7,10 @@ class MContext {
     DictKeys? dictKeys,
     SharedKeysTable? sharedKeysTable,
     SharedStringsTable? sharedStringsTable,
-  })  : dictKeys = dictKeys ?? const UnoptimizingDictKeys(),
-        sharedKeysTable = sharedKeysTable ?? const NoopSharedKeysTable(),
-        sharedStringsTable =
-            sharedStringsTable ?? const NoopSharedStringsTable();
+  }) : dictKeys = dictKeys ?? const UnoptimizingDictKeys(),
+       sharedKeysTable = sharedKeysTable ?? const NoopSharedKeysTable(),
+       sharedStringsTable =
+           sharedStringsTable ?? const NoopSharedStringsTable();
 
   final Object? data;
   final DictKeys dictKeys;

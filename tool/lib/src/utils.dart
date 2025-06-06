@@ -25,7 +25,7 @@ Future<ProcessResult> runProcess(
   final (_, _, exitCode) = await (
     process.stdout.transform(utf8.decoder).drain(logger.trace),
     process.stderr.transform(utf8.decoder).drain(logger.trace),
-    process.exitCode
+    process.exitCode,
   ).wait;
 
   logger.trace('"$executable" exited with code $exitCode');
@@ -39,12 +39,7 @@ Future<ProcessResult> runProcess(
     );
   }
 
-  return ProcessResult(
-    process.pid,
-    exitCode,
-    stdout,
-    stderr,
-  );
+  return ProcessResult(process.pid, exitCode, stdout, stderr);
 }
 
 extension LoggerExtension on Logger {

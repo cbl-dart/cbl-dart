@@ -32,8 +32,9 @@ void runBenchmarks(Iterable<BenchmarkBase> benchmarks) {
   print('Relative Results:');
   for (final benchmark in benchmarks) {
     final relativeTime = results[benchmark]! / fastestTime;
-    final relativeTimeStr =
-        relativeTime.toStringAsFixed(formattingDecimalPoints);
+    final relativeTimeStr = relativeTime.toStringAsFixed(
+      formattingDecimalPoints,
+    );
     print('$singleLineDeco ${benchmark.name}: ${relativeTimeStr}x');
   }
 }

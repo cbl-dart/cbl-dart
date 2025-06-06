@@ -22,11 +22,11 @@ abstract class _CustomDataNameDictImplBase<I extends Dictionary>
 
   @override
   bool get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'custom',
-        converter: TypedDataHelpers.boolConverter,
-      );
+    internal: internal,
+    name: 'value',
+    key: 'custom',
+    converter: TypedDataHelpers.boolConverter,
+  );
 
   @override
   MutableCustomDataNameDict toMutable() =>
@@ -34,12 +34,10 @@ abstract class _CustomDataNameDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'CustomDataNameDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'CustomDataNameDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -62,12 +60,12 @@ class ImmutableCustomDataNameDict extends _CustomDataNameDictImplBase {
 class MutableCustomDataNameDict
     extends _CustomDataNameDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<CustomDataNameDict,
-            MutableCustomDataNameDict> {
+        TypedMutableDictionaryObject<
+          CustomDataNameDict,
+          MutableCustomDataNameDict
+        > {
   /// Creates a new mutable [CustomDataNameDict].
-  MutableCustomDataNameDict(
-    bool value,
-  ) : super(MutableDictionary()) {
+  MutableCustomDataNameDict(bool value) : super(MutableDictionary()) {
     this.value = value;
   }
 
@@ -99,11 +97,11 @@ abstract class _DefaultValueDictImplBase<I extends Dictionary>
 
   @override
   bool get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'value',
-        converter: TypedDataHelpers.boolConverter,
-      );
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.boolConverter,
+  );
 
   @override
   MutableDefaultValueDict toMutable() =>
@@ -111,12 +109,10 @@ abstract class _DefaultValueDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DefaultValueDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'DefaultValueDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -139,12 +135,12 @@ class ImmutableDefaultValueDict extends _DefaultValueDictImplBase {
 class MutableDefaultValueDict
     extends _DefaultValueDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<DefaultValueDict,
-            MutableDefaultValueDict> {
+        TypedMutableDictionaryObject<
+          DefaultValueDict,
+          MutableDefaultValueDict
+        > {
   /// Creates a new mutable [DefaultValueDict].
-  MutableDefaultValueDict([
-    bool value = true,
-  ]) : super(MutableDictionary()) {
+  MutableDefaultValueDict([bool value = true]) : super(MutableDictionary()) {
     this.value = value;
   }
 
@@ -176,13 +172,11 @@ abstract class _ScalarConverterDictImplBase<I extends Dictionary>
 
   @override
   Uri get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'value',
-        converter: const ScalarConverterAdapter(
-          const TestConverter(),
-        ),
-      );
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: const ScalarConverterAdapter(const TestConverter()),
+  );
 
   @override
   MutableScalarConverterDict toMutable() =>
@@ -190,12 +184,10 @@ abstract class _ScalarConverterDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'ScalarConverterDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'ScalarConverterDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -218,12 +210,12 @@ class ImmutableScalarConverterDict extends _ScalarConverterDictImplBase {
 class MutableScalarConverterDict
     extends _ScalarConverterDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<ScalarConverterDict,
-            MutableScalarConverterDict> {
+        TypedMutableDictionaryObject<
+          ScalarConverterDict,
+          MutableScalarConverterDict
+        > {
   /// Creates a new mutable [ScalarConverterDict].
-  MutableScalarConverterDict(
-    Uri value,
-  ) : super(MutableDictionary()) {
+  MutableScalarConverterDict(Uri value) : super(MutableDictionary()) {
     this.value = value;
   }
 
@@ -237,9 +229,7 @@ class MutableScalarConverterDict
       internal: internal,
       key: 'value',
       value: promoted,
-      converter: const ScalarConverterAdapter(
-        const TestConverter(),
-      ),
+      converter: const ScalarConverterAdapter(const TestConverter()),
     );
   }
 }

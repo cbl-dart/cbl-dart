@@ -30,7 +30,7 @@ abstract final class CouchbaseLiteException implements Exception {
         message,
         if (code != null) 'code: ${code is Enum ? code.name : code}',
       ].join(', '),
-      ')'
+      ')',
     ].join();
   }
 }

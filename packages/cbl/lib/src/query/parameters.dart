@@ -169,11 +169,11 @@ final class ParametersImpl implements Parameters, FleeceEncodable {
 
   @override
   String toString() => [
-        'Parameters(',
-        [
-          for (final columnName in _data.keys)
-            '\$$columnName: ${_data.value(columnName)}'
-        ].join(', '),
-        ')'
-      ].join();
+    'Parameters(',
+    [
+      for (final columnName in _data.keys)
+        '\$$columnName: ${_data.value(columnName)}',
+    ].join(', '),
+    ')',
+  ].join();
 }

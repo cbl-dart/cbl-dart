@@ -44,26 +44,32 @@ extension OptionIterable<T extends Option> on Iterable<T> {
 
 enum CBLDartInitializeResult {
   success(
-      cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError),
-  incompatibleDartVM(cblitedart
-      .CBLDartInitializeResult.CBLDartInitializeResult_kIncompatibleDartVM),
+    cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError,
+  ),
+  incompatibleDartVM(
+    cblitedart
+        .CBLDartInitializeResult
+        .CBLDartInitializeResult_kIncompatibleDartVM,
+  ),
   cblInitError(
-      cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError);
+    cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError,
+  );
 
   const CBLDartInitializeResult(this.value);
 
   static CBLDartInitializeResult fromValue(int value) => switch (value) {
-        cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kSuccess =>
-          success,
-        cblitedart.CBLDartInitializeResult
-              .CBLDartInitializeResult_kIncompatibleDartVM =>
-          incompatibleDartVM,
-        cblitedart
-              .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError =>
-          cblInitError,
-        _ => throw ArgumentError(
-            'Unknown value for CBLDartInitializeResult: $value'),
-      };
+    cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kSuccess =>
+      success,
+    cblitedart
+        .CBLDartInitializeResult
+        .CBLDartInitializeResult_kIncompatibleDartVM =>
+      incompatibleDartVM,
+    cblitedart.CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError =>
+      cblInitError,
+    _ => throw ArgumentError(
+      'Unknown value for CBLDartInitializeResult: $value',
+    ),
+  };
 
   final int value;
 }
@@ -94,16 +100,16 @@ enum CBLErrorDomain {
   const CBLErrorDomain(this.value);
 
   factory CBLErrorDomain.fromValue(int value) => switch (value) {
-        cblite.kCBLDomain => couchbaseLite,
-        cblite.kCBLPOSIXDomain => posix,
-        cblite.kCBLSQLiteDomain => sqLite,
-        cblite.kCBLFleeceDomain => fleece,
-        cblite.kCBLNetworkDomain => network,
-        cblite.kCBLWebSocketDomain => webSocket,
-        // TODO(blaugold): use constant from library once fixed in CBL C SDK
-        7 => mbedTls,
-        _ => throw ArgumentError('Unknown error domain: $value'),
-      };
+    cblite.kCBLDomain => couchbaseLite,
+    cblite.kCBLPOSIXDomain => posix,
+    cblite.kCBLSQLiteDomain => sqLite,
+    cblite.kCBLFleeceDomain => fleece,
+    cblite.kCBLNetworkDomain => network,
+    cblite.kCBLWebSocketDomain => webSocket,
+    // TODO(blaugold): use constant from library once fixed in CBL C SDK
+    7 => mbedTls,
+    _ => throw ArgumentError('Unknown error domain: $value'),
+  };
 
   final int value;
 }
@@ -143,73 +149,73 @@ enum CBLErrorCode {
   const CBLErrorCode(this.value);
 
   factory CBLErrorCode.fromValue(int value) => switch (value) {
-        cblite.kCBLErrorAssertionFailed => assertionFailed,
-        cblite.kCBLErrorUnimplemented => unimplemented,
-        cblite.kCBLErrorUnsupportedEncryption => unsupportedEncryption,
-        cblite.kCBLErrorBadRevisionID => badRevisionId,
-        cblite.kCBLErrorCorruptRevisionData => corruptRevisionData,
-        cblite.kCBLErrorNotOpen => notOpen,
-        cblite.kCBLErrorNotFound => notFound,
-        cblite.kCBLErrorConflict => conflict,
-        cblite.kCBLErrorInvalidParameter => invalidParameter,
-        cblite.kCBLErrorUnexpectedError => unexpectedError,
-        cblite.kCBLErrorCantOpenFile => cantOpenFile,
-        cblite.kCBLErrorIOError => iOError,
-        cblite.kCBLErrorMemoryError => memoryError,
-        cblite.kCBLErrorNotWriteable => notWriteable,
-        cblite.kCBLErrorCorruptData => corruptData,
-        cblite.kCBLErrorBusy => busy,
-        cblite.kCBLErrorNotInTransaction => notInTransaction,
-        cblite.kCBLErrorTransactionNotClosed => transactionNotClosed,
-        cblite.kCBLErrorUnsupported => unsupported,
-        cblite.kCBLErrorNotADatabaseFile => notADatabaseFile,
-        cblite.kCBLErrorWrongFormat => wrongFormat,
-        cblite.kCBLErrorCrypto => crypto,
-        cblite.kCBLErrorInvalidQuery => invalidQuery,
-        cblite.kCBLErrorMissingIndex => missingIndex,
-        cblite.kCBLErrorInvalidQueryParam => invalidQueryParam,
-        cblite.kCBLErrorRemoteError => remoteError,
-        cblite.kCBLErrorDatabaseTooOld => databaseTooOld,
-        cblite.kCBLErrorDatabaseTooNew => databaseTooNew,
-        cblite.kCBLErrorBadDocID => badDocId,
-        cblite.kCBLErrorCantUpgradeDatabase => cantUpgradeDatabase,
-        _ => throw ArgumentError('Unknown error code: $value'),
-      };
+    cblite.kCBLErrorAssertionFailed => assertionFailed,
+    cblite.kCBLErrorUnimplemented => unimplemented,
+    cblite.kCBLErrorUnsupportedEncryption => unsupportedEncryption,
+    cblite.kCBLErrorBadRevisionID => badRevisionId,
+    cblite.kCBLErrorCorruptRevisionData => corruptRevisionData,
+    cblite.kCBLErrorNotOpen => notOpen,
+    cblite.kCBLErrorNotFound => notFound,
+    cblite.kCBLErrorConflict => conflict,
+    cblite.kCBLErrorInvalidParameter => invalidParameter,
+    cblite.kCBLErrorUnexpectedError => unexpectedError,
+    cblite.kCBLErrorCantOpenFile => cantOpenFile,
+    cblite.kCBLErrorIOError => iOError,
+    cblite.kCBLErrorMemoryError => memoryError,
+    cblite.kCBLErrorNotWriteable => notWriteable,
+    cblite.kCBLErrorCorruptData => corruptData,
+    cblite.kCBLErrorBusy => busy,
+    cblite.kCBLErrorNotInTransaction => notInTransaction,
+    cblite.kCBLErrorTransactionNotClosed => transactionNotClosed,
+    cblite.kCBLErrorUnsupported => unsupported,
+    cblite.kCBLErrorNotADatabaseFile => notADatabaseFile,
+    cblite.kCBLErrorWrongFormat => wrongFormat,
+    cblite.kCBLErrorCrypto => crypto,
+    cblite.kCBLErrorInvalidQuery => invalidQuery,
+    cblite.kCBLErrorMissingIndex => missingIndex,
+    cblite.kCBLErrorInvalidQueryParam => invalidQueryParam,
+    cblite.kCBLErrorRemoteError => remoteError,
+    cblite.kCBLErrorDatabaseTooOld => databaseTooOld,
+    cblite.kCBLErrorDatabaseTooNew => databaseTooNew,
+    cblite.kCBLErrorBadDocID => badDocId,
+    cblite.kCBLErrorCantUpgradeDatabase => cantUpgradeDatabase,
+    _ => throw ArgumentError('Unknown error code: $value'),
+  };
 
   final int value;
 
   DatabaseErrorCode get databaseErrorCode => switch (this) {
-        assertionFailed => DatabaseErrorCode.assertionFailed,
-        unimplemented => DatabaseErrorCode.unimplemented,
-        unsupportedEncryption => DatabaseErrorCode.unsupportedEncryption,
-        badRevisionId => DatabaseErrorCode.badRevisionId,
-        corruptRevisionData => DatabaseErrorCode.corruptRevisionData,
-        notOpen => DatabaseErrorCode.notOpen,
-        notFound => DatabaseErrorCode.notFound,
-        conflict => DatabaseErrorCode.conflict,
-        invalidParameter => DatabaseErrorCode.invalidParameter,
-        unexpectedError => DatabaseErrorCode.unexpectedError,
-        cantOpenFile => DatabaseErrorCode.cantOpenFile,
-        iOError => DatabaseErrorCode.iOError,
-        memoryError => DatabaseErrorCode.memoryError,
-        notWriteable => DatabaseErrorCode.notWriteable,
-        corruptData => DatabaseErrorCode.corruptData,
-        busy => DatabaseErrorCode.busy,
-        notInTransaction => DatabaseErrorCode.notInTransaction,
-        transactionNotClosed => DatabaseErrorCode.transactionNotClosed,
-        unsupported => DatabaseErrorCode.unsupported,
-        notADatabaseFile => DatabaseErrorCode.notADatabaseFile,
-        wrongFormat => DatabaseErrorCode.wrongFormat,
-        crypto => DatabaseErrorCode.crypto,
-        invalidQuery => DatabaseErrorCode.invalidQuery,
-        missingIndex => DatabaseErrorCode.missingIndex,
-        invalidQueryParam => DatabaseErrorCode.invalidQueryParam,
-        remoteError => DatabaseErrorCode.remoteError,
-        databaseTooOld => DatabaseErrorCode.databaseTooOld,
-        databaseTooNew => DatabaseErrorCode.databaseTooNew,
-        badDocId => DatabaseErrorCode.badDocId,
-        cantUpgradeDatabase => DatabaseErrorCode.cantUpgradeDatabase,
-      };
+    assertionFailed => DatabaseErrorCode.assertionFailed,
+    unimplemented => DatabaseErrorCode.unimplemented,
+    unsupportedEncryption => DatabaseErrorCode.unsupportedEncryption,
+    badRevisionId => DatabaseErrorCode.badRevisionId,
+    corruptRevisionData => DatabaseErrorCode.corruptRevisionData,
+    notOpen => DatabaseErrorCode.notOpen,
+    notFound => DatabaseErrorCode.notFound,
+    conflict => DatabaseErrorCode.conflict,
+    invalidParameter => DatabaseErrorCode.invalidParameter,
+    unexpectedError => DatabaseErrorCode.unexpectedError,
+    cantOpenFile => DatabaseErrorCode.cantOpenFile,
+    iOError => DatabaseErrorCode.iOError,
+    memoryError => DatabaseErrorCode.memoryError,
+    notWriteable => DatabaseErrorCode.notWriteable,
+    corruptData => DatabaseErrorCode.corruptData,
+    busy => DatabaseErrorCode.busy,
+    notInTransaction => DatabaseErrorCode.notInTransaction,
+    transactionNotClosed => DatabaseErrorCode.transactionNotClosed,
+    unsupported => DatabaseErrorCode.unsupported,
+    notADatabaseFile => DatabaseErrorCode.notADatabaseFile,
+    wrongFormat => DatabaseErrorCode.wrongFormat,
+    crypto => DatabaseErrorCode.crypto,
+    invalidQuery => DatabaseErrorCode.invalidQuery,
+    missingIndex => DatabaseErrorCode.missingIndex,
+    invalidQueryParam => DatabaseErrorCode.invalidQueryParam,
+    remoteError => DatabaseErrorCode.remoteError,
+    databaseTooOld => DatabaseErrorCode.databaseTooOld,
+    databaseTooNew => DatabaseErrorCode.databaseTooNew,
+    badDocId => DatabaseErrorCode.badDocId,
+    cantUpgradeDatabase => DatabaseErrorCode.cantUpgradeDatabase,
+  };
 }
 
 enum CBLNetworkErrorCode {
@@ -232,55 +238,55 @@ enum CBLNetworkErrorCode {
   const CBLNetworkErrorCode(this.value);
 
   factory CBLNetworkErrorCode.fromValue(int value) => switch (value) {
-        cblite.kCBLNetErrDNSFailure => dnsFailure,
-        cblite.kCBLNetErrUnknownHost => unknownHost,
-        cblite.kCBLNetErrTimeout => timeout,
-        cblite.kCBLNetErrInvalidURL => invalidURL,
-        cblite.kCBLNetErrTooManyRedirects => tooManyRedirects,
-        cblite.kCBLNetErrTLSHandshakeFailed => tlsHandshakeFailed,
-        cblite.kCBLNetErrTLSCertExpired => tlsCertExpired,
-        cblite.kCBLNetErrTLSCertUntrusted => tlsCertUntrusted,
-        cblite.kCBLNetErrTLSClientCertRequired => tlsClientCertRequired,
-        cblite.kCBLNetErrTLSClientCertRejected => tlsClientCertRejected,
-        cblite.kCBLNetErrTLSCertUnknownRoot => tlsCertUnknownRoot,
-        cblite.kCBLNetErrInvalidRedirect => invalidRedirect,
-        cblite.kCBLNetErrUnknown => unknown,
-        cblite.kCBLNetErrTLSCertRevoked => tlsCertRevoked,
-        cblite.kCBLNetErrTLSCertNameMismatch => tlsCertNameMismatch,
-        _ => throw ArgumentError('Unknown network error code: $value'),
-      };
+    cblite.kCBLNetErrDNSFailure => dnsFailure,
+    cblite.kCBLNetErrUnknownHost => unknownHost,
+    cblite.kCBLNetErrTimeout => timeout,
+    cblite.kCBLNetErrInvalidURL => invalidURL,
+    cblite.kCBLNetErrTooManyRedirects => tooManyRedirects,
+    cblite.kCBLNetErrTLSHandshakeFailed => tlsHandshakeFailed,
+    cblite.kCBLNetErrTLSCertExpired => tlsCertExpired,
+    cblite.kCBLNetErrTLSCertUntrusted => tlsCertUntrusted,
+    cblite.kCBLNetErrTLSClientCertRequired => tlsClientCertRequired,
+    cblite.kCBLNetErrTLSClientCertRejected => tlsClientCertRejected,
+    cblite.kCBLNetErrTLSCertUnknownRoot => tlsCertUnknownRoot,
+    cblite.kCBLNetErrInvalidRedirect => invalidRedirect,
+    cblite.kCBLNetErrUnknown => unknown,
+    cblite.kCBLNetErrTLSCertRevoked => tlsCertRevoked,
+    cblite.kCBLNetErrTLSCertNameMismatch => tlsCertNameMismatch,
+    _ => throw ArgumentError('Unknown network error code: $value'),
+  };
 
   final int value;
 
   NetworkErrorCode get networkErrorCode => switch (this) {
-        dnsFailure => NetworkErrorCode.dnsFailure,
-        unknownHost => NetworkErrorCode.unknownHost,
-        timeout => NetworkErrorCode.timeout,
-        invalidURL => NetworkErrorCode.invalidURL,
-        tooManyRedirects => NetworkErrorCode.tooManyRedirects,
-        tlsHandshakeFailed => NetworkErrorCode.tlsHandshakeFailed,
-        tlsCertExpired => NetworkErrorCode.tlsCertExpired,
-        tlsCertUntrusted => NetworkErrorCode.tlsCertUntrusted,
-        tlsClientCertRequired => NetworkErrorCode.tlsClientCertRequired,
-        tlsClientCertRejected => NetworkErrorCode.tlsClientCertRejected,
-        tlsCertUnknownRoot => NetworkErrorCode.tlsCertUnknownRoot,
-        invalidRedirect => NetworkErrorCode.invalidRedirect,
-        unknown => NetworkErrorCode.unknown,
-        tlsCertRevoked => NetworkErrorCode.tlsCertRevoked,
-        tlsCertNameMismatch => NetworkErrorCode.tlsCertNameMismatch,
-      };
+    dnsFailure => NetworkErrorCode.dnsFailure,
+    unknownHost => NetworkErrorCode.unknownHost,
+    timeout => NetworkErrorCode.timeout,
+    invalidURL => NetworkErrorCode.invalidURL,
+    tooManyRedirects => NetworkErrorCode.tooManyRedirects,
+    tlsHandshakeFailed => NetworkErrorCode.tlsHandshakeFailed,
+    tlsCertExpired => NetworkErrorCode.tlsCertExpired,
+    tlsCertUntrusted => NetworkErrorCode.tlsCertUntrusted,
+    tlsClientCertRequired => NetworkErrorCode.tlsClientCertRequired,
+    tlsClientCertRejected => NetworkErrorCode.tlsClientCertRejected,
+    tlsCertUnknownRoot => NetworkErrorCode.tlsCertUnknownRoot,
+    invalidRedirect => NetworkErrorCode.invalidRedirect,
+    unknown => NetworkErrorCode.unknown,
+    tlsCertRevoked => NetworkErrorCode.tlsCertRevoked,
+    tlsCertNameMismatch => NetworkErrorCode.tlsCertNameMismatch,
+  };
 }
 
 extension IntErrorCodeExt on int {
   Object toErrorCode(CBLErrorDomain domain) => switch (domain) {
-        CBLErrorDomain.couchbaseLite => CBLErrorCode.fromValue(this),
-        CBLErrorDomain.posix => this,
-        CBLErrorDomain.sqLite => this,
-        CBLErrorDomain.fleece => FLError.fromValue(this),
-        CBLErrorDomain.network => CBLNetworkErrorCode.fromValue(this),
-        CBLErrorDomain.webSocket => this,
-        CBLErrorDomain.mbedTls => this,
-      };
+    CBLErrorDomain.couchbaseLite => CBLErrorCode.fromValue(this),
+    CBLErrorDomain.posix => this,
+    CBLErrorDomain.sqLite => this,
+    CBLErrorDomain.fleece => FLError.fromValue(this),
+    CBLErrorDomain.network => CBLNetworkErrorCode.fromValue(this),
+    CBLErrorDomain.webSocket => this,
+    CBLErrorDomain.mbedTls => this,
+  };
 }
 
 extension CBLErrorExt on cblite.CBLError {
@@ -445,30 +451,29 @@ final class BaseBindings extends Bindings {
 
   late final isolateId = cblDart.CBLDart_AllocateIsolateId();
 
-  late final _refCountedFinalizer =
-      NativeFinalizer(cbl.addresses.CBL_Release.cast());
+  late final _refCountedFinalizer = NativeFinalizer(
+    cbl.addresses.CBL_Release.cast(),
+  );
 
   bool get vectorSearchLibraryAvailable =>
       libraries.vectorSearchLibraryPath != null;
 
   bool get systemSupportsVectorSearch => switch (Abi.current()) {
-        Abi.androidArm ||
-        Abi.androidArm64 ||
-        Abi.iosArm ||
-        Abi.iosArm64 ||
-        Abi.linuxArm ||
-        Abi.linuxArm64 ||
-        Abi.macosArm64 ||
-        Abi.windowsArm64 =>
-          true,
-        Abi.linuxX64 ||
-        Abi.windowsX64 ||
-        Abi.iosX64 ||
-        Abi.macosX64 ||
-        Abi.androidX64 =>
-          cblDart.CBLDart_CpuSupportsAVX2(),
-        _ => false,
-      };
+    Abi.androidArm ||
+    Abi.androidArm64 ||
+    Abi.iosArm ||
+    Abi.iosArm64 ||
+    Abi.linuxArm ||
+    Abi.linuxArm64 ||
+    Abi.macosArm64 ||
+    Abi.windowsArm64 => true,
+    Abi.linuxX64 ||
+    Abi.windowsX64 ||
+    Abi.iosX64 ||
+    Abi.macosX64 ||
+    Abi.androidX64 => cblDart.CBLDart_CpuSupportsAVX2(),
+    _ => false,
+  };
 
   void initializeNativeLibraries([CBLInitContext? context]) {
     assert(!io.Platform.isAndroid || context != null);
@@ -494,17 +499,20 @@ final class BaseBindings extends Bindings {
 
       switch (initializeResult) {
         case cblitedart
-              .CBLDartInitializeResult.CBLDartInitializeResult_kSuccess:
+            .CBLDartInitializeResult
+            .CBLDartInitializeResult_kSuccess:
           break;
-        case cblitedart.CBLDartInitializeResult
-              .CBLDartInitializeResult_kIncompatibleDartVM:
+        case cblitedart
+            .CBLDartInitializeResult
+            .CBLDartInitializeResult_kIncompatibleDartVM:
           throw createCouchbaseLiteException(
             domain: CBLErrorDomain.couchbaseLite,
             code: CBLErrorCode.unsupported,
             message: 'The current Dart VM is incompatible.',
           );
         case cblitedart
-              .CBLDartInitializeResult.CBLDartInitializeResult_kCBLInitError:
+            .CBLDartInitializeResult
+            .CBLDartInitializeResult_kCBLInitError:
           throw error.toCouchbaseLiteException();
       }
     });
@@ -515,8 +523,10 @@ final class BaseBindings extends Bindings {
         when systemSupportsVectorSearch) {
       final libraryDirectory = p.dirname(libraryPath);
       runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
-        cbl.CBL_EnableVectorSearch(flLibraryDirectory, globalCBLError)
-            .checkError();
+        cbl.CBL_EnableVectorSearch(
+          flLibraryDirectory,
+          globalCBLError,
+        ).checkError();
       });
     }
   }
@@ -555,8 +565,7 @@ final class BaseBindings extends Bindings {
   void completeCompleterWithPointer(
     cblitedart.CBLDart_Completer completer,
     Pointer<Void> result,
-  ) =>
-      cblDart.CBLDart_Completer_Complete(completer, result.address);
+  ) => cblDart.CBLDart_Completer_Complete(completer, result.address);
 
   void completeCompleterWithBool(
     cblitedart.CBLDart_Completer completer,

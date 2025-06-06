@@ -17,8 +17,10 @@ final class FfiQueryIndex
     required this.collection,
     required this.name,
   }) {
-    CBLBindings.instance.base
-        .bindCBLRefCountedToDartObject(this, pointer.cast());
+    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+      this,
+      pointer.cast(),
+    );
     needsToBeClosedByParent = false;
     attachTo(collection);
   }
@@ -32,7 +34,9 @@ final class FfiQueryIndex
   final String name;
 
   @override
-  SyncIndexUpdater? beginUpdate({required int limit}) => useSync(() => _bindings
-      .beginUpdate(pointer, limit)
-      ?.let((updater) => FfiIndexUpdater.fromPointer(updater, index: this)));
+  SyncIndexUpdater? beginUpdate({required int limit}) => useSync(
+    () => _bindings
+        .beginUpdate(pointer, limit)
+        ?.let((updater) => FfiIndexUpdater.fromPointer(updater, index: this)),
+  );
 }

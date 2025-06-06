@@ -35,9 +35,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: LogMessagesPage(),
-      );
+    debugShowCheckedModeBanner: false,
+    home: LogMessagesPage(),
+  );
 }
 
 class LogMessagesPage extends StatefulWidget {
@@ -54,8 +54,9 @@ class _LogMessagesPageState extends State<LogMessagesPage> {
   @override
   void initState() {
     super.initState();
-    _logMessagesSub =
-        logMessageRepository.allLogMessagesStream().listen((logMessages) {
+    _logMessagesSub = logMessageRepository.allLogMessagesStream().listen((
+      logMessages,
+    ) {
       setState(() => _logMessages = logMessages);
     });
   }
@@ -68,31 +69,33 @@ class _LogMessagesPageState extends State<LogMessagesPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
-          child: Column(children: [
-            Expanded(
-              child: ListView.builder(
-                // By reversing the ListView new messages will be immediately
-                // visible and when opening the page the ListView starts out
-                // scrolled all the way to the bottom.
-                reverse: true,
-                itemCount: _logMessages.length,
-                itemBuilder: (context, index) {
-                  // Since the ListView is reversed, we need to access the
-                  // log messages in reverse, to end up with the correct
-                  // ordering.
-                  final logMessage =
-                      _logMessages[_logMessages.length - 1 - index];
+    body: SafeArea(
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              // By reversing the ListView new messages will be immediately
+              // visible and when opening the page the ListView starts out
+              // scrolled all the way to the bottom.
+              reverse: true,
+              itemCount: _logMessages.length,
+              itemBuilder: (context, index) {
+                // Since the ListView is reversed, we need to access the
+                // log messages in reverse, to end up with the correct
+                // ordering.
+                final logMessage =
+                    _logMessages[_logMessages.length - 1 - index];
 
-                  return LogMessageTile(logMessage: logMessage);
-                },
-              ),
+                return LogMessageTile(logMessage: logMessage);
+              },
             ),
-            const Divider(height: 0),
-            _LogMessageForm(onSubmit: logMessageRepository.createLogMessage)
-          ]),
-        ),
-      );
+          ),
+          const Divider(height: 0),
+          _LogMessageForm(onSubmit: logMessageRepository.createLogMessage),
+        ],
+      ),
+    ),
+  );
 }
 
 class LogMessageTile extends StatelessWidget {
@@ -102,19 +105,19 @@ class LogMessageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(spacing),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              DateFormat.yMd().add_jm().format(logMessage.createdAt),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: spacing / 4),
-            Text(logMessage.message)
-          ],
+    padding: const EdgeInsets.all(spacing),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          DateFormat.yMd().add_jm().format(logMessage.createdAt),
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-      );
+        const SizedBox(height: spacing / 4),
+        Text(logMessage.message),
+      ],
+    ),
+  );
 }
 
 class _LogMessageForm extends StatefulWidget {
@@ -157,30 +160,26 @@ class _LogMessageFormState extends State<_LogMessageForm> {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(spacing),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                decoration:
-                    const InputDecoration.collapsed(hintText: 'Message'),
-                autofocus: true,
-                focusNode: _messageFocusNode,
-                controller: _messageController,
-                minLines: 1,
-                maxLines: 10,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textCapitalization: TextCapitalization.sentences,
-              ),
-            ),
-            const SizedBox(width: spacing / 2),
-            TextButton(
-              onPressed: _onSubmit,
-              child: const Text('Write to log'),
-            )
-          ],
+    padding: const EdgeInsets.all(spacing),
+    child: Row(
+      children: [
+        Expanded(
+          child: TextField(
+            decoration: const InputDecoration.collapsed(hintText: 'Message'),
+            autofocus: true,
+            focusNode: _messageFocusNode,
+            controller: _messageController,
+            minLines: 1,
+            maxLines: 10,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textCapitalization: TextCapitalization.sentences,
+          ),
         ),
-      );
+        const SizedBox(width: spacing / 2),
+        TextButton(onPressed: _onSubmit, child: const Text('Write to log')),
+      ],
+    ),
+  );
 }
 
 // === Log Message Storage =====================================================
@@ -269,8 +268,8 @@ class LogMessageRepository {
     Future(query.explain).then(print);
 
     return query.changes().asyncMap(
-          (change) => change.results.asStream().map(CblLogMessage.new).toList(),
-        );
+      (change) => change.results.asStream().map(CblLogMessage.new).toList(),
+    );
   }
 }
 

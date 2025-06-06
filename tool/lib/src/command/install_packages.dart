@@ -31,7 +31,8 @@ final class InstallPackages extends BaseCommand {
       )
       ..addOption(
         'os',
-        help: 'Optionally only install the package for the given OS. If not '
+        help:
+            'Optionally only install the package for the given OS. If not '
             'provided, the packages for all supported OSes will be installed.',
         allowed: OS.values.map((value) => value.name),
       );
@@ -67,7 +68,7 @@ final class InstallPackages extends BaseCommand {
           ...DatabasePackageConfig.all(
             releases: {_library: _release},
             edition: _edition,
-          )
+          ),
         ];
       case Library.vectorSearch:
         if (_edition != Edition.enterprise) {
@@ -79,13 +80,15 @@ final class InstallPackages extends BaseCommand {
     }
 
     if (_os case final os?) {
-      packageConfigs =
-          packageConfigs.where((config) => config.os == os).toList();
+      packageConfigs = packageConfigs
+          .where((config) => config.os == os)
+          .toList();
     }
 
     await Future.wait(
-      packageConfigs
-          .map((config) => installPackageForDevelopment(projectLayout, config)),
+      packageConfigs.map(
+        (config) => installPackageForDevelopment(projectLayout, config),
+      ),
     );
   }
 }

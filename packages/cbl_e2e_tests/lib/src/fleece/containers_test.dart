@@ -145,8 +145,7 @@ void main() {
       });
 
       test('toString returns debug description', () {
-        final doc = Doc.fromJson(
-          '''
+        final doc = Doc.fromJson('''
           {
             "null": null,
             "int": 1,
@@ -156,8 +155,7 @@ void main() {
             "dict": {},
             "array": []
           }
-          ''',
-        );
+          ''');
 
         final root = doc.root.asDict!;
 
@@ -260,11 +258,13 @@ void main() {
         expect(array.isChanged, isTrue);
       });
 
-      test('[]= throws ArgumentError if value is not compatible with Fleece',
-          () {
-        final array = MutableArray();
-        expect(() => array[0] = Object(), throwsArgumentError);
-      });
+      test(
+        '[]= throws ArgumentError if value is not compatible with Fleece',
+        () {
+          final array = MutableArray();
+          expect(() => array[0] = Object(), throwsArgumentError);
+        },
+      );
 
       test('[]= throws RangeError if index is out of range', () {
         final array = MutableArray();
@@ -277,11 +277,13 @@ void main() {
         expect(array[0].asBool, equals(true));
       });
 
-      test('add throws ArgumentError if value is not compatible with Fleece',
-          () {
-        final array = MutableArray();
-        expect(() => array.add(Object()), throwsArgumentError);
-      });
+      test(
+        'add throws ArgumentError if value is not compatible with Fleece',
+        () {
+          final array = MutableArray();
+          expect(() => array.add(Object()), throwsArgumentError);
+        },
+      );
 
       test('add appends value at end of array', () {
         final array = MutableArray()..add(true);
@@ -532,19 +534,21 @@ void main() {
       });
 
       test('converts data value to Uint8List', () {
-        expect(MutableArray([testDataUint8List]).first.toObject(),
-            testDataUint8List);
+        expect(
+          MutableArray([testDataUint8List]).first.toObject(),
+          testDataUint8List,
+        );
       });
 
       test('converts Array to List', () {
         final array = MutableArray([
           MutableDict({'a': 'b'}),
-          'c'
+          'c',
         ]);
 
         final result = [
           {'a': 'b'},
-          'c'
+          'c',
         ];
 
         expect(array.toObject(), result);
@@ -553,12 +557,12 @@ void main() {
       test('converts Dict to Map', () {
         final array = MutableDict({
           'a': 'b',
-          'c': MutableArray(['d'])
+          'c': MutableArray(['d']),
         });
 
         final result = {
           'a': 'b',
-          'c': ['d']
+          'c': ['d'],
         };
 
         expect(array.toObject(), result);
@@ -609,31 +613,35 @@ void main() {
       );
 
       // ignore: avoid_print
-      print(MutableDict({
-        'a': {
-          'b': [
-            {'c': 'd'},
-            .378,
-            null,
-            [42]
-          ]
-        }
-      }));
+      print(
+        MutableDict({
+          'a': {
+            'b': [
+              {'c': 'd'},
+              .378,
+              null,
+              [42],
+            ],
+          },
+        }),
+      );
 
       // ignore: avoid_print
-      print(MutableArray([
-        null,
-        [null],
-        {'a': true},
-        53,
-        {
-          'b': {
-            'c': {
-              'd': {'e': .64597484}
-            }
-          }
-        }
-      ]));
+      print(
+        MutableArray([
+          null,
+          [null],
+          {'a': true},
+          53,
+          {
+            'b': {
+              'c': {
+                'd': {'e': .64597484},
+              },
+            },
+          },
+        ]),
+      );
     });
   });
 }

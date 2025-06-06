@@ -48,8 +48,8 @@ abstract final class SelectResult {
 
 final class SelectResultImpl implements SelectResultInterface {
   SelectResultImpl({required ExpressionInterface expression, String? alias})
-      : _expression = expression as ExpressionImpl,
-        _alias = alias;
+    : _expression = expression as ExpressionImpl,
+      _alias = alias;
 
   final ExpressionImpl _expression;
   final String? _alias;
@@ -73,7 +73,6 @@ final class SelectResultFromImpl extends SelectResultImpl
   SelectResultFromImpl({required super.expression, super.alias});
 
   @override
-  SelectResultInterface from(String alias) => SelectResultImpl(
-        expression: Expression.all().from(alias),
-      );
+  SelectResultInterface from(String alias) =>
+      SelectResultImpl(expression: Expression.all().from(alias));
 }

@@ -26,11 +26,11 @@ Future<void> buildPackage(PrebuiltPackageConfiguration configuration) async {
   final templateContextJson =
       // ignore: avoid_annotating_with_dynamic
       JsonEncoder.withIndent('  ', (dynamic value) {
-    if (value is Function) {
-      return '<lambda>';
-    }
-    return null;
-  }).convert(templateContext);
+        if (value is Function) {
+          return '<lambda>';
+        }
+        return null;
+      }).convert(templateContext);
   log('Template context:\n$templateContextJson');
 
   await _renderTemplateDirectory(
@@ -47,8 +47,10 @@ Future<void> _renderTemplateDirectory({
   required Directory outputDirectory,
   required JsonMap templateContext,
 }) async {
-  final allEntities =
-      templateDirectory.list(recursive: true, followLinks: false);
+  final allEntities = templateDirectory.list(
+    recursive: true,
+    followLinks: false,
+  );
 
   await for (final entity in allEntities) {
     final isTemplate = p.basename(entity.path).contains(templateFileMarker);
@@ -102,10 +104,7 @@ Future<void> _renderTemplateDirectory({
   }
 }
 
-Future<void> _copyFilePermissions(
-  String file, {
-  required String from,
-}) async {
+Future<void> _copyFilePermissions(String file, {required String from}) async {
   if (Platform.isWindows) {
     final result = await Process.run('powershell.exe', [
       '-Command',

@@ -230,10 +230,11 @@ final class DictionaryImpl
 
   @override
   Map<String, Object?> toPlainMap() => {
-        for (final entry in _dict.iterable)
-          entry.key:
-              CblConversions.convertToPlainObject(entry.value.asNative(_dict))
-      };
+    for (final entry in _dict.iterable)
+      entry.key: CblConversions.convertToPlainObject(
+        entry.value.asNative(_dict),
+      ),
+  };
 
   @override
   Fragment operator [](String key) =>

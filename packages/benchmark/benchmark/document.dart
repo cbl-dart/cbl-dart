@@ -22,8 +22,10 @@ class DocumentPropertyLookup extends BenchmarkBase {
   @override
   void setup() {
     tempDir = Directory.systemTemp.createTempSync();
-    db =
-        Database.openSync('db', DatabaseConfiguration(directory: tempDir.path));
+    db = Database.openSync(
+      'db',
+      DatabaseConfiguration(directory: tempDir.path),
+    );
     collection = db.defaultCollection;
     final doc = MutableDocument(data);
     id = doc.id;
@@ -64,8 +66,10 @@ class DocumentToPlainMap extends BenchmarkBase {
   @override
   void setup() {
     tempDir = Directory.systemTemp.createTempSync();
-    db =
-        Database.openSync('db', DatabaseConfiguration(directory: tempDir.path));
+    db = Database.openSync(
+      'db',
+      DatabaseConfiguration(directory: tempDir.path),
+    );
     collection = db.defaultCollection;
     final doc = MutableDocument(data);
     id = doc.id;
@@ -87,10 +91,7 @@ class DocumentToPlainMap extends BenchmarkBase {
 void main() async {
   await initCouchbaseLite();
 
-  final benchmarks = [
-    DocumentPropertyLookup(),
-    DocumentToPlainMap(),
-  ];
+  final benchmarks = [DocumentPropertyLookup(), DocumentToPlainMap()];
 
   for (final benchmark in benchmarks) {
     benchmark.report();

@@ -167,9 +167,7 @@ abstract class CblDatabaseBenchmark extends DatabaseBenchmarkBase {
       Database.openAsync(_nextDatabaseName(), _databaseConfiguration);
 
   @protected
-  void withSyncDatabase(
-    void Function(SyncDatabase database) fn,
-  ) {
+  void withSyncDatabase(void Function(SyncDatabase database) fn) {
     final database = openSyncDatabase();
     try {
       fn(database);

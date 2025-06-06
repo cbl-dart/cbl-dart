@@ -7,27 +7,23 @@ import 'value.dart';
 final _arrayBindings = CBLBindings.instance.fleece.array;
 
 final class MArray extends MCollection {
-  MArray()
-      : _array = null,
-        _values = [];
+  MArray() : _array = null, _values = [];
 
   MArray.asCopy(MArray super.original, {bool? isMutable})
-      : _array = original._array,
-        _values = original._values
-            .map((value) => value?.clone())
-            .toList(growable: isMutable ?? original.isMutable),
-        super.asCopy(isMutable: isMutable ?? original.isMutable);
+    : _array = original._array,
+      _values = original._values
+          .map((value) => value?.clone())
+          .toList(growable: isMutable ?? original.isMutable),
+      super.asCopy(isMutable: isMutable ?? original.isMutable);
 
   MArray.asChild(super.slot, super.parent, int length, {bool? isMutable})
-      : _array = slot.value!.cast(),
-        _values = List<MValue?>.filled(
-          length,
-          null,
-          growable: isMutable ?? parent.hasMutableChildren,
-        ),
-        super.asChild(
-          isMutable: isMutable ?? parent.hasMutableChildren,
-        );
+    : _array = slot.value!.cast(),
+      _values = List<MValue?>.filled(
+        length,
+        null,
+        growable: isMutable ?? parent.hasMutableChildren,
+      ),
+      super.asChild(isMutable: isMutable ?? parent.hasMutableChildren);
 
   final FLArray? _array;
   final List<MValue?> _values;

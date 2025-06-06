@@ -11,8 +11,9 @@ bool classHasRedirectingUnnamedConstructor(
   AstNode clazz,
   String targetConstructor,
 ) {
-  final visitor =
-      _ClassHasRedirectingUnnamedConstructorVisitor(targetConstructor);
+  final visitor = _ClassHasRedirectingUnnamedConstructorVisitor(
+    targetConstructor,
+  );
   clazz.accept(visitor);
   return visitor.hasRedirectingConstructor;
 }
@@ -30,7 +31,8 @@ final class _ClassHasRedirectingUnnamedConstructorVisitor
     if (hasRedirectingConstructor) {
       return;
     }
-    hasRedirectingConstructor = node.factoryKeyword != null &&
+    hasRedirectingConstructor =
+        node.factoryKeyword != null &&
         // ignore: deprecated_member_use
         node.redirectedConstructor?.type.name2.lexeme == targetConstructor;
   }

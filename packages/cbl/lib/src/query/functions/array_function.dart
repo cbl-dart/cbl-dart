@@ -10,8 +10,7 @@ abstract final class ArrayFunction {
   static ExpressionInterface contains(
     ExpressionInterface expression, {
     required ExpressionInterface value,
-  }) =>
-      BinaryExpression('array_contains()', expression, value);
+  }) => BinaryExpression('array_contains()', expression, value);
 
   /// Creates an expression which evaluates to the length of the given array
   /// [expression].

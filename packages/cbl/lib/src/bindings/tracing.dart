@@ -33,15 +33,10 @@ enum TracedNativeCall {
   final String symbol;
 }
 
-typedef TracedCallHandler = T Function<T>(
-  TracedNativeCall call,
-  T Function() execute,
-);
+typedef TracedCallHandler =
+    T Function<T>(TracedNativeCall call, T Function() execute);
 
-T noopTracedCallHandler<T>(
-  TracedNativeCall call,
-  T Function() execute,
-) =>
+T noopTracedCallHandler<T>(TracedNativeCall call, T Function() execute) =>
     execute();
 
 TracedCallHandler onTracedCall = noopTracedCallHandler;

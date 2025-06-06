@@ -31,10 +31,7 @@ void main(List<String> args) {
 
   final output = _symbolicateStackTrace(
     inputFile.readAsStringSync(),
-    addressSymbolizer: _createAddressSymbolizer(
-      ndkDir: ndkDir,
-      libDir: libDir,
-    ),
+    addressSymbolizer: _createAddressSymbolizer(ndkDir: ndkDir, libDir: libDir),
   );
 
   outputFile
@@ -42,8 +39,9 @@ void main(List<String> args) {
     ..writeAsStringSync(output);
 }
 
-final _frameRegex =
-    RegExp(r'^#\d+\s+pc\s+(?<addr>0x[0-9a-fA-F]+)\s+(?<lib>\S+)\s+$');
+final _frameRegex = RegExp(
+  r'^#\d+\s+pc\s+(?<addr>0x[0-9a-fA-F]+)\s+(?<lib>\S+)\s+$',
+);
 
 String _symbolicateStackTrace(
   String stackTrace, {
@@ -111,8 +109,9 @@ String _addr2lineBin(String ndkDir) {
 }
 
 String _llvmToolchainDir(String ndkDir) {
-  final llvmPrebuiltToolchainsDir =
-      Directory(p.join(ndkDir, 'toolchains', 'llvm', 'prebuilt'));
+  final llvmPrebuiltToolchainsDir = Directory(
+    p.join(ndkDir, 'toolchains', 'llvm', 'prebuilt'),
+  );
   // The dir only contains one directory with the name of the host platform.
   return llvmPrebuiltToolchainsDir.listSync().first.path;
 }

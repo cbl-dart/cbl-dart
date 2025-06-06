@@ -124,25 +124,23 @@ abstract final class Blob {
 // ignore: must_be_immutable
 final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   BlobImpl.fromData(String contentType, Uint8List data)
-      : _contentType = contentType,
-        _length = data.length,
-        _content = data;
+    : _contentType = contentType,
+      _length = data.length,
+      _content = data;
 
   BlobImpl.fromStream(String contentType, Stream<Uint8List> stream)
-      : _contentType = contentType,
-        _contentStream = stream;
+    : _contentType = contentType,
+      _contentStream = stream;
 
-  BlobImpl.fromProperties(
-    Map<String, Object?> properties, {
-    Database? database,
-  })  : assert(properties[cblObjectTypeProperty] == cblObjectTypeBlob),
-        _database = database,
-        _contentType = properties[blobContentTypeProperty] as String?,
-        // ignore: cast_nullable_to_non_nullable
-        _length = properties[blobLengthProperty] as int,
-        _digest = properties[blobDigestProperty] as String?,
-        // ignore: unnecessary_parenthesis
-        _content = (properties[blobDataProperty] as Uint8List?) {
+  BlobImpl.fromProperties(Map<String, Object?> properties, {Database? database})
+    : assert(properties[cblObjectTypeProperty] == cblObjectTypeBlob),
+      _database = database,
+      _contentType = properties[blobContentTypeProperty] as String?,
+      // ignore: cast_nullable_to_non_nullable
+      _length = properties[blobLengthProperty] as int,
+      _digest = properties[blobDigestProperty] as String?,
+      // ignore: unnecessary_parenthesis
+      _content = (properties[blobDataProperty] as Uint8List?) {
     if (_digest == null && _content == null) {
       throw ArgumentError.value(
         properties,
@@ -203,18 +201,20 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
 
       if (_shouldCacheContent) {
         final byteBuilder = BytesBuilder(copy: false);
-        return stream.transform(StreamTransformer.fromHandlers(
-          handleData: (data, sink) {
-            if (_content == null) {
-              byteBuilder.add(data);
-            }
-            sink.add(data.asUnmodifiableView());
-          },
-          handleDone: (sink) {
-            _content ??= byteBuilder.toBytes();
-            sink.close();
-          },
-        ));
+        return stream.transform(
+          StreamTransformer.fromHandlers(
+            handleData: (data, sink) {
+              if (_content == null) {
+                byteBuilder.add(data);
+              }
+              sink.add(data.asUnmodifiableView());
+            },
+            handleDone: (sink) {
+              _content ??= byteBuilder.toBytes();
+              sink.close();
+            },
+          ),
+        );
       }
 
       return stream;
@@ -227,12 +227,12 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
   Map<String, Object?> get properties => _blobProperties();
 
   Map<String, Object?> _blobProperties({bool mayIncludeData = false}) => {
-        cblObjectTypeProperty: cblObjectTypeBlob,
-        if (_contentType != null) blobContentTypeProperty: _contentType,
-        if (_length != null) blobLengthProperty: _length,
-        if (_digest != null) blobDigestProperty: _digest,
-        if (mayIncludeData && _digest == null) blobDataProperty: _content,
-      };
+    cblObjectTypeProperty: cblObjectTypeBlob,
+    if (_contentType != null) blobContentTypeProperty: _contentType,
+    if (_length != null) blobLengthProperty: _length,
+    if (_digest != null) blobDigestProperty: _digest,
+    if (mayIncludeData && _digest == null) blobDataProperty: _content,
+  };
 
   @override
   String toJson() => FleeceEncoder.json.encodeWith(encodeTo).toDartString();
@@ -283,10 +283,7 @@ final class BlobImpl implements Blob, FleeceEncodable, CblConversions {
       if (_content != null) {
         if (blobStore is SyncBlobStore) {
           return blobStore
-              .saveBlobFromDataSync(
-                _contentType!,
-                _content!.toData(),
-              )
+              .saveBlobFromDataSync(_contentType!, _content!.toData())
               .let(updateProperties);
         } else {
           return blobStore

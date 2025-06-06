@@ -31,17 +31,14 @@ final class ProxyQueryIndex extends ProxyObject
 
   @override
   Future<AsyncIndexUpdater?> beginUpdate({required int limit}) => use(() async {
-        final state = await channel
-            .call(BeginQueryIndexUpdate(indexId: objectId, limit: limit));
+    final state = await channel.call(
+      BeginQueryIndexUpdate(indexId: objectId, limit: limit),
+    );
 
-        if (state == null) {
-          return null;
-        }
+    if (state == null) {
+      return null;
+    }
 
-        return ProxyIndexUpdater(
-          client: client,
-          index: this,
-          state: state,
-        );
-      });
+    return ProxyIndexUpdater(client: client, index: this, state: state);
+  });
 }

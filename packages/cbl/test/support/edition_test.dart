@@ -25,8 +25,11 @@ void main() {
         expect(
           () => useEnterpriseFeature(entry.key),
           throwsA(
-            isA<StateError>()
-                .having((it) => it.message, 'message', contains(entry.value)),
+            isA<StateError>().having(
+              (it) => it.message,
+              'message',
+              contains(entry.value),
+            ),
           ),
         );
       }

@@ -22,10 +22,10 @@ final class LogFileConfiguration {
 
   /// Creates a [LogFileConfiguration] from [config] by copying all properties.
   LogFileConfiguration.from(LogFileConfiguration config)
-      : directory = config.directory,
-        usePlainText = config.usePlainText,
-        _maxSize = config.maxSize,
-        _maxRotateCount = config.maxRotateCount;
+    : directory = config.directory,
+      usePlainText = config.usePlainText,
+      _maxSize = config.maxSize,
+      _maxRotateCount = config.maxRotateCount;
 
   static const _defaultMaxSize = 500 * 1024;
   static const _defaultMaxRotateCount = 1;
@@ -82,15 +82,15 @@ final class LogFileConfiguration {
 
   @override
   String toString() => [
-        'LogFileConfiguration(',
-        [
-          'directory: $directory',
-          if (usePlainText) 'USE-PLAIN-TEXT',
-          'maxSize: ${(maxSize / 1024).toStringAsFixed(1)} KB',
-          'maxRotateCount: $maxRotateCount',
-        ].join(', '),
-        ')'
-      ].join();
+    'LogFileConfiguration(',
+    [
+      'directory: $directory',
+      if (usePlainText) 'USE-PLAIN-TEXT',
+      'maxSize: ${(maxSize / 1024).toStringAsFixed(1)} KB',
+      'maxRotateCount: $maxRotateCount',
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 /// Logger for writing log messages to files.
@@ -171,9 +171,9 @@ final class FileLoggerImpl extends FileLogger {
 
 extension on CBLLogFileConfiguration {
   LogFileConfiguration? toLogFileConfiguration() => LogFileConfiguration(
-        directory: directory,
-        usePlainText: usePlainText,
-        maxRotateCount: maxRotateCount,
-        maxSize: maxSize,
-      );
+    directory: directory,
+    usePlainText: usePlainText,
+    maxRotateCount: maxRotateCount,
+    maxSize: maxSize,
+  );
 }

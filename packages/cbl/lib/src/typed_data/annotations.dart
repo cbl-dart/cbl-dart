@@ -22,9 +22,7 @@ final class TypedDictionary {
 @Target({TargetKind.classType})
 final class TypedDocument {
   /// Creates an annotation for a class that is a typed document.
-  const TypedDocument({
-    this.typeMatcher = const ValueTypeMatcher(),
-  });
+  const TypedDocument({this.typeMatcher = const ValueTypeMatcher()});
 
   /// The type matcher to use for the typed document.
   final TypeMatcher? typeMatcher;
@@ -118,11 +116,7 @@ final class DocumentRevisionId {
 final class TypedProperty {
   /// Creates an annotation for the property of a typed dictionary or document
   /// that is a dictionary or document property.
-  const TypedProperty({
-    this.property,
-    this.defaultValue,
-    this.converter,
-  });
+  const TypedProperty({this.property, this.defaultValue, this.converter});
 
   /// The name of the property in the underlying data.
   ///

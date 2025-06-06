@@ -47,28 +47,27 @@ base class ProxyQuery extends QueryBase
   Parameters? _parameters;
 
   @override
-  Future<void> setParameters(Parameters? parameters) =>
-      use(() => _lock.synchronized(() async {
-            await _applyParameters(parameters);
-            _parameters = parameters;
-          }));
+  Future<void> setParameters(Parameters? parameters) => use(
+    () => _lock.synchronized(() async {
+      await _applyParameters(parameters);
+      _parameters = parameters;
+    }),
+  );
 
   @override
   Future<ResultSet> execute() => asyncOperationTracePoint(
-        () => ExecuteQueryOp(this),
-        () => use(() async {
-          final resultSetId =
-              await channel!.call(ExecuteQuery(queryId: objectId!));
+    () => ExecuteQueryOp(this),
+    () => use(() async {
+      final resultSetId = await channel!.call(ExecuteQuery(queryId: objectId!));
 
-          return ProxyResultSet(
-            query: this,
-            results: channel!.stream(GetQueryResultSet(
-              queryId: objectId!,
-              resultSetId: resultSetId,
-            )),
-          );
-        }),
+      return ProxyResultSet(
+        query: this,
+        results: channel!.stream(
+          GetQueryResultSet(queryId: objectId!, resultSetId: resultSetId),
+        ),
       );
+    }),
+  );
 
   @override
   Future<String> explain() =>
@@ -90,19 +89,17 @@ base class ProxyQuery extends QueryBase
     final listenerId = client.registerQueryChangeListener((resultSetId) {
       final results = ProxyResultSet(
         query: this,
-        results: channel!.stream(GetQueryResultSet(
-          queryId: objectId!,
-          resultSetId: resultSetId,
-        )),
+        results: channel!.stream(
+          GetQueryResultSet(queryId: objectId!, resultSetId: resultSetId),
+        ),
       );
       final change = QueryChange(this, results);
       token.callListener(change);
     });
 
-    await channel!.call(AddQueryChangeListener(
-      queryId: objectId!,
-      listenerId: listenerId,
-    ));
+    await channel!.call(
+      AddQueryChangeListener(queryId: objectId!, listenerId: listenerId),
+    );
 
     return token = ProxyListenerToken(client, this, listenerId, listener);
   }
@@ -112,16 +109,18 @@ base class ProxyQuery extends QueryBase
       use(() => _listenerTokens.remove(token));
 
   @override
-  AsyncListenStream<QueryChange> changes() => useSync(() => ListenerStream(
-        parent: this,
-        addListener: (listener) => use(() => _addChangeListener(listener)),
-      ));
+  AsyncListenStream<QueryChange> changes() => useSync(
+    () => ListenerStream(
+      parent: this,
+      addListener: (listener) => use(() => _addChangeListener(listener)),
+    ),
+  );
 
   @override
   Future<T> use<T>(FutureOr<T> Function() f) => super.use(() async {
-        await prepare();
-        return f();
-      });
+    await prepare();
+    return f();
+  });
 
   Future<void> prepare() {
     attachToParentResource();
@@ -133,11 +132,13 @@ base class ProxyQuery extends QueryBase
         final database = this.database!;
         final channel = database.channel;
 
-        final state = await channel.call(CreateQuery(
-          databaseId: database.objectId,
-          language: language,
-          queryDefinition: definition!,
-        ));
+        final state = await channel.call(
+          CreateQuery(
+            databaseId: database.objectId,
+            language: language,
+            queryDefinition: definition!,
+          ),
+        );
 
         _columnNames = state.columnNames;
 
@@ -149,14 +150,14 @@ base class ProxyQuery extends QueryBase
 
     if (parameters != null) {
       final parametersImpl = parameters as ParametersImpl;
-      encodedParameters =
-          FleeceEncoder.fleece.encodeWith(parametersImpl.encodeTo);
+      encodedParameters = FleeceEncoder.fleece.encodeWith(
+        parametersImpl.encodeTo,
+      );
     }
 
-    return channel!.call(SetQueryParameters(
-      queryId: objectId!,
-      parameters: encodedParameters,
-    ));
+    return channel!.call(
+      SetQueryParameters(queryId: objectId!, parameters: encodedParameters),
+    );
   }
 
   @override
@@ -167,20 +168,22 @@ final class ProxyResultSet implements AsyncResultSet {
   ProxyResultSet({
     required ProxyQuery query,
     required Stream<SendableValue> results,
-  })  : _query = query,
-        _results = results;
+  }) : _query = query,
+       _results = results;
 
   final ProxyQuery _query;
   final Stream<SendableValue> _results;
 
   Stream<ResultImpl> _asStream() => _results
-      .map((event) => ResultImpl(
-            // Every result needs its own context, because each result is
-            // encoded independently.
-            context: createResultSetMContext(_query.database!),
-            columnNames: _query._columnNames,
-            columnValues: event.value.asArray!,
-          ))
+      .map(
+        (event) => ResultImpl(
+          // Every result needs its own context, because each result is
+          // encoded independently.
+          context: createResultSetMContext(_query.database!),
+          columnNames: _query._columnNames,
+          columnValues: event.value.asArray!,
+        ),
+      )
       .transform(ResourceStreamTransformer(parent: _query, blocking: true));
 
   @override
@@ -216,10 +219,11 @@ base class AsyncBuilderQuery extends ProxyQuery with BuilderQueryMixin {
     ExpressionInterface? limit,
     ExpressionInterface? offset,
   }) : super(
-          database: (from as DataSourceImpl?)?.database as ProxyDatabase? ??
-              query?.database as ProxyDatabase?,
-          language: CBLQueryLanguage.json,
-        ) {
+         database:
+             (from as DataSourceImpl?)?.database as ProxyDatabase? ??
+             query?.database as ProxyDatabase?,
+         language: CBLQueryLanguage.json,
+       ) {
     initBuilderQuery(
       query: query,
       selects: selects,

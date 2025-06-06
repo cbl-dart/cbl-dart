@@ -17,10 +17,9 @@ abstract final class FullTextFunction {
   static ExpressionInterface match({
     required String indexName,
     required String query,
-  }) =>
-      BinaryExpression(
-        'match()',
-        Expression.string(indexName),
-        Expression.string(query),
-      );
+  }) => BinaryExpression(
+    'match()',
+    Expression.string(indexName),
+    Expression.string(query),
+  );
 }

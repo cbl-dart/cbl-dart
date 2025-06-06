@@ -30,8 +30,7 @@ class MockHub implements Hub {
     Object? stackTrace,
     Object? hint,
     ScopeCallback? withScope,
-  }) async =>
-      const SentryId.empty();
+  }) async => const SentryId.empty();
 
   @override
   Future<SentryId> captureException(
@@ -39,8 +38,7 @@ class MockHub implements Hub {
     Object? stackTrace,
     Object? hint,
     ScopeCallback? withScope,
-  }) async =>
-      const SentryId.empty();
+  }) async => const SentryId.empty();
 
   @override
   Future<SentryId> captureMessage(
@@ -50,15 +48,13 @@ class MockHub implements Hub {
     List? params,
     Object? hint,
     ScopeCallback? withScope,
-  }) async =>
-      const SentryId.empty();
+  }) async => const SentryId.empty();
 
   @override
   Future<SentryId> captureTransaction(
     SentryTransaction transaction, {
     SentryTraceContextHeader? traceContext,
-  }) async =>
-      const SentryId.empty();
+  }) async => const SentryId.empty();
 
   @override
   // ignore: deprecated_member_use
@@ -95,20 +91,15 @@ class MockHub implements Hub {
     bool? trimEnd,
     OnTransactionFinish? onFinish,
     Map<String, dynamic>? customSamplingContext,
-  }) =>
-      startTransactionWithContext(
-        SentryTransactionContext(
-          name,
-          operation,
-          description: description,
-        ),
-        customSamplingContext: customSamplingContext,
-        startTimestamp: startTimestamp,
-        bindToScope: bindToScope,
-        waitForChildren: waitForChildren,
-        autoFinishAfter: autoFinishAfter,
-        trimEnd: trimEnd,
-      );
+  }) => startTransactionWithContext(
+    SentryTransactionContext(name, operation, description: description),
+    customSamplingContext: customSamplingContext,
+    startTimestamp: startTimestamp,
+    bindToScope: bindToScope,
+    waitForChildren: waitForChildren,
+    autoFinishAfter: autoFinishAfter,
+    trimEnd: trimEnd,
+  );
 
   @override
   ISentrySpan startTransactionWithContext(

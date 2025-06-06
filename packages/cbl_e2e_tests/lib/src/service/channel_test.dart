@@ -23,30 +23,24 @@ void main() {
     channelTest('call with normal return', () async {
       final channel = await openTestChannel();
 
-      expect(
-        channel.call(EchoRequest('Hello')),
-        completion('Input: Hello'),
-      );
+      expect(channel.call(EchoRequest('Hello')), completion('Input: Hello'));
     });
 
     channelTest('call with exceptional return', () async {
       final channel = await openTestChannel();
 
-      expect(
-        channel.call(ThrowTestError()),
-        throwsA(const TestError('Oops')),
-      );
+      expect(channel.call(ThrowTestError()), throwsA(const TestError('Oops')));
     });
 
     channelTest('call with data in request and response', () async {
       final channel = await openTestChannel();
 
       Future<void> expectData(Data input, Object output) => expectLater(
-            channel
-                .call(DataRequest(SendableData(input)))
-                .then((value) => value.data.toTypedList()),
-            completion(output),
-          );
+        channel
+            .call(DataRequest(SendableData(input)))
+            .then((value) => value.data.toTypedList()),
+        completion(output),
+      );
       final input = Uint8List.fromList([0, 1]).toData();
 
       // Send Dart typed data
@@ -61,11 +55,13 @@ void main() {
 
       expect(
         channel.call(NonExistentEndpoint()),
-        throwsA(isA<UnimplementedError>().having(
-          (it) => it.message,
-          'message',
-          'No call handler registered for endpoint: NonExistentEndpoint',
-        )),
+        throwsA(
+          isA<UnimplementedError>().having(
+            (it) => it.message,
+            'message',
+            'No call handler registered for endpoint: NonExistentEndpoint',
+          ),
+        ),
       );
     });
 
@@ -74,10 +70,7 @@ void main() {
 
       expect(
         channel.stream(EchoRequest('Hello')),
-        emitsInOrder(<Object>[
-          'Input: Hello',
-          emitsDone,
-        ]),
+        emitsInOrder(<Object>['Input: Hello', emitsDone]),
       );
     });
 
@@ -86,20 +79,14 @@ void main() {
 
       expect(
         channel.stream(ThrowTestError()),
-        emitsInOrder(<Object>[
-          emitsError(const TestError('Oops')),
-          emitsDone,
-        ]),
+        emitsInOrder(<Object>[emitsError(const TestError('Oops')), emitsDone]),
       );
     });
 
     channelTest('close infinite stream', () async {
       final channel = await openTestChannel();
 
-      expect(
-        channel.stream(InfiniteStream()),
-        emits(null),
-      );
+      expect(channel.stream(InfiniteStream()), emits(null));
     });
 
     channelTest('list to stream of non-existente endpoint', () async {
@@ -108,11 +95,13 @@ void main() {
       expect(
         channel.stream(NonExistentEndpoint()),
         emitsInOrder(<Object>[
-          emitsError(isA<UnsupportedError>().having(
-            (it) => it.message,
-            'message',
-            'No stream handler registered for endpoint: NonExistentEndpoint',
-          )),
+          emitsError(
+            isA<UnsupportedError>().having(
+              (it) => it.message,
+              'message',
+              'No stream handler registered for endpoint: NonExistentEndpoint',
+            ),
+          ),
           emitsDone,
         ]),
       );
@@ -162,13 +151,12 @@ void channelTest(String description, Future Function() body) {
   variantTest(description, body, variants: [channelTransport]);
 }
 
-enum ChannelTransport {
-  isolatePort,
-  controller,
-}
+enum ChannelTransport { isolatePort, controller }
 
-final channelTransport =
-    EnumVariant<ChannelTransport>(ChannelTransport.values, order: 100);
+final channelTransport = EnumVariant<ChannelTransport>(
+  ChannelTransport.values,
+  order: 100,
+);
 
 Future<Channel> openTestChannel() async {
   StreamChannel<Object?> localTransport;
@@ -185,10 +173,7 @@ Future<Channel> openTestChannel() async {
       localTransport = IsolateChannel.connectReceive(receivePort);
       final isolate = await Isolate.spawn(
         testIsolateMain,
-        TestIsolateConfig(
-          IsolateContext.instance,
-          receivePort.sendPort,
-        ),
+        TestIsolateConfig(IsolateContext.instance, receivePort.sendPort),
       );
       addTearDown(isolate.kill);
   }
@@ -207,21 +192,24 @@ void registerTestHandlers(Channel channel) {
       result[0] = 42;
       return SendableData(result.toData());
     })
-    ..addCallEndpoint((ThrowTestError _) =>
-        Future<void>.error(const TestError('Oops'), StackTrace.current))
+    ..addCallEndpoint(
+      (ThrowTestError _) =>
+          Future<void>.error(const TestError('Oops'), StackTrace.current),
+    )
     ..addStreamEndpoint(
-        (EchoRequest req) => Stream.value('Input: ${req.input}'))
-    ..addStreamEndpoint((ThrowTestError _) =>
-        Stream<void>.error(const TestError('Oops'), StackTrace.current))
+      (EchoRequest req) => Stream.value('Input: ${req.input}'),
+    )
     ..addStreamEndpoint(
-        (InfiniteStream _) => Stream<void>.periodic(InfiniteStream.interval));
+      (ThrowTestError _) =>
+          Stream<void>.error(const TestError('Oops'), StackTrace.current),
+    )
+    ..addStreamEndpoint(
+      (InfiniteStream _) => Stream<void>.periodic(InfiniteStream.interval),
+    );
 }
 
 class TestIsolateConfig {
-  TestIsolateConfig(
-    this.context,
-    this.sendPort,
-  );
+  TestIsolateConfig(this.context, this.sendPort);
 
   final IsolateContext context;
   final SendPort? sendPort;

@@ -57,8 +57,7 @@ abstract final class Function_ {
   static ExpressionInterface atan2({
     required ExpressionInterface y,
     required ExpressionInterface x,
-  }) =>
-      BinaryExpression('atan2()', y, x);
+  }) => BinaryExpression('atan2()', y, x);
 
   /// Creates a function expression which evaluates to the ceiling of the given
   /// numeric [expression].
@@ -108,8 +107,7 @@ abstract final class Function_ {
   static ExpressionInterface power({
     required ExpressionInterface base,
     required ExpressionInterface exponent,
-  }) =>
-      BinaryExpression('power()', base, exponent);
+  }) => BinaryExpression('power()', base, exponent);
 
   /// Creates a function expression which evaluates to the radians value of the
   /// given degree numeric [expression].
@@ -121,8 +119,7 @@ abstract final class Function_ {
   static ExpressionInterface round(
     ExpressionInterface expression, {
     ExpressionInterface? digits,
-  }) =>
-      BinaryExpression('round()', expression, digits);
+  }) => BinaryExpression('round()', expression, digits);
 
   /// Creates a function expression which evaluates to the sing (1: positive,
   /// -1: negative, 0: zero) of the given degree numeric [expression].
@@ -149,16 +146,14 @@ abstract final class Function_ {
   static ExpressionInterface trunc(
     ExpressionInterface expression, {
     ExpressionInterface? digits,
-  }) =>
-      BinaryExpression('trunc()', expression, digits);
+  }) => BinaryExpression('trunc()', expression, digits);
 
   /// Creates a function expression which evaluates to whether the given string
   /// [expression] contains the given [substring].
   static ExpressionInterface contains(
     ExpressionInterface expression, {
     required ExpressionInterface substring,
-  }) =>
-      BinaryExpression('contains()', expression, substring);
+  }) => BinaryExpression('contains()', expression, substring);
 
   /// Creates a function expression which evaluates to the length of the given
   /// string [expression].
@@ -253,8 +248,7 @@ abstract final class Function_ {
   static PredictionFunction prediction(
     String model,
     ExpressionInterface input,
-  ) =>
-      PredictionFunctionImpl(model, input);
+  ) => PredictionFunctionImpl(model, input);
 }
 
 /// A prediction function expression, which represents a call to a
@@ -290,9 +284,9 @@ final class PredictionFunctionImpl extends ExpressionImpl
 
   @override
   Object? toJson() => [
-        'prediction()',
-        model,
-        input,
-        if (outputProperty != null) outputProperty
-      ];
+    'prediction()',
+    model,
+    input,
+    if (outputProperty != null) outputProperty,
+  ];
 }

@@ -22,10 +22,10 @@ final class FleeceEncoder implements Finalizable {
     this.reserveSize = 256,
     this.uniqueStrings = true,
   }) : _pointer = _bindings.create(
-          format: format,
-          reserveSize: reserveSize,
-          uniqueStrings: uniqueStrings,
-        ) {
+         format: format,
+         reserveSize: reserveSize,
+         uniqueStrings: uniqueStrings,
+       ) {
     _bindings.bindToDartObject(this, _pointer);
   }
 
@@ -87,13 +87,13 @@ final class FleeceEncoder implements Finalizable {
 
   /// Converts the [json] string to [format] and returns the result.
   Data convertJson(String json) => encodeWith((encoder) {
-        encoder.writeJson(Data.fromTypedList(utf8.encode(json)));
-      });
+    encoder.writeJson(Data.fromTypedList(utf8.encode(json)));
+  });
 
   /// Converts the Dart [value] to [format] and returns the result.
   Data convertDartObject(Object? value) => encodeWith((encoder) {
-        encoder.writeDartObject(value);
-      });
+    encoder.writeDartObject(value);
+  });
 
   /// Writes a Dart object to this encoder.
   ///

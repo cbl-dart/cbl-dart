@@ -108,10 +108,10 @@ final class ReplicationFilterCallbackMessage {
   ReplicationFilterCallbackMessage(this.document, this.flags);
 
   ReplicationFilterCallbackMessage.fromArguments(List<Object?> arguments)
-      : this(
-          (arguments[0]! as int).toPointer(),
-          CBLReplicatedDocumentFlag._parseCFlags(arguments[1]! as int),
-        );
+    : this(
+        (arguments[0]! as int).toPointer(),
+        CBLReplicatedDocumentFlag._parseCFlags(arguments[1]! as int),
+      );
 
   final Pointer<cblite.CBLDocument> document;
   final Set<CBLReplicatedDocumentFlag> flags;
@@ -127,10 +127,10 @@ final class ReplicationConflictResolverCallbackMessage {
   ReplicationConflictResolverCallbackMessage.fromArguments(
     List<Object?> arguments,
   ) : this(
-          utf8.decode(arguments[0]! as Uint8List),
-          (arguments[1] as int?)?.toPointer(),
-          (arguments[2] as int?)?.toPointer(),
-        );
+        utf8.decode(arguments[0]! as Uint8List),
+        (arguments[1] as int?)?.toPointer(),
+        (arguments[2] as int?)?.toPointer(),
+      );
 
   final String documentId;
   final Pointer<cblite.CBLDocument>? localDocument;
@@ -147,13 +147,13 @@ enum CBLReplicatorActivityLevel {
   busy;
 
   factory CBLReplicatorActivityLevel.fromValue(int value) => switch (value) {
-        cblite.kCBLReplicatorStopped => stopped,
-        cblite.kCBLReplicatorOffline => offline,
-        cblite.kCBLReplicatorConnecting => connecting,
-        cblite.kCBLReplicatorIdle => idle,
-        cblite.kCBLReplicatorBusy => busy,
-        _ => throw ArgumentError('Unknown replicator activity level: $value'),
-      };
+    cblite.kCBLReplicatorStopped => stopped,
+    cblite.kCBLReplicatorOffline => offline,
+    cblite.kCBLReplicatorConnecting => connecting,
+    cblite.kCBLReplicatorIdle => idle,
+    cblite.kCBLReplicatorBusy => busy,
+    _ => throw ArgumentError('Unknown replicator activity level: $value'),
+  };
 }
 
 final class CBLReplicatorStatus {
@@ -180,11 +180,11 @@ extension on cblite.CBLReplicatorStatus {
   }
 
   CBLReplicatorStatus toCBLReplicatorStatus() => CBLReplicatorStatus(
-        CBLReplicatorActivityLevel.fromValue(activity),
-        progress.complete,
-        progress.documentCount,
-        exception,
-      );
+    CBLReplicatorActivityLevel.fromValue(activity),
+    progress.complete,
+    progress.documentCount,
+    exception,
+  );
 }
 
 enum CBLReplicatedDocumentFlag implements Option {
@@ -204,15 +204,17 @@ final class ReplicatorStatusCallbackMessage {
   ReplicatorStatusCallbackMessage(this.status);
 
   ReplicatorStatusCallbackMessage.fromArguments(List<Object?> arguments)
-      : this(parseArguments(arguments[0]! as List<Object?>));
+    : this(parseArguments(arguments[0]! as List<Object?>));
 
   static CBLReplicatorStatus parseArguments(List<Object?> status) {
     CouchbaseLiteException? error;
     if (status.length > 3) {
       final domain = CBLErrorDomain.fromValue(status[3]! as int);
       final code = (status[4]! as int).toErrorCode(domain);
-      final message =
-          utf8.decode(status[5]! as Uint8List, allowMalformed: true);
+      final message = utf8.decode(
+        status[5]! as Uint8List,
+        allowMalformed: true,
+      );
       error = createCouchbaseLiteException(
         domain: domain,
         code: code,
@@ -255,10 +257,10 @@ final class DocumentReplicationsCallbackMessage {
   );
 
   DocumentReplicationsCallbackMessage.fromArguments(List<Object?> arguments)
-      : this(
-          arguments[0]! as bool,
-          parseDocuments(arguments[1]! as List<Object?>),
-        );
+    : this(
+        arguments[0]! as bool,
+        parseDocuments(arguments[1]! as List<Object?>),
+      );
 
   static List<CBLReplicatedDocument> parseDocuments(List<Object?> documents) =>
       documents.cast<List<Object?>>().map((document) {
@@ -266,8 +268,10 @@ final class DocumentReplicationsCallbackMessage {
         if (document.length > 4) {
           final domain = CBLErrorDomain.fromValue(document[4]! as int);
           final code = (document[5]! as int).toErrorCode(domain);
-          final message =
-              utf8.decode(document[6]! as Uint8List, allowMalformed: true);
+          final message = utf8.decode(
+            document[6]! as Uint8List,
+            allowMalformed: true,
+          );
           error = createCouchbaseLiteException(
             domain: domain,
             code: code,
@@ -293,8 +297,9 @@ final class DocumentReplicationsCallbackMessage {
 final class ReplicatorBindings extends Bindings {
   ReplicatorBindings(super.libraries);
 
-  late final _finalizer =
-      NativeFinalizer(cblDart.addresses.CBLDart_CBLReplicator_Release.cast());
+  late final _finalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_CBLReplicator_Release.cast(),
+  );
 
   Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) =>
       runWithSingleFLString(
@@ -305,8 +310,7 @@ final class ReplicatorBindings extends Bindings {
 
   Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
     Pointer<cblite.CBLDatabase> database,
-  ) =>
-      cbl.CBLEndpoint_CreateWithLocalDB(database);
+  ) => cbl.CBLEndpoint_CreateWithLocalDB(database);
 
   void freeEndpoint(Pointer<cblite.CBLEndpoint> endpoint) {
     cbl.CBLEndpoint_Free(endpoint);
@@ -315,25 +319,26 @@ final class ReplicatorBindings extends Bindings {
   Pointer<cblite.CBLAuthenticator> createPasswordAuthenticator(
     String username,
     String password,
-  ) =>
-      withGlobalArena(() => cbl.CBLAuth_CreatePassword(
-            username.toFLString(),
-            password.toFLString(),
-          ));
+  ) => withGlobalArena(
+    () => cbl.CBLAuth_CreatePassword(
+      username.toFLString(),
+      password.toFLString(),
+    ),
+  );
 
   Pointer<cblite.CBLAuthenticator> createSessionAuthenticator(
     String sessionID,
     String? cookieName,
-  ) =>
-      withGlobalArena(() => cbl.CBLAuth_CreateSession(
-            sessionID.toFLString(),
-            cookieName.toFLString(),
-          ));
+  ) => withGlobalArena(
+    () => cbl.CBLAuth_CreateSession(
+      sessionID.toFLString(),
+      cookieName.toFLString(),
+    ),
+  );
 
   Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
     Pointer<cblite.CBLTLSIdentity> pointer,
-  ) =>
-      cbl.CBLAuth_CreateCertificate(pointer);
+  ) => cbl.CBLAuth_CreateCertificate(pointer);
 
   void freeAuthenticator(Pointer<cblite.CBLAuthenticator> authenticator) {
     cbl.CBLAuth_Free(authenticator);
@@ -341,11 +346,12 @@ final class ReplicatorBindings extends Bindings {
 
   Pointer<cblite.CBLReplicator> createReplicator(
     CBLReplicatorConfiguration config,
-  ) =>
-      withGlobalArena(() => cblDart.CBLDart_CBLReplicator_Create(
-            _createConfigurationStruct(config),
-            globalCBLError,
-          ).checkError());
+  ) => withGlobalArena(
+    () => cblDart.CBLDart_CBLReplicator_Create(
+      _createConfigurationStruct(config),
+      globalCBLError,
+    ).checkError(),
+  );
 
   void bindToDartObject(
     Finalizable object,
@@ -384,33 +390,30 @@ final class ReplicatorBindings extends Bindings {
 
   Pointer<cblite.CBLCert>? serverCertificate(
     Pointer<cblite.CBLReplicator> replicator,
-  ) =>
-      cbl.CBLReplicator_ServerCertificate(replicator).toNullable();
+  ) => cbl.CBLReplicator_ServerCertificate(replicator).toNullable();
 
   cblite.FLDict pendingDocumentIDs(
     Pointer<cblite.CBLReplicator> replicator,
     Pointer<cblite.CBLCollection> collection,
-  ) =>
-      cbl.CBLReplicator_PendingDocumentIDs2(
-        replicator,
-        collection,
-        globalCBLError,
-      ).checkError();
+  ) => cbl.CBLReplicator_PendingDocumentIDs2(
+    replicator,
+    collection,
+    globalCBLError,
+  ).checkError();
 
   bool isDocumentPending(
     Pointer<cblite.CBLReplicator> replicator,
     String docID,
     Pointer<cblite.CBLCollection> collection,
-  ) =>
-      runWithSingleFLString(
-        docID,
-        (flDocID) => cbl.CBLReplicator_IsDocumentPending2(
-          replicator,
-          flDocID,
-          collection,
-          globalCBLError,
-        ).checkError(),
-      );
+  ) => runWithSingleFLString(
+    docID,
+    (flDocID) => cbl.CBLReplicator_IsDocumentPending2(
+      replicator,
+      flDocID,
+      collection,
+      globalCBLError,
+    ).checkError(),
+  );
 
   void addChangeListener(
     Pointer<cblite.CBLDatabase> db,
@@ -433,9 +436,7 @@ final class ReplicatorBindings extends Bindings {
   }
 
   Pointer<cblitedart.CBLDart_ReplicatorConfiguration>
-      _createConfigurationStruct(
-    CBLReplicatorConfiguration config,
-  ) {
+  _createConfigurationStruct(CBLReplicatorConfiguration config) {
     final configStruct =
         globalArena<cblitedart.CBLDart_ReplicatorConfiguration>();
 
@@ -453,18 +454,21 @@ final class ReplicatorBindings extends Bindings {
       ..headers = config.headers ?? nullptr
       ..acceptOnlySelfSignedServerCertificate =
           config.acceptOnlySelfSignedServerCertificate
-      ..pinnedServerCertificate = config.pinnedServerCertificate
-              ?.toSliceResult()
-              .flSlice(globalArena) ??
+      ..pinnedServerCertificate =
+          config.pinnedServerCertificate?.toSliceResult().flSlice(
+            globalArena,
+          ) ??
           nullptr
-      ..trustedRootCertificates = config.trustedRootCertificates
-              ?.toSliceResult()
-              .flSlice(globalArena) ??
+      ..trustedRootCertificates =
+          config.trustedRootCertificates?.toSliceResult().flSlice(
+            globalArena,
+          ) ??
           nullptr;
 
     final collectionStructs =
         globalArena<cblitedart.CBLDart_ReplicationCollection>(
-            config.collections.length);
+          config.collections.length,
+        );
 
     configStruct.ref
       ..collections = collectionStructs

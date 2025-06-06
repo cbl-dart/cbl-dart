@@ -125,8 +125,9 @@ void main() {
       const logMessage = 'TEST_LOG_MESSAGE';
       cblLogMessage(LogDomain.network, LogLevel.error, logMessage);
 
-      final errorFileContents = await logDir
-          .findAndReadFile((file) => file.path.contains('cbl_error'));
+      final errorFileContents = await logDir.findAndReadFile(
+        (file) => file.path.contains('cbl_error'),
+      );
 
       expect(errorFileContents, contains('WS ERROR $logMessage'));
     });

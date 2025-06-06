@@ -84,7 +84,8 @@ mixin ClosableResourceMixin implements ClosableResource {
   bool? _needsToBeClosed;
 
   void _updateParentRegistration() {
-    final needsToBeClosed = _needsToBeClosedByParent ||
+    final needsToBeClosed =
+        _needsToBeClosedByParent ||
         _childrenToClose.isNotEmpty ||
         _pendingRequests.isNotEmpty;
 
@@ -93,10 +94,7 @@ mixin ClosableResourceMixin implements ClosableResource {
     }
 
     _needsToBeClosed = needsToBeClosed;
-    _parent?._updateChild(
-      this,
-      needsToBeClosed: needsToBeClosed,
-    );
+    _parent?._updateChild(this, needsToBeClosed: needsToBeClosed);
   }
 
   /// This method is used by this resource to wrap all synchronous access from
@@ -131,22 +129,22 @@ mixin ClosableResourceMixin implements ClosableResource {
 
   @override
   Future<void> close() => _pendingClose ??= Future.sync(() async {
-        final parent = _parent;
-        if (parent != null && !parent._isClosed) {
-          _parent?._updateChild(this, needsToBeClosed: false);
-        }
+    final parent = _parent;
+    if (parent != null && !parent._isClosed) {
+      _parent?._updateChild(this, needsToBeClosed: false);
+    }
 
-        _isClosed = true;
+    _isClosed = true;
 
-        await Future.wait([
-          ..._pendingRequests,
-          ..._childrenToClose.map((child) => child.close()),
-        ]);
+    await Future.wait([
+      ..._pendingRequests,
+      ..._childrenToClose.map((child) => child.close()),
+    ]);
 
-        _childrenToClose.clear();
+    _childrenToClose.clear();
 
-        await performClose();
-      });
+    await performClose();
+  });
 
   void _checkIsNotClosed() {
     if (isClosed) {

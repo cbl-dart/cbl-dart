@@ -9,10 +9,7 @@ import '../query.dart';
 abstract interface class LimitRouter {
   /// Creates and returns a `LIMIT` clause query component with the given
   /// [limit] and [offset].
-  Limit limit(
-    ExpressionInterface limit, {
-    ExpressionInterface? offset,
-  });
+  Limit limit(ExpressionInterface limit, {ExpressionInterface? offset});
 }
 
 /// Version of [LimitRouter] for building [SyncQuery]s.

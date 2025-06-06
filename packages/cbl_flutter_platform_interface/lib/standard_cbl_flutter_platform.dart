@@ -76,9 +76,9 @@ final class StandardCblFlutterPlatform extends CblFlutterPlatform {
   }
 }
 
-String _dirname(String path) =>
-    (path.split(Platform.pathSeparator)..removeLast())
-        .join(Platform.pathSeparator);
+String _dirname(String path) => (path.split(
+  Platform.pathSeparator,
+)..removeLast()).join(Platform.pathSeparator);
 
 String _joinPaths(String path0, String path1) =>
     '$path0${Platform.pathSeparator}$path1';

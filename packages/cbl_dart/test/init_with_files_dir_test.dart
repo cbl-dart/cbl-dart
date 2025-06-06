@@ -17,8 +17,9 @@ void main() {
     final db = await Database.openAsync('a');
     await db.close();
 
-    final databaseFile =
-        Directory(p.join(filesDir.path, 'CouchbaseLite', 'a.cblite2'));
+    final databaseFile = Directory(
+      p.join(filesDir.path, 'CouchbaseLite', 'a.cblite2'),
+    );
     expect(databaseFile.existsSync(), isTrue);
   });
 }

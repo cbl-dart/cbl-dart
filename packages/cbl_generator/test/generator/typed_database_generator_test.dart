@@ -5,24 +5,18 @@ import 'package:test/test.dart';
 
 void main() {
   test('annotated declaration is not a class', () async {
-    await _expectBadSource(
-      '''
+    await _expectBadSource('''
 @TypedDatabase(types: {})
 const a = '';
-  ''',
-      '@TypedDatabase can only be used on a class.',
-    );
+  ''', '@TypedDatabase can only be used on a class.');
   });
 
   test('class does not start with dollar sign', () async {
-    await _expectBadSource(
-      '''
+    await _expectBadSource('''
 @TypedDatabase(types: {})
 class A {
 }
-  ''',
-      r'Classes annotated with @TypedDatabase must start with $',
-    );
+  ''', r'Classes annotated with @TypedDatabase must start with $');
   });
 
   test('database without types', () async {
@@ -33,7 +27,7 @@ class A {
 @TypedDatabase(types: {})
 class $A {
 }
-''')
+'''),
       },
       outputs: {
         _genPartId: _typedDatabaseGeneratorContent(r'''
@@ -51,7 +45,7 @@ class A extends $A {
 
   static final _adapter = TypedDataRegistry(types: []);
 }
-''')
+'''),
       },
       reader: await PackageAssetReader.currentIsolate(),
     );
@@ -70,7 +64,8 @@ import 'package:cbl/cbl.dart';
 
 $content''';
 
-String _typedDatabaseGeneratorContent(String content) => '''
+String _typedDatabaseGeneratorContent(String content) =>
+    '''
 // dart format width=80
 ${TypedDatabaseBuilder.header}
 // **************************************************************************
@@ -85,15 +80,15 @@ $content''';
 
 Future<void> _expectBadSource(String source, [Object? messageMatcher]) async {
   await expectLater(
-    testBuilder(
-      TypedDatabaseBuilder(),
-      {_testLibId: _testLibContent(source)},
-      reader: await PackageAssetReader.currentIsolate(),
+    testBuilder(TypedDatabaseBuilder(), {
+      _testLibId: _testLibContent(source),
+    }, reader: await PackageAssetReader.currentIsolate()),
+    throwsA(
+      isA<InvalidGenerationSourceError>().having(
+        (error) => error.message,
+        'message',
+        messageMatcher ?? anything,
+      ),
     ),
-    throwsA(isA<InvalidGenerationSourceError>().having(
-      (error) => error.message,
-      'message',
-      messageMatcher ?? anything,
-    )),
   );
 }

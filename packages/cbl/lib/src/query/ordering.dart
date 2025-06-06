@@ -32,17 +32,12 @@ abstract final class Ordering {
 
 // === Impl ====================================================================
 
-enum Order {
-  ascending,
-  descending,
-}
+enum Order { ascending, descending }
 
 final class OrderingImpl implements OrderingInterface {
-  OrderingImpl({
-    required ExpressionInterface expression,
-    bool? isAscending,
-  })  : _expression = expression as ExpressionImpl,
-        _isAscending = isAscending ?? true;
+  OrderingImpl({required ExpressionInterface expression, bool? isAscending})
+    : _expression = expression as ExpressionImpl,
+      _isAscending = isAscending ?? true;
 
   final ExpressionImpl _expression;
   final bool _isAscending;

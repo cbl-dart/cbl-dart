@@ -36,18 +36,12 @@ class FleeceWrapperEncodingBenchmark extends EncodingBenchmark {
   FleeceWrapperEncodingBenchmark() : super('fleece_wrapper');
 
   final dictKeys = OptimizingDictKeys();
-  late final context = MContext(
-    dictKeys: dictKeys,
-  );
+  late final context = MContext(dictKeys: dictKeys);
   late final array = MutableArray(jsonValue);
 
   @override
   void run() {
-    final root = MRoot.fromNative(
-      array,
-      context: context,
-      isMutable: true,
-    );
+    final root = MRoot.fromNative(array, context: context, isMutable: true);
     final encoder = FleeceEncoder();
     root.encodeTo(encoder);
     encoder.finish();

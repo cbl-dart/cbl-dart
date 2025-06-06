@@ -7,7 +7,7 @@ environment:
 dev_dependencies:
   cbd:
     path: tool
-  daco: ^0.3.0
+  daco: ^0.4.0
   melos: ^6.3.2
   path: ^1.9.1
 

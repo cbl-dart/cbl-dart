@@ -10,8 +10,10 @@ void main() {
     group('BasicAuthenticator', () {
       test('toString', () {
         expect(
-          BasicAuthenticator(username: 'username', password: 'password')
-              .toString(),
+          BasicAuthenticator(
+            username: 'username',
+            password: 'password',
+          ).toString(),
           'BasicAuthenticator(username: username, password: *****ord)',
         );
       });
@@ -27,8 +29,10 @@ void main() {
 
       test('toString', () {
         expect(
-          SessionAuthenticator(sessionId: 'sessionId', cookieName: 'cookieName')
-              .toString(),
+          SessionAuthenticator(
+            sessionId: 'sessionId',
+            cookieName: 'cookieName',
+          ).toString(),
           'SessionAuthenticator(sessionId: ******nId, cookieName: cookieName)',
         );
       });

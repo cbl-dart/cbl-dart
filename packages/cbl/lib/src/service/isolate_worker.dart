@@ -14,10 +14,7 @@ abstract base class IsolateWorkerDelegate {
 }
 
 final class IsolateWorker {
-  IsolateWorker({
-    this.debugName,
-    required this.delegate,
-  });
+  IsolateWorker({this.debugName, required this.delegate});
 
   final String? debugName;
   final IsolateWorkerDelegate delegate;
@@ -82,8 +79,9 @@ final class IsolateWorker {
   SendPort _setupControlChannel() {
     final receivePort = ReceivePort();
 
-    _controlChannel =
-        Channel(transport: IsolateChannel.connectReceive(receivePort));
+    _controlChannel = Channel(
+      transport: IsolateChannel.connectReceive(receivePort),
+    );
 
     onError.onError(_close);
 
@@ -93,13 +91,16 @@ final class IsolateWorker {
   SendPort _setupErrorHandler() {
     final receivePort = ReceivePort();
 
-    _onErrorSub = receivePort.asyncExpand((Object? message) {
-      final errorAndStackTrace = message! as List<Object?>;
-      final error = errorAndStackTrace[0]!;
-      final stackTrace =
-          StackTrace.fromString(errorAndStackTrace[1]! as String);
-      return Stream<void>.error(error, stackTrace);
-    }).listen(null, onError: _onErrorCompleter.completeError);
+    _onErrorSub = receivePort
+        .asyncExpand((Object? message) {
+          final errorAndStackTrace = message! as List<Object?>;
+          final error = errorAndStackTrace[0]!;
+          final stackTrace = StackTrace.fromString(
+            errorAndStackTrace[1]! as String,
+          );
+          return Stream<void>.error(error, stackTrace);
+        })
+        .listen(null, onError: _onErrorCompleter.completeError);
 
     return receivePort.sendPort;
   }
@@ -120,7 +121,7 @@ final class IsolateWorker {
     return Future.wait([
       _controlChannel.close(error, stackTrace),
       _onErrorSub.cancel(),
-      _onExitSub.cancel()
+      _onExitSub.cancel(),
     ]);
   }
 
@@ -134,8 +135,9 @@ final class IsolateWorker {
 
   static void _main(_WorkerConfiguration config) {
     final delegate = config.delegate;
-    final controlChannel =
-        Channel(transport: IsolateChannel.connectSend(config.controlChannel));
+    final controlChannel = Channel(
+      transport: IsolateChannel.connectSend(config.controlChannel),
+    );
 
     controlChannel
       ..addCallEndpoint((_InitializeDelegate _) => delegate.initialize())
@@ -149,20 +151,10 @@ final class IsolateWorker {
   }
 }
 
-enum _WorkerStatus {
-  initial,
-  starting,
-  running,
-  stopping,
-  stopped,
-  crashed,
-}
+enum _WorkerStatus { initial, starting, running, stopping, stopped, crashed }
 
 final class _WorkerConfiguration {
-  _WorkerConfiguration({
-    required this.controlChannel,
-    required this.delegate,
-  });
+  _WorkerConfiguration({required this.controlChannel, required this.delegate});
 
   final SendPort controlChannel;
   final IsolateWorkerDelegate delegate;

@@ -35,8 +35,9 @@ void main(List<String> arguments) async {
 
   if (config.edition == Edition.enterprise) {
     packageConfigs.addAll(
-      VectorSearchPackageConfig.all(release: '1.0.0')
-          .where((config) => config.os == os),
+      VectorSearchPackageConfig.all(
+        release: '1.0.0',
+      ).where((config) => config.os == os),
     );
   }
 
@@ -80,9 +81,9 @@ void main(List<String> arguments) async {
 
 extension on Architecture {
   String get androidLibDir => switch (this) {
-        Architecture.arm => 'armeabi-v7a',
-        Architecture.arm64 => 'arm64-v8a',
-        Architecture.ia32 => 'x86',
-        Architecture.x64 => 'x86_64',
-      };
+    Architecture.arm => 'armeabi-v7a',
+    Architecture.arm64 => 'arm64-v8a',
+    Architecture.ia32 => 'x86',
+    Architecture.x64 => 'x86_64',
+  };
 }

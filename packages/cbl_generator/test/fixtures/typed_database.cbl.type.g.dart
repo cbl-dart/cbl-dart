@@ -22,11 +22,11 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
 
   @override
   String get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'value',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableCustomValueTypeMatcherDoc toMutable() =>
@@ -34,12 +34,10 @@ abstract class _CustomValueTypeMatcherDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'CustomValueTypeMatcherDoc',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'CustomValueTypeMatcherDoc',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -63,12 +61,12 @@ class ImmutableCustomValueTypeMatcherDoc
 class MutableCustomValueTypeMatcherDoc
     extends _CustomValueTypeMatcherDocImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<CustomValueTypeMatcherDoc,
-            MutableCustomValueTypeMatcherDoc> {
+        TypedMutableDocumentObject<
+          CustomValueTypeMatcherDoc,
+          MutableCustomValueTypeMatcherDoc
+        > {
   /// Creates a new mutable [CustomValueTypeMatcherDoc].
-  MutableCustomValueTypeMatcherDoc(
-    String value,
-  ) : super(MutableDocument()) {
+  MutableCustomValueTypeMatcherDoc(String value) : super(MutableDocument()) {
     this.value = value;
   }
 

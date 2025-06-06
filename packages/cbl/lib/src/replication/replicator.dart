@@ -53,7 +53,8 @@ final class ReplicatorProgress {
   final double progress;
 
   @override
-  String toString() => 'ReplicatorProgress('
+  String toString() =>
+      'ReplicatorProgress('
       '${(progress * 100).toStringAsFixed(1)}%; '
       // ignore: missing_whitespace_between_adjacent_strings
       'completed: $completed'
@@ -78,14 +79,14 @@ final class ReplicatorStatus {
 
   @override
   String toString() => [
-        'ReplicatorStatus(',
-        [
-          activity.name,
-          if (progress.completed != 0) 'progress: $progress',
-          if (error != null) 'error: $error',
-        ].join(', '),
-        ')',
-      ].join();
+    'ReplicatorStatus(',
+    [
+      activity.name,
+      if (progress.completed != 0) 'progress: $progress',
+      if (error != null) 'error: $error',
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 /// A listener that is called when a [Replicator]s [Replicator.status] changes.
@@ -97,9 +98,7 @@ typedef ReplicatorChangeListener = void Function(ReplicatorChange change);
 /// [Document]s.
 ///
 /// {@category Replication}
-typedef DocumentReplicationListener = void Function(
-  DocumentReplication change,
-);
+typedef DocumentReplicationListener = void Function(DocumentReplication change);
 
 /// A replicator for replicating [Document]s between a local database and a
 /// target database.
@@ -117,15 +116,17 @@ abstract interface class Replicator implements ClosableResource {
 
     // ignore: deprecated_member_use_from_same_package
     if (config.database is AsyncDatabase ||
-        config.collections.keys
-            .any((collection) => collection is AsyncCollection)) {
+        config.collections.keys.any(
+          (collection) => collection is AsyncCollection,
+        )) {
       return Replicator.createAsync(config);
     }
 
     // ignore: deprecated_member_use_from_same_package
     if (config.database is SyncDatabase ||
-        config.collections.keys
-            .any((collection) => collection is SyncCollection)) {
+        config.collections.keys.any(
+          (collection) => collection is SyncCollection,
+        )) {
       return Replicator.createSync(config);
     }
 
@@ -318,10 +319,7 @@ abstract interface class SyncReplicator implements Replicator {
   Set<String> pendingDocumentIdsInCollection(Collection collection);
 
   @override
-  bool isDocumentPendingInCollection(
-    String documentId,
-    Collection collection,
-  );
+  bool isDocumentPendingInCollection(String documentId, Collection collection);
 }
 
 /// A [Replicator] with a primarily asynchronous API.

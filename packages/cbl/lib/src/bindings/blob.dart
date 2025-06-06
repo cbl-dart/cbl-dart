@@ -17,16 +17,13 @@ final class BlobBindings extends Bindings {
   BlobBindings(super.libraries);
 
   Pointer<cblite.CBLBlob> createWithData(String? contentType, Data content) =>
-      runWithSingleFLString(
-        contentType,
-        (flContentType) {
-          final sliceResult = content.toSliceResult();
-          return cbl.CBLBlob_CreateWithData(
-            flContentType,
-            sliceResult.makeGlobal().ref,
-          );
-        },
-      );
+      runWithSingleFLString(contentType, (flContentType) {
+        final sliceResult = content.toSliceResult();
+        return cbl.CBLBlob_CreateWithData(
+          flContentType,
+          sliceResult.makeGlobal().ref,
+        );
+      });
 
   bool isBlob(cblite.FLDict dict) => cbl.FLDict_IsBlob(dict);
 
@@ -41,11 +38,10 @@ final class BlobBindings extends Bindings {
   String digest(Pointer<cblite.CBLBlob> blob) =>
       cbl.CBLBlob_Digest(blob).toDartString()!;
 
-  Data content(Pointer<cblite.CBLBlob> blob) =>
-      cbl.CBLBlob_Content(blob, globalCBLError)
-          .checkError()
-          .let(SliceResult.fromFLSliceResult)!
-          .toData();
+  Data content(Pointer<cblite.CBLBlob> blob) => cbl.CBLBlob_Content(
+    blob,
+    globalCBLError,
+  ).checkError().let(SliceResult.fromFLSliceResult)!.toData();
 
   String? contentType(Pointer<cblite.CBLBlob> blob) =>
       cbl.CBLBlob_ContentType(blob).toDartString();
@@ -59,13 +55,13 @@ final class BlobBindings extends Bindings {
 final class BlobReadStreamBindings extends Bindings {
   BlobReadStreamBindings(super.libraries);
 
-  late final _finalizer =
-      NativeFinalizer(cbl.addresses.CBLBlobReader_Close.cast());
+  late final _finalizer = NativeFinalizer(
+    cbl.addresses.CBLBlobReader_Close.cast(),
+  );
 
   Pointer<cblite.CBLBlobReadStream> openContentStream(
     Pointer<cblite.CBLBlob> blob,
-  ) =>
-      cbl.CBLBlob_OpenContentStream(blob, globalCBLError).checkError();
+  ) => cbl.CBLBlob_OpenContentStream(blob, globalCBLError).checkError();
 
   void bindToDartObject(
     Finalizable object,
@@ -75,8 +71,11 @@ final class BlobReadStreamBindings extends Bindings {
   }
 
   Data? read(Pointer<cblite.CBLBlobReadStream> stream, int bufferSize) {
-    final buffer =
-        cblDart.CBLDart_CBLBlobReader_Read(stream, bufferSize, globalCBLError);
+    final buffer = cblDart.CBLDart_CBLBlobReader_Read(
+      stream,
+      bufferSize,
+      globalCBLError,
+    );
 
     // A null slice signals an error.
     if (buffer.buf == nullptr) {
@@ -115,20 +114,19 @@ final class BlobWriteStreamBindings extends Bindings {
   Pointer<cblite.CBLBlob> createBlobWithStream(
     String? contentType,
     Pointer<cblite.CBLBlobWriteStream> stream,
-  ) =>
-      runWithSingleFLString(
-        contentType,
-        (flContentType) => cbl.CBLBlob_CreateWithStream(flContentType, stream),
-      );
+  ) => runWithSingleFLString(
+    contentType,
+    (flContentType) => cbl.CBLBlob_CreateWithStream(flContentType, stream),
+  );
 }
 
 // === BlobsBindings ===========================================================
 
 final class BlobsBindings extends Bindings {
   BlobsBindings(super.libraries)
-      : blob = BlobBindings(libraries),
-        readStream = BlobReadStreamBindings(libraries),
-        writeStream = BlobWriteStreamBindings(libraries);
+    : blob = BlobBindings(libraries),
+      readStream = BlobReadStreamBindings(libraries),
+      writeStream = BlobWriteStreamBindings(libraries);
 
   final BlobBindings blob;
   final BlobReadStreamBindings readStream;

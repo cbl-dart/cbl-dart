@@ -62,19 +62,20 @@ final class SyncGroupByImpl extends SyncBuilderQuery implements SyncGroupBy {
     OrderingInterface? ordering7,
     OrderingInterface? ordering8,
     OrderingInterface? ordering9,
-  ]) =>
-      orderByAll([
-        ordering0,
-        ordering1,
-        ordering2,
-        ordering3,
-        ordering4,
-        ordering5,
-        ordering6,
-        ordering7,
-        ordering8,
-        ordering9,
-      ].whereType());
+  ]) => orderByAll(
+    [
+      ordering0,
+      ordering1,
+      ordering2,
+      ordering3,
+      ordering4,
+      ordering5,
+      ordering6,
+      ordering7,
+      ordering8,
+      ordering9,
+    ].whereType(),
+  );
 
   @override
   SyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
@@ -107,19 +108,20 @@ final class AsyncGroupByImpl extends AsyncBuilderQuery implements AsyncGroupBy {
     OrderingInterface? ordering7,
     OrderingInterface? ordering8,
     OrderingInterface? ordering9,
-  ]) =>
-      orderByAll([
-        ordering0,
-        ordering1,
-        ordering2,
-        ordering3,
-        ordering4,
-        ordering5,
-        ordering6,
-        ordering7,
-        ordering8,
-        ordering9,
-      ].whereType());
+  ]) => orderByAll(
+    [
+      ordering0,
+      ordering1,
+      ordering2,
+      ordering3,
+      ordering4,
+      ordering5,
+      ordering6,
+      ordering7,
+      ordering8,
+      ordering9,
+    ].whereType(),
+  );
 
   @override
   AsyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>

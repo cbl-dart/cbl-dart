@@ -15,9 +15,8 @@ import 'result_set.dart';
 /// A listener that is called when the results of a [Query] have changed.
 ///
 /// {@category Query}
-typedef QueryChangeListener<T extends ResultSet> = void Function(
-  QueryChange<T> change,
-);
+typedef QueryChangeListener<T extends ResultSet> =
+    void Function(QueryChange<T> change);
 
 /// A [Database] query.
 ///

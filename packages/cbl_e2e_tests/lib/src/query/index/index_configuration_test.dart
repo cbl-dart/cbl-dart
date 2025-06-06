@@ -194,13 +194,15 @@ void main() {
 
       expect(
         VectorEncoding.none().hashCode,
-        isNot(VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit)
-            .hashCode),
+        isNot(
+          VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit).hashCode,
+        ),
       );
       expect(
         VectorEncoding.none().hashCode,
-        isNot(VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1)
-            .hashCode),
+        isNot(
+          VectorEncoding.productQuantizer(subQuantizers: 1, bits: 1).hashCode,
+        ),
       );
     });
 

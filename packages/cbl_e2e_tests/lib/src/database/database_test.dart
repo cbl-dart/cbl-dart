@@ -96,15 +96,19 @@ void main() {
 
     group('Database', () {
       apiTest('config', () async {
-        final config =
-            DatabaseConfiguration(directory: databaseDirectoryForTest());
+        final config = DatabaseConfiguration(
+          directory: databaseDirectoryForTest(),
+        );
         final db = await openTestDatabase(config: config);
 
         expect(db.name, 'db');
         expect(
           db.path,
-          [databaseDirectoryForTest(), 'db.cblite2', '']
-              .join(Platform.pathSeparator),
+          [
+            databaseDirectoryForTest(),
+            'db.cblite2',
+            '',
+          ].join(Platform.pathSeparator),
         );
         expect(db.config, config);
       });
@@ -140,10 +144,7 @@ void main() {
         await db.delete();
 
         expect(
-          await databaseExists(
-            'default',
-            directory: db.config.directory,
-          ),
+          await databaseExists('default', directory: db.config.directory),
           isFalse,
         );
       });
@@ -185,10 +186,7 @@ void main() {
           ),
         );
 
-        await expectLater(
-          Future(openTestDatabase),
-          throwsNotADatabaseFile,
-        );
+        await expectLater(Future(openTestDatabase), throwsNotADatabaseFile);
 
         await db.changeEncryptionKey(null);
 
@@ -208,12 +206,14 @@ void main() {
         await db.changeEncryptionKey(keyB);
 
         expect(
-          Future(() => openTestDatabase(
-                config: DatabaseConfiguration(
-                  directory: databaseDirectoryForTest(),
-                  encryptionKey: keyA,
-                ),
-              )),
+          Future(
+            () => openTestDatabase(
+              config: DatabaseConfiguration(
+                directory: databaseDirectoryForTest(),
+                encryptionKey: keyA,
+              ),
+            ),
+          ),
           throwsNotADatabaseFile,
         );
       });
@@ -337,11 +337,13 @@ void main() {
         );
       });
 
-      apiTest('document returns null when the document does not exist',
-          () async {
-        final db = await openTestDatabase();
-        expect(await db.document('x'), isNull);
-      });
+      apiTest(
+        'document returns null when the document does not exist',
+        () async {
+          final db = await openTestDatabase();
+          expect(await db.document('x'), isNull);
+        },
+      );
 
       apiTest('document returns the document when it exist', () async {
         final db = await openTestDatabase();
@@ -376,51 +378,45 @@ void main() {
         },
       );
 
-      apiTest(
-        'save mutable document created from changed mutable document '
-        '(lastWriteWins)',
-        () async {
-          final db = await openTestDatabase();
+      apiTest('save mutable document created from changed mutable document '
+          '(lastWriteWins)', () async {
+        final db = await openTestDatabase();
 
-          final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-          await db.saveDocument(initialDoc);
+        final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+        await db.saveDocument(initialDoc);
 
-          final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
+        final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
 
-          final doc = loadedDoc.toMutable();
+        final doc = loadedDoc.toMutable();
 
-          await db.saveDocument(loadedDoc);
+        await db.saveDocument(loadedDoc);
 
-          expect(await db.saveDocument(doc), isTrue);
+        expect(await db.saveDocument(doc), isTrue);
 
-          expect(
-            await db.saveDocument(loadedDoc, ConcurrencyControl.failOnConflict),
-            isFalse,
-          );
-        },
-      );
+        expect(
+          await db.saveDocument(loadedDoc, ConcurrencyControl.failOnConflict),
+          isFalse,
+        );
+      });
 
-      apiTest(
-        'save mutable document created from changed mutable document '
-        '(failOnConflict)',
-        () async {
-          final db = await openTestDatabase();
+      apiTest('save mutable document created from changed mutable document '
+          '(failOnConflict)', () async {
+        final db = await openTestDatabase();
 
-          final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-          await db.saveDocument(initialDoc);
+        final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+        await db.saveDocument(initialDoc);
 
-          final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
+        final loadedDoc = (await db.document(initialDoc.id))!.toMutable();
 
-          final doc = loadedDoc.toMutable();
+        final doc = loadedDoc.toMutable();
 
-          await db.saveDocument(loadedDoc);
+        await db.saveDocument(loadedDoc);
 
-          expect(
-            await db.saveDocument(doc, ConcurrencyControl.failOnConflict),
-            isFalse,
-          );
-        },
-      );
+        expect(
+          await db.saveDocument(doc, ConcurrencyControl.failOnConflict),
+          isFalse,
+        );
+      });
 
       group('saveDocumentWithConflictHandler', () {
         apiTest('save updated document', () async {
@@ -432,8 +428,10 @@ void main() {
             ..setValue('b', key: 'a');
           db.saveDocument(updatedDoc);
 
-          final SaveConflictHandler handler =
-              expectAsync2((documentBeingSaved, conflictingDocument) {
+          final SaveConflictHandler handler = expectAsync2((
+            documentBeingSaved,
+            conflictingDocument,
+          ) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, updatedDoc);
             documentBeingSaved.setValue('c', key: 'a');
@@ -456,8 +454,10 @@ void main() {
           await db.saveDocument(doc);
           await db.deleteDocument((await db.document(doc.id))!);
 
-          final SaveConflictHandler handler =
-              expectAsync2((documentBeingSaved, conflictingDocument) {
+          final SaveConflictHandler handler = expectAsync2((
+            documentBeingSaved,
+            conflictingDocument,
+          ) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, isNull);
             documentBeingSaved.setValue('c', key: 'a');
@@ -482,8 +482,10 @@ void main() {
             ..setValue('b', key: 'a');
           await db.saveDocument(updatedDoc);
 
-          final SaveConflictHandler handler =
-              expectAsync2((documentBeingSaved, conflictingDocument) {
+          final SaveConflictHandler handler = expectAsync2((
+            documentBeingSaved,
+            conflictingDocument,
+          ) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, updatedDoc);
             return apiFutureOr(false);
@@ -504,8 +506,10 @@ void main() {
             ..setValue('b', key: 'a');
           db.saveDocument(updatedDoc);
 
-          final SyncSaveConflictHandler handler =
-              expectAsync2((documentBeingSaved, conflictingDocument) {
+          final SyncSaveConflictHandler handler = expectAsync2((
+            documentBeingSaved,
+            conflictingDocument,
+          ) {
             expect(documentBeingSaved, doc);
             expect(conflictingDocument, updatedDoc);
             documentBeingSaved.setValue('c', key: 'a');
@@ -564,11 +568,13 @@ void main() {
         final doc = MutableDocument();
         expect(
           () => db.deleteDocument(doc),
-          throwsA(isA<DatabaseException>().having(
-            (exception) => exception.code,
-            'code',
-            DatabaseErrorCode.notFound,
-          )),
+          throwsA(
+            isA<DatabaseException>().having(
+              (exception) => exception.code,
+              'code',
+              DatabaseErrorCode.notFound,
+            ),
+          ),
         );
       });
 
@@ -657,11 +663,13 @@ void main() {
         final doc = MutableDocument();
         final listenerWasCalled = Completer<void>();
 
-        final token = await db.addChangeListener(expectAsync1((change) {
-          expect(change.database, db);
-          expect(change.documentIds, [doc.id]);
-          listenerWasCalled.complete();
-        }));
+        final token = await db.addChangeListener(
+          expectAsync1((change) {
+            expect(change.database, db);
+            expect(change.documentIds, [doc.id]);
+            listenerWasCalled.complete();
+          }),
+        );
 
         // Change the database.
         await db.saveDocument(doc);
@@ -679,12 +687,14 @@ void main() {
         final doc = MutableDocument();
         final listenerWasCalled = Completer<void>();
 
-        final token =
-            await db.addDocumentChangeListener(doc.id, expectAsync1((change) {
-          expect(change.database, db);
-          expect(change.documentId, doc.id);
-          listenerWasCalled.complete();
-        }));
+        final token = await db.addDocumentChangeListener(
+          doc.id,
+          expectAsync1((change) {
+            expect(change.database, db);
+            expect(change.documentId, doc.id);
+            listenerWasCalled.complete();
+          }),
+        );
 
         // Saved the document.
         await db.saveDocument(doc);
@@ -706,7 +716,7 @@ void main() {
           expect(
             db.changes(),
             emitsInOrder(<dynamic>[
-              DatabaseChange(db, [doc.id])
+              DatabaseChange(db, [doc.id]),
             ]),
           );
 
@@ -821,8 +831,9 @@ void main() {
           final db = await openTestDatabase();
           await db.createIndex('a', FullTextIndexConfiguration(['a']));
 
-          final q =
-              await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
+          final q = await db.createQuery(
+            "SELECT * FROM _ WHERE MATCH(a, 'query')",
+          );
 
           final explain = await q.explain();
 
@@ -851,8 +862,9 @@ void main() {
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
-        final q =
-            await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
+        final q = await db.createQuery(
+          "SELECT * FROM _ WHERE MATCH(a, 'query')",
+        );
 
         final explain = await q.explain();
 
@@ -898,8 +910,10 @@ void main() {
 
       apiTest('save and get blob from stream', () async {
         final db = await openTestDatabase();
-        final blob =
-            Blob.fromStream('', Stream.value(Uint8List.fromList([1, 2, 3])));
+        final blob = Blob.fromStream(
+          '',
+          Stream.value(Uint8List.fromList([1, 2, 3])),
+        );
         expect(blob.digest, isNull);
         expect(blob.length, isNull);
         await db.saveBlob(blob);
@@ -916,8 +930,10 @@ void main() {
         () async {
           final dbA = await openTestDatabase(name: 'a');
           final dbB = await openTestDatabase(name: 'b');
-          final blob =
-              Blob.fromStream('', Stream.value(Uint8List.fromList([1, 2, 3])));
+          final blob = Blob.fromStream(
+            '',
+            Stream.value(Uint8List.fromList([1, 2, 3])),
+          );
           await dbA.saveBlob(blob);
           expect(() => dbB.saveBlob(blob), throwsStateError);
         },
@@ -930,21 +946,23 @@ void main() {
     });
 
     group('Scenarios', () {
-      apiTest('open the same database twice and receive change notifications',
-          () async {
-        final dbA = await openTestDatabase(name: 'A');
-        final dbB = await openTestDatabase(name: 'A');
-        final doc = MutableDocument();
+      apiTest(
+        'open the same database twice and receive change notifications',
+        () async {
+          final dbA = await openTestDatabase(name: 'A');
+          final dbB = await openTestDatabase(name: 'A');
+          final doc = MutableDocument();
 
-        expect(
-          dbA.changes(),
-          emitsInOrder(<dynamic>[
-            DatabaseChange(dbA, [doc.id])
-          ]),
-        );
+          expect(
+            dbA.changes(),
+            emitsInOrder(<dynamic>[
+              DatabaseChange(dbA, [doc.id]),
+            ]),
+          );
 
-        await dbB.saveDocument(doc);
-      });
+          await dbB.saveDocument(doc);
+        },
+      );
 
       apiTest('SQL++ meal planner example', () async {
         final db = await openTestDatabase(name: 'A');
@@ -954,35 +972,34 @@ void main() {
           ValueIndexConfiguration(['`group`']),
         );
 
-        final dish = MutableDocument({
-          'type': 'dish',
-          'title': 'Lasagna',
-        });
+        final dish = MutableDocument({'type': 'dish', 'title': 'Lasagna'});
 
         await db.saveDocument(dish);
-        await db.saveDocument(MutableDocument({
-          'type': 'meal',
-          'dishes': [dish.id],
-          'group': 'fam',
-          'date': '2020-06-30',
-        }));
-        await db.saveDocument(MutableDocument({
-          'type': 'meal',
-          'dishes': [dish.id],
-          'group': 'fam',
-          'date': '2021-01-15',
-        }));
+        await db.saveDocument(
+          MutableDocument({
+            'type': 'meal',
+            'dishes': [dish.id],
+            'group': 'fam',
+            'date': '2020-06-30',
+          }),
+        );
+        await db.saveDocument(
+          MutableDocument({
+            'type': 'meal',
+            'dishes': [dish.id],
+            'group': 'fam',
+            'date': '2021-01-15',
+          }),
+        );
 
-        final q = await db.createQuery(
-          '''
+        final q = await db.createQuery('''
           SELECT dish, max(meal.date) AS last_used, count(meal._id) AS in_meals, meal
           FROM _ AS dish
           JOIN _ AS meal ON array_contains(meal.dishes, dish._id)
           WHERE dish.type = "dish" AND meal.type = "meal"  AND meal.`group` = "fam"
           GROUP BY dish._id
           ORDER BY max(meal.date)
-          ''',
-        );
+          ''');
 
         // ignore: avoid_print
         print(await q.explain());
@@ -995,47 +1012,42 @@ void main() {
 }
 
 FutureOr<void> removeDatabase(String name, {String? directory}) => runWithApi(
-      sync: () => Database.removeSync(name, directory: directory),
-      async: () => runWithIsolate(
-        main: () => removeDatabaseWithSharedIsolate(
-          name,
-          directory: directory,
-          isolate: Isolate.main,
-        ),
-        worker: () => Database.remove(name, directory: directory),
-      ),
-    );
+  sync: () => Database.removeSync(name, directory: directory),
+  async: () => runWithIsolate(
+    main: () => removeDatabaseWithSharedIsolate(
+      name,
+      directory: directory,
+      isolate: Isolate.main,
+    ),
+    worker: () => Database.remove(name, directory: directory),
+  ),
+);
 
 FutureOr<bool> databaseExists(String name, {String? directory}) => runWithApi(
-      sync: () => Database.existsSync(name, directory: directory),
-      async: () async => runWithIsolate(
-        main: () => databaseExistsWithSharedIsolate(
-          name,
-          directory: directory,
-          isolate: Isolate.main,
-        ),
-        worker: () => Database.exists(name, directory: directory),
-      ),
-    );
+  sync: () => Database.existsSync(name, directory: directory),
+  async: () async => runWithIsolate(
+    main: () => databaseExistsWithSharedIsolate(
+      name,
+      directory: directory,
+      isolate: Isolate.main,
+    ),
+    worker: () => Database.exists(name, directory: directory),
+  ),
+);
 
 FutureOr<void> copyDatabase({
   required String from,
   required String name,
   DatabaseConfiguration? config,
-}) =>
-    runWithApi(
-      sync: () => Database.copySync(
-        from: from,
-        name: name,
-        config: config,
-      ),
-      async: () async => runWithIsolate(
-        main: () => copyDatabaseWithSharedIsolate(
-          from: from,
-          name: name,
-          config: config,
-          isolate: Isolate.main,
-        ),
-        worker: () => Database.copy(from: from, name: name, config: config),
-      ),
-    );
+}) => runWithApi(
+  sync: () => Database.copySync(from: from, name: name, config: config),
+  async: () async => runWithIsolate(
+    main: () => copyDatabaseWithSharedIsolate(
+      from: from,
+      name: name,
+      config: config,
+      isolate: Isolate.main,
+    ),
+    worker: () => Database.copy(from: from, name: name, config: config),
+  ),
+);

@@ -18,15 +18,12 @@ void main() {
     test('dumpData shows the internal structure of Fleece data', () {
       final data = fleeceEncodeJson('{"a": true}');
 
-      expect(
-        dumpData(data),
-        '''
+      expect(dumpData(data), '''
  0000: 70 01       : Dict {
  0002: 41 61       :   "a":
  0004: 38 00       :     true }
  0006: 80 03       : &Dict @0000
-''',
-      );
+''');
     });
 
     test(
@@ -86,7 +83,7 @@ void main() {
             'e': false,
             'f': 'a',
             'g': <String, Object?>{},
-            'h': <Object?>[]
+            'h': <Object?>[],
           },
           <Object?>[],
         ]);
@@ -126,7 +123,7 @@ void main() {
             'e': false,
             'f': 'a',
             'g': <String, Object?>{},
-            'h': <Object?>[]
+            'h': <Object?>[],
           },
           <Object?>[],
         ]);
@@ -143,26 +140,21 @@ void main() {
   group('Fleece Encoding', () {
     test('convert JSON to Fleece data', () {
       final decoder = testFleeceDecoder();
-      final data = fleeceEncodeJson(
-        '''
+      final data = fleeceEncodeJson('''
         {
           "a": true,
           "foo": [true, false, null, 43, 43, 1.3, 1.3, "foo"],
           "buz": 1.3,
           "bzz": 1.3
         }
-        ''',
-      );
+        ''');
 
-      expect(
-        decoder.convert(data),
-        {
-          'a': true,
-          'buz': 1.3,
-          'bzz': 1.3,
-          'foo': [true, false, null, 43, 43, 1.3, 1.3, 'foo']
-        },
-      );
+      expect(decoder.convert(data), {
+        'a': true,
+        'buz': 1.3,
+        'bzz': 1.3,
+        'foo': [true, false, null, 43, 43, 1.3, 1.3, 'foo'],
+      });
     });
 
     group('FleeceEncoder', () {
@@ -178,7 +170,7 @@ void main() {
           Uint8List.fromList([42]),
           [true],
           {'a': true},
-          {true}
+          {true},
         ]);
 
         expect(decoder.convert(data), [
@@ -191,7 +183,7 @@ void main() {
           Uint8List.fromList([42]),
           [true],
           {'a': true},
-          [true]
+          [true],
         ]);
       });
 
@@ -216,20 +208,17 @@ void main() {
             ..endArray();
         });
 
-        expect(
-          decoder.convert(data),
-          [
-            null,
-            true,
-            false,
-            41,
-            3.14,
-            'a',
-            Uint8List.fromList([42]),
-            <Object?>[],
-            {'a': true}
-          ],
-        );
+        expect(decoder.convert(data), [
+          null,
+          true,
+          false,
+          41,
+          3.14,
+          'a',
+          Uint8List.fromList([42]),
+          <Object?>[],
+          {'a': true},
+        ]);
       });
     });
   });

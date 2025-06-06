@@ -17,86 +17,79 @@ enum Library {
   bool get isDatabaseLibrary => databaseLibraries.contains(this);
 
   String? packageRootDir(OS os, String version) => switch (this) {
-        cblite => switch (os) {
-            OS.android ||
-            OS.linux ||
-            OS.macOS ||
-            OS.windows =>
-              'libcblite-$version',
-            OS.iOS => null
-          },
-        cblitedart => switch (os) {
-            OS.android ||
-            OS.linux ||
-            OS.macOS ||
-            OS.windows =>
-              'libcblitedart-$version',
-            OS.iOS => null
-          },
-        vectorSearch => null,
-      };
+    cblite => switch (os) {
+      OS.android || OS.linux || OS.macOS || OS.windows => 'libcblite-$version',
+      OS.iOS => null,
+    },
+    cblitedart => switch (os) {
+      OS.android ||
+      OS.linux ||
+      OS.macOS ||
+      OS.windows => 'libcblitedart-$version',
+      OS.iOS => null,
+    },
+    vectorSearch => null,
+  };
 
   AppleFrameworkType? appleFrameworkType(OS os) => switch (this) {
-        cblite ||
-        cblitedart =>
-          os == OS.iOS ? AppleFrameworkType.xcframework : null,
-        vectorSearch => switch (os) {
-            OS.iOS => AppleFrameworkType.xcframework,
-            OS.macOS => AppleFrameworkType.framework,
-            OS.android || OS.linux || OS.windows => null,
-          },
-      };
+    cblite ||
+    cblitedart => os == OS.iOS ? AppleFrameworkType.xcframework : null,
+    vectorSearch => switch (os) {
+      OS.iOS => AppleFrameworkType.xcframework,
+      OS.macOS => AppleFrameworkType.framework,
+      OS.android || OS.linux || OS.windows => null,
+    },
+  };
 
   String? sharedLibrariesDir(OS os, Architecture architecture) =>
       switch (this) {
         cblite || cblitedart => switch (os) {
-            OS.android => p.join('lib', architecture.androidTriple),
-            OS.macOS => 'lib',
-            OS.linux => p.join('lib', architecture.linuxTripple),
-            OS.windows => 'bin',
-            OS.iOS => null,
-          },
+          OS.android => p.join('lib', architecture.androidTriple),
+          OS.macOS => 'lib',
+          OS.linux => p.join('lib', architecture.linuxTripple),
+          OS.windows => 'bin',
+          OS.iOS => null,
+        },
         vectorSearch => switch (os) {
-            OS.linux || OS.android => 'lib',
-            OS.windows => 'bin',
-            OS.iOS || OS.macOS => null,
-          }
+          OS.linux || OS.android => 'lib',
+          OS.windows => 'bin',
+          OS.iOS || OS.macOS => null,
+        },
       };
 
   String libraryName(OS os) => switch (this) {
-        cblite => switch (os) {
-            OS.linux || OS.android || OS.macOS => 'libcblite',
-            OS.windows => 'cblite',
-            OS.iOS => 'CouchbaseLite',
-          },
-        cblitedart => switch (os) {
-            OS.linux || OS.android || OS.macOS => 'libcblitedart',
-            OS.windows => 'cblitedart',
-            OS.iOS => 'CouchbaseLiteDart',
-          },
-        vectorSearch => switch (os) {
-            OS.android => 'libCouchbaseLiteVectorSearch',
-            OS.linux ||
-            OS.windows ||
-            OS.macOS ||
-            OS.iOS =>
-              'CouchbaseLiteVectorSearch',
-          },
-      };
+    cblite => switch (os) {
+      OS.linux || OS.android || OS.macOS => 'libcblite',
+      OS.windows => 'cblite',
+      OS.iOS => 'CouchbaseLite',
+    },
+    cblitedart => switch (os) {
+      OS.linux || OS.android || OS.macOS => 'libcblitedart',
+      OS.windows => 'cblitedart',
+      OS.iOS => 'CouchbaseLiteDart',
+    },
+    vectorSearch => switch (os) {
+      OS.android => 'libCouchbaseLiteVectorSearch',
+      OS.linux ||
+      OS.windows ||
+      OS.macOS ||
+      OS.iOS => 'CouchbaseLiteVectorSearch',
+    },
+  };
 }
 
 /// A Couchbase Lite edition.
-enum Edition {
-  community,
-  enterprise,
-}
+enum Edition { community, enterprise }
 
 /// An archive format.
 enum ArchiveFormat {
   zip,
   tarGz;
 
-  String get extension => switch (this) { zip => 'zip', tarGz => 'tar.gz' };
+  String get extension => switch (this) {
+    zip => 'zip',
+    tarGz => 'tar.gz',
+  };
 }
 
 /// An operating system.
@@ -133,21 +126,16 @@ enum OS {
 }
 
 /// A CPU architecture.
-enum Architecture {
-  ia32,
-  x64,
-  arm,
-  arm64,
-}
+enum Architecture { ia32, x64, arm, arm64 }
 
 enum AppleFrameworkType {
   xcframework,
   framework;
 
   String get extension => switch (this) {
-        xcframework => 'xcframework',
-        framework => 'framework',
-      };
+    xcframework => 'xcframework',
+    framework => 'framework',
+  };
 }
 
 abstract final class PackageConfig {
@@ -182,10 +170,7 @@ abstract final class PackageConfig {
 }
 
 final class Package {
-  Package({
-    required this.config,
-    required this.packageDir,
-  });
+  Package({required this.config, required this.packageDir});
 
   final PackageConfig config;
   final String packageDir;
@@ -195,9 +180,9 @@ final class Package {
   Library get library => config.library;
 
   String get rootDir => p.join(
-        packageDir,
-        config.library.packageRootDir(config.os, config.version),
-      );
+    packageDir,
+    config.library.packageRootDir(config.os, config.version),
+  );
 
   String get libraryName => config.library.libraryName(config.os);
 
@@ -226,8 +211,9 @@ final class Package {
   }
 
   String? get singleSharedLibrariesDir {
-    final sharedLibrariesDirectories =
-        config.architectures.map(sharedLibrariesDir).toSet();
+    final sharedLibrariesDirectories = config.architectures
+        .map(sharedLibrariesDir)
+        .toSet();
     if (sharedLibrariesDirectories.length == 1) {
       return sharedLibrariesDirectories.single;
     } else {
@@ -264,7 +250,7 @@ abstract class PackageLoader {
 
 final class RemotePackageLoader extends PackageLoader {
   RemotePackageLoader({String? cacheDir})
-      : cacheDir = cacheDir ?? _globalCacheDir;
+    : cacheDir = cacheDir ?? _globalCacheDir;
 
   static String get _globalCacheDir =>
       p.join(userCachesDir, 'cbl_native_package');
@@ -273,8 +259,9 @@ final class RemotePackageLoader extends PackageLoader {
 
   @override
   Future<String> _packageDir(PackageConfig config) async {
-    final archiveBaseName =
-        p.basenameWithoutExtension(Uri.parse(config._archiveUrl).path);
+    final archiveBaseName = p.basenameWithoutExtension(
+      Uri.parse(config._archiveUrl).path,
+    );
 
     final packageDir = p.join(cacheDir, archiveBaseName);
 
@@ -349,10 +336,7 @@ final class DatabasePackageConfig extends PackageConfig {
         DatabasePackageConfig(
           library: library,
           os: OS.iOS,
-          architectures: [
-            Architecture.arm64,
-            Architecture.x64,
-          ],
+          architectures: [Architecture.arm64, Architecture.x64],
           release: release,
           archiveFormat: ArchiveFormat.zip,
           edition: edition,
@@ -360,10 +344,7 @@ final class DatabasePackageConfig extends PackageConfig {
         DatabasePackageConfig(
           library: library,
           os: OS.macOS,
-          architectures: [
-            Architecture.arm64,
-            Architecture.x64,
-          ],
+          architectures: [Architecture.arm64, Architecture.x64],
           release: release,
           archiveFormat: ArchiveFormat.zip,
           edition: edition,
@@ -384,7 +365,7 @@ final class DatabasePackageConfig extends PackageConfig {
           archiveFormat: ArchiveFormat.zip,
           edition: edition,
         ),
-      ]
+      ],
     ];
   }
 
@@ -392,40 +373,40 @@ final class DatabasePackageConfig extends PackageConfig {
 
   @override
   String get _archiveUrl => switch (library) {
-        Library.cblite => Uri(
-            scheme: 'https',
-            host: 'packages.couchbase.com',
-            pathSegments: [
-              'releases',
-              'couchbase-lite-c',
-              release,
-              [
-                'couchbase-lite-c',
-                edition.name,
-                release,
-                '$targetId.${archiveFormat.extension}'
-              ].join('-'),
-            ],
-          ).toString(),
-        Library.cblitedart => Uri(
-            scheme: 'https',
-            host: 'github.com',
-            pathSegments: [
-              'cbl-dart',
-              'cbl-dart',
-              'releases',
-              'download',
-              'libcblitedart-v$release',
-              [
-                'couchbase-lite-dart',
-                release,
-                edition.name,
-                '$targetId.${archiveFormat.extension}',
-              ].join('-'),
-            ],
-          ).toString(),
-        _ => throw UnsupportedError('$library'),
-      };
+    Library.cblite => Uri(
+      scheme: 'https',
+      host: 'packages.couchbase.com',
+      pathSegments: [
+        'releases',
+        'couchbase-lite-c',
+        release,
+        [
+          'couchbase-lite-c',
+          edition.name,
+          release,
+          '$targetId.${archiveFormat.extension}',
+        ].join('-'),
+      ],
+    ).toString(),
+    Library.cblitedart => Uri(
+      scheme: 'https',
+      host: 'github.com',
+      pathSegments: [
+        'cbl-dart',
+        'cbl-dart',
+        'releases',
+        'download',
+        'libcblitedart-v$release',
+        [
+          'couchbase-lite-dart',
+          release,
+          edition.name,
+          '$targetId.${archiveFormat.extension}',
+        ].join('-'),
+      ],
+    ).toString(),
+    _ => throw UnsupportedError('$library'),
+  };
 }
 
 final class VectorSearchPackageConfig extends PackageConfig {
@@ -433,78 +414,71 @@ final class VectorSearchPackageConfig extends PackageConfig {
     required super.os,
     required super.architectures,
     required super.release,
-  }) : super(
-          library: Library.vectorSearch,
-          archiveFormat: ArchiveFormat.zip,
-        );
+  }) : super(library: Library.vectorSearch, archiveFormat: ArchiveFormat.zip);
 
-  static List<VectorSearchPackageConfig> all({
-    required String release,
-  }) =>
-      [
-        VectorSearchPackageConfig(
-          os: OS.android,
-          architectures: [Architecture.arm64],
-          release: release,
-        ),
-        VectorSearchPackageConfig(
-          os: OS.android,
-          architectures: [Architecture.x64],
-          release: release,
-        ),
-        VectorSearchPackageConfig(
-          os: OS.iOS,
-          architectures: [
-            Architecture.arm64,
-            Architecture.x64,
-          ],
-          release: release,
-        ),
-        VectorSearchPackageConfig(
-          os: OS.macOS,
-          architectures: [
-            Architecture.arm64,
-            Architecture.x64,
-          ],
-          release: release,
-        ),
-        VectorSearchPackageConfig(
-          os: OS.linux,
-          architectures: [Architecture.x64],
-          release: release,
-        ),
-        VectorSearchPackageConfig(
-          os: OS.windows,
-          architectures: [Architecture.x64],
-          release: release,
-        ),
-      ];
+  static List<VectorSearchPackageConfig> all({required String release}) => [
+    VectorSearchPackageConfig(
+      os: OS.android,
+      architectures: [Architecture.arm64],
+      release: release,
+    ),
+    VectorSearchPackageConfig(
+      os: OS.android,
+      architectures: [Architecture.x64],
+      release: release,
+    ),
+    VectorSearchPackageConfig(
+      os: OS.iOS,
+      architectures: [Architecture.arm64, Architecture.x64],
+      release: release,
+    ),
+    VectorSearchPackageConfig(
+      os: OS.macOS,
+      architectures: [Architecture.arm64, Architecture.x64],
+      release: release,
+    ),
+    VectorSearchPackageConfig(
+      os: OS.linux,
+      architectures: [Architecture.x64],
+      release: release,
+    ),
+    VectorSearchPackageConfig(
+      os: OS.windows,
+      architectures: [Architecture.x64],
+      release: release,
+    ),
+  ];
 
   @override
   String get _archiveUrl => Uri(
-        scheme: 'https',
-        host: 'packages.couchbase.com',
-        pathSegments: [
-          'releases',
+    scheme: 'https',
+    host: 'packages.couchbase.com',
+    pathSegments: [
+      'releases',
+      'couchbase-lite-vector-search',
+      release,
+      if (os == OS.iOS)
+        'couchbase-lite-vector-search_xcframework_'
+            '$release.${archiveFormat.extension}'
+      else
+        [
           'couchbase-lite-vector-search',
+          '-',
           release,
-          if (os == OS.iOS)
-            'couchbase-lite-vector-search_xcframework_'
-                '$release.${archiveFormat.extension}'
-          else
-            '${[
-              'couchbase-lite-vector-search',
-              release,
-              os.couchbaseSdkName,
-              if (!isMultiArchitecture)
-                if (os == OS.android &&
-                    architectures.single == Architecture.arm64)
-                  'arm64-v8a'
-                else
-                  architectures.single.couchbaseSdkName
-            ].join('-')}.${archiveFormat.extension}'
-        ],
-      ).toString();
+          '-',
+          os.couchbaseSdkName,
+          if (!isMultiArchitecture) ...[
+            '-',
+            if (os == OS.android && architectures.single == Architecture.arm64)
+              'arm64-v8a'
+            else
+              architectures.single.couchbaseSdkName,
+          ],
+          '.',
+          archiveFormat.extension,
+        ].join(),
+    ],
+  ).toString();
 
   @override
   Future<void> _postProcess(String packageDir) async {
@@ -513,20 +487,25 @@ final class VectorSearchPackageConfig extends PackageConfig {
       // linking during the build process for a macOS App and loading of the
       // extension to work, it needs to be in a framework.
       // So we place the shared library back into a framework.
-      final libraryFile =
-          File(p.join(packageDir, 'CouchbaseLiteVectorSearch.dylib'));
-      final frameworkDirectory = Directory(p.join(
-        packageDir,
-        'CouchbaseLiteVectorSearch.framework',
-      ));
-      final versionedLibraryPath =
-          p.join('Versions', 'A', 'CouchbaseLiteVectorSearch');
-      final versionedLibraryFile =
-          File(p.join(frameworkDirectory.path, versionedLibraryPath));
+      final libraryFile = File(
+        p.join(packageDir, 'CouchbaseLiteVectorSearch.dylib'),
+      );
+      final frameworkDirectory = Directory(
+        p.join(packageDir, 'CouchbaseLiteVectorSearch.framework'),
+      );
+      final versionedLibraryPath = p.join(
+        'Versions',
+        'A',
+        'CouchbaseLiteVectorSearch',
+      );
+      final versionedLibraryFile = File(
+        p.join(frameworkDirectory.path, versionedLibraryPath),
+      );
       await versionedLibraryFile.parent.create(recursive: true);
       await libraryFile.rename(versionedLibraryFile.path);
-      await Link(p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'))
-          .create(versionedLibraryPath);
+      await Link(
+        p.join(frameworkDirectory.path, 'CouchbaseLiteVectorSearch'),
+      ).create(versionedLibraryPath);
 
       // The library needs to be code signed for it to be included in the
       // release build of a macOS App. It is shipped without any code signing.
@@ -551,33 +530,33 @@ final class VectorSearchPackageConfig extends PackageConfig {
 
 extension on OS {
   String get couchbaseSdkName => switch (this) {
-        OS.android => 'android',
-        OS.iOS => 'ios',
-        OS.linux => 'linux',
-        OS.macOS => 'macos',
-        OS.windows => 'windows',
-      };
+    OS.android => 'android',
+    OS.iOS => 'ios',
+    OS.linux => 'linux',
+    OS.macOS => 'macos',
+    OS.windows => 'windows',
+  };
 }
 
 extension on Architecture {
   String get couchbaseSdkName => switch (this) {
-        Architecture.arm => 'arm',
-        Architecture.arm64 => 'arm64',
-        Architecture.ia32 => 'i686',
-        Architecture.x64 => 'x86_64',
-      };
+    Architecture.arm => 'arm',
+    Architecture.arm64 => 'arm64',
+    Architecture.ia32 => 'i686',
+    Architecture.x64 => 'x86_64',
+  };
 
   String get androidTriple => switch (this) {
-        Architecture.arm => 'arm-linux-androideabi',
-        Architecture.arm64 => 'aarch64-linux-android',
-        Architecture.ia32 => 'i686-linux-android',
-        Architecture.x64 => 'x86_64-linux-android',
-      };
+    Architecture.arm => 'arm-linux-androideabi',
+    Architecture.arm64 => 'aarch64-linux-android',
+    Architecture.ia32 => 'i686-linux-android',
+    Architecture.x64 => 'x86_64-linux-android',
+  };
 
   String get linuxTripple => switch (this) {
-        Architecture.arm => 'arm-linux-gnu',
-        Architecture.arm64 => 'aarch64-linux-gnu',
-        Architecture.ia32 => 'i686-linux-gnu',
-        Architecture.x64 => 'x86_64-linux-gnu',
-      };
+    Architecture.arm => 'arm-linux-gnu',
+    Architecture.arm64 => 'aarch64-linux-gnu',
+    Architecture.ia32 => 'i686-linux-gnu',
+    Architecture.x64 => 'x86_64-linux-gnu',
+  };
 }

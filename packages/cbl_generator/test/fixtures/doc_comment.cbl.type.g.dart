@@ -22,11 +22,11 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
 
   @override
   String get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'value',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableDocCommentDict toMutable() =>
@@ -34,12 +34,10 @@ abstract class _DocCommentDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocCommentDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'DocCommentDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -63,9 +61,7 @@ class MutableDocCommentDict extends _DocCommentDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<DocCommentDict, MutableDocCommentDict> {
   /// Creates a new mutable [DocCommentDict].
-  MutableDocCommentDict(
-    String value,
-  ) : super(MutableDictionary()) {
+  MutableDocCommentDict(String value) : super(MutableDictionary()) {
     this.value = value;
   }
 

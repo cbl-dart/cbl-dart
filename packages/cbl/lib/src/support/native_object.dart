@@ -17,6 +17,8 @@ void bindCBLRefCountedToDartObject<T extends NativeType>(
   if (!adopt) {
     CBLBindings.instance.base.retainRefCounted(pointer.cast());
   }
-  CBLBindings.instance.base
-      .bindCBLRefCountedToDartObject(object, pointer.cast());
+  CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+    object,
+    pointer.cast(),
+  );
 }

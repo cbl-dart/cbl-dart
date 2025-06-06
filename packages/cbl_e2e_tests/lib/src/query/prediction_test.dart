@@ -21,16 +21,14 @@ void main() {
     final db = await openTestDatabase();
     final users = await db.createCollection('users');
     await users.saveDocument(MutableDocument({'name': 'Alice'}));
-    final query = await db.createQuery(
-      '''
+    final query = await db.createQuery('''
       SELECT PREDICTION(uppercase, {"in": name}, "out") AS prediction
       FROM users
-      ''',
-    );
+      ''');
     final resultSet = await query.execute();
     final results = await resultSet.allPlainMapResults();
     expect(results, [
-      {'prediction': 'ALICE'}
+      {'prediction': 'ALICE'},
     ]);
   });
 
@@ -44,16 +42,14 @@ void main() {
     final db = await openTestDatabase();
     final users = await db.createCollection('users');
     await users.saveDocument(MutableDocument({'name': 'Alice'}));
-    final query = await db.createQuery(
-      '''
+    final query = await db.createQuery('''
       SELECT PREDICTION(uppercase, {"in": name}, "out") AS prediction
       FROM users
-      ''',
-    );
+      ''');
     final resultSet = await query.execute();
     final results = await resultSet.allPlainMapResults();
     expect(results, [
-      {'prediction': 'ALICE'}
+      {'prediction': 'ALICE'},
     ]);
   });
 
@@ -63,16 +59,14 @@ void main() {
     final db = await openTestDatabase();
     final users = await db.createCollection('users');
     await users.saveDocument(MutableDocument({'name': 'Alice'}));
-    final query = await db.createQuery(
-      '''
+    final query = await db.createQuery('''
       SELECT PREDICTION(noop, {}) IS MISSING
       FROM users
-      ''',
-    );
+      ''');
     final resultSet = await query.execute();
     final results = await resultSet.allPlainListResults();
     expect(results, [
-      {true}
+      {true},
     ]);
   });
 
@@ -82,16 +76,14 @@ void main() {
     final db = await openTestDatabase();
     final users = await db.createCollection('users');
     await users.saveDocument(MutableDocument({'name': 'Alice'}));
-    final query = await db.createQuery(
-      '''
+    final query = await db.createQuery('''
       SELECT PREDICTION(throwing, {}) IS MISSING
       FROM users
-      ''',
-    );
+      ''');
     final resultSet = await query.execute();
     final results = await resultSet.allPlainListResults();
     expect(results, [
-      {true}
+      {true},
     ]);
   });
 }

@@ -11,10 +11,7 @@ import 'tracing.dart';
 final _bindings = CBLBindings.instance.base;
 
 class InitContext {
-  InitContext({
-    required this.filesDir,
-    required this.tempDir,
-  });
+  InitContext({required this.filesDir, required this.tempDir});
 
   final String filesDir;
   final String tempDir;
@@ -24,11 +21,7 @@ class InitContext {
 }
 
 class IsolateContext {
-  IsolateContext({
-    this.libraries,
-    this.bindings,
-    this.initContext,
-  });
+  IsolateContext({this.libraries, this.bindings, this.initContext});
 
   static IsolateContext? _instance;
 

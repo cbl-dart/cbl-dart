@@ -9,25 +9,19 @@ import 'error.dart';
 
 final class CbdRunner extends CommandRunner<void> {
   CbdRunner({required this.projectDir})
-      : super('cbd', 'CBL Dart dev tools CLI') {
+    : super('cbd', 'CBL Dart dev tools CLI') {
     addCommand(GenerateBindings());
     addCommand(InstallPackages());
 
-    argParser.addFlag(
-      'verbose',
-      abbr: 'v',
-      help: 'Print verbose output',
-    );
+    argParser.addFlag('verbose', abbr: 'v', help: 'Print verbose output');
   }
 
   final String projectDir;
 
-  static Future<void> launch(
-    List<String> args,
-    LaunchContext context,
-  ) async {
-    final runner =
-        CbdRunner(projectDir: context.localInstallation!.packageRoot.path);
+  static Future<void> launch(List<String> args, LaunchContext context) async {
+    final runner = CbdRunner(
+      projectDir: context.localInstallation!.packageRoot.path,
+    );
 
     try {
       await runner.run(args);

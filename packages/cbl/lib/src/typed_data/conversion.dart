@@ -76,7 +76,8 @@ final class UnexpectedTypeException implements Exception {
   final Object? value;
   final List<Type> expectedTypes;
 
-  String get message => 'Expected a value of type $_expectedTypesPhrase, '
+  String get message =>
+      'Expected a value of type $_expectedTypesPhrase, '
       'but got a ${value.runtimeType}.';
 
   @override
@@ -113,18 +114,19 @@ final class DateTimeConverter extends NonPromotingDataConverter<DateTime> {
   @override
   DateTime toTyped(Object value) => value is String
       ? DateTime.parse(value)
-      : throw UnexpectedTypeException(
-          value: value,
-          expectedTypes: [String],
-        );
+      : throw UnexpectedTypeException(value: value, expectedTypes: [String]);
 
   @override
   Object toUntyped(DateTime value) => value.toIso8601String();
 }
 
 /// @nodoc
-final class TypedDictionaryConverter<I extends Object, T extends E,
-    E extends TypedDictionaryObject<T>> extends DataConverter<T, E> {
+final class TypedDictionaryConverter<
+  I extends Object,
+  T extends E,
+  E extends TypedDictionaryObject<T>
+>
+    extends DataConverter<T, E> {
   const TypedDictionaryConverter(this._factory);
 
   final Factory<I, T> _factory;

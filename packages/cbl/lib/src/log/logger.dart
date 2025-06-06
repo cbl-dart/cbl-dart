@@ -7,13 +7,7 @@ import '../support/async_callback.dart';
 /// Subsystems that log information.
 ///
 /// {@category Logging}
-enum LogDomain {
-  database,
-  query,
-  replicator,
-  network,
-  listener,
-}
+enum LogDomain { database, query, replicator, network, listener }
 
 /// Levels of log messages. Higher values are more important/severe. Each level
 /// includes the lower ones.
@@ -36,7 +30,7 @@ enum LogLevel {
   error,
 
   /// Disables logging entirely.
-  none
+  none,
 }
 
 /// Abstract class that custom loggers have to extended.

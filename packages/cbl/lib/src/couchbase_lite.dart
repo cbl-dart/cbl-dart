@@ -20,15 +20,14 @@ abstract final class CouchbaseLite {
   static Future<void> init({
     required LibrariesConfiguration libraries,
     bool autoEnableVectorSearch = true,
-  }) =>
-      asyncOperationTracePoint(InitializeOp.new, () async {
-        await initPrimaryIsolate(
-          IsolateContext(libraries: libraries),
-          autoEnableVectorSearch: autoEnableVectorSearch,
-        );
+  }) => asyncOperationTracePoint(InitializeOp.new, () async {
+    await initPrimaryIsolate(
+      IsolateContext(libraries: libraries),
+      autoEnableVectorSearch: autoEnableVectorSearch,
+    );
 
-        _setupLogging();
-      });
+    _setupLogging();
+  });
 
   /// Context object to pass to [initSecondary], when initializing a secondary
   /// [Isolate].

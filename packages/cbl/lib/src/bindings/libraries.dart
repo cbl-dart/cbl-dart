@@ -23,20 +23,20 @@ class LibraryConfiguration {
   /// Creates a configuration for a dynamic library opened with
   /// [DynamicLibrary.process].
   LibraryConfiguration.process()
-      : process = true,
-        name = null,
-        appendExtension = null,
-        version = null,
-        isAppleFramework = null;
+    : process = true,
+      name = null,
+      appendExtension = null,
+      version = null,
+      isAppleFramework = null;
 
   /// Creates a configuration for a dynamic library opened with
   /// [DynamicLibrary.executable].
   LibraryConfiguration.executable()
-      : process = false,
-        name = null,
-        appendExtension = null,
-        version = null,
-        isAppleFramework = null;
+    : process = false,
+      name = null,
+      appendExtension = null,
+      version = null,
+      isAppleFramework = null;
 
   /// `true` if the library is available in the globally visible symbols of the
   /// process.
@@ -188,9 +188,9 @@ final class DynamicLibraries {
         // TODO(blaugold): https://github.com/cbl-dart/cbl-dart/issues/657
         Abi.windowsArm64 => null,
         _ => config.vectorSearch?._tryResolvePath(
-            directory: config.directory,
-            symbol: 'couchbaselitevectorsearch_version',
-          ),
+          directory: config.directory,
+          symbol: 'couchbaselitevectorsearch_version',
+        ),
       },
     );
 
@@ -217,7 +217,8 @@ final class DynamicLibraries {
 // === Library extensions ======================================================
 
 final _isApple = Platform.isIOS || Platform.isMacOS;
-final _isUnix = Platform.isIOS ||
+final _isUnix =
+    Platform.isIOS ||
     Platform.isMacOS ||
     Platform.isAndroid ||
     Platform.isLinux ||
@@ -260,21 +261,26 @@ final class _Dl_info extends Struct {
   external Pointer<Utf8> dli_saddr;
 }
 
-final _dladdr = _process.lookupFunction<
-    Int Function(Pointer<Void>, Pointer<_Dl_info>),
-    int Function(Pointer<Void>, Pointer<_Dl_info>)>('dladdr');
+final _dladdr = _process
+    .lookupFunction<
+      Int Function(Pointer<Void>, Pointer<_Dl_info>),
+      int Function(Pointer<Void>, Pointer<_Dl_info>)
+    >('dladdr');
 
 // === Windows Dynamic Linking =================================================
 
 final _kernel32 = DynamicLibrary.open('kernel32.dll');
 
-final _AddDllDirectoryFn = _kernel32.lookupFunction<
-    Pointer<Void> Function(Pointer<Utf16>),
-    Pointer<Void> Function(Pointer<Utf16>)>('AddDllDirectory');
+final _AddDllDirectoryFn = _kernel32
+    .lookupFunction<
+      Pointer<Void> Function(Pointer<Utf16>),
+      Pointer<Void> Function(Pointer<Utf16>)
+    >('AddDllDirectory');
 
-final _RemoveDllDirectoryFn = _kernel32.lookupFunction<
-    Bool Function(Pointer<Void>),
-    bool Function(Pointer<Void>)>('RemoveDllDirectory');
+final _RemoveDllDirectoryFn = _kernel32
+    .lookupFunction<Bool Function(Pointer<Void>), bool Function(Pointer<Void>)>(
+      'RemoveDllDirectory',
+    );
 
 Pointer<Void> _AddDllDirectory(String directory) {
   final directoryNativeStr = directory.toNativeUtf16();
@@ -292,14 +298,17 @@ void _RemoveDllDirectory(Pointer<Void> cookie) {
   }
 }
 
-final _GetModuleHandleExA = _kernel32.lookupFunction<
-    Int Function(Uint32, Pointer<Utf8>, Pointer<Pointer<Void>>),
-    int Function(
-        int, Pointer<Utf8>, Pointer<Pointer<Void>>)>('GetModuleHandleExA');
+final _GetModuleHandleExA = _kernel32
+    .lookupFunction<
+      Int Function(Uint32, Pointer<Utf8>, Pointer<Pointer<Void>>),
+      int Function(int, Pointer<Utf8>, Pointer<Pointer<Void>>)
+    >('GetModuleHandleExA');
 
 const _GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS = 0x00000004;
 const _GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT = 0x00000002;
 
-final _GetModuleFileNameA = _kernel32.lookupFunction<
-    UnsignedLong Function(Pointer<Void>, Pointer<Utf8>, Uint32),
-    int Function(Pointer<Void>, Pointer<Utf8>, int)>('GetModuleFileNameA');
+final _GetModuleFileNameA = _kernel32
+    .lookupFunction<
+      UnsignedLong Function(Pointer<Void>, Pointer<Utf8>, Uint32),
+      int Function(Pointer<Void>, Pointer<Utf8>, int)
+    >('GetModuleFileNameA');

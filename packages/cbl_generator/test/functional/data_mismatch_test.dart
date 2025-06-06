@@ -10,8 +10,9 @@ void main() {
 
   group('nullable property', () {
     test('value has wrong type', () {
-      final doc =
-          MutableNullableBoolDict.internal(MutableDictionary({'value': 'a'}));
+      final doc = MutableNullableBoolDict.internal(
+        MutableDictionary({'value': 'a'}),
+      );
       expect(
         () => doc.value,
         throwsA(

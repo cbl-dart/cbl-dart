@@ -91,10 +91,7 @@ final class AsciiCollationImpl extends CollationImpl implements AsciiCollation {
       AsciiCollationImpl(ignoreCase: ignoreCase);
 
   @override
-  Object? toJson() => {
-        'UNICODE': false,
-        'CASE': !_ignoreCase,
-      };
+  Object? toJson() => {'UNICODE': false, 'CASE': !_ignoreCase};
 }
 
 final class UnicodeCollationImpl extends CollationImpl
@@ -103,9 +100,9 @@ final class UnicodeCollationImpl extends CollationImpl
     bool ignoreCase = false,
     bool ignoreAccents = false,
     String? locale,
-  })  : _ignoreCase = ignoreCase,
-        _ignoreAccents = ignoreAccents,
-        _locale = locale;
+  }) : _ignoreCase = ignoreCase,
+       _ignoreAccents = ignoreAccents,
+       _locale = locale;
 
   final bool _ignoreCase;
   final bool _ignoreAccents;
@@ -115,12 +112,11 @@ final class UnicodeCollationImpl extends CollationImpl
     bool? ignoreCase,
     bool? ignoreAccents,
     String? locale,
-  }) =>
-      UnicodeCollationImpl(
-        ignoreCase: ignoreCase ?? _ignoreCase,
-        ignoreAccents: ignoreAccents ?? _ignoreAccents,
-        locale: locale ?? _locale,
-      );
+  }) => UnicodeCollationImpl(
+    ignoreCase: ignoreCase ?? _ignoreCase,
+    ignoreAccents: ignoreAccents ?? _ignoreAccents,
+    locale: locale ?? _locale,
+  );
 
   @override
   UnicodeCollation ignoreCase(bool ignoreCase) =>
@@ -135,9 +131,9 @@ final class UnicodeCollationImpl extends CollationImpl
 
   @override
   Object? toJson() => {
-        'UNICODE': true,
-        'CASE': !_ignoreCase,
-        'DIAC': !_ignoreAccents,
-        'LOCALE': _locale,
-      };
+    'UNICODE': true,
+    'CASE': !_ignoreCase,
+    'DIAC': !_ignoreAccents,
+    'LOCALE': _locale,
+  };
 }

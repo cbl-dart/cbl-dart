@@ -29,12 +29,12 @@ final class PrebuiltPackageConfiguration {
   final List<LibraryVersionInfo> libraries;
 
   Map<String, Object?> toJson() => {
-        'name': name,
-        'version': version,
-        'cblFlutterInstallVersion': cblFlutterInstallVersion,
-        'edition': edition.name,
-        'libraries': libraries.map((library) => library.toJson()).toList(),
-      };
+    'name': name,
+    'version': version,
+    'cblFlutterInstallVersion': cblFlutterInstallVersion,
+    'edition': edition.name,
+    'libraries': libraries.map((library) => library.toJson()).toList(),
+  };
 }
 
 final class LibraryVersionInfo {
@@ -56,8 +56,8 @@ final class LibraryVersionInfo {
   final String release;
 
   Map<String, Object?> toJson() => {
-        'library': library.name,
-        'version': version,
-        'release': release,
-      };
+    'library': library.name,
+    'version': version,
+    'release': release,
+  };
 }

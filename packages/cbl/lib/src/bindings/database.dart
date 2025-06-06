@@ -19,15 +19,15 @@ enum CBLEncryptionAlgorithm {
   const CBLEncryptionAlgorithm(this.value);
 
   factory CBLEncryptionAlgorithm.fromValue(int value) => switch (value) {
-        cblite.kCBLEncryptionAES256 => aes256,
-        _ => throw ArgumentError('Unknown encryption algorithm: $value'),
-      };
+    cblite.kCBLEncryptionAES256 => aes256,
+    _ => throw ArgumentError('Unknown encryption algorithm: $value'),
+  };
 
   final int value;
 
   int get keySize => switch (this) {
-        CBLEncryptionAlgorithm.aes256 => cblite.kCBLEncryptionKeySizeAES256,
-      };
+    CBLEncryptionAlgorithm.aes256 => cblite.kCBLEncryptionKeySizeAES256,
+  };
 }
 
 final class CBLEncryptionKey {
@@ -73,8 +73,9 @@ enum CBLMaintenanceType {
 final class DatabaseBindings extends Bindings {
   DatabaseBindings(super.libraries);
 
-  late final _finalizer =
-      NativeFinalizer(cblDart.addresses.CBLDart_CBLDatabase_Release.cast());
+  late final _finalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_CBLDatabase_Release.cast(),
+  );
 
   CBLEncryptionKey encryptionKeyFromPassword(String password) =>
       withGlobalArena(() {
@@ -97,26 +98,26 @@ final class DatabaseBindings extends Bindings {
     String from,
     String name,
     CBLDatabaseConfiguration? config,
-  ) =>
-      withGlobalArena(() => cblDart.CBLDart_CBL_CopyDatabase(
-            from.toFLString(),
-            name.toFLString(),
-            _createConfig(config),
-            globalCBLError,
-          ).checkError());
+  ) => withGlobalArena(
+    () => cblDart.CBLDart_CBL_CopyDatabase(
+      from.toFLString(),
+      name.toFLString(),
+      _createConfig(config),
+      globalCBLError,
+    ).checkError(),
+  );
 
-  bool deleteDatabase(String name, String? inDirectory) =>
-      withGlobalArena(() => cbl.CBL_DeleteDatabase(
-            name.toFLString(),
-            inDirectory.toFLString(),
-            globalCBLError,
-          ).checkError());
+  bool deleteDatabase(String name, String? inDirectory) => withGlobalArena(
+    () => cbl.CBL_DeleteDatabase(
+      name.toFLString(),
+      inDirectory.toFLString(),
+      globalCBLError,
+    ).checkError(),
+  );
 
-  bool databaseExists(String name, String? inDirectory) =>
-      withGlobalArena(() => cbl.CBL_DatabaseExists(
-            name.toFLString(),
-            inDirectory.toFLString(),
-          ));
+  bool databaseExists(String name, String? inDirectory) => withGlobalArena(
+    () => cbl.CBL_DatabaseExists(name.toFLString(), inDirectory.toFLString()),
+  );
 
   CBLDatabaseConfiguration defaultConfiguration() {
     final config = cblDart.CBLDart_CBLDatabaseConfiguration_Default();
@@ -129,19 +130,18 @@ final class DatabaseBindings extends Bindings {
   Pointer<cblite.CBLDatabase> open(
     String name,
     CBLDatabaseConfiguration? config,
-  ) =>
-      withGlobalArena(() {
-        final nameFlStr = name.toFLString();
-        final cblConfig = _createConfig(config);
-        return nativeCallTracePoint(
-          TracedNativeCall.databaseOpen,
-          () => cblDart.CBLDart_CBLDatabase_Open(
-            nameFlStr,
-            cblConfig,
-            globalCBLError,
-          ),
-        ).checkError();
-      });
+  ) => withGlobalArena(() {
+    final nameFlStr = name.toFLString();
+    final cblConfig = _createConfig(config);
+    return nativeCallTracePoint(
+      TracedNativeCall.databaseOpen,
+      () => cblDart.CBLDart_CBLDatabase_Open(
+        nameFlStr,
+        cblConfig,
+        globalCBLError,
+      ),
+    ).checkError();
+  });
 
   void bindToDartObject(Finalizable object, Pointer<cblite.CBLDatabase> db) {
     _finalizer.attach(object, db.cast());
@@ -162,8 +162,11 @@ final class DatabaseBindings extends Bindings {
     Pointer<cblite.CBLDatabase> db,
     CBLMaintenanceType type,
   ) {
-    cbl.CBLDatabase_PerformMaintenance(db, type.value, globalCBLError)
-        .checkError();
+    cbl.CBLDatabase_PerformMaintenance(
+      db,
+      type.value,
+      globalCBLError,
+    ).checkError();
   }
 
   void beginTransaction(Pointer<cblite.CBLDatabase> db) {
@@ -176,8 +179,11 @@ final class DatabaseBindings extends Bindings {
   void endTransaction(Pointer<cblite.CBLDatabase> db, {required bool commit}) {
     nativeCallTracePoint(
       TracedNativeCall.databaseEndTransaction,
-      () => cbl.CBLDatabase_EndTransaction(db, commit, globalCBLError)
-          .checkError(),
+      () => cbl.CBLDatabase_EndTransaction(
+        db,
+        commit,
+        globalCBLError,
+      ).checkError(),
     );
   }
 
@@ -188,8 +194,11 @@ final class DatabaseBindings extends Bindings {
     withGlobalArena(() {
       final keyStruct = globalArena<cblite.CBLEncryptionKey>();
       _writeEncryptionKey(keyStruct.ref, from: key);
-      cbl.CBLDatabase_ChangeEncryptionKey(db, keyStruct, globalCBLError)
-          .checkError();
+      cbl.CBLDatabase_ChangeEncryptionKey(
+        db,
+        keyStruct,
+        globalCBLError,
+      ).checkError();
     });
   }
 
@@ -202,11 +211,10 @@ final class DatabaseBindings extends Bindings {
   Pointer<cblite.CBLBlob>? getBlob(
     Pointer<cblite.CBLDatabase> db,
     cblite.FLDict properties,
-  ) =>
-      nativeCallTracePoint(
-        TracedNativeCall.databaseGetBlob,
-        () => cbl.CBLDatabase_GetBlob(db, properties, globalCBLError),
-      ).checkError().toNullable();
+  ) => nativeCallTracePoint(
+    TracedNativeCall.databaseGetBlob,
+    () => cbl.CBLDatabase_GetBlob(db, properties, globalCBLError),
+  ).checkError().toNullable();
 
   void saveBlob(Pointer<cblite.CBLDatabase> db, Pointer<cblite.CBLBlob> blob) {
     nativeCallTracePoint(

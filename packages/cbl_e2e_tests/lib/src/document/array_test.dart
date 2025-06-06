@@ -13,7 +13,7 @@ void main() {
     test('toString', () async {
       final array = immutableArray([
         'a',
-        {'b': 'c'}
+        {'b': 'c'},
       ]);
       expect(array.toString(), '[a, {b: c}]');
     });
@@ -86,8 +86,7 @@ void main() {
           <Object?>[],
           <String, Object?>{},
         ]).toJson(),
-        json(
-          '''
+        json('''
           [
             null,
             "a",
@@ -99,8 +98,7 @@ void main() {
             [],
             {}
           ]
-          ''',
-        ),
+          '''),
       );
       expect(MutableArray().toJson(), '[]');
       expect(
@@ -115,8 +113,7 @@ void main() {
           <Object?>[],
           <String, Object?>{},
         ]).toJson(),
-        json(
-          '''
+        json('''
           [
             null,
             "a",
@@ -128,8 +125,7 @@ void main() {
             [],
             {}
           ]
-          ''',
-        ),
+          '''),
       );
     });
 
@@ -240,18 +236,12 @@ void main() {
       });
 
       test('set values', () {
-        setValuesTest(
-          build: MutableArray.new,
-          initialValue: 'a',
-        );
+        setValuesTest(build: MutableArray.new, initialValue: 'a');
         setValuesTest(
           build: (state) => immutableArray(state).toMutable(),
           initialValue: 'a',
         );
-        setValuesTest(
-          build: MutableArray.new,
-          initialValue: <Object?>[],
-        );
+        setValuesTest(build: MutableArray.new, initialValue: <Object?>[]);
         setValuesTest(
           build: (state) => immutableArray(state).toMutable(),
           initialValue: <Object?>[],
@@ -269,8 +259,10 @@ void main() {
         expect(() => array.setDate(testDate, at: 0), throwsRangeError);
         expect(() => array.setBlob(testBlob, at: 0), throwsRangeError);
         expect(() => array.setArray(MutableArray(), at: 0), throwsRangeError);
-        expect(() => array.setDictionary(MutableDictionary(), at: 0),
-            throwsRangeError);
+        expect(
+          () => array.setDictionary(MutableDictionary(), at: 0),
+          throwsRangeError,
+        );
       });
 
       test('append values', () {
@@ -364,28 +356,28 @@ void main() {
       group('from immutable', () {
         test('share child collection', () {
           final a = immutableArray([
-            ['a']
+            ['a'],
           ]).toMutable();
           final b = MutableArray([a.value(0)]);
 
           expect(a.toPlainList(), [
-            ['a']
+            ['a'],
           ]);
           expect(b.toPlainList(), [
-            ['a']
+            ['a'],
           ]);
         });
 
         test('move child collection', () {
           final a = immutableArray([
-            ['a']
+            ['a'],
           ]).toMutable();
           final b = MutableArray([a.value(0)]);
           a.removeValue(0);
 
           expect(a.toPlainList(), isEmpty);
           expect(b.toPlainList(), [
-            ['a']
+            ['a'],
           ]);
         });
       });

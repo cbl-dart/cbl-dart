@@ -30,12 +30,14 @@ void main() {
       expect(Slice.fromFLSlice(globalFLSlice.ref), isNull);
     });
 
-    test('toDartString decodes the slice data as UTF-8 and returns a String',
-        () {
-      final slice = SliceResult.fromString('a❤');
+    test(
+      'toDartString decodes the slice data as UTF-8 and returns a String',
+      () {
+        final slice = SliceResult.fromString('a❤');
 
-      expect(slice.toDartString(), 'a❤');
-    });
+        expect(slice.toDartString(), 'a❤');
+      },
+    );
 
     test('compareTo returns correct result', () {
       final a = SliceResult.fromString('a');

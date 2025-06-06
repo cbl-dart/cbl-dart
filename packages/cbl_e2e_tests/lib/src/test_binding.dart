@@ -22,16 +22,14 @@ export 'package:test/test.dart'
         registerException,
         printOnFailure;
 
-typedef TestFn = void Function(
-  String description,
-  FutureOr<void> Function() body, {
-  Object? skip,
-});
+typedef TestFn =
+    void Function(
+      String description,
+      FutureOr<void> Function() body, {
+      Object? skip,
+    });
 
-typedef GroupFn = void Function(
-  String description,
-  void Function() body,
-);
+typedef GroupFn = void Function(String description, void Function() body);
 
 typedef TestHook = void Function(dynamic Function() body);
 
@@ -89,10 +87,13 @@ abstract base class CblE2eTestBinding {
     final testDescriptions = [..._groupDescriptions, description];
     testFn(
       description,
-      () => runZoned<dynamic>(body, zoneValues: {
-        #testId: md5OfString(testDescriptions.join()),
-        #testDescriptions: testDescriptions,
-      }),
+      () => runZoned<dynamic>(
+        body,
+        zoneValues: {
+          #testId: md5OfString(testDescriptions.join()),
+          #testDescriptions: testDescriptions,
+        },
+      ),
       skip: skip,
     );
   }
@@ -164,11 +165,7 @@ List<String>? get testDescriptions =>
     Zone.current[#testDescriptions] as List<String>?;
 
 @isTest
-void test(
-  String description,
-  FutureOr<void> Function() body, {
-  Object? skip,
-}) =>
+void test(String description, FutureOr<void> Function() body, {Object? skip}) =>
     CblE2eTestBinding.instance._test(description, body, skip: skip);
 
 @isTestGroup

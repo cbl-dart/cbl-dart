@@ -143,14 +143,14 @@ final class FragmentImpl implements Fragment {
   FragmentImpl._empty();
 
   FragmentImpl.fromArray(ArrayInterface array, {required int index})
-      : _parent = array,
-        _index = index;
+    : _parent = array,
+      _index = index;
 
   FragmentImpl.fromDictionary(
     DictionaryInterface dictionary, {
     required String key,
-  })  : _parent = dictionary,
-        _key = key;
+  }) : _parent = dictionary,
+       _key = key;
 
   static final Fragment _emptyInstance = FragmentImpl._empty();
 

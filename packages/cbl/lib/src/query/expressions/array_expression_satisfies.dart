@@ -23,9 +23,9 @@ final class ArrayExpressionSatisfiesImpl implements ArrayExpressionSatisfies {
     Quantifier quantifier,
     VariableExpressionInterface variable,
     ExpressionInterface array,
-  )   : _quantifier = quantifier,
-        _variable = variable,
-        _array = array;
+  ) : _quantifier = quantifier,
+      _variable = variable,
+      _array = array;
 
   final Quantifier _quantifier;
   final VariableExpressionInterface _variable;

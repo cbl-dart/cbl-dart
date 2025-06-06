@@ -30,43 +30,43 @@ abstract class _UserImplBase<I extends Document> with _$User implements User {
 
   @override
   String? get email => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'email',
-        key: 'email',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'email',
+    key: 'email',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   String get username => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'username',
-        key: 'username',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'username',
+    key: 'username',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   DateTime get createdAt => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'createdAt',
-        key: 'createdAt',
-        converter: TypedDataHelpers.dateTimeConverter,
-      );
+    internal: internal,
+    name: 'createdAt',
+    key: 'createdAt',
+    converter: TypedDataHelpers.dateTimeConverter,
+  );
 
   @override
   MutableUser toMutable() => MutableUser.internal(internal.toMutable());
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'User',
-        fields: {
-          'id': id,
-          'name': name,
-          'email': email,
-          'username': username,
-          'createdAt': createdAt,
-        },
-      );
+    indent: indent,
+    className: 'User',
+    fields: {
+      'id': id,
+      'name': name,
+      'email': email,
+      'username': username,
+      'createdAt': createdAt,
+    },
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -74,10 +74,12 @@ abstract class _UserImplBase<I extends Document> with _$User implements User {
 class ImmutableUser extends _UserImplBase {
   ImmutableUser.internal(super.internal);
 
-  static const _nameConverter = const TypedDictionaryConverter<
-      Dictionary,
-      PersonalName,
-      TypedDictionaryObject<PersonalName>>(ImmutablePersonalName.internal);
+  static const _nameConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        PersonalName,
+        TypedDictionaryObject<PersonalName>
+      >(ImmutablePersonalName.internal);
 
   @override
   late final name = TypedDataHelpers.readProperty(
@@ -119,10 +121,12 @@ class MutableUser extends _UserImplBase<MutableDocument>
 
   MutableUser.internal(super.internal);
 
-  static const _nameConverter = const TypedDictionaryConverter<
-      MutableDictionary,
-      MutablePersonalName,
-      PersonalName>(MutablePersonalName.internal);
+  static const _nameConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutablePersonalName,
+        PersonalName
+      >(MutablePersonalName.internal);
 
   late MutablePersonalName _name = TypedDataHelpers.readProperty(
     internal: internal,
@@ -146,8 +150,9 @@ class MutableUser extends _UserImplBase<MutableDocument>
   }
 
   set email(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'email',
@@ -197,19 +202,19 @@ abstract class _PersonalNameImplBase<I extends Dictionary>
 
   @override
   String get first => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'first',
-        key: 'first',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'first',
+    key: 'first',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   String get last => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'last',
-        key: 'last',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'last',
+    key: 'last',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutablePersonalName toMutable() =>
@@ -217,13 +222,10 @@ abstract class _PersonalNameImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'PersonalName',
-        fields: {
-          'first': first,
-          'last': last,
-        },
-      );
+    indent: indent,
+    className: 'PersonalName',
+    fields: {'first': first, 'last': last},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -246,10 +248,8 @@ class ImmutablePersonalName extends _PersonalNameImplBase {
 class MutablePersonalName extends _PersonalNameImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<PersonalName, MutablePersonalName> {
   /// Creates a new mutable [PersonalName].
-  MutablePersonalName({
-    required String first,
-    required String last,
-  }) : super(MutableDictionary()) {
+  MutablePersonalName({required String first, required String last})
+    : super(MutableDictionary()) {
     this.first = first;
     this.last = last;
   }

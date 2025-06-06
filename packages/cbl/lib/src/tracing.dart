@@ -177,10 +177,7 @@ abstract base class TracingDelegate {
   /// The method must call [execute] exactly once. [execute] might throw an
   /// exception. This method must return the same value as [execute] or throw
   /// the same exception as [execute].
-  T traceSyncOperation<T>(
-    TracedOperation operation,
-    T Function() execute,
-  ) =>
+  T traceSyncOperation<T>(TracedOperation operation, T Function() execute) =>
       execute();
 
   /// Called when an asynchronous [operation] trace point is reached.
@@ -194,8 +191,7 @@ abstract base class TracingDelegate {
   Future<T> traceAsyncOperation<T>(
     TracedOperation operation,
     Future<T> Function() execute,
-  ) =>
-      execute();
+  ) => execute();
 }
 
 /// A traced operation.
@@ -292,7 +288,7 @@ abstract final class DocumentOperationOp implements TracedOperation {
 /// {@category Tracing}
 final class GetDocumentOp extends CollectionOperationOp {
   GetDocumentOp(Collection collection, this.id)
-      : super(collection, 'GetDocument');
+    : super(collection, 'GetDocument');
 
   /// The id of the document to load.
   final String id;
@@ -406,9 +402,8 @@ typedef OperationToStringResolver = String Function(TracedOperation operation);
 /// [TracedOperation]s.
 ///
 /// {@category Tracing}
-typedef OperationDetailsResolver = Map<String, Object?>? Function(
-  TracedOperation operation,
-);
+typedef OperationDetailsResolver =
+    Map<String, Object?>? Function(TracedOperation operation);
 
 /// A tracing delegate that integrates CBL Dart with the Dart DevTools.
 ///
@@ -434,19 +429,19 @@ final class DevToolsTracing extends TracingDelegate {
         defaultOperationNameResolver,
     OperationDetailsResolver operationDetailsResolver =
         defaultOperationDetailsResolver,
-  })  : _operationFilter = combineOperationFilters([
-          operationFilter,
-          _nestedChannelCallsFilter,
-        ]),
-        _operationNameResolver = operationNameResolver,
-        _operationDetailsResolver = operationDetailsResolver,
-        _isWorkerDelegate = false;
+  }) : _operationFilter = combineOperationFilters([
+         operationFilter,
+         _nestedChannelCallsFilter,
+       ]),
+       _operationNameResolver = operationNameResolver,
+       _operationDetailsResolver = operationDetailsResolver,
+       _isWorkerDelegate = false;
 
   DevToolsTracing._workerDelegate(DevToolsTracing userDelegate)
-      : _operationFilter = userDelegate._operationFilter,
-        _operationNameResolver = userDelegate._operationNameResolver,
-        _operationDetailsResolver = userDelegate._operationDetailsResolver,
-        _isWorkerDelegate = true;
+    : _operationFilter = userDelegate._operationFilter,
+      _operationNameResolver = userDelegate._operationNameResolver,
+      _operationDetailsResolver = userDelegate._operationDetailsResolver,
+      _isWorkerDelegate = true;
 
   /// The default filter that is used to determine whether an operation should
   /// be recorded to the timeline.
@@ -524,7 +519,8 @@ final class DevToolsTracing extends TracingDelegate {
     }
 
     if (operation is QueryOperationOp) {
-      details['query'] = operation.query.jsonRepresentation ??
+      details['query'] =
+          operation.query.jsonRepresentation ??
           operation.query.sqlRepresentation;
     }
 
@@ -541,10 +537,7 @@ final class DevToolsTracing extends TracingDelegate {
       DevToolsTracing._workerDelegate(this);
 
   @override
-  T traceSyncOperation<T>(
-    TracedOperation operation,
-    T Function() execute,
-  ) {
+  T traceSyncOperation<T>(TracedOperation operation, T Function() execute) {
     if (!_operationFilter(operation)) {
       return execute();
     }

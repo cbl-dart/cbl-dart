@@ -13,7 +13,7 @@ void main() {
     test('toString', () async {
       final dictionary = immutableDictionary({
         'a': 'b',
-        'c': ['d']
+        'c': ['d'],
       });
       expect(dictionary.toString(), '{a: b, c: [d]}');
     });
@@ -121,8 +121,7 @@ void main() {
           'array': <Object?>[],
           'dictionary': <String, Object?>{},
         }).toJson(),
-        json(
-          '''
+        json('''
           {
             "null": null,
             "string": "a",
@@ -134,8 +133,7 @@ void main() {
             "array": [],
             "dictionary": {}
           }
-          ''',
-        ),
+          '''),
       );
       expect(MutableDictionary().toJson(), '{}');
       expect(
@@ -150,8 +148,7 @@ void main() {
           'array': <Object?>[],
           'dictionary': <String, Object?>{},
         }).toJson(),
-        json(
-          '''
+        json('''
           {
             "null": null,
             "string": "a",
@@ -163,8 +160,7 @@ void main() {
             "array": [],
             "dictionary": {}
           }
-          ''',
-        ),
+          '''),
       );
     });
 
@@ -258,18 +254,12 @@ void main() {
       });
 
       test('set values', () {
-        setValuesTest(
-          build: MutableDictionary.new,
-          initialValue: 'a',
-        );
+        setValuesTest(build: MutableDictionary.new, initialValue: 'a');
         setValuesTest(
           build: (state) => immutableDictionary(state).toMutable(),
           initialValue: 'a',
         );
-        setValuesTest(
-          build: MutableDictionary.new,
-          initialValue: <Object?>{},
-        );
+        setValuesTest(build: MutableDictionary.new, initialValue: <Object?>{});
         setValuesTest(
           build: (state) => immutableDictionary(state).toMutable(),
           initialValue: <Object?>{},
@@ -308,28 +298,28 @@ void main() {
       group('from immutable', () {
         test('share child collection', () {
           final a = immutableDictionary({
-            'a': {'k': 'v'}
+            'a': {'k': 'v'},
           }).toMutable();
           final b = MutableDictionary({'b': a.value('a')});
 
           expect(a.toPlainMap(), {
-            'a': {'k': 'v'}
+            'a': {'k': 'v'},
           });
           expect(b.toPlainMap(), {
-            'b': {'k': 'v'}
+            'b': {'k': 'v'},
           });
         });
 
         test('move child collection', () {
           final a = immutableDictionary({
-            'a': {'k': 'v'}
+            'a': {'k': 'v'},
           }).toMutable();
           final b = MutableDictionary({'b': a.value('a')});
           a.removeValue('a');
 
           expect(a.toPlainMap(), isEmpty);
           expect(b.toPlainMap(), {
-            'b': {'k': 'v'}
+            'b': {'k': 'v'},
           });
         });
       });

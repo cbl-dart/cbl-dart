@@ -9,29 +9,25 @@ import 'context.dart';
 import 'value.dart';
 
 abstract base class MCollection {
-  MCollection({
-    MContext? context,
-    this.isMutable = true,
-  })  : context = context ?? const MContext(),
-        _isMutated = true,
-        _needsToSaveExternalData = false;
+  MCollection({MContext? context, this.isMutable = true})
+    : context = context ?? const MContext(),
+      _isMutated = true,
+      _needsToSaveExternalData = false;
 
-  MCollection.asCopy(
-    MCollection original, {
-    required this.isMutable,
-  })  : context = original.context,
-        _isMutated = true,
-        _needsToSaveExternalData = original._needsToSaveExternalData;
+  MCollection.asCopy(MCollection original, {required this.isMutable})
+    : context = original.context,
+      _isMutated = true,
+      _needsToSaveExternalData = original._needsToSaveExternalData;
 
   MCollection.asChild(
     MValue slot,
     MCollection parent, {
     required this.isMutable,
-  })  : context = parent.context,
-        _slot = slot,
-        _parent = parent,
-        _isMutated = slot.isMutated,
-        _needsToSaveExternalData = false;
+  }) : context = parent.context,
+       _slot = slot,
+       _parent = parent,
+       _isMutated = slot.isMutated,
+       _needsToSaveExternalData = false;
 
   MValue? _slot;
   MCollection? _parent;

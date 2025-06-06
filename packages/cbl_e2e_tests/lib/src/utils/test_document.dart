@@ -41,7 +41,8 @@ extension TestDocumentDatabaseExtension on Database {
   /// Gets the test document or `null` if does not exist.
   Future<MutableDocument?> getTestDocumentOrNull() async =>
       testDocumentId == null
-          ? null
-          : (await (await defaultCollection).document(testDocumentId!))
-              ?.toMutable();
+      ? null
+      : (await (await defaultCollection).document(
+          testDocumentId!,
+        ))?.toMutable();
 }

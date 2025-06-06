@@ -43,10 +43,11 @@ import 'scope.dart';
 ///   a custom conflict handler.
 ///
 /// {@category Database}
-typedef SaveConflictHandler = FutureOr<bool> Function(
-  MutableDocument documentBeingSaved,
-  Document? conflictingDocument,
-);
+typedef SaveConflictHandler =
+    FutureOr<bool> Function(
+      MutableDocument documentBeingSaved,
+      Document? conflictingDocument,
+    );
 
 /// Custom sync conflict handler for saving a document.
 ///
@@ -58,10 +59,11 @@ typedef SaveConflictHandler = FutureOr<bool> Function(
 ///   [Document] with a custom sync conflict handler.
 ///
 /// {@category Database}
-typedef SyncSaveConflictHandler = bool Function(
-  MutableDocument documentBeingSaved,
-  Document? conflictingDocument,
-);
+typedef SyncSaveConflictHandler =
+    bool Function(
+      MutableDocument documentBeingSaved,
+      Document? conflictingDocument,
+    );
 
 /// Listener which is called when one or more [Document]s in a [Collection] have
 /// changed.
@@ -187,10 +189,10 @@ abstract interface class Collection {
   /// - [SaveTypedDocument] for the object used to save typed documents.
   @experimental
   @useResult
-  SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
-      MD extends TypedMutableDocumentObject>(
-    TypedMutableDocumentObject<D, MD> document,
-  );
+  SaveTypedDocument<D, MD> saveTypedDocument<
+    D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject
+  >(TypedMutableDocumentObject<D, MD> document);
 
   /// Deletes a [document] from this collection, resolving conflicts through
   /// [ConcurrencyControl].
@@ -395,10 +397,10 @@ abstract interface class SyncCollection extends Collection {
   @override
   @experimental
   @useResult
-  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
-      MD extends TypedMutableDocumentObject>(
-    TypedMutableDocumentObject<D, MD> document,
-  );
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<
+    D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject
+  >(TypedMutableDocumentObject<D, MD> document);
 
   @override
   bool deleteDocument(
@@ -487,10 +489,10 @@ abstract interface class AsyncCollection extends Collection {
   @override
   @experimental
   @useResult
-  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
-      MD extends TypedMutableDocumentObject>(
-    TypedMutableDocumentObject<D, MD> document,
-  );
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<
+    D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject
+  >(TypedMutableDocumentObject<D, MD> document);
 
   @override
   Future<bool> deleteDocument(

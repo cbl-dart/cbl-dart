@@ -68,8 +68,10 @@ T runWithSingleFLString<T>(
     return fn(nullFLString.ref);
   }
 
-  final nativeString =
-      nativeUtf8StringEncoder.encode(string, cachedSliceResultAllocator);
+  final nativeString = nativeUtf8StringEncoder.encode(
+    string,
+    cachedSliceResultAllocator,
+  );
 
   try {
     return fn(nativeString.makeGlobalFLString());

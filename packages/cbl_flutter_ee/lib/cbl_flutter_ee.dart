@@ -7,7 +7,8 @@ import 'package:cbl_flutter_platform_interface/standard_cbl_flutter_platform.dar
 abstract final class CblFlutterEe {
   /// Registers this platform implementation as the current implementation.
   static void registerWith() {
-    CblFlutterPlatform.instance =
-        StandardCblFlutterPlatform(enterpriseEdition: true);
+    CblFlutterPlatform.instance = StandardCblFlutterPlatform(
+      enterpriseEdition: true,
+    );
   }
 }

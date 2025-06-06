@@ -55,37 +55,25 @@ void main() {
         async: QueryBuilder.createAsync,
       );
 
-      void expectBuilderQuery(
-        Query query,
-        Map<String, Object?> selectQuery,
-      ) {
-        expect(
-          query.jsonRepresentation,
-          json(['SELECT', selectQuery]),
-        );
+      void expectBuilderQuery(Query query, Map<String, Object?> selectQuery) {
+        expect(query.jsonRepresentation, json(['SELECT', selectQuery]));
       }
 
-      void exploreBuilderQuery(
-        Query query,
-        Map<String, Object?> selectQuery,
-      ) {
+      void exploreBuilderQuery(Query query, Map<String, Object?> selectQuery) {
         if (query is FromRouter) {
           final fromRouter = query as FromRouter;
-          exploreBuilderQuery(
-            fromRouter.from(DataSource.database(db)),
-            {
-              ...selectQuery,
-              'FROM': [
-                {'AS': 'db'}
-              ],
-            },
-          );
+          exploreBuilderQuery(fromRouter.from(DataSource.database(db)), {
+            ...selectQuery,
+            'FROM': [
+              {'AS': 'db'},
+            ],
+          });
           exploreBuilderQuery(
             fromRouter.from(DataSource.collection(collection)),
             {
               ...selectQuery,
               'FROM': [
-                {'COLLECTION': '_default._default'}
+                {'COLLECTION': '_default._default'},
               ],
             },
           );
@@ -107,9 +95,9 @@ void main() {
                 {
                   'AS': 'db',
                   'JOIN': 'INNER',
-                  'ON': ['.a']
-                }
-              ]
+                  'ON': ['.a'],
+                },
+              ],
             },
           );
           exploreBuilderQuery(
@@ -123,41 +111,35 @@ void main() {
                 {
                   'AS': 'db',
                   'JOIN': 'INNER',
-                  'ON': ['.a']
-                }
-              ]
+                  'ON': ['.a'],
+                },
+              ],
             },
           );
         }
 
         if (query is WhereRouter) {
           final whereRouter = query as WhereRouter;
-          exploreBuilderQuery(
-            whereRouter.where(Expression.value(true)),
-            {
-              ...selectQuery,
-              'WHERE': true,
-            },
-          );
+          exploreBuilderQuery(whereRouter.where(Expression.value(true)), {
+            ...selectQuery,
+            'WHERE': true,
+          });
         }
 
         if (query is GroupByRouter) {
           final groupByRouter = query as GroupByRouter;
-          exploreBuilderQuery(
-            groupByRouter.groupBy(Expression.property('a')),
-            {
-              ...selectQuery,
-              'GROUP_BY': [
-                ['.a']
-              ],
-            },
-          );
+          exploreBuilderQuery(groupByRouter.groupBy(Expression.property('a')), {
+            ...selectQuery,
+            'GROUP_BY': [
+              ['.a'],
+            ],
+          });
           exploreBuilderQuery(
             groupByRouter.groupByAll([Expression.property('a')]),
             {
               ...selectQuery,
               'GROUP_BY': [
-                ['.a']
+                ['.a'],
               ],
             },
           );
@@ -165,32 +147,26 @@ void main() {
 
         if (query is HavingRouter) {
           final havingRouter = query as HavingRouter;
-          exploreBuilderQuery(
-            havingRouter.having(Expression.value(true)),
-            {
-              ...selectQuery,
-              'HAVING': true,
-            },
-          );
+          exploreBuilderQuery(havingRouter.having(Expression.value(true)), {
+            ...selectQuery,
+            'HAVING': true,
+          });
         }
 
         if (query is OrderByRouter) {
           final orderByRouter = query as OrderByRouter;
-          exploreBuilderQuery(
-            orderByRouter.orderBy(Ordering.property('a')),
-            {
-              ...selectQuery,
-              'ORDER_BY': [
-                ['.a']
-              ],
-            },
-          );
+          exploreBuilderQuery(orderByRouter.orderBy(Ordering.property('a')), {
+            ...selectQuery,
+            'ORDER_BY': [
+              ['.a'],
+            ],
+          });
           exploreBuilderQuery(
             orderByRouter.orderByAll([Ordering.property('a')]),
             {
               ...selectQuery,
               'ORDER_BY': [
-                ['.a']
+                ['.a'],
               ],
             },
           );
@@ -199,51 +175,46 @@ void main() {
         if (query is LimitRouter) {
           final limitRouter = query as LimitRouter;
           exploreBuilderQuery(
-            limitRouter.limit(
-              Expression.value(1),
-              offset: Expression.value(0),
-            ),
-            {
-              ...selectQuery,
-              'LIMIT': 1,
-              'OFFSET': 0,
-            },
+            limitRouter.limit(Expression.value(1), offset: Expression.value(0)),
+            {...selectQuery, 'LIMIT': 1, 'OFFSET': 0},
           );
         }
       }
 
       exploreBuilderQuery(builder.select(SelectResult.all()), {
         'WHAT': [
-          ['.']
+          ['.'],
         ],
         'DISTINCT': false,
       });
       exploreBuilderQuery(builder.selectAll([SelectResult.all()]), {
         'WHAT': [
-          ['.']
+          ['.'],
         ],
         'DISTINCT': false,
       });
       exploreBuilderQuery(builder.selectDistinct(SelectResult.all()), {
         'WHAT': [
-          ['.']
+          ['.'],
         ],
         'DISTINCT': true,
       });
       exploreBuilderQuery(builder.selectAllDistinct([SelectResult.all()]), {
         'WHAT': [
-          ['.']
+          ['.'],
         ],
         'DISTINCT': true,
       });
     });
 
     group('SelectResult', () {
-      setUpAll(runWithApiValues(() async {
-        final db = await getSharedTestDatabase();
-        final doc = MutableDocument.withId('SelectOneResult', {'a': true});
-        await db.saveDocument(doc);
-      }));
+      setUpAll(
+        runWithApiValues(() async {
+          final db = await getSharedTestDatabase();
+          final doc = MutableDocument.withId('SelectOneResult', {'a': true});
+          await db.saveDocument(doc);
+        }),
+      );
 
       Future<Object?> selectOneResult(SelectResultInterface selectResult) =>
           Future.value(getSharedTestDatabase()).then((db) async {
@@ -260,7 +231,7 @@ void main() {
         final db = await getSharedTestDatabase();
 
         expect(await selectOneResult(SelectResult.all()), {
-          db.name: {'a': true}
+          db.name: {'a': true},
         });
       });
 
@@ -268,7 +239,7 @@ void main() {
         final db = await getSharedTestDatabase();
 
         expect(await selectOneResult(SelectResult.all().from(db.name)), {
-          db.name: {'a': true}
+          db.name: {'a': true},
         });
       });
 
@@ -277,17 +248,15 @@ void main() {
       });
 
       apiTest('SelectResult.property().as()', () async {
-        expect(
-          await selectOneResult(SelectResult.property('a').as('b')),
-          {'b': true},
-        );
+        expect(await selectOneResult(SelectResult.property('a').as('b')), {
+          'b': true,
+        });
       });
 
       apiTest('SelectResult.expression()', () async {
-        expect(
-          await selectOneResult(SelectResult.expression(valExpr(42))),
-          {r'$1': 42},
-        );
+        expect(await selectOneResult(SelectResult.expression(valExpr(42))), {
+          r'$1': 42,
+        });
       });
 
       apiTest('SelectResult.expression().as()', () async {
@@ -315,7 +284,7 @@ void main() {
             .toList();
 
         expect(result, [
-          {'a': true}
+          {'a': true},
         ]);
       });
 
@@ -324,93 +293,112 @@ void main() {
 
         // Inner join without right side
         expect(
-          await db.evalJoin(type: JoinType.join, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.join,
+            docs: [leftJoinDoc(id: 'A', on: 'A')],
+          ),
           isEmpty,
         );
 
         // Inner join with right side
         expect(
-          await db.evalJoin(type: JoinType.join, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-            rightJoinDoc(id: 'B', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.join,
+            docs: [
+              leftJoinDoc(id: 'A', on: 'A'),
+              rightJoinDoc(id: 'B', on: 'A'),
+            ],
+          ),
           [
-            ['A', 'B']
+            ['A', 'B'],
           ],
         );
 
         // Left outer join without right side
         expect(
-          await db.evalJoin(type: JoinType.leftJoin, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.leftJoin,
+            docs: [leftJoinDoc(id: 'A', on: 'A')],
+          ),
           [
-            ['A', null]
+            ['A', null],
           ],
         );
 
         // Left outer join with right side
         expect(
-          await db.evalJoin(type: JoinType.leftJoin, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-            rightJoinDoc(id: 'B', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.leftJoin,
+            docs: [
+              leftJoinDoc(id: 'A', on: 'A'),
+              rightJoinDoc(id: 'B', on: 'A'),
+            ],
+          ),
           [
-            ['A', 'B']
+            ['A', 'B'],
           ],
         );
 
         // Left outer join without right side
         expect(
-          await db.evalJoin(type: JoinType.leftOuterJoin, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.leftOuterJoin,
+            docs: [leftJoinDoc(id: 'A', on: 'A')],
+          ),
           [
-            ['A', null]
+            ['A', null],
           ],
         );
 
         // Left outer join with right side
         expect(
-          await db.evalJoin(type: JoinType.leftOuterJoin, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-            rightJoinDoc(id: 'B', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.leftOuterJoin,
+            docs: [
+              leftJoinDoc(id: 'A', on: 'A'),
+              rightJoinDoc(id: 'B', on: 'A'),
+            ],
+          ),
           [
-            ['A', 'B']
+            ['A', 'B'],
           ],
         );
 
         // Inner join without right side
         expect(
-          await db.evalJoin(type: JoinType.innerJoin, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.innerJoin,
+            docs: [leftJoinDoc(id: 'A', on: 'A')],
+          ),
           isEmpty,
         );
 
         // Inner join with right side
         expect(
-          await db.evalJoin(type: JoinType.innerJoin, docs: [
-            leftJoinDoc(id: 'A', on: 'A'),
-            rightJoinDoc(id: 'B', on: 'A'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.innerJoin,
+            docs: [
+              leftJoinDoc(id: 'A', on: 'A'),
+              rightJoinDoc(id: 'B', on: 'A'),
+            ],
+          ),
           [
-            ['A', 'B']
+            ['A', 'B'],
           ],
         );
 
         // Cross join without left side
         expect(
-          await db.evalJoin(type: JoinType.crossJoin, docs: [
-            leftJoinDoc(id: 'A'),
-            rightJoinDoc(id: 'B'),
-          ]),
+          await db.evalJoin(
+            type: JoinType.crossJoin,
+            docs: [
+              leftJoinDoc(id: 'A'),
+              rightJoinDoc(id: 'B'),
+            ],
+          ),
           [
             ['A', 'A'],
-            ['A', 'B']
+            ['A', 'B'],
           ],
         );
       });
@@ -464,11 +452,13 @@ void main() {
           required Object? equalTo,
         }) =>
             // ignore: cast_nullable_to_non_nullable
-            evalExpr(rangePredicate(
-              quantifier: Quantifier.any,
-              values: values,
-              equalTo: equalTo,
-            ));
+            evalExpr(
+              rangePredicate(
+                quantifier: Quantifier.any,
+                values: values,
+                equalTo: equalTo,
+              ),
+            );
 
         expect(await evalAny(values: [], equalTo: 'a'), false);
         expect(await evalAny(values: ['b'], equalTo: 'a'), false);
@@ -480,12 +470,13 @@ void main() {
         Future<Object?> evalEvery({
           required Iterable<Object?> values,
           required Object? equalTo,
-        }) =>
-            evalExpr(rangePredicate(
-              quantifier: Quantifier.every,
-              values: values,
-              equalTo: equalTo,
-            ));
+        }) => evalExpr(
+          rangePredicate(
+            quantifier: Quantifier.every,
+            values: values,
+            equalTo: equalTo,
+          ),
+        );
 
         expect(await evalEvery(values: [], equalTo: 'a'), 1);
         expect(await evalEvery(values: ['b'], equalTo: 'a'), 0);
@@ -497,15 +488,14 @@ void main() {
         Future<Object?> evalAnyAndEvery({
           required Iterable<Object?> values,
           required Object? equalTo,
-        }) =>
-            evalExpr(
-              ArrayExpression.anyAndEvery(ArrayExpression.variable('a'))
-                  .in_(Expression.property('array'))
-                  .satisfies(
-                    ArrayExpression.variable('a').equalTo(valExpr(equalTo)),
-                  ),
-              doc: MutableDocument({'array': values}),
-            );
+        }) => evalExpr(
+          ArrayExpression.anyAndEvery(ArrayExpression.variable('a'))
+              .in_(Expression.property('array'))
+              .satisfies(
+                ArrayExpression.variable('a').equalTo(valExpr(equalTo)),
+              ),
+          doc: MutableDocument({'array': values}),
+        );
 
         expect(await evalAnyAndEvery(values: [], equalTo: 'a'), 0);
         expect(await evalAnyAndEvery(values: ['b'], equalTo: 'a'), 0);
@@ -528,7 +518,7 @@ void main() {
           await evalExpr(
             Expression.property('a.b'),
             doc: MutableDocument({
-              'a': {'b': true}
+              'a': {'b': true},
             }),
           ),
           true,
@@ -739,9 +729,9 @@ void main() {
       apiTest('collation()', () async {
         expect(
           await evalExpr(
-            valExpr('A')
-                .equalTo(valExpr('a'))
-                .collate(Collation.ascii().ignoreCase(true)),
+            valExpr(
+              'A',
+            ).equalTo(valExpr('a')).collate(Collation.ascii().ignoreCase(true)),
           ),
           1,
         );
@@ -762,13 +752,15 @@ void main() {
       final doc = apiProvider((_) => MutableDocument());
       final deletedDoc = apiProvider((_) => MutableDocument());
 
-      setUpAll(runWithApiValues(() async {
-        final db = await getSharedTestDatabase();
-        await db.saveDocument(doc());
-        await db.setDocumentExpiration(doc().id, expirationDate);
-        await db.saveDocument(deletedDoc());
-        await db.deleteDocument(deletedDoc());
-      }));
+      setUpAll(
+        runWithApiValues(() async {
+          final db = await getSharedTestDatabase();
+          await db.saveDocument(doc());
+          await db.setDocumentExpiration(doc().id, expirationDate);
+          await db.saveDocument(deletedDoc());
+          await db.deleteDocument(deletedDoc());
+        }),
+      );
 
       Future<Object?> evalMetaExpr(
         ExpressionInterface expression, {
@@ -966,27 +958,22 @@ void main() {
 
       apiTest('trunc', () async {
         expect(
-          await evalExpr(Function_.trunc(
-            valExpr(.55),
-            digits: valExpr(1),
-          )),
+          await evalExpr(Function_.trunc(valExpr(.55), digits: valExpr(1))),
           0.5,
         );
       });
 
       apiTest('contains', () async {
         expect(
-          await evalExpr(Function_.contains(
-            valExpr('aa'),
-            substring: valExpr('a'),
-          )),
+          await evalExpr(
+            Function_.contains(valExpr('aa'), substring: valExpr('a')),
+          ),
           true,
         );
         expect(
-          await evalExpr(Function_.contains(
-            valExpr('a'),
-            substring: valExpr('b'),
-          )),
+          await evalExpr(
+            Function_.contains(valExpr('a'), substring: valExpr('b')),
+          ),
           false,
         );
       });
@@ -1019,7 +1006,8 @@ void main() {
       apiTest('stringToMillis', () async {
         expect(
           await evalExpr(
-              Function_.stringToMillis(valExpr('1970-01-01T00:00:00Z'))),
+            Function_.stringToMillis(valExpr('1970-01-01T00:00:00Z')),
+          ),
           0,
         );
       });
@@ -1027,7 +1015,8 @@ void main() {
       apiTest('stringToUTC', () async {
         expect(
           await evalExpr(
-              Function_.stringToUTC(valExpr('1970-01-01T00:00:00Z'))),
+            Function_.stringToUTC(valExpr('1970-01-01T00:00:00Z')),
+          ),
           '1970-01-01T00:00:00Z',
         );
       });
@@ -1052,9 +1041,7 @@ void main() {
           await evalExpr(
             Function_.prediction(
               'uppercase',
-              Expression.dictionary({
-                'in': 'a',
-              }),
+              Expression.dictionary({'in': 'a'}),
             ),
           ),
           {'out': 'A'},
@@ -1064,9 +1051,7 @@ void main() {
           await evalExpr(
             Function_.prediction(
               'uppercase',
-              Expression.dictionary({
-                'in': 'a',
-              }),
+              Expression.dictionary({'in': 'a'}),
             ).property('out'),
           ),
           'A',
@@ -1079,11 +1064,7 @@ void main() {
         ExpressionInterface containsExpr(
           Iterable<Object?> values,
           Object? value,
-        ) =>
-            ArrayFunction.contains(
-              valExpr(values),
-              value: valExpr(value),
-            );
+        ) => ArrayFunction.contains(valExpr(values), value: valExpr(value));
 
         expect(await evalExpr(containsExpr([], 'a')), false);
         expect(await evalExpr(containsExpr(['a'], 'a')), true);
@@ -1091,9 +1072,7 @@ void main() {
       });
 
       apiTest('length', () async {
-        ExpressionInterface lengthExpr(
-          Iterable<Object?> values,
-        ) =>
+        ExpressionInterface lengthExpr(Iterable<Object?> values) =>
             ArrayFunction.length(valExpr(values));
 
         expect(await evalExpr(lengthExpr([])), 0);
@@ -1110,14 +1089,10 @@ void main() {
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
-        final docA = MutableDocument({
-          'a': 'The quick brown fox',
-        });
+        final docA = MutableDocument({'a': 'The quick brown fox'});
         await db.saveDocument(docA);
 
-        final docB = MutableDocument({
-          'a': 'The slow brown fox',
-        });
+        final docB = MutableDocument({'a': 'The slow brown fox'});
         await db.saveDocument(docB);
 
         final resultSet = await const QueryBuilder()
@@ -1126,10 +1101,12 @@ void main() {
               SelectResult.expression(FullTextFunction.rank('a')),
             ])
             .from(DataSource.database(db))
-            .where(FullTextFunction.match(
-              indexName: 'a',
-              query: 'the OR quick OR brown OR fox',
-            ))
+            .where(
+              FullTextFunction.match(
+                indexName: 'a',
+                query: 'the OR quick OR brown OR fox',
+              ),
+            )
             .orderBy(Ordering.expression(FullTextFunction.rank('a')))
             .execute();
 
@@ -1147,10 +1124,12 @@ void main() {
 // === Eval expression utils ===================================================
 
 void setupEvalExprUtils() {
-  setUpAll(runWithApiValues(() async {
-    final db = await getSharedTestDatabase();
-    await db.saveDocument(MutableDocument.withId('EvalExpr'));
-  }));
+  setUpAll(
+    runWithApiValues(() async {
+      final db = await getSharedTestDatabase();
+      await db.saveDocument(MutableDocument.withId('EvalExpr'));
+    }),
+  );
 }
 
 ExpressionInterface valExpr(Object? value) => Expression.value(value);
@@ -1189,11 +1168,7 @@ Future<T> evalExpr<T extends Object?>(
       .first;
 }
 
-enum Quantifier {
-  any,
-  every,
-  anyAndEvery,
-}
+enum Quantifier { any, every, anyAndEvery }
 
 ExpressionInterface rangePredicate({
   required Quantifier quantifier,
@@ -1226,15 +1201,15 @@ final aggNumberExpression = Expression.property(aggNumberProperty);
 
 SelectResultInterface aggNumberResult(
   ExpressionInterface Function(ExpressionInterface number) fn,
-) =>
-    SelectResult.expression(fn(aggNumberExpression));
+) => SelectResult.expression(fn(aggNumberExpression));
 
 extension on Database {
-  FutureOr<void> insertAggNumbers(Iterable<num> numbers) =>
-      saveAllDocuments(numbers.map((number) => MutableDocument({
-            aggGroupProperty: '0',
-            aggNumberProperty: number,
-          })));
+  FutureOr<void> insertAggNumbers(Iterable<num> numbers) => saveAllDocuments(
+    numbers.map(
+      (number) =>
+          MutableDocument({aggGroupProperty: '0', aggNumberProperty: number}),
+    ),
+  );
 
   Future<List<Object?>> aggQuery(
     Iterable<SelectResultInterface> selectResults,
@@ -1251,24 +1226,12 @@ extension on Database {
 
 // === Join utils ==============================================================
 
-enum JoinType {
-  join,
-  leftJoin,
-  leftOuterJoin,
-  innerJoin,
-  crossJoin,
-}
+enum JoinType { join, leftJoin, leftOuterJoin, innerJoin, crossJoin }
 
-MutableDocument leftJoinDoc({
-  required String id,
-  String? on,
-}) =>
+MutableDocument leftJoinDoc({required String id, String? on}) =>
     MutableDocument.withId(id, {'side': 'left', if (on != null) 'on': on});
 
-MutableDocument rightJoinDoc({
-  required String id,
-  String? on,
-}) =>
+MutableDocument rightJoinDoc({required String id, String? on}) =>
     MutableDocument.withId(id, {'side': 'right', if (on != null) 'on': on});
 
 extension on Database {

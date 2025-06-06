@@ -83,10 +83,7 @@ void main() {
     });
 
     test('toString', () {
-      expect(
-        Parameters({'a': 'b'}).toString(),
-        r'Parameters($a: b)',
-      );
+      expect(Parameters({'a': 'b'}).toString(), r'Parameters($a: b)');
     });
   });
 }

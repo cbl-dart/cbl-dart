@@ -43,8 +43,7 @@ final class MutableDocumentBindings extends Bindings {
   void setProperties(
     Pointer<cblite.CBLDocument> doc,
     cblite.FLMutableDict properties,
-  ) =>
-      cbl.CBLDocument_SetProperties(doc, properties);
+  ) => cbl.CBLDocument_SetProperties(doc, properties);
 
   void setJSON(Pointer<cblite.CBLDocument> doc, String properties) {
     runWithSingleFLString(properties, (flProperties) {

@@ -29,11 +29,13 @@ abstract final class CouchbaseLiteNativeAssets {
         await initPrimaryIsolate(
           IsolateContext(
             initContext: context,
-            bindings: CBLBindings(BindingsLibraries(
-              enterpriseEdition: true,
-              cbl: const cbliteNative(),
-              cblDart: const cblitedartNative(),
-            )),
+            bindings: CBLBindings(
+              BindingsLibraries(
+                enterpriseEdition: true,
+                cbl: const cbliteNative(),
+                cblDart: const cblitedartNative(),
+              ),
+            ),
           ),
           autoEnableVectorSearch: false,
         );

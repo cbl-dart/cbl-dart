@@ -117,8 +117,8 @@ final class ResultImpl with IterableMixin<String> implements Result {
     required DatabaseMContext context,
     required List<String> columnNames,
     required this.columnValues,
-  })  : _context = context,
-        _columnNames = columnNames;
+  }) : _context = context,
+       _columnNames = columnNames;
 
   final DatabaseMContext _context;
   final List<String> _columnNames;
@@ -297,11 +297,11 @@ final class ResultImpl with IterableMixin<String> implements Result {
 
   @override
   String toString() => [
-        'Result(',
-        [
-          for (final columnName in this)
-            '$columnName: ${_dictionary.value(columnName)}'
-        ].join(', '),
-        ')'
-      ].join();
+    'Result(',
+    [
+      for (final columnName in this)
+        '$columnName: ${_dictionary.value(columnName)}',
+    ].join(', '),
+    ')',
+  ].join();
 }

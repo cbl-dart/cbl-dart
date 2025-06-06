@@ -221,8 +221,9 @@ void _randomlyRemoveMinValue(Map<String, int> table) {
     }
   }
 
-  final indexOfValueToRemove =
-      keysWithSameMinValue == 0 ? 0 : _random.nextInt(keysWithSameMinValue);
+  final indexOfValueToRemove = keysWithSameMinValue == 0
+      ? 0
+      : _random.nextInt(keysWithSameMinValue);
   var i = 0;
   for (final entry in table.entries) {
     if (entry.value == minValue) {

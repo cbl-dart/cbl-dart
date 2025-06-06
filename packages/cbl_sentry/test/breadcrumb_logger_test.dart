@@ -62,10 +62,7 @@ void main() {
 
     test('DatabaseOperationOp', () {
       final database = MockDatabase(name: 'a');
-      expect(
-        CloseDatabaseOp(database).debugDescription,
-        'a',
-      );
+      expect(CloseDatabaseOp(database).debugDescription, 'a');
     });
 
     test('QueryOperationOp', () {
@@ -84,21 +81,16 @@ void main() {
     test('SaveDocumentOp', () {
       final collection = MockCollection(name: 'a');
       final document = MutableDocument.withId('b');
-      expect(
-        SaveDocumentOp(collection, document).debugDetails,
-        {
-          'withConflictHandler': true,
-        },
-      );
+      expect(SaveDocumentOp(collection, document).debugDetails, {
+        'withConflictHandler': true,
+      });
       expect(
         SaveDocumentOp(
           collection,
           document,
           ConcurrencyControl.lastWriteWins,
         ).debugDetails,
-        {
-          'concurrencyControl': 'lastWriteWins',
-        },
+        {'concurrencyControl': 'lastWriteWins'},
       );
     });
 
@@ -111,9 +103,7 @@ void main() {
           document,
           ConcurrencyControl.lastWriteWins,
         ).debugDetails,
-        {
-          'concurrencyControl': 'lastWriteWins',
-        },
+        {'concurrencyControl': 'lastWriteWins'},
       );
     });
   });

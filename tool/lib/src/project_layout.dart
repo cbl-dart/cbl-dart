@@ -25,11 +25,10 @@ final class NativeVendorLayout {
   final String rootDir;
 
   String libraryPackagesDir(Library library) => switch (library) {
-        Library.cblite => '$rootDir/couchbase-lite-C-prebuilt',
-        Library.cblitedart => '$rootDir/couchbase-lite-Dart-prebuilt',
-        Library.vectorSearch =>
-          '$rootDir/couchbase-lite-vector-search-prebuilt',
-      };
+    Library.cblite => '$rootDir/couchbase-lite-C-prebuilt',
+    Library.cblitedart => '$rootDir/couchbase-lite-Dart-prebuilt',
+    Library.vectorSearch => '$rootDir/couchbase-lite-vector-search-prebuilt',
+  };
 
   String libraryPackageDir(PackageConfig config) {
     final packageDir = [
@@ -48,8 +47,9 @@ final class PackagesLayout {
   final String rootDir;
 
   late final cbl = PackageLayout(p.join(rootDir, 'cbl'));
-  late final cblNativeAssets =
-      PackageLayout(p.join(rootDir, 'cbl_native_assets'));
+  late final cblNativeAssets = PackageLayout(
+    p.join(rootDir, 'cbl_native_assets'),
+  );
 }
 
 final class PackageLayout {

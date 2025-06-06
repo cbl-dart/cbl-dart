@@ -17,10 +17,10 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
   }
 
   FfiDocumentDelegate.create([String? id])
-      : this.fromPointer(
-          _mutableDocumentBindings.createWithID(id).cast(),
-          adopt: true,
-        );
+    : this.fromPointer(
+        _mutableDocumentBindings.createWithID(id).cast(),
+        adopt: true,
+      );
 
   factory FfiDocumentDelegate.mutableCopy(FfiDocumentDelegate delegate) =>
       FfiDocumentDelegate.fromPointer(
@@ -64,8 +64,8 @@ final class FfiDocumentDelegate implements DocumentDelegate, Finalizable {
       );
 
   Data _readEncodedProperties() => FleeceEncoder.fleece.encodeWith((encoder) {
-        encoder.writeValue(_documentBindings.properties(pointer).cast());
-      });
+    encoder.writeValue(_documentBindings.properties(pointer).cast());
+  });
 
   void _writeEncodedProperties(Data value) {
     final doc = fl.Doc.fromResultData(value, FLTrust.trusted);

@@ -119,15 +119,19 @@ class _BindingsGenerator {
             visitor.methodsByClass[legacyFfigenConfig.name]!;
 
         // Read the symbol file from the legacy bindings.
-        final legacySymbolFile =
-            File(legacyFfigenConfig.output!.symbolFile!.output!);
+        final legacySymbolFile = File(
+          legacyFfigenConfig.output!.symbolFile!.output!,
+        );
         var legacySymbolFileLines = await legacySymbolFile.readAsLines();
 
         // Remove the method names of the legacy bindings from the symbol file
         // so that they are generated again in the new bindings.
         legacySymbolFileLines = legacySymbolFileLines
-            .whereNot((line) => bindingsMethodNames
-                .any((methodName) => line.contains(methodName)))
+            .whereNot(
+              (line) => bindingsMethodNames.any(
+                (methodName) => line.contains(methodName),
+              ),
+            )
             .toList();
 
         // Write the new symbol file.
@@ -145,12 +149,7 @@ class _BindingsGenerator {
       () async {
         await runProcess(
           'dart',
-          [
-            'run',
-            'ffigen',
-            '--config',
-            ffigenConfig,
-          ],
+          ['run', 'ffigen', '--config', ffigenConfig],
           workingDirectory: packageDir,
           logger: logger,
         );
@@ -271,12 +270,14 @@ class _BindingsGenerator {
               legacyFfigenConfig.output!.symbolFile!.importPath!,
         );
 
-        final nativeBindingsFile = File(p.join(
-          packageDir,
-          'lib',
-          'src',
-          '${ffigenConfig.name}_native_bindings.dart',
-        ));
+        final nativeBindingsFile = File(
+          p.join(
+            packageDir,
+            'lib',
+            'src',
+            '${ffigenConfig.name}_native_bindings.dart',
+          ),
+        );
 
         await nativeBindingsFile.writeAsString(
           bindingsGenerator.generate(legacyBindingsParseResult.unit),
@@ -313,7 +314,9 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
   String generate(CompilationUnit unit) {
     _buffer.clear();
     visitCompilationUnit(unit);
-    return DartFormatter().format(_buffer.toString());
+    return DartFormatter(
+      languageVersion: DartFormatter.latestLanguageVersion,
+    ).format(_buffer.toString());
   }
 
   final StringBuffer _buffer = StringBuffer();
@@ -331,7 +334,8 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
       ..writeln("import '$legacyBindingsLibraryPath';")
       ..writeln(r"import 'package:cbl/src/bindings/cblite.dart' as imp$1;")
       ..writeln(
-          "import './$bindingsClassName.dart' as $_nativeAssetLibraryAlias;")
+        "import './$bindingsClassName.dart' as $_nativeAssetLibraryAlias;",
+      )
       ..writeln();
 
     super.visitCompilationUnit(node);
@@ -400,7 +404,7 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
 
           switch (parameter) {
             case FieldFormalParameter(:final type) ||
-                  SimpleFormalParameter(:final type):
+                SimpleFormalParameter(:final type):
               _buffer.write(type!.toSource());
               _buffer.write(' ');
               _buffer.write(parameterName);

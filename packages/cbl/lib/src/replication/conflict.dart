@@ -30,7 +30,8 @@ final class ConflictImpl implements Conflict {
   final Document? remoteDocument;
 
   @override
-  String toString() => 'Conflict('
+  String toString() =>
+      'Conflict('
       'local: $localDocument, '
       // ignore: missing_whitespace_between_adjacent_strings
       'remote: $remoteDocument'
@@ -69,7 +70,8 @@ final class TypedConflictImpl implements TypedConflict {
   final TypedDocumentObject? remoteDocument;
 
   @override
-  String toString() => 'TypedConflict('
+  String toString() =>
+      'TypedConflict('
       'local: $localDocument, '
       // ignore: missing_whitespace_between_adjacent_strings
       'remote: $remoteDocument'

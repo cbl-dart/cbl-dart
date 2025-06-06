@@ -33,26 +33,31 @@ final class ProxyReplicator extends ProxyObject
     required int objectId,
     required ReplicatorConfiguration config,
     required void Function() unregisterCallbacks,
-  })  : _database = database,
-        _config = ReplicatorConfiguration.from(config),
-        super(database.channel, objectId, proxyFinalizer: unregisterCallbacks) {
+  }) : _database = database,
+       _config = ReplicatorConfiguration.from(config),
+       super(database.channel, objectId, proxyFinalizer: unregisterCallbacks) {
     attachTo(_database);
   }
 
-  static Future<ProxyReplicator> create(
-    ReplicatorConfiguration config,
-  ) async {
-    final (database, collections) = await resolveReplicatorCollections<
-        AsyncDatabase, AsyncCollection, ProxyDatabase, ProxyCollection>(config);
+  static Future<ProxyReplicator> create(ReplicatorConfiguration config) async {
+    final (database, collections) =
+        await resolveReplicatorCollections<
+          AsyncDatabase,
+          AsyncCollection,
+          ProxyDatabase,
+          ProxyCollection
+        >(config);
 
     var target = config.target;
     if (target is DatabaseEndpoint) {
       useEnterpriseFeature(EnterpriseFeature.localDbReplication);
 
-      final database = assertArgumentType<AsyncDatabase>(
-        target.database,
-        'config.target.database',
-      ) as ProxyDatabase;
+      final database =
+          assertArgumentType<AsyncDatabase>(
+                target.database,
+                'config.target.database',
+              )
+              as ProxyDatabase;
       target = ServiceDatabaseEndpoint(database.objectId);
     }
 
@@ -77,11 +82,9 @@ final class ProxyReplicator extends ProxyObject
           ?.let((it) => _wrapConflictResolver(it, collection))
           .let(client.registerConflictResolver);
 
-      callbacksIds.addAll([
-        pushFilterId,
-        pullFilterId,
-        conflictResolverId,
-      ].nonNulls);
+      callbacksIds.addAll(
+        [pushFilterId, pullFilterId, conflictResolverId].nonNulls,
+      );
 
       return CreateReplicatorCollection(
         collectionId: collection.objectId,
@@ -94,22 +97,24 @@ final class ProxyReplicator extends ProxyObject
     }).toList();
 
     try {
-      final objectId = await database.channel.call(CreateReplicator(
-        target: target,
-        replicatorType: config.replicatorType,
-        continuous: config.continuous,
-        authenticator: config.authenticator,
-        acceptOnlySelfSignedServerCertificate:
-            config.acceptOnlySelfSignedServerCertificate,
-        pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
-        trustedRootCertificates: config.trustedRootCertificates?.toData(),
-        headers: config.headers,
-        enableAutoPurge: config.enableAutoPurge,
-        heartbeat: config.heartbeat,
-        maxAttempts: config.maxAttempts,
-        maxAttemptWaitTime: config.maxAttemptWaitTime,
-        collections: createReplicatorCollections,
-      ));
+      final objectId = await database.channel.call(
+        CreateReplicator(
+          target: target,
+          replicatorType: config.replicatorType,
+          continuous: config.continuous,
+          authenticator: config.authenticator,
+          acceptOnlySelfSignedServerCertificate:
+              config.acceptOnlySelfSignedServerCertificate,
+          pinnedServerCertificate: config.pinnedServerCertificate?.toData(),
+          trustedRootCertificates: config.trustedRootCertificates?.toData(),
+          headers: config.headers,
+          enableAutoPurge: config.enableAutoPurge,
+          heartbeat: config.heartbeat,
+          maxAttempts: config.maxAttempts,
+          maxAttemptWaitTime: config.maxAttemptWaitTime,
+          collections: createReplicatorCollections,
+        ),
+      );
       return ProxyReplicator(
         database: database,
         objectId: objectId,
@@ -134,38 +139,34 @@ final class ProxyReplicator extends ProxyObject
 
   @override
   Future<ReplicatorStatus> get status =>
-      use(() => channel.call(GetReplicatorStatus(
-            replicatorId: objectId,
-          )));
+      use(() => channel.call(GetReplicatorStatus(replicatorId: objectId)));
 
   @override
   Future<Certificate?> get serverCertificate async => use(() async {
-        final response = await channel.call(GetReplicatorServerCertificate(
-          replicatorId: objectId,
-        ));
-        return response?.certificate;
-      });
+    final response = await channel.call(
+      GetReplicatorServerCertificate(replicatorId: objectId),
+    );
+    return response?.certificate;
+  });
 
   @override
   // ignore: prefer_expression_function_bodies
   Future<void> start({bool reset = false}) => use(() {
-        if (_database.ownsCurrentTransaction) {
-          throw DatabaseException(
-            'A replicator cannot be started from within a database '
-            'transaction.',
-            DatabaseErrorCode.transactionNotClosed,
-          );
-        }
+    if (_database.ownsCurrentTransaction) {
+      throw DatabaseException(
+        'A replicator cannot be started from within a database '
+        'transaction.',
+        DatabaseErrorCode.transactionNotClosed,
+      );
+    }
 
-        // Starting a replicator while the database has an active transaction
-        // causes a deadlock. To avoid this, we synchronize the start call with
-        // the database's transaction lock.
-        return _database.asyncTransactionLock
-            .synchronized(() => channel.call(StartReplicator(
-                  replicatorId: objectId,
-                  reset: reset,
-                )));
-      });
+    // Starting a replicator while the database has an active transaction
+    // causes a deadlock. To avoid this, we synchronize the start call with
+    // the database's transaction lock.
+    return _database.asyncTransactionLock.synchronized(
+      () => channel.call(StartReplicator(replicatorId: objectId, reset: reset)),
+    );
+  });
 
   @override
   Future<void> stop() => use(_stop);
@@ -180,51 +181,63 @@ final class ProxyReplicator extends ProxyObject
       });
 
   Future<AbstractListenerToken> _addChangeListener(
-      ReplicatorChangeListener listener) async {
+    ReplicatorChangeListener listener,
+  ) async {
     late final ProxyListenerToken<ReplicatorChange> token;
-    final listenerId =
-        _database.client.registerReplicatorChangeListener((status) {
+    final listenerId = _database.client.registerReplicatorChangeListener((
+      status,
+    ) {
       token.callListener(ReplicatorChangeImpl(this, status));
     });
 
-    await channel.call(AddReplicatorChangeListener(
-      replicatorId: objectId,
-      listenerId: listenerId,
-    ));
+    await channel.call(
+      AddReplicatorChangeListener(
+        replicatorId: objectId,
+        listenerId: listenerId,
+      ),
+    );
 
-    return token =
-        ProxyListenerToken(_database.client, this, listenerId, listener);
+    return token = ProxyListenerToken(
+      _database.client,
+      this,
+      listenerId,
+      listener,
+    );
   }
 
   @override
   Future<ListenerToken> addDocumentReplicationListener(
     DocumentReplicationListener listener,
-  ) =>
-      use(() async {
-        final token = await _addDocumentReplicationListener(listener);
-        return token.also(_listenerTokens.add);
-      });
+  ) => use(() async {
+    final token = await _addDocumentReplicationListener(listener);
+    return token.also(_listenerTokens.add);
+  });
 
   Future<AbstractListenerToken> _addDocumentReplicationListener(
     DocumentReplicationListener listener,
   ) async {
     late final ProxyListenerToken<DocumentReplication> token;
-    final listenerId =
-        _database.client.registerDocumentReplicationListener((event) {
-      token.callListener(DocumentReplicationImpl(
-        this,
-        event.isPush,
-        event.documents,
-      ));
+    final listenerId = _database.client.registerDocumentReplicationListener((
+      event,
+    ) {
+      token.callListener(
+        DocumentReplicationImpl(this, event.isPush, event.documents),
+      );
     });
 
-    await channel.call(AddDocumentReplicationListener(
-      replicatorId: objectId,
-      listenerId: listenerId,
-    ));
+    await channel.call(
+      AddDocumentReplicationListener(
+        replicatorId: objectId,
+        listenerId: listenerId,
+      ),
+    );
 
-    return token =
-        ProxyListenerToken(_database.client, this, listenerId, listener);
+    return token = ProxyListenerToken(
+      _database.client,
+      this,
+      listenerId,
+      listener,
+    );
   }
 
   @override
@@ -232,17 +245,17 @@ final class ProxyReplicator extends ProxyObject
       use(() => _listenerTokens.remove(token));
 
   @override
-  AsyncListenStream<ReplicatorChange> changes() => useSync(() => ListenerStream(
-        parent: this,
-        addListener: _addChangeListener,
-      ));
+  AsyncListenStream<ReplicatorChange> changes() => useSync(
+    () => ListenerStream(parent: this, addListener: _addChangeListener),
+  );
 
   @override
-  AsyncListenStream<DocumentReplication> documentReplications() =>
-      useSync(() => ListenerStream(
-            parent: this,
-            addListener: _addDocumentReplicationListener,
-          ));
+  AsyncListenStream<DocumentReplication> documentReplications() => useSync(
+    () => ListenerStream(
+      parent: this,
+      addListener: _addDocumentReplicationListener,
+    ),
+  );
 
   @override
   Future<Set<String>> get pendingDocumentIds async =>
@@ -260,38 +273,44 @@ final class ProxyReplicator extends ProxyObject
   @override
   Future<Set<String>> pendingDocumentIdsInCollection(
     covariant ProxyCollection collection,
-  ) =>
-      use(() => channel
-          .call(ReplicatorPendingDocumentIds(
+  ) => use(
+    () => channel
+        .call(
+          ReplicatorPendingDocumentIds(
             replicatorId: objectId,
             collectionId: collection.objectId,
-          ))
-          .then((value) => value.toSet()));
+          ),
+        )
+        .then((value) => value.toSet()),
+  );
 
   @override
   Future<bool> isDocumentPendingInCollection(
     String documentId,
     covariant ProxyCollection collection,
-  ) =>
-      use(() => channel.call(ReplicatorIsDocumentPending(
-            replicatorId: objectId,
-            documentId: documentId,
-            collectionId: collection.objectId,
-          )));
+  ) => use(
+    () => channel.call(
+      ReplicatorIsDocumentPending(
+        replicatorId: objectId,
+        documentId: documentId,
+        collectionId: collection.objectId,
+      ),
+    ),
+  );
 
   @override
   FutureOr<void> performClose() => finalizeEarly();
 
   @override
   String toString() => [
-        'ProxyReplicator(',
-        [
-          'database: $_database',
-          'type: ${config.replicatorType.name}',
-          if (config.continuous) 'CONTINUOUS'
-        ].join(', '),
-        ')'
-      ].join();
+    'ProxyReplicator(',
+    [
+      'database: $_database',
+      'type: ${config.replicatorType.name}',
+      if (config.continuous) 'CONTINUOUS',
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 CblServiceReplicationFilter _wrapReplicationFilter(
@@ -304,30 +323,29 @@ CblServiceReplicationFilter _wrapReplicationFilter(
 CblServiceConflictResolver _wrapConflictResolver(
   ConflictResolver resolver,
   ProxyCollection collection,
-) =>
-    (documentId, localState, remoteState) async {
-      final local = localState?.let(_documentStateToDocument(collection));
-      final remote = remoteState?.let(_documentStateToDocument(collection));
-      final conflict = ConflictImpl(documentId, local, remote);
+) => (documentId, localState, remoteState) async {
+  final local = localState?.let(_documentStateToDocument(collection));
+  final remote = remoteState?.let(_documentStateToDocument(collection));
+  final conflict = ConflictImpl(documentId, local, remote);
 
-      final result = await resolver.resolve(conflict) as DelegateDocument?;
+  final result = await resolver.resolve(conflict) as DelegateDocument?;
 
-      if (result != null) {
-        final resultIsNewDocument =
-            !identical(result, local) && !identical(result, remote);
-        final delegate = await collection.prepareDocument(
-          result,
-          updateEncodedProperties: resultIsNewDocument,
-        );
-        return delegate.getState(withProperties: resultIsNewDocument);
-      }
-      return null;
-    };
+  if (result != null) {
+    final resultIsNewDocument =
+        !identical(result, local) && !identical(result, remote);
+    final delegate = await collection.prepareDocument(
+      result,
+      updateEncodedProperties: resultIsNewDocument,
+    );
+    return delegate.getState(withProperties: resultIsNewDocument);
+  }
+  return null;
+};
 
 DelegateDocument Function(DocumentState) _documentStateToDocument(
   ProxyCollection collection,
 ) =>
     (state) => DelegateDocument(
-          ProxyDocumentDelegate.fromState(state, database: collection.database),
-          collection: collection,
-        );
+      ProxyDocumentDelegate.fromState(state, database: collection.database),
+      collection: collection,
+    );

@@ -10,8 +10,8 @@ void main() {
   test('subscript access', () {
     final dict = MutableDictionary({
       'a': [
-        {'b': true}
-      ]
+        {'b': true},
+      ],
     });
 
     expect(dict['x'].exists, isFalse);
@@ -190,6 +190,8 @@ void main() {
     expect(() => array[0][0].blob = testBlob, throwsStateError);
     expect(() => array[0][0].array = MutableArray(), throwsStateError);
     expect(
-        () => array[0][0].dictionary = MutableDictionary(), throwsStateError);
+      () => array[0][0].dictionary = MutableDictionary(),
+      throwsStateError,
+    );
   });
 }

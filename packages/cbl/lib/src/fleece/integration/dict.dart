@@ -8,30 +8,25 @@ import 'collection.dart';
 import 'value.dart';
 
 final class MDict extends MCollection {
-  MDict()
-      : _dict = null,
-        _values = {},
-        _length = 0,
-        _valuesHasAllKeys = true;
+  MDict() : _dict = null, _values = {}, _length = 0, _valuesHasAllKeys = true;
 
   MDict.asCopy(MDict super.original, {bool? isMutable})
-      : _dict = original._dict,
-        _values = Map.fromEntries(
-          original._values.entries
-              .map((entry) => MapEntry(entry.key, entry.value.clone())),
+    : _dict = original._dict,
+      _values = Map.fromEntries(
+        original._values.entries.map(
+          (entry) => MapEntry(entry.key, entry.value.clone()),
         ),
-        _length = original._length,
-        _valuesHasAllKeys = original._valuesHasAllKeys,
-        super.asCopy(isMutable: isMutable ?? original.isMutable);
+      ),
+      _length = original._length,
+      _valuesHasAllKeys = original._valuesHasAllKeys,
+      super.asCopy(isMutable: isMutable ?? original.isMutable);
 
   MDict.asChild(super.slot, super.parent, int length, {bool? isMutable})
-      : _dict = slot.value!.cast(),
-        _values = {},
-        _length = length,
-        _valuesHasAllKeys = false,
-        super.asChild(
-          isMutable: isMutable ?? parent.hasMutableChildren,
-        );
+    : _dict = slot.value!.cast(),
+      _values = {},
+      _length = length,
+      _valuesHasAllKeys = false,
+      super.asChild(isMutable: isMutable ?? parent.hasMutableChildren);
 
   final FLDict? _dict;
   final Map<String, MValue> _values;
@@ -111,8 +106,9 @@ final class MDict extends MCollection {
       encoder.writeValue(_dict!.cast());
     } else {
       final extraInfo = encoder.extraInfo;
-      final dictKeys =
-          extraInfo is DictKeysProvider ? extraInfo.dictKeys : null;
+      final dictKeys = extraInfo is DictKeysProvider
+          ? extraInfo.dictKeys
+          : null;
       // ignore: omit_local_variable_types
       final void Function(String) writeKey = dictKeys != null
           ? (key) => dictKeys.getKey(key).encodeTo(encoder)
@@ -223,8 +219,10 @@ final class MDict extends MCollection {
       }
 
       // Cache the value to speed up lookups later.
-      final value =
-          _values[key] = _MValueWithKey(loadedKey.value, loadedValue.value);
+      final value = _values[key] = _MValueWithKey(
+        loadedKey.value,
+        loadedValue.value,
+      );
       action(key, value);
     }
 

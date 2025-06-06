@@ -237,7 +237,7 @@ void main() {
                 internal: MutableArray([]),
                 isNullable: false,
                 converter: TypedDataHelpers.stringConverter,
-              )
+              ),
             },
           ),
           'A(a: [])',
@@ -251,7 +251,7 @@ void main() {
                 internal: MutableArray(['a']),
                 isNullable: false,
                 converter: TypedDataHelpers.stringConverter,
-              )
+              ),
             },
           ),
           'A(a: [a])',
@@ -263,7 +263,7 @@ void main() {
             fields: {
               'a': ImmutableTypedDataList(
                 internal: MutableArray([
-                  ['a']
+                  ['a'],
                 ]),
                 isNullable: false,
                 converter: const TypedListConverter(
@@ -271,7 +271,7 @@ void main() {
                   isNullable: false,
                   isCached: false,
                 ),
-              )
+              ),
             },
           ),
           'A(a: [[a]])',
@@ -342,7 +342,7 @@ A(
                 internal: MutableArray([]),
                 isNullable: false,
                 converter: TypedDataHelpers.stringConverter,
-              )
+              ),
             },
           ),
           '''
@@ -359,7 +359,7 @@ A(
                 internal: MutableArray(['a']),
                 isNullable: false,
                 converter: TypedDataHelpers.stringConverter,
-              )
+              ),
             },
           ),
           '''
@@ -376,7 +376,7 @@ A(
             fields: {
               'a': ImmutableTypedDataList(
                 internal: MutableArray([
-                  ['a']
+                  ['a'],
                 ]),
                 isNullable: false,
                 converter: const TypedListConverter(
@@ -384,7 +384,7 @@ A(
                   isNullable: false,
                   isCached: false,
                 ),
-              )
+              ),
             },
           ),
           '''
@@ -407,10 +407,8 @@ class RenderStringTestDict implements TypedDictionaryObject {
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'RenderStringTestDict',
-        fields: {
-          'a': 'b',
-        },
-      );
+    indent: indent,
+    className: 'RenderStringTestDict',
+    fields: {'a': 'b'},
+  );
 }

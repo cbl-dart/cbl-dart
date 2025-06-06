@@ -13,8 +13,9 @@ void main() {
 
       await CouchbaseLiteDart.init(edition: Edition.enterprise);
 
-      final sharedMergeNativeLibraries =
-          Directory(sharedMergedNativesLibrariesDir);
+      final sharedMergeNativeLibraries = Directory(
+        sharedMergedNativesLibrariesDir,
+      );
 
       expect(sharedMergeNativeLibraries.existsSync(), isTrue);
       expect(sharedMergeNativeLibraries.listSync(), hasLength(1));

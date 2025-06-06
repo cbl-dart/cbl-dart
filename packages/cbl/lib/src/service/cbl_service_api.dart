@@ -47,10 +47,7 @@ final class ReleaseObject extends Request<Null> {
 }
 
 final class RemoveChangeListener extends Request<Null> {
-  RemoveChangeListener({
-    required this.targetId,
-    required this.listenerId,
-  });
+  RemoveChangeListener({required this.targetId, required this.listenerId});
 
   final int targetId;
 
@@ -64,31 +61,21 @@ final class EncryptionKeyFromPassword extends Request<EncryptionKeyImpl> {
 }
 
 final class RemoveDatabase extends Request<bool> {
-  RemoveDatabase(
-    this.name,
-    this.directory,
-  );
+  RemoveDatabase(this.name, this.directory);
 
   final String name;
   final String? directory;
 }
 
 final class DatabaseExists extends Request<bool> {
-  DatabaseExists(
-    this.name,
-    this.directory,
-  );
+  DatabaseExists(this.name, this.directory);
 
   final String name;
   final String? directory;
 }
 
 final class CopyDatabase extends Request<bool> {
-  CopyDatabase(
-    this.from,
-    this.name,
-    this.config,
-  );
+  CopyDatabase(this.from, this.name, this.config);
 
   final String from;
   final String name;
@@ -96,10 +83,7 @@ final class CopyDatabase extends Request<bool> {
 }
 
 final class OpenDatabase extends Request<DatabaseState> {
-  OpenDatabase(
-    this.name,
-    this.config,
-  );
+  OpenDatabase(this.name, this.config);
 
   final String name;
   final DatabaseConfiguration? config;
@@ -166,10 +150,7 @@ final class GetCollectionIndexNames extends Request<List<String>> {
 }
 
 final class GetCollectionIndex extends Request<int?> {
-  GetCollectionIndex({
-    required this.collectionId,
-    required this.name,
-  });
+  GetCollectionIndex({required this.collectionId, required this.name});
 
   final int collectionId;
   final String name;
@@ -183,11 +164,7 @@ final class GetDocument extends Request<DocumentState?> {
 }
 
 final class SaveDocument extends Request<DocumentState?> implements SendAware {
-  SaveDocument(
-    this.collectionId,
-    this.state,
-    this.concurrencyControl,
-  );
+  SaveDocument(this.collectionId, this.state, this.concurrencyControl);
 
   final int collectionId;
   final DocumentState state;
@@ -202,11 +179,7 @@ final class SaveDocument extends Request<DocumentState?> implements SendAware {
 
 final class DeleteDocument extends Request<DocumentState?>
     implements SendAware {
-  DeleteDocument(
-    this.collectionId,
-    this.state,
-    this.concurrencyControl,
-  );
+  DeleteDocument(this.collectionId, this.state, this.concurrencyControl);
 
   final int collectionId;
   final DocumentState state;
@@ -252,10 +225,7 @@ final class SetDocumentExpiration extends Request<Null> {
 }
 
 final class GetDocumentExpiration extends Request<DateTime?> {
-  GetDocumentExpiration({
-    required this.collectionId,
-    required this.documentId,
-  });
+  GetDocumentExpiration({required this.collectionId, required this.documentId});
 
   final int collectionId;
   final String documentId;
@@ -300,10 +270,7 @@ final class CallDocumentChangeListener extends Request<Null> {
 }
 
 final class PerformDatabaseMaintenance extends Request<Null> {
-  PerformDatabaseMaintenance({
-    required this.databaseId,
-    required this.type,
-  });
+  PerformDatabaseMaintenance({required this.databaseId, required this.type});
 
   final int databaseId;
   final MaintenanceType type;
@@ -332,30 +299,21 @@ final class CreateIndex extends Request<Null> {
 }
 
 final class DeleteIndex extends Request<Null> {
-  DeleteIndex({
-    required this.collectionId,
-    required this.name,
-  });
+  DeleteIndex({required this.collectionId, required this.name});
 
   final int collectionId;
   final String name;
 }
 
 final class BlobExists extends Request<bool> {
-  BlobExists({
-    required this.databaseId,
-    required this.properties,
-  });
+  BlobExists({required this.databaseId, required this.properties});
 
   final int databaseId;
   final StringMap properties;
 }
 
 final class ReadBlob extends Request<SendableData> {
-  ReadBlob({
-    required this.databaseId,
-    required this.properties,
-  });
+  ReadBlob({required this.databaseId, required this.properties});
 
   final int databaseId;
   final StringMap properties;
@@ -374,9 +332,7 @@ final class SaveBlob extends Request<SaveBlobResponse> {
 }
 
 final class ReadBlobUpload extends Request<SendableData> {
-  ReadBlobUpload({
-    required this.uploadId,
-  });
+  ReadBlobUpload({required this.uploadId});
 
   final int uploadId;
 }
@@ -394,10 +350,8 @@ final class CreateQuery extends Request<QueryState> {
 }
 
 final class SetQueryParameters extends Request<Null> implements SendAware {
-  SetQueryParameters({
-    required this.queryId,
-    required Data? parameters,
-  }) : _parameters = parameters?.let(SendableData.new);
+  SetQueryParameters({required this.queryId, required Data? parameters})
+    : _parameters = parameters?.let(SendableData.new);
 
   final int queryId;
 
@@ -412,36 +366,26 @@ final class SetQueryParameters extends Request<Null> implements SendAware {
 }
 
 final class ExplainQuery extends Request<String> {
-  ExplainQuery({
-    required this.queryId,
-  });
+  ExplainQuery({required this.queryId});
 
   final int queryId;
 }
 
 final class ExecuteQuery extends Request<int> {
-  ExecuteQuery({
-    required this.queryId,
-  });
+  ExecuteQuery({required this.queryId});
 
   final int queryId;
 }
 
 final class GetQueryResultSet extends Request<SendableValue> {
-  GetQueryResultSet({
-    required this.queryId,
-    required this.resultSetId,
-  });
+  GetQueryResultSet({required this.queryId, required this.resultSetId});
 
   final int queryId;
   final int resultSetId;
 }
 
 final class AddQueryChangeListener extends Request<Null> {
-  AddQueryChangeListener({
-    required this.queryId,
-    required this.listenerId,
-  });
+  AddQueryChangeListener({required this.queryId, required this.listenerId});
 
   final int queryId;
   final int listenerId;
@@ -458,20 +402,14 @@ final class CallQueryChangeListener extends Request<Null> {
 }
 
 final class BeginQueryIndexUpdate extends Request<IndexUpdaterState?> {
-  BeginQueryIndexUpdate({
-    required this.indexId,
-    required this.limit,
-  });
+  BeginQueryIndexUpdate({required this.indexId, required this.limit});
 
   final int indexId;
   final int limit;
 }
 
 final class IndexUpdaterGetValue extends Request<SendableValue> {
-  IndexUpdaterGetValue({
-    required this.updaterId,
-    required this.index,
-  });
+  IndexUpdaterGetValue({required this.updaterId, required this.index});
 
   final int updaterId;
   final int index;
@@ -490,19 +428,14 @@ final class IndexUpdaterSetVector extends Request<Null> {
 }
 
 final class IndexUpdaterSkipVector extends Request<Null> {
-  IndexUpdaterSkipVector({
-    required this.updaterId,
-    required this.index,
-  });
+  IndexUpdaterSkipVector({required this.updaterId, required this.index});
 
   final int updaterId;
   final int index;
 }
 
 final class IndexUpdaterFinish extends Request<Null> {
-  IndexUpdaterFinish({
-    required this.updaterId,
-  });
+  IndexUpdaterFinish({required this.updaterId});
 
   final int updaterId;
 }
@@ -528,11 +461,13 @@ final class CreateReplicator extends Request<int> implements SendAware {
     this.maxAttempts,
     this.maxAttemptWaitTime,
     required this.collections,
-  })  : _authenticator = authenticator,
-        _pinnedServerCertificate =
-            pinnedServerCertificate?.let(SendableData.new),
-        _trustedRootCertificates =
-            trustedRootCertificates?.let(SendableData.new);
+  }) : _authenticator = authenticator,
+       _pinnedServerCertificate = pinnedServerCertificate?.let(
+         SendableData.new,
+       ),
+       _trustedRootCertificates = trustedRootCertificates?.let(
+         SendableData.new,
+       );
 
   final Endpoint target;
   final ReplicatorType replicatorType;
@@ -562,8 +497,9 @@ final class CreateReplicator extends Request<int> implements SendAware {
         case final ClientCertificateAuthenticator authenticator) {
       final identity = authenticator.identity as FfiTlsIdentity;
       _certificateAuthenticatorIdentityPointer = identity.pointer;
-      CBLBindings.instance.base
-          .retainRefCounted(_certificateAuthenticatorIdentityPointer!.cast());
+      CBLBindings.instance.base.retainRefCounted(
+        _certificateAuthenticatorIdentityPointer!.cast(),
+      );
       _authenticator = null;
     }
 
@@ -659,19 +595,14 @@ final class GetReplicatorServerCertificate
 }
 
 final class StartReplicator extends Request<Null> {
-  StartReplicator({
-    required this.replicatorId,
-    required this.reset,
-  });
+  StartReplicator({required this.replicatorId, required this.reset});
 
   final int replicatorId;
   final bool reset;
 }
 
 final class StopReplicator extends Request<Null> {
-  StopReplicator({
-    required this.replicatorId,
-  });
+  StopReplicator({required this.replicatorId});
 
   final int replicatorId;
 }
@@ -763,11 +694,9 @@ final class SendableData implements SendAware {
 
 final class SendableValue implements SendAware {
   SendableValue.fromEncodedValue(Data encodedValue)
-      : _encodedValue = SendableData(encodedValue);
+    : _encodedValue = SendableData(encodedValue);
 
-  SendableValue.fromValue(Value value)
-      : _encodedValue = null,
-        _value = value;
+  SendableValue.fromValue(Value value) : _encodedValue = null, _value = value;
 
   Data? get encodedValue => _encodedValue?.data;
   final SendableData? _encodedValue;
@@ -806,11 +735,7 @@ final class SendableValue implements SendAware {
 }
 
 final class DatabaseState {
-  DatabaseState({
-    required this.id,
-    required this.name,
-    required this.path,
-  });
+  DatabaseState({required this.id, required this.name, required this.path});
 
   final int id;
   final String name;
@@ -818,10 +743,7 @@ final class DatabaseState {
 }
 
 final class ScopeState {
-  ScopeState({
-    required this.id,
-    required this.name,
-  });
+  ScopeState({required this.id, required this.name});
 
   final int id;
   final String name;
@@ -889,30 +811,21 @@ final class SaveBlobResponse {
 }
 
 final class QueryState {
-  QueryState({
-    required this.id,
-    required this.columnNames,
-  });
+  QueryState({required this.id, required this.columnNames});
 
   final int id;
   final List<String> columnNames;
 }
 
 final class IndexUpdaterState {
-  IndexUpdaterState({
-    required this.id,
-    required this.length,
-  });
+  IndexUpdaterState({required this.id, required this.length});
 
   final int id;
   final int length;
 }
 
 final class DocumentReplicationEvent {
-  DocumentReplicationEvent({
-    required this.isPush,
-    required this.documents,
-  });
+  DocumentReplicationEvent({required this.isPush, required this.documents});
 
   final bool isPush;
   final List<ReplicatedDocument> documents;
@@ -943,7 +856,7 @@ final class SendableCertificate implements SendAware {
 
 final class NotFoundException implements Exception {
   NotFoundException(this.id, this.type)
-      : message = 'Could not find $type with id $id';
+    : message = 'Could not find $type with id $id';
 
   final String message;
   final String type;

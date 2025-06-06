@@ -19,16 +19,11 @@ class NoTypesDatabase extends $NoTypesDatabase {
       // ignore: invalid_use_of_internal_member
       AsyncDatabase.openInternal(name, config, _adapter);
 
-  static SyncDatabase openSync(
-    String name, [
-    DatabaseConfiguration? config,
-  ]) =>
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
       // ignore: invalid_use_of_internal_member
       SyncDatabase.internal(name, config, _adapter);
 
-  static final _adapter = TypedDataRegistry(
-    types: [],
-  );
+  static final _adapter = TypedDataRegistry(types: []);
 }
 
 class DocWithIdDatabase extends $DocWithIdDatabase {
@@ -39,10 +34,7 @@ class DocWithIdDatabase extends $DocWithIdDatabase {
       // ignore: invalid_use_of_internal_member
       AsyncDatabase.openInternal(name, config, _adapter);
 
-  static SyncDatabase openSync(
-    String name, [
-    DatabaseConfiguration? config,
-  ]) =>
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
       // ignore: invalid_use_of_internal_member
       SyncDatabase.internal(name, config, _adapter);
 
@@ -52,9 +44,7 @@ class DocWithIdDatabase extends $DocWithIdDatabase {
         dartName: 'DocWithId',
         factory: ImmutableDocWithId.internal,
         mutableFactory: MutableDocWithId.internal,
-        typeMatcher: const ValueTypeMatcher(
-          path: ['type'],
-        ),
+        typeMatcher: const ValueTypeMatcher(path: ['type']),
       ),
     ],
   );
@@ -68,10 +58,7 @@ class StringDictDatabase extends $StringDictDatabase {
       // ignore: invalid_use_of_internal_member
       AsyncDatabase.openInternal(name, config, _adapter);
 
-  static SyncDatabase openSync(
-    String name, [
-    DatabaseConfiguration? config,
-  ]) =>
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
       // ignore: invalid_use_of_internal_member
       SyncDatabase.internal(name, config, _adapter);
 
@@ -94,17 +81,16 @@ class CustomValueTypeMatcherDatabase extends $CustomValueTypeMatcherDatabase {
       // ignore: invalid_use_of_internal_member
       AsyncDatabase.openInternal(name, config, _adapter);
 
-  static SyncDatabase openSync(
-    String name, [
-    DatabaseConfiguration? config,
-  ]) =>
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
       // ignore: invalid_use_of_internal_member
       SyncDatabase.internal(name, config, _adapter);
 
   static final _adapter = TypedDataRegistry(
     types: [
-      TypedDocumentMetadata<CustomValueTypeMatcherDoc,
-          MutableCustomValueTypeMatcherDoc>(
+      TypedDocumentMetadata<
+        CustomValueTypeMatcherDoc,
+        MutableCustomValueTypeMatcherDoc
+      >(
         dartName: 'CustomValueTypeMatcherDoc',
         factory: ImmutableCustomValueTypeMatcherDoc.internal,
         mutableFactory: MutableCustomValueTypeMatcherDoc.internal,

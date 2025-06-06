@@ -20,8 +20,9 @@ class CblInsertBenchmark extends CblDatabaseBenchmark {
     final batchSize = batchSizeParameter.current;
     final fixture = fixtureParameter.current;
 
-    final benchmarkData =
-        List<Map<String, Object?>>.from(loadFixtureAsJson(fixture)! as List);
+    final benchmarkData = List<Map<String, Object?>>.from(
+      loadFixtureAsJson(fixture)! as List,
+    );
     final operationsData = List.generate(
       operationCount,
       (index) => benchmarkData[index % benchmarkData.length],

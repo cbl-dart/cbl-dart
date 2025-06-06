@@ -66,8 +66,8 @@ abstract base class _TypedDataListBase<T extends E, E, I extends Array>
     required this.internal,
     required DataConverter<T, E> converter,
     required bool isNullable,
-  })  : _converter = converter,
-        _isNullable = isNullable;
+  }) : _converter = converter,
+       _isNullable = isNullable;
 
   @override
   final I internal;

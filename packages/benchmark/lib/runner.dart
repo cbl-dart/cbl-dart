@@ -7,13 +7,12 @@ import 'parameter.dart';
 import 'result.dart';
 import 'utils.dart';
 
-final _dartaotruntime =
-    File(Platform.executable).parent.uri.resolve('dartaotruntime').toFilePath();
+final _dartaotruntime = File(
+  Platform.executable,
+).parent.uri.resolve('dartaotruntime').toFilePath();
 
 abstract class BenchmarkRunnerBase {
-  BenchmarkRunnerBase({
-    required this.executionMode,
-  });
+  BenchmarkRunnerBase({required this.executionMode});
 
   static const _aotDirectory = '.dart_tool/benchmark-aot';
   static const _dartDirectory = 'benchmark';
@@ -31,18 +30,18 @@ abstract class BenchmarkRunnerBase {
   /// This distinguishes between invocations with different [executionMode]s and
   /// [parameters].
   String get invocationId => [
-        executionMode.name,
-        benchmark,
-        ...parameters.map((parameter) => parameter.value)
-      ].join('_');
+    executionMode.name,
+    benchmark,
+    ...parameters.map((parameter) => parameter.value),
+  ].join('_');
 
   /// Parameters to invoke the benchmark with.
   List<DartDefine> get parameters => [];
 
   List<String> get _dartDefineOptions => DartDefine.commandLineOptions([
-        executionModeParameter.dartDefine(executionMode),
-        ...parameters,
-      ]);
+    executionModeParameter.dartDefine(executionMode),
+    ...parameters,
+  ]);
 
   String get _dartFile => '$_dartDirectory/$benchmark.dart';
 
@@ -59,16 +58,13 @@ abstract class BenchmarkRunnerBase {
 
       await Directory(_aotDirectory).create(recursive: true);
 
-      final compileResult = await Process.run(
-        'dart',
-        [
-          'compile',
-          'aot-snapshot',
-          _dartFile,
-          ..._dartDefineOptions,
-          '--output=$_aotFile',
-        ],
-      );
+      final compileResult = await Process.run('dart', [
+        'compile',
+        'aot-snapshot',
+        _dartFile,
+        ..._dartDefineOptions,
+        '--output=$_aotFile',
+      ]);
 
       if (compileResult.exitCode != 0) {
         throw Exception(
@@ -82,14 +78,11 @@ abstract class BenchmarkRunnerBase {
     print('Running $invocationId ...');
 
     final runResult = switch (executionMode) {
-      ExecutionMode.jit => await Process.run(
-          'dart',
-          [
-            ..._dartDefineOptions,
-            'run',
-            _dartFile,
-          ],
-        ),
+      ExecutionMode.jit => await Process.run('dart', [
+        ..._dartDefineOptions,
+        'run',
+        _dartFile,
+      ]),
       ExecutionMode.aot => await Process.run(_dartaotruntime, [_aotFile]),
     };
 
@@ -107,10 +100,7 @@ abstract class BenchmarkRunnerBase {
 }
 
 class MicroBenchmarkRunner extends BenchmarkRunnerBase {
-  MicroBenchmarkRunner({
-    required super.executionMode,
-    required this.benchmark,
-  });
+  MicroBenchmarkRunner({required super.executionMode, required this.benchmark});
 
   @override
   final String benchmark;
@@ -134,9 +124,7 @@ class MicroBenchmarkRunner extends BenchmarkRunnerBase {
     return BenchmarkResults({
       for (final MapEntry(key: name, value: latency) in latencies.entries)
         '${invocationId}_$name': BenchmarkResult(
-          measures: [
-            Measure(name: 'latency', value: latency),
-          ],
+          measures: [Measure(name: 'latency', value: latency)],
         ),
     });
   }
@@ -165,25 +153,25 @@ class DatabaseBenchmarkRunner extends BenchmarkRunnerBase {
 
   @override
   String get invocationId => [
-        executionMode.name,
-        apiType.name,
-        benchmark,
-        fixture,
-        '$operationCount/$batchSize',
-      ].join('_');
+    executionMode.name,
+    apiType.name,
+    benchmark,
+    fixture,
+    '$operationCount/$batchSize',
+  ].join('_');
 
   @override
   List<DartDefine> get parameters => [
-        apiTypeParameter.dartDefine(apiType),
-        fixtureParameter.dartDefine(fixture),
-        operationCountParameter.dartDefine(operationCount),
-        batchSizeParameter.dartDefine(batchSize),
-      ];
+    apiTypeParameter.dartDefine(apiType),
+    fixtureParameter.dartDefine(fixture),
+    operationCountParameter.dartDefine(operationCount),
+    batchSizeParameter.dartDefine(batchSize),
+  ];
 
   @override
   BenchmarkResults parseResults(String stdout) => BenchmarkResults({
-        invocationId: BenchmarkResult.fromJson(
-          jsonDecode(stdout) as Map<String, Object?>,
-        ),
-      });
+    invocationId: BenchmarkResult.fromJson(
+      jsonDecode(stdout) as Map<String, Object?>,
+    ),
+  });
 }

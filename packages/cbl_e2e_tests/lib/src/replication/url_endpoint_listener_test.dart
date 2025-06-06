@@ -69,12 +69,10 @@ void main() {
 
       test('throws when trying to set empty list', () async {
         expect(
-          () => UrlEndpointListenerConfiguration(
-            collections: [],
+          () => UrlEndpointListenerConfiguration(collections: []),
+          throwsA(
+            isDatabaseException.havingCode(DatabaseErrorCode.invalidParameter),
           ),
-          throwsA(isDatabaseException.havingCode(
-            DatabaseErrorCode.invalidParameter,
-          )),
         );
 
         final db = await openAsyncTestDatabase();
@@ -84,9 +82,9 @@ void main() {
 
         expect(
           () => config.collections = [],
-          throwsA(isDatabaseException.havingCode(
-            DatabaseErrorCode.invalidParameter,
-          )),
+          throwsA(
+            isDatabaseException.havingCode(DatabaseErrorCode.invalidParameter),
+          ),
         );
       });
     });
@@ -126,8 +124,10 @@ void main() {
   group('ConnectionStatus', () {
     test('toString', () {
       expect(
-        ConnectionStatus(connectionCount: 1, activeConnectionCount: 2)
-            .toString(),
+        ConnectionStatus(
+          connectionCount: 1,
+          activeConnectionCount: 2,
+        ).toString(),
         'ConnectionStatus(connectionCount: 1, activeConnectionCount: 2)',
       );
     });
@@ -136,9 +136,9 @@ void main() {
   group('UrlEndpointListener', () {
     apiTest('create', () async {
       final db = await openTestDatabase();
-      final config = UrlEndpointListenerConfiguration(collections: [
-        await db.defaultCollection,
-      ]);
+      final config = UrlEndpointListenerConfiguration(
+        collections: [await db.defaultCollection],
+      );
       await UrlEndpointListener.create(config);
     });
 
@@ -154,9 +154,9 @@ void main() {
 
     test('port & urls', () async {
       final db = await openAsyncTestDatabase();
-      final config = UrlEndpointListenerConfiguration(collections: [
-        await db.defaultCollection,
-      ]);
+      final config = UrlEndpointListenerConfiguration(
+        collections: [await db.defaultCollection],
+      );
       final listener = await UrlEndpointListener.create(config);
       expect(listener.port, isNull);
       expect(listener.urls, isNull);
@@ -225,9 +225,9 @@ void main() {
 
       // Pull document from listener to client.
       await replicator.replicateOneShot();
-      final clientDoc =
-          (await (await clientDb.defaultCollection).document(listenerDoc.id))
-              ?.toMutable();
+      final clientDoc = (await (await clientDb.defaultCollection).document(
+        listenerDoc.id,
+      ))?.toMutable();
       expect(clientDoc, isNotNull);
       expect(clientDoc!.id, listenerDoc.id);
       expect(clientDoc, listenerDoc);
@@ -236,36 +236,37 @@ void main() {
       clientDoc.setValue('client', key: 'value');
       await (await clientDb.defaultCollection).saveDocument(clientDoc);
       await replicator.replicateOneShot();
-      listenerDoc =
-          (await (await listenerDb.defaultCollection).document(listenerDoc.id))!
-              .toMutable();
+      listenerDoc = (await (await listenerDb.defaultCollection).document(
+        listenerDoc.id,
+      ))!.toMutable();
       expect(listenerDoc, clientDoc);
     });
   });
 
   apiTest('ListenerPasswordAuthenticator', skip: skipPeerSyncTest, () async {
-    final clientAuthenticatorA =
-        BasicAuthenticator(username: 'a', password: 'aa');
-    final clientAuthenticatorB =
-        BasicAuthenticator(username: 'b', password: 'bb');
+    final clientAuthenticatorA = BasicAuthenticator(
+      username: 'a',
+      password: 'aa',
+    );
+    final clientAuthenticatorB = BasicAuthenticator(
+      username: 'b',
+      password: 'bb',
+    );
 
     final listenerDb = await openTestDatabase(name: 'listener');
     final clientDb = await openTestDatabase(name: 'client');
 
     var authenticatorCall = 0;
     final listenerAuthenticator = ListenerPasswordAuthenticator(
-      expectAsync2(
-        count: 2,
-        (username, password) {
-          final expectedAuthenticator = switch (authenticatorCall++) {
-            0 => clientAuthenticatorA,
-            1 => clientAuthenticatorB,
-            _ => throw Exception('Unexpected call'),
-          };
-          expect(username, expectedAuthenticator.username);
-          return password == clientAuthenticatorB.password;
-        },
-      ),
+      expectAsync2(count: 2, (username, password) {
+        final expectedAuthenticator = switch (authenticatorCall++) {
+          0 => clientAuthenticatorA,
+          1 => clientAuthenticatorB,
+          _ => throw Exception('Unexpected call'),
+        };
+        expect(username, expectedAuthenticator.username);
+        return password == clientAuthenticatorB.password;
+      }),
     );
     final listenerConfig = UrlEndpointListenerConfiguration(
       collections: [await listenerDb.defaultCollection],
@@ -316,40 +317,39 @@ void main() {
 
   group('ListenerCertificateAuthenticator', () {
     apiTest('with handler', skip: skipPeerSyncTest, () async {
-      final clientAuthenticatorA =
-          ClientCertificateAuthenticator(await TlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.clientAuth},
-        attributes: const CertificateAttributes(commonName: 'Client A'),
-        expiration: DateTime(2100),
-      ));
-      final clientAuthenticatorB =
-          ClientCertificateAuthenticator(await TlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.clientAuth},
-        attributes: const CertificateAttributes(commonName: 'Client B'),
-        expiration: DateTime(2100),
-      ));
+      final clientAuthenticatorA = ClientCertificateAuthenticator(
+        await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.clientAuth},
+          attributes: const CertificateAttributes(commonName: 'Client A'),
+          expiration: DateTime(2100),
+        ),
+      );
+      final clientAuthenticatorB = ClientCertificateAuthenticator(
+        await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.clientAuth},
+          attributes: const CertificateAttributes(commonName: 'Client B'),
+          expiration: DateTime(2100),
+        ),
+      );
 
       final listenerDb = await openTestDatabase(name: 'listener');
       final clientDb = await openTestDatabase(name: 'client');
 
       var authenticatorCall = 0;
       final listenerAuthenticator = ListenerCertificateAuthenticator(
-        expectAsync1(
-          count: 2,
-          (certificate) {
-            final expectedAuthenticator = switch (authenticatorCall++) {
-              0 => clientAuthenticatorA,
-              1 => clientAuthenticatorB,
-              _ => throw Exception('Unexpected call'),
-            };
-            expect(
-              certificate.toPem(),
-              expectedAuthenticator.identity.certificates.single.toPem(),
-            );
-            return certificate.toPem() ==
-                clientAuthenticatorB.identity.certificates.single.toPem();
-          },
-        ),
+        expectAsync1(count: 2, (certificate) {
+          final expectedAuthenticator = switch (authenticatorCall++) {
+            0 => clientAuthenticatorA,
+            1 => clientAuthenticatorB,
+            _ => throw Exception('Unexpected call'),
+          };
+          expect(
+            certificate.toPem(),
+            expectedAuthenticator.identity.certificates.single.toPem(),
+          );
+          return certificate.toPem() ==
+              clientAuthenticatorB.identity.certificates.single.toPem();
+        }),
       );
       final listenerConfig = UrlEndpointListenerConfiguration(
         collections: [await listenerDb.defaultCollection],
@@ -399,18 +399,20 @@ void main() {
     });
 
     apiTest('with trusted roots', skip: skipPeerSyncTest, () async {
-      final clientAuthenticatorA =
-          ClientCertificateAuthenticator(await TlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.clientAuth},
-        attributes: const CertificateAttributes(commonName: 'Client A'),
-        expiration: DateTime(2100),
-      ));
-      final clientAuthenticatorB =
-          ClientCertificateAuthenticator(await TlsIdentity.createIdentity(
-        keyUsages: {KeyUsage.clientAuth},
-        attributes: const CertificateAttributes(commonName: 'Client B'),
-        expiration: DateTime(2100),
-      ));
+      final clientAuthenticatorA = ClientCertificateAuthenticator(
+        await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.clientAuth},
+          attributes: const CertificateAttributes(commonName: 'Client A'),
+          expiration: DateTime(2100),
+        ),
+      );
+      final clientAuthenticatorB = ClientCertificateAuthenticator(
+        await TlsIdentity.createIdentity(
+          keyUsages: {KeyUsage.clientAuth},
+          attributes: const CertificateAttributes(commonName: 'Client B'),
+          expiration: DateTime(2100),
+        ),
+      );
 
       final listenerDb = await openTestDatabase(name: 'listener');
       final clientDb = await openTestDatabase(name: 'client');

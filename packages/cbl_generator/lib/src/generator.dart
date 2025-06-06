@@ -21,8 +21,9 @@ final class _TypedDictionaryGeneratorBase<T> extends GeneratorForAnnotation<T> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
-    final model = await TypedDataAnalyzer(buildStep.resolver)
-        .buildTypedDataClassModel(element, kind: kind);
+    final model = await TypedDataAnalyzer(
+      buildStep.resolver,
+    ).buildTypedDataClassModel(element, kind: kind);
     return TypeDataCodeBuilder(object: model).build();
   }
 }
@@ -63,10 +64,7 @@ final class TypedDatabaseGenerator extends Generator {
           .map((import) => "import '${library.pathToUrl(import)}';")
           .join('\n');
 
-      return [
-        importStatements,
-        ...outputs,
-      ].join('\n\n');
+      return [importStatements, ...outputs].join('\n\n');
     }
 
     return null;
@@ -78,8 +76,9 @@ final class TypedDatabaseGenerator extends Generator {
     BuildStep buildStep,
     Set<Uri> imports,
   ) async {
-    final model = await TypedDataAnalyzer(buildStep.resolver)
-        .buildTypedDatabaseModel(element);
+    final model = await TypedDataAnalyzer(
+      buildStep.resolver,
+    ).buildTypedDatabaseModel(element);
 
     imports
       ..add(model.libraryUri)

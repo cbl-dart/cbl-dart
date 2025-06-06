@@ -59,17 +59,17 @@ enum FLError {
   const FLError(this.value);
 
   static FLError fromValue(int value) => switch (value) {
-        cblite.FLError.kFLNoError => noError,
-        cblite.FLError.kFLMemoryError => memoryError,
-        cblite.FLError.kFLOutOfRange => outOfRange,
-        cblite.FLError.kFLInvalidData => invalidData,
-        cblite.FLError.kFLEncodeError => encodeError,
-        cblite.FLError.kFLJSONError => jsonError,
-        cblite.FLError.kFLUnknownValue => unknownValue,
-        cblite.FLError.kFLInternalError => internalError,
-        cblite.FLError.kFLNotFound => notFound,
-        _ => throw ArgumentError('Unknown value for FLError: $value'),
-      };
+    cblite.FLError.kFLNoError => noError,
+    cblite.FLError.kFLMemoryError => memoryError,
+    cblite.FLError.kFLOutOfRange => outOfRange,
+    cblite.FLError.kFLInvalidData => invalidData,
+    cblite.FLError.kFLEncodeError => encodeError,
+    cblite.FLError.kFLJSONError => jsonError,
+    cblite.FLError.kFLUnknownValue => unknownValue,
+    cblite.FLError.kFLInternalError => internalError,
+    cblite.FLError.kFLNotFound => notFound,
+    _ => throw ArgumentError('Unknown value for FLError: $value'),
+  };
 
   final int value;
 }
@@ -175,8 +175,9 @@ final class SliceBindings extends Bindings {
 final class SharedKeysBindings extends Bindings {
   SharedKeysBindings(super.libraries);
 
-  late final _finalizer =
-      NativeFinalizer(cbl.addresses.FLSharedKeys_Release.cast());
+  late final _finalizer = NativeFinalizer(
+    cbl.addresses.FLSharedKeys_Release.cast(),
+  );
 
   cblite.FLSharedKeys create() => cbl.FLSharedKeys_New();
 
@@ -242,10 +243,10 @@ enum FLTrust {
   const FLTrust(this.value);
 
   static FLTrust fromValue(int value) => switch (value) {
-        cblite.FLTrust.kFLUntrusted => untrusted,
-        cblite.FLTrust.kFLTrusted => trusted,
-        _ => throw ArgumentError('Unknown value for FLTrust: $value'),
-      };
+    cblite.FLTrust.kFLUntrusted => untrusted,
+    cblite.FLTrust.kFLTrusted => trusted,
+    _ => throw ArgumentError('Unknown value for FLTrust: $value'),
+  };
 
   final int value;
 }
@@ -270,10 +271,10 @@ final class DocBindings extends Bindings {
   }
 
   cblite.FLDoc fromJson(String json) => runWithSingleFLString(
-        json,
-        (flJson) =>
-            cbl.FLDoc_FromJSON(flJson, globalFLErrorCode).checkFleeceError(),
-      );
+    json,
+    (flJson) =>
+        cbl.FLDoc_FromJSON(flJson, globalFLErrorCode).checkFleeceError(),
+  );
 
   void bindToDartObject(Finalizable object, cblite.FLDoc doc) {
     _finalizer.attach(
@@ -307,16 +308,16 @@ enum FLValueType {
   const FLValueType(this.value);
 
   static FLValueType fromValue(int value) => switch (value) {
-        cblite.FLValueType.kFLUndefined => undefined,
-        cblite.FLValueType.kFLNull => null$,
-        cblite.FLValueType.kFLBoolean => boolean,
-        cblite.FLValueType.kFLNumber => number,
-        cblite.FLValueType.kFLString => string,
-        cblite.FLValueType.kFLData => data,
-        cblite.FLValueType.kFLArray => array,
-        cblite.FLValueType.kFLDict => dict,
-        _ => throw ArgumentError('Unknown value for FLValueType: $value'),
-      };
+    cblite.FLValueType.kFLUndefined => undefined,
+    cblite.FLValueType.kFLNull => null$,
+    cblite.FLValueType.kFLBoolean => boolean,
+    cblite.FLValueType.kFLNumber => number,
+    cblite.FLValueType.kFLString => string,
+    cblite.FLValueType.kFLData => data,
+    cblite.FLValueType.kFLArray => array,
+    cblite.FLValueType.kFLDict => dict,
+    _ => throw ArgumentError('Unknown value for FLValueType: $value'),
+  };
 
   final int value;
 }
@@ -374,8 +375,7 @@ final class ValueBindings extends Bindings {
     cblite.FLValue value, {
     required bool json5,
     required bool canonical,
-  }) =>
-      cbl.FLValue_ToJSONX(value, json5, canonical).toDartStringAndRelease()!;
+  }) => cbl.FLValue_ToJSONX(value, json5, canonical).toDartStringAndRelease()!;
 }
 
 // === Array ===================================================================
@@ -405,12 +405,12 @@ enum FLCopyFlags {
   const FLCopyFlags(this.value);
 
   static FLCopyFlags fromValue(int value) => switch (value) {
-        cblite.FLCopyFlags.kFLDefaultCopy => defaultCopy,
-        cblite.FLCopyFlags.kFLDeepCopy => deepCopy,
-        cblite.FLCopyFlags.kFLCopyImmutables => copyImmutables,
-        cblite.FLCopyFlags.kFLDeepCopyImmutables => deepCopyImmutables,
-        _ => throw ArgumentError('Unknown value for FLCopyFlags: $value'),
-      };
+    cblite.FLCopyFlags.kFLDefaultCopy => defaultCopy,
+    cblite.FLCopyFlags.kFLDeepCopy => deepCopy,
+    cblite.FLCopyFlags.kFLCopyImmutables => copyImmutables,
+    cblite.FLCopyFlags.kFLDeepCopyImmutables => deepCopyImmutables,
+    _ => throw ArgumentError('Unknown value for FLCopyFlags: $value'),
+  };
 
   final int value;
 }
@@ -418,10 +418,7 @@ enum FLCopyFlags {
 final class MutableArrayBindings extends Bindings {
   MutableArrayBindings(super.libraries);
 
-  cblite.FLMutableArray mutableCopy(
-    cblite.FLArray array,
-    FLCopyFlags flags,
-  ) =>
+  cblite.FLMutableArray mutableCopy(cblite.FLArray array, FLCopyFlags flags) =>
       cbl.FLArray_MutableCopy(array, flags.value);
 
   cblite.FLMutableArray create() => cbl.FLMutableArray_New();
@@ -450,14 +447,12 @@ final class MutableArrayBindings extends Bindings {
   cblite.FLMutableArray? getMutableArray(
     cblite.FLMutableArray array,
     int index,
-  ) =>
-      cbl.FLMutableArray_GetMutableArray(array, index).toNullable();
+  ) => cbl.FLMutableArray_GetMutableArray(array, index).toNullable();
 
   cblite.FLMutableDict? getMutableDict(
     cblite.FLMutableArray array,
     int index,
-  ) =>
-      cbl.FLMutableArray_GetMutableDict(array, index).toNullable();
+  ) => cbl.FLMutableArray_GetMutableDict(array, index).toNullable();
 }
 
 // === Dict ====================================================================
@@ -465,9 +460,10 @@ final class MutableArrayBindings extends Bindings {
 final class DictBindings extends Bindings {
   DictBindings(super.libraries);
 
-  cblite.FLValue? get(cblite.FLDict dict, String key) =>
-      runWithSingleFLString(key, (flKey) => cbl.FLDict_Get(dict, flKey))
-          .toNullable();
+  cblite.FLValue? get(cblite.FLDict dict, String key) => runWithSingleFLString(
+    key,
+    (flKey) => cbl.FLDict_Get(dict, flKey),
+  ).toNullable();
 
   cblite.FLValue? getWithFLString(cblite.FLDict dict, cblite.FLString key) =>
       cbl.FLDict_Get(dict, key).toNullable();
@@ -496,8 +492,7 @@ final class DictKeyBindings extends Bindings {
   cblite.FLValue? getWithKey(
     cblite.FLDict dict,
     Pointer<cblite.FLDictKey> key,
-  ) =>
-      cbl.FLDict_GetWithKey(dict, key).toNullable();
+  ) => cbl.FLDict_GetWithKey(dict, key).toNullable();
 }
 
 // === MutableDict =============================================================
@@ -505,10 +500,7 @@ final class DictKeyBindings extends Bindings {
 final class MutableDictBindings extends Bindings {
   MutableDictBindings(super.libraries);
 
-  cblite.FLMutableDict mutableCopy(
-    cblite.FLDict source,
-    FLCopyFlags flags,
-  ) =>
+  cblite.FLMutableDict mutableCopy(cblite.FLDict source, FLCopyFlags flags) =>
       cbl.FLDict_MutableCopy(source, flags.value);
 
   cblite.FLMutableDict create() => cbl.FLMutableDict_New();
@@ -536,20 +528,18 @@ final class MutableDictBindings extends Bindings {
   cblite.FLMutableArray? getMutableArray(
     cblite.FLMutableDict array,
     String key,
-  ) =>
-      runWithSingleFLString(
-        key,
-        (flKey) => cbl.FLMutableDict_GetMutableArray(array, flKey).toNullable(),
-      );
+  ) => runWithSingleFLString(
+    key,
+    (flKey) => cbl.FLMutableDict_GetMutableArray(array, flKey).toNullable(),
+  );
 
   cblite.FLMutableDict? getMutableDict(
     cblite.FLMutableDict array,
     String key,
-  ) =>
-      runWithSingleFLString(
-        key,
-        (flKey) => cbl.FLMutableDict_GetMutableDict(array, flKey).toNullable(),
-      );
+  ) => runWithSingleFLString(
+    key,
+    (flKey) => cbl.FLMutableDict_GetMutableDict(array, flKey).toNullable(),
+  );
 }
 
 // === Decoder =================================================================
@@ -566,19 +556,23 @@ extension CBLDart_LoadedFLValueExt on cblitedart.CBLDart_LoadedFLValue {
 final class FleeceDecoderBindings extends Bindings {
   FleeceDecoderBindings(super.libraries);
 
-  late final _knownSharedKeysFinalizer =
-      NativeFinalizer(cblDart.addresses.CBLDart_KnownSharedKeys_Delete.cast());
-  late final _dictIteratorFinalizer =
-      NativeFinalizer(cblDart.addresses.CBLDart_FLDictIterator_Delete.cast());
-  late final _arrayIteratorFinalizer =
-      NativeFinalizer(cblDart.addresses.CBLDart_FLArrayIterator_Delete.cast());
+  late final _knownSharedKeysFinalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_KnownSharedKeys_Delete.cast(),
+  );
+  late final _dictIteratorFinalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_FLDictIterator_Delete.cast(),
+  );
+  late final _arrayIteratorFinalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_FLArrayIterator_Delete.cast(),
+  );
 
-  String dumpData(Data data) =>
-      cbl.FLData_Dump(data.toSliceResult().makeGlobal().ref)
-          .toDartStringAndRelease()!;
+  String dumpData(Data data) => cbl.FLData_Dump(
+    data.toSliceResult().makeGlobal().ref,
+  ).toDartStringAndRelease()!;
 
   Pointer<cblitedart.KnownSharedKeys> createKnownSharedKeys(
-      Finalizable object) {
+    Finalizable object,
+  ) {
     final result = cblDart.CBLDart_KnownSharedKeys_New();
     _knownSharedKeysFinalizer.attach(object, result.cast());
     return result;
@@ -588,20 +582,17 @@ final class FleeceDecoderBindings extends Bindings {
     cblDart.CBLDart_GetLoadedFLValue(value, globalLoadedFLValue);
   }
 
-  void getLoadedValueFromArray(
-    cblite.FLArray array,
-    int index,
-  ) {
+  void getLoadedValueFromArray(cblite.FLArray array, int index) {
     cblDart.CBLDart_FLArray_GetLoadedFLValue(array, index, globalLoadedFLValue);
   }
 
-  void getLoadedValueFromDict(
-    cblite.FLDict array,
-    String key,
-  ) {
+  void getLoadedValueFromDict(cblite.FLDict array, String key) {
     runWithSingleFLString(key, (flKey) {
       cblDart.CBLDart_FLDict_GetLoadedFLValue(
-          array, flKey, globalLoadedFLValue);
+        array,
+        flKey,
+        globalLoadedFLValue,
+      );
     });
   }
 
@@ -637,8 +628,11 @@ final class FleeceDecoderBindings extends Bindings {
     cblite.FLArray array,
     Pointer<cblitedart.CBLDart_LoadedFLValue> valueOut,
   ) {
-    final result =
-        cblDart.CBLDart_FLArrayIterator_Begin(array, valueOut, object == null);
+    final result = cblDart.CBLDart_FLArrayIterator_Begin(
+      array,
+      valueOut,
+      object == null,
+    );
 
     if (object != null) {
       _arrayIteratorFinalizer.attach(object, result.cast());
@@ -649,8 +643,7 @@ final class FleeceDecoderBindings extends Bindings {
 
   bool arrayIteratorNext(
     Pointer<cblitedart.CBLDart_FLArrayIterator> iterator,
-  ) =>
-      cblDart.CBLDart_FLArrayIterator_Next(iterator);
+  ) => cblDart.CBLDart_FLArrayIterator_Next(iterator);
 }
 
 // === Encoder =================================================================
@@ -663,11 +656,11 @@ enum FLEncoderFormat {
   const FLEncoderFormat(this.value);
 
   static FLEncoderFormat fromValue(int value) => switch (value) {
-        cblite.FLEncoderFormat.kFLEncodeFleece => fleece,
-        cblite.FLEncoderFormat.kFLEncodeJSON => json,
-        cblite.FLEncoderFormat.kFLEncodeJSON5 => json5,
-        _ => throw ArgumentError('Unknown value for FLEncoderFormat: $value'),
-      };
+    cblite.FLEncoderFormat.kFLEncodeFleece => fleece,
+    cblite.FLEncoderFormat.kFLEncodeJSON => json,
+    cblite.FLEncoderFormat.kFLEncodeJSON5 => json5,
+    _ => throw ArgumentError('Unknown value for FLEncoderFormat: $value'),
+  };
 
   final int value;
 }
@@ -685,13 +678,9 @@ final class FleeceEncoderBindings extends Bindings {
     required FLEncoderFormat format,
     required int reserveSize,
     required bool uniqueStrings,
-  }) =>
-      cbl.FLEncoder_NewWithOptions(format.value, reserveSize, uniqueStrings);
+  }) => cbl.FLEncoder_NewWithOptions(format.value, reserveSize, uniqueStrings);
 
-  void setSharedKeys(
-    cblite.FLEncoder encoder,
-    cblite.FLSharedKeys keys,
-  ) {
+  void setSharedKeys(cblite.FLEncoder encoder, cblite.FLSharedKeys keys) {
     cbl.FLEncoder_SetSharedKeys(encoder, keys);
   }
 
@@ -704,8 +693,10 @@ final class FleeceEncoderBindings extends Bindings {
     cblite.FLArray array,
     int index,
   ) {
-    _checkError(encoder,
-        cblDart.CBLDart_FLEncoder_WriteArrayValue(encoder, array, index));
+    _checkError(
+      encoder,
+      cblDart.CBLDart_FLEncoder_WriteArrayValue(encoder, array, index),
+    );
   }
 
   void writeValue(cblite.FLEncoder encoder, cblite.FLValue value) {
@@ -788,10 +779,10 @@ final class FleeceEncoderBindings extends Bindings {
     _checkError(encoder, cbl.FLEncoder_EndDict(encoder));
   }
 
-  Data? finish(cblite.FLEncoder encoder) =>
-      _checkError(encoder, cbl.FLEncoder_Finish(encoder, globalFLErrorCode))
-          .let(SliceResult.fromFLSliceResult)
-          ?.toData();
+  Data? finish(cblite.FLEncoder encoder) => _checkError(
+    encoder,
+    cbl.FLEncoder_Finish(encoder, globalFLErrorCode),
+  ).let(SliceResult.fromFLSliceResult)?.toData();
 
   FLError _getError(cblite.FLEncoder encoder) =>
       FLError.fromValue(cbl.FLEncoder_GetError(encoder));
@@ -800,7 +791,8 @@ final class FleeceEncoderBindings extends Bindings {
       cbl.FLEncoder_GetErrorMessage(encoder).cast<Utf8>().toDartStringAndFree();
 
   T _checkError<T>(cblite.FLEncoder encoder, T result) {
-    final mayHaveError = (result is bool && !result) ||
+    final mayHaveError =
+        (result is bool && !result) ||
         (result is cblite.FLSliceResult && result.buf == nullptr);
 
     if (mayHaveError) {
@@ -824,18 +816,18 @@ final class FleeceEncoderBindings extends Bindings {
 
 final class FleeceBindings extends Bindings {
   FleeceBindings(super.libraries)
-      : slice = SliceBindings(libraries),
-        sharedKeys = SharedKeysBindings(libraries),
-        slot = SlotBindings(libraries),
-        doc = DocBindings(libraries),
-        value = ValueBindings(libraries),
-        array = ArrayBindings(libraries),
-        mutableArray = MutableArrayBindings(libraries),
-        dict = DictBindings(libraries),
-        dictKey = DictKeyBindings(libraries),
-        mutableDict = MutableDictBindings(libraries),
-        decoder = FleeceDecoderBindings(libraries),
-        encoder = FleeceEncoderBindings(libraries);
+    : slice = SliceBindings(libraries),
+      sharedKeys = SharedKeysBindings(libraries),
+      slot = SlotBindings(libraries),
+      doc = DocBindings(libraries),
+      value = ValueBindings(libraries),
+      array = ArrayBindings(libraries),
+      mutableArray = MutableArrayBindings(libraries),
+      dict = DictBindings(libraries),
+      dictKey = DictKeyBindings(libraries),
+      mutableDict = MutableDictBindings(libraries),
+      decoder = FleeceDecoderBindings(libraries),
+      encoder = FleeceEncoderBindings(libraries);
 
   final SliceBindings slice;
   final SharedKeysBindings sharedKeys;

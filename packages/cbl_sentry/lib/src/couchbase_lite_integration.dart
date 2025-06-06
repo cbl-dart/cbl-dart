@@ -94,8 +94,9 @@ final class CouchbaseLiteIntegration extends Integration {
       operationBreadcrumbs: operationBreadcrumbs,
       onInitialize: () {
         if (breadcrumbLogLevel != LogLevel.none) {
-          Database.log.custom =
-              _breadcrumbLogger = BreadcrumbLogger(level: breadcrumbLogLevel);
+          Database.log.custom = _breadcrumbLogger = BreadcrumbLogger(
+            level: breadcrumbLogLevel,
+          );
         }
       },
     );

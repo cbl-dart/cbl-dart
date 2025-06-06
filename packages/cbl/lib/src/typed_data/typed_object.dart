@@ -33,8 +33,10 @@ abstract interface class TypedDictionaryObject<MD extends Object> {
 /// {@category Typed Data}
 @meta.experimental
 abstract interface class TypedMutableDictionaryObject<
-    D extends TypedDictionaryObject,
-    MD extends TypedDictionaryObject> extends TypedDictionaryObject<MD> {}
+  D extends TypedDictionaryObject,
+  MD extends TypedDictionaryObject
+>
+    extends TypedDictionaryObject<MD> {}
 
 /// The type that is implemented by all typed documents.
 ///
@@ -53,6 +55,8 @@ abstract interface class TypedDocumentObject<MD extends Object>
 /// {@category Typed Data}
 @meta.experimental
 abstract interface class TypedMutableDocumentObject<
-        D extends TypedDocumentObject,
-        MD extends TypedDocumentObject> extends TypedDocumentObject<MD>
+  D extends TypedDocumentObject,
+  MD extends TypedDocumentObject
+>
+    extends TypedDocumentObject<MD>
     implements TypedMutableDictionaryObject<D, MD> {}

@@ -13,7 +13,7 @@ abstract interface class TypedDataAdapter {
   /// Returns a factory for creating typed representations of [Dictionary]s with
   /// type [D].
   Factory<Dictionary, D>
-      dictionaryFactoryForType<D extends TypedDictionaryObject>();
+  dictionaryFactoryForType<D extends TypedDictionaryObject>();
 
   /// Returns a factory for creating typed representations of [Document]s with
   /// type [D].
@@ -29,10 +29,9 @@ abstract interface class TypedDataAdapter {
   /// If [allowUnmatchedDocument] is `true` and no typed document type can be
   /// matched for a [Document], the factory returns `null`. Otherwise the
   /// factory throws an exception.
-  Factory<Document, D?>
-      dynamicDocumentFactoryForType<D extends TypedDocumentObject>({
-    bool allowUnmatchedDocument = true,
-  });
+  Factory<Document, D?> dynamicDocumentFactoryForType<
+    D extends TypedDocumentObject
+  >({bool allowUnmatchedDocument = true});
 
   /// Callback that must be called each time before a typed document is saved to
   /// the database.

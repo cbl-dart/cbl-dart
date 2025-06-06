@@ -1,10 +1,7 @@
 // ignore_for_file: do_not_use_environment
 
 abstract class BenchmarkParameter<T> {
-  BenchmarkParameter({
-    required this.name,
-    required this.dartDefineValue,
-  });
+  BenchmarkParameter({required this.name, required this.dartDefineValue});
 
   final String name;
 
@@ -32,10 +29,7 @@ class DartDefine {
 }
 
 class StringParameter extends BenchmarkParameter<String> {
-  StringParameter({
-    required super.name,
-    required super.dartDefineValue,
-  });
+  StringParameter({required super.name, required super.dartDefineValue});
 
   @override
   String decode(String value) => value;
@@ -45,10 +39,7 @@ class StringParameter extends BenchmarkParameter<String> {
 }
 
 class IntParameter extends BenchmarkParameter<int> {
-  IntParameter({
-    required super.name,
-    required super.dartDefineValue,
-  });
+  IntParameter({required super.name, required super.dartDefineValue});
 
   @override
   int decode(String value) => int.parse(value);
@@ -73,15 +64,9 @@ class EnumParameter<T extends Enum> extends BenchmarkParameter<T> {
   String encode(T value) => value.name;
 }
 
-enum ExecutionMode {
-  jit,
-  aot,
-}
+enum ExecutionMode { jit, aot }
 
-enum ApiType {
-  sync,
-  async,
-}
+enum ApiType { sync, async }
 
 final executionModeParameter = EnumParameter(
   name: 'EXECUTION_MODE',

@@ -37,11 +37,7 @@ void apiTest(
   variantTest(
     description,
     body,
-    variants: [
-      api,
-      isolate,
-      if (variants != null) ...variants,
-    ],
+    variants: [api, isolate, if (variants != null) ...variants],
     skip: skip,
   );
 }
@@ -102,10 +98,9 @@ FutureOr<T> createApiResource<T extends ClosableResource>({
   required T Function() sync,
   required Future<T> Function() async,
   bool tearDown = true,
-}) =>
-    runWithApi(sync: sync, async: async).then((value) {
-      if (tearDown) {
-        addTearDown(value.close);
-      }
-      return value;
-    });
+}) => runWithApi(sync: sync, async: async).then((value) {
+  if (tearDown) {
+    addTearDown(value.close);
+  }
+  return value;
+});

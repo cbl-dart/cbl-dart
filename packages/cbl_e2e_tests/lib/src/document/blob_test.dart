@@ -58,21 +58,25 @@ void main() {
         });
         expect(
           blob.content,
-          throwsA(isStateError.having(
-            (it) => it.message,
-            'message',
-            "Cannot load Blob's content. "
-                'Save the Blob or a Document containing the Blob, first.',
-          )),
+          throwsA(
+            isStateError.having(
+              (it) => it.message,
+              'message',
+              "Cannot load Blob's content. "
+                  'Save the Blob or a Document containing the Blob, first.',
+            ),
+          ),
         );
         expect(
           blob.contentStream,
-          throwsA(isStateError.having(
-            (it) => it.message,
-            'message',
-            "Cannot load Blob's content. "
-                'Save the Blob or a Document containing the Blob, first.',
-          )),
+          throwsA(
+            isStateError.having(
+              (it) => it.message,
+              'message',
+              "Cannot load Blob's content. "
+                  'Save the Blob or a Document containing the Blob, first.',
+            ),
+          ),
         );
       });
     });
@@ -90,82 +94,83 @@ void main() {
 
     test('throws when saving document with stream blob into sync db', () {
       final db = openSyncTestDatabase();
-      final blob =
-          Blob.fromStream(contentType, Stream.value(randomTestContent()));
+      final blob = Blob.fromStream(
+        contentType,
+        Stream.value(randomTestContent()),
+      );
       final doc = MutableDocument({'blob': blob});
       expect(() => db.saveDocument(doc), throwsStateError);
     });
 
-    apiTest(
-      'read',
-      () async {
-        final db = await openTestDatabase();
+    apiTest('read', () async {
+      final db = await openTestDatabase();
 
-        final content =
-            randomTestContent(large: blobSize.value == BlobSize.large);
-        Blob? writeBlobInstance;
-        final doc = MutableDocument();
+      final content = randomTestContent(
+        large: blobSize.value == BlobSize.large,
+      );
+      Blob? writeBlobInstance;
+      final doc = MutableDocument();
 
-        switch (writeBlob.value) {
-          case WriteBlob.data:
-            writeBlobInstance = Blob.fromData(contentType, content);
-            break;
-          case WriteBlob.properties:
-            final blob = Blob.fromData(contentType, content);
-            await db.saveBlob(blob);
-            doc['blob'].value = blob.properties;
-            break;
-          case WriteBlob.stream:
-            writeBlobInstance =
-                Blob.fromStream(contentType, Stream.value(content));
+      switch (writeBlob.value) {
+        case WriteBlob.data:
+          writeBlobInstance = Blob.fromData(contentType, content);
+          break;
+        case WriteBlob.properties:
+          final blob = Blob.fromData(contentType, content);
+          await db.saveBlob(blob);
+          doc['blob'].value = blob.properties;
+          break;
+        case WriteBlob.stream:
+          writeBlobInstance = Blob.fromStream(
+            contentType,
+            Stream.value(content),
+          );
 
-            if (api.value == Api.sync) {
-              await db.saveBlob(writeBlobInstance);
-            }
-            break;
-        }
-
-        if (writeBlobInstance != null) {
-          doc['blob'].value = writeBlobInstance;
-        }
-
-        Future<void> read() async {
-          Blob readBlobInstance;
-          switch (readBlob.value) {
-            case ReadBlob.sourceBlob:
-              readBlobInstance = writeBlobInstance!;
-              break;
-            case ReadBlob.loadedBlob:
-              final loadedDoc = (await db.document(doc.id))!;
-              readBlobInstance = loadedDoc.blob('blob')!;
-              break;
+          if (api.value == Api.sync) {
+            await db.saveBlob(writeBlobInstance);
           }
+          break;
+      }
 
-          switch (readMode.value) {
-            case ReadMode.future:
-              expect(await readBlobInstance.content(), content);
-              break;
-            case ReadMode.stream:
-              expect(
-                await byteStreamToFuture(readBlobInstance.contentStream()),
-                content,
-              );
-              break;
-          }
-        }
+      if (writeBlobInstance != null) {
+        doc['blob'].value = writeBlobInstance;
+      }
 
-        switch (readTime.value) {
-          case ReadTime.beforeSave:
-            await read();
+      Future<void> read() async {
+        Blob readBlobInstance;
+        switch (readBlob.value) {
+          case ReadBlob.sourceBlob:
+            readBlobInstance = writeBlobInstance!;
             break;
-          case ReadTime.afterSave:
-            await db.saveDocument(doc);
-            await read();
+          case ReadBlob.loadedBlob:
+            final loadedDoc = (await db.document(doc.id))!;
+            readBlobInstance = loadedDoc.blob('blob')!;
             break;
         }
-      },
-      variants: [writeBlob, readTime, readMode, readBlob, blobSize],
-    );
+
+        switch (readMode.value) {
+          case ReadMode.future:
+            expect(await readBlobInstance.content(), content);
+            break;
+          case ReadMode.stream:
+            expect(
+              await byteStreamToFuture(readBlobInstance.contentStream()),
+              content,
+            );
+            break;
+        }
+      }
+
+      switch (readTime.value) {
+        case ReadTime.beforeSave:
+          await read();
+          break;
+        case ReadTime.afterSave:
+          await db.saveDocument(doc);
+          await read();
+          break;
+      }
+    }, variants: [writeBlob, readTime, readMode, readBlob, blobSize]);
 
     apiTest('remove from document', () async {
       final db = await openTestDatabase();
@@ -236,10 +241,7 @@ void main() {
     });
 
     test('hashCode returns fixed hashCode if blob has no digest', () {
-      expect(
-        blobFromData().hashCode,
-        31,
-      );
+      expect(blobFromData().hashCode, 31);
     });
 
     test('toString', () {
@@ -248,10 +250,7 @@ void main() {
         'Blob($contentType; 1.5 KB)',
       );
 
-      expect(
-        blobFromDataWithLength().toString(),
-        'Blob($contentType; 0.5 KB)',
-      );
+      expect(blobFromDataWithLength().toString(), 'Blob($contentType; 0.5 KB)');
 
       // Blob without content type.
       expect(
@@ -282,11 +281,7 @@ void main() {
         'digest': '',
         'content_type': 'text/plain',
       }, isBlob);
-      expect({
-        '@type': 'blob',
-        'digest': '',
-        'length': 0,
-      }, isBlob);
+      expect({'@type': 'blob', 'digest': '', 'length': 0}, isBlob);
       expect({
         '@type': 'blob',
         'digest': '',

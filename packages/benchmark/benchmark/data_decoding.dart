@@ -33,8 +33,9 @@ class FleeceRecursiveDecodingBenchmark extends DecodingBenchmark {
 
   final sharedKeys = fl.SharedKeys();
   final sharedKeysTable = SharedKeysTable();
-  late final data =
-      (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(jsonString);
+  late final data = (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(
+    jsonString,
+  );
 
   @override
   void run() {
@@ -52,8 +53,9 @@ class FleeceListenerDecodingBenchmark extends DecodingBenchmark {
 
   final sharedKeys = fl.SharedKeys();
   final sharedKeysTable = SharedKeysTable();
-  late final data =
-      (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(jsonString);
+  late final data = (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(
+    jsonString,
+  );
 
   @override
   void run() {
@@ -71,13 +73,17 @@ class FleeceWrapperDecodingBenchmark extends DecodingBenchmark {
   final dictKeys = OptimizingDictKeys();
   final sharedKeys = fl.SharedKeys();
   final sharedKeysTable = SharedKeysTable();
-  late final data =
-      (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(jsonString);
+  late final data = (FleeceEncoder()..setSharedKeys(sharedKeys)).convertJson(
+    jsonString,
+  );
 
   @override
   void run() {
-    final doc =
-        fl.Doc.fromResultData(data, FLTrust.trusted, sharedKeys: sharedKeys);
+    final doc = fl.Doc.fromResultData(
+      data,
+      FLTrust.trusted,
+      sharedKeys: sharedKeys,
+    );
     final root = MRoot.fromContext(
       MContext(
         data: doc,

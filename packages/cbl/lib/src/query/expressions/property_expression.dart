@@ -14,8 +14,8 @@ abstract final class PropertyExpressionInterface
 base class PropertyExpressionImpl extends ExpressionImpl
     implements PropertyExpressionInterface {
   PropertyExpressionImpl(String propertyPath, {String? from})
-      : _propertyPath = propertyPath,
-        _from = from;
+    : _propertyPath = propertyPath,
+      _from = from;
 
   PropertyExpressionImpl.all() : this('');
 
@@ -27,6 +27,7 @@ base class PropertyExpressionImpl extends ExpressionImpl
       PropertyExpressionImpl(_propertyPath, from: alias);
 
   @override
-  Object? toJson() =>
-      [if (_from == null) '.$_propertyPath' else '.$_from.$_propertyPath'];
+  Object? toJson() => [
+    if (_from == null) '.$_propertyPath' else '.$_from.$_propertyPath',
+  ];
 }

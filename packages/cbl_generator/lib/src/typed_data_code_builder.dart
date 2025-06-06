@@ -4,9 +4,7 @@ import 'model.dart';
 import 'utils.dart';
 
 final class TypeDataCodeBuilder {
-  TypeDataCodeBuilder({
-    required this.object,
-  }) {
+  TypeDataCodeBuilder({required this.object}) {
     switch (object.kind) {
       case TypedDataObjectKind.document:
         _internalType = 'Document';
@@ -405,14 +403,15 @@ ${property.type.mutableDartTypeWithNullability} get ${property.name} =>
     final converter = property.type.isCached
         ? property.converterField
         : _buildTypeConverterExpression(type, forMutable: true);
-    _code.writeln([
-      '''
+    _code.writeln(
+      [
+        '''
 set ${property.name}(${type.dartTypeWithNullability} value) {
   final promoted = ${property.isNullable ? 'value == null ? null : ' : ''}$converter.promote(value);''',
-      if (property.type.isCached)
-        '''
+        if (property.type.isCached)
+          '''
   ${property.cacheField} = promoted;''',
-      '''
+        '''
   ${property.writeHelper}(
     internal: internal,
     key: ${escapeDartString(property.property)},
@@ -421,8 +420,9 @@ set ${property.name}(${type.dartTypeWithNullability} value) {
   );
 }
 
-    '''
-    ].join('\n'));
+    ''',
+      ].join('\n'),
+    );
   }
 
   String _buildTypeConverterExpression(

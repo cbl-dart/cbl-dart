@@ -16,11 +16,14 @@ void main() {
     setUp(() => Database.log.custom = null);
 
     test('is called with log message', () {
-      Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
-        expect(level, LogLevel.warning);
-        expect(domain, LogDomain.network);
-        expect(message, 'A');
-      }), level: LogLevel.warning);
+      Database.log.custom = TestLogger(
+        expectAsync3((level, domain, message) {
+          expect(level, LogLevel.warning);
+          expect(domain, LogDomain.network);
+          expect(message, 'A');
+        }),
+        level: LogLevel.warning,
+      );
 
       cblLogMessage(LogDomain.network, LogLevel.warning, 'A');
     });
@@ -43,9 +46,12 @@ void main() {
     test('remove logger', () async {
       final receivedMessage = Completer<void>();
 
-      Database.log.custom = TestLogger(expectAsync3((level, domain, message) {
-        receivedMessage.complete();
-      }), level: LogLevel.error);
+      Database.log.custom = TestLogger(
+        expectAsync3((level, domain, message) {
+          receivedMessage.complete();
+        }),
+        level: LogLevel.error,
+      );
 
       // Will be logged.
       cblLogMessage(LogDomain.network, LogLevel.error, 'A');

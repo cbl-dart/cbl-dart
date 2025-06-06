@@ -6,11 +6,8 @@ import 'package:meta/meta.dart';
 
 import '../test_binding.dart';
 
-typedef VariantIsCompatible<T> = bool Function(
-  T value,
-  TestVariant other,
-  Object? otherValue,
-);
+typedef VariantIsCompatible<T> =
+    bool Function(T value, TestVariant other, Object? otherValue);
 
 final class TestVariant<T extends Object?> {
   const TestVariant(
@@ -47,17 +44,17 @@ final class EnumVariant<T extends Enum> extends TestVariant<T> {
     String? name,
     VariantIsCompatible<T>? isCompatible,
     int order = 0,
-  })  : assert(values.isNotEmpty),
-        super(
-          name ??
-              enumName(values.first).replaceAllMapped(
-                RegExp('^.'),
-                (match) => match.group(0)!.toLowerCase(),
-              ),
-          values: values,
-          isCompatible: isCompatible,
-          order: order,
-        );
+  }) : assert(values.isNotEmpty),
+       super(
+         name ??
+             enumName(values.first).replaceAllMapped(
+               RegExp('^.'),
+               (match) => match.group(0)!.toLowerCase(),
+             ),
+         values: values,
+         isCompatible: isCompatible,
+         order: order,
+       );
 
   @override
   String describeValue(T value) => value.name;
@@ -96,8 +93,9 @@ final class _VariantConfiguration {
   final List<_VariantEntry> combination;
 
   T getVariantValue<T>(TestVariant<T> variant) {
-    final entry =
-        combination.firstWhereOrNull((element) => element.variant == variant);
+    final entry = combination.firstWhereOrNull(
+      (element) => element.variant == variant,
+    );
 
     if (entry == null) {
       throw ArgumentError.value(variant, 'variant', 'has not value');
@@ -123,25 +121,27 @@ final class _VariantEntry {
   static List<List<_VariantEntry>> combinations(List<TestVariant> variants) {
     assert(variants.isNotEmpty);
 
-    List<List<_VariantEntry>> generateCombinations(
-      List<TestVariant> variants,
-    ) {
+    List<List<_VariantEntry>> generateCombinations(List<TestVariant> variants) {
       assert(variants.isNotEmpty);
 
       final entries = variantEntries(variants.first);
 
       if (variants.length == 1) {
         return [
-          for (final entry in entries) [entry]
+          for (final entry in entries) [entry],
         ];
       }
 
       final combinations = generateCombinations(variants.sublist(1));
 
       return entries
-          .expand((entry) => combinations
-              .where((combination) => combination.every(entry.isCompatibleWith))
-              .map((combination) => [entry, ...combination]))
+          .expand(
+            (entry) => combinations
+                .where(
+                  (combination) => combination.every(entry.isCompatibleWith),
+                )
+                .map((combination) => [entry, ...combination]),
+          )
           .toList();
     }
 
@@ -172,5 +172,4 @@ int _variantOrder(TestVariant a, TestVariant b) {
 T _runWithVariants<T>(
   T Function() fn, {
   required _VariantConfiguration config,
-}) =>
-    runZoned(fn, zoneValues: {#variantTestConfiguration: config});
+}) => runZoned(fn, zoneValues: {#variantTestConfiguration: config});

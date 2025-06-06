@@ -15,8 +15,9 @@ void main() {
       isTrue,
     );
     expect(
-      ImmutableCustomDataNameDict.internal(MutableDictionary({'custom': true}))
-          .value,
+      ImmutableCustomDataNameDict.internal(
+        MutableDictionary({'custom': true}),
+      ).value,
       isTrue,
     );
   });

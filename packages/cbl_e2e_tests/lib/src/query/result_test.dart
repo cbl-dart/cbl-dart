@@ -85,22 +85,24 @@ void main() {
     });
 
     test('get array', () {
-      final result = testResult([
-        'a'
-      ], [
-        [true]
-      ]);
+      final result = testResult(
+        ['a'],
+        [
+          [true],
+        ],
+      );
       expect(result.array(0), MutableArray([true]));
       expect(result.array('a'), MutableArray([true]));
       expect(result.array('b'), null);
     });
 
     test('get dictionary', () {
-      final result = testResult([
-        'a'
-      ], [
-        {'a': true}
-      ]);
+      final result = testResult(
+        ['a'],
+        [
+          {'a': true},
+        ],
+      );
       expect(result.dictionary(0), MutableDictionary({'a': true}));
       expect(result.dictionary('a'), MutableDictionary({'a': true}));
       expect(result.dictionary('b'), null);
@@ -194,7 +196,7 @@ void main() {
         final db = await openTestDatabase();
         final collection = await db.defaultCollection;
         final doc = MutableDocument.withId('ResultSetColumnByName', {
-          'a': {'b': true}
+          'a': {'b': true},
         });
         await collection.saveDocument(doc);
         final q = await db.createQuery(
@@ -216,8 +218,9 @@ void main() {
         final doc = MutableDocument.withId('ResultSetColumnByIndex');
         await collection.saveDocument(doc);
 
-        final q = await db
-            .createQuery(r'SELECT META().id FROM _ WHERE META().id = $ID');
+        final q = await db.createQuery(
+          r'SELECT META().id FROM _ WHERE META().id = $ID',
+        );
         await q.setParameters(Parameters({'ID': doc.id}));
 
         final resultSet = await q.execute();
@@ -238,8 +241,10 @@ Result testResult(List<String> columnNames, List<Object?> columnValues) {
   return ResultImpl(
     context: createResultSetMContext(MockDatabase()),
     columnNames: columnNames,
-    columnValues:
-        fl.Doc.fromResultData(encodedValues, fl.FLTrust.trusted).root.asArray!,
+    columnValues: fl.Doc.fromResultData(
+      encodedValues,
+      fl.FLTrust.trusted,
+    ).root.asArray!,
   );
 }
 

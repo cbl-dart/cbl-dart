@@ -18,8 +18,6 @@ abstract class User with _$User {
 
 @TypedDictionary()
 abstract class PersonalName with _$PersonalName {
-  factory PersonalName({
-    required String first,
-    required String last,
-  }) = MutablePersonalName;
+  factory PersonalName({required String first, required String last}) =
+      MutablePersonalName;
 }

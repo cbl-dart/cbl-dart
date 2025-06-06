@@ -23,7 +23,7 @@ final class ValueIndexItem {
 
   /// Creates a value index item from an [expression] to index.
   ValueIndexItem.expression(ExpressionInterface expression)
-      : _expression = expression as ExpressionImpl;
+    : _expression = expression as ExpressionImpl;
 
   final ExpressionImpl _expression;
 }
@@ -60,7 +60,7 @@ abstract final class FullTextIndex implements Index {
 final class FullTextIndexItem {
   /// Creates a full-text index item from a [propertyPath] to index.
   FullTextIndexItem.property(String propertyPath)
-      : _expression = Expression.property(propertyPath) as ExpressionImpl;
+    : _expression = Expression.property(propertyPath) as ExpressionImpl;
 
   final ExpressionImpl _expression;
 }
@@ -93,13 +93,13 @@ final class ValueIndexImpl implements IndexImplInterface, ValueIndex {
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
-        expressionLanguage: CBLQueryLanguage.json,
-        type: CBLDartIndexType.value$,
-        expressions: _items
-            .map((item) => item._expression.toJson())
-            .toList()
-            .let(jsonEncode),
-      );
+    expressionLanguage: CBLQueryLanguage.json,
+    type: CBLDartIndexType.value$,
+    expressions: _items
+        .map((item) => item._expression.toJson())
+        .toList()
+        .let(jsonEncode),
+  );
 }
 
 final class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
@@ -107,9 +107,9 @@ final class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
     required Iterable<FullTextIndexItem> items,
     bool ignoreAccents = false,
     FullTextLanguage? language,
-  })  : _items = items.toList(),
-        _ignoreAccents = ignoreAccents,
-        _language = language;
+  }) : _items = items.toList(),
+       _ignoreAccents = ignoreAccents,
+       _language = language;
 
   final List<FullTextIndexItem> _items;
   final bool _ignoreAccents;
@@ -117,27 +117,27 @@ final class FullTextIndexImpl implements IndexImplInterface, FullTextIndex {
 
   @override
   FullTextIndex ignoreAccents(bool ignoreAccents) => FullTextIndexImpl(
-        items: _items,
-        ignoreAccents: ignoreAccents,
-        language: _language,
-      );
+    items: _items,
+    ignoreAccents: ignoreAccents,
+    language: _language,
+  );
 
   @override
   FullTextIndex langauge(FullTextLanguage language) => FullTextIndexImpl(
-        items: _items,
-        ignoreAccents: _ignoreAccents,
-        language: language,
-      );
+    items: _items,
+    ignoreAccents: _ignoreAccents,
+    language: language,
+  );
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
-        expressionLanguage: CBLQueryLanguage.json,
-        type: CBLDartIndexType.fullText,
-        expressions: _items
-            .map((item) => item._expression.toJson())
-            .toList()
-            .let(jsonEncode),
-        ignoreAccents: _ignoreAccents,
-        language: _language?.name,
-      );
+    expressionLanguage: CBLQueryLanguage.json,
+    type: CBLDartIndexType.fullText,
+    expressions: _items
+        .map((item) => item._expression.toJson())
+        .toList()
+        .let(jsonEncode),
+    ignoreAccents: _ignoreAccents,
+    language: _language?.name,
+  );
 }

@@ -85,10 +85,7 @@ abstract interface class FleeceEncodable {
 }
 
 final class FleeceEncoderContext implements DictKeysProvider {
-  FleeceEncoderContext({
-    this.database,
-    this.encodeUnsavedBlobWithData = false,
-  });
+  FleeceEncoderContext({this.database, this.encodeUnsavedBlobWithData = false});
 
   final DatabaseBase? database;
   final bool encodeUnsavedBlobWithData;
@@ -111,13 +108,13 @@ class DatabaseMContext extends MContext {
   });
 
   DatabaseMContext.from(DatabaseMContext other, {Object? data})
-      : this(
-          database: other.database,
-          data: data,
-          dictKeys: other.dictKeys,
-          sharedKeysTable: other.sharedKeysTable,
-          sharedStringsTable: other.sharedStringsTable,
-        );
+    : this(
+        database: other.database,
+        data: data,
+        dictKeys: other.dictKeys,
+        sharedKeysTable: other.sharedKeysTable,
+        sharedStringsTable: other.sharedStringsTable,
+      );
 
   final DatabaseBase? database;
 }
@@ -203,8 +200,7 @@ final class CblMDelegate extends MDelegate {
   FutureOr<void> saveExternalData(
     covariant BlobImpl native,
     covariant Database context,
-  ) =>
-      native.ensureIsInstalled(context);
+  ) => native.ensureIsInstalled(context);
 
   @override
   void encodeNative(FleeceEncoder encoder, Object? native) {

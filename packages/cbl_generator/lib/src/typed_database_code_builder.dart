@@ -14,7 +14,8 @@ final class TypeDataBaseCodeBuilder {
 
   String build() {
     _code.writeln(
-        'class ${model.className} extends ${model.declaringClassName} {');
+      'class ${model.className} extends ${model.declaringClassName} {',
+    );
 
     _code.writeln('static Future<AsyncDatabase> openAsync(');
     _code.writeln('String name, [');
@@ -70,13 +71,15 @@ final class TypeDataBaseCodeBuilder {
 
     final typeMatcher = object.typeMatcher;
     if (typeMatcher is ValueTypeMatcher) {
-      final pathLiteral = typeMatcher.path.map((segment) {
-        if (segment is String) {
-          return escapeDartString(segment);
-        } else {
-          return segment;
-        }
-      }).join(', ');
+      final pathLiteral = typeMatcher.path
+          .map((segment) {
+            if (segment is String) {
+              return escapeDartString(segment);
+            } else {
+              return segment;
+            }
+          })
+          .join(', ');
       _code
         ..writeln('typeMatcher: const ValueTypeMatcher(')
         ..writeln('path: [$pathLiteral],');

@@ -90,10 +90,7 @@ void main() {
 
     test('adds query operations with breadcrumb type query', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
-      delegate.traceSyncOperation(
-        PrepareQueryOp(MockQuery()),
-        () {},
-      );
+      delegate.traceSyncOperation(PrepareQueryOp(MockQuery()), () {});
 
       final breadcrumb = hub.breadcrumbs.first;
       expect(breadcrumb.type, 'query');
@@ -101,50 +98,32 @@ void main() {
 
     test('does not add breadcrumb for sync ChannelCallOp', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
-      delegate.traceSyncOperation(
-        ChannelCallOp('a'),
-        () {},
-      );
+      delegate.traceSyncOperation(ChannelCallOp('a'), () {});
 
       expect(hub.breadcrumbs, isEmpty);
     });
 
     test('does not add breadcrumb for async ChannelCallOp', () async {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
-      await delegate.traceAsyncOperation(
-        ChannelCallOp('a'),
-        () async {},
-      );
+      await delegate.traceAsyncOperation(ChannelCallOp('a'), () async {});
 
       expect(hub.breadcrumbs, isEmpty);
     });
 
     test('does not add breadcrumb for sync internal operation', () {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
-      delegate.traceSyncOperation(
-        InitializeOp(),
-        () {
-          delegate.traceSyncOperation(
-            InitializeOp(),
-            () {},
-          );
-        },
-      );
+      delegate.traceSyncOperation(InitializeOp(), () {
+        delegate.traceSyncOperation(InitializeOp(), () {});
+      });
 
       expect(hub.breadcrumbs, hasLength(1));
     });
 
     test('does not add breadcrumb for async internal operation', () async {
       final delegate = SentryTracingDelegate(sentryDsn: '', hub: hub);
-      await delegate.traceAsyncOperation(
-        InitializeOp(),
-        () async {
-          await delegate.traceAsyncOperation(
-            InitializeOp(),
-            () async {},
-          );
-        },
-      );
+      await delegate.traceAsyncOperation(InitializeOp(), () async {
+        await delegate.traceAsyncOperation(InitializeOp(), () async {});
+      });
 
       expect(hub.breadcrumbs, hasLength(1));
     });
@@ -206,10 +185,7 @@ void main() {
       final root = MockSpan('root');
 
       runWithCblSentrySpan(root, () {
-        delegate.traceSyncOperation(
-          InitializeOp(),
-          () {},
-        );
+        delegate.traceSyncOperation(InitializeOp(), () {});
       });
 
       expect(root.children, isEmpty);
@@ -224,10 +200,7 @@ void main() {
       final root = MockSpan('root');
 
       await runWithCblSentrySpan(root, () async {
-        await delegate.traceAsyncOperation(
-          InitializeOp(),
-          () async {},
-        );
+        await delegate.traceAsyncOperation(InitializeOp(), () async {});
       });
 
       expect(root.children, isEmpty);
@@ -238,15 +211,9 @@ void main() {
       final root = MockSpan('root');
 
       runWithCblSentrySpan(root, () {
-        delegate.traceSyncOperation(
-          InitializeOp(),
-          () {
-            delegate.traceSyncOperation(
-              InitializeOp(),
-              () {},
-            );
-          },
-        );
+        delegate.traceSyncOperation(InitializeOp(), () {
+          delegate.traceSyncOperation(InitializeOp(), () {});
+        });
       });
 
       expect(root.children, hasLength(1));
@@ -260,15 +227,9 @@ void main() {
       final root = MockSpan('root');
 
       await runWithCblSentrySpan(root, () async {
-        await delegate.traceAsyncOperation(
-          InitializeOp(),
-          () async {
-            await delegate.traceAsyncOperation(
-              InitializeOp(),
-              () async {},
-            );
-          },
-        );
+        await delegate.traceAsyncOperation(InitializeOp(), () async {
+          await delegate.traceAsyncOperation(InitializeOp(), () async {});
+        });
       });
 
       expect(root.children, hasLength(1));
@@ -284,12 +245,9 @@ void main() {
 
       expect(
         () => runWithCblSentrySpan(root, () {
-          delegate.traceSyncOperation(
-            InitializeOp(),
-            () {
-              throw exception;
-            },
-          );
+          delegate.traceSyncOperation(InitializeOp(), () {
+            throw exception;
+          });
         }),
         throwsException,
       );
@@ -307,12 +265,9 @@ void main() {
 
       await expectLater(
         () => runWithCblSentrySpan(root, () async {
-          await delegate.traceAsyncOperation(
-            InitializeOp(),
-            () async {
-              throw exception;
-            },
-          );
+          await delegate.traceAsyncOperation(InitializeOp(), () async {
+            throw exception;
+          });
         }),
         throwsException,
       );
@@ -333,15 +288,9 @@ void main() {
         final root = MockSpan('root');
 
         runWithCblSentrySpan(root, () {
-          delegate.traceSyncOperation(
-            InitializeOp(),
-            () {
-              delegate.traceSyncOperation(
-                InitializeOp(),
-                () {},
-              );
-            },
-          );
+          delegate.traceSyncOperation(InitializeOp(), () {
+            delegate.traceSyncOperation(InitializeOp(), () {});
+          });
         });
 
         expect(root.children, hasLength(1));
@@ -362,15 +311,9 @@ void main() {
         final root = MockSpan('root');
 
         await runWithCblSentrySpan(root, () async {
-          await delegate.traceAsyncOperation(
-            InitializeOp(),
-            () async {
-              await delegate.traceAsyncOperation(
-                InitializeOp(),
-                () async {},
-              );
-            },
-          );
+          await delegate.traceAsyncOperation(InitializeOp(), () async {
+            await delegate.traceAsyncOperation(InitializeOp(), () async {});
+          });
         });
 
         expect(root.children, hasLength(1));
@@ -399,15 +342,9 @@ void main() {
           });
         });
 
-        workerDelegate.restoreTracingContext(
-          tracingContext,
-          () {
-            workerDelegate.traceSyncOperation(
-              InitializeOp(),
-              () {},
-            );
-          },
-        );
+        workerDelegate.restoreTracingContext(tracingContext, () {
+          workerDelegate.traceSyncOperation(InitializeOp(), () {});
+        });
 
         expect(hub.transactions, hasLength(1));
         final transaction = hub.transactions.first;

@@ -16,11 +16,11 @@ void main() {
         expectTypeMatches(
           ValueTypeMatcherImpl(path: ['a'], value: 'v'),
           matches: [
-            {'a': 'v'}
+            {'a': 'v'},
           ],
           matchesNot: [
             {'a': 'x'},
-            {}
+            {},
           ],
         );
       });
@@ -30,16 +30,16 @@ void main() {
           ValueTypeMatcherImpl(path: ['a', 'b'], value: 'v'),
           matches: [
             {
-              'a': {'b': 'v'}
-            }
+              'a': {'b': 'v'},
+            },
           ],
           matchesNot: [
             {
-              'a': {'b': 'x'}
+              'a': {'b': 'x'},
             },
             {'a': <String, Object?>{}},
             {'a': <Object?>[]},
-            {}
+            {},
           ],
         );
         expectTypeMatches(
@@ -47,24 +47,24 @@ void main() {
           matches: [
             {
               'a': [
-                {'b': 'v'}
-              ]
-            }
+                {'b': 'v'},
+              ],
+            },
           ],
           matchesNot: [
             {
               'a': [
-                {'b': 'x'}
-              ]
+                {'b': 'x'},
+              ],
             },
             {
-              'a': [<String, Object?>{}]
+              'a': [<String, Object?>{}],
             },
             {
-              'a': [<Object?>[]]
+              'a': [<Object?>[]],
             },
             {'a': <Object?>[]},
-            {}
+            {},
           ],
         );
       });
@@ -74,16 +74,16 @@ void main() {
           ValueTypeMatcherImpl(path: ['a', 0], value: 'v'),
           matches: [
             {
-              'a': ['v']
-            }
+              'a': ['v'],
+            },
           ],
           matchesNot: [
             {
-              'a': ['x']
+              'a': ['x'],
             },
             {'a': <String, Object?>{}},
             {'a': <Object?>[]},
-            {}
+            {},
           ],
         );
         expectTypeMatches(
@@ -91,24 +91,24 @@ void main() {
           matches: [
             {
               'a': {
-                'b': ['v']
-              }
-            }
+                'b': ['v'],
+              },
+            },
           ],
           matchesNot: [
             {
               'a': {
-                'b': ['x']
-              }
+                'b': ['x'],
+              },
             },
             {
-              'a': {'b': <String, Object?>{}}
+              'a': {'b': <String, Object?>{}},
             },
             {
-              'a': {'b': <Object?>[]}
+              'a': {'b': <Object?>[]},
             },
             {'a': <String, Object?>{}},
-            {}
+            {},
           ],
         );
       });
@@ -137,20 +137,20 @@ void main() {
           validStates: [
             {'a': <String, Object?>{}},
             {
-              'a': {'b': 'v'}
+              'a': {'b': 'v'},
             },
           ],
           invalidStates: [
             {'a': null},
             {'a': <Object?>[]},
             {
-              'a': {'b': 'x'}
+              'a': {'b': 'x'},
             },
             {
-              'a': {'b': <Object?>[]}
+              'a': {'b': <Object?>[]},
             },
             {
-              'a': {'b': <String, Object?>{}}
+              'a': {'b': <String, Object?>{}},
             },
           ],
         );
@@ -158,35 +158,35 @@ void main() {
           ValueTypeMatcherImpl(path: ['a', 0, 'b'], value: 'v'),
           validStates: [
             {
-              'a': [<String, Object?>{}]
+              'a': [<String, Object?>{}],
             },
             {
               'a': [
-                {'b': 'v'}
-              ]
+                {'b': 'v'},
+              ],
             },
           ],
           invalidStates: [
             {
-              'a': [null]
+              'a': [null],
             },
             {
-              'a': [<Object?>[]]
-            },
-            {
-              'a': [
-                {'b': 'x'}
-              ]
+              'a': [<Object?>[]],
             },
             {
               'a': [
-                {'b': <Object?>[]}
-              ]
+                {'b': 'x'},
+              ],
             },
             {
               'a': [
-                {'b': <String, Object?>{}}
-              ]
+                {'b': <Object?>[]},
+              ],
+            },
+            {
+              'a': [
+                {'b': <String, Object?>{}},
+              ],
             },
           ],
         );
@@ -198,20 +198,20 @@ void main() {
           validStates: [
             {'a': <Object?>[]},
             {
-              'a': ['v']
+              'a': ['v'],
             },
           ],
           invalidStates: [
             {'a': null},
             {'a': <String, Object?>{}},
             {
-              'a': ['x']
+              'a': ['x'],
             },
             {
-              'a': [<Object?>[]]
+              'a': [<Object?>[]],
             },
             {
-              'a': [<String, Object?>{}]
+              'a': [<String, Object?>{}],
             },
           ],
         );
@@ -219,10 +219,10 @@ void main() {
           ValueTypeMatcherImpl(path: ['a', 1], value: 'v'),
           validStates: [
             {
-              'a': [null]
+              'a': [null],
             },
             {
-              'a': [null, 'v']
+              'a': [null, 'v'],
             },
           ],
           invalidStates: [
@@ -230,13 +230,13 @@ void main() {
             {'a': <String, Object?>{}},
             {'a': <Object?>[]},
             {
-              'a': [null, 'x']
+              'a': [null, 'x'],
             },
             {
-              'a': [null, <Object?>[]]
+              'a': [null, <Object?>[]],
             },
             {
-              'a': [null, <String, Object?>{}]
+              'a': [null, <String, Object?>{}],
             },
           ],
         );
@@ -244,37 +244,37 @@ void main() {
           ValueTypeMatcherImpl(path: ['a', 'b', 0], value: 'v'),
           validStates: [
             {
-              'a': {'b': <Object?>[]}
+              'a': {'b': <Object?>[]},
             },
             {
               'a': {
-                'b': ['v']
-              }
+                'b': ['v'],
+              },
             },
           ],
           invalidStates: [
             {'a': null},
             {'a': <String, Object?>{}},
             {
-              'a': {'b': null}
+              'a': {'b': null},
             },
             {
-              'a': {'b': <String, Object?>{}}
-            },
-            {
-              'a': {
-                'b': ['x']
-              }
+              'a': {'b': <String, Object?>{}},
             },
             {
               'a': {
-                'b': [<Object?>[]]
-              }
+                'b': ['x'],
+              },
             },
             {
               'a': {
-                'b': [<String, Object?>{}]
-              }
+                'b': [<Object?>[]],
+              },
+            },
+            {
+              'a': {
+                'b': [<String, Object?>{}],
+              },
             },
           ],
         );
@@ -318,8 +318,7 @@ class _MatchesValue extends Matcher {
     Description mismatchDescription,
     Map matchState,
     bool verbose,
-  ) =>
-      mismatchDescription.addDescriptionOf(item).add(' does not match value');
+  ) => mismatchDescription.addDescriptionOf(item).add(' does not match value');
 }
 
 void expectMakesMatch(

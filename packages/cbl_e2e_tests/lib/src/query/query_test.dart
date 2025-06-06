@@ -32,7 +32,7 @@ void main() {
             .toList(),
         [
           {'a': 0},
-          {'a': 1}
+          {'a': 1},
         ],
       );
     });
@@ -47,8 +47,10 @@ void main() {
           .from(DataSource.database(db))
           .orderBy(Ordering.property('a'));
 
-      final query =
-          await db.createQuery(builderQuery.jsonRepresentation!, json: true);
+      final query = await db.createQuery(
+        builderQuery.jsonRepresentation!,
+        json: true,
+      );
       final resultSet = await query.execute();
 
       expect(
@@ -58,15 +60,16 @@ void main() {
             .toList(),
         [
           {'a': 0},
-          {'a': 1}
+          {'a': 1},
         ],
       );
     });
 
     apiTest('execute query with parameters', () async {
       final db = await openTestDatabase();
-      final q =
-          await db.createQuery(r'SELECT doc FROM _ WHERE META().id = $ID');
+      final q = await db.createQuery(
+        r'SELECT doc FROM _ WHERE META().id = $ID',
+      );
       await db.saveDocument(MutableDocument.withId('A'));
 
       await q.setParameters(Parameters({'ID': 'A'}));
@@ -82,35 +85,44 @@ void main() {
       final db = await openTestDatabase();
       final q = await db.createQuery('SELECT doc FROM _');
 
-      expect(
-        await q.explain(),
-        '''
+      expect(await q.explain(), '''
 SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 1 = 0)
 
 2|0|0| SCAN _
 
 {"FROM":[{"COLLECTION":"_"}],"WHAT":[[".doc"]]}
-''',
-      );
+''');
     });
 
-    apiTest('change listener is called with current results on registration',
-        () async {
-      final db = await openTestDatabase();
-      final query = await db.createQuery('SELECT * FROM _');
+    apiTest(
+      'change listener is called with current results on registration',
+      () async {
+        final db = await openTestDatabase();
+        final query = await db.createQuery('SELECT * FROM _');
 
-      // First listener gets current results.
-      await query.addChangeListener(expectAsync1((change) async {
-        expect(change.query, query);
-        expect(Future.value(change.results.allResults()), completion(isEmpty));
-      }));
+        // First listener gets current results.
+        await query.addChangeListener(
+          expectAsync1((change) async {
+            expect(change.query, query);
+            expect(
+              Future.value(change.results.allResults()),
+              completion(isEmpty),
+            );
+          }),
+        );
 
-      // Seconds listener gets current results, too.
-      await query.addChangeListener(expectAsync1((change) async {
-        expect(change.query, query);
-        expect(Future.value(change.results.allResults()), completion(isEmpty));
-      }));
-    });
+        // Seconds listener gets current results, too.
+        await query.addChangeListener(
+          expectAsync1((change) async {
+            expect(change.query, query);
+            expect(
+              Future.value(change.results.allResults()),
+              completion(isEmpty),
+            );
+          }),
+        );
+      },
+    );
 
     apiTest('change listener is notified while listening', () async {
       final db = await openTestDatabase();
@@ -120,25 +132,27 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
       final callsDone = Completer<void>();
 
       late final ListenerToken token;
-      token = await query.addChangeListener(expectAsync1((change) async {
-        expect(change.query, query);
-        final results = await change.results
-            .asStream()
-            .map((result) => result.string(0))
-            .toList();
+      token = await query.addChangeListener(
+        expectAsync1((change) async {
+          expect(change.query, query);
+          final results = await change.results
+              .asStream()
+              .map((result) => result.string(0))
+              .toList();
 
-        switch (call++) {
-          case 0:
-            expect(results, isEmpty);
-            await db.saveDocument(doc);
-            break;
-          case 1:
-            expect(results, [doc.id]);
-            await query.removeChangeListener(token);
-            callsDone.complete();
-            break;
-        }
-      }, count: 2));
+          switch (call++) {
+            case 0:
+              expect(results, isEmpty);
+              await db.saveDocument(doc);
+              break;
+            case 1:
+              expect(results, [doc.id]);
+              await query.removeChangeListener(token);
+              callsDone.complete();
+              break;
+          }
+        }, count: 2),
+      );
 
       // Wait for expected calls to listener.
       await callsDone.future;
@@ -151,8 +165,9 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
     apiTest('listeners receive change when parameters change', () async {
       final db = await openTestDatabase();
       await db.saveDocument(MutableDocument.withId('A'));
-      final query = await db
-          .createQuery(r'SELECT META().id FROM _ WHERE META().id = $ID');
+      final query = await db.createQuery(
+        r'SELECT META().id FROM _ WHERE META().id = $ID',
+      );
       await query.setParameters(Parameters({'ID': 'A'}));
 
       var changeIndex = 0;
@@ -184,15 +199,17 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
       expect(
         query
             .changes()
-            .asyncMap((change) => change.results
-                .asStream()
-                .map((result) => result.string(0))
-                .toList())
+            .asyncMap(
+              (change) => change.results
+                  .asStream()
+                  .map((result) => result.string(0))
+                  .toList(),
+            )
             .doOnData((results) {
-          if (results.isEmpty) {
-            db.saveDocument(doc);
-          }
-        }),
+              if (results.isEmpty) {
+                db.saveDocument(doc);
+              }
+            }),
         emitsInOrder(<Object>[
           isEmpty,
           [doc.id],
@@ -217,15 +234,17 @@ SELECT fl_result(fl_value(_.body, 'doc')) FROM kv_default AS _ WHERE (_.flags & 
       final db = await openTestDatabase();
       expect(
         () => db.createQuery('SELECT foo()'),
-        throwsA(isA<DatabaseException>().having(
-          (it) => it.toString(),
-          'toString()',
-          '''
+        throwsA(
+          isA<DatabaseException>().having(
+            (it) => it.toString(),
+            'toString()',
+            '''
 DatabaseException(N1QL syntax error near character 11, code: invalidQuery)
 SELECT foo()
           ^
 ''',
-        )),
+          ),
+        ),
       );
     });
 
@@ -256,8 +275,9 @@ SELECT foo()
         expect(
           () => resultSet.asTypedStream<TestTypedDict>(),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -294,8 +314,9 @@ SELECT foo()
         expect(
           () => resultSet.allTypedResults<TestTypedDict>(),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -332,8 +353,9 @@ SELECT foo()
         expect(
           () => resultSet.asTypedIterable<TestTypedDict>(),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -395,7 +417,7 @@ class MutableTestTypedDoc extends TestTypedDict<MutableDictionary>
     implements
         TypedMutableDictionaryObject<TestTypedDict, MutableTestTypedDoc> {
   MutableTestTypedDoc([MutableDictionary? document])
-      : super(document ?? MutableDictionary());
+    : super(document ?? MutableDictionary());
 }
 
 class TestTypedDict2 implements TypedDictionaryObject<MutableTestTypedDoc> {

@@ -36,30 +36,21 @@ abstract final class AsyncSelect
 final class SelectImpl extends QueryBase
     with BuilderQueryMixin
     implements Select {
-  SelectImpl(
-    Iterable<SelectResultInterface> select, {
-    required bool distinct,
-  }) : super(
-          typeName: 'SelectImpl',
-          language: CBLQueryLanguage.json,
-        ) {
-    initBuilderQuery(
-      selects: select,
-      distinct: distinct,
-    );
+  SelectImpl(Iterable<SelectResultInterface> select, {required bool distinct})
+    : super(typeName: 'SelectImpl', language: CBLQueryLanguage.json) {
+    initBuilderQuery(selects: select, distinct: distinct);
   }
 
   @override
   From from(DataSourceInterface dataSource) =>
       switch ((dataSource as DataSourceImpl).source) {
-        SyncDatabase() ||
-        SyncCollection() =>
-          SyncFromImpl(query: this, from: dataSource),
-        AsyncDatabase() ||
-        AsyncCollection() =>
-          AsyncFromImpl(query: this, from: dataSource),
-        _ => throw UnimplementedError(),
-      } as From;
+            SyncDatabase() ||
+            SyncCollection() => SyncFromImpl(query: this, from: dataSource),
+            AsyncDatabase() ||
+            AsyncCollection() => AsyncFromImpl(query: this, from: dataSource),
+            _ => throw UnimplementedError(),
+          }
+          as From;
 
   // All these methods will never execute their body because the `useSync`
   // method from `BuilderQueryMixin` throws because the query has not FROM

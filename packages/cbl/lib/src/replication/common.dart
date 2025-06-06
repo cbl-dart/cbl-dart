@@ -8,9 +8,11 @@ import '../support/errors.dart';
 import 'configuration.dart';
 
 Future<(ID, Map<IC, CollectionConfiguration>)> resolveReplicatorCollections<
-    D extends Database, C extends Collection, ID extends D, IC extends C>(
-  ReplicatorConfiguration config,
-) async {
+  D extends Database,
+  C extends Collection,
+  ID extends D,
+  IC extends C
+>(ReplicatorConfiguration config) async {
   config.validate();
 
   final ID database;
@@ -20,11 +22,11 @@ Future<(ID, Map<IC, CollectionConfiguration>)> resolveReplicatorCollections<
     database = assertArgumentType<D>(config.database, 'config.database') as ID;
     collections = {
       (await database.defaultCollection) as IC:
-          config.legacyCollectionConfiguration
+          config.legacyCollectionConfiguration,
     };
   } else {
-    final baseCollections =
-        config.collections.cast<CollectionBase, CollectionConfiguration>();
+    final baseCollections = config.collections
+        .cast<CollectionBase, CollectionConfiguration>();
 
     final firstCollectionDatabase = baseCollections.entries.first.key.database;
     if (firstCollectionDatabase is! D) {

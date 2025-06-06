@@ -55,8 +55,8 @@ final class _TypedListData extends Data {
 
 final class _TransferableTypedListData extends TransferableData {
   _TransferableTypedListData(Uint8List list)
-      : data = TransferableTypedData.fromList([list]),
-        super._();
+    : data = TransferableTypedData.fromList([list]),
+      super._();
 
   final TransferableTypedData data;
 
@@ -85,8 +85,8 @@ final class _SliceResultData extends Data {
 
 final class _TransferableSliceResultData extends TransferableData {
   _TransferableSliceResultData(SliceResult slice)
-      : data = TransferableSliceResult(slice),
-        super._();
+    : data = TransferableSliceResult(slice),
+      super._();
 
   final TransferableSliceResult data;
 

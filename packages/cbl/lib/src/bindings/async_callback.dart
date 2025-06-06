@@ -9,8 +9,9 @@ export 'cblitedart.dart' show CBLDart_AsyncCallback;
 final class AsyncCallbackBindings extends Bindings {
   AsyncCallbackBindings(super.libraries);
 
-  late final _finalizer =
-      NativeFinalizer(cblDart.addresses.CBLDart_AsyncCallback_Delete.cast());
+  late final _finalizer = NativeFinalizer(
+    cblDart.addresses.CBLDart_AsyncCallback_Delete.cast(),
+  );
 
   CBLDart_AsyncCallback create(
     int id,
@@ -18,8 +19,11 @@ final class AsyncCallbackBindings extends Bindings {
     SendPort sendPort, {
     required bool debug,
   }) {
-    final result =
-        cblDart.CBLDart_AsyncCallback_New(id, sendPort.nativePort, debug);
+    final result = cblDart.CBLDart_AsyncCallback_New(
+      id,
+      sendPort.nativePort,
+      debug,
+    );
     _finalizer.attach(callbackObject, result.cast());
     return result;
   }

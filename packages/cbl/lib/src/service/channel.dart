@@ -65,10 +65,8 @@ typedef MessageContextCapturer = Object? Function();
 /// A context restorer must call [restore] before it returns and exactly once.
 ///
 /// Typically, the context is restored by setting a zone value.
-typedef MessageContextRestorer = void Function(
-  Object? context,
-  void Function() restore,
-);
+typedef MessageContextRestorer =
+    void Function(Object? context, void Function() restore);
 
 /// Returns the remote [StackTrace] for an exception that was emitted by a
 /// [Channel].
@@ -86,12 +84,7 @@ StackTrace? remoteStackTrace(Object exception) {
 final _remoteStackTraceExpando = Expando<StackTrace>();
 
 /// The status of a [Channel].
-enum ChannelStatus {
-  initial,
-  open,
-  closing,
-  closed,
-}
+enum ChannelStatus { initial, open, closing, closed }
 
 /// Exception that pending calls or streams are complete with when a [Channel]
 /// is closed.
@@ -124,9 +117,9 @@ final class Channel {
     MessageContextCapturer? captureMessageContext,
     MessageContextRestorer? restoreMessageContext,
     this.debug = false,
-  })  : _transport = transport.cast<_Message>(),
-        _captureMessageContext = captureMessageContext ?? (() => null),
-        _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()) {
+  }) : _transport = transport.cast<_Message>(),
+       _captureMessageContext = captureMessageContext ?? (() => null),
+       _restoreMessageContext = restoreMessageContext ?? ((_, f) => f()) {
     if (autoOpen) {
       open();
     }
@@ -155,27 +148,24 @@ final class Channel {
   Future<R> call<R>(Request<R> request) async {
     late final requestName = request.runtimeType.toString();
 
-    return asyncOperationTracePoint(
-      () => ChannelCallOp(requestName),
-      () async {
-        _checkIsOpen();
-        final id = _generateConversationId();
-        _callRequestNames[id] = requestName;
-        final completer = _callCompleter[id] = Completer<_Message>();
-        _sendMessage(_CallRequest(id, request, _captureMessageContext()));
+    return asyncOperationTracePoint(() => ChannelCallOp(requestName), () async {
+      _checkIsOpen();
+      final id = _generateConversationId();
+      _callRequestNames[id] = requestName;
+      final completer = _callCompleter[id] = Completer<_Message>();
+      _sendMessage(_CallRequest(id, request, _captureMessageContext()));
 
-        final message = await completer.future;
-        if (message is _CallSuccess) {
-          return message.data as R;
-        }
-        if (message is _CallError) {
-          // ignore: only_throw_errors
-          throw message.error;
-        }
+      final message = await completer.future;
+      if (message is _CallSuccess) {
+        return message.data as R;
+      }
+      if (message is _CallError) {
+        // ignore: only_throw_errors
+        throw message.error;
+      }
 
-        throw StateError('Unexpected message: $message');
-      },
-    );
+      throw StateError('Unexpected message: $message');
+    });
   }
 
   /// Returns a stream for an endpoint at the other side of the channel.
@@ -213,10 +203,7 @@ final class Channel {
   /// Adds a call endpoint to this side of the channel.
   void addCallEndpoint<T extends Request<R>, R>(CallHandler<T, R> handler) {
     _checkStatusIsNot(ChannelStatus.closed);
-    assert(
-      !_callHandlers.containsKey(T),
-      'call endpoint already added: $T',
-    );
+    assert(!_callHandlers.containsKey(T), 'call endpoint already added: $T');
     _callHandlers[T] = (request) => handler(_checkType(request));
   }
 
@@ -394,14 +381,14 @@ final class Channel {
             .asStream()
             .asyncExpand((stream) => stream)
             .listen(
-      (event) {
-        _sendStreamData(message.conversationId, event);
-      },
-      // ignore: avoid_types_on_closure_parameters
-      onError: (Object error, StackTrace stackTrace) =>
-          _sendStreamError(message.conversationId, error, stackTrace),
-      onDone: () => _sendStreamDone(message.conversationId),
-    );
+              (event) {
+                _sendStreamData(message.conversationId, event);
+              },
+              // ignore: avoid_types_on_closure_parameters
+              onError: (Object error, StackTrace stackTrace) =>
+                  _sendStreamError(message.conversationId, error, stackTrace),
+              onDone: () => _sendStreamDone(message.conversationId),
+            );
   }
 
   void _handlePauseStream(_PauseStream message) =>
@@ -517,48 +504,31 @@ final class Channel {
     _transport.sink.add(message);
   }
 
-  void _sendCallSuccess(int conversationId, Object? data) =>
-      _sendMessage(_CallSuccess(
-        conversationId,
-        data,
-        _captureMessageContext(),
-      ));
+  void _sendCallSuccess(int conversationId, Object? data) => _sendMessage(
+    _CallSuccess(conversationId, data, _captureMessageContext()),
+  );
 
   void _sendCallError(
     int conversationId,
     Object error,
     StackTrace stackTrace,
-  ) =>
-      _sendMessage(_CallError(
-        conversationId,
-        error,
-        stackTrace,
-        _captureMessageContext(),
-      ));
+  ) => _sendMessage(
+    _CallError(conversationId, error, stackTrace, _captureMessageContext()),
+  );
 
   void _sendStreamData(int conversationId, Object? data) =>
-      _sendMessage(_StreamData(
-        conversationId,
-        data,
-        _captureMessageContext(),
-      ));
+      _sendMessage(_StreamData(conversationId, data, _captureMessageContext()));
 
   void _sendStreamError(
     int conversationId,
     Object error,
     StackTrace stackTrace,
-  ) =>
-      _sendMessage(_StreamError(
-        conversationId,
-        error,
-        stackTrace,
-        _captureMessageContext(),
-      ));
+  ) => _sendMessage(
+    _StreamError(conversationId, error, stackTrace, _captureMessageContext()),
+  );
 
-  void _sendStreamDone(int conversationId) => _sendMessage(_StreamDone(
-        conversationId,
-        _captureMessageContext(),
-      ));
+  void _sendStreamDone(int conversationId) =>
+      _sendMessage(_StreamDone(conversationId, _captureMessageContext()));
 
   // === Misc ==================================================================
 
@@ -574,9 +544,7 @@ final class Channel {
 
   void _checkStatusIsNot(ChannelStatus status) {
     if (_status == status) {
-      throw StateError(
-        'Expected Channel not to be ${status.name} but it was.',
-      );
+      throw StateError('Expected Channel not to be ${status.name} but it was.');
     }
   }
 
@@ -600,11 +568,8 @@ abstract final class _Message extends SendAware {
 }
 
 abstract final class _RequestMessage extends _Message {
-  _RequestMessage(
-    int conversationId,
-    this.request,
-    Object? context,
-  ) : super(conversationId, context);
+  _RequestMessage(int conversationId, this.request, Object? context)
+    : super(conversationId, context);
 
   final Request request;
 
@@ -624,11 +589,8 @@ abstract final class _RequestMessage extends _Message {
 }
 
 abstract final class _SuccessMessage extends _Message {
-  _SuccessMessage(
-    int conversationId,
-    this.data,
-    Object? context,
-  ) : super(conversationId, context);
+  _SuccessMessage(int conversationId, this.data, Object? context)
+    : super(conversationId, context);
 
   final Object? data;
 

@@ -12,10 +12,7 @@ Future<Uint8List> byteStreamToFuture(Stream<Uint8List> stream) async {
 
 /// Transforms streams into [ResourceStream]s.
 class ResourceStreamTransformer<T> extends StreamTransformerBase<T, T> {
-  ResourceStreamTransformer({
-    required this.parent,
-    this.blocking = false,
-  });
+  ResourceStreamTransformer({required this.parent, this.blocking = false});
 
   /// See [ResourceStream.parent].
   final ClosableResourceMixin parent;
@@ -24,11 +21,8 @@ class ResourceStreamTransformer<T> extends StreamTransformerBase<T, T> {
   final bool blocking;
 
   @override
-  Stream<T> bind(Stream<T> stream) => ResourceStream(
-        parent: parent,
-        stream: stream,
-        blocking: blocking,
-      );
+  Stream<T> bind(Stream<T> stream) =>
+      ResourceStream(parent: parent, stream: stream, blocking: blocking);
 }
 
 /// A stream that exposes another [stream] as a [ClosableResource].
@@ -220,10 +214,7 @@ abstract class AsyncListenStream<T> extends Stream<T> {
 }
 
 class ListenerStream<T> extends AsyncListenStream<T> {
-  ListenerStream({
-    required this.parent,
-    required this.addListener,
-  });
+  ListenerStream({required this.parent, required this.addListener});
 
   final ClosableResourceMixin parent;
   final FutureOr<AbstractListenerToken> Function(void Function(T)) addListener;
@@ -239,13 +230,10 @@ class ListenerStream<T> extends AsyncListenStream<T> {
   var _isCanceled = false;
   late AbstractListenerToken _token;
 
-  void _onListen() => Future.sync(() => addListener(_listener)).then(
-        (token) {
-          _token = token;
-          _listeningCompleter.complete();
-        },
-        onError: _onAddListenerError,
-      );
+  void _onListen() => Future.sync(() => addListener(_listener)).then((token) {
+    _token = token;
+    _listeningCompleter.complete();
+  }, onError: _onAddListenerError);
 
   Future<void> _onCancel() async {
     _isCanceled = true;
@@ -281,15 +269,14 @@ class ListenerStream<T> extends AsyncListenStream<T> {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
-  }) =>
-      _controller.stream
-          .transform(ResourceStreamTransformer(parent: parent))
-          .listen(
-            onData,
-            onError: onError,
-            onDone: onDone,
-            cancelOnError: cancelOnError,
-          );
+  }) => _controller.stream
+      .transform(ResourceStreamTransformer(parent: parent))
+      .listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
 }
 
 class RepeatableStream<T> extends Stream<T> {
@@ -318,32 +305,36 @@ class RepeatableStream<T> extends Stream<T> {
         }
       };
 
-      _sourceSub ??= _source.listen((chunk) {
-        _sourceChunks.add(chunk);
+      _sourceSub ??= _source.listen(
+        (chunk) {
+          _sourceChunks.add(chunk);
 
-        for (final controller in _destinations) {
-          controller.add(chunk);
-        }
-      }, onDone: () {
-        _sourceDone = true;
-        _sourceSub = null;
+          for (final controller in _destinations) {
+            controller.add(chunk);
+          }
+        },
+        onDone: () {
+          _sourceDone = true;
+          _sourceSub = null;
 
-        for (final controller in _destinations) {
-          controller.close();
-        }
+          for (final controller in _destinations) {
+            controller.close();
+          }
 
-        _destinations.clear();
-        // ignore: avoid_types_on_closure_parameters
-      }, onError: (Object error, StackTrace stackTrace) {
-        _sourceDone = true;
-        _sourceSub = null;
-        _sourceError = error;
-        _sourceStackTrace = stackTrace;
+          _destinations.clear();
+          // ignore: avoid_types_on_closure_parameters
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          _sourceDone = true;
+          _sourceSub = null;
+          _sourceError = error;
+          _sourceStackTrace = stackTrace;
 
-        for (final controller in _destinations) {
-          controller.addError(error, stackTrace);
-        }
-      });
+          for (final controller in _destinations) {
+            controller.addError(error, stackTrace);
+          }
+        },
+      );
 
       _sourceSub!.resume();
     } else {
@@ -360,11 +351,10 @@ class RepeatableStream<T> extends Stream<T> {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
-  }) =>
-      _stream.listen(
-        onData,
-        onError: onError,
-        onDone: onDone,
-        cancelOnError: cancelOnError,
-      );
+  }) => _stream.listen(
+    onData,
+    onError: onError,
+    onDone: onDone,
+    cancelOnError: cancelOnError,
+  );
 }

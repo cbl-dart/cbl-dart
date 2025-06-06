@@ -55,20 +55,21 @@ final class CblWorker {
           currentTracingDelegate.captureTracingContext(),
     );
 
-    _worker = IsolateWorker(
-      debugName: 'CblWorker($debugName)',
-      delegate: _ServiceWorkerDelegate(
-        context: IsolateContext.instance,
-        channel: receivePort.sendPort,
-      ),
-    )
-      // ignore: unawaited_futures, void_checks
-      ..onError.onError<Object>((error, stackTrace) {
-        _status = _WorkerStatus.crashed;
-        _channel.close(error, stackTrace);
-        // ignore: only_throw_errors
-        throw error;
-      });
+    _worker =
+        IsolateWorker(
+            debugName: 'CblWorker($debugName)',
+            delegate: _ServiceWorkerDelegate(
+              context: IsolateContext.instance,
+              channel: receivePort.sendPort,
+            ),
+          )
+          // ignore: unawaited_futures, void_checks
+          ..onError.onError<Object>((error, stackTrace) {
+            _status = _WorkerStatus.crashed;
+            _channel.close(error, stackTrace);
+            // ignore: only_throw_errors
+            throw error;
+          });
 
     await _worker.start();
     _status = _WorkerStatus.running;
@@ -93,20 +94,10 @@ final class CblWorker {
   }
 }
 
-enum _WorkerStatus {
-  initial,
-  starting,
-  running,
-  stopping,
-  stopped,
-  crashed,
-}
+enum _WorkerStatus { initial, starting, running, stopping, stopped, crashed }
 
 final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
-  _ServiceWorkerDelegate({
-    required this.context,
-    required this.channel,
-  });
+  _ServiceWorkerDelegate({required this.context, required this.channel});
 
   final IsolateContext context;
   final SendPort channel;
@@ -130,8 +121,6 @@ final class _ServiceWorkerDelegate extends IsolateWorkerDelegate {
   }
 
   @override
-  FutureOr<void> dispose() => Future.wait([
-        _service.dispose(),
-        _serviceChannel.close(),
-      ]);
+  FutureOr<void> dispose() =>
+      Future.wait([_service.dispose(), _serviceChannel.close()]);
 }

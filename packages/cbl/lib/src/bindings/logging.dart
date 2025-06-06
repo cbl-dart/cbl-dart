@@ -22,13 +22,13 @@ enum CBLLogDomain {
   const CBLLogDomain(this.value);
 
   factory CBLLogDomain.fromValue(int value) => switch (value) {
-        cblite.kCBLLogDomainDatabase => database,
-        cblite.kCBLLogDomainQuery => query,
-        cblite.kCBLLogDomainReplicator => replicator,
-        cblite.kCBLLogDomainNetwork => network,
-        cblite.kCBLLogDomainListener => listener,
-        _ => throw ArgumentError('Unknown log domain: $value'),
-      };
+    cblite.kCBLLogDomainDatabase => database,
+    cblite.kCBLLogDomainQuery => query,
+    cblite.kCBLLogDomainReplicator => replicator,
+    cblite.kCBLLogDomainNetwork => network,
+    cblite.kCBLLogDomainListener => listener,
+    _ => throw ArgumentError('Unknown log domain: $value'),
+  };
 
   final int value;
 }
@@ -44,14 +44,14 @@ enum CBLLogLevel {
   const CBLLogLevel(this.value);
 
   factory CBLLogLevel.fromValue(int value) => switch (value) {
-        cblite.kCBLLogDebug => debug,
-        cblite.kCBLLogVerbose => verbose,
-        cblite.kCBLLogInfo => info,
-        cblite.kCBLLogWarning => warning,
-        cblite.kCBLLogError => error,
-        cblite.kCBLLogNone => none,
-        _ => throw ArgumentError('Unknown log level: $value'),
-      };
+    cblite.kCBLLogDebug => debug,
+    cblite.kCBLLogVerbose => verbose,
+    cblite.kCBLLogInfo => info,
+    cblite.kCBLLogWarning => warning,
+    cblite.kCBLLogError => error,
+    cblite.kCBLLogNone => none,
+    _ => throw ArgumentError('Unknown log level: $value'),
+  };
 
   final int value;
 }
@@ -60,11 +60,11 @@ final class LogCallbackMessage {
   LogCallbackMessage(this.domain, this.level, this.message);
 
   LogCallbackMessage.fromArguments(List<Object?> arguments)
-      : this(
-          CBLLogDomain.fromValue(arguments[0]! as int),
-          CBLLogLevel.fromValue(arguments[1]! as int),
-          utf8.decode(arguments[2]! as Uint8List, allowMalformed: true),
-        );
+    : this(
+        CBLLogDomain.fromValue(arguments[0]! as int),
+        CBLLogLevel.fromValue(arguments[1]! as int),
+        utf8.decode(arguments[2]! as Uint8List, allowMalformed: true),
+      );
 
   final CBLLogDomain domain;
   final CBLLogLevel level;
@@ -104,14 +104,13 @@ final class CBLLogFileConfiguration {
     int? maxRotateCount,
     int? maxSize,
     bool? usePlainText,
-  }) =>
-      CBLLogFileConfiguration(
-        level: level ?? this.level,
-        directory: directory ?? this.directory,
-        maxRotateCount: maxRotateCount ?? this.maxRotateCount,
-        maxSize: maxSize ?? this.maxSize,
-        usePlainText: usePlainText ?? this.usePlainText,
-      );
+  }) => CBLLogFileConfiguration(
+    level: level ?? this.level,
+    directory: directory ?? this.directory,
+    maxRotateCount: maxRotateCount ?? this.maxRotateCount,
+    maxSize: maxSize ?? this.maxSize,
+    usePlainText: usePlainText ?? this.usePlainText,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -136,18 +135,10 @@ final class CBLLogFileConfiguration {
 final class LoggingBindings extends Bindings {
   LoggingBindings(super.libraries);
 
-  void logMessage(
-    CBLLogDomain domain,
-    CBLLogLevel level,
-    String message,
-  ) {
+  void logMessage(CBLLogDomain domain, CBLLogLevel level, String message) {
     runWithSingleFLString(
       message,
-      (flMessage) => cbl.CBL_LogMessage(
-        domain.value,
-        level.value,
-        flMessage,
-      ),
+      (flMessage) => cbl.CBL_LogMessage(domain.value, level.value, flMessage),
     );
   }
 

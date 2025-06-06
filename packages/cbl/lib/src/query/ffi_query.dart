@@ -56,25 +56,25 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
 
   @override
   void setParameters(Parameters? value) => useSync(() {
-        if (value == null) {
-          _parameters = null;
-        } else {
-          _parameters = ParametersImpl.from(value);
-        }
-        _applyParameters();
-      });
+    if (value == null) {
+      _parameters = null;
+    } else {
+      _parameters = ParametersImpl.from(value);
+    }
+    _applyParameters();
+  });
 
   @override
   SyncResultSet execute() => syncOperationTracePoint(
-        () => ExecuteQueryOp(this),
-        () => useSync(
-          () => FfiResultSet(
-            _baseBindings.runWithIsolateId(() => _bindings.execute(_pointer)),
-            query: this,
-            columnNames: _columnNames,
-          ),
-        ),
-      );
+    () => ExecuteQueryOp(this),
+    () => useSync(
+      () => FfiResultSet(
+        _baseBindings.runWithIsolateId(() => _bindings.execute(_pointer)),
+        query: this,
+        columnNames: _columnNames,
+      ),
+    ),
+  );
 
   @override
   String explain() => useSync(() => _bindings.explain(_pointer));
@@ -82,31 +82,27 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
   @override
   ListenerToken addChangeListener(
     QueryChangeListener<SyncResultSet> listener,
-  ) =>
-      useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
+  ) => useSync(() => _addChangeListener(listener).also(_listenerTokens.add));
 
   AbstractListenerToken _addChangeListener(
     QueryChangeListener<SyncResultSet> listener,
   ) {
     late Pointer<CBLListenerToken> listenerToken;
     final database = this.database!;
-    final callback = AsyncCallback(
-      (_) {
-        final results = FfiResultSet(
-          // The native side sends no arguments. When the native side
-          // notifies the listener it has to copy the current query
-          // result set.
-          _bindings.copyCurrentResults(_pointer, listenerToken),
-          query: this,
-          columnNames: _columnNames,
-        );
+    final callback = AsyncCallback((_) {
+      final results = FfiResultSet(
+        // The native side sends no arguments. When the native side
+        // notifies the listener it has to copy the current query
+        // result set.
+        _bindings.copyCurrentResults(_pointer, listenerToken),
+        query: this,
+        columnNames: _columnNames,
+      );
 
-        final change = QueryChange(this, results);
-        listener(change);
-        return null;
-      },
-      debugName: 'FfiQuery.addChangeListener',
-    );
+      final change = QueryChange(this, results);
+      listener(change);
+      return null;
+    }, debugName: 'FfiQuery.addChangeListener');
 
     listenerToken = _bindings.addChangeListener(
       database.pointer,
@@ -119,21 +115,20 @@ base class FfiQuery extends QueryBase implements SyncQuery, Finalizable {
 
   @override
   void removeChangeListener(ListenerToken token) => useSync(() {
-        final result = _listenerTokens.remove(token);
-        assert(result is! Future);
-      });
+    final result = _listenerTokens.remove(token);
+    assert(result is! Future);
+  });
 
   @override
-  Stream<QueryChange<SyncResultSet>> changes() => useSync(() => ListenerStream(
-        parent: this,
-        addListener: _addChangeListener,
-      ));
+  Stream<QueryChange<SyncResultSet>> changes() => useSync(
+    () => ListenerStream(parent: this, addListener: _addChangeListener),
+  );
 
   @override
   T useSync<T>(T Function() f) => super.useSync(() {
-        prepare();
-        return f();
-      });
+    prepare();
+    return f();
+  });
 
   void prepare() {
     if (_isPrepared) {
@@ -179,10 +174,10 @@ final class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
     Pointer<CBLResultSet> pointer, {
     required FfiQuery query,
     required List<String> columnNames,
-  })  : _database = query.database!,
-        _columnNames = columnNames,
-        _iterator = ResultSetIterator.fromPointer(pointer),
-        _context = createResultSetMContext(query.database!);
+  }) : _database = query.database!,
+       _columnNames = columnNames,
+       _iterator = ResultSetIterator.fromPointer(pointer),
+       _context = createResultSetMContext(query.database!);
 
   final DatabaseBase _database;
   final List<String> _columnNames;
@@ -194,8 +189,9 @@ final class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
   @override
   Iterable<D> asTypedIterable<D extends TypedDictionaryObject>() {
     final adapter = _database.useWithTypedData();
-    return map((_) => _current!.asDictionary)
-        .map(adapter.dictionaryFactoryForType<D>());
+    return map(
+      (_) => _current!.asDictionary,
+    ).map(adapter.dictionaryFactoryForType<D>());
   }
 
   @override
@@ -217,12 +213,12 @@ final class FfiResultSet with IterableMixin<Result> implements SyncResultSet {
 
   @override
   Result get current => _current ??= ResultImpl(
-        // Results from the same result set can share the same context, because
-        // in CBL C, a result set is encoded in a single Fleece doc.
-        context: _context,
-        columnNames: _columnNames,
-        columnValues: _iterator.current,
-      );
+    // Results from the same result set can share the same context, because
+    // in CBL C, a result set is encoded in a single Fleece doc.
+    context: _context,
+    columnNames: _columnNames,
+    columnValues: _iterator.current,
+  );
 
   @override
   bool moveNext() {
@@ -254,8 +250,9 @@ final class ResultSetIterator
   @override
   fl.Array get current {
     assert(_current != null || !_isDone);
-    final result =
-        _current ??= fl.Array.fromPointer(_bindings.resultArray(_pointer));
+    final result = _current ??= fl.Array.fromPointer(
+      _bindings.resultArray(_pointer),
+    );
     return result;
   }
 
@@ -284,10 +281,11 @@ abstract base class SyncBuilderQuery extends FfiQuery with BuilderQueryMixin {
     ExpressionInterface? limit,
     ExpressionInterface? offset,
   }) : super(
-          database: (from as DataSourceImpl?)?.database as FfiDatabase? ??
-              query?.database as FfiDatabase?,
-          language: CBLQueryLanguage.json,
-        ) {
+         database:
+             (from as DataSourceImpl?)?.database as FfiDatabase? ??
+             query?.database as FfiDatabase?,
+         language: CBLQueryLanguage.json,
+       ) {
     initBuilderQuery(
       query: query,
       selects: selects,

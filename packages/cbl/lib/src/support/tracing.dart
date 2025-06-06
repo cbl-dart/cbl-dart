@@ -27,10 +27,7 @@ T syncOperationTracePoint<T>(
     return execute();
   }
 
-  return currentTracingDelegate.traceSyncOperation(
-    createOperation(),
-    execute,
-  );
+  return currentTracingDelegate.traceSyncOperation(createOperation(), execute);
 }
 
 @pragma('vm:prefer-inline')
@@ -42,10 +39,7 @@ Future<T> asyncOperationTracePoint<T>(
     return execute();
   }
 
-  return currentTracingDelegate.traceAsyncOperation(
-    createOperation(),
-    execute,
-  );
+  return currentTracingDelegate.traceAsyncOperation(createOperation(), execute);
 }
 
 T tracingDelegateTracedNativeCallHandler<T>(

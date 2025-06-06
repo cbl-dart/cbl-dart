@@ -66,12 +66,10 @@ final _bindings = CBLBindings.instance.query;
 /// ```dart main
 /// final users = db.createCollection('users');
 /// await users.saveDocument(MutableDocument({'name': 'Alice'}));
-/// final query = await db.createQuery(
-///   '''
+/// final query = await db.createQuery('''
 /// SELECT PREDICTION(uppercase, {"in": name}, "out") AS prediction
 /// FROM users
-/// ''',
-/// );
+/// ''');
 /// final resultSet = await query.execute();
 /// final results = await resultSet.allPlainMapResults();
 /// // results: [{"prediction": "ALICE"}]
@@ -139,14 +137,10 @@ final class PredictionImpl implements Prediction {
 }
 
 // ignore: avoid_private_typedef_functions
-typedef _CBLPredictionFunctionSync = FLMutableDict Function(
-  FLDict input,
-);
+typedef _CBLPredictionFunctionSync = FLMutableDict Function(FLDict input);
 // ignore: avoid_private_typedef_functions
-typedef _CBLPredictionFunctionAsync = Void Function(
-  FLDict input,
-  CBLDart_Completer completer,
-);
+typedef _CBLPredictionFunctionAsync =
+    Void Function(FLDict input, CBLDart_Completer completer);
 
 class _FfiPredictiveModel implements Finalizable {
   _FfiPredictiveModel(this._name, this._model) {
@@ -162,9 +156,9 @@ class _FfiPredictiveModel implements Finalizable {
   final String _name;
   final PredictiveModel _model;
   late final NativeCallable<_CBLPredictionFunctionSync>
-      _predictionSyncCallable = NativeCallable.isolateLocal(_predictionSync);
+  _predictionSyncCallable = NativeCallable.isolateLocal(_predictionSync);
   late final NativeCallable<_CBLPredictionFunctionAsync>
-      _predictionAsyncCallable = NativeCallable.listener(_predictionAsync);
+  _predictionAsyncCallable = NativeCallable.listener(_predictionAsync);
   late final NativeCallable<Void Function()> _unregisteredCallable =
       NativeCallable.listener(_unregistered);
 
@@ -185,8 +179,9 @@ class _FfiPredictiveModel implements Finalizable {
       final outputData = FleeceEncoder.fleece.encodeWith(outputDict.encodeTo);
 
       final outputDoc = fl.Doc.fromResultData(outputData, FLTrust.trusted);
-      final outputMutableDict =
-          fl.MutableDict.mutableCopy(outputDoc.root.asDict!);
+      final outputMutableDict = fl.MutableDict.mutableCopy(
+        outputDoc.root.asDict!,
+      );
 
       // The caller is responsible for releasing the returned value.
       CBLBindings.instance.cbl.FLValue_Retain(outputMutableDict.pointer.cast());
@@ -206,13 +201,12 @@ class _FfiPredictiveModel implements Finalizable {
     }
   }
 
-  void _predictionAsync(
-    FLDict input,
-    CBLDart_Completer completer,
-  ) {
+  void _predictionAsync(FLDict input, CBLDart_Completer completer) {
     final result = _predictionSync(input);
-    CBLBindings.instance.base
-        .completeCompleterWithPointer(completer, result.cast());
+    CBLBindings.instance.base.completeCompleterWithPointer(
+      completer,
+      result.cast(),
+    );
   }
 
   void _unregistered() {

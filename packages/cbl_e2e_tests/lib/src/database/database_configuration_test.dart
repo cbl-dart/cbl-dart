@@ -15,10 +15,7 @@ void main() {
   group('EncryptionKey', () {
     group('key', () {
       test('throws when raw key is not exactly 32 bytes long', () {
-        expect(
-          () => EncryptionKey.key(Uint8List(0)),
-          throwsArgumentError,
-        );
+        expect(() => EncryptionKey.key(Uint8List(0)), throwsArgumentError);
       });
 
       test('creates key from raw key', () async {

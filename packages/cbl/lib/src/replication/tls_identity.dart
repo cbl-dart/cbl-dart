@@ -141,11 +141,7 @@ class OID {
   /// Creates an OID from a list of arcs.
   OID(this.arcs) {
     if (arcs.length < 2) {
-      throw ArgumentError.value(
-        arcs,
-        'arcs',
-        'must have at least two arcs',
-      );
+      throw ArgumentError.value(arcs, 'arcs', 'must have at least two arcs');
     }
   }
 
@@ -180,7 +176,7 @@ class OID {
       // Decode the first two arcs from the first byte.
       bytes[0] ~/ 40, bytes[0] % 40,
       // Decode the remaining arcs from base-128.
-      ..._decodeBase128List(bytes.sublist(1))
+      ..._decodeBase128List(bytes.sublist(1)),
     ]);
   }
 
@@ -191,11 +187,11 @@ class OID {
   /// Encodes the OID as a sequence of bytes in DER, but without the OID tag and
   /// length prefix.
   Uint8List get _encodedArcs => Uint8List.fromList([
-        // Encode the first two arcs in the first byte.
-        arcs[0] * 40 + arcs[1],
-        // Encode the remaining arcs in base-128.
-        for (var i = 2; i < arcs.length; i++) ..._encodeBase128(arcs[i])
-      ]);
+    // Encode the first two arcs in the first byte.
+    arcs[0] * 40 + arcs[1],
+    // Encode the remaining arcs in base-128.
+    for (var i = 2; i < arcs.length; i++) ..._encodeBase128(arcs[i]),
+  ]);
 
   @override
   bool operator ==(Object other) =>
@@ -356,33 +352,30 @@ abstract final class CertificateAttributes {
 
   @override
   String toString() => [
-        'CertificateAttributes(',
-        [
-          'commonName: $commonName',
-          if (pseudonym case final pseudonym?) 'pseudonym: $pseudonym',
-          if (givenName case final givenName?) 'givenName: $givenName',
-          if (surname case final surname?) 'surname: $surname',
-          if (organization case final organization?)
-            'organization: $organization',
-          if (organizationUnit case final organizationUnit?)
-            'organizationUnit: $organizationUnit',
-          if (postalAddress case final postalAddress?)
-            'postalAddress: $postalAddress',
-          if (locality case final locality?) 'locality: $locality',
-          if (postalCode case final postalCode?) 'postalCode: $postalCode',
-          if (stateOrProvince case final stateOrProvince?)
-            'stateOrProvince: $stateOrProvince',
-          if (country case final country?) 'country: $country',
-          if (emailAddress case final emailAddress?)
-            'emailAddress: $emailAddress',
-          if (hostname case final hostname?) 'hostname: $hostname',
-          if (url case final url?) 'url: $url',
-          if (ipAddress case final ipAddress?) 'ipAddress: $ipAddress',
-          if (registeredId case final registeredId?)
-            'registeredId: $registeredId',
-        ].join(', '),
-        ')'
-      ].join('');
+    'CertificateAttributes(',
+    [
+      'commonName: $commonName',
+      if (pseudonym case final pseudonym?) 'pseudonym: $pseudonym',
+      if (givenName case final givenName?) 'givenName: $givenName',
+      if (surname case final surname?) 'surname: $surname',
+      if (organization case final organization?) 'organization: $organization',
+      if (organizationUnit case final organizationUnit?)
+        'organizationUnit: $organizationUnit',
+      if (postalAddress case final postalAddress?)
+        'postalAddress: $postalAddress',
+      if (locality case final locality?) 'locality: $locality',
+      if (postalCode case final postalCode?) 'postalCode: $postalCode',
+      if (stateOrProvince case final stateOrProvince?)
+        'stateOrProvince: $stateOrProvince',
+      if (country case final country?) 'country: $country',
+      if (emailAddress case final emailAddress?) 'emailAddress: $emailAddress',
+      if (hostname case final hostname?) 'hostname: $hostname',
+      if (url case final url?) 'url: $url',
+      if (ipAddress case final ipAddress?) 'ipAddress: $ipAddress',
+      if (registeredId case final registeredId?) 'registeredId: $registeredId',
+    ].join(', '),
+    ')',
+  ].join('');
 }
 
 final class _CertificateAttributes extends CertificateAttributes {
@@ -519,44 +512,44 @@ final class _FfiCertificateAttributes extends CertificateAttributes {
 
 extension _CertificateAttributesToMapExtension on CertificateAttributes {
   Map<String, String> _toAttributesMap() => {
-        _bindings.kCBLCertAttrKeyCommonName: commonName,
-        if (pseudonym case final pseudonym?)
-          _bindings.kCBLCertAttrKeyPseudonym: pseudonym,
-        if (givenName case final givenName?)
-          _bindings.kCBLCertAttrKeyGivenName: givenName,
-        if (surname case final surname?)
-          _bindings.kCBLCertAttrKeySurname: surname,
-        if (organization case final organization?)
-          _bindings.kCBLCertAttrKeyOrganization: organization,
-        if (organizationUnit case final organizationUnit?)
-          _bindings.kCBLCertAttrKeyOrganizationUnit: organizationUnit,
-        if (postalAddress case final postalAddress?)
-          _bindings.kCBLCertAttrKeyPostalAddress: postalAddress,
-        if (locality case final locality?)
-          _bindings.kCBLCertAttrKeyLocality: locality,
-        if (postalCode case final postalCode?)
-          _bindings.kCBLCertAttrKeyPostalCode: postalCode,
-        if (stateOrProvince case final stateOrProvince?)
-          _bindings.kCBLCertAttrKeyStateOrProvince: stateOrProvince,
-        if (country case final country?)
-          _bindings.kCBLCertAttrKeyCountry: country,
-        if (emailAddress case final emailAddress?)
-          _bindings.kCBLCertAttrKeyEmailAddress: emailAddress,
-        if (hostname case final hostname?)
-          _bindings.kCBLCertAttrKeyHostname: hostname,
-        if (url case final url?) _bindings.kCBLCertAttrKeyURL: url.toString(),
-        if (ipAddress case final ipAddress?)
-          _bindings.kCBLCertAttrKeyIPAddress:
-              _InternetAddressString.fromAddress(ipAddress).string,
-        if (registeredId case final registeredId?)
-          _bindings.kCBLCertAttrKeyRegisteredID:
-              String.fromCharCodes(registeredId._encodedArcs),
-      };
+    _bindings.kCBLCertAttrKeyCommonName: commonName,
+    if (pseudonym case final pseudonym?)
+      _bindings.kCBLCertAttrKeyPseudonym: pseudonym,
+    if (givenName case final givenName?)
+      _bindings.kCBLCertAttrKeyGivenName: givenName,
+    if (surname case final surname?) _bindings.kCBLCertAttrKeySurname: surname,
+    if (organization case final organization?)
+      _bindings.kCBLCertAttrKeyOrganization: organization,
+    if (organizationUnit case final organizationUnit?)
+      _bindings.kCBLCertAttrKeyOrganizationUnit: organizationUnit,
+    if (postalAddress case final postalAddress?)
+      _bindings.kCBLCertAttrKeyPostalAddress: postalAddress,
+    if (locality case final locality?)
+      _bindings.kCBLCertAttrKeyLocality: locality,
+    if (postalCode case final postalCode?)
+      _bindings.kCBLCertAttrKeyPostalCode: postalCode,
+    if (stateOrProvince case final stateOrProvince?)
+      _bindings.kCBLCertAttrKeyStateOrProvince: stateOrProvince,
+    if (country case final country?) _bindings.kCBLCertAttrKeyCountry: country,
+    if (emailAddress case final emailAddress?)
+      _bindings.kCBLCertAttrKeyEmailAddress: emailAddress,
+    if (hostname case final hostname?)
+      _bindings.kCBLCertAttrKeyHostname: hostname,
+    if (url case final url?) _bindings.kCBLCertAttrKeyURL: url.toString(),
+    if (ipAddress case final ipAddress?)
+      _bindings.kCBLCertAttrKeyIPAddress: _InternetAddressString.fromAddress(
+        ipAddress,
+      ).string,
+    if (registeredId case final registeredId?)
+      _bindings.kCBLCertAttrKeyRegisteredID: String.fromCharCodes(
+        registeredId._encodedArcs,
+      ),
+  };
 }
 
 extension type _InternetAddressString(String string) {
   _InternetAddressString.fromAddress(InternetAddress address)
-      : this(String.fromCharCodes(address.rawAddress));
+    : this(String.fromCharCodes(address.rawAddress));
 
   InternetAddress get address =>
       InternetAddress.fromRawAddress(Uint8List.fromList(string.codeUnits));
@@ -611,13 +604,11 @@ final class FfiCertificate implements Certificate, Finalizable {
 
   // ignore: prefer_constructors_over_static_methods
   static FfiCertificate _decode(CryptoData data) => FfiCertificate.fromPointer(
-        _bindings.certCreateWithData(data._data),
-        adopt: true,
-      );
+    _bindings.certCreateWithData(data._data),
+    adopt: true,
+  );
 
-  static FfiCertificate combined(
-    Iterable<FfiCertificate> certificates,
-  ) {
+  static FfiCertificate combined(Iterable<FfiCertificate> certificates) {
     if (certificates.isEmpty) {
       throw ArgumentError.value(
         certificates,
@@ -696,14 +687,14 @@ final class FfiCertificate implements Certificate, Finalizable {
 
   @override
   String toString() => [
-        'Certificate(',
-        [
-          'created: $created',
-          'expires: $expires',
-          'attributes: $attributes',
-        ].join(', '),
-        ')'
-      ].join('');
+    'Certificate(',
+    [
+      'created: $created',
+      'expires: $expires',
+      'attributes: $attributes',
+    ].join(', '),
+    ')',
+  ].join('');
 }
 
 /// Digest algorithm of a RSA signature.
@@ -730,17 +721,15 @@ enum SignatureDigestAlgorithm {
 
   static SignatureDigestAlgorithm? _fromCbl(
     CBLSignatureDigestAlgorithm value,
-  ) =>
-      switch (value) {
-        CBLSignatureDigestAlgorithm.none => null,
-        CBLSignatureDigestAlgorithm.sha1 => SignatureDigestAlgorithm.sha1,
-        CBLSignatureDigestAlgorithm.sha224 => SignatureDigestAlgorithm.sha224,
-        CBLSignatureDigestAlgorithm.sha256 => SignatureDigestAlgorithm.sha256,
-        CBLSignatureDigestAlgorithm.sha384 => SignatureDigestAlgorithm.sha384,
-        CBLSignatureDigestAlgorithm.sha512 => SignatureDigestAlgorithm.sha512,
-        CBLSignatureDigestAlgorithm.ripemd160 =>
-          SignatureDigestAlgorithm.ripemd160,
-      };
+  ) => switch (value) {
+    CBLSignatureDigestAlgorithm.none => null,
+    CBLSignatureDigestAlgorithm.sha1 => SignatureDigestAlgorithm.sha1,
+    CBLSignatureDigestAlgorithm.sha224 => SignatureDigestAlgorithm.sha224,
+    CBLSignatureDigestAlgorithm.sha256 => SignatureDigestAlgorithm.sha256,
+    CBLSignatureDigestAlgorithm.sha384 => SignatureDigestAlgorithm.sha384,
+    CBLSignatureDigestAlgorithm.sha512 => SignatureDigestAlgorithm.sha512,
+    CBLSignatureDigestAlgorithm.ripemd160 => SignatureDigestAlgorithm.ripemd160,
+  };
 }
 
 /// [KeyPair] delegate that implements cryptographic operations without having
@@ -755,8 +744,8 @@ enum SignatureDigestAlgorithm {
 abstract base class ExternalKeyPairDelegate {
   late final _publicKeyDataCallable =
       NativeCallable<CBLDartExternalKeyPublicKeyDataFunction>.listener(
-          _publicKeyData)
-        ..keepIsolateAlive = false;
+        _publicKeyData,
+      )..keepIsolateAlive = false;
   late final _decryptCallable =
       NativeCallable<CBLDartExternalKeyDecryptFunction>.listener(_decrypt)
         ..keepIsolateAlive = false;
@@ -856,8 +845,9 @@ abstract base class ExternalKeyPairDelegate {
   ) async {
     var success = false;
     try {
-      final result =
-          await decrypt(input.buf.cast<Uint8>().asTypedList(input.size));
+      final result = await decrypt(
+        input.buf.cast<Uint8>().asTypedList(input.size),
+      );
 
       if (result == null) {
         return;
@@ -963,11 +953,7 @@ abstract final class KeyPair {
   static Future<KeyPair> fromPrivateKey(
     CryptoData privateKey, {
     String? password,
-  }) =>
-      FfiKeyPair.fromPrivateKey(
-        privateKey,
-        password: password,
-      );
+  }) => FfiKeyPair.fromPrivateKey(privateKey, password: password);
 
   /// A hex-encoded digest of the public key, if available.
   Future<String?> get publicKeyDigest;
@@ -1036,14 +1022,16 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   Future<String?> get publicKeyDigest async {
     final pointer = this.pointer;
     return _publicKeyDigest = await runInSecondaryIsolate(
-        () => _bindings.keyPairPublicKeyDigest(pointer));
+      () => _bindings.keyPairPublicKeyDigest(pointer),
+    );
   }
 
   @override
   Future<DerData?> get publicKeyData async {
     final pointer = this.pointer;
     final data = await runInSecondaryIsolate(
-        () => _bindings.keyPairPublicKeyData(pointer));
+      () => _bindings.keyPairPublicKeyData(pointer),
+    );
     return data?.let(DerData.new);
   }
 
@@ -1051,7 +1039,8 @@ final class FfiKeyPair implements KeyPair, Finalizable {
   Future<DerData?> get privateKeyData async {
     final pointer = this.pointer;
     final data = await runInSecondaryIsolate(
-        () => _bindings.keyPairPrivateKeyData(pointer));
+      () => _bindings.keyPairPrivateKeyData(pointer),
+    );
     return data?.let(DerData.new);
   }
 
@@ -1071,9 +1060,9 @@ enum KeyUsage {
   serverAuth;
 
   CBLKeyUsages _toCbl() => switch (this) {
-        clientAuth => CBLKeyUsages.clientAuth,
-        serverAuth => CBLKeyUsages.serverAuth,
-      };
+    clientAuth => CBLKeyUsages.clientAuth,
+    serverAuth => CBLKeyUsages.serverAuth,
+  };
 }
 
 /// TLS identity including a [KeyPair] and X.509 [Certificate] chain used for
@@ -1126,14 +1115,13 @@ abstract class TlsIdentity {
     required DateTime expiration,
     String? label,
     KeyPair? keyPair,
-  }) =>
-      FfiTlsIdentity.createIdentity(
-        keyUsages: keyUsages,
-        attributes: attributes,
-        expiration: expiration,
-        label: label,
-        keyPair: keyPair,
-      );
+  }) => FfiTlsIdentity.createIdentity(
+    keyUsages: keyUsages,
+    attributes: attributes,
+    expiration: expiration,
+    label: label,
+    keyPair: keyPair,
+  );
 
   /// Retrieves a persisted identity with the given [label].
   ///
@@ -1159,8 +1147,7 @@ abstract class TlsIdentity {
   /// Persisted identities are _not supported_ on Android or Linux.
   static Future<TlsIdentity> identityWithCertificates(
     List<Certificate> certificates,
-  ) =>
-      FfiTlsIdentity.identityWithCertificates(certificates.cast());
+  ) => FfiTlsIdentity.identityWithCertificates(certificates.cast());
 
   /// The chain of X.509 [Certificate]s associated with this identity.
   List<Certificate> get certificates;
@@ -1202,14 +1189,12 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
 
     final keyPairPointer = (keyPair as FfiKeyPair).pointer;
-    final certificateChainPointer =
-        FfiCertificate.combined(certificates).pointer;
+    final certificateChainPointer = FfiCertificate.combined(
+      certificates,
+    ).pointer;
 
     return FfiTlsIdentity.fromPointer(
-      _bindings.withKeyPairAndCerts(
-        keyPairPointer,
-        certificateChainPointer,
-      ),
+      _bindings.withKeyPairAndCerts(keyPairPointer, certificateChainPointer),
       adopt: true,
     );
   }
@@ -1236,8 +1221,9 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
 
     final cblKeyUsages = keyUsages.map((usage) => usage._toCbl()).toSet();
     final attributesMap = attributes._toAttributesMap();
-    final expirationDuration =
-        expiration.toUtc().difference(DateTime.now().toUtc());
+    final expirationDuration = expiration.toUtc().difference(
+      DateTime.now().toUtc(),
+    );
     final keyPairPointer = (keyPair as FfiKeyPair?)?.pointer;
 
     return FfiTlsIdentity.fromPointer(
@@ -1264,8 +1250,9 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
     useEnterpriseFeature(EnterpriseFeature.peerToPeerSync);
     _checkPersistedIdentitySupport();
 
-    final pointer =
-        await runInSecondaryIsolate(() => _bindings.withLabel(label));
+    final pointer = await runInSecondaryIsolate(
+      () => _bindings.withLabel(label),
+    );
     if (pointer == null) {
       return null;
     }
@@ -1313,11 +1300,8 @@ final class FfiTlsIdentity implements TlsIdentity, Finalizable {
 
   @override
   String toString() => [
-        'TlsIdentity(',
-        [
-          'expires: $expires',
-          'certificates: $certificates',
-        ].join(', '),
-        ')'
-      ].join('');
+    'TlsIdentity(',
+    ['expires: $expires', 'certificates: $certificates'].join(', '),
+    ')',
+  ].join('');
 }

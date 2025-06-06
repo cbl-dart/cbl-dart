@@ -120,8 +120,9 @@ final class TypedDataHelpers {
       return [
         className,
         '(',
-        [for (final entry in fields.entries) '${entry.key}: ${entry.value}']
-            .join(', '),
+        [
+          for (final entry in fields.entries) '${entry.key}: ${entry.value}',
+        ].join(', '),
         ')',
       ].join();
     } else {

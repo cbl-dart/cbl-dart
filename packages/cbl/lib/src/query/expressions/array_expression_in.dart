@@ -22,9 +22,10 @@ abstract final class ArrayExpressionIn {
 
 final class ArrayExpressionInImpl implements ArrayExpressionIn {
   ArrayExpressionInImpl(
-      Quantifier quantifier, VariableExpressionInterface variable)
-      : _quantifier = quantifier,
-        _variable = variable as VariableExpressionImpl;
+    Quantifier quantifier,
+    VariableExpressionInterface variable,
+  ) : _quantifier = quantifier,
+      _variable = variable as VariableExpressionImpl;
 
   final Quantifier _quantifier;
   final VariableExpressionImpl _variable;

@@ -9,22 +9,22 @@ import 'utils.dart';
 
 JsonMap createTemplateContext({
   required PrebuiltPackageConfiguration configuration,
-}) =>
-    {
-      ...configuration.templateContext(),
-      'prebuiltPackageConfigurationJson':
-          const JsonEncoder.withIndent('  ').convert(configuration.toJson()),
-      'capitalize': capitalize,
-    };
+}) => {
+  ...configuration.templateContext(),
+  'prebuiltPackageConfigurationJson': const JsonEncoder.withIndent(
+    '  ',
+  ).convert(configuration.toJson()),
+  'capitalize': capitalize,
+};
 
 extension on PrebuiltPackageConfiguration {
   JsonMap templateContext() => {
-        'name': name,
-        'cblFlutterInstallVersion': cblFlutterInstallVersion,
-        'edition': edition.name,
-        'enterpriseEdition': edition == Edition.enterprise,
-        'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',
-      };
+    'name': name,
+    'cblFlutterInstallVersion': cblFlutterInstallVersion,
+    'edition': edition.name,
+    'enterpriseEdition': edition == Edition.enterprise,
+    'pluginClass': 'CblFlutter${edition.name[0].toUpperCase()}e',
+  };
 }
 
 String capitalize(LambdaContext context) {

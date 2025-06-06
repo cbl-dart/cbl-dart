@@ -13,12 +13,11 @@ final _bindings = CBLBindings.instance.indexUpdater;
 final class FfiIndexUpdater
     with ClosableResourceMixin, ArrayInterfaceMixin
     implements SyncIndexUpdater, Finalizable {
-  FfiIndexUpdater.fromPointer(
-    this.pointer, {
-    required FfiQueryIndex index,
-  }) {
-    CBLBindings.instance.base
-        .bindCBLRefCountedToDartObject(this, pointer.cast());
+  FfiIndexUpdater.fromPointer(this.pointer, {required FfiQueryIndex index}) {
+    CBLBindings.instance.base.bindCBLRefCountedToDartObject(
+      this,
+      pointer.cast(),
+    );
     needsToBeClosedByParent = false;
     attachTo(index);
   }
@@ -30,11 +29,11 @@ final class FfiIndexUpdater
 
   @override
   Object? cblValue(int index) => useSync(
-        () => MRoot.fromContext(
-          MContext(data: flValue(index)),
-          isMutable: false,
-        ).asNative,
-      );
+    () => MRoot.fromContext(
+      MContext(data: flValue(index)),
+      isMutable: false,
+    ).asNative,
+  );
 
   @override
   int get length => useSync(() => _bindings.count(pointer));

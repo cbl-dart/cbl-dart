@@ -11,21 +11,13 @@ MDelegate get _delegate => MDelegate.instance!;
 final _emptyNative = Object();
 
 base class MValue {
-  MValue.empty()
-      : _value = null,
-        _native = _emptyNative;
+  MValue.empty() : _value = null, _native = _emptyNative;
 
-  MValue.withValue(FLValue value)
-      : _value = value,
-        _native = _emptyNative;
+  MValue.withValue(FLValue value) : _value = value, _native = _emptyNative;
 
-  MValue.withNative(Object? native)
-      : _value = null,
-        _native = native;
+  MValue.withNative(Object? native) : _value = null, _native = native;
 
-  MValue._(FLValue? value, Object? native)
-      : _value = value,
-        _native = native;
+  MValue._(FLValue? value, Object? native) : _value = value, _native = native;
 
   FLValue? _value;
   Object? _native;
@@ -155,7 +147,8 @@ base class MValue {
   int get hashCode => _value.hashCode ^ _native.hashCode;
 
   @override
-  String toString() => 'MValue('
+  String toString() =>
+      'MValue('
       'hasValue: $hasValue, '
       'hasNative: $hasNative, '
       'value: $_value, '

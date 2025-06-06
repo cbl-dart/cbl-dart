@@ -1,9 +1,6 @@
 import '../bindings.dart';
 
-enum Edition {
-  community,
-  enterprise,
-}
+enum Edition { community, enterprise }
 
 enum EnterpriseFeature {
   localDbReplication,
@@ -14,13 +11,13 @@ enum EnterpriseFeature {
   peerToPeerSync;
 
   String get description => switch (this) {
-        localDbReplication => 'Local database replication',
-        databaseEncryption => 'Database encryption',
-        propertyEncryption => 'Property encryption',
-        prediction => 'Prediction',
-        vectorIndex => 'Vector index',
-        peerToPeerSync => 'Peer-to-peer sync',
-      };
+    localDbReplication => 'Local database replication',
+    databaseEncryption => 'Database encryption',
+    propertyEncryption => 'Property encryption',
+    prediction => 'Prediction',
+    vectorIndex => 'Vector index',
+    peerToPeerSync => 'Peer-to-peer sync',
+  };
 }
 
 Edition get activeEdition =>

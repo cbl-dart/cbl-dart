@@ -68,8 +68,9 @@ final class _JsonMatcher extends Matcher {
       return mismatchDescription;
     }
     final Object? actualDecoded = matchState[_actualDecodedKey];
-    return mismatchDescription
-        .add('was decoded as\n${_formatJson(actualDecoded)}');
+    return mismatchDescription.add(
+      'was decoded as\n${_formatJson(actualDecoded)}',
+    );
   }
 
   @override
@@ -168,8 +169,9 @@ final class _Equality extends Matcher {
       case _EqualityFailure.actual:
         return mismatchDescription.add('actual == expected was not true');
       case _EqualityFailure.hash:
-        return mismatchDescription
-            .add('actual.hashCode == expected.hashCode was not true');
+        return mismatchDescription.add(
+          'actual.hashCode == expected.hashCode was not true',
+        );
     }
   }
 }

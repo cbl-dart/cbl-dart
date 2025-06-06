@@ -11,7 +11,10 @@ void main() {
   group('ReplicatorChange', () {
     test('toString', () {
       final status = ReplicatorStatus(
-          ReplicatorActivityLevel.idle, ReplicatorProgress(0, 0), 0);
+        ReplicatorActivityLevel.idle,
+        ReplicatorProgress(0, 0),
+        0,
+      );
       final change = ReplicatorChangeImpl(_Replicator(), status);
       expect(
         change.toString(),

@@ -78,8 +78,10 @@ final class _SharedKeysTable extends SharedKeysTable implements Finalizable {
         );
         throw Exception();
       } else {
-        return _sharedKeys[sharedKey] =
-            decodeFLString(_loadedKey.stringBuf, _loadedKey.stringSize);
+        return _sharedKeys[sharedKey] = decodeFLString(
+          _loadedKey.stringBuf,
+          _loadedKey.stringSize,
+        );
       }
     } else {
       return sharedStringsTable.decode(StringSource.dictKey);
@@ -297,10 +299,11 @@ class RecursiveFleeceDecoder extends Converter<Data, Object?> {
     this.sharedKeys,
     SharedKeysTable? sharedKeysTable,
     this.sharedStringsTable,
-  }) : sharedKeysTable = sharedKeysTable ??
-            (sharedKeys == null
-                ? const NoopSharedKeysTable()
-                : SharedKeysTable());
+  }) : sharedKeysTable =
+           sharedKeysTable ??
+           (sharedKeys == null
+               ? const NoopSharedKeysTable()
+               : SharedKeysTable());
 
   final FLTrust trust;
   final SharedKeys? sharedKeys;
@@ -429,8 +432,9 @@ final class _FleeceListenerDecoder {
             _currentLoader.handleValue();
             break;
           case FLValueType.number:
-            _listener
-                .handleNumber(value.isInteger ? value.asInt : value.asDouble);
+            _listener.handleNumber(
+              value.isInteger ? value.asInt : value.asDouble,
+            );
             _currentLoader.handleValue();
             break;
           case FLValueType.string:
@@ -468,9 +472,11 @@ final class _FleeceListenerDecoder {
   }
 
   void _drainLoaders() {
-    for (_FleeceValueLoader? loader = _currentLoader;
-        loader != null;
-        loader = loader.parent) {
+    for (
+      _FleeceValueLoader? loader = _currentLoader;
+      loader != null;
+      loader = loader.parent
+    ) {
       loader.drain();
     }
   }
@@ -535,12 +541,12 @@ final class _DictIteratorLoader extends _FleeceValueLoader {
     this._sharedKeysTable,
     this._sharedStringsTable,
   ) : _it = DictIterator(
-          dict,
-          sharedKeysTable: _sharedKeysTable,
-          keyOut: globalLoadedDictKey,
-          valueOut: globalLoadedFLValue,
-          partiallyConsumable: false,
-        ) {
+        dict,
+        sharedKeysTable: _sharedKeysTable,
+        keyOut: globalLoadedDictKey,
+        valueOut: globalLoadedFLValue,
+        partiallyConsumable: false,
+      ) {
     _listener.beginObject();
   }
 

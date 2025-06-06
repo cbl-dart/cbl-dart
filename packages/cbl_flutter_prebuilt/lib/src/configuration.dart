@@ -40,19 +40,21 @@ PrebuiltPackageConfiguration _loadPackageConfiguration(Edition edition) {
       LibraryVersionInfo(
         library: Library.cblite,
         version: couchbaseLiteCVersion,
-        release: _couchbaseLiteCReleaseOverrides[couchbaseLiteCVersion] ??
+        release:
+            _couchbaseLiteCReleaseOverrides[couchbaseLiteCVersion] ??
             couchbaseLiteCVersion,
       ),
       LibraryVersionInfo(
         library: Library.cblitedart,
         version: couchbaseLiteDartVersion,
-        release: _couchbaseLiteDartReleaseOverrides[couchbaseLiteDartVersion] ??
+        release:
+            _couchbaseLiteDartReleaseOverrides[couchbaseLiteDartVersion] ??
             couchbaseLiteDartVersion,
-      )
+      ),
     ],
   );
 }
 
 final packageConfigurations = [
-  for (final edition in Edition.values) _loadPackageConfiguration(edition)
+  for (final edition in Edition.values) _loadPackageConfiguration(edition),
 ];

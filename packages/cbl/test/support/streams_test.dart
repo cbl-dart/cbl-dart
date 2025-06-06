@@ -98,19 +98,21 @@ void main() {
   });
 
   group('ListenerStream', () {
-    test('resolves listening future when addListener future resolves',
-        () async {
-      final addListenerCompleter = Completer<AbstractListenerToken>();
-      final stream = ListenerStream(
-        parent: TestResource(),
-        addListener: (_) => addListenerCompleter.future,
-      );
+    test(
+      'resolves listening future when addListener future resolves',
+      () async {
+        final addListenerCompleter = Completer<AbstractListenerToken>();
+        final stream = ListenerStream(
+          parent: TestResource(),
+          addListener: (_) => addListenerCompleter.future,
+        );
 
-      expect(stream.listening, completes);
+        expect(stream.listening, completes);
 
-      stream.listen(null);
-      addListenerCompleter.complete(TestToken());
-    });
+        stream.listen(null);
+        addListenerCompleter.complete(TestToken());
+      },
+    );
 
     test('closes down stream when addListener future rejects', () async {
       final addListenerCompleter = Completer<AbstractListenerToken>();
@@ -122,10 +124,7 @@ void main() {
       expect(stream.listening, throwsStateError);
       expect(
         stream,
-        emitsInOrder(<Object>[
-          emitsError(isA<StateError>()),
-          emitsDone,
-        ]),
+        emitsInOrder(<Object>[emitsError(isA<StateError>()), emitsDone]),
       );
 
       addListenerCompleter.completeError(StateError(''));
@@ -207,14 +206,8 @@ void main() {
 
     test('replay events to late subscribers', () async {
       final stream = RepeatableStream(Stream.value('A'));
-      await expectLater(
-        stream,
-        emitsInOrder(<Object>['A', emitsDone]),
-      );
-      await expectLater(
-        stream,
-        emitsInOrder(<Object>['A', emitsDone]),
-      );
+      await expectLater(stream, emitsInOrder(<Object>['A', emitsDone]));
+      await expectLater(stream, emitsInOrder(<Object>['A', emitsDone]));
     });
 
     test('replay error to late subscribers', () async {
@@ -231,14 +224,8 @@ void main() {
 
     test('replay done to late subscriber', () async {
       final stream = RepeatableStream(const Stream<void>.empty());
-      await expectLater(
-        stream,
-        emitsInOrder(<Object>[emitsDone]),
-      );
-      await expectLater(
-        stream,
-        emitsInOrder(<Object>[emitsDone]),
-      );
+      await expectLater(stream, emitsInOrder(<Object>[emitsDone]));
+      await expectLater(stream, emitsInOrder(<Object>[emitsDone]));
     });
   });
 }

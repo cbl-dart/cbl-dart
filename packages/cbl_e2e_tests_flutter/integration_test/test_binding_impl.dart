@@ -32,15 +32,16 @@ final class FlutterCblE2eTestBinding extends CblE2eTestBinding {
   }
 
   @override
-  Future<String> resolveTmpDir() => getTemporaryDirectory()
-      .then((dir) => Directory.fromUri(dir.uri.resolve('cbl_flutter')).path);
+  Future<String> resolveTmpDir() => getTemporaryDirectory().then(
+    (dir) => Directory.fromUri(dir.uri.resolve('cbl_flutter')).path,
+  );
 
   @override
   final testFn = (description, body, {Object? skip}) => ft.testWidgets(
-        description,
-        (tester) async => await body(),
-        skip: skip != null,
-      );
+    description,
+    (tester) async => await body(),
+    skip: skip != null,
+  );
 
   @override
   final groupFn = ft.group;

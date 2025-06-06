@@ -36,10 +36,7 @@ Future<InitContext> _context() async {
   final clbTempDir = Directory.fromUri(filesDir.uri.resolve('CBLTemp'));
   await clbTempDir.create(recursive: true);
 
-  return InitContext(
-    filesDir: filesDir.path,
-    tempDir: clbTempDir.path,
-  );
+  return InitContext(filesDir: filesDir.path, tempDir: clbTempDir.path);
 }
 
 /// Preloads the native libraries for Android and implements a workaround for
@@ -54,10 +51,12 @@ Future<void> _preloadLibrariesForAndroid() async {
     // If we were not able to load the libraries from Dart FFI directly,
     // load them using the Android Java API. After that, we can load the
     // libraries from Dart FFI.
-    await _Native.instance.loadLibraries([
-      libraries.cbl.name!,
-      libraries.cblDart.name!,
-    ].map((name) => name.replaceFirst('lib', '')).toList());
+    await _Native.instance.loadLibraries(
+      [
+        libraries.cbl.name!,
+        libraries.cblDart.name!,
+      ].map((name) => name.replaceFirst('lib', '')).toList(),
+    );
 
     DynamicLibraries.fromConfig(libraries);
   }

@@ -39,19 +39,19 @@ final class DataSourceImpl implements DataSourceInterface {
   final String? alias;
 
   Database get database => switch (source) {
-        final Database database => database,
-        CollectionBase(:final database) => database,
-        _ => throw UnimplementedError(),
-      };
+    final Database database => database,
+    CollectionBase(:final database) => database,
+    _ => throw UnimplementedError(),
+  };
 
   Map<String, Object?> toJson() => switch (source) {
-        Database(:final name) => {'AS': alias ?? name},
-        CollectionBase(:final fullName) => {
-            if (alias != null) 'AS': alias,
-            'COLLECTION': fullName
-          },
-        _ => throw UnimplementedError(),
-      };
+    Database(:final name) => {'AS': alias ?? name},
+    CollectionBase(:final fullName) => {
+      if (alias != null) 'AS': alias,
+      'COLLECTION': fullName,
+    },
+    _ => throw UnimplementedError(),
+  };
 }
 
 final class DataSourceAsImpl extends DataSourceImpl implements DataSourceAs {

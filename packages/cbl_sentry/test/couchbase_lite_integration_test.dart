@@ -75,9 +75,9 @@ void main() {
 
     test('allows overriding enabling of tracing', () async {
       options.tracesSampleRate = 1;
-      final integration = await callTestIntegration(CouchbaseLiteIntegration(
-        tracingEnabled: false,
-      ));
+      final integration = await callTestIntegration(
+        CouchbaseLiteIntegration(tracingEnabled: false),
+      );
 
       expect(integration.tracingDelegate?.tracingEnabled, false);
     });
@@ -89,9 +89,9 @@ void main() {
     });
 
     test('passes traceInternalOperations option to delegate', () async {
-      final integration = await callTestIntegration(CouchbaseLiteIntegration(
-        traceInternalOperations: true,
-      ));
+      final integration = await callTestIntegration(
+        CouchbaseLiteIntegration(traceInternalOperations: true),
+      );
 
       expect(integration.tracingDelegate?.traceInternalOperations, true);
     });
@@ -103,9 +103,9 @@ void main() {
     });
 
     test('passes operationBreadcrumbs option to delegate', () async {
-      final integration = await callTestIntegration(CouchbaseLiteIntegration(
-        operationBreadcrumbs: false,
-      ));
+      final integration = await callTestIntegration(
+        CouchbaseLiteIntegration(operationBreadcrumbs: false),
+      );
 
       expect(integration.tracingDelegate?.operationBreadcrumbs, false);
     });
@@ -118,9 +118,9 @@ void main() {
     });
 
     test('installs breadcrumb logger with correct log level', () async {
-      await callTestIntegration(CouchbaseLiteIntegration(
-        breadcrumbLogLevel: LogLevel.debug,
-      ));
+      await callTestIntegration(
+        CouchbaseLiteIntegration(breadcrumbLogLevel: LogLevel.debug),
+      );
 
       final logger = Database.log.custom;
       expect(logger, isA<BreadcrumbLogger>());
@@ -128,9 +128,9 @@ void main() {
     });
 
     test('installs no logger is breadcrumb log level is none', () async {
-      await callTestIntegration(CouchbaseLiteIntegration(
-        breadcrumbLogLevel: LogLevel.none,
-      ));
+      await callTestIntegration(
+        CouchbaseLiteIntegration(breadcrumbLogLevel: LogLevel.none),
+      );
 
       expect(Database.log.custom, isNull);
     });

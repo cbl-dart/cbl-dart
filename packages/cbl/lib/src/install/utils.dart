@@ -73,7 +73,7 @@ Future<Uint8List?> _loadFileFromNativeVendorDirectory(Uri uri) async {
     pathSegments: [
       ...p.split(nativeVendorDirectory).sublist(1),
       uri.host,
-      ...uri.pathSegments
+      ...uri.pathSegments,
     ],
   );
 
@@ -89,34 +89,33 @@ Future<Uint8List?> _loadFileFromNativeVendorDirectory(Uri uri) async {
 Future<Uint8List> downloadUrl(
   String url, {
   Duration timeout = const Duration(minutes: 5),
-}) =>
-    _retryWithExponentialBackoff(
-      timeout: timeout,
-      retryOn: (error) {
-        if (error is Response) {
-          return error.statusCode >= 500;
-        }
-        return false;
-      },
-      () async {
-        final uri = Uri.parse(url);
-        final response = await get(uri);
+}) => _retryWithExponentialBackoff(
+  timeout: timeout,
+  retryOn: (error) {
+    if (error is Response) {
+      return error.statusCode >= 500;
+    }
+    return false;
+  },
+  () async {
+    final uri = Uri.parse(url);
+    final response = await get(uri);
 
-        if (response.statusCode case 404 || 403) {
-          if (await _loadFileFromNativeVendorDirectory(uri) case final data?) {
-            return data;
-          }
-        }
+    if (response.statusCode case 404 || 403) {
+      if (await _loadFileFromNativeVendorDirectory(uri) case final data?) {
+        return data;
+      }
+    }
 
-        if (response.statusCode != 200) {
-          throw StateError(
-            'Failed to download $url: ${response.statusCode} ${response.body}',
-          );
-        }
+    if (response.statusCode != 200) {
+      throw StateError(
+        'Failed to download $url: ${response.statusCode} ${response.body}',
+      );
+    }
 
-        return response.bodyBytes;
-      },
-    );
+    return response.bodyBytes;
+  },
+);
 
 Future<T> _retryWithExponentialBackoff<T>(
   Future<T> Function() fn, {
@@ -197,10 +196,9 @@ Future<void> copyDirectoryContents(
   final destinationDirPath = p.absolute(destinationDir);
   await Directory(destinationDirPath).create(recursive: true);
 
-  final entities = Directory(sourceDirPath).list(
-    recursive: true,
-    followLinks: false,
-  );
+  final entities = Directory(
+    sourceDirPath,
+  ).list(recursive: true, followLinks: false);
 
   await for (final entity in entities) {
     if (!(filter?.call(entity) ?? true)) {

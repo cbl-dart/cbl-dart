@@ -49,8 +49,11 @@ final class Doc implements Finalizable {
     FLTrust trust, {
     SharedKeys? sharedKeys,
   }) {
-    final docPointer =
-        _bindings.fromResultData(data, trust, sharedKeys?.pointer);
+    final docPointer = _bindings.fromResultData(
+      data,
+      trust,
+      sharedKeys?.pointer,
+    );
     return Doc.fromPointer(docPointer);
   }
 
@@ -145,9 +148,9 @@ final class Value implements Finalizable {
     this.isRefCounted = true,
     bool adopt = false,
   }) : assert(
-          !adopt || isRefCounted,
-          'only an object which is ref counted can be adopted',
-        ) {
+         !adopt || isRefCounted,
+         'only an object which is ref counted can be adopted',
+       ) {
     if (isRefCounted) {
       _bindings.bindToDartObject(this, value: pointer, retain: !adopt);
     }
@@ -294,11 +297,8 @@ final class Value implements Finalizable {
 /// A Fleece array.
 final class Array extends Value with ListMixin<Value> {
   /// Creates an [Array] based on a [pointer] to the the native value.
-  Array.fromPointer(
-    FLArray pointer, {
-    super.isRefCounted,
-    super.adopt,
-  }) : super.fromPointer(pointer.cast());
+  Array.fromPointer(FLArray pointer, {super.isRefCounted, super.adopt})
+    : super.fromPointer(pointer.cast());
 
   static final _bindings = CBLBindings.instance.fleece.array;
 
@@ -326,9 +326,9 @@ final class Array extends Value with ListMixin<Value> {
 
   @override
   Value operator [](int index) => Value.fromPointer(
-        _bindings.get(pointer.cast(), index),
-        isRefCounted: false,
-      );
+    _bindings.get(pointer.cast(), index),
+    isRefCounted: false,
+  );
 
   @override
   void operator []=(int index, Object? value) =>
@@ -342,10 +342,7 @@ final class Array extends Value with ListMixin<Value> {
 final class MutableArray extends Array {
   /// Creates a new empty [MutableArray].
   factory MutableArray([Iterable<Object?>? from]) {
-    final result = MutableArray.fromPointer(
-      _bindings.create(),
-      adopt: true,
-    );
+    final result = MutableArray.fromPointer(_bindings.create(), adopt: true);
 
     if (from != null) {
       result.addAll(from);
@@ -356,7 +353,7 @@ final class MutableArray extends Array {
 
   /// Creates a [MutableArray] based on a [pointer] to the the native value.
   MutableArray.fromPointer(FLMutableArray pointer, {super.adopt})
-      : super.fromPointer(pointer.cast(), isRefCounted: true);
+    : super.fromPointer(pointer.cast(), isRefCounted: true);
 
   /// Creates a new [MutableArray] that's a copy of the source [Array].
   ///
@@ -370,11 +367,10 @@ final class MutableArray extends Array {
   factory MutableArray.mutableCopy(
     Array source, {
     FLCopyFlags flags = FLCopyFlags.defaultCopy,
-  }) =>
-      MutableArray.fromPointer(
-        _bindings.mutableCopy(source.pointer.cast(), flags),
-        adopt: true,
-      );
+  }) => MutableArray.fromPointer(
+    _bindings.mutableCopy(source.pointer.cast(), flags),
+    adopt: true,
+  );
 
   static final _bindings = CBLBindings.instance.fleece.mutableArray;
 
@@ -457,11 +453,8 @@ final class MutableArray extends Array {
 /// A Fleece dictionary.
 final class Dict extends Value with MapMixin<String, Value> {
   /// Creates a [Dict] based on a [pointer] to the the native value.
-  Dict.fromPointer(
-    FLDict pointer, {
-    super.isRefCounted,
-    super.adopt,
-  }) : super.fromPointer(pointer.cast());
+  Dict.fromPointer(FLDict pointer, {super.isRefCounted, super.adopt})
+    : super.fromPointer(pointer.cast());
 
   static final _bindings = CBLBindings.instance.fleece.dict;
 
@@ -486,9 +479,9 @@ final class Dict extends Value with MapMixin<String, Value> {
 
   @override
   Value operator [](Object? key) => Value.fromPointer(
-        _bindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
-        isRefCounted: false,
-      );
+    _bindings.get(pointer.cast(), assertKey(key)) ?? nullptr,
+    isRefCounted: false,
+  );
 
   @override
   void operator []=(String key, Object? value) =>
@@ -503,9 +496,9 @@ final class Dict extends Value with MapMixin<String, Value> {
   @override
   // ignore: hash_and_equals
   int get hashCode => entries.fold(
-      0,
-      (hashCode, entry) =>
-          hashCode ^ entry.key.hashCode ^ entry.value.hashCode);
+    0,
+    (hashCode, entry) => hashCode ^ entry.key.hashCode ^ entry.value.hashCode,
+  );
 
   @override
   Map<String, Object?> toObject() =>
@@ -528,8 +521,10 @@ final class _DictKeyIterator implements Iterator<String> {
 
   final Dict dict;
 
-  late final DictIterator iterator =
-      DictIterator(dict.pointer.cast(), keyOut: globalLoadedDictKey);
+  late final DictIterator iterator = DictIterator(
+    dict.pointer.cast(),
+    keyOut: globalLoadedDictKey,
+  );
 
   @override
   late String current;
@@ -550,10 +545,7 @@ final class _DictKeyIterator implements Iterator<String> {
 final class MutableDict extends Dict {
   /// Creates a new empty [MutableDict].
   factory MutableDict([Map<String, Object?>? from]) {
-    final result = MutableDict.fromPointer(
-      _bindings.create(),
-      adopt: true,
-    );
+    final result = MutableDict.fromPointer(_bindings.create(), adopt: true);
 
     if (from != null) {
       result.addAll(from);
@@ -581,11 +573,10 @@ final class MutableDict extends Dict {
   factory MutableDict.mutableCopy(
     Dict source, {
     FLCopyFlags flags = FLCopyFlags.defaultCopy,
-  }) =>
-      MutableDict.fromPointer(
-        _bindings.mutableCopy(source.pointer.cast(), flags),
-        adopt: true,
-      );
+  }) => MutableDict.fromPointer(
+    _bindings.mutableCopy(source.pointer.cast(), flags),
+    adopt: true,
+  );
 
   static final _bindings = CBLBindings.instance.fleece.mutableDict;
 

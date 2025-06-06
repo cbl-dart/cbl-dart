@@ -18,10 +18,7 @@ class AppDatabase extends $AppDatabase {
       // ignore: invalid_use_of_internal_member
       AsyncDatabase.openInternal(name, config, _adapter);
 
-  static SyncDatabase openSync(
-    String name, [
-    DatabaseConfiguration? config,
-  ]) =>
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
       // ignore: invalid_use_of_internal_member
       SyncDatabase.internal(name, config, _adapter);
 
@@ -31,9 +28,7 @@ class AppDatabase extends $AppDatabase {
         dartName: 'User',
         factory: ImmutableUser.internal,
         mutableFactory: MutableUser.internal,
-        typeMatcher: const ValueTypeMatcher(
-          path: ['type'],
-        ),
+        typeMatcher: const ValueTypeMatcher(path: ['type']),
       ),
       TypedDictionaryMetadata<PersonalName, MutablePersonalName>(
         dartName: 'PersonalName',

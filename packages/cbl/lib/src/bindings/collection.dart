@@ -58,7 +58,7 @@ final class CollectionChangeCallbackMessage {
   CollectionChangeCallbackMessage(this.documentIds);
 
   CollectionChangeCallbackMessage.fromArguments(List<Object?> message)
-      : this(message.cast<Uint8List>().map(utf8.decode).toList());
+    : this(message.cast<Uint8List>().map(utf8.decode).toList());
 
   final List<String> documentIds;
 }
@@ -70,17 +70,18 @@ final class CollectionBindings extends Bindings {
       cbl.CBLDatabase_ScopeNames(db, globalCBLError).checkError();
 
   Pointer<cblite.CBLScope>? databaseScope(
-          Pointer<cblite.CBLDatabase> db, String scopeName) =>
-      runWithSingleFLString(
-        scopeName,
-        (flScopeName) => cbl.CBLDatabase_Scope(
-          db,
-          flScopeName,
-          // TODO(blaugold): Remove reset once bug is fixed.
-          // https://github.com/couchbase/couchbase-lite-C/issues/499
-          globalCBLError..ref.reset(),
-        ).checkError().toNullable(),
-      );
+    Pointer<cblite.CBLDatabase> db,
+    String scopeName,
+  ) => runWithSingleFLString(
+    scopeName,
+    (flScopeName) => cbl.CBLDatabase_Scope(
+      db,
+      flScopeName,
+      // TODO(blaugold): Remove reset once bug is fixed.
+      // https://github.com/couchbase/couchbase-lite-C/issues/499
+      globalCBLError..ref.reset(),
+    ).checkError().toNullable(),
+  );
 
   cblite.FLMutableArray scopeCollectionNames(Pointer<cblite.CBLScope> scope) =>
       cbl.CBLScope_CollectionNames(scope, globalCBLError).checkError();
@@ -88,41 +89,42 @@ final class CollectionBindings extends Bindings {
   Pointer<cblite.CBLCollection>? scopeCollection(
     Pointer<cblite.CBLScope> scope,
     String collectionName,
-  ) =>
-      runWithSingleFLString(
-        collectionName,
-        (flCollectionName) => cbl.CBLScope_Collection(
-          scope,
-          flCollectionName,
-          // TODO(blaugold): Remove reset once bug is fixed.
-          // https://github.com/couchbase/couchbase-lite-C/issues/499
-          globalCBLError..ref.reset(),
-        ).checkError().toNullable(),
-      );
+  ) => runWithSingleFLString(
+    collectionName,
+    (flCollectionName) => cbl.CBLScope_Collection(
+      scope,
+      flCollectionName,
+      // TODO(blaugold): Remove reset once bug is fixed.
+      // https://github.com/couchbase/couchbase-lite-C/issues/499
+      globalCBLError..ref.reset(),
+    ).checkError().toNullable(),
+  );
 
   Pointer<cblite.CBLCollection> databaseCreateCollection(
     Pointer<cblite.CBLDatabase> db,
     String collectionName,
     String scopeName,
-  ) =>
-      withGlobalArena(() => cbl.CBLDatabase_CreateCollection(
-            db,
-            collectionName.toFLString(),
-            scopeName.toFLString(),
-            globalCBLError,
-          ).checkError());
+  ) => withGlobalArena(
+    () => cbl.CBLDatabase_CreateCollection(
+      db,
+      collectionName.toFLString(),
+      scopeName.toFLString(),
+      globalCBLError,
+    ).checkError(),
+  );
 
   void databaseDeleteCollection(
     Pointer<cblite.CBLDatabase> db,
     String collectionName,
     String scopeName,
-  ) =>
-      withGlobalArena(() => cbl.CBLDatabase_DeleteCollection(
-            db,
-            collectionName.toFLString(),
-            scopeName.toFLString(),
-            globalCBLError,
-          ).checkError());
+  ) => withGlobalArena(
+    () => cbl.CBLDatabase_DeleteCollection(
+      db,
+      collectionName.toFLString(),
+      scopeName.toFLString(),
+      globalCBLError,
+    ).checkError(),
+  );
 
   int count(Pointer<cblite.CBLCollection> collection) =>
       cbl.CBLCollection_Count(collection);
@@ -130,15 +132,13 @@ final class CollectionBindings extends Bindings {
   Pointer<cblite.CBLDocument>? getDocument(
     Pointer<cblite.CBLCollection> collection,
     String docId,
-  ) =>
-      runWithSingleFLString(
-        docId,
-        (flDocId) => nativeCallTracePoint(
-          TracedNativeCall.collectionGetDocument,
-          () => cbl.CBLCollection_GetDocument(
-              collection, flDocId, globalCBLError),
-        ).checkError().toNullable(),
-      );
+  ) => runWithSingleFLString(
+    docId,
+    (flDocId) => nativeCallTracePoint(
+      TracedNativeCall.collectionGetDocument,
+      () => cbl.CBLCollection_GetDocument(collection, flDocId, globalCBLError),
+    ).checkError().toNullable(),
+  );
 
   void saveDocumentWithConcurrencyControl(
     Pointer<cblite.CBLCollection> collection,
@@ -160,56 +160,55 @@ final class CollectionBindings extends Bindings {
     Pointer<cblite.CBLCollection> collection,
     Pointer<cblite.CBLDocument> document,
     CBLConcurrencyControl concurrencyControl,
-  ) =>
-      nativeCallTracePoint(
-        TracedNativeCall.collectionDeleteDocument,
-        () => cbl.CBLCollection_DeleteDocumentWithConcurrencyControl(
-          collection,
-          document,
-          concurrencyControl.value,
-          globalCBLError,
-        ),
-      ).checkError();
+  ) => nativeCallTracePoint(
+    TracedNativeCall.collectionDeleteDocument,
+    () => cbl.CBLCollection_DeleteDocumentWithConcurrencyControl(
+      collection,
+      document,
+      concurrencyControl.value,
+      globalCBLError,
+    ),
+  ).checkError();
 
   bool purgeDocumentByID(Pointer<cblite.CBLCollection> db, String docId) =>
       runWithSingleFLString(
         docId,
-        (flDocId) =>
-            cbl.CBLCollection_PurgeDocumentByID(db, flDocId, globalCBLError)
-                .checkError(),
+        (flDocId) => cbl.CBLCollection_PurgeDocumentByID(
+          db,
+          flDocId,
+          globalCBLError,
+        ).checkError(),
       );
 
   DateTime? getDocumentExpiration(
     Pointer<cblite.CBLCollection> collection,
     String docId,
-  ) =>
-      runWithSingleFLString(docId, (flDocId) {
-        final result = cbl.CBLCollection_GetDocumentExpiration(
-          collection,
-          flDocId,
-          globalCBLError,
-        );
+  ) => runWithSingleFLString(docId, (flDocId) {
+    final result = cbl.CBLCollection_GetDocumentExpiration(
+      collection,
+      flDocId,
+      globalCBLError,
+    );
 
-        if (result == -1) {
-          checkError();
-        }
+    if (result == -1) {
+      checkError();
+    }
 
-        return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
-      });
+    return result == 0 ? null : DateTime.fromMillisecondsSinceEpoch(result);
+  });
 
   void setDocumentExpiration(
     Pointer<cblite.CBLCollection> collection,
     String docId,
     DateTime? expiration,
-  ) =>
-      runWithSingleFLString(docId, (flDocId) {
-        cbl.CBLCollection_SetDocumentExpiration(
-          collection,
-          flDocId,
-          expiration?.millisecondsSinceEpoch ?? 0,
-          globalCBLError,
-        ).checkError();
-      });
+  ) => runWithSingleFLString(docId, (flDocId) {
+    cbl.CBLCollection_SetDocumentExpiration(
+      collection,
+      flDocId,
+      expiration?.millisecondsSinceEpoch ?? 0,
+      globalCBLError,
+    ).checkError();
+  });
 
   cblite.FLArray indexNames(Pointer<cblite.CBLCollection> collection) =>
       cbl.CBLCollection_GetIndexNames(collection, globalCBLError).checkError();
@@ -217,14 +216,14 @@ final class CollectionBindings extends Bindings {
   Pointer<cblite.CBLQueryIndex>? index(
     Pointer<cblite.CBLCollection> collection,
     String name,
-  ) =>
-      runWithSingleFLString(
-        name,
-        (flName) =>
-            cbl.CBLCollection_GetIndex(collection, flName, globalCBLError)
-                .checkError()
-                .toNullable(),
-      );
+  ) => runWithSingleFLString(
+    name,
+    (flName) => cbl.CBLCollection_GetIndex(
+      collection,
+      flName,
+      globalCBLError,
+    ).checkError().toNullable(),
+  );
 
   void createIndex(
     Pointer<cblite.CBLCollection> collection,
@@ -243,8 +242,11 @@ final class CollectionBindings extends Bindings {
 
   void deleteIndex(Pointer<cblite.CBLCollection> collection, String name) {
     runWithSingleFLString(name, (flName) {
-      cbl.CBLCollection_DeleteIndex(collection, flName, globalCBLError)
-          .checkError();
+      cbl.CBLCollection_DeleteIndex(
+        collection,
+        flName,
+        globalCBLError,
+      ).checkError();
     });
   }
 
@@ -268,10 +270,12 @@ final class CollectionBindings extends Bindings {
             cbl.CBLVectorEncoding_CreateScalarQuantizer(scalarQuantizerType),
           CBLIndexSpec(
             :final productQuantizerSubQuantizers?,
-            :final productQuantizerBits?
+            :final productQuantizerBits?,
           ) =>
             cbl.CBLVectorEncoding_CreateProductQuantizer(
-                productQuantizerSubQuantizers, productQuantizerBits),
+              productQuantizerSubQuantizers,
+              productQuantizerBits,
+            ),
           _ => cbl.CBLVectorEncoding_CreateNone(),
         };
 
@@ -299,7 +303,11 @@ final class CollectionBindings extends Bindings {
   ) {
     runWithSingleFLString(docId, (flDocId) {
       cblDart.CBLDart_CBLCollection_AddDocumentChangeListener(
-          db, collection, flDocId, listener);
+        db,
+        collection,
+        flDocId,
+        listener,
+      );
     });
   }
 

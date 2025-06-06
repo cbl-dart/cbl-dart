@@ -153,7 +153,7 @@ void main() {
           root.encode(),
           json([
             null,
-            [true]
+            [true],
           ]),
         );
       });
@@ -254,7 +254,7 @@ void main() {
           root.encode(),
           json({
             'a': null,
-            'b': {'c': true}
+            'b': {'c': true},
           }),
         );
       });
@@ -264,10 +264,9 @@ void main() {
         final dict = root.asNative as MDict;
         final flValue = root.values.first.value!;
 
-        expect(
-          Map.fromEntries(dict.iterable),
-          {'a': mValue(value: _dictBinds.get(flValue.cast(), 'a'))},
-        );
+        expect(Map.fromEntries(dict.iterable), {
+          'a': mValue(value: _dictBinds.get(flValue.cast(), 'a')),
+        });
       });
 
       test('iterable for mutated dict', () {
@@ -276,24 +275,19 @@ void main() {
         final flValue = root.values.first.value!;
         dict.set('b', true);
 
-        expect(
-          Map.fromEntries(dict.iterable),
-          {
-            'a': mValue(value: _dictBinds.get(flValue.cast(), 'a')),
-            'b': mValue(hasNative: true),
-          },
-        );
+        expect(Map.fromEntries(dict.iterable), {
+          'a': mValue(value: _dictBinds.get(flValue.cast(), 'a')),
+          'b': mValue(hasNative: true),
+        });
       });
     });
   });
 }
 
 MRoot testMRoot(Object from) => MRoot.fromContext(
-      MContext(
-        data: Doc.fromResultData(fleeceEncode(from), FLTrust.trusted),
-      ),
-      isMutable: true,
-    );
+  MContext(data: Doc.fromResultData(fleeceEncode(from), FLTrust.trusted)),
+  isMutable: true,
+);
 
 Matcher mValue({FLValue? value, bool? hasNative}) => isA<MValue>()
     .having((p0) => p0.value, 'value', value ?? anything)

@@ -7,9 +7,8 @@ import '../bindings.dart';
 /// Handler which is invoked to respond to a [AsyncCallback].
 ///
 /// The handler receives a list of [arguments] from native side.
-typedef AsyncCallbackHandler = FutureOr<Object?> Function(
-  List<Object?> arguments,
-);
+typedef AsyncCallbackHandler =
+    FutureOr<Object?> Function(List<Object?> arguments);
 
 final _bindings = CBLBindings.instance.asyncCallback;
 
@@ -35,12 +34,7 @@ class AsyncCallback implements Finalizable {
   }) {
     _receivePort = ReceivePort();
 
-    pointer = _bindings.create(
-      _id,
-      this,
-      _receivePort.sendPort,
-      debug: debug,
-    );
+    pointer = _bindings.create(_id, this, _receivePort.sendPort, debug: debug);
 
     _receivePort.cast<List<Object?>>().listen(_messageHandler);
 
@@ -101,7 +95,8 @@ class AsyncCallback implements Finalizable {
     // ignore: cast_nullable_to_non_nullable
     final args = message[2] as List<Object?>;
 
-    String debugFormatArgs() => args.map((arg) {
+    String debugFormatArgs() => args
+        .map((arg) {
           if (arg is! Iterable<Object?>) {
             return arg;
           }
@@ -111,7 +106,8 @@ class AsyncCallback implements Finalizable {
             return [...list.take(3), '...'];
           }
           return list;
-        }).join(', ');
+        })
+        .join(', ');
 
     _debugLog('received call: ${debugFormatArgs()}');
 

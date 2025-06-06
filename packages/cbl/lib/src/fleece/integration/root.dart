@@ -8,11 +8,9 @@ import 'context.dart';
 import 'value.dart';
 
 final class MRoot extends MCollection {
-  MRoot.fromContext(
-    MContext context, {
-    required super.isMutable,
-  })  : _slot = MValue.withValue(context.flValue),
-        super(context: context) {
+  MRoot.fromContext(MContext context, {required super.isMutable})
+    : _slot = MValue.withValue(context.flValue),
+      super(context: context) {
     _slot.updateParent(this);
   }
 
@@ -20,9 +18,9 @@ final class MRoot extends MCollection {
     Object native, {
     required MContext super.context,
     required super.isMutable,
-  })  : assert(native is! Pointer),
-        assert(context.data == null),
-        _slot = MValue.withNative(native) {
+  }) : assert(native is! Pointer),
+       assert(context.data == null),
+       _slot = MValue.withNative(native) {
     _slot.updateParent(this);
   }
 

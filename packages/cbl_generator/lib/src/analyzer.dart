@@ -67,18 +67,16 @@ final class TypedDataAnalyzer {
       );
     }
 
-    final types = ConstantReader(annotation)
-        .read('types')
-        .setValue
-        .map((type) => type.toTypeValue()!)
-        .toList();
+    final types = ConstantReader(
+      annotation,
+    ).read('types').setValue.map((type) => type.toTypeValue()!).toList();
 
     return TypedDatabaseModel(
       libraryUri: element.librarySource.uri,
       declaringClassName: element.displayName,
       types: [
         // ignore: deprecated_member_use
-        for (final type in types) await buildTypedDataClassModel(type.element2!)
+        for (final type in types) await buildTypedDataClassModel(type.element!),
       ],
     );
   }
@@ -87,16 +85,17 @@ final class TypedDataAnalyzer {
     Element element, {
     TypedDataObjectKind? kind,
   }) async {
-    final cblLibrary =
-        await resolver.libraryFor(AssetId.parse('cbl|lib/cbl.dart'));
+    final cblLibrary = await resolver.libraryFor(
+      AssetId.parse('cbl|lib/cbl.dart'),
+    );
 
     // Validate element is an abstract class.
     if (element is! ClassElement) {
       final annotationDescription = kind == null
           // ignore: prefer_interpolation_to_compose_strings
           ? _describeTypedDataAnnotation(TypedDataObjectKind.dictionary) +
-              ' and ' +
-              _describeTypedDataAnnotation(TypedDataObjectKind.document)
+                ' and ' +
+                _describeTypedDataAnnotation(TypedDataObjectKind.document)
           : _describeTypedDataAnnotation(kind);
       throw InvalidGenerationSourceError(
         '$annotationDescription can only be used on a class.',
@@ -117,21 +116,26 @@ final class TypedDataAnalyzer {
       kind,
     );
 
-    final fields =
-        await _resolveTypedDataFields(annotatedClass, kind, cblLibrary);
+    final fields = await _resolveTypedDataFields(
+      annotatedClass,
+      kind,
+      cblLibrary,
+    );
     final documentIdField = fields
         .whereType<TypedDataMetadataField>()
         .firstWhereOrNull((field) => field.kind == DocumentMetadataKind.id);
 
-    final documentIdFieldName =
-        _resolveMetaDataFieldName<DocumentId, String>(annotatedClass);
-    final sequenceFieldName =
-        _resolveMetaDataFieldName<DocumentSequence, int>(annotatedClass);
+    final documentIdFieldName = _resolveMetaDataFieldName<DocumentId, String>(
+      annotatedClass,
+    );
+    final sequenceFieldName = _resolveMetaDataFieldName<DocumentSequence, int>(
+      annotatedClass,
+    );
     final revisionIdFieldName =
         _resolveMetaDataFieldName<DocumentRevisionId, String>(
-      annotatedClass,
-      nullable: true,
-    );
+          annotatedClass,
+          nullable: true,
+        );
 
     if (documentIdFieldName != null && documentIdField != null) {
       throw InvalidGenerationSourceError(
@@ -158,27 +162,33 @@ final class TypedDataAnalyzer {
     }
 
     if (documentIdFieldName != null) {
-      fields.add(TypedDataMetadataField(
-        name: documentIdFieldName,
-        kind: DocumentMetadataKind.id,
-        type: BuiltinScalarType(dartType: 'String'),
-      ));
+      fields.add(
+        TypedDataMetadataField(
+          name: documentIdFieldName,
+          kind: DocumentMetadataKind.id,
+          type: BuiltinScalarType(dartType: 'String'),
+        ),
+      );
     }
 
     if (sequenceFieldName != null) {
-      fields.add(TypedDataMetadataField(
-        name: sequenceFieldName,
-        kind: DocumentMetadataKind.sequence,
-        type: BuiltinScalarType(dartType: 'int'),
-      ));
+      fields.add(
+        TypedDataMetadataField(
+          name: sequenceFieldName,
+          kind: DocumentMetadataKind.sequence,
+          type: BuiltinScalarType(dartType: 'int'),
+        ),
+      );
     }
 
     if (revisionIdFieldName != null) {
-      fields.add(TypedDataMetadataField(
-        name: revisionIdFieldName,
-        kind: DocumentMetadataKind.revisionId,
-        type: BuiltinScalarType(dartType: 'String', isNullable: true),
-      ));
+      fields.add(
+        TypedDataMetadataField(
+          name: revisionIdFieldName,
+          kind: DocumentMetadataKind.revisionId,
+          type: BuiltinScalarType(dartType: 'String', isNullable: true),
+        ),
+      );
     }
 
     return TypedDataObjectModel(
@@ -277,20 +287,24 @@ final class TypedDataAnalyzer {
     }
 
     if (typeMatcher.instanceOf(_valueTypeMatcherType)) {
-      final path =
-          typeMatcher.read('path').listValue.map(ConstantReader.new).map((e) {
-        if (e.isString) {
-          return e.stringValue;
-        } else if (e.isInt) {
-          return e.intValue;
-        }
+      final path = typeMatcher
+          .read('path')
+          .listValue
+          .map(ConstantReader.new)
+          .map((e) {
+            if (e.isString) {
+              return e.stringValue;
+            } else if (e.isInt) {
+              return e.intValue;
+            }
 
-        throw InvalidGenerationSourceError(
-          '`typeMatcher.path` must be a List that only contains Strings and '
-          'ints.',
-          element: clazz,
-        );
-      }).toList();
+            throw InvalidGenerationSourceError(
+              '`typeMatcher.path` must be a List that only contains Strings '
+              'and ints.',
+              element: clazz,
+            );
+          })
+          .toList();
 
       if (path.isEmpty) {
         throw InvalidGenerationSourceError(
@@ -313,10 +327,7 @@ final class TypedDataAnalyzer {
         );
       }
 
-      return ValueTypeMatcher(
-        path: path,
-        value: effectiveValue,
-      );
+      return ValueTypeMatcher(path: path, value: effectiveValue);
     }
 
     return null;
@@ -326,79 +337,80 @@ final class TypedDataAnalyzer {
     ClassElement clazz,
     TypedDataObjectKind kind,
     LibraryElement cblLibrary,
-  ) async =>
-      Future.wait(clazz.unnamedConstructor!.parameters.map(
-        (parameter) async {
-          final annotations = parameter.metadata
-              .map((annotation) => annotation.computeConstantValue())
-              .map(ConstantReader.new);
+  ) async => Future.wait(
+    clazz.unnamedConstructor!.parameters.map((parameter) async {
+      final annotations = parameter.metadata
+          .map((annotation) => annotation.computeConstantValue())
+          .map(ConstantReader.new);
 
-          final typedPropertyAnnotation = annotations.firstWhereOrNull(
-            (annotation) => annotation.instanceOf(_typedPropertyType),
+      final typedPropertyAnnotation = annotations.firstWhereOrNull(
+        (annotation) => annotation.instanceOf(_typedPropertyType),
+      );
+      String? customProperty;
+      String? defaultValueCode;
+      ScalarConverterInfo? scalarConverter;
+      if (typedPropertyAnnotation != null) {
+        final propertyConstant = typedPropertyAnnotation.peek('property');
+        if (propertyConstant != null) {
+          customProperty = propertyConstant.stringValue;
+        }
+
+        final defaultValueConstant = typedPropertyAnnotation.peek(
+          'defaultValue',
+        );
+        if (defaultValueConstant != null) {
+          defaultValueCode = defaultValueConstant.stringValue;
+        }
+
+        final converterConstant = typedPropertyAnnotation.peek('converter');
+        if (converterConstant != null) {
+          final scalarConverterClass =
+              cblLibrary.exportNamespace.get('ScalarConverter')!
+                  as ClassElement;
+          final convertedType = converterConstant.objectValue.type!
+              .asInstanceOf(scalarConverterClass)!
+              .typeArguments
+              .first;
+          scalarConverter = ScalarConverterInfo(
+            type: convertedType,
+            code: converterConstant.code,
           );
-          String? customProperty;
-          String? defaultValueCode;
-          ScalarConverterInfo? scalarConverter;
-          if (typedPropertyAnnotation != null) {
-            final propertyConstant = typedPropertyAnnotation.peek('property');
-            if (propertyConstant != null) {
-              customProperty = propertyConstant.stringValue;
-            }
+        }
+      }
 
-            final defaultValueConstant =
-                typedPropertyAnnotation.peek('defaultValue');
-            if (defaultValueConstant != null) {
-              defaultValueCode = defaultValueConstant.stringValue;
-            }
+      final type = _resolveTypedDataType(
+        parameter,
+        propertyConverter: scalarConverter,
+      );
 
-            final converterConstant = typedPropertyAnnotation.peek('converter');
-            if (converterConstant != null) {
-              final scalarConverterClass = cblLibrary.exportNamespace
-                  .get('ScalarConverter')! as ClassElement;
-              final convertedType = converterConstant.objectValue.type!
-                  .asInstanceOf(scalarConverterClass)!
-                  .typeArguments
-                  .first;
-              scalarConverter = ScalarConverterInfo(
-                type: convertedType,
-                code: converterConstant.code,
-              );
-            }
-          }
+      final constructorParameter = ConstructorParameter(
+        type: type,
+        isPositional: parameter.isPositional,
+        isRequired: parameter.isRequiredNamed || parameter.isRequiredPositional,
+        documentationComment: await parameter.documentationCommentValue(
+          resolver,
+        ),
+      );
 
-          final type = _resolveTypedDataType(
-            parameter,
-            propertyConverter: scalarConverter,
-          );
+      final isDocumentId = _isDocumentIdField(parameter, annotations, kind);
+      if (isDocumentId) {
+        return TypedDataMetadataField(
+          kind: DocumentMetadataKind.id,
+          type: (type as BuiltinScalarType).withNullability(false),
+          name: parameter.name,
+          constructorParameter: constructorParameter,
+        );
+      }
 
-          final constructorParameter = ConstructorParameter(
-            type: type,
-            isPositional: parameter.isPositional,
-            isRequired:
-                parameter.isRequiredNamed || parameter.isRequiredPositional,
-            documentationComment:
-                await parameter.documentationCommentValue(resolver),
-          );
-
-          final isDocumentId = _isDocumentIdField(parameter, annotations, kind);
-          if (isDocumentId) {
-            return TypedDataMetadataField(
-              kind: DocumentMetadataKind.id,
-              type: (type as BuiltinScalarType).withNullability(false),
-              name: parameter.name,
-              constructorParameter: constructorParameter,
-            );
-          }
-
-          return TypedDataObjectProperty(
-            type: type,
-            name: parameter.name,
-            property: customProperty ?? parameter.name,
-            constructorParameter: constructorParameter,
-            defaultValueCode: defaultValueCode,
-          );
-        },
-      ));
+      return TypedDataObjectProperty(
+        type: type,
+        name: parameter.name,
+        property: customProperty ?? parameter.name,
+        constructorParameter: constructorParameter,
+        defaultValueCode: defaultValueCode,
+      );
+    }),
+  );
 
   bool _isDocumentIdField(
     ParameterElement parameter,
@@ -437,8 +449,9 @@ final class TypedDataAnalyzer {
   }) {
     final annotationTypeChecker = TypeChecker.fromRuntime(Annotation);
     final typeTypeChecker = TypeChecker.fromRuntime(Type);
-    final nullabilitySuffix =
-        nullable ? NullabilitySuffix.question : NullabilitySuffix.none;
+    final nullabilitySuffix = nullable
+        ? NullabilitySuffix.question
+        : NullabilitySuffix.none;
 
     return clazz.accessors.firstWhereOrNull((element) {
       if (!element.isGetter) {
@@ -481,8 +494,9 @@ final class TypedDataAnalyzer {
       final isNullable = type.nullabilitySuffix == NullabilitySuffix.question;
 
       if (propertyConverter != null) {
-        if (TypeChecker.fromStatic(propertyConverter.type)
-            .isExactlyType(type)) {
+        if (TypeChecker.fromStatic(
+          propertyConverter.type,
+        ).isExactlyType(type)) {
           return CustomScalarType(
             dartType: typeName,
             isNullable: isNullable,
@@ -491,10 +505,7 @@ final class TypedDataAnalyzer {
         }
       } else {
         if (isExactlyOneOfTypes(type, _builtinSupportedTypes)) {
-          return BuiltinScalarType(
-            dartType: typeName,
-            isNullable: isNullable,
-          );
+          return BuiltinScalarType(dartType: typeName, isNullable: isNullable);
         }
 
         // TODO(blaugold): Remove this ignore once the analyzer dependency is

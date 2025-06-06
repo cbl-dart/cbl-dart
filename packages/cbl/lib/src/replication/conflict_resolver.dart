@@ -11,9 +11,8 @@ import 'replicator.dart';
 /// Functional version of [ConflictResolver].
 ///
 /// {@category Replication}
-typedef ConflictResolverFunction = FutureOr<Document?> Function(
-  Conflict conflict,
-);
+typedef ConflictResolverFunction =
+    FutureOr<Document?> Function(Conflict conflict);
 
 /// An object which is able to resolve a [Conflict] between the local and remote
 /// versions of a replicated [Document].
@@ -26,9 +25,7 @@ abstract base class ConflictResolver {
 
   /// Creates a [ConflictResolver] from a function which is called to resolve
   /// the conflict.
-  factory ConflictResolver.from(
-    ConflictResolverFunction resolve,
-  ) =>
+  factory ConflictResolver.from(ConflictResolverFunction resolve) =>
       _FunctionConflictResolver(resolve);
 
   /// Resolves the [conflict] between the local and the remote version of a
@@ -100,9 +97,8 @@ final class DefaultConflictResolver implements ConflictResolver {
 /// {@category Replication}
 /// {@category Typed Data}
 @experimental
-typedef TypedConflictResolverFunction = FutureOr<TypedDocumentObject?> Function(
-  TypedConflict conflict,
-);
+typedef TypedConflictResolverFunction =
+    FutureOr<TypedDocumentObject?> Function(TypedConflict conflict);
 
 /// An object which is able to resolve a [TypedConflict] between the local and
 /// remote versions of a replicated document.
@@ -117,9 +113,7 @@ abstract base class TypedConflictResolver {
 
   /// Creates a [TypedConflictResolver] from a function which is called to
   /// resolve the conflict.
-  factory TypedConflictResolver.from(
-    TypedConflictResolverFunction resolve,
-  ) =>
+  factory TypedConflictResolver.from(TypedConflictResolverFunction resolve) =>
       _FunctionTypedConflictResolver(resolve);
 
   /// Resolves the [conflict] between the local and the remote version of a

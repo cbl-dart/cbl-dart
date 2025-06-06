@@ -22,11 +22,11 @@ extension PackageMerging on Package {
   }
 
   String get signatureContent => [
-        config.library.name,
-        config.release,
-        if (config case DatabasePackageConfig(:final edition)) edition.name,
-        config.targetId
-      ].join();
+    config.library.name,
+    config.release,
+    if (config case DatabasePackageConfig(:final edition)) edition.name,
+    config.targetId,
+  ].join();
 }
 
 Directory mergedNativeLibrariesInstallDir(
@@ -40,8 +40,7 @@ Directory mergedNativeLibrariesInstallDir(
 bool areMergedNativeLibrariesInstalled(
   Iterable<Package> packages, {
   required String directory,
-}) =>
-    mergedNativeLibrariesInstallDir(packages, directory).existsSync();
+}) => mergedNativeLibrariesInstallDir(packages, directory).existsSync();
 
 Future<void> installMergedNativeLibraries(
   Iterable<Package> packages, {
@@ -104,7 +103,7 @@ LibraryConfiguration _nativeLibraryConfiguration(Package package) =>
       // against.
       version:
           package.os == OS.macOS && package.config.library.isDatabaseLibrary
-              ? package.config.version.split('.').first
-              : null,
+          ? package.config.version.split('.').first
+          : null,
       isAppleFramework: package.isNormalAppleFramework,
     );

@@ -70,10 +70,10 @@ enum ScalarQuantizerType {
   eightBit;
 
   DartCBLScalarQuantizerType _toCBL() => switch (this) {
-        fourBit => kCBLSQ4,
-        sixBit => kCBLSQ6,
-        eightBit => kCBLSQ8,
-      };
+    fourBit => kCBLSQ4,
+    sixBit => kCBLSQ6,
+    eightBit => kCBLSQ8,
+  };
 }
 
 /// A vector encoding to reduce the size of the vectors index by algorithmic
@@ -118,11 +118,10 @@ abstract final class VectorEncoding {
   factory VectorEncoding.productQuantizer({
     required int subQuantizers,
     required int bits,
-  }) =>
-      VectorEncodingImpl(
-        productQuantizerSubQuantizers: subQuantizers,
-        productQuantizerBits: bits,
-      );
+  }) => VectorEncodingImpl(
+    productQuantizerSubQuantizers: subQuantizers,
+    productQuantizerBits: bits,
+  );
 }
 
 /// A function used to define how close an input query vector is to other
@@ -178,11 +177,11 @@ enum DistanceMetric {
   dot;
 
   DartCBLDistanceMetric _toCBL() => switch (this) {
-        euclideanSquared => kCBLDistanceMetricEuclideanSquared,
-        cosine => kCBLDistanceMetricCosine,
-        euclidean => kCBLDistanceMetricEuclidean,
-        dot => kCBLDistanceMetricDot,
-      };
+    euclideanSquared => kCBLDistanceMetricEuclideanSquared,
+    cosine => kCBLDistanceMetricCosine,
+    euclidean => kCBLDistanceMetricEuclidean,
+    dot => kCBLDistanceMetricDot,
+  };
 }
 
 /// A specification of a vector [Index] from a SQL++ [expression].
@@ -342,10 +341,10 @@ final class _ValueIndexConfiguration extends _IndexConfiguration
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
-        expressionLanguage: CBLQueryLanguage.n1ql,
-        expressions: expressions.join(', '),
-        type: CBLDartIndexType.value$,
-      );
+    expressionLanguage: CBLQueryLanguage.n1ql,
+    expressions: expressions.join(', '),
+    type: CBLDartIndexType.value$,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -377,20 +376,22 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
 
   @override
   CBLIndexSpec toCBLIndexSpec() => CBLIndexSpec(
-        expressionLanguage: CBLQueryLanguage.n1ql,
-        expressions: expressions.join(', '),
-        type: CBLDartIndexType.fullText,
-        ignoreAccents: ignoreAccents,
-        language: language?.name,
-      );
+    expressionLanguage: CBLQueryLanguage.n1ql,
+    expressions: expressions.join(', '),
+    type: CBLDartIndexType.fullText,
+    ignoreAccents: ignoreAccents,
+    language: language?.name,
+  );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is _FullTextIndexConfiguration &&
           runtimeType == other.runtimeType &&
-          const DeepCollectionEquality()
-              .equals(expressions, other.expressions) &&
+          const DeepCollectionEquality().equals(
+            expressions,
+            other.expressions,
+          ) &&
           ignoreAccents == other.ignoreAccents &&
           language == other.language;
 
@@ -412,7 +413,7 @@ final class _FullTextIndexConfiguration extends _IndexConfiguration
       expressions.join(', '),
       if (properties.isNotEmpty) ' | ',
       properties.join(', '),
-      ')'
+      ')',
     ].join();
   }
 }
@@ -440,26 +441,26 @@ final class VectorEncodingImpl implements VectorEncoding {
 
   @override
   int get hashCode => Object.hash(
-        runtimeType,
-        scalarQuantizerType,
-        productQuantizerSubQuantizers,
-        productQuantizerBits,
-      );
+    runtimeType,
+    scalarQuantizerType,
+    productQuantizerSubQuantizers,
+    productQuantizerBits,
+  );
 
   @override
   String toString() => [
-        'VectorEncoding.',
-        if (scalarQuantizerType != null)
-          'scalarQuantizer(${scalarQuantizerType!.name})'
-        else if (productQuantizerSubQuantizers != null &&
-            productQuantizerBits != null)
-          'productQuantizer('
-              'subQuantizers: $productQuantizerSubQuantizers, '
-              'bits: $productQuantizerBits'
-              ')'
-        else
-          'none()',
-      ].join();
+    'VectorEncoding.',
+    if (scalarQuantizerType != null)
+      'scalarQuantizer(${scalarQuantizerType!.name})'
+    else if (productQuantizerSubQuantizers != null &&
+        productQuantizerBits != null)
+      'productQuantizer('
+          'subQuantizers: $productQuantizerSubQuantizers, '
+          'bits: $productQuantizerBits'
+          ')'
+    else
+      'none()',
+  ].join();
 }
 
 final class _VectorIndexConfiguration extends _IndexConfiguration
@@ -474,11 +475,12 @@ final class _VectorIndexConfiguration extends _IndexConfiguration
     this.minTrainingSize,
     this.maxTrainingSize,
     this.numProbes,
-  })  : lazy = lazy ?? false,
-        encoding = encoding ??
-            VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit),
-        metric = metric ?? DistanceMetric.euclideanSquared,
-        super([expression]);
+  }) : lazy = lazy ?? false,
+       encoding =
+           encoding ??
+           VectorEncoding.scalarQuantizer(ScalarQuantizerType.eightBit),
+       metric = metric ?? DistanceMetric.euclideanSquared,
+       super([expression]);
 
   @override
   String get expression => expressions.single;
@@ -547,8 +549,10 @@ final class _VectorIndexConfiguration extends _IndexConfiguration
       identical(this, other) ||
       other is _VectorIndexConfiguration &&
           runtimeType == other.runtimeType &&
-          const DeepCollectionEquality()
-              .equals(expressions, other.expressions) &&
+          const DeepCollectionEquality().equals(
+            expressions,
+            other.expressions,
+          ) &&
           dimensions == other.dimensions &&
           centroids == other.centroids &&
           lazy == other.lazy &&
@@ -560,16 +564,16 @@ final class _VectorIndexConfiguration extends _IndexConfiguration
 
   @override
   int get hashCode => Object.hash(
-        const DeepCollectionEquality().hash(expressions),
-        dimensions,
-        centroids,
-        lazy,
-        encoding,
-        metric,
-        minTrainingSize,
-        maxTrainingSize,
-        numProbes,
-      );
+    const DeepCollectionEquality().hash(expressions),
+    dimensions,
+    centroids,
+    lazy,
+    encoding,
+    metric,
+    minTrainingSize,
+    maxTrainingSize,
+    numProbes,
+  );
 
   @override
   String toString() {
@@ -589,7 +593,7 @@ final class _VectorIndexConfiguration extends _IndexConfiguration
       expressions.join(', '),
       if (properties.isNotEmpty) ' | ',
       properties.join(', '),
-      ')'
+      ')',
     ].join();
   }
 }

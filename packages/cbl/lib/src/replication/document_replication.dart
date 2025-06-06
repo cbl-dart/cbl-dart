@@ -54,14 +54,14 @@ final class DocumentReplicationImpl implements DocumentReplication {
 
   @override
   String toString() => [
-        'DocumentReplication(',
-        [
-          'replicator: $replicator',
-          if (isPush) 'PUSH' else 'PULL',
-          documents,
-        ].join(', '),
-        ')'
-      ].join();
+    'DocumentReplication(',
+    [
+      'replicator: $replicator',
+      if (isPush) 'PUSH' else 'PULL',
+      documents,
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 final class ReplicatedDocumentImpl implements ReplicatedDocument {
@@ -90,17 +90,17 @@ final class ReplicatedDocumentImpl implements ReplicatedDocument {
 
   @override
   String toString() => [
-        'ReplicatedDocument(',
-        [
-          id,
-          'collection: $scope.$collection',
-          for (final flag in flags)
-            if (flag == DocumentFlag.accessRemoved)
-              'ACCESS-REMOVED'
-            else if (flag == DocumentFlag.deleted)
-              'DELETED',
-          if (error != null) 'error: $error',
-        ].join(', '),
-        ')'
-      ].join();
+    'ReplicatedDocument(',
+    [
+      id,
+      'collection: $scope.$collection',
+      for (final flag in flags)
+        if (flag == DocumentFlag.accessRemoved)
+          'ACCESS-REMOVED'
+        else if (flag == DocumentFlag.deleted)
+          'DELETED',
+      if (error != null) 'error: $error',
+    ].join(', '),
+    ')',
+  ].join();
 }

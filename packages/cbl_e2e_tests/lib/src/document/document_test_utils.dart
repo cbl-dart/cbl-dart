@@ -9,11 +9,11 @@ import 'package:cbl/src/fleece/encoder.dart';
 import 'package:cbl/src/fleece/integration/integration.dart';
 
 MContext createTestMContext(Object data) => MContext(
-      data: data,
-      dictKeys: OptimizingDictKeys(),
-      sharedKeysTable: SharedKeysTable(),
-      sharedStringsTable: SharedStringsTable(),
-    );
+  data: data,
+  dictKeys: OptimizingDictKeys(),
+  sharedKeysTable: SharedKeysTable(),
+  sharedStringsTable: SharedStringsTable(),
+);
 
 Array immutableArray([List<Object?>? data]) {
   final array = MutableArray(data) as MutableArrayImpl;
@@ -28,8 +28,9 @@ Array immutableArray([List<Object?>? data]) {
 
 Dictionary immutableDictionary([Map<String, Object?>? data]) {
   final dictionary = MutableDictionary(data) as MutableDictionaryImpl;
-  final encodedDictionary =
-      FleeceEncoder.fleece.encodeWith(dictionary.encodeTo);
+  final encodedDictionary = FleeceEncoder.fleece.encodeWith(
+    dictionary.encodeTo,
+  );
   final root = MRoot.fromContext(
     createTestMContext(Doc.fromResultData(encodedDictionary, FLTrust.trusted)),
     isMutable: false,

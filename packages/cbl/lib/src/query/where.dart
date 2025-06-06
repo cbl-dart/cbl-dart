@@ -58,19 +58,20 @@ final class SyncWhereImpl extends SyncBuilderQuery implements SyncWhere {
     ExpressionInterface? expression7,
     ExpressionInterface? expression8,
     ExpressionInterface? expression9,
-  ]) =>
-      groupByAll([
-        expression0,
-        expression1,
-        expression2,
-        expression3,
-        expression4,
-        expression5,
-        expression6,
-        expression7,
-        expression8,
-        expression9,
-      ].whereType());
+  ]) => groupByAll(
+    [
+      expression0,
+      expression1,
+      expression2,
+      expression3,
+      expression4,
+      expression5,
+      expression6,
+      expression7,
+      expression8,
+      expression9,
+    ].whereType(),
+  );
 
   @override
   SyncGroupBy groupByAll(Iterable<ExpressionInterface> expressions) =>
@@ -88,19 +89,20 @@ final class SyncWhereImpl extends SyncBuilderQuery implements SyncWhere {
     OrderingInterface? ordering7,
     OrderingInterface? ordering8,
     OrderingInterface? ordering9,
-  ]) =>
-      orderByAll([
-        ordering0,
-        ordering1,
-        ordering2,
-        ordering3,
-        ordering4,
-        ordering5,
-        ordering6,
-        ordering7,
-        ordering8,
-        ordering9,
-      ].whereType());
+  ]) => orderByAll(
+    [
+      ordering0,
+      ordering1,
+      ordering2,
+      ordering3,
+      ordering4,
+      ordering5,
+      ordering6,
+      ordering7,
+      ordering8,
+      ordering9,
+    ].whereType(),
+  );
 
   @override
   SyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>
@@ -129,19 +131,20 @@ final class AsyncWhereImpl extends AsyncBuilderQuery implements AsyncWhere {
     ExpressionInterface? expression7,
     ExpressionInterface? expression8,
     ExpressionInterface? expression9,
-  ]) =>
-      groupByAll([
-        expression0,
-        expression1,
-        expression2,
-        expression3,
-        expression4,
-        expression5,
-        expression6,
-        expression7,
-        expression8,
-        expression9,
-      ].whereType());
+  ]) => groupByAll(
+    [
+      expression0,
+      expression1,
+      expression2,
+      expression3,
+      expression4,
+      expression5,
+      expression6,
+      expression7,
+      expression8,
+      expression9,
+    ].whereType(),
+  );
 
   @override
   AsyncGroupBy groupByAll(Iterable<ExpressionInterface> expressions) =>
@@ -159,19 +162,20 @@ final class AsyncWhereImpl extends AsyncBuilderQuery implements AsyncWhere {
     OrderingInterface? ordering7,
     OrderingInterface? ordering8,
     OrderingInterface? ordering9,
-  ]) =>
-      orderByAll([
-        ordering0,
-        ordering1,
-        ordering2,
-        ordering3,
-        ordering4,
-        ordering5,
-        ordering6,
-        ordering7,
-        ordering8,
-        ordering9,
-      ].whereType());
+  ]) => orderByAll(
+    [
+      ordering0,
+      ordering1,
+      ordering2,
+      ordering3,
+      ordering4,
+      ordering5,
+      ordering6,
+      ordering7,
+      ordering8,
+      ordering9,
+    ].whereType(),
+  );
 
   @override
   AsyncOrderBy orderByAll(Iterable<OrderingInterface> orderings) =>

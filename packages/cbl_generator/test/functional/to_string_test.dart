@@ -11,13 +11,13 @@ void main() {
   test('toString', () {
     expect(
       BoolListListDict([
-        [true]
+        [true],
       ]).toString(),
       'BoolListListDict(value: [[true]])',
     );
     expect(
       BoolListListDict([
-        [true]
+        [true],
       ]).toString(indent: '  '),
       '''
 BoolListListDict(
@@ -32,14 +32,11 @@ BoolListListDict(
       TypedDataPropertyDict(BoolDict(false)).toString(),
       'TypedDataPropertyDict(value: BoolDict(value: false))',
     );
-    expect(
-      TypedDataPropertyDict(BoolDict(false)).toString(indent: '  '),
-      '''
+    expect(TypedDataPropertyDict(BoolDict(false)).toString(indent: '  '), '''
 TypedDataPropertyDict(
   value: BoolDict(
     value: false,
   ),
-)''',
-    );
+)''');
   });
 }

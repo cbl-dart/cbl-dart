@@ -14,12 +14,7 @@ void main() {
       final collection = await db.defaultCollection;
       await collection.createIndex(
         'a',
-        VectorIndexConfiguration(
-          'a',
-          dimensions: 2,
-          centroids: 1,
-          lazy: true,
-        ),
+        VectorIndexConfiguration('a', dimensions: 2, centroids: 1, lazy: true),
       );
 
       final index = (await collection.index('a'))!;
@@ -60,12 +55,7 @@ void main() {
       final collection = await db.defaultCollection;
       await collection.createIndex(
         'a',
-        VectorIndexConfiguration(
-          'a',
-          dimensions: 2,
-          centroids: 1,
-          lazy: true,
-        ),
+        VectorIndexConfiguration('a', dimensions: 2, centroids: 1, lazy: true),
       );
 
       final index = (await collection.index('a'))!;

@@ -17,10 +17,7 @@ void main() {
     ).where((config) => config.os == OS.current);
     final packages = await Future.wait(packageConfigs.map(loader.load));
 
-    await installMergedNativeLibraries(
-      packages,
-      directory: installDir.path,
-    );
+    await installMergedNativeLibraries(packages, directory: installDir.path);
 
     final installDirEntries = installDir.listSync();
     expect(installDirEntries, hasLength(1));
@@ -29,15 +26,13 @@ void main() {
     expect(p.basename(libDir.path), PackageMerging.signature(packages));
 
     final libDirEntries = libDir.listSync();
-    final libDirBasenames =
-        libDirEntries.map((entry) => p.basename(entry.path)).toList();
+    final libDirBasenames = libDirEntries
+        .map((entry) => p.basename(entry.path))
+        .toList();
 
     expect(
       libDirBasenames,
-      containsAll(<Object>[
-        contains('cblite.'),
-        contains('cblitedart.'),
-      ]),
+      containsAll(<Object>[contains('cblite.'), contains('cblitedart.')]),
     );
   });
 }

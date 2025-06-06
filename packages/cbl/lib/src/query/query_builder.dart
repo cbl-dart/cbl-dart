@@ -39,19 +39,20 @@ final class QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]) =>
-      selectAll([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
-        result5,
-        result6,
-        result7,
-        result8,
-        result9,
-      ].whereType());
+  ]) => selectAll(
+    [
+      result0,
+      result1,
+      result2,
+      result3,
+      result4,
+      result5,
+      result6,
+      result7,
+      result8,
+      result9,
+    ].whereType(),
+  );
 
   /// Starts a new query and defines the selected columns.
   Select selectAll(Iterable<SelectResultInterface> results) =>
@@ -70,19 +71,20 @@ final class QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]) =>
-      selectAllDistinct([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
-        result5,
-        result6,
-        result7,
-        result8,
-        result9,
-      ].whereType());
+  ]) => selectAllDistinct(
+    [
+      result0,
+      result1,
+      result2,
+      result3,
+      result4,
+      result5,
+      result6,
+      result7,
+      result8,
+      result9,
+    ].whereType(),
+  );
 
   /// Starts a new query, which returns distinct rows and defines the selected
   /// columns.
@@ -109,19 +111,20 @@ final class SyncQueryBuilder implements QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]) =>
-      selectAll([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
-        result5,
-        result6,
-        result7,
-        result8,
-        result9,
-      ].whereType());
+  ]) => selectAll(
+    [
+      result0,
+      result1,
+      result2,
+      result3,
+      result4,
+      result5,
+      result6,
+      result7,
+      result8,
+      result9,
+    ].whereType(),
+  );
 
   @override
   SyncSelect selectAll(Iterable<SelectResultInterface> results) =>
@@ -139,19 +142,20 @@ final class SyncQueryBuilder implements QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]) =>
-      selectAllDistinct([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
-        result5,
-        result6,
-        result7,
-        result8,
-        result9,
-      ].whereType());
+  ]) => selectAllDistinct(
+    [
+      result0,
+      result1,
+      result2,
+      result3,
+      result4,
+      result5,
+      result6,
+      result7,
+      result8,
+      result9,
+    ].whereType(),
+  );
 
   @override
   SyncSelect selectAllDistinct(Iterable<SelectResultInterface> results) =>
@@ -177,19 +181,20 @@ final class AsyncQueryBuilder implements QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]) =>
-      selectAll([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
-        result5,
-        result6,
-        result7,
-        result8,
-        result9,
-      ].whereType());
+  ]) => selectAll(
+    [
+      result0,
+      result1,
+      result2,
+      result3,
+      result4,
+      result5,
+      result6,
+      result7,
+      result8,
+      result9,
+    ].whereType(),
+  );
 
   @override
   AsyncSelect selectAll(Iterable<SelectResultInterface> results) =>
@@ -207,19 +212,20 @@ final class AsyncQueryBuilder implements QueryBuilder {
     SelectResultInterface? result7,
     SelectResultInterface? result8,
     SelectResultInterface? result9,
-  ]) =>
-      selectAllDistinct([
-        result0,
-        result1,
-        result2,
-        result3,
-        result4,
-        result5,
-        result6,
-        result7,
-        result8,
-        result9,
-      ].whereType());
+  ]) => selectAllDistinct(
+    [
+      result0,
+      result1,
+      result2,
+      result3,
+      result4,
+      result5,
+      result6,
+      result7,
+      result8,
+      result9,
+    ].whereType(),
+  );
 
   @override
   AsyncSelect selectAllDistinct(Iterable<SelectResultInterface> results) =>
@@ -270,26 +276,26 @@ base mixin BuilderQueryMixin on QueryBase {
   late String jsonRepresentation = jsonEncode(_buildJsonRepresentation());
 
   Object _buildJsonRepresentation() => [
-        'SELECT',
-        {
-          if (_selects != null)
-            'WHAT': _selects.map((select) => select.toJson()).toList(),
-          if (_distinct != null) 'DISTINCT': _distinct,
-          if (_from != null || _joins != null)
-            'FROM': [
-              if (_from != null) _from.toJson(),
-              if (_joins != null) ..._joins.map((join) => join.toJson())
-            ],
-          if (_where != null) 'WHERE': _where.toJson(),
-          if (_having != null) 'HAVING': _having.toJson(),
-          if (_groupBys != null)
-            'GROUP_BY': _groupBys.map((groupBy) => groupBy.toJson()).toList(),
-          if (_orderings != null)
-            'ORDER_BY': _orderings.map((e) => e.toJson()).toList(),
-          if (_limit != null) 'LIMIT': _limit.toJson(),
-          if (_offset != null) 'OFFSET': _offset.toJson()
-        }
-      ];
+    'SELECT',
+    {
+      if (_selects != null)
+        'WHAT': _selects.map((select) => select.toJson()).toList(),
+      if (_distinct != null) 'DISTINCT': _distinct,
+      if (_from != null || _joins != null)
+        'FROM': [
+          if (_from != null) _from.toJson(),
+          if (_joins != null) ..._joins.map((join) => join.toJson()),
+        ],
+      if (_where != null) 'WHERE': _where.toJson(),
+      if (_having != null) 'HAVING': _having.toJson(),
+      if (_groupBys != null)
+        'GROUP_BY': _groupBys.map((groupBy) => groupBy.toJson()).toList(),
+      if (_orderings != null)
+        'ORDER_BY': _orderings.map((e) => e.toJson()).toList(),
+      if (_limit != null) 'LIMIT': _limit.toJson(),
+      if (_offset != null) 'OFFSET': _offset.toJson(),
+    },
+  ];
 
   @override
   T useSync<T>(T Function() f) {

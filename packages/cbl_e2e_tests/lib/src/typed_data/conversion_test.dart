@@ -22,8 +22,10 @@ void main() {
   group('UnexpectedTypeException', () {
     test('message', () {
       expect(
-        const UnexpectedTypeException(value: null, expectedTypes: [String])
-            .message,
+        const UnexpectedTypeException(
+          value: null,
+          expectedTypes: [String],
+        ).message,
         'Expected a value of type String, but got a Null.',
       );
       expect(
@@ -47,7 +49,8 @@ void main() {
           () => const IdentityConverter<String>().toTyped(1),
           throwsA(
             isUnexpectedTypeException
-                .havingExpectedTypes([String]).havingValue(1),
+                .havingExpectedTypes([String])
+                .havingValue(1),
           ),
         );
       });
@@ -72,7 +75,8 @@ void main() {
           () => const DateTimeConverter().toTyped(1),
           throwsA(
             isUnexpectedTypeException
-                .havingExpectedTypes([String]).havingValue(1),
+                .havingExpectedTypes([String])
+                .havingValue(1),
           ),
         );
       });
@@ -90,8 +94,9 @@ void main() {
     group('toTyped', () {
       test('creates and returns typed dictionary', () {
         final dict = MutableDictionary();
-        final typedDict =
-            const TypedDictionaryConverter(ConverterTestDict.new).toTyped(dict);
+        final typedDict = const TypedDictionaryConverter(
+          ConverterTestDict.new,
+        ).toTyped(dict);
         expect(typedDict.internal, same(dict));
       });
 
@@ -101,7 +106,8 @@ void main() {
           () => converter.toTyped(1),
           throwsA(
             isUnexpectedTypeException
-                .havingExpectedTypes([MutableDictionary]).havingValue(1),
+                .havingExpectedTypes([MutableDictionary])
+                .havingValue(1),
           ),
         );
       });
@@ -119,15 +125,20 @@ void main() {
     group('promote', () {
       test('returns value as is if it is the mutable variant', () {
         final typedDict = MutableConverterTestDict(MutableDictionary());
-        const converter =
-            TypedDictionaryConverter(MutableConverterTestDict.new);
+        const converter = TypedDictionaryConverter(
+          MutableConverterTestDict.new,
+        );
         expect(converter.promote(typedDict), same(typedDict));
       });
 
       test('returns mutable copy if value is immutable variant', () {
         final typedDict = ConverterTestDict(MutableDictionary());
         const converter =
-            TypedDictionaryConverter(MutableConverterTestDict.new);
+            TypedDictionaryConverter<
+              MutableDictionary,
+              MutableConverterTestDict,
+              ConverterTestDict
+            >(MutableConverterTestDict.new);
         final promoted = converter.promote(typedDict);
         expect(promoted, isNot(same(typedDict)));
         expect(promoted.internal, same(typedDict.internal));
@@ -181,7 +192,8 @@ void main() {
           () => converter.toTyped(1),
           throwsA(
             isUnexpectedTypeException
-                .havingExpectedTypes([Array, MutableArray]).havingValue(1),
+                .havingExpectedTypes([Array, MutableArray])
+                .havingValue(1),
           ),
         );
       });
@@ -269,7 +281,8 @@ void main() {
           () => converter.fromData(1),
           throwsA(
             isUnexpectedTypeException
-                .havingExpectedTypes([String]).havingValue(1),
+                .havingExpectedTypes([String])
+                .havingValue(1),
           ),
         );
       });
@@ -301,7 +314,8 @@ void main() {
           () => converter.fromData(true),
           throwsA(
             isUnexpectedTypeException
-                .havingExpectedTypes([int]).havingValue(true),
+                .havingExpectedTypes([int])
+                .havingValue(true),
           ),
         );
       });
@@ -326,12 +340,9 @@ final isUnexpectedTypeException = isA<UnexpectedTypeException>();
 extension on TypeMatcher<UnexpectedTypeException> {
   TypeMatcher<UnexpectedTypeException> havingExpectedTypes(
     Object expectedTypes,
-  ) =>
-      having((it) => it.expectedTypes, 'expectedTypes', expectedTypes);
+  ) => having((it) => it.expectedTypes, 'expectedTypes', expectedTypes);
 
-  TypeMatcher<UnexpectedTypeException> havingValue(
-    Object value,
-  ) =>
+  TypeMatcher<UnexpectedTypeException> havingValue(Object value) =>
       having((it) => it.value, 'value', value);
 }
 
@@ -351,8 +362,10 @@ class ConverterTestDict
 
 class MutableConverterTestDict extends ConverterTestDict
     implements
-        TypedMutableDictionaryObject<ConverterTestDict,
-            MutableConverterTestDict> {
+        TypedMutableDictionaryObject<
+          ConverterTestDict,
+          MutableConverterTestDict
+        > {
   MutableConverterTestDict(super.internal);
 
   @override

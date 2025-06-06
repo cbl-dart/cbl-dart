@@ -64,10 +64,7 @@ void main() {
 
       config.maxAttemptWaitTime = const Duration(seconds: 1);
       expect(config.maxAttemptWaitTime, const Duration(seconds: 1));
-      expect(
-        () => config.maxAttemptWaitTime = Duration.zero,
-        throwsRangeError,
-      );
+      expect(() => config.maxAttemptWaitTime = Duration.zero, throwsRangeError);
     });
 
     test('from', () {
@@ -217,8 +214,9 @@ void main() {
             expect(
               () => combinedFilter(MutableDocument(), {}),
               throwsA(
-                isTypedDataException
-                    .havingCode(TypedDataErrorCode.unresolvableType),
+                isTypedDataException.havingCode(
+                  TypedDataErrorCode.unresolvableType,
+                ),
               ),
             );
           });
@@ -264,28 +262,19 @@ void main() {
               expect(
                 () => combinedFilter.resolve(conflict),
                 throwsA(
-                  isTypedDataException
-                      .havingCode(TypedDataErrorCode.unresolvableType),
+                  isTypedDataException.havingCode(
+                    TypedDataErrorCode.unresolvableType,
+                  ),
                 ),
               );
             }
 
-            expectResolverThrows(ConflictImpl(
-              '',
-              MutableDocument(),
-              MutableDocument(),
-            ));
-            expectResolverThrows(ConflictImpl(
-              '',
-              null,
-              MutableDocument(),
-            ));
+            expectResolverThrows(
+              ConflictImpl('', MutableDocument(), MutableDocument()),
+            );
+            expectResolverThrows(ConflictImpl('', null, MutableDocument()));
 
-            expectResolverThrows(ConflictImpl(
-              '',
-              MutableDocument(),
-              null,
-            ));
+            expectResolverThrows(ConflictImpl('', MutableDocument(), null));
           });
 
           test('use untyped filter as fallback', () {
@@ -300,21 +289,15 @@ void main() {
               expect(combinedFilter.resolve(conflict), isNull);
             }
 
-            expectUsesUntypedResolver(ConflictImpl(
-              '',
-              MutableDocument(),
-              MutableDocument(),
-            ));
-            expectUsesUntypedResolver(ConflictImpl(
-              '',
-              null,
-              MutableDocument(),
-            ));
-            expectUsesUntypedResolver(ConflictImpl(
-              '',
-              MutableDocument(),
-              null,
-            ));
+            expectUsesUntypedResolver(
+              ConflictImpl('', MutableDocument(), MutableDocument()),
+            );
+            expectUsesUntypedResolver(
+              ConflictImpl('', null, MutableDocument()),
+            );
+            expectUsesUntypedResolver(
+              ConflictImpl('', MutableDocument(), null),
+            );
           });
         });
       });

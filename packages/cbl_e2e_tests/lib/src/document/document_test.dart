@@ -127,10 +127,8 @@ void main() {
           'blob': blob,
           'array': <Object?>[],
           'dictionary': <String, Object?>{},
-        }))
-            .toJson(),
-        json(
-          '''
+        })).toJson(),
+        json('''
           {
             "null": null,
             "string": "a",
@@ -142,8 +140,7 @@ void main() {
             "array": [],
             "dictionary": {}
           }
-          ''',
-        ),
+          '''),
       );
       expect(MutableDocument().toJson(), '{}');
       expect(
@@ -158,8 +155,7 @@ void main() {
           'array': <Object?>[],
           'dictionary': <String, Object?>{},
         }).toJson(),
-        json(
-          '''
+        json('''
           {
             "null": null,
             "string": "a",
@@ -171,8 +167,7 @@ void main() {
             "array": [],
             "dictionary": {}
           }
-          ''',
-        ),
+          '''),
       );
     });
 
@@ -323,19 +318,19 @@ void main() {
         docA.setValue(child, key: 'docA');
         docB.setValue(child, key: 'docB');
         expect(docA.toPlainMap(), {
-          'docA': {'a': 'b'}
+          'docA': {'a': 'b'},
         });
         expect(docB.toPlainMap(), {
-          'docB': {'a': 'b'}
+          'docB': {'a': 'b'},
         });
 
         // Modify the child collection.
         child.setValue('c', key: 'a');
         expect(docA.toPlainMap(), {
-          'docA': {'a': 'c'}
+          'docA': {'a': 'c'},
         });
         expect(docB.toPlainMap(), {
-          'docB': {'a': 'c'}
+          'docB': {'a': 'c'},
         });
       });
 
@@ -350,14 +345,14 @@ void main() {
         docA.removeValue('docA');
         expect(docA.toPlainMap(), <String, Object?>{});
         expect(docB.toPlainMap(), {
-          'docB': {'a': 'b'}
+          'docB': {'a': 'b'},
         });
 
         // Modify the child collection.
         child.setValue('c', key: 'a');
         expect(docA.toPlainMap(), <String, Object?>{});
         expect(docB.toPlainMap(), {
-          'docB': {'a': 'c'}
+          'docB': {'a': 'c'},
         });
       });
     });

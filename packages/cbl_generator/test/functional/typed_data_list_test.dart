@@ -9,20 +9,25 @@ void main() {
 
   test('get list', () {
     expect(
-      ImmutableBoolListDict.internal(MutableDictionary({
-        'value': [true]
-      })).value,
+      ImmutableBoolListDict.internal(
+        MutableDictionary({
+          'value': [true],
+        }),
+      ).value,
       [true],
     );
     expect(
-      ImmutableOptionalBoolListDict.internal(MutableDictionary({
-        'value': [true]
-      })).value,
+      ImmutableOptionalBoolListDict.internal(
+        MutableDictionary({
+          'value': [true],
+        }),
+      ).value,
       [true],
     );
     expect(
-      ImmutableOptionalBoolListDict.internal(MutableDictionary({'value': null}))
-          .value,
+      ImmutableOptionalBoolListDict.internal(
+        MutableDictionary({'value': null}),
+      ).value,
       null,
     );
     expect(MutableBoolListDict([true]).value, [true]);
@@ -32,75 +37,66 @@ void main() {
 
   test('set list', () {
     final dartList = [false];
-    final immutableList = ImmutableBoolListDict.internal(MutableDictionary({
-      'value': [false]
-    })).value;
+    final immutableList = ImmutableBoolListDict.internal(
+      MutableDictionary({
+        'value': [false],
+      }),
+    ).value;
     final mutableList = MutableBoolListDict([false]).value;
 
-    expect(
-      (MutableBoolListDict([true])..value = dartList).value,
-      [false],
-    );
-    expect(
-      (MutableOptionalBoolListDict([true])..value = dartList).value,
-      [false],
-    );
-    expect(
-      (MutableOptionalBoolListDict(null)..value = dartList).value,
-      [false],
-    );
-    expect(
-      (MutableBoolListDict([true])..value = immutableList).value,
-      [false],
-    );
-    expect(
-      (MutableOptionalBoolListDict([true])..value = immutableList).value,
-      [false],
-    );
-    expect(
-      (MutableOptionalBoolListDict(null)..value = immutableList).value,
-      [false],
-    );
-    expect(
-      (MutableBoolListDict([true])..value = mutableList).value,
-      [false],
-    );
-    expect(
-      (MutableOptionalBoolListDict([true])..value = mutableList).value,
-      [false],
-    );
-    expect(
-      (MutableOptionalBoolListDict(null)..value = mutableList).value,
-      [false],
-    );
+    expect((MutableBoolListDict([true])..value = dartList).value, [false]);
+    expect((MutableOptionalBoolListDict([true])..value = dartList).value, [
+      false,
+    ]);
+    expect((MutableOptionalBoolListDict(null)..value = dartList).value, [
+      false,
+    ]);
+    expect((MutableBoolListDict([true])..value = immutableList).value, [false]);
+    expect((MutableOptionalBoolListDict([true])..value = immutableList).value, [
+      false,
+    ]);
+    expect((MutableOptionalBoolListDict(null)..value = immutableList).value, [
+      false,
+    ]);
+    expect((MutableBoolListDict([true])..value = mutableList).value, [false]);
+    expect((MutableOptionalBoolListDict([true])..value = mutableList).value, [
+      false,
+    ]);
+    expect((MutableOptionalBoolListDict(null)..value = mutableList).value, [
+      false,
+    ]);
   });
 
   test('nested list', () {
     expect(
-      ImmutableBoolListListDict.internal(MutableDictionary({
-        'value': <Object>[],
-      })).value,
+      ImmutableBoolListListDict.internal(
+        MutableDictionary({'value': <Object>[]}),
+      ).value,
       isEmpty,
     );
     expect(
-      ImmutableBoolListListDict.internal(MutableDictionary({
-        'value': [<Object>[]],
-      })).value.first,
+      ImmutableBoolListListDict.internal(
+        MutableDictionary({
+          'value': [<Object>[]],
+        }),
+      ).value.first,
       isEmpty,
     );
     expect(
-      ImmutableBoolListListDict.internal(MutableDictionary({
-        'value': [
-          [true]
-        ],
-      })).value.first,
+      ImmutableBoolListListDict.internal(
+        MutableDictionary({
+          'value': [
+            [true],
+          ],
+        }),
+      ).value.first,
       [true],
     );
     expect(MutableBoolListListDict([]).value, isEmpty);
     expect(MutableBoolListListDict([[]]).value.first, isEmpty);
     expect(
       MutableBoolListListDict([
-        [true]
+        [true],
       ]).value.first,
       [true],
     );
@@ -109,7 +105,7 @@ void main() {
     expect(
       (MutableBoolListListDict([])
             ..value = [
-              [true]
+              [true],
             ])
           .value
           .first,

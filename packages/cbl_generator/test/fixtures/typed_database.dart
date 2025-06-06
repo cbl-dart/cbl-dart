@@ -15,10 +15,7 @@ class $DocWithIdDatabase {}
 class $StringDictDatabase {}
 
 @TypedDocument(
-  typeMatcher: ValueTypeMatcher(
-    path: ['meta', 0, 'id'],
-    value: 'Custom',
-  ),
+  typeMatcher: ValueTypeMatcher(path: ['meta', 0, 'id'], value: 'Custom'),
 )
 abstract class CustomValueTypeMatcherDoc with _$CustomValueTypeMatcherDoc {
   factory CustomValueTypeMatcherDoc(String value) =

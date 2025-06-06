@@ -67,8 +67,10 @@ enum MaintenanceType {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract interface class SaveTypedDocument<D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject> {
+abstract interface class SaveTypedDocument<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+> {
   /// Saves the document to the database, resolving conflicts through
   /// [ConcurrencyControl].
   ///
@@ -120,12 +122,10 @@ abstract interface class SaveTypedDocument<D extends TypedDocumentObject,
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-typedef TypedSaveConflictHandler<D extends TypedDocumentObject,
-        MD extends TypedMutableDocumentObject>
-    = FutureOr<bool> Function(
-  MD documentBeingSaved,
-  D? conflictingDocument,
-);
+typedef TypedSaveConflictHandler<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+> = FutureOr<bool> Function(MD documentBeingSaved, D? conflictingDocument);
 
 /// A Couchbase Lite database.
 ///
@@ -140,8 +140,7 @@ abstract interface class Database implements ClosableResource {
   static Future<AsyncDatabase> openAsync(
     String name, [
     DatabaseConfiguration? config,
-  ]) =>
-      AsyncDatabase.open(name, config);
+  ]) => AsyncDatabase.open(name, config);
 
   /// {@template cbl.Database.openSync}
   /// Opens a Couchbase Lite database with the given [name] and [config], which
@@ -150,10 +149,7 @@ abstract interface class Database implements ClosableResource {
   /// If the database does not yet exist, it will be created.
   /// {@endtemplate}
   // ignore: prefer_constructors_over_static_methods
-  static SyncDatabase openSync(
-    String name, [
-    DatabaseConfiguration? config,
-  ]) =>
+  static SyncDatabase openSync(String name, [DatabaseConfiguration? config]) =>
       SyncDatabase(name, config);
 
   /// {@template cbl.Database.remove}
@@ -193,8 +189,7 @@ abstract interface class Database implements ClosableResource {
     required String from,
     required String name,
     DatabaseConfiguration? config,
-  }) =>
-      AsyncDatabase.copy(from: from, name: name, config: config);
+  }) => AsyncDatabase.copy(from: from, name: name, config: config);
 
   /// {@template cbl.Database.copySync}
   /// Copies a canned database [from] the given path to a new database with the
@@ -207,8 +202,7 @@ abstract interface class Database implements ClosableResource {
     required String from,
     required String name,
     DatabaseConfiguration? config,
-  }) =>
-      SyncDatabase.copy(from: from, name: name, config: config);
+  }) => SyncDatabase.copy(from: from, name: name, config: config);
 
   /// Configuration of the [ConsoleLogger], [FileLogger] and a custom [Logger].
   static final Log log = LogImpl();
@@ -332,10 +326,10 @@ abstract interface class Database implements ClosableResource {
   @Deprecated('Use defaultCollection.saveTypedDocument instead.')
   @experimental
   @useResult
-  SaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
-      MD extends TypedMutableDocumentObject>(
-    TypedMutableDocumentObject<D, MD> document,
-  );
+  SaveTypedDocument<D, MD> saveTypedDocument<
+    D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject
+  >(TypedMutableDocumentObject<D, MD> document);
 
   /// Deletes a [document] from this database, resolving conflicts through
   /// [ConcurrencyControl].
@@ -552,8 +546,11 @@ abstract interface class Database implements ClosableResource {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract interface class SyncSaveTypedDocument<D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+abstract interface class SyncSaveTypedDocument<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+>
+    extends SaveTypedDocument<D, MD> {
   @override
   bool withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -585,12 +582,10 @@ abstract interface class SyncSaveTypedDocument<D extends TypedDocumentObject,
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-typedef TypedSyncSaveConflictHandler<D extends TypedDocumentObject,
-        MD extends TypedMutableDocumentObject>
-    = bool Function(
-  MD documentBeingSaved,
-  D? conflictingDocument,
-);
+typedef TypedSyncSaveConflictHandler<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+> = bool Function(MD documentBeingSaved, D? conflictingDocument);
 
 /// A [Database] with a primarily synchronous API.
 ///
@@ -606,15 +601,14 @@ abstract interface class SyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? config,
     TypedDataAdapter? typedDataAdapter,
-  ]) =>
-      syncOperationTracePoint(
-        () => OpenDatabaseOp(name, config),
-        () => FfiDatabase(
-          name: name,
-          config: config,
-          typedDataAdapter: typedDataAdapter,
-        ),
-      );
+  ]) => syncOperationTracePoint(
+    () => OpenDatabaseOp(name, config),
+    () => FfiDatabase(
+      name: name,
+      config: config,
+      typedDataAdapter: typedDataAdapter,
+    ),
+  );
 
   /// {@macro cbl.Database.removeSync}
   static void remove(String name, {String? directory}) =>
@@ -629,8 +623,7 @@ abstract interface class SyncDatabase implements Database {
     required String from,
     required String name,
     DatabaseConfiguration? config,
-  }) =>
-      FfiDatabase.copy(from: from, name: name, config: config);
+  }) => FfiDatabase.copy(from: from, name: name, config: config);
 
   @Deprecated('Use defaultCollection.count instead.')
   @override
@@ -649,10 +642,7 @@ abstract interface class SyncDatabase implements Database {
   SyncCollection get defaultCollection;
 
   @override
-  SyncCollection? collection(
-    String name, [
-    String scope = Scope.defaultName,
-  ]);
+  SyncCollection? collection(String name, [String scope = Scope.defaultName]);
 
   @override
   List<SyncCollection> collections([String scope = Scope.defaultName]);
@@ -664,10 +654,7 @@ abstract interface class SyncDatabase implements Database {
   ]);
 
   @override
-  void deleteCollection(
-    String name, [
-    String scope = Scope.defaultName,
-  ]);
+  void deleteCollection(String name, [String scope = Scope.defaultName]);
 
   @Deprecated('Use defaultCollection.document instead.')
   @override
@@ -705,10 +692,10 @@ abstract interface class SyncDatabase implements Database {
   @override
   @experimental
   @useResult
-  SyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
-      MD extends TypedMutableDocumentObject>(
-    TypedMutableDocumentObject<D, MD> document,
-  );
+  SyncSaveTypedDocument<D, MD> saveTypedDocument<
+    D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject
+  >(TypedMutableDocumentObject<D, MD> document);
 
   @Deprecated('Use defaultCollection.deleteDocument instead.')
   @override
@@ -800,8 +787,11 @@ abstract interface class SyncDatabase implements Database {
 /// {@category Database}
 /// {@category Typed Data}
 @experimental
-abstract interface class AsyncSaveTypedDocument<D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject> extends SaveTypedDocument<D, MD> {
+abstract interface class AsyncSaveTypedDocument<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+>
+    extends SaveTypedDocument<D, MD> {
   @override
   Future<bool> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
@@ -821,8 +811,7 @@ abstract interface class AsyncDatabase implements Database {
   static Future<AsyncDatabase> open(
     String name, [
     DatabaseConfiguration? config,
-  ]) =>
-      openInternal(name, config);
+  ]) => openInternal(name, config);
 
   /// @nodoc
   @internal
@@ -830,11 +819,10 @@ abstract interface class AsyncDatabase implements Database {
     String name, [
     DatabaseConfiguration? config,
     TypedDataAdapter? typedDataAdapter,
-  ]) =>
-      asyncOperationTracePoint(
-        () => OpenDatabaseOp(name, config),
-        () => WorkerDatabase.open(name, config, typedDataAdapter),
-      );
+  ]) => asyncOperationTracePoint(
+    () => OpenDatabaseOp(name, config),
+    () => WorkerDatabase.open(name, config, typedDataAdapter),
+  );
 
   /// {@macro cbl.Database.remove}
   static Future<void> remove(String name, {String? directory}) =>
@@ -849,8 +837,7 @@ abstract interface class AsyncDatabase implements Database {
     required String from,
     required String name,
     DatabaseConfiguration? config,
-  }) =>
-      WorkerDatabase.copy(from: from, name: name, config: config);
+  }) => WorkerDatabase.copy(from: from, name: name, config: config);
 
   @Deprecated('Use defaultCollection.count instead.')
   @override
@@ -920,10 +907,10 @@ abstract interface class AsyncDatabase implements Database {
   @override
   @experimental
   @useResult
-  AsyncSaveTypedDocument<D, MD> saveTypedDocument<D extends TypedDocumentObject,
-      MD extends TypedMutableDocumentObject>(
-    TypedMutableDocumentObject<D, MD> document,
-  );
+  AsyncSaveTypedDocument<D, MD> saveTypedDocument<
+    D extends TypedDocumentObject,
+    MD extends TypedMutableDocumentObject
+  >(TypedMutableDocumentObject<D, MD> document);
 
   @Deprecated('Use defaultCollection.deleteDocument instead.')
   @override

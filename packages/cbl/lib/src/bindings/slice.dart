@@ -150,7 +150,7 @@ final class SliceResult extends Slice {
 
   /// Creates a [SliceResult] and copies the data from [slice] into it.
   SliceResult.fromSlice(Slice slice)
-      : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
+    : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
 
   SliceResult._fromFLSliceResult(
     cblite.FLSliceResult slice, {
@@ -182,10 +182,9 @@ final class SliceResult extends Slice {
   static SliceResult? fromFLSliceResult(
     cblite.FLSliceResult slice, {
     bool retain = false,
-  }) =>
-      slice.buf == nullptr
-          ? null
-          : SliceResult._fromFLSliceResult(slice, retain: retain);
+  }) => slice.buf == nullptr
+      ? null
+      : SliceResult._fromFLSliceResult(slice, retain: retain);
 
   static final _keepAliveForTypedList = Expando<SliceResult>();
 
@@ -226,8 +225,8 @@ final class SliceResult extends Slice {
 /// result is leaked.
 final class TransferableSliceResult {
   TransferableSliceResult(SliceResult sliceResult)
-      : _bufAddress = sliceResult.buf.address,
-        _size = sliceResult.size {
+    : _bufAddress = sliceResult.buf.address,
+      _size = sliceResult.size {
     // Retain the slice now, in case `sliceResult` is garbage collected
     // before this transferable slice result is materialized.
     _sliceBindings.retainSliceResultByBuf(sliceResult.buf);
@@ -278,8 +277,8 @@ final class SingleSliceResultAllocator implements Allocator {
   SingleSliceResultAllocator({
     required SliceResult sliceResult,
     Allocator delegate = calloc,
-  })  : _delegate = delegate,
-        _sliceResult = sliceResult;
+  }) : _delegate = delegate,
+       _sliceResult = sliceResult;
 
   final Allocator _delegate;
   final SliceResult _sliceResult;

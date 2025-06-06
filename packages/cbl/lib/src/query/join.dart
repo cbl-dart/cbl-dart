@@ -48,17 +48,12 @@ abstract final class Join {
 
 // === Impl ====================================================================
 
-enum JoinType {
-  leftOuter,
-  inner,
-}
+enum JoinType { leftOuter, inner }
 
 final class JoinOnImpl implements JoinOnInterface {
-  JoinOnImpl({
-    JoinType? type,
-    required DataSourceInterface dataSource,
-  })  : _type = type,
-        _dataSource = dataSource as DataSourceImpl;
+  JoinOnImpl({JoinType? type, required DataSourceInterface dataSource})
+    : _type = type,
+      _dataSource = dataSource as DataSourceImpl;
 
   final JoinType? _type;
   final DataSourceImpl _dataSource;
@@ -73,9 +68,9 @@ final class JoinImpl implements JoinInterface {
     JoinType? type,
     required DataSourceInterface dataSource,
     ExpressionInterface? on,
-  })  : _type = type,
-        _dataSource = dataSource as DataSourceImpl,
-        _on = on as ExpressionImpl?;
+  }) : _type = type,
+       _dataSource = dataSource as DataSourceImpl,
+       _on = on as ExpressionImpl?;
 
   final JoinType? _type;
   final DataSourceImpl _dataSource;

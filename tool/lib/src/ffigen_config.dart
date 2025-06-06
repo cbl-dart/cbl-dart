@@ -4,11 +4,7 @@ import 'package:package_config/package_config.dart';
 import 'package:yaml/yaml.dart';
 
 class FfigenConfig {
-  FfigenConfig({
-    required this.name,
-    this.output,
-    this.import,
-  });
+  FfigenConfig({required this.name, this.output, this.import});
 
   static Future<FfigenConfig> fromYaml(YamlMap yaml) async {
     final name = yaml['name'] as String;
@@ -23,11 +19,7 @@ class FfigenConfig {
       import = await FfigenImport.fromYaml(value as YamlMap);
     }
 
-    return FfigenConfig(
-      name: name,
-      output: output,
-      import: import,
-    );
+    return FfigenConfig(name: name, output: output, import: import);
   }
 
   static Future<FfigenConfig> load(String path) async {
@@ -43,10 +35,7 @@ class FfigenConfig {
 }
 
 class FfigenOutput {
-  FfigenOutput({
-    required this.bindings,
-    required this.symbolFile,
-  });
+  FfigenOutput({required this.bindings, required this.symbolFile});
 
   static Future<FfigenOutput> fromYaml(YamlMap yaml) async {
     String? bindings;
@@ -59,10 +48,7 @@ class FfigenOutput {
       symbolFile = await FfigenSymbolFile.fromYaml(value as YamlMap);
     }
 
-    return FfigenOutput(
-      bindings: bindings,
-      symbolFile: symbolFile,
-    );
+    return FfigenOutput(bindings: bindings, symbolFile: symbolFile);
   }
 
   final String? bindings;
@@ -70,10 +56,7 @@ class FfigenOutput {
 }
 
 class FfigenSymbolFile {
-  FfigenSymbolFile({
-    required this.output,
-    required this.importPath,
-  });
+  FfigenSymbolFile({required this.output, required this.importPath});
 
   static Future<FfigenSymbolFile> fromYaml(YamlMap yaml) async {
     String? output;
@@ -83,10 +66,7 @@ class FfigenSymbolFile {
 
     final importPath = yaml['import-path'] as String?;
 
-    return FfigenSymbolFile(
-      output: output,
-      importPath: importPath,
-    );
+    return FfigenSymbolFile(output: output, importPath: importPath);
   }
 
   final String? output;
@@ -105,9 +85,7 @@ class FfigenImport {
       }
     }
 
-    return FfigenImport(
-      symbolFiles: symbolFiles,
-    );
+    return FfigenImport(symbolFiles: symbolFiles);
   }
 
   final List<String>? symbolFiles;

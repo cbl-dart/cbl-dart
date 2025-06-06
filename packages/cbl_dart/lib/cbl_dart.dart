@@ -34,23 +34,19 @@ abstract final class CouchbaseLiteDart {
     String? filesDir,
     String? nativeLibrariesDir,
     bool autoEnableVectorSearch = true,
-  }) =>
-      asyncOperationTracePoint(InitializeOp.new, () async {
-        final context = filesDir == null ? null : await _initContext(filesDir);
+  }) => asyncOperationTracePoint(InitializeOp.new, () async {
+    final context = filesDir == null ? null : await _initContext(filesDir);
 
-        final libraries = await acquireLibraries(
-          edition: edition,
-          mergedNativeLibrariesDir: nativeLibrariesDir,
-        );
+    final libraries = await acquireLibraries(
+      edition: edition,
+      mergedNativeLibrariesDir: nativeLibrariesDir,
+    );
 
-        await initPrimaryIsolate(
-          IsolateContext(
-            initContext: context,
-            libraries: libraries,
-          ),
-          autoEnableVectorSearch: autoEnableVectorSearch,
-        );
-      });
+    await initPrimaryIsolate(
+      IsolateContext(initContext: context, libraries: libraries),
+      autoEnableVectorSearch: autoEnableVectorSearch,
+    );
+  });
 }
 
 Future<InitContext> _initContext(String filesDir) async {

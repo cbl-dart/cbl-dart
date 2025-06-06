@@ -10,10 +10,10 @@ void main() {
 
   test('immutable object', () {
     final internalDict = MutableDictionary({
-      'value': {'value': true}
+      'value': {'value': true},
     });
     final internalDoc = MutableDocument({
-      'value': {'value': true}
+      'value': {'value': true},
     });
     expect(
       ImmutableTypedDataPropertyDict.internal(internalDict).value.value,
@@ -24,9 +24,9 @@ void main() {
       isTrue,
     );
     expect(
-      ImmutableOptionalTypedDataPropertyDict.internal(internalDict)
-          .value
-          ?.value,
+      ImmutableOptionalTypedDataPropertyDict.internal(
+        internalDict,
+      ).value?.value,
       isTrue,
     );
     expect(
@@ -49,10 +49,10 @@ void main() {
 
   test('lazy mutable object', () {
     final internalDict = MutableDictionary({
-      'value': {'value': true}
+      'value': {'value': true},
     });
     final internalDoc = MutableDocument({
-      'value': {'value': true}
+      'value': {'value': true},
     });
     expect(
       MutableTypedDataPropertyDict.internal(internalDict).value.value,
@@ -88,21 +88,16 @@ void main() {
     final child = BoolDict(true);
     expect(MutableTypedDataPropertyDict(child).value, child);
     expect(MutableTypedDataPropertyDoc(child).value, child);
-    expect(
-      MutableOptionalTypedDataPropertyDict(child).value,
-      child,
-    );
-    expect(
-      MutableOptionalTypedDataPropertyDoc(child).value,
-      child,
-    );
+    expect(MutableOptionalTypedDataPropertyDict(child).value, child);
+    expect(MutableOptionalTypedDataPropertyDoc(child).value, child);
     expect(MutableOptionalTypedDataPropertyDict(null).value, isNull);
     expect(MutableOptionalTypedDataPropertyDoc(null).value, isNull);
   });
 
   test('set immutable value', () {
-    final immutableValue =
-        ImmutableBoolDict.internal(MutableDictionary({'value': false}));
+    final immutableValue = ImmutableBoolDict.internal(
+      MutableDictionary({'value': false}),
+    );
 
     final dict = MutableTypedDataPropertyDict(BoolDict(true))
       ..value = immutableValue;

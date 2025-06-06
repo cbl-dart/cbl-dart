@@ -2,10 +2,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:cbl/cbl.dart';
 import 'package:collection/collection.dart';
 
-enum TypedDataObjectKind {
-  document,
-  dictionary,
-}
+enum TypedDataObjectKind { document, dictionary }
 
 final class TypedDataObjectModel {
   TypedDataObjectModel({
@@ -22,16 +19,19 @@ final class TypedDataObjectModel {
   final List<TypedDataObjectField> fields;
   final TypeMatcher? typeMatcher;
 
-  late final metadataFields =
-      fields.whereType<TypedDataMetadataField>().toList();
+  late final metadataFields = fields
+      .whereType<TypedDataMetadataField>()
+      .toList();
 
   late final documentIdField = _documentMetadataField(DocumentMetadataKind.id);
 
-  late final documentSequenceField =
-      _documentMetadataField(DocumentMetadataKind.sequence);
+  late final documentSequenceField = _documentMetadataField(
+    DocumentMetadataKind.sequence,
+  );
 
-  late final documentRevisionIdField =
-      _documentMetadataField(DocumentMetadataKind.revisionId);
+  late final documentRevisionIdField = _documentMetadataField(
+    DocumentMetadataKind.revisionId,
+  );
 
   late final properties = fields.whereType<TypedDataObjectProperty>().toList();
 
@@ -63,11 +63,7 @@ abstract final class TypedDataObjectField {
   bool get isNullable => type.isNullable;
 }
 
-enum DocumentMetadataKind {
-  id,
-  sequence,
-  revisionId,
-}
+enum DocumentMetadataKind { id, sequence, revisionId }
 
 final class TypedDataMetadataField extends TypedDataObjectField {
   TypedDataMetadataField({
@@ -150,13 +146,11 @@ abstract final class TypedDataType {
 
 final class BuiltinScalarType extends TypedDataType {
   BuiltinScalarType({required super.dartType, super.isNullable = false})
-      : super(mutableDartType: dartType, isCached: false);
+    : super(mutableDartType: dartType, isCached: false);
 
   // ignore: avoid_positional_boolean_parameters
-  BuiltinScalarType withNullability(bool isNullable) => BuiltinScalarType(
-        dartType: dartType,
-        isNullable: isNullable,
-      );
+  BuiltinScalarType withNullability(bool isNullable) =>
+      BuiltinScalarType(dartType: dartType, isNullable: isNullable);
 }
 
 final class CustomScalarType extends TypedDataType {
@@ -178,19 +172,20 @@ final class ScalarConverterInfo {
 
 final class TypedDataObjectType extends TypedDataType {
   TypedDataObjectType({required super.dartType, required super.isNullable})
-      : super(mutableDartType: 'Mutable$dartType', isCached: true);
+    : super(mutableDartType: 'Mutable$dartType', isCached: true);
 
   late final classNames = TypedDataObjectClassNames(dartType);
 }
 
 final class TypedDataListType extends TypedDataType {
   TypedDataListType({required super.isNullable, required this.elementType})
-      : super(
-          dartType: 'List<${elementType.dartType}>',
-          mutableDartType: 'TypedDataList<${elementType.mutableDartType}, '
-              '${elementType.dartType}>',
-          isCached: true,
-        );
+    : super(
+        dartType: 'List<${elementType.dartType}>',
+        mutableDartType:
+            'TypedDataList<${elementType.mutableDartType}, '
+            '${elementType.dartType}>',
+        isCached: true,
+      );
 
   final TypedDataType elementType;
 }

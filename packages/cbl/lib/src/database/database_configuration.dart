@@ -90,17 +90,20 @@ final class EncryptionKeyImpl implements EncryptionKey {
       );
     }
 
-    return EncryptionKeyImpl(CBLEncryptionKey(
-      algorithm: CBLEncryptionAlgorithm.aes256,
-      bytes: Data.fromTypedList(bytes),
-    ));
+    return EncryptionKeyImpl(
+      CBLEncryptionKey(
+        algorithm: CBLEncryptionAlgorithm.aes256,
+        bytes: Data.fromTypedList(bytes),
+      ),
+    );
   }
 
   // ignore: prefer_constructors_over_static_methods
   static EncryptionKeyImpl passwordSync(String password) {
     useEnterpriseFeature(EnterpriseFeature.databaseEncryption);
-    final key =
-        CBLBindings.instance.database.encryptionKeyFromPassword(password);
+    final key = CBLBindings.instance.database.encryptionKeyFromPassword(
+      password,
+    );
     return EncryptionKeyImpl(key);
   }
 
@@ -147,7 +150,7 @@ final class DatabaseConfiguration {
   /// Does not copy [encryptionKey], to reduce locations and length of storage
   /// of security sensitive key material.
   DatabaseConfiguration.from(DatabaseConfiguration config)
-      : this(directory: config.directory);
+    : this(directory: config.directory);
 
   /// Path to the directory to store the [Database] in.
   String directory;
@@ -185,14 +188,14 @@ final class DatabaseConfiguration {
 
   @override
   String toString() => [
-        'DatabaseConfiguration(',
-        [
-          'directory: $directory',
-          if (encryptionKey != null) 'ENCRYPTION-KEY',
-          if (fullSync) 'FULL-SYNC',
-        ].join(', '),
-        ')',
-      ].join();
+    'DatabaseConfiguration(',
+    [
+      'directory: $directory',
+      if (encryptionKey != null) 'ENCRYPTION-KEY',
+      if (fullSync) 'FULL-SYNC',
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 String _defaultDirectory() {

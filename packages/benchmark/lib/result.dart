@@ -32,10 +32,10 @@ class Measure {
   });
 
   Measure.fromJson(Map<String, Object?> json)
-      : name = json['name']! as String,
-        value = (json['value']! as num).toDouble(),
-        upperValue = (json['upper_value'] as num?)?.toDouble(),
-        lowerValue = (json['lower_value'] as num?)?.toDouble();
+    : name = json['name']! as String,
+      value = (json['value']! as num).toDouble(),
+      upperValue = (json['upper_value'] as num?)?.toDouble(),
+      lowerValue = (json['lower_value'] as num?)?.toDouble();
 
   factory Measure.combined(
     List<Measure> measures, {
@@ -82,8 +82,9 @@ class Measure {
     List<Duration> latencies, {
     required StatisticFunction statistic,
   }) {
-    final latenciesInNanoseconds =
-        latencies.map((duration) => duration.inMicroseconds * 1000.0).toList();
+    final latenciesInNanoseconds = latencies
+        .map((duration) => duration.inMicroseconds * 1000.0)
+        .toList();
     return Measure(
       name: 'latency',
       value: statistic(latenciesInNanoseconds),
@@ -96,10 +97,7 @@ class Measure {
     required int operations,
     required Duration totalDuration,
   }) =>
-      Measure(
-        name: 'throughput',
-        value: throughput(operations, totalDuration),
-      );
+      Measure(name: 'throughput', value: throughput(operations, totalDuration));
 
   final String name;
   final double value;
@@ -107,53 +105,54 @@ class Measure {
   final double? lowerValue;
 
   Map<String, Object?> toJson() => {
-        'name': name,
-        'value': value,
-        if (upperValue != null) 'upper_value': upperValue,
-        if (lowerValue != null) 'lower_value': lowerValue,
-      };
+    'name': name,
+    'value': value,
+    if (upperValue != null) 'upper_value': upperValue,
+    if (lowerValue != null) 'lower_value': lowerValue,
+  };
 }
 
 class BenchmarkResult {
   BenchmarkResult({required this.measures});
 
   BenchmarkResult.fromJson(Map<String, Object?> json)
-      : measures = (json.entries
-            .map((entry) =>
-                Measure.fromJson(entry.value! as Map<String, Object?>))
-            .toList());
+    : measures = (json.entries
+          .map(
+            (entry) => Measure.fromJson(entry.value! as Map<String, Object?>),
+          )
+          .toList());
 
   factory BenchmarkResult.combine(
     List<BenchmarkResult> results, {
     required StatisticFunction statistic,
-  }) =>
-      BenchmarkResult(
-        measures: results
-            .expand((result) => result.measures)
-            .groupListsBy((measure) => measure.name)
-            .values
-            .map((measures) => Measure.combined(measures, statistic: statistic))
-            .toList(),
-      );
+  }) => BenchmarkResult(
+    measures: results
+        .expand((result) => result.measures)
+        .groupListsBy((measure) => measure.name)
+        .values
+        .map((measures) => Measure.combined(measures, statistic: statistic))
+        .toList(),
+  );
 
   factory BenchmarkResult.workload({
     required List<Duration> latencies,
     required StatisticFunction latencyStatistic,
     required Duration totalDuration,
-  }) =>
-      BenchmarkResult(measures: [
-        Measure.combinedLatency(latencies, statistic: latencyStatistic),
-        Measure.throughput(
-          operations: latencies.length,
-          totalDuration: totalDuration,
-        )
-      ]);
+  }) => BenchmarkResult(
+    measures: [
+      Measure.combinedLatency(latencies, statistic: latencyStatistic),
+      Measure.throughput(
+        operations: latencies.length,
+        totalDuration: totalDuration,
+      ),
+    ],
+  );
 
   final List<Measure> measures;
 
   Map<String, Object?> toJson() => {
-        for (final measure in measures) measure.name: measure.toJson(),
-      };
+    for (final measure in measures) measure.name: measure.toJson(),
+  };
 }
 
 class BenchmarkResults {
@@ -162,34 +161,35 @@ class BenchmarkResults {
   factory BenchmarkResults.combine(
     List<BenchmarkResults> results, {
     required StatisticFunction statistic,
-  }) =>
-      BenchmarkResults(
-        results
-            .expand((result) => result.results.entries)
-            .groupListsBy((entry) => entry.key)
-            .map((key, entry) => MapEntry(
-                  key,
-                  BenchmarkResult.combine(
-                    entry.map((entry) => entry.value).toList(),
-                    statistic: statistic,
-                  ),
-                )),
-      );
+  }) => BenchmarkResults(
+    results
+        .expand((result) => result.results.entries)
+        .groupListsBy((entry) => entry.key)
+        .map(
+          (key, entry) => MapEntry(
+            key,
+            BenchmarkResult.combine(
+              entry.map((entry) => entry.value).toList(),
+              statistic: statistic,
+            ),
+          ),
+        ),
+  );
 
   BenchmarkResults.fromJson(Map<String, Object?> json)
-      : results = json.map((key, value) => MapEntry(
-              key,
-              BenchmarkResult.fromJson(value! as Map<String, Object?>),
-            ));
+    : results = json.map(
+        (key, value) => MapEntry(
+          key,
+          BenchmarkResult.fromJson(value! as Map<String, Object?>),
+        ),
+      );
 
   final Map<String, BenchmarkResult> results;
 
-  BenchmarkResults merge(BenchmarkResults other) => BenchmarkResults({
-        ...results,
-        ...other.results,
-      });
+  BenchmarkResults merge(BenchmarkResults other) =>
+      BenchmarkResults({...results, ...other.results});
 
   Map<String, Object?> toJson() => {
-        for (final entry in results.entries) entry.key: entry.value.toJson(),
-      };
+    for (final entry in results.entries) entry.key: entry.value.toJson(),
+  };
 }

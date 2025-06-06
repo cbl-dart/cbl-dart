@@ -30,49 +30,40 @@ Future<void> runApp() async {
 }
 
 Future<void> initApp() => runAppTransaction('initApp', () async {
-      await CouchbaseLiteDart.init(edition: Edition.community);
-      await Database.remove('example');
-      db = await Database.openAsync('example');
-      users = await db.createCollection('users');
-    });
+  await CouchbaseLiteDart.init(edition: Edition.community);
+  await Database.remove('example');
+  db = await Database.openAsync('example');
+  users = await db.createCollection('users');
+});
 
 Future<void> shutDownApp() => runAppTransaction('shutDownApp', () async {
-      await db.close();
-    });
+  await db.close();
+});
 
 Future<void> doStuff() => runAppTransaction('doStuff', () async {
-      await fillDatabase();
-      await queryDatabase();
-      // throw Exception('Triggering exception event...');
-    });
+  await fillDatabase();
+  await queryDatabase();
+  // throw Exception('Triggering exception event...');
+});
 
 Future<void> fillDatabase() => runAppOperation('fillDatabase', () async {
-      await users.saveDocument(MutableDocument({
-        'name': 'Alice',
-        'age': 25,
-      }));
-      await users.saveDocument(MutableDocument({
-        'name': 'Bob',
-        'age': 57,
-      }));
-      await users.saveDocument(MutableDocument({
-        'name': 'Sohla',
-        'age': 36,
-      }));
-    });
+  await users.saveDocument(MutableDocument({'name': 'Alice', 'age': 25}));
+  await users.saveDocument(MutableDocument({'name': 'Bob', 'age': 57}));
+  await users.saveDocument(MutableDocument({'name': 'Sohla', 'age': 36}));
+});
 
 Future<void> queryDatabase() => runAppOperation('queryDatabase', () async {
-      final query = await db.createQuery(
-        'SELECT * FROM users WHERE age >= 28 OR name LIKE "A%"',
-      );
-      final resultSet = await query.execute();
-      final results = await resultSet
-          .asStream()
-          .map((result) => result.toPlainMap())
-          .toList();
+  final query = await db.createQuery(
+    'SELECT * FROM users WHERE age >= 28 OR name LIKE "A%"',
+  );
+  final resultSet = await query.execute();
+  final results = await resultSet
+      .asStream()
+      .map((result) => result.toPlainMap())
+      .toList();
 
-      prettyPrintJson(results);
-    });
+  prettyPrintJson(results);
+});
 
 Future<T> runAppTransaction<T>(String name, Future<T> Function() fn) =>
     _runAppSpan(Sentry.startTransaction(name, 'task'), fn);

@@ -78,8 +78,11 @@ Future<String> _resolveStandaloneDartE2eTestDir() async {
   ))!;
   assert(cblDartPackageEntryLibrary.path.contains('packages/cbl_dart'));
 
-  final cblDartDir =
-      p.join(cblDartPackageEntryLibrary.toFilePath(), '..', '..');
+  final cblDartDir = p.join(
+    cblDartPackageEntryLibrary.toFilePath(),
+    '..',
+    '..',
+  );
 
   return p.normalize(p.join(cblDartDir, '..', 'cbl_e2e_tests_standalone_dart'));
 }
@@ -110,8 +113,9 @@ Future<LibrariesConfiguration> acquireLibraries({
 
   if (_librariesOverride != null) {
     assert(mergedNativeLibrariesDir == null);
-    assert((edition == Edition.enterprise) ==
-        _librariesOverride!.enterpriseEdition);
+    assert(
+      (edition == Edition.enterprise) == _librariesOverride!.enterpriseEdition,
+    );
     return _librariesOverride!;
   }
 
@@ -131,8 +135,9 @@ Future<LibrariesConfiguration> acquireLibraries({
 
   if (edition == Edition.enterprise) {
     packageConfigs.addAll(
-      VectorSearchPackageConfig.all(release: '1.0.0')
-          .where((config) => config.os == OS.current),
+      VectorSearchPackageConfig.all(
+        release: '1.0.0',
+      ).where((config) => config.os == OS.current),
     );
   }
 

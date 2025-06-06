@@ -38,8 +38,6 @@ final class CollectionChange {
 }
 
 extension InternalCollectionChange on CollectionChange {
-  DatabaseChange toDatabaseChange() => DatabaseChange(
-        (collection as CollectionBase).database,
-        documentIds,
-      );
+  DatabaseChange toDatabaseChange() =>
+      DatabaseChange((collection as CollectionBase).database, documentIds);
 }

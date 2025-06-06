@@ -14,17 +14,17 @@ final class SentryTracingDelegate extends TracingDelegate {
     this.operationBreadcrumbs = true,
     this.onInitialize,
     Hub? hub,
-  })  : _hub = hub ?? HubAdapter(),
-        _isWorkerDelegate = false;
+  }) : _hub = hub ?? HubAdapter(),
+       _isWorkerDelegate = false;
 
   SentryTracingDelegate._workerDelegate(SentryTracingDelegate userDelegate)
-      : sentryDsn = userDelegate.sentryDsn,
-        tracingEnabled = userDelegate.tracingEnabled,
-        traceInternalOperations = userDelegate.traceInternalOperations,
-        operationBreadcrumbs = false,
-        onInitialize = null,
-        _hub = userDelegate._hub,
-        _isWorkerDelegate = true;
+    : sentryDsn = userDelegate.sentryDsn,
+      tracingEnabled = userDelegate.tracingEnabled,
+      traceInternalOperations = userDelegate.traceInternalOperations,
+      operationBreadcrumbs = false,
+      onInitialize = null,
+      _hub = userDelegate._hub,
+      _isWorkerDelegate = true;
 
   final String? sentryDsn;
 
@@ -74,8 +74,8 @@ final class SentryTracingDelegate extends TracingDelegate {
           // decided to sample it.
           ..tracesSampler = (trace) =>
               trace.transactionContext.parentSamplingDecision?.sampled ?? false
-                  ? 1
-                  : 0;
+              ? 1
+              : 0;
       });
     } else {
       onInitialize?.call();
@@ -116,10 +116,7 @@ final class SentryTracingDelegate extends TracingDelegate {
   // === Trace points ==========================================================
 
   @override
-  T traceSyncOperation<T>(
-    TracedOperation operation,
-    T Function() execute,
-  ) {
+  T traceSyncOperation<T>(TracedOperation operation, T Function() execute) {
     _addOperationBreadcrumb(operation);
 
     final span = _startOperationSpan(operation);

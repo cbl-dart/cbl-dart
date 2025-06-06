@@ -6,9 +6,6 @@ import 'user.dart';
 
 @TypedDatabase(
   // List all the typed data classes that will be used in the database.
-  types: {
-    User,
-    PersonalName,
-  },
+  types: {User, PersonalName},
 )
 abstract class $AppDatabase {}

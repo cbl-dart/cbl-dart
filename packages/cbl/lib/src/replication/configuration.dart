@@ -59,10 +59,8 @@ enum DocumentFlag {
 /// {@endtemplate}
 ///
 /// {@category Replication}
-typedef ReplicationFilter = FutureOr<bool> Function(
-  Document document,
-  Set<DocumentFlag> flags,
-);
+typedef ReplicationFilter =
+    FutureOr<bool> Function(Document document, Set<DocumentFlag> flags);
 
 /// A function that decides whether a particular typed document should be
 /// pushed/pulled.
@@ -72,10 +70,11 @@ typedef ReplicationFilter = FutureOr<bool> Function(
 /// {@category Replication}
 /// {@category Typed Data}
 @experimental
-typedef TypedReplicationFilter = FutureOr<bool> Function(
-  TypedDocumentObject document,
-  Set<DocumentFlag> flags,
-);
+typedef TypedReplicationFilter =
+    FutureOr<bool> Function(
+      TypedDocumentObject document,
+      Set<DocumentFlag> flags,
+    );
 
 /// The replication configuration for a [Collection].
 final class CollectionConfiguration {
@@ -91,11 +90,11 @@ final class CollectionConfiguration {
   /// Creates a replication configuration for a [Collection] from another
   /// [config] by coping it.
   CollectionConfiguration.from(CollectionConfiguration config)
-      : channels = config.channels,
-        documentIds = config.documentIds,
-        pushFilter = config.pushFilter,
-        pullFilter = config.pullFilter,
-        conflictResolver = config.conflictResolver;
+    : channels = config.channels,
+      documentIds = config.documentIds,
+      pushFilter = config.pushFilter,
+      pullFilter = config.pullFilter,
+      conflictResolver = config.conflictResolver;
 
   /// A set of Sync Gateway channel names to pull from.
   ///
@@ -131,16 +130,16 @@ final class CollectionConfiguration {
 
   @override
   String toString() => [
-        'CollectionConfiguration(',
-        [
-          if (channels != null) 'channels: $channels',
-          if (documentIds != null) 'documentIds: $documentIds',
-          if (pushFilter != null) 'PUSH-FILTER',
-          if (pullFilter != null) 'PULL-FILTER',
-          if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
-        ].join(', '),
-        ')'
-      ].join();
+    'CollectionConfiguration(',
+    [
+      if (channels != null) 'channels: $channels',
+      if (documentIds != null) 'documentIds: $documentIds',
+      if (pushFilter != null) 'PUSH-FILTER',
+      if (pullFilter != null) 'PULL-FILTER',
+      if (conflictResolver != null) 'CUSTOM-CONFLICT-RESOLVER',
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 /// Configuration for a [Replicator].
@@ -195,29 +194,29 @@ final class ReplicatorConfiguration {
   /// Creates a configuration for a [Replicator] from another [config] by coping
   /// it.
   ReplicatorConfiguration.from(ReplicatorConfiguration config)
-      : _collections = {...config._collections},
-        database = config.database,
-        target = config.target,
-        replicatorType = config.replicatorType,
-        continuous = config.continuous,
-        authenticator = config.authenticator,
-        _acceptOnlySelfSignedServerCertificate =
-            config.acceptOnlySelfSignedServerCertificate,
-        pinnedServerCertificate = config.pinnedServerCertificate,
-        trustedRootCertificates = config.trustedRootCertificates,
-        headers = config.headers,
-        channels = config.channels,
-        documentIds = config.documentIds,
-        pushFilter = config.pushFilter,
-        typedPushFilter = config.typedPushFilter,
-        pullFilter = config.pullFilter,
-        typedPullFilter = config.typedPullFilter,
-        conflictResolver = config.conflictResolver,
-        typedConflictResolver = config.typedConflictResolver,
-        enableAutoPurge = config.enableAutoPurge,
-        _heartbeat = config.heartbeat,
-        _maxAttempts = config.maxAttempts,
-        _maxAttemptWaitTime = config.maxAttemptWaitTime;
+    : _collections = {...config._collections},
+      database = config.database,
+      target = config.target,
+      replicatorType = config.replicatorType,
+      continuous = config.continuous,
+      authenticator = config.authenticator,
+      _acceptOnlySelfSignedServerCertificate =
+          config.acceptOnlySelfSignedServerCertificate,
+      pinnedServerCertificate = config.pinnedServerCertificate,
+      trustedRootCertificates = config.trustedRootCertificates,
+      headers = config.headers,
+      channels = config.channels,
+      documentIds = config.documentIds,
+      pushFilter = config.pushFilter,
+      typedPushFilter = config.typedPushFilter,
+      pullFilter = config.pullFilter,
+      typedPullFilter = config.typedPullFilter,
+      conflictResolver = config.conflictResolver,
+      typedConflictResolver = config.typedConflictResolver,
+      enableAutoPurge = config.enableAutoPurge,
+      _heartbeat = config.heartbeat,
+      _maxAttempts = config.maxAttempts,
+      _maxAttemptWaitTime = config.maxAttemptWaitTime;
 
   final Map<Collection, CollectionConfiguration> _collections;
 
@@ -425,10 +424,7 @@ final class ReplicatorConfiguration {
   ///
   /// If the collection has already been configured for replication, it's
   /// configuration will be overwritten.
-  void addCollection(
-    Collection collection, [
-    CollectionConfiguration? config,
-  ]) {
+  void addCollection(Collection collection, [CollectionConfiguration? config]) {
     if (database != null) {
       throw StateError(
         'Cannot add a collection to a replicator configuration that uses the '
@@ -476,8 +472,10 @@ final class ReplicatorConfiguration {
   @override
   String toString() {
     final headers = this.headers?.let(_redactHeaders);
-    final collections = _collections.map((collection, config) =>
-        MapEntry((collection as CollectionBase).fullName, config));
+    final collections = _collections.map(
+      (collection, config) =>
+          MapEntry((collection as CollectionBase).fullName, config),
+    );
 
     return [
       'ReplicatorConfiguration(',
@@ -507,7 +505,7 @@ final class ReplicatorConfiguration {
         if (maxAttemptWaitTime != null)
           'maxAttemptWaitTime: ${_maxAttemptWaitTime!.inSeconds}s',
       ].join(', '),
-      ')'
+      ')',
     ].join();
   }
 }
@@ -519,28 +517,28 @@ Map<String, String> _redactHeaders(Map<String, String> headers) {
     for (final entry in headers.entries)
       entry.key: redactedHeaders.contains(entry.key.toLowerCase())
           ? 'REDACTED'
-          : entry.value
+          : entry.value,
   };
 }
 
 extension InternalReplicatorConfiguration on ReplicatorConfiguration {
   ReplicationFilter? get combinedPushFilter => combineReplicationFilters(
-        pushFilter,
-        typedPushFilter,
-        (database as DatabaseBase?)?.typedDataAdapter,
-      );
+    pushFilter,
+    typedPushFilter,
+    (database as DatabaseBase?)?.typedDataAdapter,
+  );
 
   ReplicationFilter? get combinedPullFilter => combineReplicationFilters(
-        pullFilter,
-        typedPullFilter,
-        (database as DatabaseBase?)?.typedDataAdapter,
-      );
+    pullFilter,
+    typedPullFilter,
+    (database as DatabaseBase?)?.typedDataAdapter,
+  );
 
   ConflictResolver? get combinedConflictResolver => combineConflictResolvers(
-        conflictResolver,
-        typedConflictResolver,
-        (database as DatabaseBase?)?.typedDataAdapter,
-      );
+    conflictResolver,
+    typedConflictResolver,
+    (database as DatabaseBase?)?.typedDataAdapter,
+  );
 
   CollectionConfiguration get legacyCollectionConfiguration =>
       CollectionConfiguration(
@@ -574,8 +572,9 @@ ReplicationFilter? combineReplicationFilters(
     return filter;
   }
 
-  final factory = adapter!
-      .dynamicDocumentFactoryForType(allowUnmatchedDocument: filter != null);
+  final factory = adapter!.dynamicDocumentFactoryForType(
+    allowUnmatchedDocument: filter != null,
+  );
 
   return (document, flags) {
     final typedDocument = factory(document);
@@ -611,11 +610,13 @@ ConflictResolver? combineConflictResolvers(
     if (_equalNullability(conflict.localDocument, localTypedDocument) &&
         _equalNullability(conflict.remoteDocument, remoteTypedDocument)) {
       return typedConflictResolver
-          .resolve(TypedConflictImpl(
-            conflict.documentId,
-            localTypedDocument,
-            remoteTypedDocument,
-          ))
+          .resolve(
+            TypedConflictImpl(
+              conflict.documentId,
+              localTypedDocument,
+              remoteTypedDocument,
+            ),
+          )
           .then((result) => result?.internal as Document?);
     }
 

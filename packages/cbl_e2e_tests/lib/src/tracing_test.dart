@@ -48,10 +48,10 @@ void main() {
     test('trace sync operation', () {
       openSyncTestDatabase();
 
-      expect(
-        delegate.syncOperations,
-        [isA<OpenDatabaseOp>(), isA<NativeCallOp>()],
-      );
+      expect(delegate.syncOperations, [
+        isA<OpenDatabaseOp>(),
+        isA<NativeCallOp>(),
+      ]);
       expect(delegate.asyncOperations, isEmpty);
     });
 
@@ -85,8 +85,10 @@ void main() {
     test('worker delegate is closed', () async {
       delegate.workerDelegate.closeTraceData = 'close';
 
-      final db =
-          await openAsyncTestDatabase(usePublicApi: true, tearDown: false);
+      final db = await openAsyncTestDatabase(
+        usePublicApi: true,
+        tearDown: false,
+      );
       await db.close();
 
       expect(delegate.traceData, ['close']);

@@ -6,7 +6,8 @@ import 'package:cbl/src/service/isolate_worker.dart';
 
 import '../test_binding.dart';
 
-bool _isEnabled = (Platform.environment['ENABLE_TIME_BOMB'] != null &&
+bool _isEnabled =
+    (Platform.environment['ENABLE_TIME_BOMB'] != null &&
         Platform.environment['ENABLE_TIME_BOMB'] != 'false') ||
     // ignore: do_not_use_environment
     const bool.fromEnvironment('enableTimeBomb');
@@ -61,9 +62,9 @@ Future<void> stopTimeBomb() async {
 // === Time bomb worker ========================================================
 
 IsolateWorker _timeBombWorker(Duration timeout) => IsolateWorker(
-      delegate: _TimeBombWorkerDelegate(timeout),
-      debugName: 'TimeBomb($timeout)',
-    );
+  delegate: _TimeBombWorkerDelegate(timeout),
+  debugName: 'TimeBomb($timeout)',
+);
 
 final class _TimeBombWorkerDelegate extends IsolateWorkerDelegate {
   _TimeBombWorkerDelegate(this.timeout);
@@ -88,5 +89,6 @@ final _stdLib = Platform.isWindows
     ? DynamicLibrary.open('ucrtbase.dll')
     : DynamicLibrary.process();
 
-final _abort =
-    _stdLib.lookupFunction<Void Function(), void Function()>('abort');
+final _abort = _stdLib.lookupFunction<Void Function(), void Function()>(
+  'abort',
+);

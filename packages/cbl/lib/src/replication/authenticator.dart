@@ -21,7 +21,8 @@ final class BasicAuthenticator extends Authenticator {
   final String password;
 
   @override
-  String toString() => 'BasicAuthenticator('
+  String toString() =>
+      'BasicAuthenticator('
       'username: $username, '
       // ignore: missing_whitespace_between_adjacent_strings
       'password: ${redact(password)}'
@@ -35,10 +36,8 @@ final class BasicAuthenticator extends Authenticator {
 final class SessionAuthenticator extends Authenticator {
   /// Creates an authenticator using a Couchbase Sync Gateway login session
   /// identifier, and optionally a cookie name (pass `null` for the default.)
-  SessionAuthenticator({
-    required this.sessionId,
-    String? cookieName,
-  }) : cookieName = cookieName ?? _defaultCookieName;
+  SessionAuthenticator({required this.sessionId, String? cookieName})
+    : cookieName = cookieName ?? _defaultCookieName;
 
   static const _defaultCookieName = 'SyncGatewaySession';
 
@@ -49,7 +48,8 @@ final class SessionAuthenticator extends Authenticator {
   final String cookieName;
 
   @override
-  String toString() => 'SessionAuthenticator('
+  String toString() =>
+      'SessionAuthenticator('
       'sessionId: ${redact(sessionId)}, '
       // ignore: missing_whitespace_between_adjacent_strings
       'cookieName: $cookieName'

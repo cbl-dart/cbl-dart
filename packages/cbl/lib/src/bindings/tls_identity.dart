@@ -17,10 +17,10 @@ enum CBLKeyUsages {
   const CBLKeyUsages(this.value);
 
   factory CBLKeyUsages.fromValue(int value) => switch (value) {
-        kCBLKeyUsagesClientAuth => clientAuth,
-        kCBLKeyUsagesServerAuth => serverAuth,
-        _ => throw ArgumentError('Unknown key usage: $value'),
-      };
+    kCBLKeyUsagesClientAuth => clientAuth,
+    kCBLKeyUsagesServerAuth => serverAuth,
+    _ => throw ArgumentError('Unknown key usage: $value'),
+  };
 
   final int value;
 }
@@ -37,15 +37,15 @@ enum CBLSignatureDigestAlgorithm {
   const CBLSignatureDigestAlgorithm(this.value);
 
   factory CBLSignatureDigestAlgorithm.fromValue(int value) => switch (value) {
-        kCBLSignatureDigestNone => none,
-        kCBLSignatureDigestSHA1 => sha1,
-        kCBLSignatureDigestSHA224 => sha224,
-        kCBLSignatureDigestSHA256 => sha256,
-        kCBLSignatureDigestSHA384 => sha384,
-        kCBLSignatureDigestSHA512 => sha512,
-        kCBLSignatureDigestRIPEMD160 => ripemd160,
-        _ => throw ArgumentError('Unknown signature digest algorithm: $value'),
-      };
+    kCBLSignatureDigestNone => none,
+    kCBLSignatureDigestSHA1 => sha1,
+    kCBLSignatureDigestSHA224 => sha224,
+    kCBLSignatureDigestSHA256 => sha256,
+    kCBLSignatureDigestSHA384 => sha384,
+    kCBLSignatureDigestSHA512 => sha512,
+    kCBLSignatureDigestRIPEMD160 => ripemd160,
+    _ => throw ArgumentError('Unknown signature digest algorithm: $value'),
+  };
 
   final int value;
 }
@@ -100,32 +100,29 @@ final class TlsIdentityBindings extends Bindings {
   String? certSubjectNameComponent(Pointer<CBLCert> pointer, String key) =>
       runWithSingleFLString(
         key,
-        (flKey) => cbl.CBLCert_SubjectNameComponent(pointer, flKey)
-            .toDartStringAndRelease(),
+        (flKey) => cbl.CBLCert_SubjectNameComponent(
+          pointer,
+          flKey,
+        ).toDartStringAndRelease(),
       );
 
   ({DateTime created, DateTime expires}) certValidTimespan(
     Pointer<CBLCert> pointer,
-  ) =>
-      withGlobalArena(() {
-        final outCreated = globalArena<CBLTimestamp>();
-        final outExpires = globalArena<CBLTimestamp>();
-        cbl.CBLCert_ValidTimespan(
-          pointer,
-          outCreated,
-          outExpires,
-        );
-        return (
-          created: DateTime.fromMillisecondsSinceEpoch(
-            outCreated.value,
-            isUtc: true,
-          ),
-          expires: DateTime.fromMillisecondsSinceEpoch(
-            outExpires.value,
-            isUtc: true,
-          ),
-        );
-      });
+  ) => withGlobalArena(() {
+    final outCreated = globalArena<CBLTimestamp>();
+    final outExpires = globalArena<CBLTimestamp>();
+    cbl.CBLCert_ValidTimespan(pointer, outCreated, outExpires);
+    return (
+      created: DateTime.fromMillisecondsSinceEpoch(
+        outCreated.value,
+        isUtc: true,
+      ),
+      expires: DateTime.fromMillisecondsSinceEpoch(
+        outExpires.value,
+        isUtc: true,
+      ),
+    );
+  });
 
   Pointer<CBLKeyPair> certPublicKey(Pointer<CBLCert> pointer) =>
       cbl.CBLCert_PublicKey(pointer);
@@ -136,51 +133,48 @@ final class TlsIdentityBindings extends Bindings {
     required CBLDartExternalKeyPublicKeyData publicKeyData,
     required CBLDartExternalKeyDecrypt decrypt,
     required CBLDartExternalKeySign sign,
-  }) =>
-      cblDart.CBLDartKeyPair_CreateWithExternalKey(
-        keySizeInBits,
-        delegate,
-        publicKeyData,
-        decrypt,
-        sign,
-        globalCBLError,
-      ).checkError();
+  }) => cblDart.CBLDartKeyPair_CreateWithExternalKey(
+    keySizeInBits,
+    delegate,
+    publicKeyData,
+    decrypt,
+    sign,
+    globalCBLError,
+  ).checkError();
 
   Pointer<CBLKeyPair> keyPairCreateWithPrivateKey(
     Uint8List privateKey, {
     String? password,
-  }) =>
-      runWithSingleFLString(
-        password,
-        (flPassword) => cbl.CBLKeyPair_CreateWithPrivateKeyData(
-          SliceResult.fromTypedList(privateKey).makeGlobal().ref,
-          flPassword,
-          globalCBLError..ref.reset(),
-        ).checkError(),
-      );
+  }) => runWithSingleFLString(
+    password,
+    (flPassword) => cbl.CBLKeyPair_CreateWithPrivateKeyData(
+      SliceResult.fromTypedList(privateKey).makeGlobal().ref,
+      flPassword,
+      globalCBLError..ref.reset(),
+    ).checkError(),
+  );
 
   String? keyPairPublicKeyDigest(Pointer<CBLKeyPair> pointer) =>
       cbl.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
 
   Uint8List? keyPairPublicKeyData(Pointer<CBLKeyPair> pointer) =>
-      SliceResult.fromFLSliceResult(cbl.CBLKeyPair_PublicKeyData(pointer))
-          ?.asTypedList()
-          .let(Uint8List.fromList);
+      SliceResult.fromFLSliceResult(
+        cbl.CBLKeyPair_PublicKeyData(pointer),
+      )?.asTypedList().let(Uint8List.fromList);
 
   Uint8List? keyPairPrivateKeyData(Pointer<CBLKeyPair> pointer) =>
-      SliceResult.fromFLSliceResult(cbl.CBLKeyPair_PrivateKeyData(pointer))
-          ?.asTypedList()
-          .let(Uint8List.fromList);
+      SliceResult.fromFLSliceResult(
+        cbl.CBLKeyPair_PrivateKeyData(pointer),
+      )?.asTypedList().let(Uint8List.fromList);
 
   Pointer<CBLTLSIdentity> withKeyPairAndCerts(
     Pointer<CBLKeyPair> keyPair,
     Pointer<CBLCert> certificate,
-  ) =>
-      cbl.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
-        keyPair,
-        certificate,
-        globalCBLError..ref.reset(),
-      ).checkError();
+  ) => cbl.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+    keyPair,
+    certificate,
+    globalCBLError..ref.reset(),
+  ).checkError();
 
   Pointer<CBLTLSIdentity> create(
     Set<CBLKeyUsages> keyUsages,
@@ -218,12 +212,12 @@ final class TlsIdentityBindings extends Bindings {
   }
 
   Pointer<CBLTLSIdentity>? withLabel(String label) => runWithSingleFLString(
-        label,
-        (flLabel) => cbl.CBLTLSIdentity_IdentityWithLabel(
-          flLabel,
-          globalCBLError..ref.reset(),
-        ).checkError().toNullable(),
-      );
+    label,
+    (flLabel) => cbl.CBLTLSIdentity_IdentityWithLabel(
+      flLabel,
+      globalCBLError..ref.reset(),
+    ).checkError().toNullable(),
+  );
 
   Pointer<CBLTLSIdentity> withCerts(Pointer<CBLCert> certificate) =>
       cbl.CBLTLSIdentity_IdentityWithCerts(
@@ -232,12 +226,12 @@ final class TlsIdentityBindings extends Bindings {
       ).checkError();
 
   void deleteWithLabel(String label) => runWithSingleFLString(
-        label,
-        (flLabel) => cbl.CBLTLSIdentity_DeleteIdentityWithLabel(
-          flLabel,
-          globalCBLError..ref.reset(),
-        ).checkError(),
-      );
+    label,
+    (flLabel) => cbl.CBLTLSIdentity_DeleteIdentityWithLabel(
+      flLabel,
+      globalCBLError..ref.reset(),
+    ).checkError(),
+  );
 
   Pointer<CBLCert> identityCertificates(Pointer<CBLTLSIdentity> pointer) =>
       cbl.CBLTLSIdentity_Certificates(pointer);

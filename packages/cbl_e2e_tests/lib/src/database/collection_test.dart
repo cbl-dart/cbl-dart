@@ -117,66 +117,59 @@ void main() {
         final initialDoc = MutableDocument({'a': 'b', 'c': 4});
         await collection.saveDocument(initialDoc);
 
-        final loadedDoc =
-            (await collection.document(initialDoc.id))!.toMutable();
+        final loadedDoc = (await collection.document(
+          initialDoc.id,
+        ))!.toMutable();
 
         final doc = loadedDoc.toMutable();
         expect(await collection.saveDocument(doc), isTrue);
       },
     );
 
-    apiTest(
-      'save mutable document created from changed mutable document '
-      '(lastWriteWins)',
-      () async {
-        final db = await openTestDatabase();
-        final collection = await db.defaultCollection;
+    apiTest('save mutable document created from changed mutable document '
+        '(lastWriteWins)', () async {
+      final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
 
-        final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-        await collection.saveDocument(initialDoc);
+      final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+      await collection.saveDocument(initialDoc);
 
-        final loadedDoc =
-            (await collection.document(initialDoc.id))!.toMutable();
+      final loadedDoc = (await collection.document(initialDoc.id))!.toMutable();
 
-        final doc = loadedDoc.toMutable();
+      final doc = loadedDoc.toMutable();
 
-        await collection.saveDocument(loadedDoc);
+      await collection.saveDocument(loadedDoc);
 
-        expect(await collection.saveDocument(doc), isTrue);
+      expect(await collection.saveDocument(doc), isTrue);
 
-        expect(
-          await collection.saveDocument(
-            loadedDoc,
-            ConcurrencyControl.failOnConflict,
-          ),
-          isFalse,
-        );
-      },
-    );
+      expect(
+        await collection.saveDocument(
+          loadedDoc,
+          ConcurrencyControl.failOnConflict,
+        ),
+        isFalse,
+      );
+    });
 
-    apiTest(
-      'save mutable document created from changed mutable document '
-      '(failOnConflict)',
-      () async {
-        final db = await openTestDatabase();
-        final collection = await db.defaultCollection;
+    apiTest('save mutable document created from changed mutable document '
+        '(failOnConflict)', () async {
+      final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
 
-        final initialDoc = MutableDocument({'a': 'b', 'c': 4});
-        await collection.saveDocument(initialDoc);
+      final initialDoc = MutableDocument({'a': 'b', 'c': 4});
+      await collection.saveDocument(initialDoc);
 
-        final loadedDoc =
-            (await collection.document(initialDoc.id))!.toMutable();
+      final loadedDoc = (await collection.document(initialDoc.id))!.toMutable();
 
-        final doc = loadedDoc.toMutable();
+      final doc = loadedDoc.toMutable();
 
-        await collection.saveDocument(loadedDoc);
+      await collection.saveDocument(loadedDoc);
 
-        expect(
-          await collection.saveDocument(doc, ConcurrencyControl.failOnConflict),
-          isFalse,
-        );
-      },
-    );
+      expect(
+        await collection.saveDocument(doc, ConcurrencyControl.failOnConflict),
+        isFalse,
+      );
+    });
 
     group('saveDocumentWithConflictHandler', () {
       apiTest('save updated document', () async {
@@ -189,8 +182,10 @@ void main() {
           ..setValue('b', key: 'a');
         collection.saveDocument(updatedDoc);
 
-        final SaveConflictHandler handler =
-            expectAsync2((documentBeingSaved, conflictingDocument) {
+        final SaveConflictHandler handler = expectAsync2((
+          documentBeingSaved,
+          conflictingDocument,
+        ) {
           expect(documentBeingSaved, doc);
           expect(conflictingDocument, updatedDoc);
           documentBeingSaved.setValue('c', key: 'a');
@@ -214,8 +209,10 @@ void main() {
         await collection.saveDocument(doc);
         await collection.deleteDocument((await collection.document(doc.id))!);
 
-        final SaveConflictHandler handler =
-            expectAsync2((documentBeingSaved, conflictingDocument) {
+        final SaveConflictHandler handler = expectAsync2((
+          documentBeingSaved,
+          conflictingDocument,
+        ) {
           expect(documentBeingSaved, doc);
           expect(conflictingDocument, isNull);
           documentBeingSaved.setValue('c', key: 'a');
@@ -241,8 +238,10 @@ void main() {
           ..setValue('b', key: 'a');
         await collection.saveDocument(updatedDoc);
 
-        final SaveConflictHandler handler =
-            expectAsync2((documentBeingSaved, conflictingDocument) {
+        final SaveConflictHandler handler = expectAsync2((
+          documentBeingSaved,
+          conflictingDocument,
+        ) {
           expect(documentBeingSaved, doc);
           expect(conflictingDocument, updatedDoc);
           return apiFutureOr(false);
@@ -264,8 +263,10 @@ void main() {
           ..setValue('b', key: 'a');
         collection.saveDocument(updatedDoc);
 
-        final SyncSaveConflictHandler handler =
-            expectAsync2((documentBeingSaved, conflictingDocument) {
+        final SyncSaveConflictHandler handler = expectAsync2((
+          documentBeingSaved,
+          conflictingDocument,
+        ) {
           expect(documentBeingSaved, doc);
           expect(conflictingDocument, updatedDoc);
           documentBeingSaved.setValue('c', key: 'a');
@@ -307,20 +308,18 @@ void main() {
       expect(await collection.document(doc.id), isNull);
     });
 
-    apiTest(
-      'delete mutable document that was loaded from database',
-      () async {
-        final db = await openTestDatabase();
-        final collection = await db.defaultCollection;
+    apiTest('delete mutable document that was loaded from database', () async {
+      final db = await openTestDatabase();
+      final collection = await db.defaultCollection;
 
-        final doc = MutableDocument();
-        await collection.saveDocument(doc);
-        await collection
-            .deleteDocument((await collection.document(doc.id))!.toMutable());
+      final doc = MutableDocument();
+      await collection.saveDocument(doc);
+      await collection.deleteDocument(
+        (await collection.document(doc.id))!.toMutable(),
+      );
 
-        expect(await collection.document(doc.id), isNull);
-      },
-    );
+      expect(await collection.document(doc.id), isNull);
+    });
 
     apiTest('delete new unsaved document', () async {
       final db = await openTestDatabase();
@@ -329,11 +328,13 @@ void main() {
       final doc = MutableDocument();
       expect(
         () => collection.deleteDocument(doc),
-        throwsA(isA<DatabaseException>().having(
-          (exception) => exception.code,
-          'code',
-          DatabaseErrorCode.notFound,
-        )),
+        throwsA(
+          isA<DatabaseException>().having(
+            (exception) => exception.code,
+            'code',
+            DatabaseErrorCode.notFound,
+          ),
+        ),
       );
     });
 
@@ -381,8 +382,9 @@ void main() {
           await collection.saveDocument(doc);
           await collection.setDocumentExpiration(doc.id, expiration);
 
-          final storedExpiration =
-              await collection.getDocumentExpiration(doc.id);
+          final storedExpiration = await collection.getDocumentExpiration(
+            doc.id,
+          );
 
           expect(
             storedExpiration!.millisecondsSinceEpoch,
@@ -432,11 +434,13 @@ void main() {
         final doc = MutableDocument();
         final listenerWasCalled = Completer<void>();
 
-        final token = await collection.addChangeListener(expectAsync1((change) {
-          expect(change.collection, collection);
-          expect(change.documentIds, [doc.id]);
-          listenerWasCalled.complete();
-        }));
+        final token = await collection.addChangeListener(
+          expectAsync1((change) {
+            expect(change.collection, collection);
+            expect(change.documentIds, [doc.id]);
+            listenerWasCalled.complete();
+          }),
+        );
 
         // Change the database.
         await collection.saveDocument(doc);
@@ -456,13 +460,15 @@ void main() {
         final doc = MutableDocument();
         final listenerWasCalled = Completer<void>();
 
-        final token = await collection.addDocumentChangeListener(doc.id,
-            expectAsync1((change) {
-          expect(change.database, db);
-          expect(change.collection, collection);
-          expect(change.documentId, doc.id);
-          listenerWasCalled.complete();
-        }));
+        final token = await collection.addDocumentChangeListener(
+          doc.id,
+          expectAsync1((change) {
+            expect(change.database, db);
+            expect(change.collection, collection);
+            expect(change.documentId, doc.id);
+            listenerWasCalled.complete();
+          }),
+        );
 
         // Saved the document.
         await collection.saveDocument(doc);
@@ -486,7 +492,7 @@ void main() {
           expect(
             collection.changes(),
             emitsInOrder(<dynamic>[
-              CollectionChange(collection, [doc.id])
+              CollectionChange(collection, [doc.id]),
             ]),
           );
 
@@ -533,8 +539,9 @@ void main() {
 
           await collection.createIndex('a', FullTextIndexConfiguration(['a']));
 
-          final q =
-              await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
+          final q = await db.createQuery(
+            "SELECT * FROM _ WHERE MATCH(a, 'query')",
+          );
 
           final explain = await q.explain();
 
@@ -551,13 +558,14 @@ void main() {
           final documents = [
             for (final i in List.generate(10, (index) => index))
               MutableDocument({
-                'a': [1, i + 1]
+                'a': [1, i + 1],
               }),
           ];
 
           await Future.wait<void>(
-            (List.of(documents)..shuffle())
-                .map((document) async => collection.saveDocument(document)),
+            (List.of(documents)..shuffle()).map(
+              (document) async => collection.saveDocument(document),
+            ),
           );
 
           await collection.createIndex(
@@ -574,14 +582,12 @@ void main() {
             ),
           );
 
-          final q = await db.createQuery(
-            '''
+          final q = await db.createQuery('''
             SELECT Meta().id
             FROM _
             ORDER BY APPROX_VECTOR_DISTANCE(a, [1, 1])
             LIMIT 10
-            ''',
-          );
+            ''');
 
           final explain = await q.explain();
 
@@ -622,8 +628,9 @@ void main() {
           IndexBuilder.fullTextIndex([FullTextIndexItem.property('a')]),
         );
 
-        final q =
-            await db.createQuery("SELECT * FROM _ WHERE MATCH(a, 'query')");
+        final q = await db.createQuery(
+          "SELECT * FROM _ WHERE MATCH(a, 'query')",
+        );
 
         final explain = await q.explain();
 
@@ -657,24 +664,21 @@ void main() {
         },
       );
 
-      apiTest(
-        'index should return existing index',
-        () async {
-          final db = await openTestDatabase();
-          final collection = await db.defaultCollection;
+      apiTest('index should return existing index', () async {
+        final db = await openTestDatabase();
+        final collection = await db.defaultCollection;
 
-          expect(await collection.index('a'), isNull);
+        expect(await collection.index('a'), isNull);
 
-          await collection.createIndex('a', ValueIndexConfiguration(['a']));
+        await collection.createIndex('a', ValueIndexConfiguration(['a']));
 
-          expect(
-            await collection.index('a'),
-            isA<QueryIndex>()
-                .having((index) => index.name, 'name', 'a')
-                .having((index) => index.collection, 'collection', collection),
-          );
-        },
-      );
+        expect(
+          await collection.index('a'),
+          isA<QueryIndex>()
+              .having((index) => index.name, 'name', 'a')
+              .having((index) => index.collection, 'collection', collection),
+        );
+      });
     });
   });
 }

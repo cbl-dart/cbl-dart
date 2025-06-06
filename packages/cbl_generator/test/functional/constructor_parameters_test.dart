@@ -13,12 +13,16 @@ void main() {
     expect(MutableOptionalParamDoc('a').a, 'a');
     expect(MutableOptionalParamDict().a, isNull);
     expect(MutableOptionalParamDoc().a, isNull);
-    final mutablePositionalMixedParamDict =
-        MutablePositionalMixedParamDict('a', 'b');
+    final mutablePositionalMixedParamDict = MutablePositionalMixedParamDict(
+      'a',
+      'b',
+    );
     expect(mutablePositionalMixedParamDict.a, 'a');
     expect(mutablePositionalMixedParamDict.b, 'b');
-    final mutablePositionalMixedParamDoc =
-        MutablePositionalMixedParamDoc('a', 'b');
+    final mutablePositionalMixedParamDoc = MutablePositionalMixedParamDoc(
+      'a',
+      'b',
+    );
     expect(mutablePositionalMixedParamDoc.a, 'a');
     expect(mutablePositionalMixedParamDoc.b, 'b');
     expect(MutableNamedParamDict(a: 'a').a, 'a');

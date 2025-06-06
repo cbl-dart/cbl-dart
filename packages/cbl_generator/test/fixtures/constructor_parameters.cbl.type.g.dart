@@ -21,23 +21,21 @@ abstract class _ParamDocImplBase<I extends Document>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableParamDoc toMutable() => MutableParamDoc.internal(internal.toMutable());
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'ParamDoc',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'ParamDoc',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -60,9 +58,7 @@ class ImmutableParamDoc extends _ParamDocImplBase {
 class MutableParamDoc extends _ParamDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<ParamDoc, MutableParamDoc> {
   /// Creates a new mutable [ParamDoc].
-  MutableParamDoc(
-    String a,
-  ) : super(MutableDocument()) {
+  MutableParamDoc(String a) : super(MutableDocument()) {
     this.a = a;
   }
 
@@ -94,11 +90,11 @@ abstract class _OptionalParamDocImplBase<I extends Document>
 
   @override
   String? get a => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableOptionalParamDoc toMutable() =>
@@ -106,12 +102,10 @@ abstract class _OptionalParamDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'OptionalParamDoc',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'OptionalParamDoc',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -135,9 +129,7 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
     implements
         TypedMutableDocumentObject<OptionalParamDoc, MutableOptionalParamDoc> {
   /// Creates a new mutable [OptionalParamDoc].
-  MutableOptionalParamDoc([
-    String? a,
-  ]) : super(MutableDocument()) {
+  MutableOptionalParamDoc([String? a]) : super(MutableDocument()) {
     if (a != null) {
       this.a = a;
     }
@@ -146,8 +138,9 @@ class MutableOptionalParamDoc extends _OptionalParamDocImplBase<MutableDocument>
   MutableOptionalParamDoc.internal(super.internal);
 
   set a(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'a',
@@ -174,19 +167,19 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   String? get b => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'b',
-        key: 'b',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutablePositionalMixedParamDoc toMutable() =>
@@ -194,13 +187,10 @@ abstract class _PositionalMixedParamDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'PositionalMixedParamDoc',
-        fields: {
-          'a': a,
-          'b': b,
-        },
-      );
+    indent: indent,
+    className: 'PositionalMixedParamDoc',
+    fields: {'a': a, 'b': b},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -224,13 +214,13 @@ class ImmutablePositionalMixedParamDoc
 class MutablePositionalMixedParamDoc
     extends _PositionalMixedParamDocImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<PositionalMixedParamDoc,
-            MutablePositionalMixedParamDoc> {
+        TypedMutableDocumentObject<
+          PositionalMixedParamDoc,
+          MutablePositionalMixedParamDoc
+        > {
   /// Creates a new mutable [PositionalMixedParamDoc].
-  MutablePositionalMixedParamDoc(
-    String a, [
-    String? b,
-  ]) : super(MutableDocument()) {
+  MutablePositionalMixedParamDoc(String a, [String? b])
+    : super(MutableDocument()) {
     this.a = a;
     if (b != null) {
       this.b = b;
@@ -250,8 +240,9 @@ class MutablePositionalMixedParamDoc
   }
 
   set b(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'b',
@@ -275,11 +266,11 @@ abstract class _NamedParamDocImplBase<I extends Document>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableNamedParamDoc toMutable() =>
@@ -287,12 +278,10 @@ abstract class _NamedParamDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'NamedParamDoc',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'NamedParamDoc',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -315,9 +304,7 @@ class ImmutableNamedParamDoc extends _NamedParamDocImplBase {
 class MutableNamedParamDoc extends _NamedParamDocImplBase<MutableDocument>
     implements TypedMutableDocumentObject<NamedParamDoc, MutableNamedParamDoc> {
   /// Creates a new mutable [NamedParamDoc].
-  MutableNamedParamDoc({
-    required String a,
-  }) : super(MutableDocument()) {
+  MutableNamedParamDoc({required String a}) : super(MutableDocument()) {
     this.a = a;
   }
 
@@ -349,11 +336,11 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
 
   @override
   String? get a => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableNamedOptionalParamDoc toMutable() =>
@@ -361,12 +348,10 @@ abstract class _NamedOptionalParamDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'NamedOptionalParamDoc',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'NamedOptionalParamDoc',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -389,12 +374,12 @@ class ImmutableNamedOptionalParamDoc extends _NamedOptionalParamDocImplBase {
 class MutableNamedOptionalParamDoc
     extends _NamedOptionalParamDocImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<NamedOptionalParamDoc,
-            MutableNamedOptionalParamDoc> {
+        TypedMutableDocumentObject<
+          NamedOptionalParamDoc,
+          MutableNamedOptionalParamDoc
+        > {
   /// Creates a new mutable [NamedOptionalParamDoc].
-  MutableNamedOptionalParamDoc({
-    String? a,
-  }) : super(MutableDocument()) {
+  MutableNamedOptionalParamDoc({String? a}) : super(MutableDocument()) {
     if (a != null) {
       this.a = a;
     }
@@ -403,8 +388,9 @@ class MutableNamedOptionalParamDoc
   MutableNamedOptionalParamDoc.internal(super.internal);
 
   set a(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'a',
@@ -431,19 +417,19 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   String? get b => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'b',
-        key: 'b',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableNamedMixedParamDoc toMutable() =>
@@ -451,13 +437,10 @@ abstract class _NamedMixedParamDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'NamedMixedParamDoc',
-        fields: {
-          'a': a,
-          'b': b,
-        },
-      );
+    indent: indent,
+    className: 'NamedMixedParamDoc',
+    fields: {'a': a, 'b': b},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -480,13 +463,12 @@ class ImmutableNamedMixedParamDoc extends _NamedMixedParamDocImplBase {
 class MutableNamedMixedParamDoc
     extends _NamedMixedParamDocImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<NamedMixedParamDoc,
-            MutableNamedMixedParamDoc> {
+        TypedMutableDocumentObject<
+          NamedMixedParamDoc,
+          MutableNamedMixedParamDoc
+        > {
   /// Creates a new mutable [NamedMixedParamDoc].
-  MutableNamedMixedParamDoc(
-    String a, {
-    String? b,
-  }) : super(MutableDocument()) {
+  MutableNamedMixedParamDoc(String a, {String? b}) : super(MutableDocument()) {
     this.a = a;
     if (b != null) {
       this.b = b;
@@ -506,8 +488,9 @@ class MutableNamedMixedParamDoc
   }
 
   set b(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'b',
@@ -535,11 +518,11 @@ abstract class _ParamDictImplBase<I extends Dictionary>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableParamDict toMutable() =>
@@ -547,12 +530,10 @@ abstract class _ParamDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'ParamDict',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'ParamDict',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -575,9 +556,7 @@ class ImmutableParamDict extends _ParamDictImplBase {
 class MutableParamDict extends _ParamDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<ParamDict, MutableParamDict> {
   /// Creates a new mutable [ParamDict].
-  MutableParamDict(
-    String a,
-  ) : super(MutableDictionary()) {
+  MutableParamDict(String a) : super(MutableDictionary()) {
     this.a = a;
   }
 
@@ -609,11 +588,11 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
 
   @override
   String? get a => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableOptionalParamDict toMutable() =>
@@ -621,12 +600,10 @@ abstract class _OptionalParamDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'OptionalParamDict',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'OptionalParamDict',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -649,12 +626,12 @@ class ImmutableOptionalParamDict extends _OptionalParamDictImplBase {
 class MutableOptionalParamDict
     extends _OptionalParamDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<OptionalParamDict,
-            MutableOptionalParamDict> {
+        TypedMutableDictionaryObject<
+          OptionalParamDict,
+          MutableOptionalParamDict
+        > {
   /// Creates a new mutable [OptionalParamDict].
-  MutableOptionalParamDict([
-    String? a,
-  ]) : super(MutableDictionary()) {
+  MutableOptionalParamDict([String? a]) : super(MutableDictionary()) {
     if (a != null) {
       this.a = a;
     }
@@ -663,8 +640,9 @@ class MutableOptionalParamDict
   MutableOptionalParamDict.internal(super.internal);
 
   set a(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'a',
@@ -691,19 +669,19 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   String? get b => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'b',
-        key: 'b',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutablePositionalMixedParamDict toMutable() =>
@@ -711,13 +689,10 @@ abstract class _PositionalMixedParamDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'PositionalMixedParamDict',
-        fields: {
-          'a': a,
-          'b': b,
-        },
-      );
+    indent: indent,
+    className: 'PositionalMixedParamDict',
+    fields: {'a': a, 'b': b},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -741,13 +716,13 @@ class ImmutablePositionalMixedParamDict
 class MutablePositionalMixedParamDict
     extends _PositionalMixedParamDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<PositionalMixedParamDict,
-            MutablePositionalMixedParamDict> {
+        TypedMutableDictionaryObject<
+          PositionalMixedParamDict,
+          MutablePositionalMixedParamDict
+        > {
   /// Creates a new mutable [PositionalMixedParamDict].
-  MutablePositionalMixedParamDict(
-    String a, [
-    String? b,
-  ]) : super(MutableDictionary()) {
+  MutablePositionalMixedParamDict(String a, [String? b])
+    : super(MutableDictionary()) {
     this.a = a;
     if (b != null) {
       this.b = b;
@@ -767,8 +742,9 @@ class MutablePositionalMixedParamDict
   }
 
   set b(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'b',
@@ -792,11 +768,11 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableNamedParamDict toMutable() =>
@@ -804,12 +780,10 @@ abstract class _NamedParamDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'NamedParamDict',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'NamedParamDict',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -833,9 +807,7 @@ class MutableNamedParamDict extends _NamedParamDictImplBase<MutableDictionary>
     implements
         TypedMutableDictionaryObject<NamedParamDict, MutableNamedParamDict> {
   /// Creates a new mutable [NamedParamDict].
-  MutableNamedParamDict({
-    required String a,
-  }) : super(MutableDictionary()) {
+  MutableNamedParamDict({required String a}) : super(MutableDictionary()) {
     this.a = a;
   }
 
@@ -867,11 +839,11 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
 
   @override
   String? get a => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableNamedOptionalParamDict toMutable() =>
@@ -879,12 +851,10 @@ abstract class _NamedOptionalParamDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'NamedOptionalParamDict',
-        fields: {
-          'a': a,
-        },
-      );
+    indent: indent,
+    className: 'NamedOptionalParamDict',
+    fields: {'a': a},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -907,12 +877,12 @@ class ImmutableNamedOptionalParamDict extends _NamedOptionalParamDictImplBase {
 class MutableNamedOptionalParamDict
     extends _NamedOptionalParamDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<NamedOptionalParamDict,
-            MutableNamedOptionalParamDict> {
+        TypedMutableDictionaryObject<
+          NamedOptionalParamDict,
+          MutableNamedOptionalParamDict
+        > {
   /// Creates a new mutable [NamedOptionalParamDict].
-  MutableNamedOptionalParamDict({
-    String? a,
-  }) : super(MutableDictionary()) {
+  MutableNamedOptionalParamDict({String? a}) : super(MutableDictionary()) {
     if (a != null) {
       this.a = a;
     }
@@ -921,8 +891,9 @@ class MutableNamedOptionalParamDict
   MutableNamedOptionalParamDict.internal(super.internal);
 
   set a(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'a',
@@ -949,19 +920,19 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
 
   @override
   String get a => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'a',
-        key: 'a',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'a',
+    key: 'a',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   String? get b => TypedDataHelpers.readNullableProperty(
-        internal: internal,
-        name: 'b',
-        key: 'b',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'b',
+    key: 'b',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableNamedMixedParamDict toMutable() =>
@@ -969,13 +940,10 @@ abstract class _NamedMixedParamDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'NamedMixedParamDict',
-        fields: {
-          'a': a,
-          'b': b,
-        },
-      );
+    indent: indent,
+    className: 'NamedMixedParamDict',
+    fields: {'a': a, 'b': b},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -998,13 +966,13 @@ class ImmutableNamedMixedParamDict extends _NamedMixedParamDictImplBase {
 class MutableNamedMixedParamDict
     extends _NamedMixedParamDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<NamedMixedParamDict,
-            MutableNamedMixedParamDict> {
+        TypedMutableDictionaryObject<
+          NamedMixedParamDict,
+          MutableNamedMixedParamDict
+        > {
   /// Creates a new mutable [NamedMixedParamDict].
-  MutableNamedMixedParamDict(
-    String a, {
-    String? b,
-  }) : super(MutableDictionary()) {
+  MutableNamedMixedParamDict(String a, {String? b})
+    : super(MutableDictionary()) {
     this.a = a;
     if (b != null) {
       this.b = b;
@@ -1024,8 +992,9 @@ class MutableNamedMixedParamDict
   }
 
   set b(String? value) {
-    final promoted =
-        value == null ? null : TypedDataHelpers.stringConverter.promote(value);
+    final promoted = value == null
+        ? null
+        : TypedDataHelpers.stringConverter.promote(value);
     TypedDataHelpers.writeNullableProperty(
       internal: internal,
       key: 'b',

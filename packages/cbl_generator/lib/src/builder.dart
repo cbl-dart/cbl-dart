@@ -6,15 +6,12 @@ import 'generator.dart';
 
 final class TypedDataBuilder extends PartBuilder {
   TypedDataBuilder({BuilderOptions? options})
-      : super(
-          [
-            TypedDocumentGenerator(),
-            TypedDictionaryGenerator(),
-          ],
-          '.cbl.type.g.dart',
-          header: header,
-          options: options,
-        );
+    : super(
+        [TypedDocumentGenerator(), TypedDictionaryGenerator()],
+        '.cbl.type.g.dart',
+        header: header,
+        options: options,
+      );
 
   static const _ignoredLints = [
     'avoid_positional_boolean_parameters',
@@ -27,7 +24,8 @@ final class TypedDataBuilder extends PartBuilder {
   ];
 
   @visibleForTesting
-  static final header = '''
+  static final header =
+      '''
 $defaultFileHeader
 // ignore_for_file: ${_ignoredLints.join(', ')}
 ''';
@@ -35,12 +33,12 @@ $defaultFileHeader
 
 final class TypedDatabaseBuilder extends LibraryBuilder {
   TypedDatabaseBuilder({BuilderOptions? options})
-      : super(
-          TypedDatabaseGenerator(),
-          generatedExtension: '.cbl.database.g.dart',
-          header: header,
-          options: options,
-        );
+    : super(
+        TypedDatabaseGenerator(),
+        generatedExtension: '.cbl.database.g.dart',
+        header: header,
+        options: options,
+      );
 
   static const _ignoredLints = [
     'avoid_classes_with_only_static_members',
@@ -50,7 +48,8 @@ final class TypedDatabaseBuilder extends LibraryBuilder {
   ];
 
   @visibleForTesting
-  static final header = '''
+  static final header =
+      '''
 $defaultFileHeader
 // ignore_for_file: ${_ignoredLints.join(', ')}
 ''';

@@ -35,7 +35,8 @@ final class DocumentChange {
       database.hashCode ^ collection.hashCode ^ documentId.hashCode;
 
   @override
-  String toString() => 'DocumentChange('
+  String toString() =>
+      'DocumentChange('
       'database: $database, '
       'collection: $collection, '
       'documentId: $documentId'

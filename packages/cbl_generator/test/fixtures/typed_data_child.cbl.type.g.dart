@@ -26,12 +26,10 @@ abstract class _TypedDataPropertyDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'TypedDataPropertyDoc',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'TypedDataPropertyDoc',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -39,8 +37,12 @@ abstract class _TypedDataPropertyDocImplBase<I extends Document>
 class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
   ImmutableTypedDataPropertyDoc.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<Dictionary,
-      BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        BoolDict,
+        TypedDictionaryObject<BoolDict>
+      >(ImmutableBoolDict.internal);
 
   @override
   late final value = TypedDataHelpers.readProperty(
@@ -65,19 +67,23 @@ class ImmutableTypedDataPropertyDoc extends _TypedDataPropertyDocImplBase {
 class MutableTypedDataPropertyDoc
     extends _TypedDataPropertyDocImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<TypedDataPropertyDoc,
-            MutableTypedDataPropertyDoc> {
+        TypedMutableDocumentObject<
+          TypedDataPropertyDoc,
+          MutableTypedDataPropertyDoc
+        > {
   /// Creates a new mutable [TypedDataPropertyDoc].
-  MutableTypedDataPropertyDoc(
-    BoolDict value,
-  ) : super(MutableDocument()) {
+  MutableTypedDataPropertyDoc(BoolDict value) : super(MutableDocument()) {
     this.value = value;
   }
 
   MutableTypedDataPropertyDoc.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<
-      MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutableBoolDict,
+        BoolDict
+      >(MutableBoolDict.internal);
 
   late MutableBoolDict _value = TypedDataHelpers.readProperty(
     internal: internal,
@@ -120,12 +126,10 @@ abstract class _OptionalTypedDataPropertyDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'OptionalTypedDataPropertyDoc',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'OptionalTypedDataPropertyDoc',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -134,8 +138,12 @@ class ImmutableOptionalTypedDataPropertyDoc
     extends _OptionalTypedDataPropertyDocImplBase {
   ImmutableOptionalTypedDataPropertyDoc.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<Dictionary,
-      BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        BoolDict,
+        TypedDictionaryObject<BoolDict>
+      >(ImmutableBoolDict.internal);
 
   @override
   late final value = TypedDataHelpers.readNullableProperty(
@@ -160,12 +168,13 @@ class ImmutableOptionalTypedDataPropertyDoc
 class MutableOptionalTypedDataPropertyDoc
     extends _OptionalTypedDataPropertyDocImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<OptionalTypedDataPropertyDoc,
-            MutableOptionalTypedDataPropertyDoc> {
+        TypedMutableDocumentObject<
+          OptionalTypedDataPropertyDoc,
+          MutableOptionalTypedDataPropertyDoc
+        > {
   /// Creates a new mutable [OptionalTypedDataPropertyDoc].
-  MutableOptionalTypedDataPropertyDoc(
-    BoolDict? value,
-  ) : super(MutableDocument()) {
+  MutableOptionalTypedDataPropertyDoc(BoolDict? value)
+    : super(MutableDocument()) {
     if (value != null) {
       this.value = value;
     }
@@ -173,8 +182,12 @@ class MutableOptionalTypedDataPropertyDoc
 
   MutableOptionalTypedDataPropertyDoc.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<
-      MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutableBoolDict,
+        BoolDict
+      >(MutableBoolDict.internal);
 
   late MutableBoolDict? _value = TypedDataHelpers.readNullableProperty(
     internal: internal,
@@ -221,12 +234,10 @@ abstract class _TypedDataPropertyDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'TypedDataPropertyDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'TypedDataPropertyDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -234,8 +245,12 @@ abstract class _TypedDataPropertyDictImplBase<I extends Dictionary>
 class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
   ImmutableTypedDataPropertyDict.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<Dictionary,
-      BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        BoolDict,
+        TypedDictionaryObject<BoolDict>
+      >(ImmutableBoolDict.internal);
 
   @override
   late final value = TypedDataHelpers.readProperty(
@@ -260,19 +275,23 @@ class ImmutableTypedDataPropertyDict extends _TypedDataPropertyDictImplBase {
 class MutableTypedDataPropertyDict
     extends _TypedDataPropertyDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<TypedDataPropertyDict,
-            MutableTypedDataPropertyDict> {
+        TypedMutableDictionaryObject<
+          TypedDataPropertyDict,
+          MutableTypedDataPropertyDict
+        > {
   /// Creates a new mutable [TypedDataPropertyDict].
-  MutableTypedDataPropertyDict(
-    BoolDict value,
-  ) : super(MutableDictionary()) {
+  MutableTypedDataPropertyDict(BoolDict value) : super(MutableDictionary()) {
     this.value = value;
   }
 
   MutableTypedDataPropertyDict.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<
-      MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutableBoolDict,
+        BoolDict
+      >(MutableBoolDict.internal);
 
   late MutableBoolDict _value = TypedDataHelpers.readProperty(
     internal: internal,
@@ -315,12 +334,10 @@ abstract class _OptionalTypedDataPropertyDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'OptionalTypedDataPropertyDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'OptionalTypedDataPropertyDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -329,8 +346,12 @@ class ImmutableOptionalTypedDataPropertyDict
     extends _OptionalTypedDataPropertyDictImplBase {
   ImmutableOptionalTypedDataPropertyDict.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<Dictionary,
-      BoolDict, TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        Dictionary,
+        BoolDict,
+        TypedDictionaryObject<BoolDict>
+      >(ImmutableBoolDict.internal);
 
   @override
   late final value = TypedDataHelpers.readNullableProperty(
@@ -355,12 +376,13 @@ class ImmutableOptionalTypedDataPropertyDict
 class MutableOptionalTypedDataPropertyDict
     extends _OptionalTypedDataPropertyDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<OptionalTypedDataPropertyDict,
-            MutableOptionalTypedDataPropertyDict> {
+        TypedMutableDictionaryObject<
+          OptionalTypedDataPropertyDict,
+          MutableOptionalTypedDataPropertyDict
+        > {
   /// Creates a new mutable [OptionalTypedDataPropertyDict].
-  MutableOptionalTypedDataPropertyDict(
-    BoolDict? value,
-  ) : super(MutableDictionary()) {
+  MutableOptionalTypedDataPropertyDict(BoolDict? value)
+    : super(MutableDictionary()) {
     if (value != null) {
       this.value = value;
     }
@@ -368,8 +390,12 @@ class MutableOptionalTypedDataPropertyDict
 
   MutableOptionalTypedDataPropertyDict.internal(super.internal);
 
-  static const _valueConverter = const TypedDictionaryConverter<
-      MutableDictionary, MutableBoolDict, BoolDict>(MutableBoolDict.internal);
+  static const _valueConverter =
+      const TypedDictionaryConverter<
+        MutableDictionary,
+        MutableBoolDict,
+        BoolDict
+      >(MutableBoolDict.internal);
 
   late MutableBoolDict? _value = TypedDataHelpers.readNullableProperty(
     internal: internal,

@@ -12,15 +12,13 @@ Future<void> main(List<String> args) async {
   if (args.contains('--help') ||
       args.contains('-h') ||
       (args.isNotEmpty && args.length != 1)) {
-    print(
-      '''
+    print('''
 Usage: dart lib/main.dart [message]
 
 The provided message will be stored in the database.
 
 If no message is provided, all stored messages will be listed.
-''',
-    );
+''');
     exit(1);
   }
 
@@ -60,9 +58,7 @@ Future<void> listMessages() async {
         SelectResult.property('body'),
       )
       .from(DataSource.collection(collection))
-      .where(Expression.property('type').equalTo(
-        Expression.string('message'),
-      ))
+      .where(Expression.property('type').equalTo(Expression.string('message')))
       .orderBy(Ordering.property('createdAt').descending());
 
   final resultSet = await query.execute();

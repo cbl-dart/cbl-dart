@@ -47,10 +47,10 @@ class ListenerTokenRegistry with ClosableResourceMixin {
   final _tokens = <AbstractListenerToken>[];
 
   void add(AbstractListenerToken token) => use(() {
-        assert(!_tokens.contains(token));
-        _tokens.add(token);
-        _updateNeedsFinalization();
-      });
+    assert(!_tokens.contains(token));
+    _tokens.add(token);
+    _updateNeedsFinalization();
+  });
 
   FutureOr<void> remove(ListenerToken token) {
     if (!_tokens.remove(token)) {
@@ -123,10 +123,12 @@ class ProxyListenerToken<T> extends AsyncListenerToken {
   Future<void> removeListener() {
     super.removeListener();
     return client.channel
-        .call(RemoveChangeListener(
-          targetId: target.objectId!,
-          listenerId: listenerId,
-        ))
+        .call(
+          RemoveChangeListener(
+            targetId: target.objectId!,
+            listenerId: listenerId,
+          ),
+        )
         .then((_) => client.unregisterObject(listenerId));
   }
 }

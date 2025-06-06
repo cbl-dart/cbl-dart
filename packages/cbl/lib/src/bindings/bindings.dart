@@ -25,10 +25,10 @@ class BindingsLibraries {
   });
 
   BindingsLibraries.fromDynamicLibraries(DynamicLibraries dynamicLibraries)
-      : enterpriseEdition = dynamicLibraries.enterpriseEdition,
-        vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
-        cbl = cblite(dynamicLibraries.cbl),
-        cblDart = cblitedart(dynamicLibraries.cblDart);
+    : enterpriseEdition = dynamicLibraries.enterpriseEdition,
+      vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
+      cbl = cblite(dynamicLibraries.cbl),
+      cblDart = cblitedart(dynamicLibraries.cblDart);
 
   final bool enterpriseEdition;
   final String? vectorSearchLibraryPath;
@@ -37,9 +37,7 @@ class BindingsLibraries {
 }
 
 abstract base class Bindings {
-  Bindings(this.libraries)
-      : cbl = libraries.cbl,
-        cblDart = libraries.cblDart;
+  Bindings(this.libraries) : cbl = libraries.cbl, cblDart = libraries.cblDart;
 
   final BindingsLibraries libraries;
   final cblite cbl;
@@ -48,22 +46,22 @@ abstract base class Bindings {
 
 final class CBLBindings extends Bindings {
   CBLBindings(super.libraries)
-      : base = BaseBindings(libraries),
-        asyncCallback = AsyncCallbackBindings(libraries),
-        logging = LoggingBindings(libraries),
-        database = DatabaseBindings(libraries),
-        collection = CollectionBindings(libraries),
-        document = DocumentBindings(libraries),
-        mutableDocument = MutableDocumentBindings(libraries),
-        query = QueryBindings(libraries),
-        resultSet = ResultSetBindings(libraries),
-        queryIndex = QueryIndexBindings(libraries),
-        indexUpdater = IndexUpdaterBindings(libraries),
-        blobs = BlobsBindings(libraries),
-        replicator = ReplicatorBindings(libraries),
-        tlsIdentity = TlsIdentityBindings(libraries),
-        urlEndpointListener = UrlEndpointListenerBindings(libraries),
-        fleece = FleeceBindings(libraries);
+    : base = BaseBindings(libraries),
+      asyncCallback = AsyncCallbackBindings(libraries),
+      logging = LoggingBindings(libraries),
+      database = DatabaseBindings(libraries),
+      collection = CollectionBindings(libraries),
+      document = DocumentBindings(libraries),
+      mutableDocument = MutableDocumentBindings(libraries),
+      query = QueryBindings(libraries),
+      resultSet = ResultSetBindings(libraries),
+      queryIndex = QueryIndexBindings(libraries),
+      indexUpdater = IndexUpdaterBindings(libraries),
+      blobs = BlobsBindings(libraries),
+      replicator = ReplicatorBindings(libraries),
+      tlsIdentity = TlsIdentityBindings(libraries),
+      urlEndpointListener = UrlEndpointListenerBindings(libraries),
+      fleece = FleeceBindings(libraries);
 
   factory CBLBindings.fromLibraries(LibrariesConfiguration libraries) =>
       CBLBindings(

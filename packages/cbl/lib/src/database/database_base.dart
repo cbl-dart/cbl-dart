@@ -54,8 +54,9 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
 
   @override
   FutureOr<D?> typedDocument<D extends TypedDocumentObject>(String id) =>
-      defaultCollection.then((collection) =>
-          (collection as CollectionBase<T>).typedDocument<D>(id));
+      defaultCollection.then(
+        (collection) => (collection as CollectionBase<T>).typedDocument<D>(id),
+      );
 
   /// Whether the current transaction belongs to this database, if one exists.
   bool get ownsCurrentTransaction => _Transaction.current?.database == this;
@@ -77,10 +78,11 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
     bool requiresNewTransaction = false,
   }) =>
       _runInTransaction(
-        fn,
-        async: false,
-        requiresNewTransaction: requiresNewTransaction,
-      ) as R;
+            fn,
+            async: false,
+            requiresNewTransaction: requiresNewTransaction,
+          )
+          as R;
 
   /// Runs [fn] in an asynchronous transaction.
   ///
@@ -91,10 +93,11 @@ mixin DatabaseBase<T extends DocumentDelegate> implements Database {
     bool requiresNewTransaction = false,
   }) =>
       _runInTransaction(
-        fn,
-        async: true,
-        requiresNewTransaction: requiresNewTransaction,
-      ) as Future<R>;
+            fn,
+            async: true,
+            requiresNewTransaction: requiresNewTransaction,
+          )
+          as Future<R>;
 
   FutureOr<R> _runInTransaction<R>(
     FutureOr<R> Function() fn, {
@@ -197,17 +200,20 @@ final class _Transaction {
   }
 }
 
-abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
-    MD extends TypedMutableDocumentObject> implements SaveTypedDocument<D, MD> {
+abstract base class SaveTypedDocumentBase<
+  D extends TypedDocumentObject,
+  MD extends TypedMutableDocumentObject
+>
+    implements SaveTypedDocument<D, MD> {
   SaveTypedDocumentBase(this.database, this.collection, this.document)
-      :
-        // This call ensures that the document type D is registered with the
-        // database. This is why we call it, even though we may never need to
-        // use the returned factory.
-        // By calling useWithTypedData we also assert that database supports
-        // typed data.
-        _documentFactory =
-            database.useWithTypedData().documentFactoryForType<D>();
+    : // This call ensures that the document type D is registered with the
+      // database. This is why we call it, even though we may never need to
+      // use the returned factory.
+      // By calling useWithTypedData we also assert that database supports
+      // typed data.
+      _documentFactory = database
+          .useWithTypedData()
+          .documentFactoryForType<D>();
 
   final DatabaseBase database;
   final FutureOr<Collection> Function() collection;
@@ -217,35 +223,32 @@ abstract base class SaveTypedDocumentBase<D extends TypedDocumentObject,
   @override
   FutureOr<bool> withConcurrencyControl([
     ConcurrencyControl concurrencyControl = ConcurrencyControl.lastWriteWins,
-  ]) =>
-      collection().then((collection) {
-        database.typedDataAdapter!.willSaveDocument(document);
+  ]) => collection().then((collection) {
+    database.typedDataAdapter!.willSaveDocument(document);
 
-        return collection.saveDocument(
-          document.internal as MutableDelegateDocument,
-          concurrencyControl,
-        );
-      });
+    return collection.saveDocument(
+      document.internal as MutableDelegateDocument,
+      concurrencyControl,
+    );
+  });
 
   @override
   FutureOr<bool> withConflictHandler(
     TypedSaveConflictHandler<D, MD> conflictHandler,
-  ) =>
-      collection().then((collection) {
-        database.typedDataAdapter!.willSaveDocument(document);
+  ) => collection().then((collection) {
+    database.typedDataAdapter!.willSaveDocument(document);
 
-        return (collection as CollectionBase)
-            .saveDocumentWithConflictHandlerHelper(
-          document.internal as MutableDelegateDocument,
-          (documentBeingSaved, conflictingDocument) {
-            assert(identical(documentBeingSaved, document.internal));
-            return conflictHandler(
-              document as MD,
-              conflictingDocument?.let(_documentFactory),
-            );
-          },
+    return (collection as CollectionBase).saveDocumentWithConflictHandlerHelper(
+      document.internal as MutableDelegateDocument,
+      (documentBeingSaved, conflictingDocument) {
+        assert(identical(documentBeingSaved, document.internal));
+        return conflictHandler(
+          document as MD,
+          conflictingDocument?.let(_documentFactory),
         );
-      });
+      },
+    );
+  });
 }
 
 mixin ScopeBase implements Scope {
@@ -347,8 +350,9 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
         } else {
           // Load the conflicting document.
           late DelegateDocument? conflictingDocument;
-          yield document(documentBeingSaved.id).then(
-              (value) => conflictingDocument = value as DelegateDocument?);
+          yield document(
+            documentBeingSaved.id,
+          ).then((value) => conflictingDocument = value as DelegateDocument?);
 
           // Call the conflict handler.
           yield conflictHandler(
@@ -359,8 +363,9 @@ mixin CollectionBase<T extends DocumentDelegate> implements Collection {
           if (retry) {
             // If the document was deleted it has to be recreated.
             // ignore: parameter_assignments
-            conflictingDocument ??=
-                MutableDelegateDocument.withId(documentBeingSaved.id);
+            conflictingDocument ??= MutableDelegateDocument.withId(
+              documentBeingSaved.id,
+            );
 
             // Replace the delegate of documentBeingSaved with a copy of that of
             // conflictingDocument. After this call, documentBeingSaved is at

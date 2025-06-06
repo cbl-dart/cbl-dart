@@ -31,9 +31,9 @@ void main() async {
             ),
   ];
 
-  await Pool(Platform.numberOfProcessors)
-      .forEach(benchmarks, (benchmark) => benchmark.setupAllRuns())
-      .drain<void>();
+  await Pool(
+    Platform.numberOfProcessors,
+  ).forEach(benchmarks, (benchmark) => benchmark.setupAllRuns()).drain<void>();
 
   const runs = 3;
 

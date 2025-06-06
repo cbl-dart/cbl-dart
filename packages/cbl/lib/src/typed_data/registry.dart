@@ -33,8 +33,10 @@ abstract final class TypedDataMetadata<I, MI, D, MD> {
     if (typeMatcher == null) {
       _typeMatcherImpl = null;
     } else {
-      _typeMatcherImpl =
-          TypeMatcherImpl.fromAnnotation(typeMatcher!, forType: this);
+      _typeMatcherImpl = TypeMatcherImpl.fromAnnotation(
+        typeMatcher!,
+        forType: this,
+      );
     }
   }
 }
@@ -60,24 +62,23 @@ final class TypedDocumentMetadata<D, MD>
 }
 
 final class TypedDataRegistry implements TypedDataAdapter {
-  TypedDataRegistry({
-    Iterable<TypedDataMetadata> types = const [],
-  })  : _types = List.unmodifiable(types),
-        _dictionaryMetadataForType = HashMap.identity()
-          ..addAll({
-            for (final type in types)
-              if (type is TypedDictionaryMetadata) type._type: type
-          }),
-        _documentMetadataForType = HashMap.identity()
-          ..addAll({
-            for (final type in types)
-              if (type is TypedDocumentMetadata) type._type: type
-          }),
-        _documentMetadataForMutableType = HashMap.identity()
-          ..addAll({
-            for (final type in types)
-              if (type is TypedDocumentMetadata) type._mutableType: type
-          }) {
+  TypedDataRegistry({Iterable<TypedDataMetadata> types = const []})
+    : _types = List.unmodifiable(types),
+      _dictionaryMetadataForType = HashMap.identity()
+        ..addAll({
+          for (final type in types)
+            if (type is TypedDictionaryMetadata) type._type: type,
+        }),
+      _documentMetadataForType = HashMap.identity()
+        ..addAll({
+          for (final type in types)
+            if (type is TypedDocumentMetadata) type._type: type,
+        }),
+      _documentMetadataForMutableType = HashMap.identity()
+        ..addAll({
+          for (final type in types)
+            if (type is TypedDocumentMetadata) type._mutableType: type,
+        }) {
     for (final type in types) {
       type._addToRegistry(this);
     }
@@ -92,7 +93,7 @@ final class TypedDataRegistry implements TypedDataAdapter {
 
   @override
   Factory<Dictionary, D>
-      dictionaryFactoryForType<D extends TypedDictionaryObject>() {
+  dictionaryFactoryForType<D extends TypedDictionaryObject>() {
     final dictionaryFactory = _dictionaryFactoryFor<D>();
     if (dictionaryFactory != null) {
       return dictionaryFactory;
@@ -117,44 +118,41 @@ final class TypedDataRegistry implements TypedDataAdapter {
   }
 
   @override
-  Factory<Document, D?>
-      dynamicDocumentFactoryForType<D extends TypedDocumentObject>({
-    bool allowUnmatchedDocument = true,
-  }) =>
-          (document) {
-            final matchedMetadata =
-                _documentMetadataByTypedMatcher(document).toList();
-            if (matchedMetadata.isNotEmpty) {
-              if (matchedMetadata.length > 1) {
-                final matchedTypeNames = matchedMetadata
-                    .map((metadata) => metadata.dartName)
-                    .toList();
-                throw TypedDataException(
-                  'Unable to resolve a document type because multiple document '
-                  'types matched the document: $matchedTypeNames',
-                  TypedDataErrorCode.unresolvableType,
-                );
-              }
+  Factory<Document, D?> dynamicDocumentFactoryForType<
+    D extends TypedDocumentObject
+  >({bool allowUnmatchedDocument = true}) => (document) {
+    final matchedMetadata = _documentMetadataByTypedMatcher(document).toList();
+    if (matchedMetadata.isNotEmpty) {
+      if (matchedMetadata.length > 1) {
+        final matchedTypeNames = matchedMetadata
+            .map((metadata) => metadata.dartName)
+            .toList();
+        throw TypedDataException(
+          'Unable to resolve a document type because multiple document '
+          'types matched the document: $matchedTypeNames',
+          TypedDataErrorCode.unresolvableType,
+        );
+      }
 
-              final metadata = matchedMetadata.first;
-              if (D == TypedDocumentObject) {
-                return metadata.factory(document) as D;
-              } else {
-                assert(D == TypedMutableDocumentObject);
-                return metadata.mutableFactory(document.toMutable()) as D;
-              }
-            } else {
-              if (allowUnmatchedDocument) {
-                return null;
-              } else {
-                throw TypedDataException(
-                  'Unable to resolve a document type because no document types '
-                  'matched the document.',
-                  TypedDataErrorCode.unresolvableType,
-                );
-              }
-            }
-          };
+      final metadata = matchedMetadata.first;
+      if (D == TypedDocumentObject) {
+        return metadata.factory(document) as D;
+      } else {
+        assert(D == TypedMutableDocumentObject);
+        return metadata.mutableFactory(document.toMutable()) as D;
+      }
+    } else {
+      if (allowUnmatchedDocument) {
+        return null;
+      } else {
+        throw TypedDataException(
+          'Unable to resolve a document type because no document types '
+          'matched the document.',
+          TypedDataErrorCode.unresolvableType,
+        );
+      }
+    }
+  };
 
   @override
   void checkDocumentIsOfType<D extends TypedDocumentObject>(Document document) {
@@ -164,9 +162,9 @@ final class TypedDataRegistry implements TypedDataAdapter {
       throw _unknownTypeError(D);
     }
 
-    late final matchingMetadata = _documentMetadataByTypedMatcher(document)
-        .map((metadata) => metadata.dartName)
-        .toList();
+    late final matchingMetadata = _documentMetadataByTypedMatcher(
+      document,
+    ).map((metadata) => metadata.dartName).toList();
 
     final typeMatcher = metadata._typeMatcherImpl;
     if (typeMatcher != null) {
@@ -226,23 +224,23 @@ final class TypedDataRegistry implements TypedDataAdapter {
 
   Iterable<TypedDocumentMetadata> _documentMetadataByTypedMatcher(
     Document document,
-  ) =>
-      _types.whereType<TypedDocumentMetadata>().where(
-            (metadata) => metadata._typeMatcherImpl?.isMatch(document) ?? false,
-          );
+  ) => _types.whereType<TypedDocumentMetadata>().where(
+    (metadata) => metadata._typeMatcherImpl?.isMatch(document) ?? false,
+  );
 
   Factory<Dictionary, D>?
-      _dictionaryFactoryFor<D extends TypedDictionaryObject>() =>
-          _dictionaryMetadataForType[D]?.factory as Factory<Dictionary, D>?;
+  _dictionaryFactoryFor<D extends TypedDictionaryObject>() =>
+      _dictionaryMetadataForType[D]?.factory as Factory<Dictionary, D>?;
 
   Factory<Document, D>? _documentFactoryFor<D extends TypedDocumentObject>() =>
       _documentMetadataForType[D]?.factory as Factory<Document, D>?;
 
   Factory<Document, D>?
-      _mutableDocumentFactoryFor<D extends TypedDocumentObject>() =>
-          _mutableDocumentFactoryCache.putIfAbsent(D, () {
-            final factory = _documentMetadataForMutableType[D]?.mutableFactory
-                as Factory<MutableDocument, D>?;
+  _mutableDocumentFactoryFor<D extends TypedDocumentObject>() =>
+      _mutableDocumentFactoryCache.putIfAbsent(D, () {
+            final factory =
+                _documentMetadataForMutableType[D]?.mutableFactory
+                    as Factory<MutableDocument, D>?;
             if (factory == null) {
               return null;
             }
@@ -253,13 +251,14 @@ final class TypedDataRegistry implements TypedDataAdapter {
               }
               return factory(doc);
             };
-          }) as Factory<Document, D>?;
+          })
+          as Factory<Document, D>?;
 }
 
 Exception _unknownTypeError(Type type) => TypedDataException(
-      '$type is not a known typed data type.',
-      TypedDataErrorCode.unknownType,
-    );
+  '$type is not a known typed data type.',
+  TypedDataErrorCode.unknownType,
+);
 
 // === TypeMatcherImpl =========================================================
 

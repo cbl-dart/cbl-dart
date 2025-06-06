@@ -28,12 +28,10 @@ abstract class _DocWithIdImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithId',
-        fields: {
-          'id': id,
-        },
-      );
+    indent: indent,
+    className: 'DocWithId',
+    fields: {'id': id},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -56,9 +54,7 @@ class ImmutableDocWithId extends _DocWithIdImplBase {
 class MutableDocWithId extends _DocWithIdImplBase<MutableDocument>
     implements TypedMutableDocumentObject<DocWithId, MutableDocWithId> {
   /// Creates a new mutable [DocWithId].
-  MutableDocWithId(
-    String id,
-  ) : super(MutableDocument.withId(id));
+  MutableDocWithId(String id) : super(MutableDocument.withId(id));
 
   MutableDocWithId.internal(super.internal);
 }
@@ -85,12 +81,10 @@ abstract class _DocWithOptionalIdImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithOptionalId',
-        fields: {
-          'id': id,
-        },
-      );
+    indent: indent,
+    className: 'DocWithOptionalId',
+    fields: {'id': id},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -113,12 +107,13 @@ class ImmutableDocWithOptionalId extends _DocWithOptionalIdImplBase {
 class MutableDocWithOptionalId
     extends _DocWithOptionalIdImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<DocWithOptionalId,
-            MutableDocWithOptionalId> {
+        TypedMutableDocumentObject<
+          DocWithOptionalId,
+          MutableDocWithOptionalId
+        > {
   /// Creates a new mutable [DocWithOptionalId].
-  MutableDocWithOptionalId([
-    String? id,
-  ]) : super(id == null ? MutableDocument() : MutableDocument.withId(id));
+  MutableDocWithOptionalId([String? id])
+    : super(id == null ? MutableDocument() : MutableDocument.withId(id));
 
   MutableDocWithOptionalId.internal(super.internal);
 }
@@ -143,11 +138,11 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
 
   @override
   String get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'value',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableDocWithIdAndField toMutable() =>
@@ -155,13 +150,10 @@ abstract class _DocWithIdAndFieldImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithIdAndField',
-        fields: {
-          'id': id,
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'DocWithIdAndField',
+    fields: {'id': id, 'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -184,13 +176,13 @@ class ImmutableDocWithIdAndField extends _DocWithIdAndFieldImplBase {
 class MutableDocWithIdAndField
     extends _DocWithIdAndFieldImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<DocWithIdAndField,
-            MutableDocWithIdAndField> {
+        TypedMutableDocumentObject<
+          DocWithIdAndField,
+          MutableDocWithIdAndField
+        > {
   /// Creates a new mutable [DocWithIdAndField].
-  MutableDocWithIdAndField(
-    String id,
-    String value,
-  ) : super(MutableDocument.withId(id)) {
+  MutableDocWithIdAndField(String id, String value)
+    : super(MutableDocument.withId(id)) {
     this.value = value;
   }
 
@@ -227,11 +219,11 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
 
   @override
   String get value => TypedDataHelpers.readProperty(
-        internal: internal,
-        name: 'value',
-        key: 'value',
-        converter: TypedDataHelpers.stringConverter,
-      );
+    internal: internal,
+    name: 'value',
+    key: 'value',
+    converter: TypedDataHelpers.stringConverter,
+  );
 
   @override
   MutableDocWithOptionalIdAndField toMutable() =>
@@ -239,13 +231,10 @@ abstract class _DocWithOptionalIdAndFieldImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithOptionalIdAndField',
-        fields: {
-          'id': id,
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'DocWithOptionalIdAndField',
+    fields: {'id': id, 'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -269,13 +258,13 @@ class ImmutableDocWithOptionalIdAndField
 class MutableDocWithOptionalIdAndField
     extends _DocWithOptionalIdAndFieldImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<DocWithOptionalIdAndField,
-            MutableDocWithOptionalIdAndField> {
+        TypedMutableDocumentObject<
+          DocWithOptionalIdAndField,
+          MutableDocWithOptionalIdAndField
+        > {
   /// Creates a new mutable [DocWithOptionalIdAndField].
-  MutableDocWithOptionalIdAndField(
-    String value, [
-    String? id,
-  ]) : super(id == null ? MutableDocument() : MutableDocument.withId(id)) {
+  MutableDocWithOptionalIdAndField(String value, [String? id])
+    : super(id == null ? MutableDocument() : MutableDocument.withId(id)) {
     this.value = value;
   }
 
@@ -312,12 +301,10 @@ abstract class _DocWithIdGetterImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithIdGetter',
-        fields: {
-          'id': id,
-        },
-      );
+    indent: indent,
+    className: 'DocWithIdGetter',
+    fields: {'id': id},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -366,12 +353,10 @@ abstract class _DocWithSequenceGetterImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithSequenceGetter',
-        fields: {
-          'sequence': sequence,
-        },
-      );
+    indent: indent,
+    className: 'DocWithSequenceGetter',
+    fields: {'sequence': sequence},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -394,8 +379,10 @@ class ImmutableDocWithSequenceGetter extends _DocWithSequenceGetterImplBase {
 class MutableDocWithSequenceGetter
     extends _DocWithSequenceGetterImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<DocWithSequenceGetter,
-            MutableDocWithSequenceGetter> {
+        TypedMutableDocumentObject<
+          DocWithSequenceGetter,
+          MutableDocWithSequenceGetter
+        > {
   /// Creates a new mutable [DocWithSequenceGetter].
   MutableDocWithSequenceGetter() : super(MutableDocument());
 
@@ -422,12 +409,10 @@ abstract class _DocWithRevisionIdGetterImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'DocWithRevisionIdGetter',
-        fields: {
-          'revisionId': revisionId,
-        },
-      );
+    indent: indent,
+    className: 'DocWithRevisionIdGetter',
+    fields: {'revisionId': revisionId},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -451,8 +436,10 @@ class ImmutableDocWithRevisionIdGetter
 class MutableDocWithRevisionIdGetter
     extends _DocWithRevisionIdGetterImplBase<MutableDocument>
     implements
-        TypedMutableDocumentObject<DocWithRevisionIdGetter,
-            MutableDocWithRevisionIdGetter> {
+        TypedMutableDocumentObject<
+          DocWithRevisionIdGetter,
+          MutableDocWithRevisionIdGetter
+        > {
   /// Creates a new mutable [DocWithRevisionIdGetter].
   MutableDocWithRevisionIdGetter() : super(MutableDocument());
 

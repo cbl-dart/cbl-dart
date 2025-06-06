@@ -14,8 +14,8 @@ final class ProxyIndexUpdater extends ProxyObject
     required CblServiceClient client,
     required this.index,
     required IndexUpdaterState state,
-  })  : length = state.length,
-        super(client.channel, state.id) {
+  }) : length = state.length,
+       super(client.channel, state.id) {
     needsToBeClosedByParent = false;
     attachTo(index);
   }
@@ -27,31 +27,30 @@ final class ProxyIndexUpdater extends ProxyObject
 
   @override
   Future<T?> value<T extends Object>(int index) => use(() async {
-        final sendableValue = await channel
-            .call(IndexUpdaterGetValue(updaterId: objectId, index: index));
+    final sendableValue = await channel.call(
+      IndexUpdaterGetValue(updaterId: objectId, index: index),
+    );
 
-        final value = MRoot.fromContext(
-          MContext(data: sendableValue.value),
-          isMutable: false,
-        ).asNative;
+    final value = MRoot.fromContext(
+      MContext(data: sendableValue.value),
+      isMutable: false,
+    ).asNative;
 
-        return coerceObject(value, coerceNull: false);
-      });
-
-  @override
-  Future<void> setVector(int index, List<double>? vector) =>
-      use(() => channel.call(IndexUpdaterSetVector(
-            updaterId: objectId,
-            index: index,
-            vector: vector,
-          )));
+    return coerceObject(value, coerceNull: false);
+  });
 
   @override
-  Future<void> skipVector(int index) =>
-      use(() => channel.call(IndexUpdaterSkipVector(
-            updaterId: objectId,
-            index: index,
-          )));
+  Future<void> setVector(int index, List<double>? vector) => use(
+    () => channel.call(
+      IndexUpdaterSetVector(updaterId: objectId, index: index, vector: vector),
+    ),
+  );
+
+  @override
+  Future<void> skipVector(int index) => use(
+    () =>
+        channel.call(IndexUpdaterSkipVector(updaterId: objectId, index: index)),
+  );
 
   @override
   Future<void> finish() =>

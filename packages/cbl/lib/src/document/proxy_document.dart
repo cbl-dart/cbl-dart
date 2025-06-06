@@ -13,24 +13,25 @@ final class ProxyDocumentDelegate
     DocumentState state, {
     ProxyDatabase? database,
     bool bindToProxiedDocument = true,
-  })  : assert(state.properties != null),
-        id = state.docId,
-        _revisionId = state.revisionId,
-        _sequence = state.sequence,
-        encodedProperties = state.properties?.encodedValue,
-        _propertiesDict = state.properties?.value.asDict {
+  }) : assert(state.properties != null),
+       id = state.docId,
+       _revisionId = state.revisionId,
+       _sequence = state.sequence,
+       encodedProperties = state.properties?.encodedValue,
+       _propertiesDict = state.properties?.value.asDict {
     if (bindToProxiedDocument) {
       _bindToProxiedDocument(database!, state);
     }
   }
 
   ProxyDocumentDelegate.fromDelegate(DocumentDelegate delegate)
-      : id = delegate.id,
-        _revisionId = delegate.revisionId,
-        _sequence = delegate.sequence,
-        encodedProperties = delegate.encodedProperties,
-        _propertiesDict =
-            delegate is ProxyDocumentDelegate ? delegate._propertiesDict : null;
+    : id = delegate.id,
+      _revisionId = delegate.revisionId,
+      _sequence = delegate.sequence,
+      encodedProperties = delegate.encodedProperties,
+      _propertiesDict = delegate is ProxyDocumentDelegate
+          ? delegate._propertiesDict
+          : null;
 
   ProxyDocumentDelegate? _source;
 
@@ -54,10 +55,7 @@ final class ProxyDocumentDelegate
   MRoot createMRoot(DelegateDocument document, {required bool isMutable}) {
     if (_propertiesDict case final dict?) {
       return MRoot.fromContext(
-        DocumentMContext(
-          document,
-          data: Value.fromPointer(dict.pointer),
-        ),
+        DocumentMContext(document, data: Value.fromPointer(dict.pointer)),
         isMutable: isMutable,
       );
     }
@@ -95,15 +93,15 @@ final class ProxyDocumentDelegate
   }
 
   DocumentState getState({bool withProperties = true}) => DocumentState(
-        id: objectId,
-        sourceId: _source?.objectId,
-        docId: id,
-        revisionId: revisionId,
-        sequence: sequence,
-        properties: withProperties
-            ? SendableValue.fromEncodedValue(encodedProperties!)
-            : null,
-      );
+    id: objectId,
+    sourceId: _source?.objectId,
+    docId: id,
+    revisionId: revisionId,
+    sequence: sequence,
+    properties: withProperties
+        ? SendableValue.fromEncodedValue(encodedProperties!)
+        : null,
+  );
 
   void _bindToProxiedDocument(ProxyDatabase database, DocumentState state) =>
       bindToTargetObject(database.channel, state.id!);

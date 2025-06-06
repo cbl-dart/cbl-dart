@@ -72,18 +72,9 @@ void main() {
     });
 
     test('==', () {
-      expect(
-        OID(const [1, 2, 3, 4, 5]),
-        isNot(OID(const [1, 2, 3, 4])),
-      );
-      expect(
-        OID(const [1, 2, 3, 4]),
-        isNot(OID(const [1, 2, 3, 4, 5])),
-      );
-      expect(
-        OID(const [1, 2, 3, 4]),
-        OID(const [1, 2, 3, 4]),
-      );
+      expect(OID(const [1, 2, 3, 4, 5]), isNot(OID(const [1, 2, 3, 4])));
+      expect(OID(const [1, 2, 3, 4]), isNot(OID(const [1, 2, 3, 4, 5])));
+      expect(OID(const [1, 2, 3, 4]), OID(const [1, 2, 3, 4]));
     });
 
     test('hashCode', () {
@@ -173,8 +164,9 @@ void main() {
       expect(attributes, identicalAttributes);
       expect(identicalAttributes, attributes);
 
-      const differentAttributes =
-          CertificateAttributes(commonName: 'OtherTest');
+      const differentAttributes = CertificateAttributes(
+        commonName: 'OtherTest',
+      );
       expect(attributes, isNot(differentAttributes));
       expect(differentAttributes, isNot(attributes));
     });
@@ -218,8 +210,9 @@ void main() {
         registeredId: OID(const [1, 2, 3, 4, 5]),
       );
 
-      const differentAttributes =
-          CertificateAttributes(commonName: 'OtherTest');
+      const differentAttributes = CertificateAttributes(
+        commonName: 'OtherTest',
+      );
 
       expect(attributes.hashCode, identicalAttributes.hashCode);
       expect(attributes.hashCode, isNot(differentAttributes.hashCode));
@@ -312,8 +305,9 @@ void main() {
         identityB.certificates.single.toPem(),
       ]);
 
-      final [certificateA, certificateB] =
-          Certificate.decodeMultiple(combinedPem);
+      final [certificateA, certificateB] = Certificate.decodeMultiple(
+        combinedPem,
+      );
       expect(certificateA.attributes, identityA.certificates.single.attributes);
       expect(certificateB.attributes, identityB.certificates.single.attributes);
     });
@@ -360,7 +354,7 @@ void main() {
         // specified when creating the identity.
         anyOf([
           futureExpiration,
-          futureExpiration.subtract(const Duration(seconds: 1))
+          futureExpiration.subtract(const Duration(seconds: 1)),
         ]),
       );
     });
@@ -405,8 +399,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
     group('fromExternal', () {
       group('failures', () {
         test('public key unavailable', skip: true, () async {
-          final keyPair =
-              await KeyPair.fromExternal(ExceptionExternalKeyPairDelegate());
+          final keyPair = await KeyPair.fromExternal(
+            ExceptionExternalKeyPairDelegate(),
+          );
           expect(await keyPair.publicKeyDigest, isNull);
           expect(await keyPair.publicKeyData, isNull);
         });
@@ -428,8 +423,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
       });
 
       test('create self-signed identity', () async {
-        final keyPair =
-            await KeyPair.fromExternal(PointycastleExternalKeyPairDelegate());
+        final keyPair = await KeyPair.fromExternal(
+          PointycastleExternalKeyPairDelegate(),
+        );
         final identity = await TlsIdentity.createIdentity(
           keyUsages: {KeyUsage.serverAuth},
           attributes: const CertificateAttributes(commonName: 'Test'),
@@ -447,8 +443,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
         final listenerDb = await openAsyncTestDatabase(name: 'listener');
         final clientDb = await openAsyncTestDatabase(name: 'client');
 
-        final keyPair =
-            await KeyPair.fromExternal(PointycastleExternalKeyPairDelegate());
+        final keyPair = await KeyPair.fromExternal(
+          PointycastleExternalKeyPairDelegate(),
+        );
         final identity = await TlsIdentity.createIdentity(
           keyUsages: {KeyUsage.serverAuth},
           attributes: const CertificateAttributes(commonName: 'Test'),
@@ -529,8 +526,10 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
         keyPair: keyPair,
       );
       final certificate = identity.certificates.single;
-      final restoredIdentify =
-          TlsIdentity.from(keyPair: keyPair, certificates: [certificate]);
+      final restoredIdentify = TlsIdentity.from(
+        keyPair: keyPair,
+        certificates: [certificate],
+      );
       final restoredCertificate = restoredIdentify.certificates.single;
       expect(restoredCertificate.attributes, certificate.attributes);
       expect(
@@ -552,7 +551,7 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
         // specified when creating the identity.
         anyOf([
           futureExpiration,
-          futureExpiration.subtract(const Duration(seconds: 1))
+          futureExpiration.subtract(const Duration(seconds: 1)),
         ]),
       );
       expect(identity.certificates.single.attributes.commonName, 'Test');
@@ -565,13 +564,16 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
           : null,
       () async {
         final label = base64Encode(randomBytes(16, random: Random()));
-        final identityFuture = Future(() => TlsIdentity.createIdentity(
-              keyUsages: {KeyUsage.serverAuth},
-              attributes:
-                  const CertificateAttributes(commonName: 'CBL Dart Test'),
-              expiration: futureExpiration,
-              label: label,
-            ));
+        final identityFuture = Future(
+          () => TlsIdentity.createIdentity(
+            keyUsages: {KeyUsage.serverAuth},
+            attributes: const CertificateAttributes(
+              commonName: 'CBL Dart Test',
+            ),
+            expiration: futureExpiration,
+            label: label,
+          ),
+        );
 
         if (await expectPersistedIdentityUnsupported(identityFuture)) {
           return;
@@ -590,8 +592,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
           certificate.attributes,
         );
 
-        retrievedIdentity =
-            await TlsIdentity.identityWithCertificates([certificate]);
+        retrievedIdentity = await TlsIdentity.identityWithCertificates([
+          certificate,
+        ]);
         expect(retrievedIdentity, isNotNull);
         expect(retrievedIdentity.expires, identity.expires);
         expect(
@@ -633,8 +636,9 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
         expiration: futureExpiration,
       );
       final certificate = identity.certificates;
-      final identityFuture =
-          Future(() => TlsIdentity.identityWithCertificates(certificate));
+      final identityFuture = Future(
+        () => TlsIdentity.identityWithCertificates(certificate),
+      );
 
       if (await expectPersistedIdentityUnsupported(identityFuture)) {
         return;
@@ -642,9 +646,11 @@ b17aolOOq/6xfP6QIc9I6pOoPhEFY18mCqVCKrF3YCQjVC3P7Ac1m2x5iMXL+fXF
 
       expect(
         identityFuture,
-        throwsA(isDatabaseException
-            .havingCode(DatabaseErrorCode.crypto)
-            .havingMessage('No matching private key in keystore')),
+        throwsA(
+          isDatabaseException
+              .havingCode(DatabaseErrorCode.crypto)
+              .havingMessage('No matching private key in keystore'),
+        ),
       );
     });
   });
@@ -692,20 +698,23 @@ final class PointycastleExternalKeyPairDelegate
     extends ExternalKeyPairDelegate {
   PointycastleExternalKeyPairDelegate() {
     final keyGenerator = RSAKeyGenerator()
-      ..init(ParametersWithRandom(
-        RSAKeyGeneratorParameters(
-          // Fermat prime that is often used for RSA keys.
-          BigInt.from(65537),
-          keySizeInBits,
-          64,
-        ),
-        FortunaRandom()
-          ..seed(
-            KeyParameter(platform_check.Platform.instance
-                .platformEntropySource()
-                .getBytes(32)),
+      ..init(
+        ParametersWithRandom(
+          RSAKeyGeneratorParameters(
+            // Fermat prime that is often used for RSA keys.
+            BigInt.from(65537),
+            keySizeInBits,
+            64,
           ),
-      ));
+          FortunaRandom()..seed(
+            KeyParameter(
+              platform_check.Platform.instance.platformEntropySource().getBytes(
+                32,
+              ),
+            ),
+          ),
+        ),
+      );
     _keyPair = keyGenerator.generateKeyPair();
   }
 
@@ -720,10 +729,11 @@ final class PointycastleExternalKeyPairDelegate
     final info = ASN1SubjectPublicKeyInfo(
       ASN1AlgorithmIdentifier.fromName('rsaEncryption'),
       ASN1BitString(
-        stringValues: (ASN1Sequence()
-              ..add(ASN1Integer(publicKey.modulus))
-              ..add(ASN1Integer(publicKey.exponent)))
-            .encode(),
+        stringValues:
+            (ASN1Sequence()
+                  ..add(ASN1Integer(publicKey.modulus))
+                  ..add(ASN1Integer(publicKey.exponent)))
+                .encode(),
       ),
     );
     return DerData(info.encode());
@@ -747,17 +757,14 @@ final class PointycastleExternalKeyPairDelegate
       return cypher.process(data);
     }
 
-    final signer = RSASigner(
-      _PassThroughDigest(data),
-      switch (algorithm) {
-        SignatureDigestAlgorithm.sha1 => '06052b0e03021a',
-        SignatureDigestAlgorithm.sha224 => '0609608648016503040204',
-        SignatureDigestAlgorithm.sha256 => '0609608648016503040201',
-        SignatureDigestAlgorithm.sha384 => '0609608648016503040202',
-        SignatureDigestAlgorithm.sha512 => '0609608648016503040203',
-        SignatureDigestAlgorithm.ripemd160 => '06052b24030201',
-      },
-    )..init(true, PrivateKeyParameter<RSAPrivateKey>(_keyPair.privateKey));
+    final signer = RSASigner(_PassThroughDigest(data), switch (algorithm) {
+      SignatureDigestAlgorithm.sha1 => '06052b0e03021a',
+      SignatureDigestAlgorithm.sha224 => '0609608648016503040204',
+      SignatureDigestAlgorithm.sha256 => '0609608648016503040201',
+      SignatureDigestAlgorithm.sha384 => '0609608648016503040202',
+      SignatureDigestAlgorithm.sha512 => '0609608648016503040203',
+      SignatureDigestAlgorithm.ripemd160 => '06052b24030201',
+    })..init(true, PrivateKeyParameter<RSAPrivateKey>(_keyPair.privateKey));
     return signer.generateSignature(data).bytes;
   }
 }

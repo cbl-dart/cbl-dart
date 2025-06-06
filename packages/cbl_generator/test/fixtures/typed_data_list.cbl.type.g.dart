@@ -25,12 +25,10 @@ abstract class _BoolListDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'BoolListDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'BoolListDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -67,9 +65,7 @@ class ImmutableBoolListDict extends _BoolListDictImplBase {
 class MutableBoolListDict extends _BoolListDictImplBase<MutableDictionary>
     implements TypedMutableDictionaryObject<BoolListDict, MutableBoolListDict> {
   /// Creates a new mutable [BoolListDict].
-  MutableBoolListDict(
-    List<bool> value,
-  ) : super(MutableDictionary()) {
+  MutableBoolListDict(List<bool> value) : super(MutableDictionary()) {
     this.value = value;
   }
 
@@ -122,12 +118,10 @@ abstract class _OptionalBoolListDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'OptionalBoolListDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'OptionalBoolListDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -164,12 +158,12 @@ class ImmutableOptionalBoolListDict extends _OptionalBoolListDictImplBase {
 class MutableOptionalBoolListDict
     extends _OptionalBoolListDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<OptionalBoolListDict,
-            MutableOptionalBoolListDict> {
+        TypedMutableDictionaryObject<
+          OptionalBoolListDict,
+          MutableOptionalBoolListDict
+        > {
   /// Creates a new mutable [OptionalBoolListDict].
-  MutableOptionalBoolListDict(
-    List<bool>? value,
-  ) : super(MutableDictionary()) {
+  MutableOptionalBoolListDict(List<bool>? value) : super(MutableDictionary()) {
     if (value != null) {
       this.value = value;
     }
@@ -185,11 +179,11 @@ class MutableOptionalBoolListDict
 
   late TypedDataList<bool, bool>? _value =
       TypedDataHelpers.readNullableProperty(
-    internal: internal,
-    name: 'value',
-    key: 'value',
-    converter: _valueConverter,
-  );
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        converter: _valueConverter,
+      );
 
   @override
   TypedDataList<bool, bool>? get value => _value;
@@ -225,12 +219,10 @@ abstract class _BoolDictListDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'BoolDictListDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'BoolDictListDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -239,8 +231,12 @@ class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
   ImmutableBoolDictListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
-    converter: const TypedDictionaryConverter<Dictionary, BoolDict,
-        TypedDictionaryObject<BoolDict>>(ImmutableBoolDict.internal),
+    converter:
+        const TypedDictionaryConverter<
+          Dictionary,
+          BoolDict,
+          TypedDictionaryObject<BoolDict>
+        >(ImmutableBoolDict.internal),
     isNullable: false,
     isCached: true,
   );
@@ -268,31 +264,35 @@ class ImmutableBoolDictListDict extends _BoolDictListDictImplBase {
 class MutableBoolDictListDict
     extends _BoolDictListDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<BoolDictListDict,
-            MutableBoolDictListDict> {
+        TypedMutableDictionaryObject<
+          BoolDictListDict,
+          MutableBoolDictListDict
+        > {
   /// Creates a new mutable [BoolDictListDict].
-  MutableBoolDictListDict(
-    List<BoolDict> value,
-  ) : super(MutableDictionary()) {
+  MutableBoolDictListDict(List<BoolDict> value) : super(MutableDictionary()) {
     this.value = value;
   }
 
   MutableBoolDictListDict.internal(super.internal);
 
   static const _valueConverter = const TypedListConverter(
-    converter: const TypedDictionaryConverter<MutableDictionary,
-        MutableBoolDict, BoolDict>(MutableBoolDict.internal),
+    converter:
+        const TypedDictionaryConverter<
+          MutableDictionary,
+          MutableBoolDict,
+          BoolDict
+        >(MutableBoolDict.internal),
     isNullable: false,
     isCached: true,
   );
 
   late TypedDataList<MutableBoolDict, BoolDict> _value =
       TypedDataHelpers.readProperty(
-    internal: internal,
-    name: 'value',
-    key: 'value',
-    converter: _valueConverter,
-  );
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        converter: _valueConverter,
+      );
 
   @override
   TypedDataList<MutableBoolDict, BoolDict> get value => _value;
@@ -328,12 +328,10 @@ abstract class _BoolListListDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'BoolListListDict',
-        fields: {
-          'value': value,
-        },
-      );
+    indent: indent,
+    className: 'BoolListListDict',
+    fields: {'value': value},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -374,12 +372,12 @@ class ImmutableBoolListListDict extends _BoolListListDictImplBase {
 class MutableBoolListListDict
     extends _BoolListListDictImplBase<MutableDictionary>
     implements
-        TypedMutableDictionaryObject<BoolListListDict,
-            MutableBoolListListDict> {
+        TypedMutableDictionaryObject<
+          BoolListListDict,
+          MutableBoolListListDict
+        > {
   /// Creates a new mutable [BoolListListDict].
-  MutableBoolListListDict(
-    List<List<bool>> value,
-  ) : super(MutableDictionary()) {
+  MutableBoolListListDict(List<List<bool>> value) : super(MutableDictionary()) {
     this.value = value;
   }
 
@@ -397,11 +395,11 @@ class MutableBoolListListDict
 
   late TypedDataList<TypedDataList<bool, bool>, List<bool>> _value =
       TypedDataHelpers.readProperty(
-    internal: internal,
-    name: 'value',
-    key: 'value',
-    converter: _valueConverter,
-  );
+        internal: internal,
+        name: 'value',
+        key: 'value',
+        converter: _valueConverter,
+      );
 
   @override
   TypedDataList<TypedDataList<bool, bool>, List<bool>> get value => _value;

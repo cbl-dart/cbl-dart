@@ -19,64 +19,60 @@ Future<void> removeDatabaseWithSharedIsolate(
   String name, {
   String? directory,
   Isolate isolate = Isolate.worker,
-}) =>
-    ProxyDatabase.remove(
-      name,
-      directory: directory,
-      client: _sharedIsolateClient(isolate),
-    );
+}) => ProxyDatabase.remove(
+  name,
+  directory: directory,
+  client: _sharedIsolateClient(isolate),
+);
 
 Future<bool> databaseExistsWithSharedIsolate(
   String name, {
   String? directory,
   Isolate isolate = Isolate.worker,
-}) =>
-    ProxyDatabase.exists(
-      name,
-      directory: directory,
-      client: _sharedIsolateClient(isolate),
-    );
+}) => ProxyDatabase.exists(
+  name,
+  directory: directory,
+  client: _sharedIsolateClient(isolate),
+);
 
 Future<void> copyDatabaseWithSharedIsolate({
   required String from,
   required String name,
   DatabaseConfiguration? config,
   Isolate isolate = Isolate.worker,
-}) =>
-    ProxyDatabase.copy(
-      from: from,
-      name: name,
-      config: config,
-      client: _sharedIsolateClient(isolate),
-    );
+}) => ProxyDatabase.copy(
+  from: from,
+  name: name,
+  config: config,
+  client: _sharedIsolateClient(isolate),
+);
 
 String databaseDirectoryForTest() => [
-      tmpDir,
-      'Databases',
-      if (testId != null) testId,
-    ].join(Platform.pathSeparator);
+  tmpDir,
+  'Databases',
+  if (testId != null) testId,
+].join(Platform.pathSeparator);
 
 FutureOr<Database> openTestDatabase({
   String name = 'db',
   DatabaseConfiguration? config,
   bool tearDown = true,
   TypedDataAdapter? typedDataAdapter,
-}) =>
-    runWithApi(
-      sync: () => openSyncTestDatabase(
-        name: name,
-        config: config,
-        tearDown: tearDown,
-        typedDataAdapter: typedDataAdapter,
-      ),
-      async: () => openAsyncTestDatabase(
-        name: name,
-        config: config,
-        tearDown: tearDown,
-        typedDataAdapter: typedDataAdapter,
-        isolate: isolate.value,
-      ),
-    );
+}) => runWithApi(
+  sync: () => openSyncTestDatabase(
+    name: name,
+    config: config,
+    tearDown: tearDown,
+    typedDataAdapter: typedDataAdapter,
+  ),
+  async: () => openAsyncTestDatabase(
+    name: name,
+    config: config,
+    tearDown: tearDown,
+    typedDataAdapter: typedDataAdapter,
+    isolate: isolate.value,
+  ),
+);
 
 SyncDatabase openSyncTestDatabase({
   String name = 'db',
@@ -150,35 +146,35 @@ CblServiceClient _sharedIsolateClient(Isolate isolate) {
 }
 
 FutureOr<Database> getSharedTestDatabase() => runWithApi(
-      sync: getSharedSyncTestDatabase,
-      async: () => getSharedAsyncTestDatabase(isolate: isolate.value),
-    );
+  sync: getSharedSyncTestDatabase,
+  async: () => getSharedAsyncTestDatabase(isolate: isolate.value),
+);
 
-SyncDatabase getSharedSyncTestDatabase() =>
-    _sharedSyncDatabase ??= openSyncTestDatabase(
-      name: 'shared-sync',
-      tearDown: false,
-    );
+SyncDatabase getSharedSyncTestDatabase() => _sharedSyncDatabase ??=
+    openSyncTestDatabase(name: 'shared-sync', tearDown: false);
 
 Future<AsyncDatabase> getSharedAsyncTestDatabase({
   Isolate isolate = Isolate.worker,
-}) =>
-    _sharedServiceDatabase ??= openAsyncTestDatabase(
-      name: 'shared-async-${isolate.name}',
-      tearDown: false,
-      isolate: isolate,
-    );
+}) => _sharedServiceDatabase ??= openAsyncTestDatabase(
+  name: 'shared-async-${isolate.name}',
+  tearDown: false,
+  isolate: isolate,
+);
 
 SyncDatabase? _sharedSyncDatabase;
 Future<AsyncDatabase>? _sharedServiceDatabase;
 Future<AsyncDatabase>? _sharedWorkerDatabase;
 
 void setupSharedTestDatabases() {
-  tearDownAll(() => Future.wait([
+  tearDownAll(
+    () => Future.wait(
+      [
         _sharedSyncDatabase?.close(),
         _sharedServiceDatabase?.then((db) => db.close()),
         _sharedWorkerDatabase?.then((db) => db.close()),
-      ].whereType<Future<void>>()));
+      ].whereType<Future<void>>(),
+    ),
+  );
 }
 
 late CblServiceClient sharedMainIsolateClient;
@@ -246,7 +242,8 @@ extension AsyncDatabaseUtilsExtension on Database {
       .asStream()
       .asyncExpand((query) => query.changes())
       .asyncMap(
-          (change) => change.results.asStream().map(_getIdFromResult).toList());
+        (change) => change.results.asStream().map(_getIdFromResult).toList(),
+      );
 
   FutureOr<Query> _allIdsQuery() => createQuery('SELECT META().id FROM _');
 
@@ -279,8 +276,10 @@ extension AsyncDatabaseUtilsExtension on Database {
         }
         if (this case AsyncDatabase(:final defaultCollection)) {
           return Future.wait(
-            documents.map((document) async =>
-                (await defaultCollection).saveDocument(document)),
+            documents.map(
+              (document) async =>
+                  (await defaultCollection).saveDocument(document),
+            ),
           );
         }
       });
@@ -293,9 +292,11 @@ extension ResultSetExt on ResultSet {
   Stream<List<Object?>> plainListStream() =>
       asStream().map((result) => result.toPlainList());
 
-  FutureOr<List<StringMap>> allPlainMapResults() => allResults()
-      .then((results) => results.map((result) => result.toPlainMap()).toList());
+  FutureOr<List<StringMap>> allPlainMapResults() => allResults().then(
+    (results) => results.map((result) => result.toPlainMap()).toList(),
+  );
 
   FutureOr<List<Object?>> allPlainListResults() => allResults().then(
-      (results) => results.map((result) => result.toPlainList()).toList());
+    (results) => results.map((result) => result.toPlainList()).toList(),
+  );
 }

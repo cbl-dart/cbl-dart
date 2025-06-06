@@ -23,8 +23,9 @@ void main() {
         expect(
           () => collection.saveTypedDocument(doc).withConcurrencyControl(),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -72,16 +73,18 @@ void main() {
               .withConcurrencyControl();
 
           expect(
-            await collection.saveTypedDocument(doc).withConflictHandler(
-              expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, same(doc));
-                expect(
-                  conflictingDocument!.internal.revisionId,
-                  conflictingDoc.internal.revisionId,
-                );
-                return false;
-              }),
-            ),
+            await collection
+                .saveTypedDocument(doc)
+                .withConflictHandler(
+                  expectAsync2((documentBeingSaved, conflictingDocument) {
+                    expect(documentBeingSaved, same(doc));
+                    expect(
+                      conflictingDocument!.internal.revisionId,
+                      conflictingDoc.internal.revisionId,
+                    );
+                    return false;
+                  }),
+                ),
             isFalse,
           );
           expect(
@@ -101,16 +104,18 @@ void main() {
               .withConcurrencyControl();
 
           expect(
-            await collection.saveTypedDocument(doc).withConflictHandler(
-              expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, same(doc));
-                expect(
-                  conflictingDocument!.internal.revisionId,
-                  conflictingDoc.internal.revisionId,
-                );
-                return true;
-              }),
-            ),
+            await collection
+                .saveTypedDocument(doc)
+                .withConflictHandler(
+                  expectAsync2((documentBeingSaved, conflictingDocument) {
+                    expect(documentBeingSaved, same(doc));
+                    expect(
+                      conflictingDocument!.internal.revisionId,
+                      conflictingDoc.internal.revisionId,
+                    );
+                    return true;
+                  }),
+                ),
             isTrue,
           );
           expect(
@@ -148,16 +153,18 @@ void main() {
           collection.saveTypedDocument(conflictingDoc).withConcurrencyControl();
 
           expect(
-            collection.saveTypedDocument(doc).withConflictHandlerSync(
-              expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, same(doc));
-                expect(
-                  conflictingDocument!.internal.revisionId,
-                  conflictingDoc.internal.revisionId,
-                );
-                return false;
-              }),
-            ),
+            collection
+                .saveTypedDocument(doc)
+                .withConflictHandlerSync(
+                  expectAsync2((documentBeingSaved, conflictingDocument) {
+                    expect(documentBeingSaved, same(doc));
+                    expect(
+                      conflictingDocument!.internal.revisionId,
+                      conflictingDoc.internal.revisionId,
+                    );
+                    return false;
+                  }),
+                ),
             isFalse,
           );
           expect(
@@ -175,16 +182,18 @@ void main() {
           collection.saveTypedDocument(conflictingDoc).withConcurrencyControl();
 
           expect(
-            collection.saveTypedDocument(doc).withConflictHandlerSync(
-              expectAsync2((documentBeingSaved, conflictingDocument) {
-                expect(documentBeingSaved, same(doc));
-                expect(
-                  conflictingDocument!.internal.revisionId,
-                  conflictingDoc.internal.revisionId,
-                );
-                return true;
-              }),
-            ),
+            collection
+                .saveTypedDocument(doc)
+                .withConflictHandlerSync(
+                  expectAsync2((documentBeingSaved, conflictingDocument) {
+                    expect(documentBeingSaved, same(doc));
+                    expect(
+                      conflictingDocument!.internal.revisionId,
+                      conflictingDoc.internal.revisionId,
+                    );
+                    return true;
+                  }),
+                ),
             isTrue,
           );
           expect(
@@ -203,8 +212,9 @@ void main() {
         expect(
           () => collection.typedDocument<TestDocA>('a'),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -223,8 +233,9 @@ void main() {
         final doc = MutableTestDocA();
         await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        final loadedDoc =
-            await collection.typedDocument<TestDocA>(doc.internal.id);
+        final loadedDoc = await collection.typedDocument<TestDocA>(
+          doc.internal.id,
+        );
         expect(loadedDoc, isNotNull);
         expect(loadedDoc!.internal.id, doc.internal.id);
         expect(loadedDoc.internal.sequence, doc.internal.sequence);
@@ -237,8 +248,9 @@ void main() {
         final doc = MutableTestDocA();
         await collection.saveTypedDocument(doc).withConcurrencyControl();
 
-        final loadedDoc =
-            await collection.typedDocument<MutableTestDocA>(doc.internal.id);
+        final loadedDoc = await collection.typedDocument<MutableTestDocA>(
+          doc.internal.id,
+        );
         expect(loadedDoc, isNotNull);
         expect(loadedDoc!.internal.id, doc.internal.id);
         expect(loadedDoc.internal.sequence, doc.internal.sequence);
@@ -264,8 +276,9 @@ void main() {
         await collection.saveTypedDocument(doc).withConcurrencyControl();
 
         expect(
-          await collection
-              .typedDocument<TypedMutableDocumentObject>(doc.internal.id),
+          await collection.typedDocument<TypedMutableDocumentObject>(
+            doc.internal.id,
+          ),
           isA<MutableTestDocA>(),
         );
       });
@@ -343,8 +356,9 @@ void main() {
         expect(
           () => collection.deleteTypedDocument(doc),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -372,8 +386,9 @@ void main() {
         expect(
           () => collection.purgeTypedDocument(doc),
           throwsA(
-            isTypedDataException
-                .havingCode(TypedDataErrorCode.typedDataNotSupported),
+            isTypedDataException.havingCode(
+              TypedDataErrorCode.typedDataNotSupported,
+            ),
           ),
         );
       });
@@ -411,7 +426,7 @@ class TestDocA<I extends Document>
 class MutableTestDocA extends TestDocA<MutableDocument>
     implements TypedMutableDocumentObject<TestDocA, MutableTestDocA> {
   MutableTestDocA([MutableDocument? document])
-      : super(document ?? MutableDocument());
+    : super(document ?? MutableDocument());
 
   @override
   String toString({String? indent}) => super.toString();
@@ -434,7 +449,7 @@ class TestDocB<I extends Document>
 class MutableTestDocB extends TestDocB<MutableDocument>
     implements TypedMutableDocumentObject<TestDocB, MutableTestDocB> {
   MutableTestDocB([MutableDocument? document])
-      : super(document ?? MutableDocument());
+    : super(document ?? MutableDocument());
 }
 
 class TestDocWithoutTypeMatcher<I extends Document>
@@ -455,10 +470,12 @@ class TestDocWithoutTypeMatcher<I extends Document>
 class MutableTestDocWithoutTypeMatcher
     extends TestDocWithoutTypeMatcher<MutableDocument>
     implements
-        TypedMutableDocumentObject<TestDocWithoutTypeMatcher,
-            MutableTestDocWithoutTypeMatcher> {
+        TypedMutableDocumentObject<
+          TestDocWithoutTypeMatcher,
+          MutableTestDocWithoutTypeMatcher
+        > {
   MutableTestDocWithoutTypeMatcher([MutableDocument? document])
-      : super(document ?? MutableDocument());
+    : super(document ?? MutableDocument());
 }
 
 final testAdapter = TypedDataRegistry(
@@ -475,8 +492,10 @@ final testAdapter = TypedDataRegistry(
       mutableFactory: MutableTestDocB.new,
       typeMatcher: const ValueTypeMatcher(),
     ),
-    TypedDocumentMetadata<TestDocWithoutTypeMatcher,
-        MutableTestDocWithoutTypeMatcher>(
+    TypedDocumentMetadata<
+      TestDocWithoutTypeMatcher,
+      MutableTestDocWithoutTypeMatcher
+    >(
       dartName: 'TestDocWithoutTypeMatcher',
       factory: TestDocWithoutTypeMatcher.new,
       mutableFactory: MutableTestDocWithoutTypeMatcher.new,

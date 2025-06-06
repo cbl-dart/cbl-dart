@@ -13,18 +13,14 @@ import 'ffi_database.dart';
 
 final class _FfiBlob implements Finalizable {
   _FfiBlob.fromPointer(this.pointer, {bool adopt = false}) {
-    bindCBLRefCountedToDartObject(
-      this,
-      pointer: pointer,
-      adopt: adopt,
-    );
+    bindCBLRefCountedToDartObject(this, pointer: pointer, adopt: adopt);
   }
 
   _FfiBlob.createWithData(String contentType, Data data)
-      : this.fromPointer(
-          _blobBindings.createWithData(contentType, data),
-          adopt: true,
-        );
+    : this.fromPointer(
+        _blobBindings.createWithData(contentType, data),
+        adopt: true,
+      );
 
   static final _blobBindings = CBLBindings.instance.blobs.blob;
 
@@ -33,11 +29,11 @@ final class _FfiBlob implements Finalizable {
   Data content() => _blobBindings.content(pointer);
 
   Map<String, Object?> createBlobProperties() => {
-        cblObjectTypeProperty: cblObjectTypeBlob,
-        blobDigestProperty: _blobBindings.digest(pointer),
-        blobLengthProperty: _blobBindings.length(pointer),
-        blobContentTypeProperty: _blobBindings.contentType(pointer),
-      };
+    cblObjectTypeProperty: cblObjectTypeBlob,
+    blobDigestProperty: _blobBindings.digest(pointer),
+    blobLengthProperty: _blobBindings.length(pointer),
+    blobContentTypeProperty: _blobBindings.contentType(pointer),
+  };
 }
 
 final class FfiBlobStore implements BlobStore, SyncBlobStore {
@@ -58,8 +54,7 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
   Future<Map<String, Object?>> saveBlobFromData(
     String contentType,
     Data data,
-  ) async =>
-      saveBlobFromDataSync(contentType, data);
+  ) async => saveBlobFromDataSync(contentType, data);
 
   @override
   Future<Map<String, Object?>> saveBlobFromStream(
@@ -74,8 +69,10 @@ final class FfiBlobStore implements BlobStore, SyncBlobStore {
   @override
   bool blobExists(Map<String, Object?> properties) {
     final dict = MutableDict(properties);
-    final cblBlob =
-        _databaseBindings.getBlob(database.pointer, dict.pointer.cast());
+    final cblBlob = _databaseBindings.getBlob(
+      database.pointer,
+      dict.pointer.cast(),
+    );
 
     if (cblBlob == null) {
       return false;
@@ -116,8 +113,9 @@ Future<_FfiBlob> _createBlobFromStream(
   final writeStream = _writeStreamBindings.create(database.pointer);
 
   try {
-    await stream
-        .forEach((data) => _writeStreamBindings.write(writeStream, data));
+    await stream.forEach(
+      (data) => _writeStreamBindings.write(writeStream, data),
+    );
 
     return _FfiBlob.fromPointer(
       _writeStreamBindings.createBlobWithStream(contentType, writeStream),
@@ -187,13 +185,12 @@ final class _BlobReadStream extends Stream<Data> implements Finalizable {
     Function? onError,
     void Function()? onDone,
     bool? cancelOnError,
-  }) =>
-      _controller.stream
-          .transform(ResourceStreamTransformer(parent: parent, blocking: true))
-          .listen(
-            onData,
-            onError: onError,
-            onDone: onDone,
-            cancelOnError: cancelOnError,
-          );
+  }) => _controller.stream
+      .transform(ResourceStreamTransformer(parent: parent, blocking: true))
+      .listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
 }

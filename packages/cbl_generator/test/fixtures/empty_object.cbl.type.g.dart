@@ -22,10 +22,10 @@ abstract class _EmptyDocImplBase<I extends Document>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'EmptyDoc',
-        fields: {},
-      );
+    indent: indent,
+    className: 'EmptyDoc',
+    fields: {},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or
@@ -73,10 +73,10 @@ abstract class _EmptyDictImplBase<I extends Dictionary>
 
   @override
   String toString({String? indent}) => TypedDataHelpers.renderString(
-        indent: indent,
-        className: 'EmptyDict',
-        fields: {},
-      );
+    indent: indent,
+    className: 'EmptyDict',
+    fields: {},
+  );
 }
 
 /// DO NOT USE: Internal implementation detail, which might be changed or

@@ -24,27 +24,29 @@ import 'variable_expression.dart';
 /// Here is how to build a range predicate expression:
 ///
 /// ```dart
-/// final expr = ArrayExpression
+/// final expr =
+///     ArrayExpression
 ///         // To build a range predicate you start by selecting one the
 ///         // quantifiers and defining the variable to which the array elements
 ///         // will be assigned.
 ///         .any(ArrayExpression.variable('myVar'))
-///     // Next, you specify the array expression to evaluate the range
-///     // predicate against.
-///     .in_(Expression.property('myArray'))
-///     // And lastly, you specify the condition which is evaluated for each
-///     // array element, which should reference the previously defined variable.
-///     .satisfies(
-///       ArrayExpression.variable('myVar').equalTo(Expression.value(true)),
-///     );
+///         // Next, you specify the array expression to evaluate the range
+///         // predicate against.
+///         .in_(Expression.property('myArray'))
+///         // And lastly, you specify the condition which is evaluated for each
+///         // array element, which should reference the previously defined variable.
+///         .satisfies(
+///           ArrayExpression.variable('myVar').equalTo(Expression.value(true)),
+///         );
 /// ```
 ///
 /// In the condition given to `satisfies`, you can use a variable expression
 /// which specifies a property path, if the array contains nested collections:
 ///
 /// ```dart
-/// final expr = ArrayExpression.variable('myVar.property')
-///     .equalTo(Expression.value(true));
+/// final expr = ArrayExpression.variable(
+///   'myVar.property',
+/// ).equalTo(Expression.value(true));
 /// ```
 ///
 /// {@category Query Builder}

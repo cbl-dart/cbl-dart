@@ -252,8 +252,7 @@ abstract base class ExpressionImpl implements ExpressionInterface {
   ExpressionInterface between(
     ExpressionInterface expression, {
     required ExpressionInterface and,
-  }) =>
-      TernaryExpression('BETWEEN', this, expression, and);
+  }) => TernaryExpression('BETWEEN', this, expression, and);
 
   @override
   // ignore: non_constant_identifier_names
@@ -291,11 +290,14 @@ final class ValueExpression extends ExpressionImpl {
     return value;
   }
 
-  static Object? _mapToJson(Map<String, Object?> map) =>
-      {for (final entry in map.entries) entry.key: _valueToJson(entry.value)};
+  static Object? _mapToJson(Map<String, Object?> map) => {
+    for (final entry in map.entries) entry.key: _valueToJson(entry.value),
+  };
 
-  static Object? _iterableToJson(Iterable<Object?> iterable) =>
-      ['[]', ...iterable.map(_valueToJson)];
+  static Object? _iterableToJson(Iterable<Object?> iterable) => [
+    '[]',
+    ...iterable.map(_valueToJson),
+  ];
 }
 
 final class NullaryExpression extends ExpressionImpl {
@@ -309,8 +311,8 @@ final class NullaryExpression extends ExpressionImpl {
 
 final class UnaryExpression extends ExpressionImpl {
   UnaryExpression(String operator, ExpressionInterface operand)
-      : _operator = operator,
-        _operand = operand as ExpressionImpl;
+    : _operator = operator,
+      _operand = operand as ExpressionImpl;
 
   final String _operator;
   final ExpressionImpl _operand;
@@ -321,18 +323,23 @@ final class UnaryExpression extends ExpressionImpl {
 
 final class BinaryExpression extends ExpressionImpl {
   BinaryExpression(
-      String operator, ExpressionInterface left, ExpressionInterface? right)
-      : _operator = operator,
-        _left = left as ExpressionImpl,
-        _right = right as ExpressionImpl?;
+    String operator,
+    ExpressionInterface left,
+    ExpressionInterface? right,
+  ) : _operator = operator,
+      _left = left as ExpressionImpl,
+      _right = right as ExpressionImpl?;
 
   final String _operator;
   final ExpressionImpl _left;
   final ExpressionImpl? _right;
 
   @override
-  Object? toJson() =>
-      [_operator, _left.toJson(), if (_right != null) _right.toJson()];
+  Object? toJson() => [
+    _operator,
+    _left.toJson(),
+    if (_right != null) _right.toJson(),
+  ];
 }
 
 final class TernaryExpression extends ExpressionImpl {
@@ -341,10 +348,10 @@ final class TernaryExpression extends ExpressionImpl {
     ExpressionInterface operand0,
     ExpressionInterface operand1,
     ExpressionInterface operand2,
-  )   : _operator = operator,
-        _operand0 = operand0 as ExpressionImpl,
-        _operand1 = operand1 as ExpressionImpl,
-        _operand2 = operand2 as ExpressionImpl;
+  ) : _operator = operator,
+      _operand0 = operand0 as ExpressionImpl,
+      _operand1 = operand1 as ExpressionImpl,
+      _operand2 = operand2 as ExpressionImpl;
 
   final String _operator;
   final ExpressionImpl _operand0;
@@ -352,31 +359,35 @@ final class TernaryExpression extends ExpressionImpl {
   final ExpressionImpl _operand2;
 
   @override
-  Object? toJson() =>
-      [_operator, _operand0.toJson(), _operand1.toJson(), _operand2.toJson()];
+  Object? toJson() => [
+    _operator,
+    _operand0.toJson(),
+    _operand1.toJson(),
+    _operand2.toJson(),
+  ];
 }
 
 final class VariadicExpression extends ExpressionImpl {
-  VariadicExpression(
-    String operator,
-    Iterable<ExpressionInterface> operands,
-  )   : _operator = operator,
-        _operands = operands.toList().cast();
+  VariadicExpression(String operator, Iterable<ExpressionInterface> operands)
+    : _operator = operator,
+      _operands = operands.toList().cast();
 
   final String _operator;
   final List<ExpressionImpl> _operands;
 
   @override
-  Object? toJson() =>
-      [_operator, ..._operands.map((operand) => operand.toJson())];
+  Object? toJson() => [
+    _operator,
+    ..._operands.map((operand) => operand.toJson()),
+  ];
 }
 
 final class CollateExpression extends ExpressionImpl {
   CollateExpression(
     CollationInterface collation,
     ExpressionInterface expression,
-  )   : _collation = collation as CollationImpl,
-        _expression = expression as ExpressionImpl;
+  ) : _collation = collation as CollationImpl,
+      _expression = expression as ExpressionImpl;
 
   final CollationImpl _collation;
   final ExpressionImpl _expression;
@@ -385,11 +396,7 @@ final class CollateExpression extends ExpressionImpl {
   Object? toJson() => ['COLLATE', _collation.toJson(), _expression.toJson()];
 }
 
-enum Quantifier {
-  any,
-  every,
-  anyAndEvery,
-}
+enum Quantifier { any, every, anyAndEvery }
 
 final class RangePredicateExpression extends ExpressionImpl {
   RangePredicateExpression(
@@ -398,10 +405,10 @@ final class RangePredicateExpression extends ExpressionImpl {
     // ignore: non_constant_identifier_names
     ExpressionInterface in_,
     ExpressionInterface satisfies,
-  )   : _quantifier = quantifier,
-        _variable = variable as VariableExpressionImpl,
-        _in = in_ as ExpressionImpl,
-        _satisfies = satisfies as ExpressionImpl;
+  ) : _quantifier = quantifier,
+      _variable = variable as VariableExpressionImpl,
+      _in = in_ as ExpressionImpl,
+      _satisfies = satisfies as ExpressionImpl;
 
   final Quantifier _quantifier;
   final VariableExpressionImpl _variable;
@@ -426,7 +433,7 @@ final class RangePredicateExpression extends ExpressionImpl {
       operator,
       _variable.propertyPath,
       _in.toJson(),
-      _satisfies.toJson()
+      _satisfies.toJson(),
     ];
   }
 }

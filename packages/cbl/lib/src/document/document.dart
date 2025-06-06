@@ -108,11 +108,11 @@ abstract interface class DocumentDelegate {
 /// implementation or have a factory create new documents.
 final class NewDocumentDelegate extends DocumentDelegate {
   NewDocumentDelegate([String? id, this.encodedProperties])
-      : id = id ?? createUuid();
+    : id = id ?? createUuid();
 
   NewDocumentDelegate.mutableCopy(NewDocumentDelegate delegate)
-      : id = delegate.id,
-        encodedProperties = delegate.encodedProperties;
+    : id = delegate.id,
+      encodedProperties = delegate.encodedProperties;
 
   @override
   final String id;
@@ -184,11 +184,9 @@ final class DocumentMContext implements DatabaseMContext {
 }
 
 final class DelegateDocument with IterableMixin<String> implements Document {
-  DelegateDocument(
-    DocumentDelegate delegate, {
-    CollectionBase? collection,
-  })  : _delegate = delegate,
-        _collection = collection {
+  DelegateDocument(DocumentDelegate delegate, {CollectionBase? collection})
+    : _delegate = delegate,
+      _collection = collection {
     _setupProperties();
   }
 
@@ -207,10 +205,7 @@ final class DelegateDocument with IterableMixin<String> implements Document {
 
   DatabaseBase? get database => collection?.database;
 
-  void setDelegate(
-    DocumentDelegate delegate, {
-    bool updateProperties = true,
-  }) {
+  void setDelegate(DocumentDelegate delegate, {bool updateProperties = true}) {
     if (_delegate == delegate) {
       return;
     }
@@ -227,25 +222,25 @@ final class DelegateDocument with IterableMixin<String> implements Document {
     _setupProperties();
   }
 
-  FutureOr<Data> encodeProperties({
-    bool saveExternalData = false,
-  }) {
-    final externalDataSaved =
-        saveExternalData ? _root.saveExternalData(database!) : null;
+  FutureOr<Data> encodeProperties({bool saveExternalData = false}) {
+    final externalDataSaved = saveExternalData
+        ? _root.saveExternalData(database!)
+        : null;
 
-    return externalDataSaved
-        .then((_) => FleeceEncoder.fleece.encodeWith((encoder) {
-              encoder.extraInfo = FleeceEncoderContext(
-                database: database,
-                encodeUnsavedBlobWithData: true,
-              );
-              _root.encodeTo(encoder);
-            }));
+    return externalDataSaved.then(
+      (_) => FleeceEncoder.fleece.encodeWith((encoder) {
+        encoder.extraInfo = FleeceEncoderContext(
+          database: database,
+          encodeUnsavedBlobWithData: true,
+        );
+        _root.encodeTo(encoder);
+      }),
+    );
   }
 
-  FutureOr<void> updateEncodedProperties() =>
-      encodeProperties(saveExternalData: true)
-          .then((properties) => delegate.encodedProperties = properties);
+  FutureOr<void> updateEncodedProperties() => encodeProperties(
+    saveExternalData: true,
+  ).then((properties) => delegate.encodedProperties = properties);
 
   bool get _isMutable => false;
   String get _typeName => 'Document';
@@ -312,9 +307,9 @@ final class DelegateDocument with IterableMixin<String> implements Document {
 
   @override
   MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
-        delegate.toMutable(),
-        collection: collection,
-      );
+    delegate.toMutable(),
+    collection: collection,
+  );
 
   @override
   String toJson() => _properties.toJson();
@@ -334,7 +329,8 @@ final class DelegateDocument with IterableMixin<String> implements Document {
   int get hashCode => collection.hashCode ^ id.hashCode ^ _properties.hashCode;
 
   @override
-  String toString() => '$_typeName('
+  String toString() =>
+      '$_typeName('
       'id: $id, '
       'revisionId: $revisionId, '
       // ignore: missing_whitespace_between_adjacent_strings
@@ -345,10 +341,10 @@ final class DelegateDocument with IterableMixin<String> implements Document {
 final class MutableDelegateDocument extends DelegateDocument
     implements MutableDocument {
   MutableDelegateDocument([Map<String, Object?>? data])
-      : this.fromDelegate(NewDocumentDelegate(), data: data);
+    : this.fromDelegate(NewDocumentDelegate(), data: data);
 
   MutableDelegateDocument.withId(String id, [Map<String, Object?>? data])
-      : this.fromDelegate(NewDocumentDelegate(id), data: data);
+    : this.fromDelegate(NewDocumentDelegate(id), data: data);
 
   MutableDelegateDocument.fromDelegate(
     super.delegate, {
@@ -432,11 +428,11 @@ final class MutableDelegateDocument extends DelegateDocument
 
   @override
   MutableDocument toMutable() => MutableDelegateDocument.fromDelegate(
-        delegate.toMutable(),
-        collection: collection,
-        // We make a deep copy of the properties, to include modifications of
-        // this document, which have not been synced with the delegate, in the
-        // copy.
-        data: toPlainMap(),
-      );
+    delegate.toMutable(),
+    collection: collection,
+    // We make a deep copy of the properties, to include modifications of
+    // this document, which have not been synced with the delegate, in the
+    // copy.
+    data: toPlainMap(),
+  );
 }

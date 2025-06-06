@@ -33,10 +33,8 @@ abstract final class ListenerAuthenticator {}
 
 final class FfiListenAuthenticator
     implements ListenerAuthenticator, Finalizable {
-  FfiListenAuthenticator.fromPointer(
-    this.pointer, {
-    NativeCallable? callable,
-  }) : _callable = callable {
+  FfiListenAuthenticator.fromPointer(this.pointer, {NativeCallable? callable})
+    : _callable = callable {
     _callable?.keepIsolateAlive = false;
     _bindings.bindAuthenticatorToDartObject(this, pointer);
   }
@@ -71,10 +69,8 @@ final class FfiListenAuthenticator
 ///
 /// {@category Replication}
 /// {@category Enterprise Edition}
-typedef ListenerPasswordAuthenticatorFunction = FutureOr<bool> Function(
-  String username,
-  String password,
-);
+typedef ListenerPasswordAuthenticatorFunction =
+    FutureOr<bool> Function(String username, String password);
 
 /// A password-based [ListenerAuthenticator] for a [UrlEndpointListener].
 ///
@@ -126,8 +122,8 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
 
     final callable =
         NativeCallable<CBLDartListenerPasswordAuthCallbackFunction>.listener(
-      trampoline,
-    );
+          trampoline,
+        );
 
     return _ListenerPasswordAuthenticator.fromPointer(
       _bindings.createPasswordAuthenticator(callable.nativeFunction),
@@ -135,10 +131,8 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
     );
   }
 
-  _ListenerPasswordAuthenticator.fromPointer(
-    super.pointer, {
-    super.callable,
-  }) : super.fromPointer();
+  _ListenerPasswordAuthenticator.fromPointer(super.pointer, {super.callable})
+    : super.fromPointer();
 
   @override
   String toString() => 'ListenerPasswordAuthenticator()';
@@ -154,9 +148,8 @@ final class _ListenerPasswordAuthenticator extends FfiListenAuthenticator
 ///
 /// {@category Replication}
 /// {@category Enterprise Edition}
-typedef ListenerCertificateAuthenticatorFunction = FutureOr<bool> Function(
-  Certificate certificate,
-);
+typedef ListenerCertificateAuthenticatorFunction =
+    FutureOr<bool> Function(Certificate certificate);
 
 /// A certificate-based [ListenerAuthenticator] for a [UrlEndpointListener].
 ///
@@ -215,8 +208,8 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
 
     final callable =
         NativeCallable<CBLDartListenerCertAuthCallbackFunction>.listener(
-      trampoline,
-    );
+          trampoline,
+        );
 
     return _ListenerCertificateAuthenticator.fromPointer(
       _bindings.createCertificateAuthenticator(callable.nativeFunction),
@@ -224,17 +217,16 @@ final class _ListenerCertificateAuthenticator extends FfiListenAuthenticator
     );
   }
 
-  _ListenerCertificateAuthenticator.fromPointer(
-    super.pointer, {
-    super.callable,
-  }) : super.fromPointer();
+  _ListenerCertificateAuthenticator.fromPointer(super.pointer, {super.callable})
+    : super.fromPointer();
 
   @override
   String toString() => 'ListenerCertificateAuthenticator()';
 }
 
 final class _ListenerCertificateAuthenticatorFromRoots
-    extends FfiListenAuthenticator implements ListenerCertificateAuthenticator {
+    extends FfiListenAuthenticator
+    implements ListenerCertificateAuthenticator {
   factory _ListenerCertificateAuthenticatorFromRoots(
     List<Certificate> certificates,
   ) {
@@ -251,8 +243,8 @@ final class _ListenerCertificateAuthenticatorFromRoots
   _ListenerCertificateAuthenticatorFromRoots.fromPointer(
     super.pointer, {
     required List<Certificate> certificates,
-  })  : _certificates = certificates,
-        super.fromPointer();
+  }) : _certificates = certificates,
+       super.fromPointer();
 
   final List<Certificate> _certificates;
 
@@ -293,14 +285,14 @@ final class UrlEndpointListenerConfiguration {
   /// Creates a new [UrlEndpointListenerConfiguration] that is initialized with
   /// the state of the given [config].
   UrlEndpointListenerConfiguration.from(UrlEndpointListenerConfiguration config)
-      : _collections = List.unmodifiable(config.collections),
-        port = config.port,
-        networkInterface = config.networkInterface,
-        disableTls = config.disableTls,
-        tlsIdentity = config.tlsIdentity,
-        authenticator = config.authenticator,
-        enableDeltaSync = config.enableDeltaSync,
-        readOnly = config.readOnly;
+    : _collections = List.unmodifiable(config.collections),
+      port = config.port,
+      networkInterface = config.networkInterface,
+      disableTls = config.disableTls,
+      tlsIdentity = config.tlsIdentity,
+      authenticator = config.authenticator,
+      enableDeltaSync = config.enableDeltaSync,
+      readOnly = config.readOnly;
 
   /// The [Collection]s available for replication.
   ///
@@ -361,19 +353,19 @@ final class UrlEndpointListenerConfiguration {
 
   @override
   String toString() => [
-        'URLEndpointListenerConfiguration(',
-        [
-          'collections: $collections',
-          if (port != null) 'port: $port',
-          if (networkInterface != null) 'networkInterface: $networkInterface',
-          if (disableTls) 'DISABLE-TLS',
-          if (tlsIdentity != null) 'tlsIdentity: $tlsIdentity',
-          if (authenticator != null) 'authenticator: $authenticator',
-          if (enableDeltaSync) 'ENABLE-DELTA-SYNC',
-          if (readOnly) 'READ-ONLY',
-        ].join(', '),
-        ')',
-      ].join();
+    'URLEndpointListenerConfiguration(',
+    [
+      'collections: $collections',
+      if (port != null) 'port: $port',
+      if (networkInterface != null) 'networkInterface: $networkInterface',
+      if (disableTls) 'DISABLE-TLS',
+      if (tlsIdentity != null) 'tlsIdentity: $tlsIdentity',
+      if (authenticator != null) 'authenticator: $authenticator',
+      if (enableDeltaSync) 'ENABLE-DELTA-SYNC',
+      if (readOnly) 'READ-ONLY',
+    ].join(', '),
+    ')',
+  ].join();
 }
 
 /// The connection status of an [UrlEndpointListener].
@@ -396,7 +388,8 @@ final class ConnectionStatus {
   final int activeConnectionCount;
 
   @override
-  String toString() => 'ConnectionStatus('
+  String toString() =>
+      'ConnectionStatus('
       'connectionCount: $connectionCount, '
       'activeConnectionCount: $activeConnectionCount'
       ')';
@@ -419,8 +412,7 @@ abstract final class UrlEndpointListener {
   /// Creates a new [UrlEndpointListener] with the specified configuration.
   static Future<UrlEndpointListener> create(
     UrlEndpointListenerConfiguration config,
-  ) =>
-      FfiUrlEndpointListener.create(config);
+  ) => FfiUrlEndpointListener.create(config);
 
   /// The configuration of this listener.
   UrlEndpointListenerConfiguration get config;
@@ -478,11 +470,13 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
 
     final pointer = await _create(
       collections: config.collections
-          .map((collection) => switch (collection) {
-                FfiCollection() => collection.pointer,
-                ProxyCollection() => collection.state.pointer,
-                _ => throw UnimplementedError(),
-              })
+          .map(
+            (collection) => switch (collection) {
+              FfiCollection() => collection.pointer,
+              ProxyCollection() => collection.state.pointer,
+              _ => throw UnimplementedError(),
+            },
+          )
           .toList(),
       port: config.port,
       networkInterface: config.networkInterface,
@@ -511,17 +505,18 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
     required Pointer<CBLListenerAuthenticator>? authenticatorPointer,
     required bool enableDeltaSync,
     required bool readOnly,
-  }) async =>
-      runInSecondaryIsolate(() => _bindings.create(
-            collections: collections,
-            port: port,
-            networkInterface: networkInterface,
-            disableTls: disableTls,
-            tlsIdentity: tlsIdentityPointer,
-            authenticator: authenticatorPointer,
-            enableDeltaSync: enableDeltaSync,
-            readOnly: readOnly,
-          ));
+  }) async => runInSecondaryIsolate(
+    () => _bindings.create(
+      collections: collections,
+      port: port,
+      networkInterface: networkInterface,
+      disableTls: disableTls,
+      tlsIdentity: tlsIdentityPointer,
+      authenticator: authenticatorPointer,
+      enableDeltaSync: enableDeltaSync,
+      readOnly: readOnly,
+    ),
+  );
 
   final Pointer<CBLURLEndpointListener> _pointer;
   final UrlEndpointListenerConfiguration _config;
@@ -567,14 +562,14 @@ final class FfiUrlEndpointListener implements UrlEndpointListener, Finalizable {
 
   @override
   String toString() => [
-        'UrlEndpointListener(',
-        [
-          'config: $config',
-          if (port != null) 'port: $port',
-          if (urls != null) 'urls: $urls',
-          if (tlsIdentity != null) 'tlsIdentity: $tlsIdentity',
-          'connectionStatus: $connectionStatus',
-        ].join(', '),
-        ')',
-      ].join();
+    'UrlEndpointListener(',
+    [
+      'config: $config',
+      if (port != null) 'port: $port',
+      if (urls != null) 'urls: $urls',
+      if (tlsIdentity != null) 'tlsIdentity: $tlsIdentity',
+      'connectionStatus: $connectionStatus',
+    ].join(', '),
+    ')',
+  ].join();
 }
