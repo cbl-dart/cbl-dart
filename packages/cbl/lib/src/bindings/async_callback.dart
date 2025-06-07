@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'dart:isolate';
 
 import 'bindings.dart';
-import 'cblitedart.dart';
+import 'cblitedart.dart' as cblitedart_lib;
 
 export 'cblitedart.dart' show CBLDart_AsyncCallback;
 
@@ -10,16 +10,16 @@ final class AsyncCallbackBindings extends Bindings {
   AsyncCallbackBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(
-    cblDart.addresses.CBLDart_AsyncCallback_Delete.cast(),
+    cblitedart.addresses.CBLDart_AsyncCallback_Delete.cast(),
   );
 
-  CBLDart_AsyncCallback create(
+  cblitedart_lib.CBLDart_AsyncCallback create(
     int id,
     Finalizable callbackObject,
     SendPort sendPort, {
     required bool debug,
   }) {
-    final result = cblDart.CBLDart_AsyncCallback_New(
+    final result = cblitedart.CBLDart_AsyncCallback_New(
       id,
       sendPort.nativePort,
       debug,
@@ -28,11 +28,11 @@ final class AsyncCallbackBindings extends Bindings {
     return result;
   }
 
-  void close(CBLDart_AsyncCallback callback) {
-    cblDart.CBLDart_AsyncCallback_Close(callback);
+  void close(cblitedart_lib.CBLDart_AsyncCallback callback) {
+    cblitedart.CBLDart_AsyncCallback_Close(callback);
   }
 
-  void callForTest(CBLDart_AsyncCallback callback, int result) {
-    cblDart.CBLDart_AsyncCallback_CallForTest(callback, result);
+  void callForTest(cblitedart_lib.CBLDart_AsyncCallback callback, int result) {
+    cblitedart.CBLDart_AsyncCallback_CallForTest(callback, result);
   }
 }

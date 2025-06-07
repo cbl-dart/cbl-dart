@@ -2,7 +2,7 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
-import 'cblite.dart' as cblite;
+import 'cblite.dart' as cblite_lib;
 import 'global.dart';
 import 'native_utf8_string.dart';
 import 'slice.dart';
@@ -19,7 +19,7 @@ Object? cblReachabilityFence(Object? object) => object;
 // === Conversion ==============================================================
 
 extension StringFLStringExt on String? {
-  cblite.FLString toFLString() {
+  cblite_lib.FLString toFLString() {
     final self = this;
     if (self == null) {
       return nullFLString.ref;
@@ -28,7 +28,7 @@ extension StringFLStringExt on String? {
     return nativeUtf8StringEncoder.encode(self, globalArena).toFLString().ref;
   }
 
-  cblite.FLString makeGlobalFLString() {
+  cblite_lib.FLString makeGlobalFLString() {
     final self = this;
     if (self == null) {
       globalFLString.ref
@@ -45,12 +45,12 @@ extension StringFLStringExt on String? {
 }
 
 extension NativeUtf8StringFLStringExt on NativeUtf8String {
-  cblite.FLString makeGlobalFLString() => globalFLString.ref
+  cblite_lib.FLString makeGlobalFLString() => globalFLString.ref
     ..buf = buffer.cast()
     ..size = size;
 
-  Pointer<cblite.FLString> toFLString() {
-    final flString = globalArena<cblite.FLString>();
+  Pointer<cblite_lib.FLString> toFLString() {
+    final flString = globalArena<cblite_lib.FLString>();
 
     flString.ref
       ..buf = buffer.cast()
@@ -62,7 +62,7 @@ extension NativeUtf8StringFLStringExt on NativeUtf8String {
 
 T runWithSingleFLString<T>(
   String? string,
-  T Function(cblite.FLString flString) fn,
+  T Function(cblite_lib.FLString flString) fn,
 ) {
   if (string == null) {
     return fn(nullFLString.ref);

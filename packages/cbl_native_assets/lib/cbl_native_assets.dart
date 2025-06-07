@@ -32,8 +32,8 @@ abstract final class CouchbaseLiteNativeAssets {
             bindings: CBLBindings(
               BindingsLibraries(
                 enterpriseEdition: true,
-                cbl: const cbliteNative(),
-                cblDart: const cblitedartNative(),
+                cblite: const cbliteNative(),
+                cblitedart: const cblitedartNative(),
               ),
             ),
           ),

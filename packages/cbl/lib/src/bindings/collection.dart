@@ -4,8 +4,8 @@ import 'dart:typed_data';
 
 import 'base.dart';
 import 'bindings.dart';
-import 'cblite.dart' as cblite;
-import 'cblitedart.dart' as cblitedart;
+import 'cblite.dart' as cblite_lib;
+import 'cblitedart.dart' as cblitedart_lib;
 import 'database.dart';
 import 'global.dart';
 import 'query.dart';
@@ -45,10 +45,10 @@ final class CBLIndexSpec {
   final int? dimensions;
   final int? centroids;
   final bool? lazy;
-  final cblite.DartCBLScalarQuantizerType? scalarQuantizerType;
+  final cblite_lib.DartCBLScalarQuantizerType? scalarQuantizerType;
   final int? productQuantizerSubQuantizers;
   final int? productQuantizerBits;
-  final cblite.DartCBLDistanceMetric? metric;
+  final cblite_lib.DartCBLDistanceMetric? metric;
   final int? minTrainingSize;
   final int? maxTrainingSize;
   final int? numProbes;
@@ -66,15 +66,16 @@ final class CollectionChangeCallbackMessage {
 final class CollectionBindings extends Bindings {
   CollectionBindings(super.libraries);
 
-  cblite.FLMutableArray databaseScopeNames(Pointer<cblite.CBLDatabase> db) =>
-      cbl.CBLDatabase_ScopeNames(db, globalCBLError).checkError();
+  cblite_lib.FLMutableArray databaseScopeNames(
+    Pointer<cblite_lib.CBLDatabase> db,
+  ) => cblite.CBLDatabase_ScopeNames(db, globalCBLError).checkError();
 
-  Pointer<cblite.CBLScope>? databaseScope(
-    Pointer<cblite.CBLDatabase> db,
+  Pointer<cblite_lib.CBLScope>? databaseScope(
+    Pointer<cblite_lib.CBLDatabase> db,
     String scopeName,
   ) => runWithSingleFLString(
     scopeName,
-    (flScopeName) => cbl.CBLDatabase_Scope(
+    (flScopeName) => cblite.CBLDatabase_Scope(
       db,
       flScopeName,
       // TODO(blaugold): Remove reset once bug is fixed.
@@ -83,15 +84,16 @@ final class CollectionBindings extends Bindings {
     ).checkError().toNullable(),
   );
 
-  cblite.FLMutableArray scopeCollectionNames(Pointer<cblite.CBLScope> scope) =>
-      cbl.CBLScope_CollectionNames(scope, globalCBLError).checkError();
+  cblite_lib.FLMutableArray scopeCollectionNames(
+    Pointer<cblite_lib.CBLScope> scope,
+  ) => cblite.CBLScope_CollectionNames(scope, globalCBLError).checkError();
 
-  Pointer<cblite.CBLCollection>? scopeCollection(
-    Pointer<cblite.CBLScope> scope,
+  Pointer<cblite_lib.CBLCollection>? scopeCollection(
+    Pointer<cblite_lib.CBLScope> scope,
     String collectionName,
   ) => runWithSingleFLString(
     collectionName,
-    (flCollectionName) => cbl.CBLScope_Collection(
+    (flCollectionName) => cblite.CBLScope_Collection(
       scope,
       flCollectionName,
       // TODO(blaugold): Remove reset once bug is fixed.
@@ -100,12 +102,12 @@ final class CollectionBindings extends Bindings {
     ).checkError().toNullable(),
   );
 
-  Pointer<cblite.CBLCollection> databaseCreateCollection(
-    Pointer<cblite.CBLDatabase> db,
+  Pointer<cblite_lib.CBLCollection> databaseCreateCollection(
+    Pointer<cblite_lib.CBLDatabase> db,
     String collectionName,
     String scopeName,
   ) => withGlobalArena(
-    () => cbl.CBLDatabase_CreateCollection(
+    () => cblite.CBLDatabase_CreateCollection(
       db,
       collectionName.toFLString(),
       scopeName.toFLString(),
@@ -114,11 +116,11 @@ final class CollectionBindings extends Bindings {
   );
 
   void databaseDeleteCollection(
-    Pointer<cblite.CBLDatabase> db,
+    Pointer<cblite_lib.CBLDatabase> db,
     String collectionName,
     String scopeName,
   ) => withGlobalArena(
-    () => cbl.CBLDatabase_DeleteCollection(
+    () => cblite.CBLDatabase_DeleteCollection(
       db,
       collectionName.toFLString(),
       scopeName.toFLString(),
@@ -126,28 +128,29 @@ final class CollectionBindings extends Bindings {
     ).checkError(),
   );
 
-  int count(Pointer<cblite.CBLCollection> collection) =>
-      cbl.CBLCollection_Count(collection);
+  int count(Pointer<cblite_lib.CBLCollection> collection) =>
+      cblite.CBLCollection_Count(collection);
 
-  Pointer<cblite.CBLDocument>? getDocument(
-    Pointer<cblite.CBLCollection> collection,
+  Pointer<cblite_lib.CBLDocument>? getDocument(
+    Pointer<cblite_lib.CBLCollection> collection,
     String docId,
   ) => runWithSingleFLString(
     docId,
     (flDocId) => nativeCallTracePoint(
       TracedNativeCall.collectionGetDocument,
-      () => cbl.CBLCollection_GetDocument(collection, flDocId, globalCBLError),
+      () =>
+          cblite.CBLCollection_GetDocument(collection, flDocId, globalCBLError),
     ).checkError().toNullable(),
   );
 
   void saveDocumentWithConcurrencyControl(
-    Pointer<cblite.CBLCollection> collection,
-    Pointer<cblite.CBLDocument> doc,
+    Pointer<cblite_lib.CBLCollection> collection,
+    Pointer<cblite_lib.CBLDocument> doc,
     CBLConcurrencyControl concurrencyControl,
   ) {
     nativeCallTracePoint(
       TracedNativeCall.collectionSaveDocument,
-      () => cbl.CBLCollection_SaveDocumentWithConcurrencyControl(
+      () => cblite.CBLCollection_SaveDocumentWithConcurrencyControl(
         collection,
         doc,
         concurrencyControl.value,
@@ -157,12 +160,12 @@ final class CollectionBindings extends Bindings {
   }
 
   bool deleteDocumentWithConcurrencyControl(
-    Pointer<cblite.CBLCollection> collection,
-    Pointer<cblite.CBLDocument> document,
+    Pointer<cblite_lib.CBLCollection> collection,
+    Pointer<cblite_lib.CBLDocument> document,
     CBLConcurrencyControl concurrencyControl,
   ) => nativeCallTracePoint(
     TracedNativeCall.collectionDeleteDocument,
-    () => cbl.CBLCollection_DeleteDocumentWithConcurrencyControl(
+    () => cblite.CBLCollection_DeleteDocumentWithConcurrencyControl(
       collection,
       document,
       concurrencyControl.value,
@@ -170,10 +173,10 @@ final class CollectionBindings extends Bindings {
     ),
   ).checkError();
 
-  bool purgeDocumentByID(Pointer<cblite.CBLCollection> db, String docId) =>
+  bool purgeDocumentByID(Pointer<cblite_lib.CBLCollection> db, String docId) =>
       runWithSingleFLString(
         docId,
-        (flDocId) => cbl.CBLCollection_PurgeDocumentByID(
+        (flDocId) => cblite.CBLCollection_PurgeDocumentByID(
           db,
           flDocId,
           globalCBLError,
@@ -181,10 +184,10 @@ final class CollectionBindings extends Bindings {
       );
 
   DateTime? getDocumentExpiration(
-    Pointer<cblite.CBLCollection> collection,
+    Pointer<cblite_lib.CBLCollection> collection,
     String docId,
   ) => runWithSingleFLString(docId, (flDocId) {
-    final result = cbl.CBLCollection_GetDocumentExpiration(
+    final result = cblite.CBLCollection_GetDocumentExpiration(
       collection,
       flDocId,
       globalCBLError,
@@ -198,11 +201,11 @@ final class CollectionBindings extends Bindings {
   });
 
   void setDocumentExpiration(
-    Pointer<cblite.CBLCollection> collection,
+    Pointer<cblite_lib.CBLCollection> collection,
     String docId,
     DateTime? expiration,
   ) => runWithSingleFLString(docId, (flDocId) {
-    cbl.CBLCollection_SetDocumentExpiration(
+    cblite.CBLCollection_SetDocumentExpiration(
       collection,
       flDocId,
       expiration?.millisecondsSinceEpoch ?? 0,
@@ -210,15 +213,18 @@ final class CollectionBindings extends Bindings {
     ).checkError();
   });
 
-  cblite.FLArray indexNames(Pointer<cblite.CBLCollection> collection) =>
-      cbl.CBLCollection_GetIndexNames(collection, globalCBLError).checkError();
+  cblite_lib.FLArray indexNames(Pointer<cblite_lib.CBLCollection> collection) =>
+      cblite.CBLCollection_GetIndexNames(
+        collection,
+        globalCBLError,
+      ).checkError();
 
-  Pointer<cblite.CBLQueryIndex>? index(
-    Pointer<cblite.CBLCollection> collection,
+  Pointer<cblite_lib.CBLQueryIndex>? index(
+    Pointer<cblite_lib.CBLCollection> collection,
     String name,
   ) => runWithSingleFLString(
     name,
-    (flName) => cbl.CBLCollection_GetIndex(
+    (flName) => cblite.CBLCollection_GetIndex(
       collection,
       flName,
       globalCBLError,
@@ -226,12 +232,12 @@ final class CollectionBindings extends Bindings {
   );
 
   void createIndex(
-    Pointer<cblite.CBLCollection> collection,
+    Pointer<cblite_lib.CBLCollection> collection,
     String name,
     CBLIndexSpec spec,
   ) {
     withGlobalArena(() {
-      cblDart.CBLDart_CBLCollection_CreateIndex(
+      cblitedart.CBLDart_CBLCollection_CreateIndex(
         collection,
         name.toFLString(),
         _createIndexSpec(spec).ref,
@@ -240,9 +246,9 @@ final class CollectionBindings extends Bindings {
     });
   }
 
-  void deleteIndex(Pointer<cblite.CBLCollection> collection, String name) {
+  void deleteIndex(Pointer<cblite_lib.CBLCollection> collection, String name) {
     runWithSingleFLString(name, (flName) {
-      cbl.CBLCollection_DeleteIndex(
+      cblite.CBLCollection_DeleteIndex(
         collection,
         flName,
         globalCBLError,
@@ -250,8 +256,10 @@ final class CollectionBindings extends Bindings {
     });
   }
 
-  Pointer<cblitedart.CBLDart_CBLIndexSpec> _createIndexSpec(CBLIndexSpec spec) {
-    final result = globalArena<cblitedart.CBLDart_CBLIndexSpec>();
+  Pointer<cblitedart_lib.CBLDart_CBLIndexSpec> _createIndexSpec(
+    CBLIndexSpec spec,
+  ) {
+    final result = globalArena<cblitedart_lib.CBLDart_CBLIndexSpec>();
     final ref = result.ref
       ..type = spec.type.value
       ..expressionLanguage = spec.expressionLanguage.value
@@ -267,19 +275,19 @@ final class CollectionBindings extends Bindings {
       case CBLDartIndexType.vector:
         final encoding = switch (spec) {
           CBLIndexSpec(:final scalarQuantizerType?) =>
-            cbl.CBLVectorEncoding_CreateScalarQuantizer(scalarQuantizerType),
+            cblite.CBLVectorEncoding_CreateScalarQuantizer(scalarQuantizerType),
           CBLIndexSpec(
             :final productQuantizerSubQuantizers?,
             :final productQuantizerBits?,
           ) =>
-            cbl.CBLVectorEncoding_CreateProductQuantizer(
+            cblite.CBLVectorEncoding_CreateProductQuantizer(
               productQuantizerSubQuantizers,
               productQuantizerBits,
             ),
-          _ => cbl.CBLVectorEncoding_CreateNone(),
+          _ => cblite.CBLVectorEncoding_CreateNone(),
         };
 
-        globalArena.onReleaseAll(() => cbl.CBLVectorEncoding_Free(encoding));
+        globalArena.onReleaseAll(() => cblite.CBLVectorEncoding_Free(encoding));
 
         ref
           ..dimensions = spec.dimensions!
@@ -296,13 +304,13 @@ final class CollectionBindings extends Bindings {
   }
 
   void addDocumentChangeListener(
-    Pointer<cblite.CBLDatabase> db,
-    Pointer<cblite.CBLCollection> collection,
+    Pointer<cblite_lib.CBLDatabase> db,
+    Pointer<cblite_lib.CBLCollection> collection,
     String docId,
-    cblitedart.CBLDart_AsyncCallback listener,
+    cblitedart_lib.CBLDart_AsyncCallback listener,
   ) {
     runWithSingleFLString(docId, (flDocId) {
-      cblDart.CBLDart_CBLCollection_AddDocumentChangeListener(
+      cblitedart.CBLDart_CBLCollection_AddDocumentChangeListener(
         db,
         collection,
         flDocId,
@@ -312,10 +320,14 @@ final class CollectionBindings extends Bindings {
   }
 
   void addChangeListener(
-    Pointer<cblite.CBLDatabase> db,
-    Pointer<cblite.CBLCollection> collection,
-    cblitedart.CBLDart_AsyncCallback listener,
+    Pointer<cblite_lib.CBLDatabase> db,
+    Pointer<cblite_lib.CBLCollection> collection,
+    cblitedart_lib.CBLDart_AsyncCallback listener,
   ) {
-    cblDart.CBLDart_CBLCollection_AddChangeListener(db, collection, listener);
+    cblitedart.CBLDart_CBLCollection_AddChangeListener(
+      db,
+      collection,
+      listener,
+    );
   }
 }

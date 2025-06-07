@@ -2,8 +2,8 @@ import '../support/errors.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
-import 'cblite.dart';
-import 'cblitedart.dart';
+import 'cblite.dart' as cblite_lib;
+import 'cblitedart.dart' as cblitedart_lib;
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -20,28 +20,30 @@ class BindingsLibraries {
   BindingsLibraries({
     required this.enterpriseEdition,
     this.vectorSearchLibraryPath,
-    required this.cbl,
-    required this.cblDart,
+    required this.cblite,
+    required this.cblitedart,
   });
 
   BindingsLibraries.fromDynamicLibraries(DynamicLibraries dynamicLibraries)
     : enterpriseEdition = dynamicLibraries.enterpriseEdition,
       vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
-      cbl = cblite(dynamicLibraries.cbl),
-      cblDart = cblitedart(dynamicLibraries.cblDart);
+      cblite = cblite_lib.cblite(dynamicLibraries.cbl),
+      cblitedart = cblitedart_lib.cblitedart(dynamicLibraries.cblDart);
 
   final bool enterpriseEdition;
   final String? vectorSearchLibraryPath;
-  final cblite cbl;
-  final cblitedart cblDart;
+  final cblite_lib.cblite cblite;
+  final cblitedart_lib.cblitedart cblitedart;
 }
 
 abstract base class Bindings {
-  Bindings(this.libraries) : cbl = libraries.cbl, cblDart = libraries.cblDart;
+  Bindings(this.libraries)
+    : cblite = libraries.cblite,
+      cblitedart = libraries.cblitedart;
 
   final BindingsLibraries libraries;
-  final cblite cbl;
-  final cblitedart cblDart;
+  final cblite_lib.cblite cblite;
+  final cblitedart_lib.cblitedart cblitedart;
 }
 
 final class CBLBindings extends Bindings {

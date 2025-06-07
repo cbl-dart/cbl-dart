@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import 'bindings.dart';
-import 'cblite.dart' as cblite;
+import 'cblite.dart' as cblite_lib;
 import 'global.dart';
 import 'utils.dart';
 
@@ -37,14 +37,14 @@ final class Slice implements Finalizable {
 
   /// Creates a [Slice] which points to the same data as [slice].
   ///
-  /// Returns `null` if the [cblite.FLSlice] is the _null slice_.
-  static Slice? fromFLSlice(cblite.FLSlice slice) =>
+  /// Returns `null` if the [cblite_lib.FLSlice] is the _null slice_.
+  static Slice? fromFLSlice(cblite_lib.FLSlice slice) =>
       slice.buf == nullptr ? null : Slice._(slice.buf, slice.size);
 
   /// Creates a [Slice] which points to the same data as [string].
   ///
-  /// Returns `null` if the [cblite.FLSlice] is the _null slice_.
-  static Slice? fromFLString(cblite.FLString string) =>
+  /// Returns `null` if the [cblite_lib.FLSlice] is the _null slice_.
+  static Slice? fromFLString(cblite_lib.FLString string) =>
       string.buf == nullptr ? null : Slice._(string.buf, string.size);
 
   /// The pointer to start of this slice in native memory.
@@ -57,16 +57,16 @@ final class Slice implements Finalizable {
   String toDartString() => buf.cast<Utf8>().toDartString(length: size);
 
   /// Sets the [globalFLSlice] to this slice and returns it.
-  Pointer<cblite.FLSlice> makeGlobal() {
+  Pointer<cblite_lib.FLSlice> makeGlobal() {
     globalFLSlice.ref
       ..buf = buf
       ..size = size;
     return globalFLSlice;
   }
 
-  /// Allocates a [cblite.FLSlice] sets it to this slice.
-  Pointer<cblite.FLSlice> flSlice([Allocator allocator = malloc]) {
-    final result = allocator<cblite.FLSlice>();
+  /// Allocates a [cblite_lib.FLSlice] sets it to this slice.
+  Pointer<cblite_lib.FLSlice> flSlice([Allocator allocator = malloc]) {
+    final result = allocator<cblite_lib.FLSlice>();
     result.ref
       ..buf = buf
       ..size = size;
@@ -82,7 +82,7 @@ final class Slice implements Finalizable {
   /// |    > 0 | this slice is after [other]    |
   int compareTo(Slice other) {
     final aFLSlice = makeGlobal();
-    final bFLSlice = cachedSliceResultAllocator<cblite.FLSlice>();
+    final bFLSlice = cachedSliceResultAllocator<cblite_lib.FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -116,7 +116,7 @@ final class Slice implements Finalizable {
     }
 
     final aFLSlice = makeGlobal();
-    final bFLSlice = cachedSliceResultAllocator<cblite.FLSlice>();
+    final bFLSlice = cachedSliceResultAllocator<cblite_lib.FLSlice>();
     bFLSlice.ref
       ..buf = other.buf
       ..size = other.size;
@@ -153,7 +153,7 @@ final class SliceResult extends Slice {
     : this._fromFLSliceResult(_sliceBindings.copy(slice.makeGlobal().ref));
 
   SliceResult._fromFLSliceResult(
-    cblite.FLSliceResult slice, {
+    cblite_lib.FLSliceResult slice, {
     bool retain = false,
   }) : this._(slice.buf, slice.size, retain: retain);
 
@@ -171,16 +171,17 @@ final class SliceResult extends Slice {
     return SliceResult(encoded.length)..asTypedList().setAll(0, encoded);
   }
 
-  /// Creates a [SliceResult] from a [cblite.FLSlice] by copying its content.
-  static SliceResult? fromFLSlice(cblite.FLSlice slice) =>
+  /// Creates a [SliceResult] from a [cblite_lib.FLSlice] by copying its
+  /// content.
+  static SliceResult? fromFLSlice(cblite_lib.FLSlice slice) =>
       Slice.fromFLSlice(slice)?.let(SliceResult.fromSlice);
 
-  /// Creates a [SliceResult] from [cblite.FLSliceResult].
+  /// Creates a [SliceResult] from [cblite_lib.FLSliceResult].
   ///
   /// If the the slice should be retained, set [retain] to `true`. The slice
   /// will be release when this object is garbage collected.
   static SliceResult? fromFLSliceResult(
-    cblite.FLSliceResult slice, {
+    cblite_lib.FLSliceResult slice, {
     bool retain = false,
   }) => slice.buf == nullptr
       ? null
@@ -189,16 +190,18 @@ final class SliceResult extends Slice {
   static final _keepAliveForTypedList = Expando<SliceResult>();
 
   /// Sets the [globalFLSliceResult] to this slice and returns it.
-  Pointer<cblite.FLSliceResult> makeGlobalResult() {
+  Pointer<cblite_lib.FLSliceResult> makeGlobalResult() {
     globalFLSliceResult.ref
       ..buf = buf
       ..size = size;
     return globalFLSliceResult;
   }
 
-  /// Allocates a [cblite.FLSliceResult] sets it to this slice.
-  Pointer<cblite.FLSliceResult> flSliceResult([Allocator allocator = malloc]) {
-    final result = allocator<cblite.FLSliceResult>();
+  /// Allocates a [cblite_lib.FLSliceResult] sets it to this slice.
+  Pointer<cblite_lib.FLSliceResult> flSliceResult([
+    Allocator allocator = malloc,
+  ]) {
+    final result = allocator<cblite_lib.FLSliceResult>();
     result.ref
       ..buf = buf
       ..size = size;
