@@ -2,8 +2,6 @@ import '../support/errors.dart';
 import 'async_callback.dart';
 import 'base.dart';
 import 'blob.dart';
-import 'cblite.dart';
-import 'cblitedart.dart';
 import 'collection.dart';
 import 'database.dart';
 import 'document.dart';
@@ -20,28 +18,20 @@ class BindingsLibraries {
   BindingsLibraries({
     required this.enterpriseEdition,
     this.vectorSearchLibraryPath,
-    required this.cbl,
-    required this.cblDart,
   });
 
   BindingsLibraries.fromDynamicLibraries(DynamicLibraries dynamicLibraries)
     : enterpriseEdition = dynamicLibraries.enterpriseEdition,
-      vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath,
-      cbl = cblite(dynamicLibraries.cbl),
-      cblDart = cblitedart(dynamicLibraries.cblDart);
+      vectorSearchLibraryPath = dynamicLibraries.vectorSearchLibraryPath;
 
   final bool enterpriseEdition;
   final String? vectorSearchLibraryPath;
-  final cblite cbl;
-  final cblitedart cblDart;
 }
 
 abstract base class Bindings {
-  Bindings(this.libraries) : cbl = libraries.cbl, cblDart = libraries.cblDart;
+  const Bindings(this.libraries);
 
   final BindingsLibraries libraries;
-  final cblite cbl;
-  final cblitedart cblDart;
 }
 
 final class CBLBindings extends Bindings {

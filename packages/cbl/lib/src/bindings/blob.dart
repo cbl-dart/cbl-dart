@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'base.dart';
 import 'bindings.dart';
 import 'cblite.dart' as cblite;
+import 'cblitedart.dart' as cblitedart;
 import 'data.dart';
 import 'fleece.dart';
 import 'global.dart';
@@ -19,35 +20,35 @@ final class BlobBindings extends Bindings {
   Pointer<cblite.CBLBlob> createWithData(String? contentType, Data content) =>
       runWithSingleFLString(contentType, (flContentType) {
         final sliceResult = content.toSliceResult();
-        return cbl.CBLBlob_CreateWithData(
+        return cblite.CBLBlob_CreateWithData(
           flContentType,
           sliceResult.makeGlobal().ref,
         );
       });
 
-  bool isBlob(cblite.FLDict dict) => cbl.FLDict_IsBlob(dict);
+  bool isBlob(cblite.FLDict dict) => cblite.FLDict_IsBlob(dict);
 
   Pointer<cblite.CBLBlob>? getBlob(cblite.FLDict dict) =>
-      cbl.FLDict_GetBlob(dict).toNullable();
+      cblite.FLDict_GetBlob(dict).toNullable();
 
   void setBlob(cblite.FLSlot slot, Pointer<cblite.CBLBlob> blob) =>
-      cbl.FLSlot_SetBlob(slot, blob);
+      cblite.FLSlot_SetBlob(slot, blob);
 
-  int length(Pointer<cblite.CBLBlob> blob) => cbl.CBLBlob_Length(blob);
+  int length(Pointer<cblite.CBLBlob> blob) => cblite.CBLBlob_Length(blob);
 
   String digest(Pointer<cblite.CBLBlob> blob) =>
-      cbl.CBLBlob_Digest(blob).toDartString()!;
+      cblite.CBLBlob_Digest(blob).toDartString()!;
 
-  Data content(Pointer<cblite.CBLBlob> blob) => cbl.CBLBlob_Content(
+  Data content(Pointer<cblite.CBLBlob> blob) => cblite.CBLBlob_Content(
     blob,
     globalCBLError,
   ).checkError().let(SliceResult.fromFLSliceResult)!.toData();
 
   String? contentType(Pointer<cblite.CBLBlob> blob) =>
-      cbl.CBLBlob_ContentType(blob).toDartString();
+      cblite.CBLBlob_ContentType(blob).toDartString();
 
   cblite.FLDict properties(Pointer<cblite.CBLBlob> blob) =>
-      cbl.CBLBlob_Properties(blob);
+      cblite.CBLBlob_Properties(blob);
 }
 
 // === CBLBlobReadStream =======================================================
@@ -56,12 +57,12 @@ final class BlobReadStreamBindings extends Bindings {
   BlobReadStreamBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(
-    cbl.addresses.CBLBlobReader_Close.cast(),
+    cblite.addresses.CBLBlobReader_Close.cast(),
   );
 
   Pointer<cblite.CBLBlobReadStream> openContentStream(
     Pointer<cblite.CBLBlob> blob,
-  ) => cbl.CBLBlob_OpenContentStream(blob, globalCBLError).checkError();
+  ) => cblite.CBLBlob_OpenContentStream(blob, globalCBLError).checkError();
 
   void bindToDartObject(
     Finalizable object,
@@ -71,7 +72,7 @@ final class BlobReadStreamBindings extends Bindings {
   }
 
   Data? read(Pointer<cblite.CBLBlobReadStream> stream, int bufferSize) {
-    final buffer = cblDart.CBLDart_CBLBlobReader_Read(
+    final buffer = cblitedart.CBLDart_CBLBlobReader_Read(
       stream,
       bufferSize,
       globalCBLError,
@@ -95,15 +96,15 @@ final class BlobWriteStreamBindings extends Bindings {
   BlobWriteStreamBindings(super.libraries);
 
   Pointer<cblite.CBLBlobWriteStream> create(Pointer<cblite.CBLDatabase> db) =>
-      cbl.CBLBlobWriter_Create(db, globalCBLError).checkError();
+      cblite.CBLBlobWriter_Create(db, globalCBLError).checkError();
 
   void close(Pointer<cblite.CBLBlobWriteStream> stream) {
-    cbl.CBLBlobWriter_Close(stream);
+    cblite.CBLBlobWriter_Close(stream);
   }
 
   bool write(Pointer<cblite.CBLBlobWriteStream> stream, Data data) {
     final slice = data.toSliceResult();
-    return cbl.CBLBlobWriter_Write(
+    return cblite.CBLBlobWriter_Write(
       stream,
       slice.buf,
       slice.size,
@@ -116,7 +117,7 @@ final class BlobWriteStreamBindings extends Bindings {
     Pointer<cblite.CBLBlobWriteStream> stream,
   ) => runWithSingleFLString(
     contentType,
-    (flContentType) => cbl.CBLBlob_CreateWithStream(flContentType, stream),
+    (flContentType) => cblite.CBLBlob_CreateWithStream(flContentType, stream),
   );
 }
 

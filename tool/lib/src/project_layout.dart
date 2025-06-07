@@ -47,9 +47,6 @@ final class PackagesLayout {
   final String rootDir;
 
   late final cbl = PackageLayout(p.join(rootDir, 'cbl'));
-  late final cblNativeAssets = PackageLayout(
-    p.join(rootDir, 'cbl_native_assets'),
-  );
 }
 
 final class PackageLayout {

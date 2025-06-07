@@ -138,27 +138,28 @@ final class LoggingBindings extends Bindings {
   void logMessage(CBLLogDomain domain, CBLLogLevel level, String message) {
     runWithSingleFLString(
       message,
-      (flMessage) => cbl.CBL_LogMessage(domain.value, level.value, flMessage),
+      (flMessage) =>
+          cblite.CBL_LogMessage(domain.value, level.value, flMessage),
     );
   }
 
   CBLLogLevel consoleLevel() =>
-      CBLLogLevel.fromValue(cbl.CBLLog_ConsoleLevel());
+      CBLLogLevel.fromValue(cblite.CBLLog_ConsoleLevel());
 
   void setConsoleLevel(CBLLogLevel logLevel) {
-    cbl.CBLLog_SetConsoleLevel(logLevel.value);
+    cblite.CBLLog_SetConsoleLevel(logLevel.value);
   }
 
   void setCallbackLevel(CBLLogLevel logLevel) {
-    cblDart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
+    cblitedart.CBLDart_CBLLog_SetCallbackLevel(logLevel.value);
   }
 
   bool setCallback(cblitedart.CBLDart_AsyncCallback callback) =>
-      cblDart.CBLDart_CBLLog_SetCallback(callback);
+      cblitedart.CBLDart_CBLLog_SetCallback(callback);
 
   void setFileLogConfiguration(CBLLogFileConfiguration? config) {
     withGlobalArena(() {
-      cblDart.CBLDart_CBLLog_SetFileConfig(
+      cblitedart.CBLDart_CBLLog_SetFileConfig(
         _logFileConfig(config),
         globalCBLError,
       ).checkError();
@@ -166,13 +167,13 @@ final class LoggingBindings extends Bindings {
   }
 
   CBLLogFileConfiguration? getLogFileConfiguration() =>
-      cblDart.CBLDart_CBLLog_GetFileConfig()
+      cblitedart.CBLDart_CBLLog_GetFileConfig()
           .toNullable()
           ?.ref
           .toCBLLogFileConfiguration();
 
   bool setSentryBreadcrumbs({required bool enabled}) =>
-      cblDart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
+      cblitedart.CBLDart_CBLLog_SetSentryBreadcrumbs(enabled);
 
   Pointer<cblite.CBLLogFileConfiguration> _logFileConfig(
     CBLLogFileConfiguration? config,
