@@ -4,21 +4,21 @@ import 'dart:typed_data';
 import '../bindings.dart';
 import '../fleece/containers.dart';
 import 'base.dart';
-import 'cblite.dart';
-import 'cblitedart.dart' hide CBLCert, CBLKeyPair;
+import 'cblite.dart' as cblite;
+import 'cblitedart.dart' as cblitedart;
 import 'fleece.dart';
 import 'global.dart';
 import 'utils.dart';
 
 enum CBLKeyUsages {
-  clientAuth(kCBLKeyUsagesClientAuth),
-  serverAuth(kCBLKeyUsagesServerAuth);
+  clientAuth(cblite.kCBLKeyUsagesClientAuth),
+  serverAuth(cblite.kCBLKeyUsagesServerAuth);
 
   const CBLKeyUsages(this.value);
 
   factory CBLKeyUsages.fromValue(int value) => switch (value) {
-    kCBLKeyUsagesClientAuth => clientAuth,
-    kCBLKeyUsagesServerAuth => serverAuth,
+    cblite.kCBLKeyUsagesClientAuth => clientAuth,
+    cblite.kCBLKeyUsagesServerAuth => serverAuth,
     _ => throw ArgumentError('Unknown key usage: $value'),
   };
 
@@ -26,24 +26,24 @@ enum CBLKeyUsages {
 }
 
 enum CBLSignatureDigestAlgorithm {
-  none(kCBLSignatureDigestNone),
-  sha1(kCBLSignatureDigestSHA1),
-  sha224(kCBLSignatureDigestSHA224),
-  sha256(kCBLSignatureDigestSHA256),
-  sha384(kCBLSignatureDigestSHA384),
-  sha512(kCBLSignatureDigestSHA512),
-  ripemd160(kCBLSignatureDigestRIPEMD160);
+  none(cblite.kCBLSignatureDigestNone),
+  sha1(cblite.kCBLSignatureDigestSHA1),
+  sha224(cblite.kCBLSignatureDigestSHA224),
+  sha256(cblite.kCBLSignatureDigestSHA256),
+  sha384(cblite.kCBLSignatureDigestSHA384),
+  sha512(cblite.kCBLSignatureDigestSHA512),
+  ripemd160(cblite.kCBLSignatureDigestRIPEMD160);
 
   const CBLSignatureDigestAlgorithm(this.value);
 
   factory CBLSignatureDigestAlgorithm.fromValue(int value) => switch (value) {
-    kCBLSignatureDigestNone => none,
-    kCBLSignatureDigestSHA1 => sha1,
-    kCBLSignatureDigestSHA224 => sha224,
-    kCBLSignatureDigestSHA256 => sha256,
-    kCBLSignatureDigestSHA384 => sha384,
-    kCBLSignatureDigestSHA512 => sha512,
-    kCBLSignatureDigestRIPEMD160 => ripemd160,
+    cblite.kCBLSignatureDigestNone => none,
+    cblite.kCBLSignatureDigestSHA1 => sha1,
+    cblite.kCBLSignatureDigestSHA224 => sha224,
+    cblite.kCBLSignatureDigestSHA256 => sha256,
+    cblite.kCBLSignatureDigestSHA384 => sha384,
+    cblite.kCBLSignatureDigestSHA512 => sha512,
+    cblite.kCBLSignatureDigestRIPEMD160 => ripemd160,
     _ => throw ArgumentError('Unknown signature digest algorithm: $value'),
   };
 
@@ -54,64 +54,69 @@ final class TlsIdentityBindings extends Bindings {
   TlsIdentityBindings(super.libraries);
 
   String get kCBLCertAttrKeyCommonName =>
-      cbl.kCBLCertAttrKeyCommonName.toDartString()!;
+      cblite.kCBLCertAttrKeyCommonName.toDartString()!;
   String get kCBLCertAttrKeyPseudonym =>
-      cbl.kCBLCertAttrKeyPseudonym.toDartString()!;
+      cblite.kCBLCertAttrKeyPseudonym.toDartString()!;
   String get kCBLCertAttrKeyGivenName =>
-      cbl.kCBLCertAttrKeyGivenName.toDartString()!;
+      cblite.kCBLCertAttrKeyGivenName.toDartString()!;
   String get kCBLCertAttrKeySurname =>
-      cbl.kCBLCertAttrKeySurname.toDartString()!;
+      cblite.kCBLCertAttrKeySurname.toDartString()!;
   String get kCBLCertAttrKeyOrganization =>
-      cbl.kCBLCertAttrKeyOrganization.toDartString()!;
+      cblite.kCBLCertAttrKeyOrganization.toDartString()!;
   String get kCBLCertAttrKeyOrganizationUnit =>
-      cbl.kCBLCertAttrKeyOrganizationUnit.toDartString()!;
+      cblite.kCBLCertAttrKeyOrganizationUnit.toDartString()!;
   String get kCBLCertAttrKeyPostalAddress =>
-      cbl.kCBLCertAttrKeyPostalAddress.toDartString()!;
+      cblite.kCBLCertAttrKeyPostalAddress.toDartString()!;
   String get kCBLCertAttrKeyLocality =>
-      cbl.kCBLCertAttrKeyLocality.toDartString()!;
+      cblite.kCBLCertAttrKeyLocality.toDartString()!;
   String get kCBLCertAttrKeyPostalCode =>
-      cbl.kCBLCertAttrKeyPostalCode.toDartString()!;
+      cblite.kCBLCertAttrKeyPostalCode.toDartString()!;
   String get kCBLCertAttrKeyStateOrProvince =>
-      cbl.kCBLCertAttrKeyStateOrProvince.toDartString()!;
+      cblite.kCBLCertAttrKeyStateOrProvince.toDartString()!;
   String get kCBLCertAttrKeyCountry =>
-      cbl.kCBLCertAttrKeyCountry.toDartString()!;
+      cblite.kCBLCertAttrKeyCountry.toDartString()!;
   String get kCBLCertAttrKeyEmailAddress =>
-      cbl.kCBLCertAttrKeyEmailAddress.toDartString()!;
+      cblite.kCBLCertAttrKeyEmailAddress.toDartString()!;
   String get kCBLCertAttrKeyHostname =>
-      cbl.kCBLCertAttrKeyHostname.toDartString()!;
-  String get kCBLCertAttrKeyURL => cbl.kCBLCertAttrKeyURL.toDartString()!;
+      cblite.kCBLCertAttrKeyHostname.toDartString()!;
+  String get kCBLCertAttrKeyURL => cblite.kCBLCertAttrKeyURL.toDartString()!;
   String get kCBLCertAttrKeyIPAddress =>
-      cbl.kCBLCertAttrKeyIPAddress.toDartString()!;
+      cblite.kCBLCertAttrKeyIPAddress.toDartString()!;
   String get kCBLCertAttrKeyRegisteredID =>
-      cbl.kCBLCertAttrKeyRegisteredID.toDartString()!;
+      cblite.kCBLCertAttrKeyRegisteredID.toDartString()!;
 
-  Pointer<CBLCert> certCreateWithData(Uint8List data) =>
-      cbl.CBLCert_CreateWithData(
+  Pointer<cblite.CBLCert> certCreateWithData(Uint8List data) =>
+      cblite.CBLCert_CreateWithData(
         SliceResult.fromTypedList(data).makeGlobal().ref,
         globalCBLError..ref.reset(),
       ).checkError();
 
-  Pointer<CBLCert>? certNextInChain(Pointer<CBLCert> pointer) =>
-      cbl.CBLCert_CertNextInChain(pointer).toNullable();
+  Pointer<cblite.CBLCert>? certNextInChain(Pointer<cblite.CBLCert> pointer) =>
+      cblite.CBLCert_CertNextInChain(pointer).toNullable();
 
-  SliceResult certData(Pointer<CBLCert> pointer, {required bool pemEncoded}) =>
-      SliceResult.fromFLSliceResult(cbl.CBLCert_Data(pointer, pemEncoded))!;
+  SliceResult certData(
+    Pointer<cblite.CBLCert> pointer, {
+    required bool pemEncoded,
+  }) =>
+      SliceResult.fromFLSliceResult(cblite.CBLCert_Data(pointer, pemEncoded))!;
 
-  String? certSubjectNameComponent(Pointer<CBLCert> pointer, String key) =>
-      runWithSingleFLString(
-        key,
-        (flKey) => cbl.CBLCert_SubjectNameComponent(
-          pointer,
-          flKey,
-        ).toDartStringAndRelease(),
-      );
+  String? certSubjectNameComponent(
+    Pointer<cblite.CBLCert> pointer,
+    String key,
+  ) => runWithSingleFLString(
+    key,
+    (flKey) => cblite.CBLCert_SubjectNameComponent(
+      pointer,
+      flKey,
+    ).toDartStringAndRelease(),
+  );
 
   ({DateTime created, DateTime expires}) certValidTimespan(
-    Pointer<CBLCert> pointer,
+    Pointer<cblite.CBLCert> pointer,
   ) => withGlobalArena(() {
-    final outCreated = globalArena<CBLTimestamp>();
-    final outExpires = globalArena<CBLTimestamp>();
-    cbl.CBLCert_ValidTimespan(pointer, outCreated, outExpires);
+    final outCreated = globalArena<cblite.CBLTimestamp>();
+    final outExpires = globalArena<cblite.CBLTimestamp>();
+    cblite.CBLCert_ValidTimespan(pointer, outCreated, outExpires);
     return (
       created: DateTime.fromMillisecondsSinceEpoch(
         outCreated.value,
@@ -124,16 +129,16 @@ final class TlsIdentityBindings extends Bindings {
     );
   });
 
-  Pointer<CBLKeyPair> certPublicKey(Pointer<CBLCert> pointer) =>
-      cbl.CBLCert_PublicKey(pointer);
+  Pointer<cblite.CBLKeyPair> certPublicKey(Pointer<cblite.CBLCert> pointer) =>
+      cblite.CBLCert_PublicKey(pointer);
 
-  Pointer<CBLKeyPair> keyPairCreateWithExternalKey({
+  Pointer<cblite.CBLKeyPair> keyPairCreateWithExternalKey({
     required int keySizeInBits,
     required Object delegate,
-    required CBLDartExternalKeyPublicKeyData publicKeyData,
-    required CBLDartExternalKeyDecrypt decrypt,
-    required CBLDartExternalKeySign sign,
-  }) => cblDart.CBLDartKeyPair_CreateWithExternalKey(
+    required cblitedart.CBLDartExternalKeyPublicKeyData publicKeyData,
+    required cblitedart.CBLDartExternalKeyDecrypt decrypt,
+    required cblitedart.CBLDartExternalKeySign sign,
+  }) => cblitedart.CBLDartKeyPair_CreateWithExternalKey(
     keySizeInBits,
     delegate,
     publicKeyData,
@@ -142,41 +147,41 @@ final class TlsIdentityBindings extends Bindings {
     globalCBLError,
   ).checkError();
 
-  Pointer<CBLKeyPair> keyPairCreateWithPrivateKey(
+  Pointer<cblite.CBLKeyPair> keyPairCreateWithPrivateKey(
     Uint8List privateKey, {
     String? password,
   }) => runWithSingleFLString(
     password,
-    (flPassword) => cbl.CBLKeyPair_CreateWithPrivateKeyData(
+    (flPassword) => cblite.CBLKeyPair_CreateWithPrivateKeyData(
       SliceResult.fromTypedList(privateKey).makeGlobal().ref,
       flPassword,
       globalCBLError..ref.reset(),
     ).checkError(),
   );
 
-  String? keyPairPublicKeyDigest(Pointer<CBLKeyPair> pointer) =>
-      cbl.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
+  String? keyPairPublicKeyDigest(Pointer<cblite.CBLKeyPair> pointer) =>
+      cblite.CBLKeyPair_PublicKeyDigest(pointer).toDartStringAndRelease();
 
-  Uint8List? keyPairPublicKeyData(Pointer<CBLKeyPair> pointer) =>
+  Uint8List? keyPairPublicKeyData(Pointer<cblite.CBLKeyPair> pointer) =>
       SliceResult.fromFLSliceResult(
-        cbl.CBLKeyPair_PublicKeyData(pointer),
+        cblite.CBLKeyPair_PublicKeyData(pointer),
       )?.asTypedList().let(Uint8List.fromList);
 
-  Uint8List? keyPairPrivateKeyData(Pointer<CBLKeyPair> pointer) =>
+  Uint8List? keyPairPrivateKeyData(Pointer<cblite.CBLKeyPair> pointer) =>
       SliceResult.fromFLSliceResult(
-        cbl.CBLKeyPair_PrivateKeyData(pointer),
+        cblite.CBLKeyPair_PrivateKeyData(pointer),
       )?.asTypedList().let(Uint8List.fromList);
 
-  Pointer<CBLTLSIdentity> withKeyPairAndCerts(
-    Pointer<CBLKeyPair> keyPair,
-    Pointer<CBLCert> certificate,
-  ) => cbl.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
+  Pointer<cblite.CBLTLSIdentity> withKeyPairAndCerts(
+    Pointer<cblite.CBLKeyPair> keyPair,
+    Pointer<cblite.CBLCert> certificate,
+  ) => cblite.CBLTLSIdentity_IdentityWithKeyPairAndCerts(
     keyPair,
     certificate,
     globalCBLError..ref.reset(),
   ).checkError();
 
-  Pointer<CBLTLSIdentity> create(
+  Pointer<cblite.CBLTLSIdentity> create(
     Set<CBLKeyUsages> keyUsages,
     Map<String, String> attributes,
     Duration expiration,
@@ -185,7 +190,7 @@ final class TlsIdentityBindings extends Bindings {
     final attributesDict = MutableDict(attributes);
     return runWithSingleFLString(
       label,
-      (flLabel) => cbl.CBLTLSIdentity_CreateIdentity(
+      (flLabel) => cblite.CBLTLSIdentity_CreateIdentity(
         keyUsages.fold(0, (value, usage) => value | usage.value),
         attributesDict.pointer.cast(),
         expiration.inMilliseconds,
@@ -195,14 +200,14 @@ final class TlsIdentityBindings extends Bindings {
     );
   }
 
-  Pointer<CBLTLSIdentity> createWithKeyPair(
+  Pointer<cblite.CBLTLSIdentity> createWithKeyPair(
     Set<CBLKeyUsages> keyUsages,
     Map<String, String> attributes,
     Duration expiration,
-    Pointer<CBLKeyPair> keyPair,
+    Pointer<cblite.CBLKeyPair> keyPair,
   ) {
     final attributesDict = MutableDict(attributes);
-    return cbl.CBLTLSIdentity_CreateIdentityWithKeyPair(
+    return cblite.CBLTLSIdentity_CreateIdentityWithKeyPair(
       keyUsages.fold(0, (value, usage) => value | usage.value),
       keyPair,
       attributesDict.pointer.cast(),
@@ -211,34 +216,37 @@ final class TlsIdentityBindings extends Bindings {
     ).checkError();
   }
 
-  Pointer<CBLTLSIdentity>? withLabel(String label) => runWithSingleFLString(
-    label,
-    (flLabel) => cbl.CBLTLSIdentity_IdentityWithLabel(
-      flLabel,
-      globalCBLError..ref.reset(),
-    ).checkError().toNullable(),
-  );
+  Pointer<cblite.CBLTLSIdentity>? withLabel(String label) =>
+      runWithSingleFLString(
+        label,
+        (flLabel) => cblite.CBLTLSIdentity_IdentityWithLabel(
+          flLabel,
+          globalCBLError..ref.reset(),
+        ).checkError().toNullable(),
+      );
 
-  Pointer<CBLTLSIdentity> withCerts(Pointer<CBLCert> certificate) =>
-      cbl.CBLTLSIdentity_IdentityWithCerts(
-        certificate,
-        globalCBLError..ref.reset(),
-      ).checkError();
+  Pointer<cblite.CBLTLSIdentity> withCerts(
+    Pointer<cblite.CBLCert> certificate,
+  ) => cblite.CBLTLSIdentity_IdentityWithCerts(
+    certificate,
+    globalCBLError..ref.reset(),
+  ).checkError();
 
   void deleteWithLabel(String label) => runWithSingleFLString(
     label,
-    (flLabel) => cbl.CBLTLSIdentity_DeleteIdentityWithLabel(
+    (flLabel) => cblite.CBLTLSIdentity_DeleteIdentityWithLabel(
       flLabel,
       globalCBLError..ref.reset(),
     ).checkError(),
   );
 
-  Pointer<CBLCert> identityCertificates(Pointer<CBLTLSIdentity> pointer) =>
-      cbl.CBLTLSIdentity_Certificates(pointer);
+  Pointer<cblite.CBLCert> identityCertificates(
+    Pointer<cblite.CBLTLSIdentity> pointer,
+  ) => cblite.CBLTLSIdentity_Certificates(pointer);
 
-  DateTime identityExpiration(Pointer<CBLTLSIdentity> pointer) =>
+  DateTime identityExpiration(Pointer<cblite.CBLTLSIdentity> pointer) =>
       DateTime.fromMillisecondsSinceEpoch(
-        cbl.CBLTLSIdentity_Expiration(pointer),
+        cblite.CBLTLSIdentity_Expiration(pointer),
         isUtc: true,
       );
 }

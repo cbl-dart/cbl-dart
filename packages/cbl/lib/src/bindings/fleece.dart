@@ -138,16 +138,17 @@ final class SliceBindings extends Bindings {
   SliceBindings(super.libraries);
 
   late final _sliceResultFinalizer = NativeFinalizer(
-    cblDart.addresses.CBLDart_FLSliceResult_ReleaseByBuf.cast(),
+    cblitedart.addresses.CBLDart_FLSliceResult_ReleaseByBuf.cast(),
   );
 
-  bool equal(cblite.FLSlice a, cblite.FLSlice b) => cbl.FLSlice_Equal(a, b);
+  bool equal(cblite.FLSlice a, cblite.FLSlice b) => cblite.FLSlice_Equal(a, b);
 
-  int compare(cblite.FLSlice a, cblite.FLSlice b) => cbl.FLSlice_Compare(a, b);
+  int compare(cblite.FLSlice a, cblite.FLSlice b) =>
+      cblite.FLSlice_Compare(a, b);
 
-  cblite.FLSliceResult create(int size) => cbl.FLSliceResult_New(size);
+  cblite.FLSliceResult create(int size) => cblite.FLSliceResult_New(size);
 
-  cblite.FLSliceResult copy(cblite.FLSlice slice) => cbl.FLSlice_Copy(slice);
+  cblite.FLSliceResult copy(cblite.FLSlice slice) => cblite.FLSlice_Copy(slice);
 
   void bindToDartObject(
     Finalizable object, {
@@ -155,18 +156,18 @@ final class SliceBindings extends Bindings {
     required bool retain,
   }) {
     if (retain) {
-      cblDart.CBLDart_FLSliceResult_RetainByBuf(buf);
+      cblitedart.CBLDart_FLSliceResult_RetainByBuf(buf);
     }
 
     _sliceResultFinalizer.attach(object, buf.cast());
   }
 
   void retainSliceResultByBuf(Pointer<Void> buf) {
-    cblDart.CBLDart_FLSliceResult_RetainByBuf(buf);
+    cblitedart.CBLDart_FLSliceResult_RetainByBuf(buf);
   }
 
   void releaseSliceResultByBuf(Pointer<Void> buf) {
-    cblDart.CBLDart_FLSliceResult_ReleaseByBuf(buf);
+    cblitedart.CBLDart_FLSliceResult_ReleaseByBuf(buf);
   }
 }
 
@@ -176,10 +177,10 @@ final class SharedKeysBindings extends Bindings {
   SharedKeysBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(
-    cbl.addresses.FLSharedKeys_Release.cast(),
+    cblite.addresses.FLSharedKeys_Release.cast(),
   );
 
-  cblite.FLSharedKeys create() => cbl.FLSharedKeys_New();
+  cblite.FLSharedKeys create() => cblite.FLSharedKeys_New();
 
   void bindToDartObject(
     Finalizable object,
@@ -187,14 +188,14 @@ final class SharedKeysBindings extends Bindings {
     required bool retain,
   }) {
     if (retain) {
-      cbl.FLSharedKeys_Retain(sharedKeys);
+      cblite.FLSharedKeys_Retain(sharedKeys);
     }
 
     _finalizer.attach(object, sharedKeys.cast());
   }
 
   int count(cblite.FLSharedKeys sharedKeys) =>
-      cbl.FLSharedKeys_Count(sharedKeys);
+      cblite.FLSharedKeys_Count(sharedKeys);
 }
 
 // === Slot ====================================================================
@@ -203,34 +204,34 @@ final class SlotBindings extends Bindings {
   SlotBindings(super.libraries);
 
   void setNull(cblite.FLSlot slot) {
-    cbl.FLSlot_SetNull(slot);
+    cblite.FLSlot_SetNull(slot);
   }
 
   // ignore: avoid_positional_boolean_parameters
   void setBool(cblite.FLSlot slot, bool value) {
-    cbl.FLSlot_SetBool(slot, value);
+    cblite.FLSlot_SetBool(slot, value);
   }
 
   void setInt(cblite.FLSlot slot, int value) {
-    cbl.FLSlot_SetInt(slot, value);
+    cblite.FLSlot_SetInt(slot, value);
   }
 
   void setDouble(cblite.FLSlot slot, double value) {
-    cbl.FLSlot_SetDouble(slot, value);
+    cblite.FLSlot_SetDouble(slot, value);
   }
 
   void setString(cblite.FLSlot slot, String value) {
     runWithSingleFLString(value, (flValue) {
-      cbl.FLSlot_SetString(slot, flValue);
+      cblite.FLSlot_SetString(slot, flValue);
     });
   }
 
   void setData(cblite.FLSlot slot, Data value) {
-    cbl.FLSlot_SetData(slot, value.toSliceResult().makeGlobal().ref);
+    cblite.FLSlot_SetData(slot, value.toSliceResult().makeGlobal().ref);
   }
 
   void setValue(cblite.FLSlot slot, cblite.FLValue value) {
-    cbl.FLSlot_SetValue(slot, value);
+    cblite.FLSlot_SetValue(slot, value);
   }
 }
 
@@ -254,7 +255,9 @@ enum FLTrust {
 final class DocBindings extends Bindings {
   DocBindings(super.libraries);
 
-  late final _finalizer = NativeFinalizer(cbl.addresses.FLDoc_Release.cast());
+  late final _finalizer = NativeFinalizer(
+    cblite.addresses.FLDoc_Release.cast(),
+  );
 
   cblite.FLDoc fromResultData(
     Data data,
@@ -262,7 +265,7 @@ final class DocBindings extends Bindings {
     cblite.FLSharedKeys? sharedKeys,
   ) {
     final sliceResult = data.toSliceResult();
-    return cbl.FLDoc_FromResultData(
+    return cblite.FLDoc_FromResultData(
       sliceResult.makeGlobalResult().ref,
       trust.value,
       sharedKeys ?? nullptr,
@@ -273,7 +276,7 @@ final class DocBindings extends Bindings {
   cblite.FLDoc fromJson(String json) => runWithSingleFLString(
     json,
     (flJson) =>
-        cbl.FLDoc_FromJSON(flJson, globalFLErrorCode).checkFleeceError(),
+        cblite.FLDoc_FromJSON(flJson, globalFLErrorCode).checkFleeceError(),
   );
 
   void bindToDartObject(Finalizable object, cblite.FLDoc doc) {
@@ -285,12 +288,12 @@ final class DocBindings extends Bindings {
   }
 
   SliceResult? getAllocedData(cblite.FLDoc doc) =>
-      SliceResult.fromFLSliceResult(cbl.FLDoc_GetAllocedData(doc));
+      SliceResult.fromFLSliceResult(cblite.FLDoc_GetAllocedData(doc));
 
-  cblite.FLValue getRoot(cblite.FLDoc doc) => cbl.FLDoc_GetRoot(doc);
+  cblite.FLValue getRoot(cblite.FLDoc doc) => cblite.FLDoc_GetRoot(doc);
 
   cblite.FLSharedKeys? getSharedKeys(cblite.FLDoc doc) =>
-      cbl.FLDoc_GetSharedKeys(doc).toNullable();
+      cblite.FLDoc_GetSharedKeys(doc).toNullable();
 }
 
 // === Value ===================================================================
@@ -325,7 +328,9 @@ enum FLValueType {
 final class ValueBindings extends Bindings {
   ValueBindings(super.libraries);
 
-  late final _finalizer = NativeFinalizer(cbl.addresses.FLValue_Release.cast());
+  late final _finalizer = NativeFinalizer(
+    cblite.addresses.FLValue_Release.cast(),
+  );
 
   void bindToDartObject(
     Finalizable object, {
@@ -333,49 +338,51 @@ final class ValueBindings extends Bindings {
     required bool retain,
   }) {
     if (retain) {
-      cbl.FLValue_Retain(value);
+      cblite.FLValue_Retain(value);
     }
     _finalizer.attach(object, value.cast());
   }
 
   cblite.FLValue? fromData(SliceResult data, FLTrust trust) =>
-      cbl.FLValue_FromData(data.makeGlobal().ref, trust.value).toNullable();
+      cblite.FLValue_FromData(data.makeGlobal().ref, trust.value).toNullable();
 
   cblite.FLDoc? findDoc(cblite.FLValue value) =>
-      cbl.FLValue_FindDoc(value).toNullable();
+      cblite.FLValue_FindDoc(value).toNullable();
 
   FLValueType getType(cblite.FLValue value) =>
-      FLValueType.fromValue(cbl.FLValue_GetType(value));
+      FLValueType.fromValue(cblite.FLValue_GetType(value));
 
-  bool isInteger(cblite.FLValue value) => cbl.FLValue_IsInteger(value);
+  bool isInteger(cblite.FLValue value) => cblite.FLValue_IsInteger(value);
 
-  bool isDouble(cblite.FLValue value) => cbl.FLValue_IsDouble(value);
+  bool isDouble(cblite.FLValue value) => cblite.FLValue_IsDouble(value);
 
-  bool asBool(cblite.FLValue value) => cbl.FLValue_AsBool(value);
+  bool asBool(cblite.FLValue value) => cblite.FLValue_AsBool(value);
 
-  int asInt(cblite.FLValue value) => cbl.FLValue_AsInt(value);
+  int asInt(cblite.FLValue value) => cblite.FLValue_AsInt(value);
 
-  double asDouble(cblite.FLValue value) => cbl.FLValue_AsDouble(value);
+  double asDouble(cblite.FLValue value) => cblite.FLValue_AsDouble(value);
 
   String? asString(cblite.FLValue value) =>
-      cbl.FLValue_AsString(value).toDartString();
+      cblite.FLValue_AsString(value).toDartString();
 
-  Data? asData(cblite.FLValue value) => cbl.FLValue_AsData(value).toData();
+  Data? asData(cblite.FLValue value) => cblite.FLValue_AsData(value).toData();
 
   String? scalarToString(cblite.FLValue value) =>
-      cbl.FLValue_ToString(value).toDartStringAndRelease();
+      cblite.FLValue_ToString(value).toDartStringAndRelease();
 
-  bool isEqual(cblite.FLValue a, cblite.FLValue b) => cbl.FLValue_IsEqual(a, b);
+  bool isEqual(cblite.FLValue a, cblite.FLValue b) =>
+      cblite.FLValue_IsEqual(a, b);
 
-  void retain(cblite.FLValue value) => cbl.FLValue_Retain(value);
+  void retain(cblite.FLValue value) => cblite.FLValue_Retain(value);
 
-  void release(cblite.FLValue value) => cbl.FLValue_Release(value);
+  void release(cblite.FLValue value) => cblite.FLValue_Release(value);
 
   String toJSONX(
     cblite.FLValue value, {
     required bool json5,
     required bool canonical,
-  }) => cbl.FLValue_ToJSONX(value, json5, canonical).toDartStringAndRelease()!;
+  }) =>
+      cblite.FLValue_ToJSONX(value, json5, canonical).toDartStringAndRelease()!;
 }
 
 // === Array ===================================================================
@@ -383,15 +390,15 @@ final class ValueBindings extends Bindings {
 final class ArrayBindings extends Bindings {
   ArrayBindings(super.libraries);
 
-  int count(cblite.FLArray array) => cbl.FLArray_Count(array);
+  int count(cblite.FLArray array) => cblite.FLArray_Count(array);
 
-  bool isEmpty(cblite.FLArray array) => cbl.FLArray_IsEmpty(array);
+  bool isEmpty(cblite.FLArray array) => cblite.FLArray_IsEmpty(array);
 
   cblite.FLMutableArray? asMutable(cblite.FLArray array) =>
-      cbl.FLArray_AsMutable(array).toNullable();
+      cblite.FLArray_AsMutable(array).toNullable();
 
   cblite.FLValue get(cblite.FLArray array, int index) =>
-      cbl.FLArray_Get(array, index);
+      cblite.FLArray_Get(array, index);
 }
 
 // === MutableArray ============================================================
@@ -419,40 +426,40 @@ final class MutableArrayBindings extends Bindings {
   MutableArrayBindings(super.libraries);
 
   cblite.FLMutableArray mutableCopy(cblite.FLArray array, FLCopyFlags flags) =>
-      cbl.FLArray_MutableCopy(array, flags.value);
+      cblite.FLArray_MutableCopy(array, flags.value);
 
-  cblite.FLMutableArray create() => cbl.FLMutableArray_New();
+  cblite.FLMutableArray create() => cblite.FLMutableArray_New();
 
   cblite.FLArray? getSource(cblite.FLMutableArray array) =>
-      cbl.FLMutableArray_GetSource(array).toNullable();
+      cblite.FLMutableArray_GetSource(array).toNullable();
 
   bool isChanged(cblite.FLMutableArray array) =>
-      cbl.FLMutableArray_IsChanged(array);
+      cblite.FLMutableArray_IsChanged(array);
 
   cblite.FLSlot set(cblite.FLMutableArray array, int index) =>
-      cbl.FLMutableArray_Set(array, index);
+      cblite.FLMutableArray_Set(array, index);
 
   cblite.FLSlot append(cblite.FLMutableArray array) =>
-      cbl.FLMutableArray_Append(array);
+      cblite.FLMutableArray_Append(array);
 
   void insert(cblite.FLMutableArray array, int index, int count) =>
-      cbl.FLMutableArray_Insert(array, index, count);
+      cblite.FLMutableArray_Insert(array, index, count);
 
   void remove(cblite.FLMutableArray array, int firstIndex, int count) =>
-      cbl.FLMutableArray_Remove(array, firstIndex, count);
+      cblite.FLMutableArray_Remove(array, firstIndex, count);
 
   void resize(cblite.FLMutableArray array, int size) =>
-      cbl.FLMutableArray_Resize(array, size);
+      cblite.FLMutableArray_Resize(array, size);
 
   cblite.FLMutableArray? getMutableArray(
     cblite.FLMutableArray array,
     int index,
-  ) => cbl.FLMutableArray_GetMutableArray(array, index).toNullable();
+  ) => cblite.FLMutableArray_GetMutableArray(array, index).toNullable();
 
   cblite.FLMutableDict? getMutableDict(
     cblite.FLMutableArray array,
     int index,
-  ) => cbl.FLMutableArray_GetMutableDict(array, index).toNullable();
+  ) => cblite.FLMutableArray_GetMutableDict(array, index).toNullable();
 }
 
 // === Dict ====================================================================
@@ -462,25 +469,25 @@ final class DictBindings extends Bindings {
 
   cblite.FLValue? get(cblite.FLDict dict, String key) => runWithSingleFLString(
     key,
-    (flKey) => cbl.FLDict_Get(dict, flKey),
+    (flKey) => cblite.FLDict_Get(dict, flKey),
   ).toNullable();
 
   cblite.FLValue? getWithFLString(cblite.FLDict dict, cblite.FLString key) =>
-      cbl.FLDict_Get(dict, key).toNullable();
+      cblite.FLDict_Get(dict, key).toNullable();
 
-  int count(cblite.FLDict dict) => cbl.FLDict_Count(dict);
+  int count(cblite.FLDict dict) => cblite.FLDict_Count(dict);
 
-  bool isEmpty(cblite.FLDict dict) => cbl.FLDict_IsEmpty(dict);
+  bool isEmpty(cblite.FLDict dict) => cblite.FLDict_IsEmpty(dict);
 
   cblite.FLMutableDict? asMutable(cblite.FLDict dict) =>
-      cbl.FLDict_AsMutable(dict).toNullable();
+      cblite.FLDict_AsMutable(dict).toNullable();
 }
 
 final class DictKeyBindings extends Bindings {
   DictKeyBindings(super.libraries);
 
   void init(cblite.FLDictKey dictKey, cblite.FLString key) {
-    final state = cbl.FLDictKey_Init(key);
+    final state = cblite.FLDictKey_Init(key);
     dictKey
       ..private1 = state.private1
       ..private2 = state.private2
@@ -492,7 +499,7 @@ final class DictKeyBindings extends Bindings {
   cblite.FLValue? getWithKey(
     cblite.FLDict dict,
     Pointer<cblite.FLDictKey> key,
-  ) => cbl.FLDict_GetWithKey(dict, key).toNullable();
+  ) => cblite.FLDict_GetWithKey(dict, key).toNullable();
 }
 
 // === MutableDict =============================================================
@@ -501,28 +508,31 @@ final class MutableDictBindings extends Bindings {
   MutableDictBindings(super.libraries);
 
   cblite.FLMutableDict mutableCopy(cblite.FLDict source, FLCopyFlags flags) =>
-      cbl.FLDict_MutableCopy(source, flags.value);
+      cblite.FLDict_MutableCopy(source, flags.value);
 
-  cblite.FLMutableDict create() => cbl.FLMutableDict_New();
+  cblite.FLMutableDict create() => cblite.FLMutableDict_New();
 
   cblite.FLDict? getSource(cblite.FLMutableDict dict) =>
-      cbl.FLMutableDict_GetSource(dict).toNullable();
+      cblite.FLMutableDict_GetSource(dict).toNullable();
 
   bool isChanged(cblite.FLMutableDict dict) =>
-      cbl.FLMutableDict_IsChanged(dict);
+      cblite.FLMutableDict_IsChanged(dict);
 
   cblite.FLSlot set(cblite.FLMutableDict dict, String key) =>
-      runWithSingleFLString(key, (flKey) => cbl.FLMutableDict_Set(dict, flKey));
+      runWithSingleFLString(
+        key,
+        (flKey) => cblite.FLMutableDict_Set(dict, flKey),
+      );
 
   void remove(cblite.FLMutableDict dict, String key) {
     runWithSingleFLString(
       key,
-      (flKey) => cbl.FLMutableDict_Remove(dict, flKey),
+      (flKey) => cblite.FLMutableDict_Remove(dict, flKey),
     );
   }
 
   void removeAll(cblite.FLMutableDict dict) {
-    cbl.FLMutableDict_RemoveAll(dict);
+    cblite.FLMutableDict_RemoveAll(dict);
   }
 
   cblite.FLMutableArray? getMutableArray(
@@ -530,7 +540,7 @@ final class MutableDictBindings extends Bindings {
     String key,
   ) => runWithSingleFLString(
     key,
-    (flKey) => cbl.FLMutableDict_GetMutableArray(array, flKey).toNullable(),
+    (flKey) => cblite.FLMutableDict_GetMutableArray(array, flKey).toNullable(),
   );
 
   cblite.FLMutableDict? getMutableDict(
@@ -538,7 +548,7 @@ final class MutableDictBindings extends Bindings {
     String key,
   ) => runWithSingleFLString(
     key,
-    (flKey) => cbl.FLMutableDict_GetMutableDict(array, flKey).toNullable(),
+    (flKey) => cblite.FLMutableDict_GetMutableDict(array, flKey).toNullable(),
   );
 }
 
@@ -557,38 +567,42 @@ final class FleeceDecoderBindings extends Bindings {
   FleeceDecoderBindings(super.libraries);
 
   late final _knownSharedKeysFinalizer = NativeFinalizer(
-    cblDart.addresses.CBLDart_KnownSharedKeys_Delete.cast(),
+    cblitedart.addresses.CBLDart_KnownSharedKeys_Delete.cast(),
   );
   late final _dictIteratorFinalizer = NativeFinalizer(
-    cblDart.addresses.CBLDart_FLDictIterator_Delete.cast(),
+    cblitedart.addresses.CBLDart_FLDictIterator_Delete.cast(),
   );
   late final _arrayIteratorFinalizer = NativeFinalizer(
-    cblDart.addresses.CBLDart_FLArrayIterator_Delete.cast(),
+    cblitedart.addresses.CBLDart_FLArrayIterator_Delete.cast(),
   );
 
-  String dumpData(Data data) => cbl.FLData_Dump(
+  String dumpData(Data data) => cblite.FLData_Dump(
     data.toSliceResult().makeGlobal().ref,
   ).toDartStringAndRelease()!;
 
   Pointer<cblitedart.KnownSharedKeys> createKnownSharedKeys(
     Finalizable object,
   ) {
-    final result = cblDart.CBLDart_KnownSharedKeys_New();
+    final result = cblitedart.CBLDart_KnownSharedKeys_New();
     _knownSharedKeysFinalizer.attach(object, result.cast());
     return result;
   }
 
   void getLoadedValue(cblite.FLValue value) {
-    cblDart.CBLDart_GetLoadedFLValue(value, globalLoadedFLValue);
+    cblitedart.CBLDart_GetLoadedFLValue(value, globalLoadedFLValue);
   }
 
   void getLoadedValueFromArray(cblite.FLArray array, int index) {
-    cblDart.CBLDart_FLArray_GetLoadedFLValue(array, index, globalLoadedFLValue);
+    cblitedart.CBLDart_FLArray_GetLoadedFLValue(
+      array,
+      index,
+      globalLoadedFLValue,
+    );
   }
 
   void getLoadedValueFromDict(cblite.FLDict array, String key) {
     runWithSingleFLString(key, (flKey) {
-      cblDart.CBLDart_FLDict_GetLoadedFLValue(
+      cblitedart.CBLDart_FLDict_GetLoadedFLValue(
         array,
         flKey,
         globalLoadedFLValue,
@@ -604,7 +618,7 @@ final class FleeceDecoderBindings extends Bindings {
     Pointer<cblitedart.CBLDart_LoadedFLValue> valueOut, {
     required bool preLoad,
   }) {
-    final result = cblDart.CBLDart_FLDictIterator_Begin(
+    final result = cblitedart.CBLDart_FLDictIterator_Begin(
       dict,
       knownSharedKeys,
       keyOut,
@@ -621,14 +635,14 @@ final class FleeceDecoderBindings extends Bindings {
   }
 
   bool dictIteratorNext(Pointer<cblitedart.CBLDart_FLDictIterator> iterator) =>
-      cblDart.CBLDart_FLDictIterator_Next(iterator);
+      cblitedart.CBLDart_FLDictIterator_Next(iterator);
 
   Pointer<cblitedart.CBLDart_FLArrayIterator> arrayIteratorBegin(
     Finalizable? object,
     cblite.FLArray array,
     Pointer<cblitedart.CBLDart_LoadedFLValue> valueOut,
   ) {
-    final result = cblDart.CBLDart_FLArrayIterator_Begin(
+    final result = cblitedart.CBLDart_FLArrayIterator_Begin(
       array,
       valueOut,
       object == null,
@@ -643,7 +657,7 @@ final class FleeceDecoderBindings extends Bindings {
 
   bool arrayIteratorNext(
     Pointer<cblitedart.CBLDart_FLArrayIterator> iterator,
-  ) => cblDart.CBLDart_FLArrayIterator_Next(iterator);
+  ) => cblitedart.CBLDart_FLArrayIterator_Next(iterator);
 }
 
 // === Encoder =================================================================
@@ -668,7 +682,9 @@ enum FLEncoderFormat {
 final class FleeceEncoderBindings extends Bindings {
   FleeceEncoderBindings(super.libraries);
 
-  late final _finalizer = NativeFinalizer(cbl.addresses.FLEncoder_Free.cast());
+  late final _finalizer = NativeFinalizer(
+    cblite.addresses.FLEncoder_Free.cast(),
+  );
 
   void bindToDartObject(Finalizable object, cblite.FLEncoder encoder) {
     _finalizer.attach(object, encoder.cast());
@@ -678,14 +694,15 @@ final class FleeceEncoderBindings extends Bindings {
     required FLEncoderFormat format,
     required int reserveSize,
     required bool uniqueStrings,
-  }) => cbl.FLEncoder_NewWithOptions(format.value, reserveSize, uniqueStrings);
+  }) =>
+      cblite.FLEncoder_NewWithOptions(format.value, reserveSize, uniqueStrings);
 
   void setSharedKeys(cblite.FLEncoder encoder, cblite.FLSharedKeys keys) {
-    cbl.FLEncoder_SetSharedKeys(encoder, keys);
+    cblite.FLEncoder_SetSharedKeys(encoder, keys);
   }
 
   void reset(cblite.FLEncoder encoder) {
-    cbl.FLEncoder_Reset(encoder);
+    cblite.FLEncoder_Reset(encoder);
   }
 
   void writeArrayValue(
@@ -695,7 +712,7 @@ final class FleeceEncoderBindings extends Bindings {
   ) {
     _checkError(
       encoder,
-      cblDart.CBLDart_FLEncoder_WriteArrayValue(encoder, array, index),
+      cblitedart.CBLDart_FLEncoder_WriteArrayValue(encoder, array, index),
     );
   }
 
@@ -704,29 +721,29 @@ final class FleeceEncoderBindings extends Bindings {
       throw ArgumentError.value(value, 'value', 'must not be `nullptr`');
     }
 
-    _checkError(encoder, cbl.FLEncoder_WriteValue(encoder, value));
+    _checkError(encoder, cblite.FLEncoder_WriteValue(encoder, value));
   }
 
   void writeNull(cblite.FLEncoder encoder) {
-    _checkError(encoder, cbl.FLEncoder_WriteNull(encoder));
+    _checkError(encoder, cblite.FLEncoder_WriteNull(encoder));
   }
 
   // ignore: avoid_positional_boolean_parameters
   void writeBool(cblite.FLEncoder encoder, bool value) {
-    _checkError(encoder, cbl.FLEncoder_WriteBool(encoder, value));
+    _checkError(encoder, cblite.FLEncoder_WriteBool(encoder, value));
   }
 
   void writeInt(cblite.FLEncoder encoder, int value) {
-    _checkError(encoder, cbl.FLEncoder_WriteInt(encoder, value));
+    _checkError(encoder, cblite.FLEncoder_WriteInt(encoder, value));
   }
 
   void writeDouble(cblite.FLEncoder encoder, double value) {
-    _checkError(encoder, cbl.FLEncoder_WriteDouble(encoder, value));
+    _checkError(encoder, cblite.FLEncoder_WriteDouble(encoder, value));
   }
 
   void writeString(cblite.FLEncoder encoder, String value) {
     runWithSingleFLString(value, (flValue) {
-      _checkError(encoder, cbl.FLEncoder_WriteString(encoder, flValue));
+      _checkError(encoder, cblite.FLEncoder_WriteString(encoder, flValue));
     });
   }
 
@@ -734,7 +751,7 @@ final class FleeceEncoderBindings extends Bindings {
     final sliceResult = value.toSliceResult();
     _checkError(
       encoder,
-      cbl.FLEncoder_WriteData(encoder, sliceResult.makeGlobal().ref),
+      cblite.FLEncoder_WriteData(encoder, sliceResult.makeGlobal().ref),
     );
   }
 
@@ -742,7 +759,7 @@ final class FleeceEncoderBindings extends Bindings {
     final sliceResult = value.toSliceResult();
     _checkError(
       encoder,
-      cbl.FLEncoder_ConvertJSON(
+      cblite.FLEncoder_ConvertJSON(
         encoder,
         sliceResult.makeGlobal().cast<cblite.FLString>().ref,
       ),
@@ -750,45 +767,47 @@ final class FleeceEncoderBindings extends Bindings {
   }
 
   void beginArray(cblite.FLEncoder encoder, int reserveCount) {
-    _checkError(encoder, cbl.FLEncoder_BeginArray(encoder, reserveCount));
+    _checkError(encoder, cblite.FLEncoder_BeginArray(encoder, reserveCount));
   }
 
   void endArray(cblite.FLEncoder encoder) {
-    _checkError(encoder, cbl.FLEncoder_EndArray(encoder));
+    _checkError(encoder, cblite.FLEncoder_EndArray(encoder));
   }
 
   void beginDict(cblite.FLEncoder encoder, int reserveCount) {
-    _checkError(encoder, cbl.FLEncoder_BeginDict(encoder, reserveCount));
+    _checkError(encoder, cblite.FLEncoder_BeginDict(encoder, reserveCount));
   }
 
   void writeKey(cblite.FLEncoder encoder, String key) {
     runWithSingleFLString(key, (flKey) {
-      _checkError(encoder, cbl.FLEncoder_WriteKey(encoder, flKey));
+      _checkError(encoder, cblite.FLEncoder_WriteKey(encoder, flKey));
     });
   }
 
   void writeKeyFLString(cblite.FLEncoder encoder, cblite.FLString key) {
-    _checkError(encoder, cbl.FLEncoder_WriteKey(encoder, key));
+    _checkError(encoder, cblite.FLEncoder_WriteKey(encoder, key));
   }
 
   void writeKeyValue(cblite.FLEncoder encoder, cblite.FLValue key) {
-    _checkError(encoder, cbl.FLEncoder_WriteKeyValue(encoder, key));
+    _checkError(encoder, cblite.FLEncoder_WriteKeyValue(encoder, key));
   }
 
   void endDict(cblite.FLEncoder encoder) {
-    _checkError(encoder, cbl.FLEncoder_EndDict(encoder));
+    _checkError(encoder, cblite.FLEncoder_EndDict(encoder));
   }
 
   Data? finish(cblite.FLEncoder encoder) => _checkError(
     encoder,
-    cbl.FLEncoder_Finish(encoder, globalFLErrorCode),
+    cblite.FLEncoder_Finish(encoder, globalFLErrorCode),
   ).let(SliceResult.fromFLSliceResult)?.toData();
 
   FLError _getError(cblite.FLEncoder encoder) =>
-      FLError.fromValue(cbl.FLEncoder_GetError(encoder));
+      FLError.fromValue(cblite.FLEncoder_GetError(encoder));
 
   String _getErrorMessage(cblite.FLEncoder encoder) =>
-      cbl.FLEncoder_GetErrorMessage(encoder).cast<Utf8>().toDartStringAndFree();
+      cblite.FLEncoder_GetErrorMessage(
+        encoder,
+      ).cast<Utf8>().toDartStringAndFree();
 
   T _checkError<T>(cblite.FLEncoder encoder, T result) {
     final mayHaveError =

@@ -184,7 +184,9 @@ class _FfiPredictiveModel implements Finalizable {
       );
 
       // The caller is responsible for releasing the returned value.
-      CBLBindings.instance.cbl.FLValue_Retain(outputMutableDict.pointer.cast());
+      CBLBindings.instance.fleece.value.retain(
+        outputMutableDict.pointer.cast(),
+      );
 
       return outputMutableDict.pointer.cast();
       // ignore: avoid_catches_without_on_clauses

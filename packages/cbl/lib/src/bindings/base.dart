@@ -449,10 +449,10 @@ extension CheckErrorBoolExt on bool {
 final class BaseBindings extends Bindings {
   BaseBindings(super.libraries);
 
-  late final isolateId = cblDart.CBLDart_AllocateIsolateId();
+  late final isolateId = cblitedart.CBLDart_AllocateIsolateId();
 
   late final _refCountedFinalizer = NativeFinalizer(
-    cbl.addresses.CBL_Release.cast(),
+    cblite.addresses.CBL_Release.cast(),
   );
 
   bool get vectorSearchLibraryAvailable =>
@@ -471,7 +471,7 @@ final class BaseBindings extends Bindings {
     Abi.windowsX64 ||
     Abi.iosX64 ||
     Abi.macosX64 ||
-    Abi.androidX64 => cblDart.CBLDart_CpuSupportsAVX2(),
+    Abi.androidX64 => cblitedart.CBLDart_CpuSupportsAVX2(),
     _ => false,
   };
 
@@ -491,7 +491,7 @@ final class BaseBindings extends Bindings {
       // initialization to be completed.
       final error = zoneArena<cblite.CBLError>();
 
-      final initializeResult = cblDart.CBLDart_Initialize(
+      final initializeResult = cblitedart.CBLDart_Initialize(
         NativeApi.initializeApiDLData,
         contextStruct.cast(),
         error,
@@ -523,7 +523,7 @@ final class BaseBindings extends Bindings {
         when systemSupportsVectorSearch) {
       final libraryDirectory = p.dirname(libraryPath);
       runWithSingleFLString(libraryDirectory, (flLibraryDirectory) {
-        cbl.CBL_EnableVectorSearch(
+        cblite.CBL_EnableVectorSearch(
           flLibraryDirectory,
           globalCBLError,
         ).checkError();
@@ -539,39 +539,43 @@ final class BaseBindings extends Bindings {
   }
 
   void retainRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
-    cbl.CBL_Retain(refCounted);
+    cblite.CBL_Retain(refCounted);
   }
 
   void releaseRefCounted(Pointer<cblite.CBLRefCounted> refCounted) {
-    cbl.CBL_Release(refCounted);
+    cblite.CBL_Release(refCounted);
   }
 
   String? getErrorMessage(Pointer<cblite.CBLError> error) =>
-      cbl.CBLError_Message(error).toDartStringAndRelease(allowMalformed: true);
+      cblite.CBLError_Message(
+        error,
+      ).toDartStringAndRelease(allowMalformed: true);
 
   void removeListener(Pointer<cblite.CBLListenerToken> token) {
-    cbl.CBLListener_Remove(token);
+    cblite.CBLListener_Remove(token);
   }
 
   T runWithIsolateId<T>(T Function() body) {
-    cblDart.CBLDart_SetCurrentIsolateId(isolateId);
+    cblitedart.CBLDart_SetCurrentIsolateId(isolateId);
     try {
       return body();
     } finally {
-      cblDart.CBLDart_SetCurrentIsolateId(cblitedart.kCBLDartInvalidIsolateId);
+      cblitedart.CBLDart_SetCurrentIsolateId(
+        cblitedart.kCBLDartInvalidIsolateId,
+      );
     }
   }
 
   void completeCompleterWithPointer(
     cblitedart.CBLDart_Completer completer,
     Pointer<Void> result,
-  ) => cblDart.CBLDart_Completer_Complete(completer, result.address);
+  ) => cblitedart.CBLDart_Completer_Complete(completer, result.address);
 
   void completeCompleterWithBool(
     cblitedart.CBLDart_Completer completer,
     // ignore: avoid_positional_boolean_parameters
     bool result,
   ) {
-    cblDart.CBLDart_Completer_Complete(completer, result ? 1 : 0);
+    cblitedart.CBLDart_Completer_Complete(completer, result ? 1 : 0);
   }
 }

@@ -298,29 +298,31 @@ final class ReplicatorBindings extends Bindings {
   ReplicatorBindings(super.libraries);
 
   late final _finalizer = NativeFinalizer(
-    cblDart.addresses.CBLDart_CBLReplicator_Release.cast(),
+    cblitedart.addresses.CBLDart_CBLReplicator_Release.cast(),
   );
 
   Pointer<cblite.CBLEndpoint> createEndpointWithUrl(String url) =>
       runWithSingleFLString(
         url,
-        (flUrl) =>
-            cbl.CBLEndpoint_CreateWithURL(flUrl, globalCBLError).checkError(),
+        (flUrl) => cblite.CBLEndpoint_CreateWithURL(
+          flUrl,
+          globalCBLError,
+        ).checkError(),
       );
 
   Pointer<cblite.CBLEndpoint> createEndpointWithLocalDB(
     Pointer<cblite.CBLDatabase> database,
-  ) => cbl.CBLEndpoint_CreateWithLocalDB(database);
+  ) => cblite.CBLEndpoint_CreateWithLocalDB(database);
 
   void freeEndpoint(Pointer<cblite.CBLEndpoint> endpoint) {
-    cbl.CBLEndpoint_Free(endpoint);
+    cblite.CBLEndpoint_Free(endpoint);
   }
 
   Pointer<cblite.CBLAuthenticator> createPasswordAuthenticator(
     String username,
     String password,
   ) => withGlobalArena(
-    () => cbl.CBLAuth_CreatePassword(
+    () => cblite.CBLAuth_CreatePassword(
       username.toFLString(),
       password.toFLString(),
     ),
@@ -330,7 +332,7 @@ final class ReplicatorBindings extends Bindings {
     String sessionID,
     String? cookieName,
   ) => withGlobalArena(
-    () => cbl.CBLAuth_CreateSession(
+    () => cblite.CBLAuth_CreateSession(
       sessionID.toFLString(),
       cookieName.toFLString(),
     ),
@@ -338,16 +340,16 @@ final class ReplicatorBindings extends Bindings {
 
   Pointer<cblite.CBLAuthenticator> createClientCertificateAuthenticator(
     Pointer<cblite.CBLTLSIdentity> pointer,
-  ) => cbl.CBLAuth_CreateCertificate(pointer);
+  ) => cblite.CBLAuth_CreateCertificate(pointer);
 
   void freeAuthenticator(Pointer<cblite.CBLAuthenticator> authenticator) {
-    cbl.CBLAuth_Free(authenticator);
+    cblite.CBLAuth_Free(authenticator);
   }
 
   Pointer<cblite.CBLReplicator> createReplicator(
     CBLReplicatorConfiguration config,
   ) => withGlobalArena(
-    () => cblDart.CBLDart_CBLReplicator_Create(
+    () => cblitedart.CBLDart_CBLReplicator_Create(
       _createConfigurationStruct(config),
       globalCBLError,
     ).checkError(),
@@ -364,38 +366,38 @@ final class ReplicatorBindings extends Bindings {
     Pointer<cblite.CBLReplicator> replicator, {
     required bool resetCheckpoint,
   }) {
-    cbl.CBLReplicator_Start(replicator, resetCheckpoint);
+    cblite.CBLReplicator_Start(replicator, resetCheckpoint);
   }
 
   void stop(Pointer<cblite.CBLReplicator> replicator) {
-    cbl.CBLReplicator_Stop(replicator);
+    cblite.CBLReplicator_Stop(replicator);
   }
 
   void setHostReachable(
     Pointer<cblite.CBLReplicator> replicator, {
     required bool reachable,
   }) {
-    cbl.CBLReplicator_SetHostReachable(replicator, reachable);
+    cblite.CBLReplicator_SetHostReachable(replicator, reachable);
   }
 
   void setSuspended(
     Pointer<cblite.CBLReplicator> replicator, {
     required bool suspended,
   }) {
-    cbl.CBLReplicator_SetSuspended(replicator, suspended);
+    cblite.CBLReplicator_SetSuspended(replicator, suspended);
   }
 
   CBLReplicatorStatus status(Pointer<cblite.CBLReplicator> replicator) =>
-      cbl.CBLReplicator_Status(replicator).toCBLReplicatorStatus();
+      cblite.CBLReplicator_Status(replicator).toCBLReplicatorStatus();
 
   Pointer<cblite.CBLCert>? serverCertificate(
     Pointer<cblite.CBLReplicator> replicator,
-  ) => cbl.CBLReplicator_ServerCertificate(replicator).toNullable();
+  ) => cblite.CBLReplicator_ServerCertificate(replicator).toNullable();
 
   cblite.FLDict pendingDocumentIDs(
     Pointer<cblite.CBLReplicator> replicator,
     Pointer<cblite.CBLCollection> collection,
-  ) => cbl.CBLReplicator_PendingDocumentIDs2(
+  ) => cblite.CBLReplicator_PendingDocumentIDs2(
     replicator,
     collection,
     globalCBLError,
@@ -407,7 +409,7 @@ final class ReplicatorBindings extends Bindings {
     Pointer<cblite.CBLCollection> collection,
   ) => runWithSingleFLString(
     docID,
-    (flDocID) => cbl.CBLReplicator_IsDocumentPending2(
+    (flDocID) => cblite.CBLReplicator_IsDocumentPending2(
       replicator,
       flDocID,
       collection,
@@ -420,7 +422,11 @@ final class ReplicatorBindings extends Bindings {
     Pointer<cblite.CBLReplicator> replicator,
     cblitedart.CBLDart_AsyncCallback listener,
   ) {
-    cblDart.CBLDart_CBLReplicator_AddChangeListener(db, replicator, listener);
+    cblitedart.CBLDart_CBLReplicator_AddChangeListener(
+      db,
+      replicator,
+      listener,
+    );
   }
 
   void addDocumentReplicationListener(
@@ -428,7 +434,7 @@ final class ReplicatorBindings extends Bindings {
     Pointer<cblite.CBLReplicator> replicator,
     cblitedart.CBLDart_AsyncCallback listener,
   ) {
-    cblDart.CBLDart_CBLReplicator_AddDocumentReplicationListener(
+    cblitedart.CBLDart_CBLReplicator_AddDocumentReplicationListener(
       db,
       replicator,
       listener,
