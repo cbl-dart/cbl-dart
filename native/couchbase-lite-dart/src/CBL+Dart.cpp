@@ -10,7 +10,6 @@
 #include "CpuSupport.h"
 #include "Sentry.h"
 #include "Utils.h"
-#include "cbl/CBLTLSIdentity.h"
 #include "dart/dart_api.h"
 
 bool CBLDart_CpuSupportsAVX2() { return CBLDart::CpuSupportsAVX2(); }
