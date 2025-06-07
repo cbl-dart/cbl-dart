@@ -1,11 +1,11 @@
 name: cblitedart
 description: Bindings for Couchbase Lite Dart Support API
 output:
-  bindings: lib/src/cblitedart.dart
+  bindings: lib/src/bindings/cblitedart_native_assets.dart
 import:
   symbol-files:
     - package:cbl/src/bindings/cblite_symbols.yaml
-    - package:cbl_native_assets/src/cblitedart_symbols.yaml
+    - package:cbl/src/bindings/cblitedart_native_assets_symbols.yaml
 ffi-native:
 comments: false
 headers:

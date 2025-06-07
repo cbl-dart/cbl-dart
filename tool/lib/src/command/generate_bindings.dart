@@ -43,13 +43,13 @@ final class GenerateBindings extends BaseCommand {
       },
     );
     final cbliteNativeAssetsGenerator = _BindingsGenerator(
-      packageDir: projectLayout.packages.cblNativeAssets.rootDir,
+      packageDir: projectLayout.packages.cbl.rootDir,
       ffigenConfig: 'cblite_native_assets_ffigen.yaml',
       logger: logger,
       legacyBindings: cbliteGenerator,
     );
     final cblitedartNativeAssetsGenerator = _BindingsGenerator(
-      packageDir: projectLayout.packages.cblNativeAssets.rootDir,
+      packageDir: projectLayout.packages.cbl.rootDir,
       ffigenConfig: 'cblitedart_native_assets_ffigen.yaml',
       logger: logger,
       legacyBindings: cblitedartGenerator,
@@ -88,7 +88,7 @@ class _BindingsGenerator {
     await _runFfigen();
     await _findAndReplaceInBindings();
     await _fixNativeBindings();
-    await _generateNativeBindingsImplementation();
+    await _generateNativeAssetsBridge();
   }
 
   Future<FfigenConfig> _loadFfigenConfig() =>
@@ -244,14 +244,14 @@ class _BindingsGenerator {
     );
   }
 
-  Future<void> _generateNativeBindingsImplementation() async {
+  Future<void> _generateNativeAssetsBridge() async {
     final legacyBindings = this.legacyBindings;
     if (legacyBindings == null) {
       return;
     }
 
     await logger.runWithProgress(
-      message: 'Generating native bindings implementation for $ffigenConfig',
+      message: 'Generating native assets bridge for $ffigenConfig',
       showTiming: true,
       () async {
         final legacyFfigenConfig = await legacyBindings._loadFfigenConfig();
@@ -264,7 +264,7 @@ class _BindingsGenerator {
           path: legacyBindingsFile.path,
         );
 
-        final bindingsGenerator = _NativeBindingsGenerator(
+        final bindingsGenerator = _NativeAssetsBridgeGenerator(
           bindingsClassName: legacyFfigenConfig.name,
           legacyBindingsLibraryPath:
               legacyFfigenConfig.output!.symbolFile!.importPath!,
@@ -275,7 +275,8 @@ class _BindingsGenerator {
             packageDir,
             'lib',
             'src',
-            '${ffigenConfig.name}_native_bindings.dart',
+            'bindings',
+            '${ffigenConfig.name}_native_assets_bridge.dart',
           ),
         );
 
@@ -302,8 +303,8 @@ class _MethodNamesCollector extends RecursiveAstVisitor {
 
 /// Generates an implementation of a ffigen generated bindings class which uses
 /// the corresponding `@Native` bindings.
-class _NativeBindingsGenerator extends RecursiveAstVisitor {
-  _NativeBindingsGenerator({
+class _NativeAssetsBridgeGenerator extends RecursiveAstVisitor {
+  _NativeAssetsBridgeGenerator({
     required this.bindingsClassName,
     required this.legacyBindingsLibraryPath,
   });
@@ -334,7 +335,7 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
       ..writeln("import '$legacyBindingsLibraryPath';")
       ..writeln(r"import 'package:cbl/src/bindings/cblite.dart' as imp$1;")
       ..writeln(
-        "import './$bindingsClassName.dart' as $_nativeAssetLibraryAlias;",
+        "import './${bindingsClassName}_native_assets.dart' as $_nativeAssetLibraryAlias;",
       )
       ..writeln();
 
@@ -344,7 +345,7 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
   @override
   void visitClassDeclaration(ClassDeclaration node) {
     final className = node.name.lexeme;
-    final nativeClassName = '${className}Native';
+    final nativeClassName = '${className}NativeAssetsBridge';
 
     if (className != bindingsClassName &&
         className != _symbolAddressesClassName) {
@@ -367,7 +368,8 @@ class _NativeBindingsGenerator extends RecursiveAstVisitor {
     if (className == bindingsClassName) {
       _buffer.writeln('@override');
       _buffer.writeln(
-        'final addresses = const ${_symbolAddressesClassName}Native();',
+        'final addresses = '
+        'const ${_symbolAddressesClassName}NativeAssetsBridge();',
       );
       _buffer.writeln();
     }

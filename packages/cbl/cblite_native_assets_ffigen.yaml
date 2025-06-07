@@ -1,10 +1,10 @@
 name: cblite
 description: Bindings for Couchbase Lite C API
 output:
-  bindings: lib/src/cblite.dart
+  bindings: lib/src/bindings/cblite_native_assets.dart
 import:
   symbol-files:
-    - package:cbl_native_assets/src/cblite_symbols.yaml
+    - package:cbl/src/bindings/cblite_native_assets_symbols.yaml
 ffi-native:
 comments: false
 preamble: |

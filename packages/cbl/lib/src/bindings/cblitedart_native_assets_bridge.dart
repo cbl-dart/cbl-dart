@@ -5,13 +5,13 @@ import 'dart:ffi' as ffi;
 
 import 'package:cbl/src/bindings/cblitedart.dart';
 import 'package:cbl/src/bindings/cblite.dart' as imp$1;
-import './cblitedart.dart' as native;
+import './cblitedart_native_assets.dart' as native;
 
-class cblitedartNative implements cblitedart {
-  const cblitedartNative();
+class cblitedartNativeAssetsBridge implements cblitedart {
+  const cblitedartNativeAssetsBridge();
 
   @override
-  final addresses = const SymbolAddressesNative();
+  final addresses = const SymbolAddressesNativeAssetsBridge();
 
   @override
   void CBLDart_FLSliceResult_RetainByBuf(ffi.Pointer<ffi.Void> buf) =>
@@ -331,8 +331,8 @@ class cblitedartNative implements cblitedart {
   ) => native.CBLDart_ListenerCertAuthCallbackTrampoline(context, cert);
 }
 
-class SymbolAddressesNative implements SymbolAddresses {
-  const SymbolAddressesNative();
+class SymbolAddressesNativeAssetsBridge implements SymbolAddresses {
+  const SymbolAddressesNativeAssetsBridge();
 
   @override
   ffi.Pointer<ffi.NativeFunction<NativeCBLDart_FLSliceResult_ReleaseByBuf>>

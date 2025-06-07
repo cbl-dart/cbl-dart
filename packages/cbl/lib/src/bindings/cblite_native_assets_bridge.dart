@@ -5,13 +5,13 @@ import 'dart:ffi' as ffi;
 
 import 'package:cbl/src/bindings/cblite.dart';
 import 'package:cbl/src/bindings/cblite.dart' as imp$1;
-import './cblite.dart' as native;
+import './cblite_native_assets.dart' as native;
 
-class cbliteNative implements cblite {
-  const cbliteNative();
+class cbliteNativeAssetsBridge implements cblite {
+  const cbliteNativeAssetsBridge();
 
   @override
-  final addresses = const SymbolAddressesNative();
+  final addresses = const SymbolAddressesNativeAssetsBridge();
 
   @override
   FLSliceResult CBLError_Message(ffi.Pointer<CBLError> outError) =>
@@ -2335,8 +2335,8 @@ class cbliteNative implements cblite {
   FLStringResult FLData_Dump(FLSlice data) => native.FLData_Dump(data);
 }
 
-class SymbolAddressesNative implements SymbolAddresses {
-  const SymbolAddressesNative();
+class SymbolAddressesNativeAssetsBridge implements SymbolAddresses {
+  const SymbolAddressesNativeAssetsBridge();
 
   @override
   ffi.Pointer<ffi.NativeFunction<NativeCBL_Release>> get CBL_Release =>

@@ -4,11 +4,10 @@ import 'dart:io';
 
 import 'package:cbl/cbl.dart';
 import 'package:cbl/src/bindings.dart';
+import 'package:cbl/src/bindings/cblite_native_assets_bridge.dart';
+import 'package:cbl/src/bindings/cblitedart_native_assets_bridge.dart';
 import 'package:cbl/src/support/isolate.dart';
 import 'package:cbl/src/support/tracing.dart';
-
-import 'src/cblite_native_bindings.dart';
-import 'src/cblitedart_native_bindings.dart';
 
 // ignore: avoid_classes_with_only_static_members
 /// Initializes global resources and configures global settings, such as
@@ -32,8 +31,8 @@ abstract final class CouchbaseLiteNativeAssets {
             bindings: CBLBindings(
               BindingsLibraries(
                 enterpriseEdition: true,
-                cblite: const cbliteNative(),
-                cblitedart: const cblitedartNative(),
+                cblite: const cbliteNativeAssetsBridge(),
+                cblitedart: const cblitedartNativeAssetsBridge(),
               ),
             ),
           ),
